@@ -1,0 +1,57 @@
+@import url("../../ui/tokens/tokens.css");
+@import url("../../ui/components/buttons.css");
+
+body{
+    margin:0;
+    background:#eef5fb;
+    font-family:var(--cw-font);
+}
+
+.top{
+    background:linear-gradient(135deg,#0077B6,#00A6D6);
+    color:#fff;
+    padding:24px;
+    border-radius:0 0 26px 26px;
+}
+
+.top h1{
+    margin:0;
+    font-size:28px;
+}
+
+.top p{
+    margin-top:6px;
+    opacity:.9;
+}
+
+.wrapper{
+    max-width:520px;
+    margin:auto;
+    padding:18px;
+}
+
+.card{
+    background:white;
+    border-radius:20px;
+    padding:18px;
+    margin-bottom:18px;
+    box-shadow:0 10px 24px rgba(0,0,0,.08);
+}
+
+.visit{
+    border-left:6px solid #22C55E;
+}
+
+.visit h2{
+    margin:0;
+}
+
+.visit small{
+    color:#607282;
+}
+
+.action{
+    display:block;
+    width:100%;
+    margin-bottom:12px;
+}
