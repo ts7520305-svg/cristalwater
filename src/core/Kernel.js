@@ -9,6 +9,7 @@ const CrystalError = require("./errors/CrystalError");
 const KernelConfig = require("./config/KernelConfig");
 const KernelRuntime = require("./runtime/KernelRuntime");
 const Scheduler = require("./scheduler/Scheduler");
+const WorkerEngine = require("./worker/WorkerEngine");
 
 const InMemoryRepository = require("./repository/InMemoryRepository");
 const PermissionEngine = require("./permissions/PermissionEngine");
@@ -33,6 +34,7 @@ module.exports = {
   KernelConfig,
   KernelRuntime,
   Scheduler,
+  WorkerEngine,
   InMemoryRepository,
   PermissionEngine,
   RequestContext,
