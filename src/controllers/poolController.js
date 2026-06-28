@@ -1,4 +1,5 @@
 const { prisma } = require("../prismaClient");
+const PoolBusiness = require("../business/pool/PoolBusiness");
 
 function toInt(value) {
   const n = Number(value);
@@ -112,27 +113,7 @@ async function recordTechnicalSheetHistory(poolId, before, after, actor = "SYSTE
 
 async function listPools(req, res) {
   try {
-    const includeInactive = ["true", "1", "yes", "sim"].includes(String(req.query.includeInactive || "").toLowerCase());
-    const where = includeInactive ? {} : { active: true, deletedAt: null, archiveStatus: "ATIVO" };
-    const pools = await prisma.pool.findMany({
-      where,
-      include: {
-        client: true,
-        equipment: true,
-        technicalRoom: true,
-        calculationProfile: true,
-        technicalSheet: true,
-        roundPools: {
-          include: {
-            round: {
-              select: { id: true, name: true, dayOfWeek: true, active: true },
-            },
-          },
-          orderBy: { order: "asc" },
-        },
-      },
-      orderBy: [{ active: "desc" }, { zone: "asc" }, { id: "asc" }],
-    });
+    const pools = await PoolBusiness.list(req.query);
     return res.json({ ok: true, pools });
   } catch (err) {
     console.error(err);
@@ -144,17 +125,7 @@ async function getPoolById(req, res) {
   try {
     const id = toInt(req.params.id);
     if (!id) return res.status(400).json({ error: "ID inválido" });
-    const pool = await prisma.pool.findUnique({
-      where: { id },
-      include: {
-        client: true,
-        equipment: true,
-        technicalRoom: true,
-        calculationProfile: true,
-        technicalSheet: true,
-        technicalHistory: { orderBy: { createdAt: "desc" }, take: 20 },
-      },
-    });
+    const pool = await PoolBusiness.getById(id);
     return res.json({ ok: true, pool });
   } catch (err) {
     console.error(err);
