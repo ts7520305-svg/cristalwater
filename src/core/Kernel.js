@@ -7,6 +7,7 @@ const AuditTrail = require("./audit/AuditTrail");
 const Metrics = require("./metrics/Metrics");
 const CrystalError = require("./errors/CrystalError");
 const KernelConfig = require("./config/KernelConfig");
+const KernelRuntime = require("./runtime/KernelRuntime");
 
 const InMemoryRepository = require("./repository/InMemoryRepository");
 const PermissionEngine = require("./permissions/PermissionEngine");
@@ -29,6 +30,7 @@ module.exports = {
   Metrics,
   CrystalError,
   KernelConfig,
+  KernelRuntime,
   InMemoryRepository,
   PermissionEngine,
   RequestContext,
