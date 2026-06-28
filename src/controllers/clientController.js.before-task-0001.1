@@ -1,5 +1,4 @@
 const { prisma } = require("../prismaClient");
-const ClientBusiness = require("../business/client/ClientBusiness");
 
 function toInt(value) {
   const n = Number(value);
@@ -102,7 +101,13 @@ async function listClients(req, res) {
       status: { not: "ARCHIVED" },
     };
 
-    const clients = await ClientBusiness.list(req.query);
+    const clients = await prisma.client.findMany({
+      where,
+      include: {
+        pools: { where: includeInactive ? {} : { active: true, deletedAt: null, archiveStatus: "ATIVO" } },
+      },
+      orderBy: { name: "asc" },
+    });
 
     return res.json({ ok: true, clients });
   } catch (err) {
