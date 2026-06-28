@@ -1,0 +1,37 @@
+.cw-btn{
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+min-height:56px;
+
+padding:14px 20px;
+
+border:none;
+
+border-radius:18px;
+
+font-weight:700;
+
+cursor:pointer;
+
+transition:.2s;
+
+}
+
+.cw-btn-primary{
+
+background:var(--cw-primary);
+
+color:white;
+
+}
+
+.cw-btn-secondary{
+
+background:white;
+
+border:1px solid var(--cw-border);
+
+}
