@@ -10,17 +10,22 @@ class ClientBusiness {
             );
 
         const where = includeInactive ? {} : {
+
             active: true,
             deletedAt: null,
             archiveStatus: "ATIVO",
             status: {
                 not: "ARCHIVED"
             }
+
         };
 
         return prisma.client.findMany({
+
             where,
+
             include: {
+
                 pools: {
                     where: includeInactive
                         ? {}
@@ -30,29 +35,32 @@ class ClientBusiness {
                             archiveStatus: "ATIVO"
                         }
                 }
+
             },
+
             orderBy: {
                 name: "asc"
             }
+
         });
+
     }
 
     async getById(clientId) {
+
         return prisma.client.findUnique({
+
             where: {
                 id: Number(clientId)
             },
+
             include: {
                 pools: true,
                 invoices: true
             }
-        });
-    }
 
-    async create(data) {
-        return prisma.client.create({
-            data
         });
+
     }
 
 }

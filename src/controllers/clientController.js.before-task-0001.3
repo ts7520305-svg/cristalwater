@@ -131,7 +131,7 @@ async function createClient(req, res) {
     const data = clientCreateData(req.body);
     if (!data.name) return res.status(400).json({ error: "Nome obrigatório" });
 
-    const created = await ClientBusiness.create(data);
+    const created = await prisma.client.create({ data });
     return res.status(201).json({ ok: true, client: created, message: "Cliente criado em configuração. Faturação desligada até ativar contrato." });
   } catch (err) {
     console.error("createClient error:", err);
