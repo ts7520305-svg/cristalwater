@@ -15,6 +15,7 @@ const DependencyContainer = require("./di/DependencyContainer");
 const LifecycleManager = require("./lifecycle/LifecycleManager");
 const RuntimeMonitor = require("./monitor/RuntimeMonitor");
 const CrystalDoctor = require("./doctor/CrystalDoctor");
+const RuntimeScheduler=require("./runtime/RuntimeScheduler");
 
 const InMemoryRepository = require("./repository/InMemoryRepository");
 const PermissionEngine = require("./permissions/PermissionEngine");
@@ -45,6 +46,7 @@ module.exports = {
   LifecycleManager,
   RuntimeMonitor,
   CrystalDoctor,
+  RuntimeScheduler,
   InMemoryRepository,
   PermissionEngine,
   RequestContext,
