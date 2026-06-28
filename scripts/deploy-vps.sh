@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+APP_DIR="${APP_DIR:-/home/ubuntu/opt/cristalwater}"
+PORT="${PORT:-3002}"
+DOMAIN="${DOMAIN:-app.cristalwater.pt}"
+
+echo "Cristal Water Enterprise - preparacao VPS"
+mkdir -p "$APP_DIR"
+echo "Copie o projeto para: $APP_DIR"
+echo "Depois execute dentro de $APP_DIR/backend:"
+echo "  cp .env.example .env"
+echo "  nano .env"
+echo "  # Confirme PORT=$PORT ou ajuste a porta no .env"
+echo "  npm ci"
+echo "  npx prisma generate"
+echo "  npm run clean:vps"
+echo "  npm run check:syntax"
+echo "  npm run prisma:validate"
+echo "  npx prisma migrate deploy"
+echo "  npm run preflight:vps"
+echo "  pm2 start ecosystem.config.js --env production"
+echo "  pm2 save"
+echo ""
+echo "Nao execute seed em producao sem confirmar: seed pode criar dados de exemplo."
+echo "Nginx reverse proxy deve apontar $DOMAIN para http://127.0.0.1:$PORT"

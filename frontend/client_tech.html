@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+  <meta charset="UTF-8" />
+  <title>Cristal Water - Ficha Tcnica do Cliente</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 12px;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      color: #1f2937;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 10px 0 18px;
+      font-size: 26px;
+    }
+
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    @media (min-width: 900px) {
+      .row-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .row-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+      }
+
+      .row-4 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        gap: 12px;
+      }
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    input,
+    select,
+    textarea,
+    button {
+      font-family: Arial, sans-serif;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      font-size: 14px;
+      background: #fff;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: #2563eb;
+      color: #fff;
+    }
+
+    .btn-success {
+      background: #16a34a;
+      color: #fff;
+    }
+
+    .btn-warning {
+      background: #f59e0b;
+      color: #111827;
+    }
+
+    .btn-danger {
+      background: #dc2626;
+      color: #fff;
+    }
+
+    .btn-secondary {
+      background: #64748b;
+      color: #fff;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .status-box {
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #eef2ff;
+      color: #312e81;
+      display: none;
+      white-space: pre-wrap;
+    }
+
+    .item {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 10px;
+    }
+
+    .muted {
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-right: 6px;
+      margin-top: 6px;
+    }
+
+    .pill-blue {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .pill-green {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .pill-yellow {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .pill-red {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .pill-gray {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .days {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    @media (min-width: 700px) {
+      .days {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .day-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      padding: 8px 10px;
+      border-radius: 8px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .section-sep {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .item-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+  </style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+<body>
+  <div class="page">
+    <h1>Ficha Tcnica do Cliente</h1>
+
+    <div class="card">
+      <div class="title">Configurao</div>
+
+      <div class="row-3">
+        <div>
+          <label for="clientId">ID do Cliente</label>
+          <input type="number" id="clientId" placeholder="Ex: 1" />
+        </div>
+
+        <div>
+          <label for="poolId">ID da Piscina</label>
+          <input type="number" id="poolId" placeholder="Ex: 1" />
+        </div>
+
+        <div>
+          <label>&nbsp;</label>
+          <button class="btn-primary" onclick="loadAll()">Carregar dados</button>
+        </div>
+      </div>
+
+      <div id="statusBox" class="status-box"></div>
+    </div>
+
+    <div class="card">
+      <div class="title">Visita Extra Pontual</div>
+
+      <div class="row-4">
+        <div>
+          <label for="oneOffDate">Data / Hora</label>
+          <input type="datetime-local" id="oneOffDate" />
+        </div>
+
+        <div>
+          <label for="oneOffBillingMode">Modo de cobrana</label>
+          <select id="oneOffBillingMode" onchange="toggleOneOffPrice()">
+            <option value="EXTRA">Cobrar  parte</option>
+            <option value="INCLUDED">Includa no pacote</option>
+          </select>
+        </div>
+
+        <div id="oneOffPriceBox">
+          <label for="oneOffUnitPrice">Preço</label>
+          <input type="number" id="oneOffUnitPrice" step="0.01" placeholder="Ex: 25.00" />
+        </div>
+
+        <div>
+          <label for="oneOffTechnicianId">ID do Tcnico</label>
+          <input type="number" id="oneOffTechnicianId" placeholder="Opcional" />
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div>
+          <label for="oneOffSource">Origem</label>
+          <select id="oneOffSource">
+            <option value="MANUAL">Manual</option>
+            <option value="ADMIN">Admin</option>
+            <option value="CLIENT_REQUEST">Pedido do cliente</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="oneOffStatus">Estado inicial</label>
+          <select id="oneOffStatus">
+            <option value="PLANNED">PLANNED</option>
+            <option value="IN_PROGRESS">IN_PROGRESS</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label for="oneOffNotes">Notas</label>
+        <textarea id="oneOffNotes" placeholder="Ex: limpeza extra antes da chegada dos clientes"></textarea>
+      </div>
+
+      <div class="toolbar">
+        <button class="btn-success" onclick="createOneOffExtraVisit()">Criar visita extra pontual</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="title">Regra de Visitas Extra Recorrentes</div>
+
+      <div class="row-3">
+        <div>
+          <label for="ruleName">Nome da regra</label>
+          <input type="text" id="ruleName" placeholder="Ex: Vero 3x semana" />
+        </div>
+
+        <div>
+          <label for="ruleRecurrenceType">Tipo</label>
+          <select id="ruleRecurrenceType">
+            <option value="SEASONAL">Sazonal</option>
+            <option value="CUSTOM_PERIOD">Perodo personalizado</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="ruleYearMode">Repetio</label>
+          <select id="ruleYearMode">
+            <option value="EVERY_YEAR">Todos os anos</option>
+            <option value="ONE_TIME">Uma vez</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row-4">
+        <div>
+          <label for="ruleStartDate">Data incio</label>
+          <input type="date" id="ruleStartDate" />
+        </div>
+
+        <div>
+          <label for="ruleEndDate">Data fim</label>
+          <input type="date" id="ruleEndDate" />
+        </div>
+
+        <div>
+          <label for="ruleVisitsPerWeek">Visitas por semana</label>
+          <input type="number" id="ruleVisitsPerWeek" min="1" value="1" />
+        </div>
+
+        <div>
+          <label for="rulePreferredTime">Hora preferencial</label>
+          <input type="text" id="rulePreferredTime" placeholder="Ex: manh / 10:00" />
+        </div>
+      </div>
+
+      <div>
+        <label>Dias da semana</label>
+        <div class="days">
+          <label class="day-option"><input type="checkbox" id="ruleMonday" /> Segunda</label>
+          <label class="day-option"><input type="checkbox" id="ruleTuesday" /> Tera</label>
+          <label class="day-option"><input type="checkbox" id="ruleWednesday" /> Quarta</label>
+          <label class="day-option"><input type="checkbox" id="ruleThursday" /> Quinta</label>
+          <label class="day-option"><input type="checkbox" id="ruleFriday" /> Sexta</label>
+          <label class="day-option"><input type="checkbox" id="ruleSaturday" /> Sbado</label>
+          <label class="day-option"><input type="checkbox" id="ruleSunday" /> Domingo</label>
+        </div>
+      </div>
+
+      <div class="section-sep">
+        <div class="row-3">
+          <div>
+            <label for="ruleBillingMode">Modo de cobrana</label>
+            <select id="ruleBillingMode" onchange="toggleRulePrice()">
+              <option value="EXTRA">Cobrar  parte</option>
+              <option value="INCLUDED">Includa no pacote</option>
+            </select>
+          </div>
+
+          <div id="rulePriceBox">
+            <label for="ruleUnitPrice">Preço unitário</label>
+            <input type="number" id="ruleUnitPrice" step="0.01" placeholder="Ex: 20.00" />
+          </div>
+
+          <div>
+            <label for="ruleActive">Ativa</label>
+            <select id="ruleActive">
+              <option value="true">Sim</option>
+              <option value="false">No</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label for="ruleDescription">Descrio</label>
+        <textarea id="ruleDescription" placeholder="Ex: visitas extra no perodo de vero"></textarea>
+      </div>
+
+      <div>
+        <label for="ruleNotes">Notas internas</label>
+        <textarea id="ruleNotes" placeholder="Ex: combinado com o cliente, cobrado fora do pacote"></textarea>
+      </div>
+
+      <div class="toolbar">
+        <button class="btn-success" onclick="createExtraVisitRule()">Criar regra recorrente</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="title">Gerar Visitas a partir de Regra</div>
+
+      <div class="row-3">
+        <div>
+          <label for="generateRuleId">ID da Regra</label>
+          <input type="number" id="generateRuleId" placeholder="Ex: 3" />
+        </div>
+
+        <div>
+          <label for="generateFrom">De</label>
+          <input type="date" id="generateFrom" />
+        </div>
+
+        <div>
+          <label for="generateTo">At</label>
+          <input type="date" id="generateTo" />
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <button class="btn-primary" onclick="generateVisitsFromRule()">Gerar visitas</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="title">Regras de Visitas Extra</div>
+      <div class="toolbar">
+        <button class="btn-secondary" onclick="loadRules()">Atualizar regras</button>
+      </div>
+      <div id="rulesList"></div>
+    </div>
+
+    <div class="card">
+      <div class="title">Visitas Extra Registadas</div>
+
+      <div class="row-4">
+        <div>
+          <label for="visitFilterFrom">De</label>
+          <input type="date" id="visitFilterFrom" />
+        </div>
+
+        <div>
+          <label for="visitFilterTo">At</label>
+          <input type="date" id="visitFilterTo" />
+        </div>
+
+        <div>
+          <label for="visitFilterStatus">Estado</label>
+          <select id="visitFilterStatus">
+            <option value="">Todos</option>
+            <option value="PLANNED">PLANNED</option>
+            <option value="IN_PROGRESS">IN_PROGRESS</option>
+            <option value="DONE">DONE</option>
+            <option value="CANCELLED">CANCELLED</option>
+            <option value="SKIPPED">SKIPPED</option>
+          </select>
+        </div>
+
+        <div>
+          <label>&nbsp;</label>
+          <button class="btn-secondary" onclick="loadExtraVisits()">Atualizar visitas</button>
+        </div>
+      </div>
+
+      <div id="visitsList"></div>
+    </div>
+  </div>
+
+  <script>
+    const API = "/api";
+
+    function showStatus(message) {
+      const box = document.getElementById("statusBox");
+      box.style.display = "block";
+      box.textContent = message;
+    }
+
+    function hideStatus() {
+      const box = document.getElementById("statusBox");
+      box.style.display = "none";
+      box.textContent = "";
+    }
+
+    function getPoolId() {
+      const value = Number(document.getElementById("poolId").value);
+      return Number.isNaN(value) ? null : value;
+    }
+
+    function toggleOneOffPrice() {
+      const mode = document.getElementById("oneOffBillingMode").value;
+      document.getElementById("oneOffPriceBox").classList.toggle("hidden", mode === "INCLUDED");
+    }
+
+    function toggleRulePrice() {
+      const mode = document.getElementById("ruleBillingMode").value;
+      document.getElementById("rulePriceBox").classList.toggle("hidden", mode === "INCLUDED");
+    }
+
+    function formatDateTime(value) {
+      if (!value) return "-";
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return value;
+      return d.toLocaleString("pt-PT");
+    }
+
+    function formatDateOnly(value) {
+      if (!value) return "-";
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return value;
+      return d.toLocaleDateString("pt-PT");
+    }
+
+    function formatPrice(value) {
+      if (value === null || value === undefined || value === "") return "-";
+      const n = Number(value);
+      if (Number.isNaN(n)) return String(value);
+      return `${n.toFixed(2)} `;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    async function loadAll() {
+      hideStatus();
+      await loadRules();
+      await loadExtraVisits();
+    }
+
+    async function createOneOffExtraVisit() {
+      try {
+        hideStatus();
+
+        const poolId = getPoolId();
+        if (!poolId) {
+          showStatus("Indica primeiro o ID da piscina.");
+          return;
+        }
+
+        const scheduledAt = document.getElementById("oneOffDate").value;
+        if (!scheduledAt) {
+          showStatus("Indica a data/hora da visita extra.");
+          return;
+        }
+
+        const billingMode = document.getElementById("oneOffBillingMode").value;
+
+        const payload = {
+          poolId,
+          scheduledAt,
+          technicianId: document.getElementById("oneOffTechnicianId").value || null,
+          notes: document.getElementById("oneOffNotes").value.trim() || null,
+          billingMode,
+          unitPrice: billingMode === "INCLUDED" ? 0 : (document.getElementById("oneOffUnitPrice").value || null),
+          source: document.getElementById("oneOffSource").value,
+          visitType: "ONE_OFF",
+          status: document.getElementById("oneOffStatus").value
+        };
+
+        const res = await fetch(`${API}/extra-visits`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || data.ok === false) {
+          showStatus(data.message || "Erro ao criar visita extra.");
+          return;
+        }
+
+        showStatus("Visita extra pontual criada com sucesso.");
+        await loadExtraVisits();
+      } catch (error) {
+        console.error(error);
+        showStatus("Erro de ligao ao criar visita extra.");
+      }
+    }
+
+    async function createExtraVisitRule() {
+      try {
+        hideStatus();
+
+        const poolId = getPoolId();
+        if (!poolId) {
+          showStatus("Indica primeiro o ID da piscina.");
+          return;
+        }
+
+        const payload = {
+          poolId,
+          name: document.getElementById("ruleName").value.trim() || null,
+          description: document.getElementById("ruleDescription").value.trim() || null,
+          recurrenceType: document.getElementById("ruleRecurrenceType").value,
+          yearMode: document.getElementById("ruleYearMode").value,
+          startDate: document.getElementById("ruleStartDate").value,
+          endDate: document.getElementById("ruleEndDate").value,
+          visitsPerWeek: document.getElementById("ruleVisitsPerWeek").value || 1,
+          monday: document.getElementById("ruleMonday").checked,
+          tuesday: document.getElementById("ruleTuesday").checked,
+          wednesday: document.getElementById("ruleWednesday").checked,
+          thursday: document.getElementById("ruleThursday").checked,
+          friday: document.getElementById("ruleFriday").checked,
+          saturday: document.getElementById("ruleSaturday").checked,
+          sunday: document.getElementById("ruleSunday").checked,
+          preferredTime: document.getElementById("rulePreferredTime").value.trim() || null,
+          billingMode: document.getElementById("ruleBillingMode").value,
+          unitPrice: document.getElementById("ruleBillingMode").value === "INCLUDED"
+            ? 0
+            : (document.getElementById("ruleUnitPrice").value || null),
+          active: document.getElementById("ruleActive").value === "true",
+          notes: document.getElementById("ruleNotes").value.trim() || null,
+        };
+
+        const res = await fetch(`${API}/extra-visits/rules`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || data.ok === false) {
+          showStatus(data.message || "Erro ao criar regra.");
+          return;
+        }
+
+        showStatus("Regra de visitas extra criada com sucesso.");
+        await loadRules();
+      } catch (error) {
+        console.error(error);
+        showStatus("Erro de ligao ao criar regra.");
+      }
+    }
+
+    async function loadRules() {
+      try {
+        const poolId = getPoolId();
+        const list = document.getElementById("rulesList");
+        list.innerHTML = "";
+
+        if (!poolId) {
+          list.innerHTML = `<div class="muted">Indica o ID da piscina para carregar as regras.</div>`;
+          return;
+        }
+
+        const res = await fetch(`${API}/extra-visits/rules/pool/${poolId}`);
+        const data = await res.json().catch(() => []);
+
+        const rules = Array.isArray(data) ? data : (data.rules || []);
+
+        if (!res.ok) {
+          list.innerHTML = `<div class="muted">Erro ao carregar regras.</div>`;
+          return;
+        }
+
+        if (!rules.length) {
+          list.innerHTML = `<div class="muted">Sem regras de visitas extra para esta piscina.</div>`;
+          return;
+        }
+
+        rules.forEach((rule) => {
+          const days = [
+            rule.monday ? "Seg" : null,
+            rule.tuesday ? "Ter" : null,
+            rule.wednesday ? "Qua" : null,
+            rule.thursday ? "Qui" : null,
+            rule.friday ? "Sex" : null,
+            rule.saturday ? "Sb" : null,
+            rule.sunday ? "Dom" : null,
+          ].filter(Boolean).join(", ") || "-";
+
+          const div = document.createElement("div");
+          div.className = "item";
+
+          div.innerHTML = `
+            <div><strong>${escapeHtml(rule.name || "Sem nome")}</strong></div>
+            <div class="muted">ID da regra: ${rule.id}</div>
+
+            <div>
+              <span class="pill pill-blue">${escapeHtml(rule.recurrenceType || "SEASONAL")}</span>
+              <span class="pill ${rule.active ? "pill-green" : "pill-red"}">${rule.active ? "ATIVA" : "INATIVA"}</span>
+              <span class="pill ${rule.billingMode === "INCLUDED" ? "pill-green" : "pill-yellow"}">
+                ${rule.billingMode === "INCLUDED" ? "INCLUDA" : "COBRAR"}
+              </span>
+            </div>
+
+            <div style="margin-top:8px;">
+              <div><strong>Perodo:</strong> ${formatDateOnly(rule.startDate)} at ${formatDateOnly(rule.endDate)}</div>
+              <div><strong>Dias:</strong> ${days}</div>
+              <div><strong>Visitas por semana:</strong> ${rule.visitsPerWeek ?? "-"}</div>
+              <div><strong>Repetio:</strong> ${escapeHtml(rule.yearMode || "-")}</div>
+              <div><strong>Hora preferencial:</strong> ${escapeHtml(rule.preferredTime || "-")}</div>
+              <div><strong>Preço:</strong> ${rule.billingMode === "INCLUDED" ? "Incluído no pacote" : formatPrice(rule.unitPrice)}</div>
+              <div><strong>Notas:</strong> ${escapeHtml(rule.notes || "-")}</div>
+            </div>
+
+            <div class="item-actions">
+              <button class="btn-warning" onclick="toggleRuleActive(${rule.id}, ${rule.active})">
+                ${rule.active ? "Desativar" : "Ativar"}
+              </button>
+              <button class="btn-danger" onclick="deleteRule(${rule.id})">Apagar regra</button>
+              <button class="btn-primary" onclick="prepareGenerate(${rule.id})">Usar na gerao</button>
+            </div>
+          `;
+
+          list.appendChild(div);
+        });
+      } catch (error) {
+        console.error(error);
+        document.getElementById("rulesList").innerHTML = `<div class="muted">Erro de ligao ao carregar regras.</div>`;
+      }
+    }
+
+    async function toggleRuleActive(ruleId, currentActive) {
+      try {
+        hideStatus();
+
+        const res = await fetch(`${API}/extra-visits/rules/${ruleId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            active: !currentActive
+          }),
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || data.ok === false) {
+          showStatus(data.message || "Erro ao alterar estado da regra.");
+          return;
+        }
+
+        showStatus("Estado da regra atualizado com sucesso.");
+        await loadRules();
+      } catch (error) {
+        console.error(error);
+        showStatus("Erro de ligao ao alterar estado da regra.");
+      }
+    }
+
+    async function deleteRule(ruleId) {
+      try {
+        hideStatus();
+
+        const confirmed = confirm("Tens a certeza que queres apagar esta regra?");
+        if (!confirmed) return;
+
+        const res = await fetch(`${API}/extra-visits/rules/${ruleId}`, {
+          method: "DELETE"
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || data.ok === false) {
+          showStatus(data.message || "Erro ao apagar regra.");
+          return;
+        }
+
+        showStatus("Regra apagada com sucesso.");
+        await loadRules();
+      } catch (error) {
+        console.error(error);
+        showStatus("Erro de ligao ao apagar regra.");
+      }
+    }
+
+    function prepareGenerate(ruleId) {
+      document.getElementById("generateRuleId").value = ruleId;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      showStatus(`Regra ${ruleId} selecionada para gerao de visitas.`);
+    }
+
+    async function generateVisitsFromRule() {
+      try {
+        hideStatus();
+
+        const ruleId = Number(document.getElementById("generateRuleId").value);
+        const from = document.getElementById("generateFrom").value;
+        const to = document.getElementById("generateTo").value;
+
+        if (!ruleId) {
+          showStatus("Indica o ID da regra.");
+          return;
+        }
+
+        if (!from || !to) {
+          showStatus("Indica a data inicial e final para gerar as visitas.");
+          return;
+        }
+
+        const res = await fetch(`${API}/extra-visits/rules/${ruleId}/generate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ from, to }),
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || data.ok === false) {
+          showStatus(data.message || "Erro ao gerar visitas.");
+          return;
+        }
+
+        showStatus(
+          `Gerao concluda.\nCriadas: ${data.createdCount ?? 0}\nIgnoradas: ${data.skippedCount ?? 0}`
+        );
+
+        await loadExtraVisits();
+      } catch (error) {
+        console.error(error);
+        showStatus("Erro de ligao ao gerar visitas.");
+      }
+    }
+
+    async function loadExtraVisits() {
+      try {
+        const poolId = getPoolId();
+        const list = document.getElementById("visitsList");
+        list.innerHTML = "";
+
+        if (!poolId) {
+          list.innerHTML = `<div class="muted">Indica o ID da piscina para carregar as visitas.</div>`;
+          return;
+        }
+
+        const params = new URLSearchParams();
+        params.append("poolId", poolId);
+
+        if (document.getElementById("visitFilterFrom").value) {
+          params.append("from", document.getElementById("visitFilterFrom").value);
+        }
+
+        if (document.getElementById("visitFilterTo").value) {
+          params.append("to", document.getElementById("visitFilterTo").value);
+        }
+
+        if (document.getElementById("visitFilterStatus").value) {
+          params.append("status", document.getElementById("visitFilterStatus").value);
+        }
+
+        const res = await fetch(`${API}/extra-visits?${params.toString()}`);
+        const data = await res.json().catch(() => ({}));
+        const visits = data.extraVisits || [];
+
+        if (!res.ok) {
+          list.innerHTML = `<div class="muted">Erro ao carregar visitas extra.</div>`;
+          return;
+        }
+
+        if (!visits.length) {
+          list.innerHTML = `<div class="muted">Sem visitas extra registadas para os filtros atuais.</div>`;
+          return;
+        }
+
+        visits.forEach((visit) => {
+          const pool = visit.pool || {};
+          const client = pool.client || {};
+          const rule = visit.rule || {};
+
+          const div = document.createElement("div");
+          div.className = "item";
+
+          div.innerHTML = `
+            <div><strong>${escapeHtml(pool.name || "Piscina sem nome")}</strong></div>
+            <div class="muted">ID da visita: ${visit.id}</div>
+
+            <div>
+              <span class="pill pill-blue">EXTRA</span>
+              <span class="pill ${visit.billingMode === "INCLUDED" ? "pill-green" : "pill-yellow"}">
+                ${visit.billingMode === "INCLUDED" ? "INCLUDA" : "COBRAR"}
+              </span>
+              <span class="pill pill-gray">${escapeHtml(visit.status || "PLANNED")}</span>
+            </div>
+
+            <div style="margin-top:8px;">
+              <div><strong>Cliente:</strong> ${escapeHtml(client.name || "-")}</div>
+              <div><strong>Zona:</strong> ${escapeHtml(client.zone || "-")}</div>
+              <div><strong>Data:</strong> ${formatDateTime(visit.scheduledAt)}</div>
+              <div><strong>Tipo:</strong> ${escapeHtml(visit.visitType || "-")}</div>
+              <div><strong>Origem:</strong> ${escapeHtml(visit.source || "-")}</div>
+              <div><strong>Regra:</strong> ${escapeHtml(rule.name || "-")}</div>
+              <div><strong>Preço:</strong> ${visit.billingMode === "INCLUDED" ? "Incluído no pacote" : formatPrice(visit.totalPrice ?? visit.unitPrice)}</div>
+              <div><strong>Notas:</strong> ${escapeHtml(visit.notes || "-")}</div>
+            </div>
+
+            <div class="item-actions">
+              <button class="btn-success" onclick="updateVisitStatus(${visit.id}, 'DONE')">Marcar DONE</button>
+              <button class="btn-warning" onclick="updateVisitStatus(${visit.id}, 'SKIPPED')">Marcar SKIPPED</button>
+              <button class="btn-danger" onclick="updateVisitStatus(${visit.id}, 'CANCELLED')">Marcar CANCELLED</button>
+            </div>
+          `;
+
+          list.appendChild(div);
+        });
+      } catch (error) {
+        console.error(error);
+        document.getElementById("visitsList").innerHTML = `<div class="muted">Erro de ligao ao carregar visitas.</div>`;
+      }
+    }
+
+    async function updateVisitStatus(visitId, status) {
+      try {
+        hideStatus();
+
+        const res = await fetch(`${API}/extra-visits/${visitId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status }),
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || data.ok === false) {
+          showStatus(data.message || "Erro ao atualizar estado da visita.");
+          return;
+        }
+
+        showStatus(`Visita ${visitId} atualizada para ${status}.`);
+        await loadExtraVisits();
+      } catch (error) {
+        console.error(error);
+        showStatus("Erro de ligao ao atualizar visita.");
+      }
+    }
+
+    toggleOneOffPrice();
+    toggleRulePrice();
+  </script>
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

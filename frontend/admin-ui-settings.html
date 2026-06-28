@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cristal Water · Configuração Visual</title>
+  <link rel="stylesheet" href="/cristal-assist.css">
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#050b16;color:#e8f7ff}
+    header{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 24px;background:rgba(5,12,24,.86);border-bottom:1px solid rgba(53,217,255,.28);backdrop-filter:blur(16px)}
+    header h1{margin:0;font-size:28px} header p{margin:6px 0 0;color:#91a8be}
+    .links{display:flex;gap:10px;flex-wrap:wrap}.links a{color:#e8f7ff;text-decoration:none;border:1px solid rgba(53,217,255,.24);background:rgba(255,255,255,.06);border-radius:14px;padding:10px 12px;font-weight:800}
+    main{padding:22px;display:grid;grid-template-columns:1fr 1fr;gap:18px}.panel{border:1px solid rgba(53,217,255,.24);border-radius:24px;padding:20px;background:linear-gradient(180deg,rgba(16,32,54,.88),rgba(8,18,32,.92));box-shadow:0 24px 70px rgba(0,0,0,.4)}
+    h2{margin-top:0;color:#35d9ff}.theme-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.theme-card{padding:16px;border-radius:20px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.055);cursor:pointer}.theme-card.active{border-color:#35d9ff;box-shadow:0 0 0 3px rgba(53,217,255,.14)}.preview{height:90px;border-radius:16px;margin-bottom:12px;border:1px solid rgba(255,255,255,.16)}.dark{background:radial-gradient(circle at 15% 20%,#35d9ff55,transparent 35%),linear-gradient(135deg,#050b16,#071728)}.mid{background:radial-gradient(circle at 15% 20%,#68d8ff55,transparent 35%),linear-gradient(135deg,#111827,#253249)}.light{background:radial-gradient(circle at 15% 20%,#0b86e844,transparent 35%),linear-gradient(135deg,#fff,#edf4fb)}
+    .density-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.density{padding:14px;border-radius:18px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.055);color:#e8f7ff;cursor:pointer;font-weight:900}.density.active{border-color:#35d9ff;background:rgba(53,217,255,.12)}
+    .module-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.module-grid a{padding:14px;border-radius:18px;text-decoration:none;color:#e8f7ff;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.10);font-weight:800}.module-grid small{display:block;color:#91a8be;margin-top:4px;font-weight:400}
+    .note{color:#91a8be;line-height:1.5}.ok{color:#27f5a7;font-weight:900}@media(max-width:980px){main{grid-template-columns:1fr}.theme-cards,.density-row,.module-grid{grid-template-columns:1fr}}
+  </style>
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+<body>
+  <header>
+    <div><h1>🎨 Configuração Visual</h1><p>Temas, densidade de informação e acessos rápidos da plataforma Cristal Water.</p></div>
+    <nav class="links"><a href="/admin-dashboard">Dashboard</a><a href="/admin-ai">IA</a><a href="/help-center?topic=themes">Ajuda</a></nav>
+  </header>
+  <main>
+    <section class="panel" data-help-topic="themes">
+      <h2>Temas</h2>
+      <p class="note">Escolhe o estilo visual. A opção fica guardada neste computador.</p>
+      <div class="theme-cards">
+        <button class="theme-card" data-set-theme="dark"><div class="preview dark"></div><strong>Escuro futurista</strong><small>Ideal para sala de comando e uso prolongado.</small></button>
+        <button class="theme-card" data-set-theme="mid"><div class="preview mid"></div><strong>Meio termo</strong><small>Equilíbrio para trabalho diário.</small></button>
+        <button class="theme-card" data-set-theme="light"><div class="preview light"></div><strong>Claro</strong><small>Ideal para escritório e maior legibilidade.</small></button>
+      </div>
+    </section>
+    <section class="panel" data-help-topic="themes">
+      <h2>Densidade</h2>
+      <p class="note">Controla se queres ver mais informação no ecrã ou botões maiores.</p>
+      <div class="density-row">
+        <button class="density" data-set-density="compact">Compacto<br><small>Mais dados</small></button>
+        <button class="density" data-set-density="comfort">Normal<br><small>Equilibrado</small></button>
+        <button class="density" data-set-density="large">Grande<br><small>Campo/mobile</small></button>
+      </div>
+      <p class="note"><span class="ok">Atalhos:</span> CTRL/CMD+K abre comando rápido. CTRL/CMD+SHIFT+T alterna tema.</p>
+    </section>
+    <section class="panel" data-help-topic="dashboard">
+      <h2>Acessos recomendados</h2>
+      <div class="module-grid">
+        <a href="/admin-dashboard">🧠 Dashboard<small>Centro operacional</small></a>
+        <a href="/admin-ai">🤖 IA Operacional<small>Copiloto admin</small></a>
+        <a href="/admin-rounds">🛰️ Rondas<small>Planeamento semanal</small></a>
+        <a href="/admin-live-map">🌍 Mapa Live<small>GPS e operação</small></a>
+        <a href="/billing">💶 Financeiro<small>Cobranças e faturas</small></a>
+        <a href="/incident-center">🚨 Incidentes<small>SLA e alertas críticos</small></a>
+        <a href="/admin-crm">📇 Lembretes<small>Lembretes e agendamentos</small></a>
+        <a href="/admin-suppliers">🔗 Fornecedores<small>Links rápidos</small></a>
+        <a href="/admin-security">🔐 Segurança<small>Users/passwords</small></a>
+        
+        <a href="/admin-operational-settings">⚙️ Configurações<small>Permissões e mobile</small></a>
+      </div>
+    </section>
+    <section class="panel" data-help-topic="help">
+      <h2>Ajuda contextual</h2>
+      <p class="note">Passa o cursor sobre botões, cards e menus para ver explicações rápidas. Clica em “Saber mais” para abrir o centro de ajuda diretamente no tópico certo.</p>
+      <p class="note">Este sistema serve para treinar novos técnicos/admins sem manual separado.</p>
+    </section>
+  </main>
+  <script src="/admin-auth-guard.js"></script>
+  <script src="/admin-ui-settings.js"></script>
+  <script src="/cristal-help-data.js"></script>
+  <script src="/cristal-assist.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script src="/cw-admin-shortcuts.js"></script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

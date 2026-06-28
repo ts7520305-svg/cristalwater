@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+  <meta charset="utf-8">
+  <title>Cristal Water - Notificações</title>
+
+  <!-- 🔐 PROTEÇÃO: exige login do cliente -->
+  <script src="/client-auth-guard.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #e3f2fd;
+      color: #1f2933;
+    }
+
+    header {
+      background: white;
+      border-bottom: 3px solid #1e88e5;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    header img {
+      height: 70px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 26px;
+      color: #1e88e5;
+    }
+
+    header p {
+      margin: 4px 0 0 0;
+      color: #555;
+      font-size: 14px;
+    }
+
+    main {
+      padding: 25px;
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    .intro {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      margin-bottom: 25px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f5faff;
+      color: #1e88e5;
+      text-align: left;
+    }
+
+    tr:hover {
+      background: #f0f8ff;
+    }
+
+    button {
+      background: #1e88e5;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    button:hover {
+      background: #1565c0;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      font-size: 12px;
+      color: #555;
+    }
+  </style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+
+<body>
+
+<header>
+  <img src="/logo.png" alt="Cristal Water">
+  <div>
+    <h1>Notificações</h1>
+    <p>Mensagens importantes sobre o seu serviço</p>
+  </div>
+</header>
+
+<main>
+
+  <div class="intro">
+    Nesta área encontra mensagens importantes relacionadas com a manutenção da sua piscina,
+    pagamentos, avisos técnicos ou outras informações relevantes.
+    Recomendamos que consulte esta secção regularmente.
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Título</th>
+        <th>Mensagem</th>
+        <th>Estado</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+
+</main>
+
+<footer>
+  © Cristal Water · Swimming Pools
+</footer>
+
+<script src="/client-notifications.js"></script>
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

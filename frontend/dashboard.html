@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+<meta charset="UTF-8">
+<title>Dashboard Cristal Water</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin:0;
+  font-family:Arial;
+  background:#eef3f8;
+  color:#1f2937;
+}
+
+/* HEADER */
+.header {
+  background:linear-gradient(135deg,#0f75bc,#1e88e5);
+  color:white;
+  padding:20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.header-title {
+  font-size:24px;
+  font-weight:bold;
+}
+
+.header-actions a {
+  color:white;
+  text-decoration:none;
+  margin-left:10px;
+  padding:8px 12px;
+  background:rgba(255,255,255,0.2);
+  border-radius:8px;
+  font-weight:bold;
+}
+
+/* LAYOUT */
+.container { padding:20px; }
+
+.toolbar {
+  display:flex;
+  gap:10px;
+  margin-bottom:20px;
+}
+
+.toolbar input,
+.toolbar button {
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+
+.toolbar button {
+  background:#1e88e5;
+  color:white;
+  border:none;
+  cursor:pointer;
+}
+
+/* CARDS */
+.grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+  gap:15px;
+}
+
+.card {
+  background:white;
+  border-radius:12px;
+  padding:16px;
+  box-shadow:0 3px 10px rgba(0,0,0,0.08);
+}
+
+.card-title {
+  font-size:12px;
+  color:#6b7280;
+  text-transform:uppercase;
+}
+
+.card-value {
+  font-size:28px;
+  font-weight:bold;
+  margin-top:8px;
+}
+
+.card-sub {
+  font-size:12px;
+  margin-top:6px;
+  color:#6b7280;
+}
+
+/* SECTIONS */
+.section { margin-top:25px; }
+
+.panel {
+  background:white;
+  padding:16px;
+  border-radius:12px;
+  box-shadow:0 3px 10px rgba(0,0,0,0.08);
+}
+
+/* TABLE */
+.table {
+  width:100%;
+  border-collapse:collapse;
+}
+
+.table th,
+.table td {
+  padding:8px;
+  border-bottom:1px solid #eee;
+}
+
+.badge {
+  padding:3px 6px;
+  border-radius:6px;
+  color:white;
+  font-size:11px;
+}
+
+.PAID { background:green; }
+.PARTIAL { background:orange; }
+.PENDING { background:red; }
+
+/* ALERT */
+.alert {
+  border-left:5px solid #f59e0b;
+  padding:10px;
+  margin-bottom:10px;
+  background:#fafafa;
+}
+
+/* BUTTON */
+.btn {
+  background:#1e88e5;
+  color:white;
+  border:none;
+  padding:6px 10px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+/* RESPONSIVE */
+.two-col {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+}
+
+@media(max-width:900px){
+  .two-col { grid-template-columns:1fr; }
+}
+</style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">Cristal Water Dashboard</div>
+    <div id="dashboardStatus">A carregar...</div>
+  </div>
+
+  <div class="header-actions">
+    <a href="/billing">💶 Cobranças</a>
+    <a href="/">🏠 Início</a>
+  </div>
+</div>
+
+<div class="container">
+
+<div class="toolbar">
+  <input type="month" id="monthRef">
+  <button onclick="loadDashboard()">Atualizar</button>
+</div>
+
+<!-- KPIs -->
+<div class="grid">
+
+<div class="card">
+<div class="card-title">Clientes</div>
+<div id="totalClients" class="card-value">-</div>
+<div id="clientsSub" class="card-sub"></div>
+</div>
+
+<div class="card">
+<div class="card-title">Piscinas</div>
+<div id="totalPools" class="card-value">-</div>
+<div id="monthlyPotential" class="card-sub"></div>
+</div>
+
+<div class="card">
+<div class="card-title">Faturado</div>
+<div id="monthBilled" class="card-value">-</div>
+</div>
+
+<div class="card">
+<div class="card-title">Recebido</div>
+<div id="monthPaid" class="card-value">-</div>
+<div id="receivedPercent" class="card-sub"></div>
+</div>
+
+<div class="card">
+<div class="card-title">Em aberto</div>
+<div id="monthOpen" class="card-value">-</div>
+<div id="overdueInvoices" class="card-sub"></div>
+</div>
+
+<div class="card">
+<div class="card-title">Crédito</div>
+<div id="creditBalance" class="card-value">-</div>
+<div id="clientsWithCredit" class="card-sub"></div>
+</div>
+
+<div class="card">
+<div class="card-title">Alertas</div>
+<div id="openAlerts" class="card-value">-</div>
+</div>
+
+<div class="card">
+<div class="card-title">Visitas</div>
+<div id="visitsThisMonth" class="card-value">-</div>
+<div id="visitsSub" class="card-sub"></div>
+</div>
+
+</div>
+
+<!-- GRÁFICOS -->
+<div class="section two-col">
+
+<div class="panel">
+<h2>Evolução mensal</h2>
+<div id="monthlyEvolution"></div>
+</div>
+
+<div class="panel">
+<h2>Distribuição financeira</h2>
+<div id="financialDistribution"></div>
+</div>
+
+</div>
+
+<!-- DADOS -->
+<div class="section two-col">
+
+<div class="panel">
+<h2>Top devedores</h2>
+<div id="topDebtorsTable"></div>
+</div>
+
+<div class="panel">
+<h2>Pagamentos recentes</h2>
+<div id="latestPayments"></div>
+</div>
+
+</div>
+
+<div class="section two-col">
+
+<div class="panel">
+<h2>Zonas</h2>
+<div id="poolsByZone"></div>
+</div>
+
+<div class="panel">
+<h2>Alertas</h2>
+<div id="alertsList"></div>
+</div>
+
+</div>
+
+</div>
+
+<script src="/dashboard.js"></script>
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

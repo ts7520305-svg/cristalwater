@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>
+  Chat - Cristal Water
+</title>
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+/>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+<style>
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+
+  margin:0;
+
+  font-family:Arial,sans-serif;
+
+  background:#eef3f8;
+
+  color:#1f2937;
+
+  height:100vh;
+
+  overflow:hidden;
+}
+
+/* ======================================================
+LAYOUT
+====================================================== */
+
+.layout{
+
+  display:flex;
+
+  height:100vh;
+
+  min-width:0;
+}
+
+/* ======================================================
+SIDEBAR
+====================================================== */
+
+.sidebar{
+
+  width:360px;
+
+  flex:0 0 360px;
+
+  background:white;
+
+  border-right:1px solid #dbe4f0;
+
+  display:flex;
+
+  flex-direction:column;
+}
+
+.sidebar-header{
+
+  padding:20px;
+
+  border-bottom:1px solid #e5e7eb;
+}
+
+.sidebar-header h2{
+
+  color:#1e88e5;
+}
+
+.sidebar-search{
+
+  margin-top:15px;
+}
+
+.sidebar-search input{
+
+  width:100%;
+
+  padding:12px;
+
+  border-radius:10px;
+
+  border:1px solid #ccc;
+}
+
+/* ======================================================
+CLIENT LIST
+====================================================== */
+
+#clientList{
+
+  flex:1;
+
+  overflow-y:auto;
+}
+
+.client-item{
+
+  padding:15px;
+
+  border-bottom:1px solid #eef2f7;
+
+  cursor:pointer;
+
+  transition:.2s;
+
+  position:relative;
+}
+
+.client-item:hover{
+
+  background:#f8fafc;
+}
+
+.client-item.active{
+
+  background:#dbeafe;
+}
+
+.client-top{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+}
+
+.client-name{
+
+  font-weight:bold;
+}
+
+.client-last{
+
+  margin-top:8px;
+
+  font-size:13px;
+
+  color:#475569;
+
+  overflow:hidden;
+
+  white-space:nowrap;
+
+  text-overflow:ellipsis;
+}
+
+.client-meta{
+
+  margin-top:8px;
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+
+  font-size:11px;
+
+  color:#64748b;
+}
+
+/* ======================================================
+BADGES
+====================================================== */
+
+.badge{
+
+  min-width:24px;
+
+  height:24px;
+
+  border-radius:50%;
+
+  background:#ef4444;
+
+  color:white;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  font-size:11px;
+
+  font-weight:bold;
+
+  padding:4px;
+}
+
+.online-dot{
+
+  width:10px;
+
+  height:10px;
+
+  border-radius:50%;
+
+  background:#ef4444;
+}
+
+.online{
+
+  background:#22c55e !important;
+}
+
+/* ======================================================
+PRIORITY
+====================================================== */
+
+.priority{
+
+  margin-top:6px;
+
+  display:inline-block;
+
+  padding:4px 10px;
+
+  border-radius:20px;
+
+  font-size:11px;
+
+  font-weight:bold;
+
+  color:white;
+}
+
+.priority-normal{
+
+  background:#64748b;
+}
+
+.priority-vip{
+
+  background:#7c3aed;
+}
+
+.priority-urgent{
+
+  background:#dc2626;
+}
+
+.priority-debt{
+
+  background:#ea580c;
+}
+
+/* ======================================================
+CHAT AREA
+====================================================== */
+
+.chat-area{
+
+  flex:1;
+
+  min-width:0;
+
+  display:flex;
+
+  flex-direction:column;
+}
+
+/* ======================================================
+CHAT HEADER
+====================================================== */
+
+.chat-header{
+
+  background:white;
+
+  padding:18px 22px;
+
+  border-bottom:1px solid #e5e7eb;
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+}
+
+.chat-title{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:10px;
+}
+
+.chat-title h3{
+
+  margin:0;
+}
+
+/* ======================================================
+MESSAGES
+====================================================== */
+
+#messages{
+
+  flex:1;
+
+  overflow-y:auto;
+
+  padding:20px;
+
+  background:#eef3f8;
+}
+
+.chat-message{
+
+  max-width:75%;
+
+  padding:12px;
+
+  border-radius:14px;
+
+  margin-bottom:12px;
+}
+
+.chat-admin{
+
+  background:#dbeafe;
+
+  margin-left:auto;
+
+  text-align:right;
+}
+
+.chat-client{
+
+  background:#dcfce7;
+
+  margin-right:auto;
+}
+
+.chat-meta{
+
+  font-size:11px;
+
+  color:#666;
+
+  margin-top:6px;
+}
+
+.chat-image{
+
+  max-width:220px;
+
+  border-radius:10px;
+
+  margin-top:8px;
+}
+
+#typing{
+
+  font-size:13px;
+
+  color:#64748b;
+
+  padding:0 20px 10px;
+}
+
+.highlight{
+
+  background:#fde68a;
+}
+
+/* ======================================================
+INPUT
+====================================================== */
+
+.chat-input{
+
+  background:white;
+
+  padding:18px;
+
+  border-top:1px solid #e5e7eb;
+
+  display:flex;
+
+  gap:10px;
+
+  align-items:flex-end;
+}
+
+.chat-input textarea{
+
+  flex:1;
+
+  min-height:60px;
+
+  max-height:140px;
+
+  padding:12px;
+
+  border-radius:10px;
+
+  border:1px solid #ccc;
+
+  resize:none;
+}
+
+.chat-btn{
+
+  border:none;
+
+  border-radius:10px;
+
+  padding:12px 20px;
+
+  cursor:pointer;
+
+  font-weight:bold;
+
+  color:white;
+}
+
+.send-btn{
+
+  background:#1e88e5;
+}
+
+.file-btn{
+
+  background:#64748b;
+}
+
+.chat-admin-tools{
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:flex-end;
+
+  gap:10px;
+
+  flex-wrap:wrap;
+}
+
+.presence-toggle{
+
+  border:1px solid #cbd5e1;
+
+  border-radius:12px;
+
+  padding:10px 13px;
+
+  background:#f8fafc;
+
+  color:#0f172a;
+
+  font-weight:800;
+
+  cursor:pointer;
+}
+
+.presence-toggle.active{
+
+  background:#16a34a;
+
+  color:white;
+
+  border-color:#22c55e;
+}
+
+.presence-note{
+
+  flex-basis:100%;
+
+  text-align:right;
+
+  font-size:11px;
+
+  color:#64748b;
+}
+
+</style>
+
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+<style id="chat-contrast-overrides">
+  html body {
+    background: #06111f !important;
+    color: #e9f7ff !important;
+  }
+
+  body .layout {
+    background: #06111f !important;
+    color: #e9f7ff !important;
+  }
+
+  body .sidebar {
+    background: #071523 !important;
+    border-right: 1px solid #265675 !important;
+    color: #e9f7ff !important;
+  }
+
+  body .sidebar-header {
+    background: #0b2035 !important;
+    border-bottom: 1px solid #265675 !important;
+  }
+
+  body .sidebar-header h2,
+  body .client-name,
+  body .chat-title h3 {
+    color: #f3fbff !important;
+  }
+
+  body .sidebar-search input,
+  body .chat-input textarea {
+    background: #0a1b2d !important;
+    border: 1px solid #2d6388 !important;
+    color: #f3fbff !important;
+    box-shadow: inset 0 0 0 1px rgba(53, 209, 255, .06);
+  }
+
+  body .sidebar-search input::placeholder,
+  body .chat-input textarea::placeholder {
+    color: #9fc3dc !important;
+    opacity: 1;
+  }
+
+  body #clientList {
+    background: #071523 !important;
+  }
+
+  body .client-item {
+    background: #0a1b2d !important;
+    border-bottom: 1px solid #1f4564 !important;
+    color: #e9f7ff !important;
+  }
+
+  body .client-item:hover,
+  body .client-item.active {
+    background: #123557 !important;
+  }
+
+  body .client-last,
+  body .client-meta,
+  body #clientStatusText,
+  body #typing,
+  body .chat-meta {
+    color: #b8d6e9 !important;
+  }
+
+  body .chat-area {
+    background: #06111f !important;
+    color: #e9f7ff !important;
+  }
+
+  body .chat-header,
+  body .chat-input {
+    background: #081827 !important;
+    border-color: #265675 !important;
+    color: #e9f7ff !important;
+  }
+
+  body #messages {
+    background: linear-gradient(180deg, #071523 0%, #06111f 100%) !important;
+    color: #e9f7ff !important;
+  }
+
+  body .chat-message {
+    color: #f6fbff !important;
+    border: 1px solid rgba(125, 211, 252, .28);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, .22);
+  }
+
+  body .chat-admin {
+    background: #11506b !important;
+  }
+
+  body .chat-client {
+    background: #123f34 !important;
+  }
+
+  body .chat-message a {
+    color: #7dd3fc !important;
+    font-weight: 800;
+  }
+
+  body .priority-normal {
+    background: #355b85 !important;
+    color: #fff !important;
+  }
+
+  body .highlight {
+    background: #facc15 !important;
+    color: #172033 !important;
+    border-radius: 4px;
+    padding: 0 3px;
+  }
+
+  body .file-btn {
+    background: #355b85 !important;
+  }
+
+  body .send-btn {
+    background: linear-gradient(135deg, #0584c7, #35d1ff) !important;
+    color: #03121c !important;
+  }
+
+  body .presence-toggle {
+    background: #102b47 !important;
+    border-color: #2d6388 !important;
+    color: #dff6ff !important;
+  }
+
+  body .presence-toggle.active {
+    background: linear-gradient(135deg, #0c9f69, #40e6a0) !important;
+    color: #02150d !important;
+  }
+
+  body .presence-note {
+    color: #b8d6e9 !important;
+  }
+
+  @media (max-width: 760px) {
+    html,
+    body {
+      width: 100%;
+      min-height: 100vh;
+      height: auto;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+    }
+
+    body .layout {
+      width: 100%;
+      min-height: 100vh;
+      height: auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    body .sidebar {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      flex: none;
+      border-right: 0 !important;
+      border-bottom: 1px solid #265675 !important;
+    }
+
+    body .sidebar-header {
+      padding: 14px;
+    }
+
+    body .sidebar-header h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    body #clientList {
+      max-height: 230px;
+      overflow-y: auto;
+    }
+
+    body .chat-area {
+      width: 100%;
+      min-width: 0;
+      min-height: 62vh;
+    }
+
+    body .chat-header {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      padding: 14px;
+    }
+
+    body .chat-admin-tools {
+      justify-content: flex-start;
+      gap: 8px;
+    }
+
+    body .presence-note {
+      text-align: left;
+    }
+
+    body #messages {
+      min-height: 320px;
+      padding: 14px;
+    }
+
+    body .chat-message {
+      max-width: 94%;
+    }
+
+    body .chat-input {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 54px 86px;
+      gap: 8px;
+      padding: 12px;
+      align-items: stretch;
+    }
+
+    body .chat-input textarea {
+      min-width: 0;
+      min-height: 54px;
+    }
+
+    body .chat-btn {
+      min-width: 0;
+      padding: 10px 12px;
+    }
+  }
+
+  @media (max-width: 430px) {
+    body .chat-input {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    body .chat-btn {
+      width: 100%;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="layout">
+
+  <!-- ==================================================
+  SIDEBAR
+  =================================================== -->
+
+  <div class="sidebar">
+
+    <div class="sidebar-header">
+
+      <h2>
+        💬 Conversas
+      </h2>
+
+      <div class="sidebar-search">
+
+        <input
+          id="conversationSearch"
+          placeholder="Pesquisar cliente..."
+        >
+
+      </div>
+
+    </div>
+
+    <div id="clientList"></div>
+
+  </div>
+
+  <!-- ==================================================
+  CHAT AREA
+  =================================================== -->
+
+  <div class="chat-area">
+
+    <!-- HEADER -->
+
+    <div class="chat-header">
+
+      <div class="chat-title">
+
+        <div
+          id="clientStatusDot"
+          class="online-dot"
+        ></div>
+
+        <div>
+
+          <h3 id="chatClientName">
+            Cliente
+          </h3>
+
+          <div
+            id="clientStatusText"
+            style="font-size:12px;color:#64748b"
+          >
+            Offline
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="chat-admin-tools">
+
+        <div
+          id="priorityBadge"
+          class="priority priority-normal"
+        >
+          NORMAL
+        </div>
+
+        <button
+          id="adminPresenceToggle"
+          class="presence-toggle"
+          type="button"
+          title="Controla se os clientes veem a administracao online"
+        >
+          Invisivel
+        </button>
+
+        <div
+          id="adminPresenceNote"
+          class="presence-note"
+        >
+          Pode ler sem aparecer ativo.
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- MESSAGES -->
+
+    <div id="messages"></div>
+
+    <div id="typing"></div>
+
+    <!-- INPUT -->
+
+    <div class="chat-input">
+
+      <textarea
+        id="text"
+        placeholder="Mensagem..."
+      ></textarea>
+
+      <input
+        type="file"
+        id="fileInput"
+        hidden
+      >
+
+      <button
+        class="chat-btn file-btn"
+        id="fileBtn"
+      >
+        📎
+      </button>
+
+      <button
+        class="chat-btn send-btn"
+        id="sendBtn"
+      >
+        Enviar
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script src="/chat.js"></script>
+
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+  <meta charset="UTF-8" />
+  <title>Admin Notificações - Cristal Water</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      padding: 20px;
+      margin: 0;
+      color: #1f2937;
+    }
+
+    h1 { margin-top: 0; }
+
+    .topbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .action-btn, .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 14px;
+      background: #2563eb;
+      color: white;
+      font-weight: bold;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .btn-gray { background: #6b7280; }
+
+    .panel {
+      background: white;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card {
+      background: #fafafa;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .title {
+      font-weight: bold;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .meta {
+      font-size: 12px;
+      color: #666;
+      margin-top: 10px;
+    }
+
+    .actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .empty {
+      color: #6b7280;
+      padding: 14px 0;
+    }
+  </style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+<body>
+
+  <h1>Admin Notificações</h1>
+
+  <div class="topbar">
+    <a class="action-btn" href="/admin-dashboard"><span>🏠</span><span>Dashboard</span></a>
+    <a class="action-btn" href="/admin-payments"><span>💶</span><span>Pagamentos</span></a>
+    <button class="btn btn-gray" onclick="loadNotifications()"><span>🔄</span><span>Atualizar</span></button>
+    <button class="btn" onclick="markAllRead()"><span>✅</span><span>Marcar todas</span></button>
+  </div>
+
+  <div class="panel">
+    <div id="count"></div>
+    <div id="list" class="list"></div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+<script src="/admin-notifications.js"></script>
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script src="/cw-admin-shortcuts.js"></script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

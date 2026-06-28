@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+  <meta charset="utf-8">
+  <title>Cristal Water - Cobranças</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #eef6fb;
+      color: #1f2933;
+    }
+
+    .top-nav {
+      display: flex;
+      gap: 10px;
+      padding: 12px 20px;
+      background: #0f172a;
+      flex-wrap: wrap;
+    }
+
+    .top-nav a {
+      color: #cbd5e1;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 8px 14px;
+      border-radius: 8px;
+    }
+
+    .top-nav a:hover {
+      background: #1e293b;
+      color: white;
+    }
+
+    .top-nav a.active {
+      background: #1e88e5;
+      color: white;
+    }
+
+    header {
+      background: white;
+      border-bottom: 3px solid #1e88e5;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    header img { height: 70px; }
+
+    header h1 {
+      margin: 0;
+      font-size: 26px;
+      color: #1e88e5;
+    }
+
+    header p {
+      margin: 4px 0 0 0;
+      color: #555;
+      font-size: 14px;
+    }
+
+    main {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .toolbar,
+    .summary,
+    .list-wrap {
+      margin-bottom: 18px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: end;
+      background: white;
+      padding: 16px;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 180px;
+    }
+
+    .field label {
+      font-size: 13px;
+      font-weight: bold;
+      color: #334155;
+    }
+
+    .field input,
+    .field select {
+      padding: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 14px;
+      background: #fff;
+    }
+
+    .btn {
+      padding: 10px 14px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .btn-primary { background: #1e88e5; color: white; }
+    .btn-success { background: #16a34a; color: white; }
+    .btn-muted { background: #64748b; color: white; }
+    .btn-whatsapp { background: #16a34a; color: white; }
+    .btn-email { background: #2563eb; color: white; }
+    .btn-copy { background: #f59e0b; color: #111827; }
+    .btn-preview { background: #7c3aed; color: white; }
+    .btn-danger { background: #dc2626; color: white; }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .summary-card {
+      background: white;
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border-top: 4px solid #1e88e5;
+    }
+
+    .summary-card.warning {
+      border-top-color: #f59e0b;
+    }
+
+    .summary-card.danger {
+      border-top-color: #dc2626;
+    }
+
+    .summary-card.success {
+      border-top-color: #16a34a;
+    }
+
+    .summary-card .label {
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .summary-card .value {
+      font-size: 26px;
+      font-weight: bold;
+      color: #0f172a;
+    }
+
+    .list-wrap {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .client-card {
+      background: white;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border-left: 8px solid #cbd5e1;
+    }
+
+    .client-card.overdue {
+      border-left-color: #dc2626;
+      background: #fffaf9;
+    }
+
+    .client-card.pending {
+      border-left-color: #f59e0b;
+      background: #fffdf7;
+    }
+
+    .client-card.missing-contact {
+      box-shadow: 0 0 0 2px #facc15 inset, 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .card-top {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    @media (min-width: 980px) {
+      .card-top {
+        grid-template-columns: 1.3fr 1fr 1fr;
+      }
+    }
+
+    .block {
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .client-name {
+      font-size: 22px;
+      font-weight: bold;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    .line {
+      margin-bottom: 8px;
+      word-break: break-word;
+    }
+
+    .line:last-child {
+      margin-bottom: 0;
+    }
+
+    .strong-red {
+      color: #b91c1c;
+      font-weight: bold;
+    }
+
+    .strong-orange {
+      color: #b45309;
+      font-weight: bold;
+    }
+
+    .pills {
+      margin-top: 8px;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+
+    .pill-overdue { background: #fee2e2; color: #991b1b; }
+    .pill-pending { background: #fef3c7; color: #92400e; }
+    .pill-reminded { background: #d1fae5; color: #065f46; }
+    .pill-not-reminded { background: #fee2e2; color: #991b1b; }
+    .pill-missing { background: #fde68a; color: #92400e; }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .actions .btn {
+      width: 100%;
+    }
+
+    .empty-box {
+      background: white;
+      border-radius: 14px;
+      padding: 24px;
+      text-align: center;
+      color: #64748b;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 50;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 12px;
+      max-width: 760px;
+      width: 100%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      padding: 16px;
+      border-bottom: 1px solid #e5e7eb;
+      font-weight: bold;
+      font-size: 18px;
+      color: #0f172a;
+    }
+
+    .modal-body {
+      padding: 16px;
+    }
+
+    .modal-body textarea {
+      width: 100%;
+      min-height: 300px;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      resize: vertical;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+
+    .modal-actions {
+      padding: 16px;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      font-size: 12px;
+      color: #555;
+    }
+  </style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+
+<body>
+
+<header>
+  <img src="/logo.png" alt="Cristal Water">
+  <div>
+    <h1>Cristal Water</h1>
+    <p>Cobranças · Ação rápida</p>
+  </div>
+</header>
+
+<main>
+  <div class="toolbar">
+    <div class="field">
+      <label for="monthFilter">Mês</label>
+      <input type="month" id="monthFilter">
+    </div>
+
+    <div class="field">
+      <label for="searchFilter">Pesquisar cliente</label>
+      <input type="text" id="searchFilter" placeholder="Nome do cliente">
+    </div>
+
+    <div class="field">
+      <label for="statusFilter">Estado</label>
+      <select id="statusFilter">
+        <option value="ALL">Todos em dívida</option>
+        <option value="OVERDUE">Só OVERDUE</option>
+        <option value="PENDING">Só PENDING</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="reminderFilter">Aviso</label>
+      <select id="reminderFilter">
+        <option value="ALL">Todos</option>
+        <option value="TO_REMIND">Por avisar</option>
+        <option value="ALREADY_REMINDED">Já avisados</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="contactFilter">Contacto</label>
+      <select id="contactFilter">
+        <option value="ALL">Todos</option>
+        <option value="MISSING_CONTACT">Sem contacto</option>
+        <option value="HAS_CONTACT">Com contacto</option>
+      </select>
+    </div>
+
+    <div>
+      <button class="btn btn-primary" onclick="loadCollection()">Atualizar</button>
+    </div>
+
+    <div>
+      <button class="btn btn-muted" onclick="markVisibleAsReminded()">Marcar visíveis como avisados</button>
+    </div>
+
+    <div>
+      <button class="btn btn-success" onclick="markVisibleAsPaid()">Marcar visíveis como pagos</button>
+    </div>
+
+    <div>
+      <button class="btn btn-copy" onclick="copyVisibleContacts()">Copiar contactos visíveis</button>
+    </div>
+  </div>
+
+  <div class="summary">
+    <div class="summary-card danger">
+      <div class="label">Total em dívida</div>
+      <div class="value" id="sumDebt">0.00 €</div>
+    </div>
+
+    <div class="summary-card danger">
+      <div class="label">Clientes OVERDUE</div>
+      <div class="value" id="sumOverdue">0</div>
+    </div>
+
+    <div class="summary-card warning">
+      <div class="label">Clientes PENDING</div>
+      <div class="value" id="sumPending">0</div>
+    </div>
+
+    <div class="summary-card success">
+      <div class="label">Já avisados</div>
+      <div class="value" id="sumReminded">0</div>
+    </div>
+
+    <div class="summary-card warning">
+      <div class="label">Por avisar</div>
+      <div class="value" id="sumToRemind">0</div>
+    </div>
+
+    <div class="summary-card warning">
+      <div class="label">Sem contacto</div>
+      <div class="value" id="sumMissingContact">0</div>
+    </div>
+  </div>
+
+  <div class="list-wrap" id="collectionList"></div>
+</main>
+
+<div class="modal-backdrop" id="previewModal">
+  <div class="modal">
+    <div class="modal-header" id="previewTitle">Pré-visualização da mensagem</div>
+    <div class="modal-body">
+      <textarea id="previewText" readonly></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-copy" onclick="copyPreviewMessage()">Copiar texto</button>
+      <button class="btn btn-muted" onclick="closePreview()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  ©️ Cristal Water · Swimming Pools
+</footer>
+
+<script src="/nav.js"></script>
+<script>
+renderNav("collection");
+</script>
+<script src="/admin-collection.js"></script>
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script src="/cw-admin-shortcuts.js"></script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

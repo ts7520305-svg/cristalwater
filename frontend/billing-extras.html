@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+<meta charset="UTF-8">
+<title>Faturação Extras</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  font-family: Arial;
+  padding:20px;
+  background:#f4f6f8;
+}
+
+.card {
+  background:white;
+  padding:15px;
+  margin-bottom:10px;
+  border-radius:10px;
+  box-shadow:0 3px 8px rgba(0,0,0,0.1);
+}
+
+button {
+  padding:10px;
+  margin-top:10px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.confirm {
+  background:#2e7d32;
+  color:white;
+}
+
+.pdf {
+  background:#1e88e5;
+  color:white;
+  margin-left:10px;
+}
+
+.total {
+  font-size:18px;
+  font-weight:bold;
+}
+</style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+
+<body>
+
+<h2>Faturação de Extras</h2>
+
+<div id="list"></div>
+
+<button class="confirm" onclick="confirm()">✔ Confirmar Faturação</button>
+
+<script>
+const API = "/api";
+
+// ==========================================================
+// LOAD
+// ==========================================================
+
+async function load(){
+
+  const res = await fetch(`${API}/billing/extras`);
+  const data = await res.json();
+
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  if (!data.ok) return;
+
+  Object.entries(data.data).forEach(([clientId, c]) => {
+
+    list.innerHTML += `
+      <div class="card">
+        <div class="total">${c.client}</div>
+
+        <ul>
+          ${c.items.map(i => `
+            <li>${i.pool} - €${i.price}</li>
+          `).join("")}
+        </ul>
+
+        <div class="total">Total: €${c.total.toFixed(2)}</div>
+
+        <button class="pdf" onclick="openPdf(${clientId})">
+          📄 Gerar PDF
+        </button>
+      </div>
+    `;
+  });
+}
+
+// ==========================================================
+// PDF
+// ==========================================================
+
+function openPdf(clientId){
+  window.open(`${API}/invoice-pdf/extras/${clientId}`);
+}
+
+// ==========================================================
+// CONFIRMAR
+// ==========================================================
+
+async function confirm(){
+
+  await fetch(`${API}/billing/extras/confirm`, {
+    method:"POST"
+  });
+
+  alert("✔ Extras faturados");
+  load();
+}
+
+load();
+</script>
+
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

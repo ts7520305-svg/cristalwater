@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+<meta charset="utf-8">
+<title>Cristal Water - Configuração por Cliente</title>
+
+<style>
+body { font-family: Arial; background:#f4f6f8; padding:20px; }
+.card { background:white; padding:15px; border-radius:10px; margin-bottom:12px; }
+button { padding:8px 10px; margin-top:6px; cursor:pointer; }
+select, input { padding:6px; width:100%; margin-top:5px; }
+</style>
+
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+
+<body>
+
+<h2>Configuração de Alertas por Cliente</h2>
+
+<div class="card">
+  Cliente ID:
+  <input id="clientId" />
+  <button onclick="loadClient()">Carregar</button>
+</div>
+
+<div class="card">
+  <h3>Modo</h3>
+  <select id="mode">
+    <option value="DEFAULT">Seguir global</option>
+    <option value="ENABLED">Forçar envio</option>
+    <option value="DISABLED">Desativar</option>
+  </select>
+
+  <h3>WhatsApp</h3>
+  <input type="checkbox" id="whatsapp">
+
+  <h3>Email</h3>
+  <input type="checkbox" id="email">
+
+  <h3>Interno</h3>
+  <input type="checkbox" id="internal">
+
+  <h3>Número WhatsApp</h3>
+  <input id="whatsappNumber">
+
+  <h3>Email destino</h3>
+  <input id="emailAddress">
+
+  <button onclick="save()">Guardar</button>
+</div>
+
+<script>
+
+const API = "/api";
+
+async function loadClient() {
+  const id = document.getElementById("clientId").value;
+
+  const res = await fetch(`${API}/clients/${id}`);
+  const data = await res.json();
+
+  document.getElementById("mode").value = data.paymentReminderMode;
+  document.getElementById("whatsapp").checked = data.paymentReminderWhatsapp;
+  document.getElementById("email").checked = data.paymentReminderEmail;
+  document.getElementById("internal").checked = data.paymentReminderInternal;
+  document.getElementById("whatsappNumber").value = data.paymentReminderWhatsappNumber || "";
+  document.getElementById("emailAddress").value = data.paymentReminderEmailAddress || "";
+}
+
+async function save() {
+  const id = document.getElementById("clientId").value;
+
+  await fetch(`${API}/clients/${id}`, {
+    method:"PUT",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      paymentReminderMode: document.getElementById("mode").value,
+      paymentReminderWhatsapp: document.getElementById("whatsapp").checked,
+      paymentReminderEmail: document.getElementById("email").checked,
+      paymentReminderInternal: document.getElementById("internal").checked,
+      paymentReminderWhatsappNumber: document.getElementById("whatsappNumber").value,
+      paymentReminderEmailAddress: document.getElementById("emailAddress").value
+    })
+  });
+
+  alert("Guardado");
+}
+
+</script>
+
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script src="/cw-admin-shortcuts.js"></script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

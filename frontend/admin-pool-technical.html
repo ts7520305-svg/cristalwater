@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Cristal Water LDA - Ficha Tecnica</title>
+  <script src="/cw-auth.js"></script>
+  <link rel="stylesheet" href="/cw-polish.css">
+  <style>
+    :root {
+      --bg: #06111f;
+      --panel: #0d1d31;
+      --line: #24415f;
+      --txt: #e9f5ff;
+      --muted: #8fb1cc;
+      --brand: #35d1ff;
+      --input: #091829;
+      --ok: #1ed790;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: linear-gradient(120deg, #06111f, #0b1f33 55%, #06111f);
+      color: var(--txt);
+      font-family: Inter, Segoe UI, Arial, sans-serif;
+    }
+    main.page { max-width: 1500px; margin: 0 auto; padding: 24px; }
+    .page-head { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+    .page-head h1 { margin: 0; font-size: 30px; }
+    .page-head p { margin: 6px 0 0; color: var(--muted); }
+    .grid { display: grid; gap: 16px; }
+    .cols2 { grid-template-columns: 1fr 1fr; }
+    .card {
+      background: rgba(13,29,49,.92);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.22);
+    }
+    input, select, textarea {
+      width: 100%;
+      background: var(--input);
+      color: var(--txt);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      margin: 6px 0;
+    }
+    textarea { min-height: 85px; resize: vertical; }
+    button, .btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      background: #163354;
+      color: var(--txt);
+      font-weight: 800;
+      cursor: pointer;
+      margin: 4px 0;
+      text-decoration: none;
+      display: inline-block;
+    }
+    button.primary { background: linear-gradient(135deg, #0584c7, #35d1ff); color: #03121c; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .muted { color: var(--muted); font-size: 13px; }
+    .section-title {
+      margin: 16px 0 6px;
+      color: #7dd3fc;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    .timeline-item, .reminder-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: flex-start;
+      background: rgba(6,17,31,.55);
+      border: 1px solid rgba(125,211,252,.22);
+      border-radius: 14px;
+      padding: 12px;
+      margin-top: 10px;
+    }
+    .timeline-item { display: block; }
+    .timeline-item span, .timeline-item small { display: block; color: var(--muted); margin-top: 4px; }
+    .timeline-item p, .reminder-item p { margin: 7px 0 0; color: #cfe9ff; }
+    .reminder-item.done { opacity: .68; }
+    .calc-help {
+      border: 1px dashed rgba(125,211,252,.32);
+      border-radius: 12px;
+      padding: 12px;
+      margin: 6px 0;
+      color: #bfe4ff;
+      background: rgba(6,17,31,.55);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    input[readonly] {
+      border-color: rgba(64,230,160,.46);
+      background: rgba(30,215,144,.08);
+      color: #d9fff0;
+      font-weight: 800;
+    }
+    .access-item {
+      background: rgba(6,17,31,.55);
+      border: 1px solid rgba(125,211,252,.22);
+      border-radius: 14px;
+      padding: 12px;
+      margin-top: 10px;
+    }
+    .access-item strong { display: block; }
+    .access-item small { display: block; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid rgba(30,215,144,.45);
+      color: var(--ok);
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    @media (max-width: 1000px) {
+      main.page { padding: 14px; }
+      .cols2, .row { grid-template-columns: 1fr; }
+      .page-head { flex-direction: column; }
+      .reminder-item { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="page-head">
+      <div>
+        <h1>Ficha Tecnica da Piscina</h1>
+        <p id="subtitle">Dados tecnicos, historico e lembretes por piscina/jacuzzi.</p>
+      </div>
+      <div>
+        <a class="btn" href="/admin-pools">Piscinas</a>
+        <a class="btn" href="/admin-master-control">Centro de Operacoes</a>
+      </div>
+    </div>
+
+    <form id="sheetForm" onsubmit="saveSheet();return false">
+      <section class="grid cols2">
+        <div class="card">
+          <h2>Dados gerais</h2>
+          <input id="name" name="name" placeholder="Nome da piscina">
+          <select id="type" name="type">
+            <option value="POOL">Piscina</option>
+            <option value="JACUZZI">Jacuzzi</option>
+            <option value="CHILDREN_POOL">Piscina criancas</option>
+          </select>
+          <input id="zone" name="zone" placeholder="Zona">
+          <input id="address" name="address" placeholder="Morada/localizacao">
+          <div class="row">
+            <input id="volumeM3" name="volumeM3" type="number" step="0.1" placeholder="Volume calculado m3" readonly>
+            <input id="monthlyAmount" name="monthlyAmount" type="number" step="0.01" placeholder="Valor mensal EUR">
+          </div>
+          <div class="calc-help">Volume calculado automaticamente pelas dimensoes: comprimento x largura x profundidade media. Para formatos especiais, usa a calculadora tecnica.</div>
+          <textarea id="notes" name="notes" placeholder="Notas gerais"></textarea>
+
+          <div class="section-title">Dimensoes e calculo</div>
+          <div class="row">
+            <input id="lengthM" name="lengthM" type="number" step="0.01" placeholder="Comprimento m">
+            <input id="widthM" name="widthM" type="number" step="0.01" placeholder="Largura m">
+          </div>
+          <div class="row">
+            <input id="depthMinM" name="depthMinM" type="number" step="0.01" placeholder="Prof. minima">
+            <input id="depthMaxM" name="depthMaxM" type="number" step="0.01" placeholder="Prof. maxima">
+          </div>
+          <div class="row">
+            <input id="averageDepthM" name="averageDepthM" type="number" step="0.01" placeholder="Prof. media">
+            <input id="pumpFlowM3h" name="pumpFlowM3h" type="number" step="0.1" placeholder="Caudal bomba m3/h">
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Equipamentos</h2>
+          <div class="section-title">Filtracao</div>
+          <input id="pumpType" name="pumpType" placeholder="Tipo de bomba">
+          <input id="pumpPower" name="pumpPower" placeholder="Potencia bomba">
+          <input id="filterType" name="filterType" placeholder="Tipo de filtro">
+          <input id="filterMedia" name="filterMedia" placeholder="Areia / Vidro / Cartucho">
+
+          <div class="section-title">Tratamento e quimica</div>
+          <select id="saltSystem" name="saltSystem">
+            <option value="false">Sem maquina de sal</option>
+            <option value="true">Com maquina de sal</option>
+          </select>
+          <div class="row">
+            <input id="targetSalinityPpm" name="targetSalinityPpm" type="number" placeholder="Sal alvo ppm">
+            <input id="targetChlorinePpm" name="targetChlorinePpm" type="number" step="0.1" placeholder="Cloro alvo ppm">
+          </div>
+          <div class="row">
+            <input id="currentWaterTempC" name="currentWaterTempC" type="number" step="0.1" placeholder="Temperatura agua">
+            <input id="lightsCount" name="lightsCount" type="number" placeholder="Numero luzes">
+          </div>
+          <input id="lightsType" name="lightsType" placeholder="Tipo de LED/lampadas">
+          <textarea id="equipmentNotes" name="equipmentNotes" placeholder="Notas de equipamento"></textarea>
+        </div>
+
+        <div class="card">
+          <h2>Casa tecnica</h2>
+          <input id="technicalRoomLocation" name="technicalRoomLocation" placeholder="Localizacao da casa tecnica">
+          <input id="technicalRoomCondition" name="technicalRoomCondition" placeholder="Estado geral">
+          <input id="technicalRoomVentilation" name="technicalRoomVentilation" placeholder="Ventilacao">
+          <input id="technicalRoomElectrical" name="technicalRoomElectrical" placeholder="Quadro eletrico">
+          <textarea id="technicalRoomNotes" name="technicalRoomNotes" placeholder="Notas casa tecnica"></textarea>
+        </div>
+
+        <div class="card">
+          <h2>Chaves e acessos</h2>
+          <p class="muted">Chaves/codigos desta piscina e chaves gerais do cliente visiveis aos tecnicos.</p>
+          <div id="keyAccessList" class="muted">A carregar chaves...</div>
+          <a id="keyAccessLink" class="btn" href="/admin-keys">Gerir chaves desta piscina</a>
+        </div>
+
+        <div class="card">
+          <h2>Historico tecnico</h2>
+          <textarea id="historyNote" name="historyNote" placeholder="Adicionar nota ao historico desta ficha tecnica"></textarea>
+          <div id="history" class="muted">A carregar historico...</div>
+        </div>
+
+        <div class="card">
+          <h2>Lembretes de servico</h2>
+          <div class="row">
+            <input id="reminderTitle" placeholder="Ex: Trocar areia do filtro">
+            <input id="reminderDueAt" type="datetime-local">
+          </div>
+          <div class="row">
+            <select id="reminderRepeatRule">
+              <option value="NONE">Sem repeticao</option>
+              <option value="CUSTOM">Personalizada</option>
+            </select>
+            <select id="reminderPriority">
+              <option value="NORMAL">Normal</option>
+              <option value="HIGH">Urgente</option>
+              <option value="LOW">Baixa</option>
+            </select>
+          </div>
+          <div id="customRepeatBox" class="row" style="display:none">
+            <input id="customRepeatValue" type="number" min="1" max="1095" step="1" placeholder="Repetir a cada">
+            <select id="customRepeatUnit">
+              <option value="DAYS">Dias</option>
+              <option value="MONTHS">Meses</option>
+              <option value="YEARS">Anos</option>
+            </select>
+          </div>
+          <textarea id="reminderDescription" placeholder="Notas do servico periodico"></textarea>
+          <div class="row">
+            <button type="button" class="primary" onclick="createServiceReminder()">Criar lembrete</button>
+            <a id="poolOperationalReminderLink" class="btn" href="/admin-crm">Lembrete operacional</a>
+          </div>
+          <span id="reminderStatus" class="muted"></span>
+          <div id="serviceReminders" style="margin-top:12px">
+            <div class="muted">A carregar lembretes...</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="card" style="margin-top:16px">
+        <button class="primary" type="submit">Guardar ficha tecnica</button>
+        <span id="status" class="muted"></span>
+      </div>
+    </form>
+  </main>
+
+  <script src="/admin-auth-guard.js"></script>
+  <script src="/admin-pool-technical.js"></script>
+  <script src="/cw-flow-shell.js"></script>
+</body>
+</html>

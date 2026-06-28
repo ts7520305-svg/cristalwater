@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1778415083223,
+    "name": "andre silva ",
+    "email": "andresilva@sapo.pt",
+    "password": "123",
+    "role": "TECHNICIAN",
+    "created_at": "2026-05-10T12:11:23.223Z",
+    "updated_at": "2026-05-10T12:11:23.223Z"
+  },
+  {
+    "id": 1778416338709,
+    "name": "andre teste",
+    "email": "andre@teste.pt",
+    "password": "123",
+    "role": "TECHNICIAN",
+    "created_at": "2026-05-10T12:32:18.709Z",
+    "updated_at": "2026-05-10T12:32:18.709Z"
+  }
+]

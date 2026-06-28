@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cristal Water - Faturacao Oficial</title>
+  <script src="/cw-auth.js"></script>
+  <link rel="stylesheet" href="/cw-polish.css">
+  <link rel="stylesheet" href="/cristal-assist.css">
+  <style>
+    :root{
+      --bg:#06111f;
+      --panel:#0d1d31;
+      --panel2:#12375a;
+      --line:#24415f;
+      --text:#e9f5ff;
+      --muted:#9fc0d8;
+      --brand:#35d1ff;
+      --ok:#35e6a0;
+      --warn:#ffd166;
+      --bad:#ff6b6b;
+      --input:#091829;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(120deg,#06111f,#0b1f33 58%,#06111f);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
+    main.page{max-width:1720px;margin:0 auto;padding:24px}
+    .page-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px}
+    .page-head h1{margin:0;font-size:32px;letter-spacing:0}
+    .page-head p{margin:8px 0 0;color:var(--muted);max-width:860px;line-height:1.5}
+    .head-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .panel{background:rgba(13,29,49,.92);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.22)}
+    .metrics{display:grid;grid-template-columns:repeat(5,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+    .metric{min-height:102px;background:linear-gradient(180deg,rgba(18,55,90,.9),rgba(10,27,46,.94));border:1px solid rgba(125,211,252,.24);border-radius:16px;padding:16px}
+    .metric span{display:block;color:var(--muted);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+    .metric b{display:block;margin-top:10px;font-size:30px;color:#dff6ff}
+    .metric.warn{border-color:rgba(255,209,102,.42)}
+    .metric.warn b{color:var(--warn)}
+    .toolbar{display:grid;grid-template-columns:minmax(260px,1fr) auto auto;gap:10px;align-items:center;margin-bottom:16px}
+    input,select{width:100%;min-height:44px;border:1px solid var(--line);border-radius:13px;background:var(--input);color:var(--text);padding:0 12px;outline:none}
+    button,.btn{min-height:42px;border:0;border-radius:13px;padding:0 14px;background:#163354;color:var(--text);font-weight:900;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+    button.primary,.btn.primary{background:linear-gradient(135deg,#0584c7,#35d1ff);color:#03121c}
+    button.ok{background:linear-gradient(135deg,#12845f,#35e6a0);color:#03121c}
+    button.warn{background:rgba(255,209,102,.18);border:1px solid rgba(255,209,102,.35);color:#ffe7a3}
+    .status{min-height:32px;color:var(--muted);font-size:13px;margin-bottom:10px}
+    .client-list{display:grid;gap:12px}
+    .client-card{display:grid;grid-template-columns:minmax(280px,1.1fr) minmax(260px,.9fr) minmax(320px,1.2fr);gap:14px;background:rgba(13,48,80,.76);border:1px solid rgba(125,211,252,.22);border-radius:18px;padding:16px}
+    .client-card.missing-data{border-color:rgba(255,209,102,.45)}
+    .client-title{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .client-title h2{margin:0;font-size:20px;line-height:1.2}
+    .pill{display:inline-flex;align-items:center;border:1px solid rgba(125,211,252,.25);border-radius:999px;padding:5px 9px;color:#c8ebff;background:rgba(9,24,41,.9);font-size:12px;font-weight:800}
+    .pill.warn{border-color:rgba(255,209,102,.5);color:#ffe8a8}
+    .pill.ok{border-color:rgba(53,230,160,.45);color:#a9ffd9}
+    .meta{display:grid;gap:6px;margin-top:12px;color:#cfe8f7;font-size:13px}
+    .meta strong{color:#fff}
+    .section-label{margin-bottom:8px;color:#7dd3fc;font-size:11px;font-weight:950;text-transform:uppercase;letter-spacing:.08em}
+    .invoice-block{display:grid;gap:8px}
+    .invoice-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border:1px solid rgba(125,211,252,.18);background:rgba(6,17,31,.72);border-radius:14px;padding:10px}
+    .invoice-row.issued{border-color:rgba(53,230,160,.24)}
+    .invoice-main b{display:block;color:#fff}
+    .invoice-main span{display:block;margin-top:4px;color:var(--muted);font-size:12px}
+    .invoice-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .empty{border:1px dashed rgba(125,211,252,.28);border-radius:14px;padding:18px;color:var(--muted);background:rgba(6,17,31,.52)}
+    @media(max-width:1100px){
+      .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .toolbar{grid-template-columns:1fr}
+      .client-card{grid-template-columns:1fr}
+    }
+    @media(max-width:640px){
+      main.page{padding:14px}
+      .page-head{display:block}
+      .head-actions{justify-content:flex-start;margin-top:12px}
+      .metrics{grid-template-columns:1fr}
+      .invoice-row{grid-template-columns:1fr}
+      .invoice-actions{justify-content:flex-start}
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="page-head">
+      <div>
+        <h1>Faturacao Oficial Externa</h1>
+        <p>Clientes que pedem fatura real noutro programa. Aqui consegues ver os dados fiscais, faturas internas pendentes, historico ja emitido e marcar o numero da fatura oficial externa.</p>
+      </div>
+      <div class="head-actions">
+        <a class="btn" href="/admin-clients">Clientes</a>
+        <a class="btn" href="/invoices">Todas as faturas</a>
+        <button class="primary" id="refreshBtn" type="button">Atualizar</button>
+      </div>
+    </section>
+
+    <section class="metrics" id="metrics"></section>
+
+    <section class="panel">
+      <div class="toolbar">
+        <input id="search" placeholder="Pesquisar cliente, NIF, email fiscal, referencia ou zona">
+        <select id="statusFilter" aria-label="Estado">
+          <option value="pending">Pendentes de fatura oficial</option>
+          <option value="issued">Ja emitidas externamente</option>
+          <option value="missing-data">Dados fiscais incompletos</option>
+          <option value="all">Todos os clientes com fatura oficial</option>
+        </select>
+        <button class="primary" id="searchBtn" type="button">Pesquisar</button>
+      </div>
+      <div class="status" id="status">A carregar...</div>
+      <div class="client-list" id="list"></div>
+    </section>
+  </main>
+
+  <script src="/to-issue.js"></script>
+  <script src="/cristal-help-data.js"></script>
+  <script src="/cristal-assist.js"></script>
+  <script src="/cw-flow-shell.js"></script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <title>Cristal Water - Dashboard Operacional</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #eef3f8;
+      color: #1f2937;
+    }
+
+    header {
+      background: #ffffff;
+      border-bottom: 3px solid #1e88e5;
+      padding: 18px 20px;
+    }
+
+    header h1 {
+      margin: 0;
+      color: #1e88e5;
+    }
+
+    main {
+      padding: 20px;
+    }
+
+    .toolbar, .card {
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .toolbar input, .toolbar button {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+    }
+
+    .toolbar button {
+      background: #1e88e5;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .box {
+      background: #f8fbff;
+      border: 1px solid #d6e6f7;
+      border-radius: 10px;
+      padding: 14px;
+    }
+
+    .label {
+      font-size: 12px;
+      color: #607d8b;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .value {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 10px;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f8fafc;
+    }
+
+    .small {
+      color: #6b7280;
+      font-size: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+<body>
+
+<header>
+  <h1>Dashboard Operacional</h1>
+</header>
+
+<main>
+  <div class="toolbar">
+    <input type="month" id="monthRef">
+    <button onclick="loadOperational()">Atualizar</button>
+    <div id="status" class="small">Pronto</div>
+  </div>
+
+  <div class="card">
+    <div class="grid">
+      <div class="box">
+        <div class="label">Clientes</div>
+        <div class="value" id="totalClients">0</div>
+      </div>
+      <div class="box">
+        <div class="label">Instalações</div>
+        <div class="value" id="totalPools">0</div>
+      </div>
+      <div class="box">
+        <div class="label">Instalações por zona</div>
+        <div class="value" id="zoneCount">0</div>
+      </div>
+      <div class="box">
+        <div class="label">Mensalidade potencial</div>
+        <div class="value" id="monthlyPotential">€ 0.00</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Zonas com mais instalações</h2>
+    <div id="zonesTable"></div>
+  </div>
+
+  <div class="card">
+    <h2>Clientes com dívida</h2>
+    <div id="debtorsTable"></div>
+  </div>
+</main>
+
+<script src="/operational-dashboard.js"></script>
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+  <meta charset="utf-8">
+  <title>Técnico - Cristal Water</title>
+
+  <style>
+    body { font-family: Arial, sans-serif; background:#e3f2fd; margin:0; padding:20px; }
+    .box { background:#fff; padding:15px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,.08); margin-bottom:15px; }
+    input { padding:10px; width:100%; margin:10px 0; }
+    button { padding:10px; background:#1e88e5; color:#fff; border:none; border-radius:4px; cursor:pointer; font-weight:bold; }
+    button:hover { background:#1565c0; }
+    .error { color:#c62828; font-size:13px; }
+    .round { background:#fff; padding:12px; border-radius:8px; margin-bottom:12px; }
+    .pool { padding:10px; border-top:1px solid #ddd; margin-top:10px; }
+  </style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+
+<body>
+
+<div id="loginBox" class="box">
+  <h3>Login Técnico</h3>
+  <input id="pin" placeholder="PIN do técnico">
+  <button onclick="login()">Entrar</button>
+  <div id="loginError" class="error"></div>
+</div>
+
+<div id="sessionBox" class="box" style="display:none;">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <strong id="welcome"></strong>
+    <button onclick="logout()">Sair</button>
+  </div>
+</div>
+
+<div id="rounds"></div>
+
+<script src="/technician.js"></script>
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

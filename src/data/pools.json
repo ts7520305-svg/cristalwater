@@ -1,0 +1,10 @@
+[
+  {
+    "name": "Piscina Principal",
+    "clientName": "Cliente Fatura",
+    "location": "Quintal",
+    "volumeM3": 45,
+    "type": "pool",
+    "notes": "Piscina exterior"
+  }
+]

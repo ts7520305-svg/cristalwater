@@ -1,0 +1,10 @@
+[
+  {
+    "name": "Ronda Segunda Lagos",
+    "dayOfWeek": 1,
+    "technicians": ["João Técnico"],
+    "pools": [
+      { "name": "Piscina Principal", "order": 1 }
+    ]
+  }
+]

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>Configurações de Notificações</title>
+
+<style>
+body{
+  font-family: Arial;
+  padding:20px;
+  background:#f4f6f8;
+}
+
+h1{
+  margin-bottom:20px;
+}
+
+.card{
+  background:white;
+  padding:15px;
+  margin-bottom:10px;
+  border-radius:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+label{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+</style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+
+<body>
+
+<h1>🔧 Configuração de Som</h1>
+
+<div id="list"></div>
+
+<script>
+
+const API = "/api";
+
+// 🔥 TIPOS DE NOTIFICAÇÃO
+const types = ["ARRIVAL","PAYMENT","DEBT","CHAT","REMINDER"];
+
+const user = JSON.parse(localStorage.user || "{}");
+
+// ==========================================================
+// LOAD
+// ==========================================================
+
+async function load(){
+
+  const res = await fetch(`${API}/settings/${user.id}`);
+  const data = await res.json();
+
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  types.forEach(type => {
+
+    const found = data.settings.find(s => s.type === type);
+
+    const enabled = found ? found.sound : true;
+
+    const div = document.createElement("div");
+    div.className = "card";
+
+    div.innerHTML = `
+      <label>
+        🔔 ${type}
+        <input type="checkbox"
+          ${enabled ? "checked" : ""}
+          onchange="save('${type}', this.checked)">
+      </label>
+    `;
+
+    list.appendChild(div);
+  });
+}
+
+// ==========================================================
+// SAVE
+// ==========================================================
+
+async function save(type,value){
+
+  await fetch(`${API}/settings`, {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      userId: user.id,
+      type,
+      sound: value
+    })
+  });
+
+  console.log("✔ Guardado:", type, value);
+}
+
+// ==========================================================
+
+load();
+
+</script>
+
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>Configuração Notificações</title>
+
+<style>
+body{
+  font-family: Arial;
+  padding:20px;
+  background:#f4f6f8;
+}
+
+h1{
+  margin-bottom:20px;
+}
+
+.card{
+  background:white;
+  padding:15px;
+  margin-bottom:10px;
+  border-radius:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+label{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+</style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+
+<body>
+
+<h1>🔧 Configuração de Som</h1>
+
+<div id="list"></div>
+
+<script>
+const types = ["ARRIVAL","PAYMENT","DEBT","CHAT","REMINDER"];
+
+function loadConfig(){
+
+  const list = document.getElementById("list");
+
+  types.forEach(type => {
+
+    const saved = localStorage.getItem("sound_"+type);
+
+    const enabled = saved === null ? true : saved === "true";
+
+    const div = document.createElement("div");
+    div.className = "card";
+
+    div.innerHTML = `
+      <label>
+        🔔 ${type}
+        <input type="checkbox" ${enabled ? "checked" : ""}
+          onchange="save('${type}', this.checked)">
+      </label>
+    `;
+
+    list.appendChild(div);
+  });
+}
+
+function save(type,value){
+  localStorage.setItem("sound_"+type,value);
+}
+
+loadConfig();
+</script>
+
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

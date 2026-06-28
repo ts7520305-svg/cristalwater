@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>Mapa Inteligente</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<style>
+body { margin:0; font-family:Arial; }
+#map { width:100%; height:100vh; }
+
+.top{
+  position:absolute;
+  top:10px;
+  left:10px;
+  z-index:1000;
+  background:white;
+  padding:10px;
+  border-radius:10px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+button{
+  padding:8px;
+  border:none;
+  border-radius:6px;
+  background:#1e88e5;
+  color:white;
+  cursor:pointer;
+}
+
+.clear{ background:#ef4444; }
+.zone{ background:#2e7d32; }
+</style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+
+<body>
+
+<div class="top">
+  <button onclick="showZones()">Ver Zonas</button>
+  <button onclick="assignZones()">Atribuir Técnicos</button>
+  <button class="clear" onclick="clearMap()">Limpar</button>
+</div>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+const API = "/api";
+
+const map = L.map('map').setView([37.1, -8.6], 10);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  maxZoom:19
+}).addTo(map);
+
+let pools = [];
+let markers = [];
+let zoneLayers = [];
+
+// ==========================================================
+// LOAD POOLS
+// ==========================================================
+
+async function load(){
+
+  const res = await fetch(`${API}/pools`);
+  pools = await res.json();
+
+  drawPools();
+}
+
+// ==========================================================
+// DRAW POOLS
+// ==========================================================
+
+function drawPools(){
+
+  pools.forEach(p=>{
+
+    if (!p.latitude || !p.longitude) return;
+
+    const m = L.marker([p.latitude,p.longitude])
+      .addTo(map)
+      .bindPopup(p.name);
+
+    markers.push(m);
+  });
+}
+
+// ==========================================================
+// CALCULAR ZONAS
+// ==========================================================
+
+function getBounds(){
+
+  const lats = pools.map(p=>p.latitude);
+  const lngs = pools.map(p=>p.longitude);
+
+  return {
+    minLat: Math.min(...lats),
+    maxLat: Math.max(...lats),
+    minLng: Math.min(...lngs),
+    maxLng: Math.max(...lngs)
+  };
+}
+
+// ==========================================================
+// DESENHAR ZONAS
+// ==========================================================
+
+function showZones(){
+
+  clearZones();
+
+  const b = getBounds();
+
+  const midLat = (b.minLat + b.maxLat)/2;
+  const midLng = (b.minLng + b.maxLng)/2;
+
+  // 4 zonas
+  const zones = [
+    [[b.minLat,b.minLng],[midLat,midLng]], // SW
+    [[b.minLat,midLng],[midLat,b.maxLng]], // SE
+    [[midLat,b.minLng],[b.maxLat,midLng]], // NW
+    [[midLat,midLng],[b.maxLat,b.maxLng]]  // NE
+  ];
+
+  zones.forEach(z=>{
+
+    const rect = L.rectangle([
+      [z[0][0],z[0][1]],
+      [z[1][0],z[1][1]]
+    ],{
+      color:"green",
+      weight:2,
+      fillOpacity:0.1
+    }).addTo(map);
+
+    zoneLayers.push(rect);
+  });
+}
+
+// ==========================================================
+// ATRIBUIR ZONAS
+// ==========================================================
+
+async function assignZones(){
+
+  const techRes = await fetch(`${API}/gps/live`);
+  const techs = await techRes.json();
+
+  if (!techs.length){
+    alert("Sem técnicos");
+    return;
+  }
+
+  const b = getBounds();
+  const midLat = (b.minLat + b.maxLat)/2;
+  const midLng = (b.minLng + b.maxLng)/2;
+
+  const zones = [];
+
+  zones.push(pools.filter(p=>p.latitude <= midLat && p.longitude <= midLng));
+  zones.push(pools.filter(p=>p.latitude <= midLat && p.longitude > midLng));
+  zones.push(pools.filter(p=>p.latitude > midLat && p.longitude <= midLng));
+  zones.push(pools.filter(p=>p.latitude > midLat && p.longitude > midLng));
+
+  techs.forEach((t,i)=>{
+
+    const z = zones[i % zones.length];
+
+    console.log(`👷 ${t.name} → zona ${i}`, z.length,"piscinas");
+  });
+
+  alert("Zonas atribuídas (ver consola)");
+}
+
+// ==========================================================
+// LIMPAR
+// ==========================================================
+
+function clearZones(){
+  zoneLayers.forEach(l=>map.removeLayer(l));
+  zoneLayers = [];
+}
+
+function clearMap(){
+  clearZones();
+}
+
+// ==========================================================
+
+load();
+</script>
+
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

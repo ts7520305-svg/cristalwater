@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+<meta charset="UTF-8">
+<title>Chat Cliente</title>
+
+<style>
+body {
+  font-family: Arial;
+  background: #f4f6f8;
+  padding: 10px;
+}
+
+.header {
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.messages {
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+  height: 60vh;
+  overflow-y: auto;
+}
+
+.msg {
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  max-width: 70%;
+}
+
+.me {
+  background: #2563eb;
+  color: white;
+  margin-left: auto;
+}
+
+.other {
+  background: #e5e7eb;
+}
+
+.input {
+  display: flex;
+  margin-top: 10px;
+}
+
+textarea {
+  flex: 1;
+  padding: 10px;
+}
+
+button {
+  width: 120px;
+  background: #2563eb;
+  color: white;
+  border: none;
+}
+</style>
+
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+
+<body>
+
+<div class="header">
+  Cliente ID:
+  <input id="clientId">
+  <button onclick="load()">Abrir</button>
+</div>
+
+<div id="messages" class="messages"></div>
+
+<div class="input">
+  <textarea id="text"></textarea>
+  <button onclick="send()">Enviar</button>
+</div>
+
+<script src="/client_chat.js"></script>
+
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

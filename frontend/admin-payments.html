@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+  <meta charset="UTF-8" />
+  <title>Admin Pagamentos - Cristal Water</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      padding: 20px;
+      margin: 0;
+      color: #1f2937;
+    }
+
+    h1 { margin-top: 0; }
+
+    .topbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 14px;
+      background: #2563eb;
+      color: white;
+      font-weight: bold;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .panel {
+      background: white;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 14px;
+    }
+
+    th { background: #f9fafb; }
+
+    .empty {
+      color: #6b7280;
+      padding: 14px 0;
+    }
+
+    .mini-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: #7c3aed;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+<body>
+
+  <h1>Admin Pagamentos</h1>
+
+  <div class="topbar">
+    <a class="action-btn" href="/admin-dashboard.html"><span>🏠</span><span>Dashboard</span></a>
+    <a class="action-btn" href="/admin-notifications.html"><span>🔔</span><span>Notificações</span></a>
+    <a class="action-btn" href="/billing-center.html"><span>💶</span><span>Cobranças</span></a>
+  </div>
+
+  <div class="panel">
+    <div id="tableBox"></div>
+  </div>
+
+  <script src="/admin-payments.js"></script>
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script src="/cw-admin-shortcuts.js"></script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

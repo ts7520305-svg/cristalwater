@@ -1,0 +1,22 @@
+<script src="/cw-auth.js"></script>
+<h2>Ranking Técnicos</h2>
+<div id="ranking"></div>
+
+<script>
+fetch("/api/technician/ranking")
+.then(r=>r.json())
+.then(data=>{
+  let html="";
+  data.forEach(t=>{
+    html+=`
+      <div>
+        <b>${t.name}</b><br>
+        Feitas: ${t.done}/${t.total} |
+        ${t.performance}%
+      </div>
+      <hr>
+    `;
+  });
+  document.getElementById("ranking").innerHTML=html;
+});
+</script>

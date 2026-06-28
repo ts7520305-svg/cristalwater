@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="pt">
+
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+
+<meta charset="utf-8">
+
+<title>
+  Cristal Water - Técnico
+</title>
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
+
+<link
+  rel="manifest"
+  href="/manifest.json"
+/>
+
+<meta
+  name="theme-color"
+  content="#1e88e5"
+/>
+
+<link
+  rel="apple-touch-icon"
+  href="/icons/icon-192.png"
+/>
+
+<link
+  rel="stylesheet"
+  href="/css/splash.css"
+/>
+
+<style>
+
+*{
+  box-sizing:border-box
+}
+
+body{
+
+  margin:0;
+
+  font-family:Arial;
+
+  background:#eef3f8;
+
+  color:#1f2937;
+
+  transition:.2s;
+}
+
+:root[data-theme="dark"] body{
+
+  background:#0f172a;
+
+  color:#f8fafc;
+}
+
+:root[data-theme="dark"] header{
+
+  background:#111827;
+
+  border-bottom:4px solid #2563eb;
+}
+
+:root[data-theme="dark"] .card{
+
+  background:#1e293b;
+
+  color:#f8fafc;
+}
+
+:root[data-theme="dark"] #status{
+
+  background:#1e293b;
+
+  color:#f8fafc;
+}
+
+:root[data-theme="dark"] input,
+:root[data-theme="dark"] textarea{
+
+  background:#0f172a;
+
+  color:white;
+
+  border:1px solid #334155;
+}
+
+:root[data-theme="dark"] .offline-bar{
+
+  background:#111827;
+
+  border:1px solid #334155;
+}
+
+:root[data-theme="dark"] h3{
+
+  color:#f8fafc;
+}
+
+header{
+
+  background:#ffffff;
+
+  padding:15px;
+
+  border-bottom:4px solid #1e88e5;
+
+  position:sticky;
+
+  top:0;
+
+  z-index:10;
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:10px;
+
+  box-shadow:
+    0 2px 8px rgba(0,0,0,.08);
+}
+
+.top-row{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+}
+
+header h2{
+
+  margin:0;
+
+  font-size:22px;
+
+  color:#1e88e5;
+}
+
+.top-buttons{
+
+  display:flex;
+
+  gap:10px;
+
+  flex-wrap:wrap;
+}
+
+button{
+
+  padding:10px 14px;
+
+  border:none;
+
+  border-radius:10px;
+
+  cursor:pointer;
+
+  font-weight:bold;
+
+  transition:.2s;
+}
+
+button:hover{
+
+  transform:translateY(-1px);
+}
+
+.logout{
+
+  background:#ef4444;
+
+  color:white;
+}
+
+.route{
+
+  background:#6a1b9a;
+
+  color:white;
+}
+
+.start-day{
+
+  background:#2e7d32;
+
+  color:white;
+}
+
+.end-day{
+
+  background:#c62828;
+
+  color:white;
+}
+
+.complete-btn{
+
+  background:#2e7d32;
+
+  color:white;
+}
+
+.photo-btn{
+
+  background:#1e88e5;
+
+  color:white;
+}
+
+.alert-btn{
+
+  background:#ef6c00;
+
+  color:white;
+}
+
+.map-btn{
+
+  background:#374151;
+
+  color:white;
+}
+
+#status{
+
+  padding:12px;
+
+  margin:10px;
+
+  background:white;
+
+  border-radius:10px;
+
+  font-weight:bold;
+
+  border-left:5px solid #1e88e5;
+}
+
+.offline-bar{
+
+  display:flex;
+
+  gap:15px;
+
+  flex-wrap:wrap;
+
+  margin-top:10px;
+
+  background:#f8fbff;
+
+  border:1px solid #d6e6f7;
+
+  padding:10px;
+
+  border-radius:10px;
+
+  font-size:13px;
+}
+
+.card{
+
+  background:white;
+
+  margin:10px;
+
+  padding:15px;
+
+  border-radius:14px;
+
+  box-shadow:
+    0 2px 8px rgba(0,0,0,.08);
+}
+
+.card h3{
+
+  margin-top:0;
+
+  color:#0f172a;
+}
+
+.visit-actions{
+
+  display:flex;
+
+  flex-wrap:wrap;
+
+  gap:10px;
+
+  margin-top:15px;
+}
+
+input,
+textarea,
+select{
+
+  width:100%;
+
+  padding:12px;
+
+  margin-top:8px;
+
+  border-radius:8px;
+
+  border:1px solid #ccc;
+
+  font-size:14px;
+}
+
+.visit-photo{
+
+  width:90px;
+
+  height:90px;
+
+  object-fit:cover;
+
+  border-radius:8px;
+
+  margin:4px;
+
+  border:2px solid #eef3f8;
+}
+
+@media(max-width:700px){
+
+  .top-buttons{
+
+    flex-direction:column;
+  }
+
+  button{
+
+    width:100%;
+  }
+
+  .visit-actions{
+
+    flex-direction:column;
+  }
+
+  .offline-bar{
+
+    flex-direction:column;
+  }
+}
+
+</style>
+
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+
+<body>
+
+<div id="splashScreen">
+
+  <img
+    id="splashLogo"
+    src="/icons/icon-512.png"
+  >
+
+  <div id="splashTitle">
+    Cristal Water
+  </div>
+
+  <div id="splashSubtitle">
+    Enterprise Field System
+  </div>
+
+</div>
+
+<header>
+
+  <div class="top-row">
+
+    <h2>
+      Ronda do Técnico
+    </h2>
+
+    <button
+      class="logout"
+      id="logoutBtn"
+    >
+      Sair
+    </button>
+
+  </div>
+
+  <div class="top-buttons">
+
+    <button
+      class="route"
+      id="installAppBtn"
+      style="display:none"
+    >
+      📲 Instalar App
+    </button>
+
+    <button
+      class="route"
+      id="themeToggle"
+    >
+      🌙 Modo Escuro
+    </button>
+
+    <button
+      class="route"
+      id="optimizeRouteBtn"
+    >
+      🗺️ Otimizar Rota
+    </button>
+
+    <button
+      class="start-day"
+      id="startDayBtn"
+    >
+      ▶️ Iniciar Dia
+    </button>
+
+    <button
+      class="end-day"
+      id="endDayBtn"
+    >
+      ⏹️ Terminar Dia
+    </button>
+
+  </div>
+
+  <div id="dayStatus">
+    Estado: ...
+  </div>
+
+  <div id="offlineBar" class="offline-bar">
+
+    <span id="offlineNetwork">
+      🟢 Online
+    </span>
+
+    <span id="offlineVisits">
+      📦 0 visitas pendentes
+    </span>
+
+    <span id="offlinePhotos">
+      📸 0 fotos pendentes
+    </span>
+
+  </div>
+
+</header>
+
+<div id="status">
+  A carregar...
+</div>
+
+<div id="list"></div>
+
+<div class="card">
+
+  <h3>
+    🚨 Alerta Técnico Interno
+  </h3>
+
+  <textarea
+    id="internalAlert"
+    placeholder="Problema encontrado, material necessário, avaria, acesso, etc..."
+  ></textarea>
+
+  <button
+    class="alert-btn"
+    id="sendAlertBtn"
+  >
+    Enviar Alerta Admin
+  </button>
+
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+
+<script src="/js/theme.js"></script>
+
+<script src="/js/pwa/install-prompt.js"></script>
+
+<script src="/js/push/push-init.js"></script>
+
+<script src="/js/push/push-realtime.js"></script>
+
+<script src="/js/offline/offline-queue.js"></script>
+
+<script src="/js/offline/offline-photos.js"></script>
+
+<script src="/js/offline/offline-gps.js"></script>
+
+<script src="/technician.js"></script>
+
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

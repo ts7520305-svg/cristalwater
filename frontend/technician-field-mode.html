@@ -1,0 +1,848 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#08120f">
+  <title>Cristal Water - Modo Tecnico</title>
+  <link rel="stylesheet" href="/cw-polish.css">
+  <script src="/cw-auth.js"></script>
+  <style>
+    :root{--bg:#07120f;--panel:#10211d;--panel2:#0c1a17;--line:#244c43;--txt:#f3fff9;--muted:#9fbbb2;--ok:#33d17a;--warn:#ffd166;--bad:#ff6b6b;--blue:#58c7ff}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:linear-gradient(180deg,#06110f,#0c1f1b);color:var(--txt);font-family:Inter,Segoe UI,Arial,sans-serif}.field{width:min(760px,100%);margin:0 auto;padding:12px 12px 90px}.top{position:sticky;top:0;z-index:5;margin:0 -12px 12px;padding:12px;background:rgba(7,18,15,.94);border-bottom:1px solid rgba(255,255,255,.08);backdrop-filter:blur(12px)}.top-row{display:flex;justify-content:space-between;align-items:center;gap:10px}.brand-block{display:flex;align-items:center;gap:10px}.brand-logo{width:42px;height:42px;border-radius:10px;background:#fff;object-fit:cover;border:1px solid rgba(255,255,255,.2)}.brand{font-weight:950}.progress{color:var(--muted);font-size:13px}.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;box-shadow:0 14px 36px rgba(0,0,0,.25);margin-bottom:12px}.next{background:linear-gradient(135deg,#102b25,#10313d);border-color:rgba(88,199,255,.35)}.chip{display:inline-flex;align-items:center;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);border-radius:999px;padding:7px 10px;color:#d9fff1;font-weight:900;font-size:12px}.title{font-size:32px;line-height:1.08;font-weight:950;margin:12px 0 6px}.muted{color:var(--muted);line-height:1.45}.actions{display:grid;grid-template-columns:1fr;gap:10px;margin-top:14px}.big{min-height:66px;border:0;border-radius:8px;font-size:19px;font-weight:950;cursor:pointer;color:#06110f;background:#d8f3ff;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center}.big.ok{background:linear-gradient(135deg,#33d17a,#9affc6)}.big.warn{background:linear-gradient(135deg,#ffd166,#ffec99)}.big.bad{background:linear-gradient(135deg,#ff7b7b,#ffd0d0)}.big.ghost{background:#15362f;color:#eafff2;border:1px solid var(--line)}.checks{display:grid;grid-template-columns:1fr 1fr;gap:9px}.check{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:13px;font-weight:900;min-height:58px}.check input{width:24px;height:24px;accent-color:var(--ok)}.measure{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.measure-field{display:grid;gap:7px;background:#081612;border:1px solid var(--line);border-radius:8px;padding:10px}.measure-field input{border:0;border-radius:6px;background:#06120f;padding:12px}.measure-label{font-size:12px;font-weight:950;color:#d9fff1;text-transform:uppercase}.ref-row{display:flex;justify-content:space-between;gap:8px;align-items:center;color:var(--muted);font-size:12px;line-height:1.25}.range-status{white-space:nowrap;border-radius:999px;padding:4px 8px;background:rgba(255,255,255,.07);color:#cde8df;font-weight:950}.range-status.ok{background:rgba(51,209,122,.14);color:#9affc6}.range-status.low,.range-status.high{background:rgba(255,209,102,.16);color:#ffd166}input,textarea,select{width:100%;border:1px solid var(--line);background:#081612;color:var(--txt);border-radius:8px;padding:14px;font-size:18px}textarea{grid-column:1/-1;min-height:86px}.visit{width:100%;text-align:left;background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:12px;margin:8px 0;cursor:pointer}.visit.active{border-color:var(--blue);box-shadow:0 0 0 1px rgba(88,199,255,.35)}.visit.done{border-color:rgba(51,209,122,.5);background:#0d241d}.visit span{display:block;color:var(--muted);font-size:13px;margin-top:4px}.visit-location{display:grid;gap:3px;margin-top:7px;color:#cde8df;font-size:13px}.visit-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.toast{position:fixed;left:12px;right:12px;bottom:14px;z-index:20;background:#eafff2;color:#07120f;border-radius:8px;padding:14px;font-weight:950;text-align:center;box-shadow:0 14px 36px rgba(0,0,0,.35);transform:translateY(120%);transition:.2s}.toast.show{transform:translateY(0)}.problem-panel{margin-top:12px;background:#0b1815;border:1px solid rgba(255,209,102,.45);border-radius:8px;padding:12px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.form-grid textarea{min-height:104px}.doc-tools{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.doc-tools input{min-height:58px}.doc-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}.doc-card{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:13px}.doc-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.doc-number{font-size:22px;font-weight:950;margin:6px 0;color:#ffffff}.doc-meta{display:grid;gap:6px;color:#cde8df;font-size:14px}.doc-subtitle{margin-top:14px;color:#d9fff1;font-size:13px;font-weight:950;text-transform:uppercase;letter-spacing:.04em}.doc-items{margin-top:10px;display:grid;gap:6px}.doc-item{display:flex;justify-content:space-between;gap:10px;border-top:1px solid rgba(255,255,255,.08);padding-top:7px;color:#eafff2}.doc-summary{margin-top:12px;border:1px solid rgba(88,199,255,.24);background:rgba(88,199,255,.08);border-radius:8px;padding:11px;display:grid;gap:4px}.doc-summary strong{color:#d8f3ff}.doc-summary span{font-size:18px;font-weight:950}.doc-summary small{color:var(--muted)}.doc-actions{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px}.doc-btn{min-height:54px;border-radius:8px;background:linear-gradient(135deg,#58c7ff,#33d17a);color:#06110f;text-decoration:none;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:950}.status-ok{color:#9affc6}.status-warn{color:#ffd166}@media(max-width:520px){.checks,.measure,.form-grid,.doc-tools{grid-template-columns:1fr}.title{font-size:28px}.big{min-height:72px}.field{padding-left:10px;padding-right:10px}.doc-head{display:block}}
+    .access-card{background:linear-gradient(135deg,#11271f,#10243a);border-color:rgba(88,199,255,.32)}.access-list{display:grid;gap:9px;margin-top:12px}.access-item{background:#071612;border:1px solid var(--line);border-radius:8px;padding:12px}.access-code{font-size:24px;font-weight:950;color:#ffffff;margin:4px 0}.access-meta{color:#bfe0d8;font-size:14px;line-height:1.4}
+    .route-card{background:linear-gradient(135deg,#0f241f,#102a32);border-color:rgba(88,199,255,.34)}.map-box{margin-top:12px;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#071612;min-height:220px;position:relative}.map-box iframe{display:block;width:100%;height:230px;border:0;background:#071612}.map-fallback{min-height:220px;display:flex;align-items:center;justify-content:center;text-align:center;padding:18px;color:#cde8df;background:radial-gradient(circle at 30% 25%,rgba(88,199,255,.18),transparent 30%),linear-gradient(135deg,#071612,#0e2a23)}.map-overlay{position:absolute;left:12px;right:12px;bottom:12px;display:flex;justify-content:space-between;gap:10px;align-items:center;background:rgba(7,18,15,.9);border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:10px;color:#eafff2;pointer-events:none}.map-overlay strong{color:#9affc6}.route-meta{display:grid;gap:6px;margin-top:10px;color:#cde8df;font-size:14px}.route-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.route-btn{min-height:54px;border-radius:8px;background:linear-gradient(135deg,#58c7ff,#33d17a);color:#06110f;text-decoration:none;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:950}.route-btn.ghost{background:#15362f;color:#eafff2;border:1px solid var(--line)}.photo-card{background:linear-gradient(135deg,#10211d,#162218);border-color:rgba(255,209,102,.28)}.photo-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px}.photo-btn{min-height:58px;border:1px solid var(--line);border-radius:8px;background:#15362f;color:#eafff2;font-weight:950;font-size:15px}.photo-btn.warn{background:linear-gradient(135deg,#ffd166,#ffec99);color:#06110f;border:0}.photo-list{display:grid;gap:9px;margin-top:12px}.photo-item{display:grid;grid-template-columns:92px 1fr;gap:10px;align-items:center;background:#071612;border:1px solid var(--line);border-radius:8px;padding:9px}.photo-thumb{width:92px;height:72px;object-fit:cover;border-radius:6px;background:#0b1815;border:1px solid rgba(255,255,255,.12)}.photo-meta{display:grid;gap:5px}.photo-status{font-size:13px;color:#cde8df}.photo-status.ok{color:#9affc6}.photo-status.warn{color:#ffd166}.photo-mini{display:flex;gap:6px;flex-wrap:wrap}.photo-mini button{border:1px solid var(--line);background:#10211d;color:#eafff2;border-radius:8px;padding:8px 10px;font-weight:900}
+    .water-card{background:linear-gradient(135deg,#14251f,#2b2412);border-color:rgba(255,209,102,.38)}.water-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.water-list{display:grid;gap:9px;margin-top:12px}.water-item{background:#071612;border:1px solid rgba(255,209,102,.38);border-radius:8px;padding:12px}.water-item.overdue{border-color:#ff6b6b;background:#2a1111}.water-line{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.water-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.water-actions button{border:0;border-radius:8px;padding:12px;font-weight:950}.water-actions .close{background:#9affc6;color:#06110f}.water-actions .alarm{background:#ff7b7b;color:#06110f}@media(max-width:520px){.water-grid,.water-actions{grid-template-columns:1fr}}
+    .admin-alert-card{background:linear-gradient(135deg,#10211d,#112b34);border-color:rgba(88,199,255,.34)}.admin-alert-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.admin-alert-grid textarea{grid-column:1/-1}.admin-alert-small{display:grid;grid-template-columns:1fr 1fr;gap:9px}@media(max-width:520px){.admin-alert-grid,.admin-alert-small{grid-template-columns:1fr}}
+    .dose-card{background:linear-gradient(135deg,#10211d,#172414);border-color:rgba(154,255,198,.28)}.dose-list{display:grid;gap:9px;margin-top:12px}.dose-row{display:grid;grid-template-columns:1.3fr .65fr .55fr auto;gap:8px;align-items:center;background:#071612;border:1px solid var(--line);border-radius:8px;padding:9px}.dose-row input,.dose-row select{min-height:54px;font-size:16px}.dose-remove{min-height:54px;border:1px solid rgba(255,107,107,.42);background:#2a1111;color:#ffd0d0;border-radius:8px;font-weight:950;padding:0 12px}.dose-empty{border:1px dashed rgba(159,187,178,.35);border-radius:8px;padding:12px;color:var(--muted);background:rgba(255,255,255,.025)}.dose-footer{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}@media(max-width:520px){.dose-row,.dose-footer{grid-template-columns:1fr}.dose-remove{width:100%}}
+    .field-dashboard{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:9px;margin-bottom:12px}.field-tile{min-height:92px;border:1px solid var(--line);border-radius:8px;padding:12px;background:#0b1b17;display:grid;align-content:space-between;box-shadow:0 12px 28px rgba(0,0,0,.18)}.field-tile.primary{background:linear-gradient(135deg,#14332b,#123247);border-color:rgba(88,199,255,.38)}.field-tile span{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:#b7d8d0;font-weight:950}.field-tile b{font-size:20px;line-height:1.12;color:#fff}.field-tile small{color:var(--muted);line-height:1.3}.field-tile.warn{border-color:rgba(255,209,102,.45);background:#261f10}.field-tile.ok{border-color:rgba(51,209,122,.4);background:#0d241d}@media(max-width:640px){.field-dashboard{grid-template-columns:1fr 1fr}.field-tile.primary{grid-column:1/-1}}@media(max-width:420px){.field-dashboard{grid-template-columns:1fr}}
+    .crew-card{background:linear-gradient(135deg,#10261f,#10283a);border-color:rgba(88,199,255,.34)}.crew-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.crew-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.crew-info,.crew-doc-status{background:#071612;border:1px solid var(--line);border-radius:8px;padding:12px}.crew-info span,.crew-doc-status span.label{display:block;color:#b7d8d0;font-size:12px;text-transform:uppercase;font-weight:950;letter-spacing:.04em}.crew-info b{display:block;margin-top:5px;font-size:21px;color:#fff}.crew-info small{display:block;margin-top:4px;color:var(--muted);line-height:1.3}.crew-status-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:9px}.crew-doc-status{display:flex;gap:11px;align-items:flex-start}.signal{width:18px;height:18px;flex:0 0 18px;border-radius:999px;background:var(--bad);box-shadow:0 0 0 5px rgba(255,107,107,.16)}.crew-doc-status.ok{border-color:rgba(51,209,122,.48);background:#0d241d}.crew-doc-status.ok .signal{background:var(--ok);box-shadow:0 0 0 5px rgba(51,209,122,.16)}.crew-doc-status.warn{border-color:rgba(255,209,102,.46);background:#261f10}.crew-doc-status b{display:block;color:#fff}.crew-doc-status small{display:block;color:var(--muted);line-height:1.35;margin-top:3px}.crew-doc-status.ok small{color:#bdf7d5}.crew-doc-status.warn small{color:#ffe2a3}@media(max-width:560px){.crew-head{display:block}.crew-grid,.crew-status-grid{grid-template-columns:1fr}}
+    @media(max-width:520px){.top{margin:0 0 12px}}
+    @media(max-width:520px){.route-actions,.photo-actions{grid-template-columns:1fr}.photo-item{grid-template-columns:78px 1fr}.photo-thumb{width:78px;height:64px}}
+    /* V22.6.15 - modo tecnico mais simples para trabalho em campo */
+    body{background:#06120f!important}.field{width:min(880px,100%);padding:10px 12px 104px;overflow-x:hidden}.field *{min-width:0}.top{border-bottom:1px solid rgba(88,199,255,.18);box-shadow:0 10px 28px rgba(0,0,0,.26)}.top-row{min-height:52px}.brand-logo{width:46px;height:46px}.brand{font-size:18px}.progress{font-size:14px;color:#c8e1da}.chip{border-radius:999px;background:#123429;color:#eafff2;border-color:rgba(154,255,198,.22)}.field-dashboard{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.field-tile{min-height:88px;background:#0d1f1b;border-color:rgba(154,255,198,.16);box-shadow:none}.field-tile.primary{background:#103126;border-color:rgba(88,199,255,.34)}.field-tile b{font-size:19px}.card{background:#0d1f1b;border-color:rgba(154,255,198,.18);box-shadow:0 10px 26px rgba(0,0,0,.2);padding:16px}.next{background:#102821;border-color:rgba(88,199,255,.42);border-left:5px solid var(--blue)}.title{font-size:28px;line-height:1.12}.actions{gap:11px}.big{min-height:64px;border-radius:8px;font-size:18px;box-shadow:none}.big.ok{background:#43e08d}.big.warn{background:#ffd166}.big.ghost{background:#123429}.crew-card,.access-card,.route-card,.photo-card,.water-card,.admin-alert-card,.dose-card{background:#0d1f1b;border-color:rgba(154,255,198,.18)}.crew-info,.crew-doc-status,.access-item,.measure-field,.doc-card,.water-item,.dose-row,.photo-item,.visit,.check{background:#081612;border-color:rgba(154,255,198,.16);box-shadow:none;overflow-wrap:anywhere;word-break:break-word}.access-code,.access-meta,.doc-card *,.visit *,.crew-info *,.crew-doc-status *{overflow-wrap:anywhere;word-break:break-word}.crew-doc-status.warn{background:#221c0f;border-color:rgba(255,209,102,.45)}.crew-doc-status.ok{background:#0d241d;border-color:rgba(51,209,122,.42)}.checks{grid-template-columns:repeat(2,minmax(0,1fr))}.check{min-height:56px}.measure{grid-template-columns:repeat(2,minmax(0,1fr))}input,textarea,select{font-size:16px;min-height:48px}.route-actions,.dose-footer,.water-actions{grid-template-columns:repeat(2,minmax(0,1fr))}.photo-actions{grid-template-columns:repeat(3,minmax(0,1fr))}.visit{min-height:64px}.toast{border-radius:8px}.map-fallback{background:#081612}.doc-btn,.route-btn,.photo-btn{border-radius:8px}@media(min-width:700px){.next .actions{grid-template-columns:1fr 1fr}}@media(max-width:640px){.field-dashboard{grid-template-columns:1fr 1fr}.field-tile.primary{grid-column:1/-1}.title{font-size:25px}.card{padding:14px}.checks,.measure,.route-actions,.dose-footer,.water-actions,.photo-actions{grid-template-columns:1fr}.big{min-height:68px}.top{position:sticky}}
+    /* V22.6.16 - cockpit real para tecnico em campo */
+    body.cw-tech-field-page{background:#07130f!important;color:#f5fff9}
+    body.cw-tech-field-page .cw-global-bar,body.cw-tech-field-page .cw-side,body.cw-tech-field-page .cw-theme-fab{display:none!important}
+    body.cw-tech-field-page.cw-with-sidebar{padding-left:0!important}
+    body.cw-tech-field-page .field{width:min(720px,100%);padding:8px 10px calc(118px + env(safe-area-inset-bottom));margin:0 auto!important}
+    body.cw-tech-field-page .top{position:sticky;top:0;z-index:40;margin:0 -10px 8px;padding:10px;border-bottom:1px solid rgba(154,255,198,.16);background:rgba(7,19,15,.96);box-shadow:0 10px 24px rgba(0,0,0,.24);backdrop-filter:blur(14px)}
+    body.cw-tech-field-page .brand-logo{width:40px;height:40px;border-radius:8px}
+    body.cw-tech-field-page .brand{font-size:16px;letter-spacing:0}
+    body.cw-tech-field-page .progress{font-size:13px;color:#b9d7cf}
+    body.cw-tech-field-page .chip{min-height:30px;padding:6px 10px;font-size:12px;background:#10251f;border-color:rgba(154,255,198,.18);color:#e9fff5}
+    body.cw-tech-field-page .field-dashboard{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:0 0 8px}
+    body.cw-tech-field-page .field-tile{min-height:68px;padding:10px;border-radius:8px;background:#0b1b16;border-color:rgba(154,255,198,.14);box-shadow:none}
+    body.cw-tech-field-page .field-tile.primary{grid-column:1/-1;min-height:82px;background:linear-gradient(135deg,#0e2b21,#0d2634);border-color:rgba(88,199,255,.42)}
+    body.cw-tech-field-page .field-tile span{font-size:11px;color:#9fc5bb}
+    body.cw-tech-field-page .field-tile b{font-size:18px;line-height:1.1}
+    body.cw-tech-field-page .field-tile small{font-size:12px;color:#a9c9c1}
+    body.cw-tech-field-page .card{border-radius:8px;background:#0d1d18;border-color:rgba(154,255,198,.16);box-shadow:none;margin-bottom:8px;padding:12px}
+    body.cw-tech-field-page .crew-card{padding:10px}
+    body.cw-tech-field-page .crew-head .muted{display:none}
+    body.cw-tech-field-page .crew-grid{grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+    body.cw-tech-field-page .crew-status-grid{grid-template-columns:1fr 1fr;gap:8px}
+    body.cw-tech-field-page .crew-info,body.cw-tech-field-page .crew-doc-status{min-height:76px;padding:10px;border-radius:8px;background:#081612}
+    body.cw-tech-field-page .crew-info b{font-size:16px;line-height:1.1}
+    body.cw-tech-field-page .crew-info small,body.cw-tech-field-page .crew-doc-status small{font-size:12px}
+    body.cw-tech-field-page .signal{width:15px;height:15px;flex-basis:15px}
+    body.cw-tech-field-page .next{position:relative;overflow:hidden;padding:16px;border-left:0;background:linear-gradient(135deg,#0f3627,#0d2b3b);border-color:rgba(88,199,255,.42)}
+    body.cw-tech-field-page .next:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:#43e08d}
+    body.cw-tech-field-page .title{font-size:30px;margin:10px 0 8px;letter-spacing:0}
+    body.cw-tech-field-page #nextMeta{font-size:15px;color:#c5e1da}
+    body.cw-tech-field-page .next .actions{grid-template-columns:1fr 1fr;margin-top:12px}
+    body.cw-tech-field-page .big{min-height:58px;border-radius:8px;font-size:17px;line-height:1.15;padding:10px 12px}
+    body.cw-tech-field-page .big.ok{background:#44e38d;color:#05130e}
+    body.cw-tech-field-page .big.warn{background:#ffd166;color:#131006}
+    body.cw-tech-field-page .big.bad{background:#ff7373;color:#160707}
+    body.cw-tech-field-page .field-action-rail{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+    body.cw-tech-field-page .field-action-rail button{min-height:50px;border:1px solid rgba(154,255,198,.18);border-radius:8px;background:#10251f;color:#eafff2;font-weight:950;font-size:13px}
+    body.cw-tech-field-page .field-tabs{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:60;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:7px;border:1px solid rgba(154,255,198,.18);border-radius:8px;background:rgba(6,18,15,.96);box-shadow:0 16px 40px rgba(0,0,0,.42);backdrop-filter:blur(14px)}
+    body.cw-tech-field-page .field-tabs button{min-height:54px;border:0;border-radius:8px;background:transparent;color:#a8c9c0;font-weight:950;font-size:12px}
+    body.cw-tech-field-page .field-tabs button.active{background:#43e08d;color:#04130d}
+    body.cw-tech-field-page .field-tab-title{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:2px 0 10px}
+    body.cw-tech-field-page .field-tab-title h2{margin:0;font-size:18px}
+    body.cw-tech-field-page .field-tab-title span{color:#9fc5bb;font-size:12px;font-weight:900;text-transform:uppercase}
+    body[data-field-tab="service"] .field-panel:not(.field-panel-service),
+    body[data-field-tab="route"] .field-panel:not(.field-panel-route),
+    body[data-field-tab="list"] .field-panel:not(.field-panel-list),
+    body[data-field-tab="docs"] .field-panel:not(.field-panel-docs),
+    body[data-field-tab="more"] .field-panel:not(.field-panel-more){display:none!important}
+    body.cw-tech-field-page .checks{grid-template-columns:1fr 1fr;gap:8px}
+    body.cw-tech-field-page .check{min-height:54px;padding:10px;font-size:14px}
+    body.cw-tech-field-page .check input{width:22px;height:22px}
+    body.cw-tech-field-page .measure{grid-template-columns:1fr 1fr;gap:8px}
+    body.cw-tech-field-page .measure-field{padding:9px;border-radius:8px}
+    body.cw-tech-field-page input,body.cw-tech-field-page textarea,body.cw-tech-field-page select{min-height:50px;border-radius:8px;background:#07130f;border-color:rgba(154,255,198,.17);font-size:16px}
+    body.cw-tech-field-page textarea{min-height:94px}
+    body.cw-tech-field-page .dose-row{grid-template-columns:1fr .72fr .52fr auto}
+    body.cw-tech-field-page .photo-actions{grid-template-columns:1fr 1fr 1fr}
+    body.cw-tech-field-page .visit{padding:12px;border-radius:8px;background:#081612}
+    body.cw-tech-field-page .visit.active{border-color:#43e08d;box-shadow:0 0 0 1px rgba(67,224,141,.35)}
+    body.cw-tech-field-page .visit.done{border-color:rgba(67,224,141,.32);background:#0c2119}
+    body.cw-tech-field-page .map-box{min-height:260px}
+    body.cw-tech-field-page .map-box iframe{height:260px}
+    body.cw-tech-field-page .doc-tools{grid-template-columns:1fr 1fr}
+    body.cw-tech-field-page .doc-card{border-radius:8px;background:#081612}
+    body.cw-tech-field-page .water-grid{grid-template-columns:1fr 1fr}
+    body.cw-tech-field-page #waterNote{grid-column:1/-1}
+    body.cw-tech-field-page .admin-alert-grid{grid-template-columns:1fr 1fr}
+    body.cw-tech-field-page .admin-alert-grid textarea{grid-column:1/-1}
+    @media(max-width:560px){
+      body.cw-tech-field-page .field{padding-left:9px;padding-right:9px}
+      body.cw-tech-field-page .top{margin-left:-9px;margin-right:-9px}
+      body.cw-tech-field-page .field-dashboard{grid-template-columns:1fr 1fr}
+      body.cw-tech-field-page .field-tile.primary{grid-column:1/-1}
+      body.cw-tech-field-page .crew-grid,body.cw-tech-field-page .crew-status-grid{grid-template-columns:1fr 1fr}
+      body.cw-tech-field-page .crew-doc-status{display:grid;grid-template-columns:auto 1fr}
+      body.cw-tech-field-page .title{font-size:26px}
+      body.cw-tech-field-page .next .actions{grid-template-columns:1fr}
+      body.cw-tech-field-page .field-action-rail{grid-template-columns:1fr 1fr}
+      body.cw-tech-field-page .checks,body.cw-tech-field-page .measure,body.cw-tech-field-page .dose-row,body.cw-tech-field-page .doc-tools,body.cw-tech-field-page .water-grid,body.cw-tech-field-page .admin-alert-grid,body.cw-tech-field-page .admin-alert-small{grid-template-columns:1fr}
+      body.cw-tech-field-page #waterNote{grid-column:auto}
+      body.cw-tech-field-page .photo-actions{grid-template-columns:1fr}
+      body.cw-tech-field-page .field-tabs{left:8px;right:8px}
+      body.cw-tech-field-page .field-tabs button{font-size:11px;min-height:52px}
+    }
+    .service-summary-card{background:linear-gradient(135deg,#0d241d,#10243a);border-color:rgba(67,224,141,.42)}
+    .service-summary-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:10px}
+    .service-summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+    .service-summary-item{background:#07130f;border:1px solid rgba(154,255,198,.18);border-radius:8px;padding:10px;min-height:72px}
+    .service-summary-item span{display:block;color:#9fc5bb;font-size:11px;text-transform:uppercase;font-weight:950;letter-spacing:.04em}
+    .service-summary-item b{display:block;color:#fff;font-size:18px;margin-top:5px;line-height:1.15;overflow-wrap:anywhere}
+    .service-summary-note{margin-top:8px;background:#07130f;border:1px solid rgba(154,255,198,.18);border-radius:8px;padding:10px;color:#d7fff0;line-height:1.4;overflow-wrap:anywhere}
+    @media(max-width:560px){.service-summary-head{display:block}.service-summary-grid{grid-template-columns:1fr 1fr}}
+    /* V22.6.17 - limpeza simples e rapida para uso real em campo */
+    body.cw-tech-field-page .cleaning-card{background:linear-gradient(180deg,#0d211b,#0a1814);border-color:rgba(67,224,141,.34)}
+    body.cw-tech-field-page .field-service-tip{margin:10px 0 12px;color:#b8d8d0;line-height:1.4;font-size:14px}
+    body.cw-tech-field-page .cleaning-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:0}
+    body.cw-tech-field-page .clean-task{position:relative;display:grid;grid-template-columns:42px 1fr;align-items:center;gap:11px;min-height:74px;padding:12px;border-radius:8px;background:#07130f;border-color:rgba(154,255,198,.18);cursor:pointer;user-select:none}
+    body.cw-tech-field-page .clean-task input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+    body.cw-tech-field-page .check-icon{display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:999px;border:1px solid rgba(154,255,198,.24);background:#10251f;color:#a9c9c1;font-size:12px;font-weight:950;letter-spacing:.02em}
+    body.cw-tech-field-page .check-text{display:grid;gap:3px;line-height:1.18}
+    body.cw-tech-field-page .check-text b{font-size:16px;color:#f4fff9}
+    body.cw-tech-field-page .check-text small{font-size:12px;color:#9fc5bb;font-weight:800}
+    body.cw-tech-field-page .clean-task:has(input:checked){background:#0d2a20;border-color:rgba(67,224,141,.6)}
+    body.cw-tech-field-page .clean-task:has(input:checked) .check-icon{background:#43e08d;border-color:#43e08d;color:#04130d}
+    body.cw-tech-field-page .primary-task:has(input:checked){box-shadow:inset 0 0 0 1px rgba(67,224,141,.18)}
+    body.cw-tech-field-page .service-subhead{margin:16px 0 8px;color:#e9fff5;font-size:13px;text-transform:uppercase;letter-spacing:.04em;font-weight:950}
+    body.cw-tech-field-page .cleaning-card .measure{margin-top:0}
+    body.cw-tech-field-page .cleaning-card .measure-field{background:#07130f;border-color:rgba(154,255,198,.18)}
+    body.cw-tech-field-page .cleaning-card #salt,
+    body.cw-tech-field-page .cleaning-card #temperature,
+    body.cw-tech-field-page .cleaning-card #notes{background:#07130f;border-color:rgba(154,255,198,.18)}
+    @media(max-width:430px){
+      body.cw-tech-field-page .cleaning-grid{grid-template-columns:1fr}
+      body.cw-tech-field-page .clean-task{min-height:68px}
+    }
+    /* V22.6.18 - modo campo claro, legivel ao sol */
+    body.cw-tech-field-page{
+      --field-bg:#f4fbf8;
+      --field-surface:#ffffff;
+      --field-soft:#eef8f4;
+      --field-line:#bed8cf;
+      --field-text:#06241f;
+      --field-muted:#496a61;
+      --field-primary:#007c5c;
+      --field-primary-2:#0b8f67;
+      --field-blue:#0b73b9;
+      --field-warn:#a86400;
+      --field-danger:#bd2634;
+      background:var(--field-bg)!important;
+      color:var(--field-text)!important;
+      color-scheme:light;
+    }
+    body.cw-tech-field-page .field{width:min(760px,100%);padding:8px 10px calc(112px + env(safe-area-inset-bottom));}
+    body.cw-tech-field-page .top{
+      background:rgba(255,255,255,.97);
+      border-bottom:1px solid var(--field-line);
+      color:var(--field-text);
+      box-shadow:0 8px 24px rgba(14,63,50,.12);
+      backdrop-filter:blur(10px);
+    }
+    body.cw-tech-field-page .brand,
+    body.cw-tech-field-page .title,
+    body.cw-tech-field-page h2,
+    body.cw-tech-field-page h3,
+    body.cw-tech-field-page b{color:var(--field-text)!important;}
+    body.cw-tech-field-page .progress,
+    body.cw-tech-field-page .muted,
+    body.cw-tech-field-page #nextMeta,
+    body.cw-tech-field-page .field-tile small,
+    body.cw-tech-field-page .crew-info small,
+    body.cw-tech-field-page .crew-doc-status small{color:var(--field-muted)!important;}
+    body.cw-tech-field-page .chip{
+      background:#e7f7f1;
+      color:#06543e;
+      border:1px solid #b7ded1;
+    }
+    body.cw-tech-field-page .field-dashboard{grid-template-columns:1.25fr 1fr 1fr;gap:8px;margin-bottom:8px;}
+    body.cw-tech-field-page .field-tile{
+      background:var(--field-surface);
+      border:1px solid var(--field-line);
+      box-shadow:none;
+      min-height:66px;
+      color:var(--field-text);
+    }
+    body.cw-tech-field-page .field-tile.primary{
+      background:#e8f7f2;
+      border-color:#8bcdb6;
+      min-height:78px;
+    }
+    body.cw-tech-field-page .field-tile.warn{background:#fff5d7;border-color:#e0b04f;}
+    body.cw-tech-field-page .field-tile.ok{background:#e7f8ee;border-color:#8ed1a9;}
+    body.cw-tech-field-page .field-tile span,
+    body.cw-tech-field-page .field-tab-title span,
+    body.cw-tech-field-page .service-subhead{
+      color:#315f54!important;
+      letter-spacing:0;
+    }
+    body.cw-tech-field-page .card,
+    body.cw-tech-field-page .next,
+    body.cw-tech-field-page .crew-card,
+    body.cw-tech-field-page .access-card,
+    body.cw-tech-field-page .route-card,
+    body.cw-tech-field-page .photo-card,
+    body.cw-tech-field-page .water-card,
+    body.cw-tech-field-page .admin-alert-card,
+    body.cw-tech-field-page .dose-card,
+    body.cw-tech-field-page .cleaning-card,
+    body.cw-tech-field-page .service-summary-card{
+      background:var(--field-surface)!important;
+      border:1px solid var(--field-line)!important;
+      box-shadow:0 8px 22px rgba(17,66,54,.08);
+      color:var(--field-text);
+    }
+    body.cw-tech-field-page .next{
+      border-color:#8bcdb6!important;
+      border-left:5px solid var(--field-primary)!important;
+      padding:14px;
+    }
+    body.cw-tech-field-page .next:before{display:none;}
+    body.cw-tech-field-page .crew-info,
+    body.cw-tech-field-page .crew-doc-status,
+    body.cw-tech-field-page .access-item,
+    body.cw-tech-field-page .measure-field,
+    body.cw-tech-field-page .doc-card,
+    body.cw-tech-field-page .water-item,
+    body.cw-tech-field-page .dose-row,
+    body.cw-tech-field-page .photo-item,
+    body.cw-tech-field-page .visit,
+    body.cw-tech-field-page .check,
+    body.cw-tech-field-page .clean-task{
+      background:var(--field-soft)!important;
+      border:1px solid var(--field-line)!important;
+      color:var(--field-text)!important;
+      box-shadow:none;
+    }
+    body.cw-tech-field-page .crew-doc-status.ok,
+    body.cw-tech-field-page .visit.done,
+    body.cw-tech-field-page .clean-task:has(input:checked){
+      background:#e7f8ee!important;
+      border-color:#77c99e!important;
+    }
+    body.cw-tech-field-page .crew-doc-status.warn{
+      background:#fff5d7!important;
+      border-color:#e0b04f!important;
+    }
+    body.cw-tech-field-page .next.has-alerts{
+      background:#fff8df!important;
+      border-color:#d28b00!important;
+      border-left-color:#d28b00!important;
+    }
+    body.cw-tech-field-page .visit-notice-strip{
+      margin:10px 0 2px;
+      display:grid;
+      gap:8px;
+      padding:10px;
+      border-radius:10px;
+      background:#fff1bf;
+      border:1px solid #d28b00;
+      color:#271900;
+    }
+    body.cw-tech-field-page .visit-notice-strip[hidden]{display:none!important;}
+    body.cw-tech-field-page .visit-notice-strip b{color:#271900!important;}
+    body.cw-tech-field-page .visit-notice-strip small{color:#4f3b10!important;line-height:1.35;}
+    body.cw-tech-field-page .visit-notice-pills{display:flex;flex-wrap:wrap;gap:6px;}
+    body.cw-tech-field-page .visit-notice-pill{
+      display:inline-flex;
+      align-items:center;
+      min-height:32px;
+      padding:6px 10px;
+      border-radius:999px;
+      font-weight:950;
+      font-size:12px;
+      color:#1f1600;
+      background:#ffffff;
+      border:1px solid rgba(31,22,0,.18);
+    }
+    body.cw-tech-field-page .visit-notice-pill.access{background:#ffe08a;}
+    body.cw-tech-field-page .visit-notice-pill.reminder{background:#dff4ff;}
+    body.cw-tech-field-page .access-card.has-alerts{
+      border-color:#d28b00!important;
+      background:#fffdf4!important;
+    }
+    body.cw-tech-field-page .access-card .access-list{
+      display:grid;
+      gap:10px;
+    }
+    body.cw-tech-field-page .access-item.access-code-item{
+      background:#fff1bf!important;
+      border-color:#d28b00!important;
+      color:#271900!important;
+    }
+    body.cw-tech-field-page .access-item.reminder-temporary{
+      background:#e7f4ff!important;
+      border-color:#2d83cf!important;
+      color:#08243d!important;
+    }
+    body.cw-tech-field-page .access-item.reminder-permanent{
+      background:#e6f8ee!important;
+      border-color:#14966c!important;
+      color:#053525!important;
+    }
+    body.cw-tech-field-page .access-item.reminder-overdue{
+      background:#ffe7e7!important;
+      border-color:#d83b3b!important;
+      color:#3c0606!important;
+    }
+    body.cw-tech-field-page .access-item.access-code-item .chip,
+    body.cw-tech-field-page .access-item.reminder-temporary .chip,
+    body.cw-tech-field-page .access-item.reminder-permanent .chip,
+    body.cw-tech-field-page .access-item.reminder-overdue .chip{
+      background:#ffffff!important;
+      color:inherit!important;
+      border-color:rgba(0,0,0,.16)!important;
+      width:max-content;
+      max-width:100%;
+    }
+    body.cw-tech-field-page .access-code{
+      margin-top:8px;
+      font-size:18px;
+      font-weight:950;
+      overflow-wrap:anywhere;
+    }
+    body.cw-tech-field-page .access-meta{
+      margin-top:6px;
+      line-height:1.4;
+      color:inherit!important;
+      overflow-wrap:anywhere;
+    }
+    body.cw-tech-field-page .visit.active{
+      border-color:var(--field-primary)!important;
+      box-shadow:0 0 0 2px rgba(0,124,92,.18)!important;
+    }
+    body.cw-tech-field-page input,
+    body.cw-tech-field-page textarea,
+    body.cw-tech-field-page select{
+      background:#ffffff!important;
+      color:var(--field-text)!important;
+      border:1px solid #a8cfc2!important;
+    }
+    body.cw-tech-field-page input::placeholder,
+    body.cw-tech-field-page textarea::placeholder{color:#6f837d!important;}
+    body.cw-tech-field-page .big,
+    body.cw-tech-field-page .route-btn,
+    body.cw-tech-field-page .doc-btn,
+    body.cw-tech-field-page .photo-btn,
+    body.cw-tech-field-page .field-action-rail button{
+      box-shadow:none!important;
+      border-radius:8px;
+      font-weight:950;
+    }
+    body.cw-tech-field-page .big.ok,
+    body.cw-tech-field-page .route-btn,
+    body.cw-tech-field-page .doc-btn,
+    body.cw-tech-field-page .photo-btn{
+      background:var(--field-primary)!important;
+      color:#ffffff!important;
+      border:1px solid var(--field-primary)!important;
+    }
+    body.cw-tech-field-page .big.warn{background:#f5c84b!important;color:#201700!important;border:1px solid #d19a00!important;}
+    body.cw-tech-field-page .big.bad{background:var(--field-danger)!important;color:#ffffff!important;border:1px solid var(--field-danger)!important;}
+    body.cw-tech-field-page .big.ghost,
+    body.cw-tech-field-page .field-action-rail button{
+      background:#ffffff!important;
+      color:#074434!important;
+      border:1px solid #9ed1c1!important;
+    }
+    body.cw-tech-field-page .field-tabs{
+      background:rgba(255,255,255,.98);
+      border:1px solid var(--field-line);
+      box-shadow:0 -8px 28px rgba(17,66,54,.15);
+    }
+    body.cw-tech-field-page .field-tabs button{
+      background:#edf7f3;
+      color:#15453a;
+      min-height:54px;
+    }
+    body.cw-tech-field-page .field-tabs button.active{
+      background:var(--field-primary);
+      color:#ffffff;
+    }
+    body.cw-tech-field-page .check-icon{
+      background:#ffffff;
+      border-color:#a8cfc2;
+      color:#245e52;
+    }
+    body.cw-tech-field-page .clean-task:has(input:checked) .check-icon{
+      background:var(--field-primary);
+      border-color:var(--field-primary);
+      color:#ffffff;
+    }
+    body.cw-tech-field-page .toast{
+      background:#ffffff;
+      color:var(--field-text);
+      border:1px solid var(--field-line);
+      box-shadow:0 14px 40px rgba(17,66,54,.18);
+    }
+    body.cw-tech-field-page .field-assist-panel{
+      margin-top:12px;
+      border-top:1px solid var(--field-line);
+      padding-top:12px;
+      display:grid;
+      gap:10px;
+    }
+    body.cw-tech-field-page .field-assist-panel[hidden]{display:none!important;}
+    body.cw-tech-field-page .assist-head{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
+    }
+    body.cw-tech-field-page .assist-head b{font-size:18px;}
+    body.cw-tech-field-page .assist-head span,
+    body.cw-tech-field-page .assist-card small{
+      color:var(--field-muted);
+      line-height:1.35;
+    }
+    body.cw-tech-field-page .assist-actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+    }
+    body.cw-tech-field-page .assist-actions button,
+    body.cw-tech-field-page .assist-card{
+      border-radius:8px;
+      border:1px solid #9ed1c1;
+      background:#ffffff;
+      color:var(--field-text);
+      font-weight:950;
+    }
+    body.cw-tech-field-page .assist-actions button{
+      min-height:52px;
+      padding:10px;
+    }
+    body.cw-tech-field-page .assist-section{
+      display:grid;
+      gap:8px;
+    }
+    body.cw-tech-field-page .assist-section h3{
+      margin:6px 0 0;
+      font-size:14px;
+      text-transform:uppercase;
+      letter-spacing:0;
+      color:#315f54!important;
+    }
+    body.cw-tech-field-page .assist-list{
+      display:grid;
+      gap:8px;
+    }
+    body.cw-tech-field-page .assist-card{
+      min-height:92px;
+      padding:12px;
+      text-align:left;
+      display:grid;
+      gap:5px;
+    }
+    body.cw-tech-field-page .assist-card b{
+      font-size:17px;
+      line-height:1.16;
+    }
+    body.cw-tech-field-page .assist-card:focus,
+    body.cw-tech-field-page .assist-card:hover{
+      border-color:var(--field-primary);
+      box-shadow:0 0 0 2px rgba(0,124,92,.14);
+    }
+    body.cw-tech-field-page .assist-empty{
+      border:1px dashed #a8cfc2;
+      border-radius:8px;
+      padding:12px;
+      color:var(--field-muted);
+      background:#f8fdfb;
+    }
+    body.cw-tech-field-page .assist-empty.warn{
+      border-color:#e0b04f;
+      background:#fff5d7;
+      color:#6c4700;
+    }
+    @media(max-width:560px){
+      body.cw-tech-field-page .field-dashboard{grid-template-columns:1fr 1fr;}
+      body.cw-tech-field-page .field-tile.primary{grid-column:1/-1;}
+      body.cw-tech-field-page .title{font-size:24px;}
+      body.cw-tech-field-page .field-action-rail{grid-template-columns:1fr 1fr;}
+      body.cw-tech-field-page .field-tabs button{font-size:11px;}
+      body.cw-tech-field-page .assist-head{display:grid;}
+      body.cw-tech-field-page .assist-actions{grid-template-columns:1fr;}
+    }
+    /* V22.6.8 - zona segura para uso em telemovel no terreno */
+    body.cw-tech-field-page{
+      --field-bottom-nav-space:calc(98px + env(safe-area-inset-bottom));
+    }
+    body.cw-tech-field-page .field{
+      padding-bottom:calc(var(--field-bottom-nav-space) + 76px)!important;
+      scroll-padding-bottom:calc(var(--field-bottom-nav-space) + 28px);
+    }
+    body.cw-tech-field-page .field-panel,
+    body.cw-tech-field-page .card{
+      scroll-margin-bottom:calc(var(--field-bottom-nav-space) + 28px);
+    }
+    @media(max-width:560px){
+      body.cw-tech-field-page .next .actions{
+        grid-template-columns:1fr 1fr!important;
+        gap:8px;
+      }
+      body.cw-tech-field-page .next .big{
+        min-height:52px;
+        padding:9px 8px;
+        font-size:14px;
+        line-height:1.08;
+      }
+      body.cw-tech-field-page .field-action-rail{
+        margin-bottom:8px;
+      }
+      body.cw-tech-field-page .field-tabs{
+        bottom:calc(5px + env(safe-area-inset-bottom))!important;
+        gap:5px;
+        padding:5px;
+      }
+      body.cw-tech-field-page .field-tabs button{
+        min-height:46px!important;
+        font-size:10.5px!important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="field">
+    <header class="top">
+      <div class="top-row">
+        <div class="brand-block">
+          <img class="brand-logo" src="/logo-cristalwater.png" alt="Cristal Water">
+          <div>
+          <div class="brand">Cristal Water</div>
+          <div class="progress" id="progressText">A preparar ronda...</div>
+          </div>
+        </div>
+        <span class="chip" id="connectionState">Campo</span>
+      </div>
+    </header>
+
+    <section class="field-dashboard" aria-label="Resumo do dia em campo">
+      <div class="field-tile primary">
+        <span>Agora</span>
+        <b id="fieldFocusNow">A preparar ronda</b>
+        <small id="fieldFocusMeta">Servico atual e cliente aparecem aqui.</small>
+      </div>
+      <div class="field-tile" id="fieldProgressTile">
+        <span>Progresso</span>
+        <b id="fieldProgressValue">0 / 0</b>
+        <small id="fieldProgressMeta">visitas feitas / total</small>
+      </div>
+      <div class="field-tile" id="fieldDocsTile">
+        <span>Documentos</span>
+        <b id="fieldDocsValue">Verificar</b>
+        <small id="fieldDocsMeta">guia, AT e seguro</small>
+      </div>
+      <div class="field-tile" id="fieldPhotosTile">
+        <span>Registos</span>
+        <b id="fieldPhotosValue">0 fotos</b>
+        <small id="fieldPhotosMeta">fotos e notas da visita</small>
+      </div>
+    </section>
+
+    <section class="card crew-card" aria-label="Identificacao e documentos do tecnico">
+      <div class="crew-head">
+        <div>
+          <span class="chip">Tecnico em campo</span>
+          <div class="muted" style="margin-top:8px">Viatura e documentos associados ao dia/ronda.</div>
+        </div>
+        <button class="chip" id="refreshCrewStatus" type="button">Atualizar</button>
+      </div>
+      <div class="crew-grid">
+        <div class="crew-info">
+          <span>Tecnico</span>
+          <b id="fieldTechnicianName">Por identificar</b>
+          <small id="fieldTechnicianMeta">ID tecnico por confirmar</small>
+        </div>
+        <div class="crew-info">
+          <span>Viatura</span>
+          <b id="fieldVehiclePlate">Matricula por confirmar</b>
+          <small id="fieldVehicleMeta">Escolhe ou carrega a viatura do dia.</small>
+        </div>
+      </div>
+      <div class="crew-status-grid">
+        <div class="crew-doc-status warn" id="fieldTransportGuideStatus">
+          <i class="signal" aria-hidden="true"></i>
+          <div>
+            <span class="label">Guia AT</span>
+            <b id="fieldTransportGuideValue">Vermelha</b>
+            <small id="fieldTransportGuideMeta">Guia de transporte por carregar.</small>
+          </div>
+        </div>
+        <div class="crew-doc-status warn" id="fieldWorkGuideStatus">
+          <i class="signal" aria-hidden="true"></i>
+          <div>
+            <span class="label">Guia de obra</span>
+            <b id="fieldWorkGuideValue">Vermelha</b>
+            <small id="fieldWorkGuideMeta">Guia de obra por abrir.</small>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card next">
+      <span class="chip">Visita atual</span>
+      <div class="title" id="nextTitle">A carregar...</div>
+      <div class="muted" id="nextMeta"></div>
+      <div class="visit-notice-strip" id="visitNoticeStrip" hidden></div>
+      <div class="actions">
+        <button class="big ok" id="startBtn" type="button">Iniciar visita</button>
+        <button class="big" id="finishBtn" type="button">Concluir visita</button>
+      </div>
+    </section>
+
+    <section class="card service-summary-card" id="correctionSummaryCard" hidden>
+      <div class="service-summary-head">
+        <div>
+          <span class="chip">Registo guardado</span>
+          <div class="muted" style="margin-top:8px">Esta visita ja foi feita. Confirma o que ficou registado, altera em baixo e guarda a correcao.</div>
+        </div>
+        <span class="chip" id="correctionSavedAt">Feita</span>
+      </div>
+      <div id="correctionSummary"></div>
+    </section>
+
+    <section class="card access-card" id="accessCard">
+      <span class="chip">Acesso e avisos</span>
+      <div class="access-list" id="accessList">
+        <div class="muted">A carregar chave ou codigo desta piscina...</div>
+      </div>
+    </section>
+
+    <section class="card route-card" id="routeCard">
+      <span class="chip">Proximo local</span>
+      <div class="title" id="routeTitle">Mapa da proxima piscina</div>
+      <div class="muted" id="routeSummary">A carregar localizacao do servico atribuido...</div>
+      <div class="map-box" id="mapBox">
+        <div class="map-fallback">A carregar mapa...</div>
+      </div>
+      <div class="route-meta" id="routeMeta"></div>
+      <div class="route-actions">
+        <a class="route-btn" id="navLink" href="#" target="_blank" rel="noopener">Abrir navegacao</a>
+        <a class="route-btn ghost" id="mapsLink" href="#" target="_blank" rel="noopener">Ver no mapa</a>
+      </div>
+    </section>
+
+    <section class="card water-card">
+      <span class="chip">Agua aberta</span>
+      <div class="muted" style="margin-top:10px">Quando for preciso deixar a agua aberta, define o tempo necessario ou a hora exata para fechar/verificar.</div>
+      <div class="water-grid">
+        <input id="waterMinutes" inputmode="numeric" placeholder="Minutos. Ex: 25">
+        <input id="waterCloseTime" type="time" aria-label="Hora para fechar a agua">
+        <input id="waterNote" placeholder="Nota opcional">
+      </div>
+      <div class="actions">
+        <button class="big warn" id="openWaterBtn" type="button">Marcar agua aberta</button>
+      </div>
+      <div class="water-list" id="waterReminderList">
+        <div class="muted">Sem lembretes de agua aberta.</div>
+      </div>
+    </section>
+
+    <section class="card admin-alert-card">
+      <span class="chip">Aviso admin / stock</span>
+      <div class="muted" style="margin-top:10px">Usar para pedir material, avisar stock baixo ou enviar qualquer nota ao escritorio.</div>
+      <div class="admin-alert-grid">
+        <select id="adminAlertType" aria-label="Tipo de aviso">
+          <option value="STOCK_REQUEST">Falta de material / stock</option>
+          <option value="PURCHASE_REMINDER">Lembrete para comprar</option>
+          <option value="ADMIN_NOTE">Nota para administrador</option>
+        </select>
+        <select id="adminAlertPriority" aria-label="Prioridade">
+          <option value="NORMAL">Normal</option>
+          <option value="HIGH">Urgente</option>
+        </select>
+        <input id="stockProductName" placeholder="Material/produto. Ex: cloro shock">
+        <div class="admin-alert-small">
+          <input id="stockQuantity" inputmode="decimal" placeholder="Qtd. opcional">
+          <input id="stockUnit" placeholder="Un. ex: kg">
+        </div>
+        <textarea id="adminAlertMessage" placeholder="Escreve o que falta ou o que o administrador deve saber"></textarea>
+      </div>
+      <div class="actions">
+        <button class="big" id="sendAdminAlertBtn" type="button">Enviar aviso ao administrador</button>
+      </div>
+    </section>
+
+    <section class="card cleaning-card" id="cleaningCard">
+      <span class="chip">Limpeza da piscina</span>
+      <div class="field-service-tip">Toca apenas no que foi feito. O registo fica guardado na visita, piscina, cliente e tecnico.</div>
+      <div class="checks cleaning-grid">
+        <label class="check clean-task primary-task">
+          <input type="checkbox" id="cleaned" checked>
+          <span class="check-icon">OK</span>
+          <span class="check-text"><b>Agua limpa</b><small>limpeza geral feita</small></span>
+        </label>
+        <label class="check clean-task">
+          <input type="checkbox" id="vacuumed">
+          <span class="check-icon">OK</span>
+          <span class="check-text"><b>Aspirada</b><small>fundo aspirado</small></span>
+        </label>
+        <label class="check clean-task">
+          <input type="checkbox" id="basketCleaned" checked>
+          <span class="check-icon">OK</span>
+          <span class="check-text"><b>Cestos limpos</b><small>skimmer e bomba</small></span>
+        </label>
+        <label class="check clean-task">
+          <input type="checkbox" id="brushed">
+          <span class="check-icon">OK</span>
+          <span class="check-text"><b>Escovagem</b><small>paredes / zonas criticas</small></span>
+        </label>
+        <label class="check clean-task">
+          <input type="checkbox" id="waterlineClean">
+          <span class="check-icon">OK</span>
+          <span class="check-text"><b>Linha de agua</b><small>rebordo limpo</small></span>
+        </label>
+        <label class="check clean-task">
+          <input type="checkbox" id="backwashDone">
+          <span class="check-icon">OK</span>
+          <span class="check-text"><b>Filtro lavado</b><small>lavagem / enxaguamento</small></span>
+        </label>
+      </div>
+      <div class="service-subhead">Leituras finais</div>
+      <div class="measure">
+        <label class="measure-field">
+          <span class="measure-label">pH</span>
+          <input id="ph" inputmode="decimal" placeholder="pH" data-min="7.2" data-max="7.6">
+          <span class="ref-row"><span>Ref. min 7.2 / max 7.6</span><strong class="range-status" id="phStatus">Por medir</strong></span>
+        </label>
+        <label class="measure-field">
+          <span class="measure-label">Cloro</span>
+          <input id="chlorine" inputmode="decimal" placeholder="Cloro" data-min="1" data-max="3" data-unit="ppm">
+          <span class="ref-row"><span>Ref. min 1 / max 3 ppm</span><strong class="range-status" id="chlorineStatus">Por medir</strong></span>
+        </label>
+        <label class="measure-field">
+          <span class="measure-label">Alcalinidade</span>
+          <input id="alkalinity" inputmode="numeric" placeholder="Alcalinidade" data-min="80" data-max="120" data-unit="ppm">
+          <span class="ref-row"><span>Ref. min 80 / max 120 ppm</span><strong class="range-status" id="alkalinityStatus">Por medir</strong></span>
+        </label>
+        <input id="salt" inputmode="numeric" placeholder="Sal">
+        <label class="measure-field">
+          <span class="measure-label">ORP</span>
+          <input id="orp" inputmode="numeric" placeholder="ORP" data-min="650" data-max="750" data-unit="mV">
+          <span class="ref-row"><span>Ref. min 650 / max 750 mV</span><strong class="range-status" id="orpStatus">Por medir</strong></span>
+        </label>
+        <input id="temperature" inputmode="decimal" placeholder="Temperatura">
+        <textarea id="notes" placeholder="Notas para o escritorio ou cliente"></textarea>
+      </div>
+    </section>
+
+    <section class="card dose-card">
+      <span class="chip">Produtos usados</span>
+      <div class="dose-list" id="doseRows">
+        <div class="dose-empty">Sem produtos adicionados nesta visita.</div>
+      </div>
+      <div class="dose-footer">
+        <button class="big ghost" id="addDoseBtn" type="button">Adicionar produto</button>
+        <button class="big ghost" id="refreshDoseStockBtn" type="button">Atualizar stock</button>
+      </div>
+    </section>
+
+    <section class="card photo-card">
+      <span class="chip">Fotografias</span>
+      <div class="muted" style="margin-top:10px">Usar quando for necessario registar antes, depois, problema ou acesso.</div>
+      <input id="photoInput" type="file" accept="image/*" capture="environment" hidden>
+      <div class="photo-actions">
+        <button class="photo-btn" type="button" data-photo-type="BEFORE">Foto antes</button>
+        <button class="photo-btn" type="button" data-photo-type="AFTER">Foto depois</button>
+        <button class="photo-btn warn" type="button" data-photo-type="PROBLEM">Foto problema</button>
+      </div>
+      <div class="photo-list" id="photoList">
+        <div class="muted">Ainda sem fotografias nesta visita.</div>
+      </div>
+      <div class="actions">
+        <button class="big ghost" id="syncPhotosBtn" type="button">Sincronizar fotografias</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <span class="chip">Ronda de hoje</span>
+      <div id="visitList" style="margin-top:10px"></div>
+    </section>
+
+    <section class="card">
+      <span class="chip">Extras / problemas</span>
+      <div class="actions">
+        <button class="big warn" id="problemBtn" type="button">Registar extra ou problema</button>
+      </div>
+      <div class="problem-panel" id="problemPanel" hidden>
+        <span class="chip">Extra / problema</span>
+        <div class="form-grid">
+          <select id="problemCategory" aria-label="Classificacao">
+            <option value="Servico normal">Servico normal</option>
+            <option value="Extra / reparacao">Extra / reparacao</option>
+          </select>
+          <select id="problemType" aria-label="Tipo de problema">
+            <option value="Agua turva">Agua turva</option>
+            <option value="Equipamento">Equipamento</option>
+            <option value="Fuga">Fuga</option>
+            <option value="Acesso bloqueado">Acesso bloqueado</option>
+            <option value="Cliente ausente">Cliente ausente</option>
+            <option value="Outro">Outro</option>
+          </select>
+          <select id="problemSeverity" aria-label="Urgencia">
+            <option value="Normal">Normal</option>
+            <option value="Urgente">Urgente</option>
+          </select>
+          <textarea id="problemText" placeholder="Descreve o problema de forma simples"></textarea>
+        </div>
+        <div class="actions">
+          <button class="big bad" id="saveProblemBtn" type="button">Guardar registo</button>
+          <button class="big ghost" id="cancelProblemBtn" type="button">Cancelar</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <span class="chip">Documentos legais</span>
+      <div class="muted" style="margin-top:10px">Guias, seguro e stock da viatura quando for preciso apresentar.</div>
+      <div class="doc-tools">
+        <input id="vehicleId" inputmode="numeric" placeholder="ID da viatura">
+        <input id="technicianId" inputmode="numeric" placeholder="ID do tecnico">
+      </div>
+      <div class="actions">
+        <button class="big" id="loadGuidesBtn" type="button">Mostrar documentos</button>
+        <a class="big ghost" href="/technician-guide">Gestao de guias</a>
+      </div>
+      <div class="doc-grid">
+        <div class="doc-card" id="transportGuideBox">
+          <div class="doc-number">Guia de transporte</div>
+          <div class="muted">Carrega as guias da viatura para ver o documento AT ativo.</div>
+        </div>
+        <div class="doc-card" id="workGuideBox">
+          <div class="doc-number">Guia de obra</div>
+          <div class="muted">Carrega as guias para ver a guia de trabalho aberta e o stock em uso.</div>
+        </div>
+        <div class="doc-card" id="insuranceBox">
+          <div class="doc-number">Seguro da viatura</div>
+          <div class="muted">Carrega as guias para ver seguro, validade e ficha PDF da viatura.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <div class="toast" id="toast"></div>
+  <script src="/technician-field-mode.js"></script>
+  <script src="/cw-flow-shell.js"></script>
+</body>
+</html>

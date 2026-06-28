@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>Alertas Financeiros</title>
+
+<style>
+body { font-family: Arial; padding:20px; background:#f4f6f8; }
+
+.card {
+  background:white;
+  padding:15px;
+  margin-bottom:10px;
+  border-radius:10px;
+  border-left:6px solid red;
+}
+</style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+
+<body>
+
+<h2>⚠️ Técnicos com prejuízo</h2>
+
+<div id="list"></div>
+
+<script>
+const API = "/api";
+
+async function load(){
+
+  const res = await fetch(`${API}/billing/technician-alerts`);
+  const data = await res.json();
+
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  if (!data.ok) return;
+
+  if (data.alerts.length === 0) {
+    list.innerHTML = "<p>✔ Nenhum técnico em prejuízo</p>";
+    return;
+  }
+
+  data.alerts.forEach(a => {
+    list.innerHTML += `
+      <div class="card">
+        <b>${a.technician}</b><br>
+        Lucro: €${a.profit}<br>
+        Receita: €${a.revenue}<br>
+        Custo: €${a.cost}
+      </div>
+    `;
+  });
+}
+
+load();
+</script>
+
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

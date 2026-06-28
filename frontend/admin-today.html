@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+<meta charset="utf-8">
+<title>Painel do Dia</title>
+
+<style>
+body{font-family:Arial;margin:0;background:#eef3f8}
+header{background:#fff;padding:15px;border-bottom:3px solid #1e88e5}
+main{padding:20px}
+
+.box{
+background:#fff;
+padding:15px;
+margin:10px;
+display:inline-block;
+border-radius:8px;
+width:150px;
+text-align:center;
+}
+
+.list{
+background:#fff;
+padding:15px;
+margin-top:20px;
+border-radius:8px;
+}
+
+.item{
+border-bottom:1px solid #eee;
+padding:10px;
+}
+</style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+
+<body>
+
+<header>
+<h2>Painel do Dia</h2>
+</header>
+
+<main>
+
+<div>
+  <div class="box">
+    <h3 id="total">0</h3>
+    Total
+  </div>
+
+  <div class="box">
+    <h3 id="done">0</h3>
+    Feitas
+  </div>
+
+  <div class="box">
+    <h3 id="pending">0</h3>
+    Pendentes
+  </div>
+
+  <div class="box">
+    <h3 id="notDone">0</h3>
+    Não feitas
+  </div>
+</div>
+
+<div class="list" id="list"></div>
+
+</main>
+
+<script src="/admin-today.js"></script>
+
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script src="/cw-admin-shortcuts.js"></script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

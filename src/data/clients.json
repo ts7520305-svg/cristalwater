@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Cliente Fatura",
+    "internalName": "CF-001",
+    "phone": "910000000",
+    "email": null,
+    "address": "Lagos",
+    "zone": "Lagos",
+    "notes": "Cliente de teste",
+    "status": "ACTIVE"
+  }
+]

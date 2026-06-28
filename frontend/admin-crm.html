@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cristal Water - CRM e Lembretes</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/cristal-assist.css">
+  <link rel="stylesheet" href="/cw-polish.css">
+  <script src="/cw-auth.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, Arial, sans-serif; background: #050b16; color: #e8f7ff; }
+    header { position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 22px; background: rgba(5, 12, 24, .9); border-bottom: 1px solid rgba(53, 217, 255, .25); backdrop-filter: blur(14px); }
+    h1, h2, h3 { margin: 0; }
+    h1 { font-size: 26px; }
+    h2 { margin-bottom: 14px; font-size: 22px; }
+    h3 { font-size: 16px; color: #d8efff; }
+    p { color: #9db4c9; }
+    a { color: inherit; }
+    .links, .row, .actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .links a, .btn { color: #e8f7ff; text-decoration: none; border: 1px solid rgba(53, 217, 255, .25); background: rgba(255, 255, 255, .07); border-radius: 14px; padding: 10px 12px; font-weight: 800; cursor: pointer; }
+    .btn.primary { background: linear-gradient(135deg, #23c7f5, #3d84ff); color: #04111d; border: 0; }
+    .btn.danger { background: rgba(255, 80, 110, .16); border-color: rgba(255, 110, 140, .5); }
+    main.crm-layout { padding: 20px; display: grid; grid-template-columns: minmax(320px, 430px) minmax(0, 1fr); gap: 18px; }
+    .panel { border: 1px solid rgba(53, 217, 255, .22); border-radius: 24px; padding: 18px; background: linear-gradient(180deg, rgba(16, 32, 54, .9), rgba(8, 18, 32, .95)); box-shadow: 0 24px 70px rgba(0, 0, 0, .36); }
+    .stack { display: grid; gap: 18px; }
+    label { display: block; color: #9db4c9; margin: 10px 0 5px; font-weight: 700; }
+    input, select, textarea { width: 100%; padding: 12px; border-radius: 14px; border: 1px solid rgba(255, 255, 255, .15); background: #071829; color: #e8f7ff; outline: none; }
+    select option { color: #06111f; background: #f4fbff; }
+    textarea { min-height: 84px; resize: vertical; }
+    hr { border: 0; border-top: 1px solid rgba(255, 255, 255, .12); margin: 18px 0; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
+    .card { padding: 14px; border-radius: 18px; background: rgba(255, 255, 255, .055); border: 1px solid rgba(255, 255, 255, .12); }
+    .card header { position: static; padding: 0; border: 0; background: transparent; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .badge { display: inline-flex; border-radius: 999px; padding: 4px 8px; background: rgba(53, 217, 255, .14); color: #7fe8ff; font-size: 12px; font-weight: 900; }
+    .badge.warn { background: rgba(255, 191, 71, .18); color: #ffe4a1; }
+    .badge.done { background: rgba(41, 245, 167, .14); color: #81ffd2; }
+    .muted { color: #9db4c9; }
+    .status-line { min-height: 22px; margin: 8px 0 0; color: #9db4c9; }
+    .split { display: grid; grid-template-columns: 1fr 150px; gap: 10px; }
+    .toolbar { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+    .preview { border: 1px dashed rgba(53, 217, 255, .35); border-radius: 14px; padding: 10px 12px; color: #cceeff; background: rgba(53, 217, 255, .06); }
+    @media (max-width: 980px) {
+      header { align-items: flex-start; flex-direction: column; }
+      .links { width: 100%; }
+      .links a { flex: 1; text-align: center; }
+      main.crm-layout { grid-template-columns: 1fr; padding: 14px; }
+      .split { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>CRM e Lembretes</h1>
+      <p>Lembretes comerciais, operacionais e tarefas especificas por piscina.</p>
+    </div>
+    <nav class="links">
+      <a href="/admin-dashboard">Dashboard</a>
+      <a href="/admin-master-control">Centro</a>
+      <a href="/admin-pools">Piscinas</a>
+    </nav>
+  </header>
+
+  <main class="crm-layout">
+    <section class="panel" data-help-topic="clients">
+      <h2>Novo potencial cliente</h2>
+      <form id="leadForm">
+        <label>Nome</label>
+        <input name="name" required>
+        <label>Telefone</label>
+        <input name="phone">
+        <label>Email</label>
+        <input name="email" type="email">
+        <label>Zona</label>
+        <input name="zone">
+        <label>Morada</label>
+        <input name="address">
+        <label>Estado</label>
+        <select name="status">
+          <option value="NEW">Novo</option>
+          <option value="CONTACTED">Contactado</option>
+          <option value="VISIT_SCHEDULED">Visita agendada</option>
+          <option value="QUOTE_SENT">Orcamento enviado</option>
+          <option value="NEGOTIATION">Negociacao</option>
+        </select>
+        <label>Prioridade</label>
+        <select name="priority">
+          <option>NORMAL</option>
+          <option>HIGH</option>
+          <option>LOW</option>
+        </select>
+        <label>Notas</label>
+        <textarea name="notes"></textarea>
+        <button class="btn primary" type="submit">Criar potencial cliente</button>
+      </form>
+
+      <hr>
+
+      <h2>Leads</h2>
+      <div id="leads" class="grid"></div>
+    </section>
+
+    <div class="stack">
+      <section class="panel">
+        <div class="toolbar">
+          <div>
+            <h2>Lembrete por piscina</h2>
+            <p class="muted">Ex.: cliente chega dia X, ligar aquecimento antes da chegada.</p>
+          </div>
+          <button class="btn" type="button" id="refreshAll">Atualizar</button>
+        </div>
+        <form id="poolReminderForm">
+          <label>Piscina / jacuzzi</label>
+          <select name="poolId" id="poolReminderPool" required></select>
+          <label>Acao</label>
+          <input name="title" required placeholder="Ex: Ligar aquecimento">
+          <div class="split">
+            <div>
+              <label>Data do evento</label>
+              <input type="datetime-local" name="eventAt" id="poolReminderEventAt" required>
+            </div>
+            <div>
+              <label>Avisar dias antes</label>
+              <input type="number" min="0" max="365" step="1" name="daysBefore" id="poolReminderDaysBefore" value="1">
+            </div>
+          </div>
+          <label>Prioridade</label>
+          <select name="priority">
+            <option>NORMAL</option>
+            <option>HIGH</option>
+            <option>LOW</option>
+          </select>
+          <label>Notas</label>
+          <textarea name="description" placeholder="Notas internas para o administrador ou tecnico"></textarea>
+          <div class="preview" id="poolReminderPreview">Escolhe a data do evento para calcular o aviso.</div>
+          <p class="status-line" id="poolReminderStatus"></p>
+          <button class="btn primary" type="submit">Criar lembrete da piscina</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="toolbar">
+          <div>
+            <h2>Lembretes ativos por piscina</h2>
+            <p class="muted">Filtra por piscina quando precisares de confirmar a ficha operacional.</p>
+          </div>
+          <select id="poolReminderFilter"></select>
+        </div>
+        <div id="poolReminders" class="grid"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Lembrete geral</h2>
+        <form id="reminderForm">
+          <label>Titulo</label>
+          <input name="title" required placeholder="Ex: Visitar novo cliente Lagos">
+          <label>Data e hora</label>
+          <input type="datetime-local" name="dueAt" required>
+          <label>Categoria</label>
+          <select name="category">
+            <option>GENERAL</option>
+            <option>COMMERCIAL</option>
+            <option>TECHNICAL</option>
+            <option>FINANCE</option>
+          </select>
+          <label>Descricao</label>
+          <textarea name="description"></textarea>
+          <button class="btn" type="submit">Criar lembrete geral</button>
+        </form>
+        <hr>
+        <h2>Lembretes gerais</h2>
+        <div id="reminders" class="grid"></div>
+      </section>
+    </div>
+  </main>
+
+  <script src="/admin-auth-guard.js"></script>
+  <script src="/admin-crm.js"></script>
+  <script src="/cristal-help-data.js"></script>
+  <script src="/cristal-assist.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
+  </script>
+  <script src="/cw-admin-shortcuts.js"></script>
+  <script src="/cw-flow-shell.js"></script>
+</body>
+</html>

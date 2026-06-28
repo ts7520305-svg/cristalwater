@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#050b16">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+  <title>Cristal Water - Menu Admin</title>
+  <style>
+    *{box-sizing:border-box} body{margin:0;font-family:Arial,sans-serif;background:#edf4fb;color:#0f172a} header{background:white;padding:18px 22px;border-bottom:4px solid #1e88e5;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 2px 12px rgba(0,0,0,.08)} .brand{display:flex;align-items:center;gap:14px} .brand img{height:62px}.brand h1{margin:0;color:#1e88e5;font-size:26px}.brand p{margin:4px 0 0;color:#64748b} main{padding:22px}.section-title{margin:28px 0 14px;color:#1565c0;font-size:22px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:16px}.card{background:white;border-radius:18px;padding:20px;box-shadow:0 3px 14px rgba(0,0,0,.08);border-top:6px solid #1e88e5}.card h3{margin:0 0 10px;color:#1565c0}.card p{color:#64748b;font-size:14px;line-height:1.45;min-height:52px}.card button,.logout-btn{border:0;border-radius:12px;padding:11px 15px;font-weight:800;cursor:pointer}.card button{background:#1e88e5;color:white}.logout-btn{background:#dc2626;color:white}.critical{border-top-color:#dc2626}.critical h3{color:#dc2626}.green{border-top-color:#16a34a}.green h3{color:#16a34a}.purple{border-top-color:#7c3aed}.purple h3{color:#7c3aed} footer{text-align:center;color:#64748b;padding:24px}
+  </style>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+<body>
+<header>
+  <div class="brand"><img src="/logo.png" alt="Cristal Water"><div><h1>Cristal Water</h1><p>Admin Enterprise Menu · V22.5.1.8</p></div></div>
+  <button class="logout-btn" id="logoutBtn">Terminar Sessão</button>
+</header>
+<main>
+  <h2 class="section-title">🚀 Fluxo principal</h2>
+  <div class="grid">
+    <div class="card green"><h3>Entrada guiada</h3><p>Criar cliente, piscina/jacuzzi, ficha tecnica minima, ronda e primeira visita num fluxo unico.</p><button data-route="/admin-onboarding.html">Abrir</button></div>
+    <div class="card green"><h3>✅ Centro de Operações</h3><p>Painel único para criar técnicos, clientes, piscinas, rondas, visitas, stock e faturação.</p><button data-route="/admin-master-control">Abrir</button></div>
+    <div class="card green"><h3>🧭 Centro de Operações</h3><p>Fluxo completo operacional: clientes, piscinas, rondas, visitas, reparações e faturas.</p><button data-route="/admin-core-flow">Abrir</button></div>
+    <div class="card green"><h3>⚙️ Fluxo Operacional</h3><p>Onboarding guiado e estado operacional do sistema.</p><button data-route="/admin-operational-flow">Abrir</button></div>
+    <div class="card"><h3>📊 Dashboard</h3><p>Centro de monitorização, métricas, GPS e inteligência operacional.</p><button data-route="/admin-dashboard">Abrir</button></div>
+    <div class="card purple"><h3>🤖 Assistente interno</h3><p>Assistente interno de operação, alertas, cobranças e suporte de decisão.</p><button data-route="/admin-ai">Abrir</button></div>
+  </div>
+
+  <h2 class="section-title">👥 Gestão operacional</h2>
+  <div class="grid">
+    <div class="card"><h3>👤 Clientes</h3><p>Criar, consultar e gerir clientes.</p><button data-route="/admin-clients">Abrir</button></div>
+    <div class="card"><h3>🏊 Piscinas</h3><p>Criar piscinas, associar cliente, zona, volume e coordenadas.</p><button data-route="/admin-pools">Abrir</button></div>
+    <div class="card"><h3>👷 Técnicos</h3><p>Criar técnicos, PIN, email, zona e estado ativo.</p><button data-route="/admin-technicians">Abrir</button></div>
+    <div class="card"><h3>🛰️ Rondas</h3><p>Planeamento semanal, técnicos e piscinas.</p><button data-route="/admin-rounds">Abrir</button></div>
+    <div class="card"><h3>📅 Visitas</h3><p>Criar e acompanhar visitas em campo.</p><button data-route="/admin-visits">Abrir</button></div>
+    <div class="card"><h3>📍 Hoje</h3><p>Resumo operacional do dia.</p><button data-route="/admin-today">Abrir</button></div>
+  </div>
+
+  <h2 class="section-title">📦 Stock, frota e guias</h2>
+  <div class="grid">
+    <div class="card"><h3>📦 Stock / Compras</h3><p>Compras, stock central, transferências para viaturas e consumos.</p><button data-route="/admin-inventory">Abrir</button></div>
+    <div class="card"><h3>🚐 Frota e Guias</h3><p>Viaturas, guias de transporte e controlo operacional.</p><button data-route="/admin-vehicles">Abrir</button></div>
+    <div class="card"><h3>🧮 Calculadora Técnica</h3><p>Cálculos de piscina, volume e dosagem.</p><button data-route="/admin-pool-calculator">Abrir</button></div>
+  </div>
+
+  <h2 class="section-title">💶 Financeiro</h2>
+  <div class="grid">
+    <div class="card"><h3>💳 Cobranças</h3><p>Centro financeiro, mensalidades e pagamentos.</p><button data-route="/billing">Abrir</button></div>
+    <div class="card"><h3>💰 Pagamentos</h3><p>Registo e consulta de pagamentos.</p><button data-route="/admin-payments">Abrir</button></div>
+    <div class="card"><h3>📈 Cobrança avançada</h3><p>Listas de dívida, cobranças e avisos.</p><button data-route="/admin-collection">Abrir</button></div>
+  </div>
+
+  <h2 class="section-title">🚨 Alertas, reparações e relatórios</h2>
+  <div class="grid">
+    <div class="card critical"><h3>🚨 Alertas</h3><p>Alertas técnicos e operacionais.</p><button data-route="/admin-alerts">Abrir</button></div>
+    <div class="card critical"><h3>🛠️ Incidentes</h3><p>Centro de incidentes e escalamento.</p><button data-route="/incident-center">Abrir</button></div>
+    <div class="card"><h3>📄 Relatórios</h3><p>Relatórios operacionais e técnicos.</p><button data-route="/admin-reports">Abrir</button></div>
+    <div class="card"><h3>📧 Emails</h3><p>Logs e reenvio de emails.</p><button data-route="/admin-email-logs">Abrir</button></div>
+  </div>
+
+  <h2 class="section-title">🗺️ GPS, Lembretes e sistema</h2>
+  <div class="grid">
+    <div class="card"><h3>🌍 Live Map</h3><p>Mapa live dos técnicos e posições GPS.</p><button data-route="/admin-live-map">Abrir</button></div>
+    <div class="card"><h3>💬 Chat interno</h3><p>Comunicação cliente/admin/técnicos.</p><button data-route="/chat">Abrir</button></div>
+    <div class="card"><h3>🔔 Notificações</h3><p>Centro de notificações.</p><button data-route="/admin-notifications">Abrir</button></div>
+    <div class="card"><h3>🎨 Configuração visual</h3><p>Tema, cores e preferências.</p><button data-route="/admin-ui-settings">Abrir</button></div>
+    <div class="card"><h3>🔐 Segurança</h3><p>Auditoria, permissões e segurança.</p><button data-route="/admin-security">Abrir</button></div>
+    
+  </div>
+</main>
+<footer>© Cristal Water · Enterprise Operations Platform</footer>
+<script src="/admin-auth-guard.js"></script>
+<script>
+  document.getElementById('logoutBtn')?.addEventListener('click',()=>{localStorage.removeItem('token');localStorage.removeItem('user');location.href='/login';});
+  document.querySelectorAll('[data-route]').forEach(btn=>btn.addEventListener('click',()=>{location.href=btn.dataset.route;}));
+</script>
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{});}</script>
+<script src="/cw-admin-shortcuts.js"></script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

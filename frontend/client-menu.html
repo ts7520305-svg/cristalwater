@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+  <meta charset="utf-8">
+  <title>Cristal Water - Área do Cliente</title>
+
+  <!-- 🔐 PROTEÇÃO: exige login do cliente -->
+  <script src="/client-auth-guard.js"></script>
+  <script src="/client-logout.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #e3f2fd;
+      color: #1f2933;
+    }
+
+    header {
+      background: white;
+      border-bottom: 3px solid #1e88e5;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    header img {
+      height: 70px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 26px;
+      color: #1e88e5;
+    }
+
+    header p {
+      margin: 4px 0 0 0;
+      color: #555;
+      font-size: 14px;
+    }
+
+    .logout-btn {
+      background: #c62828;
+      color: white;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .logout-btn:hover {
+      background: #b71c1c;
+    }
+
+    main {
+      padding: 25px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      border-top: 4px solid #1e88e5;
+    }
+
+    .card h3 {
+      margin-top: 0;
+      color: #1e88e5;
+    }
+
+    .card p {
+      font-size: 14px;
+      color: #555;
+    }
+
+    .card a {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 8px 14px;
+      background: #1e88e5;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .card a:hover {
+      background: #1565c0;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      font-size: 12px;
+      color: #555;
+    }
+  </style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+
+<body>
+
+<header>
+  <div class="header-left">
+    <img src="/logo.png" alt="Cristal Water">
+    <div>
+      <h1>Cristal Water</h1>
+      <p>Área do Cliente</p>
+    </div>
+  </div>
+
+  <button class="logout-btn" onclick="logoutClient()">
+    Terminar sessão
+  </button>
+</header>
+
+<main>
+
+  <div class="grid">
+
+    <div class="card">
+      <h3>🏠 Resumo do Serviço</h3>
+      <p>
+        Consulte o estado geral da manutenção da sua piscina
+        e aceda rapidamente às principais informações.
+      </p>
+      <a href="/client-dashboard.html">Aceder</a>
+    </div>
+
+    <div class="card">
+      <h3>💳 Pagamentos</h3>
+      <p>
+        Verifique o estado da sua mensalidade, datas de pagamento
+        e histórico de valores associados ao serviço.
+      </p>
+      <a href="/client-payments.html">Consultar</a>
+    </div>
+
+    <div class="card">
+      <h3>🔔 Notificações</h3>
+      <p>
+        Mensagens importantes sobre manutenções, pagamentos,
+        avisos técnicos e comunicações da nossa equipa.
+      </p>
+      <a href="/client-notifications.html">Ver mensagens</a>
+    </div>
+
+    <div class="card">
+      <h3>🛠️ Histórico Técnico</h3>
+      <p>
+        Consulte o histórico detalhado das intervenções realizadas
+        na(s) sua(s) piscina(s), incluindo datas, horas e observações.
+      </p>
+      <a href="/client-history.html">Consultar histórico</a>
+    </div>
+
+  </div>
+
+</main>
+
+<footer>
+  © Cristal Water · Swimming Pools
+</footer>
+
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

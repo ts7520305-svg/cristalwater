@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cristal Water • Encerramentos</title>
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="stylesheet" href="/cw-theme.css" />
+  <style>
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:#07111f;color:#e5f7ff}.wrap{max-width:1240px;margin:0 auto;padding:22px}.hero{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;background:linear-gradient(135deg,#0b223d,#07111f 55%,#042f3d);border:1px solid rgba(95,220,255,.18);box-shadow:0 18px 80px rgba(0,0,0,.35);border-radius:26px;padding:24px}.hero h1{margin:0;font-size:30px}.muted{color:#8fb4c8}.grid{display:grid;grid-template-columns:1fr 1.1fr;gap:18px;margin-top:18px}.card{background:rgba(10,25,44,.78);border:1px solid rgba(95,220,255,.14);border-radius:22px;padding:18px;box-shadow:0 12px 55px rgba(0,0,0,.28)}label{display:block;margin:12px 0 6px;color:#aee8ff;font-size:13px}input,select,textarea{width:100%;box-sizing:border-box;border-radius:14px;border:1px solid rgba(135,220,255,.18);background:#081827;color:#e8fbff;padding:12px}textarea{min-height:110px}button{border:0;border-radius:14px;background:linear-gradient(135deg,#1cc7ff,#18f0b8);color:#00131e;font-weight:800;padding:12px 14px;cursor:pointer}.btn2{background:#102a45;color:#c9f4ff;border:1px solid rgba(135,220,255,.18)}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.closure{padding:14px;border-radius:16px;background:#081827;border:1px solid rgba(135,220,255,.12);margin:10px 0}.badge{display:inline-block;padding:4px 9px;border-radius:999px;background:#123b5d;color:#93e7ff;font-size:12px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.impact{white-space:pre-wrap;background:#06101d;border-radius:14px;padding:12px;color:#b9d8e7}.quick{display:flex;gap:10px;flex-wrap:wrap}.quick button{background:#0f2c49;color:#d9f8ff;border:1px solid rgba(135,220,255,.2)}@media(max-width:900px){.grid{grid-template-columns:1fr}.hero{flex-direction:column}.row{grid-template-columns:1fr}}
+  </style>
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+<body data-cw-page="admin-company-closures">
+  <main class="wrap">
+    <section class="hero">
+      <div>
+        <h1>🏖️ Modo Férias / Encerramento da Empresa</h1>
+        <p class="muted">Agenda encerramentos, mensagens de Natal/férias, impacto nas rondas, exceções críticas e avisos para clientes/técnicos.</p>
+      </div>
+      <div class="quick">
+        <button data-template="NATAL">🎄 Natal</button>
+        <button data-template="FERIAS_VERAO">☀️ Férias verão</button>
+        <button data-template="FERIADO">📅 Feriado</button>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <h2>Novo encerramento</h2>
+        <form id="closureForm">
+          <label>Título</label><input name="title" value="Encerramento Cristal Water" />
+          <div class="row"><div><label>Tipo</label><select name="closureType"><option>HOLIDAY</option><option>CHRISTMAS</option><option>SUMMER_BREAK</option><option>PUBLIC_HOLIDAY</option><option>INTERNAL_MAINTENANCE</option></select></div><div><label>Estado</label><select name="status"><option>PLANNED</option><option>ACTIVE</option></select></div></div>
+          <div class="row"><div><label>Início</label><input type="date" name="startDate" required /></div><div><label>Fim</label><input type="date" name="endDate" required /></div></div>
+          <label>Título da mensagem</label><input name="messageTitle" placeholder="🎄 Aviso de encerramento de Natal" />
+          <label>Mensagem para clientes</label><textarea name="messageBody" placeholder="Informamos que estaremos encerrados de X a Y..."></textarea>
+          <div class="row"><div><label>Telefone urgência</label><input name="emergencyPhone" /></div><div><label>Email urgência</label><input name="emergencyEmail" /></div></div>
+          <label><input type="checkbox" name="notifyClients" checked style="width:auto"> Avisar clientes</label>
+          <label><input type="checkbox" name="notifyTechnicians" checked style="width:auto"> Avisar técnicos</label>
+          <label><input type="checkbox" name="showOnClientPortal" checked style="width:auto"> Mostrar no portal cliente</label>
+          <label><input type="checkbox" name="pauseNormalVisits" checked style="width:auto"> Pausar/reagendar visitas normais</label>
+          <label><input type="checkbox" name="allowCriticalServices" checked style="width:auto"> Manter serviços críticos/VIP/hotéis</label>
+          <label>Ação sobre rondas</label><select name="routeAction"><option>PREVIEW_ONLY</option><option>CREATE_REPLAN_TASKS</option><option>MARK_FOR_REVIEW</option></select>
+          <button type="submit">Guardar encerramento</button>
+        </form>
+      </div>
+      <div class="card">
+        <h2>Encerramentos</h2>
+        <div id="closuresList" class="muted">A carregar...</div>
+      </div>
+    </section>
+  </main>
+  <script src="/admin-company-closures.js"></script>
+<script src="/cw-admin-shortcuts.js"></script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

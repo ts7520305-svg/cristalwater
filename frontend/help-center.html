@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cristal Water · Centro de Ajuda</title>
+  <link rel="stylesheet" href="/cristal-assist.css">
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,sans-serif;background:#050b16;color:#e8f7ff;}
+    .hero{padding:34px 24px 18px;max-width:1200px;margin:auto;}
+    .hero h1{font-size:clamp(32px,5vw,58px);margin:0 0 10px;color:#35d9ff;}
+    .hero p{max-width:820px;color:#91a8be;line-height:1.7;font-size:17px;}
+    .top-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px;}
+    .top-actions a{padding:12px 16px;border-radius:14px;text-decoration:none;background:linear-gradient(135deg,#35d9ff,#4f8cff);color:#03101d;font-weight:900;}
+    .wrap{max-width:1200px;margin:auto;padding:10px 24px 40px;display:grid;grid-template-columns:340px 1fr;gap:22px;}
+    .sidebar,.detail,.roadmap{background:linear-gradient(180deg,rgba(16,32,54,.94),rgba(8,18,32,.9));border:1px solid rgba(53,217,255,.24);border-radius:22px;box-shadow:0 24px 70px rgba(0,0,0,.45);padding:18px;}
+    input{width:100%;padding:14px;border-radius:14px;border:1px solid rgba(53,217,255,.32);background:rgba(0,0,0,.25);color:#e8f7ff;margin-bottom:14px;}
+    .topic{display:block;width:100%;text-align:left;margin-bottom:10px;padding:13px;border-radius:15px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.055);color:#e8f7ff;cursor:pointer;}
+    .topic strong{display:block;color:white;margin-bottom:5px;}.topic small{color:#91a8be;line-height:1.35;}
+    .topic.active{border-color:#35d9ff;background:rgba(53,217,255,.12);}
+    .detail h2{font-size:34px;color:#35d9ff;margin:0 0 10px;}.detail p{line-height:1.8;color:#cfe7f5;}.detail li{margin-bottom:8px;}
+    .roadmap{grid-column:1 / -1;}.roadmap-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}.roadmap-card{padding:15px;border-radius:16px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.045)}.roadmap-card b{color:#35d9ff;display:block;margin-bottom:7px}
+    @media(max-width:860px){.wrap{grid-template-columns:1fr}.hero{padding-top:24px}}
+  </style>
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+<body class="cw-enterprise-theme">
+  <section class="hero">
+    <h1>❔ Centro de Ajuda Cristal Water</h1>
+    <p>Ajuda contextual para aprender cada função do sistema. Passa o cursor sobre botões, cartões e painéis para explicações rápidas. Usa <b>CTRL/CMD+K</b> para abrir o comando rápido.</p>
+    <div class="top-actions">
+      <a href="/admin-dashboard">🧠 Dashboard</a>
+      <a href="/admin-ai">🤖 Assistente interno</a>
+      <a href="/admin-rounds">🛰️ Rondas</a>
+      <a href="/technician">📱 Portal Técnico</a>
+      <a href="/admin-menu">⚡ Menu Enterprise</a>
+    </div>
+  </section>
+
+  <main class="wrap">
+    <aside class="sidebar">
+      <input id="search" placeholder="Pesquisar ajuda...">
+      <div id="topics"></div>
+    </aside>
+    <section class="detail" id="detail"></section>
+    <section class="roadmap">
+      <h2>🚀 Evolução recomendada</h2>
+      <div class="roadmap-grid">
+        <div class="roadmap-card"><b>Rondas inteligentes</b>Otimização por distância, prioridade, tempo estimado, técnico disponível e urgência.</div>
+        <div class="roadmap-card"><b>Stock por viatura</b>Consumos automáticos por visita, reposição e custos reais por piscina.</div>
+        <div class="roadmap-card"><b>Portal cliente premium</b>Fotos, relatórios, pagamentos, mensagens e histórico sempre disponível.</div>
+        <div class="roadmap-card"><b>Ajuda e formação</b>Guias por função, onboarding de técnicos e explicação contextual em todos os módulos.</div>
+        <div class="roadmap-card"><b>IA operacional</b>Chat admin interno, ações pendentes de aprovação, alertas preditivos, scoring de risco, sugestões de rota e prioridades automáticas.</div>
+        <div class="roadmap-card"><b>Dashboards configuráveis</b>Widgets arrastáveis e vistas por função: admin, financeiro, técnico e cliente.</div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/cristal-help-data.js"></script>
+  <script src="/cristal-assist.js"></script>
+  <script src="/help-center.js"></script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<script src="/cw-auth.js"></script>
+<script>
+
+async function convertAlert(id) {
+
+  const price = prompt("Preço (€)");
+  if (!price) return;
+
+  const notify = confirm("Enviar WhatsApp ao cliente?");
+
+  const res = await fetch(`/api/alerts/${id}/convert`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      price: Number(price),
+      notifyClient: notify
+    })
+  });
+
+  const data = await res.json();
+
+  if (data.whatsappUrl) {
+    window.open(data.whatsappUrl);
+  }
+
+  alert("Reparação criada");
+
+  loadAlerts();
+}
+
+</script>

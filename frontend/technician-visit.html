@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+<meta charset="utf-8">
+<title>Visita</title>
+
+<style>
+body{font-family:Arial;background:#eef3f8;padding:20px}
+.card{background:white;padding:15px;margin-bottom:10px;border-radius:10px}
+button{padding:10px;margin-top:10px;width:100%}
+</style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+
+<body>
+
+<h2>Visita</h2>
+
+<div id="info"></div>
+
+<div class="card">
+<input id="ph" placeholder="pH">
+<input id="chlorine" placeholder="Cloro">
+<input id="alkalinity" placeholder="Alcalinidade">
+</div>
+
+<div class="card">
+<label><input type="checkbox" id="cleaned"> Limpeza</label>
+<label><input type="checkbox" id="brushed"> Escovado</label>
+</div>
+
+<div class="card">
+<textarea id="notes" placeholder="Notas"></textarea>
+</div>
+
+<div class="card">
+<input type="file" id="photo">
+<button onclick="uploadPhoto()">📸 Upload</button>
+</div>
+
+<div class="card">
+<button onclick="completeVisit()">✔ Concluir</button>
+<button onclick="markNotDone()">❌ Não feita</button>
+</div>
+
+<script src="/technician-visit.js"></script>
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

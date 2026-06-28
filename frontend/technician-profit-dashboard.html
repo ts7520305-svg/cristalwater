@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+<meta charset="UTF-8">
+<title>Lucro por Técnico</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+  font-family: Arial;
+  padding:20px;
+  background:#f4f6f8;
+}
+
+h2 {
+  margin-bottom:20px;
+}
+
+.controls {
+  margin-bottom:20px;
+}
+
+.card {
+  background:white;
+  padding:15px;
+  margin-bottom:10px;
+  border-radius:10px;
+  box-shadow:0 3px 8px rgba(0,0,0,0.1);
+}
+
+.positive { color:green; }
+.negative { color:red; }
+</style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+
+<body>
+
+<h2>Lucro por Técnico</h2>
+
+<div class="controls">
+  Mês:
+  <select id="month">
+    <option value="1">Jan</option>
+    <option value="2">Fev</option>
+    <option value="3">Mar</option>
+    <option value="4">Abr</option>
+    <option value="5">Mai</option>
+    <option value="6">Jun</option>
+    <option value="7">Jul</option>
+    <option value="8">Ago</option>
+    <option value="9">Set</option>
+    <option value="10">Out</option>
+    <option value="11">Nov</option>
+    <option value="12">Dez</option>
+  </select>
+
+  Ano:
+  <input type="number" id="year" value="2025" style="width:80px;">
+
+  <button onclick="load()">Atualizar</button>
+</div>
+
+<div id="list"></div>
+
+<canvas id="chart"></canvas>
+
+<script>
+const API = "/api";
+
+async function load(){
+
+  const month = document.getElementById("month").value;
+  const year = document.getElementById("year").value;
+
+  const res = await fetch(
+    `${API}/billing/technician-profit?month=${month}&year=${year}`
+  );
+
+  const data = await res.json();
+
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  if (!data.ok) return;
+
+  const names = [];
+  const profits = [];
+
+  data.ranking.forEach((t,i)=>{
+
+    const color = t.profit >= 0 ? "positive" : "negative";
+
+    list.innerHTML += `
+      <div class="card">
+        <b>#${i+1} - ${t.technician}</b><br>
+        Visitas: ${t.visits}<br>
+        Receita: €${t.revenue}<br>
+        Custo: €${t.cost}<br>
+        <span class="${color}">Lucro: €${t.profit}</span>
+      </div>
+    `;
+
+    names.push(t.technician);
+    profits.push(t.profit);
+  });
+
+  drawChart(names, profits);
+}
+
+// ==========================================================
+// GRÁFICO
+// ==========================================================
+
+let chart;
+
+function drawChart(labels, data){
+
+  if (chart) chart.destroy();
+
+  chart = new Chart(document.getElementById("chart"), {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Lucro (€)",
+        data
+      }]
+    }
+  });
+}
+
+// carregar inicial
+load();
+</script>
+
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

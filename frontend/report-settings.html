@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <title>Cristal Water - Permissões do Relatório</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #eef3f8;
+      color: #1f2937;
+    }
+
+    header {
+      background: #ffffff;
+      border-bottom: 3px solid #1e88e5;
+      padding: 18px 20px;
+    }
+
+    header h1 {
+      margin: 0;
+      color: #1e88e5;
+      font-size: 28px;
+    }
+
+    main {
+      max-width: 950px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+    }
+
+    button {
+      border: none;
+      background: #1e88e5;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-green {
+      background: #2e7d32;
+    }
+
+    .check-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 16px;
+      margin-top: 10px;
+    }
+
+    label.inline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      background: #f8fbff;
+      border: 1px solid #d6e6f7;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    label.inline input {
+      width: auto;
+      margin: 0;
+    }
+
+    .muted {
+      color: #6b7280;
+      font-size: 13px;
+    }
+
+    .links {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .link-box {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 10px;
+      word-break: break-all;
+      font-size: 13px;
+    }
+
+    @media (max-width: 700px) {
+      .row,
+      .check-grid,
+      .links {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+<body>
+
+<header>
+  <h1>Permissões do Relatório do Cliente</h1>
+</header>
+
+<main>
+  <div class="card">
+    <div class="row">
+      <div>
+        <label>ID do cliente</label>
+        <input id="clientId" placeholder="Ex: 5">
+      </div>
+      <div>
+        <label>ID da visita para pré-visualizar</label>
+        <input id="visitId" placeholder="Ex: 4">
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:12px;">
+      <button onclick="loadSettings()">Carregar configurações</button>
+      <button class="btn-green" onclick="saveSettings()">Guardar configurações</button>
+    </div>
+
+    <div id="status" class="muted" style="margin-top:10px;">Pronto</div>
+  </div>
+
+  <div class="card">
+    <h2>Campos visíveis no relatório do cliente</h2>
+
+    <div class="check-grid">
+      <label class="inline"><input type="checkbox" id="showClientName"> Mostrar nome do cliente</label>
+      <label class="inline"><input type="checkbox" id="showPoolName"> Mostrar nome da instalação</label>
+      <label class="inline"><input type="checkbox" id="showZone"> Mostrar zona</label>
+      <label class="inline"><input type="checkbox" id="showAddress"> Mostrar morada</label>
+      <label class="inline"><input type="checkbox" id="showTechnicianName"> Mostrar nome do técnico</label>
+      <label class="inline"><input type="checkbox" id="showStatus"> Mostrar estado</label>
+      <label class="inline"><input type="checkbox" id="showPlannedDate"> Mostrar data planeada</label>
+      <label class="inline"><input type="checkbox" id="showStartEnd"> Mostrar início e fim</label>
+      <label class="inline"><input type="checkbox" id="showWaterParameters"> Mostrar parâmetros da água</label>
+      <label class="inline"><input type="checkbox" id="showChecklist"> Mostrar checklist</label>
+      <label class="inline"><input type="checkbox" id="showChemicals"> Mostrar químicos</label>
+      <label class="inline"><input type="checkbox" id="showEquipment"> Mostrar equipamento</label>
+      <label class="inline"><input type="checkbox" id="showTechnicalRoom"> Mostrar casa técnica</label>
+      <label class="inline"><input type="checkbox" id="showNotes"> Mostrar observações</label>
+      <label class="inline"><input type="checkbox" id="showPhotos"> Mostrar fotos</label>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Pré-visualização rápida</h2>
+    <div class="links">
+      <div class="link-box" id="clientLink">Relatório cliente: -</div>
+      <div class="link-box" id="adminLink">Relatório admin: -</div>
+    </div>
+    <div class="row" style="margin-top:12px;">
+      <button onclick="openClientReport()">Abrir relatório cliente</button>
+      <button onclick="openAdminReport()">Abrir relatório admin</button>
+    </div>
+  </div>
+</main>
+
+<script src="/report-settings.js"></script>
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="pt">
+
+<head>
+
+<meta charset="utf-8">
+
+<title>
+  Cristal Water - Incident Command Center
+</title>
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
+
+<script src="/socket.io/socket.io.js"></script>
+
+<style>
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#edf4fb;
+  color:#1f2937;
+}
+
+/* ======================================================
+HEADER
+====================================================== */
+
+header{
+
+  background:white;
+
+  border-bottom:4px solid #dc2626;
+
+  padding:18px 24px;
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+
+  position:sticky;
+
+  top:0;
+
+  z-index:999;
+
+  box-shadow:0 2px 12px rgba(0,0,0,.08);
+}
+
+header h1{
+
+  margin:0;
+
+  color:#dc2626;
+}
+
+header button{
+
+  border:none;
+
+  border-radius:10px;
+
+  padding:12px 18px;
+
+  background:#ef4444;
+
+  color:white;
+
+  font-weight:bold;
+
+  cursor:pointer;
+}
+
+/* ======================================================
+MAIN
+====================================================== */
+
+main{
+  padding:20px;
+}
+
+/* ======================================================
+TOPBAR
+====================================================== */
+
+.topbar{
+
+  display:flex;
+
+  gap:10px;
+
+  flex-wrap:wrap;
+
+  margin-bottom:20px;
+}
+
+.topbar button{
+
+  border:none;
+
+  border-radius:10px;
+
+  padding:12px 18px;
+
+  background:#1e88e5;
+
+  color:white;
+
+  font-weight:bold;
+
+  cursor:pointer;
+}
+
+/* ======================================================
+GRID
+====================================================== */
+
+.grid{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(auto-fit,minmax(220px,1fr));
+
+  gap:16px;
+
+  margin-bottom:20px;
+}
+
+/* ======================================================
+CARD
+====================================================== */
+
+.card{
+
+  background:white;
+
+  border-radius:18px;
+
+  padding:22px;
+
+  box-shadow:0 2px 12px rgba(0,0,0,.08);
+
+  position:relative;
+
+  overflow:hidden;
+}
+
+.card::after{
+
+  content:"";
+
+  position:absolute;
+
+  top:0;
+
+  left:0;
+
+  width:100%;
+
+  height:5px;
+
+  background:#dc2626;
+}
+
+.label{
+
+  font-size:12px;
+
+  color:#64748b;
+
+  text-transform:uppercase;
+
+  margin-bottom:10px;
+}
+
+.value{
+
+  font-size:34px;
+
+  font-weight:bold;
+}
+
+/* ======================================================
+COLORS
+====================================================== */
+
+.red{
+  color:#dc2626;
+}
+
+.orange{
+  color:#ea580c;
+}
+
+.blue{
+  color:#2563eb;
+}
+
+.green{
+  color:#16a34a;
+}
+
+/* ======================================================
+LAYOUT
+====================================================== */
+
+.layout{
+
+  display:grid;
+
+  grid-template-columns:
+    1fr 2fr;
+
+  gap:20px;
+}
+
+/* ======================================================
+PANEL
+====================================================== */
+
+.panel{
+
+  background:white;
+
+  border-radius:18px;
+
+  padding:20px;
+
+  box-shadow:0 2px 12px rgba(0,0,0,.08);
+}
+
+.panel h2{
+
+  margin-top:0;
+}
+
+/* ======================================================
+INCIDENT
+====================================================== */
+
+.incident{
+
+  background:#f8fbff;
+
+  border-radius:14px;
+
+  padding:18px;
+
+  margin-bottom:16px;
+
+  position:relative;
+}
+
+.incident-critical{
+
+  border-left:8px solid #dc2626;
+}
+
+.incident-high{
+
+  border-left:8px solid #ea580c;
+}
+
+.incident-medium{
+
+  border-left:8px solid #2563eb;
+}
+
+.incident-low{
+
+  border-left:8px solid #16a34a;
+}
+
+/* ======================================================
+BADGES
+====================================================== */
+
+.badges{
+
+  display:flex;
+
+  gap:8px;
+
+  flex-wrap:wrap;
+
+  margin-top:12px;
+}
+
+.badge{
+
+  padding:6px 10px;
+
+  border-radius:999px;
+
+  font-size:11px;
+
+  font-weight:bold;
+
+  color:white;
+}
+
+.badge-critical{
+  background:#dc2626;
+}
+
+.badge-high{
+  background:#ea580c;
+}
+
+.badge-medium{
+  background:#2563eb;
+}
+
+.badge-low{
+  background:#16a34a;
+}
+
+.badge-escalated{
+  background:#7c3aed;
+}
+
+.badge-sla{
+  background:#111827;
+}
+
+/* ======================================================
+META
+====================================================== */
+
+.incident-meta{
+
+  margin-top:12px;
+
+  font-size:12px;
+
+  color:#64748b;
+
+  line-height:1.6;
+}
+
+/* ======================================================
+SLA BAR
+====================================================== */
+
+.sla-container{
+
+  margin-top:14px;
+}
+
+.sla-bar{
+
+  width:100%;
+
+  height:10px;
+
+  background:#e5e7eb;
+
+  border-radius:999px;
+
+  overflow:hidden;
+}
+
+.sla-progress{
+
+  height:100%;
+
+  width:0%;
+
+  background:#16a34a;
+}
+
+/* ======================================================
+ACTIONS
+====================================================== */
+
+.incident-actions{
+
+  display:flex;
+
+  gap:10px;
+
+  margin-top:16px;
+
+  flex-wrap:wrap;
+}
+
+.incident-actions button{
+
+  border:none;
+
+  border-radius:10px;
+
+  padding:10px 14px;
+
+  cursor:pointer;
+
+  font-weight:bold;
+}
+
+.btn-resolve{
+
+  background:#16a34a;
+
+  color:white;
+}
+
+.btn-escalate{
+
+  background:#dc2626;
+
+  color:white;
+}
+
+/* ======================================================
+TIMELINE
+====================================================== */
+
+.timeline-item{
+
+  position:relative;
+
+  padding-left:24px;
+
+  margin-bottom:18px;
+}
+
+.timeline-item::before{
+
+  content:"";
+
+  position:absolute;
+
+  left:0;
+
+  top:4px;
+
+  width:12px;
+
+  height:12px;
+
+  border-radius:50%;
+
+  background:#dc2626;
+}
+
+.timeline-time{
+
+  font-size:12px;
+
+  color:#64748b;
+
+  margin-top:5px;
+}
+
+/* ======================================================
+RESPONSIVE
+====================================================== */
+
+@media(max-width:1000px){
+
+  .layout{
+    grid-template-columns:1fr;
+  }
+}
+
+</style>
+
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+
+<body>
+
+<header>
+
+  <h1>
+    🚨 Incident Command Center
+  </h1>
+
+  <button id="logoutBtn">
+    Sair
+  </button>
+
+</header>
+
+<main>
+
+<!-- TOPBAR -->
+
+<div class="topbar">
+
+  <button id="refreshBtn">
+    🔄 Atualizar
+  </button>
+
+  <button id="dashboardBtn">
+    🧠 Dashboard
+  </button>
+
+</div>
+
+<!-- KPI -->
+
+<div class="grid">
+
+  <div class="card">
+
+    <div class="label">
+      Críticos
+    </div>
+
+    <div
+      id="criticalCount"
+      class="value red"
+    >
+      0
+    </div>
+
+  </div>
+
+  <div class="card">
+
+    <div class="label">
+      Altos
+    </div>
+
+    <div
+      id="highCount"
+      class="value orange"
+    >
+      0
+    </div>
+
+  </div>
+
+  <div class="card">
+
+    <div class="label">
+      Ativos
+    </div>
+
+    <div
+      id="activeCount"
+      class="value blue"
+    >
+      0
+    </div>
+
+  </div>
+
+  <div class="card">
+
+    <div class="label">
+      Resolvidos
+    </div>
+
+    <div
+      id="resolvedCount"
+      class="value green"
+    >
+      0
+    </div>
+
+  </div>
+
+</div>
+
+<!-- LAYOUT -->
+
+<div class="layout">
+
+  <!-- LEFT -->
+
+  <div class="panel">
+
+    <h2>
+      📡 Incident Timeline
+    </h2>
+
+    <div id="incidentTimeline"></div>
+
+  </div>
+
+  <!-- RIGHT -->
+
+  <div class="panel">
+
+    <h2>
+      🚨 Incidentes Ativos
+    </h2>
+
+    <div id="incidentList"></div>
+
+  </div>
+
+</div>
+
+</main>
+
+<script src="/admin-auth-guard.js"></script>
+<script src="/incident-center.js"></script>
+
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

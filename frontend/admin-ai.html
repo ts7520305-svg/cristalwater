@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cristal Water - IA Operacional</title>
+  <link rel="stylesheet" href="/cristal-assist.css">
+  <link rel="stylesheet" href="/cw-polish.css">
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#050b16;color:#e8f7ff}
+    header.ai-header{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 22px;background:rgba(5,12,24,.9);border-bottom:1px solid rgba(53,217,255,.26);backdrop-filter:blur(16px)}
+    .brand h1{margin:0;font-size:26px;letter-spacing:.3px}.brand p{margin:5px 0 0;color:#91a8be}
+    .top-actions{display:flex;gap:10px;flex-wrap:wrap}.top-actions a,.top-actions button{border:1px solid rgba(53,217,255,.28);border-radius:14px;padding:10px 13px;background:rgba(255,255,255,.06);color:#e8f7ff;text-decoration:none;cursor:pointer;font-weight:800}
+    main{padding:20px;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(340px,.65fr);gap:18px}.panel{border:1px solid rgba(53,217,255,.24);background:linear-gradient(180deg,rgba(16,32,54,.86),rgba(8,18,32,.9));border-radius:22px;box-shadow:0 24px 70px rgba(0,0,0,.42);backdrop-filter:blur(14px)}
+    .chat-panel{min-height:calc(100vh - 120px);display:flex;flex-direction:column}.chat-title{padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;gap:12px;align-items:center}.chat-title h2{margin:0;color:#35d9ff}.status-pill{font-size:12px;border:1px solid rgba(53,217,255,.24);border-radius:999px;padding:6px 10px;color:#91a8be}
+    .quick-prompts{display:flex;gap:8px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.08)}.quick-prompts button{border:1px solid rgba(53,217,255,.25);background:rgba(53,217,255,.08);color:#e8f7ff;border-radius:999px;padding:8px 11px;cursor:pointer}
+    #messages{flex:1;overflow:auto;padding:18px;display:flex;flex-direction:column;gap:14px}.msg{max-width:86%;padding:14px 16px;border-radius:18px;line-height:1.5;white-space:pre-wrap}.msg.user{align-self:flex-end;background:linear-gradient(135deg,#35d9ff,#4f8cff);color:#03101d;font-weight:700}.msg.ai{align-self:flex-start;background:rgba(255,255,255,.065);border:1px solid rgba(53,217,255,.2)}
+    .composer{display:flex;gap:10px;padding:16px;border-top:1px solid rgba(255,255,255,.08)}.composer textarea{flex:1;min-height:58px;max-height:160px;resize:vertical;border-radius:16px;border:1px solid rgba(53,217,255,.25);background:rgba(0,0,0,.26);color:#e8f7ff;padding:13px;outline:none}.composer button{min-width:130px;border:0;border-radius:16px;background:linear-gradient(135deg,#27f5a7,#35d9ff);color:#02100b;font-weight:900;cursor:pointer}
+    .side{display:flex;flex-direction:column;gap:18px}.side .panel{padding:18px}.side h3{margin:0 0 14px;color:#35d9ff}.grid-kpi{display:grid;grid-template-columns:1fr 1fr;gap:10px}.kpi{padding:14px;border-radius:16px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08)}.kpi strong{display:block;font-size:24px;color:#35d9ff}.kpi span{font-size:12px;color:#91a8be}
+    .rec-list,.action-list{display:grid;gap:10px}.rec,.action{border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:12px;background:rgba(255,255,255,.055)}.rec{color:#dff8ff}.action h4{margin:0 0 6px}.action p{margin:0 0 10px;color:#91a8be}.risk{font-size:11px;border-radius:999px;padding:4px 8px;margin-left:6px}.risk.LOW{background:rgba(39,245,167,.15);color:#27f5a7}.risk.MEDIUM{background:rgba(255,180,84,.15);color:#ffb454}.risk.HIGH,.risk.CRITICAL{background:rgba(255,91,122,.16);color:#ff5b7a}.action-buttons{display:flex;gap:8px;flex-wrap:wrap}.action-buttons button{border:0;border-radius:12px;padding:8px 10px;cursor:pointer;font-weight:800}.approve{background:#27f5a7;color:#02100b}.reject{background:#ff5b7a;color:#fff}
+    .capability-list{display:grid;gap:10px}.capability{display:flex;justify-content:space-between;gap:10px;align-items:center;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:12px;background:rgba(255,255,255,.055)}.capability strong{display:block}.capability span{font-size:12px;color:#91a8be}.cap-dot{min-width:82px;text-align:center;border-radius:999px;padding:6px 8px;font-size:12px;font-weight:900}.cap-dot.ok{background:rgba(39,245,167,.14);color:#27f5a7}.cap-dot.warn{background:rgba(255,180,84,.15);color:#ffb454}.cap-dot.off{background:rgba(255,91,122,.14);color:#ff8a9c}.shortcut-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.shortcut-row a{border:1px solid rgba(53,217,255,.25);background:rgba(53,217,255,.08);color:#e8f7ff;border-radius:999px;padding:8px 11px;text-decoration:none;font-weight:800}
+    .note{font-size:12px;color:#91a8be;line-height:1.45}.empty{color:#91a8be;padding:8px 0}@media(max-width:980px){main{grid-template-columns:1fr}.chat-panel{min-height:68vh}.msg{max-width:96%}.composer{flex-direction:column}.composer button{width:100%}}
+  </style>
+  <script src="/cw-auth.js"></script>
+</head>
+<body>
+  <header class="ai-header">
+    <div class="brand">
+      <h1>Cristal AI - Operações</h1>
+      <p>Assistente administrativa com leitura da plataforma, recomendações e ações pendentes de aprovação.</p>
+    </div>
+    <div class="top-actions">
+      <a href="/admin-dashboard" data-help-topic="dashboard">Dashboard</a>
+      <a href="/admin-rounds" data-help-topic="rounds">Rondas</a>
+      <a href="/admin-suppliers" data-help-topic="inventory">Fornecedores</a>
+      <a href="/help-center?topic=aiAdmin" data-help-topic="aiAdmin">Ajuda IA</a>
+      <button id="refreshBtn" data-help-topic="aiAdmin">Atualizar</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel chat-panel" data-help-topic="aiAdmin">
+      <div class="chat-title">
+        <h2>Assistente permanente</h2>
+        <span id="aiStatus" class="status-pill">A iniciar...</span>
+      </div>
+      <div class="quick-prompts">
+        <button data-prompt="Analisa o estado operacional de hoje e diz-me prioridades.">Prioridades hoje</button>
+        <button data-prompt="Analisa rondas, atrasos e carga dos técnicos. O que melhoravas?">Otimizar rondas</button>
+        <button data-prompt="Que lembretes devo enviar aos técnicos hoje?">Lembretes técnicos</button>
+        <button data-prompt="Analisa cobranças/faturas pendentes e sugere próximos passos seguros.">Cobranças</button>
+        <button data-prompt="Procura riscos críticos: alertas, visitas atrasadas, reparações e clientes sensíveis.">Riscos críticos</button>
+        <button data-prompt="Mostra-me que acessos de fornecedores devo rever e que compras ou stock devo confirmar hoje.">Fornecedores</button>
+        <button data-prompt="Pesquisa na web informação atual relevante para fornecedores, produtos ou boas práticas, se a web estiver ativa.">Web</button>
+      </div>
+      <div id="messages"></div>
+      <div class="composer">
+        <textarea id="messageInput" placeholder="Escreve uma ordem ou pergunta: rever rondas, preparar lembrete, analisar cobranças, procurar fornecedor, criar tarefa..."></textarea>
+        <button id="sendBtn">Enviar</button>
+      </div>
+    </section>
+
+    <aside class="side">
+      <section class="panel" data-help-topic="dashboard">
+        <h3>Contexto live</h3>
+        <div id="kpis" class="grid-kpi"></div>
+        <p class="note">A IA usa estes dados resumidos para recomendar ações. As alterações sensíveis ficam sempre pendentes até aprovação.</p>
+      </section>
+
+      <section class="panel" data-help-topic="aiAdmin">
+        <h3>Capacidades</h3>
+        <div id="capabilities" class="capability-list"></div>
+        <div class="shortcut-row">
+          <a href="/admin-suppliers">Abrir fornecedores</a>
+          <a href="/admin-alerts">Alertas</a>
+          <a href="/admin-rounds">Rondas</a>
+        </div>
+      </section>
+
+      <section class="panel" data-help-topic="aiAdmin">
+        <h3>Recomendações</h3>
+        <div id="recommendations" class="rec-list"><div class="empty">Ainda sem análise.</div></div>
+      </section>
+
+      <section class="panel" data-help-topic="alerts">
+        <h3>Ações IA pendentes</h3>
+        <div id="actions" class="action-list"><div class="empty">Sem ações pendentes.</div></div>
+        <p class="note">Ações de alteração, envio, faturação, rondas ou mensagens ficam pendentes até aprovação do administrador.</p>
+      </section>
+    </aside>
+  </main>
+
+  <script src="/admin-auth-guard.js"></script>
+  <script src="/admin-ai.js"></script>
+  <script src="/cristal-help-data.js"></script>
+  <script src="/cristal-assist.js"></script>
+  <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+  <script src="/cw-admin-shortcuts.js"></script>
+  <script src="/cw-flow-shell.js"></script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>Produtividade</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body { font-family: Arial; padding: 20px; }
+canvas { max-width: 800px; margin-bottom: 40px; }
+</style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+
+<body>
+
+<h2>Produtividade</h2>
+
+<h3>Clientes</h3>
+<canvas id="clientsChart"></canvas>
+
+<h3>Técnicos</h3>
+<canvas id="techChart"></canvas>
+
+<script>
+
+fetch("/api/metrics/productivity")
+.then(r => r.json())
+.then(data => {
+
+  // CLIENTES
+  new Chart(document.getElementById("clientsChart"), {
+    type: "bar",
+    data: {
+      labels: data.clients.map(c => c.name),
+      datasets: [{
+        label: "Tempo médio (min)",
+        data: data.clients.map(c => c.avgTime)
+      }]
+    }
+  });
+
+  // TÉCNICOS
+  new Chart(document.getElementById("techChart"), {
+    type: "bar",
+    data: {
+      labels: data.technicians.map(t => t.name),
+      datasets: [{
+        label: "Tempo médio (min)",
+        data: data.technicians.map(t => t.avgTime)
+      }]
+    }
+  });
+
+});
+</script>
+
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

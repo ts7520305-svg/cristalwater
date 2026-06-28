@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+<meta charset="utf-8">
+<title>Mapa Inteligente - Cristal Water</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<style>
+body { margin:0; font-family:Arial; }
+#map { height:100vh; }
+
+.panel {
+  position:absolute;
+  top:10px;
+  left:10px;
+  background:white;
+  padding:10px;
+  border-radius:8px;
+  z-index:999;
+  width:220px;
+}
+
+button {
+  width:100%;
+  margin:5px 0;
+  padding:8px;
+  background:#1e88e5;
+  color:white;
+  border:none;
+}
+</style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+
+<body>
+
+<div class="panel">
+  <h3>Cristal Water</h3>
+
+  <button onclick="loadPools()">Todas as Piscinas</button>
+  <button onclick="loadNearby()">Perto de mim</button>
+  <button onclick="loadRoute()">Rota do dia</button>
+
+  <button onclick="openGoogle()">Abrir no Google Maps</button>
+  <button onclick="openWaze()">Abrir no Waze</button>
+</div>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="/admin-map.js"></script>
+
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script src="/cw-admin-shortcuts.js"></script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

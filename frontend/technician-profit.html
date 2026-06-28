@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+<meta charset="UTF-8">
+<title>Lucro por Técnico</title>
+
+<style>
+body {
+  font-family: Arial;
+  padding:20px;
+  background:#f4f6f8;
+}
+
+.card {
+  background:white;
+  padding:15px;
+  margin-bottom:10px;
+  border-radius:10px;
+  box-shadow:0 3px 8px rgba(0,0,0,0.1);
+}
+
+.title {
+  font-size:18px;
+  font-weight:bold;
+}
+</style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+
+<body>
+
+<h2>Lucro por Técnico</h2>
+
+<div id="list"></div>
+
+<script>
+const API = "/api";
+
+async function load(){
+
+  const res = await fetch(`${API}/billing/technician-profit`);
+  const data = await res.json();
+
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  if(!data.ok) return;
+
+  data.ranking.forEach((t,i)=>{
+
+    list.innerHTML += `
+      <div class="card">
+        <div class="title">
+          #${i+1} - ${t.technician}
+        </div>
+        €${t.total.toFixed(2)}
+      </div>
+    `;
+  });
+}
+
+load();
+</script>
+
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

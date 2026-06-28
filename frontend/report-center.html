@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <title>Cristal Water - Centro de Relatórios</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #eef3f8;
+      color: #1f2937;
+    }
+
+    header {
+      background: #ffffff;
+      border-bottom: 3px solid #1e88e5;
+      padding: 18px 20px;
+    }
+
+    header h1 {
+      margin: 0;
+      color: #1e88e5;
+    }
+
+    main {
+      padding: 20px;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 16px;
+      max-width: 600px;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      box-sizing: border-box;
+    }
+
+    button {
+      background: #1e88e5;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+<body>
+
+<header>
+  <h1>Centro de Relatórios</h1>
+</header>
+
+<main>
+  <div class="card">
+    <label>Mês</label>
+    <input type="month" id="monthRef">
+
+    <label>Tipo</label>
+    <select id="onlyRequiresInvoice">
+      <option value="false">Todos os clientes</option>
+      <option value="true">Só clientes que requerem fatura</option>
+    </select>
+
+    <button onclick="openPrintableReport()">Abrir relatório para imprimir / PDF</button>
+  </div>
+</main>
+
+<script>
+  function getCurrentMonthRef() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, "0");
+    return `${y}-${m}`;
+  }
+
+  document.getElementById("monthRef").value = getCurrentMonthRef();
+
+  function openPrintableReport() {
+    const monthRef = document.getElementById("monthRef").value;
+    const onlyRequiresInvoice = document.getElementById("onlyRequiresInvoice").value;
+
+    const url =
+      `/api/reports/monthly-print?monthRef=${encodeURIComponent(monthRef)}&onlyRequiresInvoice=${encodeURIComponent(onlyRequiresInvoice)}`;
+
+    window.open(url, "_blank");
+  }
+</script>
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

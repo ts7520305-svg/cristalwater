@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+  <meta charset="UTF-8" />
+  <title>Admin Relatórios</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #f4f6f8;
+      padding: 20px;
+    }
+
+    h1 { margin-top: 0; }
+
+    .topbar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      padding: 10px;
+      background: #2563eb;
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .panel {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+  </style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+
+<body>
+
+<h1>Relatórios</h1>
+
+<div class="topbar">
+  <a class="btn" href="/admin-dashboard.html">🏠 Dashboard</a>
+  <a class="btn" href="/admin-clients.html">👥 Clientes</a>
+</div>
+
+<div class="panel">
+  <h3>📊 Financeiro</h3>
+  <div id="financial"></div>
+</div>
+
+<div class="panel">
+  <h3>💬 Comunicações</h3>
+  <div id="communications"></div>
+</div>
+
+<script src="/admin-reports.js"></script>
+
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script src="/cw-admin-shortcuts.js"></script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

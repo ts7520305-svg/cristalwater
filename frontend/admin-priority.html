@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+<meta charset="UTF-8">
+<title>Admin - Prioridades</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  font-family: Arial;
+  background:#f4f6f8;
+  padding:20px;
+}
+
+h2 {
+  margin-bottom:20px;
+}
+
+.card {
+  background:white;
+  padding:15px;
+  margin-bottom:10px;
+  border-radius:10px;
+  box-shadow:0 3px 8px rgba(0,0,0,0.1);
+}
+
+select {
+  padding:6px;
+  margin-top:10px;
+}
+</style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+
+<body>
+
+<h2>Prioridade das Piscinas</h2>
+
+<div id="list"></div>
+
+<script>
+const API = "/api";
+
+// ==========================================================
+// LOAD
+// ==========================================================
+
+async function load(){
+
+  const res = await fetch(`${API}/pools`);
+  const pools = await res.json();
+
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  pools.forEach(p => {
+
+    list.innerHTML += `
+      <div class="card">
+        <b>${p.name}</b><br>
+        Cliente: ${p.client?.name || "-"}
+
+        <br><br>
+
+        Prioridade:
+        <select onchange="save(${p.id}, this.value)">
+          <option value="0" ${p.priority==0?"selected":""}>Normal</option>
+          <option value="1" ${p.priority==1?"selected":""}>Alta</option>
+          <option value="2" ${p.priority==2?"selected":""}>Urgente</option>
+        </select>
+      </div>
+    `;
+  });
+}
+
+// ==========================================================
+// SAVE
+// ==========================================================
+
+async function save(id, priority){
+
+  await fetch(`${API}/pools/priority/${id}`,{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ priority: Number(priority) })
+  });
+
+  console.log("✔ prioridade atualizada:", id, priority);
+}
+
+load();
+</script>
+
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script src="/cw-admin-shortcuts.js"></script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

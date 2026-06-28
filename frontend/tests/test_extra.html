@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Teste Visita Extra</title>
+</head>
+<body>
+
+<h2>Criar Visita Extra</h2>
+
+<button onclick="criar()">Criar visita extra para hoje</button>
+
+<script>
+async function criar() {
+  const hoje = new Date().toISOString().split("T")[0];
+
+  const res = await fetch("/api/extra-visits", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      poolId: 1,
+      scheduledAt: hoje,
+      notes: "Teste rápido",
+      billingMode: "EXTRA",
+      unitPrice: 20
+    })
+  });
+
+  const data = await res.json();
+  console.log(data);
+
+  alert("Visita extra criada!");
+}
+</script>
+
+</body>
+</html>

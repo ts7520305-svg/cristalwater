@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#050b16">
+  <title>Cristal Water - Alertas</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <script src="/cw-auth.js"></script>
+  <link rel="stylesheet" href="/cw-polish.css">
+  <link rel="stylesheet" href="/cristal-assist.css">
+  <style>
+    :root{--bg:#06111f;--panel:#0d1d31;--panel2:#10243c;--line:#24415f;--txt:#e9f5ff;--muted:#8fb1cc;--brand:#35d1ff;--ok:#40e6a0;--warn:#ffd166;--bad:#ff6b6b;--input:#091829}
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(120deg,#06111f,#0b1f33 55%,#06111f);color:var(--txt);font-family:Inter,Segoe UI,Arial,sans-serif}
+    main.page{max-width:1450px;margin:0 auto;padding:24px}
+    .page-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px}
+    .page-head h1{margin:0;font-size:30px}
+    .page-head p{margin:6px 0 0;color:var(--muted)}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    .btn,button{border:0;border-radius:14px;padding:12px 16px;background:#163354;color:var(--txt);font-weight:800;cursor:pointer;text-decoration:none}
+    button.primary,.btn.primary{background:linear-gradient(135deg,#0584c7,#35d1ff);color:#03121c}
+    .grid{display:grid;gap:14px}
+    .metrics{grid-template-columns:repeat(5,minmax(140px,1fr));margin-bottom:16px}
+    .metric-card{background:rgba(13,29,49,.92);border:1px solid var(--line);border-radius:18px;padding:16px}
+    .metric-card strong{display:block;font-size:30px;line-height:1}
+    .metric-card span{display:block;color:var(--muted);font-size:13px;margin-top:8px}
+    .panel{background:rgba(13,29,49,.92);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.22)}
+    .toolbar{display:grid;grid-template-columns:1.5fr repeat(2,minmax(170px,1fr)) auto auto;gap:10px;align-items:center}
+    input,select{width:100%;background:var(--input);color:var(--txt);border:1px solid var(--line);border-radius:14px;padding:12px}
+    .alerts-status{border:1px solid rgba(53,217,255,.22);background:rgba(53,217,255,.08);padding:12px;border-radius:16px;color:#cfe9ff;margin:14px 0}
+    .alerts-status.error{border-color:rgba(255,107,107,.42);background:rgba(255,107,107,.12)}
+    .alerts-status.ok{border-color:rgba(64,230,160,.35);background:rgba(64,230,160,.1)}
+    .summary-line{display:flex;justify-content:space-between;align-items:center;gap:12px;color:#bfe4ff;font-size:13px;margin:12px 0}
+    .alerts-list{display:grid;gap:12px}
+    .alert-card{display:grid;grid-template-columns:1fr auto;gap:16px;background:#0a1b2e;border:1px solid var(--line);border-radius:18px;padding:16px}
+    .alert-card.priority-critical{border-color:rgba(255,107,107,.55);background:linear-gradient(135deg,rgba(255,107,107,.12),#0a1b2e 45%)}
+    .alert-card.priority-warning{border-color:rgba(255,209,102,.42);background:linear-gradient(135deg,rgba(255,209,102,.1),#0a1b2e 45%)}
+    .alert-card h3{margin:8px 0 6px;font-size:18px}
+    .alert-card p{margin:0;color:#d7edff;line-height:1.45}
+    .alert-topline,.alert-meta,.alert-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .alert-source,.alert-priority,.alert-status{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;padding:5px 9px;color:#bfe4ff;background:#071728;font-size:12px}
+    .alert-priority{border-color:rgba(53,217,255,.3)}
+    .priority-critical .alert-priority{border-color:rgba(255,107,107,.5);color:#ffd7dd;background:rgba(255,107,107,.12)}
+    .priority-warning .alert-priority{border-color:rgba(255,209,102,.5);color:#fff0c2;background:rgba(255,209,102,.1)}
+    .alert-meta{margin-top:12px;color:#9fc6df;font-size:13px}
+    .alert-meta .missing{color:#ffd166}
+    .alert-actions{align-content:flex-start;justify-content:flex-end;min-width:150px}
+    .alert-actions .note{background:#1f4f7a}
+    .alert-actions .resolve{background:linear-gradient(135deg,#0c9f69,#40e6a0);color:#02150d}
+    .alert-detail{margin-top:12px;padding:12px;border:1px solid rgba(143,177,204,.18);border-radius:14px;background:rgba(4,13,24,.42);display:grid;gap:9px}
+    .alert-detail.empty{color:#9fc6df;font-size:13px}
+    .detail-row{display:grid;grid-template-columns:minmax(120px,.24fr) 1fr;gap:10px;color:#cfe9ff;line-height:1.35}
+    .detail-row b{color:#9fc6df}
+    .detail-row.compact{font-size:13px}
+    .alert-readings{display:flex;gap:8px;flex-wrap:wrap}
+    .alert-readings span{border:1px solid rgba(53,217,255,.24);background:rgba(53,217,255,.08);border-radius:999px;padding:6px 9px;color:#d7f6ff;font-size:12px}
+    .alert-media{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .alert-media img{width:86px;height:64px;object-fit:cover;border-radius:10px;border:1px solid rgba(143,177,204,.32);background:#071728}
+    .attachment-link{display:inline-flex;align-items:center;min-height:34px;padding:8px 10px;border-radius:10px;background:#10243c;border:1px solid var(--line);color:#cfe9ff;text-decoration:none;font-weight:800;font-size:12px}
+    .empty-alerts{border:1px dashed var(--line);border-radius:18px;padding:18px;color:#bfe4ff;background:rgba(10,27,46,.72)}
+    .empty-alerts strong{display:block;color:var(--txt);font-size:18px;margin-bottom:6px}
+    @media(max-width:1100px){main.page{padding:14px}.metrics,.toolbar{grid-template-columns:1fr 1fr}.alert-card{grid-template-columns:1fr}.alert-actions{justify-content:flex-start}}
+    @media(max-width:700px){.metrics,.toolbar,.detail-row{grid-template-columns:1fr}.page-head{flex-direction:column}}
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="page-head">
+      <div>
+        <h1>Alertas</h1>
+        <p>Problemas tecnicos, visitas impedidas, pedidos de stock, agua aberta e avisos criticos.</p>
+      </div>
+      <div class="actions">
+        <a class="btn" href="/admin-master-control">Centro de Operacoes</a>
+        <button id="refreshAlerts" class="primary" type="button">Atualizar</button>
+      </div>
+    </div>
+
+    <section class="grid metrics">
+      <div class="metric-card"><strong id="alertsTotal">0</strong><span>Total visivel</span></div>
+      <div class="metric-card"><strong id="alertsCritical">0</strong><span>Criticos</span></div>
+      <div class="metric-card"><strong id="alertsTechnical">0</strong><span>Alertas tecnicos</span></div>
+      <div class="metric-card"><strong id="alertsVisits">0</strong><span>Visitas com problema</span></div>
+      <div class="metric-card"><strong id="alertsNotifications">0</strong><span>Notificacoes</span></div>
+    </section>
+
+    <section class="panel">
+      <div class="toolbar">
+        <input id="alertSearch" placeholder="Pesquisar por cliente, piscina, tecnico, tipo ou texto do alerta">
+        <select id="alertPriorityFilter">
+          <option value="">Todas as prioridades</option>
+          <option value="CRITICAL">Criticos</option>
+          <option value="WARNING">Atencao</option>
+          <option value="NORMAL">Normal</option>
+          <option value="LOW">Baixo</option>
+        </select>
+        <select id="alertSourceFilter">
+          <option value="">Todas as origens</option>
+          <option value="technical">Alertas tecnicos</option>
+          <option value="visit">Visitas</option>
+          <option value="notification">Notificacoes</option>
+          <option value="generic">Sistema</option>
+        </select>
+        <button id="clearAlertFilters" type="button">Limpar</button>
+      </div>
+
+      <div id="alertsStatus" class="alerts-status">A carregar alertas...</div>
+      <div class="summary-line"><span id="alertsSummary">0 alerta(s)</span></div>
+      <div id="alertsList" class="alerts-list"></div>
+    </section>
+  </main>
+
+  <script src="/admin-auth-guard.js"></script>
+  <script src="/admin-alerts.js?v=22.6.9-alert-context"></script>
+  <script src="/cristal-help-data.js"></script>
+  <script src="/cristal-assist.js"></script>
+  <script src="/cw-admin-shortcuts.js"></script>
+  <script src="/cw-flow-shell.js"></script>
+</body>
+</html>

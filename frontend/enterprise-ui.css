@@ -1,0 +1,7 @@
+/* Cristal Water Enterprise compatibility stylesheet */
+:root{--cw-bg:#06131f;--cw-card:#0b2033;--cw-text:#eaf7ff;--cw-muted:#9bb4c7;--cw-accent:#2ed3ff;--cw-border:rgba(255,255,255,.12)}
+body{background:var(--cw-bg);color:var(--cw-text)}
+.card,.panel,.cw-card{background:var(--cw-card);border:1px solid var(--cw-border);border-radius:18px;color:var(--cw-text)}
+.metric-value,.kpi-value,.amount,.number{color:var(--cw-text)!important}
+.muted,.label{color:var(--cw-muted)!important}
+a{color:var(--cw-accent)}

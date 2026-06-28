@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cristal Water - Faturas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 16px;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      color: #1f2937;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 0 0 18px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: end;
+      justify-content: center;
+      margin-bottom: 18px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 180px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: bold;
+      color: #374151;
+    }
+
+    input {
+      padding: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 15px;
+      background: #fff;
+    }
+
+    select {
+      padding: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 15px;
+      background: #fff;
+    }
+
+    button {
+      padding: 10px 14px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .btn-blue {
+      background: #2563eb;
+      color: #fff;
+    }
+
+    .btn-green {
+      background: #16a34a;
+      color: #fff;
+    }
+
+    .btn-gray {
+      background: #6b7280;
+      color: #fff;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .card-title {
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    .card-value {
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .invoice-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border-left: 6px solid #2563eb;
+    }
+
+    .invoice-card.overdue {
+      border-left-color: #dc2626;
+      background: #fff7f7;
+    }
+
+    .invoice-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .invoice-title {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .invoice-amount {
+      font-size: 24px;
+      font-weight: bold;
+      color: #065f46;
+    }
+
+    .meta {
+      font-size: 14px;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .invoice-badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1;
+      margin-right: 6px;
+      margin-bottom: 6px;
+      letter-spacing: .02em;
+      border: 1px solid transparent;
+      box-shadow: 0 2px 8px rgba(0,0,0,.12);
+    }
+
+    .invoice-badge.pending {
+      background: #92400e !important;
+      color: #ffffff !important;
+      border-color: #f59e0b !important;
+    }
+
+    .invoice-badge.overdue {
+      background: #991b1b !important;
+      color: #ffffff !important;
+      border-color: #f87171 !important;
+    }
+
+    .invoice-badge.paid {
+      background: #166534 !important;
+      color: #ffffff !important;
+      border-color: #22c55e !important;
+    }
+
+    .invoice-badge.partial {
+      background: #581c87 !important;
+      color: #ffffff !important;
+      border-color: #a78bfa !important;
+    }
+
+    .invoice-badge.cancelled {
+      background: #334155 !important;
+      color: #ffffff !important;
+      border-color: #94a3b8 !important;
+    }
+
+    .invoice-badge.month {
+      background: #075985 !important;
+      color: #ffffff !important;
+      border-color: #38bdf8 !important;
+    }
+
+    .empty-box {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      color: #6b7280;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .status-box {
+      margin-bottom: 14px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      padding: 12px;
+      border-radius: 10px;
+      display: none;
+      white-space: pre-line;
+    }
+  </style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+<body>
+
+  <h1>Faturas</h1>
+
+  <div id="statusBox" class="status-box"></div>
+
+  <div class="toolbar">
+    <div class="field">
+      <label for="clientIdInput">Cliente ID</label>
+      <input type="number" id="clientIdInput" placeholder="Ex: 1" />
+    </div>
+
+    <div class="field">
+      <label for="statusFilter">Filtro</label>
+      <select id="statusFilter" onchange="setInvoiceStatusFilter(this.value)">
+        <option value="all">Todas</option>
+        <option value="overdue">Em atraso / devedores</option>
+        <option value="pending">Pendentes</option>
+        <option value="paid">Pagas</option>
+      </select>
+    </div>
+
+    <button class="btn-green" onclick="generateInvoiceForClient()">Gerar fatura do cliente</button>
+    <button class="btn-blue" onclick="loadInvoices()">Atualizar lista</button>
+  </div>
+
+  <div class="summary">
+    <div class="card">
+      <div class="card-title">Total de faturas</div>
+      <div class="card-value" id="sumInvoices">0</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Pendentes</div>
+      <div class="card-value" id="sumPending">0</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Total global</div>
+      <div class="card-value" id="sumAmount">0.00 €</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Em aberto / atraso</div>
+      <div class="card-value" id="sumOpen">0.00 EUR</div>
+    </div>
+  </div>
+
+  <div id="invoiceList" class="list">
+    <div class="empty-box">A carregar...</div>
+  </div>
+
+  <script src="/invoices.js"></script>
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

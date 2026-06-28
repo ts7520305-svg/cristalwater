@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+  <meta charset="utf-8">
+  <title>Cristal Water - Histórico Técnico</title>
+
+  <!-- 🔐 Proteção -->
+  <script src="/client-auth-guard.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #e3f2fd;
+      color: #1f2933;
+    }
+
+    header {
+      background: white;
+      border-bottom: 3px solid #1e88e5;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    header img {
+      height: 70px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 26px;
+      color: #1e88e5;
+    }
+
+    header p {
+      margin: 4px 0 0 0;
+      color: #555;
+      font-size: 14px;
+    }
+
+    main {
+      padding: 25px;
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    .intro {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      margin-bottom: 25px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .pool {
+      background: white;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .pool h3 {
+      margin-top: 0;
+      color: #1e88e5;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f5faff;
+      text-align: left;
+      color: #1e88e5;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      font-size: 12px;
+      color: #555;
+    }
+  </style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+
+<body>
+
+<header>
+  <img src="/logo.png" alt="Cristal Water">
+  <div>
+    <h1>Histórico Técnico</h1>
+    <p>Registo das manutenções realizadas</p>
+  </div>
+</header>
+
+<main>
+
+  <div class="intro">
+    Nesta área pode consultar o histórico das manutenções realizadas na(s) sua(s) piscina(s).
+    Aqui encontrará a data, hora, estado do serviço e observações deixadas pelo técnico.
+  </div>
+
+  <div id="content">
+    A carregar histórico…
+  </div>
+
+</main>
+
+<footer>
+  © Cristal Water · Swimming Pools
+</footer>
+
+<script src="/client-history.js"></script>
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

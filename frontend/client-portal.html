@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#06231f">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/cw-polish.css">
+  <script src="/cw-auth.js"></script>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <title>Cristal Water LDA - Portal Cliente</title>
+  <style>
+    :root{--bg:#07150f;--bg2:#0a2531;--panel:#f7fbfc;--panel2:#ffffff;--ink:#10202a;--muted:#5f7480;--line:#dbe9ee;--brand:#0087a8;--ok:#008a62;--warn:#a86400;--bad:#b42338;--soft:#e9f7f4;--shadow:0 18px 48px rgba(2,30,42,.16)}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:linear-gradient(135deg,#dff7f3 0,#edf8ff 42%,#f8fbff 100%);color:var(--ink);font-family:Inter,Segoe UI,Arial,sans-serif}a{color:inherit}.portal{width:min(1180px,100%);margin:0 auto;padding:18px}.top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px}.brand{display:flex;align-items:center;gap:12px}.brand-logo{width:54px;height:54px;border-radius:12px;background:#fff;object-fit:cover;border:1px solid var(--line);box-shadow:0 12px 30px rgba(0,135,168,.16)}.brand h1{font-size:21px;margin:0}.brand small{color:var(--muted);font-weight:700}.btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:12px;padding:11px 14px;font-weight:900;text-decoration:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px}.btn.primary{background:linear-gradient(135deg,#007fa0,#00b78a);border-color:transparent;color:#fff}.btn.danger{background:#fff5f6;color:var(--bad);border-color:#ffd4da}.hero{display:grid;grid-template-columns:1.25fr .75fr;gap:14px;margin-bottom:14px}.panel{background:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.9);border-radius:8px;padding:18px;box-shadow:var(--shadow)}.hero-main{background:linear-gradient(135deg,#ffffff,#ebfbf8);border-color:#cdeee8}.status{display:inline-flex;align-items:center;gap:8px;border:1px solid #bde7dc;background:var(--soft);color:var(--ok);border-radius:999px;padding:7px 11px;font-weight:900;font-size:13px}.status.delayed,.status.afterHours{border-color:#ffd79b;background:#fff8eb;color:var(--warn)}.hero h2{font-size:30px;line-height:1.08;margin:12px 0 8px}.muted{color:var(--muted);line-height:1.45}.grid{display:grid;gap:12px}.metrics{grid-template-columns:repeat(3,1fr);margin-top:16px}.metric{background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px}.metric b{display:block;font-size:25px;line-height:1;color:#07384a}.metric span{display:block;margin-top:6px;color:var(--muted);font-size:13px}.split{display:grid;grid-template-columns:1fr 1fr;gap:14px}.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:10px}.section-head h2{margin:0;font-size:19px}.list{display:grid;gap:10px}.item{background:#fff;border:1px solid var(--line);border-radius:8px;padding:13px}.item b{display:block;margin-bottom:4px}.pill{display:inline-flex;border-radius:999px;border:1px solid var(--line);background:#f5fafb;color:#45606f;padding:5px 9px;font-weight:800;font-size:12px}.schedule-panel{margin-bottom:14px}.schedule-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.schedule-item{background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px;display:grid;gap:10px;min-height:154px}.schedule-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.schedule-title{font-weight:950;font-size:18px;color:#092f3d}.schedule-date{font-size:22px;font-weight:950;color:#07384a}.schedule-message{color:var(--muted);line-height:1.45}.schedule-item.delayed,.schedule-item.afterHours{border-color:#ffd79b;background:#fffaf1}.schedule-item.inProgress{border-color:#aee8ff;background:#eefaff}.schedule-item.completed{border-color:#bce6d3;background:#f0fbf6}.schedule-item.noSchedule{border-style:dashed}.chat-box{height:330px;overflow:auto;background:#f6fafb;border:1px solid var(--line);border-radius:8px;padding:12px}.msg{max-width:86%;padding:10px 12px;border-radius:8px;margin:8px 0;background:#fff;border:1px solid var(--line)}.msg.admin{border-color:#b9e4ef;background:#eefaff}.msg.client{margin-left:auto;text-align:right;background:#eaf8f1;border-color:#bce6d3}.chat-input{display:grid;grid-template-columns:1fr auto auto;gap:8px;margin-top:10px}.chat-input input[type=text]{width:100%;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:12px;padding:13px;font-size:15px}.empty{border:1px dashed #bdd3dc;background:#f8fbfc;color:var(--muted);border-radius:8px;padding:14px}.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.payment-reference-card{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px;display:grid;gap:10px}.payment-reference-code{font-size:25px;font-weight:950;letter-spacing:.06em;color:#07384a}.payment-reference-card .hint{color:var(--muted);font-size:13px;line-height:1.45}.payment-notice-form{display:grid;gap:8px}.payment-notice-form input,.payment-notice-form select{width:100%;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:12px;padding:11px;font-size:14px}.payment-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}@media(max-width:850px){.hero,.split,.metrics,.schedule-grid{grid-template-columns:1fr}.portal{padding:14px}.top{align-items:flex-start;flex-direction:column}.top .btn{width:100%}.quick-actions,.chat-input,.payment-actions{grid-template-columns:1fr}.hero h2{font-size:25px}.panel{padding:15px}.schedule-date{font-size:19px}}
+    .service-item,.invoice-item{background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px;display:grid;gap:10px}.service-head,.invoice-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.service-title,.invoice-title{font-weight:950;color:#092f3d}.readings,.checklist,.products,.invoice-lines{display:flex;gap:8px;flex-wrap:wrap}.mini{border:1px solid var(--line);background:#f5fafb;border-radius:999px;padding:5px 9px;font-size:12px;color:#45606f;font-weight:800}.photo-strip{display:flex;gap:8px;overflow:auto}.photo-strip img{width:92px;height:68px;object-fit:cover;border-radius:8px;border:1px solid var(--line);background:#f5fafb}.invoice-total{font-size:20px;font-weight:950;color:#07384a;text-align:right}.invoice-item.overdue,.invoice-item.partial,.invoice-item.pending{border-color:#ffd79b;background:#fffaf1}.invoice-item.paid{border-color:#bce6d3;background:#f0fbf6}.payment-help{margin-top:12px;border:1px solid #c9e4ed;background:#f5fbfd;border-radius:8px;padding:12px;color:#45606f;font-size:13px;line-height:1.45}.payment-help b{display:block;color:#07384a;margin-bottom:4px}.service-history-tools{display:grid;grid-template-columns:1.3fr 1fr 1fr auto auto;gap:8px;margin:8px 0 12px}.service-history-tools[hidden]{display:none}.service-history-tools input,.service-history-tools select{width:100%;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:12px;padding:11px;font-size:14px;min-height:42px}.service-history-summary{color:var(--muted);font-size:13px;margin:-2px 0 10px}.service-history-summary[hidden]{display:none}.service-group{display:grid;gap:10px}.service-group-head{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#edf8fb;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-weight:950;color:#07384a}@media(max-width:850px){.service-head,.invoice-head{display:block}.invoice-total{text-align:left;margin-top:8px}.service-history-tools{grid-template-columns:1fr}.service-history-tools .btn{width:100%}}
+    .btn[aria-disabled="true"]{opacity:.58;filter:grayscale(.25);cursor:not-allowed;background:#eef3f6;color:#6a7c86;border-color:#d4e1e6}
+    .client-focus{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:16px}.client-focus-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:13px;display:grid;gap:7px;min-height:116px}.client-focus-card span{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:#607885;font-weight:950}.client-focus-card b{font-size:18px;color:#07384a;line-height:1.15}.client-focus-card small{color:var(--muted);line-height:1.35}.client-focus-card.ok{border-color:#bce6d3;background:#f0fbf6}.client-focus-card.warn{border-color:#ffd79b;background:#fffaf1}.client-focus-card.info{border-color:#b9e4ef;background:#eefaff}@media(max-width:850px){.client-focus{grid-template-columns:1fr 1fr}}@media(max-width:520px){.client-focus{grid-template-columns:1fr}}
+    .admin-client-switcher{display:grid;gap:12px;margin-bottom:14px;background:#0e2c3a;color:#eefbff;border-color:#1e7893;box-shadow:0 18px 48px rgba(2,30,42,.22)}.admin-client-switcher[hidden]{display:none}.admin-client-switcher .section-head h2{color:#fff}.admin-client-switcher .muted{color:#bfe1ea}.admin-client-tools{display:grid;grid-template-columns:minmax(180px,1fr) minmax(240px,1.5fr) auto auto;gap:10px;align-items:center}.admin-client-tools input,.admin-client-tools select{width:100%;border:1px solid rgba(255,255,255,.22);background:#071f29;color:#fff;border-radius:12px;padding:12px;font-size:15px;min-height:46px}.admin-client-tools option{color:#10202a}.admin-client-meta{display:flex;gap:8px;flex-wrap:wrap}.admin-client-meta .pill{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#e8fbff}@media(max-width:850px){.admin-client-tools{grid-template-columns:1fr}.admin-client-tools .btn{width:100%}}
+  </style>
+</head>
+<body>
+  <main class="portal" data-cw-no-i18n>
+    <header class="top">
+      <div class="brand">
+        <img class="brand-logo" src="/logo-cristalwater.png" alt="Cristal Water">
+        <div>
+          <h1>Cristal Water LDA</h1>
+          <small id="brandPortalLabel">Portal do Cliente</small>
+        </div>
+      </div>
+      <button class="btn danger" id="portalLogoutBtn" onclick="logout()">Sair</button>
+    </header>
+
+    <section class="panel admin-client-switcher" id="adminClientSwitcher" hidden>
+      <div class="section-head">
+        <div>
+          <h2 id="adminSwitcherTitle">Ver portal de cliente</h2>
+          <div class="muted">Área de administrador. Escolha o cliente para confirmar agenda, serviços, mensagens e conta corrente.</div>
+        </div>
+        <span class="pill" id="adminSwitcherBadge">Admin</span>
+      </div>
+      <div class="admin-client-tools">
+        <input id="adminClientSearch" placeholder="Pesquisar por nome, telefone, email, zona ou referência">
+        <select id="adminClientSelect" aria-label="Escolher cliente">
+          <option value="">Escolher cliente...</option>
+        </select>
+        <a class="btn" id="adminOpenClientFile" href="/admin-clients">Ficha cliente</a>
+        <a class="btn" id="adminOpenAccount" href="/invoices">Conta corrente</a>
+      </div>
+      <div class="admin-client-meta" id="adminClientMeta"></div>
+    </section>
+
+    <section class="hero">
+      <div class="panel hero-main">
+        <span class="status" id="useStatus">A carregar estado...</span>
+        <h2 id="clientName">Cliente</h2>
+        <p class="muted" id="portalIntro">Acompanhe visitas, piscinas, mensagens e pagamentos num painel simples e transparente.</p>
+        <div class="metrics">
+          <div class="metric"><b id="poolCount">0</b><span id="poolCountLabel">Piscinas / jacuzzis</span></div>
+          <div class="metric"><b id="paymentState">-</b><span id="paymentStateLabel">Estado financeiro</span></div>
+          <div class="metric"><b id="nextVisit">-</b><span id="nextVisitLabel">Proxima visita</span></div>
+        </div>
+        <div class="client-focus" id="clientFocusPanel">
+          <div class="client-focus-card info"><span>Agenda</span><b>A confirmar</b><small>Proxima manutencao</small></div>
+          <div class="client-focus-card"><span>Conta</span><b>-</b><small>Estado financeiro</small></div>
+          <div class="client-focus-card"><span>Servicos</span><b>0</b><small>Historico autorizado</small></div>
+          <div class="client-focus-card info"><span>Contacto</span><b>Mensagem</b><small>Administracao privada</small></div>
+        </div>
+      </div>
+      <aside class="panel">
+        <div class="section-head"><h2 id="quickAccessTitle">Acesso rapido</h2><span class="pill" id="quickAccessRole">Cliente</span></div>
+        <div class="quick-actions">
+          <a class="btn primary" id="quickMessageLink" href="#mensagens">Mensagem</a>
+          <a class="btn" id="quickAgendaLink" href="#agenda">Agenda</a>
+          <a class="btn" id="quickServicesLink" href="#servicos">Servicos</a>
+          <a class="btn" id="quickPaymentsLink" href="#faturacao">Pagamentos</a>
+        </div>
+        <div class="payment-reference-card" id="paymentReferenceCard">
+          <span class="pill" id="paymentReferenceLabel">Referencia de pagamento</span>
+          <div class="payment-reference-code" id="paymentReference">CW-000000</div>
+          <div class="hint" id="paymentInstructions">Ao pagar, indique sempre esta referencia.</div>
+          <div class="payment-notice-form">
+            <input id="paymentNoticeAmount" type="number" min="0" step="0.01" placeholder="Valor pago / transferido">
+            <select id="paymentNoticeMethod">
+              <option value="Transferencia">Transferencia</option>
+              <option value="MBWay">MBWay</option>
+              <option value="Dinheiro">Dinheiro</option>
+              <option value="Multibanco">Multibanco</option>
+              <option value="Outro">Outro</option>
+            </select>
+            <input id="paymentNoticeNote" placeholder="Nota ou referencia do comprovativo">
+            <div class="payment-actions">
+              <button class="btn primary" id="paymentNoticeBtn" type="button">Avisar pagamento</button>
+              <a class="btn" id="paymentWhatsappLink" target="_blank" rel="noopener">WhatsApp</a>
+            </div>
+          </div>
+        </div>
+        <div class="payment-help" id="paymentHelpText"><b>Instrucoes de pagamento:</b>Use sempre a referencia acima no pagamento. Depois clique em Avisar pagamento ou envie WhatsApp com a referencia e o comprovativo. Se nao conseguir usar o portal, contacte a Cristal Water para registarmos manualmente.</div>
+      </aside>
+    </section>
+
+    <section class="panel schedule-panel" id="agenda">
+      <div class="section-head"><h2 id="scheduleTitle">Agendamento das piscinas</h2><span class="pill" id="scheduleLang">PT</span></div>
+      <div class="schedule-grid" id="poolScheduleList"><div class="empty">A carregar agendamento...</div></div>
+    </section>
+
+    <section class="split">
+      <section class="panel" id="piscinas">
+        <div class="section-head"><h2 id="poolsTitle">Piscinas</h2><span class="pill" id="poolsPill">Manutencao</span></div>
+        <div class="list" id="poolsList"><div class="empty">A carregar piscinas...</div></div>
+      </section>
+      <section class="panel" id="resumo">
+        <div class="section-head"><h2 id="summaryTitle">Resumo transparente</h2><span class="pill" id="summaryPill">Conta</span></div>
+        <div class="list" id="summaryList"><div class="empty">A carregar resumo...</div></div>
+      </section>
+    </section>
+
+    <section class="split" style="margin-top:14px">
+      <section class="panel" id="servicos">
+        <div class="section-head"><h2 id="servicesTitle">Servicos feitos</h2><span class="pill" id="servicesPill">Historico</span></div>
+        <div class="service-history-tools" id="serviceHistoryTools" hidden>
+          <input id="serviceHistorySearch" placeholder="Pesquisar por piscina, tecnico, produto ou nota">
+          <select id="serviceHistoryPool" aria-label="Piscina">
+            <option value="">Todas as piscinas</option>
+          </select>
+          <select id="serviceHistoryPeriod" aria-label="Periodo">
+            <option value="all">Todos</option>
+            <option value="day">Dia</option>
+            <option value="week">Semana</option>
+            <option value="month">Mes</option>
+            <option value="year">Ano</option>
+          </select>
+          <input id="serviceHistoryDate" type="date" aria-label="Data de referencia">
+          <button class="btn" id="serviceHistoryDownload" type="button">Download</button>
+        </div>
+        <div class="service-history-summary" id="serviceHistorySummary" hidden></div>
+        <div class="list" id="serviceHistoryList"><div class="empty">A carregar servicos...</div></div>
+      </section>
+      <section class="panel" id="faturacao">
+        <div class="section-head"><h2 id="billingTitle">Faturacao e pagamentos</h2><span class="pill" id="billingPill">Conta</span></div>
+        <div class="list" id="invoiceList"><div class="empty">A carregar faturacao...</div></div>
+      </section>
+    </section>
+
+    <section class="panel" id="mensagens" style="margin-top:14px">
+      <div class="section-head"><h2 id="messagesTitle">Mensagens com a administracao</h2><span class="pill" id="adminStatusText">A verificar</span></div>
+      <div class="chat-box" id="chatBox"></div>
+      <div id="typing" class="muted" style="min-height:20px;margin-top:6px"></div>
+      <div class="chat-input">
+        <input type="text" id="messageInput" placeholder="Escreva a sua mensagem...">
+        <input type="file" id="photoInput" accept="image/*" hidden>
+        <button class="btn" id="photoBtn" type="button">Anexo</button>
+        <button class="btn primary" id="sendBtn" type="button">Enviar</button>
+      </div>
+    </section>
+  </main>
+  <script src="/client-portal.js"></script>
+  <script src="/cw-flow-shell.js"></script>
+</body>
+</html>

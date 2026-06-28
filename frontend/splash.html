@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>Cristal Water</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1e88e5">
+
+<style>
+body {
+  margin:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  background:#1e88e5;
+  color:white;
+  font-family:Arial;
+  flex-direction:column;
+  transition:opacity 0.4s ease;
+}
+
+.logo {
+  font-size:28px;
+  font-weight:bold;
+  margin-bottom:20px;
+}
+
+.loader {
+  border:4px solid rgba(255,255,255,0.3);
+  border-top:4px solid white;
+  border-radius:50%;
+  width:40px;
+  height:40px;
+  animation:spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0%{ transform:rotate(0deg); }
+  100%{ transform:rotate(360deg); }
+}
+</style>
+
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+</head>
+
+<body>
+
+<div class="logo">💧 Cristal Water</div>
+<div class="loader"></div>
+
+<script>
+
+// ======================================================
+// SPLASH → REDIRECT
+// ======================================================
+
+setTimeout(() => {
+
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const token = localStorage.getItem("token");
+
+  if (!user.id || !token) {
+    redirect("/login");
+    return;
+  }
+
+  if (user.role === "admin") {
+    redirect("/dashboard");
+  } 
+  else if (user.role === "tecnico") {
+    redirect("/technician");
+  } 
+  else {
+    redirect("/login");
+  }
+
+}, 1200);
+
+// ======================================================
+
+function redirect(url){
+  document.body.style.opacity = "0";
+  setTimeout(() => {
+    window.location.href = url;
+  }, 300);
+}
+
+</script>
+
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+</body>
+</html>

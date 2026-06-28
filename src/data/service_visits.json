@@ -1,0 +1,12 @@
+[
+  {
+    "date": "2025-01-16",
+    "status": "NOT_DONE",
+    "reason": "Sem acesso à propriedade",
+    "notes": "Portão fechado, cliente não respondeu",
+    "alerts": "Reagendar visita",
+    "poolName": "Piscina Principal",
+    "technicianName": "João Técnico",
+    "roundName": "Ronda Segunda Lagos"
+  }
+]

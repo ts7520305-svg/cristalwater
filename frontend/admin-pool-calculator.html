@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cristal Water · Calculadora Técnica da Piscina</title>
+  <link rel="stylesheet" href="/cristal-assist.css">
+  <style>
+    :root{--bg:#07111f;--panel:#0d1b2f;--panel2:#10243d;--txt:#eaf6ff;--muted:#8fb3cc;--line:rgba(142,202,230,.2);--cyan:#48d8ff;--blue:#2b6cff;--green:#38d39f;--amber:#ffcd6b;--red:#ff6b80}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:radial-gradient(circle at top left,#123b63 0,#07111f 38%,#030712 100%);color:var(--txt)}
+    header{position:sticky;top:0;z-index:5;background:rgba(4,10,20,.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);padding:16px 22px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+    h1{font-size:22px;margin:0}.sub{color:var(--muted);font-size:13px;margin-top:4px}.wrap{max-width:1500px;margin:0 auto;padding:18px;display:grid;grid-template-columns:380px 1fr;gap:16px}.card{background:linear-gradient(180deg,rgba(16,36,61,.92),rgba(9,19,35,.96));border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 16px 40px rgba(0,0,0,.25)}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.full{grid-column:1/-1} label{font-size:12px;color:var(--muted);display:block;margin:8px 0 5px} input,select,textarea{width:100%;background:#081525;color:var(--txt);border:1px solid var(--line);border-radius:12px;padding:11px;outline:none} textarea{min-height:70px} button{border:0;border-radius:14px;padding:11px 14px;background:linear-gradient(135deg,var(--blue),#00b7ff);color:white;font-weight:800;cursor:pointer} .btn2{background:#132a46}.btn3{background:linear-gradient(135deg,#15a37c,var(--green));color:#03140f}.btnDanger{background:#3a1520;color:#ffd6de;border:1px solid rgba(255,107,128,.35)}
+    .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.kpiGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.kpi{background:rgba(6,18,32,.7);border:1px solid var(--line);border-radius:16px;padding:14px}.kpi b{display:block;font-size:25px;margin-top:4px}.kpi span{color:var(--muted);font-size:12px}.sections{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:14px}.result h3{margin:0 0 8px}.resultRow{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.07)}.resultRow:last-child{border-bottom:0}.value{font-weight:800;color:#fff}.note{color:var(--muted);font-size:12px;line-height:1.45}.rec{padding:10px;border-radius:12px;background:rgba(72,216,255,.08);border:1px solid rgba(72,216,255,.22);margin:8px 0}.badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:7px 10px;background:rgba(72,216,255,.1);color:#aeefff;border:1px solid rgba(72,216,255,.25);font-size:12px;font-weight:800}.status{white-space:pre-wrap;color:var(--muted);font-size:13px}.hidden{display:none}
+    @media(max-width:1000px){.wrap{grid-template-columns:1fr}.kpiGrid{grid-template-columns:repeat(2,1fr)}.sections{grid-template-columns:1fr}.grid3{grid-template-columns:1fr 1fr}} @media(max-width:600px){header{align-items:flex-start;flex-direction:column}.grid,.grid3,.kpiGrid{grid-template-columns:1fr}.wrap{padding:10px}.card{border-radius:14px}}
+  </style>
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+<body>
+  <header>
+    <div><h1>🧮 Calculadora Técnica da Piscina</h1><div class="sub">Cubicagem, filtração, sal, eletrólise, produção de cloro e bomba de calor numa só ferramenta.</div></div>
+    <div class="toolbar"><button class="btn2" onclick="location.href='/admin-pools'">Piscinas</button><button class="btn2" onclick="location.href='/admin-dashboard'">Dashboard</button><button onclick="saveAndCalculate()">Guardar cálculo</button></div>
+  </header>
+  <main class="wrap">
+    <section class="card">
+      <div class="toolbar" style="justify-content:space-between"><span class="badge" id="poolBadge">Piscina</span><button class="btn2" onclick="loadPool()">Recarregar</button></div>
+      <div class="grid">
+        <div class="full"><label>Piscina</label><select id="poolId" onchange="onPoolChange()"></select></div>
+        <div><label>Formato</label><select id="shape"><option value="RECTANGULAR">Retangular</option><option value="OVAL">Oval</option><option value="ROUND">Redonda</option><option value="KIDNEY">Rim / forma livre</option><option value="FREEFORM">Irregular</option></select></div>
+        <div><label>Fator forma livre</label><input id="shapeFactor" type="number" step="0.01" placeholder="0.80"></div>
+        <div><label>Comprimento m</label><input id="lengthM" type="number" step="0.01"></div>
+        <div><label>Largura m</label><input id="widthM" type="number" step="0.01"></div>
+        <div><label>Diâmetro m</label><input id="diameterM" type="number" step="0.01"></div>
+        <div><label>Prof. mínima m</label><input id="depthMinM" type="number" step="0.01"></div>
+        <div><label>Prof. máxima m</label><input id="depthMaxM" type="number" step="0.01"></div>
+        <div><label>Prof. média m</label><input id="averageDepthM" type="number" step="0.01"></div>
+        <div><label>Área m² manual</label><input id="surfaceM2" type="number" step="0.01"></div>
+        <div><label>Cubicagem m³ manual</label><input id="volumeM3" type="number" step="0.01"></div>
+      </div>
+      <hr style="border-color:var(--line);border-style:solid;border-width:1px 0 0;margin:16px 0">
+      <div class="grid">
+        <div><label>Caudal bomba m³/h</label><input id="pumpFlowM3h" type="number" step="0.1"></div>
+        <div><label>Potência bomba cv/hp</label><input id="pumpPowerHp" type="number" step="0.1"></div>
+        <div><label>Nº médio banhistas</label><input id="bathersAverage" type="number" step="1"></div>
+        <div><label>Carga</label><select id="poolLoad"><option>NORMAL</option><option>LOW</option><option>HIGH</option></select></div>
+      </div>
+      <hr style="border-color:var(--line);border-style:solid;border-width:1px 0 0;margin:16px 0">
+      <div class="grid">
+        <div><label>Sal atual ppm</label><input id="saltCurrentPpm" type="number" step="1"></div>
+        <div><label>Sal alvo ppm</label><input id="targetSalinityPpm" type="number" step="1" value="3500"></div>
+        <div><label>Máquina sal g/h</label><input id="chlorinatorGph" type="number" step="1"></div>
+        <div><label>Cloro atual ppm</label><input id="chlorineCurrentPpm" type="number" step="0.1"></div>
+        <div><label>Cloro alvo ppm</label><input id="targetChlorinePpm" type="number" step="0.1" value="2"></div>
+        <div><label>Alcalinidade atual ppm</label><input id="alkalinityCurrentPpm" type="number" step="1"></div>
+        <div><label>Alcalinidade alvo ppm</label><input id="targetAlkalinityPpm" type="number" step="1" value="100"></div>
+        <div><label>pH atual</label><input id="phCurrent" type="number" step="0.1"></div>
+        <div><label>pH alvo</label><input id="targetPh" type="number" step="0.1" value="7.4"></div>
+        <div><label>ORP / Redox atual mV</label><input id="orpCurrentMv" type="number" step="1"></div>
+        <div><label>ORP / Redox alvo mV</label><input id="targetOrpMv" type="number" step="1" value="720"></div>
+      </div>
+      <hr style="border-color:var(--line);border-style:solid;border-width:1px 0 0;margin:16px 0">
+      <div class="grid">
+        <div><label>Bomba calor mono/trifásica</label><select id="heatPumpPhase"><option value="">Não definido</option><option>MONOFASICA</option><option>TRIFASICA</option></select></div>
+        <div><label>Potência térmica kW</label><input id="heatPumpThermalKw" type="number" step="0.1"></div>
+        <div><label>Potência elétrica kW</label><input id="heatPumpElectricalKw" type="number" step="0.1"></div>
+        <div><label>COP</label><input id="cop" type="number" step="0.1" value="5"></div>
+        <div><label>Temperatura atual °C</label><input id="currentWaterTempC" type="number" step="0.1"></div>
+        <div><label>Temperatura alvo °C</label><input id="targetWaterTempC" type="number" step="0.1" value="27"></div>
+        <div><label>Cobertura</label><select id="covered"><option value="false">Sem cobertura</option><option value="true">Com cobertura</option></select></div>
+        <div><label>Fator perdas</label><input id="ambientLossFactor" type="number" step="0.01" placeholder="auto"></div>
+        <div class="full"><label>Notas</label><textarea id="notes"></textarea></div>
+      </div>
+      <div class="toolbar" style="margin-top:14px"><button onclick="previewCalculation()">Calcular sem guardar</button><button class="btn3" onclick="saveAndCalculate()">Guardar na ficha da piscina</button><button class="btnDanger" onclick="clearInputs()">Limpar campos</button></div>
+      <p class="status" id="status"></p>
+    </section>
+
+    <section>
+      <div class="kpiGrid">
+        <div class="kpi"><span>Cubicagem</span><b id="kVolume">-</b></div>
+        <div class="kpi"><span>Área</span><b id="kArea">-</b></div>
+        <div class="kpi"><span>Sal a adicionar</span><b id="kSalt">-</b></div>
+        <div class="kpi"><span>Bomba calor</span><b id="kHeat">-</b></div>
+      </div>
+      <div class="card" style="margin-top:14px"><h3>Recomendações automáticas</h3><div id="recommendations"></div></div>
+      <div class="sections">
+        <div class="card result"><h3>💧 Geometria</h3><div id="geometry"></div></div>
+        <div class="card result"><h3>🔁 Filtração</h3><div id="filtration"></div></div>
+        <div class="card result"><h3>🧂 Salinidade</h3><div id="salt"></div></div>
+        <div class="card result"><h3>⚡ Máquina de sal</h3><div id="chlorination"></div></div>
+        <div class="card result"><h3>🧪 Química</h3><div id="chemistry"></div></div>
+        <div class="card result full"><h3>🔥 Bomba de calor</h3><div id="heatPump"></div></div>
+      </div>
+    </section>
+  </main>
+  <script src="/admin-pool-calculator.js"></script>
+  <script src="/cristal-help-data.js"></script>
+  <script src="/cristal-assist.js"></script>
+  <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{});}</script>
+<script src="/cw-admin-shortcuts.js"></script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

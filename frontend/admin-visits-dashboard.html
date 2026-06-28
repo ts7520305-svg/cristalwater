@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="pt">
+
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+
+<meta charset="utf-8">
+
+<title>
+  Admin - Visitas
+</title>
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
+
+<style>
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+
+  margin:0;
+
+  font-family:Arial;
+
+  background:#eef3f8;
+
+  color:#1f2937;
+}
+
+header{
+
+  background:white;
+
+  padding:18px;
+
+  border-bottom:4px solid #1e88e5;
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+
+  flex-wrap:wrap;
+
+  gap:15px;
+
+  position:sticky;
+
+  top:0;
+
+  z-index:999;
+}
+
+header h2{
+
+  margin:0;
+
+  color:#1e88e5;
+}
+
+.topbar{
+
+  display:flex;
+
+  gap:10px;
+
+  flex-wrap:wrap;
+}
+
+button{
+
+  border:none;
+
+  border-radius:10px;
+
+  padding:10px 16px;
+
+  cursor:pointer;
+
+  font-weight:bold;
+}
+
+.refresh-btn{
+
+  background:#1e88e5;
+
+  color:white;
+}
+
+.logout-btn{
+
+  background:#d32f2f;
+
+  color:white;
+}
+
+main{
+
+  padding:20px;
+}
+
+.filters{
+
+  background:white;
+
+  padding:15px;
+
+  border-radius:14px;
+
+  margin-bottom:20px;
+
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+
+  display:flex;
+
+  gap:12px;
+
+  flex-wrap:wrap;
+}
+
+.filters input,
+.filters select{
+
+  padding:10px;
+
+  border-radius:8px;
+
+  border:1px solid #ccc;
+}
+
+.card{
+
+  background:white;
+
+  padding:18px;
+
+  margin-bottom:18px;
+
+  border-radius:14px;
+
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+
+  border-left:6px solid #1e88e5;
+}
+
+.card.done{
+  border-left-color:#2e7d32;
+}
+
+.card.progress{
+  border-left-color:#ef6c00;
+}
+
+.card h3{
+
+  margin-top:0;
+
+  color:#1565c0;
+}
+
+.photos{
+
+  display:flex;
+
+  flex-wrap:wrap;
+
+  gap:10px;
+
+  margin-top:10px;
+}
+
+.photos img{
+
+  width:100px;
+
+  height:100px;
+
+  object-fit:cover;
+
+  border-radius:10px;
+
+  border:2px solid #eef3f8;
+}
+
+.status{
+
+  font-weight:bold;
+
+  margin-top:10px;
+}
+
+.done-text{
+  color:#2e7d32;
+}
+
+.pending-text{
+  color:#ef6c00;
+}
+
+.grid{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(auto-fit,minmax(220px,1fr));
+
+  gap:12px;
+
+  margin-top:15px;
+}
+
+.box{
+
+  background:#f8fbff;
+
+  border:1px solid #d6e6f7;
+
+  border-radius:10px;
+
+  padding:12px;
+}
+
+.label{
+
+  font-size:12px;
+
+  color:#607d8b;
+
+  margin-bottom:5px;
+}
+
+.value{
+
+  font-weight:bold;
+}
+
+.actions{
+
+  display:flex;
+
+  gap:10px;
+
+  flex-wrap:wrap;
+
+  margin-top:15px;
+}
+
+.report-btn{
+
+  background:#1565c0;
+
+  color:white;
+}
+
+@media(max-width:700px){
+
+  .filters{
+
+    flex-direction:column;
+  }
+
+  .actions{
+
+    flex-direction:column;
+  }
+
+  button{
+
+    width:100%;
+  }
+}
+
+</style>
+
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/cw-polish.css">
+</head>
+
+<body>
+
+<header>
+
+  <h2>
+    Painel Admin - Visitas
+  </h2>
+
+  <div class="topbar">
+
+    <button
+      class="refresh-btn"
+      id="refreshBtn"
+    >
+      Atualizar
+    </button>
+
+    <button
+      class="logout-btn"
+      id="logoutBtn"
+    >
+      Sair
+    </button>
+
+  </div>
+
+</header>
+
+<main>
+
+<div class="filters">
+
+  <input
+    id="searchInput"
+    placeholder="Pesquisar cliente/piscina"
+  >
+
+  <select id="statusFilter">
+
+    <option value="">
+      Todos estados
+    </option>
+
+    <option value="DONE">
+      DONE
+    </option>
+
+    <option value="IN_PROGRESS">
+      IN PROGRESS
+    </option>
+
+  </select>
+
+</div>
+
+<div id="visits"></div>
+
+</main>
+
+<script src="/admin-auth-guard.js"></script>
+
+<script src="/admin-visits-dashboard.js"></script>
+
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script src="/cw-admin-shortcuts.js"></script>
+<script src="/cw-flow-shell.js"></script>
+</body>
+</html>

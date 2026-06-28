@@ -1,0 +1,2117 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "windows"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+model Client {
+  id                            Int                   @id @default(autoincrement())
+  name                          String
+  internalName                  String?
+  email                         String?
+  phone                         String?
+  address                       String?
+  zone                          String?
+  notes                         String?
+  status                        String                @default("ACTIVE")
+  active                        Boolean               @default(true)
+  password                      String?
+  pin                           String?
+  lastLogin                     DateTime?
+  latitude                      Float?
+  longitude                     Float?
+  arrivalNotify                 Boolean               @default(false)
+  arrivalAllowed                Boolean               @default(true)
+  monthlyFee                    Float?                @default(0)
+  monthlyAmount                 Float?                @default(0)
+  creditBalance                 Float                 @default(0)
+  lastPaymentAt                 DateTime?
+  paymentStatus                 String                @default("PAID")
+  requiresInvoice               Boolean               @default(false)
+  billingActive                 Boolean               @default(false)
+  contractActivatedAt           DateTime?
+  fiscalName                    String?
+  fiscalNif                     String?
+  fiscalAddress                 String?
+  fiscalEmail                   String?
+  externalBillingNotes          String?
+  paymentReminderMode           String                @default("DEFAULT")
+  paymentReminderEmail          Boolean               @default(true)
+  paymentReminderEmailAddress   String?
+  paymentReminderWhatsapp       Boolean               @default(true)
+  paymentReminderWhatsappNumber String?
+  paymentReminderInternal       Boolean               @default(true)
+  lastReminderAt                DateTime?
+  lastReminderMonth             String?
+  pauseReason                   String?
+  pauseUntil                    DateTime?
+  source                        String?
+  createdByTechnicianId         Int?
+  pendingReview                 Boolean               @default(false)
+  reviewStatus                  String                @default("APPROVED")
+  reviewedAt                    DateTime?
+  reviewedByUserId              Int?
+  createdAt                     DateTime              @default(now())
+  updatedAt                     DateTime              @updatedAt
+  archiveStatus                 ArchiveStatus         @default(ATIVO)
+  deletedAt                     DateTime?
+  contractActive                Boolean               @default(false)
+  attachments                   Attachment[]
+  chatMessages                  ChatMessage[]
+  accesses                      ClientAccess[]
+  messages                      ClientMessage[]
+  reportSetting                 ClientReportSetting?
+  communicationLogs             CommunicationLog[]
+  extraVisits                   ExtraVisit[]
+  invoices                      Invoice[]
+  reports                       MonthlyReport[]
+  notifications                 Notification[]
+  operationalReminders          OperationalReminder[]
+  pools                         Pool[]
+  refreshTokens                 RefreshToken[]
+  serviceVisits                 ServiceVisit[]
+  tasks                         Task[]
+  visits                        Visit[]
+
+  @@index([name])
+  @@index([zone])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([lastReminderMonth])
+  @@index([pendingReview])
+  @@index([reviewStatus])
+  @@index([createdByTechnicianId])
+}
+
+model ClientAccess {
+  id                  Int      @id @default(autoincrement())
+  clientId            Int
+  title               String?
+  accessType          String?
+  codeValue           String?
+  instructions        String?
+  visibleToTechnician Boolean  @default(true)
+  active              Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  client              Client   @relation(fields: [clientId], references: [id])
+
+  @@index([clientId])
+  @@index([active])
+}
+
+model ClientMessage {
+  id            Int       @id @default(autoincrement())
+  clientId      Int
+  sender        String?
+  senderType    String?
+  message       String?
+  text          String?
+  isReadByAdmin Boolean   @default(false)
+  seen          Boolean   @default(false)
+  fileUrl       String?
+  fileName      String?
+  messageType   String?   @default("TEXT")
+  createdAt     DateTime  @default(now())
+  seenAt        DateTime?
+  client        Client    @relation(fields: [clientId], references: [id])
+
+  @@index([clientId])
+  @@index([createdAt])
+  @@index([isReadByAdmin])
+}
+
+model ClientReportSetting {
+  id                  Int      @id @default(autoincrement())
+  clientId            Int      @unique
+  showClientName      Boolean  @default(true)
+  showPoolName        Boolean  @default(true)
+  showAddress         Boolean  @default(true)
+  showZone            Boolean  @default(true)
+  showTechnicianName  Boolean  @default(true)
+  showPlannedDate     Boolean  @default(true)
+  showStartEnd        Boolean  @default(true)
+  showStatus          Boolean  @default(true)
+  showChecklist       Boolean  @default(true)
+  showWaterParameters Boolean  @default(true)
+  showChemicals       Boolean  @default(true)
+  showPhotos          Boolean  @default(true)
+  showEquipment       Boolean  @default(true)
+  showTechnicalRoom   Boolean  @default(true)
+  showNotes           Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  client              Client   @relation(fields: [clientId], references: [id])
+}
+
+model Pool {
+  id                    Int                     @id @default(autoincrement())
+  clientId              Int
+  name                  String?
+  location              String?
+  address               String?
+  zone                  String?
+  zoneId                Int?
+  volumeM3              Float?
+  type                  String?
+  priority              Int                     @default(0)
+  active                Boolean                 @default(true)
+  notes                 String?
+  latitude              Float?
+  longitude             Float?
+  monthlyAmount         Float                   @default(0)
+  serviceFrequency      Int                     @default(1)
+  preferredDays         String?
+  scheduleMode          String                  @default("AUTO")
+  estimatedMinutes      Int                     @default(30)
+  hasLights             Boolean                 @default(true)
+  source                String?
+  createdByTechnicianId Int?
+  pendingReview         Boolean                 @default(false)
+  reviewStatus          String                  @default("APPROVED")
+  reviewedAt            DateTime?
+  reviewedByUserId      Int?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  archiveStatus         ArchiveStatus           @default(ATIVO)
+  deletedAt             DateTime?
+  attachments           Attachment[]
+  extraVisits           ExtraVisit[]
+  extraVisitRules       ExtraVisitRule[]
+  operationalReminders  OperationalReminder[]
+  client                Client                  @relation(fields: [clientId], references: [id])
+  zoneRecord            Zone?                   @relation(fields: [zoneId], references: [id])
+  calculationProfile    PoolCalculationProfile?
+  equipment             PoolEquipment?
+  poolMessages          PoolMessage[]
+  repairs               Repair[]
+  roundPools            RoundPool[]
+  services              Service[]
+  serviceVisits         ServiceVisit[]
+  tasks                 Task[]
+  technicalAlerts       TechnicalAlert[]
+  technicalHistory      TechnicalHistory[]
+  technicalRoom         TechnicalRoom?
+  technicalSheet        TechnicalSheet?
+  visits                Visit[]
+  keyAccesses           KeyAccess[]             @relation("KeyAccessToPool")
+
+  @@index([clientId])
+  @@index([active])
+  @@index([name])
+  @@index([zone])
+  @@index([pendingReview])
+  @@index([reviewStatus])
+  @@index([createdByTechnicianId])
+}
+
+model PoolCalculationProfile {
+  id                   Int      @id @default(autoincrement())
+  poolId               Int      @unique
+  shape                String   @default("RECTANGULAR")
+  lengthM              Float?
+  widthM               Float?
+  diameterM            Float?
+  depthMinM            Float?
+  depthMaxM            Float?
+  averageDepthM        Float?
+  shapeFactor          Float?   @default(1)
+  surfaceM2            Float?
+  volumeM3             Float?
+  pumpFlowM3h          Float?
+  pumpPowerHp          Float?
+  bathersAverage       Float?   @default(0)
+  poolLoad             String   @default("NORMAL")
+  saltCurrentPpm       Float?
+  targetSalinityPpm    Float?   @default(3500)
+  chlorinatorGph       Float?
+  chlorineCurrentPpm   Float?
+  targetChlorinePpm    Float?   @default(2)
+  heatPumpPhase        String?
+  heatPumpThermalKw    Float?
+  heatPumpElectricalKw Float?
+  cop                  Float?   @default(5)
+  currentWaterTempC    Float?
+  targetWaterTempC     Float?   @default(27)
+  covered              Boolean  @default(false)
+  ambientLossFactor    Float?
+  notes                String?
+  lastResultJson       Json?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  pool                 Pool     @relation(fields: [poolId], references: [id])
+
+  @@index([shape])
+  @@index([poolLoad])
+}
+
+model PoolEquipment {
+  id                Int       @id @default(autoincrement())
+  poolId            Int       @unique
+  type              String?
+  brand             String?
+  model             String?
+  pumpType          String?
+  pumpPower         String?
+  filterType        String?
+  filterMedia       String?
+  saltSystem        Boolean   @default(false)
+  saltLastAdded     DateTime?
+  saltQuantity      Float?
+  lightsCount       Int?
+  lightsType        String?
+  hasLights         Boolean   @default(true)
+  brokenLightsCount Int?      @default(0)
+  lightsNotes       String?
+  notes             String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  pool              Pool      @relation(fields: [poolId], references: [id])
+}
+
+model TechnicalRoom {
+  id           Int      @id @default(autoincrement())
+  poolId       Int      @unique
+  condition    String?
+  locationNote String?
+  ventilation  String?
+  electrical   String?
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  pool         Pool     @relation(fields: [poolId], references: [id])
+}
+
+model Technician {
+  id                   Int                    @id @default(autoincrement())
+  name                 String
+  phone                String?
+  email                String?                @unique
+  pin                  String?
+  role                 String                 @default("TECHNICIAN")
+  zone                 String?
+  vehicleId            Int?
+  latitude             Float?
+  longitude            Float?
+  notes                String?
+  active               Boolean                @default(true)
+  costPerVisit         Float                  @default(0)
+  hourlyCost           Float                  @default(0)
+  commissionRate       Float                  @default(0.10)
+  lastLogin            DateTime?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  archiveStatus        ArchiveStatus          @default(ATIVO)
+  deletedAt            DateTime?
+  extraVisits          ExtraVisit[]
+  heldKeys             KeyAccess[]
+  operationalReminders OperationalReminder[]
+  roundTechnicians     RoundTechnician[]
+  services             Service[]
+  serviceVisits        ServiceVisit[]
+  tasks                Task[]
+  vehicle              Vehicle?               @relation("TechnicianAssignedVehicle", fields: [vehicleId], references: [id])
+  locations            TechnicianLocation[]
+  tracks               TechnicianTrack[]
+  vehicleLogs          TechnicianVehicleLog[]
+  visits               Visit[]
+  workGuides           WorkGuide[]
+
+  @@index([name])
+  @@index([active])
+  @@index([vehicleId])
+  @@index([zone])
+}
+
+model User {
+  id                   Int                       @id @default(autoincrement())
+  email                String                    @unique
+  password             String
+  role                 String                    @default("TECH")
+  name                 String?
+  phone                String?
+  pin                  String?
+  active               Boolean                   @default(true)
+  mustChangePassword   Boolean                   @default(false)
+  lastLoginAt          DateTime?
+  passwordChangedAt    DateTime?
+  failedLoginAttempts  Int                       @default(0)
+  lockedUntil          DateTime?
+  avatarUrl            String?
+  username             String?
+  costPerVisit         Float                     @default(0)
+  hourlyCost           Float                     @default(0)
+  commissionRate       Float                     @default(0.10)
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+  chatMessagesReceived ChatMessage[]             @relation("ChatReceiver")
+  chatMessagesSent     ChatMessage[]             @relation("ChatSender")
+  extraVisits          ExtraVisit[]
+  locationLogs         LocationLog[]
+  notifications        Notification[]
+  technicianLocation   TechnicianLocation?
+  technicianTracks     TechnicianTrack[]
+  technicianWorkDays   TechnicianWorkDay[]
+  notificationSettings UserNotificationSetting[]
+
+  @@index([role])
+  @@index([active])
+}
+
+model ServiceVisit {
+  id             Int             @id @default(autoincrement())
+  clientId       Int?
+  poolId         Int?
+  technicianId   Int?
+  roundId        Int?
+  technicianName String?
+  date           DateTime        @default(now())
+  plannedDate    DateTime?
+  startAt        DateTime?
+  endAt          DateTime?
+  status         String          @default("PLANNED")
+  reason         String?
+  notes          String?
+  internalNotes  String?
+  alerts         String?
+  products       String?
+  chemicalsJson  Json?
+  ph             Float?
+  chlorine       Float?
+  alkalinity     Float?
+  salt           Float?
+  temperature    Float?
+  cleaned        Boolean         @default(false)
+  brushed        Boolean         @default(false)
+  vacuumed       Boolean         @default(false)
+  basketCleaned  Boolean         @default(false)
+  waterlineClean Boolean         @default(false)
+  backwashDone   Boolean         @default(false)
+  billed         Boolean         @default(false)
+  billedAt       DateTime?
+  cost           Float           @default(0)
+  revenue        Float           @default(0)
+  profit         Float           @default(0)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  orpMv          Float?
+  attachments    Attachment[]
+  chemicals      ChemicalUsage[]
+  client         Client?         @relation(fields: [clientId], references: [id])
+  pool           Pool?           @relation(fields: [poolId], references: [id])
+  round          Round?          @relation(fields: [roundId], references: [id])
+  technician     Technician?     @relation(fields: [technicianId], references: [id])
+  photos         VisitPhoto[]
+
+  @@index([clientId])
+  @@index([poolId])
+  @@index([technicianId])
+  @@index([roundId])
+  @@index([date])
+  @@index([plannedDate])
+  @@index([status])
+}
+
+model VisitPhoto {
+  id        Int          @id @default(autoincrement())
+  visitId   Int
+  url       String
+  type      String       @default("GENERAL")
+  createdAt DateTime     @default(now())
+  visit     ServiceVisit @relation(fields: [visitId], references: [id], onDelete: Cascade)
+
+  @@index([visitId])
+  @@index([type])
+}
+
+model ChemicalUsage {
+  id        Int          @id @default(autoincrement())
+  visitId   Int
+  name      String
+  quantity  Float        @default(0)
+  unit      String?
+  createdAt DateTime     @default(now())
+  visit     ServiceVisit @relation(fields: [visitId], references: [id], onDelete: Cascade)
+
+  @@index([visitId])
+}
+
+model Round {
+  id            Int               @id @default(autoincrement())
+  name          String
+  dayOfWeek     Int
+  active        Boolean           @default(true)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  pools         RoundPool[]
+  technicians   RoundTechnician[]
+  serviceVisits ServiceVisit[]
+
+  @@index([dayOfWeek])
+  @@index([active])
+}
+
+model RoundTechnician {
+  id           Int        @id @default(autoincrement())
+  roundId      Int
+  technicianId Int
+  round        Round      @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  technician   Technician @relation(fields: [technicianId], references: [id])
+
+  @@unique([roundId, technicianId])
+  @@index([technicianId])
+}
+
+model RoundPool {
+  id      Int   @id @default(autoincrement())
+  roundId Int
+  poolId  Int
+  order   Int   @default(0)
+  pool    Pool  @relation(fields: [poolId], references: [id], onDelete: Cascade)
+  round   Round @relation(fields: [roundId], references: [id], onDelete: Cascade)
+
+  @@unique([roundId, poolId])
+  @@index([poolId])
+  @@index([roundId, order])
+}
+
+model ExtraVisitRule {
+  id             Int          @id @default(autoincrement())
+  poolId         Int
+  name           String?
+  description    String?
+  active         Boolean      @default(true)
+  recurrenceType String       @default("SEASONAL")
+  yearMode       String       @default("EVERY_YEAR")
+  startDate      DateTime?
+  endDate        DateTime?
+  visitsPerWeek  Int          @default(1)
+  monday         Boolean      @default(false)
+  tuesday        Boolean      @default(false)
+  wednesday      Boolean      @default(false)
+  thursday       Boolean      @default(false)
+  friday         Boolean      @default(false)
+  saturday       Boolean      @default(false)
+  sunday         Boolean      @default(false)
+  preferredTime  String?
+  billingMode    String       @default("EXTRA")
+  unitPrice      Float?
+  notes          String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  visits         ExtraVisit[]
+  pool           Pool         @relation(fields: [poolId], references: [id], onDelete: Cascade)
+
+  @@index([poolId])
+  @@index([active])
+}
+
+model ExtraVisit {
+  id                Int             @id @default(autoincrement())
+  clientId          Int?
+  poolId            Int?
+  ruleId            Int?
+  technicianId      Int?
+  userId            Int?
+  visitType         String          @default("ONE_OFF")
+  type              String?
+  source            String          @default("MANUAL")
+  origin            String          @default("ADMIN")
+  scheduledAt       DateTime        @default(now())
+  date              DateTime?
+  status            String          @default("PLANNED")
+  billingMode       String          @default("EXTRA")
+  billingStatus     String          @default("NOT_BILLABLE")
+  commercialRule    String          @default("INCLUDED")
+  isBillable        Boolean         @default(false)
+  unitPrice         Float?
+  totalPrice        Float?
+  price             Float           @default(0)
+  includedInPackage Boolean         @default(false)
+  billed            Boolean         @default(false)
+  billedAt          DateTime?
+  notes             String?
+  internalNote      String?
+  cancelReason      String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  client            Client?         @relation(fields: [clientId], references: [id])
+  pool              Pool?           @relation(fields: [poolId], references: [id])
+  rule              ExtraVisitRule? @relation(fields: [ruleId], references: [id])
+  technician        Technician?     @relation(fields: [technicianId], references: [id])
+  user              User?           @relation(fields: [userId], references: [id])
+
+  @@index([clientId])
+  @@index([poolId])
+  @@index([technicianId])
+  @@index([userId])
+  @@index([scheduledAt])
+  @@index([status])
+}
+
+model MonthlyReport {
+  id        Int      @id @default(autoincrement())
+  month     String
+  type      String
+  clientId  Int?
+  data      Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  client    Client?  @relation(fields: [clientId], references: [id])
+
+  @@unique([month, type, clientId])
+  @@index([clientId])
+  @@index([month])
+  @@index([type])
+}
+
+model Invoice {
+  id                Int           @id @default(autoincrement())
+  clientId          Int
+  monthRef          String?
+  year              Int?
+  month             String?
+  amount            Float         @default(0)
+  amountCents       Int           @default(0)
+  total             Float         @default(0)
+  totalCents        Int           @default(0)
+  subtotal          Float         @default(0)
+  subtotalCurrent   Float         @default(0)
+  subtotalArrears   Float         @default(0)
+  taxRate           Float         @default(0)
+  taxAmount         Float         @default(0)
+  totalAmount       Float         @default(0)
+  amountPaid        Float         @default(0)
+  amountOpen        Float         @default(0)
+  status            String        @default("PENDING")
+  paymentMethod     String?
+  notes             String?
+  paidAt            DateTime?
+  dueDate           DateTime?
+  issueDate         DateTime?
+  invoiceNumber     String?       @unique
+  externalInvoiceNo String?
+  invoiceIssued     Boolean       @default(false)
+  requiresInvoice   Boolean       @default(false)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  attachments       Attachment[]
+  client            Client        @relation(fields: [clientId], references: [id])
+  lines             InvoiceLine[]
+  payments          Payment[]
+
+  @@unique([clientId, monthRef])
+  @@index([clientId])
+  @@index([year, month])
+  @@index([status])
+  @@index([dueDate])
+  @@index([clientId, status])
+  @@index([dueDate, status])
+  @@index([requiresInvoice])
+  @@index([invoiceIssued])
+}
+
+model InvoiceLine {
+  id          Int       @id @default(autoincrement())
+  invoiceId   Int
+  type        String?
+  lineType    String?
+  description String
+  referenceId Int?
+  quantity    Float     @default(1)
+  unitPrice   Float     @default(0)
+  total       Float     @default(0)
+  lineTotal   Float     @default(0)
+  serviceDate DateTime?
+  sourceMonth String?
+  notes       String?
+  createdAt   DateTime  @default(now())
+  invoice     Invoice   @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@index([type])
+  @@index([lineType])
+  @@index([referenceId])
+}
+
+model Payment {
+  id          Int      @id @default(autoincrement())
+  invoiceId   Int
+  amount      Float
+  amountCents Int      @default(0)
+  method      String?  @default("MANUAL")
+  notes       String?
+  paidAt      DateTime @default(now())
+  createdAt   DateTime @default(now())
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@index([paidAt])
+}
+
+model Repair {
+  id          Int          @id @default(autoincrement())
+  poolId      Int
+  problem     String
+  quantity    Int          @default(1)
+  unitPrice   Float?
+  totalPrice  Float?
+  priority    String       @default("NORMAL")
+  notes       String?
+  status      String       @default("PENDING")
+  paid        Boolean      @default(false)
+  paidAt      DateTime?
+  createdAt   DateTime     @default(now())
+  doneAt      DateTime?
+  attachments Attachment[]
+  pool        Pool         @relation(fields: [poolId], references: [id])
+
+  @@index([poolId])
+  @@index([status])
+  @@index([priority])
+  @@index([createdAt])
+}
+
+model TechnicalHistory {
+  id            Int       @id @default(autoincrement())
+  poolId        Int
+  type          String    @default("MAINTENANCE")
+  component     String?
+  message       String?
+  description   String?
+  status        String?
+  performedAt   DateTime?
+  doneAt        DateTime?
+  nextSuggested DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  pool          Pool      @relation(fields: [poolId], references: [id], onDelete: Cascade)
+
+  @@index([poolId])
+  @@index([type])
+}
+
+model TechnicalAlert {
+  id          Int          @id @default(autoincrement())
+  poolId      Int
+  type        String
+  message     String
+  priority    String       @default("NORMAL")
+  status      String       @default("OPEN")
+  createdAt   DateTime     @default(now())
+  resolvedAt  DateTime?
+  attachments Attachment[]
+  pool        Pool         @relation(fields: [poolId], references: [id])
+
+  @@index([poolId])
+  @@index([status])
+}
+
+model Alert {
+  id         Int       @id @default(autoincrement())
+  title      String?
+  message    String?
+  type       String?
+  status     String    @default("OPEN")
+  active     Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
+
+  @@index([status])
+  @@index([active])
+}
+
+model Notification {
+  id        Int       @id @default(autoincrement())
+  userId    Int?
+  clientId  Int?
+  type      String    @default("GENERAL")
+  eventType String?
+  title     String?
+  message   String
+  role      String?
+  status    String    @default("PENDING")
+  severity  String?
+  metadata  Json?
+  isRead    Boolean   @default(false)
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  client    Client?   @relation(fields: [clientId], references: [id])
+  user      User?     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([clientId])
+  @@index([type])
+  @@index([eventType])
+  @@index([role])
+  @@index([isRead])
+  @@index([readAt])
+  @@index([createdAt])
+}
+
+model NotificationRule {
+  id              Int      @id @default(autoincrement())
+  eventType       String
+  roles           String?
+  channels        String?
+  active          Boolean  @default(true)
+  defaultEmail    Boolean  @default(true)
+  defaultWhatsapp Boolean  @default(true)
+  defaultInternal Boolean  @default(true)
+  config          Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([eventType])
+  @@index([active])
+}
+
+model DeviceToken {
+  id        Int      @id @default(autoincrement())
+  role      String?
+  clientId  Int?
+  token     String   @unique
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([clientId])
+  @@index([active])
+}
+
+model EmailLog {
+  id          Int       @id @default(autoincrement())
+  to          String?
+  toEmail     String?
+  subject     String?
+  eventType   String?
+  type        String?
+  mode        String?
+  status      String    @default("PENDING")
+  error       String?
+  html        String?
+  text        String?
+  retryCount  Int       @default(0)
+  lastRetryAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([to])
+  @@index([toEmail])
+  @@index([eventType])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model CommunicationLog {
+  id          Int      @id @default(autoincrement())
+  clientId    Int?
+  channel     String
+  message     String
+  referenceId Int?
+  createdAt   DateTime @default(now())
+  client      Client?  @relation(fields: [clientId], references: [id])
+
+  @@index([clientId])
+  @@index([channel])
+  @@index([createdAt])
+}
+
+model ChatMessage {
+  id          Int      @id @default(autoincrement())
+  senderId    Int?
+  receiverId  Int?
+  clientId    Int?
+  chatType    String   @default("INTERNAL")
+  channel     String?
+  text        String?
+  message     String?
+  messageType String   @default("TEXT")
+  fileUrl     String?
+  fileName    String?
+  latitude    Float?
+  longitude   Float?
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  client      Client?  @relation(fields: [clientId], references: [id])
+  receiver    User?    @relation("ChatReceiver", fields: [receiverId], references: [id])
+  sender      User?    @relation("ChatSender", fields: [senderId], references: [id])
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([clientId])
+  @@index([chatType])
+  @@index([createdAt])
+}
+
+model PoolMessage {
+  id         Int      @id @default(autoincrement())
+  poolId     Int
+  senderType String?
+  text       String?
+  createdAt  DateTime @default(now())
+  pool       Pool     @relation(fields: [poolId], references: [id], onDelete: Cascade)
+
+  @@index([poolId])
+  @@index([createdAt])
+}
+
+model Service {
+  id           Int              @id @default(autoincrement())
+  poolId       Int?
+  technicianId Int?
+  date         DateTime         @default(now())
+  kind         String?
+  status       String           @default("PENDING")
+  notes        String?
+  ph           Float?
+  chlorine     Float?
+  alkalinity   Float?
+  temperature  Float?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  pool         Pool?            @relation(fields: [poolId], references: [id])
+  technician   Technician?      @relation(fields: [technicianId], references: [id])
+  messages     ServiceMessage[]
+  tasks        Task[]
+
+  @@index([poolId])
+  @@index([technicianId])
+  @@index([date])
+  @@index([status])
+}
+
+model ServiceMessage {
+  id         Int      @id @default(autoincrement())
+  serviceId  Int
+  senderType String?
+  text       String?
+  createdAt  DateTime @default(now())
+  service    Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@index([serviceId])
+  @@index([createdAt])
+}
+
+model Task {
+  id           Int         @id @default(autoincrement())
+  title        String
+  description  String?
+  priority     String      @default("NORMAL")
+  status       String      @default("PENDENTE")
+  technicianId Int?
+  clientId     Int?
+  poolId       Int?
+  serviceId    Int?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  client       Client?     @relation(fields: [clientId], references: [id])
+  pool         Pool?       @relation(fields: [poolId], references: [id])
+  service      Service?    @relation(fields: [serviceId], references: [id])
+  technician   Technician? @relation(fields: [technicianId], references: [id])
+
+  @@index([technicianId])
+  @@index([clientId])
+  @@index([poolId])
+  @@index([serviceId])
+  @@index([status])
+  @@index([priority])
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  role      String?
+  clientId  Int?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  client    Client?  @relation(fields: [clientId], references: [id])
+
+  @@index([clientId])
+  @@index([expiresAt])
+}
+
+model AiConversation {
+  id              Int                @id @default(autoincrement())
+  title           String?
+  scope           String             @default("ADMIN")
+  status          String             @default("OPEN")
+  createdById     Int?
+  createdByEmail  String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  actions         AiAction[]
+  messages        AiMessage[]
+  recommendations AiRecommendation[]
+
+  @@index([scope])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model AiMessage {
+  id             Int             @id @default(autoincrement())
+  conversationId Int?
+  role           String
+  content        String
+  metadata       Json?
+  createdAt      DateTime        @default(now())
+  conversation   AiConversation? @relation(fields: [conversationId], references: [id])
+
+  @@index([conversationId])
+  @@index([role])
+  @@index([createdAt])
+}
+
+model AiAction {
+  id               Int             @id @default(autoincrement())
+  conversationId   Int?
+  type             String
+  title            String
+  description      String?
+  payload          Json?
+  riskLevel        String          @default("MEDIUM")
+  status           String          @default("PENDING_APPROVAL")
+  requiresApproval Boolean         @default(true)
+  requestedBy      String?
+  approvedBy       String?
+  executedBy       String?
+  approvedAt       DateTime?
+  executedAt       DateTime?
+  result           Json?
+  error            String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  conversation     AiConversation? @relation(fields: [conversationId], references: [id])
+
+  @@index([conversationId])
+  @@index([type])
+  @@index([status])
+  @@index([riskLevel])
+  @@index([createdAt])
+}
+
+model AiRecommendation {
+  id             Int             @id @default(autoincrement())
+  conversationId Int?
+  category       String          @default("OPERAÇÃO")
+  priority       String          @default("MEDIUM")
+  title          String
+  summary        String
+  rationale      String?
+  payload        Json?
+  status         String          @default("OPEN")
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  conversation   AiConversation? @relation(fields: [conversationId], references: [id])
+
+  @@index([conversationId])
+  @@index([category])
+  @@index([priority])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model CompanyClosure {
+  id                    Int       @id @default(autoincrement())
+  title                 String
+  closureType           String    @default("HOLIDAY")
+  status                String    @default("PLANNED")
+  startDate             DateTime
+  endDate               DateTime
+  messageTitle          String?
+  messageBody           String?
+  emergencyPhone        String?
+  emergencyEmail        String?
+  notifyClients         Boolean   @default(true)
+  notifyTechnicians     Boolean   @default(true)
+  showOnClientPortal    Boolean   @default(true)
+  pauseNormalVisits     Boolean   @default(true)
+  allowCriticalServices Boolean   @default(true)
+  affectedServiceTypes  Json?
+  exceptionRules        Json?
+  routeAction           String    @default("PREVIEW_ONLY")
+  createdByUserId       Int?
+  approvedByUserId      Int?
+  approvedAt            DateTime?
+  activatedAt           DateTime?
+  deactivatedAt         DateTime?
+  metadata              Json?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([status])
+  @@index([closureType])
+  @@index([startDate])
+  @@index([endDate])
+}
+
+model SystemSetting {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+}
+
+model UserNotificationSetting {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  type      String
+  sound     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type], name: "userId_type")
+}
+
+model TechnicianLocation {
+  id           Int         @id @default(autoincrement())
+  userId       Int?        @unique
+  technicianId Int?
+  latitude     Float
+  longitude    Float
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  technician   Technician? @relation(fields: [technicianId], references: [id])
+  user         User?       @relation(fields: [userId], references: [id])
+
+  @@index([technicianId])
+  @@index([createdAt])
+}
+
+model TechnicianTrack {
+  id           Int         @id @default(autoincrement())
+  userId       Int?
+  technicianId Int?
+  latitude     Float
+  longitude    Float
+  createdAt    DateTime    @default(now())
+  technician   Technician? @relation(fields: [technicianId], references: [id])
+  user         User?       @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([technicianId])
+  @@index([createdAt])
+}
+
+model TechnicianWorkDay {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  date      DateTime
+  startAt   DateTime  @default(now())
+  endAt     DateTime?
+  status    String    @default("ACTIVE")
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([date])
+  @@index([status])
+}
+
+model LocationLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  latitude  Float
+  longitude Float
+  accuracyM Float?
+  timestamp DateTime @default(now())
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([timestamp])
+}
+
+model Zone {
+  id        Int      @id @default(autoincrement())
+  name      String
+  minLat    Float?
+  maxLat    Float?
+  minLng    Float?
+  maxLng    Float?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  pools     Pool[]
+}
+
+model Vehicle {
+  id                  Int                    @id @default(autoincrement())
+  plate               String                 @unique
+  name                String?
+  brand               String?
+  model               String?
+  year                Int?
+  currentKm           Float?
+  status              String                 @default("ACTIVE")
+  notes               String?
+  active              Boolean                @default(true)
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  archiveStatus       ArchiveStatus          @default(ATIVO)
+  deletedAt           DateTime?
+  assignedTechnicians Technician[]           @relation("TechnicianAssignedVehicle")
+  vehicleLogs         TechnicianVehicleLog[]
+  transportGuides     TransportGuide[]
+  workGuides          WorkGuide[]
+
+  @@index([status])
+  @@index([active])
+}
+
+model TransportGuide {
+  id              Int                  @id @default(autoincrement())
+  codeAT          String?              @unique
+  vehicleId       Int?
+  status          String               @default("ACTIVE")
+  origin          String?
+  destination     String?
+  notes           String?
+  validFrom       DateTime             @default(now())
+  validUntil      DateTime?
+  closedAt        DateTime?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  isDraft         Boolean              @default(true)
+  inheritedFromId Int?
+  vehicle         Vehicle?             @relation(fields: [vehicleId], references: [id])
+  items           TransportGuideItem[]
+  workGuides      WorkGuide[]
+
+  @@index([vehicleId])
+  @@index([status])
+}
+
+model TransportGuideItem {
+  id       Int            @id @default(autoincrement())
+  guideId  Int
+  name     String
+  type     String?
+  unit     String?        @default("UN")
+  quantity Float          @default(0)
+  guide    TransportGuide @relation(fields: [guideId], references: [id], onDelete: Cascade)
+
+  @@index([guideId])
+}
+
+model WorkGuide {
+  id              Int             @id @default(autoincrement())
+  guideId         Int?
+  vehicleId       Int?
+  technicianId    Int?
+  status          String          @default("OPEN")
+  startKm         Float?
+  endKm           Float?
+  notes           String?
+  createdAt       DateTime        @default(now())
+  closedAt        DateTime?
+  updatedAt       DateTime        @updatedAt
+  isDraft         Boolean         @default(true)
+  inheritedFromId Int?
+  guide           TransportGuide? @relation(fields: [guideId], references: [id])
+  technician      Technician?     @relation(fields: [technicianId], references: [id])
+  vehicle         Vehicle?        @relation(fields: [vehicleId], references: [id])
+  items           WorkGuideItem[]
+
+  @@index([guideId])
+  @@index([vehicleId])
+  @@index([technicianId])
+}
+
+model WorkGuideItem {
+  id          Int       @id @default(autoincrement())
+  workGuideId Int
+  name        String
+  type        String?
+  unit        String?   @default("UN")
+  initialQty  Float     @default(0)
+  quantity    Float     @default(0)
+  usedQty     Float     @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  workGuide   WorkGuide @relation(fields: [workGuideId], references: [id], onDelete: Cascade)
+
+  @@index([workGuideId])
+}
+
+model TechnicianVehicleLog {
+  id           Int        @id @default(autoincrement())
+  technicianId Int
+  vehicleId    Int
+  startAt      DateTime   @default(now())
+  endAt        DateTime?
+  technician   Technician @relation(fields: [technicianId], references: [id])
+  vehicle      Vehicle    @relation(fields: [vehicleId], references: [id])
+
+  @@index([technicianId])
+  @@index([vehicleId])
+}
+
+model Visit {
+  id                   Int         @id @default(autoincrement())
+  clientId             Int?
+  poolId               Int?
+  technicianId         Int?
+  plannedDate          DateTime    @default(now())
+  executedAt           DateTime?
+  status               String      @default("PLANNED")
+  availabilityMode     String?
+  executedBy           Int?
+  helpRequested        Boolean     @default(false)
+  advanced             Boolean     @default(false)
+  advanceReason        String?
+  originalTechnicianId Int?
+  notes                String?
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+  client               Client?     @relation(fields: [clientId], references: [id])
+  pool                 Pool?       @relation(fields: [poolId], references: [id])
+  technician           Technician? @relation(fields: [technicianId], references: [id])
+  logs                 VisitLog[]
+
+  @@index([clientId])
+  @@index([poolId])
+  @@index([technicianId])
+  @@index([plannedDate])
+  @@index([status])
+  @@index([technicianId, status])
+  @@index([poolId, plannedDate])
+  @@index([status, plannedDate])
+}
+
+model VisitLog {
+  id          Int      @id @default(autoincrement())
+  visitId     Int
+  action      String
+  performedBy Int?
+  notes       String?
+  createdAt   DateTime @default(now())
+  visit       Visit    @relation(fields: [visitId], references: [id], onDelete: Cascade)
+
+  @@index([visitId])
+  @@index([action])
+}
+
+model Incident {
+  id                 Int       @id @default(autoincrement())
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  resolvedAt         DateTime?
+  type               String
+  severity           String
+  title              String
+  description        String?
+  status             String    @default("OPEN")
+  source             String?
+  escalated          Boolean   @default(false)
+  autoEscalated      Boolean   @default(false)
+  autoAssigned       Boolean   @default(false)
+  impactScore        Int       @default(0)
+  priorityScore      Int       @default(0)
+  assignmentScore    Int       @default(0)
+  assignmentDistance Float?
+  assignmentVisits   Int?
+  slaDeadline        DateTime?
+  metadata           Json?
+  poolId             Int?
+  clientId           Int?
+  technicianId       Int?
+
+  @@index([status])
+  @@index([severity])
+  @@index([type])
+  @@index([technicianId])
+  @@index([createdAt])
+}
+
+model AiOpsConversation {
+  id          Int            @id @default(autoincrement())
+  title       String?
+  adminUserId Int?
+  status      String         @default("OPEN")
+  metadata    Json?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  actions     AiOpsAction[]
+  messages    AiOpsMessage[]
+
+  @@index([adminUserId])
+  @@index([status])
+  @@index([updatedAt])
+}
+
+model AiOpsMessage {
+  id             Int               @id @default(autoincrement())
+  conversationId Int
+  role           String
+  content        String
+  metadata       Json?
+  createdAt      DateTime          @default(now())
+  actions        AiOpsAction[]
+  conversation   AiOpsConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([role])
+  @@index([createdAt])
+}
+
+model AiOpsAction {
+  id               Int                @id @default(autoincrement())
+  conversationId   Int?
+  messageId        Int?
+  title            String
+  actionType       String
+  summary          String?
+  payload          Json?
+  result           Json?
+  riskLevel        String             @default("MEDIUM")
+  requiresApproval Boolean            @default(true)
+  status           String             @default("PENDING_APPROVAL")
+  createdByUserId  Int?
+  approvedByUserId Int?
+  rejectedByUserId Int?
+  rejectionReason  String?
+  executedAt       DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  conversation     AiOpsConversation? @relation(fields: [conversationId], references: [id])
+  message          AiOpsMessage?      @relation(fields: [messageId], references: [id])
+
+  @@index([conversationId])
+  @@index([messageId])
+  @@index([actionType])
+  @@index([riskLevel])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model AiAssistantThread {
+  id              Int                  @id @default(autoincrement())
+  title           String?
+  status          String               @default("OPEN")
+  createdByUserId Int?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  actions         AiAssistantAction[]
+  messages        AiAssistantMessage[]
+
+  @@index([status])
+  @@index([createdByUserId])
+  @@index([createdAt])
+}
+
+model AiAssistantMessage {
+  id              Int                @id @default(autoincrement())
+  threadId        Int?
+  role            String
+  content         String
+  metadata        Json?
+  createdByUserId Int?
+  createdAt       DateTime           @default(now())
+  thread          AiAssistantThread? @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@index([threadId])
+  @@index([role])
+  @@index([createdByUserId])
+  @@index([createdAt])
+}
+
+model AiAssistantAction {
+  id               Int                @id @default(autoincrement())
+  threadId         Int?
+  type             String
+  title            String
+  description      String?
+  risk             String             @default("MEDIUM")
+  status           String             @default("PENDING")
+  payload          Json
+  result           Json?
+  error            String?
+  createdByUserId  Int?
+  approvedByUserId Int?
+  approvedAt       DateTime?
+  executedAt       DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  thread           AiAssistantThread? @relation(fields: [threadId], references: [id])
+
+  @@index([threadId])
+  @@index([type])
+  @@index([risk])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Lead {
+  id                Int               @id @default(autoincrement())
+  name              String
+  internalName      String?
+  phone             String?
+  email             String?
+  address           String?
+  zone              String?
+  latitude          Float?
+  longitude         Float?
+  source            String?           @default("MANUAL")
+  status            String            @default("NEW")
+  priority          String            @default("NORMAL")
+  estimatedValue    Float?            @default(0)
+  poolType          String?
+  notes             String?
+  assignedTo        String?
+  nextFollowUpAt    DateTime?
+  convertedClientId Int?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  appointments      Appointment[]
+  reminders         GeneralReminder[]
+  activities        LeadActivity[]
+
+  @@index([name])
+  @@index([phone])
+  @@index([email])
+  @@index([zone])
+  @@index([status])
+  @@index([priority])
+  @@index([nextFollowUpAt])
+}
+
+model LeadActivity {
+  id          Int      @id @default(autoincrement())
+  leadId      Int
+  type        String   @default("NOTE")
+  title       String?
+  description String?
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  lead        Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model Appointment {
+  id              Int       @id @default(autoincrement())
+  title           String
+  description     String?
+  appointmentType String    @default("GENERAL")
+  status          String    @default("SCHEDULED")
+  startsAt        DateTime
+  endsAt          DateTime?
+  location        String?
+  latitude        Float?
+  longitude       Float?
+  clientId        Int?
+  poolId          Int?
+  leadId          Int?
+  technicianId    Int?
+  assignedTo      String?
+  reminder2d      Boolean   @default(true)
+  reminder1d      Boolean   @default(true)
+  reminderSameDay Boolean   @default(true)
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  lead            Lead?     @relation(fields: [leadId], references: [id])
+
+  @@index([startsAt])
+  @@index([status])
+  @@index([appointmentType])
+  @@index([clientId])
+  @@index([leadId])
+  @@index([technicianId])
+}
+
+model GeneralReminder {
+  id            Int       @id @default(autoincrement())
+  title         String
+  description   String?
+  category      String    @default("GENERAL")
+  priority      String    @default("NORMAL")
+  status        String    @default("PENDING")
+  dueAt         DateTime
+  completedAt   DateTime?
+  clientId      Int?
+  poolId        Int?
+  leadId        Int?
+  appointmentId Int?
+  technicianId  Int?
+  repeatRule    String?
+  createdBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lead          Lead?     @relation(fields: [leadId], references: [id])
+
+  @@index([dueAt])
+  @@index([status])
+  @@index([category])
+  @@index([priority])
+  @@index([clientId])
+  @@index([poolId])
+  @@index([leadId])
+  @@index([technicianId])
+}
+
+model SupplierAccount {
+  id                Int                 @id @default(autoincrement())
+  name              String
+  category          String?
+  website           String?
+  loginUrl          String?
+  username          String?
+  encryptedPassword String?
+  passwordHint      String?
+  contactName       String?
+  phone             String?
+  email             String?
+  address           String?
+  nif               String?
+  discountNotes     String?
+  paymentTerms      String?
+  notes             String?
+  favorite          Boolean             @default(false)
+  active            Boolean             @default(true)
+  lastAccessAt      DateTime?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  links             SupplierQuickLink[]
+
+  @@index([name])
+  @@index([category])
+  @@index([favorite])
+  @@index([active])
+}
+
+model SupplierQuickLink {
+  id         Int              @id @default(autoincrement())
+  supplierId Int?
+  title      String
+  url        String
+  category   String?          @default("GENERAL")
+  notes      String?
+  favorite   Boolean          @default(false)
+  active     Boolean          @default(true)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  supplier   SupplierAccount? @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+
+  @@index([supplierId])
+  @@index([category])
+  @@index([favorite])
+  @@index([active])
+}
+
+model VehicleStockMovement {
+  id               Int      @id @default(autoincrement())
+  vehicleId        Int?
+  transportGuideId Int?
+  workGuideId      Int?
+  visitId          Int?
+  technicianId     Int?
+  itemName         String
+  itemType         String?
+  unit             String?  @default("UN")
+  quantity         Float    @default(0)
+  movementType     String   @default("CONSUMPTION")
+  source           String?
+  notes            String?
+  createdAt        DateTime @default(now())
+
+  @@index([vehicleId])
+  @@index([transportGuideId])
+  @@index([workGuideId])
+  @@index([visitId])
+  @@index([technicianId])
+  @@index([movementType])
+  @@index([createdAt])
+}
+
+model VehicleMaintenanceRecord {
+  id          Int       @id @default(autoincrement())
+  vehicleId   Int?
+  type        String    @default("GENERAL")
+  title       String
+  status      String    @default("PENDING")
+  dueDate     DateTime?
+  completedAt DateTime?
+  km          Float?
+  cost        Float?
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([vehicleId])
+  @@index([type])
+  @@index([status])
+  @@index([dueDate])
+}
+
+model UserAuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  actor     String?
+  action    String
+  entity    String?
+  entityId  String?
+  ip        String?
+  userAgent String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([entity])
+  @@index([createdAt])
+}
+
+model InventoryProduct {
+  id              Int                 @id @default(autoincrement())
+  name            String
+  sku             String?             @unique
+  brand           String?
+  category        String?             @default("CHEMICAL")
+  unit            String              @default("KG")
+  defaultCost     Float?              @default(0)
+  minStockCentral Float?              @default(0)
+  minStockVehicle Float?              @default(0)
+  notes           String?
+  active          Boolean             @default(true)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  archiveStatus   ArchiveStatus       @default(ATIVO)
+  deletedAt       DateTime?
+  purchases       StockPurchaseItem[]
+
+  @@index([name])
+  @@index([category])
+  @@index([active])
+}
+
+model StockPurchase {
+  id            Int                 @id @default(autoincrement())
+  supplierName  String?
+  supplierId    Int?
+  invoiceNumber String?
+  invoiceDate   DateTime?
+  documentPath  String?
+  documentName  String?
+  totalAmount   Float?              @default(0)
+  status        String              @default("POSTED")
+  notes         String?
+  createdBy     String?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  items         StockPurchaseItem[]
+
+  @@index([supplierName])
+  @@index([invoiceNumber])
+  @@index([invoiceDate])
+  @@index([status])
+}
+
+model StockPurchaseItem {
+  id          Int               @id @default(autoincrement())
+  purchaseId  Int
+  productId   Int?
+  productName String
+  category    String?           @default("CHEMICAL")
+  unit        String            @default("KG")
+  quantity    Float             @default(0)
+  unitCost    Float?            @default(0)
+  totalCost   Float?            @default(0)
+  lot         String?
+  notes       String?
+  createdAt   DateTime          @default(now())
+  product     InventoryProduct? @relation(fields: [productId], references: [id])
+  purchase    StockPurchase     @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+
+  @@index([purchaseId])
+  @@index([productId])
+  @@index([productName])
+  @@index([category])
+}
+
+model StockBalance {
+  id          Int      @id @default(autoincrement())
+  scope       String   @default("CENTRAL")
+  vehicleId   Int?
+  productId   Int?
+  productName String
+  category    String?  @default("CHEMICAL")
+  unit        String   @default("KG")
+  quantity    Float    @default(0)
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+
+  @@unique([scope, vehicleId, productName, unit])
+  @@index([scope])
+  @@index([vehicleId])
+  @@index([productName])
+  @@index([category])
+}
+
+model StockMovement {
+  id               Int      @id @default(autoincrement())
+  movementType     String
+  scopeFrom        String?
+  scopeTo          String?
+  vehicleId        Int?
+  productId        Int?
+  productName      String
+  category         String?  @default("CHEMICAL")
+  unit             String   @default("KG")
+  quantity         Float    @default(0)
+  purchaseId       Int?
+  transportGuideId Int?
+  workGuideId      Int?
+  visitId          Int?
+  clientId         Int?
+  poolId           Int?
+  technicianId     Int?
+  documentPath     String?
+  notes            String?
+  createdBy        String?
+  createdAt        DateTime @default(now())
+
+  @@index([movementType])
+  @@index([vehicleId])
+  @@index([productName])
+  @@index([purchaseId])
+  @@index([transportGuideId])
+  @@index([workGuideId])
+  @@index([visitId])
+  @@index([createdAt])
+}
+
+model OperationalLock {
+  id           Int       @id @default(autoincrement())
+  lockType     String
+  severity     String    @default("WARNING")
+  status       String    @default("PENDING")
+  entity       String?
+  entityId     Int?
+  clientId     Int?
+  poolId       Int?
+  visitId      Int?
+  technicianId Int?
+  vehicleId    Int?
+  title        String
+  message      String?
+  payload      Json?
+  requestedBy  String?
+  approvedBy   String?
+  approvedAt   DateTime?
+  rejectedAt   DateTime?
+  resolvedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([lockType])
+  @@index([severity])
+  @@index([status])
+  @@index([entity, entityId])
+  @@index([clientId])
+  @@index([poolId])
+  @@index([visitId])
+  @@index([technicianId])
+  @@index([vehicleId])
+}
+
+model VisitStateLog {
+  id            Int      @id @default(autoincrement())
+  visitId       Int
+  previousState String?
+  newState      String
+  reason        String?
+  notes         String?
+  latitude      Float?
+  longitude     Float?
+  photoRequired Boolean  @default(false)
+  photoUrl      String?
+  actor         String?
+  createdAt     DateTime @default(now())
+
+  @@index([visitId])
+  @@index([newState])
+  @@index([createdAt])
+}
+
+model SeasonalRule {
+  id                       Int      @id @default(autoincrement())
+  name                     String
+  season                   String   @default("VERAO")
+  active                   Boolean  @default(true)
+  monthStart               Int?
+  monthEnd                 Int?
+  minVisitsPerWeek         Float?   @default(1)
+  idealVisitsPerWeek       Float?   @default(1)
+  filtrationMultiplier     Float?   @default(1)
+  chemicalMultiplier       Float?   @default(1)
+  saltProductionMultiplier Float?   @default(1)
+  monthlyFeeMultiplier     Float?   @default(1)
+  appliesTo                String?  @default("ALL")
+  notes                    String?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  @@index([season])
+  @@index([active])
+  @@index([monthStart, monthEnd])
+}
+
+model VehicleAccessibilityRule {
+  id                Int      @id @default(autoincrement())
+  poolId            Int?
+  clientId          Int?
+  accessibilityType String   @default("LIGEIRO")
+  maxVehicleType    String?
+  notes             String?
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([poolId])
+  @@index([clientId])
+  @@index([accessibilityType])
+  @@index([active])
+}
+
+model EmergencyConsumptionBatch {
+  id               Int                        @id @default(autoincrement())
+  technicianId     Int?
+  vehicleId        Int?
+  workGuideId      Int?
+  date             DateTime                   @default(now())
+  status           String                     @default("DRAFT")
+  distributionMode String                     @default("PROPORTIONAL")
+  notes            String?
+  createdBy        String?
+  approvedBy       String?
+  approvedAt       DateTime?
+  createdAt        DateTime                   @default(now())
+  updatedAt        DateTime                   @updatedAt
+  items            EmergencyConsumptionItem[]
+
+  @@index([technicianId])
+  @@index([vehicleId])
+  @@index([workGuideId])
+  @@index([date])
+  @@index([status])
+}
+
+model EmergencyConsumptionItem {
+  id          Int                       @id @default(autoincrement())
+  batchId     Int
+  productName String
+  unit        String                    @default("KG")
+  quantity    Float                     @default(0)
+  notes       String?
+  createdAt   DateTime                  @default(now())
+  batch       EmergencyConsumptionBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@index([batchId])
+  @@index([productName])
+}
+
+model VehicleStockAudit {
+  id            Int                     @id @default(autoincrement())
+  vehicleId     Int?
+  technicianId  Int?
+  weekRef       String
+  status        String                  @default("OPEN")
+  expectedJson  Json?
+  countedJson   Json?
+  varianceJson  Json?
+  varianceValue Float                   @default(0)
+  notes         String?
+  createdAt     DateTime                @default(now())
+  closedAt      DateTime?
+  updatedAt     DateTime                @updatedAt
+  items         VehicleStockAuditItem[]
+
+  @@index([vehicleId])
+  @@index([technicianId])
+  @@index([weekRef])
+  @@index([status])
+}
+
+model VehicleStockAuditItem {
+  id          Int               @id @default(autoincrement())
+  auditId     Int
+  productName String
+  unit        String            @default("KG")
+  expectedQty Float             @default(0)
+  countedQty  Float             @default(0)
+  varianceQty Float             @default(0)
+  notes       String?
+  audit       VehicleStockAudit @relation(fields: [auditId], references: [id], onDelete: Cascade)
+
+  @@index([auditId])
+  @@index([productName])
+}
+
+model ClientProfitSnapshot {
+  id                 Int      @id @default(autoincrement())
+  clientId           Int
+  monthRef           String
+  revenue            Float    @default(0)
+  chemicalCost       Float    @default(0)
+  materialCost       Float    @default(0)
+  laborCost          Float    @default(0)
+  vehicleCost        Float    @default(0)
+  extraRevenue       Float    @default(0)
+  grossProfit        Float    @default(0)
+  grossMarginPercent Float    @default(0)
+  status             String   @default("OK")
+  recommendation     String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([clientId, monthRef])
+  @@index([clientId])
+  @@index([monthRef])
+  @@index([status])
+}
+
+model AuditTrail {
+  id           Int      @id @default(autoincrement())
+  eventType    String
+  entity       String?
+  entityId     Int?
+  userId       Int?
+  technicianId Int?
+  clientId     Int?
+  poolId       Int?
+  visitId      Int?
+  vehicleId    Int?
+  action       String
+  message      String?
+  beforeJson   Json?
+  afterJson    Json?
+  metadata     Json?
+  latitude     Float?
+  longitude    Float?
+  serverTime   DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  @@index([eventType])
+  @@index([entity, entityId])
+  @@index([userId])
+  @@index([technicianId])
+  @@index([clientId])
+  @@index([poolId])
+  @@index([visitId])
+  @@index([vehicleId])
+  @@index([createdAt])
+}
+
+model TechnicalSheet {
+  id                    Int      @id @default(autoincrement())
+  poolId                Int      @unique
+  volumeM3              Float    @default(0)
+  disinfectionType      String   @default("CLORO")
+  targetPhMin           Float    @default(7.2)
+  targetPhMax           Float    @default(7.6)
+  targetChlorineMin     Float    @default(1.0)
+  targetChlorineMax     Float    @default(3.0)
+  targetAlkalinityMin   Float    @default(80)
+  targetAlkalinityMax   Float    @default(120)
+  targetOrpMinMv        Float?
+  filterBrandModel      String?
+  pumpHorsePower        Float?
+  chlorinatorModel      String?
+  technicalRoomLocation String?
+  specialObservations   String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  pool                  Pool     @relation(fields: [poolId], references: [id])
+
+  @@index([disinfectionType])
+}
+
+model KeyAccess {
+  id                   Int         @id @default(autoincrement())
+  keyCode              String      @unique
+  description          String?
+  requiredForVisit     Boolean     @default(false)
+  visibleToTechnician  Boolean     @default(true)
+  assignedTechnicianId Int?
+  assignedAt           DateTime?
+  active               Boolean     @default(true)
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+  assignedTechnician   Technician? @relation(fields: [assignedTechnicianId], references: [id])
+  pools                Pool[]      @relation("KeyAccessToPool")
+
+  @@index([keyCode])
+  @@index([assignedTechnicianId])
+  @@index([requiredForVisit])
+  @@index([visibleToTechnician])
+  @@index([active])
+}
+
+model Attachment {
+  id             Int             @id @default(autoincrement())
+  fileName       String
+  fileUrl        String
+  mimeType       String
+  fileSize       Int
+  clientId       Int?
+  poolId         Int?
+  serviceVisitId Int?
+  alertId        Int?
+  repairId       Int?
+  invoiceId      Int?
+  createdAt      DateTime        @default(now())
+  alert          TechnicalAlert? @relation(fields: [alertId], references: [id])
+  client         Client?         @relation(fields: [clientId], references: [id])
+  invoice        Invoice?        @relation(fields: [invoiceId], references: [id])
+  pool           Pool?           @relation(fields: [poolId], references: [id])
+  repair         Repair?         @relation(fields: [repairId], references: [id])
+  serviceVisit   ServiceVisit?   @relation(fields: [serviceVisitId], references: [id])
+
+  @@index([clientId])
+  @@index([poolId])
+  @@index([serviceVisitId])
+  @@index([alertId])
+  @@index([repairId])
+  @@index([invoiceId])
+}
+
+model OperationalReminder {
+  id                     Int         @id @default(autoincrement())
+  title                  String
+  description            String?
+  dueDate                DateTime
+  isCompleted            Boolean     @default(false)
+  clientId               Int?
+  poolId                 Int?
+  assignedToTechnicianId Int?
+  createdAt              DateTime    @default(now())
+  updatedAt              DateTime    @updatedAt
+  assignedTechnician     Technician? @relation(fields: [assignedToTechnicianId], references: [id])
+  client                 Client?     @relation(fields: [clientId], references: [id])
+  pool                   Pool?       @relation(fields: [poolId], references: [id])
+
+  @@index([dueDate])
+  @@index([isCompleted])
+  @@index([clientId])
+  @@index([poolId])
+  @@index([assignedToTechnicianId])
+}
+
+enum ArchiveStatus {
+  ATIVO
+  PAUSA
+  ARQUIVADO
+}
