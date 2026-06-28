@@ -13,6 +13,7 @@ const WorkerEngine = require("./worker/WorkerEngine");
 const QueueEngine = require("./queue/QueueEngine");
 const DependencyContainer = require("./di/DependencyContainer");
 const LifecycleManager = require("./lifecycle/LifecycleManager");
+const RuntimeMonitor = require("./monitor/RuntimeMonitor");
 
 const InMemoryRepository = require("./repository/InMemoryRepository");
 const PermissionEngine = require("./permissions/PermissionEngine");
@@ -41,6 +42,7 @@ module.exports = {
   QueueEngine,
   DependencyContainer,
   LifecycleManager,
+  RuntimeMonitor,
   InMemoryRepository,
   PermissionEngine,
   RequestContext,
