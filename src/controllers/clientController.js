@@ -144,13 +144,7 @@ async function updateClient(req, res) {
     const clientId = toInt(req.params.id);
     if (!clientId) return res.status(400).json({ error: "ID inválido" });
 
-    const currentClient = await prisma.client.findUnique({ where: { id: clientId } });
-    if (!currentClient) return res.status(404).json({ error: "Cliente não encontrado" });
-
-    const updated = await prisma.client.update({
-      where: { id: clientId },
-      data: clientUpdateData(req.body, currentClient),
-    });
+    const updated = await ClientBusiness.update(clientId, req.body);
 
     return res.json({ ok: true, client: updated });
   } catch (err) {
