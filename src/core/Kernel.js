@@ -14,6 +14,7 @@ const QueueEngine = require("./queue/QueueEngine");
 const DependencyContainer = require("./di/DependencyContainer");
 const LifecycleManager = require("./lifecycle/LifecycleManager");
 const RuntimeMonitor = require("./monitor/RuntimeMonitor");
+const CrystalDoctor = require("./doctor/CrystalDoctor");
 
 const InMemoryRepository = require("./repository/InMemoryRepository");
 const PermissionEngine = require("./permissions/PermissionEngine");
@@ -43,6 +44,7 @@ module.exports = {
   DependencyContainer,
   LifecycleManager,
   RuntimeMonitor,
+  CrystalDoctor,
   InMemoryRepository,
   PermissionEngine,
   RequestContext,
