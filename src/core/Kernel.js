@@ -10,6 +10,7 @@ const KernelConfig = require("./config/KernelConfig");
 const KernelRuntime = require("./runtime/KernelRuntime");
 const Scheduler = require("./scheduler/Scheduler");
 const WorkerEngine = require("./worker/WorkerEngine");
+const QueueEngine = require("./queue/QueueEngine");
 
 const InMemoryRepository = require("./repository/InMemoryRepository");
 const PermissionEngine = require("./permissions/PermissionEngine");
@@ -35,6 +36,7 @@ module.exports = {
   KernelRuntime,
   Scheduler,
   WorkerEngine,
+  QueueEngine,
   InMemoryRepository,
   PermissionEngine,
   RequestContext,
