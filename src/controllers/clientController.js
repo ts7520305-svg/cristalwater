@@ -1,4 +1,5 @@
 const { prisma } = require("../prismaClient");
+const ClientBusiness = require("../business/client/ClientBusiness");
 
 function toInt(value) {
   const n = Number(value);
@@ -101,13 +102,7 @@ async function listClients(req, res) {
       status: { not: "ARCHIVED" },
     };
 
-    const clients = await prisma.client.findMany({
-      where,
-      include: {
-        pools: { where: includeInactive ? {} : { active: true, deletedAt: null, archiveStatus: "ATIVO" } },
-      },
-      orderBy: { name: "asc" },
-    });
+    const clients = await ClientBusiness.list(req.query);
 
     return res.json({ ok: true, clients });
   } catch (err) {
@@ -121,10 +116,7 @@ async function getClientById(req, res) {
     const clientId = toInt(req.params.id);
     if (!clientId) return res.status(400).json({ error: "ID inválido" });
 
-    const client = await prisma.client.findUnique({
-      where: { id: clientId },
-      include: { pools: true, invoices: true },
-    });
+    const client = await ClientBusiness.getById(clientId);
 
     if (!client) return res.status(404).json({ error: "Cliente não encontrado" });
     return res.json({ ok: true, client });
@@ -139,7 +131,7 @@ async function createClient(req, res) {
     const data = clientCreateData(req.body);
     if (!data.name) return res.status(400).json({ error: "Nome obrigatório" });
 
-    const created = await prisma.client.create({ data });
+    const created = await ClientBusiness.create(data);
     return res.status(201).json({ ok: true, client: created, message: "Cliente criado em configuração. Faturação desligada até ativar contrato." });
   } catch (err) {
     console.error("createClient error:", err);
@@ -152,13 +144,7 @@ async function updateClient(req, res) {
     const clientId = toInt(req.params.id);
     if (!clientId) return res.status(400).json({ error: "ID inválido" });
 
-    const currentClient = await prisma.client.findUnique({ where: { id: clientId } });
-    if (!currentClient) return res.status(404).json({ error: "Cliente não encontrado" });
-
-    const updated = await prisma.client.update({
-      where: { id: clientId },
-      data: clientUpdateData(req.body, currentClient),
-    });
+    const updated = await ClientBusiness.update(clientId, req.body);
 
     return res.json({ ok: true, client: updated });
   } catch (err) {
@@ -172,22 +158,7 @@ async function activateClient(req, res) {
     const clientId = toInt(req.params.id);
     if (!clientId) return res.status(400).json({ error: "ID inválido" });
 
-    const amount = numberOrUndefined(req.body?.amount) || 0;
-    const client = await prisma.client.update({
-      where: { id: clientId },
-      data: {
-        contractActive: true,
-        billingActive: true,
-        contractActivatedAt: new Date(),
-        lastPaymentAt: new Date(),
-        paymentStatus: "PAID",
-        status: "ACTIVE",
-        active: true,
-        archiveStatus: "ATIVO",
-        deletedAt: null,
-        creditBalance: amount > 0 ? amount : undefined,
-      },
-    });
+    const client = await ClientBusiness.activate(clientId, req.body);
 
     return res.json({ ok: true, client, message: "Contrato ativado. A faturação começa a partir desta data." });
   } catch (err) {
@@ -201,19 +172,8 @@ async function archiveClient(req, res) {
     const clientId = toInt(req.params.id);
     if (!clientId) return res.status(400).json({ error: "ID inválido" });
 
-    const now = new Date();
-    await prisma.$transaction([
-      prisma.client.update({
-        where: { id: clientId },
-        data: { archiveStatus: "ARQUIVADO", deletedAt: now, status: "ARCHIVED", active: false, billingActive: false, paymentStatus: "BILLING_DISABLED" },
-      }),
-      prisma.pool.updateMany({
-        where: { clientId },
-        data: { archiveStatus: "ARQUIVADO", deletedAt: now, active: false, scheduleMode: "ARCHIVED" },
-      }),
-    ]);
-
-    return res.json({ ok: true, archived: true, message: "Cliente e piscinas arquivados com histórico preservado." });
+    const result = await ClientBusiness.archive(clientId);
+    return res.json(result);
   } catch (err) {
     console.error("archiveClient error:", err);
     return res.status(500).json({ error: err.message || "Erro ao arquivar cliente" });
@@ -225,18 +185,8 @@ async function restoreClient(req, res) {
     const clientId = toInt(req.params.id);
     if (!clientId) return res.status(400).json({ error: "ID inválido" });
 
-    await prisma.$transaction([
-      prisma.client.update({
-        where: { id: clientId },
-        data: { archiveStatus: "ATIVO", deletedAt: null, status: "SETUP", active: true, billingActive: false, paymentStatus: "BILLING_DISABLED" },
-      }),
-      prisma.pool.updateMany({
-        where: { clientId },
-        data: { archiveStatus: "ATIVO", deletedAt: null, active: true, scheduleMode: "PENDING_ROUND" },
-      }),
-    ]);
-
-    return res.json({ ok: true, restored: true, message: "Cliente restaurado em configuração. A faturação continua desligada até ativar contrato." });
+    const result = await ClientBusiness.restore(clientId);
+    return res.json(result);
   } catch (err) {
     console.error("restoreClient error:", err);
     return res.status(500).json({ error: err.message || "Erro ao restaurar cliente" });
@@ -248,19 +198,8 @@ async function deleteClient(req, res) {
     const clientId = toInt(req.params.id);
     if (!clientId) return res.status(400).json({ error: "ID inválido" });
 
-    const [invoices, pools, visits] = await Promise.all([
-      prisma.invoice.count({ where: { clientId } }).catch(() => 0),
-      prisma.pool.count({ where: { clientId } }).catch(() => 0),
-      prisma.serviceVisit.count({ where: { clientId } }).catch(() => 0),
-    ]);
-
-    if (invoices > 0 || pools > 0 || visits > 0) {
-      req.params.id = String(clientId);
-      return archiveClient(req, res);
-    }
-
-    await prisma.client.delete({ where: { id: clientId } });
-    return res.json({ ok: true, deleted: true });
+    const result = await ClientBusiness.delete(clientId);
+    return res.json(result);
   } catch (err) {
     console.error("deleteClient error:", err);
     return res.status(409).json({ error: err.message || "Cliente protegido por histórico. Arquive em vez de eliminar fisicamente." });
