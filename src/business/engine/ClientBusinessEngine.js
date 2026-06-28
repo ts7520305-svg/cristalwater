@@ -2,17 +2,38 @@ const prisma = require("../../prismaClient");
 
 class ClientBusinessEngine {
 
-    async list(){
+    async list(filters = {}) {
 
         return prisma.client.findMany({
 
             where:{
-                archiveStatus:"ATIVO",
-                deletedAt:null
+
+                deletedAt:null,
+
+                ...(filters.active!==undefined && {
+
+                    active:filters.active
+
+                }),
+
+                ...(filters.archiveStatus && {
+
+                    archiveStatus:filters.archiveStatus
+
+                })
+
+            },
+
+            include:{
+
+                pools:true
+
             },
 
             orderBy:{
+
                 name:"asc"
+
             }
 
         });
@@ -25,6 +46,15 @@ class ClientBusinessEngine {
 
             where:{
                 id:Number(id)
+            },
+
+            include:{
+
+                pools:true,
+
+                invoices:true,
+
+                payments:true
 
             }
 
@@ -37,7 +67,6 @@ class ClientBusinessEngine {
         return prisma.client.count({
 
             where:{
-                archiveStatus:"ATIVO",
                 deletedAt:null
             }
 
@@ -47,4 +76,4 @@ class ClientBusinessEngine {
 
 }
 
-module.exports=new ClientBusinessEngine();
+module.exports = new ClientBusinessEngine();
