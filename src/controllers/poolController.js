@@ -1,4 +1,5 @@
 const { prisma } = require("../prismaClient");
+const PoolBusiness = require("../business/pool/PoolBusiness");
 
 function toInt(value) {
   const n = Number(value);
@@ -112,27 +113,7 @@ async function recordTechnicalSheetHistory(poolId, before, after, actor = "SYSTE
 
 async function listPools(req, res) {
   try {
-    const includeInactive = ["true", "1", "yes", "sim"].includes(String(req.query.includeInactive || "").toLowerCase());
-    const where = includeInactive ? {} : { active: true, deletedAt: null, archiveStatus: "ATIVO" };
-    const pools = await prisma.pool.findMany({
-      where,
-      include: {
-        client: true,
-        equipment: true,
-        technicalRoom: true,
-        calculationProfile: true,
-        technicalSheet: true,
-        roundPools: {
-          include: {
-            round: {
-              select: { id: true, name: true, dayOfWeek: true, active: true },
-            },
-          },
-          orderBy: { order: "asc" },
-        },
-      },
-      orderBy: [{ active: "desc" }, { zone: "asc" }, { id: "asc" }],
-    });
+    const pools = await PoolBusiness.list(req.query);
     return res.json({ ok: true, pools });
   } catch (err) {
     console.error(err);
@@ -144,17 +125,7 @@ async function getPoolById(req, res) {
   try {
     const id = toInt(req.params.id);
     if (!id) return res.status(400).json({ error: "ID inválido" });
-    const pool = await prisma.pool.findUnique({
-      where: { id },
-      include: {
-        client: true,
-        equipment: true,
-        technicalRoom: true,
-        calculationProfile: true,
-        technicalSheet: true,
-        technicalHistory: { orderBy: { createdAt: "desc" }, take: 20 },
-      },
-    });
+    const pool = await PoolBusiness.getById(id);
     return res.json({ ok: true, pool });
   } catch (err) {
     console.error(err);
@@ -168,24 +139,7 @@ async function createPool(req, res) {
     if (!data.clientId) return res.status(400).json({ ok: false, error: "clientId obrigatório" });
     if (!data.name) return res.status(400).json({ ok: false, error: "Nome da piscina obrigatório" });
 
-    const client = await prisma.client.findUnique({ where: { id: data.clientId } });
-    if (!client || client.archiveStatus === "ARQUIVADO" || client.deletedAt) {
-      return res.status(400).json({ ok: false, error: "Cliente inexistente ou arquivado" });
-    }
-
-    const result = await prisma.$transaction(async (tx) => {
-      const pool = await tx.pool.create({
-        data: {
-          ...data,
-          active: true,
-          archiveStatus: "ATIVO",
-          deletedAt: null,
-          scheduleMode: data.scheduleMode || "PENDING_ROUND",
-        },
-      });
-      const technicalSheet = await ensureTechnicalSheet(tx, pool, req.body);
-      return { pool, technicalSheet };
-    });
+    const result = await PoolBusiness.create(data, req.body);
 
     return res.status(201).json({ ok: true, ...result });
   } catch (err) {
@@ -232,7 +186,7 @@ async function archivePool(req, res) {
   try {
     const id = toInt(req.params.id);
     if (!id) return res.status(400).json({ error: "ID inválido" });
-    const pool = await prisma.pool.update({ where: { id }, data: { active: false, archiveStatus: "ARQUIVADO", deletedAt: new Date(), scheduleMode: "ARCHIVED" } });
+    const pool = await PoolBusiness.archive(id);
     return res.json({ ok: true, archived: true, pool });
   } catch (err) {
     console.error(err);
@@ -244,12 +198,7 @@ async function restorePool(req, res) {
   try {
     const id = toInt(req.params.id);
     if (!id) return res.status(400).json({ error: "ID inválido" });
-    const pool = await prisma.pool.findUnique({ where: { id }, include: { client: true } });
-    if (!pool) return res.status(404).json({ error: "Piscina não encontrada" });
-    if (pool.client?.archiveStatus === "ARQUIVADO" || pool.client?.deletedAt) {
-      return res.status(400).json({ error: "Ative primeiro o cliente antes de restaurar esta piscina." });
-    }
-    const restored = await prisma.pool.update({ where: { id }, data: { active: true, archiveStatus: "ATIVO", deletedAt: null, scheduleMode: "PENDING_ROUND" } });
+    const restored = await PoolBusiness.restore(id);
     return res.json({ ok: true, restored: true, pool: restored });
   } catch (err) {
     console.error(err);
@@ -261,24 +210,8 @@ async function deletePool(req, res) {
   try {
     const id = toInt(req.params.id);
     if (!id) return res.status(400).json({ error: "ID inválido" });
-    const [visits, alerts, repairs] = await Promise.all([
-      prisma.serviceVisit.count({ where: { poolId: id } }).catch(() => 0),
-      prisma.technicalAlert.count({ where: { poolId: id } }).catch(() => 0),
-      prisma.repair.count({ where: { poolId: id } }).catch(() => 0),
-    ]);
-    if (visits > 0 || alerts > 0 || repairs > 0) {
-      req.params.id = String(id);
-      return archivePool(req, res);
-    }
-    await prisma.$transaction(async (tx) => {
-      await tx.roundPool.deleteMany({ where: { poolId: id } }).catch(() => null);
-      await tx.technicalSheet.deleteMany({ where: { poolId: id } }).catch(() => null);
-      await tx.poolCalculationProfile.deleteMany({ where: { poolId: id } }).catch(() => null);
-      await tx.poolEquipment.deleteMany({ where: { poolId: id } }).catch(() => null);
-      await tx.technicalRoom.deleteMany({ where: { poolId: id } }).catch(() => null);
-      await tx.pool.delete({ where: { id } });
-    });
-    return res.json({ ok: true, deleted: true });
+    const result = await PoolBusiness.delete(id);
+    return res.json(result);
   } catch (err) {
     console.error(err);
     return res.status(409).json({ error: err.message || "Piscina protegida por histórico. Arquive em vez de eliminar fisicamente." });
