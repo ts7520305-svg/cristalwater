@@ -64,6 +64,8 @@ const incidentRoutes = require("./routes/incidentRoutes");
 const brainApiRouter = require("./system/api/brainApiRouter");
 const platformStatusRouter = require("./platform/api/platformStatusRouter");
 const businessApiRouter = require("./business/api/businessApiRouter");
+const realBusinessApiRouter = require("./business/api/realBusinessApiRouter");
+
 
 
 
@@ -354,6 +356,8 @@ app.get("*", (req, res, next) => {
 app.use("/api/brain", brainApiRouter);
 app.use("/api/platform", platformStatusRouter);
 app.use("/api/business", businessApiRouter);
+app.use("/api/real-business", realBusinessApiRouter);
+
 
 
 
