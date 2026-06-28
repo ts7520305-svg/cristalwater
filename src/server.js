@@ -1,6 +1,12 @@
 require("./loadEnv")();
 
 const express = require("express");
+
+// Crystal Platform Runtime
+const Kernel = require("./core/Kernel");
+const KernelRuntime = require("./core/runtime/KernelRuntime");
+KernelRuntime.start(Kernel);
+
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
