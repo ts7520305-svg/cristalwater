@@ -56,6 +56,8 @@ const extraRoutes = require("./routes/extraRoutes");
 const extraVisitRoutes = require("./routes/extraVisitRoutes");
 const incidentRoutes = require("./routes/incidentRoutes");
 const brainApiRouter = require("./system/api/brainApiRouter");
+const platformStatusRouter = require("./platform/api/platformStatusRouter");
+
 
 const repairRoutes = require("./routes/repairRoutes");
 const guideRoutes = require("./routes/guideRoutes");
@@ -342,6 +344,8 @@ app.get("*", (req, res, next) => {
 });
 
 app.use("/api/brain", brainApiRouter);
+app.use("/api/platform", platformStatusRouter);
+
 
 app.use(errorHandlerMiddleware);
 
