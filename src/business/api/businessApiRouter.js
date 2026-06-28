@@ -7,6 +7,7 @@ const {
   TechnicianService,
   VisitService,
   BillingService,
+  BusinessBrainService,
 } = require("../index");
 
 const router = express.Router();
@@ -81,6 +82,22 @@ router.post("/billing/:id/pay", (req, res) => {
   }
 
   res.json({ ok: true, billing: bill });
+});
+
+
+router.post("/brain", async (req, res) => {
+  try {
+    const { question } = req.body || {};
+
+    if (!question || !String(question).trim()) {
+      return res.status(400).json({ ok: false, error: "Pergunta vazia." });
+    }
+
+    const result = await BusinessBrainService.ask(question);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ ok: false, error: error.message });
+  }
 });
 
 module.exports = router;

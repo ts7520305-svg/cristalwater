@@ -7,6 +7,7 @@ const PoolService = require("./pools/PoolService");
 const TechnicianService = require("./technicians/TechnicianService");
 const VisitService = require("./visits/VisitService");
 const BillingService = require("./billing/BillingService");
+const BusinessBrainService = require("./core/BusinessBrainService");
 
 module.exports = {
   BusinessConfig,
@@ -18,4 +19,5 @@ module.exports = {
   TechnicianService,
   VisitService,
   BillingService,
+  BusinessBrainService,
 };
