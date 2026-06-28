@@ -1,82 +1,84 @@
-const Kernel = require("../Kernel");
 const os = require("os");
 
 class CrystalDoctor {
+  async run(kernel = null) {
+    const report = {
+      ok: true,
+      timestamp: new Date().toISOString(),
+      kernel: {},
+      runtime: {},
+      brain: {},
+      providers: [],
+      system: {},
+      score: 100,
+    };
 
-    async run() {
-
-        const report = {
-            timestamp: new Date().toISOString(),
-            kernel: {},
-            runtime: {},
-            brain: {},
-            providers: {},
-            system: {},
-            score: 0
+    try {
+      if (kernel) {
+        report.kernel = {
+          ok: true,
+          version: kernel.KernelConfig?.version || "unknown",
+          modules: kernel.ModuleRegistry ? Object.keys(kernel.ModuleRegistry.all()).length : 0,
+          services: kernel.ServiceContainer ? kernel.ServiceContainer.list().length : 0,
         };
-
-        // Kernel
-        report.kernel.ok = true;
-        report.kernel.version = Kernel.KernelConfig.version;
-        report.kernel.modules = Object.keys(Kernel.ModuleRegistry.all()).length;
-        report.kernel.services = Kernel.ServiceContainer.list().length;
-
-        // Runtime
-        report.runtime = Kernel.RuntimeMonitor.status();
-
-        // Brain
-        try {
-
-            const Brain = require("../../system/brain/CrystalBrain");
-
-            report.brain = {
-                ok: true,
-                status: Brain.status()
-            };
-
-        } catch (e) {
-
-            report.brain = {
-                ok: false,
-                error: e.message
-            };
-
-        }
-
-        // Providers
-        try {
-
-            const { listProviders } = require("../../system/providers/ProviderRegistry");
-
-            report.providers = listProviders();
-
-        } catch {
-
-            report.providers = [];
-
-        }
-
-        // Sistema
-        report.system = {
-            hostname: os.hostname(),
-            node: process.version,
-            platform: os.platform(),
-            cpu: os.cpus().length,
-            ramGB: (os.totalmem()/1024/1024/1024).toFixed(2),
-            uptimeHours: (os.uptime()/3600).toFixed(2)
+      } else {
+        report.kernel = {
+          ok: true,
+          version: "unknown",
+          modules: 0,
+          services: 0,
         };
-
-        let score = 100;
-
-        if (!report.brain.ok) score -= 20;
-        if (report.providers.length === 0) score -= 10;
-
-        report.score = score;
-
-        return report;
-
+      }
+    } catch (e) {
+      report.kernel = { ok: false, error: e.message };
+      report.score -= 20;
     }
 
+    try {
+      report.runtime = kernel?.RuntimeMonitor
+        ? kernel.RuntimeMonitor.status()
+        : {
+            ok: true,
+            note: "RuntimeMonitor indisponível",
+          };
+    } catch (e) {
+      report.runtime = { ok: false, error: e.message };
+      report.score -= 10;
+    }
+
+    try {
+      const Brain = require("../../system/brain/CrystalBrain");
+      report.brain = {
+        ok: true,
+        status: Brain.status(),
+      };
+    } catch (e) {
+      report.brain = {
+        ok: false,
+        error: e.message,
+      };
+      report.score -= 20;
+    }
+
+    try {
+      const { listProviders } = require("../../system/providers/ProviderRegistry");
+      report.providers = listProviders();
+    } catch (e) {
+      report.providers = [];
+      report.score -= 10;
+    }
+
+    report.system = {
+      hostname: os.hostname(),
+      node: process.version,
+      platform: os.platform(),
+      cpu: os.cpus().length,
+      ramGB: (os.totalmem() / 1024 / 1024 / 1024).toFixed(2),
+      uptimeHours: (os.uptime() / 3600).toFixed(2),
+    };
+
+    return report;
+  }
 }
 
 module.exports = new CrystalDoctor();
