@@ -1,0 +1,63 @@
+@import url("../ui/tokens/tokens.css");
+@import url("../ui/components/buttons.css");
+@import url("../ui/layouts/mobile.css");
+
+.cw-hero{
+  background:linear-gradient(135deg,var(--cw-primary),#00A6D6);
+  color:white;
+  border-radius:0 0 28px 28px;
+  padding:26px 20px;
+}
+
+.cw-hero h1{margin:0;font-size:28px}
+.cw-hero p{margin:8px 0 0;opacity:.9}
+
+.cw-grid{
+  display:grid;
+  gap:14px;
+}
+
+.cw-action{
+  background:white;
+  border:1px solid var(--cw-border);
+  border-radius:20px;
+  padding:18px;
+  box-shadow:var(--cw-shadow);
+  font-weight:800;
+  font-size:18px;
+}
+
+.cw-status{
+  display:inline-flex;
+  padding:8px 12px;
+  border-radius:999px;
+  background:#E9FBEF;
+  color:#166534;
+  font-weight:900;
+}
+
+.cw-bottom{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:white;
+  border-top:1px solid var(--cw-border);
+  display:flex;
+  gap:6px;
+  padding:8px;
+}
+
+.cw-bottom a{
+  flex:1;
+  text-align:center;
+  padding:10px 4px;
+  border-radius:14px;
+  font-weight:800;
+  color:var(--cw-text-soft);
+}
+
+.cw-bottom a.active{
+  background:#EAF6FC;
+  color:var(--cw-primary-dark);
+}
