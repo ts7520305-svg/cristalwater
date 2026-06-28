@@ -138,6 +138,76 @@ class PoolBusiness {
       return { pool, technicalSheet };
     });
   }
+  async archive(poolId) {
+    const id = Number(poolId);
+
+    return prisma.pool.update({
+      where: { id },
+      data: {
+        active: false,
+        archiveStatus: "ARQUIVADO",
+        deletedAt: new Date(),
+        scheduleMode: "ARCHIVED",
+      },
+    });
+  }
+
+  async restore(poolId) {
+    const id = Number(poolId);
+
+    const pool = await prisma.pool.findUnique({
+      where: { id },
+      include: { client: true },
+    });
+
+    if (!pool) {
+      const error = new Error("Piscina não encontrada");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if (pool.client?.archiveStatus === "ARQUIVADO" || pool.client?.deletedAt) {
+      const error = new Error("Ative primeiro o cliente antes de restaurar esta piscina.");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    return prisma.pool.update({
+      where: { id },
+      data: {
+        active: true,
+        archiveStatus: "ATIVO",
+        deletedAt: null,
+        scheduleMode: "PENDING_ROUND",
+      },
+    });
+  }
+
+  async delete(poolId) {
+    const id = Number(poolId);
+
+    const [visits, alerts, repairs] = await Promise.all([
+      prisma.serviceVisit.count({ where: { poolId: id } }).catch(() => 0),
+      prisma.technicalAlert.count({ where: { poolId: id } }).catch(() => 0),
+      prisma.repair.count({ where: { poolId: id } }).catch(() => 0),
+    ]);
+
+    if (visits > 0 || alerts > 0 || repairs > 0) {
+      const pool = await this.archive(id);
+      return { ok: true, archived: true, pool };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.roundPool.deleteMany({ where: { poolId: id } }).catch(() => null);
+      await tx.technicalSheet.deleteMany({ where: { poolId: id } }).catch(() => null);
+      await tx.poolCalculationProfile.deleteMany({ where: { poolId: id } }).catch(() => null);
+      await tx.poolEquipment.deleteMany({ where: { poolId: id } }).catch(() => null);
+      await tx.technicalRoom.deleteMany({ where: { poolId: id } }).catch(() => null);
+      await tx.pool.delete({ where: { id } });
+    });
+
+    return { ok: true, deleted: true };
+  }
 }
 
 module.exports = new PoolBusiness();

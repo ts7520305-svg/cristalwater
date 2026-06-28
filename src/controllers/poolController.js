@@ -186,7 +186,7 @@ async function archivePool(req, res) {
   try {
     const id = toInt(req.params.id);
     if (!id) return res.status(400).json({ error: "ID inválido" });
-    const pool = await prisma.pool.update({ where: { id }, data: { active: false, archiveStatus: "ARQUIVADO", deletedAt: new Date(), scheduleMode: "ARCHIVED" } });
+    const pool = await PoolBusiness.archive(id);
     return res.json({ ok: true, archived: true, pool });
   } catch (err) {
     console.error(err);
@@ -198,12 +198,7 @@ async function restorePool(req, res) {
   try {
     const id = toInt(req.params.id);
     if (!id) return res.status(400).json({ error: "ID inválido" });
-    const pool = await prisma.pool.findUnique({ where: { id }, include: { client: true } });
-    if (!pool) return res.status(404).json({ error: "Piscina não encontrada" });
-    if (pool.client?.archiveStatus === "ARQUIVADO" || pool.client?.deletedAt) {
-      return res.status(400).json({ error: "Ative primeiro o cliente antes de restaurar esta piscina." });
-    }
-    const restored = await prisma.pool.update({ where: { id }, data: { active: true, archiveStatus: "ATIVO", deletedAt: null, scheduleMode: "PENDING_ROUND" } });
+    const restored = await PoolBusiness.restore(id);
     return res.json({ ok: true, restored: true, pool: restored });
   } catch (err) {
     console.error(err);
@@ -215,24 +210,8 @@ async function deletePool(req, res) {
   try {
     const id = toInt(req.params.id);
     if (!id) return res.status(400).json({ error: "ID inválido" });
-    const [visits, alerts, repairs] = await Promise.all([
-      prisma.serviceVisit.count({ where: { poolId: id } }).catch(() => 0),
-      prisma.technicalAlert.count({ where: { poolId: id } }).catch(() => 0),
-      prisma.repair.count({ where: { poolId: id } }).catch(() => 0),
-    ]);
-    if (visits > 0 || alerts > 0 || repairs > 0) {
-      req.params.id = String(id);
-      return archivePool(req, res);
-    }
-    await prisma.$transaction(async (tx) => {
-      await tx.roundPool.deleteMany({ where: { poolId: id } }).catch(() => null);
-      await tx.technicalSheet.deleteMany({ where: { poolId: id } }).catch(() => null);
-      await tx.poolCalculationProfile.deleteMany({ where: { poolId: id } }).catch(() => null);
-      await tx.poolEquipment.deleteMany({ where: { poolId: id } }).catch(() => null);
-      await tx.technicalRoom.deleteMany({ where: { poolId: id } }).catch(() => null);
-      await tx.pool.delete({ where: { id } });
-    });
-    return res.json({ ok: true, deleted: true });
+    const result = await PoolBusiness.delete(id);
+    return res.json(result);
   } catch (err) {
     console.error(err);
     return res.status(409).json({ error: err.message || "Piscina protegida por histórico. Arquive em vez de eliminar fisicamente." });
