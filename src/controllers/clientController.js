@@ -116,10 +116,7 @@ async function getClientById(req, res) {
     const clientId = toInt(req.params.id);
     if (!clientId) return res.status(400).json({ error: "ID inválido" });
 
-    const client = await prisma.client.findUnique({
-      where: { id: clientId },
-      include: { pools: true, invoices: true },
-    });
+    const client = await ClientBusiness.getById(clientId);
 
     if (!client) return res.status(404).json({ error: "Cliente não encontrado" });
     return res.json({ ok: true, client });
