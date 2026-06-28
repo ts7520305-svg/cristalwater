@@ -12,6 +12,7 @@ const Scheduler = require("./scheduler/Scheduler");
 const WorkerEngine = require("./worker/WorkerEngine");
 const QueueEngine = require("./queue/QueueEngine");
 const DependencyContainer = require("./di/DependencyContainer");
+const LifecycleManager = require("./lifecycle/LifecycleManager");
 
 const InMemoryRepository = require("./repository/InMemoryRepository");
 const PermissionEngine = require("./permissions/PermissionEngine");
@@ -39,6 +40,7 @@ module.exports = {
   WorkerEngine,
   QueueEngine,
   DependencyContainer,
+  LifecycleManager,
   InMemoryRepository,
   PermissionEngine,
   RequestContext,
