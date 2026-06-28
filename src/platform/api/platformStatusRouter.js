@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get("/status", async (req, res) => {
   try {
-    const runtimeStatus = Kernel.KernelRuntime.status();
+    const runtimeStatus = KernelRuntime.status();
 
     res.json({
       ok: true,
