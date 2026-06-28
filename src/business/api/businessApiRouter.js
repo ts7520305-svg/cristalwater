@@ -1,103 +1,92 @@
 const express = require("express");
-
-const {
-  BusinessEngine,
-  ClientService,
-  PoolService,
-  TechnicianService,
-  VisitService,
-  BillingService,
-  BusinessBrainService,
-} = require("../index");
+const prisma = require("../../prismaClient");
 
 const router = express.Router();
 
-router.get("/status", (req, res) => {
-  res.json({
-    ok: true,
-    module: "Cristal Water Business Engine",
-    status: BusinessEngine.start(),
-    checkedAt: new Date().toISOString(),
-  });
+router.get("/status", async (req,res)=>{
+
+    res.json({
+
+        ok:true,
+
+        module:"Cristal Water Business",
+
+        database:"PostgreSQL",
+
+        provider:"Prisma",
+
+        checkedAt:new Date().toISOString()
+
+    });
+
 });
 
-router.get("/summary", (req, res) => {
-  res.json({
-    ok: true,
-    clients: ClientService.list().length,
-    pools: PoolService.list().length,
-    technicians: TechnicianService.list().length,
-    visits: VisitService.list().length,
-    billing: BillingService.list().length,
-    pendingBilling: BillingService.pending().length,
-    checkedAt: new Date().toISOString(),
-  });
-});
+router.get("/summary",async(req,res)=>{
 
-router.post("/clients", (req, res) => {
-  res.status(201).json({ ok: true, client: ClientService.create(req.body || {}) });
-});
+    try{
 
-router.get("/clients", (req, res) => {
-  res.json({ ok: true, clients: ClientService.list() });
-});
+        const [
 
-router.post("/pools", (req, res) => {
-  res.status(201).json({ ok: true, pool: PoolService.create(req.body || {}) });
-});
+            clients,
 
-router.get("/pools", (req, res) => {
-  res.json({ ok: true, pools: PoolService.list() });
-});
+            pools,
 
-router.post("/technicians", (req, res) => {
-  res.status(201).json({ ok: true, technician: TechnicianService.create(req.body || {}) });
-});
+            technicians,
 
-router.get("/technicians", (req, res) => {
-  res.json({ ok: true, technicians: TechnicianService.list() });
-});
+            visits,
 
-router.post("/visits", (req, res) => {
-  res.status(201).json({ ok: true, visit: VisitService.create(req.body || {}) });
-});
+            invoices,
 
-router.get("/visits", (req, res) => {
-  res.json({ ok: true, visits: VisitService.list() });
-});
+            payments
 
-router.post("/billing", (req, res) => {
-  res.status(201).json({ ok: true, billing: BillingService.create(req.body || {}) });
-});
+        ]=await Promise.all([
 
-router.get("/billing", (req, res) => {
-  res.json({ ok: true, billing: BillingService.list() });
-});
+            prisma.client.count(),
 
-router.post("/billing/:id/pay", (req, res) => {
-  const bill = BillingService.markPaid(req.params.id);
+            prisma.pool.count(),
 
-  if (!bill) {
-    return res.status(404).json({ ok: false, error: "Fatura não encontrada." });
-  }
+            prisma.technician.count(),
 
-  res.json({ ok: true, billing: bill });
-});
+            prisma.serviceVisit.count(),
 
+            prisma.invoice.count(),
 
-router.post("/brain", async (req, res) => {
-  try {
-    const { question } = req.body || {};
+            prisma.payment.count()
 
-    if (!question || !String(question).trim()) {
-      return res.status(400).json({ ok: false, error: "Pergunta vazia." });
+        ]);
+
+        res.json({
+
+            ok:true,
+
+            clients,
+
+            pools,
+
+            technicians,
+
+            visits,
+
+            invoices,
+
+            payments,
+
+            checkedAt:new Date().toISOString()
+
+        });
+
+    }catch(error){
+
+        res.status(500).json({
+
+            ok:false,
+
+            error:error.message
+
+        });
+
     }
 
-    const result = await BusinessBrainService.ask(question);
-    res.json(result);
-  } catch (error) {
-    res.status(500).json({ ok: false, error: error.message });
-  }
 });
 
-module.exports = router;
+module.exports=router;
