@@ -139,24 +139,7 @@ async function createPool(req, res) {
     if (!data.clientId) return res.status(400).json({ ok: false, error: "clientId obrigatório" });
     if (!data.name) return res.status(400).json({ ok: false, error: "Nome da piscina obrigatório" });
 
-    const client = await prisma.client.findUnique({ where: { id: data.clientId } });
-    if (!client || client.archiveStatus === "ARQUIVADO" || client.deletedAt) {
-      return res.status(400).json({ ok: false, error: "Cliente inexistente ou arquivado" });
-    }
-
-    const result = await prisma.$transaction(async (tx) => {
-      const pool = await tx.pool.create({
-        data: {
-          ...data,
-          active: true,
-          archiveStatus: "ATIVO",
-          deletedAt: null,
-          scheduleMode: data.scheduleMode || "PENDING_ROUND",
-        },
-      });
-      const technicalSheet = await ensureTechnicalSheet(tx, pool, req.body);
-      return { pool, technicalSheet };
-    });
+    const result = await PoolBusiness.create(data, req.body);
 
     return res.status(201).json({ ok: true, ...result });
   } catch (err) {
