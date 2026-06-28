@@ -1,33 +1,38 @@
-const Kernel = require("../Kernel");
-
 class KernelRuntime {
   constructor() {
     this.started = false;
     this.startedAt = null;
+    this.kernel = null;
   }
 
-  start() {
+  start(kernel) {
+    if (!kernel) {
+      throw new Error("KernelRuntime.start(kernel): kernel é obrigatório.");
+    }
+
+    this.kernel = kernel;
+
     if (this.started) {
       return this.status();
     }
 
-    Kernel.EventBus.attachEventStore(Kernel.EventStore);
+    kernel.EventBus.attachEventStore(kernel.EventStore);
 
-    Kernel.ServiceContainer.register("Kernel", Kernel);
-    Kernel.ServiceContainer.register("EventBus", Kernel.EventBus);
-    Kernel.ServiceContainer.register("EventStore", Kernel.EventStore);
-    Kernel.ServiceContainer.register("Metrics", Kernel.Metrics);
-    Kernel.ServiceContainer.register("AuditTrail", Kernel.AuditTrail);
-    Kernel.ServiceContainer.register("PermissionEngine", Kernel.PermissionEngine);
+    kernel.ServiceContainer.register("Kernel", kernel);
+    kernel.ServiceContainer.register("EventBus", kernel.EventBus);
+    kernel.ServiceContainer.register("EventStore", kernel.EventStore);
+    kernel.ServiceContainer.register("Metrics", kernel.Metrics);
+    kernel.ServiceContainer.register("AuditTrail", kernel.AuditTrail);
+    kernel.ServiceContainer.register("PermissionEngine", kernel.PermissionEngine);
 
-    Kernel.ModuleRegistry.register("kernel", {
+    kernel.ModuleRegistry.register("kernel", {
       name: "Crystal Kernel",
-      version: Kernel.KernelConfig.version,
+      version: kernel.KernelConfig.version,
       status: "online",
     });
 
-    Kernel.EventBus.emit("KernelRuntimeStarted", {
-      version: Kernel.KernelConfig.version,
+    kernel.EventBus.emit("KernelRuntimeStarted", {
+      version: kernel.KernelConfig.version,
     }, {
       actor: "system",
     });
@@ -39,15 +44,17 @@ class KernelRuntime {
   }
 
   status() {
+    const kernel = this.kernel;
+
     return {
       ok: true,
       service: "KernelRuntime",
       started: this.started,
       startedAt: this.startedAt,
-      kernel: Kernel.KernelConfig,
-      services: Kernel.ServiceContainer.list(),
-      modules: Kernel.ModuleRegistry.all(),
-      metrics: Kernel.EventBus.getMetrics(),
+      kernel: kernel ? kernel.KernelConfig : null,
+      services: kernel ? kernel.ServiceContainer.list() : [],
+      modules: kernel ? kernel.ModuleRegistry.all() : {},
+      metrics: kernel ? kernel.EventBus.getMetrics() : {},
     };
   }
 }

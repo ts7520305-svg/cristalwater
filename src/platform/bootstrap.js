@@ -9,7 +9,7 @@ async function bootstrap() {
     console.log(" CRYSTAL PLATFORM BOOTSTRAP ");
     console.log("========================================");
 
-    Kernel.KernelRuntime.start();
+    Kernel.KernelRuntime.start(Kernel);
 
     Kernel.LifecycleManager.register("Kernel");
     Kernel.LifecycleManager.register("Brain");
