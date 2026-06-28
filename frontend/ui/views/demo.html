@@ -1,0 +1,55 @@
+<!doctype html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8">
+
+<link rel="stylesheet" href="../../css/crystal-v25.css">
+
+</head>
+
+<body>
+
+<div id="app"></div>
+
+<script src="../core/ui-engine.js"></script>
+
+<script src="../components/card.js"></script>
+
+<script src="../components/button.js"></script>
+
+<script src="../components/status.js"></script>
+
+<script src="../components/navbar.js"></script>
+
+<script>
+
+document.getElementById("app").innerHTML=
+
+CrystalUI.render("card",{
+
+title:"Crystal UI",
+
+content:
+
+CrystalUI.render("status",{
+
+text:"Sistema operacional"
+
+})+
+
+CrystalUI.render("button",{
+
+label:"Continuar"
+
+})
+
+});
+
+</script>
+
+</body>
+
+</html>
