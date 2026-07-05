@@ -55,7 +55,8 @@
     "test:final-two-years": "node scripts/test-final-two-year-real-simulation.js",
     "test:interconnections": "node scripts/test-system-interconnections.js",
     "test:pool-create-flow": "node scripts/test-pool-create-flow.js",
-    "test:admin-login": "node scripts/test-admin-login-alias.js"
+    "test:admin-login": "node scripts/test-admin-login-alias.js",
+    "crystal:audit": "node scripts/crystal-audit.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
