@@ -1,5 +1,13 @@
 const API = "/api";
 
+function authHeaders(extra = {}) {
+  const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
+  return {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...extra,
+  };
+}
+
 function setStatus(msg) {
   document.getElementById("status").textContent = msg;
 }
@@ -46,7 +54,9 @@ async function loadSettings() {
   setStatus("A carregar configurações...");
 
   try {
-    const res = await fetch(`${API}/report-settings/${clientId}`);
+    const res = await fetch(`${API}/report-settings/${clientId}`, {
+      headers: authHeaders()
+    });
     const data = await res.json();
 
     if (!res.ok || !data.ok) {
@@ -113,9 +123,7 @@ async function saveSettings() {
 
     const res = await fetch(`${API}/report-settings/${clientId}`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify(body),
     });
 

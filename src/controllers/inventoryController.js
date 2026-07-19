@@ -3,6 +3,7 @@ const fs = require('fs');
 const prisma = require('../prismaClient');
 const { invalidateDashboardCache } = require('../services/dashboardCacheService');
 const { normalizeProductName, normalizeUnit } = require('../utils/stockNormalizer');
+const { toPublicUploadUrl } = require('../config/uploadPath');
 
 function n(v, d = 0) { const x = Number(v); return Number.isFinite(x) ? x : d; }
 function s(v) { return typeof v === 'string' ? v.trim() : v == null ? '' : String(v).trim(); }
@@ -230,7 +231,7 @@ async function createPurchase(req, res) {
   const items = parseItems(req.body);
   if (!items.length) return res.status(400).json({ ok: false, error: 'Sem linhas de produto para adicionar ao stock.' });
 
-  const upload = req.file ? { documentPath: `/uploads/inventory/${req.file.filename}`, documentName: req.file.originalname } : {};
+    const upload = req.file ? { documentPath: toPublicUploadUrl('inventory', req.file.filename), documentName: req.file.originalname } : {};
 
   const result = await prisma.$transaction(async (tx) => {
     const purchase = await tx.stockPurchase.create({

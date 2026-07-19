@@ -52,17 +52,14 @@ function statusClass(value, type = 'normal') {
 }
 
 function renderMetrics(counts = {}) {
+  const criticalAlerts = number(counts.repairsOpen) + number(counts.notificationsUnread);
+  const techniciansInField = number(counts.techniciansActive || counts.techniciansOnField || counts.technicians);
+  const lowStock = number(counts.productsLowStock || counts.stockLow || counts.inventoryLow);
   const items = [
-    { icon: '👥', label: 'Clientes', value: counts.clients, hint: 'clientes registados', href: MODULE_ROUTES.clients },
-    { icon: '🏊', label: 'Piscinas', value: counts.pools, hint: 'piscinas / jacuzzis', href: MODULE_ROUTES.pools },
-    { icon: '👨‍🔧', label: 'Técnicos', value: counts.technicians, hint: 'equipa operacional', href: MODULE_ROUTES.technicians },
-    { icon: '📅', label: 'Rondas', value: counts.rounds, hint: 'rondas criadas', href: MODULE_ROUTES.rounds },
-    { icon: '🟡', label: 'Visitas planeadas', value: counts.visitsPlanned, hint: 'por fazer / em execução', tone: 'warn', href: MODULE_ROUTES.visits },
-    { icon: '🟢', label: 'Visitas concluídas', value: counts.visitsDone, hint: 'histórico concluído', tone: 'ok', href: MODULE_ROUTES.visits },
-    { icon: '🚨', label: 'Reparações abertas', value: counts.repairsOpen, hint: 'pendentes / aprovadas', tone: 'bad', href: '/admin-alerts' },
-    { icon: '💬', label: 'Mensagens', value: counts.messagesUnread, hint: 'mensagens por ler', tone: 'warn', href: '/chat?filter=unread' },
-    { icon: '🔔', label: 'Notificações', value: counts.notificationsUnread, hint: 'avisos para a administração', tone: 'warn', href: '/admin-notifications' },
-    { icon: '💰', label: 'Faturas pendentes', value: counts.invoicesOpen, hint: 'pendente / parcial / vencida', tone: 'bad', href: '/invoices' }
+    { icon: '🚨', label: 'Críticos', value: criticalAlerts, hint: 'ações imediatas', tone: 'bad', href: '/admin-alerts?priority=critical' },
+    { icon: '📍', label: 'Visitas hoje', value: counts.visitsPlanned, hint: 'planeadas no dia', tone: 'warn', href: '/admin-rounds?date=today' },
+    { icon: '👨‍🔧', label: 'Técnicos ativos', value: techniciansInField, hint: 'em operação no terreno', tone: 'ok', href: '/admin-technicians?status=active' },
+    { icon: '💶', label: 'Pendências', value: counts.invoicesOpen, hint: 'financeiro por fechar', tone: 'warn', href: '/invoices?status=pending' }
   ];
 
   $('#metrics').innerHTML = items.map((item) => `
@@ -77,6 +74,60 @@ function renderMetrics(counts = {}) {
   `).join('');
 }
 
+function renderPrioritySummary(counts = {}, pendingPools = []) {
+  const critical = number(counts.repairsOpen) + number(counts.notificationsUnread);
+  const attention = number(counts.invoicesOpen) + number(counts.messagesUnread) + number(counts.productsLowStock || counts.stockLow);
+  const info = Math.max(number(counts.visitsPlanned) - number(counts.visitsDone), 0) + (Array.isArray(pendingPools) ? pendingPools.length : 0);
+
+  const total = critical + attention + info;
+  $('#prioritySummary').innerHTML = `
+    <a class="item" href="/admin-alerts?priority=critical">
+      <div>
+        <b>${critical} crítico(s)</b>
+        <div class="muted">Decisão imediata necessária</div>
+      </div>
+      <span class="pill">Abrir</span>
+    </a>
+    <a class="item" href="/admin-alerts?priority=warning">
+      <div>
+        <b>${attention} requer(em) atenção</b>
+        <div class="muted">Pode impactar operação hoje</div>
+      </div>
+      <span class="pill">Abrir</span>
+    </a>
+    <a class="item" href="/admin-alerts">
+      <div>
+        <b>${info} informativo(s)</b>
+        <div class="muted">Monitorização e planeamento</div>
+      </div>
+      <span class="pill">Ver restantes</span>
+    </a>
+    <div class="small">${total} prioridade(s) agrupadas sem duplicação.</div>
+  `;
+}
+
+function renderOperationDigest(counts = {}, visits = []) {
+  const now = Date.now();
+  const active = visits.filter((visit) => String(visit.status || '').toUpperCase() === 'IN_PROGRESS').length;
+  const done = visits.filter((visit) => ['DONE', 'COMPLETED', 'CONCLUIDA', 'CONCLUÍDA'].includes(String(visit.status || '').toUpperCase())).length;
+  const delayed = visits.filter((visit) => {
+    const status = String(visit.status || '').toUpperCase();
+    if (['DONE', 'COMPLETED', 'CONCLUIDA', 'CONCLUÍDA'].includes(status)) return false;
+    const when = new Date(visit.plannedDate || visit.scheduledAt || visit.createdAt || 0).getTime();
+    return Number.isFinite(when) && when < now;
+  }).length;
+  const nextDecision = Math.max(number(counts.repairsOpen), number(counts.messagesUnread), number(counts.notificationsUnread));
+
+  const digest = document.getElementById('operationDigest');
+  if (!digest) return;
+  digest.innerHTML = `
+    <div class="item"><strong>${delayed}</strong><span>Visitas em atraso</span></div>
+    <div class="item"><strong>${active}</strong><span>Em execução</span></div>
+    <div class="item"><strong>${number(counts.techniciansActive || counts.techniciansOnField || counts.technicians)}</strong><span>Técnicos disponíveis</span></div>
+    <div class="item"><strong>${nextDecision}</strong><span>Próxima decisão</span></div>
+  `;
+}
+
 function renderStatusStrip(counts = {}, pendingPools = []) {
   const planned = number(counts.visitsPlanned);
   const done = number(counts.visitsDone);
@@ -87,6 +138,8 @@ function renderStatusStrip(counts = {}, pendingPools = []) {
   const pending = Array.isArray(pendingPools) ? pendingPools.length : 0;
   const risk = repairs + invoices + messages + notifications + pending;
   const now = new Date();
+  const lastUpdate = document.getElementById('lastUpdate');
+  const syncState = document.getElementById('syncState');
 
   $('#statusStrip').innerHTML = `
     <div class="status-mini"><strong>${risk > 0 ? 'Atenção' : 'OK'}</strong><span>Estado geral</span></div>
@@ -94,6 +147,9 @@ function renderStatusStrip(counts = {}, pendingPools = []) {
     <div class="status-mini"><strong>${risk}</strong><span>Pontos a rever</span></div>
     <div class="status-mini"><strong>${now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}</strong><span>Atualizado</span></div>
   `;
+
+  if (lastUpdate) lastUpdate.textContent = `Atualizado às ${now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}`;
+  if (syncState) syncState.textContent = risk > 0 ? 'Atenção operacional' : 'Sincronizado';
 
   $('#metricsHint').textContent = `${done} concluídas · ${planned} planeadas · ${messages} mensagem(ns) · ${notifications} aviso(s) · ${risk} ponto(s) a rever`;
 }
@@ -358,6 +414,8 @@ function render(data = {}) {
 
   renderMetrics(counts);
   renderStatusStrip(counts, pendingPools);
+  renderPrioritySummary(counts, pendingPools);
+  renderOperationDigest(counts, visits);
   renderMorningCheck(data.morningCheck || {});
   renderVisits(visits);
   renderPendingPools(pendingPools);

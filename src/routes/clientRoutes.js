@@ -1,6 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const clientController = require("../controllers/clientController");
+const auth = require("../middlewares/authMiddleware");
+
+// Restrict unrestricted client list/details to internal roles only.
+router.use(auth("TEAM_LEADER"));
 
 router.get("/", clientController.listClients);
 router.get("/:id", clientController.getClientById);

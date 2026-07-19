@@ -2,8 +2,11 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs');
 const path = require('path');
+const auth = require("../middlewares/authMiddleware");
 
 const DATA_PATH = path.join(__dirname, '..', 'data', 'services.json');
+
+router.use(auth("ADMIN"));
 
 function loadServices() {
   try {

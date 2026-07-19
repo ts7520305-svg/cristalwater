@@ -7,24 +7,35 @@
 <title>Cristal Water - Configuração por Cliente</title>
 
 <style>
-body { font-family: Arial; background:#f4f6f8; padding:20px; }
-.card { background:white; padding:15px; border-radius:10px; margin-bottom:12px; }
-button { padding:8px 10px; margin-top:6px; cursor:pointer; }
-select, input { padding:6px; width:100%; margin-top:5px; }
+* { box-sizing: border-box; }
+html, body { overflow-x: hidden; }
+body { margin: 0; background: var(--cw-bg, #f4f6f8); color: var(--cw-text, #1f2937); padding: 16px; }
+h2, h3 { margin: 0 0 10px; }
+.top-actions { display: flex; gap: 8px; margin: 0 0 12px; flex-wrap: wrap; }
+.card { background: var(--cw-surface, #fff); border: 1px solid var(--cw-border, #d7e2ed); padding: 15px; border-radius: 12px; margin-bottom: 12px; }
+button { min-height: 42px; border-radius: 10px; border: 1px solid var(--cw-border, #d7e2ed); background: var(--cw-surface, #fff); color: var(--cw-text, #1f2937); padding: 8px 12px; margin-top: 8px; cursor: pointer; font-weight: 700; }
+select, input { min-height: 44px; padding: 8px 10px; width: 100%; margin-top: 5px; border-radius: 10px; border: 1px solid var(--cw-border, #d7e2ed); background: var(--cw-surface, #fff); color: var(--cw-text, #1f2937); }
+@media (max-width: 680px) { body { padding: 12px; } .top-actions button { flex: 1 1 100%; } }
 </style>
 
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
+  <link rel="stylesheet" href="/ui/foundation.css">
+  <script src="/admin-auth-guard.js"></script>
 </head>
 
-<body>
+<body data-required-role="ADMIN">
+
+<div class="top-actions">
+  <button type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
+  <button type="button" onclick="window.location.href='/admin-master-control'">Centro de Operacoes</button>
+</div>
 
 <h2>Configuração de Alertas por Cliente</h2>
 
 <div class="card">
-  Cliente ID:
-  <input id="clientId" />
+  <label for="clientId">Cliente ID</label>
+  <input id="clientId" type="number" inputmode="numeric" />
   <button onclick="loadClient()">Carregar</button>
 </div>
 
@@ -46,10 +57,10 @@ select, input { padding:6px; width:100%; margin-top:5px; }
   <input type="checkbox" id="internal">
 
   <h3>Número WhatsApp</h3>
-  <input id="whatsappNumber">
+  <input id="whatsappNumber" type="tel" autocomplete="tel">
 
   <h3>Email destino</h3>
-  <input id="emailAddress">
+  <input id="emailAddress" type="email" autocomplete="email">
 
   <button onclick="save()">Guardar</button>
 </div>
@@ -57,12 +68,38 @@ select, input { padding:6px; width:100%; margin-top:5px; }
 <script>
 
 const API = "/api";
+const actionLock = new Set();
+
+function authHeaders(extra = {}) {
+  const token = localStorage.getItem("adminToken") || localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
+  return {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...extra,
+  };
+}
+
+async function parseJson(res, fallback) {
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || fallback);
+  return data;
+}
+
+async function withActionLock(key, callback) {
+  if (actionLock.has(key)) return;
+  actionLock.add(key);
+  try {
+    return await callback();
+  } finally {
+    actionLock.delete(key);
+  }
+}
 
 async function loadClient() {
   const id = document.getElementById("clientId").value;
+  if (!id) return alert("Indica um cliente válido.");
 
-  const res = await fetch(`${API}/clients/${id}`);
-  const data = await res.json();
+  const res = await fetch(`${API}/clients/${id}`, { headers: authHeaders() });
+  const data = await parseJson(res, "Erro ao carregar cliente.");
 
   document.getElementById("mode").value = data.paymentReminderMode;
   document.getElementById("whatsapp").checked = data.paymentReminderWhatsapp;
@@ -74,18 +111,23 @@ async function loadClient() {
 
 async function save() {
   const id = document.getElementById("clientId").value;
+  if (!id) return alert("Indica um cliente válido.");
+  if (!confirm("Guardar esta configuração do cliente?")) return;
 
-  await fetch(`${API}/clients/${id}`, {
-    method:"PUT",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({
-      paymentReminderMode: document.getElementById("mode").value,
-      paymentReminderWhatsapp: document.getElementById("whatsapp").checked,
-      paymentReminderEmail: document.getElementById("email").checked,
-      paymentReminderInternal: document.getElementById("internal").checked,
-      paymentReminderWhatsappNumber: document.getElementById("whatsappNumber").value,
-      paymentReminderEmailAddress: document.getElementById("emailAddress").value
-    })
+  await withActionLock(`save:${id}`, async () => {
+    const res = await fetch(`${API}/clients/${id}`, {
+      method:"PUT",
+      headers:authHeaders({ "Content-Type":"application/json" }),
+      body: JSON.stringify({
+        paymentReminderMode: document.getElementById("mode").value,
+        paymentReminderWhatsapp: document.getElementById("whatsapp").checked,
+        paymentReminderEmail: document.getElementById("email").checked,
+        paymentReminderInternal: document.getElementById("internal").checked,
+        paymentReminderWhatsappNumber: document.getElementById("whatsappNumber").value,
+        paymentReminderEmailAddress: document.getElementById("emailAddress").value
+      })
+    });
+    await parseJson(res, "Erro ao guardar configuração do cliente.");
   });
 
   alert("Guardado");
@@ -95,8 +137,10 @@ async function save() {
 
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
+<script src="/ui/core/navigation-context.js"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
 <script src="/cw-admin-shortcuts.js"></script>
-<script src="/cw-flow-shell.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

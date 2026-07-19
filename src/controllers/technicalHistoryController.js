@@ -1,19 +1,10 @@
 // src/controllers/technicalHistoryController.js
-const { prisma } = require("../db/connection");
+const PoolHistoryBusiness = require("../business/pool/PoolHistoryBusiness");
 
 // LISTAR TODO O HISTÓRICO (todas as piscinas)
 async function listAll(req, res) {
   try {
-    const events = await prisma.technicalHistory.findMany({
-      orderBy: { performedAt: "desc" },
-      include: {
-        pool: {
-          include: {
-            client: true,
-          },
-        },
-      },
-    });
+    const events = await PoolHistoryBusiness.listAllTechnicalHistory();
 
     res.json(events);
   } catch (err) {
@@ -30,10 +21,7 @@ async function listByPool(req, res) {
       return res.status(400).json({ error: "poolId inválido." });
     }
 
-    const events = await prisma.technicalHistory.findMany({
-      where: { poolId },
-      orderBy: { performedAt: "desc" },
-    });
+    const events = await PoolHistoryBusiness.listTechnicalHistoryByPool(poolId);
 
     res.json(events);
   } catch (err) {
@@ -52,14 +40,7 @@ async function getById(req, res) {
       return res.status(400).json({ error: "ID inválido." });
     }
 
-    const event = await prisma.technicalHistory.findUnique({
-      where: { id },
-      include: {
-        pool: {
-          include: { client: true },
-        },
-      },
-    });
+    const event = await PoolHistoryBusiness.getTechnicalHistoryById(id);
 
     if (!event) {
       return res.status(404).json({ error: "Registo técnico não encontrado." });
@@ -85,15 +66,13 @@ async function create(req, res) {
       });
     }
 
-    const data = {
-      poolId: Number(poolId),
-      component: String(component).trim(),
-      description: String(description).trim(),
-      performedAt: performedAt ? new Date(performedAt) : null,
-      nextSuggested: nextSuggested ? new Date(nextSuggested) : null,
-    };
-
-    const created = await prisma.technicalHistory.create({ data });
+    const created = await PoolHistoryBusiness.createTechnicalHistory({
+      poolId,
+      component,
+      description,
+      performedAt,
+      nextSuggested,
+    });
     res.json(created);
   } catch (err) {
     console.error("Erro ao criar histórico técnico:", err);
@@ -109,43 +88,11 @@ async function update(req, res) {
       return res.status(400).json({ error: "ID inválido." });
     }
 
-    const { component, description, performedAt, nextSuggested } = req.body;
+    const updated = await PoolHistoryBusiness.updateTechnicalHistory(id, req.body || {});
 
-    const existing = await prisma.technicalHistory.findUnique({
-      where: { id },
-    });
-
-    if (!existing) {
+    if (!updated) {
       return res.status(404).json({ error: "Registo técnico não encontrado." });
     }
-
-    const data = {
-      component:
-        component !== undefined && component !== null
-          ? String(component).trim()
-          : existing.component,
-      description:
-        description !== undefined && description !== null
-          ? String(description).trim()
-          : existing.description,
-      performedAt:
-        performedAt !== undefined && performedAt !== null
-          ? performedAt
-            ? new Date(performedAt)
-            : null
-          : existing.performedAt,
-      nextSuggested:
-        nextSuggested !== undefined && nextSuggested !== null
-          ? nextSuggested
-            ? new Date(nextSuggested)
-            : null
-          : existing.nextSuggested,
-    };
-
-    const updated = await prisma.technicalHistory.update({
-      where: { id },
-      data,
-    });
 
     res.json(updated);
   } catch (err) {
@@ -162,15 +109,11 @@ async function remove(req, res) {
       return res.status(400).json({ error: "ID inválido." });
     }
 
-    const existing = await prisma.technicalHistory.findUnique({
-      where: { id },
-    });
+    const removed = await PoolHistoryBusiness.removeTechnicalHistory(id);
 
-    if (!existing) {
+    if (!removed) {
       return res.status(404).json({ error: "Registo técnico não encontrado." });
     }
-
-    await prisma.technicalHistory.delete({ where: { id } });
 
     res.json({ success: true });
   } catch (err) {

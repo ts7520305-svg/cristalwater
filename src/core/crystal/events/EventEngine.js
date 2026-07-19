@@ -10,6 +10,11 @@ const EVENT_TYPES = {
   EXTRA_CREATED: "extra.created",
   BILLING_PENDING: "billing.pending",
   PAYMENT_RECEIVED: "payment.received",
+  ROUTE_PLANNED: "ROUTE_PLANNED",
+  ROUTE_LOADED: "ROUTE_LOADED",
+  ROUTE_STOP_STARTED: "ROUTE_STOP_STARTED",
+  ROUTE_STOP_COMPLETED: "ROUTE_STOP_COMPLETED",
+  ROUTE_SYNC_REQUIRED: "ROUTE_SYNC_REQUIRED",
 };
 
 function createEvent(type, payload = {}, context = {}) {

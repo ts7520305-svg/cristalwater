@@ -4,9 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cristal Water · Centro de Ajuda</title>
+  <link rel="stylesheet" href="/ui/foundation.css">
   <link rel="stylesheet" href="/cristal-assist.css">
   <style>
     *{box-sizing:border-box}
+    html, body{overflow-x:hidden}
     body{margin:0;font-family:Arial,sans-serif;background:#050b16;color:#e8f7ff;}
     .hero{padding:34px 24px 18px;max-width:1200px;margin:auto;}
     .hero h1{font-size:clamp(32px,5vw,58px);margin:0 0 10px;color:#35d9ff;}
@@ -24,9 +26,9 @@
     @media(max-width:860px){.wrap{grid-template-columns:1fr}.hero{padding-top:24px}}
   </style>
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
+  <script src="/client-auth-guard.js"></script>
 </head>
-<body class="cw-enterprise-theme">
+<body class="cw-enterprise-theme" data-required-role="CLIENT">
   <section class="hero">
     <h1>❔ Centro de Ajuda Cristal Water</h1>
     <p>Ajuda contextual para aprender cada função do sistema. Passa o cursor sobre botões, cartões e painéis para explicações rápidas. Usa <b>CTRL/CMD+K</b> para abrir o comando rápido.</p>
@@ -61,6 +63,8 @@
   <script src="/cristal-help-data.js"></script>
   <script src="/cristal-assist.js"></script>
   <script src="/help-center.js"></script>
-<script src="/cw-flow-shell.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

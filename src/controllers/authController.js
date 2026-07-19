@@ -3,13 +3,14 @@ const bcrypt = require("bcryptjs");
 const { prisma } = require("../prismaClient");
 const { normalizeRole } = require("../utils/roles");
 const { getLanguageForIdentity } = require("../services/languagePreferenceService");
+const { getJwtSecret } = require("../utils/jwtSecret");
 const {
   normalizeEmail,
   canonicalAdminEmail,
   isConfiguredAdminEmail,
 } = require("../utils/adminIdentity");
 
-const JWT_SECRET = process.env.JWT_SECRET || "cristalwater_secret";
+const JWT_SECRET = getJwtSecret();
 
 async function passwordMatches(inputPassword, storedPassword) {
   if (!storedPassword) return false;

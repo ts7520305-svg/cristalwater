@@ -1,0 +1,208 @@
+:root {
+  --cwos-shell-bg: rgba(5, 17, 31, 0.92);
+  --cwos-shell-line: rgba(143, 177, 204, 0.28);
+  --cwos-shell-text: #e7f3ff;
+  --cwos-shell-muted: #9cb9ca;
+  --cwos-shell-accent: #38bdf8;
+  --cwos-shell-accent-strong: #0ea5e9;
+  --cwos-shell-alert: #ffd166;
+  --cwos-shell-critical: #ff6b6b;
+  --cwos-shell-radius: 16px;
+}
+
+body.cwos-admin-body {
+  padding-top: 72px;
+}
+
+.cwos-admin-shell {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 120;
+  backdrop-filter: blur(14px);
+  background: var(--cwos-shell-bg);
+  border-bottom: 1px solid var(--cwos-shell-line);
+  color: var(--cwos-shell-text);
+}
+
+.cwos-admin-shell-inner {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 10px 18px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+}
+
+.cwos-admin-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cwos-admin-brand img {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #fff;
+  object-fit: cover;
+}
+
+.cwos-admin-brand strong {
+  font-size: 13px;
+  line-height: 1.1;
+}
+
+.cwos-admin-brand span {
+  display: block;
+  font-size: 11px;
+  color: var(--cwos-shell-muted);
+}
+
+.cwos-admin-domain-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cwos-admin-domain-nav a {
+  text-decoration: none;
+  color: #d9ecff;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  min-height: 34px;
+  padding: 7px 12px;
+  font-weight: 800;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.cwos-admin-domain-nav a.is-active {
+  background: linear-gradient(135deg, var(--cwos-shell-accent-strong), var(--cwos-shell-accent));
+  color: #03131f;
+  border-color: transparent;
+}
+
+.cwos-admin-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cwos-admin-actions a {
+  text-decoration: none;
+  font-size: 12px;
+  min-height: 34px;
+  border-radius: 10px;
+  padding: 7px 10px;
+  font-weight: 900;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--cwos-shell-text);
+}
+
+.cwos-admin-context {
+  max-width: 1600px;
+  margin: 12px auto 14px;
+  border: 1px solid rgba(56, 189, 248, 0.32);
+  border-radius: var(--cwos-shell-radius);
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.11), rgba(7, 23, 38, 0.64));
+  padding: 12px;
+  display: grid;
+  grid-template-columns: minmax(160px, 0.9fr) minmax(220px, 1.1fr) minmax(220px, 1.1fr);
+  gap: 10px;
+}
+
+.cwos-admin-context article {
+  background: rgba(5, 16, 29, 0.42);
+  border: 1px solid rgba(143, 177, 204, 0.24);
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.cwos-admin-context small {
+  display: block;
+  color: var(--cwos-shell-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cwos-admin-context strong {
+  display: block;
+  margin-top: 4px;
+  color: #f3fbff;
+  font-size: 15px;
+  line-height: 1.25;
+}
+
+.cwos-admin-context .is-warning {
+  border-color: rgba(255, 209, 102, 0.48);
+  background: rgba(255, 209, 102, 0.12);
+}
+
+.cwos-admin-context .is-critical {
+  border-color: rgba(255, 107, 107, 0.5);
+  background: rgba(255, 107, 107, 0.12);
+}
+
+@media (max-width: 1050px) {
+  .cwos-admin-shell-inner {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .cwos-admin-domain-nav {
+    justify-content: flex-start;
+  }
+
+  .cwos-admin-actions {
+    justify-content: flex-start;
+  }
+
+  .cwos-admin-context {
+    margin: 10px 14px 12px;
+    grid-template-columns: 1fr;
+  }
+
+  body.cwos-admin-body {
+    padding-top: 132px;
+  }
+}
+
+@media (max-width: 700px) {
+  .cwos-admin-domain-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    width: 100%;
+    gap: 6px;
+  }
+
+  .cwos-admin-domain-nav a {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .cwos-admin-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .cwos-admin-actions a {
+    text-align: center;
+    justify-content: center;
+  }
+
+  body.cwos-admin-body {
+    padding-top: 202px;
+  }
+}

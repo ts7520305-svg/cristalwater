@@ -1,5 +1,6 @@
 const ROLES = {
   ADMIN: "ADMIN",
+  TEAM_LEADER: "TEAM_LEADER",
   SUPERVISOR: "SUPERVISOR",
   TECHNICIAN: "TECHNICIAN",
   CLIENT: "CLIENT",
@@ -8,6 +9,14 @@ const ROLES = {
 
 const PERMISSIONS = {
   ADMIN: ["*"],
+  TEAM_LEADER: [
+    "clients.read",
+    "pools.read",
+    "technicians.read",
+    "visits.read",
+    "routes.manage",
+    "reports.read",
+  ],
   SUPERVISOR: [
     "clients.read",
     "pools.read",

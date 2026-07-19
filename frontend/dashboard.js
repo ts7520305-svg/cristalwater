@@ -28,23 +28,76 @@ function setText(id, value) {
   if (el) el.textContent = value ?? "-";
 }
 
+function esc(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (m) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[m]));
+}
+
 function getMonthRef() {
   return document.getElementById("monthRef")?.value || "";
 }
 
-// 🔥 NOVO — TOKEN
 function getHeaders() {
-  return {
-    "Authorization": "Bearer " + localStorage.token,
+  const token = localStorage.getItem("token") || localStorage.getItem("authToken") || localStorage.getItem("cwAdminToken") || "";
+  const headers = {
     "Content-Type": "application/json"
   };
+  if (token) headers.Authorization = "Bearer " + token;
+  return headers;
+}
+
+function renderSimpleSeries(containerId, rows, valueKey, suffix = "") {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  if (!Array.isArray(rows) || !rows.length) {
+    container.innerHTML = "<div class='empty'>Sem dados</div>";
+    return;
+  }
+  container.innerHTML = rows.map((row) => `
+    <div class="small-card">
+      <b>${esc(row.month || row.label || "-")}</b><br>
+      ${esc(row[valueKey] ?? 0)}${suffix}
+    </div>
+  `).join("");
+}
+
+function setError(message) {
+  setText("dashboardStatus", message || "Erro");
+  const targets = ["topDebtorsTable", "latestPayments", "poolsByZone", "alertsList", "monthlyEvolution", "financialDistribution"];
+  targets.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el && !el.innerHTML) el.innerHTML = `<div class='empty'>${esc(message || "Erro ao carregar")}</div>`;
+  });
+}
+
+function renderFinancialDistribution(summary = {}) {
+  const container = document.getElementById("financialDistribution");
+  if (!container) return;
+  const total = Number(summary.monthBilled || 0);
+  const paid = Number(summary.monthPaid || 0);
+  const open = Number(summary.monthOpen || 0);
+  const pct = total > 0 ? Math.round((paid / total) * 100) : 0;
+  container.innerHTML = `
+    <div class="small-card"><b>Recebido</b><br>${formatMoney(paid)} (${pct}%)</div>
+    <div class="small-card"><b>Em aberto</b><br>${formatMoney(open)}</div>
+    <div class="small-card"><b>Faturado</b><br>${formatMoney(total)}</div>
+  `;
+}
+
+function loadDashboard() {
+  return loadDashboardImpl();
 }
 
 // ======================================================
 // LOAD DASHBOARD
 // ======================================================
 
-async function loadDashboard() {
+async function loadDashboardImpl() {
   try {
 
     setText("dashboardStatus", "A carregar...");
@@ -58,7 +111,8 @@ async function loadDashboard() {
     const data = await res.json();
 
     if (!res.ok || !data.ok) {
-      alert("Erro ao carregar dashboard");
+      const msg = data.error || data.message || "Erro ao carregar dashboard";
+      setError(msg);
       return;
     }
 
@@ -103,7 +157,7 @@ async function loadDashboard() {
 
   } catch (err) {
     console.error(err);
-    alert("Erro ligação ao servidor");
+    setError("Erro de ligação ao servidor");
   }
 }
 
@@ -114,49 +168,8 @@ async function loadDashboard() {
 function renderCharts(data) {
 
   const evolution = data.monthlyEvolution || [];
-
-  const labels = evolution.map(e => e.month);
-  const billed = evolution.map(e => e.billed);
-  const paid = evolution.map(e => e.paid);
-
-  const ctx1 = document.getElementById("monthlyChart");
-  const ctx2 = document.getElementById("summaryChart");
-
-  if (!ctx1 || !ctx2) return;
-
-  new Chart(ctx1, {
-    type: "line",
-    data: {
-      labels,
-      datasets: [
-        {
-          label: "Faturado",
-          data: billed,
-          borderColor: "#1e88e5",
-          tension: 0.3
-        },
-        {
-          label: "Recebido",
-          data: paid,
-          borderColor: "#16a34a",
-          tension: 0.3
-        }
-      ]
-    }
-  });
-
-  new Chart(ctx2, {
-    type: "doughnut",
-    data: {
-      labels: ["Recebido", "Em aberto"],
-      datasets: [{
-        data: [
-          data.summary.monthPaid,
-          data.summary.monthOpen
-        ]
-      }]
-    }
-  });
+  renderSimpleSeries("monthlyEvolution", evolution, "billed", " EUR");
+  renderFinancialDistribution(data.summary || {});
 }
 
 // ======================================================
@@ -166,6 +179,7 @@ function renderCharts(data) {
 function renderTopDebtors(rows = []) {
 
   const container = document.getElementById("topDebtorsTable");
+  if (!container) return;
 
   if (!rows.length) {
     container.innerHTML = "<div class='empty'>Sem devedores</div>";
@@ -184,7 +198,7 @@ function renderTopDebtors(rows = []) {
   rows.forEach(r => {
     html += `
       <tr>
-        <td>${r.clientName}</td>
+        <td>${esc(r.clientName)}</td>
         <td>${formatMoney(r.amountOpen)}</td>
         <td>
           <button onclick="openClient(${r.clientId})">Cliente</button>
@@ -206,6 +220,7 @@ function renderTopDebtors(rows = []) {
 function renderPayments(rows = []) {
 
   const container = document.getElementById("latestPayments");
+  if (!container) return;
 
   if (!rows.length) {
     container.innerHTML = "<div class='empty'>Sem pagamentos</div>";
@@ -217,8 +232,8 @@ function renderPayments(rows = []) {
   rows.forEach(p => {
     html += `
       <div class="small-card">
-        <b>${p.clientName}</b><br>
-        ${formatMoney(p.amount)} - ${p.method}<br>
+        <b>${esc(p.clientName)}</b><br>
+        ${formatMoney(p.amount)} - ${esc(p.method)}<br>
         <small>${new Date(p.paidAt).toLocaleString()}</small>
       </div>
     `;
@@ -234,6 +249,7 @@ function renderPayments(rows = []) {
 function renderZones(rows = []) {
 
   const container = document.getElementById("poolsByZone");
+  if (!container) return;
 
   if (!rows.length) {
     container.innerHTML = "<div class='empty'>Sem zonas</div>";
@@ -245,7 +261,7 @@ function renderZones(rows = []) {
   rows.forEach(z => {
     html += `
       <div class="small-card">
-        <b>${z.zone}</b><br>
+        <b>${esc(z.zone)}</b><br>
         ${z.count} piscinas · ${formatMoney(z.monthlyAmount)}
       </div>
     `;
@@ -261,6 +277,7 @@ function renderZones(rows = []) {
 function renderAlerts(rows = []) {
 
   const container = document.getElementById("alertsList");
+  if (!container) return;
 
   if (!rows.length) {
     container.innerHTML = "<div class='empty'>Sem alertas</div>";
@@ -272,9 +289,9 @@ function renderAlerts(rows = []) {
   rows.forEach(a => {
     html += `
       <div class="small-card" onclick="openClient(${a.clientId})" style="cursor:pointer;">
-        <b>${a.type}</b><br>
-        ${a.message}<br>
-        <small>${a.clientName}</small>
+        <b>${esc(a.type)}</b><br>
+        ${esc(a.message)}<br>
+        <small>${esc(a.clientName)}</small>
       </div>
     `;
   });
@@ -291,5 +308,5 @@ function openBilling() {
 }
 
 function openClient(id) {
-  window.location.href = `/frontend/client.html?id=${id}`;
+  window.location.href = `/admin-clients?clientId=${id}`;
 }

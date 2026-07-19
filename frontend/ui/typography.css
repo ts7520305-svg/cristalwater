@@ -1,0 +1,37 @@
+html,
+body {
+  font-family: var(--cw-font-family);
+  color: var(--cw-color-text);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: clamp(26px, 3vw, 36px);
+  line-height: 1.08;
+}
+
+h2 {
+  font-size: clamp(18px, 2vw, 24px);
+  line-height: 1.18;
+}
+
+p,
+.muted,
+.small {
+  font-size: var(--cw-font-size-sm);
+  color: var(--cw-color-text-soft);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}

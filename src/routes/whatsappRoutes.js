@@ -1,11 +1,17 @@
 const express = require("express");
 const router = express.Router();
 const { prisma } = require("../prismaClient");
+const { assertExternalOperationAllowed } = require("../config/externalIntegrations");
 
 // ==========================================================
 // ENVIO MASSIVO DE DÍVIDAS
 // ==========================================================
 router.post("/mass-debt", async (req, res) => {
+  try {
+    assertExternalOperationAllowed("whatsapp");
+  } catch (gateErr) {
+    return res.status(gateErr.statusCode || 503).json({ ok: false, error: gateErr.code || "disabled_in_qa" });
+  }
 
   const clients = await prisma.client.findMany({
     include: { invoices: true }

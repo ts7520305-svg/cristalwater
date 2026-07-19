@@ -4,9 +4,11 @@
 
 const express = require("express");
 const router = express.Router();
+const auth = require("../middlewares/authMiddleware");
 
 const {
   listRounds,
+  getWeeklyPlan,
   createRound,
   updateRound,
   deleteRound,
@@ -16,9 +18,13 @@ const {
   updatePoolOrder,
 } = require("../controllers/adminRoundsController");
 
-// ✅ SEM authJwt aqui (modo DEV)
+router.use(auth("ADMIN"));
+
 // LISTAR RONDAS
 router.get("/", listRounds);
+
+// PLANO SEMANAL
+router.get("/week", getWeeklyPlan);
 
 // CRIAR RONDA
 router.post("/", createRound);

@@ -1,5 +1,13 @@
 const API = `${location.origin}/api`;
 
+function authHeaders(extra = {}) {
+  const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
+  return {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...extra,
+  };
+}
+
 const state = {
   technicians: [],
   vehicles: [],
@@ -41,7 +49,7 @@ function formatTime(value) {
 }
 
 async function json(path) {
-  const response = await fetch(path);
+  const response = await fetch(path, { headers: authHeaders() });
   const data = await response.json().catch(() => ({}));
   if (!response.ok || data.ok === false) throw new Error(data.error || "Erro de ligacao");
   return data;

@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Cristal Water LDA - Tecnicos</title>
   <script src="/cw-auth.js"></script>
-  <link rel="stylesheet" href="/cw-polish.css">
-  <style>
+  <link rel="stylesheet" href="/ui/foundation.css">
+<style>
     :root{--bg:#06111f;--panel:#0d1d31;--line:#24415f;--txt:#e9f5ff;--muted:#8fb1cc;--brand:#35d1ff;--ok:#40e6a0;--warn:#ffd166;--bad:#ff6b6b;--input:#091829}
     *{box-sizing:border-box}
     body{margin:0;background:linear-gradient(120deg,#06111f,#0b1f33 55%,#06111f);color:var(--txt);font-family:Inter,Segoe UI,Arial,sans-serif}
@@ -50,8 +50,14 @@
       .tech-actions{justify-content:flex-start}
     }
   </style>
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
 </head>
-<body>
+<body data-required-role="ADMIN">
+
+  <div style="padding:12px 16px 0">
+    <button type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
+  </div>
   <main class="page">
     <div class="page-head">
       <div>
@@ -97,6 +103,8 @@
   <script src="/admin-technicians.js?v=22.6.13-risk-jump"></script>
   <script src="/cristal-help-data.js"></script>
   <script src="/cristal-assist.js"></script>
-  <script src="/cw-flow-shell.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

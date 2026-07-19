@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const { prisma } = require("../prismaClient");
 const PDFDocument = require("pdfkit");
+const { roleMatches } = require("../utils/roles");
 
 // ==========================================================
 // HELPERS
@@ -90,8 +91,9 @@ function addPageFooter(doc) {
 async function generateVisitReport(req, res) {
   try {
     const visitId = Number(req.params.id);
-    const role = String(req.query.role || "CLIENT").trim().toUpperCase();
-    const isAdmin = role === "ADMIN";
+    const tokenRole = String(req.user?.role || "").trim().toUpperCase();
+    const role = tokenRole || "CLIENT";
+    const isAdmin = roleMatches(role, "ADMIN");
 
     if (!Number.isInteger(visitId)) {
       return res.status(400).send("ID da visita inválido");
@@ -118,6 +120,21 @@ async function generateVisitReport(req, res) {
 
     if (!visit) {
       return res.status(404).send("Visita não encontrada");
+    }
+
+    if (roleMatches(role, "TECHNICIAN") && !isAdmin) {
+      const authTechId = Number(req.user?.technicianId || req.user?.id || 0);
+      if (!authTechId || authTechId !== Number(visit.technicianId || 0)) {
+        return res.status(403).send("Acesso negado");
+      }
+    }
+
+    if (roleMatches(role, "CLIENT")) {
+      const authClientId = Number(req.user?.clientId || req.user?.id || 0);
+      const visitClientId = Number(visit.clientId || visit.pool?.clientId || 0);
+      if (!authClientId || authClientId !== visitClientId) {
+        return res.status(403).send("Acesso negado");
+      }
     }
 
     const setting = getClientSetting(visit.client);

@@ -5,6 +5,8 @@
   "type": "commonjs",
   "scripts": {
     "dev": "node src/server.js",
+    "test": "vitest run",
+    "test:technician": "vitest run tests/technician-business.test.js",
     "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate",
     "prisma:migrate": "prisma migrate dev",
@@ -55,10 +57,13 @@
     "test:final-two-years": "node scripts/test-final-two-year-real-simulation.js",
     "test:interconnections": "node scripts/test-system-interconnections.js",
     "test:pool-create-flow": "node scripts/test-pool-create-flow.js",
+    "test:visit-os-operational": "node scripts/test-visit-os-operational.js",
+    "test:route-os-acceptance": "node scripts/test-route-os-acceptance.js",
     "test:admin-login": "node scripts/test-admin-login-alias.js",
     "crystal:audit": "node scripts/crystal-audit.js"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.1",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^2.4.3",
     "compression": "^1.8.1",
@@ -72,14 +77,15 @@
     "multer": "^2.1.1",
     "node-cron": "^4.2.1",
     "node-fetch": "^2.7.0",
-    "nodemailer": "^7.0.13",
+    "nodemailer": "^9.0.3",
     "pdfkit": "^0.17.2",
     "socket.io": "^4.8.3",
     "twilio": "^5.13.0",
-    "zod": "^3.24.1",
-    "@prisma/client": "^6.19.1"
+    "zod": "^3.24.1"
   },
   "devDependencies": {
-    "prisma": "^6.19.1"
+    "playwright": "^1.61.1",
+    "prisma": "^6.19.1",
+    "vitest": "^4.1.9"
   }
 }

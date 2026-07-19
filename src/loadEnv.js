@@ -1,12 +1,70 @@
 const fs = require("fs");
 const path = require("path");
 
-function fallbackLoadEnv() {
-  const candidates = [
+function currentNodeEnv() {
+  return String(process.env.NODE_ENV || "production").trim().toLowerCase();
+}
+
+function unique(items) {
+  return items.filter((item, index) => items.indexOf(item) === index);
+}
+
+function resolveEnvPolicy() {
+  const env = currentNodeEnv();
+
+  if (env === "qa") {
+    return {
+      env,
+      source: "qa",
+      fileName: ".env.qa",
+      required: true,
+      allowFallback: false,
+    };
+  }
+
+  if (env === "test") {
+    return {
+      env,
+      source: "test",
+      fileName: ".env.test",
+      required: false,
+      allowFallback: false,
+    };
+  }
+
+  return {
+    env,
+    source: "production",
+    fileName: ".env",
+    required: false,
+    allowFallback: true,
+  };
+}
+
+function resolveEnvFile(policy) {
+  const preferred = unique([
+    path.resolve(process.cwd(), policy.fileName),
+    path.resolve(__dirname, "..", policy.fileName),
+  ]);
+
+  const preferredFile = preferred.find((candidate) => fs.existsSync(candidate));
+  if (preferredFile) return preferredFile;
+
+  if (policy.required) {
+    throw new Error(`Missing required environment file for ${policy.source.toUpperCase()}: ${policy.fileName}`);
+  }
+
+  if (!policy.allowFallback) return null;
+
+  const fallback = unique([
     path.resolve(process.cwd(), ".env"),
     path.resolve(__dirname, "..", ".env"),
-  ];
-  const file = candidates.find((candidate, index) => candidates.indexOf(candidate) === index && fs.existsSync(candidate));
+  ]);
+
+  return fallback.find((candidate) => fs.existsSync(candidate)) || null;
+}
+
+function parseEnvFile(file) {
   if (!file) return { parsed: {} };
 
   const parsed = {};
@@ -28,13 +86,27 @@ function fallbackLoadEnv() {
 }
 
 function loadEnv() {
+  const policy = resolveEnvPolicy();
+  const file = resolveEnvFile(policy);
+
   try {
-    return require("dotenv").config();
+    const dotenv = require("dotenv");
+    const result = file
+      ? dotenv.config({ path: file })
+      : { parsed: {} };
+
+    process.env.ENV_SOURCE = policy.source;
+    process.env.ENV_FILE_LOADED = file ? path.basename(file) : "none";
+    return result;
   } catch (error) {
     if (error?.code !== "MODULE_NOT_FOUND" || !String(error.message || "").includes("dotenv")) {
       throw error;
     }
-    return fallbackLoadEnv();
+
+    const result = parseEnvFile(file);
+    process.env.ENV_SOURCE = policy.source;
+    process.env.ENV_FILE_LOADED = file ? path.basename(file) : "none";
+    return result;
   }
 }
 

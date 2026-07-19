@@ -1,4 +1,13 @@
 const API = "/api";
+const actionLock = new Set();
+
+function authHeaders(extra = {}) {
+  const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
+  return {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...extra,
+  };
+}
 
 // ==========================================================
 // HELPERS
@@ -41,7 +50,7 @@ async function loadBilling() {
   setStatus("A carregar...");
 
   try {
-    const res = await fetch(`${API}/billing/monthly?monthRef=${monthRef}`);
+    const res = await fetch(`${API}/billing/monthly?monthRef=${monthRef}`, { headers: authHeaders() });
     const data = await res.json();
 
     const items = data.items || [];
@@ -146,43 +155,71 @@ async function loadBilling() {
 // ==========================================================
 
 async function addCredit(clientId) {
+  if (actionLock.has(`credit:${clientId}`)) return;
   const amount = prompt("Valor do crédito (€)");
   if (!amount) return;
+  const ok = confirm("Confirmar registo de crédito manual?");
+  if (!ok) return;
 
-  await fetch(`${API}/billing/client/${clientId}/credit`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ amount: Number(amount) })
-  });
+  actionLock.add(`credit:${clientId}`);
+  try {
+    await fetch(`${API}/billing/client/${clientId}/credit`, {
+      method: "POST",
+      headers: authHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify({ amount: Number(amount) })
+    });
+  } finally {
+    actionLock.delete(`credit:${clientId}`);
+  }
 
   loadBilling();
 }
 
 async function addPayment(invoiceId) {
+  if (actionLock.has(`payment:${invoiceId}`)) return;
   const amount = prompt("Valor pago?");
   if (!amount) return;
+  const ok = confirm("Confirmar registo de pagamento manual?");
+  if (!ok) return;
 
-  await fetch(`${API}/billing/invoice/${invoiceId}/payment`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      amount: Number(amount),
-      method: "TRANSFER",
-      notes: ""
-    })
-  });
+  actionLock.add(`payment:${invoiceId}`);
+  try {
+    await fetch(`${API}/billing/invoice/${invoiceId}/payment`, {
+      method: "POST",
+      headers: authHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify({
+        amount: Number(amount),
+        method: "TRANSFER",
+        notes: ""
+      })
+    });
+  } finally {
+    actionLock.delete(`payment:${invoiceId}`);
+  }
 
   loadBilling();
 }
 
 async function markPaid(invoiceId) {
-  await fetch(`${API}/billing/invoice/${invoiceId}/status`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status: "PAID" })
-  });
+  if (actionLock.has(`paid:${invoiceId}`)) return;
+  const ok = confirm("Confirmar alteração de estado para PAID?");
+  if (!ok) return;
+  actionLock.add(`paid:${invoiceId}`);
+  try {
+    await fetch(`${API}/billing/invoice/${invoiceId}/status`, {
+      method: "POST",
+      headers: authHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify({ status: "PAID" })
+    });
+  } finally {
+    actionLock.delete(`paid:${invoiceId}`);
+  }
 
   loadBilling();
+}
+
+function generateMonthly() {
+  setStatus("Geração mensal bloqueada nesta fase para evitar escrita em dados reais.");
 }
 
 // ==========================================================

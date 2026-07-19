@@ -3,8 +3,9 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { prisma } = require("../prismaClient");
+const { getJwtSecret } = require("../utils/jwtSecret");
 
-const SECRET = process.env.JWT_SECRET || "cristalwater_secret";
+const SECRET = getJwtSecret();
 
 async function passwordMatches(inputPassword, storedPassword) {
   if (!storedPassword) return false;

@@ -2,56 +2,665 @@
 <html lang="pt">
 <head>
   <link rel="manifest" href="/manifest.webmanifest">
-  <meta name="theme-color" content="#050b16">
-<meta charset="utf-8">
-<title>Visita</title>
-
-<style>
-body{font-family:Arial;background:#eef3f8;padding:20px}
-.card{background:white;padding:15px;margin-bottom:10px;border-radius:10px}
-button{padding:10px;margin-top:10px;width:100%}
-</style>
-<link rel="stylesheet" href="/cristal-assist.css">
+  <meta name="theme-color" content="#0f1723">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Cristal Water - Visita Técnica</title>
+  <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
-  <link rel="stylesheet" href="css/crystal-v25.css">
+  <script src="/technician-auth-guard.js"></script>
+  <link rel="stylesheet" href="/ui/foundation.css">
+  <style>
+    html,
+    body {
+      overflow-x: hidden;
+    }
+
+    body.cw-tech-visit-page {
+      --cw-bg: #edf4f2;
+      --cw-surface: #ffffff;
+      --cw-surface-2: #f5faf8;
+      --cw-border: #c9d8d2;
+      --cw-text: #102620;
+      --cw-muted: #577067;
+      --cw-primary: #0f7d5d;
+      --cw-primary-2: #0c644a;
+      --cw-danger: #b22f3d;
+      --cw-warning: #9a6200;
+      --cw-success: #166d3e;
+      background: linear-gradient(180deg, #f8fcfa, #edf4f2 52%, #e6efec);
+      color: var(--cw-text);
+    }
+
+    .visit-shell {
+      width: min(960px, 100%);
+      margin: 0 auto;
+      padding: 12px 12px calc(140px + env(safe-area-inset-bottom));
+    }
+
+    .visit-topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      margin: -12px -12px 14px;
+      padding: 12px;
+      background: rgba(248, 252, 250, 0.96);
+      border-bottom: 1px solid var(--cw-border);
+      backdrop-filter: blur(10px);
+    }
+
+    .visit-topbar-inner {
+      width: min(960px, calc(100% - 24px));
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .visit-back {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 0 16px;
+      border-radius: 999px;
+      border: 1px solid var(--cw-border);
+      background: #fff;
+      color: var(--cw-text);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .visit-top-meta {
+      text-align: right;
+    }
+
+    .visit-top-meta b {
+      display: block;
+      font-size: 14px;
+    }
+
+    .visit-top-meta small {
+      color: var(--cw-muted);
+    }
+
+    .visit-hero,
+    .visit-card {
+      background: var(--cw-surface);
+      border: 1px solid var(--cw-border);
+      border-radius: 18px;
+      box-shadow: 0 14px 34px rgba(16, 38, 32, 0.08);
+      padding: 18px;
+      margin-bottom: 12px;
+    }
+
+    .visit-hero {
+      background: linear-gradient(135deg, #10342c, #1d5d4b 58%, #2b7d66);
+      color: #f6fff9;
+      border-color: rgba(255, 255, 255, 0.14);
+    }
+
+    .visit-kicker {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .visit-title {
+      margin: 10px 0 6px;
+      font-size: clamp(30px, 5vw, 44px);
+      line-height: 1.02;
+      font-weight: 900;
+    }
+
+    .visit-subtitle,
+    .visit-note,
+    .visit-top-meta small,
+    .visit-card p,
+    .visit-empty {
+      color: inherit;
+      opacity: 0.9;
+    }
+
+    .visit-summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .visit-stat {
+      min-height: 88px;
+      border-radius: 16px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      display: grid;
+      align-content: space-between;
+    }
+
+    .visit-stat span {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      opacity: 0.74;
+      font-weight: 800;
+    }
+
+    .visit-stat b {
+      font-size: 24px;
+      line-height: 1.08;
+    }
+
+    .visit-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.9fr);
+      gap: 12px;
+      align-items: start;
+    }
+
+    .visit-card h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .visit-section-label {
+      color: var(--cw-muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 10px;
+    }
+
+    .visit-fields {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .visit-field,
+    .visit-check,
+    .visit-note-box,
+    .visit-file-box {
+      border: 1px solid var(--cw-border);
+      border-radius: 14px;
+      background: var(--cw-surface-2);
+    }
+
+    .visit-field {
+      padding: 12px;
+    }
+
+    .visit-field label,
+    .visit-note-box label,
+    .visit-file-box label {
+      display: block;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--cw-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 8px;
+    }
+
+    .visit-field input,
+    .visit-note-box textarea,
+    .visit-file-box input[type="file"],
+    .visit-note-box input {
+      width: 100%;
+      border: 1px solid var(--cw-border);
+      border-radius: 12px;
+      background: #fff;
+      color: var(--cw-text);
+      padding: 14px 14px;
+      font: inherit;
+      min-height: 52px;
+    }
+
+    .visit-note-box textarea {
+      min-height: 130px;
+      resize: vertical;
+    }
+
+    .visit-check-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .visit-check {
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 72px;
+    }
+
+    .visit-check input {
+      width: 22px;
+      height: 22px;
+      accent-color: var(--cw-primary);
+      flex: 0 0 auto;
+    }
+
+    .visit-check strong {
+      display: block;
+      font-size: 16px;
+    }
+
+    .visit-check small,
+    .visit-muted,
+    .visit-file-meta,
+    .visit-inline-note {
+      color: var(--cw-muted);
+      font-size: 13px;
+    }
+
+    .visit-status {
+      margin-bottom: 12px;
+      border-radius: 14px;
+      border: 1px solid var(--cw-border);
+      background: #fff;
+      padding: 14px 16px;
+      color: var(--cw-text);
+    }
+
+    .visit-status[data-tone="loading"] {
+      background: #edf6ff;
+      border-color: #b8d9ff;
+      color: #11426e;
+    }
+
+    .visit-status[data-tone="error"] {
+      background: #fff1f2;
+      border-color: #f4b8bf;
+      color: #8f2030;
+    }
+
+    .visit-status[data-tone="success"] {
+      background: #eef9f1;
+      border-color: #abd6b5;
+      color: #17633a;
+    }
+
+    .visit-status[data-tone="warning"] {
+      background: #fff7eb;
+      border-color: #e7c089;
+      color: #805100;
+    }
+
+    .visit-meta-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .visit-meta-item {
+      border: 1px solid var(--cw-border);
+      border-radius: 14px;
+      background: var(--cw-surface-2);
+      padding: 12px;
+    }
+
+    .visit-meta-item span {
+      display: block;
+      color: var(--cw-muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 5px;
+    }
+
+    .visit-inline-note {
+      margin-top: 8px;
+    }
+
+    .visit-file-box {
+      padding: 14px;
+    }
+
+    .visit-actions {
+      position: sticky;
+      bottom: calc(84px + env(safe-area-inset-bottom));
+      z-index: 30;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1fr;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 18px;
+      border: 1px solid var(--cw-border);
+      background: rgba(248, 252, 250, 0.96);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 16px 36px rgba(16, 38, 32, 0.14);
+      margin-top: 12px;
+    }
+
+    .visit-actions button,
+    .visit-upload-btn {
+      min-height: 64px;
+      border-radius: 16px;
+      border: 1px solid var(--cw-border);
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      padding: 12px 14px;
+    }
+
+    .visit-actions button:disabled,
+    .visit-upload-btn:disabled {
+      opacity: 0.65;
+      cursor: wait;
+    }
+
+    .visit-actions .primary {
+      background: var(--cw-primary);
+      border-color: var(--cw-primary);
+      color: #fff;
+    }
+
+    .visit-actions .secondary,
+    .visit-upload-btn {
+      background: #fff;
+      color: var(--cw-text);
+    }
+
+    .visit-actions .danger {
+      background: #fff1f2;
+      border-color: #f0b0b8;
+      color: var(--cw-danger);
+    }
+
+    .visit-empty {
+      margin: 0;
+      color: var(--cw-muted);
+    }
+
+    @media (max-width: 960px) {
+      .visit-grid,
+      .visit-summary {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .visit-shell {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      .visit-topbar {
+        margin-left: -10px;
+        margin-right: -10px;
+      }
+
+      .visit-topbar-inner {
+        width: min(960px, calc(100% - 20px));
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .visit-top-meta {
+        text-align: left;
+      }
+
+      .visit-grid,
+      .visit-summary,
+      .visit-fields,
+      .visit-check-grid,
+      .visit-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .visit-actions {
+        bottom: calc(72px + env(safe-area-inset-bottom));
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body.cw-tech-visit-page {
+        --cw-bg: #07120f;
+        --cw-surface: #10211c;
+        --cw-surface-2: #152a24;
+        --cw-border: #29453d;
+        --cw-text: #eef8f4;
+        --cw-muted: #a9c2b8;
+        --cw-primary: #5fd4ab;
+        --cw-primary-2: #3eb58d;
+        --cw-danger: #ff7f8d;
+        --cw-warning: #f0c36a;
+        --cw-success: #7fe0a1;
+        background: linear-gradient(180deg, #07120f, #0d1d18 50%, #11251f);
+        color: var(--cw-text);
+      }
+
+      .visit-topbar,
+      .visit-actions {
+        background: rgba(7, 18, 15, 0.94);
+      }
+
+      .visit-card,
+      .visit-check,
+      .visit-field,
+      .visit-note-box,
+      .visit-file-box,
+      .visit-meta-item,
+      .visit-stat {
+        background: var(--cw-surface-2);
+        color: var(--cw-text);
+      }
+
+      .visit-summary .visit-stat {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.12);
+      }
+
+      .visit-back,
+      .visit-status,
+      .visit-actions .secondary,
+      .visit-upload-btn,
+      .visit-field input,
+      .visit-note-box textarea,
+      .visit-file-box input[type="file"] {
+        background: #0d1c17;
+        color: var(--cw-text);
+      }
+
+      .visit-status[data-tone="loading"] {
+        background: #10273a;
+        border-color: #24506f;
+        color: #bfe5ff;
+      }
+
+      .visit-status[data-tone="error"] {
+        background: #34161b;
+        border-color: #6d2b35;
+        color: #ffbfc7;
+      }
+
+      .visit-status[data-tone="success"] {
+        background: #12291d;
+        border-color: #28573a;
+        color: #bdeecb;
+      }
+
+      .visit-status[data-tone="warning"] {
+        background: #31240d;
+        border-color: #6d5625;
+        color: #ffe3a3;
+      }
+
+      .visit-actions .danger {
+        background: #34161b;
+        border-color: #6d2b35;
+        color: #ffbcc5;
+      }
+
+      .visit-hero {
+        background: linear-gradient(135deg, #12372f, #145443 60%, #177359);
+      }
+    }
+  </style>
 </head>
 
-<body>
+<body class="cw-tech-visit-page" data-required-role="TECHNICIAN">
+  <div class="visit-topbar">
+    <div class="visit-topbar-inner">
+      <a class="visit-back" href="/technician-field-mode" data-cw-back data-cw-fallback="/technician-field-mode">Voltar ao campo</a>
+      <div class="visit-top-meta">
+        <b>Execução de visita</b>
+        <small id="visitTopMeta">Checklist, química, foto e fecho operacional</small>
+      </div>
+    </div>
+  </div>
 
-<h2>Visita</h2>
+  <main class="visit-shell">
+    <section class="visit-hero">
+      <span class="visit-kicker">Técnico no terreno</span>
+      <h1 class="visit-title">Visita técnica</h1>
+      <p class="visit-subtitle" id="visitHeroCopy">Abrir visita, registar leituras, documentar evidência e concluir sem perder contexto operacional.</p>
+      <div class="visit-summary">
+        <article class="visit-stat">
+          <span>Piscina</span>
+          <b id="heroPool">Por carregar</b>
+        </article>
+        <article class="visit-stat">
+          <span>Cliente</span>
+          <b id="heroClient">Por carregar</b>
+        </article>
+        <article class="visit-stat">
+          <span>Alertas</span>
+          <b id="heroAlerts">0</b>
+        </article>
+        <article class="visit-stat">
+          <span>Fotos</span>
+          <b id="heroPhotos">0</b>
+        </article>
+      </div>
+    </section>
 
-<div id="info"></div>
+    <div id="statusBox" class="visit-status" role="status" aria-live="polite">A preparar a ficha da visita.</div>
 
-<div class="card">
-<input id="ph" placeholder="pH">
-<input id="chlorine" placeholder="Cloro">
-<input id="alkalinity" placeholder="Alcalinidade">
-</div>
+    <div class="visit-grid">
+      <section>
+        <article class="visit-card">
+          <div class="visit-section-label">Resumo da visita</div>
+          <div id="info" class="visit-meta-list">
+            <p class="visit-empty">A carregar informação da visita.</p>
+          </div>
+        </article>
 
-<div class="card">
-<label><input type="checkbox" id="cleaned"> Limpeza</label>
-<label><input type="checkbox" id="brushed"> Escovado</label>
-</div>
+        <article class="visit-card">
+          <h3>Leituras da água</h3>
+          <div class="visit-fields">
+            <div class="visit-field">
+              <label for="ph">pH</label>
+              <input id="ph" inputmode="decimal" placeholder="Ex.: 7.2">
+            </div>
+            <div class="visit-field">
+              <label for="chlorine">Cloro</label>
+              <input id="chlorine" inputmode="decimal" placeholder="Ex.: 1.5">
+            </div>
+            <div class="visit-field">
+              <label for="alkalinity">Alcalinidade</label>
+              <input id="alkalinity" inputmode="decimal" placeholder="Ex.: 110">
+            </div>
+            <div class="visit-field">
+              <label for="salt">Sal</label>
+              <input id="salt" inputmode="decimal" placeholder="Ex.: 4200 ppm">
+            </div>
+            <div class="visit-field">
+              <label for="temperature">Temperatura</label>
+              <input id="temperature" inputmode="decimal" placeholder="Ex.: 25.5 ºC">
+            </div>
+            <div class="visit-field">
+              <label for="orp">ORP</label>
+              <input id="orp" inputmode="decimal" placeholder="Ex.: 720 mV">
+            </div>
+          </div>
+          <p class="visit-inline-note" id="targetRanges">Os intervalos recomendados serão carregados com a ficha técnica quando existirem.</p>
+        </article>
 
-<div class="card">
-<textarea id="notes" placeholder="Notas"></textarea>
-</div>
+        <article class="visit-card">
+          <h3>Trabalho executado</h3>
+          <div class="visit-check-grid">
+            <label class="visit-check" for="cleaned">
+              <input type="checkbox" id="cleaned">
+              <span>
+                <strong>Limpeza</strong>
+                <small>Confirmar aspiração, recolha e limpeza geral.</small>
+              </span>
+            </label>
+            <label class="visit-check" for="brushed">
+              <input type="checkbox" id="brushed">
+              <span>
+                <strong>Escovado</strong>
+                <small>Marcar se paredes e linhas de água foram escovadas.</small>
+              </span>
+            </label>
+          </div>
+        </article>
 
-<div class="card">
-<input type="file" id="photo">
-<button onclick="uploadPhoto()">📸 Upload</button>
-</div>
+        <article class="visit-card">
+          <h3>Notas da visita</h3>
+          <div class="visit-note-box">
+            <label for="notes">Resumo para histórico técnico</label>
+            <textarea id="notes" placeholder="Descreve rapidamente o estado da piscina, ações executadas e alertas para seguimento."></textarea>
+          </div>
+        </article>
+      </section>
 
-<div class="card">
-<button onclick="completeVisit()">✔ Concluir</button>
-<button onclick="markNotDone()">❌ Não feita</button>
-</div>
+      <aside>
+        <article class="visit-card">
+          <h3>Encerramento alternativo</h3>
+          <div class="visit-note-box">
+            <label for="notDoneReason">Motivo se a visita não foi realizada</label>
+            <textarea id="notDoneReason" placeholder="Explica impedimento, ausência de acesso, avaria ou outro bloqueio operacional."></textarea>
+          </div>
+        </article>
 
-<script src="/technician-visit.js"></script>
-<script src="/cristal-help-data.js"></script>
-<script src="/cristal-assist.js"></script>
-<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
-<script src="/cw-flow-shell.js"></script>
+        <article class="visit-card visit-file-box">
+          <h3>Foto de apoio</h3>
+          <label for="photo">Anexar fotografia do local</label>
+          <input type="file" id="photo" accept="image/*">
+          <div class="visit-file-meta" id="photoMeta">Sem ficheiro selecionado.</div>
+          <button class="visit-upload-btn" id="uploadBtn" type="button">Enviar fotografia</button>
+        </article>
+
+        <article class="visit-card">
+          <h3>Contexto operacional</h3>
+          <div id="contextBox" class="visit-meta-list">
+            <div class="visit-meta-item">
+              <span>Estado</span>
+              <strong>A aguardar carregamento do contexto.</strong>
+            </div>
+          </div>
+        </article>
+      </aside>
+    </div>
+
+    <div class="visit-actions">
+      <button id="completeBtn" class="primary" type="button">Concluir visita</button>
+      <button id="notDoneBtn" class="danger" type="button">Marcar como não feita</button>
+      <button id="refreshBtn" class="secondary" type="button">Atualizar ficha</button>
+    </div>
+  </main>
+
+  <script src="/technician-visit.js"></script>
+  <script src="/cristal-help-data.js"></script>
+  <script src="/cristal-assist.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

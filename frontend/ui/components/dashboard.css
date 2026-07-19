@@ -1,0 +1,37 @@
+.cw-admin-head {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.cw-head-meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.cw-priority-layout {
+  display: grid;
+  gap: 14px;
+}
+
+.cw-priority-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cw-status-strip {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 1024px) {
+  .cw-status-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

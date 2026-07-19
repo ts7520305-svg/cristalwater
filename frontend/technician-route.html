@@ -1,31 +1,199 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="pt">
 <head>
   <link rel="manifest" href="/manifest.webmanifest">
-  <meta name="theme-color" content="#050b16">
-  <title>Rota Técnico</title>
-<link rel="stylesheet" href="/cristal-assist.css">
+  <meta name="theme-color" content="#0f1723">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Cristal Water - Rota Tecnica</title>
+  <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
-  <link rel="stylesheet" href="css/crystal-v25.css">
+  <script src="/technician-auth-guard.js"></script>
+  <link rel="stylesheet" href="/ui/foundation.css">
+  <style>
+    html,
+    body {
+      overflow-x: hidden;
+    }
+
+    body.route-page {
+      --cw-bg: #edf4f2;
+      --cw-surface: #ffffff;
+      --cw-border: #c9d8d2;
+      --cw-text: #102620;
+      --cw-muted: #577067;
+      --cw-primary: #0f7d5d;
+      --cw-warning: #9a6200;
+      --cw-danger: #b22f3d;
+      background: linear-gradient(180deg, #f8fcfa, #edf4f2);
+      color: var(--cw-text);
+      margin: 0;
+      overflow-x: hidden;
+    }
+
+    .route-shell {
+      width: min(960px, 100%);
+      margin: 0 auto;
+      padding: 10px 10px calc(120px + env(safe-area-inset-bottom));
+    }
+
+    .route-header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      margin: -10px -10px 10px;
+      padding: 10px;
+      border-bottom: 1px solid var(--cw-border);
+      background: rgba(248, 252, 250, 0.97);
+      backdrop-filter: blur(8px);
+    }
+
+    .route-card {
+      background: var(--cw-surface);
+      border: 1px solid var(--cw-border);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 10px 28px rgba(16, 38, 32, 0.08);
+      margin-bottom: 10px;
+    }
+
+    .route-title {
+      margin: 4px 0;
+      font-size: clamp(26px, 5vw, 38px);
+      line-height: 1.05;
+      font-weight: 900;
+    }
+
+    .route-muted {
+      color: var(--cw-muted);
+      margin: 0;
+    }
+
+    .route-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .route-actions button,
+    .route-actions a {
+      min-height: 56px;
+      border-radius: 12px;
+      border: 1px solid var(--cw-border);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 16px;
+      cursor: pointer;
+      background: #fff;
+      color: var(--cw-text);
+    }
+
+    .route-actions .primary {
+      background: var(--cw-primary);
+      border-color: var(--cw-primary);
+      color: #fff;
+    }
+
+    .status-box {
+      border-radius: 12px;
+      border: 1px solid var(--cw-border);
+      background: #f4faf7;
+      padding: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      margin: 0 0 10px;
+    }
+
+    .status-box[data-tone="warning"] {
+      background: #fff6e7;
+      border-color: #e4c289;
+      color: #623900;
+    }
+
+    .status-box[data-tone="error"] {
+      background: #fdecef;
+      border-color: #efbbc5;
+      color: #6f1223;
+    }
+
+    .route-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .route-item {
+      border: 1px solid var(--cw-border);
+      border-radius: 12px;
+      padding: 10px;
+      background: #fff;
+      display: grid;
+      gap: 4px;
+    }
+
+    .route-item b {
+      font-size: 16px;
+      line-height: 1.2;
+    }
+
+    .route-item small {
+      color: var(--cw-muted);
+      font-size: 13px;
+    }
+
+    .empty {
+      color: var(--cw-muted);
+      border: 1px dashed var(--cw-border);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+      background: #fff;
+    }
+
+    @media (max-width: 680px) {
+      .route-actions {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
+<body class="route-page" data-required-role="TECHNICIAN">
+  <main class="route-shell">
+    <header class="route-header">
+      <div class="route-card" style="margin-bottom:0;">
+        <p class="route-muted">Turno tecnico</p>
+        <h1 class="route-title">Rota do Dia</h1>
+        <p class="route-muted">Vista rapida da sequencia de piscinas e estado de leitura, sem escrita nesta validacao.</p>
+        <div class="route-actions">
+          <button type="button" data-cw-back data-cw-fallback="/technician-field-mode">Voltar</button>
+          <button id="refreshBtn" class="primary" type="button">Atualizar rota</button>
+          <a href="/technician-field-mode">Modo campo</a>
+        </div>
+      </div>
+    </header>
 
-<body>
+    <p id="statusBox" class="status-box" aria-live="polite">A preparar rota tecnica.</p>
 
-<h2>Rota do Dia</h2>
+    <section class="route-card">
+      <h2 style="margin:0 0 8px;">Piscinas planeadas</h2>
+      <div id="route" class="route-list"></div>
+    </section>
 
-<div id="route"></div>
+    <section class="route-card">
+      <h2 style="margin:0 0 8px;">Sugestoes</h2>
+      <div id="suggestions" class="route-list"></div>
+    </section>
+  </main>
 
-<hr>
-
-<h3>💡 Sugestões</h3>
-<div id="suggestions"></div>
-
-<script src="/technician-route.js"></script>
-
-<script src="/cristal-help-data.js"></script>
-<script src="/cristal-assist.js"></script>
-<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
-<script src="/cw-flow-shell.js"></script>
+  <script src="/technician-route.js"></script>
+  <script src="/cristal-help-data.js"></script>
+  <script src="/cristal-assist.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

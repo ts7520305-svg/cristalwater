@@ -5,6 +5,7 @@
 const prismaModule = require("../prismaClient");
 const prisma = prismaModule.prisma;
 const { assertPoolReadyForRound } = require("../utils/poolReadiness");
+const AdminWeeklyPlanningBusiness = require("../business/admin/AdminWeeklyPlanningBusiness");
 
 function toNumber(value, fallback = null) {
   const n = Number(value);
@@ -53,6 +54,16 @@ async function listRounds(req, res) {
   } catch (err) {
     console.error(err);
     res.status(500).json({ ok: false, message: "Erro ao listar rondas" });
+  }
+}
+
+async function getWeeklyPlan(req, res) {
+  try {
+    const plan = await AdminWeeklyPlanningBusiness.getWeeklyPlan(req.query || {});
+    res.json({ ok: true, plan });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, message: "Erro ao carregar plano semanal" });
   }
 }
 
@@ -274,6 +285,7 @@ async function updatePoolOrder(req, res) {
 
 module.exports = {
   listRounds,
+  getWeeklyPlan,
   createRound,
   updateRound,
   deleteRound,

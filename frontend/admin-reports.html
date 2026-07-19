@@ -4,20 +4,19 @@
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#050b16">
   <meta charset="UTF-8" />
-  <title>Admin Relatórios</title>
+  <title>Cristal Water - Relatorios Admin</title>
+  <link rel="stylesheet" href="/ui/foundation.css">
 
   <style>
-    body {
-      font-family: Arial;
-      background: #f4f6f8;
-      padding: 20px;
-    }
+    html, body { overflow-x: hidden; }
+    body { margin:0; font-family:Inter,Segoe UI,Arial,sans-serif; background:#f4f6f8; padding:16px; color:#1f2937; }
 
     h1 { margin-top: 0; }
 
     .topbar {
       display: flex;
       gap: 10px;
+      flex-wrap: wrap;
       margin-bottom: 20px;
     }
 
@@ -32,32 +31,78 @@
 
     .panel {
       background: white;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 10px;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.08);
+    }
+
+    .toolbar {
+      display:grid;
+      grid-template-columns: 180px 180px auto;
+      gap:10px;
+      margin-bottom:12px;
+    }
+
+    input, select {
+      min-height:44px;
+      border:1px solid #d1d5db;
+      border-radius:10px;
+      padding:10px;
+      font-size:14px;
+    }
+
+    .status {
+      border:1px solid #d5dde8;
+      background:#f9fbff;
+      color:#334155;
+      border-radius:10px;
+      padding:10px 12px;
+      margin-bottom:12px;
+      font-weight:700;
+    }
+
+    .status.error { border-color:#efc0c7; background:#fff3f5; color:#8b1f2a; }
+    .status.ok { border-color:#b9e2ca; background:#f2fbf6; color:#165434; }
+
+    @media (max-width:760px) {
+      .toolbar { grid-template-columns:1fr; }
     }
   </style>
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
+  <script src="/admin-auth-guard.js"></script>
 </head>
 
-<body>
+<body data-required-role="ADMIN">
 
 <h1>Relatórios</h1>
 
 <div class="topbar">
-  <a class="btn" href="/admin-dashboard.html">🏠 Dashboard</a>
-  <a class="btn" href="/admin-clients.html">👥 Clientes</a>
+  <a class="btn" href="/admin-dashboard">Dashboard</a>
+  <a class="btn" href="/admin-clients">Clientes</a>
 </div>
 
 <div class="panel">
-  <h3>📊 Financeiro</h3>
+  <div class="toolbar">
+    <input id="reportMonth" type="month">
+    <select id="reportMode">
+      <option value="overview">Resumo</option>
+      <option value="financial">Financeiro</option>
+      <option value="communications">Comunicacoes</option>
+    </select>
+    <button class="btn" id="refreshReports" type="button">Atualizar</button>
+  </div>
+  <div id="reportsStatus" class="status" role="status" aria-live="polite">A carregar relatorios...</div>
+</div>
+
+<div class="panel">
+  <h3>Financeiro</h3>
   <div id="financial"></div>
 </div>
 
 <div class="panel">
-  <h3>💬 Comunicações</h3>
+  <h3>Comunicacoes</h3>
   <div id="communications"></div>
 </div>
 
@@ -67,6 +112,8 @@
 <script src="/cristal-assist.js"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
 <script src="/cw-admin-shortcuts.js"></script>
-<script src="/cw-flow-shell.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

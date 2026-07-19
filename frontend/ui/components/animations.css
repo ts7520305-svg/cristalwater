@@ -1,0 +1,14 @@
+@keyframes cw-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cw-animate-enter {
+  animation: cw-fade-up var(--cw-transition) both;
+}

@@ -19,12 +19,15 @@ const { Server } = require("socket.io");
 const logger = require("./services/loggerService");
 const auditMiddleware = require("./middlewares/auditMiddleware");
 const errorHandlerMiddleware = require("./middlewares/errorHandlerMiddleware");
+const { assertJwtSecretForStartup } = require("./utils/jwtSecret");
+const { ensureUploadBaseDirReady, getUploadsPublicBasePath } = require("./config/uploadPath");
 
 // Core routes
 const systemRoutes = require("./routes/systemRoutes");
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const technicianCrudRoutes = require("./routes/technicianCrudRoutes");
+const technicianStatsRoutes = require("./routes/technicianStatsRoutes");
 const technicianAuthRoutes = require("./routes/technicianAuthRoutes");
 const clientRoutes = require("./routes/clientRoutes");
 const poolRoutes = require("./routes/poolRoutes");
@@ -61,6 +64,8 @@ const zoneRoutes = require("./routes/zoneRoutes");
 const extraRoutes = require("./routes/extraRoutes");
 const extraVisitRoutes = require("./routes/extraVisitRoutes");
 const incidentRoutes = require("./routes/incidentRoutes");
+const equipmentStockOsRoutes = require("./routes/equipmentStockOsRoutes");
+const financeOsRoutes = require("./routes/financeOsRoutes");
 const brainApiRouter = require("./system/api/brainApiRouter");
 const platformStatusRouter = require("./platform/api/platformStatusRouter");
 const businessApiRouter = require("./business/api/businessApiRouter");
@@ -112,6 +117,9 @@ const operationalFlowRoutes = require("./routes/operationalFlowRoutes");
 const coreFlowRoutes = require("./routes/coreFlowRoutes");
 const operationalStateRoutes = require("./routes/operationalStateRoutes");
 const operationalRiskRoutes = require("./routes/operationalRiskRoutes");
+const installationRoutes = require("./routes/installationRoutes");
+const constructionRoutes = require("./routes/constructionRoutes");
+const administrationRoutes = require("./routes/administrationRoutes");
 
 
 // Background services
@@ -145,8 +153,11 @@ const io = new Server(server, { cors: socketCorsOptions });
 global.io = io;
 
 const PORT = Number(process.env.PORT || 4000);
+
+assertJwtSecretForStartup();
+
 const frontendPath = path.join(__dirname, "../frontend");
-const uploadsPath = path.join(__dirname, "../uploads");
+const uploadsPath = ensureUploadBaseDirReady();
 const tempPath = path.join(__dirname, "../temp");
 fs.mkdirSync(uploadsPath, { recursive: true });
 fs.mkdirSync(tempPath, { recursive: true });
@@ -184,7 +195,7 @@ app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 app.use(auditMiddleware);
 
 app.use(express.static(frontendPath));
-app.use("/uploads", express.static(uploadsPath));
+app.use(getUploadsPublicBasePath(), express.static(uploadsPath));
 
 const frontendPages = fs
   .readdirSync(frontendPath)
@@ -210,6 +221,7 @@ mount("/api/auth", authRoutes);
 mount("/api/admin-auth", require("./routes/adminAuthRoutes"));
 mount("/api/users", userRoutes);
 mount("/api/technicians", technicianCrudRoutes);
+mount("/api/technician-stats", technicianStatsRoutes);
 mount("/api/technician-auth", technicianAuthRoutes);
 mount("/api/technician", technicianRoutes);
 mount("/api/clients", clientRoutes);
@@ -247,6 +259,8 @@ mount("/api/zones", zoneRoutes);
 mount("/api/extras", extraRoutes);
 mount("/api/extra-visits", extraVisitRoutes);
 mount("/api/incidents", incidentRoutes);
+mount("/api/equipment-stock-os", equipmentStockOsRoutes);
+mount("/api/finance-os", financeOsRoutes);
 
 // Modules previously present but not wired in server.js
 mount("/api/repairs", repairRoutes);
@@ -303,6 +317,9 @@ mount("/api/operational-flow", operationalFlowRoutes);
 mount("/api/core", coreFlowRoutes);
 mount("/api/operational-state", operationalStateRoutes);
 mount("/api/operational-risk", operationalRiskRoutes);
+mount("/api/installations", installationRoutes);
+mount("/api/construction", constructionRoutes);
+mount("/api/administration", administrationRoutes);
 
 
 app.get("/", (req, res) => {

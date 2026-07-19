@@ -1,38 +1,111 @@
 const { prisma } = require("../../prismaClient");
 
-async function getTodayRoute(technicianId) {
+function startOfToday() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
 
-    let visits = await prisma.serviceVisit.findMany({
+function startOfTomorrow() {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
 
-        where: {
-            technicianId
-        },
+function normalizeVisit(v) {
+  return {
+    ...v,
 
-        include: {
-            client: true,
-            pool: true
-        },
-
-        orderBy: {
-            plannedDate: "asc"
+    client: {
+      ...v.client,
+      accesses: (v.client?.accesses || []).sort((a, b) => {
+        if ((a.sortOrder ?? 0) !== (b.sortOrder ?? 0)) {
+          return (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
         }
+        return a.id - b.id;
+      }),
+    },
 
+    pool: {
+      ...v.pool,
+      notes: v.pool?.notes || null,
+      temporaryNotes: v.pool?.temporaryNotes || null,
+      temporaryNotesActive: v.pool?.temporaryNotesActive ?? false,
+    },
+  };
+}
+
+async function getTodayRoute({ technicianId, req } = {}) {
+  const today = startOfToday();
+  const tomorrow = startOfTomorrow();
+
+  let visits = await prisma.serviceVisit.findMany({
+    where: {
+      plannedDate: {
+        gte: today,
+        lt: tomorrow,
+      },
+    },
+    include: {
+      client: {
+        include: {
+          accesses: {
+            where: {
+              active: true,
+              visibleToTechnician: true,
+            },
+          },
+        },
+      },
+      pool: true,
+    },
+    orderBy: [
+      { plannedDate: "asc" },
+      { id: "asc" },
+    ],
+  });
+
+  let mode = "TODAY";
+
+  if (!visits || visits.length === 0) {
+    visits = await prisma.serviceVisit.findMany({
+      where: {
+        status: "PLANNED",
+      },
+      include: {
+        client: {
+          include: {
+            accesses: {
+              where: {
+                active: true,
+                visibleToTechnician: true,
+              },
+            },
+          },
+        },
+        pool: true,
+      },
+      orderBy: [
+        { plannedDate: "asc" },
+        { id: "asc" },
+      ],
+      take: 50,
     });
 
-    return {
+    mode = "FALLBACK";
+  }
 
-        ok: true,
+  const normalized = (visits || []).map(normalizeVisit);
 
-        total: visits.length,
-
-        visits
-
-    };
-
+  return {
+    ok: true,
+    mode,
+    total: normalized.length,
+    visits: normalized,
+  };
 }
 
 module.exports = {
-
-    getTodayRoute
-
+  getTodayRoute,
 };

@@ -58,9 +58,18 @@ function esc(value) {
   }[char]));
 }
 
+function authHeaders(extra = {}) {
+  const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt") || localStorage.getItem("adminToken");
+  return {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...extra,
+  };
+}
+
 async function j(url, opt = {}) {
+  const headers = authHeaders({ "Content-Type": "application/json", ...(opt.headers || {}) });
   const response = await fetch(url, {
-    headers: { "Content-Type": "application/json" },
+    headers,
     ...opt,
   });
   const data = await response.json().catch(() => ({}));
@@ -71,8 +80,9 @@ async function j(url, opt = {}) {
 }
 
 async function riskRequest(path, opt = {}) {
+  const headers = authHeaders({ "Content-Type": "application/json", ...(opt.headers || {}) });
   const response = await fetch(`${RISK_API}${path}`, {
-    headers: { "Content-Type": "application/json" },
+    headers,
     ...opt,
   });
   const data = await response.json().catch(() => ({}));

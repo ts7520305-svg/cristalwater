@@ -1,4 +1,5 @@
 const API = "/api";
+const actionLock = new Set();
 
 const state = {
   clients: [],
@@ -34,6 +35,14 @@ function status(message, tone = "") {
 
 function metric(label, value, tone = "") {
   return `<div class="metric ${esc(tone)}"><span>${esc(label)}</span><b>${esc(value)}</b></div>`;
+}
+
+function authHeaders(extra = {}) {
+  const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
+  return {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...extra,
+  };
 }
 
 function renderMetrics(summary = {}) {
@@ -141,7 +150,9 @@ async function load() {
   const filter = el("statusFilter")?.value || "pending";
   status("A carregar faturacao oficial...");
   try {
-    const response = await fetch(`${API}/invoices/to-issue?status=${encodeURIComponent(filter)}&q=${encodeURIComponent(query)}`);
+    const response = await fetch(`${API}/invoices/to-issue?status=${encodeURIComponent(filter)}&q=${encodeURIComponent(query)}`, {
+      headers: authHeaders()
+    });
     const data = await response.json().catch(() => ({}));
     if (!response.ok || data.ok === false) throw new Error(data.error || "Erro ao carregar");
 
@@ -161,14 +172,18 @@ function openPdf(id) {
 }
 
 async function markIssued(id, clientName) {
+  if (actionLock.has(`issued:${id}`)) return;
+  const allow = confirm(`Confirmar marcação da fatura #${id} como emitida externamente para ${clientName || "cliente"}?`);
+  if (!allow) return;
   const externalInvoiceNo = prompt(`Numero da fatura oficial externa para ${clientName || "cliente"}`, "");
   if (!externalInvoiceNo) return;
 
   try {
+    actionLock.add(`issued:${id}`);
     status("A marcar fatura como emitida externamente...");
     const response = await fetch(`${API}/invoices/${id}/mark-issued`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ externalInvoiceNo }),
     });
     const data = await response.json().catch(() => ({}));
@@ -179,6 +194,8 @@ async function markIssued(id, clientName) {
     console.error(error);
     alert(error.message || "Erro ao marcar fatura");
     status(error.message || "Erro ao marcar fatura", "error");
+  } finally {
+    actionLock.delete(`issued:${id}`);
   }
 }
 

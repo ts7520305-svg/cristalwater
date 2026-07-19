@@ -1,12 +1,12 @@
 const express = require('express');
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 const c = require('../controllers/inventoryController');
+const auth = require('../middlewares/authMiddleware');
+const { resolveUploadSubdir } = require('../config/uploadPath');
 
 const router = express.Router();
-const dest = path.join(__dirname, '../../uploads/inventory');
-fs.mkdirSync(dest, { recursive: true });
+router.use(auth('ADMIN'));
+const dest = resolveUploadSubdir('inventory');
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, dest),
   filename: (req, file, cb) => cb(null, `${Date.now()}-${String(file.originalname || 'documento').replace(/[^a-zA-Z0-9_.-]/g, '_')}`)

@@ -1,5 +1,6 @@
 const fetch = require("node-fetch");
 const { prisma } = require("../prismaClient");
+const RepairBusiness = require("../business/repair/RepairBusiness");
 
 const DEFAULT_LIMIT = 12;
 
@@ -624,8 +625,8 @@ async function executeApprovedAction(action) {
     if (!poolId) {
       return { executed: false, type, reason: "Falta poolId. Ficou aprovado como rascunho de orçamento." };
     }
-    const repair = await prisma.repair.create({
-      data: {
+    const result = await RepairBusiness.createRepairTicket(
+      {
         poolId,
         problem: payload.problem || payload.instructions || "Orçamento/reparação criada pela IA",
         quantity: payload.quantity ? Number(payload.quantity) : 1,
@@ -634,10 +635,16 @@ async function executeApprovedAction(action) {
         priority: payload.priority || "NORMAL",
         notes: payload.instructions || null,
         status: "QUOTED",
-        paid: false
+      },
+      "ai-ops",
+      null,
+      {
+        source: "ai-ops",
+        context: { clientId: payload.clientId ? Number(payload.clientId) : null },
+        createNotification: false,
       }
-    });
-    return { executed: true, type, createdRepairId: repair.id, externalSend: false };
+    );
+    return { executed: true, type, createdRepairId: result.repair.id, externalSend: false };
   }
 
   if (type === "ROUND_REPLAN_SUGGESTION") {

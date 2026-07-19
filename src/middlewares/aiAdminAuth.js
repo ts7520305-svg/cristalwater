@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
+const { getJwtSecret } = require("../utils/jwtSecret");
 
-const JWT_SECRET = process.env.JWT_SECRET || "cristalwater_secret";
+const JWT_SECRET = getJwtSecret();
 
 function isDevTokenAllowed(req) {
   const allow = String(process.env.AI_ADMIN_ALLOW_DEV_TOKEN || "false").toLowerCase() === "true";

@@ -1,0 +1,61 @@
+const Kernel = require("../core/Kernel");
+
+const EVENT_TYPES = {
+  INSTALLATION_REQUESTED: "INSTALLATION_REQUESTED",
+  INSTALLATION_PROPOSAL_CREATED: "INSTALLATION_PROPOSAL_CREATED",
+  INSTALLATION_QUOTE_CREATED: "INSTALLATION_QUOTE_CREATED",
+  INSTALLATION_APPROVED: "INSTALLATION_APPROVED",
+  INSTALLATION_SCHEDULED: "INSTALLATION_SCHEDULED",
+  INSTALLATION_TECH_ASSIGNED: "INSTALLATION_TECH_ASSIGNED",
+  INSTALLATION_STOCK_RESERVED: "INSTALLATION_STOCK_RESERVED",
+  INSTALLATION_WORK_ORDER_CREATED: "INSTALLATION_WORK_ORDER_CREATED",
+  INSTALLATION_STARTED: "INSTALLATION_STARTED",
+  INSTALLATION_GPS_CHECKIN: "INSTALLATION_GPS_CHECKIN",
+  INSTALLATION_EQUIPMENT_INSTALLED: "INSTALLATION_EQUIPMENT_INSTALLED",
+  INSTALLATION_PHOTO_ADDED: "INSTALLATION_PHOTO_ADDED",
+  INSTALLATION_SERIALS_REGISTERED: "INSTALLATION_SERIALS_REGISTERED",
+  INSTALLATION_WARRANTY_REGISTERED: "INSTALLATION_WARRANTY_REGISTERED",
+  INSTALLATION_CHECKLIST_SUBMITTED: "INSTALLATION_CHECKLIST_SUBMITTED",
+  INSTALLATION_TECH_SIGNATURE: "INSTALLATION_TECH_SIGNATURE",
+  INSTALLATION_CUSTOMER_SIGNATURE: "INSTALLATION_CUSTOMER_SIGNATURE",
+  INSTALLATION_CUSTOMER_ACCEPTED: "INSTALLATION_CUSTOMER_ACCEPTED",
+  INSTALLATION_STOCK_CONSUMED: "INSTALLATION_STOCK_CONSUMED",
+  INSTALLATION_INVOICE_GENERATED: "INSTALLATION_INVOICE_GENERATED",
+  INSTALLATION_PAYMENT_TRACKED: "INSTALLATION_PAYMENT_TRACKED",
+  INSTALLATION_COMPLETED: "INSTALLATION_COMPLETED",
+};
+
+function emitSocket(eventName, payload) {
+  if (!global.io || typeof global.io.emit !== "function") return;
+  global.io.emit(eventName, payload);
+  global.io.emit("dashboard-refresh", { reason: eventName, payload });
+}
+
+async function emitInstallationEvent(eventName, payload = {}, metadata = {}) {
+  const finalPayload = {
+    ...payload,
+    eventType: eventName,
+    source: payload.source || "installation-os",
+  };
+
+  emitSocket(eventName, finalPayload);
+
+  if (!Kernel?.EventBus || typeof Kernel.EventBus.emit !== "function") {
+    return null;
+  }
+
+  try {
+    return await Kernel.EventBus.emit(eventName, finalPayload, {
+      ...metadata,
+      module: "installation-os",
+    });
+  } catch (error) {
+    console.warn(`[InstallationOS] failed to emit ${eventName}:`, error.message);
+    return null;
+  }
+}
+
+module.exports = {
+  EVENT_TYPES,
+  emitInstallationEvent,
+};

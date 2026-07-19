@@ -49,7 +49,7 @@ async function buildLiveMetricsPayload() {
       where: { OR: [{ plannedDate: { gte: start, lte: end } }, { date: { gte: start, lte: end } }] },
     }).catch(() => []),
     prisma.technicalAlert.count({
-      where: { OR: [{ status: { not: "RESOLVED" } }, { status: null }] },
+      where: { status: { not: "RESOLVED" } },
     }).catch(() => 0),
     prisma.invoice.aggregate({
       _sum: { total: true },
@@ -146,7 +146,7 @@ async function liveMetricsHandler(req, res) {
   }
 }
 
-router.get("/metrics", liveMetricsHandler);
-router.post("/metrics", liveMetricsHandler);
+router.get("/metrics", auth("TEAM_LEADER"), liveMetricsHandler);
+router.post("/metrics", auth("TEAM_LEADER"), liveMetricsHandler);
 
 module.exports = router;

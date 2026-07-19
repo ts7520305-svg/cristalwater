@@ -54,3 +54,9 @@ if (!user || user.role !== "CLIENT") {
   window.location.href =
     "/client-login";
 }
+
+const resolvedClientId = Number(user?.clientId || user?.id || 0);
+if (resolvedClientId > 0) {
+  localStorage.setItem("cw_client_id", String(resolvedClientId));
+  localStorage.setItem("clientId", String(resolvedClientId));
+}

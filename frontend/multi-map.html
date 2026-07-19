@@ -3,23 +3,58 @@
 <head>
 <meta charset="UTF-8">
 <title>Mapa Multi Técnicos</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<link rel="stylesheet" href="/ui/foundation.css">
 
 <style>
 body { margin:0; }
 #map { height:100vh; }
+.top {
+  position:absolute;
+  top:10px;
+  left:10px;
+  z-index:1000;
+  background:white;
+  padding:10px;
+  border-radius:10px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  max-width:260px;
+}
+button {
+  padding:8px;
+  border:none;
+  border-radius:6px;
+  background:#1e88e5;
+  color:white;
+  cursor:pointer;
+}
 </style>
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
 </head>
 
-<body>
+<body data-required-role="ADMIN">
+
+<div style="padding:12px 16px 0">
+  <button type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
+</div>
+
+<div class="top">
+  <div id="statusLine" style="font-size:12px;color:#334155;">A carregar mapa multi técnicos...</div>
+  <button onclick="load()">Atualizar</button>
+</div>
 
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="/admin-auth-guard.js"></script>
 
 <script>
 const API = "/api";
@@ -31,35 +66,87 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
 
 const colors = ["red","blue","green","purple","orange"];
 
+function token(){
+  return localStorage.getItem("token") || localStorage.getItem("authToken") || localStorage.getItem("cwAdminToken") || "";
+}
+
+function authHeaders(){
+  const t = token();
+  return t ? { Authorization: `Bearer ${t}` } : {};
+}
+
+function setStatus(message){
+  const line = document.getElementById("statusLine");
+  if (line) line.textContent = message;
+}
+
+async function fetchJson(path){
+  const res = await fetch(`${API}${path}`, { headers: { ...authHeaders() } });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.ok === false) {
+    throw new Error(data.error || data.message || `Erro ${res.status}`);
+  }
+  return data;
+}
+
+const routeLayers = [];
+
+function clearLayers(){
+  routeLayers.forEach((layer) => map.removeLayer(layer));
+  routeLayers.length = 0;
+}
+
 async function load(){
+  try {
+    setStatus("A carregar rotas multi técnicos...");
+    clearLayers();
 
-  const res = await fetch(`${API}/routes/multi-profit-route`);
-  const data = await res.json();
+    const data = await fetchJson("/routes/multi-profit-route");
+    const plans = Array.isArray(data?.plans) ? data.plans : [];
 
-  data.plans.forEach((plan, index)=>{
+    if (!plans.length) {
+      setStatus("Sem planos disponíveis.");
+      return;
+    }
 
-    const color = colors[index % colors.length];
+    plans.forEach((plan, index)=>{
 
-    const coords = [];
+      const color = colors[index % colors.length];
 
-    plan.route.forEach(p=>{
+      const coords = [];
 
-      L.circleMarker([p.latitude,p.longitude],{
-        color,
-        radius:8
-      })
-      .addTo(map)
-      .bindPopup(`
-        <b>${plan.technician}</b><br>
-        ${p.name}<br>
-        Lucro: €${p.profit}
-      `);
+      (Array.isArray(plan.route) ? plan.route : []).forEach(p=>{
+        if (!Number.isFinite(Number(p.latitude)) || !Number.isFinite(Number(p.longitude))) return;
 
-      coords.push([p.latitude,p.longitude]);
+        const marker = L.circleMarker([p.latitude,p.longitude],{
+          color,
+          radius:8
+        })
+        .addTo(map)
+        .bindPopup(`
+          <b>${plan.technician || "Técnico"}</b><br>
+          ${p.name || "Piscina"}<br>
+          Lucro: €${Number(p.profit || 0).toFixed(2)}
+        `);
+        routeLayers.push(marker);
+
+        coords.push([p.latitude,p.longitude]);
+      });
+
+      if (coords.length) {
+        const line = L.polyline(coords,{ color }).addTo(map);
+        routeLayers.push(line);
+      }
     });
 
-    L.polyline(coords,{ color }).addTo(map);
-  });
+    if (routeLayers.length) {
+      const group = L.featureGroup(routeLayers);
+      map.fitBounds(group.getBounds(), { padding: [20, 20] });
+    }
+    setStatus(`Planos carregados: ${plans.length}`);
+  } catch (e) {
+    setStatus(e.message || "Erro ao carregar rotas");
+  }
 }
 
 load();
@@ -67,6 +154,7 @@ load();
 
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
-<script src="/cw-flow-shell.js"></script>
-</body>
+<script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </html>

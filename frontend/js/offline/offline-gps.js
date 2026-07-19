@@ -121,7 +121,7 @@ async function syncOfflineGps(){
 
     } catch(err){
 
-      console.error(err);
+      console.warn("Falha temporaria ao sincronizar GPS offline");
 
       remaining.push(item);
     }
@@ -197,7 +197,7 @@ async function sendGpsPosition(
 
   } catch(err){
 
-    console.error(err);
+    console.warn("Sem rede para enviar GPS, guardado em fila local");
 
     saveOfflineGps({
 
@@ -242,10 +242,7 @@ function startGpsTracking(){
 
     (err)=>{
 
-      console.error(
-        "Erro GPS:",
-        err
-      );
+      console.warn("GPS indisponivel ou permissao negada");
     },
 
     {

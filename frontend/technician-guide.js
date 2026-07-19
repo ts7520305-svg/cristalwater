@@ -1,11 +1,29 @@
 const API = "/api/guides";
+const statusBox = document.getElementById("statusBox");
+
+function setStatus(message, tone = "") {
+  if (!statusBox) return;
+  statusBox.textContent = message;
+  if (tone) statusBox.dataset.tone = tone;
+  else statusBox.removeAttribute("data-tone");
+}
 
 async function j(url, opt) {
   const response = await fetch(url, {
     headers: { "Content-Type": "application/json" },
     ...opt
   });
-  return response.json();
+  const text = await response.text();
+  let data = {};
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch (_) {
+    data = { raw: text };
+  }
+  if (!response.ok) {
+    throw new Error(data.error || data.message || `Falha HTTP ${response.status}`);
+  }
+  return data;
 }
 
 function esc(value) {
@@ -18,28 +36,43 @@ function esc(value) {
 }
 
 async function init() {
-  const data = await j(`${API}/vehicles`);
-  vehicle.innerHTML = (data.vehicles || [])
-    .map((item) => `<option value="${item.id}">${esc(item.plate)} - ${esc(item.name || "")}</option>`)
-    .join("");
-  if (data.vehicles?.[0]) vehicleStock.value = data.vehicles[0].id;
+  if (!window.CristalAuth?.requireAuth("TECHNICIAN")) return;
+
+  setStatus("A carregar viaturas.");
+  try {
+    const data = await j(`${API}/vehicles`);
+    const vehicles = Array.isArray(data.vehicles) ? data.vehicles : [];
+    vehicle.innerHTML = vehicles
+      .map((item) => `<option value="${item.id}">${esc(item.plate)} - ${esc(item.name || "")}</option>`)
+      .join("");
+    if (vehicles[0]) vehicleStock.value = vehicles[0].id;
+    setStatus(vehicles.length ? `Modulo pronto com ${vehicles.length} viatura(s).` : "Sem viaturas associadas.", vehicles.length ? "" : "warning");
+  } catch (error) {
+    setStatus(error.message || "Falha ao carregar viaturas.", "error");
+  }
 }
 
 async function startDay() {
-  const response = await j(`${API}/work/start`, {
-    method: "POST",
-    body: JSON.stringify({
-      vehicleId: vehicle.value,
-      technicianId: techId.value,
-      startKm: startKm.value
-    })
-  });
-  if (!response.ok) return alert(response.error || "Erro");
-  workGuideId.value = response.workGuide.id;
-  closeId.value = response.workGuide.id;
-  vehicleStock.value = vehicle.value;
-  if (response.message) alert(response.message);
-  await loadStock();
+  if (!window.CristalAuth?.requireAuth("TECHNICIAN")) return;
+
+  try {
+    setStatus("A iniciar guia de obra.");
+    const response = await j(`${API}/work/start`, {
+      method: "POST",
+      body: JSON.stringify({
+        vehicleId: vehicle.value,
+        technicianId: techId.value,
+        startKm: startKm.value,
+      }),
+    });
+    workGuideId.value = response.workGuide?.id || "";
+    closeId.value = response.workGuide?.id || "";
+    vehicleStock.value = vehicle.value;
+    setStatus(response.message || "Guia iniciada com sucesso.");
+    await loadStock();
+  } catch (error) {
+    setStatus(error.message || "Nao foi possivel iniciar guia.", "error");
+  }
 }
 
 function renderAtDocumentButton(document, vehicleId, workGuide) {
@@ -66,8 +99,18 @@ function renderAtDocumentButton(document, vehicleId, workGuide) {
 }
 
 async function loadStock() {
-  const response = await j(`${API}/stock/${vehicleStock.value}`);
-  const officialDocument = response.transportGuideDocument || response.workGuide?.guide?.officialDocument;
+  if (!window.CristalAuth?.requireAuth("TECHNICIAN")) return;
+
+  if (!vehicleStock.value) {
+    setStatus("Seleciona primeiro uma viatura.", "warning");
+    return;
+  }
+
+  setStatus("A atualizar stock e movimentos.");
+
+  try {
+    const response = await j(`${API}/stock/${vehicleStock.value}`);
+    const officialDocument = response.transportGuideDocument || response.workGuide?.guide?.officialDocument;
 
   const guideActions = response.workGuide ? `
     <div>
@@ -85,41 +128,59 @@ async function loadStock() {
     </div>
   `).join("");
 
-  stock.innerHTML = response.workGuide
-    ? `<p class="muted">Guia obra #${response.workGuide.id} ligada a AT ${esc(response.workGuide.guide?.codeAT || response.workGuide.guideId || "AT EM FALTA")}</p>${guideActions}${(response.stock || []).map((item) => `
+    stock.innerHTML = response.workGuide
+      ? `<p class="muted">Guia obra #${response.workGuide.id} ligada a AT ${esc(response.workGuide.guide?.codeAT || response.workGuide.guideId || "AT EM FALTA")}</p>${guideActions}${(response.stock || []).map((item) => `
         <div class="card">
           <strong>${esc(item.name)}</strong>
           <div>${esc(item.quantity)} ${esc(item.unit || "")}</div>
           <div class="muted">Usado: ${esc(item.usedQty || 0)}</div>
         </div>
-      `).join("")}<h3>Movimentos por local</h3>${movementRows || '<p class="muted">Ainda sem movimentos.</p>'}`
-    : '<p class="muted">Sem guia de obra aberta.</p>';
+        `).join("")}<h3>Movimentos por local</h3>${movementRows || '<p class="muted">Ainda sem movimentos.</p>'}`
+      : '<p class="muted">Sem guia de obra aberta.</p>';
+    setStatus("Stock atualizado.");
+  } catch (error) {
+    stock.innerHTML = '<p class="muted">Nao foi possivel carregar stock.</p>';
+    setStatus(error.message || "Falha ao carregar stock.", "error");
+  }
 }
 
 async function consume() {
-  const response = await j(`${API}/work/consume`, {
-    method: "POST",
-    body: JSON.stringify({
-      workGuideId: workGuideId.value,
-      name: itemName.value,
-      quantity: qty.value,
-      visitId: visitId.value,
-      technicianId: techId.value,
-      location: movementLocation.value,
-      notes: movementNotes.value
-    })
-  });
-  if (!response.ok) return alert(response.error || "Erro");
-  await loadStock();
+  if (!window.CristalAuth?.requireAuth("TECHNICIAN")) return;
+
+  try {
+    setStatus("A registar consumo.");
+    await j(`${API}/work/consume`, {
+      method: "POST",
+      body: JSON.stringify({
+        workGuideId: workGuideId.value,
+        name: itemName.value,
+        quantity: qty.value,
+        visitId: visitId.value,
+        technicianId: techId.value,
+        location: movementLocation.value,
+        notes: movementNotes.value,
+      }),
+    });
+    setStatus("Consumo registado.");
+    await loadStock();
+  } catch (error) {
+    setStatus(error.message || "Nao foi possivel registar consumo.", "error");
+  }
 }
 
 async function closeGuide() {
-  const response = await j(`${API}/work/${closeId.value || workGuideId.value}/close`, {
-    method: "POST",
-    body: JSON.stringify({ endKm: endKm.value })
-  });
-  if (!response.ok) return alert(response.error || "Erro");
-  alert("Guia fechada");
+  if (!window.CristalAuth?.requireAuth("TECHNICIAN")) return;
+
+  try {
+    setStatus("A fechar guia de obra.");
+    await j(`${API}/work/${closeId.value || workGuideId.value}/close`, {
+      method: "POST",
+      body: JSON.stringify({ endKm: endKm.value }),
+    });
+    setStatus("Guia fechada com sucesso.");
+  } catch (error) {
+    setStatus(error.message || "Nao foi possivel fechar guia.", "error");
+  }
 }
 
 init();

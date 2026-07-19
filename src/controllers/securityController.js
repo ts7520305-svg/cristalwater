@@ -41,13 +41,54 @@ async function auditLogs(req, res) {
 }
 
 async function securityStatus(req, res) {
-  const [users, locked, forced, logs] = await Promise.all([
-    prisma.user.count(),
+  const [allUsers, locked, forced, logs] = await Promise.all([
+    prisma.user.findMany({
+      orderBy: { name: "asc" },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        active: true,
+        mustChangePassword: true,
+        lockedUntil: true,
+        updatedAt: true,
+        createdAt: true,
+      },
+    }),
     prisma.user.count({ where: { lockedUntil: { gt: new Date() } } }).catch(()=>0),
     prisma.user.count({ where: { mustChangePassword: true } }).catch(()=>0),
     prisma.userAuditLog.count().catch(()=>0)
   ]);
-  res.json({ ok: true, users, locked, mustChangePassword: forced, auditLogs: logs, bcrypt: true, approvalMode: process.env.AI_ADMIN_REQUIRE_APPROVAL !== "false" });
+
+  const onlineUsers = global.__CRISTAL_WATER_ONLINE_USERS__ || new Map();
+  const now = new Date();
+  const users = allUsers.map((user) => {
+    const presence = onlineUsers.get(user.id) || null;
+    const online = Boolean(presence);
+    return {
+      ...user,
+      online,
+      lastSeen: presence?.lastSeen || null,
+      onlineMinutes: presence?.lastSeen ? Math.max(0, Math.round((now.getTime() - new Date(presence.lastSeen).getTime()) / 60000)) : null,
+      accompanimentState: user.active === false ? "INACTIVE" : presence ? "LIVE" : user.mustChangePassword || (user.lockedUntil && user.lockedUntil > now) ? "ATTENTION" : "IDLE",
+    };
+  });
+
+  const onlineCount = users.filter((user) => user.online).length;
+  const attentionCount = users.filter((user) => user.accompanimentState === "ATTENTION").length;
+  res.json({
+    ok: true,
+    users: users.length,
+    locked,
+    mustChangePassword: forced,
+    auditLogs: logs,
+    onlineUsers: onlineCount,
+    attentionUsers: attentionCount,
+    usersDetail: users,
+    bcrypt: true,
+    approvalMode: process.env.AI_ADMIN_REQUIRE_APPROVAL !== "false"
+  });
 }
 
 module.exports = { changePassword, resetPassword, updateIdentity, auditLogs, securityStatus };

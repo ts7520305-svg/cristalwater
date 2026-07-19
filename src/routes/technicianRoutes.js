@@ -6,12 +6,18 @@ const { prisma } =
   require("../prismaClient");
 const { createNotifications } =
   require("../services/notificationService");
+const auth = require("../middlewares/authMiddleware");
+const { roleMatches } = require("../utils/roles");
+const { emitRouteLoaded } =
+  require("../services/routeOsEventService");
 const { buildServiceVisitDayQuery } =
   require("../utils/serviceVisitFilters");
 const {
   VisitCompletionError,
   validateVisitCompletionPayload
 } = require("../services/serviceVisitCompletionService");
+
+router.use(auth("TECHNICIAN"));
 
 function hasOwn(object, key) {
   return Object.prototype.hasOwnProperty.call(object || {}, key);
@@ -175,8 +181,16 @@ async function createWaterNotification(tx, context, data) {
 router.get("/today", async (req, res) => {
 
   try {
+    const scopedQuery = { ...(req.query || {}) };
+    if (roleMatches(req.user?.role, "TECHNICIAN") && !roleMatches(req.user?.role, "ADMIN")) {
+      scopedQuery.technicianId = req.user?.technicianId || req.user?.id;
+    }
+
     const dayQuery =
-      buildServiceVisitDayQuery(req.query || {});
+      buildServiceVisitDayQuery(scopedQuery);
+
+    const rawLimit = Number(req.query?.limit || 200);
+    const take = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 300) : 200;
 
     const visits =
       await prisma.serviceVisit.findMany({
@@ -268,7 +282,9 @@ router.get("/today", async (req, res) => {
 
           plannedDate: "asc"
 
-        }
+        },
+
+        take
 
       });
 
@@ -454,7 +470,7 @@ router.get("/today", async (req, res) => {
         }
       }));
 
-    return res.json({
+    const response = {
 
       ok: true,
 
@@ -470,7 +486,29 @@ router.get("/today", async (req, res) => {
       visits:
         formatted
 
-    });
+    };
+
+    emitRouteLoaded(
+      {
+        technicianId: dayQuery.technicianId || null,
+        date: dayQuery.isoDate,
+        routeCount: formatted.length,
+        route: formatted.map((visit) => ({
+          id: visit.id,
+          poolId: visit.pool?.id || null,
+          clientId: visit.client?.id || null,
+          status: visit.status,
+          plannedDate: visit.plannedDate || null,
+        })),
+        source: "technician.today",
+      },
+      {
+        technicianId: dayQuery.technicianId || null,
+        date: dayQuery.isoDate,
+      }
+    ).catch((error) => console.warn("ROUTE_LOADED emit failed:", error.message));
+
+    return res.json(response);
 
   } catch (err) {
 

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cristal Water LDA - Clientes</title>
   <script src="/cw-auth.js"></script>
-  <link rel="stylesheet" href="/cw-polish.css">
+  <link rel="stylesheet" href="/ui/foundation.css">
   <style>
     :root {
       --bg: #06111f;
@@ -21,6 +21,8 @@
     }
 
     * { box-sizing: border-box; }
+
+    html, body { overflow-x: hidden; }
 
     body {
       margin: 0;
@@ -337,22 +339,23 @@
     }
   </style>
 </head>
-<body>
+<body data-cw-role="ADMIN">
   <main class="page">
     <div class="page-head">
-      <div>
+      <div class="cw-page-head">
         <h1>Clientes</h1>
         <p>Criar, editar, ativar contrato, arquivar ou eliminar clientes. Clientes novos nao faturam ate ativares o contrato.</p>
       </div>
       <div class="actions">
+        <button class="btn" type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
         <a class="btn" href="/admin-master-control">Centro de Operacoes</a>
       </div>
     </div>
 
     <section class="grid cols2">
-      <div class="card">
+      <div class="card" aria-label="Formulário de cliente">
         <h2>Novo cliente</h2>
-        <form id="clientForm" onsubmit="createClient();return false">
+        <form id="clientForm" class="cw-form-grid" onsubmit="createClient();return false">
           <input id="name" name="name" placeholder="Nome" required>
           <input id="phone" name="phone" placeholder="Telefone">
           <input id="email" name="email" placeholder="Email">
@@ -376,9 +379,9 @@
         </form>
       </div>
 
-      <div class="card">
+      <div class="card" aria-label="Lista e gestão de clientes">
         <h2>Lista de clientes</h2>
-        <input id="search" placeholder="Pesquisar">
+        <input id="search" placeholder="Pesquisar" aria-label="Pesquisar clientes">
         <div id="clients" class="list muted">A carregar...</div>
       </div>
     </section>
@@ -388,6 +391,9 @@
   <script src="/admin-clients.js"></script>
   <script src="/cristal-help-data.js"></script>
   <script src="/cristal-assist.js"></script>
-  <script src="/cw-flow-shell.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script src="/cw-os-admin-shell.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

@@ -1,4 +1,5 @@
 const { prisma } = require("../prismaClient");
+const RepairBusiness = require("../business/repair/RepairBusiness");
 
 function nowMonthRef() {
   const d = new Date();
@@ -252,8 +253,8 @@ async function createRepairQuote(payload) {
   const quantity = payload.quantity ? asNumber(payload.quantity, "quantity") : 1;
   const unitPrice = payload.unitPrice !== undefined ? Number(payload.unitPrice) : null;
   const totalPrice = unitPrice !== null && Number.isFinite(unitPrice) ? unitPrice * quantity : (payload.totalPrice ? Number(payload.totalPrice) : null);
-  const repair = await prisma.repair.create({
-    data: {
+  const result = await RepairBusiness.createRepairTicket(
+    {
       poolId: asNumber(payload.poolId, "poolId"),
       problem: cleanText(payload.problem),
       quantity,
@@ -262,9 +263,16 @@ async function createRepairQuote(payload) {
       priority: cleanText(payload.priority, "NORMAL").toUpperCase(),
       notes: cleanText(payload.notes || "Rascunho/orçamento criado por IA para validação administrativa."),
       status: cleanText(payload.status, "QUOTED").toUpperCase()
+    },
+    "ai-admin-action",
+    null,
+    {
+      source: "ai-admin-action",
+      context: { clientId: payload.clientId ? asNumber(payload.clientId, "clientId") : null },
+      createNotification: false,
     }
-  });
-  return { repairId: repair.id, status: repair.status, totalPrice: repair.totalPrice };
+  );
+  return { repairId: result.repair.id, status: result.repair.status, totalPrice: result.repair.totalPrice };
 }
 
 async function createInvoiceDraft(payload) {

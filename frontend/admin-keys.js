@@ -346,7 +346,7 @@ async function generateClientList() {
   const rows = [...state.clients]
     .sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")))
     .map((client) => {
-      const pools = clientPools(client.id);
+      const pools = Array.isArray(clientPools(client.id)) ? clientPools(client.id) : [];
       return {
         "Cliente ID": client.id,
         "Cliente": client.name || "",
@@ -370,7 +370,7 @@ async function generateKeyReferenceList() {
   const rows = [];
 
   for (const key of state.keys) {
-    const pools = keyPools(key);
+    const pools = Array.isArray(keyPools(key)) ? keyPools(key) : [];
     const base = {
       "Chave/Codigo": key.codeValue || key.keyCode || "",
       "Nome": key.title || key.keyName || "Chave",

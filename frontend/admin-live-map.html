@@ -8,7 +8,7 @@
 <meta charset="utf-8">
 
 <title>
-  Cristal Water - Live Map
+  Cristal Water - Mapa em Tempo Real
 </title>
 
 <meta
@@ -16,20 +16,7 @@
   content="width=device-width, initial-scale=1.0"
 />
 
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet/dist/leaflet.css"
-/>
-
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css"
-/>
-
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css"
-/>
+<link rel="stylesheet" href="/ui/foundation.css">
 
 <style>
 
@@ -327,16 +314,23 @@ RESPONSIVE
 </style>
 
 <link rel="stylesheet" href="/cristal-assist.css">
+  <link rel="stylesheet" href="/cw-ui-kit.css">
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+  <script src="/admin-auth-guard.js"></script>
 </head>
 
-<body>
+<body data-required-role="ADMIN">
+
+<div style="padding:12px 16px 0">
+  <button type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
+</div>
 
 <header>
 
   <h1>
-    🌍 Cristal Water Live Map
+    Cristal Water Mapa em Tempo Real
   </h1>
 
   <div class="topbar">
@@ -372,6 +366,13 @@ RESPONSIVE
   </div>
   <div class="live-list" id="liveInspectorList"></div>
 </aside>
+
+<section class="cw-mobile-stack" style="position:absolute;left:12px;right:12px;bottom:132px;z-index:1000;pointer-events:none;">
+  <div class="cw-mobile-row" style="background:rgba(15,23,42,.88);border-color:rgba(56,189,248,.32);color:#d7efff;pointer-events:auto;">
+    <div class="title">Modo operacional</div>
+    <div class="meta">Usa os botoes do topo para abrir tecnicos, GPS ativos ou alertas e focar cada item no mapa.</div>
+  </div>
+</section>
 
 <!-- ======================================================
 LEGEND
@@ -418,24 +419,6 @@ LEGEND
 </div>
 
 <!-- ======================================================
-LEAFLET
-====================================================== -->
-
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
-<!-- ======================================================
-CLUSTER
-====================================================== -->
-
-<script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
-
-<!-- ======================================================
-HEATMAP
-====================================================== -->
-
-<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
-
-<!-- ======================================================
 SOCKET
 ====================================================== -->
 
@@ -449,8 +432,10 @@ MAP
 
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
+<script src="/ui/core/navigation-context.js"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
 <script src="/cw-admin-shortcuts.js"></script>
-<script src="/cw-flow-shell.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

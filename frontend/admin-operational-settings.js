@@ -24,7 +24,26 @@
   const saveTeamLeaderButton = document.getElementById('saveTeamLeader');
   const teamHierarchyList = document.getElementById('teamHierarchyList');
   let accessControlState = null;
+  const actionLock = new Set();
   function toBool(v){ return String(v).toLowerCase()==='true'; }
+  function authHeaders(extra = {}){
+    const token = localStorage.getItem('adminToken') || localStorage.getItem('token') || localStorage.getItem('cristalwater_jwt');
+    return Object.assign({}, token ? { Authorization: `Bearer ${token}` } : {}, extra);
+  }
+  async function parseJson(res, fallback){
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok || data.ok === false) throw new Error(data.error || fallback);
+    return data;
+  }
+  async function withActionLock(key, callback){
+    if(actionLock.has(key)) return;
+    actionLock.add(key);
+    try {
+      return await callback();
+    } finally {
+      actionLock.delete(key);
+    }
+  }
   function escapeHtml(value){
     return String(value ?? '').replace(/[&<>"']/g, (ch)=>({
       '&':'&amp;',
@@ -45,33 +64,41 @@
     try { return new Date(value).toLocaleString('pt-PT'); } catch (_) { return String(value); }
   }
   async function load(){
-    const res = await fetch('/api/settings/global');
-    const data = await res.json();
-    if(!data.ok) throw new Error(data.error || 'Erro ao carregar settings');
+    const res = await fetch('/api/settings/global', { headers: authHeaders() });
+    const data = await parseJson(res, 'Erro ao carregar settings');
     document.querySelectorAll('[data-setting]').forEach((el)=>{ el.checked = toBool(data.settings[el.dataset.setting]); });
     status.textContent='Configurações carregadas.';
   }
   async function save(key,value){
     status.textContent='A gravar '+key+'...';
-    const res = await fetch('/api/settings/global/'+encodeURIComponent(key),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({value,actor:'admin'})});
-    const data = await res.json();
-    if(!data.ok) throw new Error(data.error || 'Erro ao gravar');
-    status.textContent='Configuração gravada.';
+    await withActionLock(`setting:${key}`, async ()=>{
+      const res = await fetch('/api/settings/global/'+encodeURIComponent(key),{
+        method:'PUT',
+        headers:authHeaders({'Content-Type':'application/json'}),
+        body:JSON.stringify({value,actor:'admin'})
+      });
+      await parseJson(res, 'Erro ao gravar');
+      status.textContent='Configuração gravada.';
+    });
   }
   async function loadPending(){
-    const res = await fetch('/api/technician-intake/pending-review');
-    const data = await res.json();
-    if(!data.ok) throw new Error(data.error || 'Erro ao carregar pendentes');
+    const res = await fetch('/api/technician-intake/pending-review', { headers: authHeaders() });
+    const data = await parseJson(res, 'Erro ao carregar pendentes');
     if(!data.clients.length){ pendingList.innerHTML='<div class="status">Sem fichas pendentes.</div>'; return; }
     pendingList.innerHTML=data.clients.map(c=>`<div class="item"><strong>${c.name}</strong><br><small>${c.zone||''} · ${c.phone||''} · Piscinas: ${(c.pools||[]).length}</small><div class="actions"><button data-approve="${c.id}">Aprovar</button><a class="btn" href="/client-detail?id=${c.id}">Abrir ficha</a></div></div>`).join('');
     pendingList.querySelectorAll('[data-approve]').forEach(btn=>btn.addEventListener('click',()=>approve(btn.dataset.approve)));
   }
   async function approve(id){
     if(!confirm('Aprovar este cliente e ativar piscinas pendentes?')) return;
-    const res = await fetch('/api/technician-intake/clients/'+id+'/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({actor:'admin'})});
-    const data = await res.json();
-    if(!data.ok) return alert(data.error || 'Erro ao aprovar');
-    loadPending();
+    await withActionLock(`approve:${id}`, async ()=>{
+      const res = await fetch('/api/technician-intake/clients/'+id+'/approve',{
+        method:'POST',
+        headers:authHeaders({'Content-Type':'application/json'}),
+        body:JSON.stringify({actor:'admin'})
+      });
+      const data = await parseJson(res, 'Erro ao aprovar');
+      if(data.ok) loadPending();
+    }).catch((err)=>alert(err.message));
   }
   function renderBackups(items){
     if(!backupList) return;
@@ -114,17 +141,15 @@
   }
   async function loadUpgradeState(){
     if(!upgradePackageList) return;
-    const res = await fetch('/api/system/upgrade');
-    const data = await res.json();
-    if(!data.ok) throw new Error(data.error || 'Erro ao carregar pacotes de upgrade');
+    const res = await fetch('/api/system/upgrade', { headers: authHeaders() });
+    const data = await parseJson(res, 'Erro ao carregar pacotes de upgrade');
     renderUpgradePackages(data.packages || [], data.activation || {});
     if(rollbackUpgrade) rollbackUpgrade.disabled = !(data.activation && data.activation.enabled && data.previousReleaseId);
   }
   async function loadReleaseSafety(){
     if(!releaseStatus) return;
-    const res = await fetch('/api/system/release-safety');
-    const data = await res.json();
-    if(!data.ok) throw new Error(data.error || 'Erro ao carregar rollback/upgrade');
+    const res = await fetch('/api/system/release-safety', { headers: authHeaders() });
+    const data = await parseJson(res, 'Erro ao carregar rollback/upgrade');
     releaseVersion.textContent = `Versao ${data.version || '-'} - ${data.mode || '-'}`;
     releaseBackupDir.textContent = data.backupDir || 'Pasta de backups nao definida';
     releaseStatus.textContent = data.rollbackPolicy || 'Rollback seguro ativo.';
@@ -137,11 +162,12 @@
     backupNow.disabled = true;
     releaseStatus.textContent = 'A criar backup. Aguarda um momento...';
     try{
-      const res = await fetch('/api/system/backup', { method: 'POST' });
-      const data = await res.json();
-      if(!data.ok) throw new Error(data.error || 'Erro ao criar backup');
-      releaseStatus.textContent = `Backup criado: ${data.backup?.name || data.backup?.file || 'ficheiro criado'}`;
-      await loadReleaseSafety();
+      await withActionLock('backup-now', async ()=>{
+        const res = await fetch('/api/system/backup', { method: 'POST', headers: authHeaders() });
+        const data = await parseJson(res, 'Erro ao criar backup');
+        releaseStatus.textContent = `Backup criado: ${data.backup?.name || data.backup?.file || 'ficheiro criado'}`;
+        await loadReleaseSafety();
+      });
     }catch(err){
       releaseStatus.textContent = err.message;
       alert(err.message);
@@ -169,13 +195,14 @@
     uploadUpgradeZip.disabled = true;
     releaseStatus.textContent = 'A enviar ZIP e a criar backup obrigatorio...';
     try{
-      const res = await fetch('/api/system/upgrade/upload', { method:'POST', body });
-      const data = await res.json();
-      if(!data.ok) throw new Error(data.error || 'Erro ao preparar upgrade');
-      releaseStatus.textContent = `Pacote preparado: ${data.package?.id || file.name}. Dados preservados.`;
-      upgradeZip.value = '';
-      await loadUpgradeState();
-      await loadReleaseSafety();
+      await withActionLock('upload-upgrade', async ()=>{
+        const res = await fetch('/api/system/upgrade/upload', { method:'POST', headers: authHeaders(), body });
+        const data = await parseJson(res, 'Erro ao preparar upgrade');
+        releaseStatus.textContent = `Pacote preparado: ${data.package?.id || file.name}. Dados preservados.`;
+        upgradeZip.value = '';
+        await loadUpgradeState();
+        await loadReleaseSafety();
+      });
     }catch(err){
       releaseStatus.textContent = err.message;
       alert(err.message);
@@ -186,27 +213,27 @@
   async function activateUpgrade(id){
     if(!id) return;
     if(!confirm('Ativar este pacote? No VPS isto deve trocar apenas a versao do codigo e preservar os dados.')) return;
-    const res = await fetch('/api/system/upgrade/'+encodeURIComponent(id)+'/activate', { method:'POST' });
-    const data = await res.json();
-    if(!data.ok){
-      releaseStatus.textContent = data.error || 'Ativacao bloqueada.';
-      alert(data.error || 'Ativacao bloqueada.');
-      return;
-    }
-    releaseStatus.textContent = data.message || 'Upgrade ativado.';
-    await loadUpgradeState();
+    await withActionLock(`activate:${id}`, async ()=>{
+      const res = await fetch('/api/system/upgrade/'+encodeURIComponent(id)+'/activate', { method:'POST', headers: authHeaders() });
+      const data = await parseJson(res, 'Ativacao bloqueada.');
+      releaseStatus.textContent = data.message || 'Upgrade ativado.';
+      await loadUpgradeState();
+    }).catch((err)=>{
+      releaseStatus.textContent = err.message;
+      alert(err.message);
+    });
   }
   async function rollbackToPrevious(){
     if(!confirm('Voltar para a versao anterior sem mexer nos dados?')) return;
-    const res = await fetch('/api/system/upgrade/rollback', { method:'POST' });
-    const data = await res.json();
-    if(!data.ok){
-      releaseStatus.textContent = data.error || 'Rollback bloqueado.';
-      alert(data.error || 'Rollback bloqueado.');
-      return;
-    }
-    releaseStatus.textContent = data.message || 'Rollback registado.';
-    await loadUpgradeState();
+    await withActionLock('rollback-upgrade', async ()=>{
+      const res = await fetch('/api/system/upgrade/rollback', { method:'POST', headers: authHeaders() });
+      const data = await parseJson(res, 'Rollback bloqueado.');
+      releaseStatus.textContent = data.message || 'Rollback registado.';
+      await loadUpgradeState();
+    }).catch((err)=>{
+      releaseStatus.textContent = err.message;
+      alert(err.message);
+    });
   }
   function setAccessStatus(message){
     if(accessControlStatus) accessControlStatus.textContent = message;
@@ -290,9 +317,8 @@
   async function loadAccessControl(){
     if(!accessControlStatus) return;
     setAccessStatus('A carregar permissoes e hierarquia...');
-    const res = await fetch('/api/settings/access-control');
-    const data = await res.json();
-    if(!data.ok) throw new Error(data.error || 'Erro ao carregar permissoes');
+    const res = await fetch('/api/settings/access-control', { headers: authHeaders() });
+    const data = await parseJson(res, 'Erro ao carregar permissoes');
     accessControlState = data;
     renderTeamLeaderSelect();
     renderPermissionMatrix();
@@ -307,16 +333,17 @@
       informationAccess: selectedValues(infoPermissionList),
     });
     setAccessStatus('A gravar permissoes...');
-    const res = await fetch('/api/settings/access-control/policy', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ policy: accessControlState.policy }),
+    await withActionLock(`policy:${role}`, async ()=>{
+      const res = await fetch('/api/settings/access-control/policy', {
+        method: 'PUT',
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ policy: accessControlState.policy }),
+      });
+      const data = await parseJson(res, 'Erro ao gravar permissoes');
+      accessControlState.policy = data.policy;
+      renderPermissionMatrix();
+      setAccessStatus('Permissoes gravadas.');
     });
-    const data = await res.json();
-    if(!data.ok) throw new Error(data.error || 'Erro ao gravar permissoes');
-    accessControlState.policy = data.policy;
-    renderPermissionMatrix();
-    setAccessStatus('Permissoes gravadas.');
   }
   async function saveTeamLeader(){
     if(!accessControlState || !teamLeaderSelect) return;
@@ -336,32 +363,34 @@
     });
     const hierarchy = Object.assign({}, accessControlState.hierarchy || {}, { leaders });
     setAccessStatus('A gravar chefe de equipa...');
-    const res = await fetch('/api/settings/access-control/hierarchy', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ hierarchy }),
+    await withActionLock(`leader:${technicianId}`, async ()=>{
+      const res = await fetch('/api/settings/access-control/hierarchy', {
+        method: 'PUT',
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ hierarchy }),
+      });
+      const data = await parseJson(res, 'Erro ao gravar hierarquia');
+      accessControlState.hierarchy = data.hierarchy;
+      renderTeamHierarchy();
+      setAccessStatus('Chefe de equipa gravado. O perfil do tecnico passa a TEAM_LEADER.');
     });
-    const data = await res.json();
-    if(!data.ok) throw new Error(data.error || 'Erro ao gravar hierarquia');
-    accessControlState.hierarchy = data.hierarchy;
-    renderTeamHierarchy();
-    setAccessStatus('Chefe de equipa gravado. O perfil do tecnico passa a TEAM_LEADER.');
   }
   async function removeLeader(index){
     if(!accessControlState) return;
     if(!confirm('Remover este chefe de equipa da hierarquia?')) return;
     const leaders = (accessControlState.hierarchy?.leaders || []).filter((_, i)=>i !== index);
     const hierarchy = Object.assign({}, accessControlState.hierarchy || {}, { leaders });
-    const res = await fetch('/api/settings/access-control/hierarchy', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ hierarchy }),
-    });
-    const data = await res.json();
-    if(!data.ok) return alert(data.error || 'Erro ao remover');
-    accessControlState.hierarchy = data.hierarchy;
-    renderTeamHierarchy();
-    setAccessStatus('Chefe de equipa removido da hierarquia.');
+    await withActionLock(`remove-leader:${index}`, async ()=>{
+      const res = await fetch('/api/settings/access-control/hierarchy', {
+        method: 'PUT',
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ hierarchy }),
+      });
+      const data = await parseJson(res, 'Erro ao remover');
+      accessControlState.hierarchy = data.hierarchy;
+      renderTeamHierarchy();
+      setAccessStatus('Chefe de equipa removido da hierarquia.');
+    }).catch((err)=>alert(err.message));
   }
   document.querySelectorAll('[data-setting]').forEach(el=>el.addEventListener('change',()=>save(el.dataset.setting, el.checked)));
   if(backupNow) backupNow.addEventListener('click', createBackupNow);

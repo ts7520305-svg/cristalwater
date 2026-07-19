@@ -1,5 +1,6 @@
 const { prisma } = require("../prismaClient");
 const PoolBusiness = require("../business/pool/PoolBusiness");
+const PoolDashboardBusiness = require("../business/pool/PoolDashboardBusiness");
 
 function toInt(value) {
   const n = Number(value);
@@ -31,7 +32,6 @@ function definedOnly(data) {
 function poolUniqueErrorMessage(err) {
   if (err?.code !== "P2002") return null;
   const target = Array.isArray(err.meta?.target) ? err.meta.target.join(",") : String(err.meta?.target || "");
-  if (target.includes("serialNumber")) return "Ja existe uma piscina ou jacuzzi com este numero de serie.";
   if (target.includes("address") || target.includes("pool_physical_location_unique")) {
     return "Ja existe uma infraestrutura registada exatamente com este tipo e nesta localizacao/morada.";
   }
@@ -43,7 +43,6 @@ function cleanPoolPayload(body = {}, isCreate = false) {
     name: cleanString(body.name),
     location: cleanString(body.location),
     address: cleanString(body.address),
-    serialNumber: cleanString(body.serialNumber),
     zone: cleanString(body.zone),
     zoneId: body.zoneId === undefined ? undefined : numberOrNull(body.zoneId),
     volumeM3: body.volumeM3 === undefined ? undefined : numberOrNull(body.volumeM3),
@@ -113,7 +112,7 @@ async function recordTechnicalSheetHistory(poolId, before, after, actor = "SYSTE
 
 async function listPools(req, res) {
   try {
-    const pools = await PoolBusiness.list(req.query);
+    const pools = await PoolDashboardBusiness.listPools(req.query);
     return res.json({ ok: true, pools });
   } catch (err) {
     console.error(err);
@@ -125,7 +124,7 @@ async function getPoolById(req, res) {
   try {
     const id = toInt(req.params.id);
     if (!id) return res.status(400).json({ error: "ID inválido" });
-    const pool = await PoolBusiness.getById(id);
+    const pool = await PoolDashboardBusiness.getPoolById(id);
     return res.json({ ok: true, pool });
   } catch (err) {
     console.error(err);

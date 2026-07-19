@@ -12,6 +12,16 @@ router.get("/:id", poolEquipmentController.getPoolEquipmentById);
 // CRIAR EQUIPAMENTO
 router.post("/", poolEquipmentController.createPoolEquipment);
 
+// INSTALAR EQUIPAMENTO
+router.post("/:poolId/install", poolEquipmentController.installPoolEquipment);
+
+// REGISTO DE EQUIPAMENTOS (V2)
+router.get("/:poolId/registry", poolEquipmentController.getPoolEquipmentRegistry);
+router.post("/:poolId/assets/install", poolEquipmentController.installRegistryAsset);
+router.post("/:poolId/assets/:assetId/replace", poolEquipmentController.replaceRegistryAsset);
+router.post("/:poolId/assets/:assetId/warranty", poolEquipmentController.updateRegistryAssetWarranty);
+router.post("/:poolId/assets/:assetId/remove", poolEquipmentController.removeRegistryAsset);
+
 // ATUALIZAR EQUIPAMENTO
 router.put("/:id", poolEquipmentController.updatePoolEquipment);
 

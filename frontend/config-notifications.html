@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Configuração Notificações</title>
+<link rel="stylesheet" href="/ui/foundation.css">
 
 <style>
 body{
@@ -10,6 +11,7 @@ body{
   padding:20px;
   background:#f4f6f8;
 }
+html, body { overflow-x: hidden; }
 
 h1{
   margin-bottom:20px;
@@ -31,10 +33,10 @@ label{
 </style>
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
+  <script src="/client-auth-guard.js"></script>
 </head>
 
-<body>
+<body data-required-role="CLIENT">
 
 <h1>🔧 Configuração de Som</h1>
 
@@ -77,6 +79,8 @@ loadConfig();
 
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
-<script src="/cw-flow-shell.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

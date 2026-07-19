@@ -1,0 +1,33 @@
+.cw-v2-card,
+.cw-priority-block,
+.metric-card,
+.cw-kpi-card,
+.cw-menu-group,
+.item,
+.cw-list-block,
+.cw-list-group,
+.cw-today-item {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--cw-color-border);
+  border-radius: var(--cw-radius-lg);
+  box-shadow: var(--cw-shadow-md);
+}
+
+.cw-v2-card,
+.cw-priority-block,
+.cw-list-block,
+.cw-list-group,
+.cw-menu-group {
+  padding: var(--cw-space-3);
+}
+
+.pill,
+.cw-status-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--cw-radius-pill);
+  border: 1px solid var(--cw-color-border);
+  padding: 4px 10px;
+  font-size: var(--cw-font-size-xs);
+  font-weight: 700;
+}

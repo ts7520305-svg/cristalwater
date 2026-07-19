@@ -1,0 +1,8 @@
+.cw-v2-offline,
+[data-offline-indicator] {
+  border-radius: var(--cw-radius-pill);
+  border: 1px solid var(--cw-color-border);
+  padding: 4px 10px;
+  font-size: var(--cw-font-size-xs);
+  font-weight: 800;
+}

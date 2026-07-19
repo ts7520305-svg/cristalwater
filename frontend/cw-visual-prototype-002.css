@@ -1,0 +1,326 @@
+:root {
+  --vp-bg: #eff3f8;
+  --vp-bg-accent: #e5eefc;
+  --vp-surface: #ffffff;
+  --vp-surface-alt: #f8fbff;
+  --vp-line: #d4deec;
+  --vp-text: #0b1324;
+  --vp-muted: #4a5568;
+  --vp-primary: #0a67ff;
+  --vp-primary-dark: #084bb7;
+  --vp-ok: #0e8a4b;
+  --vp-warn: #9f5d00;
+  --vp-danger: #b42318;
+  --vp-radius: 20px;
+  --vp-shadow: 0 16px 42px rgba(12, 26, 56, 0.1);
+}
+
+body.cw-vp2 {
+  color: var(--vp-text) !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(10, 103, 255, 0.1), transparent 34%),
+    radial-gradient(circle at 100% 0%, rgba(14, 138, 75, 0.09), transparent 28%),
+    linear-gradient(145deg, #f9fbff 0%, var(--vp-bg-accent) 36%, var(--vp-bg) 100%) !important;
+  font-family: "Sora", "IBM Plex Sans", "Segoe UI", Arial, sans-serif !important;
+}
+
+body.cw-vp2 .card,
+body.cw-vp2 .panel,
+body.cw-vp2 .metric,
+body.cw-vp2 .item,
+body.cw-vp2 .service-item,
+body.cw-vp2 .invoice-item,
+body.cw-vp2 .visit,
+body.cw-vp2 .dose-row,
+body.cw-vp2 .doc-card,
+body.cw-vp2 .photo-item,
+body.cw-vp2 .water-item,
+body.cw-vp2 .clean-task,
+body.cw-vp2 .crew-info,
+body.cw-vp2 .crew-doc-status,
+body.cw-vp2 .access-item,
+body.cw-vp2 .client-focus-card,
+body.cw-vp2 .payment-reference-card {
+  border: 1px solid var(--vp-line) !important;
+  border-radius: var(--vp-radius) !important;
+  background: var(--vp-surface) !important;
+  box-shadow: var(--vp-shadow) !important;
+  color: var(--vp-text) !important;
+}
+
+body.cw-vp2 h1,
+body.cw-vp2 h2,
+body.cw-vp2 h3,
+body.cw-vp2 .title,
+body.cw-vp2 .hero-title,
+body.cw-vp2 b,
+body.cw-vp2 strong,
+body.cw-vp2 .metric-value {
+  color: var(--vp-text) !important;
+  letter-spacing: -0.02em;
+}
+
+body.cw-vp2 .muted,
+body.cw-vp2 .small,
+body.cw-vp2 .metric-label,
+body.cw-vp2 .progress,
+body.cw-vp2 .hero-text,
+body.cw-vp2 .metric span {
+  color: var(--vp-muted) !important;
+}
+
+body.cw-vp2 .btn,
+body.cw-vp2 button,
+body.cw-vp2 .route-btn,
+body.cw-vp2 .photo-btn,
+body.cw-vp2 .big {
+  min-height: 52px;
+  border-radius: 16px !important;
+  border: 1px solid var(--vp-line) !important;
+  background: var(--vp-surface-alt) !important;
+  color: var(--vp-text) !important;
+  font-size: 0.96rem;
+  font-weight: 800;
+}
+
+body.cw-vp2 .btn.primary,
+body.cw-vp2 button.primary,
+body.cw-vp2 .big.ok,
+body.cw-vp2 .route-btn,
+body.cw-vp2 .field-tabs button.active {
+  background: linear-gradient(140deg, var(--vp-primary), var(--vp-primary-dark)) !important;
+  border-color: var(--vp-primary) !important;
+  color: #ffffff !important;
+}
+
+body.cw-vp2 .big.warn {
+  background: linear-gradient(145deg, #f2c15e, #d89f31) !important;
+  border-color: #d89f31 !important;
+  color: #1f1504 !important;
+}
+
+body.cw-vp2 .big.bad {
+  background: linear-gradient(145deg, #cf3d33, #b42318) !important;
+  border-color: var(--vp-danger) !important;
+  color: #ffffff !important;
+}
+
+body.cw-vp2 a:focus-visible,
+body.cw-vp2 button:focus-visible,
+body.cw-vp2 input:focus-visible,
+body.cw-vp2 select:focus-visible,
+body.cw-vp2 textarea:focus-visible {
+  outline: 3px solid rgba(10, 103, 255, 0.32);
+  outline-offset: 2px;
+}
+
+/* Administrator: command center, low noise, action cards */
+body.cw-vp2-admin .page {
+  max-width: 1300px;
+  padding: 26px;
+}
+
+body.cw-vp2-admin .topbar {
+  border: 1px solid var(--vp-line) !important;
+  border-radius: 20px;
+  margin: 0 0 22px !important;
+  padding: 18px 20px !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+}
+
+body.cw-vp2-admin .brand-logo {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+}
+
+body.cw-vp2-admin .command-next {
+  padding: 24px;
+  margin-bottom: 18px;
+  background: linear-gradient(145deg, #ffffff, #edf4ff) !important;
+}
+
+body.cw-vp2-admin .command-next h2 {
+  font-size: 2rem;
+}
+
+body.cw-vp2-admin .command-next-actions .btn:first-child {
+  min-width: 270px;
+}
+
+body.cw-vp2-admin .command-groups,
+body.cw-vp2-admin #moduleSection,
+body.cw-vp2-admin .hero {
+  display: none !important;
+}
+
+body.cw-vp2-admin .metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+body.cw-vp2-admin .metrics .metric-card {
+  min-height: 196px;
+  padding: 18px;
+  text-decoration: none;
+  transition: transform 0.14s ease, box-shadow 0.14s ease;
+}
+
+body.cw-vp2-admin .metrics .metric-card:hover,
+body.cw-vp2-admin .metrics .metric-card:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 44px rgba(12, 26, 56, 0.16) !important;
+}
+
+body.cw-vp2-admin .metric-value {
+  font-size: 2.8rem;
+  font-weight: 900;
+}
+
+body.cw-vp2-admin .grid-2 {
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* Technician: one-thumb, field-first, large controls */
+body.cw-vp2-tech {
+  background: #edf4ef !important;
+}
+
+body.cw-vp2-tech .field {
+  width: min(760px, 100%);
+  padding: 10px 12px calc(132px + env(safe-area-inset-bottom));
+}
+
+body.cw-vp2-tech .top {
+  border: 1px solid var(--vp-line) !important;
+  border-radius: 18px;
+  margin: 0 0 12px !important;
+  padding: 12px !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+body.cw-vp2-tech .next {
+  position: sticky;
+  top: 84px;
+  z-index: 30;
+  border-left: 7px solid var(--vp-primary) !important;
+}
+
+body.cw-vp2-tech .title {
+  font-size: 2rem !important;
+  line-height: 1.08;
+}
+
+body.cw-vp2-tech .big,
+body.cw-vp2-tech .route-btn,
+body.cw-vp2-tech .photo-btn,
+body.cw-vp2-tech .doc-btn,
+body.cw-vp2-tech .field-action-rail button {
+  min-height: 68px !important;
+  font-size: 1.06rem !important;
+  font-weight: 900;
+}
+
+body.cw-vp2-tech .field-tabs {
+  border-radius: 20px !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  border: 1px solid var(--vp-line) !important;
+}
+
+body.cw-vp2-tech .field-tabs button {
+  min-height: 60px !important;
+  font-size: 0.85rem !important;
+}
+
+body.cw-vp2-tech .field-tile {
+  min-height: 84px;
+}
+
+/* Customer: premium calm portal */
+body.cw-vp2-client .portal {
+  max-width: 1240px;
+  padding: 24px;
+}
+
+body.cw-vp2-client .top {
+  border: 1px solid var(--vp-line);
+  border-radius: 20px;
+  padding: 16px 18px;
+  margin-bottom: 18px;
+  background: rgba(255, 255, 255, 0.86) !important;
+}
+
+body.cw-vp2-client .hero {
+  grid-template-columns: 1.5fr 0.95fr;
+  gap: 16px;
+}
+
+body.cw-vp2-client .hero-main {
+  background: linear-gradient(150deg, #ffffff 0%, #edf4ff 100%) !important;
+}
+
+body.cw-vp2-client .hero h2 {
+  font-size: 2.15rem;
+}
+
+body.cw-vp2-client .metrics {
+  gap: 12px;
+}
+
+body.cw-vp2-client .metric b {
+  font-size: 2rem;
+}
+
+body.cw-vp2-client .quick-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+body.cw-vp2-client .quick-actions .btn {
+  min-height: 56px;
+  justify-content: space-between;
+}
+
+body.cw-vp2-client .client-focus {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+body.cw-vp2-client .split {
+  gap: 14px;
+}
+
+@media (max-width: 980px) {
+  body.cw-vp2-admin .metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+  body.cw-vp2-client .hero,
+  body.cw-vp2-client .split {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  body.cw-vp2-admin .page,
+  body.cw-vp2-client .portal {
+    padding: 14px;
+  }
+  body.cw-vp2-admin .metrics,
+  body.cw-vp2-client .client-focus,
+  body.cw-vp2-admin .grid-2 {
+    grid-template-columns: 1fr;
+  }
+  body.cw-vp2-tech .next {
+    top: 74px;
+  }
+  body.cw-vp2-tech .big,
+  body.cw-vp2-tech .route-btn,
+  body.cw-vp2-tech .photo-btn,
+  body.cw-vp2-tech .doc-btn,
+  body.cw-vp2-tech .field-action-rail button {
+    min-height: 70px !important;
+  }
+}

@@ -4,6 +4,14 @@ const rows = document.getElementById("rows");
 const queryClientId = new URLSearchParams(location.search).get("clientId");
 const CLIENT_ID = Number(queryClientId || localStorage.getItem("cw_client_id") || localStorage.getItem("clientId") || 0);
 
+function authHeaders(extra = {}) {
+  const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
+  return {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...extra,
+  };
+}
+
 function money(value) {
   return Number(value || 0).toLocaleString("pt-PT", { style: "currency", currency: "EUR" });
 }
@@ -34,7 +42,7 @@ function statusText(value) {
 async function loadPayments() {
   try {
     if (!CLIENT_ID) throw new Error("Cliente nao identificado.");
-    const res = await fetch(`${API}/client-portal/${CLIENT_ID}`);
+    const res = await fetch(`${API}/client-portal/${CLIENT_ID}`, { headers: authHeaders() });
     const data = await res.json();
     if (!res.ok || data.ok === false) throw new Error(data.error || "Nao foi possivel carregar pagamentos.");
 

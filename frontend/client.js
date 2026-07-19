@@ -43,19 +43,22 @@ function logout() {
 async function loadReports() {
   const res = await fetch(`${API}/client-portal/${client.id}/reports`);
   const data = await res.json();
+  const reports = Array.isArray(data?.reports) ? data.reports : [];
 
   const container = document.getElementById("reports");
+  if (!container) return;
   container.innerHTML = "";
 
-  data.reports.forEach((report) => {
-    const info = report.data;
+  reports.forEach((report) => {
+    const info = report?.data || {};
+    const pools = Array.isArray(info.pools) ? info.pools : [];
 
     container.innerHTML += `
       <div class="card">
         <h3>Mês: ${report.month}</h3>
-        <p>Estado de pagamento: ${info.paymentStatus}</p>
+        <p>Estado de pagamento: ${info.paymentStatus || "-"}</p>
 
-        ${info.pools.map(p => `
+        ${pools.map(p => `
           <p><strong>${p.name}</strong> — Visitas: ${p.totalVisits}, Falhas: ${p.notDone}</p>
         `).join("")}
 
@@ -63,6 +66,10 @@ async function loadReports() {
       </div>
     `;
   });
+
+  if (!reports.length) {
+    container.innerHTML = '<div class="card">Sem relatórios disponíveis.</div>';
+  }
 }
 
 function downloadPDF(id) {

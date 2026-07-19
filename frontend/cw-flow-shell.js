@@ -6,6 +6,20 @@
 
   const path = (location.pathname || '/').replace(/\.html$/i, '').toLowerCase();
   const isLogin = ['/', '/login', '/admin-login', '/client-login', '/technician-login'].includes(path);
+  const isAdminArea = path.includes('admin')
+    || path.includes('billing')
+    || path.includes('invoice')
+    || path.includes('to-issue')
+    || path.includes('report')
+    || path.includes('dashboard')
+    || path.includes('communications')
+    || path.includes('help-center');
+  const isClientArea = path.includes('client-portal')
+    || path.includes('client-dashboard')
+    || path.includes('client-history')
+    || path.includes('client-notifications')
+    || path.includes('client-payments');
+  const isTechnicianField = path.includes('technician-field-mode');
 
   function loadCss(){
     if(!document.querySelector('link[href="/cw-polish.css"]')){
@@ -27,12 +41,6 @@
 
   function loadOperationalRisk(){
     if(isLogin || document.querySelector('script[data-cw-operational-risk]')) return;
-    const isAdminArea = path.includes('admin')
-      || path.includes('billing')
-      || path.includes('invoice')
-      || path.includes('to-issue')
-      || path.includes('dashboard')
-      || path.includes('report');
     if(!isAdminArea) return;
     const s = document.createElement('script');
     s.src = '/cw-operational-risk.js?v=22.6.13-risk-jump';
@@ -43,14 +51,6 @@
 
   function loadSidebar(){
     if(isLogin || document.querySelector('.cw-side')) return;
-    const isAdminArea = path.includes('admin')
-      || path.includes('billing')
-      || path.includes('invoice')
-      || path.includes('to-issue')
-      || path.includes('report')
-      || path.includes('dashboard')
-      || path.includes('communications')
-      || path.includes('help-center');
     if(isAdminArea && !window.__CW_PROD_SIDEBAR__){
       const s = document.createElement('script');
       s.src = '/cw-enterprise-sidebar.js';
@@ -58,10 +58,39 @@
     }
   }
 
+  function normalizeLegacyNavigation(){
+    document.querySelectorAll('a[href]').forEach((link) => {
+      const href = link.getAttribute('href') || '';
+      if(!href.startsWith('/') || !href.endsWith('.html')) return;
+      link.setAttribute('href', href.replace(/\.html$/i, ''));
+    });
+    document.querySelectorAll('[data-route]').forEach((node) => {
+      const route = node.dataset.route || '';
+      if(!route.startsWith('/') || !route.endsWith('.html')) return;
+      node.dataset.route = route.replace(/\.html$/i, '');
+    });
+  }
+
+  function applyEnterpriseTheme(){
+    if(!isLogin && isAdminArea) {
+      document.body.classList.add('cw-enterprise-theme');
+      document.body.classList.add('cw-admin-app');
+    }
+    if(!isLogin && isClientArea) {
+      document.body.classList.add('cw-client-app');
+    }
+    if(!isLogin && isTechnicianField) {
+      document.body.classList.add('cw-tech-field-page');
+    }
+  }
+
   function title(){
     const map = {
       '/admin-master-control': 'Centro de Operacoes',
-      '/admin-dashboard': 'Dashboard',
+      '/admin-dashboard': 'Centro de Operacoes',
+      '/admin-menu': 'Centro de Operacoes',
+      '/admin-command-center': 'Centro de Operacoes',
+      '/admin-today': 'Centro de Operacoes',
       '/admin-technicians': 'Tecnicos',
       '/admin-clients': 'Clientes',
       '/admin-pools': 'Piscinas',
@@ -135,6 +164,8 @@
     removeLegacyTopModules();
     loadCss();
     document.documentElement.classList.add('cw-polish-ready');
+    normalizeLegacyNavigation();
+    applyEnterpriseTheme();
     loadSidebar();
     addBar();
     addFormMemory();

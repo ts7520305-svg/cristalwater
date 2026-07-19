@@ -21,8 +21,41 @@ const CONFIG = {
 const runTag = `FINAL2Y_${CONFIG.startMonth.replace(/[^0-9]/g, "")}_${Date.now()}`;
 const reportDir = path.resolve(__dirname, "..", "reports");
 fs.mkdirSync(reportDir, { recursive: true });
+const reportPath = path.join(reportDir, `final-two-year-simulation-${runTag}.json`);
 
 const checks = [];
+let reportWritten = false;
+
+function buildReport(summary, error = null) {
+  const failed = checks.filter((item) => !item.ok);
+  return {
+    ok: !error && failed.length === 0,
+    partial: Boolean(error),
+    createdAt: new Date().toISOString(),
+    config: CONFIG,
+    summary: summary || null,
+    checks,
+    failedCount: failed.length,
+    error: error
+      ? {
+          message: error.message,
+          stack: error.stack,
+        }
+      : null,
+  };
+}
+
+function persistReport(summary, error = null) {
+  try {
+    const report = buildReport(summary, error);
+    fs.writeFileSync(reportPath, JSON.stringify(report, null, 2), "utf8");
+    reportWritten = true;
+    return report;
+  } catch (persistError) {
+    console.error("Erro ao persistir relatorio:", persistError);
+    return null;
+  }
+}
 
 function delegateName(modelName) {
   return modelName.charAt(0).toLowerCase() + modelName.slice(1);
@@ -859,31 +892,45 @@ async function validateDatabase(base) {
 
 async function main() {
   console.log(`Teste final dois anos: ${runTag}`);
-  const base = await loadBaseData();
-  await createTwoYearOperations(base);
-  const summary = await validateDatabase(base);
-  const failed = checks.filter((item) => !item.ok);
-  const report = {
-    ok: failed.length === 0,
-    createdAt: new Date().toISOString(),
-    config: CONFIG,
-    summary,
-    checks,
-  };
-  const reportPath = path.join(reportDir, `final-two-year-simulation-${runTag}.json`);
-  fs.writeFileSync(reportPath, JSON.stringify(report, null, 2), "utf8");
+  let summary = null;
 
-  console.log(`Relatorio: ${reportPath}`);
-  console.log(`Resultado: ${failed.length === 0 ? "SUCCESS" : "FAIL"} (${checks.length - failed.length}/${checks.length} checks)`);
-  if (failed.length) {
-    for (const item of failed) console.log(`FALHA: ${item.name} - ${item.detail}`);
+  const flushOnSignal = (signal) => {
+    const partial = persistReport(summary, new Error(`Finalizacao por sinal ${signal}`));
+    if (partial) {
+      console.log(`Relatorio parcial: ${reportPath}`);
+    }
     process.exit(1);
+  };
+
+  process.once("SIGINT", () => flushOnSignal("SIGINT"));
+  process.once("SIGTERM", () => flushOnSignal("SIGTERM"));
+
+  try {
+    const base = await loadBaseData();
+    await createTwoYearOperations(base);
+    summary = await validateDatabase(base);
+    const report = persistReport(summary, null) || buildReport(summary, null);
+    const failed = checks.filter((item) => !item.ok);
+
+    console.log(`Relatorio: ${reportPath}`);
+    console.log(`Resultado: ${failed.length === 0 ? "SUCCESS" : "FAIL"} (${checks.length - failed.length}/${checks.length} checks)`);
+    if (failed.length) {
+      for (const item of failed) console.log(`FALHA: ${item.name} - ${item.detail}`);
+      process.exit(1);
+    }
+    return report;
+  } catch (error) {
+    persistReport(summary, error);
+    throw error;
   }
 }
 
 main()
   .catch((error) => {
     console.error("Erro no teste final de dois anos:", error);
+    if (!reportWritten) {
+      persistReport(null, error);
+    }
     process.exit(1);
   })
   .finally(async () => {

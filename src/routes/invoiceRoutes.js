@@ -3,6 +3,10 @@ const router = express.Router();
 const { prisma } = require("../prismaClient");
 const { sendInvoiceFull } = require("../controllers/invoiceController");
 const { applyClientCreditToInvoice } = require("../services/clientCreditService");
+const auth = require("../middlewares/authMiddleware");
+const { assertExternalOperationAllowed } = require("../config/externalIntegrations");
+
+router.use(auth("ADMIN"));
 
 function getMonthRef(date = new Date()) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
@@ -303,6 +307,12 @@ router.post("/generate-monthly", async (req, res) => {
 
 router.post("/:id/mark-issued", async (req, res) => {
   try {
+    try {
+      assertExternalOperationAllowed("fiscal_issuing");
+    } catch (gateErr) {
+      return res.status(gateErr.statusCode || 503).json({ ok: false, error: gateErr.code || "disabled_in_qa" });
+    }
+
     const id = Number(req.params.id);
     const externalInvoiceNo = String(req.body?.externalInvoiceNo || req.body?.invoiceNumber || req.body?.externalNumber || "").trim();
     if (!id) return res.status(400).json({ ok: false, error: "Fatura invalida" });

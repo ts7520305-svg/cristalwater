@@ -1,3 +1,4 @@
+const RepairBusiness = require("../business/repair/RepairBusiness");
 class VisitCompletionError extends Error {
   constructor(statusCode, code, message) {
     super(message);
@@ -159,6 +160,89 @@ function movementNotes(body, visit, product) {
   });
 }
 
+function visitCompletionSummary(body, chemicals = []) {
+  return {
+    ph: hasValue(body.ph) ? Number(body.ph) : null,
+    chlorine: hasValue(body.chlorine) ? Number(body.chlorine) : null,
+    alkalinity: hasValue(body.alkalinity) ? Number(body.alkalinity) : null,
+    salt: hasValue(body.salt) ? Number(body.salt) : null,
+    temperature: hasValue(body.temperature) ? Number(body.temperature) : null,
+    orpMv: hasValue(body.orpMv ?? body.orp) ? Number(body.orpMv ?? body.orp) : null,
+    productsApplied: Array.isArray(chemicals)
+      ? chemicals.map((item) => ({
+          name: item.name,
+          quantity: item.quantity,
+          unit: productUnit(item),
+        }))
+      : [],
+  };
+}
+
+const VISIT_TERMINAL_STATUSES = new Set(["DONE", "CLOSED", "CANCELLED", "CANCELED", "NOT_DONE", "FAILED"]);
+const VISIT_COMPLETABLE_STATUSES = new Set(["PLANNED", "IN_PROGRESS", "A_CAMINHO", "ON_ROUTE", "STARTED", "EM_EXECUCAO", "EM EXECUCAO"]);
+
+function normalizeVisitStatus(status) {
+  return String(status || "").trim().toUpperCase();
+}
+
+async function recordVisitAudit(tx, visit, body, repair, validated) {
+  if (!tx.auditTrail?.create || !visit) return null;
+
+  return tx.auditTrail.create({
+    data: {
+      eventType: "VISIT_COMPLETED",
+      entity: "ServiceVisit",
+      entityId: visit.id,
+      userId: toPositiveIntValue(body.performedByUserId || body.userId) || null,
+      technicianId: visit.technicianId || null,
+      clientId: visit.clientId || visit.pool?.client?.id || null,
+      poolId: visit.poolId || null,
+      visitId: visit.id,
+      action: "VISIT_COMPLETE",
+      message: `Visita concluída para ${visit.pool?.name || "piscina"}.`,
+      metadata: {
+        repairId: repair?.id || null,
+        chemistry: visitCompletionSummary(body, validated.chemicalsJson),
+        completedAt: new Date().toISOString(),
+      },
+    },
+  }).catch(() => null);
+}
+
+function emitVisitCompletionSignals(visit, repair) {
+  if (!global.io || !visit) return;
+
+  global.io.emit("visit-completed", {
+    visitId: visit.id,
+    poolId: visit.poolId || null,
+    clientId: visit.clientId || visit.pool?.client?.id || null,
+    repairId: repair?.id || null,
+    completedAt: new Date().toISOString(),
+  });
+
+  global.io.emit("dashboard-refresh", {
+    source: "VISIT_COMPLETED",
+    visitId: visit.id,
+    poolId: visit.poolId || null,
+  });
+}
+
+async function emitRouteCompletionSignal(visit) {
+  try {
+    const { emitRouteStopCompleted } = require("./routeOsEventService");
+    await emitRouteStopCompleted({
+      visitId: visit.id,
+      technicianId: visit.technicianId || null,
+      poolId: visit.poolId || null,
+      clientId: visit.clientId || visit.pool?.client?.id || null,
+      completedAt: new Date().toISOString(),
+      source: "visit.complete",
+    });
+  } catch (error) {
+    console.warn("ROUTE_STOP_COMPLETED emit failed:", error.message);
+  }
+}
+
 async function resolveWorkGuide(tx, visit, body) {
   const explicitWorkGuideId = Number(body.workGuideId || body.guideWorkId || 0);
   if (Number.isInteger(explicitWorkGuideId) && explicitWorkGuideId > 0) {
@@ -291,11 +375,20 @@ async function completeServiceVisit(prisma, visitId, body = {}) {
       throw new VisitCompletionError(404, "VISIT_NOT_FOUND", "Visita nao encontrada.");
     }
 
-    if (currentVisit.status === "DONE" || currentVisit.endAt) {
+    const currentStatus = normalizeVisitStatus(currentVisit.status);
+    if (VISIT_TERMINAL_STATUSES.has(currentStatus) || currentVisit.endAt) {
       throw new VisitCompletionError(
         409,
         "VISIT_ALREADY_COMPLETED",
         "Esta visita ja foi concluida e submetida por outro tecnico."
+      );
+    }
+
+    if (!VISIT_COMPLETABLE_STATUSES.has(currentStatus)) {
+      throw new VisitCompletionError(
+        409,
+        "VISIT_INVALID_STATUS",
+        `Nao e permitido concluir visita com estado ${currentStatus || "UNKNOWN"}.`
       );
     }
 
@@ -362,15 +455,28 @@ async function completeServiceVisit(prisma, visitId, body = {}) {
     let repair = null;
     const problem = body.problem || body.repair?.problem;
     if (problem && currentVisit.poolId) {
-      repair = await tx.repair.create({
-        data: {
+      const repairResult = await RepairBusiness.createRepairTicket(
+        {
           poolId: currentVisit.poolId,
           problem: String(problem),
           notes: body.problemNotes || body.repair?.resolution || null,
           status: "PENDING",
           priority: body.priority || body.repair?.priority || "NORMAL",
         },
-      }).catch(() => null);
+        "visit-completion",
+        tx,
+        {
+          createNotification: false,
+          context: {
+            poolId: currentVisit.poolId,
+            clientId: currentVisit.clientId || null,
+          },
+          source: "visit-completion",
+          contextNotes: "Reparação criada automaticamente na conclusão da visita.",
+        }
+      );
+
+      repair = repairResult.ok ? repairResult.repair : null;
     }
 
     if (Array.isArray(validated.chemicalsJson) && validated.chemicalsJson.length) {
@@ -406,7 +512,70 @@ async function completeServiceVisit(prisma, visitId, body = {}) {
       },
     });
 
-    return { visit, repair };
+    if (visit?.poolId) {
+      await tx.technicalHistory.create({
+        data: {
+          poolId: visit.poolId,
+          type: "VISIT_COMPLETED",
+          component: "Service Visit",
+          message: "Visita de manutencao concluida",
+          description: JSON.stringify({
+            visitId: visit.id,
+            technicianId: visit.technicianId,
+            technicianName: visit.technician?.name || visit.technicianName || null,
+            summary: visitCompletionSummary(body, validated.chemicalsJson),
+          }),
+          status: "DONE",
+          performedAt: new Date(),
+          doneAt: new Date(),
+        },
+      }).catch(() => null);
+    }
+
+    const adminNotification = await tx.notification.create({
+      data: {
+        type: "VISIT_DONE",
+        eventType: "VISIT_COMPLETED",
+        title: "Visita concluida",
+        message: `Visita #${visit.id} concluida em ${visit.pool?.name || "piscina"}.`,
+        role: "ADMIN",
+        status: "PENDING",
+        severity: "NORMAL",
+        metadata: {
+          visitId: visit.id,
+          poolId: visit.poolId || null,
+          clientId: visit.clientId || visit.pool?.client?.id || null,
+          repairId: repair?.id || null,
+        },
+      },
+    }).catch(() => null);
+
+    const clientId = visit.clientId || visit.pool?.client?.id || null;
+    const clientNotification = clientId
+      ? await tx.notification.create({
+          data: {
+            clientId,
+            type: "VISIT_REPORT",
+            eventType: "VISIT_COMPLETED",
+            title: "Manutencao concluida",
+            message: `A manutencao da ${visit.pool?.name || "sua piscina"} foi concluida.`,
+            role: "CLIENT",
+            status: "PENDING",
+            severity: "NORMAL",
+            metadata: {
+              visitId: visit.id,
+              poolId: visit.poolId || null,
+            },
+          },
+        }).catch(() => null)
+      : null;
+
+    await recordVisitAudit(tx, visit, body, repair, validated);
+
+    emitVisitCompletionSignals(visit, repair);
+    await emitRouteCompletionSignal(visit);
+
+    return { visit, repair, notifications: { adminNotification, clientNotification } };
   });
 }
 

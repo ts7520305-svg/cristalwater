@@ -1,4 +1,106 @@
-<!doctype html><html lang="pt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cristal Water LDA · Visitas</title><script src="/cw-auth.js"></script><link rel="stylesheet" href="/cw-polish.css"><style>
-:root{--bg:#06111f;--panel:#0d1d31;--panel2:#10243c;--line:#24415f;--txt:#e9f5ff;--muted:#8fb1cc;--brand:#35d1ff;--ok:#40e6a0;--warn:#ffd166;--bad:#ff6b6b;--input:#091829}*{box-sizing:border-box}body{margin:0;background:linear-gradient(120deg,#06111f,#0b1f33 55%,#06111f);color:var(--txt);font-family:Inter,Segoe UI,Arial,sans-serif}main.page{padding:24px;max-width:1500px;margin:0 auto}.page-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px}.page-head h1{margin:0;font-size:30px}.page-head p{margin:6px 0 0;color:var(--muted)}.grid{display:grid;gap:16px}.cols2{grid-template-columns:minmax(320px,430px) 1fr}.cols3{grid-template-columns:repeat(3,1fr)}.cols4{grid-template-columns:repeat(4,1fr)}.card{background:rgba(13,29,49,.92);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.22)}.metric{font-size:32px;font-weight:900}.label,.muted{color:var(--muted);font-size:13px}.item,.client,.pool,.visit,.tech,.round-card,.day-card{background:#0a1b2e;border:1px solid var(--line);border-radius:16px;padding:14px;margin:8px 0;color:var(--txt)}input,select,textarea{width:100%;background:var(--input);color:var(--txt);border:1px solid var(--line);border-radius:14px;padding:12px;margin:6px 0}textarea{min-height:75px}button,.btn{border:0;border-radius:14px;padding:12px 16px;background:#163354;color:var(--txt);font-weight:800;cursor:pointer;margin:4px 0}button.primary,.btn.primary{background:linear-gradient(135deg,#0584c7,#35d1ff);color:#03121c}button.ok,.btn.ok{background:linear-gradient(135deg,#0c9f69,#40e6a0);color:#02150d}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.list{display:grid;gap:10px}.pill{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:99px;padding:5px 9px;color:#bfe4ff;background:#0a1b2e;font-size:12px}.status{border:1px solid rgba(53,217,255,.18);background:rgba(53,217,255,.08);padding:12px;border-radius:16px;color:#cfe9ff}.actions{display:flex;gap:8px;flex-wrap:wrap}.actions a,.actions button{min-width:120px;text-align:center}.quick-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.quick-card{display:block;background:rgba(13,29,49,.92);border:1px solid var(--line);border-radius:20px;padding:18px;color:var(--txt);text-decoration:none}.quick-card strong{display:block;font-size:17px}.quick-card span{display:block;margin-top:5px;color:var(--muted);font-size:12px}@media(max-width:1000px){main.page{padding:14px}.cols2,.cols3,.cols4,.row,.row3{grid-template-columns:1fr}.page-head{flex-direction:column}}
-</style></head><body><main class="page"><div class="page-head"><div><h1>Visitas</h1><p>Criar e acompanhar visitas de manutenção.</p></div><div class="actions"><a class="btn" href="/admin-master-control">Centro de Operações</a></div></div>
-<section class="grid cols2"><div class="card"><h2>Nova visita</h2><select id="poolId"></select><select id="technicianId"></select><label class="muted" for="plannedDate">Data e hora</label><input id="plannedDate" type="datetime-local"><button class="primary" onclick="createVisit()">Criar visita</button></div><div class="card"><h2>Visitas</h2><div class="row"><input id="visitDateFilter" type="date"><select id="technicianFilter"><option value="">Todos os técnicos</option></select></div><button class="primary" onclick="loadVisits()">Atualizar visitas</button><div id="visitListMeta" class="status">A carregar visitas do dia...</div><div id="visits" class="list muted">A carregar...</div></div></section></main><script src="/admin-auth-guard.js"></script><script src="/admin-visits.js"></script><script src="/cristal-help-data.js"></script><script src="/cristal-assist.js"></script><script src="/cw-flow-shell.js"></script></body></html>
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Cristal Water LDA - Visitas</title>
+  <script src="/cw-auth.js"></script>
+  <link rel="stylesheet" href="/ui/foundation.css">
+  <style>
+    :root { --bg:#06111f; --panel:#0d1d31; --line:#24415f; --txt:#e9f5ff; --muted:#8fb1cc; --input:#091829; --cw-muted:#8fb1cc; --cw-danger:#ff6b6b; --cw-border:#24415f; --cw-surface-2:#0a1b2e; --cw-text:#e9f5ff; }
+    * { box-sizing:border-box; }
+    html,body { overflow-x:hidden; }
+    body { margin:0; background:linear-gradient(120deg,#06111f,#0b1f33 55%,#06111f); color:var(--txt); font-family:Inter,Segoe UI,Arial,sans-serif; }
+    main.page { padding:24px; max-width:1500px; margin:0 auto; }
+    .page-head { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:18px; }
+    .page-head p { margin:6px 0 0; color:var(--muted); }
+    .grid { display:grid; gap:16px; }
+    .cols2 { grid-template-columns:minmax(320px,430px) 1fr; }
+    .card { background:rgba(13,29,49,.92); border:1px solid var(--line); border-radius:22px; padding:18px; box-shadow:0 20px 60px rgba(0,0,0,.22); }
+    .card h2 { margin:0 0 12px; }
+    .panel-divider { height:1px; border:0; background:rgba(143,177,204,.2); margin:14px 0; }
+    .visit { background:#0a1b2e; border:1px solid var(--line); border-radius:16px; padding:14px; margin:8px 0; color:var(--txt); }
+    input,select { width:100%; background:var(--input); color:var(--txt); border:1px solid var(--line); border-radius:14px; padding:12px; margin:0; }
+    .row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    button,.btn { border:0; border-radius:14px; padding:12px 16px; background:#163354; color:var(--txt); font-weight:800; cursor:pointer; text-decoration:none; }
+    button.primary,.btn.primary { background:linear-gradient(135deg,#0584c7,#35d1ff); color:#03121c; }
+    .actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .list { display:grid; gap:10px; }
+    .status { border:1px solid rgba(53,217,255,.18); background:rgba(53,217,255,.08); padding:12px; border-radius:16px; color:#cfe9ff; }
+    .section-note { margin:0; color:#bfe4ff; font-size:13px; }
+    @media (max-width:1000px) {
+      main.page { padding:14px; }
+      .cols2,.row { grid-template-columns:1fr; }
+      .page-head { flex-direction:column; }
+    }
+  </style>
+</head>
+<body data-required-role="ADMIN">
+  <main class="page">
+    <div class="page-head cw-page-head">
+      <div>
+        <h1>Visitas</h1>
+        <p class="cw-page-subtitle">Criar, filtrar e acompanhar visitas de manutencao do dia em operacao real.</p>
+      </div>
+      <div class="actions">
+        <button class="btn" type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
+        <a class="btn" href="/admin-master-control">Centro de Operacoes</a>
+      </div>
+    </div>
+
+    <section class="grid cols2">
+      <article class="card">
+        <h2 class="cw-section-title">Nova visita</h2>
+        <p class="section-note">Regista uma visita pontual mantendo a atribuicao tecnica e a data de planeamento.</p>
+        <div class="cw-form-grid cols-2" style="margin-top:12px;">
+          <label class="cw-field cw-full" for="poolId">
+            <span class="cw-label">Piscina</span>
+            <select id="poolId" aria-label="Piscina"></select>
+          </label>
+          <label class="cw-field cw-full" for="technicianId">
+            <span class="cw-label">Tecnico</span>
+            <select id="technicianId" aria-label="Tecnico"></select>
+          </label>
+          <label class="cw-field cw-full" for="plannedDate">
+            <span class="cw-label">Data e hora planeada</span>
+            <input id="plannedDate" type="datetime-local">
+          </label>
+        </div>
+        <hr class="panel-divider">
+        <div class="cw-form-actions">
+          <button class="primary" type="button" onclick="createVisit()">Criar visita</button>
+        </div>
+      </article>
+
+      <article class="card cw-list-wrap">
+        <h2 class="cw-section-title">Visitas do dia</h2>
+        <div class="row">
+          <label class="cw-field" for="visitDateFilter">
+            <span class="cw-label">Data</span>
+            <input id="visitDateFilter" type="date">
+          </label>
+          <label class="cw-field" for="technicianFilter">
+            <span class="cw-label">Tecnico</span>
+            <select id="technicianFilter">
+              <option value="">Todos os tecnicos</option>
+            </select>
+          </label>
+        </div>
+        <div class="cw-form-actions">
+          <button class="primary" type="button" onclick="loadVisits()">Atualizar visitas</button>
+        </div>
+        <div id="visitListMeta" class="status" role="status" aria-live="polite">A carregar visitas do dia...</div>
+        <div id="visits" class="list" aria-live="polite">A carregar...</div>
+      </article>
+    </section>
+  </main>
+
+  <script src="/admin-auth-guard.js"></script>
+  <script src="/admin-visits.js"></script>
+  <script src="/cristal-help-data.js"></script>
+  <script src="/cristal-assist.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
+</body>
+</html>

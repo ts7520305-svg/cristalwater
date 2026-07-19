@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const { assertExternalOperationAllowed } = require("../config/externalIntegrations");
 
 function smtpConfigured() {
   return Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
@@ -22,6 +23,12 @@ function createTransporter() {
 
 async function sendInvoiceEmail(req, res) {
   try {
+    try {
+      assertExternalOperationAllowed("email");
+    } catch (gateErr) {
+      return res.status(gateErr.statusCode || 503).json({ ok: false, error: gateErr.code || "disabled_in_qa" });
+    }
+
     const { email, invoiceId } = req.body;
 
     if (!email || !invoiceId) {

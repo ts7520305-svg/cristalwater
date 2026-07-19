@@ -2,9 +2,10 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const { resolveUploadSubdir, toPublicUploadUrl } = require('../config/uploadPath');
 
 const router = express.Router();
-const baseDir = path.join(__dirname, '../../uploads/documents');
+const baseDir = resolveUploadSubdir('documents');
 const manifestPath = path.join(baseDir, 'manifest.json');
 fs.mkdirSync(baseDir, { recursive: true });
 function readManifest(){ try { return JSON.parse(fs.readFileSync(manifestPath,'utf8')); } catch { return []; } }
@@ -39,7 +40,7 @@ router.post('/', upload.single('file'), (req, res) => {
     type: req.body.type || req.file.mimetype,
     originalName: req.file.originalname,
     filename: req.file.filename,
-    url: `/uploads/documents/${req.file.filename}`,
+    url: toPublicUploadUrl('documents', req.file.filename),
     notes: req.body.notes || null,
     createdAt: new Date().toISOString()
   };

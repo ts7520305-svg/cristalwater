@@ -87,7 +87,7 @@ async function processPaymentReminders() {
     await prisma.chatMessage.create({
       data: {
         senderId: 1,          // admin/sistema
-        receiverId: 0,        // canal cliente/admin
+        receiverId: null,     // canal cliente/admin sem utilizador destino fixo
         chatType: "CLIENT",
         clientId: client.id,
         text,

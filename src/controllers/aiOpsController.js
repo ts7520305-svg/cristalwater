@@ -1,5 +1,8 @@
 const jwt = require("jsonwebtoken");
 const aiOps = require("../services/aiOpsService");
+const { getJwtSecret } = require("../utils/jwtSecret");
+
+const JWT_SECRET = getJwtSecret();
 
 function requireAdmin(req, res, next) {
   const adminToken = req.headers["x-admin-token"] || req.headers["x-cristal-admin-token"];
@@ -14,7 +17,7 @@ function requireAdmin(req, res, next) {
   const bearer = header.startsWith("Bearer ") ? header.slice(7) : null;
   if (bearer) {
     try {
-      const decoded = jwt.verify(bearer, process.env.JWT_SECRET || "cristalwater_secret");
+      const decoded = jwt.verify(bearer, JWT_SECRET);
       if (String(decoded.role || "").toUpperCase() === "ADMIN") {
         req.auth = decoded;
         return next();

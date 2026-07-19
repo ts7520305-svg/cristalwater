@@ -1,0 +1,27 @@
+.cw-v2-btn,
+.btn,
+.cw-btn {
+  min-height: 38px;
+  border: 1px solid var(--cw-color-border);
+  border-radius: var(--cw-radius-sm);
+  background: var(--cw-color-surface);
+  color: var(--cw-color-text);
+  padding: 8px 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--cw-transition-fast), border-color var(--cw-transition-fast);
+}
+
+.cw-v2-btn.primary,
+.btn.primary,
+.cw-btn-primary {
+  background: linear-gradient(135deg, var(--cw-color-primary), var(--cw-color-primary-2));
+  color: #eef8fb;
+  border-color: transparent;
+}
+
+.cw-v2-btn:hover,
+.btn:hover,
+.cw-btn:hover {
+  border-color: rgba(15, 90, 112, 0.5);
+}

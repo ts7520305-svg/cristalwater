@@ -1,5 +1,13 @@
 const API = "/api";
 
+function authHeaders(extra = {}) {
+  const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
+  return {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...extra,
+  };
+}
+
 window.onload = () => {
   document.getElementById("search").addEventListener("input", renderLogs);
   document.getElementById("channelFilter").addEventListener("change", renderLogs);
@@ -9,7 +17,7 @@ window.onload = () => {
 let allLogs = [];
 
 async function load() {
-  const res = await fetch(API + "/communications");
+  const res = await fetch(API + "/communications", { headers: authHeaders() });
   const data = await res.json();
 
   const container = document.getElementById("list");
@@ -77,11 +85,11 @@ function renderLogs() {
 }
 
 function openClientChat(clientId) {
-  window.location.href = `/frontend/chat.html?mode=client&clientId=${clientId}&senderId=1`;
+  window.location.href = `/chat?mode=client&clientId=${clientId}&senderId=1`;
 }
 
 function goBilling() {
-  window.location.href = `/frontend/billing-center.html`;
+  window.location.href = `/billing-center`;
 }
 
 function escapeHtml(value) {

@@ -2,70 +2,208 @@
 <html lang="pt">
 <head>
   <link rel="manifest" href="/manifest.webmanifest">
-  <meta name="theme-color" content="#050b16">
-<meta charset="utf-8">
-<title>Técnico - Mapa</title>
-
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-
-<style>
-body { margin:0; font-family:Arial; }
-#map { height:100vh; }
-
-.panel {
-  position:absolute;
-  top:10px;
-  left:10px;
-  background:white;
-  padding:10px;
-  border-radius:8px;
-  z-index:999;
-  width:240px;
-}
-
-button {
-  width:100%;
-  margin:5px 0;
-  padding:8px;
-  background:#1e88e5;
-  color:white;
-  border:none;
-}
-
-.info {
-  font-size:12px;
-  margin-top:10px;
-}
-</style>
-<link rel="stylesheet" href="/cristal-assist.css">
+  <meta name="theme-color" content="#0f1723">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Cristal Water - Mapa Tecnico</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+  <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
-  <link rel="stylesheet" href="css/crystal-v25.css">
+  <script src="/technician-auth-guard.js"></script>
+  <link rel="stylesheet" href="/ui/foundation.css">
+  <link rel="stylesheet" href="/cw-ui-kit.css">
+  <style>
+    body.map-page {
+      margin: 0;
+      background: linear-gradient(180deg, #f7fbf9, #edf4f2);
+      color: #102620;
+      font-family: "Segoe UI", "Noto Sans", sans-serif;
+    }
+
+    .map-shell {
+      width: min(1080px, 100%);
+      margin: 0 auto;
+      padding: 10px;
+    }
+
+    .map-top {
+      background: #fff;
+      border: 1px solid #c9d8d2;
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 10px;
+      box-shadow: 0 10px 28px rgba(16, 38, 32, 0.08);
+    }
+
+    .map-title {
+      margin: 4px 0;
+      font-size: clamp(26px, 5vw, 38px);
+      line-height: 1.05;
+      font-weight: 900;
+    }
+
+    .map-muted {
+      color: #577067;
+      margin: 0;
+    }
+
+    .status-box {
+      border-radius: 12px;
+      border: 1px solid #c9d8d2;
+      background: #f4faf7;
+      padding: 10px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .status-box[data-tone="warning"] {
+      border-color: #e4c289;
+      background: #fff6e7;
+      color: #5f3900;
+    }
+
+    .status-box[data-tone="error"] {
+      border-color: #efbbc5;
+      background: #fdecef;
+      color: #6f1223;
+    }
+
+    .map-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr);
+      gap: 10px;
+    }
+
+    #map {
+      height: min(72vh, 640px);
+      border-radius: 14px;
+      border: 1px solid #c9d8d2;
+      overflow: hidden;
+      background: #d8e7e2;
+    }
+
+    .side {
+      background: #fff;
+      border: 1px solid #c9d8d2;
+      border-radius: 14px;
+      padding: 12px;
+      box-shadow: 0 10px 28px rgba(16, 38, 32, 0.08);
+      display: grid;
+      gap: 8px;
+      align-content: start;
+      max-height: min(72vh, 640px);
+      overflow: auto;
+    }
+
+    .actions {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .actions button,
+    .actions a {
+      min-height: 52px;
+      border-radius: 12px;
+      border: 1px solid #c9d8d2;
+      background: #fff;
+      color: #102620;
+      font-size: 14px;
+      font-weight: 800;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .actions .primary {
+      border-color: #0f7d5d;
+      background: #0f7d5d;
+      color: #fff;
+    }
+
+    .visit-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .visit-item {
+      border: 1px solid #c9d8d2;
+      border-radius: 12px;
+      padding: 10px;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .visit-item.active {
+      border-color: #0f7d5d;
+      background: #eaf7f3;
+    }
+
+    .visit-item small {
+      display: block;
+      color: #577067;
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .empty {
+      color: #577067;
+      border: 1px dashed #c9d8d2;
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    @media (max-width: 920px) {
+      .map-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .actions {
+        grid-template-columns: 1fr;
+      }
+
+      #map,
+      .side {
+        max-height: none;
+      }
+    }
+  </style>
 </head>
+<body class="map-page" data-required-role="TECHNICIAN">
+  <main class="map-shell">
+    <section class="map-top">
+      <p class="map-muted">Ronda tecnica</p>
+      <h1 class="map-title">Mapa do Dia</h1>
+      <p class="map-muted">Navegacao simples com foco em leitura rapida e orientacao no terreno.</p>
+    </section>
 
-<body>
+    <p id="statusBox" class="status-box" aria-live="polite">A preparar mapa.</p>
 
-<div class="panel">
-  <h3>Ronda do Dia</h3>
+    <section class="map-grid">
+      <div id="map" aria-label="Mapa tecnico"></div>
+      <aside class="side">
+        <div class="actions">
+          <button id="loadBtn" class="primary" type="button">Carregar ronda</button>
+          <button id="nextBtn" type="button">Proxima piscina</button>
+          <a id="googleLink" href="#" target="_blank" rel="noopener">Google Maps</a>
+          <a id="wazeLink" href="#" target="_blank" rel="noopener">Waze</a>
+        </div>
+        <div id="infoBox" class="status-box" style="margin:0;">Sem piscina selecionada.</div>
+        <div id="visitList" class="visit-list"></div>
+      </aside>
+    </section>
+  </main>
 
-  <button onclick="loadToday()">Carregar Ronda</button>
-  <button onclick="startTracking()">Iniciar GPS</button>
-  <button onclick="nextPool()">Próxima Piscina</button>
-
-  <button onclick="openGoogle()">Google Maps</button>
-  <button onclick="openWaze()">Waze</button>
-
-  <div class="info" id="infoBox"></div>
-</div>
-
-<div id="map"></div>
-
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script src="/technician-map.js"></script>
-
-<script src="/cristal-help-data.js"></script>
-<script src="/cristal-assist.js"></script>
-<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
-<script src="/cw-flow-shell.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="/technician-map.js"></script>
+  <script src="/cristal-help-data.js"></script>
+  <script src="/cristal-assist.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 const content = document.getElementById("content");
-const clientId = localStorage.getItem("clientId");
-const token = localStorage.getItem("authToken");
+const clientId = Number(localStorage.getItem("cw_client_id") || localStorage.getItem("clientId") || 0);
+const authToken = localStorage.getItem("token") || localStorage.getItem("authToken") || localStorage.getItem("cristalwater_jwt");
 
 function formatDateTime(dateString) {
   const d = new Date(dateString);
@@ -18,7 +18,7 @@ async function loadHistory() {
   try {
     const res = await fetch(`/api/client-portal/history/${clientId}`, {
       headers: {
-        "Authorization": `Bearer ${token}`,
+        "Authorization": `Bearer ${authToken}`,
       },
     });
 
@@ -29,7 +29,7 @@ async function loadHistory() {
       return;
     }
 
-    if (!data.pools.length) {
+    if (!Array.isArray(data.pools) || !data.pools.length) {
       content.innerText = "Sem piscinas associadas.";
       return;
     }
@@ -40,30 +40,48 @@ async function loadHistory() {
       let html = `
         <div class="pool">
           <h3>${pool.name}</h3>
+          <p>Zona: ${pool.zone || "-"}</p>
           <table>
             <thead>
               <tr>
                 <th>Data / Hora</th>
                 <th>Estado</th>
-                <th>Notas</th>
+                <th>Técnico</th>
+                <th>Química</th>
+                <th>Produtos</th>
+                <th>Notas / Incidentes</th>
               </tr>
             </thead>
             <tbody>
       `;
 
-      if (!pool.serviceVisits.length) {
+      if (!Array.isArray(pool.serviceVisits) || !pool.serviceVisits.length) {
         html += `
           <tr>
-            <td colspan="3">Sem intervenções registadas.</td>
+            <td colspan="6">Sem intervenções registadas.</td>
           </tr>
         `;
       } else {
         pool.serviceVisits.forEach(v => {
+          const products = Array.isArray(v.chemicals)
+            ? v.chemicals.map((item) => `${item.name || "Produto"} ${item.quantity || 0}${item.unit ? ` ${item.unit}` : ""}`).join(" • ")
+            : (typeof v.products === "string" ? v.products : "-");
+          const chemistry = [
+            v.ph != null ? `pH ${v.ph}` : null,
+            v.chlorine != null ? `Cloro ${v.chlorine}` : null,
+            v.alkalinity != null ? `Alcal. ${v.alkalinity}` : null,
+            v.salt != null ? `Sal ${v.salt}` : null,
+            v.temperature != null ? `Temp. ${v.temperature}` : null,
+          ].filter(Boolean).join(" • ") || "-";
+          const notes = [v.notes, v.internalNotes, v.alerts].filter(Boolean).join("<br>") || "-";
           html += `
             <tr>
               <td>${formatDateTime(v.date)}</td>
               <td>${v.status}</td>
-              <td>${v.notes || "-"}</td>
+              <td>${v.technicianName || "-"}</td>
+              <td>${chemistry}</td>
+              <td>${products}</td>
+              <td>${notes}</td>
             </tr>
           `;
         });

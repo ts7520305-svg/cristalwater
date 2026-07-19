@@ -10,6 +10,7 @@ const {
   invoiceTotal,
 } = require('../services/clientCreditService');
 const { assertPoolReadyForRound } = require('../utils/poolReadiness');
+const RepairBusiness = require('../business/repair/RepairBusiness');
 
 const prisma = prismaModule.prisma || prismaModule.default || prismaModule;
 const router = express.Router();
@@ -351,6 +352,40 @@ function monthRangeFromRef(ref) {
 }
 function sourceAmount(record) {
   return toFloat(record?.totalPrice ?? record?.price ?? record?.revenue ?? record?.unitPrice, 0);
+}
+
+function invoiceLineReferenceIds(lines, types) {
+  const allowed = new Set((types || []).map((type) => String(type || '').trim().toUpperCase()));
+  return (lines || [])
+    .filter((line) => allowed.has(String(line.type || line.lineType || '').trim().toUpperCase()))
+    .map((line) => toInt(line.referenceId))
+    .filter(Boolean);
+}
+
+function invoiceMonthlyLineAmount(lines) {
+  const monthlyLine = (lines || []).find((line) => String(line.type || line.lineType || '').trim().toUpperCase() === 'MONTHLY');
+  return toFloat(monthlyLine?.lineTotal ?? monthlyLine?.total ?? monthlyLine?.unitPrice, 0);
+}
+
+function isDuplicateInvoiceGeneration(existingInvoice, payload = {}) {
+  if (!existingInvoice) return false;
+
+  const existingServiceVisitIds = new Set(payload.existingServiceVisitIds || []);
+  const existingExtraVisitIds = new Set(payload.existingExtraVisitIds || []);
+  const existingRepairIds = new Set(payload.existingRepairIds || []);
+
+  const hasNewServiceVisits = (payload.serviceVisits || []).some((visit) => !existingServiceVisitIds.has(visit.id));
+  const hasNewExtraVisits = (payload.extraVisits || []).some((visit) => !existingExtraVisitIds.has(visit.id));
+  const hasNewRepairs = (payload.repairs || []).some((repair) => !existingRepairIds.has(repair.id));
+
+  if (hasNewServiceVisits || hasNewExtraVisits || hasNewRepairs) return false;
+
+  const existingTotal = toFloat(existingInvoice.totalAmount ?? existingInvoice.total ?? existingInvoice.amount, 0);
+  const nextTotal = toFloat(payload.total, 0);
+  const existingMonthly = invoiceMonthlyLineAmount(existingInvoice.lines || []);
+  const nextMonthly = toFloat(payload.monthly, 0);
+
+  return existingTotal === nextTotal && existingMonthly === nextMonthly;
 }
 
 
@@ -1059,9 +1094,6 @@ router.post('/clients/:clientId/pools', async (req, res) => {
       const poolData = poolBaseData({ ...body, active: true, archiveStatus: 'ATIVO', deletedAt: null, scheduleMode: 'PENDING_ROUND' }, clientId, { forCreate: true });
       const duplicateFilters = [];
 
-      if (poolData.serialNumber) {
-        duplicateFilters.push({ serialNumber: poolData.serialNumber });
-      }
       if (poolData.address && poolData.location && poolData.type) {
         duplicateFilters.push({
           address: poolData.address,
@@ -1073,7 +1105,7 @@ router.post('/clients/:clientId/pools', async (req, res) => {
       if (duplicateFilters.length) {
         const duplicate = await tx.pool.findFirst({
           where: { OR: duplicateFilters },
-          select: { id: true, clientId: true, name: true, address: true, location: true, type: true, serialNumber: true },
+          select: { id: true, clientId: true, name: true, address: true, location: true, type: true },
         });
 
         if (duplicate) {
@@ -1784,20 +1816,33 @@ router.post('/visits/:id/problem', async (req, res) => {
     const priority = severity.includes('URG') || severity.includes('CRIT') ? 'HIGH' : 'NORMAL';
     const problem = `${type}: ${message}`;
 
-    const repair = await db('repair').create({
-      data: repairBaseData({
-        poolId: visit.poolId,
-        problem,
-        notes: [
-          `Reportado pelo tecnico no modo de campo.`,
-          `Visita #${visit.id}.`,
-          visit.technician?.name ? `Tecnico: ${visit.technician.name}.` : null,
-          body.notes || null,
-        ].filter(Boolean).join(' '),
-        status: 'PENDING',
-        priority,
-      }),
+    const repairResult = await RepairBusiness.createRepairTicket({
+      poolId: visit.poolId,
+      problem,
+      notes: [
+        `Reportado pelo tecnico no modo de campo.`,
+        `Visita #${visit.id}.`,
+        visit.technician?.name ? `Tecnico: ${visit.technician.name}.` : null,
+        body.notes || null,
+      ].filter(Boolean).join(' '),
+      status: 'PENDING',
+      priority,
+    }, body.actor || req.headers['x-user-email'] || 'ADMIN', prisma, {
+      context: {
+        pool: visit.pool,
+        clientId: visit.clientId || visit.pool?.clientId || visit.pool?.client?.id || null,
+      },
+      source: 'core-flow-route',
     });
+
+    if (!repairResult?.ok) {
+      return res.status(repairResult?.status || 500).json({
+        ok: false,
+        error: repairResult?.error || 'Falha ao criar reparação',
+      });
+    }
+
+    const repair = repairResult.repair;
 
     const alert = available('technicalAlert') ? await db('technicalAlert').create({
       data: dataFor('technicalAlert', {
@@ -1906,6 +1951,7 @@ router.post('/invoices/generate', async (req, res) => {
       .filter((line) => ['EXTRA', 'EXTRA_VISIT'].includes(String(line.type || line.lineType || '').toUpperCase()))
       .map((line) => toInt(line.referenceId))
       .filter(Boolean);
+    const existingRepairIds = invoiceLineReferenceIds(existingLines, ['REPAIR']);
     const range = monthRangeFromRef(ref);
 
     const repairs = await safe('repair.findMany.invoiceGenerate.v2', [], () => db('repair').findMany({
@@ -1949,6 +1995,20 @@ router.post('/invoices/generate', async (req, res) => {
     const amountOpen = Math.max(0, total - alreadyPaid);
     const status = total <= 0 ? 'PAID' : amountOpen <= 0 ? 'PAID' : alreadyPaid > 0 ? 'PARTIAL' : 'PENDING';
     const paidAt = status === 'PAID' && alreadyPaid > 0 ? (existingInvoice?.paidAt || new Date()) : null;
+
+    if (isDuplicateInvoiceGeneration(existingInvoice, {
+      existingServiceVisitIds,
+      existingExtraVisitIds,
+      existingRepairIds,
+      serviceVisits,
+      extraVisits,
+      repairs,
+      monthly,
+      total,
+    })) {
+      const fullInvoice = await safe('invoice.findUnique.duplicateInvoice.v2', existingInvoice, () => db('invoice').findUnique({ where: { id: existingInvoice.id }, include: { lines: true, client: true, payments: true } }));
+      return res.status(409).json({ ok: false, code: 'INVOICE_ALREADY_EXISTS', error: 'Já existe fatura para este mês.', invoice: fullInvoice || existingInvoice });
+    }
 
     const invoice = await db('invoice').upsert({
       where: { clientId_monthRef: { clientId, monthRef: ref } },
@@ -2026,7 +2086,7 @@ router.post('/invoices/generate-legacy', async (req, res) => {
     const total = monthly + repairTotal;
     const existingInvoice = await db('invoice').findUnique({
       where: { clientId_monthRef: { clientId, monthRef: ref } },
-      include: { payments: true },
+      include: { payments: true, lines: true },
     });
     const alreadyPaid = existingInvoice
       ? (existingInvoice.payments || []).reduce((sum, p) => sum + toFloat(p.amount, 0), 0)
@@ -2034,6 +2094,16 @@ router.post('/invoices/generate-legacy', async (req, res) => {
     const amountOpen = Math.max(0, total - alreadyPaid);
     const status = total <= 0 ? 'PAID' : amountOpen <= 0 ? 'PAID' : alreadyPaid > 0 ? 'PARTIAL' : 'PENDING';
     const paidAt = status === 'PAID' && alreadyPaid > 0 ? (existingInvoice?.paidAt || new Date()) : null;
+
+    if (isDuplicateInvoiceGeneration(existingInvoice, {
+      existingRepairIds: invoiceLineReferenceIds(existingInvoice?.lines || [], ['REPAIR']),
+      repairs,
+      monthly,
+      total,
+    })) {
+      const fullInvoice = await safe('invoice.findUnique.duplicateInvoice.legacy', existingInvoice, () => db('invoice').findUnique({ where: { id: existingInvoice.id }, include: { lines: true, client: true, payments: true } }));
+      return res.status(409).json({ ok: false, code: 'INVOICE_ALREADY_EXISTS', error: 'Já existe fatura para este mês.', invoice: fullInvoice || existingInvoice });
+    }
 
     const invoice = await db('invoice').upsert({
       where: { clientId_monthRef: { clientId, monthRef: ref } },

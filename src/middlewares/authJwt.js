@@ -4,11 +4,13 @@
 
 const jwt = require("jsonwebtoken");
 const { roleMatches } = require("../utils/roles");
+const { getJwtSecret } = require("../utils/jwtSecret");
+const { validateJwtPrincipal } = require("../utils/jwtPrincipalGuard");
 
-const JWT_SECRET = process.env.JWT_SECRET || "cristalwater_secret";
+const JWT_SECRET = getJwtSecret();
 
 function authJwt(requiredRole = null) {
-  return (req, res, next) => {
+  return async (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -22,6 +24,14 @@ function authJwt(requiredRole = null) {
 
     try {
       const decoded = jwt.verify(token, JWT_SECRET);
+
+      const principalState = await validateJwtPrincipal(decoded);
+      if (!principalState.ok) {
+        return res.status(401).json({
+          ok: false,
+          message: "Sessão inválida",
+        });
+      }
 
       // Guardar info do token na request
       req.auth = decoded;

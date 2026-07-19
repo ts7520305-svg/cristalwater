@@ -3,202 +3,642 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#06111f">
-  <title>Cristal Water LDA · Centro de Operações</title>
+  <meta name="theme-color" content="#0f1723">
+  <title>Cristal Water · Centro de Operações V2</title>
   <script src="/cw-auth.js"></script>
-  <link rel="stylesheet" href="/cw-polish.css">
+  <link rel="stylesheet" href="/ui/foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/cw-premium-admin-phase1.css">
+  <link rel="stylesheet" href="/cw-ui-kit.css">
   <style>
-    :root{
-      --bg:#06111f;--bg2:#0b1f33;--panel:#0d1d31;--panel2:#10243c;--panel3:#0a1b2e;
-      --line:#24415f;--line2:rgba(53,217,255,.20);--txt:#e9f5ff;--muted:#8fb1cc;
-      --brand:#35d1ff;--ok:#40e6a0;--warn:#ffd166;--bad:#ff6b6b;--input:#091829;
-      --shadow:0 20px 60px rgba(0,0,0,.28);--radius:22px;
+    .admin-shell .cw-v2-main {
+      background: transparent;
     }
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{margin:0;background:radial-gradient(circle at top left,rgba(53,209,255,.16),transparent 30%),linear-gradient(120deg,var(--bg),var(--bg2) 55%,var(--bg));color:var(--txt);font-family:Inter,Segoe UI,Arial,sans-serif;min-height:100vh}
-    a{color:inherit}.page{width:min(1500px,100%);margin:0 auto;padding:22px}.topbar{position:sticky;top:0;z-index:10;margin:-22px -22px 18px;padding:16px 22px;background:rgba(6,17,31,.88);border-bottom:1px solid var(--line2);backdrop-filter:blur(18px);display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{display:flex;gap:14px;align-items:center}.brand-logo{width:58px;height:58px;border-radius:14px;background:#fff;object-fit:cover;border:1px solid rgba(125,211,252,.35);box-shadow:0 0 35px rgba(53,209,255,.22)}.brand h1{font-size:24px;line-height:1.1;margin:0}.brand p{margin:3px 0 0;color:var(--muted);font-size:13px}.top-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.btn,button{border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:11px 14px;background:#163354;color:var(--txt);font-weight:850;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px}.btn:hover,button:hover{filter:brightness(1.12)}.btn.primary,button.primary{background:linear-gradient(135deg,#0584c7,#35d1ff);color:#03121c;border-color:rgba(53,209,255,.55)}.btn.ok{background:linear-gradient(135deg,#0c9f69,#40e6a0);color:#02150d}.btn.ghost{background:rgba(255,255,255,.05)}.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;align-items:stretch;margin-bottom:16px}.panel,.card{background:rgba(13,29,49,.92);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}.hero-title{font-size:30px;margin:0 0 8px}.hero-text{color:var(--muted);margin:0;line-height:1.55}.status-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}.status-mini{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:12px}.status-mini strong{display:block;font-size:18px}.status-mini span{display:block;margin-top:2px;color:var(--muted);font-size:12px}.section-title{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:20px 0 10px}.section-title h2{margin:0;font-size:20px}.section-title span{color:var(--muted);font-size:13px}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.metric-card{position:relative;overflow:hidden}.metric-card::after{content:"";position:absolute;right:-22px;top:-22px;width:80px;height:80px;border-radius:999px;background:rgba(53,209,255,.08)}.metric-top{display:flex;justify-content:space-between;align-items:center;gap:10px}.metric-icon{width:38px;height:38px;border-radius:14px;display:grid;place-items:center;background:rgba(53,209,255,.10);border:1px solid rgba(53,209,255,.25);font-size:19px}.metric-value{font-size:34px;font-weight:950;line-height:1;margin:12px 0 4px}.metric-label{color:var(--muted);font-size:13px}.metric-hint{font-size:12px;color:#bfe4ff;margin-top:9px}.warn-card{border-color:rgba(255,209,102,.34)}.bad-card{border-color:rgba(255,107,107,.34)}.ok-card{border-color:rgba(64,230,160,.34)}.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}.quick-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.quick-card{display:block;background:rgba(10,27,46,.92);border:1px solid var(--line);border-radius:18px;padding:15px;color:var(--txt);text-decoration:none;transition:.15s transform,.15s border-color}.quick-card:hover{transform:translateY(-2px);border-color:rgba(53,209,255,.55)}.quick-card strong{display:block;font-size:16px}.quick-card span{display:block;margin-top:5px;color:var(--muted);font-size:12px;line-height:1.35}.list{display:grid;gap:10px}.item{background:var(--panel3);border:1px solid var(--line);border-radius:16px;padding:14px;color:var(--txt);display:flex;justify-content:space-between;gap:12px;align-items:center}.item b{display:block}.muted{color:var(--muted)}.pill{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:99px;padding:5px 9px;color:#bfe4ff;background:#0a1b2e;font-size:12px;white-space:nowrap}.empty{border:1px dashed rgba(143,177,204,.35);border-radius:18px;padding:18px;color:var(--muted);background:rgba(255,255,255,.025)}.ops-feed{min-height:120px}.footer-state{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.small{font-size:12px;color:var(--muted)}
-    @media(max-width:1100px){.hero,.grid-2{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.status-strip{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:720px){.page{padding:14px}.topbar{margin:-14px -14px 14px;padding:12px 14px;align-items:flex-start}.brand h1{font-size:20px}.brand p{font-size:12px}.brand-logo{width:46px;height:46px}.top-actions{width:100%}.top-actions .btn,.top-actions button{flex:1;min-width:130px}.hero-title{font-size:24px}.panel,.card{padding:14px;border-radius:18px}.metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.metric-value{font-size:28px}.quick-grid{grid-template-columns:1fr 1fr}.item{align-items:flex-start;flex-direction:column}.status-strip{grid-template-columns:1fr 1fr}}
-    @media(max-width:440px){.metrics,.quick-grid,.status-strip{grid-template-columns:1fr}.top-actions .btn,.top-actions button{width:100%}}
+
+    .cw-admin-head {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .cw-admin-head h1 {
+      margin: 0;
+      font-size: 34px;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+    }
+
+    .cw-admin-head p {
+      margin: 0;
+      color: var(--cw-muted);
+    }
+
+    .cw-status-strip {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin: 12px 0 16px;
+    }
+
+    .cw-status-strip .item {
+      background: var(--cw-surface);
+      border: 1px solid var(--cw-border);
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: var(--cw-shadow);
+    }
+
+    .cw-status-strip strong {
+      display: block;
+      font-size: 22px;
+      line-height: 1.1;
+    }
+
+    .cw-status-strip span {
+      color: var(--cw-muted);
+      font-size: 12px;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .cw-priority-layout {
+      display: grid;
+      gap: 14px;
+      margin-top: 8px;
+    }
+
+    .cw-priority-block {
+      border: 1px solid var(--cw-border);
+      border-radius: 14px;
+      background: #fff;
+      box-shadow: var(--cw-shadow);
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .cw-priority-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .cw-priority-head h2 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .metric-card {
+      min-height: 150px;
+      background: #fff;
+      border: 1px solid var(--cw-border);
+      border-radius: 14px;
+      box-shadow: var(--cw-shadow);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      color: var(--cw-text);
+    }
+
+    .metric-card .metric-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .metric-icon {
+      font-size: 20px;
+    }
+
+    .metric-value {
+      font-size: 38px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .metric-label {
+      color: var(--cw-muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .metric-card.bad-card {
+      border-color: #f2b9be;
+      background: #fff6f7;
+    }
+
+    .metric-card.warn-card {
+      border-color: #f0d2a5;
+      background: #fffaf2;
+    }
+
+    .metric-card.ok-card {
+      border-color: #abd8bf;
+      background: #f3fbf6;
+    }
+
+    .cw-block-title {
+      margin: 0 0 10px;
+      font-size: 20px;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .item {
+      border: 1px solid var(--cw-border);
+      border-radius: 12px;
+      background: var(--cw-surface-2);
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .small,
+    .muted {
+      color: var(--cw-muted);
+      font-size: 13px;
+    }
+
+    .empty {
+      border: 1px dashed var(--cw-border);
+      border-radius: 12px;
+      padding: 14px;
+      color: var(--cw-muted);
+      background: var(--cw-surface-2);
+    }
+
+    .pill {
+      display: inline-flex;
+      min-height: 30px;
+      align-items: center;
+      border-radius: 999px;
+      border: 1px solid var(--cw-border);
+      padding: 4px 9px;
+      background: #fff;
+      color: #344257;
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .visit-item {
+      align-items: flex-start;
+    }
+
+    .visit-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .cw-map-panel {
+      min-height: 300px;
+      overflow: hidden;
+      padding: 0;
+    }
+
+    .cw-map-panel iframe {
+      width: 100%;
+      height: 260px;
+      border: 0;
+      display: block;
+    }
+
+    .cw-map-caption {
+      padding: 14px;
+      border-top: 1px solid var(--cw-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .visit-modal[hidden] {
+      display: none;
+    }
+
+    .visit-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      background: rgba(14, 20, 31, 0.46);
+      display: grid;
+      place-items: center;
+      padding: 12px;
+    }
+
+    .visit-modal-panel {
+      width: min(760px, 100%);
+      max-height: 88vh;
+      overflow: auto;
+      background: #fff;
+      border: 1px solid var(--cw-border);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .visit-modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .visit-edit-form {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .visit-edit-form label {
+      display: grid;
+      gap: 6px;
+      color: #334153;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .visit-edit-form input,
+    .visit-edit-form select,
+    .visit-edit-form textarea {
+      min-height: 44px;
+      border: 1px solid var(--cw-border);
+      border-radius: 10px;
+      padding: 10px;
+      background: #fff;
+    }
+
+    .visit-edit-form .wide,
+    .visit-edit-status,
+    .visit-modal-actions {
+      grid-column: 1 / -1;
+    }
+
+    .visit-edit-status {
+      min-height: 22px;
+      color: var(--cw-muted);
+      font-size: 13px;
+    }
+
+    .visit-edit-status.ok {
+      color: var(--cw-success);
+    }
+
+    .visit-edit-status.error {
+      color: var(--cw-danger);
+    }
+
+    .visit-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .cw-hidden-hooks {
+      display: none;
+    }
+
+    @media (max-width: 1100px) {
+      .metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .cw-status-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 740px) {
+      .cw-admin-head h1 {
+        font-size: 26px;
+      }
+
+      .metrics,
+      .cw-status-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .visit-edit-form {
+        grid-template-columns: 1fr;
+      }
+
+      .visit-actions {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 1199px) {
+      .admin-shell .cw-v2-sidebar {
+        display: none;
+      }
+    }
   </style>
-  <style>
-    .metrics .metric-card{
-      display:block;
-      min-height:142px;
-      color:var(--txt);
-      text-decoration:none;
-      cursor:pointer;
-      transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease;
-    }
-    .metrics .metric-card:hover,
-    .metrics .metric-card:focus-visible{
-      transform:translateY(-2px);
-      border-color:rgba(53,209,255,.62);
-      box-shadow:0 22px 68px rgba(0,0,0,.34),0 0 0 3px rgba(53,209,255,.12);
-      outline:none;
-    }
-    .visit-item{align-items:flex-start}
-    .visit-actions{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
-    .visit-actions .btn{min-height:34px;padding:8px 10px;font-size:12px}
-    .visit-modal[hidden]{display:none}
-    .visit-modal{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:18px;background:rgba(2,8,16,.72);backdrop-filter:blur(10px)}
-    .visit-modal-panel{width:min(760px,100%);max-height:min(86vh,820px);overflow:auto;background:linear-gradient(180deg,#10243c,#091829);border:1px solid rgba(53,209,255,.30);border-radius:22px;box-shadow:0 28px 90px rgba(0,0,0,.48);padding:18px}
-    .visit-modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}
-    .visit-modal-head h2{margin:0;font-size:22px}
-    .visit-modal-head p{margin:4px 0 0}
-    .visit-edit-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-    .visit-edit-form label{display:grid;gap:6px;color:#bfe4ff;font-size:13px;font-weight:850}
-    .visit-edit-form input,.visit-edit-form select,.visit-edit-form textarea{width:100%;border:1px solid rgba(143,177,204,.25);border-radius:13px;background:#06111f;color:var(--txt);padding:11px;font:inherit}
-    .visit-edit-form .wide,.visit-edit-status,.visit-modal-actions{grid-column:1/-1}
-    .visit-edit-status{min-height:20px;color:var(--muted);font-size:13px}
-    .visit-edit-status.ok{color:#bbf7d0}
-    .visit-edit-status.error{color:#fecaca}
-    .visit-modal-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
-    @media(max-width:720px){.visit-actions{justify-content:flex-start}.visit-edit-form{grid-template-columns:1fr}.visit-modal-head,.visit-modal-actions{flex-direction:column}.visit-modal-actions .btn,.visit-modal-actions button{width:100%}}
-    .morning-panel{border-color:rgba(53,209,255,.30);background:linear-gradient(135deg,rgba(13,29,49,.96),rgba(9,24,41,.96))}
-    .morning-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:14px}
-    .morning-head h2{margin:0;font-size:22px}
-    .morning-head p{margin:5px 0 0;color:var(--muted);line-height:1.45}
-    .morning-status{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
-    .morning-badge{border-radius:999px;padding:7px 11px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);font-weight:900;font-size:12px}
-    .morning-badge.ok{color:#bbf7d0;border-color:rgba(64,230,160,.38);background:rgba(64,230,160,.10)}
-    .morning-badge.warn{color:#fde68a;border-color:rgba(255,209,102,.44);background:rgba(255,209,102,.11)}
-    .morning-badge.bad{color:#fecaca;border-color:rgba(255,107,107,.45);background:rgba(255,107,107,.12)}
-    .morning-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
-    .morning-card{display:grid;gap:10px;align-content:start;background:#0a1b2e;border:1px solid var(--line);border-radius:18px;padding:14px;color:var(--txt);text-decoration:none;min-height:172px;transition:transform .15s ease,border-color .15s ease}
-    .morning-card:hover{border-color:rgba(53,209,255,.55);transform:translateY(-1px)}
-    .morning-card.ok{border-color:rgba(64,230,160,.34)}
-    .morning-card.warn{border-color:rgba(255,209,102,.44);background:linear-gradient(135deg,#10233b,#221d0d)}
-    .morning-card.bad{border-color:rgba(255,107,107,.48);background:linear-gradient(135deg,#10233b,#2b1118)}
-    .morning-card-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-    .morning-card h3{margin:0;font-size:16px}
-    .morning-count{font-size:26px;font-weight:950;line-height:1}
-    .morning-message{color:#d7edff;line-height:1.35;font-size:13px}
-    .morning-details{display:grid;gap:5px;color:var(--muted);font-size:12px}
-    .morning-details span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .morning-actions{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:auto}
-    .morning-link{color:#a7f3d0;font-weight:900;font-size:12px}
-    .morning-empty{border:1px dashed rgba(143,177,204,.35);border-radius:18px;padding:18px;color:var(--muted);background:rgba(255,255,255,.025)}
-    @media(max-width:720px){.morning-head{display:block}.morning-status{justify-content:flex-start;margin-top:12px}}
-  </style>
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
 </head>
-<body>
-  <main class="page">
-    <header class="topbar">
-      <div class="brand">
-        <img class="brand-logo" src="/logo-cristalwater.png" alt="Cristal Water">
+<body class="admin-shell">
+  <div class="cw-v2-app">
+    <aside class="cw-v2-sidebar" aria-label="Navegação principal">
+      <div class="cw-v2-brand">
+        <img src="/logo-cristalwater.png" alt="Cristal Water">
         <div>
-          <h1>Centro de Operações</h1>
-          <p>Cristal Water Enterprise · Admin</p>
+          <b>Cristal Water</b>
+          <small>Administrador</small>
         </div>
       </div>
-      <nav class="top-actions" aria-label="Ações principais">
-        <button id="refreshBtn" class="primary" type="button">Atualizar</button>
-        <a class="btn ghost" href="/admin-menu">Menu</a>
-        <a class="btn ghost" href="/admin-today">Hoje</a>
+      <nav class="cw-v2-nav-groups" aria-label="Módulos completos">
+        <details class="cw-v2-nav-group" open>
+          <summary>Operação diária</summary>
+          <div class="cw-v2-nav-links cw-v2-nav">
+            <a class="is-active" href="/admin-master-control" data-shell-search="Centro de comando">Centro de comando</a>
+            <a href="/admin-today" data-shell-search="Hoje operacao">Hoje</a>
+            <a href="/operational-dashboard" data-shell-search="Operacao">Operacao</a>
+            <a href="/admin-visits" data-shell-search="Visitas">Visitas</a>
+            <a href="/admin-rounds" data-shell-search="Rotas Rondas">Rotas / Rondas</a>
+            <a href="/admin-alerts" data-shell-search="Alertas">Alertas</a>
+            <a href="/admin-live-map" data-shell-search="Mapas GPS">Mapas / GPS</a>
+          </div>
+        </details>
+        <details class="cw-v2-nav-group" open>
+          <summary>Clientes e Equipas</summary>
+          <div class="cw-v2-nav-links cw-v2-nav">
+            <a href="/admin-technicians" data-shell-search="Tecnicos">Tecnicos</a>
+            <a href="/admin-clients" data-shell-search="Clientes">Clientes</a>
+            <a href="/admin-crm" data-shell-search="CRM">CRM</a>
+            <a href="/admin-pools" data-shell-search="Piscinas">Piscinas</a>
+            <a href="/admin-keys" data-shell-search="Chaves">Chaves</a>
+          </div>
+        </details>
+        <details class="cw-v2-nav-group">
+          <summary>Intervenções e Campo</summary>
+          <div class="cw-v2-nav-links cw-v2-nav">
+            <a href="/admin-alerts?scope=repairs" data-shell-search="Reparacoes">Reparacoes</a>
+            <a href="/admin-onboarding?flow=installation" data-shell-search="Instalacoes">Instalacoes</a>
+            <a href="/admin-onboarding?flow=construction" data-shell-search="Construcao">Construcao</a>
+            <a href="/admin-alerts?scope=interventions" data-shell-search="Intervencoes">Intervencoes</a>
+            <a href="/admin-service-log" data-shell-search="Historico de servico">Historico de servico</a>
+            <a href="/technician-guide" data-shell-search="Guias de trabalho">Guias de trabalho</a>
+            <a href="/technician-guide?tab=transport" data-shell-search="Guias de transporte">Guias de transporte</a>
+          </div>
+        </details>
+        <details class="cw-v2-nav-group">
+          <summary>Ativos e Armazém</summary>
+          <div class="cw-v2-nav-links cw-v2-nav">
+            <a href="/admin-vehicles" data-shell-search="Viaturas">Viaturas</a>
+            <a href="/admin-pool-technical" data-shell-search="Equipamentos">Equipamentos</a>
+            <a href="/admin-inventory" data-shell-search="Stock inventario">Stock / Inventario</a>
+            <a href="/admin-inventory?tab=products" data-shell-search="Produtos">Produtos</a>
+            <a href="/admin-inventory?tab=warehouses" data-shell-search="Armazens">Armazens</a>
+          </div>
+        </details>
+        <details class="cw-v2-nav-group">
+          <summary>Financeiro e Relatórios</summary>
+          <div class="cw-v2-nav-links cw-v2-nav">
+            <a href="/billing" data-shell-search="Financeiro">Financeiro</a>
+            <a href="/invoices" data-shell-search="Faturas">Faturas</a>
+            <a href="/admin-payments" data-shell-search="Pagamentos">Pagamentos</a>
+            <a href="/billing-extras" data-shell-search="Despesas">Despesas</a>
+            <a href="/admin-collection" data-shell-search="Cobranca">Cobranca</a>
+            <a href="/admin-reports" data-shell-search="Relatorios">Relatorios</a>
+            <a href="/report-center" data-shell-search="Centro de relatorios">Centro de relatorios</a>
+          </div>
+        </details>
+        <details class="cw-v2-nav-group">
+          <summary>Sistema</summary>
+          <div class="cw-v2-nav-links cw-v2-nav">
+            <a href="/admin-notifications" data-shell-search="Notificacoes">Notificacoes</a>
+            <a href="/communications" data-shell-search="Comunicacoes">Comunicacoes</a>
+            <a href="/admin-operational-settings" data-shell-search="Definicoes">Definicoes</a>
+            <a href="/admin-security" data-shell-search="Permissoes">Permissoes</a>
+            <a href="/admin-test-center" data-shell-search="Auditoria ferramentas">Auditoria / Ferramentas</a>
+            <a href="/crystal-os-v2-route-index" data-shell-search="Indice de rotas todos os modulos">Indice de rotas (todos os modulos)</a>
+          </div>
+        </details>
       </nav>
-    </header>
+      <div class="small">Resumo operacional em tempo real.</div>
+    </aside>
 
-    <section class="hero">
-      <div class="panel">
-        <h2 class="hero-title">Operação diária</h2>
-        <p class="hero-text">Resumo rápido para gerir a operação: clientes, piscinas, rondas, visitas, reparações, stock, faturação e pagamentos.</p>
-        <div class="status-strip" id="statusStrip">
-          <div class="status-mini"><strong>—</strong><span>Estado</span></div>
-          <div class="status-mini"><strong>—</strong><span>Hoje</span></div>
-          <div class="status-mini"><strong>—</strong><span>Risco</span></div>
-          <div class="status-mini"><strong>—</strong><span>Atualização</span></div>
+    <main class="cw-v2-main">
+      <header class="cw-v2-topbar">
+        <div class="cw-v2-search">
+          <input data-cw-search-input type="search" placeholder="Pesquisa universal: alertas, visitas, stock, financeiro">
+          <span class="icon">⌕</span>
+          <div class="cw-v2-search-results" data-cw-search-results></div>
         </div>
-      </div>
-      <div class="panel">
-        <div class="section-title" style="margin-top:0"><h2>Entradas principais</h2><span>admin, cliente e campo</span></div>
-        <div class="quick-grid compact">
-          <a class="quick-card" href="/admin-onboarding.html"><strong>Entrada guiada</strong><span>Criar cliente, piscina, ficha tecnica, ronda e visita</span></a>
-          <a class="quick-card" href="/admin-clients"><strong>Admin</strong><span>Clientes, contratos, equipas e faturação</span></a>
-          <a class="quick-card" href="/client-portal"><strong>Cliente</strong><span>Portal de visitas, mensagens e pagamentos</span></a>
-          <a class="quick-card" href="/technician-field-mode"><strong>Técnico</strong><span>Modo campo com poucos botões</span></a>
-          <a class="quick-card" href="/admin-today"><strong>Hoje</strong><span>Agenda operacional do dia</span></a>
+        <div class="cw-v2-top-actions">
+          <button class="cw-v2-btn cw-mobile-back" type="button" data-cw-action="back">Voltar</button>
+          <span class="cw-v2-pill cw-v2-offline" data-offline-indicator>Online</span>
+          <button id="refreshBtn" class="cw-v2-btn primary" type="button">Atualizar</button>
+          <button class="cw-v2-btn" type="button" data-cw-open-drawer>Menu</button>
         </div>
-      </div>
-    </section>
+      </header>
 
-    <section class="card morning-panel" id="morningCheckPanel" style="margin-top:16px">
-      <div class="morning-head">
-        <div>
-          <h2>Arranque do dia</h2>
-          <p id="morningCheckMessage">A verificar guias, quimicos, agenda, chaves e lembretes.</p>
+      <section class="cw-context-row" aria-label="Contexto de navegacao">
+        <button class="cw-v2-btn" type="button" data-cw-action="back">Voltar</button>
+        <span class="cw-context-path">Centro de comando</span>
+      </section>
+
+      <section class="cw-admin-head">
+        <h1>Centro de comando</h1>
+        <p id="metricsHint">Estado da operação com foco em decisão rápida.</p>
+        <div class="cw-head-meta">
+          <span id="syncState" class="pill">Sincronizado</span>
+          <span id="lastUpdate" class="small">Atualizado agora</span>
+          <a class="cw-v2-btn primary" href="/admin-alerts">Ver prioridades</a>
         </div>
-        <div class="morning-status" id="morningCheckStatus">
-          <span class="morning-badge">A carregar</span>
+      </section>
+
+      <section class="cw-status-strip" id="statusStrip" aria-label="Estado rápido">
+        <div class="item"><strong>--</strong><span>Estado geral</span></div>
+        <div class="item"><strong id="todayStatusTop">--</strong><span>Visitas ativas</span></div>
+        <div class="item"><strong id="criticalAlertsTop">--</strong><span>Alertas críticos</span></div>
+        <div class="item"><strong>--</strong><span>Atualização</span></div>
+      </section>
+
+      <section class="cw-priority-layout" aria-label="Painel operacional por prioridade">
+        <article class="cw-priority-block">
+          <div class="cw-priority-head">
+            <h2>Resumo executivo</h2>
+            <span class="pill">4 KPIs principais</span>
+          </div>
+          <div class="metrics" id="metrics"></div>
+        </article>
+
+        <article class="cw-priority-block">
+          <div class="cw-priority-head">
+            <h2>Prioridades</h2>
+            <span class="pill">decisões necessárias</span>
+          </div>
+          <div id="prioritySummary" class="list"><div class="empty">A agregar alertas e decisões...</div></div>
+        </article>
+
+        <article class="cw-priority-block">
+          <div class="cw-priority-head">
+            <h2>Operação do dia</h2>
+            <span class="pill">atrasadas, em execução e próximas</span>
+          </div>
+          <div id="operationDigest" class="cw-status-strip"></div>
+          <div id="todayList" class="list"><div class="empty">A carregar visitas...</div></div>
+        </article>
+      </section>
+
+      <details class="cw-secondary-panel" style="margin-top:14px">
+        <summary>Informação secundária</summary>
+        <section class="cw-v2-grid cols-2" style="margin-top:10px">
+          <article class="cw-v2-card cw-map-panel">
+          <iframe title="Mapa operacional" src="/admin-live-map"></iframe>
+          <div class="cw-map-caption">
+            <div>
+              <h2 class="cw-block-title" style="margin:0">Mapa de operações</h2>
+              <div class="small">Planeamento e execução do dia.</div>
+            </div>
+            <a class="cw-v2-btn" href="/admin-live-map" data-shell-search="Mapa de operações do dia">Abrir mapa</a>
+          </div>
+          </article>
+        </section>
+      </details>
+
+      <section class="cw-hidden-hooks" aria-hidden="true">
+        <div id="morningCheckPanel"></div>
+        <div id="morningCheckMessage"></div>
+        <div id="morningCheckStatus"></div>
+        <div id="morningCheckGrid"></div>
+        <div id="pendingPoolsList"></div>
+        <div id="statusBox"></div>
+        <div id="visitEditModal" class="visit-modal" hidden>
+          <div class="visit-modal-panel">
+            <div class="visit-modal-head">
+              <div>
+                <h2 id="visitEditTitle">Editar visita</h2>
+                <p id="visitEditSubtitle"></p>
+              </div>
+              <button id="visitEditClose" type="button" class="cw-v2-btn">Fechar</button>
+            </div>
+            <form id="visitEditForm" class="visit-edit-form">
+              <input id="visitEditId" type="hidden">
+              <label>Data e hora<input id="visitEditPlannedDate" type="datetime-local"></label>
+              <label>Técnico<select id="visitEditTechnician"></select></label>
+              <label>Estado<select id="visitEditStatus"></select></label>
+              <label>Motivo<input id="visitEditReason"></label>
+              <label class="wide">Notas<textarea id="visitEditNotes" rows="2"></textarea></label>
+              <label class="wide">Notas internas<textarea id="visitEditInternalNotes" rows="2"></textarea></label>
+              <div id="visitEditStatusBox" class="visit-edit-status"></div>
+              <div class="visit-modal-actions">
+                <a id="visitEditOpenModule" class="cw-v2-btn" href="/admin-visits">Abrir módulo visitas</a>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
-      <div class="morning-grid" id="morningCheckGrid">
-        <div class="morning-empty">A carregar verificacao operacional...</div>
-      </div>
-    </section>
+      </section>
+    </main>
+  </div>
 
-    <section class="card" style="margin-top:16px">
-      <div class="section-title" style="margin-top:0"><h2>Fluxo principal</h2><span>núcleo estável</span></div>
-      <div class="quick-grid">
-        <a class="quick-card" href="/admin-onboarding.html"><strong>0. Entrada guiada</strong><span>Fluxo completo sem saltar dados obrigatorios</span></a>
-        <a class="quick-card" href="/admin-clients"><strong>1. Cliente</strong><span>Criar ficha, contrato e contacto</span></a>
-        <a class="quick-card" href="/admin-pools"><strong>2. Piscina</strong><span>Ficha técnica e equipamento</span></a>
-        <a class="quick-card" href="/admin-rounds"><strong>3. Ronda</strong><span>Planeamento por zona e técnico</span></a>
-        <a class="quick-card" href="/technician-field-mode"><strong>4. Visita</strong><span>Execução simples no telemóvel</span></a>
-        <a class="quick-card" href="/admin-alerts"><strong>5. Reparação</strong><span>Problemas, orçamentos e tarefas</span></a>
-        <a class="quick-card" href="/billing"><strong>6. Pagamento</strong><span>Faturas, mensalidades e cobranças</span></a>
-      </div>
-    </section>
+  <nav class="cw-v2-mobile-nav" aria-label="Navegação móvel administrador">
+    <a class="is-active" href="/admin-master-control">Centro</a>
+    <a href="/admin-today">Hoje</a>
+    <a href="/admin-visits">Visitas</a>
+    <a href="/admin-alerts">Alertas</a>
+    <button type="button" data-cw-open-drawer>Menu</button>
+  </nav>
 
-    <div class="section-title"><h2>Indicadores principais</h2><span id="metricsHint">a carregar...</span></div>
-    <section class="metrics" id="metrics"></section>
-
-    <section class="grid-2" style="margin-top:16px">
-      <div class="card">
-        <div class="section-title" style="margin-top:0"><h2>Próximas visitas</h2><span>planeadas / em execução</span></div>
-        <div id="todayList" class="list"><div class="empty">A carregar visitas...</div></div>
+  <aside class="cw-v2-drawer" data-cw-drawer aria-hidden="true">
+    <div class="cw-v2-drawer-backdrop" data-cw-drawer-backdrop></div>
+    <div class="cw-v2-drawer-panel" role="dialog" aria-modal="true" aria-label="Menu completo administrador">
+      <div class="cw-v2-drawer-head">
+        <div class="cw-v2-drawer-title">Menu completo</div>
+        <button class="cw-v2-drawer-close" type="button" data-cw-close-drawer aria-label="Fechar menu">X</button>
       </div>
-      <div class="card">
-        <div class="section-title" style="margin-top:0"><h2>Piscinas sem ronda</h2><span>precisam planeamento</span></div>
-        <div id="pendingPoolsList" class="list"><div class="empty">A carregar piscinas...</div></div>
-      </div>
-    </section>
-
-    <section class="card" style="margin-top:16px">
-      <div class="section-title" style="margin-top:0"><h2>Módulos principais</h2><span>navegação operacional</span></div>
-      <div class="quick-grid">
-        <a class="quick-card" href="/admin-onboarding.html"><strong>Entrada guiada</strong><span>Novo cliente com piscina, ficha tecnica, ronda e visita</span></a>
-        <a class="quick-card" href="/admin-clients"><strong>Clientes</strong><span>CRM, contrato, contactos e faturação</span></a>
-        <a class="quick-card" href="/admin-pools"><strong>Piscinas</strong><span>Ficha técnica, equipamentos e histórico</span></a>
-        <a class="quick-card" href="/admin-technicians"><strong>Técnicos</strong><span>Equipa, PIN, estado e permissões</span></a>
-        <a class="quick-card" href="/admin-rounds"><strong>Rondas</strong><span>Planeamento, zonas e cobertura</span></a>
-        <a class="quick-card" href="/admin-visits"><strong>Visitas</strong><span>Serviços, execução e histórico</span></a>
-        <a class="quick-card" href="/admin-alerts"><strong>Alertas</strong><span>Problemas técnicos e prioridades</span></a>
-        <a class="quick-card" href="/admin-vehicles"><strong>Viaturas</strong><span>Guias AT, obra, stock e consumos</span></a>
-        <a class="quick-card" href="/admin-inventory"><strong>Stock</strong><span>Produtos, compras e movimentos</span></a>
-        <a class="quick-card" href="/billing"><strong>Financeiro</strong><span>Mensalidades, faturas e pagamentos</span></a>
-        <a class="quick-card" href="/chat"><strong>Chat</strong><span>Comunicação interna e clientes</span></a>
-        <a class="quick-card" href="/admin-live-map"><strong>Mapa</strong><span>GPS, localização e operação em campo</span></a>
-        <a class="quick-card" href="/admin-ai"><strong>Assistente IA</strong><span>Análise, prioridades e recomendações</span></a>
-      </div>
-    </section>
-
-    <section class="card" style="margin-top:16px">
-      <div class="footer-state">
-        <div>
-          <h2 style="margin:0 0 6px">Estado do sistema</h2>
-          <div id="statusBox" class="small">A carregar...</div>
-        </div>
-        <a class="btn ghost" href="/admin-operational-settings">Configurações</a>
-      </div>
-    </section>
-  </main>
+      <nav class="cw-v2-nav-groups" aria-label="Todos os módulos do administrador">
+        <details class="cw-v2-nav-group" open>
+          <summary>Operação diária</summary>
+          <div class="cw-v2-nav-links cw-v2-nav">
+            <a href="/admin-master-control" data-shell-search="Centro de comando">Centro de comando</a>
+            <a href="/admin-today" data-shell-search="Hoje operacao">Hoje</a>
+            <a href="/operational-dashboard" data-shell-search="Operacao">Operacao</a>
+            <a href="/admin-visits" data-shell-search="Visitas">Visitas</a>
+            <a href="/admin-rounds" data-shell-search="Rotas Rondas">Rotas / Rondas</a>
+            <a href="/admin-alerts" data-shell-search="Alertas">Alertas</a>
+            <a href="/admin-live-map" data-shell-search="Mapas GPS">Mapas / GPS</a>
+          </div>
+        </details>
+        <details class="cw-v2-nav-group" open>
+          <summary>Clientes e Equipas</summary>
+          <div class="cw-v2-nav-links cw-v2-nav">
+            <a href="/admin-technicians" data-shell-search="Tecnicos">Tecnicos</a>
+            <a href="/admin-clients" data-shell-search="Clientes">Clientes</a>
+            <a href="/admin-crm" data-shell-search="CRM">CRM</a>
+            <a href="/admin-pools" data-shell-search="Piscinas">Piscinas</a>
+            <a href="/admin-keys" data-shell-search="Chaves">Chaves</a>
+          </div>
+        </details>
+        <details class="cw-v2-nav-group">
+          <summary>Intervenções e Campo</summary>
+          <div class="cw-v2-nav-links cw-v2-nav">
+            <a href="/admin-alerts?scope=repairs" data-shell-search="Reparacoes">Reparacoes</a>
+            <a href="/admin-onboarding?flow=installation" data-shell-search="Instalacoes">Instalacoes</a>
+            <a href="/admin-onboarding?flow=construction" data-shell-search="Construcao">Construcao</a>
+            <a href="/admin-alerts?scope=interventions" data-shell-search="Intervencoes">Intervencoes</a>
+            <a href="/admin-service-log" data-shell-search="Historico de servico">Historico de servico</a>
+            <a href="/technician-guide" data-shell-search="Guias de trabalho">Guias de trabalho</a>
+            <a href="/technician-guide?tab=transport" data-shell-search="Guias de transporte">Guias de transporte</a>
+          </div>
+        </details>
+        <details class="cw-v2-nav-group">
+          <summary>Ativos e Armazém</summary>
+          <div class="cw-v2-nav-links cw-v2-nav">
+            <a href="/admin-vehicles" data-shell-search="Viaturas">Viaturas</a>
+            <a href="/admin-pool-technical" data-shell-search="Equipamentos">Equipamentos</a>
+            <a href="/admin-inventory" data-shell-search="Stock inventario">Stock / Inventario</a>
+            <a href="/admin-inventory?tab=products" data-shell-search="Produtos">Produtos</a>
+            <a href="/admin-inventory?tab=warehouses" data-shell-search="Armazens">Armazens</a>
+          </div>
+        </details>
+        <details class="cw-v2-nav-group">
+          <summary>Financeiro e Relatórios</summary>
+          <div class="cw-v2-nav-links cw-v2-nav">
+            <a href="/billing" data-shell-search="Financeiro">Financeiro</a>
+            <a href="/invoices" data-shell-search="Faturas">Faturas</a>
+            <a href="/admin-payments" data-shell-search="Pagamentos">Pagamentos</a>
+            <a href="/billing-extras" data-shell-search="Despesas">Despesas</a>
+            <a href="/admin-collection" data-shell-search="Cobranca">Cobranca</a>
+            <a href="/admin-reports" data-shell-search="Relatorios">Relatorios</a>
+            <a href="/report-center" data-shell-search="Centro de relatorios">Centro de relatorios</a>
+          </div>
+        </details>
+        <details class="cw-v2-nav-group">
+          <summary>Sistema</summary>
+          <div class="cw-v2-nav-links cw-v2-nav">
+            <a href="/admin-notifications" data-shell-search="Notificacoes">Notificacoes</a>
+            <a href="/communications" data-shell-search="Comunicacoes">Comunicacoes</a>
+            <a href="/admin-operational-settings" data-shell-search="Definicoes">Definicoes</a>
+            <a href="/admin-security" data-shell-search="Permissoes">Permissoes</a>
+            <a href="/admin-test-center" data-shell-search="Auditoria ferramentas">Auditoria / Ferramentas</a>
+            <a href="/crystal-os-v2-route-index" data-shell-search="Indice de rotas todos os modulos">Indice de rotas (todos os modulos)</a>
+          </div>
+        </details>
+      </nav>
+    </div>
+  </aside>
 
   <script src="/admin-auth-guard.js"></script>
   <script src="/admin-master-control.js"></script>
-  <script src="/cristal-help-data.js"></script>
-  <script src="/cristal-assist.js"></script>
-  <script src="/cw-flow-shell.js"></script>
+  <script src="/cw-admin-premium-controls.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

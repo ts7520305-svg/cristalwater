@@ -11,8 +11,9 @@ const {
   canonicalAdminEmail,
   isConfiguredAdminEmail,
 } = require("../utils/adminIdentity");
+const { getJwtSecret } = require("../utils/jwtSecret");
 
-const JWT_SECRET = process.env.JWT_SECRET || "cristalwater_secret";
+const JWT_SECRET = getJwtSecret();
 
 router.post("/login", async (req, res) => {
   const { email, password } = req.body || {};

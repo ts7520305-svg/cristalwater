@@ -62,7 +62,7 @@ async function sendManualReminderForClient(clientId) {
   await prisma.chatMessage.create({
     data: {
       senderId: 1,
-      receiverId: 0,
+      receiverId: null,
       chatType: "CLIENT",
       clientId: client.id,
       text,
@@ -129,7 +129,7 @@ async function processPaymentReminders() {
     await prisma.chatMessage.create({
       data: {
         senderId: 1,
-        receiverId: 0,
+        receiverId: null,
         chatType: "CLIENT",
         clientId: client.id,
         text,

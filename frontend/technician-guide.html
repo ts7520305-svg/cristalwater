@@ -2,46 +2,160 @@
 <html lang="pt">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Cristal Water - Guia Tecnico</title>
   <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#0f1723">
   <link rel="stylesheet" href="/cristal-assist.css">
-  <style>
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Arial,sans-serif;background:#07111f;color:#e8f7ff}
-    header{padding:18px;background:#0b1b31;border-bottom:1px solid rgba(53,217,255,.25)}
-    main{padding:14px}
-    .card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:22px;padding:16px;margin:12px 0}
-    .btn{border:0;border-radius:16px;padding:14px 16px;font-weight:900;background:#2563eb;color:white;width:100%;margin:7px 0;text-align:center;text-decoration:none;display:block}
-    .warn{background:#f59e0b}.danger{background:#dc2626}
-    input,select{width:100%;padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,.14);background:#020617;color:#e8f7ff;margin:6px 0}
-    .muted{color:#91a8be}.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .movement{padding:10px;border-radius:14px;background:rgba(255,255,255,.05);margin:8px 0}
-    @media(max-width:700px){.row{grid-template-columns:1fr}}
-  </style>
+  <link rel="stylesheet" href="/cw-ui-kit.css">
+  <link rel="stylesheet" href="/ui/foundation.css">
   <script src="/cw-auth.js"></script>
-  <link rel="stylesheet" href="/cw-polish.css">
-  <link rel="stylesheet" href="css/crystal-v25.css">
+  <script src="/technician-auth-guard.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Noto Sans", sans-serif;
+      color: #102620;
+      background: linear-gradient(180deg, #f7fbf9, #edf4f2);
+    }
+
+    .guide-shell {
+      width: min(960px, 100%);
+      margin: 0 auto;
+      padding: 12px 12px calc(120px + env(safe-area-inset-bottom));
+    }
+
+    .hero,
+    .card {
+      background: #fff;
+      border: 1px solid #c9d8d2;
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 10px;
+      box-shadow: 0 10px 28px rgba(16, 38, 32, 0.08);
+    }
+
+    .hero h1 {
+      margin: 4px 0;
+      font-size: clamp(26px, 5vw, 38px);
+      line-height: 1.05;
+      font-weight: 900;
+    }
+
+    .muted { color: #577067; margin: 0; }
+
+    .status-box {
+      border-radius: 12px;
+      border: 1px solid #c9d8d2;
+      background: #f4faf7;
+      padding: 10px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .status-box[data-tone="error"] {
+      border-color: #efbbc5;
+      background: #fdecef;
+      color: #6f1223;
+    }
+
+    .status-box[data-tone="warning"] {
+      border-color: #e4c289;
+      background: #fff6e7;
+      color: #5f3900;
+    }
+
+    .btn {
+      border: 1px solid #c9d8d2;
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-weight: 800;
+      background: #fff;
+      color: #102620;
+      width: 100%;
+      margin-top: 7px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 52px;
+      cursor: pointer;
+    }
+
+    .btn.primary {
+      background: #0f7d5d;
+      border-color: #0f7d5d;
+      color: #fff;
+    }
+
+    .btn.warn {
+      border-color: #deb465;
+      background: #ffd27b;
+      color: #2f1e00;
+    }
+
+    .btn.danger {
+      border-color: #b22f3d;
+      background: #b22f3d;
+      color: #fff;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid #c9d8d2;
+      background: #fff;
+      color: #102620;
+      margin-top: 6px;
+      min-height: 50px;
+      font: inherit;
+    }
+
+    .movement {
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid #c9d8d2;
+      background: #fff;
+      margin-top: 8px;
+    }
+
+    .grid { display: grid; gap: 8px; grid-template-columns: 1fr 1fr; }
+
+    @media (max-width: 700px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
-<body>
-  <header>
-    <h1>Guia de Obra</h1>
-    <div class="muted">Stock da viatura, consumos e documentos para apresentar quando necessario.</div>
-  </header>
-  <main>
+<body data-required-role="TECHNICIAN">
+  <main class="guide-shell">
+    <section class="hero">
+      <p class="muted">Operacao tecnica</p>
+      <h1>Guia de Obra</h1>
+      <p class="muted">Stock da viatura, consumos e documentos para apresentar quando necessario.</p>
+    </section>
+
+    <p id="statusBox" class="status-box" aria-live="polite">A carregar modulo de guia.</p>
+
     <section class="card">
       <h2>Iniciar dia</h2>
-      <select id="vehicle"></select>
-      <input id="techId" type="number" placeholder="ID tecnico">
+      <div class="grid">
+        <select id="vehicle"></select>
+        <input id="techId" type="number" placeholder="ID tecnico">
+      </div>
       <input id="startKm" type="number" placeholder="Km inicial">
-      <button class="btn" onclick="startDay()">Iniciar dia / abrir guia de obra</button>
+      <button class="btn primary" onclick="startDay()" type="button">Iniciar dia / abrir guia de obra</button>
       <div class="muted">Se a AT estiver indisponivel, o dia pode iniciar. Fica um alerta para a administracao associar a guia de transporte mais tarde.</div>
     </section>
 
     <section class="card">
       <h2>Stock atual</h2>
       <input id="vehicleStock" type="number" placeholder="ID viatura para ver stock">
-      <button class="btn" onclick="loadStock()">Atualizar stock</button>
+      <button class="btn" onclick="loadStock()" type="button">Atualizar stock</button>
       <div id="stock"></div>
     </section>
 
@@ -53,19 +167,21 @@
       <input id="visitId" type="number" placeholder="ID visita opcional">
       <input id="movementLocation" placeholder="Local/piscina se nao houver visita">
       <input id="movementNotes" placeholder="Notas do consumo">
-      <button class="btn warn" onclick="consume()">Consumir material</button>
+      <button class="btn warn" onclick="consume()" type="button">Consumir material</button>
     </section>
 
     <section class="card">
       <h2>Fechar guia</h2>
       <input id="closeId" type="number" placeholder="ID guia obra">
       <input id="endKm" type="number" placeholder="Km final">
-      <button class="btn danger" onclick="closeGuide()">Fechar dia</button>
+      <button class="btn danger" onclick="closeGuide()" type="button">Fechar dia</button>
     </section>
   </main>
   <script src="/technician-guide.js"></script>
   <script src="/cristal-help-data.js"></script>
   <script src="/cristal-assist.js"></script>
-  <script src="/cw-flow-shell.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

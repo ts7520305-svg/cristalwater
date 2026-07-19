@@ -7,8 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cristal Water - IA Operacional</title>
   <link rel="stylesheet" href="/cristal-assist.css">
-  <link rel="stylesheet" href="/cw-polish.css">
-  <style>
+<style>
     *{box-sizing:border-box}
     body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#050b16;color:#e8f7ff}
     header.ai-header{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 22px;background:rgba(5,12,24,.9);border-bottom:1px solid rgba(53,217,255,.26);backdrop-filter:blur(16px)}
@@ -25,8 +24,15 @@
     .note{font-size:12px;color:#91a8be;line-height:1.45}.empty{color:#91a8be;padding:8px 0}@media(max-width:980px){main{grid-template-columns:1fr}.chat-panel{min-height:68vh}.msg{max-width:96%}.composer{flex-direction:column}.composer button{width:100%}}
   </style>
   <script src="/cw-auth.js"></script>
+  <link rel="stylesheet" href="/ui/foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
 </head>
-<body>
+<body data-required-role="ADMIN">
+
+  <div style="padding:12px 16px 0">
+    <button type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
+  </div>
   <header class="ai-header">
     <div class="brand">
       <h1>Cristal AI - Operações</h1>
@@ -99,6 +105,8 @@
   <script src="/cristal-assist.js"></script>
   <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
   <script src="/cw-admin-shortcuts.js"></script>
-  <script src="/cw-flow-shell.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

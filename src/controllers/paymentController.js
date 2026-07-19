@@ -58,7 +58,7 @@ async function registerPayment(req, res) {
     await prisma.chatMessage.create({
       data: {
         senderId: 1,
-        receiverId: 0,
+        receiverId: null,
         chatType: "CLIENT",
         clientId: invoice.clientId,
         text: "Pagamento recebido. Recibo em anexo.",

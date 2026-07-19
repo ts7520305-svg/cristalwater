@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Cristal Water LDA - Registo Diario</title>
   <script src="/cw-auth.js"></script>
-  <link rel="stylesheet" href="/cw-polish.css">
-  <style>
+<link rel="stylesheet" href="/ui/foundation.css">
+<style>
     :root {
       --bg: #06111f;
       --panel: #0d1d31;
@@ -21,6 +21,7 @@
       --input: #091829;
     }
     * { box-sizing: border-box; }
+    html, body { overflow-x: hidden; }
     body {
       margin: 0;
       background: linear-gradient(120deg, #06111f, #0b1f33 55%, #06111f);
@@ -137,7 +138,7 @@
     }
   </style>
 </head>
-<body>
+<body data-required-role="ADMIN">
   <main class="page">
     <div class="page-head">
       <div>
@@ -192,6 +193,8 @@
   <script src="/admin-auth-guard.js"></script>
   <script src="/admin-service-log.js"></script>
   <script src="/cw-enterprise-sidebar.js"></script>
-  <script src="/cw-flow-shell.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

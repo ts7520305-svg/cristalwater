@@ -1,5 +1,6 @@
 try { require('dotenv').config(); } catch (_) {}
 const { prisma } = require('../src/prismaClient');
+const RepairBusiness = require('../src/business/repair/RepairBusiness');
 
 function assert(cond, msg) { if (!cond) throw new Error(msg); }
 function stamp() { return new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14); }
@@ -23,8 +24,20 @@ async function main() {
     const visit = await tx.serviceVisit.create({ data: { clientId: client.id, poolId: pool.id, roundId: round.id, technicianId: technician.id, plannedDate: new Date(), status: 'PLANNED' } });
     const done = await tx.serviceVisit.update({ where: { id: visit.id }, data: { status: 'DONE', cleaned: true, ph: 7.2, chlorine: 1.5, notes: 'QA: visita concluída com alerta de bomba', endAt: new Date() } });
     assert(done.status === 'DONE', 'Visita não concluída');
-    const repair = await tx.repair.create({ data: { poolId: pool.id, problem: 'QA Bomba com ruído', status: 'QUOTED', totalPrice: 150, priority: 'NORMAL' } });
-    assert(repair.status === 'QUOTED', 'Reparação/orçamento não criado');
+    const repairResult = await RepairBusiness.createRepairTicket({
+      poolId: pool.id,
+      problem: 'QA Bomba com ruído',
+      status: 'QUOTED',
+      totalPrice: 150,
+      priority: 'NORMAL',
+    }, 'QA-CORE-FLOW', tx, {
+      context: { pool, clientId: client.id },
+      createNotification: false,
+      emitEvent: false,
+      source: 'test-core-flow',
+    });
+    assert(repairResult.ok && repairResult.repair.status === 'QUOTED', 'Reparação/orçamento não criado');
+    const repair = repairResult.repair;
     const invoice = await tx.invoice.create({ data: { clientId: client.id, monthRef: `QA-${s}`, month: `QA-${s}`, amount: 250, total: 250, totalAmount: 250, amountOpen: 250, status: 'PENDING' } });
     await tx.invoiceLine.create({ data: { invoiceId: invoice.id, description: 'QA Mensalidade', type: 'MONTHLY', quantity: 1, unitPrice: 100, total: 100, lineTotal: 100 } });
     await tx.invoiceLine.create({ data: { invoiceId: invoice.id, description: 'QA Orçamento bomba', type: 'REPAIR', referenceId: repair.id, quantity: 1, unitPrice: 150, total: 150, lineTotal: 150 } });

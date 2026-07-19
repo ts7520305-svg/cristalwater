@@ -7,6 +7,8 @@
 <title>Dashboard Cristal Water</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<link rel="stylesheet" href="/ui/foundation.css">
+
 <style>
 * { box-sizing: border-box; }
 
@@ -161,10 +163,15 @@ body {
 </style>
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
 </head>
 
-<body>
+<body data-required-role="ADMIN">
+
+<div style="padding:12px 16px 0">
+  <button type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
+</div>
 
 <div class="header">
   <div>
@@ -282,10 +289,13 @@ body {
 
 </div>
 
+<script src="/admin-auth-guard.js"></script>
 <script src="/dashboard.js"></script>
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
-<script src="/cw-flow-shell.js"></script>
+<script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

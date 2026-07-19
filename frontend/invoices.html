@@ -4,14 +4,16 @@
   <meta charset="UTF-8" />
   <title>Cristal Water - Faturas</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/ui/foundation.css">
 
   <style>
     * { box-sizing: border-box; }
+    html, body { overflow-x: hidden; }
 
     body {
       margin: 0;
       padding: 16px;
-      font-family: Arial, sans-serif;
+      font-family: Inter, Segoe UI, Arial, sans-serif;
       background: #f4f6f8;
       color: #1f2937;
     }
@@ -235,16 +237,38 @@
       display: none;
       white-space: pre-line;
     }
+
+    .status-box.error {
+      background:#fff3f5;
+      border-color:#efc0c7;
+      color:#8b1f2a;
+    }
+
+    .status-box.ok {
+      background:#f2fbf6;
+      border-color:#b9e2ca;
+      color:#165434;
+    }
+
+    @media (max-width: 900px) {
+      .toolbar {
+        justify-content: stretch;
+      }
+
+      .field {
+        min-width: 100%;
+      }
+    }
   </style>
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
+  <script src="/admin-auth-guard.js"></script>
 </head>
-<body>
+<body data-required-role="ADMIN">
 
   <h1>Faturas</h1>
 
-  <div id="statusBox" class="status-box"></div>
+  <div id="statusBox" class="status-box" role="status" aria-live="polite"></div>
 
   <div class="toolbar">
     <div class="field">
@@ -295,6 +319,8 @@
   <script src="/invoices.js"></script>
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
-<script src="/cw-flow-shell.js"></script>
+    <script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

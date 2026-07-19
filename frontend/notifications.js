@@ -1,5 +1,13 @@
 const API = "/api";
 
+function authHeaders(extra = {}) {
+  const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
+  return {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...extra,
+  };
+}
+
 // 🔥 SOCKET
 let socket;
 if (typeof io !== "undefined") {
@@ -9,8 +17,8 @@ if (typeof io !== "undefined") {
 let notifications = [];
 let settings = [];
 
-let audio = new Audio("https://www.soundjay.com/buttons/sounds/button-3.mp3");
 let soundEnabled = false;
+let audioCtx = null;
 
 const user = JSON.parse(localStorage.user || "{}");
 
@@ -34,7 +42,7 @@ async function loadSettings(){
   if (!user.id) return;
 
   try {
-    const res = await fetch(`${API}/settings/${user.id}`);
+    const res = await fetch(`${API}/settings/${user.id}`, { headers: authHeaders() });
     const data = await res.json();
 
     if (data.ok){
@@ -60,7 +68,7 @@ function isSoundEnabled(type){
   const saved = localStorage.getItem("sound_" + type);
   if (saved !== null) return saved === "true";
 
-  return true;
+  return false;
 }
 
 // ==========================================================
@@ -72,14 +80,12 @@ function enableSound(){
 
     if (!soundEnabled){
 
-      audio.play()
-        .then(()=>{
-          audio.pause();
-          audio.currentTime = 0;
-          soundEnabled = true;
-          console.log("🔊 Som ativado");
-        })
-        .catch(()=>{});
+      try {
+        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        soundEnabled = true;
+      } catch (_) {
+        soundEnabled = false;
+      }
 
     }
 
@@ -91,10 +97,19 @@ function playSound(type){
   if (!soundEnabled) return;
   if (!isSoundEnabled(type)) return;
 
-  try{
-    audio.currentTime = 0;
-    audio.play().catch(()=>{});
-  }catch(e){}
+  try {
+    const ctx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    audioCtx = ctx;
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+    oscillator.type = "sine";
+    oscillator.frequency.value = 880;
+    gain.gain.value = 0.02;
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+    oscillator.start();
+    oscillator.stop(ctx.currentTime + 0.08);
+  } catch (_) {}
 }
 
 // ==========================================================
@@ -146,7 +161,7 @@ async function loadNotifications(){
 
   try {
 
-    const res = await fetch(`${API}/notifications`);
+    const res = await fetch(`${API}/notifications`, { headers: authHeaders() });
     const data = await res.json();
 
     if (!data.ok) {
@@ -216,7 +231,10 @@ function render(){
 
 async function markRead(id){
 
-  await fetch(`${API}/notifications/read/${id}`, { method:"POST" });
+  await fetch(`${API}/notifications/read/${id}`, {
+    method:"POST",
+    headers: authHeaders()
+  });
 
   notifications = notifications.map(n =>
     n.id === id ? { ...n, isRead:true } : n
@@ -227,7 +245,10 @@ async function markRead(id){
 
 async function markAllRead(){
 
-  await fetch(`${API}/notifications/read-all`, { method:"POST" });
+  await fetch(`${API}/notifications/read-all`, {
+    method:"POST",
+    headers: authHeaders()
+  });
 
   notifications = notifications.map(n => ({
     ...n,

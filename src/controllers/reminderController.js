@@ -1,5 +1,6 @@
 const { prisma } = require("../prismaClient");
 const fetch = require("node-fetch");
+const { assertExternalOperationAllowed } = require("../config/externalIntegrations");
 
 // ==========================================================
 // ENVIAR LEMBRETE MANUAL
@@ -7,6 +8,11 @@ const fetch = require("node-fetch");
 
 async function sendReminder(req, res) {
   try {
+    try {
+      assertExternalOperationAllowed("external_notifications");
+    } catch (gateErr) {
+      return res.status(gateErr.statusCode || 503).json({ ok: false, error: gateErr.code || "disabled_in_qa" });
+    }
 
     const invoiceId = Number(req.params.id);
 

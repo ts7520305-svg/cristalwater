@@ -4,9 +4,11 @@
   <meta charset="utf-8">
   <title>Cristal Water - Permissões do Relatório</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/ui/foundation.css">
 
   <style>
     * { box-sizing: border-box; }
+    html, body { overflow-x: hidden; }
 
     body {
       margin: 0;
@@ -121,9 +123,9 @@
   </style>
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
+  <script src="/admin-auth-guard.js"></script>
 </head>
-<body>
+<body data-required-role="ADMIN">
 
 <header>
   <h1>Permissões do Relatório do Cliente</h1>
@@ -188,6 +190,8 @@
 <script src="/report-settings.js"></script>
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
-<script src="/cw-flow-shell.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

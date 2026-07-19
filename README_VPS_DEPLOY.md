@@ -72,3 +72,50 @@ server {
 Nao execute `npm run seed` em producao sem confirmar. Esse comando pode criar dados de exemplo.
 
 Para atualizar sem perder dados, envie apenas codigo novo, execute migracoes com `npx prisma migrate deploy` e mantenha backups da base de dados antes de cada atualizacao.
+
+## RC1 Backup/Restore Drill (Obrigatorio antes do GO)
+
+Objetivo:
+
+- Provar que a equipa consegue recuperar o sistema com dados validos.
+- Medir RTO (tempo de recuperacao) e RPO (perda maxima de dados).
+
+Passos minimos:
+
+1. Executar backup da base de dados antes de qualquer deploy:
+
+```bash
+npm run backup:db
+```
+
+2. Guardar evidencia do backup gerado:
+
+- nome do ficheiro
+- tamanho
+- timestamp
+
+3. Simular restauracao em ambiente de staging:
+
+- parar app de staging
+- restaurar backup
+- subir app
+- correr `npm run smoke`
+
+4. Validar dados criticos apos restore:
+
+- login admin
+- login tecnico
+- listagem de clientes/piscinas/visitas
+- uma fatura + um pagamento existente
+
+5. Registar tempos e resultado:
+
+- RTO alvo: <= 30 minutos
+- RPO alvo: <= 24 horas
+
+Condicao de aprovacao:
+
+- restore concluido sem erro
+- smoke test verde
+- dados criticos visiveis e consistentes
+- tempos dentro do alvo

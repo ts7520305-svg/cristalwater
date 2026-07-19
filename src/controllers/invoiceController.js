@@ -100,7 +100,7 @@ Documento em anexo`;
       await prisma.chatMessage.create({
         data: {
           senderId: 1,
-          receiverId: 0,
+          receiverId: null,
           chatType: "CLIENT",
           clientId: invoice.clientId,
           text,

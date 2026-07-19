@@ -3,8 +3,9 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const prismaModule = require("../prismaClient");
 const prisma = prismaModule.prisma;
+const { getJwtSecret } = require("../utils/jwtSecret");
 
-const JWT_SECRET = process.env.JWT_SECRET || "cristalwater_secret";
+const JWT_SECRET = getJwtSecret();
 
 router.post("/refresh", async (req, res) => {
   const { refreshToken } = req.body;

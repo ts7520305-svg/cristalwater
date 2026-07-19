@@ -1,6 +1,14 @@
 const API =
   "/api";
 
+function authHeaders(extra = {}) {
+  const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
+  return {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...extra,
+  };
+}
+
 const socket =
   io();
 
@@ -40,11 +48,13 @@ async function loadNotifications() {
     ] = await Promise.all([
 
       fetch(
-        `${API}/notifications/unread-count`
+        `${API}/notifications/unread-count`,
+        { headers: authHeaders() }
       ),
 
       fetch(
-        `${API}/notifications`
+        `${API}/notifications`,
+        { headers: authHeaders() }
       )
     ]);
 
@@ -191,7 +201,8 @@ async function markRead(id, clientId = null) {
     await fetch(
       `${API}/client-messages/seen/${clientId}`,
       {
-        method: "POST"
+        method: "POST",
+        headers: authHeaders()
       }
     );
 
@@ -202,7 +213,8 @@ async function markRead(id, clientId = null) {
   await fetch(
     `${API}/notifications/read/${id}`,
     {
-      method: "POST"
+      method: "POST",
+      headers: authHeaders()
     }
   );
 
@@ -218,7 +230,8 @@ async function markAllRead() {
   await fetch(
     `${API}/notifications/read-all`,
     {
-      method: "POST"
+      method: "POST",
+      headers: authHeaders()
     }
   );
 
@@ -256,7 +269,8 @@ async function openTarget(
     await fetch(
       `${API}/notifications/read/${notificationId}`,
       {
-        method: "POST"
+        method: "POST",
+        headers: authHeaders()
       }
     );
 

@@ -4,9 +4,10 @@ const {
   canonicalAdminEmail,
   isConfiguredAdminEmail,
 } = require("../utils/adminIdentity");
+const { getAdminJwtSecret } = require("../utils/jwtSecret");
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-const JWT_SECRET = process.env.ADMIN_JWT_SECRET || process.env.JWT_SECRET || "cristalwater_secret";
+const JWT_SECRET = getAdminJwtSecret();
 
 function loginAdmin(email, password) {
   const adminEmail = canonicalAdminEmail() || normalizeEmail(email);

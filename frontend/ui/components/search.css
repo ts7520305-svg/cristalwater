@@ -1,0 +1,18 @@
+.cw-v2-search {
+  position: relative;
+}
+
+.cw-v2-search .icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--cw-color-text-soft);
+  pointer-events: none;
+}
+
+.cw-v2-search-results {
+  position: absolute;
+  z-index: calc(var(--cw-z-topbar) + 1);
+  width: 100%;
+}

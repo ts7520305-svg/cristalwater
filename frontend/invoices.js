@@ -4,6 +4,14 @@ const queryClientId = Number(queryParams.get("clientId") || 0);
 let invoiceStatusFilter = String(queryParams.get("status") || queryParams.get("filter") || "all").toLowerCase();
 if (!["all", "overdue", "pending", "paid"].includes(invoiceStatusFilter)) invoiceStatusFilter = "all";
 
+function authHeaders(extra = {}) {
+  const token = localStorage.getItem("token");
+  return {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...extra,
+  };
+}
+
 window.onload = () => {
   const input = document.getElementById("clientIdInput");
   if (input && queryClientId) input.value = String(queryClientId);
@@ -15,14 +23,16 @@ window.onload = () => {
 async function loadInvoices() {
   const list = document.getElementById("invoiceList");
   list.innerHTML = `<div class="empty-box">A carregar faturas...</div>`;
+  showStatus("A carregar faturas...", "info");
 
   try {
-    const res = await fetch(`${API}/invoices`);
+    const res = await fetch(`${API}/invoices`, { headers: authHeaders() });
     const data = await res.json().catch(() => []);
 
     if (!res.ok) {
       list.innerHTML = `<div class="empty-box">Erro ao carregar faturas.</div>`;
       updateSummary([]);
+      showStatus(`Erro ao carregar faturas (HTTP ${res.status}).`, "error");
       return;
     }
 
@@ -40,6 +50,7 @@ async function loadInvoices() {
     if (invoiceStatusFilter === "pending") statusMessages.push("A mostrar apenas faturas pendentes.");
     if (invoiceStatusFilter === "paid") statusMessages.push("A mostrar apenas faturas pagas.");
     if (statusMessages.length) showStatus(statusMessages.join("\n"));
+    else showStatus(`${filteredInvoices.length} fatura(s) carregada(s).`, "ok");
 
     updateSummary(filteredInvoices);
     renderInvoices(filteredInvoices);
@@ -47,6 +58,7 @@ async function loadInvoices() {
     console.error("Erro ao carregar faturas:", error);
     list.innerHTML = `<div class="empty-box">Erro de ligação ao servidor.</div>`;
     updateSummary([]);
+    showStatus("Erro de ligacao ao servidor de faturas.", "error");
   }
 }
 
@@ -75,6 +87,7 @@ function renderInvoices(invoices) {
       ? "Sem faturas em atraso ou valores em aberto."
       : "Ainda nao existem faturas para este filtro.";
     list.innerHTML = `<div class="empty-box">${escapeHtml(emptyText)}</div>`;
+    showStatus(emptyText, "ok");
     return;
   }
 
@@ -151,6 +164,7 @@ async function generateInvoiceForClient() {
   try {
     const res = await fetch(`${API}/invoices/generate-for-client/${clientId}`, {
       method: "POST",
+      headers: authHeaders(),
     });
 
     const data = await res.json().catch(() => ({}));
@@ -184,10 +198,11 @@ async function copyInvoiceLink(invoiceId) {
   }
 }
 
-function showStatus(message) {
+function showStatus(message, tone = "info") {
   const box = document.getElementById("statusBox");
   box.style.display = "block";
   box.textContent = message;
+  box.className = `status-box ${tone === "info" ? "" : tone}`.trim();
 }
 
 function formatMonth(month, year) {

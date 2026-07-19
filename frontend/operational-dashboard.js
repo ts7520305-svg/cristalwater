@@ -1,5 +1,13 @@
 const API = "/api";
 
+function authHeaders(extra = {}) {
+  const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
+  return {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...extra,
+  };
+}
+
 function formatMoney(value) {
   return `€ ${Number(value || 0).toFixed(2)}`;
 }
@@ -28,7 +36,9 @@ async function loadOperational() {
   setStatus("A carregar...");
 
   try {
-    const res = await fetch(`${API}/dashboard/admin?monthRef=${encodeURIComponent(monthRef)}`);
+    const res = await fetch(`${API}/dashboard/admin?monthRef=${encodeURIComponent(monthRef)}`, {
+      headers: authHeaders(),
+    });
     const data = await res.json();
 
     if (!res.ok) {

@@ -1,0 +1,16 @@
+.cw-toast {
+  position: fixed;
+  right: var(--cw-space-3);
+  bottom: calc(70px + var(--cw-space-3));
+  z-index: calc(var(--cw-z-mobile-nav) + 1);
+  background: var(--cw-color-surface);
+  border: 1px solid var(--cw-color-border);
+  border-left: 4px solid var(--cw-color-primary);
+  border-radius: var(--cw-radius-sm);
+  box-shadow: var(--cw-shadow-md);
+  padding: 10px 12px;
+}
+
+.cw-toast.error { border-left-color: var(--cw-color-danger); }
+.cw-toast.warn { border-left-color: var(--cw-color-warning); }
+.cw-toast.ok { border-left-color: var(--cw-color-success); }

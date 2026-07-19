@@ -1,0 +1,260 @@
+/* Crystal Water UI Kit - transversal classes for forms, lists, states and mobile ergonomics */
+
+:root {
+  --cw-form-gap: 10px;
+  --cw-section-gap: 14px;
+  --cw-title-size: clamp(1.5rem, 1.3rem + 1vw, 2.25rem);
+  --cw-subtitle-size: 0.95rem;
+  --cw-control-h: 48px;
+  --cw-control-h-touch: 56px;
+}
+
+.cw-page-head,
+.page-head {
+  display: grid;
+  gap: 8px;
+}
+
+.cw-page-head h1,
+.page-head h1 {
+  margin: 0;
+  font-size: var(--cw-title-size);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.cw-page-subtitle,
+.page-head p {
+  margin: 0;
+  color: var(--cw-muted);
+  font-size: var(--cw-subtitle-size);
+  line-height: 1.45;
+}
+
+.cw-section-title {
+  margin: 0 0 6px;
+  font-size: 1.12rem;
+  line-height: 1.2;
+}
+
+.cw-form-grid {
+  display: grid;
+  gap: var(--cw-form-gap);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.cw-form-grid.cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.cw-form-grid.cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cw-form-grid .wide,
+.cw-form-grid .cw-full {
+  grid-column: 1 / -1;
+}
+
+.cw-field {
+  display: grid;
+  gap: 6px;
+}
+
+.cw-label {
+  color: var(--cw-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}
+
+.cw-required::after {
+  content: " *";
+  color: var(--cw-danger);
+}
+
+.cw-form-grid input,
+.cw-form-grid select,
+.cw-form-grid textarea,
+.cw-form input,
+.cw-form select,
+.cw-form textarea {
+  min-height: var(--cw-control-h);
+  border-radius: 12px;
+  border: 1px solid var(--cw-border);
+  background: #fff;
+  color: var(--cw-text);
+  padding: 10px 12px;
+}
+
+.cw-form-grid textarea,
+.cw-form textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+
+.cw-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cw-list-wrap {
+  display: grid;
+  gap: var(--cw-section-gap);
+}
+
+.cw-list-toolbar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.4fr) repeat(3, minmax(140px, 1fr)) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.cw-list-toolbar input,
+.cw-list-toolbar select,
+.cw-list-toolbar button {
+  margin: 0;
+}
+
+.cw-state {
+  border: 1px dashed var(--cw-border);
+  border-radius: 12px;
+  padding: 12px;
+  background: var(--cw-surface-2);
+  color: var(--cw-muted);
+  line-height: 1.4;
+}
+
+.cw-state.error {
+  border-style: solid;
+  border-color: #e5b3b8;
+  background: #fff4f5;
+  color: #7e1f29;
+}
+
+.cw-state.success {
+  border-style: solid;
+  border-color: #b4ddc5;
+  background: #f1fbf5;
+  color: #195a35;
+}
+
+.cw-state.offline {
+  border-style: solid;
+  border-color: #efcf9a;
+  background: #fff8ec;
+  color: #8a5a00;
+}
+
+.cw-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--cw-border);
+  border-radius: 12px;
+}
+
+.cw-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 780px;
+  background: #fff;
+}
+
+.cw-table th,
+.cw-table td {
+  text-align: left;
+  padding: 10px;
+  border-bottom: 1px solid #edf1f5;
+  font-size: 0.9rem;
+}
+
+.cw-table th {
+  color: #3f5168;
+  background: #f7fbff;
+  font-weight: 700;
+}
+
+.cw-mobile-stack {
+  display: none;
+}
+
+.cw-danger-action {
+  border-color: #f0b2b8 !important;
+  background: #fff3f4 !important;
+  color: #9e1d2b !important;
+}
+
+.cw-warn-action {
+  border-color: #f0d1a7 !important;
+  background: #fff8ef !important;
+  color: #8d5a00 !important;
+}
+
+.cw-ok-action {
+  border-color: #abdac0 !important;
+  background: #effaf4 !important;
+  color: #156a3c !important;
+}
+
+@media (max-width: 1024px) {
+  .cw-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cw-list-toolbar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px), (pointer: coarse) {
+  .cw-form-grid,
+  .cw-form-grid.cols-2,
+  .cw-form-grid.cols-3,
+  .cw-list-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .cw-form-grid input,
+  .cw-form-grid select,
+  .cw-form-grid textarea,
+  .cw-form input,
+  .cw-form select,
+  .cw-form textarea,
+  .cw-form-actions .cw-v2-btn,
+  .cw-form-actions button,
+  .cw-list-toolbar button,
+  .cw-list-toolbar .cw-v2-btn {
+    min-height: var(--cw-control-h-touch);
+    font-size: 1rem;
+  }
+
+  .cw-table-wrap {
+    display: none;
+  }
+
+  .cw-mobile-stack {
+    display: grid;
+    gap: 8px;
+  }
+
+  .cw-mobile-row {
+    border: 1px solid var(--cw-border);
+    border-radius: 12px;
+    background: #fff;
+    padding: 10px;
+    display: grid;
+    gap: 8px;
+  }
+
+  .cw-mobile-row .title {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--cw-text);
+  }
+
+  .cw-mobile-row .meta {
+    color: var(--cw-muted);
+    font-size: 0.87rem;
+  }
+}

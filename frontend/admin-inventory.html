@@ -1,4 +1,116 @@
-<!doctype html><html lang="pt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cristal Water LDA · Stock</title><script src="/cw-auth.js"></script><link rel="stylesheet" href="/cw-polish.css"><style>
-:root{--bg:#06111f;--panel:#0d1d31;--panel2:#10243c;--line:#24415f;--txt:#e9f5ff;--muted:#8fb1cc;--brand:#35d1ff;--ok:#40e6a0;--warn:#ffd166;--bad:#ff6b6b;--input:#091829}*{box-sizing:border-box}body{margin:0;background:linear-gradient(120deg,#06111f,#0b1f33 55%,#06111f);color:var(--txt);font-family:Inter,Segoe UI,Arial,sans-serif}main.page{padding:24px;max-width:1500px;margin:0 auto}.page-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px}.page-head h1{margin:0;font-size:30px}.page-head p{margin:6px 0 0;color:var(--muted)}.grid{display:grid;gap:16px}.cols2{grid-template-columns:minmax(320px,430px) 1fr}.cols3{grid-template-columns:repeat(3,1fr)}.cols4{grid-template-columns:repeat(4,1fr)}.card{background:rgba(13,29,49,.92);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.22)}.metric{font-size:32px;font-weight:900}.label,.muted{color:var(--muted);font-size:13px}.item,.client,.pool,.visit,.tech,.round-card,.day-card{background:#0a1b2e;border:1px solid var(--line);border-radius:16px;padding:14px;margin:8px 0;color:var(--txt)}input,select,textarea{width:100%;background:var(--input);color:var(--txt);border:1px solid var(--line);border-radius:14px;padding:12px;margin:6px 0}textarea{min-height:75px}button,.btn{border:0;border-radius:14px;padding:12px 16px;background:#163354;color:var(--txt);font-weight:800;cursor:pointer;margin:4px 0}button.primary,.btn.primary{background:linear-gradient(135deg,#0584c7,#35d1ff);color:#03121c}button.ok,.btn.ok{background:linear-gradient(135deg,#0c9f69,#40e6a0);color:#02150d}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.list{display:grid;gap:10px}.pill{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:99px;padding:5px 9px;color:#bfe4ff;background:#0a1b2e;font-size:12px}.status{border:1px solid rgba(53,217,255,.18);background:rgba(53,217,255,.08);padding:12px;border-radius:16px;color:#cfe9ff}.actions{display:flex;gap:8px;flex-wrap:wrap}.actions a,.actions button{min-width:120px;text-align:center}.quick-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.quick-card{display:block;background:rgba(13,29,49,.92);border:1px solid var(--line);border-radius:20px;padding:18px;color:var(--txt);text-decoration:none}.quick-card strong{display:block;font-size:17px}.quick-card span{display:block;margin-top:5px;color:var(--muted);font-size:12px}@media(max-width:1000px){main.page{padding:14px}.cols2,.cols3,.cols4,.row,.row3{grid-template-columns:1fr}.page-head{flex-direction:column}}
-</style></head><body><main class="page"><div class="page-head"><div><h1>Stock</h1><p>Compras, stock central, transferências para viaturas e consumos.</p></div><div class="actions"><a class="btn" href="/admin-master-control">Centro de Operações</a></div></div>
-<section class="grid cols2"><section class="card"><h2>Entrada de stock por fatura</h2><form id="purchaseForm"><input name="supplierName" placeholder="Fornecedor"><input name="invoiceNumber" placeholder="N.º fatura / documento"><input name="invoiceDate" type="date"><input name="totalAmount" type="number" step="0.01" placeholder="Total €"><input name="document" type="file" accept=".pdf,.jpg,.jpeg,.png"><h3>Produtos</h3><div id="items"></div><button type="button" onclick="addRow()">+ Produto</button><button class="primary" type="submit">Guardar entrada</button></form></section><section class="card"><h2>Transferir para viatura</h2><form id="transferForm"><input name="vehicleId" type="number" placeholder="ID da viatura"><input name="productName" placeholder="Produto"><input name="quantity" type="number" step="0.01" placeholder="Quantidade"><input name="unit" value="KG"><button class="primary">Transferir</button></form><h2>Consumo manual</h2><form id="consumeForm"><input name="vehicleId" type="number" placeholder="ID viatura"><input name="productName" placeholder="Produto"><input name="quantity" type="number" step="0.01" placeholder="Quantidade"><input name="unit" value="KG"><input name="workGuideId" type="number" placeholder="ID guia obra opcional"><button>Registar saída</button></form></section></section><section class="card" style="margin-top:18px"><h2>Stock atual</h2><div id="stock" class="list"></div></section><section class="card" style="margin-top:18px"><h2>Últimos movimentos</h2><div id="movements" class="list"></div></section></main><script src="/admin-auth-guard.js"></script><script src="/admin-inventory.js"></script><script src="/cristal-help-data.js"></script><script src="/cristal-assist.js"></script><script src="/cw-flow-shell.js"></script></body></html>
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Cristal Water - Inventario e Stock</title>
+  <script src="/cw-auth.js"></script>
+  <link rel="stylesheet" href="/ui/foundation.css">
+  <style>
+    :root { --bg:#06111f; --panel:#0d1d31; --line:#24415f; --txt:#e9f5ff; --muted:#8fb1cc; --input:#091829; }
+    * { box-sizing:border-box; }
+    html, body { overflow-x: hidden; }
+    body { margin:0; background:linear-gradient(120deg,#06111f,#0b1f33 55%,#06111f); color:var(--txt); font-family:Inter,Segoe UI,Arial,sans-serif; }
+    main.page { padding:20px; max-width:1500px; margin:0 auto; }
+    .page-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:14px; }
+    .page-head h1 { margin:0; }
+    .page-head p { margin:6px 0 0; color:var(--muted); }
+    .grid { display:grid; gap:14px; }
+    .cols2 { grid-template-columns:minmax(360px,1fr) minmax(360px,1fr); }
+    .card { background:rgba(13,29,49,.92); border:1px solid var(--line); border-radius:18px; padding:16px; box-shadow:0 18px 48px rgba(0,0,0,.2); }
+    .card h2 { margin:0 0 10px; }
+    .muted { color:var(--muted); font-size:13px; }
+    .row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .items-grid { display:grid; gap:8px; }
+    input,select,textarea { width:100%; border:1px solid var(--line); border-radius:12px; background:var(--input); color:var(--txt); padding:10px; }
+    .actions { display:flex; gap:8px; flex-wrap:wrap; }
+    button,.btn { border:0; border-radius:12px; padding:10px 14px; background:#163354; color:var(--txt); font-weight:800; cursor:pointer; text-decoration:none; }
+    .primary { background:linear-gradient(135deg,#0584c7,#35d1ff); color:#03121c; }
+    .status { border:1px solid rgba(53,217,255,.25); background:rgba(53,217,255,.08); border-radius:12px; padding:10px 12px; color:#cfe9ff; margin:8px 0; }
+    .status.error { border-color:rgba(255,107,107,.45); background:rgba(255,107,107,.12); color:#ffe3e8; }
+    .status.ok { border-color:rgba(64,230,160,.4); background:rgba(64,230,160,.1); color:#e1fff1; }
+    .list { display:grid; gap:8px; }
+    .item { background:#0a1b2e; border:1px solid var(--line); border-radius:12px; padding:10px; }
+    .section-gap { margin-top:14px; }
+    @media (max-width:1040px) { .cols2,.row { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body data-required-role="ADMIN">
+  <main class="page">
+    <div class="page-head">
+      <div>
+        <h1>Inventario e Stock</h1>
+        <p>Entradas, transferencias para viatura, consumos e historico de movimentos.</p>
+      </div>
+      <div class="actions"><a class="btn" href="/admin-master-control">Centro de Operacoes</a></div>
+    </div>
+
+    <div id="inventoryStatus" class="status" role="status" aria-live="polite">A carregar inventario...</div>
+
+    <section class="grid cols2">
+      <section class="card">
+        <h2>Entrada de stock por fatura</h2>
+        <form id="purchaseForm" class="items-grid">
+          <input name="supplierName" placeholder="Fornecedor" required>
+          <input name="invoiceNumber" placeholder="N. fatura / documento">
+          <div class="row">
+            <input name="invoiceDate" type="date">
+            <input name="totalAmount" type="number" step="0.01" placeholder="Total EUR">
+          </div>
+          <input name="document" type="file" accept=".pdf,.jpg,.jpeg,.png">
+          <h3>Produtos</h3>
+          <div id="items" class="items-grid"></div>
+          <div class="actions">
+            <button type="button" onclick="addRow()">+ Produto</button>
+            <button class="primary" type="submit">Guardar entrada</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Transferencia para viatura</h2>
+        <form id="transferForm" class="items-grid">
+          <input name="vehicleId" type="number" placeholder="ID da viatura" required>
+          <input name="productName" placeholder="Produto" required>
+          <div class="row">
+            <input name="quantity" type="number" step="0.01" placeholder="Quantidade" required>
+            <input name="unit" value="KG">
+          </div>
+          <button class="primary" type="submit">Transferir</button>
+        </form>
+
+        <h2 class="section-gap">Consumo manual</h2>
+        <form id="consumeForm" class="items-grid">
+          <input name="vehicleId" type="number" placeholder="ID viatura" required>
+          <input name="productName" placeholder="Produto" required>
+          <div class="row">
+            <input name="quantity" type="number" step="0.01" placeholder="Quantidade" required>
+            <input name="unit" value="KG">
+          </div>
+          <input name="workGuideId" type="number" placeholder="ID guia obra opcional">
+          <button type="submit">Registar saida</button>
+        </form>
+      </section>
+    </section>
+
+    <section class="card section-gap">
+      <h2>Stock atual</h2>
+      <div id="stock" class="list"></div>
+    </section>
+
+    <section class="card section-gap">
+      <h2>Ultimos movimentos</h2>
+      <div id="movements" class="list"></div>
+    </section>
+  </main>
+
+  <script src="/admin-auth-guard.js"></script>
+  <script src="/admin-inventory.js"></script>
+  <script src="/cristal-help-data.js"></script>
+  <script src="/cristal-assist.js"></script>
+  <script src="/cw-os-admin-shell.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
+</body>
+</html>

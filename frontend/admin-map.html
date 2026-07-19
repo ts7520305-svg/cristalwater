@@ -4,9 +4,11 @@
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#050b16">
 <meta charset="utf-8">
-<title>Mapa Inteligente - Cristal Water</title>
+<title>Cristal Water - Mapa Operacional</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<link rel="stylesheet" href="/ui/foundation.css">
 
 <style>
 body { margin:0; font-family:Arial; }
@@ -34,10 +36,16 @@ button {
 </style>
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+  <script src="/admin-auth-guard.js"></script>
 </head>
 
-<body>
+<body data-required-role="ADMIN">
+
+<div style="padding:12px 16px 0">
+  <button type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
+</div>
 
 <div class="panel">
   <h3>Cristal Water</h3>
@@ -57,8 +65,10 @@ button {
 
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
+<script src="/ui/core/navigation-context.js"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
 <script src="/cw-admin-shortcuts.js"></script>
-<script src="/cw-flow-shell.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

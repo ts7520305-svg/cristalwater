@@ -1,4 +1,5 @@
 const { prisma } = require("../prismaClient");
+const { emitRoutePlanned } = require("../services/routeOsEventService");
 
 // distância haversine
 function distance(lat1, lon1, lat2, lon2) {
@@ -65,6 +66,20 @@ async function optimizeRoute(req,res){
   }
 
   res.json(ordered);
+
+  emitRoutePlanned({
+    routeCount: ordered.length,
+    route: ordered.map((visit) => ({
+      id: visit.id,
+      technicianId: visit.technicianId || null,
+      poolId: visit.pool?.id || null,
+      clientId: visit.client?.id || null,
+      plannedDate: visit.plannedDate || null,
+      status: visit.status || null,
+    })),
+    technicianId: ordered[0]?.technicianId || null,
+    source: "route.optimize",
+  }).catch((error) => console.warn("ROUTE_PLANNED emit failed:", error.message));
 }
 
 module.exports = {

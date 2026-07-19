@@ -6,10 +6,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cristal Water · Calculadora Técnica da Piscina</title>
+  <link rel="stylesheet" href="/ui/foundation.css">
   <link rel="stylesheet" href="/cristal-assist.css">
   <style>
     :root{--bg:#07111f;--panel:#0d1b2f;--panel2:#10243d;--txt:#eaf6ff;--muted:#8fb3cc;--line:rgba(142,202,230,.2);--cyan:#48d8ff;--blue:#2b6cff;--green:#38d39f;--amber:#ffcd6b;--red:#ff6b80}
-    *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:radial-gradient(circle at top left,#123b63 0,#07111f 38%,#030712 100%);color:var(--txt)}
+    *{box-sizing:border-box} html,body{overflow-x:hidden} body{margin:0;font-family:Inter,Arial,sans-serif;background:radial-gradient(circle at top left,#123b63 0,#07111f 38%,#030712 100%);color:var(--txt)}
     header{position:sticky;top:0;z-index:5;background:rgba(4,10,20,.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);padding:16px 22px;display:flex;align-items:center;justify-content:space-between;gap:14px}
     h1{font-size:22px;margin:0}.sub{color:var(--muted);font-size:13px;margin-top:4px}.wrap{max-width:1500px;margin:0 auto;padding:18px;display:grid;grid-template-columns:380px 1fr;gap:16px}.card{background:linear-gradient(180deg,rgba(16,36,61,.92),rgba(9,19,35,.96));border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 16px 40px rgba(0,0,0,.25)}
     .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.full{grid-column:1/-1} label{font-size:12px;color:var(--muted);display:block;margin:8px 0 5px} input,select,textarea{width:100%;background:#081525;color:var(--txt);border:1px solid var(--line);border-radius:12px;padding:11px;outline:none} textarea{min-height:70px} button{border:0;border-radius:14px;padding:11px 14px;background:linear-gradient(135deg,var(--blue),#00b7ff);color:white;font-weight:800;cursor:pointer} .btn2{background:#132a46}.btn3{background:linear-gradient(135deg,#15a37c,var(--green));color:#03140f}.btnDanger{background:#3a1520;color:#ffd6de;border:1px solid rgba(255,107,128,.35)}
@@ -17,12 +18,12 @@
     @media(max-width:1000px){.wrap{grid-template-columns:1fr}.kpiGrid{grid-template-columns:repeat(2,1fr)}.sections{grid-template-columns:1fr}.grid3{grid-template-columns:1fr 1fr}} @media(max-width:600px){header{align-items:flex-start;flex-direction:column}.grid,.grid3,.kpiGrid{grid-template-columns:1fr}.wrap{padding:10px}.card{border-radius:14px}}
   </style>
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
+  <script src="/admin-auth-guard.js"></script>
 </head>
-<body>
+<body data-required-role="ADMIN">
   <header>
-    <div><h1>🧮 Calculadora Técnica da Piscina</h1><div class="sub">Cubicagem, filtração, sal, eletrólise, produção de cloro e bomba de calor numa só ferramenta.</div></div>
-    <div class="toolbar"><button class="btn2" onclick="location.href='/admin-pools'">Piscinas</button><button class="btn2" onclick="location.href='/admin-dashboard'">Dashboard</button><button onclick="saveAndCalculate()">Guardar cálculo</button></div>
+    <div><h1>Calculadora Técnica da Piscina</h1><div class="sub">Cubicagem, filtracao, sal, eletrolise, producao de cloro e bomba de calor numa so ferramenta.</div></div>
+    <div class="toolbar"><button class="btn2" type="button" data-cw-back data-cw-fallback="/admin-pools">Voltar</button><button class="btn2" onclick="location.href='/admin-pools'">Piscinas</button><button class="btn2" onclick="location.href='/admin-dashboard'">Dashboard</button><button onclick="saveAndCalculate()">Guardar calculo</button></div>
   </header>
   <main class="wrap">
     <section class="card">
@@ -98,8 +99,10 @@
   <script src="/admin-pool-calculator.js"></script>
   <script src="/cristal-help-data.js"></script>
   <script src="/cristal-assist.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
   <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{});}</script>
 <script src="/cw-admin-shortcuts.js"></script>
-<script src="/cw-flow-shell.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

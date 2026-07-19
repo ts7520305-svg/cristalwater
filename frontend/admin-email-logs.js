@@ -17,10 +17,20 @@ let page = 1;
 const pageSize = 25;
 
 // 🔐 TOKEN ADMIN (JWT)
-const ADMIN_TOKEN = localStorage.getItem("adminToken");
+const ADMIN_TOKEN = localStorage.getItem("adminToken") || localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
 
 if (!ADMIN_TOKEN) {
   alert("Token admin não encontrado. Faz login de admin primeiro.");
+}
+
+function esc(value) {
+  return String(value ?? "").replace(/[&<>'"]/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "'": "&#39;",
+    '"': "&quot;",
+  }[char]));
 }
 
 // ------------------------------
@@ -61,11 +71,11 @@ async function load() {
     pageSize,
   });
 
-  if (statusEl.value) params.append("status", statusEl.value);
-  if (typeEl.value) params.append("type", typeEl.value);
-  if (recipientEl.value) params.append("recipient", recipientEl.value);
-  if (fromEl.value) params.append("from", fromEl.value);
-  if (toEl.value) params.append("to", toEl.value);
+  if (statusEl?.value) params.append("status", statusEl.value);
+  if (typeEl?.value) params.append("type", typeEl.value);
+  if (recipientEl?.value) params.append("recipient", recipientEl.value);
+  if (fromEl?.value) params.append("from", fromEl.value);
+  if (toEl?.value) params.append("to", toEl.value);
 
   try {
     const res = await fetch("/api/admin/email-logs?" + params.toString(), {
@@ -90,14 +100,14 @@ async function load() {
 
         rows.innerHTML += `
           <tr>
-            <td>${new Date(e.createdAt).toLocaleString()}</td>
-            <td>${e.status}</td>
-            <td>${e.type || ""}</td>
-            <td>${e.to || ""}</td>
-            <td>${e.subject || ""}</td>
-            <td>${e.retryCount ?? 0}</td>
-            <td>${e.lastRetryAt ? new Date(e.lastRetryAt).toLocaleString() : "-"}</td>
-            <td>${e.error || ""}</td>
+            <td>${esc(new Date(e.createdAt).toLocaleString())}</td>
+            <td>${esc(e.status)}</td>
+            <td>${esc(e.type || "")}</td>
+            <td>${esc(e.to || "")}</td>
+            <td>${esc(e.subject || "")}</td>
+            <td>${esc(e.retryCount ?? 0)}</td>
+            <td>${esc(e.lastRetryAt ? new Date(e.lastRetryAt).toLocaleString() : "-")}</td>
+            <td>${esc(e.error || "")}</td>
             <td>${retryBtn}</td>
           </tr>
         `;
@@ -115,30 +125,30 @@ async function load() {
 // ------------------------------
 // EVENTOS
 // ------------------------------
-form.addEventListener("submit", e => {
+form?.addEventListener("submit", e => {
   e.preventDefault();
   page = 1;
   load();
 });
 
-document.getElementById("clear").addEventListener("click", () => {
-  statusEl.value = "";
-  typeEl.value = "";
-  recipientEl.value = "";
-  fromEl.value = "";
-  toEl.value = "";
+document.getElementById("clear")?.addEventListener("click", () => {
+  if (statusEl) statusEl.value = "";
+  if (typeEl) typeEl.value = "";
+  if (recipientEl) recipientEl.value = "";
+  if (fromEl) fromEl.value = "";
+  if (toEl) toEl.value = "";
   page = 1;
   load();
 });
 
-document.getElementById("prev").addEventListener("click", () => {
+document.getElementById("prev")?.addEventListener("click", () => {
   if (page > 1) {
     page--;
     load();
   }
 });
 
-document.getElementById("next").addEventListener("click", () => {
+document.getElementById("next")?.addEventListener("click", () => {
   page++;
   load();
 });

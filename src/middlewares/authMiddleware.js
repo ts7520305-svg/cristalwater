@@ -1,14 +1,15 @@
 const jwt =
   require("jsonwebtoken");
 const { roleMatches } = require("../utils/roles");
+const { getJwtSecret } = require("../utils/jwtSecret");
+const { validateJwtPrincipal } = require("../utils/jwtPrincipalGuard");
 
 // ======================================================
 // SECRET
 // ======================================================
 
 const SECRET =
-  process.env.JWT_SECRET ||
-  "cristalwater_secret";
+  getJwtSecret();
 
 // ======================================================
 // AUTH MIDDLEWARE
@@ -16,7 +17,7 @@ const SECRET =
 
 function auth(requiredRole = null) {
 
-  return (req, res, next) => {
+  return async (req, res, next) => {
 
     const header =
       req.headers.authorization;
@@ -41,6 +42,16 @@ function auth(requiredRole = null) {
           token,
           SECRET
         );
+
+      const principalState = await validateJwtPrincipal(decoded);
+      if (!principalState.ok) {
+        return res.status(401).json({
+
+          ok: false,
+
+          message: "Sessão inválida"
+        });
+      }
 
       req.user =
         decoded;

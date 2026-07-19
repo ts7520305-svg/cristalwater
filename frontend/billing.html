@@ -6,9 +6,11 @@
 <meta charset="utf-8">
 <title>Cristal Water - Cobranças</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="/ui/foundation.css">
 
 <style>
 * { box-sizing: border-box; }
+html, body { overflow-x: hidden; }
 
 body {
   margin: 0;
@@ -143,10 +145,10 @@ th, td {
 </style>
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
+  <script src="/admin-auth-guard.js"></script>
 </head>
 
-<body>
+<body data-required-role="ADMIN">
 
 <div class="header">
   <h2>💶 Cobranças</h2>
@@ -205,6 +207,8 @@ th, td {
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
-<script src="/cw-flow-shell.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

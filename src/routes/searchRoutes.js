@@ -1,9 +1,12 @@
 const express = require('express');
 const prisma = require('../prismaClient');
 const router = express.Router();
+const auth = require("../middlewares/authMiddleware");
 
 function q(v){ return String(v || '').trim(); }
 function contains(term){ return { contains: term, mode: 'insensitive' }; }
+
+router.use(auth("ADMIN"));
 
 router.get('/', async (req, res) => {
   const term = q(req.query.q || req.query.search);

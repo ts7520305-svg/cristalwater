@@ -436,6 +436,64 @@ function normalizeServiceHistory(visit) {
   };
 }
 
+function visitSortTimestamp(visit) {
+  const raw = visit?.endAt || visit?.startAt || visit?.plannedDate || visit?.date || visit?.createdAt;
+  const date = raw ? new Date(raw) : new Date(0);
+  const time = date.getTime();
+  return Number.isNaN(time) ? 0 : time;
+}
+
+function buildPoolTimeline(pools, poolSchedules, normalizedServices) {
+  return (pools || []).map((pool) => {
+    const schedule = (poolSchedules || []).find((item) => Number(item.poolId) === Number(pool.id)) || null;
+    const poolServices = (normalizedServices || [])
+      .filter((visit) => Number(visit.poolId) === Number(pool.id))
+      .sort((a, b) => visitSortTimestamp(b) - visitSortTimestamp(a));
+
+    const latestReport = poolServices[0] || null;
+    const timeline = poolServices.slice(0, 10).map((visit) => ({
+      id: visit.id,
+      type: visit.endAt ? "SERVICE_COMPLETED" : "SERVICE_VISITED",
+      title: visit.endAt ? "Relatorio de manutencao" : "Visita agendada",
+      timestamp: visit.endAt || visit.startAt || visit.plannedDate || null,
+      status: visit.status,
+      technicianName: visit.technicianName,
+      notes: visit.notes,
+      readings: visit.readings,
+      products: visit.products,
+      photos: visit.photos,
+      checklist: visit.checklist,
+    }));
+
+    return {
+      poolId: pool.id,
+      poolName: pool.name || pool.location || "Piscina",
+      zone: pool.zone || null,
+      status: schedule?.state || (latestReport ? "completed" : "noSchedule"),
+      nextVisit: schedule?.plannedDate ? {
+        plannedDate: schedule.plannedDate,
+        label: schedule.label,
+        title: schedule.title,
+        message: schedule.message,
+        state: schedule.state,
+      } : null,
+      latestReport: latestReport ? {
+        id: latestReport.id,
+        plannedDate: latestReport.plannedDate,
+        startAt: latestReport.startAt,
+        endAt: latestReport.endAt,
+        technicianName: latestReport.technicianName,
+        checklist: latestReport.checklist,
+        readings: latestReport.readings,
+        products: latestReport.products,
+        photos: latestReport.photos,
+        notes: latestReport.notes,
+      } : null,
+      timeline,
+    };
+  });
+}
+
 function normalizeInvoice(invoice) {
   return {
     id: invoice.id,
@@ -565,6 +623,7 @@ async function getClientPortal(req, res) {
     const nextVisit = nextVisitFromSchedules(poolSchedules);
     const normalizedInvoices = invoices.map(normalizeInvoice);
     const normalizedServices = serviceHistory.map(normalizeServiceHistory);
+    const poolTimeline = buildPoolTimeline(pools, poolSchedules, normalizedServices);
     const totalInvoices = normalizedInvoices.reduce((sum, invoice) => sum + Number(invoice.total || 0), 0);
     const totalPaid = normalizedInvoices.reduce((sum, invoice) => sum + Number(invoice.amountPaid || 0), 0);
     const totalOpenBeforeCredit = normalizedInvoices.reduce((sum, invoice) => sum + Number(invoice.amountOpen || 0), 0);
@@ -603,6 +662,7 @@ async function getClientPortal(req, res) {
       summary,
       pools,
       poolSchedules,
+      poolTimeline,
       services: normalizedServices,
       history: normalizedServices,
       serviceHistory: normalizedServices,

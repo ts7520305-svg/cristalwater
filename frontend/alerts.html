@@ -1,33 +1,257 @@
-<script src="/cw-auth.js"></script>
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Cristal Water - Alertas Rapidos</title>
+  <script src="/cw-auth.js"></script>
+  <link rel="stylesheet" href="/ui/foundation.css">
+  <style>
+    :root { --bg:#071225; --panel:#10243c; --line:#254663; --txt:#e9f5ff; --muted:#93b8d6; --bad:#ff7d8e; --warn:#ffd37a; --ok:#7be0ad; --input:#0c1e33; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Inter,Segoe UI,Arial,sans-serif; background:linear-gradient(120deg,#071225,#102340 58%,#071225); color:var(--txt); }
+    main.page { padding:18px; max-width:1200px; margin:0 auto; }
+    .page-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:14px; }
+    h1 { margin:0; font-size:28px; }
+    .muted { color:var(--muted); margin:6px 0 0; }
+    .toolbar { display:grid; grid-template-columns:1.6fr 170px auto auto; gap:10px; margin-bottom:12px; }
+    input,select { width:100%; min-height:46px; border:1px solid var(--line); background:var(--input); color:var(--txt); border-radius:12px; padding:10px 12px; }
+    button,.btn { border:0; border-radius:12px; min-height:46px; padding:10px 14px; background:#1c3f63; color:var(--txt); font-weight:700; cursor:pointer; text-decoration:none; }
+    .primary { background:linear-gradient(135deg,#0c86c8,#35d1ff); color:#03121c; }
+    .panel { background:rgba(16,36,60,.9); border:1px solid var(--line); border-radius:18px; padding:14px; }
+    .status { border:1px solid rgba(53,217,255,.28); background:rgba(53,217,255,.08); color:#cfe9ff; border-radius:12px; padding:10px 12px; margin-bottom:12px; }
+    .status.error { border-color:rgba(255,125,142,.5); background:rgba(255,125,142,.12); color:#ffe0e5; }
+    .status.ok { border-color:rgba(123,224,173,.45); background:rgba(123,224,173,.12); color:#defff0; }
+    .alerts-list { display:grid; gap:10px; }
+    .alert-card { border:1px solid var(--line); border-radius:14px; background:#0c1f34; padding:12px; display:grid; grid-template-columns:1fr auto; gap:10px; }
+    .alert-card.critical { border-color:rgba(255,125,142,.55); }
+    .alert-card.warning { border-color:rgba(255,211,122,.55); }
+    .chips { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; }
+    .chip { border:1px solid var(--line); border-radius:999px; padding:4px 8px; font-size:12px; color:#cde9ff; background:#0a182b; }
+    .chip.critical { border-color:rgba(255,125,142,.55); color:#ffdce2; }
+    .chip.warning { border-color:rgba(255,211,122,.55); color:#fff2cf; }
+    .alert-title { margin:0 0 4px; font-size:16px; }
+    .alert-text { margin:0; color:#d8eeff; line-height:1.4; }
+    .meta { margin-top:8px; color:var(--muted); font-size:13px; }
+    .actions { display:grid; align-content:start; gap:8px; min-width:150px; }
+    @media (max-width:860px) { .toolbar { grid-template-columns:1fr 1fr; } .alert-card { grid-template-columns:1fr; } }
+    @media (max-width:520px) { .toolbar { grid-template-columns:1fr; } h1 { font-size:24px; } }
+  </style>
+  <link rel="stylesheet" href="/cw-ui-kit.css">
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+</head>
+<body data-required-role="ADMIN">
+
+  <div style="padding:12px 16px 0">
+    <button type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
+  </div>
+<main class="page">
+  <div class="page-head">
+    <div>
+      <h1>Alertas rapidos</h1>
+      <p class="muted">Vista operacional simplificada para triagem e conversao de alertas em cobranca.</p>
+    </div>
+    <a class="btn" href="/admin-alerts">Abrir painel completo</a>
+  </div>
+
+  <section class="panel">
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="Pesquisar por cliente, piscina, tecnico ou texto do alerta">
+      <select id="priorityFilter">
+        <option value="">Todas prioridades</option>
+        <option value="CRITICAL">Critica</option>
+        <option value="WARNING">Atencao</option>
+        <option value="NORMAL">Normal</option>
+        <option value="LOW">Baixa</option>
+      </select>
+      <button id="refresh" class="primary" type="button">Atualizar</button>
+      <button id="clear" type="button">Limpar</button>
+    </div>
+    <div id="status" class="status" role="status" aria-live="polite">A carregar alertas...</div>
+    <div id="alertsList" class="alerts-list" aria-live="polite"></div>
+  </section>
+</main>
+
+<script src="/admin-auth-guard.js"></script>
 <script>
+const API = "/api";
+let alertsState = [];
 
-async function convertAlert(id) {
-
-  const price = prompt("Preço (€)");
-  if (!price) return;
-
-  const notify = confirm("Enviar WhatsApp ao cliente?");
-
-  const res = await fetch(`/api/alerts/${id}/convert`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      price: Number(price),
-      notifyClient: notify
-    })
-  });
-
-  const data = await res.json();
-
-  if (data.whatsappUrl) {
-    window.open(data.whatsappUrl);
-  }
-
-  alert("Reparação criada");
-
-  loadAlerts();
+function tokenHeaders() {
+  const token = localStorage.getItem("token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+function esc(v) {
+  return String(v ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function normalise(v) {
+  return String(v ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function setStatus(message, tone = "info") {
+  const el = document.getElementById("status");
+  if (!el) return;
+  el.textContent = message;
+  el.className = `status ${tone === "info" ? "" : tone}`.trim();
+}
+
+function formatDate(value) {
+  const date = value ? new Date(value) : null;
+  return date && !Number.isNaN(date.getTime()) ? date.toLocaleString("pt-PT") : "-";
+}
+
+function cardPriority(alert) {
+  const p = String(alert.priority || "NORMAL").toUpperCase();
+  if (p === "CRITICAL") return "critical";
+  if (p === "WARNING") return "warning";
+  return "";
+}
+
+function matchesFilters(alert) {
+  const query = normalise(document.getElementById("search")?.value || "");
+  const priority = String(document.getElementById("priorityFilter")?.value || "").toUpperCase();
+  if (priority && String(alert.priority || "").toUpperCase() !== priority) return false;
+  if (!query) return true;
+  const hay = normalise([
+    alert.title,
+    alert.message,
+    alert.clientName,
+    alert.poolName,
+    alert.technicianName,
+    alert.type,
+  ].join(" "));
+  return hay.includes(query);
+}
+
+async function fetchAlerts() {
+  setStatus("A carregar alertas...", "info");
+  try {
+    const response = await fetch(`${API}/alerts`, { headers: { ...tokenHeaders() } });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || data.ok === false) {
+      throw new Error(data.error || data.message || `Erro HTTP ${response.status}`);
+    }
+    alertsState = Array.isArray(data.alerts) ? data.alerts : [];
+    renderAlerts();
+  } catch (error) {
+    console.error(error);
+    alertsState = [];
+    renderAlerts();
+    setStatus(`Erro ao carregar alertas: ${error.message}`, "error");
+  }
+}
+
+async function resolveAlert(id) {
+  try {
+    const response = await fetch(`${API}/alerts/${encodeURIComponent(id)}/resolve`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", ...tokenHeaders() },
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || data.ok === false) {
+      throw new Error(data.error || data.message || `Erro HTTP ${response.status}`);
+    }
+    setStatus("Alerta resolvido com sucesso.", "ok");
+    await fetchAlerts();
+  } catch (error) {
+    setStatus(`Falha ao resolver alerta: ${error.message}`, "error");
+  }
+}
+
+async function convertAlert(id) {
+  const price = window.prompt("Preco (EUR)");
+  if (price == null) return;
+  const value = Number(price);
+  if (!Number.isFinite(value) || value <= 0) {
+    setStatus("Valor invalido para conversao.", "error");
+    return;
+  }
+  try {
+    const response = await fetch(`${API}/alerts/${encodeURIComponent(id)}/convert`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...tokenHeaders() },
+      body: JSON.stringify({ price: value }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || data.ok === false) {
+      throw new Error(data.error || data.message || `Erro HTTP ${response.status}`);
+    }
+    setStatus(`Alerta convertido em faturacao (fatura #${data.invoiceId || "n/d"}).`, "ok");
+    await fetchAlerts();
+  } catch (error) {
+    setStatus(`Falha na conversao: ${error.message}`, "error");
+  }
+}
+
+function renderAlerts() {
+  const list = document.getElementById("alertsList");
+  if (!list) return;
+  const items = alertsState.filter(matchesFilters);
+
+  if (!items.length) {
+    list.innerHTML = '<div class="status">Sem alertas para os filtros atuais.</div>';
+    if (alertsState.length) setStatus("Sem resultados para os filtros.", "ok");
+    else setStatus("Sem alertas ativos neste momento.", "ok");
+    return;
+  }
+
+  setStatus(`${items.length} alerta(s) carregado(s).`, "ok");
+  list.innerHTML = items.map((alert) => {
+    const style = cardPriority(alert);
+    return `
+      <article class="alert-card ${style}">
+        <div>
+          <div class="chips">
+            <span class="chip ${style}">${esc(alert.priority || "NORMAL")}</span>
+            <span class="chip">${esc(alert.source || alert.type || "sistema")}</span>
+            <span class="chip">${esc(alert.status || "OPEN")}</span>
+          </div>
+          <h2 class="alert-title">${esc(alert.title || "Alerta operacional")}</h2>
+          <p class="alert-text">${esc(alert.message || "Sem descricao")}</p>
+          <div class="meta">
+            Cliente: ${esc(alert.clientName || "-")} | Piscina: ${esc(alert.poolName || "-")} | Tecnico: ${esc(alert.technicianName || "-")}<br>
+            ${esc(formatDate(alert.createdAt))}
+          </div>
+        </div>
+        <div class="actions">
+          <button type="button" onclick="resolveAlert('${esc(alert.id)}')">Resolver</button>
+          <button type="button" class="primary" onclick="convertAlert('${esc(alert.id)}')">Converter</button>
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
+document.getElementById("refresh")?.addEventListener("click", fetchAlerts);
+document.getElementById("clear")?.addEventListener("click", () => {
+  const search = document.getElementById("search");
+  const priority = document.getElementById("priorityFilter");
+  if (search) search.value = "";
+  if (priority) priority.value = "";
+  renderAlerts();
+});
+document.getElementById("search")?.addEventListener("input", renderAlerts);
+document.getElementById("priorityFilter")?.addEventListener("change", renderAlerts);
+
+window.resolveAlert = resolveAlert;
+window.convertAlert = convertAlert;
+fetchAlerts();
 </script>
+
+<script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+<script src="/crystal-os-v2-nav.js"></script>
+</body>
+</html>

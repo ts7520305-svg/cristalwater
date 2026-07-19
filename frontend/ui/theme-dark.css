@@ -1,0 +1,27 @@
+@media (prefers-color-scheme: dark) {
+  :root {
+    --cw-color-bg: #10161c;
+    --cw-color-bg-2: #151d25;
+    --cw-color-surface: #131c24;
+    --cw-color-surface-2: #0f1720;
+    --cw-color-text: #e8f0f6;
+    --cw-color-text-soft: #b3c2d0;
+    --cw-color-border: rgba(166, 199, 227, 0.24);
+    --cw-color-primary: #68b6cf;
+    --cw-color-primary-2: #77b2c5;
+    --cw-color-danger: #ff8f9a;
+    --cw-color-warning: #ffcf7a;
+    --cw-color-success: #67d49f;
+  }
+
+  .cw-v2-mobile-nav a,
+  .cw-v2-mobile-nav button {
+    background: rgba(16, 39, 60, 0.9);
+    color: #dff1ff;
+  }
+
+  .cw-v2-mobile-nav a.is-active {
+    background: #1f6f91;
+    color: #f3fbff;
+  }
+}

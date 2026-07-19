@@ -1,12 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const { prisma } = require("../prismaClient");
+const auth = require("../middlewares/authMiddleware");
 const {
   listClientPayments,
   markClientPaid,
   markClientReminded,
   registerManualReceived,
 } = require("../controllers/adminPaymentController");
+
+router.use(auth("ADMIN"));
 
 // Dashboard de cobranças usado por admin-collection.js
 router.get("/", listClientPayments);

@@ -1,5 +1,13 @@
 const API = "/api";
 
+function authHeaders(extra = {}) {
+  const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
+  return {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...extra,
+  };
+}
+
 let map = L.map('map').setView([37.1, -8.6], 10);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
@@ -26,8 +34,10 @@ async function loadPools(){
 
   clearMap();
 
-  const res = await fetch(`${API}/pools`);
-  const pools = await res.json();
+  const res = await fetch(`${API}/pools`, { headers: authHeaders() });
+  if (!res.ok) return;
+  const poolsData = await res.json();
+  const pools = Array.isArray(poolsData) ? poolsData : [];
 
   pools.forEach(p => {
 
@@ -56,8 +66,10 @@ async function loadNearby(){
 
     clearMap();
 
-    const res = await fetch(`${API}/pools/nearby?lat=${lat}&lng=${lng}`);
-    const pools = await res.json();
+    const res = await fetch(`${API}/pools/nearby?lat=${lat}&lng=${lng}`, { headers: authHeaders() });
+    if (!res.ok) return;
+    const poolsData = await res.json();
+    const pools = Array.isArray(poolsData) ? poolsData : [];
 
     pools.forEach(p => {
 
@@ -70,7 +82,7 @@ async function loadNearby(){
 
     });
 
-  });
+  }, () => {});
 }
 
 // ==========================================================
@@ -81,8 +93,10 @@ async function loadRoute(){
 
   clearMap();
 
-  const res = await fetch(`${API}/pools`);
-  const pools = await res.json();
+  const res = await fetch(`${API}/pools`, { headers: authHeaders() });
+  if (!res.ok) return;
+  const poolsData = await res.json();
+  const pools = Array.isArray(poolsData) ? poolsData : [];
 
   pools.forEach(p => {
 

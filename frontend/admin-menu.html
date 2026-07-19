@@ -2,85 +2,197 @@
 <html lang="pt">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#050b16">
-  <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="stylesheet" href="/cristal-assist.css">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0f1723">
+  <title>Cristal Water · Menu Completo</title>
   <script src="/cw-auth.js"></script>
-  <title>Cristal Water - Menu Admin</title>
-  <style>
-    *{box-sizing:border-box} body{margin:0;font-family:Arial,sans-serif;background:#edf4fb;color:#0f172a} header{background:white;padding:18px 22px;border-bottom:4px solid #1e88e5;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 2px 12px rgba(0,0,0,.08)} .brand{display:flex;align-items:center;gap:14px} .brand img{height:62px}.brand h1{margin:0;color:#1e88e5;font-size:26px}.brand p{margin:4px 0 0;color:#64748b} main{padding:22px}.section-title{margin:28px 0 14px;color:#1565c0;font-size:22px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:16px}.card{background:white;border-radius:18px;padding:20px;box-shadow:0 3px 14px rgba(0,0,0,.08);border-top:6px solid #1e88e5}.card h3{margin:0 0 10px;color:#1565c0}.card p{color:#64748b;font-size:14px;line-height:1.45;min-height:52px}.card button,.logout-btn{border:0;border-radius:12px;padding:11px 15px;font-weight:800;cursor:pointer}.card button{background:#1e88e5;color:white}.logout-btn{background:#dc2626;color:white}.critical{border-top-color:#dc2626}.critical h3{color:#dc2626}.green{border-top-color:#16a34a}.green h3{color:#16a34a}.purple{border-top-color:#7c3aed}.purple h3{color:#7c3aed} footer{text-align:center;color:#64748b;padding:24px}
-  </style>
-<link rel="stylesheet" href="/cw-polish.css">
+  <link rel="stylesheet" href="/ui/foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/cw-premium-admin-phase1.css">
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
 </head>
-<body>
-<header>
-  <div class="brand"><img src="/logo.png" alt="Cristal Water"><div><h1>Cristal Water</h1><p>Admin Enterprise Menu · V22.5.1.8</p></div></div>
-  <button class="logout-btn" id="logoutBtn">Terminar Sessão</button>
-</header>
-<main>
-  <h2 class="section-title">🚀 Fluxo principal</h2>
-  <div class="grid">
-    <div class="card green"><h3>Entrada guiada</h3><p>Criar cliente, piscina/jacuzzi, ficha tecnica minima, ronda e primeira visita num fluxo unico.</p><button data-route="/admin-onboarding.html">Abrir</button></div>
-    <div class="card green"><h3>✅ Centro de Operações</h3><p>Painel único para criar técnicos, clientes, piscinas, rondas, visitas, stock e faturação.</p><button data-route="/admin-master-control">Abrir</button></div>
-    <div class="card green"><h3>🧭 Centro de Operações</h3><p>Fluxo completo operacional: clientes, piscinas, rondas, visitas, reparações e faturas.</p><button data-route="/admin-core-flow">Abrir</button></div>
-    <div class="card green"><h3>⚙️ Fluxo Operacional</h3><p>Onboarding guiado e estado operacional do sistema.</p><button data-route="/admin-operational-flow">Abrir</button></div>
-    <div class="card"><h3>📊 Dashboard</h3><p>Centro de monitorização, métricas, GPS e inteligência operacional.</p><button data-route="/admin-dashboard">Abrir</button></div>
-    <div class="card purple"><h3>🤖 Assistente interno</h3><p>Assistente interno de operação, alertas, cobranças e suporte de decisão.</p><button data-route="/admin-ai">Abrir</button></div>
+<body class="admin-shell" data-required-role="ADMIN">
+  <div class="cw-v2-app">
+    <aside class="cw-v2-sidebar" aria-label="Navegacao principal">
+      <div class="cw-v2-brand">
+        <img src="/logo-cristalwater.png" alt="Cristal Water">
+        <div>
+          <b>Cristal Water</b>
+          <small>Administrador</small>
+        </div>
+      </div>
+      <nav class="cw-v2-nav" aria-label="Acesso rapido">
+        <a href="/admin-master-control" data-shell-search="Centro de comando">Centro</a>
+        <a href="/admin-today" data-shell-search="Hoje">Hoje</a>
+        <a class="is-active" href="/admin-menu" data-shell-search="Menu completo">Menu completo</a>
+        <a href="/admin-alerts" data-shell-search="Alertas">Alertas</a>
+        <a href="/admin-visits" data-shell-search="Visitas">Visitas</a>
+      </nav>
+      <div class="cw-today-stamp">Regra dos tres cliques: tudo acessivel daqui.</div>
+    </aside>
+
+    <main class="cw-v2-main">
+      <header class="cw-v2-topbar">
+        <div class="cw-v2-search">
+          <input id="menuSearch" type="search" placeholder="Pesquisar modulo, funcionalidade ou area">
+          <span class="icon">⌕</span>
+        </div>
+        <div class="cw-v2-top-actions">
+          <button class="cw-v2-btn cw-mobile-back" type="button" data-cw-action="back">Voltar</button>
+          <a class="cw-v2-btn" href="/admin-master-control">Centro</a>
+          <button class="cw-v2-btn" type="button" data-cw-open-drawer>Menu</button>
+        </div>
+      </header>
+
+      <section class="cw-context-row" aria-label="Contexto de navegacao">
+        <button class="cw-v2-btn" type="button" data-cw-action="back">Voltar</button>
+        <span class="cw-context-path">Menu completo</span>
+      </section>
+
+      <section class="cw-today-head" aria-label="Contexto de navegacao">
+        <div>
+          <h1>Menu completo</h1>
+          <p>Navegacao unica e consistente para toda a operacao administrativa.</p>
+        </div>
+        <span class="cw-today-stamp">Priorizar simplicidade, velocidade e contexto</span>
+      </section>
+
+      <section class="cw-v2-grid cols-2" style="margin-top:12px;margin-bottom:10px">
+        <article class="cw-v2-card">
+          <div class="cw-priority-head">
+            <h2>Recentes</h2>
+            <span class="pill">acesso rápido</span>
+          </div>
+          <nav class="cw-menu-links">
+            <a href="/admin-master-control">Centro de comando <span>→</span></a>
+            <a href="/admin-today">Hoje <span>→</span></a>
+            <a href="/admin-alerts">Alertas <span>→</span></a>
+          </nav>
+        </article>
+        <article class="cw-v2-card">
+          <div class="cw-priority-head">
+            <h2>Favoritos</h2>
+            <span class="pill">atalhos operacionais</span>
+          </div>
+          <nav class="cw-menu-links">
+            <a href="/admin-rounds">Rondas <span>→</span></a>
+            <a href="/admin-technicians">Tecnicos <span>→</span></a>
+            <a href="/invoices">Faturas <span>→</span></a>
+          </nav>
+        </article>
+      </section>
+
+      <section id="menuGrid" class="cw-menu-grid" aria-label="Catalogo de modulos do administrador">
+        <details class="cw-menu-group" data-menu-group="operacao" open>
+          <summary>Operacao diaria</summary>
+          <p>Controlo da execucao de campo e decisoes do dia.</p>
+          <nav class="cw-menu-links">
+            <a href="/admin-master-control" data-shell-search="Centro de comando">Centro de comando <span>→</span></a>
+            <a href="/admin-today" data-shell-search="Hoje">Hoje <span>→</span></a>
+            <a href="/admin-visits" data-shell-search="Visitas">Visitas <span>→</span></a>
+            <a href="/admin-rounds" data-shell-search="Rondas">Rondas <span>→</span></a>
+            <a href="/admin-live-map" data-shell-search="Mapa em tempo real">Mapa em tempo real <span>→</span></a>
+          </nav>
+        </details>
+
+        <details class="cw-menu-group" data-menu-group="clientes" open>
+          <summary>Clientes e equipas</summary>
+          <p>Registos, relacao e produtividade da equipa.</p>
+          <nav class="cw-menu-links">
+            <a href="/admin-clients" data-shell-search="Clientes">Clientes <span>→</span></a>
+            <a href="/admin-technicians" data-shell-search="Tecnicos">Tecnicos <span>→</span></a>
+            <a href="/admin-pools" data-shell-search="Piscinas">Piscinas <span>→</span></a>
+            <a href="/admin-crm" data-shell-search="CRM">CRM <span>→</span></a>
+            <a href="/admin-service-log" data-shell-search="Historico de servico">Historico de servico <span>→</span></a>
+          </nav>
+        </details>
+
+        <details class="cw-menu-group" data-menu-group="ativos">
+          <summary>Ativos e armazem</summary>
+          <p>Stock, viaturas e equipamentos com rastreio.</p>
+          <nav class="cw-menu-links">
+            <a href="/admin-inventory" data-shell-search="Stock e inventario">Stock e inventario <span>→</span></a>
+            <a href="/admin-vehicles" data-shell-search="Viaturas">Viaturas <span>→</span></a>
+            <a href="/admin-pool-technical" data-shell-search="Equipamentos tecnicos">Equipamentos tecnicos <span>→</span></a>
+            <a href="/admin-keys" data-shell-search="Chaves">Chaves <span>→</span></a>
+            <a href="/admin-pool-calculator" data-shell-search="Calculadora tecnica">Calculadora tecnica <span>→</span></a>
+          </nav>
+        </details>
+
+        <details class="cw-menu-group" data-menu-group="financeiro" open>
+          <summary>Financeiro</summary>
+          <p>Cobranca, faturacao e analise de receita.</p>
+          <nav class="cw-menu-links">
+            <a href="/billing" data-shell-search="Financeiro">Financeiro <span>→</span></a>
+            <a href="/invoices" data-shell-search="Faturas">Faturas <span>→</span></a>
+            <a href="/admin-payments" data-shell-search="Pagamentos">Pagamentos <span>→</span></a>
+            <a href="/admin-collection" data-shell-search="Cobranca">Cobranca <span>→</span></a>
+            <a href="/admin-reports" data-shell-search="Relatorios">Relatorios <span>→</span></a>
+          </nav>
+        </details>
+
+        <details class="cw-menu-group" data-menu-group="comunicacao">
+          <summary>Comunicacao e alertas</summary>
+          <p>Excecoes, mensagens e canais operacionais.</p>
+          <nav class="cw-menu-links">
+            <a href="/admin-alerts" data-shell-search="Alertas">Alertas <span>→</span></a>
+            <a href="/admin-notifications" data-shell-search="Notificacoes">Notificacoes <span>→</span></a>
+            <a href="/chat" data-shell-search="Chat">Chat <span>→</span></a>
+            <a href="/communications" data-shell-search="Comunicacoes">Comunicacoes <span>→</span></a>
+            <a href="/admin-email-logs" data-shell-search="Registos email">Registos email <span>→</span></a>
+          </nav>
+        </details>
+
+        <details class="cw-menu-group" data-menu-group="sistema">
+          <summary>Sistema e governance</summary>
+          <p>Configuracao, seguranca e auditoria.</p>
+          <nav class="cw-menu-links">
+            <a href="/admin-operational-settings" data-shell-search="Definicoes operacionais">Definicoes operacionais <span>→</span></a>
+            <a href="/admin-security" data-shell-search="Seguranca">Seguranca <span>→</span></a>
+            <a href="/admin-test-center" data-shell-search="Centro de testes">Centro de testes <span>→</span></a>
+            <a href="/crystal-os-v2-route-index" data-shell-search="Indice de rotas">Indice de rotas <span>→</span></a>
+            <a href="/admin-onboarding" data-shell-search="Onboarding">Onboarding <span>→</span></a>
+          </nav>
+        </details>
+      </section>
+    </main>
   </div>
 
-  <h2 class="section-title">👥 Gestão operacional</h2>
-  <div class="grid">
-    <div class="card"><h3>👤 Clientes</h3><p>Criar, consultar e gerir clientes.</p><button data-route="/admin-clients">Abrir</button></div>
-    <div class="card"><h3>🏊 Piscinas</h3><p>Criar piscinas, associar cliente, zona, volume e coordenadas.</p><button data-route="/admin-pools">Abrir</button></div>
-    <div class="card"><h3>👷 Técnicos</h3><p>Criar técnicos, PIN, email, zona e estado ativo.</p><button data-route="/admin-technicians">Abrir</button></div>
-    <div class="card"><h3>🛰️ Rondas</h3><p>Planeamento semanal, técnicos e piscinas.</p><button data-route="/admin-rounds">Abrir</button></div>
-    <div class="card"><h3>📅 Visitas</h3><p>Criar e acompanhar visitas em campo.</p><button data-route="/admin-visits">Abrir</button></div>
-    <div class="card"><h3>📍 Hoje</h3><p>Resumo operacional do dia.</p><button data-route="/admin-today">Abrir</button></div>
-  </div>
+  <nav class="cw-v2-mobile-nav" aria-label="Navegacao movel administrador">
+    <a href="/admin-master-control">Centro</a>
+    <a href="/admin-today">Hoje</a>
+    <a href="/admin-visits">Visitas</a>
+    <a href="/admin-alerts">Alertas</a>
+    <a class="is-active" href="/admin-menu">Menu</a>
+  </nav>
 
-  <h2 class="section-title">📦 Stock, frota e guias</h2>
-  <div class="grid">
-    <div class="card"><h3>📦 Stock / Compras</h3><p>Compras, stock central, transferências para viaturas e consumos.</p><button data-route="/admin-inventory">Abrir</button></div>
-    <div class="card"><h3>🚐 Frota e Guias</h3><p>Viaturas, guias de transporte e controlo operacional.</p><button data-route="/admin-vehicles">Abrir</button></div>
-    <div class="card"><h3>🧮 Calculadora Técnica</h3><p>Cálculos de piscina, volume e dosagem.</p><button data-route="/admin-pool-calculator">Abrir</button></div>
-  </div>
+  <script src="/admin-auth-guard.js"></script>
+  <script src="/cw-admin-premium-controls.js"></script>
+  <script>
+    (function () {
+      const search = document.getElementById("menuSearch");
+      const groups = Array.from(document.querySelectorAll(".cw-menu-group"));
 
-  <h2 class="section-title">💶 Financeiro</h2>
-  <div class="grid">
-    <div class="card"><h3>💳 Cobranças</h3><p>Centro financeiro, mensalidades e pagamentos.</p><button data-route="/billing">Abrir</button></div>
-    <div class="card"><h3>💰 Pagamentos</h3><p>Registo e consulta de pagamentos.</p><button data-route="/admin-payments">Abrir</button></div>
-    <div class="card"><h3>📈 Cobrança avançada</h3><p>Listas de dívida, cobranças e avisos.</p><button data-route="/admin-collection">Abrir</button></div>
-  </div>
+      function applyFilter() {
+        const term = String(search?.value || "").trim().toLowerCase();
+        groups.forEach((group) => {
+          const links = Array.from(group.querySelectorAll("a"));
+          let visibleCount = 0;
 
-  <h2 class="section-title">🚨 Alertas, reparações e relatórios</h2>
-  <div class="grid">
-    <div class="card critical"><h3>🚨 Alertas</h3><p>Alertas técnicos e operacionais.</p><button data-route="/admin-alerts">Abrir</button></div>
-    <div class="card critical"><h3>🛠️ Incidentes</h3><p>Centro de incidentes e escalamento.</p><button data-route="/incident-center">Abrir</button></div>
-    <div class="card"><h3>📄 Relatórios</h3><p>Relatórios operacionais e técnicos.</p><button data-route="/admin-reports">Abrir</button></div>
-    <div class="card"><h3>📧 Emails</h3><p>Logs e reenvio de emails.</p><button data-route="/admin-email-logs">Abrir</button></div>
-  </div>
+          links.forEach((link) => {
+            const text = `${link.textContent} ${link.getAttribute("data-shell-search") || ""}`.toLowerCase();
+            const visible = !term || text.includes(term);
+            link.style.display = visible ? "flex" : "none";
+            if (visible) visibleCount += 1;
+          });
 
-  <h2 class="section-title">🗺️ GPS, Lembretes e sistema</h2>
-  <div class="grid">
-    <div class="card"><h3>🌍 Live Map</h3><p>Mapa live dos técnicos e posições GPS.</p><button data-route="/admin-live-map">Abrir</button></div>
-    <div class="card"><h3>💬 Chat interno</h3><p>Comunicação cliente/admin/técnicos.</p><button data-route="/chat">Abrir</button></div>
-    <div class="card"><h3>🔔 Notificações</h3><p>Centro de notificações.</p><button data-route="/admin-notifications">Abrir</button></div>
-    <div class="card"><h3>🎨 Configuração visual</h3><p>Tema, cores e preferências.</p><button data-route="/admin-ui-settings">Abrir</button></div>
-    <div class="card"><h3>🔐 Segurança</h3><p>Auditoria, permissões e segurança.</p><button data-route="/admin-security">Abrir</button></div>
-    
-  </div>
-</main>
-<footer>© Cristal Water · Enterprise Operations Platform</footer>
-<script src="/admin-auth-guard.js"></script>
-<script>
-  document.getElementById('logoutBtn')?.addEventListener('click',()=>{localStorage.removeItem('token');localStorage.removeItem('user');location.href='/login';});
-  document.querySelectorAll('[data-route]').forEach(btn=>btn.addEventListener('click',()=>{location.href=btn.dataset.route;}));
-</script>
-<script src="/cristal-help-data.js"></script>
-<script src="/cristal-assist.js"></script>
-<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{});}</script>
-<script src="/cw-admin-shortcuts.js"></script>
-<script src="/cw-flow-shell.js"></script>
+          group.style.display = visibleCount ? "grid" : "none";
+          if (visibleCount && term && !group.hasAttribute("open")) group.setAttribute("open", "");
+        });
+      }
+
+      if (search) search.addEventListener("input", applyFilter);
+    })();
+  </script>
 </body>
 </html>

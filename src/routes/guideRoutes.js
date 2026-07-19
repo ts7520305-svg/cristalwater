@@ -1,13 +1,11 @@
 const express = require("express");
-const fs = require("fs");
 const multer = require("multer");
-const path = require("path");
 const router = express.Router();
+const { resolveUploadSubdir } = require("../config/uploadPath");
 
 const c = require("../controllers/guideController");
 
-const guideUploadDir = path.join(__dirname, "../../uploads/guides");
-fs.mkdirSync(guideUploadDir, { recursive: true });
+const guideUploadDir = resolveUploadSubdir("guides");
 
 const guideDocumentUpload = multer({
   storage: multer.diskStorage({

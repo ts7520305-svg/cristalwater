@@ -6,9 +6,11 @@
   <meta charset="UTF-8" />
   <title>Centro de Cobranças - Cristal Water</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/ui/foundation.css">
 
   <style>
     * { box-sizing: border-box; }
+    html, body { overflow-x: hidden; }
 
     body {
       margin: 0;
@@ -116,9 +118,15 @@
       min-width: 220px;
     }
 
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
+      min-width: 980px;
     }
 
     th, td {
@@ -177,25 +185,61 @@
       color: #6b7280;
       font-size: 12px;
     }
+
+    .status {
+      border: 1px solid #d5dde8;
+      background: #f9fbff;
+      color: #334155;
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+
+    .status.error {
+      border-color: #efc0c7;
+      background: #fff3f5;
+      color: #8b1f2a;
+    }
+
+    .status.ok {
+      border-color: #b9e2ca;
+      background: #f2fbf6;
+      color: #165434;
+    }
+
+    @media (max-width: 760px) {
+      body {
+        padding: 12px;
+      }
+
+      input, select {
+        min-width: 100%;
+      }
+
+      .panel-header {
+        align-items: stretch;
+      }
+    }
   </style>
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
+  <script src="/admin-auth-guard.js"></script>
 </head>
-<body>
+<body data-required-role="ADMIN">
 
   <h1>Centro de Cobranças</h1>
 
   <div class="topbar">
-    <a class="action-btn" href="/dashboard.html" title="Voltar ao dashboard">
+    <a class="action-btn" href="/admin-dashboard" title="Voltar ao dashboard">
       <span class="icon">🏠</span><span>Dashboard</span>
     </a>
 
-    <a class="action-btn" href="/notifications.html" title="Abrir notificações">
+    <a class="action-btn" href="/admin-notifications" title="Abrir notificacoes">
       <span class="icon">🔔</span><span>Notificações</span>
     </a>
 
-    <a class="action-btn" href="/communications.html" title="Ver histórico de comunicações">
+    <a class="action-btn" href="/communications" title="Ver historico de comunicacoes">
       <span class="icon">💬</span><span>Comunicações</span>
     </a>
   </div>
@@ -236,6 +280,7 @@
       </div>
     </div>
 
+    <div id="billingStatus" class="status" role="status" aria-live="polite">A carregar dados de cobranca...</div>
     <div id="tableBox"></div>
   </div>
 
@@ -243,6 +288,8 @@
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
-<script src="/cw-flow-shell.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

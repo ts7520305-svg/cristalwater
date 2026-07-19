@@ -6,11 +6,16 @@ const { prisma } =
   require("../prismaClient");
 
 const multer = require("multer");
+const TechnicianVisitBusiness = require("../business/technician/TechnicianVisitBusiness");
 const { completeServiceVisit, VisitCompletionError } = require("../services/serviceVisitCompletionService");
 const {
   buildServiceVisitDayQuery,
   toPositiveInt
 } = require("../utils/serviceVisitFilters");
+const auth = require("../middlewares/authMiddleware");
+const { roleMatches } = require("../utils/roles");
+
+router.use(auth("TECHNICIAN"));
 
 // ======================================================
 // UPLOAD
@@ -38,6 +43,54 @@ const storage =
 const upload =
   multer({ storage });
 
+function emitVisitRefresh(visitId, payload = {}) {
+  if (!global.io) return;
+
+  global.io.emit("dashboard-refresh", {
+    source: payload.source || "VISIT_ACTION",
+    visitId,
+    poolId: payload.poolId || null,
+  });
+
+  global.io.emit("visit-updated", {
+    visitId,
+    poolId: payload.poolId || null,
+    type: payload.source || "VISIT_ACTION",
+  });
+}
+
+async function loadScopedVisit(req, visitId) {
+  const id = Number(visitId);
+  if (!Number.isInteger(id) || id <= 0) {
+    return { ok: false, status: 400, error: "ID de visita invalido" };
+  }
+
+  const visit = await prisma.serviceVisit.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      technicianId: true,
+      poolId: true,
+      clientId: true,
+      status: true,
+      endAt: true,
+    },
+  });
+
+  if (!visit) {
+    return { ok: false, status: 404, error: "Visita nao encontrada" };
+  }
+
+  if (roleMatches(req.user?.role, "TECHNICIAN") && !roleMatches(req.user?.role, "ADMIN")) {
+    const authTechId = Number(req.user?.technicianId || req.user?.id || 0);
+    if (!authTechId || Number(visit.technicianId || 0) !== authTechId) {
+      return { ok: false, status: 403, error: "Acesso negado" };
+    }
+  }
+
+  return { ok: true, visit };
+}
+
 // ======================================================
 // TODAY VISITS
 // ======================================================
@@ -45,8 +98,14 @@ const upload =
 router.get("/today", async (req, res) => {
 
   try {
+    const scopedQuery = { ...(req.query || {}) };
+    if (roleMatches(req.user?.role, "TECHNICIAN") && !roleMatches(req.user?.role, "ADMIN")) {
+      scopedQuery.technicianId = req.user?.technicianId || req.user?.id;
+    }
     const dayQuery =
-      buildServiceVisitDayQuery(req.query || {});
+      buildServiceVisitDayQuery(scopedQuery);
+
+    const take = Math.min(toPositiveInt(req.query?.limit) || 200, 300);
 
     const visits =
       await prisma.serviceVisit.findMany({
@@ -72,7 +131,9 @@ router.get("/today", async (req, res) => {
         orderBy: {
 
           plannedDate: "asc"
-        }
+        },
+
+        take
       });
 
     const formatted =
@@ -180,42 +241,20 @@ router.get("/today", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
-    const visitId = Number(req.params.id);
-    if (!Number.isInteger(visitId) || visitId <= 0) {
-      return res.status(400).json({
-        ok: false,
-        error: "ID de visita invalido"
-      });
+    const scoped = await loadScopedVisit(req, req.params.id);
+    if (!scoped.ok) {
+      return res.status(scoped.status).json({ ok: false, error: scoped.error });
     }
 
-    const visit = await prisma.serviceVisit.findUnique({
-      where: { id: visitId },
-      include: {
-        client: true,
-        technician: true,
-        pool: {
-          include: {
-            client: true,
-            equipment: true,
-            technicalRoom: true
-          }
-        },
-        photos: true,
-        chemicals: true,
-        attachments: true
-      }
-    });
-
-    if (!visit) {
-      return res.status(404).json({
-        ok: false,
-        error: "Visita nao encontrada"
-      });
+    const result = await TechnicianVisitBusiness.getVisitById(scoped.visit.id);
+    if (!result.ok) {
+      return res.status(result.status).json({ ok: false, error: result.error });
     }
 
     return res.json({
       ok: true,
-      visit
+      visit: result.visit,
+      context: result.context,
     });
   } catch (err) {
     console.error("visit detail error:", err);
@@ -255,44 +294,100 @@ router.post("/start", async (req, res) => {
 
     const parsedTechnicianId =
       toPositiveInt(technicianId);
+    const parsedRoundId =
+      toPositiveInt(req.body?.roundId);
     const scheduledAt =
       plannedDate ? new Date(plannedDate) : new Date();
     const shouldStartNow =
       startNow === true || String(startNow || "").toLowerCase() === "true";
 
-    const visit =
-      await prisma.serviceVisit.create({
-
-        data: {
-
-          poolId:
-            Number(poolId),
-
-          technicianId:
-            parsedTechnicianId,
-
-          technicianName:
-            technicianName || "Tecnico",
-
-          plannedDate:
-            Number.isNaN(scheduledAt.getTime()) ? new Date() : scheduledAt,
-
-          date:
-            Number.isNaN(scheduledAt.getTime()) ? new Date() : scheduledAt,
-
-          status:
-            shouldStartNow ? "IN_PROGRESS" : "PLANNED",
-
-          startAt:
-            shouldStartNow ? new Date() : null
-        }
+    if (Number.isNaN(scheduledAt.getTime())) {
+      return res.status(400).json({
+        ok: false,
+        message: "Data planeada inválida",
       });
+    }
+
+    const dedupeWindowMs = 60 * 1000;
+    const windowStart = new Date(scheduledAt.getTime() - dedupeWindowMs);
+    const windowEnd = new Date(scheduledAt.getTime() + dedupeWindowMs);
+    const poolLockKey = Number(poolId) || 0;
+    const slotBucket = Math.floor(scheduledAt.getTime() / 60000);
+    const techBucket = (parsedTechnicianId || 0) % 100000;
+    const roundBucket = (parsedRoundId || 0) % 100000;
+    const slotLockKey = Number((slotBucket + techBucket * 101 + roundBucket * 1009) % 2147483647);
+    const lockKey = Number(poolLockKey) * 2147483647 + Number(slotLockKey);
+
+    const result = await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(CAST(${lockKey} AS bigint))`;
+
+      const existingVisit = await tx.serviceVisit.findFirst({
+        where: {
+          poolId: Number(poolId),
+          technicianId: parsedTechnicianId ?? null,
+          roundId: parsedRoundId ?? null,
+          status: { in: ["PLANNED", "IN_PROGRESS", "OPEN", "PENDING"] },
+          OR: [
+            { plannedDate: { gte: windowStart, lte: windowEnd } },
+            { date: { gte: windowStart, lte: windowEnd } },
+          ],
+        },
+        orderBy: { id: "desc" },
+      });
+
+      if (existingVisit) {
+        return {
+          visit: existingVisit,
+          idempotent: true,
+        };
+      }
+
+      const createdVisit =
+        await tx.serviceVisit.create({
+
+          data: {
+
+            poolId:
+              Number(poolId),
+
+            technicianId:
+              parsedTechnicianId,
+
+            roundId:
+              parsedRoundId,
+
+            technicianName:
+              technicianName || "Tecnico",
+
+            plannedDate:
+              scheduledAt,
+
+            date:
+              scheduledAt,
+
+            status:
+              shouldStartNow ? "IN_PROGRESS" : "PLANNED",
+
+            startAt:
+              shouldStartNow ? new Date() : null
+          }
+        });
+
+      return {
+        visit: createdVisit,
+        idempotent: false,
+      };
+    }, { isolationLevel: "Serializable" });
 
     return res.json({
 
       ok: true,
 
-      visit
+      visit: result.visit,
+
+      idempotent: result.idempotent,
+
+      message: result.idempotent ? "Visita equivalente já existe (idempotente)" : undefined,
     });
 
   } catch (err) {
@@ -320,7 +415,59 @@ router.post("/complete", (req, res) => {
     });
   }
 
-  return res.redirect(307, `/api/core/visits/${visitId}/complete`);
+  return loadScopedVisit(req, visitId)
+    .then((scoped) => {
+      if (!scoped.ok) {
+        return res.status(scoped.status).json({ ok: false, error: scoped.error });
+      }
+      return res.redirect(307, `/api/core/visits/${visitId}/complete`);
+    })
+    .catch((err) => {
+      console.error("visit complete scope error:", err);
+      return res.status(500).json({ ok: false, error: err.message || "Erro ao validar visita" });
+    });
+});
+
+router.post("/:id/start", async (req, res) => {
+  try {
+    const result = await TechnicianVisitBusiness.startVisit(req.params.id);
+
+    if (!result.ok) {
+      return res.status(result.status).json({ ok: false, error: result.error });
+    }
+
+    return res.json({
+      ok: true,
+      visit: result.visit,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ ok: false, error: err.message || "Erro ao iniciar visita" });
+  }
+});
+
+router.post("/:id/not-done", async (req, res) => {
+  try {
+    const scoped = await loadScopedVisit(req, req.params.id);
+    if (!scoped.ok) {
+      return res.status(scoped.status).json({ ok: false, error: scoped.error });
+    }
+
+    const result = await TechnicianVisitBusiness.markVisitNotDone({
+      visitId: scoped.visit.id,
+      notes: req.body?.notes,
+      internalNotes: req.body?.internalNotes,
+    });
+
+    if (!result.ok) {
+      return res.status(result.status).json({ ok: false, error: result.error });
+    }
+
+    return res.json({ ok: true, visit: result.visit, idempotent: Boolean(result.idempotent) });
+  } catch (err) {
+    console.error("markVisitNotDone route error:", err);
+    return res.status(500).json({ ok: false, error: err.message || "Erro ao marcar visita como não feita" });
+  }
 });
 
 router.post("/complete-disabled", async (req, res) => {
@@ -470,40 +617,17 @@ router.post(
 
     try {
 
-      if (!req.file){
+      const result = await TechnicianVisitBusiness.recordVisitPhoto(req.params.id, req.file, req.body.type || "AFTER");
 
-        return res.json({
-
-          ok: false,
-
-          message:
-            "Sem ficheiro"
-        });
+      if (!result.ok) {
+        return res.status(result.status).json({ ok: false, error: result.error });
       }
-
-      const type =
-        req.body.type || "AFTER";
-
-      const photo =
-        await prisma.visitPhoto.create({
-
-          data: {
-
-            visitId:
-              Number(req.params.id),
-
-            url:
-              `/uploads/${req.file.filename}`,
-
-            type
-          }
-        });
 
       return res.json({
 
         ok: true,
 
-        photo
+        photo: result.photo
       });
 
     } catch (err) {
@@ -518,11 +642,26 @@ router.post(
   }
 );
 
+router.post("/:id/observation", async (req, res) => {
+  try {
+    const result = await TechnicianVisitBusiness.recordVisitObservation(req.params.id, req.body || {});
+
+    if (!result.ok) {
+      return res.status(result.status).json({ ok: false, error: result.error });
+    }
+
+    return res.json({ ok: true, visit: result.visit });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ ok: false, error: err.message || "Erro ao registar observação" });
+  }
+});
+
 // ======================================================
 // FIELD PROBLEM ALERT
 // ======================================================
 
-router.post("/alert", async (req, res) => {
+async function handleIncident(req, res) {
 
   try {
 
@@ -541,91 +680,22 @@ router.post("/alert", async (req, res) => {
       });
     }
 
-    const visit =
-      await prisma.serviceVisit.findUnique({
-        where: {
-          id: Number(visitId)
-        },
-        include: {
-          pool: {
-            include: {
-              client: true
-            }
-          }
-        }
-      });
+    const result = await TechnicianVisitBusiness.recordVisitIncident({
+      visitId,
+      message,
+      type,
+      priority,
+    });
 
-    if (!visit || !visit.poolId){
-
-      return res.status(404).json({
-        ok: false,
-        error: "Visita ou piscina não encontrada"
-      });
-    }
-
-    const finalPriority =
-      priority || "NORMAL";
-
-    const repair =
-      await prisma.repair.create({
-        data: {
-          poolId: visit.poolId,
-          problem: String(message),
-          status: "PENDING",
-          priority: finalPriority,
-          notes: `Reportado pelo técnico em campo na visita #${visit.id}.`
-        }
-      });
-
-    const technicalAlert =
-      await prisma.technicalAlert.create({
-        data: {
-          poolId: visit.poolId,
-          type: type || "FIELD_PROBLEM",
-          message: String(message),
-          priority: finalPriority,
-          status: "OPEN"
-        }
-      }).catch(() => null);
-
-    const notification =
-      await prisma.notification.create({
-        data: {
-          clientId: visit.pool?.client?.id || null,
-          type: finalPriority === "HIGH" ? "CRITICAL" : "ALERT",
-          eventType: "FIELD_PROBLEM_REPORTED",
-          title: "Problema reportado pelo técnico",
-          message: `${visit.pool?.name || "Piscina"} - ${message}`,
-          role: "ADMIN",
-          severity: finalPriority,
-          metadata: {
-            visitId: visit.id,
-            poolId: visit.poolId,
-            repairId: repair.id,
-            alertId: technicalAlert?.id || null
-          }
-        }
-      }).catch(() => null);
-
-    if (global.io && notification){
-
-      global.io.emit(
-        "new-notification",
-        {
-          id: notification.id,
-          message: notification.message,
-          type: notification.type,
-          createdAt: notification.createdAt,
-          clientId: notification.clientId
-        }
-      );
+    if (!result.ok) {
+      return res.status(result.status).json({ ok: false, error: result.error });
     }
 
     return res.json({
       ok: true,
-      repair,
-      alert: technicalAlert,
-      notification
+      repair: result.repair,
+      alert: result.alert,
+      notification: result.notification,
     });
 
   } catch (err) {
@@ -637,7 +707,10 @@ router.post("/alert", async (req, res) => {
       error: err.message
     });
   }
-});
+}
+
+router.post("/alert", handleIncident);
+router.post("/incident", handleIncident);
 
 // ======================================================
 

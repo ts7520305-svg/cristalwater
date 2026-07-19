@@ -21,6 +21,8 @@
   href="https://unpkg.com/leaflet/dist/leaflet.css"
 />
 
+<link rel="stylesheet" href="/ui/foundation.css">
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -61,8 +63,6 @@ header{
   align-items:center;
 
   box-shadow:0 2px 12px rgba(0,0,0,.08);
-
-  cursor:pointer;
 
   transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
 }
@@ -134,6 +134,8 @@ TOOLBAR
   border-radius:10px;
 
   border:1px solid #d1d5db;
+
+  min-height:46px;
 }
 
 .toolbar button{
@@ -147,6 +149,26 @@ TOOLBAR
   font-weight:bold;
 
   cursor:pointer;
+}
+
+#status{
+  min-height:46px;
+
+  display:inline-flex;
+
+  align-items:center;
+
+  padding:0 12px;
+
+  border-radius:10px;
+
+  border:1px solid #d1d5db;
+
+  background:#f8fbff;
+
+  color:#334155;
+
+  font-weight:700;
 }
 
 /* ======================================================
@@ -860,16 +882,18 @@ RESPONSIVE
 </style>
 
 <link rel="stylesheet" href="/cristal-assist.css">
+  <link rel="stylesheet" href="/cw-ui-kit.css">
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
 </head>
 
-<body>
+<body data-required-role="ADMIN">
 
 <header>
 
   <h1>
-    🧠 Centro de Operações
+    Centro de Operacoes
   </h1>
 
   <button
@@ -896,23 +920,23 @@ RESPONSIVE
     Atualizar
   </button>
 
-  <button id="liveMapBtn">
-    🌍 Mapa
+  <button id="liveMapBtn" type="button">
+    Mapa
   </button>
 
-  <button id="visitsBtn" data-help-topic="visits">
-    📄 Visitas
+  <button id="visitsBtn" data-help-topic="visits" type="button">
+    Visitas
   </button>
 
-  <button id="roundsBtn" data-help-topic="rounds">
-    🛰️ Rondas
+  <button id="roundsBtn" data-help-topic="rounds" type="button">
+    Rondas
   </button>
 
-  <button id="notificationsBtn">
-    🔔 Notificações
+  <button id="notificationsBtn" type="button">
+    Notificacoes
   </button>
 
-  <div id="status">
+  <div id="status" role="status" aria-live="polite">
     Sistema operacional
   </div>
 
@@ -1092,9 +1116,7 @@ RESPONSIVE
 
     <div class="panel">
 
-      <h2>
-        🌍 Live Operations Map
-      </h2>
+      <h2>Live Operations Map</h2>
 
       <div id="liveMap"></div>
 
@@ -1104,9 +1126,7 @@ RESPONSIVE
 
     <div class="panel">
 
-      <h2>
-        📈 Tendências
-      </h2>
+      <h2>Tendencias</h2>
 
       <div class="chart-grid">
 
@@ -1148,9 +1168,7 @@ RESPONSIVE
 
     <div class="panel">
 
-      <h2>
-        🤖 Resumo Operacional
-      </h2>
+      <h2>Resumo Operacional</h2>
 
       <div id="intelligencePanel"></div>
 
@@ -1160,11 +1178,9 @@ RESPONSIVE
 
     <div class="panel">
 
-      <h2>
-        🕒 Operational Timeline
-      </h2>
+      <h2>Operational Timeline</h2>
 
-      <div id="timelineFeed"></div>
+      <div id="timelineFeed" role="log" aria-live="polite"></div>
 
     </div>
 
@@ -1174,6 +1190,10 @@ RESPONSIVE
 
 </main>
 
+<div style="padding:12px 20px 0">
+  <button type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
+</div>
+
 <script src="/admin-auth-guard.js"></script>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="/socket.io/socket.io.js"></script>
@@ -1181,21 +1201,12 @@ RESPONSIVE
 
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
+<script src="/ui/core/navigation-context.js"></script>
 
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
 
 
-<script id="V22.5.1.7_FIXED_ADMIN_MODULES" type="text/plain">
-document.addEventListener('DOMContentLoaded',()=>{
-  if(document.getElementById('cwTopAdminModules')) return;
-  const box=document.createElement('div');
-  box.id='cwTopAdminModules';
-  box.style.cssText='position:fixed;left:260px;top:78px;right:18px;z-index:9998;display:flex;gap:8px;flex-wrap:wrap;background:rgba(5,20,42,.78);border:1px solid rgba(53,217,255,.35);backdrop-filter:blur(10px);padding:10px;border-radius:16px';
-  const items=[['👷 Criar Técnico','/admin-technicians'],['👥 Clientes','/admin-clients'],['🏊 Piscinas','/admin-pools'],['🛰️ Rondas','/admin-rounds'],['✅ Visitas','/admin-visits'],['📦 Stock','/admin-inventory'],['💶 Financeiro','/billing']];
-  box.innerHTML=items.map(([label,href])=>`<a href="${href}" style="color:#061521;background:#35d9ff;padding:9px 12px;border-radius:12px;text-decoration:none;font-weight:900">${label}</a>`).join('');
-  document.body.appendChild(box);
-});
-</script>
-<script src="/cw-flow-shell.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

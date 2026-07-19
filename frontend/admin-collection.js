@@ -1,6 +1,15 @@
 const collectionList = document.getElementById("collectionList");
 let currentClients = [];
 let previewMessageValue = "";
+const actionLock = new Set();
+
+function authHeaders(extra = {}) {
+  const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
+  return {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...extra,
+  };
+}
 
 function getCurrentMonthValue() {
   return new Date().toISOString().slice(0, 7);
@@ -207,40 +216,55 @@ async function copyMessage(clientId) {
 }
 
 async function markReminded(clientId) {
+  if (actionLock.has(`reminded:${clientId}`)) return;
   const month = document.getElementById("monthFilter")?.value || getCurrentMonthValue();
+  actionLock.add(`reminded:${clientId}`);
+  try {
+    const res = await fetch(`/api/admin/payments/${clientId}/mark-reminded?month=${encodeURIComponent(month)}`, {
+      method: "POST",
+      headers: authHeaders(),
+    });
 
-  const res = await fetch(`/api/admin/payments/${clientId}/mark-reminded?month=${encodeURIComponent(month)}`, {
-    method: "POST",
-  });
+    const data = await res.json().catch(() => ({}));
 
-  const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.ok === false) {
+      alert(data.message || "Erro ao marcar como avisado.");
+      return;
+    }
 
-  if (!res.ok || data.ok === false) {
-    alert(data.message || "Erro ao marcar como avisado.");
-    return;
+    loadCollection();
+  } finally {
+    actionLock.delete(`reminded:${clientId}`);
   }
-
-  loadCollection();
 }
 
 async function markPaid(clientId) {
+  if (actionLock.has(`paid:${clientId}`)) return;
+  const ok = confirm("Confirmar marcação de cliente como pago neste mês?");
+  if (!ok) return;
   const month = document.getElementById("monthFilter")?.value || getCurrentMonthValue();
+  actionLock.add(`paid:${clientId}`);
+  try {
+    const res = await fetch(`/api/admin/payments/${clientId}/mark-paid?month=${encodeURIComponent(month)}`, {
+      method: "POST",
+      headers: authHeaders(),
+    });
 
-  const res = await fetch(`/api/admin/payments/${clientId}/mark-paid?month=${encodeURIComponent(month)}`, {
-    method: "POST",
-  });
+    const data = await res.json().catch(() => ({}));
 
-  const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.ok === false) {
+      alert(data.message || "Erro ao marcar como pago.");
+      return;
+    }
 
-  if (!res.ok || data.ok === false) {
-    alert(data.message || "Erro ao marcar como pago.");
-    return;
+    loadCollection();
+  } finally {
+    actionLock.delete(`paid:${clientId}`);
   }
-
-  loadCollection();
 }
 
 async function registerManualPayment(clientId) {
+  if (actionLock.has(`manual:${clientId}`)) return;
   const client = currentClients.find((c) => c.id === clientId);
   const reference = client?.paymentReference || paymentReference(clientId);
   const suggested = client?.totalDue > 0 ? client.totalDue.toFixed(2) : "";
@@ -256,22 +280,28 @@ async function registerManualPayment(clientId) {
   const method = prompt("Metodo de pagamento (Transferencia, MBWay, Dinheiro, Multibanco...)", "Transferencia") || "Manual";
   const notes = prompt("Nota interna ou referencia do comprovativo", reference) || "";
   const month = document.getElementById("monthFilter")?.value || getCurrentMonthValue();
+  const ok = confirm("Confirmar registo manual do pagamento recebido?");
+  if (!ok) return;
+  actionLock.add(`manual:${clientId}`);
+  try {
+    const res = await fetch(`/api/admin/payments/${clientId}/manual-received?month=${encodeURIComponent(month)}`, {
+      method: "POST",
+      headers: authHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify({ amount, method, notes }),
+    });
 
-  const res = await fetch(`/api/admin/payments/${clientId}/manual-received?month=${encodeURIComponent(month)}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ amount, method, notes }),
-  });
+    const data = await res.json().catch(() => ({}));
 
-  const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.ok === false) {
+      alert(data.message || "Erro ao registar pagamento recebido.");
+      return;
+    }
 
-  if (!res.ok || data.ok === false) {
-    alert(data.message || "Erro ao registar pagamento recebido.");
-    return;
+    alert(data.message || "Pagamento registado.");
+    loadCollection();
+  } finally {
+    actionLock.delete(`manual:${clientId}`);
   }
-
-  alert(data.message || "Pagamento registado.");
-  loadCollection();
 }
 
 async function markVisibleAsReminded() {
@@ -289,6 +319,7 @@ async function markVisibleAsReminded() {
   for (const client of visible) {
     await fetch(`/api/admin/payments/${client.id}/mark-reminded?month=${encodeURIComponent(month)}`, {
       method: "POST",
+      headers: authHeaders(),
     });
   }
 
@@ -310,6 +341,7 @@ async function markVisibleAsPaid() {
   for (const client of visible) {
     await fetch(`/api/admin/payments/${client.id}/mark-paid?month=${encodeURIComponent(month)}`, {
       method: "POST",
+      headers: authHeaders(),
     });
   }
 
@@ -443,7 +475,7 @@ async function loadCollection() {
       ? `/api/admin/payments?month=${encodeURIComponent(month)}`
       : "/api/admin/payments";
 
-    const res = await fetch(url);
+    const res = await fetch(url, { headers: authHeaders() });
     const data = await res.json();
 
     if (!data.clients || !data.clients.length) {

@@ -185,6 +185,7 @@
 
   function loadSidebar(){
     if(document.querySelector('script[data-cw-sidebar]') || !isAuthenticatedArea()) return;
+    if(document.querySelector('link[href="/crystal-os-v2-phase2-adapter.css"]') || document.querySelector('.cw-v2-sidebar,.cw-v2-shell-sidebar')) return;
     const script = document.createElement("script"); script.src = "/cw-enterprise-sidebar.js"; script.dataset.cwSidebar = "1"; document.body.appendChild(script);
   }
 
@@ -198,7 +199,9 @@
 
   function init(){
     if(isLoginPage) return;
-    document.body.classList.add("cw-enterprise-theme");
+    if(!document.querySelector('link[href="/crystal-os-v2-phase2-adapter.css"]')) {
+      document.body.classList.add("cw-enterprise-theme");
+    }
     document.body.classList.toggle("cw-help-enabled", helpEnabled());
     document.body.classList.toggle("cw-help-mode", helpMode());
     loadSidebar();

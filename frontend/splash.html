@@ -45,6 +45,8 @@ body {
 
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
 </head>
 
 <body>
@@ -60,23 +62,36 @@ body {
 
 setTimeout(() => {
 
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const token = localStorage.getItem("token");
+  let user = null;
+  try {
+    user = JSON.parse(localStorage.getItem("user") || "null");
+  } catch (_) {
+    user = null;
+  }
 
-  if (!user.id || !token) {
+  const token = localStorage.getItem("token") || localStorage.getItem("authToken") || localStorage.getItem("cwAdminToken") || "";
+  const role = String(user?.role || "").trim().toUpperCase();
+  const hasToken = typeof token === "string" && token.split(".").length === 3;
+
+  if (!user?.id || !hasToken) {
     redirect("/login");
     return;
   }
 
-  if (user.role === "admin") {
-    redirect("/dashboard");
-  } 
-  else if (user.role === "tecnico") {
-    redirect("/technician");
-  } 
-  else {
-    redirect("/login");
+  if (role === "ADMIN") {
+    redirect("/admin-dashboard");
+    return;
   }
+  if (role === "TECHNICIAN" || role === "TECNICO") {
+    redirect("/technician");
+    return;
+  }
+  if (role === "CLIENT") {
+    redirect("/client-portal");
+    return;
+  }
+
+  redirect("/login");
 
 }, 1200);
 
@@ -93,5 +108,7 @@ function redirect(url){
 
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

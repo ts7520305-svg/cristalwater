@@ -4,16 +4,12 @@
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#050b16">
   <meta charset="UTF-8" />
-  <title>Admin Pagamentos - Cristal Water</title>
+  <title>Cristal Water - Pagamentos Admin</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/ui/foundation.css">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      padding: 20px;
-      margin: 0;
-      color: #1f2937;
-    }
+    html, body { overflow-x: hidden; }
+    body { margin:0; font-family:Inter,Segoe UI,Arial,sans-serif; background:#f4f6f8; padding:16px; color:#1f2937; }
 
     h1 { margin-top: 0; }
 
@@ -45,9 +41,40 @@
       box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     }
 
+    .toolbar {
+      display:grid;
+      grid-template-columns:minmax(220px,1fr) 180px auto;
+      gap:10px;
+      margin-bottom:12px;
+    }
+
+    input, select {
+      min-height: 44px;
+      border:1px solid #d1d5db;
+      border-radius:10px;
+      padding:10px;
+      font-size:14px;
+    }
+
+    .status {
+      border:1px solid #d5dde8;
+      background:#f9fbff;
+      color:#334155;
+      border-radius:10px;
+      padding:10px 12px;
+      margin-bottom:12px;
+      font-weight:700;
+    }
+
+    .status.error { border-color:#efc0c7; background:#fff3f5; color:#8b1f2a; }
+    .status.ok { border-color:#b9e2ca; background:#f2fbf6; color:#165434; }
+
+    .table-wrap { width:100%; overflow-x:auto; }
+
     table {
       width: 100%;
       border-collapse: collapse;
+      min-width: 980px;
     }
 
     th, td {
@@ -79,19 +106,31 @@
   </style>
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
+  <script src="/admin-auth-guard.js"></script>
 </head>
-<body>
+<body data-required-role="ADMIN">
 
-  <h1>Admin Pagamentos</h1>
+  <h1>Pagamentos</h1>
 
   <div class="topbar">
-    <a class="action-btn" href="/admin-dashboard.html"><span>🏠</span><span>Dashboard</span></a>
-    <a class="action-btn" href="/admin-notifications.html"><span>🔔</span><span>Notificações</span></a>
-    <a class="action-btn" href="/billing-center.html"><span>💶</span><span>Cobranças</span></a>
+    <a class="action-btn" href="/admin-master-control"><span>🏠</span><span>Centro</span></a>
+    <a class="action-btn" href="/admin-notifications"><span>🔔</span><span>Notificações</span></a>
+    <a class="action-btn" href="/billing-center"><span>💶</span><span>Cobranças</span></a>
   </div>
 
   <div class="panel">
+    <div class="toolbar">
+      <input id="paymentSearch" type="search" placeholder="Pesquisar cliente, referencia ou metodo">
+      <select id="paymentMethodFilter">
+        <option value="">Todos os metodos</option>
+        <option value="MBWAY">MB WAY</option>
+        <option value="TRANSFER">Transferencia</option>
+        <option value="CASH">Numerario</option>
+        <option value="CARD">Cartao</option>
+      </select>
+      <button class="action-btn" id="refreshPayments" type="button"><span>Atualizar</span></button>
+    </div>
+    <div id="paymentsStatus" class="status" role="status" aria-live="polite">A carregar pagamentos...</div>
     <div id="tableBox"></div>
   </div>
 
@@ -100,6 +139,8 @@
 <script src="/cristal-assist.js"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
 <script src="/cw-admin-shortcuts.js"></script>
-<script src="/cw-flow-shell.js"></script>
+<script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

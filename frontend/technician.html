@@ -149,16 +149,22 @@ header h2{
 
 .top-buttons{
 
-  display:flex;
+  display:grid;
+
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
 
   gap:10px;
 
-  flex-wrap:wrap;
+  width:100%;
 }
 
 button{
 
-  padding:10px 14px;
+  padding:14px 16px;
+
+  min-height:52px;
+
+  font-size:16px;
 
   border:none;
 
@@ -268,6 +274,25 @@ button:hover{
   font-size:13px;
 }
 
+#dayStatus{
+
+  min-height:44px;
+
+  display:flex;
+
+  align-items:center;
+
+  padding:10px 12px;
+
+  border-radius:10px;
+
+  background:#f7fbff;
+
+  border:1px solid #d6e6f7;
+
+  font-weight:700;
+}
+
 .card{
 
   background:white;
@@ -306,7 +331,9 @@ select{
 
   width:100%;
 
-  padding:12px;
+  padding:13px;
+
+  min-height:48px;
 
   margin-top:8px;
 
@@ -314,7 +341,12 @@ select{
 
   border:1px solid #ccc;
 
-  font-size:14px;
+  font-size:16px;
+}
+
+textarea{
+
+  min-height:120px;
 }
 
 .visit-photo{
@@ -336,7 +368,7 @@ select{
 
   .top-buttons{
 
-    flex-direction:column;
+    grid-template-columns:1fr;
   }
 
   button{
@@ -353,17 +385,24 @@ select{
 
     flex-direction:column;
   }
+
+  #status,
+  .card{
+
+    margin:8px;
+  }
 }
 
 </style>
 
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
-  <link rel="stylesheet" href="css/crystal-v25.css">
+  <script src="/technician-auth-guard.js"></script>
+<link rel="stylesheet" href="/ui/foundation.css">
+<link rel="stylesheet" href="css/crystal-v25.css">
 </head>
 
-<body>
+<body data-required-role="TECHNICIAN">
 
 <div id="splashScreen">
 
@@ -508,6 +547,8 @@ select{
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
-<script src="/cw-flow-shell.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

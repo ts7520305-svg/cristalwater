@@ -1,0 +1,21 @@
+.visit-modal,
+.cw-modal {
+  position: fixed;
+  inset: 0;
+  z-index: var(--cw-z-modal);
+  background: rgba(10, 16, 24, 0.45);
+  display: grid;
+  place-items: center;
+  padding: var(--cw-space-3);
+}
+
+.visit-modal-panel,
+.cw-modal-panel {
+  width: min(760px, 100%);
+  max-height: 88vh;
+  overflow: auto;
+  background: var(--cw-color-surface);
+  border: 1px solid var(--cw-color-border);
+  border-radius: var(--cw-radius-lg);
+  padding: var(--cw-space-3);
+}

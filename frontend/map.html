@@ -7,6 +7,8 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
+<link rel="stylesheet" href="/ui/foundation.css">
+
 <style>
 body { margin:0; font-family:Arial; }
 #map { width:100%; height:100vh; }
@@ -38,12 +40,18 @@ button{
 </style>
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
 </head>
 
-<body>
+<body data-required-role="ADMIN">
+
+<div style="padding:12px 16px 0">
+  <button type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
+</div>
 
 <div class="top">
+  <div id="statusLine" style="font-size:12px;color:#334155;max-width:220px;">A carregar mapa...</div>
   <button onclick="showZones()">Ver Zonas</button>
   <button onclick="assignZones()">Atribuir Técnicos</button>
   <button class="clear" onclick="clearMap()">Limpar</button>
@@ -52,9 +60,34 @@ button{
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="/admin-auth-guard.js"></script>
+<script src="/ui/core/navigation-context.js"></script>
 
 <script>
 const API = "/api";
+
+function token(){
+  return localStorage.getItem("token") || localStorage.getItem("authToken") || localStorage.getItem("cwAdminToken") || "";
+}
+
+function authHeaders(){
+  const t = token();
+  return t ? { Authorization: `Bearer ${t}` } : {};
+}
+
+async function fetchJson(path){
+  const res = await fetch(`${API}${path}`, { headers: { ...authHeaders() } });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.ok === false) {
+    throw new Error(data.error || data.message || `Erro ${res.status}`);
+  }
+  return data;
+}
+
+function setStatus(message){
+  const line = document.getElementById("statusLine");
+  if (line) line.textContent = message;
+}
 
 const map = L.map('map').setView([37.1, -8.6], 10);
 
@@ -71,11 +104,15 @@ let zoneLayers = [];
 // ==========================================================
 
 async function load(){
-
-  const res = await fetch(`${API}/pools`);
-  pools = await res.json();
-
-  drawPools();
+  try {
+    setStatus("A carregar piscinas...");
+    const data = await fetchJson("/pools");
+    pools = Array.isArray(data) ? data : (data.pools || []);
+    drawPools();
+    setStatus(`Piscinas carregadas: ${pools.length}`);
+  } catch (e) {
+    setStatus(e.message || "Erro ao carregar mapa");
+  }
 }
 
 // ==========================================================
@@ -83,6 +120,13 @@ async function load(){
 // ==========================================================
 
 function drawPools(){
+
+  markers.forEach((m) => map.removeLayer(m));
+  markers = [];
+
+  if (!Array.isArray(pools) || !pools.length) {
+    return;
+  }
 
   pools.forEach(p=>{
 
@@ -102,8 +146,11 @@ function drawPools(){
 
 function getBounds(){
 
-  const lats = pools.map(p=>p.latitude);
-  const lngs = pools.map(p=>p.longitude);
+  const points = pools.filter((p) => Number.isFinite(Number(p.latitude)) && Number.isFinite(Number(p.longitude)));
+  if (!points.length) return null;
+
+  const lats = points.map(p=>Number(p.latitude));
+  const lngs = points.map(p=>Number(p.longitude));
 
   return {
     minLat: Math.min(...lats),
@@ -122,6 +169,10 @@ function showZones(){
   clearZones();
 
   const b = getBounds();
+  if (!b) {
+    setStatus("Sem coordenadas válidas para desenhar zonas.");
+    return;
+  }
 
   const midLat = (b.minLat + b.maxLat)/2;
   const midLng = (b.minLng + b.maxLng)/2;
@@ -154,16 +205,25 @@ function showZones(){
 // ==========================================================
 
 async function assignZones(){
-
-  const techRes = await fetch(`${API}/gps/live`);
-  const techs = await techRes.json();
+  let techs = [];
+  try {
+    const data = await fetchJson("/gps/live");
+    techs = Array.isArray(data) ? data : (data.technicians || []);
+  } catch (e) {
+    setStatus(e.message || "Erro ao carregar técnicos");
+    return;
+  }
 
   if (!techs.length){
-    alert("Sem técnicos");
+    setStatus("Sem técnicos disponíveis.");
     return;
   }
 
   const b = getBounds();
+  if (!b) {
+    setStatus("Sem coordenadas válidas para atribuir zonas.");
+    return;
+  }
   const midLat = (b.minLat + b.maxLat)/2;
   const midLng = (b.minLng + b.maxLng)/2;
 
@@ -181,7 +241,7 @@ async function assignZones(){
     console.log(`👷 ${t.name} → zona ${i}`, z.length,"piscinas");
   });
 
-  alert("Zonas atribuídas (ver consola)");
+  setStatus("Zonas atribuídas. Ver consola para detalhe.");
 }
 
 // ==========================================================
@@ -204,6 +264,7 @@ load();
 
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
-<script src="/cw-flow-shell.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

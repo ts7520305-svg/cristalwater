@@ -1,10 +1,37 @@
 node_modules/
 .env
+.env.*
+!.env.example
+.env.qa
+.env.qa.*
 logs/
 uploads/
+uploads/qa/
 temp/
 backups/
 reports/
 *.log
 .DS_Store
 npm-debug.log*
+
+# Baseline hygiene: obvious accidental file fragments and transient backups
+*.save
+frontend-backup-*/
+
+# Obvious corrupted root-level fragment files (do not remove physical files)
+/,\ v.status,\ v.active,\ v.createdAt
+/,\ v.status,\ v.active,\ v.createdAt.save
+/:\ QA,\ mode:\ insensitive\ }\ },
+/AS\ (
+/c'\ },
+/et
+/et="utf-8">
+/it"\ v\ WHERE\ v."clientId"\ IN\ \(SELECT\ id\ FROM\ test_clients\)
+/it','Invoice')
+/ole.error\(e\);
+/ole.error\(e\);\ process.exit\(1\);\ \}\).finally\(async\ \(\)=>\{\ await\ prisma\.\$disconnect\(\);\ \}\);
+/ole.log\('FK_DEPENDENCIES'\);
+/s\ AS\ referencing_table,
+/s::text\ IN\ \('\"Vehicle\"','\"Notification\"','\"Client\"'\)
+/t\ counts\ =\ await\ prisma\.\$queryRawUnsafe\(`
+/t\ prisma\ =\ new\ PrismaClient\(\);

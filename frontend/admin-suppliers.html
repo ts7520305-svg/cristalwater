@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cristal Water - Fornecedores</title>
   <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/ui/foundation.css">
   <link rel="stylesheet" href="/cristal-assist.css">
-  <link rel="stylesheet" href="/cw-polish.css">
-  <style>
+<style>
     *{box-sizing:border-box}
+    html,body{overflow-x:hidden}
     body{margin:0;font-family:Inter,Arial,sans-serif;background:#050b16;color:#e8f7ff}
     header{position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 22px;background:rgba(5,12,24,.9);border-bottom:1px solid rgba(53,217,255,.25);backdrop-filter:blur(14px)}
     h1,h2,h3{margin:0;color:#e8f7ff} p{color:#9db4c9}
@@ -34,7 +35,7 @@
   </style>
   <script src="/cw-auth.js"></script>
 </head>
-<body>
+<body data-required-role="ADMIN">
   <header>
     <div>
       <h1>Gestor de fornecedores</h1>
@@ -137,6 +138,8 @@
   <script src="/cristal-assist.js"></script>
   <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
   <script src="/cw-admin-shortcuts.js"></script>
-  <script src="/cw-flow-shell.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

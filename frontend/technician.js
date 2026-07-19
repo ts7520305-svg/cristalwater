@@ -84,6 +84,127 @@ let visits = [];
 
 let isSyncing = false;
 
+const ROUTE_STATE_PREFIX = "cristalwater_route_state";
+
+function todayRouteKey(){
+
+  const now = new Date();
+
+  return [
+    now.getFullYear(),
+    String(now.getMonth() + 1).padStart(2, "0"),
+    String(now.getDate()).padStart(2, "0")
+  ].join("-");
+}
+
+function routeStateKey(){
+  const technicianId = user?.id ? String(user.id) : "anon";
+  return `${ROUTE_STATE_PREFIX}:${technicianId}:${todayRouteKey()}`;
+}
+
+function readRouteState(){
+  try {
+    return JSON.parse(localStorage.getItem(routeStateKey()) || "null");
+  } catch (_) {
+    return null;
+  }
+}
+
+function writeRouteState(state){
+  try {
+    localStorage.setItem(routeStateKey(), JSON.stringify(state));
+  } catch (_) {}
+}
+
+function isVisitCompleted(visit){
+  const status = String(visit?.status || "").toUpperCase();
+  return Boolean(visit?.endAt) || ["DONE", "COMPLETED", "CONCLUDED", "CONCLUIDA", "CONCLUÍDA"].includes(status);
+}
+
+function nextPendingVisitId(items = visits){
+  const next = (Array.isArray(items) ? items : []).find((visit) => !isVisitCompleted(visit));
+  return next?.id || null;
+}
+
+function activeVisitId(){
+  const state = readRouteState();
+  const lockedId = state?.activeVisitId ? Number(state.activeVisitId) : null;
+  if (lockedId && visits.some((visit) => Number(visit.id) === lockedId && !isVisitCompleted(visit))) {
+    return lockedId;
+  }
+  return nextPendingVisitId();
+}
+
+function persistRouteSnapshot(nextVisits, extra = {}){
+  const snapshot = {
+    day: todayRouteKey(),
+    technicianId: user?.id || null,
+    activeVisitId: extra.activeVisitId || nextPendingVisitId(nextVisits),
+    visits: Array.isArray(nextVisits) ? nextVisits : [],
+    pendingSyncVisitIds: Array.isArray(extra.pendingSyncVisitIds) ? extra.pendingSyncVisitIds : (readRouteState()?.pendingSyncVisitIds || []),
+    updatedAt: new Date().toISOString(),
+    source: extra.source || "server",
+  };
+
+  writeRouteState(snapshot);
+  saveLocalData("offline_visits", snapshot.visits);
+  return snapshot;
+}
+
+function mergeRouteVisits(serverVisits = [], snapshot = null){
+  const localVisits = Array.isArray(snapshot?.visits) ? snapshot.visits : [];
+  const localById = new Map(localVisits.map((visit) => [String(visit.id), visit]));
+
+  const merged = (Array.isArray(serverVisits) ? serverVisits : []).map((serverVisit) => {
+    const localVisit = localById.get(String(serverVisit.id));
+    if (!localVisit) return serverVisit;
+
+    const localCompleted = isVisitCompleted(localVisit);
+    const serverCompleted = isVisitCompleted(serverVisit);
+
+    if (localVisit.pendingSync && localCompleted && !serverCompleted) {
+      return {
+        ...serverVisit,
+        ...localVisit,
+        pool: { ...(serverVisit.pool || {}), ...(localVisit.pool || {}) },
+        client: localVisit.client || serverVisit.client,
+        technician: { ...(serverVisit.technician || {}), ...(localVisit.technician || {}) },
+      };
+    }
+
+    return {
+      ...serverVisit,
+      pendingSync: false,
+      pool: { ...(serverVisit.pool || {}), ...(localVisit.pool || {}) },
+      client: localVisit.client || serverVisit.client,
+      technician: { ...(serverVisit.technician || {}), ...(localVisit.technician || {}) },
+    };
+  });
+
+  const localOnly = localVisits.filter((visit) => !merged.some((item) => String(item.id) === String(visit.id)));
+  return [...merged, ...localOnly];
+}
+
+function markLocalVisitCompleted(id, { pendingSync = false } = {}){
+  const now = new Date().toISOString();
+  visits = visits.map((visit) => {
+    if (String(visit.id) !== String(id)) return visit;
+    return {
+      ...visit,
+      status: "DONE",
+      endAt: visit.endAt || now,
+      pendingSync,
+      syncError: "",
+    };
+  });
+
+  persistRouteSnapshot(visits, {
+    activeVisitId: nextPendingVisitId(visits),
+    pendingSyncVisitIds: visits.filter((visit) => visit.pendingSync).map((visit) => visit.id),
+    source: pendingSync ? "offline-complete" : "online-complete",
+  });
+}
+
 // ======================================================
 // INIT
 // ======================================================
@@ -126,6 +247,8 @@ window.addEventListener(
         updateOfflineBar();
 
         runAutoSync();
+
+        loadRoute();
       }
     );
 
@@ -482,12 +605,19 @@ async function loadRoute() {
 
     if (!navigator.onLine){
 
+      const snapshot = readRouteState();
       const offlineVisits =
-        getLocalData(
-          "offline_visits"
-        ) || [];
+        snapshot?.visits || getLocalData("offline_visits") || [];
 
       visits = offlineVisits;
+
+      if (snapshot?.activeVisitId) {
+        persistRouteSnapshot(visits, {
+          activeVisitId: snapshot.activeVisitId,
+          pendingSyncVisitIds: snapshot.pendingSyncVisitIds || [],
+          source: "offline-recover",
+        });
+      }
 
       renderVisits();
 
@@ -526,15 +656,19 @@ async function loadRoute() {
 
         ===
 
-        String(
-          user.name || ""
-        ).toLowerCase()
-      );
-
-    saveLocalData(
-      "offline_visits",
-      visits
+        String(user.name || user.fullName || "").toLowerCase()
+      ||
+        String(v.technicianId || "") === String(user.id || "")
+      ||
+        String(v.technician?.id || "") === String(user.id || "")
     );
+
+    visits = mergeRouteVisits(visits, readRouteState());
+
+    persistRouteSnapshot(visits, {
+      activeVisitId: activeVisitId(),
+      source: "server",
+    });
 
     renderVisits();
 
@@ -580,6 +714,8 @@ function renderVisits() {
     return;
   }
 
+  const lockedVisitId = activeVisitId();
+
   visits.forEach(v => {
 
     const client =
@@ -604,7 +740,10 @@ function renderVisits() {
     const div =
       document.createElement("div");
 
-    div.className = "card";
+    const isLocked = lockedVisitId && String(lockedVisitId) === String(v.id);
+    const isBlocked = lockedVisitId && String(lockedVisitId) !== String(v.id) && !isVisitCompleted(v);
+
+    div.className = `card${isLocked ? " active-visit" : ""}${isBlocked ? " blocked-visit" : ""}`;
 
     div.innerHTML = `
 
@@ -620,6 +759,8 @@ function renderVisits() {
         Estado:
         <b>${escapeHtml(v.status || "-")}</b>
       </div>
+
+      ${isLocked ? '<div class="muted" style="margin-top:6px;color:#9affc6;font-weight:800">Stop atual bloqueado para evitar execução duplicada.</div>' : (isBlocked ? '<div class="muted" style="margin-top:6px;color:#ffd166;font-weight:800">Esta visita está bloqueada enquanto o stop atual estiver em curso.</div>' : '')}
 
       <div>
         Início:
@@ -733,6 +874,7 @@ function renderVisits() {
           class="complete-btn"
           data-action="complete"
           data-visit-id="${v.id}"
+          ${isBlocked ? "disabled" : ""}
         >
           ✔ Concluir
         </button>
@@ -825,6 +967,14 @@ async function completeVisit(id){
 
   try {
 
+    const visit = visits.find((item) => String(item.id) === String(id));
+    const lockedId = activeVisitId();
+
+    if (lockedId && String(lockedId) !== String(id) && visit && !isVisitCompleted(visit)) {
+      alert("Há uma visita em curso. Conclui esse stop antes de avançar.");
+      return;
+    }
+
     const notes =
       document.getElementById(
         `notes-${id}`
@@ -877,13 +1027,22 @@ async function completeVisit(id){
       addOfflineAction({
 
         url:
-          `${API}/visits/complete`,
+          `${API}/core/visits/${id}/complete`,
 
         method:
           "POST",
 
+        syncKey:
+          `visit-complete:${id}`,
+
+        conflictStrategy:
+          "SERVER_WINS",
+
         body
       });
+
+      markLocalVisitCompleted(id, { pendingSync: true });
+      renderVisits();
 
       updateOfflineBar();
 
@@ -896,7 +1055,7 @@ async function completeVisit(id){
 
     const res =
       await fetch(
-        `${API}/visits/complete`,
+        `${API}/core/visits/${id}/complete`,
         {
 
           method:"POST",
@@ -918,12 +1077,22 @@ async function completeVisit(id){
     const data =
       await res.json();
 
+    if (res.status === 409 && (data.code === "VISIT_ALREADY_COMPLETED" || /ja foi conclu[ií]da|already completed/i.test(String(data.error || data.message || "")))) {
+      markLocalVisitCompleted(id, { pendingSync: false });
+      renderVisits();
+      alert("Esta visita já estava concluída no servidor. Estado sincronizado.");
+      return;
+    }
+
     if (!data.ok){
 
       alert("Erro concluir");
 
       return;
     }
+
+    markLocalVisitCompleted(id, { pendingSync: false });
+    renderVisits();
 
     alert(
       "Visita concluída"

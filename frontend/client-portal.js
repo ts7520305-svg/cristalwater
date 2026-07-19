@@ -12,6 +12,11 @@ let currentServiceHistory = [];
 let serviceHistoryToolsReady = false;
 let lastPortalSnapshot = {};
 
+function portalAuthHeaders() {
+  const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 const COPY = {
   pt: {
     brandPortal: "Portal do Cliente",
@@ -1324,6 +1329,77 @@ function renderInvoices(invoices = []) {
   }).join("");
 }
 
+function renderNotifications(notifications = []) {
+  const list = el("notificationList");
+  if (!list) return;
+  if (!notifications.length) {
+    list.innerHTML = `<div class="empty">Sem notificações recentes.</div>`;
+    return;
+  }
+  list.innerHTML = notifications.slice(0, 8).map((notification) => `
+    <article class="service-item">
+      <div class="service-head">
+        <div>
+          <div class="service-title">${esc(notification.title || "Notificação")}</div>
+          <div class="muted">${esc(fmtDateTime(notification.createdAt))}</div>
+        </div>
+        <span class="pill">${esc(notification.status || "PENDING")}</span>
+      </div>
+      <div class="muted">${esc(notification.message || "")}</div>
+    </article>
+  `).join("");
+}
+
+function renderDocuments(documents = []) {
+  const list = el("documentList");
+  if (!list) return;
+  if (!documents.length) {
+    list.innerHTML = `<div class="empty">Sem documentos disponíveis.</div>`;
+    return;
+  }
+  list.innerHTML = documents.slice(0, 8).map((documentItem) => `
+    <article class="service-item">
+      <div class="service-head">
+        <div>
+          <div class="service-title">${esc(documentItem.title || documentItem.originalName || "Documento")}</div>
+          <div class="muted">${esc(documentItem.type || "Documento")}</div>
+        </div>
+        <a class="btn primary" href="${esc(documentItem.downloadUrl || documentItem.url || "#")}" target="_blank" rel="noopener">Abrir</a>
+      </div>
+      <div class="muted">${esc(documentItem.notes || "")}</div>
+    </article>
+  `).join("");
+}
+
+function renderPermissions(permissions = {}) {
+  const list = el("permissionsList");
+  if (!list) return;
+  list.innerHTML = `
+    <div class="client-focus-card info"><span>Isolamento</span><b>${permissions.readOnly ? "Read-only" : "Ativo"}</b><small>${esc(permissions.isolation?.scope || "customer-owned-data-only")}</small></div>
+    <div class="client-focus-card"><span>Visitas</span><b>${permissions.canRequestVisit ? "Permitido" : "Bloqueado"}</b><small>Pedidos de visita e prioridade</small></div>
+    <div class="client-focus-card"><span>Documentos</span><b>${permissions.canDownloadSecureDocuments ? "Seguro" : "Restrito"}</b><small>Faturas, relatórios e guias</small></div>
+    <div class="client-focus-card"><span>Conta</span><b>${permissions.billingActive ? "Ativa" : "Pendente"}</b><small>${esc(permissions.paymentReference || "-")}</small></div>
+  `;
+}
+
+async function loadCustomerExtras() {
+  if (!clientId) return;
+  if (!portalAuthHeaders().Authorization && isAdminUser()) return;
+  const [notificationsRes, documentsRes, permissionsRes] = await Promise.all([
+    fetch(`${API}/client-portal/${clientId}/notifications`, { headers: portalAuthHeaders() }),
+    fetch(`${API}/client-portal/${clientId}/documents`, { headers: portalAuthHeaders() }),
+    fetch(`${API}/client-portal/${clientId}/permissions`, { headers: portalAuthHeaders() }),
+  ]);
+
+  const notifications = await notificationsRes.json().catch(() => ({}));
+  const documents = await documentsRes.json().catch(() => ({}));
+  const permissions = await permissionsRes.json().catch(() => ({}));
+
+  renderNotifications(Array.isArray(notifications.notifications) ? notifications.notifications : []);
+  renderDocuments(Array.isArray(documents.documents) ? documents.documents : []);
+  renderPermissions(permissions.permissions || {});
+}
+
 function renderPaymentInstructions(instructions = {}) {
   currentPaymentInstructions = instructions || {};
   const reference = instructions.paymentReference || `CW-${String(clientId || 0).padStart(6, "0")}`;
@@ -1596,6 +1672,7 @@ async function loadPortal() {
     const completeServiceHistory = await loadCompleteServiceHistory(Array.isArray(data.serviceHistory) ? data.serviceHistory : []);
     renderServiceHistory(completeServiceHistory);
     renderInvoices(Array.isArray(data.invoices) ? data.invoices : []);
+    await loadCustomerExtras();
   } catch (error) {
     console.warn(error);
     setText("clientName", copy("portalTitle"));
@@ -1633,10 +1710,16 @@ async function loadMessages() {
   if (!chat) return;
   try {
     if (!clientId) throw new Error(copy("clientNotIdentified"));
-    const response = await fetch(`${API}/chat/client/${clientId}`);
+    const secureHeaders = portalAuthHeaders();
+    const response = await fetch(
+      secureHeaders.Authorization
+        ? `${API}/client-portal/${clientId}/messages`
+        : `${API}/chat/client/${clientId}`,
+      secureHeaders.Authorization ? { headers: secureHeaders } : undefined
+    );
     const data = await response.json();
     chat.innerHTML = "";
-    const messages = Array.isArray(data.messages) ? data.messages : [];
+    const messages = Array.isArray(data) ? data : (Array.isArray(data.messages) ? data.messages : []);
     if (!messages.length) {
       chat.innerHTML = `<div class="empty">${esc(copy("noMessages"))}</div>`;
       return;
@@ -1652,11 +1735,17 @@ async function sendMessage() {
   const input = el("messageInput");
   const text = input.value.trim();
   if (!text || !clientId) return;
-  const response = await fetch(`${API}/chat`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ clientId, sender: "client", text }),
-  });
+  const secureHeaders = portalAuthHeaders();
+  const response = await fetch(
+    secureHeaders.Authorization
+      ? `${API}/client-portal/${clientId}/messages`
+      : `${API}/chat`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...secureHeaders },
+      body: JSON.stringify({ clientId, sender: "client", text }),
+    }
+  );
   const data = await response.json().catch(() => ({}));
   if (!response.ok || data.ok === false) {
     alert(data.error || copy("sendMessageError"));
@@ -1665,6 +1754,25 @@ async function sendMessage() {
   appendMessage(data.message || { sender: "CLIENT", text, createdAt: new Date() });
   input.value = "";
   socket.emit("sendMessage", data.message);
+}
+
+async function requestVisit() {
+  const input = el("visitRequestInput");
+  const text = input?.value?.trim() || "";
+  if (!text || !clientId) return;
+  const response = await fetch(`${API}/client-portal/${clientId}/visit-requests`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...portalAuthHeaders() },
+    body: JSON.stringify({ message: text }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || data.ok === false) {
+    alert(data.error || "Não foi possível solicitar a visita.");
+    return;
+  }
+  input.value = "";
+  alert("Pedido de visita enviado com sucesso.");
+  await loadCustomerExtras();
 }
 
 function updatePresence(lastSeen) {
@@ -1697,6 +1805,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     setTimeout(() => setText("typing", ""), 2000);
   });
   el("sendBtn").onclick = sendMessage;
+  if (el("visitRequestBtn")) el("visitRequestBtn").onclick = requestVisit;
   if (el("paymentNoticeBtn")) el("paymentNoticeBtn").onclick = notifyPayment;
   ["paymentNoticeAmount", "paymentNoticeMethod", "paymentNoticeNote"].forEach((id) => {
     const node = el(id);

@@ -1,7 +1,7 @@
 const API = "/api";
 
 // 🔧 CONFIG
-const technicianId = 1;
+const technicianId = Number(JSON.parse(localStorage.getItem("cristalwater_user") || localStorage.getItem("user") || "{}").technicianId || JSON.parse(localStorage.getItem("cristalwater_user") || localStorage.getItem("user") || "{}").id || 1);
 const SEND_INTERVAL = 10000; // 10 segundos
 
 let lastSent = 0;
@@ -50,15 +50,15 @@ async function handlePosition(position) {
   console.log("GPS:", lat, lng);
 
   try {
-    await fetch(API + "/gps", {
+    await fetch(API + "/gps/update", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
         technicianId,
-        lat,
-        lng,
+        latitude: lat,
+        longitude: lng,
         accuracy
       })
     });
@@ -66,7 +66,7 @@ async function handlePosition(position) {
     updateStatus("📡 Localização enviada");
 
   } catch (err) {
-    console.error(err);
+    console.warn("GPS envio indisponivel no momento");
     updateStatus("❌ Erro envio GPS");
   }
 }
@@ -76,7 +76,7 @@ async function handlePosition(position) {
 // ==========================================
 
 function handleError(err) {
-  console.error("Erro GPS:", err);
+  console.warn("GPS indisponivel ou permissao negada");
   updateStatus("❌ GPS falhou");
 }
 

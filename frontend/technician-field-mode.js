@@ -1905,6 +1905,16 @@
   }
 
   async function load() {
+    if (window.CristalAuth && !window.CristalAuth.hydrate()) {
+      window.CristalAuth.logout();
+      return;
+    }
+    const role = String(window.CristalAuth?.parseUser?.().role || "").toUpperCase().trim();
+    if (role && !["TECHNICIAN", "ADMIN"].includes(role)) {
+      window.CristalAuth?.logout();
+      return;
+    }
+
     try {
       const todayQuery = todayQueryParams();
       let data = await api(`/api/technician/today?${todayQuery}`).catch(() => null);
@@ -2143,17 +2153,31 @@
       nav.className = "field-tabs";
       nav.setAttribute("aria-label", "Navegacao do tecnico em campo");
       nav.innerHTML = `
-        <button type="button" data-field-tab-button="service">Servico</button>
-        <button type="button" data-field-tab-button="route">Rota</button>
-        <button type="button" data-field-tab-button="list">Dia</button>
-        <button type="button" data-field-tab-button="docs">Docs</button>
-        <button type="button" data-field-tab-button="more">Alertas</button>
+        <button type="button" data-field-tab-button="list">Today</button>
+        <button type="button" data-field-tab-button="route">Route</button>
+        <button type="button" data-field-tab-button="service">Visit</button>
+        <button type="button" data-field-tab-button="more">Alerts</button>
+        <button type="button" data-field-tab-button="menu">Menu</button>
       `;
       document.body.appendChild(nav);
     }
 
     document.querySelectorAll("[data-field-tab-button]").forEach((button) => {
-      button.addEventListener("click", () => switchFieldTab(button.dataset.fieldTabButton, true));
+      button.addEventListener("click", () => {
+        const tab = button.dataset.fieldTabButton;
+        if (tab === "menu") {
+          const opener = document.querySelector("[data-cw-open-drawer]");
+          if (opener) {
+            opener.click();
+          } else {
+            const drawer = document.querySelector("[data-cw-drawer]");
+            drawer?.classList.add("is-open");
+            drawer?.setAttribute("aria-hidden", "false");
+          }
+          return;
+        }
+        switchFieldTab(tab, true);
+      });
     });
     document.querySelectorAll("[data-quick-tab]").forEach((button) => {
       button.addEventListener("click", () => switchFieldTab(button.dataset.quickTab, true));

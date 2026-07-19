@@ -1,0 +1,27 @@
+.cw-list,
+.cw-list-groups {
+  display: grid;
+  gap: 10px;
+}
+
+.cw-list-group > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.cw-today-item {
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (max-width: 700px) {
+  .cw-today-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

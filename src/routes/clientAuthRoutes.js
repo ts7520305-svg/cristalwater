@@ -6,10 +6,11 @@ const express = require("express");
 const router = express.Router();
 const { prisma } = require("../prismaClient");
 const { getLanguageForIdentity } = require("../services/languagePreferenceService");
+const { getJwtSecret } = require("../utils/jwtSecret");
 
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const JWT_SECRET = process.env.JWT_SECRET || "cristalwater_secret";
+const JWT_SECRET = getJwtSecret();
 
 // ==========================================
 // 🔐 LOGIN CLIENTE (REAL)

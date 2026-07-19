@@ -82,7 +82,9 @@ async function login(){
     // VALIDAR CLIENT
     // ==================================================
 
-    if(data.user.role !== "CLIENT"){
+    const sessionUser = data.user || data.client || null;
+
+    if(!sessionUser || sessionUser.role !== "CLIENT"){
 
       errorBox.textContent =
         "Conta não é cliente.";
@@ -106,14 +108,20 @@ async function login(){
 
     localStorage.setItem(
       "user",
-      JSON.stringify(data.user)
+      JSON.stringify(sessionUser)
     );
 
+    const clientId = Number(sessionUser.clientId || sessionUser.id || data.client?.id || 0);
+    if (clientId > 0) {
+      localStorage.setItem("cw_client_id", String(clientId));
+      localStorage.setItem("clientId", String(clientId));
+    }
+
     if (window.CristalAuth) {
-      window.CristalAuth.persistSession(data.token, data.user);
+      window.CristalAuth.persistSession(data.token, sessionUser);
     } else {
       localStorage.setItem("cristalwater_jwt", data.token);
-      localStorage.setItem("cristalwater_user", JSON.stringify(data.user));
+      localStorage.setItem("cristalwater_user", JSON.stringify(sessionUser));
     }
 
     // ==================================================

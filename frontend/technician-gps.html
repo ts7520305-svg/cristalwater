@@ -1,29 +1,165 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="pt">
 <head>
   <link rel="manifest" href="/manifest.webmanifest">
-  <meta name="theme-color" content="#050b16">
-  <title>GPS Técnico</title>
-<link rel="stylesheet" href="/cristal-assist.css">
+  <meta name="theme-color" content="#0f1723">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Cristal Water - GPS Tecnico</title>
+  <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
+  <script src="/technician-auth-guard.js"></script>
+  <link rel="stylesheet" href="/ui/foundation.css">
+  <link rel="stylesheet" href="/cw-ui-kit.css">
+  <style>
+    body.gps-page {
+      margin: 0;
+      background: linear-gradient(180deg, #f7fbf9, #edf4f2);
+      color: #102620;
+      font-family: "Segoe UI", "Noto Sans", sans-serif;
+    }
+
+    .gps-shell {
+      width: min(900px, 100%);
+      margin: 0 auto;
+      padding: 12px 12px calc(120px + env(safe-area-inset-bottom));
+    }
+
+    .gps-card {
+      background: #fff;
+      border: 1px solid #c9d8d2;
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 10px;
+      box-shadow: 0 10px 28px rgba(16, 38, 32, 0.08);
+    }
+
+    .gps-title {
+      margin: 6px 0;
+      font-size: clamp(26px, 5vw, 38px);
+      line-height: 1.05;
+      font-weight: 900;
+    }
+
+    .gps-muted {
+      color: #577067;
+      margin: 0;
+    }
+
+    .status-box {
+      border-radius: 12px;
+      border: 1px solid #c9d8d2;
+      background: #f4faf7;
+      padding: 10px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .status-box[data-tone="warning"] {
+      border-color: #e4c289;
+      background: #fff6e7;
+      color: #5f3900;
+    }
+
+    .status-box[data-tone="error"] {
+      border-color: #efbbc5;
+      background: #fdecef;
+      color: #6f1223;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .actions button,
+    .actions a {
+      min-height: 56px;
+      border-radius: 12px;
+      border: 1px solid #c9d8d2;
+      background: #fff;
+      color: #102620;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 15px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .actions .primary {
+      background: #0f7d5d;
+      border-color: #0f7d5d;
+      color: #fff;
+    }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .kpi {
+      border: 1px solid #c9d8d2;
+      border-radius: 12px;
+      background: #fff;
+      padding: 10px;
+    }
+
+    .kpi span {
+      display: block;
+      color: #577067;
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .kpi b {
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    @media (max-width: 680px) {
+      .actions,
+      .kpis {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
+<body class="gps-page" data-required-role="TECHNICIAN">
+  <main class="gps-shell">
+    <section class="gps-card">
+      <p class="gps-muted">Operacao tecnica</p>
+      <h1 class="gps-title">GPS de Campo</h1>
+      <p class="gps-muted">Leitura ao sol e estado de sincronizacao em tempo real.</p>
+      <div class="actions">
+        <button id="startBtn" class="primary" type="button">Iniciar tracking</button>
+        <button id="sendNowBtn" type="button">Enviar ponto agora</button>
+      </div>
+    </section>
 
-<body>
+    <p id="gpsStatus" class="status-box" aria-live="polite">Pronto para iniciar GPS.</p>
 
-<h2>Tracking GPS</h2>
+    <section class="gps-card">
+      <h2 style="margin:0 0 8px;">Estado rapido</h2>
+      <div class="kpis">
+        <div class="kpi"><span>Sincronizacao</span><b id="syncKpi">Em espera</b></div>
+        <div class="kpi"><span>Precisao</span><b id="accuracyKpi">-</b></div>
+        <div class="kpi"><span>Ultimo envio</span><b id="lastKpi">-</b></div>
+      </div>
+    </section>
+  </main>
 
-<div id="gpsStatus">⏳ A iniciar...</div>
-
-<br>
-
-<button onclick="sendNow()">Enviar agora</button>
-
-<script src="/gps.js"></script>
-
-<script src="/cristal-help-data.js"></script>
-<script src="/cristal-assist.js"></script>
-<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
-<script src="/cw-flow-shell.js"></script>
+  <script src="/technician-gps.js"></script>
+  <script src="/cristal-help-data.js"></script>
+  <script src="/cristal-assist.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

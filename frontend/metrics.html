@@ -4,19 +4,23 @@
 <meta charset="UTF-8">
 <title>Produtividade</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="/ui/foundation.css">
 
 <style>
+html, body { overflow-x: hidden; }
 body { font-family: Arial; padding: 20px; }
 canvas { max-width: 800px; margin-bottom: 40px; }
 </style>
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
+  <script src="/admin-auth-guard.js"></script>
 </head>
 
-<body>
+<body data-required-role="ADMIN">
 
 <h2>Produtividade</h2>
+<p>Indicadores separados por produtividade operacional, sem comparacoes punitivas ou humilhantes.</p>
+<p id="status" aria-live="polite">A carregar métricas...</p>
 
 <h3>Clientes</h3>
 <canvas id="clientsChart"></canvas>
@@ -25,10 +29,18 @@ canvas { max-width: 800px; margin-bottom: 40px; }
 <canvas id="techChart"></canvas>
 
 <script>
+function authHeaders(extra = {}) {
+  const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
+  return {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...extra,
+  };
+}
 
-fetch("/api/metrics/productivity")
-.then(r => r.json())
+fetch("/api/metrics/productivity", { headers: authHeaders() })
+.then(r => r.ok ? r.json() : Promise.reject(new Error("Erro ao carregar métricas")))
 .then(data => {
+  document.getElementById("status").textContent = "Métricas carregadas.";
 
   // CLIENTES
   new Chart(document.getElementById("clientsChart"), {
@@ -55,10 +67,16 @@ fetch("/api/metrics/productivity")
   });
 
 });
+
+.catch(() => {
+  document.getElementById("status").textContent = "Erro ao carregar métricas.";
+});
 </script>
 
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
-<script src="/cw-flow-shell.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

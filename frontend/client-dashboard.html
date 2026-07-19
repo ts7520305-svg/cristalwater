@@ -5,11 +5,15 @@
   <meta name="theme-color" content="#050b16">
   <meta charset="utf-8">
   <title>Cristal Water - Área do Cliente</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 
   <!-- 🔐 GUARD DO CLIENTE (DEV SEM TOKENS) -->
   <script src="/client-auth-guard.js"></script>
+  <link rel="stylesheet" href="/ui/foundation.css">
 
   <style>
+    html, body { overflow-x: hidden; }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -95,11 +99,9 @@
   </style>
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
-  <link rel="stylesheet" href="css/crystal-v25.css">
 </head>
 
-<body>
+<body data-cw-role="CLIENT" data-required-role="CLIENT">
 
 <header>
   <img src="/logo.png" alt="Cristal Water">
@@ -110,6 +112,11 @@
 </header>
 
 <main>
+
+  <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;">
+    <button type="button" data-cw-back data-cw-fallback="/client-portal" style="border:none;border-radius:8px;padding:10px 12px;background:#1e88e5;color:#fff;font-weight:700;cursor:pointer;">Voltar</button>
+    <a href="/client-portal" style="display:inline-block;padding:10px 12px;background:#1565c0;color:#fff;border-radius:8px;text-decoration:none;font-weight:700;">Portal</a>
+  </div>
 
   <div class="grid">
 
@@ -141,7 +148,9 @@
 
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
+<script src="/ui/core/navigation-context.js"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
-<script src="/cw-flow-shell.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

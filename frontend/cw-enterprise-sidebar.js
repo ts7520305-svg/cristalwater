@@ -3,6 +3,7 @@
   "use strict";
 
   if (window.__CW_PROD_SIDEBAR__) return;
+  if (document.querySelector('link[href="/crystal-os-v2-phase2-adapter.css"]')) return;
   window.__CW_PROD_SIDEBAR__ = true;
 
   const path = String(location.pathname || "").replace(/\.html$/i, "").toLowerCase();
@@ -272,10 +273,7 @@
 
   const groups = [
     ["Operacao", [
-      ["Dashboard", "/admin-dashboard", "DA"],
       ["Centro de Operacoes", "/admin-master-control", "CO"],
-      ["Command Center", "/admin-command-center", "CC"],
-      ["Hoje", "/admin-today", "HJ"],
       ["Mapa Live", "/admin-live-map", "MP"],
     ]],
     ["Clientes e Piscinas", [

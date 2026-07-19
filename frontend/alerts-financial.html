@@ -1,66 +1,178 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt">
 <head>
-<meta charset="UTF-8">
-<title>Alertas Financeiros</title>
-
-<style>
-body { font-family: Arial; padding:20px; background:#f4f6f8; }
-
-.card {
-  background:white;
-  padding:15px;
-  margin-bottom:10px;
-  border-radius:10px;
-  border-left:6px solid red;
-}
-</style>
-<link rel="stylesheet" href="/cristal-assist.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Cristal Water - Alertas Financeiros</title>
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
+  <link rel="stylesheet" href="/ui/foundation.css">
+  <style>
+    :root { --bg:#071225; --panel:#10243c; --line:#254663; --txt:#e9f5ff; --muted:#93b8d6; --bad:#ff7d8e; --ok:#7be0ad; --input:#0c1e33; }
+    * { box-sizing:border-box; }
+    html, body { overflow-x: hidden; }
+    body { margin:0; font-family:Inter,Segoe UI,Arial,sans-serif; color:var(--txt); background:linear-gradient(120deg,#071225,#102340 58%,#071225); }
+    main.page { max-width:1180px; margin:0 auto; padding:18px; }
+    .head { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:14px; }
+    h1 { margin:0; font-size:28px; }
+    .subtitle { margin:6px 0 0; color:var(--muted); }
+    .btn { border:0; border-radius:12px; min-height:44px; padding:10px 14px; background:#1c3f63; color:var(--txt); font-weight:700; text-decoration:none; display:inline-flex; align-items:center; }
+    .panel { background:rgba(16,36,60,.9); border:1px solid var(--line); border-radius:18px; padding:14px; }
+    .toolbar { display:grid; grid-template-columns:1fr 190px auto auto; gap:10px; margin-bottom:12px; }
+    input,select { width:100%; min-height:46px; border:1px solid var(--line); background:var(--input); color:var(--txt); border-radius:12px; padding:10px 12px; }
+    button { border:0; border-radius:12px; min-height:46px; padding:10px 14px; background:#1c3f63; color:var(--txt); font-weight:700; cursor:pointer; }
+    button.primary { background:linear-gradient(135deg,#0c86c8,#35d1ff); color:#03121c; }
+    .status { border:1px solid rgba(53,217,255,.28); background:rgba(53,217,255,.08); border-radius:12px; padding:10px 12px; margin-bottom:12px; color:#cfe9ff; }
+    .status.error { border-color:rgba(255,125,142,.5); background:rgba(255,125,142,.12); color:#ffe0e5; }
+    .status.ok { border-color:rgba(123,224,173,.45); background:rgba(123,224,173,.12); color:#defff0; }
+    .grid { display:grid; gap:10px; }
+    .card { border:1px solid rgba(255,125,142,.5); border-radius:14px; background:#0d2034; padding:12px; }
+    .card h2 { margin:0 0 6px; font-size:18px; }
+    .row { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:8px; }
+    .metric { border:1px solid var(--line); border-radius:10px; background:#0a182b; padding:8px; }
+    .metric span { display:block; color:var(--muted); font-size:12px; margin-bottom:4px; }
+    .metric strong { font-size:16px; }
+    @media (max-width:860px) { .toolbar { grid-template-columns:1fr 1fr; } .row { grid-template-columns:1fr; } }
+    @media (max-width:520px) { .toolbar { grid-template-columns:1fr; } h1 { font-size:24px; } }
+  </style>
+  <link rel="stylesheet" href="/cristal-assist.css">
 </head>
+<body data-required-role="ADMIN">
+<main class="page">
+  <div class="head">
+    <div>
+      <h1>Alertas financeiros</h1>
+      <p class="subtitle">Tecnicos com rentabilidade negativa no periodo, para decisao rapida de operacao e custos.</p>
+    </div>
+    <a class="btn" href="/admin-master-control">Centro de operacoes</a>
+  </div>
 
-<body>
+  <section class="panel">
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="Pesquisar tecnico">
+      <select id="period">
+        <option value="">Periodo atual</option>
+        <option value="prev">Mes anterior</option>
+      </select>
+      <button id="refresh" class="primary" type="button">Atualizar</button>
+      <button id="clear" type="button">Limpar</button>
+    </div>
+    <div id="status" class="status" role="status" aria-live="polite">A carregar alertas financeiros...</div>
+    <div id="list" class="grid" aria-live="polite"></div>
+  </section>
+</main>
 
-<h2>⚠️ Técnicos com prejuízo</h2>
-
-<div id="list"></div>
-
+<script src="/admin-auth-guard.js"></script>
 <script>
 const API = "/api";
+let rankingState = [];
 
-async function load(){
+function headers() {
+  const token = localStorage.getItem("token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
-  const res = await fetch(`${API}/billing/technician-alerts`);
-  const data = await res.json();
+function esc(v) {
+  return String(v ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
 
+function n(v) {
+  const num = Number(v || 0);
+  return Number.isFinite(num) ? num : 0;
+}
+
+function euro(v) {
+  return n(v).toLocaleString("pt-PT", { style: "currency", currency: "EUR" });
+}
+
+function setStatus(msg, tone = "info") {
+  const el = document.getElementById("status");
+  if (!el) return;
+  el.textContent = msg;
+  el.className = `status ${tone === "info" ? "" : tone}`.trim();
+}
+
+function monthRange(mode) {
+  if (mode !== "prev") return {};
+  const now = new Date();
+  const firstThis = new Date(now.getFullYear(), now.getMonth(), 1);
+  const prev = new Date(firstThis);
+  prev.setMonth(prev.getMonth() - 1);
+  return { month: String(prev.getMonth() + 1), year: String(prev.getFullYear()) };
+}
+
+function filteredNegative() {
+  const query = String(document.getElementById("search")?.value || "").toLowerCase().trim();
+  return rankingState
+    .filter((item) => n(item.profit) < 0)
+    .filter((item) => !query || String(item.technician || "").toLowerCase().includes(query));
+}
+
+function render() {
   const list = document.getElementById("list");
-  list.innerHTML = "";
-
-  if (!data.ok) return;
-
-  if (data.alerts.length === 0) {
-    list.innerHTML = "<p>✔ Nenhum técnico em prejuízo</p>";
+  if (!list) return;
+  const rows = filteredNegative();
+  if (!rows.length) {
+    list.innerHTML = '<div class="status ok">Nenhum tecnico em prejuizo para os filtros atuais.</div>';
+    setStatus("Sem alertas financeiros ativos.", "ok");
     return;
   }
-
-  data.alerts.forEach(a => {
-    list.innerHTML += `
-      <div class="card">
-        <b>${a.technician}</b><br>
-        Lucro: €${a.profit}<br>
-        Receita: €${a.revenue}<br>
-        Custo: €${a.cost}
+  setStatus(`${rows.length} tecnico(s) com prejuizo.`, "error");
+  list.innerHTML = rows.map((a) => `
+    <article class="card">
+      <h2>${esc(a.technician || "Tecnico")}</h2>
+      <div class="row">
+        <div class="metric"><span>Lucro</span><strong>${esc(euro(a.profit))}</strong></div>
+        <div class="metric"><span>Receita</span><strong>${esc(euro(a.revenue))}</strong></div>
+        <div class="metric"><span>Custo</span><strong>${esc(euro(a.cost))}</strong></div>
       </div>
-    `;
-  });
+    </article>
+  `).join("");
 }
+
+async function load() {
+  setStatus("A carregar alertas financeiros...", "info");
+  try {
+    const period = document.getElementById("period")?.value || "";
+    const params = new URLSearchParams(monthRange(period));
+    const url = `${API}/billing/technician-profit${params.toString() ? `?${params.toString()}` : ""}`;
+    const response = await fetch(url, { headers: { ...headers() } });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || data.ok === false) {
+      throw new Error(data.error || data.message || `Erro HTTP ${response.status}`);
+    }
+    rankingState = Array.isArray(data.ranking) ? data.ranking : [];
+    render();
+  } catch (error) {
+    console.error(error);
+    rankingState = [];
+    document.getElementById("list").innerHTML = '<div class="status error">Falha no carregamento dos dados.</div>';
+    setStatus(`Erro ao carregar dados: ${error.message}`, "error");
+  }
+}
+
+document.getElementById("refresh")?.addEventListener("click", load);
+document.getElementById("clear")?.addEventListener("click", () => {
+  const search = document.getElementById("search");
+  const period = document.getElementById("period");
+  if (search) search.value = "";
+  if (period) period.value = "";
+  render();
+});
+document.getElementById("search")?.addEventListener("input", render);
+document.getElementById("period")?.addEventListener("change", load);
 
 load();
 </script>
 
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
-<script src="/cw-flow-shell.js"></script>
+<script src="/ui/core/navigation-context.js"></script>
+<script src="/crystal-os-v2-shell.js"></script>
+<script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

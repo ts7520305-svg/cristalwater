@@ -1,5 +1,12 @@
 (() => {
   const API = "/api";
+  function authHeaders(extra = {}) {
+    const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
+    return {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...extra,
+    };
+  }
   const params = new URLSearchParams(window.location.search);
   const unreadFilter = ["unread", "por-ler", "nao-lidas"].includes(
     String(params.get("filter") || "").toLowerCase()
@@ -68,9 +75,12 @@
   }
 
   async function api(path, options = {}) {
+    const headers = options.body instanceof FormData
+      ? authHeaders(options.headers || {})
+      : authHeaders({ "Content-Type": "application/json", ...(options.headers || {}) });
     const response = await fetch(`${API}${path}`, {
       cache: "no-store",
-      headers: options.body instanceof FormData ? undefined : { "Content-Type": "application/json" },
+      headers,
       ...options,
     });
     const data = await response.json().catch(() => ({}));

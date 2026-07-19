@@ -1,13 +1,12 @@
 const express = require("express");
 const multer = require("multer");
 const path = require("path");
-const fs = require("fs");
 const { prisma } = require("../prismaClient");
+const { resolveUploadSubdir, toPublicUploadUrl } = require("../config/uploadPath");
 
 const router = express.Router();
 
-const uploadDir = path.join(__dirname, "../../uploads");
-fs.mkdirSync(uploadDir, { recursive: true });
+const uploadDir = resolveUploadSubdir("");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
@@ -103,7 +102,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
       return res.status(400).json({ ok: false, error: "Dados invalidos" });
     }
 
-    const fileUrl = `/uploads/${req.file.filename}`;
+    const fileUrl = toPublicUploadUrl(req.file.filename);
     const ext = path.extname(req.file.originalname || "").toLowerCase();
     const type = [".jpg", ".jpeg", ".png", ".gif", ".webp"].includes(ext)
       ? "IMAGE"

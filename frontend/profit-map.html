@@ -7,6 +7,8 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
+<link rel="stylesheet" href="/ui/foundation.css">
+
 <style>
 body { margin:0; font-family:Arial; }
 #map { width:100%; height:100vh; }
@@ -32,21 +34,51 @@ button {
 </style>
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
 </head>
 
-<body>
+<body data-required-role="ADMIN">
+
+<div style="padding:12px 16px 0">
+  <button type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
+</div>
 
 <div class="top">
+  <div id="statusLine" style="font-size:12px;color:#334155;margin-bottom:8px;max-width:220px;">A carregar rota por lucro...</div>
   <button onclick="load()">Atualizar</button>
 </div>
 
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="/admin-auth-guard.js"></script>
 
 <script>
 const API = "/api";
+
+function token(){
+  return localStorage.getItem("token") || localStorage.getItem("authToken") || localStorage.getItem("cwAdminToken") || "";
+}
+
+function authHeaders(){
+  const t = token();
+  return t ? { Authorization: `Bearer ${t}` } : {};
+}
+
+function setStatus(message){
+  const line = document.getElementById("statusLine");
+  if (line) line.textContent = message;
+}
+
+async function fetchJson(path){
+  const res = await fetch(`${API}${path}`, { headers: { ...authHeaders() } });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.ok === false) {
+    throw new Error(data.error || data.message || `Erro ${res.status}`);
+  }
+  return data;
+}
 
 const map = L.map('map').setView([37.1, -8.6], 10);
 
@@ -55,52 +87,73 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 }).addTo(map);
 
 let routeLine;
+let markers = [];
 
 // ==========================================================
 // LOAD ROTA POR LUCRO
 // ==========================================================
 
 async function load(){
+  try {
+    setStatus("A carregar plano...");
 
-  const res = await fetch(`${API}/routes/auto-plan`);
-  const data = await res.json();
+    const data = await fetchJson("/routes/auto-plan");
 
-  if (!data.ok) return;
+    if (!data.ok) {
+      setStatus("Plano indisponível.");
+      return;
+    }
 
-  const plan = data.plans[0]; // 1 técnico
+    const plan = Array.isArray(data.plans) ? data.plans[0] : null;
+    if (!plan || !Array.isArray(plan.route) || !plan.route.length) {
+      setStatus("Sem rota disponível.");
+      return;
+    }
 
-  const coords = [];
+    markers.forEach((m) => map.removeLayer(m));
+    markers = [];
+    const coords = [];
 
-  plan.route.forEach(p => {
+    plan.route.forEach(p => {
+      if (!Number.isFinite(Number(p.latitude)) || !Number.isFinite(Number(p.longitude))) return;
 
-    const color =
-      p.type === "EXTRA" ? "red" :
-      p.profit < 0 ? "black" :
-      "green";
+      const color =
+        p.type === "EXTRA" ? "red" :
+        Number(p.profit) < 0 ? "black" :
+        "green";
 
-    L.circleMarker([p.latitude, p.longitude], {
-      color,
-      radius:8
-    })
-    .addTo(map)
-    .bindPopup(`
-      <b>${p.name}</b><br>
-      Cliente: ${p.client}<br>
-      Lucro: €${p.profit}
-    `);
+      const marker = L.circleMarker([p.latitude, p.longitude], {
+        color,
+        radius:8
+      })
+      .addTo(map)
+      .bindPopup(`
+        <b>${p.name || "Piscina"}</b><br>
+        Cliente: ${p.client || "-"}<br>
+        Lucro: €${Number(p.profit || 0).toFixed(2)}
+      `);
+      markers.push(marker);
 
-    coords.push([p.latitude, p.longitude]);
-  });
+      coords.push([p.latitude, p.longitude]);
+    });
 
-  // desenhar linha
-  if (routeLine) map.removeLayer(routeLine);
+    if (!coords.length) {
+      setStatus("Sem coordenadas válidas na rota.");
+      return;
+    }
 
-  routeLine = L.polyline(coords,{
-    color:"blue",
-    weight:4
-  }).addTo(map);
+    if (routeLine) map.removeLayer(routeLine);
 
-  map.fitBounds(routeLine.getBounds());
+    routeLine = L.polyline(coords,{
+      color:"blue",
+      weight:4
+    }).addTo(map);
+
+    map.fitBounds(routeLine.getBounds(), { padding: [20, 20] });
+    setStatus(`Paragens na rota: ${coords.length}`);
+  } catch (e) {
+    setStatus(e.message || "Erro ao carregar rota");
+  }
 }
 
 load();
@@ -108,6 +161,7 @@ load();
 
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
-<script src="/cw-flow-shell.js"></script>
-</body>
+<script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </html>

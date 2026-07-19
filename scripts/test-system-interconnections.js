@@ -1,6 +1,7 @@
 const { spawn } = require("child_process");
 const fs = require("fs");
 const path = require("path");
+const bcrypt = require("bcrypt");
 
 require("../src/loadEnv")();
 
@@ -14,6 +15,8 @@ fs.mkdirSync(reportDir, { recursive: true });
 
 const batteryRunId = `INTERLINK-${Date.now()}`;
 const checks = [];
+let adminToken = null;
+let clientToken = null;
 
 function check(name, ok, detail = "") {
   const item = { name, ok: Boolean(ok), detail };
@@ -22,10 +25,63 @@ function check(name, ok, detail = "") {
   return item.ok;
 }
 
+async function ensureAdminToken() {
+  if (adminToken) return adminToken;
+  const email = process.env.ADMIN_EMAIL || "cristal.water@sapo.pt";
+  const password = process.env.ADMIN_PASSWORD || "";
+  const response = await fetchImpl(`${BASE_URL}/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  const text = await response.text();
+  let data = {};
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch (_) {
+    data = { raw: text.slice(0, 200) };
+  }
+  if (!response.ok || !data.token) {
+    throw new Error(`Admin login failed: ${response.status} ${data.error || data.message || text.slice(0, 200)}`);
+  }
+  adminToken = data.token;
+  return adminToken;
+}
+
+async function ensureClientToken(client) {
+  if (clientToken) return clientToken;
+  const password = `ClientPortal-${batteryRunId}`;
+  const hashedPassword = await bcrypt.hash(password, 10);
+  await prisma.client.update({
+    where: { id: client.id },
+    data: { password: hashedPassword },
+  });
+
+  const response = await fetchImpl(`${BASE_URL}/api/client-auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: client.email, password }),
+  });
+  const text = await response.text();
+  let data = {};
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch (_) {
+    data = { raw: text.slice(0, 200) };
+  }
+  if (!response.ok || !data.token) {
+    throw new Error(`Client login failed: ${response.status} ${data.message || data.error || text.slice(0, 200)}`);
+  }
+  clientToken = data.token;
+  return clientToken;
+}
+
 async function api(method, pathname, body, expected = [200, 201]) {
+  const token = await ensureAdminToken();
   const response = await fetchImpl(`${BASE_URL}${pathname}`, {
     method,
-    headers: body === undefined ? undefined : {
+    headers: {
+      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
       "x-actor": `battery-${batteryRunId}`,
     },
@@ -208,7 +264,24 @@ async function extraCommunicationChecks(monthRunId) {
   const notifText = JSON.stringify(notifications.data);
   check("notificacoes agregam chat, agua e stock", notifText.includes(batteryRunId), "eventos visiveis");
 
-  const portal = await api("GET", `/api/client-portal/${ctx.client.id}`);
+  const portalToken = await ensureClientToken(ctx.client);
+  const portalResponse = await fetchImpl(`${BASE_URL}/api/client-portal/${ctx.client.id}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${portalToken}`,
+      "x-actor": `battery-${batteryRunId}`,
+    },
+  });
+  const portalText = await portalResponse.text();
+  let portal = { data: {} };
+  try {
+    portal = { data: portalText ? JSON.parse(portalText) : {} };
+  } catch (_) {
+    portal = { data: { raw: portalText.slice(0, 500) } };
+  }
+  if (!portalResponse.ok || (portal.data && portal.data.ok === false)) {
+    throw new Error(`GET /api/client-portal/${ctx.client.id} -> ${portalResponse.status}: ${portal.data.error || portal.data.message || portalText.slice(0, 250)}`);
+  }
   const portalPools = Array.isArray(portal.data.pools)
     ? portal.data.pools
     : Array.isArray(portal.data.client?.pools)

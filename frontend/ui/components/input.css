@@ -1,0 +1,22 @@
+input,
+select,
+textarea,
+.cw-field,
+.cw-v2-search input {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--cw-color-border);
+  border-radius: var(--cw-radius-sm);
+  background: var(--cw-color-surface);
+  color: var(--cw-color-text);
+  padding: 8px 10px;
+  font: inherit;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: rgba(15, 90, 112, 0.62);
+  box-shadow: 0 0 0 3px rgba(15, 90, 112, 0.12);
+}

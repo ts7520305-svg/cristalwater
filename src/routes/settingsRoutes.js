@@ -14,8 +14,9 @@ const {
   savePermissionPolicy,
   saveTeamHierarchy,
 } = require('../services/accessControlPolicyService');
+const { getJwtSecret } = require("../utils/jwtSecret");
 
-const JWT_SECRET = process.env.JWT_SECRET || 'cristalwater_secret';
+const JWT_SECRET = getJwtSecret();
 
 function parseValue(value) {
   if (typeof value === 'boolean') return value ? 'true' : 'false';

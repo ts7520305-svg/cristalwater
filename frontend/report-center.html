@@ -4,7 +4,9 @@
   <meta charset="utf-8">
   <title>Cristal Water - Centro de Relatórios</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/ui/foundation.css">
   <style>
+    html, body { overflow-x: hidden; }
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -54,9 +56,9 @@
   </style>
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
+  <script src="/admin-auth-guard.js"></script>
 </head>
-<body>
+<body data-required-role="ADMIN">
 
 <header>
   <h1>Centro de Relatórios</h1>
@@ -74,10 +76,24 @@
     </select>
 
     <button onclick="openPrintableReport()">Abrir relatório para imprimir / PDF</button>
+    <p id="status" aria-live="polite">Pronto.</p>
   </div>
 </main>
 
 <script>
+  function authHeaders(extra = {}) {
+    const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
+    return {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...extra,
+    };
+  }
+
+  function setStatus(message) {
+    const node = document.getElementById("status");
+    if (node) node.textContent = message;
+  }
+
   function getCurrentMonthRef() {
     const now = new Date();
     const y = now.getFullYear();
@@ -87,18 +103,31 @@
 
   document.getElementById("monthRef").value = getCurrentMonthRef();
 
-  function openPrintableReport() {
+  async function openPrintableReport() {
     const monthRef = document.getElementById("monthRef").value;
     const onlyRequiresInvoice = document.getElementById("onlyRequiresInvoice").value;
 
     const url =
       `/api/reports/monthly-print?monthRef=${encodeURIComponent(monthRef)}&onlyRequiresInvoice=${encodeURIComponent(onlyRequiresInvoice)}`;
 
-    window.open(url, "_blank");
+    try {
+      setStatus("A preparar relatório...");
+      const res = await fetch(url, { headers: authHeaders() });
+      if (!res.ok) throw new Error("Erro ao preparar relatório");
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      window.open(objectUrl, "_blank");
+      setStatus("Relatório aberto.");
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 30000);
+    } catch (_) {
+      setStatus("Erro ao abrir relatório.");
+    }
   }
 </script>
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
-<script src="/cw-flow-shell.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>

@@ -1,6 +1,7 @@
 const PDFDocument = require("pdfkit");
 
 const { prisma } = require("../prismaClient");
+const { toPublicUploadUrl } = require("../config/uploadPath");
 
 const COMPANY_NAME = "Cristal Water LDA";
 
@@ -873,7 +874,7 @@ async function uploadTransportGuideDocument(req, res) {
       codeAT: guide.codeAT || null,
       vehicleId: guide.vehicleId || null,
       vehiclePlate: guide.vehicle?.plate || null,
-      url: `/uploads/guides/${req.file.filename}`,
+      url: toPublicUploadUrl("guides", req.file.filename),
       filename: req.file.filename,
       originalName: req.file.originalname,
       mimeType: req.file.mimetype,

@@ -1,6 +1,8 @@
 const onlineUsers =
   new Map();
 
+global.__CRISTAL_WATER_ONLINE_USERS__ = onlineUsers;
+
 // ==========================================================
 // SOCKET SERVER
 // ==========================================================

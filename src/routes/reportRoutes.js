@@ -1,6 +1,8 @@
 const express = require("express");
 
 const router = express.Router();
+const auth = require("../middlewares/authMiddleware");
+const { roleMatches } = require("../utils/roles");
 
 const { prisma } =
   require("../prismaClient");
@@ -8,6 +10,8 @@ const { prisma } =
 // ======================================================
 // REPORT VISIT
 // ======================================================
+
+router.use(auth());
 
 router.get("/visit/:id", async (req, res) => {
 
@@ -41,6 +45,23 @@ router.get("/visit/:id", async (req, res) => {
       return res.send(
         "Visita não encontrada"
       );
+    }
+
+    const user = req.user || {};
+    const isAdmin = roleMatches(user.role, "ADMIN");
+    const isTechnician = roleMatches(user.role, "TECHNICIAN") && !isAdmin;
+    const isClient = roleMatches(user.role, "CLIENT");
+
+    if (isTechnician && Number(visit.technicianId || 0) !== Number(user.technicianId || user.id || 0)) {
+      return res.status(403).send("Acesso negado");
+    }
+
+    if (isClient) {
+      const authClientId = Number(user.clientId || user.id || 0);
+      const visitClientId = Number(visit.clientId || visit.pool?.clientId || 0);
+      if (!authClientId || authClientId !== visitClientId) {
+        return res.status(403).send("Acesso negado");
+      }
     }
 
     const beforePhotos =

@@ -1,0 +1,28 @@
+.cw-table-wrap {
+  overflow: auto;
+  border: 1px solid var(--cw-color-border);
+  border-radius: var(--cw-radius-md);
+  background: var(--cw-color-surface);
+}
+
+.cw-table,
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cw-table th,
+.cw-table td,
+th,
+td {
+  border-bottom: 1px solid var(--cw-color-border);
+  padding: 10px;
+  text-align: left;
+  font-size: var(--cw-font-size-sm);
+}
+
+.cw-table th,
+th {
+  background: var(--cw-color-surface-2);
+  font-weight: 800;
+}

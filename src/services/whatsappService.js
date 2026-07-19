@@ -1,4 +1,5 @@
 const { prisma } = require("../prismaClient");
+const { assertExternalOperationAllowed } = require("../config/externalIntegrations");
 
 // ==========================================
 // HELPERS
@@ -60,6 +61,8 @@ function getWhatsAppConfig() {
 // ==========================================
 
 async function sendWhatsAppViaApi({ toPhone, text }) {
+  assertExternalOperationAllowed("whatsapp");
+
   const cfg = getWhatsAppConfig();
 
   if (cfg.provider !== "TWILIO") {

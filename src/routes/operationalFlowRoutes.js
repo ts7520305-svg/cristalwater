@@ -65,6 +65,13 @@ function canBillClient(client) {
   return Boolean(client && client.active !== false && client.billingActive === true && String(client.status || '').toUpperCase() === 'ACTIVE');
 }
 
+const VISIT_COMPLETABLE_STATUSES = new Set(['PLANNED', 'IN_PROGRESS', 'A_CAMINHO', 'ON_ROUTE', 'STARTED', 'EM_EXECUCAO', 'EM EXECUCAO']);
+const VISIT_TERMINAL_STATUSES = new Set(['DONE', 'CLOSED', 'CANCELLED', 'CANCELED', 'NOT_DONE', 'FAILED']);
+
+function normalizeStatus(value) {
+  return String(value || '').trim().toUpperCase();
+}
+
 function monthRef(date = new Date()) {
   return date.toISOString().slice(0, 7);
 }
@@ -194,18 +201,10 @@ router.post('/onboard', asyncHandler(async (req, res) => {
 
   if (!clientInput.name) return res.status(400).json({ ok: false, error: 'Nome do cliente é obrigatório.' });
 
-  const poolSerial = String(poolInput.serialNumber || '').trim();
   const poolAddress = String(poolInput.address || clientInput.address || '').trim();
   const poolLocation = String(poolInput.location || poolInput.zone || clientInput.zone || '').trim();
   const poolType = String(poolInput.type || 'POOL').trim();
-  const wantsPool = Boolean(poolInput.name || poolInput.type || poolInput.volumeM3 || poolInput.serialNumber || poolInput.address || poolInput.location);
-
-  if (wantsPool && poolSerial) {
-    const existingSerial = await model('pool').findFirst({ where: { serialNumber: poolSerial } });
-    if (existingSerial) {
-      return res.status(409).json({ ok: false, error: 'Ja existe uma piscina ou jacuzzi com este numero de serie.' });
-    }
-  }
+  const wantsPool = Boolean(poolInput.name || poolInput.type || poolInput.volumeM3 || poolInput.address || poolInput.location);
 
   if (wantsPool && poolAddress && poolLocation && poolType) {
     const existingPool = await model('pool').findFirst({
@@ -246,7 +245,6 @@ router.post('/onboard', asyncHandler(async (req, res) => {
           type: poolInput.type || 'POOL',
           address: poolInput.address || client.address || null,
           location: poolInput.location || poolInput.zone || client.zone || null,
-          serialNumber: poolSerial || null,
           zone: poolInput.zone || client.zone || null,
           volumeM3: poolInput.volumeM3 ? toNumber(poolInput.volumeM3) : null,
           monthlyAmount: toNumber(poolInput.monthlyAmount ?? client.monthlyFee, 0),
@@ -385,8 +383,19 @@ router.post('/complete-visit', asyncHandler(async (req, res) => {
   const visitId = Number(req.body.visitId);
   if (!visitId) return res.status(400).json({ ok: false, error: 'visitId obrigatório' });
 
-  const visit = await model('serviceVisit').update({
-    where: { id: visitId },
+  const currentVisit = await model('serviceVisit').findUnique({ where: { id: visitId } });
+  if (!currentVisit) return res.status(404).json({ ok: false, error: 'Visita não encontrada' });
+
+  const currentStatus = normalizeStatus(currentVisit.status);
+  if (VISIT_TERMINAL_STATUSES.has(currentStatus) || currentVisit.endAt) {
+    return res.status(409).json({ ok: false, error: 'Visita já concluída/cancelada.' });
+  }
+  if (!VISIT_COMPLETABLE_STATUSES.has(currentStatus)) {
+    return res.status(409).json({ ok: false, error: `Estado inválido para conclusão: ${currentStatus || 'UNKNOWN'}` });
+  }
+
+  const updated = await model('serviceVisit').updateMany({
+    where: { id: visitId, endAt: null, status: { notIn: ['DONE', 'CLOSED', 'CANCELLED', 'CANCELED', 'NOT_DONE', 'FAILED'] } },
     data: {
       status: 'DONE',
       cleaned: req.body.cleaned !== false,
@@ -403,8 +412,13 @@ router.post('/complete-visit', asyncHandler(async (req, res) => {
       notes: req.body.notes || 'Visita concluída pelo fluxo operacional.',
       endAt: new Date(),
     },
-    include: { pool: true, client: true },
   });
+
+  if (updated.count !== 1) {
+    return res.status(409).json({ ok: false, error: 'Visita já concluída por outro processo.' });
+  }
+
+  const visit = await model('serviceVisit').findUnique({ where: { id: visitId }, include: { pool: true, client: true } });
 
   let repair = null;
   let alert = null;

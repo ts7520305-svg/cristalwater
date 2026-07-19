@@ -4,7 +4,7 @@
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#050b16">
 <meta charset="UTF-8">
-<title>Clientes</title>
+<title>Cristal Water - Conta do Cliente</title>
 
 <style>
 body { font-family: Arial; background:#f4f6f8; padding:20px; }
@@ -13,11 +13,19 @@ button { padding:8px 12px; margin-top:5px; cursor:pointer; }
 </style>
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
-  <link rel="stylesheet" href="css/crystal-v25.css">
+  <link rel="stylesheet" href="/ui/foundation.css">
+<link rel="stylesheet" href="css/crystal-v25.css">
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+  <link rel="stylesheet" href="/cw-block2-shell.css">
+  <script src="/client-auth-guard.js"></script>
 </head>
 
-<body>
+<body data-cw-role="CLIENT" data-required-role="CLIENT">
+
+<div style="padding:12px 16px 0">
+  <button type="button" data-cw-back data-cw-fallback="/client-menu">Voltar</button>
+</div>
 
 <h1>Clientes</h1>
 
@@ -28,10 +36,17 @@ const API = "/api";
 
 async function load() {
   const res = await fetch(API + "/clients");
-  const data = await res.json();
+  const raw = await res.json();
+  const data = Array.isArray(raw) ? raw : [];
 
   const container = document.getElementById("list");
+  if (!container) return;
   container.innerHTML = "";
+
+  if (!data.length) {
+    container.innerHTML = '<div class="card">Sem clientes disponíveis.</div>';
+    return;
+  }
 
   data.forEach(c => {
     const div = document.createElement("div");
@@ -81,6 +96,9 @@ load();
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
-<script src="/cw-flow-shell.js"></script>
+<script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
+<script src="/cw-block2-shell.js"></script>
 </body>
 </html>
