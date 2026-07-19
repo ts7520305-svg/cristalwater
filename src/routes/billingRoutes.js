@@ -1,9 +1,12 @@
 const express = require("express");
 const router = express.Router(); // 🔥 IMPORTANTE
+const auth = require("../middlewares/authMiddleware");
 const { prisma } = require("../prismaClient");
 const billingController = require("../controllers/billingController");
 const PDFDocument = require("pdfkit");
 const { sendExtrasInvoiceEmail } = require("../services/emailService");
+
+router.use(auth("ADMIN"));
 
 // ==========================================================
 // GERAR MENSALIDADES

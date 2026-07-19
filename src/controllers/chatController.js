@@ -1,5 +1,6 @@
 const { prisma } =
   require("../prismaClient");
+const { normalizeRole } = require("../utils/roles");
 
 // ======================================================
 // HELPERS
@@ -28,6 +29,14 @@ function adminUnreadWhere(clientId = null) {
       { sender: "Cliente" },
     ],
   };
+}
+
+function authClientId(req) {
+  return toNumber(req.user?.clientId || req.user?.id);
+}
+
+function isClientRole(req) {
+  return normalizeRole(req.user?.role) === "CLIENT";
 }
 
 // ======================================================
@@ -74,6 +83,13 @@ async function createMessage(req, res){
         error:
           "Mensagem vazia"
       });
+    }
+
+    if (isClientRole(req)) {
+      const scopedClientId = authClientId(req);
+      if (!scopedClientId || scopedClientId !== clientId) {
+        return res.status(403).json({ ok: false, error: "Acesso negado" });
+      }
     }
 
     // ==================================================
@@ -246,6 +262,13 @@ async function listClientConversation(req, res){
         error:
           "clientId inválido"
       });
+    }
+
+    if (isClientRole(req)) {
+      const scopedClientId = authClientId(req);
+      if (!scopedClientId || scopedClientId !== clientId) {
+        return res.status(403).json({ ok: false, error: "Acesso negado" });
+      }
     }
 
     const messages =

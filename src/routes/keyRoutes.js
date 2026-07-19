@@ -1,7 +1,18 @@
 const express = require('express');
+const auth = require('../middlewares/authMiddleware');
+const { roleIn } = require('../utils/roles');
 const prisma = require('../prismaClient');
 
 const router = express.Router();
+
+function allowRoles(...roles) {
+  return (req, res, next) => {
+    if (roleIn(req.user?.role, roles)) return next();
+    return res.status(403).json({ ok: false, message: 'Sem permissão' });
+  };
+}
+
+router.use(auth());
 
 function toInt(value, fallback = null) {
   const n = Number(value);
@@ -96,7 +107,7 @@ function modelFor(source) {
   return source === 'pool' ? prisma.keyAccess : prisma.clientAccess;
 }
 
-router.get('/', async (req, res) => {
+router.get('/', allowRoles('ADMIN'), async (req, res) => {
   try {
     const [clientKeys, poolKeys] = await Promise.all([
       prisma.clientAccess.findMany({
@@ -126,7 +137,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', allowRoles('ADMIN'), async (req, res) => {
   try {
     const poolId = toInt(req.body?.poolId);
     if (poolId) {
@@ -161,7 +172,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', allowRoles('ADMIN'), async (req, res) => {
   try {
     const ref = await resolveAction(req.params.id);
     if (ref.source === 'pool') {
@@ -184,7 +195,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-router.post('/:id/archive', async (req, res) => {
+router.post('/:id/archive', allowRoles('ADMIN'), async (req, res) => {
   try {
     const ref = await resolveAction(req.params.id);
     const key = await modelFor(ref.source).update({ where: { id: ref.id }, data: { active: false } });
@@ -194,7 +205,7 @@ router.post('/:id/archive', async (req, res) => {
   }
 });
 
-router.post('/:id/restore', async (req, res) => {
+router.post('/:id/restore', allowRoles('ADMIN'), async (req, res) => {
   try {
     const ref = await resolveAction(req.params.id);
     const key = await modelFor(ref.source).update({ where: { id: ref.id }, data: { active: true } });
@@ -204,7 +215,7 @@ router.post('/:id/restore', async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', allowRoles('ADMIN'), async (req, res) => {
   try {
     const ref = await resolveAction(req.params.id);
     const model = modelFor(ref.source);
@@ -220,7 +231,7 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-router.get('/required/morning', async (req, res) => {
+router.get('/required/morning', allowRoles('ADMIN', 'TECHNICIAN', 'TEAM_LEADER'), async (req, res) => {
   try {
     const { start, end } = dayWindow(req.query.date);
     const technicianId = req.query.technicianId ? toInt(req.query.technicianId) : null;
@@ -316,7 +327,7 @@ router.get('/required/morning', async (req, res) => {
   }
 });
 
-router.get('/holder/:code', async (req, res) => {
+router.get('/holder/:code', allowRoles('ADMIN', 'TECHNICIAN', 'TEAM_LEADER'), async (req, res) => {
   try {
     const code = String(req.params.code || '').trim();
     const [clientHolders, poolHolders] = await Promise.all([

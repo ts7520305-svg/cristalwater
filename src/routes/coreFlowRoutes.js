@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const prismaModule = require('../prismaClient');
+const auth = require('../middlewares/authMiddleware');
 const { completeServiceVisit, VisitCompletionError } = require('../services/serviceVisitCompletionService');
 const {
   applyClientCreditToInvoice,
@@ -15,6 +16,13 @@ const RepairBusiness = require('../business/repair/RepairBusiness');
 
 const prisma = prismaModule.prisma || prismaModule.default || prismaModule;
 const router = express.Router();
+
+const adminAuth = auth('ADMIN');
+router.use((req, res, next) => {
+  // Keep only minimal metadata endpoints public by design.
+  if (req.method === 'GET' && (req.path === '/health' || req.path === '/dashboard')) return next();
+  return adminAuth(req, res, next);
+});
 
 // Simulação desativada em produção: todas as ações core usam dados reais via Prisma.
 
