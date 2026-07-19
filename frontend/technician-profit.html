@@ -28,39 +28,72 @@ body {
 </style>
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
-<link rel="stylesheet" href="/cw-polish.css">
+  <link rel="stylesheet" href="/ui/foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+  <script src="/technician-auth-guard.js"></script>
 </head>
 
-<body>
+<body data-required-role="TECHNICIAN">
+
+  <div style="padding:12px 16px 0">
+    <button type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
+  </div>
 
 <h2>Lucro por Técnico</h2>
+<p id="status" aria-live="polite">A carregar...</p>
 
 <div id="list"></div>
 
 <script>
 const API = "/api";
 
+function authHeaders(extra = {}) {
+  const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
+  return {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...extra,
+  };
+}
+
+function esc(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function money(value) {
+  return Number(value || 0).toLocaleString("pt-PT", { style: "currency", currency: "EUR" });
+}
+
 async function load(){
 
-  const res = await fetch(`${API}/billing/technician-profit`);
-  const data = await res.json();
+  const res = await fetch(`${API}/billing/technician-profit`, { headers: authHeaders() });
+  const data = await res.json().catch(() => ({}));
 
   const list = document.getElementById("list");
   list.innerHTML = "";
 
-  if(!data.ok) return;
+  if(!res.ok || !data.ok) {
+    document.getElementById("status").textContent = "Erro ao carregar lucro por técnico.";
+    return;
+  }
 
   data.ranking.forEach((t,i)=>{
 
     list.innerHTML += `
       <div class="card">
         <div class="title">
-          #${i+1} - ${t.technician}
+          #${i+1} - ${esc(t.technician)}
         </div>
-        €${t.total.toFixed(2)}
+        ${money(t.total)}
       </div>
     `;
   });
+  document.getElementById("status").textContent = "Dados carregados.";
 }
 
 load();
@@ -69,6 +102,8 @@ load();
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
-<script src="/cw-flow-shell.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
 </body>
 </html>
