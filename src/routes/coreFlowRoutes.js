@@ -1,4 +1,5 @@
 const express = require('express');
+const bcrypt = require('bcryptjs');
 const prismaModule = require('../prismaClient');
 const { completeServiceVisit, VisitCompletionError } = require('../services/serviceVisitCompletionService');
 const {
@@ -280,6 +281,19 @@ function clientBaseData(body) {
   });
 }
 
+async function clientMutationData(body) {
+  const data = clientBaseData(body);
+  if (Object.prototype.hasOwnProperty.call(body || {}, 'password')) {
+    const password = String(body.password || '').trim();
+    if (password) data.password = await bcrypt.hash(password, 12);
+  }
+  if (Object.prototype.hasOwnProperty.call(body || {}, 'pin')) {
+    const pin = String(body.pin || '').trim();
+    if (pin) data.pin = await bcrypt.hash(pin, 12);
+  }
+  return data;
+}
+
 async function recordTechnicalSheetHistory(poolId, before, after, actor = 'SYSTEM') {
   if (!available('technicalHistory')) return null;
   const snapshot = {
@@ -324,11 +338,12 @@ function poolBaseData(body, clientId = undefined, options = {}) {
   });
 }
 function technicianBaseData(body) {
+  const has = (key) => Object.prototype.hasOwnProperty.call(body || {}, key);
   return dataFor('technician', {
     name: body.name == null ? undefined : String(body.name).trim(),
     email: body.email || null,
     phone: body.phone || null,
-    pin: body.pin || '1234',
+    pin: has('pin') ? (body.pin || null) : undefined,
     zone: body.zone || null,
     vehicleId: body.vehicleId == null ? undefined : toInt(body.vehicleId),
     active: body.active == null ? true : truthy(body.active),
@@ -1007,7 +1022,7 @@ router.post('/clients', async (req, res) => {
     if (!body.name) return res.status(400).json({ ok: false, error: 'Nome do cliente obrigatório' });
 
     const client = await db('client').create({
-      data: clientBaseData({ ...body, status: 'SETUP', active: true, archiveStatus: 'ATIVO', deletedAt: null, paymentStatus: 'BILLING_DISABLED' }),
+      data: await clientMutationData({ ...body, status: 'SETUP', active: true, archiveStatus: 'ATIVO', deletedAt: null, paymentStatus: 'BILLING_DISABLED' }),
     });
 
     return res.json({ ok: true, client, next: 'CREATE_POOL' });
@@ -1028,7 +1043,7 @@ router.put('/clients/:id', async (req, res) => {
     }
     const client = await db('client').update({
       where: { id },
-      data: clientBaseData(body),
+      data: await clientMutationData(body),
     });
 
     return res.json({ ok: true, client });

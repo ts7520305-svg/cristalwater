@@ -1,4 +1,12 @@
 const API = "/api";
+const ui = window.CwUi || {
+  success: (m) => console.log(m),
+  error: (m) => console.error(m),
+  info: (m) => console.info(m),
+  confirm: async () => false,
+  prompt: async () => null,
+  safeError: (err, fallback) => (err && err.message) || fallback,
+};
 
 let alertsState = [];
 
@@ -445,7 +453,11 @@ async function loadAlerts() {
 
 async function resolveAlert(id) {
   if (!id) return;
-  if (!confirm("Marcar este alerta como resolvido?")) return;
+  const ok = await ui.confirm("Marcar este alerta como resolvido?", {
+    title: "Confirmar resolucao",
+    confirmText: "Resolver",
+  });
+  if (!ok) return;
 
   try {
     setStatus("A resolver alerta...");
@@ -459,7 +471,11 @@ async function resolveAlert(id) {
 
 async function chargeAlert(id) {
   if (!id) return;
-  const price = prompt("Valor a faturar para este alerta/reparacao (EUR)");
+  const price = await ui.prompt("Valor a faturar para este alerta/reparacao (EUR)", {
+    title: "Faturar alerta",
+    defaultValue: "",
+    confirmText: "Continuar",
+  });
   if (!price) return;
 
   const amount = Number(String(price).replace(",", "."));

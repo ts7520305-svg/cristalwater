@@ -8,6 +8,7 @@ const { createNotifications } =
   require("../services/notificationService");
 const auth = require("../middlewares/authMiddleware");
 const { roleMatches } = require("../utils/roles");
+const { getPermissionPolicy } = require("../services/accessControlPolicyService");
 const { emitRouteLoaded } =
   require("../services/routeOsEventService");
 const { buildServiceVisitDayQuery } =
@@ -48,6 +49,19 @@ function appendInternalNote(existing, line) {
 function numberOrNull(value) {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function normalizedVisitStatus(visit = {}) {
+  if (visit?.endAt) return "DONE";
+  return String(visit?.status || "PENDING").trim().toUpperCase();
+}
+
+function canExposeFinancialValues(user, policy) {
+  const role = String(user?.role || "").trim().toUpperCase();
+  if (roleMatches(role, "ADMIN") || roleMatches(role, "TEAM_LEADER")) return true;
+  const rolePolicy = policy?.roles?.[role] || policy?.roles?.TECHNICIAN || null;
+  const infoAccess = Array.isArray(rolePolicy?.informationAccess) ? rolePolicy.informationAccess : [];
+  return infoAccess.includes("financialValues") || infoAccess.includes("invoicesPayments");
 }
 
 function waterText(value) {
@@ -288,8 +302,89 @@ router.get("/today", async (req, res) => {
 
       });
 
-    const poolIds = [...new Set(visits.map(v => v.poolId || v.pool?.id).filter(Boolean))];
-    const clientIds = [...new Set(visits.map(v => v.clientId || v.client?.id || v.pool?.clientId || v.pool?.client?.id).filter(Boolean))];
+    const extraVisitWhere = {
+      scheduledAt: {
+        gte: dayQuery.start,
+        lt: dayQuery.end,
+      },
+      status: {
+        notIn: [
+          "CANCELLED",
+          "CANCELED",
+          "CANCELADA",
+          "CANCELADO",
+          "ARCHIVED",
+          "ARQUIVADA",
+          "ARQUIVADO",
+        ],
+      },
+      ...(dayQuery.technicianId ? { technicianId: dayQuery.technicianId } : {}),
+    };
+
+    const extraVisits = await prisma.extraVisit.findMany({
+      where: extraVisitWhere,
+      include: {
+        technician: {
+          include: {
+            vehicle: true,
+          },
+        },
+        pool: {
+          include: {
+            keyAccesses: {
+              where: {
+                active: true,
+                visibleToTechnician: true,
+              },
+            },
+            client: {
+              include: {
+                accesses: {
+                  where: {
+                    active: true,
+                    visibleToTechnician: true,
+                  },
+                },
+                operationalReminders: {
+                  where: {
+                    isCompleted: false,
+                  },
+                  orderBy: {
+                    dueDate: "asc",
+                  },
+                  take: 20,
+                },
+              },
+            },
+            operationalReminders: {
+              where: {
+                isCompleted: false,
+              },
+              orderBy: {
+                dueDate: "asc",
+              },
+              take: 20,
+            },
+          },
+        },
+      },
+      orderBy: {
+        scheduledAt: "asc",
+      },
+      take,
+    });
+
+    const permissionPolicy = await getPermissionPolicy().catch(() => null);
+    const showFinancialValues = canExposeFinancialValues(req.user, permissionPolicy);
+
+    const poolIds = [...new Set([
+      ...visits.map(v => v.poolId || v.pool?.id),
+      ...extraVisits.map(v => v.poolId || v.pool?.id),
+    ].filter(Boolean))];
+    const clientIds = [...new Set([
+      ...visits.map(v => v.clientId || v.client?.id || v.pool?.clientId || v.pool?.client?.id),
+      ...extraVisits.map(v => v.clientId || v.pool?.clientId || v.pool?.client?.id),
+    ].filter(Boolean))];
     const closedReminderStatuses = ["DONE", "CLOSED", "COMPLETED", "RESOLVED", "CANCELLED", "CANCELED"];
     const generalReminders = (poolIds.length || clientIds.length)
       ? await prisma.generalReminder.findMany({
@@ -333,12 +428,16 @@ router.get("/today", async (req, res) => {
     const formatted =
       visits.map(v => ({
 
+        visitType:
+          "REGULAR",
+
+        extraVisitId:
+          null,
+
         id: v.id,
 
         status:
-          v.endAt
-            ? "DONE"
-            : v.status || "PENDING",
+          normalizedVisitStatus(v),
 
         plannedDate:
           v.plannedDate || v.date || v.startAt || v.endAt,
@@ -470,12 +569,174 @@ router.get("/today", async (req, res) => {
         }
       }));
 
+    const formattedExtra =
+      extraVisits.map(v => ({
+
+        visitType:
+          "EXTRA",
+
+        extraVisitId:
+          v.id,
+
+        id:
+          v.id,
+
+        clientId:
+          v.clientId || v.pool?.clientId || v.pool?.client?.id || null,
+
+        poolId:
+          v.poolId || v.pool?.id || null,
+
+        technicianId:
+          v.technicianId || null,
+
+        status:
+          normalizedVisitStatus(v),
+
+        plannedDate:
+          v.scheduledAt || null,
+
+        scheduledAt:
+          v.scheduledAt || null,
+
+        startAt:
+          null,
+
+        endAt:
+          null,
+
+        notes:
+          v.notes || null,
+
+        internalNotes:
+          null,
+
+        products:
+          null,
+
+        chemicalsJson:
+          null,
+
+        cleaned:
+          false,
+
+        brushed:
+          false,
+
+        vacuumed:
+          false,
+
+        basketCleaned:
+          false,
+
+        waterlineClean:
+          false,
+
+        backwashDone:
+          false,
+
+        photos:
+          [],
+
+        chemicals:
+          [],
+
+        ...(showFinancialValues
+          ? {
+              unitPrice: v.unitPrice,
+              totalPrice: v.totalPrice,
+              billingMode: v.billingMode,
+            }
+          : {
+              unitPrice: null,
+              totalPrice: null,
+              billingMode: null,
+            }),
+
+        technician: {
+          id:
+            v.technicianId,
+
+          name:
+            v.technician?.name || "Tecnico",
+
+          vehicle:
+            v.technician?.vehicle
+              ? {
+                  id: v.technician.vehicle.id,
+                  plate: v.technician.vehicle.plate,
+                  name: v.technician.vehicle.name,
+                  status: v.technician.vehicle.status,
+                }
+              : null,
+        },
+
+        pool: {
+          id:
+            v.pool?.id,
+
+          name:
+            v.pool?.name || "-",
+
+          zone:
+            v.pool?.zone || "-",
+
+          address:
+            v.pool?.address || v.pool?.location || v.pool?.zone || "-",
+
+          latitude:
+            v.pool?.latitude || 0,
+
+          longitude:
+            v.pool?.longitude || 0,
+
+          keyAccesses:
+            v.pool?.keyAccesses || [],
+
+          operationalReminders:
+            v.pool?.operationalReminders || [],
+
+          generalReminders:
+            relevantGeneralReminders(v, "pool"),
+        },
+
+        client: {
+          id:
+            v.pool?.client?.id || v.clientId || null,
+
+          name:
+            v.pool?.client?.name || "-",
+
+          accesses:
+            uniqueRows(v.pool?.client?.accesses || []),
+
+          operationalReminders:
+            uniqueRows(v.pool?.client?.operationalReminders || []),
+
+          generalReminders:
+            relevantGeneralReminders(v, "client"),
+        },
+      }));
+
+    const dedupeMap = new Map();
+    [...formatted, ...formattedExtra].forEach((visit) => {
+      if (!visit) return;
+      const dedupeKey = `${visit.visitType}:${visit.id}`;
+      if (!dedupeMap.has(dedupeKey)) dedupeMap.set(dedupeKey, visit);
+    });
+    const combinedVisits = Array.from(dedupeMap.values()).sort((a, b) => {
+      const left = new Date(a.plannedDate || a.scheduledAt || 0).getTime() || 0;
+      const right = new Date(b.plannedDate || b.scheduledAt || 0).getTime() || 0;
+      if (left !== right) return left - right;
+      return Number(a.id || 0) - Number(b.id || 0);
+    });
+
     const response = {
 
       ok: true,
 
       total:
-        formatted.length,
+        combinedVisits.length,
 
       date:
         dayQuery.isoDate,
@@ -484,7 +745,7 @@ router.get("/today", async (req, res) => {
         dayQuery.technicianId,
 
       visits:
-        formatted
+        combinedVisits
 
     };
 
@@ -492,9 +753,11 @@ router.get("/today", async (req, res) => {
       {
         technicianId: dayQuery.technicianId || null,
         date: dayQuery.isoDate,
-        routeCount: formatted.length,
-        route: formatted.map((visit) => ({
+        routeCount: combinedVisits.length,
+        route: combinedVisits.map((visit) => ({
           id: visit.id,
+          visitType: visit.visitType || "REGULAR",
+          extraVisitId: visit.extraVisitId || null,
           poolId: visit.pool?.id || null,
           clientId: visit.client?.id || null,
           status: visit.status,

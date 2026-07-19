@@ -1,4 +1,10 @@
 const API = "/api";
+const ui = window.CwUi || {
+  success: (m) => console.log(m),
+  error: (m) => console.error(m),
+  info: (m) => console.info(m),
+  safeError: (err, fallback) => (err && err.message) || fallback,
+};
 
 function authHeaders(extra = {}) {
   const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
@@ -43,7 +49,7 @@ async function loadOperational() {
 
     if (!res.ok) {
       setStatus("Erro");
-      alert(data.error || "Erro ao carregar");
+      ui.error(data.error || "Erro ao carregar");
       return;
     }
 
@@ -100,7 +106,7 @@ async function loadOperational() {
   } catch (err) {
     console.error(err);
     setStatus("Erro de ligação");
-    alert("Erro de ligação");
+    ui.error("Erro de ligacao");
   }
 }
 

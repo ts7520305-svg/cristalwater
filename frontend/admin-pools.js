@@ -9,11 +9,23 @@ const esc = (value) => String(value ?? "").replace(/[&<>'"]/g, (char) => ({
 }[char]));
 
 const val = (id) => document.getElementById(id)?.value?.trim() || "";
+const ui = window.CwUi || {
+  success: (m) => console.log(m),
+  error: (m) => console.error(m),
+  info: (m) => console.info(m),
+  confirm: async () => false,
+  prompt: async () => null,
+  safeError: (err, fallback) => (err && err.message) || fallback,
+};
 
 let POOLS = [];
 let CLIENTS = [];
 let showArchived = false;
 let queryClientFilterApplied = false;
+
+function userError(error, fallback) {
+  return ui.safeError(error, fallback || "Nao foi possivel concluir a operacao.");
+}
 
 function authHeaders() {
   const token = localStorage.getItem("token");
@@ -231,37 +243,40 @@ async function createPool() {
     notes: val("notes"),
   };
 
-  if (!clientId || !body.name) return alert("Cliente e nome da piscina sao obrigatorios");
+  if (!clientId || !body.name) {
+    ui.error("Seleciona um cliente e indica o nome da piscina para continuar.");
+    return;
+  }
 
   try {
     await request("/pools", { method: "POST", body: JSON.stringify({ ...body, clientId }) });
     document.getElementById("poolForm").reset();
     await loadPools();
-    alert("Piscina criada e associada ao cliente.");
+    ui.success("Piscina criada e associada ao cliente.");
   } catch (err) {
-    alert(err.message);
+    ui.error(userError(err, "Nao foi possivel criar a piscina. Verifica os dados e tenta novamente."));
   }
 }
 
-function editPayload(pool) {
-  const name = prompt("Nome da piscina/jacuzzi", pool.name || "");
+async function editPayload(pool) {
+  const name = await ui.prompt("Indica o nome da piscina ou jacuzzi.", { title: "Editar piscina", defaultValue: pool.name || "", confirmText: "Seguinte" });
   if (name === null) return null;
-  const zone = prompt("Zona", pool.zone || pool.location || "");
+  const zone = await ui.prompt("Indica a zona.", { title: "Editar piscina", defaultValue: pool.zone || pool.location || "", confirmText: "Seguinte" });
   if (zone === null) return null;
-  const address = prompt("Morada/localizacao", pool.address || "");
+  const address = await ui.prompt("Indica a morada/localizacao.", { title: "Editar piscina", defaultValue: pool.address || "", confirmText: "Seguinte" });
   if (address === null) return null;
-  const location = prompt("Local na propriedade", pool.location || "");
+  const location = await ui.prompt("Indica o local na propriedade.", { title: "Editar piscina", defaultValue: pool.location || "", confirmText: "Seguinte" });
   if (location === null) return null;
-  const monthlyAmount = prompt("Valor mensal EUR", pool.monthlyAmount ?? 0);
+  const monthlyAmount = await ui.prompt("Indica o valor mensal em EUR.", { title: "Editar piscina", defaultValue: String(pool.monthlyAmount ?? 0), confirmText: "Seguinte" });
   if (monthlyAmount === null) return null;
-  const notes = prompt("Notas tecnicas", pool.notes || "");
+  const notes = await ui.prompt("Notas tecnicas (opcional).", { title: "Editar piscina", defaultValue: pool.notes || "", confirmText: "Seguinte" });
   if (notes === null) return null;
-  const type = prompt("Tipo: POOL ou JACUZZI", poolType(pool));
+  const type = await ui.prompt("Indica o tipo: POOL ou JACUZZI.", { title: "Editar piscina", defaultValue: poolType(pool), confirmText: "Guardar" });
   if (type === null) return null;
   return { name, type: String(type || "POOL").toUpperCase(), zone, address, location, monthlyAmount, notes };
 }
 
-function findClientByAdminInput(input) {
+async function findClientByAdminInput(input) {
   const query = String(input || "").trim();
   if (!query) return null;
   const numericId = Number(query);
@@ -280,30 +295,45 @@ function findClientByAdminInput(input) {
   if (matches.length === 1) return matches[0];
   if (!matches.length) return null;
   const options = matches.slice(0, 10).map((client) => `${client.id} - ${client.name}`).join("\n");
-  const selected = prompt(`Foram encontrados varios clientes. Escreve o ID correto:\n\n${options}`);
+  const selected = await ui.prompt(`Foram encontrados varios clientes. Indica o ID correto:\n\n${options}`, {
+    title: "Selecionar cliente",
+    defaultValue: "",
+    confirmText: "Selecionar",
+  });
   if (selected === null) return null;
   return findClientByAdminInput(selected);
 }
 
 async function reassignPool(id) {
   const pool = POOLS.find((item) => Number(item.id) === Number(id));
-  if (!pool) return alert("Piscina nao encontrada.");
-  const input = prompt(
-    `Associar "${pool.name || "Piscina"}" a que cliente?\n\nPode escrever o ID, nome, telefone ou email do cliente.`,
-    pool.client?.id ? String(pool.client.id) : poolClientName(pool)
-  );
+  if (!pool) {
+    ui.error("Piscina nao encontrada.");
+    return;
+  }
+  const input = await ui.prompt(`Associar "${pool.name || "Piscina"}" a que cliente?\n\nPode escrever o ID, nome, telefone ou email do cliente.`, {
+    title: "Alterar cliente",
+    defaultValue: pool.client?.id ? String(pool.client.id) : poolClientName(pool),
+    confirmText: "Continuar",
+  });
   if (input === null) return;
-  const client = findClientByAdminInput(input);
-  if (!client) return alert("Cliente nao encontrado. Confirma o ID ou pesquisa o cliente na lista.");
-  if (!confirm(`Confirmar associacao da piscina a:\n${client.name}\n\nA cobranca mensal passa a contar nesta conta do cliente.`)) return;
+  const client = await findClientByAdminInput(input);
+  if (!client) {
+    ui.error("Cliente nao encontrado. Confirma o ID ou pesquisa na lista.");
+    return;
+  }
+  const approved = await ui.confirm(`Confirmar associacao da piscina a:\n${client.name}\n\nA cobranca mensal passa a contar nesta conta do cliente.`, {
+    title: "Confirmar associacao",
+    confirmText: "Confirmar",
+  });
+  if (!approved) return;
 
   try {
     await request(`/pools/${id}`, { method: "PUT", body: JSON.stringify({ clientId: client.id }) });
     await loadClients();
     await loadPools();
-    alert("Piscina associada ao cliente selecionado.");
+    ui.success("Piscina associada ao cliente selecionado.");
   } catch (err) {
-    alert(err.message);
+    ui.error(userError(err, "Nao foi possivel associar a piscina ao cliente."));
   }
 }
 
@@ -368,12 +398,12 @@ function renderPools() {
   updateSummary(pools);
 
   if (!POOLS.length) {
-    list.innerHTML = '<div class="cw-empty">Ainda nao existem piscinas reais inseridas.</div>';
+    list.innerHTML = '<div class="cw-empty">Ainda nao existem piscinas reais inseridas. Proxima acao: cria a primeira piscina no formulario ao lado.</div>';
     return;
   }
 
   if (!pools.length) {
-    list.innerHTML = '<div class="cw-empty">Nenhuma piscina ou jacuzzi corresponde aos filtros.</div>';
+    list.innerHTML = '<div class="cw-empty">Nenhuma piscina ou jacuzzi corresponde aos filtros. Proxima acao: limpa os filtros ou ajusta a pesquisa.</div>';
     return;
   }
 
@@ -389,25 +419,34 @@ async function loadPools() {
 
 async function editPool(id) {
   const pool = POOLS.find((item) => Number(item.id) === Number(id));
-  if (!pool) return alert("Piscina nao encontrada.");
-  const body = editPayload(pool);
+  if (!pool) {
+    ui.error("Piscina nao encontrada.");
+    return;
+  }
+  const body = await editPayload(pool);
   if (!body) return;
   try {
     await request(`/pools/${id}`, { method: "PUT", body: JSON.stringify(body) });
     await loadPools();
-    alert("Piscina atualizada.");
+    ui.success("Piscina atualizada com sucesso.");
   } catch (err) {
-    alert(err.message);
+    ui.error(userError(err, "Nao foi possivel atualizar a piscina."));
   }
 }
 
 async function archivePool(id) {
-  if (!confirm("Arquivar/desativar esta piscina?")) return;
+  const approved = await ui.confirm("Esta piscina sera arquivada/desativada e pode ser restaurada mais tarde. Queres continuar?", {
+    title: "Confirmar arquivo",
+    confirmText: "Arquivar",
+    danger: true,
+  });
+  if (!approved) return;
   try {
     await request(`/pools/${id}/archive`, { method: "POST" });
     await loadPools();
+    ui.success("Piscina arquivada.");
   } catch (err) {
-    alert(err.message);
+    ui.error(userError(err, "Nao foi possivel arquivar a piscina."));
   }
 }
 
@@ -415,21 +454,27 @@ async function restorePool(id) {
   try {
     await request(`/pools/${id}/restore`, { method: "POST" });
     await loadPools();
+    ui.success("Piscina restaurada.");
   } catch (err) {
-    alert(err.message);
+    ui.error(userError(err, "Nao foi possivel restaurar a piscina."));
   }
 }
 
 async function deletePool(id) {
   const pool = POOLS.find((item) => Number(item.id) === Number(id));
   const label = pool?.name || `Piscina ${id}`;
-  if (!confirm(`Eliminar definitivamente "${label}"?\n\nO sistema deve bloquear se houver dividas ou historico protegido. Para manter o historico, usa Arquivar.`)) return;
+  const approved = await ui.confirm(`Eliminar definitivamente "${label}"?\n\nSe existir historico protegido ou dividas, a eliminacao sera bloqueada automaticamente.`, {
+    title: "Confirmar eliminacao definitiva",
+    confirmText: "Eliminar",
+    danger: true,
+  });
+  if (!approved) return;
   try {
     await request(`/pools/${id}`, { method: "DELETE" });
     await loadPools();
-    alert("Piscina eliminada ou removida conforme as regras do sistema.");
+    ui.success("Operacao concluida na piscina.");
   } catch (err) {
-    alert(err.message);
+    ui.error(userError(err, "Nao foi possivel eliminar a piscina."));
   }
 }
 

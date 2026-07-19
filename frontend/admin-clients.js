@@ -13,6 +13,125 @@ let CLIENTS = [];
 let showArchived = false;
 let clientStatusFilter = localStorage.getItem("cw_client_status_filter") || "active";
 let clientInvoiceFilter = localStorage.getItem("cw_client_invoice_filter") || "all";
+let editingClientId = null;
+let pendingConfirmAction = null;
+
+const feedbackEl = document.getElementById("feedback");
+const editModal = document.getElementById("editClientModal");
+const editForm = document.getElementById("editClientForm");
+const confirmModal = document.getElementById("confirmModal");
+
+function setFeedback(message, tone = "") {
+  if (!feedbackEl) return;
+  feedbackEl.textContent = message || "";
+  feedbackEl.style.display = message ? "block" : "none";
+  if (tone) {
+    feedbackEl.dataset.tone = tone;
+  } else {
+    delete feedbackEl.dataset.tone;
+  }
+}
+
+function openModal(modal) {
+  if (!modal) return;
+  modal.hidden = false;
+  document.body.style.overflow = "hidden";
+}
+
+function closeModal(modal) {
+  if (!modal) return;
+  modal.hidden = true;
+  if (editModal?.hidden !== false && confirmModal?.hidden !== false) {
+    document.body.style.overflow = "";
+  }
+}
+
+function setCheckbox(id, checked) {
+  const input = document.getElementById(id);
+  if (input) input.checked = Boolean(checked);
+}
+
+function setFieldValue(id, value) {
+  const input = document.getElementById(id);
+  if (input) input.value = value ?? "";
+}
+
+function getClientPayloadFromFields(prefix = "") {
+  return {
+    name: val(`${prefix}Name`),
+    internalName: val(`${prefix}InternalName`),
+    phone: val(`${prefix}Phone`),
+    email: val(`${prefix}Email`),
+    zone: val(`${prefix}Zone`),
+    notes: val(`${prefix}Notes`),
+    password: val(`${prefix}Password`),
+    requiresInvoice: document.getElementById(`${prefix}RequiresInvoice`)?.checked || false,
+    fiscalName: val(`${prefix}FiscalName`),
+    fiscalNif: val(`${prefix}FiscalNif`),
+    fiscalAddress: val(`${prefix}FiscalAddress`),
+    fiscalEmail: val(`${prefix}FiscalEmail`),
+    externalBillingNotes: val(`${prefix}ExternalBillingNotes`),
+  };
+}
+
+function populateEditClientForm(client) {
+  editingClientId = Number(client.id);
+  setFieldValue("editName", client.name);
+  setFieldValue("editInternalName", client.internalName);
+  setFieldValue("editPhone", client.phone);
+  setFieldValue("editEmail", client.email);
+  setFieldValue("editZone", client.zone);
+  setFieldValue("editNotes", client.notes);
+  setFieldValue("editPassword", "");
+  setCheckbox("editRequiresInvoice", client.requiresInvoice);
+  setFieldValue("editFiscalName", client.fiscalName);
+  setFieldValue("editFiscalNif", client.fiscalNif);
+  setFieldValue("editFiscalAddress", client.fiscalAddress);
+  setFieldValue("editFiscalEmail", client.fiscalEmail);
+  setFieldValue("editExternalBillingNotes", client.externalBillingNotes);
+}
+
+function openEditClientModal(client) {
+  populateEditClientForm(client);
+  setFeedback("");
+  openModal(editModal);
+  document.getElementById("editName")?.focus();
+}
+
+function closeEditClientModal() {
+  editingClientId = null;
+  editForm?.reset();
+  closeModal(editModal);
+}
+
+function showConfirm({ title, subtitle, message, confirmText = "Confirmar", tone = "warning", onConfirm }) {
+  pendingConfirmAction = onConfirm;
+  const titleEl = document.getElementById("confirmTitle");
+  const subtitleEl = document.getElementById("confirmSubtitle");
+  const messageEl = document.getElementById("confirmMessage");
+  const confirmBtn = document.getElementById("confirmActionBtn");
+  if (titleEl) titleEl.textContent = title || "Confirmar ação";
+  if (subtitleEl) subtitleEl.textContent = subtitle || "Revise a operação antes de continuar.";
+  if (messageEl) messageEl.textContent = message || "";
+  if (confirmBtn) {
+    confirmBtn.textContent = confirmText;
+    confirmBtn.dataset.tone = tone;
+  }
+  openModal(confirmModal);
+}
+
+function closeConfirmModal() {
+  pendingConfirmAction = null;
+  closeModal(confirmModal);
+}
+
+async function runPendingConfirmAction() {
+  const action = pendingConfirmAction;
+  closeConfirmModal();
+  if (typeof action === "function") {
+    await action();
+  }
+}
 
 async function request(path, opts = {}) {
   const response = await fetch(`${API}${path}`, {
@@ -125,6 +244,7 @@ function renderClient(client) {
         </div>
         <div class="client-kv">
           <div>ID ${esc(client.id)} - ${esc(client.zone || "sem zona")}</div>
+          ${client.internalName ? `<div><strong>Interno</strong>${esc(client.internalName)}</div>` : ""}
           <div><strong>${esc(client.paymentReference || paymentReference(client.id))}</strong></div>
           <div><strong>${esc(client.phone || "-")}</strong>${client.email ? `<br>${esc(client.email)}` : ""}</div>
         </div>
@@ -242,69 +362,48 @@ function setClientInvoiceFilter(filter) {
   renderList();
 }
 
-function clientPayloadFromPrompts(client) {
-  const name = prompt("Nome do cliente", client.name || "");
-  if (name === null) return null;
-  const phone = prompt("Telefone", client.phone || "");
-  if (phone === null) return null;
-  const email = prompt("Email", client.email || "");
-  if (email === null) return null;
-  const zone = prompt("Zona", client.zone || "");
-  if (zone === null) return null;
-  const notes = prompt("Notas internas", client.notes || "");
-  if (notes === null) return null;
-  const requiresInvoice = confirm("Este cliente necessita de fatura oficial externa?");
-  let fiscalName = client.fiscalName || "";
-  let fiscalNif = client.fiscalNif || "";
-  let fiscalAddress = client.fiscalAddress || "";
-  let fiscalEmail = client.fiscalEmail || "";
-  let externalBillingNotes = client.externalBillingNotes || "";
-  if (requiresInvoice) {
-    fiscalName = prompt("Nome fiscal", fiscalName) || "";
-    fiscalNif = prompt("NIF", fiscalNif) || "";
-    fiscalAddress = prompt("Morada fiscal", fiscalAddress) || "";
-    fiscalEmail = prompt("Email fiscal", fiscalEmail || email) || "";
-    externalBillingNotes = prompt("Notas para contabilidade", externalBillingNotes) || "";
-  }
-  return { name, phone, email, zone, notes, requiresInvoice, fiscalName, fiscalNif, fiscalAddress, fiscalEmail, externalBillingNotes };
-}
-
 async function createClient() {
-  const body = {
-    name: val("name"),
-    phone: val("phone"),
-    email: val("email"),
-    zone: val("zone"),
-    notes: val("notes"),
-    requiresInvoice: document.getElementById("requiresInvoice")?.checked || false,
-    fiscalName: val("fiscalName"),
-    fiscalNif: val("fiscalNif"),
-    fiscalAddress: val("fiscalAddress"),
-    fiscalEmail: val("fiscalEmail"),
-    externalBillingNotes: val("externalBillingNotes"),
-  };
-  if (!body.name) return alert("Nome obrigatorio");
+  const body = getClientPayloadFromFields("");
+  if (!body.name) {
+    setFeedback("Nome obrigatorio.", "warning");
+    document.getElementById("name")?.focus();
+    return;
+  }
   try {
     await request("/clients", { method: "POST", body: JSON.stringify(body) });
     document.getElementById("clientForm").reset();
     await loadClients();
-    alert("Cliente criado em configuracao. A faturacao fica desligada ate ativar o contrato.");
+    setFeedback("Cliente criado em configuracao. A faturacao fica desligada ate ativar o contrato.", "success");
   } catch (error) {
-    alert(error.message);
+    setFeedback(error.message, "error");
   }
 }
 
 async function editClient(id) {
   const client = CLIENTS.find((item) => Number(item.id) === Number(id));
-  if (!client) return alert("Cliente nao encontrado na lista.");
-  const body = clientPayloadFromPrompts(client);
-  if (!body) return;
+  if (!client) {
+    setFeedback("Cliente nao encontrado na lista.", "error");
+    return;
+  }
+  openEditClientModal(client);
+}
+
+async function saveEditedClient() {
+  const id = editingClientId;
+  if (!id) return;
+  const body = getClientPayloadFromFields("edit");
+  if (!body.name) {
+    setFeedback("Nome obrigatorio.", "warning");
+    document.getElementById("editName")?.focus();
+    return;
+  }
   try {
     await request(`/clients/${id}`, { method: "PUT", body: JSON.stringify(body) });
     await loadClients();
-    alert("Cliente atualizado.");
+    closeEditClientModal();
+    setFeedback("Cliente atualizado.", "success");
   } catch (error) {
-    alert(error.message);
+    setFeedback(error.message, "error");
   }
 }
 
@@ -319,9 +418,9 @@ async function activateClient(id) {
   try {
     await request(`/clients/${id}/activate`, { method: "POST", body: JSON.stringify({ amount }) });
     await loadClients();
-    alert("Contrato ativado. A partir de agora comeca a faturacao.");
+    setFeedback("Contrato ativado. A partir de agora comeca a faturacao.", "success");
   } catch (error) {
-    alert(error.message);
+    setFeedback(error.message, "error");
   } finally {
     if (button && button.isConnected) {
       button.disabled = false;
@@ -331,32 +430,50 @@ async function activateClient(id) {
 }
 
 async function archiveClient(id) {
-  if (!confirm("Arquivar este cliente? Ele sai da operacao diaria mas mantem historico.")) return;
-  try {
-    await request(`/clients/${id}/archive`, { method: "POST" });
-    loadClients();
-  } catch (error) {
-    alert(error.message);
-  }
+  showConfirm({
+    title: "Arquivar cliente",
+    subtitle: "O cliente sai da operacao diaria mas mantem historico.",
+    message: "Confirmar arquivo deste cliente?",
+    confirmText: "Arquivar",
+    onConfirm: async () => {
+      try {
+        await request(`/clients/${id}/archive`, { method: "POST" });
+        await loadClients();
+        setFeedback("Cliente arquivado.", "success");
+      } catch (error) {
+        setFeedback(error.message, "error");
+      }
+    },
+  });
 }
 
 async function restoreClient(id) {
   try {
     await request(`/clients/${id}/restore`, { method: "POST" });
-    loadClients();
+    await loadClients();
+    setFeedback("Cliente restaurado.", "success");
   } catch (error) {
-    alert(error.message);
+    setFeedback(error.message, "error");
   }
 }
 
 async function deleteClient(id) {
-  if (!confirm("Eliminar definitivamente apenas se nao houver historico critico. Se houver, sera arquivado. Continuar?")) return;
-  try {
-    await request(`/clients/${id}`, { method: "DELETE" });
-    loadClients();
-  } catch (error) {
-    alert(error.message);
-  }
+  showConfirm({
+    title: "Eliminar cliente",
+    subtitle: "Se existir historico critico, a operacao pode recusar ou arquivar.",
+    message: "Eliminar definitivamente este cliente apenas se for seguro. Continuar?",
+    confirmText: "Eliminar",
+    tone: "error",
+    onConfirm: async () => {
+      try {
+        await request(`/clients/${id}`, { method: "DELETE" });
+        await loadClients();
+        setFeedback("Operacao de eliminacao concluida.", "success");
+      } catch (error) {
+        setFeedback(error.message, "error");
+      }
+    },
+  });
 }
 
 function toggleArchived() {
@@ -383,5 +500,16 @@ window.addEventListener("DOMContentLoaded", () => {
     search.placeholder = "Pesquisar por cliente, referencia, NIF, dados fiscais, zona, piscina, jacuzzi, local, telefone ou email";
     search.addEventListener("input", renderList);
   }
+  document.getElementById("closeEditClientModal")?.addEventListener("click", closeEditClientModal);
+  document.getElementById("cancelEditClient")?.addEventListener("click", closeEditClientModal);
+  editForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    saveEditedClient();
+  });
+  document.getElementById("closeConfirmModal")?.addEventListener("click", closeConfirmModal);
+  document.getElementById("cancelConfirmAction")?.addEventListener("click", closeConfirmModal);
+  document.getElementById("confirmActionBtn")?.addEventListener("click", () => {
+    runPendingConfirmAction();
+  });
   loadClients();
 });

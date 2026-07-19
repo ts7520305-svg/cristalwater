@@ -1,5 +1,13 @@
 function el(id) { return document.getElementById(id); }
 function money(v) { return Number(v || 0).toFixed(2); }
+const ui = window.CwUi || {
+  success: (m) => console.log(m),
+  error: (m) => console.error(m),
+  info: (m) => console.info(m),
+  confirm: async () => false,
+  prompt: async () => null,
+  safeError: (err, fallback) => (err && err.message) || fallback,
+};
 
 function esc(v) {
   return String(v ?? "").replace(/[&<>"']/g, (m) => ({
@@ -24,6 +32,10 @@ function setStatus(message, tone = "info") {
   if (!node) return;
   node.textContent = message;
   node.className = `status ${tone === "info" ? "" : tone}`.trim();
+}
+
+function userError(error, fallback) {
+  return ui.safeError(error, fallback || "Nao foi possivel concluir a operacao.");
 }
 
 function itemHtml(balance) {
@@ -92,19 +104,19 @@ async function refreshProducts() {
         </div>
       </div>
     `).join("")
-    : '<p class="muted">Sem produtos registados.</p>';
+    : '<p class="muted">Sem produtos registados. Proxima acao: criar um produto para começar o stock.</p>';
 }
 
 async function refresh() {
   setStatus("A atualizar stock e movimentos...");
   const report = await api("/api/inventory/report");
-  el("stock").innerHTML = (report.balances || []).map(itemHtml).join("") || '<p class="muted">Sem stock.</p>';
+  el("stock").innerHTML = (report.balances || []).map(itemHtml).join("") || '<p class="muted">Sem stock. Proxima acao: registar uma entrada de stock por fatura.</p>';
   el("movements").innerHTML = (report.lastMovements || []).map((m) => `
     <div class="item">
       <b>${esc(m.movementType)}</b> · ${esc(m.productName)} · ${esc(m.quantity)} ${esc(m.unit)}
       <br><span class="muted">${new Date(m.createdAt).toLocaleString("pt-PT")}</span>
     </div>
-  `).join("") || '<p class="muted">Sem movimentos.</p>';
+  `).join("") || '<p class="muted">Sem movimentos. Proxima acao: efetuar uma entrada, transferencia ou consumo.</p>';
   await refreshProducts();
   setStatus("Inventario atualizado.", "ok");
 }
@@ -112,16 +124,23 @@ async function refresh() {
 async function editProduct(id) {
   const p = PRODUCTS.find((x) => Number(x.id) === Number(id));
   if (!p) return;
-  const name = prompt("Produto", p.name || ""); if (name === null) return;
-  const sku = prompt("SKU", p.sku || ""); if (sku === null) return;
-  const category = prompt("Categoria", p.category || "CHEMICAL"); if (category === null) return;
-  const unit = prompt("Unidade", p.unit || "KG"); if (unit === null) return;
-  const defaultCost = prompt("Custo padrao EUR", p.defaultCost || 0); if (defaultCost === null) return;
-  const notes = prompt("Notas", p.notes || ""); if (notes === null) return;
+  const name = await ui.prompt("Indica o nome do produto.", { title: "Editar produto", defaultValue: p.name || "", confirmText: "Seguinte" });
+  if (name === null) return;
+  const sku = await ui.prompt("Indica o SKU (opcional).", { title: "Editar produto", defaultValue: p.sku || "", confirmText: "Seguinte" });
+  if (sku === null) return;
+  const category = await ui.prompt("Indica a categoria.", { title: "Editar produto", defaultValue: p.category || "CHEMICAL", confirmText: "Seguinte" });
+  if (category === null) return;
+  const unit = await ui.prompt("Indica a unidade.", { title: "Editar produto", defaultValue: p.unit || "KG", confirmText: "Seguinte" });
+  if (unit === null) return;
+  const defaultCost = await ui.prompt("Indica o custo padrao em EUR.", { title: "Editar produto", defaultValue: String(p.defaultCost || 0), confirmText: "Seguinte" });
+  if (defaultCost === null) return;
+  const notes = await ui.prompt("Notas internas (opcional).", { title: "Editar produto", defaultValue: p.notes || "", confirmText: "Guardar" });
+  if (notes === null) return;
   await api(`/api/inventory/products/${id}`, {
     method: "PUT",
     body: JSON.stringify({ name, sku: sku || null, category, unit, defaultCost, notes }),
   });
+  ui.success("Produto atualizado com sucesso.");
   await refresh();
 }
 
@@ -136,8 +155,14 @@ async function restoreProduct(id) {
 }
 
 async function deleteProduct(id) {
-  if (!confirm("Eliminar produto se nao tiver historico; caso tenha, sera arquivado. Continuar?")) return;
+  const approved = await ui.confirm("O produto sera eliminado apenas se nao existir historico. Caso contrario, sera arquivado. Queres continuar?", {
+    title: "Confirmar eliminacao",
+    confirmText: "Continuar",
+    danger: true,
+  });
+  if (!approved) return;
   await api(`/api/inventory/products/${id}`, { method: "DELETE" });
+  ui.success("Operacao concluida no produto.");
   await refresh();
 }
 
@@ -161,7 +186,8 @@ el("purchaseForm")?.addEventListener("submit", async (e) => {
     await refresh();
   } catch (error) {
     console.error(error);
-    setStatus(`Falha ao guardar entrada: ${error.message}`, "error");
+    setStatus(userError(error, "Falha ao guardar entrada. Verifica os dados e tenta novamente."), "error");
+    ui.error(userError(error, "Falha ao guardar entrada. Verifica os dados e tenta novamente."));
   }
 });
 
@@ -180,7 +206,8 @@ el("transferForm")?.addEventListener("submit", async (e) => {
     await refresh();
   } catch (error) {
     console.error(error);
-    setStatus(`Falha na transferencia: ${error.message}`, "error");
+    setStatus(userError(error, "Falha na transferencia. Confirma a viatura, o produto e a quantidade."), "error");
+    ui.error(userError(error, "Falha na transferencia. Confirma a viatura, o produto e a quantidade."));
   }
 });
 
@@ -195,7 +222,8 @@ el("consumeForm")?.addEventListener("submit", async (e) => {
     await refresh();
   } catch (error) {
     console.error(error);
-    setStatus(`Falha no consumo: ${error.message}`, "error");
+    setStatus(userError(error, "Falha no consumo. Confirma os valores e tenta novamente."), "error");
+    ui.error(userError(error, "Falha no consumo. Confirma os valores e tenta novamente."));
   }
 });
 
@@ -208,5 +236,6 @@ window.deleteProduct = deleteProduct;
 addRow();
 refresh().catch((e) => {
   console.error(e);
-  setStatus(`Erro inicial: ${e.message}`, "error");
+  setStatus(userError(e, "Nao foi possivel carregar o inventario. Atualiza a pagina e tenta novamente."), "error");
+  ui.error(userError(e, "Nao foi possivel carregar o inventario. Atualiza a pagina e tenta novamente."));
 });

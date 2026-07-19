@@ -2,6 +2,18 @@ const collectionList = document.getElementById("collectionList");
 let currentClients = [];
 let previewMessageValue = "";
 const actionLock = new Set();
+const ui = window.CwUi || {
+  success: (m) => console.log(m),
+  error: (m) => console.error(m),
+  info: (m) => console.info(m),
+  confirm: async () => false,
+  prompt: async () => null,
+  safeError: (err, fallback) => (err && err.message) || fallback,
+};
+
+function userError(error, fallback) {
+  return ui.safeError(error, fallback || "Nao foi possivel concluir a operacao.");
+}
 
 function authHeaders(extra = {}) {
   const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
@@ -178,7 +190,7 @@ function openWhatsApp(clientId) {
 
   const number = getWhatsappNumber(client);
   if (!number) {
-    alert("Este cliente não tem número configurado.");
+    ui.error("Este cliente nao tem numero configurado. Proxima acao: atualizar telefone do cliente.");
     return;
   }
 
@@ -192,7 +204,7 @@ function openEmail(clientId) {
 
   const email = getEmailAddress(client);
   if (!email) {
-    alert("Este cliente não tem email configurado.");
+    ui.error("Este cliente nao tem email configurado. Proxima acao: atualizar email do cliente.");
     return;
   }
 
@@ -209,9 +221,9 @@ async function copyMessage(clientId) {
 
   try {
     await navigator.clipboard.writeText(buildReminderMessage(client));
-    alert("Mensagem copiada.");
+    ui.success("Mensagem copiada.");
   } catch {
-    alert("Não foi possível copiar a mensagem.");
+    ui.error("Nao foi possivel copiar a mensagem.");
   }
 }
 
@@ -228,10 +240,11 @@ async function markReminded(clientId) {
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok || data.ok === false) {
-      alert(data.message || "Erro ao marcar como avisado.");
+      ui.error(userError(data, "Nao foi possivel marcar como avisado."));
       return;
     }
 
+    ui.success("Cliente marcado como avisado.");
     loadCollection();
   } finally {
     actionLock.delete(`reminded:${clientId}`);
@@ -240,7 +253,10 @@ async function markReminded(clientId) {
 
 async function markPaid(clientId) {
   if (actionLock.has(`paid:${clientId}`)) return;
-  const ok = confirm("Confirmar marcação de cliente como pago neste mês?");
+  const ok = await ui.confirm("Confirmar marcacao de cliente como pago neste mes?", {
+    title: "Confirmar pagamento",
+    confirmText: "Confirmar",
+  });
   if (!ok) return;
   const month = document.getElementById("monthFilter")?.value || getCurrentMonthValue();
   actionLock.add(`paid:${clientId}`);
@@ -253,10 +269,11 @@ async function markPaid(clientId) {
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok || data.ok === false) {
-      alert(data.message || "Erro ao marcar como pago.");
+      ui.error(userError(data, "Nao foi possivel marcar como pago."));
       return;
     }
 
+    ui.success("Cliente marcado como pago.");
     loadCollection();
   } finally {
     actionLock.delete(`paid:${clientId}`);
@@ -268,19 +285,34 @@ async function registerManualPayment(clientId) {
   const client = currentClients.find((c) => c.id === clientId);
   const reference = client?.paymentReference || paymentReference(clientId);
   const suggested = client?.totalDue > 0 ? client.totalDue.toFixed(2) : "";
-  const amountText = prompt(`Valor recebido para ${client?.name || "cliente"} (${reference})`, suggested);
+  const amountText = await ui.prompt(`Valor recebido para ${client?.name || "cliente"} (${reference})`, {
+    title: "Registar pagamento manual",
+    defaultValue: suggested,
+    confirmText: "Seguinte",
+  });
   if (!amountText) return;
 
   const amount = Number(String(amountText).replace(",", "."));
   if (!Number.isFinite(amount) || amount <= 0) {
-    alert("Indica um valor valido.");
+    ui.error("Indica um valor valido acima de zero.");
     return;
   }
 
-  const method = prompt("Metodo de pagamento (Transferencia, MBWay, Dinheiro, Multibanco...)", "Transferencia") || "Manual";
-  const notes = prompt("Nota interna ou referencia do comprovativo", reference) || "";
+  const method = (await ui.prompt("Metodo de pagamento (Transferencia, MBWay, Dinheiro, Multibanco...).", {
+    title: "Registar pagamento manual",
+    defaultValue: "Transferencia",
+    confirmText: "Seguinte",
+  })) || "Manual";
+  const notes = (await ui.prompt("Nota interna ou referencia do comprovativo.", {
+    title: "Registar pagamento manual",
+    defaultValue: reference,
+    confirmText: "Continuar",
+  })) || "";
   const month = document.getElementById("monthFilter")?.value || getCurrentMonthValue();
-  const ok = confirm("Confirmar registo manual do pagamento recebido?");
+  const ok = await ui.confirm("Confirmar registo manual do pagamento recebido?", {
+    title: "Confirmar registo",
+    confirmText: "Registar",
+  });
   if (!ok) return;
   actionLock.add(`manual:${clientId}`);
   try {
@@ -293,11 +325,11 @@ async function registerManualPayment(clientId) {
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok || data.ok === false) {
-      alert(data.message || "Erro ao registar pagamento recebido.");
+      ui.error(userError(data, "Nao foi possivel registar o pagamento recebido."));
       return;
     }
 
-    alert(data.message || "Pagamento registado.");
+    ui.success(data.message || "Pagamento registado.");
     loadCollection();
   } finally {
     actionLock.delete(`manual:${clientId}`);
@@ -308,12 +340,15 @@ async function markVisibleAsReminded() {
   const visible = applyFilters(currentClients);
 
   if (!visible.length) {
-    alert("Não há clientes visíveis.");
+    ui.info("Nao ha clientes visiveis com os filtros atuais.");
     return;
   }
 
   const month = document.getElementById("monthFilter")?.value || getCurrentMonthValue();
-  const ok = confirm(`Marcar ${visible.length} cliente(s) visível(eis) como avisados?`);
+  const ok = await ui.confirm(`Marcar ${visible.length} cliente(s) visivel(eis) como avisados?`, {
+    title: "Confirmacao em lote",
+    confirmText: "Confirmar",
+  });
   if (!ok) return;
 
   for (const client of visible) {
@@ -323,6 +358,7 @@ async function markVisibleAsReminded() {
     });
   }
 
+  ui.success("Lote de avisos concluido.");
   loadCollection();
 }
 
@@ -330,12 +366,15 @@ async function markVisibleAsPaid() {
   const visible = applyFilters(currentClients);
 
   if (!visible.length) {
-    alert("Não há clientes visíveis.");
+    ui.info("Nao ha clientes visiveis com os filtros atuais.");
     return;
   }
 
   const month = document.getElementById("monthFilter")?.value || getCurrentMonthValue();
-  const ok = confirm(`Marcar ${visible.length} cliente(s) visível(eis) como pagos?`);
+  const ok = await ui.confirm(`Marcar ${visible.length} cliente(s) visivel(eis) como pagos?`, {
+    title: "Confirmacao em lote",
+    confirmText: "Confirmar",
+  });
   if (!ok) return;
 
   for (const client of visible) {
@@ -345,6 +384,7 @@ async function markVisibleAsPaid() {
     });
   }
 
+  ui.success("Lote de pagamentos concluido.");
   loadCollection();
 }
 
@@ -352,7 +392,7 @@ async function copyVisibleContacts() {
   const visible = applyFilters(currentClients);
 
   if (!visible.length) {
-    alert("Não há clientes visíveis.");
+    ui.info("Nao ha clientes visiveis com os filtros atuais.");
     return;
   }
 
@@ -370,9 +410,9 @@ async function copyVisibleContacts() {
 
   try {
     await navigator.clipboard.writeText(text);
-    alert("Contactos visíveis copiados.");
+    ui.success("Contactos visiveis copiados.");
   } catch {
-    alert("Não foi possível copiar os contactos.");
+    ui.error("Nao foi possivel copiar os contactos.");
   }
 }
 
@@ -393,9 +433,9 @@ function closePreview() {
 async function copyPreviewMessage() {
   try {
     await navigator.clipboard.writeText(previewMessageValue || "");
-    alert("Texto copiado.");
+    ui.success("Texto copiado.");
   } catch {
-    alert("Não foi possível copiar o texto.");
+    ui.error("Nao foi possivel copiar o texto.");
   }
 }
 
@@ -404,7 +444,7 @@ function renderCollection(clients) {
 
   if (!clients.length) {
     renderSummary([]);
-    collectionList.innerHTML = `<div class="empty-box">Sem clientes para os filtros atuais.</div>`;
+    collectionList.innerHTML = `<div class="empty-box">Sem clientes para os filtros atuais. Proxima acao: limpar filtros, ajustar mes ou validar dados de cobranca.</div>`;
     return;
   }
 
@@ -490,6 +530,7 @@ async function loadCollection() {
     console.error(error);
     currentClients = [];
     renderCollection([]);
+    ui.error(userError(error, "Nao foi possivel carregar o centro de cobrancas."));
   }
 }
 

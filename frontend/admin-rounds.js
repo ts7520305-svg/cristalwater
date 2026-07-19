@@ -1,5 +1,11 @@
 const API = "/api";
 const dayNames = ["Domingo", "Segunda", "Terca", "Quarta", "Quinta", "Sexta", "Sabado"];
+const ui = window.CwUi || {
+  success: (m) => console.log(m),
+  error: (m) => console.error(m),
+  info: (m) => console.info(m),
+  confirm: async () => false,
+};
 
 const state = {
   rounds: [],
@@ -787,7 +793,14 @@ async function assignPool(){
 }
 
 async function generateWeek(force = false){
-  if(force && !confirm("Forcar a geracao vai substituir visitas planeadas ainda nao concluidas desta semana. Continuar?")) return;
+  if(force){
+    const ok = await ui.confirm("Forcar a geracao vai substituir visitas planeadas ainda nao concluidas desta semana. Continuar?", {
+      title: "Confirmar geracao forcada",
+      confirmText: "Continuar",
+      danger: true,
+    });
+    if(!ok) return;
+  }
   try{
     setStatus(force ? "A regenerar visitas planeadas da semana..." : "A gerar visitas da semana a partir das rondas...");
     const data = await fetchJSON(`${API}/round-planner/generate`, { method:"POST", body: JSON.stringify({ force }) });
@@ -928,7 +941,12 @@ function setupVisitFilters(){
 }
 
 async function deleteRound(id){
-  if(!confirm("Apagar esta ronda? As visitas ja geradas nao sao apagadas automaticamente.")) return;
+  const ok = await ui.confirm("Apagar esta ronda? As visitas ja geradas nao sao apagadas automaticamente.", {
+    title: "Confirmar eliminacao da ronda",
+    confirmText: "Apagar",
+    danger: true,
+  });
+  if(!ok) return;
   try{
     setStatus("A apagar ronda...");
     await fetchJSON(`${API}/rounds/${id}`, { method:"DELETE" });

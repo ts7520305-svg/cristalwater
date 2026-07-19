@@ -3,6 +3,7 @@ const queryParams = new URLSearchParams(location.search);
 const queryClientId = Number(queryParams.get("clientId") || 0);
 let invoiceStatusFilter = String(queryParams.get("status") || queryParams.get("filter") || "all").toLowerCase();
 if (!["all", "overdue", "pending", "paid"].includes(invoiceStatusFilter)) invoiceStatusFilter = "all";
+let paymentModalState = { invoiceId: null, openAmount: 0 };
 
 function authHeaders(extra = {}) {
   const token = localStorage.getItem("token");
@@ -106,6 +107,11 @@ function renderInvoices(invoices) {
     const creditLedger = isCreditLedgerInvoice(invoice);
     const clientCredit = Number(invoice.client?.creditBalance || 0);
 
+    const lines = Array.isArray(invoice.lines) ? invoice.lines : [];
+    const subtotal = lines.reduce((sum, line) => sum + Number(line.total || line.lineTotal || 0), 0);
+    const taxAmount = Number(invoice.taxAmount || 0);
+    const hasTaxRate = Number(invoice.taxRate || 0) > 0;
+
     card.innerHTML = `
       <div class="invoice-header">
         <div>
@@ -127,9 +133,11 @@ function renderInvoices(invoices) {
       <div class="meta"><strong>Morada:</strong> ${escapeHtml(invoice.client?.address || "-")}</div>
       <div class="meta"><strong>Forma de pagamento:</strong> ${escapeHtml(invoice.paymentMethod || "-")}</div>
       ${clientCredit > 0 ? `<div class="meta"><strong>Credito atual do cliente:</strong> ${clientCredit.toFixed(2)} EUR</div>` : ""}
+      <div class="meta"><strong>Linhas:</strong> ${lines.length} · <strong>Subtotal:</strong> ${subtotal.toFixed(2)} EUR · <strong>IVA:</strong> ${taxAmount.toFixed(2)} EUR${hasTaxRate ? ` (${Number(invoice.taxRate).toFixed(2)}%)` : ""} · <strong>Total:</strong> ${totalAmount.toFixed(2)} EUR</div>
       <div class="meta"><strong>Pago:</strong> ${paidAmount.toFixed(2)} EUR · <strong>Em aberto:</strong> ${openAmount.toFixed(2)} EUR</div>
 
       <div class="actions">
+        <button class="btn-green" onclick="openPaymentModal(${invoice.id}, ${openAmount.toFixed(2)})">Registar pagamento</button>
         <button class="btn-blue" onclick="openInvoicePdf(${invoice.id})">Abrir PDF</button>
         <button class="btn-gray" onclick="copyInvoiceLink(${invoice.id})">Copiar link PDF</button>
       </div>
@@ -138,6 +146,79 @@ function renderInvoices(invoices) {
     if (openAmount > 0) card.classList.add("overdue");
     list.appendChild(card);
   });
+}
+
+function openPaymentModal(invoiceId, openAmount) {
+  const modal = document.getElementById("paymentModal");
+  const meta = document.getElementById("paymentModalMeta");
+  const amountInput = document.getElementById("paymentAmountInput");
+  if (!modal || !meta || !amountInput) return;
+
+  const openValue = Number(openAmount || 0);
+  if (openValue <= 0) {
+    showStatus("Esta fatura já está liquidada. Não é permitido registar pagamento duplicado.", "error");
+    return;
+  }
+
+  paymentModalState = { invoiceId: Number(invoiceId), openAmount: openValue };
+  meta.textContent = `Fatura #${invoiceId} · Em aberto: ${openValue.toFixed(2)} EUR`;
+  amountInput.value = openValue.toFixed(2);
+  document.getElementById("paymentMethodInput").value = "TRANSFER";
+  document.getElementById("paymentNotesInput").value = "";
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+  amountInput.focus();
+}
+
+function closePaymentModal() {
+  const modal = document.getElementById("paymentModal");
+  if (!modal) return;
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden", "true");
+  paymentModalState = { invoiceId: null, openAmount: 0 };
+}
+
+async function submitPaymentModal() {
+  const invoiceId = Number(paymentModalState.invoiceId || 0);
+  const openAmount = Number(paymentModalState.openAmount || 0);
+  const amount = Number(document.getElementById("paymentAmountInput")?.value || 0);
+  const method = String(document.getElementById("paymentMethodInput")?.value || "TRANSFER");
+  const notes = String(document.getElementById("paymentNotesInput")?.value || "").trim();
+
+  if (!invoiceId) return;
+  if (!Number.isFinite(amount) || amount <= 0) {
+    showStatus("Indica um valor de pagamento válido.", "error");
+    return;
+  }
+
+  // Evita criar crédito indevido por clique repetido numa fatura já liquidada.
+  if (openAmount <= 0) {
+    showStatus("Esta fatura já está liquidada. Pagamento duplicado bloqueado.", "error");
+    closePaymentModal();
+    return;
+  }
+
+  try {
+    showStatus("A registar pagamento...", "info");
+    const response = await fetch(`${API}/payments/invoice/${invoiceId}`, {
+      method: "POST",
+      headers: authHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify({ amount, method, notes }),
+    });
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok || data.ok === false) {
+      showStatus(data.error || "Falha ao registar pagamento.", "error");
+      return;
+    }
+
+    closePaymentModal();
+    showStatus(`Pagamento registado. Aplicado: ${Number(data.appliedAmount || amount).toFixed(2)} EUR.`, "ok");
+    await loadInvoices();
+  } catch (error) {
+    console.error("Erro ao registar pagamento:", error);
+    showStatus("Erro de ligação ao registar pagamento.", "error");
+  }
 }
 
 function setInvoiceStatusFilter(filter) {
@@ -282,3 +363,7 @@ function statusClassName(status) {
   if (["OVERDUE", "VENCIDA"].includes(value)) return "overdue";
   return "pending";
 }
+
+window.openPaymentModal = openPaymentModal;
+window.closePaymentModal = closePaymentModal;
+window.submitPaymentModal = submitPaymentModal;

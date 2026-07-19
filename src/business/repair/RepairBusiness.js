@@ -835,7 +835,7 @@ async function quoteRepair(repairId, db = null, actor = "repair-os") {
       source: "repair-route",
     });
 
-    return repair;
+    return { ok: true, repair: repairUpdate, diagnostic };
   };
 
   if (db) return run(db);
@@ -896,7 +896,7 @@ async function approveRepair(repairId, db = null, actor = "repair-os") {
       source: "repair-route",
     });
 
-    return updated;
+    return { ok: true, repair: updated };
   };
 
   if (db) return run(db);
@@ -1341,7 +1341,7 @@ async function completeRepair(repairId, db = null, actor = "repair-os") {
       source: "repair-route",
     });
 
-    return updatedRepair;
+    return { ok: true, repair: updatedRepair };
   };
 
   if (db) return run(db);

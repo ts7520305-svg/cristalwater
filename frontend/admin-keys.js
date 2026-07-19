@@ -6,6 +6,13 @@ const state = {
   lastReportRows: [],
   lastReportName: "cristal-water-lista"
 };
+const ui = window.CwUi || {
+  success: (m) => console.log(m),
+  error: (m) => console.error(m),
+  info: (m) => console.info(m),
+  confirm: async () => false,
+  safeError: (err, fallback) => (err && err.message) || fallback,
+};
 
 async function api(url, options = {}) {
   const token = localStorage.getItem("token") || localStorage.getItem("cw_token") || "";
@@ -212,11 +219,11 @@ async function saveKey() {
     };
 
     if (!body.clientId && !body.poolId) {
-      alert("Escolhe o cliente ou a piscina/jacuzzi.");
+      ui.error("Escolhe o cliente ou a piscina/jacuzzi.");
       return;
     }
     if (!body.codeValue) {
-      alert("Indica o codigo da chave/acesso.");
+      ui.error("Indica o codigo da chave/acesso.");
       return;
     }
 
@@ -233,12 +240,13 @@ async function saveKey() {
       await loadMorningKeys().catch(() => {});
     }
   } catch (error) {
-    alert(error.message);
+    ui.error(ui.safeError(error, "Nao foi possivel guardar a chave."));
   }
 }
 
 async function archiveKey(id) {
-  if (!confirm("Arquivar esta chave?")) return;
+  const ok = await ui.confirm("Arquivar esta chave?", { title: "Confirmar arquivo", confirmText: "Arquivar", danger: true });
+  if (!ok) return;
   await api(`/api/keys/${encodeURIComponent(id)}/archive`, { method: "POST" });
   loadKeys();
 }
@@ -249,7 +257,8 @@ async function restoreKey(id) {
 }
 
 async function hardDeleteKey(id) {
-  if (!confirm("Apagar definitivamente?")) return;
+  const ok = await ui.confirm("Apagar definitivamente?", { title: "Confirmar eliminacao", confirmText: "Apagar", danger: true });
+  if (!ok) return;
   await api(`/api/keys/${encodeURIComponent(id)}?mode=hard`, { method: "DELETE" });
   loadKeys();
 }

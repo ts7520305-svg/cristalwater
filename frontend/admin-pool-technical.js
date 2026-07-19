@@ -1,5 +1,11 @@
 const API = `${location.origin}/api/core`;
 const poolId = new URLSearchParams(location.search).get("poolId");
+const ui = window.CwUi || {
+  success: (m) => console.log(m),
+  error: (m) => console.error(m),
+  info: (m) => console.info(m),
+  confirm: async () => false,
+};
 
 function esc(value) {
   return String(value ?? "").replace(/[&<>'"]/g, (char) => ({
@@ -304,7 +310,12 @@ async function completeServiceReminder(id) {
 }
 
 async function deleteServiceReminder(id) {
-  if (!confirm("Eliminar este lembrete de servico? Esta acao nao remove historico tecnico nem visitas.")) return;
+  const ok = await ui.confirm("Eliminar este lembrete de servico? Esta acao nao remove historico tecnico nem visitas.", {
+    title: "Confirmar eliminacao",
+    confirmText: "Eliminar",
+    danger: true,
+  });
+  if (!ok) return;
   await req(`/pools/${poolId}/service-reminders/${encodeURIComponent(id)}`, { method: "DELETE" });
   document.getElementById("reminderStatus").textContent = "Lembrete eliminado.";
   await loadReminders();

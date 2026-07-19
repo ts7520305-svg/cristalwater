@@ -1,5 +1,13 @@
 const API = "/api";
 const actionLock = new Set();
+const ui = window.CwUi || {
+  success: (m) => console.log(m),
+  error: (m) => console.error(m),
+  info: (m) => console.info(m),
+  confirm: async () => false,
+  prompt: async () => null,
+  safeError: (err, fallback) => (err && err.message) || fallback,
+};
 
 const state = {
   clients: [],
@@ -173,9 +181,16 @@ function openPdf(id) {
 
 async function markIssued(id, clientName) {
   if (actionLock.has(`issued:${id}`)) return;
-  const allow = confirm(`Confirmar marcação da fatura #${id} como emitida externamente para ${clientName || "cliente"}?`);
+  const allow = await ui.confirm(`Confirmar marcacao da fatura #${id} como emitida externamente para ${clientName || "cliente"}?`, {
+    title: "Confirmar emissao externa",
+    confirmText: "Confirmar",
+  });
   if (!allow) return;
-  const externalInvoiceNo = prompt(`Numero da fatura oficial externa para ${clientName || "cliente"}`, "");
+  const externalInvoiceNo = await ui.prompt(`Numero da fatura oficial externa para ${clientName || "cliente"}`, {
+    title: "Numero da fatura externa",
+    defaultValue: "",
+    confirmText: "Guardar",
+  });
   if (!externalInvoiceNo) return;
 
   try {
@@ -192,8 +207,9 @@ async function markIssued(id, clientName) {
     await load();
   } catch (error) {
     console.error(error);
-    alert(error.message || "Erro ao marcar fatura");
-    status(error.message || "Erro ao marcar fatura", "error");
+    const msg = ui.safeError(error, "Erro ao marcar fatura");
+    ui.error(msg);
+    status(msg, "error");
   } finally {
     actionLock.delete(`issued:${id}`);
   }

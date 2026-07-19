@@ -342,10 +342,18 @@ router.post("/start", async (req, res) => {
         };
       }
 
+      const poolRecord = await tx.pool.findUnique({
+        where: { id: Number(poolId) },
+        select: { clientId: true },
+      });
+
       const createdVisit =
         await tx.serviceVisit.create({
 
           data: {
+
+            clientId:
+              poolRecord?.clientId || null,
 
             poolId:
               Number(poolId),

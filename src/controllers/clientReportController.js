@@ -3,7 +3,7 @@
 // ==========================================
 
 const { prisma } = require("../prismaClient");
-const { generateClientReportPDF } = require("../services/pdfReportService");
+const { generateMonthlyReportPDF } = require("../services/pdfReportService");
 
 /**
  * LISTAR RELATÓRIOS DO CLIENTE
@@ -49,7 +49,7 @@ async function downloadClientReportPDF(req, res, next) {
       return res.status(404).json({ error: "Relatório não encontrado" });
     }
 
-    generateClientReportPDF(res, report);
+    generateMonthlyReportPDF(res, report);
   } catch (err) {
     next(err);
   }

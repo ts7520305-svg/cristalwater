@@ -11,6 +11,12 @@ let adminClients = [];
 let currentServiceHistory = [];
 let serviceHistoryToolsReady = false;
 let lastPortalSnapshot = {};
+const ui = window.CwUi || {
+  success: (m) => console.log(m),
+  error: (m) => console.error(m),
+  info: (m) => console.info(m),
+  safeError: (err, fallback) => (err && err.message) || fallback,
+};
 
 function portalAuthHeaders() {
   const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
@@ -1244,7 +1250,7 @@ function csvCell(value) {
 function downloadFilteredServiceHistory() {
   const services = filteredServiceHistory();
   if (!services.length) {
-    alert(copy("historyNoFiltered"));
+    ui.info(copy("historyNoFiltered"));
     return;
   }
   const rows = [
@@ -1450,7 +1456,7 @@ function setWhatsappLinkDisabled(link, message) {
   link.title = message;
   link.onclick = (event) => {
     event.preventDefault();
-    alert(message);
+    ui.info(message);
   };
 }
 
@@ -1621,7 +1627,10 @@ async function setupAdminClientSwitcher() {
 }
 
 async function notifyPayment() {
-  if (!clientId) return alert(copy("clientNotIdentified"));
+  if (!clientId) {
+    ui.error(copy("clientNotIdentified"));
+    return;
+  }
   const notice = buildPaymentNoticeMessage("PORTAL_CLIENTE");
   const response = await fetch(`${API}/client-portal/${clientId}/payment-notice`, {
     method: "POST",
@@ -1630,11 +1639,11 @@ async function notifyPayment() {
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok || data.ok === false) {
-    alert(data.error || copy("paymentNoticeFailed"));
+    ui.error(data.error || copy("paymentNoticeFailed"));
     return;
   }
   await loadMessages();
-  alert(`${copy("paymentNoticeSuccess")} ${data.paymentReference || currentPaymentInstructions?.paymentReference || ""}.`);
+  ui.success(`${copy("paymentNoticeSuccess")} ${data.paymentReference || currentPaymentInstructions?.paymentReference || ""}.`);
 }
 
 async function loadPortal() {
@@ -1748,7 +1757,7 @@ async function sendMessage() {
   );
   const data = await response.json().catch(() => ({}));
   if (!response.ok || data.ok === false) {
-    alert(data.error || copy("sendMessageError"));
+    ui.error(data.error || copy("sendMessageError"));
     return;
   }
   appendMessage(data.message || { sender: "CLIENT", text, createdAt: new Date() });
@@ -1767,11 +1776,11 @@ async function requestVisit() {
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok || data.ok === false) {
-    alert(data.error || "Não foi possível solicitar a visita.");
+    ui.error(data.error || "Nao foi possivel solicitar a visita.");
     return;
   }
   input.value = "";
-  alert("Pedido de visita enviado com sucesso.");
+  ui.success("Pedido de visita enviado com sucesso.");
   await loadCustomerExtras();
 }
 

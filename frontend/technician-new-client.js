@@ -1,4 +1,9 @@
 (function(){
+  const ui = window.CwUi || {
+    success: (m) => console.log(m),
+    error: (m) => console.error(m),
+    info: (m) => console.info(m),
+  };
   const box = document.getElementById('permissionBox');
   const form = document.getElementById('form');
   const result = document.getElementById('result');
@@ -21,12 +26,12 @@
   }
 
   document.getElementById('gpsBtn').addEventListener('click',()=>{
-    if(!navigator.geolocation){ alert('GPS não disponível neste aparelho.'); return; }
+    if(!navigator.geolocation){ ui.error('GPS nao disponivel neste aparelho.'); return; }
     navigator.geolocation.getCurrentPosition((pos)=>{
       form.latitude.value = pos.coords.latitude;
       form.longitude.value = pos.coords.longitude;
-      alert('Localização guardada nesta ficha.');
-    },()=>alert('Não foi possível obter localização.'));
+      ui.success('Localizacao guardada nesta ficha.');
+    },()=>ui.error('Nao foi possivel obter localizacao.'));
   });
 
   form.addEventListener('submit',async(ev)=>{

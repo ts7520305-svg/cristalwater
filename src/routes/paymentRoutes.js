@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { prisma } = require("../prismaClient");
+const auth = require("../middlewares/authMiddleware");
 const {
   createCreditLedgerPayment,
   invoiceOpen,
@@ -8,6 +9,8 @@ const {
   invoiceStatus,
   invoiceTotal,
 } = require("../services/clientCreditService");
+
+router.use(auth("ADMIN"));
 
 // ==========================================
 // LISTAR PAGAMENTOS

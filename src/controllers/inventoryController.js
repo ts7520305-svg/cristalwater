@@ -126,9 +126,18 @@ async function adjustBalance(tx, { scope = 'CENTRAL', vehicleId = null, productI
 
   if (!name) throw new Error('Produto inválido para movimentação de stock.');
 
-  const existing = await tx.stockBalance.findUnique({
-    where: { scope_vehicleId_productName_unit: { scope: sc, vehicleId: vehicleKey, productName: name, unit: u } },
-  });
+  const existing = vehicleKey == null
+    ? await tx.stockBalance.findFirst({
+        where: {
+          scope: sc,
+          vehicleId: null,
+          productName: name,
+          unit: u,
+        },
+      })
+    : await tx.stockBalance.findUnique({
+        where: { scope_vehicleId_productName_unit: { scope: sc, vehicleId: vehicleKey, productName: name, unit: u } },
+      });
 
   const available = n(existing?.quantity, 0);
   const nextQuantity = available + amount;

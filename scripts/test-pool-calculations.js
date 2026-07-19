@@ -11,7 +11,7 @@ ok('chlorinator hours calculated', result.chlorination.estimatedDailyProductionH
 ok('heat pump hours calculated', result.heatPump.estimatedHoursToTarget > 0);
 const schema = fs.readFileSync(path.join(root,'prisma/schema.prisma'),'utf8');
 ok('PoolCalculationProfile model exists', schema.includes('model PoolCalculationProfile'));
-ok('Pool relation exists', schema.includes('calculationProfile PoolCalculationProfile?'));
+ok('Pool relation exists', /calculationProfile\s+PoolCalculationProfile\?/.test(schema));
 ['src/routes/poolCalculationRoutes.js','src/controllers/poolCalculationController.js','src/services/poolCalculationService.js','frontend/admin-pool-calculator.html','frontend/admin-pool-calculator.js'].forEach(f=>ok('file '+f, fs.existsSync(path.join(root,f))));
 const server = fs.readFileSync(path.join(root,'src/server.js'),'utf8');
 ok('route mounted', server.includes('/api/pool-calculations'));

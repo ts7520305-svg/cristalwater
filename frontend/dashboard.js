@@ -117,30 +117,46 @@ async function loadDashboardImpl() {
     }
 
     const s = data.summary || {};
+    const safe = {
+      totalClients: Number(s.totalClients ?? 0),
+      clientsRequiresInvoice: Number(s.clientsRequiresInvoice ?? 0),
+      clientsWithCredit: Number(s.clientsWithCredit ?? 0),
+      totalPools: Number(s.totalPools ?? 0),
+      monthlyPotential: Number(s.monthlyPotential ?? 0),
+      monthBilled: Number(s.monthBilled ?? 0),
+      monthPaid: Number(s.monthPaid ?? 0),
+      monthOpen: Number(s.monthOpen ?? 0),
+      receivedPercent: Number(s.receivedPercent ?? 0),
+      totalCreditBalance: Number(s.totalCreditBalance ?? 0),
+      openAlerts: Number(s.openAlerts ?? 0),
+      visitsThisMonth: Number(s.visitsThisMonth ?? 0),
+      visitsDoneThisMonth: Number(s.visitsDoneThisMonth ?? 0),
+      visitsPlannedThisMonth: Number(s.visitsPlannedThisMonth ?? 0),
+    };
 
     // =========================
     // KPIs
     // =========================
 
-    setText("totalClients", s.totalClients);
-    setText("clientsSub", `${s.clientsRequiresInvoice} com fatura · ${s.clientsWithCredit} com crédito`);
+    setText("totalClients", safe.totalClients);
+    setText("clientsSub", `${safe.clientsRequiresInvoice} com fatura · ${safe.clientsWithCredit} com crédito`);
 
-    setText("totalPools", s.totalPools);
-    setText("monthlyPotential", `Potencial: ${formatMoney(s.monthlyPotential)}`);
+    setText("totalPools", safe.totalPools);
+    setText("monthlyPotential", `Potencial: ${formatMoney(safe.monthlyPotential)}`);
 
-    setText("monthBilled", formatMoney(s.monthBilled));
-    setText("monthPaid", formatMoney(s.monthPaid));
-    setText("monthOpen", formatMoney(s.monthOpen));
-    setText("receivedPercent", `${s.receivedPercent}%`);
+    setText("monthBilled", formatMoney(safe.monthBilled));
+    setText("monthPaid", formatMoney(safe.monthPaid));
+    setText("monthOpen", formatMoney(safe.monthOpen));
+    setText("receivedPercent", `${safe.receivedPercent}%`);
 
-    setText("creditBalance", formatMoney(s.totalCreditBalance));
-    setText("clientsWithCredit", `${s.clientsWithCredit} clientes`);
+    setText("creditBalance", formatMoney(safe.totalCreditBalance));
+    setText("clientsWithCredit", `${safe.clientsWithCredit} clientes`);
 
-    setText("openAlerts", s.openAlerts);
+    setText("openAlerts", safe.openAlerts);
 
-    setText("visitsThisMonth", s.visitsThisMonth);
+    setText("visitsThisMonth", safe.visitsThisMonth);
     setText("visitsSub",
-      `${s.visitsDoneThisMonth} feitas · ${s.visitsPlannedThisMonth} planeadas`
+      `${safe.visitsDoneThisMonth} feitas · ${safe.visitsPlannedThisMonth} planeadas`
     );
 
     // =========================

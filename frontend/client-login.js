@@ -46,7 +46,7 @@ async function login(){
 
     const res =
       await fetch(
-        `${API}/auth/login`,
+        `${API}/client-auth/login`,
         {
 
           method:"POST",
@@ -82,7 +82,12 @@ async function login(){
     // VALIDAR CLIENT
     // ==================================================
 
-    const sessionUser = data.user || data.client || null;
+    const baseUser = data.user || data.client || null;
+    const sessionUser = baseUser ? {
+      ...baseUser,
+      role: "CLIENT",
+      clientId: Number(baseUser.clientId || baseUser.id || data.client?.id || 0) || undefined,
+    } : null;
 
     if(!sessionUser || sessionUser.role !== "CLIENT"){
 

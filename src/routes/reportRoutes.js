@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const auth = require("../middlewares/authMiddleware");
 const { roleMatches } = require("../utils/roles");
+const { getMonthlyPrintableReport } = require("../controllers/reportController");
 
 const { prisma } =
   require("../prismaClient");
@@ -12,6 +13,8 @@ const { prisma } =
 // ======================================================
 
 router.use(auth());
+
+router.get("/monthly-print", getMonthlyPrintableReport);
 
 router.get("/visit/:id", async (req, res) => {
 
@@ -50,7 +53,7 @@ router.get("/visit/:id", async (req, res) => {
     const user = req.user || {};
     const isAdmin = roleMatches(user.role, "ADMIN");
     const isTechnician = roleMatches(user.role, "TECHNICIAN") && !isAdmin;
-    const isClient = roleMatches(user.role, "CLIENT");
+    const isClient = roleMatches(user.role, "CLIENT") && !isAdmin;
 
     if (isTechnician && Number(visit.technicianId || 0) !== Number(user.technicianId || user.id || 0)) {
       return res.status(403).send("Acesso negado");

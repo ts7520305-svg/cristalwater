@@ -4,6 +4,7 @@
 
 const { prisma } = require("../prismaClient");
 const { generateMonthlyReportPDF } = require("../services/pdfReportService");
+const { roleMatches } = require("../utils/roles");
 
 /**
  * GET /api/client/reports/:id/pdf
@@ -18,6 +19,14 @@ async function downloadReportPDF(req, res) {
 
     if (!report || report.type !== "CLIENT") {
       return res.status(404).json({ error: "Relatório não encontrado" });
+    }
+
+    const role = String(req.user?.role || "").trim().toUpperCase();
+    if (!roleMatches(role, "ADMIN")) {
+      const authClientId = Number(req.user?.clientId || req.user?.id || 0);
+      if (!authClientId || authClientId !== Number(report.clientId || 0)) {
+        return res.status(403).json({ error: "Acesso negado" });
+      }
     }
 
     generateMonthlyReportPDF(res, report);

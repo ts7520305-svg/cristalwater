@@ -1,4 +1,9 @@
 (function () {
+  const ui = window.CwUi || {
+    success: (m) => console.log(m),
+    error: (m) => console.error(m),
+    info: (m) => console.info(m),
+  };
   const $ = (selector) => document.querySelector(selector);
   const esc = (value) => String(value ?? "").replace(/[&<>'"]/g, (char) => ({
     "&": "&amp;",
@@ -78,7 +83,10 @@
 
   function toast(message) {
     const node = $("#toast");
-    if (!node) return alert(message);
+    if (!node) {
+      ui.info(message);
+      return;
+    }
     node.textContent = message;
     node.classList.add("show");
     setTimeout(() => node.classList.remove("show"), 2400);
@@ -1215,7 +1223,7 @@
       reminder.note ? `Nota: ${reminder.note}` : "",
       "Verificar ou fechar imediatamente.",
     ].filter(Boolean).join("\n");
-    setTimeout(() => alert(message), 80);
+    setTimeout(() => ui.error(message), 80);
   }
 
   function renderWaterReminders() {
@@ -2327,6 +2335,24 @@
   ["ph", "chlorine", "alkalinity", "orp"].forEach((id) => {
     const input = $(`#${id}`);
     if (input) input.addEventListener("input", () => updateReferenceStatus(input));
+  });
+
+  // Persist field draft while typing so browser refresh does not lose in-progress notes/measurements.
+  draftFieldIds.forEach((id) => {
+    const input = $(`#${id}`);
+    if (!input) return;
+    input.addEventListener("input", () => saveCurrentDraft());
+    input.addEventListener("change", () => saveCurrentDraft());
+  });
+
+  checkIds.forEach((id) => {
+    const input = $(`#${id}`);
+    if (!input) return;
+    input.addEventListener("change", () => saveCurrentDraft());
+  });
+
+  window.addEventListener("beforeunload", () => {
+    saveCurrentDraft();
   });
 
   const finishBtn = $("#finishBtn");

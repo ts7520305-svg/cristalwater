@@ -94,6 +94,7 @@ async function generateVisitReport(req, res) {
     const tokenRole = String(req.user?.role || "").trim().toUpperCase();
     const role = tokenRole || "CLIENT";
     const isAdmin = roleMatches(role, "ADMIN");
+    const isClient = !isAdmin && roleMatches(role, "CLIENT");
 
     if (!Number.isInteger(visitId)) {
       return res.status(400).send("ID da visita inválido");
@@ -129,7 +130,7 @@ async function generateVisitReport(req, res) {
       }
     }
 
-    if (roleMatches(role, "CLIENT")) {
+    if (isClient) {
       const authClientId = Number(req.user?.clientId || req.user?.id || 0);
       const visitClientId = Number(visit.clientId || visit.pool?.clientId || 0);
       if (!authClientId || authClientId !== visitClientId) {

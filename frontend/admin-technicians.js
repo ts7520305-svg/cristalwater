@@ -1,5 +1,13 @@
 const API = `${location.origin}/api/core`;
 const RISK_API = `${location.origin}/api/operational-risk`;
+const ui = window.CwUi || {
+  success: (m) => console.log(m),
+  error: (m) => console.error(m),
+  info: (m) => console.info(m),
+  confirm: async () => false,
+  prompt: async () => null,
+  safeError: (err, fallback) => (err && err.message) || fallback,
+};
 
 let TECHS = [];
 let RISK_SUMMARY = { byTechnicianId: {}, issues: [] };
@@ -13,6 +21,10 @@ function escapeHtml(value) {
     "'": "&#39;",
     '"': "&quot;",
   }[char]));
+}
+
+function userError(error, fallback) {
+  return ui.safeError(error, fallback || "Nao foi possivel concluir a operacao.");
 }
 
 function val(id) {
@@ -340,7 +352,8 @@ async function loadTechnicians() {
     renderTechnicians();
   } catch (err) {
     console.error(err);
-    if (list) list.innerHTML = `<div class="cw-empty">${escapeHtml(err.message)}</div>`;
+    if (list) list.innerHTML = `<div class="cw-empty">${escapeHtml(userError(err, "Nao foi possivel carregar os tecnicos."))}</div>`;
+    ui.error(userError(err, "Nao foi possivel carregar os tecnicos."));
   }
 }
 
@@ -356,56 +369,59 @@ async function createTechnician() {
     role: "TECHNICIAN",
   };
   if (!body.name) {
-    alert("Nome obrigatorio");
+    ui.error("Indica o nome do tecnico para continuar.");
     return;
   }
   try {
     await request("/technicians", { method: "POST", body: JSON.stringify(body) });
     document.getElementById("technicianForm").reset();
     await loadTechnicians();
-    alert("Tecnico criado.");
+    ui.success("Tecnico criado com sucesso.");
   } catch (error) {
-    alert(error.message);
+    ui.error(userError(error, "Nao foi possivel criar o tecnico."));
   }
 }
 
-function payload(tech) {
-  const name = prompt("Nome do tecnico", tech.name || "");
+async function payload(tech) {
+  const name = await ui.prompt("Indica o nome do tecnico.", { title: "Editar tecnico", defaultValue: tech.name || "", confirmText: "Seguinte" });
   if (name === null) return null;
-  const email = prompt("Email", tech.email || "");
+  const email = await ui.prompt("Indica o email (opcional).", { title: "Editar tecnico", defaultValue: tech.email || "", confirmText: "Seguinte" });
   if (email === null) return null;
-  const phone = prompt("Telefone", tech.phone || "");
+  const phone = await ui.prompt("Indica o telefone (opcional).", { title: "Editar tecnico", defaultValue: tech.phone || "", confirmText: "Seguinte" });
   if (phone === null) return null;
-  const zone = prompt("Zona", tech.zone || "");
+  const zone = await ui.prompt("Indica a zona de operacao.", { title: "Editar tecnico", defaultValue: tech.zone || "", confirmText: "Seguinte" });
   if (zone === null) return null;
-  const vehicleId = prompt("ID viatura opcional", tech.vehicleId || "");
+  const vehicleId = await ui.prompt("Indica o ID da viatura (opcional).", { title: "Editar tecnico", defaultValue: String(tech.vehicleId || ""), confirmText: "Guardar" });
   if (vehicleId === null) return null;
   return { name, email, phone, zone, vehicleId: vehicleId || null };
 }
 
 async function editTechnician(id) {
   const tech = TECHS.find((item) => Number(item.id) === Number(id));
-  if (!tech) return alert("Tecnico nao encontrado.");
-  const body = payload(tech);
+  if (!tech) {
+    ui.error("Tecnico nao encontrado.");
+    return;
+  }
+  const body = await payload(tech);
   if (!body) return;
   try {
     await request(`/technicians/${id}`, { method: "PUT", body: JSON.stringify(body) });
     await loadTechnicians();
-    alert("Tecnico atualizado.");
+    ui.success("Tecnico atualizado com sucesso.");
   } catch (error) {
-    alert(error.message);
+    ui.error(userError(error, "Nao foi possivel atualizar o tecnico."));
   }
 }
 
 async function resetPin(id) {
-  const pin = prompt("Novo PIN", "1234");
+  const pin = await ui.prompt("Indica o novo PIN do tecnico.", { title: "Reset de PIN", defaultValue: "1234", confirmText: "Atualizar" });
   if (pin === null) return;
   try {
     await request(`/technicians/${id}`, { method: "PUT", body: JSON.stringify({ pin }) });
     await loadTechnicians();
-    alert("PIN atualizado.");
+    ui.success("PIN atualizado com sucesso.");
   } catch (error) {
-    alert(error.message);
+    ui.error(userError(error, "Nao foi possivel atualizar o PIN."));
   }
 }
 
@@ -414,7 +430,7 @@ async function toggleTechnician(id, active) {
     await request(`/technicians/${id}`, { method: "PUT", body: JSON.stringify({ active }) });
     await loadTechnicians();
   } catch (error) {
-    alert(error.message);
+    ui.error(userError(error, "Nao foi possivel alterar o estado do tecnico."));
   }
 }
 
@@ -423,17 +439,23 @@ async function restoreTechnician(id) {
     await request(`/technicians/${id}/restore`, { method: "POST" });
     await loadTechnicians();
   } catch (error) {
-    alert(error.message);
+    ui.error(userError(error, "Nao foi possivel reativar o tecnico."));
   }
 }
 
 async function deleteTechnician(id) {
-  if (!confirm("Eliminar/desativar este tecnico? O historico sera preservado sempre que existirem visitas.")) return;
+  const approved = await ui.confirm("Esta operacao elimina apenas quando for seguro; caso exista historico, o tecnico sera desativado para preservar dados. Queres continuar?", {
+    title: "Confirmar eliminacao",
+    confirmText: "Continuar",
+    danger: true,
+  });
+  if (!approved) return;
   try {
     await request(`/technicians/${id}`, { method: "DELETE" });
     await loadTechnicians();
+    ui.success("Operacao concluida no tecnico.");
   } catch (error) {
-    alert(error.message);
+    ui.error(userError(error, "Nao foi possivel concluir a operacao no tecnico."));
   }
 }
 

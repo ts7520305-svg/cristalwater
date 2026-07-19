@@ -76,6 +76,32 @@
       font-size: 13px;
     }
 
+    .feedback {
+      margin: 0 auto 16px;
+      max-width: 1680px;
+      padding: 12px 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(125, 211, 252, .24);
+      background: rgba(10, 27, 46, .8);
+      color: var(--txt);
+      display: none;
+    }
+
+    .feedback[data-tone="success"] {
+      border-color: rgba(64, 230, 160, .35);
+      background: rgba(14, 56, 38, .76);
+    }
+
+    .feedback[data-tone="error"] {
+      border-color: rgba(255, 107, 107, .45);
+      background: rgba(70, 20, 20, .82);
+    }
+
+    .feedback[data-tone="warning"] {
+      border-color: rgba(255, 209, 102, .4);
+      background: rgba(67, 47, 16, .8);
+    }
+
     input,
     select,
     textarea {
@@ -292,6 +318,91 @@
       min-height: 40px;
     }
 
+    .cw-modal[hidden] {
+      display: none;
+    }
+
+    .cw-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(3, 10, 18, .7);
+      backdrop-filter: blur(8px);
+    }
+
+    .cw-modal-card {
+      width: min(920px, 100%);
+      max-height: calc(100vh - 36px);
+      overflow: auto;
+      background: rgba(13, 29, 49, .98);
+      border: 1px solid rgba(125, 211, 252, .2);
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, .4);
+    }
+
+    .cw-modal-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+      margin-bottom: 14px;
+    }
+
+    .cw-modal-head h3 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .cw-modal-head p {
+      margin: 6px 0 0;
+      color: var(--muted);
+    }
+
+    .cw-icon-btn {
+      min-width: 42px;
+      min-height: 42px;
+      padding: 0;
+      border-radius: 999px;
+      background: rgba(9, 24, 41, .95);
+      border: 1px solid rgba(125, 211, 252, .18);
+    }
+
+    .cw-modal-form {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .cw-modal-form .wide,
+    .cw-modal-form .section-title,
+    .cw-modal-form .check-row,
+    .cw-modal-form .cw-modal-actions {
+      grid-column: 1 / -1;
+    }
+
+    .cw-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .cw-confirm-body {
+      display: grid;
+      gap: 14px;
+    }
+
+    .cw-confirm-body p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
     .cw-client-inactive {
       border-color: rgba(255, 209, 102, .55);
       background: linear-gradient(135deg, rgba(55, 43, 22, .78), rgba(10, 27, 46, .94));
@@ -336,10 +447,15 @@
       .client-actions .btn {
         flex: 1 1 140px;
       }
+
+      .cw-modal-form {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body data-cw-role="ADMIN">
+  <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
   <main class="page">
     <div class="page-head">
       <div class="cw-page-head">
@@ -357,10 +473,12 @@
         <h2>Novo cliente</h2>
         <form id="clientForm" class="cw-form-grid" onsubmit="createClient();return false">
           <input id="name" name="name" placeholder="Nome" required>
+          <input id="internalName" name="internalName" placeholder="Nome interno">
           <input id="phone" name="phone" placeholder="Telefone">
           <input id="email" name="email" placeholder="Email">
           <input id="zone" name="zone" placeholder="Zona">
           <textarea id="notes" name="notes" placeholder="Notas internas"></textarea>
+          <input id="password" name="password" type="password" placeholder="Password portal cliente (opcional)">
 
           <div class="section-title">Faturacao oficial externa</div>
           <label class="check-row">
@@ -386,6 +504,63 @@
       </div>
     </section>
   </main>
+
+  <div id="editClientModal" class="cw-modal" hidden>
+    <div class="cw-modal-card" role="dialog" aria-modal="true" aria-labelledby="editClientTitle">
+      <div class="cw-modal-head">
+        <div>
+          <h3 id="editClientTitle">Editar cliente</h3>
+          <p>Atualize os dados do cliente sem sair da lista.</p>
+        </div>
+        <button id="closeEditClientModal" class="cw-icon-btn" type="button" aria-label="Fechar edicao">×</button>
+      </div>
+      <form id="editClientForm" class="cw-modal-form">
+        <input id="editName" name="name" placeholder="Nome" required>
+        <input id="editInternalName" name="internalName" placeholder="Nome interno">
+        <input id="editPhone" name="phone" placeholder="Telefone">
+        <input id="editEmail" name="email" placeholder="Email">
+        <input id="editZone" name="zone" placeholder="Zona">
+        <textarea id="editNotes" name="notes" class="wide" placeholder="Notas internas"></textarea>
+        <input id="editPassword" name="password" type="password" placeholder="Nova password do portal (opcional)">
+
+        <div class="section-title">Faturacao oficial externa</div>
+        <label class="check-row">
+          <input type="checkbox" id="editRequiresInvoice" name="requiresInvoice">
+          Necessita fatura oficial noutro sistema
+        </label>
+
+        <input id="editFiscalName" name="fiscalName" placeholder="Nome fiscal">
+        <input id="editFiscalNif" name="fiscalNif" placeholder="NIF">
+        <input id="editFiscalAddress" name="fiscalAddress" placeholder="Morada fiscal">
+        <input id="editFiscalEmail" name="fiscalEmail" placeholder="Email fiscal">
+        <textarea id="editExternalBillingNotes" name="externalBillingNotes" class="wide" placeholder="Notas para contabilidade"></textarea>
+
+        <div class="cw-modal-actions">
+          <button id="cancelEditClient" type="button">Cancelar</button>
+          <button id="saveEditClient" class="primary" type="submit">Guardar alteracoes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="confirmModal" class="cw-modal" hidden>
+    <div class="cw-modal-card" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <div class="cw-modal-head">
+        <div>
+          <h3 id="confirmTitle">Confirmar ação</h3>
+          <p id="confirmSubtitle">Revise a operação antes de continuar.</p>
+        </div>
+        <button id="closeConfirmModal" class="cw-icon-btn" type="button" aria-label="Fechar confirmacao">×</button>
+      </div>
+      <div class="cw-confirm-body">
+        <p id="confirmMessage">Mensagem da operação.</p>
+        <div class="cw-modal-actions">
+          <button id="cancelConfirmAction" type="button">Cancelar</button>
+          <button id="confirmActionBtn" class="primary" type="button">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="/admin-auth-guard.js"></script>
   <script src="/admin-clients.js"></script>
