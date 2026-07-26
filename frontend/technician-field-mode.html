@@ -118,6 +118,12 @@
       letter-spacing: 0.01em;
     }
 
+    #connectionState {
+      min-width: 82px;
+      justify-content: center;
+      font-weight: 800;
+    }
+
     .field-dashboard {
       display: grid;
       grid-template-columns: 1.4fr 1fr 1fr 1fr;
@@ -140,6 +146,7 @@
       font-size: 11px;
       text-transform: uppercase;
       font-weight: 700;
+      letter-spacing: 0.04em;
     }
 
     .field-tile b {
@@ -150,6 +157,7 @@
     .field-tile small {
       color: var(--cw-muted);
       font-size: 12px;
+      line-height: 1.35;
     }
 
     .field-tile.primary {
@@ -192,6 +200,14 @@
     .field-tile.primary .hero-action.secondary {
       background: rgba(255, 255, 255, 0.92);
       color: #1f4d40;
+    }
+
+    .field-tile.primary .hero-action:active,
+    .big:active,
+    .photo-btn:active,
+    .route-btn:active,
+    .doc-btn:active {
+      transform: translateY(1px);
     }
 
     .field-tile.primary.p0 {
@@ -511,6 +527,13 @@
       font-weight: 600;
     }
 
+    input::placeholder,
+    textarea::placeholder {
+      color: #5a786f;
+      font-weight: 600;
+      opacity: 1;
+    }
+
     textarea {
       min-height: 96px;
       resize: vertical;
@@ -529,6 +552,16 @@
     .dose-row {
       grid-template-columns: 1.3fr 0.7fr 0.5fr auto;
       align-items: center;
+    }
+
+    .measure-field input {
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.01em;
+    }
+
+    .measure-field .measure-label {
+      margin-bottom: 6px;
+      letter-spacing: 0.03em;
     }
 
     .dose-remove {
@@ -656,6 +689,11 @@
       color: #fff;
     }
 
+    .pool-segments button {
+      font-size: 13px;
+      letter-spacing: 0.01em;
+    }
+
     .visit-group {
       display: grid;
       gap: 8px;
@@ -715,6 +753,10 @@
       line-height: 1.3;
     }
 
+    .visit-location span {
+      word-break: break-word;
+    }
+
     .visit-state {
       font-weight: 600;
     }
@@ -770,6 +812,16 @@
       background: rgba(255, 255, 255, 0.75);
       font-size: 14px;
       line-height: 1.35;
+    }
+
+    .interrupt-item button {
+      min-height: 44px;
+      border-radius: 10px;
+      border: 1px solid #d9b0b8;
+      background: #fff;
+      color: #7a2031;
+      font-weight: 700;
+      padding: 0 12px;
     }
 
     .now-board {
@@ -843,6 +895,38 @@
 
     .photo-item {
       border-color: #b5c9c2;
+    }
+
+    .photo-thumb {
+      width: 100%;
+      max-height: 220px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid #b7c9c2;
+      background: #eef5f2;
+    }
+
+    .photo-meta {
+      display: grid;
+      gap: 4px;
+      margin-top: 8px;
+    }
+
+    .photo-mini {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .photo-mini button {
+      min-height: 40px;
+      border-radius: 9px;
+      border: 1px solid #b9ccc5;
+      background: #fff;
+      font-weight: 700;
+      color: #214b40;
+      padding: 0 10px;
     }
 
     .photo-status.ok {
@@ -952,6 +1036,18 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
+      .dose-row {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .dose-row select {
+        grid-column: 1 / -1;
+      }
+
+      .dose-row .dose-remove {
+        grid-column: 1 / -1;
+      }
+
       .field-tile.primary .field-cta-row {
         grid-template-columns: 1fr;
       }
@@ -973,6 +1069,15 @@
         min-height: 60px;
         font-size: 13px;
         padding: 8px;
+      }
+
+      .interrupt-item button {
+        min-height: 48px;
+      }
+
+      .pool-segments button {
+        min-height: 54px;
+        font-size: 12px;
       }
 
       .visit-top b {
