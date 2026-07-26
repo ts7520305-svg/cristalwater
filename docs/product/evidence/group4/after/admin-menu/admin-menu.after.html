@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0f1723">
+  <title>Cristal Water · Menu Completo</title>
+  <script src="/cw-auth.js"></script>
+  <link rel="stylesheet" href="/ui/foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/cw-premium-admin-phase1.css">
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+  <link rel="stylesheet" href="/ui/design-system.css">
+</head>
+<body class="admin-shell" data-required-role="ADMIN">
+  <div class="cw-v2-app">
+    <aside class="cw-v2-sidebar" aria-label="Navegacao principal">
+      <div class="cw-v2-brand">
+        <img src="/logo-cristalwater.png" alt="Cristal Water">
+        <div>
+          <b>Cristal Water</b>
+          <small>Administrador</small>
+        </div>
+      </div>
+      <nav class="cw-v2-nav" aria-label="Acesso rapido">
+        <a href="/admin-master-control" data-shell-search="Centro de comando">Centro</a>
+        <a href="/admin-today" data-shell-search="Hoje">Hoje</a>
+        <a class="is-active" href="/admin-menu" data-shell-search="Menu completo">Menu completo</a>
+        <a href="/admin-alerts" data-shell-search="Alertas">Alertas</a>
+        <a href="/admin-visits" data-shell-search="Visitas">Visitas</a>
+      </nav>
+      <div class="cw-today-stamp">Regra dos tres cliques: tudo acessivel daqui.</div>
+    </aside>
+
+    <main class="cw-v2-main">
+      <header class="cw-v2-topbar">
+        <div class="cw-v2-search">
+          <input id="menuSearch" type="search" aria-label="Pesquisar modulo, funcionalidade ou area" placeholder="Pesquisar modulo, funcionalidade ou area">
+          <span class="icon">⌕</span>
+        </div>
+        <div class="cw-v2-top-actions">
+          <button class="cw-v2-btn cw-mobile-back" type="button" data-cw-action="back">Voltar</button>
+          <a class="cw-v2-btn" href="/admin-master-control">Centro</a>
+          <button class="cw-v2-btn" type="button" data-cw-open-drawer aria-label="Abrir menu completo">Menu</button>
+        </div>
+      </header>
+
+      <section class="cw-context-row" aria-label="Contexto de navegacao">
+        <button class="cw-v2-btn" type="button" data-cw-action="back">Voltar</button>
+        <span class="cw-context-path">Menu completo</span>
+      </section>
+
+      <section class="cw-today-head" aria-label="Contexto de navegacao">
+        <div>
+          <h1>Menu completo</h1>
+          <p>Navegacao unica e consistente para toda a operacao administrativa.</p>
+        </div>
+        <span class="cw-today-stamp">Priorizar simplicidade, velocidade e contexto</span>
+      </section>
+
+      <section class="cw-v2-grid cols-2" style="margin-top:12px;margin-bottom:10px">
+        <article class="cw-v2-card">
+          <div class="cw-priority-head">
+            <h2>Recentes</h2>
+            <span class="pill">acesso rápido</span>
+          </div>
+          <nav class="cw-menu-links">
+            <a href="/admin-master-control">Centro de comando <span>→</span></a>
+            <a href="/admin-today">Hoje <span>→</span></a>
+            <a href="/admin-alerts">Alertas <span>→</span></a>
+          </nav>
+        </article>
+        <article class="cw-v2-card">
+          <div class="cw-priority-head">
+            <h2>Favoritos</h2>
+            <span class="pill">atalhos operacionais</span>
+          </div>
+          <nav class="cw-menu-links">
+            <a href="/admin-rounds">Rondas <span>→</span></a>
+            <a href="/admin-technicians">Tecnicos <span>→</span></a>
+            <a href="/invoices">Faturas <span>→</span></a>
+          </nav>
+        </article>
+      </section>
+
+      <section id="menuGrid" class="cw-menu-grid" aria-label="Catalogo de modulos do administrador">
+        <details class="cw-menu-group" data-menu-group="operacao" open>
+          <summary>Operacao diaria</summary>
+          <p>Controlo da execucao de campo e decisoes do dia.</p>
+          <nav class="cw-menu-links">
+            <a href="/admin-master-control" data-shell-search="Centro de comando">Centro de comando <span>→</span></a>
+            <a href="/admin-today" data-shell-search="Hoje">Hoje <span>→</span></a>
+            <a href="/admin-visits" data-shell-search="Visitas">Visitas <span>→</span></a>
+            <a href="/admin-rounds" data-shell-search="Rondas">Rondas <span>→</span></a>
+            <a href="/admin-live-map" data-shell-search="Mapa em tempo real">Mapa em tempo real <span>→</span></a>
+          </nav>
+        </details>
+
+        <details class="cw-menu-group" data-menu-group="clientes" open>
+          <summary>Clientes e equipas</summary>
+          <p>Registos, relacao e produtividade da equipa.</p>
+          <nav class="cw-menu-links">
+            <a href="/admin-clients" data-shell-search="Clientes">Clientes <span>→</span></a>
+            <a href="/admin-technicians" data-shell-search="Tecnicos">Tecnicos <span>→</span></a>
+            <a href="/admin-pools" data-shell-search="Piscinas">Piscinas <span>→</span></a>
+            <a href="/admin-crm" data-shell-search="CRM">CRM <span>→</span></a>
+            <a href="/admin-service-log" data-shell-search="Historico de servico">Historico de servico <span>→</span></a>
+          </nav>
+        </details>
+
+        <details class="cw-menu-group" data-menu-group="ativos">
+          <summary>Ativos e armazem</summary>
+          <p>Stock, viaturas e equipamentos com rastreio.</p>
+          <nav class="cw-menu-links">
+            <a href="/admin-inventory" data-shell-search="Stock e inventario">Stock e inventario <span>→</span></a>
+            <a href="/admin-vehicles" data-shell-search="Viaturas">Viaturas <span>→</span></a>
+            <a href="/admin-pool-technical" data-shell-search="Equipamentos tecnicos">Equipamentos tecnicos <span>→</span></a>
+            <a href="/admin-keys" data-shell-search="Chaves">Chaves <span>→</span></a>
+            <a href="/admin-pool-calculator" data-shell-search="Calculadora tecnica">Calculadora tecnica <span>→</span></a>
+          </nav>
+        </details>
+
+        <details class="cw-menu-group" data-menu-group="financeiro" open>
+          <summary>Financeiro</summary>
+          <p>Cobranca, faturacao e analise de receita.</p>
+          <nav class="cw-menu-links">
+            <a href="/billing" data-shell-search="Financeiro">Financeiro <span>→</span></a>
+            <a href="/invoices" data-shell-search="Faturas">Faturas <span>→</span></a>
+            <a href="/admin-payments" data-shell-search="Pagamentos">Pagamentos <span>→</span></a>
+            <a href="/admin-collection" data-shell-search="Cobranca">Cobranca <span>→</span></a>
+            <a href="/admin-reports" data-shell-search="Relatorios">Relatorios <span>→</span></a>
+          </nav>
+        </details>
+
+        <details class="cw-menu-group" data-menu-group="comunicacao">
+          <summary>Comunicacao e alertas</summary>
+          <p>Excecoes, mensagens e canais operacionais.</p>
+          <nav class="cw-menu-links">
+            <a href="/admin-alerts" data-shell-search="Alertas">Alertas <span>→</span></a>
+            <a href="/admin-notifications" data-shell-search="Notificacoes">Notificacoes <span>→</span></a>
+            <a href="/chat" data-shell-search="Chat">Chat <span>→</span></a>
+            <a href="/communications" data-shell-search="Comunicacoes">Comunicacoes <span>→</span></a>
+            <a href="/admin-email-logs" data-shell-search="Registos email">Registos email <span>→</span></a>
+          </nav>
+        </details>
+
+        <details class="cw-menu-group" data-menu-group="sistema">
+          <summary>Sistema e governance</summary>
+          <p>Configuracao, seguranca e auditoria.</p>
+          <nav class="cw-menu-links">
+            <a href="/admin-operational-settings" data-shell-search="Definicoes operacionais">Definicoes operacionais <span>→</span></a>
+            <a href="/admin-security" data-shell-search="Seguranca">Seguranca <span>→</span></a>
+            <a href="/admin-test-center" data-shell-search="Centro de testes">Centro de testes <span>→</span></a>
+            <a href="/crystal-os-v2-route-index" data-shell-search="Indice de rotas">Indice de rotas <span>→</span></a>
+            <a href="/admin-onboarding" data-shell-search="Onboarding">Onboarding <span>→</span></a>
+          </nav>
+        </details>
+      </section>
+    </main>
+  </div>
+
+  <nav class="cw-v2-mobile-nav" aria-label="Navegacao movel administrador">
+    <a href="/admin-master-control">Centro</a>
+    <a href="/admin-today">Hoje</a>
+    <a href="/admin-visits">Visitas</a>
+    <a href="/admin-alerts">Alertas</a>
+    <a class="is-active" href="/admin-menu">Menu</a>
+  </nav>
+
+  <script src="/admin-auth-guard.js"></script>
+  <script src="/cw-admin-premium-controls.js"></script>
+  <script>
+    (function () {
+      const search = document.getElementById("menuSearch");
+      const groups = Array.from(document.querySelectorAll(".cw-menu-group"));
+
+      function applyFilter() {
+        const term = String(search?.value || "").trim().toLowerCase();
+        groups.forEach((group) => {
+          const links = Array.from(group.querySelectorAll("a"));
+          let visibleCount = 0;
+
+          links.forEach((link) => {
+            const text = `${link.textContent} ${link.getAttribute("data-shell-search") || ""}`.toLowerCase();
+            const visible = !term || text.includes(term);
+            link.style.display = visible ? "flex" : "none";
+            if (visible) visibleCount += 1;
+          });
+
+          group.style.display = visibleCount ? "grid" : "none";
+          if (visibleCount && term && !group.hasAttribute("open")) group.setAttribute("open", "");
+        });
+      }
+
+      if (search) search.addEventListener("input", applyFilter);
+    })();
+  </script>
+  <script defer src="/ui/design-system.js"></script>
+</body>
+</html>

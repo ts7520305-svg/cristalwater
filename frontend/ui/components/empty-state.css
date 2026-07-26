@@ -1,8 +1,26 @@
 .cw-v2-state-empty,
-.empty {
+.empty,
+.empty-box,
+[data-cw-state="empty"] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cw-space-2);
   border: 1px dashed var(--cw-color-border);
   border-radius: var(--cw-radius-md);
-  padding: 12px;
+  padding: var(--cw-space-3) var(--cw-space-4);
   color: var(--cw-color-text-soft);
   background: var(--cw-color-surface-2);
+  min-height: 44px;
+}
+
+.cw-v2-state-empty::before,
+.empty::before,
+.empty-box::before,
+[data-cw-state="empty"]::before {
+  content: "Sem dados";
+  font-size: var(--cw-font-size-xs);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--cw-color-text-soft);
+  opacity: 0.75;
 }

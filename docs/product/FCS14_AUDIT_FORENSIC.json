@@ -1,0 +1,42 @@
+{
+  "ok": false,
+  "runId": "FCS14FORENSIC_1784749156169_adn2r",
+  "startedAt": "2026-07-22T19:39:16.170Z",
+  "baseUrl": "http://127.0.0.1:3002",
+  "totalRoutes": 87,
+  "processed": 1,
+  "lastRouteCompleted": "/admin-ai",
+  "nextRoute": "/admin-alerts",
+  "timings": [
+    {
+      "route": "/admin-ai",
+      "role": "ADMIN",
+      "elapsedMs": 320373,
+      "title": ""
+    }
+  ],
+  "failure": {
+    "type": "SLOW_ROUTE",
+    "route": "/admin-ai",
+    "role": "ADMIN",
+    "stage": "slow-route-threshold",
+    "elapsedMs": 320373,
+    "pendingRequests": [
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:3002/api/ai-admin/status",
+        "startedAt": 1784749158839,
+        "pendingMs": 320121
+      }
+    ],
+    "screenshot": "docs/product/FCS14_AUDIT_FORENSIC_LAST_PAGE.png"
+  },
+  "resourceSnapshot": {
+    "nodeMemoryMB": {
+      "rss": 132.4,
+      "heapUsed": 49.3,
+      "heapTotal": 50.9
+    }
+  },
+  "finishedAt": "2026-07-22T19:44:38.962Z"
+}

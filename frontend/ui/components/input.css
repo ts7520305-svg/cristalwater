@@ -4,7 +4,7 @@ textarea,
 .cw-field,
 .cw-v2-search input {
   width: 100%;
-  min-height: 38px;
+  min-height: 44px;
   border: 1px solid var(--cw-color-border);
   border-radius: var(--cw-radius-sm);
   background: var(--cw-color-surface);

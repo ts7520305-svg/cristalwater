@@ -1,0 +1,80 @@
+{
+  "generatedAt": "2026-07-20T19:35:38.247Z",
+  "page": "admin-menu",
+  "route": "/admin-menu",
+  "phase": "after",
+  "totals": {
+    "checks": 3,
+    "navigationErrors": 0,
+    "horizontalScroll": 0,
+    "unlabeledVisibleFields": 0,
+    "consoleErrors": 0,
+    "failedRequests": 0,
+    "httpErrors": 0
+  },
+  "checks": [
+    {
+      "page": "admin-menu",
+      "route": "/admin-menu",
+      "phase": "after",
+      "viewport": {
+        "label": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "navigationError": "",
+      "metrics": {
+        "title": "Cristal Water · Menu Completo",
+        "horizontalScroll": false,
+        "unlabeledVisibleFields": 0,
+        "scrollWidth": 1280,
+        "viewport": 1280
+      },
+      "consoleErrors": [],
+      "failedRequests": [],
+      "httpErrors": []
+    },
+    {
+      "page": "admin-menu",
+      "route": "/admin-menu",
+      "phase": "after",
+      "viewport": {
+        "label": "tablet",
+        "width": 1024,
+        "height": 1366
+      },
+      "navigationError": "",
+      "metrics": {
+        "title": "Cristal Water · Menu Completo",
+        "horizontalScroll": false,
+        "unlabeledVisibleFields": 0,
+        "scrollWidth": 1280,
+        "viewport": 1280
+      },
+      "consoleErrors": [],
+      "failedRequests": [],
+      "httpErrors": []
+    },
+    {
+      "page": "admin-menu",
+      "route": "/admin-menu",
+      "phase": "after",
+      "viewport": {
+        "label": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "navigationError": "",
+      "metrics": {
+        "title": "Cristal Water · Menu Completo",
+        "horizontalScroll": false,
+        "unlabeledVisibleFields": 0,
+        "scrollWidth": 1280,
+        "viewport": 1280
+      },
+      "consoleErrors": [],
+      "failedRequests": [],
+      "httpErrors": []
+    }
+  ]
+}

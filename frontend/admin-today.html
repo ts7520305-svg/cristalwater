@@ -10,6 +10,10 @@
   <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
   <link rel="stylesheet" href="/cw-premium-admin-phase1.css">
   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+  <link rel="stylesheet" href="/ui/design-system.css">
+  <style>
+    .cw-no-margin { margin: 0; }
+  </style>
 </head>
 <body class="admin-shell" data-required-role="ADMIN">
   <div class="cw-v2-app">
@@ -80,7 +84,7 @@
 
       <section class="cw-list-block" aria-label="Lista de visitas de hoje">
         <div class="cw-list-head">
-          <h2 style="margin:0">Timeline agrupada por estado</h2>
+          <h2 class="cw-no-margin">Timeline agrupada por estado</h2>
           <a class="cw-v2-btn" href="/admin-visits">Abrir modulo completo</a>
         </div>
         <div class="cw-mini-actions">
@@ -105,5 +109,6 @@
   <script src="/admin-auth-guard.js"></script>
   <script src="/admin-today.js"></script>
   <script src="/cw-admin-premium-controls.js"></script>
+  <script defer src="/ui/design-system.js"></script>
 </body>
 </html>

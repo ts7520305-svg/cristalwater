@@ -7,18 +7,50 @@
 .cw-list-block,
 .cw-list-group,
 .cw-today-item {
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.94);
   border: 1px solid var(--cw-color-border);
-  border-radius: var(--cw-radius-lg);
-  box-shadow: var(--cw-shadow-md);
+  border-radius: var(--cw-card-radius);
+  box-shadow: var(--cw-card-shadow);
+  width: 100%;
+  min-width: 0;
 }
 
 .cw-v2-card,
 .cw-priority-block,
+.metric-card,
+.cw-kpi-card,
+.item,
 .cw-list-block,
 .cw-list-group,
 .cw-menu-group {
-  padding: var(--cw-space-3);
+  padding: var(--cw-space-4);
+}
+
+.cw-v2-card > h1,
+.cw-v2-card > h2,
+.cw-v2-card > h3,
+.cw-priority-block > h1,
+.cw-priority-block > h2,
+.cw-priority-block > h3,
+.metric-card > h1,
+.metric-card > h2,
+.metric-card > h3,
+.cw-kpi-card > h1,
+.cw-kpi-card > h2,
+.cw-kpi-card > h3,
+.cw-menu-group > h1,
+.cw-menu-group > h2,
+.cw-menu-group > h3,
+.cw-list-block > h1,
+.cw-list-block > h2,
+.cw-list-block > h3,
+.cw-list-group > h1,
+.cw-list-group > h2,
+.cw-list-group > h3 {
+  margin: 0 0 var(--cw-space-2);
+  font-size: var(--cw-font-size-h3);
+  line-height: var(--cw-line-title);
+  font-weight: var(--cw-font-weight-bold);
 }
 
 .pill,

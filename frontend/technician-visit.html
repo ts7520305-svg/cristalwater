@@ -253,6 +253,11 @@
       flex: 0 0 auto;
     }
 
+    .cw-help-fab,
+    .cw-help-fab.cw-help-fab-quiet {
+      display: none;
+    }
+
     .visit-check strong {
       display: block;
       font-size: 16px;
@@ -510,6 +515,7 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="/ui/design-system.css">
 </head>
 
 <body class="cw-tech-visit-page" data-required-role="TECHNICIAN">
@@ -662,5 +668,6 @@
   <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
   <script src="/crystal-os-v2-shell.js"></script>
   <script src="/crystal-os-v2-nav.js"></script>
+  <script defer src="/ui/design-system.js"></script>
 </body>
 </html>

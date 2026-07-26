@@ -1,0 +1,50 @@
+[
+  {
+    "viewport": "1440x900",
+    "status": "200",
+    "jsErrors": 0,
+    "warnings": 0,
+    "failedRequests": 5,
+    "unexpectedFailedRequests": 5,
+    "horizScroll": false,
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "failedRequestUrls": [
+      "http://127.0.0.1:3002/ui/design-system.js",
+      "https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggexSg.woff2",
+      "https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggexSg.woff2",
+      "https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggexSg.woff2",
+      "https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggexSg.woff2"
+    ]
+  },
+  {
+    "viewport": "1024x1366",
+    "status": "200",
+    "jsErrors": 0,
+    "warnings": 0,
+    "failedRequests": 0,
+    "unexpectedFailedRequests": 0,
+    "horizScroll": false,
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "failedRequestUrls": []
+  },
+  {
+    "viewport": "390x844",
+    "status": "200",
+    "jsErrors": 0,
+    "warnings": 0,
+    "failedRequests": 5,
+    "unexpectedFailedRequests": 5,
+    "horizScroll": false,
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "failedRequestUrls": [
+      "http://127.0.0.1:3002/ui/design-system.js",
+      "https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggexSg.woff2",
+      "https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggexSg.woff2",
+      "https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggexSg.woff2",
+      "https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggexSg.woff2"
+    ]
+  }
+]

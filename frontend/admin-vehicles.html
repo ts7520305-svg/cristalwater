@@ -3,6 +3,58 @@
 </style>  <script src="/cw-auth.js"></script>
   <link rel="stylesheet" href="/ui/foundation.css">
   <style>html,body{overflow-x:hidden}</style>
+  <style>
+    body{
+      background:radial-gradient(circle at 10% 0%,#f2f8ff 0%,#eaf2fb 50%,#e3edf8 100%);
+      color:#1c2d3d;
+    }
+    header{
+      background:rgba(255,255,255,.92);
+      border-bottom:1px solid #cddaea;
+      color:#1c2d3d;
+    }
+    h1,h2,h3{color:#1c2d3d}
+    .muted{color:#56708b}
+    .panel{
+      background:#fff;
+      border:1px solid #cddaea;
+      box-shadow:0 10px 24px rgba(26,53,87,.08);
+    }
+    .card,.item-row>*,.file-picker,.document-note{
+      background:#f6faff;
+      border-color:#d7e4f1;
+      color:#1c2d3d;
+    }
+    .badge{background:#eef6ff;border-color:#c6d8eb;color:#466785}
+    input,select,textarea{
+      min-height:44px;
+      background:#f7fafd;
+      color:#1c2d3d;
+      border:1px solid #cddaea;
+    }
+    input:focus,select:focus,textarea:focus{
+      outline:2px solid #2492ec;
+      outline-offset:1px;
+      border-color:#2492ec;
+      background:#fff;
+    }
+    .btn,.links a{
+      min-height:44px;
+      min-width:44px;
+      border:1px solid #cddaea;
+      background:#fff;
+      color:#1c2d3d;
+    }
+    input[type="checkbox"]{width:20px;min-width:20px;height:20px;min-height:20px}
+    .panel label:has(input[type="checkbox"]) {display:inline-flex;align-items:center;gap:8px;min-height:44px}
+    .cw-help-fab,.cw-help-fab.cw-help-fab-quiet{display:none}
+    .btn.primary{background:linear-gradient(135deg,#1e79df,#32a6f2);border-color:#1e79df;color:#fff}
+    .btn.warn{background:#fff0d2;border-color:#e7c07a;color:#6b4300}
+    .table td,.table th{border-bottom:1px solid #e2eaf4;color:#1c2d3d}
+    .table th{color:#4f6883;background:#f3f8fe}
+    .cw-risk-global-item{display:flex;align-items:center;min-height:44px;padding:10px 12px}
+  </style>
+  <link rel="stylesheet" href="/ui/design-system.css">
 </head><body data-required-role="ADMIN">
 <header><div><h1>🚐 Frota, Guias e Stock</h1><div class="muted">Gestão de viaturas, guias AT, guias de obra, consumos e manutenção.</div></div><nav class="links"><a href="/admin-dashboard">Dashboard</a><a href="/admin-operational-settings">Configurações</a><a href="/technician-guide">Técnico</a><a href="/help-center?topic=vehicles">Ajuda</a></nav></header>
 <main>
@@ -12,6 +64,22 @@
 <section class="panel"><h2>Guias de Obra Abertas</h2><div class="form"><div><label>Viatura</label><select id="workVehicle"></select></div><div><label>Técnico ID</label><input id="workTech" type="number" placeholder="ID técnico"></div><div><label>Km início</label><input id="startKm" type="number"></div></div><br><button class="btn primary" onclick="startWorkGuide()">Iniciar dia / abrir guia de obra</button><p class="muted">Pode iniciar sem guia AT. O sistema cria o alerta "guia de transporte em falta" e associa a AT quando for adicionada.</p><div id="works"></div></section>
 <section class="panel"><h2>Movimentos e Manutenção</h2><div class="split"><div><h3>Consumir material</h3><div class="form full"><input id="consumeWork" placeholder="ID guia obra"><input id="consumeName" placeholder="Nome item"><input id="consumeQty" type="number" placeholder="Quantidade"><input id="consumeVisit" placeholder="ID visita opcional"></div><br><button class="btn warn" onclick="consume()">Registar consumo</button></div><div><h3>Manutenção</h3><div class="form full"><select id="maintVehicle"></select><select id="maintType"><option value="GENERAL">Manutenção</option><option value="INSURANCE">Seguro</option><option value="INSPECTION">Inspecao</option></select><input id="maintTitle" placeholder="Revisao / pneus / seguro"><input id="maintDue" type="date"><input id="maintKm" type="number" placeholder="Km"></div><br><button class="btn" onclick="createMaintenance()">Criar lembrete</button></div></div><div id="movements"></div></section>
 </main><script src="/admin-auth-guard.js"></script><script src="/cw-operational-risk.js?v=22.6.13-risk-jump" data-cw-operational-risk="1"></script><script src="/admin-vehicles.js?v=22.6.13-risk-jump"></script><script src="/cristal-help-data.js"></script><script src="/cristal-assist.js"></script><script src="/cw-admin-shortcuts.js"></script><script src="/ui/core/navigation-context.js"></script>
+  <script>
+    (function ensureAriaLabels() {
+      const controls = Array.from(document.querySelectorAll('input,select,textarea'));
+      controls.forEach((node) => {
+        if (node.type === 'hidden') return;
+        if (node.getAttribute('aria-label') || node.getAttribute('aria-labelledby')) return;
+
+        const byFor = node.id ? document.querySelector(`label[for="${node.id}"]`) : null;
+        const wrapperLabel = node.closest('label');
+        const siblingLabel = node.parentElement?.querySelector('label');
+        const text = (byFor?.textContent || wrapperLabel?.textContent || siblingLabel?.textContent || node.placeholder || node.name || node.id || '').trim();
+        if (text) node.setAttribute('aria-label', text);
+      });
+    })();
+  </script>
   <script src="/crystal-os-v2-shell.js"></script>
   <script src="/crystal-os-v2-nav.js"></script>
+  <script defer src="/ui/design-system.js"></script>
 </body></html>

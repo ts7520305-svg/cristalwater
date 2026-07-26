@@ -1,386 +1,210 @@
 <!doctype html>
 <html lang="pt">
-
 <head>
   <link rel="manifest" href="/manifest.webmanifest">
-  <meta name="theme-color" content="#050b16">
-
-<meta charset="utf-8">
-
-<title>
-  Admin - Visitas
-</title>
-
-<meta
-  name="viewport"
-  content="width=device-width, initial-scale=1.0"
->
-
-<style>
-
-*{
-  box-sizing:border-box;
-}
-
-html,
-body{
-  overflow-x:hidden;
-}
-
-body{
-
-  margin:0;
-
-  background:var(--cw-bg,#eef3f8);
-
-  color:var(--cw-text,#1f2937);
-}
-
-header{
-
-  background:var(--cw-surface,#ffffff);
-
-  padding:18px;
-
-  border-bottom:2px solid var(--cw-accent,#1e88e5);
-
-  display:flex;
-
-  justify-content:space-between;
-
-  align-items:center;
-
-  flex-wrap:wrap;
-
-  gap:15px;
-
-  position:sticky;
-
-  top:0;
-
-  z-index:999;
-}
-
-header h2{
-
-  margin:0;
-
-  color:var(--cw-accent,#1e88e5);
-}
-
-.topbar{
-
-  display:flex;
-
-  gap:10px;
-
-  flex-wrap:wrap;
-}
-
-button{
-
-  border:1px solid transparent;
-
-  border-radius:10px;
-
-  padding:10px 16px;
-
-  cursor:pointer;
-
-  font-weight:bold;
-}
-
-.refresh-btn{
-
-  background:var(--cw-accent,#1e88e5);
-
-  color:white;
-}
-
-.logout-btn{
-
-  background:#d32f2f;
-
-  color:white;
-}
-
-main{
-
-  padding:20px;
-}
-
-.filters{
-
-  background:var(--cw-surface,#ffffff);
-
-  padding:15px;
-
-  border-radius:14px;
-
-  margin-bottom:20px;
-
-  box-shadow:0 2px 8px rgba(0,0,0,.08);
-
-  display:flex;
-
-  gap:12px;
-
-  flex-wrap:wrap;
-}
-
-.filters input,
-.filters select{
-
-  padding:10px;
-
-  border-radius:8px;
-
-  border:1px solid var(--cw-border,#ccd8e3);
-}
-
-.card{
-
-  background:var(--cw-surface,#ffffff);
-
-  padding:18px;
-
-  margin-bottom:18px;
-
-  border-radius:14px;
-
-  box-shadow:0 2px 8px rgba(0,0,0,.08);
-
-  border-left:6px solid var(--cw-accent,#1e88e5);
-}
-
-.card.done{
-  border-left-color:#2e7d32;
-}
-
-.card.progress{
-  border-left-color:#ef6c00;
-}
-
-.card h3{
-
-  margin-top:0;
-
-  color:var(--cw-accent-strong,#1565c0);
-}
-
-.photos{
-
-  display:flex;
-
-  flex-wrap:wrap;
-
-  gap:10px;
-
-  margin-top:10px;
-}
-
-.photos img{
-
-  width:100px;
-
-  height:100px;
-
-  object-fit:cover;
-
-  border-radius:10px;
-
-  border:2px solid var(--cw-border-soft,#e7eff7);
-}
-
-.status{
-
-  font-weight:bold;
-
-  margin-top:10px;
-}
-
-.done-text{
-  color:#2e7d32;
-}
-
-.pending-text{
-  color:#ef6c00;
-}
-
-.grid{
-
-  display:grid;
-
-  grid-template-columns:
-    repeat(auto-fit,minmax(220px,1fr));
-
-  gap:12px;
-
-  margin-top:15px;
-}
-
-.box{
-
-  background:var(--cw-surface-2,#f8fbff);
-
-  border:1px solid var(--cw-border-soft,#d6e6f7);
-
-  border-radius:10px;
-
-  padding:12px;
-}
-
-.label{
-
-  font-size:12px;
-
-  color:var(--cw-muted,#607d8b);
-
-  margin-bottom:5px;
-}
-
-.value{
-
-  font-weight:bold;
-}
-
-.actions{
-
-  display:flex;
-
-  gap:10px;
-
-  flex-wrap:wrap;
-
-  margin-top:15px;
-}
-
-.report-btn{
-
-  background:var(--cw-accent-strong,#1565c0);
-
-  color:white;
-}
-
-@media(max-width:700px){
-
-  .filters{
-
-    flex-direction:column;
-  }
-
-  .actions{
-
-    flex-direction:column;
-  }
-
-  button{
-
-    width:100%;
-  }
-}
-
-@media (prefers-color-scheme: dark){
-  body{
-    background:var(--cw-bg,#0e1724);
-    color:var(--cw-text,#e8f1fa);
-  }
-
-  header,
-  .filters,
-  .card{
-    background:var(--cw-surface,#132238);
-  }
-
-  .filters input,
-  .filters select{
-    background:var(--cw-surface-2,#0f1c2e);
-    color:var(--cw-text,#e8f1fa);
-  }
-
-  .box{
-    background:var(--cw-surface-2,#0f1c2e);
-  }
-
-  .photos img{
-    border-color:var(--cw-border,#2a3a51);
-  }
-}
-
-</style>
-
-<link rel="stylesheet" href="/cristal-assist.css">
+  <meta name="theme-color" content="#0f1723">
+  <meta charset="utf-8">
+  <title>Painel Admin - Visitas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
   <link rel="stylesheet" href="/ui/foundation.css">
+  <link rel="stylesheet" href="/ui/design-system.css">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { overflow-x: hidden; }
+    body {
+      margin: 0;
+      color: var(--cw-text, #1f2937);
+      background: radial-gradient(circle at 10% 0%, #f0f7ff 0%, #ecf3fb 45%, #e7eef7 100%);
+    }
+
+    .page {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    .page-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .page-head h1 {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1.08;
+    }
+
+    .page-head p {
+      margin: 6px 0 0;
+      color: var(--cw-muted, #5f7388);
+    }
+
+    .page-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .cw-btn {
+      min-height: 44px;
+      border: 1px solid var(--cw-border, #c8d7e7);
+      border-radius: 12px;
+      padding: 10px 14px;
+      background: #fff;
+      color: var(--cw-text, #1f2937);
+      font-weight: 800;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .cw-btn.primary {
+      background: linear-gradient(135deg, #1f78e0, #22a2f2);
+      color: #fff;
+      border-color: #1f78e0;
+    }
+
+    .cw-btn.danger {
+      background: #c62828;
+      color: #fff;
+      border-color: #c62828;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(280px, 2fr) minmax(220px, 1fr);
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--cw-border, #c8d7e7);
+      border-radius: 14px;
+      background: #fff;
+      box-shadow: 0 6px 24px rgba(24, 45, 72, 0.08);
+      margin-bottom: 14px;
+    }
+
+    .toolbar input,
+    .toolbar select {
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 12px;
+      border: 1px solid var(--cw-border, #c8d7e7);
+      border-radius: 10px;
+      background: #f9fbfd;
+      color: var(--cw-text, #1f2937);
+    }
+
+    #visits {
+      display: grid;
+      gap: 12px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid var(--cw-border, #c8d7e7);
+      border-left-width: 6px;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 10px 26px rgba(24, 45, 72, 0.08);
+    }
+
+    .card.done { border-left-color: #1b8d4e; }
+    .card.progress { border-left-color: #e07b18; }
+
+    .card h3 {
+      margin: 0 0 10px;
+      color: #113c72;
+      font-size: 19px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .box {
+      border: 1px solid #d7e3ef;
+      border-radius: 12px;
+      background: #f6faff;
+      padding: 10px;
+    }
+
+    .label {
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      color: #5f7388;
+      margin-bottom: 4px;
+    }
+
+    .value { font-weight: 800; }
+    .done-text { color: #1b8d4e; }
+    .pending-text { color: #b9681d; }
+
+    .photos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .photos img {
+      width: 96px;
+      height: 96px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid #d7e3ef;
+      background: #eef4fb;
+    }
+
+    @media (max-width: 900px) {
+      .page { padding: 12px; }
+      .page-head { flex-direction: column; }
+      .toolbar { grid-template-columns: 1fr; }
+      .page-actions { width: 100%; }
+      .page-actions .cw-btn { flex: 1; }
+    }
+
+    .cw-help-fab,
+    .cw-help-fab.cw-help-fab-quiet {
+      display: none;
+    }
+  </style>
 </head>
-
 <body data-required-role="ADMIN">
+  <main class="page">
+    <section class="page-head">
+      <div>
+        <h1>Painel Admin - Visitas</h1>
+        <p>Monitorizacao operacional de visitas com estado, parametros e evidencias fotograficas.</p>
+      </div>
+      <div class="page-actions">
+        <button class="cw-btn" type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
+        <button class="cw-btn primary" id="refreshBtn" type="button">Atualizar</button>
+        <button class="cw-btn danger" id="logoutBtn" type="button">Sair</button>
+      </div>
+    </section>
 
-<header>
+    <section class="toolbar" aria-label="Filtros de visitas">
+      <input id="searchInput" placeholder="Pesquisar cliente, piscina, tecnico ou nota">
+      <select id="statusFilter" aria-label="Filtrar por estado">
+        <option value="">Todos os estados</option>
+        <option value="DONE">DONE</option>
+        <option value="IN_PROGRESS">IN PROGRESS</option>
+      </select>
+    </section>
 
-  <h2>
-    Painel Admin - Visitas
-  </h2>
-
-  <div class="topbar">
-
-    <button
-      class="refresh-btn"
-      type="button"
-      data-cw-back
-      data-cw-fallback="/admin-master-control"
-    >
-      Voltar
-    </button>
-
-    <button
-      class="refresh-btn"
-      id="refreshBtn"
-    >
-      Atualizar
-    </button>
-
-    <button
-      class="logout-btn"
-      id="logoutBtn"
-    >
-      Sair
-    </button>
-
-  </div>
-
-</header>
-
-<main>
-
-<div class="filters">
-
-  <input
-    id="searchInput"
-    placeholder="Pesquisar cliente/piscina"
-  >
-
-  <select id="statusFilter">
-
-    <option value="">
-      Todos estados
-    </option>
-
-    <option value="DONE">
-      DONE
-    </option>
-
-    <option value="IN_PROGRESS">
-      IN PROGRESS
-    </option>
-
-  </select>
-
-</div>
-
-<div id="visits"></div>
-
-</main>
+    <section id="visits" aria-live="polite"></section>
+  </main>
 
 <script src="/admin-auth-guard.js"></script>
 
@@ -393,5 +217,6 @@ main{
 <script src="/ui/core/navigation-context.js"></script>
   <script src="/crystal-os-v2-shell.js"></script>
   <script src="/crystal-os-v2-nav.js"></script>
+  <script defer src="/ui/design-system.js"></script>
 </body>
 </html>

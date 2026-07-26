@@ -1,0 +1,564 @@
+{
+  "ok": false,
+  "runId": "FCS14NAVEXAI_1784750986850_5xm9v",
+  "startedAt": "2026-07-22T20:09:46.850Z",
+  "baseUrl": "http://127.0.0.1:3002",
+  "excludedRoutes": [
+    "/admin-ai"
+  ],
+  "rows": [
+    {
+      "profile": "desktop",
+      "route": "/admin-alerts",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 429,
+      "title": "Cristal Water - Alertas"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-client-settings",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 376,
+      "title": "Cristal Water - Configuração por Cliente"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-clients",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 347,
+      "title": "Cristal Water LDA - Clientes"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-collection",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 408,
+      "title": "Cristal Water - Cobranças"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-command-center",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 463,
+      "title": "Cristal Water · Centro de Operações V2"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-company-closures",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 417,
+      "title": "Cristal Water • Encerramentos"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-crm",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 402,
+      "title": "Cristal Water - CRM e Lembretes"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-dashboard",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 502,
+      "title": "Cristal Water - Resumo Operacional"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-email-logs",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 395,
+      "title": "Cristal Water - Email Logs"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-inventory",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 406,
+      "title": "Cristal Water - Inventario e Stock"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-keys",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 322,
+      "title": "Chaves - Cristal Water LDA"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-live-map",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 387,
+      "title": "Cristal Water - Mapa em Tempo Real"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-login",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 315,
+      "title": "Login Administração"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-map",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 433,
+      "title": "Cristal Water - Mapa Operacional"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-master-control",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 390,
+      "title": "Cristal Water · Centro de Operações V2"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-menu",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 348,
+      "title": "Cristal Water · Menu Completo"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-notifications",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 398,
+      "title": "Admin Notificações - Cristal Water"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-onboarding",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 400,
+      "title": "Cristal Water LDA - Entrada Guiada"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-operational-settings",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 408,
+      "title": "Cristal Water · Central de Configurações"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-payment-settings",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 398,
+      "title": "Cristal Water - Configuração de Lembretes"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-payments",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 391,
+      "title": "Cristal Water - Pagamentos Admin"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-pool-calculator",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 422,
+      "title": "Cristal Water · Calculadora Técnica da Piscina"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-pool-technical",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 395,
+      "title": "Cristal Water LDA - Ficha Tecnica"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-pools",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 407,
+      "title": "Cristal Water LDA · Piscinas"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-priority",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 476,
+      "title": "Cristal Water - Prioridades Operacionais"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-reports",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 406,
+      "title": "Cristal Water - Relatorios Admin"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-rounds",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 843,
+      "title": "Cristal Water LDA - Rondas"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-security",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 1312,
+      "title": "Cristal Water · Segurança"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-service-log",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 768,
+      "title": "Cristal Water LDA - Registo Diario"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-suppliers",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 780,
+      "title": "Cristal Water - Fornecedores"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-technicians",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 547,
+      "title": "Cristal Water LDA - Tecnicos"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-today",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 452,
+      "title": "Cristal Water · Hoje"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-ui-settings",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 481,
+      "title": "Cristal Water · Configuração Visual"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-vehicles",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 445,
+      "title": "Cristal Water · Frota, Guias e Stock"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-visits-dashboard",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 367,
+      "title": "Painel Admin - Visitas"
+    },
+    {
+      "profile": "desktop",
+      "route": "/admin-visits",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 410,
+      "title": "Cristal Water LDA - Visitas"
+    },
+    {
+      "profile": "desktop",
+      "route": "/alerts-financial",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 393,
+      "title": "Cristal Water - Alertas Financeiros"
+    },
+    {
+      "profile": "desktop",
+      "route": "/alerts",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 397,
+      "title": "Cristal Water - Alertas Rapidos"
+    },
+    {
+      "profile": "desktop",
+      "route": "/billing-center",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 414,
+      "title": "Centro de Cobranças - Cristal Water"
+    },
+    {
+      "profile": "desktop",
+      "route": "/billing-extras",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 566,
+      "title": "Faturação Extras"
+    },
+    {
+      "profile": "desktop",
+      "route": "/billing-history",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 410,
+      "title": "Histórico Faturação"
+    },
+    {
+      "profile": "desktop",
+      "route": "/billing",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 419,
+      "title": "Cristal Water - Cobranças"
+    },
+    {
+      "profile": "desktop",
+      "route": "/chat",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 477,
+      "title": "Chat - Cristal Water"
+    },
+    {
+      "profile": "desktop",
+      "route": "/client-dashboard",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 381,
+      "title": "Cristal Water - Login Cliente"
+    },
+    {
+      "profile": "desktop",
+      "route": "/client-history",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 363,
+      "title": "Cristal Water - Login Cliente"
+    },
+    {
+      "profile": "desktop",
+      "route": "/client-login",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 345,
+      "title": "Cristal Water - Login Cliente"
+    },
+    {
+      "profile": "desktop",
+      "route": "/client-menu",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 375,
+      "title": "Cristal Water - Login Cliente"
+    },
+    {
+      "profile": "desktop",
+      "route": "/client-notifications",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 381,
+      "title": "Cristal Water - Login Cliente"
+    },
+    {
+      "profile": "desktop",
+      "route": "/client-payments",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 470,
+      "title": "Cristal Water - Login Cliente"
+    },
+    {
+      "profile": "desktop",
+      "route": "/client-portal",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 455,
+      "title": "Cristal Water - Login Cliente"
+    },
+    {
+      "profile": "desktop",
+      "route": "/client-wow",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 346,
+      "title": "Cristal Water - Login Cliente"
+    },
+    {
+      "profile": "desktop",
+      "route": "/client",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 417,
+      "title": "Cristal Water - Login Cliente"
+    },
+    {
+      "profile": "desktop",
+      "route": "/client_chat",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 460,
+      "title": "Cristal Water - Login Cliente"
+    },
+    {
+      "profile": "desktop",
+      "route": "/client_tech",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 428,
+      "title": "Cristal Water - Login Cliente"
+    },
+    {
+      "profile": "desktop",
+      "route": "/communications",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 439,
+      "title": "Histórico de Comunicações - Cristal Water"
+    },
+    {
+      "profile": "desktop",
+      "route": "/config-notifications",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 460,
+      "title": "Cristal Water - Login Cliente"
+    },
+    {
+      "profile": "desktop",
+      "route": "/crystal-os-v2-route-index",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 394,
+      "title": "Crystal OS V2 - Route Index"
+    },
+    {
+      "profile": "desktop",
+      "route": "/dashboard",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 459,
+      "title": "Dashboard Cristal Water"
+    },
+    {
+      "profile": "desktop",
+      "route": "/help-center",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 474,
+      "title": "Cristal Water - Login Cliente"
+    },
+    {
+      "profile": "desktop",
+      "route": "/incident-center",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 501,
+      "title": "Cristal Water - Centro de Incidentes"
+    },
+    {
+      "profile": "desktop",
+      "route": "/invoices",
+      "role": "ADMIN",
+      "ok": true,
+      "error": null,
+      "elapsedMs": 2276244,
+      "title": ""
+    }
+  ],
+  "runtime": {},
+  "totalRoutes": 86,
+  "finishedAt": "2026-07-22T20:48:16.620Z",
+  "error": "browser.newContext: Target page, context or browser has been closed"
+}

@@ -138,6 +138,63 @@
       border-color: #9ecfbe;
     }
 
+    .field-tile.primary .hero-label {
+      color: var(--cw-primary-2);
+      font-size: 12px;
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+    }
+
+    .field-tile.primary .field-cta-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .field-tile.primary .hero-action {
+      min-height: 44px;
+      border-radius: 12px;
+      border: 1px solid var(--cw-border);
+      background: rgba(255, 255, 255, 0.92);
+      color: var(--cw-text);
+      font-weight: 700;
+      font-size: 13px;
+      padding: 10px 12px;
+    }
+
+    .field-tile.primary .hero-action.primary {
+      border-color: var(--cw-primary);
+      background: var(--cw-primary);
+      color: #fff;
+    }
+
+    .field-tile.primary .hero-action.secondary {
+      background: rgba(255, 255, 255, 0.92);
+      color: #1f4d40;
+    }
+
+    .field-tile.primary.p0 {
+      background: #fff0f1;
+      border-color: #e6a2aa;
+    }
+
+    .field-tile.primary.p0 .hero-label {
+      color: #9e1f2c;
+    }
+
+    .field-tile.primary.p0 .hero-action.primary {
+      border-color: #b7212e;
+      background: #b7212e;
+      color: #fff;
+    }
+
+    .field-tile.primary .hero-action:hover {
+      border-color: var(--cw-primary);
+      color: var(--cw-primary-2);
+    }
+
     .field-tile.ok {
       background: #eef8f2;
       border-color: #9ecfae;
@@ -218,6 +275,23 @@
       box-shadow: 0 8px 22px rgba(16, 38, 32, 0.15);
     }
 
+    body.cw-tech-field-page[data-field-mode="free"] .field-panel-agora {
+      display: none !important;
+    }
+
+    body.cw-tech-field-page[data-field-mode="free"] .field-dashboard {
+      grid-template-columns: 1fr;
+    }
+
+    body.cw-tech-field-page[data-field-mode="free"] .field-dashboard .field-tile:not(.primary) {
+      display: none;
+    }
+
+    body.cw-tech-field-page[data-field-mode="free"] #routeCard,
+    body.cw-tech-field-page[data-field-mode="free"] #dayVisitsCard {
+      display: none;
+    }
+
     .field-action-sticky .actions {
       margin: 0;
     }
@@ -264,6 +338,20 @@
       border: 1px solid var(--cw-border);
       border-radius: 12px;
       padding: 10px;
+    }
+
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      cursor: pointer;
+    }
+
+    .check input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      flex: 0 0 20px;
     }
 
     .crew-info span,
@@ -438,26 +526,27 @@
       z-index: 70;
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 6px;
-      padding: 6px;
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.98);
+      gap: 5px;
+      padding: 5px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.86);
       border: 1px solid var(--cw-border);
-      box-shadow: 0 8px 22px rgba(16, 38, 32, 0.17);
+      box-shadow: 0 4px 14px rgba(16, 38, 32, 0.11);
+      backdrop-filter: blur(4px);
     }
 
     .field-tabs button {
-      min-height: 58px;
+      min-height: 44px;
       border-radius: 10px;
       border: 0;
-      background: #edf3f1;
-      color: #31544a;
-      font-size: 11px;
-      font-weight: 700;
+      background: rgba(237, 243, 241, 0.86);
+      color: #476b61;
+      font-size: 10px;
+      font-weight: 600;
     }
 
     .field-tabs button.active {
-      background: var(--cw-primary);
+      background: #166d4b;
       color: #fff;
     }
 
@@ -481,6 +570,96 @@
     .toast.show {
       opacity: 1;
       transform: translateY(0);
+    }
+
+    .pool-segments {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .pool-segments button {
+      min-height: 44px;
+      border-radius: 10px;
+      border: 1px solid var(--cw-border);
+      background: #fff;
+      color: var(--cw-text);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .pool-segments button.active {
+      background: var(--cw-primary);
+      border-color: var(--cw-primary);
+      color: #fff;
+    }
+
+    .visit-group {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .visit-group-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      color: var(--cw-muted);
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .visit-state {
+      font-size: 12px;
+      color: var(--cw-muted);
+      margin-top: 2px;
+      line-height: 1.35;
+    }
+
+    .interrupt-card {
+      border: 1px solid #efbbc5;
+      background: #fff0f2;
+      color: #6f1223;
+    }
+
+    .interrupt-card[hidden] {
+      display: none;
+    }
+
+    .interrupt-list {
+      display: grid;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .interrupt-item {
+      border: 1px solid rgba(183, 33, 46, 0.25);
+      border-radius: 10px;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.75);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .now-board {
+      border: 1px solid var(--cw-border);
+      border-radius: 12px;
+      padding: 10px;
+      margin-top: 10px;
+      background: #f7fbf9;
+      display: grid;
+      gap: 6px;
+    }
+
+    .now-board b {
+      font-size: 15px;
+    }
+
+    body[data-field-tab="hoje"] .field-panel:not(.field-panel-hoje),
+    body[data-field-tab="agora"] .field-panel:not(.field-panel-agora),
+    body[data-field-tab="docs"] .field-panel:not(.field-panel-docs),
+    body[data-field-tab="more"] .field-panel:not(.field-panel-more) {
+      display: none;
     }
 
     @media (max-width: 900px) {
@@ -536,8 +715,9 @@
     }
   </style>
   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+  <link rel="stylesheet" href="/ui/design-system.css">
 </head>
-<body class="cw-tech-field-page" data-field-tab="service" data-required-role="TECHNICIAN">
+<body class="cw-tech-field-page" data-field-tab="hoje" data-required-role="TECHNICIAN">
   <main class="field">
     <header class="top">
       <div class="top-row">
@@ -552,11 +732,16 @@
       </div>
     </header>
 
-    <section class="field-dashboard" aria-label="Resumo do dia em campo">
-      <div class="field-tile primary">
-        <span>Piscina atual</span>
+    <section class="field-dashboard field-panel field-panel-hoje" id="todayBoard" aria-label="Resumo do dia em campo">
+      <div class="field-tile primary" id="fieldHeroTile">
+        <span class="hero-label" id="fieldHeroLabel">Hoje</span>
         <b id="fieldFocusNow">A preparar ronda</b>
         <small id="fieldFocusMeta">Serviço atual e cliente aparecem aqui.</small>
+        <div class="field-cta-row" id="fieldHeroActions">
+          <button type="button" class="hero-action" data-hero-action="refresh">Atualizar</button>
+          <button type="button" class="hero-action" data-hero-action="agenda">Ver agenda</button>
+          <button type="button" class="hero-action" data-hero-action="contact">Comunicar</button>
+        </div>
       </div>
       <div class="field-tile" id="fieldProgressTile">
         <span>Progresso</span>
@@ -575,7 +760,13 @@
       </div>
     </section>
 
-    <section class="field-action-sticky" aria-label="Ações principais da visita">
+    <section class="card interrupt-card field-panel field-panel-hoje" id="interruptCard" hidden>
+      <span class="chip">Interrupção operacional</span>
+      <div class="muted" id="interruptSummary" style="margin-top:8px">Sem alertas críticos neste momento.</div>
+      <div class="interrupt-list" id="interruptList"></div>
+    </section>
+
+    <section class="field-action-sticky field-panel field-panel-agora" aria-label="Ações principais da visita">
       <div class="muted" style="margin-bottom:8px">Fluxo recomendado: iniciar visita -> registar água e produtos -> fotografias -> concluir.</div>
       <div class="actions">
         <button class="big ok" id="startBtn" type="button">Iniciar visita</button>
@@ -583,14 +774,19 @@
       </div>
     </section>
 
-    <section class="card next field-panel field-panel-service">
+    <section class="card next field-panel field-panel-agora">
       <span class="chip">Visita atual</span>
       <div class="title" id="nextTitle">A carregar...</div>
       <div class="muted" id="nextMeta"></div>
+      <div class="now-board" id="nowBoard">
+        <b id="nowStateLine">Em intervenção</b>
+        <span class="muted" id="nowResponsibleLine">Responsável por confirmar</span>
+        <span class="muted" id="nowTimingLine">Sem tempo em curso</span>
+      </div>
       <div class="visit-notice-strip" id="visitNoticeStrip" hidden></div>
     </section>
 
-    <section class="card crew-card field-panel field-panel-service" aria-label="Identificação e documentos do técnico">
+    <section class="card crew-card field-panel field-panel-agora" aria-label="Identificação e documentos do técnico">
       <div class="crew-head">
         <div>
           <span class="chip">Técnico e viatura</span>
@@ -627,10 +823,34 @@
             <small id="fieldWorkGuideMeta">Guia de obra por abrir.</small>
           </div>
         </div>
+        <div class="crew-doc-status warn" id="fieldInsuranceStatus">
+          <i class="signal" aria-hidden="true"></i>
+          <div>
+            <span class="label">Seguro</span>
+            <b id="fieldInsuranceValue">Pendente</b>
+            <small id="fieldInsuranceMeta">Seguro da viatura por validar.</small>
+          </div>
+        </div>
+        <div class="crew-doc-status warn" id="fieldInspectionStatus">
+          <i class="signal" aria-hidden="true"></i>
+          <div>
+            <span class="label">Inspeção</span>
+            <b id="fieldInspectionValue">Indisponível</b>
+            <small id="fieldInspectionMeta">Sem inspeção visível para esta viatura.</small>
+          </div>
+        </div>
+        <div class="crew-doc-status warn" id="fieldSafetyStatus">
+          <i class="signal" aria-hidden="true"></i>
+          <div>
+            <span class="label">Fichas e manuais</span>
+            <b id="fieldSafetyValue">Pendente</b>
+            <small id="fieldSafetyMeta">Fichas de segurança/manuais por confirmar.</small>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section class="card service-summary-card field-panel field-panel-service" id="correctionSummaryCard" hidden>
+    <section class="card service-summary-card field-panel field-panel-agora" id="correctionSummaryCard" hidden>
       <div class="service-summary-head">
         <div>
           <span class="chip">Registo guardado</span>
@@ -641,12 +861,12 @@
       <div id="correctionSummary"></div>
     </section>
 
-    <section class="card access-card field-panel field-panel-service" id="accessCard">
+    <section class="card access-card field-panel field-panel-agora" id="accessCard">
       <span class="chip">Acesso e avisos</span>
       <div class="access-list" id="accessList"><div class="empty">A carregar chave ou código desta piscina...</div></div>
     </section>
 
-    <section class="card route-card field-panel field-panel-route" id="routeCard">
+    <section class="card route-card field-panel field-panel-hoje" id="routeCard">
       <span class="chip">Próximo local</span>
       <div class="title" id="routeTitle">Mapa da próxima piscina</div>
       <div class="muted" id="routeSummary">A carregar localização do serviço atribuído...</div>
@@ -697,7 +917,7 @@
       </div>
     </section>
 
-    <section class="card cleaning-card field-panel field-panel-service" id="cleaningCard" aria-label="Registo rápido de parâmetros">
+    <section class="card cleaning-card field-panel field-panel-agora" id="cleaningCard" aria-label="Registo rápido de parâmetros">
       <span class="chip">Limpeza da piscina</span>
       <div class="muted" style="margin:8px 0">Marque apenas o que foi executado na visita atual.</div>
       <div class="checks">
@@ -735,7 +955,7 @@
       </div>
     </section>
 
-    <section class="card dose-card field-panel field-panel-service" aria-label="Produtos utilizados">
+    <section class="card dose-card field-panel field-panel-agora" aria-label="Produtos utilizados">
       <span class="chip">Produtos usados</span>
       <div class="dose-list" id="doseRows"><div class="dose-empty">Sem produtos adicionados nesta visita.</div></div>
       <div class="dose-footer">
@@ -744,7 +964,7 @@
       </div>
     </section>
 
-    <section class="card photo-card field-panel field-panel-service" aria-label="Fotografias da visita">
+    <section class="card photo-card field-panel field-panel-agora" aria-label="Fotografias da visita">
       <span class="chip">Fotografias</span>
       <input id="photoInput" type="file" accept="image/*" capture="environment" hidden>
       <div class="photo-actions">
@@ -756,8 +976,13 @@
       <div class="actions"><button class="big ghost" id="syncPhotosBtn" type="button">Sincronizar fotografias</button></div>
     </section>
 
-    <section class="card field-panel field-panel-list">
-      <span class="chip">Ronda de hoje</span>
+    <section class="card field-panel field-panel-hoje" id="dayVisitsCard">
+      <span class="chip">Piscinas do dia</span>
+      <div class="pool-segments" id="poolSegments" role="tablist" aria-label="Estado das piscinas">
+        <button type="button" class="active" data-pool-filter="TODO">Por fazer</button>
+        <button type="button" data-pool-filter="IN_PROGRESS">Em curso</button>
+        <button type="button" data-pool-filter="DONE">Concluídas</button>
+      </div>
       <div id="visitList" style="margin-top:10px"></div>
     </section>
 
@@ -801,7 +1026,7 @@
       </div>
       <div class="actions">
         <button class="big" id="loadGuidesBtn" type="button">Mostrar documentos</button>
-        <a class="big ghost doc-btn" href="/technician-guide">Gestão de guias</a>
+        <a class="big ghost doc-btn" href="/technician-guide">Consultar guias</a>
       </div>
       <div class="doc-grid">
         <div class="doc-card" id="transportGuideBox">
@@ -815,6 +1040,34 @@
         <div class="doc-card" id="insuranceBox">
           <div class="doc-number">Seguro da viatura</div>
           <div class="muted">Carregue as guias para ver seguro, validade e ficha PDF da viatura.</div>
+        </div>
+        <div class="doc-card" id="documentCenterBox">
+          <div class="doc-number">Centro documental</div>
+          <div class="muted">Resumo de estados: válido, pendente, expirado ou indisponível.</div>
+        </div>
+        <div class="doc-card" id="technicalProposalBox">
+          <div class="doc-number">Proposta de alteração técnica</div>
+          <div class="muted">Regista a proposta com motivo obrigatório. Campos com impacto operacional seguem para aprovação.</div>
+          <div class="doc-tools" style="margin-top:10px">
+            <select id="proposalRiskLevel" aria-label="Nível de risco da proposta">
+              <option value="">Risco automático</option>
+              <option value="LOW">Baixo risco</option>
+              <option value="MEDIUM">Médio</option>
+              <option value="HIGH">Alto</option>
+            </select>
+            <input id="proposalFieldName" placeholder="Campo (ex: pumpPower)">
+          </div>
+          <div class="doc-tools" style="margin-top:8px">
+            <input id="proposalBeforeValue" placeholder="Antes">
+            <input id="proposalAfterValue" placeholder="Depois">
+          </div>
+          <textarea id="proposalReason" placeholder="Motivo obrigatório da alteração" style="margin-top:8px;min-height:84px"></textarea>
+          <textarea id="proposalPhotos" placeholder="Fotos opcionais (uma URL por linha)" style="margin-top:8px;min-height:64px"></textarea>
+          <div class="actions" style="margin-top:8px">
+            <button class="big" id="submitTechnicalProposalBtn" type="button">Submeter proposta</button>
+          </div>
+          <div class="muted" id="technicalProposalStatus" style="margin-top:8px"></div>
+          <div class="muted" id="technicalProposalList" style="margin-top:8px">Sem propostas desta piscina nesta sessão.</div>
         </div>
       </div>
 
@@ -834,10 +1087,11 @@
         <details class="cw-v2-nav-group" open>
           <summary>Operação diária</summary>
           <div class="cw-v2-nav-links cw-v2-nav">
-            <a href="/technician-field-mode" data-shell-search="Today">Today</a>
-            <a href="/technician-route" data-shell-search="Route">Route</a>
-            <a href="/technician-visit" data-shell-search="Visit">Visit</a>
-            <a href="/admin-alerts" data-shell-search="Alerts">Alerts</a>
+            <a href="/technician-field-mode" data-shell-search="Hoje">Hoje</a>
+            <a href="/technician-field-mode#agora" data-shell-search="Agora">Agora</a>
+            <a href="/technician-map" data-shell-search="Mapa">Mapa</a>
+            <a href="/technician-field-mode#docs" data-shell-search="Documentos">Documentos</a>
+            <a href="/technician-field-mode#more" data-shell-search="Mais">Mais</a>
           </div>
         </details>
         <details class="cw-v2-nav-group" open>
@@ -868,5 +1122,6 @@
   <script src="/ui/core/navigation-context.js"></script>
   <script src="/crystal-os-v2-shell.js"></script>
   <script src="/crystal-os-v2-nav.js"></script>
+  <script defer src="/ui/design-system.js"></script>
 </body>
 </html>

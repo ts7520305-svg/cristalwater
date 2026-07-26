@@ -1,0 +1,134 @@
+[
+  {
+    "page": "admin-pool-technical",
+    "viewport": "1440x900",
+    "status": "200",
+    "jsErrors": 0,
+    "warnings": 0,
+    "unexpectedFailedRequests": 0,
+    "horizScroll": false,
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0
+  },
+  {
+    "page": "admin-pool-technical",
+    "viewport": "1024x1366",
+    "status": "200",
+    "jsErrors": 0,
+    "warnings": 0,
+    "unexpectedFailedRequests": 0,
+    "horizScroll": false,
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0
+  },
+  {
+    "page": "admin-pool-technical",
+    "viewport": "390x844",
+    "status": "200",
+    "jsErrors": 0,
+    "warnings": 0,
+    "unexpectedFailedRequests": 0,
+    "horizScroll": false,
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0
+  },
+  {
+    "page": "admin-keys",
+    "viewport": "1440x900",
+    "status": "200",
+    "jsErrors": 0,
+    "warnings": 0,
+    "unexpectedFailedRequests": 0,
+    "horizScroll": false,
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0
+  },
+  {
+    "page": "admin-keys",
+    "viewport": "1024x1366",
+    "status": "200",
+    "jsErrors": 0,
+    "warnings": 0,
+    "unexpectedFailedRequests": 0,
+    "horizScroll": false,
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0
+  },
+  {
+    "page": "admin-keys",
+    "viewport": "390x844",
+    "status": "200",
+    "jsErrors": 0,
+    "warnings": 0,
+    "unexpectedFailedRequests": 0,
+    "horizScroll": false,
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0
+  },
+  {
+    "page": "admin-vehicles",
+    "viewport": "1440x900",
+    "status": "200",
+    "jsErrors": 0,
+    "warnings": 0,
+    "unexpectedFailedRequests": 0,
+    "horizScroll": false,
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0
+  },
+  {
+    "page": "admin-vehicles",
+    "viewport": "1024x1366",
+    "status": "200",
+    "jsErrors": 0,
+    "warnings": 0,
+    "unexpectedFailedRequests": 0,
+    "horizScroll": false,
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0
+  },
+  {
+    "page": "admin-vehicles",
+    "viewport": "390x844",
+    "status": "200",
+    "jsErrors": 0,
+    "warnings": 0,
+    "unexpectedFailedRequests": 0,
+    "horizScroll": false,
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0
+  },
+  {
+    "page": "technician-guide",
+    "viewport": "1440x900",
+    "status": "200",
+    "jsErrors": 0,
+    "warnings": 0,
+    "unexpectedFailedRequests": 0,
+    "horizScroll": false,
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0
+  },
+  {
+    "page": "technician-guide",
+    "viewport": "1024x1366",
+    "status": "200",
+    "jsErrors": 0,
+    "warnings": 0,
+    "unexpectedFailedRequests": 0,
+    "horizScroll": false,
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0
+  },
+  {
+    "page": "technician-guide",
+    "viewport": "390x844",
+    "status": "200",
+    "jsErrors": 0,
+    "warnings": 0,
+    "unexpectedFailedRequests": 0,
+    "horizScroll": false,
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0
+  }
+]

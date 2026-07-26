@@ -1,16 +1,37 @@
 (function () {
+  if (window.__CW_V2_SHELL__) return;
+  window.__CW_V2_SHELL__ = true;
+
   const searchInput = document.querySelector('[data-cw-search-input]');
   const searchResults = document.querySelector('[data-cw-search-results]');
   const indicator = document.querySelector('[data-offline-indicator]');
-  const drawer = document.querySelector('[data-cw-drawer]');
+
+  function loadStateAdapter() {
+    if (window.CWV2StateAdapter?.start) {
+      window.CWV2StateAdapter.start();
+      return;
+    }
+    if (document.querySelector('script[data-cw-v2-state-adapter="1"]')) return;
+    const script = document.createElement('script');
+    script.src = '/ui/state-adapter-v2.js';
+    script.defer = true;
+    script.dataset.cwV2StateAdapter = '1';
+    document.body.appendChild(script);
+  }
+
+  function getDrawer() {
+    return document.querySelector('[data-cw-drawer], .cw-v2-drawer');
+  }
 
   function closeDrawer() {
+    const drawer = getDrawer();
     if (!drawer) return;
     drawer.classList.remove('is-open');
     drawer.setAttribute('aria-hidden', 'true');
   }
 
   function openDrawer() {
+    const drawer = getDrawer();
     if (!drawer) return;
     drawer.classList.add('is-open');
     drawer.setAttribute('aria-hidden', 'false');
@@ -74,20 +95,26 @@
     });
   }
 
-  document.querySelectorAll('[data-cw-open-drawer]').forEach((button) => {
-    button.addEventListener('click', openDrawer);
-  });
+  document.addEventListener('click', (event) => {
+    const openTrigger = event.target.closest('[data-cw-open-drawer]');
+    if (openTrigger) {
+      event.preventDefault();
+      openDrawer();
+      return;
+    }
 
-  document.querySelectorAll('[data-cw-close-drawer]').forEach((button) => {
-    button.addEventListener('click', closeDrawer);
-  });
+    const closeTrigger = event.target.closest('[data-cw-close-drawer], [data-cw-drawer-backdrop], .cw-v2-drawer-backdrop');
+    if (closeTrigger) {
+      event.preventDefault();
+      closeDrawer();
+      return;
+    }
 
-  if (drawer) {
-    drawer.addEventListener('click', (event) => {
-      if (event.target.hasAttribute('data-cw-drawer-backdrop')) closeDrawer();
-      if (event.target.closest('a')) closeDrawer();
-    });
-  }
+    const drawer = getDrawer();
+    if (!drawer) return;
+    if (!drawer.contains(event.target)) return;
+    if (event.target.closest('a[href]')) closeDrawer();
+  });
 
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') closeDrawer();
@@ -96,4 +123,5 @@
   window.addEventListener('online', updateConnectionState);
   window.addEventListener('offline', updateConnectionState);
   updateConnectionState();
+  loadStateAdapter();
 })();

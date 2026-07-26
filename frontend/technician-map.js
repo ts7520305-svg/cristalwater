@@ -2,11 +2,14 @@ const API = "/api";
 
 const loadBtn = document.getElementById("loadBtn");
 const nextBtn = document.getElementById("nextBtn");
+const returnFieldBtn = document.getElementById("returnFieldBtn");
 const statusBox = document.getElementById("statusBox");
 const infoBox = document.getElementById("infoBox");
 const visitList = document.getElementById("visitList");
 const googleLink = document.getElementById("googleLink");
 const wazeLink = document.getElementById("wazeLink");
+
+const RETURN_FALLBACK = "/technician-field-mode";
 
 let route = [];
 let currentIndex = 0;
@@ -32,6 +35,51 @@ function setStatus(message, tone = "") {
   statusBox.textContent = message;
   if (tone) statusBox.dataset.tone = tone;
   else statusBox.removeAttribute("data-tone");
+}
+
+function normalizeTab(value) {
+  const safe = String(value || "").toLowerCase();
+  return ["hoje", "agora", "docs", "more"].includes(safe) ? safe : "hoje";
+}
+
+function normalizeFilter(value) {
+  const safe = String(value || "").toUpperCase();
+  return ["TODO", "IN_PROGRESS", "DONE"].includes(safe) ? safe : "TODO";
+}
+
+function sanitizeReturnTo(value) {
+  const text = String(value || "").trim();
+  if (!text.startsWith("/")) return RETURN_FALLBACK;
+  if (!text.startsWith("/technician-field-mode")) return RETURN_FALLBACK;
+  return text;
+}
+
+function returnContextFromUrl() {
+  const params = new URLSearchParams(window.location.search || "");
+  return {
+    returnTo: sanitizeReturnTo(params.get("returnTo") || RETURN_FALLBACK),
+    activeTab: normalizeTab(params.get("activeTab")),
+    activeFilter: normalizeFilter(params.get("activeFilter")),
+    selectedVisitId: String(params.get("selectedVisitId") || ""),
+    scrollY: Number.isFinite(Number(params.get("scrollY"))) ? Math.max(0, Number(params.get("scrollY"))) : 0,
+  };
+}
+
+function returnUrlWithContext() {
+  const context = returnContextFromUrl();
+  const target = new URL(context.returnTo, window.location.origin);
+  target.searchParams.set("activeTab", context.activeTab);
+  target.searchParams.set("activeFilter", context.activeFilter);
+  if (context.selectedVisitId) target.searchParams.set("selectedVisitId", context.selectedVisitId);
+  if (context.scrollY > 0) target.searchParams.set("scrollY", String(context.scrollY));
+  return `${target.pathname}${target.search}${target.hash}`;
+}
+
+function setupReturnButton() {
+  if (!returnFieldBtn) return;
+  returnFieldBtn.addEventListener("click", () => {
+    window.location.href = returnUrlWithContext();
+  });
 }
 
 function escapeHtml(value) {
@@ -224,6 +272,7 @@ async function loadToday() {
 
 if (loadBtn) loadBtn.addEventListener("click", loadToday);
 if (nextBtn) nextBtn.addEventListener("click", nextPool);
+setupReturnButton();
 
 window.loadToday = loadToday;
 window.nextPool = nextPool;

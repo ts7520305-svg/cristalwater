@@ -7,43 +7,46 @@
   <script src="/cw-auth.js"></script>
   <link rel="stylesheet" href="/ui/foundation.css">
   <style>
-    :root { --bg:#06111f; --panel:#0d1d31; --line:#24415f; --txt:#e9f5ff; --muted:#8fb1cc; --input:#091829; }
-    * { box-sizing:border-box; }
     html, body { overflow-x: hidden; }
-    body { margin:0; background:linear-gradient(120deg,#06111f,#0b1f33 55%,#06111f); color:var(--txt); font-family:Inter,Segoe UI,Arial,sans-serif; }
-    main.page { padding:20px; max-width:1500px; margin:0 auto; }
-    .page-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:14px; }
+    body { margin:0; }
+    main.page { padding:20px; max-width:1320px; margin:0 auto; display:grid; gap:14px; }
+    .page-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
     .page-head h1 { margin:0; }
-    .page-head p { margin:6px 0 0; color:var(--muted); }
+    .page-head p { margin:6px 0 0; color:var(--ds-text-muted); }
     .grid { display:grid; gap:14px; }
     .cols2 { grid-template-columns:minmax(360px,1fr) minmax(360px,1fr); }
-    .card { background:rgba(13,29,49,.92); border:1px solid var(--line); border-radius:18px; padding:16px; box-shadow:0 18px 48px rgba(0,0,0,.2); }
-    .card h2 { margin:0 0 10px; }
-    .muted { color:var(--muted); font-size:13px; }
+    .card h2 { margin:0 0 10px; color:var(--ds-text); }
+    .muted, .text-muted { color:var(--ds-text-muted); font-size:13px; }
     .row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
     .items-grid { display:grid; gap:8px; }
-    input,select,textarea { width:100%; border:1px solid var(--line); border-radius:12px; background:var(--input); color:var(--txt); padding:10px; }
     .actions { display:flex; gap:8px; flex-wrap:wrap; }
-    button,.btn { border:0; border-radius:12px; padding:10px 14px; background:#163354; color:var(--txt); font-weight:800; cursor:pointer; text-decoration:none; }
-    .primary { background:linear-gradient(135deg,#0584c7,#35d1ff); color:#03121c; }
-    .status { border:1px solid rgba(53,217,255,.25); background:rgba(53,217,255,.08); border-radius:12px; padding:10px 12px; color:#cfe9ff; margin:8px 0; }
-    .status.error { border-color:rgba(255,107,107,.45); background:rgba(255,107,107,.12); color:#ffe3e8; }
-    .status.ok { border-color:rgba(64,230,160,.4); background:rgba(64,230,160,.1); color:#e1fff1; }
     .list { display:grid; gap:8px; }
-    .item { background:#0a1b2e; border:1px solid var(--line); border-radius:12px; padding:10px; }
+    .item { background:var(--ds-surface-soft); border:1px solid var(--ds-border); border-radius:12px; padding:10px; }
+    .field-stack {
+      display:grid;
+      gap:8px;
+    }
+    .field-stack label {
+      font-size:12px;
+      font-weight:800;
+      color:var(--ds-text-muted);
+    }
     .section-gap { margin-top:14px; }
     @media (max-width:1040px) { .cols2,.row { grid-template-columns:1fr; } }
   </style>
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+  <link rel="stylesheet" href="/ui/design-system.css">
 </head>
 <body data-required-role="ADMIN">
   <main class="page">
-    <div class="page-head">
+    <header class="card page-head">
       <div>
         <h1>Inventario e Stock</h1>
-        <p>Entradas, transferencias para viatura, consumos e historico de movimentos.</p>
+        <p class="text-muted">Entradas, transferencias para viatura, consumos e historico de movimentos.</p>
       </div>
-      <div class="actions"><a class="btn" href="/admin-master-control">Centro de Operacoes</a></div>
-    </div>
+      <div class="actions"><a class="cw-v2-btn" href="/admin-master-control">Centro de Operacoes</a></div>
+    </header>
 
     <div id="inventoryStatus" class="status" role="status" aria-live="polite">A carregar inventario...</div>
 
@@ -51,18 +54,33 @@
       <section class="card">
         <h2>Entrada de stock por fatura</h2>
         <form id="purchaseForm" class="items-grid">
-          <input name="supplierName" placeholder="Fornecedor" required>
-          <input name="invoiceNumber" placeholder="N. fatura / documento">
-          <div class="row">
-            <input name="invoiceDate" type="date">
-            <input name="totalAmount" type="number" step="0.01" placeholder="Total EUR">
+          <div class="field-stack">
+            <label for="supplierName">Fornecedor</label>
+            <input id="supplierName" name="supplierName" placeholder="Fornecedor" required>
           </div>
-          <input name="document" type="file" accept=".pdf,.jpg,.jpeg,.png">
+          <div class="field-stack">
+            <label for="invoiceNumber">Numero da fatura ou documento</label>
+            <input id="invoiceNumber" name="invoiceNumber" placeholder="N. fatura / documento">
+          </div>
+          <div class="row">
+            <div class="field-stack">
+              <label for="invoiceDate">Data da fatura</label>
+              <input id="invoiceDate" name="invoiceDate" type="date">
+            </div>
+            <div class="field-stack">
+              <label for="totalAmount">Total em euros</label>
+              <input id="totalAmount" name="totalAmount" type="number" step="0.01" placeholder="Total EUR">
+            </div>
+          </div>
+          <div class="field-stack">
+            <label for="document">Documento anexo</label>
+            <input id="document" name="document" type="file" accept=".pdf,.jpg,.jpeg,.png">
+          </div>
           <h3>Produtos</h3>
           <div id="items" class="items-grid"></div>
           <div class="actions">
             <button type="button" onclick="addRow()">+ Produto</button>
-            <button class="primary" type="submit">Guardar entrada</button>
+            <button class="cw-v2-btn primary" type="submit">Guardar entrada</button>
           </div>
         </form>
       </section>
@@ -70,24 +88,51 @@
       <section class="card">
         <h2>Transferencia para viatura</h2>
         <form id="transferForm" class="items-grid">
-          <input name="vehicleId" type="number" placeholder="ID da viatura" required>
-          <input name="productName" placeholder="Produto" required>
-          <div class="row">
-            <input name="quantity" type="number" step="0.01" placeholder="Quantidade" required>
-            <input name="unit" value="KG">
+          <div class="field-stack">
+            <label for="transferVehicleId">ID da viatura</label>
+            <input id="transferVehicleId" name="vehicleId" type="number" placeholder="ID da viatura" required>
           </div>
-          <button class="primary" type="submit">Transferir</button>
+          <div class="field-stack">
+            <label for="transferProductName">Produto</label>
+            <input id="transferProductName" name="productName" placeholder="Produto" required>
+          </div>
+          <div class="row">
+            <div class="field-stack">
+              <label for="transferQuantity">Quantidade</label>
+              <input id="transferQuantity" name="quantity" type="number" step="0.01" placeholder="Quantidade" required>
+            </div>
+            <div class="field-stack">
+              <label for="transferUnit">Unidade</label>
+              <input id="transferUnit" name="unit" value="KG">
+            </div>
+          </div>
+          <button class="cw-v2-btn primary" type="submit">Transferir</button>
         </form>
 
         <h2 class="section-gap">Consumo manual</h2>
         <form id="consumeForm" class="items-grid">
-          <input name="vehicleId" type="number" placeholder="ID viatura" required>
-          <input name="productName" placeholder="Produto" required>
-          <div class="row">
-            <input name="quantity" type="number" step="0.01" placeholder="Quantidade" required>
-            <input name="unit" value="KG">
+          <div class="field-stack">
+            <label for="consumeVehicleId">ID da viatura</label>
+            <input id="consumeVehicleId" name="vehicleId" type="number" placeholder="ID viatura" required>
           </div>
-          <input name="workGuideId" type="number" placeholder="ID guia obra opcional">
+          <div class="field-stack">
+            <label for="consumeProductName">Produto</label>
+            <input id="consumeProductName" name="productName" placeholder="Produto" required>
+          </div>
+          <div class="row">
+            <div class="field-stack">
+              <label for="consumeQuantity">Quantidade</label>
+              <input id="consumeQuantity" name="quantity" type="number" step="0.01" placeholder="Quantidade" required>
+            </div>
+            <div class="field-stack">
+              <label for="consumeUnit">Unidade</label>
+              <input id="consumeUnit" name="unit" value="KG">
+            </div>
+          </div>
+          <div class="field-stack">
+            <label for="workGuideId">ID guia de obra opcional</label>
+            <input id="workGuideId" name="workGuideId" type="number" placeholder="ID guia obra opcional">
+          </div>
           <button type="submit">Registar saida</button>
         </form>
       </section>
@@ -109,9 +154,9 @@
   <script src="/admin-inventory.js"></script>
   <script src="/cristal-help-data.js"></script>
   <script src="/cristal-assist.js"></script>
-  <script src="/cw-os-admin-shell.js"></script>
   <script src="/ui/core/navigation-context.js"></script>
   <script src="/crystal-os-v2-shell.js"></script>
   <script src="/crystal-os-v2-nav.js"></script>
+  <script defer src="/ui/design-system.js"></script>
 </body>
 </html>

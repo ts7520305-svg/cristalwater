@@ -1,0 +1,1386 @@
+diff --git a/frontend/admin-clients.html b/frontend/admin-clients.html
+index 355bc10..88c69d6 100644
+--- a/frontend/admin-clients.html
++++ b/frontend/admin-clients.html
+@@ -5,36 +5,20 @@
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+   <title>Cristal Water LDA - Clientes</title>
+   <script src="/cw-auth.js"></script>
++  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
++  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+   <link rel="stylesheet" href="/ui/foundation.css">
+   <style>
+-    :root {
+-      --bg: #06111f;
+-      --panel: #0d1d31;
+-      --line: #24415f;
+-      --txt: #e9f5ff;
+-      --muted: #8fb1cc;
+-      --brand: #35d1ff;
+-      --ok: #40e6a0;
+-      --warn: #ffd166;
+-      --bad: #ff6b6b;
+-      --input: #091829;
+-    }
+-
+     * { box-sizing: border-box; }
+ 
+     html, body { overflow-x: hidden; }
+ 
+-    body {
+-      margin: 0;
+-      background: linear-gradient(120deg, #06111f, #0b1f33 55%, #06111f);
+-      color: var(--txt);
+-      font-family: Inter, Segoe UI, Arial, sans-serif;
+-    }
++    body { margin: 0; }
+ 
+     main.page {
+       padding: 24px;
+-      max-width: 1680px;
+-      margin: 0 auto;
++      display: grid;
++      gap: 16px;
+     }
+ 
+     .page-head {
+@@ -51,7 +35,7 @@
+ 
+     .page-head p {
+       margin: 6px 0 0;
+-      color: var(--muted);
++      color: var(--ds-text-muted);
+     }
+ 
+     .grid {
+@@ -64,83 +48,39 @@
+     }
+ 
+     .card {
+-      background: rgba(13, 29, 49, .92);
+-      border: 1px solid var(--line);
+-      border-radius: 22px;
+       padding: 18px;
+-      box-shadow: 0 20px 60px rgba(0, 0, 0, .22);
+     }
+ 
+     .muted {
+-      color: var(--muted);
++      color: var(--ds-text-muted);
+       font-size: 13px;
+     }
+ 
+     .feedback {
+-      margin: 0 auto 16px;
+-      max-width: 1680px;
++      margin: 0 auto;
+       padding: 12px 16px;
+-      border-radius: 16px;
+-      border: 1px solid rgba(125, 211, 252, .24);
+-      background: rgba(10, 27, 46, .8);
+-      color: var(--txt);
+       display: none;
+     }
+ 
+     .feedback[data-tone="success"] {
+-      border-color: rgba(64, 230, 160, .35);
+-      background: rgba(14, 56, 38, .76);
++      background: #f2faf5;
++      color: #185c33;
+     }
+ 
+     .feedback[data-tone="error"] {
+-      border-color: rgba(255, 107, 107, .45);
+-      background: rgba(70, 20, 20, .82);
++      background: #fff5f5;
++      color: #7f2326;
+     }
+ 
+     .feedback[data-tone="warning"] {
+-      border-color: rgba(255, 209, 102, .4);
+-      background: rgba(67, 47, 16, .8);
+-    }
+-
+-    input,
+-    select,
+-    textarea {
+-      width: 100%;
+-      background: var(--input);
+-      color: var(--txt);
+-      border: 1px solid var(--line);
+-      border-radius: 14px;
+-      padding: 12px;
+-      margin: 0;
++      background: #fff7e8;
++      color: #805200;
+     }
+ 
+     textarea {
+       min-height: 58px;
+     }
+ 
+-    button,
+-    .btn {
+-      border: 0;
+-      border-radius: 14px;
+-      padding: 12px 16px;
+-      background: #163354;
+-      color: var(--txt);
+-      font-weight: 800;
+-      cursor: pointer;
+-      margin: 0;
+-      text-decoration: none;
+-      display: inline-flex;
+-      align-items: center;
+-      justify-content: center;
+-      min-height: 40px;
+-    }
+-
+-    button.primary,
+-    .btn.primary {
+-      background: linear-gradient(135deg, #0584c7, #35d1ff);
+-      color: #03121c;
+-    }
+-
+     .actions,
+     .client-actions,
+     .client-pools {
+@@ -149,21 +89,9 @@
+       flex-wrap: wrap;
+     }
+ 
+-    .pill {
+-      display: inline-flex;
+-      align-items: center;
+-      border: 1px solid var(--line);
+-      border-radius: 99px;
+-      padding: 5px 9px;
+-      color: #bfe4ff;
+-      background: #0a1b2e;
+-      font-size: 12px;
+-      max-width: 100%;
+-    }
+-
+     .section-title,
+     .client-section-label {
+-      color: #7dd3fc;
++      color: var(--ds-text-muted);
+       font-size: 11px;
+       font-weight: 900;
+       text-transform: uppercase;
+@@ -179,13 +107,24 @@
+       align-items: center;
+       gap: 10px;
+       margin: 0;
+-      color: #dff6ff;
++      color: var(--ds-text);
++      min-height: 44px;
++      padding: 10px 12px;
++      border: 1px solid var(--ds-border);
++      border-radius: 14px;
++      background: var(--ds-surface-soft);
+     }
+ 
+     .check-row input {
+       width: auto;
+     }
+ 
++    .check-row input[type="checkbox"] {
++      width: 24px;
++      height: 24px;
++      flex: 0 0 24px;
++    }
++
+     #clientForm {
+       display: grid;
+       grid-template-columns: repeat(4, minmax(170px, 1fr));
+@@ -212,9 +151,9 @@
+       gap: 12px;
+       margin: 8px 0 12px;
+       padding: 10px 12px;
+-      border: 1px solid rgba(125, 211, 252, .18);
++      border: 1px solid var(--ds-border);
+       border-radius: 14px;
+-      background: rgba(10, 27, 46, .72);
++      background: var(--ds-surface-soft);
+     }
+ 
+     .client-summary-stats,
+@@ -226,13 +165,13 @@
+     }
+ 
+     .client-summary-stats strong {
+-      color: #dff6ff;
++      color: var(--ds-text);
+       font-size: 15px;
+     }
+ 
+     .client-summary-stats span,
+     .client-search-hint {
+-      color: var(--muted);
++      color: var(--ds-text-muted);
+       font-size: 13px;
+     }
+ 
+@@ -241,21 +180,20 @@
+     }
+ 
+     .client-status-filters button {
+-      border: 1px solid rgba(125, 211, 252, .22);
+-      background: rgba(9, 24, 41, .92);
+-      color: #bfe4ff;
+       border-radius: 999px;
+       padding: 8px 11px;
+-      min-height: 34px;
++      min-height: 44px;
+       font-size: 12px;
+       white-space: nowrap;
++      background: var(--ds-surface);
++      border: 1px solid var(--ds-border);
++      color: var(--ds-text);
+     }
+ 
+     .client-status-filters button.is-active {
+-      background: linear-gradient(135deg, #0ea5e9, #35d1ff);
+-      color: #03121c;
++      background: linear-gradient(135deg, var(--ds-primary), var(--ds-primary-strong));
++      color: #f4fffd;
+       border-color: transparent;
+-      box-shadow: 0 10px 24px rgba(53, 209, 255, .18);
+     }
+ 
+     .client {
+@@ -263,12 +201,8 @@
+       grid-template-columns: minmax(190px, 1.05fr) minmax(130px, .65fr) minmax(170px, .95fr) minmax(190px, .8fr);
+       gap: 14px;
+       align-items: start;
+-      background: #0a1b2e;
+-      border: 1px solid var(--line);
+-      border-radius: 16px;
+       padding: 16px;
+       margin: 10px 0;
+-      color: var(--txt);
+     }
+ 
+     .client-main h3 {
+@@ -288,34 +222,49 @@
+     .client-kv {
+       display: grid;
+       gap: 6px;
+-      color: var(--muted);
++      color: var(--ds-text-muted);
+       font-size: 13px;
+     }
+ 
+     .client-kv strong {
+       display: block;
+-      color: #dff6ff;
++      color: var(--ds-text);
+       font-size: 14px;
+     }
+ 
+     .client-finance,
+     .client-pools-wrap,
+     .client-actions-wrap {
+-      border-left: 1px solid rgba(125, 211, 252, .16);
++      border-left: 1px solid var(--ds-border);
+       padding-left: 14px;
+       min-height: 100%;
+     }
+ 
+-    .client-pools .pill {
++    .client-pools .cw-v2-btn,
++    .client-pools .ds-badge {
+       overflow: hidden;
+       text-overflow: ellipsis;
+       white-space: nowrap;
+     }
+ 
+     .client-actions button,
+-    .client-actions .btn {
++    .client-actions .cw-v2-btn {
+       padding: 10px 12px;
+-      min-height: 40px;
++      min-height: 46px;
++    }
++
++    .actions .cw-v2-btn,
++    .client-pools .cw-v2-btn,
++    .client-list-summary .cw-v2-btn,
++    .cw-modal-actions .cw-v2-btn {
++      min-height: 46px;
++    }
++
++    .field-stack input:not([type="checkbox"]),
++    .field-stack textarea,
++    .field-stack select,
++    .activation-inline input {
++      min-height: 46px;
+     }
+ 
+     .cw-modal[hidden] {
+@@ -337,11 +286,7 @@
+       width: min(920px, 100%);
+       max-height: calc(100vh - 36px);
+       overflow: auto;
+-      background: rgba(13, 29, 49, .98);
+-      border: 1px solid rgba(125, 211, 252, .2);
+-      border-radius: 22px;
+       padding: 20px;
+-      box-shadow: 0 30px 80px rgba(0, 0, 0, .4);
+     }
+ 
+     .cw-modal-head {
+@@ -359,7 +304,7 @@
+ 
+     .cw-modal-head p {
+       margin: 6px 0 0;
+-      color: var(--muted);
++      color: var(--ds-text-muted);
+     }
+ 
+     .cw-icon-btn {
+@@ -367,8 +312,8 @@
+       min-height: 42px;
+       padding: 0;
+       border-radius: 999px;
+-      background: rgba(9, 24, 41, .95);
+-      border: 1px solid rgba(125, 211, 252, .18);
++      background: var(--ds-surface);
++      border: 1px solid var(--ds-border);
+     }
+ 
+     .cw-modal-form {
+@@ -399,13 +344,36 @@
+ 
+     .cw-confirm-body p {
+       margin: 0;
+-      color: var(--muted);
++      color: var(--ds-text-muted);
+       line-height: 1.5;
+     }
+ 
+     .cw-client-inactive {
+-      border-color: rgba(255, 209, 102, .55);
+-      background: linear-gradient(135deg, rgba(55, 43, 22, .78), rgba(10, 27, 46, .94));
++      border-color: color-mix(in srgb, var(--ds-warning) 48%, white);
++      background: linear-gradient(135deg, #fff7e8, var(--ds-surface) 65%);
++    }
++
++    .activation-inline {
++      display: grid;
++      gap: 8px;
++      min-width: 180px;
++    }
++
++    .activation-inline span {
++      font-size: 12px;
++      font-weight: 800;
++      color: var(--ds-text-muted);
++    }
++
++    .field-stack {
++      display: grid;
++      gap: 8px;
++    }
++
++    .field-stack label {
++      font-size: 12px;
++      font-weight: 800;
++      color: var(--ds-text-muted);
+     }
+ 
+     @media (max-width: 760px) {
+@@ -453,6 +421,7 @@
+       }
+     }
+   </style>
++  <link rel="stylesheet" href="/ui/design-system.css">
+ </head>
+ <body data-cw-role="ADMIN">
+   <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+@@ -463,8 +432,8 @@
+         <p>Criar, editar, ativar contrato, arquivar ou eliminar clientes. Clientes novos nao faturam ate ativares o contrato.</p>
+       </div>
+       <div class="actions">
+-        <button class="btn" type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
+-        <a class="btn" href="/admin-master-control">Centro de Operacoes</a>
++        <button class="cw-v2-btn" type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
++        <a class="cw-v2-btn" href="/admin-master-control">Centro de Operacoes</a>
+       </div>
+     </div>
+ 
+@@ -472,13 +441,13 @@
+       <div class="card" aria-label="Formulário de cliente">
+         <h2>Novo cliente</h2>
+         <form id="clientForm" class="cw-form-grid" onsubmit="createClient();return false">
+-          <input id="name" name="name" placeholder="Nome" required>
+-          <input id="internalName" name="internalName" placeholder="Nome interno">
+-          <input id="phone" name="phone" placeholder="Telefone">
+-          <input id="email" name="email" placeholder="Email">
+-          <input id="zone" name="zone" placeholder="Zona">
+-          <textarea id="notes" name="notes" placeholder="Notas internas"></textarea>
+-          <input id="password" name="password" type="password" placeholder="Password portal cliente (opcional)">
++          <div class="field-stack"><label for="name">Nome</label><input id="name" name="name" placeholder="Nome" required></div>
++          <div class="field-stack"><label for="internalName">Nome interno</label><input id="internalName" name="internalName" placeholder="Nome interno"></div>
++          <div class="field-stack"><label for="phone">Telefone</label><input id="phone" name="phone" placeholder="Telefone"></div>
++          <div class="field-stack"><label for="email">Email</label><input id="email" name="email" placeholder="Email"></div>
++          <div class="field-stack"><label for="zone">Zona</label><input id="zone" name="zone" placeholder="Zona"></div>
++          <div class="field-stack wide"><label for="notes">Notas internas</label><textarea id="notes" name="notes" placeholder="Notas internas"></textarea></div>
++          <div class="field-stack"><label for="password">Password do portal</label><input id="password" name="password" type="password" placeholder="Password portal cliente (opcional)"></div>
+ 
+           <div class="section-title">Faturacao oficial externa</div>
+           <label class="check-row">
+@@ -486,20 +455,20 @@
+             Necessita fatura oficial noutro sistema
+           </label>
+ 
+-          <input id="fiscalName" name="fiscalName" placeholder="Nome fiscal">
+-          <input id="fiscalNif" name="fiscalNif" placeholder="NIF">
+-          <input id="fiscalAddress" name="fiscalAddress" placeholder="Morada fiscal">
+-          <input id="fiscalEmail" name="fiscalEmail" placeholder="Email fiscal">
+-          <textarea class="wide" id="externalBillingNotes" name="externalBillingNotes" placeholder="Notas para contabilidade"></textarea>
++          <div class="field-stack"><label for="fiscalName">Nome fiscal</label><input id="fiscalName" name="fiscalName" placeholder="Nome fiscal"></div>
++          <div class="field-stack"><label for="fiscalNif">NIF</label><input id="fiscalNif" name="fiscalNif" placeholder="NIF"></div>
++          <div class="field-stack"><label for="fiscalAddress">Morada fiscal</label><input id="fiscalAddress" name="fiscalAddress" placeholder="Morada fiscal"></div>
++          <div class="field-stack"><label for="fiscalEmail">Email fiscal</label><input id="fiscalEmail" name="fiscalEmail" placeholder="Email fiscal"></div>
++          <div class="field-stack wide"><label for="externalBillingNotes">Notas para contabilidade</label><textarea class="wide" id="externalBillingNotes" name="externalBillingNotes" placeholder="Notas para contabilidade"></textarea></div>
+ 
+-          <button class="primary">Criar cliente em configuracao</button>
++          <button class="cw-v2-btn primary">Criar cliente em configuracao</button>
+           <p class="muted">O cliente fica sem valor mensal ate associares piscina, jacuzzi, contrato ou servico. Os valores entram na ficha do equipamento e na faturacao.</p>
+         </form>
+       </div>
+ 
+       <div class="card" aria-label="Lista e gestão de clientes">
+         <h2>Lista de clientes</h2>
+-        <input id="search" placeholder="Pesquisar" aria-label="Pesquisar clientes">
++        <div class="field-stack"><label for="search">Pesquisar clientes</label><input id="search" placeholder="Pesquisar" aria-label="Pesquisar clientes"></div>
+         <div id="clients" class="list muted">A carregar...</div>
+       </div>
+     </section>
+@@ -515,13 +484,13 @@
+         <button id="closeEditClientModal" class="cw-icon-btn" type="button" aria-label="Fechar edicao">×</button>
+       </div>
+       <form id="editClientForm" class="cw-modal-form">
+-        <input id="editName" name="name" placeholder="Nome" required>
+-        <input id="editInternalName" name="internalName" placeholder="Nome interno">
+-        <input id="editPhone" name="phone" placeholder="Telefone">
+-        <input id="editEmail" name="email" placeholder="Email">
+-        <input id="editZone" name="zone" placeholder="Zona">
+-        <textarea id="editNotes" name="notes" class="wide" placeholder="Notas internas"></textarea>
+-        <input id="editPassword" name="password" type="password" placeholder="Nova password do portal (opcional)">
++        <div class="field-stack"><label for="editName">Nome</label><input id="editName" name="name" placeholder="Nome" required></div>
++        <div class="field-stack"><label for="editInternalName">Nome interno</label><input id="editInternalName" name="internalName" placeholder="Nome interno"></div>
++        <div class="field-stack"><label for="editPhone">Telefone</label><input id="editPhone" name="phone" placeholder="Telefone"></div>
++        <div class="field-stack"><label for="editEmail">Email</label><input id="editEmail" name="email" placeholder="Email"></div>
++        <div class="field-stack"><label for="editZone">Zona</label><input id="editZone" name="zone" placeholder="Zona"></div>
++        <div class="field-stack wide"><label for="editNotes">Notas internas</label><textarea id="editNotes" name="notes" class="wide" placeholder="Notas internas"></textarea></div>
++        <div class="field-stack"><label for="editPassword">Nova password do portal</label><input id="editPassword" name="password" type="password" placeholder="Nova password do portal (opcional)"></div>
+ 
+         <div class="section-title">Faturacao oficial externa</div>
+         <label class="check-row">
+@@ -529,15 +498,15 @@
+           Necessita fatura oficial noutro sistema
+         </label>
+ 
+-        <input id="editFiscalName" name="fiscalName" placeholder="Nome fiscal">
+-        <input id="editFiscalNif" name="fiscalNif" placeholder="NIF">
+-        <input id="editFiscalAddress" name="fiscalAddress" placeholder="Morada fiscal">
+-        <input id="editFiscalEmail" name="fiscalEmail" placeholder="Email fiscal">
+-        <textarea id="editExternalBillingNotes" name="externalBillingNotes" class="wide" placeholder="Notas para contabilidade"></textarea>
++        <div class="field-stack"><label for="editFiscalName">Nome fiscal</label><input id="editFiscalName" name="fiscalName" placeholder="Nome fiscal"></div>
++        <div class="field-stack"><label for="editFiscalNif">NIF</label><input id="editFiscalNif" name="fiscalNif" placeholder="NIF"></div>
++        <div class="field-stack"><label for="editFiscalAddress">Morada fiscal</label><input id="editFiscalAddress" name="fiscalAddress" placeholder="Morada fiscal"></div>
++        <div class="field-stack"><label for="editFiscalEmail">Email fiscal</label><input id="editFiscalEmail" name="fiscalEmail" placeholder="Email fiscal"></div>
++        <div class="field-stack wide"><label for="editExternalBillingNotes">Notas para contabilidade</label><textarea id="editExternalBillingNotes" name="externalBillingNotes" class="wide" placeholder="Notas para contabilidade"></textarea></div>
+ 
+         <div class="cw-modal-actions">
+-          <button id="cancelEditClient" type="button">Cancelar</button>
+-          <button id="saveEditClient" class="primary" type="submit">Guardar alteracoes</button>
++          <button id="cancelEditClient" class="cw-v2-btn" type="button">Cancelar</button>
++          <button id="saveEditClient" class="cw-v2-btn primary" type="submit">Guardar alteracoes</button>
+         </div>
+       </form>
+     </div>
+@@ -555,8 +524,8 @@
+       <div class="cw-confirm-body">
+         <p id="confirmMessage">Mensagem da operação.</p>
+         <div class="cw-modal-actions">
+-          <button id="cancelConfirmAction" type="button">Cancelar</button>
+-          <button id="confirmActionBtn" class="primary" type="button">Confirmar</button>
++          <button id="cancelConfirmAction" class="cw-v2-btn" type="button">Cancelar</button>
++          <button id="confirmActionBtn" class="cw-v2-btn primary" type="button">Confirmar</button>
+         </div>
+       </div>
+     </div>
+@@ -570,5 +539,6 @@
+   <script src="/cw-os-admin-shell.js"></script>
+   <script src="/crystal-os-v2-shell.js"></script>
+   <script src="/crystal-os-v2-nav.js"></script>
++  <script defer src="/ui/design-system.js"></script>
+ </body>
+ </html>
+diff --git a/frontend/admin-clients.js b/frontend/admin-clients.js
+index 52eda85..67fc846 100644
+--- a/frontend/admin-clients.js
++++ b/frontend/admin-clients.js
+@@ -153,9 +153,9 @@ function paymentReference(clientId) {
+ 
+ function statusLabel(client) {
+   const status = String(client.status || "").toUpperCase();
+-  if (client.active === false || status === "ARCHIVED") return '<span class="pill cw-status-archived">Arquivado</span>';
+-  if (status === "ACTIVE") return '<span class="pill cw-status-active">Ativo</span>';
+-  return '<span class="pill cw-status-setup">Em configuracao</span>';
++  if (client.active === false || status === "ARCHIVED") return '<span class="ds-badge is-warning">Arquivado</span>';
++  if (status === "ACTIVE") return '<span class="ds-badge">Ativo</span>';
++  return '<span class="ds-badge is-muted">Em configuracao</span>';
+ }
+ 
+ function isActiveClient(client) {
+@@ -223,24 +223,24 @@ function renderClient(client) {
+   const activeClient = isActiveClient(client);
+   const contractActive = String(client.status || "").toUpperCase() === "ACTIVE";
+   const lifecycleActions = client.active === false
+-    ? `<button onclick="restoreClient(${client.id})" class="cw-action-ok">Restaurar</button>`
++    ? `<button onclick="restoreClient(${client.id})" class="cw-v2-btn">Restaurar</button>`
+     : `${contractActive
+-      ? `<span class="pill cw-status-active">Contrato ativo</span>`
++      ? `<span class="ds-badge">Contrato ativo</span>`
+       : `<label class="activation-inline">
+           <span>1o pagamento</span>
+           <input id="activationAmount-${client.id}" inputmode="decimal" placeholder="Opcional EUR">
+         </label>
+-        <button data-activate-client="${client.id}" onclick="activateClient(${client.id})" class="cw-action-ok">Ativar contrato</button>`}
+-      <button onclick="archiveClient(${client.id})" class="cw-action-warn">Arquivar</button>`;
++        <button data-activate-client="${client.id}" onclick="activateClient(${client.id})" class="cw-v2-btn primary">Ativar contrato</button>`}
++      <button onclick="archiveClient(${client.id})" class="cw-v2-btn">Arquivar</button>`;
+   return `
+     <article class="client ${hasDebt ? "cw-card-warn" : ""} ${activeClient ? "cw-client-active" : "cw-client-inactive"}">
+       <div class="client-main">
+         <h3>${esc(client.name)}</h3>
+         <div class="client-meta-line">
+           ${statusLabel(client)}
+-          ${client.requiresInvoice ? '<span class="pill">Fatura oficial</span>' : '<span class="pill">Sem fatura oficial</span>'}
+-          ${hasDebt ? '<span class="pill cw-status-warn">Valores em aberto</span>' : '<span class="pill cw-status-active">Financeiro em dia</span>'}
+-          ${totals.credit > 0 ? '<span class="pill cw-status-active">Credito positivo</span>' : ""}
++          ${client.requiresInvoice ? '<span class="ds-badge is-muted">Fatura oficial</span>' : '<span class="ds-badge is-muted">Sem fatura oficial</span>'}
++          ${hasDebt ? '<span class="ds-badge is-warning">Valores em aberto</span>' : '<span class="ds-badge">Financeiro em dia</span>'}
++          ${totals.credit > 0 ? '<span class="ds-badge">Credito positivo</span>' : ""}
+         </div>
+         <div class="client-kv">
+           <div>ID ${esc(client.id)} - ${esc(client.zone || "sem zona")}</div>
+@@ -262,20 +262,20 @@ function renderClient(client) {
+       <div class="client-pools-wrap">
+         <div class="client-section-label">Piscinas / Jacuzzis (${pools.length})</div>
+         <div class="client-pools">
+-          ${firstPools.map((pool) => `<a class="pill" href="/admin-pool-technical?poolId=${esc(pool.id)}">${esc(pool.name || pool.type || "Piscina")} - ${esc(pool.zone || pool.location || "-")}</a>`).join("")}
+-          ${pools.length > firstPools.length ? `<span class="pill">+${pools.length - firstPools.length}</span>` : ""}
++          ${firstPools.map((pool) => `<a class="cw-v2-btn" href="/admin-pool-technical?poolId=${esc(pool.id)}">${esc(pool.name || pool.type || "Piscina")} - ${esc(pool.zone || pool.location || "-")}</a>`).join("")}
++          ${pools.length > firstPools.length ? `<span class="ds-badge is-muted">+${pools.length - firstPools.length}</span>` : ""}
+         </div>
+       </div>
+       <div class="client-actions-wrap">
+         <div class="client-section-label">Acoes</div>
+         <div class="client-actions">
+-          <button onclick="editClient(${client.id})">Editar</button>
++          <button class="cw-v2-btn" onclick="editClient(${client.id})">Editar</button>
+           ${lifecycleActions}
+-          <button onclick="deleteClient(${client.id})" class="cw-action-danger">Eliminar</button>
+-          <a class="btn" href="/admin-pools?clientId=${client.id}">Piscinas</a>
+-          <a class="btn" href="/invoices?clientId=${client.id}">Conta corrente</a>
+-          <a class="btn" href="/admin-payments?clientId=${client.id}">Pagamentos</a>
+-          <a class="btn" href="/client-portal?clientId=${client.id}" target="_blank">Portal cliente</a>
++          <button class="cw-v2-btn danger" onclick="deleteClient(${client.id})">Eliminar</button>
++          <a class="cw-v2-btn" href="/admin-pools?clientId=${client.id}">Piscinas</a>
++          <a class="cw-v2-btn" href="/invoices?clientId=${client.id}">Conta corrente</a>
++          <a class="cw-v2-btn" href="/admin-payments?clientId=${client.id}">Pagamentos</a>
++          <a class="cw-v2-btn" href="/client-portal?clientId=${client.id}" target="_blank">Portal cliente</a>
+         </div>
+       </div>
+     </article>
+@@ -318,7 +318,7 @@ function renderList() {
+         <span>${totalPools} piscina(s)/jacuzzi(s)</span>
+         <span>Aberto ${money(totalOpen)}</span>
+         <span>Credito ${money(totalCredit)}</span>
+-        <a class="btn primary" href="/to-issue">Faturacao oficial</a>
++        <a class="cw-v2-btn primary" href="/to-issue">Faturacao oficial</a>
+       </div>
+       <div class="client-status-filters" role="group" aria-label="Filtrar clientes por estado">
+         <button type="button" class="${clientStatusFilter === "active" ? "is-active" : ""}" onclick="setClientStatusFilter('active')">Ativos ${activeCount}</button>
+diff --git a/frontend/admin-pools.html b/frontend/admin-pools.html
+index 19fbee4..210c24d 100644
+--- a/frontend/admin-pools.html
++++ b/frontend/admin-pools.html
+@@ -5,56 +5,53 @@
+   <meta name="viewport" content="width=device-width,initial-scale=1">
+   <title>Cristal Water LDA · Piscinas</title>
+   <script src="/cw-auth.js"></script>
++  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
++  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+   <link rel="stylesheet" href="/ui/foundation.css">
+   <style>
+-    :root{--bg:#06111f;--panel:#0d1d31;--line:#24415f;--txt:#e9f5ff;--muted:#8fb1cc;--brand:#35d1ff;--ok:#40e6a0;--warn:#ffd166;--bad:#ff6b6b;--input:#091829}
+     *{box-sizing:border-box}
+     html,body{overflow-x:hidden}
+-    body{margin:0;background:linear-gradient(120deg,#06111f,#0b1f33 55%,#06111f);color:var(--txt);font-family:Inter,Segoe UI,Arial,sans-serif}
+-    main.page{padding:24px;max-width:1540px;width:100%;margin:0 auto;overflow-x:hidden}
++    body{margin:0}
++    main.page{padding:24px;width:100%;overflow-x:hidden;display:grid;gap:16px}
+     .page-head{display:flex;justify-content:space-between;gap:16px;margin-bottom:18px}
+     .page-head h1{margin:0;font-size:30px}
+-    .page-head p{margin:6px 0 0;color:var(--muted)}
++    .page-head p{margin:6px 0 0;color:var(--ds-text-muted)}
+     .grid{display:grid;gap:16px}
+     .cols2{grid-template-columns:minmax(280px,360px) minmax(0,1fr)}
+-    .card{min-width:0;background:rgba(13,29,49,.92);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.22)}
+-    .muted{color:var(--muted);font-size:13px}
+-    input,select,textarea{width:100%;background:var(--input);color:var(--txt);border:1px solid var(--line);border-radius:14px;padding:12px;margin:6px 0}
++    .card{min-width:0;padding:18px}
++    .muted{color:var(--ds-text-muted);font-size:13px}
+     textarea{min-height:75px}
+-    button,.btn{border:0;border-radius:14px;padding:12px 16px;background:#163354;color:var(--txt);font-weight:800;cursor:pointer;margin:4px 0;text-decoration:none;display:inline-block}
+-    button.primary,.btn.primary{background:linear-gradient(135deg,#0584c7,#35d1ff);color:#03121c}
+     .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+     .actions{display:flex;gap:8px;flex-wrap:wrap}
+-    .pill{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:99px;padding:5px 9px;color:#bfe4ff;background:#0a1b2e;font-size:12px}
+     .pool-toolbar{min-width:0;display:grid;grid-template-columns:1.4fr repeat(5,minmax(120px,1fr)) auto auto;gap:10px;align-items:center;margin-bottom:12px}
+     .pool-toolbar input,.pool-toolbar select,.pool-toolbar button{margin:0}
+     .pool-summary{min-width:0;display:grid;grid-template-columns:repeat(8,minmax(120px,1fr));gap:10px;margin-bottom:12px}
+-    .pool-summary-item{border:1px solid var(--line);border-radius:16px;padding:12px;background:#0a1b2e}
++    .pool-summary-item{padding:12px}
+     .pool-summary-item strong{display:block;font-size:20px}
+-    .pool-summary-item span{display:block;margin-top:4px;color:var(--muted);font-size:12px}
+-    .pool-list-summary{color:#bfe4ff;font-size:13px;margin:6px 0 10px}
++    .pool-summary-item span{display:block;margin-top:4px;color:var(--ds-text-muted);font-size:12px}
++    .pool-list-summary{color:var(--ds-text-muted);font-size:13px;margin:6px 0 10px}
+     .list{min-width:0;display:grid;gap:10px}
+-    .pool-row{min-width:0;display:grid;grid-template-columns:minmax(230px,1.25fr) minmax(170px,.95fr) minmax(120px,.7fr) minmax(120px,.8fr) minmax(82px,.45fr) minmax(95px,.55fr);gap:12px;align-items:start;background:#0a1b2e;border:1px solid var(--line);border-radius:16px;padding:14px;color:var(--txt)}
++    .pool-row{min-width:0;display:grid;grid-template-columns:minmax(230px,1.25fr) minmax(170px,.95fr) minmax(120px,.7fr) minmax(120px,.8fr) minmax(82px,.45fr) minmax(95px,.55fr);gap:12px;align-items:start;padding:14px}
+     .pool-row-risk{border-color:rgba(255,107,107,.78);box-shadow:0 0 0 1px rgba(255,107,107,.18),0 16px 40px rgba(255,0,70,.12)}
+-    .pool-row-inactive{opacity:.78;background:rgba(10,27,46,.7)}
++    .pool-row-inactive{opacity:.78;background:linear-gradient(135deg,#fff7e8,var(--ds-surface) 70%)}
+     .pool-title-line{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+     .pool-title-line strong{font-size:16px}
+-    .pool-subline{color:var(--muted);font-size:12px;margin-top:5px}
+-    .pool-cell span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.02em}
+-    .pool-cell b{display:block;margin-top:4px;color:#dff3ff;font-size:13px}
++    .pool-subline{color:var(--ds-text-muted);font-size:12px;margin-top:5px}
++    .pool-cell span{display:block;color:var(--ds-text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.02em}
++    .pool-cell b{display:block;margin-top:4px;color:var(--ds-text);font-size:13px}
+     .pool-cell.compact{text-align:left}
+     .pool-actions{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:8px;border-top:1px solid rgba(143,177,204,.18);padding-top:12px;margin-top:2px}
+-    .pool-actions button,.pool-actions .btn{padding:11px 12px;margin:0;text-align:center;width:100%;min-height:44px}
++    .pool-actions button,.pool-actions .cw-v2-btn{padding:11px 12px;margin:0;text-align:center;width:100%;min-height:46px}
+     .pool-status-stack{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+-    .pool-alert-pill{border-color:rgba(255,107,107,.55);background:rgba(255,107,107,.15);color:#ffd8d8}
+-    .pool-warn-pill{border-color:rgba(255,209,102,.55);background:rgba(255,209,102,.13);color:#ffe8aa}
+-    .pool-ok-pill{border-color:rgba(64,230,160,.45);background:rgba(64,230,160,.12);color:#c8ffe8}
+-    .calc-note{border:1px dashed rgba(125,211,252,.32);border-radius:14px;padding:12px;margin:6px 0;color:#bfe4ff;background:rgba(10,27,46,.65);font-size:13px;line-height:1.4}
+-    .cw-empty{border:1px dashed var(--line);border-radius:16px;padding:18px;color:#bfe4ff;background:rgba(10,27,46,.7)}
++    .calc-note{border:1px dashed var(--ds-border);border-radius:14px;padding:12px;margin:6px 0;color:var(--ds-text);background:var(--ds-surface-soft);font-size:13px;line-height:1.4}
++    .cw-empty{border:1px dashed var(--ds-border);border-radius:16px;padding:18px;color:var(--ds-text-muted);background:var(--ds-surface-soft)}
++    .field-stack{display:grid;gap:8px}
++    .field-stack label{font-size:12px;font-weight:800;color:var(--ds-text-muted)}
+     @media(max-width:1500px){.cols2{grid-template-columns:1fr}.pool-row{grid-template-columns:1fr 1fr}.pool-toolbar{grid-template-columns:1fr 1fr}.pool-summary{grid-template-columns:repeat(3,1fr)}}
+     @media(max-width:1000px){main.page{padding:14px}.cols2,.row{grid-template-columns:1fr}.page-head{flex-direction:column}.pool-summary{grid-template-columns:1fr 1fr}}
+     @media(max-width:640px){.pool-toolbar,.pool-summary,.pool-row{grid-template-columns:1fr}}
+   </style>
++  <link rel="stylesheet" href="/ui/design-system.css">
+ </head>
+ <body data-required-role="ADMIN">
+   <main class="page">
+@@ -64,8 +61,8 @@
+         <p>Criar piscinas ou jacuzzis e liga-los ao cliente correto.</p>
+       </div>
+       <div class="actions">
+-        <button class="btn" type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
+-        <a class="btn" href="/admin-master-control">Centro de Operacoes</a>
++        <button class="cw-v2-btn" type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
++        <a class="cw-v2-btn" href="/admin-master-control">Centro de Operacoes</a>
+       </div>
+     </div>
+ 
+@@ -73,57 +70,57 @@
+       <div class="card" aria-label="Formulário de piscina">
+         <h2>Nova piscina / jacuzzi</h2>
+         <form id="poolForm" class="cw-form-grid cols-2" onsubmit="createPool();return false">
+-          <select id="clientId" name="clientId"></select>
+-          <input id="name" name="name" placeholder="Nome da piscina ou jacuzzi" required>
+-          <select id="type" name="type">
++          <div class="field-stack"><label for="clientId">Cliente</label><select id="clientId" name="clientId"></select></div>
++          <div class="field-stack"><label for="name">Nome da piscina ou jacuzzi</label><input id="name" name="name" placeholder="Nome da piscina ou jacuzzi" required></div>
++          <div class="field-stack"><label for="type">Tipo</label><select id="type" name="type">
+             <option value="POOL">Piscina</option>
+             <option value="JACUZZI">Jacuzzi</option>
+-          </select>
+-          <input id="zone" name="zone" placeholder="Zona">
+-          <input id="address" name="address" placeholder="Morada / localizacao">
+-          <input id="location" name="location" placeholder="Local na propriedade. Ex: Jardim, terraco, piso -1">
+-          <input id="monthlyAmount" name="monthlyAmount" type="number" step="0.01" placeholder="Valor mensal EUR">
++          </select></div>
++          <div class="field-stack"><label for="zone">Zona</label><input id="zone" name="zone" placeholder="Zona"></div>
++          <div class="field-stack"><label for="address">Morada ou localizacao</label><input id="address" name="address" placeholder="Morada / localizacao"></div>
++          <div class="field-stack"><label for="location">Local na propriedade</label><input id="location" name="location" placeholder="Local na propriedade. Ex: Jardim, terraco, piso -1"></div>
++          <div class="field-stack"><label for="monthlyAmount">Valor mensal</label><input id="monthlyAmount" name="monthlyAmount" type="number" step="0.01" placeholder="Valor mensal EUR"></div>
+           <div class="calc-note">O volume em m3 e calculado na ficha tecnica com base nas dimensoes da piscina/jacuzzi.</div>
+-          <textarea id="notes" name="notes" placeholder="Notas tecnicas"></textarea>
+-          <button class="primary">Criar piscina</button>
++          <div class="field-stack"><label for="notes">Notas tecnicas</label><textarea id="notes" name="notes" placeholder="Notas tecnicas"></textarea></div>
++          <button class="cw-v2-btn primary">Criar piscina</button>
+         </form>
+       </div>
+ 
+       <div class="card" aria-label="Lista de piscinas e filtros">
+         <h2>Lista de piscinas</h2>
+         <div class="pool-toolbar cw-list-toolbar" role="group" aria-label="Filtros de piscinas">
+-          <input id="poolSearch" placeholder="Pesquisar por cliente, piscina, jacuzzi, zona, morada ou ID">
+-          <select id="poolStatusFilter">
++          <div class="field-stack"><label for="poolSearch">Pesquisa</label><input id="poolSearch" placeholder="Pesquisar por cliente, piscina, jacuzzi, zona, morada ou ID"></div>
++          <div class="field-stack"><label for="poolStatusFilter">Estado</label><select id="poolStatusFilter">
+             <option value="">Todos os estados</option>
+             <option value="active">Ativas</option>
+             <option value="inactive">Inativas</option>
+-          </select>
+-          <select id="poolTypeFilter">
++          </select></div>
++          <div class="field-stack"><label for="poolTypeFilter">Tipo</label><select id="poolTypeFilter">
+             <option value="">Piscinas e jacuzzis</option>
+             <option value="POOL">Piscinas</option>
+             <option value="JACUZZI">Jacuzzis</option>
+-          </select>
+-          <select id="poolClientFilter"><option value="">Todos os clientes</option></select>
+-          <select id="poolZoneFilter"><option value="">Todas as zonas</option></select>
+-          <select id="poolOperationalFilter">
++          </select></div>
++          <div class="field-stack"><label for="poolClientFilter">Cliente</label><select id="poolClientFilter"><option value="">Todos os clientes</option></select></div>
++          <div class="field-stack"><label for="poolZoneFilter">Zona</label><select id="poolZoneFilter"><option value="">Todas as zonas</option></select></div>
++          <div class="field-stack"><label for="poolOperationalFilter">Operacao</label><select id="poolOperationalFilter">
+             <option value="">Toda a operacao</option>
+             <option value="attention">Sem cliente ou sem ronda</option>
+             <option value="no-client">Sem cliente associado</option>
+             <option value="no-round">Sem ronda atribuida</option>
+-          </select>
+-          <button id="clearPoolFilters" type="button">Limpar</button>
+-          <button id="toggleArchived" type="button">Ver inativas</button>
++          </select></div>
++          <button class="cw-v2-btn" id="clearPoolFilters" type="button">Limpar</button>
++          <button class="cw-v2-btn" id="toggleArchived" type="button">Ver inativas</button>
+         </div>
+ 
+         <div class="pool-summary">
+-          <div class="pool-summary-item"><strong id="poolCount">0</strong><span>Visiveis</span></div>
+-          <div class="pool-summary-item"><strong id="poolActiveCount">0</strong><span>Ativas</span></div>
+-          <div class="pool-summary-item"><strong id="poolInactiveCount">0</strong><span>Inativas</span></div>
+-          <div class="pool-summary-item"><strong id="poolJacuzziCount">0</strong><span>Jacuzzis</span></div>
+-          <div class="pool-summary-item"><strong id="poolVolumeTotal">0 m³</strong><span>Volume total</span></div>
+-          <div class="pool-summary-item"><strong id="poolMonthlyTotal">0 €</strong><span>Mensalidade</span></div>
+-          <div class="pool-summary-item"><strong id="poolNoClientCount">0</strong><span>Sem cliente</span></div>
+-          <div class="pool-summary-item"><strong id="poolNoRoundCount">0</strong><span>Sem ronda</span></div>
++          <div class="pool-summary-item card"><strong id="poolCount">0</strong><span>Visiveis</span></div>
++          <div class="pool-summary-item card"><strong id="poolActiveCount">0</strong><span>Ativas</span></div>
++          <div class="pool-summary-item card"><strong id="poolInactiveCount">0</strong><span>Inativas</span></div>
++          <div class="pool-summary-item card"><strong id="poolJacuzziCount">0</strong><span>Jacuzzis</span></div>
++          <div class="pool-summary-item card"><strong id="poolVolumeTotal">0 m³</strong><span>Volume total</span></div>
++          <div class="pool-summary-item card"><strong id="poolMonthlyTotal">0 €</strong><span>Mensalidade</span></div>
++          <div class="pool-summary-item card"><strong id="poolNoClientCount">0</strong><span>Sem cliente</span></div>
++          <div class="pool-summary-item card"><strong id="poolNoRoundCount">0</strong><span>Sem ronda</span></div>
+         </div>
+ 
+         <div id="poolListSummary" class="pool-list-summary">A carregar...</div>
+@@ -141,5 +138,6 @@
+   <script src="/cw-os-admin-shell.js"></script>
+   <script src="/crystal-os-v2-shell.js"></script>
+   <script src="/crystal-os-v2-nav.js"></script>
++  <script defer src="/ui/design-system.js"></script>
+ </body>
+ </html>
+diff --git a/frontend/admin-pools.js b/frontend/admin-pools.js
+index ce5b9fd..b5759e9 100644
+--- a/frontend/admin-pools.js
++++ b/frontend/admin-pools.js
+@@ -344,14 +344,14 @@ function renderPoolRow(pool) {
+   const hasRound = hasAssignedRound(pool);
+   const riskClass = !hasClient || !hasRound ? "pool-row-risk" : "";
+   return `
+-    <article class="pool-row ${active ? "" : "pool-row-inactive"} ${riskClass}">
++    <article class="pool-row card ${active ? "" : "pool-row-inactive"} ${riskClass}">
+       <div class="pool-main">
+         <div class="pool-title-line">
+           <strong>${esc(pool.name || "Piscina")}</strong>
+-          <span class="pill">${esc(typeLabel(pool))}</span>
+-          <span class="pill ${active ? "cw-status-active" : "cw-status-archived"}">${active ? "Ativa" : "Inativa"}</span>
+-          ${hasClient ? '<span class="pill pool-ok-pill">Cliente ligado</span>' : '<span class="pill pool-alert-pill">Sem cliente</span>'}
+-          ${hasRound ? '<span class="pill pool-ok-pill">Com ronda</span>' : '<span class="pill pool-warn-pill">Sem ronda</span>'}
++          <span class="ds-badge is-muted">${esc(typeLabel(pool))}</span>
++          <span class="ds-badge ${active ? "" : "is-warning"}">${active ? "Ativa" : "Inativa"}</span>
++          ${hasClient ? '<span class="ds-badge">Cliente ligado</span>' : '<span class="ds-badge is-danger">Sem cliente</span>'}
++          ${hasRound ? '<span class="ds-badge">Com ronda</span>' : '<span class="ds-badge is-warning">Sem ronda</span>'}
+         </div>
+         <div class="pool-subline">ID ${esc(pool.id)} · ${esc(pool.address || "Sem morada")}${pool.location ? ` · ${esc(pool.location)}` : ""}</div>
+       </div>
+@@ -376,14 +376,14 @@ function renderPoolRow(pool) {
+         <b>${esc(formatEuro(monthlyAmount))}</b>
+       </div>
+       <div class="pool-actions">
+-        <button onclick="editPool(${pool.id})">Editar</button>
+-        <button onclick="reassignPool(${pool.id})">Alterar cliente</button>
+-        <a class="btn" href="/admin-pool-technical?poolId=${pool.id}">Ficha tecnica</a>
+-        <a class="btn" href="/admin-pool-calculator?poolId=${pool.id}">Calculadora</a>
++        <button class="cw-v2-btn" onclick="editPool(${pool.id})">Editar</button>
++        <button class="cw-v2-btn" onclick="reassignPool(${pool.id})">Alterar cliente</button>
++        <a class="cw-v2-btn" href="/admin-pool-technical?poolId=${pool.id}">Ficha tecnica</a>
++        <a class="cw-v2-btn" href="/admin-pool-calculator?poolId=${pool.id}">Calculadora</a>
+         ${active
+-          ? `<button class="cw-action-warn" onclick="archivePool(${pool.id})">Arquivar</button>`
+-          : `<button class="cw-action-ok" onclick="restorePool(${pool.id})">Restaurar</button>`}
+-        <button class="cw-action-danger" onclick="deletePool(${pool.id})">Eliminar</button>
++          ? `<button class="cw-v2-btn" onclick="archivePool(${pool.id})">Arquivar</button>`
++          : `<button class="cw-v2-btn" onclick="restorePool(${pool.id})">Restaurar</button>`}
++        <button class="cw-v2-btn danger" onclick="deletePool(${pool.id})">Eliminar</button>
+       </div>
+     </article>
+   `;
+diff --git a/frontend/admin-rounds.html b/frontend/admin-rounds.html
+index 53e3b3a..795164b 100644
+--- a/frontend/admin-rounds.html
++++ b/frontend/admin-rounds.html
+@@ -5,59 +5,58 @@
+   <meta name="viewport" content="width=device-width,initial-scale=1">
+   <title>Cristal Water LDA - Rondas</title>
+   <script src="/cw-auth.js"></script>
++  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
++  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+   <link rel="stylesheet" href="/ui/foundation.css">
+   <style>
+-    :root{--bg:#06111f;--panel:#0d1d31;--panel2:#10243c;--line:#24415f;--txt:#e9f5ff;--muted:#8fb1cc;--brand:#35d1ff;--ok:#40e6a0;--warn:#ffd166;--bad:#ff6b6b;--input:#091829}
+     *{box-sizing:border-box}
+     html,body{overflow-x:hidden}
+-    body{margin:0;background:linear-gradient(120deg,#06111f,#0b1f33 55%,#06111f);color:var(--txt);font-family:Inter,Segoe UI,Arial,sans-serif}
+-    main.page{padding:24px;max-width:1500px;margin:0 auto}
++    body{margin:0}
++    main.page{padding:24px;display:grid;gap:16px}
+     .page-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px}
+-    .page-head h1{margin:0;font-size:30px}.page-head p{margin:6px 0 0;color:var(--muted)}
++    .page-head h1{margin:0;font-size:30px}.page-head p{margin:6px 0 0;color:var(--ds-text-muted)}
+     .grid{display:grid;gap:16px}.cols2{grid-template-columns:minmax(360px,470px) 1fr}.cols3{grid-template-columns:repeat(3,1fr)}.cols4{grid-template-columns:repeat(4,1fr)}.cols5{grid-template-columns:repeat(5,1fr)}
+-    .card{background:rgba(13,29,49,.92);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.22);min-width:0}
+-    .metric{font-size:32px;font-weight:900}.label,.muted,.mini,.empty{color:var(--muted);font-size:13px}
+-    .item,.visit,.round-card,.day-card{background:#0a1b2e;border:1px solid var(--line);border-radius:16px;padding:14px;margin:8px 0;color:var(--txt)}
+-    input,select,textarea{width:100%;background:var(--input);color:var(--txt);border:1px solid var(--line);border-radius:14px;padding:12px;margin:6px 0}
++    .card{padding:18px;min-width:0}
++    .metric{font-size:32px;font-weight:900}.label,.muted,.mini,.empty{color:var(--ds-text-muted);font-size:13px}
++    .item,.visit,.round-card,.day-card{padding:14px;margin:8px 0}
+     textarea{min-height:75px}
+-    button,.btn{border:0;border-radius:14px;padding:12px 16px;background:#163354;color:var(--txt);font-weight:800;cursor:pointer;margin:4px 0;text-decoration:none}
+-    button.primary,.btn.primary{background:linear-gradient(135deg,#0584c7,#35d1ff);color:#03121c}
+-    button.ok,.btn.ok{background:linear-gradient(135deg,#0c9f69,#40e6a0);color:#02150d}
+-    button.danger,.btn.danger{background:#492037;color:#ffd7e4;border:1px solid rgba(255,107,107,.38)}
+     .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+-    .pill{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:99px;padding:5px 9px;color:#bfe4ff;background:#0a1b2e;font-size:12px}
+-    .status{border:1px solid rgba(53,217,255,.18);background:rgba(53,217,255,.08);padding:12px;border-radius:16px;color:#cfe9ff}
++    .status{padding:12px;border-radius:16px}
++    .status.error{border-color:color-mix(in srgb, var(--ds-danger) 40%, white);background:#fff4f4;color:#7f2326}
++    .status.ok{border-color:color-mix(in srgb, var(--ds-success) 40%, white);background:#f2faf5;color:#185c33}
+     .actions{display:flex;gap:8px;flex-wrap:wrap}.actions a,.actions button{min-width:120px;text-align:center}
+-    .weekly-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.force-note{color:var(--muted);font-size:12px}
+-    .rule-note{border:1px solid rgba(64,230,160,.24);background:rgba(64,230,160,.08);border-radius:14px;padding:11px;color:#d9fff0;margin:10px 0;font-size:13px;line-height:1.45}
++    .weekly-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.force-note{color:var(--ds-text-muted);font-size:12px}
++    .rule-note{border:1px solid color-mix(in srgb, var(--ds-success) 28%, white);background:#f2faf5;border-radius:14px;padding:11px;color:#185c33;margin:10px 0;font-size:13px;line-height:1.45}
+     .visit-filter-panel{display:grid;grid-template-columns:1.4fr repeat(3,minmax(150px,1fr));gap:10px;margin:14px 0}
+     .visit-filter-panel input,.visit-filter-panel select,.visit-filter-panel button{margin:0}.visit-filter-panel .wide{grid-column:span 2}
+-    .visit-filter-summary{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:8px 0 12px;color:#bfe4ff;font-size:13px}
++    .visit-filter-summary{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:8px 0 12px;color:var(--ds-text-muted);font-size:13px}
+     .visit-planner{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:14px 0 18px}
+-    .tech-column{background:#081827;border:1px solid var(--line);border-radius:18px;padding:12px;min-height:135px}
+-    .tech-column.drag-over{border-color:var(--brand);box-shadow:0 0 0 2px rgba(53,209,255,.28)}
++    .tech-column{border-radius:18px;padding:12px;min-height:135px}
++    .tech-column.drag-over{border-color:var(--ds-primary);box-shadow:0 0 0 2px color-mix(in srgb, var(--ds-primary) 28%, white)}
+     .tech-column h4{margin:0 0 8px;font-size:14px}.tech-drop{display:grid;gap:8px;min-height:78px}
+-    .visit-chip{border:1px solid rgba(53,209,255,.25);background:#0d2744;border-radius:14px;padding:10px;cursor:grab}
+-    .visit-chip:active{cursor:grabbing}.visit-chip.extra{border-color:rgba(255,209,102,.45);background:rgba(255,209,102,.09)}.visit-chip.done{opacity:.72}
+-    .visit-chip b,.visit-chip span{display:block}.visit-chip span{color:#bfe4ff;font-size:12px;margin-top:3px}
+-    .round-card{transition:border-color .16s ease,box-shadow .16s ease,background .16s ease}.round-card.drag-over{border-color:var(--brand);box-shadow:0 0 0 2px rgba(53,209,255,.28);background:#0d2744}
+-    .round-card-risk,.warning-card{border-color:rgba(255,107,107,.72)!important;box-shadow:0 0 0 1px rgba(255,107,107,.18),0 18px 48px rgba(255,0,70,.12)!important;background:rgba(72,22,42,.72)!important}
+-    .round-warning-banner{display:none;margin:0 0 16px;border:1px solid rgba(255,107,107,.7);background:rgba(255,107,107,.14);border-radius:18px;padding:14px;color:#ffe3e8}
++    .visit-chip{border-radius:14px;padding:10px;cursor:grab}
++    .visit-chip:active{cursor:grabbing}.visit-chip.extra{border-color:color-mix(in srgb, var(--ds-warning) 45%, white);background:#fff7e8}.visit-chip.done{opacity:.72}
++    .visit-chip b,.visit-chip span{display:block}.visit-chip span{color:var(--ds-text-muted);font-size:12px;margin-top:3px}
++    .round-card{transition:border-color .16s ease,box-shadow .16s ease,background .16s ease}.round-card.drag-over{border-color:var(--ds-primary);box-shadow:0 0 0 2px color-mix(in srgb, var(--ds-primary) 28%, white);background:var(--ds-surface-soft)}
++    .round-card-risk,.warning-card{border-color:color-mix(in srgb, var(--ds-danger) 55%, white)!important;box-shadow:0 0 0 1px color-mix(in srgb, var(--ds-danger) 22%, white),0 18px 48px rgba(255,0,70,.12)!important;background:#fff5f5!important}
++    .round-warning-banner{display:none;margin:0 0 16px;border:1px solid color-mix(in srgb, var(--ds-danger) 55%, white);background:#fff5f5;border-radius:18px;padding:14px;color:#7f2326}
+     .round-warning-banner strong{display:block;font-size:18px;margin-bottom:4px}
+     .round-editor{display:grid;grid-template-columns:minmax(160px,1fr) 130px auto;gap:8px;margin:10px 0}.round-editor input,.round-editor select,.round-editor button{margin:0}
+-    .round-pool-list{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:8px}.pool-line{border:1px solid rgba(53,209,255,.18);background:#081827;border-radius:12px;padding:9px;cursor:grab}.pool-line:active{cursor:grabbing}.pool-line span{display:block;color:#bfe4ff;font-size:12px;margin-top:3px}
++    .round-pool-list{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:8px}.pool-line{border-radius:12px;padding:9px;cursor:grab}.pool-line:active{cursor:grabbing}.pool-line span{display:block;color:var(--ds-text-muted);font-size:12px;margin-top:3px}
+     #weekVisits{max-width:100%;min-width:0;overflow:hidden}
+     .table-scroll{display:block;width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;padding-bottom:4px;contain:paint}
+     .visits-table{width:100%;min-width:920px;border-collapse:separate;border-spacing:0 8px}
+-    .visits-table th{text-align:left;color:var(--muted);font-size:12px;padding:5px 8px}
+-    .visits-table td{background:#0a1b2e;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:9px 8px;color:#cfe9ff;vertical-align:top}
+-    .visits-table td:first-child{border-left:1px solid var(--line);border-radius:12px 0 0 12px}.visits-table td:last-child{border-right:1px solid var(--line);border-radius:0 12px 12px 0}
++    .visits-table th{text-align:left;color:var(--ds-text-muted);font-size:12px;padding:5px 8px}
++    .visits-table td{background:var(--ds-surface);border-top:1px solid var(--ds-border);border-bottom:1px solid var(--ds-border);padding:9px 8px;color:var(--ds-text);vertical-align:top}
++    .visits-table td:first-child{border-left:1px solid var(--ds-border);border-radius:12px 0 0 12px}.visits-table td:last-child{border-right:1px solid var(--ds-border);border-radius:0 12px 12px 0}
+     .visits-table input,.visits-table select{min-width:130px;margin:0}.visits-table td{overflow-wrap:anywhere}.table-actions{display:grid;gap:7px;min-width:190px}.money-input{max-width:120px}
+-    .visit-row-alert td{background:rgba(255,107,107,.11);border-color:rgba(255,107,107,.35)}.visit-row-late td{background:rgba(255,209,102,.09);border-color:rgba(255,209,102,.3)}.visit-row-extra td{background:rgba(255,209,102,.07)}
+-    .pill-alert{border-color:rgba(255,107,107,.45);color:#ffd4dc;background:rgba(255,107,107,.12)}
++    .visit-row-alert td{background:#fff5f5;border-color:color-mix(in srgb, var(--ds-danger) 35%, white)}.visit-row-late td{background:#fff7e8;border-color:color-mix(in srgb, var(--ds-warning) 30%, white)}.visit-row-extra td{background:#fff9ef}
++    .pill-alert{border-color:color-mix(in srgb, var(--ds-danger) 45%, white);color:#7f2021;background:#fff1f1}
++    .field-stack{display:grid;gap:8px}.field-stack label{font-size:12px;font-weight:800;color:var(--ds-text-muted)}
+     @media(max-width:1100px){main.page{padding:14px}.cols2,.cols3,.cols4,.cols5,.row,.row3{grid-template-columns:1fr}.page-head{flex-direction:column}.visit-filter-panel{grid-template-columns:1fr 1fr}.visit-filter-panel .wide{grid-column:auto}}
+     @media(max-width:720px){.visit-filter-panel{grid-template-columns:1fr}.visits-table{font-size:12px}}
+   </style>
++  <link rel="stylesheet" href="/ui/design-system.css">
+ </head>
+ <body data-required-role="ADMIN">
+   <main class="page">
+@@ -67,8 +66,8 @@
+         <p>Uma ronda principal por dia e por tecnico, com apoio, substituicoes e visitas de outro dia controladas no planeador.</p>
+       </div>
+       <div class="actions">
+-        <button class="btn" type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
+-        <a class="btn" href="/admin-master-control">Centro de Operacoes</a>
++        <button class="cw-v2-btn" type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
++        <a class="cw-v2-btn" href="/admin-master-control">Centro de Operacoes</a>
+       </div>
+     </div>
+ 
+@@ -82,72 +81,72 @@
+       <div class="card" id="kpiUnassignedRoundsCard"><div class="metric" id="kpiUnassignedRounds">0</div><div class="label">Rondas sem tecnico</div></div>
+     </section>
+ 
+-    <section class="grid cols2" style="margin-top:16px">
++    <section class="grid cols2">
+       <div class="card">
+         <h2>Criar ronda</h2>
+-        <input id="roundName" placeholder="Nome da ronda">
+-        <select id="roundDay">
++        <div class="field-stack"><label for="roundName">Nome da ronda</label><input id="roundName" placeholder="Nome da ronda"></div>
++        <div class="field-stack"><label for="roundDay">Dia da ronda</label><select id="roundDay">
+           <option value="1">Segunda</option>
+           <option value="2">Terca</option>
+           <option value="3">Quarta</option>
+           <option value="4">Quinta</option>
+           <option value="5">Sexta</option>
+           <option value="6">Sabado</option>
+-        </select>
+-        <button id="createRoundBtn" class="primary">Criar ronda</button>
++        </select></div>
++        <button id="createRoundBtn" class="cw-v2-btn primary">Criar ronda</button>
+ 
+         <h2>Atribuir tecnico</h2>
+         <div class="rule-note">Regra operacional: associe o tecnico principal da ronda. Se outro tecnico for ajudar, mova apenas as visitas necessarias no planeador e escolha o motivo correto.</div>
+-        <select id="assignTechRound"></select>
+-        <select id="assignTech"></select>
+-        <button id="assignTechBtn">Associar tecnico a ronda</button>
++        <div class="field-stack"><label for="assignTechRound">Ronda</label><select id="assignTechRound"></select></div>
++        <div class="field-stack"><label for="assignTech">Tecnico</label><select id="assignTech"></select></div>
++        <button id="assignTechBtn" class="cw-v2-btn">Associar tecnico a ronda</button>
+ 
+         <h2>Atribuir piscina</h2>
+-        <select id="assignPoolRound"></select>
+-        <select id="assignPool"></select>
+-        <input id="assignPoolOrder" type="number" placeholder="Ordem">
+-        <button id="assignPoolBtn">Atribuir piscina</button>
++        <div class="field-stack"><label for="assignPoolRound">Ronda</label><select id="assignPoolRound"></select></div>
++        <div class="field-stack"><label for="assignPool">Piscina</label><select id="assignPool"></select></div>
++        <div class="field-stack"><label for="assignPoolOrder">Ordem</label><input id="assignPoolOrder" type="number" placeholder="Ordem"></div>
++        <button id="assignPoolBtn" class="cw-v2-btn">Atribuir piscina</button>
+ 
+         <h2>Visita extra / pontual</h2>
+-        <select id="extraPool"></select>
+-        <select id="extraTechnician"></select>
++        <div class="field-stack"><label for="extraPool">Piscina</label><select id="extraPool"></select></div>
++        <div class="field-stack"><label for="extraTechnician">Tecnico</label><select id="extraTechnician"></select></div>
+         <div class="row">
+-          <input id="extraStart" type="datetime-local">
+-          <input id="extraRepeatCount" type="number" min="1" value="1" placeholder="Quantas visitas">
++          <div class="field-stack"><label for="extraStart">Data e hora</label><input id="extraStart" type="datetime-local"></div>
++          <div class="field-stack"><label for="extraRepeatCount">Quantidade</label><input id="extraRepeatCount" type="number" min="1" value="1" placeholder="Quantas visitas"></div>
+         </div>
+         <div class="row">
+-          <select id="extraRepeatMode">
++          <div class="field-stack"><label for="extraRepeatMode">Repeticao</label><select id="extraRepeatMode">
+             <option value="once">Uma vez</option>
+             <option value="daily">Todos os dias</option>
+             <option value="weekly">Semanal</option>
+-          </select>
+-          <select id="extraBillingMode">
++          </select></div>
++          <div class="field-stack"><label for="extraBillingMode">Faturacao</label><select id="extraBillingMode">
+             <option value="EXTRA">Extra cobravel</option>
+             <option value="INCLUDED">Incluida no contrato</option>
+             <option value="NO_CHARGE">Sem cobranca</option>
+-          </select>
++          </select></div>
+         </div>
+-        <input id="extraPrice" type="number" min="0" step="0.01" placeholder="Valor por visita extra">
+-        <textarea id="extraNotes" placeholder="Motivo, instrucoes ou observacoes internas"></textarea>
+-        <button id="createExtraVisitBtn" class="ok">Criar visita extra</button>
++        <div class="field-stack"><label for="extraPrice">Valor por visita extra</label><input id="extraPrice" type="number" min="0" step="0.01" placeholder="Valor por visita extra"></div>
++        <div class="field-stack"><label for="extraNotes">Notas internas</label><textarea id="extraNotes" placeholder="Motivo, instrucoes ou observacoes internas"></textarea></div>
++        <button id="createExtraVisitBtn" class="cw-v2-btn primary">Criar visita extra</button>
+         <p class="mini">As visitas extra cobraveis ficam marcadas para conta corrente quando forem concluidas.</p>
+       </div>
+ 
+       <div class="card">
+         <h2>Operacao semanal</h2>
+         <div class="weekly-actions">
+-          <button id="generateWeekBtn" class="primary">Gerar visitas da semana</button>
+-          <button id="forceGenerateBtn" type="button">Forcar geracao</button>
++          <button id="generateWeekBtn" class="cw-v2-btn primary">Gerar visitas da semana</button>
++          <button id="forceGenerateBtn" class="cw-v2-btn" type="button">Forcar geracao</button>
+           <span class="force-note">Substitui apenas visitas planeadas ainda nao concluidas. As visitas podem depois ser movidas para apoio, substituicao ou outro dia.</span>
+         </div>
+-        <div id="status" class="status" style="margin-top:12px">Pronto.</div>
++        <div id="status" class="status" role="status" aria-live="polite">Pronto.</div>
+ 
+         <h3>Visitas da semana</h3>
+         <div class="visit-filter-panel">
+-          <input id="visitSearch" class="wide" placeholder="Pesquisar por cliente, piscina, jacuzzi, tecnico, ronda, zona ou alerta">
+-          <input id="visitDateFilter" type="date" title="Filtrar por dia">
+-          <input id="visitWeekFilter" type="week" title="Filtrar por semana">
+-          <select id="visitDayFilter">
++          <div class="field-stack wide"><label for="visitSearch">Pesquisa</label><input id="visitSearch" class="wide" placeholder="Pesquisar por cliente, piscina, jacuzzi, tecnico, ronda, zona ou alerta"></div>
++          <div class="field-stack"><label for="visitDateFilter">Dia</label><input id="visitDateFilter" type="date" title="Filtrar por dia"></div>
++          <div class="field-stack"><label for="visitWeekFilter">Semana</label><input id="visitWeekFilter" type="week" title="Filtrar por semana"></div>
++          <div class="field-stack"><label for="visitDayFilter">Dia da semana</label><select id="visitDayFilter">
+             <option value="">Todos os dias</option>
+             <option value="1">Segunda</option>
+             <option value="2">Terca</option>
+@@ -156,10 +155,10 @@
+             <option value="5">Sexta</option>
+             <option value="6">Sabado</option>
+             <option value="0">Domingo</option>
+-          </select>
+-          <select id="visitTechnicianFilter"><option value="">Todos os tecnicos</option></select>
+-          <select id="visitRoundFilter"><option value="">Todas as rondas</option></select>
+-          <select id="visitStatusFilter">
++          </select></div>
++          <div class="field-stack"><label for="visitTechnicianFilter">Tecnico</label><select id="visitTechnicianFilter"><option value="">Todos os tecnicos</option></select></div>
++          <div class="field-stack"><label for="visitRoundFilter">Ronda</label><select id="visitRoundFilter"><option value="">Todas as rondas</option></select></div>
++          <div class="field-stack"><label for="visitStatusFilter">Estado</label><select id="visitStatusFilter">
+             <option value="">Todos os estados</option>
+             <option value="alerts">Com alertas</option>
+             <option value="late">Atrasadas</option>
+@@ -167,8 +166,8 @@
+             <option value="done">Concluidas</option>
+             <option value="extra">Visitas extra</option>
+             <option value="billable">Extras cobraveis</option>
+-          </select>
+-          <button id="clearVisitFilters" type="button">Limpar filtros</button>
++          </select></div>
++          <button id="clearVisitFilters" class="cw-v2-btn" type="button">Limpar filtros</button>
+         </div>
+         <div class="visit-filter-summary"><span id="visitFilterSummary">0 visita(s)</span></div>
+         <div id="visitPlanner" class="visit-planner"></div>
+@@ -176,7 +175,7 @@
+       </div>
+     </section>
+ 
+-    <section class="card" style="margin-top:16px">
++    <section class="card">
+       <h2>Rondas por dia</h2>
+       <div id="roundsByDay" class="grid cols3"></div>
+     </section>
+@@ -190,5 +189,6 @@
+   <script src="/ui/core/navigation-context.js"></script>
+   <script src="/crystal-os-v2-shell.js"></script>
+   <script src="/crystal-os-v2-nav.js"></script>
++  <script defer src="/ui/design-system.js"></script>
+ </body>
+ </html>
+diff --git a/frontend/admin-rounds.js b/frontend/admin-rounds.js
+index 86f905b..9ca9960 100644
+--- a/frontend/admin-rounds.js
++++ b/frontend/admin-rounds.js
+@@ -24,8 +24,7 @@ function setStatus(message, type = "info"){
+   const el = document.getElementById("status");
+   if(!el) return;
+   el.textContent = message;
+-  el.style.borderColor = type === "error" ? "rgba(255,91,122,.45)" : "rgba(53,217,255,.18)";
+-  el.style.background = type === "error" ? "rgba(255,91,122,.12)" : "rgba(53,217,255,.08)";
++  el.className = `status ${type === "error" ? "error" : type === "ok" ? "ok" : ""}`.trim();
+ }
+ 
+ function val(id){
+@@ -453,23 +452,23 @@ function renderRoundCard(round){
+           <strong>${escapeHtml(round.name)}</strong><br>
+           <span class="mini">ID ${round.id} - ${round.active === false ? "Inativa" : "Ativa"}</span>
+         </div>
+-        <span class="pill">${pools.length} piscinas</span>
++        <span class="ds-badge is-muted">${pools.length} piscinas</span>
+       </div>
+       ${hasTechnician || round.active === false ? "" : `
+-        <div class="status" style="border-color:rgba(255,107,107,.5);background:rgba(255,107,107,.12);margin:10px 0">
++        <div class="status error round-round-warning">
+           Aviso: ronda ativa sem tecnico atribuido.
+-          <button type="button" data-focus-tech-round="${round.id}" style="margin-left:8px">Associar tecnico</button>
++          <button class="cw-v2-btn" type="button" data-focus-tech-round="${round.id}">Associar tecnico</button>
+         </div>
+       `}
+       <div class="round-editor">
+         <input data-round-field="name" value="${escapeHtml(round.name)}" aria-label="Nome da ronda">
+         <select data-round-field="dayOfWeek" aria-label="Dia da ronda">${roundDayOptions(round.dayOfWeek)}</select>
+-        <button type="button" data-save-round="${round.id}">Guardar</button>
++        <button class="cw-v2-btn" type="button" data-save-round="${round.id}">Guardar</button>
+       </div>
+       <div style="margin-top:9px">
+         ${technicians.length
+-          ? technicians.map(item => `<span class="pill">${escapeHtml(item.name)} · ${escapeHtml(item.role)}</span>`).join(" ")
+-          : `<span class="pill">Sem tecnico</span>`}
++          ? technicians.map(item => `<span class="ds-badge is-muted">${escapeHtml(item.name)} · ${escapeHtml(item.role)}</span>`).join(" ")
++          : `<span class="ds-badge is-warning">Sem tecnico</span>`}
+       </div>
+       <ul class="round-pool-list">
+         ${pools.length ? pools.map(rp => `
+@@ -480,8 +479,8 @@ function renderRoundCard(round){
+         `).join("") : `<li class="mini">Ainda sem piscinas associadas. Pode arrastar uma piscina de outra ronda para aqui.</li>`}
+       </ul>
+       <div class="round-actions">
+-        <button class="secondary" data-toggle-round="${round.id}">${round.active === false ? "Ativar" : "Pausar"}</button>
+-        <button class="danger" data-delete-round="${round.id}">Apagar</button>
++        <button class="cw-v2-btn" data-toggle-round="${round.id}">${round.active === false ? "Ativar" : "Pausar"}</button>
++        <button class="cw-v2-btn danger" data-delete-round="${round.id}">Apagar</button>
+       </div>
+     </article>
+   `;
+@@ -604,7 +603,7 @@ function renderPlanner(){
+     const assigned = visits.filter((visit) => String(visit.technicianId || "") === String(column.id));
+     return `
+       <section class="tech-column" data-technician-id="${escapeHtml(column.id)}">
+-        <h4>${escapeHtml(column.name)} <span class="pill">${assigned.length}</span></h4>
++        <h4>${escapeHtml(column.name)} <span class="ds-badge is-muted">${assigned.length}</span></h4>
+         <div class="tech-drop">
+           ${assigned.length ? assigned.map(renderVisitChip).join("") : `<div class="empty">Arraste visitas para aqui</div>`}
+         </div>
+@@ -702,21 +701,21 @@ function renderVisitRow(visit){
+ 
+   return `
+     <tr class="${classes}" data-kind="${visit.kind}" data-id="${visit.id}">
+-      <td><input data-field="date" type="datetime-local" value="${escapeHtml(formatDateTimeInput(date))}"></td>
++      <td><input data-field="date" type="datetime-local" aria-label="Data da visita ${escapeHtml(visitPoolName(visit))}" value="${escapeHtml(formatDateTimeInput(date))}"></td>
+       <td>${escapeHtml(visitClientName(visit))}</td>
+       <td>${escapeHtml(visitPoolName(visit))}</td>
+-      <td><select data-field="technicianId">${technicianOptions(visit.technicianId)}</select></td>
++      <td><select data-field="technicianId" aria-label="Tecnico da visita ${escapeHtml(visitPoolName(visit))}">${technicianOptions(visit.technicianId)}</select></td>
+       <td>
+         ${visit.kind === "EXTRA"
+-          ? `<select data-field="billingMode">${billingOptions(visit.billingMode)}</select><input class="money-input" data-field="unitPrice" type="number" min="0" step="0.01" value="${escapeHtml(visit.price || "")}" placeholder="Valor">`
+-          : `<span class="pill">Ronda normal</span>`}
+-        <select data-field="assignmentMode" title="Motivo operacional">${assignmentOptions(visit.assignmentMode)}</select>
+-        ${hasAlert ? `<span class="pill pill-alert">Com alerta</span>` : ""}
++          ? `<select data-field="billingMode" aria-label="Modo de faturacao da visita ${escapeHtml(visitPoolName(visit))}">${billingOptions(visit.billingMode)}</select><input class="money-input" data-field="unitPrice" aria-label="Valor da visita ${escapeHtml(visitPoolName(visit))}" type="number" min="0" step="0.01" value="${escapeHtml(visit.price || "")}" placeholder="Valor">`
++          : `<span class="ds-badge is-muted">Ronda normal</span>`}
++        <select data-field="assignmentMode" title="Motivo operacional" aria-label="Modo de atribuicao da visita ${escapeHtml(visitPoolName(visit))}">${assignmentOptions(visit.assignmentMode)}</select>
++        ${hasAlert ? `<span class="ds-badge is-danger">Com alerta</span>` : ""}
+       </td>
+-      <td><select data-field="status">${visitStatusOptions(visit.status)}</select></td>
++      <td><select data-field="status" aria-label="Estado da visita ${escapeHtml(visitPoolName(visit))}">${visitStatusOptions(visit.status)}</select></td>
+       <td>
+         <div class="table-actions">
+-          <button data-save-visit data-kind="${visit.kind}" data-id="${visit.id}" type="button">Guardar alteracoes</button>
++          <button class="cw-v2-btn" data-save-visit data-kind="${visit.kind}" data-id="${visit.id}" type="button">Guardar alteracoes</button>
+           <span class="mini">${escapeHtml(visitRoundName(visit))}${isLate ? " - atrasada" : ""}</span>
+         </div>
+       </td>
+diff --git a/frontend/admin-technicians.html b/frontend/admin-technicians.html
+index 85cfc99..7d268f0 100644
+--- a/frontend/admin-technicians.html
++++ b/frontend/admin-technicians.html
+@@ -7,22 +7,17 @@
+   <script src="/cw-auth.js"></script>
+   <link rel="stylesheet" href="/ui/foundation.css">
+ <style>
+-    :root{--bg:#06111f;--panel:#0d1d31;--line:#24415f;--txt:#e9f5ff;--muted:#8fb1cc;--brand:#35d1ff;--ok:#40e6a0;--warn:#ffd166;--bad:#ff6b6b;--input:#091829}
+     *{box-sizing:border-box}
+-    body{margin:0;background:linear-gradient(120deg,#06111f,#0b1f33 55%,#06111f);color:var(--txt);font-family:Inter,Segoe UI,Arial,sans-serif}
+-    main.page{padding:24px;max-width:1500px;margin:0 auto}
++  body{margin:0}
++  main.page{padding:24px;display:grid;gap:16px}
+     .page-head{display:flex;justify-content:space-between;gap:16px;margin-bottom:18px}
+     .page-head h1{margin:0;font-size:30px}
+-    .page-head p{margin:6px 0 0;color:var(--muted)}
++  .page-head p{margin:6px 0 0;color:var(--ds-text-muted)}
+     .grid{display:grid;gap:16px}
+-    .card{background:rgba(13,29,49,.92);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.22)}
+-    .label,.muted{color:var(--muted);font-size:13px}
+-    input,select,textarea{width:100%;background:var(--input);color:var(--txt);border:1px solid var(--line);border-radius:14px;padding:12px;margin:6px 0}
+-    button,.btn{border:0;border-radius:14px;padding:12px 16px;background:#163354;color:var(--txt);font-weight:800;cursor:pointer;margin:4px 0;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+-    button.primary,.btn.primary{background:linear-gradient(135deg,#0584c7,#35d1ff);color:#03121c}
++  .card{padding:18px}
++  .label,.muted{color:var(--ds-text-muted);font-size:13px}
+     .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+     .actions{display:flex;gap:8px;flex-wrap:wrap}
+-    .pill{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:99px;padding:5px 9px;color:#bfe4ff;background:#0a1b2e;font-size:12px}
+     .technician-layout{grid-template-columns:1fr}
+     .technician-form{max-width:920px}
+     .technician-form form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 10px}
+@@ -30,16 +25,26 @@
+     .list{display:grid;gap:10px;overflow-x:auto;padding-bottom:4px}
+     .technician-toolbar{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;margin:8px 0 14px}
+     .technician-toolbar input{margin:0}
+-    .technician-count{color:#8fb1cc;font-size:13px;white-space:nowrap}
++  .technician-count{color:var(--ds-text-muted);font-size:13px;white-space:nowrap}
+     .tech-list-head,.tech-row{display:grid;grid-template-columns:minmax(220px,1.1fr) minmax(240px,1.2fr) minmax(170px,.8fr) minmax(380px,auto);gap:12px;align-items:center}
+-    .tech-list-head{padding:0 14px 8px;color:#7dd3fc;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+-    .tech-row{min-width:980px;background:#0a1b2e;border:1px solid var(--line);border-radius:16px;padding:14px;color:var(--txt)}
++  .tech-list-head{padding:0 14px 8px;color:var(--ds-text-muted);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
++  .tech-row{min-width:980px;padding:14px}
+     .tech-name{display:flex;align-items:center;gap:8px;min-width:0}
+     .tech-name b,.tech-meta span{overflow-wrap:anywhere}
+     .tech-meta{display:grid;gap:4px;min-width:0}
+     .tech-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+-    .tech-actions button{min-width:80px;padding:10px 11px;text-align:center}
+-    .cw-empty{border:1px dashed var(--line);border-radius:16px;padding:16px;color:var(--muted)}
++  .tech-actions button,.tech-actions .cw-v2-btn{min-width:80px;padding:10px 11px;text-align:center;min-height:46px}
++    .cw-risk-inline-list,.cw-risk-badges{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
++    .cw-risk-badge{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;padding:10px 12px;border-radius:12px;border:1px solid var(--ds-border);background:var(--ds-surface-soft);color:var(--ds-text);font-size:12px;font-weight:800;text-decoration:none}
++    .cw-risk-badge[data-severity="CRITICAL"]{border-color:color-mix(in srgb, var(--ds-danger) 45%, white);background:#fff1f1;color:#7f2021}
++    .cw-risk-badge[data-severity="WARNING"]{border-color:color-mix(in srgb, var(--ds-warning) 45%, white);background:#fff7e8;color:#805200}
++    .cw-risk-global-actions a,.cw-risk-global-actions button{display:inline-flex;align-items:center;justify-content:center;min-height:44px}
++    .cw-risk-global-item{display:grid;align-items:center;min-height:44px}
++  .cw-empty{border:1px dashed var(--ds-border);border-radius:16px;padding:16px;color:var(--ds-text-muted);background:var(--ds-surface-soft)}
++  .field-stack{display:grid;gap:8px}
++  .field-stack label{font-size:12px;font-weight:800;color:var(--ds-text-muted)}
++  .technician-back{padding:12px 16px 0}
++  .tech-head-actions{text-align:right}
+     @media(max-width:1100px){
+       main.page{padding:14px}
+       .page-head{flex-direction:column}
+@@ -52,11 +57,12 @@
+   </style>
+   <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
++  <link rel="stylesheet" href="/ui/design-system.css">
+ </head>
+ <body data-required-role="ADMIN">
+ 
+-  <div style="padding:12px 16px 0">
+-    <button type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
++  <div class="technician-back">
++    <button class="cw-v2-btn" type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
+   </div>
+   <main class="page">
+     <div class="page-head">
+@@ -65,7 +71,7 @@
+         <p>Criar tecnicos, PIN, contacto, zona e estado operacional.</p>
+       </div>
+       <div class="actions">
+-        <a class="btn" href="/admin-master-control">Centro de Operacoes</a>
++        <a class="cw-v2-btn" href="/admin-master-control">Centro de Operacoes</a>
+       </div>
+     </div>
+ 
+@@ -73,26 +79,26 @@
+       <div class="card technician-form">
+         <h2>Novo tecnico</h2>
+         <form id="technicianForm" onsubmit="createTechnician();return false">
+-          <input id="name" name="name" placeholder="Nome do tecnico" required>
+-          <input id="email" name="email" placeholder="Email">
++          <div class="field-stack"><label for="name">Nome do tecnico</label><input id="name" name="name" placeholder="Nome do tecnico" required></div>
++          <div class="field-stack"><label for="email">Email</label><input id="email" name="email" placeholder="Email"></div>
+           <div class="row">
+-            <input id="phone" name="phone" placeholder="Telefone">
+-            <input id="pin" name="pin" placeholder="PIN de login">
++            <div class="field-stack"><label for="phone">Telefone</label><input id="phone" name="phone" placeholder="Telefone"></div>
++            <div class="field-stack"><label for="pin">PIN de login</label><input id="pin" name="pin" placeholder="PIN de login"></div>
+           </div>
+           <div class="row">
+-            <input id="zone" name="zone" placeholder="Zona">
+-            <input id="vehicleId" name="vehicleId" placeholder="ID viatura opcional">
++            <div class="field-stack"><label for="zone">Zona</label><input id="zone" name="zone" placeholder="Zona"></div>
++            <div class="field-stack"><label for="vehicleId">ID viatura opcional</label><input id="vehicleId" name="vehicleId" placeholder="ID viatura opcional"></div>
+           </div>
+-          <button class="primary">Criar tecnico</button>
++          <button class="cw-v2-btn primary">Criar tecnico</button>
+         </form>
+       </div>
+ 
+       <div class="card technician-list-card">
+         <h2>Lista de tecnicos</h2>
+         <div class="technician-toolbar">
+-          <input id="technicianSearch" placeholder="Pesquisar por nome, telefone, email, PIN, zona ou viatura">
++          <div class="field-stack"><label for="technicianSearch">Pesquisa</label><input id="technicianSearch" placeholder="Pesquisar por nome, telefone, email, PIN, zona ou viatura"></div>
+           <span class="technician-count" id="technicianCount">0 tecnico(s)</span>
+-          <button id="toggleInactive" type="button" onclick="toggleInactive()">Ver inativos</button>
++          <button class="cw-v2-btn" id="toggleInactive" type="button" onclick="toggleInactive()">Ver inativos</button>
+         </div>
+         <div id="list" class="list muted">A carregar...</div>
+       </div>
+@@ -107,5 +113,6 @@
+   <script src="/ui/core/navigation-context.js"></script>
+   <script src="/crystal-os-v2-shell.js"></script>
+   <script src="/crystal-os-v2-nav.js"></script>
++  <script defer src="/ui/design-system.js"></script>
+ </body>
+ </html>
+diff --git a/frontend/admin-technicians.js b/frontend/admin-technicians.js
+index 205a287..04a98aa 100644
+--- a/frontend/admin-technicians.js
++++ b/frontend/admin-technicians.js
+@@ -277,8 +277,8 @@ function renderRiskBadges(issues = []) {
+ 
+ function technicianStatus(tech) {
+   return tech.active === false
+-    ? '<span class="pill cw-status-inactive">Inativo</span>'
+-    : '<span class="pill cw-status-active">Ativo</span>';
++    ? '<span class="ds-badge is-warning">Inativo</span>'
++    : '<span class="ds-badge">Ativo</span>';
+ }
+ 
+ function renderTechnicianRow(tech) {
+@@ -300,12 +300,12 @@ function renderTechnicianRow(tech) {
+         <span class="${issues.length ? "cw-risk-line" : ""}">Zona: ${escapeHtml(tech.zone || "-")} - Viatura: ${escapeHtml(tech.vehicleId || "-")}</span>
+       </div>
+       <div class="tech-actions">
+-        <button onclick="editTechnician(${id})">Editar</button>
++        <button class="cw-v2-btn" onclick="editTechnician(${id})">Editar</button>
+         ${tech.active === false
+-          ? `<button onclick="restoreTechnician(${id})" class="cw-action-ok">Ativar</button>`
+-          : `<button onclick="toggleTechnician(${id}, false)" class="cw-action-warn">Desativar</button>`}
+-        <button onclick="resetPin(${id})">Reset PIN</button>
+-        <button onclick="deleteTechnician(${id})" class="cw-action-danger">Eliminar</button>
++          ? `<button class="cw-v2-btn primary" onclick="restoreTechnician(${id})">Ativar</button>`
++          : `<button class="cw-v2-btn" onclick="toggleTechnician(${id}, false)">Desativar</button>`}
++        <button class="cw-v2-btn" onclick="resetPin(${id})">Reset PIN</button>
++        <button class="cw-v2-btn danger" onclick="deleteTechnician(${id})">Eliminar</button>
+       </div>
+     </article>
+   `;
+@@ -334,7 +334,7 @@ function renderTechnicians() {
+       <span>Tecnico</span>
+       <span>Contacto</span>
+       <span>Operacao</span>
+-      <span style="text-align:right">Acoes</span>
++      <span class="tech-head-actions">Acoes</span>
+     </div>
+     ${rows.map(renderTechnicianRow).join("")}
+   `;
+diff --git a/frontend/cw-polish.css b/frontend/cw-polish.css
+index 6165c53..378931e 100644
+--- a/frontend/cw-polish.css
++++ b/frontend/cw-polish.css
+@@ -29,7 +29,7 @@ body.cw-enterprise-theme td{background:rgba(12,34,55,.72);border-top:1px solid r
+ body.cw-enterprise-theme td:first-child{border-left:1px solid rgba(125,211,252,.14);border-radius:8px 0 0 8px}
+ body.cw-enterprise-theme td:last-child{border-right:1px solid rgba(125,211,252,.14);border-radius:0 8px 8px 0}
+ body.cw-enterprise-theme .cw-side{background:#06111f!important;border-right:1px solid rgba(125,211,252,.22)!important}
+-body.cw-enterprise-theme .cw-side a{border-radius:8px!important;min-height:38px}
++body.cw-enterprise-theme .cw-side a{border-radius:8px!important;min-height:44px}
+ body.cw-enterprise-theme .cw-side a.active,body.cw-enterprise-theme .cw-side a[aria-current="page"]{background:#0c4a5f!important;border-color:rgba(45,212,255,.48)!important}
+ body.cw-enterprise-theme .ai-status,body.cw-enterprise-theme #criticalBanner,.cw-risk-global{border-radius:8px!important}
+ body.cw-enterprise-theme .cw-theme-fab,body.cw-enterprise-theme .cw-theme-panel{display:none!important}
+diff --git a/frontend/ui/components/input.css b/frontend/ui/components/input.css
+index 4c0187b..cdfdda3 100644
+--- a/frontend/ui/components/input.css
++++ b/frontend/ui/components/input.css
+@@ -4,7 +4,7 @@ textarea,
+ .cw-field,
+ .cw-v2-search input {
+   width: 100%;
+-  min-height: 38px;
++  min-height: 44px;
+   border: 1px solid var(--cw-color-border);
+   border-radius: var(--cw-radius-sm);
+   background: var(--cw-color-surface);

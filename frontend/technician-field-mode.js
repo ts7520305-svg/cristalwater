@@ -29,11 +29,417 @@
   let activeInsurance = null;
   let activeVehicle = null;
   let activeTechnician = null;
+  let technicalProposals = [];
+  let docsSource = "live";
+  let docsCompliance = null;
   let assistOptions = { loading: false, loadedKey: "", otherToday: [], tomorrow: [], error: "" };
   let notifiedVisitNoticeKey = "";
+  let activePoolFilter = "TODO";
+  let opsSnapshot = { docsReady: false, done: 0, total: 0, pending: 0 };
   const waterTimers = new Map();
   const draftFieldIds = ["ph", "chlorine", "alkalinity", "salt", "orp", "temperature", "notes"];
   const checkIds = ["cleaned", "vacuumed", "basketCleaned", "brushed", "waterlineClean", "backwashDone"];
+
+  const POOL_STATE = {
+    TODO: "Por iniciar",
+    TRAVEL: "A caminho",
+    IN_PROGRESS: "Em intervenção",
+    WATER_OPEN: "Água aberta",
+    WAITING_MATERIAL: "A aguardar material",
+    CRITICAL: "Alerta crítico",
+    DONE: "Concluída",
+  };
+
+  const MAP_ROUTE_PATH = "/technician-map";
+  const FIELD_RETURN_CONTRACT_KEY = "cw:tech-field:return-contract:v1";
+  const FIELD_UI_STATE_KEY = "cw:tech-field:ui-state:v1";
+  const FIELD_LAST_EXPLICIT_FILTER_KEY = "cw:tech-field:last-explicit-filter:v1";
+  const FIELD_DOCS_CACHE_KEY_PREFIX = "cw:tech-field:docs-cache:v1:";
+  const OP_EXCEPTION_STATE_KEY = "cw:tech-field:op-exception-state:v1";
+  const OP_EXCEPTION_HISTORY_KEY = "cw:tech-field:op-exception-history:v1";
+  const OP_EXCEPTION_COMMAND_BRIDGE_KEY = "cw:tech-field:op-exception-command:v1";
+
+  function safeSessionRead(key, fallback) {
+    try {
+      const raw = sessionStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  function safeSessionWrite(key, value) {
+    try {
+      sessionStorage.setItem(key, JSON.stringify(value));
+    } catch (_) {}
+  }
+
+  function safeSessionDelete(key) {
+    try {
+      sessionStorage.removeItem(key);
+    } catch (_) {}
+  }
+
+  function normalizePoolFilter(value, fallback = "TODO") {
+    const safe = String(value || "").toUpperCase();
+    if (["TODO", "IN_PROGRESS", "DONE"].includes(safe)) return safe;
+    return fallback;
+  }
+
+  function normalizeFieldTab(value, fallback = "hoje") {
+    const safe = String(value || "").toLowerCase();
+    if (["hoje", "agora", "docs", "more", "mapa"].includes(safe)) return safe;
+    return fallback;
+  }
+
+  function readDomActivePoolFilter(fallback = "TODO") {
+    return normalizePoolFilter(
+      document.querySelector("#poolSegments [data-pool-filter].active")?.dataset?.poolFilter,
+      fallback
+    );
+  }
+
+  function currentFieldTab() {
+    return normalizeFieldTab(document.body?.dataset?.fieldTab || "hoje", "hoje");
+  }
+
+  function selectedVisitId() {
+    return current()?.id ? String(current().id) : "";
+  }
+
+  function selectedVisitTitle() {
+    return current()?.pool?.name || "";
+  }
+
+  function persistFieldUiState() {
+    const safeActiveFilter = readDomActivePoolFilter(activePoolFilter || "TODO");
+    activePoolFilter = normalizePoolFilter(safeActiveFilter, "TODO");
+    const payload = {
+      activeTab: normalizeFieldTab(currentFieldTab(), "hoje"),
+      activeFilter: activePoolFilter,
+      selectedVisitId: selectedVisitId(),
+      selectedVisitTitle: selectedVisitTitle(),
+      scrollY: Math.max(0, Math.round(window.scrollY || 0)),
+      savedAt: new Date().toISOString(),
+    };
+    storageWrite(FIELD_UI_STATE_KEY, payload);
+    try {
+      localStorage.setItem("cwFieldActivePoolFilter", payload.activeFilter);
+    } catch (_) {}
+  }
+
+  function readFieldUiState() {
+    const saved = storageRead(FIELD_UI_STATE_KEY, null);
+    if (!saved || typeof saved !== "object") return null;
+    return {
+      activeTab: normalizeFieldTab(saved.activeTab, "hoje"),
+      activeFilter: normalizePoolFilter(saved.activeFilter, "TODO"),
+      selectedVisitId: String(saved.selectedVisitId || ""),
+      selectedVisitTitle: String(saved.selectedVisitTitle || ""),
+      scrollY: Number.isFinite(Number(saved.scrollY)) ? Math.max(0, Number(saved.scrollY)) : 0,
+    };
+  }
+
+  function readLastExplicitFilter() {
+    try {
+      const raw = String(localStorage.getItem(FIELD_LAST_EXPLICIT_FILTER_KEY) || "").trim();
+      if (!raw) return "";
+      return normalizePoolFilter(raw, "");
+    } catch (_) {
+      return "";
+    }
+  }
+
+  function writeLastExplicitFilter(filter) {
+    const safe = normalizePoolFilter(filter, "");
+    if (!safe) return;
+    try {
+      localStorage.setItem(FIELD_LAST_EXPLICIT_FILTER_KEY, safe);
+    } catch (_) {}
+  }
+
+  function buildMapReturnContract() {
+    const domActiveFilter = readDomActivePoolFilter(activePoolFilter || "TODO");
+    return {
+      returnTo: `${window.location.pathname}${window.location.search || ""}${window.location.hash || ""}`,
+      activeTab: normalizeFieldTab(currentFieldTab(), "hoje"),
+      activeFilter: normalizePoolFilter(domActiveFilter || activePoolFilter, "TODO"),
+      selectedVisitId: selectedVisitId(),
+      selectedVisitTitle: selectedVisitTitle(),
+      activeInterventionVisitId: String(visits.find((visit) => hasActiveIntervention(visit))?.id || ""),
+      scrollY: Math.max(0, Math.round(window.scrollY || 0)),
+      createdAt: new Date().toISOString(),
+      source: "technician-field-mode",
+    };
+  }
+
+  function persistMapReturnContract(contract) {
+    if (!contract) return;
+    safeSessionWrite(FIELD_RETURN_CONTRACT_KEY, contract);
+  }
+
+  function sanitizeReturnToPath(raw) {
+    const fallback = "/technician-field-mode";
+    const text = String(raw || "").trim();
+    if (!text.startsWith("/")) return fallback;
+    if (!text.startsWith("/technician-field-mode")) return fallback;
+    return text;
+  }
+
+  function buildMapRouteFromContract(contract) {
+    const params = new URLSearchParams();
+    params.set("returnTo", sanitizeReturnToPath(contract.returnTo));
+    params.set("activeTab", normalizeFieldTab(contract.activeTab, "hoje"));
+    params.set("activeFilter", normalizePoolFilter(contract.activeFilter, "TODO"));
+    if (contract.selectedVisitId) params.set("selectedVisitId", String(contract.selectedVisitId));
+    if (Number.isFinite(Number(contract.scrollY))) params.set("scrollY", String(Math.max(0, Number(contract.scrollY))));
+    return `${MAP_ROUTE_PATH}?${params.toString()}`;
+  }
+
+  function readReturnContractFromUrl() {
+    try {
+      const params = new URLSearchParams(window.location.search || "");
+      const selectedVisit = params.get("selectedVisitId");
+      const activeTab = params.get("activeTab");
+      const activeFilter = params.get("activeFilter");
+      const returnTo = params.get("returnTo");
+      const scrollY = Number(params.get("scrollY"));
+
+      if (!activeTab && !activeFilter && !selectedVisit) return null;
+      if (returnTo && !sanitizeReturnToPath(returnTo).startsWith("/technician-field-mode")) return null;
+
+      return {
+        returnTo: sanitizeReturnToPath(returnTo || "/technician-field-mode"),
+        activeTab: normalizeFieldTab(activeTab, "hoje"),
+        activeFilter: normalizePoolFilter(activeFilter, "TODO"),
+        selectedVisitId: String(selectedVisit || ""),
+        activeInterventionVisitId: "",
+        scrollY: Number.isFinite(scrollY) ? Math.max(0, scrollY) : 0,
+        source: "url",
+      };
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function readReturnContract() {
+    const sessionContract = safeSessionRead(FIELD_RETURN_CONTRACT_KEY, null);
+    if (sessionContract && sanitizeReturnToPath(sessionContract.returnTo).startsWith("/technician-field-mode")) {
+      return {
+        returnTo: sanitizeReturnToPath(sessionContract.returnTo),
+        activeTab: normalizeFieldTab(sessionContract.activeTab, "hoje"),
+        activeFilter: normalizePoolFilter(sessionContract.activeFilter, "TODO"),
+        selectedVisitId: String(sessionContract.selectedVisitId || ""),
+        selectedVisitTitle: String(sessionContract.selectedVisitTitle || ""),
+        activeInterventionVisitId: String(sessionContract.activeInterventionVisitId || ""),
+        scrollY: Number.isFinite(Number(sessionContract.scrollY)) ? Math.max(0, Number(sessionContract.scrollY)) : 0,
+        source: "session",
+      };
+    }
+
+    return readReturnContractFromUrl();
+  }
+
+  function clearReturnContract() {
+    safeSessionDelete(FIELD_RETURN_CONTRACT_KEY);
+  }
+
+  function stripReturnParamsFromUrl() {
+    try {
+      const url = new URL(window.location.href);
+      const keys = ["returnTo", "activeTab", "activeFilter", "selectedVisitId", "scrollY"];
+      const hadAny = keys.some((key) => url.searchParams.has(key));
+      keys.forEach((key) => url.searchParams.delete(key));
+      if (hadAny) {
+        const next = `${url.pathname}${url.search}${url.hash}`;
+        window.history.replaceState({}, "", next);
+      }
+    } catch (_) {}
+  }
+
+  function applyVisitSelectionFromId(visitId) {
+    const wanted = String(visitId || "");
+    if (!wanted) return false;
+    const found = visits.findIndex((visit) => String(visit.id || "") === wanted);
+    if (found < 0) return false;
+    index = found;
+    return true;
+  }
+
+  function applyReturnState(contract, fallbackState) {
+    const fallbackFilter = normalizePoolFilter(fallbackState?.activeFilter || "", "");
+    const explicitFilter = normalizePoolFilter(readLastExplicitFilter(), "");
+    const preferredFilter = normalizePoolFilter(
+      contract?.activeFilter
+        || (fallbackFilter && fallbackFilter !== "TODO" ? fallbackFilter : "")
+        || explicitFilter
+        || fallbackFilter
+        || "TODO",
+      "TODO"
+    );
+    activePoolFilter = preferredFilter;
+
+    const restoredVisit = applyVisitSelectionFromId(contract?.selectedVisitId)
+      || applyVisitSelectionFromId(contract?.activeInterventionVisitId)
+      || applyVisitSelectionFromId(fallbackState?.selectedVisitId);
+
+    if (!restoredVisit) {
+      index = visits.findIndex((visit) => !isVisitDone(visit));
+      if (index < 0) index = visits.length;
+    }
+  }
+
+  function elapsedMinutesLabel(startAt) {
+    if (!startAt) return "Sem tempo em curso";
+    const date = new Date(startAt);
+    if (Number.isNaN(date.getTime())) return "Sem tempo em curso";
+    const diffMinutes = Math.max(0, Math.round((Date.now() - date.getTime()) / 60000));
+    return `${diffMinutes} minuto(s) em intervenção`;
+  }
+
+  function visitHasWaterOpen(visit) {
+    if (!visit) return false;
+    const visitId = String(visit.id || "");
+    const poolId = String(visit.pool?.id || visit.poolId || "");
+    return activeWaterReminders().some((reminder) => {
+      if (reminder.status === "CLOSED") return false;
+      if (visitId && String(reminder.visitId || "") === visitId) return true;
+      if (poolId && String(reminder.poolId || "") === poolId) return true;
+      return false;
+    });
+  }
+
+  function visitHasCriticalProblem(visit) {
+    const text = `${visit?.status || ""} ${visit?.notes || ""} ${visit?.internalNotes || ""}`.toLowerCase();
+    if (text.includes("bomba") && text.includes("manual")) return true;
+    if (text.includes("critic")) return true;
+    return pendingProblems.some((problem) => {
+      const sameVisit = String(problem.visitId || "") === String(visit?.id || "");
+      return sameVisit && String(problem.severity || "").toUpperCase() === "URGENTE";
+    });
+  }
+
+  function visitHasMaterialBlock(visit) {
+    const text = `${visit?.status || ""} ${visit?.notes || ""} ${visit?.internalNotes || ""}`.toLowerCase();
+    return text.includes("aguardar material") || text.includes("stock") || text.includes("falta material");
+  }
+
+  function operationalStateCode(visit) {
+    if (isVisitDone(visit)) return "DONE";
+    if (visitHasCriticalProblem(visit)) return "CRITICAL";
+    if (visitHasWaterOpen(visit)) return "WATER_OPEN";
+    if (visitHasMaterialBlock(visit)) return "WAITING_MATERIAL";
+
+    const status = String(visit?.status || "").toUpperCase();
+    if (["IN_PROGRESS", "STARTED", "ACTIVE"].includes(status) || (visit?.startAt && !visit?.endAt)) {
+      return "IN_PROGRESS";
+    }
+    if (["ON_ROUTE", "TRAVEL", "EM_TRANSITO", "A_CAMINHO"].includes(status)) {
+      return "TRAVEL";
+    }
+    return "TODO";
+  }
+
+  function operationalStateLabel(visit) {
+    return POOL_STATE[operationalStateCode(visit)] || POOL_STATE.TODO;
+  }
+
+  function elapsedSinceLabel(isoValue) {
+    if (!isoValue) return "duracao indisponivel";
+    const started = new Date(isoValue);
+    if (Number.isNaN(started.getTime())) return "duracao indisponivel";
+    const minutes = Math.max(0, Math.round((Date.now() - started.getTime()) / 60000));
+    if (minutes < 60) return `${minutes} minuto(s)`;
+    const hours = Math.floor(minutes / 60);
+    const rem = minutes % 60;
+    return `${hours}h ${String(rem).padStart(2, "0")}m`;
+  }
+
+  function firstPresent(values = []) {
+    for (const value of values) {
+      if (value === undefined || value === null) continue;
+      const text = String(value).trim();
+      if (!text) continue;
+      return value;
+    }
+    return null;
+  }
+
+  function resolvePumpManualSignal(visit = current()) {
+    const equipment = visit?.pool?.equipment || visit?.equipment || {};
+    const stateRaw = firstPresent([
+      equipment.pumpMode,
+      equipment.pumpStatus,
+      equipment.mode,
+      equipment.manualMode,
+      visit?.pumpMode,
+      visit?.pumpStatus,
+      visit?.manualPumpState,
+    ]);
+    const stateText = String(stateRaw || "").toUpperCase();
+    const manualFlag = [
+      equipment.pumpManual,
+      equipment.isPumpManual,
+      equipment.manual,
+      visit?.pumpManual,
+      visit?.isPumpManual,
+      visit?.manual,
+    ].some((value) => value === true || String(value).toLowerCase() === "true");
+    const active = manualFlag || stateText.includes("MANUAL");
+
+    const who = firstPresent([
+      equipment.pumpManualBy,
+      equipment.manualBy,
+      visit?.pumpManualBy,
+      visit?.manualBy,
+      visit?.lastUpdatedBy,
+    ]) || "pendente backend";
+    const since = firstPresent([
+      equipment.pumpManualAt,
+      equipment.manualAt,
+      visit?.pumpManualAt,
+      visit?.manualAt,
+      visit?.updatedAt,
+    ]);
+    const status = active ? "MANUAL" : (stateText || "SEM_SINAL");
+    const poolName = visit?.pool?.name || "Piscina por confirmar";
+    const hasBackendSignal = manualFlag || Boolean(stateRaw);
+    const hasFullMetadata = Boolean(since && who && who !== "pendente backend");
+
+    return {
+      active,
+      who,
+      poolName,
+      since,
+      duration: elapsedSinceLabel(since),
+      status,
+      hasBackendSignal,
+      hasFullMetadata,
+      dependencyPending: !hasBackendSignal || !hasFullMetadata,
+    };
+  }
+
+  function hasP0Interruption(visit = current()) {
+    const pump = resolvePumpManualSignal(visit);
+    const urgentProblems = pendingProblems.filter((problem) => String(problem.severity || "").toUpperCase() === "URGENTE").length;
+    return activeWaterReminders().length > 0 || urgentProblems > 0 || pump.active;
+  }
+
+  function hasActiveIntervention(visit = current()) {
+    if (!visit) return false;
+    const code = operationalStateCode(visit);
+    return ["IN_PROGRESS", "WATER_OPEN", "WAITING_MATERIAL"].includes(code) && !isVisitDone(visit);
+  }
+
+  function initialOperationalTab() {
+    const hash = String(window.location.hash || "").toLowerCase();
+    if (hash === "#agora") return "agora";
+    if (hash === "#docs") return "docs";
+    if (hash === "#more") return "more";
+    if (hasActiveIntervention(current())) return "agora";
+    if (hasP0Interruption(current())) return "hoje";
+    return "hoje";
+  }
 
   async function api(path, options = {}) {
     const response = await fetch(path, { headers: { "Content-Type": "application/json" }, ...options });
@@ -314,6 +720,115 @@
     return Boolean(activeTransportGuide?.id || activeWorkGuide?.guideId || activeWorkGuide?.guide?.id);
   }
 
+  function docsCacheKey(vehicleId) {
+    return `${FIELD_DOCS_CACHE_KEY_PREFIX}${String(vehicleId || "default")}`;
+  }
+
+  function readDocsCache(vehicleId) {
+    return storageRead(docsCacheKey(vehicleId), null);
+  }
+
+  function saveDocsCache(vehicleId, payload) {
+    if (!payload || !vehicleId) return;
+    storageWrite(docsCacheKey(vehicleId), {
+      savedAt: new Date().toISOString(),
+      vehicleId: String(vehicleId),
+      ...payload,
+    });
+  }
+
+  function parseDateSafe(value) {
+    if (!value) return null;
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  function firstDocDate(values = []) {
+    for (const value of values) {
+      const date = parseDateSafe(value);
+      if (date) return date;
+    }
+    return null;
+  }
+
+  function normalizeDocStatus({ present, statusText, dueDate, required }) {
+    const text = String(statusText || "").toUpperCase();
+    if (!present) return { code: "UNAVAILABLE", label: "Indisponível", required };
+    if (text.includes("EXPIR") || text.includes("VENC")) return { code: "EXPIRED", label: "Expirado", required };
+    if (text.includes("PEND") || text.includes("DRAFT") || text.includes("PROVIS")) return { code: "PENDING", label: "Pendente", required };
+    if (dueDate && dueDate.getTime() < Date.now()) return { code: "EXPIRED", label: "Expirado", required };
+    return { code: "VALID", label: "Válido", required };
+  }
+
+  function computeDocsCompliance() {
+    const vehicle = activeVehicle || activeWorkGuide?.vehicle || activeTransportGuide?.vehicle || {};
+    const transportDue = firstDocDate([activeTransportGuide?.validUntil, activeTransportGuide?.expiresAt]);
+    const workDue = firstDocDate([activeWorkGuide?.validUntil, activeWorkGuide?.expiresAt]);
+    const insuranceDue = firstDocDate([activeInsurance?.dueDate, activeInsurance?.validUntil, vehicle?.insuranceDueDate]);
+    const inspectionDue = firstDocDate([
+      vehicle?.inspectionDueDate,
+      vehicle?.inspection?.dueDate,
+      vehicle?.inspection?.validUntil,
+    ]);
+    const safetyDocs = Array.isArray(vehicle?.safetySheets)
+      ? vehicle.safetySheets
+      : (Array.isArray(vehicle?.documents) ? vehicle.documents.filter((doc) => String(doc.type || "").toUpperCase().includes("SAFETY")) : []);
+    const manuals = Array.isArray(vehicle?.manuals)
+      ? vehicle.manuals
+      : (Array.isArray(vehicle?.documents) ? vehicle.documents.filter((doc) => String(doc.type || "").toUpperCase().includes("MANUAL")) : []);
+
+    const states = {
+      transport: normalizeDocStatus({
+        present: Boolean(activeTransportGuide?.id || activeWorkGuide?.guideId || activeWorkGuide?.guide?.id),
+        statusText: activeTransportGuide?.status || activeWorkGuide?.guide?.status,
+        dueDate: transportDue,
+        required: true,
+      }),
+      workGuide: normalizeDocStatus({
+        present: Boolean(activeWorkGuide?.id),
+        statusText: activeWorkGuide?.status,
+        dueDate: workDue,
+        required: true,
+      }),
+      insurance: normalizeDocStatus({
+        present: Boolean(activeInsurance?.id || activeInsurance?.policyNumber || activeInsurance?.title),
+        statusText: activeInsurance?.status,
+        dueDate: insuranceDue,
+        required: true,
+      }),
+      inspection: normalizeDocStatus({
+        present: Boolean(vehicle?.inspection || vehicle?.inspectionDueDate || vehicle?.inspectionStatus),
+        statusText: vehicle?.inspectionStatus || vehicle?.inspection?.status,
+        dueDate: inspectionDue,
+        required: true,
+      }),
+      safety: normalizeDocStatus({
+        present: safetyDocs.length > 0,
+        statusText: safetyDocs.find((doc) => doc?.status)?.status,
+        dueDate: firstDocDate(safetyDocs.map((doc) => doc?.dueDate || doc?.validUntil)),
+        required: false,
+      }),
+      manuals: normalizeDocStatus({
+        present: manuals.length > 0,
+        statusText: manuals.find((doc) => doc?.status)?.status,
+        dueDate: firstDocDate(manuals.map((doc) => doc?.dueDate || doc?.validUntil)),
+        required: false,
+      }),
+    };
+
+    const blockers = Object.entries(states)
+      .filter(([, state]) => state.required && state.code !== "VALID")
+      .map(([key, state]) => `${key}: ${state.label}`);
+    const readyForOperation = blockers.length === 0;
+
+    return {
+      states,
+      blockers,
+      readyForOperation,
+      reason: readyForOperation ? "" : `Bloqueio documental - ${blockers.join(" | ")}`,
+    };
+  }
+
   function setCrewDocStatus(selector, ok, valueId, metaId, value, meta) {
     const node = $(selector);
     if (!node) return;
@@ -323,6 +838,18 @@
     const metaNode = $(`#${metaId}`);
     if (valueNode) valueNode.textContent = value || (ok ? "Verde" : "Vermelha");
     if (metaNode) metaNode.textContent = meta || "";
+  }
+
+  function setCrewDocState(selector, valueId, metaId, state, okMeta, warnMeta) {
+    const isOk = state?.code === "VALID";
+    setCrewDocStatus(
+      selector,
+      isOk,
+      valueId,
+      metaId,
+      state?.label || "Indisponível",
+      isOk ? okMeta : (warnMeta || "Documento pendente para operação segura.")
+    );
   }
 
   function syncTechnicianContextFromVisit(visit) {
@@ -354,8 +881,10 @@
     const technician = activeTechnician || activeWorkGuide?.technician || current()?.technician || null;
     const plate = vehicle?.plate || activeWorkGuide?.vehicle?.plate || activeTransportGuide?.vehicle?.plate || vehicleInputValue || "Matricula por confirmar";
     const vehicleName = [vehicle?.name, vehicle?.status].filter(Boolean).join(" - ");
-    const atOk = guideHasTransportReference();
-    const workOk = Boolean(activeWorkGuide?.id);
+    const compliance = computeDocsCompliance();
+    docsCompliance = compliance;
+    const atOk = compliance.states.transport.code === "VALID";
+    const workOk = compliance.states.workGuide.code === "VALID";
     const atCode = activeTransportGuide?.codeAT || activeWorkGuide?.guide?.codeAT || activeWorkGuide?.guideId || "";
 
     const technicianName = $("#fieldTechnicianName");
@@ -385,6 +914,53 @@
       workOk ? "Verde" : "Vermelha",
       workOk ? `Guia de obra #${activeWorkGuide.id} ${activeWorkGuide.guideId ? "ligada a AT." : "provisoria, falta AT."}` : "Sem guia de obra aberta para esta viatura."
     );
+
+    setCrewDocState(
+      "#fieldInsuranceStatus",
+      "fieldInsuranceValue",
+      "fieldInsuranceMeta",
+      compliance.states.insurance,
+      "Seguro válido para operação.",
+      "Seguro ausente, pendente ou expirado."
+    );
+
+    setCrewDocState(
+      "#fieldInspectionStatus",
+      "fieldInspectionValue",
+      "fieldInspectionMeta",
+      compliance.states.inspection,
+      "Inspeção válida para circulação.",
+      "Inspeção ausente, pendente ou expirada."
+    );
+
+    const safetyAggregate = compliance.states.safety.code === "VALID" && compliance.states.manuals.code === "VALID"
+      ? { code: "VALID", label: "Válido" }
+      : (compliance.states.safety.code !== "VALID" ? compliance.states.safety : compliance.states.manuals);
+    setCrewDocState(
+      "#fieldSafetyStatus",
+      "fieldSafetyValue",
+      "fieldSafetyMeta",
+      safetyAggregate,
+      "Fichas de segurança e manuais disponíveis.",
+      "Fichas de segurança/manuais pendentes ou indisponíveis."
+    );
+
+    const center = $("#documentCenterBox");
+    if (center) {
+      center.innerHTML = `
+        <div class="doc-head"><span class="chip">Centro documental</span><strong class="${compliance.readyForOperation ? "status-ok" : "status-warn"}">${compliance.readyForOperation ? "Operacional" : "Bloqueado"}</strong></div>
+        <div class="doc-number">Fonte: ${docsSource === "cache" ? "offline sincronizado" : "online"}</div>
+        <div class="doc-meta">
+          <span>Guia AT: ${esc(compliance.states.transport.label)}</span>
+          <span>Guia obra: ${esc(compliance.states.workGuide.label)}</span>
+          <span>Seguro: ${esc(compliance.states.insurance.label)}</span>
+          <span>Inspeção: ${esc(compliance.states.inspection.label)}</span>
+          <span>Fichas: ${esc(compliance.states.safety.label)}</span>
+          <span>Manuais: ${esc(compliance.states.manuals.label)}</span>
+        </div>
+        ${compliance.reason ? `<div class="muted" data-doc-lock-reason="1">${esc(compliance.reason)}</div>` : '<div class="muted">Documentação obrigatória validada para iniciar e concluir.</div>'}
+      `;
+    }
   }
 
   function currentTechnicianId() {
@@ -393,6 +969,103 @@
     const fromStorage = localStorage.getItem("cwTechnicianId") || "";
     const fromActive = activeTechnician?.id ? String(activeTechnician.id) : "";
     return String(fromQuery || fromInput || fromStorage || fromActive || "").trim();
+  }
+
+  function currentPoolId() {
+    const visit = current();
+    const poolId = visit?.pool?.id || visit?.poolId || "";
+    return String(poolId || "").trim();
+  }
+
+  function parseProposalPhotoLines(value) {
+    return String(value || "")
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .slice(0, 12);
+  }
+
+  function renderTechnicalProposalList() {
+    const list = $("#technicalProposalList");
+    if (!list) return;
+    if (!technicalProposals.length) {
+      list.textContent = "Sem propostas desta piscina nesta sessão.";
+      return;
+    }
+    list.innerHTML = technicalProposals.slice(0, 4).map((item) => {
+      const when = formatDate(item.submittedAt || item.createdAt);
+      const risk = esc(item.riskLevel || "MEDIUM");
+      const reason = esc(item.reason || "Sem motivo");
+      const changesCount = Array.isArray(item.changes) ? item.changes.length : 0;
+      const photosCount = Array.isArray(item.photos) ? item.photos.length : 0;
+      return `<div class="interrupt-item" data-tech-proposal-id="${esc(item.id)}"><strong>${risk}</strong><div>${reason}</div><div class="muted">${when} | ${changesCount} alteração(ões) | ${photosCount} foto(s)</div></div>`;
+    }).join("");
+  }
+
+  async function loadTechnicalProposals(poolId) {
+    if (!poolId) {
+      technicalProposals = [];
+      renderTechnicalProposalList();
+      return;
+    }
+    try {
+      const data = await api(`/api/core/pools/${encodeURIComponent(poolId)}/technical-change-proposals?onlyPending=true`);
+      technicalProposals = Array.isArray(data.proposals) ? data.proposals : [];
+      renderTechnicalProposalList();
+    } catch (_) {
+      technicalProposals = [];
+      renderTechnicalProposalList();
+    }
+  }
+
+  async function submitTechnicalProposal() {
+    const poolId = currentPoolId();
+    if (!poolId) {
+      toast("Sem piscina ativa para propor alteração técnica.");
+      return;
+    }
+
+    const field = String($("#proposalFieldName")?.value || "").trim();
+    const before = String($("#proposalBeforeValue")?.value || "").trim();
+    const after = String($("#proposalAfterValue")?.value || "").trim();
+    const reason = String($("#proposalReason")?.value || "").trim();
+    const riskLevel = String($("#proposalRiskLevel")?.value || "").trim();
+    const photos = parseProposalPhotoLines($("#proposalPhotos")?.value || "");
+
+    if (!field || !after) {
+      toast("Indica pelo menos campo e valor depois.");
+      return;
+    }
+    if (!reason) {
+      toast("Motivo obrigatório para submeter proposta.");
+      return;
+    }
+
+    const status = $("#technicalProposalStatus");
+    if (status) status.textContent = "A submeter proposta...";
+
+    const payload = {
+      reason,
+      riskLevel: riskLevel || undefined,
+      photos,
+      changes: [{ field, before: before || null, after }],
+    };
+
+    await api(`/api/core/pools/${encodeURIComponent(poolId)}/technical-change-proposals`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+
+    if (status) status.textContent = "Proposta submetida para análise.";
+    const fieldsToClear = ["proposalFieldName", "proposalBeforeValue", "proposalAfterValue", "proposalReason", "proposalPhotos"];
+    fieldsToClear.forEach((id) => {
+      const node = $(`#${id}`);
+      if (node) node.value = "";
+    });
+    const riskNode = $("#proposalRiskLevel");
+    if (riskNode) riskNode.value = "";
+    await loadTechnicalProposals(poolId);
+    toast("Proposta técnica enviada.");
   }
 
   function todayQueryParams() {
@@ -440,14 +1113,258 @@
     setTileTone("#fieldPhotosTile", photoCount ? "ok" : "");
   }
 
+  function actorName() {
+    const parsed = window.CristalAuth?.parseUser?.() || {};
+    return activeTechnician?.name || parsed?.name || "Tecnico em campo";
+  }
+
+  function opExceptionState() {
+    const value = storageRead(OP_EXCEPTION_STATE_KEY, {});
+    return value && typeof value === "object" ? value : {};
+  }
+
+  function saveOpExceptionState(nextState) {
+    storageWrite(OP_EXCEPTION_STATE_KEY, nextState || {});
+  }
+
+  function opExceptionHistory() {
+    const value = storageRead(OP_EXCEPTION_HISTORY_KEY, []);
+    return Array.isArray(value) ? value : [];
+  }
+
+  function saveOpExceptionHistory(entries) {
+    storageWrite(OP_EXCEPTION_HISTORY_KEY, (entries || []).slice(-200));
+  }
+
+  function appendOpExceptionHistory(entry) {
+    const next = opExceptionHistory();
+    next.push({
+      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      createdAt: new Date().toISOString(),
+      ...entry,
+    });
+    saveOpExceptionHistory(next);
+  }
+
+  function pushOpExceptionCommand(eventType, exception, state) {
+    const queue = storageRead(OP_EXCEPTION_COMMAND_BRIDGE_KEY, []);
+    const safeQueue = Array.isArray(queue) ? queue : [];
+    safeQueue.push({
+      eventType,
+      createdAt: new Date().toISOString(),
+      exceptionId: exception.id,
+      category: exception.category,
+      priority: exception.priority,
+      poolName: exception.poolName || current()?.pool?.name || "",
+      clientName: exception.clientName || current()?.client?.name || "",
+      state,
+    });
+    storageWrite(OP_EXCEPTION_COMMAND_BRIDGE_KEY, safeQueue.slice(-150));
+  }
+
+  function exceptionDurationLabel(isoStart) {
+    if (!isoStart) return "Sem tempo em curso";
+    return elapsedSinceLabel(isoStart);
+  }
+
+  function isVisitDelayed(visit) {
+    if (!visit || isVisitDone(visit)) return false;
+    const planned = new Date(visit.plannedDate || visit.date || 0);
+    if (Number.isNaN(planned.getTime())) return false;
+    return Date.now() - planned.getTime() > 20 * 60 * 1000;
+  }
+
+  function collectOperationalExceptions() {
+    const items = [];
+    const visit = current();
+    const nowIso = new Date().toISOString();
+    const pump = resolvePumpManualSignal(visit);
+
+    if (pump.active) {
+      items.push({
+        id: `pump-manual:${String(visit?.id || "none")}`,
+        category: "PUMP_MANUAL",
+        title: "P0 - Bomba em manual",
+        detail: `Quem ativou: ${pump.who} | Piscina: ${pump.poolName} | Duração: ${pump.duration} | Estado: ${pump.status}`,
+        priority: "P0",
+        createdBy: pump.who || "Sistema",
+        createdAt: pump.since || nowIso,
+        targetAction: "problem",
+      });
+    }
+
+    activeWaterReminders().forEach((reminder) => {
+      items.push({
+        id: `water-open:${String(reminder.localId || reminder.serverId || reminder.id || "none")}`,
+        category: "WATER_OPEN",
+        title: "P0 - Agua aberta",
+        detail: `${reminder.poolName || "Piscina"} | ${reminder.clientName || "Cliente"} | ${waterReminderLabel(reminder)}`,
+        priority: reminder.status === "OVERDUE" ? "P0" : "P1",
+        createdBy: reminder.technicianName || "Tecnico",
+        createdAt: reminder.createdAt || nowIso,
+        targetAction: "water",
+      });
+    });
+
+    const urgentProblems = pendingProblems.filter((problem) => String(problem.severity || "").toUpperCase() === "URGENTE");
+    if (urgentProblems.length) {
+      const first = urgentProblems[0];
+      items.push({
+        id: `critical-problem:${String(first.visitId || visit?.id || "none")}`,
+        category: "CRITICAL_PROBLEM",
+        title: "P0 - Problema critico",
+        detail: `${urgentProblems.length} problema(s) critico(s) pendente(s).`,
+        priority: "P0",
+        createdBy: actorName(),
+        createdAt: first.createdAt || nowIso,
+        targetAction: "problem",
+      });
+    }
+
+    if (isVisitDelayed(visit)) {
+      items.push({
+        id: `visit-delayed:${String(visit?.id || "none")}`,
+        category: "VISIT_DELAYED",
+        title: "P1 - Visita atrasada",
+        detail: `${visit?.pool?.name || "Piscina"} com atraso face ao planeado.`,
+        priority: "P1",
+        createdBy: "Sistema",
+        createdAt: visit?.plannedDate || visit?.date || nowIso,
+        targetAction: "hoje",
+      });
+    }
+
+    if (!opsSnapshot.docsReady) {
+      items.push({
+        id: `docs-missing:${String(visit?.id || "none")}`,
+        category: "DOC_MISSING",
+        title: "P1 - Documento obrigatorio em falta",
+        detail: opsSnapshot.docsBlockReason || "Documentacao da viatura incompleta para operacao segura.",
+        priority: "P1",
+        createdBy: "Sistema",
+        createdAt: nowIso,
+        targetAction: "docs",
+      });
+    }
+
+    return items;
+  }
+
+  function ensureOperationalExceptionState(exceptions) {
+    const state = opExceptionState();
+    let changed = false;
+    const nowIso = new Date().toISOString();
+
+    exceptions.forEach((exception) => {
+      if (!state[exception.id]) {
+        state[exception.id] = {
+          status: "OPEN",
+          createdBy: exception.createdBy || "Sistema",
+          createdAt: exception.createdAt || nowIso,
+          receivedBy: actorName(),
+          receivedAt: nowIso,
+          openLogged: false,
+        };
+        changed = true;
+      }
+
+      if (!state[exception.id].openLogged) {
+        appendOpExceptionHistory({
+          action: "OPEN",
+          by: state[exception.id].createdBy || "Sistema",
+          exceptionId: exception.id,
+          title: exception.title,
+          detail: exception.detail,
+        });
+        pushOpExceptionCommand("OPEN", exception, state[exception.id]);
+        state[exception.id].openLogged = true;
+        changed = true;
+      }
+    });
+
+    if (changed) saveOpExceptionState(state);
+    return state;
+  }
+
+  function updateOperationalException(exceptionId, updater) {
+    const state = opExceptionState();
+    const currentState = state[exceptionId];
+    if (!currentState) return;
+    const nextState = { ...currentState };
+    updater(nextState);
+    state[exceptionId] = nextState;
+    saveOpExceptionState(state);
+    renderInterruptBoard();
+  }
+
+  function assumeOperationalException(exception) {
+    updateOperationalException(exception.id, (nextState) => {
+      nextState.status = "ASSUMED";
+      nextState.assumedBy = actorName();
+      nextState.assumedAt = new Date().toISOString();
+      appendOpExceptionHistory({
+        action: "ASSUMED",
+        by: nextState.assumedBy,
+        exceptionId: exception.id,
+        title: exception.title,
+      });
+      pushOpExceptionCommand("ASSUMED", exception, nextState);
+    });
+    toast("Excecao assumida.");
+  }
+
+  function confirmOperationalException(exception) {
+    updateOperationalException(exception.id, (nextState) => {
+      nextState.status = "CONFIRMED";
+      nextState.confirmedBy = actorName();
+      nextState.confirmedAt = new Date().toISOString();
+      appendOpExceptionHistory({
+        action: "CONFIRMED",
+        by: nextState.confirmedBy,
+        exceptionId: exception.id,
+        title: exception.title,
+      });
+      pushOpExceptionCommand("CONFIRMED", exception, nextState);
+    });
+    toast("Excecao confirmada.");
+  }
+
+  function resolveOperationalException(exception) {
+    updateOperationalException(exception.id, (nextState) => {
+      nextState.status = "RESOLVED";
+      nextState.resolvedBy = actorName();
+      nextState.resolvedAt = new Date().toISOString();
+      appendOpExceptionHistory({
+        action: "RESOLVED",
+        by: nextState.resolvedBy,
+        exceptionId: exception.id,
+        title: exception.title,
+      });
+      pushOpExceptionCommand("RESOLVED", exception, nextState);
+    });
+    toast("Excecao resolvida.");
+  }
+
+  function renderExceptionHistory(history) {
+    if (!history.length) {
+      return '<div class="interrupt-item" data-history-empty="1">Sem historico local de excecoes.</div>';
+    }
+    return history.slice(-6).reverse().map((entry) => `
+      <div class="interrupt-item" data-history-entry="${esc(entry.id || "")}" style="border-style:dashed">
+        <strong>${esc(entry.action || "EVENT")}</strong>
+        <div>${esc(entry.title || "Excecao operacional")}</div>
+        <div class="muted">${esc(formatDate(entry.createdAt))} | ${esc(entry.by || "Sistema")}</div>
+      </div>
+    `).join("");
+  }
+
   function updateFieldDashboard(visit) {
     const done = visits.filter(isVisitDone).length;
     const total = visits.length;
     const pending = Math.max(total - done, 0);
-    const hasTransport = guideHasTransportReference();
-    const hasWorkGuide = Boolean(activeWorkGuide?.id);
-    const docsReady = hasTransport && hasWorkGuide;
-    const readyDocs = [hasTransport, hasWorkGuide].filter(Boolean).length;
+    const compliance = docsCompliance || computeDocsCompliance();
+    const docsReady = Boolean(compliance.readyForOperation);
+    const readyDocs = Object.values(compliance.states).filter((state) => state.code === "VALID").length;
     const photoCount = visitPhotos.length;
     const location = visit ? visitLocation(visit) : null;
 
@@ -459,27 +1376,177 @@
     const docsMeta = $("#fieldDocsMeta");
     const photosValue = $("#fieldPhotosValue");
     const photosMeta = $("#fieldPhotosMeta");
+    const heroLabel = $("#fieldHeroLabel");
+    const heroActions = $("#fieldHeroActions");
+    const heroTile = $("#fieldHeroTile");
+    const userName = String(window.CristalAuth?.parseUser?.().name || activeTechnician?.name || "").trim();
+    const firstName = userName ? userName.split(/\s+/)[0] : "Técnico";
+    const exceptions = collectOperationalExceptions().filter((item) => item && item.id);
+    const stateById = ensureOperationalExceptionState(exceptions);
+    const openExceptions = exceptions.filter((item) => (stateById[item.id]?.status || "OPEN") !== "RESOLVED");
+    const openAlerts = openExceptions.length;
+    const hasWaterOpen = openExceptions.some((item) => item.category === "WATER_OPEN");
+    const hasManualPump = openExceptions.some((item) => item.category === "PUMP_MANUAL");
+    const hasActiveVisit = Boolean(visit);
+    const hasIntervention = hasActiveIntervention(visit);
+    const hasP0 = openExceptions.some((item) => String(item.priority || "").toUpperCase() === "P0") || hasManualPump;
 
-    if (focusNow) focusNow.textContent = visit ? (visit.pool?.name || "Piscina") : "Dia concluido";
-    if (focusMeta) {
-      focusMeta.textContent = visit
-        ? `${visit.client?.name || "Cliente"} - ${location?.address || visit.pool?.zone || "local por confirmar"}`
-        : "Sem visitas pendentes nesta ronda.";
+    function setHeroButton(index, text, action, variant = "secondary") {
+      const button = heroActions?.querySelector(`button:nth-child(${index + 1})`);
+      if (!button) return;
+      if (!text || !action) {
+        button.hidden = true;
+        return;
+      }
+      button.hidden = false;
+      button.textContent = text;
+      button.dataset.heroAction = action;
+      button.classList.remove("primary", "secondary");
+      button.classList.add(variant);
     }
 
-    if (progressValue) progressValue.textContent = `${done} / ${total}`;
-    if (progressMeta) progressMeta.textContent = pending ? `${pending} visita(s) por concluir` : "Ronda pronta para fechar";
+    document.body.dataset.fieldMode = hasActiveVisit ? "active" : "free";
+    document.body.dataset.fieldPriority = hasP0 ? "p0" : "normal";
+    if (heroTile) heroTile.classList.toggle("p0", hasP0);
 
-    if (docsValue) docsValue.textContent = `${readyDocs} / 2`;
-    if (docsMeta) docsMeta.textContent = docsReady ? "AT e guia de obra prontas" : "ver luzes AT/obra";
+    if (heroLabel) {
+      heroLabel.textContent = hasP0 ? "Prioridade P0" : `Bom dia, ${firstName}`;
+    }
 
-    if (photosValue) photosValue.textContent = `${photoCount} foto${photoCount === 1 ? "" : "s"}`;
-    if (photosMeta) photosMeta.textContent = photoCount ? "registos prontos para sincronizar" : "sem fotos nesta visita";
+    if (focusNow) {
+      if (hasP0) {
+        focusNow.textContent = hasWaterOpen ? "Água aberta" : "Bomba em manual";
+      } else if (visit) {
+        focusNow.textContent = visit.pool?.name || (hasManualPump ? "Bomba em manual" : "Piscina");
+      } else {
+        focusNow.textContent = openAlerts ? (hasWaterOpen ? "Água aberta ativa" : (hasManualPump ? "Bomba em manual" : "Há alertas ativos")) : "Hoje está livre";
+      }
+    }
+    if (focusMeta) {
+      if (hasP0) {
+        focusMeta.textContent = "Alerta crítico ativo. Trate primeiro e só depois continue a ronda.";
+      } else if (visit) {
+        focusMeta.textContent = `${visit.client?.name || "Cliente"} - ${location?.address || visit.pool?.zone || "local por confirmar"}`;
+      } else {
+        const statParts = [
+          `${total} piscina${total === 1 ? "" : "s"}`,
+          `${openAlerts} alerta${openAlerts === 1 ? "" : "s"}`,
+          `${hasWaterOpen ? 1 : 0} água aberta`,
+          `${hasManualPump ? 1 : 0} bomba manual`,
+        ];
+        focusMeta.textContent = `Não tens visitas atribuídas neste momento. ${statParts.join(" · ")}.`;
+      }
+    }
 
-    setTileTone("#fieldProgressTile", pending ? "" : "ok");
-    setTileTone("#fieldDocsTile", docsReady ? "ok" : "warn");
-    setTileTone("#fieldPhotosTile", photoCount ? "ok" : "");
+    if (progressValue) progressValue.textContent = visit ? `${done} / ${total}` : `${total} / ${total}`;
+    if (progressMeta) progressMeta.textContent = visit ? (pending ? `${pending} visita(s) por concluir` : "Ronda pronta para fechar") : "Agenda livre neste momento";
+
+    if (docsValue) docsValue.textContent = visit ? `${readyDocs} / 6` : "Ver agenda";
+    if (docsMeta) docsMeta.textContent = visit ? (docsReady ? "Documentação obrigatória validada" : (compliance.reason || "ver estados documentais")) : "Sem visitas para abrir documentos agora";
+
+    if (photosValue) photosValue.textContent = visit ? `${photoCount} foto${photoCount === 1 ? "" : "s"}` : "0 fotos";
+    if (photosMeta) photosMeta.textContent = visit ? (photoCount ? "registos prontos para sincronizar" : "sem fotos nesta visita") : "Sem visita ativa para registo fotográfico";
+
+    if (heroActions) {
+      heroActions.hidden = false;
+      if (hasP0) {
+        setHeroButton(0, "Tratar alerta", "p0", "primary");
+        setHeroButton(1, "Continuar", "continue", "secondary");
+        setHeroButton(2, "Comunicar", "contact", "secondary");
+      } else if (!hasActiveVisit) {
+        setHeroButton(0, "Atualizar", "refresh", "primary");
+        setHeroButton(1, "Ver agenda", "agenda", "secondary");
+        setHeroButton(2, "Comunicar", "contact", "secondary");
+      } else if (hasIntervention) {
+        setHeroButton(0, "Continuar", "continue", "primary");
+        setHeroButton(1, "Navegar", "map", "secondary");
+        setHeroButton(2, "Comunicar", "contact", "secondary");
+      } else {
+        setHeroButton(0, "Abrir visita", "openVisit", "primary");
+        setHeroButton(1, "Navegar", "map", "secondary");
+        setHeroButton(2, "Comunicar", "contact", "secondary");
+      }
+    }
+
+    const freeMode = !visit;
+    setTileTone("#fieldProgressTile", freeMode ? "" : (pending ? "" : "ok"));
+    setTileTone("#fieldDocsTile", freeMode ? "" : (docsReady ? "ok" : "warn"));
+    setTileTone("#fieldPhotosTile", freeMode ? "" : (photoCount ? "ok" : ""));
+    const progressTile = $("#fieldProgressTile");
+    const docsTile = $("#fieldDocsTile");
+    const photosTile = $("#fieldPhotosTile");
+    if (progressTile) progressTile.hidden = freeMode;
+    if (docsTile) docsTile.hidden = freeMode;
+    if (photosTile) photosTile.hidden = freeMode;
+    const routeCard = $("#routeCard");
+    const dayVisitsCard = $("#dayVisitsCard");
+    if (routeCard) routeCard.hidden = freeMode;
+    if (dayVisitsCard) dayVisitsCard.hidden = freeMode;
+    opsSnapshot = { docsReady, done, total, pending, docsBlockReason: compliance.reason || "" };
     renderCrewStatus();
+    renderInterruptBoard();
+  }
+
+  function renderInterruptBoard() {
+    const card = $("#interruptCard");
+    const summary = $("#interruptSummary");
+    const list = $("#interruptList");
+    if (!card || !summary || !list) return;
+
+    const exceptions = collectOperationalExceptions().filter((item) => item && item.id);
+    const stateById = ensureOperationalExceptionState(exceptions);
+    const openExceptions = exceptions.filter((item) => {
+      const status = stateById[item.id]?.status || "OPEN";
+      return status !== "RESOLVED";
+    });
+    const history = opExceptionHistory();
+
+    if (!openExceptions.length && !history.length) {
+      card.hidden = true;
+      summary.textContent = "Sem alertas críticos neste momento.";
+      list.innerHTML = "";
+      return;
+    }
+
+    card.hidden = false;
+    summary.textContent = openExceptions.length
+      ? "Fluxo interrompido por excecoes operacionais. Assumir, confirmar e resolver antes de continuar."
+      : "Sem excecoes abertas. Historico local disponivel para auditoria.";
+
+    const exceptionsHtml = openExceptions.map((item) => {
+      const state = stateById[item.id] || {};
+      const status = state.status || "OPEN";
+      const canAssume = status === "OPEN";
+      const canConfirm = ["ASSUMED", "OPEN"].includes(status);
+      const canResolve = status !== "RESOLVED";
+      const createdAt = state.createdAt || item.createdAt || new Date().toISOString();
+      return `
+      <div class="interrupt-item" data-exception-id="${esc(item.id)}" data-exception-category="${esc(item.category)}">
+        <strong>${esc(item.title)}</strong>
+        <div>${esc(item.detail)}</div>
+        <div class="muted">Prioridade: ${esc(item.priority)} | Estado: ${esc(status)}</div>
+        <div class="muted">Responsabilidade: criou ${esc(state.createdBy || item.createdBy || "Sistema")} | recebeu ${esc(state.receivedBy || "Tecnico")}</div>
+        <div class="muted">Assumiu: ${esc(state.assumedBy || "pendente")} | Confirmou: ${esc(state.confirmedBy || "pendente")} | Resolveu: ${esc(state.resolvedBy || "pendente")}</div>
+        <div class="muted">Tempo em curso: ${esc(exceptionDurationLabel(createdAt))}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+          ${item.targetAction ? `<button type="button" data-interrupt-action="target" data-interrupt-target="${esc(item.targetAction)}" data-exception-id="${esc(item.id)}">Abrir</button>` : ""}
+          ${canAssume ? `<button type="button" data-interrupt-action="assume" data-exception-id="${esc(item.id)}">Assumir</button>` : ""}
+          ${canConfirm ? `<button type="button" data-interrupt-action="confirm" data-exception-id="${esc(item.id)}">Confirmar</button>` : ""}
+          ${canResolve ? `<button type="button" data-interrupt-action="resolve" data-exception-id="${esc(item.id)}">Resolver</button>` : ""}
+        </div>
+      </div>
+    `;
+    }).join("");
+
+    const historyHtml = `
+      <div class="interrupt-item" data-history-header="1" style="border-style:dashed">
+        <strong>Historico local de excecoes</strong>
+        <div class="muted">Auditoria local para notificacoes e Centro de Comando.</div>
+      </div>
+      ${renderExceptionHistory(history)}
+    `;
+
+    list.innerHTML = `${exceptionsHtml}${historyHtml}`;
   }
 
   function mapsSearchUrl(visit) {
@@ -508,10 +1575,10 @@
     if (!title || !summary || !mapBox || !meta || !navLink || !mapsLink) return;
 
     if (!visit) {
-      title.textContent = "Sem proximo servico";
-      summary.textContent = "A ronda nao tem mais piscinas pendentes.";
-      mapBox.innerHTML = '<div class="map-fallback">Ronda concluida.</div>';
-      meta.innerHTML = "";
+      title.textContent = "Hoje livre";
+      summary.textContent = "Não tens visitas atribuídas neste momento.";
+      mapBox.innerHTML = '<div class="map-fallback">Atualiza a agenda ou comunica com o administrador.</div>';
+      meta.innerHTML = `<span>Sem próxima piscina para navegar.</span>`;
       navLink.href = "#";
       mapsLink.href = "#";
       return;
@@ -1232,6 +2299,7 @@
     const active = activeWaterReminders().sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt));
     if (!active.length) {
       list.innerHTML = '<div class="muted">Sem lembretes de agua aberta.</div>';
+      renderInterruptBoard();
       return;
     }
 
@@ -1266,6 +2334,7 @@
     list.querySelectorAll("[data-water-alarm]").forEach((button) => {
       button.addEventListener("click", () => escalateWaterReminder(button.dataset.waterAlarm, true));
     });
+    renderInterruptBoard();
   }
 
   function clearWaterTimer(localId) {
@@ -1558,6 +2627,9 @@
     if (transportBox) transportBox.innerHTML = '<div class="doc-number">A carregar guia AT...</div>';
     if (workBox) workBox.innerHTML = '<div class="doc-number">A carregar guia de obra...</div>';
 
+    docsSource = "live";
+    const cachedDocs = readDocsCache(vehicleId);
+
     const [transportResult, stockResult, insuranceResult] = await Promise.allSettled([
       api(`/api/guides/transport/latest/${encodeURIComponent(vehicleId)}`),
       api(`/api/guides/stock/${encodeURIComponent(vehicleId)}${technicianId ? `?technicianId=${encodeURIComponent(technicianId)}` : ""}`),
@@ -1568,6 +2640,12 @@
       activeTransportGuide = transportResult.value.guide || null;
       activeVehicle = activeTransportGuide?.vehicle || activeVehicle;
       renderTransportGuide(transportResult.value.guide, transportResult.value.items);
+      docsSource = "live";
+    } else if (cachedDocs?.transport) {
+      activeTransportGuide = cachedDocs.transport.guide || null;
+      activeVehicle = cachedDocs.transport.vehicle || activeVehicle;
+      renderTransportGuide(cachedDocs.transport.guide, cachedDocs.transport.items || []);
+      docsSource = "cache";
     } else {
       activeTransportGuide = null;
       renderTransportGuide(null, []);
@@ -1579,6 +2657,13 @@
       activeVehicle = activeWorkGuide?.vehicle || activeVehicle;
       activeTechnician = activeWorkGuide?.technician || activeTechnician;
       renderWorkGuide(stockResult.value.workGuide, stockResult.value.stock, stockResult.value.movements);
+      docsSource = "live";
+    } else if (cachedDocs?.work) {
+      activeWorkGuide = cachedDocs.work.workGuide || null;
+      activeWorkStock = cachedDocs.work.stock || [];
+      activeVehicle = cachedDocs.work.vehicle || activeVehicle;
+      renderWorkGuide(cachedDocs.work.workGuide, cachedDocs.work.stock || [], cachedDocs.work.movements || []);
+      docsSource = "cache";
     } else {
       activeWorkGuide = null;
       activeWorkStock = [];
@@ -1591,15 +2676,41 @@
       activeVehicle = insuranceResult.value.vehicle || activeVehicle;
       activeInsurance = insuranceResult.value.insurance || null;
       renderInsurance(insuranceResult.value.vehicle, insuranceResult.value.insurance, vehicleId);
+      docsSource = "live";
+    } else if (cachedDocs?.insurance) {
+      activeVehicle = cachedDocs.insurance.vehicle || activeVehicle;
+      activeInsurance = cachedDocs.insurance.insurance || null;
+      renderInsurance(cachedDocs.insurance.vehicle, cachedDocs.insurance.insurance, vehicleId);
+      docsSource = "cache";
     } else {
       activeInsurance = null;
       renderInsurance(null, null, vehicleId);
     }
 
+    if (transportResult.status === "fulfilled" || stockResult.status === "fulfilled" || insuranceResult.status === "fulfilled") {
+      saveDocsCache(vehicleId, {
+        transport: {
+          guide: activeTransportGuide,
+          items: transportResult.status === "fulfilled" ? (transportResult.value.items || []) : (cachedDocs?.transport?.items || []),
+          vehicle: activeTransportGuide?.vehicle || activeVehicle || null,
+        },
+        work: {
+          workGuide: activeWorkGuide,
+          stock: activeWorkStock,
+          movements: stockResult.status === "fulfilled" ? (stockResult.value.movements || []) : (cachedDocs?.work?.movements || []),
+          vehicle: activeWorkGuide?.vehicle || activeVehicle || null,
+        },
+        insurance: {
+          vehicle: activeVehicle || null,
+          insurance: activeInsurance || null,
+        },
+      });
+    }
+
     updateFieldDashboard(current());
     renderCrewStatus();
 
-    if (showFeedback) toast("Guias atualizadas.");
+    if (showFeedback) toast(docsSource === "cache" ? "Documentos carregados em modo offline sincronizado." : "Guias atualizadas.");
   }
 
   function resetForm() {
@@ -1629,31 +2740,120 @@
     renderPhotoList();
   }
 
-  function renderList() {
-    const list = $("#visitList");
-    if (!list) return;
-    if (!visits.length) {
-      list.innerHTML = '<div class="visit">Sem visitas pendentes.</div>';
+  function poolFilterGroup(code) {
+    if (code === "DONE") return "DONE";
+    if (["IN_PROGRESS", "WATER_OPEN", "WAITING_MATERIAL", "CRITICAL"].includes(code)) return "IN_PROGRESS";
+    return "TODO";
+  }
+
+  function renderNowBoard(visit) {
+    const stateLine = $("#nowStateLine");
+    const responsibleLine = $("#nowResponsibleLine");
+    const timingLine = $("#nowTimingLine");
+    if (!stateLine || !responsibleLine || !timingLine) return;
+
+    if (!visit) {
+      stateLine.textContent = "Hoje está livre";
+      responsibleLine.textContent = "Ver agenda ou comunicar com o administrador";
+      timingLine.textContent = "Sem intervenção ativa neste momento";
       return;
     }
-    list.innerHTML = visits.map((visit, i) => {
+
+    const stateLabel = operationalStateLabel(visit);
+    const technicianName = visit?.technician?.name || activeTechnician?.name || "Técnico por confirmar";
+    const taskType = pendingProblems.length ? "Reparação" : "Manutenção";
+    stateLine.textContent = `${visit.pool?.name || "Piscina"} · ${stateLabel}`;
+    responsibleLine.textContent = `${technicianName} · ${taskType}`;
+    timingLine.textContent = elapsedMinutesLabel(visit.startAt || startedAt);
+  }
+
+  function renderList() {
+    const list = $("#visitList");
+    const segments = $("#poolSegments");
+    if (!list) return;
+
+    if (segments) {
+      segments.querySelectorAll("[data-pool-filter]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.poolFilter === activePoolFilter);
+      });
+    }
+
+    if (!visits.length) {
+      list.innerHTML = `
+        <div class="visit">
+          <div class="visit-top">
+            <b>Hoje está livre</b>
+            <span class="chip">Sem visitas</span>
+          </div>
+          <span>Não existem visitas atribuídas neste momento.</span>
+          <div class="visit-state">Atualiza a agenda, abre o calendário ou comunica com o administrador.</div>
+        </div>
+      `;
+      return;
+    }
+
+    const grouped = {
+      TODO: [],
+      IN_PROGRESS: [],
+      DONE: [],
+    };
+
+    visits.forEach((visit, i) => {
+      const code = operationalStateCode(visit);
+      const group = poolFilterGroup(code);
+      grouped[group].push({ visit, i, code });
+    });
+
+    const groupOrder = activePoolFilter === "ALL" ? ["TODO", "IN_PROGRESS", "DONE"] : [activePoolFilter];
+    const groupTitle = {
+      TODO: "Por fazer",
+      IN_PROGRESS: "Em curso",
+      DONE: "Concluídas",
+    };
+
+    const html = groupOrder.map((groupKey) => {
+      const rows = grouped[groupKey] || [];
+      if (!rows.length) {
+        return `
+          <div class="visit-group">
+            <div class="visit-group-title">${groupTitle[groupKey]}</div>
+            <div class="empty">Sem piscinas neste estado.</div>
+          </div>
+        `;
+      }
+
+      const rowsHtml = rows.map(({ visit, i, code }) => {
       const location = visitLocation(visit);
       const done = isVisitDone(visit);
       const status = done ? "Feita / pode corrigir" : (visit.status || "Pendente");
+      const techName = visit?.technician?.name || activeTechnician?.name || "Técnico";
+      const taskType = pendingProblems.length ? "Reparação" : "Manutenção";
+      const stateLabel = POOL_STATE[code] || POOL_STATE.TODO;
       return `
       <button class="visit ${i === index ? "active" : ""} ${done ? "done" : ""}" type="button" data-visit-index="${i}">
         <div class="visit-top">
           <b>${esc(visit.pool?.name || "Piscina")}</b>
-          <span class="chip">${esc(status)}</span>
+          <span class="chip">${esc(stateLabel)}</span>
         </div>
         <span>${esc(visit.client?.name || "Cliente")}</span>
+        <div class="visit-state">${esc(techName)} · ${esc(elapsedMinutesLabel(visit.startAt))} · ${esc(taskType)} · ${esc(status)}</div>
         <div class="visit-location">
           <span>Local: ${esc(location.address || visit.pool?.zone || "Localizacao por confirmar")}</span>
           <span>${location.lat && location.lng ? `GPS: ${esc(location.lat.toFixed(5))}, ${esc(location.lng.toFixed(5))}` : "GPS por registar"}</span>
         </div>
       </button>
     `;
+      }).join("");
+
+      return `
+        <div class="visit-group">
+          <div class="visit-group-title">${groupTitle[groupKey]}</div>
+          ${rowsHtml}
+        </div>
+      `;
     }).join("");
+
+    list.innerHTML = html;
 
     list.querySelectorAll("[data-visit-index]").forEach((button) => {
       button.addEventListener("click", () => selectVisit(Number(button.dataset.visitIndex)));
@@ -1786,7 +2986,7 @@
     }
     loadCurrentDraft();
     render();
-    switchFieldTab("route", true);
+    switchFieldTab("hoje", true);
     toast(source === "tomorrow" ? "Ronda de amanha aberta." : "Visita de apoio aberta.");
   }
 
@@ -1857,9 +3057,10 @@
     saveCurrentDraft();
     index = nextIndex;
     loadCurrentDraft();
+    persistFieldUiState();
     render();
     if (isVisitDone(current())) {
-      switchFieldTab("service");
+      switchFieldTab("agora");
       toast("Visita feita aberta para corrigir.");
     }
   }
@@ -1873,25 +3074,28 @@
 
   function render() {
     const visit = current();
-    $("#progressText").textContent = visits.length ? `${Math.min(index + 1, visits.length)} de ${visits.length} visitas` : "Sem visitas pendentes";
+    $("#progressText").textContent = visits.length ? `${Math.min(index + 1, visits.length)} de ${visits.length} visitas` : "Hoje livre";
 
     if (!visit) {
-      $("#nextTitle").textContent = "Ronda concluida";
-      $("#nextMeta").textContent = "Podes ajudar colegas que ainda tenham piscinas pendentes ou antecipar a ronda do proximo dia.";
+      $("#nextTitle").textContent = "Hoje livre";
+      $("#nextMeta").textContent = "Não tens visitas atribuídas. Atualiza a agenda, vê o calendário ou comunica com o administrador.";
       if ($("#startBtn")) {
         $("#startBtn").disabled = false;
-        $("#startBtn").textContent = "Ajudar colegas";
+        $("#startBtn").textContent = "Atualizar agenda";
       }
       $("#finishBtn").disabled = false;
-      $("#finishBtn").textContent = "Ronda de amanha";
-      $("#connectionState").textContent = "Concluido";
+      $("#finishBtn").textContent = "Ver agenda";
+      $("#connectionState").textContent = "Livre";
       renderCorrectionSummary(null);
       renderAccessCard(null);
       renderRouteCard(null);
       renderList();
+      renderNowBoard(null);
       updateFieldDashboard(null);
       renderAssistPanel();
       loadAssistOptions(false);
+      technicalProposals = [];
+      renderTechnicalProposalList();
       return;
     }
 
@@ -1909,7 +3113,10 @@
     renderAccessCard(visit);
     renderRouteCard(visit);
     renderList();
+    renderNowBoard(visit);
     updateFieldDashboard(visit);
+    loadTechnicalProposals(currentPoolId());
+    persistFieldUiState();
   }
 
   async function load() {
@@ -1924,6 +3131,8 @@
     }
 
     try {
+      const fallbackState = readFieldUiState();
+      const returnContract = readReturnContract();
       const todayQuery = todayQueryParams();
       let data = await api(`/api/technician/today?${todayQuery}`).catch(() => null);
       if (!data || !Array.isArray(data.visits)) {
@@ -1932,8 +3141,7 @@
       } else {
         visits = data.visits;
       }
-      index = visits.findIndex((visit) => !isVisitDone(visit));
-      if (index < 0) index = visits.length;
+      applyReturnState(returnContract, fallbackState);
       visitDrafts = storageRead("cwFieldVisitDrafts", {});
       loadWaterRemindersFromStorage();
       loadCurrentDraft();
@@ -1941,7 +3149,25 @@
       scheduleWaterReminders();
       syncTechnicianContextFromVisit(current());
       render();
+      const preferredTab = normalizeFieldTab(
+        returnContract?.activeTab || fallbackState?.activeTab || initialOperationalTab(),
+        initialOperationalTab()
+      );
+      switchFieldTab(preferredTab);
+      activePoolFilter = readDomActivePoolFilter(activePoolFilter || "TODO");
+      const scrollToY = Number.isFinite(Number(returnContract?.scrollY))
+        ? Math.max(0, Number(returnContract.scrollY))
+        : (Number.isFinite(Number(fallbackState?.scrollY)) ? Math.max(0, Number(fallbackState.scrollY)) : 0);
+      if (scrollToY > 0) {
+        window.setTimeout(() => {
+          window.scrollTo({ top: scrollToY, behavior: "auto" });
+        }, 40);
+      }
+      clearReturnContract();
+      stripReturnParamsFromUrl();
+      persistFieldUiState();
       await loadGuides(false).catch(() => renderCrewStatus());
+      await loadTechnicalProposals(currentPoolId());
     } catch (error) {
       $("#nextTitle").textContent = "Nao foi possivel carregar";
       $("#nextMeta").textContent = error.message;
@@ -2025,6 +3251,7 @@
     } else {
       toast("Problema nas notas. Sera enviado ao concluir.");
     }
+    renderInterruptBoard();
   }
 
   function savePendingAdminAlert(payload, error) {
@@ -2115,7 +3342,20 @@
   }
 
   function switchFieldTab(tab, shouldScroll = false) {
-    const safeTab = ["service", "route", "list", "docs", "more"].includes(tab) ? tab : "service";
+    if (tab === "mapa") {
+      activePoolFilter = normalizePoolFilter(
+        document.querySelector("#poolSegments [data-pool-filter].active")?.dataset?.poolFilter,
+        activePoolFilter
+      );
+      writeLastExplicitFilter(activePoolFilter);
+      const contract = buildMapReturnContract();
+      persistMapReturnContract(contract);
+      persistFieldUiState();
+      window.location.href = buildMapRouteFromContract(contract);
+      return;
+    }
+
+    const safeTab = ["hoje", "agora", "docs", "more"].includes(tab) ? tab : "hoje";
     document.body.dataset.fieldTab = safeTab;
     try {
       localStorage.setItem("cwFieldActiveTab", safeTab);
@@ -2123,6 +3363,7 @@
     document.querySelectorAll("[data-field-tab-button]").forEach((button) => {
       button.classList.toggle("active", button.dataset.fieldTabButton === safeTab);
     });
+    persistFieldUiState();
     if (shouldScroll) {
       window.setTimeout(() => scrollFieldTabIntoView(safeTab), 0);
     }
@@ -2131,41 +3372,28 @@
   function setupFieldLayout() {
     document.body.classList.add("cw-tech-field-page");
 
-    markFieldSection("#cleaningCard", "field-panel-service", "Servico", "limpeza e leituras");
-    markFieldSection("#doseRows", "field-panel-service", "Produtos", "consumo do carro");
-    markFieldSection("#photoList", "field-panel-service", "Fotografias", "registo rapido");
-    markFieldSection("#accessCard", "field-panel-route", "Acesso", "chaves e codigos");
-    markFieldSection("#routeCard", "field-panel-route", "Rota", "proximo local");
-    markFieldSection("#visitList", "field-panel-list", "Lista do dia", "corrigir ou avancar");
-    markFieldSection(".crew-card", "field-panel-docs", "Tecnico", "viatura e documentos");
+    markFieldSection("#cleaningCard", "field-panel-agora", "Servico", "limpeza e leituras");
+    markFieldSection("#doseRows", "field-panel-agora", "Produtos", "consumo do carro");
+    markFieldSection("#photoList", "field-panel-agora", "Fotografias", "registo rapido");
+    markFieldSection("#accessCard", "field-panel-agora", "Acesso", "chaves e codigos");
+    markFieldSection("#routeCard", "field-panel-hoje", "Rota", "proximo local");
+    markFieldSection("#visitList", "field-panel-hoje", "Lista do dia", "corrigir ou avancar");
+    markFieldSection(".crew-card", "field-panel-agora", "Tecnico", "viatura e documentos");
     markFieldSection("#transportGuideBox", "field-panel-docs", "Documentos", "AT, obra e seguro");
     markFieldSection("#waterReminderList", "field-panel-more", "Agua aberta", "alarme obrigatorio");
     markFieldSection("#adminAlertMessage", "field-panel-more", "Avisos", "admin e stock");
     markFieldSection("#problemPanel", "field-panel-more", "Extras / problemas", "separado do servico");
-
-    const nextCard = document.querySelector(".next");
-    if (nextCard && !nextCard.querySelector(".field-action-rail")) {
-      const rail = document.createElement("div");
-      rail.className = "field-action-rail";
-      rail.innerHTML = `
-        <button type="button" data-quick-tab="route">Ir</button>
-        <button type="button" data-quick-tab="service">Servico</button>
-        <button type="button" data-quick-action="photo">Fotos</button>
-        <button type="button" data-quick-action="problem">Problema</button>
-      `;
-      nextCard.appendChild(rail);
-    }
 
     if (!document.querySelector(".field-tabs")) {
       const nav = document.createElement("nav");
       nav.className = "field-tabs";
       nav.setAttribute("aria-label", "Navegacao do tecnico em campo");
       nav.innerHTML = `
-        <button type="button" data-field-tab-button="list">Today</button>
-        <button type="button" data-field-tab-button="route">Route</button>
-        <button type="button" data-field-tab-button="service">Visit</button>
-        <button type="button" data-field-tab-button="more">Alerts</button>
-        <button type="button" data-field-tab-button="menu">Menu</button>
+        <button type="button" data-field-tab-button="hoje">Hoje</button>
+        <button type="button" data-field-tab-button="agora">Agora</button>
+        <button type="button" data-field-tab-button="mapa">Mapa</button>
+        <button type="button" data-field-tab-button="docs">Documentos</button>
+        <button type="button" data-field-tab-button="more">Mais</button>
       `;
       document.body.appendChild(nav);
     }
@@ -2173,37 +3401,107 @@
     document.querySelectorAll("[data-field-tab-button]").forEach((button) => {
       button.addEventListener("click", () => {
         const tab = button.dataset.fieldTabButton;
-        if (tab === "menu") {
-          const opener = document.querySelector("[data-cw-open-drawer]");
-          if (opener) {
-            opener.click();
-          } else {
-            const drawer = document.querySelector("[data-cw-drawer]");
-            drawer?.classList.add("is-open");
-            drawer?.setAttribute("aria-hidden", "false");
-          }
-          return;
-        }
         switchFieldTab(tab, true);
       });
     });
-    document.querySelectorAll("[data-quick-tab]").forEach((button) => {
-      button.addEventListener("click", () => switchFieldTab(button.dataset.quickTab, true));
-    });
-    document.querySelectorAll("[data-quick-action='photo']").forEach((button) => {
+    document.querySelectorAll("[data-hero-action]").forEach((button) => {
       button.addEventListener("click", () => {
-        switchFieldTab("service");
-        const photoButton = document.querySelector("[data-photo-type='AFTER']");
-        photoButton?.scrollIntoView({ behavior: "smooth", block: "center" });
-        photoButton?.focus();
+        const action = button.dataset.heroAction;
+        if (action === "refresh") {
+          load();
+          return;
+        }
+        if (action === "agenda") {
+          window.location.href = "/technician-route";
+          return;
+        }
+        if (action === "openVisit") {
+          switchFieldTab("agora", true);
+          document.querySelector("#nextTitle")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          return;
+        }
+        if (action === "continue") {
+          switchFieldTab("agora", true);
+          document.querySelector("#nowBoard")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          return;
+        }
+        if (action === "map") {
+          switchFieldTab("mapa", true);
+          return;
+        }
+        if (action === "p0") {
+          switchFieldTab("hoje", true);
+          document.querySelector("#interruptCard")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          return;
+        }
+        if (action === "contact") {
+          switchFieldTab("more", true);
+          document.querySelector("#adminAlertMessage")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          document.querySelector("#adminAlertMessage")?.focus();
+        }
       });
     });
-    document.querySelectorAll("[data-quick-action='problem']").forEach((button) => {
-      button.addEventListener("click", () => {
-        switchFieldTab("more");
-        $("#problemBtn")?.click();
+
+    const interruptList = document.querySelector("#interruptList");
+    if (interruptList && !interruptList.dataset.actionsReady) {
+      interruptList.dataset.actionsReady = "1";
+      interruptList.addEventListener("click", (event) => {
+        const actionButton = event.target.closest("[data-interrupt-action]");
+        if (!actionButton) return;
+        const action = actionButton.dataset.interruptAction;
+        const exceptionId = actionButton.dataset.exceptionId;
+        const exception = collectOperationalExceptions().find((item) => item.id === exceptionId);
+        if (action === "assume" && exception) {
+          assumeOperationalException(exception);
+          return;
+        }
+        if (action === "confirm" && exception) {
+          confirmOperationalException(exception);
+          return;
+        }
+        if (action === "resolve" && exception) {
+          resolveOperationalException(exception);
+          return;
+        }
+        if (action === "target") {
+          const target = actionButton.dataset.interruptTarget;
+          if (!target) return;
+          if (target === "problem") {
+            switchFieldTab("more", true);
+            showProblemPanel();
+            return;
+          }
+          if (target === "docs") {
+            switchFieldTab("docs", true);
+            document.querySelector("#transportGuideBox")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            return;
+          }
+          if (target === "water") {
+            switchFieldTab("more", true);
+            document.querySelector("#waterReminderList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            return;
+          }
+          if (target === "hoje") {
+            switchFieldTab("hoje", true);
+          }
+          return;
+        }
+        if (action === "problem") {
+          switchFieldTab("more", true);
+          showProblemPanel();
+          return;
+        }
+        if (action === "docs") {
+          switchFieldTab("docs", true);
+          document.querySelector("#transportGuideBox")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          return;
+        }
+        if (action === "water") {
+          switchFieldTab("more", true);
+          document.querySelector("#waterReminderList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
       });
-    });
+    }
 
     const assistPanel = ensureAssistPanel();
     if (assistPanel && !assistPanel.dataset.assistReady) {
@@ -2221,14 +3519,39 @@
       });
     }
 
-    let savedTab = "service";
-    try {
-      savedTab = localStorage.getItem("cwFieldActiveTab") || "service";
-    } catch (_) {}
-    switchFieldTab(savedTab);
+    const segments = document.querySelector("#poolSegments");
+    if (segments && !segments.dataset.eventsReady) {
+      segments.dataset.eventsReady = "1";
+      segments.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-pool-filter]");
+        if (!button) return;
+        activePoolFilter = normalizePoolFilter(button.dataset.poolFilter, "TODO");
+        writeLastExplicitFilter(activePoolFilter);
+        renderList();
+        persistFieldUiState();
+      });
+    }
+
+    // Keep a visual default without persisting, so load() can restore return contract state.
+    document.body.dataset.fieldTab = "hoje";
+    document.querySelectorAll("[data-field-tab-button]").forEach((button) => {
+      button.classList.toggle("active", button.dataset.fieldTabButton === "hoje");
+    });
   }
 
   setupFieldLayout();
+
+  if (!window.__cwFieldBeforeUnloadBound) {
+    window.__cwFieldBeforeUnloadBound = true;
+    window.addEventListener("beforeunload", () => {
+      persistFieldUiState();
+    });
+    window.addEventListener("pageshow", () => {
+      window.setTimeout(() => {
+        persistFieldUiState();
+      }, 0);
+    });
+  }
 
   const startBtn = $("#startBtn");
   if (startBtn) {
@@ -2239,9 +3562,15 @@
         return;
       }
       if (isVisitDone(visit)) {
-        switchFieldTab("service");
+        switchFieldTab("agora");
         loadCurrentDraft();
         toast("Registo aberto para corrigir.");
+        return;
+      }
+      if (docsCompliance && !docsCompliance.readyForOperation) {
+        switchFieldTab("docs", true);
+        document.querySelector("#documentCenterBox")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        toast(docsCompliance.reason || "Bloqueio operacional: faltam documentos obrigatórios da viatura.");
         return;
       }
       startedAt = new Date();
@@ -2281,6 +3610,19 @@
 
   const refreshCrewStatus = $("#refreshCrewStatus");
   if (refreshCrewStatus) refreshCrewStatus.onclick = () => loadGuides(true);
+
+  const submitTechnicalProposalBtn = $("#submitTechnicalProposalBtn");
+  if (submitTechnicalProposalBtn) {
+    submitTechnicalProposalBtn.onclick = async () => {
+      try {
+        await submitTechnicalProposal();
+      } catch (error) {
+        const status = $("#technicalProposalStatus");
+        if (status) status.textContent = error.message || "Erro ao submeter proposta.";
+        toast(error.message || "Erro ao submeter proposta.");
+      }
+    };
+  }
 
   document.querySelectorAll("[data-photo-type]").forEach((button) => {
     button.addEventListener("click", () => pickPhoto(button.dataset.photoType));
@@ -2365,6 +3707,12 @@
       }
       const originalIndex = index;
       const wasDone = isVisitDone(visit);
+      if (!wasDone && docsCompliance && !docsCompliance.readyForOperation) {
+        switchFieldTab("docs", true);
+        document.querySelector("#documentCenterBox")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        toast(docsCompliance.reason || "Bloqueio operacional: faltam documentos obrigatórios da viatura.");
+        return;
+      }
       $("#finishBtn").disabled = true;
       const photosReady = await syncPendingPhotos(false);
       if (!photosReady) {

@@ -183,12 +183,6 @@
 
   function escapeHtml(value){ return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;"); }
 
-  function loadSidebar(){
-    if(document.querySelector('script[data-cw-sidebar]') || !isAuthenticatedArea()) return;
-    if(document.querySelector('link[href="/crystal-os-v2-phase2-adapter.css"]') || document.querySelector('.cw-v2-sidebar,.cw-v2-shell-sidebar')) return;
-    const script = document.createElement("script"); script.src = "/cw-enterprise-sidebar.js"; script.dataset.cwSidebar = "1"; document.body.appendChild(script);
-  }
-
   function renderFabs(){
     if(!isAuthenticatedArea()) return;
     if(document.querySelector(".cw-command-fab")) return;
@@ -204,7 +198,6 @@
     }
     document.body.classList.toggle("cw-help-enabled", helpEnabled());
     document.body.classList.toggle("cw-help-mode", helpMode());
-    loadSidebar();
     renderFabs();
     annotateHelpables();
     setTimeout(annotateHelpables, 1000);

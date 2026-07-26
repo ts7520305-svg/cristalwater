@@ -350,8 +350,9 @@
     }
   </style>
   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+  <link rel="stylesheet" href="/ui/design-system.css">
 </head>
-<body class="admin-shell">
+<body class="admin-shell" data-required-role="ADMIN">
   <div class="cw-v2-app">
     <aside class="cw-v2-sidebar" aria-label="Navegação principal">
       <div class="cw-v2-brand">
@@ -388,8 +389,8 @@
           <summary>Intervenções e Campo</summary>
           <div class="cw-v2-nav-links cw-v2-nav">
             <a href="/admin-alerts?scope=repairs" data-shell-search="Reparacoes">Reparacoes</a>
-            <a href="/admin-onboarding?flow=installation" data-shell-search="Instalacoes">Instalacoes</a>
-            <a href="/admin-onboarding?flow=construction" data-shell-search="Construcao">Construcao</a>
+            <a href="/admin-onboarding" data-shell-search="Instalacoes">Instalacoes</a>
+            <a href="/admin-company-closures" data-shell-search="Construcao">Construcao</a>
             <a href="/admin-alerts?scope=interventions" data-shell-search="Intervencoes">Intervencoes</a>
             <a href="/admin-service-log" data-shell-search="Historico de servico">Historico de servico</a>
             <a href="/technician-guide" data-shell-search="Guias de trabalho">Guias de trabalho</a>
@@ -425,7 +426,6 @@
             <a href="/communications" data-shell-search="Comunicacoes">Comunicacoes</a>
             <a href="/admin-operational-settings" data-shell-search="Definicoes">Definicoes</a>
             <a href="/admin-security" data-shell-search="Permissoes">Permissoes</a>
-            <a href="/admin-test-center" data-shell-search="Auditoria ferramentas">Auditoria / Ferramentas</a>
             <a href="/crystal-os-v2-route-index" data-shell-search="Indice de rotas todos os modulos">Indice de rotas (todos os modulos)</a>
           </div>
         </details>
@@ -436,7 +436,7 @@
     <main class="cw-v2-main">
       <header class="cw-v2-topbar">
         <div class="cw-v2-search">
-          <input data-cw-search-input type="search" placeholder="Pesquisa universal: alertas, visitas, stock, financeiro">
+          <input data-cw-search-input type="search" aria-label="Pesquisa universal" placeholder="Pesquisa universal: alertas, visitas, stock, financeiro">
           <span class="icon">⌕</span>
           <div class="cw-v2-search-results" data-cw-search-results></div>
         </div>
@@ -494,6 +494,14 @@
           </div>
           <div id="operationDigest" class="cw-status-strip"></div>
           <div id="todayList" class="list"><div class="empty">A carregar visitas...</div></div>
+        </article>
+
+        <article class="cw-priority-block">
+          <div class="cw-priority-head">
+            <h2>Propagação técnica</h2>
+            <span class="pill">timeline + command center + knowledge</span>
+          </div>
+          <div id="technicalPropagationList" class="list"><div class="empty">A carregar eventos técnicos...</div></div>
         </article>
       </section>
 
@@ -553,7 +561,7 @@
     <a href="/admin-today">Hoje</a>
     <a href="/admin-visits">Visitas</a>
     <a href="/admin-alerts">Alertas</a>
-    <button type="button" data-cw-open-drawer>Menu</button>
+    <button type="button" data-cw-open-drawer aria-label="Abrir menu completo">Menu</button>
   </nav>
 
   <aside class="cw-v2-drawer" data-cw-drawer aria-hidden="true">
@@ -590,8 +598,8 @@
           <summary>Intervenções e Campo</summary>
           <div class="cw-v2-nav-links cw-v2-nav">
             <a href="/admin-alerts?scope=repairs" data-shell-search="Reparacoes">Reparacoes</a>
-            <a href="/admin-onboarding?flow=installation" data-shell-search="Instalacoes">Instalacoes</a>
-            <a href="/admin-onboarding?flow=construction" data-shell-search="Construcao">Construcao</a>
+            <a href="/admin-onboarding" data-shell-search="Instalacoes">Instalacoes</a>
+            <a href="/admin-company-closures" data-shell-search="Construcao">Construcao</a>
             <a href="/admin-alerts?scope=interventions" data-shell-search="Intervencoes">Intervencoes</a>
             <a href="/admin-service-log" data-shell-search="Historico de servico">Historico de servico</a>
             <a href="/technician-guide" data-shell-search="Guias de trabalho">Guias de trabalho</a>
@@ -627,7 +635,6 @@
             <a href="/communications" data-shell-search="Comunicacoes">Comunicacoes</a>
             <a href="/admin-operational-settings" data-shell-search="Definicoes">Definicoes</a>
             <a href="/admin-security" data-shell-search="Permissoes">Permissoes</a>
-            <a href="/admin-test-center" data-shell-search="Auditoria ferramentas">Auditoria / Ferramentas</a>
             <a href="/crystal-os-v2-route-index" data-shell-search="Indice de rotas todos os modulos">Indice de rotas (todos os modulos)</a>
           </div>
         </details>
@@ -640,5 +647,6 @@
   <script src="/cw-admin-premium-controls.js"></script>
   <script src="/crystal-os-v2-shell.js"></script>
   <script src="/crystal-os-v2-nav.js"></script>
+  <script defer src="/ui/design-system.js"></script>
 </body>
 </html>

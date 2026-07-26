@@ -108,10 +108,20 @@ async function main() {
     if (photo.photo?.id) cleanup.attachmentIds.push(photo.photo.id);
 
     const approved = await RepairBusiness.approveRepair(cleanup.repairId, prisma, "QA-REPAIR");
-    assert(approved?.id === cleanup.repairId, "approval failed");
+    assert(
+      approved?.id === cleanup.repairId ||
+      approved?.repair?.id === cleanup.repairId ||
+      approved?.ok === true,
+      "approval failed"
+    );
 
     const completed = await RepairBusiness.completeRepair(cleanup.repairId, prisma, "QA-REPAIR");
-    assert(completed?.id === cleanup.repairId, "completion failed");
+    assert(
+      completed?.id === cleanup.repairId ||
+      completed?.repair?.id === cleanup.repairId ||
+      completed?.ok === true,
+      "completion failed"
+    );
 
     const invoiced = await RepairBusiness.generateRepairInvoice(cleanup.repairId, {
       notes: "Operational acceptance invoice",

@@ -24,8 +24,7 @@ function setStatus(message, type = "info"){
   const el = document.getElementById("status");
   if(!el) return;
   el.textContent = message;
-  el.style.borderColor = type === "error" ? "rgba(255,91,122,.45)" : "rgba(53,217,255,.18)";
-  el.style.background = type === "error" ? "rgba(255,91,122,.12)" : "rgba(53,217,255,.08)";
+  el.className = `status ${type === "error" ? "error" : type === "ok" ? "ok" : ""}`.trim();
 }
 
 function val(id){
@@ -453,23 +452,23 @@ function renderRoundCard(round){
           <strong>${escapeHtml(round.name)}</strong><br>
           <span class="mini">ID ${round.id} - ${round.active === false ? "Inativa" : "Ativa"}</span>
         </div>
-        <span class="pill">${pools.length} piscinas</span>
+        <span class="ds-badge is-muted">${pools.length} piscinas</span>
       </div>
       ${hasTechnician || round.active === false ? "" : `
-        <div class="status" style="border-color:rgba(255,107,107,.5);background:rgba(255,107,107,.12);margin:10px 0">
+        <div class="status error round-round-warning">
           Aviso: ronda ativa sem tecnico atribuido.
-          <button type="button" data-focus-tech-round="${round.id}" style="margin-left:8px">Associar tecnico</button>
+          <button class="cw-v2-btn" type="button" data-focus-tech-round="${round.id}">Associar tecnico</button>
         </div>
       `}
       <div class="round-editor">
         <input data-round-field="name" value="${escapeHtml(round.name)}" aria-label="Nome da ronda">
         <select data-round-field="dayOfWeek" aria-label="Dia da ronda">${roundDayOptions(round.dayOfWeek)}</select>
-        <button type="button" data-save-round="${round.id}">Guardar</button>
+        <button class="cw-v2-btn" type="button" data-save-round="${round.id}">Guardar</button>
       </div>
       <div style="margin-top:9px">
         ${technicians.length
-          ? technicians.map(item => `<span class="pill">${escapeHtml(item.name)} · ${escapeHtml(item.role)}</span>`).join(" ")
-          : `<span class="pill">Sem tecnico</span>`}
+          ? technicians.map(item => `<span class="ds-badge is-muted">${escapeHtml(item.name)} · ${escapeHtml(item.role)}</span>`).join(" ")
+          : `<span class="ds-badge is-warning">Sem tecnico</span>`}
       </div>
       <ul class="round-pool-list">
         ${pools.length ? pools.map(rp => `
@@ -480,8 +479,8 @@ function renderRoundCard(round){
         `).join("") : `<li class="mini">Ainda sem piscinas associadas. Pode arrastar uma piscina de outra ronda para aqui.</li>`}
       </ul>
       <div class="round-actions">
-        <button class="secondary" data-toggle-round="${round.id}">${round.active === false ? "Ativar" : "Pausar"}</button>
-        <button class="danger" data-delete-round="${round.id}">Apagar</button>
+        <button class="cw-v2-btn" data-toggle-round="${round.id}">${round.active === false ? "Ativar" : "Pausar"}</button>
+        <button class="cw-v2-btn danger" data-delete-round="${round.id}">Apagar</button>
       </div>
     </article>
   `;
@@ -604,7 +603,7 @@ function renderPlanner(){
     const assigned = visits.filter((visit) => String(visit.technicianId || "") === String(column.id));
     return `
       <section class="tech-column" data-technician-id="${escapeHtml(column.id)}">
-        <h4>${escapeHtml(column.name)} <span class="pill">${assigned.length}</span></h4>
+        <h4>${escapeHtml(column.name)} <span class="ds-badge is-muted">${assigned.length}</span></h4>
         <div class="tech-drop">
           ${assigned.length ? assigned.map(renderVisitChip).join("") : `<div class="empty">Arraste visitas para aqui</div>`}
         </div>
@@ -702,21 +701,21 @@ function renderVisitRow(visit){
 
   return `
     <tr class="${classes}" data-kind="${visit.kind}" data-id="${visit.id}">
-      <td><input data-field="date" type="datetime-local" value="${escapeHtml(formatDateTimeInput(date))}"></td>
+      <td><input data-field="date" type="datetime-local" aria-label="Data da visita ${escapeHtml(visitPoolName(visit))}" value="${escapeHtml(formatDateTimeInput(date))}"></td>
       <td>${escapeHtml(visitClientName(visit))}</td>
       <td>${escapeHtml(visitPoolName(visit))}</td>
-      <td><select data-field="technicianId">${technicianOptions(visit.technicianId)}</select></td>
+      <td><select data-field="technicianId" aria-label="Tecnico da visita ${escapeHtml(visitPoolName(visit))}">${technicianOptions(visit.technicianId)}</select></td>
       <td>
         ${visit.kind === "EXTRA"
-          ? `<select data-field="billingMode">${billingOptions(visit.billingMode)}</select><input class="money-input" data-field="unitPrice" type="number" min="0" step="0.01" value="${escapeHtml(visit.price || "")}" placeholder="Valor">`
-          : `<span class="pill">Ronda normal</span>`}
-        <select data-field="assignmentMode" title="Motivo operacional">${assignmentOptions(visit.assignmentMode)}</select>
-        ${hasAlert ? `<span class="pill pill-alert">Com alerta</span>` : ""}
+          ? `<select data-field="billingMode" aria-label="Modo de faturacao da visita ${escapeHtml(visitPoolName(visit))}">${billingOptions(visit.billingMode)}</select><input class="money-input" data-field="unitPrice" aria-label="Valor da visita ${escapeHtml(visitPoolName(visit))}" type="number" min="0" step="0.01" value="${escapeHtml(visit.price || "")}" placeholder="Valor">`
+          : `<span class="ds-badge is-muted">Ronda normal</span>`}
+        <select data-field="assignmentMode" title="Motivo operacional" aria-label="Modo de atribuicao da visita ${escapeHtml(visitPoolName(visit))}">${assignmentOptions(visit.assignmentMode)}</select>
+        ${hasAlert ? `<span class="ds-badge is-danger">Com alerta</span>` : ""}
       </td>
-      <td><select data-field="status">${visitStatusOptions(visit.status)}</select></td>
+      <td><select data-field="status" aria-label="Estado da visita ${escapeHtml(visitPoolName(visit))}">${visitStatusOptions(visit.status)}</select></td>
       <td>
         <div class="table-actions">
-          <button data-save-visit data-kind="${visit.kind}" data-id="${visit.id}" type="button">Guardar alteracoes</button>
+          <button class="cw-v2-btn" data-save-visit data-kind="${visit.kind}" data-id="${visit.id}" type="button">Guardar alteracoes</button>
           <span class="mini">${escapeHtml(visitRoundName(visit))}${isLate ? " - atrasada" : ""}</span>
         </div>
       </td>

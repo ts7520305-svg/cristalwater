@@ -135,7 +135,7 @@
   };
 
   const quickActions = [
-    { label: "Centro de Operações", icon: "🧭", href: "/admin-operational-flow", topic: "operationalFlow" },
+    { label: "Centro de Operações", icon: "🧭", href: "/admin-master-control", topic: "operationalFlow" },
     { label: "Dashboard", icon: "🧠", href: "/admin-dashboard", topic: "dashboard" },
     { label: "IA Operacional", icon: "🤖", href: "/admin-ai", topic: "aiAdmin" },
     { label: "Assistente interno", icon: "🤖", href: "/admin-ai", topic: "aiOps" },

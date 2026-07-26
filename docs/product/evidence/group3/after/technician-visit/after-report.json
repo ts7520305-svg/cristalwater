@@ -1,0 +1,17 @@
+[
+  {
+    "viewport": "1440x900",
+    "ok": true,
+    "status": "200"
+  },
+  {
+    "viewport": "1024x1366",
+    "ok": true,
+    "status": "200"
+  },
+  {
+    "viewport": "390x844",
+    "ok": true,
+    "status": "200"
+  }
+]

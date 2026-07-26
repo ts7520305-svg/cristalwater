@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
   <link rel="stylesheet" href="/cw-premium-admin-phase1.css">
   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+  <link rel="stylesheet" href="/ui/design-system.css">
 </head>
 <body class="admin-shell" data-required-role="ADMIN">
   <div class="cw-v2-app">
@@ -34,13 +35,13 @@
     <main class="cw-v2-main">
       <header class="cw-v2-topbar">
         <div class="cw-v2-search">
-          <input id="menuSearch" type="search" placeholder="Pesquisar modulo, funcionalidade ou area">
+          <input id="menuSearch" type="search" aria-label="Pesquisar modulo, funcionalidade ou area" placeholder="Pesquisar modulo, funcionalidade ou area">
           <span class="icon">⌕</span>
         </div>
         <div class="cw-v2-top-actions">
           <button class="cw-v2-btn cw-mobile-back" type="button" data-cw-action="back">Voltar</button>
           <a class="cw-v2-btn" href="/admin-master-control">Centro</a>
-          <button class="cw-v2-btn" type="button" data-cw-open-drawer>Menu</button>
+          <button class="cw-v2-btn" type="button" data-cw-open-drawer aria-label="Abrir menu completo">Menu</button>
         </div>
       </header>
 
@@ -149,7 +150,6 @@
           <nav class="cw-menu-links">
             <a href="/admin-operational-settings" data-shell-search="Definicoes operacionais">Definicoes operacionais <span>→</span></a>
             <a href="/admin-security" data-shell-search="Seguranca">Seguranca <span>→</span></a>
-            <a href="/admin-test-center" data-shell-search="Centro de testes">Centro de testes <span>→</span></a>
             <a href="/crystal-os-v2-route-index" data-shell-search="Indice de rotas">Indice de rotas <span>→</span></a>
             <a href="/admin-onboarding" data-shell-search="Onboarding">Onboarding <span>→</span></a>
           </nav>
@@ -194,5 +194,6 @@
       if (search) search.addEventListener("input", applyFilter);
     })();
   </script>
+  <script defer src="/ui/design-system.js"></script>
 </body>
 </html>

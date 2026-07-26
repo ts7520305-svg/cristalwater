@@ -171,6 +171,7 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="/ui/design-system.css">
 </head>
 <body class="map-page" data-required-role="TECHNICIAN">
   <main class="map-shell">
@@ -186,6 +187,7 @@
       <div id="map" aria-label="Mapa tecnico"></div>
       <aside class="side">
         <div class="actions">
+          <button id="returnFieldBtn" type="button">Voltar ao Centro</button>
           <button id="loadBtn" class="primary" type="button">Carregar ronda</button>
           <button id="nextBtn" type="button">Proxima piscina</button>
           <a id="googleLink" href="#" target="_blank" rel="noopener">Google Maps</a>
@@ -205,5 +207,6 @@
   <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
   <script src="/crystal-os-v2-shell.js"></script>
   <script src="/crystal-os-v2-nav.js"></script>
+  <script defer src="/ui/design-system.js"></script>
 </body>
 </html>

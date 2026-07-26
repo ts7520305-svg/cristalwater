@@ -192,6 +192,8 @@ body.cw-v2-shell-enabled .cw-help-fab {
   left: unset !important;
   right: 12px !important;
   transform: none !important;
+  min-width: 48px !important;
+  min-height: 48px !important;
 }
 
 body[data-cw-role="TECHNICIAN"].cw-v2-shell-enabled {

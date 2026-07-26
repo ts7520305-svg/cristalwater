@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+  <title>Cristal Water · Central de Configurações</title>
+  <link rel="stylesheet" href="/cristal-assist.css">
+  <style>
+    *{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#050b16;color:#e8f7ff;overflow-x:hidden}header{position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;gap:12px;align-items:center;padding:18px 22px;background:rgba(5,11,22,.90);border-bottom:1px solid rgba(53,217,255,.24);backdrop-filter:blur(16px)}h1{margin:0;font-size:26px;overflow-wrap:anywhere}main{padding:18px;display:grid;grid-template-columns:1.1fr .9fr;gap:16px}.panel{min-width:0;background:linear-gradient(180deg,rgba(17,34,58,.90),rgba(8,18,32,.96));border:1px solid rgba(53,217,255,.22);border-radius:24px;padding:18px;box-shadow:0 24px 70px rgba(0,0,0,.35)}h2{color:#35d9ff;margin-top:0}.setting{display:flex;justify-content:space-between;gap:16px;align-items:center;padding:16px;border-radius:18px;margin:12px 0;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.10)}.setting p{margin:5px 0 0;color:#91a8be}.switch{position:relative;width:64px;height:36px;flex:0 0 auto}.switch input{display:none}.slider{position:absolute;inset:0;border-radius:99px;background:#334155;cursor:pointer}.slider:before{content:"";position:absolute;width:28px;height:28px;left:4px;top:4px;border-radius:50%;background:white;transition:.18s}.switch input:checked+.slider{background:#22c55e}.switch input:checked+.slider:before{transform:translateX(28px)}.links{display:flex;gap:8px;flex-wrap:wrap}.links a,.btn{color:#e8f7ff;text-decoration:none;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:10px 12px;font-weight:800}.btn.primary{background:#2563eb;border-color:#60a5fa}.status{padding:12px;border-radius:16px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.32);color:#bbf7d0}.pending{max-height:420px;overflow:auto}.item{padding:12px;border-radius:16px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.10);margin:10px 0}.item small{color:#91a8be}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}button{border:0;border-radius:12px;padding:10px 12px;font-weight:900;cursor:pointer}@media(max-width:960px){main{grid-template-columns:1fr}header{flex-direction:column;align-items:flex-start;padding:16px}.setting{align-items:flex-start}body main{padding:14px}}@media(max-width:640px){.links,.actions,.setting,.backup-row{flex-direction:column;align-items:flex-start}.links a,.actions .btn,.actions button{width:100%}.panel{padding:14px}}
+    .release-panel{grid-column:1/-1}.release-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.release-card{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.055);border-radius:18px;padding:14px}.release-card strong{display:block;color:#e8f7ff;margin-bottom:6px}.release-card span,.release-card p{color:#9fb8ca;margin:0;line-height:1.45}.release-card code{display:block;white-space:normal;word-break:break-word;color:#c7f9ff;background:rgba(3,10,18,.55);border:1px solid rgba(53,217,255,.18);border-radius:12px;padding:9px;margin-top:8px}.backup-list{display:grid;gap:8px;margin-top:12px}.backup-row{display:flex;justify-content:space-between;gap:12px;align-items:center;border:1px solid rgba(255,255,255,.10);border-radius:14px;padding:10px 12px;background:rgba(3,10,18,.32)}.backup-row small{color:#91a8be}.danger-note{border-color:rgba(248,113,113,.42);background:rgba(127,29,29,.22)}@media(max-width:1100px){.release-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:960px){.release-grid{grid-template-columns:1fr}.backup-row{align-items:flex-start;flex-direction:column}}
+  </style>
+  <style>
+    .wide-panel{grid-column:1/-1}
+    .matrix-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .permission-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .permission-option{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:flex-start;border:1px solid rgba(255,255,255,.10);background:rgba(3,10,18,.32);border-radius:14px;padding:10px}
+    .permission-option input{margin-top:3px}
+    .permission-option strong{display:block}
+    .permission-option small{color:#91a8be}
+    .team-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .team-grid input,.team-grid select,.team-grid textarea,.role-select{width:100%;border:1px solid rgba(53,217,255,.25);border-radius:14px;background:#061525;color:#e8f7ff;padding:12px;font-weight:800}
+    .team-grid textarea{min-height:92px;resize:vertical}
+    .leader-row{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border:1px solid rgba(53,217,255,.18);border-radius:16px;background:rgba(7,20,34,.72);padding:12px;margin-top:10px}
+    .leader-row small{color:#9fb8ca}
+    .role-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0}
+    .role-card{border:1px solid rgba(53,217,255,.16);border-radius:16px;background:rgba(255,255,255,.045);padding:12px}
+    .role-card strong{color:#e8f7ff}
+    .role-card span{display:block;color:#91a8be;margin-top:6px}
+    @media(max-width:1100px){.role-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.matrix-grid,.team-grid{grid-template-columns:1fr}}
+    @media(max-width:960px){.permission-list,.role-cards{grid-template-columns:1fr}.leader-row{align-items:flex-start;flex-direction:column}}
+  </style>
+  <script src="/cw-auth.js"></script>
+  <link rel="stylesheet" href="/ui/foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+  <link rel="stylesheet" href="/ui/design-system.css">
+</head>
+<body data-required-role="ADMIN">
+
+  <div style="padding:12px 16px 0">
+    <button type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
+  </div>
+  <header>
+    <div><h1>⚙️ Central de Configurações</h1><div style="color:#91a8be">Permissões, operação, mobile/PWA e regras globais.</div></div>
+    <nav class="links"><a href="/admin-dashboard">Dashboard</a><a href="#accessControlPanel">Permissoes</a><a href="#releaseSafetyPanel">Rollback / Upgrade</a><a href="/admin-ui-settings">Visual</a><a href="/help-center?topic=settings">Ajuda</a></nav>
+  </header>
+  <main>
+    <section class="panel" data-help-topic="settings">
+      <h2>Permissões de campo</h2>
+      <div class="setting">
+        <div><strong>Técnicos podem criar novos clientes e piscinas</strong><p>Útil na fase inicial: o técnico adiciona dados mínimos em campo e o admin valida depois.</p></div>
+        <label class="switch"><input type="checkbox" data-setting="TECHNICIANS_CAN_CREATE_CLIENTS_POOLS"><span class="slider"></span></label>
+      </div>
+      <div class="setting">
+        <div><strong>Registos criados por técnicos exigem validação admin</strong><p>Recomendado ligado. Mantém as fichas provisórias até serem revistas.</p></div>
+        <label class="switch"><input type="checkbox" data-setting="TECHNICIAN_CREATED_RECORDS_REQUIRE_ADMIN_REVIEW"><span class="slider"></span></label>
+      </div>
+      <div class="setting">
+        <div><strong>Piscinas criadas por técnicos ficam ativas por defeito</strong><p>Recomendado desligado durante testes para evitar entradas incompletas em rondas reais.</p></div>
+        <label class="switch"><input type="checkbox" data-setting="TECHNICIAN_CREATED_POOLS_ACTIVE_BY_DEFAULT"><span class="slider"></span></label>
+      </div>
+
+      <h2>Operação e rondas</h2>
+      <div class="setting"><div><strong>Obrigar atribuição de ronda ao criar piscina</strong><p>Se não existir ronda, o sistema deixa a piscina em pendência obrigatória.</p></div><label class="switch"><input type="checkbox" data-setting="REQUIRE_ROUND_ASSIGNMENT_FOR_NEW_POOL"><span class="slider"></span></label></div>
+      <div class="setting"><div><strong>Obrigar técnico na visita planeada</strong><p>Visitas sem técnico aparecem como pendência operacional.</p></div><label class="switch"><input type="checkbox" data-setting="REQUIRE_TECHNICIAN_FOR_PLANNED_VISIT"><span class="slider"></span></label></div>
+      <div class="setting"><div><strong>Checklist obrigatória para concluir visita</strong><p>Impede visitas fechadas sem dados mínimos de manutenção.</p></div><label class="switch"><input type="checkbox" data-setting="REQUIRE_VISIT_CHECKLIST"><span class="slider"></span></label></div>
+      <h2>Ajuda e interface</h2>
+      <div class="setting"><div><strong>Ajuda discreta por defeito</strong><p>Sem popups automáticos. Ajuda só abre por botão, botão direito, ALT+H ou long press 3s.</p></div><label class="switch"><input type="checkbox" data-setting="QUIET_HELP_DEFAULT" checked><span class="slider"></span></label></div>
+      <div class="setting"><div><strong>Menu lateral enterprise</strong><p>Organiza módulos por Clientes, Piscinas, Rondas, Financeiro, Stock e Sistema.</p></div><label class="switch"><input type="checkbox" data-setting="ENTERPRISE_SIDEBAR_ENABLED" checked><span class="slider"></span></label></div>
+      <h2>Financeiro e notificações</h2>
+      <div class="setting"><div><strong>Gerar mensalidade automaticamente</strong><p>Cria valores mensais com base nos clientes ativos e visitas extra.</p></div><label class="switch"><input type="checkbox" data-setting="AUTO_MONTHLY_BILLING_ENABLED"><span class="slider"></span></label></div>
+      <div class="setting"><div><strong>Lembretes de pagamento ativos</strong><p>Permite lembretes automáticos ou manuais por estado de cobrança.</p></div><label class="switch"><input type="checkbox" data-setting="PAYMENT_REMINDERS_ENABLED"><span class="slider"></span></label></div>
+      <h2>Mobile/PWA</h2>
+      <div class="setting"><div><strong>PWA ativo</strong><p>Permite instalar a app no telemóvel/tablet.</p></div><label class="switch"><input type="checkbox" data-setting="MOBILE_PWA_ENABLED"><span class="slider"></span></label></div>
+      <div class="setting"><div><strong>Offline sync ativo</strong><p>Base para guardar trabalho local e sincronizar depois.</p></div><label class="switch"><input type="checkbox" data-setting="OFFLINE_SYNC_ENABLED"><span class="slider"></span></label></div>
+      <div id="saveStatus" class="status">A carregar configurações...</div>
+    </section>
+    <section class="panel">
+      <h2>Fichas pendentes de validação</h2>
+      <p style="color:#91a8be">Clientes/piscinas criados por técnicos em campo aparecem aqui para revisão.</p>
+      <div class="pending" id="pendingList">A carregar...</div>
+    </section>
+    <section class="panel wide-panel" id="accessControlPanel">
+      <h2>Permissoes e hierarquia</h2>
+      <p style="color:#91a8be">Define quem pode ver cada modulo, que informacao sensivel fica bloqueada e quais os chefes de equipa que acompanham tecnicos e piscinas.</p>
+      <div class="role-cards">
+        <div class="role-card"><strong>Administrador</strong><span>Acesso total e auditoria.</span></div>
+        <div class="role-card"><strong>Chefe de equipa</strong><span>Coordena tecnicos e piscinas atribuidas.</span></div>
+        <div class="role-card"><strong>Tecnico</strong><span>Portal de campo simples e sem valores.</span></div>
+        <div class="role-card"><strong>Cliente</strong><span>Apenas a sua area privada.</span></div>
+      </div>
+      <div class="release-card">
+        <strong>Perfil a configurar</strong>
+        <select id="permissionRole" class="role-select">
+          <option value="TEAM_LEADER">Chefe de equipa</option>
+          <option value="TECHNICIAN">Tecnico</option>
+          <option value="CLIENT">Cliente</option>
+          <option value="ADMIN">Administrador</option>
+        </select>
+      </div>
+      <div class="matrix-grid" style="margin-top:12px">
+        <div class="release-card">
+          <strong>Modulos visiveis</strong>
+          <p>Seleciona as areas que este perfil pode abrir.</p>
+          <div id="modulePermissionList" class="permission-list"></div>
+        </div>
+        <div class="release-card">
+          <strong>Tipos de informacao</strong>
+          <p>Dados sensiveis que podem ou nao aparecer.</p>
+          <div id="infoPermissionList" class="permission-list"></div>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="savePermissionPolicy" class="btn primary" type="button">Guardar permissoes</button>
+      </div>
+      <div class="matrix-grid" style="margin-top:12px">
+        <div class="release-card">
+          <strong>Chefe de equipa</strong>
+          <p>Escolhe o tecnico responsavel e associa os tecnicos/piscinas que ele deve acompanhar.</p>
+          <div class="team-grid">
+            <select id="teamLeaderSelect"></select>
+            <input id="teamLeaderZone" placeholder="Zona ou equipa">
+            <input id="teamLeaderTechnicians" placeholder="IDs tecnicos: 1,2,3">
+            <input id="teamLeaderPools" placeholder="IDs piscinas: 10,11,12">
+            <textarea id="teamLeaderNotes" placeholder="Notas internas da equipa"></textarea>
+          </div>
+          <div class="actions">
+            <button id="saveTeamLeader" class="btn primary" type="button">Guardar chefe de equipa</button>
+          </div>
+        </div>
+        <div class="release-card">
+          <strong>Equipas configuradas</strong>
+          <p>Resumo dos chefes de equipa ativos e das suas responsabilidades.</p>
+          <div id="teamHierarchyList">A carregar hierarquia...</div>
+        </div>
+      </div>
+      <div id="accessControlStatus" class="status" style="margin-top:12px">A carregar permissoes...</div>
+    </section>
+    <section class="panel release-panel" id="releaseSafetyPanel">
+      <h2>Rollback e upgrade seguro</h2>
+      <p style="color:#91a8be">Zona interna para preparar atualizacoes sem perder dados. O backup pode ser criado aqui; a troca de versao no VPS deve mudar apenas o codigo ativo.</p>
+      <div class="release-grid">
+        <div class="release-card">
+          <strong>Estado da versao</strong>
+          <span id="releaseVersion">A carregar...</span>
+        </div>
+        <div class="release-card">
+          <strong>Backups da base</strong>
+          <span id="releaseBackupDir">A carregar...</span>
+        </div>
+        <div class="release-card">
+          <strong>Regra de rollback</strong>
+          <span>Voltar versao troca so o codigo. Nao apaga clientes, piscinas, fotos, guias ou faturas.</span>
+        </div>
+        <div class="release-card danger-note">
+          <strong>Nunca fazer em producao</strong>
+          <span>Nao usar reset, seed de testes ou db push na base real do VPS.</span>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="backupNow" class="btn primary" type="button">Criar backup agora</button>
+        <button id="copyRollbackPath" class="btn" type="button">Copiar caminho do guia</button>
+        <button id="rollbackUpgrade" class="btn" type="button">Voltar versao anterior</button>
+      </div>
+      <div id="releaseStatus" class="status" style="margin-top:12px">A carregar protecao de atualizacoes...</div>
+      <div class="release-card" style="margin-top:12px">
+        <strong>Upgrade por ZIP</strong>
+        <p>Carrega aqui o pacote da nova versao. O sistema cria backup obrigatório antes de registar o upgrade. Os dados ficam fora da versao.</p>
+        <div class="actions">
+          <input id="upgradeZip" type="file" accept=".zip,application/zip" class="btn">
+          <button id="uploadUpgradeZip" class="btn primary" type="button">Enviar ZIP e preparar upgrade</button>
+        </div>
+      </div>
+      <div class="release-card" style="margin-top:12px">
+        <strong>Como deve ficar no VPS</strong>
+        <code>/opt/cristalwater/releases = versoes do codigo<br>/opt/cristalwater/shared = .env, uploads, backups e logs<br>/opt/cristalwater/current = versao ativa</code>
+      </div>
+      <div>
+        <h2 style="margin-top:18px">Ultimos backups</h2>
+        <div id="backupList" class="backup-list">A carregar backups...</div>
+      </div>
+      <div>
+        <h2 style="margin-top:18px">Pacotes de upgrade</h2>
+        <div id="upgradePackageList" class="backup-list">A carregar pacotes...</div>
+      </div>
+    </section>
+  </main>
+  <script src="/admin-auth-guard.js"></script>
+  <script src="/admin-operational-settings.js"></script>
+  <script src="/cristal-help-data.js"></script><script src="/cristal-assist.js"></script>
+<script src="/cw-admin-shortcuts.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
+  <script defer src="/ui/design-system.js"></script>
+</body>
+</html>

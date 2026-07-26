@@ -9,6 +9,11 @@ const ui = window.CwUi || {
 };
 
 let alertsState = [];
+let repairContextData = {
+  clients: [],
+  pools: [],
+  contexts: [],
+};
 
 function authHeaders() {
   const token = localStorage.getItem("token");
@@ -372,6 +377,281 @@ function renderMetrics(alerts) {
   set("alertsNotifications", notifications);
 }
 
+function setRepairModalStatus(message, tone = "info") {
+  const el = document.getElementById("repairModalStatus");
+  if (!el) return;
+  el.hidden = !message;
+  if (!message) {
+    el.textContent = "";
+    el.className = "alerts-status";
+    return;
+  }
+  el.textContent = message;
+  el.className = `alerts-status ${tone}`;
+}
+
+function setSelectOptions(id, options, placeholder) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const previous = el.value;
+  const rows = [`<option value="">${escapeHtml(placeholder)}</option>`]
+    .concat((options || []).map((option) => `<option value="${escapeHtml(String(option.value))}">${escapeHtml(option.label)}</option>`));
+  el.innerHTML = rows.join("");
+  if ((options || []).some((option) => String(option.value) === String(previous))) {
+    el.value = previous;
+  }
+}
+
+function isActiveClient(client) {
+  return client && client.active !== false && String(client.status || "").toUpperCase() !== "ARCHIVED";
+}
+
+function isActivePool(pool) {
+  return pool && pool.active !== false && String(pool.status || "").toUpperCase() !== "ARCHIVED";
+}
+
+async function loadRepairReferenceData() {
+  const [clientsData, poolsData] = await Promise.all([
+    fetchJSON(`${API}/core/clients`).catch(() => ({ clients: [] })),
+    fetchJSON(`${API}/core/pools`).catch(() => ({ pools: [] })),
+  ]);
+
+  const clients = Array.isArray(clientsData.clients)
+    ? clientsData.clients.filter((client) => isActiveClient(client))
+    : [];
+  const pools = Array.isArray(poolsData.pools)
+    ? poolsData.pools.filter((pool) => isActivePool(pool) && Number(pool.id) > 0)
+    : [];
+
+  repairContextData.clients = clients;
+  repairContextData.pools = pools;
+}
+
+function buildRepairContextsFromAlerts() {
+  const seen = new Set();
+  const contexts = [];
+
+  alertsState.forEach((alert) => {
+    const poolId = Number(alert.poolId || 0);
+    if (!poolId || alert.repairId) return;
+    const key = `${alert.id || "unknown"}:${poolId}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+
+    const clientId = Number(alert.clientId || 0) || null;
+    const visitId = Number(alert.visitId || 0) || null;
+    const poolName = alert.poolName || `Piscina #${poolId}`;
+    const clientName = alert.clientName || "Sem cliente";
+    const problemFromAlert = [alert.problemText, alert.message, alert.serviceNote?.alerts].find((item) => String(item || "").trim()) || "";
+    const sourceText = visitId ? `Visita #${visitId}` : `Alerta #${alert.id || "-"}`;
+
+    contexts.push({
+      contextId: `alert:${alert.id || key}`,
+      alertId: alert.id || null,
+      visitId,
+      poolId,
+      clientId,
+      poolName,
+      clientName,
+      problemFromAlert,
+      label: `${sourceText} - ${clientName} - ${poolName}`,
+    });
+  });
+
+  repairContextData.contexts = contexts;
+}
+
+function poolLabel(pool) {
+  const clientName = pool.client?.name || "Sem cliente";
+  const type = pool.type ? String(pool.type).toUpperCase() : "POOL";
+  return `${pool.name || `Piscina #${pool.id}`} - ${clientName} - ${type}`;
+}
+
+function renderClientOptions() {
+  setSelectOptions(
+    "repairClientSelect",
+    repairContextData.clients.map((client) => ({ value: client.id, label: client.name || `Cliente #${client.id}` })),
+    "Selecionar cliente"
+  );
+}
+
+function renderContextOptions() {
+  setSelectOptions(
+    "repairContextSelect",
+    repairContextData.contexts.map((context) => ({ value: context.contextId, label: context.label })),
+    "Selecionar contexto manualmente"
+  );
+}
+
+function renderPoolOptions(clientId = null) {
+  const parsedClientId = Number(clientId || 0) || null;
+  const pools = repairContextData.pools.filter((pool) => {
+    if (!parsedClientId) return true;
+    return Number(pool.client?.id || pool.clientId || 0) === parsedClientId;
+  });
+  setSelectOptions(
+    "repairPoolSelect",
+    pools.map((pool) => ({ value: pool.id, label: poolLabel(pool) })),
+    parsedClientId ? "Selecionar piscina/jacuzzi do cliente" : "Selecionar piscina/jacuzzi"
+  );
+}
+
+function openRepairModal() {
+  document.getElementById("repairModal")?.removeAttribute("hidden");
+  document.body.style.overflow = "hidden";
+  setRepairModalStatus("");
+  document.getElementById("repairProblemInput")?.focus();
+}
+
+function closeRepairModal() {
+  document.getElementById("repairModal")?.setAttribute("hidden", "hidden");
+  document.body.style.overflow = "";
+  const form = document.getElementById("repairCreateForm");
+  if (form) form.reset();
+  renderPoolOptions(null);
+  setRepairModalStatus("");
+}
+
+function selectedRepairContext() {
+  const contextId = document.getElementById("repairContextSelect")?.value || "";
+  return repairContextData.contexts.find((context) => context.contextId === contextId) || null;
+}
+
+function applyContextToForm(context) {
+  if (!context) return;
+  const clientSelect = document.getElementById("repairClientSelect");
+  const poolSelect = document.getElementById("repairPoolSelect");
+  const problemInput = document.getElementById("repairProblemInput");
+
+  if (clientSelect && context.clientId) {
+    clientSelect.value = String(context.clientId);
+  }
+
+  renderPoolOptions(context.clientId || null);
+
+  if (poolSelect && context.poolId) {
+    poolSelect.value = String(context.poolId);
+  }
+
+  if (problemInput && !String(problemInput.value || "").trim() && context.problemFromAlert) {
+    problemInput.value = context.problemFromAlert;
+  }
+}
+
+function getSelectedPoolClientId(poolId) {
+  const pool = repairContextData.pools.find((item) => Number(item.id) === Number(poolId));
+  return Number(pool?.client?.id || pool?.clientId || 0) || null;
+}
+
+async function createRepairFromModal(event) {
+  event.preventDefault();
+
+  const context = selectedRepairContext();
+  const clientId = Number(document.getElementById("repairClientSelect")?.value || 0) || null;
+  const poolId = Number(document.getElementById("repairPoolSelect")?.value || 0) || null;
+  const problem = String(document.getElementById("repairProblemInput")?.value || "").trim();
+  const priority = String(document.getElementById("repairPrioritySelect")?.value || "").trim();
+  const notesInput = String(document.getElementById("repairNotesInput")?.value || "").trim();
+  const resolveAlert = Boolean(document.getElementById("repairResolveAlert")?.checked);
+
+  if (!poolId) {
+    setRepairModalStatus("Seleciona a piscina/jacuzzi para garantir contexto operacional.", "error");
+    return;
+  }
+
+  const inferredClientId = clientId || getSelectedPoolClientId(poolId) || context?.clientId || null;
+  if (!context && !inferredClientId) {
+    setRepairModalStatus("Seleciona cliente e piscina, ou escolhe um contexto de alerta/visita.", "error");
+    return;
+  }
+
+  if (!problem) {
+    setRepairModalStatus("Descreve o problema tecnico antes de criar a reparacao.", "error");
+    return;
+  }
+
+  const contextNotes = [
+    context?.alertId ? `Origem: alerta #${context.alertId}` : null,
+    context?.visitId ? `Visita: #${context.visitId}` : null,
+    notesInput || null,
+  ].filter(Boolean).join(" | ");
+
+  const payload = {
+    poolId,
+    problem,
+    notes: contextNotes || null,
+  };
+
+  if (priority) payload.priority = priority;
+
+  const submitBtn = document.getElementById("repairSubmitBtn");
+  if (submitBtn) submitBtn.disabled = true;
+  setRepairModalStatus("A criar reparacao...", "info");
+
+  try {
+    const data = await fetchJSON(`${API}/repairs`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+
+    if (resolveAlert && context?.alertId) {
+      await fetchJSON(`${API}/alerts/${encodeURIComponent(context.alertId)}/resolve`, { method: "PUT" });
+    }
+
+    closeRepairModal();
+    await loadAlerts();
+    ui.success(`Reparacao #${data.repair?.id || "-"} criada com sucesso.`);
+    setStatus("Reparacao criada e fila atualizada.", "ok");
+  } catch (err) {
+    setRepairModalStatus(err.message || "Erro ao criar reparacao.", "error");
+  } finally {
+    if (submitBtn) submitBtn.disabled = false;
+  }
+}
+
+function setupRepairModal() {
+  const openBtn = document.getElementById("openRepairModal");
+  const cancelBtn = document.getElementById("repairCancelBtn");
+  const form = document.getElementById("repairCreateForm");
+  const clientSelect = document.getElementById("repairClientSelect");
+  const contextSelect = document.getElementById("repairContextSelect");
+  const modal = document.getElementById("repairModal");
+
+  openBtn?.addEventListener("click", async () => {
+    try {
+      setStatus("A preparar contexto para nova reparacao...");
+      await loadRepairReferenceData();
+      buildRepairContextsFromAlerts();
+      renderClientOptions();
+      renderPoolOptions(null);
+      renderContextOptions();
+      openRepairModal();
+      setStatus("Contexto carregado.", "ok");
+    } catch (err) {
+      setStatus(err.message || "Erro ao preparar contexto da reparacao.", "error");
+    }
+  });
+
+  cancelBtn?.addEventListener("click", closeRepairModal);
+  modal?.addEventListener("click", (event) => {
+    if (event.target === modal) closeRepairModal();
+  });
+
+  contextSelect?.addEventListener("change", () => {
+    const context = selectedRepairContext();
+    applyContextToForm(context);
+    setRepairModalStatus("");
+  });
+
+  clientSelect?.addEventListener("change", () => {
+    const selectedClientId = Number(clientSelect.value || 0) || null;
+    renderPoolOptions(selectedClientId);
+    setRepairModalStatus("");
+  });
+
+  form?.addEventListener("submit", createRepairFromModal);
+}
+
 function renderList() {
   const list = document.getElementById("alertsList");
   const summary = document.getElementById("alertsSummary");
@@ -400,8 +680,8 @@ function renderList() {
   }
 
   list.innerHTML = alerts.map((alert) => `
-    <article class="alert-card priority-${escapeHtml(String(alert.priority || "NORMAL").toLowerCase())}">
-      <div class="alert-card-main">
+    <article class="card" data-alert-priority="${escapeHtml(String(alert.priority || "NORMAL").toLowerCase())}">
+      <div class="alert-main">
         <div class="alert-topline">
           <span class="alert-source">${escapeHtml(sourceLabel(alert.source))}</span>
           <span class="alert-priority">${escapeHtml(priorityLabel(alert.priority))}</span>
@@ -514,6 +794,7 @@ function setupFilters() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
+  setupRepairModal();
   setupFilters();
   applyQueryFilters();
   loadAlerts();

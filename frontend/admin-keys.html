@@ -7,13 +7,40 @@
   <link rel="stylesheet" href="/ui/foundation.css">
   <link rel="stylesheet" href="/css/enterprise-ui.css">
   <style>
-    body{font-family:Inter,Segoe UI,Arial,sans-serif;background:#071425;color:#eaf7ff;margin:0}.page{max-width:1180px;margin:auto;padding:26px}.card{background:#0b1d33;border:1px solid rgba(125,211,252,.18);border-radius:18px;padding:18px;margin:14px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}input,select,textarea{width:100%;box-sizing:border-box;border:1px solid rgba(125,211,252,.28);background:#06111f;color:#eaf7ff;border-radius:12px;padding:11px}button,.btn{border:0;border-radius:12px;padding:11px 14px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}.primary{background:#22d3ee;color:#062033}.danger{background:#ef4444;color:white}.muted{background:#1f3755;color:#d9f2ff}.row{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(255,255,255,.08);padding:10px 0}.row-main{min-width:0}.row-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}.pill{font-size:12px;border:1px solid rgba(125,211,252,.25);border-radius:999px;padding:4px 8px;color:#93e5ff;display:inline-flex;margin:2px 3px 2px 0}.hint{color:#91c9dd;font-size:13px;line-height:1.5}.field label{display:block;margin:0 0 6px;color:#93e5ff;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}.key-alert{background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.35);border-radius:14px;padding:12px;margin-top:10px}.key-alert strong{display:block;color:#fde68a}.empty{color:#91c9dd;padding:12px;border:1px dashed rgba(125,211,252,.25);border-radius:12px;margin-top:10px}.table-wrap{overflow:auto;border:1px solid rgba(125,211,252,.18);border-radius:14px;margin-top:12px}table{width:100%;border-collapse:collapse;min-width:780px}th,td{text-align:left;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.07);vertical-align:top}th{color:#93e5ff;background:#092039;font-size:12px;text-transform:uppercase;letter-spacing:.05em}td{color:#eaf7ff;font-size:13px}.report-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}.report-actions{display:flex;gap:8px;flex-wrap:wrap}@media(max-width:780px){.row{align-items:flex-start;flex-direction:column}.row-actions{justify-content:flex-start}}
+    body{font-family:Inter,Segoe UI,Arial,sans-serif;background:radial-gradient(circle at 10% 0%,#f2f8ff 0%,#eaf2fb 48%,#e3edf8 100%);color:#1c2d3d;margin:0}
+    .page{max-width:1180px;margin:auto;padding:18px}
+    .card{background:#fff;border:1px solid #cddaea;border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 10px 24px rgba(26,53,87,.08)}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+    input,select,textarea{width:100%;box-sizing:border-box;border:1px solid #cddaea;background:#f7fafd;color:#1c2d3d;border-radius:12px;padding:11px;min-height:44px}
+    textarea{min-height:92px}
+    input:focus,select:focus,textarea:focus{outline:2px solid #2492ec;outline-offset:1px;border-color:#2492ec;background:#fff}
+    button,.btn{border:1px solid #cddaea;border-radius:12px;padding:11px 14px;min-height:44px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;background:#fff;color:#1c2d3d}
+    .primary{background:linear-gradient(135deg,#1e79df,#32a6f2);border-color:#1e79df;color:#fff}
+    .danger{background:#dc3e3e;border-color:#dc3e3e;color:#fff}
+    .muted{background:#eff5fc;color:#274766}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #dfe8f2;padding:10px 0}
+    .row-main{min-width:0}
+    .row-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+    .pill{font-size:12px;border:1px solid #c6d8eb;border-radius:999px;padding:4px 8px;color:#466785;background:#f6faff;display:inline-flex;margin:2px 3px 2px 0}
+    .hint{color:#56708b;font-size:13px;line-height:1.5}
+    .field label{display:block;margin:0 0 6px;color:#4f6883;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+    .key-alert{background:#fff7e9;border:1px solid #ecd3a7;border-radius:14px;padding:12px;margin-top:10px}
+    .key-alert strong{display:block;color:#855400}
+    .empty{color:#56708b;padding:12px;border:1px dashed #c6d8eb;border-radius:12px;margin-top:10px;background:#f7fbff}
+    .table-wrap{overflow:auto;border:1px solid #d9e5f1;border-radius:14px;margin-top:12px}
+    table{width:100%;border-collapse:collapse;min-width:780px}
+    th,td{text-align:left;padding:10px 12px;border-bottom:1px solid #e7eef6;vertical-align:top}
+    th{color:#466785;background:#f3f8fe;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+    td{color:#1c2d3d;font-size:13px}
+    .report-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .report-actions{display:flex;gap:8px;flex-wrap:wrap}
+    @media(max-width:780px){.page{padding:12px}.row{align-items:flex-start;flex-direction:column}.row-actions{justify-content:flex-start}}
   </style>
+  <link rel="stylesheet" href="/ui/design-system.css">
 </head>
 <body data-required-role="ADMIN">
   <script src="/cw-auth.js"></script>
   <script src="/admin-auth-guard.js"></script>
-  <script src="/cw-enterprise-sidebar.js"></script>
   <main class="page">
     <h1>Chaves e codigos</h1>
     <p class="hint">Cada cliente pode ter uma chave geral, e cada piscina/jacuzzi pode ter uma chave ou codigo proprio. O tecnico ve apenas chaves marcadas como visiveis.</p>
@@ -95,5 +122,6 @@
   <script src="/ui/core/navigation-context.js"></script>
   <script src="/crystal-os-v2-shell.js"></script>
   <script src="/crystal-os-v2-nav.js"></script>
+  <script defer src="/ui/design-system.js"></script>
 </body>
 </html>

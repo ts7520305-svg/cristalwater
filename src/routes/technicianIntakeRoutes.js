@@ -2,6 +2,26 @@ const express = require('express');
 const router = express.Router();
 const { prisma } = require('../prismaClient');
 const { getBooleanSetting, getAllSettings } = require('../services/systemSettingService');
+const auth = require('../middlewares/authMiddleware');
+const { roleMatches } = require('../utils/roles');
+
+router.use(auth());
+
+function roleOf(req) {
+  return String(req.user?.role || '').trim().toUpperCase();
+}
+
+function requireRoles(...roles) {
+  return (req, res, next) => {
+    const role = roleOf(req);
+    if (roles.some((allowed) => roleMatches(role, allowed))) return next();
+    return res.status(403).json({ ok: false, error: 'Sem permissão' });
+  };
+}
+
+function currentTechnicianId(req) {
+  return Number(req.user?.technicianId || req.user?.id || 0);
+}
 
 function cleanString(value) {
   const s = String(value || '').trim();
@@ -13,7 +33,7 @@ function numberOrNull(value) {
   return Number.isFinite(n) ? n : null;
 }
 
-router.get('/settings', async (req, res) => {
+router.get('/settings', requireRoles('TECHNICIAN', 'ADMIN'), async (req, res) => {
   try {
     const { map } = await getAllSettings();
     return res.json({
@@ -28,8 +48,21 @@ router.get('/settings', async (req, res) => {
   }
 });
 
-router.post('/client-with-pool', async (req, res) => {
+router.post('/client-with-pool', requireRoles('TECHNICIAN', 'ADMIN'), async (req, res) => {
   try {
+    const role = roleOf(req);
+    const isAdmin = roleMatches(role, 'ADMIN');
+    const scopedTechnicianId = currentTechnicianId(req);
+    const bodyTechnicianId = numberOrNull(req.body.technicianId);
+
+    if (!isAdmin && !scopedTechnicianId) {
+      return res.status(403).json({ ok: false, error: 'Sessão técnica inválida para intake de campo' });
+    }
+
+    if (!isAdmin && bodyTechnicianId && bodyTechnicianId !== scopedTechnicianId) {
+      return res.status(403).json({ ok: false, error: 'Não pode criar registos em nome de outro técnico' });
+    }
+
     const allowed = await getBooleanSetting('TECHNICIANS_CAN_CREATE_CLIENTS_POOLS', false);
     if (!allowed) {
       return res.status(403).json({
@@ -40,7 +73,7 @@ router.post('/client-with-pool', async (req, res) => {
 
     const requireReview = await getBooleanSetting('TECHNICIAN_CREATED_RECORDS_REQUIRE_ADMIN_REVIEW', true);
     const poolsActiveByDefault = await getBooleanSetting('TECHNICIAN_CREATED_POOLS_ACTIVE_BY_DEFAULT', false);
-    const technicianId = numberOrNull(req.body.technicianId);
+    const technicianId = isAdmin ? bodyTechnicianId : scopedTechnicianId;
     const name = cleanString(req.body.clientName || req.body.name);
     if (!name) return res.status(400).json({ ok: false, error: 'Nome do cliente obrigatório' });
 
@@ -114,7 +147,7 @@ router.post('/client-with-pool', async (req, res) => {
   }
 });
 
-router.get('/pending-review', async (req, res) => {
+router.get('/pending-review', requireRoles('ADMIN'), async (req, res) => {
   try {
     const clients = await prisma.client.findMany({
       where: { pendingReview: true },
@@ -127,7 +160,7 @@ router.get('/pending-review', async (req, res) => {
   }
 });
 
-router.post('/clients/:id/approve', async (req, res) => {
+router.post('/clients/:id/approve', requireRoles('ADMIN'), async (req, res) => {
   try {
     const id = Number(req.params.id);
     const client = await prisma.client.update({

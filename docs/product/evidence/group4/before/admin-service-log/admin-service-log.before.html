@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Cristal Water LDA - Registo Diario</title>
+  <script src="/cw-auth.js"></script>
+<link rel="stylesheet" href="/ui/foundation.css">
+<style>
+    :root {
+      --bg: #06111f;
+      --panel: #0d1d31;
+      --panel2: #10243c;
+      --line: #24415f;
+      --txt: #e9f5ff;
+      --muted: #8fb1cc;
+      --brand: #35d1ff;
+      --ok: #40e6a0;
+      --warn: #ffd166;
+      --bad: #ff7b7b;
+      --input: #091829;
+    }
+    * { box-sizing: border-box; }
+    html, body { overflow-x: hidden; }
+    body {
+      margin: 0;
+      background: linear-gradient(120deg, #06111f, #0b1f33 55%, #06111f);
+      color: var(--txt);
+      font-family: Inter, Segoe UI, Arial, sans-serif;
+    }
+    main.page { max-width: 1500px; margin: 0 auto; padding: 24px; }
+    .page-head { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; margin-bottom: 18px; }
+    h1, h2, h3 { margin-top: 0; }
+    .page-head h1 { font-size: 30px; margin-bottom: 6px; }
+    .muted { color: var(--muted); font-size: 13px; line-height: 1.45; }
+    .grid { display: grid; gap: 16px; }
+    .cols2 { grid-template-columns: minmax(360px, 1.05fr) 1fr; }
+    .metrics { grid-template-columns: repeat(5, minmax(130px, 1fr)); }
+    .filters { grid-template-columns: 1fr 1fr 1fr auto; align-items: end; }
+    .card {
+      background: rgba(13,29,49,.92);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.22);
+    }
+    input, select {
+      width: 100%;
+      background: var(--input);
+      color: var(--txt);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      min-height: 46px;
+    }
+    label { display: grid; gap: 7px; color: #cfe9ff; font-size: 13px; font-weight: 800; }
+    button, .btn {
+      border: 0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      min-height: 46px;
+      background: #163354;
+      color: var(--txt);
+      font-weight: 900;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+    }
+    button.primary, .btn.primary { background: linear-gradient(135deg, #0584c7, #35d1ff); color: #03121c; }
+    .metric {
+      background: rgba(6,17,31,.58);
+      border: 1px solid rgba(125,211,252,.22);
+      border-radius: 8px;
+      padding: 14px;
+      min-height: 92px;
+    }
+    .metric strong { display: block; font-size: 30px; line-height: 1; margin-top: 10px; }
+    .service-list, .timeline { display: grid; gap: 10px; }
+    .service {
+      border: 1px solid rgba(125,211,252,.22);
+      background: rgba(6,17,31,.58);
+      border-radius: 8px;
+      padding: 14px;
+    }
+    .service-head, .line {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .service-title { font-size: 18px; font-weight: 950; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      border: 1px solid rgba(125,211,252,.28);
+      background: rgba(88,199,255,.09);
+      color: #cfe9ff;
+      padding: 6px 9px;
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .pill.done { border-color: rgba(64,230,160,.35); background: rgba(64,230,160,.12); color: #9affc6; }
+    .service-meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(160px, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+      color: #d9efff;
+      font-size: 13px;
+    }
+    .timeline-item {
+      position: relative;
+      border-left: 3px solid rgba(53,209,255,.52);
+      background: rgba(6,17,31,.58);
+      border-radius: 8px;
+      padding: 11px 12px 11px 15px;
+    }
+    .timeline-item.gps { border-left-color: var(--ok); }
+    .timeline-item.stock { border-left-color: var(--warn); }
+    .timeline-item.done { border-left-color: var(--ok); }
+    .timeline-time { color: var(--muted); font-size: 12px; margin-bottom: 4px; }
+    .map-box {
+      min-height: 280px;
+      overflow: hidden;
+      padding: 0;
+    }
+    .map-box iframe { width: 100%; height: 320px; border: 0; display: block; filter: saturate(1.05) contrast(1.05); }
+    .empty { border: 1px dashed rgba(143,177,204,.35); border-radius: 8px; padding: 18px; color: var(--muted); }
+    @media (max-width: 1050px) {
+      main.page { padding: 14px; }
+      .cols2, .metrics, .filters, .service-meta { grid-template-columns: 1fr; }
+      .page-head { flex-direction: column; }
+    }
+  </style>
+  <link rel="stylesheet" href="/ui/design-system.css">
+</head>
+<body data-required-role="ADMIN">
+  <main class="page">
+    <div class="page-head">
+      <div>
+        <h1>Registo diario de servicos</h1>
+        <p class="muted">Servicos feitos por dia, hora, tecnico, viatura, guia de obra, stock e linha do tempo GPS.</p>
+      </div>
+      <div class="line">
+        <a class="btn" href="/admin-visits">Visitas</a>
+        <a class="btn" href="/admin-live-map">Mapa Live</a>
+        <a class="btn" href="/admin-master-control">Centro de Operacoes</a>
+      </div>
+    </div>
+
+    <section class="card">
+      <div class="grid filters">
+        <label>Dia
+          <input id="dateFilter" type="date">
+        </label>
+        <label>Tecnico
+          <select id="technicianFilter"><option value="">Todos os tecnicos</option></select>
+        </label>
+        <label>Viatura
+          <select id="vehicleFilter"><option value="">Todas as viaturas</option></select>
+        </label>
+        <button id="refreshBtn" class="primary" type="button">Atualizar</button>
+      </div>
+    </section>
+
+    <section class="grid metrics" id="metrics"></section>
+
+    <section class="grid cols2">
+      <div class="card">
+        <div class="line">
+          <h2>Servicos do dia</h2>
+          <span class="pill" id="dayLabel">Hoje</span>
+        </div>
+        <div id="services" class="service-list"><div class="empty">A carregar registos...</div></div>
+      </div>
+
+      <div class="grid">
+        <div class="card map-box" id="mapBox">
+          <div class="empty" style="margin:18px">Sem pontos GPS para mostrar.</div>
+        </div>
+        <div class="card">
+          <h2>Linha do tempo</h2>
+          <div id="timeline" class="timeline"><div class="empty">A carregar timeline...</div></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/admin-auth-guard.js"></script>
+  <script src="/admin-service-log.js"></script>
+  <script src="/cw-enterprise-sidebar.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
+  <script defer src="/ui/design-system.js"></script>
+</body>
+</html>

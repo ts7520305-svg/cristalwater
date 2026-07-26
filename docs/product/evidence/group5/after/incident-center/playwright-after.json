@@ -1,0 +1,89 @@
+{
+  "generatedAt": "2026-07-20T21:39:21.147Z",
+  "page": "incident-center",
+  "route": "/incident-center",
+  "baseUrl": "http://127.0.0.1:3002",
+  "phase": "after",
+  "totals": {
+    "checks": 3,
+    "statusNot200": 0,
+    "navigationErrors": 0,
+    "horizontalScroll": 0,
+    "unlabeledVisibleFields": 0,
+    "smallOperationalTouchTargets": 0,
+    "consoleErrors": 0,
+    "failedRequests": 0,
+    "httpErrors": 0
+  },
+  "checks": [
+    {
+      "page": "incident-center",
+      "route": "/incident-center",
+      "phase": "after",
+      "status": 200,
+      "viewport": {
+        "label": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "navigationError": "",
+      "metrics": {
+        "title": "Cristal Water - Centro de Incidentes",
+        "horizontalScroll": false,
+        "unlabeledVisibleFields": 0,
+        "smallOperationalTouchTargets": 0,
+        "scrollWidth": 1280,
+        "viewport": 1280
+      },
+      "consoleErrors": [],
+      "failedRequests": [],
+      "httpErrors": []
+    },
+    {
+      "page": "incident-center",
+      "route": "/incident-center",
+      "phase": "after",
+      "status": 200,
+      "viewport": {
+        "label": "tablet",
+        "width": 1024,
+        "height": 1366
+      },
+      "navigationError": "",
+      "metrics": {
+        "title": "Cristal Water - Centro de Incidentes",
+        "horizontalScroll": false,
+        "unlabeledVisibleFields": 0,
+        "smallOperationalTouchTargets": 0,
+        "scrollWidth": 1280,
+        "viewport": 1280
+      },
+      "consoleErrors": [],
+      "failedRequests": [],
+      "httpErrors": []
+    },
+    {
+      "page": "incident-center",
+      "route": "/incident-center",
+      "phase": "after",
+      "status": 200,
+      "viewport": {
+        "label": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "navigationError": "",
+      "metrics": {
+        "title": "Cristal Water - Centro de Incidentes",
+        "horizontalScroll": false,
+        "unlabeledVisibleFields": 0,
+        "smallOperationalTouchTargets": 0,
+        "scrollWidth": 1280,
+        "viewport": 1280
+      },
+      "consoleErrors": [],
+      "failedRequests": [],
+      "httpErrors": []
+    }
+  ]
+}

@@ -1,0 +1,280 @@
+{
+  "admin-dashboard": {
+    "unlabeledInputs": [
+      {
+        "selector": "input",
+        "placeholder": "Pesquisar modulos, clientes, visitas"
+      },
+      {
+        "selector": "#monthRef",
+        "placeholder": ""
+      }
+    ],
+    "touchSmallSamples": [
+      {
+        "tag": "a",
+        "cls": "",
+        "text": "Leaflet",
+        "w": 51,
+        "h": 14
+      },
+      {
+        "tag": "a",
+        "cls": "leaflet-control-zoom-in",
+        "text": "+",
+        "w": 34,
+        "h": 44
+      },
+      {
+        "tag": "a",
+        "cls": "leaflet-control-zoom-out",
+        "text": "−",
+        "w": 34,
+        "h": 44
+      },
+      {
+        "tag": "a",
+        "cls": "critical-link",
+        "text": "Alertas criticos (6)",
+        "w": 173,
+        "h": 40
+      },
+      {
+        "tag": "a",
+        "cls": "critical-link",
+        "text": "Mapa / tecnicos (1)",
+        "w": 175,
+        "h": 40
+      }
+    ]
+  },
+  "admin-today": {
+    "unlabeledInputs": [],
+    "touchSmallSamples": []
+  },
+  "admin-alerts": {
+    "unlabeledInputs": [
+      {
+        "selector": "input",
+        "placeholder": "Pesquisar modulos, clientes, visitas"
+      },
+      {
+        "selector": "#alertPriorityFilter",
+        "placeholder": ""
+      },
+      {
+        "selector": "#alertSourceFilter",
+        "placeholder": ""
+      }
+    ],
+    "touchSmallSamples": []
+  },
+  "admin-payments": {
+    "unlabeledInputs": [
+      {
+        "selector": "input",
+        "placeholder": "Pesquisar modulos, clientes, visitas"
+      },
+      {
+        "selector": "#paymentMethodFilter",
+        "placeholder": ""
+      }
+    ],
+    "touchSmallSamples": [
+      {
+        "tag": "a",
+        "cls": "",
+        "text": "Frota",
+        "w": 38,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "cls": "",
+        "text": "Frota",
+        "w": 38,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "cls": "",
+        "text": "Ajuda",
+        "w": 42,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "cls": "",
+        "text": "Ajuda",
+        "w": 42,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "cls": "",
+        "text": "Home",
+        "w": 43,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "cls": "",
+        "text": "Obras",
+        "w": 44,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "cls": "",
+        "text": "Obras",
+        "w": 44,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "cls": "",
+        "text": "Visitas",
+        "w": 49,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "cls": "",
+        "text": "Visitas",
+        "w": 49,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "cls": "",
+        "text": "Visitas",
+        "w": 49,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "cls": "",
+        "text": "Faturas",
+        "w": 56,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "cls": "",
+        "text": "Faturas",
+        "w": 56,
+        "h": 22
+      }
+    ]
+  },
+  "admin-inventory": {
+    "unlabeledInputs": [
+      {
+        "selector": "input",
+        "placeholder": "Pesquisar modulos, clientes, visitas"
+      },
+      {
+        "selector": "input[name=\"invoiceDate\"]",
+        "placeholder": ""
+      },
+      {
+        "selector": "input[name=\"document\"]",
+        "placeholder": ""
+      },
+      {
+        "selector": "input[name=\"unit\"]",
+        "placeholder": ""
+      },
+      {
+        "selector": "input[name=\"unit\"]",
+        "placeholder": ""
+      }
+    ],
+    "touchSmallSamples": [
+      {
+        "tag": "a",
+        "cls": "",
+        "text": "Frota",
+        "w": 38,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "cls": "",
+        "text": "Frota",
+        "w": 38,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "cls": "",
+        "text": "Ajuda",
+        "w": 42,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "cls": "",
+        "text": "Ajuda",
+        "w": 42,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "cls": "",
+        "text": "Home",
+        "w": 43,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "cls": "",
+        "text": "Obras",
+        "w": 44,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "cls": "",
+        "text": "Obras",
+        "w": 44,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "cls": "",
+        "text": "Visitas",
+        "w": 49,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "cls": "",
+        "text": "Visitas",
+        "w": 49,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "cls": "",
+        "text": "Visitas",
+        "w": 49,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "cls": "",
+        "text": "Faturas",
+        "w": 56,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "cls": "",
+        "text": "Faturas",
+        "w": 56,
+        "h": 22
+      }
+    ]
+  }
+}

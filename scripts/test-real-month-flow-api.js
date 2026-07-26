@@ -14,6 +14,8 @@ const reportDir = path.resolve(__dirname, "..", "reports");
 fs.mkdirSync(reportDir, { recursive: true });
 
 const checks = [];
+let adminToken = null;
+let tempAdminUserId = null;
 const created = {
   clients: [],
   pools: [],
@@ -33,9 +35,14 @@ function check(name, ok, detail = "") {
 }
 
 async function call(method, pathname, body = undefined, expected = [200, 201]) {
+  const token = await ensureAdminToken();
   const response = await fetchImpl(`${BASE_URL}${pathname}`, {
     method,
-    headers: body instanceof FormData ? undefined : { "Content-Type": "application/json", "x-actor": `qa-real-month-${runId}` },
+    headers: body instanceof FormData ? undefined : {
+      "Content-Type": "application/json",
+      "x-actor": `qa-real-month-${runId}`,
+      Authorization: `Bearer ${token}`,
+    },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   const text = await response.text();
@@ -46,6 +53,61 @@ async function call(method, pathname, body = undefined, expected = [200, 201]) {
     throw new Error(`${method} ${pathname} -> ${response.status}: ${message}`);
   }
   return { status: response.status, data };
+}
+
+async function loginAdmin(email, password) {
+  const response = await fetchImpl(`${BASE_URL}/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  const text = await response.text();
+  let data = {};
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch (_) {
+    data = { raw: text };
+  }
+  return { ok: response.ok, status: response.status, data, text };
+}
+
+async function ensureAdminToken() {
+  if (adminToken) return adminToken;
+
+  const envEmail = process.env.ADMIN_EMAIL || "cristal.water@sapo.pt";
+  const envPassword = process.env.ADMIN_PASSWORD || "";
+  if (envPassword) {
+    const envLogin = await loginAdmin(envEmail, envPassword);
+    if (envLogin.ok && envLogin.data?.token) {
+      adminToken = envLogin.data.token;
+      return adminToken;
+    }
+  }
+
+  const marker = `REAL_FLOW_${runId}_${Math.random().toString(36).slice(2, 8)}`;
+  const email = `${marker.toLowerCase()}@qa-real-flow.test`;
+  const plainPassword = `Tmp-${marker}-A1!`;
+  const password = await bcrypt.hash(plainPassword, 10);
+
+  const user = await prisma.user.create({
+    data: {
+      email,
+      password,
+      role: "ADMIN",
+      active: true,
+      name: `QA REAL FLOW ${marker}`,
+      mustChangePassword: false,
+    },
+  });
+  tempAdminUserId = user.id;
+
+  const login = await loginAdmin(email, plainPassword);
+  if (!login.ok || !login.data?.token) {
+    throw new Error(`Admin login failed: ${login.status} ${login.data?.error || login.data?.message || login.text || "unknown"}`);
+  }
+
+  adminToken = login.data.token;
+  return adminToken;
 }
 
 function iso(day, hour = 9, minute = 0) {
@@ -423,5 +485,8 @@ main()
     process.exit(1);
   })
   .finally(async () => {
+    if (tempAdminUserId) {
+      await prisma.user.updateMany({ where: { id: tempAdminUserId }, data: { active: false } }).catch(() => null);
+    }
     await prisma.$disconnect().catch(() => null);
   });

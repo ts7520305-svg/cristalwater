@@ -1,0 +1,38 @@
+[
+  {
+    "page": "admin-visits",
+    "viewport": "1440x900",
+    "status": "200",
+    "ok": true
+  },
+  {
+    "page": "admin-visits-dashboard",
+    "viewport": "1440x900",
+    "status": "200",
+    "ok": true
+  },
+  {
+    "page": "admin-visits",
+    "viewport": "1024x1366",
+    "status": "200",
+    "ok": true
+  },
+  {
+    "page": "admin-visits-dashboard",
+    "viewport": "1024x1366",
+    "status": "200",
+    "ok": true
+  },
+  {
+    "page": "admin-visits",
+    "viewport": "390x844",
+    "status": "200",
+    "ok": true
+  },
+  {
+    "page": "admin-visits-dashboard",
+    "viewport": "390x844",
+    "status": "200",
+    "ok": true
+  }
+]

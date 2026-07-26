@@ -1,0 +1,178 @@
+{
+  "generatedAt": "2026-07-22T05:41:08.267Z",
+  "runId": "FCS14TECH_1784698861367_nnfu0",
+  "route": "/technician-route",
+  "results": [
+    {
+      "scenario": "loading-delayed",
+      "route": "/technician-route",
+      "debug": {
+        "urlAfterGoto": "http://127.0.0.1:3002/technician-route",
+        "titleAfterGoto": "Cristal Water - Rota Tecnica"
+      },
+      "expectedApiErrors": [],
+      "unexpectedApiErrors": [],
+      "observations": [
+        {
+          "selectorObserved": "#statusBox",
+          "textFound": "A carregar rota do dia.",
+          "expectedState": "Loading visivel com texto de carregamento",
+          "observedState": "Loading correto",
+          "pass": true
+        },
+        {
+          "selectorObserved": "#route",
+          "textFound": "",
+          "expectedState": "Sem empty prematuro durante loading",
+          "observedState": "Sem flicker prematuro",
+          "pass": true
+        },
+        {
+          "selectorObserved": "#route",
+          "textFound": "Sem rota planeada para hoje.",
+          "expectedState": "Empty state apos resposta vazia",
+          "observedState": "Empty correto",
+          "pass": true
+        },
+        {
+          "selectorObserved": "#statusBox",
+          "textFound": "Sem paragens para hoje.",
+          "expectedState": "Estado final sem paragens",
+          "observedState": "Estado correto",
+          "pass": true
+        }
+      ],
+      "screenshot": "docs/product/evidence/fcs14-technician-route/FCS14TECH_1784698861367_nnfu0-loading-delayed.png",
+      "console": [
+        {
+          "type": "log",
+          "text": "FCS14 tech semantic shell bypass"
+        }
+      ],
+      "pageErrors": [],
+      "pass": true
+    },
+    {
+      "scenario": "empty",
+      "route": "/technician-route",
+      "debug": {
+        "urlAfterGoto": "http://127.0.0.1:3002/technician-route",
+        "titleAfterGoto": "Cristal Water - Rota Tecnica"
+      },
+      "expectedApiErrors": [],
+      "unexpectedApiErrors": [],
+      "observations": [
+        {
+          "selectorObserved": "#route",
+          "textFound": "Sem rota planeada para hoje.",
+          "expectedState": "Empty state com lista vazia",
+          "observedState": "Empty correto",
+          "pass": true
+        },
+        {
+          "selectorObserved": "#statusBox",
+          "textFound": "Sem paragens para hoje.",
+          "expectedState": "Estado final sem paragens",
+          "observedState": "Estado correto",
+          "pass": true
+        }
+      ],
+      "screenshot": "docs/product/evidence/fcs14-technician-route/FCS14TECH_1784698861367_nnfu0-empty.png",
+      "console": [
+        {
+          "type": "log",
+          "text": "FCS14 tech semantic shell bypass"
+        }
+      ],
+      "pageErrors": [],
+      "pass": true
+    },
+    {
+      "scenario": "data",
+      "route": "/technician-route",
+      "debug": {
+        "urlAfterGoto": "http://127.0.0.1:3002/technician-route",
+        "titleAfterGoto": "Cristal Water - Rota Tecnica"
+      },
+      "expectedApiErrors": [],
+      "unexpectedApiErrors": [],
+      "observations": [
+        {
+          "selectorObserved": "#route .route-item b",
+          "textFound": "Piscina QA",
+          "expectedState": "Registo renderizado com dados",
+          "observedState": "Dados renderizados",
+          "pass": true
+        },
+        {
+          "selectorObserved": "#statusBox",
+          "textFound": "Rota carregada com 1 paragem(ns).",
+          "expectedState": "Estado final com paragens carregadas",
+          "observedState": "Estado correto",
+          "pass": true
+        },
+        {
+          "selectorObserved": "#route .empty",
+          "textFound": "0",
+          "expectedState": "Empty state desaparece quando ha dados",
+          "observedState": "Empty removido",
+          "pass": true
+        }
+      ],
+      "screenshot": "docs/product/evidence/fcs14-technician-route/FCS14TECH_1784698861367_nnfu0-data.png",
+      "console": [
+        {
+          "type": "log",
+          "text": "FCS14 tech semantic shell bypass"
+        }
+      ],
+      "pageErrors": [],
+      "pass": true
+    },
+    {
+      "scenario": "error",
+      "route": "/technician-route",
+      "debug": {
+        "urlAfterGoto": "http://127.0.0.1:3002/technician-route",
+        "titleAfterGoto": "Cristal Water - Rota Tecnica"
+      },
+      "expectedApiErrors": [
+        {
+          "urlIncludes": "/api/technician/today",
+          "status": 500
+        }
+      ],
+      "unexpectedApiErrors": [],
+      "observations": [
+        {
+          "selectorObserved": "#statusBox",
+          "textFound": "Falha simulada na rota tecnica.",
+          "expectedState": "Mensagem de erro apos resposta 500",
+          "observedState": "Erro mostrado",
+          "pass": true
+        },
+        {
+          "selectorObserved": "#route",
+          "textFound": "Sem rota planeada para hoje.",
+          "expectedState": "Error state nao usa empty de sucesso",
+          "observedState": "Fallback vazio",
+          "pass": true
+        }
+      ],
+      "screenshot": "docs/product/evidence/fcs14-technician-route/FCS14TECH_1784698861367_nnfu0-error.png",
+      "console": [
+        {
+          "type": "log",
+          "text": "FCS14 tech semantic shell bypass"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        }
+      ],
+      "pageErrors": [],
+      "pass": true
+    }
+  ],
+  "pass": true
+}

@@ -1,0 +1,152 @@
+[
+  {
+    "page": "admin-dashboard",
+    "viewport": "desktop",
+    "status": 200,
+    "consoleErrors": 0,
+    "hscroll": false,
+    "sw": 1440,
+    "cw": 1440,
+    "screenshot": "docs/product/evidence/group1/after/admin-dashboard-desktop.png"
+  },
+  {
+    "page": "admin-today",
+    "viewport": "desktop",
+    "status": 200,
+    "consoleErrors": 0,
+    "hscroll": false,
+    "sw": 1440,
+    "cw": 1440,
+    "screenshot": "docs/product/evidence/group1/after/admin-today-desktop.png"
+  },
+  {
+    "page": "admin-alerts",
+    "viewport": "desktop",
+    "status": 200,
+    "consoleErrors": 0,
+    "hscroll": false,
+    "sw": 1440,
+    "cw": 1440,
+    "screenshot": "docs/product/evidence/group1/after/admin-alerts-desktop.png"
+  },
+  {
+    "page": "admin-payments",
+    "viewport": "desktop",
+    "status": 200,
+    "consoleErrors": 0,
+    "hscroll": false,
+    "sw": 1440,
+    "cw": 1440,
+    "screenshot": "docs/product/evidence/group1/after/admin-payments-desktop.png"
+  },
+  {
+    "page": "admin-inventory",
+    "viewport": "desktop",
+    "status": 200,
+    "consoleErrors": 0,
+    "hscroll": false,
+    "sw": 1440,
+    "cw": 1440,
+    "screenshot": "docs/product/evidence/group1/after/admin-inventory-desktop.png"
+  },
+  {
+    "page": "admin-dashboard",
+    "viewport": "tablet",
+    "status": 200,
+    "consoleErrors": 0,
+    "hscroll": false,
+    "sw": 1024,
+    "cw": 1024,
+    "screenshot": "docs/product/evidence/group1/after/admin-dashboard-tablet.png"
+  },
+  {
+    "page": "admin-today",
+    "viewport": "tablet",
+    "status": 200,
+    "consoleErrors": 0,
+    "hscroll": false,
+    "sw": 1024,
+    "cw": 1024,
+    "screenshot": "docs/product/evidence/group1/after/admin-today-tablet.png"
+  },
+  {
+    "page": "admin-alerts",
+    "viewport": "tablet",
+    "status": 200,
+    "consoleErrors": 0,
+    "hscroll": false,
+    "sw": 1024,
+    "cw": 1024,
+    "screenshot": "docs/product/evidence/group1/after/admin-alerts-tablet.png"
+  },
+  {
+    "page": "admin-payments",
+    "viewport": "tablet",
+    "status": 200,
+    "consoleErrors": 0,
+    "hscroll": false,
+    "sw": 1024,
+    "cw": 1024,
+    "screenshot": "docs/product/evidence/group1/after/admin-payments-tablet.png"
+  },
+  {
+    "page": "admin-inventory",
+    "viewport": "tablet",
+    "status": 200,
+    "consoleErrors": 0,
+    "hscroll": false,
+    "sw": 1024,
+    "cw": 1024,
+    "screenshot": "docs/product/evidence/group1/after/admin-inventory-tablet.png"
+  },
+  {
+    "page": "admin-dashboard",
+    "viewport": "mobile",
+    "status": 200,
+    "consoleErrors": 0,
+    "hscroll": false,
+    "sw": 390,
+    "cw": 390,
+    "screenshot": "docs/product/evidence/group1/after/admin-dashboard-mobile.png"
+  },
+  {
+    "page": "admin-today",
+    "viewport": "mobile",
+    "status": 200,
+    "consoleErrors": 0,
+    "hscroll": false,
+    "sw": 390,
+    "cw": 390,
+    "screenshot": "docs/product/evidence/group1/after/admin-today-mobile.png"
+  },
+  {
+    "page": "admin-alerts",
+    "viewport": "mobile",
+    "status": 200,
+    "consoleErrors": 0,
+    "hscroll": false,
+    "sw": 390,
+    "cw": 390,
+    "screenshot": "docs/product/evidence/group1/after/admin-alerts-mobile.png"
+  },
+  {
+    "page": "admin-payments",
+    "viewport": "mobile",
+    "status": 200,
+    "consoleErrors": 0,
+    "hscroll": false,
+    "sw": 390,
+    "cw": 390,
+    "screenshot": "docs/product/evidence/group1/after/admin-payments-mobile.png"
+  },
+  {
+    "page": "admin-inventory",
+    "viewport": "mobile",
+    "status": 200,
+    "consoleErrors": 0,
+    "hscroll": false,
+    "sw": 390,
+    "cw": 390,
+    "screenshot": "docs/product/evidence/group1/after/admin-inventory-mobile.png"
+  }
+]

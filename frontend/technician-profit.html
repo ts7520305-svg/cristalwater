@@ -31,10 +31,11 @@ body {
   <link rel="stylesheet" href="/ui/foundation.css">
   <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
-  <script src="/technician-auth-guard.js"></script>
+  <script src="/admin-auth-guard.js"></script>
+  <link rel="stylesheet" href="/ui/design-system.css">
 </head>
 
-<body data-required-role="TECHNICIAN">
+<body data-required-role="ADMIN">
 
   <div style="padding:12px 16px 0">
     <button type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
@@ -105,5 +106,6 @@ load();
   <script src="/ui/core/navigation-context.js"></script>
   <script src="/crystal-os-v2-shell.js"></script>
   <script src="/crystal-os-v2-nav.js"></script>
+  <script defer src="/ui/design-system.js"></script>
 </body>
 </html>

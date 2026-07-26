@@ -1,0 +1,96 @@
+diff --git a/frontend/admin-command-center.html b/frontend/admin-command-center.html
+index fc4bce5..4af38dc 100644
+--- a/frontend/admin-command-center.html
++++ b/frontend/admin-command-center.html
+@@ -8,10 +8,12 @@
+   <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+   <script src="/admin-auth-guard.js"></script>
++  <link rel="stylesheet" href="/ui/design-system.css">
+ </head>
+ <body data-required-role="ADMIN">
+   <script>location.replace('/admin-master-control');</script>
+   <script src="/crystal-os-v2-shell.js"></script>
+   <script src="/crystal-os-v2-nav.js"></script>
++  <script defer src="/ui/design-system.js"></script>
+ </body>
+ </html>
+diff --git a/frontend/admin-core-flow.html b/frontend/admin-core-flow.html
+index 857db3b..9c3f663 100644
+--- a/frontend/admin-core-flow.html
++++ b/frontend/admin-core-flow.html
+@@ -1,5 +1,7 @@
+ <!doctype html><html lang="pt"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=/admin-master-control"><title>Cristal Water LDA</title><script src="/cw-auth.js"></script>  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
++  <link rel="stylesheet" href="/ui/design-system.css">
+ </head><body><script>location.replace("/admin-master-control");</script>  <script src="/crystal-os-v2-shell.js"></script>
+   <script src="/crystal-os-v2-nav.js"></script>
++  <script defer src="/ui/design-system.js"></script>
+ </body></html>
+\ No newline at end of file
+diff --git a/frontend/admin-menu.html b/frontend/admin-menu.html
+index ab01afa..099543d 100644
+--- a/frontend/admin-menu.html
++++ b/frontend/admin-menu.html
+@@ -10,6 +10,7 @@
+   <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+   <link rel="stylesheet" href="/cw-premium-admin-phase1.css">
+   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
++  <link rel="stylesheet" href="/ui/design-system.css">
+ </head>
+ <body class="admin-shell" data-required-role="ADMIN">
+   <div class="cw-v2-app">
+@@ -194,5 +195,6 @@
+       if (search) search.addEventListener("input", applyFilter);
+     })();
+   </script>
++  <script defer src="/ui/design-system.js"></script>
+ </body>
+ </html>
+diff --git a/frontend/admin-operational-flow.html b/frontend/admin-operational-flow.html
+index ee43cd2..481c180 100644
+--- a/frontend/admin-operational-flow.html
++++ b/frontend/admin-operational-flow.html
+@@ -1,6 +1,8 @@
+ <!doctype html><html lang="pt"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=/admin-master-control"><title>Cristal Water - Fluxo Operacional (Redirect Legado)</title><script src="/cw-auth.js"></script>  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+   <script src="/admin-auth-guard.js"></script>
++  <link rel="stylesheet" href="/ui/design-system.css">
+ </head><body data-required-role="ADMIN"><script>location.replace("/admin-master-control");</script>  <script src="/crystal-os-v2-shell.js"></script>
+   <script src="/crystal-os-v2-nav.js"></script>
++  <script defer src="/ui/design-system.js"></script>
+ </body></html>
+\ No newline at end of file
+diff --git a/frontend/admin-test-center.html b/frontend/admin-test-center.html
+index c8af81c..0969cba 100644
+--- a/frontend/admin-test-center.html
++++ b/frontend/admin-test-center.html
+@@ -1,5 +1,7 @@
+ <!doctype html><html lang="pt"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=/admin-master-control"><title>Cristal Water LDA</title><script src="/cw-auth.js"></script><script src="/admin-auth-guard.js"></script>  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
++  <link rel="stylesheet" href="/ui/design-system.css">
+ </head><body data-required-role="ADMIN"><script>location.replace("/admin-master-control");</script>  <script src="/crystal-os-v2-shell.js"></script>
+   <script src="/crystal-os-v2-nav.js"></script>
++  <script defer src="/ui/design-system.js"></script>
+ </body></html>
+\ No newline at end of file
+diff --git a/frontend/admin-today.html b/frontend/admin-today.html
+index 26a87de..f79a112 100644
+--- a/frontend/admin-today.html
++++ b/frontend/admin-today.html
+@@ -10,6 +10,7 @@
+   <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+   <link rel="stylesheet" href="/cw-premium-admin-phase1.css">
+   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
++  <link rel="stylesheet" href="/ui/design-system.css">
+ </head>
+ <body class="admin-shell" data-required-role="ADMIN">
+   <div class="cw-v2-app">
+@@ -105,5 +106,6 @@
+   <script src="/admin-auth-guard.js"></script>
+   <script src="/admin-today.js"></script>
+   <script src="/cw-admin-premium-controls.js"></script>
++  <script defer src="/ui/design-system.js"></script>
+ </body>
+ </html>
+\ No newline at end of file

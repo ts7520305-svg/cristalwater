@@ -1,0 +1,151 @@
+===== DIFF tokens.css vs tokens/tokens.css =====
+--- frontend/ui/tokens.css	2026-07-13 21:20:59.731575223 +0000
++++ frontend/ui/tokens/tokens.css	2026-06-28 11:31:40.755270526 +0000
+@@ -1,52 +1,32 @@
+-:root {
+-  --cw-color-bg: #f4f6f8;
+-  --cw-color-bg-2: #eceff2;
+-  --cw-color-surface: #ffffff;
+-  --cw-color-surface-2: #f8fbfd;
+-  --cw-color-text: #112232;
+-  --cw-color-text-soft: #44576a;
+-  --cw-color-border: rgba(17, 34, 50, 0.14);
+-  --cw-color-primary: #0f5a70;
+-  --cw-color-primary-2: #2f768a;
+-  --cw-color-danger: #a1202f;
+-  --cw-color-warning: #b06a00;
+-  --cw-color-success: #13764a;
+-
+-  --cw-font-family: 'Segoe UI', 'Inter', Arial, sans-serif;
+-  --cw-font-size-xs: 12px;
+-  --cw-font-size-sm: 13px;
+-  --cw-font-size-md: 15px;
+-  --cw-font-size-lg: 18px;
+-  --cw-font-size-xl: 30px;
+-
+-  --cw-space-1: 4px;
+-  --cw-space-2: 8px;
+-  --cw-space-3: 12px;
+-  --cw-space-4: 16px;
+-  --cw-space-5: 20px;
+-  --cw-space-6: 24px;
+-
+-  --cw-radius-sm: 10px;
+-  --cw-radius-md: 14px;
+-  --cw-radius-lg: 16px;
+-  --cw-radius-pill: 999px;
+-
+-  --cw-shadow-sm: 0 3px 10px rgba(17, 34, 50, 0.06);
+-  --cw-shadow-md: 0 6px 18px rgba(17, 34, 50, 0.08);
+-
+-  --cw-transition-fast: 140ms ease;
+-  --cw-transition: 220ms ease;
+-
+-  --cw-z-topbar: 30;
+-  --cw-z-sidebar: 20;
+-  --cw-z-mobile-nav: 40;
+-  --cw-z-modal: 70;
+-
+-  --cw-break-320: 320px;
+-  --cw-break-390: 390px;
+-  --cw-break-430: 430px;
+-  --cw-break-768: 768px;
+-  --cw-break-1024: 1024px;
+-  --cw-break-1440: 1440px;
+-  --cw-break-1920: 1920px;
++:root{
++
++--cw-primary:#0077B6;
++--cw-primary-dark:#005B8A;
++
++--cw-success:#22C55E;
++--cw-warning:#F59E0B;
++--cw-danger:#DC2626;
++
++--cw-bg:#F5F9FC;
++--cw-surface:#FFFFFF;
++
++--cw-text:#132A3A;
++--cw-text-soft:#607282;
++
++--cw-border:#DDE8EF;
++
++--cw-radius-xs:8px;
++--cw-radius-sm:12px;
++--cw-radius-md:18px;
++--cw-radius-lg:24px;
++
++--cw-shadow:0 12px 28px rgba(0,0,0,.08);
++
++--cw-gap-xs:6px;
++--cw-gap-sm:12px;
++--cw-gap-md:18px;
++--cw-gap-lg:24px;
++
++--cw-font:Inter,Arial,sans-serif;
++
+ }
+===== DIFF enterprise-ui.css vs css/enterprise-ui.css =====
+===== DIFF button.css vs buttons.css =====
+--- frontend/ui/components/button.css	2026-07-13 21:20:59.731575223 +0000
++++ frontend/ui/components/buttons.css	2026-06-28 11:31:53.775400720 +0000
+@@ -1,27 +1,37 @@
+-.cw-v2-btn,
+-.btn,
+-.cw-btn {
+-  min-height: 38px;
+-  border: 1px solid var(--cw-color-border);
+-  border-radius: var(--cw-radius-sm);
+-  background: var(--cw-color-surface);
+-  color: var(--cw-color-text);
+-  padding: 8px 12px;
+-  font-weight: 700;
+-  cursor: pointer;
+-  transition: background var(--cw-transition-fast), border-color var(--cw-transition-fast);
++.cw-btn{
++
++display:flex;
++align-items:center;
++justify-content:center;
++
++min-height:56px;
++
++padding:14px 20px;
++
++border:none;
++
++border-radius:18px;
++
++font-weight:700;
++
++cursor:pointer;
++
++transition:.2s;
++
+ }
+ 
+-.cw-v2-btn.primary,
+-.btn.primary,
+-.cw-btn-primary {
+-  background: linear-gradient(135deg, var(--cw-color-primary), var(--cw-color-primary-2));
+-  color: #eef8fb;
+-  border-color: transparent;
++.cw-btn-primary{
++
++background:var(--cw-primary);
++
++color:white;
++
+ }
+ 
+-.cw-v2-btn:hover,
+-.btn:hover,
+-.cw-btn:hover {
+-  border-color: rgba(15, 90, 112, 0.5);
++.cw-btn-secondary{
++
++background:white;
++
++border:1px solid var(--cw-border);
++
+ }

@@ -48,10 +48,10 @@ function addRow() {
   const d = document.createElement("div");
   d.className = "row";
   d.innerHTML = `
-    <input placeholder="Produto" data-k="productName">
-    <input placeholder="Qtd" type="number" step="0.01" data-k="quantity">
-    <input placeholder="Un" value="KG" data-k="unit">
-    <input placeholder="Custo/un" type="number" step="0.01" data-k="unitCost">
+    <input placeholder="Produto" aria-label="Produto" data-k="productName">
+    <input placeholder="Qtd" aria-label="Quantidade" type="number" step="0.01" data-k="quantity">
+    <input placeholder="Un" aria-label="Unidade" value="KG" data-k="unit">
+    <input placeholder="Custo/un" aria-label="Custo por unidade" type="number" step="0.01" data-k="unitCost">
   `;
   el("items")?.appendChild(d);
 }
@@ -95,12 +95,12 @@ async function refreshProducts() {
     ? PRODUCTS.map((p) => `
       <div class="item">
         <b>${esc(p.name)}</b>
-        ${p.active === false ? '<span class="pill">Arquivado</span>' : '<span class="pill">Ativo</span>'}
+        ${p.active === false ? '<span class="ds-badge is-muted">Arquivado</span>' : '<span class="ds-badge">Ativo</span>'}
         <div class="muted">SKU: ${esc(p.sku || "-")} · Categoria: ${esc(p.category || "-")} · Unidade: ${esc(p.unit || "-")} · Custo: EUR ${money(p.defaultCost)}</div>
         <div class="actions">
-          <button onclick="editProduct(${p.id})">Editar</button>
-          ${p.active === false ? `<button onclick="restoreProduct(${p.id})">Restaurar</button>` : `<button onclick="archiveProduct(${p.id})">Arquivar</button>`}
-          <button onclick="deleteProduct(${p.id})">Eliminar</button>
+          <button class="cw-v2-btn" onclick="editProduct(${p.id})">Editar</button>
+          ${p.active === false ? `<button class="cw-v2-btn" onclick="restoreProduct(${p.id})">Restaurar</button>` : `<button class="cw-v2-btn" onclick="archiveProduct(${p.id})">Arquivar</button>`}
+          <button class="cw-v2-btn danger" onclick="deleteProduct(${p.id})">Eliminar</button>
         </div>
       </div>
     `).join("")

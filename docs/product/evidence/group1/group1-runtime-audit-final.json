@@ -1,0 +1,179 @@
+{
+  "results": [
+    {
+      "page": "admin-dashboard",
+      "viewport": "desktop",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    },
+    {
+      "page": "admin-today",
+      "viewport": "desktop",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    },
+    {
+      "page": "admin-alerts",
+      "viewport": "desktop",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    },
+    {
+      "page": "admin-payments",
+      "viewport": "desktop",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    },
+    {
+      "page": "admin-inventory",
+      "viewport": "desktop",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    },
+    {
+      "page": "admin-dashboard",
+      "viewport": "tablet",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    },
+    {
+      "page": "admin-today",
+      "viewport": "tablet",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    },
+    {
+      "page": "admin-alerts",
+      "viewport": "tablet",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    },
+    {
+      "page": "admin-payments",
+      "viewport": "tablet",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    },
+    {
+      "page": "admin-inventory",
+      "viewport": "tablet",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    },
+    {
+      "page": "admin-dashboard",
+      "viewport": "mobile",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    },
+    {
+      "page": "admin-today",
+      "viewport": "mobile",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    },
+    {
+      "page": "admin-alerts",
+      "viewport": "mobile",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    },
+    {
+      "page": "admin-payments",
+      "viewport": "mobile",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    },
+    {
+      "page": "admin-inventory",
+      "viewport": "mobile",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    }
+  ],
+  "aggregate": {
+    "scenarios": 15,
+    "non200": 0,
+    "consoleErrors": 0,
+    "consoleWarnings": 0,
+    "failedRequests": 0,
+    "hscroll": 0,
+    "unlabeled": 0,
+    "smallTargets": 0
+  }
+}

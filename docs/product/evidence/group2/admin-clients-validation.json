@@ -1,0 +1,215 @@
+[
+  {
+    "viewport": "desktop",
+    "status": 200,
+    "consoleErrors": 0,
+    "consoleWarnings": 0,
+    "failedRequests": 0,
+    "hscroll": false,
+    "unlabeled": [],
+    "smallTargets": [
+      {
+        "tag": "input",
+        "text": "",
+        "w": 685,
+        "h": 41
+      },
+      {
+        "tag": "input",
+        "text": "",
+        "w": 20,
+        "h": 20
+      },
+      {
+        "tag": "a",
+        "text": "Faturacao oficial",
+        "w": 128,
+        "h": 38
+      },
+      {
+        "tag": "a",
+        "text": "Conta corrente",
+        "w": 123,
+        "h": 41
+      },
+      {
+        "tag": "a",
+        "text": "Pagamentos",
+        "w": 105,
+        "h": 41
+      },
+      {
+        "tag": "a",
+        "text": "Portal cliente",
+        "w": 112,
+        "h": 41
+      },
+      {
+        "tag": "a",
+        "text": "QA Piscina 1 - Lagos Centro",
+        "w": 198,
+        "h": 38
+      },
+      {
+        "tag": "a",
+        "text": "Piscinas",
+        "w": 78,
+        "h": 41
+      },
+      {
+        "tag": "a",
+        "text": "Conta corrente",
+        "w": 123,
+        "h": 41
+      },
+      {
+        "tag": "a",
+        "text": "Pagamentos",
+        "w": 105,
+        "h": 41
+      }
+    ]
+  },
+  {
+    "viewport": "tablet",
+    "status": 200,
+    "consoleErrors": 0,
+    "consoleWarnings": 0,
+    "failedRequests": 0,
+    "hscroll": false,
+    "unlabeled": [],
+    "smallTargets": [
+      {
+        "tag": "input",
+        "text": "",
+        "w": 851,
+        "h": 41
+      },
+      {
+        "tag": "input",
+        "text": "",
+        "w": 20,
+        "h": 20
+      },
+      {
+        "tag": "a",
+        "text": "Faturacao oficial",
+        "w": 128,
+        "h": 38
+      },
+      {
+        "tag": "a",
+        "text": "Piscinas",
+        "w": 78,
+        "h": 41
+      },
+      {
+        "tag": "a",
+        "text": "Conta corrente",
+        "w": 123,
+        "h": 41
+      },
+      {
+        "tag": "a",
+        "text": "Pagamentos",
+        "w": 105,
+        "h": 41
+      },
+      {
+        "tag": "a",
+        "text": "Portal cliente",
+        "w": 112,
+        "h": 41
+      },
+      {
+        "tag": "a",
+        "text": "QA Piscina 1 - Lagos Centro",
+        "w": 198,
+        "h": 38
+      },
+      {
+        "tag": "a",
+        "text": "Piscinas",
+        "w": 78,
+        "h": 41
+      },
+      {
+        "tag": "a",
+        "text": "Conta corrente",
+        "w": 123,
+        "h": 41
+      }
+    ]
+  },
+  {
+    "viewport": "mobile",
+    "status": 200,
+    "consoleErrors": 0,
+    "consoleWarnings": 0,
+    "failedRequests": 0,
+    "hscroll": false,
+    "unlabeled": [],
+    "smallTargets": [
+      {
+        "tag": "input",
+        "text": "",
+        "w": 233,
+        "h": 40
+      },
+      {
+        "tag": "input",
+        "text": "",
+        "w": 20,
+        "h": 20
+      },
+      {
+        "tag": "a",
+        "text": "Faturacao oficial",
+        "w": 128,
+        "h": 38
+      },
+      {
+        "tag": "a",
+        "text": "Conta corrente",
+        "w": 123,
+        "h": 41
+      },
+      {
+        "tag": "a",
+        "text": "Pagamentos",
+        "w": 105,
+        "h": 41
+      },
+      {
+        "tag": "a",
+        "text": "Portal cliente",
+        "w": 112,
+        "h": 41
+      },
+      {
+        "tag": "a",
+        "text": "QA Piscina 1 - Lagos Centro",
+        "w": 198,
+        "h": 38
+      },
+      {
+        "tag": "a",
+        "text": "Piscinas",
+        "w": 78,
+        "h": 41
+      },
+      {
+        "tag": "a",
+        "text": "Conta corrente",
+        "w": 123,
+        "h": 41
+      },
+      {
+        "tag": "a",
+        "text": "Pagamentos",
+        "w": 105,
+        "h": 41
+      }
+    ]
+  }
+]

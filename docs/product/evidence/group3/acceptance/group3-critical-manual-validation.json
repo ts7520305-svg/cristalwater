@@ -1,0 +1,1006 @@
+{
+  "summary": {
+    "scenarios": 24,
+    "non200": 0,
+    "functional404Scenarios": 3,
+    "totalOperationalSmallTargets": 32,
+    "totalUnlabeledVisibleFields": 3,
+    "horizontalScrollScenarios": 0,
+    "poolEndpointChecks": [
+      {
+        "poolId": 1,
+        "status": 404
+      },
+      {
+        "poolId": 193,
+        "status": 200
+      },
+      {
+        "poolId": 192,
+        "status": 200
+      }
+    ]
+  },
+  "scenarios": [
+    {
+      "page": "admin-visits-dashboard",
+      "viewport": "1440x900",
+      "status": 200,
+      "functional404": [],
+      "smallTouchTargetsOperational": 1,
+      "unlabeledVisibleFields": 1,
+      "hasHorizontalScroll": false,
+      "overflowOffenders": [],
+      "smallTouchTargetExamples": [
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "cw-help-fab cw-help-fab-quiet",
+          "text": "?",
+          "width": 38,
+          "height": 38
+        }
+      ],
+      "unlabeledExamples": [
+        {
+          "tag": "SELECT",
+          "id": "statusFilter",
+          "name": "",
+          "placeholder": ""
+        }
+      ]
+    },
+    {
+      "page": "admin-visits-dashboard",
+      "viewport": "1024x1366",
+      "status": 200,
+      "functional404": [],
+      "smallTouchTargetsOperational": 1,
+      "unlabeledVisibleFields": 1,
+      "hasHorizontalScroll": false,
+      "overflowOffenders": [],
+      "smallTouchTargetExamples": [
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "cw-help-fab cw-help-fab-quiet",
+          "text": "?",
+          "width": 38,
+          "height": 38
+        }
+      ],
+      "unlabeledExamples": [
+        {
+          "tag": "SELECT",
+          "id": "statusFilter",
+          "name": "",
+          "placeholder": ""
+        }
+      ]
+    },
+    {
+      "page": "admin-visits-dashboard",
+      "viewport": "390x844",
+      "status": 200,
+      "functional404": [],
+      "smallTouchTargetsOperational": 1,
+      "unlabeledVisibleFields": 1,
+      "hasHorizontalScroll": false,
+      "overflowOffenders": [],
+      "smallTouchTargetExamples": [
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "cw-help-fab cw-help-fab-quiet",
+          "text": "?",
+          "width": 38,
+          "height": 38
+        }
+      ],
+      "unlabeledExamples": [
+        {
+          "tag": "SELECT",
+          "id": "statusFilter",
+          "name": "",
+          "placeholder": ""
+        }
+      ]
+    },
+    {
+      "page": "admin-pool-technical",
+      "viewport": "1440x900",
+      "status": 200,
+      "functional404": [
+        "http://127.0.0.1:3002/api/core/pools/1/technical-sheet"
+      ],
+      "smallTouchTargetsOperational": 0,
+      "unlabeledVisibleFields": 0,
+      "hasHorizontalScroll": false,
+      "overflowOffenders": [],
+      "smallTouchTargetExamples": [],
+      "unlabeledExamples": []
+    },
+    {
+      "page": "admin-pool-technical",
+      "viewport": "1024x1366",
+      "status": 200,
+      "functional404": [
+        "http://127.0.0.1:3002/api/core/pools/1/technical-sheet"
+      ],
+      "smallTouchTargetsOperational": 0,
+      "unlabeledVisibleFields": 0,
+      "hasHorizontalScroll": false,
+      "overflowOffenders": [],
+      "smallTouchTargetExamples": [],
+      "unlabeledExamples": []
+    },
+    {
+      "page": "admin-pool-technical",
+      "viewport": "390x844",
+      "status": 200,
+      "functional404": [
+        "http://127.0.0.1:3002/api/core/pools/1/technical-sheet"
+      ],
+      "smallTouchTargetsOperational": 0,
+      "unlabeledVisibleFields": 0,
+      "hasHorizontalScroll": false,
+      "overflowOffenders": [],
+      "smallTouchTargetExamples": [],
+      "unlabeledExamples": []
+    },
+    {
+      "page": "technician-guide",
+      "viewport": "1440x900",
+      "status": 200,
+      "functional404": [],
+      "smallTouchTargetsOperational": 0,
+      "unlabeledVisibleFields": 0,
+      "hasHorizontalScroll": false,
+      "overflowOffenders": [],
+      "smallTouchTargetExamples": [],
+      "unlabeledExamples": []
+    },
+    {
+      "page": "technician-guide",
+      "viewport": "1024x1366",
+      "status": 200,
+      "functional404": [],
+      "smallTouchTargetsOperational": 0,
+      "unlabeledVisibleFields": 0,
+      "hasHorizontalScroll": false,
+      "overflowOffenders": [],
+      "smallTouchTargetExamples": [],
+      "unlabeledExamples": []
+    },
+    {
+      "page": "technician-guide",
+      "viewport": "390x844",
+      "status": 200,
+      "functional404": [],
+      "smallTouchTargetsOperational": 0,
+      "unlabeledVisibleFields": 0,
+      "hasHorizontalScroll": false,
+      "overflowOffenders": [],
+      "smallTouchTargetExamples": [],
+      "unlabeledExamples": []
+    },
+    {
+      "page": "admin-keys",
+      "viewport": "1440x900",
+      "status": 200,
+      "functional404": [],
+      "smallTouchTargetsOperational": 0,
+      "unlabeledVisibleFields": 0,
+      "hasHorizontalScroll": false,
+      "overflowOffenders": [],
+      "smallTouchTargetExamples": [],
+      "unlabeledExamples": []
+    },
+    {
+      "page": "admin-keys",
+      "viewport": "1024x1366",
+      "status": 200,
+      "functional404": [],
+      "smallTouchTargetsOperational": 0,
+      "unlabeledVisibleFields": 0,
+      "hasHorizontalScroll": false,
+      "overflowOffenders": [],
+      "smallTouchTargetExamples": [],
+      "unlabeledExamples": []
+    },
+    {
+      "page": "admin-keys",
+      "viewport": "390x844",
+      "status": 200,
+      "functional404": [],
+      "smallTouchTargetsOperational": 0,
+      "unlabeledVisibleFields": 0,
+      "hasHorizontalScroll": false,
+      "overflowOffenders": [],
+      "smallTouchTargetExamples": [],
+      "unlabeledExamples": []
+    },
+    {
+      "page": "admin-vehicles",
+      "viewport": "1440x900",
+      "status": 200,
+      "functional404": [],
+      "smallTouchTargetsOperational": 2,
+      "unlabeledVisibleFields": 0,
+      "hasHorizontalScroll": false,
+      "overflowOffenders": [],
+      "smallTouchTargetExamples": [
+        {
+          "tag": "A",
+          "id": "",
+          "cls": "cw-risk-global-item",
+          "text": "Sem guia AT ativa\n              QA-00-01 tem tecnico associado mas nao tem guia ",
+          "width": 591,
+          "height": 22
+        },
+        {
+          "tag": "A",
+          "id": "",
+          "cls": "cw-risk-global-item",
+          "text": "Seguro nao registado\n              QA-00-01 nao tem seguro registado no sistema.",
+          "width": 466,
+          "height": 22
+        }
+      ],
+      "unlabeledExamples": []
+    },
+    {
+      "page": "admin-vehicles",
+      "viewport": "1024x1366",
+      "status": 200,
+      "functional404": [],
+      "smallTouchTargetsOperational": 0,
+      "unlabeledVisibleFields": 0,
+      "hasHorizontalScroll": false,
+      "overflowOffenders": [],
+      "smallTouchTargetExamples": [],
+      "unlabeledExamples": []
+    },
+    {
+      "page": "admin-vehicles",
+      "viewport": "390x844",
+      "status": 200,
+      "functional404": [],
+      "smallTouchTargetsOperational": 3,
+      "unlabeledVisibleFields": 0,
+      "hasHorizontalScroll": false,
+      "overflowOffenders": [],
+      "smallTouchTargetExamples": [
+        {
+          "tag": "A",
+          "id": "",
+          "cls": "cw-risk-global-item",
+          "text": "Sem guia AT ativa\n              QA-00-01 tem tecnico associado mas nao tem guia ",
+          "width": 348,
+          "height": 43
+        },
+        {
+          "tag": "A",
+          "id": "",
+          "cls": "cw-risk-global-item",
+          "text": "Seguro nao registado\n              QA-00-01 nao tem seguro registado no sistema.",
+          "width": 350,
+          "height": 43
+        },
+        {
+          "tag": "A",
+          "id": "",
+          "cls": "cw-risk-global-item",
+          "text": "Viatura QA-00-01: Seguro nao registado\n              QA-00-01 nao tem seguro reg",
+          "width": 348,
+          "height": 43
+        }
+      ],
+      "unlabeledExamples": []
+    },
+    {
+      "page": "admin-visits",
+      "viewport": "1440x900",
+      "status": 200,
+      "functional404": [],
+      "smallTouchTargetsOperational": 1,
+      "unlabeledVisibleFields": 0,
+      "hasHorizontalScroll": false,
+      "overflowOffenders": [],
+      "smallTouchTargetExamples": [
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "cw-help-fab cw-help-fab-quiet",
+          "text": "?",
+          "width": 42,
+          "height": 44
+        }
+      ],
+      "unlabeledExamples": []
+    },
+    {
+      "page": "admin-visits",
+      "viewport": "1024x1366",
+      "status": 200,
+      "functional404": [],
+      "smallTouchTargetsOperational": 1,
+      "unlabeledVisibleFields": 0,
+      "hasHorizontalScroll": false,
+      "overflowOffenders": [],
+      "smallTouchTargetExamples": [
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "cw-help-fab cw-help-fab-quiet",
+          "text": "?",
+          "width": 42,
+          "height": 44
+        }
+      ],
+      "unlabeledExamples": []
+    },
+    {
+      "page": "admin-visits",
+      "viewport": "390x844",
+      "status": 200,
+      "functional404": [],
+      "smallTouchTargetsOperational": 1,
+      "unlabeledVisibleFields": 0,
+      "hasHorizontalScroll": false,
+      "overflowOffenders": [],
+      "smallTouchTargetExamples": [
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "cw-help-fab cw-help-fab-quiet",
+          "text": "?",
+          "width": 42,
+          "height": 44
+        }
+      ],
+      "unlabeledExamples": []
+    },
+    {
+      "page": "technician-visit",
+      "viewport": "1440x900",
+      "status": 200,
+      "functional404": [],
+      "smallTouchTargetsOperational": 1,
+      "unlabeledVisibleFields": 0,
+      "hasHorizontalScroll": false,
+      "overflowOffenders": [],
+      "smallTouchTargetExamples": [
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "cw-help-fab cw-help-fab-quiet",
+          "text": "?",
+          "width": 38,
+          "height": 38
+        }
+      ],
+      "unlabeledExamples": []
+    },
+    {
+      "page": "technician-visit",
+      "viewport": "1024x1366",
+      "status": 200,
+      "functional404": [],
+      "smallTouchTargetsOperational": 1,
+      "unlabeledVisibleFields": 0,
+      "hasHorizontalScroll": false,
+      "overflowOffenders": [],
+      "smallTouchTargetExamples": [
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "cw-help-fab cw-help-fab-quiet",
+          "text": "?",
+          "width": 38,
+          "height": 38
+        }
+      ],
+      "unlabeledExamples": []
+    },
+    {
+      "page": "technician-visit",
+      "viewport": "390x844",
+      "status": 200,
+      "functional404": [],
+      "smallTouchTargetsOperational": 1,
+      "unlabeledVisibleFields": 0,
+      "hasHorizontalScroll": false,
+      "overflowOffenders": [],
+      "smallTouchTargetExamples": [
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "cw-help-fab cw-help-fab-quiet",
+          "text": "?",
+          "width": 38,
+          "height": 38
+        }
+      ],
+      "unlabeledExamples": []
+    },
+    {
+      "page": "technician-field-mode",
+      "viewport": "1440x900",
+      "status": 200,
+      "functional404": [],
+      "smallTouchTargetsOperational": 6,
+      "unlabeledVisibleFields": 0,
+      "hasHorizontalScroll": false,
+      "overflowOffenders": [],
+      "smallTouchTargetExamples": [
+        {
+          "tag": "INPUT",
+          "id": "cleaned",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "vacuumed",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "basketCleaned",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "brushed",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "waterlineClean",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "backwashDone",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        }
+      ],
+      "unlabeledExamples": []
+    },
+    {
+      "page": "technician-field-mode",
+      "viewport": "1024x1366",
+      "status": 200,
+      "functional404": [],
+      "smallTouchTargetsOperational": 6,
+      "unlabeledVisibleFields": 0,
+      "hasHorizontalScroll": false,
+      "overflowOffenders": [],
+      "smallTouchTargetExamples": [
+        {
+          "tag": "INPUT",
+          "id": "cleaned",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "vacuumed",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "basketCleaned",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "brushed",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "waterlineClean",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "backwashDone",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        }
+      ],
+      "unlabeledExamples": []
+    },
+    {
+      "page": "technician-field-mode",
+      "viewport": "390x844",
+      "status": 200,
+      "functional404": [],
+      "smallTouchTargetsOperational": 6,
+      "unlabeledVisibleFields": 0,
+      "hasHorizontalScroll": false,
+      "overflowOffenders": [],
+      "smallTouchTargetExamples": [
+        {
+          "tag": "INPUT",
+          "id": "cleaned",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "vacuumed",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "basketCleaned",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "brushed",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "waterlineClean",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "backwashDone",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        }
+      ],
+      "unlabeledExamples": []
+    }
+  ],
+  "unlabeledGlobal": [
+    {
+      "page": "admin-visits-dashboard",
+      "viewport": "1440x900",
+      "items": [
+        {
+          "tag": "SELECT",
+          "id": "statusFilter",
+          "name": "",
+          "placeholder": ""
+        }
+      ]
+    },
+    {
+      "page": "admin-visits-dashboard",
+      "viewport": "1024x1366",
+      "items": [
+        {
+          "tag": "SELECT",
+          "id": "statusFilter",
+          "name": "",
+          "placeholder": ""
+        }
+      ]
+    },
+    {
+      "page": "admin-visits-dashboard",
+      "viewport": "390x844",
+      "items": [
+        {
+          "tag": "SELECT",
+          "id": "statusFilter",
+          "name": "",
+          "placeholder": ""
+        }
+      ]
+    }
+  ],
+  "smallTargetsGlobal": [
+    {
+      "page": "admin-visits-dashboard",
+      "viewport": "1440x900",
+      "count": 1,
+      "items": [
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "cw-help-fab cw-help-fab-quiet",
+          "text": "?",
+          "width": 38,
+          "height": 38
+        }
+      ]
+    },
+    {
+      "page": "admin-visits-dashboard",
+      "viewport": "1024x1366",
+      "count": 1,
+      "items": [
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "cw-help-fab cw-help-fab-quiet",
+          "text": "?",
+          "width": 38,
+          "height": 38
+        }
+      ]
+    },
+    {
+      "page": "admin-visits-dashboard",
+      "viewport": "390x844",
+      "count": 1,
+      "items": [
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "cw-help-fab cw-help-fab-quiet",
+          "text": "?",
+          "width": 38,
+          "height": 38
+        }
+      ]
+    },
+    {
+      "page": "admin-vehicles",
+      "viewport": "1440x900",
+      "count": 2,
+      "items": [
+        {
+          "tag": "A",
+          "id": "",
+          "cls": "cw-risk-global-item",
+          "text": "Sem guia AT ativa\n              QA-00-01 tem tecnico associado mas nao tem guia ",
+          "width": 591,
+          "height": 22
+        },
+        {
+          "tag": "A",
+          "id": "",
+          "cls": "cw-risk-global-item",
+          "text": "Seguro nao registado\n              QA-00-01 nao tem seguro registado no sistema.",
+          "width": 466,
+          "height": 22
+        }
+      ]
+    },
+    {
+      "page": "admin-vehicles",
+      "viewport": "390x844",
+      "count": 3,
+      "items": [
+        {
+          "tag": "A",
+          "id": "",
+          "cls": "cw-risk-global-item",
+          "text": "Sem guia AT ativa\n              QA-00-01 tem tecnico associado mas nao tem guia ",
+          "width": 348,
+          "height": 43
+        },
+        {
+          "tag": "A",
+          "id": "",
+          "cls": "cw-risk-global-item",
+          "text": "Seguro nao registado\n              QA-00-01 nao tem seguro registado no sistema.",
+          "width": 350,
+          "height": 43
+        },
+        {
+          "tag": "A",
+          "id": "",
+          "cls": "cw-risk-global-item",
+          "text": "Viatura QA-00-01: Seguro nao registado\n              QA-00-01 nao tem seguro reg",
+          "width": 348,
+          "height": 43
+        }
+      ]
+    },
+    {
+      "page": "admin-visits",
+      "viewport": "1440x900",
+      "count": 1,
+      "items": [
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "cw-help-fab cw-help-fab-quiet",
+          "text": "?",
+          "width": 42,
+          "height": 44
+        }
+      ]
+    },
+    {
+      "page": "admin-visits",
+      "viewport": "1024x1366",
+      "count": 1,
+      "items": [
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "cw-help-fab cw-help-fab-quiet",
+          "text": "?",
+          "width": 42,
+          "height": 44
+        }
+      ]
+    },
+    {
+      "page": "admin-visits",
+      "viewport": "390x844",
+      "count": 1,
+      "items": [
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "cw-help-fab cw-help-fab-quiet",
+          "text": "?",
+          "width": 42,
+          "height": 44
+        }
+      ]
+    },
+    {
+      "page": "technician-visit",
+      "viewport": "1440x900",
+      "count": 1,
+      "items": [
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "cw-help-fab cw-help-fab-quiet",
+          "text": "?",
+          "width": 38,
+          "height": 38
+        }
+      ]
+    },
+    {
+      "page": "technician-visit",
+      "viewport": "1024x1366",
+      "count": 1,
+      "items": [
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "cw-help-fab cw-help-fab-quiet",
+          "text": "?",
+          "width": 38,
+          "height": 38
+        }
+      ]
+    },
+    {
+      "page": "technician-visit",
+      "viewport": "390x844",
+      "count": 1,
+      "items": [
+        {
+          "tag": "BUTTON",
+          "id": "",
+          "cls": "cw-help-fab cw-help-fab-quiet",
+          "text": "?",
+          "width": 38,
+          "height": 38
+        }
+      ]
+    },
+    {
+      "page": "technician-field-mode",
+      "viewport": "1440x900",
+      "count": 6,
+      "items": [
+        {
+          "tag": "INPUT",
+          "id": "cleaned",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "vacuumed",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "basketCleaned",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "brushed",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "waterlineClean",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "backwashDone",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "page": "technician-field-mode",
+      "viewport": "1024x1366",
+      "count": 6,
+      "items": [
+        {
+          "tag": "INPUT",
+          "id": "cleaned",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "vacuumed",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "basketCleaned",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "brushed",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "waterlineClean",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "backwashDone",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "page": "technician-field-mode",
+      "viewport": "390x844",
+      "count": 6,
+      "items": [
+        {
+          "tag": "INPUT",
+          "id": "cleaned",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "vacuumed",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "basketCleaned",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "brushed",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "waterlineClean",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        },
+        {
+          "tag": "INPUT",
+          "id": "backwashDone",
+          "cls": "",
+          "text": "",
+          "width": 20,
+          "height": 48
+        }
+      ]
+    }
+  ],
+  "hscrollGlobal": []
+}

@@ -128,6 +128,26 @@ function renderOperationDigest(counts = {}, visits = []) {
   `;
 }
 
+function renderTechnicalPropagation(events = []) {
+  const root = $('#technicalPropagationList');
+  if (!root) return;
+  if (!Array.isArray(events) || events.length === 0) {
+    root.innerHTML = '<div class="empty">Sem eventos técnicos propagados nas últimas horas.</div>';
+    return;
+  }
+
+  root.innerHTML = events.slice(0, 10).map((event) => `
+    <div class="item">
+      <div>
+        <b>${esc(event.message || event.component || 'Evento técnico')}</b>
+        <div class="muted">Piscina #${esc(event.poolId || '-')} · ${esc(event.type || 'TECHNICAL_EVENT')}</div>
+        <div class="small">${formatDate(event.at)}</div>
+      </div>
+      <a class="btn ghost" href="/admin-pool-technical">Abrir ficha técnica</a>
+    </div>
+  `).join('');
+}
+
 function renderStatusStrip(counts = {}, pendingPools = []) {
   const planned = number(counts.visitsPlanned);
   const done = number(counts.visitsDone);
@@ -135,6 +155,7 @@ function renderStatusStrip(counts = {}, pendingPools = []) {
   const invoices = number(counts.invoicesOpen);
   const messages = number(counts.messagesUnread);
   const notifications = number(counts.notificationsUnread);
+  const technicalSheetEvents = number(counts.technicalSheetEvents24h);
   const pending = Array.isArray(pendingPools) ? pendingPools.length : 0;
   const risk = repairs + invoices + messages + notifications + pending;
   const now = new Date();
@@ -151,7 +172,7 @@ function renderStatusStrip(counts = {}, pendingPools = []) {
   if (lastUpdate) lastUpdate.textContent = `Atualizado às ${now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}`;
   if (syncState) syncState.textContent = risk > 0 ? 'Atenção operacional' : 'Sincronizado';
 
-  $('#metricsHint').textContent = `${done} concluídas · ${planned} planeadas · ${messages} mensagem(ns) · ${notifications} aviso(s) · ${risk} ponto(s) a rever`;
+  $('#metricsHint').textContent = `${done} concluídas · ${planned} planeadas · ${messages} mensagem(ns) · ${notifications} aviso(s) · ${technicalSheetEvents} evento(s) técnicos/24h · ${risk} ponto(s) a rever`;
 }
 
 function morningTone(status) {
@@ -416,6 +437,7 @@ function render(data = {}) {
   renderStatusStrip(counts, pendingPools);
   renderPrioritySummary(counts, pendingPools);
   renderOperationDigest(counts, visits);
+  renderTechnicalPropagation(data.technicalPropagation || []);
   renderMorningCheck(data.morningCheck || {});
   renderVisits(visits);
   renderPendingPools(pendingPools);
