@@ -74,6 +74,25 @@
       font-weight: 700;
     }
 
+    .cw-approval-dock {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      padding: 6px 10px;
+      border: 1px solid #d6c8aa;
+      border-radius: 999px;
+      background: #fff8eb;
+      color: #6b4f1e;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .cw-approval-dock a {
+      color: #7a5615;
+      font-weight: 800;
+    }
+
     .cw-ops-snapshot {
       display: grid;
       grid-template-columns: 1.2fr 1fr 1.1fr;
@@ -232,6 +251,11 @@
       gap: var(--ac-space-2);
     }
 
+    .cw-priority-block.approvals-focus {
+      border-color: #e3cba3;
+      background: linear-gradient(180deg, #fffdfa 0%, #fff8ef 100%);
+    }
+
     .cw-priority-head {
       display: flex;
       justify-content: space-between;
@@ -344,6 +368,21 @@
       letter-spacing: -0.01em;
     }
 
+    #prioritySummary .item:nth-child(1) {
+      border-left: 6px solid #c6414f;
+      background: #fff2f4;
+    }
+
+    #prioritySummary .item:nth-child(2) {
+      border-left: 6px solid #bf7a1f;
+      background: #fff7ec;
+    }
+
+    #prioritySummary .item:nth-child(3) {
+      border-left: 6px solid #2a6999;
+      background: #f1f8ff;
+    }
+
     .small,
     .muted {
       color: var(--cw-muted);
@@ -423,6 +462,18 @@
 
     .cw-priority-block.alerts-focus .cw-priority-head {
       margin-bottom: 2px;
+    }
+
+    .cw-priority-block.alerts-focus .pill {
+      border-color: #dfaeb6;
+      background: #fff1f4;
+      color: #8e3240;
+    }
+
+    .cw-priority-block.approvals-focus .pill {
+      border-color: #dcc79b;
+      background: #fff6e7;
+      color: #795915;
     }
 
     .visit-modal[hidden] {
@@ -545,6 +596,10 @@
 
       .cw-priority-block.alerts-focus {
         position: static;
+      }
+
+      .cw-approval-dock {
+        border-radius: var(--ac-radius-control);
       }
 
       #prioritySummary,
@@ -692,6 +747,36 @@
         border-color: #3d6750;
         color: #cae9d5;
       }
+
+      .cw-approval-dock {
+        background: #413217;
+        border-color: #78613a;
+        color: #ffe5b3;
+      }
+
+      .cw-approval-dock a {
+        color: #ffdf98;
+      }
+
+      .cw-priority-block.approvals-focus {
+        border-color: #6c5733;
+        background: linear-gradient(180deg, #2c2415 0%, #251e11 100%);
+      }
+
+      #prioritySummary .item:nth-child(1) {
+        background: #3a2027;
+        border-left-color: #9a4250;
+      }
+
+      #prioritySummary .item:nth-child(2) {
+        background: #3d2b17;
+        border-left-color: #8c6530;
+      }
+
+      #prioritySummary .item:nth-child(3) {
+        background: #21364b;
+        border-left-color: #446f94;
+      }
     }
 
     @media (max-width: 1199px) {
@@ -812,6 +897,14 @@
           <span id="lastUpdate" class="small">Atualizado agora</span>
           <a class="cw-v2-btn primary" href="/admin-alerts">Ver prioridades</a>
         </div>
+        <div class="cw-approval-dock" aria-label="Aprovações pendentes em destaque">
+          <span>Aprovações pendentes</span>
+          <a href="/admin-alerts?scope=interventions">Intervenções</a>
+          <span>•</span>
+          <a href="/admin-service-log">Serviço técnico</a>
+          <span>•</span>
+          <a href="/admin-payments">Financeiro</a>
+        </div>
         <div class="cw-admin-quick-actions" aria-label="Ações rápidas operacionais">
           <a class="cw-v2-btn" href="/admin-visits">Gerir visitas</a>
           <a class="cw-v2-btn" href="/admin-rounds">Ajustar rondas</a>
@@ -867,7 +960,7 @@
           <div class="metrics" id="metrics"></div>
         </article>
 
-        <article class="cw-priority-block alerts-focus">
+        <article class="cw-priority-block alerts-focus approvals-focus">
           <div class="cw-priority-head">
             <h2>Prioridades</h2>
             <span class="pill">decisões necessárias</span>
