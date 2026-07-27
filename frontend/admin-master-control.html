@@ -74,6 +74,109 @@
       font-weight: 700;
     }
 
+    .cw-ops-snapshot {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1.1fr;
+      gap: var(--ac-space-2);
+      margin-bottom: var(--ac-space-3);
+    }
+
+    .cw-snapshot-card {
+      border: 1px solid var(--cw-border);
+      border-radius: var(--ac-radius-control);
+      background: #fff;
+      box-shadow: var(--cw-shadow);
+      padding: var(--ac-space-2) var(--ac-space-3);
+      display: grid;
+      gap: 6px;
+      align-content: start;
+      min-height: 88px;
+    }
+
+    .cw-snapshot-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--ac-space-2);
+      flex-wrap: wrap;
+    }
+
+    .cw-snapshot-title {
+      margin: 0;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #375068;
+    }
+
+    .cw-priority-scale,
+    .cw-finance-strip,
+    .cw-field-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .cw-priority-chip,
+    .cw-mini-stat,
+    .cw-field-pill {
+      border: 1px solid var(--cw-border);
+      border-radius: 999px;
+      min-height: 30px;
+      padding: 4px 8px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 700;
+      font-size: 12px;
+      white-space: nowrap;
+      text-decoration: none;
+      color: #2f4258;
+      background: #f5f8fb;
+    }
+
+    .cw-priority-chip.p0 {
+      background: #ffe9ec;
+      border-color: #f0b4bc;
+      color: #8f2433;
+    }
+
+    .cw-priority-chip.p1 {
+      background: #fff5e8;
+      border-color: #f1d1a7;
+      color: #8a5b1a;
+    }
+
+    .cw-priority-chip.p2 {
+      background: #edf7ff;
+      border-color: #bdd7f1;
+      color: #1f547e;
+    }
+
+    .cw-finance-strip .cw-mini-stat {
+      background: #f3faf5;
+      border-color: #c4decb;
+      color: #245239;
+    }
+
+    .cw-field-pill.live {
+      background: #ecf9f1;
+      border-color: #b7dcc3;
+      color: #1f5a38;
+    }
+
+    .cw-field-pill.delay {
+      background: #fff3e9;
+      border-color: #efd0ac;
+      color: #7f5621;
+    }
+
+    .cw-field-pill.free {
+      background: #eef4fb;
+      border-color: #c4d7ea;
+      color: #2d506f;
+    }
+
     .cw-status-strip {
       display: grid;
       gap: var(--ac-space-2);
@@ -102,14 +205,16 @@
 
     .metrics {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: var(--ac-space-3);
     }
 
     .cw-priority-layout {
       display: grid;
-      gap: 15px;
+      gap: var(--ac-space-3);
       margin-top: var(--ac-space-1);
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.95fr);
+      align-items: start;
     }
 
     .cw-priority-block.operation-focus {
@@ -142,14 +247,14 @@
     }
 
     .metric-card {
-      min-height: 150px;
+      min-height: 116px;
       background: #fff;
       border: 1px solid var(--cw-border);
       border-radius: var(--ac-radius-card);
       box-shadow: var(--cw-shadow);
-      padding: 15px;
+      padding: 12px;
       display: grid;
-      gap: var(--ac-space-2);
+      gap: 6px;
       color: var(--cw-text);
     }
 
@@ -165,7 +270,7 @@
     }
 
     .metric-value {
-      font-size: 40px;
+      font-size: 30px;
       font-weight: 800;
       line-height: 1;
       font-variant-numeric: tabular-nums;
@@ -200,6 +305,27 @@
     .list {
       display: grid;
       gap: var(--ac-space-2);
+    }
+
+    #prioritySummary,
+    #todayList,
+    #technicalPropagationList {
+      max-height: 270px;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    #prioritySummary::-webkit-scrollbar,
+    #todayList::-webkit-scrollbar,
+    #technicalPropagationList::-webkit-scrollbar {
+      width: 7px;
+    }
+
+    #prioritySummary::-webkit-scrollbar-thumb,
+    #todayList::-webkit-scrollbar-thumb,
+    #technicalPropagationList::-webkit-scrollbar-thumb {
+      background: #c6d4df;
+      border-radius: 999px;
     }
 
     .item {
@@ -288,6 +414,15 @@
     .cw-status-strip.digest-strip .item {
       background: #f8fcfa;
       border-color: #c8ded1;
+    }
+
+    .cw-priority-block.alerts-focus {
+      position: sticky;
+      top: var(--ac-space-2);
+    }
+
+    .cw-priority-block.alerts-focus .cw-priority-head {
+      margin-bottom: 2px;
     }
 
     .visit-modal[hidden] {
@@ -391,6 +526,11 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
+      .cw-ops-snapshot,
+      .cw-priority-layout {
+        grid-template-columns: 1fr;
+      }
+
       .cw-status-strip {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
@@ -401,6 +541,17 @@
 
       .cw-status-strip.digest-strip {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .cw-priority-block.alerts-focus {
+        position: static;
+      }
+
+      #prioritySummary,
+      #todayList,
+      #technicalPropagationList {
+        max-height: none;
+        overflow: visible;
       }
     }
 
@@ -414,7 +565,7 @@
       }
 
       .metric-value {
-        font-size: 34px;
+        font-size: 28px;
       }
 
       .cw-map-panel iframe {
@@ -428,6 +579,12 @@
 
       .cw-admin-quick-actions,
       .cw-status-strip.digest-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .cw-priority-scale,
+      .cw-finance-strip,
+      .cw-field-strip {
         grid-template-columns: 1fr;
       }
 
@@ -485,6 +642,15 @@
         border-color: #2f4b43;
       }
 
+      .cw-snapshot-card {
+        background: #13221e;
+        border-color: #2f4b43;
+      }
+
+      .cw-snapshot-title {
+        color: #b7d6c9;
+      }
+
       .cw-priority-block.operation-focus {
         background: linear-gradient(180deg, #13221e 0%, #11201c 100%);
         border-color: #35544a;
@@ -493,6 +659,38 @@
       .cw-status-strip.digest-strip .item {
         background: #1a332c;
         border-color: #3a5b50;
+      }
+
+      .cw-priority-chip,
+      .cw-mini-stat,
+      .cw-field-pill {
+        background: #1d3a32;
+        border-color: #3a5b50;
+        color: #d8ebe3;
+      }
+
+      .cw-priority-chip.p0 {
+        background: #4b222b;
+        border-color: #8d4553;
+        color: #ffccd5;
+      }
+
+      .cw-priority-chip.p1 {
+        background: #4a361d;
+        border-color: #8c6b43;
+        color: #ffd9a8;
+      }
+
+      .cw-priority-chip.p2 {
+        background: #20384d;
+        border-color: #436988;
+        color: #c9e3ff;
+      }
+
+      .cw-finance-strip .cw-mini-stat {
+        background: #1c392f;
+        border-color: #3d6750;
+        color: #cae9d5;
       }
     }
 
@@ -620,6 +818,37 @@
           <a class="cw-v2-btn" href="/admin-live-map">Abrir mapa</a>
           <a class="cw-v2-btn" href="/admin-service-log">Ver histórico técnico</a>
         </div>
+        <div class="cw-ops-snapshot" aria-label="Resumo rápido de comando">
+          <article class="cw-snapshot-card" aria-label="Hierarquia de alertas">
+            <div class="cw-snapshot-head">
+              <h2 class="cw-snapshot-title">Centro de alertas</h2>
+              <a class="cw-v2-link-btn" href="/admin-alerts">Abrir</a>
+            </div>
+            <div class="cw-priority-scale" aria-label="Prioridades P0 P1 P2">
+              <span class="cw-priority-chip p0">P0 crítico</span>
+              <span class="cw-priority-chip p1">P1 alto</span>
+              <span class="cw-priority-chip p2">P2 monitorizar</span>
+            </div>
+          </article>
+          <article class="cw-snapshot-card" aria-label="Aprovações pendentes">
+            <div class="cw-snapshot-head">
+              <h2 class="cw-snapshot-title">Aprovações pendentes</h2>
+              <a class="cw-v2-link-btn" href="/admin-alerts?scope=interventions">Ver fila</a>
+            </div>
+            <div class="small">Sempre visível no topo para decisão imediata.</div>
+          </article>
+          <article class="cw-snapshot-card" aria-label="Leitura financeira imediata">
+            <div class="cw-snapshot-head">
+              <h2 class="cw-snapshot-title">Financeiro rápido</h2>
+              <a class="cw-v2-link-btn" href="/admin-payments">Detalhe</a>
+            </div>
+            <div class="cw-finance-strip" aria-label="Receber atrasos e cobranças">
+              <a class="cw-mini-stat" href="/admin-payments">Receber</a>
+              <a class="cw-mini-stat" href="/billing">Atrasos</a>
+              <a class="cw-mini-stat" href="/admin-collection">Cobranças</a>
+            </div>
+          </article>
+        </div>
       </section>
 
       <section class="cw-status-strip" id="statusStrip" aria-label="Estado rápido">
@@ -638,7 +867,7 @@
           <div class="metrics" id="metrics"></div>
         </article>
 
-        <article class="cw-priority-block">
+        <article class="cw-priority-block alerts-focus">
           <div class="cw-priority-head">
             <h2>Prioridades</h2>
             <span class="pill">decisões necessárias</span>
@@ -652,6 +881,11 @@
             <span class="pill">atrasadas, em execução e próximas</span>
           </div>
           <div id="operationDigest" class="cw-status-strip digest-strip"></div>
+          <div class="cw-field-strip" aria-label="Estado visual técnicos em campo">
+            <span class="cw-field-pill live">Em campo</span>
+            <span class="cw-field-pill delay">Atenção atraso</span>
+            <span class="cw-field-pill free">Disponível</span>
+          </div>
           <div id="todayList" class="list"><div class="empty">A carregar visitas...</div></div>
         </article>
 
