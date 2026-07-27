@@ -331,6 +331,10 @@
       gap: var(--ac-space-2);
     }
 
+    .list.compact {
+      gap: 8px;
+    }
+
     #prioritySummary,
     #todayList,
     #technicalPropagationList {
@@ -361,6 +365,40 @@
       justify-content: space-between;
       align-items: center;
       gap: var(--ac-space-2);
+    }
+
+    .item.compact-item {
+      padding: 10px 12px;
+      min-height: 52px;
+    }
+
+    .list.compact > .item {
+      padding: 10px 12px;
+      min-height: 52px;
+    }
+
+    .list.compact > .item .small,
+    .list.compact > .item .muted {
+      font-size: 12px;
+      line-height: 1.25;
+    }
+
+    .list.compact > .item a,
+    .list.compact > .item button {
+      min-height: 36px;
+      padding: 6px 10px;
+    }
+
+    .item.compact-item .small,
+    .item.compact-item .muted {
+      font-size: 12px;
+      line-height: 1.25;
+    }
+
+    .item.compact-item a,
+    .item.compact-item button {
+      min-height: 36px;
+      padding: 6px 10px;
     }
 
     .item strong {
@@ -453,6 +491,16 @@
     .cw-status-strip.digest-strip .item {
       background: #f8fcfa;
       border-color: #c8ded1;
+    }
+
+    .cw-status-strip.digest-strip .item strong {
+      font-size: 20px;
+    }
+
+    .cw-status-strip.digest-strip .item span {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
     }
 
     .cw-priority-block.alerts-focus {
@@ -724,6 +772,11 @@
         color: #d8ebe3;
       }
 
+      .item.compact-item {
+        background: #18312a;
+        border-color: #35544a;
+      }
+
       .cw-priority-chip.p0 {
         background: #4b222b;
         border-color: #8d4553;
@@ -782,6 +835,26 @@
     @media (max-width: 1199px) {
       .admin-shell .cw-v2-sidebar {
         display: none;
+      }
+    }
+
+    @media (min-width: 1200px) {
+      .cw-v2-main {
+        padding-top: 10px;
+      }
+
+      .cw-priority-block {
+        padding: 12px;
+      }
+
+      .cw-priority-head h2 {
+        font-size: 18px;
+      }
+
+      #prioritySummary,
+      #todayList,
+      #technicalPropagationList {
+        max-height: 250px;
       }
     }
   </style>
@@ -965,7 +1038,7 @@
             <h2>Prioridades</h2>
             <span class="pill">decisões necessárias</span>
           </div>
-          <div id="prioritySummary" class="list"><div class="empty">A agregar alertas e decisões...</div></div>
+          <div id="prioritySummary" class="list compact"><div class="empty">A agregar alertas e decisões...</div></div>
         </article>
 
         <article class="cw-priority-block operation-focus">
@@ -979,7 +1052,7 @@
             <span class="cw-field-pill delay">Atenção atraso</span>
             <span class="cw-field-pill free">Disponível</span>
           </div>
-          <div id="todayList" class="list"><div class="empty">A carregar visitas...</div></div>
+          <div id="todayList" class="list compact"><div class="empty">A carregar visitas...</div></div>
         </article>
 
         <article class="cw-priority-block">
@@ -987,7 +1060,7 @@
             <h2>Propagação técnica</h2>
             <span class="pill">timeline + command center + knowledge</span>
           </div>
-          <div id="technicalPropagationList" class="list"><div class="empty">A carregar eventos técnicos...</div></div>
+          <div id="technicalPropagationList" class="list compact"><div class="empty">A carregar eventos técnicos...</div></div>
         </article>
       </section>
 
