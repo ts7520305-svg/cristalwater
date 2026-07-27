@@ -11,19 +11,29 @@
   <link rel="stylesheet" href="/cw-premium-admin-phase1.css">
   <link rel="stylesheet" href="/cw-ui-kit.css">
   <style>
+    .admin-shell {
+      --ac-radius-card: 16px;
+      --ac-radius-control: 12px;
+      --ac-space-1: 8px;
+      --ac-space-2: 10px;
+      --ac-space-3: 12px;
+      --ac-space-4: 16px;
+      --ac-space-5: 20px;
+    }
+
     .admin-shell .cw-v2-main {
       background: transparent;
     }
 
     .cw-admin-head {
       display: grid;
-      gap: 8px;
-      margin-bottom: 12px;
+      gap: var(--ac-space-1);
+      margin-bottom: var(--ac-space-3);
     }
 
     .cw-admin-head h1 {
       margin: 0;
-      font-size: 34px;
+      font-size: 36px;
       line-height: 1.05;
       letter-spacing: -0.02em;
     }
@@ -31,26 +41,28 @@
     .cw-admin-head p {
       margin: 0;
       color: var(--cw-muted);
+      font-size: 15px;
+      line-height: 1.4;
     }
 
     .cw-status-strip {
       display: grid;
-      gap: 10px;
+      gap: var(--ac-space-2);
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      margin: 12px 0 16px;
+      margin: var(--ac-space-3) 0 var(--ac-space-4);
     }
 
     .cw-status-strip .item {
       background: var(--cw-surface);
       border: 1px solid var(--cw-border);
-      border-radius: 12px;
-      padding: 12px;
+      border-radius: var(--ac-radius-control);
+      padding: var(--ac-space-3);
       box-shadow: var(--cw-shadow);
     }
 
     .cw-status-strip strong {
       display: block;
-      font-size: 22px;
+      font-size: 24px;
       line-height: 1.1;
     }
 
@@ -62,23 +74,23 @@
     .metrics {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
+      gap: var(--ac-space-3);
     }
 
     .cw-priority-layout {
       display: grid;
-      gap: 14px;
-      margin-top: 8px;
+      gap: 15px;
+      margin-top: var(--ac-space-1);
     }
 
     .cw-priority-block {
       border: 1px solid var(--cw-border);
-      border-radius: 14px;
+      border-radius: var(--ac-radius-card);
       background: #fff;
       box-shadow: var(--cw-shadow);
-      padding: 12px;
+      padding: var(--ac-space-3);
       display: grid;
-      gap: 10px;
+      gap: var(--ac-space-2);
     }
 
     .cw-priority-head {
@@ -91,7 +103,7 @@
 
     .cw-priority-head h2 {
       margin: 0;
-      font-size: 18px;
+      font-size: 20px;
       line-height: 1.2;
     }
 
@@ -99,11 +111,11 @@
       min-height: 150px;
       background: #fff;
       border: 1px solid var(--cw-border);
-      border-radius: 14px;
+      border-radius: var(--ac-radius-card);
       box-shadow: var(--cw-shadow);
-      padding: 14px;
+      padding: 15px;
       display: grid;
-      gap: 10px;
+      gap: var(--ac-space-2);
       color: var(--cw-text);
     }
 
@@ -115,13 +127,14 @@
     }
 
     .metric-icon {
-      font-size: 20px;
+      font-size: 22px;
     }
 
     .metric-value {
-      font-size: 38px;
+      font-size: 40px;
       font-weight: 800;
       line-height: 1;
+      font-variant-numeric: tabular-nums;
     }
 
     .metric-label {
@@ -146,24 +159,24 @@
     }
 
     .cw-block-title {
-      margin: 0 0 10px;
+      margin: 0 0 var(--ac-space-2);
       font-size: 20px;
     }
 
     .list {
       display: grid;
-      gap: 10px;
+      gap: var(--ac-space-2);
     }
 
     .item {
       border: 1px solid var(--cw-border);
-      border-radius: 12px;
+      border-radius: var(--ac-radius-control);
       background: var(--cw-surface-2);
-      padding: 12px;
+      padding: var(--ac-space-3);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 10px;
+      gap: var(--ac-space-2);
     }
 
     .small,
@@ -174,19 +187,19 @@
 
     .empty {
       border: 1px dashed var(--cw-border);
-      border-radius: 12px;
-      padding: 14px;
+      border-radius: var(--ac-radius-control);
+      padding: 15px;
       color: var(--cw-muted);
       background: var(--cw-surface-2);
     }
 
     .pill {
       display: inline-flex;
-      min-height: 30px;
+      min-height: 32px;
       align-items: center;
       border-radius: 999px;
       border: 1px solid var(--cw-border);
-      padding: 4px 9px;
+      padding: 4px 10px;
       background: #fff;
       color: #344257;
       font-weight: 700;
@@ -205,25 +218,25 @@
     }
 
     .cw-map-panel {
-      min-height: 300px;
+      min-height: 320px;
       overflow: hidden;
       padding: 0;
     }
 
     .cw-map-panel iframe {
       width: 100%;
-      height: 260px;
+      height: 280px;
       border: 0;
       display: block;
     }
 
     .cw-map-caption {
-      padding: 14px;
+      padding: var(--ac-space-4);
       border-top: 1px solid var(--cw-border);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 10px;
+      gap: var(--ac-space-2);
       flex-wrap: wrap;
     }
 
@@ -238,7 +251,7 @@
       background: rgba(14, 20, 31, 0.46);
       display: grid;
       place-items: center;
-      padding: 12px;
+      padding: var(--ac-space-3);
     }
 
     .visit-modal-panel {
@@ -247,8 +260,8 @@
       overflow: auto;
       background: #fff;
       border: 1px solid var(--cw-border);
-      border-radius: 14px;
-      padding: 14px;
+      border-radius: var(--ac-radius-card);
+      padding: var(--ac-space-4);
     }
 
     .visit-modal-head {
@@ -262,7 +275,7 @@
     .visit-edit-form {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
+      gap: var(--ac-space-2);
     }
 
     .visit-edit-form label {
@@ -276,11 +289,20 @@
     .visit-edit-form input,
     .visit-edit-form select,
     .visit-edit-form textarea {
-      min-height: 44px;
+      min-height: 46px;
       border: 1px solid var(--cw-border);
-      border-radius: 10px;
+      border-radius: var(--ac-radius-control);
       padding: 10px;
       background: #fff;
+    }
+
+    .visit-edit-form input:focus-visible,
+    .visit-edit-form select:focus-visible,
+    .visit-edit-form textarea:focus-visible,
+    .cw-v2-btn:focus-visible,
+    .cw-v2-link-btn:focus-visible {
+      outline: 3px solid #0f7d5d;
+      outline-offset: 2px;
     }
 
     .visit-edit-form .wide,
@@ -306,7 +328,7 @@
     .visit-modal-actions {
       display: flex;
       justify-content: flex-end;
-      gap: 8px;
+      gap: var(--ac-space-1);
       flex-wrap: wrap;
     }
 
@@ -329,6 +351,18 @@
         font-size: 26px;
       }
 
+      .metric-card {
+        min-height: 132px;
+      }
+
+      .metric-value {
+        font-size: 34px;
+      }
+
+      .cw-map-panel iframe {
+        height: 240px;
+      }
+
       .metrics,
       .cw-status-strip {
         grid-template-columns: 1fr;
@@ -340,6 +374,47 @@
 
       .visit-actions {
         justify-content: flex-start;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .cw-priority-block,
+      .metric-card,
+      .visit-modal-panel {
+        background: #13221e;
+        border-color: #2f4b43;
+        color: #e5f3ee;
+      }
+
+      .item,
+      .empty,
+      .cw-status-strip .item {
+        background: #18302a;
+        border-color: #35544a;
+      }
+
+      .pill,
+      .visit-edit-form input,
+      .visit-edit-form select,
+      .visit-edit-form textarea {
+        background: #1d3a32;
+        border-color: #3a5b50;
+        color: #e5f3ee;
+      }
+
+      .metric-card.bad-card {
+        background: #3b2227;
+        border-color: #784049;
+      }
+
+      .metric-card.warn-card {
+        background: #3d2f1a;
+        border-color: #7c6540;
+      }
+
+      .metric-card.ok-card {
+        background: #1f3a2b;
+        border-color: #3f6d54;
       }
     }
 
