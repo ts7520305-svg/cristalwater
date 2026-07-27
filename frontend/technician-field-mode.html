@@ -23,6 +23,12 @@
       --cw-danger: #b7212e;
       --cw-success: #166d3e;
       --cw-tap: 68px;
+      --cw-radius-card: 16px;
+      --cw-radius-control: 14px;
+      --cw-space-1: 8px;
+      --cw-space-2: 10px;
+      --cw-space-3: 12px;
+      --cw-space-4: 16px;
       font-family: "Montserrat", "Avenir Next", "Segoe UI", sans-serif;
       text-rendering: optimizeLegibility;
       -webkit-font-smoothing: antialiased;
@@ -87,10 +93,10 @@
     .card {
       background: var(--cw-surface);
       border: 1px solid #bed0ca;
-      border-radius: 16px;
+      border-radius: var(--cw-radius-card);
       box-shadow: var(--cw-shadow);
-      padding: 16px;
-      margin-bottom: 12px;
+      padding: var(--cw-space-4);
+      margin-bottom: var(--cw-space-3);
     }
 
     .next {
@@ -127,16 +133,16 @@
     .field-dashboard {
       display: grid;
       grid-template-columns: 1.4fr 1fr 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 12px;
+      gap: var(--cw-space-2);
+      margin-bottom: var(--cw-space-3);
     }
 
     .field-tile {
       background: var(--cw-surface);
       border: 1px solid #b8cac3;
-      border-radius: 14px;
+      border-radius: var(--cw-radius-control);
       min-height: 104px;
-      padding: 12px;
+      padding: var(--cw-space-3);
       display: grid;
       align-content: space-between;
     }
@@ -176,13 +182,13 @@
     .field-tile.primary .field-cta-row {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 8px;
-      margin-top: 10px;
+      gap: var(--cw-space-1);
+      margin-top: var(--cw-space-2);
     }
 
     .field-tile.primary .hero-action {
       min-height: 50px;
-      border-radius: 12px;
+      border-radius: var(--cw-radius-control);
       border: 1px solid #b7ccc4;
       background: rgba(255, 255, 255, 0.92);
       color: var(--cw-text);
@@ -255,13 +261,13 @@
     .actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 10px;
+      gap: var(--cw-space-2);
+      margin-top: var(--cw-space-2);
     }
 
     .big {
       min-height: 76px;
-      border-radius: 16px;
+      border-radius: var(--cw-radius-card);
       border: 1px solid #b7ccc4;
       background: #fff;
       color: var(--cw-text);
@@ -306,9 +312,9 @@
       z-index: 45;
       background: rgba(249, 252, 251, 0.98);
       border: 1px solid #adc5bc;
-      border-radius: 16px;
-      padding: 10px;
-      margin-bottom: 12px;
+      border-radius: var(--cw-radius-card);
+      padding: var(--cw-space-2);
+      margin-bottom: var(--cw-space-3);
       box-shadow: 0 10px 24px rgba(16, 38, 32, 0.16);
     }
 
@@ -376,8 +382,8 @@
     .route-actions {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-      margin-top: 10px;
+      gap: var(--cw-space-1);
+      margin-top: var(--cw-space-2);
     }
 
     .crew-info,
@@ -392,8 +398,8 @@
     .water-item {
       background: var(--cw-surface-2);
       border: 1px solid var(--cw-border);
-      border-radius: 12px;
-      padding: 10px;
+      border-radius: var(--cw-radius-control);
+      padding: var(--cw-space-2);
     }
 
     .field-panel-agora .chip,
@@ -696,8 +702,8 @@
 
     .visit-group {
       display: grid;
-      gap: 8px;
-      margin-top: 10px;
+      gap: var(--cw-space-1);
+      margin-top: var(--cw-space-2);
     }
 
     .visit {
@@ -807,8 +813,8 @@
 
     .interrupt-item {
       border: 1px solid rgba(183, 33, 46, 0.25);
-      border-radius: 10px;
-      padding: 10px;
+      border-radius: var(--cw-radius-control);
+      padding: var(--cw-space-2);
       background: rgba(255, 255, 255, 0.75);
       font-size: 14px;
       line-height: 1.35;
@@ -826,9 +832,9 @@
 
     .now-board {
       border: 1px solid var(--cw-border);
-      border-radius: 12px;
-      padding: 10px;
-      margin-top: 10px;
+      border-radius: var(--cw-radius-control);
+      padding: var(--cw-space-2);
+      margin-top: var(--cw-space-2);
       background: linear-gradient(180deg, #f7fbf9 0%, #edf6f2 100%);
       display: grid;
       gap: 6px;
@@ -901,7 +907,7 @@
       width: 100%;
       max-height: 220px;
       object-fit: cover;
-      border-radius: 10px;
+      border-radius: var(--cw-radius-control);
       border: 1px solid #b7c9c2;
       background: #eef5f2;
     }
@@ -956,6 +962,82 @@
       .toast {
         animation: none;
         transition: none;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body.cw-tech-field-page {
+        --cw-surface: #10221d;
+        --cw-surface-2: #162d27;
+        --cw-border: #2c4b42;
+        --cw-text: #e8f4ef;
+        --cw-muted: #a8c6bb;
+        background:
+          radial-gradient(120% 45% at 0% 0%, rgba(46, 164, 124, 0.15) 0%, rgba(46, 164, 124, 0) 62%),
+          linear-gradient(180deg, #0d1815, #132520);
+      }
+
+      .top,
+      .field-action-sticky {
+        background: rgba(15, 29, 24, 0.92);
+        border-color: #35574c;
+      }
+
+      .chip,
+      input,
+      select,
+      textarea,
+      .field-tabs,
+      .field-tabs button,
+      .big,
+      .route-btn,
+      .doc-btn,
+      .photo-btn,
+      .assist-card,
+      .dose-remove,
+      .photo-mini button,
+      .interrupt-item button {
+        background: #1a322b;
+        border-color: #3a5a50;
+        color: #dff1eb;
+      }
+
+      .field-tabs button.active,
+      .field-tile.primary .hero-action.primary,
+      .big.ok {
+        background: linear-gradient(180deg, #1ba579 0%, #12835f 100%);
+        color: #fff;
+      }
+
+      .big.bad,
+      .field-tile.primary.p0 .hero-action.primary {
+        background: linear-gradient(180deg, #d6414f 0%, #b92a38 100%);
+      }
+
+      .next,
+      .now-board {
+        background: #173129;
+      }
+
+      .interrupt-card {
+        background: #3a1d25;
+        border-color: #85404f;
+        color: #ffd9df;
+      }
+
+      .interrupt-card .chip {
+        background: #4a242e;
+        border-color: #965060;
+      }
+
+      .measure-field .range-status.ok {
+        color: #7ee4b8;
+      }
+
+      .measure-field .range-status.low,
+      .measure-field .range-status.high,
+      .photo-status.warn {
+        color: #ffbe8d;
       }
     }
 
