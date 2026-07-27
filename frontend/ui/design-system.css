@@ -32,6 +32,28 @@
 
   --ds-touch-min: 44px;
   --ds-max-content: 1360px;
+
+  --cw-space-1: var(--ds-s-2);
+  --cw-space-2: var(--ds-s-3);
+  --cw-space-3: var(--ds-s-4);
+  --cw-space-4: var(--ds-s-5);
+  --cw-radius-control: var(--ds-r-sm);
+  --cw-radius-card: var(--ds-r-md);
+}
+
+body[data-profile="ADMIN"] {
+  --ds-primary: #0b6a5b;
+  --ds-primary-strong: #075044;
+}
+
+body[data-profile="TECHNICIAN"] {
+  --ds-primary: #0f6c8d;
+  --ds-primary-strong: #0c516b;
+}
+
+body[data-profile="CLIENT"] {
+  --ds-primary: #1a74cf;
+  --ds-primary-strong: #1458a0;
 }
 
 * {
@@ -247,6 +269,42 @@ th {
   border: 1px solid transparent;
   background: #dff4ec;
   color: #0f5b47;
+}
+
+.ds-icon-chip,
+.icon-chip {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid var(--ds-border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ds-surface-soft);
+  color: var(--ds-primary-strong);
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.ds-stat-compact {
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-r-sm);
+  background: var(--ds-surface-soft);
+  padding: 8px 10px;
+  display: grid;
+  gap: 4px;
+}
+
+.ds-stat-compact b {
+  font-size: 1.32rem;
+  line-height: 1;
+  color: var(--ds-text);
+}
+
+.ds-stat-compact span {
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 
 .ds-badge.is-warning { background: #fff1cc; color: #6b5200; }
@@ -499,6 +557,24 @@ body[data-profile="CLIENT"] {
   }
 }
 
+@media (max-width: 960px) and (orientation: landscape) {
+  body[data-profile="TECHNICIAN"],
+  body[data-profile="CLIENT"] {
+    padding-bottom: 56px;
+  }
+
+  .ds-bottom-nav a {
+    min-height: 50px;
+    font-size: 0.74rem;
+  }
+
+  .cw-page-head,
+  .page-head,
+  .ds-page-header {
+    margin-bottom: var(--ds-s-4);
+  }
+}
+
 @media (max-width: 430px) {
   body {
     font-size: 15px;
@@ -514,5 +590,46 @@ body[data-profile="CLIENT"] {
   article,
   [data-card] {
     border-radius: var(--ds-r-sm);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ds-bg: #0f1c23;
+    --ds-surface: #152832;
+    --ds-surface-soft: #1b3340;
+    --ds-text: #e2eef5;
+    --ds-text-muted: #b5c7d5;
+    --ds-border: #33505f;
+    --ds-shadow: 0 10px 30px rgba(3, 10, 16, 0.45);
+  }
+
+  body {
+    background: radial-gradient(circle at 20% 0%, #182d38 0%, #12222c 44%, #0f1b24 100%);
+  }
+
+  .ds-bottom-nav {
+    background: rgba(17, 31, 40, 0.94);
+    border-top-color: #355565;
+  }
+
+  .ds-bottom-nav a {
+    color: #d2e3ef;
+  }
+
+  .ds-bottom-nav a.is-active {
+    color: #7dd4c4;
+  }
+
+  .ds-error,
+  [data-error-state] {
+    border-color: #7f3b44;
+    background: #3c2025;
+    color: #ffd2d7;
+  }
+
+  .ds-badge.is-muted {
+    background: #2b4252;
+    color: #d2e3ef;
   }
 }
