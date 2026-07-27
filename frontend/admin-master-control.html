@@ -45,6 +45,35 @@
       line-height: 1.4;
     }
 
+    .cw-head-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--ac-space-2);
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--ac-space-2) var(--ac-space-3);
+      border: 1px solid var(--cw-border);
+      border-radius: var(--ac-radius-control);
+      background: linear-gradient(135deg, #f6faf8 0%, #f1f8f5 100%);
+    }
+
+    .cw-head-meta .small {
+      font-weight: 600;
+    }
+
+    .cw-admin-quick-actions {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--ac-space-2);
+      margin: var(--ac-space-2) 0 var(--ac-space-3);
+    }
+
+    .cw-admin-quick-actions .cw-v2-btn {
+      justify-content: center;
+      min-height: 44px;
+      font-weight: 700;
+    }
+
     .cw-status-strip {
       display: grid;
       gap: var(--ac-space-2);
@@ -81,6 +110,11 @@
       display: grid;
       gap: 15px;
       margin-top: var(--ac-space-1);
+    }
+
+    .cw-priority-block.operation-focus {
+      border-color: #c5ddcf;
+      background: linear-gradient(180deg, #ffffff 0%, #f7fcf9 100%);
     }
 
     .cw-priority-block {
@@ -179,6 +213,11 @@
       gap: var(--ac-space-2);
     }
 
+    .item strong {
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.01em;
+    }
+
     .small,
     .muted {
       color: var(--cw-muted);
@@ -238,6 +277,17 @@
       align-items: center;
       gap: var(--ac-space-2);
       flex-wrap: wrap;
+    }
+
+    .cw-status-strip.digest-strip {
+      margin: 0;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--ac-space-2);
+    }
+
+    .cw-status-strip.digest-strip .item {
+      background: #f8fcfa;
+      border-color: #c8ded1;
     }
 
     .visit-modal[hidden] {
@@ -344,6 +394,14 @@
       .cw-status-strip {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
+
+      .cw-admin-quick-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .cw-status-strip.digest-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
     }
 
     @media (max-width: 740px) {
@@ -365,6 +423,11 @@
 
       .metrics,
       .cw-status-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .cw-admin-quick-actions,
+      .cw-status-strip.digest-strip {
         grid-template-columns: 1fr;
       }
 
@@ -415,6 +478,21 @@
       .metric-card.ok-card {
         background: #1f3a2b;
         border-color: #3f6d54;
+      }
+
+      .cw-head-meta {
+        background: linear-gradient(135deg, #173028 0%, #10261f 100%);
+        border-color: #2f4b43;
+      }
+
+      .cw-priority-block.operation-focus {
+        background: linear-gradient(180deg, #13221e 0%, #11201c 100%);
+        border-color: #35544a;
+      }
+
+      .cw-status-strip.digest-strip .item {
+        background: #1a332c;
+        border-color: #3a5b50;
       }
     }
 
@@ -536,6 +614,12 @@
           <span id="lastUpdate" class="small">Atualizado agora</span>
           <a class="cw-v2-btn primary" href="/admin-alerts">Ver prioridades</a>
         </div>
+        <div class="cw-admin-quick-actions" aria-label="Ações rápidas operacionais">
+          <a class="cw-v2-btn" href="/admin-visits">Gerir visitas</a>
+          <a class="cw-v2-btn" href="/admin-rounds">Ajustar rondas</a>
+          <a class="cw-v2-btn" href="/admin-live-map">Abrir mapa</a>
+          <a class="cw-v2-btn" href="/admin-service-log">Ver histórico técnico</a>
+        </div>
       </section>
 
       <section class="cw-status-strip" id="statusStrip" aria-label="Estado rápido">
@@ -562,12 +646,12 @@
           <div id="prioritySummary" class="list"><div class="empty">A agregar alertas e decisões...</div></div>
         </article>
 
-        <article class="cw-priority-block">
+        <article class="cw-priority-block operation-focus">
           <div class="cw-priority-head">
             <h2>Operação do dia</h2>
             <span class="pill">atrasadas, em execução e próximas</span>
           </div>
-          <div id="operationDigest" class="cw-status-strip"></div>
+          <div id="operationDigest" class="cw-status-strip digest-strip"></div>
           <div id="todayList" class="list"><div class="empty">A carregar visitas...</div></div>
         </article>
 
