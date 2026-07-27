@@ -203,6 +203,26 @@
       margin: var(--ac-space-3) 0 var(--ac-space-4);
     }
 
+    .cw-status-strip.top-ribbon {
+      margin: 8px 0 12px;
+      gap: 8px;
+    }
+
+    .cw-status-strip.top-ribbon .item {
+      padding: 10px;
+      min-height: 74px;
+    }
+
+    .cw-status-strip.top-ribbon strong {
+      font-size: 20px;
+    }
+
+    .cw-status-strip.top-ribbon span {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
     .cw-status-strip .item {
       background: var(--cw-surface);
       border: 1px solid var(--cw-border);
@@ -254,6 +274,11 @@
     .cw-priority-block.approvals-focus {
       border-color: #e3cba3;
       background: linear-gradient(180deg, #fffdfa 0%, #fff8ef 100%);
+    }
+
+    .cw-priority-block.propagation-focus {
+      border-color: #c5d7ea;
+      background: linear-gradient(180deg, #fbfdff 0%, #f4f9ff 100%);
     }
 
     .cw-priority-head {
@@ -512,6 +537,10 @@
       margin-bottom: 2px;
     }
 
+    .cw-priority-layout > .cw-priority-block:nth-child(1) {
+      grid-column: 1 / -1;
+    }
+
     .cw-priority-block.alerts-focus .pill {
       border-color: #dfaeb6;
       background: #fff1f4;
@@ -759,6 +788,11 @@
         border-color: #35544a;
       }
 
+      .cw-priority-block.propagation-focus {
+        background: linear-gradient(180deg, #1a2a3a 0%, #162435 100%);
+        border-color: #355271;
+      }
+
       .cw-status-strip.digest-strip .item {
         background: #1a332c;
         border-color: #3a5b50;
@@ -829,6 +863,11 @@
       #prioritySummary .item:nth-child(3) {
         background: #21364b;
         border-left-color: #446f94;
+      }
+
+      .cw-status-strip.top-ribbon .item {
+        background: #173028;
+        border-color: #315044;
       }
     }
 
@@ -1017,7 +1056,7 @@
         </div>
       </section>
 
-      <section class="cw-status-strip" id="statusStrip" aria-label="Estado rápido">
+      <section class="cw-status-strip top-ribbon" id="statusStrip" aria-label="Estado rápido">
         <div class="item"><strong>--</strong><span>Estado geral</span></div>
         <div class="item"><strong id="todayStatusTop">--</strong><span>Visitas ativas</span></div>
         <div class="item"><strong id="criticalAlertsTop">--</strong><span>Alertas críticos</span></div>
@@ -1055,7 +1094,7 @@
           <div id="todayList" class="list compact"><div class="empty">A carregar visitas...</div></div>
         </article>
 
-        <article class="cw-priority-block">
+        <article class="cw-priority-block propagation-focus">
           <div class="cw-priority-head">
             <h2>Propagação técnica</h2>
             <span class="pill">timeline + command center + knowledge</span>
