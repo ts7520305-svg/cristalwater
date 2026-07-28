@@ -60,6 +60,7 @@
     "test:visit-os-operational": "node scripts/test-visit-os-operational.js",
     "test:route-os-acceptance": "node scripts/test-route-os-acceptance.js",
     "test:admin-login": "node scripts/test-admin-login-alias.js",
+    "test:admin-command-center-loading-hotfix": "node scripts/test-admin-master-control-loading-hotfix.js",
     "crystal:audit": "node scripts/crystal-audit.js",
     "test:fcs13-repair-e2e": "node scripts/test-fcs13-repair-alert-e2e.js",
     "test:fcs13-microsweep": "node scripts/test-fcs13-microsweep-six-flows.js",

@@ -1,4 +1,8 @@
 const API = '/api/core';
+const DASHBOARD_TIMEOUTS = window.__CW_DASHBOARD_TIMEOUTS__ || {};
+const SUMMARY_TIMEOUT_MS = Number(DASHBOARD_TIMEOUTS.summary || 12000);
+const CORE_TIMEOUT_MS = Number(DASHBOARD_TIMEOUTS.core || 12000);
+const TECHNICIANS_TIMEOUT_MS = Number(DASHBOARD_TIMEOUTS.technicians || 8000);
 const MODULE_ROUTES = {
   technicians: '/admin-technicians',
   clients: '/admin-clients',
@@ -11,9 +15,18 @@ const MODULE_ROUTES = {
 };
 const VISIT_STATUSES = ['PLANNED', 'PENDING_TECHNICIAN', 'IN_PROGRESS', 'RETAINED', 'NOT_DONE', 'DONE', 'CANCELLED'];
 const state = {
+  summary: null,
   dashboard: null,
   technicians: [],
+  loadState: {
+    summary: 'idle',
+    core: 'idle',
+    technicians: 'idle',
+  },
 };
+
+let loadGeneration = 0;
+const activeLoadControllers = new Set();
 
 const $ = (selector) => document.querySelector(selector);
 const esc = (value) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({
@@ -24,18 +37,188 @@ const esc = (value) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({
   '"': '&quot;'
 }[char]));
 
+function trackLoadController(controller) {
+  activeLoadControllers.add(controller);
+  return controller;
+}
+
+function releaseLoadController(controller) {
+  activeLoadControllers.delete(controller);
+}
+
+function abortActiveLoads() {
+  activeLoadControllers.forEach((controller) => {
+    try {
+      controller.abort();
+    } catch (_) {
+      // noop
+    }
+  });
+  activeLoadControllers.clear();
+}
+
+function setLoadState(group, status) {
+  state.loadState[group] = status;
+  refreshLoadStatus();
+}
+
+function refreshLoadStatus() {
+  const syncState = $('#syncState');
+  const metricsHint = $('#metricsHint');
+  const lastUpdate = $('#lastUpdate');
+  const summaryState = state.loadState.summary;
+  const coreState = state.loadState.core;
+
+  if (syncState) {
+    if ([summaryState, coreState].includes('loading')) {
+      syncState.textContent = 'A carregar dados por secção';
+    } else if ([summaryState, coreState].includes('error')) {
+      syncState.textContent = 'Dados parciais';
+    } else if (summaryState === 'ready' && coreState === 'ready') {
+      syncState.textContent = 'Sincronizado';
+    } else {
+      syncState.textContent = 'A navegar';
+    }
+  }
+
+  if (metricsHint) {
+    if ([summaryState, coreState].includes('loading')) {
+      metricsHint.textContent = 'A estrutura da página já está visível. Os blocos carregam e falham de forma independente.';
+    } else if ([summaryState, coreState].includes('error')) {
+      metricsHint.textContent = 'Parte dos dados não respondeu a tempo. A navegação continua ativa.';
+    }
+  }
+
+  if (lastUpdate && summaryState === 'ready' && coreState === 'ready') {
+    lastUpdate.textContent = 'Atualizado agora';
+  }
+}
+
+function renderInlineState({ title, message, group, tone = 'loading' }) {
+  const stateClass = tone === 'error' ? 'cw-v2-state-error' : 'cw-v2-state-loading';
+  return `
+    <div class="${stateClass}" data-cw-state="${tone}" data-cw-state-context="${tone}">
+      <div style="display:grid; gap:6px; min-width:0;">
+        <b>${esc(title)}</b>
+        <div class="muted">${esc(message)}</div>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+        <button type="button" class="btn ghost" data-dashboard-retry="${esc(group)}">Tentar novamente</button>
+        <button type="button" class="btn ghost" data-dashboard-continue="${esc(group)}">Continuar sem dados</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderSectionLoading(root, title, message, group) {
+  if (!root) return;
+  root.innerHTML = renderInlineState({ title, message, group, tone: 'loading' });
+}
+
+function renderSectionError(root, title, message, group) {
+  if (!root) return;
+  root.innerHTML = renderInlineState({ title, message, group, tone: 'error' });
+}
+
+function renderSectionEmpty(root, title, message) {
+  if (!root) return;
+  root.innerHTML = `
+    <div class="empty" data-cw-state="empty">
+      <b>${esc(title)}</b>
+      <div class="muted">${esc(message)}</div>
+    </div>
+  `;
+}
+
+function renderSummaryLoading() {
+  renderSectionLoading($('#metrics'), 'A carregar resumo', 'Os indicadores principais estão a ser preparados.', 'summary');
+  renderSectionLoading($('#prioritySummary'), 'A carregar prioridades', 'As prioridades e alertas ainda estão a ser reunidos.', 'summary');
+  renderSectionLoading($('#statusStrip'), 'A carregar estado geral', 'A leitura rápida da operação vai aparecer em breve.', 'summary');
+}
+
+function renderSummaryError(message) {
+  renderSectionError($('#metrics'), 'Não foi possível carregar os dados', message, 'summary');
+  renderSectionError($('#prioritySummary'), 'Não foi possível carregar os dados', message, 'summary');
+  renderSectionError($('#statusStrip'), 'Não foi possível carregar os dados', message, 'summary');
+}
+
+function renderSummaryFallback() {
+  renderSectionEmpty($('#metrics'), 'Dados indisponíveis', 'Pode continuar a navegar sem o resumo.');
+  renderSectionEmpty($('#prioritySummary'), 'Dados indisponíveis', 'As prioridades ficam vazias até voltar a carregar.');
+  renderSectionEmpty($('#statusStrip'), 'Dados indisponíveis', 'O resumo rápido não está disponível, mas a página permanece funcional.');
+}
+
+function renderCoreLoading() {
+  renderSectionLoading($('#operationDigest'), 'A carregar operação do dia', 'As visitas e o estado operacional estão a chegar.', 'core');
+  renderSectionLoading($('#todayList'), 'A carregar visitas', 'A lista de visitas abre assim que os dados chegam.', 'core');
+  renderSectionLoading($('#technicalPropagationList'), 'A carregar propagação técnica', 'Os eventos técnicos aparecem quando o pedido responde.', 'core');
+}
+
+function renderCoreError(message) {
+  renderSectionError($('#operationDigest'), 'Não foi possível carregar os dados', message, 'core');
+  renderSectionError($('#todayList'), 'Não foi possível carregar os dados', message, 'core');
+  renderSectionError($('#technicalPropagationList'), 'Não foi possível carregar os dados', message, 'core');
+}
+
+function renderCoreFallback() {
+  renderSectionEmpty($('#operationDigest'), 'Dados indisponíveis', 'A operação do dia pode ser aberta sem este bloco.');
+  renderSectionEmpty($('#todayList'), 'Dados indisponíveis', 'Sem visitas carregadas por enquanto.');
+  renderSectionEmpty($('#technicalPropagationList'), 'Dados indisponíveis', 'Sem eventos técnicos carregados por enquanto.');
+}
+
 async function api(path, options = {}) {
   const url = path.startsWith('/api') ? path : API + path;
+  const timeoutMs = Number(options.timeoutMs || 0);
+  const externalSignal = options.signal || null;
+  const controller = new AbortController();
+  let timeoutId = null;
+  let timedOut = false;
+
+  if (externalSignal) {
+    if (externalSignal.aborted) {
+      controller.abort();
+    } else {
+      externalSignal.addEventListener('abort', () => controller.abort(), { once: true });
+    }
+  }
+
+  if (timeoutMs > 0) {
+    timeoutId = window.setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, timeoutMs);
+  }
+
   const response = await fetch(url, {
     ...options,
+    signal: controller.signal,
     headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
     cache: 'no-store'
   });
   const json = await response.json().catch(() => ({ ok: false, error: 'Resposta inválida do servidor.' }));
+  if (timeoutId) clearTimeout(timeoutId);
   if (!response.ok || json.ok === false) {
     throw new Error(json.error || json.message || `Erro HTTP ${response.status}`);
   }
   return json;
+}
+
+async function apiWithTimeout(path, options = {}) {
+  try {
+    return await api(path, options);
+  } catch (error) {
+    if (error?.name === 'AbortError') {
+      if (options.timeoutMs) {
+        const timeoutError = new Error('Não foi possível carregar os dados. O pedido excedeu o tempo limite.');
+        timeoutError.code = 'TIMEOUT';
+        throw timeoutError;
+      }
+      const abortError = new Error('Pedido cancelado.');
+      abortError.code = 'ABORTED';
+      throw abortError;
+    }
+    throw error;
+  }
 }
 
 function number(value) {
@@ -427,15 +610,49 @@ function renderPendingPools(pools = []) {
   `).join('');
 }
 
-function render(data = {}) {
+function renderSummary(data = {}) {
+  state.summary = data;
+  const counts = data.metrics || {};
+  const pendingPools = data.pending?.poolsWithoutRound || [];
+
+  renderMetrics({
+    repairsOpen: number(counts.alertsOpen) + number(counts.repairsPending),
+    invoicesOpen: number(counts.invoicesPending),
+    techniciansActive: number(counts.technicians),
+    visitsPlanned: counts.visitsPlanned,
+    visitsDone: counts.visitsDone,
+    payments: counts.payments,
+  });
+  renderStatusStrip({
+    repairsOpen: number(counts.alertsOpen) + number(counts.repairsPending),
+    invoicesOpen: number(counts.invoicesPending),
+    messagesUnread: 0,
+    notificationsUnread: 0,
+    technicalSheetEvents24h: 0,
+    visitsPlanned: counts.visitsPlanned,
+    visitsDone: counts.visitsDone,
+    techniciansActive: number(counts.technicians),
+  }, pendingPools);
+  renderPrioritySummary({
+    repairsOpen: number(counts.alertsOpen) + number(counts.repairsPending),
+    invoicesOpen: number(counts.invoicesPending),
+    messagesUnread: 0,
+    notificationsUnread: 0,
+    stockLow: 0,
+    visitsPlanned: counts.visitsPlanned,
+    visitsDone: counts.visitsDone,
+  }, pendingPools);
+
+  $('#statusBox').textContent = `Resumo carregado com sucesso. ${number(counts.clients)} cliente(s), ${number(counts.pools)} piscina(s), ${number(counts.technicians)} técnico(s).`;
+  setLoadState('summary', 'ready');
+}
+
+function renderCore(data = {}) {
   state.dashboard = data;
   const counts = data.counts || {};
   const pendingPools = data.pendingPoolsWithoutRound || [];
   const visits = data.nextVisits || [];
 
-  renderMetrics(counts);
-  renderStatusStrip(counts, pendingPools);
-  renderPrioritySummary(counts, pendingPools);
   renderOperationDigest(counts, visits);
   renderTechnicalPropagation(data.technicalPropagation || []);
   renderMorningCheck(data.morningCheck || {});
@@ -445,43 +662,100 @@ function render(data = {}) {
   const unreadMessages = number(counts.messagesUnread);
   if (unreadMessages > 0) {
     $('#statusBox').innerHTML = `Atenção: existem <b>${unreadMessages}</b> mensagem(ns) de clientes por responder. <a class="btn ghost" href="/chat?filter=unread" style="margin-left:8px">Abrir mensagens</a>`;
+    setLoadState('core', 'ready');
     return;
   }
 
   $('#statusBox').textContent = `Sistema carregado com sucesso. ${number(counts.clients)} cliente(s), ${number(counts.pools)} piscina(s), ${number(counts.technicians)} técnico(s).`;
+  setLoadState('core', 'ready');
 }
 
 async function load() {
-  const btn = $('#refreshBtn');
-  try {
-    if (btn) {
-      btn.disabled = true;
-      btn.textContent = 'A atualizar...';
-    }
-    const [dashboard, techniciansData] = await Promise.all([
-      api('/dashboard'),
-      api('/api/technicians').catch(() => ({ technicians: [] })),
-    ]);
-    state.technicians = Array.isArray(techniciansData) ? techniciansData : (techniciansData.technicians || []);
-    render(dashboard);
-  } catch (error) {
+  const runId = ++loadGeneration;
+  abortActiveLoads();
+
+  const summaryController = trackLoadController(new AbortController());
+  const coreController = trackLoadController(new AbortController());
+  const techniciansController = trackLoadController(new AbortController());
+
+  setLoadState('summary', 'loading');
+  setLoadState('core', 'loading');
+  setLoadState('technicians', 'loading');
+  renderSummaryLoading();
+  renderCoreLoading();
+
+  const summaryPromise = apiWithTimeout('/api/operational-flow/summary', {
+    timeoutMs: SUMMARY_TIMEOUT_MS,
+    signal: summaryController.signal,
+  }).then((data) => {
+    if (runId !== loadGeneration) return;
+    renderSummary(data || {});
+  }).catch((error) => {
+    if (runId !== loadGeneration || error?.code === 'ABORTED') return;
     console.error(error);
-    $('#statusBox').textContent = error.message || 'Erro ao carregar Centro de Operações.';
-    $('#metrics').innerHTML = '<div class="card bad-card"><div class="metric-value">!</div><div class="metric-label">Erro ao carregar indicadores</div></div>';
-  } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.textContent = 'Atualizar';
-    }
-  }
+    setLoadState('summary', 'error');
+    renderSummaryError(error.message || 'Não foi possível carregar os dados.');
+  }).finally(() => releaseLoadController(summaryController));
+
+  const corePromise = apiWithTimeout('/dashboard', {
+    timeoutMs: CORE_TIMEOUT_MS,
+    signal: coreController.signal,
+  }).then((data) => {
+    if (runId !== loadGeneration) return;
+    renderCore(data || {});
+  }).catch((error) => {
+    if (runId !== loadGeneration || error?.code === 'ABORTED') return;
+    console.error(error);
+    setLoadState('core', 'error');
+    renderCoreError(error.message || 'Não foi possível carregar os dados.');
+  }).finally(() => releaseLoadController(coreController));
+
+  const techniciansPromise = apiWithTimeout('/api/technicians', {
+    timeoutMs: TECHNICIANS_TIMEOUT_MS,
+    signal: techniciansController.signal,
+  }).then((data) => {
+    if (runId !== loadGeneration) return;
+    state.technicians = Array.isArray(data) ? data : (data.technicians || []);
+    setLoadState('technicians', 'ready');
+  }).catch((error) => {
+    if (runId !== loadGeneration || error?.code === 'ABORTED') return;
+    console.error(error);
+    state.technicians = [];
+    setLoadState('technicians', 'error');
+  }).finally(() => releaseLoadController(techniciansController));
+
+  await Promise.allSettled([summaryPromise, corePromise, techniciansPromise]);
+  if (runId !== loadGeneration) return;
+  refreshLoadStatus();
 }
 
 const refreshBtn = $('#refreshBtn');
 if (refreshBtn) refreshBtn.addEventListener('click', load);
 
 document.addEventListener('click', (event) => {
+  const retry = event.target.closest('[data-dashboard-retry]');
+  if (retry) {
+    event.preventDefault();
+    load();
+    return;
+  }
+
+  const continueButton = event.target.closest('[data-dashboard-continue]');
+  if (continueButton) {
+    event.preventDefault();
+    const group = continueButton.dataset.dashboardContinue;
+    if (group === 'summary') renderSummaryFallback();
+    if (group === 'core') renderCoreFallback();
+    setLoadState(group, 'idle');
+  }
+});
+
+document.addEventListener('click', (event) => {
   const button = event.target.closest('[data-edit-visit]');
   if (button) openVisitEditor(button.dataset.editVisit);
 });
+
+window.addEventListener('pagehide', abortActiveLoads);
+window.addEventListener('beforeunload', abortActiveLoads);
 
 document.addEventListener('DOMContentLoaded', load);
