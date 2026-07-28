@@ -1,0 +1,1235 @@
+[
+  {
+    "file": "frontend/admin-ai.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-alerts.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-client-settings.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-clients.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-collection.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-command-center.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-company-closures.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-core-flow.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-crm.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-dashboard.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-email-logs.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-inventory.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-keys.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-live-map.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-login.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-map.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-master-control.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-menu.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-notifications.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-onboarding.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-operational-flow.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-operational-settings.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-payment-settings.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-payments.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-pool-calculator.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-pool-technical.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-pools.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-priority.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-reports.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-rounds.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-security.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-service-log.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-suppliers.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-technicians.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-test-center.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-today.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-ui-settings.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-vehicles.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-visits-dashboard.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/admin-visits.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/alerts-financial.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/alerts.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/billing-center.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/billing-extras.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/billing-history.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/billing.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/chat.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/client-dashboard.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/client-history.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/client-login.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/client-menu.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/client-notifications.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/client-payments.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/client-portal.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/client-wow.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/client.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/client_chat.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/client_tech.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/communications.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/config-notifications.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/crystal-os-v2-route-index.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/dashboard.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/help-center.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/incident-center.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/invoices.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/login.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/map.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/metrics.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/multi-map.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 3,
+    "removed": 1,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +</html> | +<script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/notifications.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/operational-dashboard.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/profit-map.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 3,
+    "removed": 1,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +</html> | +<script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/ranking.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/report-center.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/report-settings.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/route-map.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/settings.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/splash.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/technician-chat.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/technician-field-mode.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/technician-gps.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/technician-guide.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/technician-history.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/technician-login.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/technician-map.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/technician-new-client.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/technician-profile.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/technician-profit-dashboard.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/technician-profit.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/technician-route.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/technician-visit.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/technician.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "frontend/to-issue.html",
+    "status": "modified",
+    "category": "Frontend HTML",
+    "kind": "Visual",
+    "added": 2,
+    "removed": 0,
+    "sample": "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\"> | +  <script defer src=\"/ui/design-system.js\"></script>"
+  },
+  {
+    "file": "src/routes/coreFlowRoutes.js",
+    "status": "modified",
+    "category": "Backend",
+    "kind": "Segurança",
+    "added": 25,
+    "removed": 0,
+    "sample": "+const { roleMatches } = require('../utils/roles'); | +const technicianAuth = auth('TECHNICIAN'); | +  // Technician field mode depends on these two core routes. | +  if (req.method === 'POST' && /^\\/visits\\/\\d+\\/(problem|complete)$/.test(req.path)) { | +    return technicianAuth(req, res, next); | +  }"
+  },
+  {
+    "file": "docs/product/DESIGN_SYSTEM_REPORT.md",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/FINAL_COMPLETION_AUDIT.md",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/P0_TECHNICIAN_VISIT_FIX.md",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/RC1_BUG_TRACKER.md",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/UI_UX_VALIDATION_REPORT.md",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/1024x1366/admin.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/1024x1366/client.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/1024x1366/technician.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/1280x800/admin.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/1280x800/client.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/1280x800/technician.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/1440x900/admin.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/1440x900/client.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/1440x900/technician.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/1920x1080/admin.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/1920x1080/client.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/1920x1080/technician.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/320x740/admin.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/320x740/client.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/320x740/technician.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/360x780/admin.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/360x780/client.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/360x780/technician.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/375x812/admin.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/375x812/client.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/375x812/technician.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/390x844/admin.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/390x844/client.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/390x844/technician.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/414x896/admin.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/414x896/client.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/414x896/technician.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/430x932/admin.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/430x932/client.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/430x932/technician.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/768x1024/admin.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/768x1024/client.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/chromium/768x1024/technician.png",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/design-system/summary.json",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "docs/product/evidence/diff-audit-samples.json",
+    "status": "untracked",
+    "category": "Documentação",
+    "kind": "Documentação",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "frontend/ui/design-system.css",
+    "status": "untracked",
+    "category": "Frontend CSS",
+    "kind": "Visual",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "frontend/ui/design-system.js",
+    "status": "untracked",
+    "category": "Frontend JavaScript",
+    "kind": "Funcional",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  },
+  {
+    "file": "scripts/run-design-system-visual-tests.js",
+    "status": "untracked",
+    "category": "Scripts",
+    "kind": "Funcional",
+    "added": null,
+    "removed": null,
+    "sample": "(novo ficheiro)"
+  }
+]

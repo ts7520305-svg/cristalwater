@@ -28,12 +28,15 @@
     .list { display:grid; gap:10px; }
     .status { border:1px solid rgba(53,217,255,.18); background:rgba(53,217,255,.08); padding:12px; border-radius:16px; color:#cfe9ff; }
     .section-note { margin:0; color:#bfe4ff; font-size:13px; }
+    .cw-help-fab,
+    .cw-help-fab.cw-help-fab-quiet { display:none; }
     @media (max-width:1000px) {
       main.page { padding:14px; }
       .cols2,.row { grid-template-columns:1fr; }
       .page-head { flex-direction:column; }
     }
   </style>
+  <link rel="stylesheet" href="/ui/design-system.css">
 </head>
 <body data-required-role="ADMIN">
   <main class="page">
@@ -102,5 +105,6 @@
   <script src="/ui/core/navigation-context.js"></script>
   <script src="/crystal-os-v2-shell.js"></script>
   <script src="/crystal-os-v2-nav.js"></script>
+  <script defer src="/ui/design-system.js"></script>
 </body>
 </html>

@@ -1,0 +1,6 @@
+visual_checks=18
+visual_with_errors=0
+horizontal_scroll_cases=0
+admin_checks=3
+tech_checks=3
+client_checks=2

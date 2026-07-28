@@ -3,7 +3,7 @@
    - Mantém fila offline para mutações quando não existe rede.
    - Evita erros Chrome: redirected response with redirect mode not follow.
 */
-const CACHE = 'cristalwater-v22-6-15-professional-ui';
+const CACHE = 'cristalwater-v22-6-16-nav-consolidation';
 const DB_NAME = 'cristalwater-v22-offline';
 const DB_VERSION = 2;
 const PAYLOAD_STORE = 'PayloadQueue';
@@ -19,7 +19,6 @@ const APP_SHELL = [
   '/cristal-assist.css',
   '/cristal-assist.js',
   '/cristal-help-data.js',
-  '/cw-enterprise-sidebar.js',
   '/enterprise-ui.css'
 ];
 

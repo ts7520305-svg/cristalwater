@@ -19,11 +19,20 @@
       padding-bottom: 120px;
     }
 
+    .portal-shell {
+      --cp-radius-card: 16px;
+      --cp-radius-control: 12px;
+      --cp-space-1: 8px;
+      --cp-space-2: 10px;
+      --cp-space-3: 12px;
+      --cp-space-4: 16px;
+    }
+
     .portal-hero {
       display: grid;
       grid-template-columns: 1.2fr 0.8fr;
-      gap: 12px;
-      margin-bottom: 12px;
+      gap: var(--cp-space-3);
+      margin-bottom: var(--cp-space-3);
     }
 
     .portal-title {
@@ -46,15 +55,15 @@
     .metrics {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
-      margin-top: 10px;
+      gap: var(--cp-space-2);
+      margin-top: var(--cp-space-2);
     }
 
     .metric {
       border: 1px solid var(--cw-border);
-      border-radius: 12px;
+      border-radius: var(--cp-radius-control);
       background: #fff;
-      padding: 12px;
+      padding: var(--cp-space-3);
       display: grid;
       gap: 4px;
     }
@@ -72,13 +81,13 @@
     .client-focus {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 10px;
-      margin-top: 12px;
+      gap: var(--cp-space-2);
+      margin-top: var(--cp-space-3);
     }
 
     .client-focus-card {
       border: 1px solid var(--cw-border);
-      border-radius: 12px;
+      border-radius: var(--cp-radius-control);
       background: #fff;
       padding: 10px;
       display: grid;
@@ -105,15 +114,20 @@
     .quick-actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 8px;
+      gap: var(--cp-space-1);
+      margin-top: var(--cp-space-1);
+    }
+
+    .quick-actions .cw-v2-btn {
+      min-height: 42px;
+      justify-content: center;
     }
 
     .payment-reference-card {
-      margin-top: 12px;
+      margin-top: var(--cp-space-3);
       border: 1px solid var(--cw-border);
-      border-radius: 12px;
-      padding: 12px;
+      border-radius: var(--cp-radius-control);
+      padding: var(--cp-space-3);
       background: #f8fbff;
       display: grid;
       gap: 10px;
@@ -145,7 +159,7 @@
     .chat-input {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 8px;
+      gap: var(--cp-space-1);
     }
 
     .payment-help {
@@ -165,8 +179,8 @@
     .split {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 12px;
+      gap: var(--cp-space-3);
+      margin-top: var(--cp-space-3);
     }
 
     .section-head {
@@ -179,7 +193,7 @@
 
     .section-head h2 {
       margin: 0;
-      font-size: 22px;
+      font-size: 20px;
       line-height: 1.1;
     }
 
@@ -192,8 +206,8 @@
 
     .empty {
       border: 1px dashed var(--cw-border);
-      border-radius: 12px;
-      padding: 12px;
+      border-radius: var(--cp-radius-control);
+      padding: var(--cp-space-3);
       color: var(--cw-muted);
       background: #f9fbfc;
     }
@@ -230,21 +244,48 @@
     .payment-notice-form select,
     #messageInput,
     #visitRequestInput {
-      min-height: 48px;
-      border-radius: 12px;
+      min-height: 44px;
+      border-radius: var(--cp-radius-control);
       border: 1px solid var(--cw-border);
       padding: 0 10px;
       background: #fff;
     }
 
     .chat-box {
-      min-height: 240px;
-      max-height: 420px;
+      min-height: 210px;
+      max-height: 340px;
       overflow: auto;
       border: 1px solid var(--cw-border);
-      border-radius: 12px;
+      border-radius: var(--cp-radius-control);
       background: #f9fbfc;
       padding: 10px;
+    }
+
+    #serviceHistoryList,
+    #notificationList,
+    #documentList,
+    #invoiceList,
+    #summaryList {
+      max-height: 280px;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    #serviceHistoryList::-webkit-scrollbar,
+    #notificationList::-webkit-scrollbar,
+    #documentList::-webkit-scrollbar,
+    #invoiceList::-webkit-scrollbar,
+    #summaryList::-webkit-scrollbar {
+      width: 7px;
+    }
+
+    #serviceHistoryList::-webkit-scrollbar-thumb,
+    #notificationList::-webkit-scrollbar-thumb,
+    #documentList::-webkit-scrollbar-thumb,
+    #invoiceList::-webkit-scrollbar-thumb,
+    #summaryList::-webkit-scrollbar-thumb {
+      background: #c7d5e1;
+      border-radius: 999px;
     }
 
     #mensagens .chat-input {
@@ -301,6 +342,15 @@
         grid-template-columns: 1fr;
       }
 
+      #serviceHistoryList,
+      #notificationList,
+      #documentList,
+      #invoiceList,
+      #summaryList {
+        max-height: none;
+        overflow: visible;
+      }
+
       .client-focus {
         grid-template-columns: 1fr 1fr;
       }
@@ -334,6 +384,7 @@
     }
   </style>
   <script src="/client-auth-guard.js"></script>
+  <link rel="stylesheet" href="/ui/design-system.css">
 </head>
 <body class="portal-shell" data-required-role="CLIENT">
   <div class="cw-v2-app">
@@ -538,5 +589,6 @@
   <script src="/ui/core/navigation-context.js"></script>
   <script src="/crystal-os-v2-shell.js"></script>
   <script src="/crystal-os-v2-nav.js"></script>
+  <script defer src="/ui/design-system.js"></script>
 </body>
 </html>

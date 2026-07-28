@@ -23,24 +23,35 @@
       --cw-danger: #b7212e;
       --cw-success: #166d3e;
       --cw-tap: 68px;
-      background: linear-gradient(180deg, #f7fbf9, #edf3f1);
+      --cw-radius-card: 16px;
+      --cw-radius-control: 14px;
+      --cw-space-1: 8px;
+      --cw-space-2: 10px;
+      --cw-space-3: 12px;
+      --cw-space-4: 16px;
+      font-family: "Montserrat", "Avenir Next", "Segoe UI", sans-serif;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      background:
+        radial-gradient(120% 45% at 0% 0%, rgba(15, 125, 93, 0.14) 0%, rgba(15, 125, 93, 0) 60%),
+        linear-gradient(180deg, #f9fcfb, #e8f1ee);
     }
 
     .field {
-      width: min(880px, 100%);
+      width: min(920px, 100%);
       margin: 0 auto;
-      padding: 10px 10px calc(140px + env(safe-area-inset-bottom));
+      padding: 12px 10px calc(164px + env(safe-area-inset-bottom));
     }
 
     .top {
       position: sticky;
       top: 0;
       z-index: 35;
-      margin: -10px -10px 10px;
+      margin: -12px -10px 12px;
       padding: 10px;
-      background: rgba(247, 251, 249, 0.96);
-      border-bottom: 1px solid var(--cw-border);
-      backdrop-filter: blur(8px);
+      background: rgba(249, 252, 251, 0.95);
+      border-bottom: 1px solid #b9cbc4;
+      backdrop-filter: blur(10px);
       display: grid;
       gap: 8px;
     }
@@ -69,49 +80,69 @@
 
     .brand {
       font-weight: 800;
-      font-size: 18px;
+      font-size: 20px;
+      letter-spacing: 0.01em;
     }
 
     .progress {
-      color: var(--cw-muted);
-      font-size: 13px;
+      color: #36574e;
+      font-size: 14px;
+      font-weight: 600;
     }
 
     .card {
       background: var(--cw-surface);
-      border: 1px solid var(--cw-border);
-      border-radius: 14px;
+      border: 1px solid #bed0ca;
+      border-radius: var(--cw-radius-card);
       box-shadow: var(--cw-shadow);
-      padding: 14px;
-      margin-bottom: 10px;
+      padding: var(--cw-space-4);
+      margin-bottom: var(--cw-space-3);
+    }
+
+    .next {
+      border-color: #9fc1b5;
+      box-shadow: 0 10px 22px rgba(16, 38, 32, 0.12);
+    }
+
+    .next .chip {
+      background: #e9f5f0;
+      border-color: #9fcdbd;
+      color: #0e5a42;
     }
 
     .chip {
       display: inline-flex;
       align-items: center;
-      min-height: 30px;
+      min-height: 32px;
       border-radius: 999px;
-      border: 1px solid var(--cw-border);
+      border: 1px solid #b7cbc4;
       background: #fff;
-      padding: 6px 10px;
-      color: #2f5046;
-      font-size: 12px;
+      padding: 6px 11px;
+      color: #2a4c42;
+      font-size: 12.5px;
       font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    #connectionState {
+      min-width: 82px;
+      justify-content: center;
+      font-weight: 800;
     }
 
     .field-dashboard {
       display: grid;
       grid-template-columns: 1.4fr 1fr 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 10px;
+      gap: var(--cw-space-2);
+      margin-bottom: var(--cw-space-3);
     }
 
     .field-tile {
       background: var(--cw-surface);
-      border: 1px solid var(--cw-border);
-      border-radius: 12px;
-      min-height: 92px;
-      padding: 10px;
+      border: 1px solid #b8cac3;
+      border-radius: var(--cw-radius-control);
+      min-height: 104px;
+      padding: var(--cw-space-3);
       display: grid;
       align-content: space-between;
     }
@@ -121,21 +152,88 @@
       font-size: 11px;
       text-transform: uppercase;
       font-weight: 700;
+      letter-spacing: 0.04em;
     }
 
     .field-tile b {
-      font-size: 21px;
+      font-size: 24px;
       line-height: 1.1;
     }
 
     .field-tile small {
       color: var(--cw-muted);
       font-size: 12px;
+      line-height: 1.35;
     }
 
     .field-tile.primary {
       background: #eaf7f3;
       border-color: #9ecfbe;
+    }
+
+    .field-tile.primary .hero-label {
+      color: var(--cw-primary-2);
+      font-size: 12px;
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+    }
+
+    .field-tile.primary .field-cta-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--cw-space-1);
+      margin-top: var(--cw-space-2);
+    }
+
+    .field-tile.primary .hero-action {
+      min-height: 50px;
+      border-radius: var(--cw-radius-control);
+      border: 1px solid #b7ccc4;
+      background: rgba(255, 255, 255, 0.92);
+      color: var(--cw-text);
+      font-weight: 700;
+      font-size: 14px;
+      padding: 10px 12px;
+    }
+
+    .field-tile.primary .hero-action.primary {
+      border-color: var(--cw-primary);
+      background: var(--cw-primary);
+      color: #fff;
+    }
+
+    .field-tile.primary .hero-action.secondary {
+      background: rgba(255, 255, 255, 0.92);
+      color: #1f4d40;
+    }
+
+    .field-tile.primary .hero-action:active,
+    .big:active,
+    .photo-btn:active,
+    .route-btn:active,
+    .doc-btn:active {
+      transform: translateY(1px);
+    }
+
+    .field-tile.primary.p0 {
+      background: #fff0f1;
+      border-color: #e6a2aa;
+    }
+
+    .field-tile.primary.p0 .hero-label {
+      color: #9e1f2c;
+    }
+
+    .field-tile.primary.p0 .hero-action.primary {
+      border-color: #b7212e;
+      background: #b7212e;
+      color: #fff;
+    }
+
+    .field-tile.primary .hero-action:hover {
+      border-color: var(--cw-primary);
+      color: var(--cw-primary-2);
     }
 
     .field-tile.ok {
@@ -149,31 +247,31 @@
     }
 
     .title {
-      font-size: 30px;
+      font-size: 34px;
       line-height: 1.08;
       margin: 8px 0 6px;
       font-weight: 800;
     }
 
     .muted {
-      color: var(--cw-muted);
+      color: #3f5f56;
       line-height: 1.35;
     }
 
     .actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 10px;
+      gap: var(--cw-space-2);
+      margin-top: var(--cw-space-2);
     }
 
     .big {
-      min-height: 68px;
-      border-radius: 14px;
-      border: 1px solid var(--cw-border);
+      min-height: 76px;
+      border-radius: var(--cw-radius-card);
+      border: 1px solid #b7ccc4;
       background: #fff;
       color: var(--cw-text);
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 800;
       display: inline-flex;
       align-items: center;
@@ -184,8 +282,9 @@
 
     .big.ok {
       border-color: #0f7d5d;
-      background: #0f7d5d;
+      background: linear-gradient(180deg, #13926d 0%, #0f7d5d 100%);
       color: #fff;
+      box-shadow: 0 8px 18px rgba(15, 125, 93, 0.24);
     }
 
     .big.warn {
@@ -196,8 +295,9 @@
 
     .big.bad {
       border-color: var(--cw-danger);
-      background: var(--cw-danger);
+      background: linear-gradient(180deg, #cb3341 0%, #b7212e 100%);
       color: #fff;
+      box-shadow: 0 8px 18px rgba(183, 33, 46, 0.22);
     }
 
     .big.ghost {
@@ -208,14 +308,50 @@
 
     .field-action-sticky {
       position: sticky;
-      bottom: calc(82px + env(safe-area-inset-bottom));
+      bottom: calc(92px + env(safe-area-inset-bottom));
       z-index: 45;
-      background: rgba(247, 251, 249, 0.96);
-      border: 1px solid var(--cw-border);
-      border-radius: 14px;
-      padding: 8px;
-      margin-bottom: 10px;
-      box-shadow: 0 8px 22px rgba(16, 38, 32, 0.15);
+      background: rgba(249, 252, 251, 0.98);
+      border: 1px solid #adc5bc;
+      border-radius: var(--cw-radius-card);
+      padding: var(--cw-space-2);
+      margin-bottom: var(--cw-space-3);
+      box-shadow: 0 10px 24px rgba(16, 38, 32, 0.16);
+    }
+
+    body[data-field-priority="p0"] .field-action-sticky {
+      border-color: #e19aa4;
+      background: linear-gradient(180deg, rgba(255, 245, 246, 0.98), rgba(255, 240, 242, 0.98));
+      box-shadow: 0 10px 24px rgba(145, 25, 41, 0.18);
+    }
+
+    body[data-field-priority="p0"] .field-action-sticky .muted {
+      color: #7f1d2e;
+    }
+
+    .field-action-sticky .big {
+      letter-spacing: 0.01em;
+    }
+
+    .field-action-sticky .muted {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    body.cw-tech-field-page[data-field-mode="free"] .field-panel-agora {
+      display: none !important;
+    }
+
+    body.cw-tech-field-page[data-field-mode="free"] .field-dashboard {
+      grid-template-columns: 1fr;
+    }
+
+    body.cw-tech-field-page[data-field-mode="free"] .field-dashboard .field-tile:not(.primary) {
+      display: none;
+    }
+
+    body.cw-tech-field-page[data-field-mode="free"] #routeCard,
+    body.cw-tech-field-page[data-field-mode="free"] #dayVisitsCard {
+      display: none;
     }
 
     .field-action-sticky .actions {
@@ -246,8 +382,8 @@
     .route-actions {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-      margin-top: 10px;
+      gap: var(--cw-space-1);
+      margin-top: var(--cw-space-2);
     }
 
     .crew-info,
@@ -262,8 +398,27 @@
     .water-item {
       background: var(--cw-surface-2);
       border: 1px solid var(--cw-border);
-      border-radius: 12px;
-      padding: 10px;
+      border-radius: var(--cw-radius-control);
+      padding: var(--cw-space-2);
+    }
+
+    .field-panel-agora .chip,
+    .field-panel-hoje .chip {
+      font-weight: 800;
+    }
+
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      cursor: pointer;
+    }
+
+    .check input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      flex: 0 0 20px;
     }
 
     .crew-info span,
@@ -305,6 +460,18 @@
 
     .crew-doc-status.warn .signal {
       background: var(--cw-warning);
+    }
+
+    .crew-doc-status {
+      border-left: 4px solid transparent;
+    }
+
+    .crew-doc-status.ok {
+      border-left-color: #1c8f56;
+    }
+
+    .crew-doc-status.warn {
+      border-left-color: #b56f00;
     }
 
     .visit-notice-strip {
@@ -356,12 +523,21 @@
     .assist-actions button,
     .assist-card,
     .dose-remove {
-      min-height: 58px;
-      border-radius: 12px;
-      border: 1px solid var(--cw-border);
+      min-height: 62px;
+      border-radius: 14px;
+      border: 1px solid #b7c9c2;
       background: #fff;
-      padding: 10px;
+      padding: 11px 12px;
       color: var(--cw-text);
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: #5a786f;
+      font-weight: 600;
+      opacity: 1;
     }
 
     textarea {
@@ -382,6 +558,16 @@
     .dose-row {
       grid-template-columns: 1.3fr 0.7fr 0.5fr auto;
       align-items: center;
+    }
+
+    .measure-field input {
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.01em;
+    }
+
+    .measure-field .measure-label {
+      margin-bottom: 6px;
+      letter-spacing: 0.03em;
     }
 
     .dose-remove {
@@ -432,33 +618,36 @@
 
     .field-tabs {
       position: fixed;
-      left: 8px;
-      right: 8px;
-      bottom: calc(8px + env(safe-area-inset-bottom));
+      left: 9px;
+      right: 9px;
+      bottom: calc(10px + env(safe-area-inset-bottom));
       z-index: 70;
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 6px;
-      padding: 6px;
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.98);
-      border: 1px solid var(--cw-border);
-      box-shadow: 0 8px 22px rgba(16, 38, 32, 0.17);
+      padding: 7px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid #adc5bc;
+      box-shadow: 0 8px 20px rgba(16, 38, 32, 0.15);
+      backdrop-filter: blur(6px);
     }
 
     .field-tabs button {
-      min-height: 58px;
-      border-radius: 10px;
+      min-height: 50px;
+      border-radius: 12px;
       border: 0;
-      background: #edf3f1;
-      color: #31544a;
+      background: rgba(237, 243, 241, 0.86);
+      color: #355a4f;
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 800;
+      letter-spacing: 0.01em;
     }
 
     .field-tabs button.active {
-      background: var(--cw-primary);
+      background: #166d4b;
       color: #fff;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
     }
 
     .toast {
@@ -483,6 +672,391 @@
       transform: translateY(0);
     }
 
+    .pool-segments {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .pool-segments button {
+      min-height: 50px;
+      border-radius: 10px;
+      border: 1px solid var(--cw-border);
+      background: #fff;
+      color: var(--cw-text);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .pool-segments button.active {
+      background: var(--cw-primary);
+      border-color: var(--cw-primary);
+      color: #fff;
+    }
+
+    .pool-segments button {
+      font-size: 13px;
+      letter-spacing: 0.01em;
+    }
+
+    .visit-group {
+      display: grid;
+      gap: var(--cw-space-1);
+      margin-top: var(--cw-space-2);
+    }
+
+    .visit {
+      width: 100%;
+      display: grid;
+      gap: 6px;
+      text-align: left;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+      cursor: pointer;
+    }
+
+    .visit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(16, 38, 32, 0.1);
+      border-color: #9cbfb3;
+    }
+
+    .visit.active {
+      border-color: #0f7d5d;
+      box-shadow: 0 0 0 2px rgba(15, 125, 93, 0.2);
+      background: #f0f9f5;
+    }
+
+    .visit.active .chip {
+      background: #0f7d5d;
+      color: #fff;
+      border-color: #0f7d5d;
+    }
+
+    .visit.done {
+      opacity: 0.9;
+      background: #f6faf8;
+    }
+
+    .visit-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .visit-top b {
+      font-size: 18px;
+      line-height: 1.15;
+      color: #183b32;
+    }
+
+    .visit-location {
+      display: grid;
+      gap: 3px;
+      font-size: 12px;
+      color: #49675f;
+      line-height: 1.3;
+    }
+
+    .visit-location span {
+      word-break: break-word;
+    }
+
+    .visit-state {
+      font-weight: 600;
+    }
+
+    .visit-group-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      color: var(--cw-muted);
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .visit-state {
+      font-size: 12px;
+      color: var(--cw-muted);
+      margin-top: 2px;
+      line-height: 1.35;
+    }
+
+    .interrupt-card {
+      border: 1px solid #efbbc5;
+      background: #fff0f2;
+      color: #6f1223;
+    }
+
+    .interrupt-card:not([hidden]) {
+      position: sticky;
+      top: 84px;
+      z-index: 42;
+      box-shadow: 0 8px 22px rgba(114, 18, 35, 0.12);
+    }
+
+    .interrupt-card .chip {
+      background: #ffe8ec;
+      border-color: #efbbc5;
+      color: #7f1d2e;
+    }
+
+    .interrupt-card[hidden] {
+      display: none;
+    }
+
+    .interrupt-list {
+      display: grid;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .interrupt-item {
+      border: 1px solid rgba(183, 33, 46, 0.25);
+      border-radius: var(--cw-radius-control);
+      padding: var(--cw-space-2);
+      background: rgba(255, 255, 255, 0.75);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .interrupt-item button {
+      min-height: 44px;
+      border-radius: 10px;
+      border: 1px solid #d9b0b8;
+      background: #fff;
+      color: #7a2031;
+      font-weight: 700;
+      padding: 0 12px;
+    }
+
+    .now-board {
+      border: 1px solid var(--cw-border);
+      border-radius: var(--cw-radius-control);
+      padding: var(--cw-space-2);
+      margin-top: var(--cw-space-2);
+      background: linear-gradient(180deg, #f7fbf9 0%, #edf6f2 100%);
+      display: grid;
+      gap: 6px;
+    }
+
+    .now-board b {
+      font-size: 17px;
+    }
+
+    .photo-btn {
+      font-weight: 800;
+      text-align: center;
+      letter-spacing: 0.01em;
+    }
+
+    .check {
+      border-radius: 14px;
+      background: #fbfefd;
+      border-color: #b8ccc4;
+      font-weight: 700;
+      color: #1c4137;
+    }
+
+    .check:has(input:checked) {
+      border-color: #8ec1ae;
+      background: #edf8f3;
+    }
+
+    .measure-field .range-status {
+      display: inline-flex;
+      margin-top: 6px;
+      min-height: 28px;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 800;
+      color: #35584f;
+    }
+
+    .measure-field .range-status.ok {
+      color: #0b6a3f;
+    }
+
+    .measure-field .range-status.low,
+    .measure-field .range-status.high {
+      color: #8a3500;
+    }
+
+    .measure-field input,
+    .measure-field textarea {
+      background: #fbfefd;
+    }
+
+    .measure-field:focus-within,
+    .dose-row:focus-within,
+    .water-item:focus-within,
+    .access-item:focus-within {
+      border-color: #88b9a9;
+      box-shadow: 0 0 0 2px rgba(15, 125, 93, 0.16);
+    }
+
+    .field-panel {
+      animation: fieldPanelIn 0.24s ease;
+    }
+
+    .photo-item {
+      border-color: #b5c9c2;
+    }
+
+    .photo-thumb {
+      width: 100%;
+      max-height: 220px;
+      object-fit: cover;
+      border-radius: var(--cw-radius-control);
+      border: 1px solid #b7c9c2;
+      background: #eef5f2;
+    }
+
+    .photo-meta {
+      display: grid;
+      gap: 4px;
+      margin-top: 8px;
+    }
+
+    .photo-mini {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .photo-mini button {
+      min-height: 40px;
+      border-radius: 9px;
+      border: 1px solid #b9ccc5;
+      background: #fff;
+      font-weight: 700;
+      color: #214b40;
+      padding: 0 10px;
+    }
+
+    .photo-status.ok {
+      color: #0b6a3f;
+      font-weight: 700;
+    }
+
+    .photo-status.warn {
+      color: #8a3500;
+      font-weight: 700;
+    }
+
+    @keyframes fieldPanelIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .field-panel,
+      .visit,
+      .toast {
+        animation: none;
+        transition: none;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body.cw-tech-field-page {
+        --cw-surface: #10221d;
+        --cw-surface-2: #162d27;
+        --cw-border: #2c4b42;
+        --cw-text: #e8f4ef;
+        --cw-muted: #a8c6bb;
+        background:
+          radial-gradient(120% 45% at 0% 0%, rgba(46, 164, 124, 0.15) 0%, rgba(46, 164, 124, 0) 62%),
+          linear-gradient(180deg, #0d1815, #132520);
+      }
+
+      .top,
+      .field-action-sticky {
+        background: rgba(15, 29, 24, 0.92);
+        border-color: #35574c;
+      }
+
+      .chip,
+      input,
+      select,
+      textarea,
+      .field-tabs,
+      .field-tabs button,
+      .big,
+      .route-btn,
+      .doc-btn,
+      .photo-btn,
+      .assist-card,
+      .dose-remove,
+      .photo-mini button,
+      .interrupt-item button {
+        background: #1a322b;
+        border-color: #3a5a50;
+        color: #dff1eb;
+      }
+
+      .field-tabs button.active,
+      .field-tile.primary .hero-action.primary,
+      .big.ok {
+        background: linear-gradient(180deg, #1ba579 0%, #12835f 100%);
+        color: #fff;
+      }
+
+      .big.bad,
+      .field-tile.primary.p0 .hero-action.primary {
+        background: linear-gradient(180deg, #d6414f 0%, #b92a38 100%);
+      }
+
+      .next,
+      .now-board {
+        background: #173129;
+      }
+
+      .interrupt-card {
+        background: #3a1d25;
+        border-color: #85404f;
+        color: #ffd9df;
+      }
+
+      .interrupt-card .chip {
+        background: #4a242e;
+        border-color: #965060;
+      }
+
+      .measure-field .range-status.ok {
+        color: #7ee4b8;
+      }
+
+      .measure-field .range-status.low,
+      .measure-field .range-status.high,
+      .photo-status.warn {
+        color: #ffbe8d;
+      }
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 3px solid #167657;
+      outline-offset: 2px;
+    }
+
+    body[data-field-tab="hoje"] .field-panel:not(.field-panel-hoje),
+    body[data-field-tab="agora"] .field-panel:not(.field-panel-agora),
+    body[data-field-tab="docs"] .field-panel:not(.field-panel-docs),
+    body[data-field-tab="more"] .field-panel:not(.field-panel-more) {
+      display: none;
+    }
+
     @media (max-width: 900px) {
       .field-dashboard {
         grid-template-columns: 1fr 1fr;
@@ -498,14 +1072,30 @@
     }
 
     @media (max-width: 640px), (pointer: coarse) {
+      .field {
+        padding: 10px 8px calc(168px + env(safe-area-inset-bottom));
+      }
+
+      .top {
+        margin: -10px -8px 10px;
+        padding: 10px 8px;
+      }
+
+      .field-dashboard {
+        grid-template-columns: 1fr;
+      }
+
+      .field-tile {
+        min-height: 96px;
+      }
+
       .title {
-        font-size: 26px;
+        font-size: 30px;
       }
 
       .actions,
       .crew-grid,
       .crew-status-grid,
-      .checks,
       .measure,
       .admin-alert-grid,
       .admin-alert-small,
@@ -520,8 +1110,69 @@
         grid-template-columns: 1fr;
       }
 
+      .checks {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .measure {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .dose-row {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .dose-row select {
+        grid-column: 1 / -1;
+      }
+
+      .dose-row .dose-remove {
+        grid-column: 1 / -1;
+      }
+
+      .field-tile.primary .field-cta-row {
+        grid-template-columns: 1fr;
+      }
+
+      .field-tile.primary .hero-action {
+        min-height: 56px;
+        font-size: 16px;
+      }
+
+      .measure textarea {
+        grid-column: 1 / -1;
+      }
+
+      .photo-actions {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .photo-btn {
+        min-height: 60px;
+        font-size: 13px;
+        padding: 8px;
+      }
+
+      .interrupt-item button {
+        min-height: 48px;
+      }
+
+      .pool-segments button {
+        min-height: 54px;
+        font-size: 12px;
+      }
+
+      .visit-top b {
+        font-size: 17px;
+      }
+
+      .interrupt-card:not([hidden]) {
+        top: 80px;
+      }
+
       .field-action-sticky {
-        bottom: calc(82px + env(safe-area-inset-bottom));
+        bottom: calc(98px + env(safe-area-inset-bottom));
+        margin-bottom: 14px;
       }
 
       .big,
@@ -531,13 +1182,23 @@
       input,
       select,
       textarea {
-        min-height: 62px;
+        min-height: 66px;
+      }
+
+      .field-tabs {
+        left: 8px;
+        right: 8px;
+      }
+
+      .field-tabs button {
+        min-height: 52px;
       }
     }
   </style>
   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+  <link rel="stylesheet" href="/ui/design-system.css">
 </head>
-<body class="cw-tech-field-page" data-field-tab="service" data-required-role="TECHNICIAN">
+<body class="cw-tech-field-page" data-field-tab="hoje" data-required-role="TECHNICIAN">
   <main class="field">
     <header class="top">
       <div class="top-row">
@@ -552,11 +1213,16 @@
       </div>
     </header>
 
-    <section class="field-dashboard" aria-label="Resumo do dia em campo">
-      <div class="field-tile primary">
-        <span>Piscina atual</span>
+    <section class="field-dashboard field-panel field-panel-hoje" id="todayBoard" aria-label="Resumo do dia em campo">
+      <div class="field-tile primary" id="fieldHeroTile">
+        <span class="hero-label" id="fieldHeroLabel">Hoje</span>
         <b id="fieldFocusNow">A preparar ronda</b>
         <small id="fieldFocusMeta">Serviço atual e cliente aparecem aqui.</small>
+        <div class="field-cta-row" id="fieldHeroActions">
+          <button type="button" class="hero-action" data-hero-action="refresh">Atualizar</button>
+          <button type="button" class="hero-action" data-hero-action="agenda">Ver agenda</button>
+          <button type="button" class="hero-action" data-hero-action="contact">Comunicar</button>
+        </div>
       </div>
       <div class="field-tile" id="fieldProgressTile">
         <span>Progresso</span>
@@ -575,7 +1241,13 @@
       </div>
     </section>
 
-    <section class="field-action-sticky" aria-label="Ações principais da visita">
+    <section class="card interrupt-card field-panel field-panel-hoje" id="interruptCard" hidden>
+      <span class="chip">Interrupção operacional</span>
+      <div class="muted" id="interruptSummary" style="margin-top:8px">Sem alertas críticos neste momento.</div>
+      <div class="interrupt-list" id="interruptList"></div>
+    </section>
+
+    <section class="field-action-sticky field-panel field-panel-agora" aria-label="Ações principais da visita">
       <div class="muted" style="margin-bottom:8px">Fluxo recomendado: iniciar visita -> registar água e produtos -> fotografias -> concluir.</div>
       <div class="actions">
         <button class="big ok" id="startBtn" type="button">Iniciar visita</button>
@@ -583,14 +1255,19 @@
       </div>
     </section>
 
-    <section class="card next field-panel field-panel-service">
+    <section class="card next field-panel field-panel-agora">
       <span class="chip">Visita atual</span>
       <div class="title" id="nextTitle">A carregar...</div>
       <div class="muted" id="nextMeta"></div>
+      <div class="now-board" id="nowBoard">
+        <b id="nowStateLine">Em intervenção</b>
+        <span class="muted" id="nowResponsibleLine">Responsável por confirmar</span>
+        <span class="muted" id="nowTimingLine">Sem tempo em curso</span>
+      </div>
       <div class="visit-notice-strip" id="visitNoticeStrip" hidden></div>
     </section>
 
-    <section class="card crew-card field-panel field-panel-service" aria-label="Identificação e documentos do técnico">
+    <section class="card crew-card field-panel field-panel-agora" aria-label="Identificação e documentos do técnico">
       <div class="crew-head">
         <div>
           <span class="chip">Técnico e viatura</span>
@@ -627,10 +1304,34 @@
             <small id="fieldWorkGuideMeta">Guia de obra por abrir.</small>
           </div>
         </div>
+        <div class="crew-doc-status warn" id="fieldInsuranceStatus">
+          <i class="signal" aria-hidden="true"></i>
+          <div>
+            <span class="label">Seguro</span>
+            <b id="fieldInsuranceValue">Pendente</b>
+            <small id="fieldInsuranceMeta">Seguro da viatura por validar.</small>
+          </div>
+        </div>
+        <div class="crew-doc-status warn" id="fieldInspectionStatus">
+          <i class="signal" aria-hidden="true"></i>
+          <div>
+            <span class="label">Inspeção</span>
+            <b id="fieldInspectionValue">Indisponível</b>
+            <small id="fieldInspectionMeta">Sem inspeção visível para esta viatura.</small>
+          </div>
+        </div>
+        <div class="crew-doc-status warn" id="fieldSafetyStatus">
+          <i class="signal" aria-hidden="true"></i>
+          <div>
+            <span class="label">Fichas e manuais</span>
+            <b id="fieldSafetyValue">Pendente</b>
+            <small id="fieldSafetyMeta">Fichas de segurança/manuais por confirmar.</small>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section class="card service-summary-card field-panel field-panel-service" id="correctionSummaryCard" hidden>
+    <section class="card service-summary-card field-panel field-panel-agora" id="correctionSummaryCard" hidden>
       <div class="service-summary-head">
         <div>
           <span class="chip">Registo guardado</span>
@@ -641,12 +1342,12 @@
       <div id="correctionSummary"></div>
     </section>
 
-    <section class="card access-card field-panel field-panel-service" id="accessCard">
+    <section class="card access-card field-panel field-panel-agora" id="accessCard">
       <span class="chip">Acesso e avisos</span>
       <div class="access-list" id="accessList"><div class="empty">A carregar chave ou código desta piscina...</div></div>
     </section>
 
-    <section class="card route-card field-panel field-panel-route" id="routeCard">
+    <section class="card route-card field-panel field-panel-hoje" id="routeCard">
       <span class="chip">Próximo local</span>
       <div class="title" id="routeTitle">Mapa da próxima piscina</div>
       <div class="muted" id="routeSummary">A carregar localização do serviço atribuído...</div>
@@ -697,7 +1398,7 @@
       </div>
     </section>
 
-    <section class="card cleaning-card field-panel field-panel-service" id="cleaningCard" aria-label="Registo rápido de parâmetros">
+    <section class="card cleaning-card field-panel field-panel-agora" id="cleaningCard" aria-label="Registo rápido de parâmetros">
       <span class="chip">Limpeza da piscina</span>
       <div class="muted" style="margin:8px 0">Marque apenas o que foi executado na visita atual.</div>
       <div class="checks">
@@ -735,7 +1436,7 @@
       </div>
     </section>
 
-    <section class="card dose-card field-panel field-panel-service" aria-label="Produtos utilizados">
+    <section class="card dose-card field-panel field-panel-agora" aria-label="Produtos utilizados">
       <span class="chip">Produtos usados</span>
       <div class="dose-list" id="doseRows"><div class="dose-empty">Sem produtos adicionados nesta visita.</div></div>
       <div class="dose-footer">
@@ -744,7 +1445,7 @@
       </div>
     </section>
 
-    <section class="card photo-card field-panel field-panel-service" aria-label="Fotografias da visita">
+    <section class="card photo-card field-panel field-panel-agora" aria-label="Fotografias da visita">
       <span class="chip">Fotografias</span>
       <input id="photoInput" type="file" accept="image/*" capture="environment" hidden>
       <div class="photo-actions">
@@ -756,8 +1457,13 @@
       <div class="actions"><button class="big ghost" id="syncPhotosBtn" type="button">Sincronizar fotografias</button></div>
     </section>
 
-    <section class="card field-panel field-panel-list">
-      <span class="chip">Ronda de hoje</span>
+    <section class="card field-panel field-panel-hoje" id="dayVisitsCard">
+      <span class="chip">Piscinas do dia</span>
+      <div class="pool-segments" id="poolSegments" role="tablist" aria-label="Estado das piscinas">
+        <button type="button" class="active" data-pool-filter="TODO">Por fazer</button>
+        <button type="button" data-pool-filter="IN_PROGRESS">Em curso</button>
+        <button type="button" data-pool-filter="DONE">Concluídas</button>
+      </div>
       <div id="visitList" style="margin-top:10px"></div>
     </section>
 
@@ -801,7 +1507,7 @@
       </div>
       <div class="actions">
         <button class="big" id="loadGuidesBtn" type="button">Mostrar documentos</button>
-        <a class="big ghost doc-btn" href="/technician-guide">Gestão de guias</a>
+        <a class="big ghost doc-btn" href="/technician-guide">Consultar guias</a>
       </div>
       <div class="doc-grid">
         <div class="doc-card" id="transportGuideBox">
@@ -815,6 +1521,34 @@
         <div class="doc-card" id="insuranceBox">
           <div class="doc-number">Seguro da viatura</div>
           <div class="muted">Carregue as guias para ver seguro, validade e ficha PDF da viatura.</div>
+        </div>
+        <div class="doc-card" id="documentCenterBox">
+          <div class="doc-number">Centro documental</div>
+          <div class="muted">Resumo de estados: válido, pendente, expirado ou indisponível.</div>
+        </div>
+        <div class="doc-card" id="technicalProposalBox">
+          <div class="doc-number">Proposta de alteração técnica</div>
+          <div class="muted">Regista a proposta com motivo obrigatório. Campos com impacto operacional seguem para aprovação.</div>
+          <div class="doc-tools" style="margin-top:10px">
+            <select id="proposalRiskLevel" aria-label="Nível de risco da proposta">
+              <option value="">Risco automático</option>
+              <option value="LOW">Baixo risco</option>
+              <option value="MEDIUM">Médio</option>
+              <option value="HIGH">Alto</option>
+            </select>
+            <input id="proposalFieldName" placeholder="Campo (ex: pumpPower)">
+          </div>
+          <div class="doc-tools" style="margin-top:8px">
+            <input id="proposalBeforeValue" placeholder="Antes">
+            <input id="proposalAfterValue" placeholder="Depois">
+          </div>
+          <textarea id="proposalReason" placeholder="Motivo obrigatório da alteração" style="margin-top:8px;min-height:84px"></textarea>
+          <textarea id="proposalPhotos" placeholder="Fotos opcionais (uma URL por linha)" style="margin-top:8px;min-height:64px"></textarea>
+          <div class="actions" style="margin-top:8px">
+            <button class="big" id="submitTechnicalProposalBtn" type="button">Submeter proposta</button>
+          </div>
+          <div class="muted" id="technicalProposalStatus" style="margin-top:8px"></div>
+          <div class="muted" id="technicalProposalList" style="margin-top:8px">Sem propostas desta piscina nesta sessão.</div>
         </div>
       </div>
 
@@ -834,10 +1568,11 @@
         <details class="cw-v2-nav-group" open>
           <summary>Operação diária</summary>
           <div class="cw-v2-nav-links cw-v2-nav">
-            <a href="/technician-field-mode" data-shell-search="Today">Today</a>
-            <a href="/technician-route" data-shell-search="Route">Route</a>
-            <a href="/technician-visit" data-shell-search="Visit">Visit</a>
-            <a href="/admin-alerts" data-shell-search="Alerts">Alerts</a>
+            <a href="/technician-field-mode" data-shell-search="Hoje">Hoje</a>
+            <a href="/technician-field-mode#agora" data-shell-search="Agora">Agora</a>
+            <a href="/technician-map" data-shell-search="Mapa">Mapa</a>
+            <a href="/technician-field-mode#docs" data-shell-search="Documentos">Documentos</a>
+            <a href="/technician-field-mode#more" data-shell-search="Mais">Mais</a>
           </div>
         </details>
         <details class="cw-v2-nav-group" open>
@@ -868,5 +1603,6 @@
   <script src="/ui/core/navigation-context.js"></script>
   <script src="/crystal-os-v2-shell.js"></script>
   <script src="/crystal-os-v2-nav.js"></script>
+  <script defer src="/ui/design-system.js"></script>
 </body>
 </html>

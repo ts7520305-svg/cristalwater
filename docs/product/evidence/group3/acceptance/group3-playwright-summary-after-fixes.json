@@ -1,0 +1,12 @@
+{
+  "scenarios": 24,
+  "non200": 0,
+  "jsErrors": 0,
+  "warnings": 0,
+  "unexpectedFailedRequests": 0,
+  "functional404": 0,
+  "horizScroll": 0,
+  "unlabeled": 0,
+  "smallTargets": 0,
+  "validPoolId": 193
+}

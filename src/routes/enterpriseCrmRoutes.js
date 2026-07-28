@@ -1,7 +1,10 @@
 const express = require("express");
 const router = express.Router();
+const auth = require("../middlewares/authMiddleware");
 const c = require("../controllers/enterpriseCrmController");
 function wrap(fn){ return (req,res,next)=>Promise.resolve(fn(req,res,next)).catch(next); }
+
+router.use(auth("ADMIN"));
 router.get("/leads", wrap(c.listLeads));
 router.post("/leads", wrap(c.createLead));
 router.put("/leads/:id", wrap(c.updateLead));

@@ -76,8 +76,8 @@ body.cwos-admin-body {
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.06);
   border-radius: 999px;
-  min-height: 34px;
-  padding: 7px 12px;
+  min-height: 44px;
+  padding: 10px 14px;
   font-weight: 800;
   font-size: 12px;
   display: inline-flex;
@@ -99,13 +99,16 @@ body.cwos-admin-body {
 .cwos-admin-actions a {
   text-decoration: none;
   font-size: 12px;
-  min-height: 34px;
+  min-height: 44px;
   border-radius: 10px;
-  padding: 7px 10px;
+  padding: 10px 12px;
   font-weight: 900;
   border: 1px solid rgba(255, 255, 255, 0.16);
   background: rgba(255, 255, 255, 0.07);
   color: var(--cwos-shell-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .cwos-admin-context {

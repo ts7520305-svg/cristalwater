@@ -1,0 +1,368 @@
+{
+  "runId": "FCS13ISO_1784701491531_0kfweq",
+  "generatedAt": "2026-07-22T06:25:55.137Z",
+  "baseUrl": "http://127.0.0.1:3002",
+  "memoryBefore": "total        used        free      shared  buff/cache   available\nMem:            7901        3897        2187          30        1816        3667\nSwap:           8191         113        8078",
+  "diskBefore": "Filesystem      Size  Used Avail Use% Mounted on\n/dev/vda1       291G   35G  257G  12% /",
+  "memoryAfter": "total        used        free      shared  buff/cache   available\nMem:            7901        3705        2378          30        1818        3859\nSwap:           8191         113        8078",
+  "diskAfter": "Filesystem      Size  Used Avail Use% Mounted on\n/dev/vda1       291G   35G  257G  12% /",
+  "results": [
+    {
+      "flow": "Criar cliente",
+      "flowKey": "create-client",
+      "viewport": "desktop",
+      "exitCode": 0,
+      "signal": null,
+      "pass": true,
+      "consoleErrors": [],
+      "apiErrors": [],
+      "row": {
+        "flow": "Criar cliente",
+        "profile": "ADMIN",
+        "viewport": "1440x920",
+        "landingInitial": "/admin-master-control",
+        "actionFound": true,
+        "discoveryMs": 753,
+        "discoveryInteractions": 1,
+        "flowCompleted": true,
+        "consoleErrors": [],
+        "apiErrors": [],
+        "pass": true,
+        "notes": {
+          "usedFallbackDirectRoute": true,
+          "executionError": null
+        }
+      },
+      "rawStdout": "[FCS13MS] main:create-admin\n[FCS13MS] main:create-technician\n[FCS13MS] main:run-viewport:desktop\n[FCS13MS] viewport:start:desktop\n[FCS13MS] viewport:desktop:flow:start:create-client\n[FCS13MS] viewport:desktop:flow:end:create-client:pass=true\n[FCS13MS] viewport:end:desktop\n{\n  \"ok\": true,\n  \"runId\": \"FCS13MS_1784701492232_av40op\",\n  \"baseUrl\": \"http://127.0.0.1:3002\",\n  \"startedAt\": \"2026-07-22T06:24:52.232Z\",\n  \"gate\": {\n    \"discoveryMaxInteractions\": 3,\n    \"discoveryMaxMs\": 10000\n  },\n  \"rows\": [\n    {\n      \"flow\": \"Criar cliente\",\n      \"profile\": \"ADMIN\",\n      \"viewport\": \"1440x920\",\n      \"landingInitial\": \"/admin-master-control\",\n      \"actionFound\": true,\n      \"discoveryMs\": 753,\n      \"discoveryInteractions\": 1,\n      \"flowCompleted\": true,\n      \"consoleErrors\": [],\n      \"apiErrors\": [],\n      \"pass\": true,\n      \"notes\": {\n        \"usedFallbackDirectRoute\": true,\n        \"executionError\": null\n      }\n    }\n  ],\n  \"totals\": {\n    \"total\": 1,\n    \"pass\": 1,\n    \"fail\": 0,\n    \"withConsoleErrors\": 0,\n    \"withApiErrors\": 0,\n    \"overTimeGate\": 0,\n    \"overInteractionGate\": 0\n  },\n  \"finishedAt\": \"2026-07-22T06:24:54.646Z\",\n  \"selection\": {\n    \"flowKey\": \"create-client\",\n    \"viewport\": \"desktop\"\n  },\n  \"table\": [\n    {\n      \"Fluxo\": \"Criar cliente\",\n      \"Perfil\": \"ADMIN\",\n      \"Viewport\": \"1440x920\",\n      \"Landing inicial\": \"/admin-master-control\",\n      \"Ação principal encontrada\": \"SIM\",\n      \"Tempo até abrir a ação\": \"753 ms\",\n      \"Interações até abrir a ação\": 1,\n      \"Fluxo concluído\": \"SIM\",\n      \"Erros de consola\": 0,\n      \"API 4xx/5xx\": 0,\n      \"PASS/FAIL\": \"PASS\"\n    }\n  ]\n}\n",
+      "rawStderr": ""
+    },
+    {
+      "flow": "Criar piscina",
+      "flowKey": "create-pool",
+      "viewport": "desktop",
+      "exitCode": 0,
+      "signal": null,
+      "pass": false,
+      "consoleErrors": [],
+      "apiErrors": [],
+      "row": {
+        "flow": "Criar piscina",
+        "profile": "ADMIN",
+        "viewport": "1440x920",
+        "landingInitial": "/admin-master-control",
+        "actionFound": true,
+        "discoveryMs": 749,
+        "discoveryInteractions": 1,
+        "flowCompleted": false,
+        "consoleErrors": [],
+        "apiErrors": [],
+        "pass": false,
+        "notes": {
+          "usedFallbackDirectRoute": true,
+          "executionError": "Fluxo criar piscina sem clientId",
+          "details": null
+        }
+      },
+      "rawStdout": "[FCS13MS] main:create-admin\n[FCS13MS] main:create-technician\n[FCS13MS] main:run-viewport:desktop\n[FCS13MS] viewport:start:desktop\n[FCS13MS] viewport:desktop:flow:start:create-pool\n[FCS13MS] viewport:desktop:flow:end:create-pool:pass=false\n[FCS13MS] viewport:end:desktop\n{\n  \"ok\": false,\n  \"runId\": \"FCS13MS_1784701495635_jcrzxf\",\n  \"baseUrl\": \"http://127.0.0.1:3002\",\n  \"startedAt\": \"2026-07-22T06:24:55.635Z\",\n  \"gate\": {\n    \"discoveryMaxInteractions\": 3,\n    \"discoveryMaxMs\": 10000\n  },\n  \"rows\": [\n    {\n      \"flow\": \"Criar piscina\",\n      \"profile\": \"ADMIN\",\n      \"viewport\": \"1440x920\",\n      \"landingInitial\": \"/admin-master-control\",\n      \"actionFound\": true,\n      \"discoveryMs\": 749,\n      \"discoveryInteractions\": 1,\n      \"flowCompleted\": false,\n      \"consoleErrors\": [],\n      \"apiErrors\": [],\n      \"pass\": false,\n      \"notes\": {\n        \"usedFallbackDirectRoute\": true,\n        \"executionError\": \"Fluxo criar piscina sem clientId\",\n        \"details\": null\n      }\n    }\n  ],\n  \"totals\": {\n    \"total\": 1,\n    \"pass\": 0,\n    \"fail\": 1,\n    \"withConsoleErrors\": 0,\n    \"withApiErrors\": 0,\n    \"overTimeGate\": 0,\n    \"overInteractionGate\": 0\n  },\n  \"finishedAt\": \"2026-07-22T06:24:57.756Z\",\n  \"selection\": {\n    \"flowKey\": \"create-pool\",\n    \"viewport\": \"desktop\"\n  },\n  \"table\": [\n    {\n      \"Fluxo\": \"Criar piscina\",\n      \"Perfil\": \"ADMIN\",\n      \"Viewport\": \"1440x920\",\n      \"Landing inicial\": \"/admin-master-control\",\n      \"Ação principal encontrada\": \"SIM\",\n      \"Tempo até abrir a ação\": \"749 ms\",\n      \"Interações até abrir a ação\": 1,\n      \"Fluxo concluído\": \"NAO\",\n      \"Erros de consola\": 0,\n      \"API 4xx/5xx\": 0,\n      \"PASS/FAIL\": \"FAIL\"\n    }\n  ]\n}\n",
+      "rawStderr": ""
+    },
+    {
+      "flow": "Agendar visita",
+      "flowKey": "schedule-visit",
+      "viewport": "desktop",
+      "exitCode": 0,
+      "signal": null,
+      "pass": false,
+      "consoleErrors": [],
+      "apiErrors": [],
+      "row": {
+        "flow": "Agendar visita",
+        "profile": "ADMIN",
+        "viewport": "1440x920",
+        "landingInitial": "/admin-master-control",
+        "actionFound": true,
+        "discoveryMs": 1067,
+        "discoveryInteractions": 1,
+        "flowCompleted": false,
+        "consoleErrors": [],
+        "apiErrors": [],
+        "pass": false,
+        "notes": {
+          "usedFallbackDirectRoute": false,
+          "executionError": "Fluxo agendar visita sem poolId",
+          "details": null
+        }
+      },
+      "rawStdout": "[FCS13MS] main:create-admin\n[FCS13MS] main:create-technician\n[FCS13MS] main:run-viewport:desktop\n[FCS13MS] viewport:start:desktop\n[FCS13MS] viewport:desktop:flow:start:schedule-visit\n[FCS13MS] viewport:desktop:flow:end:schedule-visit:pass=false\n[FCS13MS] viewport:end:desktop\n{\n  \"ok\": false,\n  \"runId\": \"FCS13MS_1784701498609_qfn3wg\",\n  \"baseUrl\": \"http://127.0.0.1:3002\",\n  \"startedAt\": \"2026-07-22T06:24:58.609Z\",\n  \"gate\": {\n    \"discoveryMaxInteractions\": 3,\n    \"discoveryMaxMs\": 10000\n  },\n  \"rows\": [\n    {\n      \"flow\": \"Agendar visita\",\n      \"profile\": \"ADMIN\",\n      \"viewport\": \"1440x920\",\n      \"landingInitial\": \"/admin-master-control\",\n      \"actionFound\": true,\n      \"discoveryMs\": 1067,\n      \"discoveryInteractions\": 1,\n      \"flowCompleted\": false,\n      \"consoleErrors\": [],\n      \"apiErrors\": [],\n      \"pass\": false,\n      \"notes\": {\n        \"usedFallbackDirectRoute\": false,\n        \"executionError\": \"Fluxo agendar visita sem poolId\",\n        \"details\": null\n      }\n    }\n  ],\n  \"totals\": {\n    \"total\": 1,\n    \"pass\": 0,\n    \"fail\": 1,\n    \"withConsoleErrors\": 0,\n    \"withApiErrors\": 0,\n    \"overTimeGate\": 0,\n    \"overInteractionGate\": 0\n  },\n  \"finishedAt\": \"2026-07-22T06:25:01.023Z\",\n  \"selection\": {\n    \"flowKey\": \"schedule-visit\",\n    \"viewport\": \"desktop\"\n  },\n  \"table\": [\n    {\n      \"Fluxo\": \"Agendar visita\",\n      \"Perfil\": \"ADMIN\",\n      \"Viewport\": \"1440x920\",\n      \"Landing inicial\": \"/admin-master-control\",\n      \"Ação principal encontrada\": \"SIM\",\n      \"Tempo até abrir a ação\": \"1067 ms\",\n      \"Interações até abrir a ação\": 1,\n      \"Fluxo concluído\": \"NAO\",\n      \"Erros de consola\": 0,\n      \"API 4xx/5xx\": 0,\n      \"PASS/FAIL\": \"FAIL\"\n    }\n  ]\n}\n",
+      "rawStderr": ""
+    },
+    {
+      "flow": "Criar reparação",
+      "flowKey": "create-repair",
+      "viewport": "desktop",
+      "exitCode": 0,
+      "signal": null,
+      "pass": false,
+      "consoleErrors": [],
+      "apiErrors": [],
+      "row": {
+        "flow": "Criar reparação",
+        "profile": "ADMIN",
+        "viewport": "1440x920",
+        "landingInitial": "/admin-master-control",
+        "actionFound": true,
+        "discoveryMs": 3856,
+        "discoveryInteractions": 2,
+        "flowCompleted": false,
+        "consoleErrors": [],
+        "apiErrors": [],
+        "pass": false,
+        "notes": {
+          "usedFallbackDirectRoute": false,
+          "executionError": "\nInvalid `prisma.technicalAlert.create()` invocation:\n\n{\n  data: {\n    poolId: null,\n    type: \"MANUAL_ALERT\",\n    message: \"QA MS ALERT FCS13MS_1784701504228_krw9nv-desktop\",\n    priority: \"WARNING\",\n    status: \"OPEN\",\n+   pool: {\n+     create: PoolCreateWithoutTechnicalAlertsInput | PoolUncheckedCreateWithoutTechnicalAlertsInput,\n+     connectOrCreate: PoolCreateOrConnectWithoutTechnicalAlertsInput,\n+     connect: PoolWhereUniqueInput\n+   }\n  }\n}\n\nArgument `pool` is missing.",
+          "details": null
+        }
+      },
+      "rawStdout": "[FCS13MS] main:create-admin\n[FCS13MS] main:create-technician\n[FCS13MS] main:run-viewport:desktop\n[FCS13MS] viewport:start:desktop\n[FCS13MS] viewport:desktop:flow:start:create-repair\nprisma:error \nInvalid `prisma.technicalAlert.create()` invocation:\n\n{\n  data: {\n    poolId: null,\n    type: \"MANUAL_ALERT\",\n    message: \"QA MS ALERT FCS13MS_1784701504228_krw9nv-desktop\",\n    priority: \"WARNING\",\n    status: \"OPEN\",\n+   pool: {\n+     create: PoolCreateWithoutTechnicalAlertsInput | PoolUncheckedCreateWithoutTechnicalAlertsInput,\n+     connectOrCreate: PoolCreateOrConnectWithoutTechnicalAlertsInput,\n+     connect: PoolWhereUniqueInput\n+   }\n  }\n}\n\nArgument `pool` is missing.\n[FCS13MS] viewport:desktop:flow:end:create-repair:pass=false\n[FCS13MS] viewport:end:desktop\n{\n  \"ok\": false,\n  \"runId\": \"FCS13MS_1784701504228_krw9nv\",\n  \"baseUrl\": \"http://127.0.0.1:3002\",\n  \"startedAt\": \"2026-07-22T06:25:04.229Z\",\n  \"gate\": {\n    \"discoveryMaxInteractions\": 3,\n    \"discoveryMaxMs\": 10000\n  },\n  \"rows\": [\n    {\n      \"flow\": \"Criar reparação\",\n      \"profile\": \"ADMIN\",\n      \"viewport\": \"1440x920\",\n      \"landingInitial\": \"/admin-master-control\",\n      \"actionFound\": true,\n      \"discoveryMs\": 3856,\n      \"discoveryInteractions\": 2,\n      \"flowCompleted\": false,\n      \"consoleErrors\": [],\n      \"apiErrors\": [],\n      \"pass\": false,\n      \"notes\": {\n        \"usedFallbackDirectRoute\": false,\n        \"executionError\": \"\\nInvalid `prisma.technicalAlert.create()` invocation:\\n\\n{\\n  data: {\\n    poolId: null,\\n    type: \\\"MANUAL_ALERT\\\",\\n    message: \\\"QA MS ALERT FCS13MS_1784701504228_krw9nv-desktop\\\",\\n    priority: \\\"WARNING\\\",\\n    status: \\\"OPEN\\\",\\n+   pool: {\\n+     create: PoolCreateWithoutTechnicalAlertsInput | PoolUncheckedCreateWithoutTechnicalAlertsInput,\\n+     connectOrCreate: PoolCreateOrConnectWithoutTechnicalAlertsInput,\\n+     connect: PoolWhereUniqueInput\\n+   }\\n  }\\n}\\n\\nArgument `pool` is missing.\",\n        \"details\": null\n      }\n    }\n  ],\n  \"totals\": {\n    \"total\": 1,\n    \"pass\": 0,\n    \"fail\": 1,\n    \"withConsoleErrors\": 0,\n    \"withApiErrors\": 0,\n    \"overTimeGate\": 0,\n    \"overInteractionGate\": 0\n  },\n  \"finishedAt\": \"2026-07-22T06:25:11.081Z\",\n  \"selection\": {\n    \"flowKey\": \"create-repair\",\n    \"viewport\": \"desktop\"\n  },\n  \"table\": [\n    {\n      \"Fluxo\": \"Criar reparação\",\n      \"Perfil\": \"ADMIN\",\n      \"Viewport\": \"1440x920\",\n      \"Landing inicial\": \"/admin-master-control\",\n      \"Ação principal encontrada\": \"SIM\",\n      \"Tempo até abrir a ação\": \"3856 ms\",\n      \"Interações até abrir a ação\": 2,\n      \"Fluxo concluído\": \"NAO\",\n      \"Erros de consola\": 0,\n      \"API 4xx/5xx\": 0,\n      \"PASS/FAIL\": \"FAIL\"\n    }\n  ]\n}\n",
+      "rawStderr": ""
+    },
+    {
+      "flow": "Emitir fatura",
+      "flowKey": "issue-invoice",
+      "viewport": "desktop",
+      "exitCode": 0,
+      "signal": null,
+      "pass": false,
+      "consoleErrors": [],
+      "apiErrors": [],
+      "row": {
+        "flow": "Emitir fatura",
+        "profile": "ADMIN",
+        "viewport": "1440x920",
+        "landingInitial": "/admin-master-control",
+        "actionFound": true,
+        "discoveryMs": 803,
+        "discoveryInteractions": 1,
+        "flowCompleted": false,
+        "consoleErrors": [],
+        "apiErrors": [],
+        "pass": false,
+        "notes": {
+          "usedFallbackDirectRoute": true,
+          "executionError": "Fluxo emitir fatura sem clientId",
+          "details": null
+        }
+      },
+      "rawStdout": "[FCS13MS] main:create-admin\n[FCS13MS] main:create-technician\n[FCS13MS] main:run-viewport:desktop\n[FCS13MS] viewport:start:desktop\n[FCS13MS] viewport:desktop:flow:start:issue-invoice\n[FCS13MS] viewport:desktop:flow:end:issue-invoice:pass=false\n[FCS13MS] viewport:end:desktop\n{\n  \"ok\": false,\n  \"runId\": \"FCS13MS_1784701512267_3d56j5\",\n  \"baseUrl\": \"http://127.0.0.1:3002\",\n  \"startedAt\": \"2026-07-22T06:25:12.267Z\",\n  \"gate\": {\n    \"discoveryMaxInteractions\": 3,\n    \"discoveryMaxMs\": 10000\n  },\n  \"rows\": [\n    {\n      \"flow\": \"Emitir fatura\",\n      \"profile\": \"ADMIN\",\n      \"viewport\": \"1440x920\",\n      \"landingInitial\": \"/admin-master-control\",\n      \"actionFound\": true,\n      \"discoveryMs\": 803,\n      \"discoveryInteractions\": 1,\n      \"flowCompleted\": false,\n      \"consoleErrors\": [],\n      \"apiErrors\": [],\n      \"pass\": false,\n      \"notes\": {\n        \"usedFallbackDirectRoute\": true,\n        \"executionError\": \"Fluxo emitir fatura sem clientId\",\n        \"details\": null\n      }\n    }\n  ],\n  \"totals\": {\n    \"total\": 1,\n    \"pass\": 0,\n    \"fail\": 1,\n    \"withConsoleErrors\": 0,\n    \"withApiErrors\": 0,\n    \"overTimeGate\": 0,\n    \"overInteractionGate\": 0\n  },\n  \"finishedAt\": \"2026-07-22T06:25:14.629Z\",\n  \"selection\": {\n    \"flowKey\": \"issue-invoice\",\n    \"viewport\": \"desktop\"\n  },\n  \"table\": [\n    {\n      \"Fluxo\": \"Emitir fatura\",\n      \"Perfil\": \"ADMIN\",\n      \"Viewport\": \"1440x920\",\n      \"Landing inicial\": \"/admin-master-control\",\n      \"Ação principal encontrada\": \"SIM\",\n      \"Tempo até abrir a ação\": \"803 ms\",\n      \"Interações até abrir a ação\": 1,\n      \"Fluxo concluído\": \"NAO\",\n      \"Erros de consola\": 0,\n      \"API 4xx/5xx\": 0,\n      \"PASS/FAIL\": \"FAIL\"\n    }\n  ]\n}\n",
+      "rawStderr": ""
+    },
+    {
+      "flow": "Criar produto",
+      "flowKey": "create-product",
+      "viewport": "desktop",
+      "exitCode": 0,
+      "signal": null,
+      "pass": true,
+      "consoleErrors": [],
+      "apiErrors": [],
+      "row": {
+        "flow": "Criar produto",
+        "profile": "ADMIN",
+        "viewport": "1440x920",
+        "landingInitial": "/admin-master-control",
+        "actionFound": true,
+        "discoveryMs": 852,
+        "discoveryInteractions": 1,
+        "flowCompleted": true,
+        "consoleErrors": [],
+        "apiErrors": [],
+        "pass": true,
+        "notes": {
+          "usedFallbackDirectRoute": true,
+          "executionError": null
+        }
+      },
+      "rawStdout": "[FCS13MS] main:create-admin\n[FCS13MS] main:create-technician\n[FCS13MS] main:run-viewport:desktop\n[FCS13MS] viewport:start:desktop\n[FCS13MS] viewport:desktop:flow:start:create-product\n[FCS13MS] viewport:desktop:flow:end:create-product:pass=true\n[FCS13MS] viewport:end:desktop\n{\n  \"ok\": true,\n  \"runId\": \"FCS13MS_1784701515661_2cdvgx\",\n  \"baseUrl\": \"http://127.0.0.1:3002\",\n  \"startedAt\": \"2026-07-22T06:25:15.661Z\",\n  \"gate\": {\n    \"discoveryMaxInteractions\": 3,\n    \"discoveryMaxMs\": 10000\n  },\n  \"rows\": [\n    {\n      \"flow\": \"Criar produto\",\n      \"profile\": \"ADMIN\",\n      \"viewport\": \"1440x920\",\n      \"landingInitial\": \"/admin-master-control\",\n      \"actionFound\": true,\n      \"discoveryMs\": 852,\n      \"discoveryInteractions\": 1,\n      \"flowCompleted\": true,\n      \"consoleErrors\": [],\n      \"apiErrors\": [],\n      \"pass\": true,\n      \"notes\": {\n        \"usedFallbackDirectRoute\": true,\n        \"executionError\": null\n      }\n    }\n  ],\n  \"totals\": {\n    \"total\": 1,\n    \"pass\": 1,\n    \"fail\": 0,\n    \"withConsoleErrors\": 0,\n    \"withApiErrors\": 0,\n    \"overTimeGate\": 0,\n    \"overInteractionGate\": 0\n  },\n  \"finishedAt\": \"2026-07-22T06:25:18.748Z\",\n  \"selection\": {\n    \"flowKey\": \"create-product\",\n    \"viewport\": \"desktop\"\n  },\n  \"table\": [\n    {\n      \"Fluxo\": \"Criar produto\",\n      \"Perfil\": \"ADMIN\",\n      \"Viewport\": \"1440x920\",\n      \"Landing inicial\": \"/admin-master-control\",\n      \"Ação principal encontrada\": \"SIM\",\n      \"Tempo até abrir a ação\": \"852 ms\",\n      \"Interações até abrir a ação\": 1,\n      \"Fluxo concluído\": \"SIM\",\n      \"Erros de consola\": 0,\n      \"API 4xx/5xx\": 0,\n      \"PASS/FAIL\": \"PASS\"\n    }\n  ]\n}\n",
+      "rawStderr": ""
+    },
+    {
+      "flow": "Criar cliente",
+      "flowKey": "create-client",
+      "viewport": "390x844",
+      "exitCode": 0,
+      "signal": null,
+      "pass": true,
+      "consoleErrors": [],
+      "apiErrors": [],
+      "row": {
+        "flow": "Criar cliente",
+        "profile": "ADMIN",
+        "viewport": "390x844",
+        "landingInitial": "/admin-master-control",
+        "actionFound": true,
+        "discoveryMs": 835,
+        "discoveryInteractions": 1,
+        "flowCompleted": true,
+        "consoleErrors": [],
+        "apiErrors": [],
+        "pass": true,
+        "notes": {
+          "usedFallbackDirectRoute": true,
+          "executionError": null
+        }
+      },
+      "rawStdout": "[FCS13MS] main:create-admin\n[FCS13MS] main:create-technician\n[FCS13MS] main:run-viewport:390x844\n[FCS13MS] viewport:start:390x844\n[FCS13MS] viewport:390x844:flow:start:create-client\n[FCS13MS] viewport:390x844:flow:end:create-client:pass=true\n[FCS13MS] viewport:end:390x844\n{\n  \"ok\": true,\n  \"runId\": \"FCS13MS_1784701519887_7tsnyr\",\n  \"baseUrl\": \"http://127.0.0.1:3002\",\n  \"startedAt\": \"2026-07-22T06:25:19.887Z\",\n  \"gate\": {\n    \"discoveryMaxInteractions\": 3,\n    \"discoveryMaxMs\": 10000\n  },\n  \"rows\": [\n    {\n      \"flow\": \"Criar cliente\",\n      \"profile\": \"ADMIN\",\n      \"viewport\": \"390x844\",\n      \"landingInitial\": \"/admin-master-control\",\n      \"actionFound\": true,\n      \"discoveryMs\": 835,\n      \"discoveryInteractions\": 1,\n      \"flowCompleted\": true,\n      \"consoleErrors\": [],\n      \"apiErrors\": [],\n      \"pass\": true,\n      \"notes\": {\n        \"usedFallbackDirectRoute\": true,\n        \"executionError\": null\n      }\n    }\n  ],\n  \"totals\": {\n    \"total\": 1,\n    \"pass\": 1,\n    \"fail\": 0,\n    \"withConsoleErrors\": 0,\n    \"withApiErrors\": 0,\n    \"overTimeGate\": 0,\n    \"overInteractionGate\": 0\n  },\n  \"finishedAt\": \"2026-07-22T06:25:22.544Z\",\n  \"selection\": {\n    \"flowKey\": \"create-client\",\n    \"viewport\": \"390x844\"\n  },\n  \"table\": [\n    {\n      \"Fluxo\": \"Criar cliente\",\n      \"Perfil\": \"ADMIN\",\n      \"Viewport\": \"390x844\",\n      \"Landing inicial\": \"/admin-master-control\",\n      \"Ação principal encontrada\": \"SIM\",\n      \"Tempo até abrir a ação\": \"835 ms\",\n      \"Interações até abrir a ação\": 1,\n      \"Fluxo concluído\": \"SIM\",\n      \"Erros de consola\": 0,\n      \"API 4xx/5xx\": 0,\n      \"PASS/FAIL\": \"PASS\"\n    }\n  ]\n}\n",
+      "rawStderr": ""
+    },
+    {
+      "flow": "Criar piscina",
+      "flowKey": "create-pool",
+      "viewport": "390x844",
+      "exitCode": 0,
+      "signal": null,
+      "pass": false,
+      "consoleErrors": [],
+      "apiErrors": [],
+      "row": {
+        "flow": "Criar piscina",
+        "profile": "ADMIN",
+        "viewport": "390x844",
+        "landingInitial": "/admin-master-control",
+        "actionFound": true,
+        "discoveryMs": 741,
+        "discoveryInteractions": 1,
+        "flowCompleted": false,
+        "consoleErrors": [],
+        "apiErrors": [],
+        "pass": false,
+        "notes": {
+          "usedFallbackDirectRoute": true,
+          "executionError": "Fluxo criar piscina sem clientId",
+          "details": null
+        }
+      },
+      "rawStdout": "[FCS13MS] main:create-admin\n[FCS13MS] main:create-technician\n[FCS13MS] main:run-viewport:390x844\n[FCS13MS] viewport:start:390x844\n[FCS13MS] viewport:390x844:flow:start:create-pool\n[FCS13MS] viewport:390x844:flow:end:create-pool:pass=false\n[FCS13MS] viewport:end:390x844\n{\n  \"ok\": false,\n  \"runId\": \"FCS13MS_1784701523542_szfxxe\",\n  \"baseUrl\": \"http://127.0.0.1:3002\",\n  \"startedAt\": \"2026-07-22T06:25:23.542Z\",\n  \"gate\": {\n    \"discoveryMaxInteractions\": 3,\n    \"discoveryMaxMs\": 10000\n  },\n  \"rows\": [\n    {\n      \"flow\": \"Criar piscina\",\n      \"profile\": \"ADMIN\",\n      \"viewport\": \"390x844\",\n      \"landingInitial\": \"/admin-master-control\",\n      \"actionFound\": true,\n      \"discoveryMs\": 741,\n      \"discoveryInteractions\": 1,\n      \"flowCompleted\": false,\n      \"consoleErrors\": [],\n      \"apiErrors\": [],\n      \"pass\": false,\n      \"notes\": {\n        \"usedFallbackDirectRoute\": true,\n        \"executionError\": \"Fluxo criar piscina sem clientId\",\n        \"details\": null\n      }\n    }\n  ],\n  \"totals\": {\n    \"total\": 1,\n    \"pass\": 0,\n    \"fail\": 1,\n    \"withConsoleErrors\": 0,\n    \"withApiErrors\": 0,\n    \"overTimeGate\": 0,\n    \"overInteractionGate\": 0\n  },\n  \"finishedAt\": \"2026-07-22T06:25:25.679Z\",\n  \"selection\": {\n    \"flowKey\": \"create-pool\",\n    \"viewport\": \"390x844\"\n  },\n  \"table\": [\n    {\n      \"Fluxo\": \"Criar piscina\",\n      \"Perfil\": \"ADMIN\",\n      \"Viewport\": \"390x844\",\n      \"Landing inicial\": \"/admin-master-control\",\n      \"Ação principal encontrada\": \"SIM\",\n      \"Tempo até abrir a ação\": \"741 ms\",\n      \"Interações até abrir a ação\": 1,\n      \"Fluxo concluído\": \"NAO\",\n      \"Erros de consola\": 0,\n      \"API 4xx/5xx\": 0,\n      \"PASS/FAIL\": \"FAIL\"\n    }\n  ]\n}\n",
+      "rawStderr": ""
+    },
+    {
+      "flow": "Agendar visita",
+      "flowKey": "schedule-visit",
+      "viewport": "390x844",
+      "exitCode": 0,
+      "signal": null,
+      "pass": false,
+      "consoleErrors": [],
+      "apiErrors": [],
+      "row": {
+        "flow": "Agendar visita",
+        "profile": "ADMIN",
+        "viewport": "390x844",
+        "landingInitial": "/admin-master-control",
+        "actionFound": true,
+        "discoveryMs": 790,
+        "discoveryInteractions": 1,
+        "flowCompleted": false,
+        "consoleErrors": [],
+        "apiErrors": [],
+        "pass": false,
+        "notes": {
+          "usedFallbackDirectRoute": true,
+          "executionError": "Fluxo agendar visita sem poolId",
+          "details": null
+        }
+      },
+      "rawStdout": "[FCS13MS] main:create-admin\n[FCS13MS] main:create-technician\n[FCS13MS] main:run-viewport:390x844\n[FCS13MS] viewport:start:390x844\n[FCS13MS] viewport:390x844:flow:start:schedule-visit\n[FCS13MS] viewport:390x844:flow:end:schedule-visit:pass=false\n[FCS13MS] viewport:end:390x844\n{\n  \"ok\": false,\n  \"runId\": \"FCS13MS_1784701526601_73i8mh\",\n  \"baseUrl\": \"http://127.0.0.1:3002\",\n  \"startedAt\": \"2026-07-22T06:25:26.601Z\",\n  \"gate\": {\n    \"discoveryMaxInteractions\": 3,\n    \"discoveryMaxMs\": 10000\n  },\n  \"rows\": [\n    {\n      \"flow\": \"Agendar visita\",\n      \"profile\": \"ADMIN\",\n      \"viewport\": \"390x844\",\n      \"landingInitial\": \"/admin-master-control\",\n      \"actionFound\": true,\n      \"discoveryMs\": 790,\n      \"discoveryInteractions\": 1,\n      \"flowCompleted\": false,\n      \"consoleErrors\": [],\n      \"apiErrors\": [],\n      \"pass\": false,\n      \"notes\": {\n        \"usedFallbackDirectRoute\": true,\n        \"executionError\": \"Fluxo agendar visita sem poolId\",\n        \"details\": null\n      }\n    }\n  ],\n  \"totals\": {\n    \"total\": 1,\n    \"pass\": 0,\n    \"fail\": 1,\n    \"withConsoleErrors\": 0,\n    \"withApiErrors\": 0,\n    \"overTimeGate\": 0,\n    \"overInteractionGate\": 0\n  },\n  \"finishedAt\": \"2026-07-22T06:25:28.842Z\",\n  \"selection\": {\n    \"flowKey\": \"schedule-visit\",\n    \"viewport\": \"390x844\"\n  },\n  \"table\": [\n    {\n      \"Fluxo\": \"Agendar visita\",\n      \"Perfil\": \"ADMIN\",\n      \"Viewport\": \"390x844\",\n      \"Landing inicial\": \"/admin-master-control\",\n      \"Ação principal encontrada\": \"SIM\",\n      \"Tempo até abrir a ação\": \"790 ms\",\n      \"Interações até abrir a ação\": 1,\n      \"Fluxo concluído\": \"NAO\",\n      \"Erros de consola\": 0,\n      \"API 4xx/5xx\": 0,\n      \"PASS/FAIL\": \"FAIL\"\n    }\n  ]\n}\n",
+      "rawStderr": ""
+    },
+    {
+      "flow": "Criar reparação",
+      "flowKey": "create-repair",
+      "viewport": "390x844",
+      "exitCode": 0,
+      "signal": null,
+      "pass": false,
+      "consoleErrors": [],
+      "apiErrors": [],
+      "row": {
+        "flow": "Criar reparação",
+        "profile": "ADMIN",
+        "viewport": "390x844",
+        "landingInitial": "/admin-master-control",
+        "actionFound": true,
+        "discoveryMs": 1621,
+        "discoveryInteractions": 2,
+        "flowCompleted": false,
+        "consoleErrors": [],
+        "apiErrors": [],
+        "pass": false,
+        "notes": {
+          "usedFallbackDirectRoute": true,
+          "executionError": "\nInvalid `prisma.technicalAlert.create()` invocation:\n\n{\n  data: {\n    poolId: null,\n    type: \"MANUAL_ALERT\",\n    message: \"QA MS ALERT FCS13MS_1784701529884_8zjd5o-390x844\",\n    priority: \"WARNING\",\n    status: \"OPEN\",\n+   pool: {\n+     create: PoolCreateWithoutTechnicalAlertsInput | PoolUncheckedCreateWithoutTechnicalAlertsInput,\n+     connectOrCreate: PoolCreateOrConnectWithoutTechnicalAlertsInput,\n+     connect: PoolWhereUniqueInput\n+   }\n  }\n}\n\nArgument `pool` is missing.",
+          "details": null
+        }
+      },
+      "rawStdout": "[FCS13MS] main:create-admin\n[FCS13MS] main:create-technician\n[FCS13MS] main:run-viewport:390x844\n[FCS13MS] viewport:start:390x844\n[FCS13MS] viewport:390x844:flow:start:create-repair\nprisma:error \nInvalid `prisma.technicalAlert.create()` invocation:\n\n{\n  data: {\n    poolId: null,\n    type: \"MANUAL_ALERT\",\n    message: \"QA MS ALERT FCS13MS_1784701529884_8zjd5o-390x844\",\n    priority: \"WARNING\",\n    status: \"OPEN\",\n+   pool: {\n+     create: PoolCreateWithoutTechnicalAlertsInput | PoolUncheckedCreateWithoutTechnicalAlertsInput,\n+     connectOrCreate: PoolCreateOrConnectWithoutTechnicalAlertsInput,\n+     connect: PoolWhereUniqueInput\n+   }\n  }\n}\n\nArgument `pool` is missing.\n[FCS13MS] viewport:390x844:flow:end:create-repair:pass=false\n[FCS13MS] viewport:end:390x844\n{\n  \"ok\": false,\n  \"runId\": \"FCS13MS_1784701529884_8zjd5o\",\n  \"baseUrl\": \"http://127.0.0.1:3002\",\n  \"startedAt\": \"2026-07-22T06:25:29.884Z\",\n  \"gate\": {\n    \"discoveryMaxInteractions\": 3,\n    \"discoveryMaxMs\": 10000\n  },\n  \"rows\": [\n    {\n      \"flow\": \"Criar reparação\",\n      \"profile\": \"ADMIN\",\n      \"viewport\": \"390x844\",\n      \"landingInitial\": \"/admin-master-control\",\n      \"actionFound\": true,\n      \"discoveryMs\": 1621,\n      \"discoveryInteractions\": 2,\n      \"flowCompleted\": false,\n      \"consoleErrors\": [],\n      \"apiErrors\": [],\n      \"pass\": false,\n      \"notes\": {\n        \"usedFallbackDirectRoute\": true,\n        \"executionError\": \"\\nInvalid `prisma.technicalAlert.create()` invocation:\\n\\n{\\n  data: {\\n    poolId: null,\\n    type: \\\"MANUAL_ALERT\\\",\\n    message: \\\"QA MS ALERT FCS13MS_1784701529884_8zjd5o-390x844\\\",\\n    priority: \\\"WARNING\\\",\\n    status: \\\"OPEN\\\",\\n+   pool: {\\n+     create: PoolCreateWithoutTechnicalAlertsInput | PoolUncheckedCreateWithoutTechnicalAlertsInput,\\n+     connectOrCreate: PoolCreateOrConnectWithoutTechnicalAlertsInput,\\n+     connect: PoolWhereUniqueInput\\n+   }\\n  }\\n}\\n\\nArgument `pool` is missing.\",\n        \"details\": null\n      }\n    }\n  ],\n  \"totals\": {\n    \"total\": 1,\n    \"pass\": 0,\n    \"fail\": 1,\n    \"withConsoleErrors\": 0,\n    \"withApiErrors\": 0,\n    \"overTimeGate\": 0,\n    \"overInteractionGate\": 0\n  },\n  \"finishedAt\": \"2026-07-22T06:25:32.982Z\",\n  \"selection\": {\n    \"flowKey\": \"create-repair\",\n    \"viewport\": \"390x844\"\n  },\n  \"table\": [\n    {\n      \"Fluxo\": \"Criar reparação\",\n      \"Perfil\": \"ADMIN\",\n      \"Viewport\": \"390x844\",\n      \"Landing inicial\": \"/admin-master-control\",\n      \"Ação principal encontrada\": \"SIM\",\n      \"Tempo até abrir a ação\": \"1621 ms\",\n      \"Interações até abrir a ação\": 2,\n      \"Fluxo concluído\": \"NAO\",\n      \"Erros de consola\": 0,\n      \"API 4xx/5xx\": 0,\n      \"PASS/FAIL\": \"FAIL\"\n    }\n  ]\n}\n",
+      "rawStderr": ""
+    },
+    {
+      "flow": "Emitir fatura",
+      "flowKey": "issue-invoice",
+      "viewport": "390x844",
+      "exitCode": 0,
+      "signal": null,
+      "pass": false,
+      "consoleErrors": [],
+      "apiErrors": [],
+      "row": {
+        "flow": "Emitir fatura",
+        "profile": "ADMIN",
+        "viewport": "390x844",
+        "landingInitial": "/admin-master-control",
+        "actionFound": false,
+        "discoveryMs": 10000,
+        "discoveryInteractions": 1,
+        "flowCompleted": false,
+        "consoleErrors": [],
+        "apiErrors": [],
+        "pass": false,
+        "notes": {
+          "usedFallbackDirectRoute": true,
+          "executionError": "page.waitForSelector: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button[onclick=\\'generateInvoiceForClient()\\']') to be visible\u001b[22m\n",
+          "details": null
+        }
+      },
+      "rawStdout": "[FCS13MS] main:create-admin\n[FCS13MS] main:create-technician\n[FCS13MS] main:run-viewport:390x844\n[FCS13MS] viewport:start:390x844\n[FCS13MS] viewport:390x844:flow:start:issue-invoice\n[FCS13MS] viewport:390x844:flow:end:issue-invoice:pass=false\n[FCS13MS] viewport:end:390x844\n{\n  \"ok\": false,\n  \"runId\": \"FCS13MS_1784701533952_z8wqep\",\n  \"baseUrl\": \"http://127.0.0.1:3002\",\n  \"startedAt\": \"2026-07-22T06:25:33.952Z\",\n  \"gate\": {\n    \"discoveryMaxInteractions\": 3,\n    \"discoveryMaxMs\": 10000\n  },\n  \"rows\": [\n    {\n      \"flow\": \"Emitir fatura\",\n      \"profile\": \"ADMIN\",\n      \"viewport\": \"390x844\",\n      \"landingInitial\": \"/admin-master-control\",\n      \"actionFound\": false,\n      \"discoveryMs\": 10000,\n      \"discoveryInteractions\": 1,\n      \"flowCompleted\": false,\n      \"consoleErrors\": [],\n      \"apiErrors\": [],\n      \"pass\": false,\n      \"notes\": {\n        \"usedFallbackDirectRoute\": true,\n        \"executionError\": \"page.waitForSelector: Timeout 15000ms exceeded.\\nCall log:\\n\\u001b[2m  - waiting for locator('button[onclick=\\\\'generateInvoiceForClient()\\\\']') to be visible\\u001b[22m\\n\",\n        \"details\": null\n      }\n    }\n  ],\n  \"totals\": {\n    \"total\": 1,\n    \"pass\": 0,\n    \"fail\": 1,\n    \"withConsoleErrors\": 0,\n    \"withApiErrors\": 0,\n    \"overTimeGate\": 1,\n    \"overInteractionGate\": 0\n  },\n  \"finishedAt\": \"2026-07-22T06:25:51.038Z\",\n  \"selection\": {\n    \"flowKey\": \"issue-invoice\",\n    \"viewport\": \"390x844\"\n  },\n  \"table\": [\n    {\n      \"Fluxo\": \"Emitir fatura\",\n      \"Perfil\": \"ADMIN\",\n      \"Viewport\": \"390x844\",\n      \"Landing inicial\": \"/admin-master-control\",\n      \"Ação principal encontrada\": \"NAO\",\n      \"Tempo até abrir a ação\": \"10000 ms\",\n      \"Interações até abrir a ação\": 1,\n      \"Fluxo concluído\": \"NAO\",\n      \"Erros de consola\": 0,\n      \"API 4xx/5xx\": 0,\n      \"PASS/FAIL\": \"FAIL\"\n    }\n  ]\n}\n",
+      "rawStderr": ""
+    },
+    {
+      "flow": "Criar produto",
+      "flowKey": "create-product",
+      "viewport": "390x844",
+      "exitCode": 0,
+      "signal": null,
+      "pass": true,
+      "consoleErrors": [],
+      "apiErrors": [],
+      "row": {
+        "flow": "Criar produto",
+        "profile": "ADMIN",
+        "viewport": "390x844",
+        "landingInitial": "/admin-master-control",
+        "actionFound": true,
+        "discoveryMs": 748,
+        "discoveryInteractions": 1,
+        "flowCompleted": true,
+        "consoleErrors": [],
+        "apiErrors": [],
+        "pass": true,
+        "notes": {
+          "usedFallbackDirectRoute": true,
+          "executionError": null
+        }
+      },
+      "rawStdout": "[FCS13MS] main:create-admin\n[FCS13MS] main:create-technician\n[FCS13MS] main:run-viewport:390x844\n[FCS13MS] viewport:start:390x844\n[FCS13MS] viewport:390x844:flow:start:create-product\n[FCS13MS] viewport:390x844:flow:end:create-product:pass=true\n[FCS13MS] viewport:end:390x844\n{\n  \"ok\": true,\n  \"runId\": \"FCS13MS_1784701551983_jy8600\",\n  \"baseUrl\": \"http://127.0.0.1:3002\",\n  \"startedAt\": \"2026-07-22T06:25:51.984Z\",\n  \"gate\": {\n    \"discoveryMaxInteractions\": 3,\n    \"discoveryMaxMs\": 10000\n  },\n  \"rows\": [\n    {\n      \"flow\": \"Criar produto\",\n      \"profile\": \"ADMIN\",\n      \"viewport\": \"390x844\",\n      \"landingInitial\": \"/admin-master-control\",\n      \"actionFound\": true,\n      \"discoveryMs\": 748,\n      \"discoveryInteractions\": 1,\n      \"flowCompleted\": true,\n      \"consoleErrors\": [],\n      \"apiErrors\": [],\n      \"pass\": true,\n      \"notes\": {\n        \"usedFallbackDirectRoute\": true,\n        \"executionError\": null\n      }\n    }\n  ],\n  \"totals\": {\n    \"total\": 1,\n    \"pass\": 1,\n    \"fail\": 0,\n    \"withConsoleErrors\": 0,\n    \"withApiErrors\": 0,\n    \"overTimeGate\": 0,\n    \"overInteractionGate\": 0\n  },\n  \"finishedAt\": \"2026-07-22T06:25:54.865Z\",\n  \"selection\": {\n    \"flowKey\": \"create-product\",\n    \"viewport\": \"390x844\"\n  },\n  \"table\": [\n    {\n      \"Fluxo\": \"Criar produto\",\n      \"Perfil\": \"ADMIN\",\n      \"Viewport\": \"390x844\",\n      \"Landing inicial\": \"/admin-master-control\",\n      \"Ação principal encontrada\": \"SIM\",\n      \"Tempo até abrir a ação\": \"748 ms\",\n      \"Interações até abrir a ação\": 1,\n      \"Fluxo concluído\": \"SIM\",\n      \"Erros de consola\": 0,\n      \"API 4xx/5xx\": 0,\n      \"PASS/FAIL\": \"PASS\"\n    }\n  ]\n}\n",
+      "rawStderr": ""
+    }
+  ],
+  "pass": false
+}

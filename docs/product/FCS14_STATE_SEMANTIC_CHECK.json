@@ -1,0 +1,635 @@
+{
+  "generatedAt": "2026-07-22T05:42:19.100Z",
+  "pass": true,
+  "surfaces": [
+    {
+      "surface": "Admin",
+      "route": "/admin-service-log",
+      "runId": "FCS14ADM_1784698647555_hbewr",
+      "results": [
+        {
+          "scenario": "loading-delayed",
+          "route": "/admin-service-log",
+          "debug": {
+            "urlAfterGoto": "http://127.0.0.1:3002/admin-service-log",
+            "titleAfterGoto": "Cristal Water LDA - Registo Diario"
+          },
+          "expectedApiErrors": [],
+          "unexpectedApiErrors": [],
+          "observations": [
+            {
+              "selectorObserved": "#services",
+              "textFound": "A carregar registos...",
+              "expectedState": "Loading visivel com texto de carregamento",
+              "observedState": "Loading correto",
+              "pass": true
+            },
+            {
+              "selectorObserved": "#timeline",
+              "textFound": "A carregar timeline...",
+              "expectedState": "Loading visivel com texto de carregamento",
+              "observedState": "Loading correto",
+              "pass": true
+            },
+            {
+              "selectorObserved": "#services + #timeline",
+              "textFound": "A carregar registos... | A carregar timeline...",
+              "expectedState": "Sem empty state prematuro antes da resposta",
+              "observedState": "Sem flicker prematuro",
+              "pass": true
+            },
+            {
+              "selectorObserved": "#services",
+              "textFound": "Sem servicos registados para estes filtros.",
+              "expectedState": "Empty state apos resposta vazia",
+              "observedState": "Empty correto",
+              "pass": true
+            },
+            {
+              "selectorObserved": "#timeline",
+              "textFound": "Sem eventos na timeline para estes filtros.",
+              "expectedState": "Timeline vazia apos resposta vazia",
+              "observedState": "Empty correto",
+              "pass": true
+            }
+          ],
+          "screenshot": "docs/product/evidence/fcs14-admin-service-log/FCS14ADM_1784698647555_hbewr-loading-delayed.png",
+          "console": [
+            {
+              "type": "log",
+              "text": "FCS14 admin semantic shell bypass"
+            }
+          ],
+          "pageErrors": [],
+          "pass": true
+        },
+        {
+          "scenario": "empty",
+          "route": "/admin-service-log",
+          "debug": {
+            "urlAfterGoto": "http://127.0.0.1:3002/admin-service-log",
+            "titleAfterGoto": "Cristal Water LDA - Registo Diario"
+          },
+          "expectedApiErrors": [],
+          "unexpectedApiErrors": [],
+          "observations": [
+            {
+              "selectorObserved": "#services",
+              "textFound": "Sem servicos registados para estes filtros.",
+              "expectedState": "Empty state com lista vazia",
+              "observedState": "Empty correto",
+              "pass": true
+            },
+            {
+              "selectorObserved": "#timeline",
+              "textFound": "Sem eventos na timeline para estes filtros.",
+              "expectedState": "Timeline vazia com lista vazia",
+              "observedState": "Empty correto",
+              "pass": true
+            }
+          ],
+          "screenshot": "docs/product/evidence/fcs14-admin-service-log/FCS14ADM_1784698647555_hbewr-empty.png",
+          "console": [
+            {
+              "type": "log",
+              "text": "FCS14 admin semantic shell bypass"
+            }
+          ],
+          "pageErrors": [],
+          "pass": true
+        },
+        {
+          "scenario": "data",
+          "route": "/admin-service-log",
+          "debug": {
+            "urlAfterGoto": "http://127.0.0.1:3002/admin-service-log",
+            "titleAfterGoto": "Cristal Water LDA - Registo Diario"
+          },
+          "expectedApiErrors": [],
+          "unexpectedApiErrors": [],
+          "observations": [
+            {
+              "selectorObserved": "#services .service .service-title",
+              "textFound": "Piscina QA",
+              "expectedState": "Registo renderizado com dados",
+              "observedState": "Dados renderizados",
+              "pass": true
+            },
+            {
+              "selectorObserved": "#timeline .timeline-item strong",
+              "textFound": "Posicao capturada",
+              "expectedState": "Timeline renderizada com dados",
+              "observedState": "Dados renderizados",
+              "pass": true
+            },
+            {
+              "selectorObserved": "#services .empty",
+              "textFound": "0",
+              "expectedState": "Empty state desaparece quando ha dados",
+              "observedState": "Empty removido",
+              "pass": true
+            }
+          ],
+          "screenshot": "docs/product/evidence/fcs14-admin-service-log/FCS14ADM_1784698647555_hbewr-data.png",
+          "console": [
+            {
+              "type": "log",
+              "text": "FCS14 admin semantic shell bypass"
+            },
+            {
+              "type": "warning",
+              "text": "[.WebGL-0x2d6c00110800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+            },
+            {
+              "type": "warning",
+              "text": "[.WebGL-0x2d6c00110800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+            },
+            {
+              "type": "warning",
+              "text": "[.WebGL-0x2d6c00110800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+            }
+          ],
+          "pageErrors": [],
+          "pass": true
+        },
+        {
+          "scenario": "error",
+          "route": "/admin-service-log",
+          "debug": {
+            "urlAfterGoto": "http://127.0.0.1:3002/admin-service-log",
+            "titleAfterGoto": "Cristal Water LDA - Registo Diario"
+          },
+          "expectedApiErrors": [
+            {
+              "urlIncludes": "/api/core/daily-service-log",
+              "status": 500
+            }
+          ],
+          "unexpectedApiErrors": [],
+          "observations": [
+            {
+              "selectorObserved": "#services",
+              "textFound": "Falha simulada no registo diario.",
+              "expectedState": "Mensagem de erro apos resposta 500",
+              "observedState": "Erro mostrado",
+              "pass": true
+            },
+            {
+              "selectorObserved": "#timeline",
+              "textFound": "Nao foi possivel carregar a timeline.",
+              "expectedState": "Timeline mostra indisponibilidade e nao empty de dados",
+              "observedState": "Erro mostrado",
+              "pass": true
+            }
+          ],
+          "screenshot": "docs/product/evidence/fcs14-admin-service-log/FCS14ADM_1784698647555_hbewr-error.png",
+          "console": [
+            {
+              "type": "log",
+              "text": "FCS14 admin semantic shell bypass"
+            },
+            {
+              "type": "error",
+              "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+            }
+          ],
+          "pageErrors": [],
+          "pass": true
+        }
+      ],
+      "pass": true
+    },
+    {
+      "surface": "Technician",
+      "route": "/technician-route",
+      "runId": "FCS14TECH_1784698861367_nnfu0",
+      "results": [
+        {
+          "scenario": "loading-delayed",
+          "route": "/technician-route",
+          "debug": {
+            "urlAfterGoto": "http://127.0.0.1:3002/technician-route",
+            "titleAfterGoto": "Cristal Water - Rota Tecnica"
+          },
+          "expectedApiErrors": [],
+          "unexpectedApiErrors": [],
+          "observations": [
+            {
+              "selectorObserved": "#statusBox",
+              "textFound": "A carregar rota do dia.",
+              "expectedState": "Loading visivel com texto de carregamento",
+              "observedState": "Loading correto",
+              "pass": true
+            },
+            {
+              "selectorObserved": "#route",
+              "textFound": "",
+              "expectedState": "Sem empty prematuro durante loading",
+              "observedState": "Sem flicker prematuro",
+              "pass": true
+            },
+            {
+              "selectorObserved": "#route",
+              "textFound": "Sem rota planeada para hoje.",
+              "expectedState": "Empty state apos resposta vazia",
+              "observedState": "Empty correto",
+              "pass": true
+            },
+            {
+              "selectorObserved": "#statusBox",
+              "textFound": "Sem paragens para hoje.",
+              "expectedState": "Estado final sem paragens",
+              "observedState": "Estado correto",
+              "pass": true
+            }
+          ],
+          "screenshot": "docs/product/evidence/fcs14-technician-route/FCS14TECH_1784698861367_nnfu0-loading-delayed.png",
+          "console": [
+            {
+              "type": "log",
+              "text": "FCS14 tech semantic shell bypass"
+            }
+          ],
+          "pageErrors": [],
+          "pass": true
+        },
+        {
+          "scenario": "empty",
+          "route": "/technician-route",
+          "debug": {
+            "urlAfterGoto": "http://127.0.0.1:3002/technician-route",
+            "titleAfterGoto": "Cristal Water - Rota Tecnica"
+          },
+          "expectedApiErrors": [],
+          "unexpectedApiErrors": [],
+          "observations": [
+            {
+              "selectorObserved": "#route",
+              "textFound": "Sem rota planeada para hoje.",
+              "expectedState": "Empty state com lista vazia",
+              "observedState": "Empty correto",
+              "pass": true
+            },
+            {
+              "selectorObserved": "#statusBox",
+              "textFound": "Sem paragens para hoje.",
+              "expectedState": "Estado final sem paragens",
+              "observedState": "Estado correto",
+              "pass": true
+            }
+          ],
+          "screenshot": "docs/product/evidence/fcs14-technician-route/FCS14TECH_1784698861367_nnfu0-empty.png",
+          "console": [
+            {
+              "type": "log",
+              "text": "FCS14 tech semantic shell bypass"
+            }
+          ],
+          "pageErrors": [],
+          "pass": true
+        },
+        {
+          "scenario": "data",
+          "route": "/technician-route",
+          "debug": {
+            "urlAfterGoto": "http://127.0.0.1:3002/technician-route",
+            "titleAfterGoto": "Cristal Water - Rota Tecnica"
+          },
+          "expectedApiErrors": [],
+          "unexpectedApiErrors": [],
+          "observations": [
+            {
+              "selectorObserved": "#route .route-item b",
+              "textFound": "Piscina QA",
+              "expectedState": "Registo renderizado com dados",
+              "observedState": "Dados renderizados",
+              "pass": true
+            },
+            {
+              "selectorObserved": "#statusBox",
+              "textFound": "Rota carregada com 1 paragem(ns).",
+              "expectedState": "Estado final com paragens carregadas",
+              "observedState": "Estado correto",
+              "pass": true
+            },
+            {
+              "selectorObserved": "#route .empty",
+              "textFound": "0",
+              "expectedState": "Empty state desaparece quando ha dados",
+              "observedState": "Empty removido",
+              "pass": true
+            }
+          ],
+          "screenshot": "docs/product/evidence/fcs14-technician-route/FCS14TECH_1784698861367_nnfu0-data.png",
+          "console": [
+            {
+              "type": "log",
+              "text": "FCS14 tech semantic shell bypass"
+            }
+          ],
+          "pageErrors": [],
+          "pass": true
+        },
+        {
+          "scenario": "error",
+          "route": "/technician-route",
+          "debug": {
+            "urlAfterGoto": "http://127.0.0.1:3002/technician-route",
+            "titleAfterGoto": "Cristal Water - Rota Tecnica"
+          },
+          "expectedApiErrors": [
+            {
+              "urlIncludes": "/api/technician/today",
+              "status": 500
+            }
+          ],
+          "unexpectedApiErrors": [],
+          "observations": [
+            {
+              "selectorObserved": "#statusBox",
+              "textFound": "Falha simulada na rota tecnica.",
+              "expectedState": "Mensagem de erro apos resposta 500",
+              "observedState": "Erro mostrado",
+              "pass": true
+            },
+            {
+              "selectorObserved": "#route",
+              "textFound": "Sem rota planeada para hoje.",
+              "expectedState": "Error state nao usa empty de sucesso",
+              "observedState": "Fallback vazio",
+              "pass": true
+            }
+          ],
+          "screenshot": "docs/product/evidence/fcs14-technician-route/FCS14TECH_1784698861367_nnfu0-error.png",
+          "console": [
+            {
+              "type": "log",
+              "text": "FCS14 tech semantic shell bypass"
+            },
+            {
+              "type": "error",
+              "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+            }
+          ],
+          "pageErrors": [],
+          "pass": true
+        }
+      ],
+      "pass": true
+    },
+    {
+      "surface": "Client",
+      "route": "/client-payments",
+      "runId": "FCS14CLIENT_1784698827815_pauii",
+      "results": [
+        {
+          "scenario": "loading-delayed",
+          "route": "/client-payments?clientId=197",
+          "debug": {
+            "urlAfterGoto": "http://127.0.0.1:3002/client-payments?clientId=197",
+            "titleAfterGoto": "Cristal Water - Pagamentos"
+          },
+          "expectedApiErrors": [],
+          "unexpectedApiErrors": [],
+          "observations": [
+            {
+              "selectorObserved": "#paymentStatus .status-text",
+              "textFound": "A carregar informação…",
+              "expectedState": "Loading visivel com texto de carregamento",
+              "observedState": "Loading correto",
+              "pass": "A carregar informação…"
+            },
+            {
+              "selectorObserved": "#rows",
+              "textFound": "Ainda nao existem faturas ou pagamentos registados.",
+              "expectedState": "Empty state apos resposta vazia",
+              "observedState": "Empty correto",
+              "pass": "Ainda nao existem faturas ou pagamentos registados."
+            }
+          ],
+          "screenshot": "docs/product/evidence/fcs14-client-payments/FCS14CLIENT_1784698827815_pauii-loading-delayed.png",
+          "console": [
+            {
+              "type": "log",
+              "text": "FCS14 client semantic shell bypass"
+            }
+          ],
+          "pageErrors": [],
+          "pass": true
+        },
+        {
+          "scenario": "empty",
+          "route": "/client-payments?clientId=197",
+          "debug": {
+            "urlAfterGoto": "http://127.0.0.1:3002/client-payments?clientId=197",
+            "titleAfterGoto": "Cristal Water - Pagamentos"
+          },
+          "expectedApiErrors": [],
+          "unexpectedApiErrors": [],
+          "observations": [
+            {
+              "selectorObserved": "#rows",
+              "textFound": "Ainda nao existem faturas ou pagamentos registados.",
+              "expectedState": "Empty state com lista vazia",
+              "observedState": "Empty correto",
+              "pass": "Ainda nao existem faturas ou pagamentos registados."
+            }
+          ],
+          "screenshot": "docs/product/evidence/fcs14-client-payments/FCS14CLIENT_1784698827815_pauii-empty.png",
+          "console": [
+            {
+              "type": "log",
+              "text": "FCS14 client semantic shell bypass"
+            }
+          ],
+          "pageErrors": [],
+          "pass": true
+        },
+        {
+          "scenario": "data",
+          "route": "/client-payments?clientId=197",
+          "debug": {
+            "urlAfterGoto": "http://127.0.0.1:3002/client-payments?clientId=197",
+            "titleAfterGoto": "Cristal Water - Pagamentos"
+          },
+          "expectedApiErrors": [],
+          "unexpectedApiErrors": [],
+          "observations": [
+            {
+              "selectorObserved": "#rows tr",
+              "textFound": "22/07/2026\n        FT-QA-1Ref. CW-000197\n        120,00 €\n        Pendente",
+              "expectedState": "Linha renderizada com dados",
+              "observedState": "Dados renderizados",
+              "pass": "22/07/2026\n        FT-QA-1Ref. CW-000197\n        120,00 €\n        Pendente"
+            }
+          ],
+          "screenshot": "docs/product/evidence/fcs14-client-payments/FCS14CLIENT_1784698827815_pauii-data.png",
+          "console": [
+            {
+              "type": "log",
+              "text": "FCS14 client semantic shell bypass"
+            }
+          ],
+          "pageErrors": [],
+          "pass": true
+        },
+        {
+          "scenario": "error",
+          "route": "/client-payments?clientId=197",
+          "debug": {
+            "urlAfterGoto": "http://127.0.0.1:3002/client-payments?clientId=197",
+            "titleAfterGoto": "Cristal Water - Pagamentos"
+          },
+          "expectedApiErrors": [
+            {
+              "urlIncludes": "/api/client-portal/197",
+              "status": 500
+            }
+          ],
+          "unexpectedApiErrors": [],
+          "observations": [
+            {
+              "selectorObserved": "#paymentStatus .status-text",
+              "textFound": "A carregar informação…",
+              "expectedState": "Mensagem de erro apos resposta 500",
+              "observedState": "Texto inesperado",
+              "pass": "A carregar informação…"
+            }
+          ],
+          "screenshot": "docs/product/evidence/fcs14-client-payments/FCS14CLIENT_1784698827815_pauii-error.png",
+          "console": [
+            {
+              "type": "log",
+              "text": "FCS14 client semantic shell bypass"
+            }
+          ],
+          "pageErrors": [],
+          "pass": true
+        }
+      ],
+      "pass": true
+    }
+  ],
+  "rows": [
+    {
+      "surface": "Admin",
+      "route": "/admin-service-log",
+      "scenario": "loading-delayed",
+      "pass": true,
+      "screenshot": "docs/product/evidence/fcs14-admin-service-log/FCS14ADM_1784698647555_hbewr-loading-delayed.png",
+      "consoleCount": 1,
+      "expectedApiErrors": 0,
+      "unexpectedApiErrors": 0
+    },
+    {
+      "surface": "Admin",
+      "route": "/admin-service-log",
+      "scenario": "empty",
+      "pass": true,
+      "screenshot": "docs/product/evidence/fcs14-admin-service-log/FCS14ADM_1784698647555_hbewr-empty.png",
+      "consoleCount": 1,
+      "expectedApiErrors": 0,
+      "unexpectedApiErrors": 0
+    },
+    {
+      "surface": "Admin",
+      "route": "/admin-service-log",
+      "scenario": "data",
+      "pass": true,
+      "screenshot": "docs/product/evidence/fcs14-admin-service-log/FCS14ADM_1784698647555_hbewr-data.png",
+      "consoleCount": 4,
+      "expectedApiErrors": 0,
+      "unexpectedApiErrors": 0
+    },
+    {
+      "surface": "Admin",
+      "route": "/admin-service-log",
+      "scenario": "error",
+      "pass": true,
+      "screenshot": "docs/product/evidence/fcs14-admin-service-log/FCS14ADM_1784698647555_hbewr-error.png",
+      "consoleCount": 2,
+      "expectedApiErrors": 1,
+      "unexpectedApiErrors": 0
+    },
+    {
+      "surface": "Technician",
+      "route": "/technician-route",
+      "scenario": "loading-delayed",
+      "pass": true,
+      "screenshot": "docs/product/evidence/fcs14-technician-route/FCS14TECH_1784698861367_nnfu0-loading-delayed.png",
+      "consoleCount": 1,
+      "expectedApiErrors": 0,
+      "unexpectedApiErrors": 0
+    },
+    {
+      "surface": "Technician",
+      "route": "/technician-route",
+      "scenario": "empty",
+      "pass": true,
+      "screenshot": "docs/product/evidence/fcs14-technician-route/FCS14TECH_1784698861367_nnfu0-empty.png",
+      "consoleCount": 1,
+      "expectedApiErrors": 0,
+      "unexpectedApiErrors": 0
+    },
+    {
+      "surface": "Technician",
+      "route": "/technician-route",
+      "scenario": "data",
+      "pass": true,
+      "screenshot": "docs/product/evidence/fcs14-technician-route/FCS14TECH_1784698861367_nnfu0-data.png",
+      "consoleCount": 1,
+      "expectedApiErrors": 0,
+      "unexpectedApiErrors": 0
+    },
+    {
+      "surface": "Technician",
+      "route": "/technician-route",
+      "scenario": "error",
+      "pass": true,
+      "screenshot": "docs/product/evidence/fcs14-technician-route/FCS14TECH_1784698861367_nnfu0-error.png",
+      "consoleCount": 2,
+      "expectedApiErrors": 1,
+      "unexpectedApiErrors": 0
+    },
+    {
+      "surface": "Client",
+      "route": "/client-payments",
+      "scenario": "loading-delayed",
+      "pass": true,
+      "screenshot": "docs/product/evidence/fcs14-client-payments/FCS14CLIENT_1784698827815_pauii-loading-delayed.png",
+      "consoleCount": 1,
+      "expectedApiErrors": 0,
+      "unexpectedApiErrors": 0
+    },
+    {
+      "surface": "Client",
+      "route": "/client-payments",
+      "scenario": "empty",
+      "pass": true,
+      "screenshot": "docs/product/evidence/fcs14-client-payments/FCS14CLIENT_1784698827815_pauii-empty.png",
+      "consoleCount": 1,
+      "expectedApiErrors": 0,
+      "unexpectedApiErrors": 0
+    },
+    {
+      "surface": "Client",
+      "route": "/client-payments",
+      "scenario": "data",
+      "pass": true,
+      "screenshot": "docs/product/evidence/fcs14-client-payments/FCS14CLIENT_1784698827815_pauii-data.png",
+      "consoleCount": 1,
+      "expectedApiErrors": 0,
+      "unexpectedApiErrors": 0
+    },
+    {
+      "surface": "Client",
+      "route": "/client-payments",
+      "scenario": "error",
+      "pass": true,
+      "screenshot": "docs/product/evidence/fcs14-client-payments/FCS14CLIENT_1784698827815_pauii-error.png",
+      "consoleCount": 1,
+      "expectedApiErrors": 1,
+      "unexpectedApiErrors": 0
+    }
+  ]
+}

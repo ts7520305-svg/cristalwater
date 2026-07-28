@@ -41,6 +41,31 @@ It exists to make execution clearer, decisions better, and learning permanent.
 5. Plans must adapt to real field conditions.
 6. Operational quality is measured by consistency, not activity volume.
 
+## Rule 23 - Never Block The Technician In Field
+
+1. The system must never prevent a technician from finishing an urgent visit due to bureaucracy.
+2. Missing evidence, pending approvals, expired vehicle documents, offline state, or pending notifications must create:
+- alert
+- pending responsibility
+- traceable ownership
+- immutable history
+3. These conditions must not hard-block visit completion by default.
+4. The only allowed hard block is a severe legal or safety condition that makes operation objectively unsafe or non-compliant.
+
+Operational implementation intent:
+- Raise responsibility, not paralysis.
+- Preserve service continuity first, then enforce closure and accountability loops.
+
+## Next Action Continuity Rule
+
+1. After every completed action, the interface must answer: "What do I do next?"
+2. The UI must always present at least one clear next step:
+- next customer
+- next problem
+- next alert
+- next operational action
+3. The system must avoid dead-ends where the user has to search menus to continue work.
+
 ## Knowledge Philosophy
 
 1. Knowledge is a strategic asset.

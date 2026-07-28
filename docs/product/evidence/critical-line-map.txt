@@ -1,0 +1,38 @@
+### DS INJECTION LINES (CRITICAL PAGES)
+-- frontend/admin-dashboard.html
+28:<style>
+888:  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+889:  <link rel="stylesheet" href="/ui/design-system.css">
+1212:  <script defer src="/ui/design-system.js"></script>
+-- frontend/admin-today.html
+12:  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+13:  <link rel="stylesheet" href="/ui/design-system.css">
+109:  <script defer src="/ui/design-system.js"></script>
+-- frontend/admin-alerts.html
+13:  <style>
+68:  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+69:  <link rel="stylesheet" href="/ui/design-system.css">
+131:  <script defer src="/ui/design-system.js"></script>
+-- frontend/admin-clients.html
+9:  <style>
+456:  <link rel="stylesheet" href="/ui/design-system.css">
+574:  <script defer src="/ui/design-system.js"></script>
+-- frontend/client-portal.html
+12:  <style>
+337:  <link rel="stylesheet" href="/ui/design-system.css">
+542:  <script defer src="/ui/design-system.js"></script>
+-- frontend/technician-field-mode.html
+12:  <style>
+538:  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+539:  <link rel="stylesheet" href="/ui/design-system.css">
+872:  <script defer src="/ui/design-system.js"></script>
+### BACKEND NEW GUARD LINES
+15:const { roleMatches } = require('../utils/roles');
+22:const technicianAuth = auth('TECHNICIAN');
+28:    return technicianAuth(req, res, next);
+1829:router.post('/visits/:id/problem', async (req, res) => {
+1844:    if (!roleMatches(actorRole, 'ADMIN')) {
+1847:        return res.status(403).json({ ok: false, error: 'Sem permissao para alterar visita de outro tecnico' });
+1924:router.post('/visits/:id/complete', async (req, res) => {
+1933:    if (!roleMatches(actorRole, 'ADMIN')) {
+1936:        return res.status(403).json({ ok: false, error: 'Sem permissao para alterar visita de outro tecnico' });

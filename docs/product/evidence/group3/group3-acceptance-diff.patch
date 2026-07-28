@@ -1,0 +1,1361 @@
+diff --git a/frontend/admin-keys.html b/frontend/admin-keys.html
+index 7f54e7e..475eb70 100644
+--- a/frontend/admin-keys.html
++++ b/frontend/admin-keys.html
+@@ -7,8 +7,36 @@
+   <link rel="stylesheet" href="/ui/foundation.css">
+   <link rel="stylesheet" href="/css/enterprise-ui.css">
+   <style>
+-    body{font-family:Inter,Segoe UI,Arial,sans-serif;background:#071425;color:#eaf7ff;margin:0}.page{max-width:1180px;margin:auto;padding:26px}.card{background:#0b1d33;border:1px solid rgba(125,211,252,.18);border-radius:18px;padding:18px;margin:14px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}input,select,textarea{width:100%;box-sizing:border-box;border:1px solid rgba(125,211,252,.28);background:#06111f;color:#eaf7ff;border-radius:12px;padding:11px}button,.btn{border:0;border-radius:12px;padding:11px 14px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}.primary{background:#22d3ee;color:#062033}.danger{background:#ef4444;color:white}.muted{background:#1f3755;color:#d9f2ff}.row{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(255,255,255,.08);padding:10px 0}.row-main{min-width:0}.row-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}.pill{font-size:12px;border:1px solid rgba(125,211,252,.25);border-radius:999px;padding:4px 8px;color:#93e5ff;display:inline-flex;margin:2px 3px 2px 0}.hint{color:#91c9dd;font-size:13px;line-height:1.5}.field label{display:block;margin:0 0 6px;color:#93e5ff;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}.key-alert{background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.35);border-radius:14px;padding:12px;margin-top:10px}.key-alert strong{display:block;color:#fde68a}.empty{color:#91c9dd;padding:12px;border:1px dashed rgba(125,211,252,.25);border-radius:12px;margin-top:10px}.table-wrap{overflow:auto;border:1px solid rgba(125,211,252,.18);border-radius:14px;margin-top:12px}table{width:100%;border-collapse:collapse;min-width:780px}th,td{text-align:left;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.07);vertical-align:top}th{color:#93e5ff;background:#092039;font-size:12px;text-transform:uppercase;letter-spacing:.05em}td{color:#eaf7ff;font-size:13px}.report-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}.report-actions{display:flex;gap:8px;flex-wrap:wrap}@media(max-width:780px){.row{align-items:flex-start;flex-direction:column}.row-actions{justify-content:flex-start}}
++    body{font-family:Inter,Segoe UI,Arial,sans-serif;background:radial-gradient(circle at 10% 0%,#f2f8ff 0%,#eaf2fb 48%,#e3edf8 100%);color:#1c2d3d;margin:0}
++    .page{max-width:1180px;margin:auto;padding:18px}
++    .card{background:#fff;border:1px solid #cddaea;border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 10px 24px rgba(26,53,87,.08)}
++    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
++    input,select,textarea{width:100%;box-sizing:border-box;border:1px solid #cddaea;background:#f7fafd;color:#1c2d3d;border-radius:12px;padding:11px;min-height:44px}
++    textarea{min-height:92px}
++    input:focus,select:focus,textarea:focus{outline:2px solid #2492ec;outline-offset:1px;border-color:#2492ec;background:#fff}
++    button,.btn{border:1px solid #cddaea;border-radius:12px;padding:11px 14px;min-height:44px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;background:#fff;color:#1c2d3d}
++    .primary{background:linear-gradient(135deg,#1e79df,#32a6f2);border-color:#1e79df;color:#fff}
++    .danger{background:#dc3e3e;border-color:#dc3e3e;color:#fff}
++    .muted{background:#eff5fc;color:#274766}
++    .row{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #dfe8f2;padding:10px 0}
++    .row-main{min-width:0}
++    .row-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
++    .pill{font-size:12px;border:1px solid #c6d8eb;border-radius:999px;padding:4px 8px;color:#466785;background:#f6faff;display:inline-flex;margin:2px 3px 2px 0}
++    .hint{color:#56708b;font-size:13px;line-height:1.5}
++    .field label{display:block;margin:0 0 6px;color:#4f6883;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
++    .key-alert{background:#fff7e9;border:1px solid #ecd3a7;border-radius:14px;padding:12px;margin-top:10px}
++    .key-alert strong{display:block;color:#855400}
++    .empty{color:#56708b;padding:12px;border:1px dashed #c6d8eb;border-radius:12px;margin-top:10px;background:#f7fbff}
++    .table-wrap{overflow:auto;border:1px solid #d9e5f1;border-radius:14px;margin-top:12px}
++    table{width:100%;border-collapse:collapse;min-width:780px}
++    th,td{text-align:left;padding:10px 12px;border-bottom:1px solid #e7eef6;vertical-align:top}
++    th{color:#466785;background:#f3f8fe;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
++    td{color:#1c2d3d;font-size:13px}
++    .report-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
++    .report-actions{display:flex;gap:8px;flex-wrap:wrap}
++    @media(max-width:780px){.page{padding:12px}.row{align-items:flex-start;flex-direction:column}.row-actions{justify-content:flex-start}}
+   </style>
++  <link rel="stylesheet" href="/ui/design-system.css">
+ </head>
+ <body data-required-role="ADMIN">
+   <script src="/cw-auth.js"></script>
+@@ -95,5 +123,6 @@
+   <script src="/ui/core/navigation-context.js"></script>
+   <script src="/crystal-os-v2-shell.js"></script>
+   <script src="/crystal-os-v2-nav.js"></script>
++  <script defer src="/ui/design-system.js"></script>
+ </body>
+ </html>
+diff --git a/frontend/admin-pool-technical.html b/frontend/admin-pool-technical.html
+index 794dc07..cb226a6 100644
+--- a/frontend/admin-pool-technical.html
++++ b/frontend/admin-pool-technical.html
+@@ -4,68 +4,86 @@
+   <meta charset="utf-8">
+   <meta name="viewport" content="width=device-width,initial-scale=1">
+   <title>Cristal Water LDA - Ficha Tecnica</title>
++  <link rel="icon" href="/logo-cristalwater.png">
+   <script src="/cw-auth.js"></script>
+   <link rel="stylesheet" href="/ui/foundation.css">
+ <style>
+-    :root {
+-      --bg: #06111f;
+-      --panel: #0d1d31;
+-      --line: #24415f;
+-      --txt: #e9f5ff;
+-      --muted: #8fb1cc;
+-      --brand: #35d1ff;
+-      --input: #091829;
+-      --ok: #1ed790;
+-    }
+     * { box-sizing: border-box; }
+     html, body { overflow-x: hidden; }
+     body {
+       margin: 0;
+-      background: linear-gradient(120deg, #06111f, #0b1f33 55%, #06111f);
+-      color: var(--txt);
+-      font-family: Inter, Segoe UI, Arial, sans-serif;
++      color: #1c2d3d;
++      background: radial-gradient(circle at 10% 0%, #f2f8ff 0%, #eaf1fa 46%, #e4edf7 100%);
+     }
+-    main.page { max-width: 1500px; margin: 0 auto; padding: 24px; }
+-    .page-head { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+-    .page-head h1 { margin: 0; font-size: 30px; }
+-    .page-head p { margin: 6px 0 0; color: var(--muted); }
+-    .grid { display: grid; gap: 16px; }
++    main.page { max-width: 1500px; margin: 0 auto; padding: 18px; }
++    .page-head { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 14px; align-items: flex-start; }
++    .page-head h1 { margin: 0; font-size: clamp(26px, 3.8vw, 34px); line-height: 1.08; }
++    .page-head p { margin: 6px 0 0; color: #58708a; }
++    .head-actions { display: flex; gap: 8px; flex-wrap: wrap; }
++    .grid { display: grid; gap: 12px; }
+     .cols2 { grid-template-columns: 1fr 1fr; }
+     .card {
+-      background: rgba(13,29,49,.92);
+-      border: 1px solid var(--line);
+-      border-radius: 18px;
+-      padding: 18px;
+-      box-shadow: 0 20px 60px rgba(0,0,0,.22);
++      background: #fff;
++      border: 1px solid #cddaea;
++      border-radius: 16px;
++      padding: 16px;
++      box-shadow: 0 10px 28px rgba(26, 53, 87, 0.08);
++    }
++    .card h2 { margin-top: 0; margin-bottom: 12px; }
++    .field {
++      display: grid;
++      gap: 6px;
++      margin: 8px 0;
++    }
++    .field label {
++      font-size: 12px;
++      color: #4f6883;
++      text-transform: uppercase;
++      letter-spacing: .04em;
++      font-weight: 800;
+     }
+     input, select, textarea {
+       width: 100%;
+-      background: var(--input);
+-      color: var(--txt);
+-      border: 1px solid var(--line);
++      background: #f7fafd;
++      color: #1c2d3d;
++      border: 1px solid #cddaea;
+       border-radius: 12px;
+-      padding: 12px;
+-      margin: 6px 0;
++      min-height: 44px;
++      padding: 11px 12px;
++      margin: 0;
++      font: inherit;
++    }
++    textarea { min-height: 96px; resize: vertical; }
++    input:focus, select:focus, textarea:focus {
++      outline: 2px solid #2492ec;
++      outline-offset: 1px;
++      border-color: #2492ec;
++      background: #fff;
+     }
+-    textarea { min-height: 85px; resize: vertical; }
+     button, .btn {
+-      border: 0;
++      border: 1px solid #cddaea;
+       border-radius: 12px;
+-      padding: 12px 16px;
+-      background: #163354;
+-      color: var(--txt);
++      min-height: 44px;
++      padding: 10px 14px;
++      background: #fff;
++      color: #1c2d3d;
+       font-weight: 800;
+       cursor: pointer;
+-      margin: 4px 0;
+       text-decoration: none;
+-      display: inline-block;
++      display: inline-flex;
++      align-items: center;
++      justify-content: center;
++    }
++    button.primary {
++      background: linear-gradient(135deg, #1e79df, #32a6f2);
++      border-color: #1e79df;
++      color: #fff;
+     }
+-    button.primary { background: linear-gradient(135deg, #0584c7, #35d1ff); color: #03121c; }
+     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+-    .muted { color: var(--muted); font-size: 13px; }
++    .muted { color: #58708a; font-size: 13px; }
+     .section-title {
+-      margin: 16px 0 6px;
+-      color: #7dd3fc;
++      margin: 14px 0 8px;
++      color: #365678;
+       font-size: 12px;
+       font-weight: 900;
+       text-transform: uppercase;
+@@ -76,59 +94,69 @@
+       justify-content: space-between;
+       gap: 14px;
+       align-items: flex-start;
+-      background: rgba(6,17,31,.55);
+-      border: 1px solid rgba(125,211,252,.22);
+-      border-radius: 14px;
++      background: #f6faff;
++      border: 1px solid #d8e4f0;
++      border-radius: 12px;
+       padding: 12px;
+       margin-top: 10px;
+     }
+     .timeline-item { display: block; }
+-    .timeline-item span, .timeline-item small { display: block; color: var(--muted); margin-top: 4px; }
+-    .timeline-item p, .reminder-item p { margin: 7px 0 0; color: #cfe9ff; }
+-    .reminder-item.done { opacity: .68; }
++    .timeline-item span, .timeline-item small { display: block; color: #58708a; margin-top: 4px; }
++    .timeline-item p, .reminder-item p { margin: 7px 0 0; color: #26415b; }
++    .reminder-item.done { opacity: .7; }
+     .calc-help {
+-      border: 1px dashed rgba(125,211,252,.32);
++      border: 1px dashed #cddaea;
+       border-radius: 12px;
+       padding: 12px;
+-      margin: 6px 0;
+-      color: #bfe4ff;
+-      background: rgba(6,17,31,.55);
++      margin: 8px 0;
++      color: #3f5d79;
++      background: #f6faff;
+       font-size: 13px;
+       line-height: 1.4;
+     }
+     input[readonly] {
+-      border-color: rgba(64,230,160,.46);
+-      background: rgba(30,215,144,.08);
+-      color: #d9fff0;
++      border-color: #aad7be;
++      background: #ecf9f2;
++      color: #236549;
+       font-weight: 800;
+     }
+     .access-item {
+-      background: rgba(6,17,31,.55);
+-      border: 1px solid rgba(125,211,252,.22);
+-      border-radius: 14px;
++      background: #f6faff;
++      border: 1px solid #d8e4f0;
++      border-radius: 12px;
+       padding: 12px;
+       margin-top: 10px;
+     }
+     .access-item strong { display: block; }
+-    .access-item small { display: block; color: var(--muted); margin-top: 4px; line-height: 1.4; }
++    .access-item small { display: block; color: #58708a; margin-top: 4px; line-height: 1.4; }
+     .tag {
+       display: inline-flex;
+       align-items: center;
+-      border: 1px solid rgba(30,215,144,.45);
+-      color: var(--ok);
++      border: 1px solid #aad7be;
++      color: #236549;
+       border-radius: 999px;
+       padding: 7px 10px;
+       font-size: 12px;
+       font-weight: 800;
+       white-space: nowrap;
+     }
++    .footer-save {
++      margin-top: 14px;
++      display: flex;
++      gap: 10px;
++      align-items: center;
++      flex-wrap: wrap;
++    }
+     @media (max-width: 1000px) {
+-      main.page { padding: 14px; }
++      main.page { padding: 12px; }
+       .cols2, .row { grid-template-columns: 1fr; }
+       .page-head { flex-direction: column; }
+       .reminder-item { flex-direction: column; }
++      .head-actions { width: 100%; }
++      .head-actions .btn, .head-actions button { flex: 1; }
+     }
+   </style>
++  <link rel="stylesheet" href="/ui/design-system.css">
+ </head>
+ <body data-required-role="ADMIN">
+   <main class="page">
+@@ -137,7 +165,7 @@
+         <h1>Ficha Tecnica da Piscina</h1>
+         <p id="subtitle">Dados tecnicos, historico e lembretes por piscina/jacuzzi.</p>
+       </div>
+-      <div>
++      <div class="head-actions">
+         <button class="btn" type="button" data-cw-back data-cw-fallback="/admin-pools">Voltar</button>
+         <a class="btn" href="/admin-pools">Piscinas</a>
+         <a class="btn" href="/admin-master-control">Centro de Operacoes</a>
+@@ -148,68 +176,61 @@
+       <section class="grid cols2">
+         <div class="card">
+           <h2>Dados gerais</h2>
+-          <input id="name" name="name" placeholder="Nome da piscina">
+-          <select id="type" name="type">
+-            <option value="POOL">Piscina</option>
+-            <option value="JACUZZI">Jacuzzi</option>
+-            <option value="CHILDREN_POOL">Piscina criancas</option>
+-          </select>
+-          <input id="zone" name="zone" placeholder="Zona">
+-          <input id="address" name="address" placeholder="Morada/localizacao">
++          <div class="field"><label for="name">Nome da piscina</label><input id="name" name="name" placeholder="Nome da piscina"></div>
++          <div class="field"><label for="type">Tipo</label><select id="type" name="type"><option value="POOL">Piscina</option><option value="JACUZZI">Jacuzzi</option><option value="CHILDREN_POOL">Piscina criancas</option></select></div>
++          <div class="field"><label for="zone">Zona</label><input id="zone" name="zone" placeholder="Zona"></div>
++          <div class="field"><label for="address">Morada/localizacao</label><input id="address" name="address" placeholder="Morada/localizacao"></div>
+           <div class="row">
+-            <input id="volumeM3" name="volumeM3" type="number" step="0.1" placeholder="Volume calculado m3" readonly>
+-            <input id="monthlyAmount" name="monthlyAmount" type="number" step="0.01" placeholder="Valor mensal EUR">
++            <div class="field"><label for="volumeM3">Volume calculado m3</label><input id="volumeM3" name="volumeM3" type="number" step="0.1" placeholder="Volume calculado m3" readonly></div>
++            <div class="field"><label for="monthlyAmount">Valor mensal EUR</label><input id="monthlyAmount" name="monthlyAmount" type="number" step="0.01" placeholder="Valor mensal EUR"></div>
+           </div>
+           <div class="calc-help">Volume calculado automaticamente pelas dimensoes: comprimento x largura x profundidade media. Para formatos especiais, usa a calculadora tecnica.</div>
+-          <textarea id="notes" name="notes" placeholder="Notas gerais"></textarea>
++          <div class="field"><label for="notes">Notas gerais</label><textarea id="notes" name="notes" placeholder="Notas gerais"></textarea></div>
+ 
+           <div class="section-title">Dimensoes e calculo</div>
+           <div class="row">
+-            <input id="lengthM" name="lengthM" type="number" step="0.01" placeholder="Comprimento m">
+-            <input id="widthM" name="widthM" type="number" step="0.01" placeholder="Largura m">
++            <div class="field"><label for="lengthM">Comprimento m</label><input id="lengthM" name="lengthM" type="number" step="0.01" placeholder="Comprimento m"></div>
++            <div class="field"><label for="widthM">Largura m</label><input id="widthM" name="widthM" type="number" step="0.01" placeholder="Largura m"></div>
+           </div>
+           <div class="row">
+-            <input id="depthMinM" name="depthMinM" type="number" step="0.01" placeholder="Prof. minima">
+-            <input id="depthMaxM" name="depthMaxM" type="number" step="0.01" placeholder="Prof. maxima">
++            <div class="field"><label for="depthMinM">Profundidade minima</label><input id="depthMinM" name="depthMinM" type="number" step="0.01" placeholder="Prof. minima"></div>
++            <div class="field"><label for="depthMaxM">Profundidade maxima</label><input id="depthMaxM" name="depthMaxM" type="number" step="0.01" placeholder="Prof. maxima"></div>
+           </div>
+           <div class="row">
+-            <input id="averageDepthM" name="averageDepthM" type="number" step="0.01" placeholder="Prof. media">
+-            <input id="pumpFlowM3h" name="pumpFlowM3h" type="number" step="0.1" placeholder="Caudal bomba m3/h">
++            <div class="field"><label for="averageDepthM">Profundidade media</label><input id="averageDepthM" name="averageDepthM" type="number" step="0.01" placeholder="Prof. media"></div>
++            <div class="field"><label for="pumpFlowM3h">Caudal bomba m3/h</label><input id="pumpFlowM3h" name="pumpFlowM3h" type="number" step="0.1" placeholder="Caudal bomba m3/h"></div>
+           </div>
+         </div>
+ 
+         <div class="card">
+           <h2>Equipamentos</h2>
+           <div class="section-title">Filtracao</div>
+-          <input id="pumpType" name="pumpType" placeholder="Tipo de bomba">
+-          <input id="pumpPower" name="pumpPower" placeholder="Potencia bomba">
+-          <input id="filterType" name="filterType" placeholder="Tipo de filtro">
+-          <input id="filterMedia" name="filterMedia" placeholder="Areia / Vidro / Cartucho">
++          <div class="field"><label for="pumpType">Tipo de bomba</label><input id="pumpType" name="pumpType" placeholder="Tipo de bomba"></div>
++          <div class="field"><label for="pumpPower">Potencia da bomba</label><input id="pumpPower" name="pumpPower" placeholder="Potencia bomba"></div>
++          <div class="field"><label for="filterType">Tipo de filtro</label><input id="filterType" name="filterType" placeholder="Tipo de filtro"></div>
++          <div class="field"><label for="filterMedia">Areia / Vidro / Cartucho</label><input id="filterMedia" name="filterMedia" placeholder="Areia / Vidro / Cartucho"></div>
+ 
+           <div class="section-title">Tratamento e quimica</div>
+-          <select id="saltSystem" name="saltSystem">
+-            <option value="false">Sem maquina de sal</option>
+-            <option value="true">Com maquina de sal</option>
+-          </select>
++          <div class="field"><label for="saltSystem">Maquina de sal</label><select id="saltSystem" name="saltSystem"><option value="false">Sem maquina de sal</option><option value="true">Com maquina de sal</option></select></div>
+           <div class="row">
+-            <input id="targetSalinityPpm" name="targetSalinityPpm" type="number" placeholder="Sal alvo ppm">
+-            <input id="targetChlorinePpm" name="targetChlorinePpm" type="number" step="0.1" placeholder="Cloro alvo ppm">
++            <div class="field"><label for="targetSalinityPpm">Sal alvo ppm</label><input id="targetSalinityPpm" name="targetSalinityPpm" type="number" placeholder="Sal alvo ppm"></div>
++            <div class="field"><label for="targetChlorinePpm">Cloro alvo ppm</label><input id="targetChlorinePpm" name="targetChlorinePpm" type="number" step="0.1" placeholder="Cloro alvo ppm"></div>
+           </div>
+           <div class="row">
+-            <input id="currentWaterTempC" name="currentWaterTempC" type="number" step="0.1" placeholder="Temperatura agua">
+-            <input id="lightsCount" name="lightsCount" type="number" placeholder="Numero luzes">
++            <div class="field"><label for="currentWaterTempC">Temperatura agua</label><input id="currentWaterTempC" name="currentWaterTempC" type="number" step="0.1" placeholder="Temperatura agua"></div>
++            <div class="field"><label for="lightsCount">Numero de luzes</label><input id="lightsCount" name="lightsCount" type="number" placeholder="Numero luzes"></div>
+           </div>
+-          <input id="lightsType" name="lightsType" placeholder="Tipo de LED/lampadas">
+-          <textarea id="equipmentNotes" name="equipmentNotes" placeholder="Notas de equipamento"></textarea>
++          <div class="field"><label for="lightsType">Tipo de LED/lampadas</label><input id="lightsType" name="lightsType" placeholder="Tipo de LED/lampadas"></div>
++          <div class="field"><label for="equipmentNotes">Notas de equipamento</label><textarea id="equipmentNotes" name="equipmentNotes" placeholder="Notas de equipamento"></textarea></div>
+         </div>
+ 
+         <div class="card">
+           <h2>Casa tecnica</h2>
+-          <input id="technicalRoomLocation" name="technicalRoomLocation" placeholder="Localizacao da casa tecnica">
+-          <input id="technicalRoomCondition" name="technicalRoomCondition" placeholder="Estado geral">
+-          <input id="technicalRoomVentilation" name="technicalRoomVentilation" placeholder="Ventilacao">
+-          <input id="technicalRoomElectrical" name="technicalRoomElectrical" placeholder="Quadro eletrico">
+-          <textarea id="technicalRoomNotes" name="technicalRoomNotes" placeholder="Notas casa tecnica"></textarea>
++          <div class="field"><label for="technicalRoomLocation">Localizacao da casa tecnica</label><input id="technicalRoomLocation" name="technicalRoomLocation" placeholder="Localizacao da casa tecnica"></div>
++          <div class="field"><label for="technicalRoomCondition">Estado geral</label><input id="technicalRoomCondition" name="technicalRoomCondition" placeholder="Estado geral"></div>
++          <div class="field"><label for="technicalRoomVentilation">Ventilacao</label><input id="technicalRoomVentilation" name="technicalRoomVentilation" placeholder="Ventilacao"></div>
++          <div class="field"><label for="technicalRoomElectrical">Quadro eletrico</label><input id="technicalRoomElectrical" name="technicalRoomElectrical" placeholder="Quadro eletrico"></div>
++          <div class="field"><label for="technicalRoomNotes">Notas casa tecnica</label><textarea id="technicalRoomNotes" name="technicalRoomNotes" placeholder="Notas casa tecnica"></textarea></div>
+         </div>
+ 
+         <div class="card">
+@@ -221,50 +242,39 @@
+ 
+         <div class="card">
+           <h2>Historico tecnico</h2>
+-          <textarea id="historyNote" name="historyNote" placeholder="Adicionar nota ao historico desta ficha tecnica"></textarea>
++          <div class="field"><label for="historyNote">Nota para historico tecnico</label><textarea id="historyNote" name="historyNote" placeholder="Adicionar nota ao historico desta ficha tecnica"></textarea></div>
+           <div id="history" class="muted">A carregar historico...</div>
+         </div>
+ 
+         <div class="card">
+           <h2>Lembretes de servico</h2>
+           <div class="row">
+-            <input id="reminderTitle" placeholder="Ex: Trocar areia do filtro">
+-            <input id="reminderDueAt" type="datetime-local">
++            <div class="field"><label for="reminderTitle">Titulo</label><input id="reminderTitle" placeholder="Ex: Trocar areia do filtro"></div>
++            <div class="field"><label for="reminderDueAt">Data prevista</label><input id="reminderDueAt" type="datetime-local"></div>
+           </div>
+           <div class="row">
+-            <select id="reminderRepeatRule">
+-              <option value="NONE">Sem repeticao</option>
+-              <option value="CUSTOM">Personalizada</option>
+-            </select>
+-            <select id="reminderPriority">
+-              <option value="NORMAL">Normal</option>
+-              <option value="HIGH">Urgente</option>
+-              <option value="LOW">Baixa</option>
+-            </select>
++            <div class="field"><label for="reminderRepeatRule">Repeticao</label><select id="reminderRepeatRule"><option value="NONE">Sem repeticao</option><option value="CUSTOM">Personalizada</option></select></div>
++            <div class="field"><label for="reminderPriority">Prioridade</label><select id="reminderPriority"><option value="NORMAL">Normal</option><option value="HIGH">Urgente</option><option value="LOW">Baixa</option></select></div>
+           </div>
+           <div id="customRepeatBox" class="row" style="display:none">
+-            <input id="customRepeatValue" type="number" min="1" max="1095" step="1" placeholder="Repetir a cada">
+-            <select id="customRepeatUnit">
+-              <option value="DAYS">Dias</option>
+-              <option value="MONTHS">Meses</option>
+-              <option value="YEARS">Anos</option>
+-            </select>
++            <div class="field"><label for="customRepeatValue">Repetir a cada</label><input id="customRepeatValue" type="number" min="1" max="1095" step="1" placeholder="Repetir a cada"></div>
++            <div class="field"><label for="customRepeatUnit">Unidade</label><select id="customRepeatUnit"><option value="DAYS">Dias</option><option value="MONTHS">Meses</option><option value="YEARS">Anos</option></select></div>
+           </div>
+-          <textarea id="reminderDescription" placeholder="Notas do servico periodico"></textarea>
++          <div class="field"><label for="reminderDescription">Descricao</label><textarea id="reminderDescription" placeholder="Notas do servico periodico"></textarea></div>
+           <div class="row">
+             <button type="button" class="primary" onclick="createServiceReminder()">Criar lembrete</button>
+             <a id="poolOperationalReminderLink" class="btn" href="/admin-crm">Lembrete operacional</a>
+           </div>
+-          <span id="reminderStatus" class="muted"></span>
++          <span id="reminderStatus" class="muted" role="status" aria-live="polite"></span>
+           <div id="serviceReminders" style="margin-top:12px">
+             <div class="muted">A carregar lembretes...</div>
+           </div>
+         </div>
+       </section>
+ 
+-      <div class="card" style="margin-top:16px">
++      <div class="card footer-save">
+         <button class="primary" type="submit">Guardar ficha tecnica</button>
+-        <span id="status" class="muted"></span>
++        <span id="status" class="muted" role="status" aria-live="polite"></span>
+       </div>
+     </form>
+   </main>
+@@ -275,5 +285,6 @@
+   <script src="/ui/core/navigation-context.js"></script>
+   <script src="/crystal-os-v2-shell.js"></script>
+   <script src="/crystal-os-v2-nav.js"></script>
++  <script defer src="/ui/design-system.js"></script>
+ </body>
+ </html>
+diff --git a/frontend/admin-vehicles.html b/frontend/admin-vehicles.html
+index ec8781f..4a31ff7 100644
+--- a/frontend/admin-vehicles.html
++++ b/frontend/admin-vehicles.html
+@@ -3,6 +3,56 @@
+ </style>  <script src="/cw-auth.js"></script>
+   <link rel="stylesheet" href="/ui/foundation.css">
+   <style>html,body{overflow-x:hidden}</style>
++  <style>
++    body{
++      background:radial-gradient(circle at 10% 0%,#f2f8ff 0%,#eaf2fb 50%,#e3edf8 100%) !important;
++      color:#1c2d3d !important;
++    }
++    header{
++      background:rgba(255,255,255,.92) !important;
++      border-bottom:1px solid #cddaea !important;
++      color:#1c2d3d !important;
++    }
++    h1,h2,h3{color:#1c2d3d !important}
++    .muted{color:#56708b !important}
++    .panel{
++      background:#fff !important;
++      border:1px solid #cddaea !important;
++      box-shadow:0 10px 24px rgba(26,53,87,.08) !important;
++    }
++    .card,.item-row>*,.file-picker,.document-note{
++      background:#f6faff !important;
++      border-color:#d7e4f1 !important;
++      color:#1c2d3d !important;
++    }
++    .badge{background:#eef6ff !important;border-color:#c6d8eb !important;color:#466785 !important}
++    input,select,textarea{
++      min-height:44px !important;
++      background:#f7fafd !important;
++      color:#1c2d3d !important;
++      border:1px solid #cddaea !important;
++    }
++    input:focus,select:focus,textarea:focus{
++      outline:2px solid #2492ec !important;
++      outline-offset:1px !important;
++      border-color:#2492ec !important;
++      background:#fff !important;
++    }
++    .btn,.links a{
++      min-height:44px !important;
++      min-width:44px !important;
++      border:1px solid #cddaea !important;
++      background:#fff !important;
++      color:#1c2d3d !important;
++    }
++    input[type="checkbox"]{width:44px !important;min-width:44px !important;height:44px !important;min-height:44px !important}
++    .cw-help-fab,.cw-help-fab.cw-help-fab-quiet{display:none !important}
++    .btn.primary{background:linear-gradient(135deg,#1e79df,#32a6f2) !important;border-color:#1e79df !important;color:#fff !important}
++    .btn.warn{background:#fff0d2 !important;border-color:#e7c07a !important;color:#6b4300 !important}
++    .table td,.table th{border-bottom:1px solid #e2eaf4 !important;color:#1c2d3d !important}
++    .table th{color:#4f6883 !important;background:#f3f8fe !important}
++  </style>
++  <link rel="stylesheet" href="/ui/design-system.css">
+ </head><body data-required-role="ADMIN">
+ <header><div><h1>🚐 Frota, Guias e Stock</h1><div class="muted">Gestão de viaturas, guias AT, guias de obra, consumos e manutenção.</div></div><nav class="links"><a href="/admin-dashboard">Dashboard</a><a href="/admin-operational-settings">Configurações</a><a href="/technician-guide">Técnico</a><a href="/help-center?topic=vehicles">Ajuda</a></nav></header>
+ <main>
+@@ -12,6 +62,22 @@
+ <section class="panel"><h2>Guias de Obra Abertas</h2><div class="form"><div><label>Viatura</label><select id="workVehicle"></select></div><div><label>Técnico ID</label><input id="workTech" type="number" placeholder="ID técnico"></div><div><label>Km início</label><input id="startKm" type="number"></div></div><br><button class="btn primary" onclick="startWorkGuide()">Iniciar dia / abrir guia de obra</button><p class="muted">Pode iniciar sem guia AT. O sistema cria o alerta "guia de transporte em falta" e associa a AT quando for adicionada.</p><div id="works"></div></section>
+ <section class="panel"><h2>Movimentos e Manutenção</h2><div class="split"><div><h3>Consumir material</h3><div class="form full"><input id="consumeWork" placeholder="ID guia obra"><input id="consumeName" placeholder="Nome item"><input id="consumeQty" type="number" placeholder="Quantidade"><input id="consumeVisit" placeholder="ID visita opcional"></div><br><button class="btn warn" onclick="consume()">Registar consumo</button></div><div><h3>Manutenção</h3><div class="form full"><select id="maintVehicle"></select><select id="maintType"><option value="GENERAL">Manutenção</option><option value="INSURANCE">Seguro</option><option value="INSPECTION">Inspecao</option></select><input id="maintTitle" placeholder="Revisao / pneus / seguro"><input id="maintDue" type="date"><input id="maintKm" type="number" placeholder="Km"></div><br><button class="btn" onclick="createMaintenance()">Criar lembrete</button></div></div><div id="movements"></div></section>
+ </main><script src="/admin-auth-guard.js"></script><script src="/cw-operational-risk.js?v=22.6.13-risk-jump" data-cw-operational-risk="1"></script><script src="/admin-vehicles.js?v=22.6.13-risk-jump"></script><script src="/cristal-help-data.js"></script><script src="/cristal-assist.js"></script><script src="/cw-admin-shortcuts.js"></script><script src="/ui/core/navigation-context.js"></script>
++  <script>
++    (function ensureAriaLabels() {
++      const controls = Array.from(document.querySelectorAll('input,select,textarea'));
++      controls.forEach((node) => {
++        if (node.type === 'hidden') return;
++        if (node.getAttribute('aria-label') || node.getAttribute('aria-labelledby')) return;
++
++        const byFor = node.id ? document.querySelector(`label[for="${node.id}"]`) : null;
++        const wrapperLabel = node.closest('label');
++        const siblingLabel = node.parentElement?.querySelector('label');
++        const text = (byFor?.textContent || wrapperLabel?.textContent || siblingLabel?.textContent || node.placeholder || node.name || node.id || '').trim();
++        if (text) node.setAttribute('aria-label', text);
++      });
++    })();
++  </script>
+   <script src="/crystal-os-v2-shell.js"></script>
+   <script src="/crystal-os-v2-nav.js"></script>
++  <script defer src="/ui/design-system.js"></script>
+ </body></html>
+diff --git a/frontend/admin-visits-dashboard.html b/frontend/admin-visits-dashboard.html
+index 9ba20d8..efcd4d7 100644
+--- a/frontend/admin-visits-dashboard.html
++++ b/frontend/admin-visits-dashboard.html
+@@ -1,386 +1,205 @@
+ <!doctype html>
+ <html lang="pt">
+-
+ <head>
+   <link rel="manifest" href="/manifest.webmanifest">
+-  <meta name="theme-color" content="#050b16">
+-
+-<meta charset="utf-8">
+-
+-<title>
+-  Admin - Visitas
+-</title>
+-
+-<meta
+-  name="viewport"
+-  content="width=device-width, initial-scale=1.0"
+->
+-
+-<style>
+-
+-*{
+-  box-sizing:border-box;
+-}
+-
+-html,
+-body{
+-  overflow-x:hidden;
+-}
+-
+-body{
+-
+-  margin:0;
+-
+-  background:var(--cw-bg,#eef3f8);
+-
+-  color:var(--cw-text,#1f2937);
+-}
+-
+-header{
+-
+-  background:var(--cw-surface,#ffffff);
+-
+-  padding:18px;
+-
+-  border-bottom:2px solid var(--cw-accent,#1e88e5);
+-
+-  display:flex;
+-
+-  justify-content:space-between;
+-
+-  align-items:center;
+-
+-  flex-wrap:wrap;
+-
+-  gap:15px;
+-
+-  position:sticky;
+-
+-  top:0;
+-
+-  z-index:999;
+-}
+-
+-header h2{
+-
+-  margin:0;
+-
+-  color:var(--cw-accent,#1e88e5);
+-}
+-
+-.topbar{
+-
+-  display:flex;
+-
+-  gap:10px;
+-
+-  flex-wrap:wrap;
+-}
+-
+-button{
+-
+-  border:1px solid transparent;
+-
+-  border-radius:10px;
+-
+-  padding:10px 16px;
+-
+-  cursor:pointer;
+-
+-  font-weight:bold;
+-}
+-
+-.refresh-btn{
+-
+-  background:var(--cw-accent,#1e88e5);
+-
+-  color:white;
+-}
+-
+-.logout-btn{
+-
+-  background:#d32f2f;
+-
+-  color:white;
+-}
+-
+-main{
+-
+-  padding:20px;
+-}
+-
+-.filters{
+-
+-  background:var(--cw-surface,#ffffff);
+-
+-  padding:15px;
+-
+-  border-radius:14px;
+-
+-  margin-bottom:20px;
+-
+-  box-shadow:0 2px 8px rgba(0,0,0,.08);
+-
+-  display:flex;
+-
+-  gap:12px;
+-
+-  flex-wrap:wrap;
+-}
+-
+-.filters input,
+-.filters select{
+-
+-  padding:10px;
+-
+-  border-radius:8px;
+-
+-  border:1px solid var(--cw-border,#ccd8e3);
+-}
+-
+-.card{
+-
+-  background:var(--cw-surface,#ffffff);
+-
+-  padding:18px;
+-
+-  margin-bottom:18px;
+-
+-  border-radius:14px;
+-
+-  box-shadow:0 2px 8px rgba(0,0,0,.08);
+-
+-  border-left:6px solid var(--cw-accent,#1e88e5);
+-}
+-
+-.card.done{
+-  border-left-color:#2e7d32;
+-}
+-
+-.card.progress{
+-  border-left-color:#ef6c00;
+-}
+-
+-.card h3{
+-
+-  margin-top:0;
+-
+-  color:var(--cw-accent-strong,#1565c0);
+-}
+-
+-.photos{
+-
+-  display:flex;
+-
+-  flex-wrap:wrap;
+-
+-  gap:10px;
+-
+-  margin-top:10px;
+-}
+-
+-.photos img{
+-
+-  width:100px;
+-
+-  height:100px;
+-
+-  object-fit:cover;
+-
+-  border-radius:10px;
+-
+-  border:2px solid var(--cw-border-soft,#e7eff7);
+-}
+-
+-.status{
+-
+-  font-weight:bold;
+-
+-  margin-top:10px;
+-}
+-
+-.done-text{
+-  color:#2e7d32;
+-}
+-
+-.pending-text{
+-  color:#ef6c00;
+-}
+-
+-.grid{
+-
+-  display:grid;
+-
+-  grid-template-columns:
+-    repeat(auto-fit,minmax(220px,1fr));
+-
+-  gap:12px;
+-
+-  margin-top:15px;
+-}
+-
+-.box{
+-
+-  background:var(--cw-surface-2,#f8fbff);
+-
+-  border:1px solid var(--cw-border-soft,#d6e6f7);
+-
+-  border-radius:10px;
+-
+-  padding:12px;
+-}
+-
+-.label{
+-
+-  font-size:12px;
+-
+-  color:var(--cw-muted,#607d8b);
+-
+-  margin-bottom:5px;
+-}
+-
+-.value{
+-
+-  font-weight:bold;
+-}
+-
+-.actions{
+-
+-  display:flex;
+-
+-  gap:10px;
+-
+-  flex-wrap:wrap;
+-
+-  margin-top:15px;
+-}
+-
+-.report-btn{
+-
+-  background:var(--cw-accent-strong,#1565c0);
+-
+-  color:white;
+-}
+-
+-@media(max-width:700px){
+-
+-  .filters{
+-
+-    flex-direction:column;
+-  }
+-
+-  .actions{
+-
+-    flex-direction:column;
+-  }
+-
+-  button{
+-
+-    width:100%;
+-  }
+-}
+-
+-@media (prefers-color-scheme: dark){
+-  body{
+-    background:var(--cw-bg,#0e1724);
+-    color:var(--cw-text,#e8f1fa);
+-  }
+-
+-  header,
+-  .filters,
+-  .card{
+-    background:var(--cw-surface,#132238);
+-  }
+-
+-  .filters input,
+-  .filters select{
+-    background:var(--cw-surface-2,#0f1c2e);
+-    color:var(--cw-text,#e8f1fa);
+-  }
+-
+-  .box{
+-    background:var(--cw-surface-2,#0f1c2e);
+-  }
+-
+-  .photos img{
+-    border-color:var(--cw-border,#2a3a51);
+-  }
+-}
+-
+-</style>
+-
+-<link rel="stylesheet" href="/cristal-assist.css">
++  <meta name="theme-color" content="#0f1723">
++  <meta charset="utf-8">
++  <title>Painel Admin - Visitas</title>
++  <meta name="viewport" content="width=device-width, initial-scale=1.0">
++  <link rel="stylesheet" href="/cristal-assist.css">
+   <script src="/cw-auth.js"></script>
+   <link rel="stylesheet" href="/ui/foundation.css">
++  <link rel="stylesheet" href="/ui/design-system.css">
++  <style>
++    * { box-sizing: border-box; }
++    html, body { overflow-x: hidden; }
++    body {
++      margin: 0;
++      color: var(--cw-text, #1f2937);
++      background: radial-gradient(circle at 10% 0%, #f0f7ff 0%, #ecf3fb 45%, #e7eef7 100%);
++    }
++
++    .page {
++      max-width: 1480px;
++      margin: 0 auto;
++      padding: 18px;
++    }
++
++    .page-head {
++      display: flex;
++      justify-content: space-between;
++      align-items: flex-start;
++      gap: 12px;
++      margin-bottom: 14px;
++    }
++
++    .page-head h1 {
++      margin: 0;
++      font-size: 30px;
++      line-height: 1.08;
++    }
++
++    .page-head p {
++      margin: 6px 0 0;
++      color: var(--cw-muted, #5f7388);
++    }
++
++    .page-actions {
++      display: flex;
++      gap: 8px;
++      flex-wrap: wrap;
++    }
++
++    .cw-btn {
++      min-height: 44px;
++      border: 1px solid var(--cw-border, #c8d7e7);
++      border-radius: 12px;
++      padding: 10px 14px;
++      background: #fff;
++      color: var(--cw-text, #1f2937);
++      font-weight: 800;
++      text-decoration: none;
++      display: inline-flex;
++      align-items: center;
++      justify-content: center;
++      cursor: pointer;
++    }
++
++    .cw-btn.primary {
++      background: linear-gradient(135deg, #1f78e0, #22a2f2);
++      color: #fff;
++      border-color: #1f78e0;
++    }
++
++    .cw-btn.danger {
++      background: #c62828;
++      color: #fff;
++      border-color: #c62828;
++    }
++
++    .toolbar {
++      display: grid;
++      grid-template-columns: minmax(280px, 2fr) minmax(220px, 1fr);
++      gap: 10px;
++      padding: 12px;
++      border: 1px solid var(--cw-border, #c8d7e7);
++      border-radius: 14px;
++      background: #fff;
++      box-shadow: 0 6px 24px rgba(24, 45, 72, 0.08);
++      margin-bottom: 14px;
++    }
++
++    .toolbar input,
++    .toolbar select {
++      width: 100%;
++      min-height: 44px;
++      padding: 10px 12px;
++      border: 1px solid var(--cw-border, #c8d7e7);
++      border-radius: 10px;
++      background: #f9fbfd;
++      color: var(--cw-text, #1f2937);
++    }
++
++    #visits {
++      display: grid;
++      gap: 12px;
++    }
++
++    .card {
++      background: #fff;
++      border: 1px solid var(--cw-border, #c8d7e7);
++      border-left-width: 6px;
++      border-radius: 16px;
++      padding: 16px;
++      box-shadow: 0 10px 26px rgba(24, 45, 72, 0.08);
++    }
++
++    .card.done { border-left-color: #1b8d4e; }
++    .card.progress { border-left-color: #e07b18; }
++
++    .card h3 {
++      margin: 0 0 10px;
++      color: #113c72;
++      font-size: 19px;
++    }
++
++    .grid {
++      display: grid;
++      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
++      gap: 10px;
++      margin-top: 10px;
++    }
++
++    .box {
++      border: 1px solid #d7e3ef;
++      border-radius: 12px;
++      background: #f6faff;
++      padding: 10px;
++    }
++
++    .label {
++      font-size: 11px;
++      text-transform: uppercase;
++      font-weight: 800;
++      letter-spacing: 0.03em;
++      color: #5f7388;
++      margin-bottom: 4px;
++    }
++
++    .value { font-weight: 800; }
++    .done-text { color: #1b8d4e; }
++    .pending-text { color: #b9681d; }
++
++    .photos {
++      display: flex;
++      flex-wrap: wrap;
++      gap: 8px;
++      margin-top: 10px;
++    }
++
++    .photos img {
++      width: 96px;
++      height: 96px;
++      object-fit: cover;
++      border-radius: 10px;
++      border: 1px solid #d7e3ef;
++      background: #eef4fb;
++    }
++
++    @media (max-width: 900px) {
++      .page { padding: 12px; }
++      .page-head { flex-direction: column; }
++      .toolbar { grid-template-columns: 1fr; }
++      .page-actions { width: 100%; }
++      .page-actions .cw-btn { flex: 1; }
++    }
++  </style>
+ </head>
+-
+ <body data-required-role="ADMIN">
+-
+-<header>
+-
+-  <h2>
+-    Painel Admin - Visitas
+-  </h2>
+-
+-  <div class="topbar">
+-
+-    <button
+-      class="refresh-btn"
+-      type="button"
+-      data-cw-back
+-      data-cw-fallback="/admin-master-control"
+-    >
+-      Voltar
+-    </button>
+-
+-    <button
+-      class="refresh-btn"
+-      id="refreshBtn"
+-    >
+-      Atualizar
+-    </button>
+-
+-    <button
+-      class="logout-btn"
+-      id="logoutBtn"
+-    >
+-      Sair
+-    </button>
+-
+-  </div>
+-
+-</header>
+-
+-<main>
+-
+-<div class="filters">
+-
+-  <input
+-    id="searchInput"
+-    placeholder="Pesquisar cliente/piscina"
+-  >
+-
+-  <select id="statusFilter">
+-
+-    <option value="">
+-      Todos estados
+-    </option>
+-
+-    <option value="DONE">
+-      DONE
+-    </option>
+-
+-    <option value="IN_PROGRESS">
+-      IN PROGRESS
+-    </option>
+-
+-  </select>
+-
+-</div>
+-
+-<div id="visits"></div>
+-
+-</main>
++  <main class="page">
++    <section class="page-head">
++      <div>
++        <h1>Painel Admin - Visitas</h1>
++        <p>Monitorizacao operacional de visitas com estado, parametros e evidencias fotograficas.</p>
++      </div>
++      <div class="page-actions">
++        <button class="cw-btn" type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
++        <button class="cw-btn primary" id="refreshBtn" type="button">Atualizar</button>
++        <button class="cw-btn danger" id="logoutBtn" type="button">Sair</button>
++      </div>
++    </section>
++
++    <section class="toolbar" aria-label="Filtros de visitas">
++      <input id="searchInput" placeholder="Pesquisar cliente, piscina, tecnico ou nota">
++      <select id="statusFilter">
++        <option value="">Todos os estados</option>
++        <option value="DONE">DONE</option>
++        <option value="IN_PROGRESS">IN PROGRESS</option>
++      </select>
++    </section>
++
++    <section id="visits" aria-live="polite"></section>
++  </main>
+ 
+ <script src="/admin-auth-guard.js"></script>
+ 
+@@ -393,5 +212,6 @@ main{
+ <script src="/ui/core/navigation-context.js"></script>
+   <script src="/crystal-os-v2-shell.js"></script>
+   <script src="/crystal-os-v2-nav.js"></script>
++  <script defer src="/ui/design-system.js"></script>
+ </body>
+ </html>
+\ No newline at end of file
+diff --git a/frontend/admin-visits.html b/frontend/admin-visits.html
+index 4fe0b2a..ce34326 100644
+--- a/frontend/admin-visits.html
++++ b/frontend/admin-visits.html
+@@ -34,6 +34,7 @@
+       .page-head { flex-direction:column; }
+     }
+   </style>
++  <link rel="stylesheet" href="/ui/design-system.css">
+ </head>
+ <body data-required-role="ADMIN">
+   <main class="page">
+@@ -102,5 +103,6 @@
+   <script src="/ui/core/navigation-context.js"></script>
+   <script src="/crystal-os-v2-shell.js"></script>
+   <script src="/crystal-os-v2-nav.js"></script>
++  <script defer src="/ui/design-system.js"></script>
+ </body>
+ </html>
+diff --git a/frontend/technician-field-mode.html b/frontend/technician-field-mode.html
+index 54a9023..17b7795 100644
+--- a/frontend/technician-field-mode.html
++++ b/frontend/technician-field-mode.html
+@@ -536,6 +536,7 @@
+     }
+   </style>
+   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
++  <link rel="stylesheet" href="/ui/design-system.css">
+ </head>
+ <body class="cw-tech-field-page" data-field-tab="service" data-required-role="TECHNICIAN">
+   <main class="field">
+@@ -868,5 +869,6 @@
+   <script src="/ui/core/navigation-context.js"></script>
+   <script src="/crystal-os-v2-shell.js"></script>
+   <script src="/crystal-os-v2-nav.js"></script>
++  <script defer src="/ui/design-system.js"></script>
+ </body>
+ </html>
+diff --git a/frontend/technician-guide.html b/frontend/technician-guide.html
+index 07cd632..5256812 100644
+--- a/frontend/technician-guide.html
++++ b/frontend/technician-guide.html
+@@ -17,8 +17,8 @@
+     body {
+       margin: 0;
+       font-family: "Segoe UI", "Noto Sans", sans-serif;
+-      color: #102620;
+-      background: linear-gradient(180deg, #f7fbf9, #edf4f2);
++      color: #1c2d3d;
++      background: radial-gradient(circle at 12% 0%, #f3f9ff 0%, #ebf3fb 48%, #e3edf8 100%);
+     }
+ 
+     .guide-shell {
+@@ -30,11 +30,11 @@
+     .hero,
+     .card {
+       background: #fff;
+-      border: 1px solid #c9d8d2;
+-      border-radius: 14px;
++      border: 1px solid #cddaea;
++      border-radius: 16px;
+       padding: 14px;
+       margin-bottom: 10px;
+-      box-shadow: 0 10px 28px rgba(16, 38, 32, 0.08);
++      box-shadow: 0 10px 28px rgba(26, 53, 87, 0.08);
+     }
+ 
+     .hero h1 {
+@@ -44,11 +44,25 @@
+       font-weight: 900;
+     }
+ 
+-    .muted { color: #577067; margin: 0; }
++    .muted { color: #56708b; margin: 0; }
++
++    .field {
++      display: grid;
++      gap: 6px;
++      margin-top: 8px;
++    }
++
++    .field label {
++      font-size: 12px;
++      font-weight: 800;
++      color: #4f6883;
++      text-transform: uppercase;
++      letter-spacing: 0.04em;
++    }
+ 
+     .status-box {
+       border-radius: 12px;
+-      border: 1px solid #c9d8d2;
++      border: 1px solid #cddaea;
+       background: #f4faf7;
+       padding: 10px;
+       font-weight: 700;
+@@ -68,7 +82,7 @@
+     }
+ 
+     .btn {
+-      border: 1px solid #c9d8d2;
++      border: 1px solid #cddaea;
+       border-radius: 12px;
+       padding: 14px 16px;
+       font-weight: 800;
+@@ -108,18 +122,26 @@
+       width: 100%;
+       padding: 14px;
+       border-radius: 12px;
+-      border: 1px solid #c9d8d2;
+-      background: #fff;
+-      color: #102620;
+-      margin-top: 6px;
++      border: 1px solid #cddaea;
++      background: #f7fafd;
++      color: #1c2d3d;
++      margin-top: 0;
+       min-height: 50px;
+       font: inherit;
+     }
+ 
++    input:focus,
++    select:focus {
++      outline: 2px solid #2492ec;
++      outline-offset: 1px;
++      border-color: #2492ec;
++      background: #fff;
++    }
++
+     .movement {
+       padding: 10px;
+       border-radius: 12px;
+-      border: 1px solid #c9d8d2;
++      border: 1px solid #cddaea;
+       background: #fff;
+       margin-top: 8px;
+     }
+@@ -129,7 +151,13 @@
+     @media (max-width: 700px) {
+       .grid { grid-template-columns: 1fr; }
+     }
++
++    .cw-help-fab,
++    .cw-help-fab.cw-help-fab-quiet {
++      display: none !important;
++    }
+   </style>
++  <link rel="stylesheet" href="/ui/design-system.css">
+ </head>
+ <body data-required-role="TECHNICIAN">
+   <main class="guide-shell">
+@@ -144,36 +172,48 @@
+     <section class="card">
+       <h2>Iniciar dia</h2>
+       <div class="grid">
+-        <select id="vehicle"></select>
+-        <input id="techId" type="number" placeholder="ID tecnico">
++        <div class="field">
++          <label for="vehicle">Viatura</label>
++          <select id="vehicle" aria-label="Viatura"></select>
++        </div>
++        <div class="field">
++          <label for="techId">ID tecnico</label>
++          <input id="techId" type="number" placeholder="ID tecnico">
++        </div>
++      </div>
++      <div class="field">
++        <label for="startKm">Km inicial</label>
++        <input id="startKm" type="number" placeholder="Km inicial">
+       </div>
+-      <input id="startKm" type="number" placeholder="Km inicial">
+       <button class="btn primary" onclick="startDay()" type="button">Iniciar dia / abrir guia de obra</button>
+       <div class="muted">Se a AT estiver indisponivel, o dia pode iniciar. Fica um alerta para a administracao associar a guia de transporte mais tarde.</div>
+     </section>
+ 
+     <section class="card">
+       <h2>Stock atual</h2>
+-      <input id="vehicleStock" type="number" placeholder="ID viatura para ver stock">
++      <div class="field">
++        <label for="vehicleStock">ID viatura para ver stock</label>
++        <input id="vehicleStock" type="number" placeholder="ID viatura para ver stock">
++      </div>
+       <button class="btn" onclick="loadStock()" type="button">Atualizar stock</button>
+       <div id="stock"></div>
+     </section>
+ 
+     <section class="card">
+       <h2>Registar consumo</h2>
+-      <input id="workGuideId" type="number" placeholder="ID guia obra">
+-      <input id="itemName" placeholder="Produto/material">
+-      <input id="qty" type="number" placeholder="Quantidade">
+-      <input id="visitId" type="number" placeholder="ID visita opcional">
+-      <input id="movementLocation" placeholder="Local/piscina se nao houver visita">
+-      <input id="movementNotes" placeholder="Notas do consumo">
++      <div class="field"><label for="workGuideId">ID guia obra</label><input id="workGuideId" type="number" placeholder="ID guia obra"></div>
++      <div class="field"><label for="itemName">Produto/material</label><input id="itemName" placeholder="Produto/material"></div>
++      <div class="field"><label for="qty">Quantidade</label><input id="qty" type="number" placeholder="Quantidade"></div>
++      <div class="field"><label for="visitId">ID visita opcional</label><input id="visitId" type="number" placeholder="ID visita opcional"></div>
++      <div class="field"><label for="movementLocation">Local/piscina</label><input id="movementLocation" placeholder="Local/piscina se nao houver visita"></div>
++      <div class="field"><label for="movementNotes">Notas do consumo</label><input id="movementNotes" placeholder="Notas do consumo"></div>
+       <button class="btn warn" onclick="consume()" type="button">Consumir material</button>
+     </section>
+ 
+     <section class="card">
+       <h2>Fechar guia</h2>
+-      <input id="closeId" type="number" placeholder="ID guia obra">
+-      <input id="endKm" type="number" placeholder="Km final">
++      <div class="field"><label for="closeId">ID guia obra</label><input id="closeId" type="number" placeholder="ID guia obra"></div>
++      <div class="field"><label for="endKm">Km final</label><input id="endKm" type="number" placeholder="Km final"></div>
+       <button class="btn danger" onclick="closeGuide()" type="button">Fechar dia</button>
+     </section>
+   </main>
+@@ -183,5 +223,6 @@
+   <script src="/ui/core/navigation-context.js"></script>
+   <script src="/crystal-os-v2-shell.js"></script>
+   <script src="/crystal-os-v2-nav.js"></script>
++  <script defer src="/ui/design-system.js"></script>
+ </body>
+ </html>
+diff --git a/frontend/technician-visit.html b/frontend/technician-visit.html
+index 36e6c34..b7c3513 100644
+--- a/frontend/technician-visit.html
++++ b/frontend/technician-visit.html
+@@ -510,6 +510,7 @@
+       }
+     }
+   </style>
++  <link rel="stylesheet" href="/ui/design-system.css">
+ </head>
+ 
+ <body class="cw-tech-visit-page" data-required-role="TECHNICIAN">
+@@ -662,5 +663,6 @@
+   <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+   <script src="/crystal-os-v2-shell.js"></script>
+   <script src="/crystal-os-v2-nav.js"></script>
++  <script defer src="/ui/design-system.js"></script>
+ </body>
+ </html>
+\ No newline at end of file

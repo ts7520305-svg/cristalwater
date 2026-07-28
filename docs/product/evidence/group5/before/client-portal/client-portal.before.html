@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0f1723">
+  <title>Cristal Water LDA - Portal Cliente V2</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/ui/foundation.css">
+  <script src="/cw-auth.js"></script>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <style>
+    html,
+    body {
+      overflow-x: hidden;
+    }
+
+    .portal-shell .cw-v2-main {
+      padding-bottom: 120px;
+    }
+
+    .portal-hero {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .portal-title {
+      display: grid;
+      gap: 8px;
+    }
+
+    .portal-title h1 {
+      margin: 0;
+      font-size: 36px;
+      line-height: 1.06;
+    }
+
+    .portal-title p {
+      margin: 0;
+      color: var(--cw-muted);
+      max-width: 64ch;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .metric {
+      border: 1px solid var(--cw-border);
+      border-radius: 12px;
+      background: #fff;
+      padding: 12px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .metric b {
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .metric span {
+      color: var(--cw-muted);
+      font-size: 12px;
+    }
+
+    .client-focus {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .client-focus-card {
+      border: 1px solid var(--cw-border);
+      border-radius: 12px;
+      background: #fff;
+      padding: 10px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .client-focus-card span {
+      color: var(--cw-muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .client-focus-card b {
+      font-size: 17px;
+      line-height: 1.1;
+    }
+
+    .client-focus-card small {
+      color: var(--cw-muted);
+      font-size: 12px;
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .payment-reference-card {
+      margin-top: 12px;
+      border: 1px solid var(--cw-border);
+      border-radius: 12px;
+      padding: 12px;
+      background: #f8fbff;
+      display: grid;
+      gap: 10px;
+    }
+
+    .payment-reference-code {
+      font-size: 28px;
+      line-height: 1;
+      letter-spacing: 0.02em;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .hint,
+    .payment-help,
+    .service-history-summary,
+    .muted {
+      color: var(--cw-muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .payment-notice-form {
+      display: grid;
+      gap: 8px;
+    }
+
+    .payment-actions,
+    .chat-input {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .payment-help {
+      margin-top: 10px;
+      border: 1px solid var(--cw-border);
+      border-radius: 12px;
+      background: var(--cw-surface-2);
+      padding: 10px;
+    }
+
+    .payment-help b {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--cw-text);
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.1;
+    }
+
+    .list,
+    .grid,
+    .schedule-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .empty {
+      border: 1px dashed var(--cw-border);
+      border-radius: 12px;
+      padding: 12px;
+      color: var(--cw-muted);
+      background: #f9fbfc;
+    }
+
+    .pill {
+      min-height: 30px;
+      border-radius: 999px;
+      padding: 6px 10px;
+      border: 1px solid var(--cw-border);
+      background: #fff;
+      color: #3b4a5d;
+      display: inline-flex;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 700;
+      width: fit-content;
+    }
+
+    .service-history-tools {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr 1fr auto auto;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .service-history-tools[hidden] {
+      display: none;
+    }
+
+    .service-history-tools input,
+    .service-history-tools select,
+    .chat-input input,
+    .payment-notice-form input,
+    .payment-notice-form select,
+    #messageInput,
+    #visitRequestInput {
+      min-height: 48px;
+      border-radius: 12px;
+      border: 1px solid var(--cw-border);
+      padding: 0 10px;
+      background: #fff;
+    }
+
+    .chat-box {
+      min-height: 240px;
+      max-height: 420px;
+      overflow: auto;
+      border: 1px solid var(--cw-border);
+      border-radius: 12px;
+      background: #f9fbfc;
+      padding: 10px;
+    }
+
+    #mensagens .chat-input {
+      grid-template-columns: 1fr;
+    }
+
+    .admin-client-switcher {
+      margin-bottom: 12px;
+      background: #0f1723;
+      border-color: #273244;
+      color: #ecf2fb;
+    }
+
+    .admin-client-switcher .muted,
+    .admin-client-switcher .pill {
+      color: #b8c8dd;
+    }
+
+    .admin-client-tools {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) minmax(220px, 1.4fr) auto auto;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .admin-client-tools input,
+    .admin-client-tools select {
+      min-height: 46px;
+      border-radius: 10px;
+      border: 1px solid #324158;
+      background: #192433;
+      color: #f1f5fb;
+      padding: 0 10px;
+    }
+
+    .admin-client-meta {
+      margin-top: 8px;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .cw-client-top-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    @media (max-width: 1100px) {
+      .portal-hero,
+      .split {
+        grid-template-columns: 1fr;
+      }
+
+      .client-focus {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .service-history-tools {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .admin-client-tools {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px), (pointer: coarse) {
+      .portal-title h1 {
+        font-size: 28px;
+      }
+
+      .metrics,
+      .client-focus,
+      .quick-actions,
+      .payment-actions,
+      .chat-input,
+      .service-history-tools {
+        grid-template-columns: 1fr;
+      }
+
+      .chat-box {
+        min-height: 180px;
+      }
+    }
+  </style>
+  <script src="/client-auth-guard.js"></script>
+  <link rel="stylesheet" href="/ui/design-system.css">
+</head>
+<body class="portal-shell" data-required-role="CLIENT">
+  <div class="cw-v2-app">
+    <aside class="cw-v2-sidebar" aria-label="Navegação do cliente">
+      <div class="cw-v2-brand">
+        <img src="/logo-cristalwater.png" alt="Cristal Water">
+        <div>
+          <b id="brandPortalLabel">Portal do Cliente</b>
+          <small>Crystal OS V2</small>
+        </div>
+      </div>
+      <nav class="cw-v2-nav">
+        <a class="is-active" href="/client-portal" data-shell-search="Visão geral cliente">Início</a>
+        <a href="#piscinas" data-shell-search="Pool status">Pool status</a>
+        <a href="#agenda" data-shell-search="Visits">Visits</a>
+        <a href="#documentsPanel" data-shell-search="Photos reports">Photos / Reports</a>
+        <a href="#faturacao" data-shell-search="Payments">Payments</a>
+        <a href="#mensagens" data-shell-search="Mensagens com administração">Mensagens</a>
+        <a href="#permissionsPanel" data-shell-search="Requests">Requests</a>
+      </nav>
+      <div class="small">Experiência premium simples e calma.</div>
+    </aside>
+
+    <main class="cw-v2-main" data-cw-no-i18n>
+      <header class="cw-v2-topbar">
+        <div class="cw-v2-search">
+          <input data-cw-search-input type="search" placeholder="Pesquisar relatório, fatura, mensagem ou visita">
+          <span class="icon">⌕</span>
+          <div class="cw-v2-search-results" data-cw-search-results></div>
+        </div>
+        <div class="cw-client-top-right">
+          <select id="cwLanguageSelect" class="cw-v2-btn" aria-label="Idioma">
+            <option value="pt">PT</option>
+            <option value="en">EN</option>
+            <option value="fr">FR</option>
+          </select>
+          <span class="cw-v2-pill cw-v2-offline" data-offline-indicator>Online</span>
+          <button class="cw-v2-btn" id="portalLogoutBtn" onclick="logout()">Sair</button>
+        </div>
+      </header>
+
+      <section class="cw-v2-card admin-client-switcher" id="adminClientSwitcher" hidden>
+        <div class="section-head">
+          <div>
+            <h2 id="adminSwitcherTitle">Ver portal de cliente</h2>
+            <div class="muted">Área de administrador. Escolha o cliente para confirmar agenda, serviços, mensagens e conta corrente.</div>
+          </div>
+          <span class="pill" id="adminSwitcherBadge">Admin</span>
+        </div>
+        <div class="admin-client-tools">
+          <input id="adminClientSearch" placeholder="Pesquisar por nome, telefone, email, zona ou referência">
+          <select id="adminClientSelect" aria-label="Escolher cliente">
+            <option value="">Escolher cliente...</option>
+          </select>
+          <a class="cw-v2-btn" id="adminOpenClientFile" href="/admin-clients">Ficha cliente</a>
+          <a class="cw-v2-btn" id="adminOpenAccount" href="/invoices">Conta corrente</a>
+        </div>
+        <div class="admin-client-meta" id="adminClientMeta"></div>
+      </section>
+
+      <section class="portal-hero">
+        <article class="cw-v2-card">
+          <div class="portal-title" aria-label="Resumo principal do cliente">
+            <span class="cw-v2-pill" id="useStatus">A carregar estado...</span>
+            <h1 id="clientName">Cliente</h1>
+            <p id="portalIntro">Acompanhe estado da piscina, visitas, relatórios, pagamentos e mensagens num único espaço simples.</p>
+          </div>
+          <div class="metrics">
+            <div class="metric"><b id="poolCount">0</b><span id="poolCountLabel">Piscinas / jacuzzis</span></div>
+            <div class="metric"><b id="paymentState">-</b><span id="paymentStateLabel">Estado financeiro</span></div>
+            <div class="metric"><b id="nextVisit">-</b><span id="nextVisitLabel">Próxima visita</span></div>
+          </div>
+          <div class="client-focus" id="clientFocusPanel">
+            <div class="client-focus-card"><span>Condição</span><b>A confirmar</b><small>Estado atual da piscina</small></div>
+            <div class="client-focus-card"><span>Próxima visita</span><b>-</b><small>Planeamento</small></div>
+            <div class="client-focus-card"><span>Último serviço</span><b>-</b><small>Resumo recente</small></div>
+            <div class="client-focus-card"><span>Mensagens</span><b>Canal direto</b><small>Administração</small></div>
+          </div>
+        </article>
+
+        <aside class="cw-v2-card">
+          <div class="section-head"><h2 id="quickAccessTitle">Acesso rápido</h2><span class="pill" id="quickAccessRole">Cliente</span></div>
+          <div class="quick-actions">
+            <a class="cw-v2-btn primary" id="quickMessageLink" href="#mensagens" data-shell-search="Enviar mensagem">Messages</a>
+            <a class="cw-v2-btn" id="quickAgendaLink" href="#agenda" data-shell-search="Ver visits">Visits</a>
+            <a class="cw-v2-btn" id="quickPaymentsLink" href="#faturacao" data-shell-search="Ver payments">Payments</a>
+            <a class="cw-v2-btn" id="quickServicesLink" href="#documentsPanel" data-shell-search="Ver photos reports">Photos / Reports</a>
+          </div>
+
+          <div class="payment-reference-card" id="paymentReferenceCard">
+            <span class="pill" id="paymentReferenceLabel">Referência de pagamento</span>
+            <div class="payment-reference-code" id="paymentReference">CW-000000</div>
+            <div class="hint" id="paymentInstructions">Ao pagar, indique sempre esta referência.</div>
+            <div class="payment-notice-form">
+              <input id="paymentNoticeAmount" type="number" min="0" step="0.01" placeholder="Valor pago / transferido">
+              <select id="paymentNoticeMethod">
+                <option value="Transferencia">Transferência</option>
+                <option value="MBWay">MBWay</option>
+                <option value="Dinheiro">Dinheiro</option>
+                <option value="Multibanco">Multibanco</option>
+                <option value="Outro">Outro</option>
+              </select>
+              <input id="paymentNoticeNote" placeholder="Nota ou referência do comprovativo">
+              <div class="payment-actions">
+                <button class="cw-v2-btn primary" id="paymentNoticeBtn" type="button">Avisar pagamento</button>
+                <a class="cw-v2-btn" id="paymentWhatsappLink" target="_blank" rel="noopener">WhatsApp</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="payment-help" id="paymentHelpText"><b>Instruções de pagamento:</b>Use sempre a referência acima no pagamento. Depois clique em Avisar pagamento ou envie WhatsApp com a referência e o comprovativo.</div>
+        </aside>
+      </section>
+
+      <section class="cw-v2-card" id="agenda">
+        <div class="section-head"><h2 id="scheduleTitle">Próximas visitas</h2><span class="pill" id="scheduleLang">PT</span></div>
+        <div class="schedule-grid" id="poolScheduleList"><div class="empty">A carregar agendamento...</div></div>
+      </section>
+
+      <section class="split">
+        <section class="cw-v2-card" id="piscinas">
+          <div class="section-head"><h2 id="poolsTitle">Piscinas</h2><span class="pill" id="poolsPill">Manutenção</span></div>
+          <div class="list" id="poolsList"><div class="empty">A carregar piscinas...</div></div>
+        </section>
+        <section class="cw-v2-card" id="resumo">
+          <div class="section-head"><h2 id="summaryTitle">Conta resumida</h2><span class="pill" id="summaryPill">Conta</span></div>
+          <div class="list" id="summaryList"><div class="empty">A carregar resumo...</div></div>
+        </section>
+      </section>
+
+      <section class="split">
+        <section class="cw-v2-card" id="servicos">
+          <div class="section-head"><h2 id="servicesTitle">Serviços recentes</h2><span class="pill" id="servicesPill">Histórico</span></div>
+          <div class="service-history-tools" id="serviceHistoryTools" hidden>
+            <input id="serviceHistorySearch" placeholder="Pesquisar por piscina, técnico, produto ou nota">
+            <select id="serviceHistoryPool" aria-label="Piscina"><option value="">Todas as piscinas</option></select>
+            <select id="serviceHistoryPeriod" aria-label="Período">
+              <option value="all">Todos</option>
+              <option value="day">Dia</option>
+              <option value="week">Semana</option>
+              <option value="month">Mês</option>
+              <option value="year">Ano</option>
+            </select>
+            <input id="serviceHistoryDate" type="date" aria-label="Data de referência">
+            <button class="cw-v2-btn" id="serviceHistoryDownload" type="button">Download</button>
+          </div>
+          <div class="service-history-summary" id="serviceHistorySummary" hidden></div>
+          <div class="list" id="serviceHistoryList"><div class="empty">A carregar serviços...</div></div>
+        </section>
+        <section class="cw-v2-card" id="faturacao">
+          <div class="section-head"><h2 id="billingTitle">Faturas e pagamentos</h2><span class="pill" id="billingPill">Conta</span></div>
+          <div class="list" id="invoiceList"><div class="empty">A carregar faturação...</div></div>
+        </section>
+      </section>
+
+      <section class="split">
+        <section class="cw-v2-card" id="notificationsPanel">
+          <div class="section-head"><h2 id="notificationsTitle">Notificações</h2><span class="pill" id="notificationsPill">Atualizações</span></div>
+          <div class="list" id="notificationList"><div class="empty">A carregar notificações...</div></div>
+        </section>
+        <section class="cw-v2-card" id="documentsPanel">
+          <div class="section-head"><h2 id="documentsTitle">Relatórios e documentos</h2><span class="pill" id="documentsPill">PDF</span></div>
+          <div class="list" id="documentList"><div class="empty">A carregar documentos...</div></div>
+        </section>
+      </section>
+
+      <section class="cw-v2-card" id="permissionsPanel">
+        <div class="section-head"><h2 id="permissionsTitle">Pedidos</h2><span class="pill" id="permissionsPill">Suporte</span></div>
+        <div class="grid" id="permissionsList"><div class="empty">A carregar permissões...</div></div>
+        <div class="payment-help" style="margin-top:10px"><b>Pedido de visita</b>Use este formulário para solicitar uma nova visita ou prioridade de acompanhamento.</div>
+        <div class="chat-input" style="margin-top:10px">
+          <input type="text" id="visitRequestInput" placeholder="Descreva o pedido de visita ou a prioridade desejada">
+          <button class="cw-v2-btn primary" id="visitRequestBtn" type="button">Solicitar visita</button>
+        </div>
+      </section>
+
+      <section class="cw-v2-card" id="mensagens" aria-label="Mensagens com administração">
+        <div class="section-head"><h2 id="messagesTitle">Mensagens com a equipa</h2><span class="pill" id="adminStatusText">A verificar</span></div>
+        <div class="chat-box" id="chatBox"></div>
+        <div id="typing" class="muted" style="min-height:20px;margin-top:6px"></div>
+        <div class="chat-input" style="margin-top:8px">
+          <input type="text" id="messageInput" placeholder="Escreva a sua mensagem...">
+          <input type="file" id="photoInput" accept="image/*" hidden>
+          <button class="cw-v2-btn" id="photoBtn" type="button">Anexo</button>
+          <button class="cw-v2-btn primary" id="sendBtn" type="button">Enviar</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <nav class="cw-v2-mobile-nav" aria-label="Navegação móvel">
+    <a class="is-active" href="/client-portal">Início</a>
+    <a href="#piscinas">Pool</a>
+    <a href="#agenda">Visits</a>
+    <a href="#documentsPanel">Reports</a>
+    <a href="#faturacao">Payments</a>
+    <a href="#mensagens">Mensagens</a>
+  </nav>
+
+  <script src="/cw-ui-feedback.js"></script>
+  <script src="/client-portal.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
+  <script defer src="/ui/design-system.js"></script>
+</body>
+</html>

@@ -9,130 +9,91 @@
   <link rel="stylesheet" href="/ui/foundation.css">
   <style>
     html, body { overflow-x: hidden; }
-    body { margin:0; font-family:Inter,Segoe UI,Arial,sans-serif; background:#f4f6f8; padding:16px; color:#1f2937; }
-
-    h1 { margin-top: 0; }
-
-    .topbar {
+    .finance-shell {
+      padding: 16px;
+      display: grid;
+      gap: 16px;
+    }
+    .finance-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .finance-head h1 { margin: 0; }
+    .finance-nav,
+    .finance-toolbar {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
-      margin-bottom: 20px;
     }
-
-    .action-btn {
-      display: inline-flex;
+    .finance-toolbar {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) 210px auto;
       align-items: center;
+    }
+    .finance-filters {
+      display: grid;
       gap: 8px;
-      border: none;
-      border-radius: 10px;
-      padding: 12px 14px;
-      background: #2563eb;
-      color: white;
-      font-weight: bold;
-      text-decoration: none;
-      cursor: pointer;
     }
-
-    .panel {
-      background: white;
-      border-radius: 14px;
-      padding: 18px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    .finance-filters label {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--ds-text-muted);
     }
-
-    .toolbar {
-      display:grid;
-      grid-template-columns:minmax(220px,1fr) 180px auto;
-      gap:10px;
-      margin-bottom:12px;
-    }
-
-    input, select {
-      min-height: 44px;
-      border:1px solid #d1d5db;
-      border-radius:10px;
-      padding:10px;
-      font-size:14px;
-    }
-
-    .status {
-      border:1px solid #d5dde8;
-      background:#f9fbff;
-      color:#334155;
-      border-radius:10px;
-      padding:10px 12px;
-      margin-bottom:12px;
-      font-weight:700;
-    }
-
-    .status.error { border-color:#efc0c7; background:#fff3f5; color:#8b1f2a; }
-    .status.ok { border-color:#b9e2ca; background:#f2fbf6; color:#165434; }
-
-    .table-wrap { width:100%; overflow-x:auto; }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 980px;
-    }
-
-    th, td {
-      text-align: left;
-      padding: 12px;
-      border-bottom: 1px solid #e5e7eb;
-      font-size: 14px;
-    }
-
-    th { background: #f9fafb; }
-
-    .empty {
-      color: #6b7280;
-      padding: 14px 0;
-    }
-
-    .mini-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      border: none;
-      border-radius: 8px;
-      padding: 8px 10px;
-      background: #7c3aed;
-      color: white;
-      cursor: pointer;
-      font-weight: bold;
+    @media (max-width: 920px) {
+      .finance-toolbar {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
   <script src="/admin-auth-guard.js"></script>
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+  <link rel="stylesheet" href="/ui/design-system.css">
 </head>
 <body data-required-role="ADMIN">
 
-  <h1>Pagamentos</h1>
+  <main>
+    <section class="finance-shell page">
+      <header class="card finance-head">
+        <div>
+          <h1>Pagamentos</h1>
+          <p class="text-muted">Controlo de pagamentos, filtros por metodo e acesso rapido ao cliente.</p>
+        </div>
+        <div class="finance-nav">
+          <a class="cw-v2-btn" href="/admin-master-control">Centro</a>
+          <a class="cw-v2-btn" href="/admin-notifications">Notificacoes</a>
+          <a class="cw-v2-btn" href="/billing-center">Cobrancas</a>
+        </div>
+      </header>
 
-  <div class="topbar">
-    <a class="action-btn" href="/admin-master-control"><span>🏠</span><span>Centro</span></a>
-    <a class="action-btn" href="/admin-notifications"><span>🔔</span><span>Notificações</span></a>
-    <a class="action-btn" href="/billing-center"><span>💶</span><span>Cobranças</span></a>
-  </div>
-
-  <div class="panel">
-    <div class="toolbar">
-      <input id="paymentSearch" type="search" placeholder="Pesquisar cliente, referencia ou metodo">
-      <select id="paymentMethodFilter">
-        <option value="">Todos os metodos</option>
-        <option value="MBWAY">MB WAY</option>
-        <option value="TRANSFER">Transferencia</option>
-        <option value="CASH">Numerario</option>
-        <option value="CARD">Cartao</option>
-      </select>
-      <button class="action-btn" id="refreshPayments" type="button"><span>Atualizar</span></button>
+      <section class="card">
+    <div class="finance-toolbar">
+      <div class="finance-filters">
+        <label for="paymentSearch">Pesquisa</label>
+        <input id="paymentSearch" type="search" placeholder="Pesquisar cliente, referencia ou metodo">
+      </div>
+      <div class="finance-filters">
+        <label for="paymentMethodFilter">Metodo de pagamento</label>
+        <select id="paymentMethodFilter">
+          <option value="">Todos os metodos</option>
+          <option value="MBWAY">MB WAY</option>
+          <option value="TRANSFER">Transferencia</option>
+          <option value="CASH">Numerario</option>
+          <option value="CARD">Cartao</option>
+        </select>
+      </div>
+      <button class="cw-v2-btn primary" id="refreshPayments" type="button"><span>Atualizar</span></button>
     </div>
     <div id="paymentsStatus" class="status" role="status" aria-live="polite">A carregar pagamentos...</div>
     <div id="tableBox"></div>
-  </div>
+      </section>
+    </section>
+  </main>
 
   <script src="/admin-payments.js"></script>
 <script src="/cristal-help-data.js"></script>
@@ -142,5 +103,6 @@
 <script src="/ui/core/navigation-context.js"></script>
   <script src="/crystal-os-v2-shell.js"></script>
   <script src="/crystal-os-v2-nav.js"></script>
+  <script defer src="/ui/design-system.js"></script>
 </body>
 </html>

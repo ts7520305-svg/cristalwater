@@ -14,109 +14,207 @@
   <style>
     html, body { overflow-x: hidden; }
 
+    :root {
+      --client-s-1: 8px;
+      --client-s-2: 10px;
+      --client-s-3: 12px;
+      --client-s-4: 16px;
+      --client-s-5: 20px;
+      --client-r-card: 16px;
+      --client-r-control: 12px;
+    }
+
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #e3f2fd;
-      color: #1f2933;
+      font-family: var(--ds-font, "Manrope", "Segoe UI", sans-serif);
+      color: #183046;
+      background:
+        radial-gradient(circle at 0% 0%, #ffffff 0%, #eef5fb 46%, #e5eef8 100%);
     }
 
-    header {
-      background: white;
-      border-bottom: 3px solid #1e88e5;
-      padding: 20px;
+    .client-shell {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: var(--client-s-4);
+      display: grid;
+      gap: var(--client-s-4);
+    }
+
+    .client-top {
+      border: 1px solid #cbd9e8;
+      border-radius: var(--client-r-card);
+      background: linear-gradient(135deg, #ffffff 0%, #f4f9ff 100%);
+      box-shadow: 0 14px 32px rgba(12, 34, 58, 0.09);
+      padding: var(--client-s-4);
+      display: grid;
+      gap: var(--client-s-3);
+    }
+
+    .client-brand {
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: var(--client-s-3);
+      flex-wrap: wrap;
     }
 
-    header img {
-      height: 70px;
+    .client-brand img {
+      height: 56px;
+      width: auto;
     }
 
-    header h1 {
+    .client-brand h1 {
       margin: 0;
-      font-size: 26px;
-      color: #1e88e5;
+      font-size: 32px;
+      line-height: 1.03;
+      letter-spacing: -0.02em;
+      color: #11406f;
     }
 
-    header p {
-      margin: 4px 0 0 0;
-      color: #555;
+    .client-brand p {
+      margin: 4px 0 0;
+      color: #4f667d;
       font-size: 14px;
     }
 
-    main {
-      padding: 25px;
+    .client-nav-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .client-nav-actions .cw-btn,
+    .card a {
+      min-height: 42px;
+      border: 1px solid #bfcfe0;
+      border-radius: var(--client-r-control);
+      padding: 9px 12px;
+      background: #fff;
+      color: #1e4f7d;
+      font-weight: 800;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .client-nav-actions .cw-btn.primary,
+    .card a {
+      background: linear-gradient(135deg, #1d75da, #22a0f1);
+      border-color: #1d75da;
+      color: #fff;
+    }
+
+    .client-nav-actions .cw-btn:hover,
+    .card a:hover {
+      filter: brightness(0.95);
+      text-decoration: none;
+    }
+
+    .client-kpi-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--client-s-2);
+    }
+
+    .client-kpi {
+      border: 1px solid #cbd9e8;
+      border-radius: var(--client-r-control);
+      background: #f8fbff;
+      padding: 10px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .client-kpi b {
+      font-size: 24px;
+      line-height: 1;
+      color: #154979;
+    }
+
+    .client-kpi span {
+      font-size: 12px;
+      color: #567086;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--client-s-3);
     }
 
     .card {
-      background: white;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-      border-top: 4px solid #1e88e5;
+      border: 1px solid #cbdaea;
+      border-radius: var(--client-r-card);
+      background: #fff;
+      padding: var(--client-s-4);
+      box-shadow: 0 10px 28px rgba(18, 42, 66, 0.08);
+      display: grid;
+      gap: 8px;
     }
 
     .card h3 {
-      margin-top: 0;
-      color: #1e88e5;
+      margin: 0;
+      color: #155082;
+      font-size: 21px;
+      line-height: 1.1;
     }
 
     .card p {
+      margin: 0;
       font-size: 14px;
-      color: #555;
-    }
-
-    .card a {
-      display: inline-block;
-      margin-top: 12px;
-      padding: 8px 14px;
-      background: #1e88e5;
-      color: white;
-      text-decoration: none;
-      border-radius: 4px;
-      font-weight: bold;
-      font-size: 14px;
-    }
-
-    .card a:hover {
-      background: #1565c0;
+      color: #5b7288;
+      line-height: 1.35;
     }
 
     footer {
       text-align: center;
-      padding: 15px;
+      padding: 8px 0;
       font-size: 12px;
-      color: #555;
+      color: #5e7488;
+    }
+
+    @media (max-width: 960px) {
+      .grid,
+      .client-kpi-row {
+        grid-template-columns: 1fr;
+      }
+
+      .client-shell {
+        padding: var(--client-s-3);
+      }
     }
   </style>
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
+  <link rel="stylesheet" href="/ui/design-system.css">
 </head>
 
 <body data-cw-role="CLIENT" data-required-role="CLIENT">
 
-<header>
-  <img src="/logo.png" alt="Cristal Water">
-  <div>
-    <h1>Cristal Water</h1>
-    <p>Área do Cliente</p>
-  </div>
-</header>
+<main class="client-shell">
 
-<main>
+  <section class="client-top">
+    <div class="client-brand">
+      <img src="/logo.png" alt="Cristal Water">
+      <div>
+        <h1>Cristal Water</h1>
+        <p>Área do Cliente</p>
+      </div>
+    </div>
 
-  <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;">
-    <button type="button" data-cw-back data-cw-fallback="/client-portal" style="border:none;border-radius:8px;padding:10px 12px;background:#1e88e5;color:#fff;font-weight:700;cursor:pointer;">Voltar</button>
-    <a href="/client-portal" style="display:inline-block;padding:10px 12px;background:#1565c0;color:#fff;border-radius:8px;text-decoration:none;font-weight:700;">Portal</a>
-  </div>
+    <div class="client-nav-actions">
+      <button class="cw-btn" type="button" data-cw-back data-cw-fallback="/client-portal">Voltar</button>
+      <a class="cw-btn primary" href="/client-portal">Portal</a>
+    </div>
+
+    <div class="client-kpi-row" aria-label="Resumo rápido do cliente">
+      <div class="client-kpi"><b>3</b><span>Módulos principais</span></div>
+      <div class="client-kpi"><b>24h</b><span>Canal de mensagens</span></div>
+      <div class="client-kpi"><b>1 clique</b><span>Acesso aos pagamentos</span></div>
+    </div>
+  </section>
 
   <div class="grid">
 
@@ -140,11 +238,10 @@
 
   </div>
 
+  <footer>
+    © Cristal Water · Swimming Pools
+  </footer>
 </main>
-
-<footer>
-  ©️ Cristal Water · Swimming Pools
-</footer>
 
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
@@ -152,5 +249,6 @@
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
   <script src="/crystal-os-v2-shell.js"></script>
   <script src="/crystal-os-v2-nav.js"></script>
+  <script defer src="/ui/design-system.js"></script>
 </body>
 </html>

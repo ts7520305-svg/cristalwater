@@ -2,6 +2,7 @@ html,
 body {
   font-family: var(--cw-font-family);
   color: var(--cw-color-text);
+  line-height: var(--cw-line-body);
 }
 
 h1,
@@ -10,25 +11,46 @@ h3,
 h4,
 h5,
 h6 {
-  margin: 0;
+  margin: 0 0 var(--cw-space-2);
   letter-spacing: -0.01em;
+  color: var(--cw-color-text);
 }
 
 h1 {
-  font-size: clamp(26px, 3vw, 36px);
-  line-height: 1.08;
+  font-size: var(--cw-font-size-h1);
+  line-height: var(--cw-line-tight);
+  font-weight: var(--cw-font-weight-heavy);
 }
 
 h2 {
-  font-size: clamp(18px, 2vw, 24px);
-  line-height: 1.18;
+  font-size: var(--cw-font-size-h2);
+  line-height: var(--cw-line-title);
+  font-weight: var(--cw-font-weight-bold);
+}
+
+h3 {
+  font-size: var(--cw-font-size-h3);
+  line-height: var(--cw-line-title);
+  font-weight: var(--cw-font-weight-bold);
 }
 
 p,
 .muted,
 .small {
-  font-size: var(--cw-font-size-sm);
+  font-size: var(--cw-font-size-md);
+  line-height: var(--cw-line-body);
   color: var(--cw-color-text-soft);
+}
+
+small,
+.small {
+  font-size: var(--cw-font-size-sm);
+}
+
+label,
+.cw-label {
+  font-weight: var(--cw-font-weight-bold);
+  letter-spacing: 0.02em;
 }
 
 a {

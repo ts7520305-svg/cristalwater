@@ -11,64 +11,73 @@
   <link rel="stylesheet" href="/cw-os-admin.css">
   <link rel="stylesheet" href="/ui/foundation.css">
   <style>
-    :root{--bg:#06111f;--panel:#0d1d31;--panel2:#10243c;--line:#24415f;--txt:#e9f5ff;--muted:#8fb1cc;--brand:#35d1ff;--ok:#40e6a0;--warn:#ffd166;--bad:#ff6b6b;--input:#091829}
-    *{box-sizing:border-box}
-    body{margin:0;background:linear-gradient(120deg,#06111f,#0b1f33 55%,#06111f);color:var(--txt);font-family:Inter,Segoe UI,Arial,sans-serif}
-    main.page{max-width:1450px;margin:0 auto;padding:24px}
+    body{margin:0}
+    main.page{max-width:1320px;margin:0 auto;padding:24px;display:grid;gap:14px}
     .page-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px}
     .page-head h1{margin:0;font-size:30px}
-    .page-head p{margin:6px 0 0;color:var(--muted)}
+    .page-head p{margin:6px 0 0;color:var(--ds-text-muted)}
     .actions{display:flex;gap:8px;flex-wrap:wrap}
-    .btn,button{border:0;border-radius:14px;padding:12px 16px;background:#163354;color:var(--txt);font-weight:800;cursor:pointer;text-decoration:none}
-    button.primary,.btn.primary{background:linear-gradient(135deg,#0584c7,#35d1ff);color:#03121c}
     .grid{display:grid;gap:14px}
     .metrics{grid-template-columns:repeat(5,minmax(140px,1fr));margin-bottom:16px}
-    .metric-card{background:rgba(13,29,49,.92);border:1px solid var(--line);border-radius:18px;padding:16px}
+    .metric-card{padding:16px}
     .metric-card strong{display:block;font-size:30px;line-height:1}
-    .metric-card span{display:block;color:var(--muted);font-size:13px;margin-top:8px}
-    .panel{background:rgba(13,29,49,.92);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.22)}
+    .metric-card span{display:block;color:var(--ds-text-muted);font-size:13px;margin-top:8px}
     .toolbar{display:grid;grid-template-columns:1.5fr repeat(2,minmax(170px,1fr)) auto auto;gap:10px;align-items:center}
-    input,select{width:100%;background:var(--input);color:var(--txt);border:1px solid var(--line);border-radius:14px;padding:12px}
-    .alerts-status{border:1px solid rgba(53,217,255,.22);background:rgba(53,217,255,.08);padding:12px;border-radius:16px;color:#cfe9ff;margin:14px 0}
-    .alerts-status.error{border-color:rgba(255,107,107,.42);background:rgba(255,107,107,.12)}
-    .alerts-status.ok{border-color:rgba(64,230,160,.35);background:rgba(64,230,160,.1)}
-    .summary-line{display:flex;justify-content:space-between;align-items:center;gap:12px;color:#bfe4ff;font-size:13px;margin:12px 0}
+    .alerts-status{padding:12px;margin:14px 0}
+    .alerts-status.error{border-color:color-mix(in srgb, var(--ds-danger) 35%, white);background:#fff5f5;color:#7f2326}
+    .alerts-status.ok{border-color:color-mix(in srgb, var(--ds-success) 40%, white);background:#f2faf5;color:#185c33}
+    .summary-line{display:flex;justify-content:space-between;align-items:center;gap:12px;color:var(--ds-text-muted);font-size:13px;margin:12px 0}
     .alerts-list{display:grid;gap:12px}
-    .alert-card{display:grid;grid-template-columns:1fr auto;gap:16px;background:#0a1b2e;border:1px solid var(--line);border-radius:18px;padding:16px}
-    .alert-card.priority-critical{border-color:rgba(255,107,107,.55);background:linear-gradient(135deg,rgba(255,107,107,.12),#0a1b2e 45%)}
-    .alert-card.priority-warning{border-color:rgba(255,209,102,.42);background:linear-gradient(135deg,rgba(255,209,102,.1),#0a1b2e 45%)}
-    .alert-card h3{margin:8px 0 6px;font-size:18px}
-    .alert-card p{margin:0;color:#d7edff;line-height:1.45}
+    .alerts-list > article{display:grid;grid-template-columns:1fr auto;gap:16px;background:var(--ds-surface-soft);border:1px solid var(--ds-border);border-radius:18px;padding:16px}
+    .alerts-list > article[data-alert-priority="critical"]{border-color:color-mix(in srgb, var(--ds-danger) 45%, white);background:linear-gradient(135deg,#fff1f1,var(--ds-surface-soft) 45%)}
+    .alerts-list > article[data-alert-priority="warning"]{border-color:color-mix(in srgb, var(--ds-warning) 50%, white);background:linear-gradient(135deg,#fff8e8,var(--ds-surface-soft) 45%)}
+    .alerts-list > article h3{margin:8px 0 6px;font-size:18px}
+    .alerts-list > article p{margin:0;color:var(--ds-text);line-height:1.45}
     .alert-topline,.alert-meta,.alert-actions{display:flex;gap:8px;flex-wrap:wrap}
-    .alert-source,.alert-priority,.alert-status{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;padding:5px 9px;color:#bfe4ff;background:#071728;font-size:12px}
-    .alert-priority{border-color:rgba(53,217,255,.3)}
-    .priority-critical .alert-priority{border-color:rgba(255,107,107,.5);color:#ffd7dd;background:rgba(255,107,107,.12)}
-    .priority-warning .alert-priority{border-color:rgba(255,209,102,.5);color:#fff0c2;background:rgba(255,209,102,.1)}
-    .alert-meta{margin-top:12px;color:#9fc6df;font-size:13px}
-    .alert-meta .missing{color:#ffd166}
+    .alert-source,.alert-priority,.alert-status{display:inline-flex;align-items:center;border:1px solid var(--ds-border);border-radius:999px;padding:5px 9px;color:var(--ds-text-muted);background:var(--ds-surface);font-size:12px}
+    [data-alert-priority="critical"] .alert-priority{border-color:color-mix(in srgb, var(--ds-danger) 45%, white);color:#8a2023;background:#fff2f2}
+    [data-alert-priority="warning"] .alert-priority{border-color:color-mix(in srgb, var(--ds-warning) 45%, white);color:#805200;background:#fff7e8}
+    .alert-meta{margin-top:12px;color:var(--ds-text-muted);font-size:13px}
+    .alert-meta .missing{color:#9a6700}
     .alert-actions{align-content:flex-start;justify-content:flex-end;min-width:150px}
-    .alert-actions .note{background:#1f4f7a}
-    .alert-actions .resolve{background:linear-gradient(135deg,#0c9f69,#40e6a0);color:#02150d}
-    .alert-detail{margin-top:12px;padding:12px;border:1px solid rgba(143,177,204,.18);border-radius:14px;background:rgba(4,13,24,.42);display:grid;gap:9px}
-    .alert-detail.empty{color:#9fc6df;font-size:13px}
-    .detail-row{display:grid;grid-template-columns:minmax(120px,.24fr) 1fr;gap:10px;color:#cfe9ff;line-height:1.35}
-    .detail-row b{color:#9fc6df}
+    .alert-actions .note{background:#eaf3ff}
+    .alert-actions .resolve{background:linear-gradient(135deg,var(--ds-success),#6ad69a);color:#05361b;border-color:transparent}
+    .alert-detail{margin-top:12px;padding:12px;border:1px solid var(--ds-border);border-radius:14px;background:var(--ds-surface);display:grid;gap:9px}
+    .alert-detail.empty{color:var(--ds-text-muted);font-size:13px}
+    .detail-row{display:grid;grid-template-columns:minmax(120px,.24fr) 1fr;gap:10px;color:var(--ds-text);line-height:1.35}
+    .detail-row b{color:var(--ds-text-muted)}
     .detail-row.compact{font-size:13px}
     .alert-readings{display:flex;gap:8px;flex-wrap:wrap}
-    .alert-readings span{border:1px solid rgba(53,217,255,.24);background:rgba(53,217,255,.08);border-radius:999px;padding:6px 9px;color:#d7f6ff;font-size:12px}
+    .alert-readings span{border:1px solid var(--ds-border);background:var(--ds-surface-soft);border-radius:999px;padding:6px 9px;color:var(--ds-text);font-size:12px}
     .alert-media{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-    .alert-media img{width:86px;height:64px;object-fit:cover;border-radius:10px;border:1px solid rgba(143,177,204,.32);background:#071728}
-    .attachment-link{display:inline-flex;align-items:center;min-height:34px;padding:8px 10px;border-radius:10px;background:#10243c;border:1px solid var(--line);color:#cfe9ff;text-decoration:none;font-weight:800;font-size:12px}
-    .empty-alerts{border:1px dashed var(--line);border-radius:18px;padding:18px;color:#bfe4ff;background:rgba(10,27,46,.72)}
-    .empty-alerts strong{display:block;color:var(--txt);font-size:18px;margin-bottom:6px}
-    @media(max-width:1100px){main.page{padding:14px}.metrics,.toolbar{grid-template-columns:1fr 1fr}.alert-card{grid-template-columns:1fr}.alert-actions{justify-content:flex-start}}
-    @media(max-width:700px){.metrics,.toolbar,.detail-row{grid-template-columns:1fr}.page-head{flex-direction:column}}
+    .alert-media img{width:86px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--ds-border);background:#f5fbff}
+    .attachment-link{display:inline-flex;align-items:center;min-height:34px;padding:8px 10px;border-radius:10px;background:var(--ds-surface-soft);border:1px solid var(--ds-border);color:var(--ds-text);text-decoration:none;font-weight:800;font-size:12px}
+    .empty-alerts{border:1px dashed var(--ds-border);border-radius:18px;padding:18px;color:var(--ds-text-muted);background:var(--ds-surface-soft)}
+    .empty-alerts strong{display:block;color:var(--ds-text);font-size:18px;margin-bottom:6px}
+    .alert-back{padding:12px 16px 0}
+    .filter-field{display:grid;gap:8px}
+    .filter-field label{font-size:12px;font-weight:800;color:var(--ds-text-muted)}
+    .repair-modal[hidden]{display:none}
+    .repair-modal{position:fixed;inset:0;z-index:1200;display:grid;place-items:center;padding:16px;background:rgba(5,11,22,.52)}
+    .repair-dialog{width:min(720px,100%);max-height:92vh;overflow:auto;background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:18px;padding:18px;display:grid;gap:12px}
+    .repair-dialog h2{margin:0;font-size:24px}
+    .repair-form-grid{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+    .repair-form-grid .full{grid-column:1/-1}
+    .repair-field{display:grid;gap:6px}
+    .repair-field label{font-size:12px;font-weight:800;color:var(--ds-text-muted)}
+    .repair-field input,.repair-field select,.repair-field textarea{width:100%}
+    .repair-hint{font-size:12px;color:var(--ds-text-muted)}
+    .repair-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+    .repair-check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ds-text)}
+    @media(max-width:1100px){main.page{padding:14px}.metrics,.toolbar{grid-template-columns:1fr 1fr}.alerts-list > article{grid-template-columns:1fr}.alert-actions{justify-content:flex-start}}
+    @media(max-width:700px){.metrics,.toolbar,.detail-row,.repair-form-grid{grid-template-columns:1fr}.page-head{flex-direction:column}}
   </style>
   <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+  <link rel="stylesheet" href="/ui/design-system.css">
 </head>
 <body data-required-role="ADMIN">
-  <div style="padding:12px 16px 0">
+  <div class="alert-back">
     <button type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
   </div>
   <main class="page">
@@ -78,37 +87,47 @@
         <p>Problemas tecnicos, visitas impedidas, pedidos de stock, agua aberta e avisos criticos.</p>
       </div>
       <div class="actions">
-        <a class="btn" href="/admin-master-control">Centro de Operacoes</a>
-        <button id="refreshAlerts" class="primary" type="button">Atualizar</button>
+        <a class="cw-v2-btn" href="/admin-master-control">Centro de Operacoes</a>
+        <button id="openRepairModal" class="cw-v2-btn" type="button">Nova reparacao</button>
+        <button id="refreshAlerts" class="cw-v2-btn primary" type="button">Atualizar</button>
       </div>
     </div>
 
     <section class="grid metrics">
-      <div class="metric-card"><strong id="alertsTotal">0</strong><span>Total visivel</span></div>
-      <div class="metric-card"><strong id="alertsCritical">0</strong><span>Criticos</span></div>
-      <div class="metric-card"><strong id="alertsTechnical">0</strong><span>Alertas tecnicos</span></div>
-      <div class="metric-card"><strong id="alertsVisits">0</strong><span>Visitas com problema</span></div>
-      <div class="metric-card"><strong id="alertsNotifications">0</strong><span>Notificacoes</span></div>
+      <div class="metric-card card"><strong id="alertsTotal">0</strong><span>Total visivel</span></div>
+      <div class="metric-card card"><strong id="alertsCritical">0</strong><span>Criticos</span></div>
+      <div class="metric-card card"><strong id="alertsTechnical">0</strong><span>Alertas tecnicos</span></div>
+      <div class="metric-card card"><strong id="alertsVisits">0</strong><span>Visitas com problema</span></div>
+      <div class="metric-card card"><strong id="alertsNotifications">0</strong><span>Notificacoes</span></div>
     </section>
 
-    <section class="panel">
+    <section class="card">
       <div class="toolbar">
-        <input id="alertSearch" placeholder="Pesquisar por cliente, piscina, tecnico, tipo ou texto do alerta">
-        <select id="alertPriorityFilter">
-          <option value="">Todas as prioridades</option>
-          <option value="CRITICAL">Criticos</option>
-          <option value="WARNING">Atencao</option>
-          <option value="NORMAL">Normal</option>
-          <option value="LOW">Baixo</option>
-        </select>
-        <select id="alertSourceFilter">
-          <option value="">Todas as origens</option>
-          <option value="technical">Alertas tecnicos</option>
-          <option value="visit">Visitas</option>
-          <option value="notification">Notificacoes</option>
-          <option value="generic">Sistema</option>
-        </select>
-        <button id="clearAlertFilters" type="button">Limpar</button>
+        <div class="filter-field">
+          <label for="alertSearch">Pesquisa</label>
+          <input id="alertSearch" placeholder="Pesquisar por cliente, piscina, tecnico, tipo ou texto do alerta">
+        </div>
+        <div class="filter-field">
+          <label for="alertPriorityFilter">Prioridade</label>
+          <select id="alertPriorityFilter">
+            <option value="">Todas as prioridades</option>
+            <option value="CRITICAL">Criticos</option>
+            <option value="WARNING">Atencao</option>
+            <option value="NORMAL">Normal</option>
+            <option value="LOW">Baixo</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="alertSourceFilter">Origem</label>
+          <select id="alertSourceFilter">
+            <option value="">Todas as origens</option>
+            <option value="technical">Alertas tecnicos</option>
+            <option value="visit">Visitas</option>
+            <option value="notification">Notificacoes</option>
+            <option value="generic">Sistema</option>
+          </select>
+        </div>
+        <button id="clearAlertFilters" class="cw-v2-btn" type="button">Limpar</button>
       </div>
 
       <div id="alertsStatus" class="alerts-status">A carregar alertas...</div>
@@ -117,15 +136,69 @@
     </section>
   </main>
 
+  <div id="repairModal" class="repair-modal" hidden>
+    <section class="repair-dialog" role="dialog" aria-modal="true" aria-labelledby="repairModalTitle">
+      <h2 id="repairModalTitle">Nova reparacao contextual</h2>
+      <p class="repair-hint">A reparacao so pode ser criada com contexto operacional (alerta/visita) ou com cliente + piscina selecionados.</p>
+      <form id="repairCreateForm" class="repair-form-grid">
+        <div class="repair-field full">
+          <label for="repairContextSelect">Contexto do alerta/visita (opcional)</label>
+          <select id="repairContextSelect">
+            <option value="">Selecionar contexto manualmente</option>
+          </select>
+        </div>
+        <div class="repair-field">
+          <label for="repairClientSelect">Cliente</label>
+          <select id="repairClientSelect">
+            <option value="">Selecionar cliente</option>
+          </select>
+        </div>
+        <div class="repair-field">
+          <label for="repairPoolSelect">Piscina/Jacuzzi</label>
+          <select id="repairPoolSelect">
+            <option value="">Selecionar piscina/jacuzzi</option>
+          </select>
+        </div>
+        <div class="repair-field full">
+          <label for="repairProblemInput">Problema reportado</label>
+          <textarea id="repairProblemInput" rows="4" maxlength="800" placeholder="Descreve o problema tecnico reportado"></textarea>
+        </div>
+        <div class="repair-field">
+          <label for="repairPrioritySelect">Prioridade</label>
+          <select id="repairPrioritySelect">
+            <option value="">Automatica</option>
+            <option value="HIGH">Alta</option>
+            <option value="MEDIUM">Media</option>
+            <option value="NORMAL">Normal</option>
+            <option value="LOW">Baixa</option>
+          </select>
+        </div>
+        <div class="repair-field">
+          <label for="repairNotesInput">Nota interna</label>
+          <input id="repairNotesInput" maxlength="400" placeholder="Ex.: confirmado por chamada com cliente">
+        </div>
+        <label class="repair-check full">
+          <input id="repairResolveAlert" type="checkbox" checked>
+          Resolver automaticamente o alerta de origem apos criar a reparacao
+        </label>
+        <div id="repairModalStatus" class="alerts-status full" hidden></div>
+        <div class="repair-actions full">
+          <button id="repairCancelBtn" class="cw-v2-btn" type="button">Cancelar</button>
+          <button id="repairSubmitBtn" class="cw-v2-btn primary" type="submit">Criar reparacao</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
   <script src="/admin-auth-guard.js"></script>
   <script src="/cw-ui-feedback.js"></script>
   <script src="/admin-alerts.js?v=22.6.9-alert-context"></script>
   <script src="/cristal-help-data.js"></script>
   <script src="/cristal-assist.js"></script>
   <script src="/ui/core/navigation-context.js"></script>
-  <script src="/cw-os-admin-shell.js"></script>
   <script src="/cw-admin-shortcuts.js"></script>
   <script src="/crystal-os-v2-shell.js"></script>
   <script src="/crystal-os-v2-nav.js"></script>
+  <script defer src="/ui/design-system.js"></script>
 </body>
 </html>

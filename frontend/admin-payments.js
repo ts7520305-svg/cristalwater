@@ -91,13 +91,13 @@ function renderPayments() {
   const payments = filteredPayments();
 
   if (!payments.length) {
-    tableBox.innerHTML = `<div class="empty">Sem pagamentos registados para este filtro.</div>`;
+      tableBox.innerHTML = `<div class="empty-state"><h3>Sem pagamentos</h3><p class="text-muted">Sem pagamentos registados para este filtro.</p></div>`;
     if (allPayments.length) setStatus("Sem resultados para os filtros atuais.", "ok");
     return;
   }
 
   let html = `
-      <div class="table-wrap">
+        <div class="ds-table-wrap">
       <table>
         <thead>
           <tr>
@@ -130,8 +130,8 @@ function renderPayments() {
           <td>${new Date(p.paidAt).toLocaleString("pt-PT")}</td>
           <td>
             ${clientId ? `
-              <button class="mini-btn" onclick="openClient(${clientId})" title="Abrir situação do cliente">
-                <span>🔎</span><span>Abrir cliente</span>
+              <button class="cw-v2-btn" onclick="openClient(${clientId})" title="Abrir situação do cliente" aria-label="Abrir cliente ${escapeHtml(clientName)}">
+                <span aria-hidden="true">🔎</span><span>Abrir cliente</span>
               </button>
             ` : "-"}
           </td>

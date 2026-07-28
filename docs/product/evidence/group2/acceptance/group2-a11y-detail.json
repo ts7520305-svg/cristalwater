@@ -1,0 +1,50 @@
+{
+  "admin-clients:desktop": {
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  "admin-pools:desktop": {
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  "admin-technicians:desktop": {
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  "admin-rounds:desktop": {
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  "admin-clients:tablet": {
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  "admin-pools:tablet": {
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  "admin-technicians:tablet": {
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  "admin-rounds:tablet": {
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  "admin-clients:mobile": {
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  "admin-pools:mobile": {
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  "admin-technicians:mobile": {
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  "admin-rounds:mobile": {
+    "unlabeled": [],
+    "smallTargets": []
+  }
+}

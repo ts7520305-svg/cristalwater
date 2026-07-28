@@ -1,0 +1,952 @@
+[
+  {
+    "file": "frontend/admin-ai.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-alerts.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-client-settings.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-clients.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-collection.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-command-center.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-company-closures.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-core-flow.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-crm.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-dashboard.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-email-logs.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-inventory.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-keys.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-live-map.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-login.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-map.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-master-control.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-menu.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-notifications.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-onboarding.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-operational-flow.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-operational-settings.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-payment-settings.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-payments.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-pool-calculator.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-pool-technical.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-pools.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-priority.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-reports.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-rounds.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-security.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-service-log.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-suppliers.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-technicians.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-test-center.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-today.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-ui-settings.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-vehicles.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-visits-dashboard.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/admin-visits.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/alerts-financial.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/alerts.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/billing-center.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/billing-extras.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/billing-history.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/billing.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/chat.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/client-dashboard.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/client-history.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/client-login.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/client-menu.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/client-notifications.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/client-payments.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/client-portal.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/client-wow.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/client.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/client_chat.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/client_tech.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/communications.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/config-notifications.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/crystal-os-v2-route-index.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/dashboard.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/help-center.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/incident-center.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/invoices.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/login.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/map.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/metrics.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/multi-map.html",
+    "added": 3,
+    "removed": 1,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+</html>",
+      "+<script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": [
+      "-</html>"
+    ]
+  },
+  {
+    "file": "frontend/notifications.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/operational-dashboard.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/profit-map.html",
+    "added": 3,
+    "removed": 1,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+</html>",
+      "+<script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": [
+      "-</html>"
+    ]
+  },
+  {
+    "file": "frontend/ranking.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/report-center.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/report-settings.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/route-map.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/settings.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/splash.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/technician-chat.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/technician-field-mode.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/technician-gps.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/technician-guide.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/technician-history.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/technician-login.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/technician-map.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/technician-new-client.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/technician-profile.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/technician-profit-dashboard.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/technician-profit.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/technician-route.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/technician-visit.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/technician.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "frontend/to-issue.html",
+    "added": 2,
+    "removed": 0,
+    "sampleAdded": [
+      "+  <link rel=\"stylesheet\" href=\"/ui/design-system.css\">",
+      "+  <script defer src=\"/ui/design-system.js\"></script>"
+    ],
+    "sampleRemoved": []
+  },
+  {
+    "file": "src/routes/coreFlowRoutes.js",
+    "added": 25,
+    "removed": 0,
+    "sampleAdded": [
+      "+const { roleMatches } = require('../utils/roles');",
+      "+const technicianAuth = auth('TECHNICIAN');",
+      "+  // Technician field mode depends on these two core routes.",
+      "+  if (req.method === 'POST' && /^\\/visits\\/\\d+\\/(problem|complete)$/.test(req.path)) {",
+      "+    return technicianAuth(req, res, next);",
+      "+  }"
+    ],
+    "sampleRemoved": []
+  }
+]

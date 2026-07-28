@@ -1,0 +1,62 @@
+{
+  "admin-dashboard:desktop": {
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  "admin-today:desktop": {
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  "admin-alerts:desktop": {
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  "admin-payments:desktop": {
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  "admin-inventory:desktop": {
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  "admin-dashboard:tablet": {
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  "admin-today:tablet": {
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  "admin-alerts:tablet": {
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  "admin-payments:tablet": {
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  "admin-inventory:tablet": {
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  "admin-dashboard:mobile": {
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  "admin-today:mobile": {
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  "admin-alerts:mobile": {
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  "admin-payments:mobile": {
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  "admin-inventory:mobile": {
+    "unlabeled": [],
+    "smallTargets": []
+  }
+}

@@ -5,36 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cristal Water LDA - Clientes</title>
   <script src="/cw-auth.js"></script>
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
   <link rel="stylesheet" href="/ui/foundation.css">
   <style>
-    :root {
-      --bg: #06111f;
-      --panel: #0d1d31;
-      --line: #24415f;
-      --txt: #e9f5ff;
-      --muted: #8fb1cc;
-      --brand: #35d1ff;
-      --ok: #40e6a0;
-      --warn: #ffd166;
-      --bad: #ff6b6b;
-      --input: #091829;
-    }
-
     * { box-sizing: border-box; }
 
     html, body { overflow-x: hidden; }
 
-    body {
-      margin: 0;
-      background: linear-gradient(120deg, #06111f, #0b1f33 55%, #06111f);
-      color: var(--txt);
-      font-family: Inter, Segoe UI, Arial, sans-serif;
-    }
+    body { margin: 0; }
 
     main.page {
       padding: 24px;
-      max-width: 1680px;
-      margin: 0 auto;
+      display: grid;
+      gap: 16px;
     }
 
     .page-head {
@@ -51,7 +35,7 @@
 
     .page-head p {
       margin: 6px 0 0;
-      color: var(--muted);
+      color: var(--ds-text-muted);
     }
 
     .grid {
@@ -64,81 +48,37 @@
     }
 
     .card {
-      background: rgba(13, 29, 49, .92);
-      border: 1px solid var(--line);
-      border-radius: 22px;
       padding: 18px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, .22);
     }
 
     .muted {
-      color: var(--muted);
+      color: var(--ds-text-muted);
       font-size: 13px;
     }
 
     .feedback {
-      margin: 0 auto 16px;
-      max-width: 1680px;
+      margin: 0 auto;
       padding: 12px 16px;
-      border-radius: 16px;
-      border: 1px solid rgba(125, 211, 252, .24);
-      background: rgba(10, 27, 46, .8);
-      color: var(--txt);
       display: none;
     }
 
     .feedback[data-tone="success"] {
-      border-color: rgba(64, 230, 160, .35);
-      background: rgba(14, 56, 38, .76);
+      background: #f2faf5;
+      color: #185c33;
     }
 
     .feedback[data-tone="error"] {
-      border-color: rgba(255, 107, 107, .45);
-      background: rgba(70, 20, 20, .82);
+      background: #fff5f5;
+      color: #7f2326;
     }
 
     .feedback[data-tone="warning"] {
-      border-color: rgba(255, 209, 102, .4);
-      background: rgba(67, 47, 16, .8);
-    }
-
-    input,
-    select,
-    textarea {
-      width: 100%;
-      background: var(--input);
-      color: var(--txt);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 12px;
-      margin: 0;
+      background: #fff7e8;
+      color: #805200;
     }
 
     textarea {
       min-height: 58px;
-    }
-
-    button,
-    .btn {
-      border: 0;
-      border-radius: 14px;
-      padding: 12px 16px;
-      background: #163354;
-      color: var(--txt);
-      font-weight: 800;
-      cursor: pointer;
-      margin: 0;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 40px;
-    }
-
-    button.primary,
-    .btn.primary {
-      background: linear-gradient(135deg, #0584c7, #35d1ff);
-      color: #03121c;
     }
 
     .actions,
@@ -149,21 +89,9 @@
       flex-wrap: wrap;
     }
 
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      border: 1px solid var(--line);
-      border-radius: 99px;
-      padding: 5px 9px;
-      color: #bfe4ff;
-      background: #0a1b2e;
-      font-size: 12px;
-      max-width: 100%;
-    }
-
     .section-title,
     .client-section-label {
-      color: #7dd3fc;
+      color: var(--ds-text-muted);
       font-size: 11px;
       font-weight: 900;
       text-transform: uppercase;
@@ -179,11 +107,22 @@
       align-items: center;
       gap: 10px;
       margin: 0;
-      color: #dff6ff;
+      color: var(--ds-text);
+      min-height: 44px;
+      padding: 10px 12px;
+      border: 1px solid var(--ds-border);
+      border-radius: 14px;
+      background: var(--ds-surface-soft);
     }
 
     .check-row input {
       width: auto;
+    }
+
+    .check-row input[type="checkbox"] {
+      width: 24px;
+      height: 24px;
+      flex: 0 0 24px;
     }
 
     #clientForm {
@@ -212,9 +151,9 @@
       gap: 12px;
       margin: 8px 0 12px;
       padding: 10px 12px;
-      border: 1px solid rgba(125, 211, 252, .18);
+      border: 1px solid var(--ds-border);
       border-radius: 14px;
-      background: rgba(10, 27, 46, .72);
+      background: var(--ds-surface-soft);
     }
 
     .client-summary-stats,
@@ -226,13 +165,13 @@
     }
 
     .client-summary-stats strong {
-      color: #dff6ff;
+      color: var(--ds-text);
       font-size: 15px;
     }
 
     .client-summary-stats span,
     .client-search-hint {
-      color: var(--muted);
+      color: var(--ds-text-muted);
       font-size: 13px;
     }
 
@@ -241,21 +180,20 @@
     }
 
     .client-status-filters button {
-      border: 1px solid rgba(125, 211, 252, .22);
-      background: rgba(9, 24, 41, .92);
-      color: #bfe4ff;
       border-radius: 999px;
       padding: 8px 11px;
-      min-height: 34px;
+      min-height: 44px;
       font-size: 12px;
       white-space: nowrap;
+      background: var(--ds-surface);
+      border: 1px solid var(--ds-border);
+      color: var(--ds-text);
     }
 
     .client-status-filters button.is-active {
-      background: linear-gradient(135deg, #0ea5e9, #35d1ff);
-      color: #03121c;
+      background: linear-gradient(135deg, var(--ds-primary), var(--ds-primary-strong));
+      color: #f4fffd;
       border-color: transparent;
-      box-shadow: 0 10px 24px rgba(53, 209, 255, .18);
     }
 
     .client {
@@ -263,12 +201,8 @@
       grid-template-columns: minmax(190px, 1.05fr) minmax(130px, .65fr) minmax(170px, .95fr) minmax(190px, .8fr);
       gap: 14px;
       align-items: start;
-      background: #0a1b2e;
-      border: 1px solid var(--line);
-      border-radius: 16px;
       padding: 16px;
       margin: 10px 0;
-      color: var(--txt);
     }
 
     .client-main h3 {
@@ -288,34 +222,49 @@
     .client-kv {
       display: grid;
       gap: 6px;
-      color: var(--muted);
+      color: var(--ds-text-muted);
       font-size: 13px;
     }
 
     .client-kv strong {
       display: block;
-      color: #dff6ff;
+      color: var(--ds-text);
       font-size: 14px;
     }
 
     .client-finance,
     .client-pools-wrap,
     .client-actions-wrap {
-      border-left: 1px solid rgba(125, 211, 252, .16);
+      border-left: 1px solid var(--ds-border);
       padding-left: 14px;
       min-height: 100%;
     }
 
-    .client-pools .pill {
+    .client-pools .cw-v2-btn,
+    .client-pools .ds-badge {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
     .client-actions button,
-    .client-actions .btn {
+    .client-actions .cw-v2-btn {
       padding: 10px 12px;
-      min-height: 40px;
+      min-height: 46px;
+    }
+
+    .actions .cw-v2-btn,
+    .client-pools .cw-v2-btn,
+    .client-list-summary .cw-v2-btn,
+    .cw-modal-actions .cw-v2-btn {
+      min-height: 46px;
+    }
+
+    .field-stack input:not([type="checkbox"]),
+    .field-stack textarea,
+    .field-stack select,
+    .activation-inline input {
+      min-height: 46px;
     }
 
     .cw-modal[hidden] {
@@ -337,11 +286,7 @@
       width: min(920px, 100%);
       max-height: calc(100vh - 36px);
       overflow: auto;
-      background: rgba(13, 29, 49, .98);
-      border: 1px solid rgba(125, 211, 252, .2);
-      border-radius: 22px;
       padding: 20px;
-      box-shadow: 0 30px 80px rgba(0, 0, 0, .4);
     }
 
     .cw-modal-head {
@@ -359,7 +304,7 @@
 
     .cw-modal-head p {
       margin: 6px 0 0;
-      color: var(--muted);
+      color: var(--ds-text-muted);
     }
 
     .cw-icon-btn {
@@ -367,8 +312,8 @@
       min-height: 42px;
       padding: 0;
       border-radius: 999px;
-      background: rgba(9, 24, 41, .95);
-      border: 1px solid rgba(125, 211, 252, .18);
+      background: var(--ds-surface);
+      border: 1px solid var(--ds-border);
     }
 
     .cw-modal-form {
@@ -399,13 +344,36 @@
 
     .cw-confirm-body p {
       margin: 0;
-      color: var(--muted);
+      color: var(--ds-text-muted);
       line-height: 1.5;
     }
 
     .cw-client-inactive {
-      border-color: rgba(255, 209, 102, .55);
-      background: linear-gradient(135deg, rgba(55, 43, 22, .78), rgba(10, 27, 46, .94));
+      border-color: color-mix(in srgb, var(--ds-warning) 48%, white);
+      background: linear-gradient(135deg, #fff7e8, var(--ds-surface) 65%);
+    }
+
+    .activation-inline {
+      display: grid;
+      gap: 8px;
+      min-width: 180px;
+    }
+
+    .activation-inline span {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--ds-text-muted);
+    }
+
+    .field-stack {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field-stack label {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--ds-text-muted);
     }
 
     @media (max-width: 760px) {
@@ -453,6 +421,7 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="/ui/design-system.css">
 </head>
 <body data-cw-role="ADMIN">
   <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
@@ -463,8 +432,8 @@
         <p>Criar, editar, ativar contrato, arquivar ou eliminar clientes. Clientes novos nao faturam ate ativares o contrato.</p>
       </div>
       <div class="actions">
-        <button class="btn" type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
-        <a class="btn" href="/admin-master-control">Centro de Operacoes</a>
+        <button class="cw-v2-btn" type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
+        <a class="cw-v2-btn" href="/admin-master-control">Centro de Operacoes</a>
       </div>
     </div>
 
@@ -472,13 +441,13 @@
       <div class="card" aria-label="Formulário de cliente">
         <h2>Novo cliente</h2>
         <form id="clientForm" class="cw-form-grid" onsubmit="createClient();return false">
-          <input id="name" name="name" placeholder="Nome" required>
-          <input id="internalName" name="internalName" placeholder="Nome interno">
-          <input id="phone" name="phone" placeholder="Telefone">
-          <input id="email" name="email" placeholder="Email">
-          <input id="zone" name="zone" placeholder="Zona">
-          <textarea id="notes" name="notes" placeholder="Notas internas"></textarea>
-          <input id="password" name="password" type="password" placeholder="Password portal cliente (opcional)">
+          <div class="field-stack"><label for="name">Nome</label><input id="name" name="name" placeholder="Nome" required></div>
+          <div class="field-stack"><label for="internalName">Nome interno</label><input id="internalName" name="internalName" placeholder="Nome interno"></div>
+          <div class="field-stack"><label for="phone">Telefone</label><input id="phone" name="phone" placeholder="Telefone"></div>
+          <div class="field-stack"><label for="email">Email</label><input id="email" name="email" placeholder="Email"></div>
+          <div class="field-stack"><label for="zone">Zona</label><input id="zone" name="zone" placeholder="Zona"></div>
+          <div class="field-stack wide"><label for="notes">Notas internas</label><textarea id="notes" name="notes" placeholder="Notas internas"></textarea></div>
+          <div class="field-stack"><label for="password">Password do portal</label><input id="password" name="password" type="password" placeholder="Password portal cliente (opcional)"></div>
 
           <div class="section-title">Faturacao oficial externa</div>
           <label class="check-row">
@@ -486,20 +455,20 @@
             Necessita fatura oficial noutro sistema
           </label>
 
-          <input id="fiscalName" name="fiscalName" placeholder="Nome fiscal">
-          <input id="fiscalNif" name="fiscalNif" placeholder="NIF">
-          <input id="fiscalAddress" name="fiscalAddress" placeholder="Morada fiscal">
-          <input id="fiscalEmail" name="fiscalEmail" placeholder="Email fiscal">
-          <textarea class="wide" id="externalBillingNotes" name="externalBillingNotes" placeholder="Notas para contabilidade"></textarea>
+          <div class="field-stack"><label for="fiscalName">Nome fiscal</label><input id="fiscalName" name="fiscalName" placeholder="Nome fiscal"></div>
+          <div class="field-stack"><label for="fiscalNif">NIF</label><input id="fiscalNif" name="fiscalNif" placeholder="NIF"></div>
+          <div class="field-stack"><label for="fiscalAddress">Morada fiscal</label><input id="fiscalAddress" name="fiscalAddress" placeholder="Morada fiscal"></div>
+          <div class="field-stack"><label for="fiscalEmail">Email fiscal</label><input id="fiscalEmail" name="fiscalEmail" placeholder="Email fiscal"></div>
+          <div class="field-stack wide"><label for="externalBillingNotes">Notas para contabilidade</label><textarea class="wide" id="externalBillingNotes" name="externalBillingNotes" placeholder="Notas para contabilidade"></textarea></div>
 
-          <button class="primary">Criar cliente em configuracao</button>
+          <button class="cw-v2-btn primary">Criar cliente em configuracao</button>
           <p class="muted">O cliente fica sem valor mensal ate associares piscina, jacuzzi, contrato ou servico. Os valores entram na ficha do equipamento e na faturacao.</p>
         </form>
       </div>
 
       <div class="card" aria-label="Lista e gestão de clientes">
         <h2>Lista de clientes</h2>
-        <input id="search" placeholder="Pesquisar" aria-label="Pesquisar clientes">
+        <div class="field-stack"><label for="search">Pesquisar clientes</label><input id="search" placeholder="Pesquisar" aria-label="Pesquisar clientes"></div>
         <div id="clients" class="list muted">A carregar...</div>
       </div>
     </section>
@@ -515,13 +484,13 @@
         <button id="closeEditClientModal" class="cw-icon-btn" type="button" aria-label="Fechar edicao">×</button>
       </div>
       <form id="editClientForm" class="cw-modal-form">
-        <input id="editName" name="name" placeholder="Nome" required>
-        <input id="editInternalName" name="internalName" placeholder="Nome interno">
-        <input id="editPhone" name="phone" placeholder="Telefone">
-        <input id="editEmail" name="email" placeholder="Email">
-        <input id="editZone" name="zone" placeholder="Zona">
-        <textarea id="editNotes" name="notes" class="wide" placeholder="Notas internas"></textarea>
-        <input id="editPassword" name="password" type="password" placeholder="Nova password do portal (opcional)">
+        <div class="field-stack"><label for="editName">Nome</label><input id="editName" name="name" placeholder="Nome" required></div>
+        <div class="field-stack"><label for="editInternalName">Nome interno</label><input id="editInternalName" name="internalName" placeholder="Nome interno"></div>
+        <div class="field-stack"><label for="editPhone">Telefone</label><input id="editPhone" name="phone" placeholder="Telefone"></div>
+        <div class="field-stack"><label for="editEmail">Email</label><input id="editEmail" name="email" placeholder="Email"></div>
+        <div class="field-stack"><label for="editZone">Zona</label><input id="editZone" name="zone" placeholder="Zona"></div>
+        <div class="field-stack wide"><label for="editNotes">Notas internas</label><textarea id="editNotes" name="notes" class="wide" placeholder="Notas internas"></textarea></div>
+        <div class="field-stack"><label for="editPassword">Nova password do portal</label><input id="editPassword" name="password" type="password" placeholder="Nova password do portal (opcional)"></div>
 
         <div class="section-title">Faturacao oficial externa</div>
         <label class="check-row">
@@ -529,15 +498,15 @@
           Necessita fatura oficial noutro sistema
         </label>
 
-        <input id="editFiscalName" name="fiscalName" placeholder="Nome fiscal">
-        <input id="editFiscalNif" name="fiscalNif" placeholder="NIF">
-        <input id="editFiscalAddress" name="fiscalAddress" placeholder="Morada fiscal">
-        <input id="editFiscalEmail" name="fiscalEmail" placeholder="Email fiscal">
-        <textarea id="editExternalBillingNotes" name="externalBillingNotes" class="wide" placeholder="Notas para contabilidade"></textarea>
+        <div class="field-stack"><label for="editFiscalName">Nome fiscal</label><input id="editFiscalName" name="fiscalName" placeholder="Nome fiscal"></div>
+        <div class="field-stack"><label for="editFiscalNif">NIF</label><input id="editFiscalNif" name="fiscalNif" placeholder="NIF"></div>
+        <div class="field-stack"><label for="editFiscalAddress">Morada fiscal</label><input id="editFiscalAddress" name="fiscalAddress" placeholder="Morada fiscal"></div>
+        <div class="field-stack"><label for="editFiscalEmail">Email fiscal</label><input id="editFiscalEmail" name="fiscalEmail" placeholder="Email fiscal"></div>
+        <div class="field-stack wide"><label for="editExternalBillingNotes">Notas para contabilidade</label><textarea id="editExternalBillingNotes" name="externalBillingNotes" class="wide" placeholder="Notas para contabilidade"></textarea></div>
 
         <div class="cw-modal-actions">
-          <button id="cancelEditClient" type="button">Cancelar</button>
-          <button id="saveEditClient" class="primary" type="submit">Guardar alteracoes</button>
+          <button id="cancelEditClient" class="cw-v2-btn" type="button">Cancelar</button>
+          <button id="saveEditClient" class="cw-v2-btn primary" type="submit">Guardar alteracoes</button>
         </div>
       </form>
     </div>
@@ -555,8 +524,8 @@
       <div class="cw-confirm-body">
         <p id="confirmMessage">Mensagem da operação.</p>
         <div class="cw-modal-actions">
-          <button id="cancelConfirmAction" type="button">Cancelar</button>
-          <button id="confirmActionBtn" class="primary" type="button">Confirmar</button>
+          <button id="cancelConfirmAction" class="cw-v2-btn" type="button">Cancelar</button>
+          <button id="confirmActionBtn" class="cw-v2-btn primary" type="button">Confirmar</button>
         </div>
       </div>
     </div>
@@ -567,8 +536,8 @@
   <script src="/cristal-help-data.js"></script>
   <script src="/cristal-assist.js"></script>
   <script src="/ui/core/navigation-context.js"></script>
-  <script src="/cw-os-admin-shell.js"></script>
   <script src="/crystal-os-v2-shell.js"></script>
   <script src="/crystal-os-v2-nav.js"></script>
+  <script defer src="/ui/design-system.js"></script>
 </body>
 </html>

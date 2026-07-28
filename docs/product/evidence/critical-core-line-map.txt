@@ -1,0 +1,186 @@
+## design-system.css
+3::root {
+42:body {
+47:body {
+118:.card,
+126:[data-card] {
+133:button,
+135:[role="button"],
+136:input[type="button"],
+137:input[type="submit"],
+138:input[type="reset"] {
+151:button:hover,
+153:[role="button"]:hover {
+158:button:disabled,
+160:input:disabled,
+168:button.secondary,
+178:button.danger,
+184:input,
+197:input::placeholder,
+202:input[type="checkbox"],
+203:input[type="radio"] {
+215:table {
+355:button,
+358:input,
+364:body[data-profile="TECHNICIAN"],
+365:body[data-profile="CLIENT"] {
+369:@media (max-width: 1024px) {
+370:  .ds-table-wrap,
+371:  .table-wrap,
+372:  .table-container {
+377:  table {
+382:@media (max-width: 768px) {
+383:  :root {
+401:  table {
+406:@media (max-width: 430px) {
+407:  body {
+414:  .card,
+419:  [data-card] {
+## design-system.js
+13:  function applyProfileAttribute() {
+19:    Array.prototype.forEach.call(nav.querySelectorAll("a"), function (a) {
+22:        a.classList.add("is-active");
+28:    var existing = document.querySelector(".ds-bottom-nav");
+59:    Array.prototype.forEach.call(document.querySelectorAll("table"), function (table) {
+60:      if (table.closest(".ds-table-wrap") || table.closest(".table-wrap") || table.closest(".table-container")) return;
+62:      wrap.className = "ds-table-wrap";
+63:      table.parentNode.insertBefore(wrap, table);
+64:      wrap.appendChild(table);
+69:    Array.prototype.forEach.call(document.querySelectorAll("input,select,textarea"), function (el) {
+70:      var hasLabel = !!el.getAttribute("aria-label") || !!el.id && !!document.querySelector('label[for="' + el.id + '"]');
+141:    Array.prototype.forEach.call(document.querySelectorAll(".cw-v2-sidebar a[href], nav a[href]"), function (a) {
+160:    Array.prototype.forEach.call(document.querySelectorAll("main > section, main > .section, main > article, main > div"), function (node) {
+161:      var titleNode = node.querySelector("h2, [role='heading']");
+183:    Array.prototype.forEach.call(document.querySelectorAll("nav a, .cw-v2-sidebar a"), function (a) {
+195:  function init() {
+197:    applyProfileAttribute();
+208:    document.addEventListener("DOMContentLoaded", init, { once: true });
+210:    init();
+## tokens.css
+1::root {
+2:  --cw-color-bg: #f4f6f8;
+3:  --cw-color-bg-2: #eceff2;
+4:  --cw-color-surface: #ffffff;
+5:  --cw-color-surface-2: #f8fbfd;
+6:  --cw-color-text: #112232;
+7:  --cw-color-text-soft: #44576a;
+8:  --cw-color-border: rgba(17, 34, 50, 0.14);
+9:  --cw-color-primary: #0f5a70;
+10:  --cw-color-primary-2: #2f768a;
+11:  --cw-color-danger: #a1202f;
+12:  --cw-color-warning: #b06a00;
+13:  --cw-color-success: #13764a;
+15:  --cw-font-family: 'Segoe UI', 'Inter', Arial, sans-serif;
+16:  --cw-font-size-xs: 12px;
+17:  --cw-font-size-sm: 13px;
+18:  --cw-font-size-md: 15px;
+19:  --cw-font-size-lg: 18px;
+20:  --cw-font-size-xl: 30px;
+22:  --cw-space-1: 4px;
+23:  --cw-space-2: 8px;
+24:  --cw-space-3: 12px;
+25:  --cw-space-4: 16px;
+26:  --cw-space-5: 20px;
+27:  --cw-space-6: 24px;
+29:  --cw-radius-sm: 10px;
+30:  --cw-radius-md: 14px;
+31:  --cw-radius-lg: 16px;
+32:  --cw-radius-pill: 999px;
+34:  --cw-shadow-sm: 0 3px 10px rgba(17, 34, 50, 0.06);
+35:  --cw-shadow-md: 0 6px 18px rgba(17, 34, 50, 0.08);
+37:  --cw-transition-fast: 140ms ease;
+38:  --cw-transition: 220ms ease;
+40:  --cw-z-topbar: 30;
+41:  --cw-z-sidebar: 20;
+42:  --cw-z-mobile-nav: 40;
+43:  --cw-z-modal: 70;
+45:  --cw-break-320: 320px;
+46:  --cw-break-390: 390px;
+47:  --cw-break-430: 430px;
+48:  --cw-break-768: 768px;
+49:  --cw-break-1024: 1024px;
+50:  --cw-break-1440: 1440px;
+51:  --cw-break-1920: 1920px;
+## tokens/tokens.css
+1::root{
+3:--cw-primary:#0077B6;
+4:--cw-primary-dark:#005B8A;
+6:--cw-success:#22C55E;
+7:--cw-warning:#F59E0B;
+8:--cw-danger:#DC2626;
+10:--cw-bg:#F5F9FC;
+11:--cw-surface:#FFFFFF;
+13:--cw-text:#132A3A;
+14:--cw-text-soft:#607282;
+16:--cw-border:#DDE8EF;
+18:--cw-radius-xs:8px;
+19:--cw-radius-sm:12px;
+20:--cw-radius-md:18px;
+21:--cw-radius-lg:24px;
+23:--cw-shadow:0 12px 28px rgba(0,0,0,.08);
+25:--cw-gap-xs:6px;
+26:--cw-gap-sm:12px;
+27:--cw-gap-md:18px;
+28:--cw-gap-lg:24px;
+30:--cw-font:Inter,Arial,sans-serif;
+## enterprise-ui.css
+2::root{--cw-bg:#06131f;--cw-card:#0b2033;--cw-text:#eaf7ff;--cw-muted:#9bb4c7;--cw-accent:#2ed3ff;--cw-border:rgba(255,255,255,.12)}
+3:body{background:var(--cw-bg);color:var(--cw-text)}
+4:.card,.panel,.cw-card{background:var(--cw-card);border:1px solid var(--cw-border);border-radius:18px;color:var(--cw-text)}
+5:.metric-value,.kpi-value,.amount,.number{color:var(--cw-text)!important}
+6:.muted,.label{color:var(--cw-muted)!important}
+7:a{color:var(--cw-accent)}
+## css/enterprise-ui.css
+2::root{--cw-bg:#06131f;--cw-card:#0b2033;--cw-text:#eaf7ff;--cw-muted:#9bb4c7;--cw-accent:#2ed3ff;--cw-border:rgba(255,255,255,.12)}
+3:body{background:var(--cw-bg);color:var(--cw-text)}
+4:.card,.panel,.cw-card{background:var(--cw-card);border:1px solid var(--cw-border);border-radius:18px;color:var(--cw-text)}
+5:.metric-value,.kpi-value,.amount,.number{color:var(--cw-text)!important}
+6:.muted,.label{color:var(--cw-muted)!important}
+7:a{color:var(--cw-accent)}
+## button.css
+1:.cw-v2-btn,
+2:.btn,
+3:.cw-btn {
+4:  min-height: 38px;
+5:  border: 1px solid var(--cw-color-border);
+6:  border-radius: var(--cw-radius-sm);
+7:  background: var(--cw-color-surface);
+8:  color: var(--cw-color-text);
+9:  padding: 8px 12px;
+10:  font-weight: 700;
+11:  cursor: pointer;
+12:  transition: background var(--cw-transition-fast), border-color var(--cw-transition-fast);
+13:}
+15:.cw-v2-btn.primary,
+16:.btn.primary,
+17:.cw-btn-primary {
+18:  background: linear-gradient(135deg, var(--cw-color-primary), var(--cw-color-primary-2));
+19:  color: #eef8fb;
+20:  border-color: transparent;
+21:}
+23:.cw-v2-btn:hover,
+24:.btn:hover,
+25:.cw-btn:hover {
+26:  border-color: rgba(15, 90, 112, 0.5);
+27:}
+## buttons.css
+1:.cw-btn{
+3:display:flex;
+4:align-items:center;
+5:justify-content:center;
+7:min-height:56px;
+9:padding:14px 20px;
+11:border:none;
+13:border-radius:18px;
+15:font-weight:700;
+17:cursor:pointer;
+19:transition:.2s;
+21:}
+23:.cw-btn-primary{
+25:background:var(--cw-primary);
+27:color:white;
+29:}
+31:.cw-btn-secondary{
+33:background:white;
+35:border:1px solid var(--cw-border);
+37:}

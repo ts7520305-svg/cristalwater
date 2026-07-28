@@ -711,7 +711,7 @@ function renderAdminRoleDashboard(info){
     </div>
     <div class="role-grid">
       ${cards.map((card) => `
-        <a class="role-card ${escapeHtml(card.tone)}" href="${escapeHtml(card.href)}">
+        <a class="role-card ds-nav-link ${escapeHtml(card.tone)}" href="${escapeHtml(card.href)}">
           <span>${escapeHtml(card.label)}</span>
           <strong>${escapeHtml(card.value)}</strong>
           <small>${escapeHtml(card.text)}</small>
@@ -833,7 +833,7 @@ function renderCriticalBanner(info){
 
     if(actions){
       actions.innerHTML = links.map((link) => `
-        <a class="critical-link" href="${escapeHtml(link.href)}">
+        <a class="ds-nav-link" href="${escapeHtml(link.href)}">
           ${escapeHtml(link.label)}
         </a>
       `).join("");

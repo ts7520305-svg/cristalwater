@@ -277,8 +277,8 @@ function renderRiskBadges(issues = []) {
 
 function technicianStatus(tech) {
   return tech.active === false
-    ? '<span class="pill cw-status-inactive">Inativo</span>'
-    : '<span class="pill cw-status-active">Ativo</span>';
+    ? '<span class="ds-badge is-warning">Inativo</span>'
+    : '<span class="ds-badge">Ativo</span>';
 }
 
 function renderTechnicianRow(tech) {
@@ -300,12 +300,12 @@ function renderTechnicianRow(tech) {
         <span class="${issues.length ? "cw-risk-line" : ""}">Zona: ${escapeHtml(tech.zone || "-")} - Viatura: ${escapeHtml(tech.vehicleId || "-")}</span>
       </div>
       <div class="tech-actions">
-        <button onclick="editTechnician(${id})">Editar</button>
+        <button class="cw-v2-btn" onclick="editTechnician(${id})">Editar</button>
         ${tech.active === false
-          ? `<button onclick="restoreTechnician(${id})" class="cw-action-ok">Ativar</button>`
-          : `<button onclick="toggleTechnician(${id}, false)" class="cw-action-warn">Desativar</button>`}
-        <button onclick="resetPin(${id})">Reset PIN</button>
-        <button onclick="deleteTechnician(${id})" class="cw-action-danger">Eliminar</button>
+          ? `<button class="cw-v2-btn primary" onclick="restoreTechnician(${id})">Ativar</button>`
+          : `<button class="cw-v2-btn" onclick="toggleTechnician(${id}, false)">Desativar</button>`}
+        <button class="cw-v2-btn" onclick="resetPin(${id})">Reset PIN</button>
+        <button class="cw-v2-btn danger" onclick="deleteTechnician(${id})">Eliminar</button>
       </div>
     </article>
   `;
@@ -334,7 +334,7 @@ function renderTechnicians() {
       <span>Tecnico</span>
       <span>Contacto</span>
       <span>Operacao</span>
-      <span style="text-align:right">Acoes</span>
+      <span class="tech-head-actions">Acoes</span>
     </div>
     ${rows.map(renderTechnicianRow).join("")}
   `;

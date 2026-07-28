@@ -1,0 +1,32 @@
+[
+  {
+    "viewport": "desktop",
+    "status": 200,
+    "consoleErrors": 0,
+    "consoleWarnings": 0,
+    "failedRequests": 0,
+    "hscroll": false,
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  {
+    "viewport": "tablet",
+    "status": 200,
+    "consoleErrors": 0,
+    "consoleWarnings": 0,
+    "failedRequests": 0,
+    "hscroll": false,
+    "unlabeled": [],
+    "smallTargets": []
+  },
+  {
+    "viewport": "mobile",
+    "status": 200,
+    "consoleErrors": 0,
+    "consoleWarnings": 0,
+    "failedRequests": 0,
+    "hscroll": false,
+    "unlabeled": [],
+    "smallTargets": []
+  }
+]

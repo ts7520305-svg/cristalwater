@@ -1,0 +1,193 @@
+{
+  "generatedAt": "2026-07-26T20:46:38.603Z",
+  "runId": "FCS14ADM_1785098793449_g93j8",
+  "route": "/admin-service-log",
+  "results": [
+    {
+      "scenario": "loading-delayed",
+      "route": "/admin-service-log",
+      "debug": {
+        "urlAfterGoto": "http://127.0.0.1:3002/admin-service-log",
+        "titleAfterGoto": "Cristal Water LDA - Registo Diario"
+      },
+      "expectedApiErrors": [],
+      "unexpectedApiErrors": [],
+      "observations": [
+        {
+          "selectorObserved": "#services",
+          "textFound": "A carregar registos...",
+          "expectedState": "Loading visivel com texto de carregamento",
+          "observedState": "Loading correto",
+          "pass": true
+        },
+        {
+          "selectorObserved": "#timeline",
+          "textFound": "A carregar timeline...",
+          "expectedState": "Loading visivel com texto de carregamento",
+          "observedState": "Loading correto",
+          "pass": true
+        },
+        {
+          "selectorObserved": "#services + #timeline",
+          "textFound": "A carregar registos... | A carregar timeline...",
+          "expectedState": "Sem empty state prematuro antes da resposta",
+          "observedState": "Sem flicker prematuro",
+          "pass": true
+        },
+        {
+          "selectorObserved": "#services",
+          "textFound": "Sem servicos registados para estes filtros.",
+          "expectedState": "Empty state apos resposta vazia",
+          "observedState": "Empty correto",
+          "pass": true
+        },
+        {
+          "selectorObserved": "#timeline",
+          "textFound": "Sem eventos na timeline para estes filtros.",
+          "expectedState": "Timeline vazia apos resposta vazia",
+          "observedState": "Empty correto",
+          "pass": true
+        }
+      ],
+      "screenshot": "docs/product/evidence/fcs14-admin-service-log/FCS14ADM_1785098793449_g93j8-loading-delayed.png",
+      "console": [
+        {
+          "type": "log",
+          "text": "FCS14 admin semantic shell bypass"
+        }
+      ],
+      "pageErrors": [],
+      "pass": true
+    },
+    {
+      "scenario": "empty",
+      "route": "/admin-service-log",
+      "debug": {
+        "urlAfterGoto": "http://127.0.0.1:3002/admin-service-log",
+        "titleAfterGoto": "Cristal Water LDA - Registo Diario"
+      },
+      "expectedApiErrors": [],
+      "unexpectedApiErrors": [],
+      "observations": [
+        {
+          "selectorObserved": "#services",
+          "textFound": "Sem servicos registados para estes filtros.",
+          "expectedState": "Empty state com lista vazia",
+          "observedState": "Empty correto",
+          "pass": true
+        },
+        {
+          "selectorObserved": "#timeline",
+          "textFound": "Sem eventos na timeline para estes filtros.",
+          "expectedState": "Timeline vazia com lista vazia",
+          "observedState": "Empty correto",
+          "pass": true
+        }
+      ],
+      "screenshot": "docs/product/evidence/fcs14-admin-service-log/FCS14ADM_1785098793449_g93j8-empty.png",
+      "console": [
+        {
+          "type": "log",
+          "text": "FCS14 admin semantic shell bypass"
+        }
+      ],
+      "pageErrors": [],
+      "pass": true
+    },
+    {
+      "scenario": "data",
+      "route": "/admin-service-log",
+      "debug": {
+        "urlAfterGoto": "http://127.0.0.1:3002/admin-service-log",
+        "titleAfterGoto": "Cristal Water LDA - Registo Diario"
+      },
+      "expectedApiErrors": [],
+      "unexpectedApiErrors": [],
+      "observations": [
+        {
+          "selectorObserved": "#services .service .service-title",
+          "textFound": "Piscina QA",
+          "expectedState": "Registo renderizado com dados",
+          "observedState": "Dados renderizados",
+          "pass": true
+        },
+        {
+          "selectorObserved": "#timeline .timeline-item strong",
+          "textFound": "Posicao capturada",
+          "expectedState": "Timeline renderizada com dados",
+          "observedState": "Dados renderizados",
+          "pass": true
+        },
+        {
+          "selectorObserved": "#services .empty",
+          "textFound": "0",
+          "expectedState": "Empty state desaparece quando ha dados",
+          "observedState": "Empty removido",
+          "pass": true
+        }
+      ],
+      "screenshot": "docs/product/evidence/fcs14-admin-service-log/FCS14ADM_1785098793449_g93j8-data.png",
+      "console": [
+        {
+          "type": "log",
+          "text": "FCS14 admin semantic shell bypass"
+        },
+        {
+          "type": "warning",
+          "text": "[.WebGL-0x125c0012d400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+        },
+        {
+          "type": "warning",
+          "text": "[.WebGL-0x125c0012d400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+        }
+      ],
+      "pageErrors": [],
+      "pass": true
+    },
+    {
+      "scenario": "error",
+      "route": "/admin-service-log",
+      "debug": {
+        "urlAfterGoto": "http://127.0.0.1:3002/admin-service-log",
+        "titleAfterGoto": "Cristal Water LDA - Registo Diario"
+      },
+      "expectedApiErrors": [
+        {
+          "urlIncludes": "/api/core/daily-service-log",
+          "status": 500
+        }
+      ],
+      "unexpectedApiErrors": [],
+      "observations": [
+        {
+          "selectorObserved": "#services",
+          "textFound": "Falha simulada no registo diario.",
+          "expectedState": "Mensagem de erro apos resposta 500",
+          "observedState": "Erro mostrado",
+          "pass": true
+        },
+        {
+          "selectorObserved": "#timeline",
+          "textFound": "Nao foi possivel carregar a timeline.",
+          "expectedState": "Timeline mostra indisponibilidade e nao empty de dados",
+          "observedState": "Erro mostrado",
+          "pass": true
+        }
+      ],
+      "screenshot": "docs/product/evidence/fcs14-admin-service-log/FCS14ADM_1785098793449_g93j8-error.png",
+      "console": [
+        {
+          "type": "log",
+          "text": "FCS14 admin semantic shell bypass"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        }
+      ],
+      "pageErrors": [],
+      "pass": true
+    }
+  ],
+  "pass": true
+}

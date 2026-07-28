@@ -1,0 +1,149 @@
+[
+  {
+    "viewport": "desktop",
+    "status": 200,
+    "consoleErrors": 0,
+    "consoleWarnings": 0,
+    "failedRequests": 0,
+    "hscroll": false,
+    "unlabeled": [],
+    "smallTargets": [
+      {
+        "tag": "a",
+        "text": "Sistema",
+        "w": 60,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "text": "Sem guia AT ativa\n            ",
+        "w": 591,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "text": "Seguro nao registado\n         ",
+        "w": 466,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "text": "Viatura QA-00-01: Seguro nao r",
+        "w": 605,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "text": "Erro: Viatura QA-00-01: Sem gu",
+        "w": 167,
+        "h": 37
+      },
+      {
+        "tag": "a",
+        "text": "Aviso: Viatura QA-00-01: Guia ",
+        "w": 185,
+        "h": 37
+      },
+      {
+        "tag": "a",
+        "text": "+2",
+        "w": 15,
+        "h": 18
+      }
+    ]
+  },
+  {
+    "viewport": "tablet",
+    "status": 200,
+    "consoleErrors": 0,
+    "consoleWarnings": 0,
+    "failedRequests": 0,
+    "hscroll": false,
+    "unlabeled": [],
+    "smallTargets": [
+      {
+        "tag": "a",
+        "text": "Sistema",
+        "w": 60,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "text": "Sem guia AT ativa\n            ",
+        "w": 591,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "text": "Seguro nao registado\n         ",
+        "w": 466,
+        "h": 22
+      },
+      {
+        "tag": "a",
+        "text": "Erro: Viatura QA-00-01: Sem gu",
+        "w": 249,
+        "h": 18
+      },
+      {
+        "tag": "a",
+        "text": "Aviso: Viatura QA-00-01: Guia ",
+        "w": 279,
+        "h": 18
+      },
+      {
+        "tag": "a",
+        "text": "+2",
+        "w": 15,
+        "h": 18
+      }
+    ]
+  },
+  {
+    "viewport": "mobile",
+    "status": 200,
+    "consoleErrors": 0,
+    "consoleWarnings": 0,
+    "failedRequests": 0,
+    "hscroll": false,
+    "unlabeled": [],
+    "smallTargets": [
+      {
+        "tag": "a",
+        "text": "Sistema",
+        "w": 57,
+        "h": 21
+      },
+      {
+        "tag": "a",
+        "text": "Sem guia AT ativa\n            ",
+        "w": 348,
+        "h": 43
+      },
+      {
+        "tag": "a",
+        "text": "Seguro nao registado\n         ",
+        "w": 365,
+        "h": 43
+      },
+      {
+        "tag": "a",
+        "text": "Erro: Viatura QA-00-01: Sem gu",
+        "w": 196,
+        "h": 37
+      },
+      {
+        "tag": "a",
+        "text": "Aviso: Viatura QA-00-01: Guia ",
+        "w": 194,
+        "h": 37
+      },
+      {
+        "tag": "a",
+        "text": "+2",
+        "w": 15,
+        "h": 18
+      }
+    ]
+  }
+]

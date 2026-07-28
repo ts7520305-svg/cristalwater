@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0f1723">
+  <title>Cristal Water · Centro de Operações V2</title>
+  <script src="/cw-auth.js"></script>
+  <link rel="stylesheet" href="/ui/foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/cw-premium-admin-phase1.css">
+  <link rel="stylesheet" href="/cw-ui-kit.css">
+  <style>
+    .admin-shell .cw-v2-main {
+      background: transparent;
+    }
+
+    .cw-admin-head {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .cw-admin-head h1 {
+      margin: 0;
+      font-size: 34px;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+    }
+
+    .cw-admin-head p {
+      margin: 0;
+      color: var(--cw-muted);
+    }
+
+    .cw-status-strip {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin: 12px 0 16px;
+    }
+
+    .cw-status-strip .item {
+      background: var(--cw-surface);
+      border: 1px solid var(--cw-border);
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: var(--cw-shadow);
+    }
+
+    .cw-status-strip strong {
+      display: block;
+      font-size: 22px;
+      line-height: 1.1;
+    }
+
+    .cw-status-strip span {
+      color: var(--cw-muted);
+      font-size: 12px;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .cw-priority-layout {
+      display: grid;
+      gap: 14px;
+      margin-top: 8px;
+    }
+
+    .cw-priority-block {
+      border: 1px solid var(--cw-border);
+      border-radius: 14px;
+      background: #fff;
+      box-shadow: var(--cw-shadow);
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .cw-priority-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .cw-priority-head h2 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .metric-card {
+      min-height: 150px;
+      background: #fff;
+      border: 1px solid var(--cw-border);
+      border-radius: 14px;
+      box-shadow: var(--cw-shadow);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      color: var(--cw-text);
+    }
+
+    .metric-card .metric-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .metric-icon {
+      font-size: 20px;
+    }
+
+    .metric-value {
+      font-size: 38px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .metric-label {
+      color: var(--cw-muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .metric-card.bad-card {
+      border-color: #f2b9be;
+      background: #fff6f7;
+    }
+
+    .metric-card.warn-card {
+      border-color: #f0d2a5;
+      background: #fffaf2;
+    }
+
+    .metric-card.ok-card {
+      border-color: #abd8bf;
+      background: #f3fbf6;
+    }
+
+    .cw-block-title {
+      margin: 0 0 10px;
+      font-size: 20px;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .item {
+      border: 1px solid var(--cw-border);
+      border-radius: 12px;
+      background: var(--cw-surface-2);
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .small,
+    .muted {
+      color: var(--cw-muted);
+      font-size: 13px;
+    }
+
+    .empty {
+      border: 1px dashed var(--cw-border);
+      border-radius: 12px;
+      padding: 14px;
+      color: var(--cw-muted);
+      background: var(--cw-surface-2);
+    }
+
+    .pill {
+      display: inline-flex;
+      min-height: 30px;
+      align-items: center;
+      border-radius: 999px;
+      border: 1px solid var(--cw-border);
+      padding: 4px 9px;
+      background: #fff;
+      color: #344257;
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .visit-item {
+      align-items: flex-start;
+    }
+
+    .visit-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .cw-map-panel {
+      min-height: 300px;
+      overflow: hidden;
+      padding: 0;
+    }
+
+    .cw-map-panel iframe {
+      width: 100%;
+      height: 260px;
+      border: 0;
+      display: block;
+    }
+
+    .cw-map-caption {
+      padding: 14px;
+      border-top: 1px solid var(--cw-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .visit-modal[hidden] {
+      display: none;
+    }
+
+    .visit-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      background: rgba(14, 20, 31, 0.46);
+      display: grid;
+      place-items: center;
+      padding: 12px;
+    }
+
+    .visit-modal-panel {
+      width: min(760px, 100%);
+      max-height: 88vh;
+      overflow: auto;
+      background: #fff;
+      border: 1px solid var(--cw-border);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .visit-modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .visit-edit-form {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .visit-edit-form label {
+      display: grid;
+      gap: 6px;
+      color: #334153;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .visit-edit-form input,
+    .visit-edit-form select,
+    .visit-edit-form textarea {
+      min-height: 44px;
+      border: 1px solid var(--cw-border);
+      border-radius: 10px;
+      padding: 10px;
+      background: #fff;
+    }
+
+    .visit-edit-form .wide,
+    .visit-edit-status,
+    .visit-modal-actions {
+      grid-column: 1 / -1;
+    }
+
+    .visit-edit-status {
+      min-height: 22px;
+      color: var(--cw-muted);
+      font-size: 13px;
+    }
+
+    .visit-edit-status.ok {
+      color: var(--cw-success);
+    }
+
+    .visit-edit-status.error {
+      color: var(--cw-danger);
+    }
+
+    .visit-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .cw-hidden-hooks {
+      display: none;
+    }
+
+    @media (max-width: 1100px) {
+      .metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .cw-status-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 740px) {
+      .cw-admin-head h1 {
+        font-size: 26px;
+      }
+
+      .metrics,
+      .cw-status-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .visit-edit-form {
+        grid-template-columns: 1fr;
+      }
+
+      .visit-actions {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 1199px) {
+      .admin-shell .cw-v2-sidebar {
+        display: none;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+  <link rel="stylesheet" href="/ui/design-system.css">
+</head>
+<body class="admin-shell" data-required-role="ADMIN">
+  <div class="cw-v2-app">
+    <aside class="cw-v2-sidebar" aria-label="Navegação principal">
+      <div class="cw-v2-brand">
+        <img src="/logo-cristalwater.png" alt="Cristal Water">
+        <div>
+          <b>Cristal Water</b>
+          <small>Administrador</small>
+        </div>
+      </div>
+      <nav class="cw-v2-nav-groups" aria-label="Módulos completos">
+        <details class="cw-v2-nav-group" open>
+          <summary>Operação diária</summary>
+          <div class="cw-v2-nav-links cw-v2-nav">
+            <a class="is-active" href="/admin-master-control" data-shell-search="Centro de comando">Centro de comando</a>
+            <a href="/admin-today" data-shell-search="Hoje operacao">Hoje</a>
+            <a href="/operational-dashboard" data-shell-search="Operacao">Operacao</a>
+            <a href="/admin-visits" data-shell-search="Visitas">Visitas</a>
+            <a href="/admin-rounds" data-shell-search="Rotas Rondas">Rotas / Rondas</a>
+            <a href="/admin-alerts" data-shell-search="Alertas">Alertas</a>
+            <a href="/admin-live-map" data-shell-search="Mapas GPS">Mapas / GPS</a>
+          </div>
+        </details>
+        <details class="cw-v2-nav-group" open>
+          <summary>Clientes e Equipas</summary>
+          <div class="cw-v2-nav-links cw-v2-nav">
+            <a href="/admin-technicians" data-shell-search="Tecnicos">Tecnicos</a>
+            <a href="/admin-clients" data-shell-search="Clientes">Clientes</a>
+            <a href="/admin-crm" data-shell-search="CRM">CRM</a>
+            <a href="/admin-pools" data-shell-search="Piscinas">Piscinas</a>
+            <a href="/admin-keys" data-shell-search="Chaves">Chaves</a>
+          </div>
+        </details>
+        <details class="cw-v2-nav-group">
+          <summary>Intervenções e Campo</summary>
+          <div class="cw-v2-nav-links cw-v2-nav">
+            <a href="/admin-alerts?scope=repairs" data-shell-search="Reparacoes">Reparacoes</a>
+            <a href="/admin-onboarding?flow=installation" data-shell-search="Instalacoes">Instalacoes</a>
+            <a href="/admin-onboarding?flow=construction" data-shell-search="Construcao">Construcao</a>
+            <a href="/admin-alerts?scope=interventions" data-shell-search="Intervencoes">Intervencoes</a>
+            <a href="/admin-service-log" data-shell-search="Historico de servico">Historico de servico</a>
+            <a href="/technician-guide" data-shell-search="Guias de trabalho">Guias de trabalho</a>
+            <a href="/technician-guide?tab=transport" data-shell-search="Guias de transporte">Guias de transporte</a>
+          </div>
+        </details>
+        <details class="cw-v2-nav-group">
+          <summary>Ativos e Armazém</summary>
+          <div class="cw-v2-nav-links cw-v2-nav">
+            <a href="/admin-vehicles" data-shell-search="Viaturas">Viaturas</a>
+            <a href="/admin-pool-technical" data-shell-search="Equipamentos">Equipamentos</a>
+            <a href="/admin-inventory" data-shell-search="Stock inventario">Stock / Inventario</a>
+            <a href="/admin-inventory?tab=products" data-shell-search="Produtos">Produtos</a>
+            <a href="/admin-inventory?tab=warehouses" data-shell-search="Armazens">Armazens</a>
+          </div>
+        </details>
+        <details class="cw-v2-nav-group">
+          <summary>Financeiro e Relatórios</summary>
+          <div class="cw-v2-nav-links cw-v2-nav">
+            <a href="/billing" data-shell-search="Financeiro">Financeiro</a>
+            <a href="/invoices" data-shell-search="Faturas">Faturas</a>
+            <a href="/admin-payments" data-shell-search="Pagamentos">Pagamentos</a>
+            <a href="/billing-extras" data-shell-search="Despesas">Despesas</a>
+            <a href="/admin-collection" data-shell-search="Cobranca">Cobranca</a>
+            <a href="/admin-reports" data-shell-search="Relatorios">Relatorios</a>
+            <a href="/report-center" data-shell-search="Centro de relatorios">Centro de relatorios</a>
+          </div>
+        </details>
+        <details class="cw-v2-nav-group">
+          <summary>Sistema</summary>
+          <div class="cw-v2-nav-links cw-v2-nav">
+            <a href="/admin-notifications" data-shell-search="Notificacoes">Notificacoes</a>
+            <a href="/communications" data-shell-search="Comunicacoes">Comunicacoes</a>
+            <a href="/admin-operational-settings" data-shell-search="Definicoes">Definicoes</a>
+            <a href="/admin-security" data-shell-search="Permissoes">Permissoes</a>
+            <a href="/admin-test-center" data-shell-search="Auditoria ferramentas">Auditoria / Ferramentas</a>
+            <a href="/crystal-os-v2-route-index" data-shell-search="Indice de rotas todos os modulos">Indice de rotas (todos os modulos)</a>
+          </div>
+        </details>
+      </nav>
+      <div class="small">Resumo operacional em tempo real.</div>
+    </aside>
+
+    <main class="cw-v2-main">
+      <header class="cw-v2-topbar">
+        <div class="cw-v2-search">
+          <input data-cw-search-input type="search" aria-label="Pesquisa universal" placeholder="Pesquisa universal: alertas, visitas, stock, financeiro">
+          <span class="icon">⌕</span>
+          <div class="cw-v2-search-results" data-cw-search-results></div>
+        </div>
+        <div class="cw-v2-top-actions">
+          <button class="cw-v2-btn cw-mobile-back" type="button" data-cw-action="back">Voltar</button>
+          <span class="cw-v2-pill cw-v2-offline" data-offline-indicator>Online</span>
+          <button id="refreshBtn" class="cw-v2-btn primary" type="button">Atualizar</button>
+          <button class="cw-v2-btn" type="button" data-cw-open-drawer>Menu</button>
+        </div>
+      </header>
+
+      <section class="cw-context-row" aria-label="Contexto de navegacao">
+        <button class="cw-v2-btn" type="button" data-cw-action="back">Voltar</button>
+        <span class="cw-context-path">Centro de comando</span>
+      </section>
+
+      <section class="cw-admin-head">
+        <h1>Centro de comando</h1>
+        <p id="metricsHint">Estado da operação com foco em decisão rápida.</p>
+        <div class="cw-head-meta">
+          <span id="syncState" class="pill">Sincronizado</span>
+          <span id="lastUpdate" class="small">Atualizado agora</span>
+          <a class="cw-v2-btn primary" href="/admin-alerts">Ver prioridades</a>
+        </div>
+      </section>
+
+      <section class="cw-status-strip" id="statusStrip" aria-label="Estado rápido">
+        <div class="item"><strong>--</strong><span>Estado geral</span></div>
+        <div class="item"><strong id="todayStatusTop">--</strong><span>Visitas ativas</span></div>
+        <div class="item"><strong id="criticalAlertsTop">--</strong><span>Alertas críticos</span></div>
+        <div class="item"><strong>--</strong><span>Atualização</span></div>
+      </section>
+
+      <section class="cw-priority-layout" aria-label="Painel operacional por prioridade">
+        <article class="cw-priority-block">
+          <div class="cw-priority-head">
+            <h2>Resumo executivo</h2>
+            <span class="pill">4 KPIs principais</span>
+          </div>
+          <div class="metrics" id="metrics"></div>
+        </article>
+
+        <article class="cw-priority-block">
+          <div class="cw-priority-head">
+            <h2>Prioridades</h2>
+            <span class="pill">decisões necessárias</span>
+          </div>
+          <div id="prioritySummary" class="list"><div class="empty">A agregar alertas e decisões...</div></div>
+        </article>
+
+        <article class="cw-priority-block">
+          <div class="cw-priority-head">
+            <h2>Operação do dia</h2>
+            <span class="pill">atrasadas, em execução e próximas</span>
+          </div>
+          <div id="operationDigest" class="cw-status-strip"></div>
+          <div id="todayList" class="list"><div class="empty">A carregar visitas...</div></div>
+        </article>
+      </section>
+
+      <details class="cw-secondary-panel" style="margin-top:14px">
+        <summary>Informação secundária</summary>
+        <section class="cw-v2-grid cols-2" style="margin-top:10px">
+          <article class="cw-v2-card cw-map-panel">
+          <iframe title="Mapa operacional" src="/admin-live-map"></iframe>
+          <div class="cw-map-caption">
+            <div>
+              <h2 class="cw-block-title" style="margin:0">Mapa de operações</h2>
+              <div class="small">Planeamento e execução do dia.</div>
+            </div>
+            <a class="cw-v2-btn" href="/admin-live-map" data-shell-search="Mapa de operações do dia">Abrir mapa</a>
+          </div>
+          </article>
+        </section>
+      </details>
+
+      <section class="cw-hidden-hooks" aria-hidden="true">
+        <div id="morningCheckPanel"></div>
+        <div id="morningCheckMessage"></div>
+        <div id="morningCheckStatus"></div>
+        <div id="morningCheckGrid"></div>
+        <div id="pendingPoolsList"></div>
+        <div id="statusBox"></div>
+        <div id="visitEditModal" class="visit-modal" hidden>
+          <div class="visit-modal-panel">
+            <div class="visit-modal-head">
+              <div>
+                <h2 id="visitEditTitle">Editar visita</h2>
+                <p id="visitEditSubtitle"></p>
+              </div>
+              <button id="visitEditClose" type="button" class="cw-v2-btn">Fechar</button>
+            </div>
+            <form id="visitEditForm" class="visit-edit-form">
+              <input id="visitEditId" type="hidden">
+              <label>Data e hora<input id="visitEditPlannedDate" type="datetime-local"></label>
+              <label>Técnico<select id="visitEditTechnician"></select></label>
+              <label>Estado<select id="visitEditStatus"></select></label>
+              <label>Motivo<input id="visitEditReason"></label>
+              <label class="wide">Notas<textarea id="visitEditNotes" rows="2"></textarea></label>
+              <label class="wide">Notas internas<textarea id="visitEditInternalNotes" rows="2"></textarea></label>
+              <div id="visitEditStatusBox" class="visit-edit-status"></div>
+              <div class="visit-modal-actions">
+                <a id="visitEditOpenModule" class="cw-v2-btn" href="/admin-visits">Abrir módulo visitas</a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <nav class="cw-v2-mobile-nav" aria-label="Navegação móvel administrador">
+    <a class="is-active" href="/admin-master-control">Centro</a>
+    <a href="/admin-today">Hoje</a>
+    <a href="/admin-visits">Visitas</a>
+    <a href="/admin-alerts">Alertas</a>
+    <button type="button" data-cw-open-drawer aria-label="Abrir menu completo">Menu</button>
+  </nav>
+
+  <aside class="cw-v2-drawer" data-cw-drawer aria-hidden="true">
+    <div class="cw-v2-drawer-backdrop" data-cw-drawer-backdrop></div>
+    <div class="cw-v2-drawer-panel" role="dialog" aria-modal="true" aria-label="Menu completo administrador">
+      <div class="cw-v2-drawer-head">
+        <div class="cw-v2-drawer-title">Menu completo</div>
+        <button class="cw-v2-drawer-close" type="button" data-cw-close-drawer aria-label="Fechar menu">X</button>
+      </div>
+      <nav class="cw-v2-nav-groups" aria-label="Todos os módulos do administrador">
+        <details class="cw-v2-nav-group" open>
+          <summary>Operação diária</summary>
+          <div class="cw-v2-nav-links cw-v2-nav">
+            <a href="/admin-master-control" data-shell-search="Centro de comando">Centro de comando</a>
+            <a href="/admin-today" data-shell-search="Hoje operacao">Hoje</a>
+            <a href="/operational-dashboard" data-shell-search="Operacao">Operacao</a>
+            <a href="/admin-visits" data-shell-search="Visitas">Visitas</a>
+            <a href="/admin-rounds" data-shell-search="Rotas Rondas">Rotas / Rondas</a>
+            <a href="/admin-alerts" data-shell-search="Alertas">Alertas</a>
+            <a href="/admin-live-map" data-shell-search="Mapas GPS">Mapas / GPS</a>
+          </div>
+        </details>
+        <details class="cw-v2-nav-group" open>
+          <summary>Clientes e Equipas</summary>
+          <div class="cw-v2-nav-links cw-v2-nav">
+            <a href="/admin-technicians" data-shell-search="Tecnicos">Tecnicos</a>
+            <a href="/admin-clients" data-shell-search="Clientes">Clientes</a>
+            <a href="/admin-crm" data-shell-search="CRM">CRM</a>
+            <a href="/admin-pools" data-shell-search="Piscinas">Piscinas</a>
+            <a href="/admin-keys" data-shell-search="Chaves">Chaves</a>
+          </div>
+        </details>
+        <details class="cw-v2-nav-group">
+          <summary>Intervenções e Campo</summary>
+          <div class="cw-v2-nav-links cw-v2-nav">
+            <a href="/admin-alerts?scope=repairs" data-shell-search="Reparacoes">Reparacoes</a>
+            <a href="/admin-onboarding?flow=installation" data-shell-search="Instalacoes">Instalacoes</a>
+            <a href="/admin-onboarding?flow=construction" data-shell-search="Construcao">Construcao</a>
+            <a href="/admin-alerts?scope=interventions" data-shell-search="Intervencoes">Intervencoes</a>
+            <a href="/admin-service-log" data-shell-search="Historico de servico">Historico de servico</a>
+            <a href="/technician-guide" data-shell-search="Guias de trabalho">Guias de trabalho</a>
+            <a href="/technician-guide?tab=transport" data-shell-search="Guias de transporte">Guias de transporte</a>
+          </div>
+        </details>
+        <details class="cw-v2-nav-group">
+          <summary>Ativos e Armazém</summary>
+          <div class="cw-v2-nav-links cw-v2-nav">
+            <a href="/admin-vehicles" data-shell-search="Viaturas">Viaturas</a>
+            <a href="/admin-pool-technical" data-shell-search="Equipamentos">Equipamentos</a>
+            <a href="/admin-inventory" data-shell-search="Stock inventario">Stock / Inventario</a>
+            <a href="/admin-inventory?tab=products" data-shell-search="Produtos">Produtos</a>
+            <a href="/admin-inventory?tab=warehouses" data-shell-search="Armazens">Armazens</a>
+          </div>
+        </details>
+        <details class="cw-v2-nav-group">
+          <summary>Financeiro e Relatórios</summary>
+          <div class="cw-v2-nav-links cw-v2-nav">
+            <a href="/billing" data-shell-search="Financeiro">Financeiro</a>
+            <a href="/invoices" data-shell-search="Faturas">Faturas</a>
+            <a href="/admin-payments" data-shell-search="Pagamentos">Pagamentos</a>
+            <a href="/billing-extras" data-shell-search="Despesas">Despesas</a>
+            <a href="/admin-collection" data-shell-search="Cobranca">Cobranca</a>
+            <a href="/admin-reports" data-shell-search="Relatorios">Relatorios</a>
+            <a href="/report-center" data-shell-search="Centro de relatorios">Centro de relatorios</a>
+          </div>
+        </details>
+        <details class="cw-v2-nav-group">
+          <summary>Sistema</summary>
+          <div class="cw-v2-nav-links cw-v2-nav">
+            <a href="/admin-notifications" data-shell-search="Notificacoes">Notificacoes</a>
+            <a href="/communications" data-shell-search="Comunicacoes">Comunicacoes</a>
+            <a href="/admin-operational-settings" data-shell-search="Definicoes">Definicoes</a>
+            <a href="/admin-security" data-shell-search="Permissoes">Permissoes</a>
+            <a href="/admin-test-center" data-shell-search="Auditoria ferramentas">Auditoria / Ferramentas</a>
+            <a href="/crystal-os-v2-route-index" data-shell-search="Indice de rotas todos os modulos">Indice de rotas (todos os modulos)</a>
+          </div>
+        </details>
+      </nav>
+    </div>
+  </aside>
+
+  <script src="/admin-auth-guard.js"></script>
+  <script src="/admin-master-control.js"></script>
+  <script src="/cw-admin-premium-controls.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
+  <script defer src="/ui/design-system.js"></script>
+</body>
+</html>

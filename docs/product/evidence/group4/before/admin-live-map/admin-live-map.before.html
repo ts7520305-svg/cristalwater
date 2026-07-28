@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="pt">
+
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+
+<meta charset="utf-8">
+
+<title>
+  Cristal Water - Mapa em Tempo Real
+</title>
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+/>
+
+<link rel="stylesheet" href="/ui/foundation.css">
+
+<style>
+
+*{
+  box-sizing:border-box
+}
+
+body{
+
+  margin:0;
+
+  font-family:Arial;
+
+  background:#0f172a;
+
+  color:white;
+}
+
+/* ======================================================
+HEADER
+====================================================== */
+
+header{
+
+  background:#111827;
+
+  padding:15px;
+
+  border-bottom:3px solid #2563eb;
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+
+  position:sticky;
+
+  top:0;
+
+  z-index:999;
+}
+
+header h1{
+
+  margin:0;
+
+  font-size:22px;
+}
+
+/* ======================================================
+TOPBAR
+====================================================== */
+
+.topbar{
+
+  display:flex;
+
+  gap:10px;
+
+  flex-wrap:wrap;
+}
+
+.badge{
+
+  background:#1e293b;
+
+  padding:10px 14px;
+
+  border-radius:10px;
+
+  font-size:13px;
+
+  border:1px solid #334155;
+
+  cursor:pointer;
+
+  color:white;
+
+  font:inherit;
+}
+
+.badge:hover,
+.badge:focus-visible,
+.badge.active{
+  border-color:#38bdf8;
+  background:#143b5f;
+  outline:none;
+  box-shadow:0 0 0 3px rgba(56,189,248,.18);
+}
+
+/* ======================================================
+MAP
+====================================================== */
+
+#map{
+
+  width:100%;
+
+  height:calc(100vh - 80px);
+}
+
+.live-inspector{
+  position:absolute;
+  right:18px;
+  top:142px;
+  z-index:1000;
+  width:min(390px,calc(100vw - 36px));
+  max-height:calc(100vh - 166px);
+  display:flex;
+  flex-direction:column;
+  background:rgba(15,23,42,.94);
+  border:1px solid rgba(56,189,248,.34);
+  border-radius:10px;
+  box-shadow:0 24px 70px rgba(0,0,0,.42);
+  overflow:hidden;
+  backdrop-filter:blur(14px);
+}
+
+.live-inspector[hidden]{display:none}
+.live-inspector-head{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+  padding:14px;
+  border-bottom:1px solid rgba(148,163,184,.22);
+}
+.live-inspector h2{margin:0;font-size:18px}
+.live-inspector p{margin:5px 0 0;color:#9db7ca;font-size:13px;line-height:1.35}
+.inspector-close{
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.06);
+  color:white;
+  border-radius:8px;
+  width:36px;
+  height:36px;
+  cursor:pointer;
+}
+.live-list{
+  overflow:auto;
+  padding:10px;
+  display:grid;
+  gap:9px;
+}
+.live-card{
+  width:100%;
+  text-align:left;
+  color:white;
+  border:1px solid rgba(148,163,184,.24);
+  background:rgba(15,42,68,.86);
+  border-radius:8px;
+  padding:12px;
+  cursor:pointer;
+}
+.live-card:hover,.live-card:focus-visible,.live-card.active{
+  border-color:#38bdf8;
+  background:#123b5f;
+  outline:none;
+}
+.live-card-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.live-card b{display:block;font-size:14px}
+.live-card small{display:block;color:#9db7ca;margin-top:5px;line-height:1.35}
+.live-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:24px;
+  padding:4px 8px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  color:#e0f2fe;
+  background:rgba(255,255,255,.06);
+  font-size:11px;
+  font-weight:bold;
+  white-space:nowrap;
+}
+.live-pill.ok{color:#bbf7d0;border-color:rgba(52,211,153,.45);background:rgba(52,211,153,.12)}
+.live-pill.warn{color:#fde68a;border-color:rgba(251,191,36,.45);background:rgba(251,191,36,.12)}
+.live-pill.bad{color:#fecdd3;border-color:rgba(251,113,133,.45);background:rgba(251,113,133,.12)}
+.live-empty{
+  padding:14px;
+  color:#9db7ca;
+  border:1px dashed rgba(148,163,184,.32);
+  border-radius:8px;
+  background:rgba(255,255,255,.03);
+}
+
+/* ======================================================
+LEGEND
+====================================================== */
+
+.legend{
+
+  position:absolute;
+
+  bottom:20px;
+
+  left:20px;
+
+  z-index:999;
+
+  background:#111827;
+
+  padding:15px;
+
+  border-radius:12px;
+
+  border:1px solid #334155;
+
+  width:240px;
+}
+
+.legend h3{
+
+  margin-top:0;
+
+  font-size:16px;
+}
+
+.legend-item{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:10px;
+
+  margin-top:10px;
+
+  font-size:13px;
+}
+
+.legend-color{
+
+  width:14px;
+
+  height:14px;
+
+  border-radius:50%;
+}
+
+.green{
+  background:#2e7d32;
+}
+
+.orange{
+  background:#ef6c00;
+}
+
+.red{
+  background:#c62828;
+}
+
+.blue{
+  background:#2563eb;
+}
+
+/* ======================================================
+RESPONSIVE
+====================================================== */
+
+@media(max-width:700px){
+
+  header{
+
+    flex-direction:column;
+
+    align-items:flex-start;
+
+    gap:10px;
+  }
+
+  #map{
+
+    height:calc(100vh - 135px);
+  }
+
+  .legend{
+
+    width:auto;
+
+    right:20px;
+  }
+
+  .live-inspector{
+    left:12px;
+    right:12px;
+    top:148px;
+    width:auto;
+    max-height:calc(100vh - 170px);
+  }
+}
+
+</style>
+
+<link rel="stylesheet" href="/cristal-assist.css">
+  <link rel="stylesheet" href="/cw-ui-kit.css">
+  <script src="/cw-auth.js"></script>
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+  <script src="/admin-auth-guard.js"></script>
+  <link rel="stylesheet" href="/ui/design-system.css">
+</head>
+
+<body data-required-role="ADMIN">
+
+<div style="padding:12px 16px 0">
+  <button type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
+</div>
+
+<header>
+
+  <h1>
+    Cristal Water Mapa em Tempo Real
+  </h1>
+
+  <div class="topbar">
+
+    <button class="badge" type="button" data-live-panel="technicians">
+      👨‍🔧 Técnicos:
+      <span id="techCount">0</span>
+    </button>
+
+    <button class="badge" type="button" data-live-panel="gps">
+      📍 GPS ativos:
+      <span id="gpsCount">0</span>
+    </button>
+
+    <button class="badge" type="button" data-live-panel="alerts">
+      🚨 Alertas:
+      <span id="alertCount">0</span>
+    </button>
+
+  </div>
+
+</header>
+
+<div id="map"></div>
+
+<aside class="live-inspector" id="liveInspector" hidden>
+  <div class="live-inspector-head">
+    <div>
+      <h2 id="liveInspectorTitle">Mapa live</h2>
+      <p id="liveInspectorHint">Seleciona um item para focar no mapa.</p>
+    </div>
+    <button class="inspector-close" type="button" id="liveInspectorClose" aria-label="Fechar painel">×</button>
+  </div>
+  <div class="live-list" id="liveInspectorList"></div>
+</aside>
+
+<section class="cw-mobile-stack" style="position:absolute;left:12px;right:12px;bottom:132px;z-index:1000;pointer-events:none;">
+  <div class="cw-mobile-row" style="background:rgba(15,23,42,.88);border-color:rgba(56,189,248,.32);color:#d7efff;pointer-events:auto;">
+    <div class="title">Modo operacional</div>
+    <div class="meta">Usa os botoes do topo para abrir tecnicos, GPS ativos ou alertas e focar cada item no mapa.</div>
+  </div>
+</section>
+
+<!-- ======================================================
+LEGEND
+====================================================== -->
+
+<div class="legend">
+
+  <h3>
+    Legenda
+  </h3>
+
+  <div class="legend-item">
+
+    <div class="legend-color green"></div>
+
+    Técnico disponível
+
+  </div>
+
+  <div class="legend-item">
+
+    <div class="legend-color orange"></div>
+
+    Técnico ocupado
+
+  </div>
+
+  <div class="legend-item">
+
+    <div class="legend-color red"></div>
+
+    Alerta crítico
+
+  </div>
+
+  <div class="legend-item">
+
+    <div class="legend-color blue"></div>
+
+    Piscina prioritária
+
+  </div>
+
+</div>
+
+<!-- ======================================================
+SOCKET
+====================================================== -->
+
+<script src="/socket.io/socket.io.js"></script>
+
+<!-- ======================================================
+MAP
+====================================================== -->
+
+<script src="/admin-live-map.js"></script>
+
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script src="/ui/core/navigation-context.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script src="/cw-admin-shortcuts.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
+  <script defer src="/ui/design-system.js"></script>
+</body>
+</html>

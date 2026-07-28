@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+  <meta charset="utf-8">
+  <title>Cristal Water - Configuração de Lembretes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #e3f2fd;
+      color: #1f2933;
+    }
+
+    .top-nav {
+      display: flex;
+      gap: 10px;
+      padding: 12px 20px;
+      background: #0f172a;
+      flex-wrap: wrap;
+    }
+
+    .top-nav a {
+      color: #cbd5e1;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 8px 14px;
+      border-radius: 8px;
+    }
+
+    .top-nav a:hover {
+      background: #1e293b;
+      color: white;
+    }
+
+    .top-nav a.active {
+      background: #1e88e5;
+      color: white;
+    }
+
+    header {
+      background: white;
+      border-bottom: 3px solid #1e88e5;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    header img {
+      height: 70px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 26px;
+      color: #1e88e5;
+    }
+
+    header p {
+      margin: 4px 0 0 0;
+      color: #555;
+      font-size: 14px;
+    }
+
+    main {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 25px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .title {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 14px;
+      color: #0f172a;
+    }
+
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    @media (min-width: 800px) {
+      .row-2 {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 6px;
+      color: #334155;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 14px;
+      background: #fff;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      background: #f8fafc;
+      margin-bottom: 10px;
+    }
+
+    .btn {
+      padding: 10px 14px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+      background: #1e88e5;
+      color: white;
+    }
+
+    .status {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #eef2ff;
+      color: #312e81;
+      display: none;
+      white-space: pre-wrap;
+    }
+
+    .info {
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    ul {
+      margin-top: 6px;
+      color: #475569;
+    }
+  </style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+  <link rel="stylesheet" href="/ui/foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+  <script src="/admin-auth-guard.js"></script>
+  <link rel="stylesheet" href="/ui/design-system.css">
+</head>
+<body data-required-role="ADMIN">
+
+  <div style="padding:12px 16px 0">
+    <button type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
+  </div>
+
+<header>
+  <img src="/logo.png" alt="Cristal Water">
+  <div>
+    <h1>Cristal Water</h1>
+    <p>Configuração · Lembretes de pagamento</p>
+  </div>
+</header>
+
+<main>
+  <div class="card">
+    <div class="title">Política Global de Lembretes</div>
+
+    <div class="row-2">
+      <div>
+        <label for="policy">Política</label>
+        <select id="policy">
+          <option value="OVERDUE_ONLY">Só clientes com dívida</option>
+          <option value="ALL_CLIENTS">Todos os clientes</option>
+          <option value="DISABLED">Desativado</option>
+        </select>
+      </div>
+
+      <div class="info">
+        Esta configuração define a regra global do sistema.
+        As exceções por cliente poderão depois forçar envio ou bloquear envio individualmente.
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="title">Canais por Defeito</div>
+
+    <label class="check-row">
+      <input type="checkbox" id="defaultWhatsapp">
+      <span>Preparar lembrete por WhatsApp</span>
+    </label>
+
+    <label class="check-row">
+      <input type="checkbox" id="defaultEmail">
+      <span>Preparar lembrete por Email</span>
+    </label>
+
+    <label class="check-row">
+      <input type="checkbox" id="defaultInternal">
+      <span>Criar notificação interna para o admin</span>
+    </label>
+  </div>
+
+  <div class="card">
+    <div class="title">Estado Atual</div>
+    <div class="info">
+      <ul>
+        <li>WhatsApp está em modo manual/preparado.</li>
+        <li>Email pode ser usado conforme a tua configuração SMTP.</li>
+        <li>As notificações internas continuam disponíveis.</li>
+      </ul>
+    </div>
+
+    <button class="btn" onclick="saveConfig()">Guardar configuração</button>
+    <div id="statusBox" class="status"></div>
+  </div>
+</main>
+
+<script src="/nav.js"></script>
+<script>
+renderNav("settings");
+</script>
+
+<script>
+  const API = "/api";
+
+  function authHeaders(extra = {}) {
+    const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
+    return {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...extra,
+    };
+  }
+
+  function showStatus(message) {
+    const box = document.getElementById("statusBox");
+    box.style.display = "block";
+    box.textContent = message;
+  }
+
+  async function loadConfig() {
+    try {
+      const res = await fetch(`${API}/notification-rules/payment-policy`, { headers: authHeaders() });
+      const data = await res.json();
+
+      if (!res.ok || data.ok === false) {
+        showStatus(data.message || "Erro ao carregar configuração.");
+        return;
+      }
+
+      const config = data.config || {};
+
+      document.getElementById("policy").value = config.policy || "OVERDUE_ONLY";
+      document.getElementById("defaultWhatsapp").checked = Boolean(config.defaultWhatsapp);
+      document.getElementById("defaultEmail").checked = Boolean(config.defaultEmail);
+      document.getElementById("defaultInternal").checked = Boolean(config.defaultInternal);
+    } catch (error) {
+      console.error(error);
+      showStatus("Erro de ligação ao carregar configuração.");
+    }
+  }
+
+  async function saveConfig() {
+    try {
+      const payload = {
+        policy: document.getElementById("policy").value,
+        defaultWhatsapp: document.getElementById("defaultWhatsapp").checked,
+        defaultEmail: document.getElementById("defaultEmail").checked,
+        defaultInternal: document.getElementById("defaultInternal").checked,
+      };
+
+      const res = await fetch(`${API}/notification-rules/payment-policy`, {
+        method: "PUT",
+        headers: authHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.ok === false) {
+        showStatus(data.message || "Erro ao guardar configuração.");
+        return;
+      }
+
+      showStatus("Configuração guardada com sucesso.");
+    } catch (error) {
+      console.error(error);
+      showStatus("Erro de ligação ao guardar configuração.");
+    }
+  }
+
+  loadConfig();
+</script>
+
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script src="/cw-admin-shortcuts.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
+  <script defer src="/ui/design-system.js"></script>
+</body>
+</html>

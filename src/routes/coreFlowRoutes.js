@@ -1,6 +1,8 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const prismaModule = require('../prismaClient');
+const auth = require('../middlewares/authMiddleware');
 const { completeServiceVisit, VisitCompletionError } = require('../services/serviceVisitCompletionService');
 const {
   applyClientCreditToInvoice,
@@ -11,10 +13,30 @@ const {
   invoiceTotal,
 } = require('../services/clientCreditService');
 const { assertPoolReadyForRound } = require('../utils/poolReadiness');
+const { roleMatches, normalizeRole } = require('../utils/roles');
 const RepairBusiness = require('../business/repair/RepairBusiness');
+const EventBus = require('../core/event/EventBus');
+const BrainKnowledge = require('../system/knowledge/BrainKnowledge');
 
 const prisma = prismaModule.prisma || prismaModule.default || prismaModule;
 const router = express.Router();
+
+const adminAuth = auth('ADMIN');
+const technicianAuth = auth('TECHNICIAN');
+const anyAuth = auth();
+router.use((req, res, next) => {
+  // Keep only minimal metadata endpoints public by design.
+  if (req.method === 'GET' && (req.path === '/health' || req.path === '/dashboard')) return next();
+  // Technician field mode depends on these two core routes.
+  if (req.method === 'POST' && /^\/visits\/\d+\/(problem|complete)$/.test(req.path)) {
+    return technicianAuth(req, res, next);
+  }
+  // Sprint 4.1: technicians can submit/read technical sheet change proposals.
+  if (/^\/pools\/\d+\/technical-change-proposals(?:\/.*)?$/.test(req.path)) {
+    return anyAuth(req, res, next);
+  }
+  return adminAuth(req, res, next);
+});
 
 // Simulação desativada em produção: todas as ações core usam dados reais via Prisma.
 
@@ -313,6 +335,479 @@ async function recordTechnicalSheetHistory(poolId, before, after, actor = 'SYSTE
       status: 'DONE'
     }
   }).catch(() => null);
+}
+
+function listTechnicalChangedFields(before = null, after = null) {
+  const keys = new Set([
+    ...Object.keys(before || {}),
+    ...Object.keys(after || {}),
+  ]);
+  const changed = [];
+  for (const key of keys) {
+    if (['updatedAt', 'createdAt'].includes(key)) continue;
+    const left = JSON.stringify(before?.[key] ?? null);
+    const right = JSON.stringify(after?.[key] ?? null);
+    if (left !== right) changed.push(key);
+  }
+  return changed;
+}
+
+const TECHNICAL_PROPOSAL_TYPE = 'TECHNICAL_CHANGE_PROPOSAL';
+const TECHNICAL_PROPOSAL_WORKFLOW_EVENT_TYPE = 'TECHNICAL_PROPOSAL_WORKFLOW_EVENT';
+const TECHNICAL_SHEET_PROPAGATION_EVENT_TYPE = 'TECHNICAL_SHEET_PROPAGATION_EVENT';
+const PROPOSAL_RISK_LEVELS = new Set(['LOW', 'MEDIUM', 'HIGH']);
+const PROPOSAL_WORKFLOW_STATES = new Set(['DRAFT', 'SUBMITTED', 'IN_REVIEW', 'NEEDS_INFO', 'APPROVED', 'REJECTED']);
+const PROPOSAL_PENDING_STATES = new Set(['SUBMITTED', 'IN_REVIEW', 'NEEDS_INFO']);
+const PROPOSAL_TRANSITIONS = {
+  DRAFT: new Set(['SUBMITTED']),
+  SUBMITTED: new Set(['IN_REVIEW', 'NEEDS_INFO', 'APPROVED', 'REJECTED']),
+  IN_REVIEW: new Set(['NEEDS_INFO', 'APPROVED', 'REJECTED']),
+  NEEDS_INFO: new Set(['SUBMITTED', 'IN_REVIEW']),
+  APPROVED: new Set([]),
+  REJECTED: new Set([]),
+};
+const AUTO_FIELDS = new Set(['notes', 'technicalRoomNotes', 'equipmentNotes', 'historyNote', 'spelling']);
+const MEDIUM_FIELDS = new Set(['pumpType', 'pumpPower', 'filterType', 'filterMedia', 'lightsType', 'lightsCount', 'saltSystem']);
+const HIGH_FIELDS = new Set([
+  'volumeM3', 'lengthM', 'widthM', 'depthMinM', 'depthMaxM', 'averageDepthM', 'shape',
+  'targetSalinityPpm', 'targetChlorinePpm', 'pumpFlowM3h', 'type', 'monthlyAmount',
+]);
+
+function actorNameFromReq(req) {
+  return String(req.user?.name || req.user?.email || req.headers['x-user-email'] || 'SYSTEM').trim() || 'SYSTEM';
+}
+
+function normalizeRiskLevel(value) {
+  const level = String(value || '').trim().toUpperCase();
+  return PROPOSAL_RISK_LEVELS.has(level) ? level : '';
+}
+
+function normalizeProposalWorkflowState(value, fallback = 'SUBMITTED') {
+  const state = String(value || '').trim().toUpperCase().replace(/\s+/g, '_');
+  return PROPOSAL_WORKFLOW_STATES.has(state) ? state : fallback;
+}
+
+function normalizeComparable(value) {
+  if (value === undefined || value === null) return '';
+  return String(value).trim();
+}
+
+function readPoolFieldValue(pool, field) {
+  if (!pool || !field) return null;
+  const key = String(field || '').trim();
+  const sources = [
+    pool,
+    pool.technicalSheet || {},
+    pool.calculationProfile || {},
+    pool.equipment || {},
+    pool.technicalRoom || {},
+  ];
+  for (const source of sources) {
+    if (source && Object.prototype.hasOwnProperty.call(source, key)) {
+      return source[key];
+    }
+  }
+  return null;
+}
+
+function buildProposalDiff(changes = [], pool = null) {
+  return (Array.isArray(changes) ? changes : []).map((change) => {
+    const field = String(change?.field || '').trim();
+    const before = change?.before == null ? null : String(change.before);
+    const after = change?.after == null ? null : String(change.after);
+    const currentRaw = readPoolFieldValue(pool, field);
+    const current = currentRaw == null ? null : String(currentRaw);
+    const effectiveBefore = before == null || before === '' ? current : before;
+    const hasDrift = normalizeComparable(current) !== normalizeComparable(effectiveBefore);
+    const willChange = normalizeComparable(after) !== normalizeComparable(effectiveBefore);
+    return {
+      field,
+      before,
+      current,
+      effectiveBefore,
+      after,
+      willChange,
+      hasDrift,
+    };
+  });
+}
+
+function buildWorkflowEventHash(payload = {}, previousHash = '') {
+  const source = JSON.stringify({
+    proposalId: Number(payload.proposalId || 0),
+    fromState: String(payload.fromState || ''),
+    toState: String(payload.toState || ''),
+    actor: String(payload.actor || ''),
+    actorRole: String(payload.actorRole || ''),
+    note: String(payload.note || ''),
+    transitionedAt: String(payload.transitionedAt || ''),
+    batchId: String(payload.batchId || ''),
+    previousHash: String(previousHash || ''),
+  });
+  return crypto.createHash('sha256').update(source).digest('hex');
+}
+
+async function emitTechnicalSheetPropagationEvent({
+  poolId,
+  actor = 'SYSTEM',
+  source = 'TECHNICAL_SHEET_UPDATE',
+  proposalId = null,
+  summary = '',
+  metadata = {},
+}) {
+  const payload = {
+    poolId,
+    actor,
+    source,
+    proposalId,
+    summary,
+    metadata,
+    propagatedAt: new Date().toISOString(),
+  };
+
+  if (available('technicalHistory')) {
+    await db('technicalHistory').create({
+      data: {
+        poolId,
+        type: TECHNICAL_SHEET_PROPAGATION_EVENT_TYPE,
+        component: 'Ficha Técnica Propagação',
+        message: `Propagação técnica: ${source}`,
+        description: JSON.stringify(payload),
+        performedAt: new Date(),
+        status: 'DONE',
+      },
+    }).catch(() => null);
+  }
+
+  if (available('notification')) {
+    await db('notification').create({
+      data: dataFor('notification', {
+        type: 'TECHNICAL_SHEET_PROPAGATION',
+        eventType: 'TECHNICAL_SHEET_UPDATED',
+        title: 'Ficha técnica propagada',
+        message: summary || `Atualização técnica da piscina ${poolId} propagada para Command Center e Base de Conhecimento.`,
+        role: 'ADMIN',
+        status: 'PENDING',
+        severity: 'MEDIUM',
+        metadata: {
+          poolId,
+          source,
+          proposalId,
+          actor,
+          ...metadata,
+        },
+      }),
+    }).catch(() => null);
+  }
+
+  try {
+    BrainKnowledge.addNote(
+      `Ficha técnica atualizada #${poolId}`,
+      `${summary || 'Atualização técnica propagada'} | origem=${source}${proposalId ? ` | proposta=${proposalId}` : ''}`,
+      ['technical-sheet', 'propagation', String(source || '').toLowerCase()]
+    );
+  } catch (_) {}
+
+  await EventBus.emit('TECHNICAL_SHEET_UPDATED', payload, { actor, source }).catch(() => null);
+}
+
+function parseWorkflowEventDescription(description) {
+  const parsed = safeJson(description, null);
+  if (!parsed || typeof parsed !== 'object') return null;
+  return {
+    proposalId: toInt(parsed.proposalId),
+    fromState: normalizeProposalWorkflowState(parsed.fromState || '', ''),
+    toState: normalizeProposalWorkflowState(parsed.toState || '', ''),
+    actor: String(parsed.actor || ''),
+    actorRole: String(parsed.actorRole || ''),
+    note: String(parsed.note || ''),
+    batchId: String(parsed.batchId || ''),
+    transitionedAt: parsed.transitionedAt || null,
+    previousHash: String(parsed.previousHash || ''),
+    eventHash: String(parsed.eventHash || ''),
+  };
+}
+
+async function listProposalWorkflowEventRows(poolId, proposalId) {
+  if (!available('technicalHistory')) return [];
+  const rows = await db('technicalHistory').findMany({
+    where: {
+      poolId,
+      type: TECHNICAL_PROPOSAL_WORKFLOW_EVENT_TYPE,
+    },
+    orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+    take: 500,
+  });
+  return rows.filter((row) => {
+    const parsed = parseWorkflowEventDescription(row.description || '');
+    return parsed && Number(parsed.proposalId) === Number(proposalId);
+  });
+}
+
+function buildImmutableHistory(events = []) {
+  let chainValid = true;
+  let expectedPrevHash = '';
+  const items = events.map((row) => {
+    const parsed = parseWorkflowEventDescription(row.description || '') || {};
+    const rebuiltHash = buildWorkflowEventHash(parsed, parsed.previousHash || '');
+    const hashMatches = !!parsed.eventHash && parsed.eventHash === rebuiltHash;
+    const prevMatches = (parsed.previousHash || '') === expectedPrevHash;
+    const valid = hashMatches && prevMatches;
+    if (!valid) chainValid = false;
+    expectedPrevHash = parsed.eventHash || expectedPrevHash;
+    return {
+      id: row.id,
+      proposalId: parsed.proposalId || null,
+      fromState: parsed.fromState || '',
+      toState: parsed.toState || '',
+      actor: parsed.actor || '',
+      actorRole: parsed.actorRole || '',
+      note: parsed.note || '',
+      batchId: parsed.batchId || '',
+      transitionedAt: parsed.transitionedAt || row.performedAt || row.createdAt,
+      previousHash: parsed.previousHash || '',
+      eventHash: parsed.eventHash || '',
+      valid,
+    };
+  });
+  return {
+    chainValid,
+    totalEvents: items.length,
+    latestHash: items.length ? items[items.length - 1].eventHash : '',
+    events: items,
+  };
+}
+
+function roleCanTransitionProposal(role, fromState, toState) {
+  const current = normalizeProposalWorkflowState(fromState, 'SUBMITTED');
+  const target = normalizeProposalWorkflowState(toState, '');
+  if (!target || target === current) return false;
+  if (!PROPOSAL_TRANSITIONS[current] || !PROPOSAL_TRANSITIONS[current].has(target)) return false;
+
+  if (roleMatches(role, 'ADMIN')) return true;
+  if (!roleMatches(role, 'TECHNICIAN')) return false;
+
+  return (current === 'DRAFT' && target === 'SUBMITTED')
+    || (current === 'NEEDS_INFO' && target === 'SUBMITTED');
+}
+
+async function appendTechnicalProposalWorkflowEvent({ poolId, proposalId, fromState, toState, actor, actorRole, note, batchId = '' }) {
+  if (!available('technicalHistory')) return;
+  const previousRows = await listProposalWorkflowEventRows(poolId, proposalId);
+  const previousEvent = previousRows.length ? parseWorkflowEventDescription(previousRows[previousRows.length - 1].description || '') : null;
+  const previousHash = String(previousEvent?.eventHash || '');
+  const transitionedAt = new Date().toISOString();
+  const payload = {
+    proposalId,
+    fromState,
+    toState,
+    actor,
+    actorRole,
+    note,
+    batchId,
+    transitionedAt,
+    previousHash,
+  };
+  const eventHash = buildWorkflowEventHash(payload, previousHash);
+  await db('technicalHistory').create({
+    data: {
+      poolId,
+      type: TECHNICAL_PROPOSAL_WORKFLOW_EVENT_TYPE,
+      component: 'Ficha Técnica Workflow',
+      message: `Proposta #${proposalId}: ${fromState || 'INIT'} -> ${toState}`,
+      description: JSON.stringify({ ...payload, eventHash }),
+      performedAt: new Date(),
+      status: toState,
+    },
+  }).catch(() => null);
+}
+
+async function transitionTechnicalProposalRow({ row, targetState, actorRole, actor, note = '', batchId = '' }) {
+  const current = mapTechnicalProposal(row);
+  const currentState = normalizeProposalWorkflowState(current.status, 'SUBMITTED');
+  if (!roleCanTransitionProposal(actorRole, currentState, targetState)) {
+    const deniedStatus = normalizeRole(actorRole) === 'TECHNICIAN' ? 403 : 409;
+    return { ok: false, status: deniedStatus, error: 'Transicao de workflow nao permitida para esta proposta', currentState };
+  }
+
+  const transitions = Array.isArray(current.transitions) ? current.transitions : [];
+  const nowIso = new Date().toISOString();
+  const updatedPayload = {
+    proposalId: current.id,
+    reason: current.reason,
+    riskLevel: current.riskLevel,
+    photos: current.photos,
+    changes: current.changes,
+    actor: current.actor,
+    actorRole: current.actorRole,
+    submittedAt: current.submittedAt || nowIso,
+    status: targetState,
+    lifecycle: targetState,
+    reviewNote: note || current.reviewNote || '',
+    reviewedBy: roleMatches(actorRole, 'ADMIN') ? actor : (current.reviewedBy || ''),
+    reviewedAt: roleMatches(actorRole, 'ADMIN') ? nowIso : (current.reviewedAt || null),
+    transitions: [
+      ...transitions,
+      {
+        from: currentState,
+        to: targetState,
+        at: nowIso,
+        by: actor,
+        note,
+        batchId,
+      },
+    ],
+  };
+
+  const updated = await db('technicalHistory').update({
+    where: { id: row.id },
+    data: {
+      status: targetState,
+      description: JSON.stringify(updatedPayload),
+      performedAt: new Date(),
+    },
+  });
+
+  await appendTechnicalProposalWorkflowEvent({
+    poolId: row.poolId,
+    proposalId: row.id,
+    fromState: currentState,
+    toState: targetState,
+    actor,
+    actorRole,
+    note,
+    batchId,
+  });
+
+  if (available('notification') && ['NEEDS_INFO', 'APPROVED', 'REJECTED'].includes(targetState)) {
+    const severity = targetState === 'REJECTED' ? 'HIGH' : (current.riskLevel === 'HIGH' ? 'HIGH' : 'MEDIUM');
+    await db('notification').create({
+      data: dataFor('notification', {
+        type: 'TECHNICAL_SHEET_PROPOSAL_WORKFLOW',
+        eventType: `TECHNICAL_SHEET_PROPOSAL_${targetState}`,
+        title: `Workflow proposta técnica: ${targetState}`,
+        message: `${actor} atualizou proposta #${row.id} para ${targetState}.`,
+        role: roleMatches(actorRole, 'ADMIN') ? 'TECHNICIAN' : 'ADMIN',
+        status: 'PENDING',
+        severity,
+        metadata: {
+          poolId: row.poolId,
+          proposalHistoryId: row.id,
+          fromState: currentState,
+          toState: targetState,
+          note,
+          batchId: batchId || null,
+        },
+      }),
+    }).catch(() => null);
+  }
+
+  await emitTechnicalSheetPropagationEvent({
+    poolId: row.poolId,
+    actor,
+    source: 'TECHNICAL_PROPOSAL_WORKFLOW',
+    proposalId: row.id,
+    summary: `Proposta #${row.id} transitou ${currentState} -> ${targetState}`,
+    metadata: {
+      fromState: currentState,
+      toState: targetState,
+      batchId: batchId || null,
+      note: note || null,
+    },
+  });
+
+  return { ok: true, proposal: mapTechnicalProposal(updated), currentState };
+}
+
+function normalizeProposalChanges(input) {
+  const source = Array.isArray(input)
+    ? input
+    : (input && typeof input === 'object' ? Object.entries(input).map(([field, value]) => ({ field, after: value })) : []);
+  return source
+    .map((item) => ({
+      field: String(item?.field || '').trim(),
+      before: item?.before == null ? null : String(item.before),
+      after: item?.after == null ? null : String(item.after),
+    }))
+    .filter((item) => item.field && (item.before !== item.after));
+}
+
+function inferProposalRiskLevel(changes = []) {
+  const fields = changes.map((item) => String(item.field || '').trim());
+  if (fields.some((field) => HIGH_FIELDS.has(field))) return 'HIGH';
+  if (fields.some((field) => MEDIUM_FIELDS.has(field))) return 'MEDIUM';
+  if (fields.some((field) => AUTO_FIELDS.has(field))) return 'LOW';
+  return 'MEDIUM';
+}
+
+function normalizeProposalPhotos(input) {
+  const list = Array.isArray(input) ? input : [];
+  return list
+    .map((item) => String(item || '').trim())
+    .filter((item) => item.length > 0)
+    .slice(0, 12);
+}
+
+function parseProposalDescription(description) {
+  const parsed = safeJson(description, null);
+  if (!parsed || typeof parsed !== 'object') return null;
+  const changes = normalizeProposalChanges(parsed.changes || []);
+  const workflowState = normalizeProposalWorkflowState(parsed.lifecycle || parsed.status || 'SUBMITTED', 'SUBMITTED');
+  const transitions = Array.isArray(parsed.transitions)
+    ? parsed.transitions
+      .map((item) => ({
+        from: normalizeProposalWorkflowState(item?.from || '', ''),
+        to: normalizeProposalWorkflowState(item?.to || '', ''),
+        at: item?.at || null,
+        by: String(item?.by || '').trim(),
+        note: String(item?.note || '').trim(),
+      }))
+      .filter((item) => item.from && item.to)
+    : [];
+  return {
+    proposalId: String(parsed.proposalId || ''),
+    reason: String(parsed.reason || ''),
+    riskLevel: normalizeRiskLevel(parsed.riskLevel) || inferProposalRiskLevel(changes),
+    photos: normalizeProposalPhotos(parsed.photos || []),
+    changes,
+    actor: String(parsed.actor || ''),
+    actorRole: String(parsed.actorRole || ''),
+    submittedAt: parsed.submittedAt || null,
+    status: workflowState,
+    lifecycle: workflowState,
+    reviewNote: String(parsed.reviewNote || ''),
+    reviewedBy: String(parsed.reviewedBy || ''),
+    reviewedAt: parsed.reviewedAt || null,
+    transitions,
+  };
+}
+
+function mapTechnicalProposal(historyRow, options = {}) {
+  const payload = parseProposalDescription(historyRow?.description || '') || {};
+  const pool = options.pool || null;
+  const immutableHistory = options.immutableHistory || null;
+  const diff = buildProposalDiff(Array.isArray(payload.changes) ? payload.changes : [], pool);
+  return {
+    id: historyRow.id,
+    poolId: historyRow.poolId,
+    type: TECHNICAL_PROPOSAL_TYPE,
+    lifecycle: payload.lifecycle || normalizeProposalWorkflowState(historyRow.status || 'SUBMITTED', 'SUBMITTED'),
+    status: payload.status || normalizeProposalWorkflowState(historyRow.status || 'SUBMITTED', 'SUBMITTED'),
+    riskLevel: payload.riskLevel || 'MEDIUM',
+    reason: payload.reason || '',
+    changes: Array.isArray(payload.changes) ? payload.changes : [],
+    photos: Array.isArray(payload.photos) ? payload.photos : [],
+    actor: payload.actor || 'SYSTEM',
+    actorRole: payload.actorRole || '',
+    reviewNote: payload.reviewNote || '',
+    reviewedBy: payload.reviewedBy || '',
+    reviewedAt: payload.reviewedAt || null,
+    transitions: Array.isArray(payload.transitions) ? payload.transitions : [],
+    diff,
+    immutable: immutableHistory || undefined,
+    submittedAt: payload.submittedAt || historyRow.performedAt || historyRow.createdAt,
+    createdAt: historyRow.createdAt,
+  };
 }
 
 function poolBaseData(body, clientId = undefined, options = {}) {
@@ -897,6 +1392,7 @@ async function buildMorningCheck() {
 }
 
 async function getCoreCounts() {
+  const last24h = new Date(Date.now() - (24 * 60 * 60 * 1000));
   const [
     clients,
     pools,
@@ -908,6 +1404,7 @@ async function getCoreCounts() {
     invoicesOpen,
     messagesUnread,
     notificationsUnread,
+    technicalSheetEvents24h,
   ] = await Promise.all([
     safeCount('client'),
     safeCount('pool'),
@@ -935,6 +1432,12 @@ async function getCoreCounts() {
         ],
       },
     }),
+    safeCount('technicalHistory', {
+      where: {
+        type: { in: ['TECHNICAL_SHEET_CHANGE', TECHNICAL_SHEET_PROPAGATION_EVENT_TYPE, TECHNICAL_PROPOSAL_WORKFLOW_EVENT_TYPE] },
+        createdAt: { gte: last24h },
+      },
+    }),
   ]);
 
   return {
@@ -948,6 +1451,7 @@ async function getCoreCounts() {
     invoicesOpen,
     messagesUnread,
     notificationsUnread,
+    technicalSheetEvents24h,
   };
 }
 
@@ -963,6 +1467,13 @@ router.get('/health', async (req, res) => {
 router.get('/dashboard', async (req, res) => {
   const counts = await getCoreCounts();
   const morningCheck = await buildMorningCheck();
+  const technicalPropagation = await safe('technicalHistory.findMany.propagationDashboard', [], () => available('technicalHistory') ? db('technicalHistory').findMany({
+    where: {
+      type: { in: ['TECHNICAL_SHEET_CHANGE', TECHNICAL_SHEET_PROPAGATION_EVENT_TYPE, TECHNICAL_PROPOSAL_WORKFLOW_EVENT_TYPE] },
+    },
+    orderBy: [{ performedAt: 'desc' }, { createdAt: 'desc' }],
+    take: 20,
+  }) : []);
 
   const pendingPoolsWithoutRound = await safe('pool.findMany.pendingPoolsWithoutRound', [], () => db('pool').findMany({
     where: { active: true, roundPools: { none: {} } },
@@ -997,7 +1508,72 @@ router.get('/dashboard', async (req, res) => {
     take: 20,
   }));
 
-  return res.json({ ok: true, counts, pendingPoolsWithoutRound, nextVisits, morningCheck });
+  return res.json({
+    ok: true,
+    counts,
+    pendingPoolsWithoutRound,
+    nextVisits,
+    morningCheck,
+    technicalPropagation: technicalPropagation.map((row) => ({
+      id: row.id,
+      poolId: row.poolId,
+      type: row.type,
+      message: row.message,
+      at: row.performedAt || row.createdAt,
+      status: row.status,
+      component: row.component,
+    })),
+  });
+});
+
+router.get('/timeline/technical-sheet-events', async (req, res) => {
+  try {
+    const limit = Math.min(200, Math.max(1, toInt(req.query.limit, 80) || 80));
+    const rows = await safe('technicalHistory.findMany.technicalTimeline', [], () => available('technicalHistory') ? db('technicalHistory').findMany({
+      where: {
+        type: { in: ['TECHNICAL_SHEET_CHANGE', TECHNICAL_SHEET_PROPAGATION_EVENT_TYPE, TECHNICAL_PROPOSAL_TYPE, TECHNICAL_PROPOSAL_WORKFLOW_EVENT_TYPE] },
+      },
+      orderBy: [{ performedAt: 'desc' }, { createdAt: 'desc' }],
+      take: limit,
+    }) : []);
+
+    const timeline = rows.map((row) => {
+      const parsed = safeJson(row.description, {});
+      return {
+        id: row.id,
+        poolId: row.poolId,
+        at: row.performedAt || row.createdAt,
+        type: row.type,
+        status: row.status,
+        title: row.component || 'Evento técnico',
+        message: row.message || '',
+        actor: parsed?.actor || parsed?.by || null,
+        source: parsed?.source || null,
+      };
+    });
+
+    return res.json({ ok: true, timeline });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: error.message });
+  }
+});
+
+router.get('/knowledge/technical-sheet', async (req, res) => {
+  try {
+    const limit = Math.min(200, Math.max(1, toInt(req.query.limit, 50) || 50));
+    const notes = BrainKnowledge.listNotes(limit)
+      .filter((note) => Array.isArray(note.tags) && note.tags.includes('technical-sheet'))
+      .map((note) => ({
+        id: note.id,
+        title: note.title,
+        body: note.body,
+        tags: note.tags,
+        createdAt: note.createdAt,
+      }));
+    return res.json({ ok: true, notes });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: error.message });
+  }
 });
 
 router.get('/clients', async (req, res) => {
@@ -1213,6 +1789,312 @@ router.get('/pools/:id/technical-sheet', async (req, res) => {
   } catch (error) { return res.status(500).json({ ok: false, error: error.message }); }
 });
 
+router.get('/pools/:id/technical-change-proposals', async (req, res) => {
+  try {
+    const poolId = toInt(req.params.id);
+    if (!poolId) return res.status(400).json({ ok: false, error: 'ID da piscina invalido' });
+    if (!available('technicalHistory')) return res.json({ ok: true, proposals: [] });
+
+    const onlyPending = truthy(req.query.onlyPending);
+    const rows = await db('technicalHistory').findMany({
+      where: {
+        poolId,
+        type: TECHNICAL_PROPOSAL_TYPE,
+      },
+      orderBy: [{ performedAt: 'desc' }, { createdAt: 'desc' }],
+      take: 100,
+    });
+    const pool = await db('pool').findUnique({
+      where: { id: poolId },
+      include: { technicalSheet: true, calculationProfile: true, equipment: true, technicalRoom: true },
+    }).catch(() => null);
+
+    let proposals = rows.map((row) => mapTechnicalProposal(row, { pool }));
+    if (onlyPending) {
+      proposals = proposals.filter((item) => PROPOSAL_PENDING_STATES.has(normalizeProposalWorkflowState(item.status, 'SUBMITTED')));
+    }
+
+    return res.json({ ok: true, proposals });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: error.message });
+  }
+});
+
+router.post('/pools/:id/technical-change-proposals', async (req, res) => {
+  try {
+    const poolId = toInt(req.params.id);
+    if (!poolId) return res.status(400).json({ ok: false, error: 'ID da piscina invalido' });
+    if (!available('technicalHistory')) return res.status(501).json({ ok: false, error: 'Historico tecnico indisponivel' });
+
+    const pool = await db('pool').findUnique({ where: { id: poolId }, include: { client: true } });
+    if (!pool) return res.status(404).json({ ok: false, error: 'Piscina nao encontrada' });
+
+    const body = req.body || {};
+    const reason = String(body.reason || '').trim();
+    if (!reason) return res.status(400).json({ ok: false, error: 'Motivo obrigatorio' });
+
+    const changes = normalizeProposalChanges(body.changes || []);
+    if (!changes.length) return res.status(400).json({ ok: false, error: 'A proposta precisa de pelo menos uma alteracao' });
+
+    const explicitRisk = normalizeRiskLevel(body.riskLevel);
+    if (String(body.riskLevel || '').trim() && !explicitRisk) {
+      return res.status(400).json({ ok: false, error: 'Nivel de risco invalido. Use LOW, MEDIUM ou HIGH' });
+    }
+
+    const photos = normalizeProposalPhotos(body.photos || []);
+    const actor = actorNameFromReq(req);
+    const actorRole = String(req.user?.role || '').toUpperCase();
+    const riskLevel = explicitRisk || inferProposalRiskLevel(changes);
+    const initialState = truthy(body.asDraft) ? 'DRAFT' : 'SUBMITTED';
+    const proposalPayload = {
+      proposalId: `P-${poolId}-${Date.now()}`,
+      reason,
+      riskLevel,
+      photos,
+      changes,
+      actor,
+      actorRole,
+      submittedAt: new Date().toISOString(),
+      status: initialState,
+      lifecycle: initialState,
+      reviewNote: '',
+      reviewedBy: '',
+      reviewedAt: null,
+      transitions: [{
+        from: '',
+        to: initialState,
+        at: new Date().toISOString(),
+        by: actor,
+        note: initialState === 'DRAFT' ? 'Proposta criada em rascunho' : 'Proposta submetida',
+      }],
+    };
+
+    const created = await db('technicalHistory').create({
+      data: {
+        poolId,
+        type: TECHNICAL_PROPOSAL_TYPE,
+        component: 'Ficha Técnica',
+        message: 'Proposta de alteração da ficha técnica',
+        description: JSON.stringify(proposalPayload),
+        performedAt: new Date(),
+        status: initialState,
+      },
+    });
+
+    await appendTechnicalProposalWorkflowEvent({
+      poolId,
+      proposalId: created.id,
+      fromState: '',
+      toState: initialState,
+      actor,
+      actorRole,
+      note: initialState === 'DRAFT' ? 'Proposta criada em rascunho' : 'Proposta submetida',
+    });
+
+    if (available('notification') && initialState === 'SUBMITTED') {
+      await db('notification').create({
+        data: dataFor('notification', {
+          type: 'TECHNICAL_SHEET_PROPOSAL',
+          eventType: 'TECHNICAL_SHEET_CHANGE_PROPOSED',
+          title: `Proposta técnica: ${pool.name || `Piscina #${poolId}`}`,
+          message: `${actor} submeteu proposta de alteração (${riskLevel}).`,
+          role: 'ADMIN',
+          status: 'PENDING',
+          severity: riskLevel === 'HIGH' ? 'HIGH' : (riskLevel === 'MEDIUM' ? 'MEDIUM' : 'LOW'),
+          metadata: {
+            poolId,
+            poolName: pool.name || null,
+            clientId: pool.clientId || null,
+            clientName: pool.client?.name || null,
+            proposalHistoryId: created.id,
+            reason,
+            riskLevel,
+            photosCount: photos.length,
+          },
+        }),
+      }).catch(() => null);
+    }
+
+    await emitTechnicalSheetPropagationEvent({
+      poolId,
+      actor,
+      source: 'TECHNICAL_PROPOSAL_CREATED',
+      proposalId: created.id,
+      summary: `Proposta #${created.id} criada com estado ${initialState}`,
+      metadata: {
+        riskLevel,
+        reason,
+        photosCount: photos.length,
+        lifecycle: initialState,
+      },
+    });
+
+    return res.status(201).json({ ok: true, proposal: mapTechnicalProposal(created) });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: error.message });
+  }
+});
+
+router.post('/pools/:id/technical-change-proposals/:proposalId/workflow', async (req, res) => {
+  try {
+    const poolId = toInt(req.params.id);
+    const proposalId = toInt(req.params.proposalId);
+    if (!poolId || !proposalId) return res.status(400).json({ ok: false, error: 'Identificador invalido' });
+    if (!available('technicalHistory')) return res.status(501).json({ ok: false, error: 'Historico tecnico indisponivel' });
+
+    const row = await db('technicalHistory').findFirst({
+      where: {
+        id: proposalId,
+        poolId,
+        type: TECHNICAL_PROPOSAL_TYPE,
+      },
+    });
+    if (!row) return res.status(404).json({ ok: false, error: 'Proposta tecnica nao encontrada' });
+
+    const body = req.body || {};
+    const targetState = normalizeProposalWorkflowState(body.nextStatus || body.status || '', '');
+    if (!targetState) {
+      return res.status(400).json({ ok: false, error: 'Estado de destino invalido. Use DRAFT, SUBMITTED, IN_REVIEW, NEEDS_INFO, APPROVED ou REJECTED' });
+    }
+
+    const actorRole = String(req.user?.role || '').toUpperCase();
+    const actor = actorNameFromReq(req);
+    const note = String(body.note || body.reason || '').trim();
+    const result = await transitionTechnicalProposalRow({ row, targetState, actorRole, actor, note });
+    if (!result.ok) {
+      return res.status(result.status || 409).json({ ok: false, error: result.error || 'Transicao de workflow nao permitida para esta proposta' });
+    }
+
+    return res.json({ ok: true, proposal: result.proposal });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: error.message });
+  }
+});
+
+router.get('/pools/:id/technical-change-proposals/:proposalId/diff', async (req, res) => {
+  try {
+    const poolId = toInt(req.params.id);
+    const proposalId = toInt(req.params.proposalId);
+    if (!poolId || !proposalId) return res.status(400).json({ ok: false, error: 'Identificador invalido' });
+
+    const row = await db('technicalHistory').findFirst({
+      where: {
+        id: proposalId,
+        poolId,
+        type: TECHNICAL_PROPOSAL_TYPE,
+      },
+    });
+    if (!row) return res.status(404).json({ ok: false, error: 'Proposta tecnica nao encontrada' });
+
+    const pool = await db('pool').findUnique({
+      where: { id: poolId },
+      include: { technicalSheet: true, calculationProfile: true, equipment: true, technicalRoom: true },
+    }).catch(() => null);
+
+    const proposal = mapTechnicalProposal(row, { pool });
+    return res.json({ ok: true, proposalId, status: proposal.status, diff: proposal.diff || [] });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: error.message });
+  }
+});
+
+router.get('/pools/:id/technical-change-proposals/:proposalId/history', async (req, res) => {
+  try {
+    const poolId = toInt(req.params.id);
+    const proposalId = toInt(req.params.proposalId);
+    if (!poolId || !proposalId) return res.status(400).json({ ok: false, error: 'Identificador invalido' });
+
+    const row = await db('technicalHistory').findFirst({
+      where: {
+        id: proposalId,
+        poolId,
+        type: TECHNICAL_PROPOSAL_TYPE,
+      },
+    });
+    if (!row) return res.status(404).json({ ok: false, error: 'Proposta tecnica nao encontrada' });
+
+    const eventRows = await listProposalWorkflowEventRows(poolId, proposalId);
+    const immutable = buildImmutableHistory(eventRows);
+    const proposal = mapTechnicalProposal(row, { immutableHistory: immutable });
+    return res.json({ ok: true, proposalId, immutable, transitions: proposal.transitions || [] });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: error.message });
+  }
+});
+
+router.post('/pools/:id/technical-change-proposals/workflow/batch', async (req, res) => {
+  try {
+    const poolId = toInt(req.params.id);
+    if (!poolId) return res.status(400).json({ ok: false, error: 'ID da piscina invalido' });
+    if (!available('technicalHistory')) return res.status(501).json({ ok: false, error: 'Historico tecnico indisponivel' });
+
+    const actorRole = String(req.user?.role || '').toUpperCase();
+    if (!roleMatches(actorRole, 'ADMIN')) {
+      return res.status(403).json({ ok: false, error: 'Aprovação em lote requer perfil ADMIN' });
+    }
+
+    const body = req.body || {};
+    const targetState = normalizeProposalWorkflowState(body.nextStatus || body.status || '', '');
+    if (!targetState) {
+      return res.status(400).json({ ok: false, error: 'Estado de destino invalido para batch' });
+    }
+
+    const proposalIds = Array.from(new Set(
+      (Array.isArray(body.proposalIds) ? body.proposalIds : [])
+        .map((item) => toInt(item))
+        .filter((item) => item > 0)
+    ));
+
+    if (!proposalIds.length) {
+      return res.status(400).json({ ok: false, error: 'proposalIds obrigatorio para transicao em lote' });
+    }
+    if (proposalIds.length > 50) {
+      return res.status(400).json({ ok: false, error: 'Limite de 50 propostas por lote' });
+    }
+
+    const rows = await db('technicalHistory').findMany({
+      where: {
+        id: { in: proposalIds },
+        poolId,
+        type: TECHNICAL_PROPOSAL_TYPE,
+      },
+    });
+    const rowById = new Map(rows.map((item) => [Number(item.id), item]));
+
+    const actor = actorNameFromReq(req);
+    const note = String(body.note || body.reason || '').trim();
+    const batchId = `BATCH-${poolId}-${Date.now()}`;
+    const updated = [];
+    const failed = [];
+
+    for (const proposalId of proposalIds) {
+      const row = rowById.get(Number(proposalId));
+      if (!row) {
+        failed.push({ proposalId, status: 404, error: 'Proposta tecnica nao encontrada' });
+        continue;
+      }
+      const result = await transitionTechnicalProposalRow({ row, targetState, actorRole, actor, note, batchId });
+      if (!result.ok) {
+        failed.push({ proposalId, status: result.status || 409, error: result.error || 'Transicao invalida' });
+        continue;
+      }
+      updated.push(result.proposal);
+    }
+
+    return res.json({
+      ok: failed.length === 0,
+      batchId,
+      targetState,
+      updatedCount: updated.length,
+      failedCount: failed.length,
+      updated,
+      failed,
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, error: error.message });
+  }
+});
+
 router.put('/pools/:id/technical-sheet', async (req, res) => {
   try {
     const id = toInt(req.params.id);
@@ -1264,9 +2146,23 @@ router.put('/pools/:id/technical-sheet', async (req, res) => {
 
     const afterSheet = await db('pool').findUnique({ where: { id }, include: { equipment: true, technicalRoom: true, calculationProfile: true, technicalSheet: true } }).catch(() => null);
     await recordTechnicalSheetHistory(id, beforeSheet, afterSheet, body.actor || req.headers['x-user-email'] || 'ADMIN');
+    const technicalChanges = listTechnicalChangedFields(beforeSheet, afterSheet);
     if (body.historyNote && available('technicalHistory')) {
       await db('technicalHistory').create({ data: { poolId: id, type: 'TECHNICAL_SHEET_NOTE', component: 'Ficha Técnica', message: 'Nota da ficha técnica', description: String(body.historyNote), performedAt: new Date(), status: 'DONE' } }).catch(() => null);
     }
+
+    await emitTechnicalSheetPropagationEvent({
+      poolId: id,
+      actor: body.actor || req.headers['x-user-email'] || 'ADMIN',
+      source: 'TECHNICAL_SHEET_DIRECT_UPDATE',
+      summary: technicalChanges.length
+        ? `Ficha técnica atualizada com ${technicalChanges.length} alteração(ões).`
+        : 'Ficha técnica atualizada sem diferenças mapeadas.',
+      metadata: {
+        changes: technicalChanges,
+        changesCount: technicalChanges.length,
+      },
+    });
 
     const pool = afterSheet || await db('pool').findUnique({ where: { id }, include: { client: true, equipment: true, technicalRoom: true, calculationProfile: true, technicalSheet: true } });
     return res.json({ ok: true, pool });
@@ -1826,6 +2722,14 @@ router.post('/visits/:id/problem', async (req, res) => {
     if (!visit) return res.status(404).json({ ok: false, error: 'Visita nao encontrada' });
     if (!visit.poolId) return res.status(400).json({ ok: false, error: 'Visita sem piscina associada' });
 
+    const actorRole = String(req.user?.role || '').toUpperCase();
+    if (!roleMatches(actorRole, 'ADMIN')) {
+      const actorTechnicianId = toInt(req.user?.technicianId, toInt(req.user?.id));
+      if (!actorTechnicianId || toInt(visit.technicianId) !== actorTechnicianId) {
+        return res.status(403).json({ ok: false, error: 'Sem permissao para alterar visita de outro tecnico' });
+      }
+    }
+
     const type = String(body.type || 'Problema em campo').trim();
     const severity = String(body.severity || 'Normal').toUpperCase();
     const priority = severity.includes('URG') || severity.includes('CRIT') ? 'HIGH' : 'NORMAL';
@@ -1903,6 +2807,17 @@ router.post('/visits/:id/complete', async (req, res) => {
   try {
     const id = toInt(req.params.id);
     const body = req.body || {};
+
+    const visitScope = await db('serviceVisit').findUnique({ where: { id }, select: { id: true, technicianId: true } });
+    if (!visitScope) return res.status(404).json({ ok: false, error: 'Visita nao encontrada' });
+
+    const actorRole = String(req.user?.role || '').toUpperCase();
+    if (!roleMatches(actorRole, 'ADMIN')) {
+      const actorTechnicianId = toInt(req.user?.technicianId, toInt(req.user?.id));
+      if (!actorTechnicianId || toInt(visitScope.technicianId) !== actorTechnicianId) {
+        return res.status(403).json({ ok: false, error: 'Sem permissao para alterar visita de outro tecnico' });
+      }
+    }
 
     const { visit, repair } = await completeServiceVisit(prisma, id, body);
 

@@ -1,0 +1,642 @@
+===== frontend/ui/design-system.css =====
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
+
+:root {
+  --ds-font: "Manrope", "Segoe UI", "Helvetica Neue", sans-serif;
+  --ds-bg: #f3f6f8;
+  --ds-surface: #ffffff;
+  --ds-surface-soft: #f8fbfd;
+  --ds-text: #0f1b2a;
+  --ds-text-muted: #4d6278;
+  --ds-border: #d5e1ea;
+  --ds-primary: #0a6c5e;
+  --ds-primary-strong: #065248;
+  --ds-danger: #b2383a;
+  --ds-warning: #946300;
+  --ds-success: #1b7f3b;
+  --ds-focus: #0d8ff2;
+  --ds-shadow: 0 10px 28px rgba(8, 30, 56, 0.08);
+
+  --ds-r-xs: 8px;
+  --ds-r-sm: 12px;
+  --ds-r-md: 16px;
+  --ds-r-lg: 20px;
+
+  --ds-s-1: 4px;
+  --ds-s-2: 8px;
+  --ds-s-3: 12px;
+  --ds-s-4: 16px;
+  --ds-s-5: 20px;
+  --ds-s-6: 24px;
+  --ds-s-7: 32px;
+  --ds-s-8: 40px;
+
+  --ds-touch-min: 44px;
+  --ds-max-content: 1360px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--ds-font);
+  color: var(--ds-text);
+  background: radial-gradient(circle at 20% 0%, #ffffff 0%, #f3f6f8 44%, #eaf1f6 100%);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+svg,
+video,
+canvas,
+iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: var(--ds-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--ds-text);
+  margin-top: 0;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: clamp(1.45rem, 2vw, 2rem);
+}
+
+h2 {
+  font-size: clamp(1.2rem, 1.6vw, 1.5rem);
+}
+
+h3 {
+  font-size: clamp(1.05rem, 1.35vw, 1.2rem);
+}
+
+p,
+small,
+label,
+li,
+td,
+th {
+  color: var(--ds-text-muted);
+}
+
+main,
+.container,
+.wrap,
+.page,
+.portal,
+.field,
+.content {
+  max-width: var(--ds-max-content);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.card,
+.panel,
+.box,
+.section,
+.widget,
+.metric,
+.module,
+article,
+[data-card] {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-r-md);
+  box-shadow: var(--ds-shadow);
+}
+
+button,
+.btn,
+[role="button"],
+input[type="button"],
+input[type="submit"],
+input[type="reset"] {
+  min-height: var(--ds-touch-min);
+  border-radius: var(--ds-r-sm);
+  border: 1px solid transparent;
+  padding: 10px 16px;
+  font: 700 0.95rem/1 var(--ds-font);
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+  background: var(--ds-primary);
+  color: #fff;
+}
+
+button:hover,
+.btn:hover,
+[role="button"]:hover {
+  transform: translateY(-1px);
+  background: var(--ds-primary-strong);
+}
+
+button:disabled,
+.btn:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+button.secondary,
+.btn.secondary,
+.btn-outline,
+.ghost,
+[data-variant="secondary"] {
+  background: var(--ds-surface);
+  border-color: var(--ds-border);
+  color: var(--ds-text);
+}
+
+button.danger,
+.btn-danger,
+[data-variant="danger"] {
+  background: var(--ds-danger);
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  min-height: var(--ds-touch-min);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-r-sm);
+  background: var(--ds-surface);
+  color: var(--ds-text);
+  font: 600 0.95rem/1.3 var(--ds-font);
+  padding: 10px 12px;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #6f8398;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  min-height: auto;
+  accent-color: var(--ds-primary);
+}
+
+:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--ds-focus) 72%, #ffffff 28%);
+  outline-offset: 2px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--ds-surface);
+  border-radius: var(--ds-r-md);
+  overflow: hidden;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--ds-border);
+  text-align: left;
+  padding: 10px 12px;
+}
+
+th {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #35526d;
+  background: var(--ds-surface-soft);
+}
+
+.ds-badge,
+.badge,
+.status,
+.tag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font: 700 0.78rem/1 var(--ds-font);
+  border: 1px solid transparent;
+  background: #dff4ec;
+  color: #0f5b47;
+}
+
+.ds-badge.is-warning { background: #fff1cc; color: #6b5200; }
+.ds-badge.is-danger { background: #fde4e5; color: #7f2021; }
+.ds-badge.is-muted { background: #eef3f7; color: #385068; }
+
+.ds-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-s-4);
+===== frontend/ui/design-system.js =====
+(function () {
+  if (window.__CW_DESIGN_SYSTEM__) return;
+  window.__CW_DESIGN_SYSTEM__ = true;
+
+  function getProfile() {
+    var path = (location.pathname || "").toLowerCase();
+    if (path.indexOf("/admin") === 0) return "ADMIN";
+    if (path.indexOf("/technician") === 0) return "TECHNICIAN";
+    if (path.indexOf("/client") === 0) return "CLIENT";
+    return "SHARED";
+  }
+
+  function applyProfileAttribute() {
+    document.body.setAttribute("data-profile", getProfile());
+  }
+
+  function markActiveBottomNav(nav) {
+    var current = (location.pathname || "").toLowerCase();
+    Array.prototype.forEach.call(nav.querySelectorAll("a"), function (a) {
+      var href = (a.getAttribute("href") || "").toLowerCase();
+      if (href && (current === href || current.indexOf(href + "?") === 0)) {
+        a.classList.add("is-active");
+      }
+    });
+  }
+
+  function makeBottomNav(profile) {
+    var existing = document.querySelector(".ds-bottom-nav");
+    if (existing) return;
+    if (profile !== "TECHNICIAN" && profile !== "CLIENT") return;
+
+    var nav = document.createElement("nav");
+    nav.className = "ds-bottom-nav";
+    nav.setAttribute("aria-label", profile === "TECHNICIAN" ? "Navegacao rapida tecnico" : "Navegacao rapida cliente");
+
+    if (profile === "TECHNICIAN") {
+      nav.innerHTML = [
+        '<a href="/technician-field-mode">Hoje</a>',
+        '<a href="/technician-route">Ronda</a>',
+        '<a href="/technician-visit">Visitas</a>',
+        '<a href="/technician-guide">Docs</a>',
+        '<a href="/technician-profile">Perfil</a>'
+      ].join("");
+    } else {
+      nav.innerHTML = [
+        '<a href="/client-portal">Inicio</a>',
+        '<a href="/client">Piscina</a>',
+        '<a href="/client-history">Historico</a>',
+        '<a href="/client-notifications">Pedidos</a>',
+        '<a href="/client-profile">Perfil</a>'
+      ].join("");
+    }
+
+    markActiveBottomNav(nav);
+    document.body.appendChild(nav);
+  }
+
+  function addTableWrappers() {
+    Array.prototype.forEach.call(document.querySelectorAll("table"), function (table) {
+      if (table.closest(".ds-table-wrap") || table.closest(".table-wrap") || table.closest(".table-container")) return;
+      var wrap = document.createElement("div");
+      wrap.className = "ds-table-wrap";
+      table.parentNode.insertBefore(wrap, table);
+      wrap.appendChild(table);
+    });
+  }
+
+  function ensureAriaLabels() {
+    Array.prototype.forEach.call(document.querySelectorAll("input,select,textarea"), function (el) {
+      var hasLabel = !!el.getAttribute("aria-label") || !!el.id && !!document.querySelector('label[for="' + el.id + '"]');
+      if (!hasLabel) {
+        var placeholder = el.getAttribute("placeholder");
+        if (placeholder) el.setAttribute("aria-label", placeholder);
+      }
+    });
+  }
+
+  function exposeToastApi() {
+    if (window.CWDesignSystem && window.CWDesignSystem.toast) return;
+
+    function ensureLayer() {
+      var layer = document.getElementById("ds-toast-layer");
+      if (layer) return layer;
+      layer = document.createElement("div");
+      layer.id = "ds-toast-layer";
+      layer.style.position = "fixed";
+      layer.style.right = "16px";
+      layer.style.bottom = "76px";
+      layer.style.zIndex = "80";
+      layer.style.display = "grid";
+      layer.style.gap = "8px";
+      layer.style.maxWidth = "min(92vw, 380px)";
+      document.body.appendChild(layer);
+      return layer;
+    }
+
+    function toast(message, kind) {
+      var layer = ensureLayer();
+      var el = document.createElement("div");
+      el.className = "ds-badge is-muted";
+      el.style.display = "block";
+      el.style.padding = "12px 14px";
+      el.style.borderRadius = "12px";
+      el.style.boxShadow = "0 8px 26px rgba(6, 28, 52, 0.18)";
+      el.style.background = "#f3f8fc";
+      el.style.color = "#12283f";
+      if (kind === "error") {
+        el.style.background = "#ffeef0";
+        el.style.color = "#6b1d1f";
+      } else if (kind === "success") {
+        el.style.background = "#e8f9ef";
+        el.style.color = "#145e2f";
+      }
+      el.textContent = String(message || "");
+      layer.appendChild(el);
+      setTimeout(function () {
+        el.remove();
+      }, 3200);
+    }
+
+    window.CWDesignSystem = window.CWDesignSystem || {};
+    window.CWDesignSystem.toast = toast;
+  }
+
+  function textOf(el) {
+    return String((el && el.textContent) || "").trim().toLowerCase();
+  }
+
+  function pruneAdminNavigation() {
+    if (location.pathname !== "/admin-master-control") return;
+    var keep = [
+      "/admin-today",
+      "/admin-visits",
+      "/admin-alerts",
+      "/admin-alerts?scope=repairs",
+      "/admin-inventory",
+      "/billing",
+      "/admin-technicians",
+      "/admin-master-control"
+    ];
+    Array.prototype.forEach.call(document.querySelectorAll(".cw-v2-sidebar a[href], nav a[href]"), function (a) {
+      var href = (a.getAttribute("href") || "").toLowerCase();
+      if (!href || href.indexOf("/admin") !== 0 && href !== "/billing") return;
+      if (keep.indexOf(href) === -1) {
+        a.style.display = "none";
+      }
+    });
+  }
+
+  function pruneTechnicianFieldMode() {
+    if (location.pathname !== "/technician-field-mode") return;
+    var keepSections = [
+      "resumo do dia em campo",
+      "acoes principais da visita",
+      "registo rapido de parametros",
+      "produtos utilizados",
+      "fotografias da visita",
+      "visita atual"
+    ];
+    Array.prototype.forEach.call(document.querySelectorAll("main > section, main > .section, main > article, main > div"), function (node) {
+      var titleNode = node.querySelector("h2, [role='heading']");
+      if (!titleNode) return;
+      var t = textOf(titleNode);
+      if (!t) return;
+      var keep = keepSections.some(function (k) { return t.indexOf(k) !== -1; });
+      if (!keep && (t.indexOf("document") !== -1 || t.indexOf("acesso") !== -1 || t.indexOf("rota") !== -1 || t.indexOf("extras") !== -1 || t.indexOf("agua aberta") !== -1 || t.indexOf("avisos") !== -1)) {
+        node.style.display = "none";
+      }
+    });
+  }
+
+  function pruneClientNavigation() {
+    if (location.pathname.indexOf("/client") !== 0) return;
+    var labels = {
+      "inicio": true,
+      "piscina": true,
+      "historico": true,
+      "documentos": true,
+      "pedidos": true,
+      "mensagens": true,
+      "perfil": true
+    };
+    Array.prototype.forEach.call(document.querySelectorAll("nav a, .cw-v2-sidebar a"), function (a) {
+      var txt = textOf(a);
+      if (!txt) return;
+      if (!Object.keys(labels).some(function (k) { return txt.indexOf(k) !== -1; })) {
+        if (a.closest(".ds-bottom-nav")) return;
+        if (a.getAttribute("href") && a.getAttribute("href").toLowerCase().indexOf("/client") === 0) {
+          a.style.opacity = "0.65";
+        }
+      }
+    });
+  }
+
+  function init() {
+    if (!document.body) return;
+    applyProfileAttribute();
+    makeBottomNav(getProfile());
+    addTableWrappers();
+    ensureAriaLabels();
+    exposeToastApi();
+    pruneAdminNavigation();
+    pruneTechnicianFieldMode();
+    pruneClientNavigation();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init, { once: true });
+  } else {
+    init();
+  }
+})();
+===== frontend/ui/tokens.css =====
+:root {
+  --cw-color-bg: #f4f6f8;
+  --cw-color-bg-2: #eceff2;
+  --cw-color-surface: #ffffff;
+  --cw-color-surface-2: #f8fbfd;
+  --cw-color-text: #112232;
+  --cw-color-text-soft: #44576a;
+  --cw-color-border: rgba(17, 34, 50, 0.14);
+  --cw-color-primary: #0f5a70;
+  --cw-color-primary-2: #2f768a;
+  --cw-color-danger: #a1202f;
+  --cw-color-warning: #b06a00;
+  --cw-color-success: #13764a;
+
+  --cw-font-family: 'Segoe UI', 'Inter', Arial, sans-serif;
+  --cw-font-size-xs: 12px;
+  --cw-font-size-sm: 13px;
+  --cw-font-size-md: 15px;
+  --cw-font-size-lg: 18px;
+  --cw-font-size-xl: 30px;
+
+  --cw-space-1: 4px;
+  --cw-space-2: 8px;
+  --cw-space-3: 12px;
+  --cw-space-4: 16px;
+  --cw-space-5: 20px;
+  --cw-space-6: 24px;
+
+  --cw-radius-sm: 10px;
+  --cw-radius-md: 14px;
+  --cw-radius-lg: 16px;
+  --cw-radius-pill: 999px;
+
+  --cw-shadow-sm: 0 3px 10px rgba(17, 34, 50, 0.06);
+  --cw-shadow-md: 0 6px 18px rgba(17, 34, 50, 0.08);
+
+  --cw-transition-fast: 140ms ease;
+  --cw-transition: 220ms ease;
+
+  --cw-z-topbar: 30;
+  --cw-z-sidebar: 20;
+  --cw-z-mobile-nav: 40;
+  --cw-z-modal: 70;
+
+  --cw-break-320: 320px;
+  --cw-break-390: 390px;
+  --cw-break-430: 430px;
+  --cw-break-768: 768px;
+  --cw-break-1024: 1024px;
+  --cw-break-1440: 1440px;
+  --cw-break-1920: 1920px;
+}
+===== frontend/ui/tokens/tokens.css =====
+:root{
+
+--cw-primary:#0077B6;
+--cw-primary-dark:#005B8A;
+
+--cw-success:#22C55E;
+--cw-warning:#F59E0B;
+--cw-danger:#DC2626;
+
+--cw-bg:#F5F9FC;
+--cw-surface:#FFFFFF;
+
+--cw-text:#132A3A;
+--cw-text-soft:#607282;
+
+--cw-border:#DDE8EF;
+
+--cw-radius-xs:8px;
+--cw-radius-sm:12px;
+--cw-radius-md:18px;
+--cw-radius-lg:24px;
+
+--cw-shadow:0 12px 28px rgba(0,0,0,.08);
+
+--cw-gap-xs:6px;
+--cw-gap-sm:12px;
+--cw-gap-md:18px;
+--cw-gap-lg:24px;
+
+--cw-font:Inter,Arial,sans-serif;
+
+}
+===== frontend/enterprise-ui.css =====
+/* Cristal Water Enterprise compatibility stylesheet */
+:root{--cw-bg:#06131f;--cw-card:#0b2033;--cw-text:#eaf7ff;--cw-muted:#9bb4c7;--cw-accent:#2ed3ff;--cw-border:rgba(255,255,255,.12)}
+body{background:var(--cw-bg);color:var(--cw-text)}
+.card,.panel,.cw-card{background:var(--cw-card);border:1px solid var(--cw-border);border-radius:18px;color:var(--cw-text)}
+.metric-value,.kpi-value,.amount,.number{color:var(--cw-text)!important}
+.muted,.label{color:var(--cw-muted)!important}
+a{color:var(--cw-accent)}
+===== frontend/css/enterprise-ui.css =====
+/* Cristal Water Enterprise compatibility stylesheet */
+:root{--cw-bg:#06131f;--cw-card:#0b2033;--cw-text:#eaf7ff;--cw-muted:#9bb4c7;--cw-accent:#2ed3ff;--cw-border:rgba(255,255,255,.12)}
+body{background:var(--cw-bg);color:var(--cw-text)}
+.card,.panel,.cw-card{background:var(--cw-card);border:1px solid var(--cw-border);border-radius:18px;color:var(--cw-text)}
+.metric-value,.kpi-value,.amount,.number{color:var(--cw-text)!important}
+.muted,.label{color:var(--cw-muted)!important}
+a{color:var(--cw-accent)}
+===== frontend/ui/components/button.css =====
+.cw-v2-btn,
+.btn,
+.cw-btn {
+  min-height: 38px;
+  border: 1px solid var(--cw-color-border);
+  border-radius: var(--cw-radius-sm);
+  background: var(--cw-color-surface);
+  color: var(--cw-color-text);
+  padding: 8px 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--cw-transition-fast), border-color var(--cw-transition-fast);
+}
+
+.cw-v2-btn.primary,
+.btn.primary,
+.cw-btn-primary {
+  background: linear-gradient(135deg, var(--cw-color-primary), var(--cw-color-primary-2));
+  color: #eef8fb;
+  border-color: transparent;
+}
+
+.cw-v2-btn:hover,
+.btn:hover,
+.cw-btn:hover {
+  border-color: rgba(15, 90, 112, 0.5);
+}
+===== frontend/ui/components/buttons.css =====
+.cw-btn{
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+min-height:56px;
+
+padding:14px 20px;
+
+border:none;
+
+border-radius:18px;
+
+font-weight:700;
+
+cursor:pointer;
+
+transition:.2s;
+
+}
+
+.cw-btn-primary{
+
+background:var(--cw-primary);
+
+color:white;
+
+}
+
+.cw-btn-secondary{
+
+background:white;
+
+border:1px solid var(--cw-border);
+
+}

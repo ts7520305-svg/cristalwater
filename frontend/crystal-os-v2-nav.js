@@ -68,8 +68,6 @@
           ['/admin-visits-dashboard', 'Painel de visitas'],
           ['/admin-rounds', 'Rotas e rondas'],
           ['/admin-live-map', 'Mapa e localizacao'],
-          ['/admin-operational-flow', 'Fluxo operacional'],
-          ['/admin-core-flow', 'Core flow'],
           ['/incident-center', 'Ocorrencias'],
           ['/admin-service-log', 'Historico operacional']
         ]},
@@ -96,9 +94,8 @@
         { label: '6. Comercial', links: [
           ['/admin-crm', 'CRM comercial'],
           ['/admin-onboarding', 'Onboarding de contratos'],
-          ['/admin-onboarding?flow=repair', 'Reparacoes'],
-          ['/admin-onboarding?flow=installation', 'Instalacoes'],
-          ['/admin-onboarding?flow=construction', 'Obras']
+          ['/admin-alerts?scope=repairs', 'Reparacoes'],
+          ['/admin-company-closures', 'Obras']
         ]},
         { label: '7. Faturacao e financeiro', links: [
           ['/billing', 'Resumo financeiro'],
@@ -145,7 +142,6 @@
           ['/settings', 'Parametros do sistema'],
           ['/admin-security', 'Utilizadores e permissoes'],
           ['/admin-ui-settings', 'Tema e interface'],
-          ['/admin-test-center', 'Auditoria e diagnostico'],
           ['/help-center', 'Ajuda']
         ]}
       ],

@@ -17,8 +17,8 @@
     body {
       margin: 0;
       font-family: "Segoe UI", "Noto Sans", sans-serif;
-      color: #102620;
-      background: linear-gradient(180deg, #f7fbf9, #edf4f2);
+      color: #1c2d3d;
+      background: radial-gradient(circle at 12% 0%, #f3f9ff 0%, #ebf3fb 48%, #e3edf8 100%);
     }
 
     .guide-shell {
@@ -30,11 +30,11 @@
     .hero,
     .card {
       background: #fff;
-      border: 1px solid #c9d8d2;
-      border-radius: 14px;
+      border: 1px solid #cddaea;
+      border-radius: 16px;
       padding: 14px;
       margin-bottom: 10px;
-      box-shadow: 0 10px 28px rgba(16, 38, 32, 0.08);
+      box-shadow: 0 10px 28px rgba(26, 53, 87, 0.08);
     }
 
     .hero h1 {
@@ -44,11 +44,25 @@
       font-weight: 900;
     }
 
-    .muted { color: #577067; margin: 0; }
+    .muted { color: #56708b; margin: 0; }
+
+    .field {
+      display: grid;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .field label {
+      font-size: 12px;
+      font-weight: 800;
+      color: #4f6883;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
 
     .status-box {
       border-radius: 12px;
-      border: 1px solid #c9d8d2;
+      border: 1px solid #cddaea;
       background: #f4faf7;
       padding: 10px;
       font-weight: 700;
@@ -68,7 +82,7 @@
     }
 
     .btn {
-      border: 1px solid #c9d8d2;
+      border: 1px solid #cddaea;
       border-radius: 12px;
       padding: 14px 16px;
       font-weight: 800;
@@ -108,18 +122,26 @@
       width: 100%;
       padding: 14px;
       border-radius: 12px;
-      border: 1px solid #c9d8d2;
-      background: #fff;
-      color: #102620;
-      margin-top: 6px;
+      border: 1px solid #cddaea;
+      background: #f7fafd;
+      color: #1c2d3d;
+      margin-top: 0;
       min-height: 50px;
       font: inherit;
+    }
+
+    input:focus,
+    select:focus {
+      outline: 2px solid #2492ec;
+      outline-offset: 1px;
+      border-color: #2492ec;
+      background: #fff;
     }
 
     .movement {
       padding: 10px;
       border-radius: 12px;
-      border: 1px solid #c9d8d2;
+      border: 1px solid #cddaea;
       background: #fff;
       margin-top: 8px;
     }
@@ -129,7 +151,13 @@
     @media (max-width: 700px) {
       .grid { grid-template-columns: 1fr; }
     }
+
+    .cw-help-fab,
+    .cw-help-fab.cw-help-fab-quiet {
+      display: none !important;
+    }
   </style>
+  <link rel="stylesheet" href="/ui/design-system.css">
 </head>
 <body data-required-role="TECHNICIAN">
   <main class="guide-shell">
@@ -144,36 +172,48 @@
     <section class="card">
       <h2>Iniciar dia</h2>
       <div class="grid">
-        <select id="vehicle"></select>
-        <input id="techId" type="number" placeholder="ID tecnico">
+        <div class="field">
+          <label for="vehicle">Viatura</label>
+          <select id="vehicle" aria-label="Viatura"></select>
+        </div>
+        <div class="field">
+          <label for="techId">ID tecnico</label>
+          <input id="techId" type="number" placeholder="ID tecnico">
+        </div>
       </div>
-      <input id="startKm" type="number" placeholder="Km inicial">
+      <div class="field">
+        <label for="startKm">Km inicial</label>
+        <input id="startKm" type="number" placeholder="Km inicial">
+      </div>
       <button class="btn primary" onclick="startDay()" type="button">Iniciar dia / abrir guia de obra</button>
       <div class="muted">Se a AT estiver indisponivel, o dia pode iniciar. Fica um alerta para a administracao associar a guia de transporte mais tarde.</div>
     </section>
 
     <section class="card">
       <h2>Stock atual</h2>
-      <input id="vehicleStock" type="number" placeholder="ID viatura para ver stock">
+      <div class="field">
+        <label for="vehicleStock">ID viatura para ver stock</label>
+        <input id="vehicleStock" type="number" placeholder="ID viatura para ver stock">
+      </div>
       <button class="btn" onclick="loadStock()" type="button">Atualizar stock</button>
       <div id="stock"></div>
     </section>
 
     <section class="card">
       <h2>Registar consumo</h2>
-      <input id="workGuideId" type="number" placeholder="ID guia obra">
-      <input id="itemName" placeholder="Produto/material">
-      <input id="qty" type="number" placeholder="Quantidade">
-      <input id="visitId" type="number" placeholder="ID visita opcional">
-      <input id="movementLocation" placeholder="Local/piscina se nao houver visita">
-      <input id="movementNotes" placeholder="Notas do consumo">
+      <div class="field"><label for="workGuideId">ID guia obra</label><input id="workGuideId" type="number" placeholder="ID guia obra"></div>
+      <div class="field"><label for="itemName">Produto/material</label><input id="itemName" placeholder="Produto/material"></div>
+      <div class="field"><label for="qty">Quantidade</label><input id="qty" type="number" placeholder="Quantidade"></div>
+      <div class="field"><label for="visitId">ID visita opcional</label><input id="visitId" type="number" placeholder="ID visita opcional"></div>
+      <div class="field"><label for="movementLocation">Local/piscina</label><input id="movementLocation" placeholder="Local/piscina se nao houver visita"></div>
+      <div class="field"><label for="movementNotes">Notas do consumo</label><input id="movementNotes" placeholder="Notas do consumo"></div>
       <button class="btn warn" onclick="consume()" type="button">Consumir material</button>
     </section>
 
     <section class="card">
       <h2>Fechar guia</h2>
-      <input id="closeId" type="number" placeholder="ID guia obra">
-      <input id="endKm" type="number" placeholder="Km final">
+      <div class="field"><label for="closeId">ID guia obra</label><input id="closeId" type="number" placeholder="ID guia obra"></div>
+      <div class="field"><label for="endKm">Km final</label><input id="endKm" type="number" placeholder="Km final"></div>
       <button class="btn danger" onclick="closeGuide()" type="button">Fechar dia</button>
     </section>
   </main>
@@ -183,5 +223,6 @@
   <script src="/ui/core/navigation-context.js"></script>
   <script src="/crystal-os-v2-shell.js"></script>
   <script src="/crystal-os-v2-nav.js"></script>
+  <script defer src="/ui/design-system.js"></script>
 </body>
 </html>

@@ -1,0 +1,29 @@
+[
+  {
+    "viewport": "desktop",
+    "status": 200,
+    "consoleErrors": 0,
+    "hscroll": false,
+    "sw": 1440,
+    "cw": 1440,
+    "screenshot": "docs/product/evidence/group1/after/admin-alerts-desktop.png"
+  },
+  {
+    "viewport": "tablet",
+    "status": 200,
+    "consoleErrors": 0,
+    "hscroll": false,
+    "sw": 1024,
+    "cw": 1024,
+    "screenshot": "docs/product/evidence/group1/after/admin-alerts-tablet.png"
+  },
+  {
+    "viewport": "mobile",
+    "status": 200,
+    "consoleErrors": 0,
+    "hscroll": false,
+    "sw": 390,
+    "cw": 390,
+    "screenshot": "docs/product/evidence/group1/after/admin-alerts-mobile.png"
+  }
+]

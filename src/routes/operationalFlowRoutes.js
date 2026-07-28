@@ -1,5 +1,6 @@
 const express = require('express');
 const prismaModule = require('../prismaClient');
+const auth = require('../middlewares/authMiddleware');
 const { getPoolRoundReadiness } = require('../utils/poolReadiness');
 const {
   applyClientCreditToInvoice,
@@ -12,6 +13,8 @@ const {
 
 const prisma = prismaModule.prisma || prismaModule.default || prismaModule;
 const router = express.Router();
+
+router.use(auth('ADMIN'));
 
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);

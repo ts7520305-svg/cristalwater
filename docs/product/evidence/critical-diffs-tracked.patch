@@ -1,0 +1,174 @@
+diff --git a/frontend/admin-alerts.html b/frontend/admin-alerts.html
+index b9ae073..1ee3897 100644
+--- a/frontend/admin-alerts.html
++++ b/frontend/admin-alerts.html
+@@ -66,6 +66,7 @@
+   </style>
+   <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
++  <link rel="stylesheet" href="/ui/design-system.css">
+ </head>
+ <body data-required-role="ADMIN">
+   <div style="padding:12px 16px 0">
+@@ -127,5 +128,6 @@
+   <script src="/cw-admin-shortcuts.js"></script>
+   <script src="/crystal-os-v2-shell.js"></script>
+   <script src="/crystal-os-v2-nav.js"></script>
++  <script defer src="/ui/design-system.js"></script>
+ </body>
+ </html>
+diff --git a/frontend/admin-clients.html b/frontend/admin-clients.html
+index 355bc10..f240c86 100644
+--- a/frontend/admin-clients.html
++++ b/frontend/admin-clients.html
+@@ -453,6 +453,7 @@
+       }
+     }
+   </style>
++  <link rel="stylesheet" href="/ui/design-system.css">
+ </head>
+ <body data-cw-role="ADMIN">
+   <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+@@ -570,5 +571,6 @@
+   <script src="/cw-os-admin-shell.js"></script>
+   <script src="/crystal-os-v2-shell.js"></script>
+   <script src="/crystal-os-v2-nav.js"></script>
++  <script defer src="/ui/design-system.js"></script>
+ </body>
+ </html>
+diff --git a/frontend/admin-dashboard.html b/frontend/admin-dashboard.html
+index 386d729..a65e1d2 100644
+--- a/frontend/admin-dashboard.html
++++ b/frontend/admin-dashboard.html
+@@ -886,6 +886,7 @@ RESPONSIVE
+   <script src="/cw-auth.js"></script>
+   <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
++  <link rel="stylesheet" href="/ui/design-system.css">
+ </head>
+ 
+ <body data-required-role="ADMIN">
+@@ -1208,5 +1209,6 @@ RESPONSIVE
+ 
+   <script src="/crystal-os-v2-shell.js"></script>
+   <script src="/crystal-os-v2-nav.js"></script>
++  <script defer src="/ui/design-system.js"></script>
+ </body>
+ </html>
+diff --git a/frontend/admin-today.html b/frontend/admin-today.html
+index 26a87de..f79a112 100644
+--- a/frontend/admin-today.html
++++ b/frontend/admin-today.html
+@@ -10,6 +10,7 @@
+   <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+   <link rel="stylesheet" href="/cw-premium-admin-phase1.css">
+   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
++  <link rel="stylesheet" href="/ui/design-system.css">
+ </head>
+ <body class="admin-shell" data-required-role="ADMIN">
+   <div class="cw-v2-app">
+@@ -105,5 +106,6 @@
+   <script src="/admin-auth-guard.js"></script>
+   <script src="/admin-today.js"></script>
+   <script src="/cw-admin-premium-controls.js"></script>
++  <script defer src="/ui/design-system.js"></script>
+ </body>
+ </html>
+\ No newline at end of file
+diff --git a/frontend/client-portal.html b/frontend/client-portal.html
+index 876b87f..c5a430b 100644
+--- a/frontend/client-portal.html
++++ b/frontend/client-portal.html
+@@ -334,6 +334,7 @@
+     }
+   </style>
+   <script src="/client-auth-guard.js"></script>
++  <link rel="stylesheet" href="/ui/design-system.css">
+ </head>
+ <body class="portal-shell" data-required-role="CLIENT">
+   <div class="cw-v2-app">
+@@ -538,5 +539,6 @@
+   <script src="/ui/core/navigation-context.js"></script>
+   <script src="/crystal-os-v2-shell.js"></script>
+   <script src="/crystal-os-v2-nav.js"></script>
++  <script defer src="/ui/design-system.js"></script>
+ </body>
+ </html>
+diff --git a/frontend/technician-field-mode.html b/frontend/technician-field-mode.html
+index 54a9023..17b7795 100644
+--- a/frontend/technician-field-mode.html
++++ b/frontend/technician-field-mode.html
+@@ -536,6 +536,7 @@
+     }
+   </style>
+   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
++  <link rel="stylesheet" href="/ui/design-system.css">
+ </head>
+ <body class="cw-tech-field-page" data-field-tab="service" data-required-role="TECHNICIAN">
+   <main class="field">
+@@ -868,5 +869,6 @@
+   <script src="/ui/core/navigation-context.js"></script>
+   <script src="/crystal-os-v2-shell.js"></script>
+   <script src="/crystal-os-v2-nav.js"></script>
++  <script defer src="/ui/design-system.js"></script>
+ </body>
+ </html>
+diff --git a/src/routes/coreFlowRoutes.js b/src/routes/coreFlowRoutes.js
+index 8d50f0f..b8ef165 100644
+--- a/src/routes/coreFlowRoutes.js
++++ b/src/routes/coreFlowRoutes.js
+@@ -12,15 +12,21 @@ const {
+   invoiceTotal,
+ } = require('../services/clientCreditService');
+ const { assertPoolReadyForRound } = require('../utils/poolReadiness');
++const { roleMatches } = require('../utils/roles');
+ const RepairBusiness = require('../business/repair/RepairBusiness');
+ 
+ const prisma = prismaModule.prisma || prismaModule.default || prismaModule;
+ const router = express.Router();
+ 
+ const adminAuth = auth('ADMIN');
++const technicianAuth = auth('TECHNICIAN');
+ router.use((req, res, next) => {
+   // Keep only minimal metadata endpoints public by design.
+   if (req.method === 'GET' && (req.path === '/health' || req.path === '/dashboard')) return next();
++  // Technician field mode depends on these two core routes.
++  if (req.method === 'POST' && /^\/visits\/\d+\/(problem|complete)$/.test(req.path)) {
++    return technicianAuth(req, res, next);
++  }
+   return adminAuth(req, res, next);
+ });
+ 
+@@ -1834,6 +1840,14 @@ router.post('/visits/:id/problem', async (req, res) => {
+     if (!visit) return res.status(404).json({ ok: false, error: 'Visita nao encontrada' });
+     if (!visit.poolId) return res.status(400).json({ ok: false, error: 'Visita sem piscina associada' });
+ 
++    const actorRole = String(req.user?.role || '').toUpperCase();
++    if (!roleMatches(actorRole, 'ADMIN')) {
++      const actorTechnicianId = toInt(req.user?.technicianId, toInt(req.user?.id));
++      if (!actorTechnicianId || toInt(visit.technicianId) !== actorTechnicianId) {
++        return res.status(403).json({ ok: false, error: 'Sem permissao para alterar visita de outro tecnico' });
++      }
++    }
++
+     const type = String(body.type || 'Problema em campo').trim();
+     const severity = String(body.severity || 'Normal').toUpperCase();
+     const priority = severity.includes('URG') || severity.includes('CRIT') ? 'HIGH' : 'NORMAL';
+@@ -1912,6 +1926,17 @@ router.post('/visits/:id/complete', async (req, res) => {
+     const id = toInt(req.params.id);
+     const body = req.body || {};
+ 
++    const visitScope = await db('serviceVisit').findUnique({ where: { id }, select: { id: true, technicianId: true } });
++    if (!visitScope) return res.status(404).json({ ok: false, error: 'Visita nao encontrada' });
++
++    const actorRole = String(req.user?.role || '').toUpperCase();
++    if (!roleMatches(actorRole, 'ADMIN')) {
++      const actorTechnicianId = toInt(req.user?.technicianId, toInt(req.user?.id));
++      if (!actorTechnicianId || toInt(visitScope.technicianId) !== actorTechnicianId) {
++        return res.status(403).json({ ok: false, error: 'Sem permissao para alterar visita de outro tecnico' });
++      }
++    }
++
+     const { visit, repair } = await completeServiceVisit(prisma, id, body);
+ 
+     return res.json({ ok: true, visit, repair, next: body.problem || body.repair ? 'REPAIR_QUOTE' : 'MONTHLY_BILLING' });

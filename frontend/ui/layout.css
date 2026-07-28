@@ -18,9 +18,20 @@ body.admin-shell {
   background: transparent;
 }
 
+main.page,
+.page,
+.cw-v2-main {
+  padding: var(--cw-space-5);
+}
+
+section,
+article {
+  margin-bottom: var(--cw-space-4);
+}
+
 .cw-v2-grid {
   display: grid;
-  gap: var(--cw-space-3);
+  gap: var(--cw-space-4);
 }
 
 .cw-v2-grid.cols-2 {
@@ -29,9 +40,9 @@ body.admin-shell {
 
 .cw-context-row {
   display: flex;
-  gap: var(--cw-space-2);
+  gap: var(--cw-space-3);
   align-items: center;
-  margin-bottom: var(--cw-space-2);
+  margin-bottom: var(--cw-space-3);
 }
 
 .cw-context-path {
@@ -45,6 +56,12 @@ body.admin-shell {
 }
 
 @media (max-width: 700px) {
+  main.page,
+  .page,
+  .cw-v2-main {
+    padding: var(--cw-space-4);
+  }
+
   .cw-v2-grid.cols-2 {
     grid-template-columns: 1fr;
   }

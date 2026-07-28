@@ -1,0 +1,146 @@
+{
+  "results": [
+    {
+      "page": "admin-clients",
+      "viewport": "desktop",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    },
+    {
+      "page": "admin-pools",
+      "viewport": "desktop",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    },
+    {
+      "page": "admin-technicians",
+      "viewport": "desktop",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    },
+    {
+      "page": "admin-rounds",
+      "viewport": "desktop",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    },
+    {
+      "page": "admin-clients",
+      "viewport": "tablet",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    },
+    {
+      "page": "admin-pools",
+      "viewport": "tablet",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    },
+    {
+      "page": "admin-technicians",
+      "viewport": "tablet",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    },
+    {
+      "page": "admin-rounds",
+      "viewport": "tablet",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    },
+    {
+      "page": "admin-clients",
+      "viewport": "mobile",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    },
+    {
+      "page": "admin-pools",
+      "viewport": "mobile",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    },
+    {
+      "page": "admin-technicians",
+      "viewport": "mobile",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    },
+    {
+      "page": "admin-rounds",
+      "viewport": "mobile",
+      "status": 200,
+      "consoleErrors": 0,
+      "consoleWarnings": 0,
+      "failedRequests": 0,
+      "hscroll": false,
+      "unlabeled": 0,
+      "smallTargets": 0
+    }
+  ],
+  "aggregate": {
+    "scenarios": 12,
+    "non200": 0,
+    "consoleErrors": 0,
+    "consoleWarnings": 0,
+    "failedRequests": 0,
+    "hscroll": 0,
+    "unlabeled": 0,
+    "smallTargets": 0
+  }
+}

@@ -29,7 +29,7 @@ body.cw-enterprise-theme td{background:rgba(12,34,55,.72);border-top:1px solid r
 body.cw-enterprise-theme td:first-child{border-left:1px solid rgba(125,211,252,.14);border-radius:8px 0 0 8px}
 body.cw-enterprise-theme td:last-child{border-right:1px solid rgba(125,211,252,.14);border-radius:0 8px 8px 0}
 body.cw-enterprise-theme .cw-side{background:#06111f!important;border-right:1px solid rgba(125,211,252,.22)!important}
-body.cw-enterprise-theme .cw-side a{border-radius:8px!important;min-height:38px}
+body.cw-enterprise-theme .cw-side a{border-radius:8px!important;min-height:44px}
 body.cw-enterprise-theme .cw-side a.active,body.cw-enterprise-theme .cw-side a[aria-current="page"]{background:#0c4a5f!important;border-color:rgba(45,212,255,.48)!important}
 body.cw-enterprise-theme .ai-status,body.cw-enterprise-theme #criticalBanner,.cw-risk-global{border-radius:8px!important}
 body.cw-enterprise-theme .cw-theme-fab,body.cw-enterprise-theme .cw-theme-panel{display:none!important}

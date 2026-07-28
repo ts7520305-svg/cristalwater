@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+  <meta charset="utf-8">
+  <title>Cristal Water - Área do Cliente</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+
+  <!-- 🔐 GUARD DO CLIENTE (DEV SEM TOKENS) -->
+  <script src="/client-auth-guard.js"></script>
+  <link rel="stylesheet" href="/ui/foundation.css">
+
+  <style>
+    html, body { overflow-x: hidden; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #e3f2fd;
+      color: #1f2933;
+    }
+
+    header {
+      background: white;
+      border-bottom: 3px solid #1e88e5;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    header img {
+      height: 70px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 26px;
+      color: #1e88e5;
+    }
+
+    header p {
+      margin: 4px 0 0 0;
+      color: #555;
+      font-size: 14px;
+    }
+
+    main {
+      padding: 25px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      border-top: 4px solid #1e88e5;
+    }
+
+    .card h3 {
+      margin-top: 0;
+      color: #1e88e5;
+    }
+
+    .card p {
+      font-size: 14px;
+      color: #555;
+    }
+
+    .card a {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 8px 14px;
+      background: #1e88e5;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .card a:hover {
+      background: #1565c0;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      font-size: 12px;
+      color: #555;
+    }
+  </style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+  <link rel="stylesheet" href="/ui/design-system.css">
+</head>
+
+<body data-cw-role="CLIENT" data-required-role="CLIENT">
+
+<header>
+  <img src="/logo.png" alt="Cristal Water">
+  <div>
+    <h1>Cristal Water</h1>
+    <p>Área do Cliente</p>
+  </div>
+</header>
+
+<main>
+
+  <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;">
+    <button type="button" data-cw-back data-cw-fallback="/client-portal" style="border:none;border-radius:8px;padding:10px 12px;background:#1e88e5;color:#fff;font-weight:700;cursor:pointer;">Voltar</button>
+    <a href="/client-portal" style="display:inline-block;padding:10px 12px;background:#1565c0;color:#fff;border-radius:8px;text-decoration:none;font-weight:700;">Portal</a>
+  </div>
+
+  <div class="grid">
+
+    <div class="card">
+      <h3>📊 Dashboard</h3>
+      <p>Resumo do seu serviço.</p>
+      <a href="/client-dashboard.html">Abrir</a>
+    </div>
+
+    <div class="card">
+      <h3>💳 Pagamentos</h3>
+      <p>Estado e histórico dos seus pagamentos.</p>
+      <a href="/client-payments.html">Abrir</a>
+    </div>
+
+    <div class="card">
+      <h3>🔔 Notificações</h3>
+      <p>Mensagens importantes sobre o serviço.</p>
+      <a href="/client-notifications.html">Abrir</a>
+    </div>
+
+  </div>
+
+</main>
+
+<footer>
+  ©️ Cristal Water · Swimming Pools
+</footer>
+
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script src="/ui/core/navigation-context.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
+  <script defer src="/ui/design-system.js"></script>
+</body>
+</html>

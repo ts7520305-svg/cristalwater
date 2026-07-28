@@ -344,14 +344,14 @@ function renderPoolRow(pool) {
   const hasRound = hasAssignedRound(pool);
   const riskClass = !hasClient || !hasRound ? "pool-row-risk" : "";
   return `
-    <article class="pool-row ${active ? "" : "pool-row-inactive"} ${riskClass}">
+    <article class="pool-row card ${active ? "" : "pool-row-inactive"} ${riskClass}">
       <div class="pool-main">
         <div class="pool-title-line">
           <strong>${esc(pool.name || "Piscina")}</strong>
-          <span class="pill">${esc(typeLabel(pool))}</span>
-          <span class="pill ${active ? "cw-status-active" : "cw-status-archived"}">${active ? "Ativa" : "Inativa"}</span>
-          ${hasClient ? '<span class="pill pool-ok-pill">Cliente ligado</span>' : '<span class="pill pool-alert-pill">Sem cliente</span>'}
-          ${hasRound ? '<span class="pill pool-ok-pill">Com ronda</span>' : '<span class="pill pool-warn-pill">Sem ronda</span>'}
+          <span class="ds-badge is-muted">${esc(typeLabel(pool))}</span>
+          <span class="ds-badge ${active ? "" : "is-warning"}">${active ? "Ativa" : "Inativa"}</span>
+          ${hasClient ? '<span class="ds-badge">Cliente ligado</span>' : '<span class="ds-badge is-danger">Sem cliente</span>'}
+          ${hasRound ? '<span class="ds-badge">Com ronda</span>' : '<span class="ds-badge is-warning">Sem ronda</span>'}
         </div>
         <div class="pool-subline">ID ${esc(pool.id)} · ${esc(pool.address || "Sem morada")}${pool.location ? ` · ${esc(pool.location)}` : ""}</div>
       </div>
@@ -376,14 +376,14 @@ function renderPoolRow(pool) {
         <b>${esc(formatEuro(monthlyAmount))}</b>
       </div>
       <div class="pool-actions">
-        <button onclick="editPool(${pool.id})">Editar</button>
-        <button onclick="reassignPool(${pool.id})">Alterar cliente</button>
-        <a class="btn" href="/admin-pool-technical?poolId=${pool.id}">Ficha tecnica</a>
-        <a class="btn" href="/admin-pool-calculator?poolId=${pool.id}">Calculadora</a>
+        <button class="cw-v2-btn" onclick="editPool(${pool.id})">Editar</button>
+        <button class="cw-v2-btn" onclick="reassignPool(${pool.id})">Alterar cliente</button>
+        <a class="cw-v2-btn" href="/admin-pool-technical?poolId=${pool.id}">Ficha tecnica</a>
+        <a class="cw-v2-btn" href="/admin-pool-calculator?poolId=${pool.id}">Calculadora</a>
         ${active
-          ? `<button class="cw-action-warn" onclick="archivePool(${pool.id})">Arquivar</button>`
-          : `<button class="cw-action-ok" onclick="restorePool(${pool.id})">Restaurar</button>`}
-        <button class="cw-action-danger" onclick="deletePool(${pool.id})">Eliminar</button>
+          ? `<button class="cw-v2-btn" onclick="archivePool(${pool.id})">Arquivar</button>`
+          : `<button class="cw-v2-btn" onclick="restorePool(${pool.id})">Restaurar</button>`}
+        <button class="cw-v2-btn danger" onclick="deletePool(${pool.id})">Eliminar</button>
       </div>
     </article>
   `;

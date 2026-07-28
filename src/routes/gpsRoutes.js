@@ -1,6 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const TechnicianGpsBusiness = require("../business/technician/TechnicianGpsBusiness");
+const auth = require("../middlewares/authMiddleware");
+const { roleMatches } = require("../utils/roles");
+
+router.use(auth());
 
 const logger = {
   info: (msg, ctx = null) => console.log(`[${new Date().toISOString()}] [INFO] [GPS] ${msg}`, ctx || ""),
@@ -13,9 +17,47 @@ function toNumber(value) {
   return Number.isFinite(n) ? n : null;
 }
 
+function roleOf(req) {
+  return String(req.user?.role || "").trim().toUpperCase();
+}
+
+function ownUserId(req) {
+  return toNumber(req.user?.id ?? req.user?.technicianId);
+}
+
+function isAdmin(req) {
+  return roleMatches(roleOf(req), "ADMIN");
+}
+
+function isTechnician(req) {
+  return roleMatches(roleOf(req), "TECHNICIAN") && !isAdmin(req);
+}
+
 router.post(["/update", "/ping"], async (req, res) => {
   try {
-    const result = await TechnicianGpsBusiness.processGpsUpdate(req.body || {});
+    const payload = { ...(req.body || {}) };
+
+    if (isTechnician(req)) {
+      const me = ownUserId(req);
+      if (!me) {
+        return res.status(403).json({ ok: false, success: false, message: "Sessão técnica inválida" });
+      }
+
+      const requestedUserId = toNumber(payload.userId ?? payload.technicianId ?? payload.technicianDbId);
+      if (requestedUserId && requestedUserId !== me) {
+        return res.status(403).json({ ok: false, success: false, message: "Acesso apenas ao próprio GPS" });
+      }
+
+      payload.userId = me;
+      payload.technicianId = me;
+      payload.technicianDbId = me;
+    }
+
+    if (!isTechnician(req) && !isAdmin(req)) {
+      return res.status(403).json({ ok: false, success: false, message: "Sem permissão" });
+    }
+
+    const result = await TechnicianGpsBusiness.processGpsUpdate(payload);
     return res.status(result.statusCode).json(result.body);
   } catch (err) {
     logger.error("Erro GPS update/ping", err);
@@ -30,6 +72,9 @@ router.post(["/update", "/ping"], async (req, res) => {
 
 router.post("/validate-geofence", async (req, res) => {
   try {
+    if (!isTechnician(req) && !isAdmin(req)) {
+      return res.status(403).json({ ok: false, success: false, message: "Sem permissão" });
+    }
     const result = await TechnicianGpsBusiness.validateGeofence({
       visitId: toNumber(req.body.visitId),
       currentLatitude: toNumber(req.body.currentLatitude ?? req.body.latitude),
@@ -49,6 +94,9 @@ router.post("/validate-geofence", async (req, res) => {
 
 router.get("/live", async (req, res) => {
   try {
+    if (!isAdmin(req)) {
+      return res.status(403).json({ ok: false, error: "Sem permissão" });
+    }
     const rows = await TechnicianGpsBusiness.getLiveLocations();
     return res.json(rows);
   } catch (err) {
@@ -59,6 +107,9 @@ router.get("/live", async (req, res) => {
 
 router.get("/live-legacy", async (req, res) => {
   try {
+    if (!isAdmin(req)) {
+      return res.status(403).json({ ok: false, error: "Sem permissão" });
+    }
     const data = await TechnicianGpsBusiness.getLiveLegacyLocations();
     return res.json(data);
   } catch (err) {
@@ -71,6 +122,15 @@ router.get("/history/:id", async (req, res) => {
   try {
     const id = toNumber(req.params.id);
     if (!id) return res.json([]);
+
+    if (isTechnician(req) && id !== ownUserId(req)) {
+      return res.status(403).json({ ok: false, error: "Acesso apenas ao próprio histórico GPS" });
+    }
+
+    if (!isTechnician(req) && !isAdmin(req)) {
+      return res.status(403).json({ ok: false, error: "Sem permissão" });
+    }
+
     const requestedLimit = toNumber(req.query?.limit);
     const data = await TechnicianGpsBusiness.getHistoryById(id, {
       limit: requestedLimit,

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#050b16">
+<meta charset="utf-8">
+<title>Cristal Water - Mapa Operacional</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<link rel="stylesheet" href="/ui/foundation.css">
+
+<style>
+body { margin:0; font-family:Arial; }
+#map { height:100vh; }
+
+.panel {
+  position:absolute;
+  top:10px;
+  left:10px;
+  background:white;
+  padding:10px;
+  border-radius:8px;
+  z-index:999;
+  width:220px;
+}
+
+button {
+  width:100%;
+  margin:5px 0;
+  padding:8px;
+  background:#1e88e5;
+  color:white;
+  border:none;
+}
+</style>
+<link rel="stylesheet" href="/cristal-assist.css">
+  <script src="/cw-auth.js"></script>
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+  <script src="/admin-auth-guard.js"></script>
+  <link rel="stylesheet" href="/ui/design-system.css">
+</head>
+
+<body data-required-role="ADMIN">
+
+<div style="padding:12px 16px 0">
+  <button type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
+</div>
+
+<div class="panel">
+  <h3>Cristal Water</h3>
+
+  <button onclick="loadPools()">Todas as Piscinas</button>
+  <button onclick="loadNearby()">Perto de mim</button>
+  <button onclick="loadRoute()">Rota do dia</button>
+
+  <button onclick="openGoogle()">Abrir no Google Maps</button>
+  <button onclick="openWaze()">Abrir no Waze</button>
+</div>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="/admin-map.js"></script>
+
+<script src="/cristal-help-data.js"></script>
+<script src="/cristal-assist.js"></script>
+<script src="/ui/core/navigation-context.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+<script src="/cw-admin-shortcuts.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
+  <script defer src="/ui/design-system.js"></script>
+</body>
+</html>

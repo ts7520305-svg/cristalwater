@@ -1,0 +1,381 @@
+{
+  "generatedAt": "2026-07-19T20:58:03.027Z",
+  "baseUrl": "http://127.0.0.1:3002",
+  "pages": [
+    {
+      "key": "admin",
+      "url": "http://127.0.0.1:3002/admin-master-control"
+    },
+    {
+      "key": "technician",
+      "url": "http://127.0.0.1:3002/technician-field-mode"
+    },
+    {
+      "key": "client",
+      "url": "http://127.0.0.1:3002/client-portal"
+    }
+  ],
+  "viewports": [
+    [
+      320,
+      740
+    ],
+    [
+      360,
+      780
+    ],
+    [
+      375,
+      812
+    ],
+    [
+      390,
+      844
+    ],
+    [
+      414,
+      896
+    ],
+    [
+      430,
+      932
+    ],
+    [
+      768,
+      1024
+    ],
+    [
+      1024,
+      1366
+    ],
+    [
+      1280,
+      800
+    ],
+    [
+      1440,
+      900
+    ],
+    [
+      1920,
+      1080
+    ]
+  ],
+  "engines": [
+    {
+      "engine": "chromium",
+      "launched": true,
+      "results": [
+        {
+          "viewport": "320x740",
+          "page": "admin",
+          "url": "http://127.0.0.1:3002/admin-master-control",
+          "ok": true,
+          "title": "Cristal Water - Login",
+          "status": "200",
+          "file": "admin.png"
+        },
+        {
+          "viewport": "320x740",
+          "page": "technician",
+          "url": "http://127.0.0.1:3002/technician-field-mode",
+          "ok": true,
+          "title": "Técnico - Cristal Water",
+          "status": "200",
+          "file": "technician.png"
+        },
+        {
+          "viewport": "320x740",
+          "page": "client",
+          "url": "http://127.0.0.1:3002/client-portal",
+          "ok": true,
+          "title": "Cristal Water - Login Cliente",
+          "status": "200",
+          "file": "client.png"
+        },
+        {
+          "viewport": "360x780",
+          "page": "admin",
+          "url": "http://127.0.0.1:3002/admin-master-control",
+          "ok": true,
+          "title": "Cristal Water - Login",
+          "status": "200",
+          "file": "admin.png"
+        },
+        {
+          "viewport": "360x780",
+          "page": "technician",
+          "url": "http://127.0.0.1:3002/technician-field-mode",
+          "ok": true,
+          "title": "Técnico - Cristal Water",
+          "status": "200",
+          "file": "technician.png"
+        },
+        {
+          "viewport": "360x780",
+          "page": "client",
+          "url": "http://127.0.0.1:3002/client-portal",
+          "ok": true,
+          "title": "Cristal Water - Login Cliente",
+          "status": "200",
+          "file": "client.png"
+        },
+        {
+          "viewport": "375x812",
+          "page": "admin",
+          "url": "http://127.0.0.1:3002/admin-master-control",
+          "ok": true,
+          "title": "Cristal Water - Login",
+          "status": "200",
+          "file": "admin.png"
+        },
+        {
+          "viewport": "375x812",
+          "page": "technician",
+          "url": "http://127.0.0.1:3002/technician-field-mode",
+          "ok": true,
+          "title": "Técnico - Cristal Water",
+          "status": "200",
+          "file": "technician.png"
+        },
+        {
+          "viewport": "375x812",
+          "page": "client",
+          "url": "http://127.0.0.1:3002/client-portal",
+          "ok": true,
+          "title": "Cristal Water - Login Cliente",
+          "status": "200",
+          "file": "client.png"
+        },
+        {
+          "viewport": "390x844",
+          "page": "admin",
+          "url": "http://127.0.0.1:3002/admin-master-control",
+          "ok": true,
+          "title": "Cristal Water - Login",
+          "status": "200",
+          "file": "admin.png"
+        },
+        {
+          "viewport": "390x844",
+          "page": "technician",
+          "url": "http://127.0.0.1:3002/technician-field-mode",
+          "ok": true,
+          "title": "Técnico - Cristal Water",
+          "status": "200",
+          "file": "technician.png"
+        },
+        {
+          "viewport": "390x844",
+          "page": "client",
+          "url": "http://127.0.0.1:3002/client-portal",
+          "ok": true,
+          "title": "Cristal Water - Login Cliente",
+          "status": "200",
+          "file": "client.png"
+        },
+        {
+          "viewport": "414x896",
+          "page": "admin",
+          "url": "http://127.0.0.1:3002/admin-master-control",
+          "ok": true,
+          "title": "Cristal Water - Login",
+          "status": "200",
+          "file": "admin.png"
+        },
+        {
+          "viewport": "414x896",
+          "page": "technician",
+          "url": "http://127.0.0.1:3002/technician-field-mode",
+          "ok": true,
+          "title": "Técnico - Cristal Water",
+          "status": "200",
+          "file": "technician.png"
+        },
+        {
+          "viewport": "414x896",
+          "page": "client",
+          "url": "http://127.0.0.1:3002/client-portal",
+          "ok": true,
+          "title": "Cristal Water - Login Cliente",
+          "status": "200",
+          "file": "client.png"
+        },
+        {
+          "viewport": "430x932",
+          "page": "admin",
+          "url": "http://127.0.0.1:3002/admin-master-control",
+          "ok": true,
+          "title": "Cristal Water - Login",
+          "status": "200",
+          "file": "admin.png"
+        },
+        {
+          "viewport": "430x932",
+          "page": "technician",
+          "url": "http://127.0.0.1:3002/technician-field-mode",
+          "ok": true,
+          "title": "Técnico - Cristal Water",
+          "status": "200",
+          "file": "technician.png"
+        },
+        {
+          "viewport": "430x932",
+          "page": "client",
+          "url": "http://127.0.0.1:3002/client-portal",
+          "ok": true,
+          "title": "Cristal Water - Login Cliente",
+          "status": "200",
+          "file": "client.png"
+        },
+        {
+          "viewport": "768x1024",
+          "page": "admin",
+          "url": "http://127.0.0.1:3002/admin-master-control",
+          "ok": true,
+          "title": "Cristal Water - Login",
+          "status": "200",
+          "file": "admin.png"
+        },
+        {
+          "viewport": "768x1024",
+          "page": "technician",
+          "url": "http://127.0.0.1:3002/technician-field-mode",
+          "ok": true,
+          "title": "Técnico - Cristal Water",
+          "status": "200",
+          "file": "technician.png"
+        },
+        {
+          "viewport": "768x1024",
+          "page": "client",
+          "url": "http://127.0.0.1:3002/client-portal",
+          "ok": true,
+          "title": "Cristal Water - Login Cliente",
+          "status": "200",
+          "file": "client.png"
+        },
+        {
+          "viewport": "1024x1366",
+          "page": "admin",
+          "url": "http://127.0.0.1:3002/admin-master-control",
+          "ok": true,
+          "title": "Cristal Water - Login",
+          "status": "200",
+          "file": "admin.png"
+        },
+        {
+          "viewport": "1024x1366",
+          "page": "technician",
+          "url": "http://127.0.0.1:3002/technician-field-mode",
+          "ok": true,
+          "title": "Técnico - Cristal Water",
+          "status": "200",
+          "file": "technician.png"
+        },
+        {
+          "viewport": "1024x1366",
+          "page": "client",
+          "url": "http://127.0.0.1:3002/client-portal",
+          "ok": true,
+          "title": "Cristal Water - Login Cliente",
+          "status": "200",
+          "file": "client.png"
+        },
+        {
+          "viewport": "1280x800",
+          "page": "admin",
+          "url": "http://127.0.0.1:3002/admin-master-control",
+          "ok": true,
+          "title": "Cristal Water - Login",
+          "status": "200",
+          "file": "admin.png"
+        },
+        {
+          "viewport": "1280x800",
+          "page": "technician",
+          "url": "http://127.0.0.1:3002/technician-field-mode",
+          "ok": true,
+          "title": "Técnico - Cristal Water",
+          "status": "200",
+          "file": "technician.png"
+        },
+        {
+          "viewport": "1280x800",
+          "page": "client",
+          "url": "http://127.0.0.1:3002/client-portal",
+          "ok": true,
+          "title": "Cristal Water - Login Cliente",
+          "status": "200",
+          "file": "client.png"
+        },
+        {
+          "viewport": "1440x900",
+          "page": "admin",
+          "url": "http://127.0.0.1:3002/admin-master-control",
+          "ok": true,
+          "title": "Cristal Water - Login",
+          "status": "200",
+          "file": "admin.png"
+        },
+        {
+          "viewport": "1440x900",
+          "page": "technician",
+          "url": "http://127.0.0.1:3002/technician-field-mode",
+          "ok": true,
+          "title": "Técnico - Cristal Water",
+          "status": "200",
+          "file": "technician.png"
+        },
+        {
+          "viewport": "1440x900",
+          "page": "client",
+          "url": "http://127.0.0.1:3002/client-portal",
+          "ok": true,
+          "title": "Cristal Water - Login Cliente",
+          "status": "200",
+          "file": "client.png"
+        },
+        {
+          "viewport": "1920x1080",
+          "page": "admin",
+          "url": "http://127.0.0.1:3002/admin-master-control",
+          "ok": true,
+          "title": "Cristal Water - Login",
+          "status": "200",
+          "file": "admin.png"
+        },
+        {
+          "viewport": "1920x1080",
+          "page": "technician",
+          "url": "http://127.0.0.1:3002/technician-field-mode",
+          "ok": true,
+          "title": "Técnico - Cristal Water",
+          "status": "200",
+          "file": "technician.png"
+        },
+        {
+          "viewport": "1920x1080",
+          "page": "client",
+          "url": "http://127.0.0.1:3002/client-portal",
+          "ok": true,
+          "title": "Cristal Water - Login Cliente",
+          "status": "200",
+          "file": "client.png"
+        }
+      ]
+    },
+    {
+      "engine": "firefox",
+      "launched": false,
+      "error": "browserType.launch: \n╔══════════════════════════════════════════════════════╗\n║ Host system is missing dependencies to run browsers. ║\n║ Please install them with the following command:      ║\n║                                                      ║\n║     sudo npx playwright install-deps                 ║\n║                                                      ║\n║ Alternatively, use apt:                              ║\n║     sudo apt-get install libxcursor1\\                ║\n║         libgtk-3-0\\                                  ║\n║         libpangocairo-1.0-0\\                         ║\n║         libcairo-gobject2\\                           ║\n║         libgdk-pixbuf-2.0-0                          ║\n║                                                      ║\n║ <3 Playwright Team                                   ║\n╚══════════════════════════════════════════════════════╝",
+      "results": []
+    },
+    {
+      "engine": "webkit",
+      "launched": false,
+      "error": "browserType.launch: \n╔══════════════════════════════════════════════════════╗\n║ Host system is missing dependencies to run browsers. ║\n║ Missing libraries:                                   ║\n║     libgtk-4.so.1                                    ║\n║     libpangocairo-1.0.so.0                           ║\n║     libgdk_pixbuf-2.0.so.0                           ║\n║     libcairo-gobject.so.2                            ║\n║     libgraphene-1.0.so.0                             ║\n║     liblcms2.so.2                                    ║\n║     libevent-2.1.so.7                                ║\n║     libopus.so.0                                     ║\n║     libgstallocators-1.0.so.0                        ║\n║     libgstapp-1.0.so.0                               ║\n║     libgstpbutils-1.0.so.0                           ║\n║     libgstaudio-1.0.so.0                             ║\n║     libgsttag-1.0.so.0                               ║\n║     libgstvideo-1.0.so.0                             ║\n║     libgstgl-1.0.so.0                                ║\n║     libgstcodecparsers-1.0.so.0                      ║\n║     libgstfft-1.0.so.0                               ║\n║     libflite.so.1                                    ║\n║     libflite_usenglish.so.1                          ║\n║     libflite_cmu_grapheme_lang.so.1                  ║\n║     libflite_cmu_grapheme_lex.so.1                   ║\n║     libflite_cmu_indic_lang.so.1                     ║\n║     libflite_cmu_indic_lex.so.1                      ║\n║     libflite_cmulex.so.1                             ║\n║     libflite_cmu_time_awb.so.1                       ║\n║     libflite_cmu_us_awb.so.1                         ║\n║     libflite_cmu_us_kal16.so.1                       ║\n║     libflite_cmu_us_kal.so.1                         ║\n║     libflite_cmu_us_rms.so.1                         ║\n║     libflite_cmu_us_slt.so.1                         ║\n║     libwebpdemux.so.2                                ║\n║     libavif.so.13                                    ║\n║     libharfbuzz-icu.so.0                             ║\n║     libepoxy.so.0                                    ║\n║     libwebpmux.so.3                                  ║\n║     libwayland-egl.so.1                              ║\n║     libmanette-0.2.so.0                              ║\n║     libenchant-2.so.2                                ║\n║     libhyphen.so.0                                   ║\n║     libwoff2dec.so.1.0.2                             ║\n║     libGLESv2.so.2                                   ║\n║     libx264.so                                       ║\n╚══════════════════════════════════════════════════════╝",
+      "results": []
+    }
+  ]
+}

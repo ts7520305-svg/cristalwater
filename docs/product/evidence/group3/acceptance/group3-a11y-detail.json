@@ -1,0 +1,170 @@
+[
+  {
+    "page": "admin-visits-dashboard",
+    "viewport": "1440x900",
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "smallExamples": []
+  },
+  {
+    "page": "admin-visits-dashboard",
+    "viewport": "1024x1366",
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "smallExamples": []
+  },
+  {
+    "page": "admin-visits-dashboard",
+    "viewport": "390x844",
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "smallExamples": []
+  },
+  {
+    "page": "admin-pool-technical",
+    "viewport": "1440x900",
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "smallExamples": []
+  },
+  {
+    "page": "admin-pool-technical",
+    "viewport": "1024x1366",
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "smallExamples": []
+  },
+  {
+    "page": "admin-pool-technical",
+    "viewport": "390x844",
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "smallExamples": []
+  },
+  {
+    "page": "technician-guide",
+    "viewport": "1440x900",
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "smallExamples": []
+  },
+  {
+    "page": "technician-guide",
+    "viewport": "1024x1366",
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "smallExamples": []
+  },
+  {
+    "page": "technician-guide",
+    "viewport": "390x844",
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "smallExamples": []
+  },
+  {
+    "page": "admin-keys",
+    "viewport": "1440x900",
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "smallExamples": []
+  },
+  {
+    "page": "admin-keys",
+    "viewport": "1024x1366",
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "smallExamples": []
+  },
+  {
+    "page": "admin-keys",
+    "viewport": "390x844",
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "smallExamples": []
+  },
+  {
+    "page": "admin-vehicles",
+    "viewport": "1440x900",
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "smallExamples": []
+  },
+  {
+    "page": "admin-vehicles",
+    "viewport": "1024x1366",
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "smallExamples": []
+  },
+  {
+    "page": "admin-vehicles",
+    "viewport": "390x844",
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "smallExamples": []
+  },
+  {
+    "page": "admin-visits",
+    "viewport": "1440x900",
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "smallExamples": []
+  },
+  {
+    "page": "admin-visits",
+    "viewport": "1024x1366",
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "smallExamples": []
+  },
+  {
+    "page": "admin-visits",
+    "viewport": "390x844",
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "smallExamples": []
+  },
+  {
+    "page": "technician-visit",
+    "viewport": "1440x900",
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "smallExamples": []
+  },
+  {
+    "page": "technician-visit",
+    "viewport": "1024x1366",
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "smallExamples": []
+  },
+  {
+    "page": "technician-visit",
+    "viewport": "390x844",
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "smallExamples": []
+  },
+  {
+    "page": "technician-field-mode",
+    "viewport": "1440x900",
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "smallExamples": []
+  },
+  {
+    "page": "technician-field-mode",
+    "viewport": "1024x1366",
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "smallExamples": []
+  },
+  {
+    "page": "technician-field-mode",
+    "viewport": "390x844",
+    "unlabeledFields": 0,
+    "smallTouchTargets": 0,
+    "smallExamples": []
+  }
+]

@@ -1,0 +1,136 @@
+{
+  "generatedAt": "2026-07-26T20:50:26.910Z",
+  "runId": "FCS14CLIENT_1785099021552_j0g2a",
+  "route": "/client-payments?clientId=426",
+  "results": [
+    {
+      "scenario": "loading-delayed",
+      "route": "/client-payments?clientId=426",
+      "debug": {
+        "urlAfterGoto": "http://127.0.0.1:3002/client-payments?clientId=426",
+        "titleAfterGoto": "Cristal Water - Pagamentos"
+      },
+      "expectedApiErrors": [],
+      "unexpectedApiErrors": [],
+      "observations": [
+        {
+          "selectorObserved": "#paymentStatus .status-text",
+          "textFound": "A carregar informação…",
+          "expectedState": "Loading visivel com texto de carregamento",
+          "observedState": "Loading correto",
+          "pass": true
+        },
+        {
+          "selectorObserved": "#rows",
+          "textFound": "Ainda nao existem faturas ou pagamentos registados.",
+          "expectedState": "Empty state apos resposta vazia",
+          "observedState": "Empty correto",
+          "pass": true
+        }
+      ],
+      "screenshot": "docs/product/evidence/fcs14-client-payments/FCS14CLIENT_1785099021552_j0g2a-loading-delayed.png",
+      "console": [
+        {
+          "type": "log",
+          "text": "FCS14 client semantic shell bypass"
+        }
+      ],
+      "pageErrors": [],
+      "pass": true
+    },
+    {
+      "scenario": "empty",
+      "route": "/client-payments?clientId=426",
+      "debug": {
+        "urlAfterGoto": "http://127.0.0.1:3002/client-payments?clientId=426",
+        "titleAfterGoto": "Cristal Water - Pagamentos"
+      },
+      "expectedApiErrors": [],
+      "unexpectedApiErrors": [],
+      "observations": [
+        {
+          "selectorObserved": "#rows",
+          "textFound": "Ainda nao existem faturas ou pagamentos registados.",
+          "expectedState": "Empty state com lista vazia",
+          "observedState": "Empty correto",
+          "pass": true
+        }
+      ],
+      "screenshot": "docs/product/evidence/fcs14-client-payments/FCS14CLIENT_1785099021552_j0g2a-empty.png",
+      "console": [
+        {
+          "type": "log",
+          "text": "FCS14 client semantic shell bypass"
+        }
+      ],
+      "pageErrors": [],
+      "pass": true
+    },
+    {
+      "scenario": "data",
+      "route": "/client-payments?clientId=426",
+      "debug": {
+        "urlAfterGoto": "http://127.0.0.1:3002/client-payments?clientId=426",
+        "titleAfterGoto": "Cristal Water - Pagamentos"
+      },
+      "expectedApiErrors": [],
+      "unexpectedApiErrors": [],
+      "observations": [
+        {
+          "selectorObserved": "#rows",
+          "textFound": "26/07/2026\n        FT-QA-1Ref. CW-000426\n        120,00 €\n        Pendente",
+          "expectedState": "Linha renderizada com dados",
+          "observedState": "Dados renderizados",
+          "pass": true
+        }
+      ],
+      "screenshot": "docs/product/evidence/fcs14-client-payments/FCS14CLIENT_1785099021552_j0g2a-data.png",
+      "console": [
+        {
+          "type": "log",
+          "text": "FCS14 client semantic shell bypass"
+        }
+      ],
+      "pageErrors": [],
+      "pass": true
+    },
+    {
+      "scenario": "error",
+      "route": "/client-payments?clientId=426",
+      "debug": {
+        "urlAfterGoto": "http://127.0.0.1:3002/client-payments?clientId=426",
+        "titleAfterGoto": "Cristal Water - Pagamentos"
+      },
+      "expectedApiErrors": [
+        {
+          "urlIncludes": "/api/client-portal/426",
+          "status": 500
+        }
+      ],
+      "unexpectedApiErrors": [],
+      "observations": [
+        {
+          "selectorObserved": "#paymentStatus .status-text",
+          "textFound": "Falha simulada de pagamentos.",
+          "expectedState": "Mensagem de erro apos resposta 500",
+          "observedState": "Erro mostrado",
+          "pass": true
+        }
+      ],
+      "screenshot": "docs/product/evidence/fcs14-client-payments/FCS14CLIENT_1785099021552_j0g2a-error.png",
+      "console": [
+        {
+          "type": "log",
+          "text": "FCS14 client semantic shell bypass"
+        },
+        {
+          "type": "error",
+          "text": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+        }
+      ],
+      "pageErrors": [],
+      "pass": true
+    }
+  ],
+  "pass": true
+}

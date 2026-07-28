@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cristal Water - Fornecedores</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/ui/foundation.css">
+  <link rel="stylesheet" href="/cristal-assist.css">
+<style>
+    *{box-sizing:border-box}
+    html,body{overflow-x:hidden}
+    body{margin:0;font-family:Inter,Arial,sans-serif;background:#050b16;color:#e8f7ff}
+    header{position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 22px;background:rgba(5,12,24,.9);border-bottom:1px solid rgba(53,217,255,.25);backdrop-filter:blur(14px)}
+    h1,h2,h3{margin:0;color:#e8f7ff} p{color:#9db4c9}
+    .sub{margin:6px 0 0;color:#9db4c9}.links{display:flex;gap:10px;flex-wrap:wrap}
+    .links a,.btn,button{color:#e8f7ff;text-decoration:none;border:1px solid rgba(53,217,255,.22);background:rgba(255,255,255,.07);border-radius:14px;padding:10px 12px;font-weight:800;cursor:pointer}
+    .btn.primary,button.primary{border:0;background:linear-gradient(135deg,#27f5a7,#35d9ff);color:#02100b}
+    .btn.warn{background:rgba(255,180,84,.16);border-color:rgba(255,180,84,.4)}
+    main{padding:20px;display:grid;grid-template-columns:390px minmax(0,1fr);gap:18px}
+    .panel{border:1px solid rgba(53,217,255,.22);border-radius:24px;padding:18px;background:linear-gradient(180deg,rgba(16,32,54,.88),rgba(8,18,32,.94));box-shadow:0 24px 70px rgba(0,0,0,.36)}
+    label{display:block;color:#9db4c9;margin:10px 0 5px;font-size:13px;font-weight:800}
+    input,select,textarea{width:100%;padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#e8f7ff;outline:none}
+    textarea{min-height:86px;resize:vertical}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.check{display:flex;gap:8px;align-items:center;margin:12px 0}.check input{width:auto}
+    .toolbar{display:grid;grid-template-columns:minmax(220px,1fr) 180px auto;gap:10px;margin:14px 0 18px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+    .card{padding:15px;border-radius:18px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.11);display:flex;flex-direction:column;gap:10px}
+    .card-head{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+    .badge{display:inline-flex;border-radius:999px;padding:4px 8px;background:rgba(53,217,255,.14);color:#69e4ff;font-size:12px;font-weight:900}
+    .favorite{background:rgba(255,214,102,.15);color:#ffe08a}.muted{color:#9db4c9}.small{font-size:12px}.secret{font-family:ui-monospace,Consolas,monospace;letter-spacing:2px;color:#b9d6e8}
+    .row{display:flex;gap:8px;flex-wrap:wrap}.row .btn,.row button{flex:0 0 auto}
+    .status{min-height:24px;margin:10px 0;color:#9db4c9}.status.ok{color:#27f5a7}.status.err{color:#ff8a8a}
+    hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:18px 0}
+    @media(max-width:980px){main{grid-template-columns:1fr}header{align-items:flex-start;flex-direction:column}.links{width:100%}.links a{flex:1;text-align:center}.toolbar{grid-template-columns:1fr}.two{grid-template-columns:1fr}}
+  </style>
+  <script src="/cw-auth.js"></script>
+  <link rel="stylesheet" href="/ui/design-system.css">
+</head>
+<body data-required-role="ADMIN">
+  <header>
+    <div>
+      <h1>Gestor de fornecedores</h1>
+      <p class="sub">Portais, utilizadores e passwords cifradas para acesso rápido da administração.</p>
+    </div>
+    <nav class="links">
+      <a href="/admin-dashboard">Dashboard</a>
+      <a href="/admin-ai">IA</a>
+      <a href="/admin-crm">Lembretes</a>
+      <a href="/admin-master-control">Centro</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="panel" data-help-topic="inventory">
+      <h2>Novo fornecedor</h2>
+      <form id="supplierForm">
+        <label>Fornecedor</label>
+        <input name="name" required placeholder="Ex: Fornecedor de químicos">
+        <div class="two">
+          <div>
+            <label>Categoria</label>
+            <input name="category" placeholder="Químicos, bombas, peças...">
+          </div>
+          <div>
+            <label>Website</label>
+            <input name="website" placeholder="https://...">
+          </div>
+        </div>
+        <label>URL de login</label>
+        <input name="loginUrl" placeholder="https://portal.fornecedor.pt/login">
+        <div class="two">
+          <div>
+            <label>Utilizador</label>
+            <input name="username" autocomplete="off">
+          </div>
+          <div>
+            <label>Password</label>
+            <input name="password" type="password" autocomplete="new-password">
+          </div>
+        </div>
+        <label>Dica da password</label>
+        <input name="passwordHint" placeholder="Opcional, sem escrever a password">
+        <label>Notas internas</label>
+        <textarea name="notes" placeholder="Condições, contactos, dias de entrega, descontos..."></textarea>
+        <label class="check"><input name="favorite" type="checkbox" value="true"> Favorito</label>
+        <button class="primary" type="submit">Guardar fornecedor</button>
+      </form>
+
+      <hr>
+      <h2>Atalho rápido</h2>
+      <form id="linkForm">
+        <label>Fornecedor associado</label>
+        <select name="supplierId" id="linkSupplier"><option value="">Sem fornecedor</option></select>
+        <label>Título</label>
+        <input name="title" required placeholder="Ex: Portal encomendas">
+        <label>URL</label>
+        <input name="url" required placeholder="https://...">
+        <label>Categoria</label>
+        <input name="category" placeholder="Químicos, peças, contabilidade...">
+        <label>Notas</label>
+        <textarea name="notes" placeholder="O que se faz neste portal"></textarea>
+        <label class="check"><input name="favorite" type="checkbox" value="true"> Favorito</label>
+        <button class="primary" type="submit">Guardar atalho</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <div class="card-head">
+        <div>
+          <h2>Acessos rápidos</h2>
+          <p class="sub">Abre o portal, copia o utilizador ou copia a password sem a mostrar no ecrã.</p>
+        </div>
+        <button id="refreshBtn" class="btn">Atualizar</button>
+      </div>
+
+      <div class="toolbar">
+        <input id="supplierSearch" placeholder="Pesquisar fornecedor, categoria, user ou nota">
+        <select id="activeFilter">
+          <option value="true">Ativos</option>
+          <option value="all">Todos</option>
+          <option value="false">Inativos</option>
+        </select>
+        <button id="clearSearch" class="btn">Limpar</button>
+      </div>
+      <div id="supplierStatus" class="status"></div>
+
+      <h2>Fornecedores</h2>
+      <div id="suppliers" class="grid"></div>
+
+      <hr>
+      <h2>Links rápidos</h2>
+      <div id="links" class="grid"></div>
+    </section>
+  </main>
+
+  <script src="/admin-auth-guard.js"></script>
+  <script src="/admin-suppliers.js"></script>
+  <script src="/cristal-help-data.js"></script>
+  <script src="/cristal-assist.js"></script>
+  <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
+  <script src="/cw-admin-shortcuts.js"></script>
+  <script src="/ui/core/navigation-context.js"></script>
+  <script src="/crystal-os-v2-shell.js"></script>
+  <script src="/crystal-os-v2-nav.js"></script>
+  <script defer src="/ui/design-system.js"></script>
+</body>
+</html>

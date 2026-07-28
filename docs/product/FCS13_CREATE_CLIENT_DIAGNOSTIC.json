@@ -1,0 +1,409 @@
+{
+  "generatedAt": "2026-07-22T06:23:29.078Z",
+  "runId": "FCS13DIAG_1784701261832_4o2zaz",
+  "baseUrl": "http://127.0.0.1:3002",
+  "variants": [
+    {
+      "variant": "menu-click",
+      "urlInitial": "about:blank",
+      "urlAfterLoginPrime": "http://127.0.0.1:3002/login",
+      "urlAfterLanding": "http://127.0.0.1:3002/admin-master-control",
+      "clickedSelector": "a[href='/admin-clients']",
+      "clickError": "locator.click: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('a[href=\\'/admin-clients\\']').first()\u001b[22m\n\u001b[2m    - locator resolved to <a href=\"/admin-clients\" data-shell-search=\"Clientes\">Clientes</a>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n",
+      "directGotoError": null,
+      "landingState": {
+        "label": "after-landing",
+        "href": "http://127.0.0.1:3002/admin-master-control",
+        "readyState": "interactive",
+        "title": "Cristal Water · Centro de Operações V2",
+        "clientFormPresent": false,
+        "clientFormVisible": false,
+        "clientFormNameFieldPresent": false,
+        "linkVisible": false,
+        "linkEnabled": true,
+        "linkBoundingBox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "topElementAtLinkCenter": null,
+        "overlaysVisible": [
+          {
+            "tag": "ASIDE",
+            "id": "",
+            "className": "cw-v2-sidebar",
+            "zIndex": "auto",
+            "box": {
+              "x": 0,
+              "y": 0,
+              "width": 280,
+              "height": 920
+            },
+            "text": "Cristal Water\n          Administrador\n        \n      \n      \n        \n          Operação diária\n          \n            C"
+          },
+          {
+            "tag": "HEADER",
+            "id": "",
+            "className": "cw-v2-topbar",
+            "zIndex": "30",
+            "box": {
+              "x": 561,
+              "y": 0,
+              "width": 598,
+              "height": 73
+            },
+            "text": "⌕\n          \n        \n        \n          Voltar\n          Online\n          A atualizar...\n          Menu"
+          }
+        ],
+        "serviceWorker": {
+          "controllerActive": false,
+          "controllerState": null
+        },
+        "lifecycle": [],
+        "pendingRequests": [
+          "GET http://127.0.0.1:3002/cw-auth.js",
+          "GET http://127.0.0.1:3002/admin-auth-guard.js",
+          "GET http://127.0.0.1:3002/crystal-os-v2-shell.js",
+          "GET http://127.0.0.1:3002/crystal-os-v2-nav.js",
+          "GET http://127.0.0.1:3002/ui/design-system.js",
+          "GET http://127.0.0.1:3002/ui/state-adapter-v2.js",
+          "GET http://127.0.0.1:3002/ui/components/input.css",
+          "GET http://127.0.0.1:3002/ui/components/table.css",
+          "GET http://127.0.0.1:3002/ui/components/modal.css",
+          "GET http://127.0.0.1:3002/ui/components/toast.css",
+          "GET http://127.0.0.1:3002/ui/components/sidebar.css",
+          "GET http://127.0.0.1:3002/ui/components/topbar.css",
+          "GET http://127.0.0.1:3002/ui/components/bottom-nav.css",
+          "GET http://127.0.0.1:3002/ui/components/timeline.css",
+          "GET http://127.0.0.1:3002/ui/components/dashboard.css",
+          "GET http://127.0.0.1:3002/ui/components/kpi.css",
+          "GET http://127.0.0.1:3002/ui/components/map.css",
+          "GET http://127.0.0.1:3002/ui/components/search.css",
+          "GET http://127.0.0.1:3002/ui/components/loading.css",
+          "GET http://127.0.0.1:3002/ui/components/empty-state.css",
+          "GET http://127.0.0.1:3002/ui/components/error-state.css",
+          "GET http://127.0.0.1:3002/ui/components/offline-state.css",
+          "GET http://127.0.0.1:3002/ui/components/animations.css",
+          "GET http://127.0.0.1:3002/ui/theme-light.css",
+          "GET http://127.0.0.1:3002/ui/theme-dark.css",
+          "GET http://127.0.0.1:3002/api/core/dashboard",
+          "GET http://127.0.0.1:3002/api/technicians"
+        ]
+      },
+      "immediateAfterAction": {
+        "label": "immediate-after-click",
+        "href": "http://127.0.0.1:3002/admin-master-control",
+        "readyState": "snapshot-timeout",
+        "title": "(snapshot-timeout)",
+        "clientFormPresent": null,
+        "clientFormVisible": null,
+        "clientFormNameFieldPresent": null,
+        "linkVisible": null,
+        "linkEnabled": null,
+        "linkBoundingBox": null,
+        "topElementAtLinkCenter": null,
+        "overlaysVisible": [],
+        "serviceWorker": {
+          "controllerActive": null,
+          "controllerState": null
+        },
+        "lifecycle": [],
+        "snapshotTimedOut": true,
+        "pendingRequests": [
+          "GET http://127.0.0.1:3002/api/core/dashboard",
+          "GET http://127.0.0.1:3002/api/alerts"
+        ]
+      },
+      "timeline": {
+        "after1s": {
+          "label": "after-1s",
+          "href": "http://127.0.0.1:3002/admin-master-control",
+          "readyState": "snapshot-timeout",
+          "title": "(snapshot-timeout)",
+          "clientFormPresent": null,
+          "clientFormVisible": null,
+          "clientFormNameFieldPresent": null,
+          "linkVisible": null,
+          "linkEnabled": null,
+          "linkBoundingBox": null,
+          "topElementAtLinkCenter": null,
+          "overlaysVisible": [],
+          "serviceWorker": {
+            "controllerActive": null,
+            "controllerState": null
+          },
+          "lifecycle": [],
+          "snapshotTimedOut": true,
+          "pendingRequests": [
+            "GET http://127.0.0.1:3002/api/core/dashboard",
+            "GET http://127.0.0.1:3002/api/alerts"
+          ]
+        },
+        "after3s": {
+          "label": "after-3s",
+          "href": "http://127.0.0.1:3002/admin-master-control",
+          "readyState": "snapshot-timeout",
+          "title": "(snapshot-timeout)",
+          "clientFormPresent": null,
+          "clientFormVisible": null,
+          "clientFormNameFieldPresent": null,
+          "linkVisible": null,
+          "linkEnabled": null,
+          "linkBoundingBox": null,
+          "topElementAtLinkCenter": null,
+          "overlaysVisible": [],
+          "serviceWorker": {
+            "controllerActive": null,
+            "controllerState": null
+          },
+          "lifecycle": [],
+          "snapshotTimedOut": true,
+          "pendingRequests": [
+            "GET http://127.0.0.1:3002/api/core/dashboard",
+            "GET http://127.0.0.1:3002/api/alerts"
+          ]
+        },
+        "after10s": {
+          "label": "after-10s",
+          "href": "http://127.0.0.1:3002/admin-master-control",
+          "readyState": "snapshot-timeout",
+          "title": "(snapshot-timeout)",
+          "clientFormPresent": null,
+          "clientFormVisible": null,
+          "clientFormNameFieldPresent": null,
+          "linkVisible": null,
+          "linkEnabled": null,
+          "linkBoundingBox": null,
+          "topElementAtLinkCenter": null,
+          "overlaysVisible": [],
+          "serviceWorker": {
+            "controllerActive": null,
+            "controllerState": null
+          },
+          "lifecycle": [],
+          "snapshotTimedOut": true,
+          "pendingRequests": [
+            "GET http://127.0.0.1:3002/api/core/dashboard",
+            "GET http://127.0.0.1:3002/api/alerts"
+          ]
+        }
+      },
+      "screenshots": {
+        "landing": "docs/product/evidence/fcs13-create-client-diagnostic/FCS13DIAG_1784701261832_4o2zaz-menu-click-landing.png",
+        "final": "docs/product/evidence/fcs13-create-client-diagnostic/FCS13DIAG_1784701261832_4o2zaz-menu-click-final.png"
+      },
+      "console": [],
+      "pageErrors": [],
+      "apiResponses": [
+        {
+          "url": "http://127.0.0.1:3002/api/technicians",
+          "status": 200,
+          "method": "GET"
+        },
+        {
+          "url": "http://127.0.0.1:3002/api/gps/live",
+          "status": 200,
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "variant": "direct-route",
+      "urlInitial": "about:blank",
+      "urlAfterLoginPrime": "http://127.0.0.1:3002/login",
+      "urlAfterLanding": "http://127.0.0.1:3002/admin-master-control",
+      "clickedSelector": null,
+      "clickError": null,
+      "directGotoError": "page.goto: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3002/admin-clients\", waiting until \"commit\"\u001b[22m\n",
+      "landingState": {
+        "label": "after-landing",
+        "href": "http://127.0.0.1:3002/admin-master-control",
+        "readyState": "interactive",
+        "title": "Cristal Water · Centro de Operações V2",
+        "clientFormPresent": false,
+        "clientFormVisible": false,
+        "clientFormNameFieldPresent": false,
+        "linkVisible": false,
+        "linkEnabled": true,
+        "linkBoundingBox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "topElementAtLinkCenter": null,
+        "overlaysVisible": [
+          {
+            "tag": "ASIDE",
+            "id": "",
+            "className": "cw-v2-sidebar",
+            "zIndex": "auto",
+            "box": {
+              "x": 0,
+              "y": 0,
+              "width": 280,
+              "height": 920
+            },
+            "text": "Cristal Water\n          Administrador\n        \n      \n      \n        \n          Operação diária\n          \n            C"
+          },
+          {
+            "tag": "HEADER",
+            "id": "",
+            "className": "cw-v2-topbar",
+            "zIndex": "30",
+            "box": {
+              "x": 561,
+              "y": 0,
+              "width": 598,
+              "height": 73
+            },
+            "text": "⌕\n          \n        \n        \n          Voltar\n          Online\n          A atualizar...\n          Menu"
+          }
+        ],
+        "serviceWorker": {
+          "controllerActive": false,
+          "controllerState": null
+        },
+        "lifecycle": [],
+        "pendingRequests": [
+          "GET http://127.0.0.1:3002/cw-auth.js",
+          "GET http://127.0.0.1:3002/admin-auth-guard.js",
+          "GET http://127.0.0.1:3002/cw-admin-shortcuts.js",
+          "GET http://127.0.0.1:3002/crystal-os-v2-shell.js",
+          "GET http://127.0.0.1:3002/crystal-os-v2-nav.js",
+          "GET http://127.0.0.1:3002/ui/design-system.js",
+          "GET http://127.0.0.1:3002/ui/state-adapter-v2.js",
+          "GET http://127.0.0.1:3002/ui/components/empty-state.css",
+          "GET http://127.0.0.1:3002/ui/components/error-state.css",
+          "GET http://127.0.0.1:3002/ui/components/offline-state.css",
+          "GET http://127.0.0.1:3002/ui/components/animations.css",
+          "GET http://127.0.0.1:3002/ui/theme-light.css",
+          "GET http://127.0.0.1:3002/ui/theme-dark.css",
+          "GET http://127.0.0.1:3002/api/core/dashboard",
+          "GET http://127.0.0.1:3002/api/technicians"
+        ]
+      },
+      "immediateAfterAction": {
+        "label": "immediate-after-direct-goto",
+        "href": "http://127.0.0.1:3002/admin-master-control",
+        "readyState": "snapshot-timeout",
+        "title": "(snapshot-timeout)",
+        "clientFormPresent": null,
+        "clientFormVisible": null,
+        "clientFormNameFieldPresent": null,
+        "linkVisible": null,
+        "linkEnabled": null,
+        "linkBoundingBox": null,
+        "topElementAtLinkCenter": null,
+        "overlaysVisible": [],
+        "serviceWorker": {
+          "controllerActive": null,
+          "controllerState": null
+        },
+        "lifecycle": [],
+        "snapshotTimedOut": true,
+        "pendingRequests": [
+          "GET http://127.0.0.1:3002/admin-clients"
+        ]
+      },
+      "timeline": {
+        "after1s": {
+          "label": "after-1s",
+          "href": "http://127.0.0.1:3002/admin-master-control",
+          "readyState": "snapshot-timeout",
+          "title": "(snapshot-timeout)",
+          "clientFormPresent": null,
+          "clientFormVisible": null,
+          "clientFormNameFieldPresent": null,
+          "linkVisible": null,
+          "linkEnabled": null,
+          "linkBoundingBox": null,
+          "topElementAtLinkCenter": null,
+          "overlaysVisible": [],
+          "serviceWorker": {
+            "controllerActive": null,
+            "controllerState": null
+          },
+          "lifecycle": [],
+          "snapshotTimedOut": true,
+          "pendingRequests": [
+            "GET http://127.0.0.1:3002/admin-clients"
+          ]
+        },
+        "after3s": {
+          "label": "after-3s",
+          "href": "http://127.0.0.1:3002/admin-master-control",
+          "readyState": "snapshot-timeout",
+          "title": "(snapshot-timeout)",
+          "clientFormPresent": null,
+          "clientFormVisible": null,
+          "clientFormNameFieldPresent": null,
+          "linkVisible": null,
+          "linkEnabled": null,
+          "linkBoundingBox": null,
+          "topElementAtLinkCenter": null,
+          "overlaysVisible": [],
+          "serviceWorker": {
+            "controllerActive": null,
+            "controllerState": null
+          },
+          "lifecycle": [],
+          "snapshotTimedOut": true,
+          "pendingRequests": [
+            "GET http://127.0.0.1:3002/admin-clients"
+          ]
+        },
+        "after10s": {
+          "label": "after-10s",
+          "href": "http://127.0.0.1:3002/admin-master-control",
+          "readyState": "snapshot-timeout",
+          "title": "(snapshot-timeout)",
+          "clientFormPresent": null,
+          "clientFormVisible": null,
+          "clientFormNameFieldPresent": null,
+          "linkVisible": null,
+          "linkEnabled": null,
+          "linkBoundingBox": null,
+          "topElementAtLinkCenter": null,
+          "overlaysVisible": [],
+          "serviceWorker": {
+            "controllerActive": null,
+            "controllerState": null
+          },
+          "lifecycle": [],
+          "snapshotTimedOut": true,
+          "pendingRequests": [
+            "GET http://127.0.0.1:3002/admin-clients"
+          ]
+        }
+      },
+      "screenshots": {
+        "landing": "docs/product/evidence/fcs13-create-client-diagnostic/FCS13DIAG_1784701261832_4o2zaz-direct-route-landing.png",
+        "final": "docs/product/evidence/fcs13-create-client-diagnostic/FCS13DIAG_1784701261832_4o2zaz-direct-route-final.png"
+      },
+      "console": [
+        {
+          "type": "error",
+          "text": "TypeError: Failed to fetch\n    at window.fetch (http://127.0.0.1:3002/cw-auth.js:110:27)\n    at loadLiveMap (http://127.0.0.1:3002/admin-live-map.js:193:23)\n    at initLiveMap (http://127.0.0.1:3002/admin-live-map.js:60:3)\n    at http://127.0.0.1:3002/admin-live-map.js:48:3"
+        },
+        {
+          "type": "error",
+          "text": "TypeError: Failed to fetch\n    at window.fetch (http://127.0.0.1:3002/cw-auth.js:110:27)\n    at loadCriticalAlerts (http://127.0.0.1:3002/admin-live-map.js:287:23)\n    at initLiveMap (http://127.0.0.1:3002/admin-live-map.js:61:3)\n    at http://127.0.0.1:3002/admin-live-map.js:48:3"
+        },
+        {
+          "type": "error",
+          "text": "TypeError: Failed to fetch\n    at window.fetch (http://127.0.0.1:3002/cw-auth.js:110:27)\n    at api (http://127.0.0.1:3002/admin-master-control.js:29:26)\n    at HTMLDocument.load (http://127.0.0.1:3002/admin-master-control.js:440:7)"
+        }
+      ],
+      "pageErrors": [],
+      "apiResponses": [
+        {
+          "url": "http://127.0.0.1:3002/api/technicians",
+          "status": 200,
+          "method": "GET"
+        }
+      ]
+    }
+  ]
+}

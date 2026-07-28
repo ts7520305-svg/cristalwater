@@ -57,20 +57,25 @@ function setFieldValue(id, value) {
 }
 
 function getClientPayloadFromFields(prefix = "") {
+  const fieldId = (suffix) => {
+    if (prefix) return `${prefix}${suffix}`;
+    return `${suffix.charAt(0).toLowerCase()}${suffix.slice(1)}`;
+  };
+
   return {
-    name: val(`${prefix}Name`),
-    internalName: val(`${prefix}InternalName`),
-    phone: val(`${prefix}Phone`),
-    email: val(`${prefix}Email`),
-    zone: val(`${prefix}Zone`),
-    notes: val(`${prefix}Notes`),
-    password: val(`${prefix}Password`),
-    requiresInvoice: document.getElementById(`${prefix}RequiresInvoice`)?.checked || false,
-    fiscalName: val(`${prefix}FiscalName`),
-    fiscalNif: val(`${prefix}FiscalNif`),
-    fiscalAddress: val(`${prefix}FiscalAddress`),
-    fiscalEmail: val(`${prefix}FiscalEmail`),
-    externalBillingNotes: val(`${prefix}ExternalBillingNotes`),
+    name: val(fieldId("Name")),
+    internalName: val(fieldId("InternalName")),
+    phone: val(fieldId("Phone")),
+    email: val(fieldId("Email")),
+    zone: val(fieldId("Zone")),
+    notes: val(fieldId("Notes")),
+    password: val(fieldId("Password")),
+    requiresInvoice: document.getElementById(fieldId("RequiresInvoice"))?.checked || false,
+    fiscalName: val(fieldId("FiscalName")),
+    fiscalNif: val(fieldId("FiscalNif")),
+    fiscalAddress: val(fieldId("FiscalAddress")),
+    fiscalEmail: val(fieldId("FiscalEmail")),
+    externalBillingNotes: val(fieldId("ExternalBillingNotes")),
   };
 }
 
@@ -153,9 +158,9 @@ function paymentReference(clientId) {
 
 function statusLabel(client) {
   const status = String(client.status || "").toUpperCase();
-  if (client.active === false || status === "ARCHIVED") return '<span class="pill cw-status-archived">Arquivado</span>';
-  if (status === "ACTIVE") return '<span class="pill cw-status-active">Ativo</span>';
-  return '<span class="pill cw-status-setup">Em configuracao</span>';
+  if (client.active === false || status === "ARCHIVED") return '<span class="ds-badge is-warning">Arquivado</span>';
+  if (status === "ACTIVE") return '<span class="ds-badge">Ativo</span>';
+  return '<span class="ds-badge is-muted">Em configuracao</span>';
 }
 
 function isActiveClient(client) {
@@ -223,24 +228,24 @@ function renderClient(client) {
   const activeClient = isActiveClient(client);
   const contractActive = String(client.status || "").toUpperCase() === "ACTIVE";
   const lifecycleActions = client.active === false
-    ? `<button onclick="restoreClient(${client.id})" class="cw-action-ok">Restaurar</button>`
+    ? `<button onclick="restoreClient(${client.id})" class="cw-v2-btn">Restaurar</button>`
     : `${contractActive
-      ? `<span class="pill cw-status-active">Contrato ativo</span>`
+      ? `<span class="ds-badge">Contrato ativo</span>`
       : `<label class="activation-inline">
           <span>1o pagamento</span>
           <input id="activationAmount-${client.id}" inputmode="decimal" placeholder="Opcional EUR">
         </label>
-        <button data-activate-client="${client.id}" onclick="activateClient(${client.id})" class="cw-action-ok">Ativar contrato</button>`}
-      <button onclick="archiveClient(${client.id})" class="cw-action-warn">Arquivar</button>`;
+        <button data-activate-client="${client.id}" onclick="activateClient(${client.id})" class="cw-v2-btn primary">Ativar contrato</button>`}
+      <button onclick="archiveClient(${client.id})" class="cw-v2-btn">Arquivar</button>`;
   return `
     <article class="client ${hasDebt ? "cw-card-warn" : ""} ${activeClient ? "cw-client-active" : "cw-client-inactive"}">
       <div class="client-main">
         <h3>${esc(client.name)}</h3>
         <div class="client-meta-line">
           ${statusLabel(client)}
-          ${client.requiresInvoice ? '<span class="pill">Fatura oficial</span>' : '<span class="pill">Sem fatura oficial</span>'}
-          ${hasDebt ? '<span class="pill cw-status-warn">Valores em aberto</span>' : '<span class="pill cw-status-active">Financeiro em dia</span>'}
-          ${totals.credit > 0 ? '<span class="pill cw-status-active">Credito positivo</span>' : ""}
+          ${client.requiresInvoice ? '<span class="ds-badge is-muted">Fatura oficial</span>' : '<span class="ds-badge is-muted">Sem fatura oficial</span>'}
+          ${hasDebt ? '<span class="ds-badge is-warning">Valores em aberto</span>' : '<span class="ds-badge">Financeiro em dia</span>'}
+          ${totals.credit > 0 ? '<span class="ds-badge">Credito positivo</span>' : ""}
         </div>
         <div class="client-kv">
           <div>ID ${esc(client.id)} - ${esc(client.zone || "sem zona")}</div>
@@ -262,20 +267,20 @@ function renderClient(client) {
       <div class="client-pools-wrap">
         <div class="client-section-label">Piscinas / Jacuzzis (${pools.length})</div>
         <div class="client-pools">
-          ${firstPools.map((pool) => `<a class="pill" href="/admin-pool-technical?poolId=${esc(pool.id)}">${esc(pool.name || pool.type || "Piscina")} - ${esc(pool.zone || pool.location || "-")}</a>`).join("")}
-          ${pools.length > firstPools.length ? `<span class="pill">+${pools.length - firstPools.length}</span>` : ""}
+          ${firstPools.map((pool) => `<a class="cw-v2-btn" href="/admin-pool-technical?poolId=${esc(pool.id)}">${esc(pool.name || pool.type || "Piscina")} - ${esc(pool.zone || pool.location || "-")}</a>`).join("")}
+          ${pools.length > firstPools.length ? `<span class="ds-badge is-muted">+${pools.length - firstPools.length}</span>` : ""}
         </div>
       </div>
       <div class="client-actions-wrap">
         <div class="client-section-label">Acoes</div>
         <div class="client-actions">
-          <button onclick="editClient(${client.id})">Editar</button>
+          <button class="cw-v2-btn" onclick="editClient(${client.id})">Editar</button>
           ${lifecycleActions}
-          <button onclick="deleteClient(${client.id})" class="cw-action-danger">Eliminar</button>
-          <a class="btn" href="/admin-pools?clientId=${client.id}">Piscinas</a>
-          <a class="btn" href="/invoices?clientId=${client.id}">Conta corrente</a>
-          <a class="btn" href="/admin-payments?clientId=${client.id}">Pagamentos</a>
-          <a class="btn" href="/client-portal?clientId=${client.id}" target="_blank">Portal cliente</a>
+          <button class="cw-v2-btn danger" onclick="deleteClient(${client.id})">Eliminar</button>
+          <a class="cw-v2-btn" href="/admin-pools?clientId=${client.id}">Piscinas</a>
+          <a class="cw-v2-btn" href="/invoices?clientId=${client.id}">Conta corrente</a>
+          <a class="cw-v2-btn" href="/admin-payments?clientId=${client.id}">Pagamentos</a>
+          <a class="cw-v2-btn" href="/client-portal?clientId=${client.id}" target="_blank">Portal cliente</a>
         </div>
       </div>
     </article>
@@ -318,7 +323,7 @@ function renderList() {
         <span>${totalPools} piscina(s)/jacuzzi(s)</span>
         <span>Aberto ${money(totalOpen)}</span>
         <span>Credito ${money(totalCredit)}</span>
-        <a class="btn primary" href="/to-issue">Faturacao oficial</a>
+        <a class="cw-v2-btn primary" href="/to-issue">Faturacao oficial</a>
       </div>
       <div class="client-status-filters" role="group" aria-label="Filtrar clientes por estado">
         <button type="button" class="${clientStatusFilter === "active" ? "is-active" : ""}" onclick="setClientStatusFilter('active')">Ativos ${activeCount}</button>

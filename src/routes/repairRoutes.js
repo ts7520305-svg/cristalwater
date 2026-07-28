@@ -1,9 +1,20 @@
 const express = require("express");
 const multer = require("multer");
+const auth = require("../middlewares/authMiddleware");
+const { roleIn } = require("../utils/roles");
 const controller = require("../controllers/repairController");
 const { resolveUploadSubdir } = require("../config/uploadPath");
 
 const router = express.Router();
+
+function allowRoles(...roles) {
+	return (req, res, next) => {
+		if (roleIn(req.user?.role, roles)) return next();
+		return res.status(403).json({ ok: false, message: "Sem permissão" });
+	};
+}
+
+router.use(auth());
 
 const uploadDir = resolveUploadSubdir("repairs");
 
@@ -23,21 +34,21 @@ const upload = multer({
 	},
 });
 
-router.post("/", controller.createRepair);
-router.get("/pool/:poolId", controller.listRepairsByPool);
-router.get("/:id/pdf", controller.repairPdf);
-router.put("/:id/quote", controller.quoteRepair);
-router.put("/:id/diagnose", controller.diagnoseRepair);
-router.put("/:id/schedule", controller.scheduleRepair);
-router.put("/:id/cancel", controller.cancelRepair);
-router.put("/:id/approve", controller.approveRepair);
-router.put("/:id/invoice", controller.invoiceRepair);
-router.put("/:id/payment", controller.registerPayment);
-router.put("/:id/close", controller.closeRepair);
-router.put("/:id/mark-sent", controller.markSent);
-router.put("/:id/complete", controller.completeRepair);
-router.post("/:id/photo", upload.single("photo"), controller.recordRepairPhoto);
-router.delete("/:id", controller.deleteRepair);
+router.post("/", allowRoles("ADMIN", "TECHNICIAN"), controller.createRepair);
+router.get("/pool/:poolId", allowRoles("ADMIN", "TECHNICIAN"), controller.listRepairsByPool);
+router.get("/:id/pdf", allowRoles("ADMIN", "TECHNICIAN"), controller.repairPdf);
+router.put("/:id/quote", allowRoles("ADMIN"), controller.quoteRepair);
+router.put("/:id/diagnose", allowRoles("ADMIN", "TECHNICIAN"), controller.diagnoseRepair);
+router.put("/:id/schedule", allowRoles("ADMIN", "TECHNICIAN"), controller.scheduleRepair);
+router.put("/:id/cancel", allowRoles("ADMIN", "TECHNICIAN"), controller.cancelRepair);
+router.put("/:id/approve", allowRoles("ADMIN"), controller.approveRepair);
+router.put("/:id/invoice", allowRoles("ADMIN"), controller.invoiceRepair);
+router.put("/:id/payment", allowRoles("ADMIN"), controller.registerPayment);
+router.put("/:id/close", allowRoles("ADMIN", "TECHNICIAN"), controller.closeRepair);
+router.put("/:id/mark-sent", allowRoles("ADMIN"), controller.markSent);
+router.put("/:id/complete", allowRoles("ADMIN", "TECHNICIAN"), controller.completeRepair);
+router.post("/:id/photo", allowRoles("ADMIN", "TECHNICIAN"), upload.single("photo"), controller.recordRepairPhoto);
+router.delete("/:id", allowRoles("ADMIN"), controller.deleteRepair);
 
 router.use((error, req, res, next) => {
 	if (!error) return next();

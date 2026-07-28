@@ -12,61 +12,106 @@
   <link rel="stylesheet" href="/ui/foundation.css">
 
   <style>
+    :root {
+      --cp-s-1: 8px;
+      --cp-s-2: 10px;
+      --cp-s-3: 12px;
+      --cp-s-4: 16px;
+      --cp-s-5: 20px;
+      --cp-r-card: 16px;
+      --cp-r-control: 12px;
+    }
+
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #e3f2fd;
-      color: #1f2933;
+      font-family: var(--ds-font, "Manrope", "Segoe UI", sans-serif);
+      background: radial-gradient(circle at 8% 0%, #ffffff 0%, #edf5fc 48%, #e4eef8 100%);
+      color: #1d3044;
     }
 
     header {
-      background: white;
-      border-bottom: 3px solid #1e88e5;
-      padding: 20px;
+      background: linear-gradient(135deg, #ffffff 0%, #f5f9ff 100%);
+      border: 1px solid #cbd9e8;
+      border-radius: var(--cp-r-card);
+      padding: var(--cp-s-4);
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: var(--cp-s-4);
+      box-shadow: 0 14px 34px rgba(10, 32, 54, 0.09);
     }
 
     header img {
-      height: 70px;
+      height: 56px;
     }
 
     header h1 {
       margin: 0;
-      font-size: 26px;
-      color: #1e88e5;
+      font-size: 33px;
+      line-height: 1.04;
+      letter-spacing: -0.02em;
+      color: #144675;
     }
 
     header p {
       margin: 4px 0 0 0;
-      color: #555;
+      color: #556f86;
       font-size: 14px;
     }
 
     main {
-      padding: 25px;
-      max-width: 1000px;
+      padding: var(--cp-s-4);
+      max-width: 1120px;
       margin: auto;
+      display: grid;
+      gap: var(--cp-s-4);
     }
 
     .intro {
-      background: white;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-      margin-bottom: 25px;
+      background: #fff;
+      padding: var(--cp-s-4);
+      border: 1px solid #ccdaea;
+      border-radius: var(--cp-r-card);
+      box-shadow: 0 10px 28px rgba(18, 41, 66, 0.08);
       font-size: 14px;
-      color: #555;
+      color: #5a7389;
+      line-height: 1.45;
+    }
+
+    .payment-kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--cp-s-2);
+    }
+
+    .payment-kpi {
+      border: 1px solid #cad8e8;
+      border-radius: var(--cp-r-control);
+      background: #f8fbff;
+      padding: 10px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .payment-kpi b {
+      font-size: 24px;
+      color: #144775;
+      line-height: 1;
+    }
+
+    .payment-kpi span {
+      font-size: 12px;
+      color: #587185;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
     }
 
     .status-card {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      background: #fff;
+      padding: var(--cp-s-4);
+      border-radius: var(--cp-r-card);
+      box-shadow: 0 10px 28px rgba(18, 41, 66, 0.08);
+      border: 1px solid #cddaea;
       border-left: 6px solid #1e88e5;
-      margin-bottom: 25px;
     }
 
     .status-ok {
@@ -78,40 +123,72 @@
     }
 
     .status-title {
-      font-size: 18px;
+      font-size: 20px;
       font-weight: bold;
       margin-bottom: 8px;
+      color: #1a4f7c;
     }
 
     .status-text {
       font-size: 14px;
-      color: #555;
+      color: #5a7288;
+      line-height: 1.4;
+    }
+
+    .history-block {
+      border: 1px solid #ccdaea;
+      border-radius: var(--cp-r-card);
+      background: #fff;
+      box-shadow: 0 10px 28px rgba(18, 41, 66, 0.08);
+      overflow: hidden;
+    }
+
+    .history-head {
+      margin: 0;
+      padding: 12px 14px;
+      border-bottom: 1px solid #d6e2ef;
+      font-size: 18px;
+      color: #175286;
+      background: #f7fbff;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      background: white;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      background: #fff;
     }
 
     th, td {
-      padding: 10px;
-      border-bottom: 1px solid #ddd;
+      padding: 10px 12px;
+      border-bottom: 1px solid #dbe5ef;
       font-size: 14px;
     }
 
     th {
-      background: #f5faff;
-      color: #1e88e5;
+      background: #f1f8ff;
+      color: #1f5a8c;
       text-align: left;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      font-size: 12px;
     }
 
     footer {
       text-align: center;
-      padding: 15px;
+      padding: 8px;
       font-size: 12px;
-      color: #555;
+      color: #607689;
+    }
+
+    @media (max-width: 900px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .payment-kpi-strip {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 <link rel="stylesheet" href="/cristal-assist.css">
@@ -120,6 +197,7 @@
   <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
   <link rel="stylesheet" href="/cw-block2-shell.css">
+  <link rel="stylesheet" href="/ui/design-system.css">
 </head>
 
 <body data-cw-role="CLIENT" data-required-role="CLIENT">
@@ -138,6 +216,12 @@
 
 <main>
 
+  <section class="payment-kpi-strip" aria-label="Resumo financeiro rápido">
+    <div class="payment-kpi"><b>Receber</b><span>Situação atual</span></div>
+    <div class="payment-kpi"><b>Histórico</b><span>Pagamentos e estados</span></div>
+    <div class="payment-kpi"><b>Faturas</b><span>Leitura imediata</span></div>
+  </section>
+
   <div class="intro">
     Nesta secção pode acompanhar o estado da sua mensalidade, consultar o último pagamento
     efetuado e verificar o histórico dos valores associados ao serviço de manutenção da sua piscina.
@@ -151,19 +235,20 @@
   </div>
 
   <!-- HISTÓRICO -->
-  <h3>Histórico de pagamentos</h3>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Data</th>
-        <th>Descrição</th>
-        <th>Valor</th>
-        <th>Estado</th>
-      </tr>
-    </thead>
-    <tbody id="rows"></tbody>
-  </table>
+  <section class="history-block">
+    <h3 class="history-head">Histórico de pagamentos</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Descrição</th>
+          <th>Valor</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </section>
 
 </main>
 
@@ -179,5 +264,6 @@
   <script src="/crystal-os-v2-shell.js"></script>
   <script src="/crystal-os-v2-nav.js"></script>
 <script src="/cw-block2-shell.js"></script>
+  <script defer src="/ui/design-system.js"></script>
 </body>
 </html>
