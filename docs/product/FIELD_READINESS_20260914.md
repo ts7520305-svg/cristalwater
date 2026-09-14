@@ -265,3 +265,10 @@ Ligado o seletor de anexos ao endpoint autenticado existente, com tipos JPG/PNG/
 Documentos, notificações e permissões carregam independentemente. Uma falha num bloco mostra erro/repetição nesse bloco, preservando piscinas e conta. O histórico de mensagens verifica respostas HTTP antes de apresentar um estado vazio.
 
 Chromium/API aprovados: documentos indisponíveis com piscinas visíveis, recuperação explícita, mensagem preservada após falha, um POST perante dois cliques e anexo efetivamente persistido na conversa do cliente. Os testes usam notificações externas desativadas.
+
+
+## TASK 29 — apresentação dos portais e estado parcial da gestão
+
+Restabelecida a folha base do layout que faltava ao portal cliente. Navegação móvel única, logótipo contido, controlos de toque, resumo compacto e idioma visível alinhado com os textos. Etiquetas curtas na barra inferior conservam nomes completos acessíveis. Na gestão, links laterais ganham contraste e o resumo deixa de mostrar texto sobre a implementação.
+
+O estado de atualização do centro de comando inclui agora a resposta dos técnicos. Uma falha nessa resposta produz Dados parciais, em vez de afirmar sincronização completa; atualização posterior recupera o estado. Chromium verifica falha/recuperação, idioma PT e ausência de overflow do cliente a 320/390/768 px. Revisão visual do portal realizada com dados de demonstração. Não constitui certificação da migração histórica de todas as páginas.

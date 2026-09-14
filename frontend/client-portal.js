@@ -742,6 +742,12 @@ function applyLanguage(language) {
   localStorage.setItem("cw_client_lang", portalLanguage);
   localStorage.setItem("cw_language", portalLanguage);
   document.documentElement.lang = portalLanguage;
+  const languageSelect=el('cwLanguageSelect');
+  if(languageSelect && Array.from(languageSelect.options).some(option=>option.value===portalLanguage))languageSelect.value=portalLanguage;
+  const navLabels=portalLanguage==='en'?['Home','Pools','Visits','Reports','Payments','Messages']:portalLanguage==='fr'?['Accueil','Piscines','Visites','Rapports','Paiements','Messages']:['Início','Piscinas','Visitas','Relatórios','Pagamentos','Mensagens'];
+  for(const selector of ['.cw-v2-nav','.cw-v2-mobile-nav'])document.querySelectorAll(`${selector} a`).forEach((link,index)=>{if(navLabels[index]){link.textContent=navLabels[index];link.setAttribute('aria-label',navLabels[index]);}});
+  const mobileLabels=portalLanguage==='en'?['Home','Pools','Visits','Docs','Billing','Chat']:portalLanguage==='fr'?['Accueil','Piscines','Visites','Docs','Compte','Chat']:['Início','Piscinas','Agenda','Docs','Conta','Chat'];
+  document.querySelectorAll('.cw-v2-mobile-nav a').forEach((link,index)=>{if(mobileLabels[index])link.textContent=mobileLabels[index]});
   document.title = `Cristal Water LDA - ${copy("brandPortal")}`;
   setText("brandPortalLabel", copy("brandPortal"));
   setText("portalLogoutBtn", isAdminUser() ? copy("adminBackClients") : copy("logout"));
@@ -1824,6 +1830,7 @@ function updatePresence(lastSeen) {
 
 document.addEventListener("DOMContentLoaded", async () => {
   applyLanguage(portalLanguage);
+  el('cwLanguageSelect')?.addEventListener('change',async event=>{applyLanguage(event.target.value);await loadPortal();await loadMessages();});
   await setupAdminClientSwitcher();
   window.setInterval(() => syncLanguageFromShell().catch(() => {}), 900);
   if (clientId) {

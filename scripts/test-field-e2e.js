@@ -47,7 +47,28 @@ const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
         console.log('PASS',persona.name,'online',JSON.stringify({apiErrors}));
         if(persona.role==='TECHNICIAN') await page.waitForFunction(()=>document.querySelector('#fieldDocsValue')?.textContent==='Válidos');
         if(process.env.CW_CAPTURE_UI){require('fs').mkdirSync('reports/field-ui',{recursive:true});await page.screenshot({path:`reports/field-ui/${persona.role}.png`,fullPage:true});}
+        if(persona.role==='ADMIN') {
+          await page.route('**/api/technicians',route=>route.fulfill({status:503,contentType:'application/json',body:'{"error":"Unavailable"}'}));
+          await page.locator('#refreshBtn').click();
+          await page.waitForFunction(()=>document.querySelector('#syncState').textContent==='Dados parciais');
+          await page.unroute('**/api/technicians');
+          await page.locator('#refreshBtn').click();
+          await page.waitForFunction(()=>document.querySelector('#syncState').textContent==='Sincronizado');
+          assert(!(await page.locator('#metricsHint').textContent()).includes('estrutura'));
+          console.log('PASS management partial technician data is visible and refresh restores complete status');
+        }
         if(persona.role==='CLIENT') {
+          assert.equal(await page.locator('.ds-bottom-nav').count(),0);
+          for(const width of [320,390,768]){
+            await page.setViewportSize({width,height:844});
+            assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Client horizontal overflow at ${width}`);
+          }
+          await page.setViewportSize({width:390,height:844});
+          await page.locator('#cwLanguageSelect').selectOption('pt');
+          await page.waitForFunction(()=>document.documentElement.lang==='pt');
+          assert.equal(await page.locator('#cwLanguageSelect').inputValue(),'pt');
+          assert.equal(await page.locator('.cw-v2-mobile-nav a[aria-label=Pagamentos]').textContent(),'Conta');
+          if(process.env.CW_CAPTURE_UI)await page.screenshot({path:'reports/field-ui/CLIENT_VIEWPORT.png',fullPage:false});
           await page.route('**/api/client-portal/*/documents',route=>route.fulfill({status:503,contentType:'application/json',body:'{"error":"Unavailable"}'}));
           await page.reload({waitUntil:'networkidle'});
           assert(await page.locator('#documentList [role=alert]').isVisible());
