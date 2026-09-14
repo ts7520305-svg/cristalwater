@@ -59,6 +59,29 @@
       return data;
     };
 
+    async function syncPendingWaterState() {
+      if (!navigator.onLine) return;
+      const list = rows();
+      let changed = false;
+      for (const item of list) {
+        if (!item?.localId || !item.syncError) continue;
+        try {
+          if (item.status === 'CLOSED') {
+            await api(`/api/technician/water-reminders/${encodeURIComponent(item.serverId || item.localId)}/close`, { method: 'POST', body: JSON.stringify(item) });
+            item.closeSyncedAt = new Date().toISOString();
+          } else if (!item.serverId) {
+            const data = await api('/api/technician/water-reminders', { method: 'POST', body: JSON.stringify(item) });
+            item.serverId = data.reminder?.id || data.id || null;
+            item.notificationId = data.notification?.id || null;
+            item.syncedAt = new Date().toISOString();
+          }
+          item.syncError = '';
+          changed = true;
+        } catch (_) {}
+      }
+      if (changed) save(list);
+    }
+
     function enhance() {
       const card = $('.water-card');
       const grid = card?.querySelector('.water-grid');
@@ -169,7 +192,9 @@
     const observer = new MutationObserver(decorate);
     observer.observe(document.body, { childList: true, subtree: true });
     setInterval(decorate, 30000);
+    window.addEventListener('online', () => syncPendingWaterState().catch(() => {}));
     decorate();
+    syncPendingWaterState().catch(() => {});
   }
 
   function getDrawer() {
