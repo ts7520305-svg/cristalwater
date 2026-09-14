@@ -35,8 +35,8 @@ function check(name, ok, detail = "") {
   console.log(`${mark} ${name}${detail ? ` - ${detail}` : ""}`);
 }
 
-async function call(method, pathname, body = undefined, expected = [200, 201]) {
-  const token = await ensureAdminToken();
+async function call(method, pathname, body = undefined, expected = [200, 201], actingToken = null) {
+  const token = actingToken || await ensureAdminToken();
   const response = await fetchImpl(`${BASE_URL}${pathname}`, {
     method,
     headers: body instanceof FormData ? undefined : {
@@ -319,13 +319,16 @@ async function setupRoundsAndVisits() {
 
 async function setupMessagesAndBilling() {
   for (const [index, client] of created.clients.entries()) {
+    const password = `QA-client-${runId}-${client.id}`;
+    await prisma.client.update({where:{id:client.id},data:{password:await bcrypt.hash(password,10)}});
+    const session = await call('POST','/api/client-auth/login',{email:client.email,password});
     await call("POST", "/api/client-messages", {
       clientId: client.id,
       sender: "Cliente",
       message: index % 2 === 0
         ? `Bom dia, podem confirmar a proxima manutencao? QA ${runId}`
         : `A piscina teve mais uso este fim de semana. QA ${runId}`,
-    });
+    }, [200,201], session.data.token);
 
     const invoice = await call("POST", "/api/core/invoices/generate", {
       clientId: client.id,

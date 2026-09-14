@@ -135,3 +135,9 @@ Regressão: 15 grupos em sequência passaram, incluindo uma visita sem piscina e
 Botão de subscrição pede permissão por ação explícita, informa falta de configuração e exige confirmação de entrega real. Service worker apresenta avisos e abre apenas destinos da própria aplicação.
 
 Fila antiga é preservada: aviso visível e cópia recuperável dos registos do próprio técnico, sem exportar tokens. Não se repetem cegamente operações antigas que podem já ter sido executadas. Chromium confirmou preservação, conteúdo binário exportado e ausência de credenciais na cópia. Antes da mudança de versão em campo, a gestão deve reconciliar qualquer fila antiga no respetivo telemóvel.
+
+## TASK 19 — bateria repetível e manutenção dos testes
+
+Runner sem mensagens externas, dados QA e logs por execução, com estado de saída do servidor. CI preparado para PostgreSQL 16 e Chromium. Teste mensal envia mensagens usando login real de cada cliente; estatísticas verificam IDs diferentes para User e Technician. Página de rotas carrega autenticação comum; padrões inválidos de ignore corrigidos.
+
+Execução local do runner: 15/15 grupos aprovados (reports/field-suite/1789398178600). 63/63 testes unitários, 4/4 do técnico, 3 cenários do componente móvel. Chromium adicional de recuperação passou em run-1789398265107. Execução GitHub Actions ainda por verificar; teste local usa PGlite/TCP e não certifica desempenho PostgreSQL de produção.
