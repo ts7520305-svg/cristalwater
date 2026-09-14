@@ -3,6 +3,10 @@ const jwt =
 const { roleMatches } = require("../utils/roles");
 const { getJwtSecret } = require("../utils/jwtSecret");
 const { validateJwtPrincipal } = require("../utils/jwtPrincipalGuard");
+const {
+  sanitizeTechnicianVisitDetailPayload,
+  shouldSanitizeTechnicianVisitDetail,
+} = require("../services/technicianResponseSanitizer");
 
 // ======================================================
 // SECRET
@@ -71,6 +75,14 @@ function auth(requiredRole = null) {
 
           message: "Sem permissão"
         });
+      }
+
+      // Defense-in-depth for the technician visit-detail endpoint.
+      // Ownership is still enforced by visitRoutes; this layer removes
+      // contact and financial data before a technician response leaves API.
+      if (shouldSanitizeTechnicianVisitDetail(req, decoded.role)) {
+        const json = res.json.bind(res);
+        res.json = (payload) => json(sanitizeTechnicianVisitDetailPayload(payload));
       }
 
       next();

@@ -234,6 +234,17 @@ body[data-cw-role="TECHNICIAN"].cw-v2-shell-enabled .cw-v2-mobile-primary button
   font-size: 12px;
 }
 
+/* Field technicians must not be offered administrator-only destinations. */
+body.cw-tech-field-page a[href^="/admin-"],
+body.cw-tech-field-page a[href="/billing"],
+body.cw-tech-field-page a[href^="/billing-"],
+body.cw-tech-field-page a[href="/invoices"],
+body.cw-tech-field-page a[href^="/settings"],
+body.cw-tech-field-page a[href^="/metrics"],
+body.cw-tech-field-page a[href^="/ranking"] {
+  display: none !important;
+}
+
 body.cw-v2-shell-enabled .leaflet-container,
 body.cw-v2-shell-enabled .leaflet-pane,
 body.cw-v2-shell-enabled .leaflet-map-pane,
