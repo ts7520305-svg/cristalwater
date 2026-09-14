@@ -1,5 +1,7 @@
 # EPICS
 
+> Estado da release de 14/09/2026: consultar [revisão funcional](docs/product/RELEASE_SCOPE_20260914.md). Os estados históricos abaixo referem-se ao respetivo escopo de refatoração/entrega e não certificam instalação nem aceitação em campo.
+
 ## EPIC-001 - Technician OS
 - Status: Concluído (100%)
 - Objetivo: levar o Technician OS a 100% com arquitetura controller → business, sem alterar contratos públicos nem respostas JSON.

@@ -1,5 +1,7 @@
 # CRYSTAL OS ROADMAP
 
+> Estado da release de 14/09/2026: consultar [revisão funcional](docs/product/RELEASE_SCOPE_20260914.md). Os estados históricos abaixo referem-se ao respetivo escopo de refatoração/entrega e não certificam instalação nem aceitação em campo.
+
 Status: Active Development
 
 ---
