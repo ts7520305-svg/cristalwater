@@ -50,6 +50,10 @@ jobs:
       - run: npm run check:syntax
       - run: npm test && npm run test:technician && npm run test:field-browser
       - run: node scripts/test-field-suite.js
+      - name: Restore database and uploaded files in isolated QA
+        env:
+          CW_POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        run: node scripts/test-field-restore.js
       - uses: actions/upload-artifact@v4
         if: always()
         with:
