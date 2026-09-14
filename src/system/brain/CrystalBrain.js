@@ -2,7 +2,7 @@ const AIManager = require("../manager/AIManager");
 const brainConfig = require("../config/brainConfig");
 const BrainRouter = require("../router/BrainRouter");
 const BrainMemory = require("../memory/BrainMemory");
-const BrainLogger = require("../logs/BrainLogger");
+const BrainLogger = require("../../services/loggerService");
 const { getAgent, listAgents } = require("../agents/AgentRegistry");
 
 class CrystalBrain {

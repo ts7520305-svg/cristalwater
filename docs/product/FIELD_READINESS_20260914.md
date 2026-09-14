@@ -21,6 +21,15 @@ Pedido atual: concluir e testar os fluxos do técnico em campo, gestor, cliente 
 
 ## Validação pendente
 
+## TASK 2 — arranque a partir de clone limpo
+
+- A primeira execução real falhou antes de abrir a API: `CrystalBrain` importava `../logs/BrainLogger`, ausente no repositório.
+- Corrigido para reutilizar `services/loggerService`, já existente.
+- `check:syntax` passa também a resolver os imports locais, pois `node --check` não deteta esta falha.
+- TASK 1: 25 ficheiros / 63 testes passaram; testes específicos do técnico 4/4; sintaxe e resolução a revalidar após esta correção.
+
+## Ensaios por concluir
+
 - Base isolada, arranque, dados de ensaio e testes de API.
 - Jornada completa e reabertura offline em dispositivo móvel.
 - Alertas de água aberta/bomba manual com aplicação fechada, repetição e confirmação.
