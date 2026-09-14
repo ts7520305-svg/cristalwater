@@ -104,7 +104,9 @@
       init = init || {};
       const headers = new Headers(init.headers || (input && input.headers) || {});
       const token = getToken();
-      if(token && !headers.has('Authorization')) headers.set('Authorization', 'Bearer ' + token);
+      const target = new URL(typeof input === 'string' ? apiUrl(input) : input.url, location.href);
+      const approvedOrigin = apiOrigin() ? new URL(apiOrigin(), location.href).origin : location.origin;
+      if(token && target.origin === approvedOrigin && !headers.has('Authorization')) headers.set('Authorization', 'Bearer ' + token);
       init.headers = headers;
       try{
         const res = await nativeFetch(apiUrl(input), init);
@@ -127,5 +129,18 @@
   }, true);
 
   window.CristalAuth = { TOKEN_KEY, USER_KEY, API_ORIGIN_KEY, getToken, parseUser, persistSession, clearSession, logout, hydrate, requireAuth, toast, apiOrigin, apiUrl };
+  function wrapSocketIO(factory) {
+    if (typeof factory !== 'function' || factory.__cwAuth) return factory;
+    const wrapped = function(uri, options) {
+      if (uri && typeof uri === 'object') { options=uri; uri=undefined; }
+      const opts={...(options||{}),auth:callback=>callback({token:getToken()})};
+      return uri === undefined ? factory(opts) : factory(uri,opts);
+    };
+    Object.assign(wrapped,factory); wrapped.__cwAuth=true;
+    return wrapped;
+  }
+  let socketFactory=wrapSocketIO(window.io);
+  const descriptor=Object.getOwnPropertyDescriptor(window,'io');
+  if (!descriptor || descriptor.configurable) Object.defineProperty(window,'io',{configurable:true,get:()=>socketFactory,set:value=>{socketFactory=wrapSocketIO(value)}});
   hydrate();
 })();

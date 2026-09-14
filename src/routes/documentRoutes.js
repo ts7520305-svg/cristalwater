@@ -5,6 +5,7 @@ const multer = require('multer');
 const { resolveUploadSubdir, toPublicUploadUrl } = require('../config/uploadPath');
 
 const router = express.Router();
+router.use(require('../middlewares/authMiddleware')('TEAM_LEADER'));
 const baseDir = resolveUploadSubdir('documents');
 const manifestPath = path.join(baseDir, 'manifest.json');
 fs.mkdirSync(baseDir, { recursive: true });
@@ -21,7 +22,15 @@ router.get('/', (req, res) => {
   if (visitId) rows = rows.filter(x => String(x.visitId||'') === String(visitId));
   if (entity) rows = rows.filter(x => String(x.entity||'') === String(entity));
   if (entityId) rows = rows.filter(x => String(x.entityId||'') === String(entityId));
-  res.json({ ok: true, documents: rows.sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt))) });
+  res.json({ ok: true, documents: rows.sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt))).map(doc=>({...doc,url:`/api/documents/${doc.id}/download`})) });
+});
+
+router.get('/:id/download', (req,res)=>{
+  const doc=readManifest().find(row=>Number(row.id)===Number(req.params.id));
+  if(!doc) return res.status(404).json({ok:false,error:'Documento não encontrado.'});
+  const filename=path.basename(String(doc.filename||''));
+  if(!filename || filename!==doc.filename) return res.status(400).json({ok:false,error:'Documento inválido.'});
+  res.download(path.join(baseDir,filename),doc.originalName||filename);
 });
 
 router.post('/', upload.single('file'), (req, res) => {
@@ -40,10 +49,11 @@ router.post('/', upload.single('file'), (req, res) => {
     type: req.body.type || req.file.mimetype,
     originalName: req.file.originalname,
     filename: req.file.filename,
-    url: toPublicUploadUrl('documents', req.file.filename),
+    url: `/api/documents/${Date.now()}/download`,
     notes: req.body.notes || null,
     createdAt: new Date().toISOString()
   };
+  doc.url = `/api/documents/${doc.id}/download`;
   rows.push(doc); writeManifest(rows);
   res.status(201).json({ ok: true, document: doc });
 });

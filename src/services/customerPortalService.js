@@ -98,7 +98,7 @@ function customerPermissions(client) {
 
 async function listCustomerNotifications(clientId) {
   const notifications = await prisma.notification.findMany({
-    where: { clientId },
+    where: { clientId, role: {in:['CLIENT','CUSTOMER']} },
     orderBy: { createdAt: "desc" },
     take: 100,
   });

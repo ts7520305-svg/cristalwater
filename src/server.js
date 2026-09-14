@@ -162,29 +162,7 @@ const tempPath = path.join(__dirname, "../temp");
 fs.mkdirSync(uploadsPath, { recursive: true });
 fs.mkdirSync(tempPath, { recursive: true });
 
-io.on("connection", (socket) => {
-  logger.info("SOCKET_CONNECTED", { socketId: socket.id });
-
-  socket.on("joinClient", (clientId) => socket.join("client_" + clientId));
-  socket.on("userOnline", (data = {}) => {
-    io.emit("presenceUpdate", {
-      userId: data.userId,
-      online: data.online === false ? false : true,
-      lastSeen: new Date(),
-      visibleToClients: data.visibleToClients === true,
-    });
-  });
-  socket.on("sendMessage", (data = {}) => {
-    if (data.clientId) io.to("client_" + data.clientId).emit("newMessage", data);
-  });
-  socket.on("typing", (data = {}) => {
-    if (data.clientId) io.to("client_" + data.clientId).emit("typing", data);
-  });
-  socket.on("stopTyping", (data = {}) => {
-    if (data.clientId) io.to("client_" + data.clientId).emit("stopTyping", data);
-  });
-  socket.on("disconnect", () => logger.info("SOCKET_DISCONNECTED", { socketId: socket.id }));
-});
+require('./services/realtimeAccessService').installRealtimeAccess(io);
 
 app.use(cors(corsOptions));
 app.use(express.json({ limit: "50mb" }));
@@ -195,6 +173,7 @@ app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 app.use(auditMiddleware);
 
 app.use(express.static(frontendPath));
+app.use(`${getUploadsPublicBasePath()}/documents`, (req,res)=>res.status(404).json({ok:false,error:'Utilize o download autenticado do documento.'}));
 app.use(getUploadsPublicBasePath(), express.static(uploadsPath));
 
 const frontendPages = fs

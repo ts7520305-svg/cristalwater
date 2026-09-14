@@ -70,6 +70,14 @@ Pedido atual: concluir e testar os fluxos do técnico em campo, gestor, cliente 
 - Conteúdo/hash por visita e tipo evita fotografias duplicadas quando se repete um upload após perda de resposta.
 - Chromium real preservou uma fotografia durante recarga offline e sincronizou-a juntamente com a conclusão; API operacional e portal do cliente passaram.
 
+## TASK 9 — privacidade e comunicações
+
+- Notificações do cliente filtram destinatário exato, incluindo o portal. Técnicos recebem apenas notificações destinadas ao seu perfil/identidade.
+- Sockets exigem sessão válida, entram apenas nas salas autorizadas e revalidam sessões; mensagens em tempo real vêm de registos existentes, não de conteúdo forjado pelo emissor.
+- Broadcasts operacionais sem destinatário explícito passam para a gestão; token HTTP não acompanha pedidos para origens externas.
+- Documentos e conversas exigem autenticação; cliente não pode ler outra conversa nem apresentar-se como administrador. Download direto da pasta de documentos deixa de contornar autorização.
+- Sincronização exige técnico e verifica propriedade da visita. API: 13 verificações de acesso passaram; ecrãs online mantiveram funcionamento.
+
 ## Ensaios por concluir
 
 - Base isolada, arranque, dados de ensaio e testes de API.
