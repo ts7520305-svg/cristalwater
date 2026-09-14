@@ -15,6 +15,7 @@ function allowRoles(...roles) {
 }
 
 router.use(auth());
+router.use(require('../middlewares/fieldVehicleScope'));
 
 const guideUploadDir = resolveUploadSubdir("guides");
 

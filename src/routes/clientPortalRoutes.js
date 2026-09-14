@@ -50,7 +50,8 @@ function clientAuthClientId(req) {
 }
 
 function ensureClientOwnership(req, res, clientId) {
-  const authClientId = clientAuthClientId(req);
+  if (req.user?.role === "ADMIN" && req.method === "GET") return true;
+  const authClientId = ["CLIENT", "CUSTOMER"].includes(req.user?.role) ? clientAuthClientId(req) : 0;
   if (!authClientId || authClientId !== Number(clientId)) {
     res.status(403).json({ ok: false, error: "Acesso reservado ao cliente autenticado." });
     return false;
@@ -69,8 +70,12 @@ router.get("/latest/:clientId", auth("CLIENT"), async (req, res) => {
   if (!ensureClientOwnership(req, res, clientId)) return;
   return getLatestVisit(req, res);
 });
-router.get("/:clientId(\\d+)/history", getClientHistory);
-router.get("/:clientId(\\d+)/latest", getLatestVisit);
+router.get("/:clientId(\\d+)/history", auth("CLIENT"), (req, res) => {
+  if (ensureClientOwnership(req, res, req.params.clientId)) return getClientHistory(req, res);
+});
+router.get("/:clientId(\\d+)/latest", auth("CLIENT"), (req, res) => {
+  if (ensureClientOwnership(req, res, req.params.clientId)) return getLatestVisit(req, res);
+});
 
 router.get("/:clientId(\\d+)/permissions", auth("CLIENT"), async (req, res) => {
   const clientId = Number(req.params.clientId);

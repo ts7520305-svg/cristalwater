@@ -111,3 +111,9 @@ Verificação: npm audit completo — 0 vulnerabilidades conhecidas; Prisma vali
 Subscrições autenticadas, chave VAPID validada, destinos HTTPS de fornecedores autorizados e rejeição de troca de proprietário. Job de água entrega a técnicos específicos e administradores ativos; retira endpoints expirados; QA bloqueia envios externos. Migração aditiva WebPushSubscription.
 
 API testou subscrição, perfil forjado, tentativa de apropriação de endpoint e rejeição de destino de rede interna. Envio real não efetuado: depende de configuração do servidor e de autorização de notificações no dispositivo. Referência: https://github.com/web-push-libs/web-push .
+
+## TASK 15 — acesso ao cliente e viatura atribuída
+
+Administrador pode consultar o portal de qualquer cliente. Históricos numéricos exigem autenticação e propriedade. Escritas do cliente não aceitam administrador a apresentar-se como cliente. Técnico só consulta/movimenta guias da viatura atribuída, não escolhe identidade pelo formulário e não conclui visita utilizando stock de outra viatura.
+
+Verificação: casos negativos de API e percursos de campo/cliente/gestão da bateria integrada aprovados.

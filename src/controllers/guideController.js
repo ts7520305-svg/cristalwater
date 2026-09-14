@@ -68,9 +68,10 @@ async function attachTransportGuideDocuments(guides) {
 async function listVehicles(req, res) {
   try {
     const vehicles = await prisma.vehicle.findMany({
-      where: req.query.active === "all"
-        ? {}
-        : { active: true, archiveStatus: "ATIVO", deletedAt: null },
+      where: {
+        ...(req.query.active === "all" ? {} : { active: true, archiveStatus: "ATIVO", deletedAt: null }),
+        ...(req.fieldVehicleId ? {id:req.fieldVehicleId} : {}),
+      },
       orderBy: [{ active: "desc" }, { plate: "asc" }],
       include: {
         workGuides: {

@@ -36,7 +36,7 @@
     };
     const write = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {} };
     const user = () => { try { return window.CristalAuth?.parseUser?.() || {}; } catch (_) { return {}; } };
-    const techId = () => String(new URLSearchParams(location.search).get('technicianId') || localStorage.getItem('cwTechnicianId') || user().technicianId || user().id || 'sem-tecnico');
+    const techId = () => String(user().technicianId || user().id || new URLSearchParams(location.search).get('technicianId') || localStorage.getItem('cwTechnicianId') || 'sem-tecnico');
     const key = () => `cwWaterReminders:${techId()}`;
     const rows = () => { const value = read(key(), []); return Array.isArray(value) ? value : []; };
     const save = (value) => { write(key(), value || []); window.dispatchEvent(new Event('cw:water-state-updated')); };
