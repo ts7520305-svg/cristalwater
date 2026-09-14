@@ -27,7 +27,7 @@ const storage =
     destination:
       (req, file, cb) => {
 
-        cb(null, "uploads/");
+        cb(null, require('../config/uploadPath').ensureUploadBaseDirReady());
       },
 
     filename:
@@ -35,13 +35,13 @@ const storage =
 
         cb(
           null,
-          Date.now() + "-" + file.originalname
+          require('crypto').randomUUID() + '-' + String(file.originalname || 'photo').replace(/[^a-zA-Z0-9_.-]/g,'_')
         );
       }
   });
 
 const upload =
-  multer({ storage });
+  multer({ storage, limits:{fileSize:25*1024*1024} });
 
 function emitVisitRefresh(visitId, payload = {}) {
   if (!global.io) return;
@@ -90,6 +90,11 @@ async function loadScopedVisit(req, visitId) {
 
   return { ok: true, visit };
 }
+
+router.param('id', async (req,res,next,value)=>{
+  try {const scoped=await loadScopedVisit(req,value);if(!scoped.ok)return res.status(scoped.status).json({ok:false,error:scoped.error});next();}
+  catch(error){next(error)}
+});
 
 // ======================================================
 // TODAY VISITS

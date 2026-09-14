@@ -63,6 +63,13 @@ Pedido atual: concluir e testar os fluxos do técnico em campo, gestor, cliente 
 - Revalidação de perfil ativo/role; tokens de administradores eliminados e roles desconhecidas rejeitados. Fallback de administrador exige ativação explícita `ALLOW_ENV_ADMIN_FALLBACK=true` e não ignora conta existente inativa.
 - API: segurança 22/22, jornada 7/7 e aceitação de rotas passaram. Testes antigos passaram a autenticar e a reconhecer HTTP 201 na primeira abertura de jornada.
 
+## TASK 8 — fotografias de campo
+
+- Fotografias pendentes persistem como ficheiros em IndexedDB, por técnico e visita; voltam a abrir depois de recarregar sem rede.
+- Upload usa a pasta de QA configurada, nomes normalizados, limite de tamanho e autorização da visita antes do ficheiro.
+- Conteúdo/hash por visita e tipo evita fotografias duplicadas quando se repete um upload após perda de resposta.
+- Chromium real preservou uma fotografia durante recarga offline e sincronizou-a juntamente com a conclusão; API operacional e portal do cliente passaram.
+
 ## Ensaios por concluir
 
 - Base isolada, arranque, dados de ensaio e testes de API.
