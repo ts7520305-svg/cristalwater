@@ -272,3 +272,9 @@ Chromium/API aprovados: documentos indisponíveis com piscinas visíveis, recupe
 Restabelecida a folha base do layout que faltava ao portal cliente. Navegação móvel única, logótipo contido, controlos de toque, resumo compacto e idioma visível alinhado com os textos. Etiquetas curtas na barra inferior conservam nomes completos acessíveis. Na gestão, links laterais ganham contraste e o resumo deixa de mostrar texto sobre a implementação.
 
 O estado de atualização do centro de comando inclui agora a resposta dos técnicos. Uma falha nessa resposta produz Dados parciais, em vez de afirmar sincronização completa; atualização posterior recupera o estado. Chromium verifica falha/recuperação, idioma PT e ausência de overflow do cliente a 320/390/768 px. Revisão visual do portal realizada com dados de demonstração. Não constitui certificação da migração histórica de todas as páginas.
+
+## TASK 30 — respostas de IA completas e modo de demonstração explícito
+
+O adaptador Responses agrega blocos output_text dentro das mensagens, sem assumir que o primeiro elemento é texto nem depender da propriedade de conveniência do SDK. Rejeita resposta incompleta, vazia ou de recusa, com orientação para revisão humana. Pedido limitado a 20 segundos. O modo de demonstração afirma que não gerou análise técnica.
+
+Quatro testes unitários com respostas simuladas verificam texto em vários blocos, resposta incompleta, recusa/vazio e indisponibilidade/demonstração. Não foram feitas chamadas pagas nem configurados serviços externos. Referência: https://developers.openai.com/api/docs/guides/text (consultada em 14/09/2026).

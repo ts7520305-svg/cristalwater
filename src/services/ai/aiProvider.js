@@ -21,6 +21,7 @@ async function askOpenAI({ systemPrompt = "", userPrompt = "", temperature = 0.2
 
   const response = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
+    signal: AbortSignal.timeout(20000),
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
@@ -42,10 +43,16 @@ async function askOpenAI({ systemPrompt = "", userPrompt = "", temperature = 0.2
 
   const data = await response.json();
 
+  if(data.status && data.status !== 'completed')throw new Error('A resposta da IA não foi concluída. Tente novamente.');
+  const parts=Array.isArray(data.output)?data.output.flatMap(item=>item.type==='message'&&Array.isArray(item.content)?item.content:[]):[];
+  const refusal=parts.find(part=>part.type==='refusal');
+  const text=(typeof data.output_text==='string'?data.output_text:parts.filter(part=>part.type==='output_text'&&typeof part.text==='string').map(part=>part.text).join('\n')).trim();
+  if(refusal)throw new Error('A IA não pode responder a este pedido. Peça revisão humana.');
+  if(!text)throw new Error('A IA não devolveu uma resposta de texto. Peça revisão humana.');
   return {
     provider: "openai",
     model: getModel(),
-    text: data.output_text || "",
+    text,
     raw: data,
   };
 }
