@@ -44,6 +44,12 @@ Pedido atual: concluir e testar os fluxos do técnico em campo, gestor, cliente 
 - API real: 12 verificações novas passaram; ensaio existente do técnico também passou; 63 testes unitários e 4 do técnico passaram.
 - Limitação explícita: os DeviceTokens existentes não têm identidade de técnico. Push remoto de água destina-se ao administrador; o técnico tem estado/alarme dentro da aplicação. Entrega com telefone bloqueado ainda não validada.
 
+## TASK 5 — download do cliente
+
+- Download bloqueava uma ligação numa transação e tentava consultar por outra ligação; com pool de uma ligação expirava e terminava o processo Node (rejeição não tratada).
+- Consultas usam agora o cliente da transação; erros seguem para o middleware HTTP.
+- Teste utiliza o diretório de uploads isolado configurado. Jornada Customer OS passou integralmente: dashboard, notificações, documentos, download, permissões, mensagens, pedidos e histórico.
+
 ## Ensaios por concluir
 
 - Base isolada, arranque, dados de ensaio e testes de API.

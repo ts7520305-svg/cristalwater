@@ -4,7 +4,8 @@ const bcrypt = require("bcrypt");
 const { prisma } = require("../src/prismaClient");
 
 const BASE_URL = process.env.CUSTOMER_OS_BASE_URL || "http://127.0.0.1:3002/api";
-const DOCUMENT_BASE_DIR = path.join(__dirname, "../uploads/documents");
+const { resolveUploadSubdir, toPublicUploadUrl } = require("../src/config/uploadPath");
+const DOCUMENT_BASE_DIR = resolveUploadSubdir("documents");
 const DOCUMENT_MANIFEST_PATH = path.join(DOCUMENT_BASE_DIR, "manifest.json");
 const RUN_ID = `CUSTOMER-OS-${Date.now()}`;
 
@@ -127,7 +128,7 @@ async function main() {
       type: "text/plain",
       originalName: docFilename,
       filename: docFilename,
-      url: `/uploads/documents/${docFilename}`,
+      url: toPublicUploadUrl("documents", docFilename),
       notes: "Smoke document",
       createdAt: new Date().toISOString(),
     });

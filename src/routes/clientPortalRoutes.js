@@ -188,7 +188,8 @@ router.get("/:clientId(\\d+)/documents", auth("CLIENT"), async (req, res) => {
   return res.json({ ok: true, documents });
 });
 
-router.get("/:clientId(\\d+)/documents/:documentId/download", auth("CLIENT"), async (req, res) => {
+router.get("/:clientId(\\d+)/documents/:documentId/download", auth("CLIENT"), async (req, res, next) => {
+  try {
   const clientId = Number(req.params.clientId);
   if (!ensureClientOwnership(req, res, clientId)) return;
   const documentId = Number(req.params.documentId);
@@ -198,10 +199,10 @@ router.get("/:clientId(\\d+)/documents/:documentId/download", auth("CLIENT"), as
   const document = manifest.find((item) => Number(item.id) === documentId) || null;
   if (!document) return res.status(404).json({ ok: false, error: "Documento não encontrado" });
 
-  const scope = await prisma.$transaction(async () => {
+  const scope = await prisma.$transaction(async (tx) => {
     const [pools, visits] = await Promise.all([
-      prisma.pool.findMany({ where: { clientId }, select: { id: true } }),
-      prisma.serviceVisit.findMany({
+      tx.pool.findMany({ where: { clientId }, select: { id: true } }),
+      tx.serviceVisit.findMany({
         where: {
           OR: [
             { clientId },
@@ -220,6 +221,7 @@ router.get("/:clientId(\\d+)/documents/:documentId/download", auth("CLIENT"), as
 
   const filePath = require("path").join(documentsBaseDir, document.filename);
   return res.download(filePath, document.originalName || document.title || `document-${documentId}`);
+  } catch (error) { next(error); }
 });
 
 router.get("/:clientId(\\d+)/dashboard", auth("CLIENT"), async (req, res) => {
