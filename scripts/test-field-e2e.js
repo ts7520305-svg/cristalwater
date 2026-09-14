@@ -77,6 +77,18 @@ const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
           await page.evaluate(()=>{Storage.prototype.setItem=window.__storageSet;delete window.__storageSet});
           console.log('PASS one navigation, 320/390/768px layout, touch targets and explicit local storage failure');
 
+          await page.locator('#photoInput').dispatchEvent('cancel');
+          assert.match(await page.locator('#photoFeedback').textContent(),/Nenhuma fotografia/);
+          await page.locator('#photoInput').setInputFiles({name:'invalid.txt',mimeType:'text/plain',buffer:Buffer.from('not a photo')});
+          assert.match(await page.locator('#photoFeedback').textContent(),/imagem válida/);
+          assert.equal(await page.evaluate(async id=>(await CWFieldPhotos.list(id)).length,visit.id),0);
+          await page.evaluate(()=>{window.__photoSave=CWFieldPhotos.save;CWFieldPhotos.save=async()=>{throw new DOMException('Quota exceeded','QuotaExceededError')}});
+          await page.locator('#photoInput').setInputFiles({name:'quota.png',mimeType:'image/png',buffer:Buffer.from('photo')});
+          await page.waitForFunction(()=>document.querySelector('#photoFeedback').textContent.includes('Liberte espaço'));
+          await page.evaluate(()=>{CWFieldPhotos.save=window.__photoSave;delete window.__photoSave});
+          assert.equal(await page.evaluate(async id=>(await CWFieldPhotos.list(id)).length,visit.id),0);
+          console.log('PASS photo cancellation, invalid file and storage failure do not claim a saved photograph');
+
           const notes=page.locator('#notes');
           await notes.fill('Rascunho guardado no campo');
           await page.locator('#ph').fill('7.4');
@@ -90,7 +102,11 @@ const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
           await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
           await context.setOffline(true);
           const photoBytes = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6tAAAAABJRU5ErkJggg==','base64');
-          await page.locator('#photoInput').setInputFiles({name:'field.png',mimeType:'image/png',buffer:photoBytes});
+          await page.getByText('Câmara indisponível? Escolher do telemóvel',{exact:true}).click();
+          assert.equal(await page.locator('#galleryPhotoInput').getAttribute('capture'),null);
+          const chooserPromise=page.waitForEvent('filechooser');
+          await page.locator('#galleryPhotoBtn').click();
+          await (await chooserPromise).setFiles({name:'field.png',mimeType:'image/png',buffer:photoBytes});
           await page.waitForFunction(async id=>(await window.CWFieldPhotos.list(id)).length===1,visit.id);
           await page.locator('#finishBtn').click();
           await page.waitForFunction(id => Boolean(window.CWFieldOffline.pending(id)), visit.id);
@@ -161,6 +177,20 @@ const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
           await page.locator('#fieldReloadBtn').click();
           await page.waitForFunction(()=>document.querySelector('#fieldLoadError').hidden);
           console.log('PASS missing route cache shows a recoverable error and retry restores the route');
+          await prisma.pool.update({where:{id:pool.id},data:{latitude:null,longitude:null,address:null,location:null,zone:null}});
+          await context.clearPermissions();
+          await page.reload({waitUntil:'networkidle'});
+          await page.locator('[data-field-tab-button=hoje]').click();
+          assert.equal(await page.locator('#navLink').getAttribute('href'),null);
+          assert.equal(await page.locator('#navLink').getAttribute('aria-disabled'),'true');
+          assert.match(await page.locator('#mapBox').textContent(),/Peça a localização ao escritório/);
+          await prisma.pool.update({where:{id:pool.id},data:{address:'Rua de ensaio, Lagos'}});
+          await page.reload({waitUntil:'networkidle'});
+          await page.locator('[data-field-tab-button=hoje]').click();
+          const mapUrl=new URL(await page.locator('#mapsLink').getAttribute('href'));
+          assert.equal(mapUrl.searchParams.get('query'),'Rua de ensaio, Lagos');
+          assert.equal(await page.locator('#mapsLink').getAttribute('aria-disabled'),null);
+          console.log('PASS missing GPS and address prevents guessed navigation; address-only destination works without geolocation permission');
 
 
 

@@ -1463,6 +1463,12 @@
         <button class="photo-btn" type="button" data-photo-type="AFTER">Foto depois</button>
         <button class="photo-btn" type="button" data-photo-type="PROBLEM">Foto problema</button>
       </div>
+      <details><summary>Câmara indisponível? Escolher do telemóvel</summary>
+        <label>Tipo de fotografia <select id="galleryPhotoType"><option value="BEFORE">Antes</option><option value="AFTER" selected>Depois</option><option value="PROBLEM">Problema</option></select></label>
+        <button type="button" class="photo-btn" id="galleryPhotoBtn">Escolher fotografia guardada</button>
+        <input id="galleryPhotoInput" type="file" accept="image/*" hidden>
+      </details>
+      <p id="photoFeedback" role="status" hidden></p>
       <div class="photo-list" id="photoList"><div class="empty">Ainda sem fotografias nesta visita.</div></div>
       <div class="actions"><button class="big ghost" id="syncPhotosBtn" type="button">Sincronizar fotografias</button></div>
     </section>

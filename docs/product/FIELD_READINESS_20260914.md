@@ -232,3 +232,12 @@ Na visita em campo, uma resposta 401 apresenta um aviso persistente e entrada ex
 Fotografias e conclusões capturam a identidade e o token do envio. Se a conta mudar enquanto chega a resposta, os registos locais permanecem com o proprietário original; não se elimina a fotografia da nova conta nem se conclui a visita com a identidade nova. URLs temporárias das fotografias são libertadas também em falha.
 
 Três cenários Chromium reproduzíveis em `scripts/test-field-session-browser.js`: expiração com trabalho visível e conclusão pendente, 401 atrasado após renovação e troca de conta durante upload com IDs locais coincidentes. Os dois conjuntos de fotografias permanecem intactos e o envio retoma ao regressar à conta original. Integrados no comando `npm run test:field-browser` e no CI. Isto não comprova entrega de notificações num telefone bloqueado.
+
+
+## TASK 25 — alternativas em fotografia e destino incompleto
+
+A visita permite escolher uma fotografia existente sem forçar a câmara, indicando Antes/Depois/Problema. Cancelar, escolher um ficheiro vazio/não imagem/acima de 25 MB ou falhar a gravação local apresenta mensagem persistente sem afirmar que a fotografia foi guardada. A confirmação local é distinta da confirmação do servidor. A escolha de ficheiro existente usa a mesma fila offline e deduplicação.
+
+Os links do cartão de destino ficam indisponíveis quando não existem coordenadas nem morada. O cartão pede a localização ao escritório; havendo apenas morada, pesquisa essa morada, sem adivinhar pelo nome do cliente/piscina. O mapa geral da ronda continua disponível.
+
+Chromium cobre cancelamento, tipo inválido, falha de armazenamento, alternativa de ficheiro sem captura obrigatória, fotografia offline/reconexão, destino sem dados e recuperação com morada sem permissão de geolocalização. A abertura efetiva da câmara de Android/iOS continua a exigir ensaio físico; cancelamento do seletor não é apresentado como prova de permissão recusada.

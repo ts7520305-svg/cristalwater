@@ -713,7 +713,9 @@
     const client = visit?.client || pool.client || {};
     const lat = validCoordinate(pool.latitude ?? client.latitude, "lat");
     const lng = validCoordinate(pool.longitude ?? client.longitude, "lng");
-    const address = pool.address || pool.location || client.address || pool.zone || "";
+    const address = [pool.address, pool.location, client.address, pool.zone]
+      .map(value=>String(value ?? '').trim())
+      .find(value=>value && !['-','—','n/a','null','undefined'].includes(value.toLowerCase())) || '';
     const label = [pool.name, client.name, address].filter(Boolean).join(", ");
     return { lat, lng, address, label: label || "Cristal Water" };
   }
@@ -1564,7 +1566,7 @@
     if (location.lat && location.lng) {
       return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${location.lat},${location.lng}`)}`;
     }
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location.label)}`;
+    return location.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location.address)}` : null;
   }
 
   function navigationUrl(visit) {
@@ -1589,8 +1591,7 @@
       summary.textContent = "Não tens visitas atribuídas neste momento.";
       mapBox.innerHTML = '<div class="map-fallback">Atualiza a agenda ou comunica com o administrador.</div>';
       meta.innerHTML = `<span>Sem próxima piscina para navegar.</span>`;
-      navLink.href = "#";
-      mapsLink.href = "#";
+      [navLink,mapsLink].forEach(link=>{link.removeAttribute("href");link.setAttribute("aria-disabled","true");});
       return;
     }
 
@@ -1599,8 +1600,10 @@
     const clientName = visit.client?.name || "Cliente";
     title.textContent = poolName;
     summary.textContent = `${clientName} - ${visit.status || "Pendente"}`;
-    navLink.href = navigationUrl(visit);
-    mapsLink.href = mapsSearchUrl(visit);
+    for(const [link,url] of [[navLink,navigationUrl(visit)],[mapsLink,mapsSearchUrl(visit)]]){
+      if(url){link.href=url;link.removeAttribute('aria-disabled');}
+      else{link.removeAttribute('href');link.setAttribute('aria-disabled','true');}
+    }
 
     if (location.lat && location.lng) {
       const delta = 0.008;
@@ -1630,7 +1633,7 @@
       <div class="map-fallback">
         <div>
           <strong>Sem coordenadas GPS nesta piscina.</strong><br>
-          A navegacao abre pela morada/zona registada.
+          ${location.address ? "A navegação abre pela morada/zona registada." : "Sem morada confirmada. Peça a localização ao escritório antes de navegar."}
         </div>
       </div>
     `;
@@ -2206,6 +2209,7 @@
       await window.CWFieldPhotos.remove(visit.id,photo.localId);
       saveCurrentDraft();
       photo.serverId = data.photo?.id || null;
+      photoFeedback("Fotografia confirmada pelo servidor.");
       renderPhotoList();
       return true;
     } catch (error) {
@@ -2234,16 +2238,26 @@
     return !stillPending;
   }
 
-  function pickPhoto(type) {
-    const input = $("#photoInput");
+  function photoFeedback(message) {
+    const node = $('#photoFeedback');
+    if(node){node.textContent=message;node.hidden=!message;}
+  }
+
+  function pickPhoto(type, gallery = false) {
+    const input = $(gallery ? '#galleryPhotoInput' : '#photoInput');
     if (!input) return;
     selectedPhotoType = type || "AFTER";
     input.value = "";
-    input.click();
+    try { input.click(); }
+    catch(error){ photoFeedback('Não foi possível abrir a câmara. Use a opção de fotografia guardada no telemóvel.'); }
   }
 
   async function addSelectedPhoto(file) {
     if (!file) return;
+    if (!current()?.id) { photoFeedback('Escolha uma visita antes de adicionar fotografias.'); return; }
+    if (!file.type.startsWith('image/') || !file.size || file.size > 25*1024*1024) {
+      photoFeedback('Escolha uma imagem válida, até 25 MB. A fotografia não foi adicionada.'); return;
+    }
     const photo = {
       localId: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
       visitId: current()?.id,
@@ -2255,7 +2269,8 @@
       error: "",
     };
     try { await window.CWFieldPhotos.save(photo.visitId,photo); }
-    catch(error) { URL.revokeObjectURL(photo.previewUrl);toast('Não foi possível guardar a fotografia neste dispositivo. Liberte espaço e tente novamente.');return; }
+    catch(error) { URL.revokeObjectURL(photo.previewUrl);photoFeedback('Não foi possível guardar a fotografia neste dispositivo. Liberte espaço e tente novamente; a fotografia não foi adicionada.');return; }
+    photoFeedback("Fotografia guardada neste telemóvel. Aguarda confirmação do envio.");
     visitPhotos.unshift(photo);
     saveCurrentDraft();
     renderPhotoList();
@@ -3679,12 +3694,12 @@
     button.addEventListener("click", () => pickPhoto(button.dataset.photoType));
   });
 
-  const photoInput = $("#photoInput");
-  if (photoInput) {
-    photoInput.addEventListener("change", () => {
-      Array.from(photoInput.files || []).forEach(addSelectedPhoto);
-    });
+  for(const id of ['photoInput','galleryPhotoInput']){
+    const input = $(`#${id}`);
+    input?.addEventListener('change', () => Array.from(input.files || []).forEach(addSelectedPhoto));
+    input?.addEventListener('cancel', () => photoFeedback('Nenhuma fotografia adicionada. Pode tentar novamente ou escolher uma fotografia guardada.'));
   }
+  $('#galleryPhotoBtn')?.addEventListener('click', () => pickPhoto($('#galleryPhotoType').value, true));
 
   const syncPhotosBtn = $("#syncPhotosBtn");
   if (syncPhotosBtn) syncPhotosBtn.onclick = () => syncPendingPhotos(true);
