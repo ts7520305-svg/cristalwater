@@ -2,8 +2,21 @@
   'use strict';
   const principal = () => window.CristalAuth?.parseUser?.() || {};
   const key = () => `cwFieldOutbox:${principal().technicianId || principal().id || 'none'}`;
-  const read = () => { try { return JSON.parse(localStorage.getItem(key()) || '{}'); } catch (_) { return {}; } };
-  const write = value => { localStorage.setItem(key(), JSON.stringify(value)); render(); };
+  function read(strict=false) {
+    try {
+      const rows=JSON.parse(localStorage.getItem(key()) || '{}');
+      if(!rows || typeof rows!=='object' || Array.isArray(rows) || Object.entries(rows).some(([id,item])=>!item || String(item.visitId)!==id || !item.body || typeof item.body!=='object' || Array.isArray(item.body)))throw new Error('Invalid queue');
+      document.getElementById('cwFieldStorageError')?.remove();
+      return rows;
+    } catch(error) {
+      let banner=document.getElementById('cwFieldStorageError');
+      if(!banner){banner=document.createElement('aside');banner.id='cwFieldStorageError';banner.setAttribute('role','alert');banner.style.cssText='padding:16px;background:#ffe2cf;color:#562800;font-weight:700';document.body.prepend(banner);}
+      banner.textContent='Não foi possível ler os envios guardados neste telemóvel. Os dados existentes não serão substituídos. Não limpe os dados da aplicação; peça apoio ao escritório.';
+      if(strict)throw new Error(banner.textContent);
+      return {};
+    }
+  }
+  const write = value => { read(true);localStorage.setItem(key(), JSON.stringify(value)); render(); };
   let flushing = false;
   const isBlocked = status => status >= 400 && status < 500 && ![401,408,425,429].includes(status);
   function failureMessage(error) {

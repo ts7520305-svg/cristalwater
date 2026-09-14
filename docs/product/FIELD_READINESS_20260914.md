@@ -250,3 +250,10 @@ Uma rejeição definitiva mantém o registo na fila local, com nome da visita e 
 Respostas 408/425/429 são temporárias. O pedido de espera 429 respeita Retry-After, com intervalo de 30 segundos a uma hora, antes da repetição automática. Registos bloqueados não são repetidos pelo temporizador. Uma correção explicitamente submetida pelo técnico pode substituir o corpo rejeitado, conservando o rascunho no fluxo habitual.
 
 Dois cenários Chromium adicionais verificam preservação após 403/repetição explícita e 429/espera/repetição automática. A bateria de API continua a verificar rejeição real de visitas de outro técnico e stock insuficiente. Não foi simulada comunicação real com o escritório.
+
+
+## TASK 27 — proteger filas locais ilegíveis
+
+Uma fila local com JSON interrompido, estrutura inesperada ou identificação de visita incoerente apresenta aviso persistente e bloqueia substituição dos dados e novos envios nessa fila. Não é tratada como fila vazia para gravação. Os bytes originais ficam intactos para diagnóstico; não há limpeza ou recuperação automática inventada.
+
+Chromium verifica três formas de dano, tentativa de nova conclusão, ausência de pedidos ao servidor e preservação literal do conteúdo. A reposição de uma fila válida remove o aviso no ensaio; não foi realizada qualquer limpeza de dados de utilizadores.

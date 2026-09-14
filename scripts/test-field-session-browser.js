@@ -87,6 +87,20 @@ const deadline=setTimeout(()=>{console.error('Session regression deadline exceed
   await page.evaluate(()=>{const rows=JSON.parse(localStorage.getItem('cwFieldOutbox:41'));rows[7].retryAt=Date.now()-1;localStorage.setItem('cwFieldOutbox:41',JSON.stringify(rows));return CWFieldOffline.flush()});
   assert.equal(await page.evaluate(()=>CWFieldOffline.pending(7)),false);
   console.log('PASS rate limit honours Retry-After and resumes automatically without blocking the record');
+  for(const broken of ['{interrupted-write',JSON.stringify([{visitId:8,body:{notes:'Keep me'}}]),JSON.stringify({8:{visitId:9,body:{notes:'Mismatched identity'}}})]){
+    await page.evaluate(raw=>{localStorage.setItem('cwFieldOutbox:41',raw);CWFieldOffline.render()},broken);
+    assert.equal(await page.locator('#cwFieldStorageError').isVisible(),true);
+    const callsBefore=completions;
+    const result=await page.evaluate(()=>CWFieldOffline.submitCompletion(8,{notes:'New work'}).catch(e=>e.message));
+    assert.match(result,/não serão substituídos/);
+    await page.evaluate(()=>CWFieldOffline.flush());
+    assert.equal(completions,callsBefore);
+    assert.equal(await page.evaluate(()=>localStorage.getItem('cwFieldOutbox:41')),broken);
+  }
+  await page.evaluate(()=>{localStorage.setItem('cwFieldOutbox:41','{}');CWFieldOffline.render()});
+  assert.equal(await page.locator('#cwFieldStorageError').count(),0);
+  console.log('PASS malformed or mismatched local queues remain untouched and block new network writes');
+
 
  }finally{await browser.close()}
 })().then(()=>{clearTimeout(deadline);console.log('SESSION RESULT=PASS')}).catch(e=>{clearTimeout(deadline);console.error(e);process.exitCode=1});
