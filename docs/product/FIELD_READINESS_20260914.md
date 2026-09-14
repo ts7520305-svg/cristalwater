@@ -56,6 +56,13 @@ Pedido atual: concluir e testar os fluxos do técnico em campo, gestor, cliente 
 - Execução protegida contra os próprios eventos e inicialização repetida; regressão Chromium inclui agora o adaptador real e um elemento de carregamento.
 - Ecrãs reais de técnico móvel, cliente móvel e administração desktop abrem sem erros JavaScript ou respostas API falhadas no ensaio.
 
+## TASK 7 — identidade e jornada do técnico
+
+- Corrigida confusão entre IDs de User e Technician. Login por email identifica a origem e associa o técnico por email; a jornada usa o User correto.
+- Conta sem associação técnica mantém acesso à sua jornada, mas não herda acidentalmente as visitas de outro técnico com o mesmo ID numérico.
+- Revalidação de perfil ativo/role; tokens de administradores eliminados e roles desconhecidas rejeitados. Fallback de administrador exige ativação explícita `ALLOW_ENV_ADMIN_FALLBACK=true` e não ignora conta existente inativa.
+- API: segurança 22/22, jornada 7/7 e aceitação de rotas passaram. Testes antigos passaram a autenticar e a reconhecer HTTP 201 na primeira abertura de jornada.
+
 ## Ensaios por concluir
 
 - Base isolada, arranque, dados de ensaio e testes de API.

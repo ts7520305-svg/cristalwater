@@ -1,4 +1,6 @@
 const http = require("http");
+require("../src/loadEnv")();
+let authToken;
 const { prisma } = require("../src/prismaClient");
 
 const BASE = process.env.ROUTE_OS_BASE_URL || process.env.BASE_URL || "http://127.0.0.1:3002";
@@ -13,6 +15,7 @@ function request(method, path, body = null, { parseJson = true } = {}) {
         method,
         headers: {
           "Content-Type": "application/json",
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
           ...(data ? { "Content-Length": Buffer.byteLength(data) } : {}),
         },
       },
@@ -87,6 +90,7 @@ function requestMultipart(method, path, { fields = {}, fileField = "photo", file
         headers: {
           "Content-Type": `multipart/form-data; boundary=${boundary}`,
           "Content-Length": payload.length,
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
         },
       },
       (res) => {
@@ -162,6 +166,9 @@ function orderByOptimize(points, start) {
 }
 
 async function main() {
+  const adminLogin = await request("POST", "/api/auth/login", {email: process.env.ADMIN_EMAIL, password: process.env.ADMIN_PASSWORD});
+  if (adminLogin.status !== 200 || !adminLogin.body?.token) throw new Error(`Admin login failed: ${adminLogin.status}`);
+  authToken = adminLogin.body.token;
   const startedAt = Date.now();
   const suffix = uniqueSuffix();
   const pin = String(740000 + (Date.now() % 100000)).slice(-6);
@@ -202,7 +209,7 @@ async function main() {
   assertStep(login.body?.token, "Login do tecnico nao devolveu token.");
 
   const workdayStart = await request("POST", "/api/workday/start", { userId });
-  assertStep(workdayStart.status === 200 && workdayStart.body?.ok === true, "Falha ao iniciar o dia de trabalho.");
+  assertStep([200, 201].includes(workdayStart.status) && workdayStart.body?.ok === true, "Falha ao iniciar o dia de trabalho.");
 
   const workdayStatus = await request("GET", `/api/workday/status/${userId}`);
   assertStep(workdayStatus.status === 200 && workdayStatus.body?.ok === true, "Falha ao consultar estado do workday.");
@@ -393,7 +400,7 @@ async function main() {
     user.status === 200 &&
     technician.status === 201 &&
     login.status === 200 &&
-    workdayStart.status === 200 &&
+    [200, 201].includes(workdayStart.status) &&
     workdayStatus.status === 200 &&
     routePreview.status === 200 &&
     todayRound.status === 200 &&

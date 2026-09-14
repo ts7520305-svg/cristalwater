@@ -81,7 +81,7 @@ async function ensureServerForSecurity(baseUrl) {
   }
 
   console.log(`[SEC_AUTH] Starting temporary service on ${host}:${port}`);
-  const child = spawn("npm", ["start"], {
+  const child = spawn(process.execPath, [path.resolve(__dirname, "../src/server.js")], {
     cwd: process.cwd(),
     env: { ...process.env, PORT: String(port) },
     stdio: ["ignore", "pipe", "pipe"],

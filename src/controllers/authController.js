@@ -26,11 +26,18 @@ async function buildTokenUser(user) {
   const language = await getLanguageForIdentity({ id: user.id, email: user.email, role }, "pt");
   const safeUser = {
     id: user.id,
+    userId: user.id,
+    principalType: user.principalType || "USER",
     name: user.name || user.email || "Cristal Water Admin",
     email: user.email,
     role,
     language,
   };
+  if (["TECHNICIAN", "TEAM_LEADER"].includes(role)) {
+    const technician = await prisma.technician.findFirst({where:{email:user.email,active:true},select:{id:true}});
+    safeUser.technicianId = technician?.id || null;
+    if (technician) safeUser.id = technician.id;
+  }
   const token = jwt.sign(safeUser, JWT_SECRET, { expiresIn: "7d" });
   return { token, user: safeUser };
 }
@@ -39,6 +46,7 @@ function getFallbackAdmin(email, password) {
   const configuredEmail = canonicalAdminEmail();
   const configuredPassword = String(process.env.ADMIN_PASSWORD || "");
 
+  if (process.env.ALLOW_ENV_ADMIN_FALLBACK !== "true") return null;
   if (!configuredEmail || !configuredPassword) return null;
   if (!isConfiguredAdminEmail(email) || String(password) !== configuredPassword) return null;
 
@@ -46,6 +54,7 @@ function getFallbackAdmin(email, password) {
     id: 1,
     email: configuredEmail,
     name: "Cristal Water Admin",
+    principalType: "ENV_ADMIN",
     role: "ADMIN",
     active: true,
   };
@@ -73,7 +82,7 @@ async function login(req, res) {
     }
 
     const fallbackAdmin = getFallbackAdmin(email, password);
-    if (fallbackAdmin) {
+    if (fallbackAdmin && !user) {
       const session = await buildTokenUser(fallbackAdmin);
       return res.json({ ok: true, fallback: true, ...session });
     }

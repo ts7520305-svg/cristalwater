@@ -57,8 +57,10 @@ function auth(requiredRole = null) {
         });
       }
 
-      req.user =
-        decoded;
+      req.user = decoded;
+      if (decoded.principalType === 'USER' && ['TECHNICIAN','TEAM_LEADER'].includes(decoded.role) && !decoded.technicianId && !String(req.originalUrl || '').startsWith('/api/workday/')) {
+        return res.status(403).json({ok:false,message:'Perfil de campo por associar. A administração deve associar o mesmo email ao técnico.'});
+      }
 
       // ==================================================
       // ROLE CHECK
