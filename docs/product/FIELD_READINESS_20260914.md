@@ -286,3 +286,7 @@ Completado o percurso de registo da bomba em manual: prazo explícito de 1–144
 A fila local preserva criação e fecho sem rede, incluindo recarga. O servidor reutiliza OperationalReminder com origem pump, idempotência, autorização por responsável, histórico e alerta crítico. O temporizador e a entrega Web Push incluem os lembretes vencidos da bomba; o fecho resolve apenas os avisos correspondentes. Não foi criada migração nem instalado qualquer componente no VPS.
 
 API verifica responsável, repetição, escalada sem navegador, fecho e separação da lista de água. Chromium verifica registo offline, recarga, confirmação física simulada no diálogo e sincronização de criação/fecho. Entrega num telefone real permanece um ensaio externo.
+
+## TASK 33 — cor coerente do estado do cliente
+
+Na inspeção final, o estado atrasado herdava o verde genérico. O estado delayed passa a aviso âmbar; ausência de agenda/fora de horas fica neutra e intervenção em curso azul. Mantêm-se os textos explícitos, sem depender apenas da cor. Verificação visual e percurso Chromium do portal repetidos.
