@@ -187,3 +187,7 @@ CI PostgreSQL aprovado: https://github.com/ts7520305-svg/cristalwater/actions/ru
 CI passa a criar um dump PostgreSQL, restaurar numa segunda base descartável e comparar contagem e impressão digital de todas as tabelas. Verifica também sequências de IDs e recuperação dos ficheiros de uploads por SHA-256. Guarda apenas relatório; elimina dump e base auxiliar. O teste recusa ambientes fora do serviço QA definido no workflow.
 
 Este ensaio mede a recuperação da base de testes desta release; não substitui um backup nem um restauro do VPS real. Resultado remoto ainda por verificar.
+
+## TASK 22 — instruções de instalação coerentes
+
+README, preparação VPS e runbook passam a preservar o `.env` existente e logs. Retirada indicação de aplicar migrações cegamente: primeiro verificar histórico/schema e backup restaurável. O relatório de julho não comprova recuperação do VPS atual, e um export JSON de fallback não comprova um backup PostgreSQL restaurável. Scripts apenas preparados; nenhum comando executado no VPS.
