@@ -78,6 +78,12 @@ Pedido atual: concluir e testar os fluxos do técnico em campo, gestor, cliente 
 - Documentos e conversas exigem autenticação; cliente não pode ler outra conversa nem apresentar-se como administrador. Download direto da pasta de documentos deixa de contornar autorização.
 - Sincronização exige técnico e verifica propriedade da visita. API: 13 verificações de acesso passaram; ecrãs online mantiveram funcionamento.
 
+## TASK 10 — documentos da viatura e stock
+
+- O seguro aceita o tipo INSURANCE usado pela própria administração; a inspeção é obtida do registo de manutenção e enviada no contexto da viatura.
+- Atualização da guia calcula saldo com o consumo corrente na base, evitando restaurar stock a partir de uma leitura anterior durante um consumo concorrente.
+- Ensaio móvel com guia AT, guia de obra, seguro e inspeção válidos atravessou o bloqueio documental; simulação mensal passou.
+
 ## Ensaios por concluir
 
 - Base isolada, arranque, dados de ensaio e testes de API.

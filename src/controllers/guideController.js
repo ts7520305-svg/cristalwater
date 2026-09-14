@@ -247,7 +247,7 @@ function isChemicalItem(item) {
 }
 function isInsuranceRecord(record) {
   const raw = normalize(`${record?.type || ""} ${record?.title || ""} ${record?.notes || ""}`);
-  return /seguro|apolice|apol/.test(raw);
+  return /insurance|seguro|apolice|apol/.test(raw);
 }
 function totalByUnit(items, field = "quantity", filter = () => true) {
   const totals = new Map();
@@ -288,17 +288,10 @@ async function syncWorkGuideItemsWithTransportGuide(workGuideId, guideItems) {
     const target = existingByKey.get(key);
     const initialQty = n(source.quantity, 0) || 0;
     if (target) {
-      const usedQty = n(target.usedQty, 0) || 0;
-      await prisma.workGuideItem.update({
-        where: { id: target.id },
-        data: {
-          name: source.name,
-          type: source.type,
-          unit: source.unit || "UN",
-          initialQty,
-          quantity: Math.max(0, initialQty - usedQty)
-        }
-      }).catch(() => null);
+      await prisma.$executeRaw`UPDATE "WorkGuideItem"
+        SET "name" = ${source.name}, "type" = ${source.type}, "unit" = ${source.unit || 'UN'},
+            "initialQty" = ${initialQty}, "quantity" = GREATEST(0, ${initialQty} - "usedQty")
+        WHERE "id" = ${target.id}`;
     } else {
       await prisma.workGuideItem.create({
         data: {
@@ -724,8 +717,10 @@ async function findVehicleInsurance(vehicleId) {
 }
 async function vehicleInsurancePayload(vehicleId) {
   const vehicle = await prisma.vehicle.findUnique({ where: { id: n(vehicleId) } }).catch(() => null);
-  const insurance = vehicle ? await findVehicleInsurance(vehicle.id) : null;
-  return { vehicle, insurance };
+  const records = vehicle ? await prisma.vehicleMaintenanceRecord.findMany({where:{vehicleId:vehicle.id},orderBy:[{dueDate:'desc'},{createdAt:'desc'}]}) : [];
+  const insurance = records.find(isInsuranceRecord) || null;
+  const inspection = records.find(record => /INSPE|IPO/i.test(`${record.type} ${record.title}`)) || null;
+  return { vehicle: vehicle ? {...vehicle, inspection, inspectionDueDate:inspection?.dueDate || null, inspectionStatus:inspection?.status || null} : null, insurance };
 }
 
 // ==========================================================
