@@ -7,7 +7,7 @@
     "dev": "node src/server.js",
     "test": "vitest run",
     "test:field-suite": "node scripts/test-field-suite.js",
-    "test:field-browser": "node scripts/test-field-browser.js",
+    "test:field-browser": "node scripts/test-field-browser.js && node scripts/test-field-session-browser.js",
     "test:technician": "vitest run tests/technician-business.test.js",
     "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate",

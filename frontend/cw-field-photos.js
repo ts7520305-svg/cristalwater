@@ -7,15 +7,17 @@
   async function remove(visitId,localId){await change('delete',`${owner()}:${visitId}:${localId}`)}
   async function list(visitId){const db=await database();return new Promise((resolve,reject)=>{const request=db.transaction('photos').objectStore('photos').getAll();request.onsuccess=()=>{db.close();resolve(request.result.filter(row=>row.owner===owner()&&String(row.visitId)===String(visitId)).map(row=>({...row.photo,visitId:row.visitId,previewUrl:URL.createObjectURL(row.photo.file)})))};request.onerror=()=>{db.close();reject(request.error)}})}
   async function sync(visitId) {
-    for(const photo of await list(visitId)) {
-      try {
+    const submittingOwner=owner(), submittingToken=window.CristalAuth?.getToken?.();
+    const photos=await list(visitId);
+    try { for(const photo of photos) {
+      if(owner()!==submittingOwner || window.CristalAuth?.getToken?.()!==submittingToken) throw new Error('Sessão alterada durante o envio de fotografias');
         const body=new FormData();body.append('type',photo.type||'AFTER');body.append('photo',photo.file,photo.fileName||'photo.jpg');
-        const response=await fetch(`/api/visits/${encodeURIComponent(visitId)}/photo`,{method:'POST',body});
+        const response=await fetch(`/api/visits/${encodeURIComponent(visitId)}/photo`,{method:'POST',body,headers:{Authorization:`Bearer ${submittingToken}`}});
         const data=await response.json().catch(()=>({}));
         if(!response.ok||!data.photo?.id)throw Object.assign(new Error(data.error||'Fotografia por sincronizar'),{status:response.status});
-        await remove(visitId,photo.localId);
-      } finally {URL.revokeObjectURL(photo.previewUrl);}
-    }
+        if(owner()!==submittingOwner || window.CristalAuth?.getToken?.()!==submittingToken) throw new Error('Sessão alterada durante o envio de fotografias');
+        await change('delete',`${submittingOwner}:${visitId}:${photo.localId}`);
+    } } finally {photos.forEach(photo=>URL.revokeObjectURL(photo.previewUrl));}
   }
   window.CWFieldPhotos={save,remove,list,sync};
 })();

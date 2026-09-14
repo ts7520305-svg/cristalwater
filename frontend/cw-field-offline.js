@@ -14,8 +14,10 @@
   }
   async function send(item) {
     const submittingOwner = key();
+    const submittingToken = window.CristalAuth?.getToken?.();
     await window.CWFieldPhotos?.sync(item.visitId);
-    const response = await fetch(`/api/core/visits/${encodeURIComponent(item.visitId)}/complete`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(item.body) });
+    if(key() !== submittingOwner || window.CristalAuth?.getToken?.() !== submittingToken) throw new Error('Sessão alterada durante o envio');
+    const response = await fetch(`/api/core/visits/${encodeURIComponent(item.visitId)}/complete`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${submittingToken}` }, body: JSON.stringify(item.body) });
     const result = await response.json().catch(()=>({}));
     if (!response.ok || response.status === 202 || result.offline || !result.visit?.id) {
       const error = new Error(result.error || result.message || 'Sem confirmação do servidor');
@@ -28,12 +30,14 @@
     return result;
   }
   async function submitCompletion(visitId, body) {
+    const submittingOwner = key();
     const rows = read();
     const item = (rows[visitId] && !rows[visitId].blocked ? rows[visitId] : null) || { visitId, body: {...body, clientRequestId: crypto.randomUUID()}, createdAt:new Date().toISOString() };
     rows[visitId] = item;
     write(rows); // Persistence must succeed before a network write is attempted.
     try { const result = await send(item); return result; }
     catch (error) {
+      if(key() !== submittingOwner) throw error;
       const next = read();
       if (next[visitId]) {
         if (error.status >= 400 && error.status < 500 && error.status !== 401) {
@@ -47,13 +51,15 @@
     }
   }
   async function flush() {
-    if (flushing || !navigator.onLine || !window.CristalAuth?.getToken?.()) return;
+    if (flushing || !navigator.onLine || !window.CristalAuth?.getToken?.() || window.CristalAuth?.isSessionExpired?.()) return;
     flushing = true;
     try {
       for (const item of Object.values(read())) {
         if (item.blocked) continue;
+        const submittingOwner = key();
         try { await send(item); }
         catch (error) {
+          if(key() !== submittingOwner) break;
           const rows = read();
           if (rows[item.visitId]) { rows[item.visitId].error = error.message; rows[item.visitId].blocked = error.status >= 400 && error.status < 500 && error.status !== 401; write(rows); }
           if (!error.status || error.status === 401) break;

@@ -1,5 +1,5 @@
 /* Public application shell only. Operational writes are owned by the field outbox. */
-const CACHE = 'cristalwater-field-20260914-v4';
+const CACHE = 'cristalwater-field-20260914-v5';
 const APP_SHELL = ['/technician-field-mode','/technician-login','/cw-auth.js','/technician-auth-guard.js','/cw-field-offline.js','/cw-field-recovery.js','/cw-field-photos.js','/cw-browser-push.js','/technician-field-mode.js','/cw-ui-feedback.js','/cw-auth-download.js','/crystal-os-v2-shell.js','/crystal-os-v2-nav.js','/cw-ui-kit.css','/cw-field-professional.css','/ui/foundation.css','/ui/core/navigation-context.js','/ui/design-system.js','/ui/state-adapter-v2.js'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache=>Promise.all(APP_SHELL.map(url=>cache.add(url).catch(()=>null)))).then(()=>self.skipWaiting()));

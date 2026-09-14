@@ -223,3 +223,12 @@ Referências consultadas em 14/09/2026: [Skimmer](https://www.getskimmer.com/) p
 | Sol direto, luvas, utilização prolongada e redes móveis reais | Aceitação com técnicos em campo ainda necessária |
 
 Não é possível comprovar literalmente todas as combinações de equipamento, rede e operação. Esta matriz identifica classes críticas, testes reproduzíveis e limites explícitos. A release continua em proposta; não foi instalada no VPS.
+
+
+## TASK 24 — sessão expirada e mudança de conta durante envios
+
+Na visita em campo, uma resposta 401 apresenta um aviso persistente e entrada explícita, mantendo o ecrã e os dados locais. O servidor continua a recusar acesso; não há extensão de validade nem autorização offline. A fila deixa de repetir envios enquanto essa sessão está expirada. A renovação com a mesma conta permite retomar a sincronização. Respostas 401 antigas não invalidam uma sessão entretanto renovada, nem respostas de outras origens encerram a sessão local.
+
+Fotografias e conclusões capturam a identidade e o token do envio. Se a conta mudar enquanto chega a resposta, os registos locais permanecem com o proprietário original; não se elimina a fotografia da nova conta nem se conclui a visita com a identidade nova. URLs temporárias das fotografias são libertadas também em falha.
+
+Três cenários Chromium reproduzíveis em `scripts/test-field-session-browser.js`: expiração com trabalho visível e conclusão pendente, 401 atrasado após renovação e troca de conta durante upload com IDs locais coincidentes. Os dois conjuntos de fotografias permanecem intactos e o envio retoma ao regressar à conta original. Integrados no comando `npm run test:field-browser` e no CI. Isto não comprova entrega de notificações num telefone bloqueado.

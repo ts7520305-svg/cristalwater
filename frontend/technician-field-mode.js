@@ -2180,6 +2180,7 @@
   }
 
   async function uploadPhoto(photo) {
+    const uploadOwner = currentTechnicianId();
     const visit = visits.find(v => String(v.id) === String(photo?.visitId)) || current();
     if (photo?.status === 'uploading') return false;
     if (!visit?.id || !(photo?.file instanceof Blob)) {
@@ -2198,6 +2199,7 @@
       formData.append("photo", photo.file);
       formData.append("type", photo.type || "AFTER");
       const data = await apiForm(`/api/visits/${encodeURIComponent(visit.id)}/photo`, formData);
+      if (currentTechnicianId() !== uploadOwner) throw new Error('Sessão alterada durante o envio de fotografias');
       if (!data.photo?.id || !data.photo.url) throw new Error('Fotografia ainda não confirmada pelo servidor');
       photo.status = "uploaded";
       photo.url = data.photo.url;
