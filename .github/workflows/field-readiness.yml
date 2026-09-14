@@ -36,14 +36,16 @@ jobs:
       WEBHOOKS_ENABLED: 'false'
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
           cache: npm
       - run: npm ci
       - run: npx prisma validate && npx prisma generate
-      - name: Install schema in the ephemeral QA database
-        run: npx prisma db push --skip-generate
+      - name: Verify additive upgrade from the previous schema
+        run: node scripts/test-field-migrations.js
       - run: npx playwright install --with-deps chromium
       - run: npm run check:syntax
       - run: npm test && npm run test:technician && npm run test:field-browser

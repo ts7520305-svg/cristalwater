@@ -140,4 +140,44 @@ Fila antiga é preservada: aviso visível e cópia recuperável dos registos do 
 
 Runner sem mensagens externas, dados QA e logs por execução, com estado de saída do servidor. CI preparado para PostgreSQL 16 e Chromium. Teste mensal envia mensagens usando login real de cada cliente; estatísticas verificam IDs diferentes para User e Technician. Página de rotas carrega autenticação comum; padrões inválidos de ignore corrigidos.
 
-Execução local do runner: 15/15 grupos aprovados (reports/field-suite/1789398178600). 63/63 testes unitários, 4/4 do técnico, 3 cenários do componente móvel. Chromium adicional de recuperação passou em run-1789398265107. Execução GitHub Actions ainda por verificar; teste local usa PGlite/TCP e não certifica desempenho PostgreSQL de produção.
+Execução local do runner: 15/15 grupos aprovados (reports/field-suite/1789398178600). 63/63 testes unitários, 4/4 do técnico, 3 cenários do componente móvel. Chromium adicional de recuperação passou em run-1789398265107. GitHub Actions/PostgreSQL 16 aprovado no run 34860159081. Teste local usa PGlite/TCP; nenhum dos dois certifica desempenho do VPS real.
+
+## TASK 20 — atualização do esquema sem perda de dados
+
+- Teste recusa qualquer base que já contenha tabelas. Apenas QA isolado.
+- Reconstitui o schema real do commit anterior, insere visita/lembrete, aplica os três ficheiros SQL da release e confirma preservação dos registos e compatibilidade integral do schema.
+- PASS local com PGlite/TCP. CI executa o mesmo ensaio em PostgreSQL 16 antes da bateria operacional.
+- Isto não verifica o estado real de `_prisma_migrations` nem eventual desvio do VPS. A pasta histórica de migrações não contém uma baseline de criação; nunca executar `migrate deploy` numa base desconhecida sem diagnosticar o histórico.
+
+## Critérios finais e limites
+
+| Verificação | Resultado comprovado |
+|---|---|
+| Unitários | 63/63 |
+| Técnico específico | 4/4 |
+| Componente Chromium: check-in e água offline | 3 cenários aprovados |
+| Integração de 15 grupos no mesmo servidor | Aprovada; servidor termina por SIGTERM do runner |
+| Móvel: rede interrompida, recarga, foto, conclusão e repetição | Aprovado em Chromium |
+| Stock concorrente e correção de produtos | Aprovado; saldo e histórico preservados nas rejeições |
+| Registos antigos pendentes no dispositivo | Cópia preserva conteúdo e exclui token; reconciliação humana continua necessária se existirem |
+| Audit de dependências | 0 vulnerabilidades conhecidas no npm audit desta execução |
+| Upgrade do schema anterior | Três migrações aprovadas com dados existentes em QA |
+| GitHub Actions/PostgreSQL | 15 grupos, unitários, Chromium e sintaxe aprovados no run 34860159081; upgrade SQL acrescentado ao gate seguinte |
+| Telefone físico e notificações com aplicação fechada | Não executado; falta dispositivo inscrito/servidor configurado |
+| VPS real, backup/restauro e integrações externas | Não executado; não há acesso comprovado nesta sessão |
+
+Não foi executado indiscriminadamente todo o catálogo histórico: contém testes textuais obsoletos e scripts de limpeza. Testes antigos v21-freeze/v22.6.7 dependem de documentos ausentes ou de espaçamento literal; não são substitutos da bateria operacional. Não foram alterados para fabricar aprovação.
+
+### Passagem para campo
+
+1. Na cópia de validação do VPS: confirmar commit, Node, configuração, migrações já aplicadas e diferenças do schema. Fazer backup de base/uploads e provar o restauro numa base separada.
+2. Aplicar somente as três migrações aditivas desta release depois de verificar o histórico; não usar `db push --accept-data-loss` em produção. Arrancar o servidor novo apenas após o schema necessário existir.
+3. Configurar `WEB_PUSH_SUBJECT`, `WEB_PUSH_PUBLIC_KEY` e `WEB_PUSH_PRIVATE_KEY` no servidor. Gerar o par uma única vez através da biblioteca web-push; guardar a privada fora do Git. Validar HTTPS e flags de notificações externas. Não ativar integrações de faturação/WhatsApp apenas para ensaiar água.
+4. Técnico entra com a sua conta, confirma a viatura, abre a ronda com rede e ativa os avisos por ação explícita. Se houver registos antigos pendentes, a gestão reconcilia-os antes de limpar ou trocar o telemóvel.
+5. Ensaiar numa visita de teste identificada: sem rede → medir/fotografar/concluir → fechar/reabrir → ligar rede → verificar uma visita, uma foto e um débito. Cliente e administração devem ver o mesmo resultado autorizado.
+6. Com água **fisicamente fechada**, criar um lembrete de teste e comprovar a entrega no telefone bloqueado e com aplicação fechada; fechar o lembrete e confirmar resolução. Repetir com aplicação reiniciada, sessão expirada e reconexão. Não deixar água a correr para testar software.
+7. A gestão só liberta utilização geral depois destes resultados físicos registados. O retorno à versão anterior exige compatibilidade do schema e preservação das filas dos telemóveis; não apagar colunas nem restaurar uma base antiga por cima de trabalho novo.
+
+Proposta guardada: https://github.com/ts7520305-svg/cristalwater/pull/4 (dependente da PR #2). Nada foi fundido ou instalado no VPS.
+
+CI PostgreSQL aprovado: https://github.com/ts7520305-svg/cristalwater/actions/runs/34860159081 (commit remoto 8fe59871d39e44b041e229f7ca9ff54a7d251bac).
