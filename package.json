@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node src/server.js",
     "test": "vitest run",
+    "test:field-browser": "node scripts/test-field-browser.js",
     "test:technician": "vitest run tests/technician-business.test.js",
     "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate",

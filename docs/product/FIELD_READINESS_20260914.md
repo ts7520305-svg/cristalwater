@@ -19,14 +19,20 @@ Pedido atual: concluir e testar os fluxos do técnico em campo, gestor, cliente 
 - Testes comportamentais verificam autenticação, falhas HTTP e proteção do token.
 - Nenhuma alteração de schema.
 
-## Validação pendente
-
 ## TASK 2 — arranque a partir de clone limpo
 
 - A primeira execução real falhou antes de abrir a API: `CrystalBrain` importava `../logs/BrainLogger`, ausente no repositório.
 - Corrigido para reutilizar `services/loggerService`, já existente.
 - `check:syntax` passa também a resolver os imports locais, pois `node --check` não deteta esta falha.
 - TASK 1: 25 ficheiros / 63 testes passaram; testes específicos do técnico 4/4; sintaxe e resolução a revalidar após esta correção.
+
+## TASK 3 — interface móvel e sincronização de água
+
+- Chromium real reproduziu bloqueio da interface: o observador DOM reagia às suas próprias alterações sem parar. Observação suspensa durante a decoração.
+- Respostas offline HTTP 202 mantêm o lembrete pendente. Só uma confirmação com ID do servidor confirma sincronização.
+- Fecho antes da primeira sincronização reproduz criação seguida de fecho; exclusão de tentativas concorrentes no mesmo ecrã.
+- Teste comportamental `npm run test:field-browser`: interface responsiva, check-in explícito, resposta offline e criação/fecho após reconexão passaram. Usa API controlada; não substitui ensaio integral nem telemóvel físico.
+- API real: ensaio operacional do técnico e simulação mensal passaram numa base isolada PGlite/TCP, incluindo concorrência no fecho da visita. Não equivale a validar desempenho PostgreSQL de produção.
 
 ## Ensaios por concluir
 
