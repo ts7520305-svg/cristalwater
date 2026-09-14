@@ -1,27 +1,30 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
 const {
+  mockUserFindUnique,
   mockLocationLogCount,
   mockLocationLogAggregate,
   mockServiceVisitCount,
-  mockUserFindMany,
-  mockUserFindFirst,
+  mockTechnicianFindMany,
+  mockTechnicianFindUnique,
 } = vi.hoisted(() => ({
+  mockUserFindUnique: vi.fn(),
   mockLocationLogCount: vi.fn(),
   mockLocationLogAggregate: vi.fn(),
   mockServiceVisitCount: vi.fn(),
-  mockUserFindMany: vi.fn(),
-  mockUserFindFirst: vi.fn(),
+  mockTechnicianFindMany: vi.fn(),
+  mockTechnicianFindUnique: vi.fn(),
 }));
 
 describe("TechnicianStatsBusiness", () => {
   beforeEach(() => {
     vi.resetModules();
+    mockUserFindUnique.mockReset();
     mockLocationLogCount.mockReset();
     mockLocationLogAggregate.mockReset();
     mockServiceVisitCount.mockReset();
-    mockUserFindMany.mockReset();
-    mockUserFindFirst.mockReset();
+    mockTechnicianFindMany.mockReset();
+    mockTechnicianFindUnique.mockReset();
 
     global.__CRISTAL_WATER_PRISMA__ = {
       locationLog: {
@@ -31,9 +34,10 @@ describe("TechnicianStatsBusiness", () => {
       serviceVisit: {
         count: mockServiceVisitCount,
       },
-      user: {
-        findMany: mockUserFindMany,
-        findFirst: mockUserFindFirst,
+      user: { findUnique: mockUserFindUnique },
+      technician: {
+        findMany: mockTechnicianFindMany,
+        findUnique: mockTechnicianFindUnique,
       },
     };
   });
@@ -48,14 +52,15 @@ describe("TechnicianStatsBusiness", () => {
       _max: { timestamp: new Date("2026-07-05T08:00:00.000Z") },
     }));
     mockServiceVisitCount.mockImplementation(() => Promise.resolve(serviceCounts.shift()));
-    mockUserFindMany.mockResolvedValue([
+    mockTechnicianFindMany.mockResolvedValue([
       { id: 5, name: "Tiago", email: "tiago@cristalwater.pt", role: "TECHNICIAN", createdAt: new Date() },
     ]);
-    mockUserFindFirst.mockResolvedValue({ id: 5, name: "Tiago", email: "tiago@cristalwater.pt", role: "TECHNICIAN", createdAt: new Date() });
+    mockTechnicianFindUnique.mockResolvedValue({ id: 5, name: "Tiago", email: "tiago@cristalwater.pt", role: "TECHNICIAN", createdAt: new Date() });
 
+    mockUserFindUnique.mockResolvedValue({ id: 50 });
     const { computeStatsForTechnician, getTechnicianStats } = require("../src/business/technician/TechnicianStatsBusiness");
 
-    const stats = await computeStatsForTechnician(5);
+    const stats = await computeStatsForTechnician(5, 50);
     const response = await getTechnicianStats(5);
 
     expect(stats).toEqual(
@@ -70,6 +75,8 @@ describe("TechnicianStatsBusiness", () => {
         totalAlerts: 3,
       }),
     );
+    expect(mockLocationLogCount).toHaveBeenCalledWith({ where: { userId: 50 } });
+    expect(mockServiceVisitCount).toHaveBeenCalledWith({ where: { technicianId: 5 } });
     expect(response.ok).toBe(true);
     expect(response.payload.stats.completedServices).toBe(11);
   });

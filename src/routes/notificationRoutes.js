@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const { prisma } = require("../prismaClient");
+const { Prisma } = require('@prisma/client');
 const auth = require("../middlewares/authMiddleware");
-const { roleMatches } = require("../utils/roles");
+const { roleMatches, normalizeRole } = require("../utils/roles");
 
 router.use(auth());
 
@@ -28,12 +29,13 @@ function userCanSeeNotification(req, notification = {}) {
     const authClientId = Number(req.user?.clientId || req.user?.id || 0);
     if (!authClientId) return false;
     if (Number(notification.clientId || 0) !== authClientId) return false;
-    return roleMatches(notification.role, "CLIENT") || !notification.role;
+    return normalizeRole(notification.role) === "CLIENT";
   }
 
   if (roleMatches(role, "TECHNICIAN") || roleMatches(role, "TECH") || roleMatches(role, "TEAM_LEADER")) {
     if (!canSeeFinancialNotification(notification)) return false;
-    if (roleMatches(notification.role, "ADMIN") || roleMatches(notification.role, "CLIENT")) return false;
+    if (!['TECHNICIAN','TEAM_LEADER'].includes(normalizeRole(notification.role))) return false;
+    if (notification.metadata?.technicianId && Number(notification.metadata.technicianId) !== Number(req.user?.technicianId || req.user?.id)) return false;
     if (notification.userId && Number(notification.userId) !== Number(req.user?.id || 0)) return false;
     return true;
   }
@@ -63,6 +65,9 @@ router.get("/", async (req, res) => {
 
     const [data, unreadGroups, latestMessages] = await Promise.all([
       prisma.notification.findMany({
+        where: isAdmin ? {} : normalizeRole(role)==='CLIENT'
+          ? {clientId:Number(req.user.clientId || req.user.id),role:{in:['CLIENT','CUSTOMER']}}
+          : {role:{in:['TECHNICIAN','TECH','TEAM_LEADER']},OR:[{metadata:{path:['technicianId'],equals:Number(req.user.technicianId||req.user.id)}},{metadata:{path:['technicianId'],equals:Prisma.AnyNull}}]},
         include: {
           client: true,
           user: true

@@ -5,6 +5,16 @@ const { prisma } = require("../prismaClient");
 const { resolveUploadSubdir, toPublicUploadUrl } = require("../config/uploadPath");
 
 const router = express.Router();
+router.use(require('../middlewares/authMiddleware')());
+const {normalizeRole} = require('../utils/roles');
+function canMessage(req,res,clientId) {
+  const role=normalizeRole(req.user.role);
+  if (['ADMIN','TEAM_LEADER'].includes(role) || (role==='CLIENT' && Number(clientId)===Number(req.user.clientId||req.user.id))) return true;
+  if(req.file?.path) require('fs').unlinkSync(req.file.path);
+  res.status(403).json({ok:false,error:'Sem permissão para aceder a esta conversa.'});return false;
+}
+function senderFor(req) { return normalizeRole(req.user.role)==='CLIENT'?'Cliente':req.user.name||'Administração'; }
+
 
 const uploadDir = resolveUploadSubdir("");
 
@@ -63,6 +73,7 @@ function emitClientMessage(clientId, message) {
 router.get("/:clientId", async (req, res) => {
   try {
     const clientId = n(req.params.clientId);
+    if(!canMessage(req,res,clientId))return;
     if (!clientId) return res.status(400).json({ ok: false, error: "clientId invalido" });
     const messages = await prisma.clientMessage.findMany({
       where: { clientId },
@@ -77,9 +88,10 @@ router.get("/:clientId", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
+    if(!canMessage(req,res,req.body.clientId))return;
     const payload = messagePayload({
       clientId: req.body.clientId,
-      sender: req.body.sender,
+      sender: senderFor(req),
       message: req.body.message || req.body.text,
     });
 
@@ -110,9 +122,10 @@ router.post("/upload", upload.single("file"), async (req, res) => {
         ? "PDF"
         : "FILE";
 
+    if(!canMessage(req,res,req.body.clientId))return;
     const payload = messagePayload({
       clientId: req.body.clientId,
-      sender: req.body.sender,
+      sender: senderFor(req),
       message: fileUrl,
     });
     payload.messageType = type;
@@ -131,8 +144,9 @@ router.post("/upload", upload.single("file"), async (req, res) => {
 router.post("/seen/:clientId", async (req, res) => {
   try {
     const clientId = n(req.params.clientId);
+    if(!canMessage(req,res,clientId))return;
     if (!clientId) return res.status(400).json({ ok: false, error: "clientId invalido" });
-    const actor = String(req.query.actor || req.body?.actor || "admin").toLowerCase();
+    const actor = normalizeRole(req.user.role)==='CLIENT'?'client':'admin';
 
     if (actor === "client" || actor === "cliente") {
       await prisma.clientMessage.updateMany({
@@ -167,6 +181,7 @@ router.post("/seen/:clientId", async (req, res) => {
 router.get("/unread/:clientId", async (req, res) => {
   try {
     const clientId = n(req.params.clientId);
+    if(!canMessage(req,res,clientId))return;
     if (!clientId) return res.status(400).json({ ok: false, unread: 0, error: "clientId invalido" });
     const unread = await prisma.clientMessage.count({
       where: {

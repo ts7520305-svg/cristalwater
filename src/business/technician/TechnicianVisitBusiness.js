@@ -295,13 +295,7 @@ async function recordVisitPhoto(visitId, file, type = "AFTER") {
     return { ok: false, status: 400, error: "Sem ficheiro" };
   }
 
-  const photo = await prisma.visitPhoto.create({
-    data: {
-      visitId: loaded.visit.id,
-      url: toPublicUploadUrl(file.filename),
-      type: type || "AFTER",
-    },
-  });
+  const photo = await require('../../services/visitPhotoStorageService').storeVisitPhoto(loaded.visit.id, file, type);
 
   await prisma.auditTrail?.create?.({
     data: {

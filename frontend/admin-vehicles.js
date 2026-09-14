@@ -748,8 +748,8 @@ function renderWorkGuides() {
         </table>
 
         <div class="links">
-          <a class="btn primary" target="_blank" rel="noopener" href="/api/guides/work/${workGuide.id}/pdf">PDF guia obra</a>
-          ${workGuide.guide?.id ? `<a class="btn" target="_blank" rel="noopener" href="/api/guides/transport/${workGuide.guide.id}/pdf">PDF guia AT</a>` : `<span class="btn warn">AT em falta</span>`}
+          <a class="btn primary" data-auth-download target="_blank" rel="noopener" href="/api/guides/work/${workGuide.id}/pdf">PDF guia obra</a>
+          ${workGuide.guide?.id ? `<a class="btn" data-auth-download target="_blank" rel="noopener" href="/api/guides/transport/${workGuide.guide.id}/pdf">PDF guia AT</a>` : `<span class="btn warn">AT em falta</span>`}
           <button class="btn" onclick="closeWork(${workGuide.id})">Fechar</button>
         </div>
       </div>

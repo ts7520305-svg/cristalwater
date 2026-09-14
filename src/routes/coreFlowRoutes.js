@@ -23,7 +23,6 @@ const router = express.Router();
 
 const adminAuth = auth('ADMIN');
 const technicianAuth = auth('TECHNICIAN');
-const anyAuth = auth();
 router.use((req, res, next) => {
   // Keep only minimal metadata endpoints public by design.
   if (req.method === 'GET' && (req.path === '/health' || req.path === '/dashboard')) return next();
@@ -33,7 +32,7 @@ router.use((req, res, next) => {
   }
   // Sprint 4.1: technicians can submit/read technical sheet change proposals.
   if (/^\/pools\/\d+\/technical-change-proposals(?:\/.*)?$/.test(req.path)) {
-    return anyAuth(req, res, next);
+    return technicianAuth(req, res, next);
   }
   return adminAuth(req, res, next);
 });
@@ -2817,6 +2816,15 @@ router.post('/visits/:id/complete', async (req, res) => {
       if (!actorTechnicianId || toInt(visitScope.technicianId) !== actorTechnicianId) {
         return res.status(403).json({ ok: false, error: 'Sem permissao para alterar visita de outro tecnico' });
       }
+      const technician = await db('technician').findUnique({where:{id:actorTechnicianId},select:{vehicleId:true}});
+      const workGuideId = toInt(body.workGuideId || body.guideWorkId);
+      const workGuide = workGuideId ? await db('workGuide').findUnique({where:{id:workGuideId},select:{vehicleId:true,status:true}}) : null;
+      if ((body.vehicleId && toInt(body.vehicleId) !== technician?.vehicleId) || (workGuideId && (!workGuide || workGuide.vehicleId !== technician?.vehicleId || workGuide.status !== 'OPEN'))) {
+        return res.status(403).json({ok:false,error:'Guia ou viatura não pertence ao técnico autenticado.'});
+      }
+      body.performedByTechnicianId = actorTechnicianId;
+      body.performedByUserId = req.user?.userId || null;
+      delete body.userId;
     }
 
     const { visit, repair } = await completeServiceVisit(prisma, id, body);

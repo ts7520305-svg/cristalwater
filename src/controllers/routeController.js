@@ -20,20 +20,25 @@ function distance(lat1, lon1, lat2, lon2) {
 // OTIMIZAR ROTA
 // ==========================================================
 
-async function optimizeRoute(req,res){
+async function optimizeRoute(req,res,next){
+ try {
 
   const lat = Number(req.query.lat);
   const lng = Number(req.query.lng);
 
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat)>90 || Math.abs(lng)>180 || req.query.lat == null || req.query.lng == null) return res.status(400).json({ok:false,error:"Coordenadas de partida inválidas"});
+
   const visits = await prisma.serviceVisit.findMany({
-    where:{ status:"PLANNED" },
+    where:{ status:"PLANNED", ...(String(req.user?.role).toUpperCase() === "TECHNICIAN" ? {technicianId:Number(req.user.technicianId || req.user.id)} : {}) },
     include:{ pool:true, client:true }
   });
 
   let current = { lat, lng };
   const ordered = [];
 
-  let remaining = [...visits];
+  const hasCoordinates = visit => visit.pool?.latitude != null && visit.pool?.longitude != null && Number.isFinite(Number(visit.pool.latitude)) && Number.isFinite(Number(visit.pool.longitude));
+  let remaining = visits.filter(hasCoordinates);
+  const unresolved = visits.filter(visit => !hasCoordinates(visit));
 
   while(remaining.length > 0){
 
@@ -41,7 +46,7 @@ async function optimizeRoute(req,res){
     let bestDist = Infinity;
 
     remaining.forEach((v,i)=>{
-      if(!v.pool.latitude) return;
+      if(!hasCoordinates(v)) return;
 
       const d = distance(
         current.lat,
@@ -65,6 +70,7 @@ async function optimizeRoute(req,res){
     };
   }
 
+  ordered.push(...unresolved);
   res.json(ordered);
 
   emitRoutePlanned({
@@ -80,6 +86,7 @@ async function optimizeRoute(req,res){
     technicianId: ordered[0]?.technicianId || null,
     source: "route.optimize",
   }).catch((error) => console.warn("ROUTE_PLANNED emit failed:", error.message));
+ } catch (error) { next(error); }
 }
 
 module.exports = {

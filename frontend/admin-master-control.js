@@ -70,11 +70,11 @@ function refreshLoadStatus() {
   const coreState = state.loadState.core;
 
   if (syncState) {
-    if ([summaryState, coreState].includes('loading')) {
+    if ([summaryState, coreState, state.loadState.technicians].includes('loading')) {
       syncState.textContent = 'A carregar dados por secção';
-    } else if ([summaryState, coreState].includes('error')) {
+    } else if ([summaryState, coreState, state.loadState.technicians].includes('error')) {
       syncState.textContent = 'Dados parciais';
-    } else if (summaryState === 'ready' && coreState === 'ready') {
+    } else if (summaryState === 'ready' && coreState === 'ready' && state.loadState.technicians === 'ready') {
       syncState.textContent = 'Sincronizado';
     } else {
       syncState.textContent = 'A navegar';
@@ -82,14 +82,16 @@ function refreshLoadStatus() {
   }
 
   if (metricsHint) {
-    if ([summaryState, coreState].includes('loading')) {
-      metricsHint.textContent = 'A estrutura da página já está visível. Os blocos carregam e falham de forma independente.';
-    } else if ([summaryState, coreState].includes('error')) {
-      metricsHint.textContent = 'Parte dos dados não respondeu a tempo. A navegação continua ativa.';
+    if ([summaryState, coreState, state.loadState.technicians].includes('loading')) {
+      metricsHint.textContent = 'A atualizar visitas, alertas e equipa.';
+    } else if ([summaryState, coreState, state.loadState.technicians].includes('error')) {
+      metricsHint.textContent = 'Alguns dados estão indisponíveis. Atualize para confirmar a situação da equipa.';
+    } else {
+      metricsHint.textContent = 'Visitas, alertas e equipa — informação atualizada.';
     }
   }
 
-  if (lastUpdate && summaryState === 'ready' && coreState === 'ready') {
+  if (lastUpdate && summaryState === 'ready' && coreState === 'ready' && state.loadState.technicians === 'ready') {
     lastUpdate.textContent = 'Atualizado agora';
   }
 }

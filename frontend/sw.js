@@ -1,153 +1,40 @@
-/* Cristal Water Enterprise — V22 ORE Safe Service Worker
-   - Não faz cache destrutiva de navegações com redirect.
-   - Mantém fila offline para mutações quando não existe rede.
-   - Evita erros Chrome: redirected response with redirect mode not follow.
-*/
-const CACHE = 'cristalwater-v22-6-16-nav-consolidation';
-const DB_NAME = 'cristalwater-v22-offline';
-const DB_VERSION = 2;
-const PAYLOAD_STORE = 'PayloadQueue';
-const MEDIA_STORE = 'MediaQueue';
-
-const APP_SHELL = [
-  '/',
-  '/login',
-  '/admin-dashboard',
-  '/technician-login',
-  '/technician',
-  '/manifest.json',
-  '/cristal-assist.css',
-  '/cristal-assist.js',
-  '/cristal-help-data.js',
-  '/enterprise-ui.css'
-];
-
-function openDb() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = () => {
-      const db = req.result;
-      if (!db.objectStoreNames.contains(PAYLOAD_STORE)) db.createObjectStore(PAYLOAD_STORE, { keyPath: 'id', autoIncrement: true });
-      if (!db.objectStoreNames.contains(MEDIA_STORE)) db.createObjectStore(MEDIA_STORE, { keyPath: 'id', autoIncrement: true });
-    };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-async function put(storeName, value) {
-  const db = await openDb();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(storeName, 'readwrite');
-    tx.objectStore(storeName).add(value);
-    tx.oncomplete = resolve;
-    tx.onerror = () => reject(tx.error);
-  });
-}
-
-async function getAll(storeName) {
-  const db = await openDb();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(storeName, 'readonly');
-    const req = tx.objectStore(storeName).getAll();
-    req.onsuccess = () => resolve(req.result || []);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-async function remove(storeName, id) {
-  const db = await openDb();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(storeName, 'readwrite');
-    tx.objectStore(storeName).delete(id);
-    tx.oncomplete = resolve;
-    tx.onerror = () => reject(tx.error);
-  });
-}
-
-async function queueRequest(request) {
-  const clone = request.clone();
-  const headers = {};
-  clone.headers.forEach((value, key) => { headers[key] = value; });
-  const body = await clone.arrayBuffer();
-  const record = { url: clone.url, method: clone.method, headers, body, createdAt: Date.now(), status: 'PENDING_SYNC' };
-  const contentType = headers['content-type'] || '';
-  const isMedia = clone.url.includes('/photos') || clone.url.includes('/media') || contentType.includes('multipart/form-data');
-  await put(isMedia ? MEDIA_STORE : PAYLOAD_STORE, record);
-  if (self.registration.sync) {
-    try { await self.registration.sync.register('cristalwater-v22-sync'); } catch (_) {}
-  }
-  return new Response(JSON.stringify({ ok: true, offline: true, status: 'PENDING_SYNC' }), { status: 202, headers: { 'Content-Type': 'application/json' } });
-}
-
-async function replayStore(storeName) {
-  const items = await getAll(storeName);
-  for (const item of items) {
-    try {
-      const res = await fetch(item.url, { method: item.method, headers: item.headers, body: item.body, redirect: 'follow' });
-      if (!res.ok) break;
-      await remove(storeName, item.id);
-    } catch (_) { break; }
-  }
-}
-
-async function syncQueues() {
-  await replayStore(PAYLOAD_STORE);
-  await replayStore(MEDIA_STORE);
-}
-
+/* Public application shell only. Operational writes are owned by the field outbox. */
+const CACHE = 'cristalwater-field-20260914-v9';
+const APP_SHELL = ['/technician-field-mode','/technician-login','/cw-auth.js','/technician-auth-guard.js','/cw-field-offline.js','/cw-pump-reminders.js','/cw-field-recovery.js','/cw-field-photos.js','/cw-browser-push.js','/technician-field-mode.js','/cw-ui-feedback.js','/cw-auth-download.js','/crystal-os-v2-shell.js','/crystal-os-v2-nav.js','/cw-ui-kit.css','/cw-field-professional.css','/ui/foundation.css','/ui/core/navigation-context.js','/ui/design-system.js','/ui/state-adapter-v2.js'];
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(APP_SHELL).catch(() => null)));
-  self.skipWaiting();
+  event.waitUntil(caches.open(CACHE).then(cache=>Promise.all(APP_SHELL.map(url=>cache.add(url).catch(()=>null)))).then(()=>self.skipWaiting()));
 });
-
 self.addEventListener('activate', event => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))));
-  self.clients.claim();
+  event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('cristalwater-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
 });
-
 self.addEventListener('fetch', event => {
-  const req = event.request;
-  const url = new URL(req.url);
-
-  if (!url.href.startsWith(self.location.origin)) return;
-
-  const dynamicAdminAsset =
-    url.pathname.startsWith('/api/') ||
-    url.pathname.startsWith('/admin') ||
-    url.pathname.endsWith('.js') ||
-    url.pathname.endsWith('.css') ||
-    url.pathname.includes('cw-');
-
-  if (req.method === 'GET' && dynamicAdminAsset) {
-    event.respondWith(fetch(req, { redirect: 'follow', cache: 'no-store' }).catch(() => caches.match(req)));
-    return;
-  }
-
-  // Navegações HTML: nunca guardar redirects no cache. Isto elimina o erro redirect-mode no Chrome.
-  if (req.mode === 'navigate') {
-    event.respondWith(fetch(req, { redirect: 'follow' }).catch(() => caches.match('/admin-dashboard').then(cached => cached || caches.match('/'))));
-    return;
-  }
-
-  if (req.method === 'GET') {
-    event.respondWith(fetch(req, { redirect: 'follow' }).then(res => {
-      if (res && res.ok && res.type === 'basic' && !res.redirected) {
-        const copy = res.clone();
-        caches.open(CACHE).then(c => c.put(req, copy)).catch(() => null);
-      }
-      return res;
-    }).catch(() => caches.match(req)));
-    return;
-  }
-
-  event.respondWith(fetch(req.clone(), { redirect: 'follow' }).catch(() => queueRequest(req)));
+  const request = event.request, url = new URL(request.url);
+  if (url.origin !== self.location.origin || request.method !== 'GET' || url.pathname.startsWith('/api/') || url.pathname.startsWith('/uploads/')) return;
+  event.respondWith((async()=>{
+    const cache = await caches.open(CACHE);
+    try {
+      const response = await fetch(request);
+      if (response.ok && !response.redirected) await cache.put(request, response.clone());
+      return response;
+    } catch (_) {
+      const cached = await cache.match(request, {ignoreSearch:request.mode==='navigate'});
+      return cached || new Response('Página indisponível sem ligação. Abra previamente o modo de campo com rede.', {status:503,headers:{'Content-Type':'text/plain; charset=utf-8'}});
+    }
+  })());
 });
 
-self.addEventListener('sync', event => {
-  if (event.tag === 'cristalwater-v22-sync') event.waitUntil(syncQueues());
+self.addEventListener('push', event => {
+  let data={};try{data=event.data?.json()||{}}catch{}
+  const target=new URL(data.url||'/technician-field-mode',self.location.origin);
+  event.waitUntil(self.registration.showNotification(data.title||'Cristal Water',{body:data.body||'Tem um aviso operacional.',tag:data.tag||'cristalwater-alert',renotify:true,requireInteraction:true,data:{url:target.origin===self.location.origin?target.href:self.location.origin+'/technician-field-mode'}}));
 });
-
-self.addEventListener('message', event => {
-  if (event.data && event.data.type === 'FORCE_SYNC') event.waitUntil(syncQueues());
+self.addEventListener('notificationclick',event=>{
+  event.notification.close();
+  const target=new URL(event.notification.data?.url||'/technician-field-mode',self.location.origin);
+  if(target.origin!==self.location.origin)return;
+  event.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(async windows=>{
+    const existing=windows.find(client=>new URL(client.url).origin===target.origin);
+    if(existing){await existing.navigate(target.href);return existing.focus()}
+    return self.clients.openWindow(target.href);
+  }));
 });

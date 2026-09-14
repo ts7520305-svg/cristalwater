@@ -2,7 +2,7 @@ async function askMockAI({ systemPrompt = "", userPrompt = "" }) {
   return {
     provider: "mock",
     model: "cristalwater-mock-ai",
-    text: `IA Cristal Water operacional em modo gratuito/mock.
+    text: `Modo de demonstração — não foi gerada uma análise técnica por IA.
 
 Recebi a tua pergunta:
 ${userPrompt}

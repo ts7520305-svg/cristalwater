@@ -25,6 +25,7 @@
   }
 
   function makeBottomNav(profile) {
+    if (document.querySelector(".field-tabs, .cw-v2-mobile-nav")) return;
     var existing = document.querySelector(".ds-bottom-nav");
     if (existing) return;
     if (profile !== "TECHNICIAN" && profile !== "CLIENT") return;

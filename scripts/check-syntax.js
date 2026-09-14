@@ -22,6 +22,16 @@ for (const file of files) {
     console.error(`Syntax check failed: ${path.relative(path.join(__dirname, '..'), file)}`);
     console.error(r.stderr || r.stdout || r.error?.message || 'Unknown error');
   }
+  // Parsing alone does not detect missing modules in a clean Git checkout.
+  for (const match of fs.readFileSync(file, 'utf8').matchAll(/require\(['"](\.{1,2}\/[^'"]+)['"]\)/g)) {
+    try {
+      require.resolve(path.resolve(path.dirname(file), match[1]));
+    } catch (_) {
+      ok = false;
+      console.error(`Missing local module: ${path.relative(rootPath(), file)} -> ${match[1]}`);
+    }
+  }
 }
+function rootPath() { return path.join(__dirname, '..'); }
 if (ok) console.log(`✅ Syntax OK: ${files.length} backend JS files.`);
 process.exit(ok ? 0 : 1);

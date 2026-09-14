@@ -22,16 +22,18 @@ No VPS nao se abre o sistema por `localhost` no computador pessoal.
 
 ## Comandos no servidor
 
+Para esta release, seguir primeiro [a validação de campo](docs/product/FIELD_READINESS_20260914.md). O exemplo abaixo prepara e verifica o ambiente; não autoriza instalar uma release sem concluir os critérios físicos. Preservar o `.env` existente e os logs. A pasta histórica de migrações não contém uma baseline completa: numa base nova, `migrate deploy` isoladamente não cria o sistema. Numa base existente, comparar schema e histórico antes de aplicar SQL.
+
 ```bash
 cd /home/ubuntu/opt/cristalwater/backend
-cp .env.example .env
+test -f .env || cp .env.example .env
 nano .env
 npm ci
 npx prisma generate
-npm run clean:vps
 npm run check:syntax
 npm run prisma:validate
-npx prisma migrate deploy
+npx prisma migrate status
+# Aplicar migrações só depois de verificar histórico e backup restaurável.
 npm run preflight:vps
 pm2 start ecosystem.config.js --env production
 pm2 save
@@ -71,7 +73,7 @@ server {
 
 Nao execute `npm run seed` em producao sem confirmar. Esse comando pode criar dados de exemplo.
 
-Para atualizar sem perder dados, envie apenas codigo novo, execute migracoes com `npx prisma migrate deploy` e mantenha backups da base de dados antes de cada atualizacao.
+Para atualizar, preservar base, uploads, configuração e filas dos telemóveis. Validar o backup por restauro numa base separada. Só usar `npx prisma migrate deploy` depois de confirmar que o histórico corresponde ao schema existente; não resolver diferenças apagando dados.
 
 ## RC1 Backup/Restore Drill (Obrigatorio antes do GO)
 

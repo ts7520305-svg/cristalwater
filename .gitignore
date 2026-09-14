@@ -21,9 +21,9 @@ frontend-backup-*/
 # Obvious corrupted root-level fragment files (do not remove physical files)
 /,\ v.status,\ v.active,\ v.createdAt
 /,\ v.status,\ v.active,\ v.createdAt.save
-/:\ QA,\ mode:\ insensitive\ }\ },
+/:\ QA,\ mode:\ insensitive\ \}\ \},
 /AS\ (
-/c'\ },
+/c'\ \},
 /et
 /et="utf-8">
 /it"\ v\ WHERE\ v."clientId"\ IN\ \(SELECT\ id\ FROM\ test_clients\)

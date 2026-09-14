@@ -39,6 +39,21 @@
     return input;
   }
 
+  let expiredSessionToken = '';
+  function isSessionExpired(){ return Boolean(expiredSessionToken && expiredSessionToken === getToken()); }
+  function showSessionExpired(){
+    expiredSessionToken = getToken();
+    let banner = document.getElementById('cwSessionExpired');
+    if(!banner){
+      banner = document.createElement('div'); banner.id = 'cwSessionExpired'; banner.setAttribute('role', 'alert');
+      banner.style.cssText = 'position:sticky;top:0;z-index:100;padding:14px;background:#fff4ce;color:#624400;font:600 14px system-ui';
+      const message = document.createElement('p'); message.textContent = 'Sessão expirada. Os registos locais continuam neste telemóvel. Volte a entrar com a mesma conta para enviar os dados pendentes.';
+      const link = document.createElement('a'); link.href = '/technician-login'; link.textContent = 'Voltar a entrar';
+      link.style.cssText = 'display:inline-flex;align-items:center;min-height:44px;color:#075c4c;text-decoration:underline';
+      banner.append(message,link); document.body.prepend(banner);
+    }
+    banner.hidden = false;
+  }
   function persistSession(token, user){
     if(token){
       localStorage.setItem(TOKEN_KEY, token);
@@ -49,6 +64,9 @@
       const normalized = Object.assign({}, user, { role: String(user.role || '').toUpperCase().trim() });
       localStorage.setItem(USER_KEY, JSON.stringify(normalized));
       localStorage.setItem(LEGACY_USER_KEY, JSON.stringify(normalized)); // temporary compatibility
+    }
+    if(expiredSessionToken && token && token !== expiredSessionToken){
+      expiredSessionToken = ''; document.getElementById('cwSessionExpired')?.remove();
     }
     window.CristalAuthState = { token: getToken(), user: parseUser(), hydratedAt: Date.now() };
   }
@@ -104,11 +122,16 @@
       init = init || {};
       const headers = new Headers(init.headers || (input && input.headers) || {});
       const token = getToken();
-      if(token && !headers.has('Authorization')) headers.set('Authorization', 'Bearer ' + token);
+      const target = new URL(typeof input === 'string' ? apiUrl(input) : input.url, location.href);
+      const approvedOrigin = apiOrigin() ? new URL(apiOrigin(), location.href).origin : location.origin;
+      if(token && target.origin === approvedOrigin && !headers.has('Authorization')) headers.set('Authorization', 'Bearer ' + token);
       init.headers = headers;
       try{
         const res = await nativeFetch(apiUrl(input), init);
-        if(res && res.status === 401){ logout(); }
+        if(res && res.status === 401 && target.origin === approvedOrigin && target.pathname.startsWith('/api/') && token && token === getToken() && headers.get('Authorization') === 'Bearer ' + token){
+          if(location.pathname.replace(/\.html$/, '') === '/technician-field-mode') showSessionExpired();
+          else if(!isPublic()) logout();
+        }
         return res;
       }catch(err){
         toast('Ligação instável. A sessão foi mantida e os dados serão preservados.');
@@ -126,6 +149,19 @@
     hydrate();
   }, true);
 
-  window.CristalAuth = { TOKEN_KEY, USER_KEY, API_ORIGIN_KEY, getToken, parseUser, persistSession, clearSession, logout, hydrate, requireAuth, toast, apiOrigin, apiUrl };
+  window.CristalAuth = { TOKEN_KEY, USER_KEY, API_ORIGIN_KEY, getToken, parseUser, persistSession, clearSession, logout, hydrate, requireAuth, toast, apiOrigin, apiUrl, isSessionExpired };
+  function wrapSocketIO(factory) {
+    if (typeof factory !== 'function' || factory.__cwAuth) return factory;
+    const wrapped = function(uri, options) {
+      if (uri && typeof uri === 'object') { options=uri; uri=undefined; }
+      const opts={...(options||{}),auth:callback=>callback({token:getToken()})};
+      return uri === undefined ? factory(opts) : factory(uri,opts);
+    };
+    Object.assign(wrapped,factory); wrapped.__cwAuth=true;
+    return wrapped;
+  }
+  let socketFactory=wrapSocketIO(window.io);
+  const descriptor=Object.getOwnPropertyDescriptor(window,'io');
+  if (!descriptor || descriptor.configurable) Object.defineProperty(window,'io',{configurable:true,get:()=>socketFactory,set:value=>{socketFactory=wrapSocketIO(value)}});
   hydrate();
 })();

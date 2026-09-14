@@ -363,6 +363,7 @@ model User {
 }
 
 model ServiceVisit {
+  completionRequestId String? @unique
   id             Int             @id @default(autoincrement())
   clientId       Int?
   poolId         Int?
@@ -2089,6 +2090,8 @@ model Attachment {
 }
 
 model OperationalReminder {
+  sourceKey              String?     @unique
+  metadata               Json?
   id                     Int         @id @default(autoincrement())
   title                  String
   description            String?
@@ -2114,4 +2117,16 @@ enum ArchiveStatus {
   ATIVO
   PAUSA
   ARQUIVADO
+}
+
+model WebPushSubscription {
+  id Int @id @default(autoincrement())
+  endpoint String @unique
+  role String
+  principalId Int
+  subscription Json
+  active Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([role, principalId, active])
 }

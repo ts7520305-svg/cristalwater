@@ -125,20 +125,26 @@
     nodes.forEach(normalizeNode);
   }
 
+  let started = false;
   function start() {
+    if (started) return;
+    started = true;
     scan(document);
 
     const observer = new MutationObserver(() => {
-      scan(document);
+      observer.disconnect();
+      try { scan(document); }
+      finally { observer.observe(document.body, options); }
     });
 
-    observer.observe(document.body, {
+    const options = {
       childList: true,
       subtree: true,
       characterData: true,
       attributes: true,
       attributeFilter: ["class", "aria-busy", "data-cw-state", "data-tone", "role"],
-    });
+    };
+    observer.observe(document.body, options);
   }
 
   window.CWV2StateAdapter = {

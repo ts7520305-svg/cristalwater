@@ -10,8 +10,13 @@ function roleOf(req) {
   return String(req.user?.role || "").trim().toUpperCase();
 }
 
-function scopedUserId(req) {
-  return Number(req.user?.id || req.user?.technicianId || 0);
+async function scopedUserId(req) {
+  if (req.user?.principalType === 'USER') return Number(req.user.userId || 0);
+  const {prisma} = require('../prismaClient');
+  const tech = await prisma.technician.findUnique({where:{id:Number(req.user?.technicianId || req.user?.id || 0)},select:{email:true}});
+  if (!tech?.email) return 0;
+  const user = await prisma.user.findUnique({where:{email:tech.email},select:{id:true,active:true}});
+  return user?.active ? user.id : 0;
 }
 
 function ensureTechOrAdmin(req, res) {
@@ -21,7 +26,7 @@ function ensureTechOrAdmin(req, res) {
   return false;
 }
 
-function resolveWorkdayUserId(req, targetUserId) {
+async function resolveWorkdayUserId(req, targetUserId) {
   const role = roleOf(req);
   const requested = Number(targetUserId || 0);
 
@@ -30,7 +35,7 @@ function resolveWorkdayUserId(req, targetUserId) {
   }
 
   if (roleMatches(role, "TECHNICIAN")) {
-    const ownId = scopedUserId(req);
+    const ownId = await scopedUserId(req);
     if (!ownId) return { ok: false, status: 403, error: "Sessão técnica sem identificador" };
     if (requested > 0 && requested !== ownId) {
       return { ok: false, status: 403, error: "Acesso apenas à própria jornada" };
@@ -93,7 +98,7 @@ function toHttpError(err) {
 router.post("/start", async (req, res) => {
   try {
     if (!ensureTechOrAdmin(req, res)) return;
-    const resolved = resolveWorkdayUserId(req, req.body?.userId);
+    const resolved = await resolveWorkdayUserId(req, req.body?.userId);
     if (!resolved.ok) return res.status(resolved.status).json({ ok: false, error: resolved.error });
     const result = await TechnicianWorkdayBusiness.startWorkday({ userId: resolved.userId });
     return sendBusinessResult(res, result, 201);
@@ -107,7 +112,7 @@ router.post("/start", async (req, res) => {
 router.post("/end", async (req, res) => {
   try {
     if (!ensureTechOrAdmin(req, res)) return;
-    const resolved = resolveWorkdayUserId(req, req.body?.userId);
+    const resolved = await resolveWorkdayUserId(req, req.body?.userId);
     if (!resolved.ok) return res.status(resolved.status).json({ ok: false, error: resolved.error });
     const result = await TechnicianWorkdayBusiness.endWorkday({ userId: resolved.userId });
     return sendBusinessResult(res, result, 200);
@@ -121,7 +126,7 @@ router.post("/end", async (req, res) => {
 router.get("/status/:userId", async (req, res) => {
   try {
     if (!ensureTechOrAdmin(req, res)) return;
-    const resolved = resolveWorkdayUserId(req, req.params?.userId);
+    const resolved = await resolveWorkdayUserId(req, req.params?.userId);
     if (!resolved.ok) return res.status(resolved.status).json({ ok: false, error: resolved.error });
     const result = await TechnicianWorkdayBusiness.getWorkdayStatus({ userId: resolved.userId });
     return sendBusinessResult(res, result, 200);

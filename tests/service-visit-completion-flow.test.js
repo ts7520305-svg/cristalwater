@@ -29,7 +29,7 @@ function buildTx(overrides = {}) {
     },
     workGuideItem: {
       findMany: vi.fn(),
-      update: vi.fn(),
+      updateMany: vi.fn(),
       ...overrides.workGuideItem,
     },
     vehicleStockMovement: {
@@ -93,7 +93,7 @@ describe("Service visit completion real operation flow", () => {
       { id: 1, name: "Cloro", type: "CHEMICAL", unit: "KG", quantity: 10, usedQty: 0 },
       { id: 2, name: "pH-", type: "CHEMICAL", unit: "KG", quantity: 6, usedQty: 1 },
     ]);
-    tx.workGuideItem.update.mockResolvedValue({});
+    tx.workGuideItem.updateMany.mockResolvedValue({count:1});
     tx.vehicleStockMovement.create.mockResolvedValue({});
     tx.stockMovement.create.mockResolvedValue({});
     tx.technicalHistory.create.mockResolvedValue({ id: 7000 });
@@ -139,7 +139,7 @@ describe("Service visit completion real operation flow", () => {
       ],
     });
 
-    expect(tx.workGuideItem.update).toHaveBeenCalledTimes(2);
+    expect(tx.workGuideItem.updateMany).toHaveBeenCalledTimes(2);
     expect(tx.vehicleStockMovement.create).toHaveBeenCalledTimes(2);
     expect(tx.stockMovement.create).toHaveBeenCalledTimes(2);
     expect(tx.technicalHistory.create).toHaveBeenCalledWith({

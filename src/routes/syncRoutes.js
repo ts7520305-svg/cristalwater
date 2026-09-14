@@ -5,6 +5,8 @@ const { buildChemicalAdvice } = require('../services/chemicalAdviceService');
 const { invalidateDashboardCache } = require('../services/dashboardCacheService');
 
 const router = express.Router();
+router.use(require('../middlewares/authMiddleware')('TECHNICIAN'));
+const {roleMatches} = require('../utils/roles');
 
 const SYNC_TRANSACTION_OPTIONS = {
   isolationLevel: 'Serializable',
@@ -200,6 +202,9 @@ router.post('/text', async (req, res) => {
       }
 
       const dbVisit = found.record;
+      if (!roleMatches(req.user.role,'ADMIN') && Number(dbVisit.technicianId) !== Number(req.user.technicianId || req.user.id)) {
+        results.push({id,status:'FAILED',error:'Sem permissão para sincronizar visita de outro técnico.'});continue;
+      }
       const existingChecklist = dbVisit.chemicalsJson || {};
       const existingHash = existingChecklist.lastSyncHash || null;
 
