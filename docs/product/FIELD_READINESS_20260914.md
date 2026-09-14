@@ -123,3 +123,9 @@ Verificação: casos negativos de API e percursos de campo/cliente/gestão da ba
 Correção exige propriedade da visita, bloqueia a linha durante a transação e ajusta apenas a diferença entre produtos antigos e novos. Acréscimo de consumo ou devolução gera movimentos de auditoria. Repetição da mesma correção não altera stock. Guia encerrada, unidade incoerente ou consumo antigo sem origem identificável exigem reconciliação pela gestão, sem inventar saldos.
 
 Chromium/API: aumento, repetição, diminuição e falta de saldo passaram; rejeição reverte stock e histórico em conjunto. Fixture T1 passou a carregar produtos na guia de transporte que origina a guia de obra, em vez de manter duas guias contraditórias.
+
+## TASK 17 — rota incompleta sem derrubar o servidor
+
+Reproduzido crash Node numa visita PLANNED sem piscina. Otimização conserva os registos sem coordenadas no fim da lista, aceita coordenada zero e valida ponto de partida. Erros seguem para middleware HTTP. Consulta autenticada; técnico vê apenas a sua rota.
+
+Regressão: 15 grupos em sequência passaram, incluindo uma visita sem piscina e consultas sem autorização; servidor terminou apenas por SIGTERM controlado do ensaio.

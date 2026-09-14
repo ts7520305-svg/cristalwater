@@ -28,10 +28,33 @@ async function main(){
  await test('deleted administrator token rejected',async()=>assert.equal((await call('/api/notifications',sign({id:99999999,role:'ADMIN'}))).status,401));
  await test('unknown role token rejected',async()=>assert.equal((await call('/api/notifications',sign({id:1,role:'MAGIC'}))).status,401));
  await test('another client portal rejected',async()=>assert.equal((await call(`/api/client-portal/${other.id}/dashboard`,ct)).status,403));
+ for (const suffix of ['history','latest']) {
+  await test(`anonymous numeric portal ${suffix} rejected`,async()=>assert.equal((await call(`/api/client-portal/${other.id}/${suffix}`)).status,401));
+  await test(`other client numeric portal ${suffix} rejected`,async()=>assert.equal((await call(`/api/client-portal/${other.id}/${suffix}`,ct)).status,403));
+ }
+ await test('anonymous route optimization rejected',async()=>assert.equal((await call('/api/route/optimize?lat=38&lng=-9')).status,401));
  await test('anonymous chat rejected',async()=>assert.equal((await call(`/api/client-messages/${client.id}`)).status,401));
  await test('other client chat rejected',async()=>assert.equal((await call(`/api/client-messages/${other.id}`,ct)).status,403));
  await test('client cannot impersonate administrator',async()=>{const r=await call('/api/client-messages',ct,'POST',{clientId:client.id,sender:'Administrator',message:'QA identity test'});assert.equal(r.status,200);assert.equal(r.body.message.senderType,'CLIENT');});
- await test('anonymous realtime connection rejected' ,async()=>{
+ await test('technician cannot use another vehicle',async()=>{
+  const vehicle=await prisma.vehicle.create({data:{plate:`ACCESS-${suffix}`,active:true}});
+  assert.equal((await call(`/api/guides/stock/${vehicle.id}`,tt)).status,403);
+ });
+ const assigned=await prisma.serviceVisit.create({data:{technicianId:tech.id,date:new Date(),status:'PLANNED'}});
+ await test('technician route contains only own visits including missing pool',async()=>{const r=await call('/api/route/optimize?lat=38&lng=-9',tt);assert.equal(r.status,200);assert(r.body.some(v=>v.id===assigned.id));assert(r.body.every(v=>v.technicianId===tech.id));});
+ const foreignVisit=await prisma.serviceVisit.create({data:{technicianId:tech2.id,date:new Date(),status:'DONE',endAt:new Date()}});
+ await test('completion rejects stock from another vehicle',async()=>assert.equal((await call(`/api/core/visits/${assigned.id}/complete`,tt,'POST',{ph:7.4,chlorine:1.5,vehicleId:999999})).status,403));
+ await test('correction rejects another technician visit',async()=>assert.equal((await call(`/api/technician/visits/${foreignVisit.id}/correction`,tt,'PATCH',{ph:7.4,chlorine:1.5})).status,403));
+ await test('push subscription ignores forged role and binds to authenticated technician',async()=>{
+  const key=require('web-push').generateVAPIDKeys().publicKey;
+  const subscription={endpoint:`https://fcm.googleapis.com/fcm/send/qa-${suffix}`,keys:{p256dh:key,auth:require('crypto').randomBytes(16).toString('base64url')},role:'ADMIN',principalId:1};
+  const r=await call('/api/push/subscriptions',tt,'POST',subscription);assert.equal(r.status,200,JSON.stringify(r.body));
+  const row=await prisma.webPushSubscription.findUnique({where:{id:r.body.id}});assert.equal(row.role,'TECHNICIAN');assert.equal(row.principalId,tech.id);
+  const hijack=await call('/api/push/subscriptions',ct,'POST',subscription);assert.equal(hijack.status,409);
+  const result=await require('../src/services/browserPushService').deliverWaterNotifications();assert.equal(result.reason,'EXTERNAL_NOTIFICATIONS_DISABLED');
+ });
+ await test('push subscription rejects internal network destinations',async()=>assert.equal((await call('/api/push/subscriptions',tt,'POST',{endpoint:'http://127.0.0.1:4000/private',keys:{}})).status,400));
+ await test('anonymous realtime connection rejected'  ,async()=>{
   const start=await fetch(`${BASE}/socket.io/?EIO=4&transport=polling`).then(r=>r.text());const sid=JSON.parse(start.slice(1)).sid;
   const url=`${BASE}/socket.io/?EIO=4&transport=polling&sid=${encodeURIComponent(sid)}`;
   await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain'},body:'40'});
