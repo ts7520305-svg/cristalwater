@@ -241,3 +241,12 @@ A visita permite escolher uma fotografia existente sem forçar a câmara, indica
 Os links do cartão de destino ficam indisponíveis quando não existem coordenadas nem morada. O cartão pede a localização ao escritório; havendo apenas morada, pesquisa essa morada, sem adivinhar pelo nome do cliente/piscina. O mapa geral da ronda continua disponível.
 
 Chromium cobre cancelamento, tipo inválido, falha de armazenamento, alternativa de ficheiro sem captura obrigatória, fotografia offline/reconexão, destino sem dados e recuperação com morada sem permissão de geolocalização. A abertura efetiva da câmara de Android/iOS continua a exigir ensaio físico; cancelamento do seletor não é apresentado como prova de permissão recusada.
+
+
+## TASK 26 — envios rejeitados e espera temporária
+
+Uma rejeição definitiva mantém o registo na fila local, com nome da visita e orientação para confirmar com o escritório. Os detalhes dos pendentes oferecem repetição explícita após confirmação, usando a mesma identificação do envio. O servidor volta sempre a validar permissões e stock; o botão não altera a atribuição nem ignora a rejeição.
+
+Respostas 408/425/429 são temporárias. O pedido de espera 429 respeita Retry-After, com intervalo de 30 segundos a uma hora, antes da repetição automática. Registos bloqueados não são repetidos pelo temporizador. Uma correção explicitamente submetida pelo técnico pode substituir o corpo rejeitado, conservando o rascunho no fluxo habitual.
+
+Dois cenários Chromium adicionais verificam preservação após 403/repetição explícita e 429/espera/repetição automática. A bateria de API continua a verificar rejeição real de visitas de outro técnico e stock insuficiente. Não foi simulada comunicação real com o escritório.

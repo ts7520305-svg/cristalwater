@@ -8,13 +8,13 @@ const deadline=setTimeout(()=>{console.error('Session regression deadline exceed
  const browser=await chromium.launch({headless:true,...(process.env.CW_CHROMIUM_PATH?{executablePath:process.env.CW_CHROMIUM_PATH}:{}),args:['--no-sandbox','--disable-dev-shm-usage']});
  try{
   const page=await browser.newPage();page.setDefaultTimeout(5000);
-  let status=401,held=null,hold=false,completions=0;
+  let status=401,held=null,hold=false,completions=0;const sentBodies=[];
   await page.route('http://localhost/**',async route=>{
    const pathname=new URL(route.request().url()).pathname;
    if(pathname.startsWith('/api/')){
     if(hold){held=route;return;}
-    if(pathname.endsWith('/complete'))completions++;
-    return route.fulfill({status,contentType:'application/json',body:JSON.stringify(status===401?{error:'Expired'}:{visit:{id:5},photo:{id:7,url:'/photo.jpg'}})});
+    if(pathname.endsWith('/complete')){completions++;sentBodies.push(route.request().postDataJSON());}
+    return route.fulfill({status,headers:status===429?{'Retry-After':'60'}:{},contentType:'application/json',body:JSON.stringify(status===401?{error:'Expired'}:{visit:{id:5},photo:{id:7,url:'/photo.jpg'}})});
    }
    return route.fulfill({contentType:'text/html',body:'<body><textarea id="notes">Trabalho em curso</textarea></body>'});
   });
@@ -65,5 +65,28 @@ const deadline=setTimeout(()=>{console.error('Session regression deadline exceed
   await page.evaluate(()=>CWFieldOffline.flush());
   assert.equal(await page.evaluate(()=>CWFieldOffline.pending(5)),false);
   console.log('PASS account switch preserves both photo queues and prevents cross-account completion');
+  status=403;
+  await page.evaluate(()=>CWFieldOffline.submitCompletion(6,{notes:'Registo antes de mudar a ronda'}).catch(()=>{}));
+  const original=await page.evaluate(()=>JSON.parse(localStorage.getItem('cwFieldOutbox:41'))[6]);
+  assert.equal(original.blocked,true);
+  assert.equal(original.body.notes,'Registo antes de mudar a ronda');
+  const beforeBlocked=completions;await page.evaluate(()=>CWFieldOffline.flush());assert.equal(completions,beforeBlocked);
+  assert.equal(await page.locator('#cwFieldSyncStatus details').getAttribute('open'),'');
+  assert.match(await page.locator('[data-pending-visit="6"]').textContent(),/atribuída a outro técnico/);
+  status=200;
+  await page.getByRole('button',{name:'Confirmado pelo escritório — tentar novamente'}).click();
+  await page.waitForFunction(()=>!CWFieldOffline.pending(6));
+  assert.equal(sentBodies.at(-1).clientRequestId,original.body.clientRequestId);
+  console.log('PASS reassignment rejection preserves the visit and manual confirmation can resume sending');
+  status=429;
+  await page.evaluate(()=>CWFieldOffline.submitCompletion(7,{notes:'Pausa temporária'}).catch(()=>{}));
+  const rateLimited=await page.evaluate(()=>JSON.parse(localStorage.getItem('cwFieldOutbox:41'))[7]);
+  assert.equal(rateLimited.blocked,false);assert(rateLimited.retryAt>Date.now()+45000);
+  const beforeWait=completions;await page.evaluate(()=>CWFieldOffline.flush());await page.evaluate(()=>CWFieldOffline.submitCompletion(7,{notes:'Pausa temporária'}).catch(()=>{}));assert.equal(completions,beforeWait);
+  status=200;
+  await page.evaluate(()=>{const rows=JSON.parse(localStorage.getItem('cwFieldOutbox:41'));rows[7].retryAt=Date.now()-1;localStorage.setItem('cwFieldOutbox:41',JSON.stringify(rows));return CWFieldOffline.flush()});
+  assert.equal(await page.evaluate(()=>CWFieldOffline.pending(7)),false);
+  console.log('PASS rate limit honours Retry-After and resumes automatically without blocking the record');
+
  }finally{await browser.close()}
 })().then(()=>{clearTimeout(deadline);console.log('SESSION RESULT=PASS')}).catch(e=>{clearTimeout(deadline);console.error(e);process.exitCode=1});
