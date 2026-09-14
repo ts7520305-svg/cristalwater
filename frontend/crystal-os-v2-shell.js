@@ -19,9 +19,13 @@
     document.body.appendChild(script);
   }
 
-  function installTechnicianWaterUx() {
+  function isTechnicianFieldPage() {
     const path = String(location.pathname || '').replace(/\/+$/, '');
-    if (path !== '/technician-field-mode' && path !== '/technician-field-mode.html') return;
+    return path === '/technician-field-mode' || path === '/technician-field-mode.html';
+  }
+
+  function installTechnicianWaterUx() {
+    if (!isTechnicianFieldPage()) return;
     if (window.__CW_FIELD_WATER_UX__) return;
     window.__CW_FIELD_WATER_UX__ = true;
 
@@ -197,6 +201,103 @@
     syncPendingWaterState().catch(() => {});
   }
 
+  function installTechnicianCheckinUx() {
+    if (!isTechnicianFieldPage()) return;
+    if (window.__CW_FIELD_CHECKIN_UX__) return;
+    window.__CW_FIELD_CHECKIN_UX__ = true;
+
+    const $ = (selector, root = document) => root.querySelector(selector);
+    let bypassNextStart = false;
+
+    function esc(value) {
+      return String(value || '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+    }
+
+    function selectedVisitId() {
+      try {
+        const raw = localStorage.getItem('cw:tech-field:ui-state:v1');
+        const state = raw ? JSON.parse(raw) : {};
+        return String(state?.selectedVisitId || '');
+      } catch (_) {
+        return '';
+      }
+    }
+
+    function buildNoticeSummary() {
+      const access = String($('#accessList')?.innerText || '').replace(/\s+/g, ' ').trim();
+      if (!access || access.includes('A carregar')) return 'Sem avisos adicionais registados para esta piscina.';
+      return access.slice(0, 700);
+    }
+
+    function ensureDialog() {
+      let overlay = $('#cwFieldCheckinOverlay');
+      if (overlay) return overlay;
+      overlay = document.createElement('div');
+      overlay.id = 'cwFieldCheckinOverlay';
+      overlay.hidden = true;
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      overlay.setAttribute('aria-label', 'Check-in da visita');
+      overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(6,20,16,.72);padding:16px;display:none;align-items:center;justify-content:center;';
+      overlay.innerHTML = `
+        <div style="width:min(620px,100%);max-height:90vh;overflow:auto;background:var(--cw-surface,#fff);color:var(--cw-text,#102620);border-radius:18px;border:1px solid var(--cw-border,#cbd8d2);padding:18px;box-shadow:0 22px 60px rgba(0,0,0,.28)">
+          <span class="chip">Check-in obrigatório</span>
+          <h2 id="cwFieldCheckinPool" style="font-size:28px;line-height:1.1;margin:12px 0 6px">Piscina</h2>
+          <div id="cwFieldCheckinClient" class="muted"></div>
+          <div style="margin-top:16px;padding:14px;border-radius:14px;border:1px solid var(--cw-border,#cbd8d2);background:var(--cw-surface-2,#f5f9f7)">
+            <strong>Antes de começar</strong>
+            <div id="cwFieldCheckinNotices" class="muted" style="margin-top:8px;white-space:normal;line-height:1.45"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr;gap:10px;margin-top:16px">
+            <button id="cwFieldCheckinConfirm" type="button" class="big ok" style="min-height:72px">Li e vou iniciar a visita</button>
+            <button id="cwFieldCheckinCancel" type="button" class="big ghost" style="min-height:58px">Voltar</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+      $('#cwFieldCheckinCancel', overlay).addEventListener('click', () => {
+        overlay.hidden = true;
+        overlay.style.display = 'none';
+      });
+      $('#cwFieldCheckinConfirm', overlay).addEventListener('click', () => {
+        const visitId = selectedVisitId();
+        if (visitId) {
+          try { sessionStorage.setItem(`cw:field:checkin:${visitId}`, new Date().toISOString()); } catch (_) {}
+        }
+        overlay.hidden = true;
+        overlay.style.display = 'none';
+        bypassNextStart = true;
+        $('#startBtn')?.click();
+      });
+      return overlay;
+    }
+
+    function showCheckin() {
+      const overlay = ensureDialog();
+      const pool = String($('#nextTitle')?.textContent || 'Piscina').trim();
+      const client = String($('#nextMeta')?.textContent || '').split(' - ')[0].trim();
+      $('#cwFieldCheckinPool', overlay).textContent = pool || 'Piscina';
+      $('#cwFieldCheckinClient', overlay).textContent = client || 'Cliente';
+      $('#cwFieldCheckinNotices', overlay).innerHTML = esc(buildNoticeSummary());
+      overlay.hidden = false;
+      overlay.style.display = 'flex';
+      $('#cwFieldCheckinConfirm', overlay)?.focus();
+    }
+
+    document.addEventListener('click', (event) => {
+      const start = event.target.closest('#startBtn');
+      if (!start) return;
+      if (bypassNextStart) {
+        bypassNextStart = false;
+        return;
+      }
+      const label = String(start.textContent || '').toLowerCase();
+      if (!label.includes('iniciar visita')) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      showCheckin();
+    }, true);
+  }
+
   function getDrawer() {
     return document.querySelector('[data-cw-drawer], .cw-v2-drawer');
   }
@@ -267,4 +368,5 @@
   updateConnectionState();
   loadStateAdapter();
   installTechnicianWaterUx();
+  installTechnicianCheckinUx();
 })();
