@@ -3,7 +3,9 @@ const path = require("path");
 const assert = require("assert");
 
 const shellPath = path.join(__dirname, "..", "frontend", "crystal-os-v2-shell.js");
+const cssPath = path.join(__dirname, "..", "frontend", "crystal-os-v2-phase2-adapter.css");
 const source = fs.readFileSync(shellPath, "utf8");
+const css = fs.readFileSync(cssPath, "utf8");
 
 function has(text) {
   return source.includes(text);
@@ -28,4 +30,8 @@ assert(has("Li e vou iniciar a visita"), "explicit visit-start confirmation miss
 assert(has("cw:field:checkin:"), "check-in audit marker missing");
 assert(has("Antes de começar"), "check-in operational summary missing");
 
-console.log("PASS technician water-state + mandatory check-in contract");
+assert(css.includes('body.cw-tech-field-page a[href^="/admin-"]'), "admin-only links are not hidden from technician field mode");
+assert(css.includes('body.cw-tech-field-page a[href="/billing"]'), "financial navigation is not hidden from technician field mode");
+assert(css.includes('body.cw-tech-field-page a[href="/invoices"]'), "invoice navigation is not hidden from technician field mode");
+
+console.log("PASS technician field UX, check-in, water-state and navigation-minimization contract");
