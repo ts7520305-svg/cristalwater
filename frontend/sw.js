@@ -1,6 +1,6 @@
 /* Public application shell only. Operational writes are owned by the field outbox. */
-const CACHE = 'cristalwater-field-20260914-v1';
-const APP_SHELL = ['/technician-field-mode','/technician-login','/cw-auth.js','/technician-auth-guard.js','/cw-field-offline.js','/cw-field-photos.js','/technician-field-mode.js','/cw-ui-feedback.js','/cw-auth-download.js','/crystal-os-v2-shell.js','/crystal-os-v2-nav.js','/cw-ui-kit.css','/ui/foundation.css','/ui/core/navigation-context.js','/ui/design-system.js','/ui/state-adapter-v2.js'];
+const CACHE = 'cristalwater-field-20260914-v3';
+const APP_SHELL = ['/technician-field-mode','/technician-login','/cw-auth.js','/technician-auth-guard.js','/cw-field-offline.js','/cw-field-recovery.js','/cw-field-photos.js','/cw-browser-push.js','/technician-field-mode.js','/cw-ui-feedback.js','/cw-auth-download.js','/crystal-os-v2-shell.js','/crystal-os-v2-nav.js','/cw-ui-kit.css','/ui/foundation.css','/ui/core/navigation-context.js','/ui/design-system.js','/ui/state-adapter-v2.js'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache=>Promise.all(APP_SHELL.map(url=>cache.add(url).catch(()=>null)))).then(()=>self.skipWaiting()));
 });
@@ -21,4 +21,20 @@ self.addEventListener('fetch', event => {
       return cached || new Response('Página indisponível sem ligação. Abra previamente o modo de campo com rede.', {status:503,headers:{'Content-Type':'text/plain; charset=utf-8'}});
     }
   })());
+});
+
+self.addEventListener('push', event => {
+  let data={};try{data=event.data?.json()||{}}catch{}
+  const target=new URL(data.url||'/technician-field-mode',self.location.origin);
+  event.waitUntil(self.registration.showNotification(data.title||'Cristal Water',{body:data.body||'Tem um aviso operacional.',tag:data.tag||'cristalwater-alert',renotify:true,requireInteraction:true,data:{url:target.origin===self.location.origin?target.href:self.location.origin+'/technician-field-mode'}}));
+});
+self.addEventListener('notificationclick',event=>{
+  event.notification.close();
+  const target=new URL(event.notification.data?.url||'/technician-field-mode',self.location.origin);
+  if(target.origin!==self.location.origin)return;
+  event.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(async windows=>{
+    const existing=windows.find(client=>new URL(client.url).origin===target.origin);
+    if(existing){await existing.navigate(target.href);return existing.focus()}
+    return self.clients.openWindow(target.href);
+  }));
 });

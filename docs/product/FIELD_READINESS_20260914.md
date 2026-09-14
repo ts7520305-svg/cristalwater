@@ -129,3 +129,9 @@ Chromium/API: aumento, repetição, diminuição e falta de saldo passaram; reje
 Reproduzido crash Node numa visita PLANNED sem piscina. Otimização conserva os registos sem coordenadas no fim da lista, aceita coordenada zero e valida ponto de partida. Erros seguem para middleware HTTP. Consulta autenticada; técnico vê apenas a sua rota.
 
 Regressão: 15 grupos em sequência passaram, incluindo uma visita sem piscina e consultas sem autorização; servidor terminou apenas por SIGTERM controlado do ensaio.
+
+## TASK 18 — atualização do navegador no campo
+
+Botão de subscrição pede permissão por ação explícita, informa falta de configuração e exige confirmação de entrega real. Service worker apresenta avisos e abre apenas destinos da própria aplicação.
+
+Fila antiga é preservada: aviso visível e cópia recuperável dos registos do próprio técnico, sem exportar tokens. Não se repetem cegamente operações antigas que podem já ter sido executadas. Chromium confirmou preservação, conteúdo binário exportado e ausência de credenciais na cópia. Antes da mudança de versão em campo, a gestão deve reconciliar qualquer fila antiga no respetivo telemóvel.
