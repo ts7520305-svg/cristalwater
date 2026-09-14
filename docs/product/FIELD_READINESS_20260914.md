@@ -1,6 +1,6 @@
 # Validação operacional — 14 setembro 2026
 
-Estado: EM EXECUÇÃO. Não certificado para produção ou campo.
+Estado: bateria integrada local aprovada; validação de produção e telemóvel físico pendentes. Não certificado para campo.
 
 Pedido atual: concluir e testar os fluxos do técnico em campo, gestor, cliente e administrador; continuar as correções sem aprovações intermédias. Não implica envio de mensagens a clientes nem alterações destrutivas na base produtiva.
 
@@ -42,7 +42,7 @@ Pedido atual: concluir e testar os fluxos do técnico em campo, gestor, cliente 
 - Alarmes e notificações persistem na transação. Fecho resolve apenas o alarme associado. Push respeita o modo QA e a configuração de notificações externas.
 - Migração **aditiva**, ainda não aplicada à produção: duas colunas opcionais e índice único em OperationalReminder. Aplicar antes do novo servidor.
 - API real: 12 verificações novas passaram; ensaio existente do técnico também passou; 63 testes unitários e 4 do técnico passaram.
-- Limitação explícita: os DeviceTokens existentes não têm identidade de técnico. Push remoto de água destina-se ao administrador; o técnico tem estado/alarme dentro da aplicação. Entrega com telefone bloqueado ainda não validada.
+- DeviceTokens legados não identificam técnicos. A TASK 14 acrescenta subscrições Web Push individuais; entrega com telefone bloqueado ainda não validada.
 
 ## TASK 5 — download do cliente
 
@@ -99,13 +99,9 @@ Pedido atual: concluir e testar os fluxos do técnico em campo, gestor, cliente 
 - Sincronização de água recupera os lembretes do servidor e mantém abertos os de rondas anteriores. Fechos pendentes locais prevalecem até confirmação.
 - Visit OS passou com estatísticas da visita concluída. Route OS passou em seguida, no mesmo processo, depois da invalidação de cache corrigida na TASK 11.
 
-## Ensaios por concluir
 
-- Base isolada, arranque, dados de ensaio e testes de API.
-- Jornada completa e reabertura offline em dispositivo móvel.
-- Alertas de água aberta/bomba manual com aplicação fechada, repetição e confirmação.
-- Permissões e privacidade entre clientes e técnicos, incluindo notificações e sockets.
-- Gestão: rotas, equipamentos, consumos, guias, cobranças, reparações e histórico.
-- Validação de produção: configuração, notificações reais no telemóvel, backup/restore e campo físico.
+## TASK 13 — dependências verificadas
 
-Limite: não há nesta sessão ligação comprovada ao VPS nem um telemóvel inscrito para testar notificações. Estes critérios não podem ser marcados PASS com base em testes locais.
+Atualizações compatíveis de Express, uploads, email, Socket.IO e HTTP. Overrides explícitos uuid 11.1.1 (CommonJS/v4 utilizado pelos clientes Google) e deepmerge-ts 8.0.0 (deepmerge utilizado pelo Prisma), sem downgrade do Prisma. Acrescentado web-push 3.6.7.
+
+Verificação: npm audit completo — 0 vulnerabilidades conhecidas; Prisma validate/generate; 63 testes unitários; 4 testes do técnico; bateria real de 15 grupos após atualização. Não representa auditoria de segurança exaustiva. Fontes: https://github.com/uuidjs/uuid/releases/tag/v11.1.1 e advisories devolvidos pelo npm audit.
