@@ -363,6 +363,7 @@ model User {
 }
 
 model ServiceVisit {
+  completionRequestId String? @unique
   id             Int             @id @default(autoincrement())
   clientId       Int?
   poolId         Int?

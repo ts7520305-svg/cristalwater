@@ -84,6 +84,15 @@ Pedido atual: concluir e testar os fluxos do técnico em campo, gestor, cliente 
 - Atualização da guia calcula saldo com o consumo corrente na base, evitando restaurar stock a partir de uma leitura anterior durante um consumo concorrente.
 - Ensaio móvel com guia AT, guia de obra, seguro e inspeção válidos atravessou o bloqueio documental; simulação mensal passou.
 
+## TASK 11 — conclusão offline e stock uma única vez
+
+- Ronda e rascunhos por técnico; service worker guarda a página certa e os recursos estáticos, sem cache partilhada de APIs autenticadas.
+- Outbox persiste a conclusão antes do envio. Fotografia pendente é enviada primeiro; uma resposta sem confirmação não transforma a visita em concluída.
+- Chave de pedido por visita e bloqueio transacional permitem repetir após perda de resposta; removida a segunda dedução de produtos que o frontend fazia depois da dedução automática do servidor.
+- Débitos condicionais/atómicos evitam saldo negativo em duas visitas concorrentes e em duas linhas do mesmo produto. Cache de dashboard invalidada após commit; eventos publicados após confirmação da transação.
+- Chromium/API: offline + recarga + fotografia + reconexão + conclusão + repetição passaram; 10 kg iniciais tornaram-se 9 kg, com um único consumo. Concorrência e repetição de produto sem saldo suficiente foram rejeitadas sem alterar o stock.
+- Migração aditiva de completionRequestId ainda não aplicada à produção.
+
 ## Ensaios por concluir
 
 - Base isolada, arranque, dados de ensaio e testes de API.

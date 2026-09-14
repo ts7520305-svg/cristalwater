@@ -444,14 +444,14 @@
   async function api(path, options = {}) {
     const response = await fetch(path, { headers: { "Content-Type": "application/json" }, ...options });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok || data.ok === false) throw new Error(data.error || data.message || "Erro no servidor");
+    if (!response.ok || data.ok === false || response.status === 202 || data.offline) throw new Error(data.error || data.message || "Sem confirmação do servidor; dados pendentes de sincronização");
     return data;
   }
 
   async function apiForm(path, formData) {
     const response = await fetch(path, { method: "POST", body: formData });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok || data.ok === false) throw new Error(data.error || data.message || "Erro no servidor");
+    if (!response.ok || data.ok === false || response.status === 202 || data.offline) throw new Error(data.error || data.message || "Sem confirmação do servidor; dados pendentes de sincronização");
     return data;
   }
 
@@ -674,7 +674,7 @@
     const key = visitKey(visit);
     visitPhotosByKey[key] = visitPhotos;
     visitDrafts[key] = readVisitForm();
-    storageWrite("cwFieldVisitDrafts", visitDrafts);
+    storageWrite(`cwFieldVisitDrafts:${currentTechnicianId()}`, visitDrafts);
   }
 
   function loadCurrentDraft() {
@@ -687,6 +687,11 @@
     const draft = visitDrafts[key] || null;
     applyVisitForm(draft);
     visitPhotos = visitPhotosByKey[key] || (draft?.photos || []);
+    window.CWFieldPhotos.list(visit?.id).then(pending => {
+      if (current()?.id !== visit?.id) return;
+      for(const photo of pending) { const position=visitPhotos.findIndex(p=>p.localId===photo.localId);if(position>=0)visitPhotos[position]=photo;else visitPhotos.push(photo); }
+      renderPhotoList();
+    }).catch(error=>toast('Falha ao recuperar fotografias: '+error.message));
     renderPhotoList();
   }
 
@@ -857,7 +862,7 @@
     if (technician) activeTechnician = technician;
 
     const vehicle = technician?.vehicle || activeWorkGuide?.vehicle || activeTransportGuide?.vehicle || activeVehicle || null;
-    if (vehicle) activeVehicle = vehicle;
+    if (vehicle) activeVehicle = activeVehicle?.id === vehicle.id ? {...activeVehicle, ...vehicle} : vehicle;
 
     const technicianInput = $("#technicianId");
     if (technician?.id) {
@@ -2159,15 +2164,18 @@
       button.addEventListener("click", () => {
         const photo = visitPhotos.find((item) => item.localId === button.dataset.photoRemove);
         if (photo?.previewUrl?.startsWith("blob:")) URL.revokeObjectURL(photo.previewUrl);
+        window.CWFieldPhotos.remove(photo?.visitId || current()?.id, button.dataset.photoRemove).catch(error => toast(error.message));
         visitPhotos = visitPhotos.filter((item) => item.localId !== button.dataset.photoRemove);
+        saveCurrentDraft();
         renderPhotoList();
       });
     });
   }
 
   async function uploadPhoto(photo) {
-    const visit = current();
-    if (!visit?.id || !photo?.file) {
+    const visit = visits.find(v => String(v.id) === String(photo?.visitId)) || current();
+    if (photo?.status === 'uploading') return false;
+    if (!visit?.id || !(photo?.file instanceof Blob)) {
       photo.status = "pending";
       photo.error = "Sem visita ativa";
       renderPhotoList();
@@ -2183,8 +2191,11 @@
       formData.append("photo", photo.file);
       formData.append("type", photo.type || "AFTER");
       const data = await apiForm(`/api/visits/${encodeURIComponent(visit.id)}/photo`, formData);
+      if (!data.photo?.id || !data.photo.url) throw new Error('Fotografia ainda não confirmada pelo servidor');
       photo.status = "uploaded";
-      photo.url = data.photo?.url || photo.url;
+      photo.url = data.photo.url;
+      await window.CWFieldPhotos.remove(visit.id,photo.localId);
+      saveCurrentDraft();
       photo.serverId = data.photo?.id || null;
       renderPhotoList();
       return true;
@@ -2222,10 +2233,11 @@
     input.click();
   }
 
-  function addSelectedPhoto(file) {
+  async function addSelectedPhoto(file) {
     if (!file) return;
     const photo = {
       localId: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      visitId: current()?.id,
       type: selectedPhotoType || "AFTER",
       file,
       fileName: file.name,
@@ -2233,29 +2245,27 @@
       status: "pending",
       error: "",
     };
+    try { await window.CWFieldPhotos.save(photo.visitId,photo); }
+    catch(error) { URL.revokeObjectURL(photo.previewUrl);toast('Não foi possível guardar a fotografia neste dispositivo. Liberte espaço e tente novamente.');return; }
     visitPhotos.unshift(photo);
+    saveCurrentDraft();
     renderPhotoList();
     uploadPhoto(photo);
   }
 
   function activeWaterReminders() {
+    loadWaterRemindersFromStorage();
     return waterReminders.filter((reminder) => reminder.status !== "CLOSED" && reminderBelongsToCurrentContext(reminder));
   }
 
   function saveWaterReminders() {
-    waterReminders = waterReminders.filter(reminderBelongsToCurrentContext).slice(-100);
+    waterReminders = waterReminders.filter(reminderBelongsToCurrentContext);
     storageWrite(waterReminderStorageKey(), waterReminders);
   }
 
   function reminderBelongsToCurrentContext(reminder = {}) {
     const technicianId = currentTechnicianId();
     if (technicianId && reminder.technicianId && String(reminder.technicianId) !== String(technicianId)) return false;
-
-    const poolIds = new Set(visits.map((visit) => String(visit.pool?.id || visit.poolId || "")).filter(Boolean));
-    const clientIds = new Set(visits.map((visit) => String(visit.client?.id || visit.clientId || visit.pool?.client?.id || "")).filter(Boolean));
-
-    if (reminder.poolId && poolIds.size && !poolIds.has(String(reminder.poolId))) return false;
-    if (reminder.clientId && clientIds.size && !clientIds.has(String(reminder.clientId))) return false;
 
     return true;
   }
@@ -2264,7 +2274,7 @@
     const scoped = storageRead(waterReminderStorageKey(), null);
     const legacy = storageRead("cwWaterReminders", []);
     const source = Array.isArray(scoped) ? scoped : (Array.isArray(legacy) ? legacy : []);
-    waterReminders = source.filter(reminderBelongsToCurrentContext).slice(-100);
+    waterReminders = source.filter(reminderBelongsToCurrentContext);
     storageWrite(waterReminderStorageKey(), waterReminders);
   }
 
@@ -3136,14 +3146,18 @@
       const returnContract = readReturnContract();
       const todayQuery = todayQueryParams();
       let data = await api(`/api/technician/today?${todayQuery}`).catch(() => null);
-      if (!data || !Array.isArray(data.visits)) {
-        data = await api("/api/core/dashboard");
-        visits = Array.isArray(data.nextVisits) ? data.nextVisits : [];
-      } else {
+      const routeCacheKey = `cwFieldRoute:${currentTechnicianId()}`;
+      if (data && Array.isArray(data.visits)) {
         visits = data.visits;
+        storageWrite(routeCacheKey, { visits, savedAt: new Date().toISOString() });
+      } else {
+        const cached = storageRead(routeCacheKey, null);
+        if (!cached?.visits) throw new Error("Sem ronda guardada. Abra o modo de campo com ligação antes de sair.");
+        visits = cached.visits;
+        toast(`Ronda guardada em ${new Date(cached.savedAt).toLocaleString('pt-PT')}. Sem confirmação atual do servidor.`);
       }
       applyReturnState(returnContract, fallbackState);
-      visitDrafts = storageRead("cwFieldVisitDrafts", {});
+      visitDrafts = storageRead(`cwFieldVisitDrafts:${currentTechnicianId()}`, {});
       loadWaterRemindersFromStorage();
       loadCurrentDraft();
       renderWaterReminders();
@@ -3575,6 +3589,14 @@
         return;
       }
       startedAt = new Date();
+      if (!navigator.onLine) {
+        visits[index] = mergeVisitSnapshot(visit, { startAt: startedAt.toISOString() }, "IN_PROGRESS");
+        saveCurrentDraft();
+        storageWrite(`cwFieldRoute:${currentTechnicianId()}`, {visits, savedAt:new Date().toISOString()});
+        render();
+        toast("Visita iniciada neste dispositivo. O registo será enviado ao concluir com ligação.");
+        return;
+      }
       startBtn.disabled = true;
       try {
         const result = await api(`/api/operational-state/visits/${visit.id}/state`, {
@@ -3716,7 +3738,7 @@
       }
       $("#finishBtn").disabled = true;
       const photosReady = await syncPendingPhotos(false);
-      if (!photosReady) {
+      if (!photosReady && navigator.onLine) {
         $("#finishBtn").disabled = false;
         toast("Ha fotografias pendentes. Sincroniza ou remove antes de concluir.");
         return;
@@ -3797,17 +3819,10 @@
           return;
         }
 
-        const completeResult = await api(`/api/core/visits/${visit.id}/complete`, { method: "POST", body: JSON.stringify(body) });
-        let stockUpdated = false;
-        if (productsUsed.length) {
-          try {
-            await consumeVisitProducts(visit, productsUsed);
-            stockUpdated = true;
-          } catch (stockError) {
-            console.error(stockError);
-            toast("Visita concluida. Consumo ficou por sincronizar.");
-          }
-        }
+        const completeResult = await window.CWFieldOffline.submitCompletion(visit.id, body);
+        // Stock is consumed atomically by the completion transaction on the server.
+        const stockUpdated = productsUsed.length > 0;
+        if (stockUpdated) await loadGuides(false).catch(() => {});
         const completedVisit = mergeVisitSnapshot(visit, completeResult.visit || {}, "DONE");
         completedVisit.status = "DONE";
         completedVisit.endAt = completeResult.visit?.endAt || completedVisit.endAt || new Date().toISOString();
@@ -3827,6 +3842,13 @@
     };
   }
 
+  window.addEventListener('cw:visit-synced', event => {
+    const position = visits.findIndex(v => String(v.id) === String(event.detail.visitId));
+    if (position >= 0) visits[position] = mergeVisitSnapshot(visits[position], event.detail.visit, 'DONE');
+    storageWrite(`cwFieldRoute:${currentTechnicianId()}`, {visits, savedAt:new Date().toISOString()});
+    render();
+  });
+  window.addEventListener('cw:water-state-updated', () => { loadWaterRemindersFromStorage(); renderWaterReminders(); });
   load();
   updateAllReferenceStatuses();
 })();

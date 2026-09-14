@@ -301,13 +301,14 @@ async function registerAutomaticProductConsumption(tx, visit, body, products) {
       );
     }
 
-    await tx.workGuideItem.update({
-      where: { id: target.id },
+    const consumed = await tx.workGuideItem.updateMany({
+      where: { id: target.id, quantity: {gte: Number(product.quantity)} },
       data: {
-        quantity: Number(target.quantity || 0) - Number(product.quantity || 0),
-        usedQty: Number(target.usedQty || 0) + Number(product.quantity || 0),
+        quantity: {decrement: Number(product.quantity)},
+        usedQty: {increment: Number(product.quantity)},
       },
     });
+    if (consumed.count !== 1) throw new VisitCompletionError(409, 'WORK_GUIDE_STOCK_INSUFFICIENT', `Stock insuficiente na viatura para ${product.name}. Atualize a guia.`);
 
     await tx.vehicleStockMovement.create({
       data: {
@@ -355,13 +356,16 @@ async function completeServiceVisit(prisma, visitId, body = {}) {
   }
 
   const validated = validateVisitCompletionPayload(body);
+  const completionRequestId = typeof body.clientRequestId === 'string' && /^[a-zA-Z0-9_-]{16,100}$/.test(body.clientRequestId) ? body.clientRequestId : null;
 
-  return prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
+    if (completionRequestId) await tx.$queryRaw`SELECT id FROM "ServiceVisit" WHERE id = ${id} FOR UPDATE`;
     const currentVisit = await tx.serviceVisit.findUnique({
       where: { id },
       select: {
         id: true,
         status: true,
+        completionRequestId: true,
         endAt: true,
         poolId: true,
         clientId: true,
@@ -375,6 +379,10 @@ async function completeServiceVisit(prisma, visitId, body = {}) {
       throw new VisitCompletionError(404, "VISIT_NOT_FOUND", "Visita nao encontrada.");
     }
 
+    if (completionRequestId && currentVisit.completionRequestId === completionRequestId && currentVisit.endAt) {
+      const visit = await tx.serviceVisit.findUnique({where:{id},include:{pool:{include:{client:true}},client:true,technician:true,chemicals:true,photos:true}});
+      return {visit, repair:null, idempotent:true};
+    }
     const currentStatus = normalizeVisitStatus(currentVisit.status);
     if (VISIT_TERMINAL_STATUSES.has(currentStatus) || currentVisit.endAt) {
       throw new VisitCompletionError(
@@ -429,6 +437,7 @@ async function completeServiceVisit(prisma, visitId, body = {}) {
       temperature: validated.temperature,
       orpMv: validated.orpMv,
       products: validated.productsText,
+      completionRequestId,
       chemicalsJson: validated.chemicalsJson,
       notes: body.notes || null,
       internalNotes: internalNotes ? appendInternalNote(currentVisit.internalNotes, internalNotes) : undefined,
@@ -572,11 +581,14 @@ async function completeServiceVisit(prisma, visitId, body = {}) {
 
     await recordVisitAudit(tx, visit, body, repair, validated);
 
-    emitVisitCompletionSignals(visit, repair);
-    await emitRouteCompletionSignal(visit);
-
     return { visit, repair, notifications: { adminNotification, clientNotification } };
   });
+  require('./dashboardCacheService').invalidateDashboardCache('VISIT_COMPLETED');
+  if (!result.idempotent) {
+    emitVisitCompletionSignals(result.visit, result.repair);
+    await emitRouteCompletionSignal(result.visit);
+  }
+  return result;
 }
 
 module.exports = {
