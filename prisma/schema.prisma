@@ -2089,6 +2089,8 @@ model Attachment {
 }
 
 model OperationalReminder {
+  sourceKey              String?     @unique
+  metadata               Json?
   id                     Int         @id @default(autoincrement())
   title                  String
   description            String?

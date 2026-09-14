@@ -362,6 +362,7 @@ function scheduleBackgroundJobs() {
 }
 
 scheduleBackgroundJobs();
+require("./services/waterReminderService").startScheduler();
 
 // V21 Frontend continuity fallback: invalid frontend paths return dashboard/login without destroying session.
 app.get("*", (req, res, next) => {

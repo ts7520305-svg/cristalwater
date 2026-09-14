@@ -55,6 +55,7 @@ function initFirebase() {
  * Retorna sempre um resultado estruturado para não rebentar controllers/jobs.
  */
 async function sendPush(token, title, body, data = {}) {
+  if (!require("../config/externalIntegrations").areExternalNotificationsEnabled()) return { ok: false, skipped: true, reason: "EXTERNAL_NOTIFICATIONS_DISABLED" };
   if (!token) {
     return { ok: false, skipped: true, reason: "MISSING_TOKEN" };
   }

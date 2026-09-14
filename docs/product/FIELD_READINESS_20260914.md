@@ -34,6 +34,16 @@ Pedido atual: concluir e testar os fluxos do técnico em campo, gestor, cliente 
 - Teste comportamental `npm run test:field-browser`: interface responsiva, check-in explícito, resposta offline e criação/fecho após reconexão passaram. Usa API controlada; não substitui ensaio integral nem telemóvel físico.
 - API real: ensaio operacional do técnico e simulação mensal passaram numa base isolada PGlite/TCP, incluindo concorrência no fecho da visita. Não equivale a validar desempenho PostgreSQL de produção.
 
+## TASK 4 — água persistente e alarmes no servidor
+
+- Serviço dedicado com autorização pela visita e pelo técnico real, contexto obtido da base e rejeição de IDs forjados.
+- Chave única de repetição e bloqueios transacionais evitam duplicados; fecho e alarme tardio preservam o estado fechado.
+- Job de segurança a cada minuto, independente dos jobs de faturação/IA. Escala água vencida mesmo sem navegador aberto. Registos antigos com título de água continuam monitorizados.
+- Alarmes e notificações persistem na transação. Fecho resolve apenas o alarme associado. Push respeita o modo QA e a configuração de notificações externas.
+- Migração **aditiva**, ainda não aplicada à produção: duas colunas opcionais e índice único em OperationalReminder. Aplicar antes do novo servidor.
+- API real: 12 verificações novas passaram; ensaio existente do técnico também passou; 63 testes unitários e 4 do técnico passaram.
+- Limitação explícita: os DeviceTokens existentes não têm identidade de técnico. Push remoto de água destina-se ao administrador; o técnico tem estado/alarme dentro da aplicação. Entrega com telefone bloqueado ainda não validada.
+
 ## Ensaios por concluir
 
 - Base isolada, arranque, dados de ensaio e testes de API.
