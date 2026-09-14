@@ -32,6 +32,7 @@
   let technicalProposals = [];
   let docsSource = "live";
   let docsCompliance = null;
+  let documentsLoaded = false;
   let assistOptions = { loading: false, loadedKey: "", otherToday: [], tomorrow: [], error: "" };
   let notifiedVisitNoticeKey = "";
   let activePoolFilter = "TODO";
@@ -480,7 +481,8 @@
   function storageWrite(key, value) {
     try {
       localStorage.setItem(key, JSON.stringify(value));
-    } catch (_) {}
+      return true;
+    } catch (_) { return false; }
   }
 
   function waterReminderStorageKey(technicianId = currentTechnicianId()) {
@@ -568,7 +570,7 @@
       if (!node) return;
       node.checked = Object.prototype.hasOwnProperty.call(checks, id)
         ? Boolean(checks[id])
-        : ["cleaned", "basketCleaned"].includes(id);
+        : false;
     });
 
     startedAt = draft?.startedAt ? new Date(draft.startedAt) : null;
@@ -674,7 +676,9 @@
     const key = visitKey(visit);
     visitPhotosByKey[key] = visitPhotos;
     visitDrafts[key] = readVisitForm();
-    storageWrite(`cwFieldVisitDrafts:${currentTechnicianId()}`, visitDrafts);
+    const saved = storageWrite(`cwFieldVisitDrafts:${currentTechnicianId()}`, visitDrafts);
+    const status = $("#fieldSaveStatus");
+    if (status) { status.dataset.state = saved ? "saved" : "error"; status.textContent = saved ? "Rascunho guardado neste telemóvel" : "Memória indisponível: rascunho não guardado. Não feche a página."; }
   }
 
   function loadCurrentDraft() {
@@ -823,7 +827,7 @@
 
     const blockers = Object.entries(states)
       .filter(([, state]) => state.required && state.code !== "VALID")
-      .map(([key, state]) => `${key}: ${state.label}`);
+      .map(([key, state]) => `${({transport:"Guia AT",workGuide:"Guia de obra",insurance:"Seguro",inspection:"Inspeção"})[key] || key}: ${state.label}`);
     const readyForOperation = blockers.length === 0;
 
     return {
@@ -1241,7 +1245,7 @@
       });
     }
 
-    if (!opsSnapshot.docsReady) {
+    if (documentsLoaded && !opsSnapshot.docsReady) {
       items.push({
         id: `docs-missing:${String(visit?.id || "none")}`,
         category: "DOC_MISSING",
@@ -1369,8 +1373,9 @@
     const done = visits.filter(isVisitDone).length;
     const total = visits.length;
     const pending = Math.max(total - done, 0);
-    const compliance = docsCompliance || computeDocsCompliance();
+    const compliance = computeDocsCompliance();
     const docsReady = Boolean(compliance.readyForOperation);
+    opsSnapshot = { docsReady, done, total, pending, docsBlockReason: compliance.reason || "" };
     const readyDocs = Object.values(compliance.states).filter((state) => state.code === "VALID").length;
     const photoCount = visitPhotos.length;
     const location = visit ? visitLocation(visit) : null;
@@ -1448,11 +1453,13 @@
     if (progressValue) progressValue.textContent = visit ? `${done} / ${total}` : `${total} / ${total}`;
     if (progressMeta) progressMeta.textContent = visit ? (pending ? `${pending} visita(s) por concluir` : "Ronda pronta para fechar") : "Agenda livre neste momento";
 
-    if (docsValue) docsValue.textContent = visit ? `${readyDocs} / 6` : "Ver agenda";
-    if (docsMeta) docsMeta.textContent = visit ? (docsReady ? "Documentação obrigatória validada" : (compliance.reason || "ver estados documentais")) : "Sem visitas para abrir documentos agora";
+    if (docsValue) docsValue.textContent = !documentsLoaded ? "A validar" : docsReady ? "Válidos" : "Rever";
+    if (docsMeta) docsMeta.textContent = !documentsLoaded ? "A confirmar a viatura" : docsReady ? "Obrigatórios confirmados" : "Abra Viatura para ver o que falta";
 
-    if (photosValue) photosValue.textContent = visit ? `${photoCount} foto${photoCount === 1 ? "" : "s"}` : "0 fotos";
-    if (photosMeta) photosMeta.textContent = visit ? (photoCount ? "registos prontos para sincronizar" : "sem fotos nesta visita") : "Sem visita ativa para registo fotográfico";
+    const pendingPhotos = visitPhotos.filter(photo => photo.status !== "uploaded").length;
+    const pendingVisit = visit && window.CWFieldOffline?.pending(visit.id);
+    if (photosValue) photosValue.textContent = String(pendingPhotos + (pendingVisit ? 1 : 0));
+    if (photosMeta) photosMeta.textContent = pendingVisit ? "visita por confirmar" : pendingPhotos ? "fotos por enviar" : "envios pendentes nesta visita";
 
     if (heroActions) {
       heroActions.hidden = false;
@@ -1478,7 +1485,7 @@
     const freeMode = !visit;
     setTileTone("#fieldProgressTile", freeMode ? "" : (pending ? "" : "ok"));
     setTileTone("#fieldDocsTile", freeMode ? "" : (docsReady ? "ok" : "warn"));
-    setTileTone("#fieldPhotosTile", freeMode ? "" : (photoCount ? "ok" : ""));
+    setTileTone("#fieldPhotosTile", pendingPhotos || pendingVisit ? "warn" : "ok");
     const progressTile = $("#fieldProgressTile");
     const docsTile = $("#fieldDocsTile");
     const photosTile = $("#fieldPhotosTile");
@@ -1489,7 +1496,6 @@
     const dayVisitsCard = $("#dayVisitsCard");
     if (routeCard) routeCard.hidden = freeMode;
     if (dayVisitsCard) dayVisitsCard.hidden = freeMode;
-    opsSnapshot = { docsReady, done, total, pending, docsBlockReason: compliance.reason || "" };
     renderCrewStatus();
     renderInterruptBoard();
   }
@@ -1508,7 +1514,12 @@
     });
     const history = opExceptionHistory();
 
-    if (!openExceptions.length && !history.length) {
+    const historyList = $("#fieldAlertHistoryList");
+    if (historyList) historyList.innerHTML = renderExceptionHistory(history);
+    const priorityNotice = $("#fieldPriorityNotice");
+    if (priorityNotice) { priorityNotice.hidden = !openExceptions.length; priorityNotice.textContent = `${openExceptions.length} alerta(s) por resolver · Ver`; }
+
+    if (!openExceptions.length) {
       card.hidden = true;
       summary.textContent = "Sem alertas críticos neste momento.";
       list.innerHTML = "";
@@ -1545,15 +1556,7 @@
     `;
     }).join("");
 
-    const historyHtml = `
-      <div class="interrupt-item" data-history-header="1" style="border-style:dashed">
-        <strong>Historico local de excecoes</strong>
-        <div class="muted">Auditoria local para notificacoes e Centro de Comando.</div>
-      </div>
-      ${renderExceptionHistory(history)}
-    `;
-
-    list.innerHTML = `${exceptionsHtml}${historyHtml}`;
+    list.innerHTML = exceptionsHtml;
   }
 
   function mapsSearchUrl(visit) {
@@ -1635,7 +1638,9 @@
   }
 
   function readingNumber(value) {
-    const number = Number(String(value || "").replace(",", ".").trim());
+    const raw = String(value ?? "").replace(",", ".").trim();
+    if (!raw) return null;
+    const number = Number(raw);
     return Number.isFinite(number) ? number : null;
   }
 
@@ -2628,7 +2633,8 @@
     const vehicleInput = $("#vehicleId");
     const technicianInput = $("#technicianId");
     const vehicleId = (vehicleInput?.value || localStorage.getItem("cwVehicleId") || "").trim();
-    if (!vehicleId) { renderCrewStatus(); return; }
+    if (!vehicleId) { documentsLoaded = true; renderCrewStatus(); updateFieldDashboard(current()); return; }
+    documentsLoaded = false;
     const technicianId = (technicianInput?.value || localStorage.getItem("cwTechnicianId") || "").trim();
 
     if (vehicleInput) vehicleInput.value = vehicleId;
@@ -2721,6 +2727,7 @@
       });
     }
 
+    documentsLoaded = true;
     updateFieldDashboard(current());
     renderCrewStatus();
 
@@ -2735,11 +2742,7 @@
     updateAllReferenceStatuses();
     const category = $("#problemCategory");
     if (category) category.value = "Servico normal";
-    ["cleaned", "basketCleaned"].forEach((id) => {
-      const node = $(`#${id}`);
-      if (node) node.checked = true;
-    });
-    ["vacuumed", "brushed", "waterlineClean", "backwashDone"].forEach((id) => {
+    checkIds.forEach((id) => {
       const node = $(`#${id}`);
       if (node) node.checked = false;
     });
@@ -3088,7 +3091,7 @@
 
   function render() {
     const visit = current();
-    $("#progressText").textContent = visits.length ? `${Math.min(index + 1, visits.length)} de ${visits.length} visitas` : "Hoje livre";
+    $("#progressText").textContent = visits.length ? `${visits.filter(isVisitDone).length} de ${visits.length} visitas concluídas` : "Sem visitas atribuídas";
 
     if (!visit) {
       $("#nextTitle").textContent = "Hoje livre";
@@ -3099,7 +3102,7 @@
       }
       $("#finishBtn").disabled = false;
       $("#finishBtn").textContent = "Ver agenda";
-      $("#connectionState").textContent = "Livre";
+      updateFieldConnection();
       renderCorrectionSummary(null);
       renderAccessCard(null);
       renderRouteCard(null);
@@ -3114,14 +3117,14 @@
     }
 
     $("#finishBtn").disabled = false;
-    $("#connectionState").textContent = "Campo";
+    updateFieldConnection();
     $("#nextTitle").textContent = visit.pool?.name || "Piscina";
     const sourceLabel = visit.assistSource === "otherToday"
       ? `Ajudar ${visit.technician?.name || visit.technicianName || "colega"}`
       : (visit.assistSource === "tomorrow" ? "Ronda do proximo dia" : (visit.technician?.name || "Tecnico"));
     $("#nextMeta").textContent = `${visit.client?.name || "Cliente"} - ${sourceLabel} - ${isVisitDone(visit) ? "Feita / correcao aberta" : (visit.status || "Pendente")}`;
     if ($("#startBtn")) $("#startBtn").textContent = isVisitDone(visit) ? "Rever registo" : "Iniciar visita";
-    $("#finishBtn").textContent = isVisitDone(visit) ? "Guardar correcao" : "Concluir e passar a proxima";
+    $("#finishBtn").textContent = isVisitDone(visit) ? "Guardar correção" : "Concluir visita";
     renderAssistPanel();
     renderCorrectionSummary(visit);
     renderAccessCard(visit);
@@ -3152,11 +3155,14 @@
       const routeCacheKey = `cwFieldRoute:${currentTechnicianId()}`;
       if (data && Array.isArray(data.visits)) {
         visits = data.visits;
+        $("#fieldLoadError").hidden = true; $("#fieldRouteAge").hidden = true;
         storageWrite(routeCacheKey, { visits, savedAt: new Date().toISOString() });
       } else {
         const cached = storageRead(routeCacheKey, null);
         if (!cached?.visits) throw new Error("Sem ronda guardada. Abra o modo de campo com ligação antes de sair.");
         visits = cached.visits;
+        $("#fieldLoadError").hidden = true; $("#fieldRouteAge").hidden = false;
+        $("#fieldRouteAge").textContent = `Ronda guardada em ${new Date(cached.savedAt).toLocaleString("pt-PT")}. Alterações do escritório ainda por confirmar.`;
         toast(`Ronda guardada em ${new Date(cached.savedAt).toLocaleString('pt-PT')}. Sem confirmação atual do servidor.`);
       }
       applyReturnState(returnContract, fallbackState);
@@ -3187,7 +3193,8 @@
       await loadGuides(false).catch(() => renderCrewStatus());
       await loadTechnicalProposals(currentPoolId());
     } catch (error) {
-      $("#nextTitle").textContent = "Nao foi possivel carregar";
+      $("#fieldLoadError").hidden = false; $("#fieldLoadErrorText").textContent = error.message;
+      $("#nextTitle").textContent = "Não foi possível carregar";
       $("#nextMeta").textContent = error.message;
       $("#progressText").textContent = "Verificar ligacao";
       $("#connectionState").textContent = "Offline";
@@ -3375,11 +3382,13 @@
 
     const safeTab = ["hoje", "agora", "docs", "more"].includes(tab) ? tab : "hoje";
     document.body.dataset.fieldTab = safeTab;
+    if ($("#fieldPageTitle")) $("#fieldPageTitle").textContent = {hoje:"O meu dia",agora:"Visita",docs:"Viatura e documentos",more:"Apoio"}[safeTab];
     try {
       localStorage.setItem("cwFieldActiveTab", safeTab);
     } catch (_) {}
     document.querySelectorAll("[data-field-tab-button]").forEach((button) => {
       button.classList.toggle("active", button.dataset.fieldTabButton === safeTab);
+      if (button.dataset.fieldTabButton === safeTab) button.setAttribute("aria-current", "page"); else button.removeAttribute("aria-current");
     });
     persistFieldUiState();
     if (shouldScroll) {
@@ -3387,7 +3396,21 @@
     }
   }
 
+  function updateFieldConnection() {
+    const badge = $("#connectionState"); if (!badge) return;
+    badge.textContent = navigator.onLine ? "Rede disponível" : "Sem rede";
+    badge.dataset.offline = String(!navigator.onLine);
+  }
+  window.addEventListener("online", updateFieldConnection);
+  window.addEventListener("offline", updateFieldConnection);
+
   function setupFieldLayout() {
+    $("#fieldPriorityNotice")?.addEventListener("click", () => {switchFieldTab("hoje"); $("#interruptCard")?.scrollIntoView({block:"start"});});
+    $("#fieldReloadBtn")?.addEventListener("click", () => load());
+    document.querySelectorAll("[data-field-jump]").forEach(button => button.addEventListener("click", () => {
+      const target = document.getElementById(button.dataset.fieldJump);
+      target?.scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",block:"start"});
+    }));
     document.body.classList.add("cw-tech-field-page");
 
     markFieldSection("#cleaningCard", "field-panel-agora", "Servico", "limpeza e leituras");
@@ -3396,7 +3419,7 @@
     markFieldSection("#accessCard", "field-panel-agora", "Acesso", "chaves e codigos");
     markFieldSection("#routeCard", "field-panel-hoje", "Rota", "proximo local");
     markFieldSection("#visitList", "field-panel-hoje", "Lista do dia", "corrigir ou avancar");
-    markFieldSection(".crew-card", "field-panel-agora", "Tecnico", "viatura e documentos");
+    markFieldSection(".crew-card", "field-panel-docs", "Tecnico", "viatura e documentos");
     markFieldSection("#transportGuideBox", "field-panel-docs", "Documentos", "AT, obra e seguro");
     markFieldSection("#waterReminderList", "field-panel-more", "Agua aberta", "alarme obrigatorio");
     markFieldSection("#adminAlertMessage", "field-panel-more", "Avisos", "admin e stock");
@@ -3408,9 +3431,9 @@
       nav.setAttribute("aria-label", "Navegacao do tecnico em campo");
       nav.innerHTML = `
         <button type="button" data-field-tab-button="hoje">Hoje</button>
-        <button type="button" data-field-tab-button="agora">Agora</button>
+        <button type="button" data-field-tab-button="agora">Visita</button>
         <button type="button" data-field-tab-button="mapa">Mapa</button>
-        <button type="button" data-field-tab-button="docs">Documentos</button>
+        <button type="button" data-field-tab-button="docs">Viatura</button>
         <button type="button" data-field-tab-button="more">Mais</button>
       `;
       document.body.appendChild(nav);

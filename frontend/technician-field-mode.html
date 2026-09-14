@@ -1197,6 +1197,7 @@
   </style>
   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
   <link rel="stylesheet" href="/ui/design-system.css">
+  <link rel="stylesheet" href="/cw-field-professional.css">
 </head>
 <body class="cw-tech-field-page" data-field-tab="hoje" data-required-role="TECHNICIAN">
   <main class="field">
@@ -1205,13 +1206,17 @@
         <div class="brand-block">
           <img class="brand-logo" src="/logo-cristalwater.png" alt="Cristal Water">
           <div>
-            <div class="brand">Modo Campo</div>
+            <div class="brand" id="fieldPageTitle">O meu dia</div>
             <div class="progress" id="progressText">A preparar ronda...</div>
           </div>
         </div>
         <span class="chip" id="connectionState">Online</span>
       </div>
+      <button type="button" id="fieldPriorityNotice" hidden></button>
     </header>
+
+    <section class="field-load-feedback" id="fieldLoadError" role="alert" hidden><strong>Não foi possível atualizar a ronda</strong><p id="fieldLoadErrorText"></p><button class="big ghost" id="fieldReloadBtn" type="button">Tentar novamente</button></section>
+    <div class="field-load-feedback" id="fieldRouteAge" role="status" hidden></div>
 
     <section class="field-dashboard field-panel field-panel-hoje" id="todayBoard" aria-label="Resumo do dia em campo">
       <div class="field-tile primary" id="fieldHeroTile">
@@ -1235,7 +1240,7 @@
         <small id="fieldDocsMeta">guia, AT e seguro</small>
       </div>
       <div class="field-tile" id="fieldPhotosTile">
-        <span>Sincronização</span>
+        <span>Envios</span>
         <b id="fieldPhotosValue">0 fotos</b>
         <small id="fieldPhotosMeta">fotos e notas da visita</small>
       </div>
@@ -1248,7 +1253,7 @@
     </section>
 
     <section class="field-action-sticky field-panel field-panel-agora" aria-label="Ações principais da visita">
-      <div class="muted" style="margin-bottom:8px">Fluxo recomendado: iniciar visita -> registar água e produtos -> fotografias -> concluir.</div>
+      <div id="fieldSaveStatus" role="status">Registe apenas o trabalho realizado nesta visita.</div>
       <div class="actions">
         <button class="big ok" id="startBtn" type="button">Iniciar visita</button>
         <button class="big bad" id="finishBtn" type="button">Concluir visita</button>
@@ -1265,9 +1270,10 @@
         <span class="muted" id="nowTimingLine">Sem tempo em curso</span>
       </div>
       <div class="visit-notice-strip" id="visitNoticeStrip" hidden></div>
+      <nav class="field-step-links" aria-label="Etapas da visita"><button type="button" data-field-jump="accessCard">Acesso</button><button type="button" data-field-jump="cleaningCard">Serviço</button><button type="button" data-field-jump="productsCard">Produtos</button><button type="button" data-field-jump="photosCard">Fotos</button></nav>
     </section>
 
-    <section class="card crew-card field-panel field-panel-agora" aria-label="Identificação e documentos do técnico">
+    <section class="card crew-card field-panel field-panel-docs" aria-label="Identificação e documentos do técnico">
       <div class="crew-head">
         <div>
           <span class="chip">Técnico e viatura</span>
@@ -1359,6 +1365,10 @@
       </div>
     </section>
 
+    <section class="card field-panel field-panel-more"><h2>Apoio e conta</h2><div class="field-account-links"><a href="/notifications">Notificações</a><a href="/technician-profile">O meu perfil</a><a href="/technician-route">Agenda</a></div></section>
+
+    <details class="card field-panel field-panel-more"><summary>Histórico de alertas</summary><div id="fieldAlertHistoryList"></div></details>
+
     <section class="card water-card field-panel field-panel-more">
       <span class="chip">Água aberta</span>
       <div class="muted" style="margin-top:10px">Defina tempo ou hora para fechar e evitar esquecimentos.</div>
@@ -1402,9 +1412,9 @@
       <span class="chip">Limpeza da piscina</span>
       <div class="muted" style="margin:8px 0">Marque apenas o que foi executado na visita atual.</div>
       <div class="checks">
-        <label class="check"><input type="checkbox" id="cleaned" checked> Água limpa</label>
+        <label class="check"><input type="checkbox" id="cleaned"> Água limpa</label>
         <label class="check"><input type="checkbox" id="vacuumed"> Aspirada</label>
-        <label class="check"><input type="checkbox" id="basketCleaned" checked> Cestos limpos</label>
+        <label class="check"><input type="checkbox" id="basketCleaned"> Cestos limpos</label>
         <label class="check"><input type="checkbox" id="brushed"> Escovagem</label>
         <label class="check"><input type="checkbox" id="waterlineClean"> Linha de água</label>
         <label class="check"><input type="checkbox" id="backwashDone"> Filtro lavado</label>
@@ -1422,21 +1432,21 @@
         </label>
         <label class="measure-field">
           <span class="measure-label">Alcalinidade</span>
-          <input id="alkalinity" inputmode="numeric" placeholder="Alcalinidade" data-min="80" data-max="120" data-unit="ppm">
+          <input id="alkalinity" inputmode="numeric" placeholder="ppm" data-min="80" data-max="120" data-unit="ppm">
           <strong class="range-status" id="alkalinityStatus">Por medir</strong>
         </label>
-        <input id="salt" inputmode="numeric" placeholder="Sal">
+        <label class="measure-field"><span class="measure-label">Sal</span><input id="salt" inputmode="numeric" placeholder="Sal"></label>
         <label class="measure-field">
           <span class="measure-label">ORP</span>
           <input id="orp" inputmode="numeric" placeholder="ORP" data-min="650" data-max="750" data-unit="mV">
           <strong class="range-status" id="orpStatus">Por medir</strong>
         </label>
-        <input id="temperature" inputmode="decimal" placeholder="Temperatura">
+        <label class="measure-field"><span class="measure-label">Temperatura</span><input id="temperature" inputmode="decimal" placeholder="Temperatura"></label>
         <textarea id="notes" placeholder="Notas para o escritório ou cliente"></textarea>
       </div>
     </section>
 
-    <section class="card dose-card field-panel field-panel-agora" aria-label="Produtos utilizados">
+    <section id="productsCard" class="card dose-card field-panel field-panel-agora" aria-label="Produtos utilizados">
       <span class="chip">Produtos usados</span>
       <div class="dose-list" id="doseRows"><div class="dose-empty">Sem produtos adicionados nesta visita.</div></div>
       <div class="dose-footer">
@@ -1445,7 +1455,7 @@
       </div>
     </section>
 
-    <section class="card photo-card field-panel field-panel-agora" aria-label="Fotografias da visita">
+    <section id="photosCard" class="card photo-card field-panel field-panel-agora" aria-label="Fotografias da visita">
       <span class="chip">Fotografias</span>
       <input id="photoInput" type="file" accept="image/*" capture="environment" hidden>
       <div class="photo-actions">
@@ -1557,47 +1567,6 @@
   </main>
 
   <div class="toast" id="toast"></div>
-  <aside class="cw-v2-drawer" data-cw-drawer aria-hidden="true">
-    <div class="cw-v2-drawer-backdrop" data-cw-drawer-backdrop></div>
-    <div class="cw-v2-drawer-panel" role="dialog" aria-modal="true" aria-label="Menu técnico completo">
-      <div class="cw-v2-drawer-head">
-        <div class="cw-v2-drawer-title">Menu técnico</div>
-        <button class="cw-v2-drawer-close" type="button" data-cw-close-drawer aria-label="Fechar menu">X</button>
-      </div>
-      <nav class="cw-v2-nav-groups" aria-label="Capacidades do técnico">
-        <details class="cw-v2-nav-group" open>
-          <summary>Operação diária</summary>
-          <div class="cw-v2-nav-links cw-v2-nav">
-            <a href="/technician-field-mode" data-shell-search="Hoje">Hoje</a>
-            <a href="/technician-field-mode#agora" data-shell-search="Agora">Agora</a>
-            <a href="/technician-map" data-shell-search="Mapa">Mapa</a>
-            <a href="/technician-field-mode#docs" data-shell-search="Documentos">Documentos</a>
-            <a href="/technician-field-mode#more" data-shell-search="Mais">Mais</a>
-          </div>
-        </details>
-        <details class="cw-v2-nav-group" open>
-          <summary>Módulos secundários</summary>
-          <div class="cw-v2-nav-links cw-v2-nav">
-            <a href="/admin-pools" data-shell-search="Pools">Pools</a>
-            <a href="/admin-inventory?tab=products" data-shell-search="Products">Products</a>
-            <a href="/admin-pool-technical" data-shell-search="Equipment">Equipment</a>
-            <a href="/admin-alerts?scope=repairs" data-shell-search="Repairs interventions">Repairs / Interventions</a>
-            <a href="/technician-guide" data-shell-search="Documents">Documents</a>
-            <a href="/technician-guide" data-shell-search="Work guides">Work Guides</a>
-            <a href="/technician-guide?tab=transport" data-shell-search="Transport guides">Transport Guides</a>
-            <a href="/admin-vehicles" data-shell-search="Vehicle">Vehicle</a>
-            <a href="/admin-inventory" data-shell-search="Stock">Stock</a>
-            <a href="/technician-map" data-shell-search="Map">Map</a>
-            <a href="/technician.html" data-shell-search="History">History</a>
-            <a href="/notifications" data-shell-search="Notifications">Notifications</a>
-            <a href="/technician-login" data-shell-search="Profile">Profile</a>
-            <a href="/technician-field-mode#syncPhotosBtn" data-shell-search="Sync offline status">Sync / Offline status</a>
-            <a href="/crystal-os-v2-route-index" data-shell-search="Route index all modules">Route Index (All Modules)</a>
-          </div>
-        </details>
-      </nav>
-    </div>
-  </aside>
   <script src="/cw-ui-feedback.js"></script>
   <script src="/cw-auth-download.js"></script>
   <script src="/cw-browser-push.js"></script>
@@ -1607,7 +1576,6 @@
   <script src="/technician-field-mode.js"></script>
   <script src="/ui/core/navigation-context.js"></script>
   <script src="/crystal-os-v2-shell.js"></script>
-  <script src="/crystal-os-v2-nav.js"></script>
   <script defer src="/ui/design-system.js"></script>
 </body>
 </html>

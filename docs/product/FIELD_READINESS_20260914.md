@@ -186,8 +186,40 @@ CI PostgreSQL aprovado: https://github.com/ts7520305-svg/cristalwater/actions/ru
 
 CI passa a criar um dump PostgreSQL, restaurar numa segunda base descartável e comparar contagem e impressão digital de todas as tabelas. Verifica também sequências de IDs e recuperação dos ficheiros de uploads por SHA-256. Guarda apenas relatório; elimina dump e base auxiliar. O teste recusa ambientes fora do serviço QA definido no workflow.
 
-Este ensaio mede a recuperação da base de testes desta release; não substitui um backup nem um restauro do VPS real. Resultado remoto ainda por verificar.
+Este ensaio mede a recuperação da base de testes desta release; não substitui um backup nem um restauro do VPS real. Resultado remoto aprovado no run 34862036809: 93 tabelas e 9 ficheiros recuperados, com impressões digitais e sequências verificadas.
 
 ## TASK 22 — instruções de instalação coerentes
 
 README, preparação VPS e runbook passam a preservar o `.env` existente e logs. Retirada indicação de aplicar migrações cegamente: primeiro verificar histórico/schema e backup restaurável. O relatório de julho não comprova recuperação do VPS atual, e um export JSON de fallback não comprova um backup PostgreSQL restaurável. Scripts apenas preparados; nenhum comando executado no VPS.
+
+
+## TASK 23 — interface profissional para utilização em campo
+
+Uma única navegação: Hoje, Visita, Mapa, Viatura e Mais. Ações de início/conclusão ao fundo; atalhos Acesso/Serviço/Produtos/Fotos; documentos detalhados na viatura; histórico local em Mais. Contraste e alvos de toque reforçados. Resumo de documentos aguarda os dados reais antes de alertar. Alertas por resolver continuam acessíveis nos vários separadores.
+
+Estados distintos para rascunho local, falha de gravação, ausência de rede, cópia da ronda e envios pendentes da visita. Falha de carregamento sem cópia apresenta nova tentativa. Medição vazia é “Por medir”; vírgula decimal é aceite e zero continua uma leitura real. Nova visita não começa com tarefas marcadas como realizadas; rascunhos preservam as escolhas do técnico.
+
+Referências consultadas em 14/09/2026: [Skimmer](https://www.getskimmer.com/) para rondas, registos e fotografias em campo; [Jobber](https://www.getjobber.com/) para informação e execução de trabalhos no telemóvel; [Pool Founder](https://www.poolfounder.com/) para padrões de utilização em campo. Adaptação ao produto existente, sem copiar marcas ou assumir resultados comerciais dos fornecedores.
+
+### Matriz de situações e limites da evidência
+
+| Situação | Verificação / tratamento |
+|---|---|
+| Ecrãs de 320, 390 e 768 px | Chromium: sem overflow horizontal, uma navegação, alvos da navegação de pelo menos 44 × 44 px |
+| Ronda, visita e documentos | Navegação, atalhos, separação de documentos e ausência de alertas falsos verificados |
+| Leituras vazias, zero, vírgula e fora da referência | Estados Por medir/Baixo/OK/Alto verificados sem alterar os limites configurados |
+| Trabalho ainda não executado | Novas visitas sem caixas pré-selecionadas; escolhas persistem após conclusão |
+| Memória local cheia | Falha simulada apresenta erro de gravação; não afirma sucesso |
+| Ronda sem rede e sem cópia | Erro visível e botão de repetição; recuperação ao restabelecer o pedido |
+| Ronda em cache, fotografia e conclusão sem rede | Recarga, preservação de dados e repetição após reconexão verificadas |
+| Repetição de conclusão/fotografia | Uma visita, uma fotografia e um débito de stock; concorrência e correções verificadas |
+| Guias/seguro/inspeção e stock inválidos | Bateria de validação operacional e autorizações; falhas não deixam débito parcial |
+| Conta inválida, cliente/viatura/visita alheios | Bateria de acesso bloqueia leitura ou alteração não autorizada |
+| Água e check-in sem rede | Componentes Chromium e API: pendência explícita, reconciliação e autorização |
+| Gestão, cliente, administração, finanças, reparações e interligações | 15 grupos integrados, incluindo simulação de mês operacional |
+| Recuperação de desastre | QA PostgreSQL 16: restauro de 93 tabelas e 9 ficheiros aprovado; VPS real não ensaiado |
+| Câmara/GPS recusados, bateria esgotada, sistema a encerrar a aplicação | Exigem ensaio em dispositivos físicos; não comprovados por esta bateria |
+| Notificação no telefone bloqueado, aplicação fechada e sessão expirada | Exige telefone inscrito e configuração real; não comprovado |
+| Sol direto, luvas, utilização prolongada e redes móveis reais | Aceitação com técnicos em campo ainda necessária |
+
+Não é possível comprovar literalmente todas as combinações de equipamento, rede e operação. Esta matriz identifica classes críticas, testes reproduzíveis e limites explícitos. A release continua em proposta; não foi instalada no VPS.

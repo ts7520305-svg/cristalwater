@@ -8,7 +8,7 @@ const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
 (async () => {
   const suffix = Date.now();
   const password = `Qa-${suffix}-Only!`;
-  const tech = await prisma.technician.create({ data: { name: `Campo QA ${suffix}`, email: `e2e-${suffix}@qa.test`, pin: '762948', active: true } });
+  const tech = await prisma.technician.create({ data: { name: 'Rui · Técnico QA', email: `e2e-${suffix}@qa.test`, pin: '762948', active: true } });
   const vehicle = await prisma.vehicle.create({data:{plate:`QA-${suffix}`,name:'Viatura E2E',active:true}});
   await prisma.technician.update({where:{id:tech.id},data:{vehicleId:vehicle.id}});
   const guide = await prisma.transportGuide.create({data:{vehicleId:vehicle.id,codeAT:`QA-${suffix}`,status:'ACTIVE',validUntil:new Date(Date.now()+86400000),isDraft:false}});
@@ -16,8 +16,8 @@ const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
   const work = await prisma.workGuide.create({data:{vehicleId:vehicle.id,technicianId:tech.id,guideId:guide.id,status:'OPEN',isDraft:false}});
   const product = await prisma.workGuideItem.create({data:{workGuideId:work.id,name:'Cloro E2E',type:'CHEMICAL',unit:'KG',quantity:10,initialQty:10,usedQty:0}});
   for(const type of ['INSURANCE','INSPECTION']) await prisma.vehicleMaintenanceRecord.create({data:{vehicleId:vehicle.id,type,title:type,status:'ACTIVE',dueDate:new Date(Date.now()+86400000*30)}});
-  const client = await prisma.client.create({ data: { name: `Cliente E2E ${suffix}`, email: `client-${suffix}@qa.test`, password: await bcrypt.hash(password,10), active: true } });
-  const pool = await prisma.pool.create({ data: { name: 'Piscina Campo E2E', clientId: client.id, volumeM3: 45, active: true, latitude: 38.7, longitude: -9.1 } });
+  const client = await prisma.client.create({ data: { name: 'Cliente de demonstração', email: `client-${suffix}@qa.test`, password: await bcrypt.hash(password,10), active: true } });
+  const pool = await prisma.pool.create({ data: { name: 'Piscina da Quinta', clientId: client.id, volumeM3: 45, active: true, latitude: 38.7, longitude: -9.1 } });
   const visit = await prisma.serviceVisit.create({ data: { clientId: client.id, poolId: pool.id, technicianId: tech.id, plannedDate: new Date(), date: new Date(), status: 'PLANNED' } });
   const browser = await chromium.launch({ headless:true, ...(process.env.CW_CHROMIUM_PATH ? {executablePath:process.env.CW_CHROMIUM_PATH,args:['--no-sandbox','--disable-gpu','--disable-dev-shm-usage']} : {}) });
   const failures=[];
@@ -45,9 +45,38 @@ const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
         assert.equal(await page.evaluate(()=>getComputedStyle(document.documentElement).visibility),'visible');
         assert.equal(errors.length,0,errors.join('\n'));
         console.log('PASS',persona.name,'online',JSON.stringify({apiErrors}));
+        if(persona.role==='TECHNICIAN') await page.waitForFunction(()=>document.querySelector('#fieldDocsValue')?.textContent==='Válidos');
+        if(process.env.CW_CAPTURE_UI){require('fs').mkdirSync('reports/field-ui',{recursive:true});await page.screenshot({path:`reports/field-ui/${persona.role}.png`,fullPage:true});}
         if(persona.role==='TECHNICIAN') {
-          await page.waitForFunction(() => document.querySelector('#nextTitle')?.textContent.includes('Piscina Campo E2E'));
+          await page.waitForFunction(() => document.querySelector('#nextTitle')?.textContent.includes('Piscina da Quinta'));
+          assert.equal(await page.locator('.field-tabs').count(),1);
+          assert.equal(await page.locator('.ds-bottom-nav, .cw-v2-mobile-primary, [data-cw-drawer]').count(),0);
+          assert.equal(await page.locator('#interruptCard').isVisible(),false,'Valid documents must not leave false operational alerts');
+          for(const width of [320,390,768]){
+            await page.setViewportSize({width,height:844});
+            assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Horizontal overflow at ${width}px`);
+            const targets=await page.locator('.field-tabs button').evaluateAll(buttons=>buttons.map(button=>({w:button.getBoundingClientRect().width,h:button.getBoundingClientRect().height})));
+            assert(targets.every(target=>target.w>=44&&target.h>=44),`Navigation targets too small at ${width}px`);
+          }
+          await page.setViewportSize({width:390,height:844});
           await page.locator('[data-field-tab-button=agora]').first().click();
+          assert.equal(await page.locator('[data-field-tab-button=agora]').getAttribute('aria-current'),'page');
+          assert.equal(await page.locator('.crew-card').isVisible(),false,'Detailed vehicle documents belong in the Vehicle tab');
+          await page.getByRole('button',{name:'Serviço',exact:true}).click();
+          assert.equal(await page.locator('.check input:checked').count(),0,'New visits must not claim tasks were already performed');
+          await page.locator('#basketCleaned').check();
+          for(const id of ['ph','chlorine','alkalinity','orp'])assert.equal(await page.locator(`#${id}Status`).textContent(),'Por medir');
+          for(const [value,status] of [['7,4','OK'],['0','Baixo'],['9','Alto'],['','Por medir']]){
+            await page.locator('#ph').fill(value);
+            assert.equal(await page.locator('#phStatus').textContent(),status);
+          }
+          if(process.env.CW_CAPTURE_UI)await page.screenshot({path:'reports/field-ui/TECHNICIAN_VISIT.png',fullPage:false});
+          await page.evaluate(()=>{window.__storageSet=Storage.prototype.setItem;Storage.prototype.setItem=function(key,value){if(key.startsWith('cwFieldVisitDrafts:'))throw new DOMException('Quota exceeded','QuotaExceededError');return window.__storageSet.call(this,key,value)}});
+          await page.locator('#notes').fill('Teste de memória cheia');
+          assert.equal(await page.locator('#fieldSaveStatus').getAttribute('data-state'),'error');
+          await page.evaluate(()=>{Storage.prototype.setItem=window.__storageSet;delete window.__storageSet});
+          console.log('PASS one navigation, 320/390/768px layout, touch targets and explicit local storage failure');
+
           const notes=page.locator('#notes');
           await notes.fill('Rascunho guardado no campo');
           await page.locator('#ph').fill('7.4');
@@ -68,7 +97,7 @@ const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
           const pendingBody = await page.evaluate(id => Object.values(JSON.parse(localStorage.getItem(`cwFieldOutbox:${id}`)))[0].body, tech.id);
           assert.notEqual((await prisma.serviceVisit.findUnique({where:{id:visit.id}})).status,'DONE');
           await page.reload({waitUntil:'domcontentloaded',timeout:10000});
-          await page.waitForFunction(() => document.querySelector('#nextTitle')?.textContent.includes('Piscina Campo E2E'));
+          await page.waitForFunction(() => document.querySelector('#nextTitle')?.textContent.includes('Piscina da Quinta'));
           assert.equal(await page.locator('#notes').inputValue(),'Rascunho guardado no campo');
           assert.equal(await page.evaluate(async id=>(await window.CWFieldPhotos.list(id))[0].file.size,visit.id),photoBytes.length);
           console.log('PASS technician offline reload preserves route and draft');
@@ -77,6 +106,8 @@ const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
           const persisted=await prisma.serviceVisit.findUnique({where:{id:visit.id}});
           assert.equal(persisted.status,'DONE');
           assert.equal(persisted.notes,'Rascunho guardado no campo');
+          assert.equal(persisted.basketCleaned,true);
+          assert.equal(persisted.cleaned,false);
           const used=await prisma.workGuideItem.findUnique({where:{id:product.id}});
           assert.equal(used.quantity,9);assert.equal(used.usedQty,1);
           const replay=await fetch(`${base}/api/core/visits/${visit.id}/complete`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${login.token}`},body:JSON.stringify(pendingBody)});
@@ -120,6 +151,17 @@ const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
           assert.equal(backup.entries.length,1);assert(!JSON.stringify(backup).includes(login.token));assert.equal(Buffer.from(backup.entries[0].bodyBase64,'base64').toString(),'{"notes":"Registo antigo"}');
           await page.evaluate(()=>window.CWFieldRecovery.refresh());assert(await page.locator('#cwFieldRecovery').isVisible());
           console.log('PASS older pending records remain preserved and export excludes authentication tokens');
+          await page.evaluate(()=>{for(const key of Object.keys(localStorage))if(key.startsWith('cwFieldRoute:'))localStorage.removeItem(key)});
+          await page.route('**/api/technician/today?*',route=>route.abort('failed'));
+          await page.reload({waitUntil:'networkidle'});
+          await page.waitForFunction(()=>!document.querySelector('#fieldLoadError').hidden);
+          assert((await page.locator('#fieldLoadErrorText').innerText()).includes('Sem ronda guardada'));
+          assert(await page.locator('#fieldReloadBtn').isVisible());
+          await page.unroute('**/api/technician/today?*');
+          await page.locator('#fieldReloadBtn').click();
+          await page.waitForFunction(()=>document.querySelector('#fieldLoadError').hidden);
+          console.log('PASS missing route cache shows a recoverable error and retry restores the route');
+
 
 
         }
