@@ -17,7 +17,7 @@ const deadline = setTimeout(() => { console.error('FAIL: browser did not remain 
     await page.route('http://field.test/**', async (route) => {
       const url = new URL(route.request().url());
       if (url.pathname.startsWith('/api/')) {
-        requests.push({ path: url.pathname, body: route.request().postDataJSON() });
+        requests.push({ method: route.request().method(), path: url.pathname, body: route.request().postDataJSON() });
         return route.fulfill({ status: mode === 'queued' ? 202 : 200, contentType: 'application/json', body: JSON.stringify(mode === 'queued' ? { ok: true, offline: true, status: 'PENDING_SYNC' } : { ok: true, reminder: { id: 7 } }) });
       }
       return route.fulfill({ contentType: url.pathname.endsWith('.js') ? 'text/javascript' : 'text/html', body: url.pathname.endsWith('.js') ? '' : html });
@@ -31,6 +31,8 @@ const deadline = setTimeout(() => { console.error('FAIL: browser did not remain 
       window.starts = 0;
       document.querySelector('#startBtn').addEventListener('click', () => window.starts++);
     });
+    await page.evaluate(() => { const node=document.createElement('div'); node.className='loading'; node.textContent='A carregar'; document.body.appendChild(node); });
+    await page.addScriptTag({content:fs.readFileSync(path.join(__dirname,'../frontend/ui/state-adapter-v2.js'),'utf8')});
     await page.addScriptTag({ content: source });
     assert.equal(await page.evaluate(() => new Promise(r => setTimeout(() => r('responsive'), 50))), 'responsive');
     await page.getByRole('button', { name: 'Iniciar visita', exact: true }).click();
@@ -60,7 +62,7 @@ const deadline = setTimeout(() => { console.error('FAIL: browser did not remain 
     }, pending);
     await page.addScriptTag({ content: source });
     await page.waitForFunction(() => JSON.parse(localStorage.getItem('cwWaterReminders:41'))[0].closeSyncedAt);
-    assert.deepEqual(requests.map(r => r.path), ['/api/technician/water-reminders', '/api/technician/water-reminders/7/close']);
+    assert.deepEqual(requests.filter(r => r.method === 'POST').map(r => r.path), ['/api/technician/water-reminders', '/api/technician/water-reminders/7/close']);
     const closed = await page.evaluate(() => JSON.parse(localStorage.getItem('cwWaterReminders:41'))[0]);
     assert.equal(closed.status, 'CLOSED');
     assert.equal(closed.syncError, '');

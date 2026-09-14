@@ -50,6 +50,12 @@ Pedido atual: concluir e testar os fluxos do técnico em campo, gestor, cliente 
 - Consultas usam agora o cliente da transação; erros seguem para o middleware HTTP.
 - Teste utiliza o diretório de uploads isolado configurado. Jornada Customer OS passou integralmente: dashboard, notificações, documentos, download, permissões, mensagens, pedidos e histórico.
 
+## TASK 6 — componente comum de estados
+
+- O teste integral encontrou um segundo ciclo de MutationObserver no adaptador de carregamento/erro: observava alterações de atributos que ele próprio fazia.
+- Execução protegida contra os próprios eventos e inicialização repetida; regressão Chromium inclui agora o adaptador real e um elemento de carregamento.
+- Ecrãs reais de técnico móvel, cliente móvel e administração desktop abrem sem erros JavaScript ou respostas API falhadas no ensaio.
+
 ## Ensaios por concluir
 
 - Base isolada, arranque, dados de ensaio e testes de API.
