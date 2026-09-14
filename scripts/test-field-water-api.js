@@ -27,12 +27,27 @@ async function main() {
   let id;
   await test('concurrent replay creates one reminder', async()=>{ const replies=await Promise.all([call('POST',path,token,payload),call('POST',path,token,payload)]); replies.forEach(r=>assert.equal(r.status,200,JSON.stringify(r.body))); id=replies[0].body.reminder.id;assert.equal(replies[1].body.reminder.id,id);assert.equal(await prisma.operationalReminder.count({where:{sourceKey:`water:${tech.id}:${payload.localId}`}}),1); });
   assert(id,'Creation must succeed to test remaining transitions');
+  await test('pump reminder persists, escalates and closes with isolated ownership',async()=>{
+    const pumpPath='/api/technician/pump-reminders';
+    assert.equal((await call('POST',pumpPath,otherToken,payload)).status,403);
+    const created=await call('POST',pumpPath,token,payload);assert.equal(created.status,200,JSON.stringify(created.body));
+    const pumpId=created.body.reminder.id;assert.notEqual(pumpId,id);
+    assert.equal((await call('POST',pumpPath,token,payload)).body.reminder.id,pumpId);
+    await processOverdue();await processOverdue();
+    assert.equal(await prisma.notification.count({where:{eventType:'PUMP_MANUAL_OVERDUE',metadata:{path:['reminderId'],equals:pumpId}}}),2);
+    assert.equal((await call('POST',`${pumpPath}/${pumpId}/close`,otherToken,{})).status,403);
+    assert.equal((await call('POST',`${pumpPath}/${pumpId}/close`,token,{})).status,200);
+    assert.equal((await prisma.operationalReminder.findUnique({where:{id:pumpId}})).isCompleted,true);
+    assert.equal(await prisma.notification.count({where:{eventType:'PUMP_MANUAL_OVERDUE',status:'PENDING',metadata:{path:['reminderId'],equals:pumpId}}}),0);
+    assert(!(await call('GET',path,token)).body.reminders.some(row=>row.id===pumpId));
+  });
+
   await test('foreign close rejected',async()=>assert.equal((await call('POST',`${path}/${id}/close`,otherToken,{})).status,403));
   await test('unknown close returns404',async()=>assert.equal((await call('POST',`${path}/99999999/close`,token,{})).status,404));
   await test('server escalates without browser and repeats safely',async()=>{await processOverdue();await processOverdue();assert.equal(await prisma.technicalAlert.count({where:{poolId:pool.id,type:'AGUA_ABERTA'}}),1);assert.equal(await prisma.notification.count({where:{clientId:client.id,eventType:'WATER_OPEN_OVERDUE'}}),2);});
   await test('foreign list hides reminder',async()=>{const r=await call('GET',path,otherToken);assert.equal(r.status,200);assert(!r.body.reminders.some(x=>x.id===id));});
   await test('close resolves linked alarm only',async()=>{const r=await call('POST',`${path}/${id}/close`,token,{});assert.equal(r.status,200);assert.equal(r.body.reminder.isCompleted,true);assert.equal(await prisma.technicalAlert.count({where:{poolId:pool.id,status:'OPEN'}}),0);});
-  await test('late alarm cannot reopen a closed reminder',async()=>{const r=await call('POST',`${path}/${id}/alarm`,token,{});assert.equal(r.status,200);assert.equal(r.body.reminder.isCompleted,true);assert.equal(await prisma.technicalAlert.count({where:{poolId:pool.id}}),1);});
+  await test('late alarm cannot reopen a closed reminder',async()=>{const r=await call('POST',`${path}/${id}/alarm`,token,{});assert.equal(r.status,200);assert.equal(r.body.reminder.isCompleted,true);assert.equal(await prisma.technicalAlert.count({where:{poolId:pool.id,type:'AGUA_ABERTA'}}),1);});
   await test('replayed create preserves closed state',async()=>{const r=await call('POST',path,token,payload);assert.equal(r.body.reminder.id,id);assert.equal(r.body.reminder.isCompleted,true);});
   await test('field reload can retrieve authoritative state',async()=>{const r=await call('GET',path,token);assert(r.body.reminders.some(x=>x.id===id&&x.isCompleted));});
   console.log(JSON.stringify({results},null,2));

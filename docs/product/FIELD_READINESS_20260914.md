@@ -278,3 +278,11 @@ O estado de atualização do centro de comando inclui agora a resposta dos técn
 O adaptador Responses agrega blocos output_text dentro das mensagens, sem assumir que o primeiro elemento é texto nem depender da propriedade de conveniência do SDK. Rejeita resposta incompleta, vazia ou de recusa, com orientação para revisão humana. Pedido limitado a 20 segundos. O modo de demonstração afirma que não gerou análise técnica.
 
 Quatro testes unitários com respostas simuladas verificam texto em vários blocos, resposta incompleta, recusa/vazio e indisponibilidade/demonstração. Não foram feitas chamadas pagas nem configurados serviços externos. Referência: https://developers.openai.com/api/docs/guides/text (consultada em 14/09/2026).
+
+## TASK 31 — lembrete persistente de bomba em manual
+
+Completado o percurso de registo da bomba em manual: prazo explícito de 1–1440 minutos, nome da piscina e técnico, tempo em curso, aviso persistente nos separadores e confirmação humana de regresso a automático. O lembrete não comanda a bomba nem comprova o estado físico.
+
+A fila local preserva criação e fecho sem rede, incluindo recarga. O servidor reutiliza OperationalReminder com origem pump, idempotência, autorização por responsável, histórico e alerta crítico. O temporizador e a entrega Web Push incluem os lembretes vencidos da bomba; o fecho resolve apenas os avisos correspondentes. Não foi criada migração nem instalado qualquer componente no VPS.
+
+API verifica responsável, repetição, escalada sem navegador, fecho e separação da lista de água. Chromium verifica registo offline, recarga, confirmação física simulada no diálogo e sincronização de criação/fecho. Entrega num telefone real permanece um ensaio externo.

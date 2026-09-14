@@ -26,7 +26,7 @@ async function deliverWaterNotifications(){
  if(!areExternalNotificationsEnabled())return {skipped:true,reason:'EXTERNAL_NOTIFICATIONS_DISABLED'};
  if(!configured())return {skipped:true,reason:'WEB_PUSH_NOT_CONFIGURED'};
  const config=configuration();webPush.setVapidDetails(config.subject,config.publicKey,config.privateKey);
- const notifications=await prisma.notification.findMany({where:{eventType:'WATER_OPEN_OVERDUE',status:{in:['PENDING','SENT']}},orderBy:{createdAt:'desc'},take:100});
+ const notifications=await prisma.notification.findMany({where:{eventType:{in:['WATER_OPEN_OVERDUE','PUMP_MANUAL_OVERDUE']},status:{in:['PENDING','SENT']}},orderBy:{createdAt:'desc'},take:100});
  let sent=0;
  for(const notification of notifications){
   const metadata=notification.metadata||{};if(metadata.webPushComplete)continue;

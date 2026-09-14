@@ -855,6 +855,9 @@ function waterHandler(action) {
     }
   };
 }
+router.get('/pump-reminders', waterHandler(req => waterReminderService.list(req.user, 'PUMP_MANUAL')));
+router.post('/pump-reminders', waterHandler(req => waterReminderService.create(req.user, req.body, 'PUMP_MANUAL')));
+router.post('/pump-reminders/:id/close', waterHandler(req => waterReminderService.transition(req.user, req.params.id, 'close')));
 router.get('/water-reminders', waterHandler(req => waterReminderService.list(req.user)));
 router.post('/water-reminders', waterHandler(req => waterReminderService.create(req.user, req.body)));
 router.post('/water-reminders/:id/close', waterHandler(req => waterReminderService.transition(req.user, req.params.id, 'close')));
