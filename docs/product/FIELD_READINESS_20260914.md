@@ -105,3 +105,9 @@ Pedido atual: concluir e testar os fluxos do técnico em campo, gestor, cliente 
 Atualizações compatíveis de Express, uploads, email, Socket.IO e HTTP. Overrides explícitos uuid 11.1.1 (CommonJS/v4 utilizado pelos clientes Google) e deepmerge-ts 8.0.0 (deepmerge utilizado pelo Prisma), sem downgrade do Prisma. Acrescentado web-push 3.6.7.
 
 Verificação: npm audit completo — 0 vulnerabilidades conhecidas; Prisma validate/generate; 63 testes unitários; 4 testes do técnico; bateria real de 15 grupos após atualização. Não representa auditoria de segurança exaustiva. Fontes: https://github.com/uuidjs/uuid/releases/tag/v11.1.1 e advisories devolvidos pelo npm audit.
+
+## TASK 14 — subscrições de avisos por identidade
+
+Subscrições autenticadas, chave VAPID validada, destinos HTTPS de fornecedores autorizados e rejeição de troca de proprietário. Job de água entrega a técnicos específicos e administradores ativos; retira endpoints expirados; QA bloqueia envios externos. Migração aditiva WebPushSubscription.
+
+API testou subscrição, perfil forjado, tentativa de apropriação de endpoint e rejeição de destino de rede interna. Envio real não efetuado: depende de configuração do servidor e de autorização de notificações no dispositivo. Referência: https://github.com/web-push-libs/web-push .

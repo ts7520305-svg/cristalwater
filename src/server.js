@@ -197,6 +197,7 @@ function mount(pathname, router) {
 // API core
 mount("/api/system", systemRoutes);
 mount("/api/auth", authRoutes);
+mount("/api/push", require("./routes/browserPushRoutes"));
 mount("/api/admin-auth", require("./routes/adminAuthRoutes"));
 mount("/api/users", userRoutes);
 mount("/api/technicians", technicianCrudRoutes);

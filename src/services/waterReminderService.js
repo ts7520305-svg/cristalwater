@@ -131,6 +131,7 @@ async function processOverdue(now = new Date()) {
       const deliveries = await Promise.all(tokens.map(t => sendPush(t.token, notification.title, notification.message, { notificationId: notification.id, href: '/admin-alerts?origin=water-open' })));
       if (deliveries.length && deliveries.every(d => d.ok)) await prisma.notification.update({ where: { id: notification.id }, data: { status: 'SENT' } });
     }
+    await require('./browserPushService').deliverWaterNotifications();
     return { escalated };
   } finally { processing = false; }
 }
