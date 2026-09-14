@@ -1,4 +1,6 @@
 const http = require("http");
+require("../src/loadEnv")();
+let authToken;
 
 const BASE = process.env.VISIT_OS_BASE_URL || process.env.BASE_URL || "http://127.0.0.1:3002";
 
@@ -12,6 +14,7 @@ function request(method, path, body = null, { parseJson = true } = {}) {
         method,
         headers: {
           "Content-Type": "application/json",
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
           ...(data ? { "Content-Length": Buffer.byteLength(data) } : {}),
         },
       },
@@ -86,6 +89,7 @@ function requestMultipart(method, path, { fields = {}, fileField = "photo", file
         headers: {
           "Content-Type": `multipart/form-data; boundary=${boundary}`,
           "Content-Length": payload.length,
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
         },
       },
       (res) => {
@@ -123,6 +127,9 @@ function assertStep(condition, message) {
 }
 
 async function main() {
+  const login = await request("POST", "/api/auth/login", {email: process.env.ADMIN_EMAIL, password: process.env.ADMIN_PASSWORD});
+  if (login.status !== 200 || !login.body?.token) throw new Error(`Admin login failed: ${login.status}`);
+  authToken = login.body.token;
   const startedAt = Date.now();
   const suffix = uniqueSuffix();
 
@@ -162,7 +169,7 @@ async function main() {
 
   const technician = await request("POST", "/api/technicians", {
     name: `Visit OS Technician ${suffix}`,
-    email: `visit-os-tech-${suffix}@cristalwater.pt`,
+    email: `visit-os-gps-${suffix}@cristalwater.pt`,
     phone: "920000000",
     role: "TECHNICIAN",
     active: true,
@@ -226,7 +233,7 @@ async function main() {
   const portal = await request("GET", `/api/client-portal/${client.body.client.id}`);
   const dashboard = await request("GET", "/api/dashboard/metrics");
   const history = await request("GET", `/api/technical-history/pool/${pool.body.pool.id}`);
-  const technicianStatsById = await request("GET", `/api/technician-stats/${user.body.id}`);
+  const technicianStatsById = await request("GET", `/api/technician-stats/${technician.body.id}`);
   const technicianStats = technicianStatsById.status === 200
     ? technicianStatsById
     : await request("GET", "/api/technician-stats");

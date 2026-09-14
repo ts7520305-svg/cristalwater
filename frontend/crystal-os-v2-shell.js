@@ -39,7 +39,7 @@
     const techId = () => String(new URLSearchParams(location.search).get('technicianId') || localStorage.getItem('cwTechnicianId') || user().technicianId || user().id || 'sem-tecnico');
     const key = () => `cwWaterReminders:${techId()}`;
     const rows = () => { const value = read(key(), []); return Array.isArray(value) ? value : []; };
-    const save = (value) => write(key(), (value || []).slice(-100));
+    const save = (value) => { write(key(), value || []); window.dispatchEvent(new Event('cw:water-state-updated')); };
     const byId = (id) => rows().find((item) => String(item.localId || '') === String(id || '')) || null;
     const elapsed = (value) => {
       const date = new Date(value || 0);
@@ -65,6 +65,21 @@
       return data;
     };
 
+    async function refreshServerWater() {
+      if (!navigator.onLine) return;
+      const response = await fetch('/api/technician/water-reminders');
+      if (!response.ok) return;
+      const data = await response.json();
+      if (!Array.isArray(data.reminders)) return;
+      const list = rows();
+      for (const remote of data.reminders) {
+        let item = list.find(x => x.serverId === remote.id || x.localId === remote.metadata?.localId);
+        if (item?.syncError) continue;
+        if (!item) { item = {localId:remote.metadata?.localId || `server-${remote.id}`}; list.push(item); }
+        Object.assign(item, remote.metadata || {}, {serverId:remote.id, technicianId:remote.assignedToTechnicianId, poolId:remote.poolId, clientId:remote.clientId, dueAt:remote.dueDate, createdAt:remote.createdAt, status:remote.isCompleted?'CLOSED':remote.metadata?.alarmedAt?'OVERDUE':'OPEN', syncError:''});
+      }
+      save(list);
+    }
     let syncingWater = false;
     async function syncPendingWaterState() {
       if (!navigator.onLine || syncingWater) return;
@@ -98,6 +113,7 @@
         } catch (_) {}
       }
       } finally { syncingWater = false; }
+      await refreshServerWater().catch(() => {});
     }
 
     function enhance() {
@@ -195,7 +211,7 @@
       item.status = 'CLOSED'; item.closedAt = new Date().toISOString(); item.closeConfirmed = true; item.closeConfirmedBy = user().name || 'Técnico';
       item.closeDurationMinutes = Math.max(0, Math.round((Date.now() - new Date(item.createdAt || Date.now()).getTime()) / 60000)); save(list);
       toast('Água fechada confirmada.');
-      try { await api(`/api/technician/water-reminders/${encodeURIComponent(item.serverId || localId)}/close`, { method: 'POST', body: JSON.stringify(item) }); item.syncError = ''; save(list); }
+      try { await api(`/api/technician/water-reminders/${encodeURIComponent(item.serverId || localId)}/close`, { method: 'POST', body: JSON.stringify(item) }); item.syncError = ''; item.closeSyncedAt = new Date().toISOString(); save(list); }
       catch (error) { item.syncError = error.message || 'Fecho pendente de sincronização'; save(list); }
       setTimeout(() => location.reload(), 120);
     }

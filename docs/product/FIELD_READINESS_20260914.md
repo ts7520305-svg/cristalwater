@@ -93,6 +93,12 @@ Pedido atual: concluir e testar os fluxos do técnico em campo, gestor, cliente 
 - Chromium/API: offline + recarga + fotografia + reconexão + conclusão + repetição passaram; 10 kg iniciais tornaram-se 9 kg, com um único consumo. Concorrência e repetição de produto sem saldo suficiente foram rejeitadas sem alterar o stock.
 - Migração aditiva de completionRequestId ainda não aplicada à produção.
 
+## TASK 12 — estatísticas e contexto persistente
+
+- Estatísticas usam o ID Technician das visitas; GPS associa o User por email. Acesso protegido à gestão/próprio técnico.
+- Sincronização de água recupera os lembretes do servidor e mantém abertos os de rondas anteriores. Fechos pendentes locais prevalecem até confirmação.
+- Visit OS passou com estatísticas da visita concluída. Route OS passou em seguida, no mesmo processo, depois da invalidação de cache corrigida na TASK 11.
+
 ## Ensaios por concluir
 
 - Base isolada, arranque, dados de ensaio e testes de API.

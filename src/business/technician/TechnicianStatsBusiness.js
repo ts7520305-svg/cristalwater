@@ -1,18 +1,18 @@
 const { prisma } = require("../../prismaClient");
 
-async function computeStatsForTechnician(techId) {
+async function computeStatsForTechnician(techId, userId = null) {
   const now = new Date();
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
   const [totalLogs, logsLast7Days, logsLast30Days, minMax, totalServices, servicesLast30Days, completedServices, completedServicesLast30Days, totalAlerts] = await Promise.all([
-    prisma.locationLog.count({ where: { userId: techId } }),
-    prisma.locationLog.count({ where: { userId: techId, timestamp: { gte: sevenDaysAgo } } }),
-    prisma.locationLog.count({ where: { userId: techId, timestamp: { gte: thirtyDaysAgo } } }),
+    prisma.locationLog.count({ where: { userId: userId || -1 } }),
+    prisma.locationLog.count({ where: { userId: userId || -1, timestamp: { gte: sevenDaysAgo } } }),
+    prisma.locationLog.count({ where: { userId: userId || -1, timestamp: { gte: thirtyDaysAgo } } }),
     prisma.locationLog.aggregate({
       _min: { timestamp: true },
       _max: { timestamp: true },
-      where: { userId: techId },
+      where: { userId: userId || -1 },
     }),
     prisma.serviceVisit.count({ where: { technicianId: techId } }),
     prisma.serviceVisit.count({ where: { technicianId: techId, plannedDate: { gte: thirtyDaysAgo } } }),
@@ -36,8 +36,8 @@ async function computeStatsForTechnician(techId) {
 }
 
 async function listTechnicianStats() {
-  const technicians = await prisma.user.findMany({
-    where: { role: "TECHNICIAN" },
+  const technicians = await prisma.technician.findMany({
+    where: { role: {in:["TECHNICIAN","TEAM_LEADER"]} },
     orderBy: { id: "asc" },
     select: {
       id: true,
@@ -50,7 +50,8 @@ async function listTechnicianStats() {
 
   const statsList = [];
   for (const tech of technicians) {
-    const stats = await computeStatsForTechnician(tech.id);
+    const user = tech.email ? await prisma.user.findUnique({where:{email:tech.email},select:{id:true}}) : null;
+    const stats = await computeStatsForTechnician(tech.id, user?.id);
     statsList.push({ technician: tech, stats });
   }
 
@@ -58,8 +59,8 @@ async function listTechnicianStats() {
 }
 
 async function getTechnicianStats(id) {
-  const tech = await prisma.user.findFirst({
-    where: { id, role: "TECHNICIAN" },
+  const tech = await prisma.technician.findUnique({
+    where: { id },
     select: { id: true, name: true, email: true, role: true, createdAt: true },
   });
 
@@ -67,7 +68,8 @@ async function getTechnicianStats(id) {
     return { ok: false, status: 404, error: "Técnico não encontrado." };
   }
 
-  const stats = await computeStatsForTechnician(tech.id);
+  const user = tech.email ? await prisma.user.findUnique({where:{email:tech.email},select:{id:true}}) : null;
+  const stats = await computeStatsForTechnician(tech.id, user?.id);
   return { ok: true, payload: { technician: tech, stats } };
 }
 
