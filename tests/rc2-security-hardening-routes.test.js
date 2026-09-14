@@ -41,4 +41,25 @@ describe("RC2 security hardening route guards", () => {
     expect(chatController).toMatch(/Acesso negado/);
     expect(chatController).toMatch(/scopedClientId !== clientId/);
   });
+
+  it("restricts technical proposals to technicians and admins", () => {
+    const core = read("src/routes/coreFlowRoutes.js");
+    expect(core).toMatch(/technical-change-proposals[\s\S]{0,120}technicianAuth/);
+    expect(core).not.toMatch(/const anyAuth = auth\(\);/);
+  });
+
+  it("opens protected guide PDFs through an authenticated download", () => {
+    const helper = read("frontend/cw-auth-download.js");
+    const admin = read("frontend/admin-vehicles.js");
+    const technician = read("frontend/technician-field-mode.js");
+    expect(helper).toMatch(/Authorization: `Bearer \$\{token\}`/);
+    expect(helper).toMatch(/URL\.createObjectURL/);
+    expect(admin).toMatch(/data-auth-download/);
+    expect(technician).toMatch(/data-auth-download/);
+  });
+
+  it("imports bcrypt for the real-month fallback admin", () => {
+    const script = read("scripts/test-real-month-flow-api.js");
+    expect(script).toMatch(/const bcrypt = require\("bcryptjs"\);/);
+  });
 });

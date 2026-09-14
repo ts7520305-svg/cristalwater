@@ -23,7 +23,6 @@ const router = express.Router();
 
 const adminAuth = auth('ADMIN');
 const technicianAuth = auth('TECHNICIAN');
-const anyAuth = auth();
 router.use((req, res, next) => {
   // Keep only minimal metadata endpoints public by design.
   if (req.method === 'GET' && (req.path === '/health' || req.path === '/dashboard')) return next();
@@ -33,7 +32,7 @@ router.use((req, res, next) => {
   }
   // Sprint 4.1: technicians can submit/read technical sheet change proposals.
   if (/^\/pools\/\d+\/technical-change-proposals(?:\/.*)?$/.test(req.path)) {
-    return anyAuth(req, res, next);
+    return technicianAuth(req, res, next);
   }
   return adminAuth(req, res, next);
 });
