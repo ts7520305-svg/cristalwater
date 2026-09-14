@@ -22,4 +22,10 @@ assert(has("/api/technician/water-reminders"), "backend contract not reused");
 assert(has("event.stopImmediatePropagation()"), "legacy manual-timer action is not intercepted");
 assert(has("node.hidden = true"), "legacy manual timing fields are not hidden");
 
-console.log("PASS technician water-state v2 contract");
+assert(has("installTechnicianCheckinUx"), "mandatory check-in installer missing");
+assert(has("Check-in obrigatório"), "check-in dialog label missing");
+assert(has("Li e vou iniciar a visita"), "explicit visit-start confirmation missing");
+assert(has("cw:field:checkin:"), "check-in audit marker missing");
+assert(has("Antes de começar"), "check-in operational summary missing");
+
+console.log("PASS technician water-state + mandatory check-in contract");
