@@ -257,3 +257,11 @@ Dois cenários Chromium adicionais verificam preservação após 403/repetição
 Uma fila local com JSON interrompido, estrutura inesperada ou identificação de visita incoerente apresenta aviso persistente e bloqueia substituição dos dados e novos envios nessa fila. Não é tratada como fila vazia para gravação. Os bytes originais ficam intactos para diagnóstico; não há limpeza ou recuperação automática inventada.
 
 Chromium verifica três formas de dano, tentativa de nova conclusão, ausência de pedidos ao servidor e preservação literal do conteúdo. A reposição de uma fila válida remove o aviso no ensaio; não foi realizada qualquer limpeza de dados de utilizadores.
+
+## TASK 28 — completar ações do portal cliente
+
+Ligado o seletor de anexos ao endpoint autenticado existente, com tipos JPG/PNG/WebP/GIF/PDF e limite de 25 MB. Mensagens, pedidos de visita e avisos de pagamento têm proteção contra duplo toque e falha de rede visível; o texto não é limpo antes da confirmação. Mensagens recebidas por socket e pela resposta HTTP são deduplicadas pelo ID.
+
+Documentos, notificações e permissões carregam independentemente. Uma falha num bloco mostra erro/repetição nesse bloco, preservando piscinas e conta. O histórico de mensagens verifica respostas HTTP antes de apresentar um estado vazio.
+
+Chromium/API aprovados: documentos indisponíveis com piscinas visíveis, recuperação explícita, mensagem preservada após falha, um POST perante dois cliques e anexo efetivamente persistido na conversa do cliente. Os testes usam notificações externas desativadas.

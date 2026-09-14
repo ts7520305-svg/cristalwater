@@ -1389,21 +1389,24 @@ function renderPermissions(permissions = {}) {
 }
 
 async function loadCustomerExtras() {
-  if (!clientId) return;
-  if (!portalAuthHeaders().Authorization && isAdminUser()) return;
-  const [notificationsRes, documentsRes, permissionsRes] = await Promise.all([
-    fetch(`${API}/client-portal/${clientId}/notifications`, { headers: portalAuthHeaders() }),
-    fetch(`${API}/client-portal/${clientId}/documents`, { headers: portalAuthHeaders() }),
-    fetch(`${API}/client-portal/${clientId}/permissions`, { headers: portalAuthHeaders() }),
-  ]);
-
-  const notifications = await notificationsRes.json().catch(() => ({}));
-  const documents = await documentsRes.json().catch(() => ({}));
-  const permissions = await permissionsRes.json().catch(() => ({}));
-
-  renderNotifications(Array.isArray(notifications.notifications) ? notifications.notifications : []);
-  renderDocuments(Array.isArray(documents.documents) ? documents.documents : []);
-  renderPermissions(permissions.permissions || {});
+  const requestedClient = clientId;
+  if (!requestedClient) return;
+  const sections=[['notifications','notificationList','notifications',renderNotifications],['documents','documentList','documents',renderDocuments],['permissions','permissionsList','permissions',renderPermissions]];
+  await Promise.allSettled(sections.map(async ([endpoint,id,field,render])=>{
+    try{
+      const response=await fetch(`${API}/client-portal/${requestedClient}/${endpoint}`,{headers:portalAuthHeaders()});
+      const data=await response.json();
+      if(!response.ok || data.ok===false)throw new Error(copy('loadError'));
+      if(clientId!==requestedClient)return;
+      render(field==='permissions' ? data[field] || {} : Array.isArray(data[field]) ? data[field] : []);
+    }catch(error){
+      if(clientId!==requestedClient)return;
+      const node=el(id);if(!node)return;
+      node.replaceChildren();const message=document.createElement('p');message.textContent=copy('loadError');message.setAttribute('role','alert');
+      const retry=document.createElement('button');retry.type='button';retry.className='cw-v2-btn';retry.textContent=portalLanguage==='en'?'Try again':portalLanguage==='fr'?'Réessayer':'Tentar novamente';
+      retry.onclick=()=>loadCustomerExtras();node.append(message,retry);
+    }
+  }));
 }
 
 function renderPaymentInstructions(instructions = {}) {
@@ -1701,6 +1704,7 @@ async function loadPortal() {
 }
 
 function appendMessage(message) {
+  if(message?.id && document.querySelector(`[data-client-message-id="${Number(message.id)}"]`))return;
   const chat = el("chatBox");
   if (!chat) return;
   const sender = String(message.sender || message.from || "").toLowerCase();
@@ -1709,6 +1713,7 @@ function appendMessage(message) {
   const date = message.createdAt ? new Date(message.createdAt).toLocaleString(localeForLanguage()) : "";
   const div = document.createElement("div");
   div.className = `msg ${isClient ? "client" : "admin"}`;
+  if(message?.id)div.dataset.clientMessageId=String(Number(message.id));
   div.innerHTML = `<b>${isClient ? esc(copy("clientDefault")) : "Cristal Water"}</b><br>${String(text).startsWith("/uploads/") ? `<a href="${esc(text)}" target="_blank">${esc(copy("openAttachment"))}</a>` : esc(text)}<div class="muted">${esc(date)}</div>`;
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
@@ -1727,6 +1732,7 @@ async function loadMessages() {
       secureHeaders.Authorization ? { headers: secureHeaders } : undefined
     );
     const data = await response.json();
+    if(!response.ok || data.ok===false)throw new Error(copy("messagesUnavailable"));
     chat.innerHTML = "";
     const messages = Array.isArray(data) ? data : (Array.isArray(data.messages) ? data.messages : []);
     if (!messages.length) {
@@ -1761,8 +1767,7 @@ async function sendMessage() {
     return;
   }
   appendMessage(data.message || { sender: "CLIENT", text, createdAt: new Date() });
-  input.value = "";
-  socket.emit("sendMessage", data.message);
+  if(input.value.trim()===text)input.value = "";
 }
 
 async function requestVisit() {
@@ -1779,9 +1784,33 @@ async function requestVisit() {
     ui.error(data.error || "Nao foi possivel solicitar a visita.");
     return;
   }
-  input.value = "";
+  if(input.value.trim()===text)input.value = "";
   ui.success("Pedido de visita enviado com sucesso.");
   await loadCustomerExtras();
+}
+
+const portalActions = new Set();
+async function runPortalAction(buttonId, action) {
+  if(portalActions.has(buttonId))return;
+  const button=el(buttonId),status=el('portalActionStatus');
+  portalActions.add(buttonId);if(button)button.disabled=true;
+  if(status){status.hidden=false;status.textContent=portalLanguage==='en'?'Sending…':portalLanguage==='fr'?'Envoi…':'A enviar…';}
+  try { await action();if(status)status.hidden=true; }
+  catch(error){
+    const message=error.userMessage || copy('sendMessageError');
+    if(status){status.textContent=message;status.hidden=false;}
+    ui.error(message);
+  }finally{portalActions.delete(buttonId);if(button)button.disabled=false;}
+}
+async function sendAttachment() {
+  const input=el('photoInput'),file=input?.files?.[0];
+  if(!file || !clientId)return;
+  if(!file.size || file.size>25*1024*1024 || !['image/jpeg','image/png','image/webp','image/gif','application/pdf'].includes(file.type))throw Object.assign(new Error('Invalid attachment'),{userMessage:portalLanguage==='en'?'Choose a JPG, PNG, WebP, GIF or PDF file, up to 25 MB.':portalLanguage==='fr'?'Choisissez un fichier JPG, PNG, WebP, GIF ou PDF de 25 Mo maximum.':'Escolha um ficheiro JPG, PNG, WebP, GIF ou PDF, até 25 MB.'});
+  const form=new FormData();form.append('clientId',String(clientId));form.append('file',file);
+  const response=await fetch(`${API}/client-messages/upload`,{method:'POST',body:form});
+  const data=await response.json();
+  if(!response.ok || data.ok===false || !data.message?.id)throw new Error(data.error || copy('sendMessageError'));
+  appendMessage(data.message);input.value='';
 }
 
 function updatePresence(lastSeen) {
@@ -1813,9 +1842,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     setText("typing", copy("adminTyping"));
     setTimeout(() => setText("typing", ""), 2000);
   });
-  el("sendBtn").onclick = sendMessage;
-  if (el("visitRequestBtn")) el("visitRequestBtn").onclick = requestVisit;
-  if (el("paymentNoticeBtn")) el("paymentNoticeBtn").onclick = notifyPayment;
+  el("sendBtn").onclick = ()=>runPortalAction("sendBtn",sendMessage);
+  if (el("visitRequestBtn")) el("visitRequestBtn").onclick = ()=>runPortalAction("visitRequestBtn",requestVisit);
+  if (el("paymentNoticeBtn")) el("paymentNoticeBtn").onclick = ()=>runPortalAction("paymentNoticeBtn",notifyPayment);
   ["paymentNoticeAmount", "paymentNoticeMethod", "paymentNoticeNote"].forEach((id) => {
     const node = el(id);
     if (node) node.addEventListener("input", refreshPaymentWhatsappLink);
@@ -1823,9 +1852,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   el("messageInput").addEventListener("keydown", (event) => {
     socket.emit("typing", { clientId });
-    if (event.key === "Enter") sendMessage();
+    if (event.key === "Enter") runPortalAction("sendBtn",sendMessage);
   });
   el("photoBtn").onclick = () => el("photoInput").click();
+  el("photoInput").onchange = ()=>runPortalAction("photoBtn",sendAttachment);
   await loadPortal();
   if (clientId) await loadMessages();
   if (clientId) fetch(`${API}/client-messages/seen/${clientId}?actor=client`, { method: "POST" }).catch(() => {});

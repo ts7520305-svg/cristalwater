@@ -563,11 +563,12 @@
 
       <section class="cw-v2-card" id="mensagens" aria-label="Mensagens com administração">
         <div class="section-head"><h2 id="messagesTitle">Mensagens com a equipa</h2><span class="pill" id="adminStatusText">A verificar</span></div>
+        <p id="portalActionStatus" role="status" hidden></p>
         <div class="chat-box" id="chatBox"></div>
         <div id="typing" class="muted" style="min-height:20px;margin-top:6px"></div>
         <div class="chat-input" style="margin-top:8px">
           <input type="text" id="messageInput" placeholder="Escreva a sua mensagem...">
-          <input type="file" id="photoInput" accept="image/*" hidden>
+          <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf" hidden>
           <button class="cw-v2-btn" id="photoBtn" type="button">Anexo</button>
           <button class="cw-v2-btn primary" id="sendBtn" type="button">Enviar</button>
         </div>

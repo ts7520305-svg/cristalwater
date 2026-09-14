@@ -47,6 +47,32 @@ const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
         console.log('PASS',persona.name,'online',JSON.stringify({apiErrors}));
         if(persona.role==='TECHNICIAN') await page.waitForFunction(()=>document.querySelector('#fieldDocsValue')?.textContent==='Válidos');
         if(process.env.CW_CAPTURE_UI){require('fs').mkdirSync('reports/field-ui',{recursive:true});await page.screenshot({path:`reports/field-ui/${persona.role}.png`,fullPage:true});}
+        if(persona.role==='CLIENT') {
+          await page.route('**/api/client-portal/*/documents',route=>route.fulfill({status:503,contentType:'application/json',body:'{"error":"Unavailable"}'}));
+          await page.reload({waitUntil:'networkidle'});
+          assert(await page.locator('#documentList [role=alert]').isVisible());
+          assert.match(await page.locator('#poolsList').textContent(),/Piscina da Quinta/);
+          await page.unroute('**/api/client-portal/*/documents');
+          await page.locator('#documentList button').click();
+          await page.waitForFunction(()=>!document.querySelector('#documentList [role=alert]'));
+          await page.route('**/api/client-portal/*/messages',route=>route.request().method()==='POST'?route.abort('failed'):route.continue());
+          await page.locator('#messageInput').fill('Mensagem preservada após falha');
+          await page.locator('#sendBtn').click();
+          await page.waitForFunction(()=>!document.querySelector('#sendBtn').disabled);
+          assert.equal(await page.locator('#messageInput').inputValue(),'Mensagem preservada após falha');
+          assert(await page.locator('#portalActionStatus').isVisible());
+          await page.unroute('**/api/client-portal/*/messages');
+          let posts=0;
+          await page.route('**/api/client-portal/*/messages',async route=>{if(route.request().method()==='POST'){posts++;await new Promise(r=>setTimeout(r,150));}await route.continue()});
+          await page.evaluate(()=>{document.querySelector('#sendBtn').click();document.querySelector('#sendBtn').click()});
+          await page.waitForFunction(()=>document.querySelector('#messageInput').value==='');
+          assert.equal(posts,1);
+          assert.equal(await prisma.clientMessage.count({where:{clientId:client.id,text:'Mensagem preservada após falha'}}),1);
+          await page.locator('#photoInput').setInputFiles({name:'client-attachment.png',mimeType:'image/png',buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6tAAAAABJRU5ErkJggg==','base64')});
+          await page.waitForFunction(()=>document.querySelector('#photoInput').value==='');
+          assert.equal(await prisma.clientMessage.count({where:{clientId:client.id,fileName:'client-attachment.png'}}),1);
+          console.log('PASS client partial failure recovery, retained message, double-click guard and persisted attachment');
+        }
         if(persona.role==='TECHNICIAN') {
           await page.waitForFunction(() => document.querySelector('#nextTitle')?.textContent.includes('Piscina da Quinta'));
           assert.equal(await page.locator('.field-tabs').count(),1);
