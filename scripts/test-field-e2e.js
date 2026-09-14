@@ -98,6 +98,30 @@ const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
           assert.equal(excessive.status,409);
           assert.equal((await prisma.workGuideItem.findUnique({where:{id:product.id}})).quantity,3);
           console.log('PASS concurrent visits and repeated product lines cannot overspend stock');
+          const correct=quantity=>fetch(`${base}/api/technician/visits/${visit.id}/correction`,{method:'PATCH',headers:{'Content-Type':'application/json',Authorization:`Bearer ${login.token}`},body:JSON.stringify({ph:7.4,chlorine:1.5,products:JSON.stringify([{name:'Cloro E2E',quantity,unit:'KG'}])})});
+          assert.equal((await correct(2)).status,200);
+          assert.equal((await prisma.workGuideItem.findUnique({where:{id:product.id}})).quantity,2);
+          assert.equal((await correct(2)).status,200);
+          assert.equal((await prisma.workGuideItem.findUnique({where:{id:product.id}})).quantity,2);
+          assert.equal((await correct(0.5)).status,200);
+          assert.equal((await prisma.workGuideItem.findUnique({where:{id:product.id}})).quantity,3.5);
+          assert.equal((await correct(99)).status,409);
+          assert.equal((await prisma.workGuideItem.findUnique({where:{id:product.id}})).quantity,3.5);
+          assert.equal((await prisma.chemicalUsage.findFirst({where:{visitId:visit.id}})).quantity,0.5);
+          console.log('PASS corrections reconcile quantity differences once and reject insufficient stock atomically');
+          await page.evaluate(async token=>{
+            const request=indexedDB.open('cristalwater-v22-offline',2);
+            const db=await new Promise((resolve,reject)=>{request.onupgradeneeded=()=>{request.result.createObjectStore('PayloadQueue',{keyPath:'id',autoIncrement:true});request.result.createObjectStore('MediaQueue',{keyPath:'id',autoIncrement:true})};request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)});
+            await new Promise((resolve,reject)=>{const tx=db.transaction('PayloadQueue','readwrite');tx.objectStore('PayloadQueue').add({url:location.origin+'/api/core/visits/1/complete',method:'POST',headers:{authorization:'Bearer '+token,'content-type':'application/json'},body:new TextEncoder().encode('{"notes":"Registo antigo"}').buffer});tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close();await window.CWFieldRecovery.refresh();
+          },login.token);
+          assert(await page.locator('#cwFieldRecovery').isVisible());
+          const [download]=await Promise.all([page.waitForEvent('download'),page.getByRole('button',{name:'Guardar cópia dos registos'}).click()]);
+          const backup=JSON.parse(require('fs').readFileSync(await download.path(),'utf8'));
+          assert.equal(backup.entries.length,1);assert(!JSON.stringify(backup).includes(login.token));assert.equal(Buffer.from(backup.entries[0].bodyBase64,'base64').toString(),'{"notes":"Registo antigo"}');
+          await page.evaluate(()=>window.CWFieldRecovery.refresh());assert(await page.locator('#cwFieldRecovery').isVisible());
+          console.log('PASS older pending records remain preserved and export excludes authentication tokens');
+
+
         }
       } catch(e) { const state=await page.evaluate(()=>({toast:document.querySelector('#toast')?.textContent,documents:document.querySelector('#documentCenterBox')?.innerText})).catch(()=>null); failures.push({persona:persona.name,error:e.message,state,errors,apiErrors});console.error('FAIL',persona.name,e.message); }
       console.log('CLOSE',persona.name);

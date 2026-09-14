@@ -969,6 +969,8 @@
   }
 
   function currentTechnicianId() {
+    const principal = window.CristalAuth?.parseUser?.() || {};
+    if (['TECHNICIAN','TEAM_LEADER'].includes(principal.role)) return String(principal.technicianId || principal.id || '');
     const fromQuery = new URLSearchParams(location.search).get("technicianId") || "";
     const fromInput = $("#technicianId")?.value || "";
     const fromStorage = localStorage.getItem("cwTechnicianId") || "";
@@ -2625,7 +2627,8 @@
   async function loadGuides(showFeedback = true) {
     const vehicleInput = $("#vehicleId");
     const technicianInput = $("#technicianId");
-    const vehicleId = (vehicleInput?.value || localStorage.getItem("cwVehicleId") || "1").trim();
+    const vehicleId = (vehicleInput?.value || localStorage.getItem("cwVehicleId") || "").trim();
+    if (!vehicleId) { renderCrewStatus(); return; }
     const technicianId = (technicianInput?.value || localStorage.getItem("cwTechnicianId") || "").trim();
 
     if (vehicleInput) vehicleInput.value = vehicleId;
@@ -3814,7 +3817,7 @@
           visits[index] = updatedVisit;
           loadCurrentDraft();
           render();
-          toast("Correcao guardada sem duplicar stock.");
+          toast("Correção guardada e stock reconciliado.");
           $("#finishBtn").disabled = false;
           return;
         }

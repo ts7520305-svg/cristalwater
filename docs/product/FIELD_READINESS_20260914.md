@@ -117,3 +117,9 @@ API testou subscrição, perfil forjado, tentativa de apropriação de endpoint 
 Administrador pode consultar o portal de qualquer cliente. Históricos numéricos exigem autenticação e propriedade. Escritas do cliente não aceitam administrador a apresentar-se como cliente. Técnico só consulta/movimenta guias da viatura atribuída, não escolhe identidade pelo formulário e não conclui visita utilizando stock de outra viatura.
 
 Verificação: casos negativos de API e percursos de campo/cliente/gestão da bateria integrada aprovados.
+
+## TASK 16 — correção de consumos após conclusão
+
+Correção exige propriedade da visita, bloqueia a linha durante a transação e ajusta apenas a diferença entre produtos antigos e novos. Acréscimo de consumo ou devolução gera movimentos de auditoria. Repetição da mesma correção não altera stock. Guia encerrada, unidade incoerente ou consumo antigo sem origem identificável exigem reconciliação pela gestão, sem inventar saldos.
+
+Chromium/API: aumento, repetição, diminuição e falta de saldo passaram; rejeição reverte stock e histórico em conjunto. Fixture T1 passou a carregar produtos na guia de transporte que origina a guia de obra, em vez de manter duas guias contraditórias.

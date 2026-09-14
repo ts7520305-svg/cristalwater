@@ -131,6 +131,7 @@ async function safeDelete(modelName, where) {
       },
     });
     created.transportGuideId = transportGuide.id;
+    await prisma.transportGuideItem.create({data:{guideId:transportGuide.id,name:"Cloro Granulado",type:"CHEMICAL",unit:"KG",quantity:20}});
 
     const workGuide = await prisma.workGuide.create({
       data: {

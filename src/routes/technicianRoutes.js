@@ -717,11 +717,13 @@ router.patch("/visits/:id/correction", async (req, res) => {
 
   try {
     const result = await prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "ServiceVisit" WHERE id = ${id} FOR UPDATE`; 
       const currentVisit = await tx.serviceVisit.findUnique({
         where: { id },
         select: {
           id: true,
           status: true,
+          technicianId: true,
           endAt: true,
           internalNotes: true
         }
@@ -733,6 +735,10 @@ router.patch("/visits/:id/correction", async (req, res) => {
         throw error;
       }
 
+      if (!roleMatches(req.user?.role, "ADMIN") && Number(currentVisit.technicianId) !== Number(req.user?.technicianId || req.user?.id)) {
+        throw Object.assign(new Error("VISIT_FORBIDDEN"), {statusCode:403});
+      }
+
       if (!currentVisit.endAt && currentVisit.status !== "DONE") {
         const error = new Error("VISIT_NOT_COMPLETED");
         error.statusCode = 409;
@@ -740,6 +746,7 @@ router.patch("/visits/:id/correction", async (req, res) => {
       }
 
       const hasProducts = hasOwn(body, "products");
+      if (hasProducts) await require("../services/visitCorrectionStockService").reconcile(tx, currentVisit, validated.chemicalsJson || []);
       const correctionLine = `[Correcao tecnico] ${new Date().toISOString()} - registo de servico atualizado em campo.`;
 
       await tx.serviceVisit.update({
@@ -765,7 +772,7 @@ router.patch("/visits/:id/correction", async (req, res) => {
       });
 
       if (hasProducts) {
-        await tx.chemicalUsage.deleteMany({ where: { visitId: id } }).catch(() => null);
+        await tx.chemicalUsage.deleteMany({ where: { visitId: id } });
         if (Array.isArray(validated.chemicalsJson) && validated.chemicalsJson.length) {
           await tx.chemicalUsage.createMany({
             data: validated.chemicalsJson.map((product) => ({
@@ -774,7 +781,7 @@ router.patch("/visits/:id/correction", async (req, res) => {
               quantity: product.quantity,
               unit: product.unit || null
             }))
-          }).catch(() => null);
+          });
         }
       }
 
@@ -811,6 +818,7 @@ router.patch("/visits/:id/correction", async (req, res) => {
       visit: result.visit
     });
   } catch (error) {
+    if (error instanceof VisitCompletionError) return res.status(error.statusCode).json({ok:false,code:error.code,error:error.message});
     if (error.message === "VISIT_NOT_FOUND") {
       return res.status(404).json({
         ok: false,
