@@ -1,7 +1,7 @@
 'use strict';
 const router = require('express').Router();
 const business = require('../business/chat/LegacyClientChatBusiness');
-router.use(require('../middlewares/authMiddleware')());
+router.use(require('../middlewares/authMiddleware')('CLIENT'));
 const handle = (operation, status = 200) => async (req, res) => {
   try { return res.status(status).json(await operation(req)); }
   catch (error) { return res.status(error.statusCode || 500).json({ ok: false, error: error.statusCode ? error.message : 'Não foi possível aceder à conversa. O histórico foi preservado.' }); }

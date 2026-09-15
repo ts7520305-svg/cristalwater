@@ -23,24 +23,24 @@ function allowRoles(...roles) {
 router.use(auth());
 
 // Caixa de entrada admin: conversas, nao lidas e ultimas mensagens
-router.get("/overview", allowRoles("ADMIN", "TEAM_LEADER"), listOverview);
+router.get("/overview", allowRoles("ADMIN"), listOverview);
 
 // Debug / admin
-router.get("/", allowRoles("ADMIN", "TEAM_LEADER"), listMessages);
+router.get("/", allowRoles("ADMIN"), listMessages);
 
 // Conversa interna
 router.get("/internal", allowRoles("ADMIN", "TEAM_LEADER"), listInternalConversation);
 
 // Conversa cliente
-router.get("/client/:clientId", allowRoles("ADMIN", "TEAM_LEADER", "CLIENT"), listClientConversation);
+router.get("/client/:clientId", allowRoles("ADMIN", "CLIENT"), listClientConversation);
 
 // Enviar mensagem
-router.post("/", allowRoles("ADMIN", "TEAM_LEADER", "CLIENT"), createMessage);
+router.post("/", allowRoles("ADMIN", "CLIENT"), createMessage);
 
 // Marcar como lidas
-router.post("/read", allowRoles("ADMIN", "TEAM_LEADER"), markAsRead);
+router.post("/read", allowRoles("ADMIN"), markAsRead);
 
 // Contador de não lidas
-router.get("/unread", allowRoles("ADMIN", "TEAM_LEADER"), getUnreadCount);
+router.get("/unread", allowRoles("ADMIN"), getUnreadCount);
 
 module.exports = router;

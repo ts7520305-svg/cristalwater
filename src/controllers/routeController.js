@@ -1,5 +1,7 @@
 const { prisma } = require("../prismaClient");
 const { emitRoutePlanned } = require("../services/routeOsEventService");
+const { normalizeRole } = require('../utils/roles');
+const { safeVisit } = require('../services/technicianResponseSanitizer');
 
 // distância haversine
 function distance(lat1, lon1, lat2, lon2) {
@@ -23,20 +25,23 @@ function distance(lat1, lon1, lat2, lon2) {
 async function optimizeRoute(req,res,next){
  try {
 
-  const lat = Number(req.query.lat);
-  const lng = Number(req.query.lng);
-
-  if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat)>90 || Math.abs(lng)>180 || req.query.lat == null || req.query.lng == null) return res.status(400).json({ok:false,error:"Coordenadas de partida inválidas"});
+  const validCoordinate = (value, limit) => typeof value === 'string' && value.trim() !== '' && Number.isFinite(Number(value)) && Math.abs(Number(value)) <= limit;
+  if (!validCoordinate(req.query.lat, 90) || !validCoordinate(req.query.lng, 180)) return res.status(400).json({ok:false,error:"Coordenadas de partida inválidas"});
+  const lat = Number(req.query.lat), lng = Number(req.query.lng);
+  const field = normalizeRole(req.user?.role) !== 'ADMIN';
+  const technicianId = Number(req.user?.technicianId || (req.user?.principalType !== 'USER' && req.user?.id));
+  if (field && (!Number.isSafeInteger(technicianId) || technicianId < 1)) return res.status(403).json({ok:false,error:'Perfil de campo por associar.'});
 
   const visits = await prisma.serviceVisit.findMany({
-    where:{ status:"PLANNED", ...(String(req.user?.role).toUpperCase() === "TECHNICIAN" ? {technicianId:Number(req.user.technicianId || req.user.id)} : {}) },
-    include:{ pool:true, client:true }
+    where:{ status:"PLANNED", ...(field ? {technicianId} : {}) },
+    include:{ pool:true, client:true },
+    orderBy: { id: 'asc' }
   });
 
   let current = { lat, lng };
   const ordered = [];
 
-  const hasCoordinates = visit => visit.pool?.latitude != null && visit.pool?.longitude != null && Number.isFinite(Number(visit.pool.latitude)) && Number.isFinite(Number(visit.pool.longitude));
+  const hasCoordinates = visit => visit.pool?.latitude != null && visit.pool?.longitude != null && Number.isFinite(Number(visit.pool.latitude)) && Number.isFinite(Number(visit.pool.longitude)) && Math.abs(Number(visit.pool.latitude)) <= 90 && Math.abs(Number(visit.pool.longitude)) <= 180;
   let remaining = visits.filter(hasCoordinates);
   const unresolved = visits.filter(visit => !hasCoordinates(visit));
 
@@ -71,7 +76,12 @@ async function optimizeRoute(req,res,next){
   }
 
   ordered.push(...unresolved);
-  res.json(ordered);
+  res.set('Cache-Control', 'private, no-store');
+  res.json(ordered.map(visit => {
+    if (field) return safeVisit(visit);
+    if (visit.client) { delete visit.client.password; delete visit.client.pin; }
+    return visit;
+  }));
 
   emitRoutePlanned({
     routeCount: ordered.length,

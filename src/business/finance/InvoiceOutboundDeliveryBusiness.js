@@ -5,6 +5,8 @@ const { normalizeRole } = require('../../utils/roles');
 const gate = require('../../config/externalIntegrations');
 const whatsapp = require('../../services/whatsappService');
 const nodemailer = require('nodemailer');
+const reminderPolicy = require('../../services/invoiceReminderPolicy');
+const { invoiceOpen } = require('../../services/clientCreditService');
 function fail(statusCode, message) { throw Object.assign(new Error(message), { statusCode }); }
 function transport(mode) {
   if (mode === 'browser') return null;
@@ -20,35 +22,45 @@ function transport(mode) {
     tls: { rejectUnauthorized: true }, connectionTimeout: 15000, socketTimeout: 30000 });
   return ({ recipient, text }) => sender.sendMail({ from: process.env.SMTP_FROM || process.env.SMTP_USER, to: recipient, subject: 'Documento Cristal Water', text });
 }
-function recipientFor(invoice, mode, body) {
+function recipientFor(invoice, mode, body, reminder) {
   if (mode !== 'email') {
-    const phone = whatsapp.normalizePhone(invoice.client.phone);
+    const phone = whatsapp.normalizePhone(reminder ? invoice.client.paymentReminderWhatsappNumber || invoice.client.phone : invoice.client.phone);
     if (!/^[1-9]\d{7,14}$/.test(phone || '')) fail(400, 'O cliente não tem um telefone válido.');
     return phone;
   }
-  const registered = [invoice.client.fiscalEmail, invoice.client.email].filter(Boolean).map(s => s.trim().toLowerCase());
+  const registered = [reminder && invoice.client.paymentReminderEmailAddress, invoice.client.fiscalEmail, invoice.client.email].filter(Boolean).map(s => s.trim().toLowerCase());
   const email = body.email === undefined ? registered[0] : typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
   if (!registered.includes(email) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email || '')) fail(400, 'Use um endereço de email registado na ficha do cliente.');
   return email;
 }
-async function send(rawId, user, mode, baseUrl, body = {}) {
+async function send(rawId, user, mode, baseUrl, body = {}, delivery = null) {
   if (normalizeRole(user?.role) !== 'ADMIN' || !Number.isSafeInteger(user?.id) || user.id <= 0) fail(403, 'Apenas a administração pode enviar documentos.');
   const id = Number(rawId);
   if (!/^\d+$/.test(String(rawId)) || !Number.isSafeInteger(id) || id <= 0 || id > 2147483647) fail(400, 'Documento inválido.');
   if (!['browser', 'api', 'email'].includes(mode) || !body || typeof body !== 'object' || Array.isArray(body)) fail(400, 'Modo de envio inválido.');
+  if (delivery && delivery.purpose !== 'payment-reminder') fail(400, 'Tipo de envio inválido.');
+  const reminder = delivery?.purpose === 'payment-reminder';
+  const requestId = reminder ? reminderPolicy.requestId(delivery.requestId) : null;
   let origin;
   try { const url = new URL(baseUrl); if (!['https:', 'http:'].includes(url.protocol) || url.username || url.password) throw Error(); origin = url.origin; }
   catch { fail(503, 'O endereço público da aplicação não está configurado.'); }
   const dispatch = transport(mode), channel = mode === 'email' ? 'EMAIL' : mode === 'api' ? 'WHATSAPP_API' : 'WHATSAPP_BROWSER';
-  const sourceKey = `invoice-outbound:${id}:${channel}`;
+  const sourceKey = reminder ? `invoice-reminder:${id}:${requestId}:${channel}` : `invoice-outbound:${id}:${channel}`;
   const prepared = await prisma.$transaction(async tx => {
     await tx.$queryRaw`SELECT id FROM "Invoice" WHERE id = ${id} FOR UPDATE`;
     const invoice = await documents.sendable(rawId, user, tx);
-    const recipient = recipientFor(invoice, mode, body);
+    if (reminder) {
+      reminderPolicy.assertEligible(invoice);
+      if (!reminderPolicy.modes(invoice.client).includes(mode)) fail(409, 'O canal do lembrete já não está ativo.');
+    }
+    const recipient = recipientFor(invoice, mode, body, reminder);
     const previous = await tx.operationalReminder.findUnique({ where: { sourceKey } });
+    if (previous && reminder && previous.metadata.actor !== `ADMIN:${user.id}`) fail(409, 'Este pedido pertence a outro responsável.');
     if (previous) return { previous: true, result: { ...previous.metadata.result, idempotent: true } };
     const documentUrl = `${origin}/invoice-document?id=${id}`;
-    const text = `Cristal Water\n\nDocumento financeiro #${id} disponível. Consulte o documento com a sua conta:\n${documentUrl}`;
+    const text = reminder
+      ? `Cristal Water\n\nLembrete do documento #${id}: ${invoiceOpen(invoice).toFixed(2)} EUR em aberto. Se já efetuou o pagamento, ignore esta mensagem.\nConsulte o documento com a sua conta:\n${documentUrl}`
+      : `Cristal Water\n\nDocumento financeiro #${id} disponível. Consulte o documento com a sua conta:\n${documentUrl}`;
     const result = { ok: true, mode, prepared: true, documentUrl, deliveryStatus: dispatch ? 'PENDING_CONFIRMATION' : 'NOT_SENT',
       requiresReview: !!dispatch, message: dispatch ? 'Tentativa registada. Confirme o resultado antes de reenviar.' : 'Mensagem preparada. O envio no WhatsApp ainda não foi efetuado.' };
     if (!dispatch) result.link = whatsapp.buildWhatsAppBrowserLink(recipient, text);

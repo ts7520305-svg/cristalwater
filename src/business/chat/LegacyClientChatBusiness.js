@@ -6,7 +6,7 @@ const dataPath = path.join(__dirname, '../../data/clientChatMessages.json');
 function fail(statusCode, message) { throw Object.assign(new Error(message), { statusCode }); }
 function actor(user, rawId) {
   const role = normalizeRole(user?.role), client = role === 'CLIENT';
-  if (!['ADMIN', 'TEAM_LEADER', 'CLIENT'].includes(role)) fail(403, 'Sem permissão para esta conversa.');
+  if (!['ADMIN', 'CLIENT'].includes(role)) fail(403, 'Sem permissão para esta conversa.');
   const id = Number(rawId);
   if (!/^[1-9]\d*$/.test(String(rawId)) || !Number.isSafeInteger(id) || id > 2147483647) fail(400, 'Cliente inválido.');
   if (client && id !== Number(user.clientId || user.id)) fail(403, 'Sem permissão para esta conversa.');
@@ -30,7 +30,7 @@ function list(user, rawId) {
   return load().filter(m => String(m.clientId) === id).sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 }
 function unread(user) {
-  if (!['ADMIN', 'TEAM_LEADER'].includes(normalizeRole(user?.role))) fail(403, 'Sem permissão para esta consulta.');
+  if (normalizeRole(user?.role) !== 'ADMIN') fail(403, 'Sem permissão para esta consulta.');
   return { unreadCount: load().filter(m => m.from === 'CLIENT' && !m.readByAdmin).length };
 }
 async function create(user, rawId, body = {}) {

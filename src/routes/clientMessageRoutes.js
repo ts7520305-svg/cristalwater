@@ -5,11 +5,11 @@ const { prisma } = require("../prismaClient");
 const { resolveUploadSubdir, toPublicUploadUrl } = require("../config/uploadPath");
 
 const router = express.Router();
-router.use(require('../middlewares/authMiddleware')());
+router.use(require('../middlewares/authMiddleware')('CLIENT'));
 const {normalizeRole} = require('../utils/roles');
 function canMessage(req,res,clientId) {
   const role=normalizeRole(req.user.role);
-  if (['ADMIN','TEAM_LEADER'].includes(role) || (role==='CLIENT' && Number(clientId)===Number(req.user.clientId||req.user.id))) return true;
+  if (role==='ADMIN' || (role==='CLIENT' && Number(clientId)===Number(req.user.clientId||req.user.id))) return true;
   if(req.file?.path) require('fs').unlinkSync(req.file.path);
   res.status(403).json({ok:false,error:'Sem permissão para aceder a esta conversa.'});return false;
 }

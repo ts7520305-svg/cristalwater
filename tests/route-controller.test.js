@@ -51,8 +51,8 @@ describe("RouteController", () => {
     ]);
 
     const { optimizeRoute } = require("../src/controllers/routeController");
-    const req = { query: { lat: 0, lng: 0 } };
-    const res = { json: mockJson };
+    const req = { query: { lat: '0', lng: '0' }, user: { id: 1, role: 'ADMIN' } };
+    const res = { json: mockJson, set: vi.fn() };
 
     await optimizeRoute(req, res);
 

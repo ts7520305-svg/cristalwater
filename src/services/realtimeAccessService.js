@@ -12,10 +12,10 @@ function installRealtimeAccess(io) {
   io.on('connection',socket=>{
     const user=socket.data.user, role=normalizeRole(user.role);
     const clientId=role==='CLIENT'?Number(user.clientId||user.id):null;
-    if(role==='ADMIN'||role==='TEAM_LEADER')socket.join('role:MANAGEMENT');
+    if(role==='ADMIN')socket.join('role:MANAGEMENT');
     if(clientId)socket.join(`client_${clientId}`);
-    if(role==='TECHNICIAN')socket.join(`technician_${user.technicianId||user.id}`);
-    const canAccessClient=id=>Number.isSafeInteger(Number(id))&&Number(id)>0&&(role==='ADMIN'||role==='TEAM_LEADER'||Number(id)===clientId);
+    if(role==='TECHNICIAN'||role==='TEAM_LEADER')socket.join(`technician_${user.technicianId||user.id}`);
+    const canAccessClient=id=>Number.isSafeInteger(Number(id))&&Number(id)>0&&(role==='ADMIN'||Number(id)===clientId);
     const live = async()=>{
       try { if(user.exp*1000<=Date.now()||!(await validateJwtPrincipal(user)).ok){socket.disconnect(true);return false}return true; }
       catch {socket.disconnect(true);return false;}

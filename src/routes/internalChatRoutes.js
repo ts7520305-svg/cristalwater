@@ -1,37 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const fs = require('fs');
-const path = require('path');
-
-const DATA_PATH = path.join(__dirname, '..', 'data', 'internalChat.json');
-
-function loadMessages() {
-  try {
-    return JSON.parse(fs.readFileSync(DATA_PATH, 'utf8'));
-  } catch {
-    return [];
-  }
-}
-
-function saveMessages(data) {
-  fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2));
-}
+const chat = require('../business/chat/InternalChatBusiness');
+router.use(require('../middlewares/authMiddleware')('TECHNICIAN'));
+router.use((req, res, next) => { res.set('Cache-Control', 'private, no-store'); next(); });
+function error(res, err) { return res.status(err.statusCode || 500).json({ ok: false, error: err.statusCode ? err.message : 'Não foi possível aceder ao histórico da conversa.' }); }
 
 router.get('/messages', (req, res) => {
-  res.json(loadMessages());
+  try { res.json(chat.list(req.user)); } catch (err) { error(res, err); }
 });
 
 router.post('/messages', (req, res) => {
-  const messages = loadMessages();
-  const msg = {
-    id: Date.now(),
-    author: req.body.author || 'ADMIN',
-    text: req.body.text || '',
-    created_at: new Date().toISOString()
-  };
-  messages.push(msg);
-  saveMessages(messages);
-  res.status(201).json(msg);
+  try { res.status(201).json(chat.create(req.user, req.body)); } catch (err) { error(res, err); }
 });
 
 router.get('/health', (req, res) => {
