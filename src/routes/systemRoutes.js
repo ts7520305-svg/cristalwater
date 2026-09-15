@@ -32,6 +32,10 @@ const upgradeUpload = multer({
   },
 });
 
+const retentionController=require('../controllers/dataRetentionController');
+router.get('/retention/preview',auth('ADMIN'),retentionController.preview);
+router.post('/retention/execute',auth('ADMIN'),retentionController.execute);
+
 router.get("/health", async (req, res) => {
   const health=await checkDatabaseHealth();
   return res.status(health.ok?200:503).json({...health,status:health.ok?'ONLINE':'ERROR',at:new Date().toISOString()});
