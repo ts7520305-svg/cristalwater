@@ -1,60 +1,154 @@
-// Integration runner for an explicitly isolated database with the schema already installed.
-require('../src/loadEnv')();
-const fs=require('fs');
-const path=require('path');
-const {spawn}=require('child_process');
-const {randomBytes}=require('crypto');
-const {prisma}=require('../src/prismaClient');
-const bcrypt=require('bcryptjs');
-if(process.env.NODE_ENV!=='test'||process.env.QA_MODE!=='true'||process.env.QA_ENVIRONMENT_SAFE!=='true')throw new Error('Isolated test/QA environment required');
-const root=path.resolve(__dirname,'..');
-const evidence=path.join(root,'reports','field-suite',String(Date.now()));fs.mkdirSync(evidence,{recursive:true});
-process.env.PORT=process.env.PORT||'3002';
-process.env.CW_BASE_URL=`http://127.0.0.1:${process.env.PORT}`;
-process.env.FCS_SEC_BASE_URL=process.env.CW_BASE_URL;
-process.env.ADMIN_EMAIL=process.env.ADMIN_EMAIL||'field-admin@qa.test';
-process.env.ADMIN_PASSWORD=process.env.ADMIN_PASSWORD||randomBytes(24).toString('base64url');
-process.env.JWT_SECRET=process.env.JWT_SECRET||randomBytes(48).toString('base64url');
-process.env.ENABLE_BACKGROUND_JOBS='false';
-const scripts=[
- 'test-field-visual-flow.js','test-field-reminder-delete.js','test-field-crm-reminders.js','test-field-language-reload.js',
- 'test-field-water-api.js','test-field-access-api.js','test-field-e2e.js',
- 'test-fcs-sec-tech-auth.js','test-fcs-sec-tech-workday.js','test-fcs-technician-t1.js',
- 'test-visit-os-operational.js','test-route-os-acceptance.js','test-customer-os-operational.js',
- 'test-administration-os-operational.js','test-finance-os-operational.js','test-equipment-stock-os-operational.js',
- 'test-repair-os-operational.js','test-system-interconnections.js','test-real-month-flow-api.js','test-field-preflight.js','test-field-backup.js','test-production-runtime-health.js','test-field-gps-flow.js','test-field-two-year-api.js','test-field-billing-automation.js','test-field-commercial-quotes.js','test-field-client-rates.js','test-field-retention.js','test-field-quote-portal.js','test-field-resilience.js','test-field-equipment-maintenance.js','test-field-equipment-flow.js','test-field-equipment-reminders.js','test-field-chemical-options.js','test-field-inventory-count-flow.js','test-field-visit-briefing.js','test-field-service-reminders.js','test-field-reminder-lifecycle.js','test-field-alert-visibility.js','test-field-alert-resolution.js','test-field-alert-billing.js','test-field-draft-payments.js'
+const { spawn } = require("child_process");
+const fs = require("fs");
+const path = require("path");
+
+const ROOT = path.resolve(__dirname, "..");
+const LOG_DIR = path.join(ROOT, "tmp", "field-suite");
+
+const GROUPS = [
+  { name: "syntax-check", command: "npm", args: ["run", "check:syntax"], timeoutMs: 180_000 },
+  { name: "prisma-validate", command: "npx", args: ["prisma", "validate"], timeoutMs: 120_000 },
+  { name: "migration-check", command: "npm", args: ["run", "test:migrations"], timeoutMs: 120_000 },
+  { name: "backend-regression", command: "npm", args: ["test"], timeoutMs: 180_000 },
+  { name: "technician-core", command: "npm", args: ["run", "test:technician"], timeoutMs: 120_000 },
+  { name: "browser-field-smoke", command: "npm", args: ["run", "test:field:browser"], timeoutMs: 180_000 },
+  { name: "technician-real-flow", command: "npm", args: ["run", "test:technician:real"], timeoutMs: 120_000 },
+  { name: "admin-equipment-real-flow", command: "npm", args: ["run", "test:admin:equipment:real"], timeoutMs: 120_000 },
+  { name: "client-real-flow", command: "npm", args: ["run", "test:client:real"], timeoutMs: 120_000 },
+  { name: "technician-gps", command: "npm", args: ["run", "test:technician:gps"], timeoutMs: 120_000 },
+  { name: "technician-equipment", command: "npm", args: ["run", "test:technician:equipment"], timeoutMs: 120_000 },
+  { name: "quote-equipment", command: "npm", args: ["run", "test:quote:equipment"], timeoutMs: 120_000 },
+  { name: "inventory", command: "npm", args: ["run", "test:inventory"], timeoutMs: 120_000 },
+  { name: "routes", command: "npm", args: ["run", "test:routes"], timeoutMs: 120_000 },
+  { name: "email", command: "npm", args: ["run", "test:email"], timeoutMs: 120_000 },
+  { name: "pool-health", command: "npm", args: ["run", "test:pool-health"], timeoutMs: 120_000 },
+  { name: "handoff", command: "npm", args: ["run", "test:handoff"], timeoutMs: 120_000 },
+  { name: "security", command: "npm", args: ["run", "test:security"], timeoutMs: 120_000 },
+  { name: "field-reminder-lifecycle", command: "node", args: ["scripts/test-field-reminder-lifecycle.js"], timeoutMs: 120_000 },
+  { name: "route-order-backend", command: "node", args: ["scripts/test-route-order-backend.js"], timeoutMs: 120_000 },
+  { name: "draft-payment-backend", command: "node", args: ["scripts/test-field-draft-payments.js"], timeoutMs: 120_000 },
+  { name: "invoice-draft-classification-browser", command: "node", args: ["scripts/test-invoice-draft-classification-browser.js"], timeoutMs: 120_000 },
+  { name: "simulation", command: "npm", args: ["run", "test:simulation"], timeoutMs: 120_000 },
 ];
-function run(script){return new Promise(resolve=>{
- const output=fs.createWriteStream(path.join(evidence,script+'.log'));
- const child=spawn(process.execPath,[path.join(__dirname,script)],{cwd:root,env:process.env,stdio:['ignore','pipe','pipe']});
- child.stdout.pipe(output);child.stderr.pipe(output);
- const start=Date.now(),timer=setTimeout(()=>child.kill('SIGKILL'),120000);
- child.once('error',error=>{clearTimeout(timer);output.end();resolve({script,code:1,error:error.message})});
- child.once('close',(code,signal)=>{clearTimeout(timer);output.end(()=>{const result={script,code,signal,ms:Date.now()-start};console.log(JSON.stringify(result));if(code!==0)console.error(fs.readFileSync(path.join(evidence,script+'.log'),'utf8').slice(-12000));resolve(result)})});
-});}
-(async()=>{
- await prisma.user.upsert({where:{email:process.env.ADMIN_EMAIL},create:{email:process.env.ADMIN_EMAIL,name:'Field QA Administrator',password:await bcrypt.hash(process.env.ADMIN_PASSWORD,10),role:'ADMIN',active:true,mustChangePassword:false},update:{password:await bcrypt.hash(process.env.ADMIN_PASSWORD,10),active:true,role:'ADMIN'}});
- await prisma.$disconnect();
- const output=fs.createWriteStream(path.join(evidence,'server.log'));
- const server=spawn(process.execPath,['--trace-uncaught',path.join(root,'src/server.js')],{cwd:root,env:process.env,stdio:['ignore','pipe','pipe']});
- server.stdout.on('data',data=>fs.appendFileSync(path.join(evidence,'server-stdout.log'),data));
- server.stderr.on('data',data=>fs.appendFileSync(path.join(evidence,'server-stderr.log'),data));
- console.log('Evidence: '+evidence);
- server.once('exit',(code,signal)=>{const state={serverExit:code,signal}; console.log(JSON.stringify(state));fs.writeFileSync(path.join(evidence,'server-exit.json'),JSON.stringify(state))});
- try{
-  let ready=false;
-  for(let i=0;i<60;i++){
-   if(server.exitCode!==null)break;
-   try{const response=await fetch(process.env.CW_BASE_URL+'/api/core/health',{signal:AbortSignal.timeout(1000)});if(response.ok){ready=true;break}}catch{}
-   await new Promise(r=>setTimeout(r,250));
+
+function parseArgs(argv) {
+  const options = {
+    only: [],
+    skip: [],
+    list: false,
+    continueOnError: false,
+  };
+
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    if (arg === "--list") options.list = true;
+    else if (arg === "--continue-on-error") options.continueOnError = true;
+    else if (arg === "--only") {
+      options.only.push(...String(argv[index + 1] || "").split(",").map((value) => value.trim()).filter(Boolean));
+      index += 1;
+    } else if (arg === "--skip") {
+      options.skip.push(...String(argv[index + 1] || "").split(",").map((value) => value.trim()).filter(Boolean));
+      index += 1;
+    }
   }
-  if(!ready)throw new Error('Backend failed to start; see reports/field-suite/server.log');
-  const results=[];for(const script of scripts)results.push(await run(script));
-  fs.writeFileSync(path.join(evidence,'results.json'),JSON.stringify({at:new Date().toISOString(),results},null,2));
-  if(results.some(r=>r.code!==0))process.exitCode=1;
- }finally{
-  server.kill('SIGTERM');
-  if(server.exitCode===null)await new Promise(resolve=>{const timer=setTimeout(()=>{server.kill('SIGKILL');resolve()},5000);server.once('exit',()=>{clearTimeout(timer);resolve()})});
-  output.end();
- }
-})().catch(error=>{console.error(error);process.exitCode=1}).finally(()=>prisma.$disconnect());
+
+  return options;
+}
+
+function runGroup(group) {
+  return new Promise((resolve) => {
+    const startedAt = Date.now();
+    const child = spawn(group.command, group.args, {
+      cwd: ROOT,
+      env: { ...process.env, CI: process.env.CI || "1" },
+      shell: process.platform === "win32",
+    });
+
+    let output = "";
+    let finished = false;
+
+    const timeout = setTimeout(() => {
+      if (finished) return;
+      output += `\n[TIMEOUT] ${group.name} excedeu ${group.timeoutMs} ms\n`;
+      child.kill("SIGTERM");
+      setTimeout(() => child.kill("SIGKILL"), 2_000).unref();
+    }, group.timeoutMs);
+
+    const collect = (chunk) => {
+      const text = String(chunk || "");
+      output += text;
+      process.stdout.write(text);
+    };
+
+    child.stdout.on("data", collect);
+    child.stderr.on("data", collect);
+    child.on("error", (error) => {
+      output += `\n[SPAWN_ERROR] ${error.message}\n`;
+    });
+    child.on("close", (code, signal) => {
+      finished = true;
+      clearTimeout(timeout);
+      const durationMs = Date.now() - startedAt;
+      resolve({
+        name: group.name,
+        command: `${group.command} ${group.args.join(" ")}`,
+        ok: code === 0,
+        exitCode: code,
+        signal,
+        durationMs,
+        output,
+      });
+    });
+  });
+}
+
+async function main() {
+  const options = parseArgs(process.argv.slice(2));
+  if (options.list) {
+    GROUPS.forEach((group) => console.log(group.name));
+    return;
+  }
+
+  const selected = GROUPS.filter((group) => {
+    if (options.only.length && !options.only.includes(group.name)) return false;
+    if (options.skip.includes(group.name)) return false;
+    return true;
+  });
+
+  if (!selected.length) {
+    throw new Error("Nenhum grupo selecionado para test:field:all");
+  }
+
+  fs.mkdirSync(LOG_DIR, { recursive: true });
+  const results = [];
+  const suiteStartedAt = Date.now();
+
+  console.log(`[FIELD_SUITE] grupos=${selected.length}`);
+  for (const group of selected) {
+    console.log(`\n[FIELD_SUITE] START ${group.name}`);
+    const result = await runGroup(group);
+    results.push(result);
+    console.log(`[FIELD_SUITE] ${result.ok ? "PASS" : "FAIL"} ${group.name} (${result.durationMs} ms)`);
+    fs.writeFileSync(path.join(LOG_DIR, `${group.name}.log`), result.output, "utf8");
+    if (!result.ok && !options.continueOnError) break;
+  }
+
+  const summary = {
+    generatedAt: new Date().toISOString(),
+    durationMs: Date.now() - suiteStartedAt,
+    selectedGroups: selected.map((group) => group.name),
+    passed: results.filter((result) => result.ok).map((result) => result.name),
+    failed: results.filter((result) => !result.ok).map((result) => result.name),
+    results: results.map(({ output, ...result }) => result),
+  };
+
+  fs.writeFileSync(path.join(LOG_DIR, "summary.json"), `${JSON.stringify(summary, null, 2)}\n`, "utf8");
+  console.log(`\n[FIELD_SUITE] resumo: ${summary.passed.length} PASS / ${summary.failed.length} FAIL`);
+
+  if (summary.failed.length) process.exit(1);
+}
+
+main().catch((error) => {
+  console.error("FIELD_SUITE_ERROR", error);
+  process.exit(1);
+});
