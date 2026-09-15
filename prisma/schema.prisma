@@ -151,6 +151,7 @@ model ClientReportSetting {
 }
 
 model Pool {
+  maintenancePlans EquipmentMaintenancePlan[]
   id                    Int                     @id @default(autoincrement())
   clientId              Int
   name                  String?
@@ -366,6 +367,7 @@ model User {
 }
 
 model ServiceVisit {
+  maintenanceCompletions EquipmentMaintenanceCompletion[]
   completionRequestId String? @unique
   id             Int             @id @default(autoincrement())
   clientId       Int?
@@ -2197,4 +2199,42 @@ model RepairQuotePortal {
   client      Client      @relation(fields: [clientId], references: [id], onDelete: Restrict)
 
   @@index([clientId, publishedAt])
+}
+
+// Preventive equipment tasks. Dates are UTC civil days; completed versions are immutable.
+model EquipmentMaintenancePlan {
+  id Int @id @default(autoincrement())
+  poolId Int
+  component String
+  title String
+  instructions String
+  intervalUnit String
+  intervalCount Int
+  nextDue DateTime @db.Date
+  active Boolean @default(true)
+  version Int @default(1)
+  lastCompletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  pool Pool @relation(fields: [poolId], references: [id], onDelete: Restrict)
+  completions EquipmentMaintenanceCompletion[]
+  @@index([poolId, active, nextDue])
+  @@unique([poolId, title])
+}
+model EquipmentMaintenanceCompletion {
+  id Int @id @default(autoincrement())
+  planId Int
+  version Int
+  visitId Int
+  requestId String @unique
+  actor String
+  fingerprint String
+  notes String
+  completedAt DateTime @default(now())
+  result Json
+  plan EquipmentMaintenancePlan @relation(fields: [planId], references: [id], onDelete: Restrict)
+  visit ServiceVisit @relation(fields: [visitId], references: [id], onDelete: Restrict)
+  @@unique([planId, version])
+  @@unique([planId, visitId])
+  @@index([visitId])
 }
