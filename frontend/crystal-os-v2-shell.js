@@ -244,10 +244,7 @@
 
     const $ = (selector, root = document) => root.querySelector(selector);
     let bypassNextStart = false;
-
-    function esc(value) {
-      return String(value || '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
-    }
+    let reviewed = null;
 
     function selectedVisitId() {
       try {
@@ -260,9 +257,46 @@
     }
 
     function buildNoticeSummary() {
-      const access = String($('#accessList')?.innerText || '').replace(/\s+/g, ' ').trim();
-      if (!access || access.includes('A carregar')) return 'Sem avisos adicionais registados para esta piscina.';
-      return access.slice(0, 700);
+      const list = $('#accessList');
+      const items = [...(list?.querySelectorAll('.access-item') || [])];
+      const blockText = node => {
+        const copy = node.cloneNode(true);
+        copy.querySelectorAll('br').forEach(br => br.replaceWith(document.createTextNode('\n')));
+        return String(copy.textContent || '').trim();
+      };
+      const access = items.length
+        ? items.map(item => [...item.children].map(blockText).filter(Boolean).join('\n')).filter(Boolean).join('\n\n')
+        : String(list?.textContent || '').trim();
+      return access || 'Sem avisos adicionais registados para esta piscina.';
+    }
+
+    function snapshot() {
+      let user;
+      try { user = window.CristalAuth?.parseUser?.() || JSON.parse(localStorage.getItem('cristalwater_user') || localStorage.getItem('user') || 'null'); } catch {}
+      return {
+        visitId: selectedVisitId(),
+        target: $('#startBtn')?.dataset.cwCheckinTarget || selectedVisitId(),
+        required: $('#startBtn')?.dataset.cwCheckinRequired,
+        session: JSON.stringify([window.CristalAuth?.getToken?.() || localStorage.getItem('cristalwater_jwt') || localStorage.getItem('token'), user?.role, user?.id, user?.technicianId]),
+        pool: String($('#nextTitle')?.textContent || 'Piscina').trim(),
+        client: String($('#nextMeta')?.textContent || '').trim(),
+        notices: buildNoticeSummary(),
+      };
+    }
+
+    function closeCheckin() {
+      reviewed = null;
+      const overlay = $('#cwFieldCheckinOverlay');
+      if (!overlay) return;
+      overlay.hidden = true; overlay.style.display = 'none';
+      for (const id of ['cwFieldCheckinPool', 'cwFieldCheckinClient', 'cwFieldCheckinNotices']) $('#' + id, overlay).textContent = '';
+    }
+
+    function invalidateChangedCheckin() {
+      if (!reviewed || JSON.stringify(reviewed) === JSON.stringify(snapshot())) return false;
+      closeCheckin();
+      window.CwUi?.info?.('A piscina, as instruções ou a sessão mudaram. Reveja os dados e volte a iniciar a visita.');
+      return true;
     }
 
     function ensureDialog() {
@@ -278,11 +312,11 @@
       overlay.innerHTML = `
         <div style="width:min(620px,100%);max-height:90vh;overflow:auto;background:var(--cw-surface,#fff);color:var(--cw-text,#102620);border-radius:18px;border:1px solid var(--cw-border,#cbd8d2);padding:18px;box-shadow:0 22px 60px rgba(0,0,0,.28)">
           <span class="chip">Check-in obrigatório</span>
-          <h2 id="cwFieldCheckinPool" style="font-size:28px;line-height:1.1;margin:12px 0 6px">Piscina</h2>
-          <div id="cwFieldCheckinClient" class="muted"></div>
+          <h2 id="cwFieldCheckinPool" data-cw-no-i18n style="font-size:28px;line-height:1.1;margin:12px 0 6px">Piscina</h2>
+          <div id="cwFieldCheckinClient" data-cw-no-i18n class="muted"></div>
           <div style="margin-top:16px;padding:14px;border-radius:14px;border:1px solid var(--cw-border,#cbd8d2);background:var(--cw-surface-2,#f5f9f7)">
             <strong>Antes de começar</strong>
-            <div id="cwFieldCheckinNotices" class="muted" style="margin-top:8px;white-space:normal;line-height:1.45"></div>
+            <div id="cwFieldCheckinNotices" data-cw-no-i18n class="muted" style="margin-top:8px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.45"></div>
           </div>
           <div style="display:grid;grid-template-columns:1fr;gap:10px;margin-top:16px">
             <button id="cwFieldCheckinConfirm" type="button" class="big ok" style="min-height:72px">Li e vou iniciar a visita</button>
@@ -290,34 +324,36 @@
           </div>
         </div>`;
       document.body.appendChild(overlay);
-      $('#cwFieldCheckinCancel', overlay).addEventListener('click', () => {
-        overlay.hidden = true;
-        overlay.style.display = 'none';
-      });
+      $('#cwFieldCheckinCancel', overlay).addEventListener('click', closeCheckin);
       $('#cwFieldCheckinConfirm', overlay).addEventListener('click', () => {
-        const visitId = selectedVisitId();
-        if (visitId) {
-          try { sessionStorage.setItem(`cw:field:checkin:${visitId}`, new Date().toISOString()); } catch (_) {}
-        }
-        overlay.hidden = true;
-        overlay.style.display = 'none';
+        if (!reviewed || invalidateChangedCheckin()) return;
+        const start = $('#startBtn');
+        if (!reviewed.visitId || !start || start.disabled) { closeCheckin(); return; }
+        try { sessionStorage.setItem(`cw:field:checkin:${reviewed.visitId}`, new Date().toISOString()); } catch (_) {}
+        closeCheckin();
         bypassNextStart = true;
-        $('#startBtn')?.click();
+        try { start.click(); } finally { bypassNextStart = false; }
       });
       return overlay;
     }
 
     function showCheckin() {
       const overlay = ensureDialog();
-      const pool = String($('#nextTitle')?.textContent || 'Piscina').trim();
-      const client = String($('#nextMeta')?.textContent || '').split(' - ')[0].trim();
-      $('#cwFieldCheckinPool', overlay).textContent = pool || 'Piscina';
-      $('#cwFieldCheckinClient', overlay).textContent = client || 'Cliente';
-      $('#cwFieldCheckinNotices', overlay).innerHTML = esc(buildNoticeSummary());
+      reviewed = snapshot();
+      $('#cwFieldCheckinPool', overlay).textContent = reviewed.pool || 'Piscina';
+      $('#cwFieldCheckinClient', overlay).textContent = reviewed.client.split(' - ')[0] || 'Cliente';
+      $('#cwFieldCheckinNotices', overlay).textContent = reviewed.notices;
       overlay.hidden = false;
       overlay.style.display = 'flex';
       $('#cwFieldCheckinConfirm', overlay)?.focus();
     }
+
+    const noticeObserver = new MutationObserver(invalidateChangedCheckin);
+    for (const selector of ['#nextTitle', '#nextMeta', '#accessList']) {
+      const node = $(selector); if (node) noticeObserver.observe(node, { childList: true, characterData: true, subtree: true });
+    }
+    if ($('#startBtn')) noticeObserver.observe($('#startBtn'), { attributes: true, attributeFilter: ['data-cw-checkin-target', 'data-cw-checkin-required'] });
+    for (const event of ['storage', 'focus']) window.addEventListener(event, invalidateChangedCheckin);
 
     document.addEventListener('click', (event) => {
       const start = event.target.closest('#startBtn');
@@ -327,7 +363,8 @@
         return;
       }
       const label = String(start.textContent || '').toLowerCase();
-      if (!label.includes('iniciar visita')) return;
+      const required = start.dataset.cwCheckinRequired;
+      if (required != null ? required !== 'true' : !label.includes('iniciar visita')) return;
       event.preventDefault();
       event.stopImmediatePropagation();
       showCheckin();

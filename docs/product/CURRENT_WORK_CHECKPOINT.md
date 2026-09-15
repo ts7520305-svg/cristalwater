@@ -6,8 +6,8 @@
 - Branch de trabalho: `work/field-readiness-20260915-simulation`.
 - Última entrega remota verificada: TASK122, commit `d9c3af4591f2027a846d3e20211762909e227cc0`; workflow `34955946592` aprovado, incluindo PostgreSQL 16 e restauro de 99 tabelas/11 anexos.
 - TASK123: notas da piscina e seleção correta dos lembretes no endpoint da rota, implementadas. Teste API com 505 lembretes gerais, 23 operacionais, duas piscinas, reatribuição e visitas extra aprovado em `field-qa-runtime/run-1789467419688`. 218 testes unitários e 4 de técnicos aprovados.
-- Continuação ativa: apresentação das instruções e proteção da confirmação de início da visita (TASK124). Sem aprovações intermédias conforme pedido «continua sem parar».
-- Relatório atual: `VISIT_BRIEFING_API_20260915.md`. Inventário concluído nas TASK121/TASK122; não repetir a implementação.
+- TASK124: notas no ecrã de campo, avisos recorrentes atrasados e confirmação de início completa e vinculada à visita/sessão implementados. Percurso real verificado em PT/EN/FR/ES/DE; regressão local final aprovada: 218 testes unitários, 4 de técnicos, 17 scripts de navegador e 33 grupos integrados (`reports/field-suite/1789468180539/results.json`). Imagem: `reports/field-visual/visit-briefing-1789468325934/technician-briefing-mobile.png`. Confirmar o workflow PostgreSQL 16/restauro do commit publicado. Continuação sem aprovações intermédias conforme pedido «continua sem parar».
+- Relatórios atuais: `VISIT_BRIEFING_API_20260915.md` e `VISIT_BRIEFING_UI_20260915.md`. Inventário concluído nas TASK121/TASK122; não repetir a implementação.
 
 ### Pedido ativo
 
@@ -33,10 +33,11 @@ Evidência atual da TASK120: 216 testes unitários, 4 testes de técnicos, os 15
 
 ### Próxima retoma
 
-1. Concluir a apresentação e confirmação das instruções no modo de campo (TASK124); executar a bateria final e confirmar o workflow do commit publicado.
-2. Continuar a revisão dos módulos pendentes usando `COMPLETENESS_20260915.md` juntamente com `IMPLEMENTATION_20260915.md` e os relatórios posteriores. A matriz de completude conserva o diagnóstico inicial e contém pontos já corrigidos posteriormente.
-3. Manter tarefas pequenas, com testes de comportamento e documentação. Não repetir trabalho apenas por encontrar um relatório antigo.
-4. Ensaios físicos e VPS permanecem pendentes. Não declarar o sistema inteiro concluído ou certificado para campo.
+1. TASK123/TASK124 concluídas no código. Confirmar a bateria final e o workflow do commit publicado se ainda não estiver registado na conversa. Não repetir a implementação das instruções de visita.
+2. Próximo candidato concreto: reproduzir e corrigir a conclusão de lembretes periódicos em `coreFlowRoutes.js` (atualmente atualiza o original e cria a próxima ocorrência sem uma transação/idempotência comum).
+3. Continuar a revisão dos módulos pendentes usando `COMPLETENESS_20260915.md` juntamente com `IMPLEMENTATION_20260915.md` e os relatórios posteriores. A matriz de completude conserva o diagnóstico inicial e contém pontos já corrigidos posteriormente.
+4. Manter tarefas pequenas, com testes de comportamento e documentação. Não repetir trabalho apenas por encontrar um relatório antigo.
+5. Ensaios físicos e VPS permanecem pendentes. Não declarar o sistema inteiro concluído ou certificado para campo.
 
 ## Registo histórico — 21/07/2026 (não é a fase ativa)
 

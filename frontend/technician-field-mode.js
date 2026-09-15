@@ -1984,18 +1984,17 @@
     return value;
   }
 
-  function reminderIsPermanent(reminder) {
-    const text = `${reminder?.title || ""} ${reminder?.description || ""} ${reminder?.category || ""}`.toLowerCase();
-    const repeat = String(reminder?.repeatRule || "").trim();
-    return Boolean(repeat && repeat !== "NONE") || text.includes("permanente") || text.includes("permanent");
+  function reminderIsRecurring(reminder) {
+    const repeat = String(reminder?.repeatRule || "").trim().toUpperCase();
+    return Boolean(repeat && repeat !== "NONE");
   }
 
   function normalizeReminder(reminder, source, model) {
     const due = reminder?.dueDate || reminder?.dueAt || null;
     const dueDate = due ? new Date(due) : null;
     const hasValidDue = dueDate && !Number.isNaN(dueDate.getTime());
-    const permanent = reminderIsPermanent(reminder);
-    const overdue = hasValidDue && dueDate < new Date() && !permanent;
+    const recurring = reminderIsRecurring(reminder);
+    const overdue = Boolean(hasValidDue && dueDate < new Date());
     return {
       id: reminder?.id,
       model,
@@ -2006,20 +2005,21 @@
       category: reminder?.category || "",
       priority: reminder?.priority || "NORMAL",
       repeatRule: reminder?.repeatRule || "",
-      permanent,
+      recurring,
       overdue,
-      label: overdue ? "Lembrete atrasado" : (permanent ? "Lembrete permanente" : "Lembrete temporario")
+      label: overdue ? (recurring ? "Lembrete recorrente atrasado" : "Lembrete atrasado") : (recurring ? "Lembrete recorrente" : "Lembrete pontual")
     };
   }
 
   function visibleReminders(visit) {
+    const open = reminder => reminder && reminder.isCompleted !== true && !reminder.completedAt && !["DONE", "CLOSED", "COMPLETED", "RESOLVED", "CANCELLED", "CANCELED"].includes(String(reminder.status || "").toUpperCase());
     const reminders = [
-      ...listOf(visit?.pool?.operationalReminders).map((reminder) => normalizeReminder(reminder, "Piscina", "operational")),
-      ...listOf(visit?.client?.operationalReminders).map((reminder) => normalizeReminder(reminder, "Cliente", "operational")),
-      ...listOf(visit?.pool?.client?.operationalReminders).map((reminder) => normalizeReminder(reminder, "Cliente", "operational")),
-      ...listOf(visit?.pool?.generalReminders).map((reminder) => normalizeReminder(reminder, "Piscina", "general")),
-      ...listOf(visit?.client?.generalReminders).map((reminder) => normalizeReminder(reminder, "Cliente", "general")),
-      ...listOf(visit?.pool?.client?.generalReminders).map((reminder) => normalizeReminder(reminder, "Cliente", "general"))
+      ...listOf(visit?.pool?.operationalReminders).filter(open).map((reminder) => normalizeReminder(reminder, "Piscina", "operational")),
+      ...listOf(visit?.client?.operationalReminders).filter(open).map((reminder) => normalizeReminder(reminder, "Cliente", "operational")),
+      ...listOf(visit?.pool?.client?.operationalReminders).filter(open).map((reminder) => normalizeReminder(reminder, "Cliente", "operational")),
+      ...listOf(visit?.pool?.generalReminders).filter(open).map((reminder) => normalizeReminder(reminder, "Piscina", "general")),
+      ...listOf(visit?.client?.generalReminders).filter(open).map((reminder) => normalizeReminder(reminder, "Cliente", "general")),
+      ...listOf(visit?.pool?.client?.generalReminders).filter(open).map((reminder) => normalizeReminder(reminder, "Cliente", "general"))
     ].filter((reminder) => reminder && reminder.title);
 
     return uniqueByKey(reminders, (reminder) => (
@@ -2029,16 +2029,16 @@
 
   function reminderClass(reminder) {
     if (reminder.overdue) return "reminder-overdue";
-    return reminder.permanent ? "reminder-permanent" : "reminder-temporary";
+    return reminder.recurring ? "reminder-permanent" : "reminder-temporary";
   }
 
-  function renderVisitNoticeStrip(visit, accesses, reminders) {
+  function renderVisitNoticeStrip(visit, accesses, reminders, notes = "") {
     const strip = $("#visitNoticeStrip");
     const nextCard = document.querySelector(".next");
     if (!strip) return;
 
     const returnInstructions = visit?.reason === "INCOMPLETE_RETURN" ? String(visit.returnInstructions || "Confirme as instruções com o escritório") : "";
-    const hasNotices = Boolean(visit && (accesses.length || reminders.length || returnInstructions));
+    const hasNotices = Boolean(visit && (accesses.length || reminders.length || notes || returnInstructions));
     if (nextCard) nextCard.classList.toggle("has-alerts", hasNotices);
     if (!hasNotices) {
       strip.hidden = true;
@@ -2047,6 +2047,7 @@
     }
 
     const pills = [
+      notes ? '<span class="visit-notice-pill reminder">Notas da piscina</span>' : "",
       accesses.length ? `<span class="visit-notice-pill access">${accesses.length} acesso(s)</span>` : "",
       reminders.length ? `<span class="visit-notice-pill reminder">${reminders.length} lembrete(s)</span>` : ""
     ].filter(Boolean).join("");
@@ -2059,16 +2060,16 @@
     `;
   }
 
-  function maybeNotifyVisitNotices(visit, accesses, reminders) {
-    const total = accesses.length + reminders.length;
+  function maybeNotifyVisitNotices(visit, accesses, reminders, notes) {
+    const total = accesses.length + reminders.length + (notes ? 1 : 0);
     if (!visit || !total) {
       notifiedVisitNoticeKey = "";
       return;
     }
-    const key = `${visitKey(visit)}:${accesses.length}:${reminders.length}`;
+    const key = `${visitKey(visit)}:${accesses.length}:${reminders.length}:${notes || ""}`;
     if (notifiedVisitNoticeKey === key) return;
     notifiedVisitNoticeKey = key;
-    toast(`Atencao: esta visita tem ${total} aviso(s) de acesso ou lembrete.`);
+    toast(`Atencao: esta visita tem ${total} aviso(s), notas ou lembretes.`);
   }
 
   function renderAccessCard(visit) {
@@ -2086,16 +2087,17 @@
 
     const accesses = visibleAccesses(visit);
     const reminders = visibleReminders(visit);
-    const hasNotices = accesses.length || reminders.length;
+    const notes = typeof visit.pool?.notes === "string" ? visit.pool.notes.trim() : "";
+    const hasNotices = accesses.length || reminders.length || notes;
     card.hidden = false;
     card.classList.toggle("has-alerts", Boolean(hasNotices));
-    renderVisitNoticeStrip(visit, accesses, reminders);
-    maybeNotifyVisitNotices(visit, accesses, reminders);
+    renderVisitNoticeStrip(visit, accesses, reminders, notes);
+    maybeNotifyVisitNotices(visit, accesses, reminders, notes);
 
     if (!hasNotices) {
       list.innerHTML = `
         <div class="access-item">
-          <div class="access-code">Sem codigo ou lembrete registado</div>
+          <div class="access-code">Sem código, nota ou lembrete registado</div>
           <div class="access-meta">Se esta piscina precisar de codigo de portao, alarme, chave ou aviso permanente, o administrador deve registar na ficha do cliente ou da piscina.</div>
         </div>
       `;
@@ -2120,14 +2122,15 @@
       ].filter(Boolean).map((part) => esc(part)).join("<br>");
       return `
         <div class="access-item ${reminderClass(reminder)}">
-          <span class="chip">${esc(reminder.label)} - ${esc(reminder.source)}</span>
-          <div class="access-code">${esc(reminder.title)}</div>
+          <span class="chip"><span>${esc(reminder.label)}</span> - <span>${esc(reminder.source)}</span></span>
+          <div class="access-code" data-cw-no-i18n>${esc(reminder.title)}</div>
           <div class="access-meta">${meta}</div>
         </div>
       `;
     }).join("");
 
-    list.innerHTML = `${accessHtml}${reminderHtml}`;
+    const notesHtml = notes ? `<div class="access-item reminder-permanent" data-pool-notes><span class="chip">Notas da piscina</span><div class="access-meta" data-cw-no-i18n style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(notes)}</div></div>` : "";
+    list.innerHTML = `${notesHtml}${accessHtml}${reminderHtml}`;
   }
 
   function photoTypeLabel(type) {
@@ -3126,6 +3129,8 @@
       if ($("#startBtn")) {
         $("#startBtn").disabled = false;
         $("#startBtn").textContent = "Atualizar agenda";
+        $("#startBtn").dataset.cwCheckinRequired = 'false';
+        delete $("#startBtn").dataset.cwCheckinTarget;
       }
       $("#finishBtn").disabled = false;
       $("#finishBtn").textContent = "Ver agenda";
@@ -3150,7 +3155,11 @@
       ? `Ajudar ${visit.technician?.name || visit.technicianName || "colega"}`
       : (visit.assistSource === "tomorrow" ? "Ronda do proximo dia" : (visit.technician?.name || "Tecnico"));
     $("#nextMeta").textContent = `${visit.client?.name || "Cliente"} - ${sourceLabel} - ${isVisitDone(visit) ? "Feita / correcao aberta" : (visit.status || "Pendente")}`;
-    if ($("#startBtn")) $("#startBtn").textContent = isVisitDone(visit) ? "Rever registo" : "Iniciar visita";
+    if ($("#startBtn")) {
+      $("#startBtn").textContent = isVisitDone(visit) ? "Rever registo" : "Iniciar visita";
+      $("#startBtn").dataset.cwCheckinRequired = String(!isVisitDone(visit));
+      $("#startBtn").dataset.cwCheckinTarget = JSON.stringify([visit.visitType || 'REGULAR', visit.id, visit.pool?.id]);
+    }
     $("#finishBtn").textContent = isVisitDone(visit) ? "Guardar correção" : "Concluir visita";
     renderAssistPanel();
     renderCorrectionSummary(visit);

@@ -5,6 +5,7 @@ if (process.env.NODE_ENV !== 'test' || process.env.QA_MODE !== 'true' || process
 const { prisma } = require('../src/prismaClient');
 const jwt = require('jsonwebtoken'), { getJwtSecret } = require('../src/utils/jwtSecret');
 const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
+let browser;
 assert(['127.0.0.1', 'localhost'].includes(new URL(base).hostname));
 (async () => {
   const client = await prisma.client.create({ data: { name: 'Briefing QA', active: true, email: 'private-briefing@qa.test', phone: 'PRIVATE-PHONE' } });
@@ -60,4 +61,85 @@ assert(['127.0.0.1', 'localhost'].includes(new URL(base).hostname));
   assert(reassigned.pool.operationalReminders.some(r => r.id === foreignOperation.id));
   assert.equal(await prisma.generalReminder.count({ where: { poolId: p.id } }), 509, 'Reading must not complete or delete instructions');
   console.log('PASS regular/extra briefing, pool notes, exact pool/client and technician scope, 505 general + 23 operational notices, closed exclusion, team leader, reassignment and read-only history');
-})().catch(error => { console.error(error); process.exitCode = 1; }).finally(() => prisma.$disconnect());
+
+  const { chromium } = require('playwright'), fs = require('node:fs'), path = require('node:path');
+  const stamp = Date.now(), output = path.resolve(__dirname, '../reports/field-visual/visit-briefing-' + stamp);
+  fs.mkdirSync(output, { recursive: true });
+  const vehicle = await prisma.vehicle.create({ data: { plate: `BRIEF-${stamp}`, active: true } });
+  const field = await prisma.technician.create({ data: { name: 'Técnico das instruções', active: true, vehicleId: vehicle.id } });
+  for (const type of ['INSURANCE', 'INSPECTION']) await prisma.vehicleMaintenanceRecord.create({ data: { vehicleId: vehicle.id, type, title: type, status: 'ACTIVE', dueDate: new Date(Date.now() + 30 * 86400000) } });
+  const guide = await prisma.transportGuide.create({ data: { vehicleId: vehicle.id, codeAT: `BRIEF-${stamp}`, status: 'ACTIVE', validUntil: new Date(Date.now() + 86400000), isDraft: false } });
+  await prisma.workGuide.create({ data: { vehicleId: vehicle.id, technicianId: field.id, guideId: guide.id, status: 'OPEN', isDraft: false } });
+  const fieldClient = await prisma.client.create({ data: { name: 'Quinta da Luz', active: true } });
+  const longNotes = 'Fechar o portão à entrada e à saída.\n' + 'Verificar os cestos e a linha de água. '.repeat(28) + '\nÚLTIMA INSTRUÇÃO: <img src=x onerror=alert(1)> Não tocar na válvula marcada.';
+  const fieldPool = await prisma.pool.create({ data: { clientId: fieldClient.id, name: 'Piscina do jardim', notes: longNotes, active: true } });
+  const fieldVisit = await prisma.serviceVisit.create({ data: { clientId: fieldClient.id, poolId: fieldPool.id, technicianId: field.id, plannedDate: now, date: now, status: 'PLANNED' } });
+  const past = new Date(Date.now() - 86400000), future = new Date(Date.now() + 86400000);
+  await prisma.generalReminder.createMany({ data: [
+    { title: 'Limpar o pré-filtro', poolId: fieldPool.id, dueAt: past, repeatRule: 'WEEKLY', status: 'PENDING' },
+    { title: 'Aviso permanente no título', poolId: fieldPool.id, dueAt: past, repeatRule: 'NONE', status: 'PENDING' },
+    { title: 'Registar fotografia da cobertura', poolId: fieldPool.id, dueAt: future, repeatRule: 'NONE', status: 'PENDING' },
+    { title: 'Aviso já concluído', poolId: fieldPool.id, dueAt: past, status: 'DONE', completedAt: now },
+  ] });
+  browser = await chromium.launch({ headless: true, executablePath: process.env.CW_CHROMIUM_PATH, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const token = sign(field);
+  await context.addInitScript(({ token, id }) => {
+    localStorage.setItem('cristalwater_jwt', token); localStorage.setItem('token', token);
+    const user = JSON.stringify({ id, technicianId: id, role: 'TECHNICIAN', name: 'Técnico das instruções' });
+    localStorage.setItem('cristalwater_user', user); localStorage.setItem('user', user); localStorage.setItem('cwTechnicianId', String(id));
+  }, { token, id: field.id });
+  const page = await context.newPage(), errors = []; page.setDefaultTimeout(10000);
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto(base + '/technician-field-mode', { waitUntil: 'networkidle' });
+  await page.locator('[data-field-tab-button=agora]').click();
+  await page.locator('#accessList [data-pool-notes]').waitFor({ state: 'attached' });
+  assert.equal(await page.locator('[data-pool-notes] .access-meta').textContent(), longNotes);
+  assert.equal(await page.locator('[data-pool-notes] img').count(), 0);
+  const recurring = page.locator('#accessList .access-item').filter({ hasText: 'Limpar o pré-filtro' });
+  assert.match(await recurring.textContent(), /Lembrete recorrente atrasado/);
+  assert.match(await page.locator('#accessList .access-item').filter({ hasText: 'Aviso permanente no título' }).textContent(), /Lembrete atrasado/);
+  assert.match(await page.locator('#accessList .access-item').filter({ hasText: 'Registar fotografia' }).textContent(), /Lembrete pontual/);
+  assert(!(await page.locator('#accessList').textContent()).includes('Aviso já concluído'));
+  await page.locator('#startBtn').click(); await page.getByRole('dialog', { name: 'Check-in da visita' }).waitFor();
+  assert((await page.locator('#cwFieldCheckinNotices').textContent()).includes('ÚLTIMA INSTRUÇÃO:'));
+  assert.equal((await prisma.serviceVisit.findUnique({ where: { id: fieldVisit.id } })).startAt, null);
+  await page.locator('#cwFieldCheckinCancel').click();
+  assert.equal((await prisma.serviceVisit.findUnique({ where: { id: fieldVisit.id } })).startAt, null);
+  await page.locator('#startBtn').click(); await page.locator('#cwFieldCheckinConfirm').click();
+  await page.waitForFunction(() => document.querySelector('#toast').textContent.includes('Piscina iniciada e registada.'));
+  assert((await prisma.serviceVisit.findUnique({ where: { id: fieldVisit.id } })).startAt);
+  const concise = 'Fechar o portão à entrada e à saída.\nNão mexer na válvula marcada a vermelho.\nRegistar uma fotografia da cobertura no fim da visita.';
+  await prisma.pool.update({ where: { id: fieldPool.id }, data: { notes: concise } });
+  await prisma.generalReminder.updateMany({ where: { poolId: fieldPool.id, title: 'Aviso permanente no título' }, data: { title: 'Verificar a porta da casa técnica' } });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('[data-field-tab-button=agora]').click();
+  assert.equal(await page.locator('[data-pool-notes] .access-meta').textContent(), concise);
+  for (const [language, startLabel, noteLabel, overdueLabel] of [
+    ['en', 'Start visit', 'Pool notes', 'Overdue recurring reminder'],
+    ['fr', 'Commencer la visite', 'Consignes de la piscine', 'Rappel récurrent en retard'],
+    ['es', 'Iniciar visita', 'Notas de la piscina', 'Recordatorio recurrente vencido'],
+    ['de', 'Besuch starten', 'Poolhinweise', 'Überfällige wiederkehrende Erinnerung'],
+  ]) {
+    await page.evaluate(language => CristalI18n.applyLanguage(language), language);
+    await page.locator('#startBtn').filter({ hasText: startLabel }).waitFor();
+    assert.equal(await page.locator('[data-pool-notes] .chip').textContent(), noteLabel);
+    assert((await recurring.textContent()).includes(overdueLabel));
+    assert.equal(await page.locator('[data-pool-notes] .access-meta').textContent(), concise);
+    await page.locator('#startBtn').click(); await page.getByRole('dialog', { name: 'Check-in da visita' }).waitFor();
+    assert((await page.locator('#cwFieldCheckinNotices').textContent()).includes(concise));
+    await page.locator('#cwFieldCheckinCancel').click();
+  }
+  await page.evaluate(() => CristalI18n.applyLanguage('pt'));
+  await page.locator('#startBtn').click(); await page.getByRole('dialog', { name: 'Check-in da visita' }).waitFor();
+  for (const width of [320, 390, 1280]) {
+    await page.setViewportSize({ width, height: 1000 });
+    assert(await page.locator('#cwFieldCheckinNotices').evaluate(n => n.scrollWidth <= n.clientWidth + 1));
+    if (width === 390) await page.screenshot({ path: path.join(output, 'technician-briefing-mobile.png') });
+  }
+  await page.locator('#cwFieldCheckinCancel').click();
+  assert.deepEqual(errors, []);
+  console.log('PASS real field notes, recurring overdue warning, literal text, full check-in, cancellation, explicit persisted start, refresh, PT/EN/FR/ES/DE and responsive review');
+  console.log('Visual evidence: ' + output);
+  await context.close();
+})().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => { if (browser) await browser.close(); await prisma.$disconnect(); });

@@ -516,6 +516,17 @@
     "de": "Verbindung verfügbar"
   }
 });
+  Object.assign(DICT, {
+    'Notas da piscina': { en: 'Pool notes', fr: 'Consignes de la piscine', es: 'Notas de la piscina', de: 'Poolhinweise' },
+    'Lembrete recorrente atrasado': { en: 'Overdue recurring reminder', fr: 'Rappel récurrent en retard', es: 'Recordatorio recurrente vencido', de: 'Überfällige wiederkehrende Erinnerung' },
+    'Lembrete recorrente': { en: 'Recurring reminder', fr: 'Rappel récurrent', es: 'Recordatorio recurrente', de: 'Wiederkehrende Erinnerung' },
+    'Lembrete atrasado': { en: 'Overdue reminder', fr: 'Rappel en retard', es: 'Recordatorio vencido', de: 'Überfällige Erinnerung' },
+    'Lembrete pontual': { en: 'One-time reminder', fr: 'Rappel ponctuel', es: 'Recordatorio puntual', de: 'Einmalige Erinnerung' },
+    'Check-in obrigatório': { en: 'Required check-in', fr: 'Confirmation obligatoire', es: 'Confirmación obligatoria', de: 'Bestätigung erforderlich' },
+    'Antes de começar': { en: 'Before you start', fr: 'Avant de commencer', es: 'Antes de empezar', de: 'Bevor Sie beginnen' },
+    'Li e vou iniciar a visita': { en: 'I have read this; start visit', fr: 'J’ai lu les consignes ; commencer la visite', es: 'He leído las instrucciones; iniciar visita', de: 'Gelesen; Besuch starten' },
+    'Sem código, nota ou lembrete registado': { en: 'No access code, note or reminder recorded', fr: 'Aucun code d’accès, consigne ou rappel enregistré', es: 'No hay códigos, notas ni recordatorios registrados', de: 'Kein Zugangscode, Hinweis oder Erinnerung gespeichert' },
+  });
   const CANON_DICT = Object.entries(DICT).reduce((acc, [key, value]) => {
     acc[canonicalText(key)] = value;
     return acc;
