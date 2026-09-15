@@ -112,4 +112,9 @@ async function list() {
     };
   }, { isolationLevel: 'RepeatableRead', timeout: 30000 });
 }
-module.exports = { list };
+// Compatibility listing for the former client-auth alias, now restricted to ADMIN.
+async function listLegacyTechnical() {
+  return prisma.technicalAlert.findMany({ where: { status: { in: ['OPEN', 'IN_PROGRESS'] } },
+    include: { pool: { include: { client: true } } }, orderBy: { createdAt: 'desc' } });
+}
+module.exports = { list, listLegacyTechnical };

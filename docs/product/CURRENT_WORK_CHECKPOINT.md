@@ -4,6 +4,8 @@
 
 - Repositório: `ts7520305-svg/cristalwater`.
 - Branch de trabalho: `work/field-readiness-20260915-simulation`.
+- TASK161 verificada no workflow `35020637133`: 66 grupos aprovados, PostgreSQL 16 e restauro de 99 tabelas/11 ficheiros. Commit `64d9e335ed34cc75e7edc2e03e9a43453fbcddf5`.
+- TASK163: acesso anónimo legado aos alertas reproduzido e corrigido, incluindo o desvio à confirmação física. Relatório `LEGACY_ALERT_ACCESS_20260915.md`; três grupos aprovados em `field-qa-runtime/run-1789504955148`. Publicar TASK162/TASK163, depois corrigir o envio completo: escreve atualmente em ChatMessage mas o chat/portal leem ClientMessage, além de guardar caminho local de PDF. Prosseguir para a matriz de conclusão após fechar este percurso.
 - TASK161 publicada em `64d9e335ed34cc75e7edc2e03e9a43453fbcddf5`, árvore igual à local `884d6409c4c90794462caf0f113d30adfdc62688`; workflow `35020637133` em verificação.
 - TASK162: links de documentos com autenticação e regresso seguro após login. Relatório `INVOICE_DOCUMENT_LINK_20260915.md`; três grupos aprovados em `field-qa-runtime/run-1789504756197`. Ao rever o login foram localizadas as rotas antigas GET/PUT de alertas em `clientAuthRoutes.js`, sem guarda e com escrita direta; reproduzir e corrigir antes da continuação do envio completo. Runner com 67 grupos.
 - Última entrega remota verificada: TASK160, commit `9de9ecd56f01ac175af151b9474e0e184042d06a`, árvore `eb51d9b7fcc048d014e36308dd681d16c2e0bde7`. Workflow `35018387783` aprovado: 65 grupos operacionais sem falhas, testes unitários/técnicos/navegador, PostgreSQL 16 e restauro de 99 tabelas/11 ficheiros. Inclui TASK158–160.

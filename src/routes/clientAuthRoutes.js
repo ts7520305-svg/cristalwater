@@ -11,6 +11,9 @@ const { getJwtSecret } = require("../utils/jwtSecret");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const JWT_SECRET = getJwtSecret();
+const auth = require('../middlewares/authMiddleware');
+const AlertListBusiness = require('../business/admin/AlertListBusiness');
+const AlertResolutionBusiness = require('../business/admin/AlertResolutionBusiness');
 
 // ==========================================
 // 🔐 LOGIN CLIENTE (REAL)
@@ -82,25 +85,10 @@ router.post("/login", async (req, res) => {
 // ==========================================
 // LISTAR ALERTAS
 // ==========================================
+router.use(auth('ADMIN'));
 router.get("/", async (req, res) => {
   try {
-    const alerts = await prisma.technicalAlert.findMany({
-      where: {
-        status: {
-          in: ["OPEN", "IN_PROGRESS"],
-        },
-      },
-      include: {
-        pool: {
-          include: {
-            client: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+    const alerts = await AlertListBusiness.listLegacyTechnical();
 
     res.json(alerts);
   } catch (error) {
@@ -114,20 +102,10 @@ router.get("/", async (req, res) => {
 // ==========================================
 router.put("/:id/resolve", async (req, res) => {
   try {
-    const id = Number(req.params.id);
-
-    const alert = await prisma.technicalAlert.update({
-      where: { id },
-      data: {
-        status: "RESOLVED",
-        resolvedAt: new Date(),
-      },
-    });
-
-    res.json(alert);
+    return res.json(await AlertResolutionBusiness.resolve(req.user, `technical-${req.params.id}`, req.body));
   } catch (error) {
     console.error("Erro ao resolver alerta:", error);
-    res.status(500).json({ error: "Erro ao resolver alerta" });
+    return res.status(error.statusCode || 500).json({ ok: false, error: error.statusCode ? error.message : "Erro ao resolver alerta", ...(error.code ? { code: error.code } : {}) });
   }
 });
 

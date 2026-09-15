@@ -41,6 +41,7 @@ scripts.push('test-field-invoice-issue.js');
 scripts.push('test-field-invoice-delivery.js');
 scripts.push('test-field-invoice-pdf-access.js');
 scripts.push('test-field-invoice-document.js');
+scripts.push('test-field-legacy-alert-access.js');
 function run(script){return new Promise(resolve=>{
  const output=fs.createWriteStream(path.join(evidence,script+'.log'));
  const child=spawn(process.execPath,[path.join(__dirname,script)],{cwd:root,env:process.env,stdio:['ignore','pipe','pipe']});
