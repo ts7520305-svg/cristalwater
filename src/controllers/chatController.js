@@ -55,13 +55,7 @@ async function createMessage(req, res){
         ? String(req.body.text).trim()
         : null;
 
-    const sender =
-      String(
-        req.body.sender || "admin"
-      );
-
-    const fromClient =
-      isClientSender(sender);
+    const fromClient = isClientRole(req);
 
     if(!clientId){
 
@@ -129,11 +123,6 @@ async function createMessage(req, res){
           seen: !fromClient,
         },
       });
-
-    console.log(
-      "CHAT MESSAGE:",
-      message
-    );
 
     return res.json({
 
