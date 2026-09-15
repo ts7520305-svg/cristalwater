@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="same-origin">
+  <title>Documento financeiro · Cristal Water</title>
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <style>
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 20px; background: #eef3f8; font-family: system-ui, sans-serif; color: #14243a; box-sizing: border-box; }
+    main { box-sizing: border-box; width: min(100%, 620px); padding: clamp(24px, 5vw, 44px); border: 1px solid #d9e3ed; border-radius: 20px; background: white; box-shadow: 0 12px 40px #182d4210; }
+    .brand { color: #126d81; font-size: 14px; font-weight: 700; letter-spacing: .08em; }
+    h1 { font-size: clamp(26px, 5vw, 34px); line-height: 1.15; }
+    p { line-height: 1.6; }
+    #documentStatus { min-height: 3em; }
+    button, a { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 18px; box-sizing: border-box; border-radius: 10px; font: 600 15px system-ui; text-decoration: none; }
+    button { border: 0; background: #126d81; color: white; cursor: pointer; width: 100%; }
+    button:disabled { opacity: .6; cursor: wait; }
+    nav { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
+    a { color: #126d81; border: 1px solid #cedce6; }
+    [hidden] { display: none !important; }
+    .note { margin-top: 24px; color: #526477; font-size: 13px; }
+  </style>
+  <script defer src="/cw-auth.js"></script>
+  <script defer src="/cw-auth-download.js?v=20260915-invoice-access"></script>
+  <script defer src="/invoice-document.js"></script>
+</head>
+<body>
+  <main>
+    <div class="brand">CRISTAL WATER</div>
+    <h1>Documento financeiro</h1>
+    <p id="documentStatus" role="status" aria-live="polite">A preparar o acesso ao documento…</p>
+    <button id="openDocument" type="button" hidden>Abrir PDF</button>
+    <nav id="documentLogin" aria-label="Entrar ou mudar de conta" hidden>
+      <a id="clientDocumentLogin">Entrar como cliente</a>
+      <a id="adminDocumentLogin">Entrar como administrador</a>
+    </nav>
+    <p class="note">A consulta requer a conta do cliente titular ou da administração. O link, por si só, não dá acesso ao documento.</p>
+  </main>
+</body>
+</html>

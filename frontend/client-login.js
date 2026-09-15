@@ -125,8 +125,7 @@ async function login(){
     // REDIRECT
     // ==================================================
 
-    window.location.href =
-      "/client-portal";
+    window.location.href = window.CristalAuth?.invoiceReturnPath?.() || "/client-portal";
 
   } catch(err){
 

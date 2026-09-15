@@ -116,6 +116,12 @@ async function login(){
     }
 
 
+    const documentReturn = window.CristalAuth?.invoiceReturnPath?.();
+    if (documentReturn && ["ADMIN", "CLIENT"].includes(role)) {
+      window.location.href = documentReturn;
+      return;
+    }
+
     // ==================================================
     // ADMIN
     // ==================================================

@@ -263,11 +263,12 @@ async function openInvoicePdf(invoiceId) {
 
 async function copyInvoiceLink(invoiceId) {
   if (!invoiceDocumentAvailable(invoiceId)) return;
-  const link = `${API}/invoice-pdf/${invoiceId}`;
+  const link = new URL(`/invoice-document?id=${Number(invoiceId)}`, location.origin).href;
 
   try {
     await navigator.clipboard.writeText(link);
-    showStatus(`Link copiado:\n${link}`);
+    if (!invoiceSessionCurrent()) return;
+    showStatus(`Link copiado. O destinatário deve entrar na conta titular:\n${link}`);
   } catch (error) {
     console.error("Erro ao copiar link:", error);
     showStatus("Não foi possível copiar o link.");

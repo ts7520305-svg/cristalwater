@@ -11,7 +11,13 @@
   const LEGACY_USER_KEY = 'user';
   const ADMIN_TOKEN_KEY = 'adminToken';
   const API_ORIGIN_KEY = 'cw_api_origin';
-  const PUBLIC_PATHS = new Set(['/', '/login', '/admin-login', '/client-login', '/technician-login', '/splash']);
+  const PUBLIC_PATHS = new Set(['/', '/login', '/admin-login', '/client-login', '/technician-login', '/splash', '/invoice-document']);
+
+  function invoiceReturnPath(){
+    const target = new URLSearchParams(window.location.search).get('returnTo') || '';
+    const match = /^\/invoice-document\?id=([1-9]\d{0,9})$/.exec(target);
+    return match && Number(match[1]) <= 2147483647 ? target : null;
+  }
 
   function path(){ return String(window.location.pathname || '/').replace(/\.html$/,'').toLowerCase(); }
   function isPublic(){ return PUBLIC_PATHS.has(path()); }
@@ -199,7 +205,7 @@
     hydrate();
   }, true);
 
-  window.CristalAuth = { TOKEN_KEY, USER_KEY, API_ORIGIN_KEY, getToken, parseUser, persistSession, clearSession, logout, hydrate, requireAuth, toast, apiOrigin, apiUrl, isSessionExpired, retirePushSubscription };
+  window.CristalAuth = { TOKEN_KEY, USER_KEY, API_ORIGIN_KEY, getToken, parseUser, persistSession, clearSession, logout, hydrate, requireAuth, toast, apiOrigin, apiUrl, isSessionExpired, retirePushSubscription, invoiceReturnPath };
   function wrapSocketIO(factory) {
     if (typeof factory !== 'function' || factory.__cwAuth) return factory;
     const wrapped = function(uri, options) {
