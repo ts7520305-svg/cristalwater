@@ -1,3 +1,4 @@
+const ReminderCompletionBusiness = require('../business/admin/ReminderCompletionBusiness');
 const { prisma } = require("../prismaClient");
 
 function toDate(value) { return value ? new Date(value) : null; }
@@ -121,9 +122,12 @@ async function createReminder(req, res) {
 }
 
 async function completeReminder(req, res) {
-  const id = Number(req.params.id);
-  const reminder = await prisma.generalReminder.update({ where: { id }, data: { status: "DONE", completedAt: new Date() }});
-  res.json({ ok: true, reminder });
+  try {
+    const result = await ReminderCompletionBusiness.complete({ reminderId: req.params.id, createdBy: req.user?.email || 'ADMIN' });
+    res.json(result);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ ok: false, error: error.message });
+  }
 }
 
 module.exports = {

@@ -1,3 +1,5 @@
+const ReminderCompletionBusiness = require('../business/admin/ReminderCompletionBusiness');
+const { normalizeRepeatRuleInput } = require('../services/reminderRepeatService');
 const clientRates = require('../business/finance/ClientRateBusiness');
 const {checkDatabaseHealth}=require('../services/databaseHealthService');
 const express = require('express');
@@ -161,71 +163,6 @@ function dataFor(modelName, data) {
     if (fields.has(key)) out[key] = value;
   }
   return out;
-}
-function parseRepeatRuleInterval(rule) {
-  const value = String(rule || '').trim().toUpperCase();
-  if (!value || value === 'NONE') return null;
-  const match = value.match(/^EVERY_(\d+)_(DAY|DAYS|MONTH|MONTHS|YEAR|YEARS)$/);
-  if (match) {
-    const amount = Math.max(1, toInt(match[1], 1));
-    const unit = match[2].replace(/^(DAY|MONTH|YEAR)$/, '$1S');
-    return { amount, unit };
-  }
-  if (value === 'WEEKLY') return { amount: 7, unit: 'DAYS' };
-  if (value === 'MONTHLY') return { amount: 1, unit: 'MONTHS' };
-  if (value === 'QUARTERLY') return { amount: 3, unit: 'MONTHS' };
-  if (value === 'YEARLY') return { amount: 1, unit: 'YEARS' };
-  return null;
-}
-function normalizeRepeatUnit(value) {
-  const unit = String(value || 'DAYS').trim().toUpperCase();
-  if (['DAY', 'DIA', 'DIAS', 'DAYS'].includes(unit)) return 'DAYS';
-  if (['MONTH', 'MES', 'MESES', 'MONTHS'].includes(unit)) return 'MONTHS';
-  if (['YEAR', 'ANO', 'ANOS', 'YEARS'].includes(unit)) return 'YEARS';
-  return 'DAYS';
-}
-function validateRepeatInterval(interval) {
-  if (!interval) return false;
-  const maxByUnit = { DAYS: 1095, MONTHS: 120, YEARS: 10 };
-  const max = maxByUnit[interval.unit] || 1095;
-  return Number.isInteger(interval.amount) && interval.amount >= 1 && interval.amount <= max;
-}
-function normalizeRepeatRuleInput(body = {}) {
-  const raw = String(body.repeatRule || '').trim().toUpperCase();
-  if (!raw || raw === 'NONE') return 'NONE';
-
-  let interval = null;
-  if (raw === 'CUSTOM') {
-    interval = {
-      amount: toInt(body.customRepeatValue ?? body.customRepeatDays ?? body.repeatEveryDays),
-      unit: normalizeRepeatUnit(body.customRepeatUnit ?? body.repeatUnit),
-    };
-  } else {
-    interval = parseRepeatRuleInterval(raw);
-  }
-
-  if (!validateRepeatInterval(interval)) {
-    const error = new Error('Repeticao invalida. Usa personalizada com dias, meses ou anos dentro dos limites permitidos.');
-    error.statusCode = 400;
-    throw error;
-  }
-
-  return `EVERY_${interval.amount}_${interval.unit}`;
-}
-function addRepeatInterval(date, interval) {
-  const next = new Date(date);
-  if (!interval) return next;
-  if (interval.unit === 'MONTHS' || interval.unit === 'YEARS') {
-    const months = interval.unit === 'YEARS' ? interval.amount * 12 : interval.amount;
-    const originalDay = next.getDate();
-    next.setDate(1);
-    next.setMonth(next.getMonth() + months);
-    const lastDay = new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate();
-    next.setDate(Math.min(originalDay, lastDay));
-    return next;
-  }
-  next.setDate(next.getDate() + interval.amount);
-  return next;
 }
 function parseDayRange(dayValue) {
   const raw = String(dayValue || '').trim();
@@ -2220,47 +2157,12 @@ router.post('/pools/:id/service-reminders', async (req, res) => {
 
 router.post('/pools/:id/service-reminders/:reminderId/complete', async (req, res) => {
   try {
-    const poolId = toInt(req.params.id);
-    const reminderId = toInt(req.params.reminderId);
-    if (!poolId || !reminderId) return res.status(400).json({ ok: false, error: 'IDs invalidos' });
-    if (!available('generalReminder')) return res.status(501).json({ ok: false, error: 'Lembretes indisponiveis' });
-
-    const existing = await db('generalReminder').findUnique({ where: { id: reminderId } });
-    if (!existing || existing.poolId !== poolId) {
-      return res.status(404).json({ ok: false, error: 'Lembrete nao encontrado nesta piscina' });
-    }
-
-    const completed = await db('generalReminder').update({
-      where: { id: reminderId },
-      data: dataFor('generalReminder', {
-        status: 'DONE',
-        completedAt: new Date(),
-      }),
-    });
-
-    let nextReminder = null;
-    const repeatInterval = parseRepeatRuleInterval(existing.repeatRule);
-    if (repeatInterval) {
-      nextReminder = await db('generalReminder').create({
-        data: dataFor('generalReminder', {
-          title: existing.title,
-          description: existing.description,
-          category: existing.category || 'TECHNICAL_PERIODIC_SERVICE',
-          priority: existing.priority || 'NORMAL',
-          status: 'PENDING',
-          dueAt: addRepeatInterval(existing.dueAt || new Date(), repeatInterval),
-          clientId: existing.clientId || null,
-          poolId: existing.poolId,
-          technicianId: existing.technicianId || null,
-          repeatRule: existing.repeatRule,
-          createdBy: req.headers['x-user-email'] || 'ADMIN',
-        }),
-      });
-    }
-
-    return res.json({ ok: true, reminder: completed, nextReminder });
+    return res.json(await ReminderCompletionBusiness.complete({
+      poolId: req.params.id, reminderId: req.params.reminderId,
+      createdBy: req.user?.email || 'ADMIN',
+    }));
   } catch (error) {
-    return res.status(500).json({ ok: false, error: error.message });
+    return res.status(error.statusCode || 500).json({ ok: false, error: error.message });
   }
 });
 

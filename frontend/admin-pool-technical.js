@@ -7,6 +7,7 @@ const ui = window.CwUi || {
   confirm: async () => false,
 };
 let proposalSelection = new Set();
+const completingReminders = new Set();
 
 function esc(value) {
   return String(value ?? "").replace(/[&<>'"]/g, (char) => ({
@@ -92,6 +93,10 @@ function repeatLabel(rule) {
   }
   const labels = {
     NONE: "Sem repeticao",
+    WEEKLY: "Semanal",
+    MONTHLY: "Mensal",
+    QUARTERLY: "Trimestral",
+    YEARLY: "Anual",
     EVERY_7_DAYS: "Semanal",
     EVERY_30_DAYS: "Mensal",
     EVERY_90_DAYS: "Trimestral",
@@ -299,7 +304,9 @@ function renderReminders(reminders) {
   }
 
   list.innerHTML = reminders.map((item) => {
-    const done = item.status === "DONE";
+    const status = String(item.status || "").trim().toUpperCase();
+    const cancelled = ["CANCELLED", "CANCELED"].includes(status);
+    const done = Boolean(item.completedAt) || ["DONE", "COMPLETED", "CLOSED", "RESOLVED"].includes(status);
     return `
       <div class="reminder-item ${done ? "done" : ""}">
         <div>
@@ -308,9 +315,9 @@ function renderReminders(reminders) {
           ${item.description ? `<p>${esc(item.description)}</p>` : ""}
         </div>
         <div>
-          ${done
+          ${cancelled ? '<span class="tag">Cancelado</span>' : done
             ? '<span class="tag">Concluido</span>'
-            : `<button type="button" data-complete-reminder="${esc(item.id)}">Concluir</button>`}
+            : `<button type="button" data-complete-reminder="${esc(item.id)}" ${completingReminders.has(String(item.id)) ? 'disabled' : ''}>Concluir</button>`}
           <button type="button" class="cw-action-danger" data-delete-reminder="${esc(item.id)}">Eliminar</button>
         </div>
       </div>
@@ -360,8 +367,11 @@ function renderKeyAccesses(pool) {
 
 async function loadReminders() {
   if (!poolId) return;
+  const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt") || "";
   const data = await req(`/pools/${poolId}/service-reminders`);
-  renderReminders(data.reminders || []);
+  if (token !== (localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt") || "")) return;
+  if (data.ok !== true || !Array.isArray(data.reminders)) throw new Error("Nao foi possivel ler os lembretes. Atualiza a pagina.");
+  renderReminders(data.reminders);
 }
 
 async function loadSheet() {
@@ -463,12 +473,35 @@ async function createServiceReminder() {
 }
 
 async function completeServiceReminder(id) {
-  await req(`/pools/${poolId}/service-reminders/${encodeURIComponent(id)}/complete`, { method: "POST" });
-  document.getElementById("reminderStatus").textContent = "Lembrete concluido.";
-  await loadReminders();
+  const key = String(id);
+  if (completingReminders.has(key)) return;
+  completingReminders.add(key);
+  const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt") || "";
+  const currentSession = () => token === (localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt") || "");
+  const buttons = () => [...document.querySelectorAll('[data-complete-reminder], [data-delete-reminder]')]
+    .filter(button => (button.dataset.completeReminder || button.dataset.deleteReminder) === key);
+  buttons().forEach(button => { button.disabled = true; });
+  const status = document.getElementById("reminderStatus");
+  try {
+    const result = await req(`/pools/${poolId}/service-reminders/${encodeURIComponent(key)}/complete`, { method: "POST" });
+    if (!currentSession()) return;
+    if (result.ok !== true || String(result.reminder?.id) !== key || !(result.reminder.completedAt || ["DONE", "COMPLETED", "CLOSED", "RESOLVED"].includes(result.reminder.status))) {
+      throw new Error("Resposta de conclusao invalida. Atualiza a lista antes de repetir.");
+    }
+    status.textContent = "Lembrete concluido.";
+    try { await loadReminders(); } catch {
+      if (currentSession()) status.textContent = "Lembrete concluido. Atualiza a pagina para consultar a proxima ocorrencia.";
+    }
+  } catch (error) {
+    if (currentSession()) status.textContent = `Nao foi possivel confirmar a conclusao. Podes atualizar ou repetir sem duplicar a proxima ocorrencia. ${error.message}`;
+  } finally {
+    completingReminders.delete(key);
+    buttons().forEach(button => { button.disabled = false; });
+  }
 }
 
 async function deleteServiceReminder(id) {
+  if (completingReminders.has(String(id))) return;
   const ok = await ui.confirm("Eliminar este lembrete de servico? Esta acao nao remove historico tecnico nem visitas.", {
     title: "Confirmar eliminacao",
     confirmText: "Eliminar",
