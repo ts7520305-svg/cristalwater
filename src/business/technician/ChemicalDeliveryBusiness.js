@@ -15,10 +15,24 @@ async function context(user,id,db=prisma){
 async function linkedNeeds(db,vehicleId){return new Map((await require('../../services/stockPreparationService').forVehicle(db,vehicleId)).map(m=>[m.id,m]));}
 async function options(user,id){
   const {row,tech}=await context(user,id);
-  const movements=await prisma.stockMovement.findMany({where:{vehicleId:tech.vehicleId,movementType:'TRANSFER_TO_VEHICLE',scopeTo:'VEHICLE',createdAt:{gte:new Date(row.reportedAt)}},orderBy:{id:'desc'},take:100});
-  const receipts=movements.length?await prisma.operationalReminder.findMany({where:{sourceKey:{startsWith:'chemical-delivery:'},OR:movements.map(m=>({metadata:{path:['movementId'],equals:m.id}}))},select:{metadata:true}}):[];
-  const links=await linkedNeeds(prisma,tech.vehicleId);
-  return {ok:true,rows:movements.filter(m=>(!links.has(m.id)||links.get(m.id).shortageId===row.shortageId)&&norm(m.productName)===norm(row.productName)&&norm(m.unit)===norm(row.unit)).map(m=>({id:m.id,createdAt:m.createdAt,quantity:m.quantity,available:Math.max(0,(links.get(m.id)?.quantity??m.quantity)-receipts.filter(r=>r.metadata?.movementId===m.id).reduce((n,r)=>n+Number(r.metadata.quantity||0),0)),unit:m.unit})).filter(m=>m.available>0)};
+  const remaining=row.quantity===null?Infinity:Math.max(0,row.quantity-row.receivedQuantity);
+  if(remaining===0)return {ok:true,rows:[]};
+  const links=await linkedNeeds(prisma,tech.vehicleId),rows=[];
+  let cursor;
+  while(true){
+    const movements=await prisma.stockMovement.findMany({where:{vehicleId:tech.vehicleId,movementType:'TRANSFER_TO_VEHICLE',scopeTo:'VEHICLE',createdAt:{gte:new Date(row.reportedAt)},...(cursor?{id:{lt:cursor}}:{})},orderBy:{id:'desc'},take:100});
+    if(!movements.length)break;
+    const candidates=movements.filter(m=>(!links.has(m.id)||links.get(m.id).shortageId===row.shortageId)&&norm(m.productName)===norm(row.productName)&&norm(m.unit)===norm(row.unit));
+    const receipts=candidates.length?await prisma.operationalReminder.findMany({where:{sourceKey:{startsWith:'chemical-delivery:'},OR:candidates.map(m=>({metadata:{path:['movementId'],equals:m.id}}))},select:{metadata:true}}):[];
+    for(const m of candidates){
+      const received=receipts.filter(r=>r.metadata?.movementId===m.id).reduce((n,r)=>n+Number(r.metadata.quantity||0),0);
+      const available=Math.max(0,Math.min(remaining,(links.get(m.id)?.quantity??m.quantity)-received));
+      if(available>0)rows.push({id:m.id,createdAt:m.createdAt,quantity:m.quantity,available,unit:m.unit});
+    }
+    cursor=movements[movements.length-1].id;
+    if(movements.length<100)break;
+  }
+  return {ok:true,rows};
 }
 async function confirm(user,id,body={}){
   const technicianId=technician(user),shortageId=Number(id),movementId=Number(body.movementId),quantity=Number(body.quantity);

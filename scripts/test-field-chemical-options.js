@@ -1,0 +1,35 @@
+require('../src/loadEnv')();
+const assert=require('node:assert/strict');
+const {randomUUID}=require('node:crypto');
+if(process.env.NODE_ENV!=='test'||process.env.QA_MODE!=='true'||process.env.QA_ENVIRONMENT_SAFE!=='true')throw Error('Isolated QA required');
+const {prisma}=require('../src/prismaClient');
+const jwt=require('jsonwebtoken'),{getJwtSecret}=require('../src/utils/jwtSecret');
+const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';
+assert(['localhost','127.0.0.1'].includes(new URL(base).hostname));
+(async()=>{
+ const vehicle=await prisma.vehicle.create({data:{plate:`OPT-${Date.now()}`,active:true}});
+ const tech=await prisma.technician.create({data:{name:'Chemical options QA',active:true,vehicleId:vehicle.id}});
+ const other=await prisma.technician.create({data:{name:'Chemical options other',active:true}});
+ const client=await prisma.client.create({data:{name:'Chemical options QA',active:true}});
+ const pool=await prisma.pool.create({data:{name:'Chemical options QA',clientId:client.id}});
+ const visit=await prisma.serviceVisit.create({data:{poolId:pool.id,clientId:client.id,technicianId:tech.id,status:'PLANNED'}});
+ const user={id:tech.id,technicianId:tech.id,role:'TECHNICIAN'};
+ const report=await require('../src/business/technician/IncompleteVisitBusiness').report(user,visit.id,{requestId:randomUUID(),reason:'CHEMICAL_MISSING',nextStep:'Levar o produto em falta',chemicalShortage:{productName:'Cloro opções QA',quantity:10,unit:'KG'}});
+ const movement=await prisma.stockMovement.create({data:{movementType:'TRANSFER_TO_VEHICLE',scopeTo:'VEHICLE',vehicleId:vehicle.id,productName:'Cloro opções QA',unit:'KG',quantity:20}});
+ await prisma.stockMovement.createMany({data:Array.from({length:101},(_,i)=>({movementType:'TRANSFER_TO_VEHICLE',scopeTo:'VEHICLE',vehicleId:vehicle.id,productName:`Outro produto ${i}`,unit:'KG',quantity:1}))});
+ const token=jwt.sign(user,getJwtSecret(),{expiresIn:'1h'});
+ const path=`/api/technician/chemical-shortages/${report.reminder.id}/deliveries`;
+ async function call(method='GET',body){const r=await fetch(base+path,{method,headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});return {status:r.status,body:await r.json()};}
+ let options=await call();assert.equal(options.status,200);assert.equal(options.body.rows.length,1);assert.equal(options.body.rows[0].id,movement.id);assert.equal(options.body.rows[0].available,10);
+ const request={requestId:randomUUID(),movementId:movement.id,quantity:7};
+ assert.equal((await call('POST',request)).status,200);
+ assert.equal((await call('POST',request)).body.idempotent,true);
+ options=await call();assert.equal(options.body.rows[0].available,3);
+ assert.equal((await call('POST',{...request,requestId:randomUUID(),quantity:4})).status,409);
+ assert.equal((await call('POST',{...request,requestId:randomUUID(),quantity:3})).status,200);
+ assert.deepEqual((await call()).body.rows,[]);
+ assert.equal(await prisma.stockMovement.count({where:{vehicleId:vehicle.id}}),102);
+ await prisma.serviceVisit.update({where:{id:visit.id},data:{technicianId:other.id}});
+ assert.equal((await call()).status,409);
+ console.log('PASS chemical options beyond 100 movements, remaining quantity, partial/idempotent receipt, over-receipt rejection, completed need, unchanged stock and reassignment');
+})().catch(e=>{console.error(e);process.exitCode=1}).finally(()=>prisma.$disconnect());
