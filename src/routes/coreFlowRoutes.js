@@ -1,3 +1,4 @@
+const clientRates = require('../business/finance/ClientRateBusiness');
 const {checkDatabaseHealth}=require('../services/databaseHealthService');
 const express = require('express');
 const bcrypt = require('bcryptjs');
@@ -2915,7 +2916,7 @@ router.post('/invoices/generate', async (req, res) => {
       include: { pool: true },
     })) : [];
 
-    const monthly = toFloat(client.monthlyFee || client.monthlyAmount || 0, 0) + (client.pools || []).reduce((sum, p) => sum + toFloat(p.monthlyAmount, 0), 0);
+    const monthly = (await clientRates.billing(client, ref, toFloat(client.monthlyFee || client.monthlyAmount || 0, 0) + (client.pools || []).reduce((sum, p) => sum + toFloat(p.monthlyAmount, 0), 0))).amount;
     const serviceTotal = serviceVisits.reduce((sum, visit) => sum + sourceAmount(visit), 0);
     const extraVisitTotal = extraVisits.reduce((sum, visit) => sum + sourceAmount(visit), 0);
     const repairTotal = repairs.reduce((sum, repair) => sum + toFloat(repair.totalPrice, 0), 0);
@@ -2991,7 +2992,7 @@ router.post('/invoices/generate', async (req, res) => {
     const fullInvoice = await safe('invoice.findUnique.fullInvoice.v2', invoice, () => db('invoice').findUnique({ where: { id: invoice.id }, include: { lines: true, client: true, payments: true } }));
     return res.json({ ok: true, invoice: fullInvoice, creditUsed: credit.creditUsed || 0, lines: { monthly, services: serviceTotal, extras: extraVisitTotal, repairs: repairTotal }, next: 'PAYMENT' });
   } catch (error) {
-    return res.status(500).json({ ok: false, error: error.message });
+    return res.status(error.status || 500).json({ ok: false, error: error.message });
   }
 });
 
@@ -3012,7 +3013,7 @@ router.post('/invoices/generate-legacy', async (req, res) => {
       include: { pool: true },
     }));
 
-    const monthly = toFloat(client.monthlyFee || client.monthlyAmount || 0, 0) + (client.pools || []).reduce((sum, p) => sum + toFloat(p.monthlyAmount, 0), 0);
+    const monthly = (await clientRates.billing(client, ref, toFloat(client.monthlyFee || client.monthlyAmount || 0, 0) + (client.pools || []).reduce((sum, p) => sum + toFloat(p.monthlyAmount, 0), 0))).amount;
     const repairTotal = repairs.reduce((sum, r) => sum + toFloat(r.totalPrice, 0), 0);
     const total = monthly + repairTotal;
     const existingInvoice = await db('invoice').findUnique({
@@ -3081,7 +3082,7 @@ router.post('/invoices/:id/pay', async (req, res) => {
     const result = await CoreInvoicePaymentBusiness.registerPayment(prisma, toInt(req.params.id), req.body || {});
     return res.json({ ok: true, ...result, next: 'CLOSED' });
   } catch (error) {
-    return res.status(error.status || 500).json({ ok: false, error: error.message });
+    return res.status(500).json({ ok: false, error: error.message });
   }
 });
 

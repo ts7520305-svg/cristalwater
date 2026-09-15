@@ -2,6 +2,8 @@ const { prisma } = require('../../prismaClient');
 const { getBooleanSetting } = require('../../services/systemSettingService');
 const activeClient = { active: true, status: 'ACTIVE', billingActive: true, archiveStatus: 'ATIVO', deletedAt: null };
 const DAY = 86400000;
+const clientRates = require('./ClientRateBusiness');
+const legacyAmount = client => Math.round((Number(client.monthlyFee || client.monthlyAmount || 0) + (client.pools || []).reduce((n,p) => n + Number(p.monthlyAmount || 0),0))*100)/100;
 function scope(clientIds) { return Array.isArray(clientIds) ? { id: { in: clientIds.map(Number).filter(Number.isSafeInteger) } } : {}; }
 async function monthly({ now = new Date(), preview = false, clientIds } = {}) {
   if (!Number.isFinite(now.getTime())) throw Error('Data inválida');
@@ -9,7 +11,12 @@ async function monthly({ now = new Date(), preview = false, clientIds } = {}) {
   if (!enabled && !preview) return { ok: true, skipped: 'DISABLED', created: 0 };
   const monthRef = now.toISOString().slice(0, 7);
   const clients = await prisma.client.findMany({ where: { ...activeClient, ...scope(clientIds) }, include: { pools: true }, orderBy: { id: 'asc' } });
-  const candidates = clients.map(client => ({ clientId: client.id, name: client.name, amount: Math.round((Number(client.monthlyFee || client.monthlyAmount || 0) + client.pools.reduce((sum, pool) => sum + Number(pool.monthlyAmount || 0), 0)) * 100) / 100 })).filter(row => Number.isFinite(row.amount) && row.amount > 0);
+  const candidates = [];
+  for (const client of clients) {
+    const plan = await clientRates.latest(client.id);
+    const amount = plan ? clientRates.calculate(plan.snapshot,monthRef).amount : legacyAmount(client);
+    if (Number.isFinite(amount) && amount > 0) candidates.push({clientId:client.id,name:client.name,amount,planVersion:plan?.version || null});
+  }
   if (preview) return { ok: true, preview: true, enabled, monthRef, candidates };
   // A transaction-scoped lock coordinates scheduler instances. Existing Finance
   // OS remains responsible for creating and calculating reviewable drafts.
@@ -18,8 +25,12 @@ async function monthly({ now = new Date(), preview = false, clientIds } = {}) {
     if (!lock.acquired) return { ok: true, skipped: 'BUSY', created: 0 };
     let created = 0; const errors = [];
     for (const row of candidates) {
-      const current = await tx.client.findFirst({ where: { id: row.clientId, ...activeClient } });
-      if (!current) continue;
+      await tx.$queryRaw`SELECT id FROM "Client" WHERE id = ${row.clientId} FOR UPDATE`;
+      const current = await tx.client.findFirst({ where: { id: row.clientId, ...activeClient }, include: {pools:true} });
+      if (!current || await tx.invoice.findUnique({where:{clientId_monthRef:{clientId:current.id,monthRef}}})) continue;
+      const pricing = await clientRates.billing(current,monthRef,legacyAmount(current),tx);
+      if (pricing.amount <= 0) continue;
+      row.amount = pricing.amount;
         const result = await require('./FinanceOsBusiness').createDraftInvoice({ clientId: row.clientId, monthRef, requireActiveContract: true, dueDate: new Date(now.getTime() + 15 * DAY).toISOString(), notes: 'Mensalidade preparada automaticamente; rever antes de emitir. Não inclui serviços extra.', lines: [{ type: 'MONTHLY', description: `Mensalidade ${monthRef}`, quantity: 1, unitPrice: row.amount, total: row.amount }] }, 'monthly-scheduler', tx);
         if (result.ok) { created++; await tx.userAuditLog.create({ data: { actor: 'monthly-scheduler', action: 'AUTO_MONTHLY_DRAFT', entity: 'Invoice', entityId: String(result.invoice.id), metadata: { monthRef, clientId: row.clientId, amount: row.amount } } }); }
         else if (result.status !== 409) errors.push({ clientId: row.clientId, error: result.error });

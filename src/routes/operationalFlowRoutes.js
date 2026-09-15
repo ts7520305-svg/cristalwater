@@ -1,3 +1,4 @@
+const clientRates = require('../business/finance/ClientRateBusiness');
 const express = require('express');
 const prismaModule = require('../prismaClient');
 const auth = require('../middlewares/authMiddleware');
@@ -17,7 +18,10 @@ const router = express.Router();
 router.use(auth('ADMIN'));
 
 function asyncHandler(fn) {
-  return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+  return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(error => {
+    if ([400,404,409].includes(error.status)) return res.status(error.status).json({ok:false,error:error.message});
+    next(error);
+  });
 }
 
 function toNumber(value, fallback = 0) {
@@ -444,7 +448,7 @@ router.post('/generate-monthly-invoice', asyncHandler(async (req, res) => {
   const ref = req.body.monthRef || monthRef();
   const visits = await model('serviceVisit').findMany({ where: { clientId, status: 'DONE', billed: false } });
   const repairs = await model('repair').findMany({ where: { pool: { clientId }, status: { in: ['DONE', 'QUOTED', 'APPROVED', 'QUOTE_REQUESTED'] }, NOT: { status: { in: ['QUOTED','QUOTE_REQUESTED'] }, quotes: { some: {} } }, paid: false } });
-  const monthly = toNumber(client.monthlyAmount || client.monthlyFee, 0);
+  const monthly = (await clientRates.billing(client, ref, toNumber(client.monthlyAmount || client.monthlyFee, 0))).amount;
   const repairTotal = repairs.reduce((sum, r) => sum + toNumber(r.totalPrice || r.unitPrice, 0), 0);
   const total = monthly + repairTotal;
 

@@ -53,3 +53,7 @@ A inspeção visual encontrou espaçamento irregular na substituição de Helvet
 ## TASK 92 — preços mensais por período
 
 Planos privados e versionados por cliente. O valor base e cada período representam o total mensal do contrato, incluindo todas as piscinas, sem IVA; não se somam novamente às mensalidades das piscinas. Datas finais inclusivas, períodos adjacentes permitidos, sobreposições recusadas, data final vazia significa permanente. Alteração a meio do mês é proporcional aos dias de calendário, com arredondamento final ao cêntimo. Zero é permitido, para um período gratuito. Planos antigos ficam preservados e uma versão esperada protege contra alterações concorrentes. Não se repetem automaticamente períodos em anos seguintes.
+
+## TASK 93 — integração dos preços na faturação
+
+Configuração e pré-visualização reservadas à administração. Os geradores core, operacional e de faturas e o agendador mensal usam o mesmo plano quando configurado. Clientes sem plano mantêm o comportamento anterior. As reexecuções não substituem o valor de faturas existentes; o editor financeiro continua a ser o local para correções explícitas. O agendador lê novamente o contrato e os preços dentro da transação, com bloqueio do cliente. Um mês gratuito não cria automaticamente uma cobrança.

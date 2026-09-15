@@ -1,3 +1,4 @@
+const clientRates = require('../business/finance/ClientRateBusiness');
 const express = require("express");
 const router = express.Router();
 const { prisma } = require("../prismaClient");
@@ -93,7 +94,7 @@ router.get("/", async (req, res) => {
     res.json(invoices.map(normalizeInvoice));
   } catch (err) {
     console.error(err);
-    res.status(500).json({ ok: false, error: err.message });
+    res.status(err.status || 500).json({ ok: false, error: err.message });
   }
 });
 
@@ -108,7 +109,7 @@ router.get("/client/:clientId", async (req, res) => {
     res.json(invoices.map(normalizeInvoice));
   } catch (err) {
     console.error(err);
-    res.status(500).json({ ok: false, error: err.message });
+    res.status(err.status || 500).json({ ok: false, error: err.message });
   }
 });
 
@@ -183,7 +184,7 @@ router.get("/:id", async (req, res) => {
     res.json(normalizeInvoice(invoice));
   } catch (err) {
     console.error(err);
-    res.status(500).json({ ok: false, error: err.message });
+    res.status(err.status || 500).json({ ok: false, error: err.message });
   }
 });
 
@@ -213,7 +214,7 @@ router.post("/generate-for-client/:clientId", async (req, res) => {
       });
     }
 
-    const monthly = Number(client.monthlyFee || 0) || client.pools.reduce((sum, p) => sum + Number(p.monthlyAmount || 0), 0);
+    const monthly = (await clientRates.billing(client, monthRef, Number(client.monthlyFee || 0) || client.pools.reduce((sum, p) => sum + Number(p.monthlyAmount || 0), 0))).amount;
     const invoice = await prisma.invoice.create({
       data: {
         clientId,
@@ -256,7 +257,7 @@ router.post("/generate-for-client/:clientId", async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ ok: false, error: err.message });
+    res.status(err.status || 500).json({ ok: false, error: err.message });
   }
 });
 
@@ -275,7 +276,7 @@ router.post("/generate-monthly", async (req, res) => {
         results.push({ clientId: client.id, status: credit.creditUsed > 0 ? "EXISTS_CREDIT_APPLIED" : "EXISTS", invoiceId: existing.id, creditUsed: credit.creditUsed || 0 });
         continue;
       }
-      const monthly = Number(client.monthlyFee || 0) || client.pools.reduce((sum, p) => sum + Number(p.monthlyAmount || 0), 0);
+      const monthly = (await clientRates.billing(client, monthRef, Number(client.monthlyFee || 0) || client.pools.reduce((sum, p) => sum + Number(p.monthlyAmount || 0), 0))).amount;
       const invoice = await prisma.invoice.create({
         data: {
           clientId: client.id,
@@ -301,7 +302,7 @@ router.post("/generate-monthly", async (req, res) => {
     res.json({ ok: true, message: "Faturação mensal processada", monthRef, results });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ ok: false, error: err.message });
+    res.status(err.status || 500).json({ ok: false, error: err.message });
   }
 });
 

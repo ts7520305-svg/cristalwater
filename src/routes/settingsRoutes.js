@@ -20,6 +20,10 @@ const JWT_SECRET = getJwtSecret();
 
 router.use(auth());
 router.use('/global', auth('ADMIN'));
+const clientRates = require('../controllers/clientRateController');
+router.get('/client-rates/:clientId', auth('ADMIN'), clientRates.read);
+router.put('/client-rates/:clientId', auth('ADMIN'), clientRates.save);
+router.post('/client-rates-preview', auth('ADMIN'), clientRates.preview);
 
 function notificationSettingsOwner(req, res, next) {
   const id = Number(req.params.userId ?? req.body?.userId);
