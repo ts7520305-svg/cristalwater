@@ -15,6 +15,7 @@ let clientStatusFilter = localStorage.getItem("cw_client_status_filter") || "act
 let clientInvoiceFilter = localStorage.getItem("cw_client_invoice_filter") || "all";
 let editingClientId = null;
 let pendingConfirmAction = null;
+let contractActivation;
 
 const feedbackEl = document.getElementById("feedback");
 const editModal = document.getElementById("editClientModal");
@@ -341,6 +342,7 @@ function renderList() {
   container.innerHTML = clients.length
     ? header + clients.map(renderClient).join("")
     : '<div class="cw-empty">Nenhum cliente encontrado para esta pesquisa.</div>';
+  contractActivation?.render();
 }
 
 async function loadClients() {
@@ -413,25 +415,7 @@ async function saveEditedClient() {
 }
 
 async function activateClient(id) {
-  const amountInput = document.getElementById(`activationAmount-${id}`);
-  const amount = amountInput ? amountInput.value.trim() : "";
-  const button = document.querySelector(`[data-activate-client="${id}"]`);
-  if (button) {
-    button.disabled = true;
-    button.textContent = "A ativar...";
-  }
-  try {
-    await request(`/clients/${id}/activate`, { method: "POST", body: JSON.stringify({ amount }) });
-    await loadClients();
-    setFeedback("Contrato ativado. A partir de agora comeca a faturacao.", "success");
-  } catch (error) {
-    setFeedback(error.message, "error");
-  } finally {
-    if (button && button.isConnected) {
-      button.disabled = false;
-      button.textContent = "Ativar contrato";
-    }
-  }
+  return contractActivation?.submit(id);
 }
 
 async function archiveClient(id) {
@@ -488,6 +472,7 @@ function toggleArchived() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
+  contractActivation = setupContractActivation();
   const params = new URLSearchParams(location.search);
   const invoiceFilter = String(params.get("invoice") || params.get("fatura") || "").toLowerCase();
   const financialFilter = String(params.get("financial") || params.get("financeiro") || "").toLowerCase();

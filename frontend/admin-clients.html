@@ -267,6 +267,7 @@
       min-height: 46px;
     }
 
+    #contractActivationPending[hidden], #contractActivationPending [hidden] { display: none !important; }
     .cw-modal[hidden] {
       display: none;
     }
@@ -469,6 +470,11 @@
       <div class="card" aria-label="Lista e gestão de clientes">
         <h2>Lista de clientes</h2>
         <div class="field-stack"><label for="search">Pesquisar clientes</label><input id="search" placeholder="Pesquisar" aria-label="Pesquisar clientes"></div>
+        <section id="contractActivationPending" class="cw-card" hidden aria-live="polite">
+          <p id="contractActivationSummary"></p>
+          <button id="contractActivationRetry" type="button" class="cw-v2-btn primary">Confirmar ativação guardada</button>
+          <button id="contractActivationReview" type="button" class="cw-v2-btn" hidden>Rever pedido recusado</button>
+        </section>
         <div id="clients" class="list muted">A carregar...</div>
       </div>
     </section>
@@ -532,6 +538,7 @@
   </div>
 
   <script src="/admin-auth-guard.js"></script>
+  <script src="/cw-contract-activation.js"></script>
   <script src="/admin-clients.js"></script>
   <script src="/cristal-help-data.js"></script>
   <script src="/cristal-assist.js"></script>
