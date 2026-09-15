@@ -330,6 +330,7 @@
       <label for="statusFilter">Filtro</label>
       <select id="statusFilter" onchange="setInvoiceStatusFilter(this.value)">
         <option value="all">Todas</option>
+        <option value="draft">Rascunhos</option>
         <option value="overdue">Em atraso / devedores</option>
         <option value="pending">Pendentes</option>
         <option value="paid">Pagas</option>
@@ -395,7 +396,7 @@
     </div>
   </div>
 
-  <script src="/invoices.js"></script>
+  <script src="/invoices.js?v=20260915-draft-visibility"></script>
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
     <script src="/ui/core/navigation-context.js"></script>

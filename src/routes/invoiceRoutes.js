@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const { prisma } = require("../prismaClient");
 const { sendInvoiceFull } = require("../controllers/invoiceController");
-const { applyClientCreditToInvoice } = require("../services/clientCreditService");
+const { applyClientCreditToInvoice, invoiceOpen } = require("../services/clientCreditService");
 const auth = require("../middlewares/authMiddleware");
 const { assertExternalOperationAllowed } = require("../config/externalIntegrations");
 
@@ -35,7 +35,7 @@ function normalizeInvoice(inv) {
     monthRef,
     amount: total,
     totalAmount: Number(inv.totalAmount || total),
-    amountOpen: Number(inv.amountOpen || Math.max(total - Number(inv.amountPaid || 0), 0)),
+    amountOpen: invoiceOpen(inv),
   };
 }
 

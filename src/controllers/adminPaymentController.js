@@ -1,6 +1,7 @@
 const { prisma } = require("../prismaClient");
 const { buildClientPaymentReference } = require("../utils/clientPaymentReference");
 const {
+  NON_RECEIVABLE_STATUSES,
   createCreditLedgerPayment,
   invoiceOpen,
   invoicePaid,
@@ -46,6 +47,7 @@ async function updateClientFinancialState(clientId) {
   const openCount = await prisma.invoice.count({
     where: {
       clientId,
+      status: { notIn: NON_RECEIVABLE_STATUSES },
       OR: [
         { amountOpen: { gt: 0 } },
         { status: { in: ["PENDING", "PARTIAL", "OVERDUE"] } },
