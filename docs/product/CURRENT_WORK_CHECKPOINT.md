@@ -4,9 +4,9 @@
 
 - Repositório: `ts7520305-svg/cristalwater`.
 - Branch de trabalho: `work/field-readiness-20260915-simulation`.
-- Última entrega remota verificada antes desta tarefa: TASK118, commit `199e3eebe8c62a8c3de43e92eef33e04ed6aa858`.
-- TASK119: normalização e validação das contagens físicas de stock concluídas, incluindo testes locais integrados. Consultar o workflow do commit desta tarefa para confirmar PostgreSQL 16, migrações e restauro após publicação.
-- Relatório: `docs/product/INVENTORY_COUNT_NORMALIZATION_20260915.md`.
+- Última entrega remota verificada antes desta tarefa: TASK119, commit `181fe22d8cf29763178ff8e0fc0d12f4b4b3d288`; workflow `34950688772` aprovado, incluindo PostgreSQL 16 e restauro de 99 tabelas/11 anexos.
+- TASK120: formulário administrativo de contagem física integrado no inventário, com confirmação explícita, recuperação de resposta perdida, proteção entre contas/janelas e testes móveis. Bateria local completa aprovada; confirmar PostgreSQL 16/migrações/restauro no workflow do commit desta tarefa.
+- Relatório atual: `docs/product/INVENTORY_COUNT_UI_20260915.md`. A TASK119 está descrita em `INVENTORY_COUNT_NORMALIZATION_20260915.md`.
 
 ### Pedido ativo
 
@@ -18,7 +18,9 @@ O código contém as entregas até TASK118: orçamentos versionados e portal, pr
 
 A TASK119 unifica a identidade de produto/unidade entre saldo, movimento e repetição da contagem; conserva reenvios antigos exatos; recusa tipos malformados; protege contra repetição com quantidade alterada e consumo concorrente.
 
-### Evidência desta retoma
+### Evidência da TASK119 (retoma anterior)
+
+Evidência atual da TASK120: 216 testes unitários, 4 testes de técnicos, os 15 scripts de navegador e os 32 grupos integrados locais aprovados. Resultado: `reports/field-suite/1789464442010/results.json`. As imagens atuais estão em `reports/field-visual/inventory-count-<timestamp>/`. O relatório `INVENTORY_COUNT_UI_20260915.md` delimita os ensaios e as pendências.
 
 - Base local e remota da TASK118 com a mesma árvore Git: `8cc09c0e3df85a82a5da7751924b4d4b7dda0699`.
 - Sintaxe aprovada em 484 ficheiros backend e nos scripts alterados.
@@ -30,7 +32,7 @@ A TASK119 unifica a identidade de produto/unidade entre saldo, movimento e repet
 
 ### Próxima retoma
 
-1. Confirmar a conclusão da TASK119 e o workflow associado ao commit atual; resolver falhas concretas se existirem.
+1. Confirmar a conclusão da TASK120 e o workflow associado ao commit atual; resolver falhas concretas se existirem.
 2. Continuar a revisão dos módulos pendentes usando `COMPLETENESS_20260915.md` juntamente com `IMPLEMENTATION_20260915.md` e os relatórios posteriores. A matriz de completude conserva o diagnóstico inicial e contém pontos já corrigidos posteriormente.
 3. Manter tarefas pequenas, com testes de comportamento e documentação. Não repetir trabalho apenas por encontrar um relatório antigo.
 4. Ensaios físicos e VPS permanecem pendentes. Não declarar o sistema inteiro concluído ou certificado para campo.
