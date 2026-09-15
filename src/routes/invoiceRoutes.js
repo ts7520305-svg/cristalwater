@@ -1,43 +1,13 @@
-const clientRates = require('../business/finance/ClientRateBusiness');
 const express = require("express");
 const router = express.Router();
 const { prisma } = require("../prismaClient");
 const { sendInvoiceFull } = require("../controllers/invoiceController");
-const { applyClientCreditToInvoice, invoiceOpen } = require("../services/clientCreditService");
+const generation = require("../controllers/invoicePageGenerationController");
+const { normalizeInvoice } = require("../services/invoiceViewService");
 const auth = require("../middlewares/authMiddleware");
 const { assertExternalOperationAllowed } = require("../config/externalIntegrations");
 
 router.use(auth("ADMIN"));
-
-function getMonthRef(date = new Date()) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-}
-
-function canBillClient(client) {
-  return Boolean(client && client.active !== false && client.billingActive === true && String(client.status || '').toUpperCase() === 'ACTIVE');
-}
-
-function blockedBillingResponse(res) {
-  return res.status(409).json({ ok: false, error: 'Faturação desligada: ativa primeiro o contrato do cliente após receber o pagamento inicial.' });
-}
-
-function normalizeInvoice(inv) {
-  const monthRef = inv.monthRef || inv.month || getMonthRef(inv.createdAt || new Date());
-  const [yearPart, monthPart] = String(monthRef).includes("-")
-    ? String(monthRef).split("-")
-    : [String(inv.year || new Date().getFullYear()), String(inv.month || "")];
-  const total = Number(inv.total || inv.totalAmount || inv.amount || 0);
-  return {
-    ...inv,
-    clientName: inv.client?.name || null,
-    year: inv.year || Number(yearPart),
-    month: inv.month || monthPart,
-    monthRef,
-    amount: total,
-    totalAmount: Number(inv.totalAmount || total),
-    amountOpen: invoiceOpen(inv),
-  };
-}
 
 function invoiceAmount(inv) {
   return Number(inv.totalAmount || inv.total || inv.amount || 0);
@@ -188,123 +158,8 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.post("/generate-for-client/:clientId", async (req, res) => {
-  try {
-    const clientId = Number(req.params.clientId);
-    const monthRef = req.body?.monthRef || getMonthRef();
-    const client = await prisma.client.findUnique({ where: { id: clientId }, include: { pools: true } });
-    if (!client) return res.status(404).json({ ok: false, error: "Cliente não encontrado" });
-    if (!canBillClient(client)) return blockedBillingResponse(res);
-
-    const existing = await prisma.invoice.findFirst({ where: { clientId, monthRef } });
-    if (existing) {
-      const credit = await applyClientCreditToInvoice(prisma, existing, {
-        reference: `Fatura ${monthRef}`,
-        notes: "Abatimento automatico ao abrir fatura existente.",
-      });
-      const invoice = await prisma.invoice.findUnique({
-        where: { id: existing.id },
-        include: { client: true, lines: true, payments: true },
-      });
-      return res.json({
-        ok: true,
-        message: credit.creditUsed > 0 ? "Fatura ja existia e credito positivo foi abatido." : "Fatura já existia",
-        invoice: normalizeInvoice(invoice || existing),
-        creditUsed: credit.creditUsed || 0,
-      });
-    }
-
-    const monthly = (await clientRates.billing(client, monthRef, Number(client.monthlyFee || 0) || client.pools.reduce((sum, p) => sum + Number(p.monthlyAmount || 0), 0))).amount;
-    const invoice = await prisma.invoice.create({
-      data: {
-        clientId,
-        monthRef,
-        month: monthRef,
-        year: Number(String(monthRef).slice(0, 4)),
-        total: monthly,
-        totalAmount: monthly,
-        amount: monthly,
-        amountOpen: monthly,
-        amountPaid: 0,
-        status: monthly > 0 ? "PENDING" : "PAID",
-        requiresInvoice: Boolean(client.requiresInvoice),
-        lines: {
-          create: [{
-            type: "MONTHLY",
-            description: `Mensalidade ${monthRef}`,
-            quantity: 1,
-            unitPrice: monthly,
-            total: monthly,
-          }],
-        },
-      },
-      include: { client: true, lines: true, payments: true },
-    });
-
-    const credit = await applyClientCreditToInvoice(prisma, invoice, {
-      reference: `Fatura ${monthRef}`,
-      notes: "Abatimento automatico de credito positivo.",
-    });
-    const finalInvoice = credit.invoice
-      ? await prisma.invoice.findUnique({ where: { id: invoice.id }, include: { client: true, lines: true, payments: true } })
-      : invoice;
-
-    res.json({
-      ok: true,
-      message: credit.creditUsed > 0 ? "Fatura gerada com credito positivo abatido." : "Fatura gerada",
-      invoice: normalizeInvoice(finalInvoice || invoice),
-      creditUsed: credit.creditUsed || 0,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(err.status || 500).json({ ok: false, error: err.message });
-  }
-});
-
-router.post("/generate-monthly", async (req, res) => {
-  try {
-    const monthRef = req.body?.monthRef || getMonthRef();
-    const clients = await prisma.client.findMany({ where: { active: true, billingActive: true, status: "ACTIVE" }, include: { pools: true } });
-    const results = [];
-    for (const client of clients) {
-      const existing = await prisma.invoice.findFirst({ where: { clientId: client.id, monthRef } });
-      if (existing) {
-        const credit = await applyClientCreditToInvoice(prisma, existing, {
-          reference: `Fatura ${monthRef}`,
-          notes: "Abatimento automatico em faturacao mensal existente.",
-        });
-        results.push({ clientId: client.id, status: credit.creditUsed > 0 ? "EXISTS_CREDIT_APPLIED" : "EXISTS", invoiceId: existing.id, creditUsed: credit.creditUsed || 0 });
-        continue;
-      }
-      const monthly = (await clientRates.billing(client, monthRef, Number(client.monthlyFee || 0) || client.pools.reduce((sum, p) => sum + Number(p.monthlyAmount || 0), 0))).amount;
-      const invoice = await prisma.invoice.create({
-        data: {
-          clientId: client.id,
-          monthRef,
-          month: monthRef,
-          year: Number(String(monthRef).slice(0, 4)),
-          total: monthly,
-          totalAmount: monthly,
-          amount: monthly,
-          amountOpen: monthly,
-          amountPaid: 0,
-          status: monthly > 0 ? "PENDING" : "PAID",
-          requiresInvoice: Boolean(client.requiresInvoice),
-          lines: { create: [{ type: "MONTHLY", description: `Mensalidade ${monthRef}`, quantity: 1, unitPrice: monthly, total: monthly }] },
-        },
-      });
-      const credit = await applyClientCreditToInvoice(prisma, invoice, {
-        reference: `Fatura ${monthRef}`,
-        notes: "Abatimento automatico em faturacao mensal.",
-      });
-      results.push({ clientId: client.id, status: credit.creditUsed > 0 ? "CREATED_CREDIT_APPLIED" : "CREATED", invoiceId: invoice.id, amount: monthly, creditUsed: credit.creditUsed || 0 });
-    }
-    res.json({ ok: true, message: "Faturação mensal processada", monthRef, results });
-  } catch (err) {
-    console.error(err);
-    res.status(err.status || 500).json({ ok: false, error: err.message });
-  }
-});
+router.post("/generate-for-client/:clientId", generation.generateForClient);
+router.post("/generate-monthly", generation.generateMonthly);
 
 router.post("/:id/mark-issued", async (req, res) => {
   try {
