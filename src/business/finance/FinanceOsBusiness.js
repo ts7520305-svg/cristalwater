@@ -191,49 +191,33 @@ async function issueInvoice(invoiceId, payload = {}, actor = "finance-os", trans
 }
 
 async function sendInvoice(invoiceId, payload = {}, actor = "finance-os") {
-  const invoice = await repository.getInvoice(invoiceId);
-  if (!invoice) return { ok: false, status: 404, error: "Fatura não encontrada" };
-
+  const id = Number(invoiceId);
+  if (!/^\d+$/.test(String(invoiceId)) || !Number.isSafeInteger(id) || id <= 0 || id > 2147483647) return { ok: false, status: 400, error: 'Fatura inválida' };
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload) || (payload.channel !== undefined && typeof payload.channel !== 'string')) return { ok: false, status: 400, error: 'Canal inválido' };
   const channel = String(payload.channel || "EMAIL").trim().toUpperCase();
-
-  await repository.transaction(async (tx) => {
-    await repository.createCommunicationLog(tx, {
-      clientId: invoice.clientId,
-      channel: `INVOICE_${channel}`,
-      message: `Fatura #${invoice.id} enviada via ${channel}`,
-      referenceId: invoice.id,
-    });
-
-    await repository.createNotification(tx, {
-      clientId: invoice.clientId,
-      type: "INVOICE_SENT",
-      eventType: "FINANCE_INVOICE_SENT",
-      title: "Fatura enviada",
-      message: `A fatura #${invoice.id} foi enviada via ${channel}.`,
-      role: "CLIENT",
-      severity: "INFO",
-      status: "PENDING",
-      metadata: { invoiceId: invoice.id, channel },
-    });
-
-    await repository.createAudit(tx, {
-      action: "FINANCE_INVOICE_SENT",
-      entity: "Invoice",
-      entityId: invoice.id,
-      metadata: { channel, actor },
-    });
-
-    await tx.invoice.update({ where: { id: invoice.id }, data: { status: invoice.status === "DRAFT" ? "ISSUED" : invoice.status } });
+  if (!['EMAIL', 'WHATSAPP', 'SMS', 'CHAT', 'PORTAL'].includes(channel)) return { ok: false, status: 400, error: 'Canal inválido' };
+  const result = await repository.transaction(async (tx) => {
+    await tx.$queryRaw`SELECT id FROM "Invoice" WHERE id = ${id} FOR UPDATE`;
+    const invoice = await tx.invoice.findUnique({ where: { id }, include: { client: true, lines: true, payments: true } });
+    if (!invoice) return { ok: false, status: 404, error: 'Fatura não encontrada' };
+    if (!isReceivableInvoice(invoice)) return { ok: false, status: 409, error: 'Emita o rascunho ou reveja o documento retirado antes de preparar o envio' };
+    const sourceKey = `invoice-delivery-preparation:${id}:${channel}`;
+    const previous = await tx.operationalReminder.findUnique({ where: { sourceKey } });
+    if (previous) return { ...previous.metadata.result, invoice: invoiceShape(invoice), idempotent: true };
+    await tx.communicationLog.create({ data: { clientId: invoice.clientId, channel: 'INVOICE_DELIVERY_PREPARATION', referenceId: id,
+      message: `Preparação da fatura #${id} para ${channel}. A entrega externa ainda não foi efetuada.` } });
+    await tx.notification.create({ data: { clientId: invoice.clientId, type: 'INVOICE_DELIVERY_PREPARED', eventType: 'FINANCE_INVOICE_DELIVERY_PREPARED',
+      title: 'Documento preparado', message: `Fatura #${id} preparada para ${channel}; envio externo por concluir.`, role: 'ADMIN', severity: 'INFO', status: 'PENDING', metadata: { invoiceId: id, channel, deliveryStatus: 'NOT_SENT' } } });
+    await tx.auditTrail.create({ data: { action: 'FINANCE_INVOICE_DELIVERY_PREPARED', eventType: 'FINANCE_INVOICE_DELIVERY_PREPARED', entity: 'Invoice', entityId: id,
+      clientId: invoice.clientId, metadata: { channel, actor, deliveryStatus: 'NOT_SENT' } } });
+    const prepared = { ok: true, invoice: invoiceShape(invoice), channel, prepared: true, deliveryStatus: 'NOT_SENT',
+      message: 'Documento preparado. A entrega externa ainda não foi efetuada.' };
+    await tx.operationalReminder.create({ data: { sourceKey, title: 'Preparação de documento registada', dueDate: new Date(), isCompleted: true,
+      metadata: { result: JSON.parse(JSON.stringify(prepared)) } } });
+    return prepared;
   });
-
-  await emitFinanceEvent(EVENT_TYPES.FINANCE_INVOICE_SENT, {
-    invoiceId: invoice.id,
-    clientId: invoice.clientId,
-    channel,
-    actor,
-  });
-
-  return { ok: true, invoice: invoiceShape(await repository.getInvoice(invoice.id)), channel };
+  if (result.ok && !result.idempotent) await emitFinanceEvent(EVENT_TYPES.FINANCE_INVOICE_DELIVERY_PREPARED, { invoiceId: id, clientId: result.invoice.clientId, channel, actor, deliveryStatus: 'NOT_SENT' });
+  return result;
 }
 
 async function registerPayment(invoiceId, payload = {}, actor = "finance-os", user = null, transaction = null) {
