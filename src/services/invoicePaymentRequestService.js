@@ -1,4 +1,5 @@
 'use strict';
+const INTERNAL_PAYMENT_METHODS = Object.freeze(['CREDIT', 'CREDIT_NOTE', 'ADJUSTMENT', 'CREDIT_ADJUSTMENT']);
 
 function fail(message, status = 400) { throw Object.assign(new Error(message), { status }); }
 function text(value, limit, fallback = '') {
@@ -12,6 +13,12 @@ function paymentDetails(body) {
   const amount = Number(body.amount), amountCents = Math.round(amount * 100);
   if (!Number.isFinite(amount) || !Number.isSafeInteger(amountCents) || amountCents <= 0 || Math.abs(amount * 100 - amountCents) > 0.000001) fail('Indica um valor válido, com até dois decimais.');
   return { amountCents, method: text(body.method, 40, 'MANUAL').toUpperCase() || 'MANUAL', notes: text(body.notes, 2000) };
+}
+
+function cashMethod(value) {
+  const method = text(value, 40, 'MANUAL').toUpperCase() || 'MANUAL';
+  if (INTERNAL_PAYMENT_METHODS.includes(method)) fail('Um recebimento exige um método de pagamento. Use a operação própria para aplicar ou ajustar crédito interno.');
+  return method;
 }
 
 function preparePaymentRequest(invoiceId, body, user) {
@@ -57,4 +64,4 @@ async function executePaymentRequest(tx, request, work) {
   return saved;
 }
 
-module.exports = { preparePaymentRequest, prepareClientPaymentRequest, paymentDetails, executePaymentRequest };
+module.exports = { preparePaymentRequest, prepareClientPaymentRequest, paymentDetails, executePaymentRequest, cashMethod, INTERNAL_PAYMENT_METHODS };

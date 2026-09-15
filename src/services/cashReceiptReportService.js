@@ -1,6 +1,7 @@
 'use strict';
 const { prisma } = require('../prismaClient');
-const internalMethods = new Set(['CREDIT', 'CREDIT_NOTE', 'ADJUSTMENT', 'CREDIT_ADJUSTMENT']);
+const { INTERNAL_PAYMENT_METHODS } = require('./invoicePaymentRequestService');
+const internalMethods = new Set(INTERNAL_PAYMENT_METHODS);
 const total = rows => rows.reduce((sum, row) => sum + Math.round(Number(row.amount || 0) * 100), 0) / 100;
 async function payments(monthRef) {
   const where = {};

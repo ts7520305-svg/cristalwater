@@ -2,7 +2,7 @@ const repository = require("../../dal/FinanceOsRepository");
 const { processPaymentReminders } = require("../../services/paymentService");
 const { NON_RECEIVABLE_STATUSES, isReceivableInvoice, createCreditLedgerPayment, invoiceOpen, invoicePaid, invoiceStatus, invoiceTotal } = require("../../services/clientCreditService");
 const { EVENT_TYPES, emitFinanceEvent } = require("../../services/financeOsEventService");
-const { preparePaymentRequest, executePaymentRequest } = require('../../services/invoicePaymentRequestService');
+const { preparePaymentRequest, executePaymentRequest, cashMethod } = require('../../services/invoicePaymentRequestService');
 const { reservedRepairIds } = require('../../services/repairInvoiceSourceService');
 const cashReceipts = require('../../services/cashReceiptReportService');
 
@@ -221,6 +221,7 @@ async function sendInvoice(invoiceId, payload = {}, actor = "finance-os") {
 }
 
 async function registerPayment(invoiceId, payload = {}, actor = "finance-os", user = null, transaction = null) {
+  payload = { ...payload, method: cashMethod(payload.method) };
   const request = preparePaymentRequest(invoiceId, payload, user);
   if (request) payload = { ...payload, amount: request.amountCents / 100, method: request.method, notes: request.notes };
   const amount = asMoney(payload.amount || 0);

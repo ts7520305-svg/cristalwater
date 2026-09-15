@@ -1,9 +1,10 @@
 const { assertPayableInvoice, createCreditLedgerPayment, invoiceOpen, invoicePaid, invoiceStatus, invoiceTotal } = require('../../services/clientCreditService');
-const { preparePaymentRequest, executePaymentRequest } = require('../../services/invoicePaymentRequestService');
+const { preparePaymentRequest, executePaymentRequest, cashMethod } = require('../../services/invoicePaymentRequestService');
 
 function fail(message, status) { throw Object.assign(new Error(message), { status }); }
 
 async function registerPayment(prisma, id, body = {}, user = null) {
+  body = { ...body, method: cashMethod(body.method) };
   const request = preparePaymentRequest(id, body, user);
   if (request) { id = request.invoiceId; body = { ...body, amount: request.amountCents / 100, method: request.method, notes: request.notes }; }
   return prisma.$transaction(async tx => executePaymentRequest(tx, request, async () => {

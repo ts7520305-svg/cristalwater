@@ -2,12 +2,13 @@
 const { prisma } = require('../../prismaClient');
 const { buildClientPaymentReference } = require('../../utils/clientPaymentReference');
 const { createCreditLedgerPayment, invoiceOpen, invoicePaid, invoiceStatus, invoiceTotal, moneyLabel } = require('../../services/clientCreditService');
-const { prepareClientPaymentRequest, paymentDetails, executePaymentRequest } = require('../../services/invoicePaymentRequestService');
+const { prepareClientPaymentRequest, paymentDetails, executePaymentRequest, cashMethod } = require('../../services/invoicePaymentRequestService');
 
 function fail(message, status = 400) { throw Object.assign(new Error(message), { status }); }
 const cents = amount => Math.round(Number(amount || 0) * 100);
 
 async function registerReceived(clientId, month, body = {}, user = null, transaction = null) {
+  body = { ...body, method: cashMethod(body.method) };
   const id = Number(clientId);
   if (!Number.isSafeInteger(id) || id <= 0) fail('Cliente inválido.');
   const request = prepareClientPaymentRequest(id, month, body, user), details = request || paymentDetails(body);
