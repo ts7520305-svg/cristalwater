@@ -483,11 +483,12 @@ async function getHistoryById(id, options = {}) {
     where: ['TECHNICIAN','TEAM_LEADER'].includes(normalizeRole(options.actor?.role))
       ? {OR:[{technicianId:Number(options.actor.technicianId||options.actor.id)},...(options.actor.principalType==='USER'?[{technicianId:null,userId:Number(options.actor.userId||options.actor.id)}]:[])]}
       : options.scope==='TECHNICIAN'?{technicianId:id}:{userId:id},
-    orderBy: { createdAt: "asc" },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     take: limit,
   });
 
-  return data;
+  // Select the latest window, then retain chronological order for map polylines.
+  return data.reverse();
 }
 
 module.exports = {
