@@ -5,14 +5,8 @@ const crypto = require('crypto');
 const prismaModule = require('../prismaClient');
 const auth = require('../middlewares/authMiddleware');
 const { completeServiceVisit, VisitCompletionError } = require('../services/serviceVisitCompletionService');
-const {
-  applyClientCreditToInvoice,
-  createCreditLedgerPayment,
-  invoiceOpen,
-  invoicePaid,
-  invoiceStatus,
-  invoiceTotal,
-} = require('../services/clientCreditService');
+const { applyClientCreditToInvoice } = require('../services/clientCreditService');
+const CoreInvoicePaymentBusiness = require('../business/finance/CoreInvoicePaymentBusiness');
 const { assertPoolReadyForRound } = require('../utils/poolReadiness');
 const { roleMatches, normalizeRole } = require('../utils/roles');
 const RepairBusiness = require('../business/repair/RepairBusiness');
@@ -846,7 +840,6 @@ function technicianBaseData(body) {
 }
 function invoiceBaseData(data) { return dataFor('invoice', data); }
 function invoiceLineBaseData(data) { return dataFor('invoiceLine', data); }
-function paymentBaseData(data) { return dataFor('payment', data); }
 function serviceVisitBaseData(data) { return dataFor('serviceVisit', data); }
 function repairBaseData(data) { return dataFor('repair', data); }
 function monthRangeFromRef(ref) {
@@ -3082,54 +3075,10 @@ router.get('/invoices', async (req, res) => {
 
 router.post('/invoices/:id/pay', async (req, res) => {
   try {
-    const id = toInt(req.params.id);
-
-    const invoice = await db('invoice').findUnique({ where: { id }, include: { payments: true } });
-    if (!invoice) return res.status(404).json({ ok: false, error: 'Fatura não encontrada' });
-
-    const amount = toFloat(req.body.amount, invoice.amountOpen || invoice.total || 0);
-    if (!Number.isFinite(amount) || amount <= 0) return res.status(400).json({ ok: false, error: 'Valor invalido' });
-
-    const result = await prisma.$transaction(async (tx) => {
-      const current = await tx.invoice.findUnique({ where: { id } });
-      if (!current) throw new Error('Fatura nao encontrada');
-
-      const open = invoiceOpen(current);
-      const applied = Math.min(amount, open);
-      let payment = null;
-      let updated = current;
-
-      if (applied > 0) {
-        payment = await tx.payment.create({ data: paymentBaseData({ invoiceId: id, amount: applied, amountCents: Math.round(applied * 100), method: req.body.method || 'MANUAL', notes: req.body.notes || null }) });
-        const paidTotal = invoicePaid(current) + applied;
-        const openAfter = Math.max(open - applied, 0);
-        updated = await tx.invoice.update({
-          where: { id },
-          data: invoiceBaseData({
-            amountPaid: paidTotal,
-            amountOpen: openAfter,
-            status: invoiceStatus(invoiceTotal(current), paidTotal, openAfter),
-            paidAt: openAfter <= 0 ? new Date() : current.paidAt,
-            paymentMethod: req.body.method || 'MANUAL',
-          }),
-        });
-      }
-
-      const surplus = Math.max(amount - applied, 0);
-      const credit = surplus > 0 && current.clientId
-        ? await createCreditLedgerPayment(tx, current.clientId, surplus, {
-          monthRef: current.monthRef || monthRef(),
-          method: req.body.method || 'MANUAL',
-          notes: req.body.notes || 'Excedente convertido em credito positivo.',
-        })
-        : { creditAdded: 0 };
-
-      return { payment, invoice: updated, appliedAmount: applied, creditAdded: credit.creditAdded || 0, creditBalance: credit.creditBalance };
-    });
-
+    const result = await CoreInvoicePaymentBusiness.registerPayment(prisma, toInt(req.params.id), req.body || {});
     return res.json({ ok: true, ...result, next: 'CLOSED' });
   } catch (error) {
-    return res.status(500).json({ ok: false, error: error.message });
+    return res.status(error.status || 500).json({ ok: false, error: error.message });
   }
 });
 

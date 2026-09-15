@@ -19,3 +19,11 @@ Limites: as datas de visitas são históricas/futuras simuladas; não se acelera
 ## TASK 80 — diagnóstico visível de falhas de integração
 
 A execução 34929183943 aprovou os 19 grupos anteriores, mas a simulação nova falhou em PostgreSQL real. O runner só mostrava o código de saída e remetia o erro para o artefacto ZIP. Passa a aguardar o fecho dos streams e a mostrar as últimas 12.000 posições do log do teste falhado no próprio job, sem alterar as verificações nem ocultar falhas. Ficheiros: runner e este relatório. A repetição em CI identifica a causa antes de qualquer declaração de sucesso final.
+
+## TASK 81 — pagamentos simultâneos sem perda de saldo
+
+A execução 34929473933 reproduziu a falha no PostgreSQL real: dois pagamentos de 20 EUR constavam dos registos, mas `amountPaid` da fatura ficava em 20 EUR em vez de 40 EUR. As duas transações liam o mesmo saldo e a última escrita substituía a anterior. A simulação local PGlite não reproduzia esta concorrência, pelo que não era suficiente para validar este cenário.
+
+O pagamento do fluxo core passa a uma Business própria, reutilizando os cálculos e o serviço de crédito existentes. A transação bloqueia a linha da fatura antes de ler o saldo e de criar o pagamento. Assim, cada pagamento concorrente lê o resultado confirmado do anterior. A rota delega a operação e conserva o formato da resposta, os erros de fatura inexistente/valor inválido e a conversão de excedente em crédito. Não se altera a estrutura da base de dados.
+
+Ficheiros: `src/business/finance/CoreInvoicePaymentBusiness.js`, `src/routes/coreFlowRoutes.js` e este relatório. O teste mantém os 144 pagamentos concorrentes e exige a reconciliação entre pagamentos, valor pago, saldo aberto e estado da fatura. A correção incide neste endpoint; não constitui certificação de todos os outros percursos financeiros ou de reenvios de pedidos de pagamento.
