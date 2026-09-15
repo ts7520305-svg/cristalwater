@@ -3,7 +3,7 @@ const { prisma } = require('../../prismaClient');
 const { createHash } = require('node:crypto');
 const { roleMatches } = require('../../utils/roles');
 const { normalizeRepeatRuleInput } = require('../../services/reminderRepeatService');
-const PERIODIC = ['TECHNICAL_PERIODIC_SERVICE', 'POOL_SERVICE_REMINDER'];
+const { id: scopeId, SERVICE_CATEGORIES: PERIODIC } = require('../../services/reminderScopeService');
 function fail(statusCode, message) { throw Object.assign(new Error(message), { statusCode }); }
 function text(value, name, max, fallback = null) {
   if (value === undefined || value === null || value === '') return fallback;
@@ -11,9 +11,7 @@ function text(value, name, max, fallback = null) {
   return value.trim() || fallback;
 }
 function id(value, optional = true) {
-  if (optional && (value === undefined || value === null || value === '')) return null;
-  if (!['string', 'number'].includes(typeof value) || !/^[1-9]\d*$/.test(String(value)) || Number(value) > 2147483647) fail(400, 'Identificador invalido');
-  return Number(value);
+  return scopeId(value, optional);
 }
 function normalize(body, poolId) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) fail(400, 'Lembrete invalido');

@@ -17,7 +17,7 @@ process.env.ADMIN_PASSWORD=process.env.ADMIN_PASSWORD||randomBytes(24).toString(
 process.env.JWT_SECRET=process.env.JWT_SECRET||randomBytes(48).toString('base64url');
 process.env.ENABLE_BACKGROUND_JOBS='false';
 const scripts=[
- 'test-field-visual-flow.js',
+ 'test-field-visual-flow.js','test-field-reminder-delete.js',
  'test-field-water-api.js','test-field-access-api.js','test-field-e2e.js',
  'test-fcs-sec-tech-auth.js','test-fcs-sec-tech-workday.js','test-fcs-technician-t1.js',
  'test-visit-os-operational.js','test-route-os-acceptance.js','test-customer-os-operational.js',

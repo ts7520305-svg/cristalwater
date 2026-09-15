@@ -1,13 +1,9 @@
 'use strict';
 const { prisma } = require('../../prismaClient');
 const repeat = require('../../services/reminderRepeatService');
-const SERVICE_CATEGORIES = ['TECHNICAL_PERIODIC_SERVICE', 'POOL_SERVICE_REMINDER'];
+const { id, SERVICE_CATEGORIES } = require('../../services/reminderScopeService');
 const CLOSED = ['DONE', 'COMPLETED', 'CLOSED', 'RESOLVED'];
 function fail(statusCode, message) { throw Object.assign(new Error(message), { statusCode }); }
-function id(value) {
-  if (!/^[1-9]\d*$/.test(String(value)) || !Number.isSafeInteger(Number(value)) || Number(value) > 2147483647) fail(400, 'IDs invalidos');
-  return Number(value);
-}
 
 async function complete({ reminderId, poolId, createdBy = 'ADMIN' }) {
   const reminderKey = id(reminderId), poolKey = poolId === undefined ? null : id(poolId);

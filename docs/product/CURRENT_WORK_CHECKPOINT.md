@@ -4,7 +4,7 @@
 
 - Repositório: `ts7520305-svg/cristalwater`.
 - Branch de trabalho: `work/field-readiness-20260915-simulation`.
-- Última entrega remota verificada: TASK125, commit `2e14f87a3ad7c41329750cd5af22d4da01b380b3`; workflow `34961173094` aprovado, incluindo 234 testes unitários, 17 scripts de navegador, 34 grupos operacionais, PostgreSQL 16 e restauro de 99 tabelas/11 anexos.
+- Última entrega remota verificada: TASK128, commit `f453c729575453c7a6e62d9aeff68b995fbbc17d`; workflow `34964272796` aprovado, incluindo 249 testes unitários, 17 scripts de navegador, 35 grupos operacionais, PostgreSQL 16 e restauro de 99 tabelas/11 anexos.
 - TASK123: notas da piscina e seleção correta dos lembretes no endpoint da rota, implementadas. Teste API com 505 lembretes gerais, 23 operacionais, duas piscinas, reatribuição e visitas extra aprovado em `field-qa-runtime/run-1789467419688`. 218 testes unitários e 4 de técnicos aprovados.
 - TASK124: notas no ecrã de campo, avisos recorrentes atrasados e confirmação de início completa e vinculada à visita/sessão implementados. Percurso real verificado em PT/EN/FR/ES/DE; regressão local final aprovada: 218 testes unitários, 4 de técnicos, 17 scripts de navegador e 33 grupos integrados (`reports/field-suite/1789468180539/results.json`). Imagem: `reports/field-visual/visit-briefing-1789468325934/technician-briefing-mobile.png`. Workflow PostgreSQL 16/restauro aprovado no commit acima. Continuação sem aprovações intermédias conforme pedido «continua sem parar».
 - Relatórios atuais: `VISIT_BRIEFING_API_20260915.md` e `VISIT_BRIEFING_UI_20260915.md`. Inventário concluído nas TASK121/TASK122; não repetir a implementação.
@@ -15,7 +15,9 @@
 
 - TASK127: criação com `requestId`, comprovativo transacional e recusa de repetições alteradas implementada. 249 testes unitários, 4 de técnicos e testes integrados dirigidos aprovados em `field-qa-runtime/run-1789471051397`. Os três formulários são tratados pela TASK128. Relatório `REMINDER_CREATION_API_20260915.md`.
 
-- TASK128 implementada: pedido persistido e imutável nos três formulários, repetição explícita, duas janelas, confirmação inválida, quota/corrupção, rejeição e mudança de sessão. Relatório `REMINDER_CREATION_UI_20260915.md`. Versão final aprovada em `field-qa-runtime/run-1789472050268`, incluindo PT/EN/FR/ES/DE e recuperação da carga inicial. 249 testes unitários, 4 de técnicos e 17 scripts de navegador aprovados; 34 grupos da bateria `reports/field-suite/1789471734616/results.json` passaram, e a falha do novo grupo nos idiomas foi corrigida e revalidada no teste dirigido final. Confirmar os 35 grupos e o restauro no workflow do lote publicado. Imagem: `reports/field-visual/reminder-creation-1789472056455/lembrete-recuperado.png`.
+- TASK128 implementada: pedido persistido e imutável nos três formulários, repetição explícita, duas janelas, confirmação inválida, quota/corrupção, rejeição e mudança de sessão. Relatório `REMINDER_CREATION_UI_20260915.md`. Versão final aprovada em `field-qa-runtime/run-1789472050268`, incluindo PT/EN/FR/ES/DE e recuperação da carga inicial. 249 testes unitários, 4 de técnicos e 17 scripts de navegador aprovados; 34 grupos da bateria `reports/field-suite/1789471734616/results.json` passaram, e a falha do novo grupo nos idiomas foi corrigida e revalidada no teste dirigido final. Os 35 grupos e o restauro passaram no workflow 34964272796 do commit f453c729575453c7a6e62d9aeff68b995fbbc17d. Imagem: `reports/field-visual/reminder-creation-1789472056455/lembrete-recuperado.png`.
+
+- TASK129 implementada: eliminação com IDs/categoria/piscina estritos, versão otimista, comprovativo transacional e repetição segura. Ensaio dirigido aprovado em `field-qa-runtime/run-1789473148930`, incluindo criação e conclusão existentes. Relatório `REMINDER_DELETION_API_20260915.md`. A proteção da confirmação nos ecrãs é a TASK130.
 
 ### Pedido ativo
 
@@ -41,8 +43,8 @@ Evidência atual da TASK120: 216 testes unitários, 4 testes de técnicos, os 15
 
 ### Próxima retoma
 
-1. TASK123–TASK125 publicadas e verificadas. TASK126–TASK128 implementadas; confirmar a bateria final e o workflow publicado na conversa antes de repetir verificações. Não repetir estas implementações.
-2. As três tarefas de consulta/criação de lembretes estão implementadas. Próximo candidato concreto: validar IDs e categoria na eliminação de lembretes da ficha; a rota DELETE ainda usa `toInt` e verifica apenas a piscina. Não repetir os formulários já corrigidos.
+1. TASK123–TASK128 publicadas e verificadas. TASK129 implementada; confirmar o workflow do lote final. Não repetir estas implementações.
+2. TASK129 corrige a API de eliminação. TASK130 deve vincular a confirmação na ficha/CRM ao título, piscina, sessão e updatedAt, recusar respostas trocadas e testar respostas perdidas e alterações concorrentes.
 3. Continuar a revisão dos módulos pendentes usando `COMPLETENESS_20260915.md` juntamente com `IMPLEMENTATION_20260915.md` e os relatórios posteriores. A matriz de completude conserva o diagnóstico inicial e contém pontos já corrigidos posteriormente.
 4. Manter tarefas pequenas, com testes de comportamento e documentação. Não repetir trabalho apenas por encontrar um relatório antigo.
 5. Ensaios físicos e VPS permanecem pendentes. Não declarar o sistema inteiro concluído ou certificado para campo.

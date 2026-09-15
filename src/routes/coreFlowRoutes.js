@@ -1,6 +1,7 @@
 const ReminderListBusiness = require('../business/admin/ReminderListBusiness');
 const ReminderCompletionBusiness = require('../business/admin/ReminderCompletionBusiness');
 const ReminderCreationBusiness = require('../business/admin/ReminderCreationBusiness');
+const ReminderDeletionBusiness = require('../business/admin/ReminderDeletionBusiness');
 const clientRates = require('../business/finance/ClientRateBusiness');
 const {checkDatabaseHealth}=require('../services/databaseHealthService');
 const express = require('express');
@@ -2126,20 +2127,11 @@ router.post('/pools/:id/service-reminders/:reminderId/complete', async (req, res
 
 router.delete('/pools/:id/service-reminders/:reminderId', async (req, res) => {
   try {
-    const poolId = toInt(req.params.id);
-    const reminderId = toInt(req.params.reminderId);
-    if (!poolId || !reminderId) return res.status(400).json({ ok: false, error: 'IDs invalidos' });
-    if (!available('generalReminder')) return res.status(501).json({ ok: false, error: 'Lembretes indisponiveis' });
-
-    const existing = await db('generalReminder').findUnique({ where: { id: reminderId } });
-    if (!existing || existing.poolId !== poolId) {
-      return res.status(404).json({ ok: false, error: 'Lembrete nao encontrado nesta piscina' });
-    }
-
-    await db('generalReminder').delete({ where: { id: reminderId } });
-    return res.json({ ok: true, deleted: true, reminderId });
+    return res.json(await ReminderDeletionBusiness.remove(req.user, {
+      poolId: req.params.id, reminderId: req.params.reminderId, expectedUpdatedAt: req.body?.expectedUpdatedAt,
+    }));
   } catch (error) {
-    return res.status(500).json({ ok: false, error: error.message });
+    return res.status(error.statusCode || 500).json({ ok: false, error: error.message });
   }
 });
 
