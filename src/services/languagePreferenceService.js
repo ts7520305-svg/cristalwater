@@ -1,13 +1,14 @@
 const { prisma } = require("../prismaClient");
 const { normalizeRole } = require("../utils/roles");
 
-const SUPPORTED_LANGUAGES = new Set(["pt", "en", "fr", "de"]);
+const SUPPORTED_LANGUAGES = new Set(["pt", "en", "fr", "es", "de"]);
 
 function normalizeLanguage(value) {
   const raw = String(value || "pt").trim().toLowerCase();
   if (["pt", "pt-pt", "portugues", "portuguese"].includes(raw)) return "pt";
   if (["en", "en-gb", "en-us", "ing", "ingles", "english"].includes(raw)) return "en";
   if (["fr", "fr-fr", "frances", "french"].includes(raw)) return "fr";
+  if (["es", "es-es", "espanhol", "español", "spanish"].includes(raw)) return "es";
   if (["de", "de-de", "alemao", "alemão", "german", "deutsch"].includes(raw)) return "de";
   const short = raw.slice(0, 2);
   return SUPPORTED_LANGUAGES.has(short) ? short : "pt";

@@ -1,21 +1,24 @@
-// Cristal Water - idioma global PT / EN / FR / DE
+// Cristal Water - idioma global PT / EN / FR / ES / DE
 (function () {
   "use strict";
   if (window.__CW_I18N__) return;
   window.__CW_I18N__ = true;
 
-  const SUPPORTED = ["pt", "en", "fr", "de"];
+  const SUPPORTED = ["pt", "en", "fr", "es", "de"];
   const STORAGE_KEY = "cw_language";
   const CLIENT_STORAGE_KEY = "cw_client_lang";
   const ATTR_ORIGINAL_TEXT = "data-cw-i18n-original";
   const ATTR_ORIGINAL_PLACEHOLDER = "data-cw-i18n-placeholder";
   const ATTR_ORIGINAL_TITLE = "data-cw-i18n-title";
   const textMemory = new WeakMap();
+  let languageRevision = 0;
+  let pendingRemoteWrite = Promise.resolve();
 
   const LANGUAGE_LABELS = {
-    pt: "Portugues",
+    pt: "Português",
     en: "English",
-    fr: "Francais",
+    fr: "Français",
+    es: "Español",
     de: "Deutsch",
   };
 
@@ -224,6 +227,295 @@
     "Sistema": { en: "System", fr: "Systeme", de: "System" },
   });
 
+  const SPANISH_BY_ENGLISH = {
+  "← Back": "← Volver",
+  "Back": "Volver",
+  "🏠 Home": "🏠 Inicio",
+  "Home": "Inicio",
+  "↶ Recover form": "↶ Recuperar formulario",
+  "Recover form": "Recuperar formulario",
+  "Cristal Water Ltd": "Cristal Water LDA",
+  "Operations Center": "Centro de operaciones",
+  "Command Center": "Centro de control",
+  "Dashboard": "Panel de control",
+  "Today": "Hoy",
+  "Live Map": "Mapa en directo",
+  "Clients": "Clientes",
+  "Pools": "Piscinas",
+  "Keys": "Llaves",
+  "Client Portal": "Portal del cliente",
+  "Alerts": "Alertas",
+  "Technicians": "Técnicos",
+  "Rounds": "Rondas",
+  "Visits": "Visitas",
+  "Daily Log": "Registro diario",
+  "Technician Portal": "Portal del técnico",
+  "Stock": "Existencias",
+  "Vehicles and Guides": "Vehículos y documentos de transporte",
+  "Finance": "Finanzas",
+  "Payments": "Pagos",
+  "Invoices": "Facturas",
+  "Reports": "Informes",
+  "Communications": "Comunicaciones",
+  "Settings": "Configuración",
+  "Security": "Seguridad",
+  "Notifications": "Notificaciones",
+  "Save": "Guardar",
+  "Refresh": "Actualizar",
+  "Create": "Crear",
+  "Edit": "Editar",
+  "Delete": "Eliminar",
+  "Archive": "Archivar",
+  "Restore": "Restaurar",
+  "Search": "Buscar",
+  "Clear": "Limpiar",
+  "Resolve": "Resolver",
+  "Bill": "Facturar",
+  "Sign in": "Iniciar sesión",
+  "Sign out": "Cerrar sesión",
+  "Email": "Correo electrónico",
+  "Password": "Contraseña",
+  "Show": "Mostrar",
+  "Hide": "Ocultar",
+  "Restricted access": "Acceso restringido",
+  "Sign in to the system": "Entrar en el sistema",
+  "Administrator": "Administrador",
+  "Technician": "Técnico",
+  "Client": "Cliente",
+  "Secure": "Seguro",
+  "Auditable": "Auditable",
+  "Mobile": "Móvil",
+  "Exclusive use by authorized users.": "Uso exclusivo de usuarios autorizados.",
+  "Privacy and data protection": "Privacidad y protección de datos",
+  "All rights reserved.": "Todos los derechos reservados.",
+  "Enterprise version": "Versión Enterprise",
+  "Internal use": "Uso interno",
+  "Active": "Activo",
+  "Inactive": "Inactivo",
+  "Pending": "Pendiente",
+  "Paid": "Pagado",
+  "Overdue": "Vencido",
+  "Completed": "Finalizado",
+  "Planned": "Programado",
+  "On the way": "En camino",
+  "In progress": "En curso",
+  "Cancelled": "Cancelado",
+  "Resolved": "Resuelto",
+  "Name": "Nombre",
+  "Phone": "Teléfono",
+  "Zone": "Zona",
+  "Address": "Dirección",
+  "Notes": "Notas",
+  "Search by client, zone, pool, jacuzzi, location, phone or email": "Buscar por cliente, zona, piscina, jacuzzi, ubicación, teléfono o correo electrónico",
+  "Use the credentials assigned by Cristal Water. The system will open the correct area automatically.": "Utilice las credenciales asignadas por Cristal Water. El sistema abrirá automáticamente el área correspondiente.",
+  "Professional pool management, service and field operations.": "Gestión profesional de piscinas, asistencia y trabajo en campo.",
+  "Private Cristal Water area.": "Área privada de Cristal Water.",
+  "Restricted area": "Área restringida",
+  "Swimming Pools - Restricted area": "Swimming Pools - Área restringida",
+  "Reserved Cristal Water platform. Controlled access, confidential information and exclusive use by authorized people.": "Plataforma privada de Cristal Water. Acceso controlado, información confidencial y uso exclusivo de personas autorizadas.",
+  "Use only the credentials assigned by Cristal Water.": "Utilice únicamente las credenciales asignadas por Cristal Water.",
+  "Unauthorized access is prohibited. Actions may be logged for security, audit and service improvement.": "Se prohíbe el acceso no autorizado. Las operaciones pueden registrarse para seguridad, auditoría y mejora del servicio.",
+  "Data is processed as part of Cristal Water service delivery, in line with GDPR and internal confidentiality rules.": "Los datos se tratan como parte de los servicios de Cristal Water, de acuerdo con el RGPD y las normas internas de confidencialidad.",
+  "For authorized users only.": "Solo para usuarios autorizados.",
+  "Information handled confidentially.": "Información tratada de forma confidencial.",
+  "Use subject to internal rules.": "Uso sujeto a las normas internas.",
+  "Guided entry": "Entrada guiada",
+  "Official invoicing": "Facturación oficial",
+  "Reminders and schedules": "Recordatorios y programación",
+  "Visual": "Aspecto visual",
+  "Operations": "Operaciones",
+  "Clients and pools": "Clientes y piscinas",
+  "Team and service": "Equipo y servicio",
+  "Management": "Gestión",
+  "Organization": "Organización",
+  "System": "Sistema"
+};
+  Object.values(DICT).forEach(entry => { entry.es = SPANISH_BY_ENGLISH[entry.en]; });
+  Object.assign(DICT, {
+  "Água aberta": {
+    "en": "Water running",
+    "fr": "Eau ouverte",
+    "es": "Agua abierta",
+    "de": "Wasser läuft"
+  },
+  "Fechar água": {
+    "en": "Turn off water",
+    "fr": "Fermer l’eau",
+    "es": "Cerrar el agua",
+    "de": "Wasser abstellen"
+  },
+  "Bomba em manual": {
+    "en": "Pump in manual mode",
+    "fr": "Pompe en mode manuel",
+    "es": "Bomba en modo manual",
+    "de": "Pumpe im Handbetrieb"
+  },
+  "Falta de química": {
+    "en": "Chemicals unavailable",
+    "fr": "Produits chimiques manquants",
+    "es": "Faltan productos químicos",
+    "de": "Chemikalien fehlen"
+  },
+  "Sem rede": {
+    "en": "No connection",
+    "fr": "Sans connexion",
+    "es": "Sin conexión",
+    "de": "Keine Verbindung"
+  },
+  "Sincronização pendente": {
+    "en": "Sync pending",
+    "fr": "Synchronisation en attente",
+    "es": "Sincronización pendiente",
+    "de": "Synchronisierung ausstehend"
+  },
+  "Piscinas do dia": {
+    "en": "Today’s pools",
+    "fr": "Piscines du jour",
+    "es": "Piscinas del día",
+    "de": "Heutige Pools"
+  },
+  "Confirmar": {
+    "en": "Confirm",
+    "fr": "Confirmer",
+    "es": "Confirmar",
+    "de": "Bestätigen"
+  },
+  "Iniciar visita": {
+    "en": "Start visit",
+    "fr": "Commencer la visite",
+    "es": "Iniciar visita",
+    "de": "Besuch starten"
+  },
+  "Concluir visita": {
+    "en": "Complete visit",
+    "fr": "Terminer la visite",
+    "es": "Finalizar visita",
+    "de": "Besuch abschließen"
+  },
+  "Fotografias": {
+    "en": "Photos",
+    "fr": "Photos",
+    "es": "Fotografías",
+    "de": "Fotos"
+  },
+  "Cloro livre": {
+    "en": "Free chlorine",
+    "fr": "Chlore libre",
+    "es": "Cloro libre",
+    "de": "Freies Chlor"
+  },
+  "Cloro total": {
+    "en": "Total chlorine",
+    "fr": "Chlore total",
+    "es": "Cloro total",
+    "de": "Gesamtchlor"
+  },
+  "Alcalinidade": {
+    "en": "Alkalinity",
+    "fr": "Alcalinité",
+    "es": "Alcalinidad",
+    "de": "Alkalinität"
+  },
+  "Dureza": {
+    "en": "Hardness",
+    "fr": "Dureté",
+    "es": "Dureza",
+    "de": "Härte"
+  },
+  "Temperatura": {
+    "en": "Temperature",
+    "fr": "Température",
+    "es": "Temperatura",
+    "de": "Temperatur"
+  }
+});
+
+  Object.assign(DICT,{
+  "Falta de produtos químicos": {
+    "en": "Chemicals unavailable",
+    "fr": "Produits chimiques manquants",
+    "es": "Faltan productos químicos",
+    "de": "Chemikalien fehlen"
+  },
+  "Acesso impedido": {
+    "en": "Access blocked",
+    "fr": "Accès bloqué",
+    "es": "Acceso bloqueado",
+    "de": "Zugang gesperrt"
+  },
+  "Chave indisponível ou incorreta": {
+    "en": "Key missing or incorrect",
+    "fr": "Clé manquante ou incorrecte",
+    "es": "Llave no disponible o incorrecta",
+    "de": "Schlüssel fehlt oder ist falsch"
+  },
+  "Cliente impediu o serviço": {
+    "en": "Client refused service",
+    "fr": "Service refusé par le client",
+    "es": "El cliente impidió el servicio",
+    "de": "Kunde hat den Service abgelehnt"
+  },
+  "Falta de material": {
+    "en": "Materials unavailable",
+    "fr": "Matériel manquant",
+    "es": "Falta de material",
+    "de": "Material fehlt"
+  },
+  "Equipamento avariado": {
+    "en": "Equipment failure",
+    "fr": "Équipement en panne",
+    "es": "Equipo averiado",
+    "de": "Gerät defekt"
+  },
+  "Condições meteorológicas": {
+    "en": "Weather conditions",
+    "fr": "Conditions météorologiques",
+    "es": "Condiciones meteorológicas",
+    "de": "Wetterbedingungen"
+  },
+  "Outro motivo": {
+    "en": "Other reason",
+    "fr": "Autre motif",
+    "es": "Otro motivo",
+    "de": "Anderer Grund"
+  },
+  "Escolher motivo": {
+    "en": "Choose a reason",
+    "fr": "Choisir un motif",
+    "es": "Elegir motivo",
+    "de": "Grund auswählen"
+  },
+  "Água aberta ativa": {
+    "en": "Water still running",
+    "fr": "Eau toujours ouverte",
+    "es": "Agua todavía abierta",
+    "de": "Wasser läuft noch"
+  },
+  "P0 - Agua aberta": {
+    "en": "P0 - Water running",
+    "fr": "P0 - Eau ouverte",
+    "es": "P0 - Agua abierta",
+    "de": "P0 - Wasser läuft"
+  },
+  "P0 - Bomba em manual": {
+    "en": "P0 - Pump in manual mode",
+    "fr": "P0 - Pompe en mode manuel",
+    "es": "P0 - Bomba en modo manual",
+    "de": "P0 - Pumpe im Handbetrieb"
+  },
+  "Sincronizar fotografias": {
+    "en": "Sync photos",
+    "fr": "Synchroniser les photos",
+    "es": "Sincronizar fotografías",
+    "de": "Fotos synchronisieren"
+  },
+  "Rede disponível": {
+    "en": "Connection available",
+    "fr": "Connexion disponible",
+    "es": "Conexión disponible",
+    "de": "Verbindung verfügbar"
+  }
+});
   const CANON_DICT = Object.entries(DICT).reduce((acc, [key, value]) => {
     acc[canonicalText(key)] = value;
     return acc;
@@ -234,6 +526,7 @@
     if (["pt", "pt-pt", "portugues", "portuguese"].includes(raw)) return "pt";
     if (["en", "en-gb", "en-us", "ing", "ingles", "english"].includes(raw)) return "en";
     if (["fr", "fr-fr", "frances", "french"].includes(raw)) return "fr";
+    if (["es", "es-es", "espanhol", "español", "spanish"].includes(raw)) return "es";
     if (["de", "de-de", "alemao", "alemão", "german", "deutsch"].includes(raw)) return "de";
     const short = raw.slice(0, 2);
     return SUPPORTED.includes(short) ? short : "pt";
@@ -307,7 +600,7 @@
   function shouldSkipElement(element) {
     if (!element || element.nodeType !== 1) return false;
     return Boolean(element.closest(
-      ".cw-lang-switch, script, style, noscript, textarea, code, pre, svg, canvas, select, [data-cw-no-i18n]"
+      ".cw-lang-switch, script, style, noscript, textarea, code, pre, svg, canvas, select:not([data-cw-i18n-options]), [data-cw-no-i18n]"
     ));
   }
 
@@ -323,9 +616,10 @@
     const nodes = [];
     while (walker.nextNode()) nodes.push(walker.currentNode);
     nodes.forEach((node) => {
-      if (!textMemory.has(node)) textMemory.set(node, node.nodeValue);
-      const original = textMemory.get(node);
+      const previous = textMemory.get(node);
+      const original = !previous || node.nodeValue !== previous.rendered ? node.nodeValue : previous.original;
       const translated = translateValue(original, language);
+      textMemory.set(node, { original, rendered: translated });
       if (node.nodeValue !== translated) node.nodeValue = translated;
     });
   }
@@ -356,6 +650,7 @@
   }
 
   function applyLanguage(language, options = {}) {
+    if (!options.silent) languageRevision++;
     const normalized = normalizeLanguage(language);
     document.documentElement.lang = normalized;
     document.body?.setAttribute("data-cw-language", normalized);
@@ -370,28 +665,29 @@
     }
   }
 
-  async function syncRemoteLanguage(language) {
-    if (!token()) return;
-    try {
-      await fetch("/api/settings/language/me", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ language: normalizeLanguage(language) }),
+  function syncRemoteLanguage(language) {
+    const credential = token();
+    if (!credential) return;
+    pendingRemoteWrite = pendingRemoteWrite.catch(() => {}).then(async () => {
+      if (token() !== credential) return;
+      const response = await fetch('/api/settings/language/me', {
+        method:'PUT', headers:{'Content-Type':'application/json',Authorization:`Bearer ${credential}`},
+        body:JSON.stringify({language:normalizeLanguage(language)})
       });
-    } catch (error) {
-      console.warn("Nao foi possivel gravar idioma:", error.message);
-    }
+      if (!response.ok) throw Error('Preferência guardada apenas neste dispositivo.');
+    }).catch(error => {
+      if (token() === credential) document.getElementById('cwLanguageSelect')?.setAttribute('title',error.message);
+    });
   }
 
   async function loadRemoteLanguage() {
-    if (!token()) return;
+    const credential = token(), revision = languageRevision;
+    if (!credential) return;
     try {
-      const response = await fetch("/api/settings/language/me");
+      const response = await fetch('/api/settings/language/me',{headers:{Authorization:`Bearer ${credential}`}});
       const data = await response.json().catch(() => ({}));
-      if (response.ok && data.ok !== false && data.language) applyLanguage(data.language, { silent: true });
-    } catch (error) {
-      console.warn("Nao foi possivel ler idioma:", error.message);
-    }
+      if (token() === credential && revision === languageRevision && response.ok && data.ok !== false && data.language) applyLanguage(data.language,{silent:true});
+    } catch (_) { /* The local preference remains usable offline. */ }
   }
 
   function buildSelector() {
@@ -481,7 +777,7 @@
         applyLanguage(readLanguage(), { silent: true });
       }, 180);
     });
-    if (document.body) observer.observe(document.body, { childList: true, subtree: true });
+    if (document.body) observer.observe(document.body, { childList: true, characterData: true, subtree: true });
   }
 
   window.CristalI18n = {

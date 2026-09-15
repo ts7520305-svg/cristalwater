@@ -45,6 +45,8 @@ async function main(){
   assert.equal((await call('/api/settings',ut,'POST',{userId:user.id,type:'QA',sound:false})).status,200);
   assert.equal((await call(`/api/settings/${user.id}`,ut)).body.settings[0].sound,false);
   assert.equal((await call('/api/settings/language/me',ct)).status,200);
+  assert.equal((await call('/api/settings/language/me',ct,'PUT',{language:'es-ES'})).body.language,'es');
+  assert.equal((await call('/api/settings/language/me',ct)).body.language,'es');
   await prisma.systemSetting.delete({where:{key}});
  });
  await test('geofence only validates assigned open visits and never invents missing GPS',async()=>{

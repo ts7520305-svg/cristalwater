@@ -61,3 +61,8 @@ Configuração e pré-visualização reservadas à administração. Os geradores
 ## TASK 94 — configuração por cliente e simulação
 
 A página de configuração permite escolher o cliente pelo nome, carregar os preços, adicionar períodos, simular o mês e guardar uma nova versão. Mostra claramente que é um preço mensal total e que a mudança dentro do mês é proporcional. Alterar cliente limpa o plano anterior; gravação exige o cliente carregado e a versão esperada. Mudança de sessão esconde os dados. O formulário antigo de lembretes exige também carregar o cliente antes de guardar, evitando copiar a configuração de outro cliente por engano.
+
+## TASK 95 — espanhol e estados traduzidos atualizados
+
+Espanhol adicionado às preferências de idioma e a todas as entradas do dicionário global existente. Acrescentadas traduções PT/EN/FR/ES/DE para mensagens operacionais de água aberta, bomba em manual, falta de química, falta de rede e sincronização pendente. Uma resposta remota atrasada não se sobrepõe a uma escolha mais recente nem muda a preferência de outra sessão. Escritas de preferência são sequenciais e autenticadas explicitamente. Texto atualizado pela aplicação conserva o estado novo ao voltar a traduzir. Este dicionário não constitui revisão integral de todos os textos dinâmicos do sistema.
+
