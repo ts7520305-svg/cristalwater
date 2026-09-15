@@ -479,9 +479,9 @@ router.post('/pay-invoice', asyncHandler(async (req, res) => {
   const amount = toNumber(req.body.amount, 0);
   if (!invoiceId || amount <= 0) return res.status(400).json({ ok: false, error: 'invoiceId e amount obrigatórios' });
 
-  const result = await CoreInvoicePaymentBusiness.registerPayment(prisma, invoiceId, {
+  const result = await CoreInvoicePaymentBusiness.registerPayment(prisma, invoiceId, req.body.requestId !== undefined ? req.body : {
     amount, method: req.body.method || 'MANUAL', notes: req.body.notes || 'Pagamento registado no fluxo operacional.',
-  });
+  }, req.user);
 
   res.json({
     ok: true,
@@ -490,6 +490,7 @@ router.post('/pay-invoice', asyncHandler(async (req, res) => {
     appliedAmount: result.appliedAmount,
     creditAdded: result.creditAdded,
     creditBalance: result.creditBalance,
+    ...(result.requestReceipt ? { requestReceipt: result.requestReceipt, idempotent: result.idempotent === true } : {}),
     flowStatus: invoiceOpen(result.invoice) <= 0 ? 'CLOSED' : 'PARTIAL_PAYMENT',
   });
 }));

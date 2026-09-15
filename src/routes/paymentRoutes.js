@@ -49,9 +49,9 @@ router.post("/invoice/:invoiceId", async (req, res) => {
       });
     }
 
-    const result = await CoreInvoicePaymentBusiness.registerPayment(prisma, invoiceId, {
+    const result = await CoreInvoicePaymentBusiness.registerPayment(prisma, invoiceId, req.body.requestId !== undefined ? req.body : {
       amount, method, notes: notes || 'Pagamento manual registado',
-    });
+    }, req.user);
 
     res.json({
       ok: true,

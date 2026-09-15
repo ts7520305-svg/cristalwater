@@ -4,7 +4,7 @@
 
 - Repositório: `ts7520305-svg/cristalwater`.
 - Branch de trabalho: `work/field-readiness-20260915-simulation`.
-- Última entrega remota verificada: TASK136, commit `6e7a795a9ece95cec26dfff188f3a9b5fe2f25ba`; workflow `34982947007` aprovado, incluindo 322 testes unitários, 17 scripts de navegador, 42 grupos operacionais, PostgreSQL 16 e restauro de 99 tabelas/11 anexos.
+- Última entrega remota verificada: TASK139, commit `057c723444db4c91ae3468476e05b46d933c262d`; workflow `34986420057` aprovado, incluindo 322 testes unitários, 17 scripts de navegador, 44 grupos operacionais, PostgreSQL 16 e restauro de 99 tabelas/11 anexos.
 - TASK123: notas da piscina e seleção correta dos lembretes no endpoint da rota, implementadas. Teste API com 505 lembretes gerais, 23 operacionais, duas piscinas, reatribuição e visitas extra aprovado em `field-qa-runtime/run-1789467419688`. 218 testes unitários e 4 de técnicos aprovados.
 - TASK124: notas no ecrã de campo, avisos recorrentes atrasados e confirmação de início completa e vinculada à visita/sessão implementados. Percurso real verificado em PT/EN/FR/ES/DE; regressão local final aprovada: 218 testes unitários, 4 de técnicos, 17 scripts de navegador e 33 grupos integrados (`reports/field-suite/1789468180539/results.json`). Imagem: `reports/field-visual/visit-briefing-1789468325934/technician-briefing-mobile.png`. Workflow PostgreSQL 16/restauro aprovado no commit acima. Continuação sem aprovações intermédias conforme pedido «continua sem parar».
 - Relatórios atuais: `VISIT_BRIEFING_API_20260915.md` e `VISIT_BRIEFING_UI_20260915.md`. Inventário concluído nas TASK121/TASK122; não repetir a implementação.
@@ -41,6 +41,11 @@
 
 ### Pedido ativo
 
+- TASK140: repetição segura de pagamentos implementada nos quatro percursos da API. Reprodução em `field-qa-runtime/run-1789485522002` confirmou dois pagamentos de 10 EUR para o mesmo `requestId` em todos os percursos. A confirmação passa a ser guardada na mesma transação do pagamento/crédito, com bloqueio por pedido, identidade do responsável, fatura e valores em cêntimos. Reutilização do identificador com outros dados ou responsável devolve 409; repetições devolvem a confirmação original mesmo depois de pagamentos posteriores ou cancelamento. A mesma chave funciona entre os quatro percursos. Falha ao guardar a confirmação reverte os efeitos financeiros e notificações/auditoria transacionais. Finance OS não volta a emitir o evento ao repetir uma confirmação guardada.
+  - Ensaio dirigido aprovado em `field-qa-runtime/run-1789485722445`: repetição de pagamentos, proteção dos rascunhos e regressão Finance OS. Inclui oito chamadas simultâneas por percurso, doze chamadas entre percursos, excedente de 5 EUR registado uma vez, mudança de responsável/dados, valores malformados e falha transacional forçada.
+  - Dez ficheiros: serviço `invoicePaymentRequestService.js`, dois negócios financeiros, controlador Finance OS, três routers, teste `test-field-payment-retry.js`, runner de 45 grupos e este checkpoint. Sem migração de esquema; reutiliza os comprovativos internos existentes em `OperationalReminder`.
+  - Compatibilidade: integrações sem `requestId` conservam o comportamento anterior e não beneficiam desta garantia. O formulário de faturas deve passar a enviar e conservar o pedido na TASK141. Outros ecrãs e o recebimento geral por cliente continuam sujeitos a revisão própria. O evento do Finance OS após commit mantém o mecanismo existente; esta tarefa não cria uma fila durável de entrega de eventos. Confirmar o CI final publicado, incluindo restauro.
+
 O proprietário pediu continuar a implementação e correções sem aprovações intermédias, concluir os módulos e testar os percursos completos, como registado em `FIELD_READINESS_20260914.md`. Não voltar a usar o congelamento de julho para impedir este trabalho autorizado. Instalação no VPS, ensaios físicos, canais externos, emissão fiscal, alterações destrutivas de produção e merge para a branch principal não fazem parte desta tarefa.
 
 ### Estado verificado
@@ -63,7 +68,7 @@ Evidência atual da TASK120: 216 testes unitários, 4 testes de técnicos, os 15
 
 ### Próxima retoma
 
-1. TASK123–TASK136 publicadas e verificadas. TASK137 trata a classificação dos rascunhos no ecrã/API/dashboard e a recuperação de leitura. A TASK138 reconcilia a implementação concorrente e a TASK139 corrige a comparação monetária do teste. Confirmar o workflow final com 44 grupos e restauro. Não repetir estas implementações. Os pagamentos diretos ainda precisam de revisão específica de repetição de pedidos e respostas perdidas.
+1. TASK123–TASK139 publicadas e verificadas. TASK140 protege pedidos de pagamento identificados nas quatro APIs; ligar a proteção ao formulário na TASK141 e confirmar o workflow completo. Não repetir estas implementações. Os restantes ecrãs de recebimentos precisam de revisão específica de repetição de pedidos e respostas perdidas.
 2. A coerência e conclusão dos lembretes no CRM estão tratadas na TASK131. Prosseguir a revisão dos outros ecrãs operacionais, a partir da implementação atual e relatórios posteriores; não repetir os fluxos de lembretes já corrigidos.
 3. Continuar a revisão dos módulos pendentes usando `COMPLETENESS_20260915.md` juntamente com `IMPLEMENTATION_20260915.md` e os relatórios posteriores. A matriz de completude conserva o diagnóstico inicial e contém pontos já corrigidos posteriormente.
 4. Manter tarefas pequenas, com testes de comportamento e documentação. Não repetir trabalho apenas por encontrar um relatório antigo.

@@ -24,7 +24,11 @@ async function sendInvoice(req, res) {
 }
 
 async function registerPayment(req, res) {
-  return send(res, await business.registerPayment(req.params.invoiceId, req.body || {}, actor(req)), 201);
+  try {
+    return send(res, await business.registerPayment(req.params.invoiceId, req.body || {}, actor(req), req.user), 201);
+  } catch (error) {
+    return res.status([400, 404, 409].includes(error.status) ? error.status : 500).json({ ok: false, error: error.message });
+  }
 }
 
 async function createCreditNote(req, res) {

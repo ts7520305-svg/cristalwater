@@ -1,9 +1,12 @@
 const { assertPayableInvoice, createCreditLedgerPayment, invoiceOpen, invoicePaid, invoiceStatus, invoiceTotal } = require('../../services/clientCreditService');
+const { preparePaymentRequest, executePaymentRequest } = require('../../services/invoicePaymentRequestService');
 
 function fail(message, status) { throw Object.assign(new Error(message), { status }); }
 
-async function registerPayment(prisma, id, body = {}) {
-  return prisma.$transaction(async tx => {
+async function registerPayment(prisma, id, body = {}, user = null) {
+  const request = preparePaymentRequest(id, body, user);
+  if (request) { id = request.invoiceId; body = { ...body, amount: request.amountCents / 100, method: request.method, notes: request.notes }; }
+  return prisma.$transaction(async tx => executePaymentRequest(tx, request, async () => {
     // Read the balance only after acquiring the row lock. Concurrent payments
     // must see the previous committed payment rather than overwrite its totals.
     await tx.$queryRaw`SELECT id FROM "Invoice" WHERE id = ${id} FOR UPDATE`;
@@ -32,7 +35,7 @@ async function registerPayment(prisma, id, body = {}) {
         method: body.method || 'MANUAL', notes: body.notes || 'Excedente convertido em credito positivo.',
       }) : { creditAdded: 0 };
     return { payment, invoice: updated, appliedAmount: applied, creditAdded: credit.creditAdded || 0, creditBalance: credit.creditBalance };
-  });
+  }), { maxWait: 15000, timeout: 15000 });
 }
 
 module.exports = { registerPayment };
