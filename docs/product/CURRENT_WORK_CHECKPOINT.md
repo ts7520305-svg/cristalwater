@@ -11,7 +11,9 @@
 
 - TASK125 implementada: conclusão atómica/idempotente dos serviços periódicos na ficha, CRM e agenda; interface protegida contra cliques repetidos e respostas perdidas. Relatório `SERVICE_REMINDER_COMPLETION_20260915.md`. Reprodução inicial confirmada; testes dirigidos API/base/Chromium aprovados em `field-qa-runtime/run-1789469812066`. Bateria local final aprovada: 234 testes unitários, 4 de técnicos, 17 scripts de navegador, sintaxe de 487 ficheiros backend e 34 grupos integrados (`reports/field-suite/1789469956928/results.json`). Workflow PostgreSQL 16/restauro da TASK125 aprovado conforme o commit acima.
 
-- TASK126: consulta completa dos lembretes com pendentes antes do histórico; reprodução confirmou zero pendentes na ficha perante 105 concluídos/505 pendentes. Relatório `REMINDER_VISIBILITY_20260915.md`. Criação resistente a reenvios continua como próxima tarefa.
+- TASK126: consulta completa dos lembretes com pendentes antes do histórico; reprodução confirmou zero pendentes na ficha perante 105 concluídos/505 pendentes. Relatório `REMINDER_VISIBILITY_20260915.md`. Teste da consulta aprovado em `field-qa-runtime/run-1789470809542`, com 235 testes unitários e 4 de técnicos.
+
+- TASK127: criação com `requestId`, comprovativo transacional e recusa de repetições alteradas implementada. 249 testes unitários, 4 de técnicos e testes integrados dirigidos aprovados em `field-qa-runtime/run-1789471051397`. Próxima tarefa: recuperar pedidos por confirmar nos três formulários existentes. Relatório `REMINDER_CREATION_API_20260915.md`.
 
 ### Pedido ativo
 
@@ -37,8 +39,8 @@ Evidência atual da TASK120: 216 testes unitários, 4 testes de técnicos, os 15
 
 ### Próxima retoma
 
-1. TASK123–TASK125 publicadas e verificadas. TASK126 implementada; confirmar a bateria final e o workflow publicado na conversa antes de repetir verificações. Não repetir estas implementações.
-2. Próximo candidato: verificar criação de lembretes na ficha/CRM perante resposta perdida e reenvio, A consulta sem cortes silenciosos está implementada na TASK126. A criação ainda não foi tornada idempotente.
+1. TASK123–TASK125 publicadas e verificadas. TASK126/TASK127 implementadas; confirmar a bateria final e o workflow publicado na conversa antes de repetir verificações. Não repetir estas implementações.
+2. Próximo passo: formulários de criação com identificador persistido e repetição explícita após falha de ligação. API protegida na TASK127; consulta sem cortes silenciosos na TASK126.
 3. Continuar a revisão dos módulos pendentes usando `COMPLETENESS_20260915.md` juntamente com `IMPLEMENTATION_20260915.md` e os relatórios posteriores. A matriz de completude conserva o diagnóstico inicial e contém pontos já corrigidos posteriormente.
 4. Manter tarefas pequenas, com testes de comportamento e documentação. Não repetir trabalho apenas por encontrar um relatório antigo.
 5. Ensaios físicos e VPS permanecem pendentes. Não declarar o sistema inteiro concluído ou certificado para campo.

@@ -1,3 +1,4 @@
+const ReminderCreationBusiness = require('../business/admin/ReminderCreationBusiness');
 const ReminderListBusiness = require('../business/admin/ReminderListBusiness');
 const ReminderCompletionBusiness = require('../business/admin/ReminderCompletionBusiness');
 const { prisma } = require("../prismaClient");
@@ -110,15 +111,11 @@ async function listReminders(req, res) {
 }
 
 async function createReminder(req, res) {
-  const data = req.body || {};
-  if (!data.title || !data.dueAt) return res.status(400).json({ ok: false, error: "Título e data obrigatórios" });
-  const reminder = await prisma.generalReminder.create({ data: {
-    title: data.title, description: data.description || null, category: data.category || "GENERAL", priority: data.priority || "NORMAL", status: data.status || "PENDING",
-    dueAt: new Date(data.dueAt), clientId: data.clientId ? Number(data.clientId) : null, poolId: data.poolId ? Number(data.poolId) : null,
-    leadId: data.leadId ? Number(data.leadId) : null, appointmentId: data.appointmentId ? Number(data.appointmentId) : null, technicianId: data.technicianId ? Number(data.technicianId) : null,
-    repeatRule: data.repeatRule || null, createdBy: data.createdBy || "system"
-  }});
-  res.status(201).json({ ok: true, reminder });
+  try {
+    res.status(201).json(await ReminderCreationBusiness.create(req.user, req.body || {}));
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ ok: false, error: error.message });
+  }
 }
 
 async function completeReminder(req, res) {

@@ -1,6 +1,6 @@
 const ReminderListBusiness = require('../business/admin/ReminderListBusiness');
 const ReminderCompletionBusiness = require('../business/admin/ReminderCompletionBusiness');
-const { normalizeRepeatRuleInput } = require('../services/reminderRepeatService');
+const ReminderCreationBusiness = require('../business/admin/ReminderCreationBusiness');
 const clientRates = require('../business/finance/ClientRateBusiness');
 const {checkDatabaseHealth}=require('../services/databaseHealthService');
 const express = require('express');
@@ -2107,40 +2107,9 @@ router.get('/pools/:id/service-reminders', async (req, res) => {
 
 router.post('/pools/:id/service-reminders', async (req, res) => {
   try {
-    const poolId = toInt(req.params.id);
-    if (!poolId) return res.status(400).json({ ok: false, error: 'ID da piscina invalido' });
-    if (!available('generalReminder')) return res.status(501).json({ ok: false, error: 'Lembretes indisponiveis' });
-
-    const pool = await db('pool').findUnique({ where: { id: poolId }, include: { client: true } });
-    if (!pool) return res.status(404).json({ ok: false, error: 'Piscina nao encontrada' });
-
-    const body = req.body || {};
-    const title = String(body.title || '').trim();
-    const dueAt = body.dueAt ? new Date(body.dueAt) : null;
-    if (!title || !dueAt || Number.isNaN(dueAt.getTime())) {
-      return res.status(400).json({ ok: false, error: 'Titulo e data do lembrete sao obrigatorios' });
-    }
-
-    const repeatRule = normalizeRepeatRuleInput(body);
-    const reminder = await db('generalReminder').create({
-      data: dataFor('generalReminder', {
-        title,
-        description: body.description ? String(body.description).trim() : null,
-        category: 'TECHNICAL_PERIODIC_SERVICE',
-        priority: body.priority || 'NORMAL',
-        status: 'PENDING',
-        dueAt,
-        clientId: pool.clientId || null,
-        poolId,
-        technicianId: body.technicianId ? toInt(body.technicianId) : null,
-        repeatRule,
-        createdBy: body.createdBy || req.headers['x-user-email'] || 'ADMIN',
-      }),
-    });
-    return res.status(201).json({ ok: true, reminder });
+    return res.status(201).json(await ReminderCreationBusiness.create(req.user, req.body || {}, req.params.id));
   } catch (error) {
-    if (error.statusCode) return res.status(error.statusCode).json({ ok: false, error: error.message });
-    return res.status(500).json({ ok: false, error: error.message });
+    return res.status(error.statusCode || 500).json({ ok: false, error: error.message });
   }
 });
 
