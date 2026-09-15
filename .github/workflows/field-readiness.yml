@@ -58,5 +58,8 @@ jobs:
         if: always()
         with:
           name: field-readiness-results
-          path: reports/field-suite/
+          path: |
+            reports/field-suite/
+            reports/field-visual/
+            reports/field-resilience/
           retention-days: 7

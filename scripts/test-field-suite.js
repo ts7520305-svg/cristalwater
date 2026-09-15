@@ -17,11 +17,12 @@ process.env.ADMIN_PASSWORD=process.env.ADMIN_PASSWORD||randomBytes(24).toString(
 process.env.JWT_SECRET=process.env.JWT_SECRET||randomBytes(48).toString('base64url');
 process.env.ENABLE_BACKGROUND_JOBS='false';
 const scripts=[
+ 'test-field-visual-flow.js',
  'test-field-water-api.js','test-field-access-api.js','test-field-e2e.js',
  'test-fcs-sec-tech-auth.js','test-fcs-sec-tech-workday.js','test-fcs-technician-t1.js',
  'test-visit-os-operational.js','test-route-os-acceptance.js','test-customer-os-operational.js',
  'test-administration-os-operational.js','test-finance-os-operational.js','test-equipment-stock-os-operational.js',
- 'test-repair-os-operational.js','test-system-interconnections.js','test-real-month-flow-api.js','test-field-preflight.js','test-field-backup.js','test-production-runtime-health.js','test-field-gps-flow.js','test-field-two-year-api.js','test-field-billing-automation.js','test-field-commercial-quotes.js','test-field-client-rates.js','test-field-retention.js'
+ 'test-repair-os-operational.js','test-system-interconnections.js','test-real-month-flow-api.js','test-field-preflight.js','test-field-backup.js','test-production-runtime-health.js','test-field-gps-flow.js','test-field-two-year-api.js','test-field-billing-automation.js','test-field-commercial-quotes.js','test-field-client-rates.js','test-field-retention.js','test-field-quote-portal.js','test-field-resilience.js'
 ];
 function run(script){return new Promise(resolve=>{
  const output=fs.createWriteStream(path.join(evidence,script+'.log'));
