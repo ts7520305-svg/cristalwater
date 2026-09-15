@@ -51,7 +51,7 @@ async function generate(mode, body = {}) {
       if (!Number.isSafeInteger(monthlyCents) || monthlyCents < 0) fail('Preço mensal inválido. Reveja a configuração do cliente.');
       const start = new Date(`${monthRef}-01T00:00:00Z`), end = new Date(start); end.setUTCMonth(end.getUTCMonth() + 1);
       const dates = { OR: [{ plannedDate: { gte: start, lt: end } }, { date: { gte: start, lt: end } }, { endAt: { gte: start, lt: end } }] };
-      const [repairs, visits, extras] = await Promise.all([
+      const [candidateRepairs, visits, extras] = await Promise.all([
         tx.repair.findMany({ where: { pool: { clientId }, paid: false,
           status: { in: mode === 'OPERATIONAL' ? ['DONE', 'QUOTED', 'APPROVED', 'QUOTE_REQUESTED'] : ['QUOTED', 'APPROVED', 'DONE'] },
           NOT: { status: { in: ['QUOTED', 'QUOTE_REQUESTED'] }, quotes: { some: {} } } }, include: { pool: true }, orderBy: { id: 'asc' } }),
@@ -68,6 +68,15 @@ async function generate(mode, body = {}) {
           { OR: [{ totalPrice: { gt: 0 } }, { price: { gt: 0 } }, { unitPrice: { gt: 0 } }] },
         ] }, include: { pool: true }, orderBy: { id: 'asc' } }),
       ]);
+      // The client/receipt lock serializes different months as well. A repair
+      // remains reserved by any historical document, even a draft or withdrawal;
+      // releasing it requires an explicit correction, never monthly generation.
+      const previousRepairLines = candidateRepairs.length ? await tx.invoiceLine.findMany({ where: {
+        referenceId: { in: candidateRepairs.map(repair => repair.id) },
+        OR: [{ type: 'REPAIR' }, { lineType: 'REPAIR' }],
+      }, select: { referenceId: true } }) : [];
+      const reservedRepairs = new Set(previousRepairLines.map(row => row.referenceId));
+      const repairs = candidateRepairs.filter(repair => !reservedRepairs.has(repair.id));
       const repairCents = repairs.reduce((sum, r) => sum + sourceCents(mode === 'OPERATIONAL' ? r.totalPrice || r.unitPrice : r.totalPrice), 0);
       const serviceCents = mode === 'CORE' ? visits.reduce((sum, v) => sum + sourceCents(sourceAmount(v)), 0) : 0;
       const extraCents = extras.reduce((sum, v) => sum + sourceCents(sourceAmount(v)), 0);
