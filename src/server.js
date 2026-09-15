@@ -246,6 +246,7 @@ mount("/api/finance-os", financeOsRoutes);
 mount("/api/repairs", repairRoutes);
 mount("/api/guides", guideRoutes);
 mount("/api/pool-equipment", poolEquipmentRoutes);
+mount("/api/equipment-maintenance", require("./routes/equipmentMaintenanceRoutes"));
 mount("/api/poolEquipment", poolEquipmentRoutes);
 mount("/api/technical-history", technicalHistoryRoutes);
 mount("/api/technicalHistory", technicalHistoryRoutes);

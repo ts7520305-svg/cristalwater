@@ -62,4 +62,5 @@ jobs:
             reports/field-suite/
             reports/field-visual/
             reports/field-resilience/
+            reports/equipment-flow/
           retention-days: 7
