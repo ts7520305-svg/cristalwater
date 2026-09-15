@@ -65,6 +65,7 @@ model Client {
   accesses                      ClientAccess[]
   messages                      ClientMessage[]
   ratePlans                     ClientRatePlan[]
+  quotePublications             RepairQuotePortal[]
   reportSetting                 ClientReportSetting?
   communicationLogs             CommunicationLog[]
   extraVisits                   ExtraVisit[]
@@ -2154,7 +2155,7 @@ model WebPushSubscription {
   @@index([role, principalId, active])
 }
 
-// Commercial snapshots are loaded only by the administrator quote endpoints.
+// Private commercial snapshots; client endpoints expose only an explicit selling-price projection.
 model RepairQuote {
   id         Int      @id @default(autoincrement())
   repairId   Int
@@ -2163,6 +2164,8 @@ model RepairQuote {
   createdBy  String
   createdAt  DateTime @default(now())
   repair     Repair   @relation(fields: [repairId], references: [id], onDelete: Restrict)
+
+  portal     RepairQuotePortal?
 
   @@unique([repairId, version])
 }
@@ -2178,4 +2181,20 @@ model ClientRatePlan {
   client    Client   @relation(fields: [clientId], references: [id], onDelete: Restrict)
 
   @@unique([clientId, version])
+}
+
+// Explicit publication and immutable client decision for one exact quote version.
+model RepairQuotePortal {
+  id          Int       @id @default(autoincrement())
+  quoteId     Int       @unique
+  clientId    Int
+  publishedAt DateTime  @default(now())
+  publishedBy String
+  decision    String?
+  decisionAt  DateTime?
+  reason      String?
+  quote       RepairQuote @relation(fields: [quoteId], references: [id], onDelete: Restrict)
+  client      Client      @relation(fields: [clientId], references: [id], onDelete: Restrict)
+
+  @@index([clientId, publishedAt])
 }

@@ -1,0 +1,73 @@
+require('../src/loadEnv')();
+const assert = require('node:assert/strict');
+if (process.env.NODE_ENV !== 'test' || process.env.QA_MODE !== 'true' || process.env.QA_ENVIRONMENT_SAFE !== 'true') throw Error('Isolated QA required');
+const { prisma } = require('../src/prismaClient');
+const jwt = require('jsonwebtoken');
+const { getJwtSecret } = require('../src/utils/jwtSecret');
+const BASE = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
+(async () => {
+ const suffix = Date.now();
+ const admin = await prisma.user.create({data:{name:'Portal QA admin',email:`portal-quote-${suffix}@qa.test`,password:'no-login',role:'ADMIN',active:true}});
+ const tech = await prisma.technician.create({data:{name:'Portal QA technician',active:true}});
+ const client = await prisma.client.create({data:{name:'Portal QA client',active:true,status:'ACTIVE'}});
+ const other = await prisma.client.create({data:{name:'Other portal client',active:true,status:'ACTIVE'}});
+ const pool = await prisma.pool.create({data:{name:'Piscina da Luz QA',clientId:client.id}});
+ const sign = body => jwt.sign(body,getJwtSecret(),{expiresIn:'1h'});
+ const at=sign({id:admin.id,role:'ADMIN'}),tt=sign({id:tech.id,technicianId:tech.id,role:'TECHNICIAN'}),ct=sign({id:client.id,clientId:client.id,role:'CLIENT'}),ot=sign({id:other.id,clientId:other.id,role:'CLIENT'});
+ async function call(path,token,method='GET',body){const res=await fetch(BASE+path,{method,headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})},body:body?JSON.stringify(body):undefined});return{status:res.status,body:await res.json().catch(()=>({}))};}
+ const listing=`/api/client-portal/${client.id}/quotes`;
+ const payload={lines:[{type:'MATERIAL',description:'Bomba eficiente',quantity:1,unitCost:80,marginPercent:20}],taxPercent:23,expectedVersion:0,terms:'Pagamento após aprovação.'};
+ async function fixture(){const repair=await prisma.repair.create({data:{poolId:pool.id,problem:'Substituir bomba',notes:'PRIVATE-NOTE'}});const saved=await call(`/api/repairs/${repair.id}/quote`,at,'PUT',payload);assert.equal(saved.status,200,JSON.stringify(saved));const q=await prisma.repairQuote.findFirst({where:{repairId:repair.id}});return {repair,q,publish:`/api/repairs/${repair.id}/quotes/${q.id}/publish`,decide:listing+`/${q.id}/decision`};}
+ const f=await fixture();
+ assert.equal((await call(listing,ct)).body.quotes.length,0,'Draft is private');
+ assert.equal((await call(listing,null)).status,401);
+ assert.equal((await call(listing,tt)).status,403);
+ assert.equal((await call(listing,ot)).status,403);
+ for(const token of [ct,tt])assert.equal((await call(f.publish,token,'POST',{})).status,403);
+ const published=await Promise.all(Array.from({length:4},()=>call(f.publish,at,'POST',{})));
+ assert(published.every(x=>x.status===200),JSON.stringify(published));
+ assert.equal(await prisma.repairQuotePortal.count({where:{quoteId:f.q.id}}),1);
+ assert.equal(await prisma.notification.count({where:{clientId:client.id,type:'QUOTE_AVAILABLE'}}),1);
+ let listed=(await call(listing,ct)).body.quotes;
+ assert.equal(listed.length,1);assert.equal(listed[0].status,'PENDING');assert.equal(listed[0].total,123);
+ for(const key of ['unitCost','marginPercent','totalCost','profit','createdBy','PRIVATE-NOTE','snapshot'])assert(!JSON.stringify(listed).includes(key),key);
+ assert.equal((await call(`/api/client-portal/${other.id}/quotes/${f.q.id}/decision`,ot,'POST',{decision:'APPROVED',confirm:true})).status,404);
+ assert.equal((await call(f.decide,at,'POST',{decision:'APPROVED',confirm:true})).status,403,'Admin cannot impersonate client decision');
+ assert.equal((await call(f.decide,ct,'POST',{decision:'APPROVED'})).status,400);
+ const approvals=await Promise.all(Array.from({length:5},()=>call(f.decide,ct,'POST',{decision:'APPROVED',confirm:true})));
+ assert(approvals.every(x=>x.status===200),JSON.stringify(approvals));
+ assert.equal(await prisma.userAuditLog.count({where:{action:'CLIENT_QUOTE_DECISION',entityId:String(f.q.id)}}),1);
+ assert.equal((await prisma.repair.findUnique({where:{id:f.repair.id}})).status,'APPROVED');
+ assert.equal((await call(f.decide,ct,'POST',{decision:'DECLINED',confirm:true})).status,409);
+ assert.equal((await call(listing,ct)).body.quotes[0].status,'APPROVED');
+ const declined=await fixture();await call(declined.publish,at,'POST',{});
+ assert.equal((await call(declined.decide,ct,'POST',{decision:'DECLINED',confirm:true,reason:'Prefiro outra solução.'})).status,200);
+ assert.equal((await prisma.repair.findUnique({where:{id:declined.repair.id}})).status,'QUOTED');
+ const superseded=await fixture();await call(superseded.publish,at,'POST',{});
+ assert.equal((await call(`/api/repairs/${superseded.repair.id}/quote`,at,'PUT',{...payload,expectedVersion:1})).status,200);
+ assert.equal((await call(superseded.decide,ct,'POST',{decision:'APPROVED',confirm:true})).status,409);
+ assert.equal((await call(listing,ct)).body.quotes.find(q=>q.id===superseded.q.id).status,'SUPERSEDED');
+ const expired=await fixture();await call(expired.publish,at,'POST',{});
+ await prisma.repairQuote.update({where:{id:expired.q.id},data:{snapshot:{...expired.q.snapshot,validUntil:'2001-01-01T00:00:00Z'}}});
+ assert.equal((await call(expired.decide,ct,'POST',{decision:'APPROVED',confirm:true})).status,409);
+ assert.equal((await call(listing,ct)).body.quotes.find(q=>q.id===expired.q.id).status,'EXPIRED');
+ const racing=await fixture();await call(racing.publish,at,'POST',{});
+ let pending;
+ await prisma.$transaction(async tx=>{
+  await tx.pool.update({where:{id:pool.id},data:{clientId:other.id}});
+  pending=call(racing.decide,ct,'POST',{decision:'APPROVED',confirm:true});
+  // The transfer holds the pool row while the HTTP request starts. The decision
+  // must recheck ownership after this committed transfer, never approve old scope.
+  await new Promise(resolve=>setTimeout(resolve,200));
+ });
+ assert.equal((await pending).status,404);
+ assert.equal((await prisma.repair.findUnique({where:{id:racing.repair.id}})).status,'QUOTED');
+ await prisma.pool.update({where:{id:pool.id},data:{clientId:client.id}});
+ const transferred=await fixture();await call(transferred.publish,at,'POST',{});
+ await prisma.pool.update({where:{id:pool.id},data:{clientId:other.id}});
+ assert.equal((await call(listing,ct)).body.quotes.length,0);
+ assert.equal((await call(`/api/client-portal/${other.id}/quotes`,ot)).body.quotes.length,0,'Previous owner publication stays private');
+ assert.equal((await call(transferred.decide,ct,'POST',{decision:'APPROVED',confirm:true})).status,404);
+ assert.equal((await call(transferred.publish,at,'POST',{})).status,409);
+ console.log('PASS explicit publication, portal notification once, safe customer prices, client ownership, admin read-only, concurrent approval once, rejection, superseded/expired protection and ownership transfer');
+})().catch(error=>{console.error(error);process.exitCode=1}).finally(()=>prisma.$disconnect());

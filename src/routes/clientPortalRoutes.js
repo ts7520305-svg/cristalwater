@@ -60,6 +60,14 @@ function ensureClientOwnership(req, res, clientId) {
   return true;
 }
 
+const quotePortal = require('../controllers/quotePortalController');
+router.get('/:clientId(\\d+)/quotes', auth('CLIENT'), (req, res, next) => {
+  if (ensureClientOwnership(req, res, req.params.clientId)) return quotePortal.list(req, res, next);
+});
+router.post('/:clientId(\\d+)/quotes/:quoteId/decision', auth('CLIENT'), (req, res, next) => {
+  if (ensureClientOwnership(req, res, req.params.clientId)) return quotePortal.decide(req, res, next);
+});
+
 // Aliases usados pelos frontends atuais.
 router.get("/history/:clientId", auth("CLIENT"), async (req, res) => {
   const clientId = Number(req.params.clientId);

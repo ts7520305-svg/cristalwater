@@ -55,6 +55,7 @@ const upload = multer({
 });
 
 router.post('/quote-preview', allowRoles('ADMIN'), controller.previewQuote);
+router.post('/:id/quotes/:quoteId/publish', allowRoles('ADMIN'), require('../controllers/quotePortalController').publish);
 router.get('/:id/quotes', allowRoles('ADMIN'), controller.listQuotes);
 router.post("/", allowRoles("ADMIN", "TECHNICIAN"), controller.createRepair);
 router.get("/pool/:poolId", allowRoles("ADMIN", "TECHNICIAN"), controller.listRepairsByPool);
