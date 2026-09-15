@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+router.use(require('../middlewares/authMiddleware')('ADMIN'));
 const c = require("../controllers/securityController");
 function wrap(fn){ return (req,res,next)=>Promise.resolve(fn(req,res,next)).catch(next); }
 router.get("/status", wrap(c.securityStatus));

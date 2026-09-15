@@ -16,7 +16,7 @@ async function changePassword(req, res) {
   }
   const hashed = await bcrypt.hash(String(newPassword), 12);
   const updated = await prisma.user.update({ where: { id: userId }, data: { password: hashed, mustChangePassword: false, passwordChangedAt: new Date(), failedLoginAttempts: 0, lockedUntil: null }});
-  await prisma.userAuditLog.create({ data: { userId, actor: req.body?.actor || "admin", action: "PASSWORD_CHANGED", entity: "User", entityId: String(userId), ip: req.ip, userAgent: req.headers["user-agent"] || null }}).catch(()=>{});
+  await prisma.userAuditLog.create({ data: { userId, actor: `ADMIN:${req.user.id}`, action: "PASSWORD_CHANGED", entity: "User", entityId: String(userId), ip: req.ip, userAgent: req.headers["user-agent"] || null }}).catch(()=>{});
   res.json({ ok: true, user: safeUser(updated) });
 }
 
@@ -32,7 +32,7 @@ async function updateIdentity(req, res) {
   const update = {};
   for (const k of allowed) if (data[k] !== undefined) update[k] = data[k];
   const user = await prisma.user.update({ where: { id }, data: update });
-  await prisma.userAuditLog.create({ data: { userId: id, actor: data.actor || "admin", action: "IDENTITY_UPDATED", entity: "User", entityId: String(id), metadata: update }}).catch(()=>{});
+  await prisma.userAuditLog.create({ data: { userId: id, actor: `ADMIN:${req.user.id}`, action: "IDENTITY_UPDATED", entity: "User", entityId: String(id), metadata: update }}).catch(()=>{});
   res.json({ ok: true, user: safeUser(user) });
 }
 
