@@ -7,7 +7,7 @@ const {chromium}=require('playwright');
   const html=fs.readFileSync(path.join(__dirname,'../frontend/admin-alerts.html'),'utf8');
   const section=html.slice(html.indexOf('    <style>#commercialQuotes'),html.indexOf('  </main>'));
   const q={lines:[{type:'MATERIAL',description:'Bomba <img src=x onerror=alert(1)>',quantity:1,unitCost:80,marginPercent:20}],taxPercent:23,discountPercent:0,validityDays:15,terms:'',net:100,tax:23,total:123,totalCost:80,profit:20};
-  let versions=[],saves=0,approvals=0;
+  let versions=[],saves=0,approvals=0,publishes=0,publishFailure=false;
   await page.addInitScript(()=>{localStorage.setItem('token','ADMIN-A');window.authHeaders=()=>({Authorization:'Bearer '+localStorage.getItem('token')});window.fetchJSON=async(url,options={})=>{const r=await fetch(url,{...options,headers:{...authHeaders(),'Content-Type':'application/json'}});const d=await r.json();if(!r.ok)throw Error(d.message||'Falha');return d;};});
   page.on('dialog',dialog=>dialog.accept());
   await page.route('**/*',route=>{
@@ -19,6 +19,7 @@ const {chromium}=require('playwright');
    else if(url.pathname.endsWith('/quotes'))data.quotes=versions;
    else if(url.pathname.endsWith('/quote-preview'))data.quote=q;
    else if(url.pathname.endsWith('/quote')){assert.equal(body.expectedVersion,0);assert.equal(body.taxPercent,23);saves++;versions=[{id:10,version:1,snapshot:q}];}
+   else if(url.pathname.endsWith('/publish')){assert(url.pathname.endsWith('/1/quotes/10/publish'));publishes++;if(publishFailure)return route.fulfill({status:409,contentType:'application/json',body:JSON.stringify({message:'Versão substituída.'})});}
    else if(url.pathname.endsWith('/approve')){assert.equal(body.quoteId,10);assert.equal(body.approvalReference,'Email recebido QA');approvals++;}
    return route.fulfill({contentType:'application/json',body:JSON.stringify(data)});
   });
@@ -29,8 +30,11 @@ const {chromium}=require('playwright');
   assert.equal(saves,0);await page.locator('#cqSave').click();await page.waitForFunction(()=>document.querySelector('#cqVersions').textContent.includes('Versão guardada: 1'));assert.equal(saves,1);
   assert.equal(await page.locator('#cqLines img').count(),0);
   await page.locator('[data-key=quantity]').fill('2');await page.locator('#cqApprove').click();assert.equal(approvals,0);assert.match(await page.locator('#cqStatus').textContent(),/Guarde/);
+  await page.locator('#cqPublish').click();assert.equal(publishes,0);assert.match(await page.locator('#cqStatus').textContent(),/Guarde/);
   // Reloading retrieves the actual saved version; approval refers to that immutable snapshot.
   await page.reload();await page.locator('summary').click();await page.locator('#cqRepair').selectOption('1');await page.waitForFunction(()=>document.querySelector('#cqVersions').textContent.includes('Versão guardada: 1'));
+  await page.locator('#cqPublish').click();await page.waitForFunction(()=>document.querySelector('#cqStatus').textContent.includes('Versão publicada'));assert.equal(publishes,1);
+  publishFailure=true;await page.locator('#cqPublish').click();await page.waitForFunction(()=>document.querySelector('#cqStatus').textContent.includes('Versão substituída'));assert.equal(publishes,2);
   await page.locator('#cqApproval').fill('Email recebido QA');await page.locator('#cqApprove').click();await page.waitForFunction(()=>document.querySelector('#cqStatus').textContent.includes('Aprovação registada'));assert.equal(approvals,1);
   if(process.env.CW_QUOTE_SCREENSHOT) await page.screenshot({path:process.env.CW_QUOTE_SCREENSHOT,fullPage:true});
   for(const width of [320,390,1280]){await page.setViewportSize({width,height:844});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'horizontal overflow');}

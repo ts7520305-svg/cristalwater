@@ -553,6 +553,21 @@
         </section>
       </section>
 
+      <section class="cw-v2-card" id="clientQuotesPanel" data-cw-no-i18n>
+        <style>
+          #clientQuotesPanel{min-width:0;overflow-wrap:anywhere}
+          .cw-quote-card{border:1px solid var(--border,#cbd5e1);border-radius:12px;padding:16px;margin:12px 0;min-width:0}
+          .cw-quote-card h3{margin-top:0}.cw-quote-card ul{padding-left:20px}
+          .cw-quote-card textarea{display:block;width:100%;max-width:100%;box-sizing:border-box;margin:6px 0 12px}
+          .cw-quote-confirm{display:flex;align-items:flex-start;gap:10px;margin:16px 0}
+          .cw-quote-confirm input{flex:0 0 22px;width:22px;height:22px}
+          .cw-quote-actions{display:flex;flex-wrap:wrap;gap:10px}.cw-quote-actions button{min-height:44px;white-space:normal}
+        </style>
+        <div class="section-head"><h2>Orçamentos</h2><button type="button" class="cw-v2-btn" id="clientQuotesRefresh">Atualizar</button></div>
+        <p id="clientQuotesStatus" role="status" aria-live="polite"></p>
+        <div id="clientQuotesList"></div>
+      </section>
+
       <section class="cw-v2-card" id="permissionsPanel">
         <div class="section-head"><h2 id="permissionsTitle">Pedidos</h2><span class="pill" id="permissionsPill">Suporte</span></div>
         <div class="grid" id="permissionsList"><div class="empty">A carregar permissões...</div></div>
@@ -589,6 +604,7 @@
 
   <script src="/cw-ui-feedback.js"></script>
   <script src="/client-portal.js"></script>
+  <script src="/client-quotes.js"></script>
   <script src="/ui/core/navigation-context.js"></script>
   <script src="/crystal-os-v2-shell.js"></script>
 

@@ -90,6 +90,15 @@ Sem IVA: ${eur(q.net)} | IVA: ${eur(q.tax)} | Total: ${eur(q.total)}${q.belowCos
     if (dirty && !window.confirm('Descartar alterações e recarregar a versão guardada?')) return;
     run(async () => { await readVersions(); status('Versão guardada recarregada.'); });
   };
+  el('cqPublish').onclick = () => {
+    if (!ready || !latest || dirty) return status('Guarde as alterações antes de publicar no portal.');
+    const amount = new Intl.NumberFormat('pt-PT',{style:'currency',currency:'EUR'}).format(latest.snapshot.total);
+    if (!window.confirm(`Publicar a versão ${latest.version} no portal do cliente, no total de ${amount} (IVA incluído)?`)) return;
+    run(async () => {
+      await api(`/api/repairs/${currentId}/quotes/${latest.id}/publish`, {method:'POST',body:JSON.stringify({})});
+      status('Versão publicada no portal do cliente. A decisão pode ser registada pelo cliente no portal.');
+    });
+  };
   el('cqPdf').onclick = () => {
     if (!ready || !latest || dirty) return status('Guarde as alterações antes de abrir o PDF.');
     run(async () => {
