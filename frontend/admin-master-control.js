@@ -236,21 +236,32 @@ function statusClass(value, type = 'normal') {
   return '';
 }
 
+// Fixed vector artwork keeps operational indicators readable without emoji fonts.
+const metricIcons = Object.freeze({
+  alert: '<path d="M12 3 2 21h20L12 3Z"/><path d="M12 9v5m0 3h.01"/>',
+  location: '<path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/>',
+  technician: '<circle cx="9" cy="7" r="3"/><path d="M3 21v-3a6 6 0 0 1 8-5.65M16 3a4 4 0 0 0 0 7l-4 8 3 2 4-8a4 4 0 0 0 3-6l-3 3-2-2 2-3"/>',
+  payment: '<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20m-16 5h4"/>'
+});
+function metricIcon(name) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${metricIcons[name] || ''}</svg>`;
+}
+
 function renderMetrics(counts = {}) {
   const criticalAlerts = number(counts.repairsOpen) + number(counts.notificationsUnread);
   const techniciansInField = number(counts.techniciansActive || counts.techniciansOnField || counts.technicians);
   const lowStock = number(counts.productsLowStock || counts.stockLow || counts.inventoryLow);
   const items = [
-    { icon: '🚨', label: 'Críticos', value: criticalAlerts, hint: 'ações imediatas', tone: 'bad', href: '/admin-alerts?priority=critical' },
-    { icon: '📍', label: 'Visitas hoje', value: counts.visitsPlanned, hint: 'planeadas no dia', tone: 'warn', href: '/admin-rounds?date=today' },
-    { icon: '👨‍🔧', label: 'Técnicos ativos', value: techniciansInField, hint: 'em operação no terreno', tone: 'ok', href: '/admin-technicians?status=active' },
-    { icon: '💶', label: 'Pendências', value: counts.invoicesOpen, hint: 'financeiro por fechar', tone: 'warn', href: '/invoices?status=pending' }
+    { icon: 'alert', label: 'Críticos', value: criticalAlerts, hint: 'ações imediatas', tone: 'bad', href: '/admin-alerts?priority=critical' },
+    { icon: 'location', label: 'Visitas hoje', value: counts.visitsPlanned, hint: 'planeadas no dia', tone: 'warn', href: '/admin-rounds?date=today' },
+    { icon: 'technician', label: 'Técnicos ativos', value: techniciansInField, hint: 'em operação no terreno', tone: 'ok', href: '/admin-technicians?status=active' },
+    { icon: 'payment', label: 'Pendências', value: counts.invoicesOpen, hint: 'financeiro por fechar', tone: 'warn', href: '/invoices?status=pending' }
   ];
 
   $('#metrics').innerHTML = items.map((item) => `
     <a class="card metric-card ${statusClass(item.value, item.tone)}" href="${esc(item.href)}" aria-label="Abrir ${esc(item.label)}" title="Abrir ${esc(item.label)}">
       <div class="metric-top">
-        <div class="metric-icon">${item.icon}</div>
+        <div class="metric-icon" aria-hidden="true">${metricIcon(item.icon)}</div>
         <span class="pill">${esc(item.label)}</span>
       </div>
       <div class="metric-value">${number(item.value)}</div>
