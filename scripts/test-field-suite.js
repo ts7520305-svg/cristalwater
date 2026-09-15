@@ -25,6 +25,7 @@ const scripts=[
  'test-repair-os-operational.js','test-system-interconnections.js','test-real-month-flow-api.js','test-field-preflight.js','test-field-backup.js','test-production-runtime-health.js','test-field-gps-flow.js','test-field-two-year-api.js','test-field-billing-automation.js','test-field-commercial-quotes.js','test-field-client-rates.js','test-field-retention.js','test-field-quote-portal.js','test-field-resilience.js','test-field-equipment-maintenance.js','test-field-equipment-flow.js','test-field-equipment-reminders.js','test-field-chemical-options.js','test-field-inventory-count-flow.js','test-field-visit-briefing.js','test-field-service-reminders.js','test-field-reminder-lifecycle.js','test-field-alert-visibility.js','test-field-alert-resolution.js','test-field-alert-billing.js','test-field-draft-payments.js','test-field-draft-visibility.js','test-invoice-draft-classification-browser.js','test-field-payment-retry.js','test-field-payment-retry-ui.js','test-field-client-receipts.js','test-field-client-receipts-ui.js','test-field-credit-allocation.js','test-field-monthly-credit.js'
 ];
 scripts.push('test-field-surplus-ledger.js');
+scripts.push('test-field-credit-adjustment.js');
 function run(script){return new Promise(resolve=>{
  const output=fs.createWriteStream(path.join(evidence,script+'.log'));
  const child=spawn(process.execPath,[path.join(__dirname,script)],{cwd:root,env:process.env,stdio:['ignore','pipe','pipe']});

@@ -1,4 +1,4 @@
-const { prisma } = require("../prismaClient");
+const BillingCreditBusiness = require('../business/finance/BillingCreditBusiness');
 const MonthlyBillingBusiness = require('../business/finance/MonthlyBillingBusiness');
 
 async function generateMonthly(req, res) {
@@ -10,34 +10,16 @@ async function generateMonthly(req, res) {
 }
 
 async function addCredit(req, res) {
-
-  try {
-
-    const clientId = Number(req.params.id);
-    const amount = Number(req.body.amount);
-
-    if (!amount || amount <= 0) {
-      return res.status(400).json({ ok: false });
-    }
-
-    const client = await prisma.client.update({
-      where: { id: clientId },
-      data: {
-        creditBalance: {
-          increment: amount
-        }
-      }
-    });
-
-    res.json({ ok: true, client });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ ok: false });
-  }
+  try { return res.json(await BillingCreditBusiness.adjust(req.params.id, req.body || {}, req.user)); }
+  catch (error) { return res.status(error.status || 500).json({ ok: false, error: error.status ? error.message : 'Não foi possível confirmar o ajuste de crédito.' }); }
+}
+async function listMonthly(req, res) {
+  try { return res.json(await BillingCreditBusiness.list(req.query.monthRef)); }
+  catch (error) { return res.status(error.status || 500).json({ ok: false, error: error.status ? error.message : 'Não foi possível consultar a faturação.' }); }
 }
 
 module.exports = {
   generateMonthly,
-  addCredit
+  addCredit,
+  listMonthly
 };

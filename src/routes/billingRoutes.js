@@ -21,24 +21,7 @@ router.post("/client/:id/credit", billingController.addCredit);
 // ==========================================================
 // LISTAR FATURAÇÃO
 // ==========================================================
-router.get("/monthly", async (req, res) => {
-  try {
-    const invoices = await prisma.invoice.findMany({
-      include: { client: true }
-    });
-
-    const totals = {
-      total: invoices.reduce((s,i)=>s+i.total,0),
-      paid: invoices.reduce((s,i)=>s+i.amountPaid,0),
-      open: invoices.reduce((s,i)=>s+i.amountOpen,0)
-    };
-
-    res.json({ ok:true, totals });
-
-  } catch {
-    res.json({ ok:false });
-  }
-});
+router.get("/monthly", billingController.listMonthly);
 
 // ==========================================================
 // EXTRAS NÃO FATURADOS
