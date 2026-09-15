@@ -13,6 +13,7 @@ const logger = {
 };
 
 function toNumber(value) {
+  if(value==null||typeof value==='boolean'||String(value).trim()==='')return null;
   const n = Number(value);
   return Number.isFinite(n) ? n : null;
 }
@@ -22,7 +23,7 @@ function roleOf(req) {
 }
 
 function ownUserId(req) {
-  return toNumber(req.user?.id ?? req.user?.technicianId);
+  return toNumber(req.user?.technicianId ?? req.user?.id);
 }
 
 function isAdmin(req) {
@@ -37,35 +38,19 @@ router.post(["/update", "/ping"], async (req, res) => {
   try {
     const payload = { ...(req.body || {}) };
 
-    if (isTechnician(req)) {
-      const me = ownUserId(req);
-      if (!me) {
-        return res.status(403).json({ ok: false, success: false, message: "Sessão técnica inválida" });
-      }
-
-      const requestedUserId = toNumber(payload.userId ?? payload.technicianId ?? payload.technicianDbId);
-      if (requestedUserId && requestedUserId !== me) {
-        return res.status(403).json({ ok: false, success: false, message: "Acesso apenas ao próprio GPS" });
-      }
-
-      payload.userId = me;
-      payload.technicianId = me;
-      payload.technicianDbId = me;
-    }
-
     if (!isTechnician(req) && !isAdmin(req)) {
       return res.status(403).json({ ok: false, success: false, message: "Sem permissão" });
     }
 
-    const result = await TechnicianGpsBusiness.processGpsUpdate(payload);
+    const result = await TechnicianGpsBusiness.processGpsUpdate(payload, req.user);
     return res.status(result.statusCode).json(result.body);
   } catch (err) {
     logger.error("Erro GPS update/ping", err);
-    return res.status(200).json({
+    return res.status(503).json({
       ok: false,
       success: false,
       degradedMode: true,
-      message: "Modo degradado ativo. Telemetria retida no dispositivo para retry.",
+      message: "Não foi possível confirmar o registo GPS. Tente novamente.",
     });
   }
 });
@@ -76,6 +61,7 @@ router.post("/validate-geofence", async (req, res) => {
       return res.status(403).json({ ok: false, success: false, message: "Sem permissão" });
     }
     const result = await TechnicianGpsBusiness.validateGeofence({
+      actor: req.user,
       visitId: toNumber(req.body.visitId),
       currentLatitude: toNumber(req.body.currentLatitude ?? req.body.latitude),
       currentLongitude: toNumber(req.body.currentLongitude ?? req.body.longitude),
@@ -83,11 +69,12 @@ router.post("/validate-geofence", async (req, res) => {
     return res.status(result.statusCode).json(result.body);
   } catch (err) {
     logger.error("Falha no motor de Geofencing", err);
-    return res.status(200).json({
-      success: true,
-      inside: true,
+    return res.status(503).json({
+      success: false,
+      inside: null,
       degradedMode: true,
-      message: "Serviço de validação espacial indisponível. Operação autorizada em modo degradado de emergência.",
+      requiresManualConfirmation: true,
+      message: "Validação GPS indisponível. Confirme o local no modo de campo e tente novamente.",
     });
   }
 });
@@ -134,6 +121,8 @@ router.get("/history/:id", async (req, res) => {
     const requestedLimit = toNumber(req.query?.limit);
     const data = await TechnicianGpsBusiness.getHistoryById(id, {
       limit: requestedLimit,
+      actor:req.user,
+      scope:req.query?.scope,
     });
     return res.json(data);
   } catch (err) {

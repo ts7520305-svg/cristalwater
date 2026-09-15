@@ -89,21 +89,21 @@
         <h2>Transferencia para viatura</h2>
         <form id="transferForm" class="items-grid">
           <div class="field-stack">
-            <label for="transferVehicleId">ID da viatura</label>
-            <input id="transferVehicleId" name="vehicleId" type="number" placeholder="ID da viatura" required>
+            <label for="transferVehicleId">Viatura</label>
+            <select id="transferVehicleId" name="vehicleId" required><option value="">A carregar viaturas…</option></select>
           </div>
           <div class="field-stack">
             <label for="transferProductName">Produto</label>
-            <input id="transferProductName" name="productName" placeholder="Produto" required>
+            <select id="transferProductName" name="productName" required><option value="">A carregar stock do armazém…</option></select><p id="transferAvailability" class="muted" aria-live="polite"></p>
           </div>
           <div class="row">
             <div class="field-stack">
               <label for="transferQuantity">Quantidade</label>
-              <input id="transferQuantity" name="quantity" type="number" step="0.01" placeholder="Quantidade" required>
+              <input id="transferQuantity" name="quantity" type="number" min="0.001" step="any" placeholder="Quantidade" required>
             </div>
             <div class="field-stack">
               <label for="transferUnit">Unidade</label>
-              <input id="transferUnit" name="unit" value="KG">
+              <input id="transferUnit" name="unit" value="KG" readonly>
             </div>
           </div>
           <button class="cw-v2-btn primary" type="submit">Transferir</button>
@@ -112,21 +112,21 @@
         <h2 class="section-gap">Consumo manual</h2>
         <form id="consumeForm" class="items-grid">
           <div class="field-stack">
-            <label for="consumeVehicleId">ID da viatura</label>
-            <input id="consumeVehicleId" name="vehicleId" type="number" placeholder="ID viatura" required>
+            <label for="consumeVehicleId">Viatura</label>
+            <select id="consumeVehicleId" name="vehicleId" required><option value="">Selecionar viatura</option></select>
           </div>
           <div class="field-stack">
             <label for="consumeProductName">Produto</label>
-            <input id="consumeProductName" name="productName" placeholder="Produto" required>
+            <select id="consumeProductName" name="productName" required><option value="">Selecionar produto da viatura</option></select>
           </div>
           <div class="row">
             <div class="field-stack">
               <label for="consumeQuantity">Quantidade</label>
-              <input id="consumeQuantity" name="quantity" type="number" step="0.01" placeholder="Quantidade" required>
+              <input id="consumeQuantity" name="quantity" type="number" min="0.001" step="any" placeholder="Quantidade" required>
             </div>
             <div class="field-stack">
               <label for="consumeUnit">Unidade</label>
-              <input id="consumeUnit" name="unit" value="KG">
+              <input id="consumeUnit" name="unit" readonly>
             </div>
           </div>
           <div class="field-stack">

@@ -9,6 +9,8 @@ describe("EquipmentStockOsBusiness", () => {
     global.io = { emit: vi.fn() };
 
     global.__CRISTAL_WATER_PRISMA__ = {
+      $queryRaw:vi.fn().mockResolvedValue([]),
+      vehicle:{findUnique:vi.fn().mockResolvedValue({id:2,active:true,archiveStatus:"ATIVO"})},
       poolEquipment: {
         findMany: vi.fn().mockResolvedValue([]),
         findUnique: vi.fn().mockResolvedValue({ id: 11, poolId: 10, type: "PUMP", notes: "" }),
@@ -25,6 +27,8 @@ describe("EquipmentStockOsBusiness", () => {
         findMany: vi.fn().mockResolvedValue([{ id: 20, scope: "VEHICLE", vehicleId: 2, productName: "CLORO", unit: "KG", quantity: 0 }]),
         findFirst: vi.fn().mockResolvedValue({ id: 20, scope: "VEHICLE", vehicleId: 2, productName: "CLORO", unit: "KG", quantity: 6 }),
         update: vi.fn().mockResolvedValue({ id: 20, quantity: 4 }),
+        updateMany:vi.fn().mockResolvedValue({count:1}),
+        findUnique:vi.fn().mockResolvedValue({id:20,quantity:4}),
         create: vi.fn().mockResolvedValue({ id: 21 }),
       },
       technicalHistory: {

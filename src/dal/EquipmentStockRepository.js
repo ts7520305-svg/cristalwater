@@ -128,13 +128,19 @@ async function findBalance(tx, key) {
   });
 }
 
+async function lockBalance(tx,payload={}){
+  const key=stockKey(payload),lockKey=JSON.stringify([key.scope,key.vehicleId,key.productName,key.unit]);
+  await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))::text`;
+  const balances=await tx.stockBalance.findMany({where:key,select:{id:true},take:2});
+  if(balances.length>1)throw new Error(`STOCK_BALANCE_AMBIGUOUS: ${key.productName} tem saldos duplicados em ${key.scope}.`);
+  return findBalance(tx,key);
+}
 async function adjustBalance(tx, payload = {}) {
   const key = stockKey(payload);
   const delta = asNumber(payload.delta, 0);
   const category = cleanString(payload.category || "CHEMICAL") || "CHEMICAL";
   const productId = payload.productId ? asNumber(payload.productId, 0) : null;
-
-  const existing = await findBalance(tx, key);
+  const existing=await lockBalance(tx,key);
   const current = asNumber(existing?.quantity, 0);
   const nextQuantity = current + delta;
 
@@ -143,14 +149,12 @@ async function adjustBalance(tx, payload = {}) {
   }
 
   if (existing) {
-    return tx.stockBalance.update({
-      where: { id: existing.id },
-      data: {
-        quantity: nextQuantity,
-        productId: productId || existing.productId,
-        category: category || existing.category,
-      },
+    const changed=await tx.stockBalance.updateMany({
+      where:{id:existing.id,...(delta<0?{quantity:{gte:-delta}}:{})},
+      data:{quantity:{increment:delta},productId:productId||existing.productId,category:category||existing.category}
     });
+    if(!changed.count)throw new Error(`STOCK_NEGATIVE_GUARD: ${key.productName} indisponivel em ${key.scope}.`);
+    return tx.stockBalance.findUnique({where:{id:existing.id}});
   }
 
   if (delta < 0) {
@@ -200,6 +204,7 @@ module.exports = {
   listBalances,
   listMovements,
   adjustBalance,
+  lockBalance,
   createMovement,
   createAuditTrail,
   createNotification,

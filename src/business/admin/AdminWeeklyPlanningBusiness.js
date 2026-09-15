@@ -34,7 +34,7 @@ function normalizeRound(round) {
   return {
     id: round.id,
     name: round.name,
-    dayOfWeek: round.dayOfWeek,
+    dayOfWeek: round.dayOfWeek,recurrence:round.recurrence||'WEEKLY',dayOfMonth:round.dayOfMonth,startsOn:round.startsOn,endsOn:round.endsOn,
     active: round.active,
     technicians: (round.technicians || []).map((item) => ({
       id: item.technician?.id || item.technicianId,
@@ -104,7 +104,7 @@ async function getWeeklyPlan(query = {}) {
     currentDate.setDate(weekStart.getDate() + index);
 
     const dayRounds = rounds
-      .filter((round) => Number(round.dayOfWeek) === index)
+      .filter((round) => require('../../services/roundScheduleService').matches(round,currentDate))
       .map(normalizeRound);
 
     const dayVisits = visits

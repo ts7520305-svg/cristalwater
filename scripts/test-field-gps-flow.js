@@ -1,0 +1,63 @@
+const assert=require('node:assert/strict');
+require('../src/loadEnv')();
+if(process.env.NODE_ENV!=='test'||process.env.QA_MODE!=='true'||process.env.QA_ENVIRONMENT_SAFE!=='true')throw Error('Isolated QA environment required');
+const {prisma}=require('../src/prismaClient'),jwt=require('jsonwebtoken'),{getJwtSecret}=require('../src/utils/jwtSecret');
+const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';
+const token=user=>jwt.sign(user,getJwtSecret(),{expiresIn:'1h'});
+async function call(url,auth,body){const response=await fetch(base+url,{method:body?'POST':'GET',headers:{Authorization:`Bearer ${auth}`,'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});return {status:response.status,body:await response.json()};}
+(async()=>{
+ const stamp=Date.now(),now=new Date(),future=new Date(now);future.setDate(future.getDate()+1);
+ const tech=await prisma.technician.create({data:{id:710001,name:'GPS field A',active:true}}),other=await prisma.technician.create({data:{name:'GPS field B',active:true}});
+ const collision=await prisma.user.create({data:{id:tech.id,name:'Unrelated account',email:`collision-${stamp}@qa.test`,password:'qa-no-login',role:'ADMIN',active:true}});
+ const original=await prisma.technicianLocation.create({data:{userId:collision.id,latitude:40,longitude:-9}});
+ const auth=token({id:tech.id,technicianId:tech.id,role:'TECHNICIAN'});
+ const client=await prisma.client.create({data:{name:'GPS customer QA',active:true,arrivalAllowed:true,arrivalNotify:true}});
+ const pool=await prisma.pool.create({data:{name:'Assigned destination',clientId:client.id,active:true,latitude:37,longitude:-8}});
+ const neighbor=await prisma.pool.create({data:{name:'Other round nearby',clientId:client.id,active:true,latitude:37.0001,longitude:-8}});
+ const visit=await prisma.serviceVisit.create({data:{poolId:pool.id,clientId:client.id,technicianId:tech.id,status:'PLANNED',date:now,plannedDate:now}});
+ await prisma.serviceVisit.create({data:{poolId:neighbor.id,clientId:client.id,technicianId:other.id,status:'PLANNED',date:now,plannedDate:now}});
+ await prisma.serviceVisit.create({data:{poolId:neighbor.id,clientId:client.id,technicianId:tech.id,status:'PLANNED',date:future,plannedDate:future}});
+ const recordedAt=new Date().toISOString(),body={technicianId:tech.id,latitude:37,longitude:-8,accuracy:8,recordedAt};
+ const replies=await Promise.all([call('/api/gps/update',auth,body),call('/api/gps/update',auth,body)]);replies.forEach(r=>assert.equal(r.status,200,JSON.stringify(r.body)));
+ assert.equal((await prisma.technicianLocation.findUnique({where:{id:original.id}})).latitude,40);
+ const saved=await prisma.technicianLocation.findFirst({where:{technicianId:tech.id}});assert(saved);assert.equal(saved.userId,null);
+ assert.equal(await prisma.technicianTrack.count({where:{technicianId:tech.id}}),1);
+ const notices=await prisma.notification.findMany({where:{eventType:'ARRIVAL_ALERT',clientId:client.id}});assert.equal(notices.length,1);assert.equal(notices[0].metadata.visitId,visit.id);assert.equal(notices[0].role,'ADMIN');assert.equal(notices[0].metadata.arrivalConfirmed,false);
+ assert.equal((await prisma.serviceVisit.findUnique({where:{id:visit.id}})).startAt,null);
+ console.log('PASS colliding account IDs remain separate; simultaneous GPS creates one track and only the assigned proximity notice');
+ for(const age of [60000,600000]){const r=await call('/api/gps/update',auth,{...body,latitude:38,recordedAt:new Date(Date.parse(recordedAt)-age).toISOString()});assert.equal(r.status,200);assert.equal(r.body.ignored,true);}
+ assert.equal((await prisma.technicianLocation.findUnique({where:{id:saved.id}})).latitude,37);
+ assert.equal((await call('/api/gps/update',auth,{...body,technicianId:other.id})).status,403);
+ const history=await call(`/api/gps/history/${tech.id}`,auth);assert.equal(history.status,200);assert(history.body.every(row=>row.technicianId===tech.id));assert.equal(history.body.length,1);
+ console.log('PASS old offline readings cannot overwrite current location and GPS history uses the technician identity');
+ const adminAuth=token({id:collision.id,role:'ADMIN'}),transfer={visitIds:[visit.id],technicianId:other.id,reason:'Substituição de técnico durante a ronda'};
+ const preview=await call('/api/rounds/transfer-visits',adminAuth,{...transfer,preview:true});assert.equal(preview.status,200,JSON.stringify(preview.body));
+ const moved=await call('/api/rounds/transfer-visits',adminAuth,{...transfer,expected:preview.body.visits,requestId:require('crypto').randomUUID()});assert.equal(moved.status,200,JSON.stringify(moved.body));
+ await call('/api/gps/update',auth,{...body,recordedAt:new Date(Date.now()+1000).toISOString()});
+ assert.equal(await prisma.notification.count({where:{eventType:'ARRIVAL_ALERT',clientId:client.id}}),1);
+ const otherAuth=token({id:other.id,technicianId:other.id,role:'TECHNICIAN'});
+ const next=await call('/api/gps/update',otherAuth,{...body,technicianId:other.id,recordedAt:new Date().toISOString()});assert.equal(next.status,200);
+ const reassignedNotices=await prisma.notification.findMany({where:{eventType:'ARRIVAL_ALERT',metadata:{path:['visitId'],equals:visit.id}}});assert.equal(reassignedNotices.length,2);assert(reassignedNotices.some(row=>row.metadata.technicianId===other.id));
+ await prisma.client.update({where:{id:client.id},data:{status:'PAUSED'}});
+ await prisma.serviceVisit.create({data:{poolId:pool.id,clientId:client.id,technicianId:other.id,status:'PLANNED',date:now,plannedDate:now}});
+ const before=await prisma.notification.count({where:{eventType:'ARRIVAL_ALERT',clientId:client.id}});
+ await call('/api/gps/update',otherAuth,{...body,technicianId:other.id,recordedAt:new Date(Date.now()+2000).toISOString()});
+ assert.equal(await prisma.notification.count({where:{eventType:'ARRIVAL_ALERT',clientId:client.id}}),before);
+ console.log('PASS actual visit handover moves proximity responsibility; paused clients receive no new proximity notices');
+
+ const email=`linked-${stamp}@qa.test`;
+ const linkedTech=await prisma.technician.create({data:{name:'Linked technician',email,active:true}});
+ const user=await prisma.user.create({data:{id:710010,name:'Linked user',email,password:'qa-no-login',role:'TECHNICIAN',active:true}});
+ assert.notEqual(user.id,linkedTech.id);
+ const linkedAuth=token({id:user.id,userId:user.id,technicianId:linkedTech.id,principalType:'USER',role:'TECHNICIAN'});
+ const linked=await call('/api/gps/update',linkedAuth,{technicianId:linkedTech.id,latitude:37.2,longitude:-8.2,accuracy:10});assert.equal(linked.status,200,JSON.stringify(linked.body));
+ const location=await prisma.technicianLocation.findFirst({where:{technicianId:linkedTech.id}});assert.equal(location.userId,user.id);
+ assert.equal((await call(`/api/gps/history/${linkedTech.id}`,linkedAuth)).status,200);
+ console.log('PASS linked login with distinct user/technician IDs can send and consult its own GPS');
+ const legacy=await call('/api/gps/update',adminAuth,{userId:user.id,latitude:37.3,longitude:-8.3,recordedAt:new Date(Date.now()+1000).toISOString()});assert.equal(legacy.status,200,JSON.stringify(legacy.body));
+ const linkedSaved=await prisma.technicianLocation.findFirst({where:{technicianId:linkedTech.id}});assert.equal(linkedSaved.userId,user.id);assert.equal(linkedSaved.latitude,37.3);
+ assert.equal((await call('/api/gps/update',adminAuth,{userId:collision.id,latitude:37,longitude:-8})).status,409);
+ assert.equal((await prisma.technicianLocation.findUnique({where:{id:original.id}})).latitude,40);
+ console.log('PASS legacy administrative GPS resolves verified account links and rejects ambiguous colliding identities');
+
+})().catch(error=>{console.error(error);process.exitCode=1;}).finally(()=>prisma.$disconnect());

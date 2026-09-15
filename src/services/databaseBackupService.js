@@ -1,6 +1,9 @@
 const fs = require("fs");
 const path = require("path");
-const { execFileSync } = require("child_process");
+const { execFile } = require("child_process");
+const { promisify } = require("util");
+const { randomUUID } = require("crypto");
+const execute = promisify(execFile);
 const { Prisma, PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient({ log: ["warn", "error"] });
@@ -31,7 +34,7 @@ function normalizeDatabaseUrl(databaseUrl) {
   }
 }
 
-function runPgDump(databaseUrl, outFile) {
+async function runPgDump(databaseUrl, outFile) {
   const candidates = [
     process.env.PG_DUMP_PATH,
     "C:\\Program Files\\PostgreSQL\\16\\bin\\pg_dump.exe",
@@ -42,13 +45,20 @@ function runPgDump(databaseUrl, outFile) {
   const pgDumpUrl = normalizeDatabaseUrl(databaseUrl);
   for (const command of candidates) {
     try {
-      execFileSync(command, ["--no-owner", "--no-privileges", "--file", outFile, pgDumpUrl], {
-        stdio: "pipe",
+      const temporary = `${outFile}.partial`;
+      fs.writeFileSync(temporary, "", { mode: 0o600 });
+      await execute(command, ["--no-owner", "--no-privileges", "--file", temporary], {
+        env: { ...process.env, PGDATABASE: pgDumpUrl },
         windowsHide: true,
+        timeout: 120000,
+        maxBuffer: 4 * 1024 * 1024,
       });
+      if (!fs.statSync(temporary).size) throw new Error("Backup SQL vazio");
+      fs.renameSync(temporary, outFile);
       return { ok: true, file: outFile, type: "sql", command };
     } catch (_) {
-      // Try next candidate.
+      fs.rmSync(`${outFile}.partial`, { force: true });
+      // Only completed files are listed as backups. Try the next candidate.
     }
   }
 
@@ -61,18 +71,26 @@ async function runJsonFallback(outFile) {
     .map((model) => model.name)
     .sort((a, b) => a.localeCompare(b));
 
-  for (const modelName of models) {
-    const delegateName = modelName.charAt(0).toLowerCase() + modelName.slice(1);
-    const delegate = prisma[delegateName];
-    if (!delegate?.findMany) continue;
-    data[modelName] = await delegate.findMany();
-  }
+  await prisma.$transaction(async tx => {
+    for (const modelName of models) {
+      const delegateName = modelName.charAt(0).toLowerCase() + modelName.slice(1);
+      const delegate = tx[delegateName];
+      if (!delegate?.findMany) throw new Error("Modelo indisponível para exportação");
+      data[modelName] = await delegate.findMany();
+    }
+  }, { isolationLevel: "RepeatableRead", timeout: 120000 });
 
-  fs.writeFileSync(outFile, JSON.stringify({
+  const temporary = `${outFile}.partial`;
+  try {
+    fs.writeFileSync(temporary, JSON.stringify({
     createdAt: new Date().toISOString(),
     format: "prisma-json-fallback",
     data,
-  }, null, 2));
+    }, (_key, value) => typeof value === "bigint" ? value.toString() : value, 2), { mode: 0o600 });
+    fs.renameSync(temporary, outFile);
+  } finally {
+    fs.rmSync(temporary, { force: true });
+  }
 
   return { ok: true, file: outFile, type: "json-fallback" };
 }
@@ -103,11 +121,11 @@ async function createDatabaseBackup() {
   if (!databaseUrl) throw new Error("DATABASE_URL em falta.");
 
   const dir = ensureBackupDir();
-  const stamp = timestamp();
+  const stamp = `${timestamp()}-${randomUUID()}`;
   const sqlFile = path.join(dir, `cristalwater-db-${stamp}.sql`);
   const jsonFile = path.join(dir, `cristalwater-db-${stamp}.json`);
 
-  const backup = runPgDump(databaseUrl, sqlFile);
+  const backup = await runPgDump(databaseUrl, sqlFile);
   const result = backup.ok ? backup : await runJsonFallback(jsonFile);
   return {
     ok: true,

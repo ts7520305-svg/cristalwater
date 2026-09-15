@@ -9,13 +9,7 @@
     if (loginError) loginError.textContent = message || "Erro de autenticação.";
   }
 
-  function persistSession(token, user) {
-    localStorage.setItem("token", token);
-    localStorage.setItem("adminToken", token);
-    localStorage.setItem("cristalwater_jwt", token);
-    localStorage.setItem("user", JSON.stringify(user));
-    localStorage.setItem("cristalwater_user", JSON.stringify(user));
-  }
+  function persistSession(token,user){return window.CristalAuth.persistSession(token,user);}
 
   window.login = async function login() {
     const pin = String(pinInput?.value || "").trim();
@@ -39,7 +33,7 @@
         return;
       }
 
-      persistSession(data.token, data.user);
+      await persistSession(data.token, data.user);
 
       if (welcome) welcome.textContent = `Bem-vindo ${data.user.name || "Técnico"}`;
       if (loginBox) loginBox.style.display = "none";
@@ -51,8 +45,8 @@
     }
   };
 
-  window.logout = function logout() {
-    ["token", "adminToken", "cristalwater_jwt", "user", "cristalwater_user"].forEach((key) => localStorage.removeItem(key));
-    window.location.href = "/technician-login";
+  window.logout = async function logout() {
+    await window.CristalAuth.clearSession();
+    if(!window.CristalAuth.getToken())window.location.href = "/technician-login";
   };
 })();

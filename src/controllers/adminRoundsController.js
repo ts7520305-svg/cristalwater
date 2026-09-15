@@ -41,6 +41,7 @@ async function listRounds(req, res) {
   try {
     const rounds = await prisma.round.findMany({
       include: {
+        assignments: {include:{technician:{select:{id:true,name:true}}},orderBy:{id:'desc'}},
         technicians: { include: { technician: true } },
         pools: {
           orderBy: { order: "asc" },
@@ -50,7 +51,7 @@ async function listRounds(req, res) {
       orderBy: [{ dayOfWeek: "asc" }, { name: "asc" }],
     });
 
-    res.json({ ok: true, rounds });
+    res.json({ ok: true, rounds:rounds.map(round=>({...round,nextOccurrence:require('../services/roundScheduleService').nextDate(round,new Date())})) });
   } catch (err) {
     console.error(err);
     res.status(500).json({ ok: false, message: "Erro ao listar rondas" });
@@ -59,7 +60,7 @@ async function listRounds(req, res) {
 
 async function getWeeklyPlan(req, res) {
   try {
-    const plan = await AdminWeeklyPlanningBusiness.getWeeklyPlan(req.query || {});
+    const plan = await require('../business/admin/RoundAssignmentBusiness').applyWeeklyAssignments(await AdminWeeklyPlanningBusiness.getWeeklyPlan(req.query || {}));
     res.json({ ok: true, plan });
   } catch (err) {
     console.error(err);
@@ -78,13 +79,13 @@ async function createRound(req, res) {
 
   try {
     const round = await prisma.round.create({
-      data: { name, dayOfWeek },
+      data: { name, ...require('../services/roundScheduleService').parse(req.body) },
     });
 
     res.json({ ok: true, round });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ ok: false, message: "Erro ao criar ronda" });
+    res.status(err.status||500).json({ ok: false, message: err.status?err.message:"Erro ao criar ronda" });
   }
 }
 
@@ -102,11 +103,12 @@ async function updateRound(req, res) {
   }
 
   try {
-    const round = await prisma.round.update({ where: { id }, data });
+    const round=await require('../services/roundScheduleService').update(prisma,id,req.body,data);
+    if(!round)return res.status(404).json({ok:false,message:'Ronda não encontrada'});
     res.json({ ok: true, round });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ ok: false, message: "Erro ao atualizar ronda" });
+    res.status(err.status||500).json({ ok: false, message: err.status?err.message:"Erro ao atualizar ronda" });
   }
 }
 
@@ -125,6 +127,10 @@ async function deleteRound(req, res) {
 
 // ATRIBUIR TÉCNICO
 async function assignTechnician(req, res) {
+  if(req.body.period){
+    try{return res.json(await require('../business/admin/RoundAssignmentBusiness').assign(req.params.id,req.body,req.user));}
+    catch(error){return res.status(error.status||500).json({ok:false,message:error.status?error.message:'Erro ao atribuir ronda'});}
+  }
   const roundId = Number(req.params.id);
   const technicianId = Number(req.body.technicianId);
 
@@ -233,11 +239,13 @@ async function movePoolToRound(req, res) {
             visit.internalNotes || "",
             `[Rondas] Piscina movida da ronda ${sourceRoundId || "-"} para ${targetRoundId}.`,
           ].filter(Boolean).join("\n");
+          const nextDate=require('../services/roundScheduleService').nextDate(targetRound,startOfWeek(baseDate),order);
+          if(!nextDate)throw Object.assign(new Error('A ronda de destino não tem próxima ocorrência no período definido'),{status:409});
           await tx.serviceVisit.update({
             where: { id: visit.id },
             data: {
               roundId: targetRoundId,
-              plannedDate: dateForRoundDay(baseDate, targetRound.dayOfWeek, order),
+              plannedDate: nextDate,
               internalNotes: movementNote,
             },
           });
@@ -283,7 +291,16 @@ async function updatePoolOrder(req, res) {
   }
 }
 
+async function coverage(req,res){
+  try{return res.json(await require('../business/admin/VisitCoverageBusiness').get(req.user));}
+  catch(error){return res.status(error.statusCode||500).json({ok:false,message:error.statusCode?error.message:'Não foi possível verificar as visitas'});}
+}
+async function transferVisits(req,res){
+  try{return res.json(await require('../business/admin/VisitCoverageBusiness').transfer(req.user,req.body));}
+  catch(error){return res.status(error.statusCode||500).json({ok:false,message:error.statusCode?error.message:'Não foi possível redistribuir as visitas'});}
+}
 module.exports = {
+  coverage,transferVisits,
   listRounds,
   getWeeklyPlan,
   createRound,

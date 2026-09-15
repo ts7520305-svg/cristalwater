@@ -54,7 +54,35 @@
     }
     banner.hidden = false;
   }
+  let pushSessionModule;
+  function syncPushSession(){
+    if(!pushSessionModule)pushSessionModule=import('/cw-push-session.js').then(()=>window.CWPushSession).catch(()=>null);
+    return pushSessionModule.then(service=>service?.sync(()=>getToken()?pushOwner(parseUser()):null)).catch(()=>null);
+  }
+  function pushOwner(user){
+    const role=String(user?.role||'').toUpperCase();
+    const id=Number(['TECHNICIAN','TEAM_LEADER'].includes(role)?user.technicianId||user.id:role==='CLIENT'?user.clientId||user.id:user.userId||user.id);
+    return role&&id?`${role}:${id}`:'';
+  }
+  async function retirePushSubscription(token, options={}){
+    if(!token)return;
+    try{
+      const registration=options.endpoint?null:await navigator.serviceWorker?.getRegistration('/');
+      const subscription=registration?await registration.pushManager?.getSubscription():null;
+      const endpoint=options.endpoint||subscription?.endpoint;
+      const jobs=[];
+      // Use the captured credential, without invoking expiry handling for the new session.
+      if(endpoint&&nativeFetch)jobs.push(nativeFetch(apiUrl('/api/push/subscriptions'),{method:'DELETE',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({endpoint}),signal:AbortSignal.timeout(4000)}).catch(()=>null));
+      if(subscription&&(!getToken()||getToken()===token))jobs.push(Promise.resolve(subscription.unsubscribe()).catch(()=>null));
+      if(registration?.getNotifications){
+        const shown=await registration.getNotifications();
+        for(const notification of shown){if(!getToken()||notification.data?.owner===options.owner||!notification.data?.owner)notification.close();}
+      }
+      await Promise.allSettled(jobs);
+    }catch(_){/* Session data is still removed; transport cleanup can fail offline. */}
+  }
   function persistSession(token, user){
+    const previousToken=getToken(),previousOwner=pushOwner(parseUser());
     if(token){
       localStorage.setItem(TOKEN_KEY, token);
       localStorage.setItem(LEGACY_TOKEN_KEY, token); // temporary compatibility for legacy modules
@@ -69,11 +97,15 @@
       expiredSessionToken = ''; document.getElementById('cwSessionExpired')?.remove();
     }
     window.CristalAuthState = { token: getToken(), user: parseUser(), hydratedAt: Date.now() };
+    if(previousToken&&previousOwner&&previousOwner!==pushOwner(parseUser()))void retirePushSubscription(previousToken,{owner:previousOwner});
+    return syncPushSession();
   }
 
   function clearSession(){
+    const previousToken=getToken(),owner=pushOwner(parseUser());
     [TOKEN_KEY, USER_KEY, LEGACY_TOKEN_KEY, LEGACY_USER_KEY, ADMIN_TOKEN_KEY].forEach(k => localStorage.removeItem(k));
     window.CristalAuthState = { token: '', user: null, hydratedAt: Date.now() };
+    return Promise.allSettled([syncPushSession(),retirePushSubscription(previousToken,{owner})]);
   }
 
   function hydrate(){
@@ -81,12 +113,13 @@
     const user = parseUser();
     if(validToken(token)){ persistSession(token, user); return true; }
     window.CristalAuthState = { token: '', user: null, hydratedAt: Date.now() };
+    void syncPushSession();
     return false;
   }
 
-  function logout(){
-    clearSession();
-    if(path() !== '/login') window.location.replace('/login');
+  async function logout(){
+    await clearSession();
+    if(!getToken()&&path() !== '/login') window.location.replace('/login');
   }
 
   function requireAuth(role){
@@ -149,7 +182,7 @@
     hydrate();
   }, true);
 
-  window.CristalAuth = { TOKEN_KEY, USER_KEY, API_ORIGIN_KEY, getToken, parseUser, persistSession, clearSession, logout, hydrate, requireAuth, toast, apiOrigin, apiUrl, isSessionExpired };
+  window.CristalAuth = { TOKEN_KEY, USER_KEY, API_ORIGIN_KEY, getToken, parseUser, persistSession, clearSession, logout, hydrate, requireAuth, toast, apiOrigin, apiUrl, isSessionExpired, retirePushSubscription };
   function wrapSocketIO(factory) {
     if (typeof factory !== 'function' || factory.__cwAuth) return factory;
     const wrapped = function(uri, options) {

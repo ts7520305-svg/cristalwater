@@ -1,3 +1,4 @@
+const { activeFor } = require('./notificationScopeService');
 const fs = require("fs");
 const path = require("path");
 const { prisma } = require("../prismaClient");
@@ -96,9 +97,17 @@ function customerPermissions(client) {
   };
 }
 
+async function markCustomerNotificationRead(clientId, notificationId) {
+  const result=await prisma.notification.updateMany({
+    where:{...activeFor({role:'CLIENT',clientId}),id:notificationId},
+    data:{isRead:true,readAt:new Date()},
+  });
+  return result.count>0;
+}
+
 async function listCustomerNotifications(clientId) {
   const notifications = await prisma.notification.findMany({
-    where: { clientId, role: {in:['CLIENT','CUSTOMER']} },
+    where: activeFor({role:'CLIENT',clientId}),
     orderBy: { createdAt: "desc" },
     take: 100,
   });
@@ -360,6 +369,7 @@ module.exports = {
   listCustomerHistory,
   listCustomerMessages,
   listCustomerNotifications,
+  markCustomerNotificationRead,
   readDocumentManifest,
   resolveDocumentAccess,
   normalizeDocument,

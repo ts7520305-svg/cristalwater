@@ -311,6 +311,7 @@ model Technician {
   heldKeys             KeyAccess[]
   operationalReminders OperationalReminder[]
   roundTechnicians     RoundTechnician[]
+  roundAssignments     RoundAssignment[]
   services             Service[]
   serviceVisits        ServiceVisit[]
   tasks                Task[]
@@ -442,6 +443,10 @@ model ChemicalUsage {
 }
 
 model Round {
+  recurrence    String            @default("WEEKLY")
+  dayOfMonth    Int?
+  startsOn      DateTime?         @db.Date
+  endsOn        DateTime?         @db.Date
   id            Int               @id @default(autoincrement())
   name          String
   dayOfWeek     Int
@@ -450,6 +455,7 @@ model Round {
   updatedAt     DateTime          @updatedAt
   pools         RoundPool[]
   technicians   RoundTechnician[]
+  assignments   RoundAssignment[]
   serviceVisits ServiceVisit[]
 
   @@index([dayOfWeek])
@@ -465,6 +471,21 @@ model RoundTechnician {
 
   @@unique([roundId, technicianId])
   @@index([technicianId])
+}
+
+model RoundAssignment {
+  id           Int        @id @default(autoincrement())
+  roundId      Int
+  technicianId Int
+  startsAt     DateTime
+  endsBefore   DateTime?
+  reason       String
+  createdBy    String
+  createdAt    DateTime   @default(now())
+  round        Round      @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  technician   Technician @relation(fields: [technicianId], references: [id])
+
+  @@index([roundId, startsAt])
 }
 
 model RoundPool {

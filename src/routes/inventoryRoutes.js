@@ -9,7 +9,7 @@ router.use(auth('ADMIN'));
 const dest = resolveUploadSubdir('inventory');
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, dest),
-  filename: (req, file, cb) => cb(null, `${Date.now()}-${String(file.originalname || 'documento').replace(/[^a-zA-Z0-9_.-]/g, '_')}`)
+  filename: (req, file, cb) => cb(null, `${require('crypto').randomUUID()}-${String(file.originalname || 'documento').replace(/[^a-zA-Z0-9_.-]/g, '_')}`)
 });
 const upload = multer({ storage, limits: { fileSize: 20 * 1024 * 1024 } });
 

@@ -1,8 +1,10 @@
 /* Public application shell only. Operational writes are owned by the field outbox. */
-const CACHE = 'cristalwater-field-20260914-v9';
-const APP_SHELL = ['/technician-field-mode','/technician-login','/cw-auth.js','/technician-auth-guard.js','/cw-field-offline.js','/cw-pump-reminders.js','/cw-field-recovery.js','/cw-field-photos.js','/cw-browser-push.js','/technician-field-mode.js','/cw-ui-feedback.js','/cw-auth-download.js','/crystal-os-v2-shell.js','/crystal-os-v2-nav.js','/cw-ui-kit.css','/cw-field-professional.css','/ui/foundation.css','/ui/core/navigation-context.js','/ui/design-system.js','/ui/state-adapter-v2.js'];
+importScripts('/cw-push-session.js');
+const CACHE = 'cristalwater-field-20260914-v27';
+const APP_SHELL = ['/technician-field-mode','/technician-login','/cw-auth.js','/technician-auth-guard.js','/cw-field-offline.js','/cw-pump-reminders.js','/cw-field-recovery.js','/cw-field-photos.js','/cw-browser-push.js','/cw-push-session.js','/technician-field-mode.js','/cw-ui-feedback.js','/cw-auth-download.js','/crystal-os-v2-shell.js','/crystal-os-v2-nav.js','/cw-ui-kit.css','/cw-field-professional.css','/ui/foundation.css','/ui/core/navigation-context.js','/ui/design-system.js','/ui/state-adapter-v2.js'];
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE).then(cache=>Promise.all(APP_SHELL.map(url=>cache.add(url).catch(()=>null)))).then(()=>self.skipWaiting()));
+  APP_SHELL.push('/cw-field-day-review.js', '/crystal-os-v2-phase2-adapter.css', '/ui/design-system.css');
+  event.waitUntil(caches.open(CACHE).then(cache=>Promise.all(APP_SHELL.map(url=>cache.add(url)))).then(()=>self.skipWaiting()));
 });
 self.addEventListener('activate', event => {
   event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('cristalwater-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
@@ -11,22 +13,32 @@ self.addEventListener('fetch', event => {
   const request = event.request, url = new URL(request.url);
   if (url.origin !== self.location.origin || request.method !== 'GET' || url.pathname.startsWith('/api/') || url.pathname.startsWith('/uploads/')) return;
   event.respondWith((async()=>{
-    const cache = await caches.open(CACHE);
+    const cacheReady = caches.open(CACHE).catch(()=>null);
     try {
       const response = await fetch(request);
-      if (response.ok && !response.redirected) await cache.put(request, response.clone());
+      if (response.ok && !response.redirected) {
+        const copy = response.clone();
+        // Cache availability must never delay or replace a valid network response.
+        event.waitUntil(cacheReady.then(cache=>cache?.put(request, copy)).catch(()=>null));
+      }
       return response;
     } catch (_) {
-      const cached = await cache.match(request, {ignoreSearch:request.mode==='navigate'});
+      const cache = await cacheReady;
+      const cached = await cache?.match(request, {ignoreSearch:request.mode==='navigate'}).catch(()=>null);
       return cached || new Response('Página indisponível sem ligação. Abra previamente o modo de campo com rede.', {status:503,headers:{'Content-Type':'text/plain; charset=utf-8'}});
     }
   })());
 });
 
 self.addEventListener('push', event => {
-  let data={};try{data=event.data?.json()||{}}catch{}
-  const target=new URL(data.url||'/technician-field-mode',self.location.origin);
-  event.waitUntil(self.registration.showNotification(data.title||'Cristal Water',{body:data.body||'Tem um aviso operacional.',tag:data.tag||'cristalwater-alert',renotify:true,requireInteraction:true,data:{url:target.origin===self.location.origin?target.href:self.location.origin+'/technician-field-mode'}}));
+  event.waitUntil((async()=>{
+    let data={};try{data=event.data?.json()||{}}catch{}
+    const state=await self.CWPushSession.read(),message=self.CWPushSession.presentation(data,state);
+    if(!message)return;
+    let target;try{target=new URL(data.url||'/technician-field-mode',self.location.origin)}catch{target=new URL('/login',self.location.origin)}
+    const own=state.known&&state.owner===data.owner;
+    await self.registration.showNotification(message.title,{body:message.body,tag:data.tag||'cristalwater-alert',renotify:true,requireInteraction:true,data:{owner:typeof data.owner==='string'?data.owner:null,url:own&&target.origin===self.location.origin?target.href:self.location.origin+'/login'}});
+  })());
 });
 self.addEventListener('notificationclick',event=>{
   event.notification.close();

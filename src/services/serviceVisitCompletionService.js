@@ -179,7 +179,7 @@ function visitCompletionSummary(body, chemicals = []) {
 }
 
 const VISIT_TERMINAL_STATUSES = new Set(["DONE", "CLOSED", "CANCELLED", "CANCELED", "NOT_DONE", "FAILED"]);
-const VISIT_COMPLETABLE_STATUSES = new Set(["PLANNED", "IN_PROGRESS", "A_CAMINHO", "ON_ROUTE", "STARTED", "EM_EXECUCAO", "EM EXECUCAO"]);
+const VISIT_COMPLETABLE_STATUSES = new Set(["PLANNED", "INCOMPLETE", "IN_PROGRESS", "A_CAMINHO", "ON_ROUTE", "STARTED", "EM_EXECUCAO", "EM EXECUCAO"]);
 
 function normalizeVisitStatus(status) {
   return String(status || "").trim().toUpperCase();
@@ -359,7 +359,7 @@ async function completeServiceVisit(prisma, visitId, body = {}) {
   const completionRequestId = typeof body.clientRequestId === 'string' && /^[a-zA-Z0-9_-]{16,100}$/.test(body.clientRequestId) ? body.clientRequestId : null;
 
   const result = await prisma.$transaction(async (tx) => {
-    if (completionRequestId) await tx.$queryRaw`SELECT id FROM "ServiceVisit" WHERE id = ${id} FOR UPDATE`;
+    await tx.$queryRaw`SELECT id FROM "ServiceVisit" WHERE id = ${id} FOR UPDATE`;
     const currentVisit = await tx.serviceVisit.findUnique({
       where: { id },
       select: {
@@ -398,6 +398,12 @@ async function completeServiceVisit(prisma, visitId, body = {}) {
         "VISIT_INVALID_STATUS",
         `Nao e permitido concluir visita com estado ${currentStatus || "UNKNOWN"}.`
       );
+    }
+
+    if(currentStatus==='INCOMPLETE'){
+      const followups=await tx.operationalReminder.findMany({where:{sourceKey:{startsWith:`incomplete:${id}:`}}});
+      const returns=followups.map(row=>row.metadata?.returnPlan?.visitId).filter(Number.isSafeInteger);
+      if(returns.length&&await tx.serviceVisit.findFirst({where:{id:{in:returns},status:{notIn:['CANCELLED','CANCELED','SKIPPED','ARCHIVED']}}}))throw new VisitCompletionError(409,'RETURN_ALREADY_SCHEDULED','O escritório agendou um regresso. Conclua a visita de regresso ou confirme com o escritório.');
     }
 
     const actingTechnicianId = toPositiveIntValue(
@@ -541,6 +547,21 @@ async function completeServiceVisit(prisma, visitId, body = {}) {
       }).catch(() => null);
     }
 
+    await tx.operationalReminder.updateMany({where:{sourceKey:{startsWith:`incomplete:${visit.id}:`},isCompleted:false},data:{isCompleted:true}});
+    await tx.notification.updateMany({where:{eventType:'VISIT_INCOMPLETE',metadata:{path:['visitId'],equals:visit.id},status:'PENDING'},data:{status:'RESOLVED'}});
+    // A completed return also settles earlier impediments in the same return chain.
+    const reviewed=new Set();let resolvedVisits=[visit.id];
+    while(resolvedVisits.length){
+      resolvedVisits.forEach(value=>reviewed.add(value));
+      const returnFollowups=await tx.operationalReminder.findMany({where:{sourceKey:{startsWith:'incomplete:'},isCompleted:false,OR:resolvedVisits.map(value=>({metadata:{path:['returnPlan','visitId'],equals:value}}))}});
+      const ancestors=[];
+      for(const row of returnFollowups){
+        await tx.operationalReminder.update({where:{id:row.id},data:{isCompleted:true,metadata:{...row.metadata,resolvedByReturnVisitId:visit.id,resolvedAt:new Date().toISOString()}}});
+        await tx.notification.updateMany({where:{eventType:'VISIT_INCOMPLETE',metadata:{path:['reminderId'],equals:row.id},status:'PENDING'},data:{status:'RESOLVED'}});
+        const ancestor=row.metadata?.visitId;if(Number.isSafeInteger(ancestor)&&!reviewed.has(ancestor))ancestors.push(ancestor);
+      }
+      resolvedVisits=[...new Set(ancestors)];
+    }
     const adminNotification = await tx.notification.create({
       data: {
         type: "VISIT_DONE",

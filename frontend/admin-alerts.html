@@ -69,6 +69,13 @@
     .repair-hint{font-size:12px;color:var(--ds-text-muted)}
     .repair-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
     .repair-check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ds-text)}
+    #incompleteFollowups{min-width:0}#followupList{display:grid;gap:14px}
+    .followup-row{min-width:0;padding:16px;border:1px solid var(--ds-border);border-radius:14px;overflow-wrap:anywhere}
+    .followup-row h3{margin-top:0}.followup-form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .followup-form label{display:grid;gap:6px;min-width:0}.followup-form .full{grid-column:1/-1}
+    .followup-form input,.followup-form select,.followup-form textarea{box-sizing:border-box;width:100%;min-width:0;min-height:48px}
+    .followup-form button{min-height:48px;background:#12613f!important;color:#fff!important}
+    @media(max-width:700px){.followup-form{grid-template-columns:1fr}}
     @media(max-width:1100px){main.page{padding:14px}.metrics,.toolbar{grid-template-columns:1fr 1fr}.alerts-list > article{grid-template-columns:1fr}.alert-actions{justify-content:flex-start}}
     @media(max-width:700px){.metrics,.toolbar,.detail-row,.repair-form-grid{grid-template-columns:1fr}.page-head{flex-direction:column}}
   </style>
@@ -93,6 +100,13 @@
       </div>
     </div>
 
+    <section id="incompleteFollowups" class="card" data-cw-state-managed="manual" aria-labelledby="followupTitle">
+      <h2 id="followupTitle">Visitas por concluir — combinar regresso</h2>
+      <p>Confirme o acesso e o material com o técnico. O regresso mantém o histórico original e só resolve o aviso quando for concluído. Água aberta e bombas em manual mantêm o responsável até à passagem aceite.</p>
+      <button id="refreshFollowups" class="cw-v2-btn" type="button">Atualizar regressos</button>
+      <p id="followupStatus" role="status" aria-live="polite">A consultar visitas por concluir…</p>
+      <div id="shortagePreparation" aria-live="polite"></div><div id="followupList"></div>
+    </section>
     <section class="grid metrics">
       <div class="metric-card card"><strong id="alertsTotal">0</strong><span>Total visivel</span></div>
       <div class="metric-card card"><strong id="alertsCritical">0</strong><span>Criticos</span></div>
@@ -192,7 +206,7 @@
 
   <script src="/admin-auth-guard.js"></script>
   <script src="/cw-ui-feedback.js"></script>
-  <script src="/admin-alerts.js?v=22.6.9-alert-context"></script>
+  <script src="/admin-alerts.js?v=20260914-returns"></script>
   <script src="/cristal-help-data.js"></script>
   <script src="/cristal-assist.js"></script>
   <script src="/ui/core/navigation-context.js"></script>

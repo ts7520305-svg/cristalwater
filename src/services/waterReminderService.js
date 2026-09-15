@@ -114,29 +114,112 @@ async function list(user, kind = "WATER_OPEN") {
     prisma.operationalReminder.findMany({ where: { ...where, isCompleted: false }, orderBy: { dueDate: 'asc' } }),
     prisma.operationalReminder.findMany({ where: { ...where, isCompleted: true }, orderBy: { updatedAt: 'desc' }, take: 100 })
   ]);
-  return { ok: true, reminders: [...active, ...closed] };
+  const transferred = privileged(user) ? [] : await prisma.operationalReminder.findMany({where:{AND:[kind==='PUMP_MANUAL'?{sourceKey:{startsWith:'pump:'}}:{sourceKey:{startsWith:'water:'}}, {metadata:{path:['previousOwners'],array_contains:[techId(user)]}},{assignedToTechnicianId:{not:techId(user)}}]}});
+  return { ok: true, reminders: [...active, ...closed, ...transferred.map(row=>({...row,transferredAway:true}))] };
+}
+async function handoverTargets() {
+  return {ok:true,technicians:await prisma.technician.findMany({where:{active:true},select:{id:true,name:true},orderBy:{name:'asc'}})};
+}
+async function incomingHandovers(user) {
+  const reminders=await prisma.operationalReminder.findMany({where:{isCompleted:false,AND:[{metadata:{path:['handover','to'],equals:techId(user)}},{metadata:{path:['handover','status'],equals:'PENDING'}}]},orderBy:{dueDate:'asc'}});
+  return {ok:true,reminders};
+}
+async function handover(user, value, action, body = {}) {
+  const id=Number(value);
+  if(!Number.isSafeInteger(id)||id<=0)fail(404,'Lembrete não encontrado');
+  return prisma.$transaction(async tx=>{
+    await tx.$queryRaw`SELECT id FROM "OperationalReminder" WHERE id = ${id} FOR UPDATE`;
+    const current=await tx.operationalReminder.findUnique({where:{id}});
+    if(!isWater(current))fail(404,'Lembrete não encontrado');
+    const meta=current.metadata||{}, previous=meta.handover;
+    if(action==='request') {
+      authorize(user,current);
+      if(current.isCompleted)fail(409,'Lembrete já resolvido');
+      if(previous?.status==='PENDING')fail(409,'Já existe uma passagem por aceitar');
+      const to=Number(body.technicianId),reason=String(body.reason||'').trim();
+      if(!Number.isSafeInteger(to)||to<=0||to===current.assignedToTechnicianId||reason.length<3||reason.length>1000)fail(400,'Escolha outro técnico e indique o motivo (3–1000 caracteres)');
+      const target=await tx.technician.findUnique({where:{id:to},select:{active:true,name:true}});
+      if(!target?.active)fail(400,'Técnico indisponível');
+      const proposal={id:randomUUID(),from:current.assignedToTechnicianId,to,toName:target.name,reason,status:'PENDING',requestedAt:new Date().toISOString(),requestedBy:techId(user),requestedByRole:normalizeRole(user?.role)};
+      const reminder=await tx.operationalReminder.update({where:{id},data:{metadata:{...meta,handover:proposal}}});
+      await trace(tx,reminder,`HANDOVER_REQUESTED ${proposal.from} → ${to}: ${reason}`);
+      return {ok:true,reminder};
+    }
+    if(!previous||body.handoverId!==previous.id)fail(409,'Pedido alterado. Atualize a lista');
+    if(action==='accept') {
+      if(!['TECHNICIAN','TECNICO'].includes(normalizeRole(user?.role))||techId(user)!==previous.to)fail(403,'Só o técnico destinatário pode aceitar');
+      if(previous.status==='ACCEPTED'&&current.assignedToTechnicianId===techId(user))return {ok:true,reminder:current,idempotent:true};
+      if(current.isCompleted||previous.status!=='PENDING'||current.assignedToTechnicianId!==previous.from)fail(409,'A passagem já não está disponível');
+      const target=await tx.technician.findUnique({where:{id:previous.to},select:{active:true,name:true}});
+      if(!target?.active)fail(403,'Técnico inativo');
+      const reminder=await tx.operationalReminder.update({where:{id},data:{assignedToTechnicianId:previous.to,metadata:{...meta,previousOwners:[...new Set([...(meta.previousOwners||[]),previous.from])],technicianName:target.name,handover:{...previous,status:'ACCEPTED',acceptedAt:new Date().toISOString()}}}});
+      // Existing overdue delivery follows the newly accepted responsibility.
+      await tx.notification.updateMany({where:{eventType:`${kindFor(current)}_OVERDUE`,role:'TECHNICIAN',status:{in:['PENDING','SENT']},metadata:{path:['reminderId'],equals:id}},data:{status:'RESOLVED'}});
+      if(meta.alarmedAt)await notify(tx,reminder,`${kindFor(current)}_OVERDUE`,'TECHNICIAN');
+      await trace(tx,reminder,`HANDOVER_ACCEPTED ${previous.from} → ${previous.to}`);
+      return {ok:true,reminder};
+    }
+    if(action==='cancel') {
+      authorize(user,current);
+      if(previous.status!=='PENDING')fail(409,'A passagem já não pode ser cancelada');
+      const reminder=await tx.operationalReminder.update({where:{id},data:{metadata:{...meta,handover:{...previous,status:'CANCELLED',cancelledAt:new Date().toISOString()}}}});
+      await trace(tx,reminder,`HANDOVER_CANCELLED ${previous.from} → ${previous.to}`);
+      return {ok:true,reminder};
+    }
+    fail(400,'Ação inválida');
+  });
+}
+const REPEAT_INTERVAL_MS = 15 * 60000;
+async function repeatOverdue(id, now = new Date()) {
+  return prisma.$transaction(async tx => {
+    await tx.$queryRaw`SELECT id FROM "OperationalReminder" WHERE id = ${Number(id)} FOR UPDATE`;
+    const current = await tx.operationalReminder.findUnique({where:{id:Number(id)}});
+    if (!isWater(current) || current.isCompleted || current.dueDate > now || !current.metadata?.alarmedAt) return {repeated:false};
+    const meta=current.metadata,last=Date.parse(meta.lastRepeatedAt || meta.alarmedAt);
+    if (!Number.isFinite(last) || now.getTime()-last < REPEAT_INTERVAL_MS) return {repeated:false};
+    // Replace delivery attempts, never the unresolved operational reminder or alert.
+    await tx.notification.updateMany({where:{eventType:`${kindFor(current)}_OVERDUE`,status:{in:['PENDING','SENT']},metadata:{path:['reminderId'],equals:current.id}},data:{status:'SUPERSEDED'}});
+    const reminder=await tx.operationalReminder.update({where:{id:current.id},data:{metadata:{...meta,lastRepeatedAt:now.toISOString(),repeatCount:Number(meta.repeatCount||0)+1}}});
+    for (const role of ['ADMIN','TECHNICIAN']) await notify(tx,reminder,`${kindFor(reminder)}_OVERDUE`,role);
+    return {repeated:true};
+  });
 }
 let processing = false;
 async function processOverdue(now = new Date()) {
   if (processing) return { skipped: true };
   processing = true;
+  let result;
   try {
     const pending = await prisma.operationalReminder.findMany({ where: { isCompleted: false, dueDate: { lte: now }, OR: [{ sourceKey: { startsWith: 'water:' } }, {sourceKey:{startsWith:'pump:'}}, { title: { startsWith: 'Agua aberta - ' } }] }, orderBy: { dueDate: 'asc' } });
-    let escalated = 0;
+    let escalated = 0, repeated = 0;
     for (const row of pending) {
-      if (!row.poolId || row.metadata?.alarmedAt) continue;
+      if (!row.poolId) continue;
+      if(row.metadata?.alarmedAt){if((await repeatOverdue(row.id,now)).repeated)repeated++;continue;}
       await transition({ role: 'ADMIN' }, row.id, 'alarm', { automatic: true, now }); escalated++;
     }
+    result={escalated,repeated};
+  } finally { processing=false; }
+  await deliverCriticalNotifications();
+  return result;
+}
+let delivering=false;
+async function deliverCriticalNotifications(){
+  if(delivering)return {skipped:true};
+  delivering=true;
+  try {
     // Admin push only: legacy DeviceToken has no technician identity. Never broadcast client details to every technician.
     const notifications = await prisma.notification.findMany({ where: { eventType: {in:['WATER_OPEN_OVERDUE','PUMP_MANUAL_OVERDUE']}, role: 'ADMIN', status: 'PENDING' }, take: 100 });
     const tokens = notifications.length ? await prisma.deviceToken.findMany({ where: { role: 'ADMIN', active: true } }) : [];
     for (const notification of notifications) {
-      const deliveries = await Promise.all(tokens.map(t => sendPush(t.token, notification.title, notification.message, { notificationId: notification.id, href: '/admin-alerts?origin=water-open' })));
-      if (deliveries.length && deliveries.every(d => d.ok)) await prisma.notification.update({ where: { id: notification.id }, data: { status: 'SENT' } });
+      const deliveries=[];
+      for(const token of tokens){
+        if(!await require('./browserPushService').stillCurrent(notification))break;
+        deliveries.push(await sendPush(token.token,notification.title,notification.message,{notificationId:notification.id,href:'/admin-alerts?origin=water-open'}));
+      }
+      if(deliveries.length===tokens.length&&deliveries.length&&deliveries.every(d=>d.ok))await prisma.notification.updateMany({where:{id:notification.id,status:'PENDING'},data:{status:'SENT'}});
     }
     await require('./browserPushService').deliverWaterNotifications();
-    return { escalated };
-  } finally { processing = false; }
+  } finally { delivering=false; }
 }
 function startScheduler() {
   // Field safety monitoring is independent of optional billing/AI jobs.
@@ -144,4 +227,4 @@ function startScheduler() {
   const run = () => processOverdue().catch(e => console.error('WATER_REMINDER_JOB_ERROR', e.message));
   run(); const timer = setInterval(run, 60000); timer.unref(); return timer;
 }
-module.exports = { create, transition, list, processOverdue, startScheduler };
+module.exports = { create, transition, list, processOverdue, startScheduler, handoverTargets, incomingHandovers, handover, repeatOverdue, REPEAT_INTERVAL_MS };

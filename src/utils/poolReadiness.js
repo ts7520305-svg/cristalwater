@@ -20,6 +20,9 @@ async function getPoolRoundReadiness(prisma, poolId) {
       name: true,
       clientId: true,
       active: true,
+      archiveStatus: true,
+      deletedAt: true,
+      client: {select:{active:true,status:true,archiveStatus:true,deletedAt:true}},
       volumeM3: true,
       type: true,
       technicalSheet: {
@@ -44,6 +47,8 @@ async function getPoolRoundReadiness(prisma, poolId) {
   const missing = [];
 
   if (!pool.clientId) missing.push("Cliente associado");
+  if (pool.deletedAt || (pool.archiveStatus && pool.archiveStatus !== 'ATIVO')) missing.push('Piscina disponível para manutenção');
+  if (pool.client && (!pool.client.active || pool.client.deletedAt || (pool.client.archiveStatus && pool.client.archiveStatus !== 'ATIVO') || ['PAUSED','PAUSA','INACTIVE','ARCHIVED'].includes(String(pool.client.status).toUpperCase()))) missing.push('Cliente ativo e sem pausa');
   if (pool.active === false) missing.push("Piscina ativa");
   if (!pool.technicalSheet) missing.push("Ficha tecnica");
   if (!hasPositiveNumber(pool.volumeM3) && !hasPositiveNumber(pool.technicalSheet?.volumeM3)) {

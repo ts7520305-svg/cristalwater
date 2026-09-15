@@ -41,7 +41,7 @@
     .round-card-risk,.warning-card{border-color:color-mix(in srgb, var(--ds-danger) 55%, white)!important;box-shadow:0 0 0 1px color-mix(in srgb, var(--ds-danger) 22%, white),0 18px 48px rgba(255,0,70,.12)!important;background:#fff5f5!important}
     .round-warning-banner{display:none;margin:0 0 16px;border:1px solid color-mix(in srgb, var(--ds-danger) 55%, white);background:#fff5f5;border-radius:18px;padding:14px;color:#7f2326}
     .round-warning-banner strong{display:block;font-size:18px;margin-bottom:4px}
-    .round-editor{display:grid;grid-template-columns:minmax(160px,1fr) 130px auto;gap:8px;margin:10px 0}.round-editor input,.round-editor select,.round-editor button{margin:0}
+    .round-editor{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}.round-editor input,.round-editor select,.round-editor button{margin:0;min-width:0;width:100%;box-sizing:border-box;min-height:48px}.round-editor label{display:grid;gap:6px;min-width:0}.round-editor button{grid-column:1/-1}@media(max-width:720px){.round-editor{grid-template-columns:1fr}}
     .round-pool-list{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:8px}.pool-line{border-radius:12px;padding:9px;cursor:grab}.pool-line:active{cursor:grabbing}.pool-line span{display:block;color:var(--ds-text-muted);font-size:12px;margin-top:3px}
     #weekVisits{max-width:100%;min-width:0;overflow:hidden}
     .table-scroll{display:block;width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;padding-bottom:4px;contain:paint}
@@ -53,6 +53,9 @@
     .visit-row-alert td{background:#fff5f5;border-color:color-mix(in srgb, var(--ds-danger) 35%, white)}.visit-row-late td{background:#fff7e8;border-color:color-mix(in srgb, var(--ds-warning) 30%, white)}.visit-row-extra td{background:#fff9ef}
     .pill-alert{border-color:color-mix(in srgb, var(--ds-danger) 45%, white);color:#7f2021;background:#fff1f1}
     .field-stack{display:grid;gap:8px}.field-stack label{font-size:12px;font-weight:800;color:var(--ds-text-muted)}
+    #coveragePanel{min-width:0}.coverage-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}.coverage-form label{display:grid;gap:6px;min-width:0}.coverage-form :is(input,textarea,select,button){box-sizing:border-box;min-width:0;width:100%;min-height:48px}.coverage-form button{background:#12613f!important;color:#fff!important}
+    #coverageList{display:grid;gap:12px}.coverage-pool{padding:14px;border:1px solid var(--ds-border);border-radius:14px;overflow-wrap:anywhere;min-width:0}.coverage-pool h3{margin:0 0 8px}.coverage-visit{display:flex;gap:10px;align-items:center;margin:8px 0;padding:10px;background:var(--ds-surface-soft);border-radius:10px;min-height:48px}.coverage-visit input{flex:0 0 24px;width:24px;height:24px;margin:0}
+    @media(max-width:720px){.coverage-form{grid-template-columns:1fr}}
     @media(max-width:1100px){main.page{padding:14px}.cols2,.cols3,.cols4,.cols5,.row,.row3{grid-template-columns:1fr}.page-head{flex-direction:column}.visit-filter-panel{grid-template-columns:1fr 1fr}.visit-filter-panel .wide{grid-column:auto}}
     @media(max-width:720px){.visit-filter-panel{grid-template-columns:1fr}.visits-table{font-size:12px}}
   </style>
@@ -71,6 +74,20 @@
       </div>
     </div>
 
+    <section id="coveragePanel" class="card" data-cw-state-managed="manual">
+      <h2>Visitas que precisam de atenção</h2>
+      <p>Verifique atrasos, piscinas sem manutenção concluída e visitas sem técnico. Se faltar pessoal, viatura ou química, selecione apenas o trabalho ainda por iniciar.</p>
+      <button id="coverageRefresh" type="button" class="cw-v2-btn">Verificar agora</button>
+      <p id="coverageStatus" role="status" aria-live="polite">A consultar o planeamento…</p>
+      <form id="coverageTransfer" class="coverage-form">
+        <label>Novo técnico<select id="coverageTechnician" required><option value="">Selecionar técnico</option></select></label>
+        <label>Motivo da redistribuição<select id="coverageCause"><option>Ausência de técnico</option><option>Avaria de viatura</option><option>Falta de produtos químicos</option><option>Falta de material ou equipamento</option><option>Apoio à rota</option></select></label>
+        <label>Informação para a gestão<textarea id="coverageReason" rows="2" maxlength="900" required minlength="5" placeholder="Ex.: viatura sem hipoclorito; confirmar reposição"></textarea></label>
+        <button type="submit" class="cw-v2-btn primary">Pré-visualizar transferência</button>
+      </form>
+      <p>A transferência conserva datas e histórico. Visitas iniciadas, água aberta e bombas em manual exigem acompanhamento próprio. O novo técnico deve atualizar a rota; esta ação não confirma que já a recebeu.</p>
+      <div id="coverageList"></div><h3>Receção das visitas atribuídas</h3><p>Confirmar receção não significa iniciar ou concluir a visita, nem aceitar água aberta ou bomba manual.</p><div id="visitReceiptsAdmin"></div>
+    </section>
     <div id="roundTechWarning" class="round-warning-banner"></div>
 
     <section class="grid cols5">
@@ -85,21 +102,29 @@
       <div class="card">
         <h2>Criar ronda</h2>
         <div class="field-stack"><label for="roundName">Nome da ronda</label><input id="roundName" placeholder="Nome da ronda"></div>
-        <div class="field-stack"><label for="roundDay">Dia da ronda</label><select id="roundDay">
+        <div class="field-stack"><label for="roundRecurrence">Frequência</label><select id="roundRecurrence"><option value="WEEKLY">Semanal</option><option value="DAILY">Diária — todos os dias</option><option value="MONTHLY">Mensal</option></select></div>
+        <div class="field-stack" id="roundWeekField"><label for="roundDay">Dia da semana</label><select id="roundDay">
           <option value="1">Segunda</option>
           <option value="2">Terca</option>
           <option value="3">Quarta</option>
           <option value="4">Quinta</option>
           <option value="5">Sexta</option>
-          <option value="6">Sabado</option>
+          <option value="6">Sabado</option><option value="0">Domingo</option>
         </select></div>
+        <div class="field-stack" id="roundMonthField" hidden style="display:none"><label for="roundMonthDay">Dia do mês (1–31)</label><input id="roundMonthDay" type="number" min="1" max="31" value="1"></div>
+        <div class="row"><div class="field-stack"><label for="roundStartsOn">Início (opcional)</label><input id="roundStartsOn" type="date"></div><div class="field-stack"><label for="roundEndsOn">Fim (opcional)</label><input id="roundEndsOn" type="date"></div></div>
+        <p class="mini">Sem fim: repete enquanto estiver ativa. No modo mensal, um dia inexistente passa ao último dia desse mês. Alterações não apagam visitas já geradas.</p>
         <button id="createRoundBtn" class="cw-v2-btn primary">Criar ronda</button>
 
         <h2>Atribuir tecnico</h2>
-        <div class="rule-note">Regra operacional: associe o tecnico principal da ronda. Se outro tecnico for ajudar, mova apenas as visitas necessarias no planeador e escolha o motivo correto.</div>
+        <div class="rule-note">Atribua a ronda por um período ou sem fim. A nova atribuição prevalece nas datas indicadas; fora desse período aplica-se a atribuição anterior. Visitas iniciadas, histórico e lembretes críticos mantêm os responsáveis.</div>
         <div class="field-stack"><label for="assignTechRound">Ronda</label><select id="assignTechRound"></select></div>
         <div class="field-stack"><label for="assignTech">Tecnico</label><select id="assignTech"></select></div>
-        <button id="assignTechBtn" class="cw-v2-btn">Associar tecnico a ronda</button>
+        <div class="field-stack"><label for="assignmentPeriod">Validade</label><select id="assignmentPeriod"><option value="RANGE">De data X a data Y</option><option value="DAY">Um dia</option><option value="WEEK">Uma semana (7 dias)</option><option value="MONTH">Um mês</option><option value="PERMANENT">Sempre, desde a data de início</option></select></div>
+        <div class="field-stack"><label for="assignmentStart">Data de início</label><input id="assignmentStart" type="date" required></div>
+        <div class="field-stack" id="assignmentEndField"><label for="assignmentEnd">Último dia incluído</label><input id="assignmentEnd" type="date"></div>
+        <div class="field-stack"><label for="assignmentReason">Motivo da atribuição</label><textarea id="assignmentReason" maxlength="1000" placeholder="Ex.: férias, substituição ou mudança permanente"></textarea></div>
+        <button id="assignTechBtn" class="cw-v2-btn">Rever e atribuir ronda</button>
 
         <h2>Atribuir piscina</h2>
         <div class="field-stack"><label for="assignPoolRound">Ronda</label><select id="assignPoolRound"></select></div>
@@ -136,7 +161,7 @@
         <h2>Operacao semanal</h2>
         <div class="weekly-actions">
           <button id="generateWeekBtn" class="cw-v2-btn primary">Gerar visitas da semana</button>
-          <button id="forceGenerateBtn" class="cw-v2-btn" type="button">Forcar geracao</button>
+          <button id="forceGenerateBtn" class="cw-v2-btn" type="button">Verificar visitas em falta</button>
           <span class="force-note">Substitui apenas visitas planeadas ainda nao concluidas. As visitas podem depois ser movidas para apoio, substituicao ou outro dia.</span>
         </div>
         <div id="status" class="status" role="status" aria-live="polite">Pronto.</div>

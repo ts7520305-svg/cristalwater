@@ -74,6 +74,7 @@
       const list = rows();
       for (const remote of data.reminders) {
         let item = list.find(x => x.serverId === remote.id || x.localId === remote.metadata?.localId);
+        if (remote.transferredAway) { if (item) list.splice(list.indexOf(item),1); continue; }
         if (item?.syncError) continue;
         if (!item) { item = {localId:remote.metadata?.localId || `server-${remote.id}`}; list.push(item); }
         Object.assign(item, remote.metadata || {}, {serverId:remote.id, technicianId:remote.assignedToTechnicianId, poolId:remote.poolId, clientId:remote.clientId, dueAt:remote.dueDate, createdAt:remote.createdAt, status:remote.isCompleted?'CLOSED':remote.metadata?.alarmedAt?'OVERDUE':'OPEN', syncError:''});

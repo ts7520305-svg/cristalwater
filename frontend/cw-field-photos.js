@@ -19,5 +19,13 @@
         await change('delete',`${submittingOwner}:${visitId}:${photo.localId}`);
     } } finally {photos.forEach(photo=>URL.revokeObjectURL(photo.previewUrl));}
   }
-  window.CWFieldPhotos={save,remove,list,sync};
+  async function pendingSummary(){
+    const requestedOwner=owner(),db=await database();
+    return new Promise((resolve,reject)=>{
+      const request=db.transaction('photos').objectStore('photos').getAll();
+      request.onsuccess=()=>{db.close();if(owner()!==requestedOwner)return reject(new Error('Sessão alterada'));resolve(request.result.filter(row=>row.owner===requestedOwner).map(row=>({visitId:row.visitId})));};
+      request.onerror=()=>{db.close();reject(request.error);};
+    });
+  }
+  window.CWFieldPhotos={save,remove,list,sync,pendingSummary};
 })();

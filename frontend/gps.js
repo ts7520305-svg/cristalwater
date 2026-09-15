@@ -50,7 +50,7 @@ async function handlePosition(position) {
   console.log("GPS:", lat, lng);
 
   try {
-    await fetch(API + "/gps/update", {
+    const response=await fetch(API + "/gps/update", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -59,13 +59,17 @@ async function handlePosition(position) {
         technicianId,
         latitude: lat,
         longitude: lng,
-        accuracy
+        accuracy,
+        recordedAt:new Date(position.timestamp||now).toISOString()
       })
     });
 
-    updateStatus("📡 Localização enviada");
+    const result=await response.json();
+    if(!response.ok||result.ok===false||result.success===false)throw new Error('GPS não confirmado');
+    updateStatus(result.ignored?'📍 A aguardar localização atual':'📡 Localização enviada');
 
   } catch (err) {
+    lastSent=0;
     console.warn("GPS envio indisponivel no momento");
     updateStatus("❌ Erro envio GPS");
   }

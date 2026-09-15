@@ -389,41 +389,32 @@ async function recordVisitIncident({ visitId, message, type, priority }) {
   };
 }
 
-async function startVisit(visitId) {
+async function startVisit(visitId, user) {
   const id = toInt(visitId);
-
-  if (!id) {
-    return { ok: false, status: 400, error: "ID inválido" };
-  }
-
-  const visit = await prisma.serviceVisit.findUnique({
-    where: { id },
+  if (!id || id <= 0) return {ok:false,status:400,error:'ID inválido'};
+  const {roleMatches}=require('../../utils/roles');
+  if(!roleMatches(user?.role,'TECHNICIAN'))return {ok:false,status:403,error:'Sessão sem acesso à visita'};
+  const result=await prisma.$transaction(async tx=>{
+    await tx.$queryRaw`SELECT id FROM "ServiceVisit" WHERE id = ${id} FOR UPDATE`;
+    const visit=await tx.serviceVisit.findUnique({where:{id}});
+    if(!visit)return {ok:false,status:404,error:'Visita não encontrada'};
+    const technicianId=Number(user.technicianId||user.id);
+    if(!roleMatches(user.role,'ADMIN')&&visit.technicianId!==technicianId)return {ok:false,status:403,error:'A visita foi atribuída a outro técnico. Atualize a rota'};
+    if(visit.endAt||!['PLANNED','PENDING','SCHEDULED','ASSIGNED','IN_PROGRESS','STARTED','INCOMPLETE'].includes(visit.status))return {ok:false,status:409,error:'Esta visita já não pode ser iniciada. Atualize a rota'};
+    if(visit.status==='INCOMPLETE'){
+      const followups=await tx.operationalReminder.findMany({where:{sourceKey:{startsWith:`incomplete:${id}:`}}});
+      const ids=followups.map(row=>row.metadata?.returnPlan?.visitId).filter(Number.isSafeInteger);
+      if(ids.length&&await tx.serviceVisit.findFirst({where:{id:{in:ids},status:{notIn:['CANCELLED','CANCELED','SKIPPED','ARCHIVED']}}}))return {ok:false,status:409,error:'Já existe um regresso agendado. Utilize a visita de regresso'};
+    }
+    if(visit.startAt&&['IN_PROGRESS','STARTED'].includes(visit.status))return {ok:true,visit,idempotent:true};
+    const updated=await tx.serviceVisit.update({where:{id},data:{startAt:visit.startAt||new Date(),status:'IN_PROGRESS'}});
+    return {ok:true,visit:updated};
   });
-
-  if (!visit) {
-    return { ok: false, status: 404, error: "Visita não encontrada" };
+  if(result.ok&&!result.idempotent){
+    const updated=result.visit;
+    emitRouteStopStarted({visitId:updated.id,technicianId:updated.technicianId||null,poolId:updated.poolId||null,plannedDate:updated.plannedDate||updated.date||null,source:'visit.start'}).catch(error=>console.warn('ROUTE_STOP_STARTED emit failed:',error.message));
   }
-
-  const updated = await prisma.serviceVisit.update({
-    where: { id },
-    data: {
-      startAt: new Date(),
-      status: "IN_PROGRESS",
-    },
-  });
-
-  emitRouteStopStarted({
-    visitId: updated.id,
-    technicianId: updated.technicianId || null,
-    poolId: updated.poolId || null,
-    plannedDate: updated.plannedDate || updated.date || null,
-    source: "visit.start",
-  }).catch((error) => console.warn("ROUTE_STOP_STARTED emit failed:", error.message));
-
-  return {
-    ok: true,
-    visit: updated,
-  };
+  return result;
 }
 
 async function completeVisit(visitId, body = {}) {

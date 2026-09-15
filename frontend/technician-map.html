@@ -13,6 +13,8 @@
   <link rel="stylesheet" href="/ui/foundation.css">
   <link rel="stylesheet" href="/cw-ui-kit.css">
   <style>
+    .map-page *, .map-page *::before, .map-page *::after { box-sizing: border-box; }
+    .map-grid > * { min-width:0; }
     body.map-page {
       margin: 0;
       background: linear-gradient(180deg, #f7fbf9, #edf4f2);
@@ -148,6 +150,8 @@
       margin-top: 2px;
     }
 
+    .actions a[aria-disabled="true"] { opacity:.5; pointer-events:none; }
+    .visit-item { overflow-wrap:anywhere; }
     .empty {
       color: #577067;
       border: 1px dashed #c9d8d2;

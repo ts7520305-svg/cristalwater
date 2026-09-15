@@ -11,6 +11,22 @@ let adminClients = [];
 let currentServiceHistory = [];
 let serviceHistoryToolsReady = false;
 let lastPortalSnapshot = {};
+let clientSelectionRevision = 0;
+let portalLoadRevision = 0;
+let messagesLoadRevision = 0;
+let extrasLoadRevision = 0;
+let loadedClientId = 0;
+const clientDrafts = new Map();
+const draftFields = ['messageInput', 'visitRequestInput', 'paymentNoticeAmount', 'paymentNoticeNote', 'paymentNoticeMethod'];
+function selectionIsCurrent(id, revision) {
+  return clientId === id && clientSelectionRevision === revision;
+}
+function updatePortalActionAvailability() {
+  ['sendBtn', 'visitRequestBtn', 'paymentNoticeBtn', 'photoBtn'].forEach(id => {
+    const button = el(id);
+    if (button) button.disabled = isAdminUser() || !clientId || loadedClientId !== clientId || portalActions.has(id);
+  });
+}
 const ui = window.CwUi || {
   success: (m) => console.log(m),
   error: (m) => console.error(m),
@@ -593,7 +609,7 @@ function logout() {
   }
   localStorage.removeItem("cw_client_id");
   localStorage.removeItem("clientId");
-  location.href = "/client-login";
+  return window.CristalAuth.logout();
 }
 
 window.logout = logout;
@@ -1017,10 +1033,10 @@ function normalizeHistoryVisit(visit = {}) {
   };
 }
 
-async function loadCompleteServiceHistory(services = []) {
-  if (!clientId || services.length < 40) return services;
+async function loadCompleteServiceHistory(services = [], requestedClient = clientId) {
+  if (!requestedClient || services.length < 40) return services;
   try {
-    const response = await fetch(`${API}/client-portal/history/${clientId}`);
+    const response = await fetch(`${API}/client-portal/history/${requestedClient}`);
     const data = await response.json();
     const visits = Array.isArray(data.visits) ? data.visits : [];
     if (!response.ok || data.ok === false || visits.length <= services.length) return services;
@@ -1341,25 +1357,33 @@ function renderInvoices(invoices = []) {
   }).join("");
 }
 
+function notificationCopy(){
+  return ({pt:{empty:'Sem notificações recentes.',title:'Notificação',read:'Lida',unread:'Por ler',mark:'Marcar como lida',error:'Não foi possível confirmar a leitura. Tente novamente.'},en:{empty:'No recent notifications.',title:'Notification',read:'Read',unread:'Unread',mark:'Mark as read',error:'Could not confirm reading. Please try again.'},fr:{empty:'Aucune notification récente.',title:'Notification',read:'Lue',unread:'Non lue',mark:'Marquer comme lue',error:'Impossible de confirmer la lecture. Réessayez.'},de:{empty:'Keine aktuellen Mitteilungen.',title:'Mitteilung',read:'Gelesen',unread:'Ungelesen',mark:'Als gelesen markieren',error:'Lesebestätigung fehlgeschlagen. Bitte erneut versuchen.'}})[normalizeLanguage(portalLanguage)];
+}
+async function markPortalNotificationRead(notification,button,status){
+  if(isAdminUser()||!clientId||loadedClientId!==clientId||button.disabled)return;
+  const requestedClient=clientId,revision=clientSelectionRevision,headers=portalAuthHeaders();
+  const current=()=>selectionIsCurrent(requestedClient,revision)&&headers.Authorization===portalAuthHeaders().Authorization;
+  button.disabled=true;if(status)status.textContent='';
+  try{
+    const response=await fetch(`${API}/notifications/${notification.id}/read`,{method:'POST',headers});
+    const data=await response.json();
+    if(!current())return;
+    if(!response.ok||data.ok===false)throw new Error('Read not confirmed');
+    notification.isRead=true;button.textContent=notificationCopy().read;
+    const pill=button.closest?.('article')?.querySelector('.pill');if(pill)pill.textContent=notificationCopy().read;
+  }catch(_){if(current()){button.disabled=false;if(status)status.textContent=notificationCopy().error;}}
+}
 function renderNotifications(notifications = []) {
-  const list = el("notificationList");
-  if (!list) return;
-  if (!notifications.length) {
-    list.innerHTML = `<div class="empty">Sem notificações recentes.</div>`;
-    return;
-  }
-  list.innerHTML = notifications.slice(0, 8).map((notification) => `
+  const list=el('notificationList'),labels=notificationCopy();if(!list)return;
+  if(!notifications.length){list.innerHTML=`<div class="empty">${esc(labels.empty)}</div>`;return;}
+  list.innerHTML=notifications.slice(0,8).map((notification,index)=>`
     <article class="service-item">
-      <div class="service-head">
-        <div>
-          <div class="service-title">${esc(notification.title || "Notificação")}</div>
-          <div class="muted">${esc(fmtDateTime(notification.createdAt))}</div>
-        </div>
-        <span class="pill">${esc(notification.status || "PENDING")}</span>
-      </div>
-      <div class="muted">${esc(notification.message || "")}</div>
-    </article>
-  `).join("");
+      <div class="service-head"><div><div class="service-title">${esc(notification.title||labels.title)}</div><div class="muted">${esc(fmtDateTime(notification.createdAt))}</div></div><span class="pill">${esc(notification.isRead?labels.read:labels.unread)}</span></div>
+      <div class="muted">${esc(notification.message||'')}</div>
+      ${!notification.isRead&&!isAdminUser()?`<button type="button" data-notice-read="${index}" class="btn">${esc(labels.mark)}</button><div class="muted" role="status"></div>`:''}
+    </article>`).join('');
+  list.querySelectorAll?.('[data-notice-read]').forEach(button=>button.addEventListener('click',()=>markPortalNotificationRead(notifications[Number(button.dataset.noticeRead)],button,button.nextElementSibling)));
 }
 
 function renderDocuments(documents = []) {
@@ -1396,6 +1420,8 @@ function renderPermissions(permissions = {}) {
 
 async function loadCustomerExtras() {
   const requestedClient = clientId;
+  const selectionRevision = clientSelectionRevision;
+  const revision = ++extrasLoadRevision;
   if (!requestedClient) return;
   const sections=[['notifications','notificationList','notifications',renderNotifications],['documents','documentList','documents',renderDocuments],['permissions','permissionsList','permissions',renderPermissions]];
   await Promise.allSettled(sections.map(async ([endpoint,id,field,render])=>{
@@ -1403,10 +1429,10 @@ async function loadCustomerExtras() {
       const response=await fetch(`${API}/client-portal/${requestedClient}/${endpoint}`,{headers:portalAuthHeaders()});
       const data=await response.json();
       if(!response.ok || data.ok===false)throw new Error(copy('loadError'));
-      if(clientId!==requestedClient)return;
+      if(!selectionIsCurrent(requestedClient, selectionRevision) || revision !== extrasLoadRevision)return;
       render(field==='permissions' ? data[field] || {} : Array.isArray(data[field]) ? data[field] : []);
     }catch(error){
-      if(clientId!==requestedClient)return;
+      if(!selectionIsCurrent(requestedClient, selectionRevision) || revision !== extrasLoadRevision)return;
       const node=el(id);if(!node)return;
       node.replaceChildren();const message=document.createElement('p');message.textContent=copy('loadError');message.setAttribute('role','alert');
       const retry=document.createElement('button');retry.type='button';retry.className='cw-v2-btn';retry.textContent=portalLanguage==='en'?'Try again':portalLanguage==='fr'?'Réessayer':'Tentar novamente';
@@ -1590,7 +1616,26 @@ function showNoClientSelectedState() {
 
 async function chooseAdminClient(nextClientId, updateUrl = true) {
   const id = Number(nextClientId || 0);
+  if (clientId) clientDrafts.set(clientId, {
+    values: Object.fromEntries(draftFields.map(field => [field, el(field)?.value || ''])),
+    files: el('photoInput')?.files,
+  });
+  ++clientSelectionRevision;
   clientId = Number.isInteger(id) && id > 0 ? id : 0;
+  const selectionRevision = clientSelectionRevision;
+  loadedClientId = 0;
+  lastPortalSnapshot = {};
+  showNoClientSelectedState();
+  ['notificationList', 'documentList', 'permissionsList'].forEach(field => el(field)?.replaceChildren());
+  const draft = clientDrafts.get(clientId);
+  draftFields.forEach(field => { if (el(field)) el(field).value = draft?.values[field] || (field === 'paymentNoticeMethod' ? 'Transferencia' : ''); });
+  if (el('photoInput')) {
+    el('photoInput').value = '';
+    if (draft?.files) el('photoInput').files = draft.files;
+  }
+  if (el('portalActionStatus')) el('portalActionStatus').hidden = true;
+  refreshPaymentWhatsappLink();
+  updatePortalActionAvailability();
   if (clientId) sessionStorage.setItem("cw_admin_preview_client_id", String(clientId));
   if (updateUrl) {
     const url = new URL(location.href);
@@ -1605,6 +1650,7 @@ async function chooseAdminClient(nextClientId, updateUrl = true) {
   }
   socket.emit("joinClient", clientId);
   await loadPortal();
+  if (selectionRevision !== clientSelectionRevision) return;
   await loadMessages();
 }
 
@@ -1636,6 +1682,7 @@ async function setupAdminClientSwitcher() {
 }
 
 async function notifyPayment() {
+  const requestedClient = clientId, selectionRevision = clientSelectionRevision;
   if (!clientId) {
     ui.error(copy("clientNotIdentified"));
     return;
@@ -1647,15 +1694,22 @@ async function notifyPayment() {
     body: JSON.stringify(notice),
   });
   const data = await response.json().catch(() => ({}));
+  if (!selectionIsCurrent(requestedClient, selectionRevision)) return;
   if (!response.ok || data.ok === false) {
     ui.error(data.error || copy("paymentNoticeFailed"));
     return;
   }
   await loadMessages();
+  if (!selectionIsCurrent(requestedClient, selectionRevision)) return;
   ui.success(`${copy("paymentNoticeSuccess")} ${data.paymentReference || currentPaymentInstructions?.paymentReference || ""}.`);
 }
 
 async function loadPortal() {
+  const requestedClient = clientId, selectionRevision = clientSelectionRevision;
+  const revision = ++portalLoadRevision;
+  const isCurrent = () => selectionIsCurrent(requestedClient, selectionRevision) && revision === portalLoadRevision;
+  loadedClientId = 0;
+  updatePortalActionAvailability();
   try {
     if (!clientId && isAdminUser()) {
       showNoClientSelectedState();
@@ -1664,6 +1718,7 @@ async function loadPortal() {
     if (!clientId) throw new Error(copy("clientNotIdentified"));
     const response = await fetch(`${API}/client-portal/${clientId}?lang=${encodeURIComponent(portalLanguage)}`);
     const data = await response.json();
+    if (!isCurrent()) return;
     if (!response.ok || data.ok === false) throw new Error(data.error || copy("noDataStatus"));
 
     applyLanguage(preferredLanguage(data.language));
@@ -1687,11 +1742,15 @@ async function loadPortal() {
     renderSummary(data);
     renderClientFocus(data);
     renderPaymentInstructions(data.paymentInstructions || { paymentReference: client.paymentReference, amountOpen: totalOpen });
-    const completeServiceHistory = await loadCompleteServiceHistory(Array.isArray(data.serviceHistory) ? data.serviceHistory : []);
+    const completeServiceHistory = await loadCompleteServiceHistory(Array.isArray(data.serviceHistory) ? data.serviceHistory : [], requestedClient);
+    if (!isCurrent()) return;
     renderServiceHistory(completeServiceHistory);
     renderInvoices(Array.isArray(data.invoices) ? data.invoices : []);
+    loadedClientId = requestedClient;
+    updatePortalActionAvailability();
     await loadCustomerExtras();
   } catch (error) {
+    if (!isCurrent()) return;
     console.warn(error);
     setText("clientName", copy("portalTitle"));
     setText("useStatus", copy("loadError"));
@@ -1710,6 +1769,7 @@ async function loadPortal() {
 }
 
 function appendMessage(message) {
+  if (!clientId || (message?.clientId != null && Number(message.clientId) !== clientId)) return;
   if(message?.id && document.querySelector(`[data-client-message-id="${Number(message.id)}"]`))return;
   const chat = el("chatBox");
   if (!chat) return;
@@ -1726,6 +1786,9 @@ function appendMessage(message) {
 }
 
 async function loadMessages() {
+  const requestedClient = clientId, selectionRevision = clientSelectionRevision;
+  const revision = ++messagesLoadRevision;
+  const isCurrent = () => selectionIsCurrent(requestedClient, selectionRevision) && revision === messagesLoadRevision;
   const chat = el("chatBox");
   if (!chat) return;
   try {
@@ -1738,6 +1801,7 @@ async function loadMessages() {
       secureHeaders.Authorization ? { headers: secureHeaders } : undefined
     );
     const data = await response.json();
+    if (!isCurrent()) return;
     if(!response.ok || data.ok===false)throw new Error(copy("messagesUnavailable"));
     chat.innerHTML = "";
     const messages = Array.isArray(data) ? data : (Array.isArray(data.messages) ? data.messages : []);
@@ -1747,12 +1811,14 @@ async function loadMessages() {
     }
     messages.forEach(appendMessage);
   } catch (error) {
+    if (!isCurrent()) return;
     console.warn(error);
     chat.innerHTML = `<div class="empty">${esc(copy("messagesUnavailable"))}</div>`;
   }
 }
 
 async function sendMessage() {
+  const requestedClient = clientId, selectionRevision = clientSelectionRevision;
   const input = el("messageInput");
   const text = input.value.trim();
   if (!text || !clientId) return;
@@ -1768,6 +1834,7 @@ async function sendMessage() {
     }
   );
   const data = await response.json().catch(() => ({}));
+  if (!selectionIsCurrent(requestedClient, selectionRevision)) return;
   if (!response.ok || data.ok === false) {
     ui.error(data.error || copy("sendMessageError"));
     return;
@@ -1777,6 +1844,7 @@ async function sendMessage() {
 }
 
 async function requestVisit() {
+  const requestedClient = clientId, selectionRevision = clientSelectionRevision;
   const input = el("visitRequestInput");
   const text = input?.value?.trim() || "";
   if (!text || !clientId) return;
@@ -1786,6 +1854,7 @@ async function requestVisit() {
     body: JSON.stringify({ message: text }),
   });
   const data = await response.json().catch(() => ({}));
+  if (!selectionIsCurrent(requestedClient, selectionRevision)) return;
   if (!response.ok || data.ok === false) {
     ui.error(data.error || "Nao foi possivel solicitar a visita.");
     return;
@@ -1797,24 +1866,28 @@ async function requestVisit() {
 
 const portalActions = new Set();
 async function runPortalAction(buttonId, action) {
-  if(portalActions.has(buttonId))return;
+  if(isAdminUser() || !clientId || loadedClientId !== clientId || portalActions.has(buttonId))return;
+  const requestedClient = clientId, selectionRevision = clientSelectionRevision;
   const button=el(buttonId),status=el('portalActionStatus');
   portalActions.add(buttonId);if(button)button.disabled=true;
   if(status){status.hidden=false;status.textContent=portalLanguage==='en'?'Sending…':portalLanguage==='fr'?'Envoi…':'A enviar…';}
-  try { await action();if(status)status.hidden=true; }
+  try { await action();if(status && selectionIsCurrent(requestedClient, selectionRevision))status.hidden=true; }
   catch(error){
+    if (!selectionIsCurrent(requestedClient, selectionRevision)) return;
     const message=error.userMessage || copy('sendMessageError');
     if(status){status.textContent=message;status.hidden=false;}
     ui.error(message);
-  }finally{portalActions.delete(buttonId);if(button)button.disabled=false;}
+  }finally{portalActions.delete(buttonId);updatePortalActionAvailability();}
 }
 async function sendAttachment() {
+  const requestedClient = clientId, selectionRevision = clientSelectionRevision;
   const input=el('photoInput'),file=input?.files?.[0];
   if(!file || !clientId)return;
   if(!file.size || file.size>25*1024*1024 || !['image/jpeg','image/png','image/webp','image/gif','application/pdf'].includes(file.type))throw Object.assign(new Error('Invalid attachment'),{userMessage:portalLanguage==='en'?'Choose a JPG, PNG, WebP, GIF or PDF file, up to 25 MB.':portalLanguage==='fr'?'Choisissez un fichier JPG, PNG, WebP, GIF ou PDF de 25 Mo maximum.':'Escolha um ficheiro JPG, PNG, WebP, GIF ou PDF, até 25 MB.'});
   const form=new FormData();form.append('clientId',String(clientId));form.append('file',file);
   const response=await fetch(`${API}/client-messages/upload`,{method:'POST',body:form});
   const data=await response.json();
+  if (!selectionIsCurrent(requestedClient, selectionRevision)) return;
   if(!response.ok || data.ok===false || !data.message?.id)throw new Error(data.error || copy('sendMessageError'));
   appendMessage(data.message);input.value='';
 }
@@ -1837,7 +1910,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     socket.emit("joinClient", clientId);
     socket.emit("userOnline", { userId: `client_${clientId}` });
   }
-  socket.on("newMessage", appendMessage);
+  socket.on("newMessage", message => {
+    if (Number(message?.clientId) === clientId) appendMessage(message);
+  });
   socket.on("presenceUpdate", (data) => {
     if (String(data.userId) === "admin_public") {
       adminOnline = data.online;

@@ -1,10 +1,11 @@
+const {normalizeRole}=require('../../utils/roles');
 const { prisma } = require("../../prismaClient");
 
 const GEOFENCE_RADIUS_METERS = Number(process.env.GEOFENCE_RADIUS_METERS || 100);
 const ARRIVAL_RADIUS_METERS = Number(process.env.ARRIVAL_RADIUS_METERS || 150);
-const ARRIVAL_ALERT_COOLDOWN_MS = Number(process.env.ARRIVAL_ALERT_COOLDOWN_MS || 1000 * 60 * 60 * 3);
 
-const lastAlerts = Object.create(null);
+
+
 
 const logger = {
   info: (msg, ctx = null) => console.log(`[${new Date().toISOString()}] [INFO] [GPS] ${msg}`, ctx || ""),
@@ -13,6 +14,7 @@ const logger = {
 };
 
 function toNumber(value) {
+  if(value==null||typeof value==='boolean'||String(value).trim()==='')return null;
   const n = Number(value);
   return Number.isFinite(n) ? n : null;
 }
@@ -111,24 +113,16 @@ function canSendArrivalAlert(client) {
 }
 
 function getTargetCoordinatesFromPool(pool) {
-  const targetLatitude = pool?.latitude ?? pool?.client?.latitude ?? null;
-  const targetLongitude = pool?.longitude ?? pool?.client?.longitude ?? null;
-
-  if (targetLatitude === null || targetLatitude === undefined || targetLongitude === null || targetLongitude === undefined) {
-    return null;
+  for(const candidate of [pool,pool?.client]){
+    const lat=toNumber(candidate?.latitude),lng=toNumber(candidate?.longitude);
+    if(isValidCoordinate(lat,lng))return {lat,lng};
   }
-
-  const lat = Number(targetLatitude);
-  const lng = Number(targetLongitude);
-
-  if (!isValidCoordinate(lat, lng)) return null;
-
-  return { lat, lng };
+  return null;
 }
 
-async function safeAuditTrail(data) {
+async function safeAuditTrail(data, db = prisma) {
   try {
-    await prisma.auditTrail.create({
+    await db.auditTrail.create({
       data: {
         eventType: data.eventType || "GPS",
         entity: data.entity || null,
@@ -173,119 +167,70 @@ async function registerTelemetry({ userId, technicianId, vehicleId, latitude, lo
   });
 }
 
-async function processGpsUpdate(payload) {
-  const userId = toNumber(payload.userId ?? payload.technicianId);
-  const technicianId = payload.technicianDbId ? toNumber(payload.technicianDbId) : null;
-  const vehicleId = payload.vehicleId ? toNumber(payload.vehicleId) : null;
-  const latitude = toNumber(payload.latitude);
-  const longitude = toNumber(payload.longitude);
-  const batteryLevel = payload.batteryLevel !== undefined ? toNumber(payload.batteryLevel) : null;
-  const accuracyM = payload.accuracyM !== undefined ? toNumber(payload.accuracyM) : null;
-  const trackingMode = payload.trackingMode || payload.mode || "PASSIVE";
-
-  if (!userId || !isValidCoordinate(latitude, longitude)) {
-    return {
-      statusCode: 200,
-      body: {
-        ok: false,
-        success: false,
-        code: "ANTI_JUMP_TRIGGERED",
-        message: "Filtro geográfico rejeitou leitura ruidosa ou incompleta de hardware.",
-      },
-    };
+async function processGpsUpdate(payload={}, actor={}) {
+  const role=normalizeRole(actor.role);
+  if(!['ADMIN','TECHNICIAN','TEAM_LEADER'].includes(role))return {statusCode:403,body:{ok:false,success:false,message:'Sessão sem acesso ao GPS.'}};
+  let technicianId=role==='ADMIN'?toNumber(payload.technicianDbId??payload.technicianId):toNumber(actor.technicianId||actor.id);
+  let userId=role!=='ADMIN'&&actor.principalType==='USER'?toNumber(actor.userId||actor.id):null;
+  if(role==='ADMIN'&&!technicianId&&Number.isSafeInteger(toNumber(payload.userId))&&Number(payload.userId)>0){
+    const requested=Number(payload.userId),account=await prisma.user.findUnique({where:{id:requested}});
+    if(account){
+      const matches=account.active&&['TECHNICIAN','TEAM_LEADER'].includes(normalizeRole(account.role))&&account.email
+        ? await prisma.technician.findMany({where:{email:account.email,active:true},take:2}):[];
+      if(matches.length!==1)return {statusCode:409,body:{ok:false,success:false,message:'Conta sem ligação inequívoca. Indique technicianId.'}};
+      technicianId=matches[0].id;userId=account.id;
+    }else technicianId=requested;
   }
-
-  const userExists = await prisma.user.findUnique({ where: { id: userId } });
-
-  if (global.io) {
-    global.io.emit("gps-update", {
-      id: userId,
-      name: userExists?.name || "Técnico",
-      latitude,
-      longitude,
-      trackingMode,
-      batteryLevel,
-    });
+  if(!Number.isSafeInteger(technicianId)||technicianId<=0)return {statusCode:400,body:{ok:false,success:false,message:'Indique o técnico associado à localização.'}};
+  if(role!=='ADMIN'){
+    for(const key of ['technicianId','technicianDbId'])if(payload[key]!=null&&toNumber(payload[key])!==technicianId)return {statusCode:403,body:{ok:false,success:false,message:'Acesso apenas ao próprio GPS.'}};
+    if(payload.userId!=null&&![technicianId,userId].filter(Boolean).includes(toNumber(payload.userId)))return {statusCode:403,body:{ok:false,success:false,message:'Conta GPS diferente da sessão.'}};
   }
-
-  if (userExists) {
-    await prisma.technicianLocation.upsert({
-      where: { userId },
-      update: { latitude, longitude },
-      create: { userId, latitude, longitude },
-    });
-
-    await prisma.technicianTrack.create({
-      data: { userId, latitude, longitude },
-    });
-  }
-
-  await registerTelemetry({ userId, technicianId, vehicleId, latitude, longitude, trackingMode, batteryLevel, accuracyM });
-
-  const pools = await prisma.pool.findMany({
-    where: { active: true },
-    include: { client: true },
+  const technician=await prisma.technician.findUnique({where:{id:technicianId}});
+  if(!technician?.active)return {statusCode:403,body:{ok:false,success:false,message:'Técnico indisponível.'}};
+  const latitude=toNumber(payload.latitude),longitude=toNumber(payload.longitude);
+  const accuracyM=toNumber(payload.accuracyM??payload.accuracy),batteryLevel=toNumber(payload.batteryLevel);
+  if(!isValidCoordinate(latitude,longitude)||(accuracyM!==null&&(accuracyM<0||accuracyM>10000)))return {statusCode:400,body:{ok:false,success:false,message:'Leitura GPS inválida.'}};
+  const now=new Date(),recordedAt=payload.recordedAt?new Date(payload.recordedAt):now;
+  if(!Number.isFinite(recordedAt.getTime())||recordedAt.getTime()>now.getTime()+120000)return {statusCode:400,body:{ok:false,success:false,message:'Data da leitura GPS inválida.'}};
+  if(now-recordedAt>5*60*1000)return {statusCode:200,body:{ok:true,success:true,ignored:true,code:'STALE_LOCATION',message:'Leitura antiga ignorada; envie uma localização atual.'}};
+  const trackingMode=String(payload.trackingMode||payload.mode||'PASSIVE').slice(0,40);
+  const saved=await prisma.$transaction(async tx=>{
+    await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${`gps-technician:${technicianId}`}))::text`;
+    const previous=await tx.technicianLocation.findFirst({where:{OR:[{technicianId},...(userId?[{userId}]:[])]},orderBy:{updatedAt:'desc'}});
+    if(previous&&previous.updatedAt>=recordedAt)return false;
+    const data={technicianId,userId,latitude,longitude,updatedAt:recordedAt};
+    if(previous)await tx.technicianLocation.update({where:{id:previous.id},data});
+    else await tx.technicianLocation.create({data});
+    await tx.technicianTrack.create({data:{technicianId,userId,latitude,longitude,createdAt:recordedAt}});
+    return true;
   });
-
-  for (const pool of pools) {
-    if (!pool.client || !canSendArrivalAlert(pool.client)) continue;
-
-    const target = getTargetCoordinatesFromPool(pool);
-    if (!target) continue;
-
-    const d = distanceMeters({ lat: latitude, lng: longitude }, target);
-
-    if (d < ARRIVAL_RADIUS_METERS) {
-      const key = `${userId}_${pool.id}`;
-      const previous = lastAlerts[key] || 0;
-      const now = Date.now();
-
-      if (now - previous < ARRIVAL_ALERT_COOLDOWN_MS) {
-        continue;
-      }
-
-      lastAlerts[key] = now;
-      const message = `Técnico chegou a ${pool.name || "Piscina"} (${pool.client.name})`;
-
-      try {
-        const notification = await prisma.notification.create({
-          data: {
-            userId: userExists ? userId : null,
-            clientId: pool.client.id,
-            message,
-            type: "ARRIVAL",
-            eventType: "ARRIVAL_ALERT",
-            title: "Chegada ao cliente",
-            status: "PENDING",
-            metadata: {
-              poolId: pool.id,
-              poolName: pool.name,
-              technicianId: userExists?.id || null,
-            },
-          },
-        });
-
-        if (global.io) {
-          global.io.emit("new-notification", notification);
-        }
-      } catch (err) {
-        logger.warn("Falha ao criar notificação de chegada", err.message);
-      }
-    }
-  }
-
-  return {
-    statusCode: 200,
-    body: {
-      ok: true,
-      success: true,
-      message: "Telemetria GPS registada com sucesso.",
-    },
-  };
+  if(!saved)return {statusCode:200,body:{ok:true,success:true,ignored:true,code:'OLDER_LOCATION',message:'Já existe uma localização mais recente.'}};
+  await registerTelemetry({userId,technicianId,vehicleId:technician.vehicleId||null,latitude,longitude,trackingMode,batteryLevel,accuracyM});
+  if(global.io)global.io.emit('gps-update',{id:technicianId,technicianId,userId,name:technician.name,latitude,longitude,trackingMode,batteryLevel});
+  let proximityDeferred=false;
+  if(accuracyM!==null&&accuracyM<=100){try{await recordAssignedProximity({technicianId,latitude,longitude,now});}catch(_){proximityDeferred=true;logger.warn('Aviso de proximidade pendente; nova leitura voltará a tentar.');}}
+  return {statusCode:200,body:{ok:true,success:true,proximityDeferred,message:'Telemetria GPS registada com sucesso.'}};
 }
 
-async function validateGeofence({ visitId, currentLatitude, currentLongitude }) {
-  if (!visitId || !isValidCoordinate(currentLatitude, currentLongitude)) {
+async function recordAssignedProximity({technicianId,latitude,longitude,now}){
+  const due={OR:[{plannedDate:{gte:startOfDay(now),lte:endOfDay(now)}},{plannedDate:null,date:{gte:startOfDay(now),lte:endOfDay(now)}}]};
+  const visits=await prisma.serviceVisit.findMany({where:{technicianId,endAt:null,status:{in:['PLANNED','SCHEDULED','ASSIGNED','PENDING','IN_PROGRESS','STARTED']},...due},select:{id:true},orderBy:{id:'asc'}});
+  for(const candidate of visits)await prisma.$transaction(async tx=>{
+    await tx.$queryRaw`SELECT id FROM "ServiceVisit" WHERE id = ${candidate.id} FOR UPDATE`;
+    const visit=await tx.serviceVisit.findFirst({where:{id:candidate.id,technicianId,endAt:null,status:{in:['PLANNED','SCHEDULED','ASSIGNED','PENDING','IN_PROGRESS','STARTED']},...due},include:{pool:{include:{client:true}}}});
+    const pool=visit?.pool,client=pool?.client;
+    if(!pool?.active||!client?.active||['PAUSED','PAUSA','INACTIVE','ARCHIVED'].includes(String(client.status).toUpperCase())||!canSendArrivalAlert(client))return;
+    const target=getTargetCoordinatesFromPool(pool);if(!target||distanceMeters({lat:latitude,lng:longitude},target)>=ARRIVAL_RADIUS_METERS)return;
+    const sourceKey=`gps-proximity:${candidate.id}:${technicianId}`;
+    if(await tx.operationalReminder.findUnique({where:{sourceKey}}))return;
+    await tx.notification.create({data:{clientId:client.id,role:'ADMIN',type:'ARRIVAL',eventType:'ARRIVAL_ALERT',title:'Proximidade da visita',message:`Localização recebida perto de ${pool.name||'piscina'}. A chegada ainda precisa de confirmação.`,status:'PENDING',metadata:{visitId:visit.id,poolId:pool.id,technicianId,confirmation:'GPS_PROXIMITY',arrivalConfirmed:false}}});
+    await tx.operationalReminder.create({data:{sourceKey,title:'Proximidade GPS registada',dueDate:now,isCompleted:true,metadata:{visitId:visit.id,technicianId}}});
+  });
+}
+
+async function validateGeofence({ visitId, currentLatitude, currentLongitude, actor }) {
+  if (!Number.isSafeInteger(visitId) || visitId<=0 || !isValidCoordinate(currentLatitude, currentLongitude)) {
     return {
       statusCode: 400,
       body: {
@@ -295,7 +240,11 @@ async function validateGeofence({ visitId, currentLatitude, currentLongitude }) 
     };
   }
 
-  const visit = await prisma.serviceVisit.findUnique({
+  const role=normalizeRole(actor?.role),technicianId=Number(actor?.technicianId||actor?.id);
+  if(!['ADMIN','TECHNICIAN','TEAM_LEADER'].includes(role))return {statusCode:403,body:{success:false,error:'Sessão sem acesso à validação GPS.'}};
+  return prisma.$transaction(async tx=>{
+  await tx.$queryRaw`SELECT id FROM "ServiceVisit" WHERE id = ${visitId} FOR UPDATE`;
+  const visit = await tx.serviceVisit.findUnique({
     where: { id: visitId },
     include: {
       pool: { include: { client: true } },
@@ -309,6 +258,8 @@ async function validateGeofence({ visitId, currentLatitude, currentLongitude }) 
     };
   }
 
+  if(role!=='ADMIN'&&visit.technicianId!==technicianId)return {statusCode:403,body:{success:false,error:'Visita atribuída a outro técnico.'}};
+  if(visit.endAt||['DONE','COMPLETED','CLOSED','CONCLUIDA','CONCLUÍDA','CANCELLED','CANCELED','SKIPPED','ARCHIVED','NOT_DONE'].includes(String(visit.status).toUpperCase()))return {statusCode:409,body:{success:false,error:'A visita já foi concluída ou retirada.'}};
   const target = getTargetCoordinatesFromPool(visit.pool);
 
   if (!target) {
@@ -324,15 +275,16 @@ async function validateGeofence({ visitId, currentLatitude, currentLongitude }) 
       message: `Visita ${visitId} sem coordenadas alvo configuradas na piscina ou cliente.`,
       latitude: currentLatitude,
       longitude: currentLongitude,
-    });
+    }, tx);
 
     return {
       statusCode: 200,
       body: {
         success: true,
-        inside: true,
+        inside: null,
         degradedMode: true,
-        message: "Coordenadas da piscina/cliente em falta. Operação autorizada em modo degradado com auditoria.",
+        requiresManualConfirmation: true,
+        message: "Sem coordenadas da piscina. Confirme o local no modo de campo; a presença GPS não foi validada.",
       },
     };
   }
@@ -360,16 +312,16 @@ async function validateGeofence({ visitId, currentLatitude, currentLongitude }) 
     },
     latitude: currentLatitude,
     longitude: currentLongitude,
-  });
+  }, tx);
 
   if (inside) {
-    await prisma.serviceVisit.update({
+    await tx.serviceVisit.update({
       where: { id: visitId },
       data: {
         status: visit.status === "PLANNED" ? "IN_PROGRESS" : visit.status,
         startAt: visit.startAt || new Date(),
       },
-    }).catch(() => null);
+    });
   }
 
   return {
@@ -384,6 +336,7 @@ async function validateGeofence({ visitId, currentLatitude, currentLongitude }) 
         : "Aviso: localização atual diverge do raio geométrico cadastrado na piscina/cliente.",
     },
   };
+  });
 }
 
 async function getLiveLocations() {
@@ -527,7 +480,9 @@ async function getLiveLegacyLocations() {
 async function getHistoryById(id, options = {}) {
   const limit = clampLimit(options.limit, 1000, 50, 5000);
   const data = await prisma.technicianTrack.findMany({
-    where: { userId: id },
+    where: ['TECHNICIAN','TEAM_LEADER'].includes(normalizeRole(options.actor?.role))
+      ? {OR:[{technicianId:Number(options.actor.technicianId||options.actor.id)},...(options.actor.principalType==='USER'?[{technicianId:null,userId:Number(options.actor.userId||options.actor.id)}]:[])]}
+      : options.scope==='TECHNICIAN'?{technicianId:id}:{userId:id},
     orderBy: { createdAt: "asc" },
     take: limit,
   });

@@ -305,7 +305,7 @@ async function stopServerIfOwned(lifecycle) {
         workdayStatusOk && workdayBodyOk
       );
     }
-    pushCase("admin can call gps update", 200, (await http("POST", "/api/gps/update", adminToken, { userId: tech1.id, latitude: 37.1, longitude: -8.2 })).status);
+    pushCase("admin can call gps update", 200, (await http("POST", "/api/gps/update", adminToken, { technicianId: tech1.id, latitude: 37.1, longitude: -8.2 })).status);
 
     const passCount = cases.filter((c) => c.pass).length;
     const failCount = cases.length - passCount;

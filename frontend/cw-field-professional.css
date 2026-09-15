@@ -1,4 +1,17 @@
 /* Field workspace: one navigation, legible context and reachable actions. */
+body.cw-tech-field-page #dayReviewCard h2{margin:0 0 8px;font-size:21px}
+body.cw-tech-field-page #dayReviewBtn{width:100%;white-space:normal;min-height:48px;background:#075c4c!important;color:#fff!important;border-color:#075c4c}
+body.cw-tech-field-page #dayReviewBtn:disabled{background:#dce7e3!important;color:#365b51!important}
+body.cw-tech-field-page #handoverPanel .big{width:100%;white-space:normal;min-height:48px;background:#075c4c!important;color:#fff!important;border-color:#075c4c}
+body.cw-tech-field-page #handoverPanel .big:disabled{background:#dce7e3!important;color:#365b51!important}
+body.cw-tech-field-page #handoverPanel :is(select,textarea){width:100%;box-sizing:border-box;margin-bottom:10px;min-height:48px}
+body.cw-tech-field-page .day-review-group{margin:12px 0;padding:14px;border:1px solid #ccdcd6;border-radius:12px;background:#f5f9f7;overflow-wrap:anywhere}
+body.cw-tech-field-page .day-review-group h3{font-size:16px;margin:0 0 8px;color:inherit}
+body.cw-tech-field-page .day-review-group ul{padding-left:20px;margin:0}
+body.cw-tech-field-page .day-review-group li+li{margin-top:10px}
+body.cw-tech-field-page .day-review-critical{background:#fff0e5;color:#682b08;border-color:#e3b38d}
+body.cw-tech-field-page .day-review-unknown{background:#fff8de;color:#614a05;border-color:#dcc979}
+body.cw-tech-field-page #dayReviewResult small{display:block;line-height:1.5;color:#48645f}
 body.cw-tech-field-page{--cw-text:#142e2b;--cw-muted:#48645f;--cw-primary:#087660;--cw-tap:52px;background:#f2f6f5!important;color:var(--cw-text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif!important;padding:0!important;line-height:1.45;color-scheme:light}
 body.cw-tech-field-page .field{width:min(980px,100%);padding:16px 16px 190px;margin:auto;box-sizing:border-box}
 body.cw-tech-field-page .top{margin:-16px -16px 16px;padding:14px 16px;background:#fff;backdrop-filter:none;box-shadow:0 1px 0 #d5e2df;z-index:40}
@@ -32,6 +45,7 @@ body.cw-tech-field-page .field-action-sticky button{min-height:52px;font-size:14
 body.cw-tech-field-page #startBtn{background:#eff5f2!important;color:#075c4c!important;border:1px solid #bad4ca}
 body.cw-tech-field-page #finishBtn{background:#087660!important;color:white!important;border:1px solid #087660}
 body.cw-tech-field-page .field-tabs{left:50%;right:auto;transform:translateX(-50%);width:min(948px,calc(100% - 24px));bottom:calc(8px + env(safe-area-inset-bottom));grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;padding:5px;background:#fff;border:1px solid #ccdcd6;box-shadow:0 2px 12px #12392b12;box-sizing:border-box;z-index:50}
+body.cw-tech-field-page .field-action-sticky{animation:none}
 body.cw-tech-field-page .field-tabs button{font-size:12px;min-height:48px;min-width:0;padding:6px 2px;background:#fff;color:#365b51;letter-spacing:0}
 body.cw-tech-field-page .field-tabs button.active{background:#e1f2eb;color:#075c4c;box-shadow:inset 0 -3px #087660}
 body.cw-tech-field-page :is(.big,.route-btn,.doc-btn,.photo-btn,input,select){min-height:52px;font-size:16px}

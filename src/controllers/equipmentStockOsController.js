@@ -45,8 +45,11 @@ async function listVehicleStock(req, res) {
   return send(res, await EquipmentStockOsBusiness.listVehicleStock(req.params.vehicleId));
 }
 
+function stockFailure(res,error){const stockError=/^STOCK_(NEGATIVE_GUARD|NOT_FOUND|BALANCE_AMBIGUOUS):/.test(error.message||'');return res.status(stockError?409:500).json({ok:false,error:error.message?.startsWith('STOCK_BALANCE_AMBIGUOUS:')?'Existem saldos duplicados. Peça à gestão para reconciliar o stock antes de movimentar.':stockError?'Stock insuficiente. Atualize os saldos antes de repetir.':'Não foi possível confirmar o movimento de stock'});}
+
 async function transferStock(req, res) {
-  return send(res, await EquipmentStockOsBusiness.transferStock(req.body || {}, actor(req)));
+  try{return send(res, await EquipmentStockOsBusiness.transferStock({...req.body,userId:req.user?.id},`${req.user?.role}:${req.user?.id}`,req.user));}
+  catch(error){return stockFailure(res,error);}
 }
 
 async function listStockAlerts(req, res) {
@@ -62,7 +65,8 @@ async function suggestProducts(req, res) {
 }
 
 async function consumeProducts(req, res) {
-  return send(res, await EquipmentStockOsBusiness.consumeProductsForVisit(req.params.visitId, req.body || {}, actor(req)));
+  try{return send(res, await EquipmentStockOsBusiness.consumeProductsForVisit(req.params.visitId, {...req.body,userId:req.user?.id}, `${req.user?.role}:${req.user?.id}`, req.user));}
+  catch(error){return stockFailure(res,error);}
 }
 
 async function operationalDashboard(req, res) {

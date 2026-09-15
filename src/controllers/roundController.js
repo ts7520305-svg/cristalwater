@@ -95,37 +95,13 @@ async function visitAlreadyExists(poolId, plannedDate) {
 }
 
 async function createVisitFromRound(round, roundPool, plannedDate) {
-  const pool = roundPool.pool;
-  const technician = round.technicians?.[0]?.technician || null;
-
-  return prisma.serviceVisit.create({
-    data: {
-      clientId: pool?.clientId || null,
-      poolId: pool?.id || null,
-      roundId: round.id,
-      technicianId: technician?.id || null,
-      technicianName: technician?.name || null,
-      plannedDate,
-      status: "PLANNED",
-      reason: "AUTO_ROUND",
-      notes: `Gerado automaticamente pela ronda ${round.name}`,
-    },
-  });
+  return require('../business/admin/RoundAssignmentBusiness').generateVisit(round,roundPool,plannedDate);
 }
 
 async function generateFromRoundTemplates({ weekStart, force = false }) {
   const weekEnd = addDays(weekStart, 7);
 
-  if (force) {
-    await prisma.serviceVisit.deleteMany({
-      where: {
-        roundId: { not: null },
-        status: "PLANNED",
-        plannedDate: { gte: weekStart, lt: weekEnd },
-      },
-    });
-  }
-
+  // Generation is additive, including legacy requests with force=true.
   const rounds = await prisma.round.findMany({
     where: { active: true },
     include: {
@@ -144,7 +120,7 @@ async function generateFromRoundTemplates({ weekStart, force = false }) {
 
   for (const round of rounds) {
     for (const roundPool of round.pools || []) {
-      const plannedDate = dateForWeekday(weekStart, round.dayOfWeek, roundPool.order || 1);
+      for(const plannedDate of require('../services/roundScheduleService').weekDates(round,weekStart,roundPool.order||1)){
       const readiness = await getPoolRoundReadiness(prisma, roundPool.poolId);
       if (!readiness.ok) {
         blocked += 1;
@@ -154,8 +130,9 @@ async function generateFromRoundTemplates({ weekStart, force = false }) {
         skipped += 1;
         continue;
       }
-      await createVisitFromRound(round, roundPool, plannedDate);
-      created += 1;
+      const visit=await createVisitFromRound(round, roundPool, plannedDate);
+      if(visit)created += 1;else skipped += 1;
+      }
     }
   }
 
@@ -197,17 +174,8 @@ async function generateFallbackFromPools({ weekStart }) {
         continue;
       }
 
-      await prisma.serviceVisit.create({
-        data: {
-          clientId: pool.clientId,
-          poolId: pool.id,
-          plannedDate,
-          status: "PLANNED",
-          reason: "AUTO_POOL_FALLBACK",
-          notes: "Gerado automaticamente por fallback de piscinas ativas",
-        },
-      });
-      created += 1;
+      const visit=await require('../business/admin/RoundAssignmentBusiness').generateVisit(null,{pool},plannedDate);
+      if(visit)created += 1;else skipped += 1;
     }
   }
 

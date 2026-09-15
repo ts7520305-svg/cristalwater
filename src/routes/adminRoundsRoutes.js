@@ -7,6 +7,8 @@ const router = express.Router();
 const auth = require("../middlewares/authMiddleware");
 
 const {
+  coverage,
+  transferVisits,
   listRounds,
   getWeeklyPlan,
   createRound,
@@ -19,6 +21,9 @@ const {
 } = require("../controllers/adminRoundsController");
 
 router.use(auth("ADMIN"));
+
+router.get('/coverage', coverage);
+router.post('/transfer-visits', transferVisits);
 
 // LISTAR RONDAS
 router.get("/", listRounds);

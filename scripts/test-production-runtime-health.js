@@ -11,9 +11,9 @@ const endpoints = [
   { id: "system-health", path: "/api/system/health", expected: [200], maxMs: 2500 },
   { id: "system-version", path: "/api/system/version", expected: [200], maxMs: 2500 },
   { id: "system-modules", path: "/api/system/modules", expected: [200], maxMs: 2500 },
-  { id: "dashboard-metrics", path: "/api/dashboard/metrics", expected: [200, 401, 403], maxMs: 5000 },
-  { id: "core-dashboard", path: "/api/core/dashboard", expected: [200, 401, 403], maxMs: 5000 },
-  { id: "gps-live", path: "/api/gps/live", expected: [200, 401, 403], maxMs: 5000 },
+  { id: "dashboard-metrics", path: "/api/dashboard/metrics", expected: [401, 403], maxMs: 5000 },
+  { id: "core-dashboard", path: "/api/core/dashboard", expected: [401, 403], maxMs: 5000 },
+  { id: "gps-live", path: "/api/gps/live", expected: [401, 403], maxMs: 5000 },
 ];
 
 function ensureDir(filePath) {

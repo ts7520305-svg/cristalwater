@@ -123,7 +123,7 @@ async function login(){
     }
 
     if (window.CristalAuth) {
-      window.CristalAuth.persistSession(data.token, sessionUser);
+      await window.CristalAuth.persistSession(data.token, sessionUser);
     } else {
       localStorage.setItem("cristalwater_jwt", data.token);
       localStorage.setItem("cristalwater_user", JSON.stringify(sessionUser));

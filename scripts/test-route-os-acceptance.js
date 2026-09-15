@@ -169,6 +169,9 @@ async function main() {
   const adminLogin = await request("POST", "/api/auth/login", {email: process.env.ADMIN_EMAIL, password: process.env.ADMIN_PASSWORD});
   if (adminLogin.status !== 200 || !adminLogin.body?.token) throw new Error(`Admin login failed: ${adminLogin.status}`);
   authToken = adminLogin.body.token;
+  await testRoundAssignmentPeriods(adminLogin.body.user);
+  await testVisitCoverage(adminLogin.body.user);
+  await testRecurrence(adminLogin.body.user);
   const startedAt = Date.now();
   const suffix = uniqueSuffix();
   const pin = String(740000 + (Date.now() % 100000)).slice(-6);
@@ -459,6 +462,175 @@ async function main() {
   );
 
   process.exit(ok ? 0 : 1);
+}
+
+async function testRoundAssignmentPeriods(adminUser){
+  const assert=require('node:assert/strict');
+  const business=require('../src/business/admin/RoundAssignmentBusiness');
+  const a=await prisma.technician.create({data:{name:'Ronda habitual QA',active:true}}),b=await prisma.technician.create({data:{name:'Substituição QA',active:true}});
+  const round=await prisma.round.create({data:{name:'Atribuição por datas QA',dayOfWeek:new Date().getDay(),technicians:{create:{technicianId:a.id}}}});
+  const base=`/api/rounds/${round.id}/technicians`;
+  const payload={technicianId:b.id,period:'RANGE',startsOn:'2032-12-28',endsOn:'2033-01-03',reason:'Férias entre anos'};
+  const planned=await prisma.serviceVisit.create({data:{roundId:round.id,technicianId:a.id,plannedDate:new Date('2033-01-03T08:00:00'),status:'PLANNED'}});
+  const started=await prisma.serviceVisit.create({data:{roundId:round.id,technicianId:a.id,plannedDate:new Date('2033-01-02T08:00:00'),status:'PLANNED',startAt:new Date()}});
+  const after=await prisma.serviceVisit.create({data:{roundId:round.id,technicianId:a.id,plannedDate:new Date('2033-01-04T08:00:00'),status:'PLANNED'}});
+  const preview=await request('POST',base,{...payload,preview:true});assert.equal(preview.status,200,JSON.stringify(preview.body));assert.equal(preview.body.eligible,1);assert.equal(preview.body.preserved,1);assert.equal(await prisma.roundAssignment.count({where:{roundId:round.id}}),0);
+  const saved=await request('POST',base,payload);assert.equal(saved.status,200,JSON.stringify(saved.body));assert.equal(saved.body.updated,1);
+  assert.equal((await prisma.serviceVisit.findUnique({where:{id:planned.id}})).technicianId,b.id);
+  assert.equal(await prisma.operationalReminder.count({where:{sourceKey:{startsWith:`visit-receipt:${planned.id}:`}}}),1);
+  assert.equal(await prisma.operationalReminder.count({where:{sourceKey:{startsWith:`visit-receipt:${started.id}:`}}}),0);
+  for(const visit of [started,after])assert.equal((await prisma.serviceVisit.findUnique({where:{id:visit.id}})).technicianId,a.id);
+  const withBase=await prisma.round.findUnique({where:{id:round.id},include:{technicians:{include:{technician:true}}}});
+  assert.equal((await business.resolveTechnician(prisma,withBase,new Date('2033-01-03T23:59:59'))).id,b.id);
+  assert.equal((await business.resolveTechnician(prisma,withBase,new Date('2033-01-04T00:00:00'))).id,a.id);
+  assert.equal((await request('POST',base,{...payload,endsOn:'2032-12-20'})).status,400);
+  assert.equal((await request('POST',base,{...payload,startsOn:'2032-02-31'})).status,400);
+  for(const [period,end] of [['DAY','2032-02-01'],['WEEK','2032-02-07'],['MONTH','2032-02-29']]){
+    const dates=business.interval({period,startsOn:'2032-01-31'});assert.equal(dates.endsBefore.getFullYear(),Number(end.slice(0,4)));assert.equal(dates.endsBefore.getMonth()+1,Number(end.slice(5,7)));assert.equal(dates.endsBefore.getDate(),Number(end.slice(8,10)));
+  }
+  const permanent=await request('POST',base,{...payload,period:'PERMANENT',startsOn:'2033-02-01'});assert.equal(permanent.status,200);assert.equal(permanent.body.assignment.endsBefore,null);
+  assert.equal((await business.resolveTechnician(prisma,withBase,new Date('2040-01-01T08:00:00'))).id,b.id);
+  const now=new Date(),date=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const client=await prisma.client.create({data:{name:'Cliente geração QA',active:true}});
+  const pool=await prisma.pool.create({data:{name:'Piscina geração QA',clientId:client.id,volumeM3:40,active:true,technicalSheet:{create:{volumeM3:40,disinfectionType:'CHLORINE'}}}});
+  await prisma.roundPool.create({data:{roundId:round.id,poolId:pool.id,order:1}});
+  assert.equal((await request('POST',base,{...payload,period:'DAY',startsOn:date})).status,200);
+  const generated=await Promise.all([request('POST','/api/round-planner/generate',{}),request('POST','/api/round-planner/generate',{})]);generated.forEach(reply=>assert.equal(reply.status,200,JSON.stringify(reply.body)));
+  const visits=await prisma.serviceVisit.findMany({where:{poolId:pool.id}});assert.equal(visits.length,1);assert.equal(visits[0].technicianId,b.id);
+  assert.equal(await prisma.operationalReminder.count({where:{sourceKey:{startsWith:`visit-receipt:${visits[0].id}:`}}}),1);
+  await prisma.serviceVisit.update({where:{id:visits[0].id},data:{internalNotes:'Nota preservada QA',ph:7.3}});
+  const forced=await request('POST','/api/round-planner/generate',{force:true});assert.equal(forced.status,200);
+  const retained=await prisma.serviceVisit.findUnique({where:{id:visits[0].id}});assert.equal(retained.internalNotes,'Nota preservada QA');assert.equal(retained.ph,7.3);
+  assert.equal(await prisma.operationalReminder.count({where:{sourceKey:{startsWith:`visit-receipt:${retained.id}:`}}}),1);
+  const next=new Date(now);next.setDate(next.getDate()+14);next.setHours(8,0,0,0);
+  const fallback=await Promise.all([business.generateVisit(null,{pool},next),business.generateVisit(null,{pool},next)]);assert.equal(fallback.filter(Boolean).length,1);
+  await prisma.client.update({where:{id:client.id},data:{archiveStatus:'PAUSA'}});next.setDate(next.getDate()+1);assert.equal(await business.generateVisit(null,{pool},next),null);
+  await prisma.client.update({where:{id:client.id},data:{archiveStatus:'ATIVO'}});
+  await prisma.technician.update({where:{id:a.id},data:{active:false}});next.setDate(next.getDate()+1);
+  while(next.getDay()!==round.dayOfWeek)next.setDate(next.getDate()+1);
+  const unassigned=await business.generateVisit(withBase,{pool},next);assert.equal(unassigned.technicianId,null);assert.equal(await prisma.operationalReminder.count({where:{sourceKey:{startsWith:`visit-receipt:${unassigned.id}:`}}}),0);
+  await prisma.technician.update({where:{id:a.id},data:{active:true}});
+
+  const plan=await request('GET',`/api/rounds/week?date=${date}`);assert.equal(plan.status,200);assert(plan.body.plan.days.some(day=>day.rounds.some(item=>item.id===round.id&&item.technicians[0]?.id===b.id)));
+  const {chromium}=require('playwright');
+  const browser=await chromium.launch({headless:true,...(process.env.CW_CHROMIUM_PATH?{executablePath:process.env.CW_CHROMIUM_PATH,args:['--no-sandbox','--disable-gpu','--disable-dev-shm-usage']}:{})});
+  try{
+    const context=await browser.newContext({viewport:{width:1280,height:900}});
+    await context.addInitScript(({token,user})=>{for(const key of ['token','cristalwater_jwt'])localStorage.setItem(key,token);for(const key of ['user','cristalwater_user'])localStorage.setItem(key,JSON.stringify({...user,role:'ADMIN'}));},{token:authToken,user:adminUser||{}});
+    const page=await context.newPage();const errors=[];page.on('pageerror',error=>errors.push(error.message));
+    await page.goto(BASE+'/admin-rounds',{waitUntil:'networkidle'});
+    await page.locator('#assignTechRound').selectOption(String(round.id));await page.locator('#assignTech').selectOption(String(b.id));
+    await page.locator('#assignmentPeriod').selectOption('PERMANENT');assert(await page.locator('#assignmentEndField').isHidden());
+    await page.locator('#assignmentStart').fill('2034-01-01');await page.locator('#assignmentReason').fill('Mudança permanente QA');
+    const before=await prisma.roundAssignment.count({where:{roundId:round.id}});
+    await page.locator('#assignTechBtn').click();
+    await page.getByRole('dialog').waitFor();assert.match(await page.getByRole('dialog').textContent(),/sem fim/);
+    await page.getByRole('dialog').getByRole('button',{name:/Cancelar/i}).click();
+    assert.equal(await prisma.roundAssignment.count({where:{roundId:round.id}}),before);
+    assert.deepEqual(errors,[]);
+    await context.close();
+  }finally{await browser.close();}
+  // Remove this template from later acceptance fixtures; preserve its history and assignments.
+  await prisma.round.update({where:{id:round.id},data:{active:false}});
+  console.log('PASS round date ranges include final day, cross years, expire to base, preserve started visits and generate once with assigned technician');
+}
+
+async function testVisitCoverage(adminUser){
+  const assert=require('node:assert/strict'),uuid=()=>require('node:crypto').randomUUID();
+  const old=new Date();old.setDate(old.getDate()-20);const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
+  const a=await prisma.technician.create({data:{name:'Cobertura origem QA',active:true,pin:'984731'}}),b=await prisma.technician.create({data:{name:'Cobertura destino QA',active:true}});
+  const client=await prisma.client.create({data:{name:'Cliente cobertura QA',active:true}});
+  const pool=await prisma.pool.create({data:{name:'Piscina cobertura QA',clientId:client.id,createdAt:old}});
+  const done=await prisma.serviceVisit.create({data:{poolId:pool.id,clientId:client.id,technicianId:a.id,status:'DONE',endAt:old}});
+  const pending=await prisma.serviceVisit.create({data:{poolId:pool.id,clientId:client.id,technicianId:a.id,status:'PLANNED',plannedDate:yesterday}});
+  const started=await prisma.serviceVisit.create({data:{poolId:pool.id,clientId:client.id,technicianId:a.id,status:'IN_PROGRESS',plannedDate:new Date(),startAt:new Date()}});
+  const round=await prisma.round.create({data:{name:'Cobertura hoje QA',active:true,dayOfWeek:new Date().getDay()}});
+  const missing=await prisma.pool.create({data:{name:'Piscina sem geração QA',clientId:client.id}});await prisma.roundPool.create({data:{roundId:round.id,poolId:missing.id,order:1}});
+  const historical=await prisma.serviceVisit.create({data:{poolId:pool.id,clientId:client.id,technicianId:a.id,status:'INCOMPLETE',plannedDate:old}});
+  await prisma.operationalReminder.create({data:{sourceKey:`incomplete:${historical.id}:${uuid()}`,title:'Regresso concluído QA',dueDate:old,isCompleted:true,metadata:{visitId:historical.id,resolvedByReturnVisitId:done.id}}});
+  const coverage=await request('GET','/api/rounds/coverage');assert.equal(coverage.status,200);
+  const row=coverage.body.rows.find(row=>row.poolId===pool.id);assert(row.flags.includes('STALE_COMPLETION'));assert(row.visits.find(v=>v.id===pending.id).issues.includes('OVERDUE'));assert(!row.visits.find(v=>v.id===started.id).canTransfer);assert(!row.visits.some(v=>v.id===historical.id));
+  assert(coverage.body.rows.find(row=>row.poolId===missing.id).flags.includes('NOT_SCHEDULED_TODAY'));
+  const login=await request('POST','/api/technician-auth/login',{pin:a.pin});
+  const foreign=await fetch(BASE+'/api/rounds/coverage',{headers:{Authorization:`Bearer ${login.body.token}`}});assert.equal(foreign.status,403);
+  const service=require('../src/services/autoVisitAlertService');await Promise.all([service.runAutoVisitAlerts(),service.runAutoVisitAlerts()]);
+  const where={eventType:'VISIT_COVERAGE',metadata:{path:['poolId'],equals:pool.id}};assert.equal(await prisma.notification.count({where}),1);assert.equal((await prisma.notification.findFirst({where})).role,'ADMIN');
+  const payload={visitIds:[pending.id],technicianId:b.id,reason:'Falta de produtos químicos: confirmar stock da viatura de apoio'};
+  const endpoint='/api/rounds/transfer-visits';
+  assert.equal((await request('POST',endpoint,{...payload,visitIds:[pending.id,started.id],preview:true})).status,409);
+  let preview=await request('POST',endpoint,{...payload,preview:true});assert.equal(preview.status,200);assert.equal((await prisma.serviceVisit.findUnique({where:{id:pending.id}})).technicianId,a.id);
+  await prisma.serviceVisit.update({where:{id:pending.id},data:{notes:'Alteração simultânea da gestão'}});
+  assert.equal((await request('POST',endpoint,{...payload,expected:preview.body.visits,requestId:uuid()})).status,409);
+  assert.equal((await prisma.serviceVisit.findUnique({where:{id:pending.id}})).technicianId,a.id);
+  preview=await request('POST',endpoint,{...payload,preview:true});const requestId=uuid();
+  const replies=await Promise.all([request('POST',endpoint,{...payload,expected:preview.body.visits,requestId}),request('POST',endpoint,{...payload,expected:preview.body.visits,requestId})]);replies.forEach(reply=>assert.equal(reply.status,200,JSON.stringify(reply.body)));
+  for(const changed of [{technicianId:a.id},{visitIds:[started.id]},{reason:'Motivo diferente reutilizando o mesmo pedido'}]){
+    const rejected=await request('POST',endpoint,{...payload,...changed,expected:preview.body.visits,requestId});
+    assert.equal(rejected.status,409,JSON.stringify(rejected.body));
+  }
+  const malformed=await request('POST',endpoint,{...payload,technicianId:a.id,expected:[null],requestId:uuid()});
+  assert.equal(malformed.status,409,JSON.stringify(malformed.body));
+  assert.equal(await prisma.technicalHistory.count({where:{type:'VISIT_REASSIGNED',poolId:pool.id}}),1);
+  const saved=await prisma.serviceVisit.findUnique({where:{id:pending.id}});assert.equal(saved.technicianId,b.id);assert.equal(saved.plannedDate.getTime(),yesterday.getTime());assert.equal(saved.endAt,null);
+  assert.equal((await prisma.serviceVisit.findUnique({where:{id:started.id}})).technicianId,a.id);
+  // A real mobile office preview can be cancelled without writing, then confirmed.
+  const {chromium}=require('playwright');const browser=await chromium.launch({headless:true,executablePath:process.env.CW_CHROMIUM_PATH,args:['--no-sandbox','--disable-dev-shm-usage']});
+  try{
+    const context=await browser.newContext({viewport:{width:390,height:844}});
+    await context.addInitScript(({token,user})=>{for(const key of ['token','cristalwater_jwt'])localStorage.setItem(key,token);for(const key of ['user','cristalwater_user'])localStorage.setItem(key,JSON.stringify(user));},{token:authToken,user:adminUser});
+    const page=await context.newPage();await page.goto(BASE+'/admin-rounds',{waitUntil:'networkidle'});
+    await page.locator(`[data-transfer-visit="${pending.id}"]`).check();await page.locator('#coverageTechnician').selectOption(String(a.id));await page.locator('#coverageCause').selectOption({label:'Falta de produtos químicos'});await page.locator('#coverageReason').fill('Produto em falta confirmado; reposição na viatura');
+    await page.locator('#coverageTransfer button').click();await page.getByRole('dialog').getByRole('button',{name:'Cancelar',exact:true}).click();assert.equal((await prisma.serviceVisit.findUnique({where:{id:pending.id}})).technicianId,b.id);
+    await page.locator('#coverageTransfer button').click();await page.getByRole('dialog').getByRole('button',{name:'Transferir',exact:true}).click();await page.waitForFunction(()=>document.getElementById('coverageStatus').textContent.includes('transferida(s)'));
+    assert.equal((await prisma.serviceVisit.findUnique({where:{id:pending.id}})).technicianId,a.id);
+    for(const width of [320,390]){await page.setViewportSize({width,height:844});const sizes=await page.locator('#coveragePanel').evaluate(node=>({width:node.clientWidth,scroll:node.scrollWidth}));assert(sizes.scroll<=sizes.width+1,JSON.stringify(sizes));}
+    if(process.env.CW_CAPTURE_UI==='true'){require('node:fs').mkdirSync('reports/field-ui',{recursive:true});await page.locator('#coverageTransfer').screenshot({path:'reports/field-ui/ADMIN_COVERAGE_TRANSFER.png'});}
+    await context.close();
+  }finally{await browser.close();}
+  await prisma.client.update({where:{id:client.id},data:{archiveStatus:'PAUSA'}});assert(!(await service.getCoverage()).rows.some(row=>row.poolId===pool.id));await service.runAutoVisitAlerts();assert.equal(await prisma.notification.count({where:{...where,status:'PENDING'}}),0);
+  await prisma.round.update({where:{id:round.id},data:{active:false}});
+  console.log('PASS coverage ignores started-only maintenance, excludes paused clients, deduplicates office alerts and transfers pending work with preview/concurrency guards');
+}
+
+async function testRecurrence(adminUser){
+  const assert=require('node:assert/strict'),schedule=require('../src/services/roundScheduleService'),business=require('../src/business/admin/RoundAssignmentBusiness');
+  const monthly=await request('POST','/api/rounds',{name:'Mensal QA',recurrence:'MONTHLY',dayOfMonth:31,startsOn:'2032-02-01',endsOn:'2032-03-31'});assert.equal(monthly.status,200,JSON.stringify(monthly.body));const round=monthly.body.round;
+  const client=await prisma.client.create({data:{name:'Cliente recorrência QA',active:true}}),tech=await prisma.technician.create({data:{name:'Técnico recorrência QA',active:true}});
+  const pool=await prisma.pool.create({data:{name:'Piscina recorrência mensal QA',clientId:client.id,active:true,volumeM3:40,technicalSheet:{create:{volumeM3:40,disinfectionType:'CHLORINE'}}}});
+  await prisma.roundPool.create({data:{roundId:round.id,poolId:pool.id,order:1}});await prisma.roundTechnician.create({data:{roundId:round.id,technicianId:tech.id}});
+  const withTech=await prisma.round.findUnique({where:{id:round.id},include:{technicians:{include:{technician:true}}}});
+  assert.equal(await business.generateVisit(withTech,{pool},new Date('2032-02-28T08:00:00')),null);
+  const leap=await Promise.all([business.generateVisit(withTech,{pool},new Date('2032-02-29T08:00:00')),business.generateVisit(withTech,{pool},new Date('2032-02-29T08:00:00'))]);assert.equal(leap.filter(Boolean).length,1);
+  assert(await business.generateVisit(withTech,{pool},new Date('2032-03-31T08:00:00')));assert.equal(await business.generateVisit(withTech,{pool},new Date('2032-04-30T08:00:00')),null);
+  assert(schedule.matches({...round,startsOn:null,endsOn:null},new Date('2033-02-28T08:00:00')));assert(!schedule.matches(round,new Date('2032-03-30T08:00:00')));
+  assert.equal((await request('PUT',`/api/rounds/${round.id}`,{endsOn:'2032-01-01'})).status,400);assert.equal((await request('POST','/api/rounds',{name:'Invalid QA',recurrence:'MONTHLY',dayOfMonth:32})).status,400);assert.equal((await request('POST','/api/rounds',{name:'Invalid QA',recurrence:'DAILY',startsOn:'2032-02-31'})).status,400);
+  const monthPlan=await request('GET','/api/rounds/week?date=2032-02-29');assert(monthPlan.body.plan.days.find(d=>d.date.startsWith('2032-02-29')).rounds.some(r=>r.id===round.id));
+  const start=new Date();start.setDate(start.getDate()+1);const end=new Date(start);end.setDate(end.getDate()+2);const ymd=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const daily=await request('POST','/api/rounds',{name:'Diária limitada QA',recurrence:'DAILY',startsOn:ymd(start),endsOn:ymd(end)});assert.equal(daily.status,200);
+  const dailyPool=await prisma.pool.create({data:{name:'Piscina diária QA',clientId:client.id,active:true,volumeM3:40,technicalSheet:{create:{volumeM3:40,disinfectionType:'CHLORINE'}}}});
+  await prisma.roundPool.create({data:{roundId:daily.body.round.id,poolId:dailyPool.id,order:1}});await prisma.roundTechnician.create({data:{roundId:daily.body.round.id,technicianId:tech.id}});
+  const generated=await Promise.all([request('POST','/api/round-planner/generate',{}),request('POST','/api/round-planner/generate',{})]);generated.forEach(r=>assert.equal(r.status,200));
+  const visits=await prisma.serviceVisit.findMany({where:{roundId:daily.body.round.id},orderBy:{plannedDate:'asc'}});assert.equal(visits.length,3);assert.equal(ymd(visits[0].plannedDate),ymd(start));assert.equal(ymd(visits[2].plannedDate),ymd(end));
+  assert.equal(await prisma.operationalReminder.count({where:{sourceKey:{startsWith:'visit-receipt:'},OR:visits.map(v=>({metadata:{path:['visitId'],equals:v.id}}))}}),3);
+  assert.equal((await request('PUT',`/api/rounds/${daily.body.round.id}`,{recurrence:'WEEKLY',dayOfWeek:0,startsOn:null,endsOn:null})).status,200);assert.equal(await prisma.serviceVisit.count({where:{roundId:daily.body.round.id}}),3);
+  for(const id of [round.id,daily.body.round.id])await prisma.round.update({where:{id},data:{active:false}});
+  const {chromium}=require('playwright');const browser=await chromium.launch({headless:true,executablePath:process.env.CW_CHROMIUM_PATH,args:['--no-sandbox','--disable-dev-shm-usage']});
+  try{
+    const context=await browser.newContext({viewport:{width:390,height:844}});
+    await context.addInitScript(({token,user})=>{for(const k of ['token','cristalwater_jwt'])localStorage.setItem(k,token);for(const k of ['user','cristalwater_user'])localStorage.setItem(k,JSON.stringify(user));},{token:authToken,user:adminUser});
+    const page=await context.newPage();await page.goto(BASE+'/admin-rounds',{waitUntil:'networkidle'});
+    const name='Mensal criada no ecrã QA '+Date.now();await page.locator('#roundName').fill(name);await page.locator('#roundRecurrence').selectOption('MONTHLY');assert(await page.locator('#roundWeekField').isHidden());assert(await page.locator('#roundMonthField').isVisible());
+    await page.locator('#roundMonthDay').fill('31');await page.locator('#roundStartsOn').fill('2032-02-01');await page.locator('#roundEndsOn').fill('2032-03-31');await page.locator('#createRoundBtn').click();
+    await page.waitForFunction(name=>[...document.querySelectorAll('.round-card')].some(card=>card.textContent.includes(name)),name);
+    const created=await prisma.round.findFirst({where:{name}});assert.equal(created.recurrence,'MONTHLY');assert.equal(created.dayOfMonth,31);
+    const card=page.locator(`.round-card[data-round-id="${created.id}"]`);for(const width of [320,390,1280]){await page.setViewportSize({width,height:900});const sizes=await card.locator('.round-editor').evaluate(n=>({width:n.clientWidth,scroll:n.scrollWidth}));assert(sizes.scroll<=sizes.width+1,JSON.stringify(sizes));}
+    await page.setViewportSize({width:390,height:844});if(process.env.CW_CAPTURE_UI)await card.screenshot({path:'reports/field-ui/ADMIN_MONTHLY_ROUND.png'});
+    await card.locator('[data-round-field=recurrence]').selectOption('DAILY');assert(await card.locator('[data-schedule-month]').isHidden());await card.locator('[data-round-field=startsOn]').fill('2032-03-01');await card.locator('[data-round-field=endsOn]').fill('2032-03-03');const savedResponse=page.waitForResponse(r=>r.url().endsWith('/api/rounds/'+created.id)&&r.request().method()==='PUT');await card.locator('[data-save-round]').click();assert.equal((await savedResponse).status(),200);
+    await page.waitForFunction(()=>document.querySelector('#roundsByDay')?.textContent.includes('Rondas diárias'));
+    const edited=await prisma.round.findUnique({where:{id:created.id}});assert.equal(edited.recurrence,'DAILY');assert.equal(edited.endsOn.toISOString().slice(0,10),'2032-03-03');await prisma.round.update({where:{id:created.id},data:{active:false}});
+    await context.close();
+  }finally{await browser.close();}
+  console.log('PASS daily/monthly recurrence, leap-year month end, inclusive window, preserved visits and concurrent generation');
 }
 
 main().catch((error) => {

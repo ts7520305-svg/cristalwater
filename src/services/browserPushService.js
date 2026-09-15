@@ -17,34 +17,55 @@ function validateSubscription(value){
 }
 async function subscribe(user,value){
  const subscription=validateSubscription(value),identity=owner(user);
- const existing=await prisma.webPushSubscription.findUnique({where:{endpoint:subscription.endpoint}});
- if(existing&&(existing.role!==identity.role||existing.principalId!==identity.principalId))throw Object.assign(new Error('Subscrição de outra sessão. Volte a ativar as notificações neste dispositivo.'),{statusCode:409});
- return prisma.webPushSubscription.upsert({where:{endpoint:subscription.endpoint},create:{...identity,endpoint:subscription.endpoint,subscription,active:true},update:{subscription,active:true}});
+ return prisma.$transaction(async tx=>{
+  const lockKey=`browser-push-subscription:${subscription.endpoint}`;
+  await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))::text`;
+  const existing=await tx.webPushSubscription.findUnique({where:{endpoint:subscription.endpoint}});
+  if(existing&&(existing.role!==identity.role||existing.principalId!==identity.principalId))throw Object.assign(new Error('Subscrição de outra sessão. Volte a ativar as notificações neste dispositivo.'),{statusCode:409});
+  return tx.webPushSubscription.upsert({where:{endpoint:subscription.endpoint},create:{...identity,endpoint:subscription.endpoint,subscription,active:true},update:{subscription,active:true}});
+ });
 }
 async function unsubscribe(user,endpoint){return prisma.webPushSubscription.updateMany({where:{...owner(user),endpoint:String(endpoint)},data:{active:false}});}
+async function stillCurrent(notification){
+ const fresh=await prisma.notification.findUnique({where:{id:notification.id},select:{status:true}});
+ if(!fresh||!['PENDING','SENT'].includes(fresh.status))return false;
+ const reminder=await prisma.operationalReminder.findUnique({where:{id:Number(notification.metadata?.reminderId)||0}});
+ const role=normalizeRole(notification.role);
+ const critical=notification.eventType==='PUMP_MANUAL_OVERDUE'?reminder?.sourceKey?.startsWith('pump:'):(reminder?.sourceKey?.startsWith('water:')||/^Agua aberta - /i.test(reminder?.title||''));
+ const valid=critical&&reminder&&!reminder.isCompleted&&(role==='ADMIN'||reminder.assignedToTechnicianId===Number(notification.metadata?.technicianId));
+ if(!valid)await prisma.notification.updateMany({where:{id:notification.id,status:{in:['PENDING','SENT']}},data:{status:'SUPERSEDED'}});
+ return Boolean(valid);
+}
 async function deliverWaterNotifications(){
  if(!areExternalNotificationsEnabled())return {skipped:true,reason:'EXTERNAL_NOTIFICATIONS_DISABLED'};
  if(!configured())return {skipped:true,reason:'WEB_PUSH_NOT_CONFIGURED'};
  const config=configuration();webPush.setVapidDetails(config.subject,config.publicKey,config.privateKey);
- const notifications=await prisma.notification.findMany({where:{eventType:{in:['WATER_OPEN_OVERDUE','PUMP_MANUAL_OVERDUE']},status:{in:['PENDING','SENT']}},orderBy:{createdAt:'desc'},take:100});
- let sent=0;
+ let sent=0,cursor=0;
+ while(true){
+ const notifications=await prisma.notification.findMany({where:{id:{gt:cursor},eventType:{in:['WATER_OPEN_OVERDUE','PUMP_MANUAL_OVERDUE']},status:{in:['PENDING','SENT']}},orderBy:{id:'asc'},take:100});
+ if(!notifications.length)break;
+ cursor=notifications[notifications.length-1].id;
  for(const notification of notifications){
   const metadata=notification.metadata||{};if(metadata.webPushComplete)continue;
   const role=normalizeRole(notification.role);
   if(role!=='ADMIN'&&role!=='TECHNICIAN')continue;
   if(role==='TECHNICIAN'&&!metadata.technicianId)continue;
+  if(!await stillCurrent(notification))continue;
   const subscriptions=await prisma.webPushSubscription.findMany({where:{active:true,role,...(role==='TECHNICIAN'?{principalId:Number(metadata.technicianId)}:{})}});
   const delivered=new Set(metadata.webPushDeliveredTo||[]);
   for(const subscription of subscriptions){
    if(delivered.has(subscription.id))continue;
    if(!(await validateJwtPrincipal({id:subscription.principalId,role:subscription.role})).ok){await prisma.webPushSubscription.update({where:{id:subscription.id},data:{active:false}});continue;}
+   if(!await stillCurrent(notification))break;
    try{
-    await webPush.sendNotification(subscription.subscription,JSON.stringify({title:notification.title,body:notification.message,tag:`water-${metadata.reminderId}`,url:role==='ADMIN'?'/admin-alerts?origin=water-open':'/technician-field-mode'}),{TTL:3600,urgency:'high',timeout:10000});
+    await webPush.sendNotification(subscription.subscription,JSON.stringify({owner:`${role}:${subscription.principalId}`,title:notification.title,body:notification.message,tag:`water-${metadata.reminderId}`,url:role==='ADMIN'?'/admin-alerts?origin=water-open':'/technician-field-mode'}),{TTL:3600,urgency:'high',timeout:10000});
     delivered.add(subscription.id);sent++;
    }catch(error){if([404,410].includes(error.statusCode))await prisma.webPushSubscription.update({where:{id:subscription.id},data:{active:false}});else console.warn('WEB_PUSH_DELIVERY_FAILED',notification.id,error.statusCode||'NETWORK');}
   }
-  if(delivered.size)await prisma.notification.update({where:{id:notification.id},data:{metadata:{...metadata,webPushDeliveredTo:[...delivered],webPushComplete:subscriptions.length>0&&subscriptions.every(s=>delivered.has(s.id))}}});
+  if(delivered.size)await prisma.notification.updateMany({where:{id:notification.id,status:{in:['PENDING','SENT']}},data:{metadata:{...metadata,webPushDeliveredTo:[...delivered],webPushComplete:subscriptions.length>0&&subscriptions.every(s=>delivered.has(s.id))}}});
+ }
+ if(notifications.length<100)break;
  }
  return {sent};
 }
-module.exports={configuration,configured,owner,validateSubscription,subscribe,unsubscribe,deliverWaterNotifications};
+module.exports={configuration,configured,owner,validateSubscription,subscribe,unsubscribe,deliverWaterNotifications,stillCurrent};

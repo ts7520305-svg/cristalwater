@@ -799,3 +799,71 @@ window.addEventListener("DOMContentLoaded", () => {
   applyQueryFilters();
   loadAlerts();
 });
+
+// The office plans a separate return; the original field report remains historical.
+(() => {
+  let revision=0,shortageRows=[];
+  const status=()=>document.getElementById('followupStatus');
+  async function refresh(){
+    const own=++revision,token=localStorage.getItem('token');
+    status().textContent='A consultar visitas por concluir…';
+    try{
+      const data=await fetchJSON('/api/technician/incomplete-followups',{cache:'no-store',signal:AbortSignal.timeout(10000)});
+      if(own!==revision||token!==localStorage.getItem('token'))return;
+      const shortages=data.shortages?.rows||[];shortageRows=shortages;
+      document.getElementById('shortagePreparation').innerHTML='<h3>Preparar reposição de química</h3><p>Necessidades reportadas por visita. Confirme produto, quantidade e disponibilidade antes de preparar a viatura. Não representa stock entregue ou uma dose calculada.</p>'+ (shortages.length?shortages.map(row=>`<article class="followup-row" data-preparation-visit="${row.visitId}"><strong>${escapeHtml(row.productName)} · ${row.quantity===null?'Quantidade por confirmar':escapeHtml(row.quantity+' '+row.unit)}</strong><p>${escapeHtml(row.poolName)} · visita #${row.visitId} · ${escapeHtml(row.technicianName)}</p><p>Recebido: ${escapeHtml((row.receivedQuantity||0)+' '+row.unit)} · ${row.quantity===null?'Necessidade total por confirmar':'Falta receber: '+escapeHtml(Math.max(0,row.quantity-(row.receivedQuantity||0))+' '+row.unit)}</p><p>Cargas associadas: ${escapeHtml((row.preparedQuantity||0)+' '+row.unit)} · Viatura: ${escapeHtml(row.vehiclePlate||'Por atribuir')}</p>${row.vehicleId&&(row.quantity===null||row.committedQuantity<row.quantity)?`<form class="followup-form chemical-load-form" data-shortage="${row.shortageId}"><label>Quantidade a carregar (${escapeHtml(row.unit)})<input name="quantity" type="number" min="0.001" step="any" inputmode="decimal" required ${row.quantity===null?'':'max="'+Math.max(0,row.quantity-row.committedQuantity)+'"'}></label><button type="submit" class="cw-v2-btn">Registar carga na viatura</button><p class="full" role="status">${row.quantity===null?'Confirme a quantidade necessária com o técnico.':'Por carregar: '+escapeHtml(Math.max(0,row.quantity-row.committedQuantity)+' '+row.unit)}. Só registe depois de carregar fisicamente o produto.</p></form>`:row.vehicleId?'<p>Quantidade já carregada ou recebida. Aguarde a confirmação do técnico.</p>':'<p>Atribua uma viatura ao técnico antes de registar a carga.</p>'}${(row.loads||[]).map(load=>`<p>Carga #${load.id} · viatura #${load.vehicleId} · ${escapeHtml(load.originalQuantity+' '+load.unit)} carregados · ${escapeHtml(load.returnedQuantity+' '+load.unit)} devolvidos</p>${load.quantity>0?`<form class="followup-form chemical-return-form" data-shortage="${row.shortageId}" data-movement="${load.id}"><label>Quantidade devolvida ao armazém (${escapeHtml(load.unit)})<input name="quantity" type="number" min="0.001" step="any" max="${load.quantity}" required inputmode="decimal"></label><button type="submit" class="cw-v2-btn">Registar devolução</button><p class="full" role="status">Confirme a receção física no armazém. Não altera o histórico da visita.</p></form>`:''}`).join('')}${(row.receipts||[]).map(receipt=>`<small>Confirmado por ${escapeHtml(receipt.receivedByName)} · ${escapeHtml(new Date(receipt.receivedAt).toLocaleString('pt-PT'))}${receipt.currentAssignment?'':' · atribuição anterior'}</small>`).join('<br>')}</article>`).join(''):'<p>Sem necessidades de química reportadas por resolver.</p>');
+      const rows=[...new Map(data.reminders.map(row=>[row.metadata.visitId,row])).values()];
+      document.getElementById('followupList').innerHTML=rows.map(row=>{
+        const id=row.metadata.visitId,returned=row.returnVisit;
+        const scheduled=returned&&!['CANCELLED','CANCELED','SKIPPED','ARCHIVED'].includes(returned.status);
+        const originalOpen=row.visit?.status==='INCOMPLETE'&&!row.visit.endAt;
+        return `<article class="followup-row" data-followup-visit="${id}"><h3>${escapeHtml(row.pool?.name||'Piscina')} · visita #${id}</h3>
+          <p>${escapeHtml(row.client?.name||'')} · Reportado por ${escapeHtml(row.assignedTechnician?.name||'técnico')}</p>
+          <p>${escapeHtml(row.description)}</p>
+          ${scheduled?`<p><strong>Regresso #${returned.id} · ${escapeHtml(returned.plannedDate?new Date(returned.plannedDate).toLocaleDateString('pt-PT'):'Data por confirmar')} · ${escapeHtml(returned.technicianName||'Técnico por confirmar')}</strong></p><p>Estado: ${escapeHtml(({PLANNED:'Agendado',IN_PROGRESS:'Em curso',INCOMPLETE:'Por concluir',DONE:'Concluído'})[returned.status]||returned.status)}. ${returned.endAt?'Conclusão registada; atualizar acompanhamento.':'O aviso continua aberto até à conclusão.'}</p><p>${escapeHtml(row.metadata.returnPlan.instructions)}</p>`:!originalOpen?'<p>O estado da visita mudou. Reveja o histórico antes de planear outro serviço.</p>':`<form class="followup-form" data-visit="${id}">
+          <label>Data do regresso<input name="date" type="date" required></label>
+          <label>Técnico responsável<select name="technicianId" required><option value="">Selecionar técnico</option>${data.technicians.map(tech=>`<option value="${tech.id}">${escapeHtml(tech.name)}</option>`).join('')}</select></label>
+          <label class="full">Instruções para o técnico<textarea name="instructions" rows="3" minlength="5" maxlength="1000" required placeholder="Acesso confirmado, material necessário e trabalho a executar"></textarea></label>
+          <button type="submit" class="cw-v2-btn full">Agendar regresso</button><p class="full" role="status"></p></form>`}</article>`;
+      }).join('');
+      const now=new Date(),today=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+      document.querySelectorAll('.followup-form input[type="date"]').forEach(input=>{input.min=today;input.value=today;});
+      status().textContent=rows.length?`${rows.length} visita(s) em acompanhamento.`:'Sem visitas por concluir pendentes no servidor.';
+    }catch(error){if(own===revision&&token===localStorage.getItem('token'))status().textContent=`Não foi possível atualizar: ${error.message}. A lista anterior pode estar desatualizada.`;}
+  }
+  document.getElementById('shortagePreparation').addEventListener('submit',async event=>{
+    event.preventDefault();const form=event.target;if(!form.matches('.chemical-load-form,.chemical-return-form'))return;
+    const returning=form.matches('.chemical-return-form');
+    const row=shortageRows.find(r=>r.shortageId===Number(form.dataset.shortage)),message=form.querySelector('[role=status]'),token=localStorage.getItem('token');
+    if(!navigator.onLine){message.textContent='Sem rede. A carga ainda não foi registada.';return;}
+    const quantity=Number(form.elements.quantity.value);
+    if(!row||!Number.isFinite(quantity)||quantity<=0)return;
+    const load=returning?row.loads.find(m=>m.id===Number(form.dataset.movement)):null;if(returning&&!load)return;
+    if(!confirm(returning?`Confirmar a receção no armazém de ${quantity} ${load.unit} de ${load.productName}, da viatura #${load.vehicleId}, carga #${load.id}?`:`Registar ${quantity} ${row.unit} de ${row.productName} na viatura ${row.vehiclePlate}, de ${row.technicianName}? Confirme que a carga física já foi realizada. O técnico confirma a receção separadamente.`))return;
+    const body=returning?{vehicleId:load.vehicleId,returnOfMovementId:load.id,direction:'VEHICLE_TO_CENTRAL',items:[{productName:load.productName,unit:load.unit,quantity}]}:{vehicleId:row.vehicleId,shortageId:row.shortageId,direction:'CENTRAL_TO_VEHICLE',items:[{productName:row.productName,unit:row.unit,quantity}]};let key;
+    try{const user=JSON.parse(localStorage.getItem('user')||localStorage.getItem('cristalwater_user')||'null');if(!user?.id)throw new Error('Sessão por confirmar');key='cwChemicalLoad:'+JSON.stringify([user.id,body]);body.requestId=localStorage.getItem(key)||crypto.randomUUID();localStorage.setItem(key,body.requestId);}catch{message.textContent='Não foi possível guardar o pedido no dispositivo. Confirme a sessão e tente novamente.';return;}
+    for(const control of form.elements)control.disabled=true;document.getElementById('refreshFollowups').disabled=true;
+    try{const result=await fetchJSON('/api/equipment-stock-os/stock/transfers',{method:'POST',body:JSON.stringify(body),signal:AbortSignal.timeout(15000)});
+      if(token!==localStorage.getItem('token'))return;localStorage.removeItem(key);await refresh();status().textContent=returning?`Devolução registada (movimento #${result.movements[0].id}). Stock e necessidade atualizados.`:`Carga registada (movimento #${result.movements[0].id}). Aguarda confirmação de receção pelo técnico.`;
+    }catch(error){if(token===localStorage.getItem('token'))message.textContent=`Não foi possível confirmar: ${error.message}. Pode repetir com os mesmos dados; não repita a operação física por causa de uma falha de ligação.`;}
+    finally{for(const control of form.elements)control.disabled=false;document.getElementById('refreshFollowups').disabled=false;}
+  });
+  document.getElementById('followupList').addEventListener('submit',async event=>{
+    event.preventDefault();const form=event.target;if(!form.matches('.followup-form'))return;
+    const token=localStorage.getItem('token'),button=form.querySelector('button'),message=form.querySelector('[role="status"]');
+    const values=Object.fromEntries(new FormData(form));
+    button.disabled=true;
+    try{
+      if(!await ui.confirm(`Agendar o regresso para ${values.date}, com ${form.elements.technicianId.selectedOptions[0].textContent}? A visita original mantém o histórico.`,{title:'Confirmar regresso',confirmText:'Agendar'}))return;
+      if(token!==localStorage.getItem('token'))throw new Error('A sessão mudou. Atualize a página');
+      const fingerprint=JSON.stringify(values);
+      if(form.dataset.fingerprint!==fingerprint){form.dataset.requestId=crypto.randomUUID();form.dataset.fingerprint=fingerprint;}
+      const result=await fetchJSON(`/api/technician/visits/${form.dataset.visit}/schedule-return`,{method:'POST',body:JSON.stringify({...values,requestId:form.dataset.requestId}),signal:AbortSignal.timeout(10000)});
+      if(token!==localStorage.getItem('token'))return;
+      await refresh();status().textContent=`Regresso #${result.visit.id} registado. O técnico deve atualizar a rota para o consultar.`;
+    }catch(error){if(token===localStorage.getItem('token'))message.textContent=`Não foi possível confirmar: ${error.message}. Pode tentar novamente; o pedido evita duplicações.`;}
+    finally{button.disabled=false;}
+  });
+  document.getElementById('refreshFollowups').addEventListener('click',refresh);
+  refresh();
+})();

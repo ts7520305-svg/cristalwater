@@ -1,3 +1,4 @@
+const {checkDatabaseHealth}=require('../services/databaseHealthService');
 const express = require("express");
 const router = express.Router();
 const fs = require("fs");
@@ -32,23 +33,8 @@ const upgradeUpload = multer({
 });
 
 router.get("/health", async (req, res) => {
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-
-    res.json({
-      ok: true,
-      status: "ONLINE",
-      database: "ONLINE",
-      at: new Date().toISOString(),
-    });
-  } catch (err) {
-    res.status(500).json({
-      ok: false,
-      status: "ERROR",
-      database: "ERROR",
-      error: err.message,
-    });
-  }
+  const health=await checkDatabaseHealth();
+  return res.status(health.ok?200:503).json({...health,status:health.ok?'ONLINE':'ERROR',at:new Date().toISOString()});
 });
 
 router.get("/version", (req, res) => {

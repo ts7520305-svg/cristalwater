@@ -110,6 +110,8 @@
 
   function normalizeNode(node) {
     if (!(node instanceof HTMLElement)) return;
+    // Rich panels manage their own loading/error state; do not turn them into a badge.
+    if (node.closest('[data-cw-state-managed="manual"]')) return;
     const kind = classify(node);
     if (!kind) return;
 

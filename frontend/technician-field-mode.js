@@ -14,6 +14,11 @@
   }[char]));
 
   let visits = [];
+  let routeConfirmedAt = null;
+  window.CWFieldDaySnapshot = () => ({
+    confirmedAt: routeConfirmedAt,
+    visits: visits.map(visit => ({ id: visit.id, name: visit.pool?.name || `Visita ${visit.id}`, done: isVisitDone(visit), future: visit.assistSource === 'tomorrow' })),
+  });
   let index = 0;
   let startedAt = null;
   let pendingProblems = [];
@@ -38,7 +43,7 @@
   let activePoolFilter = "TODO";
   let opsSnapshot = { docsReady: false, done: 0, total: 0, pending: 0 };
   const waterTimers = new Map();
-  const draftFieldIds = ["ph", "chlorine", "alkalinity", "salt", "orp", "temperature", "notes"];
+  const draftFieldIds = ["ph", "chlorine", "alkalinity", "salt", "orp", "temperature", "notes", "incompleteReason", "incompleteNextStep", "shortageProduct", "shortageQuantity", "shortageUnit"];
   const checkIds = ["cleaned", "vacuumed", "basketCleaned", "brushed", "waterlineClean", "backwashDone"];
 
   const POOL_STATE = {
@@ -49,6 +54,7 @@
     WAITING_MATERIAL: "A aguardar material",
     CRITICAL: "Alerta crítico",
     DONE: "Concluída",
+    INCOMPLETE: "Por concluir",
   };
 
   const MAP_ROUTE_PATH = "/technician-map";
@@ -332,6 +338,7 @@
     if (visitHasMaterialBlock(visit)) return "WAITING_MATERIAL";
 
     const status = String(visit?.status || "").toUpperCase();
+    if (status === 'INCOMPLETE') return 'INCOMPLETE';
     if (["IN_PROGRESS", "STARTED", "ACTIVE"].includes(status) || (visit?.startAt && !visit?.endAt)) {
       return "IN_PROGRESS";
     }
@@ -561,7 +568,7 @@
     const values = draft?.values || {};
     draftFieldIds.forEach((id) => {
       const node = $(`#${id}`);
-      if (node) node.value = values[id] || "";
+      if (node) node.value = values[id] || (id === "shortageUnit" ? "L" : "");
     });
 
     const checks = draft?.checks || {};
@@ -2030,7 +2037,8 @@
     const nextCard = document.querySelector(".next");
     if (!strip) return;
 
-    const hasNotices = Boolean(visit && (accesses.length || reminders.length));
+    const returnInstructions = visit?.reason === "INCOMPLETE_RETURN" ? String(visit.returnInstructions || "Confirme as instruções com o escritório") : "";
+    const hasNotices = Boolean(visit && (accesses.length || reminders.length || returnInstructions));
     if (nextCard) nextCard.classList.toggle("has-alerts", hasNotices);
     if (!hasNotices) {
       strip.hidden = true;
@@ -2045,7 +2053,7 @@
 
     strip.hidden = false;
     strip.innerHTML = `
-      <b>Atencao antes de entrar</b>
+      ${returnInstructions ? `<b>Regresso agendado pelo escritório</b><p style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(returnInstructions)}</p>` : "<b>Atencao antes de entrar</b>"}
       <div class="visit-notice-pills">${pills}</div>
       <small>Confirma codigos, chaves e instrucoes desta piscina antes de iniciar ou concluir a visita.</small>
     `;
@@ -3107,6 +3115,7 @@
   }
 
   function render() {
+    renderIncompleteStatus();
     const visit = current();
     $("#progressText").textContent = visits.length ? `${visits.filter(isVisitDone).length} de ${visits.length} visitas concluídas` : "Sem visitas atribuídas";
 
@@ -3171,10 +3180,12 @@
       let data = await api(`/api/technician/today?${todayQuery}`).catch(() => null);
       const routeCacheKey = `cwFieldRoute:${currentTechnicianId()}`;
       if (data && Array.isArray(data.visits)) {
+        routeConfirmedAt = new Date().toISOString();
         visits = data.visits;
         $("#fieldLoadError").hidden = true; $("#fieldRouteAge").hidden = true;
         storageWrite(routeCacheKey, { visits, savedAt: new Date().toISOString() });
       } else {
+        routeConfirmedAt = null;
         const cached = storageRead(routeCacheKey, null);
         if (!cached?.visits) throw new Error("Sem ronda guardada. Abra o modo de campo com ligação antes de sair.");
         visits = cached.visits;
@@ -3892,6 +3903,72 @@
     render();
   });
   window.addEventListener('cw:water-state-updated', () => { loadWaterRemindersFromStorage(); renderWaterReminders(); });
-  load();
+  const incompleteKey=()=>`cwIncompleteVisits:${currentTechnicianId()}`;
+  function readIncomplete(key=incompleteKey()) {
+    const rows=JSON.parse(localStorage.getItem(key)||'{}');
+    if(!rows||Array.isArray(rows)||typeof rows!=='object'||Object.entries(rows).some(([id,row])=>!row||String(row.visitId)!==id||!row.body?.requestId))throw new Error('Não foi possível ler as visitas por concluir. Preserve os dados e contacte o escritório.');
+    return rows;
+  }
+  function renderIncompleteStatus(){
+    const shortageFields=$('#chemicalShortageFields');
+    if(shortageFields){const show=$('#incompleteReason').value==='CHEMICAL_MISSING';shortageFields.hidden=!show;shortageFields.style.display=show?'block':'none';}
+
+    const node=$('#incompleteStatus');if(!node)return;
+    let banner=$('#incompletePendingBanner');
+    if(!banner){banner=document.createElement('aside');banner.id='incompletePendingBanner';banner.setAttribute('role','status');banner.setAttribute('data-cw-state-managed','manual');banner.style.cssText='padding:14px;background:#fff4ce;color:#624400';document.body.prepend(banner);}
+    try{const rows=Object.values(readIncomplete());node.textContent=rows.length?`${rows.length} registo(s) de visita por concluir guardado(s) neste telemóvel, por confirmar no escritório.`:current()?.status==='INCOMPLETE'?'Visita por concluir registada no servidor. Aviso disponível para o escritório.':'';banner.hidden=!rows.length;banner.textContent=rows.length?`${node.textContent} ${rows.map(row=>row.label||`Visita ${row.visitId}`).join(', ')}. Não limpe os dados da aplicação.`:'';}catch(error){node.textContent=error.message;banner.hidden=false;banner.textContent=error.message;}
+  }
+  let incompleteSyncing=false;
+  async function syncIncomplete(){
+    if(incompleteSyncing||!navigator.onLine||window.CristalAuth?.isSessionExpired?.())return;
+    const key=incompleteKey(),token=window.CristalAuth?.getToken?.();if(!token)return;
+    incompleteSyncing=true;
+    try{
+      for(const row of Object.values(readIncomplete(key))){
+        if(key!==incompleteKey()||token!==window.CristalAuth?.getToken?.())return;
+        if(row.blocked||Number(row.retryAt)>Date.now())continue;
+        try{
+        const response=await fetch(`/api/technician/visits/${row.visitId}/incomplete`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify(row.body),signal:AbortSignal.timeout(10000)});
+        const data=await response.json();
+        if(!response.ok||!data.ok){const retry=response.headers.get('Retry-After');throw Object.assign(new Error(data.error||'Envio por confirmar'),{status:response.status,retryAt:retry?(Number.isFinite(Number(retry))?Date.now()+Number(retry)*1000:Date.parse(retry)):0});}
+        if(key!==incompleteKey()||token!==window.CristalAuth?.getToken?.())return;
+        const rows=readIncomplete(key);if(rows[row.visitId]?.body.requestId===row.body.requestId)delete rows[row.visitId];localStorage.setItem(key,JSON.stringify(rows));
+        const position=visits.findIndex(visit=>String(visit.id)===String(row.visitId));if(position>=0)visits[position]={...visits[position],...data.visit};
+        storageWrite(`cwFieldRoute:${currentTechnicianId()}`,{visits,savedAt:new Date().toISOString()});
+        window.dispatchEvent(new Event('cw:incomplete-updated'));render();
+        }catch(error){
+          if(key!==incompleteKey()||token!==window.CristalAuth?.getToken?.())return;
+          const rows=readIncomplete(key);
+          if(rows[row.visitId]){rows[row.visitId].error=error.message;rows[row.visitId].blocked=error.status>=400&&error.status<500&&![401,408,425,429].includes(error.status);rows[row.visitId].retryAt=error.retryAt||0;localStorage.setItem(key,JSON.stringify(rows));}
+          renderIncompleteStatus();$('#incompleteStatus').textContent=`Registo preservado. ${error.message}${rows[row.visitId]?.blocked?' Confirme a situação com o escritório antes de reenviar.':''}`;
+        }
+      }
+    }catch(error){if(key===incompleteKey())$('#incompleteStatus').textContent=`Registo preservado no telemóvel. ${error.message}`;}
+    finally{incompleteSyncing=false;}
+  }
+  $('#incompleteReason').addEventListener('change',renderIncompleteStatus);
+  $('#incompleteSave').onclick=async()=>{
+    const button=$('#incompleteSave');if(button.disabled)return;button.disabled=true;
+    try{
+      const visit=current(),reason=$('#incompleteReason').value,nextStep=$('#incompleteNextStep').value.trim();
+      if(!visit?.id||isVisitDone(visit))throw new Error('Escolha uma visita ainda não concluída');
+      if(!reason||nextStep.length<5)throw new Error('Escolha o motivo e indique o próximo passo');
+      let chemicalShortage;
+      if(reason==='CHEMICAL_MISSING'){
+        const productName=$('#shortageProduct').value.trim(),raw=$('#shortageQuantity').value.trim(),quantity=raw?Number(raw.replace(',','.')):null,unit=$('#shortageUnit').value||'L';
+        if(productName.length<2||productName.length>120||(quantity!==null&&(!Number.isFinite(quantity)||quantity<=0||quantity>100000)))throw new Error('Indique o produto em falta e uma quantidade positiva, ou deixe a quantidade por confirmar');
+        chemicalShortage={productName,quantity,unit};
+      }
+      saveCurrentDraft();const rows=readIncomplete();if(rows[visit.id])throw new Error('Esta visita já tem um registo por enviar. Ligue à rede para confirmar o envio.');
+      rows[visit.id]={visitId:visit.id,label:visit.pool?.name||`Visita ${visit.id}`,body:{requestId:crypto.randomUUID(),reason,nextStep,...(chemicalShortage?{chemicalShortage}:{})}};
+      localStorage.setItem(incompleteKey(),JSON.stringify(rows));renderIncompleteStatus();window.dispatchEvent(new Event('cw:incomplete-updated'));await syncIncomplete();
+    }catch(error){$('#incompleteStatus').textContent=error.message;}finally{button.disabled=false;}
+  };
+  window.addEventListener('online',syncIncomplete);
+  $('#incompleteRetry').onclick=async()=>{
+    try{const key=incompleteKey(),rows=readIncomplete(key);if(Object.values(rows).some(row=>row.blocked)&&!confirm('O escritório confirmou que pode repetir o envio destas visitas?'))return;if(key!==incompleteKey())return;for(const row of Object.values(rows))row.blocked=false;localStorage.setItem(key,JSON.stringify(rows));await syncIncomplete();}catch(error){$('#incompleteStatus').textContent=error.message;}
+  };
+  window.setInterval(syncIncomplete,60000);
+  load().then(syncIncomplete);
   updateAllReferenceStatuses();
 })();

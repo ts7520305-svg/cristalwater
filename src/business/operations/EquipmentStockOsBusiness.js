@@ -261,17 +261,65 @@ async function listVehicleStock(vehicleId) {
   return { ok: true, stock: balances };
 }
 
-async function transferStock(payload = {}, actor = "admin") {
+function normalizeStockItems(rawItems){
+  if(!Array.isArray(rawItems)||!rawItems.length||rawItems.length>100||rawItems.some(item=>!item||typeof item!=='object'||Array.isArray(item)||typeof (item.productName||item.name)!=='string'||!['number','string'].includes(typeof item.quantity)||(item.unit!==undefined&&typeof item.unit!=='string')))return null;
+  const items=rawItems.map(item=>({productName:s(item.productName||item.name).replace(/\s+/g,' ').toUpperCase(),unit:s(item.unit||'KG').toUpperCase(),category:s(item.category||'CHEMICAL'),quantity:Number(item.quantity)}));
+  if(items.some(item=>!item.productName||item.productName.length>160||!item.unit||item.unit.length>24||!Number.isFinite(item.quantity)||item.quantity<=0))return null;
+  return items.sort((a,b)=>a.productName.localeCompare(b.productName)||a.unit.localeCompare(b.unit));
+}
+async function transferStock(payload = {}, actor = "admin", user) {
   const vehicleId = Number(payload.vehicleId || 0);
   const direction = s(payload.direction || "CENTRAL_TO_VEHICLE") || "CENTRAL_TO_VEHICLE";
-  const items = Array.isArray(payload.items) ? payload.items : [];
-  if (!vehicleId || !items.length) {
-    return { ok: false, status: 400, error: "vehicleId e items são obrigatórios" };
-  }
+  const items=normalizeStockItems(payload.items);
+  if(!Number.isSafeInteger(vehicleId)||vehicleId<=0||!items||!['CENTRAL_TO_VEHICLE','VEHICLE_TO_CENTRAL'].includes(direction))return {ok:false,status:400,error:'Indique viatura, sentido válido e entre 1 e 100 produtos com quantidade positiva'};
+  const requestId=payload.requestId;
+  if(requestId!==undefined&&!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(requestId)))return {ok:false,status:400,error:'Identificador do pedido inválido'};
+  const shortageId=payload.shortageId===undefined?null:Number(payload.shortageId);
+  if(shortageId!==null&&(!Number.isSafeInteger(shortageId)||shortageId<=0||!requestId||direction!=='CENTRAL_TO_VEHICLE'||items.length!==1))return {ok:false,status:400,error:'Reposição associada requer necessidade, identificador e um produto para a viatura'};
+  if(shortageId!==null&&!require('../../utils/roles').roleMatches(user?.role,'ADMIN'))return {ok:false,status:403,error:'A gestão deve registar a carga associada à necessidade'};
+  const returnOfMovementId=payload.returnOfMovementId===undefined?null:Number(payload.returnOfMovementId);
+  if(returnOfMovementId!==null&&(!Number.isSafeInteger(returnOfMovementId)||returnOfMovementId<=0||!requestId||direction!=='VEHICLE_TO_CENTRAL'||items.length!==1||shortageId!==null))return {ok:false,status:400,error:'Devolução associada requer movimento original, identificador e um produto'};
+  if(returnOfMovementId!==null&&!require('../../utils/roles').roleMatches(user?.role,'ADMIN'))return {ok:false,status:403,error:'A gestão deve confirmar a devolução ao armazém'};
+  const fingerprint=JSON.stringify({vehicleId,direction,items,actor,...(shortageId!==null?{shortageId}:{}),...(returnOfMovementId!==null?{returnOfMovementId}:{})});
 
   const isOutbound = direction === "CENTRAL_TO_VEHICLE";
 
-  const movements = await repository.prisma.$transaction(async (tx) => {
+  const result = await repository.prisma.$transaction(async (tx) => {
+    const key=`stock-transfer:${requestId}`;
+    if(requestId){
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${key}))::text`;
+      const replay=await tx.operationalReminder.findUnique({where:{sourceKey:key}});
+      if(replay){if(replay.metadata.fingerprint!==fingerprint)return {ok:false,status:409,error:'Este pedido já foi utilizado com outros dados'};return {ok:true,movements:replay.metadata.movements,idempotent:true};}
+    }
+    let shortage,returnedLoad;
+    if(returnOfMovementId!==null){
+      await tx.$queryRaw`SELECT id FROM "StockMovement" WHERE id=${returnOfMovementId} FOR UPDATE`;
+      returnedLoad=(await require('../../services/stockPreparationService').forVehicle(tx,vehicleId)).find(m=>m.id===returnOfMovementId);
+      if(!returnedLoad||returnedLoad.productName!==items[0].productName||returnedLoad.unit!==items[0].unit||items[0].quantity>returnedLoad.quantity)return {ok:false,status:409,error:'Movimento incompatível ou quantidade superior à carga ainda não devolvida'};
+      const reminder=await tx.operationalReminder.findUnique({where:{id:returnedLoad.shortageId}});
+      const current=(await require('../technician/IncompleteVisitBusiness').shortages(user,tx)).rows.find(r=>r.shortageId===returnedLoad.shortageId);
+      for(const id of [...new Set([reminder?.metadata?.visitId,current?.visitId].filter(Number.isSafeInteger))].sort((a,b)=>a-b))await tx.$queryRaw`SELECT id FROM "ServiceVisit" WHERE id=${id} FOR UPDATE`;
+    }
+    if(shortageId!==null){
+      const findNeed=async()=> (await require('../technician/IncompleteVisitBusiness').shortages(user,tx)).rows.find(row=>row.shortageId===shortageId);
+      const initial=await findNeed();
+      if(!initial?.technicianId)return {ok:false,status:409,error:'Necessidade encerrada, substituída ou sem técnico'};
+      for(const id of [...new Set([initial.reportedVisitId,initial.visitId])].sort((a,b)=>a-b))await tx.$queryRaw`SELECT id FROM "ServiceVisit" WHERE id=${id} FOR UPDATE`;
+      await tx.$queryRaw`SELECT id FROM "Technician" WHERE id=${initial.technicianId} FOR UPDATE`;
+      shortage=await findNeed();
+      if(!shortage||shortage.visitId!==initial.visitId||shortage.technicianId!==initial.technicianId||shortage.vehicleId!==vehicleId)return {ok:false,status:409,error:'A atribuição ou viatura mudou. Atualize as necessidades antes de carregar'};
+      const technician=await tx.technician.findUnique({where:{id:shortage.technicianId}});
+      if(!technician?.active)return {ok:false,status:409,error:'Técnico indisponível'};
+      const normalize=value=>String(value||'').trim().replace(/\s+/g,' ').toUpperCase();
+      if(normalize(shortage.productName)!==items[0].productName||normalize(shortage.unit)!==items[0].unit)return {ok:false,status:409,error:'Produto ou unidade não corresponde à necessidade'};
+      if(shortage.quantity!==null&&items[0].quantity>shortage.quantity-shortage.committedQuantity)return {ok:false,status:409,error:'Quantidade superior à necessidade ainda por carregar. Reveja as cargas já registadas'};
+    }
+    const vehicle=await tx.vehicle.findUnique({where:{id:vehicleId}});
+    if(!vehicle||(!returnedLoad&&(!vehicle.active||vehicle.deletedAt||vehicle.archiveStatus!=='ATIVO')))return {ok:false,status:400,error:'Viatura inexistente ou indisponível'};
+    if(user&&!require('../../utils/roles').roleMatches(user.role,'ADMIN')){
+      const technician=await tx.technician.findUnique({where:{id:Number(user.technicianId||user.id)}});
+      if(!technician?.active||technician.vehicleId!==vehicleId)return {ok:false,status:403,error:'Só pode movimentar stock da sua viatura atribuída'};
+    }
     const out = [];
     for (const item of items) {
       const productName = s(item.productName || item.name).toUpperCase();
@@ -280,13 +328,9 @@ async function transferStock(payload = {}, actor = "admin") {
       const quantity = n(item.quantity, 0);
       if (!productName || quantity <= 0) continue;
 
-      if (isOutbound) {
-        await repository.adjustBalance(tx, { scope: "CENTRAL", productName, unit, category, delta: -quantity });
-        await repository.adjustBalance(tx, { scope: "VEHICLE", vehicleId, productName, unit, category, delta: quantity });
-      } else {
-        await repository.adjustBalance(tx, { scope: "VEHICLE", vehicleId, productName, unit, category, delta: -quantity });
-        await repository.adjustBalance(tx, { scope: "CENTRAL", productName, unit, category, delta: quantity });
-      }
+      // Always lock central before vehicle, in a stable product order, including returns.
+      await repository.adjustBalance(tx,{scope:'CENTRAL',productName,unit,category,delta:isOutbound?-quantity:quantity});
+      await repository.adjustBalance(tx,{scope:'VEHICLE',vehicleId,productName,unit,category,delta:isOutbound?quantity:-quantity});
 
       const movement = await repository.createMovement(tx, {
         movementType: isOutbound ? "TRANSFER_TO_VEHICLE" : "RETURN_TO_WAREHOUSE",
@@ -317,8 +361,11 @@ async function transferStock(payload = {}, actor = "admin") {
 
       out.push(movement);
     }
-    return out;
+    if(requestId)await tx.operationalReminder.create({data:{sourceKey:key,title:'Transferência de stock registada',dueDate:new Date(),isCompleted:true,metadata:{fingerprint,...(shortage?{shortageId,technicianId:shortage.technicianId,vehicleId}:{}),...(returnedLoad?{shortageId:returnedLoad.shortageId,technicianId:returnedLoad.technicianId,vehicleId,returnOfMovementId,returnQuantity:items[0].quantity}:{}),movements:JSON.parse(JSON.stringify(out))}}});
+    return {ok:true,movements:out};
   });
+  if(!result.ok||result.idempotent)return result;
+  const movements=result.movements;
 
   await emitEquipmentStockEvent(EVENT_TYPES.STOCK_TRANSFERRED, {
     vehicleId,
@@ -449,8 +496,9 @@ async function suggestProductsForVisit(visitId) {
   return { ok: true, visitId: Number(visitId), suggestedProducts };
 }
 
-async function consumeProductsForVisit(visitId, payload = {}, actor = "TECHNICIAN_FIELD") {
-  const visit = await repository.prisma.serviceVisit.findUnique({
+async function consumeProductsForVisit(visitId, payload = {}, actor = "TECHNICIAN_FIELD", user) {
+  if(!Number.isSafeInteger(Number(visitId))||Number(visitId)<=0)return {ok:false,status:400,error:'Visita inválida'};
+  let visit = await repository.prisma.serviceVisit.findUnique({
     where: { id: Number(visitId) },
     include: {
       technician: true,
@@ -460,12 +508,37 @@ async function consumeProductsForVisit(visitId, payload = {}, actor = "TECHNICIA
   if (!visit) return { ok: false, status: 404, error: "Visita não encontrada" };
 
   const vehicleId = Number(payload.vehicleId || visit.technician?.vehicleId || 0);
-  const items = Array.isArray(payload.items) ? payload.items : [];
-  if (!vehicleId || !items.length) {
+  const items = normalizeStockItems(payload.items);
+  if (!Number.isSafeInteger(vehicleId)||vehicleId<=0||!items) {
     return { ok: false, status: 400, error: "vehicleId e items são obrigatórios" };
   }
 
-  const consumed = await repository.prisma.$transaction(async (tx) => {
+  const requestId=payload.requestId;
+  if(requestId!==undefined&&!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(requestId)))return {ok:false,status:400,error:'Identificador do consumo inválido'};
+  const fingerprint=JSON.stringify({visitId:Number(visitId),vehicleId,items,actor});
+  const result = await repository.prisma.$transaction(async (tx) => {
+    const sourceKey=`stock-consumption:${requestId}`;
+    if(requestId){
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${sourceKey}))::text`;
+      const previous=await tx.operationalReminder.findUnique({where:{sourceKey}});
+      if(previous){if(previous.metadata.fingerprint!==fingerprint)return {ok:false,status:409,error:'Identificador já utilizado com outros dados'};return {...previous.metadata.result,idempotent:true};}
+    }
+    await tx.$queryRaw`SELECT id FROM "ServiceVisit" WHERE id=${Number(visitId)} FOR UPDATE`;
+    visit=await tx.serviceVisit.findUnique({where:{id:Number(visitId)},include:{technician:true,pool:{include:{client:true}}}});
+    if(!visit)return {ok:false,status:404,error:'Visita não encontrada'};
+    if(user){
+      const admin=require('../../utils/roles').roleMatches(user.role,'ADMIN');
+      if(!admin&&visit.technicianId!==Number(user.technicianId||user.id))return {ok:false,status:403,error:'Esta visita não está atribuída a si'};
+      if(!admin){
+        await tx.$queryRaw`SELECT id FROM "Technician" WHERE id=${visit.technicianId} FOR UPDATE`;
+        const technician=await tx.technician.findUnique({where:{id:visit.technicianId}});
+        if(!technician?.active||technician.vehicleId!==vehicleId)return {ok:false,status:403,error:'Só pode registar consumo da sua viatura atribuída'};
+      }
+      const vehicle=await tx.vehicle.findUnique({where:{id:vehicleId}});
+      if(!vehicle?.active||vehicle.deletedAt||vehicle.archiveStatus!=='ATIVO')return {ok:false,status:409,error:'Viatura indisponível'};
+    }
+    if(visit.endAt||['DONE','COMPLETED','CANCELLED','CANCELED','SKIPPED','ARCHIVED'].includes(visit.status))return {ok:false,status:409,error:'A visita está encerrada. Utilize o procedimento de correção do registo'};
+
     const out = [];
     for (const item of items) {
       const productName = s(item.productName || item.name).toUpperCase();
@@ -531,8 +604,12 @@ async function consumeProductsForVisit(visitId, payload = {}, actor = "TECHNICIA
       }).catch(() => null);
     }
 
-    return out;
+    const result={ok:true,visitId:visit.id,vehicleId,consumed:out};
+    if(requestId)await tx.operationalReminder.create({data:{sourceKey,title:'Consumo de stock registado',dueDate:new Date(),isCompleted:true,metadata:{fingerprint,result:JSON.parse(JSON.stringify(result))}}});
+    return result;
   });
+  if(!result.ok||result.idempotent)return result;
+  const consumed=result.consumed;
 
   const vehicleBalance = await repository.listBalances({ scope: "VEHICLE", vehicleId });
   const lowStockRows = vehicleBalance.filter((row) => n(row.quantity, 0) <= 0);

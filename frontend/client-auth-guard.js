@@ -45,7 +45,10 @@ try {
 // VALIDATE ROLE
 // ======================================================
 
-if (!user || user.role !== "CLIENT") {
+const clientPortalAdminPreview = user?.role === "ADMIN"
+  && /^\/client-portal(?:\.html)?\/?$/.test(window.location.pathname);
+
+if (!user || (user.role !== "CLIENT" && !clientPortalAdminPreview)) {
 
   alert("Acesso reservado ao cliente.");
 
@@ -56,7 +59,7 @@ if (!user || user.role !== "CLIENT") {
 }
 
 const resolvedClientId = Number(user?.clientId || user?.id || 0);
-if (resolvedClientId > 0) {
+if (user?.role === "CLIENT" && resolvedClientId > 0) {
   localStorage.setItem("cw_client_id", String(resolvedClientId));
   localStorage.setItem("clientId", String(resolvedClientId));
 }

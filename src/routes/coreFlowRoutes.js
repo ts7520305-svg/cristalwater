@@ -1,3 +1,4 @@
+const {checkDatabaseHealth}=require('../services/databaseHealthService');
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
@@ -24,8 +25,8 @@ const router = express.Router();
 const adminAuth = auth('ADMIN');
 const technicianAuth = auth('TECHNICIAN');
 router.use((req, res, next) => {
-  // Keep only minimal metadata endpoints public by design.
-  if (req.method === 'GET' && (req.path === '/health' || req.path === '/dashboard')) return next();
+  // Only the minimal health endpoint is public; dashboards contain operational data.
+  if (req.method === 'GET' && req.path === '/health') return next();
   // Technician field mode depends on these two core routes.
   if (req.method === 'POST' && /^\/visits\/\d+\/(problem|complete)$/.test(req.path)) {
     return technicianAuth(req, res, next);
@@ -1455,12 +1456,8 @@ async function getCoreCounts() {
 }
 
 router.get('/health', async (req, res) => {
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-    return res.json({ ok: true, database: 'ONLINE', time: new Date().toISOString() });
-  } catch (error) {
-    return res.status(200).json({ ok: false, database: 'ERROR', error: error.message });
-  }
+  const health=await checkDatabaseHealth();
+  return res.status(health.ok?200:503).json({...health,time:new Date().toISOString()});
 });
 
 router.get('/dashboard', async (req, res) => {

@@ -4,6 +4,7 @@ const { completeServiceVisit } = require("../src/services/serviceVisitCompletion
 
 function buildTx(overrides = {}) {
   return {
+    $queryRaw: vi.fn().mockResolvedValue([]),
     serviceVisit: {
       findUnique: vi.fn(),
       updateMany: vi.fn(),
@@ -46,8 +47,10 @@ function buildTx(overrides = {}) {
     },
     notification: {
       create: vi.fn(),
+      updateMany: vi.fn().mockResolvedValue({count:1}),
       ...overrides.notification,
     },
+    operationalReminder: {findMany:vi.fn().mockResolvedValue([]),updateMany:vi.fn().mockResolvedValue({count:1})},
   };
 }
 
@@ -58,7 +61,7 @@ describe("Service visit completion real operation flow", () => {
     tx.serviceVisit.findUnique
       .mockResolvedValueOnce({
         id: 91,
-        status: "IN_PROGRESS",
+        status: "INCOMPLETE",
         endAt: null,
         poolId: 12,
         clientId: 3,
@@ -171,5 +174,7 @@ describe("Service visit completion real operation flow", () => {
       }),
     );
     expect(result.visit).toEqual(expect.objectContaining({ id: 91, status: "DONE" }));
+    expect(tx.operationalReminder.updateMany).toHaveBeenCalledWith({where:{sourceKey:{startsWith:'incomplete:91:'},isCompleted:false},data:{isCompleted:true}});
+    expect(tx.notification.updateMany).toHaveBeenCalledWith({where:{eventType:'VISIT_INCOMPLETE',metadata:{path:['visitId'],equals:91},status:'PENDING'},data:{status:'RESOLVED'}});
   });
 });

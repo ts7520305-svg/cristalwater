@@ -102,6 +102,7 @@ async function syncOfflineGps(){
 
             body: JSON.stringify({
 
+              recordedAt: item.recordedAt || item.createdAt,
               userId:
                 item.userId,
 

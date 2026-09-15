@@ -14,7 +14,8 @@ const RETURN_FALLBACK = "/technician-field-mode";
 let route = [];
 let currentIndex = 0;
 let map = null;
-let markers = [];
+let markers = new Map();
+let loadVersion = 0;
 let activeMarker = null;
 
 function userData() {
@@ -70,7 +71,8 @@ function returnUrlWithContext() {
   const target = new URL(context.returnTo, window.location.origin);
   target.searchParams.set("activeTab", context.activeTab);
   target.searchParams.set("activeFilter", context.activeFilter);
-  if (context.selectedVisitId) target.searchParams.set("selectedVisitId", context.selectedVisitId);
+  const selected=route[currentIndex]?.id||context.selectedVisitId;
+  if (selected) target.searchParams.set("selectedVisitId", selected);
   if (context.scrollY > 0) target.searchParams.set("scrollY", String(context.scrollY));
   return `${target.pathname}${target.search}${target.hash}`;
 }
@@ -92,11 +94,11 @@ function escapeHtml(value) {
 }
 
 function validCoordinate(value, type) {
+  if (value == null || String(value).trim() === '') return null;
   const number = Number(value);
   if (!Number.isFinite(number)) return null;
   if (type === "lat" && (number < -90 || number > 90)) return null;
   if (type === "lng" && (number < -180 || number > 180)) return null;
-  if (Math.abs(number) < 0.0001) return null;
   return number;
 }
 
@@ -132,9 +134,8 @@ function ensureMap() {
 }
 
 function clearMarkers() {
-  if (!map) return;
   markers.forEach((marker) => marker.remove());
-  markers = [];
+  markers = new Map();
   activeMarker = null;
 }
 
@@ -147,9 +148,10 @@ function renderMarkers() {
     const { lat, lng } = visitCoordinates(visit);
     if (lat == null || lng == null) return;
     const marker = window.L.marker([lat, lng]).addTo(map);
-    marker.bindPopup(`<b>${escapeHtml(visit.pool?.name || "Piscina")}</b><br>${escapeHtml(visit.client?.name || "Cliente")}`);
+    marker.bindPopup(`<b>${index+1}. ${escapeHtml(visit.pool?.name || "Piscina")}</b><br>${escapeHtml(visitState(visit))}`);
+    marker.bindTooltip(String(index+1), {permanent:true, direction:'top'});
     marker.on("click", () => setCurrent(index));
-    markers.push(marker);
+    markers.set(index, marker);
     bounds.push([lat, lng]);
   });
 
@@ -161,15 +163,26 @@ function renderMarkers() {
 function setNavigationLinks(visit) {
   const { lat, lng } = visitCoordinates(visit || {});
   if (lat == null || lng == null) {
-    googleLink.href = "#";
-    wazeLink.href = "#";
+    for (const link of [googleLink,wazeLink]) { link.removeAttribute('href');link.setAttribute('aria-disabled','true'); }
+    const address=visit?.pool?.address||visit?.pool?.location;
+    if(address){googleLink.href=`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;googleLink.removeAttribute('aria-disabled');}
     return;
   }
 
+  for (const link of [googleLink,wazeLink]) link.removeAttribute('aria-disabled');
   googleLink.href = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${lat},${lng}`)}`;
   wazeLink.href = `https://waze.com/ul?ll=${encodeURIComponent(`${lat},${lng}`)}&navigate=yes`;
 }
 
+function isClosed(visit) {
+  return Boolean(visit?.endAt)||['DONE','COMPLETED','CONCLUIDA','CANCELLED','CANCELED','SKIPPED','ARCHIVED'].includes(String(visit?.status||'').toUpperCase());
+}
+function visitState(visit) {
+  if(['CANCELLED','CANCELED','SKIPPED','ARCHIVED'].includes(String(visit?.status||'').toUpperCase()))return 'Retirada da ronda';
+  if(isClosed(visit))return 'Concluída';
+  if(visit?.status==='INCOMPLETE')return 'Por terminar';
+  return visit?.startAt||['IN_PROGRESS','STARTED'].includes(visit?.status)?'Em intervenção':'Por fazer';
+}
 function renderList() {
   if (!visitList) return;
   if (!route.length) {
@@ -182,7 +195,8 @@ function renderList() {
     const location = visit.pool?.location || visit.pool?.address || "Local por confirmar";
     return `
       <button type="button" class="${cls}" data-index="${index}">
-        <b>${escapeHtml(visit.pool?.name || "Piscina")}</b>
+        <b>${index+1}. ${escapeHtml(visit.pool?.name || "Piscina")}</b>
+        <small>${escapeHtml(visitState(visit))}${visitCoordinates(visit).lat==null||visitCoordinates(visit).lng==null?' · GPS por confirmar':''}</small>
         <small>${escapeHtml(visit.client?.name || "Cliente")}</small>
         <small>${escapeHtml(location)}</small>
       </button>
@@ -198,6 +212,7 @@ function renderList() {
 
 function updateInfo() {
   const visit = route[currentIndex];
+  if(nextBtn)nextBtn.disabled=!route.some((item,index)=>index!==currentIndex&&!isClosed(item));
   if (!visit) {
     infoBox.textContent = "Sem piscina selecionada.";
     setNavigationLinks(null);
@@ -211,12 +226,14 @@ function updateInfo() {
     <b>${escapeHtml(visit.pool?.name || "Piscina")}</b><br>
     Cliente: ${escapeHtml(visit.client?.name || "Cliente")}<br>
     Local: ${escapeHtml(location)}<br>
-    Hora: ${escapeHtml(whenLabel)}
+    Hora: ${escapeHtml(whenLabel)}<br>
+    Estado: ${escapeHtml(visitState(visit))}
   `;
 
   setNavigationLinks(visit);
-  if (markers[currentIndex]) {
-    activeMarker = markers[currentIndex];
+  if (activeMarker) activeMarker.closePopup();
+  if (markers.has(currentIndex)) {
+    activeMarker = markers.get(currentIndex);
     activeMarker.openPopup();
   }
 }
@@ -230,14 +247,18 @@ function setCurrent(index) {
 
 function nextPool() {
   if (!route.length) return;
-  const next = currentIndex + 1 >= route.length ? 0 : currentIndex + 1;
-  setCurrent(next);
+  for(let offset=1;offset<route.length;offset++){
+    const next=(currentIndex+offset)%route.length;
+    if(!isClosed(route[next])){setCurrent(next);return;}
+  }
+  setStatus('Não há outra visita pendente nesta ronda.');
 }
 
 async function loadToday() {
   if (!window.CristalAuth?.requireAuth("TECHNICIAN")) return;
 
-  const id = technicianId();
+  const id = technicianId(), token=window.CristalAuth.getToken(),version=++loadVersion;
+  const current=()=>version===loadVersion&&technicianId()===id&&window.CristalAuth.getToken()===token;
   if (!id) {
     setStatus("Sessao tecnica sem tecnico associado.", "error");
     route = [];
@@ -250,23 +271,30 @@ async function loadToday() {
   setStatus("A carregar ronda do dia.");
 
   try {
-    const data = await parseResponse(await fetch(`${API}/visits/today?technicianId=${encodeURIComponent(id)}`));
+    const data = await parseResponse(await fetch(`${API}/visits/today?technicianId=${encodeURIComponent(id)}`,{headers:{Authorization:`Bearer ${token}`}}));
+    if(!current())return;
+    const selected=route[currentIndex]?.id||returnContextFromUrl().selectedVisitId;
     route = Array.isArray(data.visits) ? data.visits : [];
-    currentIndex = 0;
+    currentIndex = route.findIndex(visit=>String(visit.id)===String(selected));
+    if(currentIndex<0)currentIndex=Math.max(0,route.findIndex(visit=>!isClosed(visit)));
 
     ensureMap();
     renderMarkers();
     renderList();
     updateInfo();
 
-    setStatus(route.length ? `Ronda carregada com ${route.length} visita(s).` : "Sem visitas para hoje.", route.length ? "" : "warning");
+    const pending=route.filter(visit=>!isClosed(visit)).length;
+    setStatus(route.length ? `${pending} por terminar · ${route.length-pending} concluídas ou retiradas.${!map?' Mapa indisponível; use a lista e a navegação.':''}` : "Sem visitas para hoje.", route.length ? "" : "warning");
   } catch (error) {
+    if(!current())return;
     route = [];
+    clearMarkers();
     renderList();
     updateInfo();
-    setStatus(error.message || "Falha ao carregar mapa.", "error");
+    setStatus('Não foi possível atualizar a ronda. Verifique a ligação e tente novamente.', "error");
   } finally {
-    if (loadBtn) loadBtn.disabled = false;
+    if(version===loadVersion&&!current())clearAccountMap();
+    if (loadBtn && version===loadVersion) loadBtn.disabled = false;
   }
 }
 
@@ -274,6 +302,9 @@ if (loadBtn) loadBtn.addEventListener("click", loadToday);
 if (nextBtn) nextBtn.addEventListener("click", nextPool);
 setupReturnButton();
 
+function clearAccountMap(){loadVersion++;route=[];clearMarkers();renderList();updateInfo();if(loadBtn)loadBtn.disabled=false;setStatus('A sessão mudou. Atualize a ronda com a conta atual.','warning');}
+window.addEventListener('storage',event=>{if(['token','cristalwater_jwt','user','cristalwater_user'].includes(event.key)||event.key===null)clearAccountMap();});
+window.addEventListener('cw:session-expired',clearAccountMap);
 window.loadToday = loadToday;
 window.nextPool = nextPool;
 

@@ -1198,6 +1198,11 @@
   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
   <link rel="stylesheet" href="/ui/design-system.css">
   <link rel="stylesheet" href="/cw-field-professional.css">
+  <style>
+    #incompleteVisitCard .big{width:100%;white-space:normal;background:#075c4c!important;color:#fff!important;min-height:48px}
+    #incompleteVisitCard :is(select,textarea){width:100%;box-sizing:border-box;margin:8px 0 12px}
+    #incompleteVisitCard label{display:block;margin-top:8px}
+  </style>
 </head>
 <body class="cw-tech-field-page" data-field-tab="hoje" data-required-role="TECHNICIAN">
   <main class="field">
@@ -1246,6 +1251,13 @@
       </div>
     </section>
 
+    <section class="card field-panel field-panel-hoje" id="dayReviewCard">
+      <h2>Antes de sair</h2>
+      <p>Reveja trabalhos, envios e lembretes. Esta revisão não encerra a jornada nem transfere responsabilidades.</p>
+      <button type="button" id="dayReviewBtn" class="big">Rever pendências do dia</button>
+      <div id="dayReviewResult" role="status" aria-live="polite" data-cw-state-managed="manual"></div>
+    </section>
+
     <section class="card interrupt-card field-panel field-panel-hoje" id="interruptCard" hidden>
       <span class="chip">Interrupção operacional</span>
       <div class="muted" id="interruptSummary" style="margin-top:8px">Sem alertas críticos neste momento.</div>
@@ -1258,6 +1270,24 @@
         <button class="big ok" id="startBtn" type="button">Iniciar visita</button>
         <button class="big bad" id="finishBtn" type="button">Concluir visita</button>
       </div>
+    </section>
+
+    <section class="card field-panel field-panel-agora" id="incompleteVisitCard" data-cw-state-managed="manual">
+      <details><summary style="min-height:48px;font-weight:700">Não consegui concluir esta visita</summary>
+        <p>Registe o impedimento e o próximo passo. Não marca a piscina como limpa, não desconta produtos e não fecha água ou bombas.</p>
+        <label for="incompleteReason">Motivo</label><select id="incompleteReason"><option value="">Escolher motivo</option><option value="ACCESS_BLOCKED">Acesso impedido</option><option value="NO_KEY">Chave indisponível ou incorreta</option><option value="CLIENT_REFUSED">Cliente impediu o serviço</option><option value="CHEMICAL_MISSING">Falta de produtos químicos</option><option value="MATERIAL_MISSING">Falta de material</option><option value="EQUIPMENT_FAILURE">Equipamento avariado</option><option value="WEATHER">Condições meteorológicas</option><option value="OTHER">Outro motivo</option></select>
+        <div id="chemicalShortageFields" hidden style="display:none">
+          <label for="shortageProduct">Produto em falta</label><input id="shortageProduct" maxlength="120" placeholder="Ex.: hipoclorito de sódio" style="width:100%;box-sizing:border-box;min-height:48px">
+          <label for="shortageQuantity">Quantidade para reposição, se souber</label><input id="shortageQuantity" inputmode="decimal" placeholder="Deixar vazio se ainda não souber" style="width:100%;box-sizing:border-box;min-height:48px">
+          <label for="shortageUnit">Unidade</label><select id="shortageUnit"><option value="L">Litros</option><option value="KG">Quilogramas</option><option value="UN">Unidades</option></select>
+          <p>Indique a necessidade de reposição. Este registo não calcula uma dose, não consome stock nem autoriza substituir o produto.</p>
+        </div>
+        <label for="incompleteNextStep">Próximo passo</label><textarea id="incompleteNextStep" maxlength="1000" placeholder="Ex.: escritório confirmar a chave e combinar regresso"></textarea>
+        <p>Pode juntar fotografias na área de fotografias desta visita.</p>
+        <button type="button" id="incompleteSave" class="big" style="background:#075c4c;color:white">Guardar visita por concluir</button>
+      </details>
+      <p id="incompleteStatus" role="status" aria-live="polite"></p>
+      <button type="button" id="incompleteRetry" class="big" style="background:#075c4c;color:white">Reenviar registos pendentes</button>
     </section>
 
     <section class="card next field-panel field-panel-agora">
@@ -1581,6 +1611,7 @@
 <script src="/cw-field-recovery.js"></script>
   <script src="/technician-field-mode.js"></script>
   <script src="/cw-pump-reminders.js"></script>
+  <script src="/cw-field-day-review.js"></script>
   <script src="/ui/core/navigation-context.js"></script>
   <script src="/crystal-os-v2-shell.js"></script>
   <script defer src="/ui/design-system.js"></script>

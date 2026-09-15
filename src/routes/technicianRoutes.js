@@ -332,6 +332,8 @@ router.get("/today", async (req, res) => {
           null,
 
         id: v.id,
+        reason: v.reason,
+        returnInstructions: v.reason === "INCOMPLETE_RETURN" ? v.internalNotes : null,
 
         status:
           normalizedVisitStatus(v),
@@ -856,6 +858,17 @@ function waterHandler(action) {
   };
 }
 router.get('/pump-reminders', waterHandler(req => waterReminderService.list(req.user, 'PUMP_MANUAL')));
+router.get('/visit-receipts', waterHandler(req => require('../business/admin/VisitCoverageBusiness').receipts(req.user)));
+router.post('/visit-receipts/:id/acknowledge', waterHandler(req => require('../business/admin/VisitCoverageBusiness').acknowledge(req.user,req.params.id)));
+router.get('/chemical-shortages/:id/deliveries', waterHandler(req => require('../business/technician/ChemicalDeliveryBusiness').options(req.user,req.params.id)));
+router.post('/chemical-shortages/:id/deliveries', waterHandler(req => require('../business/technician/ChemicalDeliveryBusiness').confirm(req.user,req.params.id,req.body)));
+router.get('/chemical-shortages', waterHandler(req => require('../business/technician/IncompleteVisitBusiness').shortages(req.user)));
+router.get('/incomplete-followups', waterHandler(req => require('../business/technician/IncompleteVisitBusiness').followups(req.user)));
+router.post('/visits/:id/schedule-return', waterHandler(req => require('../business/technician/IncompleteVisitBusiness').scheduleReturn(req.user,req.params.id,req.body)));
+router.post('/visits/:id/incomplete', waterHandler(req => require('../business/technician/IncompleteVisitBusiness').report(req.user,req.params.id,req.body)));
+router.get('/reminder-handovers/targets', waterHandler(() => waterReminderService.handoverTargets()));
+router.get('/reminder-handovers/incoming', waterHandler(req => waterReminderService.incomingHandovers(req.user)));
+for (const action of ['request','accept','cancel']) router.post(`/reminder-handovers/:id/${action}`, waterHandler(req => waterReminderService.handover(req.user, req.params.id, action, req.body)));
 router.post('/pump-reminders', waterHandler(req => waterReminderService.create(req.user, req.body, 'PUMP_MANUAL')));
 router.post('/pump-reminders/:id/close', waterHandler(req => waterReminderService.transition(req.user, req.params.id, 'close')));
 router.get('/water-reminders', waterHandler(req => waterReminderService.list(req.user)));

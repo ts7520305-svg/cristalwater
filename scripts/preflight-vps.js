@@ -2,10 +2,9 @@
 const fs = require("fs");
 const path = require("path");
 
-require("../src/loadEnv")();
+const {configurationChecks,inspectSchema}=require("./lib/vps-preflight-checks");
 
 const root = path.resolve(__dirname, "..");
-const projectRoot = path.resolve(root, "..");
 const checks = [];
 
 function ok(name, detail = "") {
@@ -36,34 +35,8 @@ function isWritable(dir) {
   }
 }
 
-function requireEnv(name, options = {}) {
-  const value = process.env[name];
-  if (!value) return fail(`ENV ${name}`, "Obrigatorio em VPS/producao.");
-  if (options.notDefault && options.notDefault.includes(value)) {
-    return fail(`ENV ${name}`, "Valor de exemplo/default nao pode ser usado em producao.");
-  }
-  if (options.minLength && String(value).length < options.minLength) {
-    return fail(`ENV ${name}`, `Deve ter pelo menos ${options.minLength} caracteres.`);
-  }
-  return ok(`ENV ${name}`);
-}
-
 async function run() {
-  requireEnv("DATABASE_URL");
-  requireEnv("JWT_SECRET", { minLength: 32, notDefault: ["cristalwater_secret", "trocar_esta_chave_em_producao"] });
-  requireEnv("PORT");
-
-  if (process.env.NODE_ENV !== "production") {
-    warn("NODE_ENV", "Recomendado: NODE_ENV=production no VPS.");
-  } else {
-    ok("NODE_ENV", "production");
-  }
-
-  if (String(process.env.ALLOW_LEGACY_PLAIN_PASSWORDS || "false").toLowerCase() === "true") {
-    fail("ALLOW_LEGACY_PLAIN_PASSWORDS", "Nao pode ficar true em producao.");
-  } else {
-    ok("ALLOW_LEGACY_PLAIN_PASSWORDS", "Passwords antigas em texto simples bloqueadas.");
-  }
+  checks.push(...configurationChecks(process.env));
 
   if (process.env.ADMIN_PASSWORD && ["admin", "password", "trocar_esta_password"].includes(process.env.ADMIN_PASSWORD)) {
     fail("ADMIN_PASSWORD", "Password de exemplo nao pode ficar ativa.");
@@ -84,16 +57,12 @@ async function run() {
     ok("src/.env ausente");
   }
 
-  if (process.env.NODE_ENV === "production" && (!process.env.CORS_ORIGIN || process.env.CORS_ORIGIN === "*")) {
-    warn("CORS_ORIGIN", "Em producao recomenda-se definir o dominio publico, por exemplo https://app.cristalwater.pt.");
-  }
-
   ["frontend/admin-master-control.html", "frontend/technician-field-mode.html", "frontend/client-portal.html"].forEach((file) => {
     if (exists(file)) ok(`UI ${file}`);
     else fail(`UI ${file}`, "Pagina critica em falta.");
   });
 
-  const uploadDir = path.resolve(root, process.env.UPLOAD_DIR || "uploads");
+  const uploadDir = require("../src/config/uploadPath").resolveUploadBaseDir();
   if (isWritable(uploadDir)) ok("UPLOAD_DIR gravavel", uploadDir);
   else fail("UPLOAD_DIR gravavel", uploadDir);
 
@@ -119,19 +88,16 @@ async function run() {
     } else {
       ok("Prisma Client gerado", `${models.length} modelos.`);
       const prisma = new PrismaClient();
-      await prisma.$queryRaw`SELECT 1`;
-      await prisma.$disconnect();
+      try { await prisma.$queryRaw`SELECT 1`; } finally { await prisma.$disconnect(); }
       prismaReady = true;
       ok("Base de dados", "Ligacao PostgreSQL OK.");
     }
   } catch (error) {
-    fail("Prisma/Base de dados", error.message);
+    fail("Prisma/Base de dados", "Não foi possível confirmar a ligação. Verifique a configuração e o acesso ao PostgreSQL.");
   }
 
-  const frontendDist = path.join(projectRoot, "frontend", "dist", "index.html");
-  if (fs.existsSync(frontendDist)) ok("Frontend build", frontendDist);
-  else warn("Frontend build", "Nao encontrado. Executa no projeto frontend: npm run build");
-
+  if(prismaReady)checks.push(inspectSchema({root}));
+  ok("Frontend servido pelo backend", "Páginas em frontend/; não é necessário um frontend/dist separado.");
   if (process.env.ENABLE_BACKGROUND_JOBS === "true" && !prismaReady) {
     fail("Background jobs", "Nao ativar jobs sem Prisma/Base de dados OK.");
   }
@@ -146,7 +112,11 @@ async function run() {
   if (failures.length) process.exit(1);
 }
 
+if(require.main===module){
+require("../src/loadEnv")();
 run().catch((error) => {
-  console.error("[FAIL] Preflight VPS inesperado:", error);
+  console.error("[FAIL] Não foi possível concluir a verificação do VPS. Verifique a configuração sem partilhar credenciais.");
   process.exit(1);
 });
+
+}

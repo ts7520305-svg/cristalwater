@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { prisma } = require("../prismaClient");
-const { Prisma } = require('@prisma/client');
+const {activeFor,canSeeFinancialNotification}=require('../services/notificationScopeService');
 const auth = require("../middlewares/authMiddleware");
 const { roleMatches, normalizeRole } = require("../utils/roles");
 
@@ -9,16 +9,6 @@ router.use(auth());
 
 function roleOf(req) {
   return String(req.user?.role || "").trim().toUpperCase();
-}
-
-function canSeeFinancialNotification(notification = {}) {
-  const isFinancial = [
-    notification.type,
-    notification.eventType,
-    notification.title,
-    notification.message,
-  ].some((value) => /(PAYMENT|INVOICE|DEBT|BILL|FINANCE|FATUR|PAGAMENTO|DIVIDA|COBRANCA)/i.test(String(value || "")));
-  return !isFinancial;
 }
 
 function userCanSeeNotification(req, notification = {}) {
@@ -65,9 +55,7 @@ router.get("/", async (req, res) => {
 
     const [data, unreadGroups, latestMessages] = await Promise.all([
       prisma.notification.findMany({
-        where: isAdmin ? {} : normalizeRole(role)==='CLIENT'
-          ? {clientId:Number(req.user.clientId || req.user.id),role:{in:['CLIENT','CUSTOMER']}}
-          : {role:{in:['TECHNICIAN','TECH','TEAM_LEADER']},OR:[{metadata:{path:['technicianId'],equals:Number(req.user.technicianId||req.user.id)}},{metadata:{path:['technicianId'],equals:Prisma.AnyNull}}]},
+        where: activeFor(req.user),
         include: {
           client: true,
           user: true
@@ -163,26 +151,7 @@ router.get("/unread-count", async (req, res) => {
     const role = roleOf(req);
     const isAdmin = roleMatches(role, "ADMIN");
 
-    const notifications = await prisma.notification.findMany({
-      where: { isRead: false },
-      include: { client: true, user: true },
-      orderBy: { createdAt: "desc" },
-      take: 250,
-    });
-
-    const scopedUnread = notifications
-      .map((n) => ({
-        id: n.id,
-        userId: n.userId || null,
-        role: n.role,
-        type: n.type,
-        eventType: n.eventType,
-        title: n.title,
-        message: n.message,
-        clientId: n.clientId || null,
-        isRead: n.isRead,
-      }))
-      .filter((item) => userCanSeeNotification(req, item)).length;
+    const scopedUnread=await prisma.notification.count({where:{...activeFor(req.user),isRead:false}});
 
     const messageCount = isAdmin
       ? await prisma.clientMessage.count({
@@ -228,10 +197,8 @@ router.post("/read/:id", async (req, res) => {
       return res.status(403).json({ ok: false, error: "Sem permissão" });
     }
 
-    await prisma.notification.update({
-      where: { id },
-      data: { isRead: true, readAt: new Date() }
-    });
+    const changed=await prisma.notification.updateMany({where:{...activeFor(req.user),id},data:{isRead:true,readAt:new Date()}});
+    if(!changed.count)return res.status(403).json({ok:false,error:'Notificação indisponível nesta sessão'});
 
     return res.json({ ok: true });
 
@@ -253,7 +220,8 @@ router.post("/:id/read", async (req, res) => {
     const notification = await prisma.notification.findUnique({ where: { id } });
     if (!notification) return res.status(404).json({ ok: false, error: "Notificação não encontrada" });
     if (!userCanSeeNotification(req, notification)) return res.status(403).json({ ok: false, error: "Sem permissão" });
-    await prisma.notification.update({ where: { id }, data: { isRead: true, readAt: new Date() } });
+    const changed=await prisma.notification.updateMany({where:{...activeFor(req.user),id},data:{isRead:true,readAt:new Date()}});
+    if(!changed.count)return res.status(403).json({ok:false,error:'Notificação indisponível nesta sessão'});
     return res.json({ ok: true });
   } catch (err) {
     console.error("Erro marcar notificação:", err);
@@ -268,42 +236,7 @@ router.post("/:id/read", async (req, res) => {
 router.post("/read-all", async (req, res) => {
   try {
 
-    const role = roleOf(req);
-
-    if (roleMatches(role, "ADMIN")) {
-      await prisma.notification.updateMany({
-        where: { isRead: false },
-        data: { isRead: true, readAt: new Date() }
-      });
-
-      return res.json({ ok: true });
-    }
-
-    const notifications = await prisma.notification.findMany({
-      where: { isRead: false },
-      select: {
-        id: true,
-        userId: true,
-        clientId: true,
-        role: true,
-        type: true,
-        eventType: true,
-        title: true,
-        message: true,
-      },
-      take: 500,
-    });
-
-    const ids = notifications.filter((item) => userCanSeeNotification(req, item)).map((item) => item.id);
-
-    if (!ids.length) {
-      return res.json({ ok: true });
-    }
-
-    await prisma.notification.updateMany({
-      where: { id: { in: ids } },
-      data: { isRead: true, readAt: new Date() }
-    });
+    await prisma.notification.updateMany({where:{...activeFor(req.user),isRead:false},data:{isRead:true,readAt:new Date()}});
 
     return res.json({ ok: true });
 

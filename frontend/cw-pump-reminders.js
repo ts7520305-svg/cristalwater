@@ -34,6 +34,10 @@
   if(syncing||!navigator.onLine||window.CristalAuth?.isSessionExpired?.())return;
   const ownerKey=key(),token=window.CristalAuth?.getToken?.();if(!token)return;syncing=true;
   try{
+   const ownership=await request('/api/technician/pump-reminders',token);
+   const ownedRows=read(ownerKey);
+   for(const item of ownership.reminders.filter(item=>item.transferredAway))delete ownedRows[item.metadata?.localId||`server-${item.id}`];
+   write(ownedRows,ownerKey);
    for(const item of Object.values(read(ownerKey))){
     if(key()!==ownerKey)return;
     if(!item.serverId){const data=await request('/api/technician/pump-reminders',token,item);const rows=read(ownerKey);if(rows[item.localId]){rows[item.localId].serverId=data.reminder.id;write(rows,ownerKey);item.serverId=data.reminder.id;}}
@@ -42,7 +46,7 @@
    }
    if(key()!==ownerKey)return;
    const data=await request('/api/technician/pump-reminders',token);const rows=read(ownerKey);
-   for(const item of data.reminders){const localId=item.metadata?.localId||`server-${item.id}`;if(item.isCompleted){delete rows[localId];continue;}rows[localId]={...rows[localId],localId,serverId:item.id,visitId:item.metadata?.visitId,poolName:item.metadata?.poolName,technicianName:item.metadata?.technicianName,openedAt:item.metadata?.openedAt,dueAt:item.dueDate};}
+   for(const item of data.reminders){const localId=item.metadata?.localId||`server-${item.id}`;if(item.isCompleted||item.transferredAway){delete rows[localId];continue;}rows[localId]={...rows[localId],localId,serverId:item.id,visitId:item.metadata?.visitId,poolName:item.metadata?.poolName,technicianName:item.metadata?.technicianName,openedAt:item.metadata?.openedAt,dueAt:item.dueDate};}
    write(rows,ownerKey);
   }catch(e){feedback('Lembrete mantido neste telemóvel. Envio por confirmar.');}
   finally{syncing=false;render();}

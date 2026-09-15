@@ -5,9 +5,9 @@ const endpoints = [
   { path: "/api/system/health", expected: [200] },
   { path: "/api/system/version", expected: [200] },
   { path: "/api/system/modules", expected: [200] },
-  { path: "/api/dashboard/metrics", expected: [200, 401, 403] },
-  { path: "/api/core/dashboard", expected: [200, 401, 403] },
-  { path: "/api/gps/live", expected: [200, 401, 403] }
+  { path: "/api/dashboard/metrics", expected: [401, 403] },
+  { path: "/api/core/dashboard", expected: [401, 403] },
+  { path: "/api/gps/live", expected: [401, 403] }
 ];
 
 async function test(){

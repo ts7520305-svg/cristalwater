@@ -115,10 +115,14 @@ function getWeekKey(date){
 }
 
 function roundLabel(round){
-  return `${dayNames[Number(round.dayOfWeek) || 0]} - ${round.name}`;
+  return `${round.recurrence==='DAILY'?'Diária':round.recurrence==='MONTHLY'?'Mensal · dia '+round.dayOfMonth:dayNames[Number(round.dayOfWeek)||0]} - ${round.name}`;
 }
 
 function roundTechnicians(round){
+  if(Object.prototype.hasOwnProperty.call(round,"nextOccurrence")&&!round.nextOccurrence)return (round.technicians||[]).filter(rt=>rt&&(rt.technician?.id||rt.technicianId));
+  const nextDate=round.nextOccurrence?new Date(round.nextOccurrence):new Date();if(!round.nextOccurrence){nextDate.setHours(8,0,0,0);nextDate.setDate(nextDate.getDate()+(Number(round.dayOfWeek)-nextDate.getDay()+7)%7);}
+  const rule=(round.assignments||[]).filter(item=>new Date(item.startsAt)<=nextDate&&(!item.endsBefore||new Date(item.endsBefore)>nextDate)).sort((a,b)=>b.id-a.id)[0];
+  if(rule)return [{technicianId:rule.technicianId,technician:rule.technician}];
   return (round.technicians || []).filter((rt) => rt && (rt.technician?.id || rt.technicianId));
 }
 
@@ -422,11 +426,12 @@ function renderRounds(){
   if(!box) return;
   const byDay = new Map();
   for(let i = 0; i < 7; i++) byDay.set(i, []);
-  state.rounds.forEach(r => byDay.get(Number(r.dayOfWeek) || 0).push(r));
+  for(const frequency of ['DAILY','MONTHLY'])if(state.rounds.some(r=>r.recurrence===frequency))byDay.set(frequency,[]);
+  state.rounds.forEach(r => byDay.get(['DAILY','MONTHLY'].includes(r.recurrence)?r.recurrence:Number(r.dayOfWeek)||0).push(r));
 
   box.innerHTML = [...byDay.entries()].map(([day, rounds]) => `
     <div class="day-card" data-help-topic="rounds">
-      <h3>${escapeHtml(dayNames[day])}</h3>
+      <h3>${escapeHtml(day==='DAILY'?'Rondas diárias':day==='MONTHLY'?'Rondas mensais':dayNames[day])}</h3>
       ${rounds.length ? rounds.map(renderRoundCard).join("") : `<div class="empty">Sem ronda definida</div>`}
     </div>
   `).join("");
@@ -435,6 +440,7 @@ function renderRounds(){
   box.querySelectorAll("[data-toggle-round]").forEach(btn => btn.addEventListener("click", () => toggleRound(btn.dataset.toggleRound)));
   box.querySelectorAll("[data-save-round]").forEach(btn => btn.addEventListener("click", () => saveRoundFromCard(btn.dataset.saveRound)));
   box.querySelectorAll("[data-focus-tech-round]").forEach(btn => btn.addEventListener("click", () => focusTechnicianAssignment(btn.dataset.focusTechRound)));
+  box.querySelectorAll('[data-round-field="recurrence"]').forEach(select=>{const update=()=>{const card=select.closest('.round-card');card.querySelector('[data-schedule-week]').style.display=select.value==='WEEKLY'?'':'none';card.querySelector('[data-schedule-month]').style.display=select.value==='MONTHLY'?'':'none';};select.addEventListener('change',update);update();});
   setupRoundPoolDrag(box);
 }
 
@@ -442,11 +448,12 @@ function renderRoundCard(round){
   const hasTechnician = roundHasTechnician(round);
   const technicians = roundTechnicians(round).map((rt, index) => ({
     name: rt.technician?.name || `Tecnico #${rt.technicianId}`,
-    role: index === 0 ? "principal" : "apoio"
+    role: index === 0 ? (round.nextOccurrence===null?"atribuição base":"próxima ocorrência") : "apoio"
   })).filter(item => item.name);
   const pools = (round.pools || []).slice().sort((a,b)=>(a.order || 0)-(b.order || 0));
   return `
     <article class="round-card ${hasTechnician || round.active === false ? "" : "round-card-risk"}" data-help-topic="rounds" data-round-id="${round.id}">
+      ${(round.assignments||[]).length?`<details><summary>Atribuições por período (${round.assignments.length})</summary><p>A atribuição mais recente prevalece quando as datas coincidem.</p>${round.assignments.map(rule=>`<p><strong>${escapeHtml(rule.technician?.name||rule.technicianId)}</strong>: ${escapeHtml(new Date(rule.startsAt).toLocaleDateString('pt-PT'))} — ${rule.endsBefore?escapeHtml(new Date(new Date(rule.endsBefore).getTime()-1).toLocaleDateString('pt-PT')):'sem fim'}<br>${escapeHtml(rule.reason)}</p>`).join('')}</details>`:''}
       <div class="round-top">
         <div>
           <strong>${escapeHtml(round.name)}</strong><br>
@@ -461,8 +468,12 @@ function renderRoundCard(round){
         </div>
       `}
       <div class="round-editor">
-        <input data-round-field="name" value="${escapeHtml(round.name)}" aria-label="Nome da ronda">
-        <select data-round-field="dayOfWeek" aria-label="Dia da ronda">${roundDayOptions(round.dayOfWeek)}</select>
+        <label>Nome da ronda<input data-round-field="name" value="${escapeHtml(round.name)}"></label>
+        <label>Frequência<select data-round-field="recurrence">${[['WEEKLY','Semanal'],['DAILY','Diária — todos os dias'],['MONTHLY','Mensal']].map(([value,label])=>`<option value="${value}" ${(round.recurrence||'WEEKLY')===value?'selected':''}>${label}</option>`).join('')}</select></label>
+        <label data-schedule-week>Dia da semana<select data-round-field="dayOfWeek">${roundDayOptions(round.dayOfWeek)}</select></label>
+        <label data-schedule-month>Dia do mês (1–31)<input data-round-field="dayOfMonth" type="number" min="1" max="31" value="${round.dayOfMonth||1}"></label>
+        <label>Início (opcional)<input data-round-field="startsOn" type="date" value="${escapeHtml(String(round.startsOn||'').slice(0,10))}"></label>
+        <label>Fim (opcional)<input data-round-field="endsOn" type="date" value="${escapeHtml(String(round.endsOn||'').slice(0,10))}"></label>
         <button class="cw-v2-btn" type="button" data-save-round="${round.id}">Guardar</button>
       </div>
       <div style="margin-top:9px">
@@ -530,13 +541,14 @@ async function saveRoundFromCard(roundId){
   const card = document.querySelector(`.round-card[data-round-id="${roundId}"]`);
   if(!card) return;
   const name = card.querySelector('[data-round-field="name"]')?.value?.trim() || "";
+  const schedule={recurrence:card.querySelector('[data-round-field=recurrence]').value,dayOfMonth:Number(card.querySelector('[data-round-field=dayOfMonth]').value),startsOn:card.querySelector('[data-round-field=startsOn]').value||null,endsOn:card.querySelector('[data-round-field=endsOn]').value||null};
   const dayOfWeek = Number(card.querySelector('[data-round-field="dayOfWeek"]')?.value || 1);
   if(!name){ setStatus("Indica o nome da ronda.", "error"); return; }
   try{
     setStatus("A guardar ronda...");
     await fetchJSON(`${API}/rounds/${roundId}`, {
       method: "PUT",
-      body: JSON.stringify({ name, dayOfWeek })
+      body: JSON.stringify({ name, dayOfWeek, ...schedule })
     });
     await loadAll();
     setStatus("Ronda atualizada. Se necessario, volta a gerar as visitas planeadas.");
@@ -758,24 +770,33 @@ async function loadAll(){
 async function createRound(){
   const name = val("roundName").trim();
   const dayOfWeek = Number(val("roundDay"));
+  const schedule={recurrence:val("roundRecurrence"),dayOfMonth:Number(val("roundMonthDay")),startsOn:val("roundStartsOn")||null,endsOn:val("roundEndsOn")||null};
   if(!name){ setStatus("Indica o nome da ronda.", "error"); return; }
   try{
     setStatus("A criar ronda...");
-    await fetchJSON(`${API}/rounds`, { method:"POST", body: JSON.stringify({ name, dayOfWeek }) });
+    await fetchJSON(`${API}/rounds`, { method:"POST", body: JSON.stringify({ name, dayOfWeek, ...schedule }) });
     document.getElementById("roundName").value = "";
     await loadAll();
   }catch(err){ setStatus(err.message, "error"); }
 }
 
 async function assignTechnician(){
+  const button=document.getElementById('assignTechBtn');if(button.disabled)return;
   const roundId = Number(val("assignTechRound"));
   const technicianId = Number(val("assignTech"));
   if(!roundId || !technicianId){ setStatus("Seleciona uma ronda e um tecnico.", "error"); return; }
+  const payload={technicianId,period:val('assignmentPeriod'),startsOn:val('assignmentStart'),endsOn:val('assignmentEnd'),reason:val('assignmentReason')};
+  button.disabled=true;
   try{
-    setStatus("A associar tecnico...");
-    await fetchJSON(`${API}/rounds/${roundId}/technicians`, { method:"POST", body: JSON.stringify({ technicianId }) });
+    const url=`${API}/rounds/${roundId}/technicians`;
+    const preview=await fetchJSON(url,{method:'POST',body:JSON.stringify({...payload,preview:true})});
+    const last=preview.endsBefore?new Date(new Date(preview.endsBefore).getTime()-1).toLocaleDateString('pt-PT'):'sem fim';
+    if(!await ui.confirm(`Atribuir a ${preview.technicianName}, de ${new Date(preview.startsAt).toLocaleDateString('pt-PT')} até ${last}? ${preview.eligible} visita(s) ainda não iniciada(s) serão atualizadas e ${preview.preserved} preservada(s). As novas visitas geradas respeitarão este período. Lembretes críticos exigem passagem separada.`))return;
+    setStatus("A atribuir ronda...");
+    const result=await fetchJSON(url, { method:"POST", body: JSON.stringify(payload) });
     await loadAll();
-  }catch(err){ setStatus(err.message, "error"); }
+    setStatus(`Atribuição guardada. ${result.updated} visita(s) atualizada(s); histórico e visitas iniciadas preservados.`,'ok');
+  }catch(err){ setStatus(err.message, "error"); }finally{button.disabled=false;}
 }
 
 async function assignPool(){
@@ -793,15 +814,15 @@ async function assignPool(){
 
 async function generateWeek(force = false){
   if(force){
-    const ok = await ui.confirm("Forcar a geracao vai substituir visitas planeadas ainda nao concluidas desta semana. Continuar?", {
-      title: "Confirmar geracao forcada",
+    const ok = await ui.confirm("Verificar os próximos sete dias e criar apenas as visitas em falta? As visitas existentes e os seus registos serão conservados.", {
+      title: "Verificar planeamento",
       confirmText: "Continuar",
       danger: true,
     });
     if(!ok) return;
   }
   try{
-    setStatus(force ? "A regenerar visitas planeadas da semana..." : "A gerar visitas da semana a partir das rondas...");
+    setStatus(force ? "A verificar e preencher visitas em falta..." : "A gerar visitas da semana a partir das rondas...");
     const data = await fetchJSON(`${API}/round-planner/generate`, { method:"POST", body: JSON.stringify({ force }) });
     await loadAll();
     const blocked = Number(data.blocked || 0);
@@ -966,7 +987,13 @@ async function toggleRound(id){
 window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("refreshBtn")?.addEventListener("click", loadAll);
   document.getElementById("createRoundBtn")?.addEventListener("click", createRound);
+  const updateFrequency=()=>{for(const [id,visible] of [['roundWeekField',val('roundRecurrence')==='WEEKLY'],['roundMonthField',val('roundRecurrence')==='MONTHLY']]){const field=document.getElementById(id);field.hidden=!visible;field.style.display=visible?'':'none';}};document.getElementById('roundRecurrence').addEventListener('change',updateFrequency);updateFrequency();
   document.getElementById("assignTechBtn")?.addEventListener("click", assignTechnician);
+  const assignmentNow=new Date();
+  const assignmentDate=`${assignmentNow.getFullYear()}-${String(assignmentNow.getMonth()+1).padStart(2,'0')}-${String(assignmentNow.getDate()).padStart(2,'0')}`;
+  document.getElementById('assignmentStart').value=assignmentDate;
+  document.getElementById('assignmentEnd').value=assignmentDate;
+  document.getElementById('assignmentPeriod').addEventListener('change',()=>{const field=document.getElementById('assignmentEndField');field.hidden=val('assignmentPeriod')!=='RANGE';field.style.display=field.hidden?'none':'';});
   document.getElementById("assignPoolBtn")?.addEventListener("click", assignPool);
   document.getElementById("generateWeekBtn")?.addEventListener("click", () => generateWeek(false));
   document.getElementById("forceGenerateBtn")?.addEventListener("click", () => generateWeek(true));
@@ -974,3 +1001,39 @@ window.addEventListener("DOMContentLoaded", () => {
   setupVisitFilters();
   loadAll();
 });
+
+(() => {
+  const labels={NO_ROUND:'Sem ronda ativa',STALE_COMPLETION:'Última manutenção precisa de revisão',NEVER_COMPLETED:'Sem manutenção concluída registada',NOT_SCHEDULED_TODAY:'Ronda prevista hoje, sem visita gerada',OVERDUE:'Em atraso',UNASSIGNED:'Sem técnico ativo',NO_DATE:'Sem data',INCOMPLETE:'Por concluir'};
+  let revision=0;
+  const message=()=>document.getElementById('coverageStatus');
+  async function refresh(){
+    const own=++revision,token=localStorage.getItem('token');message().textContent='A verificar as visitas…';
+    try{
+      const data=await fetchJSON('/api/rounds/coverage',{cache:'no-store',signal:AbortSignal.timeout(15000)});
+      if(own!==revision||token!==localStorage.getItem('token'))return;
+      document.getElementById('coverageTechnician').innerHTML='<option value="">Selecionar técnico</option>'+data.technicians.map(tech=>`<option value="${tech.id}">${escapeHtml(tech.name)}</option>`).join('');
+      document.getElementById('coverageList').innerHTML=data.rows.map(row=>`<article class="coverage-pool" data-coverage-pool="${row.poolId}"><h3>${escapeHtml(row.poolName)}</h3><p>${escapeHtml(row.clientName)} · ${row.lastCompleted?'Última conclusão: '+new Date(row.lastCompleted).toLocaleDateString('pt-PT'):'Sem conclusão registada'}</p><p>${row.flags.map(flag=>escapeHtml(labels[flag])).join(' · ')}</p>${row.visits.map(visit=>`<label class="coverage-visit">${visit.canTransfer?`<input type="checkbox" data-transfer-visit="${visit.id}" aria-label="Selecionar visita ${visit.id}">`:''}<span>Visita #${visit.id} · ${visit.plannedDate?new Date(visit.plannedDate).toLocaleDateString('pt-PT'):'Sem data'} · ${escapeHtml(visit.technicianName||'Por atribuir')}<br>${visit.issues.map(flag=>escapeHtml(labels[flag])).join(' · ')||'Agendada'}${visit.canTransfer?'':' · Acompanhamento individual necessário'}</span></label>`).join('')}${row.visits.some(v=>v.issues.includes('INCOMPLETE'))?'<a href="/admin-alerts#incompleteFollowups">Combinar regresso</a>':''}${row.flags.includes('NOT_SCHEDULED_TODAY')?'<p>Verifique as rondas abaixo e utilize Gerar semana após confirmar o planeamento.</p>':''}</article>`).join('');
+      document.getElementById('visitReceiptsAdmin').innerHTML=(data.receipts||[]).map(row=>`<p data-admin-receipt="${row.id}"><strong>${escapeHtml(row.poolName)} · #${row.visitId}</strong> · ${escapeHtml(row.technicianName)} · ${({PENDING:'Por confirmar pelo técnico',RECEIVED:'Receção confirmada',RECEIVED_PREVIOUS:'Receção confirmada numa atribuição anterior',SUPERSEDED:'Atribuição substituída',CLOSED:'Visita encerrada sem confirmação de receção'})[row.state]}${row.receivedAt?' · '+new Date(row.receivedAt).toLocaleString('pt-PT'):''}</p>`).join('')||'<p>Sem transferências com confirmação registada.</p>';
+      message().textContent=`${data.rows.length} piscina(s) a verificar. ${data.scope} ${data.automaticAlertsEnabled?'Avisos ao escritório verificados automaticamente de hora a hora.':'Avisos automáticos desativados neste ambiente; utilize Verificar agora.'}`;
+    }catch(error){if(own===revision&&token===localStorage.getItem('token'))message().textContent=`Não foi possível atualizar: ${error.message}. A informação anterior pode estar desatualizada.`;}
+  }
+  document.getElementById('coverageRefresh').addEventListener('click',refresh);
+  document.getElementById('coverageTransfer').addEventListener('submit',async event=>{
+    event.preventDefault();const button=event.target.querySelector('button'),token=localStorage.getItem('token');
+    const visitIds=[...document.querySelectorAll('[data-transfer-visit]:checked')].map(node=>Number(node.dataset.transferVisit));
+    if(!visitIds.length){message().textContent='Selecione as visitas que pretende transferir.';return;}
+    const payload={visitIds,technicianId:Number(val('coverageTechnician')),reason:val('coverageCause')+': '+val('coverageReason')};button.disabled=true;
+    try{
+      const preview=await fetchJSON('/api/rounds/transfer-visits',{method:'POST',body:JSON.stringify({...payload,preview:true}),signal:AbortSignal.timeout(15000)});
+      if(token!==localStorage.getItem('token'))return;
+      const description=preview.visits.map(v=>`#${v.id} ${v.poolName}`).join(', ');
+      if(!await ui.confirm(`Transferir ${preview.updated} visita(s) para ${preview.technicianName}? ${preview.unchanged} já atribuída(s) a esse técnico. Datas preservadas. ${description}`,{title:'Confirmar redistribuição',confirmText:'Transferir'}))return;
+      if(token!==localStorage.getItem('token'))return;
+      const result=await fetchJSON('/api/rounds/transfer-visits',{method:'POST',body:JSON.stringify({...payload,expected:preview.visits,requestId:crypto.randomUUID()}),signal:AbortSignal.timeout(15000)});
+      if(token!==localStorage.getItem('token'))return;
+      await refresh();message().textContent=`${result.updated} visita(s) transferida(s) para ${result.technicianName}. Peça ao técnico para atualizar a rota e confirmar consigo.`;
+    }catch(error){if(token===localStorage.getItem('token'))message().textContent=`Transferência não confirmada: ${error.message}. Atualize a lista antes de repetir.`;}
+    finally{button.disabled=false;}
+  });
+  refresh();
+})();

@@ -10,6 +10,7 @@ const {
   listCustomerHistory,
   listCustomerMessages,
   listCustomerNotifications,
+  markCustomerNotificationRead,
   readDocumentManifest,
   resolveDocumentAccess,
   safeNumber,
@@ -106,20 +107,12 @@ router.post("/:clientId(\\d+)/notifications/:notificationId/read", auth("CLIENT"
   const clientId = Number(req.params.clientId);
   const notificationId = Number(req.params.notificationId);
   if (!ensureClientOwnership(req, res, clientId)) return;
-  if (!notificationId) return res.status(400).json({ ok: false, error: "Notificação inválida" });
-
-  const notification = await prisma.notification.findFirst({
-    where: { id: notificationId, clientId },
-  });
-
-  if (!notification) {
-    return res.status(404).json({ ok: false, error: "Notificação não encontrada" });
+  if (!Number.isSafeInteger(notificationId)||notificationId<=0) return res.status(400).json({ ok: false, error: "Notificação inválida" });
+  try {
+    if(!await markCustomerNotificationRead(clientId,notificationId))return res.status(404).json({ok:false,error:'Notificação não encontrada'});
+  } catch (_) {
+    return res.status(500).json({ok:false,error:'Não foi possível confirmar a leitura'});
   }
-
-  await prisma.notification.update({
-    where: { id: notificationId },
-    data: { isRead: true },
-  });
 
   return res.json({ ok: true });
 });

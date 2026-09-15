@@ -94,3 +94,8 @@ Archive the following with the release record:
 - git tag
 - operator who executed release
 - operator who validated rollback readiness
+## Field preflight
+
+Run from the directory containing `package.json`, `src/` and `prisma/`. The current application serves `frontend/` directly; a separate `frontend/dist` build is not required.
+
+`npm run preflight:vps` checks production mode, disabled QA mode, explicit HTTPS origins, authentication settings, active/configured Web Push, the runtime upload directory and PostgreSQL schema alignment. It compares the schema using Prisma migrate diff and does not apply migrations. A failure must be resolved before starting the new revision. Do not use a green preflight as evidence of a current backup or physical-device push delivery; those remain separate release checks.

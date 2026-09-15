@@ -34,7 +34,12 @@ function setStatus(message, tone = "info") {
   node.className = `status ${tone === "info" ? "" : tone}`.trim();
 }
 
+function showFormError(form,message){
+  let node=form.querySelector('[data-inventory-feedback]');if(!node){node=document.createElement('div');node.dataset.inventoryFeedback='true';node.className='status error';node.setAttribute('role','alert');form.appendChild(node);}node.textContent=message;
+}
+function clearFormError(form){form.querySelector('[data-inventory-feedback]')?.remove();}
 function userError(error, fallback) {
+  if(/failed to fetch|networkerror|load failed/i.test(error?.message||''))return 'Ligação interrompida. Repita o pedido com os mesmos dados; o sistema evita duplicações.';
   return ui.safeError(error, fallback || "Nao foi possivel concluir a operacao.");
 }
 
@@ -63,7 +68,7 @@ function collectRows() {
       r.querySelectorAll("input").forEach((i) => { o[i.dataset.k] = i.value; });
       return o;
     })
-    .filter((x) => x.productName && Number(x.quantity) > 0);
+    .filter((x) => x.productName || x.quantity || x.unitCost);
 }
 
 async function api(url, opt) {
@@ -108,8 +113,10 @@ async function refreshProducts() {
 }
 
 async function refresh() {
+  const token=localStorage.getItem("token");
   setStatus("A atualizar stock e movimentos...");
   const report = await api("/api/inventory/report");
+  if(token!==localStorage.getItem("token"))return;
   el("stock").innerHTML = (report.balances || []).map(itemHtml).join("") || '<p class="muted">Sem stock. Proxima acao: registar uma entrada de stock por fatura.</p>';
   el("movements").innerHTML = (report.lastMovements || []).map((m) => `
     <div class="item">
@@ -118,6 +125,16 @@ async function refresh() {
     </div>
   `).join("") || '<p class="muted">Sem movimentos. Proxima acao: efetuar uma entrada, transferencia ou consumo.</p>';
   await refreshProducts();
+  const vehiclesData=await api('/api/guides/vehicles');if(token!==localStorage.getItem('token'))return;
+  const vehicles=Array.isArray(vehiclesData)?vehiclesData:vehiclesData.vehicles||vehiclesData.data||[];
+  const vehicleSelection=el('transferVehicleId').value;el('transferVehicleId').innerHTML='<option value="">Selecionar viatura</option>'+vehicles.filter(v=>v.active!==false&&!v.deletedAt&&(!v.archiveStatus||v.archiveStatus==='ATIVO')).map(v=>`<option value="${v.id}">${esc(v.plate||v.name||'Viatura '+v.id)}</option>`).join('');el('transferVehicleId').value=vehicleSelection;
+  const productSelection=el('transferProductName').value;el('transferProductName').innerHTML='<option value="">Selecionar produto do armazém</option>'+(report.balances||[]).filter(b=>b.scope==='CENTRAL'&&Number(b.quantity)>0).map(b=>`<option value="${esc(b.productName)}" data-unit="${esc(b.unit)}" data-quantity="${Number(b.quantity)}">${esc(b.productName)} · ${esc(b.quantity+' '+b.unit)}</option>`).join('');el('transferProductName').value=productSelection;
+  const updateTransferProduct=()=>{const option=el('transferProductName').selectedOptions[0];el('transferUnit').value=option?.dataset.unit||'';el('transferQuantity').max=option?.dataset.quantity||'';el('transferAvailability').textContent=option?.dataset.quantity?'Saldo consultado: '+option.dataset.quantity+' '+option.dataset.unit+'. A disponibilidade volta a ser verificada ao guardar.':'';};el('transferProductName').onchange=updateTransferProduct;updateTransferProduct();
+  const consumeVehicle=el('consumeVehicleId'),oldVehicle=consumeVehicle.value;
+  consumeVehicle.innerHTML=el('transferVehicleId').innerHTML;consumeVehicle.value=oldVehicle;
+  const updateConsumptionUnit=()=>{const option=el('consumeProductName').selectedOptions[0];el('consumeUnit').value=option?.dataset.unit||'';el('consumeQuantity').max=option?.dataset.quantity||'';};
+  const updateConsumptionProducts=()=>{const select=el('consumeProductName'),oldProduct=select.value;select.innerHTML='<option value="">Selecionar produto da viatura</option>'+(report.balances||[]).filter(b=>b.scope==='VEHICLE'&&String(b.vehicleId)===consumeVehicle.value&&Number(b.quantity)>0).map(b=>`<option value="${esc(JSON.stringify([b.productName,b.unit]))}" data-product-name="${esc(b.productName)}" data-unit="${esc(b.unit)}" data-quantity="${Number(b.quantity)}">${esc(b.productName+' · '+b.quantity+' '+b.unit)}</option>`).join('');select.value=oldProduct;updateConsumptionUnit();};
+  consumeVehicle.onchange=updateConsumptionProducts;el('consumeProductName').onchange=updateConsumptionUnit;updateConsumptionProducts();
   setStatus("Inventario atualizado.", "ok");
 }
 
@@ -166,33 +183,35 @@ async function deleteProduct(id) {
   await refresh();
 }
 
+async function inventoryRequest(kind,payload,token){
+  const user=JSON.parse(localStorage.getItem('user')||localStorage.getItem('cristalwater_user')||'null');
+  if(!user?.id)throw new Error('Confirme a sessão antes de guardar');
+  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify([user.role,user.id,payload])));
+  if(token!==localStorage.getItem('token'))throw new Error('A sessão mudou. Confirme a conta antes de guardar');
+  const key='cwInventoryWrite:'+kind+':'+Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');
+  const requestId=localStorage.getItem(key)||crypto.randomUUID();localStorage.setItem(key,requestId);return {key,requestId};
+}
 el("purchaseForm")?.addEventListener("submit", async (e) => {
-  e.preventDefault();
+  e.preventDefault();const form=e.target,button=form.querySelector('button[type=submit]');if(button.disabled)return;button.disabled=true;clearFormError(form);const token=localStorage.getItem('token');
   try {
     setStatus("A guardar entrada de stock...");
-    const fd = new FormData(e.target);
-    fd.append("items", JSON.stringify(collectRows()));
-    const res = await fetch("/api/inventory/purchases", {
-      method: "POST",
-      headers: authHeaders(),
-      body: fd,
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || data.ok === false) throw new Error(data.error || data.message || `Erro HTTP ${res.status}`);
-    e.target.reset();
-    el("items").innerHTML = "";
-    addRow();
-    setStatus("Entrada de stock guardada.", "ok");
-    await refresh();
-  } catch (error) {
-    console.error(error);
-    setStatus(userError(error, "Falha ao guardar entrada. Verifica os dados e tenta novamente."), "error");
-    ui.error(userError(error, "Falha ao guardar entrada. Verifica os dados e tenta novamente."));
-  }
+    const fd=new FormData(form),items=collectRows();fd.append('items',JSON.stringify(items));
+    const file=fd.get('document');let documentHash=null;
+    if(file?.size){const hash=await crypto.subtle.digest('SHA-256',await file.arrayBuffer());documentHash=Array.from(new Uint8Array(hash),b=>b.toString(16).padStart(2,'0')).join('');}
+    const payload={...Object.fromEntries(fd),document:file?.size?{name:file.name,documentHash}:null};
+    const pending=await inventoryRequest('purchase',payload,token);fd.append('requestId',pending.requestId);
+    const res=await fetch('/api/inventory/purchases',{method:'POST',headers:authHeaders(),body:fd});
+    const data=await res.json().catch(()=>({}));if(!res.ok||data.ok===false)throw new Error(data.error||data.message||`Erro HTTP ${res.status}`);
+    if(token!==localStorage.getItem('token'))return;localStorage.removeItem(pending.key);
+    form.reset();el('items').innerHTML='';addRow();setStatus('Entrada de stock guardada.','ok');await refresh();
+  }catch(error){
+    if(token!==localStorage.getItem('token'))return;
+    setStatus(userError(error,'Falha ao guardar entrada. Os dados foram mantidos para repetir.'),'error');showFormError(form,userError(error,'Falha ao guardar entrada.'));
+  }finally{button.disabled=false;}
 });
 
 el("transferForm")?.addEventListener("submit", async (e) => {
-  e.preventDefault();
+  e.preventDefault();const form=e.target,button=form.querySelector('button[type=submit],button');if(button?.disabled)return;clearFormError(form);const token=localStorage.getItem('token');let key;
   try {
     setStatus("A transferir stock para viatura...");
     const f = Object.fromEntries(new FormData(e.target));
@@ -200,31 +219,32 @@ el("transferForm")?.addEventListener("submit", async (e) => {
       vehicleId: f.vehicleId,
       items: [{ productName: f.productName, quantity: f.quantity, unit: f.unit || "KG" }],
     };
+    const user=JSON.parse(localStorage.getItem('user')||localStorage.getItem('cristalwater_user')||'null');if(!user?.id)throw new Error('Confirme a sessão antes de transferir');
+    key='cwInventoryTransfer:'+JSON.stringify([user.id,body]);body.requestId=localStorage.getItem(key)||crypto.randomUUID();localStorage.setItem(key,body.requestId);if(button)button.disabled=true;
     await api("/api/inventory/transfer-to-vehicle", { method: "POST", body: JSON.stringify(body) });
+    if(token!==localStorage.getItem('token'))return;localStorage.removeItem(key);
     e.target.reset();
     setStatus("Transferencia registada.", "ok");
     await refresh();
   } catch (error) {
+    if(token!==localStorage.getItem('token'))return;
     console.error(error);
     setStatus(userError(error, "Falha na transferencia. Confirma a viatura, o produto e a quantidade."), "error");
-    ui.error(userError(error, "Falha na transferencia. Confirma a viatura, o produto e a quantidade."));
-  }
+    showFormError(form,userError(error, "Falha na transferencia. Confirma a viatura, o produto e a quantidade."));
+  }finally{if(button)button.disabled=false;}
 });
 
 el("consumeForm")?.addEventListener("submit", async (e) => {
-  e.preventDefault();
+  e.preventDefault();const form=e.target,button=form.querySelector('button[type=submit]');if(button.disabled)return;button.disabled=true;clearFormError(form);const token=localStorage.getItem('token');
   try {
-    setStatus("A registar consumo...");
-    const body = Object.fromEntries(new FormData(e.target));
-    await api("/api/inventory/consume", { method: "POST", body: JSON.stringify(body) });
-    e.target.reset();
-    setStatus("Consumo registado.", "ok");
-    await refresh();
-  } catch (error) {
-    console.error(error);
-    setStatus(userError(error, "Falha no consumo. Confirma os valores e tenta novamente."), "error");
-    ui.error(userError(error, "Falha no consumo. Confirma os valores e tenta novamente."));
-  }
+    setStatus('A registar consumo...');const body=Object.fromEntries(new FormData(form));body.productName=el('consumeProductName').selectedOptions[0]?.dataset.productName||'';
+    const pending=await inventoryRequest('consume',body,token);body.requestId=pending.requestId;
+    await api('/api/inventory/consume',{method:'POST',body:JSON.stringify(body)});
+    if(token!==localStorage.getItem('token'))return;localStorage.removeItem(pending.key);form.reset();setStatus('Consumo registado.','ok');await refresh();
+  }catch(error){
+    if(token!==localStorage.getItem('token'))return;
+    setStatus(userError(error,'Falha no consumo. Os dados foram mantidos para repetir.'),'error');showFormError(form,userError(error,'Falha no consumo.'));
+  }finally{button.disabled=false;}
 });
 
 window.addRow = addRow;

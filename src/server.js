@@ -124,7 +124,7 @@ const administrationRoutes = require("./routes/administrationRoutes");
 
 // Background services
 const { runAutoBilling } = require("./services/autoBillingService");
-const { runAutoVisitAlerts } = require("./services/autoVisitAlertService");
+const { startScheduler: startVisitCoverageScheduler } = require("./services/autoVisitAlertService");
 const { detectOperationalIncidents, processSlaEscalations } = require("./services/incidentService");
 const { runIncidentEngine } = require("./services/incidentEngine");
 const { runRouteOptimization } = require("./services/routeOptimizationEngine");
@@ -322,8 +322,6 @@ function scheduleBackgroundJobs() {
   safeRun("AUTO_BILLING", runAutoBilling);
   setInterval(() => safeRun("AUTO_BILLING", runAutoBilling), 1000 * 60 * 60 * 24);
 
-  safeRun("AUTO_VISIT_ALERTS", runAutoVisitAlerts);
-  setInterval(() => safeRun("AUTO_VISIT_ALERTS", runAutoVisitAlerts), 1000 * 60 * 60);
 
   safeRun("INCIDENT_DETECTION", detectOperationalIncidents);
   setInterval(() => safeRun("INCIDENT_DETECTION", detectOperationalIncidents), 1000 * 60 * 5);
@@ -343,6 +341,7 @@ function scheduleBackgroundJobs() {
 
 scheduleBackgroundJobs();
 require("./services/waterReminderService").startScheduler();
+startVisitCoverageScheduler();
 
 // V21 Frontend continuity fallback: invalid frontend paths return dashboard/login without destroying session.
 app.get("*", (req, res, next) => {

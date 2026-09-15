@@ -443,7 +443,7 @@ router.post("/complete", (req, res) => {
 
 router.post("/:id/start", async (req, res) => {
   try {
-    const result = await TechnicianVisitBusiness.startVisit(req.params.id);
+    const result = await TechnicianVisitBusiness.startVisit(req.params.id, req.user);
 
     if (!result.ok) {
       return res.status(result.status).json({ ok: false, error: result.error });

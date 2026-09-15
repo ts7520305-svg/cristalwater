@@ -45,7 +45,7 @@ async function parseResponse(response) {
   } catch (_) {
     data = { raw: text };
   }
-  if (!response.ok) {
+  if (!response.ok || data.ok===false || data.success===false) {
     throw new Error(data.error || data.message || `Falha HTTP ${response.status}`);
   }
   return data;
@@ -65,7 +65,7 @@ async function sendPoint(position) {
   const lng = position.coords.longitude;
   const accuracy = Number(position.coords.accuracy || 0);
 
-  await parseResponse(await fetch(`${API}/gps/update`, {
+  const data=await parseResponse(await fetch(`${API}/gps/update`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -73,15 +73,18 @@ async function sendPoint(position) {
       latitude: lat,
       longitude: lng,
       accuracy,
+      recordedAt:new Date(position.timestamp||now).toISOString(),
     }),
   }));
 
+  if(data.ignored){setKpi('A atualizar',`${Math.round(accuracy)} m`,'-');setStatus(data.message);return;}
   setKpi("Sincronizado", `${Math.round(accuracy)} m`, new Date().toLocaleTimeString("pt-PT"));
   setStatus("Localizacao enviada com sucesso.");
 }
 
 function onPosition(position) {
   sendPoint(position).catch((error) => {
+    lastSentAt=0;
     setStatus(error.message || "Falha no envio de localizacao.", "error");
     setKpi("Erro", "-", lastKpi?.textContent || "-");
   });
