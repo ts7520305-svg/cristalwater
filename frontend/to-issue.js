@@ -176,7 +176,7 @@ async function load() {
 }
 
 function openPdf(id) {
-  window.open(`${API}/invoice-pdf/${id}`, "_blank");
+  window.open(`/invoice-document?id=${Number(id)}`, "_blank", "noopener");
 }
 
 async function markIssued(id, clientName) {

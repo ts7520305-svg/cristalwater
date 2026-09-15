@@ -3,6 +3,7 @@ const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const path = require("path");
 const { prisma } = require("../prismaClient");
+const InvoiceChatDeliveryBusiness = require('../business/finance/InvoiceChatDeliveryBusiness');
 const {
   buildWhatsAppBrowserLink,
   sendWhatsAppViaApi
@@ -61,6 +62,7 @@ async function sendInvoiceFull(req, res) {
   try {
     const invoiceId = Number(req.params.invoiceId);
     const mode = String(req.query.mode || "chat").toLowerCase(); // chat | browser | api
+    if (mode === 'chat') return res.json(await InvoiceChatDeliveryBusiness.deliver(req.params.invoiceId, req.user));
 
     if (Number.isNaN(invoiceId)) {
       return res.status(400).json({
@@ -91,49 +93,6 @@ Valor: ${Number(invoice.totalAmount || 0).toFixed(2)} €
 Em dívida: ${Number(invoice.amountOpen || 0).toFixed(2)} €
 
 Documento em anexo`;
-
-    // ======================
-    // CHAT
-    // ======================
-
-    if (mode === "chat") {
-      await prisma.chatMessage.create({
-        data: {
-          senderId: 1,
-          receiverId: null,
-          chatType: "CLIENT",
-          clientId: invoice.clientId,
-          text,
-          messageType: "DOCUMENT",
-          fileUrl: pdf,
-          fileName: `fatura_${invoice.month}_${invoice.year}.pdf`,
-          isRead: false
-        }
-      });
-
-      await prisma.notification.create({
-        data: {
-          clientId: invoice.clientId,
-          type: "INVOICE",
-          title: "Fatura enviada no chat",
-          message: `Fatura ${invoice.month}/${invoice.year} enviada pelo chat`,
-          isRead: false
-        }
-      });
-
-      await logCommunication({
-        clientId: invoice.clientId,
-        channel: "CHAT",
-        message: text,
-        referenceId: invoice.id
-      });
-
-      return res.json({
-        ok: true,
-        mode: "chat",
-        message: "Fatura enviada para o chat"
-      });
-    }
 
     // ======================
     // WHATSAPP BROWSER
@@ -214,7 +173,7 @@ Documento em anexo`;
 
   } catch (err) {
     console.error("ERRO sendInvoiceFull:", err);
-    return res.status(500).json({
+    return res.status(err.statusCode || 500).json({
       ok: false,
       error: err.message
     });

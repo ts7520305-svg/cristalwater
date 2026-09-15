@@ -1781,6 +1781,10 @@ function appendMessage(message) {
   div.className = `msg ${isClient ? "client" : "admin"}`;
   if(message?.id)div.dataset.clientMessageId=String(Number(message.id));
   div.innerHTML = `<b>${isClient ? esc(copy("clientDefault")) : "Cristal Water"}</b><br>${String(text).startsWith("/uploads/") ? `<a href="${esc(text)}" target="_blank">${esc(copy("openAttachment"))}</a>` : esc(text)}<div class="muted">${esc(date)}</div>`;
+  if (message.messageType === 'DOCUMENT' && /^\/invoice-document\?id=[1-9]\d{0,9}$/.test(message.fileUrl || '')) {
+    const link = document.createElement('a'); link.href = message.fileUrl; link.target = '_blank'; link.rel = 'noopener'; link.textContent = copy('openAttachment');
+    div.appendChild(document.createElement('br')); div.appendChild(link);
+  }
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
 }

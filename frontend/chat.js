@@ -220,13 +220,15 @@
         : upload
           ? `<a href="${esc(text)}" target="_blank" rel="noopener">Abrir documento</a>`
           : esc(text);
+      const invoiceDocument = message.messageType === 'DOCUMENT' && /^\/invoice-document\?id=[1-9]\d{0,9}$/.test(message.fileUrl || '')
+        ? `<br><a href="${esc(message.fileUrl)}" target="_blank" rel="noopener">Abrir documento</a>` : '';
 
       return `
         ${separator}
         <div class="chat-message ${admin ? "chat-admin" : "chat-client"}">
           <strong>${esc(sender)}</strong>
           <br>
-          ${body}
+          ${body}${invoiceDocument}
           <div class="chat-meta">${esc(shortDate(message.createdAt))}</div>
         </div>
       `;

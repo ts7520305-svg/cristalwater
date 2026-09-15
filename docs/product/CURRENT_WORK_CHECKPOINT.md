@@ -4,6 +4,8 @@
 
 - Repositório: `ts7520305-svg/cristalwater`.
 - Branch de trabalho: `work/field-readiness-20260915-simulation`.
+- TASK162/TASK163 publicadas até `4633876c2a26f914b2049f09a1c5284e25d818c4`, árvore `2470dd1add4eedf145996937f98344d9fa366259`; workflow `35021468570` em verificação com 68 grupos.
+- TASK164: documento financeiro disponível na conversa real do cliente, publicação atómica e sem duplicar, autor correto e link autenticado nos ecrãs. Relatório `INVOICE_CHAT_DELIVERY_20260915.md`; dois grupos aprovados em `field-qa-runtime/run-1789505209296`. Na revisão foram localizados aliases de chat JSON `/api/clientChat` e `/api/client-chat` sem autenticação, e o POST moderno permite escolher o remetente pelo corpo: reproduzir/corrigir. Modos externos de fatura continuam por rever; não declarar 100%.
 - TASK161 verificada no workflow `35020637133`: 66 grupos aprovados, PostgreSQL 16 e restauro de 99 tabelas/11 ficheiros. Commit `64d9e335ed34cc75e7edc2e03e9a43453fbcddf5`.
 - TASK163: acesso anónimo legado aos alertas reproduzido e corrigido, incluindo o desvio à confirmação física. Relatório `LEGACY_ALERT_ACCESS_20260915.md`; três grupos aprovados em `field-qa-runtime/run-1789504955148`. Publicar TASK162/TASK163, depois corrigir o envio completo: escreve atualmente em ChatMessage mas o chat/portal leem ClientMessage, além de guardar caminho local de PDF. Prosseguir para a matriz de conclusão após fechar este percurso.
 - TASK161 publicada em `64d9e335ed34cc75e7edc2e03e9a43453fbcddf5`, árvore igual à local `884d6409c4c90794462caf0f113d30adfdc62688`; workflow `35020637133` em verificação.
