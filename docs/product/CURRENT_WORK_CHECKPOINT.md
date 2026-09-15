@@ -4,9 +4,9 @@
 
 - Repositório: `ts7520305-svg/cristalwater`.
 - Branch de trabalho: `work/field-readiness-20260915-simulation`.
-- Última entrega remota verificada antes desta tarefa: TASK119, commit `181fe22d8cf29763178ff8e0fc0d12f4b4b3d288`; workflow `34950688772` aprovado, incluindo PostgreSQL 16 e restauro de 99 tabelas/11 anexos.
-- TASK120: formulário administrativo de contagem física integrado no inventário, com confirmação explícita, recuperação de resposta perdida, proteção entre contas/janelas e testes móveis. Bateria local completa aprovada; confirmar PostgreSQL 16/migrações/restauro no workflow do commit desta tarefa.
-- Relatório atual: `docs/product/INVENTORY_COUNT_UI_20260915.md`. A TASK119 está descrita em `INVENTORY_COUNT_NORMALIZATION_20260915.md`.
+- Última entrega remota verificada antes deste lote: TASK120, commit `a5dd81b69fee903041f09e679a40e2460e48b8c0`; workflow `34952907528` aprovado, incluindo PostgreSQL 16 e restauro de 99 tabelas/11 anexos.
+- TASK121: validação dos pedidos de inventário antes da normalização concluída e testada localmente. Continuação ativa: confirmação e recuperação das entradas, transferências e consumos na interface; sem aprovações intermédias conforme pedido «continua sem parar».
+- Relatório atual: `docs/product/INVENTORY_INPUT_VALIDATION_20260915.md`; formulário de contagem em `INVENTORY_COUNT_UI_20260915.md`.
 
 ### Pedido ativo
 
@@ -32,7 +32,7 @@ Evidência atual da TASK120: 216 testes unitários, 4 testes de técnicos, os 15
 
 ### Próxima retoma
 
-1. Confirmar a conclusão da TASK120 e o workflow associado ao commit atual; resolver falhas concretas se existirem.
+1. Continuar o lote de inventário (TASK121 e seguintes) e confirmar o workflow associado ao commit final; resolver falhas concretas se existirem.
 2. Continuar a revisão dos módulos pendentes usando `COMPLETENESS_20260915.md` juntamente com `IMPLEMENTATION_20260915.md` e os relatórios posteriores. A matriz de completude conserva o diagnóstico inicial e contém pontos já corrigidos posteriormente.
 3. Manter tarefas pequenas, com testes de comportamento e documentação. Não repetir trabalho apenas por encontrar um relatório antigo.
 4. Ensaios físicos e VPS permanecem pendentes. Não declarar o sistema inteiro concluído ou certificado para campo.

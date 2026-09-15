@@ -9,19 +9,6 @@ function s(v) { return typeof v === 'string' ? v.trim() : v == null ? '' : Strin
 function stockName(v) { return normalizeProductName(s(v)); }
 function stockUnit(v) { return normalizeUnit(s(v) || 'KG'); }
 
-function parseItems(body) {
-  if (Array.isArray(body.items)) return body.items;
-  if (typeof body.items === 'string' && body.items.trim()) {
-    try {
-      const parsed = JSON.parse(body.items);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  }
-  return [];
-}
-
 async function safeAudit(data) {
   try {
     if (!prisma?.auditTrail?.create) return null;
@@ -120,12 +107,11 @@ async function createPurchase(req,res){
 }
 
 async function transferToVehicle(req,res){
-  const items=parseItems(req.body).map(item=>item&&typeof item==='object'?{...item,productName:stockName(item.productName||item.name),unit:stockUnit(item.unit||'KG')}:item);
   try{
-    const result=await require('../business/operations/EquipmentStockOsBusiness').transferStock({...req.body,items,direction:'CENTRAL_TO_VEHICLE',userId:req.user?.id},`${req.user?.role}:${req.user?.id}`,req.user);
+    const result=await require('../business/operations/InventoryWriteBusiness').transfer(req.user,req.body);
     if(!result.ok)return res.status(result.status||400).json(result);
     invalidateDashboardCache('STOCK_TRANSFER_TO_VEHICLE');return res.json(result);
-  }catch(error){return res.status(/^STOCK_/.test(error.message)?409:500).json({ok:false,error:/^STOCK_/.test(error.message)?error.message:'Não foi possível confirmar a transferência'});}
+  }catch(error){return res.status(error.status||(/^STOCK_/.test(error.message)?409:500)).json({ok:false,error:error.status||/^STOCK_/.test(error.message)?error.message:'Não foi possível confirmar a transferência'});}
 }
 
 async function consumeMaterial(req,res){
@@ -136,11 +122,10 @@ async function consumeMaterial(req,res){
 }
 
 async function auditCount(req,res){
-  const vehicleId=Number(req.body.vehicleId);
   try{
-    const transactionResult=await require('../business/operations/InventoryCountBusiness').count(req.user,{...req.body,productName:req.body.productName??req.body.name});
+    const transactionResult=await require('../business/operations/InventoryCountBusiness').count(req.user,req.body);
     if(!transactionResult.ok)return res.status(transactionResult.status||400).json(transactionResult);
-    const {productName,unit}=transactionResult.movement;
+    const {vehicleId,productName,unit}=transactionResult.movement;
     if (!transactionResult.idempotent && transactionResult.desvio !== 0) {
       await safeAudit({
         eventType: 'STOCK_AUDIT',

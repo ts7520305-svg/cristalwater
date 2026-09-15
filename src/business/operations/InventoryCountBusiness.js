@@ -3,8 +3,10 @@ const {normalizeProductName,normalizeUnit}=require('../../utils/stockNormalizer'
 async function count(user,body={}){
   if(!require('../../utils/roles').roleMatches(user?.role,'ADMIN'))return {ok:false,status:403,error:'Apenas a gestão pode reconciliar contagens'};
   if(!body||typeof body!=='object'||Array.isArray(body))return {ok:false,status:400,error:'Contagem inválida'};
-  if(typeof body.productName!=='string'||body.productName.length>160||body.unit!=null&&typeof body.unit!=='string'||typeof body.unit==='string'&&body.unit.length>24)return {ok:false,status:400,error:'Produto e unidade inválidos'};
-  const rawProductName=body.productName.trim(),rawUnit=String(body.unit||'KG').trim();
+  const productInput=body.productName??body.name;
+  if(typeof productInput!=='string'||productInput.length>160||body.unit!=null&&typeof body.unit!=='string'||typeof body.unit==='string'&&body.unit.length>24)return {ok:false,status:400,error:'Produto e unidade inválidos'};
+  if(['vehicleId','physicalQuantity','expectedQuantity'].some(key=>!['number','string'].includes(typeof body[key])||String(body[key]).trim()===''))return {ok:false,status:400,error:'Viatura e quantidades inválidas'};
+  const rawProductName=productInput.trim(),rawUnit=String(body.unit||'KG').trim();
   const vehicleId=Number(body.vehicleId),physicalQuantity=Number(body.physicalQuantity),expectedQuantity=Number(body.expectedQuantity),productName=normalizeProductName(rawProductName),unit=normalizeUnit(rawUnit);
   if(!productName||!normalizeProductName(rawUnit))return {ok:false,status:400,error:'Produto e unidade inválidos'};
   if(!['number','string'].includes(typeof body.vehicleId)||!Number.isSafeInteger(vehicleId)||vehicleId<=0||!productName||productName.length>160||!['number','string'].includes(typeof body.physicalQuantity)||!['number','string'].includes(typeof body.expectedQuantity)||String(body.physicalQuantity).trim()===''||String(body.expectedQuantity).trim()===''||!Number.isFinite(physicalQuantity)||physicalQuantity<0||!Number.isFinite(expectedQuantity)||expectedQuantity<0)return {ok:false,status:400,error:'Indique viatura, produto, contagem não negativa e expectedQuantity com o saldo consultado antes da contagem'};

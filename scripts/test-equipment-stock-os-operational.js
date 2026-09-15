@@ -262,6 +262,13 @@ async function main() {
     const legacyProduct=`LEGACY ${RUN_ID}`;await prisma.stockBalance.create({data:{scope:'CENTRAL',productName:legacyProduct,unit:'L',quantity:10}});
     const legacyBody={vehicleId:assignedVehicle.id,requestId:uuid(),items:[{productName:legacyProduct,unit:'L',quantity:7}],createdBy:'SPOOFED'};
     const legacySend=body=>fetchJson(`${BASE_URL}/inventory/transfer-to-vehicle`,{method:'POST',headers:managerHeaders,body:JSON.stringify(body)});
+    for(const change of [{unit:['L']},{unit:{}},{unit:'!!!'},{productName:[legacyProduct]},{productName:false,name:legacyProduct}]){
+      const invalid=await legacySend({...legacyBody,requestId:uuid(),items:[{...legacyBody.items[0],...change}]});
+      check.equal(invalid.response.status,400,`Malformed transfer accepted: ${JSON.stringify(change)}`);
+    }
+    for(const change of [{vehicleId:[assignedVehicle.id]},{vehicleId:{toString:null}},{requestId:[uuid()]},{items:null}])check.equal((await legacySend({...legacyBody,...change})).response.status,400);
+    check.equal((await prisma.stockBalance.findFirst({where:{scope:'CENTRAL',productName:legacyProduct}})).quantity,10);
+    check.equal(await prisma.stockMovement.count({where:{productName:legacyProduct}}),0);
     const sharedRace=await Promise.all([legacySend(legacyBody),load({...legacyBody,requestId:uuid()})]);check.deepEqual(sharedRace.map(r=>r.response.status).sort(),[200,409]);
     check.equal((await legacySend({...legacyBody,items:[null]})).response.status,400);
     const repeatLegacy={...legacyBody,requestId:uuid(),items:[{productName:legacyProduct,unit:'L',quantity:1}]};const legacyReplies=await Promise.all([legacySend(repeatLegacy),legacySend(repeatLegacy)]);legacyReplies.forEach(r=>check.equal(r.response.status,200,JSON.stringify(r.data)));check.equal(legacyReplies[0].data.movements[0].id,legacyReplies[1].data.movements[0].id);check.notEqual(legacyReplies[0].data.movements[0].createdBy,'SPOOFED');
@@ -275,6 +282,7 @@ async function main() {
     for(const unit of [{},[], '!!!', 'X'.repeat(25),true,0])check.equal((await count({...countBody,unit})).response.status,400);
     for(const vehicleId of [true,[assignedVehicle.id],{}])check.equal((await count({...countBody,vehicleId})).response.status,400);
     for(const requestId of [[countBody.requestId],{},true])check.equal((await count({...countBody,requestId})).response.status,400);
+    for(const field of ['vehicleId','physicalQuantity','expectedQuantity'])check.equal((await count({...countBody,[field]:{toString:null}})).response.status,400);
     check.equal(await prisma.stockMovement.count({where:countMovementFilter}),movementsBeforeCount);
     check.equal((await prisma.stockBalance.findUnique({where:{id:legacyVan.id}})).quantity,8);
     const countReplies=await Promise.all([count({...countBody,productName:'  '+legacyProduct.toLowerCase()+'  ',unit:'l'}),count(countBody)]);countReplies.forEach(r=>check.equal(r.response.status,200,JSON.stringify(r.data)));check.equal(countReplies[0].data.movement.id,countReplies[1].data.movement.id);check.equal(countReplies[0].data.digitalQuantity,8);check.equal(countReplies[0].data.desvio,-4);check.equal(countReplies[0].data.movement.productName,legacyProduct);check.equal(countReplies[0].data.movement.unit,'L');check.notEqual(countReplies[0].data.movement.createdBy,'SPOOFED');
@@ -350,6 +358,23 @@ async function main() {
     check.equal(await prisma.stockPurchase.count({where:{invoiceNumber:RUN_ID}}),1);
     const manualBody={productName:entryProduct,unit:'L',quantity:1,requestId:uuid(),createdBy:'SPOOFED'};
     const manual=body=>fetchJson(`${BASE_URL}/inventory/consume`,{method:'POST',headers:managerHeaders,body:JSON.stringify(body)});
+    const unitGuardProduct=`UNIT GUARD ${RUN_ID}`;
+    const unitGuard=await prisma.stockBalance.create({data:{scope:'CENTRAL',productName:unitGuardProduct,unit:'KG',quantity:10}});
+    for(const unit of ['!!!',{},['KG'],false]){
+      check.equal((await purchase({...entryBody,requestId:uuid(),items:[{productName:unitGuardProduct,unit,quantity:1}]})).response.status,400);
+      check.equal((await manual({...manualBody,requestId:uuid(),productName:unitGuardProduct,unit})).response.status,400);
+    }
+    check.equal((await prisma.stockBalance.findUnique({where:{id:unitGuard.id}})).quantity,10);
+    check.equal(await prisma.stockMovement.count({where:{productName:unitGuardProduct}}),0);
+    for(const requestId of [[uuid()],{},true]){
+      check.equal((await purchase({...entryBody,requestId})).response.status,400);
+      check.equal((await manual({...manualBody,requestId})).response.status,400);
+    }
+    for(const invalidBody of [null,[]]){
+      const business=require('../src/business/operations/InventoryWriteBusiness');
+      await check.rejects(()=>business.purchase({role:'ADMIN',id:1},invalidBody),error=>error.status===400);
+      await check.rejects(()=>business.consume({role:'ADMIN',id:1},invalidBody),error=>error.status===400);
+    }
     const manualReplies=await Promise.all([manual(manualBody),manual(manualBody)]);manualReplies.forEach(r=>check.equal(r.response.status,200,JSON.stringify(r.data)));check.equal(manualReplies[0].data.movement.id,manualReplies[1].data.movement.id);check.notEqual(manualReplies[0].data.movement.createdBy,'SPOOFED');
     for(const bad of [{quantity:true},{quantity:-1},{requestId:undefined},{visitId:syncVisit.id},{workGuideId:1900000000}])check.ok([400,409].includes((await manual({...manualBody,requestId:uuid(),...bad})).response.status));
     const manualRace=await Promise.all([manual({...manualBody,requestId:uuid(),quantity:8}),load({vehicleId:assignedVehicle.id,requestId:uuid(),items:[{productName:entryProduct,quantity:8,unit:'L'}]})]);check.deepEqual(manualRace.map(r=>r.response.status).sort(),[200,409]);

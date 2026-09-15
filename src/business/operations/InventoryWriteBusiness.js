@@ -6,15 +6,19 @@ function fail(message,status=400){throw Object.assign(new Error(message),{status
 function text(value,max=500){if(value==null)return '';if(typeof value!=='string'||value.length>max)fail('Texto inválido ou demasiado longo.');return value.trim();}
 function number(value,label,optional=false){if(optional&&(value==null||value===''))return 0;if(!['string','number'].includes(typeof value)||String(value).trim()===''||!Number.isFinite(Number(value))||Number(value)<0)fail(`${label}: valor não negativo obrigatório.`);return Number(value);}
 function id(value){if(value==null||value==='')return null;const n=number(value,'Identificador');if(!Number.isSafeInteger(n)||n<=0)fail('Identificador inválido.');return n;}
+function bodyObject(value){if(!value||typeof value!=='object'||Array.isArray(value))fail('Pedido de inventário inválido.');}
+function validRequestId(value){return typeof value==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);}
 function item(raw){
   if(!raw||typeof raw!=='object'||Array.isArray(raw))fail('Linha de produto inválida.');
-  const productName=normalizeProductName(text(raw.productName||raw.name,160)),unit=normalizeUnit(text(raw.unit,24)||'KG'),quantity=number(raw.quantity,'Quantidade');
+  const rawUnit=text(raw.unit,24)||'KG';
+  if(!normalizeProductName(rawUnit))fail('Unidade inválida.');
+  const productName=normalizeProductName(text(raw.productName??raw.name,160)),unit=normalizeUnit(rawUnit),quantity=number(raw.quantity,'Quantidade');
   if(!productName||quantity<=0)fail('Produto e quantidade positiva obrigatórios.');
   return {productName,unit,quantity,category:text(raw.category,80)||'CHEMICAL'};
 }
 async function once(user,requestId,kind,data,work){
   if(!roleMatches(user?.role,'ADMIN'))fail('Operação reservada à gestão.',403);
-  if(!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(requestId||'')))fail('Identificador do pedido obrigatório.');
+  if(!validRequestId(requestId))fail('Identificador do pedido obrigatório.');
   const actor=`${user.role}:${user.id}`,fingerprint=JSON.stringify({actor,data}),sourceKey=`inventory-${kind}:${requestId}`;
   return repository.prisma.$transaction(async tx=>{
     await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${sourceKey}))::text`;
@@ -26,6 +30,7 @@ async function once(user,requestId,kind,data,work){
   },{maxWait:15000,timeout:15000});
 }
 async function purchase(user,body,upload={}){
+  bodyObject(body);
   let raw=body.items;
   if(typeof raw==='string'){try{raw=JSON.parse(raw);}catch{fail('Linhas de produto inválidas.');}}
   if(!Array.isArray(raw)||!raw.length||raw.length>100)fail('Envie entre 1 e 100 linhas de produto.');
@@ -50,6 +55,7 @@ async function purchase(user,body,upload={}){
   });
 }
 async function consume(user,body){
+  bodyObject(body);
   const row=item(body),vehicleId=id(body.vehicleId),references={};
   for(const key of ['workGuideId','visitId','clientId','poolId','technicianId'])references[key]=id(body[key]);
   const notes=text(body.notes)||null;
@@ -72,4 +78,15 @@ async function consume(user,body){
     return {ok:true,movement};
   });
 }
-module.exports={purchase,consume};
+async function transfer(user,body){
+  if(!roleMatches(user?.role,'ADMIN'))fail('Operação reservada à gestão.',403);
+  bodyObject(body);
+  let raw=body.items;
+  if(typeof raw==='string'){try{raw=JSON.parse(raw);}catch{fail('Linhas de produto inválidas.');}}
+  if(!Array.isArray(raw)||!raw.length||raw.length>100)fail('Envie entre 1 e 100 linhas de produto.');
+  const items=raw.map(item),vehicleId=id(body.vehicleId);
+  if(!vehicleId)fail('Viatura obrigatória.');
+  if(body.requestId!==undefined&&!validRequestId(body.requestId))fail('Identificador do pedido inválido.');
+  return require('./EquipmentStockOsBusiness').transferStock({...body,items,vehicleId,direction:'CENTRAL_TO_VEHICLE',userId:user.id},`${user.role}:${user.id}`,user);
+}
+module.exports={purchase,consume,transfer};
