@@ -690,6 +690,7 @@ model Repair {
   createdAt   DateTime     @default(now())
   doneAt      DateTime?
   attachments Attachment[]
+  quotes      RepairQuote[]
   pool        Pool         @relation(fields: [poolId], references: [id])
 
   @@index([poolId])
@@ -2150,4 +2151,17 @@ model WebPushSubscription {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@index([role, principalId, active])
+}
+
+// Commercial snapshots are loaded only by the administrator quote endpoints.
+model RepairQuote {
+  id         Int      @id @default(autoincrement())
+  repairId   Int
+  version    Int
+  snapshot   Json
+  createdBy  String
+  createdAt  DateTime @default(now())
+  repair     Repair   @relation(fields: [repairId], references: [id], onDelete: Restrict)
+
+  @@unique([repairId, version])
 }
