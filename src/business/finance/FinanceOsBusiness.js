@@ -224,7 +224,7 @@ async function sendInvoice(invoiceId, payload = {}, actor = "finance-os") {
   return { ok: true, invoice: invoiceShape(await repository.getInvoice(invoice.id)), channel };
 }
 
-async function registerPayment(invoiceId, payload = {}, actor = "finance-os", user = null) {
+async function registerPayment(invoiceId, payload = {}, actor = "finance-os", user = null, transaction = null) {
   const request = preparePaymentRequest(invoiceId, payload, user);
   if (request) payload = { ...payload, amount: request.amountCents / 100, method: request.method, notes: request.notes };
   const amount = asMoney(payload.amount || 0);
@@ -232,7 +232,7 @@ async function registerPayment(invoiceId, payload = {}, actor = "finance-os", us
 
   const method = normalizeMethod(payload.method);
 
-  const result = await repository.transaction(async (tx) => executePaymentRequest(tx, request, async () => {
+  const run = async (tx) => executePaymentRequest(tx, request, async () => {
     await tx.$queryRaw`SELECT id FROM "Invoice" WHERE id = ${Number(invoiceId)} FOR UPDATE`;
     const invoice = await tx.invoice.findUnique({ where: { id: Number(invoiceId) }, include: { client: true, lines: true, payments: true } });
     if (!invoice) return { ok: false, status: 404, error: "Fatura não encontrada" };
@@ -309,10 +309,11 @@ async function registerPayment(invoiceId, payload = {}, actor = "finance-os", us
       creditPaymentId: credit.payment?.id || null,
       method,
     };
-  }));
+  });
+  const result = transaction ? await run(transaction) : await repository.transaction(run);
 
   if (!result.ok) return result;
-  if (result.idempotent) return result;
+  if (result.idempotent || transaction) return result;
 
   await emitFinanceEvent(EVENT_TYPES.FINANCE_PAYMENT_CONFIRMED, {
     invoiceId: result.invoice.id,

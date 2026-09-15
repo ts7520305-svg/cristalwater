@@ -5,6 +5,7 @@ const { EVENT_TYPES, emitRepairEvent } = require("../../services/repairEventServ
 const { EVENT_TYPES: FINANCE_EVENT_TYPES, emitFinanceEvent } = require("../../services/financeOsEventService");
 const { EVENT_TYPES: STOCK_EVENT_TYPES, emitEquipmentStockEvent } = require("../../services/equipmentStockEventService");
 const { toPublicUploadUrl } = require("../../config/uploadPath");
+const { preparePaymentRequest, executePaymentRequest, paymentDetails } = require('../../services/invoicePaymentRequestService');
 
 function asNumber(value, fallback = 0) {
   const parsed = Number(value);
@@ -1016,22 +1017,30 @@ async function generateRepairInvoice(repairId, payload = {}, db = null, actor = 
   return result;
 }
 
-async function registerRepairPayment(repairId, payload = {}, db = null, actor = "repair-os") {
-  const run = async (tx) => {
+async function registerRepairPayment(repairId, payload = {}, db = null, actor = "repair-os", user = null) {
+  const invoiceId = Number(payload?.invoiceId), id = Number(repairId);
+  if (![payload?.invoiceId, repairId].every(value => ['number', 'string'].includes(typeof value) && /^\d+$/.test(String(value)) && Number.isSafeInteger(Number(value)) && Number(value) > 0 && Number(value) <= 2147483647)) return { ok: false, status: 400, error: 'Fatura ou reparação inválida' };
+  const details = paymentDetails(payload), prepared = preparePaymentRequest(invoiceId, payload, user);
+  const request = prepared ? { ...prepared, scope: 'REPAIR_PAYMENT', repairId: id } : null;
+  const run = async (tx) => executePaymentRequest(tx, request, async () => {
+    await tx.$queryRaw`SELECT id FROM "Invoice" WHERE id = ${invoiceId} FOR UPDATE`;
+    const invoice = await tx.invoice.findUnique({ where: { id: invoiceId }, include: { lines: true } });
+    if (!invoice) return { ok: false, status: 404, error: 'Fatura não encontrada' };
+    await tx.$queryRaw`SELECT id FROM "Client" WHERE id = ${invoice.clientId} FOR NO KEY UPDATE`;
+    await tx.$queryRaw`SELECT id FROM "Repair" WHERE id = ${id} FOR UPDATE`;
     const repair = await repository.getRepair(repairId, tx);
     if (!repair) return { ok: false, status: 404, error: "Reparação não encontrada" };
+    if (repair.pool?.client?.id !== invoice.clientId || !invoice.lines.some(line => line.referenceId === id && [line.type, line.lineType].includes('REPAIR'))) return { ok: false, status: 409, error: 'A fatura não corresponde a esta reparação e cliente' };
+    if (repair.paid && invoice.amountOpen <= 0) return { ok: false, status: 409, error: 'Reparação já paga. Registe outros recebimentos na conta do cliente.' };
 
     const transition = ensureRepairTransition(repair, "REGISTER_PAYMENT");
     if (!transition.ok) return transition;
 
-    const invoiceId = asNumber(payload.invoiceId, 0);
-    if (!invoiceId) return { ok: false, status: 400, error: "invoiceId obrigatório" };
-
     const payment = await FinanceBusiness.registerPayment(invoiceId, {
-      amount: asNumber(payload.amount, 0),
-      method: payload.method,
-      notes: buildRepairNotes(payload.notes, `Pagamento associado à reparação #${repair.id}.`),
-    }, actor);
+      amount: details.amountCents / 100,
+      method: details.method,
+      notes: buildRepairNotes(details.notes, `Pagamento associado à reparação #${repair.id}.`),
+    }, actor, user, tx);
 
     if (!payment.ok) return payment;
 
@@ -1041,7 +1050,7 @@ async function registerRepairPayment(repairId, payload = {}, db = null, actor = 
       notes: buildRepairNotes(repair.notes, `Pagamento registado na fatura #${invoiceId}.`),
     });
 
-    await repository.createTechnicalHistory(tx, {
+    await tx.technicalHistory.create({ data: {
       poolId: repair.poolId,
       type: "REPAIR_PAYMENT_RECORDED",
       component: "Repair",
@@ -1050,9 +1059,9 @@ async function registerRepairPayment(repairId, payload = {}, db = null, actor = 
       status: payment.invoice?.status === "PAID" ? "DONE" : "OPEN",
       performedAt: new Date(),
       doneAt: payment.invoice?.status === "PAID" ? new Date() : null,
-    });
+    } });
 
-    await repository.createAudit(tx, {
+    await tx.auditTrail.create({ data: {
       action: "REPAIR_PAYMENT_RECORDED",
       eventType: "REPAIR_PAYMENT_RECORDED",
       entity: "Repair",
@@ -1061,9 +1070,9 @@ async function registerRepairPayment(repairId, payload = {}, db = null, actor = 
       clientId: repair.pool?.client?.id || null,
       metadata: { actor, invoiceId, paymentStatus: payment.invoice?.status || null },
       message: `Pagamento registado para a reparação #${repair.id}`,
-    });
+    } });
 
-    await repository.createNotification(tx, {
+    await tx.notification.create({ data: {
       clientId: repair.pool?.client?.id || null,
       type: "REPAIR_PAYMENT_RECORDED",
       eventType: "REPAIR_PAYMENT_RECORDED",
@@ -1073,23 +1082,21 @@ async function registerRepairPayment(repairId, payload = {}, db = null, actor = 
       severity: "NORMAL",
       status: "PENDING",
       metadata: { repairId: repair.id, invoiceId, paymentStatus: payment.invoice?.status || null },
-    });
+    } });
 
-    await emitRepairEvent(EVENT_TYPES.REPAIR_PAYMENT_RECORDED, {
-      repairId: repair.id,
-      poolId: repair.poolId,
-      clientId: repair.pool?.client?.id || null,
-      actor,
-      invoiceId,
-      invoiceStatus: payment.invoice?.status || null,
-      source: "repair-payment-tracking",
-    });
+    return { ok: true, repair: updatedRepair, invoice: payment.invoice, payment, appliedAmount: payment.appliedAmount,
+      creditAdded: payment.creditAdded, creditBalance: payment.creditBalance, method: payment.method };
+  });
 
-    return { ok: true, repair: updatedRepair, invoice: payment.invoice, payment };
-  };
-
-  if (db) return run(db);
-  return repository.transaction(run);
+  if (db && !db.$transaction) return run(db);
+  const result = db ? await db.$transaction(run, { maxWait: 15000, timeout: 15000 }) : await repository.transaction(run);
+  if (result.ok && !result.idempotent) {
+    const event = { repairId: result.repair.id, poolId: result.repair.poolId, clientId: result.invoice.clientId,
+      actor, invoiceId, invoiceStatus: result.invoice.status, source: 'repair-payment-tracking' };
+    await emitFinanceEvent(FINANCE_EVENT_TYPES.FINANCE_PAYMENT_CONFIRMED, { ...event, method: result.method, amount: details.amountCents / 100 });
+    await emitRepairEvent(EVENT_TYPES.REPAIR_PAYMENT_RECORDED, event);
+  }
+  return result;
 }
 
 async function closeRepair(repairId, payload = {}, db = null, actor = "repair-os") {

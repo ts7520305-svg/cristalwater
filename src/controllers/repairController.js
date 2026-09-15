@@ -134,9 +134,13 @@ async function invoiceRepair(req, res) {
 }
 
 async function registerPayment(req, res) {
-  const result = await RepairBusiness.registerRepairPayment(req.params.id, req.body || {}, null, actor(req));
-  if (!result.ok) return res.status(result.status || 400).json({ ok: false, message: result.error || "Erro" });
-  return res.json({ ok: true, repair: result.repair, invoice: result.invoice, payment: result.payment });
+  try {
+    const result = await RepairBusiness.registerRepairPayment(req.params.id, req.body || {}, null, actor(req), req.user);
+    if (!result.ok) return res.status(result.status || 400).json({ ok: false, message: result.error || "Erro" });
+    return res.json(result);
+  } catch (error) {
+    return res.status(error.status || 500).json({ ok: false, message: error.status ? error.message : 'Erro ao registar pagamento da reparação' });
+  }
 }
 
 async function closeRepair(req, res) {
