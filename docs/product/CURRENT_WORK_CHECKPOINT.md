@@ -1,5 +1,42 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Ponto de retoma atual — 15/09/2026
+
+- Repositório: `ts7520305-svg/cristalwater`.
+- Branch de trabalho: `work/field-readiness-20260915-simulation`.
+- Última entrega remota verificada antes desta tarefa: TASK118, commit `199e3eebe8c62a8c3de43e92eef33e04ed6aa858`.
+- TASK119: normalização e validação das contagens físicas de stock concluídas, incluindo testes locais integrados. Consultar o workflow do commit desta tarefa para confirmar PostgreSQL 16, migrações e restauro após publicação.
+- Relatório: `docs/product/INVENTORY_COUNT_NORMALIZATION_20260915.md`.
+
+### Pedido ativo
+
+O proprietário pediu continuar a implementação e correções sem aprovações intermédias, concluir os módulos e testar os percursos completos, como registado em `FIELD_READINESS_20260914.md`. Não voltar a usar o congelamento de julho para impedir este trabalho autorizado. Instalação no VPS, ensaios físicos, canais externos, emissão fiscal, alterações destrutivas de produção e merge para a branch principal não fazem parte desta tarefa.
+
+### Estado verificado
+
+O código contém as entregas até TASK118: orçamentos versionados e portal, preços por período, sessões/logout, idiomas, proteção de dados, manutenção preventiva com configuração e avisos, retornos de visitas e seleção de cargas de químicos. Cada relatório delimita o escopo efetivamente testado; não significa que a especificação inteira esteja concluída.
+
+A TASK119 unifica a identidade de produto/unidade entre saldo, movimento e repetição da contagem; conserva reenvios antigos exatos; recusa tipos malformados; protege contra repetição com quantidade alterada e consumo concorrente.
+
+### Evidência desta retoma
+
+- Base local e remota da TASK118 com a mesma árvore Git: `8cc09c0e3df85a82a5da7751924b4d4b7dda0699`.
+- Sintaxe aprovada em 484 ficheiros backend e nos scripts alterados.
+- `npm test`: 216 testes em 49 ficheiros aprovados; `npm run test:technician`: 4 aprovados.
+- Teste operacional de stock em base descartável aprovado: `field-qa-runtime/run-1789462922026`.
+- Bateria integrada local: `reports/field-suite/1789462961988/results.json`; 31 grupos aprovados, incluindo a versão final dos testes de contagem. Base descartável PGlite, sem alegações de desempenho do VPS.
+- `npm run test:field-browser`: os 14 scripts de navegador aprovados.
+- PostgreSQL 16/migrações/restauro: confirmar o workflow do commit final; não usar a aprovação de um commit anterior como prova desta alteração.
+
+### Próxima retoma
+
+1. Confirmar a conclusão da TASK119 e o workflow associado ao commit atual; resolver falhas concretas se existirem.
+2. Continuar a revisão dos módulos pendentes usando `COMPLETENESS_20260915.md` juntamente com `IMPLEMENTATION_20260915.md` e os relatórios posteriores. A matriz de completude conserva o diagnóstico inicial e contém pontos já corrigidos posteriormente.
+3. Manter tarefas pequenas, com testes de comportamento e documentação. Não repetir trabalho apenas por encontrar um relatório antigo.
+4. Ensaios físicos e VPS permanecem pendentes. Não declarar o sistema inteiro concluído ou certificado para campo.
+
+## Registo histórico — 21/07/2026 (não é a fase ativa)
+
 1. Data e hora
 - 2026-07-21 09:12 UTC
 

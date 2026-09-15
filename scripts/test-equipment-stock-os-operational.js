@@ -269,8 +269,35 @@ async function main() {
     const countUrl=`${BASE_URL}/inventory/audit-count`,countBody={vehicleId:assignedVehicle.id,productName:legacyProduct,unit:'L',expectedQuantity:8,physicalQuantity:4,requestId:uuid(),createdBy:'SPOOFED'};
     const count=body=>fetchJson(countUrl,{method:'POST',headers:managerHeaders,body:JSON.stringify(body)});
     check.equal((await count({...countBody,physicalQuantity:''})).response.status,400);check.equal((await count({...countBody,expectedQuantity:'  '})).response.status,400);check.equal((await count({...countBody,physicalQuantity:-1})).response.status,400);check.equal((await count({...countBody,expectedQuantity:7})).response.status,409);check.equal((await count({...countBody,physicalQuantity:true})).response.status,400);
-    const countReplies=await Promise.all([count(countBody),count(countBody)]);countReplies.forEach(r=>check.equal(r.response.status,200,JSON.stringify(r.data)));check.equal(countReplies[0].data.movement.id,countReplies[1].data.movement.id);check.equal(countReplies[0].data.digitalQuantity,8);check.equal(countReplies[0].data.desvio,-4);check.notEqual(countReplies[0].data.movement.createdBy,'SPOOFED');
+    const countMovementFilter={vehicleId:assignedVehicle.id,productName:legacyProduct,movementType:{startsWith:'AUDIT_COUNT_'}};
+    const movementsBeforeCount=await prisma.stockMovement.count({where:countMovementFilter});
+    for(const productName of [{},[],['CLORO'],'!!!','X'.repeat(161),false,0])check.equal((await count({...countBody,productName,name:legacyProduct})).response.status,400);
+    for(const unit of [{},[], '!!!', 'X'.repeat(25),true,0])check.equal((await count({...countBody,unit})).response.status,400);
+    for(const vehicleId of [true,[assignedVehicle.id],{}])check.equal((await count({...countBody,vehicleId})).response.status,400);
+    for(const requestId of [[countBody.requestId],{},true])check.equal((await count({...countBody,requestId})).response.status,400);
+    check.equal(await prisma.stockMovement.count({where:countMovementFilter}),movementsBeforeCount);
+    check.equal((await prisma.stockBalance.findUnique({where:{id:legacyVan.id}})).quantity,8);
+    const countReplies=await Promise.all([count({...countBody,productName:'  '+legacyProduct.toLowerCase()+'  ',unit:'l'}),count(countBody)]);countReplies.forEach(r=>check.equal(r.response.status,200,JSON.stringify(r.data)));check.equal(countReplies[0].data.movement.id,countReplies[1].data.movement.id);check.equal(countReplies[0].data.digitalQuantity,8);check.equal(countReplies[0].data.desvio,-4);check.equal(countReplies[0].data.movement.productName,legacyProduct);check.equal(countReplies[0].data.movement.unit,'L');check.notEqual(countReplies[0].data.movement.createdBy,'SPOOFED');
+    const savedCount=await prisma.operationalReminder.findUnique({where:{sourceKey:`stock-count:${countBody.requestId}`}});
+    const legacyCountFingerprint={...JSON.parse(savedCount.metadata.fingerprint),productName:legacyProduct.toLowerCase(),unit:'l'};
+    await prisma.operationalReminder.update({where:{id:savedCount.id},data:{metadata:{...savedCount.metadata,fingerprint:JSON.stringify(legacyCountFingerprint)}}});
+    try{const replay=await count({...countBody,productName:legacyProduct.toLowerCase(),unit:'l'});check.equal(replay.response.status,200);check.equal(replay.data.movement.id,countReplies[0].data.movement.id);}
+    finally{await prisma.operationalReminder.update({where:{id:savedCount.id},data:{metadata:savedCount.metadata}});}
     check.equal((await count({...countBody,physicalQuantity:5})).response.status,409);
+    const aliasReplay=await count({...countBody,productName:undefined,name:legacyProduct});check.equal(aliasReplay.response.status,200);check.equal(aliasReplay.data.movement.id,countReplies[0].data.movement.id);
+    const countBusiness=require('../src/business/operations/InventoryCountBusiness');
+    const countActor={role:'ADMIN',id:countReplies[0].data.movement.createdBy.split(':')[1]};
+    const directReplay=await countBusiness.count(countActor,{...countBody,productName:'  '+legacyProduct.toLowerCase()+'  ',unit:'l'});
+    check.equal(directReplay.ok,true);check.equal(directReplay.movement.id,countReplies[0].data.movement.id);
+    check.equal(await prisma.stockMovement.count({where:countMovementFilter}),movementsBeforeCount+1);
+    check.equal((await prisma.stockBalance.findUnique({where:{id:legacyVan.id}})).quantity,4);
+    const directBody={...countBody,expectedQuantity:4,physicalQuantity:4,requestId:uuid()};
+    const directCount=await countBusiness.count(countActor,{...directBody,productName:'  '+legacyProduct.toLowerCase()+'  ',unit:'l'});
+    check.equal(directCount.ok,true);check.equal(directCount.movement.productName,legacyProduct);check.equal(directCount.movement.unit,'L');
+    check.equal(directCount.movement.quantity,0);check.equal(directCount.movement.movementType,'AUDIT_COUNT_CONFIRMED');
+    const directCountReplay=await countBusiness.count(countActor,directBody);
+    check.equal(directCountReplay.idempotent,true);check.equal(directCountReplay.movement.id,directCount.movement.id);
+    check.equal(await prisma.stockMovement.count({where:countMovementFilter}),movementsBeforeCount+2);
     const countRace=await Promise.all([count({...countBody,requestId:uuid(),expectedQuantity:4,physicalQuantity:5}),recordConsumption({...consumeBody,requestId:uuid(),items:[{productName:legacyProduct,unit:'L',quantity:1}]})]);check.equal(countRace[1].response.status,200);check.ok([200,409].includes(countRace[0].response.status));check.equal((await prisma.stockBalance.findUnique({where:{id:legacyVan.id}})).quantity,countRace[0].response.status===200?4:3);
     console.log('PASS legacy/new transfer conservation, trusted actor, safe physical counts, stale count rejection and concurrent consumption');
 

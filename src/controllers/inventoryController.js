@@ -136,10 +136,11 @@ async function consumeMaterial(req,res){
 }
 
 async function auditCount(req,res){
-  const vehicleId=Number(req.body.vehicleId),productName=stockName(req.body.productName||req.body.name),unit=stockUnit(req.body.unit);
+  const vehicleId=Number(req.body.vehicleId);
   try{
-    const transactionResult=await require('../business/operations/InventoryCountBusiness').count(req.user,{...req.body,productName,unit});
+    const transactionResult=await require('../business/operations/InventoryCountBusiness').count(req.user,{...req.body,productName:req.body.productName??req.body.name});
     if(!transactionResult.ok)return res.status(transactionResult.status||400).json(transactionResult);
+    const {productName,unit}=transactionResult.movement;
     if (!transactionResult.idempotent && transactionResult.desvio !== 0) {
       await safeAudit({
         eventType: 'STOCK_AUDIT',
