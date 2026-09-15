@@ -1,8 +1,11 @@
 const state = {
   pools: [],
   poolReminders: [],
+  generalReminders: [],
 };
 const initialPoolId = new URLSearchParams(location.search).get("poolId");
+const completingPoolReminders = new Set();
+let removePoolReminder;
 
 function el(id) {
   return document.getElementById(id);
@@ -94,7 +97,8 @@ function renderLeads(leads) {
 }
 
 function renderGeneralReminders(reminders) {
-  el("reminders").innerHTML = (reminders || []).map((item) => `
+  state.generalReminders = (reminders || []).filter(item => !window.CwReminderDelete.wasDeleted(item.id));
+  el("reminders").innerHTML = state.generalReminders.map((item) => `
     <div class="card">
       <header>
         <h3 data-cw-no-i18n>${esc(item.title)}</h3>
@@ -102,7 +106,7 @@ function renderGeneralReminders(reminders) {
       </header>
       <p>${formatDate(item.dueAt)}</p>
       <p class="muted" data-cw-no-i18n>${esc(item.description || "")}</p>
-      ${item.status === "DONE" ? '<span class="badge done">Concluido</span>' : `<button class="btn" type="button" onclick="completeReminder(${Number(item.id)})">Concluir</button>`}
+      ${item.status === "DONE" ? '<span class="badge done">Concluido</span>' : `<button class="btn" type="button" data-complete-reminder="${Number(item.id)}" ${completingPoolReminders.has(String(item.id)) || window.CwReminderDelete.busy(item.id) ? 'disabled' : ''} onclick="completeReminder(${Number(item.id)})">Concluir</button>`}
     </div>
   `).join("") || '<p class="muted">Sem lembretes gerais.</p>';
 }
@@ -129,8 +133,8 @@ function renderPoolReminders(reminders) {
         <p class="muted">${esc(days || "")}</p>
         ${notes ? `<p class="muted" data-cw-no-i18n>${esc(notes)}</p>` : ""}
         <div class="actions">
-          ${completed ? '<span class="badge done">Concluido</span>' : `<button class="btn primary" type="button" onclick="completePoolReminder(${Number(item.id)}, ${Number(item.poolId || 0)})">Concluir</button>`}
-          <button class="btn danger" type="button" onclick="deletePoolReminder(${Number(item.id)}, ${Number(item.poolId || 0)})">Eliminar</button>
+          ${completed ? '<span class="badge done">Concluido</span>' : `<button class="btn primary" type="button" data-complete-reminder="${Number(item.id)}" ${completingPoolReminders.has(String(item.id)) || window.CwReminderDelete.busy(item.id) ? 'disabled' : ''} onclick="completePoolReminder(${Number(item.id)}, ${Number(item.poolId || 0)})">Concluir</button>`}
+          <button class="btn danger" type="button" data-delete-reminder="${Number(item.id)}" ${completingPoolReminders.has(String(item.id)) || window.CwReminderDelete.busy(item.id) ? 'disabled' : ''} onclick="deletePoolReminder(${Number(item.id)}, ${Number(item.poolId || 0)})">Eliminar</button>
           ${item.poolId ? `<a class="btn" href="/admin-pool-technical?poolId=${Number(item.poolId)}">Ficha piscina</a>` : ""}
         </div>
       </div>
@@ -144,6 +148,7 @@ async function loadPoolReminders() {
   const data = await api("/api/crm/reminders?category=TECHNICAL_PERIODIC_SERVICE");
   if (authorization !== authHeaders().Authorization) return;
   state.poolReminders = (data.reminders || [])
+    .filter(item => !window.CwReminderDelete.wasDeleted(item.id))
     .filter((item) => !item.completedAt && !["DONE", "COMPLETED", "CLOSED", "RESOLVED", "CANCELLED", "CANCELED"].includes(item.status))
     .filter((item) => !poolId || String(item.poolId) === String(poolId));
   renderPoolReminders(state.poolReminders);
@@ -221,23 +226,39 @@ function setupReminderCreators() {
   });
 }
 
+function reminderActionButtons(id) {
+  return [...document.querySelectorAll('[data-complete-reminder], [data-delete-reminder]')]
+    .filter(button => (button.dataset.completeReminder || button.dataset.deleteReminder) === String(id));
+}
+function setReminderCompleting(id, busy) {
+  if (busy) completingPoolReminders.add(String(id)); else completingPoolReminders.delete(String(id));
+  reminderActionButtons(id).forEach(button => { button.disabled = busy || window.CwReminderDelete.busy(id); });
+}
+
 async function completePoolReminder(id, poolId) {
   if (!poolId) return alert("Este lembrete nao tem piscina associada.");
-  await api(`/api/core/pools/${encodeURIComponent(poolId)}/service-reminders/${encodeURIComponent(id)}/complete`, { method: "POST" });
-  await loadPoolReminders();
+  const key = String(id);
+  if (completingPoolReminders.has(key) || window.CwReminderDelete.busy(id) || window.CwReminderDelete.wasDeleted(id)) return;
+  setReminderCompleting(id, true);
+  try {
+    await api(`/api/core/pools/${encodeURIComponent(poolId)}/service-reminders/${encodeURIComponent(id)}/complete`, { method: "POST" });
+    await loadPoolReminders();
+  } finally { setReminderCompleting(id, false); }
 }
 
 async function deletePoolReminder(id, poolId) {
-  if (!confirm("Eliminar este lembrete da piscina?")) return;
-  if (!poolId) return alert("Este lembrete nao tem piscina associada.");
-  await api(`/api/core/pools/${encodeURIComponent(poolId)}/service-reminders/${encodeURIComponent(id)}`, { method: "DELETE" });
-  await loadPoolReminders();
+  await removePoolReminder(id);
 }
 
 async function completeReminder(id) {
-  await api(`/api/crm/reminders/${encodeURIComponent(id)}/complete`, { method: "POST" });
-  const generalReminders = await api("/api/crm/reminders");
-  renderGeneralReminders(generalReminders.reminders || []);
+  const key = String(id);
+  if (completingPoolReminders.has(key) || window.CwReminderDelete.busy(id) || window.CwReminderDelete.wasDeleted(id)) return;
+  setReminderCompleting(id, true);
+  try {
+    await api(`/api/crm/reminders/${encodeURIComponent(id)}/complete`, { method: "POST" });
+    const generalReminders = await api("/api/crm/reminders");
+    renderGeneralReminders(generalReminders.reminders || []);
+  } finally { setReminderCompleting(id, false); }
 }
 
 async function convertLead(id) {
@@ -279,6 +300,16 @@ el("poolReminderDaysBefore").addEventListener("input", updateReminderPreview);
 el("refreshAll").addEventListener("click", () => loadAll().catch((error) => alert(error.message)));
 
 window.completePoolReminder = completePoolReminder;
+removePoolReminder = window.CwReminderDelete.attach({
+  status: 'poolReminderStatus', get: id => state.poolReminders.find(row => String(row.id) === String(id)),
+  poolLabel: row => `${poolById(row.poolId)?.name || 'Piscina'} (#${row.poolId})`, reload: loadPoolReminders,
+  isCompleting: id => completingPoolReminders.has(String(id)),
+  buttons: reminderActionButtons,
+  onDeleted(id) {
+    state.poolReminders = state.poolReminders.filter(row => String(row.id) !== String(id)); renderPoolReminders(state.poolReminders);
+    renderGeneralReminders(state.generalReminders);
+  },
+});
 window.deletePoolReminder = deletePoolReminder;
 window.completeReminder = completeReminder;
 window.convertLead = convertLead;

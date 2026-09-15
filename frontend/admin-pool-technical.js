@@ -8,6 +8,7 @@ const ui = window.CwUi || {
 };
 let proposalSelection = new Set();
 const completingReminders = new Set();
+let reminderRows = [], reminderPoolName = '', removeReminder;
 
 function esc(value) {
   return String(value ?? "").replace(/[&<>'"]/g, (char) => ({
@@ -297,6 +298,8 @@ async function loadTechnicalProposals() {
 }
 
 function renderReminders(reminders) {
+  reminders = reminders.filter(item => !window.CwReminderDelete.wasDeleted(item.id));
+  reminderRows = reminders;
   const list = document.getElementById("serviceReminders");
   if (!reminders.length) {
     list.innerHTML = '<div class="muted">Sem lembretes de servico nesta piscina.</div>';
@@ -317,8 +320,8 @@ function renderReminders(reminders) {
         <div>
           ${cancelled ? '<span class="tag">Cancelado</span>' : done
             ? '<span class="tag">Concluido</span>'
-            : `<button type="button" data-complete-reminder="${esc(item.id)}" ${completingReminders.has(String(item.id)) ? 'disabled' : ''}>Concluir</button>`}
-          <button type="button" class="cw-action-danger" data-delete-reminder="${esc(item.id)}">Eliminar</button>
+            : `<button type="button" data-complete-reminder="${esc(item.id)}" ${completingReminders.has(String(item.id)) || window.CwReminderDelete.busy(item.id) ? 'disabled' : ''}>Concluir</button>`}
+          <button type="button" class="cw-action-danger" data-delete-reminder="${esc(item.id)}" ${completingReminders.has(String(item.id)) || window.CwReminderDelete.busy(item.id) ? 'disabled' : ''}>Eliminar</button>
         </div>
       </div>
     `;
@@ -381,6 +384,7 @@ async function loadSheet() {
   }
 
   const { pool } = await req(`/pools/${poolId}/technical-sheet`);
+  reminderPoolName = pool.name || `Piscina #${poolId}`;
   document.getElementById("subtitle").textContent = `${pool.client?.name || "Cliente"} - ${pool.name || "Piscina"}`;
   const operationalReminderLink = document.getElementById("poolOperationalReminderLink");
   if (operationalReminderLink) {
@@ -463,7 +467,7 @@ function setupServiceReminderCreator() {
 
 async function completeServiceReminder(id) {
   const key = String(id);
-  if (completingReminders.has(key)) return;
+  if (completingReminders.has(key) || window.CwReminderDelete.busy(id) || window.CwReminderDelete.wasDeleted(id)) return;
   completingReminders.add(key);
   const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt") || "";
   const currentSession = () => token === (localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt") || "");
@@ -490,22 +494,20 @@ async function completeServiceReminder(id) {
 }
 
 async function deleteServiceReminder(id) {
-  if (completingReminders.has(String(id))) return;
-  const ok = await ui.confirm("Eliminar este lembrete de servico? Esta acao nao remove historico tecnico nem visitas.", {
-    title: "Confirmar eliminacao",
-    confirmText: "Eliminar",
-    danger: true,
-  });
-  if (!ok) return;
-  await req(`/pools/${poolId}/service-reminders/${encodeURIComponent(id)}`, { method: "DELETE" });
-  document.getElementById("reminderStatus").textContent = "Lembrete eliminado.";
-  await loadReminders();
+  await removeReminder(id);
 }
 
 window.saveSheet = saveSheet;
 window.createServiceReminder = createServiceReminder;
 
 window.addEventListener("DOMContentLoaded", () => {
+  removeReminder = window.CwReminderDelete.attach({
+    status: 'reminderStatus', get: id => reminderRows.find(row => String(row.id) === String(id)),
+    poolLabel: () => `${reminderPoolName} (#${poolId})`, reload: loadReminders,
+    isCompleting: id => completingReminders.has(String(id)),
+    buttons: id => [...document.querySelectorAll('[data-complete-reminder], [data-delete-reminder]')].filter(button => (button.dataset.completeReminder || button.dataset.deleteReminder) === String(id)),
+    onDeleted: id => renderReminders(reminderRows.filter(row => String(row.id) !== String(id))),
+  });
   setupServiceReminderCreator();
   ["lengthM", "widthM", "depthMinM", "depthMaxM", "averageDepthM"].forEach((id) => {
     document.getElementById(id)?.addEventListener("input", updateCalculatedVolume);

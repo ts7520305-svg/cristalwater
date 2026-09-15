@@ -17,7 +17,9 @@
 
 - TASK128 implementada: pedido persistido e imutável nos três formulários, repetição explícita, duas janelas, confirmação inválida, quota/corrupção, rejeição e mudança de sessão. Relatório `REMINDER_CREATION_UI_20260915.md`. Versão final aprovada em `field-qa-runtime/run-1789472050268`, incluindo PT/EN/FR/ES/DE e recuperação da carga inicial. 249 testes unitários, 4 de técnicos e 17 scripts de navegador aprovados; 34 grupos da bateria `reports/field-suite/1789471734616/results.json` passaram, e a falha do novo grupo nos idiomas foi corrigida e revalidada no teste dirigido final. Os 35 grupos e o restauro passaram no workflow 34964272796 do commit f453c729575453c7a6e62d9aeff68b995fbbc17d. Imagem: `reports/field-visual/reminder-creation-1789472056455/lembrete-recuperado.png`.
 
-- TASK129 implementada: eliminação com IDs/categoria/piscina estritos, versão otimista, comprovativo transacional e repetição segura. Ensaio dirigido aprovado em `field-qa-runtime/run-1789473148930`, incluindo criação e conclusão existentes. Relatório `REMINDER_DELETION_API_20260915.md`. A proteção da confirmação nos ecrãs é a TASK130.
+- TASK129 implementada: eliminação com IDs/categoria/piscina estritos, versão otimista, comprovativo transacional e repetição segura. Ensaio dirigido aprovado em `field-qa-runtime/run-1789473148930`, incluindo criação e conclusão existentes. Relatório `REMINDER_DELETION_API_20260915.md`. A confirmação nos ecrãs está implementada na TASK130.
+
+- TASK130 implementada: confirmação de eliminação comum à ficha/CRM, título e piscina exatos, sessão/versão, resposta perdida ou trocada, refrescamento falhado e cliques tardios. Relatório `REMINDER_DELETION_UI_20260915.md`. 36 grupos integrados aprovados em `reports/field-suite/1789473623034/results.json`, com 272 testes unitários, 4 de técnicos e 17 scripts de navegador. Revisão final de libertação dos botões verificada no ensaio dirigido `field-qa-runtime/run-1789473837096`; confirmar workflow publicado.
 
 ### Pedido ativo
 
@@ -43,8 +45,8 @@ Evidência atual da TASK120: 216 testes unitários, 4 testes de técnicos, os 15
 
 ### Próxima retoma
 
-1. TASK123–TASK128 publicadas e verificadas. TASK129 implementada; confirmar o workflow do lote final. Não repetir estas implementações.
-2. TASK129 corrige a API de eliminação. TASK130 deve vincular a confirmação na ficha/CRM ao título, piscina, sessão e updatedAt, recusar respostas trocadas e testar respostas perdidas e alterações concorrentes.
+1. TASK123–TASK128 publicadas e verificadas. TASK129–TASK130 implementadas; confirmar o workflow do lote final. Não repetir estas implementações.
+2. Consulta, criação, conclusão e eliminação de lembretes de serviço estão tratadas. Próximo candidato: coerência das duas listas do CRM quando a conclusão parte da lista geral, incluindo erros visíveis e respostas após mudança de sessão; não repetir os fluxos já corrigidos.
 3. Continuar a revisão dos módulos pendentes usando `COMPLETENESS_20260915.md` juntamente com `IMPLEMENTATION_20260915.md` e os relatórios posteriores. A matriz de completude conserva o diagnóstico inicial e contém pontos já corrigidos posteriormente.
 4. Manter tarefas pequenas, com testes de comportamento e documentação. Não repetir trabalho apenas por encontrar um relatório antigo.
 5. Ensaios físicos e VPS permanecem pendentes. Não declarar o sistema inteiro concluído ou certificado para campo.

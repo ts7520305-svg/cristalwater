@@ -18,7 +18,8 @@
       ".cw-ui-modal-backdrop { position: fixed; inset: 0; background: rgba(1,6,17,.7); display: grid; place-items: center; padding: 14px; pointer-events: auto; }",
       ".cw-ui-modal { width: min(100%, 520px); border-radius: 16px; background: #0a1d31; border: 1px solid #2e4f72; color: #eaf5ff; box-shadow: 0 24px 60px rgba(0,0,0,.4); }",
       ".cw-ui-modal-head { padding: 14px 16px 6px; font: 800 18px/1.2 Inter, Segoe UI, Arial, sans-serif; }",
-      ".cw-ui-modal-body { padding: 0 16px 14px; font: 500 14px/1.45 Inter, Segoe UI, Arial, sans-serif; color: #bcd4e8; white-space: pre-wrap; }",
+      ".cw-ui-modal-body { padding: 0 16px 14px; font: 500 14px/1.45 Inter, Segoe UI, Arial, sans-serif; color: #bcd4e8; white-space: pre-wrap; overflow-wrap: anywhere; }",
+      ".cw-ui-modal-details { margin: 0 16px 14px; padding: 12px; background: #102940; border-radius: 10px; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 40vh; overflow: auto; }",
       ".cw-ui-modal-input { width: calc(100% - 32px); margin: 2px 16px 12px; padding: 10px 11px; border-radius: 10px; border: 1px solid #2e4f72; background: #082238; color: #eaf5ff; }",
       ".cw-ui-modal-actions { padding: 0 16px 16px; display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }",
       ".cw-ui-btn { border: 0; border-radius: 10px; cursor: pointer; min-height: 40px; padding: 10px 14px; font: 700 13px/1 Inter, Segoe UI, Arial, sans-serif; }",
@@ -94,6 +95,13 @@
 
       panel.appendChild(title);
       panel.appendChild(body);
+      if (typeof opts.details === 'string') {
+        const details = document.createElement('div');
+        details.className = 'cw-ui-modal-details';
+        details.setAttribute('data-cw-no-i18n', 'true');
+        details.textContent = opts.details;
+        panel.appendChild(details);
+      }
 
       let input = null;
       if (opts.withInput) {
@@ -136,13 +144,13 @@
         }
         if (event.key === "Enter") {
           event.preventDefault();
-          closeBackdrop(backdrop, resolve, input ? input.value : true);
+          closeBackdrop(backdrop, resolve, event.target === cancel ? null : input ? input.value : true);
         }
       });
 
       setTimeout(() => {
         if (input) input.focus();
-        else accept.focus();
+        else (opts.danger ? cancel : accept).focus();
       }, 0);
     });
   }
