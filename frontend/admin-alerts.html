@@ -148,6 +148,35 @@
       <div class="summary-line"><span id="alertsSummary">0 alerta(s)</span></div>
       <div id="alertsList" class="alerts-list"></div>
     </section>
+    <style>#commercialQuotes input:not([type="checkbox"]),#commercialQuotes select,#commercialQuotes textarea{max-width:100%;box-sizing:border-box;padding:10px;min-height:44px}#commercialQuotes label{min-width:0;max-width:100%}#commercialQuotes .cq-line{min-width:0}#commercialQuotes button{min-height:44px;white-space:normal}#commercialQuotes{overflow-wrap:anywhere}</style>
+    <details id="commercialQuotes" class="cw-v2-card" style="margin-top:24px;padding:20px">
+      <summary style="cursor:pointer;font-weight:700">Orçamentos de reparação</summary>
+      <p>Materiais e mão de obra, com custos e margens visíveis apenas à administração.</p>
+      <label>Reparação (200 mais recentes)<select id="cqRepair" style="display:block;width:100%;margin:8px 0 16px"><option value="">Escolher reparação</option></select></label>
+      <form id="cqForm">
+        <div id="cqLines"></div>
+        <button type="button" id="cqAdd" class="cw-v2-btn">Adicionar linha</button>
+        <div style="display:flex;flex-wrap:wrap;gap:16px;margin:16px 0">
+          <label>Desconto (%)<input id="cqDiscount" type="number" min="0" max="100" step="0.01" value="0" required></label>
+          <label>IVA (%)<input id="cqTax" type="number" min="0" max="100" step="0.01" placeholder="Indicar taxa" required></label>
+          <label>Validade (dias)<input id="cqValidity" type="number" min="1" max="365" step="1" value="15" required></label>
+        </div>
+        <label>Condições e pagamentos<textarea id="cqTerms" maxlength="3000" rows="3" style="display:block;width:100%"></textarea></label>
+        <p>A margem é calculada sobre o preço de venda: custo 80 € com margem de 20% resulta em 100 € antes de IVA.</p>
+        <label><input id="cqBelow" type="checkbox"> Confirmo uma venda abaixo do custo, se aplicável</label>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:16px">
+          <button type="submit" class="cw-v2-btn">Calcular</button>
+          <button type="button" id="cqSave" class="cw-v2-btn primary">Guardar versão</button>
+          <button type="button" id="cqReload" class="cw-v2-btn">Recarregar versão guardada</button>
+          <button type="button" id="cqPdf" class="cw-v2-btn">Abrir PDF guardado</button>
+        </div>
+        <output id="cqTotals" style="display:block;white-space:pre-line;margin:16px 0"></output>
+      </form>
+      <p id="cqVersions"></p>
+      <label>Referência da aprovação recebida do cliente<input id="cqApproval" maxlength="1000" placeholder="Ex.: email recebido em 15/09" style="display:block;width:100%"></label>
+      <button type="button" id="cqApprove" class="cw-v2-btn" style="margin-top:12px">Registar aprovação da versão guardada</button>
+      <p id="cqStatus" role="status" aria-live="polite"></p>
+    </details>
   </main>
 
   <div id="repairModal" class="repair-modal" hidden>
@@ -207,6 +236,7 @@
   <script src="/admin-auth-guard.js"></script>
   <script src="/cw-ui-feedback.js"></script>
   <script src="/admin-alerts.js?v=20260914-returns"></script>
+  <script src="/admin-commercial-quotes.js"></script>
   <script src="/cristal-help-data.js"></script>
   <script src="/cristal-assist.js"></script>
   <script src="/ui/core/navigation-context.js"></script>

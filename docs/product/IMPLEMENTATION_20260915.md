@@ -33,3 +33,7 @@ Modelo privado RepairQuote, migração aditiva e cálculo de materiais, mão de 
 ## TASK 87 — edição e aprovação dos orçamentos
 
 API administrativa para pré-visualizar, guardar e consultar versões. Aprovação exige o ID da versão atual e referência da autorização recebida do cliente; orçamento expirado é recusado. O editor antigo não pode substituir uma versão detalhada. PDF comercial exclusivo da administração; respostas das reparações para técnicos deixam de incluir preços, pagamentos, contactos ou relações completas do cliente. Estes controlos não constituem uma auditoria integral de autorização por piscina. A aprovação regista uma autorização recebida, não envia mensagens.
+
+## TASK 88 — editor administrativo integrado
+
+O editor está dentro de Alertas/Reparações, sem novo módulo de navegação. Permite escolher reparação, adicionar/remover linhas, calcular, guardar versões, gerar PDF com valores de venda e registar aprovação com referência. Mostra custo e resultado internos, e avisa sobre alterações por guardar. IVA é introduzido explicitamente. O PDF não contém notas internas, custos ou margens. O total sem IVA fica disponível no fluxo existente de faturação; esta tarefa não certifica a emissão fiscal nem acrescenta envio externo automático.
