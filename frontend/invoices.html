@@ -317,6 +317,7 @@
 <body data-required-role="ADMIN">
 
   <h1>Faturas</h1>
+
   <div id="statusBox" class="status-box" role="status" aria-live="polite"></div>
 
   <div class="toolbar">
@@ -329,6 +330,7 @@
       <label for="statusFilter">Filtro</label>
       <select id="statusFilter" onchange="setInvoiceStatusFilter(this.value)">
         <option value="all">Todas</option>
+        <option value="draft">Rascunhos</option>
         <option value="overdue">Em atraso / devedores</option>
         <option value="pending">Pendentes</option>
         <option value="paid">Pagas</option>
@@ -394,8 +396,8 @@
     </div>
   </div>
 
-  <script src="/invoices.js"></script>
-  <script src="/invoice-draft-classification.js"></script>
+  <script src="/invoices.js?v=20260915-draft-visibility"></script>
+  <script src="/invoice-draft-classification.js?v=20260915-reconciled"></script>
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
     <script src="/ui/core/navigation-context.js"></script>

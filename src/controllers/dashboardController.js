@@ -1,4 +1,5 @@
 const { prisma } = require("../prismaClient");
+const { isReceivableInvoice } = require('../services/clientCreditService');
 
 const CLOSED_STATUSES = ["RESOLVED", "DONE", "CLOSED", "CANCELLED", "CANCELED", "ARCHIVED"];
 const ALERT_NOTIFICATION_TYPES = [
@@ -78,6 +79,7 @@ function invoicePaid(invoice) {
 }
 
 function invoiceOpen(invoice) {
+  if (!isReceivableInvoice(invoice)) return 0;
   const direct = moneyFromRecord(invoice, ["amountOpen"], []);
   if (direct) return direct;
   return Math.max(invoiceTotal(invoice) - invoicePaid(invoice), 0);
@@ -258,7 +260,8 @@ async function getAdminDashboardData(req = {}) {
   const totalClients = clients.length;
   const totalPools = pools.length;
 
-  const totalBilledAll = invoices.reduce((sum, invoice) => sum + invoiceTotal(invoice), 0);
+  const receivableInvoices = invoices.filter(isReceivableInvoice);
+  const totalBilledAll = receivableInvoices.reduce((sum, invoice) => sum + invoiceTotal(invoice), 0);
   const totalPaidAll = payments.reduce((sum, payment) => sum + paymentAmount(payment), 0);
   const totalOpenAll = invoices.reduce((sum, invoice) => sum + invoiceOpen(invoice), 0);
   const openInvoicesAll = invoices.filter((invoice) => invoiceOpen(invoice) > 0);
@@ -271,7 +274,7 @@ async function getAdminDashboardData(req = {}) {
     !invoice.externalInvoiceNo
   ));
 
-  const monthInvoices = invoices.filter((invoice) => invoiceMonthRef(invoice) === currentMonth);
+  const monthInvoices = receivableInvoices.filter((invoice) => invoiceMonthRef(invoice) === currentMonth);
   const monthBilled = monthInvoices.reduce((sum, invoice) => sum + invoiceTotal(invoice), 0);
   const monthPaid = payments.reduce((sum, payment) => {
     const ref = getMonthRef(new Date(payment.paidAt || payment.createdAt));
@@ -341,7 +344,7 @@ async function getAdminDashboardData(req = {}) {
     monthlyMap[ref] = { billed: 0, paid: 0, open: 0 };
   }
 
-  invoices.forEach((invoice) => {
+  receivableInvoices.forEach((invoice) => {
     const ref = invoiceMonthRef(invoice);
     if (!monthlyMap[ref]) return;
     monthlyMap[ref].billed += invoiceTotal(invoice);
@@ -369,7 +372,7 @@ async function getAdminDashboardData(req = {}) {
       totalBilledAll,
       totalPaidAll,
       totalOpenAll,
-      totalInvoicesAll: invoices.length,
+      totalInvoicesAll: receivableInvoices.length,
       openInvoicesAll: openInvoicesAll.length,
       overdueInvoices: openInvoicesAll.length,
       overdueClients: overdueClientIds.size,

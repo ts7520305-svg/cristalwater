@@ -132,7 +132,7 @@ async function main() {
 
   let browser;
   try {
-    browser = await chromium.launch({ headless: true });
+    browser = await chromium.launch({ headless: true, executablePath: process.env.CW_CHROMIUM_PATH, args: ["--no-sandbox", "--disable-dev-shm-usage"] });
     const page = await browser.newPage();
     const pageErrors = [];
     page.on("pageerror", (error) => pageErrors.push(error.message));
@@ -142,14 +142,14 @@ async function main() {
 
     const snapshot = await page.evaluate(() => {
       const cards = Array.from(document.querySelectorAll("#invoiceList .invoice-card"));
-      const draftCard = cards.find((card) => card.textContent.includes("Fatura #1"));
-      const paymentButton = Array.from(draftCard.querySelectorAll("button")).find((button) => button.textContent.includes("Pagamento indisponível"));
-      const copyButton = Array.from(draftCard.querySelectorAll("button")).find((button) => button.textContent.includes("Partilha disponível"));
+      const draftCard = cards.find((card) => card.textContent.includes("Rascunho #1"));
+      const paymentButton = Array.from(draftCard.querySelectorAll("button")).find((button) => /Pagamento indisponível|Registar pagamento/.test(button.textContent));
+      const copyButton = Array.from(draftCard.querySelectorAll("button")).find((button) => /Partilha disponível|Copiar link PDF/.test(button.textContent));
       return {
         draftText: draftCard.textContent,
         draftClasses: Array.from(draftCard.classList),
-        paymentDisabled: Boolean(paymentButton?.disabled),
-        copyDisabled: Boolean(copyButton?.disabled),
+        paymentDisabled: !paymentButton || paymentButton.disabled,
+        copyDisabled: !copyButton || copyButton.disabled,
         openAmount: document.getElementById("sumOpen")?.textContent,
         pendingCount: document.getElementById("sumPending")?.textContent,
         draftCount: document.getElementById("sumDrafts")?.textContent,
@@ -170,7 +170,7 @@ async function main() {
     assert.strictEqual(snapshot.hasDraftFilter, true, "draft filter must be available");
 
     await page.evaluate(() => {
-      const draftCard = Array.from(document.querySelectorAll("#invoiceList .invoice-card")).find((card) => card.textContent.includes("Fatura #1"));
+      const draftCard = Array.from(document.querySelectorAll("#invoiceList .invoice-card")).find((card) => card.textContent.includes("Rascunho #1"));
       const button = Array.from(draftCard.querySelectorAll("button")).find((item) => item.textContent.includes("Pagamento indisponível"));
       button?.click();
     });
@@ -179,7 +179,7 @@ async function main() {
     await page.selectOption("#statusFilter", "draft");
     await waitForInvoiceCount(page, 1);
     let texts = await cardTexts(page);
-    assert(texts[0].includes("Fatura #1") && texts[0].includes("RASCUNHO"), "draft filter must show only drafts");
+    assert(texts[0].includes("Rascunho #1") && texts[0].includes("RASCUNHO"), "draft filter must show only drafts");
 
     await page.selectOption("#statusFilter", "paid");
     await waitForInvoiceCount(page, 1);
@@ -191,12 +191,12 @@ async function main() {
     texts = await cardTexts(page);
     assert(texts.some((text) => text.includes("Fatura #2")), "open pending invoice must remain in debt filter");
     assert(texts.some((text) => text.includes("Fatura #4")), "overdue invoice must remain in debt filter");
-    assert(!texts.some((text) => text.includes("Fatura #1")), "draft must be excluded from debt filter");
+    assert(!texts.some((text) => text.includes("Rascunho #1")), "draft must be excluded from debt filter");
 
     await page.goto(`${baseUrl}/invoices.html?status=draft`, { waitUntil: "load" });
     await waitForInvoiceCount(page, 1);
     texts = await cardTexts(page);
-    assert(texts[0].includes("Fatura #1") && texts[0].includes("RASCUNHO"), "draft deep-link must preserve the draft filter");
+    assert(texts[0].includes("Rascunho #1") && texts[0].includes("RASCUNHO"), "draft deep-link must preserve the draft filter");
 
     assert.deepStrictEqual(pageErrors, [], `browser page errors: ${pageErrors.join(" | ")}`);
     console.log("OK invoice draft classification browser");
