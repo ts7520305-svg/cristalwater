@@ -1,6 +1,6 @@
 const repository = require("../../dal/FinanceOsRepository");
 const { processPaymentReminders } = require("../../services/paymentService");
-const { NON_RECEIVABLE_STATUSES, isReceivableInvoice, applyClientCreditToInvoice, invoiceOpen, invoicePaid, invoiceStatus, invoiceTotal } = require("../../services/clientCreditService");
+const { NON_RECEIVABLE_STATUSES, isReceivableInvoice, invoiceOpen, invoicePaid, invoiceStatus, invoiceTotal } = require("../../services/clientCreditService");
 const { EVENT_TYPES, emitFinanceEvent } = require("../../services/financeOsEventService");
 const { preparePaymentRequest, executePaymentRequest } = require('../../services/invoicePaymentRequestService');
 
@@ -246,10 +246,8 @@ async function registerPayment(invoiceId, payload = {}, actor = "finance-os", us
     }
 
     if (surplus > 0) {
-      await applyClientCreditToInvoice(tx, invoice.id, {
-        reference: `SURPLUS-${invoice.id}`,
-        notes: `Excedente convertido em crédito: ${surplus.toFixed(2)} EUR`,
-      }).catch(() => null);
+      // Cash already covers the remaining invoice. Preserve any earlier credit;
+      // applying it here would settle the same debt twice before recalculation.
       await tx.client.update({
         where: { id: invoice.clientId },
         data: { creditBalance: { increment: surplus } },

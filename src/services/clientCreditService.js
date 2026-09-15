@@ -41,7 +41,7 @@ function moneyLabel(value) {
 }
 
 async function applyClientCreditToInvoice(db, invoiceInput, options = {}) {
-  if (db.$transaction) return db.$transaction(tx => applyClientCreditToInvoice(tx, invoiceInput, options));
+  if (db.$transaction) return db.$transaction(tx => applyClientCreditToInvoice(tx, invoiceInput, options), { maxWait: 15000, timeout: 15000 });
   const invoiceId = Number(invoiceInput?.id || invoiceInput);
   if (!invoiceId) return { creditUsed: 0 };
 
@@ -54,14 +54,18 @@ async function applyClientCreditToInvoice(db, invoiceInput, options = {}) {
   if (!invoice || !invoice.clientId) return { creditUsed: 0 };
   if (!isReceivableInvoice(invoice)) return { creditUsed: 0, invoice };
 
-  const client = invoice.client || await db.client.findUnique({ where: { id: invoice.clientId } });
-  const availableCredit = toMoney(client?.creditBalance);
-  const openBefore = invoiceOpen(invoice);
-  const creditUsed = Math.min(availableCredit, openBefore);
-  if (creditUsed <= 0) return { creditUsed: 0, invoice };
+  // Invoice first, then client: same order as receipt/payment writers. NO KEY
+  // UPDATE remains compatible with foreign-key checks when another invoice is created.
+  await db.$queryRaw`SELECT id FROM "Client" WHERE id = ${invoice.clientId} FOR NO KEY UPDATE`;
+  const client = await db.client.findUnique({ where: { id: invoice.clientId } });
+  invoice.client = client;
+  const availableCents = Math.max(Math.round(toMoney(client?.creditBalance) * 100), 0);
+  const openCents = Math.max(Math.round(invoiceOpen(invoice) * 100), 0);
+  const creditCents = Math.min(availableCents, openCents), creditUsed = creditCents / 100;
+  if (creditCents <= 0) return { creditUsed: 0, invoice };
 
-  const paidAfter = invoicePaid(invoice) + creditUsed;
-  const openAfter = Math.max(openBefore - creditUsed, 0);
+  const paidAfter = (Math.round(invoicePaid(invoice) * 100) + creditCents) / 100;
+  const openAfter = (openCents - creditCents) / 100;
   const total = invoiceTotal(invoice);
   const status = invoiceStatus(total, paidAfter, openAfter);
   const notes = [
@@ -91,22 +95,14 @@ async function applyClientCreditToInvoice(db, invoiceInput, options = {}) {
     },
   });
 
-  const remainingOpenInvoices = await db.invoice.count({
-    where: {
-      clientId: invoice.clientId,
-      status: { notIn: NON_RECEIVABLE_STATUSES },
-      OR: [
-        { amountOpen: { gt: 0 } },
-        { status: { in: ["PENDING", "PARTIAL", "OVERDUE"] } },
-      ],
-    },
-  });
+  const clientInvoices = await db.invoice.findMany({ where: { clientId: invoice.clientId } });
+  const hasOpenInvoices = clientInvoices.some(row => invoiceOpen(row) > 0);
 
   const updatedClient = await db.client.update({
     where: { id: invoice.clientId },
     data: {
-      creditBalance: { decrement: creditUsed },
-      paymentStatus: remainingOpenInvoices > 0 ? "PARTIAL" : "PAID",
+      creditBalance: (availableCents - creditCents) / 100,
+      paymentStatus: hasOpenInvoices ? "PARTIAL" : "PAID",
       lastPaymentAt: new Date(),
     },
   });
@@ -118,7 +114,7 @@ async function applyClientCreditToInvoice(db, invoiceInput, options = {}) {
       message: `Credito positivo abatido na fatura #${invoice.id}: ${moneyLabel(creditUsed)}. Credito restante: ${moneyLabel(updatedClient.creditBalance)}.`,
       referenceId: payment.id,
     },
-  }).catch(() => null);
+  });
 
   return {
     creditUsed,
@@ -196,7 +192,7 @@ async function createCreditLedgerPayment(db, clientId, amount, options = {}) {
       message: `Credito positivo recebido: ${moneyLabel(creditAmount)}. Credito atual: ${moneyLabel(client.creditBalance)}.`,
       referenceId: payment.id,
     },
-  }).catch(() => null);
+  });
 
   return {
     creditAdded: creditAmount,
