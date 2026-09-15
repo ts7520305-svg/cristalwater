@@ -9,6 +9,9 @@ const ui = window.CwUi || {
 };
 
 let alertsState = [];
+let alertsLoaded = false;
+let alertsRead = 0;
+const alertsAuthorization = authHeaders().Authorization;
 let repairContextData = {
   clients: [],
   pools: [],
@@ -158,12 +161,12 @@ function mergeAlertVisit(alert, visit) {
 }
 
 async function enrichAlertsWithVisits(alerts) {
-  const ids = Array.from(new Set((alerts || []).map(extractVisitId).filter(Boolean)));
+  const ids = Array.from(new Set((alerts || []).filter(alert => !alert.serviceNote).map(extractVisitId).filter(Boolean)));
   if (!ids.length) return alerts;
 
   const pairs = await Promise.all(ids.slice(0, 80).map(async (id) => {
     try {
-      const data = await fetchJSON(`${API}/visits/${encodeURIComponent(id)}`);
+      const data = await fetchJSON(`${API}/visits/${encodeURIComponent(id)}`, { headers: { Authorization: alertsAuthorization } });
       return [id, data.visit || null];
     } catch (_) {
       return [id, null];
@@ -599,9 +602,9 @@ async function createRepairFromModal(event) {
     }
 
     closeRepairModal();
-    await loadAlerts();
+    const refreshed = await loadAlerts();
     ui.success(`Reparacao #${data.repair?.id || "-"} criada com sucesso.`);
-    setStatus("Reparacao criada e fila atualizada.", "ok");
+    if (refreshed) setStatus("Reparacao criada e fila atualizada.", "ok");
   } catch (err) {
     setRepairModalStatus(err.message || "Erro ao criar reparacao.", "error");
   } finally {
@@ -656,6 +659,16 @@ function renderList() {
   const list = document.getElementById("alertsList");
   const summary = document.getElementById("alertsSummary");
   if (!list) return;
+
+  if (!alertsLoaded) {
+    for (const id of ["alertsTotal", "alertsCritical", "alertsTechnical", "alertsVisits", "alertsNotifications"]) {
+      const metric = document.getElementById(id);
+      if (metric) metric.textContent = "—";
+    }
+    if (summary) summary.textContent = "Alertas por confirmar";
+    list.innerHTML = '<div class="empty-alerts"><strong>Atualize para consultar os alertas.</strong></div>';
+    return;
+  }
 
   const alerts = filteredAlerts();
   renderMetrics(alerts);
@@ -718,18 +731,44 @@ function renderList() {
 }
 
 async function loadAlerts() {
+  const own = ++alertsRead;
+  const current = () => own === alertsRead && alertsSessionCurrent();
+  if (!alertsSessionCurrent()) return false;
   try {
     setStatus("A carregar alertas...");
-    const data = await fetchJSON(`${API}/alerts`);
-    alertsState = await enrichAlertsWithVisits(Array.isArray(data.alerts) ? data.alerts : []);
+    const data = await fetchJSON(`${API}/alerts`, { headers: { Authorization: alertsAuthorization } });
+    if (!current()) return false;
+    if (data.ok !== true || !Array.isArray(data.alerts) || data.count !== data.alerts.length ||
+      data.alerts.some(row => !row || !/^(notification|technical|visit|generic)-[1-9]\d*$/.test(row.id) ||
+        row.id !== `${row.source}-${row.numericId}` || !["CRITICAL", "WARNING", "NORMAL", "LOW"].includes(row.priority)) ||
+      new Set(data.alerts.map(row => row.id)).size !== data.alerts.length) throw Error("Resposta de alertas invalida");
+    const rows = await enrichAlertsWithVisits(data.alerts);
+    if (!current()) return false;
+    alertsState = rows;
+    alertsLoaded = true;
     renderList();
     setStatus(alertsState.length ? "Alertas carregados." : "Nao existem alertas abertos.", alertsState.length ? "info" : "ok");
+    return true;
   } catch (err) {
-    alertsState = [];
+    if (!current()) return false;
     renderList();
-    setStatus(err.message || "Erro ao carregar alertas.", "error");
+    setStatus(alertsLoaded ? "Nao foi possivel atualizar. Os alertas apresentados sao da ultima consulta; volte a atualizar." : "Nao foi possivel consultar os alertas. Volte a atualizar.", "error");
+    return false;
   }
 }
+
+function alertsSessionCurrent() {
+  if (authHeaders().Authorization === alertsAuthorization) return true;
+  alertsRead++;
+  alertsState = [];
+  alertsLoaded = false;
+  renderList();
+  setStatus("A sessao mudou. Reabra esta pagina para consultar os alertas.", "error");
+  return false;
+}
+window.addEventListener("storage", event => {
+  if (event.key === "token" || event.key === null) alertsSessionCurrent();
+});
 
 async function resolveAlert(id) {
   if (!id) return;
@@ -742,8 +781,7 @@ async function resolveAlert(id) {
   try {
     setStatus("A resolver alerta...");
     await fetchJSON(`${API}/alerts/${encodeURIComponent(id)}/resolve`, { method: "PUT" });
-    await loadAlerts();
-    setStatus("Alerta resolvido e retirado da lista aberta.", "ok");
+    if (await loadAlerts()) setStatus("Alerta resolvido e retirado da lista aberta.", "ok");
   } catch (err) {
     setStatus(err.message || "Erro ao resolver alerta.", "error");
   }
