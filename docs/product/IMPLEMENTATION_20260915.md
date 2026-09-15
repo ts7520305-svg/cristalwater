@@ -69,3 +69,7 @@ Espanhol adicionado às preferências de idioma e a todas as entradas do dicion�
 ## TASK 96 — retenção administrativa do histórico GPS
 
 Pré-visualização autenticada com contagens e limite de um ano de calendário. Limpeza manual exige confirmação textual, motivo e pré-visualização assinada de cinco minutos, vinculada ao administrador. Mudança nas contagens exige nova revisão. Uma transação RepeatableRead preserva a consistência da contagem e eliminação, com auditoria e bloqueio entre limpezas. Abrange TechnicianTrack.createdAt e LocationLog apenas quando tanto a medição como a criação têm mais de um ano. Mantém a última localização, visitas, histórico técnico, faturas, pagamentos e anexos; não existe eliminação de histórico crítico. Não altera backups nem cópias externas. Execução automática desligada; os testes eliminam apenas dados da base QA isolada.
+
+## TASK 97 — monitorização local de backups
+
+A configuração mostra a idade e o tipo da cópia local mais recente, com estados para ausência, ficheiro vazio, antiguidade excessiva, exportação JSON de recurso e relógio incoerente. Ficheiros parciais, ficheiros não relacionados e ligações simbólicas não contam como backups válidos. Prazo configurável por BACKUP_MAX_AGE_HOURS, por defeito 48 horas. A sonda `node scripts/check-backup-health.js` é apenas leitura e termina com código não zero quando requer atenção. A presença de SQL recente não é apresentada como prova de restauro, cópia externa ou proteção de uploads; esses estados permanecem explicitamente não verificados.

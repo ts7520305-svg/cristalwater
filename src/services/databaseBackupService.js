@@ -157,6 +157,7 @@ function getReleaseSafetyStatus() {
       current: "/opt/cristalwater/current",
     },
     latestBackups: listBackups(6),
+    backupHealth: require("./backupHealthService").inspectBackups({directory:backupDir}),
   };
 }
 
