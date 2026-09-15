@@ -1,11 +1,10 @@
 const CoreInvoicePaymentBusiness = require('../business/finance/CoreInvoicePaymentBusiness');
-const clientRates = require('../business/finance/ClientRateBusiness');
+const invoiceGenerationController = require('../controllers/invoiceGenerationController');
 const express = require('express');
 const prismaModule = require('../prismaClient');
 const auth = require('../middlewares/authMiddleware');
 const { getPoolRoundReadiness } = require('../utils/poolReadiness');
 const {
-  applyClientCreditToInvoice,
   invoiceOpen,
 } = require('../services/clientCreditService');
 
@@ -63,10 +62,6 @@ function technicalSheetPayload(source = {}, pool = {}) {
     technicalRoomLocation: optionalText(source.technicalRoomLocation),
     specialObservations: optionalText(source.specialObservations || source.notes),
   }).filter(([, value]) => value !== undefined));
-}
-
-function canBillClient(client) {
-  return Boolean(client && client.active !== false && client.billingActive === true && String(client.status || '').toUpperCase() === 'ACTIVE');
 }
 
 const VISIT_COMPLETABLE_STATUSES = new Set(['PLANNED', 'IN_PROGRESS', 'A_CAMINHO', 'ON_ROUTE', 'STARTED', 'EM_EXECUCAO', 'EM EXECUCAO']);
@@ -434,45 +429,7 @@ router.post('/complete-visit', asyncHandler(async (req, res) => {
   res.json({ ok: true, visit, alert, repair, nextStep: repair ? 'QUOTE_REQUIRED' : 'BILLING_READY' });
 }));
 
-router.post('/generate-monthly-invoice', asyncHandler(async (req, res) => {
-  const clientId = Number(req.body.clientId);
-  if (!clientId) return res.status(400).json({ ok: false, error: 'clientId obrigatório' });
-
-  const client = await model('client').findUnique({ where: { id: clientId }, include: { pools: true } });
-  if (!client) return res.status(404).json({ ok: false, error: 'Cliente não encontrado' });
-  if (!canBillClient(client)) return res.status(409).json({ ok: false, error: 'Faturação desligada: ativa primeiro o contrato do cliente após receber o pagamento inicial.' });
-
-  const ref = req.body.monthRef || monthRef();
-  const visits = await model('serviceVisit').findMany({ where: { clientId, status: 'DONE', billed: false } });
-  const repairs = await model('repair').findMany({ where: { pool: { clientId }, status: { in: ['DONE', 'QUOTED', 'APPROVED', 'QUOTE_REQUESTED'] }, NOT: { status: { in: ['QUOTED','QUOTE_REQUESTED'] }, quotes: { some: {} } }, paid: false } });
-  const monthly = (await clientRates.billing(client, ref, toNumber(client.monthlyAmount || client.monthlyFee, 0))).amount;
-  const repairTotal = repairs.reduce((sum, r) => sum + toNumber(r.totalPrice || r.unitPrice, 0), 0);
-  const total = monthly + repairTotal;
-
-  const invoice = await model('invoice').upsert({
-    where: { clientId_monthRef: { clientId, monthRef: ref } },
-    update: { total, amount: total, totalAmount: total, amountOpen: total, status: 'PENDING', requiresInvoice: Boolean(client.requiresInvoice) },
-    create: { clientId, monthRef: ref, amount: total, total, totalAmount: total, amountOpen: total, status: 'PENDING', requiresInvoice: Boolean(client.requiresInvoice), notes: 'Gerada pelo fluxo operacional.' },
-  });
-
-  await model('invoiceLine').deleteMany({ where: { invoiceId: invoice.id } });
-  if (monthly > 0) await model('invoiceLine').create({ data: { invoiceId: invoice.id, type: 'MONTHLY', description: `Mensalidade ${ref}`, quantity: 1, unitPrice: monthly, total: monthly, lineTotal: monthly } });
-  for (const r of repairs) {
-    const value = toNumber(r.totalPrice || r.unitPrice, 0);
-    if (value > 0) await model('invoiceLine').create({ data: { invoiceId: invoice.id, type: 'REPAIR', description: r.problem, referenceId: r.id, quantity: r.quantity || 1, unitPrice: value, total: value, lineTotal: value } });
-  }
-
-  const credit = await applyClientCreditToInvoice(prisma, invoice, {
-    reference: `Fatura ${ref}`,
-    notes: 'Abatimento automatico no fluxo operacional.',
-  });
-  const finalInvoice = credit.creditUsed > 0
-    ? await model('invoice').findUnique({ where: { id: invoice.id }, include: { lines: true, payments: true, client: true } })
-    : invoice;
-
-  await model('serviceVisit').updateMany({ where: { id: { in: visits.map((v) => v.id) } }, data: { billed: true, billedAt: new Date() } });
-  res.json({ ok: true, invoice: finalInvoice, creditUsed: credit.creditUsed || 0, lines: { monthly, repairs: repairTotal }, nextStep: 'PAYMENT' });
-}));
+router.post('/generate-monthly-invoice', invoiceGenerationController.operational);
 
 router.post('/pay-invoice', asyncHandler(async (req, res) => {
   const invoiceId = Number(req.body.invoiceId);

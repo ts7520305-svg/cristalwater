@@ -2,7 +2,7 @@ const ReminderListBusiness = require('../business/admin/ReminderListBusiness');
 const ReminderCompletionBusiness = require('../business/admin/ReminderCompletionBusiness');
 const ReminderCreationBusiness = require('../business/admin/ReminderCreationBusiness');
 const ReminderDeletionBusiness = require('../business/admin/ReminderDeletionBusiness');
-const clientRates = require('../business/finance/ClientRateBusiness');
+const invoiceGenerationController = require('../controllers/invoiceGenerationController');
 const {checkDatabaseHealth}=require('../services/databaseHealthService');
 const express = require('express');
 const bcrypt = require('bcryptjs');
@@ -10,7 +10,6 @@ const crypto = require('crypto');
 const prismaModule = require('../prismaClient');
 const auth = require('../middlewares/authMiddleware');
 const { completeServiceVisit, VisitCompletionError } = require('../services/serviceVisitCompletionService');
-const { applyClientCreditToInvoice } = require('../services/clientCreditService');
 const CoreInvoicePaymentBusiness = require('../business/finance/CoreInvoicePaymentBusiness');
 const { assertPoolReadyForRound } = require('../utils/poolReadiness');
 const { roleMatches, normalizeRole } = require('../utils/roles');
@@ -779,59 +778,8 @@ function technicianBaseData(body) {
   });
 }
 function invoiceBaseData(data) { return dataFor('invoice', data); }
-function invoiceLineBaseData(data) { return dataFor('invoiceLine', data); }
 function serviceVisitBaseData(data) { return dataFor('serviceVisit', data); }
 function repairBaseData(data) { return dataFor('repair', data); }
-function monthRangeFromRef(ref) {
-  const match = String(ref || '').match(/^(\d{4})-(\d{2})$/);
-  if (!match) return null;
-  const year = Number(match[1]);
-  const month = Number(match[2]);
-  if (!Number.isInteger(year) || !Number.isInteger(month) || month < 1 || month > 12) return null;
-  return {
-    start: new Date(Date.UTC(year, month - 1, 1, 0, 0, 0)),
-    end: new Date(Date.UTC(year, month, 1, 0, 0, 0)),
-  };
-}
-function sourceAmount(record) {
-  return toFloat(record?.totalPrice ?? record?.price ?? record?.revenue ?? record?.unitPrice, 0);
-}
-
-function invoiceLineReferenceIds(lines, types) {
-  const allowed = new Set((types || []).map((type) => String(type || '').trim().toUpperCase()));
-  return (lines || [])
-    .filter((line) => allowed.has(String(line.type || line.lineType || '').trim().toUpperCase()))
-    .map((line) => toInt(line.referenceId))
-    .filter(Boolean);
-}
-
-function invoiceMonthlyLineAmount(lines) {
-  const monthlyLine = (lines || []).find((line) => String(line.type || line.lineType || '').trim().toUpperCase() === 'MONTHLY');
-  return toFloat(monthlyLine?.lineTotal ?? monthlyLine?.total ?? monthlyLine?.unitPrice, 0);
-}
-
-function isDuplicateInvoiceGeneration(existingInvoice, payload = {}) {
-  if (!existingInvoice) return false;
-
-  const existingServiceVisitIds = new Set(payload.existingServiceVisitIds || []);
-  const existingExtraVisitIds = new Set(payload.existingExtraVisitIds || []);
-  const existingRepairIds = new Set(payload.existingRepairIds || []);
-
-  const hasNewServiceVisits = (payload.serviceVisits || []).some((visit) => !existingServiceVisitIds.has(visit.id));
-  const hasNewExtraVisits = (payload.extraVisits || []).some((visit) => !existingExtraVisitIds.has(visit.id));
-  const hasNewRepairs = (payload.repairs || []).some((repair) => !existingRepairIds.has(repair.id));
-
-  if (hasNewServiceVisits || hasNewExtraVisits || hasNewRepairs) return false;
-
-  const existingTotal = toFloat(existingInvoice.totalAmount ?? existingInvoice.total ?? existingInvoice.amount, 0);
-  const nextTotal = toFloat(payload.total, 0);
-  const existingMonthly = invoiceMonthlyLineAmount(existingInvoice.lines || []);
-  const nextMonthly = toFloat(payload.monthly, 0);
-
-  return existingTotal === nextTotal && existingMonthly === nextMonthly;
-}
-
-
 async function hasOperationalHistory(modelName, id) {
   try {
     if (modelName === 'client') {
@@ -2710,214 +2658,9 @@ router.post('/repairs/:id/quote', async (req, res) => {
   }
 });
 
-router.post('/invoices/generate', async (req, res) => {
-  try {
-    const clientId = toInt(req.body.clientId);
-    const ref = req.body.monthRef || monthRef();
+router.post('/invoices/generate', invoiceGenerationController.core);
 
-    const client = await db('client').findUnique({ where: { id: clientId }, include: { pools: true } });
-    if (!client) return res.status(404).json({ ok: false, error: 'Cliente nao encontrado' });
-
-    if (String(client.status || '').toUpperCase() !== 'ACTIVE' || client.billingActive === false) {
-      return res.status(409).json({ ok: false, error: 'Faturacao desligada: ativa primeiro o contrato do cliente apos receber o pagamento inicial.' });
-    }
-
-    const existingInvoice = await db('invoice').findUnique({
-      where: { clientId_monthRef: { clientId, monthRef: ref } },
-      include: { payments: true, lines: true },
-    });
-    const existingLines = existingInvoice?.lines || [];
-    const existingServiceVisitIds = existingLines
-      .filter((line) => ['SERVICE', 'SERVICE_VISIT'].includes(String(line.type || line.lineType || '').toUpperCase()))
-      .map((line) => toInt(line.referenceId))
-      .filter(Boolean);
-    const existingExtraVisitIds = existingLines
-      .filter((line) => ['EXTRA', 'EXTRA_VISIT'].includes(String(line.type || line.lineType || '').toUpperCase()))
-      .map((line) => toInt(line.referenceId))
-      .filter(Boolean);
-    const existingRepairIds = invoiceLineReferenceIds(existingLines, ['REPAIR']);
-    const range = monthRangeFromRef(ref);
-
-    const repairs = await safe('repair.findMany.invoiceGenerate.v2', [], () => db('repair').findMany({
-      where: { pool: { clientId }, status: { in: ['QUOTED', 'APPROVED', 'DONE'] }, NOT: { status: 'QUOTED', quotes: { some: {} } }, paid: false },
-      include: { pool: true },
-    }));
-    const serviceVisits = range && available('serviceVisit') ? await safe('serviceVisit.findMany.invoiceGenerate.v2', [], () => db('serviceVisit').findMany({
-      where: {
-        AND: [
-          { OR: [{ clientId }, { pool: { clientId } }] },
-          { OR: [{ plannedDate: { gte: range.start, lt: range.end } }, { date: { gte: range.start, lt: range.end } }, { endAt: { gte: range.start, lt: range.end } }] },
-          { status: { in: ['DONE', 'COMPLETED', 'CONCLUIDA', 'CONCLUIDO'] } },
-          { revenue: { gt: 0 } },
-          { OR: [{ billed: false }, { id: { in: existingServiceVisitIds } }] },
-        ],
-      },
-      include: { pool: true },
-    })) : [];
-    const extraVisits = range && available('extraVisit') ? await safe('extraVisit.findMany.invoiceGenerate.v2', [], () => db('extraVisit').findMany({
-      where: {
-        AND: [
-          { OR: [{ clientId }, { pool: { clientId } }] },
-          { OR: [{ scheduledAt: { gte: range.start, lt: range.end } }, { date: { gte: range.start, lt: range.end } }] },
-          { status: { in: ['DONE', 'COMPLETED', 'CONCLUIDA', 'CONCLUIDO'] } },
-          { OR: [{ isBillable: true }, { billingMode: 'EXTRA' }, { billingStatus: { in: ['PENDING', 'IN_MONTHLY_REPORT'] } }] },
-          { OR: [{ billed: false }, { billingStatus: { in: ['PENDING', 'IN_MONTHLY_REPORT'] } }, { id: { in: existingExtraVisitIds } }] },
-          { OR: [{ totalPrice: { gt: 0 } }, { price: { gt: 0 } }, { unitPrice: { gt: 0 } }] },
-        ],
-      },
-      include: { pool: true },
-    })) : [];
-
-    const monthly = (await clientRates.billing(client, ref, toFloat(client.monthlyFee || client.monthlyAmount || 0, 0) + (client.pools || []).reduce((sum, p) => sum + toFloat(p.monthlyAmount, 0), 0))).amount;
-    const serviceTotal = serviceVisits.reduce((sum, visit) => sum + sourceAmount(visit), 0);
-    const extraVisitTotal = extraVisits.reduce((sum, visit) => sum + sourceAmount(visit), 0);
-    const repairTotal = repairs.reduce((sum, repair) => sum + toFloat(repair.totalPrice, 0), 0);
-    const total = monthly + serviceTotal + extraVisitTotal + repairTotal;
-    const alreadyPaid = existingInvoice
-      ? (existingInvoice.payments || []).reduce((sum, payment) => sum + toFloat(payment.amount, 0), 0)
-      : 0;
-    const amountOpen = Math.max(0, total - alreadyPaid);
-    const status = total <= 0 ? 'PAID' : amountOpen <= 0 ? 'PAID' : alreadyPaid > 0 ? 'PARTIAL' : 'PENDING';
-    const paidAt = status === 'PAID' && alreadyPaid > 0 ? (existingInvoice?.paidAt || new Date()) : null;
-
-    if (isDuplicateInvoiceGeneration(existingInvoice, {
-      existingServiceVisitIds,
-      existingExtraVisitIds,
-      existingRepairIds,
-      serviceVisits,
-      extraVisits,
-      repairs,
-      monthly,
-      total,
-    })) {
-      const fullInvoice = await safe('invoice.findUnique.duplicateInvoice.v2', existingInvoice, () => db('invoice').findUnique({ where: { id: existingInvoice.id }, include: { lines: true, client: true, payments: true } }));
-      return res.status(409).json({ ok: false, code: 'INVOICE_ALREADY_EXISTS', error: 'Já existe fatura para este mês.', invoice: fullInvoice || existingInvoice });
-    }
-
-    const invoice = await db('invoice').upsert({
-      where: { clientId_monthRef: { clientId, monthRef: ref } },
-      update: invoiceBaseData({ total, totalAmount: total, amount: total, amountPaid: alreadyPaid, amountOpen, status, paidAt, requiresInvoice: Boolean(client.requiresInvoice) }),
-      create: invoiceBaseData({ clientId, monthRef: ref, month: ref, amount: total, total, totalAmount: total, amountPaid: 0, amountOpen: total, status: total > 0 ? 'PENDING' : 'PAID', paidAt: null, requiresInvoice: Boolean(client.requiresInvoice) }),
-    });
-    const credit = await applyClientCreditToInvoice(prisma, invoice, {
-      reference: `Fatura ${ref}`,
-      notes: 'Abatimento automatico no fluxo core.',
-    });
-
-    if (available('invoiceLine')) {
-      await db('invoiceLine').deleteMany({ where: { invoiceId: invoice.id } });
-      if (monthly > 0) {
-        await db('invoiceLine').create({ data: invoiceLineBaseData({ invoiceId: invoice.id, description: `Mensalidade ${ref}`, type: 'MONTHLY', quantity: 1, unitPrice: monthly, total: monthly, lineTotal: monthly }) });
-      }
-      for (const visit of serviceVisits) {
-        const value = sourceAmount(visit);
-        if (value > 0) {
-          await db('invoiceLine').create({ data: invoiceLineBaseData({ invoiceId: invoice.id, description: `Servico: ${visit.pool?.name || `Visita ${visit.id}`}`, type: 'SERVICE', referenceId: visit.id, quantity: 1, unitPrice: value, total: value, lineTotal: value, serviceDate: visit.endAt || visit.plannedDate || visit.date || null, sourceMonth: ref, notes: visit.notes || null }) });
-        }
-      }
-      for (const visit of extraVisits) {
-        const value = sourceAmount(visit);
-        if (value > 0) {
-          await db('invoiceLine').create({ data: invoiceLineBaseData({ invoiceId: invoice.id, description: `Extra: ${visit.pool?.name || `Visita extra ${visit.id}`}`, type: 'EXTRA_VISIT', referenceId: visit.id, quantity: 1, unitPrice: value, total: value, lineTotal: value, serviceDate: visit.scheduledAt || visit.date || null, sourceMonth: ref, notes: visit.notes || null }) });
-        }
-      }
-      for (const repair of repairs) {
-        const value = toFloat(repair.totalPrice, 0);
-        if (value > 0) {
-          await db('invoiceLine').create({ data: invoiceLineBaseData({ invoiceId: invoice.id, description: `Reparacao: ${repair.problem}`, type: 'REPAIR', referenceId: repair.id, quantity: 1, unitPrice: value, total: value, lineTotal: value, sourceMonth: ref }) });
-        }
-      }
-    }
-    if (serviceVisits.length && available('serviceVisit')) {
-      await safe('serviceVisit.updateMany.invoiceGenerate.v2', null, () => db('serviceVisit').updateMany({
-        where: { id: { in: serviceVisits.map((visit) => visit.id) } },
-        data: { billed: true, billedAt: new Date() },
-      }));
-    }
-    if (extraVisits.length && available('extraVisit')) {
-      await safe('extraVisit.updateMany.invoiceGenerate.v2', null, () => db('extraVisit').updateMany({
-        where: { id: { in: extraVisits.map((visit) => visit.id) } },
-        data: dataFor('extraVisit', { billed: true, billedAt: new Date(), billingStatus: 'IN_INVOICE' }),
-      }));
-    }
-
-    const fullInvoice = await safe('invoice.findUnique.fullInvoice.v2', invoice, () => db('invoice').findUnique({ where: { id: invoice.id }, include: { lines: true, client: true, payments: true } }));
-    return res.json({ ok: true, invoice: fullInvoice, creditUsed: credit.creditUsed || 0, lines: { monthly, services: serviceTotal, extras: extraVisitTotal, repairs: repairTotal }, next: 'PAYMENT' });
-  } catch (error) {
-    return res.status(error.status || 500).json({ ok: false, error: error.message });
-  }
-});
-
-router.post('/invoices/generate-legacy', async (req, res) => {
-  try {
-    const clientId = toInt(req.body.clientId);
-    const ref = req.body.monthRef || monthRef();
-
-    const client = await db('client').findUnique({ where: { id: clientId }, include: { pools: true } });
-    if (!client) return res.status(404).json({ ok: false, error: 'Cliente não encontrado' });
-
-    if (String(client.status || '').toUpperCase() !== 'ACTIVE' || client.billingActive === false) {
-      return res.status(409).json({ ok: false, error: 'Faturação desligada: ativa primeiro o contrato do cliente após receber o pagamento inicial.' });
-    }
-
-    const repairs = await safe('repair.findMany.invoiceGenerate', [], () => db('repair').findMany({
-      where: { pool: { clientId }, status: { in: ['QUOTED', 'APPROVED', 'DONE'] }, NOT: { status: 'QUOTED', quotes: { some: {} } }, paid: false },
-      include: { pool: true },
-    }));
-
-    const monthly = (await clientRates.billing(client, ref, toFloat(client.monthlyFee || client.monthlyAmount || 0, 0) + (client.pools || []).reduce((sum, p) => sum + toFloat(p.monthlyAmount, 0), 0))).amount;
-    const repairTotal = repairs.reduce((sum, r) => sum + toFloat(r.totalPrice, 0), 0);
-    const total = monthly + repairTotal;
-    const existingInvoice = await db('invoice').findUnique({
-      where: { clientId_monthRef: { clientId, monthRef: ref } },
-      include: { payments: true, lines: true },
-    });
-    const alreadyPaid = existingInvoice
-      ? (existingInvoice.payments || []).reduce((sum, p) => sum + toFloat(p.amount, 0), 0)
-      : 0;
-    const amountOpen = Math.max(0, total - alreadyPaid);
-    const status = total <= 0 ? 'PAID' : amountOpen <= 0 ? 'PAID' : alreadyPaid > 0 ? 'PARTIAL' : 'PENDING';
-    const paidAt = status === 'PAID' && alreadyPaid > 0 ? (existingInvoice?.paidAt || new Date()) : null;
-
-    if (isDuplicateInvoiceGeneration(existingInvoice, {
-      existingRepairIds: invoiceLineReferenceIds(existingInvoice?.lines || [], ['REPAIR']),
-      repairs,
-      monthly,
-      total,
-    })) {
-      const fullInvoice = await safe('invoice.findUnique.duplicateInvoice.legacy', existingInvoice, () => db('invoice').findUnique({ where: { id: existingInvoice.id }, include: { lines: true, client: true, payments: true } }));
-      return res.status(409).json({ ok: false, code: 'INVOICE_ALREADY_EXISTS', error: 'Já existe fatura para este mês.', invoice: fullInvoice || existingInvoice });
-    }
-
-    const invoice = await db('invoice').upsert({
-      where: { clientId_monthRef: { clientId, monthRef: ref } },
-      update: invoiceBaseData({ total, totalAmount: total, amount: total, amountPaid: alreadyPaid, amountOpen, status, paidAt, requiresInvoice: Boolean(client.requiresInvoice) }),
-      create: invoiceBaseData({ clientId, monthRef: ref, month: ref, amount: total, total, totalAmount: total, amountPaid: 0, amountOpen: total, status: total > 0 ? 'PENDING' : 'PAID', paidAt: null, requiresInvoice: Boolean(client.requiresInvoice) }),
-    });
-    const credit = await applyClientCreditToInvoice(prisma, invoice, {
-      reference: `Fatura ${ref}`,
-      notes: 'Abatimento automatico no fluxo core legado.',
-    });
-
-    if (available('invoiceLine')) {
-      await db('invoiceLine').deleteMany({ where: { invoiceId: invoice.id } });
-      if (monthly > 0) {
-        await db('invoiceLine').create({ data: invoiceLineBaseData({ invoiceId: invoice.id, description: `Mensalidade ${ref}`, type: 'MONTHLY', quantity: 1, unitPrice: monthly, total: monthly, lineTotal: monthly }) });
-      }
-      for (const repair of repairs) {
-        const value = toFloat(repair.totalPrice, 0);
-        if (value > 0) {
-          await db('invoiceLine').create({ data: invoiceLineBaseData({ invoiceId: invoice.id, description: `Reparação: ${repair.problem}`, type: 'REPAIR', referenceId: repair.id, quantity: 1, unitPrice: value, total: value, lineTotal: value }) });
-        }
-      }
-    }
-
-    const fullInvoice = await safe('invoice.findUnique.fullInvoice', invoice, () => db('invoice').findUnique({ where: { id: invoice.id }, include: { lines: true, client: true, payments: true } }));
-    return res.json({ ok: true, invoice: fullInvoice, creditUsed: credit.creditUsed || 0, next: 'PAYMENT' });
-  } catch (error) {
-    return res.status(500).json({ ok: false, error: error.message });
-  }
-});
+router.post('/invoices/generate-legacy', invoiceGenerationController.legacy);
 
 router.get('/invoices', async (req, res) => {
   const invoices = await safe('invoice.findMany', [], () => db('invoice').findMany({
