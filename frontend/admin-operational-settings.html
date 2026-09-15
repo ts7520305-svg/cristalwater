@@ -203,10 +203,33 @@
       <button type="button" id="applyGpsRetention" class="btn" disabled>Eliminar apenas o GPS revisto</button>
       <p id="retentionStatus" role="status" aria-live="polite"></p>
     </section>
+    <section class="panel" id="equipmentMaintenancePanel" data-cw-no-i18n>
+      <h2>Manutenção preventiva</h2>
+      <p>Planeie a revisão de cada componente. O técnico regista a execução na visita e o próximo prazo é calculado a partir dessa execução.</p>
+      <button type="button" id="emLoadPools" class="btn">Escolher piscina</button>
+      <label>Piscina (até 1000 ativas)<select id="emPool"><option value="">Escolher piscina</option></select></label>
+      <div id="emPlans"></div>
+      <div class="actions"><button type="button" id="emNew" class="btn" disabled>Novo plano</button><button type="button" id="emRefresh" class="btn" disabled>Atualizar planos</button></div>
+      <form id="emForm" hidden>
+        <h3 id="emFormTitle">Novo plano</h3>
+        <label>Componente<select id="emComponent"><option value="FILTER">Filtro</option><option value="CHLORINATOR">Célula / clorador</option><option value="PUMP">Bomba</option><option value="OTHER">Outro</option></select></label>
+        <label>Nome que identifica o componente<input id="emTitle" maxlength="120" minlength="3" required placeholder="Ex.: Revisão do filtro principal"></label>
+        <label>Instruções para o técnico<textarea id="emInstructions" maxlength="2000" minlength="3" required rows="3" placeholder="Verificações e cuidados específicos deste equipamento"></textarea></label>
+        <div class="em-grid"><label>Repetir após<input id="emCount" type="number" min="1" max="3650" step="1" required></label><label>Unidade<select id="emUnit"><option value="DAYS">Dias</option><option value="MONTHS">Meses</option></select></label></div>
+        <label>Próxima data de revisão<input id="emDue" type="date" required min="2000-01-01" max="2199-12-31"></label>
+        <label class="em-active"><input id="emActive" type="checkbox" checked> Plano ativo</label>
+        <p>Defina o intervalo e as verificações de acordo com o equipamento. Pausar conserva o histórico. A conclusão exige confirmação do técnico; não é automática.</p>
+        <button type="submit" id="emSave" class="btn primary">Guardar plano</button>
+        <button type="button" id="emCancel" class="btn">Fechar edição</button>
+      </form>
+      <p id="emStatus" role="status" aria-live="polite">Escolha uma piscina para consultar e configurar os planos.</p>
+      <style>#equipmentMaintenancePanel label{display:block;margin:12px 0}#equipmentMaintenancePanel input:not([type=checkbox]),#equipmentMaintenancePanel select,#equipmentMaintenancePanel textarea{display:block;width:100%;min-height:44px;padding:10px;max-width:100%;box-sizing:border-box}#equipmentMaintenancePanel button{min-height:44px;white-space:normal}#equipmentMaintenancePanel .em-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}#equipmentMaintenancePanel{overflow-wrap:anywhere}#equipmentMaintenancePanel .em-plan{border:1px solid #94a3b8;border-radius:12px;padding:12px;margin:12px 0}#equipmentMaintenancePanel .em-active{display:flex;align-items:center;gap:12px;min-height:44px}#equipmentMaintenancePanel .em-active input{width:24px;height:24px}</style>
+    </section>
   </main>
   <script src="/admin-auth-guard.js"></script>
   <script src="/admin-operational-settings.js"></script>
   <script src="/admin-data-protection.js"></script>
+  <script src="/admin-equipment-maintenance.js"></script>
   <script src="/cristal-help-data.js"></script><script src="/cristal-assist.js"></script>
 <script src="/cw-admin-shortcuts.js"></script>
   <script src="/ui/core/navigation-context.js"></script>
