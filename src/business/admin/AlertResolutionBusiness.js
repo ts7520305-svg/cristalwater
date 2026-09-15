@@ -63,4 +63,4 @@ async function resolve(user, reference, body = {}) {
     return result;
   }, { timeout: 30000 });
 }
-module.exports = { resolve };
+module.exports = { resolve, lock };

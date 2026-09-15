@@ -6,41 +6,9 @@ router.use(auth('ADMIN'));
 
 const { prisma } = require("../prismaClient");
 
-const { SERVICE_VISIT_INCLUDE, parseReference, mapTechnicalAlert, mapVisitAlert, mapGenericAlert, mapNotification } = require('../services/alertPresentationService');
 const AlertListBusiness = require('../business/admin/AlertListBusiness');
 const AlertResolutionBusiness = require('../business/admin/AlertResolutionBusiness');
-
-async function resolveAlertContext(reference) {
-  const ref = parseReference(reference);
-  if (!Number.isInteger(ref.id) || ref.id <= 0) return null;
-
-  if (ref.source === "technical") {
-    const alert = await prisma.technicalAlert.findUnique({
-      where: { id: ref.id },
-      include: { pool: { include: { client: true } } },
-    });
-    return alert ? { ref, alert: mapTechnicalAlert(alert), raw: alert } : null;
-  }
-
-  if (ref.source === "visit") {
-    const visit = await prisma.serviceVisit.findUnique({
-      where: { id: ref.id },
-      include: SERVICE_VISIT_INCLUDE,
-    });
-    return visit ? { ref, alert: mapVisitAlert(visit), raw: visit } : null;
-  }
-
-  if (ref.source === "generic") {
-    const alert = await prisma.alert.findUnique({ where: { id: ref.id } });
-    return alert ? { ref, alert: mapGenericAlert(alert), raw: alert } : null;
-  }
-
-  const notification = await prisma.notification.findUnique({
-    where: { id: ref.id },
-    include: { client: true, user: true },
-  });
-  return notification ? { ref, alert: mapNotification(notification), raw: notification } : null;
-}
+const AlertBillingBusiness = require('../business/admin/AlertBillingBusiness');
 
 // Criar alerta manual associado a uma piscina.
 router.post("/", async (req, res) => {
@@ -59,8 +27,8 @@ router.post("/", async (req, res) => {
       });
     }
 
-    const [technicalAlert, notification] = await Promise.all([
-      prisma.technicalAlert.create({
+    const { technicalAlert, notification } = await prisma.$transaction(async tx => {
+      const technicalAlert = await tx.technicalAlert.create({
         data: {
           poolId: pool.id,
           type: type || "MANUAL_ALERT",
@@ -68,8 +36,8 @@ router.post("/", async (req, res) => {
           priority: priority || "NORMAL",
           status: "OPEN",
         },
-      }),
-      prisma.notification.create({
+      });
+      const notification = await tx.notification.create({
         data: {
           clientId: pool.clientId,
           message: `${pool.name || "Piscina"} - ${message || type || "Alerta manual"}`,
@@ -78,10 +46,11 @@ router.post("/", async (req, res) => {
           eventType: "MANUAL_POOL_ALERT",
           role: "ADMIN",
           severity: priority || "NORMAL",
-          metadata: { poolId: pool.id, poolName: pool.name },
+          metadata: { poolId: pool.id, poolName: pool.name, alertId: technicalAlert.id },
         },
-      }),
-    ]);
+      });
+      return { technicalAlert, notification };
+    });
 
     return res.json({
       ok: true,
@@ -126,72 +95,7 @@ router.put("/:id/resolve", async (req, res) => {
 // Converter alerta em linha de faturacao.
 router.post("/:id/convert", async (req, res) => {
   try {
-    const context = await resolveAlertContext(req.params.id);
-    if (!context) {
-      return res.status(404).json({ ok: false, error: "Alerta nao encontrado" });
-    }
-
-    const price = Number(req.body.price || req.body.amount || 0);
-    if (!Number.isFinite(price) || price <= 0) {
-      return res.status(400).json({ ok: false, error: "Valor invalido" });
-    }
-
-    const clientId = context.alert.clientId;
-    if (!clientId) {
-      return res.status(400).json({ ok: false, error: "Alerta sem cliente associado" });
-    }
-
-    const monthRef = new Date().toISOString().slice(0, 7);
-
-    let invoice = await prisma.invoice.findFirst({
-      where: { clientId, monthRef },
-    });
-
-    if (!invoice) {
-      invoice = await prisma.invoice.create({
-        data: {
-          clientId,
-          monthRef,
-          total: 0,
-          amount: 0,
-          totalAmount: 0,
-          amountPaid: 0,
-          amountOpen: 0,
-          status: "PENDING",
-        },
-      });
-    }
-
-    await prisma.invoiceLine.create({
-      data: {
-        invoiceId: invoice.id,
-        type: "REPAIR",
-        lineType: "ALERT",
-        referenceId: context.alert.numericId,
-        description: context.alert.message,
-        quantity: 1,
-        unitPrice: price,
-        total: price,
-        lineTotal: price,
-      },
-    });
-
-    const updatedInvoice = await prisma.invoice.update({
-      where: { id: invoice.id },
-      data: {
-        total: { increment: price },
-        amount: { increment: price },
-        totalAmount: { increment: price },
-        amountOpen: { increment: price },
-        status: "PENDING",
-      },
-    });
-
-    return res.json({
-      ok: true,
-      invoiceId: updatedInvoice.id,
-      amount: price,
-    });
+    return res.json(await AlertBillingBusiness.convert(req.user, req.params.id, req.body));
   } catch (err) {
     console.error("Erro converter alerta em faturacao:", err);
     return res.status(err.statusCode || 500).json({ ok: false, error: err.statusCode ? err.message : "Erro ao faturar alerta" });

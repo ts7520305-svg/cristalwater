@@ -13,6 +13,7 @@ let alertsLoaded = false;
 let alertsRead = 0;
 const alertsAuthorization = authHeaders().Authorization;
 const alertResolutions = new Set();
+let alertBilling;
 let repairContextData = {
   clients: [],
   pools: [],
@@ -731,7 +732,7 @@ function renderList() {
         ${alert.href ? `<a class="btn" href="${escapeHtml(alert.href)}">Abrir ficha</a>` : ""}
         ${alert.visitHref ? `<a class="btn note" href="${escapeHtml(alert.visitHref)}">Abrir visita</a>` : ""}
         ${alert.serviceNote?.href ? `<a class="btn note" href="${escapeHtml(alert.serviceNote.href)}" target="_blank" rel="noopener">Relatorio</a>` : ""}
-        <button type="button" data-charge-alert="${escapeHtml(alert.id)}">Faturar</button>
+        <button type="button" data-charge-alert="${escapeHtml(alert.id)}">Preparar rascunho</button>
         ${alert.resolutionRequirement ? `<p>${escapeHtml(alert.resolutionRequirement.message)}</p>` : ''}
         <button type="button" class="resolve" data-resolve-alert="${escapeHtml(alert.id)}" ${alertResolutions.size ? 'disabled' : ''}>${alert.resolutionRequirement ? 'Verificar resolucao' : 'Resolver'}</button>
       </div>
@@ -744,6 +745,7 @@ function renderList() {
   list.querySelectorAll("[data-charge-alert]").forEach((btn) => {
     btn.addEventListener("click", () => chargeAlert(btn.dataset.chargeAlert));
   });
+  updateResolutionButtons();
 }
 
 async function loadAlerts() {
@@ -778,6 +780,7 @@ function alertsSessionCurrent() {
   alertsRead++;
   alertsState = [];
   alertsLoaded = false;
+  alertBilling?.hide();
   renderList();
   setStatus("A sessao mudou. Reabra esta pagina para consultar os alertas.", "error");
   return false;
@@ -823,6 +826,7 @@ function updateResolutionButtons() {
   document.querySelectorAll('[data-resolve-alert]').forEach(button => {
     button.disabled = alertResolutions.size > 0;
   });
+  alertBilling?.render();
 }
 
 async function requestAlertResolution(target) {
@@ -843,30 +847,128 @@ async function requestAlertResolution(target) {
 }
 
 async function chargeAlert(id) {
-  if (!id) return;
-  const price = await ui.prompt("Valor a faturar para este alerta/reparacao (EUR)", {
-    title: "Faturar alerta",
-    defaultValue: "",
-    confirmText: "Continuar",
-  });
-  if (!price) return;
+  return alertBilling?.submit(id);
+}
 
-  const amount = Number(String(price).replace(",", "."));
-  if (!Number.isFinite(amount) || amount <= 0) {
-    setStatus("Valor invalido.", "error");
-    return;
+function setupAlertBilling() {
+  let owner, key, pending = null, blocked = false, issue = '';
+  const panel = document.createElement('div'), summary = document.createElement('p');
+  const retry = document.createElement('button'), review = document.createElement('button');
+  panel.id = 'alertBillingPending'; panel.setAttribute('data-cw-no-i18n', 'true');
+  panel.style.cssText = 'margin:12px 0;overflow-wrap:anywhere';
+  retry.type = review.type = 'button'; retry.textContent = 'Repetir confirmação'; review.textContent = 'Rever alerta';
+  panel.append(summary, retry, review); document.getElementById('alertsStatus').after(panel);
+  const positive = value => Number.isInteger(value) && value > 0 && value <= 2147483647;
+  const reference = value => typeof value === 'string' && /^(technical|notification|visit|generic)-[1-9]\d*$/.test(value) && positive(Number(value.split('-')[1]));
+  function read() {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw === null) return null;
+      const record = JSON.parse(raw);
+      if (record?.schema !== 1 || record.owner !== owner || !/^[a-f0-9-]{36}$/.test(record.requestId || '') ||
+        !reference(record.reference) || !positive(record.clientId) || !positive(record.amountCents) ||
+        !/^[a-f0-9]{64}$/.test(record.expectedVersion || '') || typeof record.details !== 'string' ||
+        (record.rejection && (![400, 404, 409].includes(record.rejection.status) || typeof record.rejection.message !== 'string'))) throw Error();
+      return record;
+    } catch (_) { blocked = true; issue = 'O pedido guardado nao pode ser lido. Foi conservado para revisao; nenhum novo pedido sera enviado.'; throw Error(issue); }
   }
-
-  try {
-    setStatus("A adicionar valor a faturacao...");
-    const data = await fetchJSON(`${API}/alerts/${encodeURIComponent(id)}/convert`, {
-      method: "POST",
-      body: JSON.stringify({ price: amount }),
+  function render() {
+    const sameSession = authHeaders().Authorization === alertsAuthorization;
+    const busy = alertResolutions.size > 0;
+    panel.hidden = !sameSession || (!pending && !blocked);
+    if (pending && sameSession) summary.textContent = `${pending.rejection ? pending.rejection.message : 'Pedido por confirmar'}\n${pending.details}\n${(pending.amountCents / 100).toFixed(2)} EUR`;
+    if (blocked && sameSession) summary.textContent = issue;
+    summary.style.whiteSpace = 'pre-line';
+    retry.hidden = blocked || !pending;
+    retry.disabled = busy || blocked || Boolean(pending?.rejection);
+    review.hidden = !pending?.rejection; review.disabled = busy || blocked;
+    document.querySelectorAll('[data-charge-alert]').forEach(button => {
+      button.disabled = !sameSession || busy || blocked || Boolean(pending);
     });
-    setStatus(`Valor adicionado a fatura #${data.invoiceId}.`, "ok");
-  } catch (err) {
-    setStatus(err.message || "Erro ao faturar alerta.", "error");
   }
+  function forget(record) {
+    if (read()?.requestId !== record.requestId) throw Error('O pedido mudou noutra janela. Atualize a pagina.');
+    localStorage.removeItem(key); pending = null;
+  }
+  async function submit(id, discard = false) {
+    if (blocked || alertResolutions.size || !alertsSessionCurrent()) return;
+    if (!navigator.locks?.request || !crypto.randomUUID) { setStatus('Abra esta pagina num navegador atualizado para proteger os pedidos entre janelas.', 'error'); return; }
+    alertResolutions.add('billing'); updateResolutionButtons();
+    try {
+      await navigator.locks.request(key, { ifAvailable: true }, async lock => {
+        if (!alertsSessionCurrent()) return;
+        if (!lock) { setStatus('Existe um pedido em curso noutra janela. Aguarde e atualize a pagina.', 'error'); return; }
+        pending = read();
+        if (discard) {
+          if (pending?.rejection) { forget(pending); await loadAlerts(); }
+          return;
+        }
+        if (pending && (id || pending.rejection)) { setStatus('Reveja o pedido guardado antes de preparar outro rascunho.', 'error'); return; }
+        if (!pending) {
+          if (!id) { setStatus('O pedido foi confirmado noutra janela. Consulte a faturacao.', 'info'); return; }
+          const target = alertsState.find(row => row.id === id);
+          if (!target || !positive(target.clientId) || !/^[a-f0-9]{64}$/.test(target.resolutionVersion || '')) throw Error('Atualize os alertas e confirme o cliente antes de preparar o rascunho.');
+          const details = [target.clientName, target.poolName, target.title, target.message].filter(Boolean).join('\n');
+          const price = await ui.prompt('Valor do extra a preparar (EUR)', { title: 'Preparar rascunho', confirmText: 'Continuar', defaultValue: '', details });
+          if (price === null || price === '') return;
+          const value = String(price).trim().replace(',', '.');
+          if (!/^(0|[1-9]\d*)(?:\.\d{1,2})?$/.test(value)) throw Error('Indique um valor positivo com ate duas casas decimais.');
+          const [whole, part = ''] = value.split('.'), amountCents = Number(whole) * 100 + Number(part.padEnd(2, '0'));
+          if (!positive(amountCents)) throw Error('Valor fora do intervalo permitido.');
+          const confirmed = await ui.confirm(`Preparar um rascunho separado de ${(amountCents / 100).toFixed(2)} EUR para este cliente?`, {
+            title: 'Confirmar rascunho', confirmText: 'Preparar rascunho', details,
+          });
+          if (!confirmed || !alertsSessionCurrent()) return;
+          const latest = alertsState.find(row => row.id === id);
+          if (latest?.resolutionVersion !== target.resolutionVersion || latest?.clientId !== target.clientId) throw Error('O alerta mudou. Atualize e confirme novamente.');
+          const record = { schema: 1, owner, requestId: crypto.randomUUID(), reference: id, clientId: target.clientId,
+            expectedVersion: target.resolutionVersion, amountCents, details };
+          try { localStorage.setItem(key, JSON.stringify(record)); }
+          catch (_) { throw Error('Nao foi possivel guardar o pedido neste navegador. Nenhum pedido foi enviado.'); }
+          pending = read();
+          if (JSON.stringify(pending) !== JSON.stringify(record)) throw Error('Nao foi possivel verificar o pedido guardado. Nenhum pedido foi enviado.');
+        }
+        const record = pending;
+        render(); setStatus('A confirmar o rascunho...');
+        try {
+          const result = await fetchJSON(`${API}/alerts/${encodeURIComponent(record.reference)}/convert`, {
+            method: 'POST', headers: { Authorization: alertsAuthorization }, signal: AbortSignal.timeout(20000),
+            body: JSON.stringify({ price: (record.amountCents / 100).toFixed(2), expectedClientId: record.clientId, expectedVersion: record.expectedVersion }),
+          });
+          if (!alertsSessionCurrent()) return;
+          if (result.ok !== true || !positive(result.invoiceId) || !positive(result.invoiceLineId) || result.reference !== record.reference ||
+            !reference(result.convertedReference) || result.clientId !== record.clientId || result.amountCents !== record.amountCents ||
+            result.amount !== record.amountCents / 100 || result.status !== 'DRAFT' || typeof result.preparedAt !== 'string' ||
+            !Number.isFinite(Date.parse(result.preparedAt)) || new Date(result.preparedAt).toISOString() !== result.preparedAt) throw Error('Confirmacao invalida');
+          forget(record);
+          setStatus(result.idempotent ? `Preparacao original confirmada no documento #${result.invoiceId}. Consulte o seu estado na faturacao.` : `Rascunho #${result.invoiceId} preparado. Reveja-o na faturacao antes de emitir.`, 'ok');
+        } catch (error) {
+          if (!alertsSessionCurrent()) return;
+          if ([400, 404, 409].includes(error.status)) {
+            pending = { ...record, rejection: { status: error.status, message: error.message } };
+            localStorage.setItem(key, JSON.stringify(pending));
+            setStatus(`${error.message} Use Rever alerta.`, 'error');
+          } else setStatus('Ainda nao foi possivel confirmar o rascunho. O pedido foi guardado; use Repetir confirmação, mesmo depois de reabrir a pagina.', 'error');
+        }
+      });
+    } catch (error) { if (alertsSessionCurrent()) setStatus(error.message, 'error'); }
+    finally { alertResolutions.delete('billing'); updateResolutionButtons(); }
+  }
+  retry.onclick = () => submit(); review.onclick = () => submit(null, true);
+  try {
+    const payload = JSON.parse(atob(alertsAuthorization.split(' ')[1].split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    if (payload.role !== 'ADMIN' || !positive(Number(payload.id))) throw Error('Sessao administrativa invalida.');
+    owner = `ADMIN:${Number(payload.id)}`; key = `cwAlertBilling:v1:${owner}`; pending = read();
+  } catch (error) { blocked = true; issue = error.message; setStatus(error.message, 'error'); }
+  window.addEventListener('storage', event => {
+    if (!alertsSessionCurrent()) return;
+    if (event.key === key && !alertResolutions.has('billing')) {
+      try { pending = read(); } catch (error) { setStatus(error.message, 'error'); }
+      render();
+    }
+  });
+  render();
+  return { submit, render, hide: () => { panel.hidden = true; } };
 }
 
 function setupFilters() {
@@ -890,6 +992,7 @@ window.addEventListener("DOMContentLoaded", () => {
   setupRepairModal();
   setupFilters();
   applyQueryFilters();
+  alertBilling = setupAlertBilling();
   loadAlerts();
 });
 

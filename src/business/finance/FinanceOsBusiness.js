@@ -98,21 +98,22 @@ async function recalculateInvoice(tx, invoiceId) {
 async function createDraftInvoice(payload = {}, actor = "finance-os", transaction = null) {
   const clientId = Number(payload.clientId || 0);
   if (!clientId) return { ok: false, status: 400, error: "clientId obrigatório" };
-  const monthRef = String(payload.monthRef || monthRefFromDate()).trim();
+  const monthRef = payload.standalone === true ? null : String(payload.monthRef || monthRefFromDate()).trim();
+  const period = monthRef || monthRefFromDate();
   const run = async tx => {
     await tx.$queryRaw`SELECT id FROM "Client" WHERE id = ${clientId} FOR UPDATE`;
     const client = await tx.client.findUnique({ where: { id: clientId } });
     if (!client) return { ok: false, status: 404, error: "Cliente não encontrado" };
     if (payload.requireActiveContract && (!client.active || client.status !== 'ACTIVE' || !client.billingActive || client.deletedAt || client.archiveStatus !== 'ATIVO')) return { ok: false, status: 409, error: "Contrato inativo" };
-    if (await tx.invoice.findFirst({ where: { clientId, monthRef } })) return { ok: false, status: 409, error: "Já existe fatura para este mês" };
+    if (monthRef !== null && await tx.invoice.findFirst({ where: { clientId, monthRef } })) return { ok: false, status: 409, error: "Já existe fatura para este mês" };
   const dueDate = repository.toDate(payload.dueDate) || new Date(Date.now() + 15 * 86400000);
   const lineItems = Array.isArray(payload.lines) ? payload.lines : [];
 
   const invoice = await tx.invoice.create({ data: {
     clientId,
     monthRef,
-    month: monthRef,
-    year: Number(String(monthRef).slice(0, 4)) || new Date().getUTCFullYear(),
+    month: period,
+    year: Number(String(period).slice(0, 4)) || new Date().getUTCFullYear(),
     dueDate,
     status: "DRAFT",
     requiresInvoice: Boolean(client.requiresInvoice),
