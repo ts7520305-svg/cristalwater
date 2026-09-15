@@ -4,7 +4,7 @@
 
 - Repositório: `ts7520305-svg/cristalwater`.
 - Branch de trabalho: `work/field-readiness-20260915-simulation`.
-- Última entrega remota verificada: TASK128, commit `f453c729575453c7a6e62d9aeff68b995fbbc17d`; workflow `34964272796` aprovado, incluindo 249 testes unitários, 17 scripts de navegador, 35 grupos operacionais, PostgreSQL 16 e restauro de 99 tabelas/11 anexos.
+- Última entrega remota verificada: TASK130, commit `c172760caeb34d1f918f7b0992ea5f33047a2539`; workflow `34966846294` aprovado, incluindo 272 testes unitários, 17 scripts de navegador, 36 grupos operacionais, PostgreSQL 16 e restauro de 99 tabelas/11 anexos.
 - TASK123: notas da piscina e seleção correta dos lembretes no endpoint da rota, implementadas. Teste API com 505 lembretes gerais, 23 operacionais, duas piscinas, reatribuição e visitas extra aprovado em `field-qa-runtime/run-1789467419688`. 218 testes unitários e 4 de técnicos aprovados.
 - TASK124: notas no ecrã de campo, avisos recorrentes atrasados e confirmação de início completa e vinculada à visita/sessão implementados. Percurso real verificado em PT/EN/FR/ES/DE; regressão local final aprovada: 218 testes unitários, 4 de técnicos, 17 scripts de navegador e 33 grupos integrados (`reports/field-suite/1789468180539/results.json`). Imagem: `reports/field-visual/visit-briefing-1789468325934/technician-briefing-mobile.png`. Workflow PostgreSQL 16/restauro aprovado no commit acima. Continuação sem aprovações intermédias conforme pedido «continua sem parar».
 - Relatórios atuais: `VISIT_BRIEFING_API_20260915.md` e `VISIT_BRIEFING_UI_20260915.md`. Inventário concluído nas TASK121/TASK122; não repetir a implementação.
@@ -19,7 +19,9 @@
 
 - TASK129 implementada: eliminação com IDs/categoria/piscina estritos, versão otimista, comprovativo transacional e repetição segura. Ensaio dirigido aprovado em `field-qa-runtime/run-1789473148930`, incluindo criação e conclusão existentes. Relatório `REMINDER_DELETION_API_20260915.md`. A confirmação nos ecrãs está implementada na TASK130.
 
-- TASK130 implementada: confirmação de eliminação comum à ficha/CRM, título e piscina exatos, sessão/versão, resposta perdida ou trocada, refrescamento falhado e cliques tardios. Relatório `REMINDER_DELETION_UI_20260915.md`. 36 grupos integrados aprovados em `reports/field-suite/1789473623034/results.json`, com 272 testes unitários, 4 de técnicos e 17 scripts de navegador. Revisão final de libertação dos botões verificada no ensaio dirigido `field-qa-runtime/run-1789473837096`; confirmar workflow publicado.
+- TASK130 implementada: confirmação de eliminação comum à ficha/CRM, título e piscina exatos, sessão/versão, resposta perdida ou trocada, refrescamento falhado e cliques tardios. Relatório `REMINDER_DELETION_UI_20260915.md`. 36 grupos integrados aprovados em `reports/field-suite/1789473623034/results.json`, com 272 testes unitários, 4 de técnicos e 17 scripts de navegador. Revisão final de libertação dos botões verificada no ensaio dirigido `field-qa-runtime/run-1789473837096`; workflow 34966846294 aprovado no commit c172760caeb34d1f918f7b0992ea5f33047a2539, incluindo PostgreSQL e restauro.
+
+- TASK131 implementada: listas do CRM coerentes, conclusão com confirmação validada, repetição segura, rejeição de consultas/respostas antigas e estados históricos corretos. Reprodução em `field-qa-runtime/run-1789474663761`; ensaio dirigido aprovado em `field-qa-runtime/run-1789474965482`. Relatório `CRM_REMINDER_COMPLETION_20260915.md`. 37 grupos aprovados em `reports/field-suite/1789475096683/results.json`. Revisão final aprovada em `field-qa-runtime/run-1789475349814`, com 272 testes unitários/4 de técnicos; 17 scripts de navegador aprovados. Imagem revista em `reports/field-visual/crm-reminders-1789475367994/crm-lembrete-concluido.png`. Confirmar workflow publicado.
 
 ### Pedido ativo
 
@@ -45,8 +47,8 @@ Evidência atual da TASK120: 216 testes unitários, 4 testes de técnicos, os 15
 
 ### Próxima retoma
 
-1. TASK123–TASK128 publicadas e verificadas. TASK129–TASK130 implementadas; confirmar o workflow do lote final. Não repetir estas implementações.
-2. Consulta, criação, conclusão e eliminação de lembretes de serviço estão tratadas. Próximo candidato: coerência das duas listas do CRM quando a conclusão parte da lista geral, incluindo erros visíveis e respostas após mudança de sessão; não repetir os fluxos já corrigidos.
+1. TASK123–TASK130 publicadas e verificadas. TASK131 implementada; confirmar o workflow publicado nesta conversa. Não repetir estas implementações.
+2. A coerência e conclusão dos lembretes no CRM estão tratadas na TASK131. Prosseguir a revisão dos outros ecrãs operacionais, a partir da implementação atual e relatórios posteriores; não repetir os fluxos de lembretes já corrigidos.
 3. Continuar a revisão dos módulos pendentes usando `COMPLETENESS_20260915.md` juntamente com `IMPLEMENTATION_20260915.md` e os relatórios posteriores. A matriz de completude conserva o diagnóstico inicial e contém pontos já corrigidos posteriormente.
 4. Manter tarefas pequenas, com testes de comportamento e documentação. Não repetir trabalho apenas por encontrar um relatório antigo.
 5. Ensaios físicos e VPS permanecem pendentes. Não declarar o sistema inteiro concluído ou certificado para campo.

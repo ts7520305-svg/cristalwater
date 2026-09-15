@@ -1,0 +1,173 @@
+'use strict';
+require('../src/loadEnv')();
+const assert = require('node:assert/strict');
+if (process.env.NODE_ENV !== 'test' || process.env.QA_MODE !== 'true' || process.env.QA_ENVIRONMENT_SAFE !== 'true') throw Error('Isolated QA required');
+const { prisma } = require('../src/prismaClient');
+const jwt = require('jsonwebtoken'), { getJwtSecret } = require('../src/utils/jwtSecret');
+const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
+assert(['127.0.0.1', 'localhost'].includes(new URL(base).hostname));
+let browser;
+(async () => {
+  const admin = await prisma.user.findUniqueOrThrow({ where: { email: process.env.ADMIN_EMAIL } });
+  const token = jwt.sign({ id: admin.id, role: 'ADMIN' }, getJwtSecret(), { expiresIn: '1h' });
+  const client = await prisma.client.create({ data: { name: 'CRM coerência QA' } });
+  const pool = await prisma.pool.create({ data: { clientId: client.id, name: 'Piscina do CRM QA' } });
+  const create = values => prisma.generalReminder.create({ data: { title: 'Concluir no CRM QA', dueAt: new Date('2028-01-31T10:00:00Z'), category: 'TECHNICAL_PERIODIC_SERVICE', poolId: pool.id, clientId: client.id, repeatRule: 'EVERY_1_MONTHS', ...values } });
+  const first = await create();
+  const { chromium } = require('playwright');
+  browser = await chromium.launch({ headless: true, executablePath: process.env.CW_CHROMIUM_PATH, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await context.addInitScript(({ token, id }) => {
+    localStorage.setItem('token', token); localStorage.setItem('cristalwater_jwt', token);
+    const user = JSON.stringify({ id, name: 'CRM QA', role: 'ADMIN' });
+    localStorage.setItem('user', user); localStorage.setItem('cristalwater_user', user);
+  }, { token, id: admin.id });
+  const page = await context.newPage(); page.setDefaultTimeout(10000);
+  const errors = []; page.on('pageerror', e => errors.push(e.message));
+  const pageUrl = base + `/admin-crm.html?poolId=${pool.id}`;
+  const button = (row, list) => page.locator(`${list} [data-complete-reminder="${row.id}"]`);
+  await page.goto(pageUrl, { waitUntil: 'networkidle' });
+  await button(first, '#reminders').click();
+  await button(first, '#reminders').waitFor({ state: 'hidden' });
+  const remaining = await button(first, '#poolReminders').count();
+  console.log(JSON.stringify({ completedReminderStillActionableInPoolList: remaining }));
+  assert.equal(remaining, 0, 'Completing from the general list must also update the pool list');
+  assert.equal(await prisma.generalReminder.count({ where: { poolId: pool.id, title: first.title } }), 2);
+  console.log('PASS completion refreshes both CRM lists and creates exactly one successor');
+  const status = page.locator('#generalReminderActionStatus');
+  const endpoint = row => base + `/api/crm/reminders/${row.id}/complete`;
+  const poolEndpoint = row => base + `/api/core/pools/${pool.id}/service-reminders/${row.id}/complete`;
+  const absentInBoth = async row => { assert.equal(await page.locator(`[data-complete-reminder="${row.id}"]`).count(), 0); };
+  const count = row => prisma.generalReminder.count({ where: { title: row.title, poolId: pool.id } });
+  const lost = await create({ title: 'Resposta perdida CRM QA' });
+  await page.reload({ waitUntil: 'networkidle' });
+  let calls = 0;
+  await page.route(poolEndpoint(lost), async route => {
+    calls++; const response = await route.fetch(); assert.equal(response.status(), 200); return route.abort('failed');
+  });
+  await page.evaluate(({ id, poolId }) => { completePoolReminder(id, poolId); completeReminder(id); completePoolReminder(id, poolId); }, lost);
+  await status.filter({ hasText: 'Ainda não foi possível confirmar' }).waitFor();
+  assert.equal(calls, 1); assert.equal(await count(lost), 2);
+  assert.equal(await page.locator(`[data-complete-reminder="${lost.id}"]`).count(), 2);
+  await button(lost, '#reminders').click();
+  await status.filter({ hasText: 'já estava concluído' }).waitFor(); await absentInBoth(lost);
+  assert.equal(await count(lost), 2); await page.unroute(poolEndpoint(lost));
+  console.log('PASS lost response and three cross-list clicks send once; replay through the other entry point keeps one successor');
+
+  const wrong = await create({ title: 'Resposta trocada CRM QA' });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.route(endpoint(wrong), async route => {
+    const response = await route.fetch(), result = await response.json();
+    await route.fulfill({ response, json: { ...result, reminder: { ...result.reminder, poolId: pool.id + 100000 } } });
+  });
+  await button(wrong, '#reminders').click();
+  await status.filter({ hasText: 'Ainda não foi possível confirmar' }).waitFor();
+  assert.equal(await page.locator(`[data-complete-reminder="${wrong.id}"]`).count(), 2);
+  await page.unroute(endpoint(wrong));
+  await button(wrong, '#reminders').click(); await status.filter({ hasText: 'já estava concluído' }).waitFor();
+  await absentInBoth(wrong); assert.equal(await count(wrong), 2);
+  const refreshFault = await create({ title: 'Concluído sem refrescamento CRM QA' });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.route(base + '/api/crm/reminders', route => route.fulfill({ status: 503, json: { ok: false } }));
+  await button(refreshFault, '#poolReminders').click();
+  await status.filter({ hasText: 'Lembrete concluído. Atualiza a página' }).waitFor();
+  await absentInBoth(refreshFault);
+  const next = await prisma.generalReminder.findFirstOrThrow({ where: { title: refreshFault.title, poolId: pool.id, status: 'PENDING' } });
+  assert.equal(await page.locator(`[data-complete-reminder="${next.id}"]`).count(), 2);
+  for (const [language, label] of [['en', 'Reminder completed. Refresh the page'], ['fr', 'Rappel terminé. Actualisez la page'], ['es', 'Recordatorio completado. Actualiza la página'], ['de', 'Erinnerung abgeschlossen. Aktualisieren Sie die Seite']]) {
+    await page.evaluate(language => CristalI18n.applyLanguage(language), language);
+    await status.filter({ hasText: label }).waitFor();
+  }
+  await page.evaluate(() => CristalI18n.applyLanguage('pt'));
+  await page.unroute(base + '/api/crm/reminders');
+  console.log('PASS mismatched response stays unconfirmed; confirmed completion and successor survive refresh failure in five languages');
+
+  const alias = await create({ title: 'Categoria alternativa CRM QA', category: 'POOL_SERVICE_REMINDER' });
+  const canceled = await create({ title: 'Cancelado CRM QA', status: 'CANCELED' });
+  const historic = await create({ title: 'Histórico CRM QA', status: 'RESOLVED' });
+  const otherPool = await prisma.pool.create({ data: { clientId: client.id, name: 'Outra piscina CRM QA' } });
+  const other = await create({ title: 'Outra piscina CRM QA', poolId: otherPool.id });
+  await page.reload({ waitUntil: 'networkidle' });
+  assert.equal(await button(alias, '#poolReminders').count(), 1);
+  await absentInBoth(canceled); await absentInBoth(historic);
+  assert.equal(await button(other, '#poolReminders').count(), 0);
+  await page.locator('#poolReminderFilter').selectOption(String(otherPool.id));
+  assert.equal(await button(other, '#poolReminders').count(), 1);
+  assert.equal(await button(alias, '#poolReminders').count(), 0);
+  await page.locator('#poolReminderFilter').selectOption(String(pool.id));
+  await button(alias, '#poolReminders').click(); await status.filter({ hasText: 'Lembrete concluído.' }).waitFor();
+  await absentInBoth(alias); assert.equal(await count(alias), 2);
+  const rejected = await create({ title: 'Cancelado entretanto CRM QA' });
+  await page.reload({ waitUntil: 'networkidle' });
+  await prisma.generalReminder.update({ where: { id: rejected.id }, data: { status: 'CANCELLED' } });
+  await button(rejected, '#reminders').click(); await status.filter({ hasText: 'já não pode ser concluído' }).waitFor();
+  await page.waitForFunction(id => !document.querySelector(`[data-complete-reminder="${id}"]`), rejected.id);
+  assert.equal(await count(rejected), 1);
+  console.log('PASS both service categories, pool filter, historical/cancelled states and cancellation after initial read');
+
+  const delayed = await create({ title: 'Consulta antiga CRM QA' });
+  await page.reload({ waitUntil: 'networkidle' });
+  let releaseRead, captured = false;
+  const readGate = new Promise(resolve => { releaseRead = resolve; });
+  await page.route(base + '/api/crm/reminders', async route => {
+    if (captured) return route.continue();
+    const response = await route.fetch(); captured = true; await readGate; return route.fulfill({ response });
+  });
+  const oldRead = page.evaluate(() => loadPoolReminders());
+  for (let i = 0; !captured && i < 100; i++) await new Promise(resolve => setTimeout(resolve, 20));
+  assert(captured);
+  await button(delayed, '#poolReminders').click(); await status.filter({ hasText: 'Lembrete concluído.' }).waitFor();
+  releaseRead(); await oldRead; await absentInBoth(delayed);
+  await page.unroute(base + '/api/crm/reminders');
+  await page.route(base + '/api/crm/reminders', route => route.fulfill({ json: { ok: true, reminders: {} } }));
+  const before = await page.locator('#reminders').textContent();
+  assert.match(await page.evaluate(() => loadPoolReminders().catch(error => error.message)), /Não foi possível ler/);
+  assert.equal(await page.locator('#reminders').textContent(), before);
+  await page.unroute(base + '/api/crm/reminders');
+  console.log('PASS delayed pre-completion read cannot restore pending actions; malformed refresh preserves both lists');
+
+  for (const entry of ['general', 'pool']) {
+    const sessionRow = await create({ title: `Resposta da sessão anterior ${entry} QA` });
+    await page.reload({ waitUntil: 'networkidle' });
+    let release, committed = false;
+    const gate = new Promise(resolve => { release = resolve; });
+    const path = entry === 'general' ? endpoint(sessionRow) : poolEndpoint(sessionRow);
+    await page.route(path, async route => {
+      const response = await route.fetch(); assert.equal(response.status(), 200); committed = true;
+      await gate; return route.fulfill({ response });
+    });
+    await button(sessionRow, entry === 'general' ? '#reminders' : '#poolReminders').click();
+    for (let i = 0; !committed && i < 100; i++) await new Promise(resolve => setTimeout(resolve, 20));
+    assert(committed);
+    await page.evaluate(() => { localStorage.setItem('token', 'other-session'); localStorage.setItem('cristalwater_jwt', 'other-session'); });
+    release(); await status.filter({ hasText: 'A sessão mudou' }).waitFor();
+    assert.equal(await page.locator('#reminders').textContent(), ''); assert.equal(await page.locator('#poolReminders').textContent(), '');
+    assert.equal(await count(sessionRow), 2);
+    let forbidden = 0;
+    await page.unroute(path); await page.route(path, route => { forbidden++; return route.continue(); });
+    await page.evaluate(({ id, poolId }) => Promise.all([completeReminder(id), completePoolReminder(id, poolId)]), sessionRow);
+    assert.equal(forbidden, 0); await page.unroute(path);
+    await page.evaluate(token => { localStorage.setItem('token', token); localStorage.setItem('cristalwater_jwt', token); }, token);
+  }
+  console.log('PASS both entry points reject old-session responses and prevent another write after an account change');
+  const visualPool = await prisma.pool.create({ data: { clientId: client.id, name: 'Piscina do jardim' } });
+  const visual = await create({ title: 'Verificar pressão e limpar o filtro', poolId: visualPool.id, priority: 'HIGH' });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('#poolReminderFilter').selectOption(String(visualPool.id));
+  await button(visual, '#poolReminders').click();
+  await status.filter({ hasText: 'Lembrete concluído.' }).waitFor();
+  await button(visual, '#poolReminders').waitFor({ state: 'hidden' });
+  const panel = page.locator('#poolReminders').locator('..');
+  for (const width of [320, 390, 1280]) {
+    await page.setViewportSize({ width, height: 1000 });
+    assert(await panel.evaluate(node => node.scrollWidth <= node.clientWidth + 1));
+  }
+  await page.setViewportSize({ width: 390, height: 1000 });
+  const fs = require('node:fs'), path = require('node:path');
+  const output = path.resolve(__dirname, '../reports/field-visual/crm-reminders-' + Date.now()); fs.mkdirSync(output, { recursive: true });
+  await panel.evaluate(node => window.scrollTo(0, window.scrollY + node.getBoundingClientRect().top - 120));
+  await panel.screenshot({ path: path.join(output, 'crm-lembrete-concluido.png') });
+  console.log(`PASS 320/390/1280 layouts; visual evidence ${output}`);
+  assert.deepEqual(errors, []);
+  await context.close();
+})().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => { if (browser) await browser.close(); await prisma.$disconnect(); });

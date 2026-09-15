@@ -182,7 +182,7 @@ let browser;
     await open(wrong); await accept();
     await status.filter({ hasText: 'Ainda não foi possível' }).waitFor(); assert.equal(await button(wrong).count(), 1);
     await page.unroute(base + url(wrong.id));
-    const listPath = kind === 'technical' ? `/api/core/pools/${pool.id}/service-reminders` : '/api/crm/reminders?category=TECHNICAL_PERIODIC_SERVICE';
+    const listPath = kind === 'technical' ? `/api/core/pools/${pool.id}/service-reminders` : '/api/crm/reminders';
     await page.route(base + listPath, route => route.fulfill({ status: 503, json: { ok: false, error: 'QA list unavailable' } }));
     await open(wrong); await accept();
     await status.filter({ hasText: 'Lembrete eliminado. Atualiza a página' }).waitFor();

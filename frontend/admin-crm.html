@@ -22,6 +22,9 @@
     .links a, .btn { color: #e8f7ff; text-decoration: none; border: 1px solid rgba(53, 217, 255, .25); background: rgba(255, 255, 255, .07); border-radius: 14px; padding: 10px 12px; font-weight: 800; cursor: pointer; }
     .btn.primary { background: linear-gradient(135deg, #23c7f5, #3d84ff); color: #04111d; border: 0; }
     .btn.danger { background: rgba(255, 80, 110, .16); border-color: rgba(255, 110, 140, .5); }
+    .crm-layout .btn.danger { background: #b2383a; border-color: #b2383a; color: #fff; }
+    .crm-layout .muted { color: var(--ds-text-muted, #4d6278); }
+    .crm-layout .badge.warn { background: #fff3c4; color: #6b4300; }
     main.crm-layout { padding: 20px; display: grid; grid-template-columns: minmax(320px, 430px) minmax(0, 1fr); gap: 18px; }
     .panel { border: 1px solid rgba(53, 217, 255, .22); border-radius: 24px; padding: 18px; background: linear-gradient(180deg, rgba(16, 32, 54, .9), rgba(8, 18, 32, .95)); box-shadow: 0 24px 70px rgba(0, 0, 0, .36); }
     .stack { display: grid; gap: 18px; }
@@ -155,6 +158,7 @@
           </div>
           <select id="poolReminderFilter" aria-label="Filtrar lembretes por piscina"></select>
         </div>
+        <p id="poolReminderActionStatus" role="status" aria-live="polite"></p>
         <div id="poolReminders" class="grid"></div>
       </section>
 
@@ -179,6 +183,7 @@
         </form>
         <hr>
         <h2>Lembretes gerais</h2>
+        <p id="generalReminderActionStatus" role="status" aria-live="polite"></p>
         <div id="reminders" class="grid"></div>
       </section>
     </div>

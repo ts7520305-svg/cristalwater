@@ -6,6 +6,24 @@ const state = {
 const initialPoolId = new URLSearchParams(location.search).get("poolId");
 const completingPoolReminders = new Set();
 let removePoolReminder;
+const reminderAuthorization = authHeaders().Authorization;
+let reminderRead = 0, metadataRead = 0;
+const serviceCategories = ['TECHNICAL_PERIODIC_SERVICE', 'POOL_SERVICE_REMINDER'];
+const closedStatuses = ['DONE', 'COMPLETED', 'CLOSED', 'RESOLVED', 'CANCELLED', 'CANCELED'];
+const reminderClosed = row => Boolean(row.completedAt) || closedStatuses.includes(String(row.status).trim().toUpperCase());
+
+function reminderActionStatus(message) {
+  el('poolReminderActionStatus').textContent = message;
+  el('generalReminderActionStatus').textContent = message;
+}
+function reminderSessionCurrent() {
+  if (reminderAuthorization && reminderAuthorization === authHeaders().Authorization) return true;
+  reminderRead++;
+  state.generalReminders = []; state.poolReminders = [];
+  el('reminders').textContent = ''; el('poolReminders').textContent = '';
+  reminderActionStatus('A sessão mudou. Reabre a página para continuar com a conta atual.');
+  return false;
+}
 
 function el(id) {
   return document.getElementById(id);
@@ -31,12 +49,12 @@ function authHeaders() {
 
 async function api(path, options = {}) {
   const response = await fetch(path, {
-    headers: { "Content-Type": "application/json", ...authHeaders(), ...(options.headers || {}) },
     ...options,
+    headers: { "Content-Type": "application/json", ...authHeaders(), ...(options.headers || {}) },
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok || data.ok === false) {
-    throw new Error(data.error || `Erro ${response.status}`);
+    throw Object.assign(new Error(data.error || `Erro ${response.status}`), { status: response.status });
   }
   return data;
 }
@@ -106,7 +124,7 @@ function renderGeneralReminders(reminders) {
       </header>
       <p>${formatDate(item.dueAt)}</p>
       <p class="muted" data-cw-no-i18n>${esc(item.description || "")}</p>
-      ${item.status === "DONE" ? '<span class="badge done">Concluido</span>' : `<button class="btn" type="button" data-complete-reminder="${Number(item.id)}" ${completingPoolReminders.has(String(item.id)) || window.CwReminderDelete.busy(item.id) ? 'disabled' : ''} onclick="completeReminder(${Number(item.id)})">Concluir</button>`}
+      ${reminderClosed(item) ? `<span class="badge done">${['CANCELLED', 'CANCELED'].includes(String(item.status).trim().toUpperCase()) ? 'Cancelado' : 'Concluido'}</span>` : `<button class="btn" type="button" data-complete-reminder="${Number(item.id)}" ${completingPoolReminders.has(String(item.id)) || window.CwReminderDelete.busy(item.id) ? 'disabled' : ''} onclick="completeReminder(${Number(item.id)})">Concluir</button>`}
     </div>
   `).join("") || '<p class="muted">Sem lembretes gerais.</p>';
 }
@@ -117,14 +135,15 @@ function renderPoolReminders(reminders) {
     const client = item.client || pool?.client;
     const eventAt = extractLine(item.description, "Evento");
     const days = extractLine(item.description, "Avisar");
-    const priority = extractLine(item.description, "Prioridade") || "NORMAL";
+    const priority = item.priority || extractLine(item.description, "Prioridade") || "NORMAL";
+    const priorityLabel = { LOW: 'Baixa', NORMAL: 'Normal', HIGH: 'Alta', URGENT: 'Urgente', CRITICAL: 'Crítica' }[priority] || priority;
     const notes = extractLine(item.description, "Notas");
     const completed = item.isCompleted || item.status === "DONE";
     return `
       <div class="card">
         <header>
           <h3 data-cw-no-i18n>${esc(item.title)}</h3>
-          <span class="badge ${priority === "HIGH" ? "warn" : ""}">${esc(priority)}</span>
+          <span class="badge ${priority === "HIGH" ? "warn" : ""}">${esc(priorityLabel)}</span>
         </header>
         <p><strong data-cw-no-i18n>${esc(pool?.name || "Piscina")}</strong></p>
         <p class="muted" data-cw-no-i18n>${esc(client?.name || "Cliente")} ${pool?.zone ? `- ${esc(pool.zone)}` : ""}</p>
@@ -142,33 +161,56 @@ function renderPoolReminders(reminders) {
   }).join("") || '<p class="muted">Sem lembretes por piscina.</p>';
 }
 
-async function loadPoolReminders() {
-  const authorization = authHeaders().Authorization;
+function filterPoolReminders() {
   const poolId = el("poolReminderFilter").value;
-  const data = await api("/api/crm/reminders?category=TECHNICAL_PERIODIC_SERVICE");
-  if (authorization !== authHeaders().Authorization) return;
-  state.poolReminders = (data.reminders || [])
+  state.poolReminders = state.generalReminders
     .filter(item => !window.CwReminderDelete.wasDeleted(item.id))
-    .filter((item) => !item.completedAt && !["DONE", "COMPLETED", "CLOSED", "RESOLVED", "CANCELLED", "CANCELED"].includes(item.status))
+    .filter(item => serviceCategories.includes(item.category) && item.poolId && !reminderClosed(item))
     .filter((item) => !poolId || String(item.poolId) === String(poolId));
   renderPoolReminders(state.poolReminders);
 }
+function validReminder(row) {
+  return row && Number.isSafeInteger(row.id) && row.id > 0 && typeof row.title === 'string' && typeof row.category === 'string' &&
+    typeof row.status === 'string' && typeof row.dueAt === 'string' && Number.isFinite(Date.parse(row.dueAt)) &&
+    (row.poolId === null || Number.isSafeInteger(row.poolId) && row.poolId > 0) &&
+    (row.completedAt === null || typeof row.completedAt === 'string' && Number.isFinite(Date.parse(row.completedAt)));
+}
+function renderReminderViews(rows) {
+  rows = [...rows].sort((a, b) => Number(reminderClosed(a)) - Number(reminderClosed(b)) ||
+    (reminderClosed(a) ? Date.parse(b.completedAt || b.dueAt) - Date.parse(a.completedAt || a.dueAt) : Date.parse(a.dueAt) - Date.parse(b.dueAt)) || a.id - b.id);
+  renderGeneralReminders(rows); filterPoolReminders();
+}
+function applyReminderRead(data, revision) {
+  if (!reminderSessionCurrent() || revision !== reminderRead) return false;
+  if (data.ok !== true || !Array.isArray(data.reminders) || !data.reminders.every(validReminder) || new Set(data.reminders.map(row => row.id)).size !== data.reminders.length) {
+    throw Error('Não foi possível ler os lembretes. Atualiza a página.');
+  }
+  renderReminderViews(data.reminders); return true;
+}
+async function loadPoolReminders() {
+  if (!reminderSessionCurrent()) return false;
+  const revision = ++reminderRead;
+  try { return applyReminderRead(await api('/api/crm/reminders'), revision); }
+  catch (error) {
+    if (!reminderSessionCurrent() || revision !== reminderRead) return false;
+    throw error;
+  }
+}
 
 async function loadAll() {
-  const authorization = authHeaders().Authorization;
+  if (!reminderSessionCurrent()) return;
+  const revision = ++reminderRead, metadataRevision = ++metadataRead;
   el("poolReminderStatus").textContent = "A carregar dados...";
   const [leads, generalReminders, pools] = await Promise.all([
     api("/api/crm/leads"),
     api("/api/crm/reminders"),
     api("/api/core/pools?includeInactive=true"),
   ]);
-  if (authorization !== authHeaders().Authorization) return;
+  if (!reminderSessionCurrent() || metadataRevision !== metadataRead) return;
   state.pools = pools.pools || [];
   renderPoolOptions();
   renderLeads(leads.leads || []);
-  renderGeneralReminders(generalReminders.reminders || []);
-  await loadPoolReminders();
-  if (authorization !== authHeaders().Authorization) return;
+  applyReminderRead(generalReminders, revision);
   el("poolReminderStatus").textContent = "";
   updateReminderPreview();
   if (!poolReminderCreator) setupReminderCreators();
@@ -222,7 +264,7 @@ function setupReminderCreators() {
       if (!title || !Number.isFinite(dueAt.getTime())) throw Error('Indica titulo e data.');
       return { path: '/api/crm/reminders', body: { title, dueAt: dueAt.toISOString(), category: el('generalReminderCategory').value, description: el('generalReminderDescription').value } };
     },
-    async onSuccess(_result, current) { el('reminderForm').reset(); const data = await api('/api/crm/reminders'); if (current()) renderGeneralReminders(data.reminders || []); },
+    async onSuccess() { el('reminderForm').reset(); await loadPoolReminders(); },
   });
 }
 
@@ -236,14 +278,7 @@ function setReminderCompleting(id, busy) {
 }
 
 async function completePoolReminder(id, poolId) {
-  if (!poolId) return alert("Este lembrete nao tem piscina associada.");
-  const key = String(id);
-  if (completingPoolReminders.has(key) || window.CwReminderDelete.busy(id) || window.CwReminderDelete.wasDeleted(id)) return;
-  setReminderCompleting(id, true);
-  try {
-    await api(`/api/core/pools/${encodeURIComponent(poolId)}/service-reminders/${encodeURIComponent(id)}/complete`, { method: "POST" });
-    await loadPoolReminders();
-  } finally { setReminderCompleting(id, false); }
+  await completeCrmReminder(id, poolId);
 }
 
 async function deletePoolReminder(id, poolId) {
@@ -251,13 +286,43 @@ async function deletePoolReminder(id, poolId) {
 }
 
 async function completeReminder(id) {
+  await completeCrmReminder(id);
+}
+
+async function completeCrmReminder(id, poolId) {
   const key = String(id);
-  if (completingPoolReminders.has(key) || window.CwReminderDelete.busy(id) || window.CwReminderDelete.wasDeleted(id)) return;
+  if (completingPoolReminders.has(key) || window.CwReminderDelete.busy(id) || window.CwReminderDelete.wasDeleted(id) || !reminderSessionCurrent()) return;
+  const target = state.generalReminders.find(row => String(row.id) === key);
+  if (!target || reminderClosed(target) || (poolId !== undefined && (target.poolId !== Number(poolId) || !serviceCategories.includes(target.category)))) {
+    reminderActionStatus('O lembrete já não pode ser concluído. Atualiza a lista antes de tentar novamente.'); return;
+  }
+  reminderRead++; // Discard reads started before this action, and again after its result.
   setReminderCompleting(id, true);
+  reminderActionStatus('A confirmar conclusão do lembrete…');
   try {
-    await api(`/api/crm/reminders/${encodeURIComponent(id)}/complete`, { method: "POST" });
-    const generalReminders = await api("/api/crm/reminders");
-    renderGeneralReminders(generalReminders.reminders || []);
+    const path = poolId === undefined ? `/api/crm/reminders/${target.id}/complete` : `/api/core/pools/${target.poolId}/service-reminders/${target.id}/complete`;
+    const result = await api(path, { method: 'POST', headers: { Authorization: reminderAuthorization } });
+    if (!reminderSessionCurrent()) return;
+    reminderRead++;
+    const row = result.reminder, next = result.nextReminder;
+    if (result.ok !== true || !validReminder(row) || row.id !== target.id || row.poolId !== target.poolId || row.category !== target.category ||
+      !['DONE', 'COMPLETED', 'CLOSED', 'RESOLVED'].includes(String(row.status).trim().toUpperCase()) ||
+      (next !== null && (!validReminder(next) || next.id === row.id || next.poolId !== row.poolId || next.category !== row.category || reminderClosed(next)))) throw Error('Unconfirmed completion');
+    const rows = state.generalReminders.filter(item => item.id !== row.id && item.id !== next?.id);
+    renderReminderViews([...rows, row, ...(next ? [next] : [])]);
+    reminderActionStatus(result.idempotent ? 'Conclusão confirmada. O lembrete já estava concluído.' : next
+      ? 'Lembrete concluído. A próxima ocorrência já está na lista.' : 'Lembrete concluído.');
+    try { await loadPoolReminders(); }
+    catch { if (reminderSessionCurrent()) reminderActionStatus('Lembrete concluído. Atualiza a página para consultar a lista.'); }
+  } catch (error) {
+    if (!reminderSessionCurrent()) return;
+    reminderRead++;
+    if ([400, 404, 409].includes(error.status)) {
+      reminderActionStatus('O lembrete já não pode ser concluído. Atualiza a lista antes de tentar novamente.');
+      try { await loadPoolReminders(); } catch { /* Preserve the rejection if the refresh fails. */ }
+    } else {
+      reminderActionStatus('Ainda não foi possível confirmar a conclusão. Podes repetir sem duplicar a próxima ocorrência.');
+    }
   } finally { setReminderCompleting(id, false); }
 }
 
@@ -291,9 +356,7 @@ el("leadForm").addEventListener("submit", async (event) => {
 el('reminderForm').addEventListener('submit', event => { event.preventDefault(); generalReminderCreator?.submit(); });
 el('poolReminderForm').addEventListener('submit', event => { event.preventDefault(); poolReminderCreator?.submit(); });
 el("poolReminderFilter").addEventListener("change", () => {
-  loadPoolReminders().catch((error) => {
-    el("poolReminders").innerHTML = `<p class="muted">${esc(error.message)}</p>`;
-  });
+  if (reminderSessionCurrent()) filterPoolReminders();
 });
 el("poolReminderEventAt").addEventListener("input", updateReminderPreview);
 el("poolReminderDaysBefore").addEventListener("input", updateReminderPreview);
@@ -306,8 +369,8 @@ removePoolReminder = window.CwReminderDelete.attach({
   isCompleting: id => completingPoolReminders.has(String(id)),
   buttons: reminderActionButtons,
   onDeleted(id) {
-    state.poolReminders = state.poolReminders.filter(row => String(row.id) !== String(id)); renderPoolReminders(state.poolReminders);
-    renderGeneralReminders(state.generalReminders);
+    reminderRead++;
+    renderReminderViews(state.generalReminders.filter(row => String(row.id) !== String(id)));
   },
 });
 window.deletePoolReminder = deletePoolReminder;
@@ -316,5 +379,8 @@ window.convertLead = convertLead;
 window.addActivity = addActivity;
 
 loadAll().catch((error) => {
-  el("poolReminderStatus").textContent = error.message;
+  if (reminderSessionCurrent()) el("poolReminderStatus").textContent = error.message;
+});
+window.addEventListener('storage', event => {
+  if (event.key === null || ['token', 'cristalwater_jwt'].includes(event.key)) reminderSessionCurrent();
 });

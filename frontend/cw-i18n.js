@@ -554,6 +554,17 @@
     'A sessão mudou. Reabre a página para continuar com a conta atual.': { en: 'The session changed. Reopen the page to continue with the current account.', fr: 'La session a changé. Rouvrez la page pour continuer avec le compte actuel.', es: 'La sesión ha cambiado. Vuelve a abrir la página para continuar con la cuenta actual.', de: 'Die Sitzung wurde geändert. Öffnen Sie die Seite erneut, um mit dem aktuellen Konto fortzufahren.' },
   });
 
+  Object.assign(DICT, {
+    'Não foi possível ler os lembretes. Atualiza a página.': { en: 'Could not load reminders. Refresh the page.', fr: 'Impossible de charger les rappels. Actualisez la page.', es: 'No se pudieron cargar los recordatorios. Actualiza la página.', de: 'Erinnerungen konnten nicht geladen werden. Aktualisieren Sie die Seite.' },
+    'A confirmar conclusão do lembrete…': { en: 'Confirming reminder completion…', fr: 'Confirmation de la clôture du rappel…', es: 'Confirmando finalización del recordatorio…', de: 'Abschluss der Erinnerung wird bestätigt…' },
+    'Lembrete concluído.': { en: 'Reminder completed.', fr: 'Rappel terminé.', es: 'Recordatorio completado.', de: 'Erinnerung abgeschlossen.' },
+    'Lembrete concluído. A próxima ocorrência já está na lista.': { en: 'Reminder completed. The next occurrence is now in the list.', fr: 'Rappel terminé. La prochaine occurrence figure dans la liste.', es: 'Recordatorio completado. La próxima ocurrencia ya está en la lista.', de: 'Erinnerung abgeschlossen. Der nächste Termin steht jetzt in der Liste.' },
+    'Conclusão confirmada. O lembrete já estava concluído.': { en: 'Completion confirmed. The reminder was already completed.', fr: 'Clôture confirmée. Le rappel était déjà terminé.', es: 'Finalización confirmada. El recordatorio ya estaba completado.', de: 'Abschluss bestätigt. Die Erinnerung war bereits abgeschlossen.' },
+    'Lembrete concluído. Atualiza a página para consultar a lista.': { en: 'Reminder completed. Refresh the page to view the list.', fr: 'Rappel terminé. Actualisez la page pour consulter la liste.', es: 'Recordatorio completado. Actualiza la página para consultar la lista.', de: 'Erinnerung abgeschlossen. Aktualisieren Sie die Seite, um die Liste anzuzeigen.' },
+    'Ainda não foi possível confirmar a conclusão. Podes repetir sem duplicar a próxima ocorrência.': { en: 'Completion could not be confirmed yet. You can retry without duplicating the next occurrence.', fr: 'La clôture n’a pas encore pu être confirmée. Vous pouvez réessayer sans dupliquer la prochaine occurrence.', es: 'Aún no se ha podido confirmar la finalización. Puedes reintentar sin duplicar la próxima ocurrencia.', de: 'Der Abschluss konnte noch nicht bestätigt werden. Sie können es erneut versuchen, ohne den nächsten Termin zu duplizieren.' },
+    'O lembrete já não pode ser concluído. Atualiza a lista antes de tentar novamente.': { en: 'This reminder can no longer be completed. Refresh the list before trying again.', fr: 'Ce rappel ne peut plus être terminé. Actualisez la liste avant de réessayer.', es: 'Este recordatorio ya no se puede completar. Actualiza la lista antes de volver a intentarlo.', de: 'Diese Erinnerung kann nicht mehr abgeschlossen werden. Aktualisieren Sie die Liste vor einem erneuten Versuch.' },
+  });
+
   const CANON_DICT = Object.entries(DICT).reduce((acc, [key, value]) => {
     acc[canonicalText(key)] = value;
     return acc;
