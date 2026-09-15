@@ -178,6 +178,18 @@ await prisma.serviceVisit.update({where:{id:own.id},data:{status:'CANCELLED'}});
     const sent={...payload,chemicalShortage:{productName:'Hipoclorito de sódio',quantity:null,unit:'L'}};
     const response=await call('POST',endpoint,token,sent);assert.equal(response.status,200);assert.equal(response.body.reminder.metadata.chemicalShortage.quantity,null);assert.match(response.body.reminder.description,/Quantidade: por confirmar/);
     assert.equal((await call('POST',endpoint,token,sent)).body.reminder.id,response.body.reminder.id);
+    for(const changed of [
+      {...sent,chemicalShortage:{...sent.chemicalShortage,quantity:5}},
+      {...sent,chemicalShortage:{...sent.chemicalShortage,productName:'Outro produto'}},
+      {...sent,chemicalShortage:{...sent.chemicalShortage,unit:'KG'}},
+      {...sent,nextStep:'Outra ação para o regresso'},
+      {...sent,reason:'MATERIAL_MISSING'},
+    ])assert.equal((await call('POST',endpoint,token,changed)).status,409);
+    for(const quantity of [true,[],{},[5]])assert.equal((await call('POST',endpoint,token,{...sent,chemicalShortage:{...sent.chemicalShortage,quantity}})).status,400);
+    assert.equal((await call('POST',endpoint,token,{...sent,reason:'__proto__'})).status,400);
+    const retries=await Promise.all([call('POST',endpoint,token,sent),call('POST',endpoint,token,sent)]);
+    retries.forEach(r=>{assert.equal(r.status,200);assert.equal(r.body.reminder.id,response.body.reminder.id)});
+    assert.equal(await prisma.operationalReminder.count({where:{sourceKey:`incomplete:${own.id}:${sent.requestId}`}}),1);
     const saved=await prisma.serviceVisit.findUnique({where:{id:own.id}});assert.equal(saved.ph,7.4);assert.equal(saved.endAt,null);assert.equal(saved.cleaned,false);assert.equal(await prisma.stockMovement.count({where:{visitId:own.id}}),0);
     const shortagePath='/api/technician/chemical-shortages';
     assert((await call('GET',shortagePath,token)).body.rows.some(row=>row.visitId===own.id&&row.quantity===null));

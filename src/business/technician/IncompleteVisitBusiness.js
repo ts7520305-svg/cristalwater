@@ -5,11 +5,13 @@ function fail(statusCode,message){throw Object.assign(new Error(message),{status
 async function report(user,value,body={}){
   const id=Number(value),technicianId=Number(user?.technicianId||user?.id||0),role=normalizeRole(user?.role);
   if(!Number.isSafeInteger(id)||id<=0)fail(400,'Visita inválida');
-  if(!reasons[body.reason]||String(body.nextStep||'').trim().length<5||String(body.nextStep).length>1000)fail(400,'Escolha um motivo e indique o próximo passo (5–1000 caracteres)');
+  if(!Object.hasOwn(reasons,body.reason)||typeof body.nextStep!=='string'||body.nextStep.trim().length<5||body.nextStep.length>1000)fail(400,'Escolha um motivo e indique o próximo passo (5–1000 caracteres)');
   if(!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(body.requestId||'')))fail(400,'Identificador do registo inválido');
   let chemicalShortage=null;
   if(body.reason==='CHEMICAL_MISSING'){
-    const productName=String(body.chemicalShortage?.productName||'').trim(),raw=body.chemicalShortage?.quantity;
+    const rawProduct=body.chemicalShortage?.productName,raw=body.chemicalShortage?.quantity;
+    if(typeof rawProduct!=='string'||typeof body.chemicalShortage?.unit!=='string'||raw!==null&&raw!==undefined&&!['number','string'].includes(typeof raw))fail(400,'Produto, unidade e quantidade inválidos');
+    const productName=rawProduct.trim();
     const quantity=raw===null||raw===undefined||raw===''?null:Number(String(raw).replace(',','.'));
     const unit=String(body.chemicalShortage?.unit||'').toUpperCase();
     if(productName.length<2||productName.length>120||!['L','KG','UN'].includes(unit)||(quantity!==null&&(!Number.isFinite(quantity)||quantity<=0||quantity>100000)))fail(400,'Indique o produto em falta e uma quantidade positiva, ou deixe a quantidade por confirmar');
@@ -22,7 +24,12 @@ async function report(user,value,body={}){
     if(role!=='ADMIN'&&(role!=='TECHNICIAN'||current.technicianId!==technicianId))fail(403,'A visita não está atribuída a este técnico');
     const sourceKey=`incomplete:${id}:${body.requestId}`;
     const existing=await tx.operationalReminder.findUnique({where:{sourceKey}});
-    if(existing)return {ok:true,visit:current,reminder:existing,idempotent:true};
+    if(existing){
+      const saved=existing.metadata||{};
+      const same=saved.reportedBy===technicianId&&saved.reportedByRole===role&&saved.reason===body.reason&&saved.nextStep===body.nextStep.trim()&&(chemicalShortage ? saved.chemicalShortage?.productName===chemicalShortage.productName&&saved.chemicalShortage?.quantity===chemicalShortage.quantity&&saved.chemicalShortage?.unit===chemicalShortage.unit : !saved.chemicalShortage);
+      if(!same)fail(409,'Este identificador já foi utilizado com outros dados. Atualize o registo antes de enviar uma alteração.');
+      return {ok:true,visit:current,reminder:existing,idempotent:true};
+    }
     if(current.endAt||['DONE','COMPLETED','CONCLUIDA','CANCELLED','CANCELED','ARCHIVED'].includes(String(current.status).toUpperCase()))fail(409,'A visita já foi concluída ou retirada. Confirme com o escritório');
     const previous=await tx.operationalReminder.findMany({where:{sourceKey:{startsWith:`incomplete:${id}:`}}});
     const returns=previous.map(row=>row.metadata?.returnPlan?.visitId).filter(Number.isSafeInteger);
