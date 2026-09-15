@@ -10,7 +10,9 @@
 
   async function open(href) {
     const url = new URL(href, window.location.href);
-    if (url.origin !== window.location.origin || !url.pathname.startsWith("/api/guides/")) {
+    const allowed = url.pathname.startsWith("/api/guides/")
+      || /^\/api\/invoice-pdf\/(?:extras\/)?[1-9]\d*$/.test(url.pathname);
+    if (url.origin !== window.location.origin || !allowed) {
       throw new Error("Documento fora da aplicação.");
     }
     const popup = window.open("", "_blank");
@@ -21,11 +23,14 @@
       const response = await fetch(url.pathname + url.search, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
+      if (authToken() !== token) throw new Error("A sessão mudou. Entra novamente para abrir o documento.");
       if (!response.ok) throw new Error(response.status === 401
         ? "A sessão expirou. Entra novamente para abrir o documento."
         : "Não foi possível abrir o documento. Tenta novamente.");
 
-      const objectUrl = URL.createObjectURL(await response.blob());
+      const blob = await response.blob();
+      if (authToken() !== token) throw new Error("A sessão mudou. Entra novamente para abrir o documento.");
+      const objectUrl = URL.createObjectURL(blob);
       popup.location.href = objectUrl;
       setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
     } catch (error) {

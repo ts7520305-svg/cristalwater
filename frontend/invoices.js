@@ -252,9 +252,13 @@ function invoiceDocumentAvailable(invoiceId) {
   return true;
 }
 
-function openInvoicePdf(invoiceId) {
+async function openInvoicePdf(invoiceId) {
   if (!invoiceDocumentAvailable(invoiceId)) return;
-  window.open(`${API}/invoice-pdf/${invoiceId}`, "_blank");
+  try {
+    await window.CristalDownloads.open(`${API}/invoice-pdf/${invoiceId}`);
+  } catch (error) {
+    if (invoiceSessionCurrent()) showStatus(error.message || "Não foi possível abrir o documento.", "error");
+  }
 }
 
 async function copyInvoiceLink(invoiceId) {

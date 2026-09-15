@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const controller = require("../controllers/invoicePdfController");
+router.use(require('../middlewares/authMiddleware')());
 
 // ==========================================================
 // 🔥 PDF EXTRAS (PRIMEIRO — MUITO IMPORTANTE)

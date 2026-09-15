@@ -1,4 +1,4 @@
-const { prisma } = require("../prismaClient");
+const documents = require('../business/finance/InvoiceDocumentAccessBusiness');
 const PDFDocument = require("pdfkit");
 
 // ==========================================================
@@ -26,14 +26,7 @@ async function generateInvoicePdf(req, res) {
       return res.status(400).send("ID inválido");
     }
 
-    const invoice = await prisma.invoice.findUnique({
-      where: { id: invoiceId },
-      include: {
-        client: true,
-        lines: true,
-        payments: true,
-      },
-    });
+    const invoice = await documents.invoice(req.params.id, req.user);
 
     if (!invoice) {
       return res.status(404).send("Fatura não encontrada");
@@ -41,6 +34,7 @@ async function generateInvoicePdf(req, res) {
 
     const doc = new PDFDocument({ margin: 40 });
 
+    res.setHeader('Cache-Control', 'private, no-store');
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
@@ -80,7 +74,7 @@ async function generateInvoicePdf(req, res) {
 
   } catch (err) {
     console.error(err);
-    res.status(500).send("Erro ao gerar PDF");
+    res.status(err.status || 500).send(err.status ? err.message : "Erro ao gerar PDF");
   }
 }
 
@@ -93,21 +87,7 @@ async function generateExtrasPdf(req, res) {
 
     const clientId = Number(req.params.id);
 
-    const extras = await prisma.extraVisit.findMany({
-      where: {
-        billed: false,
-        pool: {
-          clientId: clientId
-        }
-      },
-      include: {
-        pool: {
-          include: {
-            client: true
-          }
-        }
-      }
-    });
+    const extras = await documents.extras(req.params.id, req.user);
 
     if (!extras.length) {
       return res.status(404).send("Sem extras");
@@ -119,10 +99,11 @@ async function generateExtrasPdf(req, res) {
 
     const doc = new PDFDocument({ margin: 40 });
 
+    res.setHeader('Cache-Control', 'private, no-store');
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
-      `inline; filename="extras-${clientName}.pdf"`
+      `inline; filename="extras-${clientId}.pdf"`
     );
 
     doc.pipe(res);
@@ -158,7 +139,7 @@ async function generateExtrasPdf(req, res) {
 
   } catch (err) {
     console.error(err);
-    res.status(500).send("Erro PDF extras");
+    res.status(err.status || 500).send(err.status ? err.message : "Erro PDF extras");
   }
 }
 
