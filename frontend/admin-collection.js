@@ -1,5 +1,6 @@
 const collectionList = document.getElementById("collectionList");
-let currentClients = [];
+let currentClients = [], collectionFresh = false, collectionLoaded = false, collectionRead = 0, collectionMonth = null, clientReceipt = null;
+const collectionAuthorization = authHeaders().Authorization;
 let previewMessageValue = "";
 const actionLock = new Set();
 const ui = window.CwUi || {
@@ -85,19 +86,15 @@ function normalizeClient(client) {
 }
 
 function buildReminderMessage(client) {
-  const month = document.getElementById("monthFilter")?.value || getCurrentMonthValue();
   const reference = client.paymentReference || paymentReference(client.id);
 
   return `Olá ${client.name},
 
-Verificámos que existe um valor em aberto referente ao mês ${month}.
+Verificámos que existe um valor em aberto nas suas faturas emitidas.
 
 Resumo:
 - Referencia fixa do cliente: ${reference}
-- Mensalidade: ${formatMoney(client.monthlyFee)}
-- Reparações: ${formatMoney(client.repairsTotal)}
-- Visitas extra: ${formatMoney(client.extraVisitsTotal)}
-- Crédito positivo disponível: ${formatMoney(client.creditBalance)}
+- Crédito disponível por aplicar: ${formatMoney(client.creditBalance)}
 - Total em dívida: ${formatMoney(client.totalDue)}
 
 Ao efetuar o pagamento, indique sempre a referencia ${reference}.
@@ -185,6 +182,7 @@ function renderSummary(clients) {
 }
 
 function openWhatsApp(clientId) {
+  if (!collectionSessionCurrent() || !collectionFresh) return;
   const client = currentClients.find((c) => c.id === clientId);
   if (!client) return;
 
@@ -199,6 +197,7 @@ function openWhatsApp(clientId) {
 }
 
 function openEmail(clientId) {
+  if (!collectionSessionCurrent() || !collectionFresh) return;
   const client = currentClients.find((c) => c.id === clientId);
   if (!client) return;
 
@@ -216,6 +215,7 @@ function openEmail(clientId) {
 }
 
 async function copyMessage(clientId) {
+  if (!collectionSessionCurrent() || !collectionFresh) return;
   const client = currentClients.find((c) => c.id === clientId);
   if (!client) return;
 
@@ -228,13 +228,14 @@ async function copyMessage(clientId) {
 }
 
 async function markReminded(clientId) {
+  if (!collectionSessionCurrent() || !collectionFresh) return;
   if (actionLock.has(`reminded:${clientId}`)) return;
   const month = document.getElementById("monthFilter")?.value || getCurrentMonthValue();
   actionLock.add(`reminded:${clientId}`);
   try {
     const res = await fetch(`/api/admin/payments/${clientId}/mark-reminded?month=${encodeURIComponent(month)}`, {
       method: "POST",
-      headers: authHeaders(),
+      headers: { Authorization: collectionAuthorization },
     });
 
     const data = await res.json().catch(() => ({}));
@@ -251,92 +252,10 @@ async function markReminded(clientId) {
   }
 }
 
-async function markPaid(clientId) {
-  if (actionLock.has(`paid:${clientId}`)) return;
-  const ok = await ui.confirm("Confirmar marcacao de cliente como pago neste mes?", {
-    title: "Confirmar pagamento",
-    confirmText: "Confirmar",
-  });
-  if (!ok) return;
-  const month = document.getElementById("monthFilter")?.value || getCurrentMonthValue();
-  actionLock.add(`paid:${clientId}`);
-  try {
-    const res = await fetch(`/api/admin/payments/${clientId}/mark-paid?month=${encodeURIComponent(month)}`, {
-      method: "POST",
-      headers: authHeaders(),
-    });
-
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok || data.ok === false) {
-      ui.error(userError(data, "Nao foi possivel marcar como pago."));
-      return;
-    }
-
-    ui.success("Cliente marcado como pago.");
-    loadCollection();
-  } finally {
-    actionLock.delete(`paid:${clientId}`);
-  }
-}
-
-async function registerManualPayment(clientId) {
-  if (actionLock.has(`manual:${clientId}`)) return;
-  const client = currentClients.find((c) => c.id === clientId);
-  const reference = client?.paymentReference || paymentReference(clientId);
-  const suggested = client?.totalDue > 0 ? client.totalDue.toFixed(2) : "";
-  const amountText = await ui.prompt(`Valor recebido para ${client?.name || "cliente"} (${reference})`, {
-    title: "Registar pagamento manual",
-    defaultValue: suggested,
-    confirmText: "Seguinte",
-  });
-  if (!amountText) return;
-
-  const amount = Number(String(amountText).replace(",", "."));
-  if (!Number.isFinite(amount) || amount <= 0) {
-    ui.error("Indica um valor valido acima de zero.");
-    return;
-  }
-
-  const method = (await ui.prompt("Metodo de pagamento (Transferencia, MBWay, Dinheiro, Multibanco...).", {
-    title: "Registar pagamento manual",
-    defaultValue: "Transferencia",
-    confirmText: "Seguinte",
-  })) || "Manual";
-  const notes = (await ui.prompt("Nota interna ou referencia do comprovativo.", {
-    title: "Registar pagamento manual",
-    defaultValue: reference,
-    confirmText: "Continuar",
-  })) || "";
-  const month = document.getElementById("monthFilter")?.value || getCurrentMonthValue();
-  const ok = await ui.confirm("Confirmar registo manual do pagamento recebido?", {
-    title: "Confirmar registo",
-    confirmText: "Registar",
-  });
-  if (!ok) return;
-  actionLock.add(`manual:${clientId}`);
-  try {
-    const res = await fetch(`/api/admin/payments/${clientId}/manual-received?month=${encodeURIComponent(month)}`, {
-      method: "POST",
-      headers: authHeaders({ "Content-Type": "application/json" }),
-      body: JSON.stringify({ amount, method, notes }),
-    });
-
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok || data.ok === false) {
-      ui.error(userError(data, "Nao foi possivel registar o pagamento recebido."));
-      return;
-    }
-
-    ui.success(data.message || "Pagamento registado.");
-    loadCollection();
-  } finally {
-    actionLock.delete(`manual:${clientId}`);
-  }
-}
+function registerManualPayment(clientId) { clientReceipt?.open(clientId); }
 
 async function markVisibleAsReminded() {
+  if (!collectionSessionCurrent() || !collectionFresh) return;
   const visible = applyFilters(currentClients);
 
   if (!visible.length) {
@@ -349,12 +268,13 @@ async function markVisibleAsReminded() {
     title: "Confirmacao em lote",
     confirmText: "Confirmar",
   });
-  if (!ok) return;
+  if (!ok || !collectionSessionCurrent() || !collectionFresh || month !== selectedCollectionMonth()) return;
 
   for (const client of visible) {
+    if (!collectionSessionCurrent() || month !== selectedCollectionMonth()) return;
     await fetch(`/api/admin/payments/${client.id}/mark-reminded?month=${encodeURIComponent(month)}`, {
       method: "POST",
-      headers: authHeaders(),
+      headers: { Authorization: collectionAuthorization },
     });
   }
 
@@ -362,33 +282,8 @@ async function markVisibleAsReminded() {
   loadCollection();
 }
 
-async function markVisibleAsPaid() {
-  const visible = applyFilters(currentClients);
-
-  if (!visible.length) {
-    ui.info("Nao ha clientes visiveis com os filtros atuais.");
-    return;
-  }
-
-  const month = document.getElementById("monthFilter")?.value || getCurrentMonthValue();
-  const ok = await ui.confirm(`Marcar ${visible.length} cliente(s) visivel(eis) como pagos?`, {
-    title: "Confirmacao em lote",
-    confirmText: "Confirmar",
-  });
-  if (!ok) return;
-
-  for (const client of visible) {
-    await fetch(`/api/admin/payments/${client.id}/mark-paid?month=${encodeURIComponent(month)}`, {
-      method: "POST",
-      headers: authHeaders(),
-    });
-  }
-
-  ui.success("Lote de pagamentos concluido.");
-  loadCollection();
-}
-
 async function copyVisibleContacts() {
+  if (!collectionSessionCurrent() || !collectionFresh) return;
   const visible = applyFilters(currentClients);
 
   if (!visible.length) {
@@ -417,6 +312,7 @@ async function copyVisibleContacts() {
 }
 
 function openPreview(clientId) {
+  if (!collectionSessionCurrent() || !collectionFresh) return;
   const client = currentClients.find((c) => c.id === clientId);
   if (!client) return;
 
@@ -431,6 +327,7 @@ function closePreview() {
 }
 
 async function copyPreviewMessage() {
+  if (!collectionSessionCurrent() || !collectionFresh) return;
   try {
     await navigator.clipboard.writeText(previewMessageValue || "");
     ui.success("Texto copiado.");
@@ -440,11 +337,14 @@ async function copyPreviewMessage() {
 }
 
 function renderCollection(clients) {
+  if (!collectionSessionCurrent()) return;
+  if (!collectionLoaded) { unknownCollection('As cobranças ainda não foram consultadas. Use Atualizar.'); clientReceipt?.render(); return; }
   collectionList.innerHTML = "";
 
   if (!clients.length) {
     renderSummary([]);
     collectionList.innerHTML = `<div class="empty-box">Sem clientes para os filtros atuais. Proxima acao: limpar filtros, ajustar mes ou validar dados de cobranca.</div>`;
+    clientReceipt?.render();
     return;
   }
 
@@ -456,6 +356,7 @@ function renderCollection(clients) {
     const reminded = isAlreadyReminded(client, month);
 
     const card = document.createElement("div");
+    card.dataset.clientId = String(client.id);
     card.className = `client-card ${client.paymentStatus === "OVERDUE" ? "overdue" : "pending"} ${client.missingContact ? "missing-contact" : ""}`;
 
     card.innerHTML = `
@@ -465,23 +366,23 @@ function renderCollection(clients) {
           <div class="line"><strong>Referencia fixa:</strong> ${escapeHtml(client.paymentReference || paymentReference(client.id))}</div>
           <div class="line"><strong>Total em dívida:</strong> ${formatMoney(client.totalDue)}</div>
           ${client.creditBalance > 0 ? `<div class="line"><strong>Crédito positivo:</strong> ${formatMoney(client.creditBalance)}</div>` : ""}
-          <div class="line"><strong>Status:</strong> <span class="${client.paymentStatus === "OVERDUE" ? "strong-red" : "strong-orange"}">${escapeHtml(client.paymentStatus)}</span></div>
+          <div class="line"><strong>Estado:</strong> <span class="${client.paymentStatus === "OVERDUE" ? "strong-red" : "strong-orange"}">${client.paymentStatus === "OVERDUE" ? "Em atraso" : "Por pagar"}</span></div>
           <div class="line"><strong>Dias em atraso:</strong> ${client.daysOverdue || 0}</div>
           <div class="line"><strong>Último pagamento:</strong> ${formatDate(client.lastPaymentAt)}</div>
 
           <div class="pills">
-            <span class="pill ${client.paymentStatus === "OVERDUE" ? "pill-overdue" : "pill-pending"}">${escapeHtml(client.paymentStatus)}</span>
+            <span class="pill ${client.paymentStatus === "OVERDUE" ? "pill-overdue" : "pill-pending"}">${client.paymentStatus === "OVERDUE" ? "EM ATRASO" : "POR PAGAR"}</span>
             <span class="pill ${reminded ? "pill-reminded" : "pill-not-reminded"}">${reminded ? "AVISADO" : "POR AVISAR"}</span>
             ${client.missingContact ? `<span class="pill pill-missing">SEM CONTACTO</span>` : ""}
           </div>
         </div>
 
         <div class="block">
-          <div class="detail-title">Resumo cobrança</div>
+          <div class="detail-title">Informação do mês (não soma da dívida)</div>
           <div class="line"><strong>Mensalidade:</strong> ${formatMoney(client.monthlyFee)}</div>
           <div class="line"><strong>Reparações:</strong> ${formatMoney(client.repairsTotal)}</div>
           <div class="line"><strong>Visitas extra:</strong> ${formatMoney(client.extraVisitsTotal)}</div>
-          ${client.creditBalance > 0 ? `<div class="line"><strong>Abatido por crédito:</strong> ${formatMoney(Math.min(client.creditBalance, client.totalBeforeCredit || client.totalDue))}</div>` : ""}
+          ${client.creditBalance > 0 ? `<div class="line"><strong>Crédito por aplicar:</strong> ${formatMoney(client.creditBalance)}</div>` : ""}
           <div class="line"><strong>Último aviso:</strong> ${formatDateTime(client.lastReminderAt)}</div>
         </div>
 
@@ -499,42 +400,66 @@ function renderCollection(clients) {
         <button class="btn btn-copy" onclick="copyMessage(${client.id})">Copiar mensagem</button>
         <button class="btn btn-preview" onclick="openPreview(${client.id})">Pré-visualizar</button>
         <button class="btn btn-muted" onclick="markReminded(${client.id})">Marcar avisado</button>
-        <button class="btn btn-primary" onclick="registerManualPayment(${client.id})">Registar recebido</button>
-        <button class="btn btn-success" onclick="markPaid(${client.id})">Marcar pago</button>
+        <button class="btn btn-primary" data-client-receipt onclick="registerManualPayment(${client.id})">Registar recebido</button>
       </div>
     `;
 
     collectionList.appendChild(card);
   });
+  clientReceipt?.render();
 }
 
+function selectedCollectionMonth() { return document.getElementById('monthFilter').value || getCurrentMonthValue(); }
+function collectionStatus(message, error = false) {
+  const box = document.getElementById('collectionStatus'); box.textContent = message; box.dataset.error = String(error);
+}
+function unknownCollection(message) {
+  for (const id of ['sumDebt', 'sumOverdue', 'sumPending', 'sumReminded', 'sumToRemind', 'sumMissingContact']) document.getElementById(id).textContent = '—';
+  collectionList.textContent = message;
+}
+function collectionSessionCurrent() {
+  if (authHeaders().Authorization === collectionAuthorization) return true;
+  collectionRead++; currentClients = []; collectionFresh = false; collectionLoaded = false;
+  closePreview(); previewMessageValue = ''; document.getElementById('previewText').value = '';
+  document.getElementById('previewTitle').textContent = 'Pré-visualização';
+  clientReceipt?.close(true); clientReceipt?.render(); unknownCollection('A sessão mudou. Reabra esta página.');
+  collectionStatus('A sessão mudou. Reabra esta página para consultar as cobranças.', true); return false;
+}
+window.addEventListener('storage', event => { if (['token', 'cristalwater_jwt', null].includes(event.key)) collectionSessionCurrent(); });
+
 async function loadCollection() {
+  if (!collectionSessionCurrent()) return false;
+  const month = selectedCollectionMonth(), own = ++collectionRead;
+  const current = () => own === collectionRead && month === selectedCollectionMonth() && collectionSessionCurrent();
+  collectionFresh = false; clientReceipt?.render();
+  collectionStatus('A consultar cobranças...');
+  if (!collectionLoaded) unknownCollection('A consultar cobranças...');
   try {
-    const month = document.getElementById("monthFilter")?.value || "";
-    const url = month
-      ? `/api/admin/payments?month=${encodeURIComponent(month)}`
-      : "/api/admin/payments";
-
-    const res = await fetch(url, { headers: authHeaders() });
+    const res = await fetch(`/api/admin/payments?month=${encodeURIComponent(month)}`, { headers: { Authorization: collectionAuthorization }, cache: 'no-store' });
     const data = await res.json();
-
-    if (!data.clients || !data.clients.length) {
-      currentClients = [];
-      renderCollection([]);
-      return;
-    }
-
-    currentClients = data.clients.map(normalizeClient);
+    if (!current()) return false;
+    if (!res.ok || data.month !== month || !Array.isArray(data.clients) || data.clients.some(row => !row || !Number.isSafeInteger(row.id) || row.id <= 0 ||
+      typeof row.name !== 'string' || !['PAID', 'PENDING', 'OVERDUE'].includes(row.paymentStatus) || !Number.isFinite(row.totalDue) || row.totalDue < 0 ||
+      !Number.isFinite(row.creditBalance) || row.creditBalance < 0 || !Number.isSafeInteger(row.openInvoicesCount) || row.openInvoicesCount < 0)) throw Error('Resposta de cobranças inválida.');
+    currentClients = data.clients.map(normalizeClient); collectionLoaded = true; collectionFresh = true; collectionMonth = month;
     renderCollection(applyFilters(currentClients));
-  } catch (error) {
-    console.error(error);
-    currentClients = [];
-    renderCollection([]);
-    ui.error(userError(error, "Nao foi possivel carregar o centro de cobrancas."));
+    collectionStatus('Dívida atual de todas as faturas emitidas. O mês seleciona a informação de serviços e avisos.');
+    return true;
+  } catch (_) {
+    if (!current()) return false;
+    collectionFresh = false;
+    if (!collectionLoaded) unknownCollection('Não foi possível consultar as cobranças. Use Atualizar.');
+    collectionStatus(`Não foi possível atualizar as cobranças.${collectionLoaded ? ` Mantida a última consulta (${collectionMonth}).` : ''} Atualize antes de registar um recebimento.`, true);
+    clientReceipt?.render(); return false;
   }
 }
 
 initMonthFilter();
+clientReceipt = setupClientReceipt();
+window.addEventListener('load', () => {
+  const topbar = document.querySelector('.cw-v2-shell-topbar');
+  if (topbar && window.ResizeObserver) new ResizeObserver(() => document.body.style.setProperty('--collection-header-height', `${topbar.getBoundingClientRect().height}px`)).observe(topbar);
+});
 
 document.getElementById("searchFilter").addEventListener("input", () => {
   renderCollection(applyFilters(currentClients));
