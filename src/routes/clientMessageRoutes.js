@@ -16,13 +16,13 @@ function canMessage(req,res,clientId) {
 function senderFor(req) { return normalizeRole(req.user.role)==='CLIENT'?'Cliente':req.user.name||'Administração'; }
 
 
-const uploadDir = resolveUploadSubdir("");
+const uploadDir = resolveUploadSubdir('documents/client-chat');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => {
     const safeName = String(file.originalname || "anexo").replace(/[^a-zA-Z0-9._-]/g, "_");
-    cb(null, `${Date.now()}-${safeName}`);
+    cb(null, `${require('node:crypto').randomUUID()}-${safeName}`);
   },
 });
 
@@ -70,6 +70,8 @@ function emitClientMessage(clientId, message) {
   }
 }
 
+router.get('/attachments/:messageId', require('../services/clientChatAttachmentService').download);
+
 router.get("/:clientId", async (req, res) => {
   try {
     const clientId = n(req.params.clientId);
@@ -109,12 +111,14 @@ router.post("/", async (req, res) => {
 });
 
 router.post("/upload", upload.single("file"), async (req, res) => {
+  let persisted = false;
   try {
     if (!req.body.clientId || !req.file) {
+      if (req.file?.path) require('fs').unlinkSync(req.file.path);
       return res.status(400).json({ ok: false, error: "Dados invalidos" });
     }
 
-    const fileUrl = toPublicUploadUrl(req.file.filename);
+    const fileUrl = toPublicUploadUrl('documents', 'client-chat', req.file.filename);
     const ext = path.extname(req.file.originalname || "").toLowerCase();
     const type = [".jpg", ".jpeg", ".png", ".gif", ".webp"].includes(ext)
       ? "IMAGE"
@@ -133,10 +137,12 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     payload.fileName = req.file.originalname || req.file.filename;
 
     const message = await prisma.clientMessage.create({ data: payload });
+    persisted = true;
     emitClientMessage(payload.clientId, message);
     return res.json({ ok: true, type, message });
   } catch (err) {
     console.error("client-messages upload error:", err);
+    if (!persisted && req.file?.path) require('fs').rmSync(req.file.path, { force: true });
     return res.status(500).json({ ok: false, error: err.message });
   }
 });

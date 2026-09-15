@@ -11,7 +11,8 @@
   async function open(href) {
     const url = new URL(href, window.location.href);
     const allowed = url.pathname.startsWith("/api/guides/")
-      || /^\/api\/invoice-pdf\/(?:extras\/)?[1-9]\d*$/.test(url.pathname);
+      || /^\/api\/invoice-pdf\/(?:extras\/)?[1-9]\d*$/.test(url.pathname)
+      || /^\/api\/client-messages\/attachments\/[1-9]\d*$/.test(url.pathname);
     if (url.origin !== window.location.origin || !allowed) {
       throw new Error("Documento fora da aplicação.");
     }
@@ -30,6 +31,15 @@
 
       const blob = await response.blob();
       if (authToken() !== token) throw new Error("A sessão mudou. Entra novamente para abrir o documento.");
+      if (url.pathname.startsWith('/api/client-messages/attachments/') && !['application/pdf', 'image/png', 'image/jpeg', 'image/gif', 'image/webp'].includes(blob.type)) {
+        // Download arbitrary attachments as inert bytes; never execute HTML/SVG in an application-origin blob.
+        const fileUrl = URL.createObjectURL(new Blob([blob], { type: 'application/octet-stream' }));
+        const link = document.createElement('a'); link.href = fileUrl;
+        const header = response.headers.get('content-disposition') || '';
+        const plain = /filename="([^"\r\n]+)"/.exec(header);
+        link.download = plain ? plain[1].replace(/[\\/]/g, '_') : 'anexo-' + url.pathname.split('/').pop();
+        link.click(); popup.close(); setTimeout(() => URL.revokeObjectURL(fileUrl), 60000); return;
+      }
       const objectUrl = URL.createObjectURL(blob);
       popup.location.href = objectUrl;
       setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);

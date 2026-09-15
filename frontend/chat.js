@@ -211,14 +211,11 @@
         })()
         : "";
       const text = messageText(message);
-      const upload = String(text).startsWith("/uploads/");
-      const ext = String(text).split(".").pop().toLowerCase();
+      const upload = [message.fileUrl, text].some(value => String(value || '').startsWith('/uploads/')) && Number.isSafeInteger(Number(message.id)) && Number(message.id) > 0;
       const admin = !isClientMessage(message);
       const sender = message.sender || (admin ? "Administracao" : "Cliente");
-      const body = upload && ["jpg", "jpeg", "png", "gif", "webp"].includes(ext)
-        ? `<img src="${esc(text)}" class="chat-image" alt="Anexo">`
-        : upload
-          ? `<a href="${esc(text)}" target="_blank" rel="noopener">Abrir documento</a>`
+      const body = upload
+          ? `<a data-auth-download href="/api/client-messages/attachments/${Number(message.id)}" target="_blank" rel="noopener">Abrir anexo${message.fileName ? ': ' + esc(message.fileName) : ''}</a>`
           : esc(text);
       const invoiceDocument = message.messageType === 'DOCUMENT' && /^\/invoice-document\?id=[1-9]\d{0,9}$/.test(message.fileUrl || '')
         ? `<br><a href="${esc(message.fileUrl)}" target="_blank" rel="noopener">Abrir documento</a>` : '';

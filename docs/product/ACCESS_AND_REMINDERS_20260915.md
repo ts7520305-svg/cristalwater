@@ -32,7 +32,7 @@ No tempo real, MANAGEMENT e a adesão administrativa a salas de clientes ficam e
 
 O primeiro ensaio do teste Socket.IO falhou porque `cw-auth` substituía os tokens pela sessão única da página de login. O ensaio foi corrigido para uma página neutra da mesma origem; as credenciais e o servidor continuam reais. Essa falha do teste não é prova de um defeito novo de autenticação.
 
-Limites: esta tarefa protege texto e eventos das conversas nas rotas testadas. Anexos antigos de `clientMessageRoutes` ainda usam URLs da área pública de uploads e precisam de um percurso de download autenticado; não declarar confidencialidade integral dos anexos. O alias `/api/chat/internal` ainda devolve lista vazia em vez de ler o histórico de `/api/internal-chat/messages`; consolidar numa tarefa própria. Não há migração automática de histórico.
+Limites à data da TASK175: esta tarefa protege texto e eventos das conversas nas rotas testadas. Os anexos antigos precisavam de download autenticado; a lacuna foi entretanto corrigida na TASK176, em `CHAT_ATTACHMENTS_20260915.md`. O alias `/api/chat/internal` ainda devolve lista vazia em vez de ler o histórico de `/api/internal-chat/messages`; consolidar numa tarefa própria. Não há migração automática de histórico.
 
 ## Validação
 
@@ -43,3 +43,5 @@ Limites: esta tarefa protege texto e eventos das conversas nas rotas testadas. A
 - 323 testes unitários em 58 ficheiros e quatro de técnicos aprovados; sintaxe de 518 ficheiros backend aprovada. A bateria integrada passa de 75 para 79 grupos. Confirmar a árvore publicada em PostgreSQL 16 e o restauro antes de usar o CI como evidência deste lote.
 
 Sem instalação no VPS, envio externo real, eliminação histórica ou alteração da branch principal. A matriz atual está em `COMPLETENESS_CURRENT_20260915.md`.
+
+Publicação confirmada: commit `05c8632a2d1c7462138b489826cff3baa3d8e15e`, workflow `35028280336` aprovado com os 79 grupos, testes unitários/técnicos/navegador e restauro PostgreSQL 16. A TASK176 é uma árvore posterior, com verificação própria.
