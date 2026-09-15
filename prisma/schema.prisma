@@ -64,6 +64,7 @@ model Client {
   chatMessages                  ChatMessage[]
   accesses                      ClientAccess[]
   messages                      ClientMessage[]
+  ratePlans                     ClientRatePlan[]
   reportSetting                 ClientReportSetting?
   communicationLogs             CommunicationLog[]
   extraVisits                   ExtraVisit[]
@@ -2164,4 +2165,17 @@ model RepairQuote {
   repair     Repair   @relation(fields: [repairId], references: [id], onDelete: Restrict)
 
   @@unique([repairId, version])
+}
+
+// Private, immutable versions of the agreed total monthly price for a client.
+model ClientRatePlan {
+  id        Int      @id @default(autoincrement())
+  clientId  Int
+  version   Int
+  snapshot  Json
+  createdBy String
+  createdAt DateTime @default(now())
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Restrict)
+
+  @@unique([clientId, version])
 }

@@ -49,3 +49,7 @@ As consultas dos dois geradores mensais antigos também incluíam QUOTED. Orçam
 ## TASK 91 — apresentação portátil do PDF
 
 A inspeção visual encontrou espaçamento irregular na substituição de Helvetica pelo leitor de PDF. O documento passa a incorporar DejaVu Sans, distribuída com a respetiva licença, sem depender das fontes do servidor ou do dispositivo do cliente. A verificação compara a extração do texto e a renderização do PDF.
+
+## TASK 92 — preços mensais por período
+
+Planos privados e versionados por cliente. O valor base e cada período representam o total mensal do contrato, incluindo todas as piscinas, sem IVA; não se somam novamente às mensalidades das piscinas. Datas finais inclusivas, períodos adjacentes permitidos, sobreposições recusadas, data final vazia significa permanente. Alteração a meio do mês é proporcional aos dias de calendário, com arredondamento final ao cêntimo. Zero é permitido, para um período gratuito. Planos antigos ficam preservados e uma versão esperada protege contra alterações concorrentes. Não se repetem automaticamente períodos em anos seguintes.
