@@ -15,7 +15,9 @@ const errorBox =
 // LOGIN
 // ======================================================
 
+let loginPending = false;
 async function login(){
+  if(loginPending) return;
 
   errorBox.textContent = "";
 
@@ -36,6 +38,7 @@ async function login(){
     return;
   }
 
+  loginPending = true;
   try {
 
     loginBtn.disabled = true;
@@ -66,10 +69,6 @@ async function login(){
     const data =
       await res.json();
 
-    console.log(
-      "LOGIN RESPONSE:",
-      data
-    );
 
     if(!res.ok){
 
@@ -95,6 +94,10 @@ async function login(){
       .toUpperCase()
       .trim();
 
+    if(!data.token || !["ADMIN", "CLIENT", "TECHNICIAN", "TEAM_LEADER"].includes(role)){
+      errorBox.textContent = "Resposta de autenticação inválida.";
+      return;
+    }
     data.user.role =
       role;
 
@@ -102,28 +105,16 @@ async function login(){
     // SAVE SESSION
     // ==================================================
 
-    localStorage.setItem(
-      "token",
-      data.token
-    );
-
-    localStorage.setItem(
-      "user",
-      JSON.stringify(data.user)
-    );
-
     if (window.CristalAuth) {
       await window.CristalAuth.persistSession(data.token, data.user);
     } else {
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
       localStorage.setItem("cristalwater_jwt", data.token);
       localStorage.setItem("cristalwater_user", JSON.stringify(data.user));
       localStorage.setItem("adminToken", data.token);
     }
 
-    console.log(
-      "ROLE NORMALIZED:",
-      role
-    );
 
     // ==================================================
     // ADMIN
@@ -153,7 +144,7 @@ async function login(){
     // TECHNICIAN
     // ==================================================
 
-    if (role === "TECHNICIAN"){
+    if (role === "TECHNICIAN" || role === "TEAM_LEADER"){
 
       window.location.href =
         "/technician";
@@ -177,6 +168,8 @@ async function login(){
 
   } finally {
 
+    loginPending = false;
+
     loginBtn.disabled = false;
 
     loginBtn.textContent =
@@ -198,7 +191,7 @@ document.addEventListener(
   (e)=>{
 
     if(e.key === "Enter"){
-
+      e.preventDefault();
       login();
     }
   }

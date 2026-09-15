@@ -77,3 +77,15 @@ A configuração mostra a idade e o tipo da cópia local mais recente, com estad
 ## TASK 98 — controlos operacionais nas interfaces existentes
 
 Configurações operacionais passa a incluir estado da cópia local e revisão/limpeza do histórico GPS. A interface exige motivo, confirmação textual e confirmação final, e invalida a revisão após erro ou execução. Não inicia limpezas ao abrir a página. O ecrã principal do técnico passa a carregar explicitamente o seletor de idioma numa área do cabeçalho, sem sobrepor o estado da ligação ou os alertas.
+
+
+## TASK99 — Entradas de sessão e encerramento das notificações privadas
+
+- Corrigida identificação das páginas públicas `.html`, para não terminar a sessão durante um login recusado.
+- Os quatro ecrãs de entrada impedem pedidos simultâneos por Enter/cliques repetidos; a entrada por PIN aceita Enter e indica pedido em curso. Palavras-passe conservam espaços e o login geral deixa de escrever a resposta/token na consola.
+- Respostas com perfil inesperado/token em falta são recusadas antes de guardar a sessão. Persistência centralizada mantém a identidade anterior disponível para retirar a subscrição push correta.
+- Logout elimina também os identificadores auxiliares de cliente, desliga sockets privados e preserva as filas de trabalho de campo. Troca de token e alterações de sessão noutra aba desligam os sockets anteriores. A página volta a ligar através do seu fluxo normal após navegação/reentrada.
+- Confirmado no servidor: broadcasts `global.io.emit` já são limitados à sala MANAGEMENT pelo serviço realtimeAccessService; não foi alterado o alcance destes eventos.
+- Verificação: novo `test-auth-entry-browser.js` em Chromium cobre quatro entradas, repetição/retry, passwords exatas, ausência de token na consola, perfil inválido, página pública HTML, mudança de conta, logout e alteração noutra aba. As regressões `test-field-session-browser.js` e `test-field-push-session-browser.js` continuam aprovadas. Não substitui receção push em dispositivos físicos.
+
+TASK99 — complemento visual: botão Sair visível no topo do Técnico Campo, com alvo mínimo de 44 px, bloqueio enquanto termina a sessão e ação central CristalAuth.logout. Teste da página HTML real a 320 px em espanhol verifica separação do idioma/estado de rede, saída única e preservação do trabalho pendente. Teste de idioma existente continua aprovado.

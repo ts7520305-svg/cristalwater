@@ -11,7 +11,9 @@ const errorBox =
 // LOGIN ADMIN
 // ======================================================
 
+let loginPending = false;
 async function login() {
+  if(loginPending) return;
 
   errorBox.textContent = "";
 
@@ -22,8 +24,7 @@ async function login() {
 
   const password =
     document.getElementById("password")
-      .value
-      .trim();
+      .value;
 
   if (!email || !password) {
 
@@ -33,6 +34,7 @@ async function login() {
     return;
   }
 
+  loginPending = true;
   try {
 
     loginBtn.disabled = true;
@@ -77,7 +79,7 @@ async function login() {
     // VALIDAR ADMIN
     // ==================================================
 
-    if (data.user.role !== "ADMIN") {
+    if (!data.token || data.user?.role !== "ADMIN") {
 
       errorBox.textContent =
         "Acesso reservado ao administrador.";
@@ -94,19 +96,11 @@ async function login() {
     // SAVE SESSION
     // ==================================================
 
-    localStorage.setItem(
-      "token",
-      data.token
-    );
-
-    localStorage.setItem(
-      "user",
-      JSON.stringify(data.user)
-    );
-
     if (window.CristalAuth) {
       await window.CristalAuth.persistSession(data.token, data.user);
     } else {
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
       localStorage.setItem("cristalwater_jwt", data.token);
       localStorage.setItem("cristalwater_user", JSON.stringify(data.user));
       localStorage.setItem("adminToken", data.token);
@@ -127,6 +121,8 @@ async function login() {
       "Erro ligação servidor.";
 
   } finally {
+
+    loginPending = false;
 
     loginBtn.disabled = false;
 
@@ -149,7 +145,7 @@ document.addEventListener(
   (e)=>{
 
     if(e.key === "Enter"){
-
+      e.preventDefault();
       login();
     }
   }

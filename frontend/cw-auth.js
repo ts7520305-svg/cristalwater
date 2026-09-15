@@ -13,7 +13,7 @@
   const API_ORIGIN_KEY = 'cw_api_origin';
   const PUBLIC_PATHS = new Set(['/', '/login', '/admin-login', '/client-login', '/technician-login', '/splash']);
 
-  function path(){ return String(window.location.pathname || '/').replace(/\\.html$/,'').toLowerCase(); }
+  function path(){ return String(window.location.pathname || '/').replace(/\.html$/,'').toLowerCase(); }
   function isPublic(){ return PUBLIC_PATHS.has(path()); }
   function getToken(){ return localStorage.getItem(TOKEN_KEY) || localStorage.getItem(LEGACY_TOKEN_KEY) || ''; }
   function getUserRaw(){ return localStorage.getItem(USER_KEY) || localStorage.getItem(LEGACY_USER_KEY) || ''; }
@@ -39,6 +39,11 @@
     return input;
   }
 
+  const activeSockets = new Set();
+  function disconnectSockets(){
+    for(const socket of activeSockets){try{socket.disconnect();}catch(_){}}
+    activeSockets.clear();
+  }
   let expiredSessionToken = '';
   function isSessionExpired(){ return Boolean(expiredSessionToken && expiredSessionToken === getToken()); }
   function showSessionExpired(){
@@ -83,6 +88,7 @@
   }
   function persistSession(token, user){
     const previousToken=getToken(),previousOwner=pushOwner(parseUser());
+    if(previousToken && token && previousToken !== token) disconnectSockets();
     if(token){
       localStorage.setItem(TOKEN_KEY, token);
       localStorage.setItem(LEGACY_TOKEN_KEY, token); // temporary compatibility for legacy modules
@@ -103,7 +109,8 @@
 
   function clearSession(){
     const previousToken=getToken(),owner=pushOwner(parseUser());
-    [TOKEN_KEY, USER_KEY, LEGACY_TOKEN_KEY, LEGACY_USER_KEY, ADMIN_TOKEN_KEY].forEach(k => localStorage.removeItem(k));
+    disconnectSockets();
+    [TOKEN_KEY, USER_KEY, LEGACY_TOKEN_KEY, LEGACY_USER_KEY, ADMIN_TOKEN_KEY, 'cw_client_id', 'clientId'].forEach(k => localStorage.removeItem(k));
     window.CristalAuthState = { token: '', user: null, hydratedAt: Date.now() };
     return Promise.allSettled([syncPushSession(),retirePushSubscription(previousToken,{owner})]);
   }
@@ -173,6 +180,16 @@
     };
   }
 
+  // A shared logout action also works on field pages without the navigation shell.
+  document.addEventListener('click', async function(event){
+    const button=event.target?.closest?.('[data-cw-logout]');
+    if(!button || button.disabled) return;
+    event.preventDefault(); button.disabled=true; button.setAttribute('aria-busy','true');
+    try{await logout();}
+    catch(_){toast('Não foi possível terminar a sessão. Tente novamente.');}
+    finally{button.disabled=false;button.removeAttribute('aria-busy');}
+  });
+
   // Prevent internal anchor clicks from dropping session keys.
   document.addEventListener('click', function(e){
     const a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
@@ -188,7 +205,9 @@
     const wrapped = function(uri, options) {
       if (uri && typeof uri === 'object') { options=uri; uri=undefined; }
       const opts={...(options||{}),auth:callback=>callback({token:getToken()})};
-      return uri === undefined ? factory(opts) : factory(uri,opts);
+      const socket = uri === undefined ? factory(opts) : factory(uri,opts);
+      activeSockets.add(socket);
+      return socket;
     };
     Object.assign(wrapped,factory); wrapped.__cwAuth=true;
     return wrapped;
@@ -196,5 +215,11 @@
   let socketFactory=wrapSocketIO(window.io);
   const descriptor=Object.getOwnPropertyDescriptor(window,'io');
   if (!descriptor || descriptor.configurable) Object.defineProperty(window,'io',{configurable:true,get:()=>socketFactory,set:value=>{socketFactory=wrapSocketIO(value)}});
+  window.addEventListener('storage', event=>{
+    if(event.key === null || [TOKEN_KEY, LEGACY_TOKEN_KEY, USER_KEY, LEGACY_USER_KEY].includes(event.key)){
+      disconnectSockets();
+      if(!getToken() && !isPublic()) void logout();
+    }
+  });
   hydrate();
 })();

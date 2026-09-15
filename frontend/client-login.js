@@ -15,7 +15,9 @@ const errorBox =
 // LOGIN CLIENTE
 // ======================================================
 
+let loginPending = false;
 async function login(){
+  if(loginPending) return;
 
   errorBox.textContent = "";
 
@@ -26,8 +28,7 @@ async function login(){
 
   const password =
     document.getElementById("password")
-      .value
-      .trim();
+      .value;
 
   if(!email || !password){
 
@@ -37,6 +38,7 @@ async function login(){
     return;
   }
 
+  loginPending = true;
   try {
 
     loginBtn.disabled = true;
@@ -89,7 +91,7 @@ async function login(){
       clientId: Number(baseUser.clientId || baseUser.id || data.client?.id || 0) || undefined,
     } : null;
 
-    if(!sessionUser || sessionUser.role !== "CLIENT"){
+    if(!sessionUser || (baseUser.role && baseUser.role !== "CLIENT") || !data.token || !Number.isSafeInteger(sessionUser.clientId) || sessionUser.clientId <= 0){
 
       errorBox.textContent =
         "Conta não é cliente.";
@@ -106,28 +108,18 @@ async function login(){
     // SAVE SESSION
     // ==================================================
 
-    localStorage.setItem(
-      "token",
-      data.token
-    );
-
-    localStorage.setItem(
-      "user",
-      JSON.stringify(sessionUser)
-    );
-
-    const clientId = Number(sessionUser.clientId || sessionUser.id || data.client?.id || 0);
-    if (clientId > 0) {
-      localStorage.setItem("cw_client_id", String(clientId));
-      localStorage.setItem("clientId", String(clientId));
-    }
-
     if (window.CristalAuth) {
       await window.CristalAuth.persistSession(data.token, sessionUser);
     } else {
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(sessionUser));
       localStorage.setItem("cristalwater_jwt", data.token);
       localStorage.setItem("cristalwater_user", JSON.stringify(sessionUser));
     }
+
+    const clientId = Number(sessionUser.clientId || sessionUser.id || 0);
+    localStorage.setItem("cw_client_id", String(clientId));
+    localStorage.setItem("clientId", String(clientId));
 
     // ==================================================
     // REDIRECT
@@ -144,6 +136,8 @@ async function login(){
       "Erro ligação servidor.";
 
   } finally {
+
+    loginPending = false;
 
     loginBtn.disabled = false;
 
@@ -166,7 +160,7 @@ document.addEventListener(
   (e)=>{
 
     if(e.key === "Enter"){
-
+      e.preventDefault();
       login();
     }
   }
