@@ -1,5 +1,7 @@
 # Cristal Water — requisitos, código e trabalho por concluir
 
+Entregas posteriores a esta auditoria: consultar [implementação e testes das TASKs 83–85](IMPLEMENTATION_20260915.md). GPS legado, configurações fixas e preparação de mensalidades/lembretes já receberam as alterações aí descritas; as linhas abaixo conservam o diagnóstico que lhes deu origem.
+
 Revisão de 15/09/2026, sobre a branch `work/field-readiness-20260915-simulation`.
 
 ## Conclusão
