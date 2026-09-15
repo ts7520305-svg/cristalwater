@@ -3117,6 +3117,7 @@
   function render() {
     renderIncompleteStatus();
     const visit = current();
+    window.dispatchEvent(new CustomEvent("cw:field-visit-selected", { detail: { visitId: visit?.id || null } }));
     $("#progressText").textContent = visits.length ? `${visits.filter(isVisitDone).length} de ${visits.length} visitas concluídas` : "Sem visitas atribuídas";
 
     if (!visit) {

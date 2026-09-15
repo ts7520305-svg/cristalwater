@@ -1488,6 +1488,22 @@
       </div>
     </section>
 
+    <section class="card field-panel field-panel-agora" id="fieldEquipmentMaintenance" data-cw-no-i18n>
+      <style>
+        #fieldEquipmentMaintenance{min-width:0;overflow-wrap:anywhere}
+        .field-equipment-plan{padding:12px 0;border-top:1px solid #cbd5e1}
+        .field-equipment-plan textarea{display:block;box-sizing:border-box;width:100%;max-width:100%;margin:8px 0}
+        #fieldEquipmentMaintenance button{min-height:44px;max-width:100%;white-space:normal}
+        .field-equipment-check{display:flex;gap:10px;align-items:flex-start;margin:12px 0}
+        .field-equipment-check input{width:24px;height:24px;flex:0 0 24px}
+      </style>
+      <h2>Revisões dos equipamentos</h2>
+      <p>Consulte o trabalho previsto e registe apenas as revisões realizadas.</p>
+      <button type="button" id="fieldEquipmentRefresh" class="big">Atualizar revisões</button>
+      <p id="fieldEquipmentStatus" role="status" aria-live="polite">Escolha uma visita.</p>
+      <div id="fieldEquipmentList"></div>
+    </section>
+
     <section id="photosCard" class="card photo-card field-panel field-panel-agora" aria-label="Fotografias da visita">
       <span class="chip">Fotografias</span>
       <input id="photoInput" type="file" accept="image/*" capture="environment" hidden>
@@ -1613,6 +1629,7 @@
   <script src="/cw-field-photos.js"></script>
   <script src="/cw-field-offline.js"></script>
 <script src="/cw-field-recovery.js"></script>
+  <script src="/field-equipment-maintenance.js"></script>
   <script src="/technician-field-mode.js"></script>
   <script src="/cw-pump-reminders.js"></script>
   <script src="/cw-field-day-review.js"></script>
