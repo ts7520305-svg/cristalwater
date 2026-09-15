@@ -1,6 +1,7 @@
 // src/routes/poolChatRoutes.js
 const express = require("express");
 const router = express.Router();
+router.use(require('../middlewares/authMiddleware')('TECHNICIAN'));
 
 const {
   listPoolMessages,

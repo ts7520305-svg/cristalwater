@@ -1,6 +1,7 @@
 // src/routes/serviceChatRoutes.js
 const express = require("express");
 const router = express.Router();
+router.use(require('../middlewares/authMiddleware')('TECHNICIAN'));
 
 const {
   getServiceChat,
