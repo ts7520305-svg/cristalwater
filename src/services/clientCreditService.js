@@ -1,3 +1,11 @@
+const NON_RECEIVABLE_STATUSES = ['DRAFT', 'RASCUNHO', 'CANCELLED', 'CANCELED', 'CANCELADO', 'VOID', 'ARCHIVED', 'SUPERSEDED'];
+function isReceivableInvoice(invoice = {}) {
+  return !NON_RECEIVABLE_STATUSES.includes(String(invoice.status || '').trim().toUpperCase());
+}
+function assertPayableInvoice(invoice) {
+  if (!isReceivableInvoice(invoice)) throw Object.assign(new Error('Este documento esta em rascunho ou foi retirado da cobranca. Reveja o seu estado antes de registar pagamentos.'), { status: 409 });
+}
+
 function toMoney(value) {
   const number = Number(value || 0);
   return Number.isFinite(number) ? number : 0;
@@ -16,6 +24,7 @@ function invoicePaid(invoice = {}) {
 }
 
 function invoiceOpen(invoice = {}) {
+  if (!isReceivableInvoice(invoice)) return 0;
   const direct = toMoney(invoice.amountOpen);
   if (direct > 0) return direct;
   return Math.max(invoiceTotal(invoice) - invoicePaid(invoice), 0);
@@ -32,14 +41,18 @@ function moneyLabel(value) {
 }
 
 async function applyClientCreditToInvoice(db, invoiceInput, options = {}) {
+  if (db.$transaction) return db.$transaction(tx => applyClientCreditToInvoice(tx, invoiceInput, options));
   const invoiceId = Number(invoiceInput?.id || invoiceInput);
   if (!invoiceId) return { creditUsed: 0 };
+
+  await db.$queryRaw`SELECT id FROM "Invoice" WHERE id = ${invoiceId} FOR UPDATE`;
 
   const invoice = await db.invoice.findUnique({
     where: { id: invoiceId },
     include: { client: true },
   });
   if (!invoice || !invoice.clientId) return { creditUsed: 0 };
+  if (!isReceivableInvoice(invoice)) return { creditUsed: 0, invoice };
 
   const client = invoice.client || await db.client.findUnique({ where: { id: invoice.clientId } });
   const availableCredit = toMoney(client?.creditBalance);
@@ -81,6 +94,7 @@ async function applyClientCreditToInvoice(db, invoiceInput, options = {}) {
   const remainingOpenInvoices = await db.invoice.count({
     where: {
       clientId: invoice.clientId,
+      status: { notIn: NON_RECEIVABLE_STATUSES },
       OR: [
         { amountOpen: { gt: 0 } },
         { status: { in: ["PENDING", "PARTIAL", "OVERDUE"] } },
@@ -193,6 +207,9 @@ async function createCreditLedgerPayment(db, clientId, amount, options = {}) {
 }
 
 module.exports = {
+  NON_RECEIVABLE_STATUSES,
+  isReceivableInvoice,
+  assertPayableInvoice,
   applyClientCreditToInvoice,
   createCreditLedgerPayment,
   invoiceOpen,

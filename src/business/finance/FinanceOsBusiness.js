@@ -1,6 +1,6 @@
 const repository = require("../../dal/FinanceOsRepository");
 const { processPaymentReminders } = require("../../services/paymentService");
-const { applyClientCreditToInvoice, invoiceOpen, invoicePaid, invoiceStatus, invoiceTotal } = require("../../services/clientCreditService");
+const { NON_RECEIVABLE_STATUSES, isReceivableInvoice, applyClientCreditToInvoice, invoiceOpen, invoicePaid, invoiceStatus, invoiceTotal } = require("../../services/clientCreditService");
 const { EVENT_TYPES, emitFinanceEvent } = require("../../services/financeOsEventService");
 
 function monthRefFromDate(date = new Date()) {
@@ -43,8 +43,6 @@ function statusFromInvoice(invoice) {
   const open = invoiceOpen(invoice);
   return invoiceStatus(total, paid, open);
 }
-
-const PAYMENT_BLOCKED_STATUSES = new Set(["CANCELLED", "CANCELED", "VOID"]);
 
 function normalizeInvoiceStatus(status) {
   return String(status || "").trim().toUpperCase();
@@ -218,11 +216,12 @@ async function registerPayment(invoiceId, payload = {}, actor = "finance-os") {
   const method = normalizeMethod(payload.method);
 
   const result = await repository.transaction(async (tx) => {
+    await tx.$queryRaw`SELECT id FROM "Invoice" WHERE id = ${Number(invoiceId)} FOR UPDATE`;
     const invoice = await tx.invoice.findUnique({ where: { id: Number(invoiceId) }, include: { client: true, lines: true, payments: true } });
     if (!invoice) return { ok: false, status: 404, error: "Fatura não encontrada" };
 
     const currentStatus = normalizeInvoiceStatus(invoice.status);
-    if (PAYMENT_BLOCKED_STATUSES.has(currentStatus)) {
+    if (!isReceivableInvoice(invoice)) {
       return { ok: false, status: 409, error: `Não é possível registar pagamento para fatura ${currentStatus}` };
     }
 
@@ -589,7 +588,7 @@ async function getCustomerBalance(clientId) {
   if (!client) return { ok: false, status: 404, error: "Cliente não encontrado" };
 
   const invoices = await repository.getInvoices({ clientId: id });
-  const totalInvoiced = invoices.reduce((sum, invoice) => sum + invoiceTotal(invoice), 0);
+  const totalInvoiced = invoices.filter(isReceivableInvoice).reduce((sum, invoice) => sum + invoiceTotal(invoice), 0);
   const totalPaid = invoices.reduce((sum, invoice) => sum + invoicePaid(invoice), 0);
   const totalOpen = invoices.reduce((sum, invoice) => sum + invoiceOpen(invoice), 0);
 
@@ -619,7 +618,7 @@ async function getCustomerAccount(clientId) {
     invoiceId: invoice.id,
     status: invoice.status,
     dueDate: invoice.dueDate,
-    issuedAt: invoice.issueDate || invoice.createdAt,
+    issuedAt: isReceivableInvoice(invoice) ? invoice.issueDate || invoice.createdAt : null,
     totalAmount: invoiceTotal(invoice),
     paidAmount: invoicePaid(invoice),
     openAmount: invoiceOpen(invoice),
@@ -638,7 +637,7 @@ async function getCustomerAccount(clientId) {
 
   const runningEvents = [];
   for (const invoice of invoices) {
-    runningEvents.push({
+    if (isReceivableInvoice(invoice)) runningEvents.push({
       at: invoice.issueDate || invoice.createdAt,
       type: "INVOICE",
       amount: invoiceTotal(invoice),
@@ -694,7 +693,7 @@ async function getCompanyBalance() {
     repository.listClients({ active: true }),
   ]);
 
-  const totalInvoiced = invoices.reduce((sum, invoice) => sum + invoiceTotal(invoice), 0);
+  const totalInvoiced = invoices.filter(isReceivableInvoice).reduce((sum, invoice) => sum + invoiceTotal(invoice), 0);
   const totalPaid = invoices.reduce((sum, invoice) => sum + invoicePaid(invoice), 0);
   const outstandingDebt = invoices.reduce((sum, invoice) => sum + invoiceOpen(invoice), 0);
   const customerCredit = clients.reduce((sum, client) => sum + asMoney(client.creditBalance), 0);
@@ -738,9 +737,10 @@ async function getMonthlyRevenueReport() {
 
 async function getOutstandingDebtReport() {
   const limit = 10000;
-  const invoices = await repository.getInvoices({
+  const invoices = (await repository.getInvoices({
+    status: { notIn: NON_RECEIVABLE_STATUSES },
     OR: [{ amountOpen: { gt: 0 } }, { status: { in: ["PENDING", "PARTIAL", "OVERDUE"] } }],
-  }, { take: limit });
+  }, { take: limit })).filter(invoice => invoiceOpen(invoice) > 0);
 
   const totalOutstanding = invoices.reduce((sum, invoice) => sum + invoiceOpen(invoice), 0);
   return {

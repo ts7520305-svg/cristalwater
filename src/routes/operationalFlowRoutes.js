@@ -1,3 +1,4 @@
+const CoreInvoicePaymentBusiness = require('../business/finance/CoreInvoicePaymentBusiness');
 const clientRates = require('../business/finance/ClientRateBusiness');
 const express = require('express');
 const prismaModule = require('../prismaClient');
@@ -5,11 +6,7 @@ const auth = require('../middlewares/authMiddleware');
 const { getPoolRoundReadiness } = require('../utils/poolReadiness');
 const {
   applyClientCreditToInvoice,
-  createCreditLedgerPayment,
   invoiceOpen,
-  invoicePaid,
-  invoiceStatus,
-  invoiceTotal,
 } = require('../services/clientCreditService');
 
 const prisma = prismaModule.prisma || prismaModule.default || prismaModule;
@@ -482,52 +479,8 @@ router.post('/pay-invoice', asyncHandler(async (req, res) => {
   const amount = toNumber(req.body.amount, 0);
   if (!invoiceId || amount <= 0) return res.status(400).json({ ok: false, error: 'invoiceId e amount obrigatórios' });
 
-  const invoice = await model('invoice').findUnique({ where: { id: invoiceId } });
-  if (!invoice) return res.status(404).json({ ok: false, error: 'Fatura não encontrada' });
-
-  const result = await prisma.$transaction(async (tx) => {
-    const current = await tx.invoice.findUnique({ where: { id: invoiceId } });
-    if (!current) throw new Error('Fatura nao encontrada');
-
-    const open = invoiceOpen(current);
-    const applied = Math.min(amount, open);
-    let payment = null;
-    let updated = current;
-
-    if (applied > 0) {
-      payment = await tx.payment.create({
-        data: {
-          invoiceId,
-          amount: applied,
-          amountCents: Math.round(applied * 100),
-          method: req.body.method || 'MANUAL',
-          notes: req.body.notes || 'Pagamento registado no fluxo operacional.',
-        },
-      });
-      const paid = invoicePaid(current) + applied;
-      const amountOpen = Math.max(open - applied, 0);
-      updated = await tx.invoice.update({
-        where: { id: invoiceId },
-        data: {
-          amountPaid: paid,
-          amountOpen,
-          status: invoiceStatus(invoiceTotal(current), paid, amountOpen),
-          paidAt: amountOpen <= 0 ? new Date() : current.paidAt,
-          paymentMethod: req.body.method || 'MANUAL',
-        },
-      });
-    }
-
-    const surplus = Math.max(amount - applied, 0);
-    const credit = surplus > 0 && current.clientId
-      ? await createCreditLedgerPayment(tx, current.clientId, surplus, {
-        monthRef: current.monthRef || monthRef(),
-        method: req.body.method || 'MANUAL',
-        notes: req.body.notes || 'Excedente de pagamento convertido em credito positivo.',
-      })
-      : { creditAdded: 0 };
-
-    return { payment, invoice: updated, appliedAmount: applied, creditAdded: credit.creditAdded || 0, creditBalance: credit.creditBalance };
+  const result = await CoreInvoicePaymentBusiness.registerPayment(prisma, invoiceId, {
+    amount, method: req.body.method || 'MANUAL', notes: req.body.notes || 'Pagamento registado no fluxo operacional.',
   });
 
   res.json({

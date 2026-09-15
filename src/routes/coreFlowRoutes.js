@@ -2934,7 +2934,7 @@ router.post('/invoices/:id/pay', async (req, res) => {
     const result = await CoreInvoicePaymentBusiness.registerPayment(prisma, toInt(req.params.id), req.body || {});
     return res.json({ ok: true, ...result, next: 'CLOSED' });
   } catch (error) {
-    return res.status(500).json({ ok: false, error: error.message });
+    return res.status([400, 404, 409].includes(error.status) ? error.status : 500).json({ ok: false, error: error.message });
   }
 });
 

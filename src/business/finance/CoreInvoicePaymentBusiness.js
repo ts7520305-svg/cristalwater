@@ -1,4 +1,4 @@
-const { createCreditLedgerPayment, invoiceOpen, invoicePaid, invoiceStatus, invoiceTotal } = require('../../services/clientCreditService');
+const { assertPayableInvoice, createCreditLedgerPayment, invoiceOpen, invoicePaid, invoiceStatus, invoiceTotal } = require('../../services/clientCreditService');
 
 function fail(message, status) { throw Object.assign(new Error(message), { status }); }
 
@@ -9,6 +9,7 @@ async function registerPayment(prisma, id, body = {}) {
     await tx.$queryRaw`SELECT id FROM "Invoice" WHERE id = ${id} FOR UPDATE`;
     const current = await tx.invoice.findUnique({ where: { id } });
     if (!current) fail('Fatura não encontrada', 404);
+    assertPayableInvoice(current);
     const requested = Number(body.amount);
     const amount = Number.isFinite(requested) ? requested : (current.amountOpen || current.total || 0);
     if (!Number.isFinite(amount) || amount <= 0) fail('Valor invalido', 400);
