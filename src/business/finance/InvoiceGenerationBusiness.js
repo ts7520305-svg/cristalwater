@@ -2,6 +2,7 @@
 const { prisma } = require('../../prismaClient');
 const clientRates = require('./ClientRateBusiness');
 const { applyClientCreditToInvoice } = require('../../services/clientCreditService');
+const { reservedRepairIds } = require('../../services/repairInvoiceSourceService');
 const include = { lines: true, payments: true, client: true };
 const cent = value => Math.round(Number(value || 0) * 100);
 const sourceAmount = row => row.totalPrice ?? row.price ?? row.revenue ?? row.unitPrice ?? 0;
@@ -71,11 +72,7 @@ async function generate(mode, body = {}) {
       // The client/receipt lock serializes different months as well. A repair
       // remains reserved by any historical document, even a draft or withdrawal;
       // releasing it requires an explicit correction, never monthly generation.
-      const previousRepairLines = candidateRepairs.length ? await tx.invoiceLine.findMany({ where: {
-        referenceId: { in: candidateRepairs.map(repair => repair.id) },
-        OR: [{ type: 'REPAIR' }, { lineType: 'REPAIR' }],
-      }, select: { referenceId: true } }) : [];
-      const reservedRepairs = new Set(previousRepairLines.map(row => row.referenceId));
+      const reservedRepairs = await reservedRepairIds(tx, candidateRepairs.map(repair => repair.id));
       const repairs = candidateRepairs.filter(repair => !reservedRepairs.has(repair.id));
       const repairCents = repairs.reduce((sum, r) => sum + sourceCents(mode === 'OPERATIONAL' ? r.totalPrice || r.unitPrice : r.totalPrice), 0);
       const serviceCents = mode === 'CORE' ? visits.reduce((sum, v) => sum + sourceCents(sourceAmount(v)), 0) : 0;

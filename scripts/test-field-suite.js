@@ -30,6 +30,7 @@ scripts.push('test-field-monthly-rates.js');
 scripts.push('test-field-invoice-regeneration.js');
 scripts.push('test-field-invoice-page-generation.js');
 scripts.push('test-field-repair-monthly-once.js');
+scripts.push('test-field-repair-invoice-atomic.js');
 function run(script){return new Promise(resolve=>{
  const output=fs.createWriteStream(path.join(evidence,script+'.log'));
  const child=spawn(process.execPath,[path.join(__dirname,script)],{cwd:root,env:process.env,stdio:['ignore','pipe','pipe']});

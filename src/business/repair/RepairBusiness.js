@@ -922,23 +922,36 @@ async function invoiceRepair(repairId, db = null, actor = "repair-os") {
 }
 
 async function generateRepairInvoice(repairId, payload = {}, db = null, actor = "repair-os") {
+  if (!/^\d+$/.test(String(repairId)) || !Number.isSafeInteger(Number(repairId)) || Number(repairId) <= 0 || Number(repairId) > 2147483647) return { ok: false, status: 400, error: "Reparação inválida" };
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return { ok: false, status: 400, error: "Dados de faturação inválidos" };
+  const monthRef = payload.monthRef === undefined ? new Date().toISOString().slice(0, 7) : payload.monthRef;
+  if (typeof monthRef !== 'string' || !/^(20\d{2}|21\d{2})-(0[1-9]|1[0-2])$/.test(monthRef)) return { ok: false, status: 400, error: "Mês inválido; use AAAA-MM" };
+  if (payload.amount !== undefined && (!['number', 'string'].includes(typeof payload.amount) || !/^\d+(\.\d{1,2})?$/.test(String(payload.amount)) || !Number.isSafeInteger(Math.round(Number(payload.amount) * 100)))) return { ok: false, status: 400, error: "Valor de reparação inválido" };
   const run = async (tx) => {
-    const repair = await repository.getRepair(repairId, tx);
+    let repair = await repository.getRepair(repairId, tx);
     if (!repair) return { ok: false, status: 404, error: "Reparação não encontrada" };
+
+    const clientId = repair.pool?.client?.id || null;
+    if (!clientId) return { ok: false, status: 409, error: "Reparação sem cliente associado" };
+    const receiptKey = `client-receipt:${clientId}`;
+    await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${receiptKey}))::text`;
+    await tx.$queryRaw`SELECT id FROM "Client" WHERE id = ${clientId} FOR NO KEY UPDATE`;
+    await tx.$queryRaw`SELECT id FROM "Repair" WHERE id = ${repair.id} FOR UPDATE`;
+    repair = await repository.getRepair(repairId, tx);
+    if (!repair || repair.pool?.client?.id !== clientId) return { ok: false, status: 409, error: "A reparação mudou de cliente. Recarregue antes de faturar." };
+    if (normalizeRepairStatus(repair.status) === 'INVOICED') return { ok: false, status: 409, error: "Reparação já faturada. Consulte o documento existente." };
 
     const transition = ensureRepairTransition(repair, "INVOICE");
     if (!transition.ok) return transition;
 
-    const clientId = repair.pool?.client?.id || null;
-    if (!clientId) return { ok: false, status: 409, error: "Reparação sem cliente associado" };
-
-    const monthRef = normalizeText(payload.monthRef) || new Date().toISOString().slice(0, 7);
+    const invoiceLine = buildRepairInvoiceLine(repair, payload);
+    if (invoiceLine.total < 0 || !Number.isSafeInteger(Math.round(invoiceLine.total * 100))) return { ok: false, status: 400, error: "Preço da reparação inválido" };
     const draft = await FinanceBusiness.createDraftInvoice({
       clientId,
       monthRef,
       notes: buildRepairNotes(repair.notes, `Fatura gerada para reparação #${repair.id}.`),
-      lines: [buildRepairInvoiceLine(repair, payload)],
-    }, actor);
+      lines: [invoiceLine],
+    }, actor, tx);
 
     if (!draft.ok) return draft;
 
@@ -946,16 +959,16 @@ async function generateRepairInvoice(repairId, payload = {}, db = null, actor = 
       invoiceNumber: payload.invoiceNumber,
       externalInvoiceNo: payload.externalInvoiceNo,
       notes: buildRepairNotes(payload.notes, `Fatura emitida para reparação #${repair.id}.`),
-    }, actor);
+    }, actor, tx);
 
-    if (!issued.ok) return issued;
+    if (!issued.ok) throw Object.assign(new Error(issued.error || "Falha ao emitir documento interno"), { status: issued.status || 409 });
 
     const updatedRepair = await repository.updateRepair(tx, repair.id, {
       status: "INVOICED",
       notes: buildRepairNotes(repair.notes, `Fatura #${issued.invoice.id} emitida.`),
     });
 
-    await repository.createTechnicalHistory(tx, {
+    await tx.technicalHistory.create({ data: {
       poolId: repair.poolId,
       type: "REPAIR_INVOICE_GENERATED",
       component: "Repair",
@@ -963,9 +976,9 @@ async function generateRepairInvoice(repairId, payload = {}, db = null, actor = 
       description: JSON.stringify({ repairId: repair.id, invoiceId: issued.invoice.id, actor }),
       status: "OPEN",
       performedAt: new Date(),
-    });
+    } });
 
-    await repository.createAudit(tx, {
+    await tx.auditTrail.create({ data: {
       action: "REPAIR_INVOICE_GENERATED",
       eventType: "REPAIR_INVOICE_GENERATED",
       entity: "Repair",
@@ -974,9 +987,9 @@ async function generateRepairInvoice(repairId, payload = {}, db = null, actor = 
       clientId,
       metadata: { actor, invoiceId: issued.invoice.id },
       message: `Fatura #${issued.invoice.id} gerada para a reparação #${repair.id}`,
-    });
+    } });
 
-    await repository.createNotification(tx, {
+    await tx.notification.create({ data: {
       clientId,
       type: "REPAIR_INVOICE_GENERATED",
       eventType: "REPAIR_INVOICE_GENERATED",
@@ -986,31 +999,21 @@ async function generateRepairInvoice(repairId, payload = {}, db = null, actor = 
       severity: "NORMAL",
       status: "PENDING",
       metadata: { repairId: repair.id, invoiceId: issued.invoice.id },
-    });
-
-    await emitRepairEvent(EVENT_TYPES.REPAIR_INVOICE_GENERATED, {
-      repairId: repair.id,
-      poolId: repair.poolId,
-      clientId,
-      actor,
-      invoiceId: issued.invoice.id,
-      source: "repair-invoice-generation",
-    });
-
-    await emitRepairEvent(EVENT_TYPES.REPAIR_INVOICED, {
-      repairId: repair.id,
-      poolId: repair.poolId,
-      clientId,
-      actor,
-      invoiceId: issued.invoice.id,
-      source: "repair-invoice-generation",
-    });
+    } });
 
     return { ok: true, repair: updatedRepair, invoice: issued.invoice };
   };
 
-  if (db) return run(db);
-  return repository.transaction(run);
+  if (db && !db.$transaction) return run(db);
+  const result = db ? await db.$transaction(run, { maxWait: 15000, timeout: 15000 }) : await repository.transaction(run);
+  if (result.ok) {
+    const event = { repairId: result.repair.id, poolId: result.repair.poolId, clientId: result.invoice.clientId, invoiceId: result.invoice.id, actor, source: "repair-invoice-generation" };
+    await emitFinanceEvent(FINANCE_EVENT_TYPES.FINANCE_INVOICE_DRAFT, { ...event, monthRef: result.invoice.monthRef });
+    await emitFinanceEvent(FINANCE_EVENT_TYPES.FINANCE_INVOICE_ISSUED, event);
+    await emitRepairEvent(EVENT_TYPES.REPAIR_INVOICE_GENERATED, event);
+    await emitRepairEvent(EVENT_TYPES.REPAIR_INVOICED, event);
+  }
+  return result;
 }
 
 async function registerRepairPayment(repairId, payload = {}, db = null, actor = "repair-os") {

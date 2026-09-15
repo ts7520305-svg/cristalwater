@@ -124,9 +124,13 @@ async function approveRepair(req, res) {
 }
 
 async function invoiceRepair(req, res) {
-  const result = await RepairBusiness.generateRepairInvoice(req.params.id, req.body || {}, null, actor(req));
-  if (!result.ok) return res.status(result.status || 400).json({ ok: false, message: result.error || "Erro" });
-  return res.json({ ok: true, repair: result.repair, invoice: result.invoice });
+  try {
+    const result = await RepairBusiness.generateRepairInvoice(req.params.id, req.body || {}, null, actor(req));
+    if (!result.ok) return res.status(result.status || 400).json({ ok: false, message: result.error || "Erro" });
+    return res.json({ ok: true, repair: result.repair, invoice: result.invoice });
+  } catch (error) {
+    return res.status(error.status || 500).json({ ok: false, message: error.status ? error.message : "Não foi possível concluir a fatura da reparação." });
+  }
 }
 
 async function registerPayment(req, res) {

@@ -3,6 +3,7 @@ const { processPaymentReminders } = require("../../services/paymentService");
 const { NON_RECEIVABLE_STATUSES, isReceivableInvoice, createCreditLedgerPayment, invoiceOpen, invoicePaid, invoiceStatus, invoiceTotal } = require("../../services/clientCreditService");
 const { EVENT_TYPES, emitFinanceEvent } = require("../../services/financeOsEventService");
 const { preparePaymentRequest, executePaymentRequest } = require('../../services/invoicePaymentRequestService');
+const { reservedRepairIds } = require('../../services/repairInvoiceSourceService');
 
 function monthRefFromDate(date = new Date()) {
   return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
@@ -99,14 +100,23 @@ async function createDraftInvoice(payload = {}, actor = "finance-os", transactio
   if (!clientId) return { ok: false, status: 400, error: "clientId obrigatório" };
   const monthRef = payload.standalone === true ? null : String(payload.monthRef || monthRefFromDate()).trim();
   const period = monthRef || monthRefFromDate();
+  const lineItems = Array.isArray(payload.lines) ? payload.lines : [];
+  for (const line of lineItems) {
+    if (!line || typeof line !== 'object' || Array.isArray(line)) return { ok: false, status: 400, error: 'Linha inválida' };
+    const ref = line.referenceId;
+    if (ref != null && (!['string', 'number'].includes(typeof ref) || !/^\d+$/.test(String(ref)) || !Number.isSafeInteger(Number(ref)) || Number(ref) <= 0 || Number(ref) > 2147483647)) return { ok: false, status: 400, error: 'Referência de origem inválida' };
+  }
+  const repairIds = lineItems.filter(line => [line.type, line.lineType].some(type => String(type || '').trim().toUpperCase() === 'REPAIR') && line.referenceId != null).map(line => Number(line.referenceId));
+  if (new Set(repairIds).size !== repairIds.length) return { ok: false, status: 409, error: 'A reparação está repetida nas linhas da fatura' };
   const run = async tx => {
-    await tx.$queryRaw`SELECT id FROM "Client" WHERE id = ${clientId} FOR UPDATE`;
+    await tx.$queryRaw`SELECT id FROM "Client" WHERE id = ${clientId} FOR NO KEY UPDATE`;
     const client = await tx.client.findUnique({ where: { id: clientId } });
     if (!client) return { ok: false, status: 404, error: "Cliente não encontrado" };
     if (payload.requireActiveContract && (!client.active || client.status !== 'ACTIVE' || !client.billingActive || client.deletedAt || client.archiveStatus !== 'ATIVO')) return { ok: false, status: 409, error: "Contrato inativo" };
     if (monthRef !== null && await tx.invoice.findFirst({ where: { clientId, monthRef } })) return { ok: false, status: 409, error: "Já existe fatura para este mês" };
+    if ((await reservedRepairIds(tx, repairIds)).size) return { ok: false, status: 409, error: 'Reparação já associada a uma fatura. Consulte o documento existente.' };
+    if (repairIds.length && await tx.repair.count({ where: { id: { in: repairIds }, pool: { clientId } } }) !== repairIds.length) return { ok: false, status: 409, error: 'A referência não pertence a uma reparação deste cliente' };
   const dueDate = repository.toDate(payload.dueDate) || new Date(Date.now() + 15 * 86400000);
-  const lineItems = Array.isArray(payload.lines) ? payload.lines : [];
 
   const invoice = await tx.invoice.create({ data: {
     clientId,
@@ -119,7 +129,9 @@ async function createDraftInvoice(payload = {}, actor = "finance-os", transactio
     notes: String(payload.notes || "").trim() || null,
     lines: {
       create: lineItems.map((line) => ({
-        type: String(line.type || "SERVICE").trim() || "SERVICE",
+        type: String(line.type || line.lineType || "SERVICE").trim().toUpperCase() || "SERVICE",
+        lineType: line.lineType ? String(line.lineType).trim().toUpperCase() : null,
+        referenceId: line.referenceId == null ? null : Number(line.referenceId),
         description: String(line.description || "Linha").trim() || "Linha",
         quantity: asMoney(line.quantity || 1),
         unitPrice: asMoney(line.unitPrice || 0),
@@ -141,21 +153,23 @@ async function createDraftInvoice(payload = {}, actor = "finance-os", transactio
   return result;
 }
 
-async function issueInvoice(invoiceId, payload = {}, actor = "finance-os") {
-  const invoice = await repository.getInvoice(invoiceId);
+async function issueInvoice(invoiceId, payload = {}, actor = "finance-os", transaction = null) {
+  const include = { client: true, lines: true, payments: true };
+  const invoice = transaction ? await transaction.invoice.findUnique({ where: { id: Number(invoiceId) }, include }) : await repository.getInvoice(invoiceId);
   if (!invoice) return { ok: false, status: 404, error: "Fatura não encontrada" };
 
   const invoiceNumber = String(payload.invoiceNumber || payload.externalInvoiceNo || "").trim() || null;
-  const issued = await repository.updateInvoice(invoice.id, {
+  const data = {
     status: "ISSUED",
     invoiceIssued: true,
     invoiceNumber: invoiceNumber || invoice.invoiceNumber,
     externalInvoiceNo: invoiceNumber || invoice.externalInvoiceNo,
     issueDate: invoice.issueDate || new Date(),
     notes: [invoice.notes, payload.notes].filter(Boolean).join("\n") || invoice.notes,
-  });
+  };
+  const issued = transaction ? await transaction.invoice.update({ where: { id: invoice.id }, data, include }) : await repository.updateInvoice(invoice.id, data);
 
-  await emitFinanceEvent(EVENT_TYPES.FINANCE_INVOICE_ISSUED, {
+  if (!transaction) await emitFinanceEvent(EVENT_TYPES.FINANCE_INVOICE_ISSUED, {
     invoiceId: issued.id,
     clientId: issued.clientId,
     actor,
