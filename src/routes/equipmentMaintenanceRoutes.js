@@ -1,6 +1,9 @@
 const router = require('express').Router();
 const auth = require('../middlewares/authMiddleware');
 const controller = require('../controllers/equipmentMaintenanceController');
+router.get('/notifications/config', auth('ADMIN'), controller.reminderConfiguration);
+router.put('/notifications/config', auth('ADMIN'), controller.configureReminders);
+router.post('/notifications/check', auth('ADMIN'), controller.checkReminders);
 router.get('/pools/:poolId', auth('ADMIN'), controller.listPool);
 router.post('/pools/:poolId', auth('ADMIN'), controller.create);
 router.put('/plans/:id', auth('ADMIN'), controller.update);

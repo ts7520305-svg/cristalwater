@@ -320,6 +320,13 @@ function scheduleBackgroundJobs() {
     return;
   }
 
+  const checkMaintenance = async () => {
+    await require('./business/equipment/EquipmentMaintenanceReminderBusiness').run();
+    await require('./services/browserPushService').deliverMaintenanceNotifications();
+  };
+  safeRun('EQUIPMENT_MAINTENANCE_REMINDERS', checkMaintenance);
+  setInterval(() => safeRun('EQUIPMENT_MAINTENANCE_REMINDERS', checkMaintenance), 1000 * 60 * 5);
+
   safeRun("AUTO_BILLING", runAutoBilling);
   setInterval(() => safeRun("AUTO_BILLING", runAutoBilling), 1000 * 60 * 60 * 24);
 
