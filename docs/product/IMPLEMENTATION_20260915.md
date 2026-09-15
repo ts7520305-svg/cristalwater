@@ -73,3 +73,7 @@ Pré-visualização autenticada com contagens e limite de um ano de calendário.
 ## TASK 97 — monitorização local de backups
 
 A configuração mostra a idade e o tipo da cópia local mais recente, com estados para ausência, ficheiro vazio, antiguidade excessiva, exportação JSON de recurso e relógio incoerente. Ficheiros parciais, ficheiros não relacionados e ligações simbólicas não contam como backups válidos. Prazo configurável por BACKUP_MAX_AGE_HOURS, por defeito 48 horas. A sonda `node scripts/check-backup-health.js` é apenas leitura e termina com código não zero quando requer atenção. A presença de SQL recente não é apresentada como prova de restauro, cópia externa ou proteção de uploads; esses estados permanecem explicitamente não verificados.
+
+## TASK 98 — controlos operacionais nas interfaces existentes
+
+Configurações operacionais passa a incluir estado da cópia local e revisão/limpeza do histórico GPS. A interface exige motivo, confirmação textual e confirmação final, e invalida a revisão após erro ou execução. Não inicia limpezas ao abrir a página. O ecrã principal do técnico passa a carregar explicitamente o seletor de idioma numa área do cabeçalho, sem sobrepor o estado da ligação ou os alertas.

@@ -28,6 +28,18 @@ const {chromium}=require('playwright');
   // An old server reply must never write language into another account.
   await page.reload();await page.waitForFunction(()=>document.querySelector('#cwLanguageSelect'));await page.evaluate(()=>{localStorage.setItem('token','TECH-B');localStorage.setItem('cristalwater_user',JSON.stringify({id:2,role:'TECHNICIAN',language:'es'}));});releaseRead();await page.waitForTimeout(250);
   assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('cristalwater_user')).language),'es');assert.deepEqual(errors,[]);
+  const field=await browser.newPage({viewport:{width:320,height:844}});
+  await field.addInitScript(()=>{localStorage.setItem('cw_language','es');});
+  await field.route('**/*',route=>{
+   const u=new URL(route.request().url());
+   if(u.pathname==='/technician-field-mode')return route.fulfill({contentType:'text/html',body:fs.readFileSync(path.join(__dirname,'../frontend/technician-field-mode.html'),'utf8')});
+   if(u.pathname==='/cw-i18n.js')return route.fulfill({contentType:'text/javascript',body:fs.readFileSync(path.join(__dirname,'../frontend/cw-i18n.js'),'utf8')});
+   return route.fulfill({contentType:u.pathname.endsWith('.css')?'text/css':'text/javascript',body:''});
+  });
+  await field.goto('http://field-language.test/technician-field-mode');await field.waitForFunction(()=>document.querySelector('#cwLanguageSelect')?.value==='es');
+  assert.equal(await field.locator('#incompleteReason option[value=CHEMICAL_MISSING]').textContent(),'Faltan productos químicos');
+  const bounds=await field.locator('#cwLanguageSelect').boundingBox();assert(bounds.x>=0&&bounds.x+bounds.width<=320);
+  assert.equal(await field.locator('.top .cw-lang-switch').count(),1);await field.close();
   console.log('PASS Spanish field labels, stable option values, user text protection, fresh live states, ordered preference writes and delayed read after choice/account change');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

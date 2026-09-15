@@ -7,7 +7,7 @@
     "dev": "node src/server.js",
     "test": "vitest run",
     "test:field-suite": "node scripts/test-field-suite.js",
-    "test:field-browser": "node scripts/test-field-browser.js && node scripts/test-field-session-browser.js && node scripts/test-field-push-session-browser.js && node scripts/test-field-map-browser.js && node scripts/test-client-notifications-browser.js && node scripts/test-commercial-quotes-browser.js && node scripts/test-client-rates-browser.js && node scripts/test-language-browser.js",
+    "test:field-browser": "node scripts/test-field-browser.js && node scripts/test-field-session-browser.js && node scripts/test-field-push-session-browser.js && node scripts/test-field-map-browser.js && node scripts/test-client-notifications-browser.js && node scripts/test-commercial-quotes-browser.js && node scripts/test-client-rates-browser.js && node scripts/test-language-browser.js && node scripts/test-data-protection-browser.js",
     "test:technician": "vitest run tests/technician-business.test.js",
     "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate",

@@ -186,9 +186,27 @@
         <div id="upgradePackageList" class="backup-list">A carregar pacotes...</div>
       </div>
     </section>
+    <section class="panel" id="dataProtectionPanel">
+      <h2>Histórico GPS e backups</h2>
+      <h3>Estado da cópia local</h3>
+      <p id="backupHealthText" role="status">Por verificar.</p>
+      <button type="button" id="checkBackupHealth" class="btn">Verificar cópia local</button>
+      <p>A verificação da idade de um ficheiro não confirma o seu restauro nem uma cópia externa. Fotografias e outros uploads exigem proteção própria.</p>
+      <h3>Retenção do histórico GPS</h3>
+      <p>Rever registos com mais de um ano. A última localização, visitas, histórico técnico, faturas, pagamentos e anexos são conservados. Esta limpeza não altera backups.</p>
+      <button type="button" id="reviewGpsRetention" class="btn">Rever registos GPS antigos</button>
+      <output id="retentionPreview" style="display:block;white-space:pre-line;margin:14px 0"></output>
+      <label for="retentionReason">Motivo da limpeza</label>
+      <input id="retentionReason" maxlength="1000" placeholder="Motivo para o registo de auditoria" style="display:block;width:100%;min-height:44px;margin:8px 0">
+      <label for="retentionConfirm">Escreva ELIMINAR GPS ANTIGO para confirmar</label>
+      <input id="retentionConfirm" autocomplete="off" style="display:block;width:100%;min-height:44px;margin:8px 0">
+      <button type="button" id="applyGpsRetention" class="btn" disabled>Eliminar apenas o GPS revisto</button>
+      <p id="retentionStatus" role="status" aria-live="polite"></p>
+    </section>
   </main>
   <script src="/admin-auth-guard.js"></script>
   <script src="/admin-operational-settings.js"></script>
+  <script src="/admin-data-protection.js"></script>
   <script src="/cristal-help-data.js"></script><script src="/cristal-assist.js"></script>
 <script src="/cw-admin-shortcuts.js"></script>
   <script src="/ui/core/navigation-context.js"></script>
