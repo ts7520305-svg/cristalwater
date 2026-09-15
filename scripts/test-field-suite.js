@@ -29,7 +29,7 @@ function run(script){return new Promise(resolve=>{
  child.stdout.pipe(output);child.stderr.pipe(output);
  const start=Date.now(),timer=setTimeout(()=>child.kill('SIGKILL'),120000);
  child.once('error',error=>{clearTimeout(timer);output.end();resolve({script,code:1,error:error.message})});
- child.once('exit',(code,signal)=>{clearTimeout(timer);output.end();const result={script,code,signal,ms:Date.now()-start};console.log(JSON.stringify(result));resolve(result)});
+ child.once('close',(code,signal)=>{clearTimeout(timer);output.end(()=>{const result={script,code,signal,ms:Date.now()-start};console.log(JSON.stringify(result));if(code!==0)console.error(fs.readFileSync(path.join(evidence,script+'.log'),'utf8').slice(-12000));resolve(result)})});
 });}
 (async()=>{
  await prisma.user.upsert({where:{email:process.env.ADMIN_EMAIL},create:{email:process.env.ADMIN_EMAIL,name:'Field QA Administrator',password:await bcrypt.hash(process.env.ADMIN_PASSWORD,10),role:'ADMIN',active:true,mustChangePassword:false},update:{password:await bcrypt.hash(process.env.ADMIN_PASSWORD,10),active:true,role:'ADMIN'}});
