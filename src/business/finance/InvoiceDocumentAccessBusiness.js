@@ -11,9 +11,9 @@ function scope(user, rawId) {
   if (role === 'CLIENT' && (!Number.isSafeInteger(clientId) || clientId <= 0)) fail('Sessão inválida.', 403);
   return { id, clientId };
 }
-async function invoice(rawId, user) {
+async function invoice(rawId, user, db = prisma) {
   const { id, clientId } = scope(user, rawId);
-  const row = await prisma.invoice.findFirst({ where: { id, ...(clientId ? { clientId, status: { notIn: NON_RECEIVABLE_STATUSES } } : {}) },
+  const row = await db.invoice.findFirst({ where: { id, ...(clientId ? { clientId, status: { notIn: NON_RECEIVABLE_STATUSES } } : {}) },
     include: { client: true, lines: true, payments: true } });
   if (!row || (clientId && NON_RECEIVABLE_STATUSES.includes(String(row.status || '').trim().toUpperCase()))) fail('Documento não encontrado.', 404);
   return row;
@@ -23,4 +23,11 @@ async function extras(rawId, user) {
   if (clientId && clientId !== id) fail('Documento não encontrado.', 404);
   return prisma.extraVisit.findMany({ where: { billed: false, pool: { clientId: id } }, include: { pool: { include: { client: true } } } });
 }
-module.exports = { invoice, extras };
+async function sendable(rawId, user, db = prisma) {
+  if (normalizeRole(user?.role) !== 'ADMIN') fail('Apenas a administração pode preparar envios.', 403);
+  const row = await invoice(rawId, user, db);
+  if (NON_RECEIVABLE_STATUSES.includes(String(row.status || '').trim().toUpperCase())) fail('Reveja o rascunho ou documento retirado antes do envio.', 409);
+  if (!row.client?.active) fail('O cliente está inativo.', 409);
+  return row;
+}
+module.exports = { invoice, extras, sendable };

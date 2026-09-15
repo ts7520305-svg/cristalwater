@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+router.use(require('../middlewares/authMiddleware')('ADMIN'));
 const { prisma } = require("../prismaClient");
 const { assertExternalOperationAllowed } = require("../config/externalIntegrations");
 
