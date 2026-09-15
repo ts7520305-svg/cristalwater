@@ -8,6 +8,7 @@ const { prisma } = require("../prismaClient");
 
 const { SERVICE_VISIT_INCLUDE, parseReference, mapTechnicalAlert, mapVisitAlert, mapGenericAlert, mapNotification } = require('../services/alertPresentationService');
 const AlertListBusiness = require('../business/admin/AlertListBusiness');
+const AlertResolutionBusiness = require('../business/admin/AlertResolutionBusiness');
 
 async function resolveAlertContext(reference) {
   const ref = parseReference(reference);
@@ -115,43 +116,10 @@ router.get("/", async (req, res) => {
 // Resolver alerta mantendo historico.
 router.put("/:id/resolve", async (req, res) => {
   try {
-    const context = await resolveAlertContext(req.params.id);
-    if (!context) {
-      return res.status(404).json({ ok: false, error: "Alerta nao encontrado" });
-    }
-
-    const resolvedAt = new Date();
-
-    if (context.ref.source === "technical") {
-      await prisma.technicalAlert.update({
-        where: { id: context.ref.id },
-        data: { status: "RESOLVED", resolvedAt },
-      });
-    } else if (context.ref.source === "visit") {
-      const note = `Alerta resolvido pelo administrador em ${resolvedAt.toLocaleString("pt-PT")}.`;
-      await prisma.serviceVisit.update({
-        where: { id: context.ref.id },
-        data: {
-          alerts: null,
-          internalNotes: [context.raw.internalNotes, note].filter(Boolean).join("\n"),
-        },
-      });
-    } else if (context.ref.source === "generic") {
-      await prisma.alert.update({
-        where: { id: context.ref.id },
-        data: { status: "RESOLVED", active: false, resolvedAt },
-      });
-    } else {
-      await prisma.notification.update({
-        where: { id: context.ref.id },
-        data: { status: "RESOLVED", isRead: true, readAt: resolvedAt },
-      });
-    }
-
-    return res.json({ ok: true });
+    return res.json(await AlertResolutionBusiness.resolve(req.user, req.params.id, req.body));
   } catch (err) {
     console.error("Erro resolver alerta:", err);
-    return res.status(500).json({ ok: false, error: "Erro ao resolver alerta" });
+    return res.status(err.statusCode || 500).json({ ok: false, error: err.statusCode ? err.message : "Erro ao resolver alerta", ...(err.code ? { code: err.code } : {}) });
   }
 });
 
@@ -226,7 +194,7 @@ router.post("/:id/convert", async (req, res) => {
     });
   } catch (err) {
     console.error("Erro converter alerta em faturacao:", err);
-    return res.status(500).json({ ok: false, error: "Erro ao faturar alerta" });
+    return res.status(err.statusCode || 500).json({ ok: false, error: err.statusCode ? err.message : "Erro ao faturar alerta" });
   }
 });
 

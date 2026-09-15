@@ -1,4 +1,5 @@
 'use strict';
+const { parseReference, resolutionVersion, requirement } = require('./alertResolutionStateService');
 
 const CLOSED_STATUSES = ["RESOLVED", "DONE", "CLOSED", "CANCELLED", "CANCELED", "ARCHIVED"];
 const ALERT_NOTIFICATION_TYPES = [
@@ -27,15 +28,6 @@ const SERVICE_VISIT_INCLUDE = {
   attachments: true,
   chemicals: true,
 };
-
-function parseReference(raw) {
-  const value = String(raw || "").trim();
-  const match = /^([a-zA-Z]+)-(\d+)$/.exec(value);
-  if (match) {
-    return { source: match[1].toLowerCase(), id: Number(match[2]) };
-  }
-  return { source: "notification", id: Number(value) };
-}
 
 function isOpenStatus(status) {
   return !CLOSED_STATUSES.includes(String(status || "OPEN").toUpperCase());
@@ -235,6 +227,8 @@ function mapNotification(alert) {
   const technicalAlertId = metadata.alertId || null;
   const href = metadata.href || buildHref({ clientId: alert.clientId, poolId, visitId });
   return {
+    resolutionVersion: resolutionVersion('notification', alert),
+    resolutionRequirement: requirement('notification', alert),
     id: `notification-${alert.id}`,
     numericId: alert.id,
     source: "notification",
@@ -260,6 +254,8 @@ function mapNotification(alert) {
 
 function mapTechnicalAlert(alert) {
   return {
+    resolutionVersion: resolutionVersion('technical', alert),
+    resolutionRequirement: requirement('technical', alert),
     id: `technical-${alert.id}`,
     numericId: alert.id,
     source: "technical",
@@ -296,6 +292,8 @@ function mapTechnicalAlert(alert) {
 function mapVisitAlert(visit) {
   const alertMessage = visit.alerts || visit.reason || "Visita com alerta operacional";
   return {
+    resolutionVersion: resolutionVersion('visit', visit),
+    resolutionRequirement: requirement('visit', visit),
     id: `visit-${visit.id}`,
     numericId: visit.id,
     source: "visit",
@@ -331,6 +329,8 @@ function mapVisitAlert(visit) {
 
 function mapGenericAlert(alert) {
   return {
+    resolutionVersion: resolutionVersion('generic', alert),
+    resolutionRequirement: requirement('generic', alert),
     id: `generic-${alert.id}`,
     numericId: alert.id,
     source: "generic",

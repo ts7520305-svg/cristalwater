@@ -4,7 +4,7 @@
 
 - Repositório: `ts7520305-svg/cristalwater`.
 - Branch de trabalho: `work/field-readiness-20260915-simulation`.
-- Última entrega remota verificada: TASK132, commit `8585addfa21badd1d6e68799545918e2e5934c4e`; workflow `34970756321` aprovado, incluindo 272 testes unitários, 17 scripts de navegador, 38 grupos operacionais, PostgreSQL 16 e restauro de 99 tabelas/11 anexos.
+- Última entrega remota verificada: TASK133, commit `09f17a17e4b9179d503c5af5bf67819665200896`; workflow `34973409103` aprovado, incluindo 278 testes unitários, 17 scripts de navegador, 39 grupos operacionais, PostgreSQL 16 e restauro de 99 tabelas/11 anexos.
 - TASK123: notas da piscina e seleção correta dos lembretes no endpoint da rota, implementadas. Teste API com 505 lembretes gerais, 23 operacionais, duas piscinas, reatribuição e visitas extra aprovado em `field-qa-runtime/run-1789467419688`. 218 testes unitários e 4 de técnicos aprovados.
 - TASK124: notas no ecrã de campo, avisos recorrentes atrasados e confirmação de início completa e vinculada à visita/sessão implementados. Percurso real verificado em PT/EN/FR/ES/DE; regressão local final aprovada: 218 testes unitários, 4 de técnicos, 17 scripts de navegador e 33 grupos integrados (`reports/field-suite/1789468180539/results.json`). Imagem: `reports/field-visual/visit-briefing-1789468325934/technician-briefing-mobile.png`. Workflow PostgreSQL 16/restauro aprovado no commit acima. Continuação sem aprovações intermédias conforme pedido «continua sem parar».
 - Relatórios atuais: `VISIT_BRIEFING_API_20260915.md` e `VISIT_BRIEFING_UI_20260915.md`. Inventário concluído nas TASK121/TASK122; não repetir a implementação.
@@ -25,7 +25,9 @@
 
 - TASK132 implementada após divergência entre dois workflows da TASK131: um passou; outro falhou ao esperar a recuperação em português. Reprodução determinística confirmou perda da última escolha de idioma durante resposta anterior retida e reload. Preferência pendente agora conservada por conta e retomada; ensaio dirigido aprovado em `field-qa-runtime/run-1789476149709`. Teste de recuperação passa a isolar o idioma esperado. Relatório `LANGUAGE_RELOAD_RECOVERY_20260915.md`. CI final com 38 grupos e restauro aprovado no workflow 34970756321.
 
-- TASK133 implementada: consulta completa dos alertas administrativos, críticos antes dos restantes, autenticação do router e conservação da última lista após erro. Reprodução confirmou quatro alertas antigos ocultos e acesso sem token. Ensaio dirigido aprovado em `field-qa-runtime/run-1789477690689`, incluindo API/base/Chromium, água/regressos e acesso. Relatório `ALERT_VISIBILITY_20260915.md`. 278 testes unitários, 4 de técnicos, 17 scripts de navegador e sintaxe de 493 ficheiros backend aprovados. Confirmar workflow publicado com 39 grupos e restauro.
+- TASK133 implementada: consulta completa dos alertas administrativos, críticos antes dos restantes, autenticação do router e conservação da última lista após erro. Reprodução confirmou quatro alertas antigos ocultos e acesso sem token. Ensaio dirigido aprovado em `field-qa-runtime/run-1789477690689`, incluindo API/base/Chromium, água/regressos e acesso. Relatório `ALERT_VISIBILITY_20260915.md`. 278 testes unitários, 4 de técnicos, 17 scripts de navegador e sintaxe de 493 ficheiros backend aprovados. Workflow 34973409103 aprovado com 39 grupos e restauro no commit acima.
+
+- TASK134 implementada: resolução transacional dos alertas, proteção do fecho físico da água/bomba e dos estados operacionais, versão, comprovativo original e confirmação validada no ecrã. Reprodução em `field-qa-runtime/run-1789478946210`; ensaio dirigido aprovado em `field-qa-runtime/run-1789479629638`. Relatório `ALERT_RESOLUTION_20260915.md`. Revisão final aprovada em `field-qa-runtime/run-1789479845553`, após corrigir os botões durante o fim da operação anterior. 302 testes unitários, 4 de técnicos e 17 scripts de navegador aprovados. Confirmar workflow publicado com 302 testes unitários, 17 scripts de navegador, 40 grupos operacionais e restauro.
 
 ### Pedido ativo
 
@@ -51,7 +53,7 @@ Evidência atual da TASK120: 216 testes unitários, 4 testes de técnicos, os 15
 
 ### Próxima retoma
 
-1. TASK123–TASK132 publicadas e verificadas; TASK133 trata a visibilidade e acesso aos alertas administrativos. Confirmar o workflow final com 39 grupos nesta conversa. Não repetir estas implementações.
+1. TASK123–TASK133 publicadas e verificadas. TASK134 trata a resolução dos alertas e a confirmação do ecrã. Confirmar o workflow final com 40 grupos nesta conversa. Não repetir estas implementações.
 2. A coerência e conclusão dos lembretes no CRM estão tratadas na TASK131. Prosseguir a revisão dos outros ecrãs operacionais, a partir da implementação atual e relatórios posteriores; não repetir os fluxos de lembretes já corrigidos.
 3. Continuar a revisão dos módulos pendentes usando `COMPLETENESS_20260915.md` juntamente com `IMPLEMENTATION_20260915.md` e os relatórios posteriores. A matriz de completude conserva o diagnóstico inicial e contém pontos já corrigidos posteriormente.
 4. Manter tarefas pequenas, com testes de comportamento e documentação. Não repetir trabalho apenas por encontrar um relatório antigo.

@@ -12,6 +12,7 @@ let alertsState = [];
 let alertsLoaded = false;
 let alertsRead = 0;
 const alertsAuthorization = authHeaders().Authorization;
+const alertResolutions = new Set();
 let repairContextData = {
   clients: [],
   pools: [],
@@ -51,7 +52,7 @@ async function fetchJSON(url, options = {}) {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok || data.ok === false) {
-    throw new Error(data.error || data.message || `Erro HTTP ${res.status}`);
+    throw Object.assign(new Error(data.error || data.message || `Erro HTTP ${res.status}`), { status: res.status });
   }
   return data;
 }
@@ -556,6 +557,15 @@ async function createRepairFromModal(event) {
   const priority = String(document.getElementById("repairPrioritySelect")?.value || "").trim();
   const notesInput = String(document.getElementById("repairNotesInput")?.value || "").trim();
   const resolveAlert = Boolean(document.getElementById("repairResolveAlert")?.checked);
+  const resolutionTarget = resolveAlert && context?.alertId ? alertsState.find(row => row.id === context.alertId) : null;
+  if (resolveAlert && context?.alertId && (!resolutionTarget?.resolutionVersion || alertResolutions.size)) {
+    setRepairModalStatus("Atualize os alertas antes de criar e resolver a reparacao.", "error");
+    return;
+  }
+  if (resolutionTarget?.resolutionRequirement) {
+    setRepairModalStatus(resolutionTarget.resolutionRequirement.message, "error");
+    return;
+  }
 
   if (!poolId) {
     setRepairModalStatus("Seleciona a piscina/jacuzzi para garantir contexto operacional.", "error");
@@ -590,6 +600,7 @@ async function createRepairFromModal(event) {
   const submitBtn = document.getElementById("repairSubmitBtn");
   if (submitBtn) submitBtn.disabled = true;
   setRepairModalStatus("A criar reparacao...", "info");
+  if (resolutionTarget) { alertResolutions.add(resolutionTarget.id); updateResolutionButtons(); }
 
   try {
     const data = await fetchJSON(`${API}/repairs`, {
@@ -597,17 +608,21 @@ async function createRepairFromModal(event) {
       body: JSON.stringify(payload),
     });
 
-    if (resolveAlert && context?.alertId) {
-      await fetchJSON(`${API}/alerts/${encodeURIComponent(context.alertId)}/resolve`, { method: "PUT" });
-    }
-
     closeRepairModal();
+    if (resolutionTarget) {
+      try { await requestAlertResolution(resolutionTarget); }
+      catch (_) {
+        if (alertsSessionCurrent()) setStatus(`Reparacao #${data.repair?.id || "-"} criada. A resolucao do alerta nao foi confirmada; atualize os alertas e trate o aviso.`, "error");
+        return;
+      }
+    }
     const refreshed = await loadAlerts();
     ui.success(`Reparacao #${data.repair?.id || "-"} criada com sucesso.`);
     if (refreshed) setStatus("Reparacao criada e fila atualizada.", "ok");
   } catch (err) {
     setRepairModalStatus(err.message || "Erro ao criar reparacao.", "error");
   } finally {
+    if (resolutionTarget) { alertResolutions.delete(resolutionTarget.id); updateResolutionButtons(); }
     if (submitBtn) submitBtn.disabled = false;
   }
 }
@@ -717,7 +732,8 @@ function renderList() {
         ${alert.visitHref ? `<a class="btn note" href="${escapeHtml(alert.visitHref)}">Abrir visita</a>` : ""}
         ${alert.serviceNote?.href ? `<a class="btn note" href="${escapeHtml(alert.serviceNote.href)}" target="_blank" rel="noopener">Relatorio</a>` : ""}
         <button type="button" data-charge-alert="${escapeHtml(alert.id)}">Faturar</button>
-        <button type="button" class="resolve" data-resolve-alert="${escapeHtml(alert.id)}">Resolver</button>
+        ${alert.resolutionRequirement ? `<p>${escapeHtml(alert.resolutionRequirement.message)}</p>` : ''}
+        <button type="button" class="resolve" data-resolve-alert="${escapeHtml(alert.id)}" ${alertResolutions.size ? 'disabled' : ''}>${alert.resolutionRequirement ? 'Verificar resolucao' : 'Resolver'}</button>
       </div>
     </article>
   `).join("");
@@ -771,20 +787,59 @@ window.addEventListener("storage", event => {
 });
 
 async function resolveAlert(id) {
-  if (!id) return;
-  const ok = await ui.confirm("Marcar este alerta como resolvido?", {
-    title: "Confirmar resolucao",
-    confirmText: "Resolver",
-  });
-  if (!ok) return;
-
-  try {
-    setStatus("A resolver alerta...");
-    await fetchJSON(`${API}/alerts/${encodeURIComponent(id)}/resolve`, { method: "PUT" });
-    if (await loadAlerts()) setStatus("Alerta resolvido e retirado da lista aberta.", "ok");
-  } catch (err) {
-    setStatus(err.message || "Erro ao resolver alerta.", "error");
+  if (alertResolutions.size || !alertsSessionCurrent()) return;
+  const target = alertsState.find(row => row.id === id);
+  if (!target || !/^[a-f0-9]{64}$/.test(target.resolutionVersion || '')) {
+    setStatus("Atualize os alertas antes de confirmar a resolucao.", "error"); return;
   }
+  alertResolutions.add(id);
+  updateResolutionButtons();
+  try {
+    const ok = await ui.confirm("Marcar este alerta como resolvido?", {
+      title: "Confirmar resolucao", confirmText: "Resolver",
+      details: [target.resolutionRequirement?.message, target.title, target.poolName, target.message].filter(Boolean).join('\n'),
+    });
+    if (!ok || !alertsSessionCurrent()) return;
+    if (alertsState.find(row => row.id === id)?.resolutionVersion !== target.resolutionVersion) {
+      setStatus("O alerta foi alterado. Atualize a lista e confirme novamente.", "error"); return;
+    }
+    setStatus("A resolver alerta...");
+    await requestAlertResolution(target);
+    if (await loadAlerts()) setStatus("Alerta resolvido e retirado da lista aberta.", "ok");
+    else if (alertsSessionCurrent()) setStatus("Alerta resolvido. Nao foi possivel atualizar os restantes alertas; volte a atualizar.", "error");
+  } catch (err) {
+    if (!alertsSessionCurrent()) return;
+    if ([400, 404, 409].includes(err.status)) {
+      await loadAlerts();
+      if (alertsSessionCurrent()) setStatus(err.message, "error");
+    } else setStatus("Nao foi possivel confirmar a resolucao. Volte a tentar neste mesmo alerta.", "error");
+  } finally {
+    alertResolutions.delete(id);
+    updateResolutionButtons();
+  }
+}
+
+function updateResolutionButtons() {
+  document.querySelectorAll('[data-resolve-alert]').forEach(button => {
+    button.disabled = alertResolutions.size > 0;
+  });
+}
+
+async function requestAlertResolution(target) {
+  if (!alertsSessionCurrent()) throw Error('Sessao alterada');
+  alertsRead++;
+  const result = await fetchJSON(`${API}/alerts/${encodeURIComponent(target.id)}/resolve`, {
+    method: "PUT", headers: { Authorization: alertsAuthorization }, body: JSON.stringify({ expectedVersion: target.resolutionVersion }),
+  });
+  if (!alertsSessionCurrent()) throw Error('Sessao alterada');
+  if (result.ok !== true || result.resolved !== true || result.reference !== target.id || result.source !== target.source ||
+    result.numericId !== target.numericId || result.sourceVersion !== target.resolutionVersion ||
+    !/^[a-f0-9]{64}$/.test(result.resolvedVersion || '') || typeof result.resolvedAt !== 'string' ||
+    !Number.isFinite(Date.parse(result.resolvedAt)) || new Date(result.resolvedAt).toISOString() !== result.resolvedAt) throw Error('Confirmacao invalida');
+  alertsRead++;
+  alertsState = alertsState.filter(row => row.id !== target.id || row.resolutionVersion !== target.resolutionVersion);
+  renderList();
+  return result;
 }
 
 async function chargeAlert(id) {
