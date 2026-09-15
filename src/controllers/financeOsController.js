@@ -32,7 +32,11 @@ async function registerPayment(req, res) {
 }
 
 async function createCreditNote(req, res) {
-  return send(res, await business.createCreditNote(req.params.invoiceId, req.body || {}, actor(req)), 201);
+  try {
+    return send(res, await business.createCreditNote(req.params.invoiceId, req.body || {}, actor(req), req.user), 201);
+  } catch (error) {
+    return res.status(error.status || 500).json({ ok: false, error: error.status ? error.message : 'Erro ao registar nota de crédito' });
+  }
 }
 
 async function cancelInvoice(req, res) {

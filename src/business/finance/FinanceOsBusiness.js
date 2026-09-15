@@ -325,61 +325,8 @@ async function registerPayment(invoiceId, payload = {}, actor = "finance-os", us
   return result;
 }
 
-async function createCreditNote(invoiceId, payload = {}, actor = "finance-os") {
-  const creditAmount = asMoney(payload.amount || 0);
-  if (creditAmount <= 0) return { ok: false, status: 400, error: "amount inválido" };
-
-  const result = await repository.transaction(async (tx) => {
-    const invoice = await tx.invoice.findUnique({ where: { id: Number(invoiceId) }, include: { lines: true, payments: true, client: true } });
-    if (!invoice) return { ok: false, status: 404, error: "Fatura não encontrada" };
-
-    await repository.createInvoiceLine(tx, {
-      invoiceId: invoice.id,
-      type: "CREDIT_NOTE",
-      lineType: "CREDIT_NOTE",
-      description: String(payload.reason || "Nota de crédito").trim() || "Nota de crédito",
-      quantity: 1,
-      unitPrice: -creditAmount,
-      total: -creditAmount,
-      lineTotal: -creditAmount,
-      sourceMonth: monthRefFromDate(new Date()),
-      notes: String(payload.notes || "").trim() || null,
-    });
-
-    const updated = await recalculateInvoice(tx, invoice.id);
-
-    await repository.createAudit(tx, {
-      action: "FINANCE_CREDIT_NOTE_CREATED",
-      entity: "Invoice",
-      entityId: invoice.id,
-      metadata: { creditAmount, actor },
-    });
-
-    await repository.createNotification(tx, {
-      clientId: invoice.clientId,
-      type: "CREDIT_NOTE",
-      eventType: "FINANCE_CREDIT_NOTE_CREATED",
-      title: "Nota de crédito emitida",
-      message: `Foi emitida uma nota de crédito de ${creditAmount.toFixed(2)} EUR para a fatura #${invoice.id}.`,
-      role: "CLIENT",
-      severity: "INFO",
-      status: "PENDING",
-      metadata: { invoiceId: invoice.id, amount: creditAmount },
-    });
-
-    return { ok: true, invoice: invoiceShape(updated || invoice), creditNoteAmount: creditAmount };
-  });
-
-  if (!result.ok) return result;
-
-  await emitFinanceEvent(EVENT_TYPES.FINANCE_CREDIT_NOTE_CREATED, {
-    invoiceId: result.invoice.id,
-    clientId: result.invoice.clientId,
-    amount: result.creditNoteAmount,
-    actor,
-  });
-
-  return result;
+async function createCreditNote(invoiceId, payload = {}, actor = "finance-os", user = null) {
+  return require('./InvoiceCreditNoteBusiness').create(invoiceId, payload, actor, user);
 }
 
 async function cancelInvoice(invoiceId, payload = {}, actor = "finance-os") {

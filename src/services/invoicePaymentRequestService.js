@@ -51,7 +51,7 @@ async function executePaymentRequest(tx, request, work) {
     requestReceipt: { version: 1, ...request, appliedCents: Math.round(Number(result.appliedAmount) * 100), creditCents: Math.round(credit * 100) },
   }));
   await tx.operationalReminder.create({ data: {
-    sourceKey, title: request.scope === 'CREDIT_ADJUSTMENT' ? 'Ajuste de crédito registado' : 'Pagamento registado', dueDate: new Date(), isCompleted: true,
+    sourceKey, title: request.scope === 'CREDIT_ADJUSTMENT' ? 'Ajuste de crédito registado' : request.scope === 'INVOICE_CREDIT_NOTE' ? 'Nota de crédito interna registada' : 'Pagamento registado', dueDate: new Date(), isCompleted: true,
     metadata: { fingerprint, result: saved },
   } });
   return saved;

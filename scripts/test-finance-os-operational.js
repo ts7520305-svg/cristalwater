@@ -99,7 +99,7 @@ async function main() {
     const credit = await fetchJson(`${BASE_URL}/finance-os/invoices/${created.invoiceId}/credit-note`, {
       method: "POST",
       headers,
-      body: JSON.stringify({ amount: 10, reason: "Ajuste serviço" }),
+      body: JSON.stringify({ requestId: require('node:crypto').randomUUID(), amount: 10, reason: "Ajuste serviço" }),
     });
     assert(credit.response.ok && credit.data.ok, "credit note failed");
 
