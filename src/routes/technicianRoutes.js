@@ -119,15 +119,7 @@ router.get("/today", async (req, res) => {
                   visibleToTechnician: true
                 }
               },
-              operationalReminders: {
-                where: {
-                  isCompleted: false
-                },
-                orderBy: {
-                  dueDate: "asc"
-                },
-                take: 20
-              }
+
             }
           },
 
@@ -156,27 +148,11 @@ router.get("/today", async (req, res) => {
                       visibleToTechnician: true
                     }
                   },
-                  operationalReminders: {
-                    where: {
-                      isCompleted: false
-                    },
-                    orderBy: {
-                      dueDate: "asc"
-                    },
-                    take: 20
-                  }
+
                 }
               },
 
-              operationalReminders: {
-                where: {
-                  isCompleted: false
-                },
-                orderBy: {
-                  dueDate: "asc"
-                },
-                take: 20
-              }
+
 
             }
           }
@@ -242,26 +218,10 @@ router.get("/today", async (req, res) => {
                     visibleToTechnician: true,
                   },
                 },
-                operationalReminders: {
-                  where: {
-                    isCompleted: false,
-                  },
-                  orderBy: {
-                    dueDate: "asc",
-                  },
-                  take: 20,
-                },
+
               },
             },
-            operationalReminders: {
-              where: {
-                isCompleted: false,
-              },
-              orderBy: {
-                dueDate: "asc",
-              },
-              take: 20,
-            },
+
           },
         },
       },
@@ -274,42 +234,8 @@ router.get("/today", async (req, res) => {
     const permissionPolicy = await getPermissionPolicy().catch(() => null);
     const showFinancialValues = canExposeFinancialValues(req.user, permissionPolicy);
 
-    const poolIds = [...new Set([
-      ...visits.map(v => v.poolId || v.pool?.id),
-      ...extraVisits.map(v => v.poolId || v.pool?.id),
-    ].filter(Boolean))];
-    const clientIds = [...new Set([
-      ...visits.map(v => v.clientId || v.client?.id || v.pool?.clientId || v.pool?.client?.id),
-      ...extraVisits.map(v => v.clientId || v.pool?.clientId || v.pool?.client?.id),
-    ].filter(Boolean))];
-    const closedReminderStatuses = ["DONE", "CLOSED", "COMPLETED", "RESOLVED", "CANCELLED", "CANCELED"];
-    const generalReminders = (poolIds.length || clientIds.length)
-      ? await prisma.generalReminder.findMany({
-          where: {
-            status: {
-              notIn: closedReminderStatuses
-            },
-            OR: [
-              ...(poolIds.length ? [{ poolId: { in: poolIds } }] : []),
-              ...(clientIds.length ? [{ clientId: { in: clientIds } }] : [])
-            ]
-          },
-          orderBy: {
-            dueAt: "asc"
-          },
-          take: 500
-        }).catch(() => [])
-      : [];
-
-    const relevantGeneralReminders = (visit, scope) => {
-      const poolId = visit.poolId || visit.pool?.id;
-      const clientId = visit.clientId || visit.client?.id || visit.pool?.clientId || visit.pool?.client?.id;
-      return generalReminders.filter(reminder => {
-        if (scope === "pool") return reminder.poolId && poolId && reminder.poolId === poolId;
-        if (scope === "client") return reminder.clientId && clientId && reminder.clientId === clientId && !reminder.poolId;
-        return (reminder.poolId && poolId && reminder.poolId === poolId) || (reminder.clientId && clientId && reminder.clientId === clientId);
-      });
-    };
+    const briefings = await require('../business/technician/TechnicianBriefingBusiness')
+      .loadVisitBriefings([...visits, ...extraVisits]);
 
     const uniqueRows = (...lists) => {
       const seen = new Set();
@@ -439,14 +365,16 @@ router.get("/today", async (req, res) => {
           longitude:
             v.pool?.longitude || 0,
 
+          notes: briefings.get(v).notes,
+
           keyAccesses:
             v.pool?.keyAccesses || [],
 
           operationalReminders:
-            v.pool?.operationalReminders || [],
+            briefings.get(v).poolOperational,
 
           generalReminders:
-            relevantGeneralReminders(v, "pool")
+            briefings.get(v).poolGeneral
         },
 
         client: {
@@ -461,10 +389,10 @@ router.get("/today", async (req, res) => {
             uniqueRows(v.client?.accesses || [], v.pool?.client?.accesses || []),
 
           operationalReminders:
-            uniqueRows(v.client?.operationalReminders || [], v.pool?.client?.operationalReminders || []),
+            briefings.get(v).clientOperational,
 
           generalReminders:
-            relevantGeneralReminders(v, "client")
+            briefings.get(v).clientGeneral
         }
       }));
 
@@ -589,14 +517,16 @@ router.get("/today", async (req, res) => {
           longitude:
             v.pool?.longitude || 0,
 
+          notes: briefings.get(v).notes,
+
           keyAccesses:
             v.pool?.keyAccesses || [],
 
           operationalReminders:
-            v.pool?.operationalReminders || [],
+            briefings.get(v).poolOperational,
 
           generalReminders:
-            relevantGeneralReminders(v, "pool"),
+            briefings.get(v).poolGeneral,
         },
 
         client: {
@@ -610,10 +540,10 @@ router.get("/today", async (req, res) => {
             uniqueRows(v.pool?.client?.accesses || []),
 
           operationalReminders:
-            uniqueRows(v.pool?.client?.operationalReminders || []),
+            briefings.get(v).clientOperational,
 
           generalReminders:
-            relevantGeneralReminders(v, "client"),
+            briefings.get(v).clientGeneral,
         },
       }));
 
