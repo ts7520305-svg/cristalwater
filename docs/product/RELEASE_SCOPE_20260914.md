@@ -1,5 +1,7 @@
 # Cristal Water — revisão funcional da release
 
+Atualização de completude: consultar [requisitos, lacunas e configurações de 15/09/2026](COMPLETENESS_20260915.md). Esta revisão distingue implementação parcial de dependências do servidor e corrige estados históricos dos backlogs.
+
 Revisão: 14/09/2026. Esta matriz acompanha as alterações propostas na PR #4. Estados antigos de “100%” nos documentos de refatoração não certificam toda a operação da versão atual. QA significa ambiente isolado; não significa instalação no VPS.
 
 | Necessidade | Código / percurso existente | Evidência atual e limite |

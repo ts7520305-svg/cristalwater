@@ -18,6 +18,19 @@ const { getJwtSecret } = require("../utils/jwtSecret");
 
 const JWT_SECRET = getJwtSecret();
 
+router.use(auth());
+router.use('/global', auth('ADMIN'));
+
+function notificationSettingsOwner(req, res, next) {
+  const id = Number(req.params.userId ?? req.body?.userId);
+  if (!Number.isSafeInteger(id) || id <= 0) return res.status(400).json({ ok: false, error: 'Utilizador inválido' });
+  if (req.user.role === 'ADMIN') return next();
+  // This legacy table belongs to User, not to Technician/Client with the same ID.
+  const ownsUser = req.user.principalType === 'USER' && Number(req.user.userId || req.user.id) === id;
+  if (!ownsUser) return res.status(403).json({ ok: false, error: 'Sem permissão para estas configurações' });
+  return next();
+}
+
 function parseValue(value) {
   if (typeof value === 'boolean') return value ? 'true' : 'false';
   if (value === undefined || value === null) return '';
@@ -194,7 +207,7 @@ router.put('/language/me', async (req, res) => {
   }
 });
 
-router.get('/:userId', async (req, res) => {
+router.get('/:userId', notificationSettingsOwner, async (req, res) => {
   try {
     const data = await prisma.userNotificationSetting.findMany({ where: { userId: Number(req.params.userId) } });
     return res.json({ ok: true, settings: data });
@@ -203,7 +216,7 @@ router.get('/:userId', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', notificationSettingsOwner, async (req, res) => {
   try {
     const { userId, type, sound } = req.body;
     const data = await prisma.userNotificationSetting.upsert({

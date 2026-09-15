@@ -19,6 +19,28 @@ async function main(){
  const otherTech=await prisma.notification.create({data:{role:'TECHNICIAN',title:'TECH-OTHER',message:'Other update',metadata:{technicianId:tech2.id}}});
  async function call(path,token,method='GET',body){const response=await fetch(BASE+path,{method,headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})},body:body?JSON.stringify(body):undefined});return{status:response.status,body:await response.json().catch(()=>({}))};}
  const test=async(name,fn)=>{try{await fn();console.log('PASS',name);results.push({name,pass:true})}catch(e){console.error('FAIL',name,e.message);results.push({name,pass:false,error:e.message})}};
+ await test('global settings require administration and notification settings require ownership',async()=>{
+  const key=`QA_ACCESS_${suffix}`;
+  const admin=await prisma.user.create({data:{name:'Settings QA',email:`settings-${suffix}@qa.test`,password:'qa-no-login',role:'ADMIN',active:true}});
+  const at=sign({id:admin.id,role:'ADMIN'});
+  for(const [token,expected] of [[null,401],[ct,403],[tt,403]]){
+   for(const [url,method,body] of [['/api/settings/global','GET'],[`/api/settings/global/${key}`,'GET'],[`/api/settings/global/${key}`,'PUT',{value:'true'}],['/api/settings/global/bulk','POST',{settings:{[key]:'true'}}]])assert.equal((await call(url,token,method,body)).status,expected,`${method} ${url}`);
+  }
+  assert.equal(await prisma.systemSetting.count({where:{key}}),0);
+  assert.equal((await call(`/api/settings/global/${key}`,at,'PUT',{value:'true'})).status,200);
+  assert.equal((await call(`/api/settings/global/${key}`,at)).body.value,'true');
+  const user=await prisma.user.create({data:{name:'Settings user',email:`settings-user-${suffix}@qa.test`,password:'qa-no-login',role:'TECHNICIAN',active:true}});
+  await prisma.technician.update({where:{id:tech2.id},data:{email:user.email}});
+  const ut=sign({id:user.id,userId:user.id,technicianId:tech2.id,principalType:'USER',role:'TECHNICIAN'});
+  assert.equal((await call(`/api/settings/${user.id}`,null)).status,401);
+  assert.equal((await call('/api/settings',null,'POST',{userId:user.id,type:'QA',sound:false})).status,401);
+  assert.equal((await call('/api/settings',tt,'POST',{userId:user.id,type:'QA',sound:false})).status,403);
+  assert.equal((await call(`/api/settings/${admin.id}`,ut)).status,403);
+  assert.equal((await call('/api/settings',ut,'POST',{userId:user.id,type:'QA',sound:false})).status,200);
+  assert.equal((await call(`/api/settings/${user.id}`,ut)).body.settings[0].sound,false);
+  assert.equal((await call('/api/settings/language/me',ct)).status,200);
+  await prisma.systemSetting.delete({where:{key}});
+ });
  await test('geofence only validates assigned open visits and never invents missing GPS',async()=>{
   const pool=await prisma.pool.create({data:{clientId:client.id,name:'GPS QA',active:true,latitude:37,longitude:-8}});
   const visit=await prisma.serviceVisit.create({data:{clientId:client.id,poolId:pool.id,technicianId:tech.id,status:'PLANNED',date:new Date(),plannedDate:new Date()}});
