@@ -13,3 +13,15 @@ Limites: não converte automaticamente a antiga fila sem identidade inequívoca;
 PWA, proteção offline e aprovação humana das ações IA são capacidades fixas desta versão. A API devolve o valor efetivo e recusa tentativas de desligar essas capacidades; os valores antigos guardados não se sobrepõem ao comportamento efetivo. Um pedido bulk com uma dessas opções é recusado antes de gravar as restantes opções. A interface deixa de mostrar interruptores inoperantes para PWA/offline. Os estados de IA e segurança usam a mesma fonte para indicar aprovação humana obrigatória.
 
 Ficheiros: systemSettingService, settingsRoutes, aiAdminController, securityController, admin-operational-settings.html, test-field-access-api e este documento. Testes de API aprovados em `settings-capabilities.log`: configurações fixas devolvem 409 na alteração e true na leitura; bulk recusado não altera a outra chave. As opções de preparação de mensalidades e lembretes ficam desligadas por defeito. Não se apaga nenhum trabalho offline.
+
+## TASK 85 — preparação mensal e lembretes do portal
+
+O agendador existente passa a preparar mensalidades em rascunho através do Finance OS, apenas quando ativado nas configurações. Não emite documentos fiscais, não envia mensagens externas e não inclui reparações/visitas extra automaticamente. A pré-visualização da Business é apenas leitura. Há controlo de concorrência do agendador, uma fatura por cliente/mês, exclusão de clientes em pausa/inativos e auditoria da preparação. A criação de rascunho e o cálculo passam a usar a mesma transação, compatível com uma única ligação à base de dados.
+
+Foi corrigido um erro do fluxo de rascunhos: o cálculo convertia DRAFT em PENDING. Agora o rascunho conserva DRAFT até emissão explícita. O método usado manualmente continua disponível.
+
+Os lembretes consideram vencimento há pelo menos sete dias, saldo em aberto e contrato ativo. A deduplicação persistente por fatura/semana impede repetições concorrentes. Novos avisos param com pagamento ou pausa. A mensagem indica a data e o saldo observado; é um aviso no portal, não prova de envio por email/WhatsApp. Foi retirado o fallback antigo que podia criar avisos sem deduplicação após erro.
+
+Ficheiros: MonthlyAutomationBusiness, FinanceOsBusiness, autoBillingService, paymentService, test-field-billing-automation, test-field-suite e este documento. A bateria passa a 21 grupos. Testes locais da automação e Finance OS passaram em `run-1789449099885`; incluem desativação, pré-visualização sem escrita, cliente em pausa, duas execuções simultâneas, repetição mensal, limite de sete dias, repetição semanal e paragem após pagamento. Não houve migração ou envio externo.
+
+Continuam por completar: orçamento comercial detalhado, contratos/preços sazonais, revisão linguística integral, retenção e monitorização externa de backups. Esta entrega não declara concluídos esses itens.

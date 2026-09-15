@@ -95,21 +95,20 @@ async function recalculateInvoice(tx, invoiceId) {
   });
 }
 
-async function createDraftInvoice(payload = {}, actor = "finance-os") {
+async function createDraftInvoice(payload = {}, actor = "finance-os", transaction = null) {
   const clientId = Number(payload.clientId || 0);
   if (!clientId) return { ok: false, status: 400, error: "clientId obrigatório" };
-
-  const client = await repository.getClient(clientId);
-  if (!client) return { ok: false, status: 404, error: "Cliente não encontrado" };
-
   const monthRef = String(payload.monthRef || monthRefFromDate()).trim();
-  const existing = await repository.getInvoices({ clientId, monthRef });
-  if ((existing || []).length) return { ok: false, status: 409, error: "Já existe fatura para este mês" };
-
+  const run = async tx => {
+    await tx.$queryRaw`SELECT id FROM "Client" WHERE id = ${clientId} FOR UPDATE`;
+    const client = await tx.client.findUnique({ where: { id: clientId } });
+    if (!client) return { ok: false, status: 404, error: "Cliente não encontrado" };
+    if (payload.requireActiveContract && (!client.active || client.status !== 'ACTIVE' || !client.billingActive || client.deletedAt || client.archiveStatus !== 'ATIVO')) return { ok: false, status: 409, error: "Contrato inativo" };
+    if (await tx.invoice.findFirst({ where: { clientId, monthRef } })) return { ok: false, status: 409, error: "Já existe fatura para este mês" };
   const dueDate = repository.toDate(payload.dueDate) || new Date(Date.now() + 15 * 86400000);
   const lineItems = Array.isArray(payload.lines) ? payload.lines : [];
 
-  const invoice = await repository.createInvoice({
+  const invoice = await tx.invoice.create({ data: {
     clientId,
     monthRef,
     month: monthRef,
@@ -129,19 +128,17 @@ async function createDraftInvoice(payload = {}, actor = "finance-os") {
         notes: String(line.notes || "").trim() || null,
       })),
     },
-  });
+  } });
 
-  const recalculated = await repository.transaction((tx) => recalculateInvoice(tx, invoice.id));
-  const finalInvoice = invoiceShape(recalculated || invoice);
-
-  await emitFinanceEvent(EVENT_TYPES.FINANCE_INVOICE_DRAFT, {
-    invoiceId: finalInvoice.id,
-    clientId,
-    monthRef,
-    actor,
-  });
+  const recalculated = await recalculateInvoice(tx, invoice.id);
+  await tx.invoice.update({ where: { id: invoice.id }, data: { status: "DRAFT" } });
+  const finalInvoice = invoiceShape({ ...(recalculated || invoice), status: "DRAFT" });
 
   return { ok: true, invoice: finalInvoice };
+  };
+  const result = transaction ? await run(transaction) : await repository.transaction(run);
+  if (result.ok && !transaction) await emitFinanceEvent(EVENT_TYPES.FINANCE_INVOICE_DRAFT, { invoiceId: result.invoice.id, clientId, monthRef, actor });
+  return result;
 }
 
 async function issueInvoice(invoiceId, payload = {}, actor = "finance-os") {
@@ -895,29 +892,8 @@ async function getCustomerProfitabilityReport(query = {}) {
 }
 
 async function triggerReminderAutomation(actor = "finance-os") {
-  try {
-    await processPaymentReminders();
-  } catch (error) {
-    // Fallback path keeps finance automation operational when chat bindings are stricter in some environments.
-    const overdue = await repository.findOverdueInvoices(new Date());
-    await repository.transaction(async (tx) => {
-      for (const invoice of overdue) {
-        await repository.createNotification(tx, {
-          clientId: invoice.clientId,
-          type: "PAYMENT_REMINDER",
-          eventType: "FINANCE_REMINDER_FALLBACK",
-          title: "Lembrete de pagamento",
-          message: `Fatura #${invoice.id} em atraso. Valor em aberto: ${invoiceOpen(invoice).toFixed(2)} EUR.`,
-          role: "CLIENT",
-          severity: "WARNING",
-          status: "PENDING",
-          metadata: { invoiceId: invoice.id, fallback: true },
-        });
-      }
-    });
-  }
-  await emitFinanceEvent(EVENT_TYPES.FINANCE_REMINDER_SENT, { actor });
-  return { ok: true, message: "Lembretes financeiros processados" };
+  const result = await processPaymentReminders();
+  return { ...result, message: result.skipped ? "Lembretes automáticos desligados nas configurações." : "Avisos de pagamento registados no portal." };
 }
 
 async function confirmPaymentAutomation(invoiceId, payload = {}, actor = "finance-os") {
