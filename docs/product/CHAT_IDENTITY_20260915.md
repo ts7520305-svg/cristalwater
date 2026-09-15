@@ -9,3 +9,9 @@ O negócio legado conserva os formatos de resposta e o histórico JSON existente
 Ensaio `field-qa-runtime/run-1789505523377` aprovado: dois aliases, visitantes, outro cliente, técnico, permissões de leitura/escrita, tentativa de falsificar origem ou leitura administrativa, IDs inválidos e preservação de conteúdo corrompido. O ficheiro de teste é restaurado exatamente no final. Inclui regressões da publicação de faturas e da matriz de acessos. Testes unitários/técnicos/sintaxe executados antes do commit. Runner com 70 grupos.
 
 Sete ficheiros: negócio, router legado, controlador moderno, teste, runner, relatório e checkpoint. Sem migração nem alteração ao histórico de produção.
+
+## TASK167 — Identidade real na bateria de interligações
+
+Os workflows `35022515921` e `35022583595` aprovaram 69/70 grupos. O único caso falhado enviava `sender: client` usando o token da administração, comportamento intencionalmente eliminado pela TASK165. A bateria passa a autenticar o cliente pelo endpoint real antes de enviar a mensagem, e exige também `senderType: CLIENT`, além da mensagem por ler. Não reduz a regra de autorização nem a asserção de leitura.
+
+Validação `field-qa-runtime/run-1789506504094`: interligações completas, identidade do chat e envio de documentos aprovados. Testes unitários e técnicos aprovados; sintaxe do script validada. Três ficheiros nesta tarefa: teste de interligações, este relatório e checkpoint.

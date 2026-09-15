@@ -76,8 +76,8 @@ async function ensureClientToken(client) {
   return clientToken;
 }
 
-async function api(method, pathname, body, expected = [200, 201]) {
-  const token = await ensureAdminToken();
+async function api(method, pathname, body, expected = [200, 201], authenticatedToken = null) {
+  const token = authenticatedToken || await ensureAdminToken();
   const response = await fetchImpl(`${BASE_URL}${pathname}`, {
     method,
     headers: {
@@ -253,18 +253,18 @@ async function extraCommunicationChecks(monthRunId) {
   });
   check("aviso de stock do tecnico cria lembrete e notificacao", Boolean(stockReminder.data.notification?.id), `notificacao ${stockReminder.data.notification?.id || "-"}`);
 
+  const portalToken = await ensureClientToken(ctx.client);
   const chat = await api("POST", "/api/chat", {
     clientId: ctx.client.id,
     sender: "client",
     text: `Mensagem cliente bateria ${batteryRunId}`,
-  });
-  check("chat cliente cria mensagem por ler para admin", Boolean(chat.data.message?.id && chat.data.message?.isReadByAdmin === false), `msg ${chat.data.message?.id || "-"}`);
+  }, [200, 201], portalToken);
+  check("chat cliente cria mensagem por ler para admin", Boolean(chat.data.message?.id && chat.data.message?.senderType === "CLIENT" && chat.data.message?.isReadByAdmin === false), `msg ${chat.data.message?.id || "-"}`);
 
   const notifications = await api("GET", "/api/notifications");
   const notifText = JSON.stringify(notifications.data);
   check("notificacoes agregam chat, agua e stock", notifText.includes(batteryRunId), "eventos visiveis");
 
-  const portalToken = await ensureClientToken(ctx.client);
   const portalResponse = await fetchImpl(`${BASE_URL}/api/client-portal/${ctx.client.id}`, {
     method: "GET",
     headers: {
