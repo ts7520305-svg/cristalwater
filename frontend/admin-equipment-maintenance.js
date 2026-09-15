@@ -6,7 +6,7 @@
  const status=text=>{el('emStatus').textContent=text;};
  function session(){if(!owner||owner!==token()){root.hidden=true;el('emPlans').replaceChildren();el('emForm').reset();revision++;throw Error('Sessão alterada. Reabra a página.');}}
  async function api(url,method='GET',payload){session();const rev=revision;const response=await fetch(url,{method,headers:{Authorization:`Bearer ${owner}`,'Content-Type':'application/json'},body:payload?JSON.stringify(payload):undefined,cache:'no-store'});const body=await response.json();session();if(rev!==revision)throw Error('Piscina alterada. Atualize os planos.');if(!response.ok||body.ok===false)throw Error(body.error||body.message||'Não foi possível concluir.');return body;}
- function controls(){root.querySelectorAll('button,input,select,textarea').forEach(c=>c.disabled=busy);el('emNew').disabled=busy||!loaded;el('emRefresh').disabled=busy||!poolId;el('emPool').disabled=busy||el('emPool').options.length<2;}
+ function controls(){root.querySelectorAll('button,input,select,textarea').forEach(c=>{if(!c.closest('#equipmentReminderControls'))c.disabled=busy;});el('emNew').disabled=busy||!loaded;el('emRefresh').disabled=busy||!poolId;el('emPool').disabled=busy||el('emPool').options.length<2;}
  async function run(fn){if(busy)return;busy=true;controls();try{session();await fn();}catch(e){status(e.message);}finally{busy=false;controls();}}
  function discard(){return !dirty||window.confirm('Existem alterações por guardar. Descartar?');}
  function close(){editing=null;dirty=false;el('emForm').hidden=true;el('emForm').reset();}

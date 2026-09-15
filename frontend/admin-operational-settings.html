@@ -224,12 +224,26 @@
       </form>
       <p id="emStatus" role="status" aria-live="polite">Escolha uma piscina para consultar e configurar os planos.</p>
       <style>#equipmentMaintenancePanel label{display:block;margin:12px 0}#equipmentMaintenancePanel input:not([type=checkbox]),#equipmentMaintenancePanel select,#equipmentMaintenancePanel textarea{display:block;width:100%;min-height:44px;padding:10px;max-width:100%;box-sizing:border-box}#equipmentMaintenancePanel button{min-height:44px;white-space:normal}#equipmentMaintenancePanel .em-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}#equipmentMaintenancePanel{overflow-wrap:anywhere}#equipmentMaintenancePanel .em-plan{border:1px solid #94a3b8;border-radius:12px;padding:12px;margin:12px 0}#equipmentMaintenancePanel .em-active{display:flex;align-items:center;gap:12px;min-height:44px}#equipmentMaintenancePanel .em-active input{width:24px;height:24px}</style>
+      <div id="equipmentReminderControls" style="margin-top:20px;padding-top:16px;border-top:1px solid #94a3b8">
+        <h3>Avisos de manutenção preventiva</h3>
+        <p>Quando ativados, os vencimentos geram avisos na aplicação. As notificações push dependem das permissões do dispositivo e da configuração do servidor.</p>
+        <label class="em-active"><input type="checkbox" id="equipmentRemindersEnabled" disabled><span>Ativar avisos na aplicação</span></label>
+        <div style="display:flex;flex-wrap:wrap;gap:10px">
+          <button type="button" class="btn" id="equipmentRemindersSave" disabled>Guardar configuração de avisos</button>
+          <button type="button" class="btn" id="equipmentRemindersReload" disabled>Atualizar configuração de avisos</button>
+          <button type="button" class="btn" id="equipmentRemindersCheck" disabled>Verificar vencimentos agora</button>
+        </div>
+        <p id="equipmentRemindersAutomatic"></p>
+        <p>A verificação manual cria avisos internos; não envia email, SMS ou WhatsApp.</p>
+        <p id="equipmentRemindersStatus" role="status" aria-live="polite"></p>
+      </div>
     </section>
   </main>
   <script src="/admin-auth-guard.js"></script>
   <script src="/admin-operational-settings.js"></script>
   <script src="/admin-data-protection.js"></script>
   <script src="/admin-equipment-maintenance.js"></script>
+  <script src="/admin-equipment-reminders.js"></script>
   <script src="/cristal-help-data.js"></script><script src="/cristal-assist.js"></script>
 <script src="/cw-admin-shortcuts.js"></script>
   <script src="/ui/core/navigation-context.js"></script>
