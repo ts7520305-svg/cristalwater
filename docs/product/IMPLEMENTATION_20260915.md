@@ -89,3 +89,15 @@ Configurações operacionais passa a incluir estado da cópia local e revisão/l
 - Verificação: novo `test-auth-entry-browser.js` em Chromium cobre quatro entradas, repetição/retry, passwords exatas, ausência de token na consola, perfil inválido, página pública HTML, mudança de conta, logout e alteração noutra aba. As regressões `test-field-session-browser.js` e `test-field-push-session-browser.js` continuam aprovadas. Não substitui receção push em dispositivos físicos.
 
 TASK99 — complemento visual: botão Sair visível no topo do Técnico Campo, com alvo mínimo de 44 px, bloqueio enquanto termina a sessão e ação central CristalAuth.logout. Teste da página HTML real a 320 px em espanhol verifica separação do idioma/estado de rede, saída única e preservação do trabalho pendente. Teste de idioma existente continua aprovado.
+
+
+## TASK112 — Entrega push de manutenção preventiva
+
+- Novo `deliverMaintenanceNotifications()` processa apenas EQUIPMENT_MAINTENANCE_DUE; o caminho crítico conserva exclusivamente água aberta/bomba manual, prioridade alta, TTL e destinos anteriores.
+- Preventivos usam urgência normal, TTL de 24 horas, tag da chave de manutenção, Técnico Campo para técnicos e configurações de manutenção para administradores. Entrega técnica filtrada pela identidade atribuída; notificações de administrador com userId explícito limitadas a esse administrador.
+- Antes de cada envio, a notificação ainda tem de estar pendente/enviada e não lida; o negócio `isCurrentNotification` volta a validar o plano/versão/vencimento/atribuição. Decisões obsoletas são marcadas SUPERSEDED.
+- Conservados gates de notificações externas e VAPID, validação do principal, desativação de subscrições 404/410 e repetição de falhas transitórias apenas nos dispositivos ainda não confirmados. Uma promessa em curso evita duas entregas preventivas concorrentes no mesmo processo.
+- Sem garantia exactly-once global: a entrega tem semântica at-least-once em falha/crash entre aceitação do fornecedor e gravação da confirmação, ou múltiplos processos. A tag permite ao dispositivo substituir a apresentação anterior. Não foi enviado push real nesta tarefa.
+- Validação isolada com VM e mocks sem rede: 15 testes preventivos e 8 regressões críticas aprovados. Inclui filtro de eventos/destinatários, leitura, decisão obsoleta, revalidação antes de envio, 410, repetição parcial, concorrência local e gates. Os motivos de obsolescência são respostas simuladas do negócio; regras de calendário/atribuição são testadas pelo respetivo módulo.
+
+TASK112 — consistência de chefes de equipa: preventivos atribuídos a um técnico também procuram subscrições TEAM_LEADER desse mesmo technicianId, conservando validação do principal e owner do payload correspondente à subscrição. Nenhuma alteração no caminho crítico. Teste adicional confirma receção pelo chefe responsável e exclusão de outro chefe; 16 testes preventivos + 8 críticos aprovados.
