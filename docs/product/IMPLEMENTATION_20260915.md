@@ -29,3 +29,7 @@ Continuam por completar: orçamento comercial detalhado, contratos/preços sazon
 ## TASK 86 — base de orçamentos comerciais versionados
 
 Modelo privado RepairQuote, migração aditiva e cálculo de materiais, mão de obra, margem sobre venda, desconto antes do IVA e validade. Taxa de IVA obrigatória e escolhida pelo administrador. Preços arredondados por unidade e linha; margem efetiva calculada após desconto. Valores abaixo do custo exigem confirmação. O bloqueio da reparação e a versão esperada evitam substituir alterações concorrentes. Versões anteriores são conservadas e reparações aprovadas não podem ser reorçamentadas por este método. A ligação à interface e aprovação é a tarefa seguinte.
+
+## TASK 87 — edição e aprovação dos orçamentos
+
+API administrativa para pré-visualizar, guardar e consultar versões. Aprovação exige o ID da versão atual e referência da autorização recebida do cliente; orçamento expirado é recusado. O editor antigo não pode substituir uma versão detalhada. PDF comercial exclusivo da administração; respostas das reparações para técnicos deixam de incluir preços, pagamentos, contactos ou relações completas do cliente. Estes controlos não constituem uma auditoria integral de autorização por piscina. A aprovação regista uma autorização recebida, não envia mensagens.

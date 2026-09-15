@@ -2843,10 +2843,13 @@ router.post('/repairs/:id/quote', async (req, res) => {
     const id = toInt(req.params.id);
     const price = toFloat(req.body.totalPrice, 0);
 
-    const repair = await db('repair').update({
-      where: { id },
-      data: repairBaseData({ totalPrice: price, status: 'QUOTED', notes: req.body.notes || undefined }),
+    const repository = require('../dal/RepairRepository');
+    const repair = await repository.transaction(async tx => {
+      await tx.$queryRaw`SELECT id FROM "Repair" WHERE id = ${id} FOR UPDATE`;
+      if (await tx.repairQuote.count({ where: { repairId: id } })) return null;
+      return tx.repair.update({ where: { id }, data: repairBaseData({ totalPrice: price, status: 'QUOTED', notes: req.body.notes || undefined }) });
     });
+    if (!repair) return res.status(409).json({ ok: false, error: 'Use o editor detalhado para rever este orçamento' });
 
     return res.json({ ok: true, repair });
   } catch (error) {

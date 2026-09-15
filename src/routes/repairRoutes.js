@@ -15,6 +15,26 @@ function allowRoles(...roles) {
 }
 
 router.use(auth());
+// Commercial documents and arbitrary nested diagnostic data never leave these
+// routes for field profiles. Operational responses use an explicit allowlist.
+router.use((req, res, next) => {
+  if (roleIn(req.user?.role, ['ADMIN'])) return next();
+  const json = res.json.bind(res);
+  const safeRepair = repair => repair && Object.fromEntries(
+    ['id','poolId','problem','quantity','priority','status','createdAt','doneAt'].map(key => [key, repair[key]])
+  );
+  res.json = payload => {
+    if (Array.isArray(payload)) return json(payload.map(safeRepair));
+    const safe = { ...payload };
+    if (safe.repair) safe.repair = safeRepair(safe.repair);
+    if (safe.diagnostic) {
+      const d = safe.diagnostic;
+      safe.diagnostic = { diagnosticNotes: d.diagnosticNotes, partsRequired: d.partsRequired?.map(p => ({name:p.name,quantity:p.quantity,unit:p.unit})), stockOk: d.stockOk };
+    }
+    return json(safe);
+  };
+  next();
+});
 
 const uploadDir = resolveUploadSubdir("repairs");
 
@@ -34,9 +54,11 @@ const upload = multer({
 	},
 });
 
+router.post('/quote-preview', allowRoles('ADMIN'), controller.previewQuote);
+router.get('/:id/quotes', allowRoles('ADMIN'), controller.listQuotes);
 router.post("/", allowRoles("ADMIN", "TECHNICIAN"), controller.createRepair);
 router.get("/pool/:poolId", allowRoles("ADMIN", "TECHNICIAN"), controller.listRepairsByPool);
-router.get("/:id/pdf", allowRoles("ADMIN", "TECHNICIAN"), controller.repairPdf);
+router.get("/:id/pdf", allowRoles("ADMIN"), controller.repairPdf);
 router.put("/:id/quote", allowRoles("ADMIN"), controller.quoteRepair);
 router.put("/:id/diagnose", allowRoles("ADMIN", "TECHNICIAN"), controller.diagnoseRepair);
 router.put("/:id/schedule", allowRoles("ADMIN", "TECHNICIAN"), controller.scheduleRepair);

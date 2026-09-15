@@ -791,11 +791,14 @@ async function diagnoseRepair(repairId, payload = {}, db = null, actor = "repair
   return repository.transaction(run);
 }
 
-async function quoteRepair(repairId, db = null, actor = "repair-os") {
+async function quoteRepair(repairId, db = null, actor = "repair-os", payload = {}) {
+  if (payload.lines) return require('./CommercialQuoteBusiness').save(repairId, payload, actor);
   const run = async (tx) => {
+    if (tx.$queryRaw) await tx.$queryRaw`SELECT id FROM "Repair" WHERE id = ${Number(repairId)} FOR UPDATE`;
     const repair = await repository.getRepair(repairId, tx);
     if (!repair) return { ok: false, status: 404, error: "Reparação não encontrada" };
 
+    if (tx.repairQuote && await tx.repairQuote.count({ where: { repairId: repair.id } })) return { ok: false, status: 409, error: 'Use o editor detalhado para rever este orçamento' };
     const transition = ensureRepairTransition(repair, "QUOTE");
     if (!transition.ok) return transition;
 
@@ -842,15 +845,26 @@ async function quoteRepair(repairId, db = null, actor = "repair-os") {
   return repository.transaction(run);
 }
 
-async function approveRepair(repairId, db = null, actor = "repair-os") {
+async function approveRepair(repairId, db = null, actor = "repair-os", payload = {}) {
   const executor = db || repository;
 
   const run = async (tx) => {
+    if (tx.$queryRaw) await tx.$queryRaw`SELECT id FROM "Repair" WHERE id = ${Number(repairId)} FOR UPDATE`;
     const repair = await repository.getRepair(repairId, tx);
     if (!repair) return { ok: false, status: 404, error: "Reparação não encontrada" };
 
+    const quote = tx.repairQuote ? await tx.repairQuote.findFirst({ where: { repairId: repair.id }, orderBy: { version: 'desc' } }) : null;
+    if (quote) {
+      if (payload.quoteId !== quote.id || !String(payload.approvalReference || '').trim()) return { ok: false, status: 409, error: 'Confirme a versão atual e indique a referência da aprovação do cliente' };
+      if (repair.status === 'APPROVED') return { ok: true, repair, alreadyApproved: true };
+      if (new Date(quote.snapshot.validUntil) < new Date()) return { ok: false, status: 409, error: 'Orçamento expirado. Grave uma nova versão antes de aprovar.' };
+
+    }
     const transition = ensureRepairTransition(repair, "APPROVE");
     if (!transition.ok) return transition;
+    if (quote) {
+      await tx.userAuditLog.create({ data: { action: 'REPAIR_QUOTE_APPROVED', actor, entity: 'RepairQuote', entityId: String(quote.id), metadata: { repairId: repair.id, version: quote.version, approvalReference: String(payload.approvalReference).trim().slice(0,1000) } } });
+    }
 
     const updated = await repository.updateRepair(tx, repairId, {
       status: "APPROVED",
