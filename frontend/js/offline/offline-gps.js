@@ -1,258 +1,91 @@
-const OFFLINE_GPS_KEY =
-  "cristalwater_offline_gps";
-
-// ======================================================
-// GET
-// ======================================================
-
-function getOfflineGps(){
-
-  try {
-
-    return JSON.parse(
-
-      localStorage.getItem(
-        OFFLINE_GPS_KEY
-      )
-
-    ) || [];
-
-  } catch {
-
-    return [];
-  }
-}
-
-// ======================================================
-// SAVE
-// ======================================================
-
-function saveOfflineGps(position){
-
-  const data =
-    getOfflineGps();
-
-  data.push({
-
-    ...position,
-
-    createdAt:
-      new Date()
-        .toISOString()
-  });
-
-  localStorage.setItem(
-
-    OFFLINE_GPS_KEY,
-
-    JSON.stringify(data)
-  );
-
-  console.log(
-    "📍 GPS offline guardado"
-  );
-}
-
-// ======================================================
-// CLEAR
-// ======================================================
-
-function clearOfflineGps(){
-
-  localStorage.removeItem(
-    OFFLINE_GPS_KEY
-  );
-}
-
-// ======================================================
-// SYNC
-// ======================================================
-
-async function syncOfflineGps(){
-
-  if (!navigator.onLine)
-    return;
-
-  const data =
-    getOfflineGps();
-
-  if (!data.length)
-    return;
-
-  console.log(
-    "🔄 Sync GPS offline..."
-  );
-
-  const remaining = [];
-
-  for (const item of data){
-
+// Legacy page adapter. Each immutable point has its own key, so acknowledgements
+// cannot overwrite points captured while an upload is in flight or in another tab.
+(function () {
+  'use strict';
+  const PREFIX = 'cwGpsPoint:v2:', LEGACY = 'cristalwater_offline_gps';
+  let flushing = null, watchId = null;
+  function session() {
+    const token = window.CristalAuth?.getToken?.() || '';
+    if (!token) return null;
     try {
-
-      const res =
-        await fetch(
-          `${API}/gps/update`,
-          {
-
-            method:"POST",
-
-            headers:{
-              "Content-Type":"application/json"
-            },
-
-            body: JSON.stringify({
-
-              recordedAt: item.recordedAt || item.createdAt,
-              userId:
-                item.userId,
-
-              latitude:
-                item.latitude,
-
-              longitude:
-                item.longitude
-            })
-          }
-        );
-
-      if (!res.ok){
-
-        remaining.push(item);
-      }
-
-    } catch(err){
-
-      console.warn("Falha temporaria ao sincronizar GPS offline");
-
-      remaining.push(item);
+      const claim = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      if (!['TECHNICIAN', 'TEAM_LEADER'].includes(claim.role)) return null;
+      const technicianId = Number(claim.technicianId || claim.id);
+      if (!Number.isSafeInteger(technicianId) || technicianId <= 0) return null;
+      const owner = claim.principalType === 'USER' ? `USER:${claim.userId || claim.id}:TECH:${technicianId}` : `TECH:${technicianId}`;
+      return { token, technicianId, owner };
+    } catch (_) { return null; }
+  }
+  function same(captured) { const current = session(); return current?.token === captured.token && current?.owner === captured.owner; }
+  function notice(message) {
+    let node = document.getElementById('cwLegacyGpsStatus');
+    if (!node) { node = document.createElement('div'); node.id = 'cwLegacyGpsStatus'; node.setAttribute('role', 'status'); node.style.cssText = 'padding:12px;background:#fff4ce;color:#624400'; document.body.prepend(node); }
+    node.textContent = message;
+  }
+  function entries(captured = session()) {
+    if (!captured) return [];
+    const prefix = PREFIX + captured.owner + ':';
+    const rows = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key?.startsWith(prefix)) continue;
+      const raw = localStorage.getItem(key);
+      let point; try { point = JSON.parse(raw); } catch (_) { throw Error('Registo GPS ilegível. Os dados foram preservados; peça apoio ao escritório.'); }
+      if (!point || point.owner !== captured.owner || !point.id || !Number.isFinite(point.latitude) || !Number.isFinite(point.longitude)) throw Error('Registo GPS inválido; peça apoio ao escritório.');
+      rows.push({ key, raw, point });
     }
+    return rows.sort((a, b) => a.point.recordedAt.localeCompare(b.point.recordedAt));
   }
-
-  localStorage.setItem(
-
-    OFFLINE_GPS_KEY,
-
-    JSON.stringify(remaining)
-  );
-
-  console.log(
-    "✅ GPS offline sincronizado"
-  );
-}
-
-// ======================================================
-// SEND GPS
-// ======================================================
-
-async function sendGpsPosition(
-  latitude,
-  longitude
-){
-
-  // ================================================
-  // OFFLINE
-  // ================================================
-
-  if (!navigator.onLine){
-
-    saveOfflineGps({
-
-      userId:
-        user.id,
-
-      latitude,
-
-      longitude
-    });
-
-    return;
+  function save(position, captured = session()) {
+    if (!captured || !same(captured)) throw Error('Entre com a conta do técnico para guardar o GPS.');
+    const point = { id: crypto.randomUUID(), owner: captured.owner, technicianId: captured.technicianId, latitude: position.latitude, longitude: position.longitude, accuracy: position.accuracy ?? null, recordedAt: position.recordedAt || new Date().toISOString() };
+    if (!Number.isFinite(point.latitude) || !Number.isFinite(point.longitude) || Math.abs(point.latitude) > 90 || Math.abs(point.longitude) > 180 || !Number.isFinite(Date.parse(point.recordedAt))) throw Error('Leitura GPS inválida.');
+    localStorage.setItem(PREFIX + captured.owner + ':' + point.id, JSON.stringify(point));
+    return point;
   }
-
-  // ================================================
-  // ONLINE
-  // ================================================
-
-  try {
-
-    await fetch(
-      `${API}/gps/update`,
-      {
-
-        method:"POST",
-
-        headers:{
-          "Content-Type":"application/json"
-        },
-
-        body: JSON.stringify({
-
-          userId:
-            user.id,
-
-          latitude,
-
-          longitude
-        })
+  async function flush() {
+    if (flushing) return flushing;
+    const captured = session();
+    if (!captured) throw Error('Sessão GPS indisponível. Volte a entrar.');
+    if (!navigator.onLine) return { pending: entries(captured).length };
+    flushing = (async () => {
+      for (const { key, raw, point } of entries(captured).slice(0, 100)) {
+        if (!same(captured)) throw Error('A conta mudou. Os pontos GPS foram preservados.');
+        const response = await fetch('/api/gps/update', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + captured.token }, body: JSON.stringify({ technicianId: point.technicianId, latitude: point.latitude, longitude: point.longitude, accuracy: point.accuracy, recordedAt: point.recordedAt }) });
+        const data = await response.json();
+        if (!same(captured)) throw Error('A conta mudou. Os pontos GPS foram preservados.');
+        if (!response.ok || data.ok === false || data.success === false) throw Error(data.message || 'GPS por confirmar. O envio será repetido.');
+        if (localStorage.getItem(key) === raw) localStorage.removeItem(key);
       }
-    );
-
-  } catch(err){
-
-    console.warn("Sem rede para enviar GPS, guardado em fila local");
-
-    saveOfflineGps({
-
-      userId:
-        user.id,
-
-      latitude,
-
-      longitude
-    });
+      const pending = entries(captured).length;
+      const legacy = localStorage.getItem(LEGACY);
+      if (legacy && legacy !== '[]') notice('Existem pontos GPS antigos sem conta confirmada. Foram preservados; peça apoio ao escritório.');
+      else notice(pending ? `${pending} ponto(s) GPS por enviar.` : 'Envios GPS confirmados.');
+      return { pending };
+    })();
+    try { return await flushing; } finally { flushing = null; }
   }
-}
-
-// ======================================================
-// START GPS TRACKING
-// ======================================================
-
-function startGpsTracking(){
-
-  if (
-    !navigator.geolocation
-  ){
-
-    console.log(
-      "GPS não suportado"
-    );
-
-    return;
+  async function send(latitude, longitude, options = {}) {
+    try { save({ latitude, longitude, ...options }); } catch (error) { notice('Não foi possível guardar o GPS: ' + error.message); throw error; }
+    if (!navigator.onLine) { notice('GPS guardado neste dispositivo; aguarda rede.'); return; }
+    try { return await flush(); } catch (error) { notice('GPS pendente: ' + error.message); throw error; }
   }
-
-  navigator.geolocation.watchPosition(
-
-    (pos)=>{
-
-      sendGpsPosition(
-
-        pos.coords.latitude,
-
-        pos.coords.longitude
-      );
-    },
-
-    (err)=>{
-
-      console.warn("GPS indisponivel ou permissao negada");
-    },
-
-    {
-
-      enableHighAccuracy:true,
-
-      maximumAge:10000,
-
-      timeout:10000
-    }
-  );
-}
+  function stop() { if (watchId !== null) navigator.geolocation?.clearWatch(watchId); watchId = null; }
+  function start() {
+    stop();
+    const captured = session();
+    if (!captured || !navigator.geolocation) return;
+    watchId = navigator.geolocation.watchPosition(position => {
+      if (session()?.owner !== captured.owner) { stop(); return; }
+      send(position.coords.latitude, position.coords.longitude, { accuracy: position.coords.accuracy, recordedAt: new Date(position.timestamp).toISOString() }).catch(() => {});
+    }, () => notice('GPS indisponível ou sem permissão.'), { enableHighAccuracy: true, maximumAge: 10000, timeout: 10000 });
+  }
+  window.getOfflineGps = () => entries().map(row => row.point);
+  window.saveOfflineGps = save;
+  window.clearOfflineGps = () => { for (const row of entries()) localStorage.removeItem(row.key); };
+  window.syncOfflineGps = flush;
+  window.sendGpsPosition = send;
+  window.startGpsTracking = start;
+  window.addEventListener('pagehide', stop);
+  window.addEventListener('storage', () => { if (!session()) stop(); });
+})();

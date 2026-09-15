@@ -521,7 +521,8 @@ async function runAutoSync(){
       typeof syncOfflineGps === "function"
     ){
 
-      await syncOfflineGps();
+      const gpsResult = await syncOfflineGps();
+      if (gpsResult?.pending) throw new Error('GPS ainda por enviar.');
     }
 
     updateOfflineBar(
