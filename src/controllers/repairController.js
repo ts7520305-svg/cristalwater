@@ -33,6 +33,7 @@ async function repairPdf(req, res) {
   const latest = (await CommercialQuote.list(repair.id))[0];
   const quote = latest?.snapshot;
   const doc = new PDFDocument({ size: "A4", margin: 50 });
+  doc.font(require("node:path").join(__dirname, "../assets/fonts/DejaVuSans.ttf"));
   const fileName = `reparacao_${repair.id}.pdf`;
 
   res.setHeader("Content-Type", "application/pdf");

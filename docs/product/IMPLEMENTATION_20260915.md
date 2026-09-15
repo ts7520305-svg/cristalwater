@@ -45,3 +45,7 @@ A revisão encontrou um desvio no fluxo antigo: permitia agendar QUOTED antes da
 ## TASK 90 — orçamento e faturação mensal
 
 As consultas dos dois geradores mensais antigos também incluíam QUOTED. Orçamentos detalhados por aprovar ficam agora excluídos, mantendo as regras antigas para registos sem versões. O teste de API verifica mensalidade de 80 antes da aprovação e 310 após incluir uma reparação de 230. Guardar um orçamento mantém a quantidade operacional original da reparação, em vez de a substituir por 1.
+
+## TASK 91 — apresentação portátil do PDF
+
+A inspeção visual encontrou espaçamento irregular na substituição de Helvetica pelo leitor de PDF. O documento passa a incorporar DejaVu Sans, distribuída com a respetiva licença, sem depender das fontes do servidor ou do dispositivo do cliente. A verificação compara a extração do texto e a renderização do PDF.
