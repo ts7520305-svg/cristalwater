@@ -1,3 +1,4 @@
+const { FIXED_SETTINGS } = require('../services/systemSettingService');
 const bcrypt = require("bcrypt");
 const { prisma } = require("../prismaClient");
 
@@ -87,7 +88,7 @@ async function securityStatus(req, res) {
     attentionUsers: attentionCount,
     usersDetail: users,
     bcrypt: true,
-    approvalMode: process.env.AI_ADMIN_REQUIRE_APPROVAL !== "false"
+    approvalMode: FIXED_SETTINGS.AI_ADMIN_REQUIRE_APPROVAL === "true"
   });
 }
 

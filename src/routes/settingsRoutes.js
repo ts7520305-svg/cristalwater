@@ -2,7 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
 const { prisma } = require('../prismaClient');
-const { DEFAULT_SETTINGS, getAllSettings, setSetting } = require('../services/systemSettingService');
+const { DEFAULT_SETTINGS, getAllSettings, setSetting, validateSetting } = require('../services/systemSettingService');
 const auth = require('../middlewares/authMiddleware');
 const {
   identityFromPayload,
@@ -58,7 +58,7 @@ router.get('/global', async (req, res) => {
     return res.json({ ok: true, settings: settings.map, rows: settings.rows, defaults: DEFAULT_SETTINGS });
   } catch (err) {
     console.error('settings global error:', err);
-    return res.status(500).json({ ok: false, error: err.message || 'Erro ao obter configurações globais' });
+    return res.status(err.status || 500).json({ ok: false, error: err.message || 'Erro ao obter configurações globais' });
   }
 });
 
@@ -67,7 +67,7 @@ router.get('/global/:key', async (req, res) => {
     const settings = await getAllSettings();
     return res.json({ ok: true, key: req.params.key, value: settings.map[req.params.key] ?? null });
   } catch (err) {
-    return res.status(500).json({ ok: false, error: err.message || 'Erro ao obter configuração' });
+    return res.status(err.status || 500).json({ ok: false, error: err.message || 'Erro ao obter configuração' });
   }
 });
 
@@ -88,7 +88,7 @@ router.put('/global/:key', async (req, res) => {
     return res.json({ ok: true, setting: row });
   } catch (err) {
     console.error('settings update error:', err);
-    return res.status(500).json({ ok: false, error: err.message || 'Erro ao gravar configuração' });
+    return res.status(err.status || 500).json({ ok: false, error: err.message || 'Erro ao gravar configuração' });
   }
 });
 
@@ -101,7 +101,7 @@ router.get('/access-control', auth('ADMIN'), async (req, res) => {
     return res.json({ ok: true, ...snapshot });
   } catch (err) {
     console.error('access control load error:', err);
-    return res.status(500).json({ ok: false, error: err.message || 'Erro ao carregar permissoes' });
+    return res.status(err.status || 500).json({ ok: false, error: err.message || 'Erro ao carregar permissoes' });
   }
 });
 
@@ -121,7 +121,7 @@ router.put('/access-control/policy', auth('ADMIN'), async (req, res) => {
     return res.json({ ok: true, policy });
   } catch (err) {
     console.error('access control policy error:', err);
-    return res.status(500).json({ ok: false, error: err.message || 'Erro ao gravar permissoes' });
+    return res.status(err.status || 500).json({ ok: false, error: err.message || 'Erro ao gravar permissoes' });
   }
 });
 
@@ -141,13 +141,14 @@ router.put('/access-control/hierarchy', auth('ADMIN'), async (req, res) => {
     return res.json({ ok: true, hierarchy });
   } catch (err) {
     console.error('team hierarchy error:', err);
-    return res.status(500).json({ ok: false, error: err.message || 'Erro ao gravar hierarquia' });
+    return res.status(err.status || 500).json({ ok: false, error: err.message || 'Erro ao gravar hierarquia' });
   }
 });
 
 router.post('/global/bulk', async (req, res) => {
   try {
     const entries = Object.entries(req.body.settings || {});
+    entries.forEach(([key]) => validateSetting(key));
     const saved = [];
     for (const [key, value] of entries) saved.push(await setSetting(key, parseValue(value), req.body.notes || null));
     await prisma.userAuditLog.create({
@@ -161,7 +162,7 @@ router.post('/global/bulk', async (req, res) => {
     return res.json({ ok: true, saved });
   } catch (err) {
     console.error('settings bulk error:', err);
-    return res.status(500).json({ ok: false, error: err.message || 'Erro ao gravar configurações' });
+    return res.status(err.status || 500).json({ ok: false, error: err.message || 'Erro ao gravar configurações' });
   }
 });
 
@@ -180,7 +181,7 @@ router.get('/language/me', async (req, res) => {
     return res.json({ ok: true, language, identity });
   } catch (err) {
     console.error('language get error:', err);
-    return res.status(500).json({ ok: false, error: err.message || 'Erro ao obter idioma' });
+    return res.status(err.status || 500).json({ ok: false, error: err.message || 'Erro ao obter idioma' });
   }
 });
 
@@ -203,7 +204,7 @@ router.put('/language/me', async (req, res) => {
     return res.json({ ok: true, language: result.language });
   } catch (err) {
     console.error('language update error:', err);
-    return res.status(500).json({ ok: false, error: err.message || 'Erro ao gravar idioma' });
+    return res.status(err.status || 500).json({ ok: false, error: err.message || 'Erro ao gravar idioma' });
   }
 });
 
@@ -212,7 +213,7 @@ router.get('/:userId', notificationSettingsOwner, async (req, res) => {
     const data = await prisma.userNotificationSetting.findMany({ where: { userId: Number(req.params.userId) } });
     return res.json({ ok: true, settings: data });
   } catch (err) {
-    return res.status(500).json({ ok: false, error: err.message || 'Erro ao obter configurações do utilizador' });
+    return res.status(err.status || 500).json({ ok: false, error: err.message || 'Erro ao obter configurações do utilizador' });
   }
 });
 
@@ -226,7 +227,7 @@ router.post('/', notificationSettingsOwner, async (req, res) => {
     });
     return res.json({ ok: true, setting: data });
   } catch (err) {
-    return res.status(500).json({ ok: false, error: err.message || 'Erro ao guardar configurações' });
+    return res.status(err.status || 500).json({ ok: false, error: err.message || 'Erro ao guardar configurações' });
   }
 });
 

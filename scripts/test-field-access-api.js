@@ -29,6 +29,12 @@ async function main(){
   assert.equal(await prisma.systemSetting.count({where:{key}}),0);
   assert.equal((await call(`/api/settings/global/${key}`,at,'PUT',{value:'true'})).status,200);
   assert.equal((await call(`/api/settings/global/${key}`,at)).body.value,'true');
+  for(const fixed of ['MOBILE_PWA_ENABLED','OFFLINE_SYNC_ENABLED','AI_ADMIN_REQUIRE_APPROVAL']){
+   assert.equal((await call(`/api/settings/global/${fixed}`,at,'PUT',{value:'false'})).status,409);
+   assert.equal((await call(`/api/settings/global/${fixed}`,at)).body.value,'true');
+  }
+  const bulk=await call('/api/settings/global/bulk',at,'POST',{settings:{[key]:'false',OFFLINE_SYNC_ENABLED:'false'}});
+  assert.equal(bulk.status,409);assert.equal((await call(`/api/settings/global/${key}`,at)).body.value,'true');
   const user=await prisma.user.create({data:{name:'Settings user',email:`settings-user-${suffix}@qa.test`,password:'qa-no-login',role:'TECHNICIAN',active:true}});
   await prisma.technician.update({where:{id:tech2.id},data:{email:user.email}});
   const ut=sign({id:user.id,userId:user.id,technicianId:tech2.id,principalType:'USER',role:'TECHNICIAN'});

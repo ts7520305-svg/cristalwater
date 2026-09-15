@@ -1,3 +1,4 @@
+const { FIXED_SETTINGS } = require('../services/systemSettingService');
 const { prisma } = require("../prismaClient");
 const { getOperationalContext } = require("../services/aiAdminContextService");
 const { generateAiAdminResponse } = require("../services/aiAdminLlmService");
@@ -38,7 +39,7 @@ async function status(req, res) {
           ? "Chave OpenAI encontrada, mas o motor externo esta desligado. Ativar ENABLE_ADMIN_AI_OPENAI=true."
           : "Para ativar web: OPENAI_API_KEY + ENABLE_ADMIN_AI_OPENAI=true + ENABLE_ADMIN_AI_WEB=true."
     },
-    requireApproval: String(process.env.AI_ADMIN_REQUIRE_APPROVAL || "true").toLowerCase() !== "false",
+    requireApproval: FIXED_SETTINGS.AI_ADMIN_REQUIRE_APPROVAL === "true",
     allowedActions: getActionDefinitions(),
     context
   });
