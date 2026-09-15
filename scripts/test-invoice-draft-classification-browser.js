@@ -187,9 +187,11 @@ async function main() {
     assert(texts[0].includes("Fatura #3"), "paid filter must not classify a draft as paid");
 
     await page.selectOption("#statusFilter", "overdue");
-    await waitForInvoiceCount(page, 1);
+    await waitForInvoiceCount(page, 2);
     texts = await cardTexts(page);
-    assert(texts[0].includes("Fatura #4"), "overdue filter must exclude drafts");
+    assert(texts.some((text) => text.includes("Fatura #2")), "open pending invoice must remain in debt filter");
+    assert(texts.some((text) => text.includes("Fatura #4")), "overdue invoice must remain in debt filter");
+    assert(!texts.some((text) => text.includes("Fatura #1")), "draft must be excluded from debt filter");
 
     await page.goto(`${baseUrl}/invoices.html?status=draft`, { waitUntil: "load" });
     await waitForInvoiceCount(page, 1);
