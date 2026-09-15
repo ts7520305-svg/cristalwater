@@ -1221,9 +1221,11 @@ async function markRepairSent(repairId, payload = {}, db = null, actor = "repair
 
 async function scheduleRepair(repairId, payload = {}, db = null, actor = "repair-os") {
   const run = async (tx) => {
+    if (tx.$queryRaw) await tx.$queryRaw`SELECT id FROM "Repair" WHERE id = ${Number(repairId)} FOR UPDATE`;
     const repair = await repository.getRepair(repairId, tx);
     if (!repair) return { ok: false, status: 404, error: "Reparação não encontrada" };
 
+    if (repair.status === 'QUOTED' && tx.repairQuote && await tx.repairQuote.count({ where: { repairId: repair.id } })) return { ok: false, status: 409, error: 'Registe a aprovação da versão guardada antes de agendar' };
     const transition = ensureRepairTransition(repair, "SCHEDULE");
     if (!transition.ok) return transition;
 
@@ -1369,6 +1371,7 @@ async function deleteRepair(repairId, db = null, actor = "repair-os") {
       return { ok: false, status: 404, error: "Reparação não encontrada" };
     }
 
+    if (tx.repairQuote && await tx.repairQuote.count({ where: { repairId: repair.id } })) return { ok: false, status: 409, error: 'Reparação com histórico de orçamento. Cancele para conservar o registo.' };
     await releaseRepairReservation(repair.id, { reason: "DELETE" }, tx, actor, "DELETE");
 
     await repository.createAudit(tx, {

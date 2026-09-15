@@ -37,3 +37,7 @@ API administrativa para pré-visualizar, guardar e consultar versões. Aprovaç�
 ## TASK 88 — editor administrativo integrado
 
 O editor está dentro de Alertas/Reparações, sem novo módulo de navegação. Permite escolher reparação, adicionar/remover linhas, calcular, guardar versões, gerar PDF com valores de venda e registar aprovação com referência. Mostra custo e resultado internos, e avisa sobre alterações por guardar. IVA é introduzido explicitamente. O PDF não contém notas internas, custos ou margens. O total sem IVA fica disponível no fluxo existente de faturação; esta tarefa não certifica a emissão fiscal nem acrescenta envio externo automático.
+
+## TASK 89 — validação do fluxo comercial
+
+A revisão encontrou um desvio no fluxo antigo: permitia agendar QUOTED antes da aprovação. Para orçamentos detalhados essa passagem é agora recusada, com bloqueio da reparação durante a decisão. Eliminar uma reparação com versões guardadas devolve conflito e orienta para cancelamento, preservando o histórico. O teste API verifica também a geração real de PDF. O editor foi verificado em larguras 320, 390 e 1280 px.
