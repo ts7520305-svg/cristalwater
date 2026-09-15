@@ -15,6 +15,15 @@ let browser;
     const response = await fetch(base + path, { headers }); assert.equal(response.status, 200);
     return response.json();
   }
+  function assertMoneyDelta(after, before, expected) {
+    assert(Number.isFinite(after) && Number.isFinite(before));
+    assert.equal(Math.round(after * 100) - Math.round(before * 100), Math.round(expected * 100));
+  }
+  // Existing fractional amounts must not make a correct monetary delta fail
+  // because of binary floating-point subtraction (213.45 - 123.45 !== 90).
+  const history = await prisma.client.create({ data: { name: 'Historico fracionario QA', status: 'ACTIVE' } });
+  await prisma.invoice.create({ data: { clientId: history.id, status: 'PENDING', amount: 123.45, total: 123.45,
+    totalAmount: 123.45, amountOpen: 123.45, month: new Date().toISOString().slice(0, 7), year: new Date().getUTCFullYear() } });
   const dashboardBefore = await get('/api/dashboard/admin');
   const client = await prisma.client.create({ data: { name: 'Rascunho visivel <b>literal</b> QA', status: 'ACTIVE' } });
   const create = (status, total, values = {}) => prisma.invoice.create({ data: { clientId: client.id, status, amount: total, total, totalAmount: total,
@@ -24,14 +33,14 @@ let browser;
   for (const row of [draft, zero, cancelled]) assert.equal(api.find(item => item.id === row.id).amountOpen, 0);
   assert.equal(api.find(item => item.id === draft.id).totalAmount, 20);
   const dashboard = await get('/api/dashboard/admin');
-  assert.equal(dashboard.summary.totalBilledAll - dashboardBefore.summary.totalBilledAll, 90);
-  assert.equal(dashboard.summary.totalOpenAll - dashboardBefore.summary.totalOpenAll, 40);
+  assertMoneyDelta(dashboard.summary.totalBilledAll, dashboardBefore.summary.totalBilledAll, 90);
+  assertMoneyDelta(dashboard.summary.totalOpenAll, dashboardBefore.summary.totalOpenAll, 40);
   assert.equal(dashboard.summary.paidInvoices - dashboardBefore.summary.paidInvoices, 1);
   assert.equal(dashboard.summary.totalInvoicesAll - dashboardBefore.summary.totalInvoicesAll, 2);
   assert(!dashboard.topDebtors.some(row => [draft.id, zero.id, cancelled.id].includes(row.invoiceId)));
   const month = new Date().toISOString().slice(0, 7);
   const evolution = dashboard.monthlyEvolution.find(row => row.month === month), oldEvolution = dashboardBefore.monthlyEvolution.find(row => row.month === month);
-  assert.equal(evolution.billed - oldEvolution.billed, 90); assert.equal(evolution.open - oldEvolution.open, 40);
+  assertMoneyDelta(evolution.billed, oldEvolution.billed, 90); assertMoneyDelta(evolution.open, oldEvolution.open, 40);
   console.log('PASS invoice API and administrative dashboard preserve draft face value without debt, billed totals, paid counts or debtor ranking');
   await fetch(base + '/api/settings/language/me', { method: 'PUT', headers, body: '{"language":"pt"}' });
   browser = await require('playwright').chromium.launch({ headless: true, executablePath: process.env.CW_CHROMIUM_PATH, args: ['--no-sandbox', '--disable-dev-shm-usage'] });

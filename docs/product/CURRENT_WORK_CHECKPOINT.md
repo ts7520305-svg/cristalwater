@@ -35,7 +35,9 @@
 
 - TASK137 implementada: rascunhos identificados, filtro próprio, ações de pagamento/PDF protegidas, valores cobraveis coerentes no ecrã/API/dashboard, estado de adiantamento e recuperação de consultas/sessão. Reprodução em `field-qa-runtime/run-1789483176194`; ensaio dirigido final aprovado em `field-qa-runtime/run-1789483564490`, incluindo pagamentos e faturação de alertas. Relatório `DRAFT_VISIBILITY_20260915.md`. 322 testes unitários, quatro de técnicos e sintaxe de 496 ficheiros backend aprovados. A implementação concorrente da interface foi reconciliada na TASK138; confirmar o workflow final com 44 grupos e restauro.
 
-- TASK138: reconciliação da TASK137 local com as atualizações concorrentes até `957739f9f07a8f9e4180143d68018905cd98e6c4`. Conservados estilos/contador e os dois testes de interface; o runner mantém os 42 grupos anteriores e passa a 44. Quatro ensaios dirigidos aprovados em `field-qa-runtime/run-1789483932485`, com 322 testes unitários e quatro de técnicos. Ver `DRAFT_VISIBILITY_20260915.md`. Confirmar o workflow final da reconciliação antes de declarar a entrega aprovada.
+- TASK138 publicada no commit `a526a9e2fdc438ad4321be6a0bef93a32da3fa10`: reconciliação da TASK137 local com as atualizações concorrentes até `8ac098f0ab7d03f0618b37ac6d0152c821251e2e`. Conservados estilos/contador e os dois testes de interface; o runner mantém os 42 grupos anteriores e passa a 44. Quatro ensaios dirigidos aprovados em `field-qa-runtime/run-1789483932485`, com 322 testes unitários e quatro de técnicos. O workflow `34985396401` passou 43 dos 44 grupos; a comparação monetária do novo teste foi corrigida na TASK139.
+
+- TASK139: teste de visibilidade compara deltas monetários em cêntimos inteiros e inclui histórico fracionário de 123,45 EUR. Corrige a comparação binária `89.99999999999997 !== 90` encontrada no CI, mantendo as verificações exatas de dívida e contagens. Ensaio dirigido aprovado em `field-qa-runtime/run-1789484810247`, com 322 testes unitários e quatro de técnicos. Ver `DRAFT_VISIBILITY_20260915.md`. Confirmar o workflow final com 44 grupos e restauro.
 
 ### Pedido ativo
 
@@ -61,7 +63,7 @@ Evidência atual da TASK120: 216 testes unitários, 4 testes de técnicos, os 15
 
 ### Próxima retoma
 
-1. TASK123–TASK136 publicadas e verificadas. TASK137 trata a classificação dos rascunhos no ecrã/API/dashboard e a recuperação de leitura. A TASK138 reconcilia a implementação concorrente. Confirmar o workflow final com 44 grupos. Não repetir estas implementações. Os pagamentos diretos ainda precisam de revisão específica de repetição de pedidos e respostas perdidas.
+1. TASK123–TASK136 publicadas e verificadas. TASK137 trata a classificação dos rascunhos no ecrã/API/dashboard e a recuperação de leitura. A TASK138 reconcilia a implementação concorrente e a TASK139 corrige a comparação monetária do teste. Confirmar o workflow final com 44 grupos e restauro. Não repetir estas implementações. Os pagamentos diretos ainda precisam de revisão específica de repetição de pedidos e respostas perdidas.
 2. A coerência e conclusão dos lembretes no CRM estão tratadas na TASK131. Prosseguir a revisão dos outros ecrãs operacionais, a partir da implementação atual e relatórios posteriores; não repetir os fluxos de lembretes já corrigidos.
 3. Continuar a revisão dos módulos pendentes usando `COMPLETENESS_20260915.md` juntamente com `IMPLEMENTATION_20260915.md` e os relatórios posteriores. A matriz de completude conserva o diagnóstico inicial e contém pontos já corrigidos posteriormente.
 4. Manter tarefas pequenas, com testes de comportamento e documentação. Não repetir trabalho apenas por encontrar um relatório antigo.
