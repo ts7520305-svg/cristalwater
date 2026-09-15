@@ -608,7 +608,8 @@
     const user = parseUser();
     const userKey = userLanguageKey(user);
     return normalizeLanguage(
-      user.language
+      pendingLanguage(userKey)?.language
+      || user.language
       || (userKey ? localStorage.getItem(userKey) : "")
       || localStorage.getItem(STORAGE_KEY)
       || localStorage.getItem(CLIENT_STORAGE_KEY)
@@ -714,19 +715,41 @@
     }
   }
 
-  function syncRemoteLanguage(language) {
-    const credential = token();
-    if (!credential) return;
+  function pendingLanguage(owner = userLanguageKey()) {
+    if (!owner) return null;
+    try {
+      const record = JSON.parse(localStorage.getItem(`${owner}:pending`) || 'null');
+      return record && record.owner === owner && typeof record.id === 'string' && SUPPORTED.includes(record.language) ? record : null;
+    } catch { return null; }
+  }
+
+  function queueRemoteLanguage(record, credential = token()) {
+    if (!record || !credential) return;
+    const { owner } = record;
     pendingRemoteWrite = pendingRemoteWrite.catch(() => {}).then(async () => {
-      if (token() !== credential) return;
+      if (token() !== credential || userLanguageKey() !== owner || pendingLanguage(owner)?.id !== record.id) return;
       const response = await fetch('/api/settings/language/me', {
         method:'PUT', headers:{'Content-Type':'application/json',Authorization:`Bearer ${credential}`},
-        body:JSON.stringify({language:normalizeLanguage(language)})
+        body:JSON.stringify({language:record.language})
       });
-      if (!response.ok) throw Error('Preferência guardada apenas neste dispositivo.');
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.ok !== true || data.language !== record.language) throw Error('Preferência guardada apenas neste dispositivo.');
+      if (token() === credential && userLanguageKey() === owner && pendingLanguage(owner)?.id === record.id) {
+        localStorage.removeItem(`${owner}:pending`);
+        document.getElementById('cwLanguageSelect')?.removeAttribute('title');
+      }
     }).catch(error => {
-      if (token() === credential) document.getElementById('cwLanguageSelect')?.setAttribute('title',error.message);
+      if (token() === credential && userLanguageKey() === owner) document.getElementById('cwLanguageSelect')?.setAttribute('title',error.message);
     });
+  }
+
+  function syncRemoteLanguage(language) {
+    const credential = token(), owner = userLanguageKey();
+    if (!credential || !owner) return;
+    const record = { owner, language: normalizeLanguage(language), id: window.crypto?.randomUUID?.() || `${Date.now()}:${Math.random()}` };
+    try { localStorage.setItem(`${owner}:pending`, JSON.stringify(record)); }
+    catch { document.getElementById('cwLanguageSelect')?.setAttribute('title', 'Preferência guardada apenas neste dispositivo.'); return; }
+    queueRemoteLanguage(record, credential);
   }
 
   async function loadRemoteLanguage() {
@@ -735,7 +758,7 @@
     try {
       const response = await fetch('/api/settings/language/me',{headers:{Authorization:`Bearer ${credential}`}});
       const data = await response.json().catch(() => ({}));
-      if (token() === credential && revision === languageRevision && response.ok && data.ok !== false && data.language) applyLanguage(data.language,{silent:true});
+      if (token() === credential && revision === languageRevision && !pendingLanguage() && response.ok && data.ok !== false && data.language) applyLanguage(data.language,{silent:true});
     } catch (_) { /* The local preference remains usable offline. */ }
   }
 
@@ -817,7 +840,10 @@
     buildSelector();
     const language = readLanguage();
     applyLanguage(language, { silent: true });
-    loadRemoteLanguage();
+    const pending = pendingLanguage();
+    if (pending) queueRemoteLanguage(pending);
+    else loadRemoteLanguage();
+    window.addEventListener('online', () => queueRemoteLanguage(pendingLanguage()));
 
     const observer = new MutationObserver(() => {
       window.clearTimeout(observer._cwTimer);

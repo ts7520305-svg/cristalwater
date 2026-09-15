@@ -1,0 +1,106 @@
+'use strict';
+require('../src/loadEnv')();
+const assert = require('node:assert/strict');
+if (process.env.NODE_ENV !== 'test' || process.env.QA_MODE !== 'true' || process.env.QA_ENVIRONMENT_SAFE !== 'true') throw Error('Isolated QA required');
+const { prisma } = require('../src/prismaClient');
+const jwt = require('jsonwebtoken'), { getJwtSecret } = require('../src/utils/jwtSecret');
+const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
+assert(['127.0.0.1', 'localhost'].includes(new URL(base).hostname));
+let browser;
+(async () => {
+  const admin = await prisma.user.findUniqueOrThrow({ where: { email: process.env.ADMIN_EMAIL } });
+  const token = jwt.sign({ id: admin.id, role: 'ADMIN' }, getJwtSecret(), { expiresIn: '1h' });
+  const endpoint = base + '/api/settings/language/me';
+  async function language(authToken, value) {
+    const response = await fetch(endpoint, { method: value ? 'PUT' : 'GET', headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json' }, ...(value ? { body: JSON.stringify({ language: value }) } : {}) });
+    assert.equal(response.status, 200); return (await response.json()).language;
+  }
+  await language(token, 'pt');
+  const { chromium } = require('playwright');
+  browser = await chromium.launch({ headless: true, executablePath: process.env.CW_CHROMIUM_PATH, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
+  const context = await browser.newContext();
+  await context.addInitScript(({ token, id }) => {
+    if (localStorage.getItem('token')) return;
+    localStorage.setItem('token', token); localStorage.setItem('cristalwater_jwt', token);
+    const user = JSON.stringify({ id, role: 'ADMIN', language: 'pt' });
+    localStorage.setItem('user', user); localStorage.setItem('cristalwater_user', user);
+  }, { token, id: admin.id });
+  const page = await context.newPage(); page.setDefaultTimeout(10000);
+  const errors = []; page.on('pageerror', error => errors.push(error.message));
+  await page.goto(base + '/admin-crm.html', { waitUntil: 'networkidle' });
+  let release, committed = false;
+  const gate = new Promise(resolve => { release = resolve; });
+  await page.route(endpoint, async route => {
+    if (route.request().method() !== 'PUT' || route.request().postDataJSON().language !== 'de') return route.continue();
+    const response = await route.fetch(); assert.equal(response.status(), 200); committed = true;
+    await gate; await route.fulfill({ response }).catch(() => {});
+  });
+  await page.evaluate(() => CristalI18n.applyLanguage('de'));
+  for (let i = 0; !committed && i < 100; i++) await new Promise(resolve => setTimeout(resolve, 20));
+  assert(committed); assert.equal(await language(token), 'de');
+  await page.evaluate(() => CristalI18n.applyLanguage('pt'));
+  await page.reload({ waitUntil: 'networkidle' }); release();
+  const shown = await page.locator('html').getAttribute('lang');
+  console.log(JSON.stringify({ lastChoice: 'pt', languageAfterReload: shown }));
+  assert.equal(shown, 'pt', 'Reload must preserve the latest choice while the previous save response is delayed');
+  await page.unroute(endpoint);
+  assert.equal(await language(token), 'pt');
+  console.log('PASS latest language survives reload during an earlier write and is synchronized to the same account');
+  const pendingKey = `cw_language:admin:${admin.id}:pending`;
+  let lost = 0;
+  await page.route(endpoint, async route => {
+    if (route.request().method() !== 'PUT') return route.continue();
+    lost++; const response = await route.fetch(); assert.equal(response.status(), 200); return route.abort('failed');
+  });
+  await page.evaluate(() => CristalI18n.applyLanguage('fr'));
+  await page.waitForFunction(() => document.querySelector('#cwLanguageSelect')?.title);
+  assert.equal(lost, 1); assert.equal(await language(token), 'fr');
+  assert.equal(await page.evaluate(key => JSON.parse(localStorage.getItem(key)).language, pendingKey), 'fr');
+  await page.unroute(endpoint); await page.reload({ waitUntil: 'networkidle' });
+  assert.equal(await page.locator('html').getAttribute('lang'), 'fr');
+  assert.equal(await page.evaluate(key => localStorage.getItem(key), pendingKey), null);
+  console.log('PASS lost acknowledgment keeps the preference pending; reload safely confirms it and clears the pending record');
+
+  await page.route(endpoint, route => route.request().method() === 'PUT' ? route.fulfill({ json: { ok: true, language: 'de' } }) : route.continue());
+  await page.evaluate(() => CristalI18n.applyLanguage('pt'));
+  await page.waitForFunction(() => document.querySelector('#cwLanguageSelect')?.title);
+  assert.equal(await page.evaluate(key => JSON.parse(localStorage.getItem(key)).language, pendingKey), 'pt');
+  await page.unroute(endpoint);
+  const other = await prisma.user.create({ data: { email: `language-reload-${Date.now()}@qa.test`, name: 'Outra conta idioma QA', password: 'unused', role: 'ADMIN', active: true } });
+  const otherToken = jwt.sign({ id: other.id, role: 'ADMIN' }, getJwtSecret(), { expiresIn: '1h' });
+  await language(otherToken, 'es');
+  const writes = [];
+  await page.route(endpoint, route => { if (route.request().method() === 'PUT') writes.push({ token: route.request().headers().authorization, language: route.request().postDataJSON().language }); return route.continue(); });
+  await page.evaluate(({ token, id }) => {
+    localStorage.setItem('token', token); localStorage.setItem('cristalwater_jwt', token);
+    const user = JSON.stringify({ id, role: 'ADMIN', language: 'es' }); localStorage.setItem('user', user); localStorage.setItem('cristalwater_user', user);
+  }, { token: otherToken, id: other.id });
+  await page.reload({ waitUntil: 'networkidle' });
+  assert.equal(await page.locator('html').getAttribute('lang'), 'es');
+  assert.deepEqual(writes, []);
+  assert.equal(await page.evaluate(key => JSON.parse(localStorage.getItem(key)).language, pendingKey), 'pt');
+  await page.evaluate(({ token, id }) => {
+    localStorage.setItem('token', token); localStorage.setItem('cristalwater_jwt', token);
+    const user = JSON.stringify({ id, role: 'ADMIN' }); localStorage.setItem('user', user); localStorage.setItem('cristalwater_user', user);
+  }, { token, id: admin.id });
+  await page.reload({ waitUntil: 'networkidle' });
+  assert.equal(await page.locator('html').getAttribute('lang'), 'pt');
+  assert.deepEqual(writes, [{ token: `Bearer ${token}`, language: 'pt' }]);
+  assert.equal(await language(otherToken), 'es'); assert.equal(await language(token), 'pt');
+  assert.equal(await page.evaluate(key => localStorage.getItem(key), pendingKey), null);
+  await page.unroute(endpoint);
+  console.log('PASS mismatched acknowledgment stays pending; another account cannot receive it; returning to the owner resumes the choice');
+  await page.route(endpoint, route => route.request().method() === 'PUT' ? route.abort('failed') : route.continue());
+  await page.evaluate(() => CristalI18n.applyLanguage('en'));
+  await page.waitForFunction(() => document.querySelector('#cwLanguageSelect')?.title);
+  await page.unroute(endpoint);
+  await page.evaluate(() => window.dispatchEvent(new Event('online')));
+  await page.waitForFunction(key => !localStorage.getItem(key), pendingKey);
+  assert.equal(await language(token), 'en');
+  await page.evaluate(() => CristalI18n.applyLanguage('pt'));
+  await page.waitForFunction(key => !localStorage.getItem(key), pendingKey);
+  assert.equal(await language(token), 'pt');
+  assert.deepEqual(errors, []);
+  console.log('PASS restored connectivity synchronizes the pending preference without another page load');
+  await context.close();
+})().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => { if (browser) await browser.close(); await prisma.$disconnect(); });

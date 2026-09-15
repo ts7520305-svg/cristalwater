@@ -14,6 +14,8 @@ let browser;
     const response = await fetch(base + path, { ...options, headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}`, ...options.headers } });
     const data = await response.json(); assert.equal(response.status, expected, JSON.stringify(data)); return data;
   }
+  // This suite asserts Portuguese labels; do not inherit another suite's account preference.
+  await api('/api/settings/language/me', { method: 'PUT', body: JSON.stringify({ language: 'pt' }) });
   const client = await prisma.client.create({ data: { name: 'Lista lembretes QA' } });
   const pool = await prisma.pool.create({ data: { clientId: client.id, name: 'Piscina com histórico' } });
   const dueAt = new Date('2028-01-01T10:00:00Z');
@@ -121,7 +123,11 @@ let browser;
     const title = requests[0].title;
     assert.equal(await prisma.generalReminder.count({ where: { title } }), 1);
     await page.reload({ waitUntil: 'networkidle' });
-    await page.locator(test.status).filter({ hasText: 'Pedido pendente recuperado' }).waitFor();
+    try { await page.locator(test.status).filter({ hasText: 'Pedido pendente recuperado' }).waitFor(); }
+    catch (error) {
+      console.error(JSON.stringify({ scope: test.scope, language: await page.locator('html').getAttribute('lang'), visibleStatus: await page.locator(test.status).textContent() }));
+      throw error;
+    }
     assert.equal(requests.length, 1, 'Reload must not send automatically');
     for (const [id, value] of Object.entries(test.fields)) { assert.equal(await page.locator('#' + id).inputValue(), value); assert(await page.locator('#' + id).isDisabled()); }
     assert(await page.locator(test.button).isDisabled());
