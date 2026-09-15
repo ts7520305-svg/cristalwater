@@ -22,6 +22,7 @@
     .actions { display:flex; gap:8px; flex-wrap:wrap; }
     .list { display:grid; gap:8px; }
     .item { background:var(--ds-surface-soft); border:1px solid var(--ds-border); border-radius:12px; padding:10px; }
+    [data-inventory-pending] { min-width:0; overflow-wrap:anywhere; }
     .field-stack {
       display:grid;
       gap:8px;
@@ -51,7 +52,7 @@
         <h1>Inventario e Stock</h1>
         <p class="text-muted">Entradas, transferencias para viatura, consumos e historico de movimentos.</p>
       </div>
-      <div class="actions"><a class="cw-v2-btn" href="/admin-master-control">Centro de Operacoes</a></div>
+      <div class="actions"><button class="cw-v2-btn" type="button" onclick="reloadInventory()">Atualizar inventário</button><a class="cw-v2-btn" href="/admin-master-control">Centro de Operacoes</a></div>
     </header>
 
     <div id="inventoryStatus" class="status" role="status" aria-live="polite">A carregar inventario...</div>
@@ -190,6 +191,7 @@
 
   <script src="/admin-auth-guard.js"></script>
   <script src="/cw-ui-feedback.js"></script>
+  <script src="/cw-inventory-pending.js"></script>
   <script src="/admin-inventory.js"></script>
   <script src="/admin-inventory-count.js"></script>
   <script src="/cristal-help-data.js"></script>
