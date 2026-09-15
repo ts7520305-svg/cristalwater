@@ -1506,23 +1506,10 @@ router.put('/clients/:id', async (req, res) => {
 });
 
 
-router.post('/clients/:id/activate', async (req, res) => {
-  try {
-    const id = toInt(req.params.id);
-    const amount = toFloat(req.body?.amount, 0);
-    const client = await db('client').update({
-      where: { id },
-      data: dataFor('client', { status: 'ACTIVE', active: true, archiveStatus: 'ATIVO', deletedAt: null, contractActive: true, billingActive: true, contractActivatedAt: new Date(), paymentStatus: 'PAID', lastPaymentAt: new Date(), creditBalance: amount > 0 ? amount : undefined }),
-    });
-    return res.json({ ok: true, client, message: 'Contrato ativado. A faturação começa a partir desta data.' });
-  } catch (error) { return res.status(500).json({ ok: false, error: error.message }); }
-});
+router.post('/clients/:id/activate', require('../controllers/clientController').activateClient);
 
 
-router.post('/clients/:id/activate-contract', async (req, res) => {
-  req.url = req.url.replace('/activate-contract', '/activate');
-  return router.handle(req, res);
-});
+router.post('/clients/:id/activate-contract', require('../controllers/clientController').activateClient);
 
 router.post('/clients/:id/archive', async (req, res) => {
   try {

@@ -110,24 +110,8 @@ class ClientBusiness {
     });
   }
 
-  async activate(clientId, body = {}) {
-    const amount = numberOrUndefined(body?.amount) || 0;
-
-    return prisma.client.update({
-      where: { id: Number(clientId) },
-      data: {
-        contractActive: true,
-        billingActive: true,
-        contractActivatedAt: new Date(),
-        lastPaymentAt: new Date(),
-        paymentStatus: "PAID",
-        status: "ACTIVE",
-        active: true,
-        archiveStatus: "ATIVO",
-        deletedAt: null,
-        creditBalance: amount > 0 ? amount : undefined,
-      },
-    });
+  async activate(clientId, body = {}, user = null) {
+    return require('./ContractActivationBusiness').activate(clientId, body, user);
   }
 
   async archive(clientId) {

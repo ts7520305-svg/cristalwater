@@ -155,15 +155,9 @@ async function updateClient(req, res) {
 
 async function activateClient(req, res) {
   try {
-    const clientId = toInt(req.params.id);
-    if (!clientId) return res.status(400).json({ error: "ID inválido" });
-
-    const client = await ClientBusiness.activate(clientId, req.body);
-
-    return res.json({ ok: true, client, message: "Contrato ativado. A faturação começa a partir desta data." });
+    return res.json(await ClientBusiness.activate(req.params.id, req.body, req.user));
   } catch (err) {
-    console.error("activateClient error:", err);
-    return res.status(500).json({ error: err.message || "Erro ao ativar contrato" });
+    return res.status(err.status || 500).json({ ok: false, error: err.status ? err.message : "Erro ao ativar contrato" });
   }
 }
 

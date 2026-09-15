@@ -7,12 +7,12 @@ const { prepareClientPaymentRequest, paymentDetails, executePaymentRequest } = r
 function fail(message, status = 400) { throw Object.assign(new Error(message), { status }); }
 const cents = amount => Math.round(Number(amount || 0) * 100);
 
-async function registerReceived(clientId, month, body = {}, user = null) {
+async function registerReceived(clientId, month, body = {}, user = null, transaction = null) {
   const id = Number(clientId);
   if (!Number.isSafeInteger(id) || id <= 0) fail('Cliente inválido.');
   const request = prepareClientPaymentRequest(id, month, body, user), details = request || paymentDetails(body);
   const { amountCents, method, notes } = details;
-  return prisma.$transaction(tx => executePaymentRequest(tx, request, async () => {
+  const run = tx => executePaymentRequest(tx, request, async () => {
     // Serialize allocations for this client, then acquire invoice locks in the
     // same order before touching the client row (invoice payments do this too).
     const allocationKey = `client-receipt:${id}`;
@@ -59,7 +59,8 @@ async function registerReceived(clientId, month, body = {}, user = null) {
       creditBalance: Number(updatedClient.creditBalance || 0), creditPaymentId: credit.payment?.id || null, remainingOpen: openCents / 100, paymentReference: reference,
       message: credit.creditAdded > 0 ? `Pagamento registado. ${moneyLabel(applied)} abatido e ${moneyLabel(credit.creditAdded)} ficou em credito positivo.` : `Pagamento registado em ${client.name} com referencia ${reference}.`,
     };
-  }), { maxWait: 15000, timeout: 15000 });
+  });
+  return transaction ? run(transaction) : prisma.$transaction(run, { maxWait: 15000, timeout: 15000 });
 }
 
 module.exports = { registerReceived };
