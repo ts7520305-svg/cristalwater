@@ -1,3 +1,4 @@
+const ReminderListBusiness = require('../business/admin/ReminderListBusiness');
 const ReminderCompletionBusiness = require('../business/admin/ReminderCompletionBusiness');
 const { prisma } = require("../prismaClient");
 
@@ -101,12 +102,11 @@ async function updateAppointment(req, res) {
 }
 
 async function listReminders(req, res) {
-  const { status, category } = req.query;
-  const where = {};
-  if (status && status !== "ALL") where.status = status;
-  if (category && category !== "ALL") where.category = category;
-  const reminders = await prisma.generalReminder.findMany({ where, orderBy: [{ status: "asc" }, { dueAt: "asc" }], take: 500 });
-  res.json({ ok: true, reminders });
+  try {
+    res.json(await ReminderListBusiness.list({ status: req.query.status, category: req.query.category }));
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ ok: false, error: error.message });
+  }
 }
 
 async function createReminder(req, res) {

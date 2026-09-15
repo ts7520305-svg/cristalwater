@@ -1,3 +1,4 @@
+const ReminderListBusiness = require('../business/admin/ReminderListBusiness');
 const ReminderCompletionBusiness = require('../business/admin/ReminderCompletionBusiness');
 const { normalizeRepeatRuleInput } = require('../services/reminderRepeatService');
 const clientRates = require('../business/finance/ClientRateBusiness');
@@ -2098,21 +2099,9 @@ router.put('/pools/:id/technical-sheet', async (req, res) => {
 
 router.get('/pools/:id/service-reminders', async (req, res) => {
   try {
-    const poolId = toInt(req.params.id);
-    if (!poolId) return res.status(400).json({ ok: false, error: 'ID da piscina invalido' });
-    if (!available('generalReminder')) return res.json({ ok: true, reminders: [] });
-
-    const reminders = await db('generalReminder').findMany({
-      where: {
-        poolId,
-        category: { in: ['TECHNICAL_PERIODIC_SERVICE', 'POOL_SERVICE_REMINDER'] },
-      },
-      orderBy: [{ status: 'asc' }, { dueAt: 'asc' }],
-      take: 100,
-    });
-    return res.json({ ok: true, reminders });
+    return res.json(await ReminderListBusiness.list({ poolId: req.params.id }));
   } catch (error) {
-    return res.status(500).json({ ok: false, error: error.message });
+    return res.status(error.statusCode || 500).json({ ok: false, error: error.message });
   }
 });
 
