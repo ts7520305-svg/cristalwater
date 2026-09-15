@@ -1,5 +1,6 @@
 const repository = require('../../dal/RepairRepository');
 const RepairBusiness = require('./RepairBusiness');
+const { emitRepairEvent, EVENT_TYPES } = require('../../services/repairEventService');
 const fail = (status, error) => ({ ok: false, status, error });
 const validId = value => Number.isSafeInteger(Number(value)) && Number(value) > 0;
 function publicQuote(publication, now = new Date()) {
@@ -49,7 +50,7 @@ async function decide(clientId, quoteId, payload = {}) {
   if (!['APPROVED', 'DECLINED'].includes(payload.decision) || payload.confirm !== true) return fail(400, 'Confirme explicitamente a decisão sobre este orçamento');
   if (payload.reason != null && (typeof payload.reason !== 'string' || payload.reason.length > 1000)) return fail(400, 'Motivo inválido, máximo 1000 caracteres');
   const cid = Number(clientId), qid = Number(quoteId);
-  return repository.transaction(async tx => {
+  const result = await repository.transaction(async tx => {
     const owned = await tx.repairQuotePortal.findFirst({ where: { quoteId: qid, clientId: cid, quote: { repair: { pool: { clientId: cid } } } }, select: { quote: { select: { repairId: true } } } });
     if (!owned) return fail(404, 'Orçamento não encontrado');
     const repairId = owned.quote.repairId;
@@ -62,13 +63,17 @@ async function decide(clientId, quoteId, payload = {}) {
     if (publicQuote(publication).status !== 'PENDING') return fail(409, 'Orçamento alterado, expirado ou indisponível. Atualize a lista.');
     const actor = `CLIENT:${cid}`;
     if (payload.decision === 'APPROVED') {
-      const result = await RepairBusiness.approveRepair(repairId, tx, actor, { quoteId: qid, approvalReference: `Confirmação autenticada no portal pelo cliente ${cid}, versão ${publication.quote.version}` });
+      const result = await RepairBusiness.approveRepair(repairId, tx, actor, { quoteId: qid, approvalReference: `Confirmação autenticada no portal pelo cliente ${cid}, versão ${publication.quote.version}` }, { deferEvents: true });
       if (!result.ok) return result;
     }
     await tx.repairQuotePortal.update({ where: { quoteId: qid }, data: { decision: payload.decision, decisionAt: new Date(), reason: payload.reason?.trim() || null } });
     await tx.userAuditLog.create({ data: { actor, action: 'CLIENT_QUOTE_DECISION', entity: 'RepairQuote', entityId: String(qid), metadata: { clientId: cid, decision: payload.decision, version: publication.quote.version, total: publication.quote.snapshot.total, currency: publication.quote.snapshot.currency } } });
     await tx.notification.create({ data: { role: 'ADMIN', type: 'CLIENT_QUOTE_DECISION', title: 'Resposta ao orçamento', message: `O cliente ${cid} ${payload.decision === 'APPROVED' ? 'aprovou' : 'recusou'} o orçamento da reparação #${repairId}, versão ${publication.quote.version}.`, metadata: { clientId: cid, repairId, quoteId: qid, decision: payload.decision } } });
-    return { ok: true, alreadyDecided: false, decision: payload.decision };
+    return { ok: true, alreadyDecided: false, decision: payload.decision, repairId, poolId: scope.poolId };
   });
+  if (result.ok && !result.alreadyDecided && result.decision === 'APPROVED') {
+    await emitRepairEvent(EVENT_TYPES.REPAIR_APPROVED, { repairId: result.repairId, poolId: result.poolId, actor: `CLIENT:${cid}`, source: 'client-quote-portal' });
+  }
+  return result;
 }
 module.exports = { publicQuote, list, publish, decide };

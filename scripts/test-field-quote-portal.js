@@ -51,6 +51,26 @@ const BASE = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
  await prisma.repairQuote.update({where:{id:expired.q.id},data:{snapshot:{...expired.q.snapshot,validUntil:'2001-01-01T00:00:00Z'}}});
  assert.equal((await call(expired.decide,ct,'POST',{decision:'APPROVED',confirm:true})).status,409);
  assert.equal((await call(listing,ct)).body.quotes.find(q=>q.id===expired.q.id).status,'EXPIRED');
+ const rollback=await fixture();await call(rollback.publish,at,'POST',{});
+ const events=[],previousIo=global.io;
+ global.io={emit:(event,payload)=>events.push({event,payload})};
+ const business=require('../src/business/repair/QuotePortalBusiness');
+ try {
+  await prisma.$executeRawUnsafe(`CREATE FUNCTION qa_quote_decision_failure() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW."quoteId" = ${rollback.q.id} THEN RAISE EXCEPTION 'QA forced failure after approval write'; END IF; RETURN NEW; END $$`);
+  await prisma.$executeRawUnsafe('CREATE TRIGGER qa_quote_decision_failure BEFORE UPDATE ON "RepairQuotePortal" FOR EACH ROW EXECUTE FUNCTION qa_quote_decision_failure()');
+  await assert.rejects(()=>business.decide(client.id,rollback.q.id,{decision:'APPROVED',confirm:true}));
+  assert.equal((await prisma.repair.findUnique({where:{id:rollback.repair.id}})).status,'QUOTED');
+  assert.equal((await prisma.repairQuotePortal.findUnique({where:{quoteId:rollback.q.id}})).decision,null);
+  assert.equal(events.filter(e=>e.event==='REPAIR_APPROVED').length,0,'Rolled-back approval must not emit an event');
+ } finally {
+  await prisma.$executeRawUnsafe('DROP TRIGGER IF EXISTS qa_quote_decision_failure ON "RepairQuotePortal"');
+  await prisma.$executeRawUnsafe('DROP FUNCTION IF EXISTS qa_quote_decision_failure()');
+ }
+ try {
+  const accepted=await business.decide(client.id,rollback.q.id,{decision:'APPROVED',confirm:true});assert.equal(accepted.ok,true);
+  await business.decide(client.id,rollback.q.id,{decision:'APPROVED',confirm:true});
+  assert.equal(events.filter(e=>e.event==='REPAIR_APPROVED').length,1,'Committed approval emits once');
+ } finally {global.io=previousIo;}
  const racing=await fixture();await call(racing.publish,at,'POST',{});
  let pending;
  await prisma.$transaction(async tx=>{

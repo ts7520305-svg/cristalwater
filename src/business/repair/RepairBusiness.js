@@ -845,7 +845,7 @@ async function quoteRepair(repairId, db = null, actor = "repair-os", payload = {
   return repository.transaction(run);
 }
 
-async function approveRepair(repairId, db = null, actor = "repair-os", payload = {}) {
+async function approveRepair(repairId, db = null, actor = "repair-os", payload = {}, options = {}) {
   const executor = db || repository;
 
   const run = async (tx) => {
@@ -903,7 +903,7 @@ async function approveRepair(repairId, db = null, actor = "repair-os", payload =
       metadata: { repairId: updated.id },
     });
 
-    await emitRepairEvent(EVENT_TYPES.REPAIR_APPROVED, {
+    if (!options.deferEvents) await emitRepairEvent(EVENT_TYPES.REPAIR_APPROVED, {
       repairId: updated.id,
       poolId: updated.poolId,
       actor,
