@@ -22,7 +22,7 @@ function formValues(form) {
 }
 
 function authHeaders() {
-  const token = localStorage.getItem("cwAdminToken") || localStorage.getItem("token") || localStorage.getItem("authToken");
+  const token = window.CristalAuth?.getToken?.() || localStorage.getItem("cristalwater_jwt") || localStorage.getItem("token");
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
@@ -80,11 +80,11 @@ function renderLeads(leads) {
   el("leads").innerHTML = (leads || []).map((lead) => `
     <div class="card">
       <header>
-        <h3>${esc(lead.name)}</h3>
+        <h3 data-cw-no-i18n>${esc(lead.name)}</h3>
         <span class="badge">${esc(lead.status)}</span>
       </header>
       <p>${esc(lead.phone || "")}${lead.zone ? ` - ${esc(lead.zone)}` : ""}</p>
-      <p class="muted">${esc(lead.notes || "")}</p>
+      <p class="muted" data-cw-no-i18n>${esc(lead.notes || "")}</p>
       <div class="actions">
         <button class="btn" type="button" onclick="convertLead(${Number(lead.id)})">Converter cliente</button>
         <button class="btn" type="button" onclick="addActivity(${Number(lead.id)})">Nota</button>
@@ -97,11 +97,11 @@ function renderGeneralReminders(reminders) {
   el("reminders").innerHTML = (reminders || []).map((item) => `
     <div class="card">
       <header>
-        <h3>${esc(item.title)}</h3>
+        <h3 data-cw-no-i18n>${esc(item.title)}</h3>
         <span class="badge ${item.status === "DONE" ? "done" : ""}">${esc(item.category || "GENERAL")}</span>
       </header>
       <p>${formatDate(item.dueAt)}</p>
-      <p class="muted">${esc(item.description || "")}</p>
+      <p class="muted" data-cw-no-i18n>${esc(item.description || "")}</p>
       ${item.status === "DONE" ? '<span class="badge done">Concluido</span>' : `<button class="btn" type="button" onclick="completeReminder(${Number(item.id)})">Concluir</button>`}
     </div>
   `).join("") || '<p class="muted">Sem lembretes gerais.</p>';
@@ -119,15 +119,15 @@ function renderPoolReminders(reminders) {
     return `
       <div class="card">
         <header>
-          <h3>${esc(item.title)}</h3>
+          <h3 data-cw-no-i18n>${esc(item.title)}</h3>
           <span class="badge ${priority === "HIGH" ? "warn" : ""}">${esc(priority)}</span>
         </header>
-        <p><strong>${esc(pool?.name || "Piscina")}</strong></p>
-        <p class="muted">${esc(client?.name || "Cliente")} ${pool?.zone ? `- ${esc(pool.zone)}` : ""}</p>
+        <p><strong data-cw-no-i18n>${esc(pool?.name || "Piscina")}</strong></p>
+        <p class="muted" data-cw-no-i18n>${esc(client?.name || "Cliente")} ${pool?.zone ? `- ${esc(pool.zone)}` : ""}</p>
         <p>Aviso: ${formatDate(item.dueDate || item.dueAt)}</p>
         <p>Evento: ${formatDate(eventAt)}</p>
         <p class="muted">${esc(days || "")}</p>
-        ${notes ? `<p class="muted">${esc(notes)}</p>` : ""}
+        ${notes ? `<p class="muted" data-cw-no-i18n>${esc(notes)}</p>` : ""}
         <div class="actions">
           ${completed ? '<span class="badge done">Concluido</span>' : `<button class="btn primary" type="button" onclick="completePoolReminder(${Number(item.id)}, ${Number(item.poolId || 0)})">Concluir</button>`}
           <button class="btn danger" type="button" onclick="deletePoolReminder(${Number(item.id)}, ${Number(item.poolId || 0)})">Eliminar</button>
@@ -139,28 +139,35 @@ function renderPoolReminders(reminders) {
 }
 
 async function loadPoolReminders() {
+  const authorization = authHeaders().Authorization;
   const poolId = el("poolReminderFilter").value;
   const data = await api("/api/crm/reminders?category=TECHNICAL_PERIODIC_SERVICE");
+  if (authorization !== authHeaders().Authorization) return;
   state.poolReminders = (data.reminders || [])
-    .filter((item) => item.status !== "DONE")
+    .filter((item) => !item.completedAt && !["DONE", "COMPLETED", "CLOSED", "RESOLVED", "CANCELLED", "CANCELED"].includes(item.status))
     .filter((item) => !poolId || String(item.poolId) === String(poolId));
   renderPoolReminders(state.poolReminders);
 }
 
 async function loadAll() {
+  const authorization = authHeaders().Authorization;
   el("poolReminderStatus").textContent = "A carregar dados...";
   const [leads, generalReminders, pools] = await Promise.all([
     api("/api/crm/leads"),
     api("/api/crm/reminders"),
     api("/api/core/pools?includeInactive=true"),
   ]);
+  if (authorization !== authHeaders().Authorization) return;
   state.pools = pools.pools || [];
   renderPoolOptions();
   renderLeads(leads.leads || []);
   renderGeneralReminders(generalReminders.reminders || []);
   await loadPoolReminders();
+  if (authorization !== authHeaders().Authorization) return;
   el("poolReminderStatus").textContent = "";
   updateReminderPreview();
+  if (!poolReminderCreator) setupReminderCreators();
+  else { poolReminderCreator.refresh(); generalReminderCreator.refresh(); }
 }
 
 function updateReminderPreview() {
@@ -176,40 +183,42 @@ function updateReminderPreview() {
   target.textContent = `Aviso programado para ${formatDate(dueAt)}. Evento em ${formatDate(eventAt)}.`;
 }
 
-async function createPoolReminder(event) {
-  event.preventDefault();
-  const form = event.target;
-  const data = formValues(form);
-  data.daysBefore = Number(data.daysBefore || 0);
-  const eventAt = new Date(data.eventAt);
-  const dueAt = new Date(eventAt.getTime() - data.daysBefore * 24 * 60 * 60 * 1000);
+let poolReminderCreator, generalReminderCreator;
+function preparePoolReminder() {
+  const data = Object.fromEntries([...el('poolReminderForm').querySelectorAll('[name]')].map(input => [input.name, input.value]));
+  const days = Number(data.daysBefore || 0), eventAt = new Date(data.eventAt);
+  if (!data.title.trim() || !data.poolId || !Number.isFinite(eventAt.getTime()) || !Number.isInteger(days) || days < 0 || days > 365) throw Error('Indica piscina, titulo, data e antecedencia entre 0 e 365 dias.');
   const pool = poolById(data.poolId);
-  const cleanNotes = String(data.description || "").replace(/\r?\n/g, " ").trim();
   const description = [
-    `Acao: ${data.title}`,
-    `Evento: ${eventAt.toISOString()}`,
-    `Avisar: ${data.daysBefore} dia(s) antes`,
-    `Prioridade: ${data.priority || "NORMAL"}`,
-    pool ? `Piscina: ${pool.name || `#${pool.id}`}` : null,
+    `Acao: ${data.title}`, `Evento: ${eventAt.toISOString()}`, `Avisar: ${days} dia(s) antes`,
+    `Prioridade: ${data.priority || 'NORMAL'}`, pool ? `Piscina: ${pool.name || '#' + pool.id}` : null,
     pool?.client ? `Cliente: ${pool.client.name}` : null,
-    cleanNotes ? `Notas: ${cleanNotes}` : null,
-  ].filter(Boolean).join("\n");
-  el("poolReminderStatus").textContent = "A guardar lembrete...";
-  await api(`/api/core/pools/${encodeURIComponent(data.poolId)}/service-reminders`, {
-    method: "POST",
-    body: JSON.stringify({
-      title: data.title,
-      dueAt: dueAt.toISOString(),
-      priority: data.priority || "NORMAL",
-      repeatRule: "NONE",
-      description,
-    }),
+    data.description.trim() ? `Notas: ${data.description.replace(/\r?\n/g, ' ').trim()}` : null,
+  ].filter(Boolean).join('\n');
+  return { path: `/api/core/pools/${data.poolId}/service-reminders`, body: {
+    title: data.title.trim(), dueAt: new Date(eventAt.getTime() - days * 86400000).toISOString(),
+    priority: data.priority || 'NORMAL', repeatRule: 'NONE', description,
+  } };
+}
+function setupReminderCreators() {
+  poolReminderCreator = CwReminderCreate.attach({
+    scope: 'crm-pool', button: 'createPoolReminderBtn', status: 'poolReminderStatus',
+    fields: ['poolReminderPool', 'poolReminderTitle', 'poolReminderEventAt', 'poolReminderDaysBefore', 'poolReminderPriority', 'poolReminderDescription'],
+    validPath: path => typeof path === 'string' && /^\/api\/core\/pools\/[1-9]\d*\/service-reminders$/.test(path),
+    prepare: preparePoolReminder, onRestore: updateReminderPreview,
+    async onSuccess() { el('poolReminderForm').reset(); el('poolReminderDaysBefore').value = '1'; updateReminderPreview(); await loadPoolReminders(); },
   });
-  form.reset();
-  el("poolReminderDaysBefore").value = "1";
-  el("poolReminderStatus").textContent = "Lembrete criado e ligado a piscina.";
-  updateReminderPreview();
-  await loadPoolReminders();
+  generalReminderCreator = CwReminderCreate.attach({
+    scope: 'crm-general', button: 'createGeneralReminderBtn', status: 'generalReminderStatus',
+    fields: ['generalReminderTitle', 'generalReminderDueAt', 'generalReminderCategory', 'generalReminderDescription'],
+    validPath: path => path === '/api/crm/reminders',
+    prepare() {
+      const dueAt = new Date(el('generalReminderDueAt').value), title = el('generalReminderTitle').value.trim();
+      if (!title || !Number.isFinite(dueAt.getTime())) throw Error('Indica titulo e data.');
+      return { path: '/api/crm/reminders', body: { title, dueAt: dueAt.toISOString(), category: el('generalReminderCategory').value, description: el('generalReminderDescription').value } };
+    },
+    async onSuccess(_result, current) { el('reminderForm').reset(); const data = await api('/api/crm/reminders'); if (current()) renderGeneralReminders(data.reminders || []); },
+  });
 }
 
 async function completePoolReminder(id, poolId) {
@@ -258,25 +267,8 @@ el("leadForm").addEventListener("submit", async (event) => {
   }
 });
 
-el("reminderForm").addEventListener("submit", async (event) => {
-  event.preventDefault();
-  try {
-    const data = formValues(event.target);
-    data.dueAt = new Date(data.dueAt).toISOString();
-    await api("/api/crm/reminders", { method: "POST", body: JSON.stringify(data) });
-    event.target.reset();
-    const generalReminders = await api("/api/crm/reminders");
-    renderGeneralReminders(generalReminders.reminders || []);
-  } catch (error) {
-    alert(error.message);
-  }
-});
-
-el("poolReminderForm").addEventListener("submit", (event) => {
-  createPoolReminder(event).catch((error) => {
-    el("poolReminderStatus").textContent = error.message;
-  });
-});
+el('reminderForm').addEventListener('submit', event => { event.preventDefault(); generalReminderCreator?.submit(); });
+el('poolReminderForm').addEventListener('submit', event => { event.preventDefault(); poolReminderCreator?.submit(); });
 el("poolReminderFilter").addEventListener("change", () => {
   loadPoolReminders().catch((error) => {
     el("poolReminders").innerHTML = `<p class="muted">${esc(error.message)}</p>`;

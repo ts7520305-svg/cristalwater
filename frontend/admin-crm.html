@@ -143,7 +143,7 @@
           <textarea id="poolReminderDescription" name="description" placeholder="Notas internas para o administrador ou tecnico"></textarea>
           <div class="preview" id="poolReminderPreview">Escolhe a data do evento para calcular o aviso.</div>
           <p class="status-line" id="poolReminderStatus"></p>
-          <button class="btn primary" type="submit">Criar lembrete da piscina</button>
+          <button id="createPoolReminderBtn" class="btn primary" type="submit" disabled>Criar lembrete da piscina</button>
         </form>
       </section>
 
@@ -174,7 +174,8 @@
           </select>
           <label for="generalReminderDescription">Descricao</label>
           <textarea id="generalReminderDescription" name="description"></textarea>
-          <button class="btn" type="submit">Criar lembrete geral</button>
+          <p id="generalReminderStatus" role="status" aria-live="polite"></p>
+          <button id="createGeneralReminderBtn" class="btn" type="submit" disabled>Criar lembrete geral</button>
         </form>
         <hr>
         <h2>Lembretes gerais</h2>
@@ -184,6 +185,8 @@
   </main>
 
   <script src="/admin-auth-guard.js"></script>
+  <script src="/cw-i18n.js"></script>
+  <script src="/cw-reminder-create.js"></script>
   <script src="/admin-crm.js"></script>
   <script src="/cristal-help-data.js"></script>
   <script src="/cristal-assist.js"></script>

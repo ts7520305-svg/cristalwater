@@ -13,7 +13,9 @@
 
 - TASK126: consulta completa dos lembretes com pendentes antes do histórico; reprodução confirmou zero pendentes na ficha perante 105 concluídos/505 pendentes. Relatório `REMINDER_VISIBILITY_20260915.md`. Teste da consulta aprovado em `field-qa-runtime/run-1789470809542`, com 235 testes unitários e 4 de técnicos.
 
-- TASK127: criação com `requestId`, comprovativo transacional e recusa de repetições alteradas implementada. 249 testes unitários, 4 de técnicos e testes integrados dirigidos aprovados em `field-qa-runtime/run-1789471051397`. Próxima tarefa: recuperar pedidos por confirmar nos três formulários existentes. Relatório `REMINDER_CREATION_API_20260915.md`.
+- TASK127: criação com `requestId`, comprovativo transacional e recusa de repetições alteradas implementada. 249 testes unitários, 4 de técnicos e testes integrados dirigidos aprovados em `field-qa-runtime/run-1789471051397`. Os três formulários são tratados pela TASK128. Relatório `REMINDER_CREATION_API_20260915.md`.
+
+- TASK128 implementada: pedido persistido e imutável nos três formulários, repetição explícita, duas janelas, confirmação inválida, quota/corrupção, rejeição e mudança de sessão. Relatório `REMINDER_CREATION_UI_20260915.md`. Versão final aprovada em `field-qa-runtime/run-1789472050268`, incluindo PT/EN/FR/ES/DE e recuperação da carga inicial. 249 testes unitários, 4 de técnicos e 17 scripts de navegador aprovados; 34 grupos da bateria `reports/field-suite/1789471734616/results.json` passaram, e a falha do novo grupo nos idiomas foi corrigida e revalidada no teste dirigido final. Confirmar os 35 grupos e o restauro no workflow do lote publicado. Imagem: `reports/field-visual/reminder-creation-1789472056455/lembrete-recuperado.png`.
 
 ### Pedido ativo
 
@@ -39,8 +41,8 @@ Evidência atual da TASK120: 216 testes unitários, 4 testes de técnicos, os 15
 
 ### Próxima retoma
 
-1. TASK123–TASK125 publicadas e verificadas. TASK126/TASK127 implementadas; confirmar a bateria final e o workflow publicado na conversa antes de repetir verificações. Não repetir estas implementações.
-2. Próximo passo: formulários de criação com identificador persistido e repetição explícita após falha de ligação. API protegida na TASK127; consulta sem cortes silenciosos na TASK126.
+1. TASK123–TASK125 publicadas e verificadas. TASK126–TASK128 implementadas; confirmar a bateria final e o workflow publicado na conversa antes de repetir verificações. Não repetir estas implementações.
+2. As três tarefas de consulta/criação de lembretes estão implementadas. Próximo candidato concreto: validar IDs e categoria na eliminação de lembretes da ficha; a rota DELETE ainda usa `toInt` e verifica apenas a piscina. Não repetir os formulários já corrigidos.
 3. Continuar a revisão dos módulos pendentes usando `COMPLETENESS_20260915.md` juntamente com `IMPLEMENTATION_20260915.md` e os relatórios posteriores. A matriz de completude conserva o diagnóstico inicial e contém pontos já corrigidos posteriormente.
 4. Manter tarefas pequenas, com testes de comportamento e documentação. Não repetir trabalho apenas por encontrar um relatório antigo.
 5. Ensaios físicos e VPS permanecem pendentes. Não declarar o sistema inteiro concluído ou certificado para campo.

@@ -277,7 +277,7 @@
           </div>
           <div class="field"><label for="reminderDescription">Descricao</label><textarea id="reminderDescription" placeholder="Notas do servico periodico"></textarea></div>
           <div class="row">
-            <button type="button" class="primary" onclick="createServiceReminder()">Criar lembrete</button>
+            <button type="button" id="createServiceReminderBtn" class="primary" onclick="createServiceReminder()">Criar lembrete</button>
             <a id="poolOperationalReminderLink" class="btn" href="/admin-crm">Lembrete operacional</a>
           </div>
           <span id="reminderStatus" class="muted" role="status" aria-live="polite"></span>
@@ -296,6 +296,8 @@
 
   <script src="/admin-auth-guard.js"></script>
   <script src="/cw-ui-feedback.js"></script>
+  <script src="/cw-i18n.js"></script>
+  <script src="/cw-reminder-create.js"></script>
   <script src="/admin-pool-technical.js"></script>
   <script src="/ui/core/navigation-context.js"></script>
   <script src="/crystal-os-v2-shell.js"></script>

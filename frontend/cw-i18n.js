@@ -517,6 +517,19 @@
   }
 });
   Object.assign(DICT, {
+    'Repetir confirmação': { en: 'Retry confirmation', fr: 'Réessayer la confirmation', es: 'Reintentar confirmación', de: 'Bestätigung erneut versuchen' },
+    'Corrigir dados': { en: 'Correct details', fr: 'Corriger les données', es: 'Corregir datos', de: 'Angaben korrigieren' },
+    'Pedido por confirmar': { en: 'Awaiting confirmation', fr: 'Confirmation en attente', es: 'Pendiente de confirmación', de: 'Bestätigung ausstehend' },
+    'Pedido recusado': { en: 'Request rejected', fr: 'Demande refusée', es: 'Solicitud rechazada', de: 'Anfrage abgelehnt' },
+    'Pedido pendente recuperado. Usa Repetir confirmação.': { en: 'Pending request recovered. Select Retry confirmation.', fr: 'Demande en attente récupérée. Sélectionnez Réessayer la confirmation.', es: 'Solicitud pendiente recuperada. Selecciona Reintentar confirmación.', de: 'Ausstehende Anfrage wiederhergestellt. Wählen Sie Bestätigung erneut versuchen.' },
+    'A confirmar criação do lembrete…': { en: 'Confirming reminder creation…', fr: 'Confirmation de la création du rappel…', es: 'Confirmando la creación del recordatorio…', de: 'Erstellung der Erinnerung wird bestätigt…' },
+    'Lembrete criado.': { en: 'Reminder created.', fr: 'Rappel créé.', es: 'Recordatorio creado.', de: 'Erinnerung erstellt.' },
+    'Criação confirmada. Foi recuperado o lembrete original.': { en: 'Creation confirmed. The original reminder was recovered.', fr: 'Création confirmée. Le rappel original a été récupéré.', es: 'Creación confirmada. Se ha recuperado el recordatorio original.', de: 'Erstellung bestätigt. Die ursprüngliche Erinnerung wurde wiederhergestellt.' },
+    'Ainda não foi possível confirmar a criação. O pedido foi guardado; usa Repetir confirmação, mesmo depois de reabrir a página.': { en: 'Creation could not be confirmed yet. The request was saved; select Retry confirmation, even after reopening the page.', fr: 'La création ne peut pas encore être confirmée. La demande est enregistrée ; sélectionnez Réessayer la confirmation, même après avoir rouvert la page.', es: 'Todavía no se ha podido confirmar la creación. La solicitud se ha guardado; selecciona Reintentar confirmación, incluso después de volver a abrir la página.', de: 'Die Erstellung konnte noch nicht bestätigt werden. Die Anfrage wurde gespeichert. Wählen Sie Bestätigung erneut versuchen, auch nach dem erneuten Öffnen der Seite.' },
+    'Lembrete criado. Atualiza a página para consultar a lista.': { en: 'Reminder created. Refresh the page to view the list.', fr: 'Rappel créé. Actualisez la page pour consulter la liste.', es: 'Recordatorio creado. Actualiza la página para consultar la lista.', de: 'Erinnerung erstellt. Aktualisieren Sie die Seite, um die Liste anzuzeigen.' },
+  });
+
+  Object.assign(DICT, {
     'Notas da piscina': { en: 'Pool notes', fr: 'Consignes de la piscine', es: 'Notas de la piscina', de: 'Poolhinweise' },
     'Lembrete recorrente atrasado': { en: 'Overdue recurring reminder', fr: 'Rappel récurrent en retard', es: 'Recordatorio recurrente vencido', de: 'Überfällige wiederkehrende Erinnerung' },
     'Lembrete recorrente': { en: 'Recurring reminder', fr: 'Rappel récurrent', es: 'Recordatorio recurrente', de: 'Wiederkehrende Erinnerung' },

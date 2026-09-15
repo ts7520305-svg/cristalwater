@@ -310,9 +310,9 @@ function renderReminders(reminders) {
     return `
       <div class="reminder-item ${done ? "done" : ""}">
         <div>
-          <strong>${esc(item.title)}</strong>
+          <strong data-cw-no-i18n>${esc(item.title)}</strong>
           <div class="muted">${formatDate(item.dueAt)} · ${repeatLabel(item.repeatRule)} · ${esc(item.priority || "NORMAL")}</div>
-          ${item.description ? `<p>${esc(item.description)}</p>` : ""}
+          ${item.description ? `<p data-cw-no-i18n>${esc(item.description)}</p>` : ""}
         </div>
         <div>
           ${cancelled ? '<span class="tag">Cancelado</span>' : done
@@ -437,39 +437,28 @@ async function saveSheet() {
   await loadSheet();
 }
 
-async function createServiceReminder() {
-  const title = val("reminderTitle");
-  const dueAt = val("reminderDueAt");
-  if (!title || !dueAt) {
-    document.getElementById("reminderStatus").textContent = "Indica titulo e data.";
-    return;
-  }
-  let repeatRule = "NONE";
-  try {
-    repeatRule = selectedRepeatRule();
-  } catch (error) {
-    document.getElementById("reminderStatus").textContent = error.message;
-    return;
-  }
-
-  await req(`/pools/${poolId}/service-reminders`, {
-    method: "POST",
-    body: JSON.stringify({
-      title,
-      dueAt: new Date(dueAt).toISOString(),
-      repeatRule,
-      priority: val("reminderPriority") || "NORMAL",
-      description: val("reminderDescription"),
-    }),
+let serviceReminderCreator;
+function createServiceReminder() { return serviceReminderCreator?.submit(); }
+function setupServiceReminderCreator() {
+  serviceReminderCreator = CwReminderCreate.attach({
+    scope: `pool:${poolId}`, button: 'createServiceReminderBtn', status: 'reminderStatus',
+    fields: ['reminderTitle', 'reminderDueAt', 'reminderRepeatRule', 'reminderPriority', 'customRepeatValue', 'customRepeatUnit', 'reminderDescription'],
+    validPath: path => path === `/api/core/pools/${poolId}/service-reminders`,
+    prepare() {
+      const title = val('reminderTitle'), date = new Date(val('reminderDueAt'));
+      if (!title || !Number.isFinite(date.getTime())) throw Error('Indica titulo e data.');
+      return { path: `/api/core/pools/${poolId}/service-reminders`, body: {
+        title, dueAt: date.toISOString(), repeatRule: selectedRepeatRule(),
+        priority: val('reminderPriority') || 'NORMAL', description: val('reminderDescription'),
+      } };
+    },
+    onRestore: toggleCustomRepeat,
+    async onSuccess() {
+      ['reminderTitle', 'reminderDueAt', 'reminderDescription', 'customRepeatValue'].forEach(id => setVal(id, ''));
+      setVal('reminderRepeatRule', 'NONE'); setVal('customRepeatUnit', 'DAYS'); setVal('reminderPriority', 'NORMAL');
+      toggleCustomRepeat(); await loadReminders();
+    },
   });
-
-  ["reminderTitle", "reminderDueAt", "reminderDescription", "customRepeatValue"].forEach((id) => setVal(id, ""));
-  setVal("reminderRepeatRule", "NONE");
-  setVal("customRepeatUnit", "DAYS");
-  setVal("reminderPriority", "NORMAL");
-  toggleCustomRepeat();
-  document.getElementById("reminderStatus").textContent = "Lembrete criado.";
-  await loadReminders();
 }
 
 async function completeServiceReminder(id) {
@@ -517,6 +506,7 @@ window.saveSheet = saveSheet;
 window.createServiceReminder = createServiceReminder;
 
 window.addEventListener("DOMContentLoaded", () => {
+  setupServiceReminderCreator();
   ["lengthM", "widthM", "depthMinM", "depthMaxM", "averageDepthM"].forEach((id) => {
     document.getElementById(id)?.addEventListener("input", updateCalculatedVolume);
   });
