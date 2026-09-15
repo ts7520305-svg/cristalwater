@@ -89,10 +89,10 @@ async function scheduleReturn(user,value,body={}){
   admin(user);
   const id=Number(value),technicianId=Number(body.technicianId),instructions=String(body.instructions||'').trim();
   if(!Number.isSafeInteger(id)||id<=0||!Number.isSafeInteger(technicianId)||technicianId<=0)fail(400,'Visita e técnico obrigatórios');
-  if(instructions.length<5||instructions.length>1000)fail(400,'Indique instruções para o regresso (5–1000 caracteres)');
+  if(typeof body.instructions!=='string'||instructions.length<5||instructions.length>1000)fail(400,'Indique instruções para o regresso (5–1000 caracteres)');
   if(!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(body.requestId||'')))fail(400,'Identificador do pedido inválido');
   const dateText=String(body.date||''),date=new Date(`${dateText}T00:00:00`),today=new Date();today.setHours(0,0,0,0);
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(dateText)||!Number.isFinite(date.getTime())||date.getFullYear()!==Number(dateText.slice(0,4))||date.getMonth()+1!==Number(dateText.slice(5,7))||date.getDate()!==Number(dateText.slice(8,10))||date<today)fail(400,'Escolha uma data válida a partir de hoje');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(dateText)||!Number.isFinite(date.getTime())||date.getFullYear()!==Number(dateText.slice(0,4))||date.getMonth()+1!==Number(dateText.slice(5,7))||date.getDate()!==Number(dateText.slice(8,10)))fail(400,'Escolha uma data válida a partir de hoje');
   return prisma.$transaction(async tx=>{
     await tx.$queryRaw`SELECT id FROM "ServiceVisit" WHERE id = ${id} FOR UPDATE`;
     const current=await tx.serviceVisit.findUnique({where:{id}});
@@ -100,7 +100,13 @@ async function scheduleReturn(user,value,body={}){
     const all=await tx.operationalReminder.findMany({where:{sourceKey:{startsWith:`incomplete:${id}:`}},orderBy:{id:'asc'}});
     const plans=all.flatMap(row=>row.metadata?.returnPlans||[]);
     const replay=plans.find(plan=>plan.requestId===body.requestId);
-    if(replay)return {ok:true,idempotent:true,visit:await tx.serviceVisit.findUnique({where:{id:replay.visitId}})};
+    if(replay){
+      if(replay.date!==dateText||replay.technicianId!==technicianId||replay.instructions!==instructions||replay.scheduledBy!==user.id)fail(409,'Este identificador já foi utilizado com outro agendamento. Atualize o planeamento antes de enviar alterações.');
+      const savedVisit=await tx.serviceVisit.findUnique({where:{id:replay.visitId}});
+      if(!savedVisit)fail(409,'O regresso registado já não está disponível. Confirme o planeamento com a gestão.');
+      return {ok:true,idempotent:true,visit:savedVisit};
+    }
+    if(date<today)fail(400,'Escolha uma data válida a partir de hoje');
     if(current.status!=='INCOMPLETE'||current.endAt||!current.poolId||!all.some(row=>!row.isCompleted))fail(409,'A visita já não tem um impedimento aberto. Atualize a lista');
     const linkedIds=[...new Set(all.map(row=>row.metadata?.returnPlan?.visitId).filter(Number.isSafeInteger))];
     if(linkedIds.length&&await tx.serviceVisit.findFirst({where:{id:{in:linkedIds},status:{notIn:['CANCELLED','CANCELED','SKIPPED','ARCHIVED']}}}))fail(409,'Já existe um regresso para esta visita. Atualize a lista');

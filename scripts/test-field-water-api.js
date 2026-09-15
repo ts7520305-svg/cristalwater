@@ -223,6 +223,21 @@ await prisma.serviceVisit.update({where:{id:own.id},data:{status:'CANCELLED'}});
     await prisma.serviceVisit.update({where:{id:conflict.id},data:{status:'CANCELLED'}});
     const replies=await Promise.all([call('POST',endpoint,adminToken,payload),call('POST',endpoint,adminToken,payload)]);
     replies.forEach(reply=>assert.equal(reply.status,200,JSON.stringify(reply.body)));const returned=replies[0].body.visit;
+    for(const changed of [{...payload,date:'2035-01-21'},{...payload,technicianId:tech.id},{...payload,instructions:'Levar outra peça e contactar o cliente'}])assert.equal((await call('POST',endpoint,adminToken,changed)).status,409);
+    assert.equal((await prisma.serviceVisit.findUnique({where:{id:returned.id}})).technicianId,other.id);
+    // An exact retry remains readable after its original scheduling day has passed.
+    const originalReminder=await prisma.operationalReminder.findUnique({where:{id:report.body.reminder.id}});
+    const oldDate='2020-01-02';
+    const oldMetadata={...originalReminder.metadata,returnPlans:originalReminder.metadata.returnPlans.map(plan=>plan.requestId===payload.requestId?{...plan,date:oldDate}:plan)};
+    await prisma.operationalReminder.update({where:{id:originalReminder.id},data:{metadata:oldMetadata}});
+    await prisma.serviceVisit.update({where:{id:returned.id},data:{plannedDate:new Date(oldDate+'T00:00:00')}});
+    try{
+      const oldReplay=await call('POST',endpoint,adminToken,{...payload,date:oldDate});assert.equal(oldReplay.status,200);assert.equal(oldReplay.body.visit.id,returned.id);assert.equal(oldReplay.body.idempotent,true);
+      assert.equal((await call('POST',endpoint,adminToken,{...payload,date:oldDate,requestId:uuid()})).status,400);
+    }finally{
+      await prisma.operationalReminder.update({where:{id:originalReminder.id},data:{metadata:originalReminder.metadata}});
+      await prisma.serviceVisit.update({where:{id:returned.id},data:{plannedDate:new Date(returned.plannedDate)}});
+    }
     assert.equal(await prisma.operationalReminder.count({where:{sourceKey:{startsWith:`visit-receipt:${returned.id}:`}}}),1);
     assert((await call('GET','/api/technician/visit-receipts',otherToken)).body.receipts.some(row=>row.visitId===returned.id));
     assert.equal(replies[1].body.visit.id,returned.id);assert.equal(returned.technicianId,other.id);assert.equal(returned.ph,null);assert.equal(returned.cleaned,false);assert(!returned.notes.includes(payload.instructions));
