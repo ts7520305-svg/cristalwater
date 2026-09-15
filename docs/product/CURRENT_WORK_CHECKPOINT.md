@@ -2,6 +2,9 @@
 
 ## Ponto de retoma atual — 15/09/2026
 
+- TASK170: guarda ADMIN ativa antes dos 30 prefixos administrativos antigos, incluindo aliases, IA e diagnósticos. Três grupos aprovados em `field-qa-runtime/run-1789507700323`; 323 unitários e quatro de técnicos. Relatório `LEGACY_ADMIN_ACCESS_20260915.md`. Prosseguir por titularidade/identidade dos chats por recurso, chat interno e perfil antigo; otimização `/api/route` ainda precisa de revisão da resposta TECH/TEAM_LEADER; lembrete manual antigo ignora falhas HTTP internas. Atualizar depois a matriz global.
+- TASK168/TASK169 confirmadas no GitHub: `42455e1c3131a15c38a95e38e3690ea850b975f7`, árvore `83cd6690c18ee01214f608370605e3cb287ff0cf`; workflow `35024969768` aprovado com 73 grupos e restauro de 99 tabelas/11 ficheiros. TASK166/TASK167 também verificadas: 71 grupos e restauro no workflow `35024037375`.
+
 - Repositório: `ts7520305-svg/cristalwater`.
 - Branch de trabalho: `work/field-readiness-20260915-simulation`.
 - TASK169: gestão de utilizadores/passwords exige ADMIN ativo; autor derivado da sessão e passwords retiradas do log. Relatório `ACCOUNT_ACCESS_20260915.md`; três grupos aprovados em `field-qa-runtime/run-1789507058993`. Publicar TASK168/TASK169 e confirmar 73 grupos. A revisão estática encontrou outros routers antigos sem guarda (piscinas, notificações/regras, zonas, extras, históricos, planeamento, comunicações, localizações e chats por recurso); validar os perfis necessários e proteger antes de concluir a matriz global. Não confundir esta listagem estática com prova de exploração de todos os endpoints.

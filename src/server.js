@@ -195,6 +195,7 @@ function mount(pathname, router) {
 }
 
 // API core
+require('./middlewares/legacyAdministrationAccess')(app);
 mount("/api/system", systemRoutes);
 mount("/api/auth", authRoutes);
 mount("/api/push", require("./routes/browserPushRoutes"));
