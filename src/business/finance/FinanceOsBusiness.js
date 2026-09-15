@@ -4,6 +4,7 @@ const { NON_RECEIVABLE_STATUSES, isReceivableInvoice, createCreditLedgerPayment,
 const { EVENT_TYPES, emitFinanceEvent } = require("../../services/financeOsEventService");
 const { preparePaymentRequest, executePaymentRequest } = require('../../services/invoicePaymentRequestService');
 const { reservedRepairIds } = require('../../services/repairInvoiceSourceService');
+const cashReceipts = require('../../services/cashReceiptReportService');
 
 function monthRefFromDate(date = new Date()) {
   return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
@@ -655,50 +656,43 @@ async function getCustomerAccount(clientId) {
 }
 
 async function getCompanyBalance() {
-  const [invoices, clients] = await Promise.all([
+  const [invoices, clients, payments] = await Promise.all([
     repository.getInvoices({}),
-    repository.listClients({ active: true }),
+    repository.listClients({}),
+    cashReceipts.payments(),
   ]);
 
   const totalInvoiced = invoices.filter(isReceivableInvoice).reduce((sum, invoice) => sum + invoiceTotal(invoice), 0);
   const totalPaid = invoices.reduce((sum, invoice) => sum + invoicePaid(invoice), 0);
   const outstandingDebt = invoices.reduce((sum, invoice) => sum + invoiceOpen(invoice), 0);
   const customerCredit = clients.reduce((sum, client) => sum + asMoney(client.creditBalance), 0);
+  const cashReceived = cashReceipts.total(payments);
 
   return {
     ok: true,
     balance: {
       totalInvoiced,
       totalPaid,
+      cashReceived,
       outstandingDebt,
       customerCreditLiability: customerCredit,
-      netCompanyBalance: totalPaid - customerCredit,
+      netCompanyBalance: asMoney(cashReceived - customerCredit),
     },
   };
 }
 
 async function getRevenueReport(query = {}) {
-  const limit = clampLimit(query.limit, 5000, 100, 10000);
-  const where = {};
-  if (query.monthRef) {
-    where.paidAt = {
-      gte: new Date(`${query.monthRef}-01T00:00:00.000Z`),
-      lt: new Date(`${query.monthRef}-31T23:59:59.999Z`),
-    };
-  }
-
-  const payments = await repository.listPayments(where, { take: limit });
-  const revenue = payments.reduce((sum, payment) => sum + asMoney(payment.amount), 0);
-  return { ok: true, revenue, paymentsCount: payments.length, limitApplied: limit };
+  const payments = await cashReceipts.payments(query.monthRef);
+  return { ok: true, revenue: cashReceipts.total(payments), paymentsCount: payments.length, limitApplied: null, basis: 'CASH_RECEIPTS' };
 }
 
 async function getMonthlyRevenueReport() {
-  const limit = 10000;
-  const payments = await repository.listPayments({}, { take: limit });
+  const payments = await cashReceipts.payments();
   return {
     ok: true,
-    monthlyRevenue: repository.groupByMonth(payments, "paidAt", "amount"),
-    limitApplied: limit,
+    monthlyRevenue: cashReceipts.monthly(payments),
+    limitApplied: null,
+    basis: 'CASH_RECEIPTS',
   };
 }
 
@@ -726,19 +720,19 @@ async function getOutstandingDebtReport() {
 }
 
 async function getCashflowReport() {
-  const limit = 10000;
   const [payments, invoices] = await Promise.all([
-    repository.listPayments({}, { take: limit }),
-    repository.getInvoices({}, { take: limit }),
+    cashReceipts.payments(),
+    repository.getInvoices({}),
   ]);
 
-  const inflow = payments.reduce((sum, payment) => sum + asMoney(payment.amount), 0);
+  const inflow = cashReceipts.total(payments);
   const receivables = invoices.reduce((sum, invoice) => sum + invoiceOpen(invoice), 0);
-  const billed = invoices.reduce((sum, invoice) => sum + invoiceTotal(invoice), 0);
+  const billed = invoices.filter(isReceivableInvoice).reduce((sum, invoice) => sum + invoiceTotal(invoice), 0);
 
   return {
     ok: true,
-    limitApplied: limit,
+    limitApplied: null,
+    basis: 'CASH_RECEIPTS',
     cashflow: {
       inflow,
       receivables,

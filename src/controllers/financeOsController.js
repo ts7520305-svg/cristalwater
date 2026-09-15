@@ -68,7 +68,11 @@ async function companyBalance(req, res) {
 }
 
 async function reportRevenue(req, res) {
-  return send(res, await business.getRevenueReport(req.query || {}));
+  try {
+    return send(res, await business.getRevenueReport(req.query || {}));
+  } catch (error) {
+    return res.status(error.status || 500).json({ ok: false, error: error.status ? error.message : 'Erro ao consultar recebimentos' });
+  }
 }
 
 async function reportMonthlyRevenue(req, res) {
