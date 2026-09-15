@@ -155,28 +155,39 @@ async function createDraftInvoice(payload = {}, actor = "finance-os", transactio
 }
 
 async function issueInvoice(invoiceId, payload = {}, actor = "finance-os", transaction = null) {
+  const id = Number(invoiceId);
+  if (!/^\d+$/.test(String(invoiceId)) || !Number.isSafeInteger(id) || id <= 0 || id > 2147483647) return { ok: false, status: 400, error: 'Fatura inválida' };
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload) || [payload.invoiceNumber, payload.externalInvoiceNo, payload.notes].some(value => value !== undefined && (typeof value !== 'string' || value.length > 2000))) return { ok: false, status: 400, error: 'Dados de emissão inválidos' };
+  if (payload.invoiceNumber && payload.externalInvoiceNo && payload.invoiceNumber.trim() !== payload.externalInvoiceNo.trim()) return { ok: false, status: 400, error: 'Números de documento diferentes' };
   const include = { client: true, lines: true, payments: true };
-  const invoice = transaction ? await transaction.invoice.findUnique({ where: { id: Number(invoiceId) }, include }) : await repository.getInvoice(invoiceId);
-  if (!invoice) return { ok: false, status: 404, error: "Fatura não encontrada" };
-
   const invoiceNumber = String(payload.invoiceNumber || payload.externalInvoiceNo || "").trim() || null;
-  const data = {
-    status: "ISSUED",
-    invoiceIssued: true,
-    invoiceNumber: invoiceNumber || invoice.invoiceNumber,
-    externalInvoiceNo: invoiceNumber || invoice.externalInvoiceNo,
-    issueDate: invoice.issueDate || new Date(),
-    notes: [invoice.notes, payload.notes].filter(Boolean).join("\n") || invoice.notes,
+  const run = async tx => {
+    await tx.$queryRaw`SELECT id FROM "Invoice" WHERE id = ${id} FOR UPDATE`;
+    const invoice = await tx.invoice.findUnique({ where: { id }, include });
+    if (!invoice) return { ok: false, status: 404, error: "Fatura não encontrada" };
+    const status = normalizeInvoiceStatus(invoice.status);
+    if (NON_RECEIVABLE_STATUSES.includes(status) && !['DRAFT', 'RASCUNHO'].includes(status)) return { ok: false, status: 409, error: 'Documento retirado; não pode ser reaberto por emissão' };
+    if ((invoice.invoiceNumber && invoiceNumber && invoice.invoiceNumber !== invoiceNumber) || (invoice.externalInvoiceNo && invoiceNumber && invoice.externalInvoiceNo !== invoiceNumber)) return { ok: false, status: 409, error: 'O número do documento já está definido' };
+    if (invoice.invoiceIssued || status === 'ISSUED') return { ok: true, invoice: invoiceShape(invoice), alreadyIssued: true };
+    if (!['DRAFT', 'RASCUNHO', 'PENDING'].includes(status) || invoicePaid(invoice) > 0 || invoice.payments.some(payment => Number(payment.amount) > 0 || Number(payment.amountCents) > 0)) return { ok: false, status: 409, error: 'O estado ou pagamentos do documento não permitem esta emissão' };
+    const issued = await tx.invoice.update({ where: { id }, data: {
+      status: 'ISSUED', invoiceIssued: true, invoiceNumber: invoiceNumber || invoice.invoiceNumber,
+      externalInvoiceNo: invoiceNumber || invoice.externalInvoiceNo, issueDate: invoice.issueDate || new Date(),
+      notes: [invoice.notes, payload.notes].filter(Boolean).join('\n') || invoice.notes,
+    }, include });
+    await tx.auditTrail.create({ data: { eventType: 'FINANCE_INVOICE_ISSUED', action: 'FINANCE_INVOICE_ISSUED', entity: 'Invoice', entityId: id,
+      clientId: invoice.clientId, metadata: { actor, invoiceNumber: issued.invoiceNumber, kind: 'INTERNAL_ISSUE' }, beforeJson: { status: invoice.status }, afterJson: { status: issued.status } } });
+    return { ok: true, invoice: invoiceShape(issued) };
   };
-  const issued = transaction ? await transaction.invoice.update({ where: { id: invoice.id }, data, include }) : await repository.updateInvoice(invoice.id, data);
-
-  if (!transaction) await emitFinanceEvent(EVENT_TYPES.FINANCE_INVOICE_ISSUED, {
-    invoiceId: issued.id,
-    clientId: issued.clientId,
+  let result;
+  try { result = transaction ? await run(transaction) : await repository.transaction(run); }
+  catch (error) { if (error.code === 'P2002' && !transaction) return { ok: false, status: 409, error: 'Número de documento já utilizado' }; throw error; }
+  if (result.ok && !result.alreadyIssued && !transaction) await emitFinanceEvent(EVENT_TYPES.FINANCE_INVOICE_ISSUED, {
+    invoiceId: result.invoice.id,
+    clientId: result.invoice.clientId,
     actor,
   });
-
-  return { ok: true, invoice: invoiceShape(issued) };
+  return result;
 }
 
 async function sendInvoice(invoiceId, payload = {}, actor = "finance-os") {

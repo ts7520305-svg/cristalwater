@@ -16,7 +16,11 @@ async function createDraftInvoice(req, res) {
 }
 
 async function issueInvoice(req, res) {
-  return send(res, await business.issueInvoice(req.params.invoiceId, req.body || {}, actor(req)));
+  try {
+    return send(res, await business.issueInvoice(req.params.invoiceId, req.body || {}, actor(req)));
+  } catch (error) {
+    return res.status(error.status || 500).json({ ok: false, error: error.status ? error.message : 'Erro ao emitir documento interno' });
+  }
 }
 
 async function sendInvoice(req, res) {

@@ -37,6 +37,7 @@ scripts.push('test-field-invoice-cancellation.js');
 scripts.push('test-field-invoice-credit-note.js');
 scripts.push('test-field-repair-payment.js');
 scripts.push('test-field-cash-reports.js');
+scripts.push('test-field-invoice-issue.js');
 function run(script){return new Promise(resolve=>{
  const output=fs.createWriteStream(path.join(evidence,script+'.log'));
  const child=spawn(process.execPath,[path.join(__dirname,script)],{cwd:root,env:process.env,stdio:['ignore','pipe','pipe']});
