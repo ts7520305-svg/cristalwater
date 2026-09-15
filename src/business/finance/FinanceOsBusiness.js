@@ -383,26 +383,28 @@ async function createCreditNote(invoiceId, payload = {}, actor = "finance-os") {
 }
 
 async function cancelInvoice(invoiceId, payload = {}, actor = "finance-os") {
-  const invoice = await repository.getInvoice(invoiceId);
-  if (!invoice) return { ok: false, status: 404, error: "Fatura não encontrada" };
-
-  const currentStatus = normalizeInvoiceStatus(invoice.status);
-  if (currentStatus === "CANCELLED" || currentStatus === "CANCELED") {
-    return { ok: true, invoice: invoiceShape(invoice), alreadyCancelled: true };
-  }
-
-  if (currentStatus === "PAID") {
-    return { ok: false, status: 409, error: "Não é possível cancelar fatura paga" };
-  }
-
-  const paid = invoicePaid(invoice);
-  if (paid > 0) {
-    return { ok: false, status: 409, error: "Não é possível cancelar fatura com pagamentos registados" };
-  }
-
+  const id = Number(invoiceId);
+  if (!/^\d+$/.test(String(invoiceId)) || !Number.isSafeInteger(id) || id <= 0 || id > 2147483647) return { ok: false, status: 400, error: 'Fatura inválida' };
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload) || [payload.reason, payload.notes].some(value => value !== undefined && (typeof value !== 'string' || value.length > 2000))) return { ok: false, status: 400, error: 'Motivo inválido' };
   const reason = String(payload.reason || payload.notes || "Cancelada via Finance OS").trim();
+  const result = await repository.transaction(async (tx) => {
+    await tx.$queryRaw`SELECT id FROM "Invoice" WHERE id = ${id} FOR UPDATE`;
+    const invoice = await tx.invoice.findUnique({ where: { id }, include: { client: true, lines: true, payments: true } });
+    if (!invoice) return { ok: false, status: 404, error: "Fatura não encontrada" };
 
-  const cancelled = await repository.transaction(async (tx) => {
+    const currentStatus = normalizeInvoiceStatus(invoice.status);
+    if (currentStatus === "CANCELLED" || currentStatus === "CANCELED") {
+      return { ok: true, invoice: invoiceShape(invoice), alreadyCancelled: true };
+    }
+
+    if (currentStatus === "PAID") {
+      return { ok: false, status: 409, error: "Não é possível cancelar fatura paga" };
+    }
+
+    if (invoicePaid(invoice) > 0 || (invoice.payments || []).some(payment => Number(payment.amount) > 0 || Number(payment.amountCents) > 0)) {
+      return { ok: false, status: 409, error: "Não é possível cancelar fatura com pagamentos registados" };
+    }
+
     const updated = await tx.invoice.update({
       where: { id: Number(invoice.id) },
       data: {
@@ -413,7 +415,7 @@ async function cancelInvoice(invoiceId, payload = {}, actor = "finance-os") {
       include: { client: true, lines: true, payments: true },
     });
 
-    await repository.createAudit(tx, {
+    await tx.auditTrail.create({ data: {
       action: "FINANCE_INVOICE_CANCELLED",
       eventType: "FINANCE_INVOICE_CANCELLED",
       entity: "Invoice",
@@ -421,9 +423,9 @@ async function cancelInvoice(invoiceId, payload = {}, actor = "finance-os") {
       clientId: updated.clientId,
       metadata: { reason, actor },
       message: `Fatura #${updated.id} cancelada`,
-    });
+    } });
 
-    await repository.createNotification(tx, {
+    await tx.notification.create({ data: {
       clientId: updated.clientId,
       type: "INVOICE_CANCELLED",
       eventType: "FINANCE_INVOICE_CANCELLED",
@@ -433,26 +435,27 @@ async function cancelInvoice(invoiceId, payload = {}, actor = "finance-os") {
       severity: "WARNING",
       status: "PENDING",
       metadata: { invoiceId: updated.id, reason },
-    });
+    } });
 
-    await repository.createCommunicationLog(tx, {
+    await tx.communicationLog.create({ data: {
       clientId: updated.clientId,
       channel: "INVOICE_CANCELLATION",
       message: `Fatura #${updated.id} cancelada (${reason}).`,
       referenceId: updated.id,
-    });
+    } });
 
-    return updated;
+    return { ok: true, invoice: invoiceShape(updated), reason };
   });
 
+  if (!result.ok || result.alreadyCancelled) return result;
   await emitFinanceEvent(EVENT_TYPES.FINANCE_INVOICE_CANCELLED, {
-    invoiceId: cancelled.id,
-    clientId: cancelled.clientId,
+    invoiceId: result.invoice.id,
+    clientId: result.invoice.clientId,
     reason,
     actor,
   });
 
-  return { ok: true, invoice: invoiceShape(cancelled), reason };
+  return result;
 }
 
 async function getInvoiceHistory(invoiceId) {

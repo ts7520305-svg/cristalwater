@@ -36,7 +36,11 @@ async function createCreditNote(req, res) {
 }
 
 async function cancelInvoice(req, res) {
-  return send(res, await business.cancelInvoice(req.params.invoiceId, req.body || {}, actor(req)));
+  try {
+    return send(res, await business.cancelInvoice(req.params.invoiceId, req.body || {}, actor(req)));
+  } catch (error) {
+    return res.status(error.status || 500).json({ ok: false, error: error.status ? error.message : 'Erro ao cancelar fatura' });
+  }
 }
 
 async function invoiceHistory(req, res) {

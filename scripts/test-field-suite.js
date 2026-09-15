@@ -33,6 +33,7 @@ scripts.push('test-field-repair-monthly-once.js');
 scripts.push('test-field-repair-invoice-atomic.js');
 scripts.push('test-field-contract-activation.js');
 scripts.push('test-field-contract-activation-ui.js');
+scripts.push('test-field-invoice-cancellation.js');
 function run(script){return new Promise(resolve=>{
  const output=fs.createWriteStream(path.join(evidence,script+'.log'));
  const child=spawn(process.execPath,[path.join(__dirname,script)],{cwd:root,env:process.env,stdio:['ignore','pipe','pipe']});
