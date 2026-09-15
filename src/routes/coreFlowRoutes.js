@@ -2886,7 +2886,7 @@ router.post('/invoices/generate', async (req, res) => {
     const range = monthRangeFromRef(ref);
 
     const repairs = await safe('repair.findMany.invoiceGenerate.v2', [], () => db('repair').findMany({
-      where: { pool: { clientId }, status: { in: ['QUOTED', 'APPROVED', 'DONE'] }, paid: false },
+      where: { pool: { clientId }, status: { in: ['QUOTED', 'APPROVED', 'DONE'] }, NOT: { status: 'QUOTED', quotes: { some: {} } }, paid: false },
       include: { pool: true },
     }));
     const serviceVisits = range && available('serviceVisit') ? await safe('serviceVisit.findMany.invoiceGenerate.v2', [], () => db('serviceVisit').findMany({
@@ -3008,7 +3008,7 @@ router.post('/invoices/generate-legacy', async (req, res) => {
     }
 
     const repairs = await safe('repair.findMany.invoiceGenerate', [], () => db('repair').findMany({
-      where: { pool: { clientId }, status: { in: ['QUOTED', 'APPROVED', 'DONE'] }, paid: false },
+      where: { pool: { clientId }, status: { in: ['QUOTED', 'APPROVED', 'DONE'] }, NOT: { status: 'QUOTED', quotes: { some: {} } }, paid: false },
       include: { pool: true },
     }));
 

@@ -59,7 +59,7 @@ async function save(repairId, payload, actor) {
     const createdAt = new Date();
     snapshot.validUntil = new Date(createdAt.getTime() + snapshot.validityDays * 86400000).toISOString();
     const quote = await tx.repairQuote.create({ data: { repairId: id, version: payload.expectedVersion + 1, snapshot, createdBy: actor, createdAt } });
-    const updated = await tx.repair.update({ where: { id }, data: { status: 'QUOTED', quantity: 1, unitPrice: snapshot.net, totalPrice: snapshot.net } });
+    const updated = await tx.repair.update({ where: { id }, data: { status: 'QUOTED', unitPrice: snapshot.net / Math.max(1, repair.quantity), totalPrice: snapshot.net } });
     await tx.userAuditLog.create({ data: { action: 'REPAIR_QUOTE_SAVED', metadata: { repairId: id, quoteId: quote.id, version: quote.version, actor } } });
     return { ok: true, repair: updated, quote };
   });

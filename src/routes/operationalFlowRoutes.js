@@ -443,7 +443,7 @@ router.post('/generate-monthly-invoice', asyncHandler(async (req, res) => {
 
   const ref = req.body.monthRef || monthRef();
   const visits = await model('serviceVisit').findMany({ where: { clientId, status: 'DONE', billed: false } });
-  const repairs = await model('repair').findMany({ where: { pool: { clientId }, status: { in: ['DONE', 'QUOTED', 'APPROVED', 'QUOTE_REQUESTED'] }, paid: false } });
+  const repairs = await model('repair').findMany({ where: { pool: { clientId }, status: { in: ['DONE', 'QUOTED', 'APPROVED', 'QUOTE_REQUESTED'] }, NOT: { status: { in: ['QUOTED','QUOTE_REQUESTED'] }, quotes: { some: {} } }, paid: false } });
   const monthly = toNumber(client.monthlyAmount || client.monthlyFee, 0);
   const repairTotal = repairs.reduce((sum, r) => sum + toNumber(r.totalPrice || r.unitPrice, 0), 0);
   const total = monthly + repairTotal;

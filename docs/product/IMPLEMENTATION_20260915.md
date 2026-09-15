@@ -41,3 +41,7 @@ O editor está dentro de Alertas/Reparações, sem novo módulo de navegação. 
 ## TASK 89 — validação do fluxo comercial
 
 A revisão encontrou um desvio no fluxo antigo: permitia agendar QUOTED antes da aprovação. Para orçamentos detalhados essa passagem é agora recusada, com bloqueio da reparação durante a decisão. Eliminar uma reparação com versões guardadas devolve conflito e orienta para cancelamento, preservando o histórico. O teste API verifica também a geração real de PDF. O editor foi verificado em larguras 320, 390 e 1280 px.
+
+## TASK 90 — orçamento e faturação mensal
+
+As consultas dos dois geradores mensais antigos também incluíam QUOTED. Orçamentos detalhados por aprovar ficam agora excluídos, mantendo as regras antigas para registos sem versões. O teste de API verifica mensalidade de 80 antes da aprovação e 310 após incluir uma reparação de 230. Guardar um orçamento mantém a quantidade operacional original da reparação, em vez de a substituir por 1.
