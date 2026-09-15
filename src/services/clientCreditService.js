@@ -1,3 +1,4 @@
+const { randomUUID } = require('node:crypto');
 const NON_RECEIVABLE_STATUSES = ['DRAFT', 'RASCUNHO', 'CANCELLED', 'CANCELED', 'CANCELADO', 'VOID', 'ARCHIVED', 'SUPERSEDED'];
 function isReceivableInvoice(invoice = {}) {
   return !NON_RECEIVABLE_STATUSES.includes(String(invoice.status || '').trim().toUpperCase());
@@ -125,11 +126,12 @@ async function applyClientCreditToInvoice(db, invoiceInput, options = {}) {
 }
 
 async function createCreditLedgerPayment(db, clientId, amount, options = {}) {
+  if (db.$transaction) return db.$transaction(tx => createCreditLedgerPayment(tx, clientId, amount, options), { maxWait: 15000, timeout: 15000 });
   const creditAmount = toMoney(amount);
   if (!clientId || creditAmount <= 0) return { creditAdded: 0 };
 
   const monthRef = options.monthRef || new Date().toISOString().slice(0, 7);
-  const ledgerRef = `${monthRef}-CREDIT-${Date.now()}`;
+  const ledgerRef = `${monthRef}-CREDIT-${randomUUID()}`;
   const paymentReference = options.paymentReference || `CW-${String(Number(clientId)).padStart(6, "0")}`;
   const notes = [
     paymentReference,
@@ -176,11 +178,13 @@ async function createCreditLedgerPayment(db, clientId, amount, options = {}) {
     },
   });
 
+  await db.$queryRaw`SELECT id FROM "Client" WHERE id = ${clientId} FOR NO KEY UPDATE`;
+  const receivables = await db.invoice.findMany({ where: { clientId } });
   const client = await db.client.update({
     where: { id: clientId },
     data: {
       creditBalance: { increment: creditAmount },
-      paymentStatus: "PAID",
+      paymentStatus: receivables.some(row => invoiceOpen(row) > 0) ? 'PARTIAL' : 'PAID',
       lastPaymentAt: new Date(),
     },
   });

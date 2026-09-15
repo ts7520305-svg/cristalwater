@@ -1,6 +1,6 @@
 const repository = require("../../dal/FinanceOsRepository");
 const { processPaymentReminders } = require("../../services/paymentService");
-const { NON_RECEIVABLE_STATUSES, isReceivableInvoice, invoiceOpen, invoicePaid, invoiceStatus, invoiceTotal } = require("../../services/clientCreditService");
+const { NON_RECEIVABLE_STATUSES, isReceivableInvoice, createCreditLedgerPayment, invoiceOpen, invoicePaid, invoiceStatus, invoiceTotal } = require("../../services/clientCreditService");
 const { EVENT_TYPES, emitFinanceEvent } = require("../../services/financeOsEventService");
 const { preparePaymentRequest, executePaymentRequest } = require('../../services/invoicePaymentRequestService');
 
@@ -245,16 +245,13 @@ async function registerPayment(invoiceId, payload = {}, actor = "finance-os", us
       });
     }
 
-    if (surplus > 0) {
-      // Cash already covers the remaining invoice. Preserve any earlier credit;
-      // applying it here would settle the same debt twice before recalculation.
-      await tx.client.update({
-        where: { id: invoice.clientId },
-        data: { creditBalance: { increment: surplus } },
-      });
-    }
-
     const updated = await recalculateInvoice(tx, invoice.id);
+    // The whole cash receipt belongs in the payment ledger. Its unapplied part
+    // becomes a deposit, never a second payment on the already settled invoice.
+    const credit = surplus > 0 ? await createCreditLedgerPayment(tx, invoice.clientId, surplus, {
+      monthRef: invoice.monthRef || monthRefFromDate(), method,
+      notes: String(payload.notes || `Excedente da fatura #${invoice.id}`).trim(),
+    }) : { creditAdded: 0 };
 
     await repository.createAudit(tx, {
       action: "FINANCE_PAYMENT_CONFIRMED",
@@ -293,6 +290,9 @@ async function registerPayment(invoiceId, payload = {}, actor = "finance-os", us
       invoice: invoiceShape(updated || invoice),
       appliedAmount: applied,
       surplusAmount: surplus,
+      creditAdded: credit.creditAdded,
+      creditBalance: credit.creditBalance,
+      creditPaymentId: credit.payment?.id || null,
       method,
     };
   }));
