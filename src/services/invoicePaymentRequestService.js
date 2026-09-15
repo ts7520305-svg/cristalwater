@@ -7,19 +7,30 @@ function text(value, limit, fallback = '') {
   return value.trim();
 }
 
+function paymentDetails(body) {
+  if (!['number', 'string'].includes(typeof body.amount) || (typeof body.amount === 'string' && !/^\d+(\.\d{1,2})?$/.test(body.amount.trim()))) fail('Indica um valor válido, com até dois decimais.');
+  const amount = Number(body.amount), amountCents = Math.round(amount * 100);
+  if (!Number.isFinite(amount) || !Number.isSafeInteger(amountCents) || amountCents <= 0 || Math.abs(amount * 100 - amountCents) > 0.000001) fail('Indica um valor válido, com até dois decimais.');
+  return { amountCents, method: text(body.method, 40, 'MANUAL').toUpperCase() || 'MANUAL', notes: text(body.notes, 2000) };
+}
+
 function preparePaymentRequest(invoiceId, body, user) {
   if (body.requestId === undefined) return null; // Existing integrations remain compatible.
   if (typeof body.requestId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(body.requestId)) fail('Identificador do pagamento inválido.');
   const id = Number(invoiceId), actorId = Number(user?.id);
   if (!Number.isSafeInteger(id) || id <= 0 || !Number.isSafeInteger(actorId) || actorId <= 0 || !user?.role) fail('Fatura ou responsável inválido.');
-  if (!['number', 'string'].includes(typeof body.amount) || (typeof body.amount === 'string' && !/^\d+(\.\d{1,2})?$/.test(body.amount.trim()))) fail('Indica um valor válido, com até dois decimais.');
-  const amount = Number(body.amount), amountCents = Math.round(amount * 100);
-  if (!Number.isFinite(amount) || !Number.isSafeInteger(amountCents) || amountCents <= 0 || Math.abs(amount * 100 - amountCents) > 0.000001) fail('Indica um valor válido, com até dois decimais.');
   return {
-    requestId: body.requestId.toLowerCase(), invoiceId: id, amountCents,
-    method: text(body.method, 40, 'MANUAL').toUpperCase() || 'MANUAL', notes: text(body.notes, 2000),
+    requestId: body.requestId.toLowerCase(), invoiceId: id, ...paymentDetails(body),
     actorId, actorRole: String(user.role).toUpperCase(),
   };
+}
+
+function prepareClientPaymentRequest(clientId, month, body, user) {
+  if (typeof month !== 'string' || !/^\d{4}-(0[1-9]|1[0-2])$/.test(month) || Number(month.slice(0, 4)) === 0) fail('Mês do recebimento inválido.');
+  const request = preparePaymentRequest(clientId, body, user);
+  if (!request) return null;
+  const { invoiceId, ...details } = request;
+  return { scope: 'CLIENT', ...details, clientId: invoiceId, month };
 }
 
 async function executePaymentRequest(tx, request, work) {
@@ -46,4 +57,4 @@ async function executePaymentRequest(tx, request, work) {
   return saved;
 }
 
-module.exports = { preparePaymentRequest, executePaymentRequest };
+module.exports = { preparePaymentRequest, prepareClientPaymentRequest, paymentDetails, executePaymentRequest };
