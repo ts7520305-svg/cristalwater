@@ -57,3 +57,7 @@ Planos privados e versionados por cliente. O valor base e cada período represen
 ## TASK 93 — integração dos preços na faturação
 
 Configuração e pré-visualização reservadas à administração. Os geradores core, operacional e de faturas e o agendador mensal usam o mesmo plano quando configurado. Clientes sem plano mantêm o comportamento anterior. As reexecuções não substituem o valor de faturas existentes; o editor financeiro continua a ser o local para correções explícitas. O agendador lê novamente o contrato e os preços dentro da transação, com bloqueio do cliente. Um mês gratuito não cria automaticamente uma cobrança.
+
+## TASK 94 — configuração por cliente e simulação
+
+A página de configuração permite escolher o cliente pelo nome, carregar os preços, adicionar períodos, simular o mês e guardar uma nova versão. Mostra claramente que é um preço mensal total e que a mudança dentro do mês é proporcional. Alterar cliente limpa o plano anterior; gravação exige o cliente carregado e a versão esperada. Mudança de sessão esconde os dados. O formulário antigo de lembretes exige também carregar o cliente antes de guardar, evitando copiar a configuração de outro cliente por engano.

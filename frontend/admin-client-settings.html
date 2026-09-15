@@ -33,14 +33,33 @@ select, input { min-height: 44px; padding: 8px 10px; width: 100%; margin-top: 5p
   <button type="button" class="cw-v2-btn" aria-label="Abrir centro de operacoes" onclick="window.location.href='/admin-master-control'">Centro de Operacoes</button>
 </div>
 
-<h2>Configuração de Alertas por Cliente</h2>
+<h2>Configuração por Cliente</h2>
 
 <div class="card">
-  <label for="clientId">Cliente ID</label>
-  <input id="clientId" type="number" inputmode="numeric" />
+  <label for="clientId">Cliente</label>
+  <select id="clientId"><option value="">Escolher cliente</option></select>
   <button onclick="loadClient()">Carregar</button>
 </div>
 
+<section id="ratePanel" class="card">
+  <h3>Mensalidade e preços por período</h3>
+  <p id="rateClient">Escolha um cliente e carregue o plano.</p>
+  <p>Valores mensais totais do contrato, incluindo todas as piscinas, sem IVA. A data final está incluída. Uma mudança a meio do mês é proporcional aos dias de calendário.</p>
+  <button type="button" id="rateLoad">Carregar / recarregar plano</button>
+  <form id="rateForm">
+    <label>Preço mensal base (€)<input id="rateBase" type="number" min="0" max="10000000" step="0.01" required></label>
+    <div id="ratePeriods"></div>
+    <button type="button" id="rateAdd">Adicionar período</button>
+    <p>Sem data final: preço permanente. Fora dos períodos aplica-se o preço base. Para outro ano, crie o respetivo período.</p>
+    <label>Mês para simular<input id="rateMonth" type="month" min="2000-01" max="2199-12" required></label>
+    <button type="submit">Simular mês</button>
+    <button type="button" id="rateSave">Guardar nova versão</button>
+  </form>
+  <output id="ratePreview" style="display:block;white-space:pre-line;margin-top:16px"></output>
+  <p id="rateStatus" role="status" aria-live="polite"></p>
+  <p>Guardar o plano não altera faturas existentes nem avisa automaticamente o cliente. Registe apenas preços já acordados.</p>
+</section>
+<style>#ratePanel fieldset{display:flex;flex-wrap:wrap;gap:12px;border:1px solid var(--cw-border,#cbd5e1);border-radius:10px;margin:16px 0;padding:12px;min-width:0}#ratePanel fieldset label{flex:1 1 150px;min-width:0}#ratePanel input{max-width:100%;min-width:0}#ratePanel{overflow-wrap:anywhere}</style>
 <div class="card">
   <h3>Modo</h3>
   <label for="mode">Modo de lembrete</label>
@@ -102,6 +121,7 @@ async function withActionLock(key, callback) {
   }
 }
 
+let loadedClientId = null;
 async function loadClient() {
   const id = document.getElementById("clientId").value;
   if (!id) return alert("Indica um cliente válido.");
@@ -109,6 +129,8 @@ async function loadClient() {
   const res = await fetch(`${API}/clients/${id}`, { headers: authHeaders() });
   const data = await parseJson(res, "Erro ao carregar cliente.");
 
+  if (document.getElementById("clientId").value !== id) return;
+  loadedClientId = id;
   document.getElementById("mode").value = data.paymentReminderMode;
   document.getElementById("whatsapp").checked = data.paymentReminderWhatsapp;
   document.getElementById("email").checked = data.paymentReminderEmail;
@@ -120,6 +142,7 @@ async function loadClient() {
 async function save() {
   const id = document.getElementById("clientId").value;
   if (!id) return alert("Indica um cliente válido.");
+  if (loadedClientId !== id) return alert("Carregue primeiro a configuração deste cliente.");
   if (!confirm("Guardar esta configuração do cliente?")) return;
 
   await withActionLock(`save:${id}`, async () => {
@@ -143,6 +166,7 @@ async function save() {
 
 </script>
 
+<script src="/admin-client-rates.js"></script>
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
 <script src="/ui/core/navigation-context.js"></script>
