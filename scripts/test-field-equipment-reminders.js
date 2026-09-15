@@ -40,8 +40,17 @@ let priorConfig;
  await prisma.notification.update({where:{id:administrative.id},data:{isRead:true,status:'READ',metadata:{...administrative.metadata,webPush:{attempts:3}}}});
  await engine.run({now});assert.equal(await prisma.notification.count({where:filter}),2);
  assert.deepEqual((await prisma.notification.findUnique({where:{id:administrative.id}})).metadata.webPush,{attempts:3});
+ const currentList=await fetch(base+'/api/notifications',{headers:{Authorization:`Bearer ${tt}`}});assert.equal(currentList.status,200);assert((await currentList.json()).notifications.some(n=>n.id===field.id));
  await prisma.serviceVisit.update({where:{id:visit.id},data:{technicianId:other.id}});
  assert.equal(await engine.isCurrentNotification(field,{now}),false);
+ async function notifications(route,method='GET'){const response=await fetch(base+'/api/notifications'+route,{method,headers:{Authorization:`Bearer ${tt}`}});return {status:response.status,body:await response.json()};}
+ const oldList=await notifications('');assert.equal(oldList.status,200);assert(!oldList.body.notifications.some(n=>n.id===field.id));
+ assert.equal((await notifications('/unread-count')).body.count,0);
+ assert.equal((await notifications('/read/'+field.id,'POST')).status,403);
+ assert.equal((await notifications('/'+field.id+'/read','POST')).status,403);
+ assert.equal((await notifications('/read-all','POST')).status,200);
+ assert.equal((await prisma.notification.findUnique({where:{id:field.id}})).isRead,false);
+
  await engine.run({now});notices=await prisma.notification.findMany({where:filter});assert.equal(notices.length,3);
  assert.equal(notices.find(n=>n.id===field.id).status,'SUPERSEDED');
  const reassigned=notices.find(n=>n.role==='TECHNICIAN'&&n.metadata.technicianId===other.id);assert(reassigned);assert.equal(await engine.isCurrentNotification(reassigned,{now}),true);
