@@ -4,7 +4,7 @@
 
 - Repositório: `ts7520305-svg/cristalwater`.
 - Branch de trabalho: `work/field-readiness-20260915-simulation`.
-- Última entrega remota verificada: TASK139, commit `057c723444db4c91ae3468476e05b46d933c262d`; workflow `34986420057` aprovado, incluindo 322 testes unitários, 17 scripts de navegador, 44 grupos operacionais, PostgreSQL 16 e restauro de 99 tabelas/11 anexos.
+- Última entrega remota verificada: TASK140, commit `737fa422ba3336515673a3f523ec0705572bc8bd`; workflow `34988224376` aprovado, incluindo 322 testes unitários, 17 scripts de navegador, 45 grupos operacionais, PostgreSQL 16 e restauro de 99 tabelas/11 anexos.
 - TASK123: notas da piscina e seleção correta dos lembretes no endpoint da rota, implementadas. Teste API com 505 lembretes gerais, 23 operacionais, duas piscinas, reatribuição e visitas extra aprovado em `field-qa-runtime/run-1789467419688`. 218 testes unitários e 4 de técnicos aprovados.
 - TASK124: notas no ecrã de campo, avisos recorrentes atrasados e confirmação de início completa e vinculada à visita/sessão implementados. Percurso real verificado em PT/EN/FR/ES/DE; regressão local final aprovada: 218 testes unitários, 4 de técnicos, 17 scripts de navegador e 33 grupos integrados (`reports/field-suite/1789468180539/results.json`). Imagem: `reports/field-visual/visit-briefing-1789468325934/technician-briefing-mobile.png`. Workflow PostgreSQL 16/restauro aprovado no commit acima. Continuação sem aprovações intermédias conforme pedido «continua sem parar».
 - Relatórios atuais: `VISIT_BRIEFING_API_20260915.md` e `VISIT_BRIEFING_UI_20260915.md`. Inventário concluído nas TASK121/TASK122; não repetir a implementação.
@@ -48,6 +48,8 @@
 
 O proprietário pediu continuar a implementação e correções sem aprovações intermédias, concluir os módulos e testar os percursos completos, como registado em `FIELD_READINESS_20260914.md`. Não voltar a usar o congelamento de julho para impedir este trabalho autorizado. Instalação no VPS, ensaios físicos, canais externos, emissão fiscal, alterações destrutivas de produção e merge para a branch principal não fazem parte desta tarefa.
 
+- TASK141: formulário de faturas com pedido persistido, confirmação validada, recuperação após reload/resposta perdida, coordenação entre janelas, consulta recente antes do envio e proteção de sessão. Navegação da página corrigida com os estilos comuns existentes. Relatório `INVOICE_PAYMENT_RECOVERY_20260915.md`. Revisão dirigida da interface, navegação e filtros aprovada em `field-qa-runtime/run-1789486703205`; 322 testes unitários e quatro de técnicos aprovados. O teste estático passa a esperar os IDs exatos para não aceitar a lista anterior com a mesma contagem. Confirmar a versão final no CI com 46 grupos e restauro. O recebimento geral por cliente e os restantes ecrãs financeiros permanecem a rever.
+
 ### Estado verificado
 
 O código contém as entregas até TASK118: orçamentos versionados e portal, preços por período, sessões/logout, idiomas, proteção de dados, manutenção preventiva com configuração e avisos, retornos de visitas e seleção de cargas de químicos. Cada relatório delimita o escopo efetivamente testado; não significa que a especificação inteira esteja concluída.
@@ -68,7 +70,7 @@ Evidência atual da TASK120: 216 testes unitários, 4 testes de técnicos, os 15
 
 ### Próxima retoma
 
-1. TASK123–TASK139 publicadas e verificadas. TASK140 protege pedidos de pagamento identificados nas quatro APIs; ligar a proteção ao formulário na TASK141 e confirmar o workflow completo. Não repetir estas implementações. Os restantes ecrãs de recebimentos precisam de revisão específica de repetição de pedidos e respostas perdidas.
+1. TASK123–TASK140 publicadas e verificadas. TASK141 liga a proteção de pagamentos ao formulário de faturas; confirmar o workflow final com 46 grupos e restauro. Não repetir estas implementações. Prosseguir com o recebimento geral por cliente e os outros ecrãs de recebimentos, incluindo repetição de pedidos e respostas perdidas.
 2. A coerência e conclusão dos lembretes no CRM estão tratadas na TASK131. Prosseguir a revisão dos outros ecrãs operacionais, a partir da implementação atual e relatórios posteriores; não repetir os fluxos de lembretes já corrigidos.
 3. Continuar a revisão dos módulos pendentes usando `COMPLETENESS_20260915.md` juntamente com `IMPLEMENTATION_20260915.md` e os relatórios posteriores. A matriz de completude conserva o diagnóstico inicial e contém pontos já corrigidos posteriormente.
 4. Manter tarefas pequenas, com testes de comportamento e documentação. Não repetir trabalho apenas por encontrar um relatório antigo.

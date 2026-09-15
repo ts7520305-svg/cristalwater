@@ -250,19 +250,31 @@
       color:#165434;
     }
 
-    .modal-backdrop {
+    #paymentModal.modal-backdrop {
       position: fixed;
       inset: 0;
       background: rgba(15, 23, 42, 0.55);
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 60;
+      z-index: 1300;
       padding: 16px;
     }
 
-    .modal-backdrop.open {
+    #paymentModal.modal-backdrop.open {
       display: flex;
+    }
+
+    #invoicePage.cw-v2-shell-enabled {
+      padding: calc(var(--invoice-header-height, 124px) + 16px) 16px 100px;
+    }
+    #invoicePage > .cw-v2-shell-topbar,
+    #invoicePage > .cw-v2-shell-sidebar,
+    #invoicePage > .cw-v2-drawer,
+    #invoicePage > .cw-v2-mobile-nav { position: fixed; }
+    @media (min-width: 1201px) {
+      #invoicePage.cw-v2-shell-enabled { padding-left: 296px; }
+      #invoicePage > .cw-v2-shell-topbar { left: 280px; }
     }
 
     .modal-card {
@@ -312,9 +324,11 @@
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
   <script src="/admin-auth-guard.js"></script>
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
   <link rel="stylesheet" href="/ui/design-system.css">
 </head>
-<body data-required-role="ADMIN">
+<body id="invoicePage" data-required-role="ADMIN">
 
   <h1>Faturas</h1>
 
@@ -387,16 +401,16 @@
       </div>
       <div class="field">
         <label for="paymentNotesInput">Notas (opcional)</label>
-        <input type="text" id="paymentNotesInput" placeholder="Comprovativo / referência" />
+        <input type="text" id="paymentNotesInput" maxlength="2000" placeholder="Comprovativo / referência" />
       </div>
       <div class="modal-actions">
-        <button type="button" class="btn-gray" onclick="closePaymentModal()">Cancelar</button>
-        <button type="button" class="btn-green" onclick="submitPaymentModal()">Confirmar</button>
+        <button type="button" id="paymentCancel" class="btn-gray" onclick="closePaymentModal()">Cancelar</button>
+        <button type="button" id="paymentConfirm" class="btn-green" onclick="submitPaymentModal()">Confirmar</button>
       </div>
     </div>
   </div>
 
-  <script src="/invoices.js?v=20260915-draft-visibility"></script>
+  <script src="/invoices.js?v=20260915-payment-retry"></script>
   <script src="/invoice-draft-classification.js?v=20260915-reconciled"></script>
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>

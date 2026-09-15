@@ -112,10 +112,10 @@ function createServer() {
   return { server, getPaymentPosts: () => paymentPosts };
 }
 
-async function waitForInvoiceCount(page, count) {
+async function waitForInvoiceIds(page, ids) {
   await page.waitForFunction(
-    (expected) => document.querySelectorAll("#invoiceList .invoice-card").length === expected,
-    count,
+    (expected) => JSON.stringify(Array.from(document.querySelectorAll("#invoiceList .invoice-card"), card => Number(card.dataset.invoiceId)).sort((a, b) => a - b)) === JSON.stringify(expected),
+    ids,
     { timeout: 10_000 },
   );
 }
@@ -138,7 +138,7 @@ async function main() {
     page.on("pageerror", (error) => pageErrors.push(error.message));
 
     await page.goto(`${baseUrl}/invoices.html`, { waitUntil: "load" });
-    await waitForInvoiceCount(page, 4);
+    await waitForInvoiceIds(page, [1, 2, 3, 4]);
 
     const snapshot = await page.evaluate(() => {
       const cards = Array.from(document.querySelectorAll("#invoiceList .invoice-card"));
@@ -177,24 +177,24 @@ async function main() {
     assert.strictEqual(getPaymentPosts(), 0, "disabled draft action must not submit a payment");
 
     await page.selectOption("#statusFilter", "draft");
-    await waitForInvoiceCount(page, 1);
+    await waitForInvoiceIds(page, [1]);
     let texts = await cardTexts(page);
     assert(texts[0].includes("Rascunho #1") && texts[0].includes("RASCUNHO"), "draft filter must show only drafts");
 
     await page.selectOption("#statusFilter", "paid");
-    await waitForInvoiceCount(page, 1);
+    await waitForInvoiceIds(page, [3]);
     texts = await cardTexts(page);
     assert(texts[0].includes("Fatura #3"), "paid filter must not classify a draft as paid");
 
     await page.selectOption("#statusFilter", "overdue");
-    await waitForInvoiceCount(page, 2);
+    await waitForInvoiceIds(page, [2, 4]);
     texts = await cardTexts(page);
     assert(texts.some((text) => text.includes("Fatura #2")), "open pending invoice must remain in debt filter");
     assert(texts.some((text) => text.includes("Fatura #4")), "overdue invoice must remain in debt filter");
     assert(!texts.some((text) => text.includes("Rascunho #1")), "draft must be excluded from debt filter");
 
     await page.goto(`${baseUrl}/invoices.html?status=draft`, { waitUntil: "load" });
-    await waitForInvoiceCount(page, 1);
+    await waitForInvoiceIds(page, [1]);
     texts = await cardTexts(page);
     assert(texts[0].includes("Rascunho #1") && texts[0].includes("RASCUNHO"), "draft deep-link must preserve the draft filter");
 

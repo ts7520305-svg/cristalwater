@@ -4,7 +4,7 @@ const queryClientId = Number(queryParams.get("clientId") || 0);
 let invoiceStatusFilter = String(queryParams.get("status") || queryParams.get("filter") || "all").toLowerCase();
 if (!["all", "draft", "overdue", "pending", "paid"].includes(invoiceStatusFilter)) invoiceStatusFilter = "all";
 let paymentModalState = { invoiceId: null, openAmount: 0 };
-let invoicesState = [], invoicesLoaded = false, invoicesRead = 0;
+let invoicesState = [], invoicesLoaded = false, invoicesFresh = false, invoicesRead = 0, invoicePayment = null;
 const invoiceAuthorization = authHeaders().Authorization;
 
 function authHeaders(extra = {}) {
@@ -16,6 +16,11 @@ function authHeaders(extra = {}) {
 }
 
 window.onload = () => {
+  const topbar = document.querySelector('.cw-v2-shell-topbar');
+  if (topbar && window.ResizeObserver) new ResizeObserver(() => {
+    document.body.style.setProperty('--invoice-header-height', `${topbar.getBoundingClientRect().height}px`);
+  }).observe(topbar);
+  invoicePayment = setupInvoicePayment();
   const input = document.getElementById("clientIdInput");
   if (input && queryClientId) input.value = String(queryClientId);
   const statusSelect = document.getElementById("statusFilter");
@@ -30,8 +35,8 @@ function unknownInvoices(message) {
 
 function invoiceSessionCurrent() {
   if (authHeaders().Authorization === invoiceAuthorization) return true;
-  invoicesRead++; invoicesState = []; invoicesLoaded = false;
-  closePaymentModal(); unknownInvoices('A sessao mudou. Reabra esta pagina.');
+  invoicesRead++; invoicesState = []; invoicesLoaded = false; invoicesFresh = false;
+  closePaymentModal(true); invoicePayment?.hide(); unknownInvoices('A sessao mudou. Reabra esta pagina.');
   showStatus('A sessao mudou. Reabra esta pagina para consultar a faturacao.', 'error');
   return false;
 }
@@ -41,11 +46,13 @@ function renderInvoiceView() {
   let rows = queryClientId ? invoicesState.filter(invoice => Number(invoice.clientId || invoice.client?.id) === queryClientId) : invoicesState;
   rows = rows.filter(matchesInvoiceStatusFilter);
   updateSummary(rows); renderInvoices(rows);
+  invoicePayment?.render();
   showStatus(`${rows.length} documento(s) apresentado(s).${invoiceStatusFilter === 'draft' ? ' Rascunhos por rever; ainda sem valor a cobrar.' : ''}`, 'ok');
 }
 
 async function loadInvoices() {
   if (!invoiceSessionCurrent()) return false;
+  invoicesFresh = false; invoicePayment?.render();
   const own = ++invoicesRead;
   const current = () => own === invoicesRead && invoiceSessionCurrent();
   if (!invoicesLoaded) unknownInvoices('A consultar documentos...');
@@ -57,7 +64,7 @@ async function loadInvoices() {
     if (!response.ok || !Array.isArray(data) || data.some(row => !row || !Number.isInteger(row.id) || row.id <= 0 || typeof row.status !== 'string' ||
       !row.status.trim() || ['total', 'amount', 'totalAmount', 'amountPaid', 'amountOpen'].some(key => row[key] != null && !Number.isFinite(Number(row[key])))) ||
       new Set(data.map(row => row.id)).size !== data.length) throw Error('Resposta de faturas invalida');
-    invoicesState = data; invoicesLoaded = true; renderInvoiceView();
+    invoicesState = data; invoicesLoaded = true; invoicesFresh = true; renderInvoiceView();
     return true;
   } catch (error) {
     if (!current()) return false;
@@ -144,7 +151,7 @@ function renderInvoices(invoices) {
       <div class="meta"><strong>Pago:</strong> ${paidAmount.toFixed(2)} EUR · <strong>Em aberto:</strong> ${openAmount.toFixed(2)} EUR</div>
 
       <div class="actions">
-        ${isReceivableInvoice(invoice) && openAmount > 0 ? `<button class="btn-green" onclick="openPaymentModal(${invoice.id}, ${openAmount.toFixed(2)})">Registar pagamento</button>` : ''}
+        ${isReceivableInvoice(invoice) && openAmount > 0 ? `<button class="btn-green" data-invoice-payment onclick="openPaymentModal(${invoice.id}, ${openAmount.toFixed(2)})">Registar pagamento</button>` : ''}
         ${draft ? '' : `<button class="btn-blue" onclick="openInvoicePdf(${invoice.id})">Abrir PDF</button><button class="btn-gray" onclick="copyInvoiceLink(${invoice.id})">Copiar link PDF</button>`}
       </div>
     `;
@@ -156,6 +163,7 @@ function renderInvoices(invoices) {
 
 function openPaymentModal(invoiceId, openAmount) {
   if (!invoiceSessionCurrent()) return;
+  if (!invoicePayment?.canStart()) { showStatus('Atualize a lista ou confirme o pagamento guardado antes de preparar outro.', 'error'); return; }
   const target = invoicesState.find(row => row.id === Number(invoiceId));
   if (!target || !isReceivableInvoice(target)) { showStatus('Este documento nao esta disponivel para pagamento. Reveja o seu estado.', 'error'); return; }
   const modal = document.getElementById("paymentModal");
@@ -169,7 +177,7 @@ function openPaymentModal(invoiceId, openAmount) {
     return;
   }
 
-  paymentModalState = { invoiceId: Number(invoiceId), openAmount: openValue };
+  paymentModalState = { invoiceId: Number(invoiceId), openAmount: openValue, version: paymentSourceVersion(target) };
   meta.textContent = `Fatura #${invoiceId} · Em aberto: ${openValue.toFixed(2)} EUR`;
   amountInput.value = openValue.toFixed(2);
   document.getElementById("paymentMethodInput").value = "TRANSFER";
@@ -179,7 +187,8 @@ function openPaymentModal(invoiceId, openAmount) {
   amountInput.focus();
 }
 
-function closePaymentModal() {
+function closePaymentModal(force = false) {
+  if (!force && invoicePayment?.busy()) return;
   const modal = document.getElementById("paymentModal");
   if (!modal) return;
   modal.classList.remove("open");
@@ -188,51 +197,7 @@ function closePaymentModal() {
 }
 
 async function submitPaymentModal() {
-  if (!invoiceSessionCurrent()) return;
-  const target = invoicesState.find(row => row.id === paymentModalState.invoiceId);
-  if (!target || !isReceivableInvoice(target)) { closePaymentModal(); showStatus('O documento mudou. Atualize e reveja o seu estado.', 'error'); return; }
-  const invoiceId = Number(paymentModalState.invoiceId || 0);
-  const openAmount = Number(paymentModalState.openAmount || 0);
-  const amount = Number(document.getElementById("paymentAmountInput")?.value || 0);
-  const method = String(document.getElementById("paymentMethodInput")?.value || "TRANSFER");
-  const notes = String(document.getElementById("paymentNotesInput")?.value || "").trim();
-
-  if (!invoiceId) return;
-  if (!Number.isFinite(amount) || amount <= 0) {
-    showStatus("Indica um valor de pagamento válido.", "error");
-    return;
-  }
-
-  // Evita criar crédito indevido por clique repetido numa fatura já liquidada.
-  if (openAmount <= 0) {
-    showStatus("Esta fatura já está liquidada. Pagamento duplicado bloqueado.", "error");
-    closePaymentModal();
-    return;
-  }
-
-  try {
-    showStatus("A registar pagamento...", "info");
-    const response = await fetch(`${API}/payments/invoice/${invoiceId}`, {
-      method: "POST",
-      headers: { Authorization: invoiceAuthorization, "Content-Type": "application/json" },
-      body: JSON.stringify({ amount, method, notes }),
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!invoiceSessionCurrent()) return;
-
-    if (!response.ok || data.ok === false) {
-      showStatus(data.error || "Falha ao registar pagamento.", "error");
-      return;
-    }
-
-    closePaymentModal();
-    showStatus(`Pagamento registado. Aplicado: ${Number(data.appliedAmount || amount).toFixed(2)} EUR.`, "ok");
-    await loadInvoices();
-  } catch (error) {
-    if (!invoiceSessionCurrent()) return;
-    console.error("Erro ao registar pagamento:", error);
-    showStatus("Erro de ligação ao registar pagamento.", "error");
-  }
+  return invoicePayment?.submit(true);
 }
 
 function setInvoiceStatusFilter(filter) {
@@ -411,3 +376,145 @@ function statusClassName(status) {
 window.openPaymentModal = openPaymentModal;
 window.closePaymentModal = closePaymentModal;
 window.submitPaymentModal = submitPaymentModal;
+
+function paymentSourceVersion(invoice) {
+  return JSON.stringify([invoice.id, invoice.clientId, invoice.updatedAt, invoice.status, invoiceTotalAmount(invoice), invoicePaidAmount(invoice), invoiceOpenAmount(invoice)]);
+}
+
+function setupInvoicePayment() {
+  let owner, actorId, key, pending = null, blocked = false, working = false, issue = '';
+  const panel = document.createElement('div'), summary = document.createElement('p');
+  const retry = document.createElement('button'), review = document.createElement('button');
+  panel.id = 'invoicePaymentPending'; panel.hidden = true; panel.setAttribute('data-cw-no-i18n', 'true');
+  panel.style.cssText = 'margin:12px 0;padding:12px;border:1px solid #9aabbb;border-radius:10px;overflow-wrap:anywhere';
+  summary.style.whiteSpace = 'pre-line';
+  retry.type = review.type = 'button'; retry.className = 'btn-blue'; review.className = 'btn-gray';
+  retry.textContent = 'Confirmar pagamento guardado'; review.textContent = 'Rever pagamento';
+  panel.append(summary, retry, review); document.getElementById('statusBox').after(panel);
+  const positive = value => Number.isSafeInteger(value) && value > 0;
+  const uuid = value => typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(value);
+  const sameSession = () => authHeaders().Authorization === invoiceAuthorization;
+  function read() {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw === null) return null;
+      const record = JSON.parse(raw);
+      if (record?.schema !== 1 || record.owner !== owner || !uuid(record.requestId) || !positive(record.invoiceId) || !positive(record.clientId) || !positive(record.amountCents) ||
+        !['TRANSFER', 'MBWAY', 'CASH', 'CARD', 'MANUAL'].includes(record.method) || typeof record.notes !== 'string' || record.notes.length > 2000 || record.notes !== record.notes.trim() ||
+        typeof record.details !== 'string' || record.details.length > 2000 ||
+        (record.rejection && (![400, 404, 409].includes(record.rejection.status) || typeof record.rejection.message !== 'string'))) throw Error();
+      return record;
+    } catch (_) {
+      blocked = true; issue = 'O pagamento guardado não pode ser lido. Foi conservado para revisão; nenhum novo pedido será enviado.';
+      throw Error(issue);
+    }
+  }
+  function render() {
+    const same = sameSession(), disabled = !same || working || blocked || Boolean(pending) || !invoicesFresh;
+    panel.hidden = !same || (!pending && !blocked);
+    if (same && pending) summary.textContent = `${pending.rejection ? pending.rejection.message : 'Pagamento por confirmar'}\n${pending.details}\n${(pending.amountCents / 100).toFixed(2)} EUR · ${pending.method}${pending.notes ? '\n' + pending.notes : ''}`;
+    if (same && blocked) summary.textContent = issue;
+    retry.hidden = blocked || !pending; retry.disabled = working || Boolean(pending?.rejection);
+    review.hidden = !pending?.rejection || blocked; review.disabled = working;
+    document.querySelectorAll('[data-invoice-payment]').forEach(button => { button.disabled = disabled; });
+    for (const id of ['paymentAmountInput', 'paymentMethodInput', 'paymentNotesInput', 'paymentConfirm']) {
+      const element = document.getElementById(id); if (element) element.disabled = disabled;
+    }
+    const cancel = document.getElementById('paymentCancel'); if (cancel) cancel.disabled = working;
+  }
+  function forget(record) {
+    if (JSON.stringify(read()) !== JSON.stringify(record)) throw Error('O pagamento mudou noutra janela. Atualize a página.');
+    localStorage.removeItem(key);
+    if (localStorage.getItem(key) !== null) throw Error('Não foi possível concluir a confirmação neste navegador. Repita a confirmação guardada.');
+    pending = null;
+  }
+  function validReceipt(data, record) {
+    const receipt = data?.requestReceipt;
+    return data?.ok === true && data.invoice?.id === record.invoiceId && data.invoice?.clientId === record.clientId && receipt?.version === 1 &&
+      receipt.requestId === record.requestId && receipt.invoiceId === record.invoiceId && receipt.actorId === actorId && receipt.actorRole === 'ADMIN' &&
+      receipt.amountCents === record.amountCents && receipt.method === record.method && receipt.notes === record.notes &&
+      Number.isSafeInteger(receipt.appliedCents) && receipt.appliedCents >= 0 && Number.isSafeInteger(receipt.creditCents) && receipt.creditCents >= 0 &&
+      receipt.appliedCents + receipt.creditCents === record.amountCents && Number.isFinite(data.appliedAmount) && Number.isFinite(data.creditAdded) &&
+      Math.round(data.appliedAmount * 100) === receipt.appliedCents && Math.round(data.creditAdded * 100) === receipt.creditCents;
+  }
+  async function submit(fresh = false, discard = false) {
+    if (blocked || working || !invoiceSessionCurrent()) return;
+    if (!navigator.locks?.request || !crypto.randomUUID) { showStatus('Abra esta página num navegador atualizado para proteger pagamentos entre janelas.', 'error'); return; }
+    const form = fresh ? { ...paymentModalState, amount: document.getElementById('paymentAmountInput').value,
+      method: document.getElementById('paymentMethodInput').value, notes: document.getElementById('paymentNotesInput').value.trim() } : null;
+    working = true; render();
+    try {
+      await navigator.locks.request(key, { ifAvailable: true }, async lock => {
+        if (!invoiceSessionCurrent()) return;
+        if (!lock) { showStatus('Existe um pagamento em curso noutra janela. Aguarde e atualize a lista.', 'error'); return; }
+        pending = read();
+        if (discard) {
+          if (pending?.rejection && await loadInvoices() && invoiceSessionCurrent()) {
+            forget(pending); closePaymentModal(true); showStatus('Reveja o saldo atualizado antes de registar outro pagamento.', 'info');
+          }
+          return;
+        }
+        if (pending && (fresh || pending.rejection)) { closePaymentModal(true); showStatus('Reveja o pagamento guardado antes de preparar outro.', 'error'); return; }
+        if (!pending) {
+          if (!fresh) { await loadInvoices(); showStatus('O pedido já foi confirmado noutra janela. Consulte o saldo atualizado.', 'info'); return; }
+          if (!positive(form.invoiceId) || !/^\d+(\.\d{1,2})?$/.test(form.amount) || !positive(Math.round(Number(form.amount) * 100))) throw Error('Indica um valor positivo, com até dois decimais.');
+          if (!['TRANSFER', 'MBWAY', 'CASH', 'CARD', 'MANUAL'].includes(form.method) || form.notes.length > 2000) throw Error('Método ou notas inválidos.');
+          if (!await loadInvoices() || !invoiceSessionCurrent()) return;
+          const target = invoicesState.find(row => row.id === form.invoiceId);
+          if (!target || !isReceivableInvoice(target) || invoiceOpenAmount(target) <= 0 || paymentSourceVersion(target) !== form.version) {
+            closePaymentModal(true); showStatus('O documento ou saldo mudou. Um rascunho não aceita pagamentos. Reveja a lista e confirme novamente.', 'error'); return;
+          }
+          const record = { schema: 1, owner, requestId: crypto.randomUUID(), invoiceId: target.id, clientId: Number(target.clientId || target.client?.id),
+            amountCents: Math.round(Number(form.amount) * 100), method: form.method, notes: form.notes,
+            details: `Fatura #${target.id} · ${String(target.client?.name || 'Cliente').slice(0, 1800)}` };
+          try { localStorage.setItem(key, JSON.stringify(record)); }
+          catch (_) { throw Error('Não foi possível guardar o pagamento neste navegador. Nenhum pedido foi enviado.'); }
+          pending = read();
+          if (JSON.stringify(pending) !== JSON.stringify(record)) throw Error('Não foi possível verificar o pedido guardado. Nenhum pedido foi enviado.');
+        }
+        const record = pending;
+        closePaymentModal(true); render(); showStatus('A confirmar pagamento...', 'info');
+        try {
+          const response = await fetch(`${API}/payments/invoice/${record.invoiceId}`, {
+            method: 'POST', headers: { Authorization: invoiceAuthorization, 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(20000),
+            body: JSON.stringify({ requestId: record.requestId, amount: (record.amountCents / 100).toFixed(2), method: record.method, notes: record.notes }),
+          });
+          const data = await response.json().catch(() => null);
+          if (!invoiceSessionCurrent()) return;
+          if (!response.ok) {
+            if ([400, 404, 409].includes(response.status) && data?.ok === false && typeof data.error === 'string') {
+              pending = { ...record, rejection: { status: response.status, message: data.error } };
+              localStorage.setItem(key, JSON.stringify(pending));
+              showStatus(`${data.error} Use Rever pagamento.`, 'error'); return;
+            }
+            throw Error('Não foi possível obter a confirmação.');
+          }
+          if (!validReceipt(data, record)) throw Error('Confirmação inválida.');
+          forget(record);
+          const refreshed = await loadInvoices();
+          if (!invoiceSessionCurrent()) return;
+          showStatus(`Pagamento confirmado. Aplicado: ${(data.requestReceipt.appliedCents / 100).toFixed(2)} EUR.${data.requestReceipt.creditCents ? ` Crédito: ${(data.requestReceipt.creditCents / 100).toFixed(2)} EUR.` : ''}${refreshed ? '' : ' Não foi possível atualizar o saldo. Atualize a lista antes de outro pagamento.'}`, refreshed ? 'ok' : 'error');
+        } catch (_) {
+          if (invoiceSessionCurrent()) showStatus('Ainda não foi possível confirmar o pagamento. O pedido foi guardado; use Confirmar pagamento guardado, mesmo depois de reabrir a página.', 'error');
+        }
+      });
+    } catch (error) { if (invoiceSessionCurrent()) showStatus(error.message, 'error'); }
+    finally { working = false; render(); }
+  }
+  retry.onclick = () => submit(); review.onclick = () => submit(false, true);
+  try {
+    const payload = JSON.parse(atob(invoiceAuthorization.split(' ')[1].split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    actorId = Number(payload.id);
+    if (payload.role !== 'ADMIN' || !positive(actorId)) throw Error('Sessão administrativa por confirmar.');
+    owner = `ADMIN:${actorId}`; key = `cwInvoicePayment:v1:${owner}`; pending = read();
+  } catch (error) { blocked = true; issue = error.message; }
+  window.addEventListener('storage', event => {
+    if (!invoiceSessionCurrent()) return;
+    if ((event.key === key || event.key === null) && !working) {
+      try { pending = read(); if (pending) closePaymentModal(true); } catch (_) {}
+      render();
+    }
+  });
+  render();
+  return { submit, render, busy: () => working, canStart: () => !blocked && !working && !pending && invoicesFresh && sameSession(), hide: () => { panel.hidden = true; render(); } };
+}
