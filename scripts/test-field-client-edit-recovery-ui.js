@@ -162,8 +162,8 @@ let browser;
     assert.equal(await literal.locator('h3').textContent(), 'Pago'); assert.equal(await literal.locator('.client-kv span').last().textContent(), 'Urgente');
     for (const width of [320, 390, 1440]) {
       await page.setViewportSize({ width, height: 900 });
-      const fit = await page.locator('.cw-modal-card').first().evaluate(element => ({ client: element.clientWidth, scroll: element.scrollWidth, right: element.getBoundingClientRect().right, viewport: innerWidth }));
-      assert(fit.scroll <= fit.client + 1 && fit.right <= fit.viewport, `${language}/${width}: ${JSON.stringify(fit)}`);
+      const fit = await page.locator('#editClientModal .cw-modal-card').evaluate(element => { const rect = element.getBoundingClientRect(), modal = element.closest('#editClientModal'); return { client: element.clientWidth, scroll: element.scrollWidth, left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, width: innerWidth, height: innerHeight, position: getComputedStyle(modal).position, foreground: modal.contains(document.elementFromPoint(innerWidth / 2, innerHeight / 2)) }; });
+      assert(fit.position === 'fixed' && fit.foreground && fit.scroll <= fit.client + 1 && fit.left >= 0 && fit.right <= fit.width && fit.top >= 0 && fit.bottom <= fit.height, `${language}/${width}: ${JSON.stringify(fit)}`);
     }
   }
   await page.setViewportSize({ width: 390, height: 844 }); await page.locator('#clientEditComparison').scrollIntoViewIfNeeded(); await page.screenshot({ path: path.join(evidence, 'review-de-390.png') });

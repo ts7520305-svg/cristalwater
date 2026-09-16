@@ -100,6 +100,11 @@ async function createPool(req, res) {
   }
 }
 
+async function getPoolEditState(req, res) {
+  try { return res.json(await require("../business/pool/PoolEditBusiness").getState(req.params.id, req.user)); }
+  catch (err) { return res.status(err.statusCode || 500).json({ ok: false, code: err.publicCode || "POOL_EDIT_FAILED", error: err.statusCode ? err.message : "Não foi possível carregar os dados atuais." }); }
+}
+
 async function updatePool(req, res) {
   try {
     const result = await require("../business/pool/PoolEditBusiness").update(req.params.id, req.body, req.user);
@@ -108,8 +113,8 @@ async function updatePool(req, res) {
     console.error("updatePool error:", err.code || err.statusCode || "POOL_UPDATE_FAILED");
     const duplicateMessage = poolUniqueErrorMessage(err);
     if (duplicateMessage) return res.status(409).json({ ok: false, error: duplicateMessage });
-    return res.status(err.statusCode || 500).json({ ok: false,
-      error: err.statusCode ? err.message : "Alteração não confirmada. Atualize os dados antes de repetir." });
+    return res.status(err.statusCode || 500).json({ ok: false, code: err.publicCode || "POOL_EDIT_FAILED",
+      error: err.statusCode ? err.message : "Alteração não confirmada. Conserve o pedido e repita a confirmação." });
   }
 }
 
@@ -154,6 +159,7 @@ module.exports = {
   getPoolById,
   createPool,
   updatePool,
+  getPoolEditState,
   archivePool,
   restorePool,
   deletePool,

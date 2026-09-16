@@ -47,8 +47,10 @@ O mecanismo genérico `cw-flow-shell` também passou a excluir credenciais e a r
 
 ## Limites e próxima etapa
 
+Atualização TASK193: a base acima foi confirmada no workflow `35084563824`, commit `a8fd7656cbcbfd23222cb9803024319bade4a440`, com 93 grupos e restauro de 105 tabelas/22 ficheiros. A revisão posterior de piscinas reproduziu também neste editor uma regra geral que tornava o modal relativo e o deixava fora do ecrã após redimensionar. A posição/camada e o espaço do seletor de idioma foram corrigidos; o teste agora exige visibilidade à frente da página e limites verticais. Ver `POOL_EDIT_RECOVERY_20260916.md` para a reprodução e validação desta correção visual.
+
 O rascunho não enviado dura na sessão da janela; o pedido já persistido em IndexedDB pode ser recuperado após reload/reabertura com a conta original. Limpar os dados do navegador remove esses registos. Não há promessa de recuperação de password: quando necessária, é reintroduzida.
 
 Uma mudança em qualquer campo da linha Client pode exigir revisão, mesmo que o campo não apareça neste formulário. Uma rotação da chave de assinatura também invalida versões ainda não executadas. Não se trata de sincronização automática nem de histórico editável de versões.
 
-Continuam por tratar a versão/recuperação do editor de piscinas, a rota específica da ficha técnica e propostas técnicas, outras escritas antigas e o inventário visual global. Sem merge em main, deploy/VPS, fornecedores reais ou emissão fiscal neste lote. Não demonstra prontidão integral de produção.
+TASK192–193 implementam a versão/recuperação do editor geral de piscinas. Continuam por tratar a rota específica da ficha técnica e propostas técnicas, outras escritas antigas e o inventário visual global. Sem merge em main, deploy/VPS, fornecedores reais ou emissão fiscal neste lote. Não demonstra prontidão integral de produção.

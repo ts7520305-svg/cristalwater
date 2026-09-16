@@ -22,6 +22,9 @@ let POOLS = [];
 let CLIENTS = [];
 let showArchived = false;
 let queryClientFilterApplied = false;
+let poolEdit;
+const poolPageCredential = localStorage.getItem('cristalwater_jwt') || localStorage.getItem('token') || '';
+const samePoolSession = () => poolPageCredential === (localStorage.getItem('cristalwater_jwt') || localStorage.getItem('token') || '');
 
 function userError(error, fallback) {
   return ui.safeError(error, fallback || "Nao foi possivel concluir a operacao.");
@@ -218,7 +221,9 @@ function applyQueryClientFilter() {
 }
 
 async function loadClients() {
+  if (!samePoolSession()) return;
   const data = await request("/clients");
+  if (!samePoolSession()) return;
   CLIENTS = data.clients || [];
   const select = document.getElementById("clientId");
   if (select) {
@@ -258,83 +263,8 @@ async function createPool() {
   }
 }
 
-async function editPayload(pool) {
-  const name = await ui.prompt("Indica o nome da piscina ou jacuzzi.", { title: "Editar piscina", defaultValue: pool.name || "", confirmText: "Seguinte" });
-  if (name === null) return null;
-  const zone = await ui.prompt("Indica a zona.", { title: "Editar piscina", defaultValue: pool.zone || pool.location || "", confirmText: "Seguinte" });
-  if (zone === null) return null;
-  const address = await ui.prompt("Indica a morada/localizacao.", { title: "Editar piscina", defaultValue: pool.address || "", confirmText: "Seguinte" });
-  if (address === null) return null;
-  const location = await ui.prompt("Indica o local na propriedade.", { title: "Editar piscina", defaultValue: pool.location || "", confirmText: "Seguinte" });
-  if (location === null) return null;
-  const monthlyAmount = await ui.prompt("Indica o valor mensal em EUR.", { title: "Editar piscina", defaultValue: String(pool.monthlyAmount ?? 0), confirmText: "Seguinte" });
-  if (monthlyAmount === null) return null;
-  const notes = await ui.prompt("Notas tecnicas (opcional).", { title: "Editar piscina", defaultValue: pool.notes || "", confirmText: "Seguinte" });
-  if (notes === null) return null;
-  const type = await ui.prompt("Indica o tipo: POOL ou JACUZZI.", { title: "Editar piscina", defaultValue: poolType(pool), confirmText: "Guardar" });
-  if (type === null) return null;
-  return { name, type: String(type || "POOL").toUpperCase(), zone, address, location, monthlyAmount, notes };
-}
-
-async function findClientByAdminInput(input) {
-  const query = String(input || "").trim();
-  if (!query) return null;
-  const numericId = Number(query);
-  if (Number.isInteger(numericId) && numericId > 0) {
-    return CLIENTS.find((client) => Number(client.id) === numericId) || null;
-  }
-  const normalized = normalize(query);
-  const matches = CLIENTS.filter((client) => normalize([
-    client.name,
-    client.email,
-    client.phone,
-    client.zone,
-    client.address,
-    client.id,
-  ].join(" ")).includes(normalized));
-  if (matches.length === 1) return matches[0];
-  if (!matches.length) return null;
-  const options = matches.slice(0, 10).map((client) => `${client.id} - ${client.name}`).join("\n");
-  const selected = await ui.prompt(`Foram encontrados varios clientes. Indica o ID correto:\n\n${options}`, {
-    title: "Selecionar cliente",
-    defaultValue: "",
-    confirmText: "Selecionar",
-  });
-  if (selected === null) return null;
-  return findClientByAdminInput(selected);
-}
-
 async function reassignPool(id) {
-  const pool = POOLS.find((item) => Number(item.id) === Number(id));
-  if (!pool) {
-    ui.error("Piscina nao encontrada.");
-    return;
-  }
-  const input = await ui.prompt(`Associar "${pool.name || "Piscina"}" a que cliente?\n\nPode escrever o ID, nome, telefone ou email do cliente.`, {
-    title: "Alterar cliente",
-    defaultValue: pool.client?.id ? String(pool.client.id) : poolClientName(pool),
-    confirmText: "Continuar",
-  });
-  if (input === null) return;
-  const client = await findClientByAdminInput(input);
-  if (!client) {
-    ui.error("Cliente nao encontrado. Confirma o ID ou pesquisa na lista.");
-    return;
-  }
-  const approved = await ui.confirm(`Confirmar associacao da piscina a:\n${client.name}\n\nA cobranca mensal passa a contar nesta conta do cliente.`, {
-    title: "Confirmar associacao",
-    confirmText: "Confirmar",
-  });
-  if (!approved) return;
-
-  try {
-    await request(`/pools/${id}`, { method: "PUT", body: JSON.stringify({ clientId: client.id }) });
-    await loadClients();
-    await loadPools();
-    ui.success("Piscina associada ao cliente selecionado.");
-  } catch (err) {
-    ui.error(userError(err, "Nao foi possivel associar a piscina ao cliente."));
-  }
+  return poolEdit?.open(Number(id), true);
 }
 
 function renderPoolRow(pool) {
@@ -347,25 +277,25 @@ function renderPoolRow(pool) {
     <article class="pool-row card ${active ? "" : "pool-row-inactive"} ${riskClass}">
       <div class="pool-main">
         <div class="pool-title-line">
-          <strong>${esc(pool.name || "Piscina")}</strong>
+          <strong data-cw-no-i18n>${esc(pool.name || "Piscina")}</strong>
           <span class="ds-badge is-muted">${esc(typeLabel(pool))}</span>
           <span class="ds-badge ${active ? "" : "is-warning"}">${active ? "Ativa" : "Inativa"}</span>
           ${hasClient ? '<span class="ds-badge">Cliente ligado</span>' : '<span class="ds-badge is-danger">Sem cliente</span>'}
           ${hasRound ? '<span class="ds-badge">Com ronda</span>' : '<span class="ds-badge is-warning">Sem ronda</span>'}
         </div>
-        <div class="pool-subline">ID ${esc(pool.id)} · ${esc(pool.address || "Sem morada")}${pool.location ? ` · ${esc(pool.location)}` : ""}</div>
+        <div class="pool-subline" data-cw-no-i18n>ID ${esc(pool.id)} · ${esc(pool.address || "Sem morada")}${pool.location ? ` · ${esc(pool.location)}` : ""}</div>
       </div>
       <div class="pool-cell">
         <span>Cliente</span>
-        <b>${hasClient ? esc(poolClientName(pool)) : "Sem cliente associado"}</b>
+        <b data-cw-no-i18n>${hasClient ? esc(poolClientName(pool)) : "Sem cliente associado"}</b>
       </div>
       <div class="pool-cell">
         <span>Zona</span>
-        <b>${esc(poolZone(pool))}</b>
+        <b data-cw-no-i18n>${esc(poolZone(pool))}</b>
       </div>
       <div class="pool-cell">
         <span>Ronda</span>
-        <b>${esc(roundSummary(pool))}</b>
+        <b data-cw-no-i18n>${esc(roundSummary(pool))}</b>
       </div>
       <div class="pool-cell compact">
         <span>Volume</span>
@@ -411,27 +341,16 @@ function renderPools() {
 }
 
 async function loadPools() {
+  if (!samePoolSession()) return;
   const data = await request(`/pools${showArchived ? "?includeInactive=1" : ""}`);
+  if (!samePoolSession()) return;
   POOLS = data.pools || [];
   renderPools();
   applyQueryClientFilter();
 }
 
 async function editPool(id) {
-  const pool = POOLS.find((item) => Number(item.id) === Number(id));
-  if (!pool) {
-    ui.error("Piscina nao encontrada.");
-    return;
-  }
-  const body = await editPayload(pool);
-  if (!body) return;
-  try {
-    await request(`/pools/${id}`, { method: "PUT", body: JSON.stringify(body) });
-    await loadPools();
-    ui.success("Piscina atualizada com sucesso.");
-  } catch (err) {
-    ui.error(userError(err, "Nao foi possivel atualizar a piscina."));
-  }
+  return poolEdit?.open(Number(id));
 }
 
 async function archivePool(id) {
@@ -503,9 +422,12 @@ function setupFilters() {
 }
 
 window.addEventListener("DOMContentLoaded", async () => {
+  poolEdit = CWPoolEdit.create({
+    confirmed: async () => { await loadClients(); await loadPools(); },
+    invalidated: () => { POOLS = []; CLIENTS = []; document.getElementById('clientId').replaceChildren(); renderPools(); },
+  });
   setupFilters();
-  await loadClients();
-  await loadPools();
+  try { await loadClients(); await loadPools(); } catch (error) { if (samePoolSession()) ui.error(userError(error, 'Não foi possível carregar os dados.')); }
 });
 
 window.createPool = createPool;

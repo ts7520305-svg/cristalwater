@@ -205,6 +205,19 @@ model ClientReportSetting {
   client              Client   @relation(fields: [clientId], references: [id])
 }
 
+// Immutable acknowledgement of a general pool edit, independent of its mutable history rows.
+model PoolEditRequest {
+  actorKey    String
+  requestId   String
+  poolId      Int
+  payloadHash String
+  response    Json
+  createdAt   DateTime @default(now())
+
+  @@id([actorKey, requestId])
+  @@index([poolId])
+}
+
 model Pool {
   maintenancePlans EquipmentMaintenancePlan[]
   id                    Int                     @id @default(autoincrement())

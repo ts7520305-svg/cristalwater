@@ -2255,6 +2255,7 @@ router.get('/daily-service-log', async (req, res) => {
 });
 
 router.put('/pools/:id', require('../controllers/poolController').updatePool);
+router.get('/pools/:id/edit-state', require('../controllers/poolController').getPoolEditState);
 
 
 router.post('/pools/:id/archive', async (req, res) => {

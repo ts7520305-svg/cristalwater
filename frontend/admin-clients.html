@@ -268,14 +268,14 @@
     }
 
     #contractActivationPending[hidden], #contractActivationPending [hidden] { display: none !important; }
-    .cw-modal[hidden] {
+    #editClientModal[hidden], #confirmModal[hidden] {
       display: none;
     }
 
-    .cw-modal {
+    #editClientModal, #confirmModal {
       position: fixed;
       inset: 0;
-      z-index: 30;
+      z-index: 1200;
       display: grid;
       place-items: center;
       padding: 18px;
@@ -339,6 +339,10 @@
     }
 
     #editClientModal [hidden], #clientEditPendingList[hidden] { display: none !important; }
+    @media (max-width: 640px) {
+      #editClientModal, #confirmModal { padding-top: 72px; }
+      #editClientModal .cw-modal-card, #confirmModal .cw-modal-card { max-height: calc(100dvh - 90px); }
+    }
     #editClientModal .field-stack { min-width: 0; }
     #editClientModal .cw-modal-card { background: var(--ds-surface, #fff); color: var(--ds-text, #172839); border: 1px solid var(--ds-border); border-radius: 18px; box-shadow: 0 18px 70px #0005; }
     #editClientModal .cw-modal-actions { position: sticky; bottom: -20px; background: var(--ds-surface, #fff); padding: 12px 0; border-top: 1px solid var(--ds-border); }

@@ -6,6 +6,7 @@ router.get("/", poolController.listPools);
 router.get("/:id", poolController.getPoolById);
 router.post("/", poolController.createPool);
 router.put("/:id", poolController.updatePool);
+router.get("/:id/edit-state", poolController.getPoolEditState);
 router.post("/:id/archive", poolController.archivePool);
 router.patch("/:id/archive", poolController.archivePool);
 router.post("/:id/restore", poolController.restorePool);
