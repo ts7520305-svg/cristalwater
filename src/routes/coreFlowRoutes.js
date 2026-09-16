@@ -1484,26 +1484,7 @@ router.post('/clients', async (req, res) => {
   }
 });
 
-router.put('/clients/:id', async (req, res) => {
-  try {
-    const id = toInt(req.params.id);
-    const body = req.body || {};
-
-    const currentClient = await db('client').findUnique({ where: { id } });
-    const finalContractActive = body.contractActive === undefined ? Boolean(currentClient?.contractActive) : truthy(body.contractActive);
-    if (truthy(body.billingActive) && !finalContractActive) {
-      return res.status(400).json({ ok: false, error: 'Não é possível ativar faturação sem ativar primeiro o contrato.' });
-    }
-    const client = await db('client').update({
-      where: { id },
-      data: await clientMutationData(body),
-    });
-
-    return res.json({ ok: true, client });
-  } catch (error) {
-    return res.status(500).json({ ok: false, error: error.message });
-  }
-});
+router.put('/clients/:id', require('../controllers/clientController').updateClient);
 
 
 router.post('/clients/:id/activate', require('../controllers/clientController').activateClient);

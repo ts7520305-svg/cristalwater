@@ -144,12 +144,12 @@ async function updateClient(req, res) {
     const clientId = toInt(req.params.id);
     if (!clientId) return res.status(400).json({ error: "ID inválido" });
 
-    const updated = await ClientBusiness.update(clientId, req.body);
+    const updated = await ClientBusiness.update(clientId, req.body, req.user);
 
     return res.json({ ok: true, client: updated });
   } catch (err) {
-    console.error("updateClient error:", err);
-    return res.status(err.statusCode || 500).json({ error: err.message || "Erro ao atualizar cliente" });
+    console.error("updateClient error:", err.code || err.statusCode || "CLIENT_UPDATE_FAILED");
+    return res.status(err.statusCode || 500).json({ ok: false, error: err.statusCode ? err.message : "Alteração não confirmada. Atualize os dados antes de repetir." });
   }
 }
 
