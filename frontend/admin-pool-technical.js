@@ -9,6 +9,22 @@ const ui = window.CwUi || {
 let proposalSelection = new Set();
 const completingReminders = new Set();
 let reminderRows = [], reminderPoolName = '', removeReminder;
+let sheetLoaded = false, savingSheet = false, sheetStatusIndex;
+const sheetCredential = localStorage.getItem('token') || localStorage.getItem('cristalwater_jwt') || '';
+const sameSheetSession = () => !!sheetCredential && sheetCredential === (localStorage.getItem('token') || localStorage.getItem('cristalwater_jwt') || '');
+function sheetStatus(index) {
+  sheetStatusIndex = index;
+  const text = {
+    pt: ['A guardar a ficha técnica...', 'Ficha técnica guardada.', 'Alteração não confirmada. Conserve os dados e consulte a ficha atual antes de voltar a guardar.', 'Carregue os dados atuais antes de guardar.', 'A sessão mudou. Reabra a página.', 'Ficha guardada. Atualize a página para consultar os dados atuais.'],
+    en: ['Saving the technical sheet...', 'Technical sheet saved.', 'Change not confirmed. Keep the data and check the current sheet before saving again.', 'Load the current data before saving.', 'The session changed. Reopen the page.', 'Sheet saved. Refresh the page to view the current data.'],
+    fr: ['Enregistrement de la fiche technique...', 'Fiche technique enregistrée.', 'Modification non confirmée. Conservez les données et consultez la fiche actuelle avant de réenregistrer.', 'Chargez les données actuelles avant d’enregistrer.', 'La session a changé. Rouvrez la page.', 'Fiche enregistrée. Actualisez la page pour consulter les données actuelles.'],
+    es: ['Guardando la ficha técnica...', 'Ficha técnica guardada.', 'Cambio no confirmado. Conserve los datos y consulte la ficha actual antes de guardar de nuevo.', 'Cargue los datos actuales antes de guardar.', 'La sesión ha cambiado. Abra la página de nuevo.', 'Ficha guardada. Actualice la página para consultar los datos actuales.'],
+    de: ['Technisches Datenblatt wird gespeichert...', 'Technisches Datenblatt gespeichert.', 'Änderung nicht bestätigt. Bewahren Sie die Angaben auf und prüfen Sie das aktuelle Datenblatt vor dem erneuten Speichern.', 'Laden Sie vor dem Speichern die aktuellen Daten.', 'Die Sitzung wurde geändert. Öffnen Sie die Seite erneut.', 'Datenblatt gespeichert. Aktualisieren Sie die Seite, um die aktuellen Daten zu sehen.'],
+  };
+  const language = String(window.CristalI18n?.readLanguage?.() || document.documentElement.lang || 'pt').slice(0, 2);
+  const status = document.getElementById('status'); status.dataset.cwNoI18n = ''; status.textContent = (text[language] || text.pt)[index];
+}
+window.addEventListener('cw-language-change', () => { if (sheetStatusIndex !== undefined) sheetStatus(sheetStatusIndex); });
 
 function esc(value) {
   return String(value ?? "").replace(/[&<>'"]/g, (char) => ({
@@ -62,14 +78,15 @@ function updateCalculatedVolume() {
 }
 
 async function req(path, options = {}) {
+  const { expectedStatus, ...fetchOptions } = options;
   const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt") || "";
   const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
   const response = await fetch(`${API}${path}`, {
     headers: { "Content-Type": "application/json", ...authHeader, ...(options.headers || {}) },
-    ...options,
+    ...fetchOptions,
   });
   const data = await response.json().catch(() => ({}));
-  if (!response.ok || data.ok === false) throw new Error(data.error || "Erro");
+  if (!response.ok || data.ok === false || (expectedStatus !== undefined && response.status !== expectedStatus)) throw new Error(data.error || "Erro");
   return data;
 }
 
@@ -378,12 +395,15 @@ async function loadReminders() {
 }
 
 async function loadSheet() {
+  sheetLoaded = false;
   if (!poolId) {
     document.getElementById("status").textContent = "Falta poolId";
     return;
   }
 
   const { pool } = await req(`/pools/${poolId}/technical-sheet`);
+  if (!sameSheetSession()) { sheetLoaded = false; sheetStatus(4); return; }
+  if (!pool || Number(pool.id) !== Number(poolId) || !pool.name || !Number.isFinite(pool.monthlyAmount)) throw new Error('Não foi possível carregar a ficha atual.');
   reminderPoolName = pool.name || `Piscina #${poolId}`;
   document.getElementById("subtitle").textContent = `${pool.client?.name || "Cliente"} - ${pool.name || "Piscina"}`;
   const operationalReminderLink = document.getElementById("poolOperationalReminderLink");
@@ -419,11 +439,15 @@ async function loadSheet() {
 
   renderKeyAccesses(pool);
   renderHistory(pool);
+  sheetLoaded = true;
   await loadTechnicalProposals();
   await loadReminders();
 }
 
 async function saveSheet() {
+  if (savingSheet) return;
+  if (!sameSheetSession()) { sheetStatus(4); return; }
+  if (!sheetLoaded) { sheetStatus(3); return; }
   updateCalculatedVolume();
   const ids = [
     "name", "type", "zone", "address", "volumeM3", "monthlyAmount", "notes",
@@ -435,10 +459,16 @@ async function saveSheet() {
   ];
   const body = {};
   ids.forEach((id) => { body[id] = val(id); });
-  await req(`/pools/${poolId}/technical-sheet`, { method: "PUT", body: JSON.stringify(body) });
-  document.getElementById("status").textContent = "Ficha tecnica guardada.";
-  document.getElementById("historyNote").value = "";
-  await loadSheet();
+  const controls = [...ids.map(id => document.getElementById(id)), document.querySelector('#sheetForm button[type="submit"]')].filter(Boolean), disabled = controls.map(el => el.disabled);
+  savingSheet = true; controls.forEach(el => { el.disabled = true; }); sheetStatus(0);
+  try {
+    const result = await req(`/pools/${poolId}/technical-sheet`, { method: 'PUT', expectedStatus: 200, body: JSON.stringify(body) });
+    if (!sameSheetSession()) { sheetStatus(4); return; }
+    if (result.ok !== true || Number(result.pool?.id) !== Number(poolId) || !Number.isSafeInteger(result.historyId) || result.historyId <= 0 || result.propagation?.persisted !== true) throw new Error('Unconfirmed sheet');
+    document.getElementById('historyNote').value = ''; sheetStatus(1);
+    try { await loadSheet(); } catch { if (sameSheetSession()) sheetStatus(5); }
+  } catch { if (sameSheetSession()) sheetStatus(2); else sheetStatus(4); }
+  finally { savingSheet = false; controls.forEach((el, i) => { el.disabled = !sameSheetSession() || disabled[i]; }); }
 }
 
 let serviceReminderCreator;

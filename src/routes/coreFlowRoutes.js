@@ -1942,77 +1942,8 @@ router.post('/pools/:id/technical-change-proposals/workflow/batch', async (req, 
 });
 
 router.put('/pools/:id/technical-sheet', async (req, res) => {
-  try {
-    const id = toInt(req.params.id);
-    const body = req.body || {};
-    const beforeSheet = await db('pool').findUnique({ where: { id }, include: { equipment: true, technicalRoom: true, calculationProfile: true, technicalSheet: true } }).catch(() => null);
-    const volumeM3 = calculatedPoolVolumeM3(body);
-    const sheetBody = { ...body };
-    if (volumeM3 !== null) sheetBody.volumeM3 = volumeM3;
-    const poolData = poolBaseData(sheetBody);
-    if (Object.keys(poolData).length) await db('pool').update({ where: { id }, data: poolData });
-
-    if (available('technicalSheet') && sheetBody.volumeM3 !== undefined) {
-      await db('technicalSheet').upsert({
-        where: { poolId: id },
-        update: { volumeM3: toFloat(sheetBody.volumeM3, 0) },
-        create: { poolId: id, volumeM3: toFloat(sheetBody.volumeM3, 0), disinfectionType: body.disinfectionType || 'CLORO' },
-      }).catch(() => null);
-    }
-
-    if (available('poolEquipment')) {
-      await db('poolEquipment').upsert({
-        where: { poolId: id },
-        update: definedOnly({
-          pumpType: body.pumpType, pumpPower: body.pumpPower, filterType: body.filterType, filterMedia: body.filterMedia,
-          saltSystem: body.saltSystem == null ? undefined : truthy(body.saltSystem), lightsCount: body.lightsCount == null ? undefined : toInt(body.lightsCount),
-          lightsType: body.lightsType, hasLights: body.hasLights == null ? undefined : truthy(body.hasLights), notes: body.equipmentNotes,
-        }),
-        create: { poolId: id, pumpType: body.pumpType || null, pumpPower: body.pumpPower || null, filterType: body.filterType || null, filterMedia: body.filterMedia || null, saltSystem: truthy(body.saltSystem), lightsCount: toInt(body.lightsCount, 0), lightsType: body.lightsType || null, hasLights: body.hasLights == null ? true : truthy(body.hasLights), notes: body.equipmentNotes || null },
-      });
-    }
-
-    if (available('technicalRoom')) {
-      await db('technicalRoom').upsert({
-        where: { poolId: id },
-        update: definedOnly({ condition: body.technicalRoomCondition, locationNote: body.technicalRoomLocation, ventilation: body.technicalRoomVentilation, electrical: body.technicalRoomElectrical, notes: body.technicalRoomNotes }),
-        create: { poolId: id, condition: body.technicalRoomCondition || null, locationNote: body.technicalRoomLocation || null, ventilation: body.technicalRoomVentilation || null, electrical: body.technicalRoomElectrical || null, notes: body.technicalRoomNotes || null },
-      });
-    }
-
-    if (available('poolCalculationProfile')) {
-      await db('poolCalculationProfile').upsert({
-        where: { poolId: id },
-        update: definedOnly({
-          shape: body.shape, lengthM: body.lengthM == null ? undefined : toFloat(body.lengthM), widthM: body.widthM == null ? undefined : toFloat(body.widthM), depthMinM: body.depthMinM == null ? undefined : toFloat(body.depthMinM), depthMaxM: body.depthMaxM == null ? undefined : toFloat(body.depthMaxM), averageDepthM: body.averageDepthM == null ? undefined : toFloat(body.averageDepthM), volumeM3: sheetBody.volumeM3 == null ? undefined : toFloat(sheetBody.volumeM3), pumpFlowM3h: body.pumpFlowM3h == null ? undefined : toFloat(body.pumpFlowM3h), currentWaterTempC: body.currentWaterTempC == null ? undefined : toFloat(body.currentWaterTempC), targetSalinityPpm: body.targetSalinityPpm == null ? undefined : toFloat(body.targetSalinityPpm), targetChlorinePpm: body.targetChlorinePpm == null ? undefined : toFloat(body.targetChlorinePpm), notes: body.calculationNotes,
-        }),
-        create: { poolId: id, shape: body.shape || 'RECTANGULAR', lengthM: body.lengthM == null ? null : toFloat(body.lengthM), widthM: body.widthM == null ? null : toFloat(body.widthM), depthMinM: body.depthMinM == null ? null : toFloat(body.depthMinM), depthMaxM: body.depthMaxM == null ? null : toFloat(body.depthMaxM), averageDepthM: body.averageDepthM == null ? null : toFloat(body.averageDepthM), volumeM3: sheetBody.volumeM3 == null ? null : toFloat(sheetBody.volumeM3), pumpFlowM3h: body.pumpFlowM3h == null ? null : toFloat(body.pumpFlowM3h), currentWaterTempC: body.currentWaterTempC == null ? null : toFloat(body.currentWaterTempC), targetSalinityPpm: body.targetSalinityPpm == null ? 3500 : toFloat(body.targetSalinityPpm), targetChlorinePpm: body.targetChlorinePpm == null ? 2 : toFloat(body.targetChlorinePpm), notes: body.calculationNotes || null },
-      });
-    }
-
-    const afterSheet = await db('pool').findUnique({ where: { id }, include: { equipment: true, technicalRoom: true, calculationProfile: true, technicalSheet: true } }).catch(() => null);
-    await recordTechnicalSheetHistory(id, beforeSheet, afterSheet, body.actor || req.headers['x-user-email'] || 'ADMIN');
-    const technicalChanges = listTechnicalChangedFields(beforeSheet, afterSheet);
-    if (body.historyNote && available('technicalHistory')) {
-      await db('technicalHistory').create({ data: { poolId: id, type: 'TECHNICAL_SHEET_NOTE', component: 'Ficha Técnica', message: 'Nota da ficha técnica', description: String(body.historyNote), performedAt: new Date(), status: 'DONE' } }).catch(() => null);
-    }
-
-    await emitTechnicalSheetPropagationEvent({
-      poolId: id,
-      actor: body.actor || req.headers['x-user-email'] || 'ADMIN',
-      source: 'TECHNICAL_SHEET_DIRECT_UPDATE',
-      summary: technicalChanges.length
-        ? `Ficha técnica atualizada com ${technicalChanges.length} alteração(ões).`
-        : 'Ficha técnica atualizada sem diferenças mapeadas.',
-      metadata: {
-        changes: technicalChanges,
-        changesCount: technicalChanges.length,
-      },
-    });
-
-    const pool = afterSheet || await db('pool').findUnique({ where: { id }, include: { client: true, equipment: true, technicalRoom: true, calculationProfile: true, technicalSheet: true } });
-    return res.json({ ok: true, pool });
-  } catch (error) { return res.status(500).json({ ok: false, error: error.message }); }
+  try { return res.json(await require('../business/pool/PoolTechnicalSheetBusiness').update(req.params.id, req.body, req.user)); }
+  catch (error) { return res.status(error.statusCode || 500).json({ ok: false, error: error.statusCode ? error.message : 'Alteração não confirmada. Atualize os dados antes de voltar a guardar.' }); }
 });
 
 router.get('/pools/:id/service-reminders', async (req, res) => {
