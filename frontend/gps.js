@@ -1,108 +1,14 @@
-const API = "/api";
-
-// 🔧 CONFIG
-const technicianId = Number(JSON.parse(localStorage.getItem("cristalwater_user") || localStorage.getItem("user") || "{}").technicianId || JSON.parse(localStorage.getItem("cristalwater_user") || localStorage.getItem("user") || "{}").id || 1);
-const SEND_INTERVAL = 10000; // 10 segundos
-
-let lastSent = 0;
-
-// ==========================================
-// INICIAR TRACKING
-// ==========================================
-
-function startTracking() {
-
-  if (!navigator.geolocation) {
-    alert("GPS não suportado neste dispositivo");
-    return;
-  }
-
-  console.log("GPS tracking iniciado");
-
-  navigator.geolocation.watchPosition(
-    handlePosition,
-    handleError,
-    {
-      enableHighAccuracy: true,
-      maximumAge: 5000,
-      timeout: 10000
-    }
-  );
-}
-
-// ==========================================
-// POSIÇÃO RECEBIDA
-// ==========================================
-
-async function handlePosition(position) {
-
-  const now = Date.now();
-
-  // ⛔ evitar enviar demasiadas vezes
-  if (now - lastSent < SEND_INTERVAL) return;
-
-  lastSent = now;
-
-  const lat = position.coords.latitude;
-  const lng = position.coords.longitude;
-  const accuracy = position.coords.accuracy;
-
-  console.log("GPS:", lat, lng);
-
-  try {
-    const response=await fetch(API + "/gps/update", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        technicianId,
-        latitude: lat,
-        longitude: lng,
-        accuracy,
-        recordedAt:new Date(position.timestamp||now).toISOString()
-      })
-    });
-
-    const result=await response.json();
-    if(!response.ok||result.ok===false||result.success===false)throw new Error('GPS não confirmado');
-    updateStatus(result.ignored?'📍 A aguardar localização atual':'📡 Localização enviada');
-
-  } catch (err) {
-    lastSent=0;
-    console.warn("GPS envio indisponivel no momento");
-    updateStatus("❌ Erro envio GPS");
-  }
-}
-
-// ==========================================
-// ERRO GPS
-// ==========================================
-
-function handleError(err) {
-  console.warn("GPS indisponivel ou permissao negada");
-  updateStatus("❌ GPS falhou");
-}
-
-// ==========================================
-// STATUS VISUAL
-// ==========================================
-
-function updateStatus(text) {
-  const el = document.getElementById("gpsStatus");
-  if (el) el.innerText = text;
-}
-
-// ==========================================
-// BOTÃO MANUAL (opcional)
-// ==========================================
-
-async function sendNow() {
-  navigator.geolocation.getCurrentPosition(handlePosition);
-}
-
-// ==========================================
-// INICIAR AUTOMATICAMENTE
-// ==========================================
-
-startTracking();
+// Compatibility entry point; all GPS sends use the durable account queue.
+(function () {
+  'use strict';
+  function status(message) { const node = document.getElementById('gpsStatus'); if (node) node.textContent = message; }
+  const ready = window.CWGps ? Promise.resolve() : new Promise((resolve, reject) => { const script = document.createElement('script'); script.src = '/js/offline/offline-gps.js'; script.onload = resolve; script.onerror = () => reject(Error('Não foi possível carregar o GPS.')); document.head.append(script); });
+  function result(value) { status(value.pending || value.offline || value.busy ? 'GPS guardado; por confirmar.' : value.unattributed ? 'Pontos antigos por rever.' : value.ignored ? 'Leitura antiga reconhecida; obtenha uma posição atual.' : 'Localização confirmada.'); }
+  window.startTracking = async () => { try { await ready; if (!window.CWGps.session()) throw Error('Entre com a conta do técnico para iniciar o GPS.'); window.CWGps.start({ onResult: result, onError: error => status(error.message) }); } catch (error) { status(error.message); } };
+  window.sendNow = async () => {
+    await ready; const captured = window.CWGps.session();
+    if (!captured || !navigator.geolocation) { status('GPS indisponível. Confirme a sessão e a permissão.'); return; }
+    navigator.geolocation.getCurrentPosition(position => { if (!window.CWGps.same(captured)) return; window.CWGps.send(position.coords.latitude, position.coords.longitude, { accuracy: position.coords.accuracy, recordedAt: position.timestamp }, captured).then(value => { if (window.CWGps.same(captured)) result(value); }).catch(error => { if (window.CWGps.same(captured)) status(error.message); }); }, () => { if (window.CWGps.same(captured)) status('GPS indisponível ou sem permissão.'); }, { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 });
+  };
+  void window.startTracking();
+})();

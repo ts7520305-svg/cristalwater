@@ -439,10 +439,8 @@ function updateOfflineBar(syncText){
       ? getOfflinePhotos()
       : [];
 
-  const gps =
-    typeof getOfflineGps === "function"
-      ? getOfflineGps()
-      : [];
+  let gps = [], gpsError = '';
+  try { gps = typeof getOfflineGps === 'function' ? getOfflineGps() : []; } catch (_) { gpsError = 'GPS por rever; os registos foram preservados.'; }
 
   const network =
     document.getElementById(
@@ -462,7 +460,7 @@ function updateOfflineBar(syncText){
   if (network){
 
     network.innerText =
-      syncText ||
+      gpsError || syncText ||
       (
         navigator.onLine
           ? "🟢 Online"
@@ -496,6 +494,8 @@ async function runAutoSync(){
     return;
 
   isSyncing = true;
+  const syncCredential = window.CristalAuth?.getToken?.();
+  const sameSyncSession = () => !!syncCredential && window.CristalAuth?.getToken?.() === syncCredential;
 
   updateOfflineBar(
     "🔄 A sincronizar..."
@@ -508,6 +508,7 @@ async function runAutoSync(){
     ){
 
       await syncOfflineQueue();
+      if (!sameSyncSession()) return;
     }
 
     if (
@@ -515,6 +516,7 @@ async function runAutoSync(){
     ){
 
       await syncOfflinePhotos();
+      if (!sameSyncSession()) return;
     }
 
     if (
@@ -522,7 +524,8 @@ async function runAutoSync(){
     ){
 
       const gpsResult = await syncOfflineGps();
-      if (gpsResult?.pending) throw new Error('GPS ainda por enviar.');
+      if (!sameSyncSession()) return;
+      if (gpsResult?.pending || gpsResult?.unattributed || gpsResult?.busy) throw new Error('GPS ainda por confirmar ou a rever.');
     }
 
     updateOfflineBar(
@@ -538,6 +541,8 @@ async function runAutoSync(){
     loadRoute();
 
   } catch(err){
+
+    if (!sameSyncSession()) return;
 
     console.error(err);
 

@@ -2,10 +2,18 @@
 
 ## Ponto de retoma atual — 16/09/2026
 
+- TASK200: confirmação GPS vinculada ao UUID, conta, técnico, coordenadas, precisão e instante originais; fila existente preservada, coordenação entre janelas, recuperação explícita na página GPS e proteção de respostas/callbacks após mudança de sessão. Emissores antigos partilham o adaptador. Relatório `GPS_CONFIRMATION_RECOVERY_20260916.md`; runner com 102 grupos, sem migração nova.
+- Correção do diagnóstico anterior: a TASK83 já tinha eliminado a chave global para pontos novos e a substituição da fila por snapshot. A falha reproduzida nesta retoma foi apagar um ponto após HTTP 202 com corpo alheio à leitura. Dados globais históricos continuam preservados sem atribuição presumida. Leituras antigas reconhecidas não são apresentadas como posição atual.
+- Validação final dirigida em `run-1789572891450`: recuperação GPS/API/Chromium, fluxo GPS, sprint técnico 4.4 e T1 aprovados. 340 unitários/quatro técnicos, 17 scripts de navegador e sintaxe de 530 ficheiros aprovados. Este registo antecede a publicação; confirmar os 102 grupos e o restauro da árvore final no CI nativo. PNG preexistente preservado com SHA256 `fba3c8189d9e0a31d96b378550736f865d30a4019f5e8d4d4487b15cfc543a71`.
+- TASK198–199 confirmadas em `8d7360a36dc18a665047e6c943c128e9db1652e2`, árvore `fbb02941e666907fbc3786143d854a18c6abfa1e`, workflow `35110081844`: 101 grupos, 324 unitários/quatro técnicos, 17 scripts de navegador, 17 migrações e restauro de 108 tabelas/22 ficheiros com linhas e hashes iguais.
+- Próximo ponto após confirmar TASK200: rever as restantes escritas antigas efetivamente usadas pelos ecrãs e reconciliar cada lacuna com o código/relatórios posteriores antes de a considerar aberta. A matriz corrente é `COMPLETENESS_CURRENT_20260915.md`; a fotografia TASK82 não é uma lista atual de defeitos. Prosseguir o inventário visual. Vídeos continuam sem fluxo completo demonstrado. Sem main/deploy/fornecedores reais/emissão fiscal; não declarar prontidão global.
+
+### Registo anterior da TASK198–199
+
 - TASK198–199: pedidos recuperáveis para criação/decisão/lote/aplicação, comprovativos por conta/UUID, recuperação explícita nos dois ecrãs e aplicação administrativa após comparação de versões, divergências e efeitos calculados. Nova migração aditiva/tabela `TechnicalProposalRequest`; runner com 101 grupos. Relatório `TECHNICAL_PROPOSAL_RECOVERY_20260916.md`.
 - Testes finais dirigidos API/Chromium e regressão TASK197 aprovados em `run-1789569295316`; quota da confirmação e resposta tardia depois de mudar de conta aprovadas em `run-1789569381725`. Três regressões da ficha aprovadas em `run-1789569097814`. 324 unitários/quatro técnicos, 17 scripts de navegador e sintaxe de 530 ficheiros aprovados. Publicar e confirmar 101 grupos, 17 migrações e restauro. PNG preexistente preservado com SHA256 `fba3c8189d9e0a31d96b378550736f865d30a4019f5e8d4d4487b15cfc543a71`.
 - TASK197 confirmada em `6eed38728e9b42b0a97013d6296c26250966bd66`, árvore `3419ee79ed9604d663a377e96ab0354da2ed9d84`, workflow `35103668221`: 99 grupos, 324 unitários/quatro técnicos, 17 scripts de navegador, 16 migrações e restauro de 107 tabelas/22 ficheiros com linhas e hashes iguais.
-- Próximo ponto depois de confirmar esta publicação: fila GPS da interface técnica antiga, com chave global e substituição da fila por snapshot. Reproduzir antes de consolidar o emissor. Vídeos continuam sem fluxo completo demonstrado. Sem main/deploy/fornecedores reais/emissão fiscal; não declarar prontidão global.
+- Prioridade então indicada: rever a fila GPS antiga. A atribuição de chave global/substituição por snapshot estava desatualizada; ver correção do diagnóstico e resultado da TASK200 acima.
 
 ### Registo anterior da TASK197
 

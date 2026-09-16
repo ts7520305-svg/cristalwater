@@ -36,10 +36,10 @@ A criação, a decisão individual, o lote e a aplicação à ficha técnica ace
 | Navegador independente | 17 scripts aprovados |
 | Sintaxe backend | 530 ficheiros aprovados |
 
-Dois ensaios locais anteriores da TASK197 encontraram `UnexpectedMessage`/falha de rollback no adaptador PGlite após erros SQL deliberados. A versão final passou localmente em `run-1789569295316`. O CI com PostgreSQL 16 é a verificação final desses cenários e do restauro. O runner inclui agora **101 grupos**, com **17 migrações aditivas**. Publicação e CI desta árvore ainda por confirmar no momento deste registo.
+Dois ensaios locais anteriores da TASK197 encontraram `UnexpectedMessage`/falha de rollback no adaptador PGlite após erros SQL deliberados. A versão final passou localmente em `run-1789569295316`. A verificação posterior no CI com PostgreSQL 16 também passou: [workflow 35110081844](https://github.com/ts7520305-svg/cristalwater/actions/runs/35110081844), commit `8d7360a36dc18a665047e6c943c128e9db1652e2`, árvore `fbb02941e666907fbc3786143d854a18c6abfa1e`. **101 grupos**, **17 migrações aditivas**, 324 unitários/quatro técnicos, 17 scripts de navegador e sintaxe de 530 ficheiros aprovados; restauro de **108 tabelas/22 ficheiros**, com linhas e hashes iguais.
 
 ## Limites
 
 Os pedidos antigos sem UUID mantêm compatibilidade e serialização, mas não obtêm recuperação da resposta original. A aplicação exige sempre UUID e comparação. O acesso à recuperação depende da conta original e dos dados guardados no navegador; apagar esses dados elimina o acesso local ao pedido. IndexedDB e Web Locks são necessários neste percurso. Os recibos confirmados são conservados para reconhecer rascunhos antigos, sem limpeza automática nesta entrega. Propostas históricas com tipos inválidos ou histórico incoerente exigem revisão administrativa.
 
-Esta entrega não demonstra prontidão global, receção em telefones reais ou funcionamento dos fornecedores externos. Próximo ponto da matriz: reproduzir e corrigir a fila GPS da interface técnica antiga, cuja chave global e substituição por snapshot ainda permitem perda ou mistura de registos.
+Esta entrega não demonstra prontidão global, receção em telefones reais ou funcionamento dos fornecedores externos. A retoma seguinte reviu o GPS antigo: a chave global/substituição por snapshot já fora corrigida na TASK83. A falha remanescente de confirmação incompleta e a consolidação dos emissores são tratadas na TASK200; ver `GPS_CONFIRMATION_RECOVERY_20260916.md`.

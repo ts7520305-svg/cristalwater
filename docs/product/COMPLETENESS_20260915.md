@@ -1,6 +1,6 @@
 # Cristal Water — requisitos, código e trabalho por concluir
 
-**Fotografia histórica da TASK82. Para o estado atual e o próximo trabalho, consultar [matriz após TASK175](COMPLETENESS_CURRENT_20260915.md).** As lacunas registadas abaixo podem já estar resolvidas por tarefas posteriores.
+**Fotografia histórica da TASK82. Para o estado atual e o próximo trabalho, consultar [matriz corrente](COMPLETENESS_CURRENT_20260915.md).** As lacunas registadas abaixo podem já estar resolvidas por tarefas posteriores.
 
 Entregas posteriores a esta auditoria: consultar [implementação e testes das TASKs 83–85](IMPLEMENTATION_20260915.md). GPS legado, configurações fixas e preparação de mensalidades/lembretes já receberam as alterações aí descritas; as linhas abaixo conservam o diagnóstico que lhes deu origem.
 
@@ -29,8 +29,8 @@ Os documentos antigos contradizem-se: o ROADMAP marca Finance/Stock/Customer com
 | Substituição temporária/permanente de técnico | Existente/testado | Atribuições de ronda, `VisitCoverageBusiness.js`, recibos de transferência; visitas iniciadas preservadas. |
 | Mapas e navegação | Existente/testado no escopo | `frontend/technician-map.js`: seleção, próximas visitas, ausência de GPS e mudança de conta. Trânsito e qualidade de rotas reais não comprovados. |
 | Histórico GPS depois de uso prolongado | Corrigido/testado | `TechnicianGpsBusiness.getHistoryById`: últimos pontos em ordem cronológica, incluindo histórico acima de 1.000 posições. |
-| GPS offline na interface antiga | Parcial; prioridade alta | `frontend/technician.html` carrega `js/offline/offline-gps.js`, chamado por `technician.js`. A fila usa uma chave global; no fim da sincronização substitui a fila pelo snapshot restante, podendo perder entradas acrescentadas entretanto. Não tem a proteção de sessão/concorrência da fila moderna. Reproduzir e consolidar o emissor legado. |
-| Sugestões e aprovação de alterações técnicas | Recuperação e aplicação implementadas/testadas localmente; CI desta entrega pendente | TASK197–199: transação e autoria, UUID/resultado original, recuperação por conta no navegador, lote por item e comparação explícita para aplicar uma proposta aprovada. Versões e efeitos revistos impedem aplicação desatualizada; cálculos não substituem escolhas explícitas. Ensaios de falha, concorrência, dois processos, formulários reais e cinco idiomas. `TECHNICAL_PROPOSAL_RECOVERY_20260916.md`. Clientes antigos sem UUID não têm confirmação recuperável. |
+| GPS offline na interface antiga | Diagnóstico TASK82 superado pelas TASK83 e 200 | O snapshot/global descrito originalmente foi substituído na TASK83 por pontos individuais por conta. TASK200 reproduziu e corrigiu a eliminação após resposta incompleta, consolidou os emissores e ensaiou recuperação/sessão/concorrência. Ver `GPS_CONFIRMATION_RECOVERY_20260916.md` e a matriz corrente; não repetir o diagnóstico antigo como falha atual. |
+| Sugestões e aprovação de alterações técnicas | Recuperação e aplicação implementadas; CI confirmado | TASK197–199: transação e autoria, UUID/resultado original, recuperação por conta no navegador, lote por item e comparação explícita para aplicar uma proposta aprovada. Versões e efeitos revistos impedem aplicação desatualizada; cálculos não substituem escolhas explícitas. CI `35110081844` aprovado com 101 grupos e restauro. `TECHNICAL_PROPOSAL_RECOVERY_20260916.md`. Clientes antigos sem UUID não têm confirmação recuperável. |
 | Vídeos de visitas/reparações | Não localizado como fluxo completo | Backlog documenta a intenção. Não foi encontrado percurso dedicado de captura, fila, upload, reprodução e limites de vídeo. Anexos/fotos não bastam para o considerar implementado. |
 
 ## Gestão, cliente e área comercial
@@ -69,7 +69,7 @@ Os documentos antigos contradizem-se: o ROADMAP marca Finance/Stock/Customer com
 ## Trabalho que pode avançar já, por ordem
 
 1. Fechar a proteção das configurações e confirmar os percursos existentes de idioma e preferências.
-2. Consolidar o GPS offline legado e reproduzir perda de rede, novos pontos durante sincronização e troca de conta.
+2. GPS offline legado: prioridade histórica tratada pelas TASK83 e 200; consultar a matriz corrente para o próximo trabalho.
 3. Corrigir os controlos de configuração sem efeito e identificar a fonte real de cada opção.
 4. Implementar cobrança/lembretes agendados com pré-visualização, deduplicação e ensaios isolados, reutilizando Finance OS. Nenhuma mensagem externa sem autorização.
 5. Completar o orçamento dentro das reparações existentes: materiais, mão de obra, custos, margem, revisão, aprovação e conversão.

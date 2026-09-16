@@ -193,7 +193,11 @@ async function processGpsUpdate(payload={}, actor={}) {
   if(!isValidCoordinate(latitude,longitude)||(accuracyM!==null&&(accuracyM<0||accuracyM>10000)))return {statusCode:400,body:{ok:false,success:false,message:'Leitura GPS inválida.'}};
   const now=new Date(),recordedAt=payload.recordedAt?new Date(payload.recordedAt):now;
   if(!Number.isFinite(recordedAt.getTime())||recordedAt.getTime()>now.getTime()+120000)return {statusCode:400,body:{ok:false,success:false,message:'Data da leitura GPS inválida.'}};
-  if(now-recordedAt>5*60*1000)return {statusCode:200,body:{ok:true,success:true,ignored:true,code:'STALE_LOCATION',message:'Leitura antiga ignorada; envie uma localização atual.'}};
+  const guarded=payload.pointId!==undefined;
+  if(guarded&&(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(payload.pointId)||typeof payload.pointId!=='string'||typeof payload.recordedAt!=='string'||!Number.isFinite(Date.parse(payload.recordedAt))||typeof payload.latitude!=='number'||typeof payload.longitude!=='number'||(payload.accuracy!==null&&(typeof payload.accuracy!=='number'||!Number.isFinite(payload.accuracy)))||Object.keys(payload).some(key=>!['pointId','technicianId','latitude','longitude','accuracy','recordedAt'].includes(key))))return {statusCode:400,body:{ok:false,success:false,message:'Conserve a leitura GPS original e o seu identificador.'}};
+  const owner=role==='ADMIN'?`ADMIN:${actor.userId||actor.id}`:actor.principalType==='USER'?`USER:${actor.userId||actor.id}:TECH:${technicianId}`:`TECH:${technicianId}`;
+  const reply=(outcome,body)=>({statusCode:200,body:{ok:true,success:true,...body,...(guarded?{acknowledgement:{scope:'GPS_READING',pointId:payload.pointId,owner,technicianId,latitude,longitude,accuracy:accuracyM,recordedAt:recordedAt.toISOString(),outcome}}:{})}});
+  if(now-recordedAt>5*60*1000)return reply('STALE_LOCATION',{ignored:true,code:'STALE_LOCATION',message:'Leitura antiga ignorada; envie uma localização atual.'});
   const trackingMode=String(payload.trackingMode||payload.mode||'PASSIVE').slice(0,40);
   const saved=await prisma.$transaction(async tx=>{
     await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${`gps-technician:${technicianId}`}))::text`;
@@ -205,12 +209,12 @@ async function processGpsUpdate(payload={}, actor={}) {
     await tx.technicianTrack.create({data:{technicianId,userId,latitude,longitude,createdAt:recordedAt}});
     return true;
   });
-  if(!saved)return {statusCode:200,body:{ok:true,success:true,ignored:true,code:'OLDER_LOCATION',message:'Já existe uma localização mais recente.'}};
+  if(!saved)return reply('OLDER_LOCATION',{ignored:true,code:'OLDER_LOCATION',message:'Já existe uma localização mais recente.'});
   await registerTelemetry({userId,technicianId,vehicleId:technician.vehicleId||null,latitude,longitude,trackingMode,batteryLevel,accuracyM});
   if(global.io)global.io.emit('gps-update',{id:technicianId,technicianId,userId,name:technician.name,latitude,longitude,trackingMode,batteryLevel});
   let proximityDeferred=false;
   if(accuracyM!==null&&accuracyM<=100){try{await recordAssignedProximity({technicianId,latitude,longitude,now});}catch(_){proximityDeferred=true;logger.warn('Aviso de proximidade pendente; nova leitura voltará a tentar.');}}
-  return {statusCode:200,body:{ok:true,success:true,proximityDeferred,message:'Telemetria GPS registada com sucesso.'}};
+  return reply('RECORDED',{proximityDeferred,message:'Telemetria GPS registada com sucesso.'});
 }
 
 async function recordAssignedProximity({technicianId,latitude,longitude,now}){
