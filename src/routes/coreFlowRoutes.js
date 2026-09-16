@@ -1727,6 +1727,12 @@ router.post('/visits/:id/complete', async (req, res) => {
     const id = toInt(req.params.id);
     const body = req.body || {};
 
+    if (body.requestId !== undefined) {
+      const result = await completeServiceVisit(prisma, id, body, req.user);
+      const { idempotent, ...response } = result;
+      return res.json(response);
+    }
+
     const visitScope = await db('serviceVisit').findUnique({ where: { id }, select: { id: true, technicianId: true } });
     if (!visitScope) return res.status(404).json({ ok: false, error: 'Visita nao encontrada' });
 
@@ -1754,6 +1760,7 @@ router.post('/visits/:id/complete', async (req, res) => {
     if (error instanceof VisitCompletionError) {
       return res.status(error.statusCode).json({ ok: false, code: error.code, error: error.message });
     }
+    if (req.body?.requestId !== undefined) return res.status(error.statusCode || 503).json({ ok: false, code: error.code || 'FIELD_COMPLETION_UNCONFIRMED', error: error.statusCode ? error.message : 'Conclusão por confirmar. Repita o pedido original.' });
     return res.status(500).json({ ok: false, error: error.message });
   }
 });

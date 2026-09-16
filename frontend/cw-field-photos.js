@@ -1,31 +1,53 @@
-(function(){
+(function () {
   'use strict';
-  const owner=()=>{const user=window.CristalAuth?.parseUser?.()||{};return String(user.technicianId||user.id||'none')};
-  function database(){return new Promise((resolve,reject)=>{const request=indexedDB.open('cw-field-media',1);request.onupgradeneeded=()=>request.result.createObjectStore('photos',{keyPath:'key'});request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)});}
-  async function change(action,value){const db=await database();return new Promise((resolve,reject)=>{const tx=db.transaction('photos','readwrite');tx.objectStore('photos')[action](value);tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>{db.close();reject(tx.error)}});}
-  async function save(visitId,photo){await change('put',{key:`${owner()}:${visitId}:${photo.localId}`,owner:owner(),visitId,photo:{...photo,previewUrl:undefined,status:'pending',error:''}})}
-  async function remove(visitId,localId){await change('delete',`${owner()}:${visitId}:${localId}`)}
-  async function list(visitId){const db=await database();return new Promise((resolve,reject)=>{const request=db.transaction('photos').objectStore('photos').getAll();request.onsuccess=()=>{db.close();resolve(request.result.filter(row=>row.owner===owner()&&String(row.visitId)===String(visitId)).map(row=>({...row.photo,visitId:row.visitId,previewUrl:URL.createObjectURL(row.photo.file)})))};request.onerror=()=>{db.close();reject(request.error)}})}
-  async function sync(visitId) {
-    const submittingOwner=owner(), submittingToken=window.CristalAuth?.getToken?.();
-    const photos=await list(visitId);
-    try { for(const photo of photos) {
-      if(owner()!==submittingOwner || window.CristalAuth?.getToken?.()!==submittingToken) throw new Error('Sessão alterada durante o envio de fotografias');
-        const body=new FormData();body.append('type',photo.type||'AFTER');body.append('photo',photo.file,photo.fileName||'photo.jpg');
-        const response=await fetch(`/api/visits/${encodeURIComponent(visitId)}/photo`,{method:'POST',body,headers:{Authorization:`Bearer ${submittingToken}`}});
-        const data=await response.json().catch(()=>({}));
-        if(!response.ok||!data.photo?.id)throw Object.assign(new Error(data.error||'Fotografia por sincronizar'),{status:response.status});
-        if(owner()!==submittingOwner || window.CristalAuth?.getToken?.()!==submittingToken) throw new Error('Sessão alterada durante o envio de fotografias');
-        await change('delete',`${submittingOwner}:${visitId}:${photo.localId}`);
-    } } finally {photos.forEach(photo=>URL.revokeObjectURL(photo.previewUrl));}
-  }
-  async function pendingSummary(){
-    const requestedOwner=owner(),db=await database();
-    return new Promise((resolve,reject)=>{
-      const request=db.transaction('photos').objectStore('photos').getAll();
-      request.onsuccess=()=>{db.close();if(owner()!==requestedOwner)return reject(new Error('Sessão alterada'));resolve(request.result.filter(row=>row.owner===requestedOwner).map(row=>({visitId:row.visitId})));};
-      request.onerror=()=>{db.close();reject(request.error);};
+  const store = window.CWFieldWriteStore;
+  async function assertHistory(captured = store.session()) {
+    if (!store.same(captured)) throw Error('A sessão mudou. Reabra a página com a conta original.');
+    // Older records have only a numeric identity, not the authenticated principal type.
+    const rows = await new Promise((resolve, reject) => {
+      const open = indexedDB.open('cw-field-media', 1);
+      open.onupgradeneeded = () => open.result.createObjectStore('photos', { keyPath: 'key' });
+      open.onerror = () => reject(open.error);
+      open.onsuccess = () => {
+        const db = open.result;
+        if (!db.objectStoreNames.contains('photos')) { db.close(); reject(Error('Arquivo de fotografias ilegível. Preserve os dados.')); return; }
+        const tx = db.transaction('photos'), read = tx.objectStore('photos').getAll();
+        read.onsuccess = () => { db.close(); resolve(read.result); }; read.onerror = () => { db.close(); reject(read.error); };
+      };
     });
+    if (!store.same(captured)) throw Error('A sessão mudou. As fotografias foram preservadas.');
+    if (rows.some(row => !row.owner || row.owner === 'none' || String(row.owner) === String(captured.technicianId))) throw Error('Existem fotografias antigas sem conta confirmada. Os ficheiros foram preservados; peça revisão ao escritório antes de enviar.');
   }
-  window.CWFieldPhotos={save,remove,list,sync,pendingSummary};
+  async function save(visitId, photo, captured = store.session()) {
+    await assertHistory(captured);
+    if (!(photo.file instanceof Blob) || !photo.file.size || photo.file.size > 25 * 1024 * 1024) throw Error('Escolha uma fotografia até 25 MB.');
+    const payload = { type: photo.type || 'AFTER', size: photo.file.size, sha256: await store.digest(await photo.file.arrayBuffer()) };
+    return store.prepare('VISIT_PHOTO', Number(visitId), payload, { requestId: photo.localId, file: photo.file, fileName: photo.fileName, label: 'Fotografia da visita ' + visitId }, captured);
+  }
+  async function list(visitId, includeConfirmed = false, captured = store.session()) {
+    await assertHistory(captured);
+    const rows = await store.records('VISIT_PHOTO', captured, includeConfirmed);
+    return rows.filter(row => row.resourceId === Number(visitId)).map(row => ({
+      localId: row.requestId, visitId: row.resourceId, type: row.payload.type, file: row.file, fileName: row.fileName,
+      status: row.response ? 'uploaded' : 'pending', error: row.failure?.message || '',
+      ...(row.response ? { url: row.response.photo.url, serverId: row.response.photo.id } : { previewUrl: URL.createObjectURL(row.file) })
+    }));
+  }
+  async function send(visitId, localId, captured = store.session(), options = {}) {
+    await assertHistory(captured);
+    const row = await store.get(localId, captured);
+    if (row.scope !== 'VISIT_PHOTO' || row.resourceId !== Number(visitId)) throw Error('A fotografia pertence a outra visita. Preserve o envio.');
+    return store.send(localId, captured, options);
+  }
+  async function remove(visitId, localId, captured = store.session()) {
+    const row = await store.get(localId, captured);
+    if (row.scope !== 'VISIT_PHOTO' || row.resourceId !== Number(visitId) || row.response) throw Error('Esta fotografia já foi confirmada ou pertence a outra visita. Peça revisão ao escritório.');
+    return store.remove(localId, captured);
+  }
+  async function sync(visitId, captured = store.session(), options = {}) {
+    await assertHistory(captured);
+    for (const row of await store.records('VISIT_PHOTO', captured)) if (row.resourceId === Number(visitId)) await store.send(row.requestId, captured, options);
+  }
+  async function pendingSummary(captured = store.session()) { await assertHistory(captured); return (await store.records('VISIT_PHOTO', captured)).map(row => ({ visitId: row.resourceId })); }
+  window.CWFieldPhotos = { save, remove, list, sync, send, pendingSummary, assertHistory };
 })();

@@ -427,63 +427,39 @@ function updateConnectionStatus(){
 // OFFLINE BAR
 // ======================================================
 
-function updateOfflineBar(syncText){
-
-  const queue =
-    typeof getOfflineQueue === "function"
-      ? getOfflineQueue()
-      : [];
-
-  const photos =
-    typeof getOfflinePhotos === "function"
-      ? getOfflinePhotos()
-      : [];
-
-  let gps = [], gpsError = '';
-  try { gps = typeof getOfflineGps === 'function' ? getOfflineGps() : []; } catch (_) { gpsError = 'GPS por rever; os registos foram preservados.'; }
-
-  const network =
-    document.getElementById(
-      "offlineNetwork"
-    );
-
-  const visitsEl =
-    document.getElementById(
-      "offlineVisits"
-    );
-
-  const photosEl =
-    document.getElementById(
-      "offlinePhotos"
-    );
-
-  if (network){
-
-    network.innerText =
-      gpsError || syncText ||
-      (
-        navigator.onLine
-          ? "🟢 Online"
-          : "🔴 Offline"
-      );
-  }
-
-  if (visitsEl){
-
-    visitsEl.innerText =
-      `📦 ${queue.length} visitas pendentes`;
-  }
-
-  if (photosEl){
-
-    photosEl.innerText =
-      `📸 ${photos.length} fotos pendentes · 📍 ${gps.length} GPS pendentes`;
+let offlineBarRevision = 0, legacyEntryGeneration = 0;
+const legacyWriteSession = window.CWFieldWriteStore.session();
+const legacyCompletionBusy = new Set();
+const legacyFormDrafts = new Map();
+window.addEventListener('pagehide', () => { legacyEntryGeneration++; });
+window.addEventListener('pageshow', () => updateOfflineBar());
+window.addEventListener('cw:field-write-change', () => updateOfflineBar());
+async function updateOfflineBar(syncText) {
+  const revision = ++offlineBarRevision, credential = window.CristalAuth?.getToken?.();
+  const results = await Promise.allSettled([
+    typeof getOfflineQueue === 'function' ? getOfflineQueue() : [],
+    typeof getOfflinePhotos === 'function' ? getOfflinePhotos() : [],
+    Promise.resolve().then(() => typeof getOfflineGps === 'function' ? getOfflineGps() : [])
+  ]);
+  if (revision !== offlineBarRevision || credential !== window.CristalAuth?.getToken?.()) return;
+  const errors = results.map((result, index) => result.status === 'rejected' ? (index === 2 ? 'GPS por rever; os registos foram preservados.' : result.reason.message) : '').filter(Boolean);
+  const rows = results.map(result => result.status === 'fulfilled' ? result.value : []);
+  const network = document.getElementById('offlineNetwork'), visitsEl = document.getElementById('offlineVisits'), photosEl = document.getElementById('offlinePhotos');
+  if (network) network.textContent = errors[0] || syncText || (navigator.onLine ? 'Online' : 'Offline');
+  if (visitsEl) visitsEl.textContent = (results[0].status === 'fulfilled' ? rows[0].length : '?') + ' visitas por confirmar';
+  if (photosEl) photosEl.textContent = (results[1].status === 'fulfilled' ? rows[1].length : '?') + ' fotos por confirmar · ' + rows[2].length + ' GPS pendentes';
+  let panel = document.getElementById('legacyFieldRecovery');
+  if (!panel) { panel = document.createElement('section'); panel.id = 'legacyFieldRecovery'; panel.setAttribute('role', 'status'); panel.style.cssText = 'padding:14px;background:#fff4ce;color:#624400'; (network?.parentElement || document.body).append(panel); }
+  panel.replaceChildren(); panel.hidden = !errors.length && !rows[0].length && !rows[1].length;
+  for (const message of errors) { const item = document.createElement('p'); item.textContent = message; panel.append(item); }
+  for (const record of [...rows[1], ...rows[0]]) {
+    const row = document.createElement('div'), label = document.createElement('span'), retry = document.createElement('button');
+    label.textContent = record.label + ' — ' + (record.failure?.message || 'por confirmar. '); retry.textContent = 'Confirmar envio guardado'; retry.type = 'button'; retry.style.cssText = 'min-height:44px;white-space:normal';
+    const captured = window.CWFieldWriteStore.session();
+    retry.onclick = async () => { retry.disabled = true; try { if (record.scope === 'VISIT_COMPLETION') await sendOfflineAction(record, captured); else await window.CWFieldWriteStore.send(record.requestId, captured); if (window.CWFieldWriteStore.same(captured)) { await updateOfflineBar(); loadRoute(); } } catch (error) { if (window.CWFieldWriteStore.same(captured)) label.textContent = record.label + ' — ' + error.message; } finally { retry.disabled = false; } };
+    row.append(label, retry); panel.append(row);
   }
 }
-
-// ======================================================
-// AUTO SYNC
-// ======================================================
 
 async function runAutoSync(){
 
@@ -507,16 +483,18 @@ async function runAutoSync(){
       typeof syncOfflineQueue === "function"
     ){
 
-      await syncOfflineQueue();
+      const queueResult = await syncOfflineQueue();
       if (!sameSyncSession()) return;
+      if (queueResult?.pending || queueResult?.unattributed) throw new Error(queueResult.error || 'Conclusões por confirmar ou a rever.');
     }
 
     if (
       typeof syncOfflinePhotos === "function"
     ){
 
-      await syncOfflinePhotos();
+      const photoResult = await syncOfflinePhotos();
       if (!sameSyncSession()) return;
+      if (photoResult?.pending || photoResult?.unattributed) throw new Error(photoResult.error || 'Fotografias por confirmar ou a rever.');
     }
 
     if (
@@ -606,6 +584,7 @@ function getAuthHeaders(){
 // ======================================================
 
 async function loadRoute() {
+  if (!window.CWFieldWriteStore.same(legacyWriteSession)) return;
 
   try {
 
@@ -640,6 +619,7 @@ async function loadRoute() {
         }
       );
 
+    if (!window.CWFieldWriteStore.same(legacyWriteSession)) return;
     if (res.status === 401 || res.status === 403){
 
       redirectToLogin();
@@ -649,6 +629,7 @@ async function loadRoute() {
 
     const data =
       await res.json();
+    if (!window.CWFieldWriteStore.same(legacyWriteSession)) return;
 
     const allVisits =
       data.visits || [];
@@ -701,12 +682,15 @@ async function loadRoute() {
 // ======================================================
 
 function renderVisits() {
+  if (!window.CWFieldWriteStore.same(legacyWriteSession)) return;
 
   const list =
     document.getElementById("list");
 
   if (!list) return;
 
+  // A late route/photo refresh must not erase fields being entered in this page.
+  for (const input of list.querySelectorAll('input[id],textarea[id]')) if (/^(notes|ph|chlorine|alkalinity|salt|products)-[1-9][0-9]*$/.test(input.id)) legacyFormDrafts.set(input.id, input.value);
   list.innerHTML = "";
 
   if (!visits.length) {
@@ -766,7 +750,7 @@ function renderVisits() {
         <b>${escapeHtml(v.status || "-")}</b>
       </div>
 
-      ${isLocked ? '<div class="muted" style="margin-top:6px;color:#9affc6;font-weight:800">Stop atual bloqueado para evitar execução duplicada.</div>' : (isBlocked ? '<div class="muted" style="margin-top:6px;color:#ffd166;font-weight:800">Esta visita está bloqueada enquanto o stop atual estiver em curso.</div>' : '')}
+      ${isLocked ? '<div class="visit-lock-note">Stop atual bloqueado para evitar execução duplicada.</div>' : (isBlocked ? '<div class="visit-block-note">Esta visita está bloqueada enquanto o stop atual estiver em curso.</div>' : '')}
 
       <div>
         Início:
@@ -899,6 +883,7 @@ function renderVisits() {
     `;
 
     list.appendChild(div);
+    for (const input of div.querySelectorAll('input[id],textarea[id]')) if (legacyFormDrafts.has(input.id)) input.value = legacyFormDrafts.get(input.id);
   });
 
   bindVisitButtons();
@@ -969,271 +954,44 @@ function bindVisitButtons(){
 // COMPLETE VISIT
 // ======================================================
 
-async function completeVisit(id){
-
+async function completeVisit(id) {
+  const captured = legacyWriteSession, generation = legacyEntryGeneration;
+  if (legacyCompletionBusy.has(id)) return;
+  legacyCompletionBusy.add(id);
   try {
-
-    const visit = visits.find((item) => String(item.id) === String(id));
-    const lockedId = activeVisitId();
-
-    if (lockedId && String(lockedId) !== String(id) && visit && !isVisitCompleted(visit)) {
-      alert("Há uma visita em curso. Conclui esse stop antes de avançar.");
-      return;
-    }
-
-    const notes =
-      document.getElementById(
-        `notes-${id}`
-      ).value;
-
-    const ph =
-      document.getElementById(
-        `ph-${id}`
-      ).value;
-
-    const chlorine =
-      document.getElementById(
-        `chlorine-${id}`
-      ).value;
-
-    const alkalinity =
-      document.getElementById(
-        `alkalinity-${id}`
-      ).value;
-
-    const salt =
-      document.getElementById(
-        `salt-${id}`
-      ).value;
-
-    const products =
-      document.getElementById(
-        `products-${id}`
-      ).value;
-
-    const body = {
-
-      visitId:id,
-
-      notes,
-
-      ph,
-
-      chlorine,
-
-      alkalinity,
-
-      salt,
-
-      products
-    };
-
-    if (!navigator.onLine){
-
-      addOfflineAction({
-
-        url:
-          `${API}/core/visits/${id}/complete`,
-
-        method:
-          "POST",
-
-        syncKey:
-          `visit-complete:${id}`,
-
-        conflictStrategy:
-          "SERVER_WINS",
-
-        body
-      });
-
-      markLocalVisitCompleted(id, { pendingSync: true });
-      renderVisits();
-
-      updateOfflineBar();
-
-      alert(
-        "📦 Visita guardada offline"
-      );
-
-      return;
-    }
-
-    const res =
-      await fetch(
-        `${API}/core/visits/${id}/complete`,
-        {
-
-          method:"POST",
-
-          headers:getAuthHeaders(),
-
-          body:
-            JSON.stringify(body)
-        }
-      );
-
-    if (res.status === 401 || res.status === 403){
-
-      redirectToLogin();
-
-      return;
-    }
-
-    const data =
-      await res.json();
-
-    if (res.status === 409 && (data.code === "VISIT_ALREADY_COMPLETED" || /ja foi conclu[ií]da|already completed/i.test(String(data.error || data.message || "")))) {
-      markLocalVisitCompleted(id, { pendingSync: false });
-      renderVisits();
-      alert("Esta visita já estava concluída no servidor. Estado sincronizado.");
-      return;
-    }
-
-    if (!data.ok){
-
-      alert("Erro concluir");
-
-      return;
-    }
-
-    markLocalVisitCompleted(id, { pendingSync: false });
-    renderVisits();
-
-    alert(
-      "Visita concluída"
-    );
-
-    loadRoute();
-
-  } catch(err){
-
-    console.error(err);
-
-    alert("Erro");
-  }
+    const visit = visits.find(item => String(item.id) === String(id)), lockedId = activeVisitId();
+    if (lockedId && String(lockedId) !== String(id) && visit && !isVisitCompleted(visit)) throw Error('Há uma visita em curso. Conclua essa visita antes de avançar.');
+    const body = { visitId: Number(id) };
+    for (const field of ['notes','ph','chlorine','alkalinity','salt','products']) body[field] = document.getElementById(field + '-' + id).value;
+    const record = await addOfflineAction({ url: '/api/core/visits/' + id + '/complete', method: 'POST', body }, captured);
+    if (!window.CWFieldWriteStore.same(captured) || generation !== legacyEntryGeneration) return;
+    markLocalVisitCompleted(id, { pendingSync: true }); renderVisits(); await updateOfflineBar();
+    try {
+      await sendOfflineAction(record, captured);
+      if (!window.CWFieldWriteStore.same(captured) || generation !== legacyEntryGeneration) return;
+      markLocalVisitCompleted(id, { pendingSync: false }); renderVisits(); alert('Visita confirmada no servidor.'); loadRoute();
+    } catch (error) { if (window.CWFieldWriteStore.same(captured) && generation === legacyEntryGeneration) alert('Conclusão guardada, por confirmar. ' + error.message); }
+  } catch (error) { if (window.CWFieldWriteStore.same(captured) && generation === legacyEntryGeneration) alert(error.message || 'Não foi possível guardar a conclusão. Os campos foram preservados.'); }
+  finally { legacyCompletionBusy.delete(id); if (window.CWFieldWriteStore.same(captured)) updateOfflineBar(); }
 }
 
-// ======================================================
-// PHOTO
-// ======================================================
-
-async function uploadPhoto(id, type){
-
-  try {
-
-    const input =
-      document.createElement("input");
-
-    input.type =
-      "file";
-
-    input.accept =
-      "image/*";
-
-    input.capture =
-      "environment";
-
-    input.onchange = async () => {
-
-      const file =
-        input.files[0];
-
-      if (!file) return;
-
-      if (!navigator.onLine){
-
-        const reader =
-          new FileReader();
-
-        reader.onload = function(e){
-
-          saveOfflinePhoto({
-
-            visitId:id,
-
-            type,
-
-            base64:e.target.result
-          });
-
-          updateOfflineBar();
-
-          alert(
-            "📸 Foto guardada offline"
-          );
-        };
-
-        reader.readAsDataURL(file);
-
-        return;
-      }
-
-      const formData =
-        new FormData();
-
-      formData.append(
-        "photo",
-        file
-      );
-
-      formData.append(
-        "type",
-        type
-      );
-
-      const res =
-        await fetch(
-          `${API}/visits/${id}/photo`,
-          {
-
-            method:"POST",
-
-            headers:{
-              "Authorization": `Bearer ${token}`
-            },
-
-            body: formData
-          }
-        );
-
-      if (res.status === 401 || res.status === 403){
-
-        redirectToLogin();
-
-        return;
-      }
-
-      const data =
-        await res.json();
-
-      if (!data.ok){
-
-        alert("Erro upload");
-
-        return;
-      }
-
-      alert(
-        `Foto ${type} enviada`
-      );
-
-      loadRoute();
-    };
-
-    input.click();
-
-  } catch(err){
-
-    console.error(err);
-
-    alert("Erro foto");
-  }
+async function uploadPhoto(id, type) {
+  const captured = legacyWriteSession, generation = legacyEntryGeneration;
+  const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.capture = 'environment';
+  input.onchange = async () => {
+    if (!window.CWFieldWriteStore.same(captured) || generation !== legacyEntryGeneration) return;
+    const file = input.files[0]; if (!file) return;
+    let saved = false;
+    try {
+      const record = await saveOfflinePhoto({ visitId: Number(id), type, file }, captured); saved = true;
+      if (!window.CWFieldWriteStore.same(captured) || generation !== legacyEntryGeneration) return;
+      await window.CWFieldWriteStore.send(record.requestId, captured);
+      if (window.CWFieldWriteStore.same(captured) && generation === legacyEntryGeneration) { alert('Fotografia confirmada no servidor.'); loadRoute(); }
+    } catch (error) { if (window.CWFieldWriteStore.same(captured) && generation === legacyEntryGeneration) alert((saved ? 'Fotografia guardada neste dispositivo; por confirmar. ' : 'A fotografia não ficou guardada. Selecione-a novamente. ') + error.message); }
+    finally { if (window.CWFieldWriteStore.same(captured)) updateOfflineBar(); }
+  };
+  input.click();
 }
-
-// ======================================================
-// INTERNAL ALERT
-// ======================================================
 
 async function sendInternalAlert(){
 

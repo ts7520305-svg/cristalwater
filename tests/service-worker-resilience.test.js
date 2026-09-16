@@ -52,6 +52,6 @@ describe('field service worker storage resilience',()=>{
  it('activates the replacement after the whole shell is available',async()=>{
   const add=vi.fn(async()=>{}),w=worker({cache:{add}});let install;
   w.handlers.install({waitUntil:p=>install=p});await install;
-  expect(add).toHaveBeenCalledWith('/cw-field-offline.js');expect(w.context.skipWaiting).toHaveBeenCalledOnce();
+  expect(add).toHaveBeenCalledWith('/cw-field-offline.js');expect(add).toHaveBeenCalledWith('/cw-field-write-store.js');expect(add).toHaveBeenCalledWith('/logo-cristalwater.png');expect(w.context.skipWaiting).toHaveBeenCalledOnce();
  });
 });

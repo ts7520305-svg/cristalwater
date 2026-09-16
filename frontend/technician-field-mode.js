@@ -23,6 +23,11 @@
   let startedAt = null;
   let pendingProblems = [];
   let selectedPhotoType = "AFTER";
+  const fieldWriteSession = window.CWFieldWriteStore?.session();
+  let fieldWriteGeneration = 0, selectedPhotoContext = null;
+  let fieldPendingRevision = 0;
+  window.addEventListener('pagehide', () => { ++fieldWriteGeneration; });
+  const sameFieldSession = () => window.CWFieldWriteStore?.same(fieldWriteSession);
   let visitPhotos = [];
   let visitDrafts = {};
   let visitPhotosByKey = {};
@@ -679,6 +684,7 @@
   }
 
   function saveCurrentDraft() {
+    if (!sameFieldSession()) return;
     const visit = current();
     if (!visit?.id) return;
     const key = visitKey(visit);
@@ -699,11 +705,11 @@
     const draft = visitDrafts[key] || null;
     applyVisitForm(draft);
     visitPhotos = visitPhotosByKey[key] || (draft?.photos || []);
-    window.CWFieldPhotos.list(visit?.id).then(pending => {
-      if (current()?.id !== visit?.id) return;
-      for(const photo of pending) { const position=visitPhotos.findIndex(p=>p.localId===photo.localId);if(position>=0)visitPhotos[position]=photo;else visitPhotos.push(photo); }
+    window.CWFieldPhotos.list(visit?.id, true, fieldWriteSession).then(pending => {
+      if (!sameFieldSession() || current()?.id !== visit?.id) { pending.forEach(photo => { if (photo.previewUrl) URL.revokeObjectURL(photo.previewUrl); }); return; }
+      for(const photo of pending) { const position=visitPhotos.findIndex(p=>p.localId===photo.localId);if(position>=0){if(visitPhotos[position].previewUrl?.startsWith('blob:'))URL.revokeObjectURL(visitPhotos[position].previewUrl);visitPhotos[position]=photo;}else visitPhotos.push(photo); }
       renderPhotoList();
-    }).catch(error=>toast('Falha ao recuperar fotografias: '+error.message));
+    }).catch(error=>{if(sameFieldSession())toast('Falha ao recuperar fotografias: '+error.message)});
     renderPhotoList();
   }
 
@@ -1427,9 +1433,15 @@
     if (docsMeta) docsMeta.textContent = !documentsLoaded ? "A confirmar a viatura" : docsReady ? "Obrigatórios confirmados" : "Abra Viatura para ver o que falta";
 
     const pendingPhotos = visitPhotos.filter(photo => photo.status !== "uploaded").length;
-    const pendingVisit = visit && window.CWFieldOffline?.pending(visit.id);
-    if (photosValue) photosValue.textContent = String(pendingPhotos + (pendingVisit ? 1 : 0));
-    if (photosMeta) photosMeta.textContent = pendingVisit ? "visita por confirmar" : pendingPhotos ? "fotos por enviar" : "envios pendentes nesta visita";
+    const pendingRevision = ++fieldPendingRevision;
+    if (photosValue) photosValue.textContent = '…';
+    if (photosMeta) photosMeta.textContent = 'A verificar envios guardados';
+    Promise.resolve(visit ? window.CWFieldOffline.pending(visit.id) : false).then(pendingVisit => {
+      if (!sameFieldSession() || pendingRevision !== fieldPendingRevision) return;
+      if (photosValue) photosValue.textContent = String(pendingPhotos + (pendingVisit ? 1 : 0));
+      if (photosMeta) photosMeta.textContent = pendingVisit ? 'visita por confirmar' : pendingPhotos ? 'fotos por enviar' : 'envios pendentes nesta visita';
+      setTileTone('#fieldPhotosTile', pendingPhotos || pendingVisit ? 'warn' : 'ok');
+    }).catch(() => { if (sameFieldSession() && pendingRevision === fieldPendingRevision) { if (photosValue) photosValue.textContent = '?'; if (photosMeta) photosMeta.textContent = 'Envios por verificar; preserve os dados'; setTileTone('#fieldPhotosTile','warn'); } });
 
     if (heroActions) {
       heroActions.hidden = false;
@@ -1455,7 +1467,7 @@
     const freeMode = !visit;
     setTileTone("#fieldProgressTile", freeMode ? "" : (pending ? "" : "ok"));
     setTileTone("#fieldDocsTile", freeMode ? "" : (docsReady ? "ok" : "warn"));
-    setTileTone("#fieldPhotosTile", pendingPhotos || pendingVisit ? "warn" : "ok");
+    setTileTone("#fieldPhotosTile", "warn");
     const progressTile = $("#fieldProgressTile");
     const docsTile = $("#fieldDocsTile");
     const photosTile = $("#fieldPhotosTile");
@@ -2129,7 +2141,7 @@
           <span class="muted">${esc(photo.fileName || "Foto do servico")}</span>
           <div class="photo-mini">
             ${photo.status !== "uploaded" ? `<button type="button" data-photo-retry="${esc(photo.localId)}">Enviar</button>` : ""}
-            <button type="button" data-photo-remove="${esc(photo.localId)}">Remover</button>
+            ${photo.status !== "uploaded" ? `<button type="button" data-photo-remove="${esc(photo.localId)}">Remover</button>` : ""}
           </div>
         </div>
       </div>
@@ -2143,19 +2155,25 @@
     });
 
     list.querySelectorAll("[data-photo-remove]").forEach((button) => {
-      button.addEventListener("click", () => {
+      button.addEventListener("click", async () => {
         const photo = visitPhotos.find((item) => item.localId === button.dataset.photoRemove);
-        if (photo?.previewUrl?.startsWith("blob:")) URL.revokeObjectURL(photo.previewUrl);
-        window.CWFieldPhotos.remove(photo?.visitId || current()?.id, button.dataset.photoRemove).catch(error => toast(error.message));
-        visitPhotos = visitPhotos.filter((item) => item.localId !== button.dataset.photoRemove);
-        saveCurrentDraft();
-        renderPhotoList();
+        if (!photo || !sameFieldSession()) return;
+        button.disabled = true;
+        try {
+          await window.CWFieldPhotos.remove(photo.visitId || current()?.id, photo.localId, fieldWriteSession);
+          if (photo.previewUrl?.startsWith("blob:")) URL.revokeObjectURL(photo.previewUrl);
+          if (!sameFieldSession()) return;
+          visitPhotos = visitPhotos.filter((item) => item.localId !== photo.localId);
+          saveCurrentDraft(); renderPhotoList();
+        } catch (error) { if (sameFieldSession()) toast(error.message); }
+        finally { button.disabled = false; }
       });
     });
   }
 
   async function uploadPhoto(photo) {
-    const uploadOwner = currentTechnicianId();
+    const generation = fieldWriteGeneration;
+    if (!sameFieldSession()) { photoFeedback('A sessão mudou. Reabra a página com a conta original.'); return false; }
     const visit = visits.find(v => String(v.id) === String(photo?.visitId)) || current();
     if (photo?.status === 'uploading') return false;
     if (!visit?.id || !(photo?.file instanceof Blob)) {
@@ -2170,24 +2188,17 @@
     renderPhotoList();
 
     try {
-      const formData = new FormData();
-      formData.append("photo", photo.file);
-      formData.append("type", photo.type || "AFTER");
-      const data = await apiForm(`/api/visits/${encodeURIComponent(visit.id)}/photo`, formData);
-      if (currentTechnicianId() !== uploadOwner) throw new Error('Sessão alterada durante o envio de fotografias');
-      if (!data.photo?.id || !data.photo.url) throw new Error('Fotografia ainda não confirmada pelo servidor');
+      const data = await window.CWFieldPhotos.send(visit.id, photo.localId, fieldWriteSession);
+      if (!sameFieldSession() || generation !== fieldWriteGeneration) return false;
       photo.status = "uploaded";
       photo.url = data.photo.url;
-      await window.CWFieldPhotos.remove(visit.id,photo.localId);
-      saveCurrentDraft();
       photo.serverId = data.photo?.id || null;
-      photoFeedback("Fotografia confirmada pelo servidor.");
-      renderPhotoList();
+      if (current()?.id === visit.id) { saveCurrentDraft(); photoFeedback("Fotografia confirmada pelo servidor."); renderPhotoList(); }
       return true;
     } catch (error) {
       photo.status = "pending";
       photo.error = error.message;
-      renderPhotoList();
+      if (sameFieldSession() && generation === fieldWriteGeneration && current()?.id === visit.id) renderPhotoList();
       return false;
     }
   }
@@ -2219,29 +2230,33 @@
     const input = $(gallery ? '#galleryPhotoInput' : '#photoInput');
     if (!input) return;
     selectedPhotoType = type || "AFTER";
+    if (!sameFieldSession()) { photoFeedback('A sessão mudou. Reabra a página com a conta original.'); return; }
+    selectedPhotoContext = { visitId: current()?.id, type: selectedPhotoType, generation: fieldWriteGeneration };
     input.value = "";
     try { input.click(); }
     catch(error){ photoFeedback('Não foi possível abrir a câmara. Use a opção de fotografia guardada no telemóvel.'); }
   }
 
-  async function addSelectedPhoto(file) {
+  async function addSelectedPhoto(file, selection = selectedPhotoContext) {
     if (!file) return;
+    if (!sameFieldSession() || (selection && (selection.generation !== fieldWriteGeneration || selection.visitId !== current()?.id))) { photoFeedback('A visita ou a sessão mudou. Escolha novamente a fotografia na visita correta.'); return; }
     if (!current()?.id) { photoFeedback('Escolha uma visita antes de adicionar fotografias.'); return; }
     if (!file.type.startsWith('image/') || !file.size || file.size > 25*1024*1024) {
       photoFeedback('Escolha uma imagem válida, até 25 MB. A fotografia não foi adicionada.'); return;
     }
     const photo = {
-      localId: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      localId: crypto.randomUUID(),
       visitId: current()?.id,
-      type: selectedPhotoType || "AFTER",
+      type: selection?.type || selectedPhotoType || "AFTER",
       file,
       fileName: file.name,
       previewUrl: URL.createObjectURL(file),
       status: "pending",
       error: "",
     };
-    try { await window.CWFieldPhotos.save(photo.visitId,photo); }
+    try { await window.CWFieldPhotos.save(photo.visitId,photo,fieldWriteSession); }
     catch(error) { URL.revokeObjectURL(photo.previewUrl);photoFeedback('Não foi possível guardar a fotografia neste dispositivo. Liberte espaço e tente novamente; a fotografia não foi adicionada.');return; }
+    if (!sameFieldSession() || photo.visitId !== current()?.id) { URL.revokeObjectURL(photo.previewUrl); return; }
     photoFeedback("Fotografia guardada neste telemóvel. Aguarda confirmação do envio.");
     visitPhotos.unshift(photo);
     saveCurrentDraft();
@@ -3679,7 +3694,7 @@
 
   for(const id of ['photoInput','galleryPhotoInput']){
     const input = $(`#${id}`);
-    input?.addEventListener('change', () => Array.from(input.files || []).forEach(addSelectedPhoto));
+    input?.addEventListener('change', () => { const selection = selectedPhotoContext; selectedPhotoContext = null; Array.from(input.files || []).forEach(file => addSelectedPhoto(file, selection)); });
     input?.addEventListener('cancel', () => photoFeedback('Nenhuma fotografia adicionada. Pode tentar novamente ou escolher uma fotografia guardada.'));
   }
   $('#galleryPhotoBtn')?.addEventListener('click', () => pickPhoto($('#galleryPhotoType').value, true));
@@ -3749,6 +3764,7 @@
   const finishBtn = $("#finishBtn");
   if (finishBtn) {
     finishBtn.onclick = async () => {
+      if (!sameFieldSession()) { toast('A sessão mudou. Reabra a página com a conta original.'); return; }
       const visit = current();
       if (!visit) {
         showAssistMode("tomorrow");
@@ -3764,6 +3780,7 @@
       }
       $("#finishBtn").disabled = true;
       const photosReady = await syncPendingPhotos(false);
+      if (!sameFieldSession() || current()?.id !== visit.id) { finishBtn.disabled = false; return; }
       if (!photosReady && navigator.onLine) {
         $("#finishBtn").disabled = false;
         toast("Ha fotografias pendentes. Sincroniza ou remove antes de concluir.");
@@ -3787,6 +3804,8 @@
         unit: product.unit,
         notes: product.notes,
       }));
+
+      if (!sameFieldSession() || current()?.id !== visit.id) { finishBtn.disabled = false; return; }
 
       const body = {
         cleaned: $("#cleaned").checked,
@@ -3845,7 +3864,10 @@
           return;
         }
 
-        const completeResult = await window.CWFieldOffline.submitCompletion(visit.id, body);
+        // These fields are server-derived or already stored through the photo contract.
+        const { startedAt: ignoredStart, completedAt: ignoredEnd, performedByTechnicianId: ignoredActor, performedByTechnicianName: ignoredName, photos: ignoredPhotos, problemCategory: ignoredCategory, ...completionBody } = body;
+        const completeResult = await window.CWFieldOffline.submitCompletion(visit.id, completionBody, fieldWriteSession);
+        if (!sameFieldSession()) return;
         // Stock is consumed atomically by the completion transaction on the server.
         const stockUpdated = productsUsed.length > 0;
         if (stockUpdated) await loadGuides(false).catch(() => {});
@@ -3869,6 +3891,7 @@
   }
 
   window.addEventListener('cw:visit-synced', event => {
+    if (!sameFieldSession() || event.detail.owner !== fieldWriteSession.owner || event.detail.token !== fieldWriteSession.token) return;
     const position = visits.findIndex(v => String(v.id) === String(event.detail.visitId));
     if (position >= 0) visits[position] = mergeVisitSnapshot(visits[position], event.detail.visit, 'DONE');
     storageWrite(`cwFieldRoute:${currentTechnicianId()}`, {visits, savedAt:new Date().toISOString()});

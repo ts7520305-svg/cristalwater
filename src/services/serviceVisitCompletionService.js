@@ -1,4 +1,5 @@
 const RepairBusiness = require("../business/repair/RepairBusiness");
+const fieldRequests = require('./fieldWriteRequestService');
 class VisitCompletionError extends Error {
   constructor(statusCode, code, message) {
     super(message);
@@ -349,16 +350,25 @@ async function registerAutomaticProductConsumption(tx, visit, body, products) {
   }
 }
 
-async function completeServiceVisit(prisma, visitId, body = {}) {
+async function completeServiceVisit(prisma, visitId, body = {}, actor = null) {
   const id = Number(visitId);
   if (!Number.isInteger(id) || id <= 0) {
     throw new VisitCompletionError(400, "INVALID_VISIT_ID", "ID de visita invalido.");
   }
 
+  let request = null;
+  if (body.requestId !== undefined) {
+    const allowed = ['requestId','visitId','notes','internalNotes','ph','chlorine','alkalinity','salt','temperature','orp','orpMv','products','cleaned','brushed','vacuumed','basketCleaned','waterlineClean','backwashDone','problem','problemNotes','priority','repair','vehicleId','workGuideId','guideWorkId'];
+    if (Object.keys(body).some(key => !allowed.includes(key)) || (body.visitId !== undefined && body.visitId !== id)) fieldRequests.fail('Conserve os campos do pedido original.');
+    const payload = Object.fromEntries(Object.entries(body).filter(([key]) => key !== 'requestId'));
+    request = fieldRequests.context(actor, 'VISIT_COMPLETION', id, body.requestId, payload);
+    body = { ...body, clientRequestId: request.requestId, performedByUserId: actor.principalType === 'USER' || request.owner.startsWith('ADMIN:') ? actor.userId || actor.id : null, ...(!request.owner.startsWith('ADMIN:') ? { performedByTechnicianId: Number(actor.technicianId || actor.id) } : {}) };
+  }
   const validated = validateVisitCompletionPayload(body);
   const completionRequestId = typeof body.clientRequestId === 'string' && /^[a-zA-Z0-9_-]{16,100}$/.test(body.clientRequestId) ? body.clientRequestId : null;
 
   const result = await prisma.$transaction(async (tx) => {
+    if (request) { const saved = await fieldRequests.recover(tx, request); if (saved) return { ...saved, idempotent: true }; }
     await tx.$queryRaw`SELECT id FROM "ServiceVisit" WHERE id = ${id} FOR UPDATE`;
     const currentVisit = await tx.serviceVisit.findUnique({
       where: { id },
@@ -377,6 +387,16 @@ async function completeServiceVisit(prisma, visitId, body = {}) {
 
     if (!currentVisit) {
       throw new VisitCompletionError(404, "VISIT_NOT_FOUND", "Visita nao encontrada.");
+    }
+
+    if (request) {
+      fieldRequests.authorize(actor, currentVisit);
+      if (!request.owner.startsWith('ADMIN:')) {
+        const technician = await tx.technician.findUnique({ where: { id: Number(actor.technicianId || actor.id) }, select: { active: true, vehicleId: true } });
+        const guideId = Number(body.workGuideId || body.guideWorkId || 0);
+        const guide = Number.isSafeInteger(guideId) && guideId > 0 ? await tx.workGuide.findUnique({ where: { id: guideId }, select: { vehicleId: true, status: true } }) : null;
+        if (!technician?.active || (body.vehicleId && Number(body.vehicleId) !== technician.vehicleId) || (guideId && (!guide || guide.vehicleId !== technician.vehicleId || guide.status !== 'OPEN'))) fieldRequests.fail('Guia ou viatura não pertence ao técnico autenticado.', 403, 'FIELD_VISIT_FORBIDDEN');
+      }
     }
 
     if (completionRequestId && currentVisit.completionRequestId === completionRequestId && currentVisit.endAt) {
@@ -602,6 +622,10 @@ async function completeServiceVisit(prisma, visitId, body = {}) {
 
     await recordVisitAudit(tx, visit, body, repair, validated);
 
+    if (request) {
+      const fields = ['id','status','completionRequestId','endAt','technicianId','poolId','clientId','ph','chlorine','alkalinity','salt','temperature','orpMv','products','notes','cleaned','brushed','vacuumed','basketCleaned','waterlineClean','backwashDone'];
+      return fieldRequests.confirm(tx, request, { ok: true, visit: Object.fromEntries(fields.map(key => [key, visit[key]])), repairId: repair?.id || null });
+    }
     return { visit, repair, notifications: { adminNotification, clientNotification } };
   });
   require('./dashboardCacheService').invalidateDashboardCache('VISIT_COMPLETED');

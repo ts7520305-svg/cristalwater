@@ -1,6 +1,6 @@
 # Cristal Water — matriz atual de conclusão
 
-Atualizada após implementação da TASK200 em 16/09/2026. Substitui a fotografia inicial da TASK82 para decidir o próximo trabalho, preservando esse diagnóstico em `COMPLETENESS_20260915.md`. Esta matriz cruza os relatórios posteriores e as rotas atualmente revistas; não constitui auditoria exaustiva de todas as páginas/APIs nem conclusão a 100%.
+Atualizada após implementação das TASK201–202 em 16/09/2026. Substitui a fotografia inicial da TASK82 para decidir o próximo trabalho, preservando esse diagnóstico em `COMPLETENESS_20260915.md`. Esta matriz cruza os relatórios posteriores e as rotas atualmente revistas; não constitui auditoria exaustiva de todas as páginas/APIs nem conclusão a 100%.
 
 ## Implementação e evidência atual
 
@@ -8,7 +8,8 @@ Atualizada após implementação da TASK200 em 16/09/2026. Substitui a fotografi
 |---|---|---|
 | Operação do técnico | Percursos de rota, jornada, checklist, consumos, água/bomba, retornos, notas e confirmação de início implementados/testados | TASK123–124, relatórios de retornos e simulação. Telefone e receção persistente de push em campo pendentes. |
 | Offline, sessão e concorrência | GPS antigo corrigido; filas por identidade, recuperação de resposta perdida, logout e idioma persistente ensaiados | TASK83, 99, 100, 132; `RESILIENCE_20260915.md`. Não demonstra redundância de servidores ou autonomia real do dispositivo. |
-| Confirmação GPS nos emissores antigos | Fila por ponto/conta conservada; confirmação exata, recuperação explícita, duas janelas e troca de conta ensaiadas na página GPS e interface antiga | TASK83 já corrigira o snapshot; TASK200 fecha a aceitação de respostas incompletas e consolida os emissores. `GPS_CONFIRMATION_RECOVERY_20260916.md`. Web Locks necessário; leituras com mais de cinco minutos são reconhecidas como ignoradas pela política existente, sem arquivo histórico novo. CI desta árvore por confirmar. |
+| Confirmação GPS nos emissores antigos | Fila por ponto/conta conservada; confirmação exata, recuperação explícita, duas janelas e troca de conta ensaiadas na página GPS e interface antiga | TASK83 já corrigira o snapshot; TASK200 confirmada no CI `35117291725`, com 102 grupos/17 migrações e restauro de 108 tabelas/22 ficheiros. `GPS_CONFIRMATION_RECOVERY_20260916.md`. Web Locks necessário; leituras com mais de cinco minutos são reconhecidas como ignoradas pela política existente, sem arquivo histórico novo. |
+| Fotografias e conclusões de visita | Dois ecrãs partilham pedido/conta/UUID, comprovativo imutável e recuperação; quota, concorrência, resposta perdida/incompleta e stock único ensaiados | TASK201–202; `FIELD_WRITE_RECOVERY_20260916.md`. 355 unitários, percursos reais e revisões mobile aprovados localmente; confirmar CI com 104 grupos/18 migrações. Histórico sem conta comprovada preservado para revisão; clientes sem UUID mantêm contrato antigo. |
 | Equipamentos e stock | Preventivos, recorrência, execução, lembretes, atribuição, contagem e escrita recuperável implementados/testados | TASK106–122 e relatórios de equipamento/inventário. Inventário físico continua externo. |
 | Lembretes operacionais/alertas | Consultas completas, prioridade crítica, criação/conclusão/eliminação recuperáveis e resolução vinculada ao estado físico | TASK125–135. Confirmação física é um ato do técnico, não uma conclusão automática dos testes. |
 | Orçamentos e contratos | Materiais/MO/margem/IVA, versões, aprovação no portal, conversão e preços por vigência implementados/testados | TASK86–94, 101–102, 148, 153–154; relatórios do portal e ativação. Não usar o antigo diagnóstico “estimativa fixa apenas” como estado atual. |
@@ -30,8 +31,8 @@ Atualizada após implementação da TASK200 em 16/09/2026. Substitui a fotografi
 
 ## Próximo trabalho no código
 
-1. Confirmar o CI/restauro da TASK200, com 102 grupos e 17 migrações. A recuperação/aplicação de propostas das TASK197–199 já foi confirmada no CI. Antes de escolher outra lacuna, confrontar esta matriz e a fotografia TASK82 com os relatórios posteriores e o código; o diagnóstico antigo do snapshot GPS já fora corrigido na TASK83.
-2. Rever individualmente as escritas antigas protegidas na TASK170: ter autenticação não garante atomicidade, versão ou recuperação de reenvio. Priorizar as rotas realmente utilizadas pelos ecrãs.
+1. Confirmar CI/restauro das TASK201–202, com 104 grupos/18 migrações. TASK200 e as propostas anteriores já foram confirmadas. Antes de escolher outra lacuna, cruzar matriz, relatórios e código; não repetir tarefas concluídas a partir da fotografia TASK82.
+2. Rever individualmente as escritas antigas protegidas na TASK170: ter autenticação não garante atomicidade, versão ou recuperação. Próximo defeito verificado: `sendInternalAlert` da página técnica antiga anuncia envio e apaga texto sem API. Rever também o botão de otimização antigo e os rascunhos ainda não submetidos, sem alterar silenciosamente os destinatários.
 3. Concluir inventário visual por perfil de páginas, erros, carregamento, vazio, traduções e PDFs. Os ecrãs já ensaiados não equivalem à revisão de todas as páginas.
 4. Tratar vídeo, custos reais de rentabilidade e IA offline/aprendizagem como requisitos próprios com critérios verificáveis, reutilizando os módulos existentes.
 

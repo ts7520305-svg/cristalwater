@@ -105,7 +105,12 @@ body{
   color:#f8fafc;
 }
 
-header{
+.visit-lock-note{margin-top:6px;font-weight:800;color:#126b45}
+.visit-block-note{margin-top:6px;font-weight:800;color:#775100}
+:root[data-theme="dark"] .visit-lock-note{color:#9affc6}
+:root[data-theme="dark"] .visit-block-note{color:#ffd166}
+
+body > header{
 
   background:#ffffff;
 
@@ -113,7 +118,7 @@ header{
 
   border-bottom:4px solid #1e88e5;
 
-  position:sticky;
+  position:static;
 
   top:0;
 
@@ -537,6 +542,7 @@ textarea{
 
 <script src="/js/push/push-realtime.js"></script>
 
+<script src="/cw-field-write-store.js"></script>
 <script src="/js/offline/offline-queue.js"></script>
 
 <script src="/js/offline/offline-photos.js"></script>

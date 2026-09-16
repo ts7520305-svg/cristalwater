@@ -74,9 +74,10 @@
     result.setAttribute('aria-busy', 'true');
     try {
       if (requestedOwner === 'none') throw new Error('Sem técnico identificado');
-      const [photos, remote] = await Promise.all([
+      const [photos, remote, completions] = await Promise.all([
         window.CWFieldPhotos.pendingSummary(),
         navigator.onLine && token ? serverData(token) : Promise.resolve(null),
+        window.CWFieldOffline.entries(),
       ]);
       if (revision !== requestedRevision) return;
       if (owner() !== requestedOwner || token !== window.CristalAuth?.getToken?.()) { result.textContent = 'Sessão alterada. Repita a revisão com a conta atual.'; return; }
@@ -90,8 +91,7 @@
       if (remote?.[2].rows) pumps = mergeReminders(pumps, remote[2].rows, true);
       const legacyWater = read('cwWaterReminders', true);
       if (legacyWater.some(item => !item.technicianId || String(item.technicianId) === requestedOwner)) throw new Error('Lembretes antigos por reconciliar');
-      const outbox = read(`cwFieldOutbox:${requestedOwner}`);
-      if (Object.entries(outbox).some(([id, item]) => String(item.visitId) !== id || !item.body)) throw new Error('Fila de envios inválida');
+      const outbox = Object.fromEntries(completions.map(row => [row.resourceId, { visitId: row.resourceId, blocked: row.failure?.blocked }]));
       const items = buildReview({ snapshot, water, pumps, outbox, drafts: read(`cwFieldVisitDrafts:${requestedOwner}`), photos, online: navigator.onLine, verificationErrors });
       result.replaceChildren();
       const title = document.createElement('p');
@@ -114,7 +114,7 @@
     } finally { if (revision === requestedRevision) { button.disabled = false; result.setAttribute('aria-busy','false'); } }
   }
   button.addEventListener('click', review);
-  ['online', 'offline', 'storage', 'cw:visit-synced', 'cw:water-state-updated'].forEach(event => window.addEventListener(event, invalidate));
+  ['online', 'offline', 'storage', 'cw:visit-synced', 'cw:water-state-updated', 'cw:field-write-change'].forEach(event => window.addEventListener(event, invalidate));
   document.addEventListener('visibilitychange', invalidate);
   document.addEventListener('input', invalidate);
   window.setInterval(invalidate, 60000);

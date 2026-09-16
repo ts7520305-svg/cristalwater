@@ -2277,6 +2277,20 @@ model WebPushSubscription {
   @@index([role, principalId, active])
 }
 
+// Immutable confirmations for the exact field write, independent of mutable visits.
+model FieldWriteRequest {
+  id Int @id @default(autoincrement())
+  owner String
+  requestId String
+  scope String
+  resourceId Int
+  payloadHash String
+  response Json
+  createdAt DateTime @default(now())
+  @@unique([owner, requestId])
+  @@index([scope, resourceId])
+}
+
 // Private commercial snapshots; client endpoints expose only an explicit selling-price projection.
 model RepairQuote {
   id         Int      @id @default(autoincrement())

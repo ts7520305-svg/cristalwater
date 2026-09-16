@@ -3,6 +3,8 @@ const fs=require('node:fs');
 const path=require('node:path');
 const {chromium}=require('playwright');
 const publicKey=require('web-push').generateVAPIDKeys().publicKey;
+const accountAToken='x.'+Buffer.from(JSON.stringify({id:41,role:'TECHNICIAN'})).toString('base64url')+'.x';
+async function fieldSnapshot(page){return page.evaluate(()=>new Promise((resolve,reject)=>{const request=indexedDB.open('cw-field-writes',1);request.onerror=()=>reject(request.error);request.onsuccess=()=>{const db=request.result,read=db.transaction('requests').objectStore('requests').getAll();read.onsuccess=()=>{db.close();resolve(JSON.stringify(read.result))};read.onerror=()=>reject(read.error)}}));}
 const deadline=setTimeout(()=>{console.error('Push session test timed out');process.exit(1)},40000);
 (async()=>{
  const browser=await chromium.launch({headless:true,...(process.env.CW_CHROMIUM_PATH?{executablePath:process.env.CW_CHROMIUM_PATH}:{}),args:['--no-sandbox','--disable-dev-shm-usage']});
@@ -31,8 +33,8 @@ const deadline=setTimeout(()=>{console.error('Push session test timed out');proc
    window.PushManager=function(){};
    Object.defineProperty(window,'Notification',{configurable:true,value:{requestPermission:()=>holdPermission?new Promise(resolve=>{window.resolvePermission=resolve}):Promise.resolve('granted')}});
   },options);
-  for(const file of ['cw-auth.js','cw-field-offline.js'])await page.addScriptTag({content:fs.readFileSync(path.join(__dirname,'../frontend',file),'utf8')});
-  await page.evaluate(()=>CristalAuth.persistSession('account-A-token',{id:41,technicianId:41,role:'TECHNICIAN'}));
+  for(const file of ['cw-auth.js','cw-field-write-store.js','cw-field-photos.js','cw-field-offline.js'])await page.addScriptTag({content:fs.readFileSync(path.join(__dirname,'../frontend',file),'utf8')});
+  await page.evaluate(token=>CristalAuth.persistSession(token,{id:41,technicianId:41,role:'TECHNICIAN'}),accountAToken);
   return {page,requests,heldReady,get held(){return held;}};
  }
  async function enable(page){await page.addScriptTag({content:fs.readFileSync(path.join(__dirname,'../frontend/cw-browser-push.js'),'utf8')});await page.waitForFunction(()=>!document.querySelector('.water-card button').disabled);await page.locator('.water-card button').click();}
@@ -40,18 +42,18 @@ const deadline=setTimeout(()=>{console.error('Push session test timed out');proc
   {
    const {page,requests}=await setup();
    await page.evaluate(()=>CWFieldOffline.submitCompletion(5,{notes:'Trabalho feito em campo'}).catch(()=>null));
-   const before=await page.evaluate(()=>localStorage.getItem('cwFieldOutbox:41'));assert(before);
+   const before=await fieldSnapshot(page);assert.equal(JSON.parse(before).length,1);assert.equal(JSON.parse(before)[0].payload.notes,'Trabalho feito em campo');
    await page.evaluate(()=>CristalAuth.clearSession());
-   assert.equal(await page.evaluate(()=>CristalAuth.getToken()),'');assert.deepEqual(await page.evaluate(()=>CWPushSession.read()),{known:true,owner:null});assert.equal(await page.evaluate(()=>localStorage.getItem('cwFieldOutbox:41')),before);
+   assert.equal(await page.evaluate(()=>CristalAuth.getToken()),'');assert.deepEqual(await page.evaluate(()=>CWPushSession.read()),{known:true,owner:null});assert.equal(await fieldSnapshot(page),before);
    assert.deepEqual(await page.evaluate(()=>unsubscribed),['https://fcm.googleapis.com/fcm/send/account-A']);assert.deepEqual(await page.evaluate(()=>closedNotices),['A','B']);
-   assert.equal(requests[0].authorization,'Bearer account-A-token');assert.equal(requests[0].method,'DELETE');
+   assert.equal(requests[0].authorization,'Bearer '+accountAToken);assert.equal(requests[0].method,'DELETE');
    await page.close();console.log('PASS logout retires push and visible notices while preserving the actual field outbox');
   }
   {
    const {page,requests}=await setup({delete401:true});
    await page.evaluate(()=>CristalAuth.persistSession('account-B-token',{id:42,technicianId:42,role:'TECHNICIAN'}));
    await page.waitForFunction(()=>closedNotices.includes('A'));
-   assert.equal(requests[0].authorization,'Bearer account-A-token');assert.equal(await page.evaluate(()=>CristalAuth.getToken()),'account-B-token');assert.deepEqual(await page.evaluate(()=>CWPushSession.read()),{known:true,owner:'TECHNICIAN:42'});assert.deepEqual(await page.evaluate(()=>closedNotices),['A']);assert.deepEqual(await page.evaluate(()=>unsubscribed),[]);
+   assert.equal(requests[0].authorization,'Bearer '+accountAToken);assert.equal(await page.evaluate(()=>CristalAuth.getToken()),'account-B-token');assert.deepEqual(await page.evaluate(()=>CWPushSession.read()),{known:true,owner:'TECHNICIAN:42'});assert.deepEqual(await page.evaluate(()=>closedNotices),['A']);assert.deepEqual(await page.evaluate(()=>unsubscribed),[]);
    assert.equal(await page.locator('#cwSessionExpired').count(),0);await page.close();console.log('PASS account switch retires only the previous account and ignores its late 401');
   }
   {
@@ -67,7 +69,7 @@ const deadline=setTimeout(()=>{console.error('Push session test timed out');proc
    await page.evaluate(()=>{CristalAuth.persistSession('account-B-token',{id:42,technicianId:42,role:'TECHNICIAN'});currentSubscription=makeSubscription('https://fcm.googleapis.com/fcm/send/account-B');});
    await state.held.fulfill({json:{ok:true}});
    await page.waitForFunction(()=>document.querySelector('.water-card [role=status]').textContent.includes('sessão mudou'));
-   assert(requests.some(r=>r.method==='DELETE'&&r.authorization==='Bearer account-A-token'&&r.body.endpoint.endsWith('/account-A')));assert.equal(requests.filter(r=>r.method==='POST').length,1);assert.deepEqual(await page.evaluate(()=>unsubscribed),[]);assert.equal(await page.evaluate(()=>CristalAuth.getToken()),'account-B-token');
+   assert(requests.some(r=>r.method==='DELETE'&&r.authorization==='Bearer '+accountAToken&&r.body.endpoint.endsWith('/account-A')));assert.equal(requests.filter(r=>r.method==='POST').length,1);assert.deepEqual(await page.evaluate(()=>unsubscribed),[]);assert.equal(await page.evaluate(()=>CristalAuth.getToken()),'account-B-token');
    await page.close();console.log('PASS late activation is retired with its original credential without disabling the new subscription');
   }
   {

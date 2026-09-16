@@ -92,6 +92,8 @@ async function loadScopedVisit(req, visitId) {
 }
 
 router.param('id', async (req,res,next,value)=>{
+  // The guarded upload checks assignment under the visit lock; prior own receipts remain recoverable.
+  if (req.method === 'POST' && req.path.endsWith('/photo') && req.headers['x-cw-field-request']) return next();
   try {const scoped=await loadScopedVisit(req,value);if(!scoped.ok)return res.status(scoped.status).json({ok:false,error:scoped.error});next();}
   catch(error){next(error)}
 });
@@ -630,6 +632,10 @@ router.post(
 
     try {
 
+      if (req.body.requestId !== undefined || req.headers['x-cw-field-request']) {
+        if (req.headers['x-cw-field-request'] !== req.body.requestId) return res.status(400).json({ ok: false, error: 'Conserve o pedido original.' });
+        return res.json(await require('../services/fieldPhotoRequestService').record(req.user, req.params.id, req.file, req.body));
+      }
       const result = await TechnicianVisitBusiness.recordVisitPhoto(req.params.id, req.file, req.body.type || "AFTER");
 
       if (!result.ok) {
@@ -647,10 +653,9 @@ router.post(
 
       console.error(err);
 
-      return res.json({
-
-        ok: false
-      });
+      return res.status(err.statusCode || 503).json({ ok: false, code: err.code || 'FIELD_PHOTO_UNCONFIRMED', error: err.statusCode ? err.message : 'Fotografia por confirmar. Repita o pedido original.' });
+    } finally {
+      if (req.body.requestId !== undefined || req.headers['x-cw-field-request']) await require('../services/fieldPhotoRequestService').cleanTemporary(req.file).catch(() => {});
     }
   }
 );
