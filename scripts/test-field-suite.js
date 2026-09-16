@@ -81,6 +81,7 @@ scripts.push('test-field-internal-alert-ui.js');
 scripts.push('test-field-route-preview.js');
 scripts.push('test-field-route-preview-ui.js');
 scripts.push('test-field-legacy-route-recovery.js');
+scripts.push('test-field-legacy-visit-drafts.js');
 function run(script){return new Promise(resolve=>{
  const output=fs.createWriteStream(path.join(evidence,script+'.log'));
  const child=spawn(process.execPath,[path.join(__dirname,script)],{cwd:root,env:process.env,stdio:['ignore','pipe','pipe']});

@@ -389,7 +389,6 @@ function updateConnectionStatus(){
 let offlineBarRevision = 0, legacyEntryGeneration = 0;
 const legacyWriteSession = window.CWFieldWriteStore.session();
 const legacyCompletionBusy = new Set();
-const legacyFormDrafts = new Map();
 function protectLegacyRouteSession() {
   if (!window.CWFieldWriteStore.same(legacyWriteSession)) { ++routeLoadRevision; visits = []; document.getElementById('list')?.replaceChildren(); showRouteStatus('A sessão mudou. Reabra a página para consultar a rota da conta atual.'); }
   else if (routeVisibleDay && routeVisibleDay !== todayRouteKey()) { visits = []; document.getElementById('list')?.replaceChildren(); routeVisibleDay = null; loadRoute(); }
@@ -592,8 +591,6 @@ function renderVisits() {
 
   if (!list) return;
 
-  // A late route/photo refresh must not erase fields being entered in this page.
-  for (const input of list.querySelectorAll('input[id],textarea[id]')) if (/^(notes|ph|chlorine|alkalinity|salt|products)-[1-9][0-9]*$/.test(input.id)) legacyFormDrafts.set(input.id, input.value);
   list.innerHTML = "";
 
   if (!visits.length) {
@@ -787,7 +784,7 @@ function renderVisits() {
     `;
 
     list.appendChild(div);
-    for (const input of div.querySelectorAll('input[id],textarea[id]')) if (legacyFormDrafts.has(input.id)) input.value = legacyFormDrafts.get(input.id);
+    window.CWLegacyVisitDrafts.bind(div, v);
   });
 
   bindVisitButtons();
@@ -865,8 +862,7 @@ async function completeVisit(id) {
   try {
     const visit = visits.find(item => String(item.id) === String(id)), lockedId = activeVisitId();
     if (lockedId && String(lockedId) !== String(id) && visit && !isVisitCompleted(visit)) throw Error('Há uma visita em curso. Conclua essa visita antes de avançar.');
-    const body = { visitId: Number(id) };
-    for (const field of ['notes','ph','chlorine','alkalinity','salt','products']) body[field] = document.getElementById(field + '-' + id).value;
+    const body = { visitId: Number(id), ...await window.CWLegacyVisitDrafts.beforeComplete(id) };
     const record = await addOfflineAction({ url: '/api/core/visits/' + id + '/complete', method: 'POST', body }, captured);
     if (!window.CWFieldWriteStore.same(captured) || generation !== legacyEntryGeneration) return;
     markLocalVisitCompleted(id, { pendingSync: true }); renderVisits(); await updateOfflineBar();
