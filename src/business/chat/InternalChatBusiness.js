@@ -67,6 +67,18 @@ function present(row) {
     technicianId: row.technicianId, text: row.text, requestId: row.requestId, created_at: row.createdAt.toISOString(), source: 'DATABASE', identityVerified: true };
 }
 
+async function presentWithNames(tx, rows) {
+  const verified = rows.filter(row => row.legacyPayload === null);
+  const userIds = [...new Set(verified.filter(row => row.actorType === 'USER').map(row => row.actorId))];
+  const technicianIds = [...new Set(verified.filter(row => row.actorType === 'TECHNICIAN').map(row => row.actorId))];
+  const [users, technicians] = await Promise.all([
+    userIds.length ? tx.user.findMany({ where: { id: { in: userIds } }, select: { id: true, name: true } }) : [],
+    technicianIds.length ? tx.technician.findMany({ where: { id: { in: technicianIds } }, select: { id: true, name: true } }) : [],
+  ]);
+  const names = new Map([...users.map(row => [`USER:${row.id}`, row.name]), ...technicians.map(row => [`TECHNICIAN:${row.id}`, row.name])]);
+  return rows.map(row => row.legacyPayload !== null ? present(row) : { ...present(row), actorName: names.get(`${row.actorType}:${row.actorId}`) || null });
+}
+
 async function execute(user, body, writing) {
   const identity = actor(user), input = writing ? request(body) : null, source = await snapshot();
   return prisma.$transaction(async tx => {
@@ -74,15 +86,15 @@ async function execute(user, body, writing) {
     // Unique database keys also protect both receipts and historical identities.
     await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext('internal-staff-chat:v1'))::text`;
     await importSnapshot(tx, source);
-    if (!writing) return (await tx.internalChatMessage.findMany({ orderBy: { id: 'asc' } })).map(present);
+    if (!writing) return presentWithNames(tx, await tx.internalChatMessage.findMany({ orderBy: { id: 'asc' } }));
     const where = { actorKey_requestId: { actorKey: identity.actorKey, requestId: input.requestId } };
     const previous = await tx.internalChatMessage.findUnique({ where });
     if (previous) {
       if (previous.text !== input.text) fail(409, 'Este pedido já foi usado para outra mensagem. Conserve o texto original ao repetir.');
-      return { message: present(previous), replayed: true };
+      return { message: (await presentWithNames(tx, [previous]))[0], replayed: true };
     }
     const message = await tx.internalChatMessage.create({ data: { ...identity, ...input } });
-    return { message: present(message), replayed: false };
+    return { message: (await presentWithNames(tx, [message]))[0], replayed: false };
   }, { maxWait: 15000, timeout: 20000 });
 }
 

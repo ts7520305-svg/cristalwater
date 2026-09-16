@@ -55,6 +55,8 @@ scripts.push('test-field-manual-invoice-reminder.js');
 scripts.push('test-field-client-chat-privacy.js');
 scripts.push('test-field-chat-attachments.js');
 scripts.push('test-field-internal-chat-durability.js');
+scripts.push('test-field-internal-chat-ui.js');
+scripts.push('test-field-notification-confirmation.js');
 function run(script){return new Promise(resolve=>{
  const output=fs.createWriteStream(path.join(evidence,script+'.log'));
  const child=spawn(process.execPath,[path.join(__dirname,script)],{cwd:root,env:process.env,stdio:['ignore','pipe','pipe']});

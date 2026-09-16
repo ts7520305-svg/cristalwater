@@ -1,44 +1,48 @@
 <!doctype html>
 <html lang="pt">
 <head>
-  <link rel="manifest" href="/manifest.webmanifest">
-  <meta name="theme-color" content="#0f1723">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>Cristal Water - Chat Tecnico</title>
-  <link rel="stylesheet" href="/ui/foundation.css">
-  <link rel="stylesheet" href="/cw-ui-kit.css">
-  <script src="/cw-auth.js"></script>
-  <script src="/technician-auth-guard.js"></script>
-  <style>
-    body { margin: 0; font-family: "Segoe UI", "Noto Sans", sans-serif; color: #102620; background: linear-gradient(180deg, #f7fbf9, #edf4f2); }
-    .shell { width: min(960px, 100%); margin: 0 auto; padding: 12px 12px calc(120px + env(safe-area-inset-bottom)); }
-    .card { background: #fff; border: 1px solid #c9d8d2; border-radius: 14px; padding: 14px; margin-bottom: 10px; box-shadow: 0 10px 28px rgba(16, 38, 32, 0.08); }
-    .title { margin: 6px 0; font-size: clamp(26px, 5vw, 38px); line-height: 1.05; font-weight: 900; }
-    .muted { color: #577067; margin: 0; }
-    .status { border-radius: 12px; border: 1px solid #c9d8d2; background: #f4faf7; padding: 10px; font-weight: 700; margin-bottom: 10px; }
-    .status[data-tone="error"] { border-color: #efbbc5; background: #fdecef; color: #6f1223; }
-    .message { border: 1px solid #c9d8d2; border-radius: 12px; padding: 10px; margin-top: 8px; background: #fff; }
-    .message small { display: block; color: #577067; font-size: 12px; margin-top: 3px; }
-    .empty { color: #577067; border: 1px dashed #c9d8d2; border-radius: 12px; padding: 14px; text-align: center; }
-  </style>
+  <meta name="theme-color" content="#0c625b">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <title>Equipa · Cristal Water</title>
   <link rel="stylesheet" href="/ui/design-system.css">
+  <link rel="stylesheet" href="/technician-chat.css">
+  <script src="/cw-auth.js"></script>
 </head>
-<body data-required-role="TECHNICIAN">
-  <main class="shell">
-    <section class="card">
-      <p class="muted">Tecnico</p>
-      <h1 class="title">Canal de Mensagens</h1>
-      <p class="muted">Leitura segura para alinhamento de trabalho; sem escrita nesta fase.</p>
-    </section>
-
-    <p id="statusBox" class="status" aria-live="polite">A carregar mensagens.</p>
-
-    <section class="card">
-      <div id="messageList"></div>
-    </section>
+<body>
+  <p id="sessionStatus" class="session-status" role="alert" hidden></p>
+  <main id="staffChat" class="chat-shell" data-cw-no-i18n hidden>
+    <div class="chat-toolbar cw-global-actions"></div>
+    <header class="chat-header">
+      <div><a id="backLink" class="back-link" href="/technician-field-mode" data-chat-label="back">Voltar à operação</a><p class="eyebrow">CRISTAL WATER</p><h1 data-chat-label="title">Conversa da equipa</h1><p class="muted" data-chat-label="audience">Visível aos técnicos, chefes de equipa e administração.</p></div>
+      <button id="refreshChat" class="secondary" type="button" data-chat-label="refresh">Atualizar</button>
+    </header>
+    <div class="chat-layout">
+      <section class="chat-card conversation" aria-labelledby="conversationTitle">
+        <div class="section-heading"><h2 id="conversationTitle" data-chat-label="conversation">Mensagens</h2><span id="connectionStatus" class="connection"></span></div>
+        <p id="chatReadStatus" class="feedback" role="status"></p>
+        <div id="messageList" class="message-list" aria-labelledby="conversationTitle" tabindex="0"></div>
+        <form id="chatForm" class="composer">
+          <section id="chatPending" class="pending" hidden>
+            <strong data-chat-label="pending">Mensagem por confirmar</strong>
+            <p id="chatPendingText" class="message-text"></p>
+            <p class="muted" data-chat-label="retryHelp">Use o mesmo envio para confirmar sem duplicar a mensagem.</p>
+            <button id="chatRetry" class="primary" type="button" data-chat-label="retry">Confirmar envio guardado</button>
+          </section>
+          <p id="chatWriteStatus" class="feedback" role="status"></p>
+          <label for="chatText" data-chat-label="newMessage">Nova mensagem</label>
+          <textarea id="chatText" rows="3" maxlength="4000" aria-describedby="draftStatus" required></textarea>
+          <div class="composer-actions"><span id="draftStatus" class="muted"></span><button id="chatSend" class="primary" type="submit" data-chat-label="send">Enviar mensagem</button></div>
+        </form>
+      </section>
+      <aside class="chat-card notices" aria-labelledby="noticesTitle">
+        <details id="noticeDetails"><summary id="noticesTitle"><span data-chat-label="notices">Notificações</span> <span id="noticeBadge"></span></summary><p class="muted" data-chat-label="noticesHelp">Consulte os avisos. A resolução dos alertas continua na operação.</p><p id="noticeStatus" class="feedback" role="status"></p><div id="noticeList" class="notice-list"></div><a id="operationLink" class="back-link" href="/technician-field-mode" data-chat-label="operation">Abrir operação</a></details>
+      </aside>
+    </div>
   </main>
+  <script src="/cw-i18n.js"></script>
+  <script src="/staff-chat-i18n.js"></script>
   <script src="/technician-chat.js"></script>
-  <script defer src="/ui/design-system.js"></script>
 </body>
 </html>

@@ -1,12 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const { prisma } = require("../prismaClient");
-const {canSeeFinancialNotification}=require('../services/notificationScopeService');
+const { Prisma } = require("@prisma/client");
+const {canSeeFinancialNotification,recipientUserId}=require('../services/notificationScopeService');
 const {currentNotificationScope}=require('../services/currentNotificationScope');
 const auth = require("../middlewares/authMiddleware");
 const { roleMatches, normalizeRole } = require("../utils/roles");
 
 router.use(auth());
+router.use((req, res, next) => { res.set("Cache-Control", "private, no-store"); next(); });
 
 function roleOf(req) {
   return String(req.user?.role || "").trim().toUpperCase();
@@ -27,7 +29,7 @@ function userCanSeeNotification(req, notification = {}) {
     if (!canSeeFinancialNotification(notification)) return false;
     if (!['TECHNICIAN','TEAM_LEADER'].includes(normalizeRole(notification.role))) return false;
     if (notification.metadata?.technicianId && Number(notification.metadata.technicianId) !== Number(req.user?.technicianId || req.user?.id)) return false;
-    if (notification.userId && Number(notification.userId) !== Number(req.user?.id || 0)) return false;
+    if (notification.userId && Number(notification.userId) !== recipientUserId(req.user)) return false;
     return true;
   }
 
@@ -58,26 +60,25 @@ router.get("/", async (req, res) => {
       prisma.notification.findMany({
         where: await currentNotificationScope(req.user),
         include: {
-          client: true,
-          user: true
+          client: { select: { name: true } },
+          user: { select: { name: true } }
         },
         orderBy: {
           createdAt: "desc"
-        },
-        take: 50
+        }
       }),
       isAdmin ? prisma.clientMessage.groupBy({
         by: ["clientId"],
         where: adminUnreadMessageWhere(),
         _count: { _all: true },
         _max: { createdAt: true },
-      }).catch(() => []) : Promise.resolve([]),
+      }) : Promise.resolve([]),
       isAdmin ? prisma.clientMessage.findMany({
         where: adminUnreadMessageWhere(),
-        include: { client: true },
-        orderBy: { createdAt: "desc" },
-        take: 100,
-      }).catch(() => []) : Promise.resolve([]),
+        include: { client: { select: { name: true } } },
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        distinct: ["clientId"],
+      }) : Promise.resolve([]),
     ]);
 
     const latestByClient = new Map();
@@ -130,7 +131,7 @@ router.get("/", async (req, res) => {
       notifications: [
         ...(isAdmin ? chatNotifications : []),
         ...scopedNotifications
-      ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 80)
+      ].sort((a, b) => notificationPriority(a) - notificationPriority(b) || Number(a.isRead) - Number(b.isRead) || new Date(b.createdAt) - new Date(a.createdAt))
     });
 
   } catch (err) {
@@ -157,7 +158,7 @@ router.get("/unread-count", async (req, res) => {
     const messageCount = isAdmin
       ? await prisma.clientMessage.count({
         where: adminUnreadMessageWhere()
-      }).catch(() => 0)
+      })
       : 0;
 
     return res.json({
@@ -178,76 +179,50 @@ router.get("/unread-count", async (req, res) => {
 // MARCAR UMA COMO LIDA
 // ==========================================================
 
-router.post("/read/:id", async (req, res) => {
+function notificationPriority(row) {
+  if (['WATER_OPEN_CREATED', 'WATER_OPEN_OVERDUE', 'PUMP_MANUAL_CREATED', 'PUMP_MANUAL_OVERDUE'].includes(row.eventType)) return 0;
+  return ['CRITICAL', 'ERROR'].includes(String(row.severity).toUpperCase()) ? 0 : 1;
+}
+function readError(statusCode, message) { throw Object.assign(new Error(message), { statusCode }); }
+function validId(id) { return Number.isSafeInteger(id) && id > 0 && id <= 2147483647; }
+async function markRead(req, res) {
   try {
-
-    const id = Number(req.params.id);
-
-    if (!id) {
-      return res.status(400).json({
-        ok: false,
-        error: "ID inválido"
-      });
+    const single = req.params.id !== undefined;
+    let ids;
+    if (single) {
+      if (!/^[1-9]\d*$/.test(req.params.id) || !validId(Number(req.params.id))) readError(400, 'ID inválido');
+      ids = [Number(req.params.id)];
+    } else if (req.body?.ids !== undefined) {
+      ids = req.body.ids;
+      if (!Array.isArray(ids) || ids.length > 20000 || ids.some(id => !validId(id)) || new Set(ids).size !== ids.length) readError(400, 'Lista de notificações inválida');
     }
-
-    const notification = await prisma.notification.findUnique({ where: { id } });
-    if (!notification) {
-      return res.status(404).json({ ok: false, error: "Notificação não encontrada" });
-    }
-    if (!userCanSeeNotification(req, notification)) {
-      return res.status(403).json({ ok: false, error: "Sem permissão" });
-    }
-
-    const changed=await prisma.notification.updateMany({where:{...(await currentNotificationScope(req.user)),id},data:{isRead:true,readAt:new Date()}});
-    if(!changed.count)return res.status(403).json({ok:false,error:'Notificação indisponível nesta sessão'});
-
-    return res.json({ ok: true });
-
+    const scope = await currentNotificationScope(req.user);
+    const receipt = await prisma.$transaction(async tx => {
+      if (single) {
+        const row = await tx.notification.findUnique({ where: { id: ids[0] } });
+        if (!row) readError(404, 'Notificação não encontrada');
+        if (!userCanSeeNotification(req, row)) readError(403, 'Sem permissão');
+      }
+      const selected = (await tx.notification.findMany({ where: { AND: [scope, ...(ids === undefined ? [] : [{ id: { in: ids } }])] }, orderBy: { id: 'asc' } })).filter(row => userCanSeeNotification(req, row));
+      if (ids !== undefined && selected.length !== ids.length) readError(403, 'Notificação indisponível nesta sessão');
+      const selectedIds = selected.map(row => row.id);
+      if (selectedIds.length) {
+        await tx.$queryRaw`SELECT id FROM "Notification" WHERE id IN (${Prisma.join(selectedIds)}) ORDER BY id FOR UPDATE`;
+        const current = await tx.notification.count({ where: { AND: [scope, { id: { in: selectedIds } }] } });
+        if (current !== selectedIds.length) readError(409, 'As notificações mudaram. Atualize a lista.');
+        // A retry never replaces the first read time. Reading does not resolve
+        // water, pump or other operational state. New arrivals are not in this set.
+        await tx.notification.updateMany({ where: { id: { in: selectedIds }, isRead: false }, data: { isRead: true, readAt: new Date() } });
+      }
+      return { scope: 'NOTIFICATION_READ', ids: selectedIds, isRead: true };
+    }, { maxWait: 10000, timeout: 15000 });
+    return res.json({ ok: true, receipt });
   } catch (err) {
-    console.error("Erro marcar notificação:", err);
-    return res.status(500).json({
-      ok: false,
-      error: "Erro ao marcar como lida"
-    });
+    return res.status(err.statusCode || 500).json({ ok: false, error: err.statusCode ? err.message : 'A leitura não foi confirmada. Tente novamente.' });
   }
-});
-
-// Alias compatível com frontend: POST /api/notifications/:id/read
-router.post("/:id/read", async (req, res) => {
-  req.params.id = req.params.id;
-  try {
-    const id = Number(req.params.id);
-    if (!id) return res.status(400).json({ ok: false, error: "ID inválido" });
-    const notification = await prisma.notification.findUnique({ where: { id } });
-    if (!notification) return res.status(404).json({ ok: false, error: "Notificação não encontrada" });
-    if (!userCanSeeNotification(req, notification)) return res.status(403).json({ ok: false, error: "Sem permissão" });
-    const changed=await prisma.notification.updateMany({where:{...(await currentNotificationScope(req.user)),id},data:{isRead:true,readAt:new Date()}});
-    if(!changed.count)return res.status(403).json({ok:false,error:'Notificação indisponível nesta sessão'});
-    return res.json({ ok: true });
-  } catch (err) {
-    console.error("Erro marcar notificação:", err);
-    return res.status(500).json({ ok: false, error: "Erro ao marcar como lida" });
-  }
-});
-
-// ==========================================================
-// MARCAR TODAS COMO LIDAS
-// ==========================================================
-
-router.post("/read-all", async (req, res) => {
-  try {
-
-    await prisma.notification.updateMany({where:{...(await currentNotificationScope(req.user)),isRead:false},data:{isRead:true,readAt:new Date()}});
-
-    return res.json({ ok: true });
-
-  } catch (err) {
-    console.error("Erro marcar todas:", err);
-    return res.status(500).json({
-      ok: false,
-      error: "Erro ao marcar todas"
-    });
-  }
-});
+}
+router.post('/read/:id', markRead);
+router.post('/:id/read', markRead);
+router.post('/read-all', markRead);
 
 module.exports = router;

@@ -33,7 +33,8 @@
     '/admin-collection': { area: 'Faturacao e financeiro', title: 'Contas correntes' },
     '/admin-email-logs': { area: 'Comunicacao', title: 'Logs de email' },
     '/communications': { area: 'Comunicacao', title: 'Comunicacoes' },
-    '/chat': { area: 'Comunicacao', title: 'Chat interno' },
+    '/chat': { area: 'Comunicacao', title: 'Conversas com clientes' },
+    '/technician-chat': { area: 'Comunicacao', title: 'Conversa da equipa' },
     '/admin-reports': { area: 'Relatorios e estatisticas', title: 'Relatorios' },
     '/report-center': { area: 'Relatorios e estatisticas', title: 'Centro de relatorios' },
     '/settings': { area: 'Configuracoes', title: 'Configuracoes' },
@@ -124,8 +125,9 @@
           ['/admin-vehicles', 'Frota']
         ]},
         { label: '11. Comunicacao', links: [
-          ['/chat', 'Chat interno'],
-          ['/communications', 'Chat com clientes'],
+          ['/technician-chat', 'Conversa da equipa'],
+          ['/chat', 'Conversas com clientes'],
+          ['/communications', 'Historico de comunicacoes'],
           ['/admin-notifications', 'Notificacoes'],
           ['/config-notifications', 'Modelos e regras'],
           ['/admin-email-logs', 'Historico email']
@@ -177,7 +179,8 @@
         ]},
         { label: 'Conta', links: [
           ['/technician', 'Historico recente'],
-          ['/notifications', 'Notificacoes'],
+          ['/technician-chat', 'Conversa da equipa'],
+          ['/technician-chat#noticesTitle', 'Notificacoes'],
           ['/technician-login', 'Perfil e sessao']
         ]}
       ],

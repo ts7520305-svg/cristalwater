@@ -156,26 +156,13 @@ if (socket){
 // ==========================================================
 
 async function loadNotifications(){
-
-  const countBox = document.getElementById("count");
-
+  const read = CWNotificationRead.begin(); if (!read) return false;
   try {
-
-    const res = await fetch(`${API}/notifications`, { headers: authHeaders() });
-    const data = await res.json();
-
-    if (!data.ok) {
-      countBox.textContent = "Erro";
-      return;
-    }
-
-    notifications = data.notifications || [];
-
-    render();
-
-  } catch (err){
-    console.log(err);
-  }
+    const res = await fetch(`${API}/notifications`, { headers: CWNotificationRead.headers(), cache: 'no-store' });
+    const data = await res.json(); if (!CWNotificationRead.accepts(read)) return false;
+    if (!res.ok || !CWNotificationRead.validList(data)) throw Error();
+    notifications = data.notifications; render(); CWNotificationRead.controls(); return true;
+  } catch { if (CWNotificationRead.accepts(read)) CWNotificationRead.status('Não foi possível atualizar as notificações. A última lista foi conservada.', true); return false; }
 }
 
 // ==========================================================
@@ -217,7 +204,7 @@ function render(){
       </div>
 
       <div class="actions">
-        ${!n.isRead ? `<button onclick="markRead(${n.id})">✔ Lido</button>` : ""}
+        ${!n.isRead ? `<button onclick="markRead('${n.id}', ${Number(n.clientId) || 'null'})">✔ Lido</button>` : ""}
       </div>
     `;
 
@@ -229,33 +216,11 @@ function render(){
 // READ
 // ==========================================================
 
-async function markRead(id){
-
-  await fetch(`${API}/notifications/read/${id}`, {
-    method:"POST",
-    headers: authHeaders()
-  });
-
-  notifications = notifications.map(n =>
-    n.id === id ? { ...n, isRead:true } : n
-  );
-
-  render();
+async function markRead(id, clientId){
+  if (await CWNotificationRead.one(id, clientId)) await loadNotifications();
 }
-
 async function markAllRead(){
-
-  await fetch(`${API}/notifications/read-all`, {
-    method:"POST",
-    headers: authHeaders()
-  });
-
-  notifications = notifications.map(n => ({
-    ...n,
-    isRead:true
-  }));
-
-  render();
+  if (await CWNotificationRead.all(notifications)) await loadNotifications();
 }
 
 // ==========================================================
@@ -263,6 +228,7 @@ async function markAllRead(){
 // ==========================================================
 
 function getIcon(type){
+  type = String(type || "");
   if(type.includes("ARRIVAL")) return "📍";
   if(type.includes("CHAT")) return "💬";
   if(type.includes("PAYMENT")) return "💶";

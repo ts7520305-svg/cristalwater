@@ -1,6 +1,8 @@
 const API =
   "/api";
 
+let notificationRows = [];
+
 function authHeaders(extra = {}) {
   const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
   return {
@@ -33,6 +35,7 @@ window.onload =
 // ======================================================
 
 async function loadNotifications() {
+  const read = CWNotificationRead.begin(); if (!read) return false;
 
   const countBox =
     document.getElementById("count");
@@ -49,12 +52,12 @@ async function loadNotifications() {
 
       fetch(
         `${API}/notifications/unread-count`,
-        { headers: authHeaders() }
+        { headers: CWNotificationRead.headers(), cache: "no-store" }
       ),
 
       fetch(
         `${API}/notifications`,
-        { headers: authHeaders() }
+        { headers: CWNotificationRead.headers(), cache: "no-store" }
       )
     ]);
 
@@ -63,6 +66,10 @@ async function loadNotifications() {
 
     const listData =
       await listRes.json();
+
+    if (!CWNotificationRead.accepts(read)) return false;
+    if (!countRes.ok || !listRes.ok || countData?.ok !== true || !Number.isSafeInteger(countData.count) || countData.count < 0 || !CWNotificationRead.validList(listData)) throw Error();
+    notificationRows = listData.notifications;
 
     countBox.innerHTML = `
 
@@ -176,18 +183,10 @@ async function loadNotifications() {
 
       listBox.appendChild(div);
     });
+    CWNotificationRead.controls();
 
   } catch (err) {
-
-    console.error(err);
-
-    listBox.innerHTML = `
-
-      <div class="empty">
-        Erro ao carregar notificações.
-      </div>
-
-    `;
+    if (CWNotificationRead.accepts(read)) CWNotificationRead.status('Não foi possível atualizar as notificações. A última lista foi conservada.', true);
   }
 }
 
@@ -196,46 +195,10 @@ async function loadNotifications() {
 // ======================================================
 
 async function markRead(id, clientId = null) {
-
-  if (String(id || "").startsWith("chat-") && clientId) {
-    await fetch(
-      `${API}/client-messages/seen/${clientId}`,
-      {
-        method: "POST",
-        headers: authHeaders()
-      }
-    );
-
-    loadNotifications();
-    return;
-  }
-
-  await fetch(
-    `${API}/notifications/read/${id}`,
-    {
-      method: "POST",
-      headers: authHeaders()
-    }
-  );
-
-  loadNotifications();
+  if (await CWNotificationRead.one(id, clientId)) await loadNotifications();
 }
-
-// ======================================================
-// MARK ALL
-// ======================================================
-
 async function markAllRead() {
-
-  await fetch(
-    `${API}/notifications/read-all`,
-    {
-      method: "POST",
-      headers: authHeaders()
-    }
-  );
-
-  loadNotifications();
+  if (await CWNotificationRead.all(notificationRows)) await loadNotifications();
 }
 
 // ======================================================
@@ -248,6 +211,7 @@ async function openTarget(
   type
 ) {
 
+  if (!CWNotificationRead.active()) return;
   const t =
     String(type || "")
       .toUpperCase();
@@ -264,20 +228,8 @@ async function openTarget(
     return;
   }
 
-  try {
-
-    await fetch(
-      `${API}/notifications/read/${notificationId}`,
-      {
-        method: "POST",
-        headers: authHeaders()
-      }
-    );
-
-  } catch (err) {
-
-    console.error(err);
-  }
+  await CWNotificationRead.one(notificationId, clientId);
+  if (!CWNotificationRead.active()) return;
 
   // ==================================================
   // BILLING

@@ -4,6 +4,7 @@
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#050b16">
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Cristal Water - Notificações</title>
 
   <!-- 🔐 PROTEÇÃO: exige login do cliente -->
@@ -135,6 +136,8 @@
     Recomendamos que consulte esta secção regularmente.
   </div>
 
+  <p id="notificationActionStatus" role="status"></p>
+  <div class="table-wrap" style="max-width:100%;overflow-x:auto">
   <table>
     <thead>
       <tr>
@@ -147,6 +150,7 @@
     </thead>
     <tbody id="rows"></tbody>
   </table>
+  </div>
 
 </main>
 
@@ -154,6 +158,7 @@
   © Cristal Water · Swimming Pools
 </footer>
 
+<script src="/cw-notification-read.js"></script>
 <script src="/client-notifications.js"></script>
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
