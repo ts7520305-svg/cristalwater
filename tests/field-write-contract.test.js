@@ -8,6 +8,12 @@ function browser(actor = { id: 3, role: 'TECHNICIAN' }) {
   return { store: window.CWFieldWriteStore, change: value => { token = value; } };
 }
 describe('Exact field write contract', () => {
+  it.each(['id','technicianId','visitId','message','priority','recipientRole'])('rejects a mismatching ADMIN alert confirmation: %s', field => {
+    const payload = { message: 'Texto original', visitId: 8, priority: 'HIGH' };
+    const record = { ...requests.context({ id: 3, role: 'TECHNICIAN' }, 'TECHNICIAN_ALERT', 3, randomUUID(), payload), payload };
+    const response = { ok: true, alert: { id: 9, technicianId: 3, ...payload, recipientRole: 'ADMIN', createdAt: new Date().toISOString() }, receipt: { owner: record.owner, requestId: record.requestId, scope: record.scope, resourceId: record.resourceId, payloadHash: record.payloadHash, confirmedAt: new Date().toISOString() } };
+    expect(browser().store.confirmation(response, record)).toBe(response); response.alert[field] = 'wrong'; expect(() => browser().store.confirmation(response, record)).toThrow();
+  });
   it.each([{ id: 3, role: 'TECHNICIAN' }, { id: 3, role: 'TEAM_LEADER' }, { id: 9, userId: 9, technicianId: 3, principalType: 'USER', role: 'TECHNICIAN' }])('uses the same typed owner in API and browser: %s', actor => {
     const client = browser(actor); expect(client.store.session().owner).toBe(requests.owner(actor));
     const captured = client.store.session(); client.change('invalid'); expect(client.store.same(captured)).toBe(false);

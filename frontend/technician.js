@@ -439,20 +439,21 @@ async function updateOfflineBar(syncText) {
   const results = await Promise.allSettled([
     typeof getOfflineQueue === 'function' ? getOfflineQueue() : [],
     typeof getOfflinePhotos === 'function' ? getOfflinePhotos() : [],
-    Promise.resolve().then(() => typeof getOfflineGps === 'function' ? getOfflineGps() : [])
+    Promise.resolve().then(() => typeof getOfflineGps === 'function' ? getOfflineGps() : []),
+    window.CWFieldWriteStore.records('TECHNICIAN_ALERT')
   ]);
   if (revision !== offlineBarRevision || credential !== window.CristalAuth?.getToken?.()) return;
   const errors = results.map((result, index) => result.status === 'rejected' ? (index === 2 ? 'GPS por rever; os registos foram preservados.' : result.reason.message) : '').filter(Boolean);
   const rows = results.map(result => result.status === 'fulfilled' ? result.value : []);
   const network = document.getElementById('offlineNetwork'), visitsEl = document.getElementById('offlineVisits'), photosEl = document.getElementById('offlinePhotos');
-  if (network) network.textContent = errors[0] || syncText || (navigator.onLine ? 'Online' : 'Offline');
+  if (network) network.textContent = errors[0] || (rows[3].length && syncText?.includes('Sincronizado') ? 'Alertas por confirmar' : syncText) || (navigator.onLine ? 'Online' : 'Offline');
   if (visitsEl) visitsEl.textContent = (results[0].status === 'fulfilled' ? rows[0].length : '?') + ' visitas por confirmar';
-  if (photosEl) photosEl.textContent = (results[1].status === 'fulfilled' ? rows[1].length : '?') + ' fotos por confirmar · ' + rows[2].length + ' GPS pendentes';
+  if (photosEl) photosEl.textContent = (results[1].status === 'fulfilled' ? rows[1].length : '?') + ' fotos por confirmar · ' + rows[2].length + ' GPS pendentes · ' + (results[3].status === 'fulfilled' ? rows[3].length : '?') + ' alertas por confirmar';
   let panel = document.getElementById('legacyFieldRecovery');
   if (!panel) { panel = document.createElement('section'); panel.id = 'legacyFieldRecovery'; panel.setAttribute('role', 'status'); panel.style.cssText = 'padding:14px;background:#fff4ce;color:#624400'; (network?.parentElement || document.body).append(panel); }
-  panel.replaceChildren(); panel.hidden = !errors.length && !rows[0].length && !rows[1].length;
+  panel.replaceChildren(); panel.hidden = !errors.length && !rows[0].length && !rows[1].length && !rows[3].length;
   for (const message of errors) { const item = document.createElement('p'); item.textContent = message; panel.append(item); }
-  for (const record of [...rows[1], ...rows[0]]) {
+  for (const record of [...rows[1], ...rows[0], ...rows[3]]) {
     const row = document.createElement('div'), label = document.createElement('span'), retry = document.createElement('button');
     label.textContent = record.label + ' — ' + (record.failure?.message || 'por confirmar. '); retry.textContent = 'Confirmar envio guardado'; retry.type = 'button'; retry.style.cssText = 'min-height:44px;white-space:normal';
     const captured = window.CWFieldWriteStore.session();
@@ -683,6 +684,7 @@ async function loadRoute() {
 
 function renderVisits() {
   if (!window.CWFieldWriteStore.same(legacyWriteSession)) return;
+  window.CWFieldInternalAlert?.setVisits(visits);
 
   const list =
     document.getElementById("list");
@@ -994,35 +996,7 @@ async function uploadPhoto(id, type) {
 }
 
 async function sendInternalAlert(){
-
-  try {
-
-    const text =
-      document.getElementById(
-        "internalAlert"
-      ).value;
-
-    if (!text){
-
-      alert("Escreve o alerta");
-
-      return;
-    }
-
-    alert(
-      "Alerta enviado ao administrador"
-    );
-
-    document.getElementById(
-      "internalAlert"
-    ).value = "";
-
-  } catch(err){
-
-    console.error(err);
-
-    alert("Erro alerta");
-  }
+  await window.CWFieldInternalAlert.send();
 }
 
 // ======================================================

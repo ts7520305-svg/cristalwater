@@ -17,6 +17,12 @@ const { roleMatches } = require("../utils/roles");
 
 router.use(auth("TECHNICIAN"));
 
+router.post('/internal-alert', async (req, res) => {
+  res.set('Cache-Control', 'private, no-store');
+  try { return res.json(await require('../services/fieldInternalAlertService').create(req.user, req.body)); }
+  catch (error) { return res.status(error.statusCode || 503).json({ ok: false, code: error.code || 'FIELD_ALERT_UNCONFIRMED', error: error.statusCode ? error.message : 'Alerta por confirmar. Conserve e repita o pedido original.' }); }
+});
+
 // ======================================================
 // UPLOAD
 // ======================================================
