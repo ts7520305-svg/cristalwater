@@ -914,94 +914,9 @@ function openGoogleMaps(lat, lng) {
 // WORKDAY
 // ======================================================
 
-async function startDay(){
-
-  if (!user || !user.id){
-
-    redirectToLogin();
-
-    return;
-  }
-
-  await fetch(`${API}/workday/start`,{
-
-    method:"POST",
-
-    headers:getAuthHeaders(),
-
-    body: JSON.stringify({
-      userId:user.id
-    })
-  });
-
-  checkDay();
-}
-
-async function endDay(){
-
-  if (!user || !user.id){
-
-    redirectToLogin();
-
-    return;
-  }
-
-  await fetch(`${API}/workday/end`,{
-
-    method:"POST",
-
-    headers:getAuthHeaders(),
-
-    body: JSON.stringify({
-      userId:user.id
-    })
-  });
-
-  checkDay();
-}
-
-async function checkDay(){
-
-  try {
-
-    if (!user || !user.id){
-
-      return;
-    }
-
-    const res =
-      await fetch(
-        `${API}/workday/status/${user.id}`,
-        {
-          headers:{
-            "Authorization": `Bearer ${token}`
-          }
-        }
-      );
-
-    const data =
-      await res.json();
-
-    const el =
-      document.getElementById("dayStatus");
-
-    if (!el) return;
-
-    if (!data.workDay){
-
-      el.innerText =
-        "Não iniciado";
-
-    } else {
-
-      el.innerText =
-        data.workDay.status === "ACTIVE"
-          ? "🟢 Em trabalho"
-          : "🔴 Terminado";
-    }
-
-  } catch {}
-}
+function startDay(){ return window.CWLegacyWorkday.start(); }
+function endDay(){ return window.CWLegacyWorkday.end(); }
+function checkDay(){ return window.CWLegacyWorkday.refresh(); }
 
 // ======================================================
 // UTILS

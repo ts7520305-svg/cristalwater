@@ -5,6 +5,7 @@ const auth = require("../middlewares/authMiddleware");
 const { roleMatches } = require("../utils/roles");
 
 router.use(auth());
+router.use((_req, res, next) => { res.set('Cache-Control', 'private, no-store'); next(); });
 
 function roleOf(req) {
   return String(req.user?.role || "").trim().toUpperCase();
@@ -29,6 +30,7 @@ function ensureTechOrAdmin(req, res) {
 async function resolveWorkdayUserId(req, targetUserId) {
   const role = roleOf(req);
   const requested = Number(targetUserId || 0);
+  if (targetUserId !== undefined && targetUserId !== null && (!Number.isSafeInteger(requested) || requested <= 0)) return { ok: false, status: 422, error: 'userId inválido' };
 
   if (roleMatches(role, "ADMIN")) {
     return { ok: requested > 0, userId: requested, status: 422, error: "userId obrigatório" };
@@ -36,7 +38,7 @@ async function resolveWorkdayUserId(req, targetUserId) {
 
   if (roleMatches(role, "TECHNICIAN")) {
     const ownId = await scopedUserId(req);
-    if (!ownId) return { ok: false, status: 403, error: "Sessão técnica sem identificador" };
+    if (!ownId) return { ok: false, status: 403, error: "A conta técnica não tem um utilizador ativo associado à jornada. Peça ao escritório para rever a associação." };
     if (requested > 0 && requested !== ownId) {
       return { ok: false, status: 403, error: "Acesso apenas à própria jornada" };
     }
@@ -58,6 +60,13 @@ function sendBusinessResult(res, result, successStatus = 200) {
 
   const status = Number(result.status || successStatus);
   return res.status(status).json(result);
+}
+
+function scopedResult(req, result) {
+  if (!result?.ok) return result;
+  const user = req.user, id = Number(user.userId || user.id), technicianId = Number(user.technicianId || user.id);
+  const owner = roleMatches(user.role, 'ADMIN') ? 'ADMIN:' + id : user.principalType === 'USER' ? 'USER:' + id + (user.technicianId ? ':TECH:' + technicianId : '') : 'TECH:' + technicianId;
+  return { ...result, scope: { owner, userId: result.userId, date: result.date, dayStart: result.dayStart } };
 }
 
 function toHttpError(err) {
@@ -100,8 +109,8 @@ router.post("/start", async (req, res) => {
     if (!ensureTechOrAdmin(req, res)) return;
     const resolved = await resolveWorkdayUserId(req, req.body?.userId);
     if (!resolved.ok) return res.status(resolved.status).json({ ok: false, error: resolved.error });
-    const result = await TechnicianWorkdayBusiness.startWorkday({ userId: resolved.userId });
-    return sendBusinessResult(res, result, 201);
+    const result = await TechnicianWorkdayBusiness.startWorkday({ userId: resolved.userId, date: req.body?.date });
+    return sendBusinessResult(res, scopedResult(req, result), 201);
   } catch (err) {
     console.error("WORKDAY_START_ERROR", err);
     const mapped = toHttpError(err);
@@ -114,8 +123,8 @@ router.post("/end", async (req, res) => {
     if (!ensureTechOrAdmin(req, res)) return;
     const resolved = await resolveWorkdayUserId(req, req.body?.userId);
     if (!resolved.ok) return res.status(resolved.status).json({ ok: false, error: resolved.error });
-    const result = await TechnicianWorkdayBusiness.endWorkday({ userId: resolved.userId });
-    return sendBusinessResult(res, result, 200);
+    const result = await TechnicianWorkdayBusiness.endWorkday({ userId: resolved.userId, date: req.body?.date, workDayId: req.body?.workDayId });
+    return sendBusinessResult(res, scopedResult(req, result), 200);
   } catch (err) {
     console.error("WORKDAY_END_ERROR", err);
     const mapped = toHttpError(err);
@@ -123,13 +132,13 @@ router.post("/end", async (req, res) => {
   }
 });
 
-router.get("/status/:userId", async (req, res) => {
+router.get(["/status", "/status/:userId"], async (req, res) => {
   try {
     if (!ensureTechOrAdmin(req, res)) return;
     const resolved = await resolveWorkdayUserId(req, req.params?.userId);
     if (!resolved.ok) return res.status(resolved.status).json({ ok: false, error: resolved.error });
-    const result = await TechnicianWorkdayBusiness.getWorkdayStatus({ userId: resolved.userId });
-    return sendBusinessResult(res, result, 200);
+    const result = await TechnicianWorkdayBusiness.getWorkdayStatus({ userId: resolved.userId, date: req.query?.date });
+    return sendBusinessResult(res, scopedResult(req, result), 200);
   } catch (err) {
     console.error("WORKDAY_STATUS_ERROR", err);
     const mapped = toHttpError(err);
