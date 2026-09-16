@@ -16,17 +16,18 @@
   let visits = [];
   let routeConfirmedAt = null;
   window.CWFieldDaySnapshot = () => ({
-    confirmedAt: routeConfirmedAt,
-    visits: visits.map(visit => ({ id: visit.id, name: visit.pool?.name || `Visita ${visit.id}`, done: isVisitDone(visit), future: visit.assistSource === 'tomorrow' })),
+    confirmedAt: sameFieldSession() && window.CWFieldRouteCache.same(routeContext) ? routeConfirmedAt : null,
+    visits: sameFieldSession() && window.CWFieldRouteCache.same(routeContext) ? visits.map(visit => ({ id: visit.id, name: visit.pool?.name || `Visita ${visit.id}`, done: isVisitDone(visit), future: visit.assistSource === 'tomorrow' })) : [],
   });
   let index = 0;
   let startedAt = null;
   let pendingProblems = [];
   let selectedPhotoType = "AFTER";
   const fieldWriteSession = window.CWFieldWriteStore?.session();
+  let routeRevision = 0, routeContext = null, routeSnapshot = null, routeSessionBlocked = false;
   let fieldWriteGeneration = 0, selectedPhotoContext = null;
   let fieldPendingRevision = 0;
-  window.addEventListener('pagehide', () => { ++fieldWriteGeneration; });
+  window.addEventListener('pagehide', () => { ++fieldWriteGeneration; ++routeRevision; });
   const sameFieldSession = () => window.CWFieldWriteStore?.same(fieldWriteSession);
   let visitPhotos = [];
   let visitDrafts = {};
@@ -3149,7 +3150,37 @@
     persistFieldUiState();
   }
 
+  function showRouteCacheWarning(message) {
+    const node = $("#fieldRouteAge"); node.hidden = false; node.textContent = message;
+  }
+
+  function persistModernRoute() {
+    if (!sameFieldSession() || !window.CWFieldRouteCache.same(routeContext) || !routeSnapshot) return false;
+    try { routeSnapshot = window.CWFieldRouteCache.update(routeSnapshot, visits, routeContext); return true; }
+    catch (error) { showRouteCacheWarning('A ronda não ficou guardada para uso offline. ' + error.message); return false; }
+  }
+
+  function protectFieldRouteSession() {
+    if (!sameFieldSession()) {
+      if (routeSessionBlocked) return;
+      routeSessionBlocked = true; ++routeRevision; visits = []; index = 0; routeConfirmedAt = null; routeSnapshot = null;
+      const main = document.querySelector('main.field'); main.inert = true; main.style.setProperty('display', 'none', 'important');
+      const banner = document.createElement('section'); banner.id = 'fieldRouteSessionChanged'; banner.setAttribute('role', 'alert'); banner.style.cssText = 'padding:20px;background:#fff4ce;color:#624400';
+      const text = document.createElement('p'); text.textContent = 'A sessão mudou. Os dados guardados foram preservados. Reabra o modo de campo com a conta atual.';
+      const link = document.createElement('a'); link.href = '/technician-field-mode'; link.textContent = 'Reabrir modo de campo'; banner.append(text, link); document.body.prepend(banner);
+    } else if (routeContext && routeContext.day !== window.CWFieldRouteCache.today()) {
+      ++routeRevision; visits = []; index = 0; routeConfirmedAt = null; routeSnapshot = null; routeContext = null;
+      loadCurrentDraft(); render(); void load();
+    }
+  }
+  window.addEventListener('storage', protectFieldRouteSession);
+  window.addEventListener('pageshow', event => { protectFieldRouteSession(); if (event.persisted && !routeSessionBlocked) void load(); });
+  window.setInterval(protectFieldRouteSession, 1000);
+
   async function load() {
+    if (!sameFieldSession() || routeSessionBlocked) { protectFieldRouteSession(); return; }
+    const revision = ++routeRevision, context = window.CWFieldRouteCache.scope(fieldWriteSession);
+    const relevant = () => revision === routeRevision && !routeSessionBlocked && sameFieldSession() && window.CWFieldRouteCache.same(context);
     if (window.CristalAuth && !window.CristalAuth.hydrate()) {
       window.CristalAuth.logout();
       return;
@@ -3163,23 +3194,30 @@
     try {
       const fallbackState = readFieldUiState();
       const returnContract = readReturnContract();
-      const todayQuery = todayQueryParams();
-      let data = await api(`/api/technician/today?${todayQuery}`).catch(() => null);
-      const routeCacheKey = `cwFieldRoute:${currentTechnicianId()}`;
-      if (data && Array.isArray(data.visits)) {
-        routeConfirmedAt = new Date().toISOString();
-        visits = data.visits;
-        $("#fieldLoadError").hidden = true; $("#fieldRouteAge").hidden = true;
-        storageWrite(routeCacheKey, { visits, savedAt: new Date().toISOString() });
+      const query = new URLSearchParams({ date: context.day, technicianId: String(context.session.technicianId) });
+      let snapshot, failure;
+      try {
+        const response = await fetch('/api/technician/today?' + query, { headers: { Authorization: 'Bearer ' + context.session.token }, cache: 'no-store', signal: AbortSignal.timeout(15000) });
+        if (!relevant()) return;
+        const data = await response.json(); if (!relevant()) return;
+        if (response.status !== 200) throw Object.assign(Error(data.error || 'Não foi possível confirmar a ronda no servidor.'), { denied: [401,403].includes(response.status) });
+        snapshot = window.CWFieldRouteCache.fromResponse(data, context);
+      } catch (error) { if (!relevant()) return; failure = error; }
+      if (!relevant()) return;
+      $("#fieldRouteAge").hidden = true;
+      if (snapshot) {
+        routeConfirmedAt = snapshot.serverConfirmedAt;
+        try { window.CWFieldRouteCache.save(snapshot, context); }
+        catch (error) { showRouteCacheWarning('A ronda não ficou guardada para uso offline. ' + error.message); }
       } else {
         routeConfirmedAt = null;
-        const cached = storageRead(routeCacheKey, null);
-        if (!cached?.visits) throw new Error("Sem ronda guardada. Abra o modo de campo com ligação antes de sair.");
-        visits = cached.visits;
-        $("#fieldLoadError").hidden = true; $("#fieldRouteAge").hidden = false;
-        $("#fieldRouteAge").textContent = `Ronda guardada em ${new Date(cached.savedAt).toLocaleString("pt-PT")}. Alterações do escritório ainda por confirmar.`;
-        toast(`Ronda guardada em ${new Date(cached.savedAt).toLocaleString('pt-PT')}. Sem confirmação atual do servidor.`);
+        if (failure?.denied) { visits = []; routeSnapshot = null; routeContext = null; throw failure; }
+        snapshot = window.CWFieldRouteCache.read(context);
+        if (!snapshot) throw new Error('Sem ronda guardada para esta conta e este dia. Abra o modo de campo com ligação antes de sair.');
+        showRouteCacheWarning(`Ronda de ${context.day}, consultada no servidor em ${new Date(snapshot.serverConfirmedAt).toLocaleString('pt-PT')}. Sem confirmação atual; alterações do escritório por verificar.`);
       }
+      routeContext = context; routeSnapshot = snapshot; visits = snapshot.visits;
+      $("#fieldLoadError").hidden = true;
       applyReturnState(returnContract, fallbackState);
       visitDrafts = storageRead(`cwFieldVisitDrafts:${currentTechnicianId()}`, {});
       loadWaterRemindersFromStorage();
@@ -3206,8 +3244,11 @@
       stripReturnParamsFromUrl();
       persistFieldUiState();
       await loadGuides(false).catch(() => renderCrewStatus());
+      if (!relevant()) return;
       await loadTechnicalProposals(currentPoolId());
     } catch (error) {
+      if (!relevant()) return;
+      routeConfirmedAt = null;
       $("#fieldLoadError").hidden = false; $("#fieldLoadErrorText").textContent = error.message;
       $("#nextTitle").textContent = "Não foi possível carregar";
       $("#nextMeta").textContent = error.message;
@@ -3633,9 +3674,9 @@
       if (!navigator.onLine) {
         visits[index] = mergeVisitSnapshot(visit, { startAt: startedAt.toISOString() }, "IN_PROGRESS");
         saveCurrentDraft();
-        storageWrite(`cwFieldRoute:${currentTechnicianId()}`, {visits, savedAt:new Date().toISOString()});
+        const saved = persistModernRoute();
         render();
-        toast("Visita iniciada neste dispositivo. O registo será enviado ao concluir com ligação.");
+        toast(saved ? "Visita iniciada neste dispositivo. O registo será enviado ao concluir com ligação." : "Início apenas em memória: a ronda não ficou guardada. Não feche a página.");
         return;
       }
       startBtn.disabled = true;
@@ -3894,7 +3935,7 @@
     if (!sameFieldSession() || event.detail.owner !== fieldWriteSession.owner || event.detail.token !== fieldWriteSession.token) return;
     const position = visits.findIndex(v => String(v.id) === String(event.detail.visitId));
     if (position >= 0) visits[position] = mergeVisitSnapshot(visits[position], event.detail.visit, 'DONE');
-    storageWrite(`cwFieldRoute:${currentTechnicianId()}`, {visits, savedAt:new Date().toISOString()});
+    persistModernRoute();
     render();
   });
   window.addEventListener('cw:water-state-updated', () => { loadWaterRemindersFromStorage(); renderWaterReminders(); });
@@ -3929,7 +3970,7 @@
         if(key!==incompleteKey()||token!==window.CristalAuth?.getToken?.())return;
         const rows=readIncomplete(key);if(rows[row.visitId]?.body.requestId===row.body.requestId)delete rows[row.visitId];localStorage.setItem(key,JSON.stringify(rows));
         const position=visits.findIndex(visit=>String(visit.id)===String(row.visitId));if(position>=0)visits[position]={...visits[position],...data.visit};
-        storageWrite(`cwFieldRoute:${currentTechnicianId()}`,{visits,savedAt:new Date().toISOString()});
+        persistModernRoute();
         window.dispatchEvent(new Event('cw:incomplete-updated'));render();
         }catch(error){
           if(key!==incompleteKey()||token!==window.CristalAuth?.getToken?.())return;
