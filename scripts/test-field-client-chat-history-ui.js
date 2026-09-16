@@ -27,15 +27,15 @@ let previous, touched = false, browser;
     assert(!(await page.locator(list).textContent()).includes('SECRET-OTHER-')); assert.equal(await page.locator(list).getByText('/uploads/documents/guessed-private.pdf', { exact: false }).locator('a').count(), 0);
     const author = row.locator(mode === 'portal' ? 'b' : 'strong');
     for (const [language, label] of Object.entries(labels)) {
-      await page.evaluate(({ language, mode }) => { document.documentElement.lang = language; if (mode === 'portal') { portalLanguage = language; return loadMessages(); } if (mode === 'legacy') return load(); }, { language, mode });
+      await page.evaluate(({ language, mode }) => { localStorage.setItem('cw_language', language); document.documentElement.lang = language; if (mode === 'portal') { applyLanguage(language); return loadMessages(); } if (mode === 'legacy') return load(); }, { language, mode });
       if (mode === 'admin') await page.locator(`.client-item[data-client-id="${client.id}"]`).click();
       await page.waitForFunction(({ selector, label }) => document.querySelector(selector)?.textContent === label, { selector: `${list} ${rowSelector} ${mode === 'portal' ? 'b' : 'strong'}`, label });
       assert.equal(await author.textContent(), label);
     }
-    await page.evaluate(({ mode }) => { document.documentElement.lang = 'pt'; if (mode === 'portal') { portalLanguage = 'pt'; return loadMessages(); } if (mode === 'legacy') return load(); }, { mode });
+    await page.evaluate(({ mode }) => { localStorage.setItem('cw_language', 'pt'); document.documentElement.lang = 'pt'; if (mode === 'portal') { applyLanguage('pt'); return loadMessages(); } if (mode === 'legacy') return load(); }, { mode });
     if (mode === 'admin') await page.locator(`.client-item[data-client-id="${client.id}"]`).click();
     await page.waitForFunction(({ selector, label }) => document.querySelector(selector)?.textContent === label, { selector: `${list} ${rowSelector} ${mode === 'portal' ? 'b' : 'strong'}`, label: labels.pt });
-    for (const width of [390, 1440]) { await page.setViewportSize({ width, height: width === 390 ? 844 : 1000 }); await row.scrollIntoViewIfNeeded(); assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)); await page.screenshot({ path: path.join(evidence, `${mode}-${width}.png`), fullPage: true }); }
+    for (const width of [390, 1440]) { await page.setViewportSize({ width, height: width === 390 ? 844 : 1000 }); await page.locator(list).scrollIntoViewIfNeeded(); assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)); await page.screenshot({ path: path.join(evidence, `${mode}-${width}.png`), fullPage: true }); }
     assert.deepEqual(errors, []); await context.close();
     console.log(`PASS ${mode}: imported conversation, unconfirmed author in five languages, literal text, no inferred attachment access, private ownership and mobile/desktop layout`);
   }

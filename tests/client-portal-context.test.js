@@ -20,6 +20,7 @@ function harness() {
     document: { getElementById: node, addEventListener() {}, querySelector: () => null, createElement: () => ({ dataset: {} }) },
     fetch: vi.fn(),
     CWClientChat: { create: senderFactory },
+    CWClientPortalRequest: { create: () => ({ render() {}, active: () => true, send: vi.fn() }) },
   });
   vm.runInContext(source, context);
   vm.runInContext(`

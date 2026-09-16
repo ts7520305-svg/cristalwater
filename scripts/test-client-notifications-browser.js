@@ -18,6 +18,7 @@ const {chromium}=require('playwright');
   // This isolated notification fixture has no chat composer. Real sender/portal
   // integration is covered by test-field-client-chat-recovery-ui.js.
   await page.evaluate(()=>{window.CWClientChat={create:()=>({active:()=>true,render(){},sendText(){throw Error('Unexpected chat send in notification test');}})};});
+  await page.evaluate(()=>{window.CWClientPortalRequest={create:()=>({render(){},active:()=>true,send(){throw Error('Unexpected portal request in notification test');}})};});
   await page.addScriptTag({content:fs.readFileSync(path.join(__dirname,'../frontend/client-portal.js'),'utf8')});
   async function render(){await page.evaluate(()=>{loadedClientId=clientId;portalLanguage='pt';renderNotifications([{id:7,isRead:false,title:'Manutenção concluída',message:'O relatório está disponível no portal.'}]);});}
   await render();await page.getByRole('button',{name:'Marcar como lida'}).click();await page.waitForFunction(()=>document.querySelector('.pill').textContent==='Lida');

@@ -10,7 +10,7 @@ app.use((req, res, next) => {
   const json = res.json.bind(res);
   res.json = body => {
     // Destroy the HTTP response only after the production handler has committed.
-    if (req.headers['x-cw-qa-drop-response'] === 'true' && res.statusCode === 201) { res.destroy(); return res; }
+    if (req.headers['x-cw-qa-drop-response'] === 'true' && [200, 201].includes(res.statusCode)) { res.destroy(); return res; }
     return json(body);
   };
   next();
@@ -19,6 +19,7 @@ app.use('/api/internal-chat', require('../../src/routes/internalChatRoutes'));
 app.use('/api/chat', require('../../src/routes/chatRoutes'));
 app.use('/api/clientChat', require('../../src/routes/clientChatRoutes'));
 app.use('/api/client-chat', require('../../src/routes/clientChatRoutes'));
+app.use('/api/client-portal', require('../../src/routes/clientPortalRoutes'));
 app.use('/api/client-messages', require('../../src/routes/clientMessageRoutes'));
 const server = app.listen(0, '127.0.0.1', () => process.send({ port: server.address().port }));
 process.on('SIGTERM', () => server.close(async () => { await prisma.$disconnect(); process.exit(0); }));

@@ -22,6 +22,14 @@ const messageRecovery = CWClientChat.create({ clientId: () => clientId, input: e
   mount: el('mensagens'), list: el('chatBox'), language: () => portalLanguage, invalidate: () => socket.disconnect?.(),
   canSend: () => !isAdminUser() && !!clientId && loadedClientId === clientId,
   confirmed: async message => { if (Number(message.clientId) === clientId) await loadMessages(); } });
+const visitRecovery = CWClientPortalRequest.create({ id: 'visitRequest', kind: 'VISIT_REQUEST', clientId: () => clientId,
+  fields: { message: el('visitRequestInput') }, button: el('visitRequestBtn'), mount: el('visitRequestRecovery'), language: () => portalLanguage,
+  canSend: () => !isAdminUser() && loadedClientId === clientId,
+  confirmed: async result => { if (visitRecovery.active() && result.message.clientId === clientId) await Promise.allSettled([loadMessages(), loadCustomerExtras()]); } });
+const paymentRecovery = CWClientPortalRequest.create({ id: 'paymentNotice', kind: 'PAYMENT_NOTICE', clientId: () => clientId,
+  fields: { amount: el('paymentNoticeAmount'), method: el('paymentNoticeMethod'), note: el('paymentNoticeNote') }, button: el('paymentNoticeBtn'), mount: el('paymentNoticeRecovery'), language: () => portalLanguage,
+  canSend: () => !isAdminUser() && loadedClientId === clientId, changed: () => refreshPaymentWhatsappLink(),
+  confirmed: async result => { if (paymentRecovery.active() && result.message.clientId === clientId) await loadMessages(); } });
 function selectionIsCurrent(id, revision) {
   return clientId === id && clientSelectionRevision === revision;
 }
@@ -31,6 +39,8 @@ function updatePortalActionAvailability() {
     if (button) button.disabled = isAdminUser() || !clientId || loadedClientId !== clientId || portalActions.has(id);
   });
   messageRecovery.render();
+  visitRecovery.render();
+  paymentRecovery.render();
 }
 const ui = window.CwUi || {
   success: (m) => console.log(m),
@@ -184,6 +194,146 @@ const COPY = {
     adminSelectServices: "Selecione um cliente para ver os servicos feitos.",
     adminSelectBilling: "Selecione um cliente para ver a faturacao.",
     adminSelectMessages: "Selecione um cliente para ver mensagens.",
+  },
+  es: {
+    brandPortal: "Portal del cliente",
+    logout: "Salir",
+    adminBackClients: "Volver a clientes",
+    portalTitle: "Portal del cliente",
+    clientDefault: "Cliente",
+    portalIntro: "Consulte visitas, piscinas, mensajes y pagos en un panel sencillo y transparente.",
+    loadingState: "Cargando estado…",
+    loadError: "No se pudieron cargar los datos",
+    noDataStatus: "No hay datos del cliente.",
+    poolsJacuzzis: "Piscinas / jacuzzis",
+    financialState: "Estado financiero",
+    nextVisitMetric: "Próxima visita",
+    quickAccess: "Acceso rápido",
+    clientRole: "Cliente",
+    message: "Mensaje",
+    agenda: "Agenda",
+    services: "Servicios",
+    payments: "Pagos",
+    paymentReference: "Referencia de pago",
+    paymentInstructionShort: "Indique siempre esta referencia al pagar.",
+    paymentInstructionFull: "Indique siempre esta referencia al pagar y avise a la administración por el portal o WhatsApp.",
+    amountPlaceholder: "Importe pagado / transferido",
+    notePlaceholder: "Nota o referencia del justificante",
+    notifyPayment: "Avisar del pago",
+    whatsapp: "WhatsApp",
+    whatsappNoClient: "Seleccione un cliente o acceda como cliente antes de abrir WhatsApp.",
+    whatsappChooseContact: "Abre WhatsApp con el mensaje preparado para enviar.",
+    whatsappDirect: "Abre WhatsApp directamente con Cristal Water.",
+    methodTransfer: "Transferencia",
+    methodMbway: "MBWay",
+    methodCash: "Efectivo",
+    methodAtm: "Multibanco",
+    methodOther: "Otro",
+    paymentHelp: "<b>Instrucciones de pago:</b>Indique siempre la referencia anterior al pagar. Después pulse Avisar del pago o envíe la referencia y el justificante por WhatsApp. Si no puede usar el portal, contacte con Cristal Water para registrarlo manualmente.",
+    scheduleTitle: "Programación de las piscinas",
+    schedulePill: "ES",
+    noSchedules: "Todavía no hay visitas programadas para mostrar.",
+    scheduleBackend: "No se pudo cargar la programación. Vuelva a intentarlo.",
+    poolsTitle: "Piscinas",
+    maintenancePill: "Mantenimiento",
+    noPools: "Todavía no hay piscinas asociadas a este cliente.",
+    poolsBackend: "Seleccione un cliente para consultar sus piscinas.",
+    summaryTitle: "Resumen de la cuenta",
+    account: "Cuenta",
+    summaryBackend: "No se pudo cargar el resumen. Vuelva a intentarlo.",
+    servicesTitle: "Servicios realizados",
+    historyPill: "Historial",
+    noServices: "Todavía no hay servicios registrados.",
+    servicesUnavailable: "Los servicios no están disponibles en este momento.",
+    historySearchPlaceholder: "Buscar por piscina, técnico, producto o nota",
+    historyAllPools: "Todas las piscinas",
+    historyAllPeriods: "Todos",
+    historyByDay: "Día",
+    historyByWeek: "Semana",
+    historyByMonth: "Mes",
+    historyByYear: "Año",
+    historyReferenceDate: "Fecha de referencia",
+    historyDownload: "Descargar",
+    historyFilteredCount: "servicio(s) filtrado(s)",
+    historyNoFiltered: "No se encontraron servicios con estos filtros.",
+    billingTitle: "Facturación y pagos",
+    noInvoices: "Todavía no hay facturas ni pagos registrados.",
+    billingUnavailable: "La facturación no está disponible en este momento.",
+    messagesTitle: "Mensajes con la administración",
+    checking: "Comprobando",
+    messagePlaceholder: "Escriba su mensaje…",
+    attachment: "Adjunto",
+    send: "Enviar",
+    adminOnline: "Administración en línea",
+    adminUnavailable: "Administración no disponible en este momento",
+    adminTyping: "La administración está escribiendo…",
+    noMessages: "Todavía no hay mensajes.",
+    messagesUnavailable: "Los mensajes no están disponibles en este momento.",
+    openAttachment: "Abrir adjunto",
+    statusDone: "Completado",
+    statusPlanned: "Planificado",
+    statusPending: "Pendiente",
+    statusPartial: "Parcial",
+    statusPaid: "Pagado",
+    statusOverdue: "Vencido",
+    statusNotDone: "No realizado",
+    confirm: "Por confirmar",
+    operationalState: "Estado operativo",
+    registeredServices: "servicio(s) registrado(s)",
+    lastService: "Último servicio",
+    paymentSummary: "Pagos",
+    openAmount: "Importe pendiente",
+    paidInPeriod: "Pagado en el período",
+    positiveCredit: "Saldo a favor",
+    noPendingValues: "No hay importes pendientes registrados.",
+    scheduleDelayedHint: "Vamos con retraso y acudiremos lo antes posible.",
+    schedulePlannedHint: "Próximo mantenimiento planificado.",
+    accountPendingHint: "documento(s) pendiente(s) de regularizar.",
+    serviceHistoryHint: "Historial autorizado disponible.",
+    servicesFirstVisitHint: "Los servicios aparecerán aquí después de la primera visita.",
+    contactHint: "Canal privado con la administración.",
+    contact: "Contacto",
+    upToDate: "Al día",
+    updatedState: "Estado actualizado",
+    noPoolStatus: "Sin piscina asociada",
+    poolFallback: "Piscina",
+    zoneUndefined: "Zona no definida",
+    active: "Activa",
+    calendarLabel: "Agenda",
+    noConsumption: "Sin consumo registrado",
+    productFallback: "Producto",
+    issued: "emitida",
+    invoiceFallback: "Factura",
+    paid: "Pagado",
+    open: "Pendiente",
+    paymentFallback: "Pago",
+    invoiceLineMonthly: "Cuota mensual",
+    paymentNoticeGreeting: "Hola, Cristal Water.",
+    paymentNoticeText: "Les informo de que he realizado un pago.",
+    paymentNoticeRef: "Referencia del cliente",
+    paymentNoticeAmount: "Importe",
+    paymentNoticeMethod: "Método",
+    paymentNoticeNote: "Nota/justificante",
+    clientNotIdentified: "Cliente no identificado.",
+    paymentNoticeFailed: "No se pudo comunicar el pago.",
+    paymentNoticeSuccess: "Pago comunicado con la referencia",
+    sendMessageError: "Error al enviar el mensaje.",
+    adminSwitcherTitle: "Ver portal del cliente",
+    adminSwitcherHelp: "Área de administración. Seleccione un cliente para consultar la agenda, los servicios, los mensajes y la cuenta.",
+    adminChooseClientMeta: "Seleccione un cliente para ver su portal.",
+    adminClientSearch: "Buscar por nombre, teléfono, correo, zona o referencia",
+    adminChooseClient: "Seleccionar cliente…",
+    adminClientFile: "Ficha del cliente",
+    adminAccount: "Cuenta corriente",
+    adminListFailed: "No se pudo cargar la lista de clientes.",
+    adminChooseTitle: "Seleccione un cliente",
+    adminMode: "Modo de administración",
+    adminSelectPools: "Seleccione un cliente para consultar sus piscinas.",
+    adminSelectSchedule: "Seleccione un cliente para consultar su programación.",
+    adminSelectSummary: "Seleccione un cliente para consultar el resumen de su cuenta.",
+    adminSelectServices: "Seleccione un cliente para consultar sus servicios realizados.",
+    adminSelectBilling: "Seleccione un cliente para consultar su facturación.",
+    adminSelectMessages: "Seleccione un cliente para consultar sus mensajes.",
   },
   en: {
     brandPortal: "Client Portal",
@@ -621,7 +771,7 @@ window.logout = logout;
 
 function normalizeLanguage(value) {
   const lang = String(value || "pt").trim().toLowerCase().slice(0, 2);
-  return ["pt", "en", "fr", "de"].includes(lang) ? lang : "pt";
+  return ["pt", "en", "fr", "es", "de"].includes(lang) ? lang : "pt";
 }
 
 function preferredLanguage(serverLanguage) {
@@ -670,6 +820,7 @@ function localeForLanguage() {
   if (portalLanguage === "en") return "en-GB";
   if (portalLanguage === "fr") return "fr-FR";
   if (portalLanguage === "de") return "de-DE";
+  if (portalLanguage === "es") return "es-ES";
   return "pt-PT";
 }
 
@@ -765,9 +916,9 @@ function applyLanguage(language) {
   document.documentElement.lang = portalLanguage;
   const languageSelect=el('cwLanguageSelect');
   if(languageSelect && Array.from(languageSelect.options).some(option=>option.value===portalLanguage))languageSelect.value=portalLanguage;
-  const navLabels=portalLanguage==='en'?['Home','Pools','Visits','Reports','Payments','Messages']:portalLanguage==='fr'?['Accueil','Piscines','Visites','Rapports','Paiements','Messages']:['Início','Piscinas','Visitas','Relatórios','Pagamentos','Mensagens'];
+  const navLabels=portalLanguage==='en'?['Home','Pools','Visits','Reports','Payments','Messages']:portalLanguage==='fr'?['Accueil','Piscines','Visites','Rapports','Paiements','Messages']:portalLanguage==='es'?['Inicio','Piscinas','Visitas','Informes','Pagos','Mensajes']:portalLanguage==='de'?['Start','Pools','Besuche','Berichte','Zahlungen','Nachrichten']:['Início','Piscinas','Visitas','Relatórios','Pagamentos','Mensagens'];
   for(const selector of ['.cw-v2-nav','.cw-v2-mobile-nav'])document.querySelectorAll(`${selector} a`).forEach((link,index)=>{if(navLabels[index]){link.textContent=navLabels[index];link.setAttribute('aria-label',navLabels[index]);}});
-  const mobileLabels=portalLanguage==='en'?['Home','Pools','Visits','Docs','Billing','Chat']:portalLanguage==='fr'?['Accueil','Piscines','Visites','Docs','Compte','Chat']:['Início','Piscinas','Agenda','Docs','Conta','Chat'];
+  const mobileLabels=portalLanguage==='en'?['Home','Pools','Visits','Docs','Billing','Chat']:portalLanguage==='fr'?['Accueil','Piscines','Visites','Docs','Compte','Chat']:portalLanguage==='es'?['Inicio','Piscinas','Visitas','Docs','Cuenta','Chat']:portalLanguage==='de'?['Start','Pools','Besuche','Dok.','Konto','Chat']:['Início','Piscinas','Agenda','Docs','Conta','Chat'];
   document.querySelectorAll('.cw-v2-mobile-nav a').forEach((link,index)=>{if(mobileLabels[index])link.textContent=mobileLabels[index]});
   document.title = `Cristal Water LDA - ${copy("brandPortal")}`;
   setText("brandPortalLabel", copy("brandPortal"));
@@ -795,6 +946,17 @@ function applyLanguage(language) {
   setPlaceholder("paymentNoticeAmount", copy("amountPlaceholder"));
   setPlaceholder("paymentNoticeNote", copy("notePlaceholder"));
   setText("paymentNoticeBtn", copy("notifyPayment"));
+  const visitLabels = {
+    pt: ['Pedido de visita', 'Solicite uma nova visita ou prioridade de acompanhamento. Aguarde a confirmação do agendamento.', 'Descreva o pedido de visita', 'Solicitar visita'],
+    en: ['Visit request', 'Request a new visit or follow-up priority. Await scheduling confirmation.', 'Describe the visit request', 'Request a visit'],
+    fr: ['Demande de visite', 'Demandez une nouvelle visite ou un suivi prioritaire. Attendez la confirmation du rendez-vous.', 'Décrivez la demande de visite', 'Demander une visite'],
+    es: ['Solicitud de visita', 'Solicite una nueva visita o atención prioritaria. Espere la confirmación de la cita.', 'Describa la solicitud de visita', 'Solicitar visita'],
+    de: ['Besuchsanfrage', 'Fordern Sie einen Besuch oder eine vorrangige Betreuung an. Warten Sie auf die Terminbestätigung.', 'Beschreiben Sie Ihre Besuchsanfrage', 'Besuch anfragen'],
+  }[portalLanguage];
+  const requestLabels = { pt: ['Pedidos', 'Suporte'], en: ['Requests', 'Support'], fr: ['Demandes', 'Assistance'], es: ['Solicitudes', 'Asistencia'], de: ['Anfragen', 'Hilfe'] }[portalLanguage];
+  setText('permissionsTitle', requestLabels[0]); setText('permissionsBadge', requestLabels[1]);
+  setHtml('visitRequestHelp', `<b>${visitLabels[0]}</b>${visitLabels[1]}`);
+  setPlaceholder('visitRequestInput', visitLabels[2]); setText('visitRequestBtn', visitLabels[3]);
   setText("paymentWhatsappLink", copy("whatsapp"));
   setText("scheduleTitle", copy("scheduleTitle"));
   setText("scheduleLang", copy("schedulePill"));
@@ -1415,12 +1577,19 @@ function renderDocuments(documents = []) {
 function renderPermissions(permissions = {}) {
   const list = el("permissionsList");
   if (!list) return;
-  list.innerHTML = `
-    <div class="client-focus-card info"><span>Isolamento</span><b>${permissions.readOnly ? "Read-only" : "Ativo"}</b><small>${esc(permissions.isolation?.scope || "customer-owned-data-only")}</small></div>
-    <div class="client-focus-card"><span>Visitas</span><b>${permissions.canRequestVisit ? "Permitido" : "Bloqueado"}</b><small>Pedidos de visita e prioridade</small></div>
-    <div class="client-focus-card"><span>Documentos</span><b>${permissions.canDownloadSecureDocuments ? "Seguro" : "Restrito"}</b><small>Faturas, relatórios e guias</small></div>
-    <div class="client-focus-card"><span>Conta</span><b>${permissions.billingActive ? "Ativa" : "Pendente"}</b><small>${esc(permissions.paymentReference || "-")}</small></div>
-  `;
+  const labels = {
+    pt: ['Visitas', 'Disponível', 'Indisponível', 'Pedidos de visita e prioridade', 'Documentos', 'Disponíveis', 'Restritos', 'Faturas, relatórios e guias', 'Conta', 'Ativa', 'Pendente'],
+    en: ['Visits', 'Available', 'Unavailable', 'Visit and priority requests', 'Documents', 'Available', 'Restricted', 'Invoices, reports and guides', 'Account', 'Active', 'Pending'],
+    fr: ['Visites', 'Disponible', 'Indisponible', 'Demandes de visite et de priorité', 'Documents', 'Disponibles', 'Restreints', 'Factures, rapports et guides', 'Compte', 'Actif', 'En attente'],
+    es: ['Visitas', 'Disponible', 'No disponible', 'Solicitudes de visita y prioridad', 'Documentos', 'Disponibles', 'Restringidos', 'Facturas, informes y guías', 'Cuenta', 'Activa', 'Pendiente'],
+    de: ['Besuche', 'Verfügbar', 'Nicht verfügbar', 'Besuchs- und Prioritätsanfragen', 'Dokumente', 'Verfügbar', 'Eingeschränkt', 'Rechnungen, Berichte und Anleitungen', 'Konto', 'Aktiv', 'Ausstehend'],
+  }[portalLanguage] || [];
+  const cards = [
+    [labels[0], permissions.canRequestVisit ? labels[1] : labels[2], labels[3]],
+    [labels[4], permissions.canDownloadSecureDocuments ? labels[5] : labels[6], labels[7]],
+    [labels[8], permissions.billingActive ? labels[9] : labels[10], permissions.paymentReference || '-'],
+  ];
+  list.innerHTML = cards.map(([title, state, description]) => `<div class="client-focus-card"><span>${esc(title)}</span><b>${esc(state)}</b><small>${esc(description)}</small></div>`).join('');
 }
 
 async function loadCustomerExtras() {
@@ -1449,17 +1618,11 @@ async function loadCustomerExtras() {
 function renderPaymentInstructions(instructions = {}) {
   currentPaymentInstructions = instructions || {};
   const reference = instructions.paymentReference || `CW-${String(clientId || 0).padStart(6, "0")}`;
-  const amountOpen = Number(instructions.amountOpen || 0);
   setText("paymentReference", reference);
   setText(
     "paymentInstructions",
     portalLanguage === "pt" && instructions.instructions ? instructions.instructions : copy("paymentInstructionFull")
   );
-
-  const amountInput = el("paymentNoticeAmount");
-  if (amountInput && amountOpen > 0 && !amountInput.value) {
-    amountInput.value = amountOpen.toFixed(2);
-  }
 
   refreshPaymentWhatsappLink();
 }
@@ -1686,28 +1849,7 @@ async function setupAdminClientSwitcher() {
   el("adminClientSelect")?.addEventListener("change", (event) => chooseAdminClient(event.target.value));
 }
 
-async function notifyPayment() {
-  const requestedClient = clientId, selectionRevision = clientSelectionRevision;
-  if (!clientId) {
-    ui.error(copy("clientNotIdentified"));
-    return;
-  }
-  const notice = buildPaymentNoticeMessage("PORTAL_CLIENTE");
-  const response = await fetch(`${API}/client-portal/${clientId}/payment-notice`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(notice),
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!selectionIsCurrent(requestedClient, selectionRevision)) return;
-  if (!response.ok || data.ok === false) {
-    ui.error(data.error || copy("paymentNoticeFailed"));
-    return;
-  }
-  await loadMessages();
-  if (!selectionIsCurrent(requestedClient, selectionRevision)) return;
-  ui.success(`${copy("paymentNoticeSuccess")} ${data.paymentReference || currentPaymentInstructions?.paymentReference || ""}.`);
-}
+async function notifyPayment() { await paymentRecovery.send(); }
 
 async function loadPortal() {
   const requestedClient = clientId, selectionRevision = clientSelectionRevision;
@@ -1831,26 +1973,7 @@ async function loadMessages() {
 
 async function sendMessage() { ++messagesLoadRevision; await messageRecovery.sendText(); }
 
-async function requestVisit() {
-  const requestedClient = clientId, selectionRevision = clientSelectionRevision;
-  const input = el("visitRequestInput");
-  const text = input?.value?.trim() || "";
-  if (!text || !clientId) return;
-  const response = await fetch(`${API}/client-portal/${clientId}/visit-requests`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", ...portalAuthHeaders() },
-    body: JSON.stringify({ message: text }),
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!selectionIsCurrent(requestedClient, selectionRevision)) return;
-  if (!response.ok || data.ok === false) {
-    ui.error(data.error || "Nao foi possivel solicitar a visita.");
-    return;
-  }
-  if(input.value.trim()===text)input.value = "";
-  ui.success("Pedido de visita enviado com sucesso.");
-  await loadCustomerExtras();
-}
+async function requestVisit() { await visitRecovery.send(); }
 
 const portalActions = new Set();
 async function runPortalAction(buttonId, action) {
@@ -1905,8 +2028,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     setTimeout(() => setText("typing", ""), 2000);
   });
   el("sendBtn").onclick = sendMessage;
-  if (el("visitRequestBtn")) el("visitRequestBtn").onclick = ()=>runPortalAction("visitRequestBtn",requestVisit);
-  if (el("paymentNoticeBtn")) el("paymentNoticeBtn").onclick = ()=>runPortalAction("paymentNoticeBtn",notifyPayment);
+  if (el("visitRequestBtn")) el("visitRequestBtn").onclick = requestVisit;
+  if (el("paymentNoticeBtn")) el("paymentNoticeBtn").onclick = notifyPayment;
   ["paymentNoticeAmount", "paymentNoticeMethod", "paymentNoticeNote"].forEach((id) => {
     const node = el(id);
     if (node) node.addEventListener("input", refreshPaymentWhatsappLink);

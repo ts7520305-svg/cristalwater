@@ -422,6 +422,8 @@
             <option value="pt">PT</option>
             <option value="en">EN</option>
             <option value="fr">FR</option>
+            <option value="es">ES</option>
+            <option value="de">DE</option>
           </select>
           <span class="cw-v2-pill cw-v2-offline" data-offline-indicator>Online</span>
           <button class="cw-v2-btn" id="portalLogoutBtn" onclick="logout()">Sair</button>
@@ -489,11 +491,12 @@
                 <option value="Multibanco">Multibanco</option>
                 <option value="Outro">Outro</option>
               </select>
-              <input id="paymentNoticeNote" placeholder="Nota ou referência do comprovativo">
+              <input id="paymentNoticeNote" maxlength="4000" placeholder="Nota ou referência do comprovativo">
               <div class="payment-actions">
                 <button class="cw-v2-btn primary" id="paymentNoticeBtn" type="button">Avisar pagamento</button>
                 <a class="cw-v2-btn" id="paymentWhatsappLink" target="_blank" rel="noopener">WhatsApp</a>
               </div>
+              <div id="paymentNoticeRecovery"></div>
             </div>
           </div>
 
@@ -571,11 +574,12 @@
       <section class="cw-v2-card" id="permissionsPanel">
         <div class="section-head"><h2 id="permissionsTitle">Pedidos</h2><span class="pill" id="permissionsPill">Suporte</span></div>
         <div class="grid" id="permissionsList"><div class="empty">A carregar permissões...</div></div>
-        <div class="payment-help" style="margin-top:10px"><b>Pedido de visita</b>Use este formulário para solicitar uma nova visita ou prioridade de acompanhamento.</div>
+        <div class="payment-help" id="visitRequestHelp" style="margin-top:10px"><b>Pedido de visita</b>Use este formulário para solicitar uma nova visita ou prioridade de acompanhamento.</div>
         <div class="chat-input" style="margin-top:10px">
-          <input type="text" id="visitRequestInput" placeholder="Descreva o pedido de visita ou a prioridade desejada">
+          <input type="text" maxlength="4000" id="visitRequestInput" placeholder="Descreva o pedido de visita ou a prioridade desejada">
           <button class="cw-v2-btn primary" id="visitRequestBtn" type="button">Solicitar visita</button>
         </div>
+        <div id="visitRequestRecovery"></div>
       </section>
 
       <section class="cw-v2-card" id="mensagens" aria-label="Mensagens com administração">
@@ -605,6 +609,7 @@
   <script src="/cw-ui-feedback.js"></script>
   <script src="/cw-auth-download.js"></script>
   <script src="/cw-client-chat-send.js"></script>
+  <script src="/cw-client-portal-request.js"></script>
   <script src="/client-portal.js"></script>
   <script src="/client-quotes.js"></script>
   <script src="/ui/core/navigation-context.js"></script>

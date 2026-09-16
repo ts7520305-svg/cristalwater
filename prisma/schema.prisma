@@ -134,6 +134,20 @@ model ClientMessage {
   @@index([isReadByAdmin])
 }
 
+// Immutable portal acknowledgement, independent of mutable notification/message rows.
+model ClientPortalRequest {
+  actorKey    String
+  requestId   String
+  clientId    Int
+  kind        String
+  payloadHash String
+  response    Json
+  createdAt   DateTime @default(now())
+
+  @@id([actorKey, requestId])
+  @@index([clientId])
+}
+
 model ClientChatLegacyRecord {
   recordKey     String        @id
   clientId      Int?

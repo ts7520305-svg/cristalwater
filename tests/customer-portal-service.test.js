@@ -119,7 +119,7 @@ describe("customerPortalService", () => {
     mockCommunicationCreate.mockResolvedValue({ id: 222 });
 
     const { createVisitRequest } = require("../src/services/customerPortalService");
-    const result = await createVisitRequest(7, { message: "preciso de apoio" });
+    const result = await createVisitRequest(7, { message: "preciso de apoio" }, { id: 7, role: "CLIENT" });
 
     expect(result.ok).toBe(true);
     expect(mockClientMessageCreate).toHaveBeenCalledWith(

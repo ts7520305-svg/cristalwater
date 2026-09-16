@@ -299,68 +299,8 @@ async function getClientOwnershipScope(clientId) {
   };
 }
 
-async function createVisitRequest(clientId, body = {}) {
-  const message = String(body.message || body.text || "").trim();
-  if (!message) {
-    return { ok: false, status: 400, error: "Mensagem obrigatória" };
-  }
-
-  const scope = await getClientOwnershipScope(clientId);
-  if (!scope.client) {
-    return { ok: false, status: 404, error: "Cliente não encontrado" };
-  }
-
-  const payload = {
-    clientId,
-    sender: scope.client.name || "Cliente",
-    senderType: "CLIENT",
-    message: `Pedido de visita: ${message}`,
-    text: `Pedido de visita: ${message}`,
-    messageType: "VISIT_REQUEST",
-    isReadByAdmin: false,
-    seen: false,
-  };
-
-  const { clientMessage, notification } = await prisma.$transaction(async (tx) => {
-    const createdMessage = await tx.clientMessage.create({ data: payload });
-    const createdNotification = await tx.notification.create({
-      data: {
-        clientId,
-        type: "VISIT_REQUEST",
-        eventType: "CLIENT_VISIT_REQUEST",
-        title: `Pedido de visita - ${scope.client.name}`,
-        message: message,
-        role: "ADMIN",
-        severity: "INFO",
-        metadata: {
-          clientId,
-          source: "customer-os",
-          workflow: "visit-request",
-        },
-        isRead: false,
-      },
-    });
-
-    await tx.communicationLog.create({
-      data: {
-        clientId,
-        channel: "PORTAL_CLIENTE",
-        message: message,
-        referenceId: clientId,
-      },
-    }).catch(() => null);
-
-    return {
-      clientMessage: createdMessage,
-      notification: createdNotification,
-    };
-  });
-
-  return {
-    ok: true,
-    message: clientMessage,
-    notification,
-  };
+async function createVisitRequest(clientId, body, user) {
+  return require('../business/portal/ClientPortalRequestBusiness').create(user, clientId, 'VISIT_REQUEST', body);
 }
 
 module.exports = {

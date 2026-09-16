@@ -144,11 +144,12 @@ router.post("/:clientId(\\d+)/messages", auth("CLIENT"), (req, res) => {
 router.post("/:clientId(\\d+)/visit-requests", auth("CLIENT"), async (req, res) => {
   const clientId = Number(req.params.clientId);
   if (!ensureClientOwnership(req, res, clientId)) return;
-  const result = await createVisitRequest(clientId, req.body || {});
-  if (!result.ok) {
-    return res.status(result.status || 400).json({ ok: false, error: result.error || "Erro ao criar pedido" });
-  }
-  return res.status(201).json({ ok: true, request: result.message, notification: result.notification });
+  const business = require('../business/portal/ClientPortalRequestBusiness');
+  try {
+    const result = await createVisitRequest(clientId, req.body, req.user);
+    business.emit(result);
+    return res.status(201).json(result);
+  } catch (error) { return business.sendError(res, error); }
 });
 
 router.get("/:clientId(\\d+)/documents", auth("CLIENT"), async (req, res) => {

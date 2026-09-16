@@ -1,7 +1,6 @@
 const { prisma } = require("../prismaClient");
 const {
   buildClientPaymentReference,
-  buildPaymentNoticeText,
 } = require("../utils/clientPaymentReference");
 
 const DEFAULT_WORK_END_HOUR = 18;
@@ -685,98 +684,12 @@ async function getClientPortal(req, res) {
 }
 
 async function notifyPayment(req, res) {
+  const business = require('../business/portal/ClientPortalRequestBusiness');
   try {
-    const clientId = Number(req.params.clientId);
-    if (!clientId) {
-      return res.status(400).json({ ok: false, error: "Cliente invalido" });
-    }
-
-    const client = await prisma.client.findUnique({
-      where: { id: clientId },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-      },
-    });
-
-    if (!client) {
-      return res.status(404).json({ ok: false, error: "Cliente nao encontrado" });
-    }
-
-    const amount = Number(req.body?.amount || 0);
-    const method = String(req.body?.method || "Nao indicado").trim();
-    const channel = String(req.body?.channel || "PORTAL_CLIENTE").trim();
-    const note = String(req.body?.note || req.body?.message || "").trim();
-    const paymentReference = buildClientPaymentReference(client.id);
-    const text = buildPaymentNoticeText({ client, amount, method, note, channel });
-
-    const [message] = await prisma.$transaction([
-      prisma.clientMessage.create({
-        data: {
-          clientId: client.id,
-          sender: "Cliente",
-          senderType: "CLIENT",
-          message: text,
-          text,
-          messageType: "PAYMENT_NOTICE",
-          isReadByAdmin: false,
-          seen: false,
-        },
-      }),
-      prisma.notification.create({
-        data: {
-          clientId: client.id,
-          type: "PAYMENT_NOTICE",
-          eventType: "CLIENT_PAYMENT_NOTICE",
-          title: `Pagamento comunicado - ${paymentReference}`,
-          message: `${client.name}: comunicou pagamento${amount > 0 ? ` de ${amount.toFixed(2)} EUR` : ""}. Ref. ${paymentReference}`,
-          role: "ADMIN",
-          severity: "WARN",
-          metadata: {
-            href: `/chat?clientId=${client.id}&filter=unread`,
-            clientId: client.id,
-            paymentReference,
-            amount,
-            method,
-            channel,
-          },
-          isRead: false,
-        },
-      }),
-      prisma.communicationLog.create({
-        data: {
-          clientId: client.id,
-          channel,
-          message: text,
-          referenceId: client.id,
-        },
-      }),
-    ]);
-
-    if (global.io) {
-      global.io.to(`client_${client.id}`).emit("newMessage", message);
-      global.io.emit("new-notification", {
-        type: "PAYMENT_NOTICE",
-        clientId: client.id,
-        message: `${client.name}: pagamento comunicado. Ref. ${paymentReference}`,
-        createdAt: message.createdAt,
-      });
-    }
-
-    return res.json({
-      ok: true,
-      paymentReference,
-      message,
-    });
-  } catch (err) {
-    console.error("notifyPayment error:", err);
-    return res.status(500).json({
-      ok: false,
-      error: err.message || "Erro ao comunicar pagamento",
-    });
-  }
+    const result = await business.create(req.user, req.params.clientId, 'PAYMENT_NOTICE', req.body);
+    business.emit(result);
+    return res.json(result);
+  } catch (error) { return business.sendError(res, error); }
 }
 
 module.exports = {
