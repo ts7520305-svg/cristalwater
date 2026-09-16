@@ -29,7 +29,7 @@ Não são alteradas faturas, pagamentos, movimentos de crédito ou a lógica pr�
 
 ## Validação
 
-O executor local desligou-se após a reprodução (`409 environment_offline`). A implementação foi preparada sobre o commit remoto `6abcecf6f61703508f9d04144c3353d27a37b97f`, árvore `187042168b437f76b767167ed21ba3e4104e646b`, e a sintaxe dos cinco ficheiros JavaScript alterados foi analisada. Não foi executada localmente.
+O executor local desligou-se após a reprodução (`409 environment_offline`). A implementação foi preparada sobre o commit remoto `6abcecf6f61703508f9d04144c3353d27a37b97f`, árvore `187042168b437f76b767167ed21ba3e4104e646b`, e a sintaxe dos cinco ficheiros JavaScript alterados foi analisada. Não foi executada localmente antes da primeira publicação.
 
 O teste de integração `scripts/test-field-client-edit-preservation.js`, integrado como o 90.º grupo operacional, verifica:
 
@@ -55,3 +55,9 @@ Workflow `35075302355`, commit `bb2cf83589161d721443481d0c831540ba6ac1d3`: 324 u
 A falha ocorreu no anexo do cliente móvel: o teste preenchia diretamente o input de ficheiro assim que a mensagem anterior era limpa, antes de terminar o carregamento da conversa e de o botão de anexo voltar a estar disponível. O emissor mantém `working=true` durante esse carregamento e recusa outro envio nesse intervalo.
 
 O ensaio passa a reter deliberadamente a resposta de atualização da conversa, verificar que o botão de anexo está desativado/ocupado, libertar a atualização e escolher o ficheiro através do botão e seletor reais. Mantém as verificações de UUID/conteúdo, envio único e persistência do anexo, sem aumentar os tempos limite nem alterar o produto. Confirmar o CI completo da nova árvore, incluindo restauro.
+
+## Confirmação final da TASK188
+
+O executor regressou e o checkout foi reconciliado com `00b4247a328bdc2349722713335765ca7756be72`, conservando a alteração preexistente na imagem do guia. O E2E corrigido e a preservação de clientes passaram localmente em `field-qa-runtime/run-1789548978140`.
+
+Workflow `35076385728` aprovado para essa revisão, árvore `e94d19261d268039c979b7979e6aebcbbc09ac05`: 90 grupos operacionais, 324 unitários/quatro técnicos, 17 scripts de navegador, treze migrações e restauro de 104 tabelas/22 ficheiros com linhas e hashes iguais. As indicações anteriores de validação/reconciliação pendente pertencem ao registo da primeira publicação.

@@ -2253,40 +2253,7 @@ router.get('/daily-service-log', async (req, res) => {
   }
 });
 
-router.put('/pools/:id', async (req, res) => {
-  try {
-    const id = toInt(req.params.id);
-    const body = req.body || {};
-    const nextClientId = body.clientId === undefined || body.clientId === null || body.clientId === ''
-      ? undefined
-      : toInt(body.clientId);
-
-    if (nextClientId !== undefined) {
-      const client = await db('client').findUnique({ where: { id: nextClientId }, select: { id: true } });
-      if (!client) return res.status(404).json({ ok: false, error: 'Cliente para associar a piscina nao encontrado.' });
-    }
-
-    const pool = await db('pool').update({
-      where: { id },
-      data: poolBaseData(body, nextClientId),
-      include: { client: true, roundPools: { include: { round: true } }, technicalSheet: true },
-    });
-
-    if (nextClientId !== undefined && available('serviceVisit')) {
-      await db('serviceVisit').updateMany({
-        where: {
-          poolId: id,
-          status: { notIn: ['DONE', 'COMPLETED', 'CANCELLED'] },
-        },
-        data: serviceVisitBaseData({ clientId: nextClientId }),
-      }).catch(() => null);
-    }
-
-    return res.json({ ok: true, pool });
-  } catch (error) {
-    return res.status(500).json({ ok: false, error: error.message });
-  }
-});
+router.put('/pools/:id', require('../controllers/poolController').updatePool);
 
 
 router.post('/pools/:id/archive', async (req, res) => {

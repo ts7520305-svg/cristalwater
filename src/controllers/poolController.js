@@ -1,4 +1,3 @@
-const { prisma } = require("../prismaClient");
 const PoolBusiness = require("../business/pool/PoolBusiness");
 const PoolDashboardBusiness = require("../business/pool/PoolDashboardBusiness");
 
@@ -62,54 +61,6 @@ function cleanPoolPayload(body = {}, isCreate = false) {
     deletedAt: body.deletedAt === undefined ? undefined : body.deletedAt,
   });
 }
-function technicalSheetData(body = {}) {
-  const source = body.technicalSheet && typeof body.technicalSheet === "object" ? body.technicalSheet : body;
-  return definedOnly({
-    volumeM3: source.volumeM3 === undefined ? undefined : numberOrDefault(source.volumeM3, 0),
-    disinfectionType: cleanString(source.disinfectionType || source.type) || undefined,
-    targetPhMin: source.targetPhMin === undefined ? undefined : numberOrDefault(source.targetPhMin, 7.2),
-    targetPhMax: source.targetPhMax === undefined ? undefined : numberOrDefault(source.targetPhMax, 7.6),
-    targetChlorineMin: source.targetChlorineMin === undefined ? undefined : numberOrDefault(source.targetChlorineMin, 1),
-    targetChlorineMax: source.targetChlorineMax === undefined ? undefined : numberOrDefault(source.targetChlorineMax, 3),
-    targetAlkalinityMin: source.targetAlkalinityMin === undefined ? undefined : numberOrDefault(source.targetAlkalinityMin, 80),
-    targetAlkalinityMax: source.targetAlkalinityMax === undefined ? undefined : numberOrDefault(source.targetAlkalinityMax, 120),
-    targetOrpMinMv: source.targetOrpMinMv === undefined ? undefined : numberOrNull(source.targetOrpMinMv),
-    filterBrandModel: cleanString(source.filterBrandModel),
-    pumpHorsePower: source.pumpHorsePower === undefined ? undefined : numberOrNull(source.pumpHorsePower),
-    chlorinatorModel: cleanString(source.chlorinatorModel),
-    technicalRoomLocation: cleanString(source.technicalRoomLocation),
-    specialObservations: cleanString(source.specialObservations || source.notes),
-  });
-}
-async function ensureTechnicalSheet(tx, pool, body = {}) {
-  if (!tx.technicalSheet) return null;
-  const tsData = technicalSheetData({ ...body, volumeM3: body.volumeM3 ?? pool.volumeM3, type: body.type ?? pool.type });
-  return tx.technicalSheet.upsert({
-    where: { poolId: pool.id },
-    update: tsData,
-    create: {
-      poolId: pool.id,
-      volumeM3: numberOrDefault(body.volumeM3 ?? pool.volumeM3, 0),
-      disinfectionType: cleanString(body.disinfectionType || body.type || pool.type) || "CLORO",
-      ...tsData,
-    },
-  }).catch(() => null);
-}
-async function recordTechnicalSheetHistory(poolId, before, after, actor = "SYSTEM") {
-  if (!prisma.technicalHistory) return null;
-  return prisma.technicalHistory.create({
-    data: {
-      poolId,
-      type: "TECHNICAL_SHEET_CHANGE",
-      component: "Ficha Técnica",
-      message: "Alteração imutável da ficha técnica",
-      description: JSON.stringify({ actor, before: before || null, after: after || null, changedAt: new Date().toISOString() }),
-      performedAt: new Date(),
-      status: "DONE",
-    },
-  }).catch(() => null);
-}
-
 async function listPools(req, res) {
   try {
     const pools = await PoolDashboardBusiness.listPools(req.query);
@@ -151,33 +102,14 @@ async function createPool(req, res) {
 
 async function updatePool(req, res) {
   try {
-    const id = toInt(req.params.id);
-    if (!id) return res.status(400).json({ error: "ID inválido" });
-    const data = cleanPoolPayload(req.body, false);
-    const nextClientId = req.body?.clientId === undefined ? undefined : toInt(req.body.clientId);
-    if (req.body?.clientId !== undefined) {
-      if (!nextClientId) return res.status(400).json({ ok: false, error: "Cliente invalido para associar piscina" });
-      const client = await prisma.client.findUnique({ where: { id: nextClientId } });
-      if (!client || client.archiveStatus === "ARQUIVADO" || client.deletedAt) {
-        return res.status(400).json({ ok: false, error: "Cliente inexistente ou arquivado" });
-      }
-      data.clientId = nextClientId;
-    }
-
-    const before = await prisma.pool.findUnique({ where: { id }, include: { technicalSheet: true, equipment: true, technicalRoom: true, calculationProfile: true } });
-    const result = await prisma.$transaction(async (tx) => {
-      const pool = await tx.pool.update({ where: { id }, data });
-      const technicalSheet = await ensureTechnicalSheet(tx, pool, req.body);
-      return { pool, technicalSheet };
-    });
-    const after = await prisma.pool.findUnique({ where: { id }, include: { technicalSheet: true, equipment: true, technicalRoom: true, calculationProfile: true } });
-    await recordTechnicalSheetHistory(id, before, after, req.headers["x-user-email"] || "ADMIN");
+    const result = await require("../business/pool/PoolEditBusiness").update(req.params.id, req.body, req.user);
     return res.json({ ok: true, ...result });
   } catch (err) {
-    console.error(err);
+    console.error("updatePool error:", err.code || err.statusCode || "POOL_UPDATE_FAILED");
     const duplicateMessage = poolUniqueErrorMessage(err);
     if (duplicateMessage) return res.status(409).json({ ok: false, error: duplicateMessage });
-    return res.status(500).json({ error: "Erro atualizar piscina" });
+    return res.status(err.statusCode || 500).json({ ok: false,
+      error: err.statusCode ? err.message : "Alteração não confirmada. Atualize os dados antes de repetir." });
   }
 }
 
