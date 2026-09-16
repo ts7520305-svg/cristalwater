@@ -38,7 +38,7 @@ function serviceVisitDayWhere(start, end) {
   return {
     OR: [
       { plannedDate: { gte: start, lt: end } },
-      { date: { gte: start, lt: end } },
+      { plannedDate: null, date: { gte: start, lt: end } },
       { startAt: { gte: start, lt: end } },
       { endAt: { gte: start, lt: end } }
     ]

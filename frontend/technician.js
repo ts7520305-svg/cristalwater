@@ -84,36 +84,18 @@ let visits = [];
 
 let isSyncing = false;
 
-const ROUTE_STATE_PREFIX = "cristalwater_route_state";
-
-function todayRouteKey(){
-
+let routeLoadRevision = 0, routeServerConfirmedAt = null, routeViewSource = '', routeCacheWarning = '', routeVisibleDay = null;
+function todayRouteKey() {
   const now = new Date();
-
-  return [
-    now.getFullYear(),
-    String(now.getMonth() + 1).padStart(2, "0"),
-    String(now.getDate()).padStart(2, "0")
-  ].join("-");
+  return [now.getFullYear(), String(now.getMonth() + 1).padStart(2, "0"), String(now.getDate()).padStart(2, "0")].join("-");
 }
-
-function routeStateKey(){
-  const technicianId = user?.id ? String(user.id) : "anon";
-  return `${ROUTE_STATE_PREFIX}:${technicianId}:${todayRouteKey()}`;
+function readRouteState() {
+  try { return window.CWLegacyRouteCache.read(legacyWriteSession, todayRouteKey()); }
+  catch (error) { routeCacheWarning = error.message; return null; }
 }
-
-function readRouteState(){
-  try {
-    return JSON.parse(localStorage.getItem(routeStateKey()) || "null");
-  } catch (_) {
-    return null;
-  }
-}
-
-function writeRouteState(state){
-  try {
-    localStorage.setItem(routeStateKey(), JSON.stringify(state));
-  } catch (_) {}
+function showRouteStatus(message) {
+  const status = document.getElementById('status');
+  if (status) status.textContent = message || (routeViewSource === 'offline' ? 'Rota offline da conta atual, consultada em ' + routeServerConfirmedAt + '. Confirme alterações com o escritório.' : 'Rota atualizada para ' + routeVisibleDay + '.') + (routeCacheWarning ? ' ' + routeCacheWarning : '');
 }
 
 function isVisitCompleted(visit){
@@ -135,54 +117,30 @@ function activeVisitId(){
   return nextPendingVisitId();
 }
 
-function persistRouteSnapshot(nextVisits, extra = {}){
+function persistRouteSnapshot(nextVisits, extra = {}) {
+  const previous = readRouteState();
   const snapshot = {
-    day: todayRouteKey(),
-    technicianId: user?.id || null,
+    v: 2, owner: legacyWriteSession.owner, technicianId: legacyWriteSession.technicianId, day: todayRouteKey(),
+    serverConfirmedAt: routeServerConfirmedAt || previous?.serverConfirmedAt,
     activeVisitId: extra.activeVisitId || nextPendingVisitId(nextVisits),
-    visits: Array.isArray(nextVisits) ? nextVisits : [],
-    pendingSyncVisitIds: Array.isArray(extra.pendingSyncVisitIds) ? extra.pendingSyncVisitIds : (readRouteState()?.pendingSyncVisitIds || []),
-    updatedAt: new Date().toISOString(),
-    source: extra.source || "server",
+    visits: nextVisits, pendingSyncVisitIds: nextVisits.filter(visit => visit.pendingSync).map(visit => visit.id),
+    updatedAt: new Date().toISOString(), source: extra.source || 'server'
   };
-
-  writeRouteState(snapshot);
-  saveLocalData("offline_visits", snapshot.visits);
+  try { window.CWLegacyRouteCache.save(snapshot, legacyWriteSession); routeCacheWarning = ''; }
+  catch (error) { routeCacheWarning = 'A rota não ficou guardada para uso offline. ' + error.message; }
   return snapshot;
 }
-
-function mergeRouteVisits(serverVisits = [], snapshot = null){
-  const localVisits = Array.isArray(snapshot?.visits) ? snapshot.visits : [];
-  const localById = new Map(localVisits.map((visit) => [String(visit.id), visit]));
-
-  const merged = (Array.isArray(serverVisits) ? serverVisits : []).map((serverVisit) => {
-    const localVisit = localById.get(String(serverVisit.id));
-    if (!localVisit) return serverVisit;
-
-    const localCompleted = isVisitCompleted(localVisit);
-    const serverCompleted = isVisitCompleted(serverVisit);
-
-    if (localVisit.pendingSync && localCompleted && !serverCompleted) {
-      return {
-        ...serverVisit,
-        ...localVisit,
-        pool: { ...(serverVisit.pool || {}), ...(localVisit.pool || {}) },
-        client: localVisit.client || serverVisit.client,
-        technician: { ...(serverVisit.technician || {}), ...(localVisit.technician || {}) },
-      };
-    }
-
-    return {
-      ...serverVisit,
-      pendingSync: false,
-      pool: { ...(serverVisit.pool || {}), ...(localVisit.pool || {}) },
-      client: localVisit.client || serverVisit.client,
-      technician: { ...(serverVisit.technician || {}), ...(localVisit.technician || {}) },
-    };
+function validVisitCoordinates(pool) {
+  return typeof pool?.latitude === 'number' && Number.isFinite(pool.latitude) && Math.abs(pool.latitude) <= 90 && typeof pool?.longitude === 'number' && Number.isFinite(pool.longitude) && Math.abs(pool.longitude) <= 180;
+}
+function mergeRouteVisits(serverVisits, completionRequests) {
+  const pending = new Map(completionRequests.map(record => [record.resourceId, record]));
+  return serverVisits.map(visit => {
+    const request = pending.get(visit.id);
+    // Current assignment, names, location and photos always come from the current response.
+    if (request && !isVisitCompleted(visit) && !['CANCELLED','CANCELED','ARCHIVED'].includes(visit.status)) return { ...visit, status: 'DONE', endAt: request.createdAt, pendingSync: true };
+    return { ...visit, pendingSync: !!request };
   });
-
-  const localOnly = localVisits.filter((visit) => !merged.some((item) => String(item.id) === String(visit.id)));
-  return [...merged, ...localOnly];
 }
 
 function markLocalVisitCompleted(id, { pendingSync = false } = {}){
@@ -203,6 +161,7 @@ function markLocalVisitCompleted(id, { pendingSync = false } = {}){
     pendingSyncVisitIds: visits.filter((visit) => visit.pendingSync).map((visit) => visit.id),
     source: pendingSync ? "offline-complete" : "online-complete",
   });
+  showRouteStatus();
 }
 
 // ======================================================
@@ -431,6 +390,13 @@ let offlineBarRevision = 0, legacyEntryGeneration = 0;
 const legacyWriteSession = window.CWFieldWriteStore.session();
 const legacyCompletionBusy = new Set();
 const legacyFormDrafts = new Map();
+function protectLegacyRouteSession() {
+  if (!window.CWFieldWriteStore.same(legacyWriteSession)) { ++routeLoadRevision; visits = []; document.getElementById('list')?.replaceChildren(); showRouteStatus('A sessão mudou. Reabra a página para consultar a rota da conta atual.'); }
+  else if (routeVisibleDay && routeVisibleDay !== todayRouteKey()) { visits = []; document.getElementById('list')?.replaceChildren(); routeVisibleDay = null; loadRoute(); }
+}
+window.addEventListener('storage', protectLegacyRouteSession);
+window.addEventListener('offline', () => { if (window.CWFieldWriteStore.same(legacyWriteSession) && routeVisibleDay) { routeViewSource = 'offline'; showRouteStatus(); } });
+setInterval(protectLegacyRouteSession, 1000);
 window.addEventListener('pagehide', () => { legacyEntryGeneration++; });
 window.addEventListener('pageshow', () => updateOfflineBar());
 window.addEventListener('cw:field-write-change', () => updateOfflineBar());
@@ -585,97 +551,32 @@ function getAuthHeaders(){
 // ======================================================
 
 async function loadRoute() {
-  if (!window.CWFieldWriteStore.same(legacyWriteSession)) return;
-
+  const captured = legacyWriteSession, ticket = ++routeLoadRevision, day = todayRouteKey();
+  if (!window.CWFieldWriteStore.same(captured)) return;
+  const current = () => ticket === routeLoadRevision && day === todayRouteKey() && window.CWFieldWriteStore.same(captured);
+  routeCacheWarning = '';
   try {
-
-    if (!navigator.onLine){
-
+    if (!navigator.onLine) {
       const snapshot = readRouteState();
-      const offlineVisits =
-        snapshot?.visits || getLocalData("offline_visits") || [];
-
-      visits = offlineVisits;
-
-      if (snapshot?.activeVisitId) {
-        persistRouteSnapshot(visits, {
-          activeVisitId: snapshot.activeVisitId,
-          pendingSyncVisitIds: snapshot.pendingSyncVisitIds || [],
-          source: "offline-recover",
-        });
-      }
-
+      const pending = snapshot ? await window.CWFieldWriteStore.records('VISIT_COMPLETION', captured) : [];
+      if (!current()) return;
+      visits = mergeRouteVisits(snapshot?.visits || [], pending); routeVisibleDay = day; routeServerConfirmedAt = snapshot?.serverConfirmedAt || null; routeViewSource = 'offline';
       renderVisits();
-
+      showRouteStatus(snapshot ? null : routeCacheWarning || 'Não há rota offline confirmada para esta conta e dia. Abra a ronda com ligação.');
       return;
     }
-
-    const res =
-      await fetch(
-        `${API}/visits/today`,
-        {
-          headers:{
-            "Authorization": `Bearer ${token}`
-          }
-        }
-      );
-
-    if (!window.CWFieldWriteStore.same(legacyWriteSession)) return;
-    if (res.status === 401 || res.status === 403){
-
-      redirectToLogin();
-
-      return;
-    }
-
-    const data =
-      await res.json();
-    if (!window.CWFieldWriteStore.same(legacyWriteSession)) return;
-
-    const allVisits =
-      data.visits || [];
-
-    visits =
-      allVisits.filter(v =>
-
-        String(
-          v.technicianName || ""
-        ).toLowerCase()
-
-        ===
-
-        String(user.name || user.fullName || "").toLowerCase()
-      ||
-        String(v.technicianId || "") === String(user.id || "")
-      ||
-        String(v.technician?.id || "") === String(user.id || "")
-    );
-
-    visits = mergeRouteVisits(visits, readRouteState());
-
-    persistRouteSnapshot(visits, {
-      activeVisitId: activeVisitId(),
-      source: "server",
-    });
-
-    renderVisits();
-
-  } catch (err) {
-
-    console.error(
-      "Erro rota:",
-      err
-    );
-
-    const status =
-      document.getElementById("status");
-
-    if (status){
-
-      status.innerText =
-        "Erro carregar ronda";
-    }
-  }
+    const response = await fetch(API + '/visits/today?date=' + encodeURIComponent(day), { headers: { Authorization: 'Bearer ' + captured.token }, cache: 'no-store' });
+    if (!current()) return;
+    if (response.status === 401 || response.status === 403) { redirectToLogin(); return; }
+    const data = await response.json(); if (!current()) return;
+    const ids = new Set();
+    if (!response.ok || data.ok !== true || data.date !== day || data.technicianId !== captured.technicianId || !Array.isArray(data.visits) || data.total !== data.visits.length || data.visits.some(visit => { if (!visit || !Number.isSafeInteger(visit.id) || visit.id <= 0 || ids.has(visit.id) || visit.technicianId !== captured.technicianId || typeof visit.status !== 'string') return true; ids.add(visit.id); return false; })) throw Error('Não foi possível confirmar a rota desta conta e dia. A lista anterior foi conservada; tente atualizar com rede.');
+    const previous = readRouteState();
+    const pending = await window.CWFieldWriteStore.records('VISIT_COMPLETION', captured); if (!current()) return;
+    visits = mergeRouteVisits(data.visits, pending); routeVisibleDay = day; routeServerConfirmedAt = new Date().toISOString(); routeViewSource = 'server';
+    persistRouteSnapshot(visits, { activeVisitId: previous?.activeVisitId && visits.some(visit => visit.id === previous.activeVisitId && !isVisitCompleted(visit)) ? previous.activeVisitId : nextPendingVisitId(visits), source: 'server' });
+    renderVisits(); showRouteStatus();
+  } catch (error) { if (current()) showRouteStatus(error.message || 'Não foi possível carregar a ronda. A lista anterior foi conservada.'); }
 }
 
 // ======================================================
@@ -699,7 +600,7 @@ function renderVisits() {
 
     list.innerHTML = `
       <div class="card">
-        Sem visitas hoje
+        ${routeViewSource === 'offline' && !routeServerConfirmedAt ? 'Rota indisponível sem confirmação desta conta e dia.' : 'Sem visitas hoje'}
       </div>
     `;
 
@@ -717,7 +618,7 @@ function renderVisits() {
       v.pool?.name || "-";
 
     const photos =
-      v.VisitPhoto || [];
+      v.photos || v.VisitPhoto || [];
 
     const beforePhotos =
       photos.filter(
@@ -874,10 +775,11 @@ function renderVisits() {
         <button
           class="map-btn"
           data-action="map"
-          data-lat="${v.pool?.latitude || 0}"
-          data-lng="${v.pool?.longitude || 0}"
+          data-lat="${v.pool?.latitude ?? ''}"
+          data-lng="${v.pool?.longitude ?? ''}"
+          ${validVisitCoordinates(v.pool) ? '' : 'disabled'}
         >
-          Navegar
+          ${validVisitCoordinates(v.pool) ? 'Navegar' : 'Sem coordenadas: confirmar morada'}
         </button>
 
       </div>
@@ -1004,10 +906,11 @@ async function sendInternalAlert(){
 // ======================================================
 
 function openGoogleMaps(lat, lng) {
-
+  if (!window.CWFieldWriteStore.same(legacyWriteSession)) return;
+  if (lat == null || lng == null || String(lat).trim() === '' || String(lng).trim() === '' || !validVisitCoordinates({ latitude: Number(lat), longitude: Number(lng) })) { alert('Coordenadas indisponíveis. Confirme a morada com o escritório.'); return; }
   window.open(
     `https://www.google.com/maps?q=${lat},${lng}`,
-    "_blank"
+    "_blank", "noopener,noreferrer"
   );
 }
 

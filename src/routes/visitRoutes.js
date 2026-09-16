@@ -109,7 +109,7 @@ router.param('id', async (req,res,next,value)=>{
 // ======================================================
 
 router.get("/today", async (req, res) => {
-
+  res.set('Cache-Control', 'private, no-store');
   try {
     const scopedQuery = { ...(req.query || {}) };
     if (roleMatches(req.user?.role, "TECHNICIAN") && !roleMatches(req.user?.role, "ADMIN")) {
@@ -204,10 +204,10 @@ router.get("/today", async (req, res) => {
             v.pool?.name || "-",
 
           latitude:
-            v.pool?.latitude || 0,
+            v.pool?.latitude ?? null,
 
           longitude:
-            v.pool?.longitude || 0
+            v.pool?.longitude ?? null
         },
 
         client: {
