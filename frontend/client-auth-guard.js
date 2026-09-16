@@ -48,7 +48,11 @@ try {
 const clientPortalAdminPreview = user?.role === "ADMIN"
   && /^\/client-portal(?:\.html)?\/?$/.test(window.location.pathname);
 
-if (!user || (user.role !== "CLIENT" && !clientPortalAdminPreview)) {
+const clientChatAdminRedirect = user?.role === "ADMIN"
+  && /^\/client_chat(?:\.html)?\/?$/.test(window.location.pathname);
+if (clientChatAdminRedirect) window.location.replace('/chat');
+
+if (!user || (user.role !== "CLIENT" && !clientPortalAdminPreview && !clientChatAdminRedirect)) {
 
   alert("Acesso reservado ao cliente.");
 

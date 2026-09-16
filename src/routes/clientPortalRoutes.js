@@ -132,49 +132,9 @@ router.get("/:clientId(\\d+)/messages", auth("CLIENT"), async (req, res) => {
   return res.json({ ok: true, messages });
 });
 
-router.post("/:clientId(\\d+)/messages", auth("CLIENT"), async (req, res) => {
-  const clientId = Number(req.params.clientId);
-  if (!ensureClientOwnership(req, res, clientId)) return;
-  const text = String(req.body?.text || req.body?.message || "").trim();
-  if (!text) return res.status(400).json({ ok: false, error: "Mensagem obrigatória" });
-
-  const client = await prisma.client.findUnique({ where: { id: clientId }, select: { id: true, name: true } });
-  if (!client) return res.status(404).json({ ok: false, error: "Cliente não encontrado" });
-
-  const message = await prisma.clientMessage.create({
-    data: {
-      clientId,
-      sender: client.name || "Cliente",
-      senderType: "CLIENT",
-      message: text,
-      text,
-      messageType: "TEXT",
-      isReadByAdmin: false,
-      seen: false,
-    },
-  });
-
-  await prisma.communicationLog.create({
-    data: {
-      clientId,
-      channel: "PORTAL_CLIENTE",
-      message: text,
-      referenceId: clientId,
-    },
-  }).catch(() => null);
-
-  if (global.io) {
-    global.io.to(`client_${clientId}`).emit("newMessage", message);
-    global.io.emit("new-notification", {
-      id: `chat-${clientId}-${message.id}`,
-      clientId,
-      type: "CHAT_MESSAGE",
-      message: text,
-      createdAt: message.createdAt,
-    });
-  }
-
-  return res.status(201).json({ ok: true, message });
+router.post("/:clientId(\\d+)/messages", auth("CLIENT"), (req, res) => {
+  if (!ensureClientOwnership(req, res, req.params.clientId)) return;
+  return require('../controllers/clientMessageWriteController').write(true, 201)(req, res);
 });
 
 router.post("/:clientId(\\d+)/visit-requests", auth("CLIENT"), async (req, res) => {

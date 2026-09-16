@@ -4,6 +4,7 @@
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#050b16">
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Cristal Water - Mensagens do Cliente</title>
 
 <link rel="stylesheet" href="/ui/foundation.css">
@@ -63,15 +64,23 @@ button {
   color: white;
   border: none;
 }
+html body .msg.me small,html body .msg.me a{color:#fff!important}html body .msg.other small{color:#334155!important}h1{font-size:24px}*{box-sizing:border-box}.msg{overflow-wrap:anywhere;white-space:pre-wrap}textarea{min-width:0;font-size:16px}button{min-height:44px;border-radius:8px}.cw-client-chat-recovery{max-width:100%}@media(max-width:420px){.msg{max-width:94%}.input{display:grid;gap:8px}.input button{width:100%}}
 </style>
 
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
   <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
-  <link rel="stylesheet" href="/cw-block2-shell.css">
   <script src="/client-auth-guard.js"></script>
   <link rel="stylesheet" href="/ui/design-system.css">
+<style>
+html body.cw-v2-shell-enabled{padding-top:84px;padding-bottom:100px;}
+html body.cw-v2-shell-enabled > .cw-v2-shell-topbar{position:fixed!important;top:0;left:0;right:0;}
+html body.cw-v2-shell-enabled > .cw-v2-mobile-primary{position:fixed!important;}
+html body.cw-v2-shell-enabled > .cw-v2-shell-sidebar{display:none!important;}
+html body .header,html body .messages,html body .input,html body .cw-client-chat-recovery{max-width:1000px;margin-left:auto;margin-right:auto;}
+@media(max-width:900px){html body.cw-v2-shell-enabled{padding-top:128px;}html body.cw-v2-shell-enabled .cw-v2-shell-topbar .cw-v2-topbar{min-height:128px;}}
+</style>
 </head>
 
 <body data-cw-role="CLIENT" data-required-role="CLIENT">
@@ -81,18 +90,20 @@ button {
   </div>
 
 <div class="header">
-  Cliente ID:
-  <input id="clientId">
-  <button onclick="load()">Abrir</button>
+  <h1>Conversa com a administração</h1>
+  <input id="clientId" type="hidden">
+  <button type="button" onclick="load()">Atualizar</button>
 </div>
 
 <div id="messages" class="messages"></div>
 
 <div class="input">
-  <textarea id="text"></textarea>
-  <button onclick="send()">Enviar</button>
+  <textarea id="text" aria-label="Mensagem" maxlength="10000"></textarea>
+  <button id="sendBtn" type="button" onclick="send()">Enviar</button>
 </div>
 
+<script src="/cw-auth-download.js"></script>
+<script src="/cw-client-chat-send.js"></script>
 <script src="/client_chat.js"></script>
 
 <script src="/cristal-help-data.js"></script>
@@ -101,7 +112,6 @@ button {
 <script src="/ui/core/navigation-context.js"></script>
   <script src="/crystal-os-v2-shell.js"></script>
   <script src="/crystal-os-v2-nav.js"></script>
-<script src="/cw-block2-shell.js"></script>
   <script defer src="/ui/design-system.js"></script>
 </body>
 </html>

@@ -4,6 +4,10 @@ import vm from 'node:vm';
 
 const source = readFileSync(new URL('../frontend/client-portal.js', import.meta.url), 'utf8');
 function harness() {
+  // The sender has its own real-browser persistence/transport coverage. These
+  // tests exercise the portal's consumer callbacks and selection lifecycle.
+  const recovery = { active: () => true, begin: () => ({}), accepts: () => true, headers: () => ({}), render() {}, readError() {}, sendText: vi.fn(), sendFile: vi.fn() };
+  const senderFactory = vi.fn(() => recovery);
   const nodes = new Map();
   const node = id => {
     if (!nodes.has(id)) nodes.set(id, { value: '', innerHTML: '', textContent: '', hidden: false, children: [], appendChild(child) { this.children.push(child); }, dataset: {} });
@@ -15,6 +19,7 @@ function harness() {
     localStorage: { getItem: () => null }, window: { addEventListener() {} },
     document: { getElementById: node, addEventListener() {}, querySelector: () => null, createElement: () => ({ dataset: {} }) },
     fetch: vi.fn(),
+    CWClientChat: { create: senderFactory },
   });
   vm.runInContext(source, context);
   vm.runInContext(`
@@ -22,14 +27,14 @@ function harness() {
     renderPools = renderPoolSchedules = renderSummary = renderClientFocus = renderPaymentInstructions = renderServiceHistory = renderInvoices = () => {};
     isAdminUser = () => false;
   `, context);
-  return { context, node, run: script => vm.runInContext(script, context) };
+  return { context, node, recovery, senderOptions: senderFactory.mock.calls[0][0], run: script => vm.runInContext(script, context) };
 }
 function deferred() {
   let resolve, reject;
   const promise = new Promise((yes, no) => { resolve = yes; reject = no; });
   return { promise, resolve, reject };
 }
-const response = data => ({ ok: true, json: async () => data });
+const response = data => ({ ok: true, json: async () => ({ ok: true, ...data }) });
 
 describe('client portal asynchronous context isolation', () => {
   it('ignores an old portal success after switching clients', async () => {
@@ -72,13 +77,15 @@ describe('client portal asynchronous context isolation', () => {
   it('does not clear a new client draft after an old send succeeds', async () => {
     const h = harness(), pending = deferred();
     h.node('messageInput').value = 'Mesmo texto';
-    h.context.fetch.mockReturnValueOnce(pending.promise);
+    h.recovery.sendText.mockReturnValueOnce(pending.promise);
     const sending = h.run('sendMessage()');
     h.run('clientId = 2; ++clientSelectionRevision;');
-    pending.resolve(response({ message: { id: 10, clientId: 1, text: 'Mesmo texto' } }));
+    pending.resolve();
+    await h.senderOptions.confirmed({ id: 10, clientId: 1, text: 'Mesmo texto' });
     await sending;
     expect(h.node('messageInput').value).toBe('Mesmo texto');
     expect(h.node('chatBox').children).toHaveLength(0);
+    expect(h.context.fetch).not.toHaveBeenCalled();
   });
   it('does not allow actions until the selected client has loaded', async () => {
     const h = harness();
@@ -105,6 +112,13 @@ describe('client portal asynchronous context isolation', () => {
 });
 
 describe('administrator client preview guard', () => {
+  it('redirects the old client chat link without ending the administrator session', () => {
+    const storage = { getItem: key => key === 'token' ? 'qa-token' : JSON.stringify({ id: 99, role: 'ADMIN' }), setItem: vi.fn(), clear: vi.fn() };
+    const location = { pathname: '/client_chat', replace: vi.fn() }, alert = vi.fn();
+    vm.runInNewContext(readFileSync(new URL('../frontend/client-auth-guard.js', import.meta.url), 'utf8'), { localStorage: storage, window: { location }, alert, console });
+    expect(location.replace).toHaveBeenCalledWith('/chat');
+    expect(storage.clear).not.toHaveBeenCalled(); expect(storage.setItem).not.toHaveBeenCalled(); expect(alert).not.toHaveBeenCalled();
+  });
   it('preserves admin session and does not set admin ID as client ID', () => {
     const storage = { getItem: key => key === 'token' ? 'qa-token' : JSON.stringify({ id: 99, role: 'ADMIN' }), setItem: vi.fn(), clear: vi.fn() };
     const location = { pathname: '/client-portal', href: '/client-portal?clientId=1' };

@@ -108,6 +108,9 @@ model ClientAccess {
 
 model ClientMessage {
   id            Int       @id @default(autoincrement())
+  actorKey      String?
+  requestId     String?
+  payloadHash   String?
   clientId      Int
   sender        String?
   senderType    String?
@@ -122,6 +125,7 @@ model ClientMessage {
   seenAt        DateTime?
   client        Client    @relation(fields: [clientId], references: [id])
 
+  @@unique([actorKey, requestId])
   @@index([clientId])
   @@index([createdAt])
   @@index([isReadByAdmin])

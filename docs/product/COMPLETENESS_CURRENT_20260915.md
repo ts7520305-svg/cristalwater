@@ -1,6 +1,6 @@
 # Cristal Water — matriz atual de conclusão
 
-Atualizada após TASK181 em 16/09/2026. Substitui a fotografia inicial da TASK82 para decidir o próximo trabalho, preservando esse diagnóstico em `COMPLETENESS_20260915.md`. Esta matriz cruza os relatórios posteriores e as rotas atualmente revistas; não constitui auditoria exaustiva de todas as páginas/APIs nem conclusão a 100%.
+Atualizada após TASK183 em 16/09/2026. Substitui a fotografia inicial da TASK82 para decidir o próximo trabalho, preservando esse diagnóstico em `COMPLETENESS_20260915.md`. Esta matriz cruza os relatórios posteriores e as rotas atualmente revistas; não constitui auditoria exaustiva de todas as páginas/APIs nem conclusão a 100%.
 
 ## Implementação e evidência atual
 
@@ -16,6 +16,7 @@ Atualizada após TASK181 em 16/09/2026. Substitui a fotografia inicial da TASK82
 | Envio de documentos/lembrete manual | Documento autenticado, publicação no chat, preparação e estados verdadeiros de transporte; manual por UUID/canal | TASK160–167 e 174. Fornecedores simulados; canais externos e confirmação final de entrega pendentes. |
 | Identidades e acessos | ADMIN ativo nas entradas antigas revistas; atribuição nos chats por recurso; perfil próprio e rota limitada a cada técnico; conversa CLIENT restrita por REST/Socket.IO; anexos novos e históricos com titularidade; destinatários User/Technician separados nas notificações | TASK161–181. Novas rotas ou aliases continuam a exigir revisão própria. Sem revogação de cópias previamente descarregadas. |
 | Chat da equipa | APIs consolidadas e armazenamento transacional; ecrã partilhado por técnicos/chefes/ADMIN, rascunho e pedido por conta, confirmação validada e recuperação sem duplicar | TASK177–178; `INTERNAL_CHAT_20260916.md` e `STAFF_CHAT_UI_20260916.md`. Mobile/desktop, cinco idiomas e falhas ensaiados. Reenvio explícito; identidade histórica não presumida. Não demonstra operação prolongada num telefone real. |
+| Conversas CLIENT/ADMIN | Três APIs PostgreSQL e upload com envio identificado/atómico; os três ecrãs conservam pedido e anexo, validam a confirmação e recuperam após reload/resposta perdida | TASK182–183; `CLIENT_CHAT_RECOVERY_20260916.md`. Sete regressões e UI mobile/desktop aprovadas. Chamadas antigas sem UUID e aliases JSON conservam limites próprios. Eventos após commit não constituem entrega durável por fornecedor. |
 | Notificações | Lista completa e prioridade crítica, leitura atómica com confirmação exata, primeira data conservada e lote limitado aos avisos apresentados; estado conservado em falhas nos três ecrãs | TASK179–181; `NOTIFICATION_CONFIRMATION_20260916.md`. Ler não resolve água/bomba. CLIENT usa texto literal e titularidade. Sem ensaio de volume de produção; aliases antigos não migrados conservam contrato próprio. |
 | Idiomas/configurações | PT/EN/FR/ES/DE no dicionário e percursos operacionais ensaiados; capacidades fixas são apresentadas como tal | TASK84, 95, 99, 132. Tradução e apresentação de todos os textos/PDFs ainda não auditadas integralmente. |
 | Retenção/backup | Pré-visualização e limpeza manual controlada de GPS; monitorização de idade da cópia local; restauro em QA | TASK96–98 e CI. Cópia externa, agendamento e alerta real de falha no VPS pendentes. Não há eliminação automática de histórico crítico. |
@@ -23,7 +24,7 @@ Atualizada após TASK181 em 16/09/2026. Substitui a fotografia inicial da TASK82
 
 ## Próximo trabalho no código
 
-1. Garantir confirmação e recuperação do envio nas conversas CLIENT/ADMIN usadas pelos ecrãs. O ecrã antigo `client_chat.js` ainda limpa o texto sem validar a resposta; rever primeiro APIs e aliases, conservando titularidade, identidade, anexos e histórico. A conversa da equipa já foi integrada na TASK178.
+1. Consolidar os aliases JSON `/api/clientChat` e `/api/client-chat` com a conversa persistida, preservando o arquivo, a compatibilidade e a incerteza de identidade histórica. Os três ecrãs atuais já usam a confirmação recuperável da TASK182–183; não repetir esse trabalho.
 2. Rever individualmente as escritas antigas protegidas na TASK170: ter autenticação não garante atomicidade, versão ou recuperação de reenvio. Priorizar as rotas realmente utilizadas pelos ecrãs.
 3. Concluir inventário visual por perfil de páginas, erros, carregamento, vazio, traduções e PDFs. Os ecrãs já ensaiados não equivalem à revisão de todas as páginas.
 4. Tratar vídeo, custos reais de rentabilidade e IA offline/aprendizagem como requisitos próprios com critérios verificáveis, reutilizando os módulos existentes.
@@ -43,4 +44,4 @@ Base remota TASK171: `90c4d01a7d80f7a0c5aee3cb4de33a13a994d2bf`, árvore `d0b68a
 
 TASK172–175 confirmadas no workflow `35028280336`, commit `05c8632a2d1c7462138b489826cff3baa3d8e15e`: 79 grupos e restauro aprovados. TASK176 confirmada no workflow `35029272245`, commit `14306f306af676bc7bfec321db9adb600b2cb546`: 80 grupos e restauro de 99 tabelas/18 ficheiros aprovados. TASK177 confirmada no workflow `35057153680`, commit `321a8fd84bbd437344495100719c3d64802fb3ed`: 81 grupos, dez migrações e restauro de 101 tabelas/18 ficheiros aprovados.
 
-TASK178–181 acrescentam dois grupos, com seis regressões locais finais aprovadas em `field-qa-runtime/run-1789536438369`. Publicar e verificar a árvore correspondente no CI com 83 grupos e restauro; não usar o sucesso da TASK177 como prova desta alteração.
+TASK178–181 confirmadas no workflow `35060119620`, commit `e48b62a818bacb13707cb0496dbd2c94c5040151`: 83 grupos e restauro de 101 tabelas/18 ficheiros aprovados. TASK182–183 acrescentam dois grupos e uma migração aditiva. Sete regressões locais em `field-qa-runtime/run-1789538958038`; revisão final de UI em `run-1789539318979` e repetição final do contrato aprovada em `run-1789539397352`. Publicar e verificar a árvore correspondente com 85 grupos, onze migrações e restauro; não usar o sucesso da base como prova da alteração nova.

@@ -42,6 +42,12 @@
     typing: document.querySelector("#typing"),
   };
 
+  const recovery = CWClientChat.create({ clientId: () => state.activeClientId, input: els.text, sendButton: els.sendBtn, fileInput: els.fileInput, fileButton: els.fileBtn,
+    mount: document.querySelector('.chat-area'), list: els.messages, canSend: () => !!state.activeClientId,
+    invalidate: () => { els.clientList.replaceChildren(); state.messages = []; state.conversations = []; setHeader(null); socket?.disconnect(); },
+    confirmed: async message => { if (Number(message.clientId) === state.activeClientId) await openConversation(state.activeClientId); } });
+  let overviewRevision = 0;
+
   function esc(value) {
     return String(value ?? "").replace(/[&<>'"]/g, (char) => ({
       "&": "&amp;",
@@ -78,13 +84,16 @@
     const headers = options.body instanceof FormData
       ? authHeaders(options.headers || {})
       : authHeaders({ "Content-Type": "application/json", ...(options.headers || {}) });
+    if (!recovery.active()) throw Error("A sessão mudou.");
+    Object.assign(headers, recovery.headers());
     const response = await fetch(`${API}${path}`, {
       cache: "no-store",
       headers,
       ...options,
     });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok || data.ok === false) {
+    if (!recovery.active()) throw Error("A sessão mudou.");
+    if (!response.ok || data.ok !== true) {
       throw new Error(data.error || data.message || "Erro no servidor");
     }
     return data;
@@ -237,7 +246,9 @@
   }
 
   async function loadConversations() {
+    await recovery.ready; const stamp = ++overviewRevision, selected = state.activeClientId;
     const data = await api(`/chat/overview${unreadFilter ? "?filter=unread" : ""}`);
+    if (stamp !== overviewRevision || selected !== state.activeClientId || !Array.isArray(data.conversations)) return;
     state.totalUnread = Number(data.totalUnread || 0);
     state.conversations = Array.isArray(data.conversations) ? data.conversations : [];
     renderConversationList();
@@ -259,61 +270,28 @@
   }
 
   async function openConversation(clientId, options = {}) {
-    state.activeClientId = Number(clientId);
-    const client = state.conversations.find((item) => Number(item.id) === Number(clientId));
-    setHeader(client);
-
-    const data = await api(`/chat/client/${state.activeClientId}`);
-    state.messages = Array.isArray(data.messages) ? data.messages : [];
-    renderMessages();
-
-    await api(`/client-messages/seen/${state.activeClientId}`, { method: "POST" }).catch(() => null);
-
-    const current = state.conversations.find((item) => Number(item.id) === Number(clientId));
-    if (current) current.unreadCount = 0;
-    if (!options.preserveList) renderConversationList();
+    const selected = Number(clientId), changed = selected !== state.activeClientId;
+    state.activeClientId = selected;
+    recovery.selectionChanged();
+    const client = state.conversations.find(item => Number(item.id) === selected); setHeader(client);
+    if (changed) { state.messages = []; els.messages.replaceChildren(); }
+    await recovery.ready; await recovery.sync();
+    const read = recovery.begin(); if (!read) return;
+    try {
+      const data = await api(`/chat/client/${selected}`);
+      if (!recovery.accepts(read)) return;
+      if (!Array.isArray(data.messages)) throw Error('Conversa inválida');
+      state.messages = data.messages; renderMessages();
+      await api(`/client-messages/seen/${selected}`, { method: 'POST' });
+      if (!recovery.accepts(read)) return;
+      const current = state.conversations.find(item => Number(item.id) === selected);
+      if (current) current.unreadCount = 0;
+      if (!options.preserveList) renderConversationList();
+    } catch { if (recovery.accepts(read)) recovery.readError(); }
   }
 
-  async function sendMessage() {
-    const text = String(els.text.value || "").trim();
-    if (!state.activeClientId) {
-      alert("Escolha uma conversa primeiro.");
-      return;
-    }
-    if (!text) {
-      alert("Escreva a mensagem.");
-      return;
-    }
-
-    const data = await api("/chat", {
-      method: "POST",
-      body: JSON.stringify({
-        clientId: state.activeClientId,
-        sender: "admin",
-        text,
-      }),
-    });
-
-    els.text.value = "";
-    state.messages.push(data.message);
-    renderMessages();
-    await loadConversations();
-
-    if (socket) socket.emit("sendMessage", data.message);
-  }
-
-  async function sendFile(file) {
-    if (!state.activeClientId || !file) return;
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("clientId", state.activeClientId);
-    formData.append("sender", "Administracao Cristal Water");
-    const data = await api("/client-messages/upload", { method: "POST", body: formData });
-    state.messages.push(data.message);
-    renderMessages();
-    await loadConversations();
-    if (socket) socket.emit("sendMessage", data.message);
-  }
+  async function sendMessage() { return recovery.sendText(); }
+  async function sendFile(file) { return recovery.sendFile(file); }
 
   els.search.addEventListener("input", () => renderConversationList());
   els.sendBtn.addEventListener("click", () => sendMessage().catch((error) => alert(error.message)));
@@ -327,7 +305,6 @@
   els.fileBtn.addEventListener("click", () => els.fileInput.click());
   els.fileInput.addEventListener("change", async () => {
     const file = els.fileInput.files?.[0];
-    els.fileInput.value = "";
     if (file) await sendFile(file).catch((error) => alert(error.message));
   });
   if (els.adminPresenceToggle) {
@@ -340,13 +317,10 @@
     socket.on("connect", () => {
       broadcastAdminPresence();
     });
-    socket.on("newMessage", async (message) => {
-      if (Number(message.clientId) === Number(state.activeClientId)) {
-        state.messages.push(message);
-        renderMessages();
-        await api(`/client-messages/seen/${state.activeClientId}`, { method: "POST" }).catch(() => null);
-      }
-      await loadConversations().catch(() => null);
+    socket.on("newMessage", async message => {
+      if (!recovery.active()) return;
+      if (Number(message.clientId) === state.activeClientId) await openConversation(state.activeClientId);
+      else await loadConversations().catch(() => null);
     });
     socket.on("typing", () => {
       els.typing.textContent = "Cliente a escrever...";

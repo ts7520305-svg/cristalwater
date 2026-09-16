@@ -13,7 +13,6 @@ function canMessage(req,res,clientId) {
   if(req.file?.path) require('fs').unlinkSync(req.file.path);
   res.status(403).json({ok:false,error:'Sem permissão para aceder a esta conversa.'});return false;
 }
-function senderFor(req) { return normalizeRole(req.user.role)==='CLIENT'?'Cliente':req.user.name||'Administração'; }
 
 
 const uploadDir = resolveUploadSubdir('documents/client-chat');
@@ -36,40 +35,6 @@ function n(value) {
   return Number.isFinite(number) ? number : null;
 }
 
-function isClientSender(value) {
-  const normalized = String(value || "").trim().toLowerCase();
-  return normalized === "cliente" || normalized === "client";
-}
-
-function messagePayload({ clientId, sender, message }) {
-  const rawSender = String(sender || "Cliente").trim();
-  const fromClient = isClientSender(rawSender);
-  return {
-    clientId: n(clientId),
-    sender: fromClient ? "Cliente" : (rawSender || "Administracao Cristal Water"),
-    senderType: fromClient ? "CLIENT" : "ADMIN",
-    message,
-    text: message,
-    isReadByAdmin: !fromClient,
-    seen: !fromClient,
-    seenAt: fromClient ? null : new Date(),
-  };
-}
-
-function emitClientMessage(clientId, message) {
-  if (!global.io || !clientId) return;
-  global.io.to(`client_${clientId}`).emit("newMessage", message);
-  if (message.senderType === "CLIENT") {
-    global.io.emit("new-notification", {
-      id: `chat-${clientId}`,
-      clientId,
-      type: "CHAT_MESSAGE",
-      message: message.message || "Nova mensagem de cliente",
-      createdAt: message.createdAt,
-    });
-  }
-}
-
 router.get('/attachments/:messageId', require('../services/clientChatAttachmentService').download);
 
 router.get("/:clientId", async (req, res) => {
@@ -88,62 +53,31 @@ router.get("/:clientId", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
-  try {
-    if(!canMessage(req,res,req.body.clientId))return;
-    const payload = messagePayload({
-      clientId: req.body.clientId,
-      sender: senderFor(req),
-      message: req.body.message || req.body.text,
-    });
+router.post("/", require('../controllers/clientMessageWriteController').write());
 
-    if (!payload.clientId || !payload.message) {
-      return res.status(400).json({ ok: false, error: "Dados invalidos" });
-    }
-
-    const message = await prisma.clientMessage.create({ data: payload });
-    emitClientMessage(payload.clientId, message);
-    return res.json({ ok: true, message });
-  } catch (err) {
-    console.error("client-messages create error:", err);
-    return res.status(500).json({ ok: false, error: err.message });
-  }
-});
-
+async function removeUnreferenced(file, url) {
+  if (!file?.path) return;
+  // A failed commit acknowledgement may still have committed. Never remove an
+  // upload without first establishing that no message references it.
+  try { if (!await prisma.clientMessage.count({ where: { fileUrl: url } })) require('fs').rmSync(file.path, { force: true }); }
+  catch (error) { console.error('Preserving upload until reference can be checked:', error.message); }
+}
 router.post("/upload", upload.single("file"), async (req, res) => {
-  let persisted = false;
+  const fileUrl = req.file ? toPublicUploadUrl('documents', 'client-chat', req.file.filename) : null;
   try {
-    if (!req.body.clientId || !req.file) {
-      if (req.file?.path) require('fs').unlinkSync(req.file.path);
-      return res.status(400).json({ ok: false, error: "Dados invalidos" });
-    }
-
-    const fileUrl = toPublicUploadUrl('documents', 'client-chat', req.file.filename);
-    const ext = path.extname(req.file.originalname || "").toLowerCase();
-    const type = [".jpg", ".jpeg", ".png", ".gif", ".webp"].includes(ext)
-      ? "IMAGE"
-      : ext === ".pdf"
-        ? "PDF"
-        : "FILE";
-
-    if(!canMessage(req,res,req.body.clientId))return;
-    const payload = messagePayload({
-      clientId: req.body.clientId,
-      sender: senderFor(req),
-      message: fileUrl,
-    });
-    payload.messageType = type;
-    payload.fileUrl = fileUrl;
-    payload.fileName = req.file.originalname || req.file.filename;
-
-    const message = await prisma.clientMessage.create({ data: payload });
-    persisted = true;
-    emitClientMessage(payload.clientId, message);
-    return res.json({ ok: true, type, message });
-  } catch (err) {
-    console.error("client-messages upload error:", err);
-    if (!persisted && req.file?.path) require('fs').rmSync(req.file.path, { force: true });
-    return res.status(500).json({ ok: false, error: err.message });
+    if (!req.file) return res.status(400).json({ ok: false, error: 'Anexo obrigatório.' });
+    const name = req.body.fileName === undefined ? req.file.originalname : req.body.fileName;
+    if (typeof name !== 'string' || !name || name.length > 255 || /[\x00-\x1f/\\]/.test(name)) throw Object.assign(new Error('Nome do anexo inválido.'), { statusCode: 400 });
+    const ext = path.extname(name).toLowerCase();
+    const type = ['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext) ? 'IMAGE' : ext === '.pdf' ? 'PDF' : 'FILE';
+    const business = require('../business/chat/ClientMessageBusiness');
+    const result = await business.create(req.user, req.body.clientId, req.body, { path: req.file.path, url: fileUrl, name, type });
+    if (result.message.fileUrl !== fileUrl) await removeUnreferenced(req.file, fileUrl);
+    business.emit(result);
+    return res.json({ ...result, type: result.message.messageType });
+  } catch (error) {
+    await removeUnreferenced(req.file, fileUrl);
+    return res.status(error.statusCode || 500).json({ ok: false, error: error.statusCode ? error.message : 'Envio não confirmado. Conserve o anexo e repita o mesmo pedido.' });
   }
 });
 

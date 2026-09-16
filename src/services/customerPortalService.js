@@ -117,8 +117,7 @@ async function listCustomerNotifications(clientId) {
 async function listCustomerMessages(clientId) {
   const messages = await prisma.clientMessage.findMany({
     where: { clientId },
-    orderBy: { createdAt: "desc" },
-    take: 100,
+    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
   });
   return messages.map(normalizeMessage);
 }

@@ -23,19 +23,24 @@ const cli=args=>run(process.execPath,['node_modules/prisma/build/index.js',...ar
   const [visit]=await prisma.$queryRaw`INSERT INTO "ServiceVisit" ("notes","updatedAt") VALUES ('Migration preserved visit',CURRENT_TIMESTAMP) RETURNING id`;
   const [reminder]=await prisma.$queryRaw`INSERT INTO "OperationalReminder" ("title","dueDate","updatedAt") VALUES ('Migration preserved reminder',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) RETURNING id`;
   const [chat]=await prisma.$queryRaw`INSERT INTO "ChatMessage" ("text","channel") VALUES ('Migration preserved private message','ADMIN_INTERNAL') RETURNING id`;
+  const [oldClient] = await prisma.$queryRaw`INSERT INTO "Client" ("name","updatedAt") VALUES ('Migration preserved chat client',CURRENT_TIMESTAMP) RETURNING id`;
+  const historical = await prisma.$queryRaw`INSERT INTO "ClientMessage" ("clientId","text") VALUES (${oldClient.id},'Historical one'),(${oldClient.id},'Historical two') RETURNING id`;
   await prisma.$disconnect();
-  for(const migration of ['20260914140000_water_reminder_replay','20260914150000_visit_completion_replay','20260914160000_browser_push','20260914190000_round_assignment_periods','20260914220000_round_recurrence','20260915060000_repair_quotes','20260915080000_client_rate_plans','20260915100000_quote_portal','20260915120000_equipment_maintenance','20260916090000_internal_chat'])cli(['db','execute','--file',`prisma/migrations/${migration}/migration.sql`,'--schema','prisma/schema.prisma']);
+  for(const migration of ['20260914140000_water_reminder_replay','20260914150000_visit_completion_replay','20260914160000_browser_push','20260914190000_round_assignment_periods','20260914220000_round_recurrence','20260915060000_repair_quotes','20260915080000_client_rate_plans','20260915100000_quote_portal','20260915120000_equipment_maintenance','20260916090000_internal_chat','20260916100000_client_chat_retry'])cli(['db','execute','--file',`prisma/migrations/${migration}/migration.sql`,'--schema','prisma/schema.prisma']);
   const savedVisit=await prisma.serviceVisit.findUnique({where:{id:visit.id}}),savedReminder=await prisma.operationalReminder.findUnique({where:{id:reminder.id}});
   const savedRound=await prisma.round.findUnique({where:{id:round.id}});assert.equal(savedRound.recurrence,'WEEKLY');assert.equal(savedRound.dayOfWeek,2);assert.equal(savedRound.startsOn,null);
   assert.equal(savedVisit.notes,'Migration preserved visit');assert.equal(savedVisit.completionRequestId,null);
   assert.equal(savedReminder.title,'Migration preserved reminder');assert.equal(savedReminder.sourceKey,null);
   assert.equal((await prisma.chatMessage.findUniqueOrThrow({where:{id:chat.id}})).text,'Migration preserved private message');
+  const retained = await prisma.clientMessage.findMany({where:{id:{in:historical.map(row=>row.id)}},orderBy:{id:'asc'}});
+  assert.deepEqual(retained.map(row=>row.text),['Historical one','Historical two']);assert(retained.every(row=>row.actorKey===null&&row.requestId===null&&row.payloadHash===null));
   assert.equal(await prisma.internalChatMessage.count(),0);assert.equal(await prisma.internalChatImport.count(),0);
   await prisma.webPushSubscription.create({data:{endpoint:'https://fcm.googleapis.com/fcm/send/migration-qa',role:'TECHNICIAN',principalId:999999,subscription:{},active:false}});
   await prisma.$disconnect();
   cli(['migrate','diff','--from-schema-datasource','prisma/schema.prisma','--to-schema-datamodel','prisma/schema.prisma','--exit-code']);
   await prisma.serviceVisit.delete({where:{id:visit.id}});await prisma.operationalReminder.delete({where:{id:reminder.id}});await prisma.webPushSubscription.deleteMany({where:{endpoint:'https://fcm.googleapis.com/fcm/send/migration-qa'}});
   await prisma.chatMessage.delete({where:{id:chat.id}});
-  console.log('PASS ten additive migrations preserve previous data and match the current schema');
+  await prisma.clientMessage.deleteMany({where:{id:{in:historical.map(row=>row.id)}}});await prisma.client.delete({where:{id:oldClient.id}});
+  console.log('PASS eleven additive migrations preserve previous data and match the current schema');
  }finally{fs.rmSync(temp,{recursive:true,force:true})}
 })().catch(error=>{console.error(error);process.exitCode=1}).finally(()=>prisma.$disconnect());

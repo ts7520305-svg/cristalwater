@@ -1,0 +1,55 @@
+'use strict';
+require('../src/loadEnv')();
+const assert = require('node:assert/strict'), fs = require('node:fs'), path = require('node:path');
+const { randomUUID } = require('node:crypto');
+if (process.env.NODE_ENV !== 'test' || process.env.QA_MODE !== 'true' || process.env.QA_ENVIRONMENT_SAFE !== 'true') throw Error('Isolated QA required');
+const { prisma } = require('../src/prismaClient'), jwt = require('jsonwebtoken'), { getJwtSecret } = require('../src/utils/jwtSecret');
+const { resolveUploadSubdir } = require('../src/config/uploadPath');
+const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002'; assert(['127.0.0.1', 'localhost'].includes(new URL(base).hostname));
+let trigger = false;
+(async () => {
+  const admin = await prisma.user.findUniqueOrThrow({ where: { email: process.env.ADMIN_EMAIL } });
+  const client = await prisma.client.create({ data: { name: 'Client chat retry QA', active: true } });
+  const other = await prisma.client.create({ data: { name: 'Other retry QA', active: true } });
+  const sign = body => jwt.sign(body, getJwtSecret(), { expiresIn: '1h' });
+  const token = sign({ id: client.id, clientId: client.id, role: 'CLIENT' }), adminToken = sign({ id: admin.id, role: 'ADMIN' });
+  async function call(p, body, credential = token) { const r = await fetch(base + p, { method: 'POST', headers: { Authorization: 'Bearer ' + credential, 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); return { status: r.status, body: await r.json() }; }
+  const urls = ['/api/chat', '/api/client-messages', `/api/client-portal/${client.id}/messages`];
+  const request = { clientId: client.id, text: 'Exact retry QA', requestId: randomUUID() };
+  const first = await call(urls[0], request), repeat = await call(urls[1], request);
+  console.log(JSON.stringify({ first: first.status, repeat: repeat.status, count: await prisma.clientMessage.count({ where: { clientId: client.id } }) }));
+  assert.equal(first.status, 200); assert.equal(repeat.status, 200);
+  assert.equal(await prisma.clientMessage.count({ where: { clientId: client.id } }), 1, 'The same request across aliases must create one message');
+  assert.equal(first.body.message.id, repeat.body.message.id); assert.equal(repeat.body.replayed, true);
+  assert.deepEqual(first.body.receipt, repeat.body.receipt); assert.equal(first.body.receipt.actorKey, `CLIENT:${client.id}`);
+  const portal = await call(urls[2], request); assert.equal(portal.status, 201); assert.equal(portal.body.message.id, first.body.message.id);
+  const concurrent = { ...request, text: 'Concurrent across aliases', requestId: randomUUID() };
+  const results = await Promise.all(Array.from({ length: 9 }, (_, i) => call(urls[i % urls.length], concurrent)));
+  assert(results.every(r => [200, 201].includes(r.status))); assert.equal(new Set(results.map(r => r.body.message.id)).size, 1);
+  for (const p of urls) assert.equal((await call(p, { ...request, text: 'Different content' })).status, 409);
+  assert.equal((await call(urls[0], { ...request, clientId: other.id }, adminToken)).status, 200, 'An independent account has its own request namespace');
+  assert.equal((await call(urls[0], { ...request, clientId: client.id }, adminToken)).status, 409, 'The same admin request cannot move between clients');
+  assert.equal((await call(urls[0], { ...request, clientId: other.id })).status, 403);
+  for (const bad of [null, '', 'bad', 15]) assert.equal((await call(urls[0], { ...request, requestId: bad })).status, 400);
+  for (const text of [null, {}, 15, '', ' ', 'x'.repeat(10001)]) assert.equal((await call(urls[0], { ...request, text, requestId: randomUUID() })).status, 400);
+  const before = await prisma.clientMessage.count({ where: { clientId: client.id } });
+  await prisma.$executeRawUnsafe(`CREATE FUNCTION qa_client_chat_log_fail() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.message = 'QA CHAT FAIL ATOMIC' THEN RAISE EXCEPTION 'QA mandatory chat audit failure'; END IF; RETURN NEW; END $$`);
+  await prisma.$executeRawUnsafe('CREATE TRIGGER qa_client_chat_log_fail BEFORE INSERT ON "CommunicationLog" FOR EACH ROW EXECUTE FUNCTION qa_client_chat_log_fail()'); trigger = true;
+  const rollback = { ...request, text: 'QA CHAT FAIL ATOMIC', requestId: randomUUID() };
+  assert.equal((await call(urls[2], rollback)).status, 500); assert.equal(await prisma.clientMessage.count({ where: { clientId: client.id } }), before);
+  await prisma.$executeRawUnsafe('DROP TRIGGER qa_client_chat_log_fail ON "CommunicationLog"'); await prisma.$executeRawUnsafe('DROP FUNCTION qa_client_chat_log_fail()'); trigger = false;
+  assert.equal((await call(urls[2], rollback)).status, 201);
+  assert.equal(await prisma.communicationLog.count({ where: { clientId: client.id, message: 'Exact retry QA' } }), 1);
+  console.log('PASS text replay across all three database routes, concurrent aliases, account and recipient isolation, strict payloads and mandatory transaction rollback');
+
+  const filename = `retry-${randomUUID()}.pdf`, uploadId = randomUUID();
+  async function upload(bytes, id = uploadId, credential = token) { const form = new FormData(); form.append('clientId', String(client.id)); form.append('requestId', id); form.append('file', new Blob([bytes], { type: 'application/pdf' }), filename); const r = await fetch(base + '/api/client-messages/upload', { method: 'POST', headers: { Authorization: 'Bearer ' + credential }, body: form }); return { status: r.status, body: await r.json() }; }
+  const uploads = await Promise.all([upload('Exact file bytes'), upload('Exact file bytes'), upload('Exact file bytes')]);
+  assert(uploads.every(r => r.status === 200)); assert.equal(new Set(uploads.map(r => r.body.message.id)).size, 1);
+  assert.equal((await upload('Different file bytes')).status, 409);
+  assert.equal((await upload('Exact file bytes', uploadId, sign({ id: other.id, role: 'CLIENT' }))).status, 403);
+  const files = fs.readdirSync(resolveUploadSubdir('documents/client-chat')).filter(file => file.endsWith(filename)); assert.equal(files.length, 1, 'Replays/conflicts must not retain redundant private uploads');
+  assert.equal(fs.readFileSync(path.join(resolveUploadSubdir('documents/client-chat'), files[0]), 'utf8'), 'Exact file bytes');
+  const attachment = await fetch(base + `/api/client-messages/attachments/${uploads[0].body.message.id}`, { headers: { Authorization: 'Bearer ' + token } }); assert.equal(attachment.status, 200); assert.equal(await attachment.text(), 'Exact file bytes');
+  console.log('PASS byte-exact attachment replay, one retained file, conflicts/foreign accounts refused and authenticated original download');
+})().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => { if (trigger) { await prisma.$executeRawUnsafe('DROP TRIGGER IF EXISTS qa_client_chat_log_fail ON "CommunicationLog"'); await prisma.$executeRawUnsafe('DROP FUNCTION IF EXISTS qa_client_chat_log_fail()'); } await prisma.$disconnect(); });

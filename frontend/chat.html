@@ -500,6 +500,8 @@ INPUT
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
   <script src="/admin-auth-guard.js"></script>
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
 <style id="chat-contrast-overrides">
   html body {
     background: #06111f !important;
@@ -637,6 +639,9 @@ INPUT
     color: #b8d6e9 !important;
   }
 
+  body .layout { height: calc(100dvh - 100px); min-height: 600px; }
+  body .cw-client-chat-recovery { flex: 0 0 auto; }
+  body #messages { overflow-wrap: anywhere; }
   @media (max-width: 760px) {
     html,
     body {
@@ -739,6 +744,22 @@ INPUT
   }
 </style>
   <link rel="stylesheet" href="/ui/design-system.css">
+<style>
+  html body.cw-v2-shell-enabled { padding-top:84px; }
+  html body .cw-client-chat-recovery p,html body .cw-v2-shell-sidebar .cw-v2-brand b{color:#b8d6e9!important;}
+  html body.cw-v2-shell-enabled > .cw-v2-shell-topbar { position:fixed!important;top:0;left:0;right:0; }
+  html body.cw-v2-shell-enabled .cw-v2-shell-topbar .cw-v2-topbar { min-height:84px; }
+  html body.cw-v2-shell-enabled > .cw-v2-shell-sidebar { position:fixed!important;top:84px;height:calc(100dvh - 84px);background:#071523!important;color:#e9f7ff!important; }
+  html body.cw-v2-shell-enabled > .cw-v2-mobile-primary { position:fixed!important; }
+  html body.cw-v2-shell-enabled > .layout { height:calc(100dvh - 84px); }
+  @media(min-width:1201px){html body.cw-v2-shell-enabled{padding-left:280px;}}
+  @media(max-width:900px){
+    html body.cw-v2-shell-enabled{padding-top:128px;}
+    html body.cw-v2-shell-enabled .cw-v2-shell-topbar .cw-v2-topbar{min-height:128px;}
+    html body.cw-v2-shell-enabled > .layout{height:auto;}
+  }
+  @media(max-width:760px){body .chat-area #messages{height:52dvh;max-height:600px;min-height:220px;flex:none;}}
+</style>
 </head>
 
 <body data-required-role="ADMIN">
@@ -754,7 +775,7 @@ INPUT
     <div class="sidebar-header">
 
       <h2>
-        💬 Conversas
+        Conversas
       </h2>
 
       <div class="sidebar-search">
@@ -860,7 +881,7 @@ INPUT
         class="chat-btn file-btn"
         id="fileBtn"
       >
-        📎
+        Anexo
       </button>
 
       <button
@@ -877,6 +898,7 @@ INPUT
 </div>
 
 <script src="/cw-auth-download.js"></script>
+<script src="/cw-client-chat-send.js"></script>
 <script src="/chat.js"></script>
 
 <script src="/cristal-help-data.js"></script>

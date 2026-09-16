@@ -18,6 +18,10 @@ let extrasLoadRevision = 0;
 let loadedClientId = 0;
 const clientDrafts = new Map();
 const draftFields = ['messageInput', 'visitRequestInput', 'paymentNoticeAmount', 'paymentNoticeNote', 'paymentNoticeMethod'];
+const messageRecovery = CWClientChat.create({ clientId: () => clientId, input: el('messageInput'), sendButton: el('sendBtn'), fileInput: el('photoInput'), fileButton: el('photoBtn'),
+  mount: el('mensagens'), list: el('chatBox'), language: () => portalLanguage, invalidate: () => socket.disconnect?.(),
+  canSend: () => !isAdminUser() && !!clientId && loadedClientId === clientId,
+  confirmed: async message => { if (Number(message.clientId) === clientId) await loadMessages(); } });
 function selectionIsCurrent(id, revision) {
   return clientId === id && clientSelectionRevision === revision;
 }
@@ -26,6 +30,7 @@ function updatePortalActionAvailability() {
     const button = el(id);
     if (button) button.disabled = isAdminUser() || !clientId || loadedClientId !== clientId || portalActions.has(id);
   });
+  messageRecovery.render();
 }
 const ui = window.CwUi || {
   success: (m) => console.log(m),
@@ -1792,13 +1797,14 @@ function appendMessage(message) {
 
 async function loadMessages() {
   const requestedClient = clientId, selectionRevision = clientSelectionRevision;
-  const revision = ++messagesLoadRevision;
-  const isCurrent = () => selectionIsCurrent(requestedClient, selectionRevision) && revision === messagesLoadRevision;
+  const revision = ++messagesLoadRevision, read = messageRecovery.begin();
+  if (!read) return;
+  const isCurrent = () => messageRecovery.accepts(read) && selectionIsCurrent(requestedClient, selectionRevision) && revision === messagesLoadRevision;
   const chat = el("chatBox");
   if (!chat) return;
   try {
     if (!clientId) throw new Error(copy("clientNotIdentified"));
-    const secureHeaders = portalAuthHeaders();
+    const secureHeaders = messageRecovery.headers();
     const response = await fetch(
       secureHeaders.Authorization
         ? `${API}/client-portal/${clientId}/messages`
@@ -1807,7 +1813,7 @@ async function loadMessages() {
     );
     const data = await response.json();
     if (!isCurrent()) return;
-    if(!response.ok || data.ok===false)throw new Error(copy("messagesUnavailable"));
+    if(!response.ok || data.ok!==true || !Array.isArray(data.messages))throw new Error(copy("messagesUnavailable"));
     chat.innerHTML = "";
     const messages = Array.isArray(data) ? data : (Array.isArray(data.messages) ? data.messages : []);
     if (!messages.length) {
@@ -1818,35 +1824,11 @@ async function loadMessages() {
   } catch (error) {
     if (!isCurrent()) return;
     console.warn(error);
-    chat.innerHTML = `<div class="empty">${esc(copy("messagesUnavailable"))}</div>`;
+    messageRecovery.readError();
   }
 }
 
-async function sendMessage() {
-  const requestedClient = clientId, selectionRevision = clientSelectionRevision;
-  const input = el("messageInput");
-  const text = input.value.trim();
-  if (!text || !clientId) return;
-  const secureHeaders = portalAuthHeaders();
-  const response = await fetch(
-    secureHeaders.Authorization
-      ? `${API}/client-portal/${clientId}/messages`
-      : `${API}/chat`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...secureHeaders },
-      body: JSON.stringify({ clientId, sender: "client", text }),
-    }
-  );
-  const data = await response.json().catch(() => ({}));
-  if (!selectionIsCurrent(requestedClient, selectionRevision)) return;
-  if (!response.ok || data.ok === false) {
-    ui.error(data.error || copy("sendMessageError"));
-    return;
-  }
-  appendMessage(data.message || { sender: "CLIENT", text, createdAt: new Date() });
-  if(input.value.trim()===text)input.value = "";
-}
+async function sendMessage() { ++messagesLoadRevision; await messageRecovery.sendText(); }
 
 async function requestVisit() {
   const requestedClient = clientId, selectionRevision = clientSelectionRevision;
@@ -1885,16 +1867,8 @@ async function runPortalAction(buttonId, action) {
   }finally{portalActions.delete(buttonId);updatePortalActionAvailability();}
 }
 async function sendAttachment() {
-  const requestedClient = clientId, selectionRevision = clientSelectionRevision;
-  const input=el('photoInput'),file=input?.files?.[0];
-  if(!file || !clientId)return;
-  if(!file.size || file.size>25*1024*1024 || !['image/jpeg','image/png','image/webp','image/gif','application/pdf'].includes(file.type))throw Object.assign(new Error('Invalid attachment'),{userMessage:portalLanguage==='en'?'Choose a JPG, PNG, WebP, GIF or PDF file, up to 25 MB.':portalLanguage==='fr'?'Choisissez un fichier JPG, PNG, WebP, GIF ou PDF de 25 Mo maximum.':'Escolha um ficheiro JPG, PNG, WebP, GIF ou PDF, até 25 MB.'});
-  const form=new FormData();form.append('clientId',String(clientId));form.append('file',file);
-  const response=await fetch(`${API}/client-messages/upload`,{method:'POST',body:form});
-  const data=await response.json();
-  if (!selectionIsCurrent(requestedClient, selectionRevision)) return;
-  if(!response.ok || data.ok===false || !data.message?.id)throw new Error(data.error || copy('sendMessageError'));
-  appendMessage(data.message);input.value='';
+  ++messagesLoadRevision;
+  await messageRecovery.sendFile(el('photoInput')?.files?.[0]);
 }
 
 function updatePresence(lastSeen) {
@@ -1916,7 +1890,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     socket.emit("userOnline", { userId: `client_${clientId}` });
   }
   socket.on("newMessage", message => {
-    if (Number(message?.clientId) === clientId) appendMessage(message);
+    if (messageRecovery.active() && Number(message?.clientId) === clientId) { ++messagesLoadRevision; appendMessage(message); }
   });
   socket.on("presenceUpdate", (data) => {
     if (String(data.userId) === "admin_public") {
@@ -1929,7 +1903,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     setText("typing", copy("adminTyping"));
     setTimeout(() => setText("typing", ""), 2000);
   });
-  el("sendBtn").onclick = ()=>runPortalAction("sendBtn",sendMessage);
+  el("sendBtn").onclick = sendMessage;
   if (el("visitRequestBtn")) el("visitRequestBtn").onclick = ()=>runPortalAction("visitRequestBtn",requestVisit);
   if (el("paymentNoticeBtn")) el("paymentNoticeBtn").onclick = ()=>runPortalAction("paymentNoticeBtn",notifyPayment);
   ["paymentNoticeAmount", "paymentNoticeMethod", "paymentNoticeNote"].forEach((id) => {
@@ -1939,10 +1913,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   el("messageInput").addEventListener("keydown", (event) => {
     socket.emit("typing", { clientId });
-    if (event.key === "Enter") runPortalAction("sendBtn",sendMessage);
+    if (event.key === "Enter") { event.preventDefault(); void sendMessage(); }
   });
   el("photoBtn").onclick = () => el("photoInput").click();
-  el("photoInput").onchange = ()=>runPortalAction("photoBtn",sendAttachment);
+  el("photoInput").onchange = sendAttachment;
   await loadPortal();
   if (clientId) await loadMessages();
   if (clientId) fetch(`${API}/client-messages/seen/${clientId}?actor=client`, { method: "POST" }).catch(() => {});
