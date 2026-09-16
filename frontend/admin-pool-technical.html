@@ -6,6 +6,8 @@
   <title>Cristal Water LDA - Ficha Tecnica</title>
   <link rel="icon" href="/logo-cristalwater.png">
   <script src="/cw-auth.js"></script>
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
   <link rel="stylesheet" href="/ui/foundation.css">
 <style>
     * { box-sizing: border-box; }
@@ -153,13 +155,26 @@
       .page-head { flex-direction: column; }
       .reminder-item { flex-direction: column; }
       .head-actions { width: 100%; }
-      .head-actions .btn, .head-actions button { flex: 1; }
+      .head-actions .btn, .head-actions button { flex: 1 1 140px; overflow-wrap: normal; }
     }
+    .sheet-language-slot { display: flex; justify-content: flex-end; margin-bottom: 14px; }
+    .sheet-language-slot .cw-lang-switch { max-width: 100%; }
+    .page-head > div { min-width: 0; overflow-wrap: anywhere; }
+    .sheet-edit-recovery { margin-bottom: 16px; overflow-wrap: anywhere; }
+    .sheet-edit-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .sheet-edit-actions button { white-space: normal; max-width: 100%; }
+    .sheet-edit-choice { border: 1px solid #b7cbdc; border-radius: 10px; padding: 12px; margin: 12px 0; background: #f4f8fc; color: #152e49; }
+    .sheet-edit-choice p { color: #152e49; white-space: pre-wrap; }
+    .sheet-edit-choice select { width: 100%; background: white; color: #152e49; }
+    #sheetEditPending p { white-space: pre-wrap; overflow-wrap: anywhere; }
+    #sheetEditPendingList a { display: block; margin: 8px 0; }
+    #sheetForm [hidden] { display: none !important; }
   </style>
   <link rel="stylesheet" href="/ui/design-system.css">
 </head>
 <body data-required-role="ADMIN">
   <main class="page">
+    <div class="sheet-language-slot cw-global-actions"></div>
     <div class="page-head">
       <div>
         <h1>Ficha Tecnica da Piscina</h1>
@@ -172,7 +187,7 @@
       </div>
     </div>
 
-    <form id="sheetForm" onsubmit="saveSheet();return false">
+    <form id="sheetForm" data-cw-form-memory="managed" data-cw-state-managed="manual" onsubmit="saveSheet();return false">
       <section class="grid cols2">
         <div class="card">
           <h2>Dados gerais</h2>
@@ -299,6 +314,7 @@
   <script src="/cw-i18n.js"></script>
   <script src="/cw-reminder-create.js"></script>
   <script src="/cw-reminder-delete.js"></script>
+  <script src="/cw-technical-sheet-edit.js"></script>
   <script src="/admin-pool-technical.js"></script>
   <script src="/ui/core/navigation-context.js"></script>
   <script src="/crystal-os-v2-shell.js"></script>

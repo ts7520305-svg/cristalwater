@@ -39,3 +39,7 @@ Estas verificações são mínimas: esta ficha ainda não usa UUID, versão obse
 Implementar versão, confirmação exata e recuperação durável nesta ficha, com rascunhos por conta/piscina e revisão de conflitos. Rever separadamente submissão/transição/aprovação de propostas técnicas, cujos escritores antigos não foram alterados aqui. Continuam também o inventário visual global e as restantes escritas antigas.
 
 Sem merge em main, deploy/VPS, mensagens a fornecedores reais ou emissão fiscal. Esta alteração não declara o sistema integralmente pronto.
+
+## Seguimento — TASK195–196
+
+A versão/UUID/recuperação durável descrita acima como pendente foi implementada em `TECHNICAL_SHEET_RECOVERY_20260916.md`. Este relatório conserva o diagnóstico e os limites da TASK194. O seu CI `35090624706` foi aprovado no commit `d98651ff84b1f0626aa6c04e4495b9f5967ca78c`, com 96 grupos e restauro de 106 tabelas/22 ficheiros. Propostas técnicas continuam por rever.

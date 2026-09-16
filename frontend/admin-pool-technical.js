@@ -9,22 +9,9 @@ const ui = window.CwUi || {
 let proposalSelection = new Set();
 const completingReminders = new Set();
 let reminderRows = [], reminderPoolName = '', removeReminder;
-let sheetLoaded = false, savingSheet = false, sheetStatusIndex;
-const sheetCredential = localStorage.getItem('token') || localStorage.getItem('cristalwater_jwt') || '';
-const sameSheetSession = () => !!sheetCredential && sheetCredential === (localStorage.getItem('token') || localStorage.getItem('cristalwater_jwt') || '');
-function sheetStatus(index) {
-  sheetStatusIndex = index;
-  const text = {
-    pt: ['A guardar a ficha técnica...', 'Ficha técnica guardada.', 'Alteração não confirmada. Conserve os dados e consulte a ficha atual antes de voltar a guardar.', 'Carregue os dados atuais antes de guardar.', 'A sessão mudou. Reabra a página.', 'Ficha guardada. Atualize a página para consultar os dados atuais.'],
-    en: ['Saving the technical sheet...', 'Technical sheet saved.', 'Change not confirmed. Keep the data and check the current sheet before saving again.', 'Load the current data before saving.', 'The session changed. Reopen the page.', 'Sheet saved. Refresh the page to view the current data.'],
-    fr: ['Enregistrement de la fiche technique...', 'Fiche technique enregistrée.', 'Modification non confirmée. Conservez les données et consultez la fiche actuelle avant de réenregistrer.', 'Chargez les données actuelles avant d’enregistrer.', 'La session a changé. Rouvrez la page.', 'Fiche enregistrée. Actualisez la page pour consulter les données actuelles.'],
-    es: ['Guardando la ficha técnica...', 'Ficha técnica guardada.', 'Cambio no confirmado. Conserve los datos y consulte la ficha actual antes de guardar de nuevo.', 'Cargue los datos actuales antes de guardar.', 'La sesión ha cambiado. Abra la página de nuevo.', 'Ficha guardada. Actualice la página para consultar los datos actuales.'],
-    de: ['Technisches Datenblatt wird gespeichert...', 'Technisches Datenblatt gespeichert.', 'Änderung nicht bestätigt. Bewahren Sie die Angaben auf und prüfen Sie das aktuelle Datenblatt vor dem erneuten Speichern.', 'Laden Sie vor dem Speichern die aktuellen Daten.', 'Die Sitzung wurde geändert. Öffnen Sie die Seite erneut.', 'Datenblatt gespeichert. Aktualisieren Sie die Seite, um die aktuellen Daten zu sehen.'],
-  };
-  const language = String(window.CristalI18n?.readLanguage?.() || document.documentElement.lang || 'pt').slice(0, 2);
-  const status = document.getElementById('status'); status.dataset.cwNoI18n = ''; status.textContent = (text[language] || text.pt)[index];
-}
-window.addEventListener('cw-language-change', () => { if (sheetStatusIndex !== undefined) sheetStatus(sheetStatusIndex); });
+let sheetEditor;
+const sheetCredential = localStorage.getItem('cristalwater_jwt') || localStorage.getItem('token') || '';
+const sameSheetSession = () => !!sheetCredential && sheetCredential === (localStorage.getItem('cristalwater_jwt') || localStorage.getItem('token') || '') && (!localStorage.getItem('token') || localStorage.getItem('token') === sheetCredential);
 
 function esc(value) {
   return String(value ?? "").replace(/[&<>'"]/g, (char) => ({
@@ -45,39 +32,8 @@ function val(id) {
   return document.getElementById(id)?.value?.trim() || "";
 }
 
-function numberVal(id) {
-  const raw = val(id).replace(",", ".");
-  if (!raw) return null;
-  const value = Number(raw);
-  return Number.isFinite(value) ? value : null;
-}
-
-function calculateVolumeFromDimensions() {
-  const length = numberVal("lengthM");
-  const width = numberVal("widthM");
-  const depthMin = numberVal("depthMinM");
-  const depthMax = numberVal("depthMaxM");
-  let averageDepth = numberVal("averageDepthM");
-
-  if ((!averageDepth || averageDepth <= 0) && depthMin > 0 && depthMax > 0) {
-    averageDepth = (depthMin + depthMax) / 2;
-    setVal("averageDepthM", Math.round(averageDepth * 100) / 100);
-  }
-
-  if (length > 0 && width > 0 && averageDepth > 0) {
-    return Math.round(length * width * averageDepth * 10) / 10;
-  }
-
-  return null;
-}
-
-function updateCalculatedVolume() {
-  const volume = calculateVolumeFromDimensions();
-  if (volume !== null) setVal("volumeM3", volume);
-  return volume;
-}
-
 async function req(path, options = {}) {
+  if (!sameSheetSession()) throw new Error("A sessão mudou. Reabra a página.");
   const { expectedStatus, ...fetchOptions } = options;
   const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt") || "";
   const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
@@ -86,6 +42,7 @@ async function req(path, options = {}) {
     ...fetchOptions,
   });
   const data = await response.json().catch(() => ({}));
+  if (!sameSheetSession()) throw new Error("A sessão mudou. Reabra a página.");
   if (!response.ok || data.ok === false || (expectedStatus !== undefined && response.status !== expectedStatus)) throw new Error(data.error || "Erro");
   return data;
 }
@@ -152,7 +109,7 @@ function renderHistory(pool) {
       <div class="timeline-item">
         <strong>${esc(item.component || item.type || "Intervencao")}</strong>
         <span>${formatDate(item.performedAt || item.createdAt)}</span>
-        <p>${esc(item.message || item.description || "Sem descricao")}</p>
+        <p>${esc((item.type === "TECHNICAL_SHEET_NOTE" ? item.description : item.message || item.description) || "Sem descricao")}</p>
         ${item.nextSuggested ? `<small>Proxima sugestao: ${formatDate(item.nextSuggested)}</small>` : ""}
       </div>
     `).join("")
@@ -305,11 +262,13 @@ async function transitionTechnicalProposal(proposalId, nextStatus) {
 }
 
 async function loadTechnicalProposals() {
+  if (!sameSheetSession()) return;
   if (!poolId) return;
   const data = await req(`/pools/${poolId}/technical-change-proposals`);
   const proposals = Array.isArray(data.proposals) ? data.proposals : [];
   const validIds = new Set(proposals.map((item) => Number(item.id)));
   proposalSelection = new Set(Array.from(proposalSelection).filter((item) => validIds.has(Number(item))));
+  if (!sameSheetSession()) return;
   renderTechnicalProposalSummary(proposals);
   renderTechnicalProposalList(proposals);
 }
@@ -386,90 +345,39 @@ function renderKeyAccesses(pool) {
 }
 
 async function loadReminders() {
+  if (!sameSheetSession()) return;
   if (!poolId) return;
   const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt") || "";
   const data = await req(`/pools/${poolId}/service-reminders`);
   if (token !== (localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt") || "")) return;
   if (data.ok !== true || !Array.isArray(data.reminders)) throw new Error("Nao foi possivel ler os lembretes. Atualiza a pagina.");
-  renderReminders(data.reminders);
+  if (sameSheetSession()) renderReminders(data.reminders);
 }
 
 async function loadSheet() {
-  sheetLoaded = false;
   if (!poolId) {
     document.getElementById("status").textContent = "Falta poolId";
     return;
   }
 
   const { pool } = await req(`/pools/${poolId}/technical-sheet`);
-  if (!sameSheetSession()) { sheetLoaded = false; sheetStatus(4); return; }
+  if (!sameSheetSession()) return;
   if (!pool || Number(pool.id) !== Number(poolId) || !pool.name || !Number.isFinite(pool.monthlyAmount)) throw new Error('Não foi possível carregar a ficha atual.');
   reminderPoolName = pool.name || `Piscina #${poolId}`;
+  document.getElementById("subtitle").dataset.cwNoI18n = "";
   document.getElementById("subtitle").textContent = `${pool.client?.name || "Cliente"} - ${pool.name || "Piscina"}`;
   const operationalReminderLink = document.getElementById("poolOperationalReminderLink");
   if (operationalReminderLink) {
     operationalReminderLink.href = `/admin-crm?poolId=${encodeURIComponent(pool.id)}`;
   }
 
-  setVal("name", pool.name);
-  setVal("type", pool.type || "POOL");
-  setVal("zone", pool.zone);
-  setVal("address", pool.address);
-  setVal("volumeM3", pool.volumeM3);
-  setVal("monthlyAmount", pool.monthlyAmount);
-  setVal("notes", pool.notes);
-
-  const calculation = pool.calculationProfile || {};
-  ["lengthM", "widthM", "depthMinM", "depthMaxM", "averageDepthM", "pumpFlowM3h", "targetSalinityPpm", "targetChlorinePpm", "currentWaterTempC"]
-    .forEach((key) => setVal(key, calculation[key]));
-  updateCalculatedVolume();
-
-  const equipment = pool.equipment || {};
-  ["pumpType", "pumpPower", "filterType", "filterMedia", "lightsCount", "lightsType"]
-    .forEach((key) => setVal(key, equipment[key]));
-  setVal("saltSystem", String(Boolean(equipment.saltSystem)));
-  setVal("equipmentNotes", equipment.notes);
-
-  const technicalRoom = pool.technicalRoom || {};
-  setVal("technicalRoomLocation", technicalRoom.locationNote);
-  setVal("technicalRoomCondition", technicalRoom.condition);
-  setVal("technicalRoomVentilation", technicalRoom.ventilation);
-  setVal("technicalRoomElectrical", technicalRoom.electrical);
-  setVal("technicalRoomNotes", technicalRoom.notes);
-
   renderKeyAccesses(pool);
   renderHistory(pool);
-  sheetLoaded = true;
   await loadTechnicalProposals();
   await loadReminders();
 }
 
-async function saveSheet() {
-  if (savingSheet) return;
-  if (!sameSheetSession()) { sheetStatus(4); return; }
-  if (!sheetLoaded) { sheetStatus(3); return; }
-  updateCalculatedVolume();
-  const ids = [
-    "name", "type", "zone", "address", "volumeM3", "monthlyAmount", "notes",
-    "lengthM", "widthM", "depthMinM", "depthMaxM", "averageDepthM", "pumpFlowM3h",
-    "targetSalinityPpm", "targetChlorinePpm", "currentWaterTempC", "pumpType",
-    "pumpPower", "filterType", "filterMedia", "saltSystem", "lightsCount", "lightsType",
-    "equipmentNotes", "technicalRoomLocation", "technicalRoomCondition",
-    "technicalRoomVentilation", "technicalRoomElectrical", "technicalRoomNotes", "historyNote",
-  ];
-  const body = {};
-  ids.forEach((id) => { body[id] = val(id); });
-  const controls = [...ids.map(id => document.getElementById(id)), document.querySelector('#sheetForm button[type="submit"]')].filter(Boolean), disabled = controls.map(el => el.disabled);
-  savingSheet = true; controls.forEach(el => { el.disabled = true; }); sheetStatus(0);
-  try {
-    const result = await req(`/pools/${poolId}/technical-sheet`, { method: 'PUT', expectedStatus: 200, body: JSON.stringify(body) });
-    if (!sameSheetSession()) { sheetStatus(4); return; }
-    if (result.ok !== true || Number(result.pool?.id) !== Number(poolId) || !Number.isSafeInteger(result.historyId) || result.historyId <= 0 || result.propagation?.persisted !== true) throw new Error('Unconfirmed sheet');
-    document.getElementById('historyNote').value = ''; sheetStatus(1);
-    try { await loadSheet(); } catch { if (sameSheetSession()) sheetStatus(5); }
-  } catch { if (sameSheetSession()) sheetStatus(2); else sheetStatus(4); }
-  finally { savingSheet = false; controls.forEach((el, i) => { el.disabled = !sameSheetSession() || disabled[i]; }); }
-}
+function saveSheet() { return sheetEditor?.save(); }
 
 let serviceReminderCreator;
 function createServiceReminder() { return serviceReminderCreator?.submit(); }
@@ -539,9 +447,6 @@ window.addEventListener("DOMContentLoaded", () => {
     onDeleted: id => renderReminders(reminderRows.filter(row => String(row.id) !== String(id))),
   });
   setupServiceReminderCreator();
-  ["lengthM", "widthM", "depthMinM", "depthMaxM", "averageDepthM"].forEach((id) => {
-    document.getElementById(id)?.addEventListener("input", updateCalculatedVolume);
-  });
   document.getElementById("reminderRepeatRule")?.addEventListener("change", toggleCustomRepeat);
   document.getElementById("proposalSelectPendingBtn")?.addEventListener("click", async () => {
     const data = await req(`/pools/${poolId}/technical-change-proposals?onlyPending=true`);
@@ -592,7 +497,10 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  loadSheet().catch((error) => {
-    document.getElementById("status").textContent = error.message;
+  sheetEditor = window.CWTechnicalSheetEdit.create({
+    confirmed: loadSheet,
+    invalidated: () => { for (const id of ['subtitle', 'keyAccessList', 'history', 'technicalProposalSummary', 'technicalProposalAdminList', 'serviceReminders']) document.getElementById(id)?.replaceChildren(); },
   });
+  void sheetEditor.open(poolId);
+  loadSheet().catch(() => { /* Related panels can be refreshed without overwriting the draft. */ });
 });

@@ -1605,6 +1605,11 @@ router.get('/pools', async (req, res) => {
   return res.json({ ok: true, pools });
 });
 
+router.get('/pools/:id/technical-sheet/edit-state', async (req, res) => {
+  try { return res.json(await require('../business/pool/PoolTechnicalSheetBusiness').getState(req.params.id, req.user)); }
+  catch (error) { return res.status(error.statusCode || 500).json({ ok: false, code: error.publicCode, error: error.statusCode ? error.message : 'Não foi possível carregar a ficha técnica.' }); }
+});
+
 router.get('/pools/:id/technical-sheet', async (req, res) => {
   try {
     const id = toInt(req.params.id);
@@ -1631,6 +1636,7 @@ router.get('/pools/:id/technical-sheet', async (req, res) => {
       },
     });
     if (!pool) return res.status(404).json({ ok: false, error: 'Piscina não encontrada' });
+    if (pool.client) { delete pool.client.password; delete pool.client.pin; }
     return res.json({ ok: true, pool });
   } catch (error) { return res.status(500).json({ ok: false, error: error.message }); }
 });
@@ -1943,7 +1949,7 @@ router.post('/pools/:id/technical-change-proposals/workflow/batch', async (req, 
 
 router.put('/pools/:id/technical-sheet', async (req, res) => {
   try { return res.json(await require('../business/pool/PoolTechnicalSheetBusiness').update(req.params.id, req.body, req.user)); }
-  catch (error) { return res.status(error.statusCode || 500).json({ ok: false, error: error.statusCode ? error.message : 'Alteração não confirmada. Atualize os dados antes de voltar a guardar.' }); }
+  catch (error) { return res.status(error.statusCode || 500).json({ ok: false, code: error.publicCode, error: error.statusCode ? error.message : 'Alteração não confirmada. Conserve o pedido e repita a confirmação.' }); }
 });
 
 router.get('/pools/:id/service-reminders', async (req, res) => {

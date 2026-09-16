@@ -218,6 +218,19 @@ model PoolEditRequest {
   @@index([poolId])
 }
 
+// Durable acknowledgement of one technical-sheet edit and its optional appended note.
+model TechnicalSheetEditRequest {
+  actorKey    String
+  requestId   String
+  poolId      Int
+  payloadHash String
+  response    Json
+  createdAt   DateTime @default(now())
+
+  @@id([actorKey, requestId])
+  @@index([poolId])
+}
+
 model Pool {
   maintenancePlans EquipmentMaintenancePlan[]
   id                    Int                     @id @default(autoincrement())

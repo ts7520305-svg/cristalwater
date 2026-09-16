@@ -85,19 +85,19 @@ async function inject(table, operation, type = '') {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await context.addInitScript(({ token, id }) => { for (const key of ['token', 'cristalwater_jwt']) localStorage.setItem(key, token); for (const key of ['user', 'cristalwater_user']) localStorage.setItem(key, JSON.stringify({ id, role: 'ADMIN' })); }, { token, id: admin.id });
   const page = await context.newPage(), errors = []; page.on('pageerror', error => errors.push(error.message)); page.setDefaultTimeout(7000);
-  await page.goto(base + '/admin-pool-technical?poolId=' + pool.id, { waitUntil: 'networkidle' }); await page.waitForFunction(() => sheetLoaded);
-  const button = page.locator('#sheetForm button[type="submit"]'), submit = async () => { await button.click(); await page.waitForFunction(() => !savingSheet); };
+  await page.goto(base + '/admin-pool-technical?poolId=' + pool.id, { waitUntil: 'networkidle' }); await page.waitForFunction(() => !document.getElementById('name').disabled);
+  const button = page.locator('#sheetForm button[type="submit"]'), submit = async () => { await (await page.locator('#sheetEditRetry').isVisible() ? page.locator('#sheetEditRetry') : button).click(); await page.waitForFunction(() => document.getElementById('sheetForm').getAttribute('aria-busy') === 'false'); };
   await page.locator('#notes').fill('General note from the actual form'); await page.locator('#historyNote').fill('Keep this note until confirmed');
   const beforeFailure = await row(), recordsBeforeFailure = await records(); await inject('Notification', 'INSERT', 'TECHNICAL_SHEET_PROPAGATION');
-  try { await submit(); assert.match(await page.locator('#status').textContent(), /não confirmada/); assert.equal(await page.locator('#historyNote').inputValue(), 'Keep this note until confirmed'); assert.deepEqual(await row(), beforeFailure); assert.deepEqual(await records(), recordsBeforeFailure); } finally { await clearFailure(); }
+  try { await submit(); assert.match(await page.locator('#status').textContent(), /não confirmado/); assert.equal(await page.locator('#historyNote').inputValue(), 'Keep this note until confirmed'); assert.deepEqual(await row(), beforeFailure); assert.deepEqual(await records(), recordsBeforeFailure); } finally { await clearFailure(); }
   const endpoint = base + '/api/core/pools/' + pool.id + '/technical-sheet'; let unlock, calls = 0;
   const held = new Promise(resolve => { unlock = resolve; }); await page.route(endpoint, async route => { if (route.request().method() === 'PUT') { calls++; await held; } await route.continue(); });
-  await button.click(); await page.waitForFunction(() => savingSheet); assert.equal(await button.isDisabled(), true); assert.equal(await page.locator('#notes').isDisabled(), true); await page.evaluate(() => saveSheet()); unlock(); await page.waitForFunction(() => !savingSheet); await page.unroute(endpoint);
-  assert.equal(calls, 1); assert.match(await page.locator('#status').textContent(), /guardada/); assert.equal(await page.locator('#historyNote').inputValue(), ''); assert.equal((await row()).notes, 'General note from the actual form');
+  await page.locator('#sheetEditRetry').click(); await page.waitForFunction(() => document.getElementById('sheetForm').getAttribute('aria-busy') === 'true'); assert.equal(await button.isDisabled(), true); assert.equal(await page.locator('#notes').isDisabled(), true); await page.evaluate(() => saveSheet()); unlock(); await page.waitForFunction(() => document.getElementById('sheetForm').getAttribute('aria-busy') === 'false'); await page.unroute(endpoint);
+  assert.equal(calls, 1); assert.match(await page.locator('#status').textContent(), /confirmada/); assert.equal(await page.locator('#historyNote').inputValue(), ''); assert.equal((await row()).notes, 'General note from the actual form');
   const confirmedCount = (await records()).length;
   for (const response of [{ status: 202, json: { ok: true } }, { status: 200, json: { ok: true } }, { status: 200, json: { ok: true, pool: { id: freshPool.id }, historyId: 1, propagation: { persisted: true } } }]) {
-    await page.locator('#historyNote').fill('Still not confirmed'); await page.route(endpoint, route => route.request().method() === 'PUT' ? route.fulfill(response) : route.continue()); await submit(); await page.unroute(endpoint);
-    assert.match(await page.locator('#status').textContent(), /não confirmada/); assert.equal(await page.locator('#historyNote').inputValue(), 'Still not confirmed'); assert.equal((await records()).length, confirmedCount);
+    if (await page.locator('#historyNote').isEnabled()) await page.locator('#historyNote').fill('Still not confirmed'); await page.route(endpoint, route => route.request().method() === 'PUT' ? route.fulfill(response) : route.continue()); await submit(); await page.unroute(endpoint);
+    assert.match(await page.locator('#status').textContent(), /não confirmado/); assert.equal(await page.locator('#historyNote').inputValue(), 'Still not confirmed'); assert.equal((await records()).length, confirmedCount);
   }
   assert.deepEqual(errors, []);
   console.log('PASS real technical form preserves failed work, blocks duplicate submission and refuses intermediate or malformed confirmations');

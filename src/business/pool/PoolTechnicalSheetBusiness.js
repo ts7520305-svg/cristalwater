@@ -1,12 +1,13 @@
 'use strict';
 const { prisma } = require('../../prismaClient');
 const { normalizeRole } = require('../../utils/roles');
-const { createHash } = require('node:crypto');
+const { createHash, createHmac } = require('node:crypto');
+const { getJwtSecret } = require('../../utils/jwtSecret');
 const EventBus = require('../../core/event/EventBus');
 const BrainKnowledge = require('../../system/knowledge/BrainKnowledge');
 
 const include = { technicalSheet: true, equipment: true, technicalRoom: true, calculationProfile: true };
-function fail(message, statusCode = 400) { throw Object.assign(new Error(message), { statusCode }); }
+function fail(message, statusCode = 400, publicCode = 'INVALID_TECHNICAL_SHEET_EDIT') { throw Object.assign(new Error(message), { statusCode, publicCode }); }
 function identity(user) {
   const id = Number(user?.userId || user?.id);
   if (normalizeRole(user?.role) !== 'ADMIN' || !Number.isSafeInteger(id) || id <= 0) fail('Só a administração pode alterar a ficha técnica.', 403);
@@ -76,13 +77,63 @@ function deriveVolume(before, data, body) {
 }
 const changedFields = (before, after) => Object.keys(after).filter(key => !['createdAt', 'updatedAt'].includes(key) && JSON.stringify(before[key] ?? null) !== JSON.stringify(after[key] ?? null));
 
+
+const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const versionPattern = /^technical-sheet-v1:[0-9a-f]{64}$/;
+function canonical(value) {
+  if (value instanceof Date) return value.toISOString();
+  if (Array.isArray(value)) return value.map(canonical);
+  return value && typeof value === 'object' ? Object.fromEntries(Object.keys(value).sort().filter(key => value[key] !== undefined).map(key => [key, canonical(value[key])])) : value;
+}
+const serialized = value => JSON.stringify(canonical(value));
+const version = pool => 'technical-sheet-v1:' + createHmac('sha256', getJwtSecret()).update('TECHNICAL_SHEET_EDIT_V1\0' + serialized(pool)).digest('hex');
+const groups = {
+  pool: { name: 'name', type: 'type', zone: 'zone', address: 'address', monthlyAmount: 'monthlyAmount', notes: 'notes' },
+  calculation: Object.fromEntries(['lengthM', 'widthM', 'depthMinM', 'depthMaxM', 'averageDepthM', 'pumpFlowM3h', 'targetSalinityPpm', 'targetChlorinePpm', 'currentWaterTempC'].map(key => [key, key])),
+  equipment: { pumpType: 'pumpType', pumpPower: 'pumpPower', filterType: 'filterType', filterMedia: 'filterMedia', saltSystem: 'saltSystem', lightsCount: 'lightsCount', lightsType: 'lightsType', equipmentNotes: 'notes' },
+  room: { technicalRoomLocation: 'locationNote', technicalRoomCondition: 'condition', technicalRoomVentilation: 'ventilation', technicalRoomElectrical: 'electrical', technicalRoomNotes: 'notes' },
+};
+const editable = [...Object.values(groups).flatMap(group => Object.keys(group)), 'historyNote'];
+function publicPool(pool) {
+  // Missing components use their creation defaults; no credentials, keys or historical entries enter browser recovery storage.
+  const calculation = pool.calculationProfile || { shape: 'RECTANGULAR', shapeFactor: 1, targetSalinityPpm: 3500, targetChlorinePpm: 2 };
+  const components = { pool, calculation, equipment: pool.equipment || { saltSystem: false }, room: pool.technicalRoom || {} };
+  const result = { id: pool.id, clientId: pool.clientId, historyNote: null, volumeM3: pool.volumeM3,
+    calculatedVolumeM3: calculation.volumeM3 ?? null, treatmentVolumeM3: pool.technicalSheet?.volumeM3 ?? 0,
+    shape: calculation.shape, diameterM: calculation.diameterM ?? null, shapeFactor: calculation.shapeFactor };
+  for (const [group, fields] of Object.entries(groups)) for (const [field, column] of Object.entries(fields)) result[field] = components[group][column] ?? null;
+  return result;
+}
+function poolIdentifier(raw) { const id = Number(raw); if (!Number.isSafeInteger(id) || id <= 0 || id > 2147483647) fail('Identificador de piscina inválido.'); return id; }
+async function getState(rawId, user) {
+  identity(user); const poolId = poolIdentifier(rawId);
+  return prisma.$transaction(async tx => {
+    const pool = await tx.pool.findUnique({ where: { id: poolId }, include });
+    if (!pool) fail('Piscina não encontrada.', 404);
+    return { ok: true, scope: 'TECHNICAL_SHEET_EDIT', poolId, version: version(pool), pool: publicPool(pool) };
+  }, { isolationLevel: 'RepeatableRead' });
+}
+
 async function update(rawId, body, user) {
-  const actor = identity(user), poolId = Number(rawId);
-  if (!Number.isSafeInteger(poolId) || poolId <= 0 || poolId > 2147483647) fail('Identificador de piscina inválido.');
+  const actor = identity(user), poolId = poolIdentifier(rawId);
   if (!body || typeof body !== 'object' || Array.isArray(body)) fail('Dados da ficha técnica inválidos.');
-  const data = patches(body);
+  const guarded = body.requestId !== undefined || body.expectedVersion !== undefined;
+  if (guarded && (typeof body.requestId !== 'string' || typeof body.expectedVersion !== 'string' || !uuid.test(body.requestId) || !versionPattern.test(body.expectedVersion) || Object.keys(body).some(key => ![...editable, 'requestId', 'expectedVersion'].includes(key)))) fail('Conserve o pedido original e a versão da ficha técnica.');
+  const data = patches(body), intent = {};
+  for (const [group, fields] of Object.entries(groups)) for (const [field, column] of Object.entries(fields)) if (Object.hasOwn(body, field)) intent[field] = data[group][column];
+  if (Object.hasOwn(body, 'historyNote')) intent.historyNote = data.note;
+  const requestId = guarded ? body.requestId.toLowerCase() : null;
+  const payloadHash = guarded ? createHash('sha256').update(serialized({ v: 1, poolId, expectedVersion: body.expectedVersion, changes: intent })).digest('hex') : null;
   if (!data.note && !['pool', 'equipment', 'room', 'calculation', 'sheet'].some(key => Object.keys(data[key]).length)) fail('Não há alterações para guardar.');
   const committed = await prisma.$transaction(async tx => {
+    if (requestId) {
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${`technical-sheet-edit:${actor}:${requestId}`}))::text`;
+      const saved = await tx.technicalSheetEditRequest.findUnique({ where: { actorKey_requestId: { actorKey: actor, requestId } } });
+      if (saved) {
+        if (saved.poolId !== poolId || saved.payloadHash !== payloadHash) fail('Este pedido já identifica outra alteração. Conserve o pedido original.', 409, 'TECHNICAL_SHEET_REQUEST_REUSED');
+        return { response: { ...saved.response, replayed: true } };
+      }
+    }
     // Use the same lock order as the general pool editor; read only after locking.
     await tx.$queryRaw`SELECT id FROM "Pool" WHERE id = ${poolId} FOR UPDATE`;
     await tx.$queryRaw`SELECT id FROM "TechnicalSheet" WHERE "poolId" = ${poolId} FOR UPDATE`;
@@ -91,28 +142,37 @@ async function update(rawId, body, user) {
     await tx.$queryRaw`SELECT id FROM "PoolCalculationProfile" WHERE "poolId" = ${poolId} FOR UPDATE`;
     const before = await tx.pool.findUnique({ where: { id: poolId }, include });
     if (!before) fail('Piscina não encontrada.', 404);
+    if (guarded && version(before) !== body.expectedVersion) fail('Os dados mudaram. Reveja as alterações antes de guardar.', 409, 'TECHNICAL_SHEET_VERSION_CONFLICT');
     deriveVolume(before, data, body);
-    if (Object.keys(data.pool).length) await tx.pool.update({ where: { id: poolId }, data: data.pool });
+    if (guarded || data.note || Object.keys(data.pool).length) await tx.pool.update({ where: { id: poolId }, data: { ...data.pool, updatedAt: new Date(Math.max(Date.now(), before.updatedAt.getTime() + 1)) } });
     for (const [model, fields] of [['technicalSheet', data.sheet], ['poolEquipment', data.equipment], ['technicalRoom', data.room], ['poolCalculationProfile', data.calculation]]) {
       if (Object.keys(fields).length) await tx[model].upsert({ where: { poolId }, update: fields, create: { poolId, ...fields } });
     }
     const pool = await tx.pool.findUnique({ where: { id: poolId }, include }), changes = changedFields(before, pool), changedAt = new Date();
     const history = await tx.technicalHistory.create({ data: { poolId, type: 'TECHNICAL_SHEET_CHANGE', component: 'Ficha Técnica', message: 'Alteração imutável da ficha técnica',
-      description: JSON.stringify({ actor, changedAt: changedAt.toISOString(), before, after: pool }), performedAt: changedAt, status: 'DONE' } });
-    if (data.note) await tx.technicalHistory.create({ data: { poolId, type: 'TECHNICAL_SHEET_NOTE', component: 'Ficha Técnica', message: 'Nota da ficha técnica', description: data.note, performedAt: changedAt, status: 'DONE' } });
+      description: JSON.stringify({ actor, changedAt: changedAt.toISOString(), before, after: pool, ...(requestId ? { requestId } : {}) }), performedAt: changedAt, status: 'DONE' } });
+    const note = data.note ? await tx.technicalHistory.create({ data: { poolId, type: 'TECHNICAL_SHEET_NOTE', component: 'Ficha Técnica', message: 'Nota da ficha técnica', description: data.note, performedAt: changedAt, status: 'DONE' } }) : null;
     const source = 'TECHNICAL_SHEET_DIRECT_UPDATE', summary = `Ficha técnica atualizada com ${changes.length} alteração(ões).`;
     const event = { poolId, actor, source, proposalId: null, summary, metadata: { changes, changesCount: changes.length, historyId: history.id }, propagatedAt: changedAt.toISOString() };
     const propagation = await tx.technicalHistory.create({ data: { poolId, type: 'TECHNICAL_SHEET_PROPAGATION_EVENT', component: 'Ficha Técnica Propagação', message: `Propagação técnica: ${source}`, description: JSON.stringify(event), performedAt: changedAt, status: 'DONE' } });
     const notification = await tx.notification.create({ data: { type: 'TECHNICAL_SHEET_PROPAGATION', eventType: 'TECHNICAL_SHEET_UPDATED', title: 'Ficha técnica atualizada', message: summary,
       role: 'ADMIN', status: 'PENDING', severity: 'MEDIUM', metadata: { poolId, source, proposalId: null, actor, ...event.metadata } } });
-    return { pool, historyId: history.id, event, propagationId: propagation.id, notificationId: notification.id };
+    const currentVersion = version(pool);
+    const response = JSON.parse(JSON.stringify({ ok: true, pool: guarded ? publicPool(pool) : pool, historyId: history.id, noteHistoryId: note?.id || null,
+      propagation: { persisted: true, historyId: propagation.id, notificationId: notification.id },
+      ...(guarded ? { version: currentVersion, replayed: false, receipt: { scope: 'TECHNICAL_SHEET_EDIT', actorKey: actor, requestId, poolId, expectedVersion: body.expectedVersion,
+        version: currentVersion, payloadHash, historyId: history.id, noteHistoryId: note?.id || null, propagationHistoryId: propagation.id, notificationId: notification.id } } : {}) }));
+    if (requestId) await tx.technicalSheetEditRequest.create({ data: { actorKey: actor, requestId, poolId, payloadHash, response } });
+    return { response, event };
   }, { maxWait: 15000, timeout: 15000 });
+  if (!committed.event) return committed.response;
   // Optional process-local projections run only after the durable transaction commits.
   let livePublished = false;
   try {
     BrainKnowledge.addNote(`Ficha técnica atualizada #${poolId}`, `${committed.event.summary} | origem=${committed.event.source}`, ['technical-sheet', 'propagation', 'technical_sheet_direct_update']);
     const result = await EventBus.emit('TECHNICAL_SHEET_UPDATED', committed.event, { actor, source: committed.event.source }); livePublished = result?.ok === true;
   } catch { /* Durable history/notification remain available even if a live projection fails. */ }
-  return { ok: true, pool: committed.pool, historyId: committed.historyId, propagation: { persisted: true, historyId: committed.propagationId, notificationId: committed.notificationId, livePublished } };
+  if (!guarded) committed.response.propagation.livePublished = livePublished;
+  return committed.response;
 }
-module.exports = { update };
+module.exports = { update, getState };
