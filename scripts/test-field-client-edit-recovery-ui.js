@@ -189,12 +189,25 @@ let browser;
   await page.reload({ waitUntil: 'networkidle' }); await open(page, corrupt.id); await retry(page); assert.equal(await audits(corrupt.id), 1);
   console.log('PASS incomplete reads and corrupt pending data fail closed; failed draft storage requires keeping or explicitly discarding the draft');
 
-  await page.locator('#cancelEditClient').click(); await page.addScriptTag({ url: base + '/cw-flow-shell.js' });
+  await page.locator('#cancelEditClient').click();
+  // Current navigation removes the legacy toolbar on boot timers. Capture its real
+  // button on insertion so this storage-guard test is independent of that cleanup.
+  await page.evaluate(() => {
+    const observer = new MutationObserver(() => {
+      const button = document.querySelector('.cw-undo');
+      if (typeof button?.onclick === 'function') { window.qaLegacyRestoreButton = button; observer.disconnect(); }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  });
+  await page.addScriptTag({ url: base + '/cw-flow-shell.js' });
+  await page.waitForFunction(() => typeof window.qaLegacyRestoreButton?.onclick === 'function');
+  // Force the cleanup ordering observed in CI, without replacing the legacy handler.
+  await page.evaluate(() => document.querySelector('.cw-global-bar')?.remove());
   await page.locator('#password').fill('Generic QA secret'); assert(!(await storageText(page)).includes('Generic QA secret'));
   await page.locator('#password').fill(''); await open(page, first.id); await page.locator('#editPassword').fill('Managed QA secret');
   assert(!(await storageText(page)).includes('Managed QA secret')); assert.equal(await page.evaluate(() => localStorage.getItem('cw:lastform:editClientForm')), null);
   await page.evaluate(() => { localStorage.setItem('cw:lastform:key', 'editClientForm'); localStorage.setItem('cw:lastform:editClientForm', JSON.stringify({ name: 'Wrong restored name', password: 'Wrong restored password' })); });
-  await page.evaluate(() => document.querySelector('.cw-undo').click()); assert.equal(await page.locator('#editName').inputValue(), 'Nome revisto'); assert.equal(await page.locator('#editPassword').inputValue(), 'Managed QA secret');
+  await page.evaluate(() => { if (document.querySelector('.cw-undo')) throw Error('Legacy toolbar should already be removed'); window.qaLegacyRestoreButton.click(); }); assert.equal(await page.locator('#editName').inputValue(), 'Nome revisto'); assert.equal(await page.locator('#editPassword').inputValue(), 'Managed QA secret');
   await page.locator('#editPassword').fill('');
   console.log('PASS generic navigation/form memory excludes credentials and cannot restore over the managed editor');
 

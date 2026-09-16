@@ -38,3 +38,9 @@ A página específica da ficha técnica tinha gravação atómica (TASK194), mas
 Rever a seguir os escritores de propostas técnicas (submissão, transição e aprovação), incluindo a sua aplicação aos mesmos componentes e a propagação antiga. A versão da ficha não torna esses escritores recuperáveis. Chamadas antigas sem UUID não adquirem deduplicação própria. A conservação local das confirmações está sujeita à capacidade e permanência dos dados deste navegador; os comprovativos do servidor persistem em PostgreSQL.
 
 Continuam as restantes escritas antigas e o inventário visual global. Sem merge em main, deploy/VPS, mensagens a fornecedores reais ou emissão fiscal. O PNG preexistente do guia técnico permanece fora deste lote. Não há declaração de prontidão global.
+
+## Primeiro CI e correção do ensaio legado
+
+O workflow `35097630168`, sobre `deb89535040a83609e3bedff5a0f883cce89c35f`/árvore `75202b7a0bb92c039da27117d58da2eb3998a96c`, aprovou dezasseis migrações, unitários, técnicos, navegador e 97 dos 98 grupos. Os três grupos da ficha técnica passaram em PostgreSQL 16. O restauro não correu nessa execução.
+
+A falha foi `document.querySelector('.cw-undo').click()` no ensaio de recuperação de clientes. A navegação atual remove a barra antiga através de temporizadores de arranque, mas o teste carregava a barra e tentava usar o botão mais tarde. A fixture passa a capturar o botão real na inserção, força a remoção da barra e exerce o mesmo handler original. Mantém todas as verificações de exclusão de credenciais, proteção do editor gerido e troca de conta, sem alterar código de produção nem aumentar timeouts. Ensaio corrigido aprovado em `field-qa-runtime/run-1789563326029`. Verificar a execução completa da nova árvore.
