@@ -26,7 +26,7 @@ async function physical(relative) {
 }
 async function references(relative) {
   const url = toPublicUploadUrl(relative), encoded = toPublicUploadUrl(relative.split('/').map(encodeURIComponent).join('/'));
-  return prisma.clientMessage.findMany({ where: { OR: ['fileUrl', 'message', 'text'].map(key => ({ [key]: { in: [...new Set([url, encoded])] } })) }, select: { id: true, clientId: true } });
+  return prisma.clientMessage.findMany({ where: { legacyKey: null, OR: ['fileUrl', 'message', 'text'].map(key => ({ [key]: { in: [...new Set([url, encoded])] } })) }, select: { id: true, clientId: true } });
 }
 function allowed(user, rows) {
   if (normalizeRole(user?.role) === 'ADMIN') return true;
@@ -58,7 +58,7 @@ async function download(req, res) {
     const rawId = req.params.messageId, id = Number(rawId);
     if (!/^[1-9]\d*$/.test(rawId) || !Number.isSafeInteger(id) || id > 2147483647) fail(400, 'Anexo inválido.');
     const message = await prisma.clientMessage.findUnique({ where: { id } });
-    if (!message || !allowed(req.user, [message])) fail(404, 'Anexo não encontrado.');
+    if (!message || message.legacyKey || !allowed(req.user, [message])) fail(404, 'Anexo não encontrado.');
     const relative = referencePath(message.fileUrl) || referencePath(message.message) || referencePath(message.text);
     if (!relative) fail(404, 'Anexo não encontrado.');
     const file = await physical(relative), rows = await references(file.relative);

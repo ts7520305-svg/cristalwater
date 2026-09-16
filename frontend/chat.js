@@ -220,9 +220,10 @@
         })()
         : "";
       const text = messageText(message);
-      const upload = [message.fileUrl, text].some(value => String(value || '').startsWith('/uploads/')) && Number.isSafeInteger(Number(message.id)) && Number(message.id) > 0;
+      const historical = message.senderType === 'LEGACY';
+      const upload = !historical && [message.fileUrl, text].some(value => String(value || '').startsWith('/uploads/')) && Number.isSafeInteger(Number(message.id)) && Number(message.id) > 0;
       const admin = !isClientMessage(message);
-      const sender = message.sender || (admin ? "Administracao" : "Cliente");
+      const sender = historical ? CWClientChat.historyLabel() : message.sender || (admin ? "Administracao" : "Cliente");
       const body = upload
           ? `<a data-auth-download href="/api/client-messages/attachments/${Number(message.id)}" target="_blank" rel="noopener">Abrir anexo${message.fileName ? ': ' + esc(message.fileName) : ''}</a>`
           : esc(text);
@@ -231,8 +232,8 @@
 
       return `
         ${separator}
-        <div class="chat-message ${admin ? "chat-admin" : "chat-client"}">
-          <strong>${esc(sender)}</strong>
+        <div class="chat-message ${historical ? "chat-history" : admin ? "chat-admin" : "chat-client"}">
+          <strong ${historical ? 'data-cw-no-i18n' : ''}>${esc(sender)}</strong>
           <br>
           ${body}${invoiceDocument}
           <div class="chat-meta">${esc(shortDate(message.createdAt))}</div>

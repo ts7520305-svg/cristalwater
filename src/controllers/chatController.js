@@ -1,6 +1,7 @@
 const { prisma } =
   require("../prismaClient");
 const { normalizeRole } = require("../utils/roles");
+const history = require("../services/clientChatHistoryService");
 
 // ======================================================
 // HELPERS
@@ -20,16 +21,7 @@ function isClientSender(value) {
     String(value || "").trim().toLowerCase() === "cliente";
 }
 
-function adminUnreadWhere(clientId = null) {
-  return {
-    ...(clientId ? { clientId } : {}),
-    isReadByAdmin: false,
-    OR: [
-      { senderType: "CLIENT" },
-      { sender: "Cliente" },
-    ],
-  };
-}
+const adminUnreadWhere = history.adminUnreadWhere;
 
 function authClientId(req) {
   return toNumber(req.user?.clientId || req.user?.id);
@@ -51,6 +43,7 @@ const createMessage = require('./clientMessageWriteController').write();
 
 async function listOverview(req, res) {
   try {
+    await history.ensure();
     const unreadOnly = String(req.query.unreadOnly || req.query.filter || "").toLowerCase().includes("unread");
 
     const [clients, latestMessages, unreadGroups] = await Promise.all([
@@ -123,7 +116,7 @@ async function listOverview(req, res) {
     });
   } catch (err) {
     console.error("ERRO CHAT listOverview:", err);
-    return res.status(500).json({ ok: false, error: err.message });
+    return res.status(500).json({ ok: false, error: "Não foi possível aceder à conversa. O histórico foi preservado." });
   }
 }
 
@@ -158,6 +151,7 @@ async function listClientConversation(req, res){
       }
     }
 
+    await history.ensure();
     const messages =
       await prisma.clientMessage.findMany({
 
@@ -190,7 +184,7 @@ async function listClientConversation(req, res){
 
       ok:false,
 
-      error: err.message
+      error: "Não foi possível aceder à conversa. O histórico foi preservado."
     });
   }
 }
@@ -209,6 +203,7 @@ async function listMessages(req, res){
 
   try {
 
+    await history.ensure();
     const messages =
       await prisma.clientMessage.findMany({
 
@@ -236,7 +231,7 @@ async function listMessages(req, res){
 
       ok:false,
 
-      error: err.message
+      error: "Não foi possível aceder à conversa. O histórico foi preservado."
     });
   }
 }
@@ -248,15 +243,12 @@ async function listMessages(req, res){
 async function markAsRead(req, res){
 
   try {
-    const clientId = toNumber(req.body?.clientId || req.query?.clientId);
-    await prisma.clientMessage.updateMany({
-      where: adminUnreadWhere(clientId),
-      data: { isReadByAdmin: true, seen: true, seenAt: new Date() },
-    });
+    const clientId = req.body?.clientId ?? req.query?.clientId;
+    await require("../business/chat/LegacyClientChatBusiness").markRead(req.user, clientId);
     return res.json({ ok: true });
   } catch (err) {
     console.error("ERRO CHAT markAsRead:", err);
-    return res.status(500).json({ ok: false, error: err.message });
+    return res.status(500).json({ ok: false, error: "Não foi possível aceder à conversa. O histórico foi preservado." });
   }
 }
 
@@ -267,6 +259,7 @@ async function markAsRead(req, res){
 async function getUnreadCount(req, res){
 
   try {
+    await history.ensure();
     const unread = await prisma.clientMessage.count({ where: adminUnreadWhere() });
     return res.json({ ok: true, unread });
   } catch (err) {

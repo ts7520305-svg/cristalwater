@@ -1779,14 +1779,15 @@ function appendMessage(message) {
   const chat = el("chatBox");
   if (!chat) return;
   const sender = String(message.sender || message.from || "").toLowerCase();
-  const isClient = sender.includes("client") || sender.includes("cliente");
+  const historical = message.senderType === 'LEGACY';
+  const isClient = !historical && (sender.includes("client") || sender.includes("cliente"));
   const text = message.text || message.message || "";
   const date = message.createdAt ? new Date(message.createdAt).toLocaleString(localeForLanguage()) : "";
   const div = document.createElement("div");
   div.className = `msg ${isClient ? "client" : "admin"}`;
   if(message?.id)div.dataset.clientMessageId=String(Number(message.id));
-  const uploadedAttachment = [message.fileUrl, text].some(value => String(value || '').startsWith('/uploads/')) && Number.isSafeInteger(Number(message.id)) && Number(message.id) > 0;
-  div.innerHTML = `<b>${isClient ? esc(copy("clientDefault")) : "Cristal Water"}</b><br>${uploadedAttachment ? `<a data-auth-download href="/api/client-messages/attachments/${Number(message.id)}" target="_blank" rel="noopener">${esc(copy("openAttachment"))}</a>` : esc(text)}<div class="muted">${esc(date)}</div>`;
+  const uploadedAttachment = !historical && [message.fileUrl, text].some(value => String(value || '').startsWith('/uploads/')) && Number.isSafeInteger(Number(message.id)) && Number(message.id) > 0;
+  div.innerHTML = `<b ${historical ? 'data-cw-no-i18n' : ''}>${historical ? esc(CWClientChat.historyLabel(portalLanguage)) : isClient ? esc(copy("clientDefault")) : "Cristal Water"}</b><br>${uploadedAttachment ? `<a data-auth-download href="/api/client-messages/attachments/${Number(message.id)}" target="_blank" rel="noopener">${esc(copy("openAttachment"))}</a>` : esc(text)}<div class="muted">${esc(date)}</div>`;
   if (message.messageType === 'DOCUMENT' && /^\/invoice-document\?id=[1-9]\d{0,9}$/.test(message.fileUrl || '')) {
     const link = document.createElement('a'); link.href = message.fileUrl; link.target = '_blank'; link.rel = 'noopener'; link.textContent = copy('openAttachment');
     div.appendChild(document.createElement('br')); div.appendChild(link);

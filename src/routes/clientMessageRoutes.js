@@ -3,6 +3,7 @@ const multer = require("multer");
 const path = require("path");
 const { prisma } = require("../prismaClient");
 const { resolveUploadSubdir, toPublicUploadUrl } = require("../config/uploadPath");
+const history = require('../services/clientChatHistoryService');
 
 const router = express.Router();
 router.use(require('../middlewares/authMiddleware')('CLIENT'));
@@ -42,6 +43,7 @@ router.get("/:clientId", async (req, res) => {
     const clientId = n(req.params.clientId);
     if(!canMessage(req,res,clientId))return;
     if (!clientId) return res.status(400).json({ ok: false, error: "clientId invalido" });
+    await history.ensure();
     const messages = await prisma.clientMessage.findMany({
       where: { clientId },
       orderBy: { createdAt: "asc" },
@@ -49,7 +51,7 @@ router.get("/:clientId", async (req, res) => {
     return res.json({ ok: true, messages });
   } catch (err) {
     console.error("client-messages list error:", err);
-    return res.status(500).json({ ok: false, error: err.message });
+    return res.status(err.statusCode || 500).json({ ok: false, error: err.statusCode ? err.message : 'Não foi possível aceder à conversa. O histórico foi preservado.' });
   }
 });
 
@@ -86,35 +88,10 @@ router.post("/seen/:clientId", async (req, res) => {
     const clientId = n(req.params.clientId);
     if(!canMessage(req,res,clientId))return;
     if (!clientId) return res.status(400).json({ ok: false, error: "clientId invalido" });
-    const actor = normalizeRole(req.user.role)==='CLIENT'?'client':'admin';
-
-    if (actor === "client" || actor === "cliente") {
-      await prisma.clientMessage.updateMany({
-        where: {
-          clientId,
-          seen: false,
-          OR: [
-            { senderType: "ADMIN" },
-            { sender: { not: "Cliente" } },
-          ],
-        },
-        data: { seen: true, seenAt: new Date() },
-      });
-      return res.json({ ok: true, actor: "client" });
-    }
-
-    await prisma.clientMessage.updateMany({
-      where: {
-        clientId,
-        isReadByAdmin: false,
-        OR: [{ senderType: "CLIENT" }, { sender: "Cliente" }],
-      },
-      data: { isReadByAdmin: true, seen: true, seenAt: new Date() },
-    });
-    return res.json({ ok: true });
+    return res.json(await require('../business/chat/LegacyClientChatBusiness').markRead(req.user, req.params.clientId));
   } catch (err) {
     console.error("client-messages seen error:", err);
-    return res.status(500).json({ ok: false, error: err.message });
+    return res.status(err.statusCode || 500).json({ ok: false, error: err.statusCode ? err.message : 'Não foi possível confirmar a leitura.' });
   }
 });
 
@@ -123,17 +100,12 @@ router.get("/unread/:clientId", async (req, res) => {
     const clientId = n(req.params.clientId);
     if(!canMessage(req,res,clientId))return;
     if (!clientId) return res.status(400).json({ ok: false, unread: 0, error: "clientId invalido" });
-    const unread = await prisma.clientMessage.count({
-      where: {
-        clientId,
-        isReadByAdmin: false,
-        OR: [{ senderType: "CLIENT" }, { sender: "Cliente" }],
-      },
-    });
+    await history.ensure();
+    const unread = await prisma.clientMessage.count({ where: history.adminUnreadWhere(clientId) });
     return res.json({ ok: true, unread });
   } catch (err) {
     console.error("client-messages unread error:", err);
-    return res.status(500).json({ ok: false, unread: 0, error: err.message });
+    return res.status(err.statusCode || 500).json({ ok: false, error: err.statusCode ? err.message : 'Não foi possível consultar as mensagens por ler.' });
   }
 });
 

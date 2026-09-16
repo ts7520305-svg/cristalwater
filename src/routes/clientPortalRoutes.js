@@ -128,8 +128,12 @@ router.post("/:clientId(\\d+)/notifications/:notificationId/read", auth("CLIENT"
 router.get("/:clientId(\\d+)/messages", auth("CLIENT"), async (req, res) => {
   const clientId = Number(req.params.clientId);
   if (!ensureClientOwnership(req, res, clientId)) return;
-  const messages = await listCustomerMessages(clientId);
-  return res.json({ ok: true, messages });
+  try {
+    const messages = await listCustomerMessages(clientId);
+    return res.json({ ok: true, messages });
+  } catch (_) {
+    return res.status(500).json({ ok: false, error: 'Não foi possível aceder à conversa. O histórico foi preservado.' });
+  }
 });
 
 router.post("/:clientId(\\d+)/messages", auth("CLIENT"), (req, res) => {

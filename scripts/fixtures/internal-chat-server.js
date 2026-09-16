@@ -17,5 +17,8 @@ app.use((req, res, next) => {
 });
 app.use('/api/internal-chat', require('../../src/routes/internalChatRoutes'));
 app.use('/api/chat', require('../../src/routes/chatRoutes'));
+app.use('/api/clientChat', require('../../src/routes/clientChatRoutes'));
+app.use('/api/client-chat', require('../../src/routes/clientChatRoutes'));
+app.use('/api/client-messages', require('../../src/routes/clientMessageRoutes'));
 const server = app.listen(0, '127.0.0.1', () => process.send({ port: server.address().port }));
 process.on('SIGTERM', () => server.close(async () => { await prisma.$disconnect(); process.exit(0); }));

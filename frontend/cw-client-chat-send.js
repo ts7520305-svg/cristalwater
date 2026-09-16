@@ -143,5 +143,6 @@
       headers() { return { Authorization: `Bearer ${credential}` }; },
       readError() { note(11); }, get busy() { return working || unavailable || invalidated || !!pending; } };
   }
-  window.CWClientChat = { create };
+  const historyLabel = language => ({ pt: 'Mensagem antiga · autor não confirmado', en: 'Earlier message · author unconfirmed', fr: 'Ancien message · auteur non confirmé', es: 'Mensaje anterior · autor sin confirmar', de: 'Frühere Nachricht · Verfasser unbestätigt' })[String(language || document.documentElement.lang || 'pt').slice(0, 2)] || 'Mensagem antiga · autor não confirmado';
+  window.CWClientChat = { create, historyLabel };
 })();

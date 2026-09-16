@@ -1,49 +1,48 @@
 'use strict';
-const fs = require('node:fs'), path = require('node:path'), { randomUUID } = require('node:crypto');
-const { prisma } = require('../../prismaClient');
-const { normalizeRole } = require('../../utils/roles');
-const dataPath = path.join(__dirname, '../../data/clientChatMessages.json');
+const { prisma } = require('../../prismaClient'), { normalizeRole } = require('../../utils/roles');
+const current = require('./ClientMessageBusiness'), history = require('../../services/clientChatHistoryService');
 function fail(statusCode, message) { throw Object.assign(new Error(message), { statusCode }); }
-function actor(user, rawId) {
-  const role = normalizeRole(user?.role), client = role === 'CLIENT';
-  if (!['ADMIN', 'CLIENT'].includes(role)) fail(403, 'Sem permissão para esta conversa.');
-  const id = Number(rawId);
-  if (!/^[1-9]\d*$/.test(String(rawId)) || !Number.isSafeInteger(id) || id > 2147483647) fail(400, 'Cliente inválido.');
-  if (client && id !== Number(user.clientId || user.id)) fail(403, 'Sem permissão para esta conversa.');
-  return { id: String(id), role: client ? 'CLIENT' : 'ADMIN' };
+function present(message) {
+  const legacy = message.legacyRecord;
+  return { ...(legacy ? legacy.payload : { id: `db-${message.id}`, clientId: String(message.clientId), from: message.senderType || 'UNKNOWN', text: message.text || message.message || '', created_at: message.createdAt.toISOString() }),
+    recordId: legacy?.recordKey || `db-${message.id}`, messageId: message.id, source: legacy ? 'LEGACY' : 'DATABASE', projected: true, identityVerified: !legacy && !!message.actorKey,
+    readByAdmin: message.isReadByAdmin, readByClient: message.isReadByClient || message.senderType === 'CLIENT',
+    ...(message.fileUrl ? { fileUrl: message.fileUrl, fileName: message.fileName, messageType: message.messageType } : {}) };
 }
-function load() {
-  let raw;
-  try { raw = fs.readFileSync(dataPath, 'utf8'); } catch (error) { if (error.code === 'ENOENT') return []; throw error; }
-  const rows = JSON.parse(raw);
-  if (!Array.isArray(rows) || rows.some(row => !row || typeof row !== 'object')) throw Error('Histórico inválido; conteúdo preservado.');
-  return rows;
+async function list(user, rawId) {
+  const { clientId, role } = current.actor(user, rawId); await history.ensure();
+  const messages = (await prisma.clientMessage.findMany({ where: { clientId }, include: { legacyRecord: true }, orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] })).map(present);
+  if (role === 'ADMIN') {
+    const unassigned = await prisma.clientChatLegacyRecord.findMany({ where: { clientId, message: { is: null } }, orderBy: { importedAt: 'asc' } });
+    messages.push(...unassigned.map(row => ({ ...row.payload, recordId: row.recordKey, source: 'LEGACY', projected: false, identityVerified: false, readByAdmin: row.readByAdmin, readByClient: row.readByClient })));
+  }
+  return messages;
 }
-function save(rows) {
-  fs.mkdirSync(path.dirname(dataPath), { recursive: true });
-  const temporary = `${dataPath}.${randomUUID()}.tmp`;
-  try { fs.writeFileSync(temporary, JSON.stringify(rows, null, 2), { flag: 'wx', mode: 0o600 }); fs.renameSync(temporary, dataPath); }
-  finally { fs.rmSync(temporary, { force: true }); }
-}
-function list(user, rawId) {
-  const { id } = actor(user, rawId);
-  return load().filter(m => String(m.clientId) === id).sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-}
-function unread(user) {
+async function unread(user) {
   if (normalizeRole(user?.role) !== 'ADMIN') fail(403, 'Sem permissão para esta consulta.');
-  return { unreadCount: load().filter(m => m.from === 'CLIENT' && !m.readByAdmin).length };
+  await history.ensure(); return { unreadCount: await prisma.clientMessage.count({ where: history.adminUnreadWhere() }) };
 }
 async function create(user, rawId, body = {}) {
-  const { id, role } = actor(user, rawId);
-  if (typeof body?.text !== 'string' || !body.text.trim() || body.text.length > 10000) fail(400, 'Mensagem inválida.');
-  if (!await prisma.client.findUnique({ where: { id: Number(id) }, select: { id: true } })) fail(404, 'Cliente não encontrado.');
-  const rows = load();
-  const message = { id: randomUUID(), clientId: id, from: role, text: body.text.trim(), created_at: new Date().toISOString(), readByAdmin: role === 'ADMIN', readByClient: role === 'CLIENT' };
-  rows.push(message); save(rows); return message;
+  const result = await current.create(user, rawId, body); current.emit(result);
+  return { ...present(result.message), ok: true, requestId: result.message.requestId, replayed: result.replayed, receipt: result.receipt };
 }
-function markRead(user, rawId) {
-  const { id, role } = actor(user, rawId), key = role === 'CLIENT' ? 'readByClient' : 'readByAdmin';
-  save(load().map(m => String(m.clientId) === id ? { ...m, [key]: true } : m));
-  return { ok: true };
+async function markRead(user, rawId) {
+  const role = normalizeRole(user?.role);
+  const id = rawId == null && role === 'ADMIN' ? null : current.actor(user, rawId).clientId;
+  const source = await history.snapshot();
+  return prisma.$transaction(async tx => {
+    await history.importSnapshot(tx, source);
+    const scope = id ? { clientId: id } : {}, now = new Date();
+    if (role === 'CLIENT') {
+      await tx.clientMessage.updateMany({ where: { ...scope, isReadByClient: false, senderType: { not: 'CLIENT' }, seenAt: null }, data: { seen: true, seenAt: now } });
+      await tx.clientMessage.updateMany({ where: { ...scope, isReadByClient: false }, data: { isReadByClient: true } });
+    } else {
+      const where = history.adminUnreadWhere(id);
+      await tx.clientMessage.updateMany({ where: { ...where, seenAt: null }, data: { seenAt: now } });
+      await tx.clientMessage.updateMany({ where, data: { isReadByAdmin: true, seen: true } });
+    }
+    if (role === 'ADMIN') await tx.clientChatLegacyRecord.updateMany({ where: { ...scope, message: { is: null }, readByAdmin: false }, data: { readByAdmin: true } });
+    return { ok: true, ...(role === 'CLIENT' ? { actor: 'client' } : {}) };
+  }, { maxWait: 15000, timeout: 20000 });
 }
 module.exports = { list, unread, create, markRead };

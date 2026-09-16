@@ -15,8 +15,9 @@ async function load() {
     const fragment = document.createDocumentFragment();
     for (const message of data.messages) {
       const node = document.createElement('div'); node.className = 'msg ' + (message.senderType === 'CLIENT' ? 'me' : 'other'); node.dataset.messageId = message.id;
+      if (message.senderType === 'LEGACY') { const author = document.createElement('strong'); author.textContent = CWClientChat.historyLabel(); author.dataset.cwNoI18n = ''; node.append(author); }
       const text = document.createElement('div'); text.textContent = message.text || message.message || ''; node.append(text);
-      if (message.fileUrl && Number.isSafeInteger(message.id)) { const link = document.createElement('a'); link.dataset.authDownload = ''; link.href = message.messageType === 'DOCUMENT' && /^\/invoice-document\?id=[1-9]\d{0,9}$/.test(message.fileUrl) ? message.fileUrl : `/api/client-messages/attachments/${message.id}`; link.textContent = message.fileName || 'Abrir anexo'; node.append(link); }
+      if (message.senderType !== 'LEGACY' && message.fileUrl && Number.isSafeInteger(message.id)) { const link = document.createElement('a'); link.dataset.authDownload = ''; link.href = message.messageType === 'DOCUMENT' && /^\/invoice-document\?id=[1-9]\d{0,9}$/.test(message.fileUrl) ? message.fileUrl : `/api/client-messages/attachments/${message.id}`; link.textContent = message.fileName || 'Abrir anexo'; node.append(link); }
       const date = document.createElement('small'); date.textContent = new Date(message.createdAt).toLocaleString(document.documentElement.lang === 'pt' ? 'pt-PT' : document.documentElement.lang || 'pt-PT'); node.append(date); fragment.append(node);
     }
     const list = document.getElementById('messages'); list.replaceChildren(fragment); list.scrollTop = list.scrollHeight;

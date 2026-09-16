@@ -493,7 +493,7 @@ const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
 
 
         }
-      } catch(e) { const state=await page.evaluate(()=>({toast:document.querySelector('#toast')?.textContent,documents:document.querySelector('#documentCenterBox')?.innerText})).catch(()=>null); failures.push({persona:persona.name,error:e.message,state,errors,apiErrors});console.error('FAIL',persona.name,e.message); }
+      } catch(e) { const state=await page.evaluate(()=>({toast:document.querySelector('#toast')?.textContent,documents:document.querySelector('#documentCenterBox')?.innerText})).catch(()=>null); failures.push({persona:persona.name,error:e.message,stack:e.stack,state,errors,apiErrors});console.error('FAIL',persona.name,e.stack); }
       console.log('CLOSE',persona.name);
       await context.close();
       console.log('CLOSED',persona.name);

@@ -2,6 +2,7 @@
 const { createHash } = require('node:crypto'), fs = require('node:fs/promises');
 const { prisma } = require('../../prismaClient');
 const { normalizeRole } = require('../../utils/roles');
+const history = require('../../services/clientChatHistoryService');
 const hash = value => createHash('sha256').update(value).digest('hex');
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 function fail(statusCode, message) { throw Object.assign(new Error(message), { statusCode }); }
@@ -35,7 +36,9 @@ async function create(user, rawClientId, body = {}, attachment) {
     payload = { text: input.text, message: input.text, messageType: 'TEXT' };
   }
   const payloadHash = hash(JSON.stringify(input));
+  const source = await history.snapshot();
   return prisma.$transaction(async tx => {
+    await history.importSnapshot(tx, source);
     if (requestId) await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${`client-message:${identity.actorKey}:${requestId}`}))::text`;
     const client = await tx.client.findUnique({ where: { id: identity.clientId }, select: { id: true } });
     if (!client) fail(404, 'Cliente não encontrado.');
@@ -45,7 +48,7 @@ async function create(user, rawClientId, body = {}, attachment) {
     if (!message) {
       const fromClient = identity.role === 'CLIENT';
       message = await tx.clientMessage.create({ data: { ...payload, clientId: identity.clientId, actorKey: identity.actorKey, requestId, payloadHash,
-        sender: fromClient ? 'Cliente' : 'Administração Cristal Water', senderType: identity.role, isReadByAdmin: !fromClient, seen: !fromClient, seenAt: fromClient ? null : new Date() } });
+        sender: fromClient ? 'Cliente' : 'Administração Cristal Water', senderType: identity.role, isReadByAdmin: !fromClient, isReadByClient: fromClient, seen: !fromClient, seenAt: fromClient ? null : new Date() } });
       await tx.communicationLog.create({ data: { clientId: identity.clientId, channel: fromClient ? 'PORTAL_CLIENTE' : 'CHAT', referenceId: message.id, message: attachment ? `Anexo: ${attachment.name}` : input.text } });
     }
     return { ok: true, message, replayed, receipt: requestId ? { scope: 'CLIENT_CHAT_SEND', actorKey: message.actorKey, requestId: message.requestId,
@@ -61,4 +64,4 @@ function emit(result) {
     if (message.senderType === 'CLIENT') global.io.emit('new-notification', { id: `chat-${message.clientId}`, clientId: message.clientId, type: 'CHAT_MESSAGE', message: message.message, createdAt: message.createdAt });
   } catch (error) { console.error('Chat event after commit:', error.message); }
 }
-module.exports = { create, emit };
+module.exports = { create, emit, actor };

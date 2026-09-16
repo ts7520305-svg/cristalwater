@@ -111,12 +111,14 @@ model ClientMessage {
   actorKey      String?
   requestId     String?
   payloadHash   String?
+  legacyKey     String?   @unique
   clientId      Int
   sender        String?
   senderType    String?
   message       String?
   text          String?
   isReadByAdmin Boolean   @default(false)
+  isReadByClient Boolean  @default(false)
   seen          Boolean   @default(false)
   fileUrl       String?
   fileName      String?
@@ -124,11 +126,31 @@ model ClientMessage {
   createdAt     DateTime  @default(now())
   seenAt        DateTime?
   client        Client    @relation(fields: [clientId], references: [id])
+  legacyRecord  ClientChatLegacyRecord? @relation(fields: [legacyKey], references: [recordKey])
 
   @@unique([actorKey, requestId])
   @@index([clientId])
   @@index([createdAt])
   @@index([isReadByAdmin])
+}
+
+model ClientChatLegacyRecord {
+  recordKey     String        @id
+  clientId      Int?
+  payload       Json
+  readByAdmin   Boolean       @default(false)
+  readByClient  Boolean       @default(false)
+  importedAt    DateTime      @default(now())
+  message       ClientMessage?
+
+  @@index([clientId])
+}
+
+model ClientChatImport {
+  sourceHash    String   @id
+  sourceBytes   Bytes
+  messageCount  Int
+  importedAt    DateTime @default(now())
 }
 
 model ClientReportSetting {

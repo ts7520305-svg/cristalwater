@@ -64,12 +64,14 @@ function normalizeMessage(message) {
     clientId: message.clientId,
     sender: message.sender || (message.senderType === "CLIENT" ? "Cliente" : "Cristal Water"),
     senderType: message.senderType || "ADMIN",
+    identityVerified: message.senderType !== 'LEGACY' && !!message.actorKey,
     text: message.text || message.message || "",
     message: message.message || message.text || "",
     messageType: message.messageType || "TEXT",
     fileUrl: message.fileUrl || null,
     fileName: message.fileName || null,
     isReadByAdmin: Boolean(message.isReadByAdmin),
+    isReadByClient: Boolean(message.isReadByClient),
     seen: Boolean(message.seen),
     seenAt: message.seenAt || null,
     createdAt: message.createdAt || null,
@@ -115,6 +117,7 @@ async function listCustomerNotifications(clientId) {
 }
 
 async function listCustomerMessages(clientId) {
+  await require('./clientChatHistoryService').ensure();
   const messages = await prisma.clientMessage.findMany({
     where: { clientId },
     orderBy: [{ createdAt: "asc" }, { id: "asc" }],
