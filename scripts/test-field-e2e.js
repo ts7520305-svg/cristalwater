@@ -153,15 +153,29 @@ const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
           let posts=0;
           const retriedRequests=[];
           await page.route('**/api/client-messages',async route=>{if(route.request().method()==='POST'){posts++;retriedRequests.push(route.request().postDataJSON());await new Promise(r=>setTimeout(r,150));}await route.continue()});
+          // Hold the post-confirmation refresh so the busy interval is deterministic.
+          let releaseChatRefresh, markChatRefresh;
+          const chatRefreshStarted = new Promise(resolve=>{markChatRefresh=resolve;});
+          const chatRefreshReleased = new Promise(resolve=>{releaseChatRefresh=resolve;});
+          const chatRefreshUrl = `**/api/client-portal/${client.id}/messages`;
+          await page.route(chatRefreshUrl,async route=>{markChatRefresh();await chatRefreshReleased;await route.continue();});
           await page.evaluate(()=>{document.querySelector('#clientChatRetry').click();document.querySelector('#clientChatRetry').click()});
           await page.waitForFunction(()=>document.querySelector('#messageInput').value==='');
           assert.equal(posts,1);
           assert.deepEqual(retriedRequests,[originalRequest],'Retry must retain the exact UUID, recipient and content across reload');
           assert.equal(await prisma.clientMessage.count({where:{clientId:client.id,text:'Mensagem preservada após falha'}}),1);
-          await page.locator('#photoInput').setInputFiles({name:'client-attachment.png',mimeType:'image/png',buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6tAAAAABJRU5ErkJggg==','base64')});
+          await chatRefreshStarted;
+          assert(await page.locator('#photoBtn').isDisabled(),'Attachment selection must stay blocked until the previous send finishes');
+          assert.equal(await page.locator('.cw-client-chat-recovery').getAttribute('aria-busy'),'true');
+          releaseChatRefresh();
+          await page.waitForFunction(()=>!document.querySelector('#photoBtn').disabled&&document.querySelector('.cw-client-chat-recovery').getAttribute('aria-busy')==='false');
+          await page.unroute(chatRefreshUrl);
+          // Use the same enabled button and file chooser that the customer uses.
+          const [attachmentChooser] = await Promise.all([page.waitForEvent('filechooser'),page.locator('#photoBtn').click()]);
+          await attachmentChooser.setFiles({name:'client-attachment.png',mimeType:'image/png',buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6tAAAAABJRU5ErkJggg==','base64')});
           await page.waitForFunction(()=>document.querySelector('#photoInput').value==='');
           assert.equal(await prisma.clientMessage.count({where:{clientId:client.id,fileName:'client-attachment.png'}}),1);
-          console.log('PASS client partial failure recovery, retained message, double-click guard and persisted attachment');
+          console.log('PASS client partial failure recovery, retained message, double-click guard, busy attachment controls and persisted attachment');
         }
         if(persona.role==='TECHNICIAN') {
           await page.waitForFunction(() => document.querySelector('#nextTitle')?.textContent.includes('Piscina da Quinta'));

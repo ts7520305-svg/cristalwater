@@ -47,3 +47,11 @@ A aprovação depende do workflow `Field readiness integration` do commit public
 A edição continua sem UUID/comprovativo de reenvio nem controlo de versão. Alterações concorrentes ao mesmo campo podem sobrepor-se; esta entrega não resolve formulários obsoletos, respostas perdidas ou confirmação no navegador. Não foram modificados os formulários de clientes nem as rotas/formulários de piscinas.
 
 Quando o executor regressar, reconciliar o checkout com o commit remoto, preservando a imagem preexistente `docs/product/evidence/group3/acceptance/technician-guide-1440x900.png`. Retomar controlo de versão/recuperação de clientes e a atomicidade/histórico dos aliases de piscinas. Não declarar prontidão global.
+
+## Primeira execução nativa e correção do ensaio E2E
+
+Workflow `35075302355`, commit `bb2cf83589161d721443481d0c831540ba6ac1d3`: 324 unitários, quatro técnicos, 17 scripts de navegador, sintaxe de 524 ficheiros e treze migrações aprovados. O novo teste de preservação de clientes passou. Resultado operacional: 89 de 90 grupos aprovados; o restauro foi omitido pelo CI após a falha de `test-field-e2e.js`.
+
+A falha ocorreu no anexo do cliente móvel: o teste preenchia diretamente o input de ficheiro assim que a mensagem anterior era limpa, antes de terminar o carregamento da conversa e de o botão de anexo voltar a estar disponível. O emissor mantém `working=true` durante esse carregamento e recusa outro envio nesse intervalo.
+
+O ensaio passa a reter deliberadamente a resposta de atualização da conversa, verificar que o botão de anexo está desativado/ocupado, libertar a atualização e escolher o ficheiro através do botão e seletor reais. Mantém as verificações de UUID/conteúdo, envio único e persistência do anexo, sem aumentar os tempos limite nem alterar o produto. Confirmar o CI completo da nova árvore, incluindo restauro.
