@@ -119,8 +119,12 @@
 
   function saveFormSnapshot(form){
     try{
+      if(form.dataset.cwFormMemory === 'managed') return;
       const id = form.id || form.getAttribute('name') || location.pathname;
       const data = Object.fromEntries(new FormData(form).entries());
+      for(const field of form.elements){
+        if(field.type === 'password' || field.type === 'file' || /password|passwd|token|secret|^pin$/i.test(field.name || '')) delete data[field.name];
+      }
       localStorage.setItem('cw:lastform:' + id, JSON.stringify(data));
       localStorage.setItem('cw:lastform:key', id);
     }catch{}
@@ -133,9 +137,10 @@
       const data = JSON.parse(localStorage.getItem('cw:lastform:' + key) || '{}');
       const form = document.getElementById(key) || document.querySelector('form');
       if(!form) return alert('Nao encontrei formulario nesta pagina');
+      if(form.dataset.cwFormMemory === 'managed') return;
       Object.entries(data).forEach(([k,v]) => {
         const el = form.elements[k] || document.getElementById(k);
-        if(el) el.value = v;
+        if(el && el.type !== 'password' && el.type !== 'file' && !/password|passwd|token|secret|^pin$/i.test(el.name || '')) el.value = v;
       });
       alert('Ultimo formulario recuperado');
     }catch{

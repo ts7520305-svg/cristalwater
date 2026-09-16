@@ -9,6 +9,7 @@ router.use(auth("TEAM_LEADER"));
 router.get("/", clientController.listClients);
 router.get("/:id", clientController.getClientById);
 router.post("/", clientController.createClient);
+router.get("/:id/edit-state", clientController.getClientEditState);
 router.put("/:id", clientController.updateClient);
 router.post("/:id/activate", clientController.activateClient);
 router.post("/:id/activate-contract", clientController.activateClient);

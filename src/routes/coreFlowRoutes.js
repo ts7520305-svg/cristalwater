@@ -1484,6 +1484,7 @@ router.post('/clients', async (req, res) => {
   }
 });
 
+router.get('/clients/:id/edit-state', require('../controllers/clientController').getClientEditState);
 router.put('/clients/:id', require('../controllers/clientController').updateClient);
 
 

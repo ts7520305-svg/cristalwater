@@ -1,12 +1,15 @@
 (function () {
   const KEY_PREFIX = 'cw:ctx:';
   const key = KEY_PREFIX + window.location.pathname;
+  const canRemember = el => el && el.type !== 'file' && el.type !== 'password'
+    && !/password|passwd|token|secret|^pin$/i.test(el.name || el.id || '')
+    && !el.closest('[data-cw-form-memory="managed"]');
 
   function collectFields() {
     const fields = {};
     document.querySelectorAll('input[id], select[id], textarea[id]').forEach((el) => {
       if (!el.id) return;
-      if (el.type === 'file') return;
+      if (!canRemember(el)) return;
       if (el.type === 'checkbox' || el.type === 'radio') fields[el.id] = !!el.checked;
       else fields[el.id] = el.value;
     });
@@ -17,7 +20,7 @@
     if (!fields || typeof fields !== 'object') return;
     Object.entries(fields).forEach(([id, value]) => {
       const el = document.getElementById(id);
-      if (!el) return;
+      if (!canRemember(el)) return;
       if (el.type === 'checkbox' || el.type === 'radio') el.checked = !!value;
       else if (typeof value === 'string') el.value = value;
       else if (value != null) el.value = String(value);
@@ -42,6 +45,9 @@
       const raw = sessionStorage.getItem(key);
       if (!raw) return;
       const parsed = JSON.parse(raw);
+      // Remove old credential snapshots and values now owned by a recoverable form.
+      parsed.fields = Object.fromEntries(Object.entries(parsed.fields || {}).filter(([id]) => canRemember(document.getElementById(id))));
+      sessionStorage.setItem(key, JSON.stringify(parsed));
       restoreFields(parsed.fields || {});
       if (Number.isFinite(parsed.scrollY)) {
         requestAnimationFrame(() => window.scrollTo({ top: parsed.scrollY, behavior: 'auto' }));

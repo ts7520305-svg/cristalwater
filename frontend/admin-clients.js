@@ -13,7 +13,7 @@ let CLIENTS = [];
 let showArchived = false;
 let clientStatusFilter = localStorage.getItem("cw_client_status_filter") || "active";
 let clientInvoiceFilter = localStorage.getItem("cw_client_invoice_filter") || "all";
-let editingClientId = null;
+let clientEdit;
 let pendingConfirmAction = null;
 let contractActivation;
 
@@ -47,16 +47,6 @@ function closeModal(modal) {
   }
 }
 
-function setCheckbox(id, checked) {
-  const input = document.getElementById(id);
-  if (input) input.checked = Boolean(checked);
-}
-
-function setFieldValue(id, value) {
-  const input = document.getElementById(id);
-  if (input) input.value = value ?? "";
-}
-
 function getClientPayloadFromFields(prefix = "") {
   const fieldId = (suffix) => {
     if (prefix) return `${prefix}${suffix}`;
@@ -80,34 +70,13 @@ function getClientPayloadFromFields(prefix = "") {
   };
 }
 
-function populateEditClientForm(client) {
-  editingClientId = Number(client.id);
-  setFieldValue("editName", client.name);
-  setFieldValue("editInternalName", client.internalName);
-  setFieldValue("editPhone", client.phone);
-  setFieldValue("editEmail", client.email);
-  setFieldValue("editZone", client.zone);
-  setFieldValue("editNotes", client.notes);
-  setFieldValue("editPassword", "");
-  setCheckbox("editRequiresInvoice", client.requiresInvoice);
-  setFieldValue("editFiscalName", client.fiscalName);
-  setFieldValue("editFiscalNif", client.fiscalNif);
-  setFieldValue("editFiscalAddress", client.fiscalAddress);
-  setFieldValue("editFiscalEmail", client.fiscalEmail);
-  setFieldValue("editExternalBillingNotes", client.externalBillingNotes);
-}
-
 function openEditClientModal(client) {
-  populateEditClientForm(client);
   setFeedback("");
-  openModal(editModal);
-  document.getElementById("editName")?.focus();
+  return clientEdit?.open(Number(client.id));
 }
 
 function closeEditClientModal() {
-  editingClientId = null;
-  editForm?.reset();
-  closeModal(editModal);
+  return clientEdit?.close();
 }
 
 function showConfirm({ title, subtitle, message, confirmText = "Confirmar", tone = "warning", onConfirm }) {
@@ -347,12 +316,16 @@ function renderList() {
 
 async function loadClients() {
   const container = document.getElementById("clients");
+  const credential = localStorage.getItem("cristalwater_jwt") || localStorage.getItem("token") || "";
+  const sameSession = () => credential === (localStorage.getItem("cristalwater_jwt") || localStorage.getItem("token") || "");
   container.textContent = "A carregar...";
   try {
     const data = await request("/clients?includeInactive=1");
+    if (!sameSession()) return;
     CLIENTS = data.clients || [];
     renderList();
   } catch (error) {
+    if (!sameSession()) return;
     container.innerHTML = `<div class="cw-empty">${esc(error.message)}</div>`;
   }
 }
@@ -392,26 +365,11 @@ async function editClient(id) {
     setFeedback("Cliente nao encontrado na lista.", "error");
     return;
   }
-  openEditClientModal(client);
+  await openEditClientModal(client);
 }
 
 async function saveEditedClient() {
-  const id = editingClientId;
-  if (!id) return;
-  const body = getClientPayloadFromFields("edit");
-  if (!body.name) {
-    setFeedback("Nome obrigatorio.", "warning");
-    document.getElementById("editName")?.focus();
-    return;
-  }
-  try {
-    await request(`/clients/${id}`, { method: "PUT", body: JSON.stringify(body) });
-    await loadClients();
-    closeEditClientModal();
-    setFeedback("Cliente atualizado.", "success");
-  } catch (error) {
-    setFeedback(error.message, "error");
-  }
+  return clientEdit?.save();
 }
 
 async function activateClient(id) {
@@ -473,6 +431,12 @@ function toggleArchived() {
 
 window.addEventListener("DOMContentLoaded", () => {
   contractActivation = setupContractActivation();
+  clientEdit = CWClientEdit.create({
+    show: () => openModal(editModal),
+    hide: () => closeModal(editModal),
+    confirmed: () => loadClients(),
+    invalidated: () => { CLIENTS = []; renderList(); },
+  });
   const params = new URLSearchParams(location.search);
   const invoiceFilter = String(params.get("invoice") || params.get("fatura") || "").toLowerCase();
   const financialFilter = String(params.get("financial") || params.get("financeiro") || "").toLowerCase();

@@ -134,6 +134,21 @@ model ClientMessage {
   @@index([isReadByAdmin])
 }
 
+// Immutable edit acknowledgement, with keyed credential proofs excluded from public responses.
+model ClientEditRequest {
+  actorKey      String
+  requestId     String
+  clientId      Int
+  payloadHash   String
+  passwordProof String?
+  pinProof      String?
+  response      Json
+  createdAt     DateTime @default(now())
+
+  @@id([actorKey, requestId])
+  @@index([clientId])
+}
+
 // Immutable portal acknowledgement, independent of mutable notification/message rows.
 model ClientPortalRequest {
   actorKey    String

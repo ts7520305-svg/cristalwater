@@ -56,42 +56,6 @@ function clientCreateData(body = {}) {
   });
 }
 
-function clientUpdateData(body = {}, currentClient = null) {
-  const finalContractActive = body.contractActive === undefined
-    ? Boolean(currentClient?.contractActive)
-    : boolFrom(body.contractActive);
-
-  const wantsBillingActive = body.billingActive === undefined
-    ? undefined
-    : boolFrom(body.billingActive);
-
-  if (wantsBillingActive === true && !finalContractActive) {
-    const error = new Error("Não é possível ativar faturação sem ativar primeiro o contrato.");
-    error.statusCode = 400;
-    throw error;
-  }
-
-  return definedOnly({
-    name: cleanString(body.name),
-    internalName: cleanString(body.internalName),
-    email: cleanString(body.email),
-    phone: cleanString(body.phone),
-    address: cleanString(body.address),
-    zone: cleanString(body.zone),
-    notes: cleanString(body.notes),
-    monthlyFee: numberOrUndefined(body.monthlyFee),
-    monthlyAmount: numberOrUndefined(body.monthlyFee ?? body.monthlyAmount),
-    requiresInvoice: body.requiresInvoice === undefined ? undefined : boolFrom(body.requiresInvoice),
-    fiscalName: cleanString(body.fiscalName),
-    fiscalNif: cleanString(body.fiscalNif ?? body.nif),
-    fiscalAddress: cleanString(body.fiscalAddress),
-    fiscalEmail: cleanString(body.fiscalEmail),
-    externalBillingNotes: cleanString(body.externalBillingNotes),
-    contractActive: body.contractActive === undefined ? undefined : finalContractActive,
-    billingActive: wantsBillingActive,
-  });
-}
-
 async function listClients(req, res) {
   try {
     const includeInactive = ["true", "1", "yes", "sim"].includes(String(req.query.includeInactive || "").toLowerCase());
@@ -139,17 +103,20 @@ async function createClient(req, res) {
   }
 }
 
+async function getClientEditState(req, res) {
+  try { return res.json(await ClientBusiness.getEditState(req.params.id, req.user)); }
+  catch (err) { return res.status(err.statusCode || 500).json({ ok: false, code: err.publicCode || "CLIENT_EDIT_FAILED", error: err.statusCode ? err.message : "Não foi possível carregar os dados atuais." }); }
+}
+
 async function updateClient(req, res) {
   try {
     const clientId = toInt(req.params.id);
     if (!clientId) return res.status(400).json({ error: "ID inválido" });
 
-    const updated = await ClientBusiness.update(clientId, req.body, req.user);
-
-    return res.json({ ok: true, client: updated });
+    return res.json(await ClientBusiness.update(clientId, req.body, req.user));
   } catch (err) {
     console.error("updateClient error:", err.code || err.statusCode || "CLIENT_UPDATE_FAILED");
-    return res.status(err.statusCode || 500).json({ ok: false, error: err.statusCode ? err.message : "Alteração não confirmada. Atualize os dados antes de repetir." });
+    return res.status(err.statusCode || 500).json({ ok: false, code: err.publicCode || "CLIENT_EDIT_FAILED", fields: err.fields, error: err.statusCode ? err.message : "Alteração não confirmada. Conserve o pedido e repita a confirmação." });
   }
 }
 
@@ -205,6 +172,7 @@ module.exports = {
   getClientById,
   createClient,
   updateClient,
+  getClientEditState,
   activateClient,
   archiveClient,
   restoreClient,

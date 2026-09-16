@@ -338,6 +338,26 @@
       margin-top: 8px;
     }
 
+    #editClientModal [hidden], #clientEditPendingList[hidden] { display: none !important; }
+    #editClientModal .field-stack { min-width: 0; }
+    #editClientModal .cw-modal-card { background: var(--ds-surface, #fff); color: var(--ds-text, #172839); border: 1px solid var(--ds-border); border-radius: 18px; box-shadow: 0 18px 70px #0005; }
+    #editClientModal .cw-modal-actions { position: sticky; bottom: -20px; background: var(--ds-surface, #fff); padding: 12px 0; border-top: 1px solid var(--ds-border); }
+    #editClientModal input, #editClientModal textarea, #editClientModal select { width: 100%; min-width: 0; }
+    #editClientModal input[type="checkbox"] { width: auto; }
+    #clientEditStatus, #clientEditPending, .client-edit-choice {
+      padding: 12px; border: 1px solid var(--ds-border); border-radius: 12px;
+      background: var(--ds-surface); overflow-wrap: anywhere;
+    }
+    #clientEditStatus[data-tone="warning"] { border-color: #ad792e; }
+    #clientEditStatus[data-tone="success"] { border-color: #278367; }
+    #clientEditPending, #clientEditComparison { max-height: 40vh; overflow: auto; }
+    #clientEditPending p, .client-edit-choice p { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .client-edit-choice { margin-bottom: 10px; }
+    .client-edit-choice select { min-height: 46px; }
+    #editClientModal button, #clientEditPendingList button { min-height: 44px; max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+    #clientEditPendingList { margin-block: 14px; }
+    #clientEditPendingList button { margin: 4px; }
+
     .cw-confirm-body {
       display: grid;
       gap: 14px;
@@ -475,12 +495,13 @@
           <button id="contractActivationRetry" type="button" class="cw-v2-btn primary">Confirmar ativação guardada</button>
           <button id="contractActivationReview" type="button" class="cw-v2-btn" hidden>Rever pedido recusado</button>
         </section>
+        <section id="clientEditPendingList" class="cw-card" hidden aria-live="polite" data-cw-no-i18n></section>
         <div id="clients" class="list muted">A carregar...</div>
       </div>
     </section>
   </main>
 
-  <div id="editClientModal" class="cw-modal" hidden>
+  <div id="editClientModal" class="cw-modal" hidden data-cw-no-i18n>
     <div class="cw-modal-card" role="dialog" aria-modal="true" aria-labelledby="editClientTitle">
       <div class="cw-modal-head">
         <div>
@@ -489,19 +510,22 @@
         </div>
         <button id="closeEditClientModal" class="cw-icon-btn" type="button" aria-label="Fechar edicao">×</button>
       </div>
-      <form id="editClientForm" class="cw-modal-form">
+      <form id="editClientForm" class="cw-modal-form" data-cw-form-memory="managed" data-cw-state-managed="manual">
+        <p id="clientEditStatus" class="wide" hidden role="status" aria-live="polite"></p>
+        <section id="clientEditPending" class="wide" hidden></section>
+        <div id="clientEditComparison" class="wide"></div>
         <div class="field-stack"><label for="editName">Nome</label><input id="editName" name="name" placeholder="Nome" required></div>
         <div class="field-stack"><label for="editInternalName">Nome interno</label><input id="editInternalName" name="internalName" placeholder="Nome interno"></div>
         <div class="field-stack"><label for="editPhone">Telefone</label><input id="editPhone" name="phone" placeholder="Telefone"></div>
         <div class="field-stack"><label for="editEmail">Email</label><input id="editEmail" name="email" placeholder="Email"></div>
         <div class="field-stack"><label for="editZone">Zona</label><input id="editZone" name="zone" placeholder="Zona"></div>
         <div class="field-stack wide"><label for="editNotes">Notas internas</label><textarea id="editNotes" name="notes" class="wide" placeholder="Notas internas"></textarea></div>
-        <div class="field-stack"><label for="editPassword">Nova password do portal</label><input id="editPassword" name="password" type="password" placeholder="Nova password do portal (opcional)"></div>
+        <div class="field-stack"><label for="editPassword">Nova palavra-passe do portal</label><input id="editPassword" name="password" type="password" autocomplete="new-password" aria-describedby="clientEditPasswordHint"><small id="clientEditPasswordHint" class="muted"></small></div>
 
         <div class="section-title">Faturacao oficial externa</div>
         <label class="check-row">
           <input type="checkbox" id="editRequiresInvoice" name="requiresInvoice">
-          Necessita fatura oficial noutro sistema
+          <span id="editRequiresInvoiceLabel">Necessita fatura oficial noutro sistema</span>
         </label>
 
         <div class="field-stack"><label for="editFiscalName">Nome fiscal</label><input id="editFiscalName" name="fiscalName" placeholder="Nome fiscal"></div>
@@ -511,6 +535,11 @@
         <div class="field-stack wide"><label for="editExternalBillingNotes">Notas para contabilidade</label><textarea id="editExternalBillingNotes" name="externalBillingNotes" class="wide" placeholder="Notas para contabilidade"></textarea></div>
 
         <div class="cw-modal-actions">
+          <button id="clientEditReload" class="cw-v2-btn" type="button" hidden>Carregar novamente</button>
+          <button id="clientEditDiscard" class="cw-v2-btn" type="button" hidden>Descartar rascunho</button>
+          <button id="clientEditRetry" class="cw-v2-btn primary" type="button" hidden>Confirmar pedido pendente</button>
+          <button id="clientEditReview" class="cw-v2-btn" type="button" hidden>Rever alterações</button>
+          <button id="clientEditApplyReview" class="cw-v2-btn primary" type="button" hidden>Preparar edição revista</button>
           <button id="cancelEditClient" class="cw-v2-btn" type="button">Cancelar</button>
           <button id="saveEditClient" class="cw-v2-btn primary" type="submit">Guardar alteracoes</button>
         </div>
@@ -539,7 +568,9 @@
 
   <script src="/admin-auth-guard.js"></script>
   <script src="/cw-contract-activation.js"></script>
+  <script src="/cw-client-edit.js"></script>
   <script src="/admin-clients.js"></script>
+  <script src="/cw-i18n.js"></script>
   <script src="/cristal-help-data.js"></script>
   <script src="/cristal-assist.js"></script>
   <script src="/ui/core/navigation-context.js"></script>
