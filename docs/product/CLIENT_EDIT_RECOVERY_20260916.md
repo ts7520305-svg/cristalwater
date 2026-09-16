@@ -27,7 +27,7 @@ Os dois aliases de edição de clientes partilham agora um contrato de versão, 
 - Uma resposta atrasada aplica-se apenas ao editor original. Fechar o cliente A e abrir B conserva o rascunho de B. Uma mudança de token/conta limpa dados visíveis e impede que o pedido antigo use a nova sessão.
 - Conflitos apresentam os valores atuais, do rascunho e, quando distinto, do pedido pendente. Alterações não sobrepostas são propostas; conflitos reais exigem escolha. Preparar a revisão não grava no servidor. Só o próximo Guardar cria outro UUID sobre a versão revista.
 - Um pedido incerto só é substituído depois de o servidor confirmar a rejeição por versão. A revisão é persistida antes de remover essa pendência. Falhas/corrupção de armazenamento não são tratadas como confirmação.
-- PT/EN/FR/ES/DE, texto de utilizador literal, controlos adequados ao toque e largura de 320/390/1440 px ensaiados. O editor possui os seus próprios estados e traduções.
+- PT/EN/FR/ES/DE, texto de utilizador literal, controlos adequados ao toque e largura de 320/390/1440 px ensaiados. O editor possui os seus próprios estados e traduções. Nomes, referências, contactos e designações de piscinas na lista também são excluídos da tradução automática; nomes coincidentes com rótulos, como “Pago” e “Urgente”, permanecem literais nos cinco idiomas.
 
 ## Interação com a memória antiga da página
 
@@ -41,7 +41,7 @@ O mecanismo genérico `cw-flow-shell` também passou a excluir credenciais e a r
 - `test-field-client-edit-recovery-ui.js`: página administrativa real em Chromium, confirmação exata, falhas antes/depois do commit, reload, duas janelas com rascunhos distintos, revisão de conflito, resposta de outro cliente, quotas/corrupção, leitura incompleta, validação, memória genérica, cinco idiomas e mudança de conta.
 - `field-qa-runtime/run-1789553091646`: recuperação API/UI, preservação de clientes e ativação aprovadas. A regressão de piscinas encontrou um erro de ligação do adaptador local PGlite durante injeção de falha; foi repetida numa instância nova, sem relaxar asserções.
 - `field-qa-runtime/run-1789553266343`: piscinas, editor novo e percurso E2E completo aprovados. Capturas em `reports/field-visual/client-edit/` revistas; superfície/contraste e ações do modal corrigidos.
-- Revisão final dos dois grupos em `field-qa-runtime/run-1789553370683`. 324 unitários, quatro testes de técnicos, validação Prisma e sintaxe de 526 ficheiros backend. Os 17 scripts de navegador usam o Chromium local configurado; a tentativa inicial sem esse caminho não encontrou o executável.
+- Revisão final dos dois grupos em `field-qa-runtime/run-1789553370683`; editor e nomes literais nos cinco idiomas aprovados em `run-1789554020061`. 324 unitários, quatro testes de técnicos, validação Prisma e sintaxe de 526 ficheiros backend. Os 17 scripts de navegador passaram com o Chromium local configurado; a tentativa inicial sem esse caminho não encontrou o executável.
 - Runner passa de 91 para 93 grupos. A migração aditiva `20260916130000_client_edit_requests` acrescenta uma tabela, chave composta e índice. O teste de upgrade aplica catorze migrações e verifica a conservação dos dados antigos; o restauro deverá abranger 105 tabelas.
 - Base remota confirmada: TASK189, commit `20001585bed6e8384325bc25f6d4cbac90314104`, workflow `35078224632`, com 91 grupos e restauro de 104 tabelas/22 ficheiros. A confirmação nativa desta alteração deve ser consultada no workflow associado ao seu próprio commit; o êxito da base não a substitui.
 

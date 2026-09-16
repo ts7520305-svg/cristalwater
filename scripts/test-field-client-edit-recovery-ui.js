@@ -12,7 +12,7 @@ let browser;
   const admin = await prisma.user.findUniqueOrThrow({ where: { email: process.env.ADMIN_EMAIL } });
   const token = jwt.sign({ id: admin.id, role: 'ADMIN' }, getJwtSecret(), { expiresIn: '1h' });
   const fixtures = [];
-  for (let i = 0; i < 12; i++) fixtures.push(await prisma.client.create({ data: { name: `Edição UI ${i} <b>literal</b>`, phone: '910000000', email: `client-edit-ui-${Date.now()}-${i}@qa.test`, status: 'ACTIVE', active: true, contractActive: true, billingActive: true, creditBalance: 37, monthlyFee: 70, monthlyAmount: 70, password: await bcrypt.hash('Before QA only', 4) } }));
+  for (let i = 0; i < 12; i++) fixtures.push(await prisma.client.create({ data: { name: i === 10 ? 'Pago' : `Edição UI ${i} <b>literal</b>`, internalName: i === 10 ? 'Urgente' : null, phone: '910000000', email: `client-edit-ui-${Date.now()}-${i}@qa.test`, status: 'ACTIVE', active: true, contractActive: true, billingActive: true, creditBalance: 37, monthlyFee: 70, monthlyAmount: 70, password: await bcrypt.hash('Before QA only', 4) } }));
   await fetch(base + '/api/settings/language/me', { method: 'PUT', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: '{"language":"pt"}' });
   browser = await require('playwright').chromium.launch({ headless: true, executablePath: process.env.CW_CHROMIUM_PATH, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
@@ -158,6 +158,8 @@ let browser;
   for (const [language, title] of Object.entries(titles)) {
     await page.evaluate(language => window.CristalI18n.applyLanguage(language), language);
     assert.equal(await page.locator('#editClientTitle').textContent(), title);
+    const literal = page.locator('article.client').filter({ has: page.locator(`button[onclick="editClient(${fixtures[10].id})"]`) });
+    assert.equal(await literal.locator('h3').textContent(), 'Pago'); assert.equal(await literal.locator('.client-kv span').last().textContent(), 'Urgente');
     for (const width of [320, 390, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       const fit = await page.locator('.cw-modal-card').first().evaluate(element => ({ client: element.clientWidth, scroll: element.scrollWidth, right: element.getBoundingClientRect().right, viewport: innerWidth }));

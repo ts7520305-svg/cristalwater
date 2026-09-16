@@ -210,7 +210,7 @@ function renderClient(client) {
   return `
     <article class="client ${hasDebt ? "cw-card-warn" : ""} ${activeClient ? "cw-client-active" : "cw-client-inactive"}">
       <div class="client-main">
-        <h3>${esc(client.name)}</h3>
+        <h3 data-cw-no-i18n>${esc(client.name)}</h3>
         <div class="client-meta-line">
           ${statusLabel(client)}
           ${client.requiresInvoice ? '<span class="ds-badge is-muted">Fatura oficial</span>' : '<span class="ds-badge is-muted">Sem fatura oficial</span>'}
@@ -218,10 +218,10 @@ function renderClient(client) {
           ${totals.credit > 0 ? '<span class="ds-badge">Credito positivo</span>' : ""}
         </div>
         <div class="client-kv">
-          <div>ID ${esc(client.id)} - ${esc(client.zone || "sem zona")}</div>
-          ${client.internalName ? `<div><strong>Interno</strong>${esc(client.internalName)}</div>` : ""}
-          <div><strong>${esc(client.paymentReference || paymentReference(client.id))}</strong></div>
-          <div><strong>${esc(client.phone || "-")}</strong>${client.email ? `<br>${esc(client.email)}` : ""}</div>
+          <div>ID ${esc(client.id)} - <span data-cw-no-i18n>${esc(client.zone || "sem zona")}</span></div>
+          ${client.internalName ? `<div><strong>Interno</strong><span data-cw-no-i18n>${esc(client.internalName)}</span></div>` : ""}
+          <div data-cw-no-i18n><strong>${esc(client.paymentReference || paymentReference(client.id))}</strong></div>
+          <div data-cw-no-i18n><strong>${esc(client.phone || "-")}</strong>${client.email ? `<br>${esc(client.email)}` : ""}</div>
         </div>
       </div>
       <div class="client-finance">
@@ -237,7 +237,7 @@ function renderClient(client) {
       <div class="client-pools-wrap">
         <div class="client-section-label">Piscinas / Jacuzzis (${pools.length})</div>
         <div class="client-pools">
-          ${firstPools.map((pool) => `<a class="cw-v2-btn" href="/admin-pool-technical?poolId=${esc(pool.id)}">${esc(pool.name || pool.type || "Piscina")} - ${esc(pool.zone || pool.location || "-")}</a>`).join("")}
+          ${firstPools.map((pool) => `<a class="cw-v2-btn" data-cw-no-i18n href="/admin-pool-technical?poolId=${esc(pool.id)}">${esc(pool.name || pool.type || "Piscina")} - ${esc(pool.zone || pool.location || "-")}</a>`).join("")}
           ${pools.length > firstPools.length ? `<span class="ds-badge is-muted">+${pools.length - firstPools.length}</span>` : ""}
         </div>
       </div>
