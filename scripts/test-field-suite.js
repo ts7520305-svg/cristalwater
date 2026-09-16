@@ -70,6 +70,7 @@ scripts.push('test-field-client-edit-recovery-ui.js');
 scripts.push('test-field-pool-edit-recovery.js');
 scripts.push('test-field-pool-edit-recovery-ui.js');
 scripts.push('test-field-technical-sheet-atomicity.js', 'test-field-technical-sheet-recovery.js', 'test-field-technical-sheet-recovery-ui.js');
+scripts.push('test-field-technical-proposals.js');
 function run(script){return new Promise(resolve=>{
  const output=fs.createWriteStream(path.join(evidence,script+'.log'));
  const child=spawn(process.execPath,[path.join(__dirname,script)],{cwd:root,env:process.env,stdio:['ignore','pipe','pipe']});

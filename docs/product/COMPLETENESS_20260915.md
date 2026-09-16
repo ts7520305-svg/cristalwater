@@ -30,7 +30,7 @@ Os documentos antigos contradizem-se: o ROADMAP marca Finance/Stock/Customer com
 | Mapas e navegação | Existente/testado no escopo | `frontend/technician-map.js`: seleção, próximas visitas, ausência de GPS e mudança de conta. Trânsito e qualidade de rotas reais não comprovados. |
 | Histórico GPS depois de uso prolongado | Corrigido/testado | `TechnicianGpsBusiness.getHistoryById`: últimos pontos em ordem cronológica, incluindo histórico acima de 1.000 posições. |
 | GPS offline na interface antiga | Parcial; prioridade alta | `frontend/technician.html` carrega `js/offline/offline-gps.js`, chamado por `technician.js`. A fila usa uma chave global; no fim da sincronização substitui a fila pelo snapshot restante, podendo perder entradas acrescentadas entretanto. Não tem a proteção de sessão/concorrência da fila moderna. Reproduzir e consolidar o emissor legado. |
-| Sugestões e aprovação de alterações técnicas | Existente | Rotas `technical-change-proposals` no core: motivo obrigatório, risco e revisão. Atualizar backlog antigo; não criar módulo duplicado. |
+| Sugestões e aprovação de alterações técnicas | Gravação/revisão corrigidas; recuperação/aplicação pendentes | TASK197: transação de proposta/evento/notificações, autoria e âmbito técnico, versão de revisão, lote por item, histórico completo e verificação dos formulários. APPROVED regista a decisão; aplicação vinculada e UUID/recibo recuperável ainda por completar. `TECHNICAL_PROPOSALS_ATOMICITY_20260916.md`. |
 | Vídeos de visitas/reparações | Não localizado como fluxo completo | Backlog documenta a intenção. Não foi encontrado percurso dedicado de captura, fila, upload, reprodução e limites de vídeo. Anexos/fotos não bastam para o considerar implementado. |
 
 ## Gestão, cliente e área comercial

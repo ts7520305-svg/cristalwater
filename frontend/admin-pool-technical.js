@@ -7,6 +7,7 @@ const ui = window.CwUi || {
   confirm: async () => false,
 };
 let proposalSelection = new Set();
+let proposalVersions = new Map(), proposalBusy = false;
 const completingReminders = new Set();
 let reminderRows = [], reminderPoolName = '', removeReminder;
 let sheetEditor;
@@ -34,7 +35,7 @@ function val(id) {
 
 async function req(path, options = {}) {
   if (!sameSheetSession()) throw new Error("A sessão mudou. Reabra a página.");
-  const { expectedStatus, ...fetchOptions } = options;
+  const { expectedStatus, allowPartial = false, ...fetchOptions } = options;
   const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt") || "";
   const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
   const response = await fetch(`${API}${path}`, {
@@ -43,7 +44,7 @@ async function req(path, options = {}) {
   });
   const data = await response.json().catch(() => ({}));
   if (!sameSheetSession()) throw new Error("A sessão mudou. Reabra a página.");
-  if (!response.ok || data.ok === false || (expectedStatus !== undefined && response.status !== expectedStatus)) throw new Error(data.error || "Erro");
+  if (!response.ok || (data.ok === false && !allowPartial) || (expectedStatus !== undefined && response.status !== expectedStatus)) throw new Error(data.error || "Erro");
   return data;
 }
 
@@ -160,7 +161,7 @@ function renderTechnicalProposalList(proposals = []) {
   list.innerHTML = proposals.map((proposal) => {
     const when = formatDate(proposal.submittedAt || proposal.createdAt);
     const changes = Array.isArray(proposal.changes) ? proposal.changes : [];
-    const photos = Array.isArray(proposal.photos) ? proposal.photos : [];
+    const photos = (Array.isArray(proposal.photos) ? proposal.photos : []).filter(safeProposalPhoto);
     const changeLines = changes.slice(0, 4).map((change) => `<li>${esc(change.field)}: ${esc(change.before ?? "-")} -> ${esc(change.after ?? "-")}</li>`).join("");
     const photoLines = photos.length
       ? `<ul>${photos.slice(0, 4).map((url) => `<li><a class="btn" href="${esc(url)}" target="_blank" rel="noreferrer noopener">Foto</a></li>`).join("")}</ul>`
@@ -170,8 +171,8 @@ function renderTechnicalProposalList(proposals = []) {
       ? `<table style="width:100%;border-collapse:collapse;margin:6px 0"><thead><tr><th style="text-align:left">Campo</th><th style="text-align:left">Antes</th><th style="text-align:left">Atual</th><th style="text-align:left">Depois</th></tr></thead><tbody>${diffRows.map((item) => `<tr><td>${esc(item.field || "-")}</td><td>${esc(item.effectiveBefore ?? "-")}</td><td>${esc(item.current ?? "-")}${item.hasDrift ? ' ⚠' : ''}</td><td>${esc(item.after ?? "-")}</td></tr>`).join("")}</tbody></table>`
       : '<div class="muted">Sem alterações para diff.</div>';
     const immutableBadge = proposal.immutable
-      ? `<div class="muted">Histórico imutável: ${proposal.immutable.chainValid ? "válido" : "inválido"} · eventos ${proposal.immutable.totalEvents || 0}</div>`
-      : '<div class="muted">Histórico imutável por carregar.</div>';
+      ? `<div class="muted">Integridade do histórico: ${proposal.immutable.chainValid ? "válido" : "inválido"} · eventos ${proposal.immutable.totalEvents || 0}</div>`
+      : '<div class="muted">Integridade do histórico por carregar.</div>';
     const checked = proposalSelection.has(Number(proposal.id)) ? "checked" : "";
     const actions = proposalWorkflowActions(proposal)
       .map((item) => `<button type="button" class="btn" data-proposal-transition="${esc(item.to)}" data-proposal-id="${esc(proposal.id)}">${esc(item.label)}</button>`)
@@ -188,7 +189,7 @@ function renderTechnicalProposalList(proposals = []) {
         <p><b>Alterações:</b></p>
         <ul>${changeLines || "<li>Sem detalhe</li>"}</ul>
         <details style="margin:8px 0"><summary>Diff visual</summary>${diffHtml}</details>
-        <details style="margin:8px 0"><summary>Histórico imutável</summary>${immutableBadge}<div class="muted" data-proposal-immutable-container="${esc(proposal.id)}"></div><button type="button" class="btn" data-proposal-load-history="${esc(proposal.id)}">Carregar histórico</button></details>
+        <details style="margin:8px 0"><summary>Integridade do histórico</summary>${immutableBadge}<div class="muted" data-proposal-immutable-container="${esc(proposal.id)}"></div><button type="button" class="btn" data-proposal-load-history="${esc(proposal.id)}">Carregar histórico</button></details>
         <p><b>Fotos:</b> ${photoLines}</p>
         ${actions ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">${actions}</div>` : '<span class="muted">Workflow finalizado</span>'}
       </div>
@@ -205,28 +206,41 @@ function setBatchStatus(message) {
   if (node) node.textContent = String(message || "");
 }
 
+function safeProposalPhoto(value) {
+  if (typeof value !== 'string' || /[\\\x00-\x20]/.test(value)) return false;
+  try { const url = new URL(value, location.origin); return (value.startsWith('/uploads/') || /^https?:\/\//i.test(value)) && ['http:', 'https:'].includes(url.protocol) && !url.username && !url.password; } catch (_) { return false; }
+}
+function setProposalBusy(value) {
+  proposalBusy = value;
+  document.querySelectorAll('[data-proposal-transition], [data-proposal-select], [id^="proposalBatch"][id$="Btn"]').forEach(node => { node.disabled = value; });
+}
+function confirmedProposal(proposal, id, state) {
+  return proposal && proposal.id === Number(id) && proposal.poolId === Number(poolId) && proposal.status === state && /^technical-proposal-v1:[0-9a-f]{64}$/.test(proposal.version);
+}
 async function runBatchTransition(nextStatus) {
+  if (proposalBusy) return;
   const ids = selectedProposalIds();
-  if (!ids.length) {
-    setBatchStatus("Seleciona pelo menos uma proposta para ação em lote.");
-    return;
-  }
+  if (!ids.length) { setBatchStatus("Seleciona pelo menos uma proposta para ação em lote."); return; }
   const needsNote = ["NEEDS_INFO", "REJECTED"].includes(String(nextStatus).toUpperCase());
-  let note = "";
-  if (needsNote) {
-    note = String(window.prompt("Nota obrigatória para ação em lote:", "") || "").trim();
-    if (!note) {
-      setBatchStatus("Ação em lote cancelada: nota obrigatória.");
-      return;
-    }
-  }
-  const data = await req(`/pools/${poolId}/technical-change-proposals/workflow/batch`, {
-    method: "POST",
-    body: JSON.stringify({ nextStatus, note, proposalIds: ids }),
-  });
-  setBatchStatus(`Lote ${data.batchId || ""}: ${data.updatedCount || 0} atualizada(s), ${data.failedCount || 0} falha(s).`);
-  proposalSelection = new Set();
-  await loadTechnicalProposals();
+  const note = needsNote ? String(window.prompt("Nota obrigatória para ação em lote:", "") || "").trim() : "";
+  if (needsNote && !note) { setBatchStatus("Ação em lote cancelada: nota obrigatória."); return; }
+  const expectedVersions = Object.fromEntries(ids.map(id => [id, proposalVersions.get(id)]));
+  if (ids.some(id => !expectedVersions[id])) throw new Error("Atualize as propostas antes de decidir.");
+  setProposalBusy(true);
+  try {
+    const data = await req(`/pools/${poolId}/technical-change-proposals/workflow/batch`, {
+      method: "POST", expectedStatus: 200, allowPartial: true,
+      body: JSON.stringify({ nextStatus, note, proposalIds: ids, expectedVersions }),
+    });
+    const outcomes = [...(data.updated || []).map(item => item.id), ...(data.failed || []).map(item => item.proposalId)];
+    if (!Array.isArray(data.updated) || !Array.isArray(data.failed) || !data.batchId || data.targetState !== nextStatus ||
+      data.updatedCount !== data.updated.length || data.failedCount !== data.failed.length || data.ok !== (data.failed.length === 0) ||
+      outcomes.length !== ids.length || new Set(outcomes).size !== ids.length || outcomes.some(id => !ids.includes(id)) ||
+      data.updated.some(item => !confirmedProposal(item, item.id, nextStatus)) || data.failed.some(item => !Number.isInteger(item.status) || item.status < 400)) throw new Error("Sem confirmação completa do lote. Consulte as propostas antes de repetir.");
+    proposalSelection = new Set(data.failed.map(item => item.proposalId));
+    setBatchStatus(`${data.updatedCount} atualizada(s), ${data.failedCount} falha(s).` + (data.failed.length ? ' ' + data.failed.map(item => `#${item.proposalId}: ${item.error || 'Rever proposta'}`).join(' · ') : ''));
+    try { await loadTechnicalProposals(); } catch (_) { setBatchStatus(`${data.updatedCount} atualizada(s), ${data.failedCount} falha(s). Atualize a lista para consultar o estado.`); }
+  } finally { setProposalBusy(false); }
 }
 
 async function loadProposalImmutableHistory(proposalId) {
@@ -243,22 +257,21 @@ async function loadProposalImmutableHistory(proposalId) {
 }
 
 async function transitionTechnicalProposal(proposalId, nextStatus) {
-  if (!poolId || !proposalId || !nextStatus) return;
+  if (proposalBusy || !poolId || !proposalId || !nextStatus) return;
+  const expectedVersion = proposalVersions.get(Number(proposalId));
+  if (!expectedVersion) throw new Error("Atualize as propostas antes de decidir.");
   const requireNote = ["NEEDS_INFO", "REJECTED"].includes(String(nextStatus).toUpperCase());
-  let note = "";
-  if (requireNote) {
-    note = String(window.prompt("Nota obrigatória para esta transição:", "") || "").trim();
-    if (!note) {
-      ui.info("Transição cancelada: nota obrigatória.");
-      return;
-    }
-  }
-  await req(`/pools/${poolId}/technical-change-proposals/${encodeURIComponent(proposalId)}/workflow`, {
-    method: "POST",
-    body: JSON.stringify({ nextStatus, note }),
-  });
-  ui.success(`Proposta atualizada para ${nextStatus}.`);
-  await loadTechnicalProposals();
+  const note = requireNote ? String(window.prompt("Nota obrigatória para esta transição:", "") || "").trim() : "";
+  if (requireNote && !note) { ui.info("Transição cancelada: nota obrigatória."); return; }
+  setProposalBusy(true);
+  try {
+    const data = await req(`/pools/${poolId}/technical-change-proposals/${encodeURIComponent(proposalId)}/workflow`, {
+      method: "POST", expectedStatus: 200, body: JSON.stringify({ nextStatus, note, expectedVersion }),
+    });
+    if (data.ok !== true || data.propagation?.persisted !== true || !confirmedProposal(data.proposal, proposalId, nextStatus)) throw new Error("Sem confirmação da decisão. Consulte a proposta antes de repetir.");
+    ui.success(`Decisão registada: ${nextStatus}.`);
+    await loadTechnicalProposals();
+  } finally { setProposalBusy(false); }
 }
 
 async function loadTechnicalProposals() {
@@ -266,11 +279,13 @@ async function loadTechnicalProposals() {
   if (!poolId) return;
   const data = await req(`/pools/${poolId}/technical-change-proposals`);
   const proposals = Array.isArray(data.proposals) ? data.proposals : [];
+  proposalVersions = new Map(proposals.map(item => [Number(item.id), item.version]));
   const validIds = new Set(proposals.map((item) => Number(item.id)));
   proposalSelection = new Set(Array.from(proposalSelection).filter((item) => validIds.has(Number(item))));
   if (!sameSheetSession()) return;
   renderTechnicalProposalSummary(proposals);
   renderTechnicalProposalList(proposals);
+  setProposalBusy(proposalBusy);
 }
 
 function renderReminders(reminders) {

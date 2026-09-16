@@ -450,9 +450,10 @@
   }
 
   async function api(path, options = {}) {
-    const response = await fetch(path, { headers: { "Content-Type": "application/json" }, ...options });
+    const { expectedStatus, ...fetchOptions } = options;
+    const response = await fetch(path, { headers: { "Content-Type": "application/json" }, ...fetchOptions });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok || data.ok === false || response.status === 202 || data.offline) throw new Error(data.error || data.message || "Sem confirmação do servidor; dados pendentes de sincronização");
+    if (!response.ok || data.ok === false || response.status === 202 || data.offline || (expectedStatus !== undefined && response.status !== expectedStatus)) throw new Error(data.error || data.message || "Sem confirmação do servidor; dados pendentes de sincronização");
     return data;
   }
 
@@ -1028,17 +1029,25 @@
       renderTechnicalProposalList();
       return;
     }
+    const credential = localStorage.getItem('cristalwater_jwt') || localStorage.getItem('token') || '';
+    const relevant = () => currentPoolId() === String(poolId) && credential === (localStorage.getItem('cristalwater_jwt') || localStorage.getItem('token') || '');
+    technicalProposals = [];
+    const list = $("#technicalProposalList");
+    if (list) list.textContent = "A consultar propostas...";
     try {
       const data = await api(`/api/core/pools/${encodeURIComponent(poolId)}/technical-change-proposals?onlyPending=true`);
+      if (!relevant()) return;
       technicalProposals = Array.isArray(data.proposals) ? data.proposals : [];
       renderTechnicalProposalList();
     } catch (_) {
-      technicalProposals = [];
-      renderTechnicalProposalList();
+      if (!relevant()) return;
+      if (list) list.textContent = "Não foi possível consultar as propostas. Atualize antes de repetir um envio.";
     }
   }
 
+  let submittingTechnicalProposal = false;
   async function submitTechnicalProposal() {
+    if (submittingTechnicalProposal) return;
     const poolId = currentPoolId();
     if (!poolId) {
       toast("Sem piscina ativa para propor alteração técnica.");
@@ -1071,10 +1080,16 @@
       changes: [{ field, before: before || null, after }],
     };
 
-    await api(`/api/core/pools/${encodeURIComponent(poolId)}/technical-change-proposals`, {
-      method: "POST",
-      body: JSON.stringify(payload),
+    const credential = localStorage.getItem('cristalwater_jwt') || localStorage.getItem('token') || '';
+    const controls = [...document.querySelectorAll('#technicalProposalBox input, #technicalProposalBox textarea, #technicalProposalBox select, #submitTechnicalProposalBtn')];
+    submittingTechnicalProposal = true; controls.forEach(node => { node.disabled = true; });
+    try {
+    const data = await api(`/api/core/pools/${encodeURIComponent(poolId)}/technical-change-proposals`, {
+      method: "POST", expectedStatus: 201, body: JSON.stringify(payload),
     });
+    if (credential !== (localStorage.getItem('cristalwater_jwt') || localStorage.getItem('token') || '') || currentPoolId() !== poolId) throw new Error('A sessão ou a piscina mudou. Consulte as propostas da piscina original.');
+    const saved = data.proposal;
+    if (data.ok !== true || data.propagation?.persisted !== true || !Number.isSafeInteger(saved?.id) || saved.poolId !== Number(poolId) || saved.status !== 'SUBMITTED' || saved.reason !== reason || saved.changes?.length !== 1 || saved.changes[0].field !== field || saved.changes[0].after !== after || JSON.stringify(saved.photos) !== JSON.stringify(photos)) throw new Error('Sem confirmação da proposta. Consulte a lista antes de repetir.');
 
     if (status) status.textContent = "Proposta submetida para análise.";
     const fieldsToClear = ["proposalFieldName", "proposalBeforeValue", "proposalAfterValue", "proposalReason", "proposalPhotos"];
@@ -1086,6 +1101,7 @@
     if (riskNode) riskNode.value = "";
     await loadTechnicalProposals(poolId);
     toast("Proposta técnica enviada.");
+    } finally { submittingTechnicalProposal = false; controls.forEach(node => { node.disabled = false; }); }
   }
 
   function todayQueryParams() {

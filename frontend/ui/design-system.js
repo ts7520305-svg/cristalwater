@@ -173,6 +173,9 @@
       "visita atual"
     ];
     Array.prototype.forEach.call(document.querySelectorAll("main > section, main > .section, main > article, main > div"), function (node) {
+      // Field panels already have explicit tab visibility. The legacy pruning
+      // would hide documents, proposals and access instructions in every tab.
+      if (node.classList.contains('field-panel')) return;
       var titleNode = node.querySelector("h2, [role='heading']");
       if (!titleNode) return;
       var t = textOf(titleNode);

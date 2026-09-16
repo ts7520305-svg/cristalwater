@@ -565,6 +565,69 @@
     'O lembrete já não pode ser concluído. Atualiza a lista antes de tentar novamente.': { en: 'This reminder can no longer be completed. Refresh the list before trying again.', fr: 'Ce rappel ne peut plus être terminé. Actualisez la liste avant de réessayer.', es: 'Este recordatorio ya no se puede completar. Actualiza la lista antes de volver a intentarlo.', de: 'Diese Erinnerung kann nicht mehr abgeschlossen werden. Aktualisieren Sie die Liste vor einem erneuten Versuch.' },
   });
 
+  Object.assign(DICT, {
+  "A aprovação regista a decisão. Para alterar valores, reveja e guarde a ficha técnica.": {
+    "en": "Approval records the decision. To change values, review and save the technical sheet.",
+    "fr": "L’approbation enregistre la décision. Pour modifier les valeurs, vérifiez et enregistrez la fiche technique.",
+    "es": "La aprobación registra la decisión. Para cambiar valores, revise y guarde la ficha técnica.",
+    "de": "Die Freigabe hält die Entscheidung fest. Um Werte zu ändern, das technische Datenblatt prüfen und speichern."
+  },
+  "Integridade do histórico": {
+    "en": "History integrity",
+    "fr": "Intégrité de l’historique",
+    "es": "Integridad del historial",
+    "de": "Integrität des Verlaufs"
+  },
+  "Integridade do histórico por carregar.": {
+    "en": "History integrity not loaded yet.",
+    "fr": "Intégrité de l’historique pas encore chargée.",
+    "es": "Integridad del historial pendiente de cargar.",
+    "de": "Integrität des Verlaufs noch nicht geladen."
+  },
+  "A consultar propostas...": {
+    "en": "Loading proposals...",
+    "fr": "Chargement des propositions...",
+    "es": "Cargando propuestas...",
+    "de": "Vorschläge werden geladen..."
+  },
+  "Não foi possível consultar as propostas. Atualize antes de repetir um envio.": {
+    "en": "Could not load proposals. Refresh before sending again.",
+    "fr": "Impossible de charger les propositions. Actualisez avant un nouvel envoi.",
+    "es": "No se pudieron consultar las propuestas. Actualice antes de volver a enviar.",
+    "de": "Vorschläge konnten nicht geladen werden. Vor erneutem Senden aktualisieren."
+  },
+  "Atualize as propostas antes de decidir.": {
+    "en": "Refresh proposals before deciding.",
+    "fr": "Actualisez les propositions avant de décider.",
+    "es": "Actualice las propuestas antes de decidir.",
+    "de": "Vorschläge vor der Entscheidung aktualisieren."
+  },
+  "Sem confirmação completa do lote. Consulte as propostas antes de repetir.": {
+    "en": "The batch was not fully confirmed. Check the proposals before retrying.",
+    "fr": "Le lot n’a pas été entièrement confirmé. Consultez les propositions avant de réessayer.",
+    "es": "El lote no se ha confirmado por completo. Consulte las propuestas antes de reintentar.",
+    "de": "Der Stapel wurde nicht vollständig bestätigt. Vorschläge vor einem erneuten Versuch prüfen."
+  },
+  "Sem confirmação da decisão. Consulte a proposta antes de repetir.": {
+    "en": "The decision was not confirmed. Check the proposal before retrying.",
+    "fr": "La décision n’a pas été confirmée. Consultez la proposition avant de réessayer.",
+    "es": "La decisión no se ha confirmado. Consulte la propuesta antes de reintentar.",
+    "de": "Die Entscheidung wurde nicht bestätigt. Vorschlag vor einem erneuten Versuch prüfen."
+  },
+  "Sem confirmação da proposta. Consulte a lista antes de repetir.": {
+    "en": "The proposal was not confirmed. Check the list before retrying.",
+    "fr": "La proposition n’a pas été confirmée. Consultez la liste avant de réessayer.",
+    "es": "La propuesta no se ha confirmado. Consulte la lista antes de reintentar.",
+    "de": "Der Vorschlag wurde nicht bestätigt. Liste vor einem erneuten Versuch prüfen."
+  },
+  "A sessão ou a piscina mudou. Consulte as propostas da piscina original.": {
+    "en": "The session or pool changed. Check the original pool’s proposals.",
+    "fr": "La session ou la piscine a changé. Consultez les propositions de la piscine initiale.",
+    "es": "La sesión o la piscina ha cambiado. Consulte las propuestas de la piscina original.",
+    "de": "Sitzung oder Pool wurde geändert. Vorschläge des ursprünglichen Pools prüfen."
+  }
+});
+
   const CANON_DICT = Object.entries(DICT).reduce((acc, [key, value]) => {
     acc[canonicalText(key)] = value;
     return acc;
