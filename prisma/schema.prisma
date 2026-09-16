@@ -231,6 +231,21 @@ model TechnicalSheetEditRequest {
   @@index([poolId])
 }
 
+// Immutable acknowledgements for proposal creation, decisions, batches and application.
+model TechnicalProposalRequest {
+  actorKey    String
+  requestId   String
+  poolId      Int
+  proposalId  Int?
+  action      String
+  payloadHash String
+  response    Json?
+  createdAt   DateTime @default(now())
+
+  @@id([actorKey, requestId])
+  @@index([poolId])
+}
+
 model Pool {
   maintenancePlans EquipmentMaintenancePlan[]
   id                    Int                     @id @default(autoincrement())

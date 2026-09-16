@@ -135,9 +135,9 @@ async function inject(table, type, proposalId = null) {
   assert.equal(await field.locator('#proposalReason').inputValue(), 'Real field measurement'); await field.unroute(proposalEndpoint);
   let fieldRelease, fieldCalls = 0; const fieldHeld = new Promise(resolve => { fieldRelease = resolve; });
   await field.route(proposalEndpoint, async route => { if (route.request().method() === 'POST') { fieldCalls++; await fieldHeld; } await route.continue(); });
-  await field.locator('#submitTechnicalProposalBtn').click(); assert.equal(await field.locator('#proposalReason').isDisabled(), true);
+  await field.locator('[data-proposal-retry]').click(); assert.equal(await field.locator('#proposalReason').isDisabled(), true);
   await field.evaluate(() => document.getElementById('submitTechnicalProposalBtn').onclick()); fieldRelease();
-  await field.waitForFunction(() => document.getElementById('technicalProposalStatus').textContent.includes('submetida para análise'));
+  await field.waitForFunction(() => document.getElementById('technicalProposalStatus').textContent.includes('Pedido confirmado'));
   assert.equal(fieldCalls, 1); assert.equal(await field.locator('#proposalReason').inputValue(), '');
   assert.equal((await records()).filter(r => r.type === 'TECHNICAL_CHANGE_PROPOSAL' && JSON.parse(r.description).reason === 'Real field measurement').length, 1);
   console.log('PASS actual technician form keeps unconfirmed text, blocks repeat submission and only clears after an exact saved response');

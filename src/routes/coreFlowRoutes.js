@@ -1198,6 +1198,9 @@ router.post('/pools/:id/technical-change-proposals/:proposalId/workflow', propos
 router.get('/pools/:id/technical-change-proposals/:proposalId/diff', proposalHandler(req => TechnicalProposals.detail(req.params.id, req.params.proposalId, req.user, 'diff')));
 router.get('/pools/:id/technical-change-proposals/:proposalId/history', proposalHandler(req => TechnicalProposals.detail(req.params.id, req.params.proposalId, req.user, 'history')));
 router.post('/pools/:id/technical-change-proposals/workflow/batch', proposalHandler(req => TechnicalProposals.batch(req.params.id, req.body, req.user)));
+router.get('/pools/:id/technical-change-proposals/:proposalId/application-preview', proposalHandler(req => TechnicalProposals.applicationPreview(req.params.id, req.params.proposalId, req.user)));
+router.post('/pools/:id/technical-change-proposals/:proposalId/application-preview', proposalHandler(req => TechnicalProposals.applicationPreview(req.params.id, req.params.proposalId, req.user, req.body)));
+router.post('/pools/:id/technical-change-proposals/:proposalId/apply', proposalHandler(req => TechnicalProposals.apply(req.params.id, req.params.proposalId, req.body, req.user)));
 
 router.put('/pools/:id/technical-sheet', async (req, res) => {
   try { return res.json(await require('../business/pool/PoolTechnicalSheetBusiness').update(req.params.id, req.body, req.user)); }

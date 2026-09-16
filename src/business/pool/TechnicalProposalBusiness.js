@@ -5,6 +5,8 @@ const { createHash, randomUUID } = require('node:crypto');
 const EventBus = require('../../core/event/EventBus');
 const BrainKnowledge = require('../../system/knowledge/BrainKnowledge');
 const C = require('./TechnicalProposalContract');
+const Requests = require('./TechnicalProposalRequests');
+const Sheet = require('./PoolTechnicalSheetBusiness').proposalSupport;
 const include = { technicalSheet: true, equipment: true, technicalRoom: true, calculationProfile: true };
 const fields = new Set(['notes', 'historyNote', 'equipmentNotes', 'technicalRoomNotes', 'pumpType', 'pumpPower', 'filterType', 'filterMedia', 'lightsType', 'lightsCount', 'saltSystem', 'hasLights', 'volumeM3', 'lengthM', 'widthM', 'diameterM', 'depthMinM', 'depthMaxM', 'averageDepthM', 'shape', 'shapeFactor', 'targetSalinityPpm', 'targetChlorinePpm', 'pumpFlowM3h', 'currentWaterTempC', 'type', 'disinfectionType', 'technicalRoomCondition', 'technicalRoomLocation', 'technicalRoomVentilation', 'technicalRoomElectrical', 'calculationNotes']);
 function fail(message, statusCode = 400, publicCode = 'INVALID_TECHNICAL_PROPOSAL') { throw Object.assign(new Error(message), { statusCode, publicCode }); }
@@ -78,7 +80,8 @@ function creationInput(body, actor, pool) {
 }
 async function create(rawPoolId, body = {}, user) {
   const actor = identity(user), poolId = identifier(rawPoolId);
-  const result = await prisma.$transaction(async tx => {
+  const request = Requests.context(actor, poolId, null, 'CREATE', body);
+  const result = await Requests.run(request, async tx => {
     await tx.$queryRaw`SELECT id FROM "Pool" WHERE id = ${poolId} FOR UPDATE`;
     const pool = await poolScope(tx, poolId, actor), input = creationInput(body, actor, pool), now = new Date().toISOString();
     const payload = { proposalId: randomUUID(), reason: input.reason, changes: input.changes, photos: input.photos, riskLevel: input.riskLevel, baselineCaptured: true, actor: actor.name, actorRole: actor.role, creatorKey: actor.key, creatorTechnicianId: actor.technicianId, submittedAt: now, status: input.state, lifecycle: input.state, transitions: [{ from: '', to: input.state, at: now, by: actor.name, actorKey: actor.key, note: 'Proposta criada' }] };
@@ -87,10 +90,10 @@ async function create(rawPoolId, body = {}, user) {
     if (input.state === 'SUBMITTED') await submissionNotice(tx, poolId, row.id, actor, input.riskLevel);
     const propagation = { poolId, actor: actor.key, source: 'TECHNICAL_PROPOSAL_CREATED', proposalId: row.id, summary: `Proposta #${row.id} criada com estado ${input.state}`, metadata: { riskLevel: input.riskLevel, lifecycle: input.state }, propagatedAt: now };
     await persistPropagation(tx, propagation);
-    return { proposal: C.mapTechnicalProposal(row, { pool }), propagation };
-  }, { timeout: 20000 });
-  await project(result.propagation);
-  return { ok: true, proposal: result.proposal, propagation: { persisted: true } };
+    return { response: { ok: true, proposal: C.mapTechnicalProposal(row, { pool }), propagation: { persisted: true } }, event: propagation };
+  });
+  if (result.event) await project(result.event);
+  return result.response;
 }
 async function submissionNotice(tx, poolId, id, actor, riskLevel) {
   await tx.notification.create({ data: { type: 'TECHNICAL_SHEET_PROPOSAL', eventType: 'TECHNICAL_SHEET_CHANGE_PROPOSED', title: 'Proposta técnica para revisão', message: `${actor.name} submeteu a proposta #${id}.`, role: 'ADMIN', status: 'PENDING', severity: riskLevel, metadata: { poolId, proposalHistoryId: id, riskLevel } } });
@@ -103,9 +106,10 @@ function transitionInput(body) {
   if (body.expectedVersion !== undefined && !/^technical-proposal-v1:[0-9a-f]{64}$/.test(body.expectedVersion)) fail('Versão da proposta inválida.');
   return { targetState, note };
 }
-async function transition(rawPoolId, rawProposalId, body = {}, user, batchId = '') {
+async function transition(rawPoolId, rawProposalId, body = {}, user, batchId = '', parentRequest = null) {
   const actor = identity(user), poolId = identifier(rawPoolId), proposalId = identifier(rawProposalId), { targetState, note } = transitionInput(body);
-  const result = await prisma.$transaction(async tx => {
+  const request = Requests.context(actor, poolId, proposalId, 'WORKFLOW', body);
+  const result = await Requests.run(request, async tx => {
     // Same pool-first ordering as the existing pool and technical-sheet editors.
     await tx.$queryRaw`SELECT id FROM "Pool" WHERE id = ${poolId} FOR UPDATE`;
     const pool = await poolScope(tx, poolId, actor);
@@ -127,10 +131,11 @@ async function transition(rawPoolId, rawProposalId, body = {}, user, batchId = '
     }
     const propagation = { poolId, actor: actor.key, source: 'TECHNICAL_PROPOSAL_WORKFLOW', proposalId, summary: `Proposta #${proposalId}: ${current.status} -> ${targetState}. Decisão registada.`, metadata: { fromState: current.status, toState: targetState, batchId: batchId || null, decisionOnly: true }, propagatedAt: now };
     await persistPropagation(tx, propagation);
-    return { proposal: C.mapTechnicalProposal(updated, { pool }), currentState: current.status, propagation };
-  }, { timeout: 20000 });
-  await project(result.propagation);
-  return { ok: true, proposal: result.proposal, currentState: result.currentState, propagation: { persisted: true } };
+    return { response: { ok: true, proposal: C.mapTechnicalProposal(updated, { pool }), currentState: current.status, propagation: { persisted: true } }, event: propagation };
+  }, parentRequest);
+  if (result.batchComplete) return { batchComplete: result.response };
+  if (result.event) await project(result.event);
+  return result.response;
 }
 async function list(rawPoolId, user, onlyPending = false) {
   const actor = identity(user), poolId = identifier(rawPoolId);
@@ -156,12 +161,96 @@ async function batch(rawPoolId, body = {}, user) {
   if (!Array.isArray(body.proposalIds) || !body.proposalIds.length || body.proposalIds.length > 50) fail('Indique de uma a cinquenta propostas.');
   const ids = body.proposalIds.map(identifier); if (new Set(ids).size !== ids.length) fail('O lote contém propostas repetidas.');
   if (body.expectedVersions !== undefined && (!body.expectedVersions || typeof body.expectedVersions !== 'object' || ids.some(id => !/^technical-proposal-v1:[0-9a-f]{64}$/.test(body.expectedVersions[id])))) fail('Versões do lote inválidas.');
-  const batchId = 'BATCH-' + randomUUID(), updated = [], failed = [];
+  const request = Requests.context(actor, poolId, null, 'BATCH', body);
+  if (request && !body.expectedVersions) fail('São necessárias as versões revistas do lote.');
+  const execute = async () => {
+  const batchId = 'BATCH-' + (request?.requestId || randomUUID()), updated = [], failed = [];
   // Each item is atomic. A failed item never hides the result of committed items.
   for (const id of ids) {
-    try { const result = await transition(poolId, id, { ...body, ...(body.expectedVersions ? { expectedVersion: body.expectedVersions[id] } : {}) }, user, batchId); updated.push(result.proposal); }
+    try { const result = await transition(poolId, id, { nextStatus: targetState, note: body.note ?? body.reason ?? '', ...(body.expectedVersions ? { expectedVersion: body.expectedVersions[id] } : {}), ...(request ? { requestId: Requests.itemId(request.requestId, id) } : {}) }, user, batchId, request); if (result.batchComplete) return result.batchComplete; updated.push(result.proposal); }
     catch (error) { failed.push({ proposalId: id, status: error.statusCode || 500, code: error.publicCode || 'TECHNICAL_PROPOSAL_WRITE_FAILED', error: error.statusCode ? error.message : 'Não foi possível gravar esta decisão. Consulte o estado antes de repetir.' }); }
   }
   return { ok: failed.length === 0, batchId, targetState, updatedCount: updated.length, failedCount: failed.length, updated, failed };
+  };
+  if (!request) return execute();
+  return Requests.batch(request, ids, execute);
 }
-module.exports = { create, transition, list, detail, batch };
+function typedValue(field, value) {
+  if (!fields.has(field) && field !== 'monthlyAmount') fail('Esta proposta contém um campo que precisa de revisão antes da aplicação.');
+  const data = Sheet.patches({ [field]: value });
+  if (field === 'historyNote') return data.note;
+  return C.readPoolFieldValue({ ...data.pool, equipment: data.equipment, technicalRoom: data.room, calculationProfile: data.calculation, technicalSheet: data.sheet }, field);
+}
+function applicationPlan(pool, row, resolutions) {
+  const proposal = C.parseProposalDescription(row.description);
+  if (row.status !== 'APPROVED' || proposal?.status !== 'APPROVED') fail('A proposta tem de estar aprovada e ainda por aplicar.', 409, 'TECHNICAL_PROPOSAL_APPLICATION_STATE');
+  const changes = proposal.changes;
+  if (!changes.length || new Set(changes.map(c => c.field)).size !== changes.length) fail('As alterações desta proposta precisam de revisão.');
+  if (resolutions !== undefined && (!resolutions || typeof resolutions !== 'object' || Array.isArray(resolutions) || Object.keys(resolutions).length !== changes.length || changes.some(c => !['PROPOSED', 'CURRENT'].includes(resolutions[c.field])))) fail('Escolha o valor de cada campo antes de aplicar.');
+  const body = {}, rows = changes.map(change => {
+    const after = typedValue(change.field, change.after), current = C.readPoolFieldValue(pool, change.field);
+    let before = change.before, known = proposal.baselineCaptured || change.before != null;
+    if (before != null) { try { before = typedValue(change.field, before); } catch (_) { known = false; } }
+    const hasDrift = change.field !== 'historyNote' && (!known || JSON.stringify(before ?? null) !== JSON.stringify(current ?? null));
+    const choice = resolutions?.[change.field] || (hasDrift ? null : 'PROPOSED');
+    if (choice === 'PROPOSED') body[change.field] = after;
+    return { field: change.field, before, current, after, hasDrift, choice };
+  });
+  const data = Sheet.patches(body); Sheet.deriveVolume(pool, data, body);
+  const projected = { ...pool, ...data.pool, equipment: { ...pool.equipment, ...data.equipment }, technicalRoom: { ...pool.technicalRoom, ...data.room }, technicalSheet: { ...pool.technicalSheet, ...data.sheet }, calculationProfile: { ...pool.calculationProfile, ...data.calculation } };
+  // A calculated result must never silently override an explicit field choice.
+  for (const item of rows) {
+    item.hasDerivedConflict = !!item.choice && ['volumeM3', 'averageDepthM'].includes(item.field) && JSON.stringify(C.readPoolFieldValue(projected, item.field) ?? null) !== JSON.stringify((item.choice === 'CURRENT' ? item.current : item.after) ?? null);
+  }
+  // Include derived effects, so changing dimensions cannot hide a volume change.
+  const effectFields = [...new Set([...changes.map(c => c.field), 'volumeM3', 'averageDepthM', ...(Object.hasOwn(data.pool, 'volumeM3') ? ['calculatedVolumeM3', 'treatmentVolumeM3'] : [])])];
+  const readEffect = (value, field) => field === 'calculatedVolumeM3' ? value.calculationProfile?.volumeM3 ?? null : field === 'treatmentVolumeM3' ? value.technicalSheet?.volumeM3 ?? null : C.readPoolFieldValue(value, field);
+  const effects = effectFields.map(field => ({ field, before: readEffect(pool, field), after: field === 'historyNote' ? data.note || null : readEffect(projected, field) })).filter(effect => JSON.stringify(effect.before ?? null) !== JSON.stringify(effect.after ?? null));
+  return { data, public: { ok: true, scope: 'TECHNICAL_PROPOSAL_APPLICATION', poolId: pool.id, proposalId: row.id, version: C.proposalVersion(row), sheetVersion: Sheet.version(pool), fields: rows, effects, effectsHash: Requests.hash({ effects }), canApply: rows.every(r => !!r.choice && !r.hasDerivedConflict), resolutions: Object.fromEntries(rows.map(r => [r.field, r.choice])) } };
+}
+async function checkApplicationHistory(tx, poolId, row) {
+  const immutable = C.buildImmutableHistory(await events(tx, poolId, row.id));
+  if (!immutable.chainValid || immutable.events.at(-1)?.toState !== row.status) fail('O histórico da proposta precisa de revisão administrativa.', 409, 'TECHNICAL_PROPOSAL_HISTORY_CONFLICT');
+  return immutable;
+}
+async function applicationPreview(rawPoolId, rawProposalId, user, body = {}) {
+  const actor = identity(user), poolId = identifier(rawPoolId), proposalId = identifier(rawProposalId);
+  if (!actor.admin) fail('Só a administração pode aplicar propostas.', 403);
+  if (!body || typeof body !== 'object' || Array.isArray(body)) fail('Comparação inválida.');
+  return prisma.$transaction(async tx => {
+    const pool = await poolScope(tx, poolId, actor), row = await proposalRow(tx, poolId, proposalId, actor);
+    await checkApplicationHistory(tx, poolId, row);
+    if (body.expectedVersion !== undefined && (body.expectedVersion !== C.proposalVersion(row) || body.expectedSheetVersion !== Sheet.version(pool))) fail('A proposta ou a ficha mudou. Reabra a comparação.', 409, 'TECHNICAL_PROPOSAL_APPLICATION_CONFLICT');
+    return applicationPlan(pool, row, body.resolutions).public;
+  }, { isolationLevel: 'RepeatableRead', timeout: 20000 });
+}
+async function apply(rawPoolId, rawProposalId, body = {}, user) {
+  const actor = identity(user), poolId = identifier(rawPoolId), proposalId = identifier(rawProposalId);
+  if (!actor.admin) fail('Só a administração pode aplicar propostas.', 403);
+  const request = Requests.context(actor, poolId, proposalId, 'APPLY', body);
+  if (!/^technical-sheet-v1:[0-9a-f]{64}$/.test(body.expectedSheetVersion)) fail('É necessária a versão revista da ficha técnica.');
+  const result = await Requests.run(request, async tx => {
+    await tx.$queryRaw`SELECT id FROM "Pool" WHERE id = ${poolId} FOR UPDATE`;
+    await tx.$queryRaw`SELECT id FROM "TechnicalSheet" WHERE "poolId" = ${poolId} FOR UPDATE`;
+    await tx.$queryRaw`SELECT id FROM "PoolEquipment" WHERE "poolId" = ${poolId} FOR UPDATE`;
+    await tx.$queryRaw`SELECT id FROM "TechnicalRoom" WHERE "poolId" = ${poolId} FOR UPDATE`;
+    await tx.$queryRaw`SELECT id FROM "PoolCalculationProfile" WHERE "poolId" = ${poolId} FOR UPDATE`;
+    await tx.$queryRaw`SELECT id FROM "TechnicalHistory" WHERE id = ${proposalId} AND "poolId" = ${poolId} FOR UPDATE`;
+    const before = await poolScope(tx, poolId, actor), row = await proposalRow(tx, poolId, proposalId, actor);
+    if (body.expectedVersion !== C.proposalVersion(row) || body.expectedSheetVersion !== Sheet.version(before)) fail('A proposta ou a ficha mudou. Reabra a comparação.', 409, 'TECHNICAL_PROPOSAL_APPLICATION_CONFLICT');
+    const immutable = await checkApplicationHistory(tx, poolId, row), plan = applicationPlan(before, row, body.resolutions);
+    if (body.expectedEffectsHash !== plan.public.effectsHash) fail('Reveja o resultado calculado antes de aplicar.', 409, 'TECHNICAL_PROPOSAL_APPLICATION_CONFLICT');
+    if (!plan.public.canApply || body.resolutions === undefined) fail('Reveja todos os campos e escolha valores compatíveis com o resultado calculado antes de aplicar.');
+    const saved = await Sheet.commitPatch(tx, { poolId, before, data: plan.data, actor: actor.key, requestId: request.requestId, proposalId, source: 'TECHNICAL_PROPOSAL_APPLIED', forceVersion: true });
+    const application = { at: new Date().toISOString(), actorKey: actor.key, historyId: saved.history.id, noteHistoryId: saved.note?.id || null, sheetVersion: Sheet.version(saved.pool), resolutions: plan.public.resolutions, effects: plan.public.effects };
+    const payload = JSON.parse(row.description);
+    Object.assign(payload, { status: 'APPLIED', lifecycle: 'APPLIED', application, transitions: [...(payload.transitions || []), { from: 'APPROVED', to: 'APPLIED', at: application.at, by: actor.name, actorKey: actor.key, note: 'Aplicação revista à ficha técnica' }] });
+    const updated = await tx.technicalHistory.update({ where: { id: row.id }, data: { status: 'APPLIED', description: JSON.stringify(payload), performedAt: new Date() } });
+    await appendEvent(tx, { poolId, proposalId, fromState: 'APPROVED', toState: 'APPLIED', actor, note: 'Aplicação revista à ficha técnica', previousHash: immutable.latestHash });
+    if (payload.creatorKey && Number.isSafeInteger(payload.creatorTechnicianId)) await tx.notification.create({ data: { type: 'TECHNICAL_SHEET_PROPOSAL_WORKFLOW', eventType: 'TECHNICAL_SHEET_PROPOSAL_APPLIED', title: 'Proposta aplicada', message: `A proposta #${proposalId} foi aplicada após revisão.`, role: 'TECHNICIAN', status: 'PENDING', severity: payload.riskLevel, metadata: { poolId, proposalHistoryId: proposalId, technicianId: payload.creatorTechnicianId } } });
+    return { response: { ok: true, proposal: C.mapTechnicalProposal(updated, { pool: saved.pool }), application, propagation: { persisted: true, historyId: saved.propagation.id, notificationId: saved.notification.id } }, event: saved.event };
+  });
+  if (result.event) await project(result.event);
+  return result.response;
+}
+module.exports = { create, transition, list, detail, batch, applicationPreview, apply };

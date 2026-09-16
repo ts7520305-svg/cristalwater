@@ -114,6 +114,23 @@ async function getState(rawId, user) {
   }, { isolationLevel: 'RepeatableRead' });
 }
 
+async function commitPatch(tx, { poolId, before, data, actor, requestId = null, proposalId = null, source = 'TECHNICAL_SHEET_DIRECT_UPDATE', forceVersion = false }) {
+    if (forceVersion || data.note || Object.keys(data.pool).length) await tx.pool.update({ where: { id: poolId }, data: { ...data.pool, updatedAt: new Date(Math.max(Date.now(), before.updatedAt.getTime() + 1)) } });
+    for (const [model, fields] of [['technicalSheet', data.sheet], ['poolEquipment', data.equipment], ['technicalRoom', data.room], ['poolCalculationProfile', data.calculation]]) {
+      if (Object.keys(fields).length) await tx[model].upsert({ where: { poolId }, update: fields, create: { poolId, ...fields } });
+    }
+    const pool = await tx.pool.findUnique({ where: { id: poolId }, include }), changes = changedFields(before, pool), changedAt = new Date();
+    const history = await tx.technicalHistory.create({ data: { poolId, type: 'TECHNICAL_SHEET_CHANGE', component: 'Ficha Técnica', message: 'Alteração imutável da ficha técnica',
+      description: JSON.stringify({ actor, changedAt: changedAt.toISOString(), before, after: pool, ...(requestId ? { requestId } : {}), ...(proposalId ? { proposalId } : {}) }), performedAt: changedAt, status: 'DONE' } });
+    const note = data.note ? await tx.technicalHistory.create({ data: { poolId, type: 'TECHNICAL_SHEET_NOTE', component: 'Ficha Técnica', message: 'Nota da ficha técnica', description: data.note, performedAt: changedAt, status: 'DONE' } }) : null;
+    const summary = `Ficha técnica atualizada com ${changes.length} alteração(ões).`;
+    const event = { poolId, actor, source, proposalId, summary, metadata: { changes, changesCount: changes.length, historyId: history.id }, propagatedAt: changedAt.toISOString() };
+    const propagation = await tx.technicalHistory.create({ data: { poolId, type: 'TECHNICAL_SHEET_PROPAGATION_EVENT', component: 'Ficha Técnica Propagação', message: `Propagação técnica: ${source}`, description: JSON.stringify(event), performedAt: changedAt, status: 'DONE' } });
+    const notification = await tx.notification.create({ data: { type: 'TECHNICAL_SHEET_PROPAGATION', eventType: 'TECHNICAL_SHEET_UPDATED', title: 'Ficha técnica atualizada', message: summary,
+      role: 'ADMIN', status: 'PENDING', severity: 'MEDIUM', metadata: { poolId, source, proposalId, actor, ...event.metadata } } });
+    return { pool, history, note, propagation, notification, event };
+}
+
 async function update(rawId, body, user) {
   const actor = identity(user), poolId = poolIdentifier(rawId);
   if (!body || typeof body !== 'object' || Array.isArray(body)) fail('Dados da ficha técnica inválidos.');
@@ -144,19 +161,7 @@ async function update(rawId, body, user) {
     if (!before) fail('Piscina não encontrada.', 404);
     if (guarded && version(before) !== body.expectedVersion) fail('Os dados mudaram. Reveja as alterações antes de guardar.', 409, 'TECHNICAL_SHEET_VERSION_CONFLICT');
     deriveVolume(before, data, body);
-    if (guarded || data.note || Object.keys(data.pool).length) await tx.pool.update({ where: { id: poolId }, data: { ...data.pool, updatedAt: new Date(Math.max(Date.now(), before.updatedAt.getTime() + 1)) } });
-    for (const [model, fields] of [['technicalSheet', data.sheet], ['poolEquipment', data.equipment], ['technicalRoom', data.room], ['poolCalculationProfile', data.calculation]]) {
-      if (Object.keys(fields).length) await tx[model].upsert({ where: { poolId }, update: fields, create: { poolId, ...fields } });
-    }
-    const pool = await tx.pool.findUnique({ where: { id: poolId }, include }), changes = changedFields(before, pool), changedAt = new Date();
-    const history = await tx.technicalHistory.create({ data: { poolId, type: 'TECHNICAL_SHEET_CHANGE', component: 'Ficha Técnica', message: 'Alteração imutável da ficha técnica',
-      description: JSON.stringify({ actor, changedAt: changedAt.toISOString(), before, after: pool, ...(requestId ? { requestId } : {}) }), performedAt: changedAt, status: 'DONE' } });
-    const note = data.note ? await tx.technicalHistory.create({ data: { poolId, type: 'TECHNICAL_SHEET_NOTE', component: 'Ficha Técnica', message: 'Nota da ficha técnica', description: data.note, performedAt: changedAt, status: 'DONE' } }) : null;
-    const source = 'TECHNICAL_SHEET_DIRECT_UPDATE', summary = `Ficha técnica atualizada com ${changes.length} alteração(ões).`;
-    const event = { poolId, actor, source, proposalId: null, summary, metadata: { changes, changesCount: changes.length, historyId: history.id }, propagatedAt: changedAt.toISOString() };
-    const propagation = await tx.technicalHistory.create({ data: { poolId, type: 'TECHNICAL_SHEET_PROPAGATION_EVENT', component: 'Ficha Técnica Propagação', message: `Propagação técnica: ${source}`, description: JSON.stringify(event), performedAt: changedAt, status: 'DONE' } });
-    const notification = await tx.notification.create({ data: { type: 'TECHNICAL_SHEET_PROPAGATION', eventType: 'TECHNICAL_SHEET_UPDATED', title: 'Ficha técnica atualizada', message: summary,
-      role: 'ADMIN', status: 'PENDING', severity: 'MEDIUM', metadata: { poolId, source, proposalId: null, actor, ...event.metadata } } });
+    const { pool, history, note, propagation, notification, event } = await commitPatch(tx, { poolId, before, data, actor, requestId, forceVersion: guarded });
     const currentVersion = version(pool);
     const response = JSON.parse(JSON.stringify({ ok: true, pool: guarded ? publicPool(pool) : pool, historyId: history.id, noteHistoryId: note?.id || null,
       propagation: { persisted: true, historyId: propagation.id, notificationId: notification.id },
@@ -175,4 +180,4 @@ async function update(rawId, body, user) {
   if (!guarded) committed.response.propagation.livePublished = livePublished;
   return committed.response;
 }
-module.exports = { update, getState };
+module.exports = { update, getState, proposalSupport: { version, publicPool, patches, deriveVolume, commitPatch } };

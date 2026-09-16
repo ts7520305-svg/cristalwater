@@ -9,7 +9,7 @@ const TECHNICAL_PROPOSAL_TYPE = 'TECHNICAL_CHANGE_PROPOSAL';
 const TECHNICAL_PROPOSAL_WORKFLOW_EVENT_TYPE = 'TECHNICAL_PROPOSAL_WORKFLOW_EVENT';
 const TECHNICAL_SHEET_PROPAGATION_EVENT_TYPE = 'TECHNICAL_SHEET_PROPAGATION_EVENT';
 const PROPOSAL_RISK_LEVELS = new Set(['LOW', 'MEDIUM', 'HIGH']);
-const PROPOSAL_WORKFLOW_STATES = new Set(['DRAFT', 'SUBMITTED', 'IN_REVIEW', 'NEEDS_INFO', 'APPROVED', 'REJECTED']);
+const PROPOSAL_WORKFLOW_STATES = new Set(['DRAFT', 'SUBMITTED', 'IN_REVIEW', 'NEEDS_INFO', 'APPROVED', 'REJECTED', 'APPLIED']);
 const PROPOSAL_PENDING_STATES = new Set(['SUBMITTED', 'IN_REVIEW', 'NEEDS_INFO']);
 const PROPOSAL_TRANSITIONS = {
   DRAFT: new Set(['SUBMITTED']),
@@ -219,6 +219,7 @@ function parseProposalDescription(description) {
     : [];
   return {
     proposalId: String(parsed.proposalId || ''),
+    application: parsed.application || null,
     creatorKey: parsed.creatorKey || null,
     creatorTechnicianId: parsed.creatorTechnicianId || null,
     baselineCaptured: parsed.baselineCaptured === true,
@@ -246,7 +247,8 @@ function mapTechnicalProposal(historyRow, options = {}) {
   return {
     id: historyRow.id,
     version: proposalVersion(historyRow),
-    decisionOnly: true,
+    decisionOnly: payload.status !== 'APPLIED',
+    application: payload.application || null,
     creatorKey: payload.creatorKey,
     creatorTechnicianId: payload.creatorTechnicianId,
     poolId: historyRow.poolId,

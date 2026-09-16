@@ -263,7 +263,7 @@
 
         <div class="card">
           <h2>Propostas de alteração</h2>
-          <p class="muted">Workflow técnico: draft, submitted, in review, needs info, approved, rejected. Inclui aprovação em lote e histórico imutável.</p>
+          <p class="muted">Reveja as propostas individualmente ou em lote e consulte o histórico das decisões.</p>
           <div class="row" style="margin:8px 0">
             <button type="button" class="btn" id="proposalSelectPendingBtn">Selecionar pendentes</button>
             <button type="button" class="primary" id="proposalBatchApproveBtn">Aprovar lote</button>
@@ -271,7 +271,8 @@
             <button type="button" class="btn" id="proposalBatchNeedsInfoBtn">Pedir info em lote</button>
             <button type="button" class="btn" id="proposalBatchRejectBtn">Rejeitar lote</button>
           </div>
-          <p class="muted">A aprovação regista a decisão. Para alterar valores, reveja e guarde a ficha técnica.</p>
+          <p class="muted">Depois de aprovar, abra a comparação e confirme os valores a aplicar à ficha técnica.</p>
+          <div id="proposalRequestRecovery" hidden></div>
           <div id="proposalBatchStatus" class="muted" style="margin:8px 0">Sem ações em lote.</div>
           <div id="technicalProposalSummary" class="muted">A carregar propostas...</div>
           <div id="technicalProposalAdminList" class="muted" style="margin-top:10px">Sem propostas.</div>
@@ -316,6 +317,8 @@
   <script src="/cw-reminder-create.js"></script>
   <script src="/cw-reminder-delete.js"></script>
   <script src="/cw-technical-sheet-edit.js"></script>
+  <script src="/cw-proposal-requests.js"></script>
+  <script src="/cw-proposal-application.js"></script>
   <script src="/admin-pool-technical.js"></script>
   <script src="/ui/core/navigation-context.js"></script>
   <script src="/crystal-os-v2-shell.js"></script>

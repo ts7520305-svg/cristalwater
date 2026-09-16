@@ -1024,6 +1024,7 @@
   }
 
   async function loadTechnicalProposals(poolId) {
+    void technicalProposalEditor.open(Number(poolId));
     if (!poolId) {
       technicalProposals = [];
       renderTechnicalProposalList();
@@ -1045,64 +1046,8 @@
     }
   }
 
-  let submittingTechnicalProposal = false;
-  async function submitTechnicalProposal() {
-    if (submittingTechnicalProposal) return;
-    const poolId = currentPoolId();
-    if (!poolId) {
-      toast("Sem piscina ativa para propor alteração técnica.");
-      return;
-    }
-
-    const field = String($("#proposalFieldName")?.value || "").trim();
-    const before = String($("#proposalBeforeValue")?.value || "").trim();
-    const after = String($("#proposalAfterValue")?.value || "").trim();
-    const reason = String($("#proposalReason")?.value || "").trim();
-    const riskLevel = String($("#proposalRiskLevel")?.value || "").trim();
-    const photos = parseProposalPhotoLines($("#proposalPhotos")?.value || "");
-
-    if (!field || !after) {
-      toast("Indica pelo menos campo e valor depois.");
-      return;
-    }
-    if (!reason) {
-      toast("Motivo obrigatório para submeter proposta.");
-      return;
-    }
-
-    const status = $("#technicalProposalStatus");
-    if (status) status.textContent = "A submeter proposta...";
-
-    const payload = {
-      reason,
-      riskLevel: riskLevel || undefined,
-      photos,
-      changes: [{ field, before: before || null, after }],
-    };
-
-    const credential = localStorage.getItem('cristalwater_jwt') || localStorage.getItem('token') || '';
-    const controls = [...document.querySelectorAll('#technicalProposalBox input, #technicalProposalBox textarea, #technicalProposalBox select, #submitTechnicalProposalBtn')];
-    submittingTechnicalProposal = true; controls.forEach(node => { node.disabled = true; });
-    try {
-    const data = await api(`/api/core/pools/${encodeURIComponent(poolId)}/technical-change-proposals`, {
-      method: "POST", expectedStatus: 201, body: JSON.stringify(payload),
-    });
-    if (credential !== (localStorage.getItem('cristalwater_jwt') || localStorage.getItem('token') || '') || currentPoolId() !== poolId) throw new Error('A sessão ou a piscina mudou. Consulte as propostas da piscina original.');
-    const saved = data.proposal;
-    if (data.ok !== true || data.propagation?.persisted !== true || !Number.isSafeInteger(saved?.id) || saved.poolId !== Number(poolId) || saved.status !== 'SUBMITTED' || saved.reason !== reason || saved.changes?.length !== 1 || saved.changes[0].field !== field || saved.changes[0].after !== after || JSON.stringify(saved.photos) !== JSON.stringify(photos)) throw new Error('Sem confirmação da proposta. Consulte a lista antes de repetir.');
-
-    if (status) status.textContent = "Proposta submetida para análise.";
-    const fieldsToClear = ["proposalFieldName", "proposalBeforeValue", "proposalAfterValue", "proposalReason", "proposalPhotos"];
-    fieldsToClear.forEach((id) => {
-      const node = $(`#${id}`);
-      if (node) node.value = "";
-    });
-    const riskNode = $("#proposalRiskLevel");
-    if (riskNode) riskNode.value = "";
-    await loadTechnicalProposals(poolId);
-    toast("Proposta técnica enviada.");
-    } finally { submittingTechnicalProposal = false; controls.forEach(node => { node.disabled = false; }); }
-  }
+  const technicalProposalEditor = window.CWTechnicalProposalEditor.create({ saved: async id => { if (Number(currentPoolId()) === id) await loadTechnicalProposals(currentPoolId()); } });
+  async function submitTechnicalProposal() { return technicalProposalEditor.submit(); }
 
   function todayQueryParams() {
     return dayQueryParams(new Date(), currentTechnicianId());
@@ -3141,6 +3086,7 @@
 
     if (!visit) {
       $("#nextTitle").textContent = "Hoje livre";
+      void technicalProposalEditor.open(null);
       $("#nextMeta").textContent = "Não tens visitas atribuídas. Atualiza a agenda, vê o calendário ou comunica com o administrador.";
       if ($("#startBtn")) {
         $("#startBtn").disabled = false;

@@ -8,6 +8,7 @@ const ui = window.CwUi || {
 };
 let proposalSelection = new Set();
 let proposalVersions = new Map(), proposalBusy = false;
+let proposalRequestClient, proposalRecoveryPanel, proposalApplication;
 const completingReminders = new Set();
 let reminderRows = [], reminderPoolName = '', removeReminder;
 let sheetEditor;
@@ -130,7 +131,7 @@ function renderTechnicalProposalSummary(proposals = []) {
     acc[state] = (acc[state] || 0) + 1;
     return acc;
   }, {});
-  node.textContent = `Baixo: ${counts.LOW || 0} · Médio: ${counts.MEDIUM || 0} · Alto: ${counts.HIGH || 0} · Draft: ${workflowCounts.DRAFT || 0} · Submetida: ${workflowCounts.SUBMITTED || 0} · Em revisão: ${workflowCounts.IN_REVIEW || 0} · Pedida info: ${workflowCounts.NEEDS_INFO || 0} · Aprovada: ${workflowCounts.APPROVED || 0} · Rejeitada: ${workflowCounts.REJECTED || 0}`;
+  node.textContent = `Baixo: ${counts.LOW || 0} · Médio: ${counts.MEDIUM || 0} · Alto: ${counts.HIGH || 0} · Draft: ${workflowCounts.DRAFT || 0} · Submetida: ${workflowCounts.SUBMITTED || 0} · Em revisão: ${workflowCounts.IN_REVIEW || 0} · Pedida info: ${workflowCounts.NEEDS_INFO || 0} · Aprovada: ${workflowCounts.APPROVED || 0} · Rejeitada: ${workflowCounts.REJECTED || 0} · Aplicada: ${workflowCounts.APPLIED || 0}`;
 }
 
 function proposalWorkflowActions(proposal) {
@@ -176,7 +177,7 @@ function renderTechnicalProposalList(proposals = []) {
     const checked = proposalSelection.has(Number(proposal.id)) ? "checked" : "";
     const actions = proposalWorkflowActions(proposal)
       .map((item) => `<button type="button" class="btn" data-proposal-transition="${esc(item.to)}" data-proposal-id="${esc(proposal.id)}">${esc(item.label)}</button>`)
-      .join(" ");
+      .join(" ") + (proposal.status === 'APPROVED' ? `<button type="button" class="primary" data-proposal-apply="${esc(proposal.id)}">Comparar e aplicar à ficha</button>` : '');
     return `
       <div class="timeline-item" data-technical-proposal-id="${esc(proposal.id)}">
         <label style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><input type="checkbox" data-proposal-select="${esc(proposal.id)}" ${checked}>Selecionar</label>
@@ -186,6 +187,7 @@ function renderTechnicalProposalList(proposals = []) {
         <p><b>Técnico:</b> ${esc(proposal.actor || "-")}</p>
         ${proposal.reviewedBy ? `<p><b>Revisor:</b> ${esc(proposal.reviewedBy)} (${esc(formatDate(proposal.reviewedAt))})</p>` : ""}
         ${proposal.reviewNote ? `<p><b>Nota workflow:</b> ${esc(proposal.reviewNote)}</p>` : ""}
+        ${proposal.application ? `<p><b>Aplicada à ficha:</b> ${esc(formatDate(proposal.application.at))}</p>` : ''}
         <p><b>Alterações:</b></p>
         <ul>${changeLines || "<li>Sem detalhe</li>"}</ul>
         <details style="margin:8px 0"><summary>Diff visual</summary>${diffHtml}</details>
@@ -212,10 +214,32 @@ function safeProposalPhoto(value) {
 }
 function setProposalBusy(value) {
   proposalBusy = value;
-  document.querySelectorAll('[data-proposal-transition], [data-proposal-select], [id^="proposalBatch"][id$="Btn"]').forEach(node => { node.disabled = value; });
+  document.querySelectorAll('[data-proposal-transition], [data-proposal-select], [data-proposal-apply], #proposalSelectPendingBtn, [id^="proposalBatch"][id$="Btn"]').forEach(node => { node.disabled = value || !sameSheetSession(); });
 }
-function confirmedProposal(proposal, id, state) {
-  return proposal && proposal.id === Number(id) && proposal.poolId === Number(poolId) && proposal.status === state && /^technical-proposal-v1:[0-9a-f]{64}$/.test(proposal.version);
+function setupProposalRequests() {
+  proposalRequestClient = window.CWProposalRequests.create({
+    onChange: () => { void proposalRecoveryPanel?.refresh(); },
+    onInvalidated: () => { proposalRecoveryPanel?.clear(); proposalApplication?.close(); proposalSelection.clear(); proposalVersions.clear(); setProposalBusy(true); },
+    async onConfirmed(record, data) {
+      if (record.poolId !== Number(poolId) || !sameSheetSession()) return;
+      if (record.action === 'BATCH') {
+        proposalSelection = new Set(data.failed.map(item => item.proposalId));
+        setBatchStatus(`${data.updatedCount} atualizada(s), ${data.failedCount} falha(s).` + (data.failed.length ? ' ' + data.failed.map(item => `#${item.proposalId}: ${item.error || 'Rever proposta'}`).join(' · ') : ''));
+      } else {
+        setBatchStatus(record.action === 'APPLY' ? 'Proposta aplicada à ficha técnica.' : 'Decisão confirmada.');
+      }
+      proposalApplication?.confirmed(record);
+      // Refresh proposal decisions only: an unsaved technical-sheet draft stays intact.
+      try { await loadTechnicalProposals(); } catch (_) { ui.info('Pedido confirmado. Atualize a lista para consultar o estado.'); }
+    },
+    onRejected: (record, result) => { if (record.poolId === Number(poolId)) setBatchStatus(result.error); },
+  });
+  proposalRecoveryPanel = window.CWProposalRequests.panel(proposalRequestClient, document.getElementById('proposalRequestRecovery'), { busy: setProposalBusy });
+  proposalApplication = window.CWProposalApplication.create({
+    client: proposalRequestClient, poolId,
+    preview: (id, body) => req(`/pools/${poolId}/technical-change-proposals/${id}/application-preview`, body === undefined ? {} : { method: 'POST', body: JSON.stringify(body) }),
+  });
+  void proposalRecoveryPanel.refresh();
 }
 async function runBatchTransition(nextStatus) {
   if (proposalBusy) return;
@@ -228,18 +252,7 @@ async function runBatchTransition(nextStatus) {
   if (ids.some(id => !expectedVersions[id])) throw new Error("Atualize as propostas antes de decidir.");
   setProposalBusy(true);
   try {
-    const data = await req(`/pools/${poolId}/technical-change-proposals/workflow/batch`, {
-      method: "POST", expectedStatus: 200, allowPartial: true,
-      body: JSON.stringify({ nextStatus, note, proposalIds: ids, expectedVersions }),
-    });
-    const outcomes = [...(data.updated || []).map(item => item.id), ...(data.failed || []).map(item => item.proposalId)];
-    if (!Array.isArray(data.updated) || !Array.isArray(data.failed) || !data.batchId || data.targetState !== nextStatus ||
-      data.updatedCount !== data.updated.length || data.failedCount !== data.failed.length || data.ok !== (data.failed.length === 0) ||
-      outcomes.length !== ids.length || new Set(outcomes).size !== ids.length || outcomes.some(id => !ids.includes(id)) ||
-      data.updated.some(item => !confirmedProposal(item, item.id, nextStatus)) || data.failed.some(item => !Number.isInteger(item.status) || item.status < 400)) throw new Error("Sem confirmação completa do lote. Consulte as propostas antes de repetir.");
-    proposalSelection = new Set(data.failed.map(item => item.proposalId));
-    setBatchStatus(`${data.updatedCount} atualizada(s), ${data.failedCount} falha(s).` + (data.failed.length ? ' ' + data.failed.map(item => `#${item.proposalId}: ${item.error || 'Rever proposta'}`).join(' · ') : ''));
-    try { await loadTechnicalProposals(); } catch (_) { setBatchStatus(`${data.updatedCount} atualizada(s), ${data.failedCount} falha(s). Atualize a lista para consultar o estado.`); }
+    await proposalRequestClient.send('BATCH', Number(poolId), null, { nextStatus, note, proposalIds: ids, expectedVersions });
   } finally { setProposalBusy(false); }
 }
 
@@ -265,12 +278,7 @@ async function transitionTechnicalProposal(proposalId, nextStatus) {
   if (requireNote && !note) { ui.info("Transição cancelada: nota obrigatória."); return; }
   setProposalBusy(true);
   try {
-    const data = await req(`/pools/${poolId}/technical-change-proposals/${encodeURIComponent(proposalId)}/workflow`, {
-      method: "POST", expectedStatus: 200, body: JSON.stringify({ nextStatus, note, expectedVersion }),
-    });
-    if (data.ok !== true || data.propagation?.persisted !== true || !confirmedProposal(data.proposal, proposalId, nextStatus)) throw new Error("Sem confirmação da decisão. Consulte a proposta antes de repetir.");
-    ui.success(`Decisão registada: ${nextStatus}.`);
-    await loadTechnicalProposals();
+    await proposalRequestClient.send('WORKFLOW', Number(poolId), Number(proposalId), { nextStatus, note, expectedVersion });
   } finally { setProposalBusy(false); }
 }
 
@@ -454,6 +462,7 @@ window.saveSheet = saveSheet;
 window.createServiceReminder = createServiceReminder;
 
 window.addEventListener("DOMContentLoaded", () => {
+  setupProposalRequests();
   removeReminder = window.CwReminderDelete.attach({
     status: 'reminderStatus', get: id => reminderRows.find(row => String(row.id) === String(id)),
     poolLabel: () => `${reminderPoolName} (#${poolId})`, reload: loadReminders,
@@ -464,6 +473,7 @@ window.addEventListener("DOMContentLoaded", () => {
   setupServiceReminderCreator();
   document.getElementById("reminderRepeatRule")?.addEventListener("change", toggleCustomRepeat);
   document.getElementById("proposalSelectPendingBtn")?.addEventListener("click", async () => {
+    if (proposalBusy) return;
     const data = await req(`/pools/${poolId}/technical-change-proposals?onlyPending=true`);
     const proposals = Array.isArray(data.proposals) ? data.proposals : [];
     proposalSelection = new Set(proposals.map((item) => Number(item.id)));
@@ -477,6 +487,8 @@ window.addEventListener("DOMContentLoaded", () => {
   toggleCustomRepeat();
 
   document.addEventListener("click", (event) => {
+    const applicationButton = event.target.closest('[data-proposal-apply]');
+    if (applicationButton) { if (!proposalBusy) void proposalApplication.open(applicationButton.dataset.proposalApply); return; }
     const selectionInput = event.target.closest("[data-proposal-select]");
     if (selectionInput) {
       const proposalId = Number(selectionInput.dataset.proposalSelect);
