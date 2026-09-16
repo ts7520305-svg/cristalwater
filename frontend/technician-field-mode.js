@@ -17,7 +17,7 @@
   let routeConfirmedAt = null;
   window.CWFieldDaySnapshot = () => ({
     confirmedAt: sameFieldSession() && window.CWFieldRouteCache.same(routeContext) ? routeConfirmedAt : null,
-    visits: sameFieldSession() && window.CWFieldRouteCache.same(routeContext) ? visits.map(visit => ({ id: visit.id, name: visit.pool?.name || `Visita ${visit.id}`, done: isVisitDone(visit), future: visit.assistSource === 'tomorrow' })) : [],
+    visits: sameFieldSession() && window.CWFieldRouteCache.same(routeContext) ? visits.map(visit => ({ id: visit.id, visitType: visit.visitType || 'REGULAR', name: visit.pool?.name || `Visita ${visit.id}`, done: isVisitDone(visit), future: visit.assistSource === 'tomorrow' })) : [],
   });
   let index = 0;
   let startedAt = null;
@@ -29,6 +29,9 @@
   let fieldPendingRevision = 0;
   window.addEventListener('pagehide', () => { ++fieldWriteGeneration; ++routeRevision; });
   const sameFieldSession = () => window.CWFieldWriteStore?.same(fieldWriteSession);
+  const startingVisits = new Set();
+  const extraVisitNotice = 'Visita extra: consulta disponível. O registo de execução desta visita ainda exige confirmação pelo escritório. Não registe este trabalho noutra visita.';
+  window.CWFieldVisitContext = () => sameFieldSession() && current() ? { id:current().id, visitType:current().visitType || 'REGULAR', poolId:current().poolId || current().pool?.id } : null;
   let visitPhotos = [];
   let visitDrafts = {};
   let visitPhotosByKey = {};
@@ -131,6 +134,7 @@
       activeTab: normalizeFieldTab(currentFieldTab(), "hoje"),
       activeFilter: activePoolFilter,
       selectedVisitId: selectedVisitId(),
+      selectedVisitType: current()?.visitType || 'REGULAR',
       selectedVisitTitle: selectedVisitTitle(),
       scrollY: Math.max(0, Math.round(window.scrollY || 0)),
       savedAt: new Date().toISOString(),
@@ -148,6 +152,7 @@
       activeTab: normalizeFieldTab(saved.activeTab, "hoje"),
       activeFilter: normalizePoolFilter(saved.activeFilter, "TODO"),
       selectedVisitId: String(saved.selectedVisitId || ""),
+      selectedVisitType: saved.selectedVisitType || '',
       selectedVisitTitle: String(saved.selectedVisitTitle || ""),
       scrollY: Number.isFinite(Number(saved.scrollY)) ? Math.max(0, Number(saved.scrollY)) : 0,
     };
@@ -178,6 +183,7 @@
       activeTab: normalizeFieldTab(currentFieldTab(), "hoje"),
       activeFilter: normalizePoolFilter(domActiveFilter || activePoolFilter, "TODO"),
       selectedVisitId: selectedVisitId(),
+      selectedVisitType: current()?.visitType || 'REGULAR',
       selectedVisitTitle: selectedVisitTitle(),
       activeInterventionVisitId: String(visits.find((visit) => hasActiveIntervention(visit))?.id || ""),
       scrollY: Math.max(0, Math.round(window.scrollY || 0)),
@@ -205,6 +211,7 @@
     params.set("activeTab", normalizeFieldTab(contract.activeTab, "hoje"));
     params.set("activeFilter", normalizePoolFilter(contract.activeFilter, "TODO"));
     if (contract.selectedVisitId) params.set("selectedVisitId", String(contract.selectedVisitId));
+    if (contract.selectedVisitType) params.set("selectedVisitType", contract.selectedVisitType);
     if (Number.isFinite(Number(contract.scrollY))) params.set("scrollY", String(Math.max(0, Number(contract.scrollY))));
     return `${MAP_ROUTE_PATH}?${params.toString()}`;
   }
@@ -226,6 +233,7 @@
         activeTab: normalizeFieldTab(activeTab, "hoje"),
         activeFilter: normalizePoolFilter(activeFilter, "TODO"),
         selectedVisitId: String(selectedVisit || ""),
+        selectedVisitType: params.get('selectedVisitType') || '',
         activeInterventionVisitId: "",
         scrollY: Number.isFinite(scrollY) ? Math.max(0, scrollY) : 0,
         source: "url",
@@ -238,11 +246,13 @@
   function readReturnContract() {
     const sessionContract = safeSessionRead(FIELD_RETURN_CONTRACT_KEY, null);
     if (sessionContract && sanitizeReturnToPath(sessionContract.returnTo).startsWith("/technician-field-mode")) {
+      const returned = readReturnContractFromUrl();
       return {
         returnTo: sanitizeReturnToPath(sessionContract.returnTo),
         activeTab: normalizeFieldTab(sessionContract.activeTab, "hoje"),
         activeFilter: normalizePoolFilter(sessionContract.activeFilter, "TODO"),
-        selectedVisitId: String(sessionContract.selectedVisitId || ""),
+        selectedVisitId: returned?.selectedVisitId || String(sessionContract.selectedVisitId || ""),
+        selectedVisitType: returned?.selectedVisitId ? returned.selectedVisitType : sessionContract.selectedVisitType || '',
         selectedVisitTitle: String(sessionContract.selectedVisitTitle || ""),
         activeInterventionVisitId: String(sessionContract.activeInterventionVisitId || ""),
         scrollY: Number.isFinite(Number(sessionContract.scrollY)) ? Math.max(0, Number(sessionContract.scrollY)) : 0,
@@ -260,7 +270,7 @@
   function stripReturnParamsFromUrl() {
     try {
       const url = new URL(window.location.href);
-      const keys = ["returnTo", "activeTab", "activeFilter", "selectedVisitId", "scrollY"];
+      const keys = ["returnTo", "activeTab", "activeFilter", "selectedVisitId", "selectedVisitType", "scrollY"];
       const hadAny = keys.some((key) => url.searchParams.has(key));
       keys.forEach((key) => url.searchParams.delete(key));
       if (hadAny) {
@@ -270,12 +280,12 @@
     } catch (_) {}
   }
 
-  function applyVisitSelectionFromId(visitId) {
+  function applyVisitSelectionFromId(visitId, visitType) {
     const wanted = String(visitId || "");
     if (!wanted) return false;
-    const found = visits.findIndex((visit) => String(visit.id || "") === wanted);
-    if (found < 0) return false;
-    index = found;
+    const matches = visits.map((visit,position)=>({visit,position})).filter(({visit})=>String(visit.id || '')===wanted && (!visitType || (visit.visitType || 'REGULAR')===visitType));
+    if (matches.length !== 1) return false;
+    index = matches[0].position;
     return true;
   }
 
@@ -292,9 +302,9 @@
     );
     activePoolFilter = preferredFilter;
 
-    const restoredVisit = applyVisitSelectionFromId(contract?.selectedVisitId)
+    const restoredVisit = applyVisitSelectionFromId(contract?.selectedVisitId, contract?.selectedVisitType)
       || applyVisitSelectionFromId(contract?.activeInterventionVisitId)
-      || applyVisitSelectionFromId(fallbackState?.selectedVisitId);
+      || applyVisitSelectionFromId(fallbackState?.selectedVisitId, fallbackState?.selectedVisitType);
 
     if (!restoredVisit) {
       index = visits.findIndex((visit) => !isVisitDone(visit));
@@ -316,7 +326,7 @@
     const poolId = String(visit.pool?.id || visit.poolId || "");
     return activeWaterReminders().some((reminder) => {
       if (reminder.status === "CLOSED") return false;
-      if (visitId && String(reminder.visitId || "") === visitId) return true;
+      if (isRegularVisit(visit) && visitId && String(reminder.visitId || "") === visitId) return true;
       if (poolId && String(reminder.poolId || "") === poolId) return true;
       return false;
     });
@@ -327,7 +337,7 @@
     if (text.includes("bomba") && text.includes("manual")) return true;
     if (text.includes("critic")) return true;
     return pendingProblems.some((problem) => {
-      const sameVisit = String(problem.visitId || "") === String(visit?.id || "");
+      const sameVisit = isRegularVisit(visit) && String(problem.visitId || "") === String(visit?.id || "");
       return sameVisit && String(problem.severity || "").toUpperCase() === "URGENTE";
     });
   }
@@ -475,8 +485,28 @@
   }
 
   function visitKey(visit = current()) {
-    return visit?.id ? `visit-${visit.id}` : "visit-none";
+    return visit?.id ? `visit-${visit.visitType || 'REGULAR'}-${visit.id}` : "visit-none";
   }
+
+  function isRegularVisit(visit = current()) {
+    return !!visit?.id && (!visit.visitType || visit.visitType === 'REGULAR');
+  }
+
+  function requireRegularVisit(visit = current()) {
+    if (!sameFieldSession()) { toast('A sessão mudou. Reabra a página com a conta original.'); return false; }
+    if (!isRegularVisit(visit)) { toast(visit ? extraVisitNotice : 'Escolha uma visita.'); return false; }
+    return true;
+  }
+
+  const fieldDraftStorageKey = () => 'cwFieldVisitDrafts:v2:' + fieldWriteSession.owner;
+  function readFieldDrafts() {
+    const raw = localStorage.getItem(fieldDraftStorageKey());
+    if (!raw) return {};
+    let value; try { value = JSON.parse(raw); } catch (_) { throw Error('Rascunhos ilegíveis. Preserve os dados e peça apoio ao escritório.'); }
+    if (!value || value.v !== 2 || value.owner !== fieldWriteSession.owner || !value.drafts || typeof value.drafts !== 'object' || Array.isArray(value.drafts) || Object.entries(value.drafts).some(([key,draft])=>!/^visit-REGULAR-[1-9][0-9]*$/.test(key) || !draft || typeof draft !== 'object' || Array.isArray(draft))) throw Error('Rascunhos sem identidade válida. Preserve os dados e peça apoio ao escritório.');
+    return value.drafts;
+  }
+  window.CWFieldDraftSnapshot = () => { if (!sameFieldSession()) throw Error('Sessão alterada.'); return readFieldDrafts(); };
 
   function isVisitDone(visit) {
     const status = String(visit?.status || "").toUpperCase();
@@ -687,17 +717,23 @@
   function saveCurrentDraft() {
     if (!sameFieldSession()) return;
     const visit = current();
-    if (!visit?.id) return;
+    if (!isRegularVisit(visit)) return;
     const key = visitKey(visit);
     visitPhotosByKey[key] = visitPhotos;
     visitDrafts[key] = readVisitForm();
-    const saved = storageWrite(`cwFieldVisitDrafts:${currentTechnicianId()}`, visitDrafts);
     const status = $("#fieldSaveStatus");
-    if (status) { status.dataset.state = saved ? "saved" : "error"; status.textContent = saved ? "Rascunho guardado neste telemóvel" : "Memória indisponível: rascunho não guardado. Não feche a página."; }
+    try {
+      const drafts = { ...readFieldDrafts(), [key]:visitDrafts[key] };
+      const raw = JSON.stringify({v:2,owner:fieldWriteSession.owner,drafts});
+      localStorage.setItem(fieldDraftStorageKey(), raw);
+      if (localStorage.getItem(fieldDraftStorageKey()) !== raw) throw Error('A gravação não foi confirmada.');
+      if (status) { status.dataset.state='saved'; status.textContent='Rascunho guardado neste telemóvel'; }
+    } catch (error) { if (status) { status.dataset.state='error'; status.textContent='Rascunho não guardado. Não feche a página. ' + error.message; } }
   }
 
   function loadCurrentDraft() {
     const visit = current();
+    if (visit && !isRegularVisit(visit)) { applySavedVisitData(visit); return; }
     if (isVisitDone(visit)) {
       applySavedVisitData(visit);
       return;
@@ -707,7 +743,7 @@
     applyVisitForm(draft);
     visitPhotos = visitPhotosByKey[key] || (draft?.photos || []);
     window.CWFieldPhotos.list(visit?.id, true, fieldWriteSession).then(pending => {
-      if (!sameFieldSession() || current()?.id !== visit?.id) { pending.forEach(photo => { if (photo.previewUrl) URL.revokeObjectURL(photo.previewUrl); }); return; }
+      if (!sameFieldSession() || visitKey(current()) !== key) { pending.forEach(photo => { if (photo.previewUrl) URL.revokeObjectURL(photo.previewUrl); }); return; }
       for(const photo of pending) { const position=visitPhotos.findIndex(p=>p.localId===photo.localId);if(position>=0){if(visitPhotos[position].previewUrl?.startsWith('blob:'))URL.revokeObjectURL(visitPhotos[position].previewUrl);visitPhotos[position]=photo;}else visitPhotos.push(photo); }
       renderPhotoList();
     }).catch(error=>{if(sameFieldSession())toast('Falha ao recuperar fotografias: '+error.message)});
@@ -1437,7 +1473,7 @@
     const pendingRevision = ++fieldPendingRevision;
     if (photosValue) photosValue.textContent = '…';
     if (photosMeta) photosMeta.textContent = 'A verificar envios guardados';
-    Promise.resolve(visit ? window.CWFieldOffline.pending(visit.id) : false).then(pendingVisit => {
+    Promise.resolve(isRegularVisit(visit) ? window.CWFieldOffline.pending(visit.id) : false).then(pendingVisit => {
       if (!sameFieldSession() || pendingRevision !== fieldPendingRevision) return;
       if (photosValue) photosValue.textContent = String(pendingPhotos + (pendingVisit ? 1 : 0));
       if (photosMeta) photosMeta.textContent = pendingVisit ? 'visita por confirmar' : pendingPhotos ? 'fotos por enviar' : 'envios pendentes nesta visita';
@@ -1453,6 +1489,10 @@
       } else if (!hasActiveVisit) {
         setHeroButton(0, "Atualizar", "refresh", "primary");
         setHeroButton(1, "Ver agenda", "agenda", "secondary");
+        setHeroButton(2, "Comunicar", "contact", "secondary");
+      } else if (!isRegularVisit(visit)) {
+        setHeroButton(0, "Consultar visita extra", "continue", "primary");
+        setHeroButton(1, "Navegar", "map", "secondary");
         setHeroButton(2, "Comunicar", "contact", "secondary");
       } else if (hasIntervention) {
         setHeroButton(0, "Continuar", "continue", "primary");
@@ -2175,7 +2215,7 @@
   async function uploadPhoto(photo) {
     const generation = fieldWriteGeneration;
     if (!sameFieldSession()) { photoFeedback('A sessão mudou. Reabra a página com a conta original.'); return false; }
-    const visit = visits.find(v => String(v.id) === String(photo?.visitId)) || current();
+    const visit = visits.find(v => isRegularVisit(v) && String(v.id) === String(photo?.visitId));
     if (photo?.status === 'uploading') return false;
     if (!visit?.id || !(photo?.file instanceof Blob)) {
       photo.status = "pending";
@@ -2194,17 +2234,19 @@
       photo.status = "uploaded";
       photo.url = data.photo.url;
       photo.serverId = data.photo?.id || null;
-      if (current()?.id === visit.id) { saveCurrentDraft(); photoFeedback("Fotografia confirmada pelo servidor."); renderPhotoList(); }
+      if (visitKey(current()) === visitKey(visit)) { saveCurrentDraft(); photoFeedback("Fotografia confirmada pelo servidor."); renderPhotoList(); }
       return true;
     } catch (error) {
       photo.status = "pending";
       photo.error = error.message;
-      if (sameFieldSession() && generation === fieldWriteGeneration && current()?.id === visit.id) renderPhotoList();
+      if (sameFieldSession() && generation === fieldWriteGeneration && visitKey(current()) === visitKey(visit)) renderPhotoList();
       return false;
     }
   }
 
   async function syncPendingPhotos(showFeedback = true) {
+    if (!isRegularVisit()) return false;
+    const target = visitKey();
     const pending = visitPhotos.filter((photo) => photo.status !== "uploaded");
     if (!pending.length) {
       if (showFeedback) toast("Fotografias ja sincronizadas.");
@@ -2213,6 +2255,7 @@
 
     for (const photo of pending) {
       await uploadPhoto(photo);
+      if (visitKey() !== target || !sameFieldSession()) return false;
     }
 
     const stillPending = visitPhotos.some((photo) => photo.status !== "uploaded");
@@ -2228,11 +2271,12 @@
   }
 
   function pickPhoto(type, gallery = false) {
+    if (!requireRegularVisit()) { photoFeedback(extraVisitNotice); return; }
     const input = $(gallery ? '#galleryPhotoInput' : '#photoInput');
     if (!input) return;
     selectedPhotoType = type || "AFTER";
     if (!sameFieldSession()) { photoFeedback('A sessão mudou. Reabra a página com a conta original.'); return; }
-    selectedPhotoContext = { visitId: current()?.id, type: selectedPhotoType, generation: fieldWriteGeneration };
+    selectedPhotoContext = { visitId: current()?.id, visitKey:visitKey(), type: selectedPhotoType, generation: fieldWriteGeneration };
     input.value = "";
     try { input.click(); }
     catch(error){ photoFeedback('Não foi possível abrir a câmara. Use a opção de fotografia guardada no telemóvel.'); }
@@ -2240,7 +2284,9 @@
 
   async function addSelectedPhoto(file, selection = selectedPhotoContext) {
     if (!file) return;
-    if (!sameFieldSession() || (selection && (selection.generation !== fieldWriteGeneration || selection.visitId !== current()?.id))) { photoFeedback('A visita ou a sessão mudou. Escolha novamente a fotografia na visita correta.'); return; }
+    if (!sameFieldSession() || (selection && (selection.generation !== fieldWriteGeneration || selection.visitKey !== visitKey()))) { photoFeedback('A visita ou a sessão mudou. Escolha novamente a fotografia na visita correta.'); return; }
+    if (!requireRegularVisit()) { photoFeedback(extraVisitNotice); return; }
+    const target = visitKey();
     if (!current()?.id) { photoFeedback('Escolha uma visita antes de adicionar fotografias.'); return; }
     if (!file.type.startsWith('image/') || !file.size || file.size > 25*1024*1024) {
       photoFeedback('Escolha uma imagem válida, até 25 MB. A fotografia não foi adicionada.'); return;
@@ -2257,7 +2303,7 @@
     };
     try { await window.CWFieldPhotos.save(photo.visitId,photo,fieldWriteSession); }
     catch(error) { URL.revokeObjectURL(photo.previewUrl);photoFeedback('Não foi possível guardar a fotografia neste dispositivo. Liberte espaço e tente novamente; a fotografia não foi adicionada.');return; }
-    if (!sameFieldSession() || photo.visitId !== current()?.id) { URL.revokeObjectURL(photo.previewUrl); return; }
+    if (!sameFieldSession() || target !== visitKey()) { URL.revokeObjectURL(photo.previewUrl); return; }
     photoFeedback("Fotografia guardada neste telemóvel. Aguarda confirmação do envio.");
     visitPhotos.unshift(photo);
     saveCurrentDraft();
@@ -2414,6 +2460,7 @@
 
   async function createWaterReminder() {
     const visit = current();
+    if (!requireRegularVisit(visit)) return;
     if (!visit) {
       toast("Seleciona uma piscina primeiro.");
       return;
@@ -2847,7 +2894,7 @@
       const rowsHtml = rows.map(({ visit, i, code }) => {
       const location = visitLocation(visit);
       const done = isVisitDone(visit);
-      const status = done ? "Feita / pode corrigir" : (visit.status || "Pendente");
+      const status = !isRegularVisit(visit) ? `Extra / ${visit.status || 'Pendente'} / confirmação pelo escritório` : done ? "Feita / pode corrigir" : (visit.status || "Pendente");
       const techName = visit?.technician?.name || activeTechnician?.name || "Técnico";
       const taskType = pendingProblems.length ? "Reparação" : "Manutenção";
       const stateLabel = POOL_STATE[code] || POOL_STATE.TODO;
@@ -2909,7 +2956,7 @@
     const isTomorrow = source === "tomorrow";
     const techName = visit.technician?.name || visit.technicianName || "tecnico por confirmar";
     return `
-      <button class="assist-card" type="button" data-assist-visit="${esc(visit.id)}" data-assist-source="${esc(source)}">
+      <button class="assist-card" type="button" data-assist-visit="${esc(visit.id)}" data-assist-type="${esc(visit.visitType || 'REGULAR')}" data-assist-source="${esc(source)}">
         <span class="chip">${isTomorrow ? "Amanha" : "Ajudar colega"}</span>
         <b>${esc(visit.pool?.name || "Piscina")}</b>
         <small>${esc(visitLine(visit))}</small>
@@ -2993,12 +3040,12 @@
     renderAssistPanel();
   }
 
-  function openAssistVisit(visitId, source) {
+  function openAssistVisit(visitId, source, visitType = 'REGULAR') {
     const pools = source === "tomorrow" ? assistOptions.tomorrow : assistOptions.otherToday;
-    const found = pools.find((visit) => String(visit.id) === String(visitId));
+    const found = pools.find((visit) => String(visit.id) === String(visitId) && (visit.visitType || 'REGULAR') === visitType);
     if (!found) return;
     const visit = { ...found, assistSource: source };
-    const existing = visits.findIndex((item) => String(item.id) === String(visit.id));
+    const existing = visits.findIndex((item) => visitKey(item) === visitKey(visit));
     if (existing >= 0) {
       visits[existing] = { ...visits[existing], ...visit };
       index = existing;
@@ -3097,7 +3144,11 @@
   function render() {
     renderIncompleteStatus();
     const visit = current();
-    window.dispatchEvent(new CustomEvent("cw:field-visit-selected", { detail: { visitId: visit?.id || null } }));
+    window.dispatchEvent(new CustomEvent("cw:field-visit-selected", { detail: { visitId: isRegularVisit(visit) ? visit.id : null, visitType:visit?.visitType || null } }));
+    const readOnly = !!visit && !isRegularVisit(visit);
+    $('#fieldExtraVisitNotice').hidden = !readOnly;
+    $('#fieldExtraVisitNotice').textContent = readOnly ? extraVisitNotice : '';
+    for (const selector of [...draftFieldIds.map(id=>'#'+id),...checkIds.map(id=>'#'+id),'#startBtn','#finishBtn','#incompleteSave','#problemBtn','#saveProblemBtn','#openWaterBtn','#pumpReminderCreate','#sendAdminAlertBtn','#addDoseBtn','#galleryPhotoBtn','#photoInput','#galleryPhotoInput','[data-photo-type]','#doseRows input','#doseRows select','#doseRows button']) document.querySelectorAll(selector).forEach(node=>{node.disabled=readOnly;});
     $("#progressText").textContent = visits.length ? `${visits.filter(isVisitDone).length} de ${visits.length} visitas concluídas` : "Sem visitas atribuídas";
 
     if (!visit) {
@@ -3126,19 +3177,20 @@
       return;
     }
 
-    $("#finishBtn").disabled = false;
+    $("#finishBtn").disabled = readOnly;
     updateFieldConnection();
     $("#nextTitle").textContent = visit.pool?.name || "Piscina";
     const sourceLabel = visit.assistSource === "otherToday"
       ? `Ajudar ${visit.technician?.name || visit.technicianName || "colega"}`
       : (visit.assistSource === "tomorrow" ? "Ronda do proximo dia" : (visit.technician?.name || "Tecnico"));
-    $("#nextMeta").textContent = `${visit.client?.name || "Cliente"} - ${sourceLabel} - ${isVisitDone(visit) ? "Feita / correcao aberta" : (visit.status || "Pendente")}`;
+    $("#nextMeta").textContent = `${visit.client?.name || "Cliente"} - ${sourceLabel} - ${readOnly ? 'Extra / ' + (visit.status || 'Pendente') : isVisitDone(visit) ? "Feita / correcao aberta" : (visit.status || "Pendente")}`;
     if ($("#startBtn")) {
-      $("#startBtn").textContent = isVisitDone(visit) ? "Rever registo" : "Iniciar visita";
+      $("#startBtn").textContent = readOnly ? "Execução pelo escritório" : isVisitDone(visit) ? "Rever registo" : "Iniciar visita";
       $("#startBtn").dataset.cwCheckinRequired = String(!isVisitDone(visit));
       $("#startBtn").dataset.cwCheckinTarget = JSON.stringify([visit.visitType || 'REGULAR', visit.id, visit.pool?.id]);
+      $("#startBtn").disabled = readOnly || startingVisits.has(visitKey(visit));
     }
-    $("#finishBtn").textContent = isVisitDone(visit) ? "Guardar correção" : "Concluir visita";
+    $("#finishBtn").textContent = readOnly ? "Confirmação pelo escritório" : isVisitDone(visit) ? "Guardar correção" : "Concluir visita";
     renderAssistPanel();
     renderCorrectionSummary(visit);
     renderAccessCard(visit);
@@ -3219,7 +3271,9 @@
       routeContext = context; routeSnapshot = snapshot; visits = snapshot.visits;
       $("#fieldLoadError").hidden = true;
       applyReturnState(returnContract, fallbackState);
-      visitDrafts = storageRead(`cwFieldVisitDrafts:${currentTechnicianId()}`, {});
+      try { visitDrafts = readFieldDrafts(); } catch (error) { visitDrafts = {}; $('#fieldSaveStatus').textContent = error.message; }
+      const oldDrafts = localStorage.getItem(`cwFieldVisitDrafts:${currentTechnicianId()}`);
+      $('#fieldDraftHistory').hidden = !oldDrafts || oldDrafts === '{}';
       loadWaterRemindersFromStorage();
       loadCurrentDraft();
       renderWaterReminders();
@@ -3274,6 +3328,8 @@
 
   async function saveProblem() {
     const visit = current();
+    if (!requireRegularVisit(visit)) return;
+    const target = visitKey(visit);
     const category = $("#problemCategory")?.value || "Servico normal";
     const type = $("#problemType")?.value || "Outro";
     const severity = $("#problemSeverity")?.value || "Normal";
@@ -3316,9 +3372,10 @@
     } catch (error) {
       report.syncError = error.message;
     } finally {
-      if (saveButton) saveButton.disabled = false;
+      if (saveButton) saveButton.disabled = !isRegularVisit();
     }
 
+    if (!sameFieldSession() || visitKey() !== target) return;
     pendingProblems.unshift(report);
     const saved = JSON.parse(localStorage.getItem("cwFieldProblems") || "[]");
     saved.unshift(report);
@@ -3347,6 +3404,8 @@
 
   async function sendAdminStockAlert() {
     const visit = current();
+    if (!requireRegularVisit(visit)) return;
+    const target = visitKey(visit);
     const message = ($("#adminAlertMessage")?.value || "").trim();
     const productName = ($("#stockProductName")?.value || "").trim();
     const quantity = ($("#stockQuantity")?.value || "").trim();
@@ -3383,6 +3442,7 @@
         method: "POST",
         body: JSON.stringify(payload),
       });
+      if (!sameFieldSession() || visitKey() !== target) return;
       ["adminAlertMessage", "stockProductName", "stockQuantity"].forEach((id) => {
         const node = $(`#${id}`);
         if (node) node.value = "";
@@ -3394,7 +3454,7 @@
       savePendingAdminAlert(payload, error);
       toast("Sem ligacao. Aviso guardado no telemovel.");
     } finally {
-      if (button) button.disabled = false;
+      if (button) button.disabled = !isRegularVisit();
     }
   }
 
@@ -3611,7 +3671,7 @@
         }
         const visitButton = event.target.closest("[data-assist-visit]");
         if (visitButton) {
-          openAssistVisit(visitButton.dataset.assistVisit, visitButton.dataset.assistSource);
+          openAssistVisit(visitButton.dataset.assistVisit, visitButton.dataset.assistSource, visitButton.dataset.assistType);
         }
       });
     }
@@ -3658,6 +3718,7 @@
         showAssistMode("help");
         return;
       }
+      if (!requireRegularVisit(visit) || startingVisits.has(visitKey(visit))) return;
       if (isVisitDone(visit)) {
         switchFieldTab("agora");
         loadCurrentDraft();
@@ -3680,23 +3741,32 @@
         return;
       }
       startBtn.disabled = true;
+      const target = visitKey(visit);
+      startingVisits.add(target);
       try {
         const result = await api(`/api/operational-state/visits/${visit.id}/state`, {
           method: "POST",
           body: JSON.stringify({
             state: "IN_PROGRESS",
-            actor: activeTechnician?.name || "TECHNICIAN_FIELD_MODE",
-            technicianId: currentTechnicianId() || undefined,
-            notes: "Visita iniciada no portal tecnico.",
+            visitType: 'REGULAR',
+            poolId: visit.poolId || visit.pool?.id,
           }),
         });
-        visits[index] = mergeVisitSnapshot(visit, result.visit || {}, "IN_PROGRESS");
+        if (!sameFieldSession()) return;
+        const confirmed = result.visit;
+        if (result.ok !== true || confirmed?.id !== visit.id || confirmed.poolId !== (visit.poolId || visit.pool?.id) || confirmed.technicianId !== fieldWriteSession.technicianId || !['IN_PROGRESS','STARTED','EM_EXECUCAO'].includes(confirmed.status) || !Number.isFinite(Date.parse(confirmed.startAt)) || confirmed.endAt) throw Error('A resposta não confirma o início desta visita. Atualize a rota.');
+        const position = visits.findIndex(row=>visitKey(row)===target);
+        if (position < 0) return;
+        visits[position] = mergeVisitSnapshot(visits[position], confirmed, 'IN_PROGRESS');
+        if (visitKey() === target) { startedAt = new Date(confirmed.startAt); saveCurrentDraft(); }
+        persistModernRoute();
         render();
-        toast("Piscina iniciada e registada.");
+        toast(`${visit.pool?.name || 'Piscina'}: início confirmado.`);
       } catch (error) {
-        toast(error.message || "Nao foi possivel iniciar visita.");
+        if (sameFieldSession()) toast(error.message || "Nao foi possivel iniciar visita.");
       } finally {
-        startBtn.disabled = false;
+        startingVisits.delete(target);
+        if (sameFieldSession()) startBtn.disabled = !isRegularVisit() || startingVisits.has(visitKey());
       }
     };
   }
@@ -3811,8 +3881,10 @@
         showAssistMode("tomorrow");
         return;
       }
-      const originalIndex = index;
+      if (!requireRegularVisit(visit)) return;
+      const target = visitKey(visit);
       const wasDone = isVisitDone(visit);
+      try { readFieldDrafts(); } catch (error) { toast(error.message); return; }
       if (!wasDone && docsCompliance && !docsCompliance.readyForOperation) {
         switchFieldTab("docs", true);
         document.querySelector("#documentCenterBox")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -3821,7 +3893,7 @@
       }
       $("#finishBtn").disabled = true;
       const photosReady = await syncPendingPhotos(false);
-      if (!sameFieldSession() || current()?.id !== visit.id) { finishBtn.disabled = false; return; }
+      if (!sameFieldSession() || visitKey(current()) !== visitKey(visit)) { finishBtn.disabled = !isRegularVisit(); return; }
       if (!photosReady && navigator.onLine) {
         $("#finishBtn").disabled = false;
         toast("Ha fotografias pendentes. Sincroniza ou remove antes de concluir.");
@@ -3846,7 +3918,7 @@
         notes: product.notes,
       }));
 
-      if (!sameFieldSession() || current()?.id !== visit.id) { finishBtn.disabled = false; return; }
+      if (!sameFieldSession() || visitKey(current()) !== visitKey(visit)) { finishBtn.disabled = !isRegularVisit(); return; }
 
       const body = {
         cleaned: $("#cleaned").checked,
@@ -3883,6 +3955,8 @@
             method: "PATCH",
             body: JSON.stringify(body),
           });
+          if (!sameFieldSession()) return;
+          if (result.visit?.id !== visit.id || result.visit?.poolId !== (visit.poolId || visit.pool?.id)) throw Error('A resposta não confirma a correção desta visita. Atualize a rota.');
           const updatedVisit = {
             ...visit,
             ...(result.visit || {}),
@@ -3897,11 +3971,13 @@
               ...((result.visit || {}).technician || {}),
             },
           };
-          visits[index] = updatedVisit;
-          loadCurrentDraft();
+          const position = visits.findIndex(row=>visitKey(row)===target);
+          if (position >= 0) visits[position] = updatedVisit;
+          if (visitKey() === target) loadCurrentDraft();
+          persistModernRoute();
           render();
-          toast("Correção guardada e stock reconciliado.");
-          $("#finishBtn").disabled = false;
+          toast(`${visit.pool?.name || 'Piscina'}: correção guardada e stock reconciliado.`);
+          $("#finishBtn").disabled = !isRegularVisit();
           return;
         }
 
@@ -3912,28 +3988,30 @@
         // Stock is consumed atomically by the completion transaction on the server.
         const stockUpdated = productsUsed.length > 0;
         if (stockUpdated) await loadGuides(false).catch(() => {});
+        if (!sameFieldSession()) return;
         const completedVisit = mergeVisitSnapshot(visit, completeResult.visit || {}, "DONE");
         completedVisit.status = "DONE";
         completedVisit.endAt = completeResult.visit?.endAt || completedVisit.endAt || new Date().toISOString();
-        visits[originalIndex] = completedVisit;
-        usedProducts = [];
-        saveCurrentDraft();
-        toast(wasDone ? "Correcao guardada." : (stockUpdated ? "Visita concluida e stock atualizado." : "Visita concluida."));
-        if (!wasDone) {
-          index = nextPendingIndex(originalIndex);
+        const position = visits.findIndex(row=>visitKey(row)===target);
+        if (position >= 0) visits[position] = completedVisit;
+        persistModernRoute();
+        toast(`${visit.pool?.name || 'Piscina'}: ${stockUpdated ? 'visita concluída e stock atualizado.' : 'visita concluída.'}`);
+        if (visitKey() === target && position >= 0) {
+          usedProducts = [];
+          saveCurrentDraft();
+          index = nextPendingIndex(position);
           loadCurrentDraft();
         }
         render();
       } catch (error) {
-        $("#finishBtn").disabled = false;
-        toast(error.message);
+        if (sameFieldSession()) { $("#finishBtn").disabled = !isRegularVisit(); toast(error.message); }
       }
     };
   }
 
   window.addEventListener('cw:visit-synced', event => {
     if (!sameFieldSession() || event.detail.owner !== fieldWriteSession.owner || event.detail.token !== fieldWriteSession.token) return;
-    const position = visits.findIndex(v => String(v.id) === String(event.detail.visitId));
+    const position = visits.findIndex(v => isRegularVisit(v) && String(v.id) === String(event.detail.visitId));
     if (position >= 0) visits[position] = mergeVisitSnapshot(visits[position], event.detail.visit, 'DONE');
     persistModernRoute();
     render();
@@ -3969,7 +4047,7 @@
         if(!response.ok||!data.ok){const retry=response.headers.get('Retry-After');throw Object.assign(new Error(data.error||'Envio por confirmar'),{status:response.status,retryAt:retry?(Number.isFinite(Number(retry))?Date.now()+Number(retry)*1000:Date.parse(retry)):0});}
         if(key!==incompleteKey()||token!==window.CristalAuth?.getToken?.())return;
         const rows=readIncomplete(key);if(rows[row.visitId]?.body.requestId===row.body.requestId)delete rows[row.visitId];localStorage.setItem(key,JSON.stringify(rows));
-        const position=visits.findIndex(visit=>String(visit.id)===String(row.visitId));if(position>=0)visits[position]={...visits[position],...data.visit};
+        const position=visits.findIndex(visit=>isRegularVisit(visit)&&String(visit.id)===String(row.visitId));if(position>=0)visits[position]={...visits[position],...data.visit};
         persistModernRoute();
         window.dispatchEvent(new Event('cw:incomplete-updated'));render();
         }catch(error){
@@ -3987,6 +4065,7 @@
     const button=$('#incompleteSave');if(button.disabled)return;button.disabled=true;
     try{
       const visit=current(),reason=$('#incompleteReason').value,nextStep=$('#incompleteNextStep').value.trim();
+      if (!requireRegularVisit(visit)) return;
       if(!visit?.id||isVisitDone(visit))throw new Error('Escolha uma visita ainda não concluída');
       if(!reason||nextStep.length<5)throw new Error('Escolha o motivo e indique o próximo passo');
       let chemicalShortage;
@@ -3998,7 +4077,7 @@
       saveCurrentDraft();const rows=readIncomplete();if(rows[visit.id])throw new Error('Esta visita já tem um registo por enviar. Ligue à rede para confirmar o envio.');
       rows[visit.id]={visitId:visit.id,label:visit.pool?.name||`Visita ${visit.id}`,body:{requestId:crypto.randomUUID(),reason,nextStep,...(chemicalShortage?{chemicalShortage}:{})}};
       localStorage.setItem(incompleteKey(),JSON.stringify(rows));renderIncompleteStatus();window.dispatchEvent(new Event('cw:incomplete-updated'));await syncIncomplete();
-    }catch(error){$('#incompleteStatus').textContent=error.message;}finally{button.disabled=false;}
+    }catch(error){$('#incompleteStatus').textContent=error.message;}finally{button.disabled=!isRegularVisit();}
   };
   window.addEventListener('online',syncIncomplete);
   $('#incompleteRetry').onclick=async()=>{

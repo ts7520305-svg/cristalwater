@@ -14,7 +14,7 @@
   function buildReview({ snapshot, water, pumps, outbox, drafts, photos, online, verificationErrors = [] }) {
     const items = [];
     const add = (kind, text) => items.push({ kind, text });
-    const name = id => snapshot.visits.find(v => String(v.id) === String(id))?.name || `Visita ${id}`;
+    const name = id => snapshot.visits.find(v => (!v.visitType || v.visitType === 'REGULAR') && String(v.id) === String(id))?.name || `Visita ${id}`;
     if (!online || !snapshot.confirmedAt) add('unknown', 'Ronda sem confirmação atual. Ligue à rede e atualize a agenda; podem existir alterações do escritório.');
     for (const section of verificationErrors) add('unknown', `${section}: não foi possível confirmar os dados no servidor. A revisão está incompleta.`);
     for (const reminder of water) {
@@ -26,14 +26,14 @@
       if (!reminder.serverId || reminder.closed) add('pending', `${reminder.poolName || name(reminder.visitId)} — estado da bomba por confirmar no servidor.`);
     }
     for (const visit of snapshot.visits) {
-      if (!visit.done && !visit.future && !outbox[visit.id]) add('pending', `${visit.name} — trabalho por concluir. Combine o próximo passo com o escritório.`);
+      if (!visit.done && !visit.future && (visit.visitType === 'EXTRA' || !outbox[visit.id])) add('pending', `${visit.name} — ${visit.visitType === 'EXTRA' ? 'visita extra por confirmar pelo escritório' : 'trabalho por concluir'}. Combine o próximo passo com o escritório.`);
     }
     for (const item of Object.values(outbox)) add('pending', `${name(item.visitId)} — conclusão por confirmar no servidor${item.blocked ? '; precisa de apoio do escritório' : ''}.`);
     const photoCounts = new Map();
     for (const photo of photos) photoCounts.set(photo.visitId, (photoCounts.get(photo.visitId) || 0) + 1);
     for (const [id, count] of photoCounts) add('pending', `${name(id)} — ${count} fotografia(s) por enviar.`);
     for (const [id, draft] of Object.entries(drafts)) {
-      if (draft.pendingProblems?.some(problem => !problem.synced)) add('pending', `${name(id.replace(/^visit-/, ''))} — ocorrência guardada no telemóvel, por enviar.`);
+      if (draft.pendingProblems?.some(problem => !problem.synced)) add('pending', `${name(id.replace(/^visit-(?:REGULAR-)?/, ''))} — ocorrência guardada no telemóvel, por enviar.`);
     }
     return items;
   }
@@ -85,14 +85,15 @@
       let water = read(`cwWaterReminders:${requestedOwner}`, true);
       let pumps = Object.values(read(`cwPumpReminders:${requestedOwner}`));
       const verificationErrors = remote ? remote.filter(section=>section.error).map(section=>section.label) : ['Lembretes críticos'];
-      if (remote?.[0].rows) snapshot = {confirmedAt:new Date().toISOString(),visits:remote[0].rows.map(visit=>({id:visit.id,name:visit.pool?.name || `Visita ${visit.id}`,done:Boolean(visit.endAt) || ['DONE','COMPLETED','CONCLUIDA'].includes(String(visit.status).toUpperCase())}))};
+      if (remote?.[0].rows) snapshot = {confirmedAt:new Date().toISOString(),visits:remote[0].rows.map(visit=>({id:visit.id,visitType:visit.visitType || 'REGULAR',name:visit.pool?.name || `Visita ${visit.id}`,done:Boolean(visit.endAt) || ['DONE','COMPLETED','CONCLUIDA'].includes(String(visit.status).toUpperCase())}))};
       else snapshot = {...snapshot,confirmedAt:null};
       if (remote?.[1].rows) water = mergeReminders(water, remote[1].rows);
       if (remote?.[2].rows) pumps = mergeReminders(pumps, remote[2].rows, true);
       const legacyWater = read('cwWaterReminders', true);
       if (legacyWater.some(item => !item.technicianId || String(item.technicianId) === requestedOwner)) throw new Error('Lembretes antigos por reconciliar');
       const outbox = Object.fromEntries(completions.map(row => [row.resourceId, { visitId: row.resourceId, blocked: row.failure?.blocked }]));
-      const items = buildReview({ snapshot, water, pumps, outbox, drafts: read(`cwFieldVisitDrafts:${requestedOwner}`), photos, online: navigator.onLine, verificationErrors });
+      if (Object.keys(read(`cwFieldVisitDrafts:${requestedOwner}`)).length) verificationErrors.push('Rascunhos antigos sem conta/tipo de visita confirmados');
+      const items = buildReview({ snapshot, water, pumps, outbox, drafts: window.CWFieldDraftSnapshot ? window.CWFieldDraftSnapshot() : {}, photos, online: navigator.onLine, verificationErrors });
       result.replaceChildren();
       const title = document.createElement('p');
       title.textContent = items.length ? 'Existem pendências antes de sair:' : 'Não foram encontradas pendências nos dados verificados. Confirme as condições físicas antes de sair.';

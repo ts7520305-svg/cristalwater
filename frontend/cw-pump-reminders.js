@@ -53,6 +53,8 @@
  }
  document.getElementById('pumpReminderCreate').onclick=()=>{
   try{
+   const context=window.CWFieldVisitContext?.();
+   if(window.CWFieldVisitContext && (!context || context.visitType!=='REGULAR'))throw new Error('Escolha uma visita regular. A execução da visita extra requer confirmação pelo escritório.');
    const visitId=JSON.parse(localStorage.getItem('cw:tech-field:ui-state:v1')||'{}').selectedVisitId;
    const minutes=Number(document.getElementById('pumpReminderMinutes').value);
    if(!Number(visitId)||!Number.isFinite(minutes)||minutes<1||minutes>1440)throw new Error('Escolha uma visita e um prazo entre 1 e 1440 minutos.');

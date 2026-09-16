@@ -62,6 +62,7 @@ function returnContextFromUrl() {
     activeTab: normalizeTab(params.get("activeTab")),
     activeFilter: normalizeFilter(params.get("activeFilter")),
     selectedVisitId: String(params.get("selectedVisitId") || ""),
+    selectedVisitType: String(params.get('selectedVisitType') || ''),
     scrollY: Number.isFinite(Number(params.get("scrollY"))) ? Math.max(0, Number(params.get("scrollY"))) : 0,
   };
 }
@@ -73,6 +74,8 @@ function returnUrlWithContext() {
   target.searchParams.set("activeFilter", context.activeFilter);
   const selected=route[currentIndex]?.id||context.selectedVisitId;
   if (selected) target.searchParams.set("selectedVisitId", selected);
+  const type=route[currentIndex]?.visitType || (route[currentIndex] ? 'REGULAR' : context.selectedVisitType);
+  if(type)target.searchParams.set('selectedVisitType',type);
   if (context.scrollY > 0) target.searchParams.set("scrollY", String(context.scrollY));
   return `${target.pathname}${target.search}${target.hash}`;
 }
@@ -271,11 +274,16 @@ async function loadToday() {
   setStatus("A carregar ronda do dia.");
 
   try {
-    const data = await parseResponse(await fetch(`${API}/visits/today?technicianId=${encodeURIComponent(id)}`,{headers:{Authorization:`Bearer ${token}`}}));
+    const data = await parseResponse(await fetch(`${API}/technician/today?technicianId=${encodeURIComponent(id)}`,{headers:{Authorization:`Bearer ${token}`}}));
     if(!current())return;
     const selected=route[currentIndex]?.id||returnContextFromUrl().selectedVisitId;
+    const selectedType=route[currentIndex]?.visitType || (route[currentIndex] ? 'REGULAR' : returnContextFromUrl().selectedVisitType);
+    if(data.ok===false||!Array.isArray(data.visits))throw Error('A resposta não confirma a ronda. Atualize antes de navegar.');
     route = Array.isArray(data.visits) ? data.visits : [];
-    currentIndex = route.findIndex(visit=>String(visit.id)===String(selected));
+    const matches=route.map((visit,index)=>({visit,index})).filter(({visit})=>String(visit.id)===String(selected)&&(!selectedType||(visit.visitType||'REGULAR')===selectedType));
+    if(matches.length>1)throw Error('Há visitas de tipos diferentes com este número. Selecione a visita novamente no modo de campo.');
+    if(selected&&selectedType&&!matches.length)throw Error('A visita selecionada já não consta desta ronda. Atualize o modo de campo.');
+    currentIndex = matches[0]?.index ?? -1;
     if(currentIndex<0)currentIndex=Math.max(0,route.findIndex(visit=>!isClosed(visit)));
 
     ensureMap();

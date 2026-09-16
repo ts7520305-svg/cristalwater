@@ -15,7 +15,7 @@ const {chromium}=require('playwright');
   });
   await page.route('**/*',async route=>{
    const url=new URL(route.request().url());
-   if(url.pathname==='/api/visits/today'){
+   if(url.pathname==='/api/technician/today'){
     assert.equal(route.request().headers().authorization,'Bearer A');
     if(mode==='held'){started();await new Promise(resolve=>release=resolve);}
     if(mode==='error')return route.fulfill({status:503,contentType:'application/json',body:'{}'});
@@ -36,6 +36,11 @@ const {chromium}=require('playwright');
   mode='error';await page.locator('#loadBtn').click();await page.waitForFunction(()=>document.querySelector('#statusBox').dataset.tone==='error');
   assert.equal(await page.locator('#visitList button').count(),0);assert.equal(await page.locator('#googleLink').getAttribute('aria-disabled'),'true');assert.equal(await page.evaluate(()=>removed.length),3);
   console.log('PASS failed refresh clears old markers and navigation destinations');
+  mode='normal';visits.push({id:3,visitType:'EXTRA',status:'PLANNED',pool:{name:'Extra with same number',latitude:38,longitude:-9}});
+  await page.goto('http://field.test/technician-map?selectedVisitId=3&selectedVisitType=EXTRA');await page.waitForFunction(()=>document.querySelector('#infoBox').textContent.includes('Extra with same number'));assert.deepEqual(await page.evaluate(()=>opened.at(-1)),[38,-9]);
+  assert.match(await page.evaluate(()=>returnUrlWithContext()),/selectedVisitType=EXTRA/);
+  await page.goto('http://field.test/technician-map?selectedVisitId=3');await page.waitForFunction(()=>document.querySelector('#statusBox').dataset.tone==='error');assert.equal(await page.locator('#googleLink').getAttribute('aria-disabled'),'true');
+  console.log('PASS map destinations and return links distinguish EXTRA from REGULAR; an ambiguous number cannot choose an unrelated pool');
   mode='held';const ready=new Promise(resolve=>started=resolve);await page.locator('#loadBtn').click();await ready;
   await page.evaluate(()=>{localStorage.setItem('token','B');localStorage.setItem('cristalwater_user',JSON.stringify({id:42,role:'TECHNICIAN'}));window.dispatchEvent(new StorageEvent('storage',{key:'token'}));});release();
   await page.waitForFunction(()=>!document.querySelector('#loadBtn').disabled);assert.equal(await page.locator('#visitList button').count(),0);

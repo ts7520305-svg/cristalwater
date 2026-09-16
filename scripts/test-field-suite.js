@@ -84,6 +84,7 @@ scripts.push('test-field-legacy-route-recovery.js');
 scripts.push('test-field-legacy-visit-drafts.js');
 scripts.push('test-field-modern-route-recovery.js');
 scripts.push('test-field-workday-recovery.js');
+scripts.push('test-field-visit-types.js');
 function run(script){return new Promise(resolve=>{
  const output=fs.createWriteStream(path.join(evidence,script+'.log'));
  const child=spawn(process.execPath,[path.join(__dirname,script)],{cwd:root,env:process.env,stdio:['ignore','pipe','pipe']});

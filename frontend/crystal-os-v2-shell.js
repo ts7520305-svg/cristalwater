@@ -173,6 +173,8 @@
     }
 
     async function openWater() {
+      const context = window.CWFieldVisitContext?.();
+      if (window.CWFieldVisitContext && (!context || context.visitType !== 'REGULAR')) return toast('Escolha uma visita regular. A execução da visita extra requer confirmação pelo escritório.');
       const state = read('cw:tech-field:ui-state:v1', {});
       const visitId = String(state.selectedVisitId || '');
       if (!visitId) return toast('Seleciona uma piscina antes de marcar água aberta.');

@@ -107,7 +107,7 @@ assert(['127.0.0.1', 'localhost'].includes(new URL(base).hostname));
   await page.locator('#cwFieldCheckinCancel').click();
   assert.equal((await prisma.serviceVisit.findUnique({ where: { id: fieldVisit.id } })).startAt, null);
   await page.locator('#startBtn').click(); await page.locator('#cwFieldCheckinConfirm').click();
-  await page.waitForFunction(() => document.querySelector('#toast').textContent.includes('Piscina iniciada e registada.'));
+  await page.waitForFunction(name => document.querySelector('#toast').textContent.includes(name + ': início confirmado.'), fieldPool.name);
   assert((await prisma.serviceVisit.findUnique({ where: { id: fieldVisit.id } })).startAt);
   const concise = 'Fechar o portão à entrada e à saída.\nNão mexer na válvula marcada a vermelho.\nRegistar uma fotografia da cobertura no fim da visita.';
   await prisma.pool.update({ where: { id: fieldPool.id }, data: { notes: concise } });

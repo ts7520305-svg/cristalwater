@@ -111,35 +111,34 @@ async function validateChemicalDose({ visitId, poolId, technicianId, productName
   return { ok: true, blocked: false, limit };
 }
 
-async function setVisitState({ visitId, state, reason, notes, actor, latitude, longitude, photoUrl }) {
-  const visit = await prisma.serviceVisit.findUnique({ where: { id: Number(visitId) } });
-  if (!visit) throw new Error('Visita não encontrada');
-  const valid = ['SCHEDULED', 'AGENDADA', 'ON_ROUTE', 'A_CAMINHO', 'IN_PROGRESS', 'EM_EXECUCAO', 'BLOCKED', 'RETIDA', 'IMPEDIDA', 'DONE', 'CONCLUIDA'];
-  if (!valid.includes(state)) throw new Error(`Estado inválido: ${state}`);
-  const normalized = {
-    SCHEDULED: 'AGENDADA', AGENDADA: 'AGENDADA',
-    ON_ROUTE: 'A_CAMINHO', A_CAMINHO: 'A_CAMINHO',
-    IN_PROGRESS: 'EM_EXECUCAO', EM_EXECUCAO: 'EM_EXECUCAO',
-    BLOCKED: 'RETIDA', RETIDA: 'RETIDA', IMPEDIDA: 'RETIDA',
-    DONE: 'CONCLUIDA', CONCLUIDA: 'CONCLUIDA'
-  }[state];
-  const photoRequired = normalized === 'RETIDA';
-  if (photoRequired && !photoUrl) {
-    await createLock({ lockType: 'BLOCKED_VISIT_PHOTO_REQUIRED', severity: 'BLOCKING', entity: 'ServiceVisit', entityId: visit.id, visitId: visit.id, clientId: visit.clientId, poolId: visit.poolId, technicianId: visit.technicianId, title: 'Foto obrigatória para visita impedida', message: 'Para reter/impedir uma visita é obrigatório anexar foto do impedimento.' });
-    return { ok: false, code: 'PHOTO_REQUIRED' };
+async function setVisitState(payload = {}, user) {
+  const { roleMatches } = require('../utils/roles');
+  const requests = require('./fieldWriteRequestService');
+  const fail = (message, status = 400) => { throw Object.assign(new Error(message), { status }); };
+  if (!roleMatches(user?.role, 'TECHNICIAN')) fail('Sessão sem acesso à visita.', 403);
+  const id = Number(payload.visitId);
+  if (!Number.isSafeInteger(id) || id <= 0) fail('Visita inválida.');
+  if (payload.visitType !== undefined && payload.visitType !== 'REGULAR') fail('Esta ação pertence a uma visita regular. A visita extra requer confirmação pelo escritório.', 409);
+  if (payload.poolId !== undefined && (!Number.isSafeInteger(payload.poolId) || payload.poolId <= 0)) fail('Piscina de destino inválida.');
+  const state = { AGENDADA:'SCHEDULED', SCHEDULED:'SCHEDULED', A_CAMINHO:'ON_ROUTE', ON_ROUTE:'ON_ROUTE', EM_EXECUCAO:'IN_PROGRESS', IN_PROGRESS:'IN_PROGRESS' }[payload.state];
+  if (!state) fail('Utilize a conclusão ou o registo de impedimento da visita para encerrar o trabalho.', 409);
+  if (state === 'IN_PROGRESS') {
+    const result = await require('../business/technician/TechnicianVisitBusiness').startVisit(id, user, payload);
+    if (!result.ok) fail(result.error, result.status);
+    return result;
   }
-  const updated = await prisma.serviceVisit.update({
-    where: { id: visit.id },
-    data: {
-      status: normalized,
-      startAt: normalized === 'EM_EXECUCAO' && !visit.startAt ? new Date() : undefined,
-      endAt: normalized === 'CONCLUIDA' || normalized === 'RETIDA' ? new Date() : undefined,
-      reason: normalized === 'RETIDA' ? (reason || 'IMPEDIMENTO') : undefined,
-      notes: notes || undefined
-    }
+  if (state === 'SCHEDULED' && !roleMatches(user.role, 'ADMIN')) fail('Só o escritório pode alterar o planeamento.', 403);
+  return prisma.$transaction(async tx => {
+    await tx.$queryRaw`SELECT id FROM "ServiceVisit" WHERE id = ${id} FOR UPDATE`;
+    const visit = await tx.serviceVisit.findUnique({ where:{id} });
+    requests.authorize(user, visit);
+    if (payload.poolId !== undefined && payload.poolId !== visit.poolId) fail('A piscina da visita mudou. Atualize a rota.', 409);
+    if (visit.startAt || visit.endAt || !['PLANNED','PENDING','SCHEDULED','AGENDADA','ASSIGNED','ON_ROUTE','A_CAMINHO'].includes(visit.status)) fail('O estado desta visita já não permite esta alteração. Atualize a rota.', 409);
+    if (visit.status === state || (state === 'ON_ROUTE' && visit.status === 'A_CAMINHO') || (state === 'SCHEDULED' && visit.status === 'AGENDADA')) return { ok:true, visit, idempotent:true };
+    const updated = await tx.serviceVisit.update({ where:{id}, data:{status:state} });
+    await tx.visitStateLog.create({ data:{visitId:id,previousState:visit.status,newState:state,actor:requests.owner(user)} });
+    return { ok:true, visit:updated };
   });
-  await prisma.visitStateLog.create({ data: { visitId: visit.id, previousState: visit.status, newState: normalized, reason, notes, actor, latitude: latitude == null ? null : num(latitude), longitude: longitude == null ? null : num(longitude), photoRequired, photoUrl } });
-  return { ok: true, visit: updated };
 }
 
 async function checkVehicleCompatibility({ poolId, vehicleId }) {

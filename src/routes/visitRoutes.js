@@ -451,7 +451,7 @@ router.post("/complete", (req, res) => {
 
 router.post("/:id/start", async (req, res) => {
   try {
-    const result = await TechnicianVisitBusiness.startVisit(req.params.id, req.user);
+    const result = await TechnicianVisitBusiness.startVisit(req.params.id, req.user, req.body || {});
 
     if (!result.ok) {
       return res.status(result.status).json({ ok: false, error: result.error });

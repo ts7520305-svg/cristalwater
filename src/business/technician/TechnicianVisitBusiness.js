@@ -389,25 +389,29 @@ async function recordVisitIncident({ visitId, message, type, priority }) {
   };
 }
 
-async function startVisit(visitId, user) {
+async function startVisit(visitId, user, target = {}) {
   const id = toInt(visitId);
   if (!id || id <= 0) return {ok:false,status:400,error:'ID inválido'};
   const {roleMatches}=require('../../utils/roles');
   if(!roleMatches(user?.role,'TECHNICIAN'))return {ok:false,status:403,error:'Sessão sem acesso à visita'};
+  if(target.visitType !== undefined && target.visitType !== 'REGULAR')return {ok:false,status:409,error:'Esta ação pertence a uma visita regular. A visita extra requer confirmação pelo escritório.'};
+  if(target.poolId !== undefined && (!Number.isSafeInteger(target.poolId)||target.poolId<=0))return {ok:false,status:400,error:'Piscina de destino inválida'};
   const result=await prisma.$transaction(async tx=>{
     await tx.$queryRaw`SELECT id FROM "ServiceVisit" WHERE id = ${id} FOR UPDATE`;
     const visit=await tx.serviceVisit.findUnique({where:{id}});
     if(!visit)return {ok:false,status:404,error:'Visita não encontrada'};
     const technicianId=Number(user.technicianId||user.id);
     if(!roleMatches(user.role,'ADMIN')&&visit.technicianId!==technicianId)return {ok:false,status:403,error:'A visita foi atribuída a outro técnico. Atualize a rota'};
-    if(visit.endAt||!['PLANNED','PENDING','SCHEDULED','ASSIGNED','IN_PROGRESS','STARTED','INCOMPLETE'].includes(visit.status))return {ok:false,status:409,error:'Esta visita já não pode ser iniciada. Atualize a rota'};
+    if(target.poolId !== undefined && target.poolId !== visit.poolId)return {ok:false,status:409,error:'A piscina da visita mudou. Atualize a rota antes de iniciar'};
+    if(visit.endAt||!['PLANNED','PENDING','SCHEDULED','AGENDADA','ASSIGNED','ON_ROUTE','A_CAMINHO','IN_PROGRESS','EM_EXECUCAO','STARTED','INCOMPLETE'].includes(visit.status))return {ok:false,status:409,error:'Esta visita já não pode ser iniciada. Atualize a rota'};
     if(visit.status==='INCOMPLETE'){
       const followups=await tx.operationalReminder.findMany({where:{sourceKey:{startsWith:`incomplete:${id}:`}}});
       const ids=followups.map(row=>row.metadata?.returnPlan?.visitId).filter(Number.isSafeInteger);
       if(ids.length&&await tx.serviceVisit.findFirst({where:{id:{in:ids},status:{notIn:['CANCELLED','CANCELED','SKIPPED','ARCHIVED']}}}))return {ok:false,status:409,error:'Já existe um regresso agendado. Utilize a visita de regresso'};
     }
-    if(visit.startAt&&['IN_PROGRESS','STARTED'].includes(visit.status))return {ok:true,visit,idempotent:true};
+    if(visit.startAt&&['IN_PROGRESS','EM_EXECUCAO','STARTED'].includes(visit.status))return {ok:true,visit,idempotent:true};
     const updated=await tx.serviceVisit.update({where:{id},data:{startAt:visit.startAt||new Date(),status:'IN_PROGRESS'}});
+    await tx.visitStateLog.create({data:{visitId:id,previousState:visit.status,newState:'IN_PROGRESS',actor:require('../../services/fieldWriteRequestService').owner(user)}});
     return {ok:true,visit:updated};
   });
   if(result.ok&&!result.idempotent){

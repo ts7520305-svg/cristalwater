@@ -45,8 +45,9 @@ router.post('/chemical/check', allowRoles('ADMIN', 'TECHNICIAN', 'TEAM_LEADER'),
 });
 
 router.post('/visits/:visitId/state', allowRoles('ADMIN', 'TECHNICIAN', 'TEAM_LEADER'), async (req, res) => {
-  try { res.json(await engine.setVisitState({ visitId: req.params.visitId, ...(req.body || {}) })); }
-  catch (error) { res.status(400).json({ ok: false, error: error.message }); }
+  res.set('Cache-Control', 'private, no-store');
+  try { res.json(await engine.setVisitState({ ...(req.body || {}), visitId: req.params.visitId }, req.user)); }
+  catch (error) { res.status(error.status || error.statusCode || 500).json({ ok: false, error: error.status || error.statusCode ? error.message : 'Não foi possível confirmar o estado da visita.' }); }
 });
 
 router.post('/vehicle-compatibility', allowRoles('ADMIN', 'TECHNICIAN', 'TEAM_LEADER'), async (req, res) => {
