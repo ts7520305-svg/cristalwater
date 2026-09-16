@@ -81,6 +81,8 @@ let browser; const releases = [];
   console.log('PASS late account change cannot clear or confirm another account; original owner recovers the same alert once');
 
   await page.waitForFunction(() => !document.getElementById('internalAlert').readOnly);
+  await page.evaluate(() => { window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: true })); window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true })); });
+  await page.waitForFunction(() => !document.getElementById('internalAlert').readOnly && !document.getElementById('sendAlertBtn').disabled);
   const secondPage = await context.newPage(); await secondPage.goto(base + '/technician.html', { waitUntil: 'networkidle' }); await secondPage.waitForFunction(() => !document.getElementById('internalAlert').readOnly);
   await page.locator('#internalAlert').fill('Rascunho preservado entre janelas'); await secondPage.waitForFunction(() => document.getElementById('sendAlertBtn').disabled); assert.match(await secondPage.locator('#internalAlertStatus').textContent(), /noutra janela/); await secondPage.close();
   const key = 'cwFieldInternalAlertDraft:TECH:' + tech.id; await page.evaluate(key => localStorage.setItem(key, '{interrupted'), key); await open();

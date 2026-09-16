@@ -1123,10 +1123,7 @@ function escapeHtml(value){
 // ======================================================
 
 function optimizeRoute(){
-
-  alert(
-    "Modo otimização em desenvolvimento"
-  );
+  window.CWFieldRoutePreview.open();
 }
 
 function logout(){

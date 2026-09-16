@@ -90,7 +90,7 @@
   });
   window.addEventListener('cw:field-write-change', refresh);
   window.addEventListener('pagehide', () => { closed = true; ++revision; });
-  window.addEventListener('pageshow', refresh);
+  window.addEventListener('pageshow', () => { closed = false; refresh(); });
   setInterval(() => { if (!active()) refresh(); }, 1000);
   window.CWFieldInternalAlert = { send, setVisits(rows) { visits = rows; if (active()) choices(visitSelect.value ? Number(visitSelect.value) : null); }, refresh };
   lock(true); refresh();
