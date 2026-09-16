@@ -875,6 +875,30 @@ model ChatMessage {
   @@index([createdAt])
 }
 
+// Shared staff conversation. Addressed administration messages remain in ChatMessage.
+model InternalChatMessage {
+  id            Int      @id @default(autoincrement())
+  messageId     String   @unique @default(uuid())
+  actorKey      String?
+  actorId       Int?
+  actorType     String?
+  technicianId  Int?
+  author        String?
+  requestId     String?
+  text          String?
+  createdAt     DateTime @default(now())
+  legacyPayload Json?
+
+  @@unique([actorKey, requestId])
+}
+
+model InternalChatImport {
+  sourceHash   String   @id
+  sourceText   String
+  messageCount Int
+  createdAt    DateTime @default(now())
+}
+
 model PoolMessage {
   id         Int      @id @default(autoincrement())
   poolId     Int

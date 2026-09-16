@@ -301,15 +301,7 @@ async function listClientConversation(req, res){
 // INTERNAL
 // ======================================================
 
-async function listInternalConversation(req, res){
-
-  return res.json({
-
-    ok:true,
-
-    messages:[]
-  });
-}
+const listInternalConversation = require("./internalChatController").list(true);
 
 // ======================================================
 // LIST

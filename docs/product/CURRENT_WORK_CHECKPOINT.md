@@ -1,6 +1,12 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Ponto de retoma atual — 15/09/2026
+## Ponto de retoma atual — 16/09/2026
+
+- TASK177: chat interno consolidado em PostgreSQL, UUID por envio/conta, dois processos coordenados e importação transacional do JSON com arquivo integral. Identidades históricas não são presumidas; mensagens privadas administrativas/CLIENT continuam separadas. Relatório `INTERNAL_CHAT_20260916.md`. Quatro grupos aprovados em `field-qa-runtime/run-1789533950142`, revisão final em `run-1789534044698`; 323 unitários/quatro técnicos e 520 ficheiros backend. Runner passa a 81 grupos; publicar e confirmar a árvore final no CI, incluindo dez migrações e restauro.
+- Próximo ponto: integrar o canal da equipa no ecrã existente `technician-chat`, que ainda apresenta apenas notificações de leitura. Conservar notificações, identidade, UUID e texto durante reenvio/resposta perdida; testar erro/reload e conta antes de avançar. Depois rever escritas antigas realmente usadas pelos ecrãs e continuar a matriz global.
+- TASK176 já publicada e verificada em `14306f306af676bc7bfec321db9adb600b2cb546`, árvore `543ddd6fedad978eda12dee60c901f68e2f68363`; workflow `35029272245` aprovado com 80 grupos, 323 unitários/quatro técnicos, navegador e restauro de 99 tabelas/18 ficheiros em PostgreSQL 16. Não repetir a publicação pendente do registo histórico abaixo.
+
+## Registo de retoma — 15/09/2026
 
 - TASK176: anexos CLIENT antigos/novos com titularidade e download autenticado; proteção de caminhos codificados/HEAD/Range, tipos ativos descarregados como bytes e botões reais no chat/portal. Reprodução confirmou leitura anónima; versão final aprovada em `field-qa-runtime/run-1789509747826` com documentos e percurso visual. Relatório `CHAT_ATTACHMENTS_20260915.md`; runner passa a 80 grupos. Publicar e confirmar a árvore final no CI. Próximo ponto: consolidar o chat interno vazio/JSON com armazenamento seguro entre processos e sem duplicar reenvios, depois continuar a matriz atual.
 - TASK172–175 publicadas em `05c8632a2d1c7462138b489826cff3baa3d8e15e`, árvore `34ef5efcbb3befc6fcda2162dd9ee12c4f7d4c9e`; workflow `35028280336` aprovado com 79 grupos, unitários/navegador e restauro em PostgreSQL 16. A prioridade de anexos registada abaixo foi tratada na TASK176.

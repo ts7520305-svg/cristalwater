@@ -1,6 +1,6 @@
 # Cristal Water — matriz atual de conclusão
 
-Atualizada após TASK176 em 15/09/2026. Substitui a fotografia inicial da TASK82 para decidir o próximo trabalho, preservando esse diagnóstico em `COMPLETENESS_20260915.md`. Esta matriz cruza os relatórios posteriores e as rotas atualmente revistas; não constitui auditoria exaustiva de todas as páginas/APIs nem conclusão a 100%.
+Atualizada após TASK177 em 16/09/2026. Substitui a fotografia inicial da TASK82 para decidir o próximo trabalho, preservando esse diagnóstico em `COMPLETENESS_20260915.md`. Esta matriz cruza os relatórios posteriores e as rotas atualmente revistas; não constitui auditoria exaustiva de todas as páginas/APIs nem conclusão a 100%.
 
 ## Implementação e evidência atual
 
@@ -15,13 +15,14 @@ Atualizada após TASK176 em 15/09/2026. Substitui a fotografia inicial da TASK82
 | Cobranças agendadas | Preparação mensal de rascunhos e lembretes no portal após vencimento +7 dias, com deduplicação e exclusão de pausas | TASK85 e alinhamentos posteriores dos preços/crédito. Não confundir aviso no portal com email/WhatsApp entregue. |
 | Envio de documentos/lembrete manual | Documento autenticado, publicação no chat, preparação e estados verdadeiros de transporte; manual por UUID/canal | TASK160–167 e 174. Fornecedores simulados; canais externos e confirmação final de entrega pendentes. |
 | Identidades e acessos | ADMIN ativo nas entradas antigas revistas; atribuição nos chats por recurso; perfil próprio e rota limitada a cada técnico; conversa CLIENT restrita por REST/Socket.IO; anexos novos e históricos com titularidade | TASK161–176. Novas rotas ou aliases continuam a exigir revisão própria. Sem revogação de cópias previamente descarregadas. |
+| Chat da equipa | APIs consolidadas, identidade atual e armazenamento transacional; arquivo do JSON, concorrência entre processos e reenvios seguros | TASK177; `INTERNAL_CHAT_20260916.md`. O ecrã de técnicos ainda apresenta notificações; integração da conversa no ecrã é o próximo ponto. |
 | Idiomas/configurações | PT/EN/FR/ES/DE no dicionário e percursos operacionais ensaiados; capacidades fixas são apresentadas como tal | TASK84, 95, 99, 132. Tradução e apresentação de todos os textos/PDFs ainda não auditadas integralmente. |
 | Retenção/backup | Pré-visualização e limpeza manual controlada de GPS; monitorização de idade da cópia local; restauro em QA | TASK96–98 e CI. Cópia externa, agendamento e alerta real de falha no VPS pendentes. Não há eliminação automática de histórico crítico. |
 | IA e evoluções avançadas | Sugestões e controlos humanos existentes | Aprendizagem validada por piscina, assistente generativo offline e vídeo completo continuam sem evidência de implementação integral. Não declarar estes pontos concluídos. |
 
 ## Próximo trabalho no código
 
-1. Consolidar `/api/chat/internal` (lista vazia) e `/api/internal-chat/messages` (JSON), definir armazenamento transacional para concorrência entre processos e repetição segura. O histórico antigo não pode ser apagado nem atribuído a outro autor por suposição.
+1. Integrar a conversa da equipa no ecrã existente `technician-chat`, conservando as notificações e acrescentando estados de leitura/envio/erro e recuperação do pedido por conta. As APIs vazia/JSON foram consolidadas na TASK177; o histórico permanece preservado e a identidade antiga não é presumida.
 2. Rever individualmente as escritas antigas protegidas na TASK170: ter autenticação não garante atomicidade, versão ou recuperação de reenvio. Priorizar as rotas realmente utilizadas pelos ecrãs.
 3. Concluir inventário visual por perfil de páginas, erros, carregamento, vazio, traduções e PDFs. Os ecrãs já ensaiados não equivalem à revisão de todas as páginas.
 4. Tratar vídeo, custos reais de rentabilidade e IA offline/aprendizagem como requisitos próprios com critérios verificáveis, reutilizando os módulos existentes.
@@ -39,4 +40,4 @@ A prioridade anterior de anexos CLIENT foi concluída na TASK176. Ver `CHAT_ATTA
 
 Base remota TASK171: `90c4d01a7d80f7a0c5aee3cb4de33a13a994d2bf`, árvore `d0b68aebfa750605f26a377367d331e4afec536c`, workflow `35026498860` aprovado com 75 grupos, unitários/navegador e restauro em PostgreSQL 16. TASK172–175 acrescentam quatro grupos; validação local detalhada em `ACCESS_AND_REMINDERS_20260915.md`. A aprovação dessa base não substitui a verificação da árvore nova publicada. Não atribuir percentagem global sem um inventário fechado de critérios de aceitação.
 
-TASK172–175 confirmadas no workflow `35028280336`, commit `05c8632a2d1c7462138b489826cff3baa3d8e15e`: 79 grupos e restauro aprovados. TASK176 passa a 80 grupos e requer a confirmação da árvore final publicada.
+TASK172–175 confirmadas no workflow `35028280336`, commit `05c8632a2d1c7462138b489826cff3baa3d8e15e`: 79 grupos e restauro aprovados. TASK176 confirmada no workflow `35029272245`, commit `14306f306af676bc7bfec321db9adb600b2cb546`: 80 grupos e restauro de 99 tabelas/18 ficheiros aprovados. TASK177 passa a 81 grupos e requer confirmação da árvore final publicada, com a migração aditiva das duas tabelas do chat interno.
