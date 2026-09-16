@@ -1,6 +1,6 @@
 # Cristal Water — matriz atual de conclusão
 
-Atualizada após implementação da TASK208 em 16/09/2026. Substitui a fotografia inicial da TASK82 para decidir o próximo trabalho, preservando esse diagnóstico em `COMPLETENESS_20260915.md`. Esta matriz cruza os relatórios posteriores e as rotas atualmente revistas; não constitui auditoria exaustiva de todas as páginas/APIs nem conclusão a 100%.
+Atualizada após implementação da TASK209 em 16/09/2026. Substitui a fotografia inicial da TASK82 para decidir o próximo trabalho, preservando esse diagnóstico em `COMPLETENESS_20260915.md`. Esta matriz cruza os relatórios posteriores e as rotas atualmente revistas; não constitui auditoria exaustiva de todas as páginas/APIs nem conclusão a 100%.
 
 ## Implementação e evidência atual
 
@@ -16,6 +16,7 @@ Atualizada após implementação da TASK208 em 16/09/2026. Substitui a fotografi
 | Recuperação da rota antiga | Cache por conta tipada/dia, históricos sem titularidade preservados/ocultos, atualização sem ressuscitar visitas reatribuídas nem nomes/fotos antigos; falhas, corrupção, quota e sessão ensaiadas | TASK205 confirmada no CI `35140618235`: 109 grupos, 370 unitários/quatro técnicos e restauro de 109 tabelas/29 ficheiros. `LEGACY_ROUTE_RECOVERY_20260916.md`. Ambos os endpoints diários respeitam planeamento e conservam início/fim do dia; coordenadas ausentes não viram 0,0. |
 | Rascunhos do formulário antigo | Seis campos persistidos por conta/visita, recuperação offline, comparação por campo, duas janelas e falhas de armazenamento ensaiadas; conclusão preparada/confirmada conserva pedido original | TASK206 confirmada no CI `35143658234`: 110 grupos e restauro de 109 tabelas/29 ficheiros. `LEGACY_VISIT_DRAFTS_20260916.md`. Persistência após indicação de gravação concluída, sem sincronização externa nem versão opaca nova na conclusão. |
 | Recuperação da ronda moderna | Cache por identidade tipada/papel/dia, validação da resposta e visitas, recarga offline, mudança de dia/conta, corrupção/quota e respostas fora de ordem ensaiadas | TASK207 confirmada no CI `35145094551`: 111 grupos, 382 unitários/quatro técnicos e restauro de 109 tabelas/29 ficheiros. `MODERN_ROUTE_RECOVERY_20260916.md`. Outros armazenamentos modernos e limites de paginação têm revisão própria pendente. |
+| Datas do plano semanal | Data civil no fuso local, resposta com dias explícitos, datas impossíveis recusadas e campos ISO conservados | TASK209; `WEEKLY_CALENDAR_DATES_20260916.md`. Cinco fusos, ano bissexto, mudanças de hora/ano e Route OS em Chicago aprovados. Usa o fuso do servidor; não demonstra todos os outros planeadores. |
 | Equipamentos e stock | Preventivos, recorrência, execução, lembretes, atribuição, contagem e escrita recuperável implementados/testados | TASK106–122 e relatórios de equipamento/inventário. Inventário físico continua externo. |
 | Lembretes operacionais/alertas | Consultas completas, prioridade crítica, criação/conclusão/eliminação recuperáveis e resolução vinculada ao estado físico | TASK125–135. Confirmação física é um ato do técnico, não uma conclusão automática dos testes. |
 | Orçamentos e contratos | Materiais/MO/margem/IVA, versões, aprovação no portal, conversão e preços por vigência implementados/testados | TASK86–94, 101–102, 148, 153–154; relatórios do portal e ativação. Não usar o antigo diagnóstico “estimativa fixa apenas” como estado atual. |
@@ -37,8 +38,8 @@ Atualizada após implementação da TASK208 em 16/09/2026. Substitui a fotografi
 
 ## Próximo trabalho no código
 
-1. Confirmar CI/restauro da TASK208, com 112 grupos/18 migrações. TASK207 e as anteriores já foram confirmadas. Antes de escolher outra lacuna, cruzar matriz, relatórios e código; não repetir tarefas concluídas a partir da fotografia TASK82.
-2. Corrigir a consulta semanal que interpreta uma data civil como UTC antes de calcular a semana local; a falha de 29/02/2032 foi reproduzida em America/Chicago e não ocorre em UTC. Depois, outros armazenamentos modernos (rascunhos/incompletas/documentos/lembretes), entrada TEAM_LEADER e limites de paginação. `global.io.emit` já é restringido a MANAGEMENT por `realtimeAccessService`; não repetir essa correção.
+1. Confirmar CI/restauro das TASK208–209, com 112 grupos/18 migrações. TASK207 e as anteriores já foram confirmadas. Antes de escolher outra lacuna, cruzar matriz, relatórios e código; não repetir tarefas concluídas a partir da fotografia TASK82.
+2. Reproduzir e tratar ações de campo que usam só o ID quando existem visitas REGULAR/EXTRA com o mesmo número; rever o início pela rota de estados operacionais. Depois, outros armazenamentos modernos (rascunhos/incompletas/documentos/lembretes), entrada TEAM_LEADER e limites de paginação. `global.io.emit` já é restringido a MANAGEMENT por `realtimeAccessService`; não repetir essa correção.
 3. Concluir inventário visual por perfil de páginas, erros, carregamento, vazio, traduções e PDFs. Os ecrãs já ensaiados não equivalem à revisão de todas as páginas.
 4. Tratar vídeo, custos reais de rentabilidade e IA offline/aprendizagem como requisitos próprios com critérios verificáveis, reutilizando os módulos existentes.
 

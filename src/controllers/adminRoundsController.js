@@ -63,6 +63,7 @@ async function getWeeklyPlan(req, res) {
     const plan = await require('../business/admin/RoundAssignmentBusiness').applyWeeklyAssignments(await AdminWeeklyPlanningBusiness.getWeeklyPlan(req.query || {}));
     res.json({ ok: true, plan });
   } catch (err) {
+    if (err.code === 'INVALID_WEEK_DATE') return res.status(400).json({ ok: false, code: err.code, message: err.message });
     console.error(err);
     res.status(500).json({ ok: false, message: "Erro ao carregar plano semanal" });
   }

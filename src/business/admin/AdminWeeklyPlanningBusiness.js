@@ -4,6 +4,24 @@ const prisma = global.__CRISTAL_WATER_PRISMA__ || prismaClient?.prisma || prisma
 
 const DAY_LABELS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
+function calendarDate(date) {
+  return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-');
+}
+
+function referenceDate(value) {
+  if (value === undefined) return new Date();
+  const invalid = () => { throw Object.assign(new Error('Data de referência inválida. Indique AAAA-MM-DD ou um instante ISO com fuso.'), { status: 400, code: 'INVALID_WEEK_DATE' }); };
+  if (typeof value !== 'string') return invalid();
+  const civil = /^\d{4}-\d{2}-\d{2}$/.test(value);
+  const instant = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/.test(value);
+  if (!civil && !instant) return invalid();
+  const day = value.slice(0, 10), dayCheck = new Date(day + 'T00:00:00Z');
+  if (!Number.isFinite(dayCheck.getTime()) || dayCheck.toISOString().slice(0, 10) !== day) return invalid();
+  const date = new Date(civil ? value + 'T00:00:00' : value);
+  if (!Number.isFinite(date.getTime()) || (civil && calendarDate(date) !== value)) return invalid();
+  return date;
+}
+
 function startOfWeek(referenceDate = new Date()) {
   const date = new Date(referenceDate);
   date.setHours(0, 0, 0, 0);
@@ -65,10 +83,10 @@ function normalizeVisit(visit) {
 }
 
 async function getWeeklyPlan(query = {}) {
-  const referenceDate = query.date ? new Date(query.date) : new Date();
+  const reference = referenceDate(query.date);
   const includeInactive = ["true", "1", "yes", "sim"].includes(String(query.includeInactive || "").toLowerCase());
-  const weekStart = startOfWeek(referenceDate);
-  const weekEnd = endOfWeek(referenceDate);
+  const weekStart = startOfWeek(reference);
+  const weekEnd = endOfWeek(reference);
 
   const [rounds, visits] = await Promise.all([
     prisma.round.findMany({
@@ -115,6 +133,7 @@ async function getWeeklyPlan(query = {}) {
       dayOfWeek: index,
       label: DAY_LABELS[index],
       date: currentDate.toISOString(),
+      calendarDate: calendarDate(currentDate),
       rounds: dayRounds,
       visits: dayVisits,
       summary: {
@@ -127,6 +146,9 @@ async function getWeeklyPlan(query = {}) {
   });
 
   return {
+    referenceDate: calendarDate(reference),
+    weekStartDate: calendarDate(weekStart),
+    weekEndDate: calendarDate(weekEnd),
     weekStart: weekStart.toISOString(),
     weekEnd: weekEnd.toISOString(),
     totalRounds: rounds.length,
