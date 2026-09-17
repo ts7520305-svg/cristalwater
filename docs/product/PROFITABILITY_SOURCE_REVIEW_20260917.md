@@ -1,6 +1,6 @@
 # Revisão das fontes de rentabilidade — 17/09/2026
 
-Diagnóstico histórico da base TASK234–235. As TASK236–237 corrigem os relatórios e substituem o planeador inválido por consulta de trabalho realmente agendado. Implementação e ensaios locais em `OPERATIONAL_VALUES_AND_PLANNED_WORK_20260917.md`; CI/restauro do novo lote ainda pendentes neste registo. A rentabilidade total continua por apurar: fontes documentais e estimativas não substituem repartição de receitas nem custos históricos.
+Diagnóstico histórico da base TASK234–235. As TASK236–237 corrigem os relatórios e substituem o planeador inválido por consulta de trabalho realmente agendado. Implementação e ensaios locais em `OPERATIONAL_VALUES_AND_PLANNED_WORK_20260917.md`; CI `35259181393` e restauro confirmados no commit `c38567380cfdbccf75237cb11832acc6524abcc5`. A rentabilidade total continua por apurar: fontes documentais e estimativas não substituem repartição de receitas nem custos históricos.
 
 ## Reprodução em QA isolada
 

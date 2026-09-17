@@ -1,6 +1,6 @@
 # Revisão pendente dos mapas e gráficos antigos
 
-Este registo conserva a triagem inicial. TASK233 trata /admin-map e /route-map, conforme `ADMIN_MAP_RECOVERY_20260917.md`; TASK234–235 tratam /map e /multi-map, conforme `GEOGRAPHIC_AND_MULTI_MAP_RECOVERY_20260917.md`. TASK236–237 tratam /profit-map, o seu planeador e os três consumidores de atividade/valores por técnico, incluindo Alertas financeiros, conforme `OPERATIONAL_VALUES_AND_PLANNED_WORK_20260917.md`; ensaios locais aprovados, CI/restauro do lote ainda pendentes. Base da triagem: `e1b9ddc4353781de43d04f716ae725bea47dc306` (TASK231–232).
+Este registo conserva a triagem inicial. TASK233 trata /admin-map e /route-map, conforme `ADMIN_MAP_RECOVERY_20260917.md`; TASK234–235 tratam /map e /multi-map, conforme `GEOGRAPHIC_AND_MULTI_MAP_RECOVERY_20260917.md`. TASK236–237 tratam /profit-map, o seu planeador e os três consumidores de atividade/valores por técnico, incluindo Alertas financeiros, conforme `OPERATIONAL_VALUES_AND_PLANNED_WORK_20260917.md`; CI `35259181393` aprovado no commit `c38567380cfdbccf75237cb11832acc6524abcc5`, 131/131 grupos e restauro confirmado. Base da triagem: `e1b9ddc4353781de43d04f716ae725bea47dc306` (TASK231–232).
 
 ## Evidência
 
@@ -36,3 +36,5 @@ TASK233 fechada para /admin-map e /route-map no commit `083dc7f600e989236c2611ea
 TASK234–235 substituem a falsa atribuição por pré-visualização explícita e ligam /multi-map ao contrato diário completo existente. Não corrigem nem validam as fontes financeiras do planeador antigo. CI `35254021003` aprovado no commit `8cd59cd3eb9842a82d4199eb9598a6250371b9d0`: 128 grupos e restauro de 110 tabelas/32 ficheiros.
 
 Revisão de fontes financeiras reproduzida em `run-1789666894641`, descrita em `PROFITABILITY_SOURCE_REVIEW_20260917.md`: a fonte antiga omite Technician, a alternativa usa constantes de receita/custo e trata devolução como consumo. O alias /technician-profit lê um campo total inexistente. Este é o diagnóstico anterior às TASK236–237; a correção das fontes e dos consumidores está descrita no relatório novo. Custos históricos e repartição da receita total continuam pendentes.
+
+TASK236–237 fecham os consumidores identificados nesta triagem: relatório com fontes explícitas, três interfaces recuperáveis e trabalho planeado real no lugar do planeador inválido. CI `35259181393`, commit `c38567380cfdbccf75237cb11832acc6524abcc5`: 131/131 grupos, 388 unitários/quatro técnicos, 21 scripts de navegador, 20 migrações e restauro de 110 tabelas/32 ficheiros. Isto não apura lucro total nem comprova despacho, trânsito, custos históricos ou a revisão de todos os HTML/PDFs.

@@ -2,7 +2,7 @@
 
 ## Estado
 
-Implementação e ensaios locais aprovados em 17/09/2026. A publicação, a integração completa em PostgreSQL nativo e o restauro desta árvore ainda aguardam confirmação. Base anterior: `f45082e48537cc22323c642a3ee0c01341176348`, sobre código TASK234–235 `8cd59cd3eb9842a82d4199eb9598a6250371b9d0`.
+TASK236–237 confirmadas no commit `c38567380cfdbccf75237cb11832acc6524abcc5`, árvore `5870d97ef8efe4fc55c658ef12daeda9f935ee34`, CI `35259181393`: 131/131 grupos, 388 testes unitários/quatro técnicos, 21 scripts de navegador, 20 migrações, sintaxe de 540 JS backend/176 frontend/57 inline e restauro de 110 tabelas/32 ficheiros com linhas e hashes iguais em PostgreSQL 16. Publicação confirmada na branch de trabalho em 17/09/2026. Este registo posterior altera apenas documentação; a evidência pertence ao commit de código indicado. Base anterior: `f45082e48537cc22323c642a3ee0c01341176348`, sobre código TASK234–235 `8cd59cd3eb9842a82d4199eb9598a6250371b9d0`.
 
 Sem migração de esquema, envio externo, emissão fiscal, deploy, alteração de main ou reatribuição de visitas. O diagnóstico anterior fica conservado em `PROFITABILITY_SOURCE_REVIEW_20260917.md`.
 
@@ -47,3 +47,9 @@ Capacidade, deslocações, tempos previstos e lucro permanecem desconhecidos. Is
 Os ensaios incluem mais de 205 técnicos, homónimos/inativos, REGULAR/EXTRA com ID igual, fronteiras mensais, conclusão sem fim/duração invertida, crédito/DRAFT/anulação, devolução/unidades/movimento espelhado, cliente histórico ausente, fontes monetárias incoerentes e sessão/período/rede. O planeador usa 304 visitas reais, exclui piscinas sem tarefa e visitas iniciadas/concluídas/canceladas/outro dia, recusa respostas contraditórias, conserva responsáveis e testa três larguras com recursos externos indisponíveis. As leituras não alteram visitas, documentos, movimentos ou snapshots.
 
 Runner de integração: 131 grupos, incluindo os três grupos novos. Sintaxe aprovada: 540 ficheiros JS backend, 176 frontend e 57 scripts inline. Inventário atualizado: 101 HTML, 55 páginas com referência literal de teste, zero recursos locais em falta e zero divergências de guardas no catálogo. Cache v65. Não há ensaio de volume de produção, despacho automático, custo histórico apurado, tradução exaustiva de todos os textos/PDFs ou validação física/VPS neste lote.
+
+## Confirmação em PostgreSQL nativo
+
+TASK236–237 confirmadas no commit `c38567380cfdbccf75237cb11832acc6524abcc5`, árvore `5870d97ef8efe4fc55c658ef12daeda9f935ee34`, CI `35259181393`: 131/131 grupos, 388 testes unitários/quatro técnicos, 21 scripts de navegador, 20 migrações, sintaxe de 540 JS backend/176 frontend/57 inline e restauro de 110 tabelas/32 ficheiros com linhas e hashes iguais em PostgreSQL 16. [Execução completa](https://github.com/ts7520305-svg/cristalwater/actions/runs/35259181393), job `105330307821`, concluída com sucesso. Os 131 resultados individuais têm código 0. O grupo de valores passou em 748 ms, as três interfaces em 6625 ms e o planeador em 3499 ms. Regressões de mapas TASK233–235 passaram igualmente.
+
+Backups locais da publicação: `backup/task237-local-20260917` e `backup/task237-alerts-local-20260917`. A primeira publicação `29a63fbc7ae05427cae048cb189bf4f00278775b` também passou no CI `35258837660`; a confirmação usada neste relatório é a versão final, que inclui Alertas financeiros. Custos históricos, repartição de mensalidades, despacho, ensaios físicos/VPS e os restantes itens da matriz não se tornam concluídos por esta aprovação.
