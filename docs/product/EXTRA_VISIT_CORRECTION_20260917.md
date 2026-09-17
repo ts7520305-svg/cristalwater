@@ -22,11 +22,13 @@ Uma versão entretanto alterada exige consulta e revisão explícita das diferen
 
 ## Evidência
 
+Confirmação final em PostgreSQL 16: [CI 35185743837](https://github.com/ts7520305-svg/cristalwater/actions/runs/35185743837), commit `6aef9a1adef2fbdee5d978df73970b8047eb6049`, árvore `2dbeb4e5281a0ab943df177b5b3fd1274637e7ad`. Aprovados 117/117 grupos, 388 testes unitários, quatro testes de técnicos, 17 scripts de navegador, 19 migrações e sintaxe de 537 ficheiros backend. Restauro de 110 tabelas e 31 ficheiros com linhas e hashes iguais. Este registo posterior é apenas documental e não altera o código ensaiado.
+
 - `run-1789622056227`: correção extra, execução extra, recuperação de escritas e identidade REGULAR/EXTRA aprovadas.
 - `run-1789622309766`: ensaio final da correção, E2E operacional e regressão água/bomba extra aprovados. Inclui seis pedidos simultâneos com o mesmo UUID, dois pedidos com a mesma versão, alteração do payload, guia fechada, falha transacional, resposta perdida, confirmação com piscina errada, rascunho preservado, conflito de duas janelas, quota/corrupção e resposta tardia após mudar de conta.
 - `run-1789622506497`: repetição final aprovada, incluindo reconhecimento explícito da recusa sem eliminar o comprovativo anterior.
 - `run-1789622702982`: revisão final aprovada; sem consumo original, o sistema recusa assumir a guia atual e mantém intactos o stock e a execução.
 - 388 testes unitários, quatro testes de técnicos, 17 scripts de navegador e sintaxe de 537 ficheiros backend aprovados localmente. Interface exercitada a 320/390/1440 px e captura mobile revista.
-- Runner integrado passa a 117 grupos; sem migração nova (19 existentes). Confirmar PostgreSQL 16 e restauro no CI da árvore publicada antes de marcar o lote validado remotamente.
+- Runner integrado passa a 117 grupos; sem migração nova (19 existentes). Primeiro CI `35185543641` aprovado no commit `805a78709ab61ffd9e08ed12bf28c6b8db11d1e6`; a confirmação final acima inclui também a proteção da origem do stock.
 
 Impedimentos/regressos, equipamento de ExtraVisit e a revisão geral dos rascunhos modernos continuam separados. Esta tarefa não substitui os ensaios físicos em telemóvel nem a validação externa de produção.
