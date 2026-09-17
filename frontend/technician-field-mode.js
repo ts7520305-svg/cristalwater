@@ -2902,6 +2902,7 @@
         api(`/api/technician/today?${tomorrowQuery}`),
       ]);
 
+      for(const result of [todayResult, tomorrowResult])if(result.status==='fulfilled'&&(result.value.complete!==true||!Array.isArray(result.value.visits)||result.value.total!==result.value.visits.length))throw Error('A resposta não confirma a ronda completa. Atualize antes de escolher outra visita.');
       const todayVisits = todayResult.status === "fulfilled" ? pendingVisitsOnly(todayResult.value.visits) : [];
       const tomorrowVisits = tomorrowResult.status === "fulfilled" ? pendingVisitsOnly(tomorrowResult.value.visits) : [];
       const otherToday = todayVisits

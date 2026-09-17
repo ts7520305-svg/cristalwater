@@ -19,7 +19,7 @@ const {chromium}=require('playwright');
     assert.equal(route.request().headers().authorization,'Bearer A');
     if(mode==='held'){started();await new Promise(resolve=>release=resolve);}
     if(mode==='error')return route.fulfill({status:503,contentType:'application/json',body:'{}'});
-    return route.fulfill({contentType:'application/json',body:JSON.stringify({visits})});
+    return route.fulfill({contentType:'application/json',body:JSON.stringify({complete:true,total:visits.length,visits})});
    }
    if(url.pathname==='/technician-map')return route.fulfill({contentType:'text/html',body:fs.readFileSync(path.join(__dirname,'../frontend/technician-map.html'),'utf8')});
    if(url.pathname==='/technician-map.js')return route.fulfill({contentType:'text/javascript',body:fs.readFileSync(path.join(__dirname,'../frontend/technician-map.js'),'utf8')});

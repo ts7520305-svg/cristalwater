@@ -100,8 +100,8 @@ router.get("/today", async (req, res) => {
     const dayQuery =
       buildServiceVisitDayQuery(scopedQuery);
 
-    const rawLimit = Number(req.query?.limit || 200);
-    const take = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 300) : 200;
+    const { parseDailyRoutePage, dailyRoutePage } = require('../utils/dailyRoutePagination');
+    const page = parseDailyRoutePage(req.query);
 
     const visits =
       await prisma.serviceVisit.findMany({
@@ -165,13 +165,7 @@ router.get("/today", async (req, res) => {
 
         },
 
-        orderBy: {
-
-          plannedDate: "asc"
-
-        },
-
-        take
+        orderBy: [{ plannedDate: "asc" }, { id: "asc" }]
 
       });
 
@@ -223,10 +217,7 @@ router.get("/today", async (req, res) => {
           },
         },
       },
-      orderBy: {
-        scheduledAt: "asc",
-      },
-      take,
+      orderBy: [{ scheduledAt: "asc" }, { id: "asc" }],
     });
 
     const permissionPolicy = await getPermissionPolicy().catch(() => null);
@@ -520,24 +511,20 @@ router.get("/today", async (req, res) => {
       const left = new Date(a.plannedDate || a.scheduledAt || 0).getTime() || 0;
       const right = new Date(b.plannedDate || b.scheduledAt || 0).getTime() || 0;
       if (left !== right) return left - right;
-      return Number(a.id || 0) - Number(b.id || 0);
+      return Number(a.id || 0) - Number(b.id || 0) || (a.visitType === b.visitType ? 0 : a.visitType === 'REGULAR' ? -1 : 1);
     });
 
     const response = {
 
       ok: true,
 
-      total:
-        combinedVisits.length,
+      ...dailyRoutePage(combinedVisits, page),
 
       date:
         dayQuery.isoDate,
 
       technicianId:
-        dayQuery.technicianId,
-
-      visits:
-        combinedVisits
+        dayQuery.technicianId
 
     };
 
@@ -569,7 +556,7 @@ router.get("/today", async (req, res) => {
 
     console.error(err);
 
-    return res.status(500).json({
+    return res.status(err.status || 500).json({
 
       ok: false,
 

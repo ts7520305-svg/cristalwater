@@ -278,7 +278,7 @@ async function loadToday() {
     if(!current())return;
     const selected=route[currentIndex]?.id||returnContextFromUrl().selectedVisitId;
     const selectedType=route[currentIndex]?.visitType || (route[currentIndex] ? 'REGULAR' : returnContextFromUrl().selectedVisitType);
-    if(data.ok===false||!Array.isArray(data.visits))throw Error('A resposta não confirma a ronda. Atualize antes de navegar.');
+    if(data.ok===false||data.complete!==true||!Array.isArray(data.visits)||data.total!==data.visits.length)throw Error('A resposta não confirma a ronda completa. Atualize antes de navegar.');
     route = Array.isArray(data.visits) ? data.visits : [];
     const matches=route.map((visit,index)=>({visit,index})).filter(({visit})=>String(visit.id)===String(selected)&&(!selectedType||(visit.visitType||'REGULAR')===selectedType));
     if(matches.length>1)throw Error('Há visitas de tipos diferentes com este número. Selecione a visita novamente no modo de campo.');

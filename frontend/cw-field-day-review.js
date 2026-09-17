@@ -58,6 +58,7 @@
         const response = await fetch(url, {headers:{Authorization:`Bearer ${token}`},cache:'no-store',signal:AbortSignal.timeout(8000)});
         const data = await response.json();
         if (!response.ok || data.ok === false || !Array.isArray(data[field])) throw new Error('Resposta incompleta');
+        if (label === 'Ronda' && (data.complete !== true || data.total !== data.visits.length)) throw new Error('Ronda incompleta');
         return {label, rows:data[field]};
       } catch (_) { return {label, error:true}; }
     }));

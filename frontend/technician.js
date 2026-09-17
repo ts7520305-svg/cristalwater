@@ -120,7 +120,7 @@ function activeVisitId(){
 function persistRouteSnapshot(nextVisits, extra = {}) {
   const previous = readRouteState();
   const snapshot = {
-    v: 2, owner: legacyWriteSession.owner, technicianId: legacyWriteSession.technicianId, day: todayRouteKey(),
+    v: 3, owner: legacyWriteSession.owner, technicianId: legacyWriteSession.technicianId, day: todayRouteKey(),
     serverConfirmedAt: routeServerConfirmedAt || previous?.serverConfirmedAt,
     activeVisitId: extra.activeVisitId || nextPendingVisitId(nextVisits),
     visits: nextVisits, pendingSyncVisitIds: nextVisits.filter(visit => visit.pendingSync).map(visit => visit.id),
@@ -569,7 +569,7 @@ async function loadRoute() {
     if (response.status === 401 || response.status === 403) { redirectToLogin(); return; }
     const data = await response.json(); if (!current()) return;
     const ids = new Set();
-    if (!response.ok || data.ok !== true || data.date !== day || data.technicianId !== captured.technicianId || !Array.isArray(data.visits) || data.total !== data.visits.length || data.visits.some(visit => { if (!visit || !Number.isSafeInteger(visit.id) || visit.id <= 0 || ids.has(visit.id) || visit.technicianId !== captured.technicianId || typeof visit.status !== 'string') return true; ids.add(visit.id); return false; })) throw Error('Não foi possível confirmar a rota desta conta e dia. A lista anterior foi conservada; tente atualizar com rede.');
+    if (!response.ok || data.ok !== true || data.complete !== true || data.date !== day || data.technicianId !== captured.technicianId || !Array.isArray(data.visits) || data.total !== data.visits.length || data.visits.some(visit => { if (!visit || !Number.isSafeInteger(visit.id) || visit.id <= 0 || ids.has(visit.id) || visit.technicianId !== captured.technicianId || typeof visit.status !== 'string') return true; ids.add(visit.id); return false; })) throw Error('Não foi possível confirmar a rota completa desta conta e dia. A lista anterior foi conservada; tente atualizar com rede.');
     const previous = readRouteState();
     const pending = await window.CWFieldWriteStore.records('VISIT_COMPLETION', captured); if (!current()) return;
     visits = mergeRouteVisits(data.visits, pending); routeVisibleDay = day; routeServerConfirmedAt = new Date().toISOString(); routeViewSource = 'server';

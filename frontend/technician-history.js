@@ -74,7 +74,8 @@ async function loadHistory() {
   setStatus("A carregar historico.");
   try {
     const data = await parseResponse(await fetch(`/api/technician/today?technicianId=${encodeURIComponent(technicianId)}`));
-    const visits = (Array.isArray(data.visits) ? data.visits : []).filter((visit) => {
+    if(data.complete!==true||!Array.isArray(data.visits)||data.total!==data.visits.length)throw Error('A resposta não confirma a lista completa. Atualize antes de consultar o histórico.');
+    const visits = data.visits.filter((visit) => {
       const status = String(visit.status || "").toUpperCase();
       return Boolean(visit.endAt) || status === "DONE";
     });

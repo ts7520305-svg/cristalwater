@@ -118,7 +118,8 @@ router.get("/today", async (req, res) => {
     const dayQuery =
       buildServiceVisitDayQuery(scopedQuery);
 
-    const take = Math.min(toPositiveInt(req.query?.limit) || 200, 300);
+    const { parseDailyRoutePage, dailyRoutePage } = require('../utils/dailyRoutePagination');
+    const page = parseDailyRoutePage(req.query);
 
     const visits =
       await prisma.serviceVisit.findMany({
@@ -141,12 +142,7 @@ router.get("/today", async (req, res) => {
           photos: true
         },
 
-        orderBy: {
-
-          plannedDate: "asc"
-        },
-
-        take
+        orderBy: [{ plannedDate: "asc" }, { id: "asc" }]
       });
 
     const formatted =
@@ -224,24 +220,20 @@ router.get("/today", async (req, res) => {
 
       ok: true,
 
-      total:
-        formatted.length,
+      ...dailyRoutePage(formatted, page),
 
       date:
         dayQuery.isoDate,
 
       technicianId:
-        dayQuery.technicianId,
-
-      visits:
-        formatted
+        dayQuery.technicianId
     });
 
   } catch (err) {
 
     console.error(err);
 
-    return res.json({
+    return res.status(err.status || 500).json({
 
       ok: false
     });

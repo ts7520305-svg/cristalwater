@@ -19,25 +19,26 @@
   function requireScope(context) {
     if (!same(context)) throw Error('A sessão ou o dia mudou. Atualize a ronda da conta atual.');
   }
-  const key = context => 'cwFieldRoute:v2:' + context.session.owner + ':' + context.role + ':' + context.day;
+  const key = context => 'cwFieldRoute:v3:' + context.session.owner + ':' + context.role + ':' + context.day;
   function validate(value, context) {
     const ids = new Set();
     const invalidVisit = visit => {
       if (!visit || !positive(visit.id) || !['REGULAR', 'EXTRA'].includes(visit.visitType) || ids.has(visitKey(visit)) || visit.technician?.id !== context.session.technicianId || (visit.technicianId != null && visit.technicianId !== context.session.technicianId) || typeof visit.status !== 'string' || visit.assistSource) return true;
       ids.add(visitKey(visit)); return false;
     };
-    if (!value || value.v !== 2 || value.owner !== context.session.owner || value.role !== context.role || value.technicianId !== context.session.technicianId || value.day !== context.day || !Number.isFinite(Date.parse(value.serverConfirmedAt)) || !Array.isArray(value.visits) || value.visits.some(invalidVisit)) throw Error('A ronda guardada não corresponde à conta/dia ou está ilegível. Os dados foram preservados.');
+    if (!value || value.v !== 3 || value.owner !== context.session.owner || value.role !== context.role || value.technicianId !== context.session.technicianId || value.day !== context.day || !Number.isFinite(Date.parse(value.serverConfirmedAt)) || !Array.isArray(value.visits) || value.visits.some(invalidVisit)) throw Error('A ronda guardada não corresponde à conta/dia ou está ilegível. Os dados foram preservados.');
     return value;
   }
   function fromResponse(data, context) {
     requireScope(context);
-    if (data?.ok !== true || data.date !== context.day || data.technicianId !== context.session.technicianId || !Array.isArray(data.visits) || data.total !== data.visits.length) throw Error('A resposta não confirma a ronda desta conta e deste dia.');
-    return validate({ v: 2, owner: context.session.owner, role: context.role, technicianId: context.session.technicianId, day: context.day, serverConfirmedAt: new Date().toISOString(), visits: data.visits }, context);
+    if (data?.ok !== true || data.complete !== true || data.date !== context.day || data.technicianId !== context.session.technicianId || !Array.isArray(data.visits) || data.total !== data.visits.length) throw Error('A resposta não confirma a ronda completa desta conta e deste dia.');
+    return validate({ v: 3, owner: context.session.owner, role: context.role, technicianId: context.session.technicianId, day: context.day, serverConfirmedAt: new Date().toISOString(), visits: data.visits }, context);
   }
   function read(context) {
     requireScope(context);
     const raw = localStorage.getItem(key(context));
     if (!raw) {
+      if (localStorage.getItem(key(context).replace('cwFieldRoute:v3:', 'cwFieldRoute:v2:'))) throw Error('A ronda antiga pode estar incompleta. Foi preservada; consulte a ronda completa com rede antes de trabalhar offline.');
       if (localStorage.getItem('cwFieldRoute:' + context.session.technicianId)) throw Error('Existe uma ronda antiga sem conta/dia comprovados. Foi preservada; consulte a ronda atual com rede.');
       return null;
     }

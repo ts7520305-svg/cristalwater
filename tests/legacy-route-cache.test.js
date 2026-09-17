@@ -4,7 +4,7 @@ function harness() {
   const data = new Map(), session = { owner: 'TECH:7', technicianId: 7, token: 'not-persisted' }; let active = true;
   const window = { CWFieldWriteStore: { same: captured => active && captured === session } };
   vm.runInNewContext(fs.readFileSync('frontend/cw-legacy-route-cache.js','utf8'), { window, localStorage: { getItem: key => data.get(key) ?? null, setItem: (key,value) => data.set(key,value) } });
-  const value = { v:2,owner:session.owner,technicianId:7,day:'2026-09-16',serverConfirmedAt:'2026-09-16T10:00:00.000Z',visits:[{id:9,technicianId:7,status:'PLANNED'}],activeVisitId:9,pendingSyncVisitIds:[] };
+  const value = { v:3,owner:session.owner,technicianId:7,day:'2026-09-16',serverConfirmedAt:'2026-09-16T10:00:00.000Z',visits:[{id:9,technicianId:7,status:'PLANNED'}],activeVisitId:9,pendingSyncVisitIds:[] };
   return { cache:window.CWLegacyRouteCache,data,session,value,change:()=>{active=false;} };
 }
 describe('Legacy route identity and preservation',()=>{

@@ -121,7 +121,8 @@ async function loadRoute() {
       date: todayDateValue(),
     });
     const data = await parseResponse(await fetch(`${API}/technician/today?${query.toString()}`));
-    const visits = Array.isArray(data.visits) ? data.visits : [];
+    if(data.complete!==true||!Array.isArray(data.visits)||data.total!==data.visits.length)throw Error('A resposta não confirma a rota completa. Atualize antes de navegar.');
+    const visits = data.visits;
 
     renderRoute(visits);
     renderSuggestions(visits);

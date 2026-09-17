@@ -21,10 +21,10 @@ O service worker passa a v47 para atualizar os scripts de entrada. Sem alteraç�
 - `scripts/test-field-team-leader-entry.js`: logins reais por PIN/email com base de QA e Chromium; rota REGULAR/EXTRA própria, tentativa de consultar outro técnico/visita/contas, recarga offline, páginas técnicas reais, separação dos rascunhos, logout/reentrada, revogação do perfil e regressão de TECHNICIAN. Destinos de CLIENT/ADMIN e sessões inválidas são verificados no guardião da página real, com apenas as páginas de destino substituídas no ensaio.
 - `run-1789634685206`: grupo novo e recuperação da ronda moderna aprovados. O primeiro ensaio identificou os campos editáveis sem visita após recusa de autorização; essa situação foi corrigida antes da aprovação.
 - `run-1789634753211`: grupo novo ampliado com revogação durante a sessão aberta, recuperação após restaurar o perfil e preservação no guardião sem reinserir dados; E2E completo aprovado na mesma árvore. 388 unitários, quatro técnicos, 17 scripts de navegador e sintaxe de 538 ficheiros backend aprovados.
-- Runner integrado passa a 121 grupos. Confirmação nativa da árvore publicada e restauro ainda pendentes.
+- Confirmada no commit `d9cad93f2564c6b85da494774fdf1abeffbff12a`, árvore `6870ceadd405a3ecdf6922c05c699e6299482d9e`, CI `35201773521`: 121/121 grupos, 388 unitários/quatro técnicos, 17 scripts de navegador, 20 migrações aditivas, sintaxe de 538 ficheiros e restauro em PostgreSQL 16 de 110 tabelas/32 ficheiros com linhas e hashes iguais. Backup local `backup/task218-local-20260917`.
 
 ## Limites e continuidade
 
 O teste de entrada não demonstra todas as operações administrativas ou financeiras do perfil. As regras do servidor não foram ampliadas. A cache offline não permite descobrir revogações enquanto o dispositivo está sem rede; uma recusa recebida impede o seu uso como ronda ativa. Páginas antigas conservam os seus contratos de escrita próprios.
 
-Prosseguir a revisão da lista diária, que ainda corta cada tipo de visita a 200 por omissão/300 máximo sem paginação, e o inventário das restantes filas/documentos e páginas. Não há deploy, alteração em main ou conclusão global do sistema neste lote.
+O corte da lista diária e as páginas explícitas foram tratados em seguida na TASK219, com relatório próprio. Prosseguir o inventário das restantes filas/documentos e páginas. Não há deploy, alteração em main ou conclusão global do sistema neste lote.
