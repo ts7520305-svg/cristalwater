@@ -296,15 +296,17 @@ const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
           assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Incomplete form must fit mobile viewport');
           if(process.env.CW_CAPTURE_UI){await page.locator('#incompleteVisitCard').scrollIntoViewIfNeeded();await page.screenshot({path:'reports/field-ui/TECHNICIAN_INCOMPLETE.png',fullPage:false});}
           await page.locator('#incompleteSave').click();
+          await page.waitForFunction(()=>document.getElementById('incompleteStatus').textContent.includes('por confirmar no escritório'));
           assert.match(await page.locator('#incompleteStatus').textContent(),/por confirmar no escritório/);
           await page.reload({waitUntil:'domcontentloaded'});
           await page.waitForFunction(()=>document.querySelector('#nextTitle')?.textContent.includes('Piscina da Quinta'));
           await page.locator('[data-field-tab-button=agora]').click();
+          await page.waitForFunction(()=>document.getElementById('incompleteStatus').textContent.includes('por confirmar no escritório'));
           assert.match(await page.locator('#incompleteStatus').textContent(),/por confirmar no escritório/);
           await page.route('**/api/technician/visits/*/incomplete',route=>route.fulfill({status:403,contentType:'application/json',body:'{"ok":false,"error":"QA atribuição por confirmar"}'}));
           await context.setOffline(false);
           await page.waitForFunction(()=>document.querySelector('#incompleteStatus').textContent.includes('Confirme a situação com o escritório'));
-          assert(await page.evaluate(id=>Object.values(JSON.parse(localStorage.getItem(`cwIncompleteVisits:${id}`))).some(row=>row.blocked),tech.id));
+          assert(await page.evaluate(async()=> (await window.CWFieldWriteStore.records('VISIT_INCOMPLETE')).some(row=>row.failure?.blocked)));
           await page.unroute('**/api/technician/visits/*/incomplete');
           page.once('dialog',dialog=>dialog.accept());
           await page.locator('#incompleteRetry').click();
@@ -527,7 +529,7 @@ const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
 
 
         }
-      } catch(e) { const state=await page.evaluate(()=>({toast:document.querySelector('#toast')?.textContent,documents:document.querySelector('#documentCenterBox')?.innerText})).catch(()=>null); failures.push({persona:persona.name,error:e.message,stack:e.stack,state,errors,apiErrors});console.error('FAIL',persona.name,e.stack); }
+      } catch(e) { const state=await page.evaluate(()=>({incomplete:document.getElementById('incompleteStatus')?.textContent,toast:document.querySelector('#toast')?.textContent,documents:document.querySelector('#documentCenterBox')?.innerText})).catch(()=>null); failures.push({persona:persona.name,error:e.message,stack:e.stack,state,errors,apiErrors});console.error('FAIL',persona.name,e.stack); }
       console.log('CLOSE',persona.name);
       await context.close();
       console.log('CLOSED',persona.name);

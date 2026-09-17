@@ -30,7 +30,7 @@
   window.addEventListener('pagehide', () => { ++fieldWriteGeneration; ++routeRevision; });
   const sameFieldSession = () => window.CWFieldWriteStore?.same(fieldWriteSession);
   const startingVisits = new Set();
-  const extraVisitNotice = 'Visita extra: registe o trabalho, as medições, os produtos e as fotografias. Pode também registar revisões de equipamento, água aberta ou bomba em manual. Depois de concluir, use “Corrigir registo” para rever os valores. Para impedimentos, contacte o escritório.';
+  const extraVisitNotice = 'Visita extra: registe o trabalho, as medições, os produtos e as fotografias. Pode também registar revisões de equipamento, água aberta ou bomba em manual. Depois de concluir, use “Corrigir registo” para rever os valores. Pode registar impedimentos e combinar o regresso com o escritório.';
   window.CWFieldVisitContext = () => sameFieldSession() && current() ? { id:current().id, visitType:current().visitType || 'REGULAR', poolId:current().poolId || current().pool?.id, clientId:current().clientId || current().client?.id || current().pool?.clientId, poolName:current().pool?.name, clientName:current().client?.name, technicianName:activeTechnician?.name || current().technician?.name } : null;
   let visitPhotos = [];
   let visitDrafts = {};
@@ -3030,7 +3030,7 @@
     $('#fieldExtraVisitNotice').textContent = extra ? extraVisitNotice : '';
     for (const selector of [...draftFieldIds.map(id=>'#'+id),...checkIds.map(id=>'#'+id),'#startBtn','#finishBtn','#incompleteSave','#problemBtn','#saveProblemBtn','#openWaterBtn','#pumpReminderCreate','#sendAdminAlertBtn','#addDoseBtn','#galleryPhotoBtn','#photoInput','#galleryPhotoInput','[data-photo-type]','#doseRows input','#doseRows select','#doseRows button']) document.querySelectorAll(selector).forEach(node=>{node.disabled=readOnly;});
     for(const selector of ['#openWaterBtn','#pumpReminderCreate'])document.querySelectorAll(selector).forEach(node=>{node.disabled=!visit || !sameFieldSession();});
-    if(extra)for(const selector of ['#incompleteSave','#problemBtn','#saveProblemBtn','#sendAdminAlertBtn'])document.querySelectorAll(selector).forEach(node=>{node.disabled=true;});
+    if(extra)for(const selector of ['#problemBtn','#saveProblemBtn','#sendAdminAlertBtn'])document.querySelectorAll(selector).forEach(node=>{node.disabled=true;});
     $("#progressText").textContent = visits.length ? `${visits.filter(isVisitDone).length} de ${visits.length} visitas concluídas` : "Sem visitas atribuídas";
 
     if (!visit) {
@@ -3112,7 +3112,7 @@
   window.addEventListener('pageshow', event => { protectFieldRouteSession(); if (event.persisted && !routeSessionBlocked) void load(); });
   window.setInterval(protectFieldRouteSession, 1000);
 
-  async function load() {
+  async function load(options = {}) {
     if (!sameFieldSession() || routeSessionBlocked) { protectFieldRouteSession(); return; }
     const revision = ++routeRevision, context = window.CWFieldRouteCache.scope(fieldWriteSession);
     const relevant = () => revision === routeRevision && !routeSessionBlocked && sameFieldSession() && window.CWFieldRouteCache.same(context);
@@ -3153,7 +3153,9 @@
       }
       routeContext = context; routeSnapshot = snapshot; visits = snapshot.visits;
       $("#fieldLoadError").hidden = true;
-      applyReturnState(returnContract, fallbackState);
+      const liveState = options.preserveNavigation ? readFieldUiState() : fallbackState;
+      const liveContract = options.preserveNavigation ? null : returnContract;
+      applyReturnState(liveContract, liveState);
       try { visitDrafts = readFieldDrafts(); } catch (error) { visitDrafts = {}; $('#fieldSaveStatus').textContent = error.message; }
       const oldDrafts = localStorage.getItem(`cwFieldVisitDrafts:${currentTechnicianId()}`);
       $('#fieldDraftHistory').hidden = !oldDrafts || oldDrafts === '{}';
@@ -3164,7 +3166,7 @@
       syncTechnicianContextFromVisit(current());
       render();
       const preferredTab = normalizeFieldTab(
-        returnContract?.activeTab || fallbackState?.activeTab || initialOperationalTab(),
+        liveContract?.activeTab || liveState?.activeTab || initialOperationalTab(),
         initialOperationalTab()
       );
       switchFieldTab(preferredTab);
@@ -3172,7 +3174,7 @@
       const scrollToY = Number.isFinite(Number(returnContract?.scrollY))
         ? Math.max(0, Number(returnContract.scrollY))
         : (Number.isFinite(Number(fallbackState?.scrollY)) ? Math.max(0, Number(fallbackState.scrollY)) : 0);
-      if (scrollToY > 0) {
+      if (scrollToY > 0 && !options.preserveNavigation) {
         window.setTimeout(() => {
           window.scrollTo({ top: scrollToY, behavior: "auto" });
         }, 40);
@@ -3902,73 +3904,8 @@
   });
   window.addEventListener('cw:extra-correction-confirmed',event=>{if(sameFieldSession()&&event.detail.owner===fieldWriteSession.owner&&event.detail.token===fieldWriteSession.token)void load();});
   window.addEventListener('cw:water-state-updated', () => { loadWaterRemindersFromStorage(); renderWaterReminders(); scheduleWaterReminders(); renderList(); renderNowBoard(current()); });
-  const incompleteKey=()=>`cwIncompleteVisits:${currentTechnicianId()}`;
-  function readIncomplete(key=incompleteKey()) {
-    const rows=JSON.parse(localStorage.getItem(key)||'{}');
-    if(!rows||Array.isArray(rows)||typeof rows!=='object'||Object.entries(rows).some(([id,row])=>!row||String(row.visitId)!==id||!row.body?.requestId))throw new Error('Não foi possível ler as visitas por concluir. Preserve os dados e contacte o escritório.');
-    return rows;
-  }
-  function renderIncompleteStatus(){
-    const shortageFields=$('#chemicalShortageFields');
-    if(shortageFields){const show=$('#incompleteReason').value==='CHEMICAL_MISSING';shortageFields.hidden=!show;shortageFields.style.display=show?'block':'none';}
-
-    const node=$('#incompleteStatus');if(!node)return;
-    let banner=$('#incompletePendingBanner');
-    if(!banner){banner=document.createElement('aside');banner.id='incompletePendingBanner';banner.setAttribute('role','status');banner.setAttribute('data-cw-state-managed','manual');banner.style.cssText='padding:14px;background:#fff4ce;color:#624400';document.body.prepend(banner);}
-    try{const rows=Object.values(readIncomplete());node.textContent=rows.length?`${rows.length} registo(s) de visita por concluir guardado(s) neste telemóvel, por confirmar no escritório.`:current()?.status==='INCOMPLETE'?'Visita por concluir registada no servidor. Aviso disponível para o escritório.':'';banner.hidden=!rows.length;banner.textContent=rows.length?`${node.textContent} ${rows.map(row=>row.label||`Visita ${row.visitId}`).join(', ')}. Não limpe os dados da aplicação.`:'';}catch(error){node.textContent=error.message;banner.hidden=false;banner.textContent=error.message;}
-  }
-  let incompleteSyncing=false;
-  async function syncIncomplete(){
-    if(incompleteSyncing||!navigator.onLine||window.CristalAuth?.isSessionExpired?.())return;
-    const key=incompleteKey(),token=window.CristalAuth?.getToken?.();if(!token)return;
-    incompleteSyncing=true;
-    try{
-      for(const row of Object.values(readIncomplete(key))){
-        if(key!==incompleteKey()||token!==window.CristalAuth?.getToken?.())return;
-        if(row.blocked||Number(row.retryAt)>Date.now())continue;
-        try{
-        const response=await fetch(`/api/technician/visits/${row.visitId}/incomplete`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify(row.body),signal:AbortSignal.timeout(10000)});
-        const data=await response.json();
-        if(!response.ok||!data.ok){const retry=response.headers.get('Retry-After');throw Object.assign(new Error(data.error||'Envio por confirmar'),{status:response.status,retryAt:retry?(Number.isFinite(Number(retry))?Date.now()+Number(retry)*1000:Date.parse(retry)):0});}
-        if(key!==incompleteKey()||token!==window.CristalAuth?.getToken?.())return;
-        const rows=readIncomplete(key);if(rows[row.visitId]?.body.requestId===row.body.requestId)delete rows[row.visitId];localStorage.setItem(key,JSON.stringify(rows));
-        const position=visits.findIndex(visit=>isRegularVisit(visit)&&String(visit.id)===String(row.visitId));if(position>=0)visits[position]={...visits[position],...data.visit};
-        persistModernRoute();
-        window.dispatchEvent(new Event('cw:incomplete-updated'));render();
-        }catch(error){
-          if(key!==incompleteKey()||token!==window.CristalAuth?.getToken?.())return;
-          const rows=readIncomplete(key);
-          if(rows[row.visitId]){rows[row.visitId].error=error.message;rows[row.visitId].blocked=error.status>=400&&error.status<500&&![401,408,425,429].includes(error.status);rows[row.visitId].retryAt=error.retryAt||0;localStorage.setItem(key,JSON.stringify(rows));}
-          renderIncompleteStatus();$('#incompleteStatus').textContent=`Registo preservado. ${error.message}${rows[row.visitId]?.blocked?' Confirme a situação com o escritório antes de reenviar.':''}`;
-        }
-      }
-    }catch(error){if(key===incompleteKey())$('#incompleteStatus').textContent=`Registo preservado no telemóvel. ${error.message}`;}
-    finally{incompleteSyncing=false;}
-  }
-  $('#incompleteReason').addEventListener('change',renderIncompleteStatus);
-  $('#incompleteSave').onclick=async()=>{
-    const button=$('#incompleteSave');if(button.disabled)return;button.disabled=true;
-    try{
-      const visit=current(),reason=$('#incompleteReason').value,nextStep=$('#incompleteNextStep').value.trim();
-      if (!requireRegularVisit(visit)) return;
-      if(!visit?.id||isVisitDone(visit))throw new Error('Escolha uma visita ainda não concluída');
-      if(!reason||nextStep.length<5)throw new Error('Escolha o motivo e indique o próximo passo');
-      let chemicalShortage;
-      if(reason==='CHEMICAL_MISSING'){
-        const productName=$('#shortageProduct').value.trim(),raw=$('#shortageQuantity').value.trim(),quantity=raw?Number(raw.replace(',','.')):null,unit=$('#shortageUnit').value||'L';
-        if(productName.length<2||productName.length>120||(quantity!==null&&(!Number.isFinite(quantity)||quantity<=0||quantity>100000)))throw new Error('Indique o produto em falta e uma quantidade positiva, ou deixe a quantidade por confirmar');
-        chemicalShortage={productName,quantity,unit};
-      }
-      saveCurrentDraft();const rows=readIncomplete();if(rows[visit.id])throw new Error('Esta visita já tem um registo por enviar. Ligue à rede para confirmar o envio.');
-      rows[visit.id]={visitId:visit.id,label:visit.pool?.name||`Visita ${visit.id}`,body:{requestId:crypto.randomUUID(),reason,nextStep,...(chemicalShortage?{chemicalShortage}:{})}};
-      localStorage.setItem(incompleteKey(),JSON.stringify(rows));renderIncompleteStatus();window.dispatchEvent(new Event('cw:incomplete-updated'));await syncIncomplete();
-    }catch(error){$('#incompleteStatus').textContent=error.message;}finally{button.disabled=!isRegularVisit();}
-  };
-  window.addEventListener('online',syncIncomplete);
-  $('#incompleteRetry').onclick=async()=>{
-    try{const key=incompleteKey(),rows=readIncomplete(key);if(Object.values(rows).some(row=>row.blocked)&&!confirm('O escritório confirmou que pode repetir o envio destas visitas?'))return;if(key!==incompleteKey())return;for(const row of Object.values(rows))row.blocked=false;localStorage.setItem(key,JSON.stringify(rows));await syncIncomplete();}catch(error){$('#incompleteStatus').textContent=error.message;}
-  };
-  window.setInterval(syncIncomplete,60000);
-  load().then(syncIncomplete);
+  function renderIncompleteStatus(){void window.CWFieldIncomplete?.refresh();}
+  window.addEventListener('cw:incomplete-confirmed',event=>{if(sameFieldSession()&&event.detail.owner===fieldWriteSession.owner&&event.detail.token===fieldWriteSession.token)void load({preserveNavigation:true});});
+  void load();
   updateAllReferenceStatuses();
 })();

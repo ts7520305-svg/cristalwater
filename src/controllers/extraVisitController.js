@@ -170,6 +170,7 @@ async function updateExtraVisit(req, res) {
     });
     if (!current) throw Object.assign(new Error('Visita extra nao encontrada'), {statusCode:404});
 
+    await require('../services/incompleteVisitLifecycle').assertNoReturn(tx,'EXTRA',current);
     if (current.clientId !== before.clientId || current.poolId !== before.poolId) fail('A visita mudou. Atualize antes de editar.',409);
     const reserved = current.billed || !!(await tx.invoiceLine.findFirst({where:{type:'EXTRA_VISIT',referenceId:id}}));
     if (reserved && Object.entries(body).some(([key,value])=>key !== 'status' || value !== current.status)) fail('Visita já incluída em faturação. Conserve o documento e peça uma correção explícita.',409);
@@ -253,7 +254,7 @@ async function updateExtraVisit(req, res) {
       },
     });
 
-    if (updated.status === 'DONE') await billing.record(tx,updated);
+    if (updated.status === 'DONE') {await billing.record(tx,updated);await require('../services/incompleteVisitLifecycle').settle(tx,'EXTRA',updated.id);}
     if (!terminal) await tx.auditTrail.create({data:{eventType:'EXTRA_VISIT_ADMIN_UPDATED',entity:'ExtraVisit',entityId:id,poolId:updated.poolId,clientId:updated.clientId,action:'EXTRA_VISIT_ADMIN_UPDATED',metadata:{owner:require('../services/fieldWriteRequestService').owner(req.user),status:updated.status}}});
     return tx.extraVisit.findUnique({where:{id},include:{pool:{include:{client:true}},client:true,technician:true}});
     }, {maxWait:15000,timeout:20000});

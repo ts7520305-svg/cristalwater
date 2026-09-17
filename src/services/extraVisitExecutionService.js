@@ -5,7 +5,7 @@ const billing = require('./extraVisitBillingService');
 const { validateVisitCompletionPayload } = require('./serviceVisitCompletionService');
 const checks = ['cleaned','brushed','vacuumed','basketCleaned','waterlineClean','backwashDone'];
 const readings = ['ph','chlorine','alkalinity','salt','temperature','orp','orpMv'];
-const editable = new Set(['PLANNED','PENDING','SCHEDULED','ASSIGNED','ON_ROUTE','A_CAMINHO','IN_PROGRESS','STARTED']);
+const editable = new Set(['PLANNED','PENDING','SCHEDULED','ASSIGNED','ON_ROUTE','A_CAMINHO','IN_PROGRESS','STARTED','INCOMPLETE']);
 const id = value => Number.isSafeInteger(Number(value)) && Number(value) > 0 && Number(value) <= 2147483647 ? Number(value) : requests.fail('Visita extra inválida.');
 const normalize = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
 function project(visit) {
@@ -53,6 +53,7 @@ async function start(actor, value, body) {
   return prisma.$transaction(async tx => {
     const saved = await requests.recover(tx, request); if (saved) return saved;
     const visit = await locked(tx, actor, visitId, body.poolId);
+    await require('./incompleteVisitLifecycle').assertNoReturn(tx,'EXTRA',visit);
     if (visit.endAt || !editable.has(visit.status)) requests.fail('Esta visita extra já não pode ser iniciada.', 409);
     if (visit.startAt && visit.status === 'IN_PROGRESS') return requests.confirm(tx, request, { ok: true, visit: project(visit) });
     const updated = await tx.extraVisit.update({ where: { id: visitId }, data: { status: 'IN_PROGRESS', startAt: visit.startAt || new Date() } });
@@ -93,6 +94,7 @@ async function complete(actor, value, body) {
   return prisma.$transaction(async tx => {
     const saved = await requests.recover(tx, request); if (saved) return saved;
     const current = await locked(tx, actor, visitId, body.poolId);
+    await require('./incompleteVisitLifecycle').assertNoReturn(tx,'EXTRA',current);
     if (current.endAt || !editable.has(current.status)) requests.fail('A visita extra já está fechada. Conserve o pedido original; correções exigem revisão do escritório.', 409);
     const products = validated.chemicalsJson || [];
     const execution = { ...Object.fromEntries(Object.entries(validated).filter(([key, value]) => value !== undefined && key !== 'productsText')), products: validated.productsText || '[]', notes: body.notes || '',
@@ -100,6 +102,7 @@ async function complete(actor, value, body) {
     await consume(tx, current, body, products, request);
     const visit = await tx.extraVisit.update({ where: { id: visitId }, data: { status: 'DONE', startAt: current.startAt || new Date(), endAt: new Date(), execution, completionRequestId: request.requestId }, include: { photos: true, pool: true } });
     await billing.record(tx, visit);
+    await require('./incompleteVisitLifecycle').settle(tx,'EXTRA',visit.id);
     await audit(tx, actor, visit, 'EXTRA_VISIT_COMPLETED', request, { execution });
     await tx.technicalHistory.create({ data: { poolId: visit.poolId, type: 'EXTRA_VISIT_COMPLETED', component: 'Extra Visit', message: 'Visita extra concluída', description: JSON.stringify({ extraVisitId: visit.id, owner: request.owner, execution }), status: 'DONE', performedAt: visit.startAt, doneAt: visit.endAt } });
     await tx.notification.create({ data: { role: 'ADMIN', type: 'EXTRA_VISIT_COMPLETED', eventType: 'EXTRA_VISIT_COMPLETED', title: 'Visita extra concluída', message: `${visit.pool?.name || 'Piscina'}: visita extra concluída.${body.problem ? ' Ocorrência: ' + body.problem : ''}`, metadata: { extraVisitId: visit.id, poolId: visit.poolId, technicianId: visit.technicianId } } });

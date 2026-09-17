@@ -427,6 +427,8 @@ router.get("/today", async (req, res) => {
         ...require('../services/extraVisitExecutionService').project(v),
         notes: v.execution?.notes ?? v.notes ?? null,
         internalNotes: null,
+        reason: v.source === "INCOMPLETE_RETURN" ? "INCOMPLETE_RETURN" : null,
+        returnInstructions: v.source === "INCOMPLETE_RETURN" ? v.internalNote : null,
         chemicals: v.execution?.chemicalsJson || [],
 
         ...(showFinancialValues
@@ -756,6 +758,7 @@ router.post('/chemical-shortages/:id/deliveries', waterHandler(req => require('.
 router.get('/chemical-shortages', waterHandler(req => require('../business/technician/IncompleteVisitBusiness').shortages(req.user)));
 router.get('/incomplete-followups', waterHandler(req => require('../business/technician/IncompleteVisitBusiness').followups(req.user)));
 router.post('/visits/:id/schedule-return', waterHandler(req => require('../business/technician/IncompleteVisitBusiness').scheduleReturn(req.user,req.params.id,req.body)));
+router.get('/visits/:id/incomplete', waterHandler(req => require('../business/technician/IncompleteVisitBusiness').view(req.user,req.params.id,req.query)));
 router.post('/visits/:id/incomplete', waterHandler(req => require('../business/technician/IncompleteVisitBusiness').report(req.user,req.params.id,req.body)));
 router.get('/reminder-handovers/targets', waterHandler(() => waterReminderService.handoverTargets()));
 router.get('/reminder-handovers/incoming', waterHandler(req => waterReminderService.incomingHandovers(req.user)));

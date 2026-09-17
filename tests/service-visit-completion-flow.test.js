@@ -50,7 +50,7 @@ function buildTx(overrides = {}) {
       updateMany: vi.fn().mockResolvedValue({count:1}),
       ...overrides.notification,
     },
-    operationalReminder: {findMany:vi.fn().mockResolvedValue([]),updateMany:vi.fn().mockResolvedValue({count:1})},
+    operationalReminder: {findMany:vi.fn().mockImplementation(async query=>query.where.isCompleted===false&&query.where.sourceKey.startsWith==='incomplete:91:'?[{id:321,metadata:{visitId:91}}]:[]),update:vi.fn().mockResolvedValue({}),updateMany:vi.fn().mockResolvedValue({count:1})},
   };
 }
 
@@ -174,7 +174,7 @@ describe("Service visit completion real operation flow", () => {
       }),
     );
     expect(result.visit).toEqual(expect.objectContaining({ id: 91, status: "DONE" }));
-    expect(tx.operationalReminder.updateMany).toHaveBeenCalledWith({where:{sourceKey:{startsWith:'incomplete:91:'},isCompleted:false},data:{isCompleted:true}});
-    expect(tx.notification.updateMany).toHaveBeenCalledWith({where:{eventType:'VISIT_INCOMPLETE',metadata:{path:['visitId'],equals:91},status:'PENDING'},data:{status:'RESOLVED'}});
+    expect(tx.operationalReminder.update).toHaveBeenCalledWith({where:{id:321},data:expect.objectContaining({isCompleted:true,metadata:expect.objectContaining({visitId:91,resolvedByReturnVisitId:91,resolvedByReturnVisitType:'REGULAR'})})});
+    expect(tx.notification.updateMany).toHaveBeenCalledWith({where:{eventType:'VISIT_INCOMPLETE',metadata:{path:['reminderId'],equals:321},status:'PENDING'},data:{status:'RESOLVED'}});
   });
 });

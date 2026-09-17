@@ -50,7 +50,7 @@ let browser;const releases=[];
   const after=await prisma.serviceVisit.findUnique({where:{id:regular.id}});assert.equal(after.status,'PLANNED','Starting an EXTRA visit must never start the unrelated REGULAR visit with the same numeric ID');assert.equal(after.startAt,null);
   assert.equal((await prisma.extraVisit.findUnique({where:{id:extra.id}})).status,'IN_PROGRESS');
   assert.equal(await page.locator('#fieldExtraVisitNotice').isVisible(),true);
-  assert(await page.locator('#incompleteSave').isDisabled());
+  await page.waitForFunction(()=>!document.getElementById('incompleteSave').disabled);
   for(const selector of ['#openWaterBtn','#pumpReminderCreate'])assert(await page.locator(selector).isEnabled(),selector+' must allow EXTRA safety reminders');
   await page.locator('#saveProblemBtn').evaluate(button=>button.onclick());await page.locator('#pumpReminderCreate').evaluate(button=>button.onclick());
   assert.deepEqual(await prisma.serviceVisit.findUnique({where:{id}}),baseline);assert.equal(await prisma.visitPhoto.count({where:{visitId:id}}),0);

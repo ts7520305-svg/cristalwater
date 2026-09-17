@@ -298,16 +298,16 @@ async function transferStock(payload = {}, actor = "admin", user) {
       if(!returnedLoad||returnedLoad.productName!==items[0].productName||returnedLoad.unit!==items[0].unit||items[0].quantity>returnedLoad.quantity)return {ok:false,status:409,error:'Movimento incompatível ou quantidade superior à carga ainda não devolvida'};
       const reminder=await tx.operationalReminder.findUnique({where:{id:returnedLoad.shortageId}});
       const current=(await require('../technician/IncompleteVisitBusiness').shortages(user,tx)).rows.find(r=>r.shortageId===returnedLoad.shortageId);
-      for(const id of [...new Set([reminder?.metadata?.visitId,current?.visitId].filter(Number.isSafeInteger))].sort((a,b)=>a-b))await tx.$queryRaw`SELECT id FROM "ServiceVisit" WHERE id=${id} FOR UPDATE`;
+      for(const id of [...new Set([reminder?.metadata?.visitId,current?.visitId].filter(Number.isSafeInteger))].sort((a,b)=>a-b))await require('../../services/incompleteVisitLifecycle').lock(tx,require('../../services/incompleteVisitLifecycle').type(reminder?.metadata),id);
     }
     if(shortageId!==null){
       const findNeed=async()=> (await require('../technician/IncompleteVisitBusiness').shortages(user,tx)).rows.find(row=>row.shortageId===shortageId);
       const initial=await findNeed();
       if(!initial?.technicianId)return {ok:false,status:409,error:'Necessidade encerrada, substituída ou sem técnico'};
-      for(const id of [...new Set([initial.reportedVisitId,initial.visitId])].sort((a,b)=>a-b))await tx.$queryRaw`SELECT id FROM "ServiceVisit" WHERE id=${id} FOR UPDATE`;
+      for(const id of [...new Set([initial.reportedVisitId,initial.visitId])].sort((a,b)=>a-b))await require('../../services/incompleteVisitLifecycle').lock(tx,initial.visitType,id);
       await tx.$queryRaw`SELECT id FROM "Technician" WHERE id=${initial.technicianId} FOR UPDATE`;
       shortage=await findNeed();
-      if(!shortage||shortage.visitId!==initial.visitId||shortage.technicianId!==initial.technicianId||shortage.vehicleId!==vehicleId)return {ok:false,status:409,error:'A atribuição ou viatura mudou. Atualize as necessidades antes de carregar'};
+      if(!shortage||shortage.visitType!==initial.visitType||shortage.visitId!==initial.visitId||shortage.technicianId!==initial.technicianId||shortage.vehicleId!==vehicleId)return {ok:false,status:409,error:'A atribuição ou viatura mudou. Atualize as necessidades antes de carregar'};
       const technician=await tx.technician.findUnique({where:{id:shortage.technicianId}});
       if(!technician?.active)return {ok:false,status:409,error:'Técnico indisponível'};
       const normalize=value=>String(value||'').trim().replace(/\s+/g,' ').toUpperCase();

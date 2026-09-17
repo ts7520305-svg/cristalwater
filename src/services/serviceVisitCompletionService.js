@@ -567,21 +567,7 @@ async function completeServiceVisit(prisma, visitId, body = {}, actor = null) {
       }).catch(() => null);
     }
 
-    await tx.operationalReminder.updateMany({where:{sourceKey:{startsWith:`incomplete:${visit.id}:`},isCompleted:false},data:{isCompleted:true}});
-    await tx.notification.updateMany({where:{eventType:'VISIT_INCOMPLETE',metadata:{path:['visitId'],equals:visit.id},status:'PENDING'},data:{status:'RESOLVED'}});
-    // A completed return also settles earlier impediments in the same return chain.
-    const reviewed=new Set();let resolvedVisits=[visit.id];
-    while(resolvedVisits.length){
-      resolvedVisits.forEach(value=>reviewed.add(value));
-      const returnFollowups=await tx.operationalReminder.findMany({where:{sourceKey:{startsWith:'incomplete:'},isCompleted:false,OR:resolvedVisits.map(value=>({metadata:{path:['returnPlan','visitId'],equals:value}}))}});
-      const ancestors=[];
-      for(const row of returnFollowups){
-        await tx.operationalReminder.update({where:{id:row.id},data:{isCompleted:true,metadata:{...row.metadata,resolvedByReturnVisitId:visit.id,resolvedAt:new Date().toISOString()}}});
-        await tx.notification.updateMany({where:{eventType:'VISIT_INCOMPLETE',metadata:{path:['reminderId'],equals:row.id},status:'PENDING'},data:{status:'RESOLVED'}});
-        const ancestor=row.metadata?.visitId;if(Number.isSafeInteger(ancestor)&&!reviewed.has(ancestor))ancestors.push(ancestor);
-      }
-      resolvedVisits=[...new Set(ancestors)];
-    }
+    await require('./incompleteVisitLifecycle').settle(tx,'REGULAR',visit.id);
     const adminNotification = await tx.notification.create({
       data: {
         type: "VISIT_DONE",

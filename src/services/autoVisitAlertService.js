@@ -28,7 +28,7 @@ async function getCoverage(db = prisma, now = new Date()) {
     db.operationalReminder.findMany({where:{sourceKey:{startsWith:'incomplete:'}},select:{metadata:true,isCompleted:true}})
   ]);
   const activeVisitIds = new Set(openVisits.map(visit=>visit.id));
-  const handledIncompleteIds = new Set(followups.filter(row=>(row.isCompleted&&row.metadata?.resolvedByReturnVisitId)||activeVisitIds.has(row.metadata?.returnPlan?.visitId)).map(row=>row.metadata?.visitId));
+  const handledIncompleteIds = new Set(followups.filter(row=>row.metadata?.visitType!=='EXTRA').filter(row=>(row.isCompleted&&row.metadata?.resolvedByReturnVisitId)||activeVisitIds.has(row.metadata?.returnPlan?.visitId)).map(row=>row.metadata?.visitId));
   const roundsByPool = new Map(), visitsByPool = new Map();
   const todayPoolIds = new Set(todayVisits.map(visit=>visit.poolId));
   const activeRoundIds = new Set(rounds.filter(round=>roundSchedule.inWindow(round,today)).map(round=>round.id));

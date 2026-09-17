@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  const scopes = ['VISIT_PHOTO', 'VISIT_COMPLETION', 'TECHNICIAN_ALERT', 'EXTRA_VISIT_START', 'EXTRA_VISIT_PHOTO', 'EXTRA_VISIT_COMPLETION', 'EXTRA_VISIT_CORRECTION', 'EQUIPMENT_MAINTENANCE'];
+  const scopes = ['VISIT_PHOTO', 'VISIT_COMPLETION', 'TECHNICIAN_ALERT', 'EXTRA_VISIT_START', 'EXTRA_VISIT_PHOTO', 'EXTRA_VISIT_COMPLETION', 'EXTRA_VISIT_CORRECTION', 'EQUIPMENT_MAINTENANCE', 'VISIT_INCOMPLETE', 'VISIT_RETURN'];
   const photoScope = scope => ['VISIT_PHOTO','EXTRA_VISIT_PHOTO'].includes(scope);
   const extraScope = scope => scope.startsWith('EXTRA_VISIT_');
   const id = value => Number.isSafeInteger(value) && value > 0;
@@ -10,16 +10,17 @@
   const digest = async bytes => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))).map(value => value.toString(16).padStart(2, '0')).join('');
   const hash = value => digest(new TextEncoder().encode(JSON.stringify(canonical(value))));
   const envelope = record => ({ v: 1, scope: record.scope, resourceId: record.resourceId, payload: record.payload });
-  function session() {
+  function session(admin = false) {
     try {
       const token = window.CristalAuth?.getToken?.();
       if (!token || (localStorage.getItem('token') && localStorage.getItem('token') !== token)) return null;
       const claim = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))), technicianId = Number(claim.technicianId || claim.id), userId = Number(claim.userId || claim.id);
+      if(admin===true){if(claim.role!=='ADMIN'||!id(userId))return null;return {token,userId,owner:`ADMIN:${userId}`,admin:true};}
       if (!['TECHNICIAN', 'TEAM_LEADER'].includes(claim.role) || !id(technicianId) || (claim.principalType === 'USER' && !id(userId))) return null;
       return { token, technicianId, owner: claim.principalType === 'USER' ? `USER:${userId}:TECH:${technicianId}` : `TECH:${technicianId}` };
     } catch (_) { return null; }
   }
-  function same(captured) { const current = session(); return !!captured && current?.owner === captured.owner && current?.token === captured.token; }
+  function same(captured) { const current = session(captured?.admin === true); return !!captured && current?.owner === captured.owner && current?.token === captured.token; }
   function requireSession(captured) { if (!same(captured)) throw Error('A sessão mudou. Reabra a página com a conta original; os envios foram preservados.'); }
   const key = record => `${record.owner}:${record.requestId}`;
   function database() { return new Promise((resolve, reject) => { const request = indexedDB.open('cw-field-writes', 1); request.onupgradeneeded = () => request.result.createObjectStore('requests', { keyPath: 'key' }); request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error); request.onblocked = () => reject(Error('Feche as outras janelas para recuperar os envios.')); }); }
@@ -39,6 +40,21 @@
       if (!id(response.photo?.id) || response.photo[extraScope(record.scope) ? 'extraVisitId' : 'visitId'] !== record.resourceId || response.photo.type !== record.payload.type || !(extraScope(record.scope) ? /^\/uploads\/(?:qa\/)?extra-visit-/ : /^\/uploads\/(?:qa\/)?visit-/).test(response.photo.url) || response.sha256 !== record.payload.sha256 || response.size !== record.payload.size) throw Error('A confirmação não corresponde à fotografia guardada.');
     } else if (record.scope === 'TECHNICIAN_ALERT') {
       if (!id(response.alert?.id) || response.alert.technicianId !== record.resourceId || response.alert.visitId !== record.payload.visitId || response.alert.message !== record.payload.message || response.alert.priority !== record.payload.priority || response.alert.recipientRole !== 'ADMIN' || !Number.isFinite(Date.parse(response.alert.createdAt))) throw Error('A confirmação não corresponde ao alerta original para a administração.');
+    } else if (['VISIT_INCOMPLETE','VISIT_RETURN'].includes(record.scope)) {
+      const p=record.payload,context={visitId:record.resourceId,visitType:p.visitType,poolId:p.poolId,baseVersion:p.baseVersion};
+      if(!equal(response.context,context)||typeof response.applied!=='boolean')throw Error('A confirmação não corresponde ao impedimento desta visita.');
+      if(!response.applied){if(!['INCOMPLETE_CONTEXT','INCOMPLETE_STALE','INCOMPLETE_STATE','INCOMPLETE_RETURN_EXISTS','INCOMPLETE_DATE','INCOMPLETE_TECHNICIAN','INCOMPLETE_SCHEDULE_CONFLICT','INCOMPLETE_BILLING'].includes(response.code)||typeof response.message!=='string'||!response.message)throw Error('A recusa está incompleta. Conserve o pedido.');}
+      else {
+        if(response.visit?.visitType!==p.visitType||response.visit.poolId!==p.poolId)throw Error('A confirmação pertence a outra visita.');
+        if(record.scope==='VISIT_INCOMPLETE'){
+          const m=response.reminder?.metadata;
+          const shortage=p.reason==='CHEMICAL_MISSING'?{productName:p.chemicalShortage.productName.trim(),quantity:p.chemicalShortage.quantity===''||p.chemicalShortage.quantity===null?null:Number(String(p.chemicalShortage.quantity).replace(',','.')),unit:p.chemicalShortage.unit}:null;
+          if(response.visit.id!==record.resourceId||response.visit.status!=='INCOMPLETE'||!id(response.reminder?.id)||response.reminder.sourceKey!==`incomplete:${p.visitType==='EXTRA'?'EXTRA:':''}${record.resourceId}:${record.requestId}`||m?.visitType!==p.visitType||m.visitId!==record.resourceId||m.reason!==p.reason||m.nextStep!==p.nextStep.trim()||!equal(m.chemicalShortage||null,shortage))throw Error('O impedimento ainda não está confirmado.');
+        }else{
+          const plan=response.plan;
+          if(!id(response.visit.id)||response.visit.status!=='PLANNED'||response.visit.technicianId!==Number(p.technicianId)||response.visit.plannedDate?.slice(0,10)!==p.date||plan?.visitId!==response.visit.id||plan.visitType!==p.visitType||plan.requestId!==record.requestId||plan.date!==p.date||plan.technicianId!==Number(p.technicianId)||plan.instructions!==p.instructions.trim())throw Error('O regresso ainda não está confirmado.');
+        }
+      }
     } else if (record.scope === 'EQUIPMENT_MAINTENANCE') {
       const p = record.payload, context = { planId: record.resourceId, visitType: p.visitType, visitId: p.visitId, poolId: p.poolId, expectedVersion: p.expectedVersion };
       if (!equal(response.context, context) || typeof response.applied !== 'boolean') throw Error('A confirmação não corresponde à revisão desta visita.');
@@ -64,9 +80,11 @@
   async function validate(record, captured, bytes = false) {
     const allowed = ['key','owner','requestId','scope','resourceId','payload','payloadHash','createdAt','file','fileName','label','attemptedAt','response','failure','reviewedAt'];
     if (!record || Object.keys(record).some(field => !allowed.includes(field)) || record.owner !== captured.owner || !uuid.test(record.requestId) || record.key !== key(record) || !scopes.includes(record.scope) || !id(record.resourceId) || !record.payload || typeof record.payload !== 'object' || Array.isArray(record.payload) || !Number.isFinite(Date.parse(record.createdAt)) || await hash(envelope(record)) !== record.payloadHash) throw Error('Envio guardado inválido. Os dados foram preservados; peça apoio ao escritório.');
+    if(captured.admin && record.scope!=='VISIT_RETURN')throw Error('Pedido incompatível com esta conta de escritório.');
+    if(['VISIT_INCOMPLETE','VISIT_RETURN'].includes(record.scope)&&(!['REGULAR','EXTRA'].includes(record.payload.visitType)||!id(record.payload.poolId)||!(/^[a-f0-9]{64}$/).test(record.payload.baseVersion)))throw Error('Contexto do impedimento inválido. Conserve os dados.');
     if (record.scope === 'TECHNICIAN_ALERT' && (record.resourceId !== captured.technicianId || Object.keys(record.payload).some(field => !['message','visitId','priority'].includes(field)) || typeof record.payload.message !== 'string' || !record.payload.message.trim() || record.payload.message.length > 5000 || !['NORMAL','HIGH'].includes(record.payload.priority) || (record.payload.visitId !== null && !id(record.payload.visitId)))) throw Error('Alerta guardado inválido. Preserve os dados e peça revisão ao escritório.');
     if(record.scope==='EQUIPMENT_MAINTENANCE' && (Object.keys(record.payload).some(field=>!['visitType','visitId','poolId','expectedVersion','notes','confirmed'].includes(field)) || !['REGULAR','EXTRA'].includes(record.payload.visitType) || !id(record.payload.visitId) || !id(record.payload.poolId) || !id(record.payload.expectedVersion) || record.payload.confirmed!==true || typeof record.payload.notes!=='string' || record.payload.notes.trim().length<3 || record.payload.notes.length>3000))throw Error('Revisão guardada inválida. Preserve os dados.');
-    if(record.reviewedAt && (!['EXTRA_VISIT_CORRECTION','EQUIPMENT_MAINTENANCE'].includes(record.scope)||record.response?.applied!==false||!Number.isFinite(Date.parse(record.reviewedAt))))throw Error('Revisão guardada inválida. Preserve os dados.');
+    if(record.reviewedAt && (!['EXTRA_VISIT_CORRECTION','EQUIPMENT_MAINTENANCE','VISIT_INCOMPLETE','VISIT_RETURN'].includes(record.scope)||record.response?.applied!==false||!Number.isFinite(Date.parse(record.reviewedAt))))throw Error('Revisão guardada inválida. Preserve os dados.');
     if (record.response) confirmation(record.response, record);
     else if (photoScope(record.scope)) {
       if (!(record.file instanceof Blob) || !record.file.size || record.file.size > 25 * 1024 * 1024 || record.file.size !== record.payload.size || !['BEFORE','AFTER','PROBLEM','ACCESS','GENERAL'].includes(record.payload.type) || !/^[0-9a-f]{64}$/.test(record.payload.sha256) || (bytes && await digest(await record.file.arrayBuffer()) !== record.payload.sha256)) throw Error('Fotografia guardada inválida. Os dados foram preservados.');
@@ -89,6 +107,7 @@
   async function prepare(scope, resourceId, payload, options = {}, captured = session()) {
     return locked(`prepare:${scope}:${resourceId}`, captured, async () => {
       const previous = await records(scope, captured, true);
+      if(['VISIT_INCOMPLETE','VISIT_RETURN'].includes(scope)){const existing=previous.find(row=>row.resourceId===resourceId&&row.payload.visitType===payload.visitType&&(!row.response||row.response.applied===false&&!row.reviewedAt||equal(row.payload,payload)));if(existing){if(!equal(existing.payload,payload))throw Error('Há um pedido por confirmar ou uma recusa por rever. Conserve o pedido original.');return existing;}}
       if(scope==='EQUIPMENT_MAINTENANCE'){const existing=previous.find(record=>record.resourceId===resourceId&&record.payload.visitType===payload.visitType&&record.payload.visitId===payload.visitId&&(!record.response||record.response.applied===true));if(existing){if(!equal(existing.payload,payload))throw Error('Há uma revisão desta visita por confirmar ou já registada. Conserve o pedido original.');return existing;}}
       if(scope==='EXTRA_VISIT_CORRECTION'){const existing=previous.find(record=>record.resourceId===resourceId&&!record.response);if(existing){if(!equal(existing.payload,payload))throw Error('Há uma correção diferente por confirmar. Conserve o pedido original antes de preparar outra.');return existing;}}
       if (['VISIT_COMPLETION','EXTRA_VISIT_COMPLETION','EXTRA_VISIT_START'].includes(scope)) { const existing = previous.find(record => record.resourceId === resourceId); if (existing) { if (!equal(existing.payload, payload)) throw Error(existing.response ? 'Esta conclusão já foi confirmada. Use o procedimento de correção da visita.' : 'Há uma conclusão diferente por confirmar. Conserve-a e peça revisão antes de alterar.'); return existing; } }
@@ -113,7 +132,7 @@
       await update(record, captured, current => ({ ...current, attemptedAt: current.attemptedAt || new Date().toISOString() }));
       const headers = { Authorization: 'Bearer ' + captured.token }; let body, endpoint;
       if (photoScope(record.scope)) { body = new FormData(); body.append('type', record.payload.type); body.append('requestId', record.requestId); body.append('photo', record.file, record.fileName); if(extraScope(record.scope))body.append('poolId', String(record.payload.poolId)); headers['X-CW-Field-Request'] = record.requestId; endpoint = extraScope(record.scope) ? `/api/field/extra-visits/${record.resourceId}/photo` : `/api/visits/${record.resourceId}/photo`; }
-      else { headers['Content-Type'] = 'application/json'; body = JSON.stringify({ ...record.payload, requestId: record.requestId }); endpoint = record.scope === 'EQUIPMENT_MAINTENANCE' ? `/api/equipment-maintenance/plans/${record.resourceId}/complete` : record.scope === 'TECHNICIAN_ALERT' ? '/api/visits/internal-alert' : extraScope(record.scope) ? `/api/field/extra-visits/${record.resourceId}/${record.scope === 'EXTRA_VISIT_START' ? 'start' : record.scope === 'EXTRA_VISIT_CORRECTION' ? 'correction' : 'complete'}` : `/api/core/visits/${record.resourceId}/complete`; }
+      else { headers['Content-Type'] = 'application/json'; body = JSON.stringify({ ...record.payload, requestId: record.requestId }); endpoint = ['VISIT_INCOMPLETE','VISIT_RETURN'].includes(record.scope) ? `/api/technician/visits/${record.resourceId}/${record.scope==='VISIT_RETURN'?'schedule-return':'incomplete'}` : record.scope === 'EQUIPMENT_MAINTENANCE' ? `/api/equipment-maintenance/plans/${record.resourceId}/complete` : record.scope === 'TECHNICIAN_ALERT' ? '/api/visits/internal-alert' : extraScope(record.scope) ? `/api/field/extra-visits/${record.resourceId}/${record.scope === 'EXTRA_VISIT_START' ? 'start' : record.scope === 'EXTRA_VISIT_CORRECTION' ? 'correction' : 'complete'}` : `/api/core/visits/${record.resourceId}/complete`; }
       const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 20000), check = setInterval(() => { if (!same(captured)) controller.abort(); }, 250);
       try {
         const response = await fetch(endpoint, { method: 'POST', headers, body, signal: controller.signal }); const result = await response.json(); requireSession(captured);
@@ -128,6 +147,6 @@
   }
   async function remove(requestId, captured = session()) { return locked(requestId, captured, async () => { const record = await get(requestId, captured); if (record.response) return; if (record.attemptedAt) throw Error('O envio já foi iniciado. Confirme o pedido antes de remover a fotografia.'); requireSession(captured); await transaction('readwrite', (store, done) => { requireSession(captured); store.delete(record.key); done(); }); window.dispatchEvent(new Event('cw:field-write-change')); }); }
   async function flush(scope, captured = session()) { const pending = await records(scope, captured); const confirmed = []; for (const record of pending) { if (record.failure?.blocked || record.failure?.retryAt > Date.now()) continue; try { confirmed.push(await send(record.requestId, captured, { automatic: true })); } catch (error) { return { pending: (await records(scope, captured)).length, confirmed, error: error.message }; } } return { pending: (await records(scope, captured)).length, confirmed }; }
-  async function acknowledgeRejection(requestId,captured=session()){return locked(requestId,captured,async()=>{const row=await get(requestId,captured);if(!['EXTRA_VISIT_CORRECTION','EQUIPMENT_MAINTENANCE'].includes(row.scope)||row.response?.applied!==false)throw Error('Apenas uma recusa confirmada pode ser reconhecida.');await update(row,captured,current=>({...current,reviewedAt:current.reviewedAt||new Date().toISOString()}));window.dispatchEvent(new Event('cw:field-write-change'));});}
-  window.CWFieldWriteStore = { session, same, prepare, send, records, get, remove, flush, digest, hash, confirmation, acknowledgeRejection };
+  async function acknowledgeRejection(requestId,captured=session()){return locked(requestId,captured,async()=>{const row=await get(requestId,captured);if(!['EXTRA_VISIT_CORRECTION','EQUIPMENT_MAINTENANCE','VISIT_INCOMPLETE','VISIT_RETURN'].includes(row.scope)||row.response?.applied!==false)throw Error('Apenas uma recusa confirmada pode ser reconhecida.');await update(row,captured,current=>({...current,reviewedAt:current.reviewedAt||new Date().toISOString()}));window.dispatchEvent(new Event('cw:field-write-change'));});}
+  window.CWFieldWriteStore = { session, adminSession:()=>session(true), same, prepare, send, records, get, remove, flush, digest, hash, confirmation, acknowledgeRejection };
 })();

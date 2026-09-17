@@ -1,6 +1,7 @@
+const lifecycle=require('../../services/incompleteVisitLifecycle');
 const {prisma} = require('../../prismaClient');
 const {Prisma} = require('@prisma/client');
-const {normalizeRole} = require('../../utils/roles');
+const {normalizeRole,roleMatches} = require('../../utils/roles');
 const coverage = require('../../services/autoVisitAlertService');
 function fail(statusCode,message){throw Object.assign(new Error(message),{statusCode});}
 function admin(user){if(normalizeRole(user?.role)!=='ADMIN')fail(403,'Apenas a gestão pode redistribuir trabalho');}
@@ -46,22 +47,22 @@ async function transfer(user,body={}){
 }
 function principal(user){
   const role=normalizeRole(user?.role);
-  if(!['ADMIN','TECHNICIAN'].includes(role))fail(403,'Sessão sem acesso');
+  if(role!=='ADMIN'&&!roleMatches(role,'TECHNICIAN'))fail(403,'Sessão sem acesso');
   return {admin:role==='ADMIN',id:Number(user.technicianId||user.id)};
 }
 async function receipts(user){
   const actor=principal(user);
   const rows=await prisma.operationalReminder.findMany({where:{sourceKey:{startsWith:'visit-receipt:'},...(!actor.admin?{assignedToTechnicianId:actor.id,isCompleted:false}:{})},include:{pool:{select:{name:true}},assignedTechnician:{select:{name:true}}},orderBy:{id:'desc'}});
   const ids=[...new Set(rows.map(row=>row.metadata?.visitId).filter(Number.isSafeInteger))];
-  const visits=await prisma.serviceVisit.findMany({where:{id:{in:ids}},select:{id:true,technicianId:true,status:true,endAt:true,plannedDate:true}});
+  const visits=await lifecycle.collect(prisma,rows);
   const latest=await prisma.operationalReminder.findMany({where:{sourceKey:{startsWith:'visit-receipt:'},OR:ids.map(id=>({metadata:{path:['visitId'],equals:id}}))},orderBy:{id:'desc'},select:{id:true,metadata:true}});
-  const seen=new Map();for(const row of latest)if(!seen.has(row.metadata.visitId))seen.set(row.metadata.visitId,row.id);
+  const seen=new Map();for(const row of latest){const key=lifecycle.key(lifecycle.type(row.metadata),row.metadata.visitId);if(!seen.has(key))seen.set(key,row.id);}
   const result=rows.map(row=>{
-    const visit=visits.find(visit=>visit.id===row.metadata.visitId);
-    const current=visit&&visit.technicianId===row.assignedToTechnicianId&&seen.get(visit.id)===row.id;
+    const key=lifecycle.key(lifecycle.type(row.metadata),row.metadata.visitId),visit=visits.get(key);
+    const current=visit&&visit.technicianId===row.assignedToTechnicianId&&seen.get(key)===row.id;
     const closed=!visit||visit.endAt||['DONE','COMPLETED','CANCELLED','CANCELED','SKIPPED','ARCHIVED'].includes(visit.status);
     const state=row.metadata.receivedAt?(current?'RECEIVED':'RECEIVED_PREVIOUS'):!current?'SUPERSEDED':closed?'CLOSED':'PENDING';
-    return {id:row.id,visitId:row.metadata.visitId,poolName:row.pool?.name||'Piscina',technicianName:row.assignedTechnician?.name||'Técnico',assignedAt:row.metadata.assignedAt,receivedAt:row.metadata.receivedAt||null,plannedDate:visit?.plannedDate||null,state};
+    return {id:row.id,visitType:lifecycle.type(row.metadata),visitId:row.metadata.visitId,poolName:row.pool?.name||'Piscina',technicianName:row.assignedTechnician?.name||'Técnico',assignedAt:row.metadata.assignedAt,receivedAt:row.metadata.receivedAt||null,plannedDate:visit?.plannedDate||null,state};
   });
   return {ok:true,receipts:actor.admin?result:result.filter(row=>row.state==='PENDING')};
 }
@@ -72,18 +73,18 @@ async function acknowledge(user,value){
   const original=await prisma.operationalReminder.findUnique({where:{id}});
   if(!original?.sourceKey?.startsWith('visit-receipt:'))fail(404,'Transferência não encontrada');
   if(original.assignedToTechnicianId!==actor.id)fail(403,'Transferência atribuída a outro técnico');
-  const visitId=original.metadata.visitId;
+  const visitId=original.metadata.visitId,visitType=lifecycle.type(original.metadata);
   return prisma.$transaction(async tx=>{
-    await tx.$queryRaw`SELECT id FROM "ServiceVisit" WHERE id = ${visitId} FOR UPDATE`;
-    const visit=await tx.serviceVisit.findUnique({where:{id:visitId}});
-    const latest=await tx.operationalReminder.findFirst({where:{sourceKey:{startsWith:`visit-receipt:${visitId}:`}},orderBy:{id:'desc'}});
+    await lifecycle.lock(tx,visitType,visitId);
+    const visit=await lifecycle.model(tx,visitType).findUnique({where:{id:visitId}});
+    const latest=await tx.operationalReminder.findFirst({where:{sourceKey:{startsWith:lifecycle.prefix(visitType,visitId,'visit-receipt')}},orderBy:{id:'desc'}});
     if(!visit||visit.technicianId!==actor.id||latest?.id!==id)fail(409,'A atribuição mudou. Atualize a rota');
     if(latest.metadata.receivedAt)return {ok:true,receivedAt:latest.metadata.receivedAt,idempotent:true};
     if(visit.endAt||['DONE','COMPLETED','CANCELLED','CANCELED','SKIPPED','ARCHIVED'].includes(visit.status))fail(409,'A visita já foi concluída ou retirada. Atualize a rota');
     await tx.notification.updateMany({where:{eventType:'VISIT_RECEIPT_PENDING',metadata:{path:['receiptId'],equals:id},status:'PENDING'},data:{status:'RESOLVED'}});
     const receivedAt=new Date().toISOString();
     await tx.operationalReminder.update({where:{id},data:{isCompleted:true,metadata:{...latest.metadata,state:'RECEIVED',receivedAt,receivedBy:actor.id}}});
-    if(visit.poolId)await tx.technicalHistory.create({data:{poolId:visit.poolId,type:'VISIT_ASSIGNMENT_RECEIVED',component:'Service Visit',message:`Técnico confirmou receção da visita #${visitId}`,description:JSON.stringify({visitId,receiptId:id,technicianId:actor.id,receivedAt}),status:visit.status,performedAt:new Date()}});
+    if(visit.poolId)await tx.technicalHistory.create({data:{poolId:visit.poolId,type:'VISIT_ASSIGNMENT_RECEIVED',component:visitType==='EXTRA'?'Extra Visit':'Service Visit',message:`Técnico confirmou receção da visita #${visitId}`,description:JSON.stringify({visitId,visitType,receiptId:id,technicianId:actor.id,receivedAt}),status:visit.status,performedAt:new Date()}});
     return {ok:true,receivedAt};
   });
 }
