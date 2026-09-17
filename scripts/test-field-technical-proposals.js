@@ -52,7 +52,24 @@ async function inject(table, type, proposalId = null) {
   for (const body of [undefined, proposal]) assert.equal((await call('', body, techTokens[0], outside.id)).status, 403);
   const finance = await create({ changes: [{ field: 'monthlyAmount', before: '9876', after: '9999' }], riskLevel: 'LOW' }); assert.equal(finance.riskLevel, 'HIGH');
   assert.equal((await call('', { ...proposal, changes: [{ field: 'monthlyAmount', after: '1' }] }, techTokens[0])).status, 400);
-  assert(!JSON.stringify((await call('', undefined, techTokens[0])).body).includes('9876'));
+  const visibleProposals = await call('', undefined, techTokens[0]);
+  assert.equal(visibleProposals.status, 200);
+  assert.deepEqual(visibleProposals.body.proposals.map(row => row.id), [owned.id]);
+  assert.deepEqual(visibleProposals.body.proposals[0].changes, proposal.changes);
+  assert.deepEqual(visibleProposals.body.proposals[0].diff.map(row => row.field), ['pumpPower']);
+  // A version hash can legitimately contain the four digits 9876. Check the
+  // financial field and diff values instead of substring-matching all metadata.
+  function assertNoFinancialData(value) {
+    if (!value || typeof value !== 'object') return;
+    for (const [key, item] of Object.entries(value)) {
+      assert.notEqual(key, 'monthlyAmount');
+      if (key === 'field') assert.notEqual(item, 'monthlyAmount');
+      if (['before', 'after', 'current', 'effectiveBefore'].includes(key)) assert(!['9876', '9999'].includes(String(item)));
+      assertNoFinancialData(item);
+    }
+  }
+  assertNoFinancialData(visibleProposals.body);
+  for (const suffix of ['/diff', '/history']) assert.equal((await call('/' + finance.id + suffix, undefined, techTokens[0])).status, 404);
   for (const extra of [{ changes: [{ field: 'password', after: 'secret' }] }, { changes: [proposal.changes[0], proposal.changes[0]] }, { photos: ['javascript:alert(1)'] }, { photos: ['//bad.example/x'] }, { reason: '' }, { asDraft: 'maybe' }, { changes: [{ field: 'pumpPower', after: {} }] }]) assert.equal((await call('', { ...proposal, ...extra })).status, 400);
   assert.equal((await call('', proposal, '')).status, 401);
   console.log('PASS authenticated ownership, assigned pools, technician financial privacy, risk floor and invalid input');

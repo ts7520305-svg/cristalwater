@@ -150,7 +150,7 @@
     closeDrawer();
     drawerBackdrop = document.createElement("div"); drawerBackdrop.className = "cw-drawer-backdrop"; drawerBackdrop.addEventListener("click", closeDrawer);
     drawer = document.createElement("aside"); drawer.className = "cw-drawer"; drawer.setAttribute("role", "dialog"); drawer.setAttribute("aria-label", words().title); drawer.setAttribute('data-cw-no-i18n', '');
-    const entries = Object.entries(topics()).filter(([key])=>key !== "default");
+    const entries = Object.entries(topics()).filter(([key, topic])=>key !== "default" && !topic.aliasFor);
     drawer.innerHTML = `<header><h2>${escapeHtml(words().title)}</h2><button class="cw-close" type="button" aria-label="${escapeHtml(words().close)}">×</button></header>
       <div class="cw-help-mode-row"><label><input type="checkbox" id="cwHelpHoverMode"> ${escapeHtml(words().hover)}</label><small>${escapeHtml(words().press)}</small></div>
       <input class="cw-help-search" aria-label="${escapeHtml(words().search)}" placeholder="${escapeHtml(words().search)}">

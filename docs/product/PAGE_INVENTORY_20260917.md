@@ -1,10 +1,10 @@
-# TASK228 — Inventário atual de páginas
+# Inventário atual de páginas
 
-Base publicada: `bc5e4e35efccf89c9bb085a2ff5749ecb82c4e62`. Gerado em 2026-09-17T12:47:06.070Z. Inclui as alterações locais do lote TASK225.
+Base publicada: `d924f8a6d1c4ea9ff68abdba15791f9d4ef7faba`. Gerado em 2026-09-17T16:23:10.316Z. Inclui o estado dos ficheiros locais no momento da geração.
 
 101 ficheiros HTML: 94 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 144 scripts de integração/navegador ativos. 46 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 146 scripts de integração/navegador ativos. 48 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 As colunas de papéis distinguem o catálogo anterior dos indícios explícitos no HTML/scripts. Não são uma auditoria de autorização: as APIs, a atribuição atual e o comportamento real de cada perfil continuam a determinar o acesso.
 
@@ -62,8 +62,8 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /admin-payments | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-pool-calculator | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-pool-technical | Entrada raiz | ADMIN | ADMIN | 4 |
-| /admin-pools | Entrada raiz | ADMIN | ADMIN | 1 |
-| /admin-priority | Entrada raiz | ADMIN | ADMIN | 0 |
+| /admin-pools | Entrada raiz | ADMIN | ADMIN | 2 |
+| /admin-priority | Entrada raiz | ADMIN | ADMIN | 2 |
 | /admin-reports | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-rounds | Entrada raiz | ADMIN | ADMIN | 3 |
 | /admin-security | Entrada raiz | ADMIN | ADMIN | 0 |
@@ -98,18 +98,18 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /config-notifications | Entrada raiz | ADMIN, CLIENT, TECHNICIAN, TEAM_LEADER | ADMIN, CLIENT, TEAM_LEADER, TECHNICIAN | 2 |
 | /crystal-os-v2-route-index | Entrada raiz | ADMIN | — | 0 |
 | /dashboard | Entrada raiz | ADMIN | ADMIN | 5 |
-| /help-center | Entrada raiz | ADMIN, CLIENT, TECHNICIAN, TEAM_LEADER | ADMIN, CLIENT, TEAM_LEADER, TECHNICIAN | 2 |
+| /help-center | Entrada raiz | ADMIN, CLIENT, TECHNICIAN, TEAM_LEADER | ADMIN, CLIENT, TEAM_LEADER, TECHNICIAN | 3 |
 | /incident-center | Entrada raiz | ADMIN | ADMIN | 0 |
 | /invoice-document | Entrada raiz | — | — | 4 |
 | /invoices | Entrada raiz | ADMIN | ADMIN | 6 |
 | /login | Entrada raiz | PUBLIC | — | 19 |
 | /map | Entrada raiz | ADMIN | ADMIN | 0 |
-| /metrics | Entrada raiz | ADMIN | ADMIN | 3 |
+| /metrics | Entrada raiz | ADMIN | ADMIN | 4 |
 | /multi-map | Entrada raiz | ADMIN | ADMIN | 0 |
 | /notifications | Entrada raiz | ADMIN | ADMIN | 12 |
 | /operational-dashboard | Entrada raiz | ADMIN | ADMIN | 0 |
 | /profit-map | Entrada raiz | ADMIN | ADMIN | 0 |
-| /ranking | Entrada raiz | ADMIN | ADMIN | 0 |
+| /ranking | Entrada raiz | ADMIN | ADMIN | 1 |
 | /report-center | Entrada raiz | ADMIN | ADMIN | 0 |
 | /report-settings | Entrada raiz | ADMIN | ADMIN | 0 |
 | /route-map | Entrada raiz | ADMIN | ADMIN | 0 |

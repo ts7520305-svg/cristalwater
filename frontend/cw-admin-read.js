@@ -3,6 +3,9 @@
   // Read-only lists stay tied to the opening account. A failed response must
   // never be rendered as an empty or successfully refreshed result.
   function create({ url, list, status, reload, parse, render, empty, loaded }) {
+    // This controller owns these states. The legacy text/aria-busy adapter
+    // otherwise keeps a loading badge on the populated list after completion.
+    list.dataset.cwStateManaged = 'manual'; status.dataset.cwStateManaged = 'manual';
     const keys = ['cristalwater_jwt', 'token', 'cristalwater_user', 'user'];
     const fingerprint = () => JSON.stringify(keys.map(key => localStorage.getItem(key)));
     let initial = '', credential = '', invalidated = false, sequence = 0, controller;

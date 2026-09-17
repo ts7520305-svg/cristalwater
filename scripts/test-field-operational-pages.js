@@ -7,6 +7,7 @@ const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002'; assert(['127.0.
 let browser;
 (async () => {
   const stamp = Date.now(), admin = await prisma.user.findUniqueOrThrow({ where: { email: process.env.ADMIN_EMAIL } });
+  const visual = path.join(__dirname, '../reports/field-visual/operational-pages-' + stamp); fs.mkdirSync(visual, { recursive: true });
   const user = { id: admin.id, userId: admin.id, role: 'ADMIN', principalType: 'USER' }, token = jwt.sign(user, getJwtSecret(), { expiresIn: '1h' });
   const client = await prisma.client.create({ data: { name: 'QA priority client ' + stamp, active: true } });
   const pool = await prisma.pool.create({ data: { name: '<img src=x onerror=alert(1)> pool ' + stamp, clientId: client.id, priority: 0, monthlyAmount: 95 } });
@@ -27,6 +28,7 @@ let browser;
   assert(data.some(row => row.name === '__proto__' && row.total >= 1));
   for (const actor of [{ id: a.id, technicianId: a.id, principalType: 'TECHNICIAN', role: 'TECHNICIAN' }, { id: b.id, technicianId: b.id, principalType: 'TECHNICIAN', role: 'TEAM_LEADER' }, { id: client.id, clientId: client.id, principalType: 'CLIENT', role: 'CLIENT' }]) {
     assert.equal((await api('/api/technician/ranking', jwt.sign(actor, getJwtSecret(), { expiresIn: '1h' }))).status, 403, actor.role);
+    assert.equal((await api('/api/metrics/productivity', jwt.sign(actor, getJwtSecret(), { expiresIn: '1h' }))).status, 403, actor.role);
   }
   console.log('PASS ranking API: administrator only, stable technician identities, cancelled exclusion, completed status and prototype-like legacy names');
 
@@ -42,6 +44,7 @@ let browser;
   const goto = url => page.goto(base + url, { waitUntil: 'networkidle' });
   await goto('/ranking'); await page.waitForFunction(() => document.getElementById('status').dataset.state === 'ready');
   assert.equal(await page.locator('#ranking article').filter({ hasText: name }).count(), 2);
+  assert.equal(await page.locator('#ranking.loading, #ranking[data-cw-state="loading"]').count(), 0, 'A completed list must not retain the legacy loading layout');
   assert((await page.locator('#ranking').textContent()).includes('1 de 2 visitas concluídas · 50%'));
   for (const [status, json, state] of [[503, [], 'error'], [202, [], 'error'], [200, { ok: true }, 'error'], [200, [], 'empty']]) {
     await page.route('**/api/technician/ranking', route => route.fulfill({ status, json })); await page.locator('#rankingReload').click();
@@ -50,6 +53,48 @@ let browser;
   }
   await page.locator('#rankingReload').click(); await page.waitForFunction(() => document.getElementById('status').dataset.state === 'ready');
   console.log('PASS ranking page: real records, retry, failed/malformed/queued reads and genuine empty state');
+
+  const startAt = new Date('2026-09-01T10:00:00Z');
+  for (const minutes of [20, 40]) await prisma.serviceVisit.create({ data: { poolId: pool.id, clientId: client.id, technicianId: a.id, status: 'DONE', startAt, endAt: new Date(startAt.getTime() + minutes * 60000) } });
+  await prisma.serviceVisit.create({ data: { poolId: pool.id, clientId: client.id, technicianId: a.id, status: 'DONE', startAt, endAt: new Date(startAt.getTime() - 60000) } });
+  const metricsResponse = await api('/api/metrics/productivity'), metrics = await metricsResponse.json();
+  assert.equal(metricsResponse.status, 200); assert.match(metricsResponse.headers.get('cache-control'), /no-store/);
+  assert.equal(metrics.clients.find(row => row.name === client.name)?.avgTime, 30, 'Averages must use only visits with valid recorded duration');
+  const metricA = metrics.technicians.find(row => row.id === a.id), metricB = metrics.technicians.find(row => row.id === b.id);
+  assert.equal(metricA.measuredVisits, 2); assert.equal(metricA.totalVisits, 4); assert.equal(metricA.totalTime, 60); assert.equal(metricA.avgTime, 30);
+  assert.equal(metricB.totalVisits, 1); assert.equal(metricB.measuredVisits, 0); assert.equal(metricB.avgTime, null, 'Missing duration is unknown, not zero minutes');
+  const sameNameClient = await prisma.client.create({ data: { name: client.name, active: true } });
+  await prisma.serviceVisit.create({ data: { clientId: sameNameClient.id, technicianName: '__proto__', status: 'DONE', startAt, endAt: startAt } });
+  await prisma.serviceVisit.create({ data: { poolId: pool.id, technicianName: 'QA missing customer ' + stamp, status: 'DONE', startAt, endAt: new Date(startAt.getTime() + 15 * 60000) } });
+  const identityMetrics = await (await api('/api/metrics/productivity')).json();
+  assert.equal(identityMetrics.clients.filter(row => row.name === client.name).length, 2, 'Customer names are not identities');
+  assert.equal(identityMetrics.clients.find(row => row.id === sameNameClient.id).avgTime, 0, 'A recorded zero duration is distinct from missing duration');
+  assert.equal(identityMetrics.clients.find(row => row.id === client.id).totalVisits, 5, 'An unassigned historical visit must not inherit the pool customer');
+  assert(identityMetrics.clients.some(row => row.id === null));
+  assert(identityMetrics.technicians.some(row => row.id === null && row.name === '__proto__' && row.measuredVisits >= 1));
+  const recipient = await prisma.client.create({ data: { name: 'QA subsequent customer ' + stamp, active: true } });
+  await prisma.pool.update({ where: { id: pool.id }, data: { clientId: recipient.id } });
+  const reassignedMetrics = await (await api('/api/metrics/productivity')).json();
+  assert.equal(reassignedMetrics.clients.find(row => row.id === client.id)?.avgTime, 30); assert(!reassignedMetrics.clients.some(row => row.id === recipient.id), 'Historical work stays with its recorded customer');
+  await prisma.pool.update({ where: { id: pool.id }, data: { clientId: client.id } });
+  await goto('/metrics'); await page.waitForFunction(() => document.getElementById('status').dataset.state === 'ready');
+  assert.equal(await page.locator('#metricsList [data-metric-kind="technicians"] [data-metric-id="' + a.id + '"] [data-average]').textContent(), '30 min');
+  assert.equal(await page.locator('#metricsList [data-metric-kind="technicians"] [data-metric-id="' + b.id + '"] [data-average]').textContent(), 'Sem duração válida');
+  assert.equal(await page.locator('script[src*="cdn.jsdelivr.net"]').count(), 0, 'Metrics must remain readable without an external chart library');
+  for (const [status, json, state] of [[503, {}, 'error'], [200, { ok: true, clients: [{ name: 'invalid' }], technicians: [] }, 'error'], [200, { ok: true, clients: [], technicians: [] }, 'empty']]) {
+    await page.route('**/api/metrics/productivity', route => route.fulfill({ status, json })); await page.locator('#metricsReload').click();
+    await page.waitForFunction(state => document.getElementById('status').dataset.state === state, state); assert.equal(await page.locator('#metricsList article').count(), 0);
+    await page.unroute('**/api/metrics/productivity');
+  }
+  await page.locator('#metricsReload').click(); await page.waitForFunction(() => document.getElementById('status').dataset.state === 'ready');
+  for (const width of [320, 390, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    assert(await page.locator('#metricsList article').evaluateAll(nodes => nodes.length > 0 && nodes.every(node => node.scrollWidth <= node.clientWidth + 1)), 'Metric names and values fit narrow screens');
+    assert.equal(await page.locator('#metricsList.loading, #metricsList[data-cw-state="loading"]').count(), 0);
+    assert(await page.locator('#metricsList article').evaluateAll(nodes => nodes.every(node => node.clientWidth >= 240)), 'Metric cards retain a readable width');
+    await page.screenshot({ path: path.join(visual, 'metrics-' + width + '.png') });
+  }
+  console.log('PASS metrics: measured duration denominator, unknown/invalid times, stable technician and historical customer identities, local bars, failures and empty states');
 
   // Keep a genuine general-editor draft while exercising the separate priority
   // editor. Its stored v1 shape must not be migrated or reinterpreted.
@@ -88,7 +133,6 @@ let browser;
   assert.equal(await page.evaluate(key => sessionStorage.getItem(key), draftKey), oldDraft);
   console.log('PASS priorities: real API shape, confirmed versioned writes, lost-response/reload recovery without duplication, explicit conflict review and old priority/general draft preserved');
 
-  const visual = path.join(__dirname, '../reports/field-visual/operational-pages-' + stamp); fs.mkdirSync(visual, { recursive: true });
   for (const width of [320, 390, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await page.locator('#poolEditPriority').scrollIntoViewIfNeeded();

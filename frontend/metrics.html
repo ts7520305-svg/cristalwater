@@ -1,80 +1,41 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt">
 <head>
-<meta charset="UTF-8">
-<title>Produtividade</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<link rel="stylesheet" href="/ui/foundation.css">
-
-<style>
-html, body { overflow-x: hidden; }
-body { font-family: Arial; padding: 20px; }
-canvas { max-width: 800px; margin-bottom: 40px; }
-</style>
-<link rel="stylesheet" href="/cristal-assist.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Produtividade</title>
+  <link rel="stylesheet" href="/ui/foundation.css">
+  <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
   <script src="/admin-auth-guard.js"></script>
   <link rel="stylesheet" href="/ui/design-system.css">
+  <style>
+    html, body { overflow-x: hidden; }
+    .metrics-page { padding:16px; max-width:1000px; margin:0 auto; }
+    .metrics-page p { line-height:1.5; }
+    #metricsList { display:grid; grid-template-columns:minmax(0,1fr); gap:20px; }
+    @media(min-width:1000px) { #metricsList { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    .metrics-group { margin-top:24px; }
+    .metrics-row { padding:16px; margin:12px 0; border:1px solid #cbd9e8; border-radius:12px; background:#fff; color:#12334c; overflow-wrap:anywhere; }
+    .metrics-row strong, .metrics-row [data-average] { display:block; }
+    .metrics-row [data-average] { margin:8px 0; font-size:1.25rem; font-weight:700; }
+    .metrics-track { height:12px; border-radius:6px; background:#e1ebf2; overflow:hidden; }
+    .metrics-bar { display:block; height:100%; background:#147ca8; }
+  </style>
 </head>
-
 <body data-required-role="ADMIN">
-
-<h2>Produtividade</h2>
-<p>Indicadores separados por produtividade operacional, sem comparacoes punitivas ou humilhantes.</p>
-<p id="status" aria-live="polite">A carregar métricas...</p>
-
-<h3>Clientes</h3>
-<canvas id="clientsChart"></canvas>
-
-<h3>Técnicos</h3>
-<canvas id="techChart"></canvas>
-
-<script>
-function authHeaders(extra = {}) {
-  const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
-  return {
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...extra,
-  };
-}
-
-fetch("/api/metrics/productivity", { headers: authHeaders() })
-.then(r => r.ok ? r.json() : Promise.reject(new Error("Erro ao carregar métricas")))
-.then(data => {
-  document.getElementById("status").textContent = "Métricas carregadas.";
-
-  // CLIENTES
-  new Chart(document.getElementById("clientsChart"), {
-    type: "bar",
-    data: {
-      labels: data.clients.map(c => c.name),
-      datasets: [{
-        label: "Tempo médio (min)",
-        data: data.clients.map(c => c.avgTime)
-      }]
-    }
-  });
-
-  // TÉCNICOS
-  new Chart(document.getElementById("techChart"), {
-    type: "bar",
-    data: {
-      labels: data.technicians.map(t => t.name),
-      datasets: [{
-        label: "Tempo médio (min)",
-        data: data.technicians.map(t => t.avgTime)
-      }]
-    }
-  });
-
-})
-.catch(() => {
-  document.getElementById("status").textContent = "Erro ao carregar métricas.";
-});
-</script>
-
-<script src="/cristal-help-data.js"></script>
-<script src="/cristal-assist.js"></script>
+  <main class="metrics-page">
+    <h1>Produtividade</h1>
+    <p>Tempo médio das visitas regulares concluídas, em todo o histórico. Visitas canceladas e visitas extra ficam excluídas.</p>
+    <p>A média usa apenas visitas com início e fim registados numa ordem válida. Os registos sem duração válida aparecem na contagem, mas não entram na média. O tempo, por si só, não mede a qualidade do trabalho.</p>
+    <p id="status" role="status" aria-live="polite">A carregar métricas…</p>
+    <button id="metricsReload" type="button">Atualizar</button>
+    <div id="metricsList"></div>
+  </main>
+  <script src="/cw-admin-read.js"></script>
+  <script src="/metrics.js"></script>
+  <script src="/cristal-help-data.js"></script>
+  <script src="/cristal-assist.js"></script>
   <script src="/ui/core/navigation-context.js"></script>
   <script src="/crystal-os-v2-shell.js"></script>
   <script src="/crystal-os-v2-nav.js"></script>

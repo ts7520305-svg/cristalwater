@@ -55,6 +55,12 @@ const fixture = role => {
         assert.equal(await page.locator('#topics [data-topic="aiAdmin"]').count(), 0);
         assert(!/administrador|emitir fatura|criar técnico/i.test(await page.locator('#detail').textContent()));
       } else assert.equal(await page.locator('#helpStatus').getAttribute('data-state'), 'ready');
+      if (role === 'ADMIN') {
+        await page.goto('http://help.test/help-center?topic=aiOps');
+        assert.equal(await page.locator('#helpStatus').getAttribute('data-state'), 'ready');
+        assert.equal(await page.locator('#topics [data-topic="aiOps"]').count(), 0, 'A legacy contextual alias must not duplicate a guide');
+        assert.equal(await page.locator('#topics [data-topic="aiAdmin"]').getAttribute('aria-pressed'), 'true');
+      }
       for (const query of ['constructor', '__proto__', '<img src=x onerror=alert(1)>']) {
         await page.goto('http://help.test/help-center?topic=' + encodeURIComponent(query));
         assert.equal(await page.locator('#helpStatus').getAttribute('data-state'), 'unavailable');
@@ -66,6 +72,11 @@ const fixture = role => {
       const selected = role === 'ADMIN' ? 'vehicles' : role === 'CLIENT' ? 'finance' : 'safety';
       await page.locator('#topics [data-topic="' + selected + '"]').click();
       assert.equal(new URL(page.url()).searchParams.get('topic'), selected); await checkLinks('#detail a');
+      assert.equal(await page.locator('#detail').evaluate(node => node === document.activeElement), true, 'Mobile topic selection must bring the guide into focus');
+      await page.waitForFunction(() => {
+        const detail = document.getElementById('detail').getBoundingClientRect(), bar = document.querySelector('.cw-v2-shell-topbar').getBoundingClientRect();
+        return detail.top >= bar.bottom - 1 && detail.top < innerHeight - 150;
+      });
       await page.keyboard.press('Control+k'); await page.locator('.cw-command').waitFor(); await checkLinks('.cw-command-results a');
       await page.locator('.cw-command-search').fill('no-such-command-xyz'); assert.equal(await page.locator('.cw-command-results a').count(), 0); assert(await page.locator('.cw-command-results [role=status]').isVisible());
       await page.keyboard.press('Escape'); assert.equal(await page.locator('.cw-command').count(), 0);
@@ -78,6 +89,18 @@ const fixture = role => {
       for (const [language, title] of Object.entries(titles)) {
         await page.evaluate(language => window.dispatchEvent(new CustomEvent('cw-language-change', { detail: { language } })), language);
         assert.equal(await page.locator('#helpTitle').textContent(), title);
+        if (role === 'ADMIN') {
+          const fleetTitles = { pt: 'Frota, guias e stock', en: 'Fleet, guides and stock', es: 'Flota, guías y existencias', fr: 'Flotte, guides et stock', de: 'Fuhrpark, Belege und Bestand' };
+          assert.equal(await page.locator('#detail h2').textContent(), fleetTitles[language]);
+          const guides = await page.evaluate(() => ({ topics: CristalHelp.topics(), actions: CristalHelp.actions() }));
+          for (const guide of Object.values(guides.topics)) {
+            assert(guide.title && guide.summary && guide.detail && guide.href, 'Every administrative guide needs complete copy and a real destination');
+            assert(fs.existsSync(path.join(root, 'frontend', guide.href.split(/[?#]/)[0].slice(1) + '.html')), 'Administrative destination must exist: ' + guide.href);
+          }
+          for (const action of guides.actions) assert.equal(action.label, guides.topics[action.topic].title, 'Quick command labels must follow the selected language');
+          assert(!/futuramente|no futuro|evolução ideal|marcar paga/i.test(JSON.stringify(guides)), 'Help must not present roadmap ideas or bypass receipts');
+          assert.equal(guides.topics.priorities.href, '/admin-priority');
+        }
         for (const width of [320, 390, 1440]) {
           await page.setViewportSize({ width, height: 1000 });
           await page.evaluate(() => scrollTo(0, 0));

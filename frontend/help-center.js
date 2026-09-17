@@ -16,13 +16,14 @@
     const found = Object.hasOwn(topics, selected) && selected !== 'default';
     status.textContent = !valid ? words.session : found ? '' : words.unavailable;
     status.dataset.state = !valid ? 'session' : found ? 'ready' : 'unavailable';
-    const active = found ? selected : 'help', query = fold(search.value);
-    const entries = Object.entries(topics).filter(([key, topic]) => key !== 'default' && (!query || fold(`${topic.title} ${topic.summary} ${topic.detail} ${(topic.actions || []).join(' ')}`).includes(query)));
+    const active = found ? topics[selected].aliasFor || selected : 'help', query = fold(search.value);
+    const entries = Object.entries(topics).filter(([key, topic]) => key !== 'default' && !topic.aliasFor && (!query || fold(`${topic.title} ${topic.summary} ${topic.detail} ${(topic.actions || []).join(' ')}`).includes(query)));
     box.innerHTML = entries.map(([key, topic]) => `<button type="button" class="topic ${key === active ? 'active' : ''}" data-topic="${escapeHtml(key)}" aria-pressed="${key === active}"><strong>${escapeHtml(topic.title)}</strong><small>${escapeHtml(topic.summary)}</small></button>`).join('');
     const empty = document.getElementById('emptyTopics'); empty.textContent = words.empty; empty.hidden = !valid || entries.length > 0;
     box.querySelectorAll('[data-topic]').forEach(button => button.addEventListener('click', () => {
       selected = button.dataset.topic;
       history.replaceState(null, '', '/help-center?topic=' + encodeURIComponent(selected)); render();
+      if (innerWidth <= 860) { detail.focus({ preventScroll: true }); detail.scrollIntoView({ block: 'start' }); }
     }));
     document.getElementById('helpActions').innerHTML = help.actions().filter(action => action.topic !== 'help').slice(0, 5).map(action => `<a href="${escapeHtml(action.href)}">${escapeHtml(action.label)}</a>`).join('');
     const topic = topics[active];

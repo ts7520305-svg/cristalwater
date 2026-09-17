@@ -29,6 +29,7 @@
     .help-shell .sidebar,.help-shell .detail{min-width:0;background:#fff;border:1px solid #d3e1e4;border-radius:16px;box-shadow:0 6px 24px rgba(25,60,67,.06);padding:18px;overflow-wrap:anywhere}
     .help-shell label{display:block;color:#31535b;font-weight:700;margin-bottom:8px}
     .help-shell input{width:100%;min-height:44px;padding:12px;border-radius:10px;border:1px solid #92acb3;background:#fff;color:#173c43;margin-bottom:14px}
+    #topics{max-height:520px;overflow-y:auto;overscroll-behavior:contain}
     .help-shell .topic{display:block;width:100%;min-height:44px;text-align:left;margin-bottom:10px;padding:13px;border-radius:10px;border:1px solid #d3e1e4;background:#f6f9fa;color:#173c43;cursor:pointer;box-shadow:none}
     .help-shell .topic strong{display:block;color:#183e46;margin-bottom:5px}.help-shell .topic small{color:#516c74;line-height:1.4}
     .help-shell .topic.active{border-color:#087564;background:#e7f5f0}
@@ -36,7 +37,7 @@
     .help-shell .detail a{display:inline-flex;align-items:center;min-height:44px;margin-top:8px;padding:10px 14px;border-radius:10px;background:#0c6c60;color:#fff;text-decoration:none;font-weight:700}
     .help-shell .topic:focus-visible,.hero a:focus-visible,.help-shell a:focus-visible{outline:3px solid #0c7564;outline-offset:3px}
     @media(max-width:1200px){body.cw-role-help.cw-v2-shell-enabled{padding-left:0;padding-top:144px}body.cw-role-help>.cw-v2-shell-topbar{left:0}}
-    @media(max-width:860px){.help-shell{grid-template-columns:1fr}.hero{padding-top:20px}}
+    @media(max-width:860px){.help-shell{grid-template-columns:1fr}.hero{padding-top:20px}#topics{max-height:340px}}
     @media(max-width:480px){.hero,.help-shell{padding-left:14px;padding-right:14px}.help-shell .sidebar,.help-shell .detail{padding:14px}}
   </style>
   <script src="/cw-auth.js"></script>
@@ -57,7 +58,7 @@
       <div id="topics"></div>
       <p id="emptyTopics" role="status" hidden></p>
     </aside>
-    <section class="detail" id="detail"></section>
+    <section class="detail" id="detail" tabindex="-1"></section>
   </main>
 
   <script src="/cristal-help-data.js"></script>

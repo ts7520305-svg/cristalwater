@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-09-17T12:47:06.070Z",
-  "baseCommit": "bc5e4e35efccf89c9bb085a2ff5749ecb82c4e62",
+  "generatedAt": "2026-09-17T16:23:10.316Z",
+  "baseCommit": "d924f8a6d1c4ea9ff68abdba15791f9d4ef7faba",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 144,
+  "activeScriptsScanned": 146,
   "summary": {
     "htmlFiles": 101,
     "rootPages": 94,
     "nestedPages": 7,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 46,
+    "pagesWithLiteralTestReference": 48,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -1048,6 +1048,7 @@
         "/crystal-os-v2-phase2-adapter.css",
         "/ui/foundation.css",
         "/ui/design-system.css",
+        "/cw-pool-edit.css",
         "/admin-auth-guard.js",
         "/cw-ui-feedback.js",
         "/cw-pool-edit.js",
@@ -1062,7 +1063,8 @@
       ],
       "missingAssets": [],
       "testReferences": [
-        "test-field-pool-edit-recovery-ui.js"
+        "test-field-pool-edit-recovery-ui.js",
+        "test-field-operational-pages.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -1092,6 +1094,10 @@
         "/crystal-os-v2-phase2-adapter.css",
         "/admin-auth-guard.js",
         "/ui/design-system.css",
+        "/cw-pool-edit.css",
+        "/cw-admin-read.js",
+        "/cw-pool-edit.js",
+        "/admin-priority.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
         "/ui/core/navigation-context.js",
@@ -1101,7 +1107,10 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "testReferences": [
+        "test-field-operational-pages.js",
+        "test-role-help-browser.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -2476,7 +2485,8 @@
       "missingAssets": [],
       "testReferences": [
         "test-field-team-leader-entry.js",
-        "test-role-help-browser.js"
+        "test-role-help-browser.js",
+        "test-shared-navigation-browser.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -2698,6 +2708,8 @@
         "/cw-auth.js",
         "/admin-auth-guard.js",
         "/ui/design-system.css",
+        "/cw-admin-read.js",
+        "/metrics.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
         "/ui/core/navigation-context.js",
@@ -2709,7 +2721,8 @@
       "testReferences": [
         "test-visit-os-operational.js",
         "test-route-os-acceptance.js",
-        "test-production-runtime-health.js"
+        "test-production-runtime-health.js",
+        "test-field-operational-pages.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -2896,13 +2909,17 @@
         "/cw-auth.js",
         "/admin-auth-guard.js",
         "/ui/design-system.css",
+        "/cw-admin-read.js",
+        "/ranking.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
         "/ui/core/navigation-context.js",
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "testReferences": [
+        "test-field-operational-pages.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {

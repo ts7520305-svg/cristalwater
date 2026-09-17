@@ -48,8 +48,8 @@ const result = { generatedAt: new Date().toISOString(), baseCommit: execFileSync
 const escape = value => String(value || '—').replace(/\|/g, '\\|').replace(/[\r\n]/g, ' ');
 const differences = pages.filter(page => page.catalogueRolesMissingFromGuard.length);
 const markdown = [
-  '# TASK228 — Inventário atual de páginas', '',
-  `Base publicada: \`${result.baseCommit}\`. Gerado em ${result.generatedAt}. Inclui as alterações locais do lote TASK225.`, '',
+  '# Inventário atual de páginas', '',
+  `Base publicada: \`${result.baseCommit}\`. Gerado em ${result.generatedAt}. Inclui o estado dos ficheiros locais no momento da geração.`, '',
   `${result.summary.htmlFiles} ficheiros HTML: ${result.summary.rootPages} entradas de raiz e ${result.summary.nestedPages} ficheiros auxiliares/protótipos/testes. ${result.summary.missingAssetReferences} referências locais a scripts/estilos/recursos sem ficheiro correspondente.`, '',
   `Foram procuradas referências literais em ${scripts.size} scripts de integração/navegador ativos. ${result.summary.pagesWithLiteralTestReference} páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.`, '',
   'As colunas de papéis distinguem o catálogo anterior dos indícios explícitos no HTML/scripts. Não são uma auditoria de autorização: as APIs, a atribuição atual e o comportamento real de cada perfil continuam a determinar o acesso.', '',
