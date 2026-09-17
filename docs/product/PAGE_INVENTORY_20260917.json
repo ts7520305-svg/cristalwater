@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-09-17T17:37:29.344Z",
-  "baseCommit": "d7a5f9994ccf885b01cb39f05ee0384b06a1f1fb",
+  "generatedAt": "2026-09-17T18:24:59.367Z",
+  "baseCommit": "f45082e48537cc22323c642a3ee0c01341176348",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 149,
+  "activeScriptsScanned": 152,
   "summary": {
     "htmlFiles": 101,
     "rootPages": 94,
     "nestedPages": 7,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 52,
+    "pagesWithLiteralTestReference": 54,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -2862,7 +2862,7 @@
       "file": "frontend/profit-map.html",
       "route": "/profit-map",
       "kind": "Entrada raiz",
-      "title": "Mapa Lucro Inteligente",
+      "title": "Trabalho planeado — Cristal Water",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -2877,12 +2877,13 @@
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/ui/foundation.css",
+        "/ui/design-system.css",
+        "/cw-admin-map.css",
         "/cristal-assist.css",
         "/cw-auth.js",
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
-        "/ui/design-system.css",
         "/admin-auth-guard.js",
+        "/cw-admin-map.js",
+        "/profit-map.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
         "/ui/core/navigation-context.js",
@@ -2891,7 +2892,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "testReferences": [
+        "test-field-planned-work.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -3502,7 +3505,7 @@
       "file": "frontend/technician-profit-dashboard.html",
       "route": "/technician-profit-dashboard",
       "kind": "Entrada raiz",
-      "title": "Lucro por Técnico",
+      "title": "Atividade e valores por técnico — Cristal Water",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -3516,51 +3519,13 @@
       "entryRedirects": {},
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/manifest.webmanifest",
+        "/ui/foundation.css",
+        "/ui/design-system.css",
+        "/cw-value-report.css",
         "/cristal-assist.css",
         "/cw-auth.js",
-        "/ui/foundation.css",
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
         "/admin-auth-guard.js",
-        "/ui/design-system.css",
-        "/cristal-help-data.js",
-        "/cristal-assist.js",
-        "/ui/core/navigation-context.js",
-        "/crystal-os-v2-shell.js",
-        "/crystal-os-v2-nav.js",
-        "/ui/design-system.js"
-      ],
-      "missingAssets": [],
-      "testReferences": [],
-      "visualReview": "Não reavaliada por este inventário"
-    },
-    {
-      "file": "frontend/technician-profit.html",
-      "route": "/technician-profit",
-      "kind": "Entrada raiz",
-      "title": "Lucro por Técnico",
-      "catalogueRoles": [
-        "ADMIN"
-      ],
-      "guardFiles": [
-        "admin-auth-guard.js"
-      ],
-      "explicitRoleHints": [
-        "ADMIN"
-      ],
-      "conditionalAccess": [],
-      "entryRedirects": {},
-      "catalogueRolesMissingFromGuard": [],
-      "localAssets": [
-        "/manifest.webmanifest",
-        "/cristal-assist.css",
-        "/cw-auth.js",
-        "/ui/foundation.css",
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
-        "/admin-auth-guard.js",
-        "/ui/design-system.css",
+        "/cw-value-report.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
         "/ui/core/navigation-context.js",
@@ -3570,7 +3535,47 @@
       ],
       "missingAssets": [],
       "testReferences": [
-        "test-fcs-sec-tech-auth.js"
+        "test-field-operational-values-ui.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/technician-profit.html",
+      "route": "/technician-profit",
+      "kind": "Entrada raiz",
+      "title": "Atividade e valores por técnico — Cristal Water",
+      "catalogueRoles": [
+        "ADMIN"
+      ],
+      "guardFiles": [
+        "admin-auth-guard.js"
+      ],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/ui/foundation.css",
+        "/ui/design-system.css",
+        "/cw-value-report.css",
+        "/cristal-assist.css",
+        "/cw-auth.js",
+        "/admin-auth-guard.js",
+        "/cw-value-report.js",
+        "/cristal-help-data.js",
+        "/cristal-assist.js",
+        "/ui/core/navigation-context.js",
+        "/crystal-os-v2-shell.js",
+        "/crystal-os-v2-nav.js",
+        "/ui/design-system.js"
+      ],
+      "missingAssets": [],
+      "testReferences": [
+        "test-fcs-sec-tech-auth.js",
+        "test-field-operational-values.js",
+        "test-field-operational-values-ui.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },

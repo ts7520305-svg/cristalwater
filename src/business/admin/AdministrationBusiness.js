@@ -612,6 +612,11 @@ async function updateCompanyReports(moduleId, payload = {}, actorCtx = {}) {
     revenue: revenue.ok ? revenue.report : null,
     technicianProfitability: techProfitability.ok ? techProfitability.technicians : [],
     customerProfitability: customerProfitability.ok ? customerProfitability.clients : [],
+    profitabilityStatus: 'NOT_ESTABLISHED',
+    profitabilitySources: {
+      technician: techProfitability.ok ? { basis:techProfitability.basis, dataQuality:techProfitability.dataQuality, financialComplete:false } : null,
+      customer: customerProfitability.ok ? { basis:customerProfitability.basis, dataQuality:customerProfitability.dataQuality, financialComplete:false } : null,
+    },
     purchases,
     recentAudit: audit,
     generatedAt: nowIso(),

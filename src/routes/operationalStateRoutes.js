@@ -70,8 +70,11 @@ router.post('/stock-audit', allowRoles('ADMIN', 'TEAM_LEADER'), async (req, res)
 });
 
 router.post('/profitability/:clientId', allowRoles('ADMIN', 'TEAM_LEADER'), async (req, res) => {
-  const snapshot = await engine.computeClientProfit(req.params.clientId, req.body?.monthRef);
-  res.json({ ok: true, snapshot });
+  res.set('Cache-Control', 'private, no-store');
+  try {
+    const snapshot = await engine.computeClientProfit(req.params.clientId, req.body?.monthRef);
+    res.json({ ok: true, snapshot });
+  } catch (error) { res.status(error.status || 500).json({ok:false,error:error.status ? error.message : 'Não foi possível confirmar as fontes.'}); }
 });
 
 module.exports = router;

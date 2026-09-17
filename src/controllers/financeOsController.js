@@ -100,11 +100,15 @@ async function reportVatSummary(req, res) {
 }
 
 async function reportTechnicianProfitability(req, res) {
-  return send(res, await business.getTechnicianProfitabilityReport(req.query || {}));
+  res.set('Cache-Control', 'private, no-store');
+  try { return send(res, await business.getTechnicianProfitabilityReport(req.query || {})); }
+  catch (error) { return res.status(error.status || 500).json({ok:false,error:error.status ? error.message : 'Não foi possível confirmar o relatório.'}); }
 }
 
 async function reportCustomerProfitability(req, res) {
-  return send(res, await business.getCustomerProfitabilityReport(req.query || {}));
+  res.set('Cache-Control', 'private, no-store');
+  try { return send(res, await business.getCustomerProfitabilityReport(req.query || {})); }
+  catch (error) { return res.status(error.status || 500).json({ok:false,error:error.status ? error.message : 'Não foi possível confirmar o relatório.'}); }
 }
 
 async function automationReminders(req, res) {

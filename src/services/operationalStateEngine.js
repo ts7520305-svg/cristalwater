@@ -181,18 +181,16 @@ async function distributeEmergencyConsumption(batchId) {
   return { ok: true, visits: visits.length, distributed: perVisit };
 }
 
-async function computeClientProfit(clientId, monthRef = getMonthRef()) {
-  const invoices = await prisma.invoice.findMany({ where: { clientId: Number(clientId), OR: [{ monthRef }, { month: monthRef }] } });
-  const revenue = invoices.reduce((s, i) => s + num(i.amountPaid || i.total || i.totalAmount || i.amount), 0);
-  const movements = await prisma.stockMovement.findMany({ where: { clientId: Number(clientId), createdAt: { gte: new Date(`${monthRef}-01T00:00:00.000Z`) } } }).catch(() => []);
-  const chemicalCost = movements.reduce((s, m) => s + Math.abs(num(m.quantity)) * 1.5, 0);
-  const visits = await prisma.serviceVisit.count({ where: { clientId: Number(clientId), plannedDate: { gte: new Date(`${monthRef}-01T00:00:00.000Z`) }, status: { in: ['DONE', 'CONCLUIDA'] } } }).catch(() => 0);
-  const laborCost = visits * 12;
-  const grossProfit = revenue - chemicalCost - laborCost;
-  const margin = revenue > 0 ? (grossProfit / revenue) * 100 : 0;
-  const status = margin < 25 ? 'REVIEW_CONTRACT' : 'OK';
-  const recommendation = status === 'REVIEW_CONTRACT' ? 'Sugerir revisão de contrato no próximo mês.' : 'Rentabilidade dentro do esperado.';
-  return prisma.clientProfitSnapshot.upsert({ where: { clientId_monthRef: { clientId: Number(clientId), monthRef } }, update: { revenue, chemicalCost, laborCost, grossProfit, grossMarginPercent: margin, status, recommendation }, create: { clientId: Number(clientId), monthRef, revenue, chemicalCost, laborCost, grossProfit, grossMarginPercent: margin, status, recommendation } });
+async function computeClientProfit(clientId, monthRef) {
+  if (!/^[1-9]\d*$/.test(String(clientId)) || !Number.isSafeInteger(Number(clientId))) throw Object.assign(new Error('Cliente inválido.'), { status: 400 });
+  const report = await require('./operationalValueReportService').clients(monthRef === undefined ? {} : { monthRef });
+  const row = report.clients.find(client => client.clientId === Number(clientId));
+  if (!row) throw Object.assign(new Error('Cliente não encontrado.'), { status: 404 });
+  // Unknown costs cannot justify a persisted profit or a contract-price recommendation.
+  return { ...row, clientId: Number(clientId), monthRef: report.monthRef, reportVersion: report.reportVersion,
+    grossProfit: null, grossMarginPercent: null, chemicalCost: null, status: 'INSUFFICIENT_DATA', persisted: false,
+    recommendation: 'Confirme a repartição das receitas e os custos históricos antes de avaliar a margem.',
+    basis: report.basis, dataQuality: report.dataQuality };
 }
 
 async function createVehicleAudit({ vehicleId, technicianId, counted = [], weekRef = getWeekRef(), notes }) {

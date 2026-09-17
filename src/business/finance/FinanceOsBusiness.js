@@ -773,80 +773,11 @@ async function getVatSummaryReport() {
 }
 
 async function getTechnicianProfitabilityReport(query = {}) {
-  const monthRef = String(query.monthRef || monthRefFromDate()).trim();
-  const limit = clampLimit(query.limit, 10000, 100, 20000);
-  const start = new Date(`${monthRef}-01T00:00:00.000Z`);
-  const end = new Date(start);
-  end.setUTCMonth(end.getUTCMonth() + 1);
-
-  const [technicians, visits, movements] = await Promise.all([
-    repository.listTechnicians({ take: 200 }),
-    repository.listServiceVisits({ plannedDate: { gte: start, lt: end } }, { take: limit }),
-    repository.listStockMovements({ createdAt: { gte: start, lt: end } }, { take: limit }),
-  ]);
-
-  const costByTech = new Map();
-  for (const movement of movements) {
-    const techId = Number(movement.technicianId || 0);
-    if (!techId) continue;
-    costByTech.set(techId, asMoney(costByTech.get(techId), 0) + asMoney(movement.quantity, 0) * 1.5);
-  }
-
-  const report = technicians.map((technician) => {
-    const techVisits = visits.filter((visit) => Number(visit.technicianId || 0) === technician.id);
-    const visitsDone = techVisits.filter((visit) => String(visit.status || "").toUpperCase().includes("DONE") || String(visit.status || "").toUpperCase().includes("CONCL")).length;
-    const estimatedRevenue = visitsDone * 45;
-    const stockCost = asMoney(costByTech.get(technician.id), 0);
-    const profitability = estimatedRevenue - stockCost;
-    return {
-      technicianId: technician.id,
-      technicianName: technician.name,
-      visitsDone,
-      estimatedRevenue,
-      stockCost,
-      profitability,
-    };
-  });
-
-  return { ok: true, monthRef, technicians: report, limitApplied: limit };
+  return require('../../services/operationalValueReportService').technicians(query);
 }
 
 async function getCustomerProfitabilityReport(query = {}) {
-  const monthRef = String(query.monthRef || monthRefFromDate()).trim();
-  const limit = clampLimit(query.limit, 10000, 100, 20000);
-  const start = new Date(`${monthRef}-01T00:00:00.000Z`);
-  const end = new Date(start);
-  end.setUTCMonth(end.getUTCMonth() + 1);
-
-  const [clients, invoices, movements, visits] = await Promise.all([
-    repository.listClients({ active: true }, { take: 2000 }),
-    repository.getInvoices({ monthRef }, { take: limit }),
-    repository.listStockMovements({ createdAt: { gte: start, lt: end } }, { take: limit }),
-    repository.listServiceVisits({ plannedDate: { gte: start, lt: end } }, { take: limit }),
-  ]);
-
-  const byClient = clients.map((client) => {
-    const clientInvoices = invoices.filter((invoice) => Number(invoice.clientId) === client.id);
-    const revenue = clientInvoices.reduce((sum, invoice) => sum + invoicePaid(invoice), 0);
-    const outstanding = clientInvoices.reduce((sum, invoice) => sum + invoiceOpen(invoice), 0);
-    const stockCost = movements
-      .filter((movement) => Number(movement.clientId || 0) === client.id)
-      .reduce((sum, movement) => sum + asMoney(movement.quantity, 0) * 1.5, 0);
-    const laborCost = visits.filter((visit) => Number(visit.clientId || 0) === client.id).length * 12;
-    const profitability = revenue - stockCost - laborCost;
-
-    return {
-      clientId: client.id,
-      clientName: client.name,
-      revenue,
-      outstanding,
-      stockCost,
-      laborCost,
-      profitability,
-    };
-  });
-
-  return { ok: true, monthRef, clients: byClient, limitApplied: limit };
+  return require('../../services/operationalValueReportService').clients(query);
 }
 
 async function triggerReminderAutomation(actor = "finance-os") {

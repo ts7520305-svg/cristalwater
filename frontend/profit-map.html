@@ -1,169 +1,22 @@
-<!DOCTYPE html>
-<html lang="pt">
-<head>
-<meta charset="UTF-8">
-<title>Mapa Lucro Inteligente</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-
-<link rel="stylesheet" href="/ui/foundation.css">
-
-<style>
-body { margin:0; font-family:Arial; }
-#map { width:100%; height:100vh; }
-
-.top {
-  position:absolute;
-  top:10px;
-  left:10px;
-  z-index:1000;
-  background:white;
-  padding:10px;
-  border-radius:10px;
-}
-
-button {
-  padding:8px;
-  border:none;
-  border-radius:6px;
-  background:#1e88e5;
-  color:white;
-  cursor:pointer;
-}
-</style>
-<link rel="stylesheet" href="/cristal-assist.css">
-  <script src="/cw-auth.js"></script>
-  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
-  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
-  <link rel="stylesheet" href="/ui/design-system.css">
-</head>
-
-<body data-required-role="ADMIN">
-
-<div style="padding:12px 16px 0">
-  <button type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
+<!doctype html>
+<html lang="pt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trabalho planeado — Cristal Water</title>
+<link rel="stylesheet" href="/ui/foundation.css"><link rel="stylesheet" href="/ui/design-system.css">
+<link rel="stylesheet" href="/cw-admin-map.css">
+<link rel="stylesheet" href="/cristal-assist.css"><script src="/cw-auth.js"></script><script src="/admin-auth-guard.js"></script></head>
+<body data-required-role="ADMIN"><main class="admin-map-page" data-cw-state-managed="manual" data-cw-form-memory="managed">
+<h1>Trabalho planeado</h1>
+<p>Visitas regulares e extra agendadas para o dia selecionado e ainda por iniciar. Inclui técnicos inativos, visitas sem técnico e locais sem coordenadas.</p>
+<p>A atribuição corresponde às visitas registadas. Os pontos mostram as piscinas e não definem uma ordem de deslocação. Tempos de viagem, disponibilidade da equipa e lucro estão por apurar.</p>
+<p><a href="/admin-rounds">Gerir rotas e rondas</a> · <a href="/multi-map">Consultar todas as visitas do dia</a> · <a href="/technician-profit-dashboard">Consultar atividade e valores por técnico</a></p>
+<div class="map-controls">
+<label for="mapDate">Dia<input id="mapDate" type="date" required></label>
+<button id="mapLoad" type="button">Atualizar planeamento</button>
+<label for="mapTechnician">Técnico<select id="mapTechnician" disabled></select></label>
 </div>
-
-<div class="top">
-  <div id="statusLine" style="font-size:12px;color:#334155;margin-bottom:8px;max-width:220px;">A carregar rota por lucro...</div>
-  <button onclick="load()">Atualizar</button>
-</div>
-
-<div id="map"></div>
-
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script src="/admin-auth-guard.js"></script>
-
-<script>
-const API = "/api";
-
-function token(){
-  return localStorage.getItem("token") || localStorage.getItem("authToken") || localStorage.getItem("cwAdminToken") || "";
-}
-
-function authHeaders(){
-  const t = token();
-  return t ? { Authorization: `Bearer ${t}` } : {};
-}
-
-function setStatus(message){
-  const line = document.getElementById("statusLine");
-  if (line) line.textContent = message;
-}
-
-async function fetchJson(path){
-  const res = await fetch(`${API}${path}`, { headers: { ...authHeaders() } });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok || data.ok === false) {
-    throw new Error(data.error || data.message || `Erro ${res.status}`);
-  }
-  return data;
-}
-
-const map = L.map('map').setView([37.1, -8.6], 10);
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-  maxZoom:19
-}).addTo(map);
-
-let routeLine;
-let markers = [];
-
-// ==========================================================
-// LOAD ROTA POR LUCRO
-// ==========================================================
-
-async function load(){
-  try {
-    setStatus("A carregar plano...");
-
-    const data = await fetchJson("/routes/auto-plan");
-
-    if (!data.ok) {
-      setStatus("Plano indisponível.");
-      return;
-    }
-
-    const plan = Array.isArray(data.plans) ? data.plans[0] : null;
-    if (!plan || !Array.isArray(plan.route) || !plan.route.length) {
-      setStatus("Sem rota disponível.");
-      return;
-    }
-
-    markers.forEach((m) => map.removeLayer(m));
-    markers = [];
-    const coords = [];
-
-    plan.route.forEach(p => {
-      if (!Number.isFinite(Number(p.latitude)) || !Number.isFinite(Number(p.longitude))) return;
-
-      const color =
-        p.type === "EXTRA" ? "red" :
-        Number(p.profit) < 0 ? "black" :
-        "green";
-
-      const marker = L.circleMarker([p.latitude, p.longitude], {
-        color,
-        radius:8
-      })
-      .addTo(map)
-      .bindPopup(`
-        <b>${p.name || "Piscina"}</b><br>
-        Cliente: ${p.client || "-"}<br>
-        Lucro: €${Number(p.profit || 0).toFixed(2)}
-      `);
-      markers.push(marker);
-
-      coords.push([p.latitude, p.longitude]);
-    });
-
-    if (!coords.length) {
-      setStatus("Sem coordenadas válidas na rota.");
-      return;
-    }
-
-    if (routeLine) map.removeLayer(routeLine);
-
-    routeLine = L.polyline(coords,{
-      color:"blue",
-      weight:4
-    }).addTo(map);
-
-    map.fitBounds(routeLine.getBounds(), { padding: [20, 20] });
-    setStatus(`Paragens na rota: ${coords.length}`);
-  } catch (e) {
-    setStatus(e.message || "Erro ao carregar rota");
-  }
-}
-
-load();
-</script>
-
-<script src="/cristal-help-data.js"></script>
-<script src="/cristal-assist.js"></script>
-<script src="/ui/core/navigation-context.js"></script>
-  <script src="/crystal-os-v2-shell.js"></script>
-  <script src="/crystal-os-v2-nav.js"></script>
-</html>
-<script defer src="/ui/design-system.js"></script>
+<p id="mapStatus" role="status" aria-live="polite"></p><p id="mapNotice" role="status"></p>
+<div id="map" role="region" aria-label="Mapa com localizações confirmadas"></div><div id="mapList"></div>
+</main>
+<script src="/cw-admin-map.js"></script><script src="/profit-map.js"></script>
+<script src="/cristal-help-data.js"></script><script src="/cristal-assist.js"></script><script src="/ui/core/navigation-context.js"></script><script src="/crystal-os-v2-shell.js"></script><script src="/crystal-os-v2-nav.js"></script><script defer src="/ui/design-system.js"></script>
+</body></html>

@@ -96,96 +96,10 @@ router.post('/extras/confirm', (req,res) => res.status(409).json({ok:false,code:
 // ==========================================================
 // 🔥 LUCRO REAL + ALERTAS
 // ==========================================================
-router.get("/technician-profit", async (req, res) => {
-  try {
-
-    const { month, year } = req.query;
-
-    let start = null;
-    let end = null;
-
-    if (month && year) {
-      start = new Date(year, month - 1, 1);
-      end = new Date(year, month, 1);
-    }
-
-    const techs = await prisma.user.findMany({
-      where: { role: "tecnico" }
-    });
-
-    const visits = await prisma.serviceVisit.findMany({
-      where: {
-        technicianName: { not: null },
-        ...(start && end
-          ? {
-              OR: [
-                { startAt: { gte: start, lt: end } },
-                { endAt: { gte: start, lt: end } }
-              ]
-            }
-          : {})
-      }
-    });
-
-    const extras = await prisma.extraVisit.findMany({
-      where: {
-        billed: true,
-        ...(start && end
-          ? { billedAt: { gte: start, lt: end } }
-          : {})
-      },
-      include: { user: true }
-    });
-
-    const result = {};
-    const alerts = {};
-
-    const techByName = {};
-    techs.forEach(t => {
-      techByName[t.name] = t;
-    });
-
-    techs.forEach(t => {
-      result[t.id] = {
-        technician: t.name,
-        visits: 0,
-        revenue: 0,
-        cost: 0,
-        profit: 0,
-        costPerVisit: t.costPerVisit || 0
-      };
-    });
-
-    visits.forEach(v => {
-      const tech = techByName[v.technicianName];
-      if (!tech) return;
-      result[tech.id].visits += 1;
-    });
-
-    extras.forEach(e => {
-      if (!e.userId) return;
-      if (!result[e.userId]) return;
-      result[e.userId].revenue += Number(e.price || 0);
-    });
-
-    Object.values(result).forEach(t => {
-      t.cost = t.visits * t.costPerVisit;
-      t.profit = t.revenue - t.cost;
-
-      if (t.profit < 0) {
-        alerts[t.technician] = t;
-      }
-    });
-
-    const ranking = Object.values(result)
-      .sort((a,b)=>b.profit-a.profit);
-
-    res.json({ ok:true, ranking, alerts });
-
-  } catch (err) {
-    console.error(err);
-    res.json({ ok:false });
-  }
+router.get('/technician-profit', async (req, res) => {
+  res.set('Cache-Control', 'private, no-store');
+  try { res.json(await require('../services/operationalValueReportService').technicians(req.query)); }
+  catch (error) { res.status(error.status || 500).json({ok:false,error:error.status ? error.message : 'Não foi possível confirmar o relatório.'}); }
 });
 
 module.exports = router;

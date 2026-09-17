@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `d7a5f9994ccf885b01cb39f05ee0384b06a1f1fb`. Gerado em 2026-09-17T17:37:29.344Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `f45082e48537cc22323c642a3ee0c01341176348`. Gerado em 2026-09-17T18:24:59.367Z. Inclui o estado dos ficheiros locais no momento da geração.
 
 101 ficheiros HTML: 94 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 149 scripts de integração/navegador ativos. 52 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 152 scripts de integração/navegador ativos. 54 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 As colunas de papéis distinguem o catálogo anterior dos indícios explícitos no HTML/scripts. Não são uma auditoria de autorização: as APIs, a atribuição atual e o comportamento real de cada perfil continuam a determinar o acesso.
 
@@ -108,7 +108,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /multi-map | Entrada raiz | ADMIN | ADMIN | 1 |
 | /notifications | Entrada raiz | ADMIN | ADMIN | 12 |
 | /operational-dashboard | Entrada raiz | ADMIN | ADMIN | 0 |
-| /profit-map | Entrada raiz | ADMIN | ADMIN | 0 |
+| /profit-map | Entrada raiz | ADMIN | ADMIN | 1 |
 | /ranking | Entrada raiz | ADMIN | ADMIN | 1 |
 | /report-center | Entrada raiz | ADMIN | ADMIN | 0 |
 | /report-settings | Entrada raiz | ADMIN | ADMIN | 0 |
@@ -124,8 +124,8 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /technician-map | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 4 |
 | /technician-new-client | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 0 |
 | /technician-profile | Entrada raiz | — | TEAM_LEADER, TECHNICIAN | 2 |
-| /technician-profit-dashboard | Entrada raiz | ADMIN | ADMIN | 0 |
-| /technician-profit | Entrada raiz | ADMIN | ADMIN | 1 |
+| /technician-profit-dashboard | Entrada raiz | ADMIN | ADMIN | 1 |
+| /technician-profit | Entrada raiz | ADMIN | ADMIN | 3 |
 | /technician-route | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 2 |
 | /technician-visit | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 1 |
 | /technician | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 3 |

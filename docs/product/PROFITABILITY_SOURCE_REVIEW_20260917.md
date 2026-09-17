@@ -1,6 +1,6 @@
 # Revisão das fontes de rentabilidade — 17/09/2026
 
-Revisão complementar às TASK234–235. Estes defeitos permanecem abertos; a aprovação dos mapas não os corrige. Não substituir a fonte antiga pela Finance OS sem rever a metodologia.
+Diagnóstico histórico da base TASK234–235. As TASK236–237 corrigem os relatórios e substituem o planeador inválido por consulta de trabalho realmente agendado. Implementação e ensaios locais em `OPERATIONAL_VALUES_AND_PLANNED_WORK_20260917.md`; CI/restauro do novo lote ainda pendentes neste registo. A rentabilidade total continua por apurar: fontes documentais e estimativas não substituem repartição de receitas nem custos históricos.
 
 ## Reprodução em QA isolada
 

@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   function start(mode) {
-    const routeMode = mode === 'route', zonesMode = mode === 'zones', multiMode = mode === 'multi', list = document.getElementById('mapList'), status = document.getElementById('mapStatus'), notice = document.getElementById('mapNotice'), canvas = document.getElementById('map');
+    const routeMode = mode === 'route', zonesMode = mode === 'zones', plannedMode = mode === 'planned', multiMode = mode === 'multi' || plannedMode, list = document.getElementById('mapList'), status = document.getElementById('mapStatus'), notice = document.getElementById('mapNotice'), canvas = document.getElementById('map');
     const load = document.getElementById('mapLoad'), nearby = document.getElementById('mapNearby'), date = document.getElementById('mapDate'), tech = document.getElementById('mapTechnician');
     const showZones = document.getElementById('mapZonesShow'), hideZones = document.getElementById('mapZonesHide'), zoneSummary = document.getElementById('mapZonesSummary');
     const zoneNames = ['Sudoeste', 'Sudeste', 'Noroeste', 'Nordeste'];
@@ -161,7 +161,7 @@
       const selected = tech.value;
       const rows = selected === 'all' ? multiRows : multiRows.filter(row => String(row.technicianId ?? 'unassigned') === selected);
       render(rows);
-      state(rows.length ? 'ready' : 'empty', multiRows.length ? rows.length+' de '+multiRows.length+' visitas do dia · '+rows.filter(row => !row.point).length+' sem coordenadas válidas nesta seleção.' : 'Sem visitas operacionais para este dia.');
+      state(rows.length ? 'ready' : 'empty', multiRows.length ? rows.length+' de '+multiRows.length+' visitas '+(plannedMode ? 'por iniciar' : 'do dia')+' · '+rows.filter(row => !row.point).length+' sem coordenadas válidas nesta seleção.' : plannedMode ? 'Sem visitas planeadas por iniciar neste dia.' : 'Sem visitas operacionais para este dia.');
     }
     function multiVisitRows(data, chosenDate) {
       if (data?.ok !== true || data.date !== chosenDate || data.technicianId !== null || data.complete !== true || data.hasMore !== false || data.nextOffset !== null || data.offset !== 0 || !Array.isArray(data.visits) || data.total !== data.visits.length || data.returned !== data.visits.length) throw Error('A resposta não confirma a lista completa deste dia. Atualize para tentar novamente.');
@@ -171,8 +171,25 @@
         if (!v || !validId(v.id) || !['REGULAR','EXTRA'].includes(v.visitType) || typeof v.status !== 'string' || !v.status || (technicianId !== null && !validId(technicianId)) || typeof v.technician?.name !== 'string' || !v.pool || (v.pool.id != null && !validId(v.pool.id)) || typeof v.pool.name !== 'string' || (v.visitType === 'EXTRA' && (v.extraVisitId !== v.id || v.technicianId !== technicianId))) throw Error('A resposta contém visitas sem identidade confirmada. Atualize para tentar novamente.');
         if (technicianId !== null && names.has(technicianId) && names.get(technicianId) !== v.technician.name) throw Error('A resposta contém técnicos contraditórios. Atualize para tentar novamente.');
         names.set(technicianId, v.technician.name);
-        return { id: v.visitType+':'+v.id, visitId: v.id, visitLabel: v.visitType === 'EXTRA' ? 'Extra' : 'Regular', name: v.pool.id ? (v.pool.name && v.pool.name !== '-' ? v.pool.name : 'Piscina #'+v.pool.id) : 'Visita sem piscina associada', point: v.pool.id ? point(v.pool) : null, technicianId, technicianLabel: technicianId === null ? 'Sem técnico atribuído' : (v.technician.name || 'Técnico')+' · #'+technicianId, statusLabel: statusNames[v.status] || v.status };
+        return { id: v.visitType+':'+v.id, visitId: v.id, visitLabel: v.visitType === 'EXTRA' ? 'Extra' : 'Regular', name: v.pool.id ? (v.pool.name && v.pool.name !== '-' ? v.pool.name : 'Piscina #'+v.pool.id) : 'Visita sem piscina associada', point: v.pool.id ? point(v.pool) : null, technicianId, technicianLabel: technicianId === null ? 'Sem técnico atribuído' : (v.technician.name || 'Técnico')+' · #'+technicianId+(v.technician.active === false ? ' (inativo)' : ''), statusLabel: statusNames[v.status] || v.status };
       });
+    }
+    function plannedVisitRows(data, chosenDate) {
+      const invalid = () => Error('A resposta não confirma o trabalho planeado deste dia. Atualize para tentar novamente.');
+      if (data?.ok !== true || data.reportVersion !== 1 || data.mode !== 'assigned-work-preview' || data.date !== chosenDate || data.dayBasis !== 'SERVER_LOCAL_CIVIL_DAY' || data.complete !== true || data.readOnly !== true || !Number.isSafeInteger(data.total) || data.total < 0 || data.returned !== data.total || !Array.isArray(data.plans)) throw invalid();
+      const visits = [], owners = new Set();
+      for (const plan of data.plans) {
+        const t = plan?.technician, a = plan?.analytics;
+        if (!t || (t.id !== null && !validId(t.id)) || typeof t.name !== 'string' || (t.id === null ? t.active !== null : typeof t.active !== 'boolean') || owners.has(t.id) || !Array.isArray(plan.route) || !a || a.visits !== plan.route.length || a.totalMinutes !== null || a.overloaded !== null || a.profit !== null) throw invalid();
+        owners.add(t.id);
+        for (const v of plan.route) {
+          if (!v || !validId(v.visitId) || !['REGULAR','EXTRA'].includes(v.type) || v.id !== v.type+':'+v.visitId || v.technicianId !== t.id || v.status !== 'PLANNED' || v.startAt !== null || v.endAt !== null || v.profit !== null || v.estimatedMinutes !== null || typeof v.scheduledAt !== 'string' || !Number.isFinite(Date.parse(v.scheduledAt)) || !(v.type === 'EXTRA' ? v.dateBasis === 'SCHEDULED_AT' : ['PLANNED_DATE','LEGACY_DATE'].includes(v.dateBasis)) || (v.pool !== null && (!v.pool || !validId(v.pool.id) || (v.pool.name !== null && typeof v.pool.name !== 'string')))) throw invalid();
+          visits.push({id:v.visitId,visitType:v.type,extraVisitId:v.type === 'EXTRA'?v.visitId:null,technicianId:t.id,technician:t,status:v.status,pool:v.pool?{...v.pool,name:v.pool.name || ''}:{id:null,name:''}});
+        }
+        if (a.regular !== plan.route.filter(v=>v.type==='REGULAR').length || a.extras !== plan.route.filter(v=>v.type==='EXTRA').length || a.missingCoordinates !== plan.route.filter(v=>!point(v.pool)).length) throw invalid();
+      }
+      if (visits.length !== data.total) throw invalid();
+      return multiVisitRows({ok:true,date:chosenDate,technicianId:null,complete:true,hasMore:false,nextOffset:null,offset:0,visits,total:visits.length,returned:visits.length}, chosenDate);
     }
     async function query(proximity = false) {
       if (!active()) return;
@@ -185,7 +202,7 @@
         if (multiMode && (!date.checkValidity() || !chosenDate)) throw Error('Escolha uma data válida.');
         const origin = proximity || routeMode ? await position() : null;
         if (!currentQuery()) return;
-        const url = routeMode ? '/api/route/optimize?'+new URLSearchParams({ lat: origin[0], lng: origin[1], date: chosenDate, technicianId: chosenTech }) : multiMode ? '/api/technician/today?'+new URLSearchParams({ date: chosenDate }) : '/api/pools';
+        const url = routeMode ? '/api/route/optimize?'+new URLSearchParams({ lat: origin[0], lng: origin[1], date: chosenDate, technicianId: chosenTech }) : multiMode ? (plannedMode ? '/api/routes/auto-plan?' : '/api/technician/today?')+new URLSearchParams({ date: chosenDate }) : '/api/pools';
         state('loading', 'A confirmar os dados…');
         const { response, data } = await json(url, request.signal); if (!currentQuery()) return;
         let rows;
@@ -193,7 +210,7 @@
           if (response.headers.get('X-CW-Route-Date') !== chosenDate || response.headers.get('X-CW-Route-Technician') !== chosenTech || response.headers.get('X-CW-Route-Mode') !== 'proximity-preview' || !Array.isArray(data) || !data.every(v => v && validId(v.id) && v.technicianId === Number(chosenTech) && v.status === 'PLANNED' && !v.startAt && !v.endAt && (v.pool === null || (v.pool && validId(v.pool.id) && (v.pool.name === null || typeof v.pool.name === 'string'))))) throw Error('A resposta não confirma a seleção. Atualize para tentar novamente.');
           rows = data.map(v => ({ id: v.id, name: v.pool ? v.pool.name || 'Piscina #'+v.pool.id : 'Visita sem piscina associada', point: point(v.pool) }));
         } else if (multiMode) {
-          rows = multiVisitRows(data, chosenDate);
+          rows = plannedMode ? plannedVisitRows(data, chosenDate) : multiVisitRows(data, chosenDate);
         } else {
           if (data?.ok !== true || !Array.isArray(data.pools) || !data.pools.every(p => p && validId(p.id) && (p.name === null || typeof p.name === 'string'))) throw Error('A resposta de piscinas está incompleta. Atualize para tentar novamente.');
           rows = data.pools.map(p => ({ id: p.id, name: p.name || 'Piscina #'+p.id, point: point(p) }));

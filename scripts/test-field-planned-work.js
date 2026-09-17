@@ -1,0 +1,60 @@
+'use strict';
+require('../src/loadEnv')();
+const assert=require('node:assert/strict'),jwt=require('jsonwebtoken'),fs=require('node:fs'),path=require('node:path');
+const {chromium}=require('playwright'),{prisma}=require('../src/prismaClient'),{getJwtSecret}=require('../src/utils/jwtSecret');
+if(process.env.NODE_ENV!=='test'||process.env.QA_MODE!=='true'||process.env.QA_ENVIRONMENT_SAFE!=='true')throw Error('Isolated QA required');
+const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['127.0.0.1','localhost'].includes(new URL(base).hostname));let browser;
+(async()=>{
+ const stamp=Date.now(),day='2037-08-14',when=new Date(day+'T12:00:00'),admin=await prisma.user.findUniqueOrThrow({where:{email:process.env.ADMIN_EMAIL}});
+ const user={id:admin.id,userId:admin.id,role:'ADMIN',principalType:'USER'},token=jwt.sign(user,getJwtSecret(),{expiresIn:'1h'});
+ const call=async(url,credential=token)=>{const response=await fetch(base+url,{headers:{Authorization:'Bearer '+credential}});return{status:response.status,cache:response.headers.get('cache-control'),data:await response.json()};};
+ const client=await prisma.client.create({data:{name:'QA planned '+stamp}}),pool=await prisma.pool.create({data:{clientId:client.id,name:'<img src=x onerror=alert(1)> Planned '+stamp,latitude:0,longitude:0}}),unused=await prisma.pool.create({data:{clientId:client.id,name:'Unscheduled pool '+stamp,latitude:38,longitude:-9}});
+ const a=await prisma.technician.create({data:{name:'<b>Same technician</b> '+stamp,active:true}}),b=await prisma.technician.create({data:{name:a.name,active:false}}),idle=await prisma.technician.create({data:{name:'Idle without assigned work '+stamp}});
+ await prisma.user.create({data:{name:a.name,email:'qa-planned-'+stamp+'@qa.test',password:'not-used-by-qa',role:'tecnico'}});
+ const maxima=await Promise.all([prisma.serviceVisit.aggregate({_max:{id:true}}),prisma.extraVisit.aggregate({_max:{id:true}})]),sharedId=Math.max(...maxima.map(row=>row._max.id||0))+1;
+ const regular=await prisma.serviceVisit.create({data:{id:sharedId,clientId:client.id,poolId:pool.id,technicianId:a.id,plannedDate:when,status:'PLANNED'}});
+ const extra=await prisma.extraVisit.create({data:{id:sharedId,clientId:client.id,poolId:null,technicianId:b.id,scheduledAt:when,status:'PLANNED',price:99999}});
+ for(const model of ['ServiceVisit','ExtraVisit'])await prisma.$queryRawUnsafe(`SELECT setval(pg_get_serial_sequence('"${model}"','id'), ${sharedId}, true)`);
+ const legacy=await prisma.serviceVisit.create({data:{clientId:client.id,poolId:pool.id,technicianId:null,technicianName:a.name,plannedDate:null,date:when,status:'PLANNED'}});
+ await prisma.serviceVisit.createMany({data:Array.from({length:301},()=>({clientId:client.id,poolId:null,technicianId:a.id,plannedDate:when,status:'PLANNED'}))});
+ const excluded=[];
+ for(const patch of [{status:'DONE',endAt:when},{status:'CANCELLED'},{status:'PLANNED',startAt:when},{status:'PLANNED',endAt:when},{status:'IN_PROGRESS'}, {status:'PLANNED',plannedDate:new Date('2037-08-15T00:00:00'),date:when}])excluded.push(await prisma.serviceVisit.create({data:{clientId:client.id,poolId:pool.id,technicianId:a.id,plannedDate:when,...patch}}));
+ await prisma.extraVisit.createMany({data:[{clientId:client.id,poolId:pool.id,technicianId:a.id,status:'DONE',scheduledAt:when,endAt:when},{clientId:client.id,poolId:pool.id,technicianId:a.id,status:'PLANNED',scheduledAt:new Date('2037-08-15T00:00:00')}]});
+ const snapshot=async()=>({regular:await prisma.serviceVisit.findMany({where:{clientId:client.id},orderBy:{id:'asc'}}),extras:await prisma.extraVisit.findMany({where:{clientId:client.id},orderBy:{id:'asc'}})}),before=await snapshot();
+ const url='/api/routes/auto-plan?date='+day,result=await call(url),data=result.data,rows=data.plans.flatMap(p=>p.route);
+ assert.equal(result.status,200);assert.match(result.cache,/no-store/);assert.equal(data.mode,'assigned-work-preview');assert.equal(data.readOnly,true);assert.equal(data.complete,true);assert.equal(data.total,304);assert.equal(rows.length,304);assert.equal(data.returned,304);
+ assert(data.plans.some(p=>p.technician.id===b.id&&p.technician.active===false));assert(data.plans.some(p=>p.technician.id===null&&p.route.some(v=>v.id==='REGULAR:'+legacy.id)));
+ assert(rows.some(v=>v.id==='REGULAR:'+regular.id&&v.technicianId===a.id));assert(rows.some(v=>v.id==='EXTRA:'+extra.id&&v.technicianId===b.id));assert(!rows.some(v=>v.pool?.id===unused.id));
+ for(const v of rows){assert.equal(v.profit,null);assert.equal(v.estimatedMinutes,null);assert.equal(v.status,'PLANNED');assert.equal(v.startAt,null);assert.equal(v.endAt,null);}
+ for(const v of excluded)assert(!rows.some(row=>row.id==='REGULAR:'+v.id));for(const p of data.plans){assert.equal(p.analytics.totalMinutes,null);assert.equal(p.analytics.overloaded,null);}
+ const own=await call('/api/routes/today/'+b.id+'?date='+day);assert.equal(own.status,200);assert.equal(own.data.technicianId,b.id);assert.deepEqual(own.data.route.map(v=>v.id),['EXTRA:'+extra.id]);
+ const empty=await call('/api/routes/auto-plan?date=2037-08-16');assert.equal(empty.status,200);assert.equal(empty.data.total,0);assert.deepEqual(empty.data.plans,[]);
+ assert.equal((await call('/api/routes/today/'+idle.id+'?date='+day)).data.total,0);
+ for(const query of ['date=bad','date=2037-02-29','date=2037-08-14&date=2037-08-15'])assert.equal((await call('/api/routes/auto-plan?'+query)).status,400);
+ assert.equal((await call('/api/routes/today/1.5')).status,400);assert.equal((await call('/api/routes/today/2147483647')).status,404);
+ for(const principal of [{id:a.id,technicianId:a.id,role:'TECHNICIAN',principalType:'TECHNICIAN'},{id:client.id,clientId:client.id,role:'CLIENT',principalType:'CLIENT'}])for(const route of [url,'/api/routes/today/'+a.id])assert.equal((await call(route,jwt.sign(principal,getJwtSecret(),{expiresIn:'1h'}))).status,403);
+ assert.equal((await call(url,'')).status,401);
+ console.log('PASS planned work API: 304 real scheduled visits, typed IDs, homonyms/inactive/unassigned, legacy date precedence, no pool-created tasks, completion/start/cancellation/day bounds, complete and empty responses, Technician scope and permissions');
+ browser=await chromium.launch({headless:true,executablePath:process.env.CW_CHROMIUM_PATH,args:['--no-sandbox','--disable-dev-shm-usage']});
+ const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
+ await context.route('**/*',r=>new URL(r.request().url()).origin===new URL(base).origin?r.continue():r.abort());
+ await context.addInitScript(({user,token})=>{for(const k of ['token','cristalwater_jwt'])localStorage.setItem(k,token);for(const k of ['user','cristalwater_user'])localStorage.setItem(k,JSON.stringify(user));localStorage.setItem('cw_language','pt');},{user,token});
+ const page=await context.newPage(),errors=[],writes=[];page.setDefaultTimeout(10000);page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(r.url().includes('/api/routes/')&&r.method()!=='GET')writes.push(r.url());});
+ const state=s=>page.waitForFunction(s=>document.getElementById('mapStatus').dataset.state===s,s),card=(type,id)=>page.locator('#mapList [data-record-id="'+type+':'+id+'"]');
+ await page.goto(base+'/profit-map',{waitUntil:'networkidle'});await page.locator('#mapDate').fill(day);await page.locator('#mapLoad').click();await state('ready');
+ assert.equal(await page.locator('#mapList article').count(),304);assert.equal(await page.locator('#mapNotice').getAttribute('data-state'),'unavailable');
+ assert.equal(await card('REGULAR',regular.id).locator('a').first().getAttribute('href'),'https://www.google.com/maps?q=0,0');assert.equal(await card('EXTRA',extra.id).locator('a').count(),0);assert.equal(await page.locator('#mapList img,#mapList b').count(),0);
+ await page.locator('#mapTechnician').selectOption(String(b.id));assert.equal(await page.locator('#mapList article').count(),1);assert.match(await card('EXTRA',extra.id).textContent(),/inativo/);
+ await page.locator('#mapTechnician').selectOption('unassigned');assert.equal(await page.locator('#mapList article').count(),1);assert.equal(await card('REGULAR',legacy.id).count(),1);
+ const visual=path.join(__dirname,'../reports/field-visual/planned-work-'+stamp);fs.mkdirSync(visual,{recursive:true});
+ for(const width of [320,390,1440]){await page.setViewportSize({width,height:900});await page.evaluate(()=>scrollTo(0,0));assert(await page.locator('.map-controls input,.map-controls select,.map-controls button,#mapList article').evaluateAll(nodes=>nodes.every(n=>{const r=n.getBoundingClientRect();return r.x>=0&&r.right<=innerWidth+1&&n.scrollWidth<=n.clientWidth+1;})));await page.screenshot({path:path.join(visual,'planned-'+width+'.png')});}
+ await page.locator('#mapDate').fill('2037-08-16');await state('idle');assert.equal(await page.locator('#mapList article').count(),0);await page.locator('#mapLoad').click();await state('empty');await page.locator('#mapDate').fill(day);
+ const endpoint='**/api/routes/auto-plan?*';let payload=data;await page.route(endpoint,r=>r.fulfill({json:payload}));
+ const altered=mutate=>{const copy=structuredClone(data);mutate(copy);return copy;};
+ for(const bad of [{ok:true,plans:[]},altered(d=>d.complete=false),altered(d=>d.date='2037-08-15'),altered(d=>d.total--),altered(d=>d.readOnly=false),altered(d=>d.plans[0].route[0].profit=99999),altered(d=>d.plans[0].route[0].technicianId=idle.id),altered(d=>d.plans[0].route[0].startAt=when.toISOString()),altered(d=>d.plans.push(d.plans[0]))]){payload=bad;await page.locator('#mapLoad').click();await state('error');assert.equal(await page.locator('#mapList article').count(),0);}
+ await page.unroute(endpoint);await page.locator('#mapLoad').click();await state('ready');
+ await page.evaluate(()=>{const box=document.createElement('div');box.id='aiSuggestions';document.body.append(box);});await page.addScriptTag({url:base+'/js/dashboard/dashboard-ai.js'});await page.evaluate(()=>loadAISuggestions());assert.equal(await page.locator('#aiSuggestions a').getAttribute('href'),'/profit-map');assert.doesNotMatch(await page.locator('#aiSuggestions').textContent(),/sobrecarregado|disponível para ajudar|prevê/);
+ await page.evaluate(()=>localStorage.setItem('cristalwater_user','changed'));await state('session');assert.equal(await page.locator('#mapList article').count(),0);assert(await page.locator('#mapLoad').isDisabled());assert.deepEqual(errors,[]);assert.deepEqual(writes,[]);assert.deepEqual(await snapshot(),before);
+ console.log('PASS planned work UI: all 304 visits, source assignment filter, literal names, absent/zero coordinates, map fallback, three widths, scope/count/profit/owner contradictions refused, retry/session clearing, truthful legacy widget and no assignment writes; evidence '+visual);
+ await context.close();
+})().catch(error=>{console.error(error);process.exitCode=1}).finally(async()=>{await browser?.close();await prisma.$disconnect();});
