@@ -4,9 +4,79 @@ const fs=require('node:fs');
 const path=require('node:path');
 const {chromium}=require('playwright');
 const source=file=>fs.readFileSync(path.join(__dirname,'../frontend',file),'utf8');
+async function clientGuardCases(browser){
+ // These unsigned fixtures exercise browser entry only; API signature/ownership tests run separately.
+ const jwt=payload=>Buffer.from('{"alg":"HS256"}').toString('base64url')+'.'+Buffer.from(JSON.stringify(payload)).toString('base64url')+'.browser-fixture';
+ const client={id:7,clientId:7,role:'CLIENT',name:'Cliente João'},exp=Math.floor(Date.now()/1000)+3600;
+ const work={'cwFieldOutbox:41':'[{"visitId":42,"pending":true}]','cwFieldDocuments:v2:TECH:41:TECHNICIAN:9:2026-09-17':'saved-guide','cwFieldAlertJournal:v2:USER:41:TEAM_LEADER:2026-09-17':'{unreadable-preserve','offline_visits':'legacy-unattributed-bytes','cw_language':'es'};
+ const cases=[
+  {name:'missing session',token:null,reason:'no_session'},
+  {name:'malformed credential',token:'broken',reason:'invalid_token'},
+  {name:'missing expiry',payload:{...client,exp:undefined},reason:'invalid_token'},
+  {name:'expired session',payload:{...client,exp:1},reason:'session_expired',shared:true},
+  {name:'malformed identity',userRaw:'{broken',reason:'invalid_session'},
+  {name:'null identity',userRaw:'null',reason:'invalid_session'},
+  {name:'different role',payload:{id:41,role:'TECHNICIAN',exp},reason:'invalid_session'},
+  {name:'different client',payload:{...client,clientId:8,exp},reason:'invalid_session'},
+  {name:'missing client identity',payload:{role:'CLIENT',exp},user:{role:'CLIENT'},reason:'invalid_session'},
+  {name:'unknown role',user:{id:7,role:'UNKNOWN'},payload:{id:7,role:'UNKNOWN',exp},reason:'invalid_session'},
+  {name:'valid legacy client',aliases:'legacy'},
+  {name:'valid canonical client',aliases:'canonical',shared:true},
+  {name:'valid settings page',route:'/settings',actual:true,shared:true},
+  {name:'failed storage read',storage:'read',reason:'guard_error'},
+  {name:'quota storing aliases',aliases:'canonical',storage:'quota',reason:'guard_error'},
+  {name:'silent lost alias write',aliases:'canonical',storage:'noop',reason:'guard_error'},
+  ...['TECHNICIAN','TEAM_LEADER','ADMIN'].map(role=>({name:'forbidden '+role,user:{id:41,role},payload:{id:41,role,exp},destination:role==='ADMIN'?'/admin-master-control':'/technician-field-mode'})),
+  ...['/client-portal','/client-portal.html','/client-portal/'].map(route=>({name:'administrator preview '+route,route,user:{id:1,role:'ADMIN'},payload:{id:1,role:'ADMIN',exp}})),
+  ...['/client_chat','/client_chat.html'].map(route=>({name:'administrator chat '+route,route,user:{id:1,role:'ADMIN'},payload:{id:1,role:'ADMIN',exp},destination:'/chat'})),
+ ];
+ for(const item of cases){
+  const context=await browser.newContext(),page=await context.newPage(),errors=[];
+  page.setDefaultTimeout(5000);page.on('pageerror',error=>errors.push(error.message));
+  const route=item.route||'/client-payments',expected=item.reason?'/client-login?reason='+item.reason:item.destination||route;
+  const token=item.token===undefined?jwt(item.payload||{...client,exp}):item.token,userRaw=item.userRaw===undefined?JSON.stringify(item.user||client):item.userRaw;
+  const identity={adminToken:'old-admin-credential',cw_client_id:'999',clientId:'999'};
+  if(item.aliases!=='legacy'){if(token)identity.cristalwater_jwt=token;identity.cristalwater_user=userRaw;}
+  if(item.aliases!=='canonical'){if(token)identity.token=token;identity.user=userRaw;}
+  await context.route('http://guard.test/**',request=>{
+   const url=new URL(request.request().url());
+   if(url.pathname==='/client-auth-guard.js')return request.fulfill({contentType:'application/javascript',body:source('client-auth-guard.js')});
+   if(url.pathname==='/cw-auth.js'&&item.shared)return request.fulfill({contentType:'application/javascript',body:source('cw-auth.js')});
+   if(url.pathname.startsWith('/api/'))return request.fulfill({json:{ok:true,settings:[]}});
+   if(/\.(?:js|css)$/.test(url.pathname))return request.fulfill({contentType:url.pathname.endsWith('.js')?'application/javascript':'text/css',body:''});
+   let body='<body>Destination</body>';
+   if(url.pathname===route)body=item.actual?source('settings.html'):'<html><head>'+(item.shared?'<script src="/cw-auth.js"></script>':'')+'<script src="/client-auth-guard.js"></script></head><body><p id="protected">Client</p><script>const user = {}; window.pageReady = true;</script></body></html>';
+   return request.fulfill({contentType:'text/html',body});
+  });
+  await page.goto('http://guard.test/seed');
+  await page.evaluate(seed=>{for(const [key,value]of Object.entries(seed))localStorage.setItem(key,value);},{...work,...identity});
+  if(item.storage)await page.addInitScript(({route,mode})=>{
+   if(location.pathname!==route)return;
+   const originalGet=Storage.prototype.getItem,originalSet=Storage.prototype.setItem;
+   Storage.prototype.getItem=function(key){if(mode==='read'&&key==='cristalwater_jwt')throw new DOMException('Unavailable','SecurityError');return originalGet.call(this,key);};
+   Storage.prototype.setItem=function(key,value){if(key==='token'){if(mode==='quota')throw new DOMException('Full','QuotaExceededError');if(mode==='noop')return;}return originalSet.call(this,key,value);};
+  },{route,mode:item.storage});
+  await page.goto('http://guard.test'+route);await page.waitForURL('http://guard.test'+expected);
+  if(expected===route){
+   if(item.actual)await page.locator('#list input').first().waitFor();else await page.waitForFunction(()=>window.pageReady===true);
+   assert.notEqual(await page.evaluate(()=>document.documentElement.style.visibility),'hidden',item.name);
+   const aliases=await page.evaluate(()=>['token','cristalwater_jwt','user','cristalwater_user'].map(key=>localStorage.getItem(key)));
+   assert.equal(aliases[0],token,item.name);assert.equal(aliases[1],token,item.name);assert.deepEqual(JSON.parse(aliases[2]),JSON.parse(aliases[3]));
+   if((item.user||client).role==='CLIENT')assert.deepEqual(await page.evaluate(()=>[localStorage.getItem('cw_client_id'),localStorage.getItem('clientId')]),['7','7']);
+  }else if(item.reason){
+   assert.deepEqual(await page.evaluate(keys=>keys.map(key=>localStorage.getItem(key)),['token','cristalwater_jwt','user','cristalwater_user','adminToken','cw_client_id','clientId']),Array(7).fill(null),item.name);
+  }else{
+   assert.equal(await page.evaluate(()=>localStorage.getItem('token')),token,item.name+' must keep the valid session');
+  }
+  assert.deepEqual(await page.evaluate(keys=>Object.fromEntries(keys.map(key=>[key,localStorage.getItem(key)])),Object.keys(work)),work,item.name+' must preserve every work byte');
+  assert.deepEqual(errors,[],item.name);await context.close();
+ }
+ console.log('PASS client guard: '+cases.length+' entry cases, preserved drafts/documents/corrupt legacy bytes, expiry/identity validation, storage failure, administrator preview/chat and real settings script');
+}
 (async()=>{
  const browser=await chromium.launch({headless:true,...(process.env.CW_CHROMIUM_PATH?{executablePath:process.env.CW_CHROMIUM_PATH}:{}),args:['--no-sandbox','--disable-dev-shm-usage']});
  try{
+  await clientGuardCases(browser);
   for(const file of ['login.js','admin-login.js','client-login.js','technician-login.js']){
    const page=await browser.newPage();let held;const bodies=[];const logs=[];page.on('console',msg=>logs.push(msg.text()));
    await page.route('http://localhost/**',route=>{

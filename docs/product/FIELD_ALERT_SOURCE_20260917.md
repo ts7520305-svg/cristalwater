@@ -22,7 +22,7 @@ O botão genérico «Resolver» escrevia RESOLVED num estado local global e reti
 | `run-1789638302898` | Novo grupo inicial e regressão completa de água/bomba EXTRA aprovados |
 | `run-1789638468519` | Grupo ampliado de alertas e recuperação documental aprovados; E2E detetou aviso antigo após passagem de responsabilidade, corrigido na atualização conjunta |
 | Ambiente recuperado | `run-1789640745090`: grupo final de alertas aprovado. `run-1789640852461`: E2E completo e recuperação documental aprovados. 388 unitários, quatro técnicos, 17 scripts de navegador e sintaxe de 539 ficheiros aprovados |
-| CI nativo | Publicar e confirmar árvore final com 124 grupos, 20 migrações existentes e restauro |
+| CI nativo | Commit `cda7aac67b9faa28eabc4fc65477c91a67e6e4df`, árvore `4eec75d434c917e97dfdc024a8b1f0e577666e8f`, execução `35210811898` aprovada: 124/124 grupos, 388 unitários/quatro técnicos, 17 scripts de navegador, 20 migrações e sintaxe de 539 ficheiros. Restauro de 110 tabelas e 32 ficheiros com linhas/hashes iguais em PostgreSQL 16 |
 
 O grupo novo usa API/base reais e Chromium: água/bomba efetivas, histórico legado de outra conta, duas janelas, falhas de gravação, corrupção, recarga offline, 320/390/1440 px, fecho físico no servidor, mudança de sessão com bloqueio pendente e mudança de dia. A leitura local nunca altera o estado físico na base.
 

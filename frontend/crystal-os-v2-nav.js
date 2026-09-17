@@ -88,9 +88,9 @@
         { label: '5. Tecnicos e equipa', links: [
           ['/admin-technicians', 'Tecnicos'],
           ['/admin-vehicles', 'Viaturas'],
-          ['/technician-guide', 'Guias de obra'],
-          ['/technician-guide?tab=transport', 'Guias de transporte'],
-          ['/technician-gps', 'Localizacao em campo']
+          ['/admin-vehicles#works', 'Guias de obra'],
+          ['/admin-vehicles#guides', 'Guias de transporte'],
+          ['/admin-live-map', 'Localizacao em campo']
         ]},
         { label: '6. Comercial', links: [
           ['/admin-crm', 'CRM comercial'],
@@ -121,7 +121,7 @@
         ]},
         { label: '10. Obras e logistica', links: [
           ['/admin-company-closures', 'Planeamento operacional'],
-          ['/technician-guide', 'Guias e assinaturas'],
+          ['/admin-vehicles#works', 'Guias e assinaturas'],
           ['/admin-vehicles', 'Frota']
         ]},
         { label: '11. Comunicacao', links: [

@@ -79,8 +79,8 @@
 | /settings | Settings | ADMIN | Admin Route Index | /crystal-os-v2-route-index | YES | Reachable through Route Index |
 | /splash | Splash | ADMIN | Admin Route Index | /crystal-os-v2-route-index | YES | Reachable through Route Index |
 | /technician-field-mode | Technician Field Mode | TECHNICIAN, ADMIN | Technician Menu | /technician-field-mode | YES | Direct in V2 navigation |
-| /technician-gps | Technician Gps | TECHNICIAN, ADMIN | Technician Menu | /crystal-os-v2-route-index | YES | Reachable through Route Index |
-| /technician-guide | Technician Guide | TECHNICIAN, ADMIN | Technician Menu | /technician-guide | YES | Direct in V2 navigation |
+| /technician-gps | Technician Gps | TECHNICIAN, TEAM_LEADER | Technician Menu | /technician-gps | YES | ADMIN uses /admin-live-map; current field guard remains restricted |
+| /technician-guide | Technician Guide | TECHNICIAN, TEAM_LEADER | Technician Menu | /technician-guide | YES | ADMIN uses /admin-vehicles#works or #guides; current field guard remains restricted |
 | /technician-login | Technician Login | PUBLIC | Technician Menu | /technician-login | YES | Direct in V2 navigation |
 | /technician-map | Technician Map | TECHNICIAN, ADMIN | Technician Menu | /technician-map | YES | Direct in V2 navigation |
 | /technician-new-client | Technician New Client | TECHNICIAN, ADMIN | Technician Menu | /crystal-os-v2-route-index | YES | Reachable through Route Index |

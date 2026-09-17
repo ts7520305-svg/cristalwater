@@ -78,6 +78,17 @@ let browser;
   await context.setOffline(false);
   console.log('PASS real TEAM_LEADER PIN login, assigned REGULAR/EXTRA route, forbidden foreign/admin resources and offline draft recovery');
 
+  for (const path of ['/client-payments', '/settings', '/client-portal']) {
+    await goto(path);
+    await page.waitForURL('**/technician-field-mode');
+    await page.waitForFunction(() => document.getElementById('fieldLoadError')?.hidden && document.querySelector('#visitList [data-visit-index]'));
+    assert.equal(await token(), pinToken, 'Wrong portal must keep the valid field session: ' + path);
+    assert.equal(await page.evaluate(key => localStorage.getItem(key), pinKey), pinDraft, 'Wrong portal must preserve the exact pending draft: ' + path);
+    await selectRegular();
+    assert.equal(await page.locator('#notes').inputValue(), 'Rascunho da sessão PIN');
+  }
+  console.log('PASS real client payment/settings/portal entry returns TEAM_LEADER to field with session and saved draft intact');
+
   for (const [path, selector, expected] of [
     ['/technician', '#status', 'Rota atualizada'],
     ['/technician-visit?visit=' + visit.id, '#statusBox', 'Ficha da visita pronta'],
