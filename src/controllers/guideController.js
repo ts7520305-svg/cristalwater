@@ -32,19 +32,20 @@ function transportGuideDocumentKey(guideId) {
 }
 
 function parseOfficialDocument(row) {
-  if (!row?.value) return null;
+  if (!row) return null;
   try {
     const document = JSON.parse(row.value);
-    return document && document.url ? document : null;
+    if (!document || typeof document.url !== 'string' || !document.url.trim()) throw Error('Invalid document');
+    return document;
   } catch (_) {
-    return null;
+    throw Error('O registo do documento oficial está ilegível. Confirme-o no escritório.');
   }
 }
 
 async function getTransportGuideOfficialDocument(guideId) {
   const row = await prisma.systemSetting.findUnique({
     where: { key: transportGuideDocumentKey(guideId) }
-  }).catch(() => null);
+  });
   return parseOfficialDocument(row);
 }
 
@@ -54,7 +55,7 @@ async function attachTransportGuideDocuments(guides) {
   const keys = rows.map((guide) => transportGuideDocumentKey(guide.id));
   const settings = await prisma.systemSetting.findMany({
     where: { key: { in: keys } }
-  }).catch(() => []);
+  });
   const byKey = new Map(settings.map((setting) => [setting.key, parseOfficialDocument(setting)]));
   return rows.map((guide) => ({
     ...guide,
@@ -632,7 +633,7 @@ async function enrichMovementsWithVisitContext(movements) {
     ? await prisma.serviceVisit.findMany({
         where: { id: { in: visitIds } },
         include: { pool: { include: { client: true } }, client: true, technician: true }
-      }).catch(() => [])
+      })
     : [];
   const byVisit = new Map(visits.map((visit) => [visit.id, visit]));
 
@@ -717,7 +718,7 @@ async function findVehicleInsurance(vehicleId) {
   return records.find(isInsuranceRecord) || null;
 }
 async function vehicleInsurancePayload(vehicleId) {
-  const vehicle = await prisma.vehicle.findUnique({ where: { id: n(vehicleId) } }).catch(() => null);
+  const vehicle = await prisma.vehicle.findUnique({ where: { id: n(vehicleId) } });
   const records = vehicle ? await prisma.vehicleMaintenanceRecord.findMany({where:{vehicleId:vehicle.id},orderBy:[{dueDate:'desc'},{createdAt:'desc'}]}) : [];
   const insurance = records.find(isInsuranceRecord) || null;
   const inspection = records.find(record => /INSPE|IPO/i.test(`${record.type} ${record.title}`)) || null;
@@ -1140,7 +1141,7 @@ async function getVehicleStock(req, res) {
       ? await enrichMovementsWithVisitContext(await prisma.vehicleStockMovement.findMany({
           where: { workGuideId: workGuide.id, movementType: "CONSUMPTION" },
           orderBy: { createdAt: "asc" }
-        }).catch(() => []))
+        }))
       : [];
     res.json({
       ok: true,
@@ -1205,7 +1206,7 @@ async function downloadWorkGuidePdf(req, res) {
     const movements = await enrichMovementsWithVisitContext(await prisma.vehicleStockMovement.findMany({
       where: { workGuideId: id, movementType: "CONSUMPTION" },
       orderBy: { createdAt: "asc" }
-    }).catch(() => []));
+    }));
     const productTotals = groupMovementTotals(movements, (move) => move.itemName);
     const locationTotals = groupMovementTotals(movements, (move) => move.locationLabel);
 

@@ -52,6 +52,7 @@
   let activeTechnician = null;
   let technicalProposals = [];
   let docsSource = "live";
+  let docsContext = null, docsRevision = 0, docsDetail = '', docsWarning = '';
   let docsCompliance = null;
   let documentsLoaded = false;
   let assistOptions = { loading: false, loadedKey: "", otherToday: [], tomorrow: [], error: "" };
@@ -77,7 +78,6 @@
   const FIELD_RETURN_CONTRACT_KEY = "cw:tech-field:return-contract:v1";
   const FIELD_UI_STATE_KEY = "cw:tech-field:ui-state:v1";
   const FIELD_LAST_EXPLICIT_FILTER_KEY = "cw:tech-field:last-explicit-filter:v1";
-  const FIELD_DOCS_CACHE_KEY_PREFIX = "cw:tech-field:docs-cache:v1:";
   const OP_EXCEPTION_STATE_KEY = "cw:tech-field:op-exception-state:v1";
   const OP_EXCEPTION_HISTORY_KEY = "cw:tech-field:op-exception-history:v1";
   const OP_EXCEPTION_COMMAND_BRIDGE_KEY = "cw:tech-field:op-exception-command:v1";
@@ -789,21 +789,12 @@
     return Boolean(activeTransportGuide?.id || activeWorkGuide?.guideId || activeWorkGuide?.guide?.id);
   }
 
-  function docsCacheKey(vehicleId) {
-    return `${FIELD_DOCS_CACHE_KEY_PREFIX}${String(vehicleId || "default")}`;
-  }
-
-  function readDocsCache(vehicleId) {
-    return storageRead(docsCacheKey(vehicleId), null);
-  }
-
-  function saveDocsCache(vehicleId, payload) {
-    if (!payload || !vehicleId) return;
-    storageWrite(docsCacheKey(vehicleId), {
-      savedAt: new Date().toISOString(),
-      vehicleId: String(vehicleId),
-      ...payload,
-    });
+  function clearFieldDocuments(message = '') {
+    ++docsRevision; docsContext = null; documentsLoaded = false;
+    activeTransportGuide = null; activeWorkGuide = null; activeWorkStock = []; activeInsurance = null; activeVehicle = null;
+    docsSource = 'unavailable'; docsDetail = ''; docsWarning = message;
+    renderTransportGuide(null, []); renderWorkGuide(null, [], []); renderInsurance(null, null, '');
+    renderDoseRows(); renderCrewStatus(); updateFieldDashboard(current());
   }
 
   function parseDateSafe(value) {
@@ -888,6 +879,8 @@
     const blockers = Object.entries(states)
       .filter(([, state]) => state.required && state.code !== "VALID")
       .map(([key, state]) => `${({transport:"Guia AT",workGuide:"Guia de obra",insurance:"Seguro",inspection:"Inspeção"})[key] || key}: ${state.label}`);
+    if (!documentsLoaded || !window.CWFieldDocuments.same(docsContext) || docsContext.vehicleId !== Number($('#vehicleId')?.value)) blockers.push('Documentos por confirmar para a sessão, viatura e dia atuais');
+    if (activeTransportGuide?.id && activeWorkGuide?.guideId && activeTransportGuide.id !== activeWorkGuide.guideId) blockers.push('As guias AT e de obra não correspondem. Atualize os documentos.');
     const readyForOperation = blockers.length === 0;
 
     return {
@@ -1018,7 +1011,9 @@
     if (center) {
       center.innerHTML = `
         <div class="doc-head"><span class="chip">Centro documental</span><strong class="${compliance.readyForOperation ? "status-ok" : "status-warn"}">${compliance.readyForOperation ? "Operacional" : "Bloqueado"}</strong></div>
-        <div class="doc-number">Fonte: ${docsSource === "cache" ? "offline sincronizado" : "online"}</div>
+        <div class="doc-number">Fonte: ${esc(({live:'online',cache:'cópia guardada',mixed:'parcial — inclui cópia guardada',unavailable:'por confirmar'})[docsSource] || 'por confirmar')}</div>
+        ${docsDetail ? `<div class="muted">${esc(docsDetail)}</div>` : ''}
+        ${docsWarning ? `<div class="muted" role="status">${esc(docsWarning)}</div>` : ''}
         <div class="doc-meta">
           <span>Guia AT: ${esc(compliance.states.transport.label)}</span>
           <span>Guia obra: ${esc(compliance.states.workGuide.label)}</span>
@@ -1474,7 +1469,7 @@
     if (progressMeta) progressMeta.textContent = visit ? (pending ? `${pending} visita(s) por concluir` : "Ronda pronta para fechar") : "Agenda livre neste momento";
 
     if (docsValue) docsValue.textContent = !documentsLoaded ? "A validar" : docsReady ? "Válidos" : "Rever";
-    if (docsMeta) docsMeta.textContent = !documentsLoaded ? "A confirmar a viatura" : docsReady ? "Obrigatórios confirmados" : "Abra Viatura para ver o que falta";
+    if (docsMeta) docsMeta.textContent = !documentsLoaded ? "A confirmar a viatura" : docsReady ? docsSource === 'live' ? "Obrigatórios confirmados" : "Cópia de hoje por confirmar" : "Abra Viatura para ver o que falta";
 
     const pendingPhotos = visitPhotos.filter(photo => photo.status !== "uploaded").length;
     const pendingRevision = ++fieldPendingRevision;
@@ -2562,109 +2557,42 @@
   }
 
   async function loadGuides(showFeedback = true) {
-    const vehicleInput = $("#vehicleId");
-    const technicianInput = $("#technicianId");
-    const vehicleId = (vehicleInput?.value || localStorage.getItem("cwVehicleId") || "").trim();
-    if (!vehicleId) { documentsLoaded = true; renderCrewStatus(); updateFieldDashboard(current()); return; }
-    documentsLoaded = false;
-    const technicianId = (technicianInput?.value || localStorage.getItem("cwTechnicianId") || "").trim();
-
-    if (vehicleInput) vehicleInput.value = vehicleId;
-    if (technicianInput) technicianInput.value = technicianId;
-    localStorage.setItem("cwVehicleId", vehicleId);
-    if (technicianId) localStorage.setItem("cwTechnicianId", technicianId);
-
-    const transportBox = $("#transportGuideBox");
-    const workBox = $("#workGuideBox");
-    if (transportBox) transportBox.innerHTML = '<div class="doc-number">A carregar guia AT...</div>';
-    if (workBox) workBox.innerHTML = '<div class="doc-number">A carregar guia de obra...</div>';
-
-    docsSource = "live";
-    const cachedDocs = readDocsCache(vehicleId);
-
-    const [transportResult, stockResult, insuranceResult] = await Promise.allSettled([
-      api(`/api/guides/transport/latest/${encodeURIComponent(vehicleId)}`),
-      api(`/api/guides/stock/${encodeURIComponent(vehicleId)}${technicianId ? `?technicianId=${encodeURIComponent(technicianId)}` : ""}`),
-      api(`/api/guides/vehicles/${encodeURIComponent(vehicleId)}/insurance`),
-    ]);
-
-    if (transportResult.status === "fulfilled") {
-      activeTransportGuide = transportResult.value.guide || null;
-      activeVehicle = activeTransportGuide?.vehicle || activeVehicle;
-      renderTransportGuide(transportResult.value.guide, transportResult.value.items);
-      docsSource = "live";
-    } else if (cachedDocs?.transport) {
-      activeTransportGuide = cachedDocs.transport.guide || null;
-      activeVehicle = cachedDocs.transport.vehicle || activeVehicle;
-      renderTransportGuide(cachedDocs.transport.guide, cachedDocs.transport.items || []);
-      docsSource = "cache";
-    } else {
-      activeTransportGuide = null;
-      renderTransportGuide(null, []);
-    }
-
-    if (stockResult.status === "fulfilled") {
-      activeWorkGuide = stockResult.value.workGuide || null;
-      activeWorkStock = stockResult.value.stock || activeWorkGuide?.items || [];
-      activeVehicle = activeWorkGuide?.vehicle || activeVehicle;
-      activeTechnician = activeWorkGuide?.technician || activeTechnician;
-      renderWorkGuide(stockResult.value.workGuide, stockResult.value.stock, stockResult.value.movements);
-      docsSource = "live";
-    } else if (cachedDocs?.work) {
-      activeWorkGuide = cachedDocs.work.workGuide || null;
-      activeWorkStock = cachedDocs.work.stock || [];
-      activeVehicle = cachedDocs.work.vehicle || activeVehicle;
-      renderWorkGuide(cachedDocs.work.workGuide, cachedDocs.work.stock || [], cachedDocs.work.movements || []);
-      docsSource = "cache";
-    } else {
-      activeWorkGuide = null;
-      activeWorkStock = [];
-      renderWorkGuide(null, [], []);
-    }
-
+    if (!sameFieldSession()) return;
+    const vehicleInput = $('#vehicleId'), technicianInput = $('#technicianId');
+    const vehicleId = Number(vehicleInput?.value || localStorage.getItem('cwVehicleId'));
+    clearFieldDocuments();
+    if (!Number.isSafeInteger(vehicleId) || vehicleId < 1) { docsWarning = 'Confirme a viatura atribuída antes de consultar documentos.'; renderCrewStatus(); return; }
+    const context = window.CWFieldDocuments.scope(fieldWriteSession, vehicleId), revision = docsRevision;
+    const relevant = () => revision === docsRevision && window.CWFieldDocuments.same(context) && Number(vehicleInput?.value) === vehicleId;
+    docsContext = context;
+    vehicleInput.value = String(vehicleId);
+    if (technicianInput) { technicianInput.value = String(fieldWriteSession.technicianId); technicianInput.readOnly = true; }
+    localStorage.setItem('cwVehicleId', String(vehicleId));
+    localStorage.setItem('cwTechnicianId', String(fieldWriteSession.technicianId));
+    $('#transportGuideBox').textContent = 'A carregar guia AT...';
+    $('#workGuideBox').textContent = 'A carregar guia de obra...';
+    const result = await window.CWFieldDocuments.load(context, relevant);
+    if (!result || !relevant()) return;
+    const transport = result.sections.transport?.data, work = result.sections.work?.data, insurance = result.sections.insurance?.data;
+    activeTransportGuide = transport?.guide || null;
+    activeWorkGuide = work?.workGuide || null;
+    activeWorkStock = work?.stock || [];
+    activeInsurance = insurance?.insurance || null;
+    activeVehicle = insurance?.vehicle || activeWorkGuide?.vehicle || activeTransportGuide?.vehicle || null;
+    renderTransportGuide(activeTransportGuide, transport?.items || []);
+    renderWorkGuide(activeWorkGuide, activeWorkStock, work?.movements || []);
+    renderInsurance(insurance?.vehicle || null, activeInsurance, vehicleId);
     renderDoseRows();
-
-    if (insuranceResult.status === "fulfilled") {
-      activeVehicle = insuranceResult.value.vehicle || activeVehicle;
-      activeInsurance = insuranceResult.value.insurance || null;
-      renderInsurance(insuranceResult.value.vehicle, insuranceResult.value.insurance, vehicleId);
-      docsSource = "live";
-    } else if (cachedDocs?.insurance) {
-      activeVehicle = cachedDocs.insurance.vehicle || activeVehicle;
-      activeInsurance = cachedDocs.insurance.insurance || null;
-      renderInsurance(cachedDocs.insurance.vehicle, cachedDocs.insurance.insurance, vehicleId);
-      docsSource = "cache";
-    } else {
-      activeInsurance = null;
-      renderInsurance(null, null, vehicleId);
-    }
-
-    if (transportResult.status === "fulfilled" || stockResult.status === "fulfilled" || insuranceResult.status === "fulfilled") {
-      saveDocsCache(vehicleId, {
-        transport: {
-          guide: activeTransportGuide,
-          items: transportResult.status === "fulfilled" ? (transportResult.value.items || []) : (cachedDocs?.transport?.items || []),
-          vehicle: activeTransportGuide?.vehicle || activeVehicle || null,
-        },
-        work: {
-          workGuide: activeWorkGuide,
-          stock: activeWorkStock,
-          movements: stockResult.status === "fulfilled" ? (stockResult.value.movements || []) : (cachedDocs?.work?.movements || []),
-          vehicle: activeWorkGuide?.vehicle || activeVehicle || null,
-        },
-        insurance: {
-          vehicle: activeVehicle || null,
-          insurance: activeInsurance || null,
-        },
-      });
-    }
-
+    const sources = Object.values(result.sources), hasCache = sources.includes('cache');
+    docsSource = sources.length === 3 && sources.every(source => source === 'live') ? 'live' : sources.length === 3 && sources.every(source => source === 'cache') ? 'cache' : sources.some(source => source === 'live' || source === 'cache') ? 'mixed' : 'unavailable';
+    docsDetail = ['transport', 'work', 'insurance'].map(kind => {
+      const title = ({transport:'Guia AT',work:'Guia de obra/stock',insurance:'Seguro/inspeção'})[kind], section = result.sections[kind];
+      return title + ': ' + (section ? (result.sources[kind] === 'cache' ? 'guardado em ' : 'consultado em ') + new Date(section.confirmedAt).toLocaleString('pt-PT') : 'indisponível');
+    }).join(' · ');
+    docsWarning = [result.warning, hasCache ? 'A cópia guardada não confirma alterações recentes. Os PDFs precisam de ligação.' : ''].filter(Boolean).join(' ');
     documentsLoaded = true;
-    updateFieldDashboard(current());
-    renderCrewStatus();
-
-    visitDraftManager.paint(currentDraftEntry);
-    if (showFeedback) toast(docsSource === "cache" ? "Documentos carregados em modo offline sincronizado." : "Guias atualizadas.");
+    renderCrewStatus(); updateFieldDashboard(current()); visitDraftManager.paint(currentDraftEntry);
+    if (showFeedback) toast(result.denied ? result.warning : docsSource === 'live' ? (result.warning || 'Guias atualizadas.') : 'Documentação com dados por confirmar. Consulte a origem de cada informação.');
   }
 
   function resetForm() {
@@ -3100,6 +3028,8 @@
   }
 
   function protectFieldRouteSession() {
+    if (sameFieldSession() && docsContext && !window.CWFieldDocuments.same(docsContext))
+      clearFieldDocuments('O dia mudou. Consulte os documentos atuais com rede.');
     if (!sameFieldSession()) {
       if (routeSessionBlocked) return;
       for(const url of photoPreviewCache.values())URL.revokeObjectURL(url); photoPreviewCache.clear();
@@ -3616,7 +3546,8 @@
         toast("Registo aberto para corrigir.");
         return;
       }
-      if (docsCompliance && !docsCompliance.readyForOperation) {
+      docsCompliance = computeDocsCompliance();
+      if (!docsCompliance.readyForOperation) {
         switchFieldTab("docs", true);
         document.querySelector("#documentCenterBox")?.scrollIntoView({ behavior: "smooth", block: "start" });
         toast(docsCompliance.reason || "Bloqueio operacional: faltam documentos obrigatórios da viatura.");
@@ -3715,6 +3646,8 @@
 
   const refreshDoseStockBtn = $("#refreshDoseStockBtn");
   if (refreshDoseStockBtn) refreshDoseStockBtn.onclick = () => loadGuides(true);
+  $('#vehicleId')?.addEventListener('input', () => clearFieldDocuments('A viatura mudou. Consulte os documentos antes de iniciar ou concluir.'));
+  if ($('#technicianId')) $('#technicianId').readOnly = true;
 
   const doseRows = $("#doseRows");
   if (doseRows) {
@@ -3777,7 +3710,8 @@
       if (!sameFieldSession() || visitKey() !== target) return;
       if (draftEntry.error || draftEntry.external || Object.keys(draftEntry.conflicts).length || draftEntry.request) { visitDraftManager.paint(draftEntry);toast($('#fieldSaveStatus').textContent);return; }
       try { readFieldDrafts(); } catch (error) { toast(error.message); return; }
-      if (!wasDone && docsCompliance && !docsCompliance.readyForOperation) {
+      docsCompliance = computeDocsCompliance();
+      if (!wasDone && !docsCompliance.readyForOperation) {
         switchFieldTab("docs", true);
         document.querySelector("#documentCenterBox")?.scrollIntoView({ behavior: "smooth", block: "start" });
         toast(docsCompliance.reason || "Bloqueio operacional: faltam documentos obrigatórios da viatura.");

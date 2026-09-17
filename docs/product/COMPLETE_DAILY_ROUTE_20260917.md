@@ -31,7 +31,7 @@ As caches de ronda passam a v3 porque as v2 podem conter o corte antigo. Os byte
 - `run-1789635538241`: `test-field-complete-daily-route.js`, recuperação moderna e recuperação antiga aprovados. Fixture com 305 REGULAR e 305 EXTRA, IDs iguais, visita de outro técnico, futura e cancelada; consulta completa, páginas concatenadas sem perda/duplicação, última página vazia e parâmetros inválidos.
 - Chromium real: última visita regular depois de 300, nota existente e recarga offline; mapa/rota/histórico com últimos registos; respostas parciais recusadas; revisão de fim de dia incompleta explícita; cache completa intacta; caches v2 modernas/antigas preservadas e consulta online cria v3 completa.
 - `run-1789635618707`: E2E completo, entrada TEAM_LEADER por PIN/email e rascunhos modernos com concorrência/fotografia EXTRA aprovados na árvore final. 388 unitários/quatro técnicos, 17 scripts de navegador e sintaxe de 539 ficheiros backend aprovados.
-- Runner integrado passa a 122 grupos. Confirmação nativa da árvore publicada e restauro ainda pendentes.
+- Confirmação nativa: commit `8a9cd6ac8ef92d7ed597263650c4c2c281ca9f16`, árvore `226889b0c01f12abc996d0d7ef725f21bf46ce5d`, CI `35203478060`, 122/122 grupos aprovados. 388 unitários/quatro técnicos, 17 scripts de navegador, 20 migrações, sintaxe de 539 ficheiros e restauro de 110 tabelas/32 ficheiros com linhas/hashes iguais em PostgreSQL 16. Backup `backup/task219-local-20260917`. O registo desta confirmação posterior é documental.
 
 ## Limites
 

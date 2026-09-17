@@ -16,6 +16,12 @@ function allowRoles(...roles) {
 
 router.use(auth());
 router.use(require('../middlewares/fieldVehicleScope'));
+// Related technicians/clients are operational context, not credential records.
+router.use((req, res, next) => {
+  const json = res.json.bind(res);
+  res.json = payload => json(JSON.parse(JSON.stringify(payload, (key, value) => ['pin', 'password', 'passwordHash', 'accessToken', 'refreshToken', 'resetToken'].includes(key) ? undefined : value)));
+  next();
+});
 
 const guideUploadDir = resolveUploadSubdir("guides");
 
