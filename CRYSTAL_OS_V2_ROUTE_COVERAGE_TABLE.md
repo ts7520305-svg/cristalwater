@@ -47,17 +47,17 @@
 | /billing-history | Billing History | ADMIN | Admin Route Index | /crystal-os-v2-route-index | YES | Reachable through Route Index |
 | /billing | Billing | ADMIN | Admin Route Index | /billing | YES | Direct in V2 navigation |
 | /chat | Chat | ADMIN | Admin Route Index | /crystal-os-v2-route-index | YES | Reachable through Route Index |
-| /client-dashboard | Client Dashboard | CLIENT, ADMIN | Customer Navigation | /crystal-os-v2-route-index | YES | Reachable through Route Index |
-| /client-history | Client History | CLIENT, ADMIN | Customer Navigation | /crystal-os-v2-route-index | YES | Reachable through Route Index |
+| /client-dashboard | Client Dashboard | CLIENT | Customer Navigation | /crystal-os-v2-route-index | YES | Reachable through Route Index |
+| /client-history | Client History | CLIENT | Customer Navigation | /crystal-os-v2-route-index | YES | Reachable through Route Index |
 | /client-login | Client Login | PUBLIC | Customer Navigation | /crystal-os-v2-route-index | YES | Reachable through Route Index |
-| /client-menu | Client Menu | CLIENT, ADMIN | Customer Navigation | /crystal-os-v2-route-index | YES | Reachable through Route Index |
-| /client-notifications | Client Notifications | CLIENT, ADMIN | Customer Navigation | /crystal-os-v2-route-index | YES | Reachable through Route Index |
-| /client-payments | Client Payments | CLIENT, ADMIN | Customer Navigation | /crystal-os-v2-route-index | YES | Reachable through Route Index |
+| /client-menu | Client Menu | CLIENT | Customer Navigation | /crystal-os-v2-route-index | YES | Reachable through Route Index |
+| /client-notifications | Client Notifications | CLIENT | Customer Navigation | /crystal-os-v2-route-index | YES | Reachable through Route Index |
+| /client-payments | Client Payments | CLIENT | Customer Navigation | /crystal-os-v2-route-index | YES | Reachable through Route Index |
 | /client-portal | Client Portal | CLIENT, ADMIN | Customer Navigation | /client-portal | YES | Direct in V2 navigation |
-| /client-wow | Client Wow | CLIENT, ADMIN | Customer Navigation | /crystal-os-v2-route-index | YES | Reachable through Route Index |
-| /client | Client | CLIENT, ADMIN | Customer Navigation | /crystal-os-v2-route-index | YES | Reachable through Route Index |
+| /client-wow | Client Wow | CLIENT | Customer Navigation | /crystal-os-v2-route-index | YES | Reachable through Route Index |
+| /client | Client | CLIENT | Customer Navigation | /crystal-os-v2-route-index | YES | Reachable through Route Index |
 | /client_chat | Client Chat | CLIENT, ADMIN | Customer Navigation | /crystal-os-v2-route-index | YES | Reachable through Route Index |
-| /client_tech | Client Tech | CLIENT, ADMIN | Customer Navigation | /crystal-os-v2-route-index | YES | Reachable through Route Index |
+| /client_tech | Client Tech | CLIENT | Customer Navigation | /crystal-os-v2-route-index | YES | Reachable through Route Index |
 | /communications | Communications | ADMIN | Admin Route Index | /communications | YES | Direct in V2 navigation |
 | /config-notifications | Config Notifications | ADMIN | Admin Route Index | /crystal-os-v2-route-index | YES | Reachable through Route Index |
 | /crystal-os-v2-route-index | Crystal Os V2 Route Index | ADMIN | Admin Route Index | /crystal-os-v2-route-index | YES | Direct in V2 navigation |
@@ -78,15 +78,15 @@
 | /route-map | Route Map | ADMIN | Admin Route Index | /crystal-os-v2-route-index | YES | Reachable through Route Index |
 | /settings | Settings | ADMIN | Admin Route Index | /crystal-os-v2-route-index | YES | Reachable through Route Index |
 | /splash | Splash | ADMIN | Admin Route Index | /crystal-os-v2-route-index | YES | Reachable through Route Index |
-| /technician-field-mode | Technician Field Mode | TECHNICIAN, ADMIN | Technician Menu | /technician-field-mode | YES | Direct in V2 navigation |
+| /technician-field-mode | Technician Field Mode | TECHNICIAN, TEAM_LEADER | Technician Menu | /technician-field-mode | YES | Direct in V2 navigation |
 | /technician-gps | Technician Gps | TECHNICIAN, TEAM_LEADER | Technician Menu | /technician-gps | YES | ADMIN uses /admin-live-map; current field guard remains restricted |
 | /technician-guide | Technician Guide | TECHNICIAN, TEAM_LEADER | Technician Menu | /technician-guide | YES | ADMIN uses /admin-vehicles#works or #guides; current field guard remains restricted |
 | /technician-login | Technician Login | PUBLIC | Technician Menu | /technician-login | YES | Direct in V2 navigation |
-| /technician-map | Technician Map | TECHNICIAN, ADMIN | Technician Menu | /technician-map | YES | Direct in V2 navigation |
-| /technician-new-client | Technician New Client | TECHNICIAN, ADMIN | Technician Menu | /crystal-os-v2-route-index | YES | Reachable through Route Index |
-| /technician-profit-dashboard | Technician Profit Dashboard | TECHNICIAN, ADMIN | Technician Menu | /crystal-os-v2-route-index | YES | Reachable through Route Index |
-| /technician-profit | Technician Profit | TECHNICIAN, ADMIN | Technician Menu | /crystal-os-v2-route-index | YES | Reachable through Route Index |
-| /technician-route | Technician Route | TECHNICIAN, ADMIN | Technician Menu | /technician-route | YES | Direct in V2 navigation |
-| /technician-visit | Technician Visit | TECHNICIAN, ADMIN | Technician Menu | /technician-visit | YES | Direct in V2 navigation |
-| /technician | Technician | ADMIN | Admin Route Index | /crystal-os-v2-route-index | YES | Reachable through Route Index |
+| /technician-map | Technician Map | TECHNICIAN, TEAM_LEADER | Technician Menu | /technician-map | YES | Direct in V2 navigation |
+| /technician-new-client | Technician New Client | TECHNICIAN, TEAM_LEADER | Technician Menu | /crystal-os-v2-route-index | YES | Reachable through Route Index |
+| /technician-profit-dashboard | Technician Profit Dashboard | ADMIN | Technician Menu | /crystal-os-v2-route-index | YES | Reachable through Route Index |
+| /technician-profit | Technician Profit | ADMIN | Technician Menu | /crystal-os-v2-route-index | YES | Reachable through Route Index |
+| /technician-route | Technician Route | TECHNICIAN, TEAM_LEADER | Technician Menu | /technician-route | YES | Direct in V2 navigation |
+| /technician-visit | Technician Visit | TECHNICIAN, TEAM_LEADER | Technician Menu | /technician-visit | YES | Direct in V2 navigation |
+| /technician | Technician | TECHNICIAN, TEAM_LEADER | Admin Route Index | /crystal-os-v2-route-index | YES | Reachable through Route Index |
 | /to-issue | To Issue | ADMIN | Admin Route Index | /crystal-os-v2-route-index | YES | Reachable through Route Index |

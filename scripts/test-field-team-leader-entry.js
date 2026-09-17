@@ -99,12 +99,18 @@ let browser;
     ['/technician-profile', '#profileGrid', 'TEAM_LEADER'],
     ['/technician-gps', '#gpsStatus', 'Pronto para iniciar GPS'],
   ]) {
-    await goto(path);
+    if (['/technician-guide', '/technician-history', '/technician-profile'].includes(path)) {
+      await goto('/technician');
+      const menu = page.locator('.cw-v2-sidebar');
+      assert.equal(await menu.locator('a[href^="/admin-"]').count(), 0, 'Technical menu must not offer administrative pages');
+      await menu.locator(`a[href="${path}"]`).first().click();
+      await page.waitForURL(base + path);
+    } else await goto(path);
     await page.waitForFunction(({ selector, expected }) => document.querySelector(selector)?.textContent.includes(expected), { selector, expected });
     assert.equal(await token(), pinToken, path + ' must keep the authenticated session');
     assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).visibility), 'visible', path);
   }
-  console.log('PASS leader entry into modern/legacy field, visit, route, map, guide, history, profile and GPS without logout');
+  console.log('PASS leader entry into modern/legacy field, visit, route, map and GPS; actual menu opens guide/history/profile without logout or administrative shortcuts');
 
   await goto('/login');
   await page.locator('#email').fill(email);

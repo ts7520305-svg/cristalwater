@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-17T10:47:52.126Z",
-  "baseCommit": "cda7aac67b9faa28eabc4fc65477c91a67e6e4df",
+  "generatedAt": "2026-09-17T11:30:53.488Z",
+  "baseCommit": "aafd1c8f599574984f6ddc678f50c1691f90f8ad",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
   "activeScriptsScanned": 141,
   "summary": {
@@ -8,8 +8,8 @@
     "rootPages": 94,
     "nestedPages": 7,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 42,
-    "catalogueGuardDifferences": 19
+    "pagesWithLiteralTestReference": 43,
+    "catalogueGuardDifferences": 3
   },
   "pages": [
     {
@@ -1501,7 +1501,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "testReferences": [
+        "test-auth-entry-browser.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -1821,8 +1823,7 @@
       "kind": "Entrada raiz",
       "title": "Cristal Water - Área do Cliente",
       "catalogueRoles": [
-        "CLIENT",
-        "ADMIN"
+        "CLIENT"
       ],
       "guardFiles": [
         "client-auth-guard.js"
@@ -1832,9 +1833,7 @@
       ],
       "conditionalAccess": [],
       "entryRedirects": {},
-      "catalogueRolesMissingFromGuard": [
-        "ADMIN"
-      ],
+      "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/manifest.webmanifest",
         "/client-auth-guard.js",
@@ -1859,8 +1858,7 @@
       "kind": "Entrada raiz",
       "title": "Cristal Water - Historico do Cliente",
       "catalogueRoles": [
-        "CLIENT",
-        "ADMIN"
+        "CLIENT"
       ],
       "guardFiles": [
         "client-auth-guard.js"
@@ -1870,9 +1868,7 @@
       ],
       "conditionalAccess": [],
       "entryRedirects": {},
-      "catalogueRolesMissingFromGuard": [
-        "ADMIN"
-      ],
+      "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/manifest.webmanifest",
         "/client-auth-guard.js",
@@ -1937,8 +1933,7 @@
       "kind": "Entrada raiz",
       "title": "Cristal Water - Menu do Cliente",
       "catalogueRoles": [
-        "CLIENT",
-        "ADMIN"
+        "CLIENT"
       ],
       "guardFiles": [
         "client-auth-guard.js"
@@ -1948,9 +1943,7 @@
       ],
       "conditionalAccess": [],
       "entryRedirects": {},
-      "catalogueRolesMissingFromGuard": [
-        "ADMIN"
-      ],
+      "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/manifest.webmanifest",
         "/client-auth-guard.js",
@@ -1981,8 +1974,7 @@
       "kind": "Entrada raiz",
       "title": "Cristal Water - Notificações",
       "catalogueRoles": [
-        "CLIENT",
-        "ADMIN"
+        "CLIENT"
       ],
       "guardFiles": [
         "client-auth-guard.js"
@@ -1992,9 +1984,7 @@
       ],
       "conditionalAccess": [],
       "entryRedirects": {},
-      "catalogueRolesMissingFromGuard": [
-        "ADMIN"
-      ],
+      "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/manifest.webmanifest",
         "/client-auth-guard.js",
@@ -2028,8 +2018,7 @@
       "kind": "Entrada raiz",
       "title": "Cristal Water - Pagamentos",
       "catalogueRoles": [
-        "CLIENT",
-        "ADMIN"
+        "CLIENT"
       ],
       "guardFiles": [
         "client-auth-guard.js"
@@ -2039,9 +2028,7 @@
       ],
       "conditionalAccess": [],
       "entryRedirects": {},
-      "catalogueRolesMissingFromGuard": [
-        "ADMIN"
-      ],
+      "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/manifest.webmanifest",
         "/client-auth-guard.js",
@@ -2064,6 +2051,7 @@
       ],
       "missingAssets": [],
       "testReferences": [
+        "test-field-team-leader-entry.js",
         "test-auth-entry-browser.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
@@ -2127,8 +2115,7 @@
       "kind": "Entrada raiz",
       "title": "Cristal Water - Portal do Cliente",
       "catalogueRoles": [
-        "CLIENT",
-        "ADMIN"
+        "CLIENT"
       ],
       "guardFiles": [
         "client-auth-guard.js"
@@ -2138,9 +2125,7 @@
       ],
       "conditionalAccess": [],
       "entryRedirects": {},
-      "catalogueRolesMissingFromGuard": [
-        "ADMIN"
-      ],
+      "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/cw-auth.js",
         "/client-auth-guard.js",
@@ -2166,8 +2151,7 @@
       "kind": "Entrada raiz",
       "title": "Cristal Water - Conta do Cliente",
       "catalogueRoles": [
-        "CLIENT",
-        "ADMIN"
+        "CLIENT"
       ],
       "guardFiles": [
         "client-auth-guard.js"
@@ -2177,9 +2161,7 @@
       ],
       "conditionalAccess": [],
       "entryRedirects": {},
-      "catalogueRolesMissingFromGuard": [
-        "ADMIN"
-      ],
+      "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/manifest.webmanifest",
         "/cristal-assist.css",
@@ -2263,8 +2245,7 @@
       "kind": "Entrada raiz",
       "title": "Cristal Water - Parametros da Piscina",
       "catalogueRoles": [
-        "CLIENT",
-        "ADMIN"
+        "CLIENT"
       ],
       "guardFiles": [
         "client-auth-guard.js"
@@ -2274,9 +2255,7 @@
       ],
       "conditionalAccess": [],
       "entryRedirects": {},
-      "catalogueRolesMissingFromGuard": [
-        "ADMIN"
-      ],
+      "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/manifest.webmanifest",
         "/ui/foundation.css",
@@ -3045,6 +3024,7 @@
       "testReferences": [
         "test-field-access-api.js",
         "test-fcs-sec-tech-auth.js",
+        "test-field-team-leader-entry.js",
         "test-auth-entry-browser.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
@@ -3112,7 +3092,7 @@
       "title": "Cristal Water - Técnico Campo V2",
       "catalogueRoles": [
         "TECHNICIAN",
-        "ADMIN"
+        "TEAM_LEADER"
       ],
       "guardFiles": [
         "technician-auth-guard.js"
@@ -3123,9 +3103,7 @@
       ],
       "conditionalAccess": [],
       "entryRedirects": {},
-      "catalogueRolesMissingFromGuard": [
-        "ADMIN"
-      ],
+      "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/ui/foundation.css",
         "/cw-ui-kit.css",
@@ -3349,7 +3327,7 @@
       "title": "Cristal Water - Mapa Tecnico",
       "catalogueRoles": [
         "TECHNICIAN",
-        "ADMIN"
+        "TEAM_LEADER"
       ],
       "guardFiles": [
         "technician-auth-guard.js"
@@ -3360,9 +3338,7 @@
       ],
       "conditionalAccess": [],
       "entryRedirects": {},
-      "catalogueRolesMissingFromGuard": [
-        "ADMIN"
-      ],
+      "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/manifest.webmanifest",
         "/cristal-assist.css",
@@ -3395,7 +3371,7 @@
       "title": "Cristal Water · Novo Cliente em Campo",
       "catalogueRoles": [
         "TECHNICIAN",
-        "ADMIN"
+        "TEAM_LEADER"
       ],
       "guardFiles": [
         "technician-auth-guard.js"
@@ -3406,9 +3382,7 @@
       ],
       "conditionalAccess": [],
       "entryRedirects": {},
-      "catalogueRolesMissingFromGuard": [
-        "ADMIN"
-      ],
+      "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/manifest.webmanifest",
         "/ui/foundation.css",
@@ -3464,7 +3438,6 @@
       "kind": "Entrada raiz",
       "title": "Lucro por Técnico",
       "catalogueRoles": [
-        "TECHNICIAN",
         "ADMIN"
       ],
       "guardFiles": [
@@ -3475,9 +3448,7 @@
       ],
       "conditionalAccess": [],
       "entryRedirects": {},
-      "catalogueRolesMissingFromGuard": [
-        "TECHNICIAN"
-      ],
+      "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/manifest.webmanifest",
         "/cristal-assist.css",
@@ -3504,7 +3475,6 @@
       "kind": "Entrada raiz",
       "title": "Lucro por Técnico",
       "catalogueRoles": [
-        "TECHNICIAN",
         "ADMIN"
       ],
       "guardFiles": [
@@ -3515,9 +3485,7 @@
       ],
       "conditionalAccess": [],
       "entryRedirects": {},
-      "catalogueRolesMissingFromGuard": [
-        "TECHNICIAN"
-      ],
+      "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/manifest.webmanifest",
         "/cristal-assist.css",
@@ -3547,7 +3515,7 @@
       "title": "Cristal Water - Rota Tecnica",
       "catalogueRoles": [
         "TECHNICIAN",
-        "ADMIN"
+        "TEAM_LEADER"
       ],
       "guardFiles": [
         "technician-auth-guard.js"
@@ -3558,9 +3526,7 @@
       ],
       "conditionalAccess": [],
       "entryRedirects": {},
-      "catalogueRolesMissingFromGuard": [
-        "ADMIN"
-      ],
+      "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/manifest.webmanifest",
         "/cristal-assist.css",
@@ -3590,7 +3556,7 @@
       "title": "Cristal Water - Visita Técnica",
       "catalogueRoles": [
         "TECHNICIAN",
-        "ADMIN"
+        "TEAM_LEADER"
       ],
       "guardFiles": [
         "technician-auth-guard.js"
@@ -3601,9 +3567,7 @@
       ],
       "conditionalAccess": [],
       "entryRedirects": {},
-      "catalogueRolesMissingFromGuard": [
-        "ADMIN"
-      ],
+      "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/manifest.webmanifest",
         "/cristal-assist.css",
@@ -3631,7 +3595,8 @@
       "kind": "Entrada raiz",
       "title": "Cristal Water - Técnico",
       "catalogueRoles": [
-        "ADMIN"
+        "TECHNICIAN",
+        "TEAM_LEADER"
       ],
       "guardFiles": [
         "technician-auth-guard.js"
@@ -3642,9 +3607,7 @@
       ],
       "conditionalAccess": [],
       "entryRedirects": {},
-      "catalogueRolesMissingFromGuard": [
-        "ADMIN"
-      ],
+      "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/manifest.webmanifest",
         "/manifest.json",

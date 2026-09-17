@@ -11,6 +11,19 @@
     return 'ADMIN';
   })();
 
+  function navigationRole() {
+    // Page guards define the surface; a legacy filename is not a user role.
+    const normalize = role => role === 'TEAM_LEADER' ? 'TECHNICIAN' : ['ADMIN', 'CLIENT', 'TECHNICIAN'].includes(role) ? role : '';
+    const declared = normalize(String(document.body?.dataset.requiredRole || '').toUpperCase());
+    if (declared) return declared;
+    try {
+      const user = window.CristalAuth?.parseUser?.() || JSON.parse(localStorage.getItem('cristalwater_user') || localStorage.getItem('user') || '{}');
+      const sessionRole = normalize(String(user?.role || '').toUpperCase());
+      if (sessionRole) return sessionRole;
+    } catch (_) {}
+    return roleForPath;
+  }
+
   const PAGE_META = {
     '/admin-master-control': { area: 'Visao geral', title: 'Centro de operacoes' },
     '/admin-dashboard': { area: 'Visao geral', title: 'Dashboard administrativo' },
@@ -129,7 +142,7 @@
           ['/chat', 'Conversas com clientes'],
           ['/communications', 'Historico de comunicacoes'],
           ['/admin-notifications', 'Notificacoes'],
-          ['/config-notifications', 'Modelos e regras'],
+          ['/admin-operational-settings#equipmentReminderControls', 'Avisos de manutencao'],
           ['/admin-email-logs', 'Historico email']
         ]},
         { label: '12. Relatorios e estatisticas', links: [
@@ -141,7 +154,6 @@
         ]},
         { label: '13. Configuracoes', links: [
           ['/admin-operational-settings', 'Configuracoes gerais'],
-          ['/settings', 'Parametros do sistema'],
           ['/admin-security', 'Utilizadores e permissoes'],
           ['/admin-ui-settings', 'Tema e interface'],
           ['/help-center', 'Ajuda']
@@ -165,23 +177,17 @@
           ['/technician-map', 'Navegacao GPS'],
           ['/technician-field-mode#syncPhotosBtn', 'Offline e sincronizacao']
         ]},
-        { label: 'Trabalho em campo', links: [
-          ['/admin-pools', 'Dados essenciais da piscina'],
-          ['/admin-pool-technical', 'Equipamentos e alertas'],
-          ['/admin-alerts?scope=repairs', 'Avarias e reparacoes'],
-          ['/admin-inventory?tab=products', 'Produtos utilizados']
-        ]},
         { label: 'Logistica', links: [
           ['/technician-guide', 'Guia de trabalho'],
           ['/technician-guide?tab=transport', 'Guia de transporte'],
-          ['/admin-vehicles', 'Viatura'],
+          ['/technician-guide', 'Viatura e stock'],
           ['/technician-gps', 'Posicao GPS']
         ]},
         { label: 'Conta', links: [
-          ['/technician', 'Historico recente'],
+          ['/technician-history', 'Historico recente'],
           ['/technician-chat', 'Conversa da equipa'],
           ['/technician-chat#noticesTitle', 'Notificacoes'],
-          ['/technician-login', 'Perfil e sessao']
+          ['/technician-profile', 'Perfil']
         ]}
       ],
       mobile: [
@@ -366,7 +372,7 @@
     normalizeLinks();
     ensureStatusSlots();
     if (!isAuthPage && !document.querySelector('.cw-v2-sidebar')) {
-      buildShell(roleForPath);
+      buildShell(navigationRole());
     }
     // Old shell scripts can inject legacy UI asynchronously; remove it again shortly after boot.
     setTimeout(removeLegacyShell, 0);

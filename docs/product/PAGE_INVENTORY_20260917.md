@@ -1,10 +1,10 @@
-# TASK222 — Inventário atual de páginas
+# TASK224 — Inventário atual de páginas
 
-Base publicada: `cda7aac67b9faa28eabc4fc65477c91a67e6e4df`. Gerado em 2026-09-17T10:47:52.126Z. Inclui as alterações locais do lote TASK222.
+Base publicada: `aafd1c8f599574984f6ddc678f50c1691f90f8ad`. Gerado em 2026-09-17T11:30:53.488Z. Inclui as alterações locais do lote TASK224.
 
 101 ficheiros HTML: 94 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 141 scripts de integração/navegador ativos. 42 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 141 scripts de integração/navegador ativos. 43 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 As colunas de papéis distinguem o catálogo anterior dos indícios explícitos no HTML/scripts. Não são uma auditoria de autorização: as APIs, a atribuição atual e o comportamento real de cada perfil continuam a determinar o acesso.
 
@@ -24,27 +24,17 @@ O menu principal, o menu comum e o cabeçalho da frota deixam de encaminhar o ad
 
 | Página | Papéis do catálogo sem correspondência na guarda declarada |
 |---|---|
-| /client-dashboard | ADMIN |
-| /client-history | ADMIN |
-| /client-menu | ADMIN |
-| /client-notifications | ADMIN |
-| /client-payments | ADMIN |
-| /client-wow | ADMIN |
-| /client | ADMIN |
-| /client_tech | ADMIN |
 | /config-notifications | ADMIN |
 | /help-center | ADMIN |
 | /settings | ADMIN |
-| /technician-field-mode | ADMIN |
-| /technician-map | ADMIN |
-| /technician-new-client | ADMIN |
-| /technician-profit-dashboard | TECHNICIAN |
-| /technician-profit | TECHNICIAN |
-| /technician-route | ADMIN |
-| /technician-visit | ADMIN |
-| /technician | ADMIN |
 
-Estas diferenças são itens de revisão, não autorização para alargar acessos. O catálogo histórico é mantido como evidência e só os dois percursos de guias/GPS revistos foram alinhados neste lote.
+Estas diferenças são itens de revisão, não autorização para alargar acessos. TASK222 alinhou guias/GPS; TASK224 alinha outras dezasseis entradas do catálogo com as guardas existentes, sem alterar permissões. Permanecem as três páginas antigas de ajuda/configurações. As versões anteriores do catálogo/inventário estão no Git.
+
+## Menu por perfil
+
+TASK224 escolhe a navegação pela indicação de papel da página, usando a sessão como segunda opção e o nome do URL apenas como último recurso. CLIENT deixa de receber o menu ADMIN nas páginas genéricas; a rentabilidade mantém menu ADMIN apesar do prefixo técnico. O menu técnico deixa de oferecer cinco destinos administrativos recusados e usa os percursos existentes para guias/stock, histórico e perfil. Registos de campo continuam na entrada Rota do dia e Visita; não há acesso novo ao inventário ou à gestão da frota.
+
+No menu ADMIN, Configurações gerais continua a abrir a central administrativa. O atalho duplicado para a página CLIENT de som foi removido. Avisos de manutenção abre os controlos existentes na central; não se apresenta essa capacidade como um editor geral de modelos/regras. A ajuda e a página CLIENT antiga de configurações ainda exigem revisão própria.
 
 ## Inventário
 
@@ -88,7 +78,7 @@ Estas diferenças são itens de revisão, não autorização para alargar acesso
 | /admin-today | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-ui-settings | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-vehicles | Entrada raiz | ADMIN | ADMIN | 0 |
-| /admin-visits-dashboard | Entrada raiz | ADMIN | ADMIN | 0 |
+| /admin-visits-dashboard | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-visits | Entrada raiz | ADMIN | ADMIN | 0 |
 | /alerts-financial | Entrada raiz | ADMIN | ADMIN | 0 |
 | /alerts | Entrada raiz | ADMIN | ADMIN | 5 |
@@ -97,17 +87,17 @@ Estas diferenças são itens de revisão, não autorização para alargar acesso
 | /billing-history | Entrada raiz | ADMIN | ADMIN | 0 |
 | /billing | Entrada raiz | ADMIN | ADMIN | 3 |
 | /chat | Entrada raiz | ADMIN | ADMIN | 9 |
-| /client-dashboard | Entrada raiz | CLIENT, ADMIN | CLIENT | 0 |
-| /client-history | Entrada raiz | CLIENT, ADMIN | CLIENT | 0 |
+| /client-dashboard | Entrada raiz | CLIENT | CLIENT | 0 |
+| /client-history | Entrada raiz | CLIENT | CLIENT | 0 |
 | /client-login | Entrada raiz | PUBLIC | — | 2 |
-| /client-menu | Entrada raiz | CLIENT, ADMIN | CLIENT | 0 |
-| /client-notifications | Entrada raiz | CLIENT, ADMIN | CLIENT | 1 |
-| /client-payments | Entrada raiz | CLIENT, ADMIN | CLIENT | 1 |
+| /client-menu | Entrada raiz | CLIENT | CLIENT | 0 |
+| /client-notifications | Entrada raiz | CLIENT | CLIENT | 1 |
+| /client-payments | Entrada raiz | CLIENT | CLIENT | 2 |
 | /client-portal | Entrada raiz | CLIENT, ADMIN | ADMIN, CLIENT | 9 |
-| /client-wow | Entrada raiz | CLIENT, ADMIN | CLIENT | 0 |
-| /client | Entrada raiz | CLIENT, ADMIN | CLIENT | 6 |
+| /client-wow | Entrada raiz | CLIENT | CLIENT | 0 |
+| /client | Entrada raiz | CLIENT | CLIENT | 6 |
 | /client_chat | Entrada raiz | CLIENT, ADMIN | CLIENT | 3 |
-| /client_tech | Entrada raiz | CLIENT, ADMIN | CLIENT | 0 |
+| /client_tech | Entrada raiz | CLIENT | CLIENT | 0 |
 | /communications | Entrada raiz | ADMIN | ADMIN | 1 |
 | /config-notifications | Entrada raiz | ADMIN | CLIENT | 0 |
 | /crystal-os-v2-route-index | Entrada raiz | ADMIN | — | 0 |
@@ -127,22 +117,22 @@ Estas diferenças são itens de revisão, não autorização para alargar acesso
 | /report-center | Entrada raiz | ADMIN | ADMIN | 0 |
 | /report-settings | Entrada raiz | ADMIN | ADMIN | 0 |
 | /route-map | Entrada raiz | ADMIN | ADMIN | 0 |
-| /settings | Entrada raiz | ADMIN | CLIENT | 3 |
+| /settings | Entrada raiz | ADMIN | CLIENT | 4 |
 | /splash | Entrada raiz | ADMIN | — | 0 |
 | /technician-chat | Entrada raiz | — | — | 1 |
-| /technician-field-mode | Entrada raiz | TECHNICIAN, ADMIN | TEAM_LEADER, TECHNICIAN | 25 |
+| /technician-field-mode | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 25 |
 | /technician-gps | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 2 |
 | /technician-guide | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 1 |
 | /technician-history | Entrada raiz | — | TEAM_LEADER, TECHNICIAN | 2 |
 | /technician-login | Entrada raiz | PUBLIC | — | 3 |
-| /technician-map | Entrada raiz | TECHNICIAN, ADMIN | TEAM_LEADER, TECHNICIAN | 4 |
-| /technician-new-client | Entrada raiz | TECHNICIAN, ADMIN | TEAM_LEADER, TECHNICIAN | 0 |
+| /technician-map | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 4 |
+| /technician-new-client | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 0 |
 | /technician-profile | Entrada raiz | — | TEAM_LEADER, TECHNICIAN | 1 |
-| /technician-profit-dashboard | Entrada raiz | TECHNICIAN, ADMIN | ADMIN | 0 |
-| /technician-profit | Entrada raiz | TECHNICIAN, ADMIN | ADMIN | 1 |
-| /technician-route | Entrada raiz | TECHNICIAN, ADMIN | TEAM_LEADER, TECHNICIAN | 2 |
-| /technician-visit | Entrada raiz | TECHNICIAN, ADMIN | TEAM_LEADER, TECHNICIAN | 1 |
-| /technician | Entrada raiz | ADMIN | TEAM_LEADER, TECHNICIAN | 3 |
+| /technician-profit-dashboard | Entrada raiz | ADMIN | ADMIN | 0 |
+| /technician-profit | Entrada raiz | ADMIN | ADMIN | 1 |
+| /technician-route | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 2 |
+| /technician-visit | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 1 |
+| /technician | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 3 |
 | /tests/test_extra.html | Auxiliar/protótipo/teste | — | — | 0 |
 | /to-issue | Entrada raiz | ADMIN | ADMIN | 0 |
 | /ui/views/demo.html | Auxiliar/protótipo/teste | — | — | 0 |

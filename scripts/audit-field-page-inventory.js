@@ -45,8 +45,8 @@ const result = { generatedAt: new Date().toISOString(), baseCommit: execFileSync
 const escape = value => String(value || '—').replace(/\|/g, '\\|').replace(/[\r\n]/g, ' ');
 const differences = pages.filter(page => page.catalogueRolesMissingFromGuard.length);
 const markdown = [
-  '# TASK222 — Inventário atual de páginas', '',
-  `Base publicada: \`${result.baseCommit}\`. Gerado em ${result.generatedAt}. Inclui as alterações locais do lote TASK222.`, '',
+  '# TASK224 — Inventário atual de páginas', '',
+  `Base publicada: \`${result.baseCommit}\`. Gerado em ${result.generatedAt}. Inclui as alterações locais do lote TASK224.`, '',
   `${result.summary.htmlFiles} ficheiros HTML: ${result.summary.rootPages} entradas de raiz e ${result.summary.nestedPages} ficheiros auxiliares/protótipos/testes. ${result.summary.missingAssetReferences} referências locais a scripts/estilos/recursos sem ficheiro correspondente.`, '',
   `Foram procuradas referências literais em ${scripts.size} scripts de integração/navegador ativos. ${result.summary.pagesWithLiteralTestReference} páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.`, '',
   'As colunas de papéis distinguem o catálogo anterior dos indícios explícitos no HTML/scripts. Não são uma auditoria de autorização: as APIs, a atribuição atual e o comportamento real de cada perfil continuam a determinar o acesso.', '',
@@ -57,7 +57,10 @@ const markdown = [
   'O menu principal, o menu comum e o cabeçalho da frota deixam de encaminhar o administrador para guardas exclusivas de técnicos. As permissões dessas páginas técnicas permanecem iguais.', '',
   '## Diferenças a rever no catálogo', '',
   ...(differences.length ? ['| Página | Papéis do catálogo sem correspondência na guarda declarada |', '|---|---|', ...differences.map(page => `| ${page.route} | ${page.catalogueRolesMissingFromGuard.join(', ')} |`)] : ['Nenhuma diferença detetada nas páginas com ficheiro de guarda explícito.']), '',
-  'Estas diferenças são itens de revisão, não autorização para alargar acessos. O catálogo histórico é mantido como evidência e só os dois percursos de guias/GPS revistos foram alinhados neste lote.', '',
+  'Estas diferenças são itens de revisão, não autorização para alargar acessos. TASK222 alinhou guias/GPS; TASK224 alinha outras dezasseis entradas do catálogo com as guardas existentes, sem alterar permissões. Permanecem as três páginas antigas de ajuda/configurações. As versões anteriores do catálogo/inventário estão no Git.', '',
+  '## Menu por perfil', '',
+  'TASK224 escolhe a navegação pela indicação de papel da página, usando a sessão como segunda opção e o nome do URL apenas como último recurso. CLIENT deixa de receber o menu ADMIN nas páginas genéricas; a rentabilidade mantém menu ADMIN apesar do prefixo técnico. O menu técnico deixa de oferecer cinco destinos administrativos recusados e usa os percursos existentes para guias/stock, histórico e perfil. Registos de campo continuam na entrada Rota do dia e Visita; não há acesso novo ao inventário ou à gestão da frota.', '',
+  'No menu ADMIN, Configurações gerais continua a abrir a central administrativa. O atalho duplicado para a página CLIENT de som foi removido. Avisos de manutenção abre os controlos existentes na central; não se apresenta essa capacidade como um editor geral de modelos/regras. A ajuda e a página CLIENT antiga de configurações ainda exigem revisão própria.', '',
   '## Inventário', '',
   '| Entrada | Tipo | Papéis no catálogo | Indícios de papel no código | Referências literais em QA |', '|---|---|---|---|---|',
   ...pages.map(page => `| ${escape(page.route)} | ${escape(page.kind)} | ${escape(page.catalogueRoles.join(', '))} | ${escape(page.explicitRoleHints.join(', '))} | ${page.testReferences.length} |`), '',
