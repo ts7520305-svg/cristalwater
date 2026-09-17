@@ -2,13 +2,13 @@
 
 ## Estado
 
-Implementação e verificação local concluídas em 17/09/2026, sobre `14d8e776825ea7e87848d1af8dae26f1176837f4`. Publicação e CI/restauro nativo da árvore final por confirmar. Cache v66; runner com 133 grupos; nenhuma migração de esquema.
+Implementação e verificação local concluídas em 17/09/2026, sobre `14d8e776825ea7e87848d1af8dae26f1176837f4`. Publicada inicialmente em `40fa9dc3068ba1bebf744abaa51b5a48a11a356f` e com âmbito final do lembrete em `68df5a10ed918b994c1a156de6e42c0b3a0e612d`. O CI `35264319158` passou 132/133 grupos: o novo teste UI lia a mensagem imediatamente após um envio assíncrono; recebeu o aviso anterior de quota, em vez de aguardar o estado final. Foi acrescentada espera explícita, conservando asserções de zero POST e texto preservado. CI/restauro da correção por confirmar. Cache v66; runner com 133 grupos; nenhuma migração de esquema.
 
 ## Diagnóstico e alteração
 
 A inspeção do código encontrou o botão de avisos a aceitar um `ok` genérico e a limpar os campos sem comprovativo do pedido. Qualquer falha escrevia numa lista global `cwPendingAdminAlerts`, limitada aos últimos 50 itens, através de uma função que ocultava falhas de armazenamento; o ecrã afirmava que o aviso estava guardado. Não foi encontrada recuperação dessa lista. Este diagnóstico foi por leitura de fonte, não por reprodução anterior à correção.
 
-O endpoint aceitava identidades e contexto enviados pelo navegador, tolerava falha na criação do lembrete e criava notificações separadamente. A coluna `clientId` da notificação permitia a sua inclusão no feed do cliente; regras configuráveis podiam gerar mais destinatários. O emissor Socket.IO global já tinha proteção MANAGEMENT anterior: esta alteração não é apresentada como descoberta de uma fuga global por socket.
+O endpoint aceitava identidades e contexto enviados pelo navegador, tolerava falha na criação do lembrete e criava notificações separadamente. A notificação ADMIN incluía `clientId` e a criação também chamava regras configuráveis de audiência. O filtro atual do feed CLIENT já exige papel CLIENT: não foi demonstrada fuga dessa notificação ADMIN pelo feed. A alteração mantém o destinatário ADMIN explícito, retira essa associação da notificação e evita duplicação por regras. O emissor Socket.IO global já tinha proteção MANAGEMENT anterior: esta alteração não é apresentada como descoberta de uma fuga global por socket.
 
 TASK238 introduz `FIELD_STOCK_REQUEST` no mecanismo existente de pedidos de campo. Para pedidos modernos, UUID, proprietário tipado, técnico autenticado, tipo REGULAR, visita/piscina e os seis campos literais participam no comprovativo. Quantidades são opcionais; quando indicadas, têm de ser positivas, finitas e acompanhadas de unidade. Produtos, notas, prioridades, tipos e comprimentos são validados.
 

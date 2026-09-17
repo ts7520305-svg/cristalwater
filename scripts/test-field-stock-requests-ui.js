@@ -27,7 +27,7 @@ let browser;const releases=[];
   let requests=0;page.on('request',request=>{if(request.url().endsWith('/api/technician/stock-reminders')&&request.method()==='POST')requests++;});
   await open();await page.waitForFunction(()=>!document.getElementById('stockProductName').readOnly);
   await page.evaluate(()=>{window.qaSetItem=Storage.prototype.setItem;Storage.prototype.setItem=function(key,value){if(key.startsWith('cwFieldStockDraft:'))throw new DOMException('QA draft quota','QuotaExceededError');return qaSetItem.call(this,key,value);};});
-  await page.locator('#stockProductName').fill('Sem espaço');await page.locator('#sendAdminAlertBtn').click();assert.equal(requests,0);assert.equal(await page.locator('#stockProductName').inputValue(),'Sem espaço');assert.match(await status(),/não foi enviado/);
+  await page.locator('#stockProductName').fill('Sem espaço');await page.locator('#sendAdminAlertBtn').click();await page.waitForFunction(()=>document.getElementById('adminAlertStatus').textContent.includes('não foi enviado'));assert.equal(requests,0);assert.equal(await page.locator('#stockProductName').inputValue(),'Sem espaço');assert.match(await status(),/não foi enviado/);
   await page.evaluate(()=>{Storage.prototype.setItem=qaSetItem;delete window.qaSetItem;});
   const message='Pedido original <img src=x onerror=window.qaExecuted=true>';
   await page.locator('#stockProductName').fill('Cloro shock');await page.locator('#stockQuantity').fill('2,5');await page.locator('#stockUnit').fill('kg');await page.locator('#adminAlertMessage').fill(message);await page.locator('#adminAlertType').selectOption('PURCHASE_REMINDER');await page.locator('#adminAlertPriority').selectOption('HIGH');
