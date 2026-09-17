@@ -16,7 +16,8 @@
     if (error.status === 409) return 'O servidor detetou um conflito. Confirme a visita, os produtos e o stock com o escritório antes de repetir.';
     return error.message || 'Sem confirmação do servidor.';
   }
-  async function entries(captured = store.session()) { assertHistory(captured); return (await store.records(null, captured)).filter(row=>['VISIT_COMPLETION','EXTRA_VISIT_COMPLETION','EXTRA_VISIT_START'].includes(row.scope)); }
+  async function entries(captured = store.session()) { assertHistory(captured); return (await store.records(null, captured)).filter(row=>['VISIT_COMPLETION','EXTRA_VISIT_COMPLETION','EXTRA_VISIT_START','EXTRA_VISIT_CORRECTION'].includes(row.scope)); }
+  async function rejections(captured=store.session()) { const latest=new Map();for(const row of await store.records('EXTRA_VISIT_CORRECTION',captured,true))latest.set(row.resourceId,row);return [...latest.values()].filter(row=>row.response?.applied===false&&!row.reviewedAt); }
   async function pending(visitId, visitType = 'REGULAR') { return (await entries()).some(row => row.resourceId === Number(visitId) && row.scope === (visitType === 'EXTRA' ? 'EXTRA_VISIT_COMPLETION' : 'VISIT_COMPLETION')); }
   async function render() {
     const current = ++revision, captured = store.session();
@@ -24,22 +25,23 @@
     if (!banner) { banner = document.createElement('aside'); banner.id = 'cwFieldSyncStatus'; banner.setAttribute('role','status'); banner.setAttribute('data-cw-state-managed','manual'); banner.style.cssText = 'padding:12px;background:#fff4ce;color:#624400;font-weight:700'; document.body.prepend(banner); }
     try {
       if (!captured) { banner.hidden = true; banner.replaceChildren(); document.getElementById('cwFieldStorageError')?.remove(); return; }
-      const rows = await entries(captured);
+      const rows = [...await entries(captured),...await rejections(captured)];
       await window.CWFieldPhotos?.assertHistory(captured);
       if (current !== revision || !store.same(captured)) return;
       document.getElementById('cwFieldStorageError')?.remove();
       const expanded = banner.querySelector('details')?.open === true;
       banner.hidden = !rows.length; banner.replaceChildren();
       if (!rows.length) return;
-      const summary = document.createElement('p'); summary.textContent = rows.length + ' visita(s) guardada(s) neste dispositivo, por confirmar no servidor.'; banner.append(summary);
+      const summary = document.createElement('p'); summary.textContent = rows.some(row=>row.response?.applied===false) ? 'Há correções não aplicadas. Reveja os avisos antes de continuar.' : rows.length + ' visita(s) guardada(s) neste dispositivo, por confirmar no servidor.'; banner.append(summary);
       const details = document.createElement('details'), title = document.createElement('summary');
       details.open = expanded || rows.some(row => row.failure); title.textContent = 'Ver envios pendentes'; title.style.minHeight = '44px'; details.append(title);
       for (const row of rows) {
         const item = document.createElement('div'); item.dataset.pendingVisit = row.resourceId; item.style.cssText = 'padding:12px 0;border-top:1px solid #d8be74';
         const name = document.createElement('strong'), info = document.createElement('p'), button = document.createElement('button');
-        name.textContent = row.label; info.textContent = row.failure ? message(row.failure) : 'Aguarda sincronização automática.';
+        name.textContent = row.label; info.textContent = row.response?.applied===false ? 'Correção não aplicada. '+row.response.message+' Abra a visita concluída para rever o registo.' : row.failure ? message(row.failure) : 'Aguarda sincronização automática.';
         button.type = 'button'; button.textContent = row.failure?.blocked ? 'Confirmado pelo escritório — tentar novamente' : 'Confirmar envio guardado'; button.style.cssText = 'min-height:44px;padding:10px;white-space:normal';
-        button.onclick = async () => { button.disabled = true; try { await send(row, captured); } catch (error) { if (store.same(captured)) info.textContent = message(error); } finally { if(store.same(captured))await render(); button.disabled = false; } };
+        if(row.response?.applied===false)button.textContent='Tomei conhecimento da recusa';
+        button.onclick = async () => { button.disabled = true; try { if(row.response?.applied===false)await store.acknowledgeRejection(row.requestId,captured);else await send(row, captured); } catch (error) { if (store.same(captured)) info.textContent = message(error); } finally { if(store.same(captured))await render(); button.disabled = false; } };
         item.append(name, info, button); details.append(item);
       }
       banner.append(details);
@@ -54,10 +56,11 @@
   async function send(row, captured, options = {}) {
     assertHistory(captured);
     const visitType = row.scope.startsWith('EXTRA_') ? 'EXTRA' : 'REGULAR';
-    if (row.scope !== 'EXTRA_VISIT_START') await window.CWFieldPhotos?.sync(row.resourceId, captured, options, visitType);
+    if (!['EXTRA_VISIT_START','EXTRA_VISIT_CORRECTION'].includes(row.scope)) await window.CWFieldPhotos?.sync(row.resourceId, captured, options, visitType);
     const result = await store.send(row.requestId, captured, options);
     if (!store.same(captured)) throw Error('A sessão mudou. O pedido foi preservado.');
-    window.dispatchEvent(new CustomEvent('cw:visit-synced', { detail: { visitId: row.resourceId, visitType, visit: result.visit, owner: captured.owner, token: captured.token } }));
+    if(row.scope==='EXTRA_VISIT_CORRECTION')window.dispatchEvent(new CustomEvent('cw:extra-correction-confirmed',{detail:{visitId:row.resourceId,result,owner:captured.owner,token:captured.token}}));
+    else window.dispatchEvent(new CustomEvent('cw:visit-synced', { detail: { visitId: row.resourceId, visitType, visit: result.visit, owner: captured.owner, token: captured.token } }));
     return result;
   }
   async function submitCompletion(visitId, body, captured = store.session(), visitType = 'REGULAR') {
@@ -88,7 +91,7 @@
     const row = await store.prepare('EXTRA_VISIT_START',Number(visit.id),{visitType:'EXTRA',poolId:visit.poolId || visit.pool?.id},{label:'Início: '+(visit.pool?.name || visit.id)},captured);
     try { return await send(row,captured); } finally { await render(); }
   }
-  window.CWFieldOffline = { submitExtraStart, submitCompletion, flush, pending, render, retry, entries, assertHistory };
+  window.CWFieldOffline = { submitExtraStart, submitCompletion, flush, pending, render, retry, entries, rejections, assertHistory };
   window.addEventListener('cw:field-write-change', render);
   window.addEventListener('storage', render);
   window.addEventListener('online', flush);

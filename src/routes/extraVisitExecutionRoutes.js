@@ -10,6 +10,8 @@ const upload = multer({ storage: multer.diskStorage({ destination: (req,file,don
 function failure(res,error) { return res.status(error.statusCode || 503).json({ok:false,code:error.code || 'EXTRA_VISIT_UNCONFIRMED',error:error.statusCode ? error.message : 'Envio por confirmar. Conserve o pedido original.'}); }
 router.post('/:id/start',async(req,res) => { try { res.json(await execution.start(req.user,req.params.id,req.body)); } catch(error) { failure(res,error); } });
 router.post('/:id/complete',async(req,res) => { try { res.json(await execution.complete(req.user,req.params.id,req.body)); } catch(error) { failure(res,error); } });
+router.get('/:id/correction',async(req,res) => { try { res.json(await require('../services/extraVisitCorrectionService').view(req.user,req.params.id)); } catch(error) { failure(res,error); } });
+router.post('/:id/correction',async(req,res) => { try { res.json(await require('../services/extraVisitCorrectionService').correct(req.user,req.params.id,req.body)); } catch(error) { failure(res,error); } });
 router.post('/:id/photo',(req,res) => upload.single('photo')(req,res,async(error) => {
   try { if(error) throw Object.assign(error,{statusCode:400}); res.json(await photos.record(req.user,req.params.id,req.file,req.body,'EXTRA')); }
   catch(error) { failure(res,error); }

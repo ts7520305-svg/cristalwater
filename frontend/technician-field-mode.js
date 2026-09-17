@@ -30,7 +30,7 @@
   window.addEventListener('pagehide', () => { ++fieldWriteGeneration; ++routeRevision; });
   const sameFieldSession = () => window.CWFieldWriteStore?.same(fieldWriteSession);
   const startingVisits = new Set();
-  const extraVisitNotice = 'Visita extra: registe o trabalho, as medições, os produtos e as fotografias. Pode também registar água aberta ou bomba em manual. Para impedimentos ou correções após concluir, contacte o escritório.';
+  const extraVisitNotice = 'Visita extra: registe o trabalho, as medições, os produtos e as fotografias. Pode também registar água aberta ou bomba em manual. Depois de concluir, use “Corrigir registo” para rever os valores. Para impedimentos, contacte o escritório.';
   window.CWFieldVisitContext = () => sameFieldSession() && current() ? { id:current().id, visitType:current().visitType || 'REGULAR', poolId:current().poolId || current().pool?.id, clientId:current().clientId || current().client?.id || current().pool?.clientId, poolName:current().pool?.name, clientName:current().client?.name, technicianName:activeTechnician?.name || current().technician?.name } : null;
   let visitPhotos = [];
   let visitDrafts = {};
@@ -3059,7 +3059,7 @@
       return;
     }
 
-    $("#finishBtn").disabled = readOnly;
+    $("#finishBtn").disabled = !sameFieldSession();
     updateFieldConnection();
     $("#nextTitle").textContent = visit.pool?.name || "Piscina";
     const sourceLabel = visit.assistSource === "otherToday"
@@ -3072,7 +3072,7 @@
       $("#startBtn").dataset.cwCheckinTarget = JSON.stringify([visit.visitType || 'REGULAR', visit.id, visit.pool?.id]);
       $("#startBtn").disabled = readOnly || startingVisits.has(visitKey(visit));
     }
-    $("#finishBtn").textContent = readOnly ? "Visita extra concluída" : isVisitDone(visit) ? "Guardar correção" : "Concluir visita";
+    $("#finishBtn").textContent = readOnly ? "Corrigir registo" : isVisitDone(visit) ? "Guardar correção" : "Concluir visita";
     renderAssistPanel();
     renderCorrectionSummary(visit);
     renderAccessCard(visit);
@@ -3764,6 +3764,7 @@
         showAssistMode("tomorrow");
         return;
       }
+      if(visit.visitType==='EXTRA'&&isVisitDone(visit)){await window.CWExtraVisitCorrection.open(visit,fieldWriteSession);return;}
       if (!requireExecutableVisit(visit)) return;
       const target = visitKey(visit);
       const wasDone = isVisitDone(visit);
@@ -3899,6 +3900,7 @@
     persistModernRoute();
     render();
   });
+  window.addEventListener('cw:extra-correction-confirmed',event=>{if(sameFieldSession()&&event.detail.owner===fieldWriteSession.owner&&event.detail.token===fieldWriteSession.token)void load();});
   window.addEventListener('cw:water-state-updated', () => { loadWaterRemindersFromStorage(); renderWaterReminders(); scheduleWaterReminders(); renderList(); renderNowBoard(current()); });
   const incompleteKey=()=>`cwIncompleteVisits:${currentTechnicianId()}`;
   function readIncomplete(key=incompleteKey()) {

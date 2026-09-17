@@ -28,7 +28,7 @@
     for (const visit of snapshot.visits) {
       if (!visit.done && !visit.future && !Object.values(outbox).some(item=>String(item.visitId)===String(visit.id)&&(item.visitType || 'REGULAR')===(visit.visitType || 'REGULAR')&&item.scope!=='EXTRA_VISIT_START')) add('pending', `${visit.name} — ${visit.visitType === 'EXTRA' ? 'visita extra por concluir' : 'trabalho por concluir'}. Combine o próximo passo com o escritório.`);
     }
-    for (const item of Object.values(outbox)) add('pending', `${name(item.visitId,item.visitType || 'REGULAR')} — ${item.scope === 'EXTRA_VISIT_START' ? 'início' : 'conclusão'} por confirmar no servidor${item.blocked ? '; precisa de apoio do escritório' : ''}.`);
+    for (const item of Object.values(outbox)) add('pending', item.rejected ? `${name(item.visitId,'EXTRA')} — correção não aplicada: ${item.rejected}` : `${name(item.visitId,item.visitType || 'REGULAR')} — ${item.scope === 'EXTRA_VISIT_START' ? 'início' : item.scope === 'EXTRA_VISIT_CORRECTION' ? 'correção' : 'conclusão'} por confirmar no servidor${item.blocked ? '; precisa de apoio do escritório' : ''}.`);
     const photoCounts = new Map();
     for (const photo of photos) { const key=(photo.visitType || 'REGULAR')+':'+photo.visitId; photoCounts.set(key,(photoCounts.get(key)||0)+1); }
     for (const [key, count] of photoCounts) add('pending', `${name(key.split(':')[1],key.split(':')[0])} — ${count} fotografia(s) por enviar.`);
@@ -77,7 +77,7 @@
       const [photos, remote, completions] = await Promise.all([
         window.CWFieldPhotos.pendingSummary(),
         navigator.onLine && token ? serverData(token) : Promise.resolve(null),
-        window.CWFieldOffline.entries(),
+        window.CWFieldOffline.entries().then(async rows=>[...rows,...await window.CWFieldOffline.rejections()]),
       ]);
       if (revision !== requestedRevision) return;
       if (owner() !== requestedOwner || token !== window.CristalAuth?.getToken?.()) { result.textContent = 'Sessão alterada. Repita a revisão com a conta atual.'; return; }
@@ -90,9 +90,11 @@
       if (remote?.[1].rows) water = mergeReminders(water, remote[1].rows);
       if (remote?.[2].rows) pumps = mergeReminders(pumps, remote[2].rows, true);
       if (window.CWFieldReminders.legacyWarning()) verificationErrors.push('Lembretes antigos por reconciliar com o escritório');
-      const outbox = Object.fromEntries(completions.map(row => [row.scope+':'+row.resourceId, { visitId: row.resourceId, visitType:row.scope.startsWith('EXTRA_') ? 'EXTRA' : 'REGULAR', scope:row.scope, blocked: row.failure?.blocked }]));
+      const outbox = Object.fromEntries(completions.map(row => [row.scope+':'+row.resourceId, { visitId: row.resourceId, visitType:row.scope.startsWith('EXTRA_') ? 'EXTRA' : 'REGULAR', scope:row.scope, blocked: row.failure?.blocked, rejected:row.response?.applied===false ? row.response.message : null }]));
       if (Object.keys(read(`cwFieldVisitDrafts:${requestedOwner}`)).length) verificationErrors.push('Rascunhos antigos sem conta/tipo de visita confirmados');
       const items = buildReview({ snapshot, water, pumps, outbox, drafts: window.CWFieldDraftSnapshot ? window.CWFieldDraftSnapshot() : {}, photos, online: navigator.onLine, verificationErrors });
+      for(const draft of await window.CWExtraVisitCorrection?.pendingDrafts?.()||[])items.push({kind:'pending',text:`${draft.name} — rascunho de correção guardado, ainda não confirmado.`});
+      if(revision!==requestedRevision||owner()!==requestedOwner||token!==window.CristalAuth?.getToken?.())return;
       result.replaceChildren();
       const title = document.createElement('p');
       title.textContent = items.length ? 'Existem pendências antes de sair:' : 'Não foram encontradas pendências nos dados verificados. Confirme as condições físicas antes de sair.';

@@ -106,4 +106,4 @@ async function complete(actor, value, body) {
     return requests.confirm(tx, request, { ok: true, visit: project(visit) });
   }, { maxWait: 15000, timeout: 20000 });
 }
-module.exports = { start, complete, project, locked };
+module.exports = { start, complete, project, locked, validate };
