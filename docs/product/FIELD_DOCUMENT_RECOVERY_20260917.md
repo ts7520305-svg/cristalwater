@@ -22,7 +22,7 @@ A cache antiga era global por viatura, sem conta nem dia. Uma consulta parcialme
 | `run-1789637608124` | Grupo documental final aprovado, incluindo PDF com falha de consulta, tentativa de início durante validação/recusa e mudança de dia no ecrã |
 | Unitários/técnicos | 388 unitários e quatro testes de técnicos aprovados |
 | Navegador/sintaxe | 17 scripts de navegador e sintaxe de 539 ficheiros backend aprovados; ficheiros JS finais alterados também verificados |
-| CI nativo/restauro | Árvore final por publicar e confirmar; runner passa a 123 grupos, com as 20 migrações existentes |
+| CI nativo/restauro | CI `35205980948`, commit `2627ea6f06c5ca8abf1b7185d1c4a093b5b604ba`, árvore `5a18af23fc449b340d34ae786cde0ed893819010`: 123/123 grupos, 388 unitários/quatro técnicos, 17 scripts de navegador, 20 migrações e restauro de 110 tabelas/32 ficheiros com linhas/hashes iguais em PostgreSQL 16 |
 
 O novo grupo usa API/base reais e Chromium: dois técnicos na mesma viatura, viatura alheia, PIN privado na fixture, três secções documentais, falha parcial, quota, gravação sem efeito, JSON corrompido, resposta com viatura errada, respostas fora de ordem, recarga totalmente offline, recusa 403 não JSON, troca de conta e dia. Confirma ausência de pedidos de início e visita ainda PLANNED durante validação/recusa. Larguras 320, 390 e 1440 sem overflow horizontal, sem erros de página. Falhas de consulta são injetadas em handlers reais e exigem resposta 500, incluindo o PDF de obra.
 

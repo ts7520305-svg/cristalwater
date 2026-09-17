@@ -78,9 +78,8 @@
   const FIELD_RETURN_CONTRACT_KEY = "cw:tech-field:return-contract:v1";
   const FIELD_UI_STATE_KEY = "cw:tech-field:ui-state:v1";
   const FIELD_LAST_EXPLICIT_FILTER_KEY = "cw:tech-field:last-explicit-filter:v1";
-  const OP_EXCEPTION_STATE_KEY = "cw:tech-field:op-exception-state:v1";
-  const OP_EXCEPTION_HISTORY_KEY = "cw:tech-field:op-exception-history:v1";
-  const OP_EXCEPTION_COMMAND_BRIDGE_KEY = "cw:tech-field:op-exception-command:v1";
+  let opJournalReadWarning = '', opJournalWriteWarning = '', opJournalBusy = false, pumpRemindersError = '';
+  const opJournalAttempts = new Set();
 
   function safeSessionRead(key, fallback) {
     try {
@@ -453,7 +452,7 @@
   function hasP0Interruption(visit = current()) {
     const pump = resolvePumpManualSignal(visit);
     const urgentProblems = pendingProblems.filter((problem) => String(problem.severity || "").toUpperCase() === "URGENTE").length;
-    return activeWaterReminders().length > 0 || urgentProblems > 0 || pump.active;
+    return activeWaterReminders().length > 0 || activePumpReminders().length > 0 || urgentProblems > 0 || pump.active;
   }
 
   function hasActiveIntervention(visit = current()) {
@@ -1141,51 +1140,23 @@
 
   function actorName() {
     const parsed = window.CristalAuth?.parseUser?.() || {};
-    return activeTechnician?.name || parsed?.name || "Tecnico em campo";
+    return parsed?.name || activeTechnician?.name || "Tecnico em campo";
   }
 
-  function opExceptionState() {
-    const value = storageRead(OP_EXCEPTION_STATE_KEY, {});
-    return value && typeof value === "object" ? value : {};
+  function readOpJournal() {
+    try {
+      const context = window.CWFieldAlertJournal.scope(fieldWriteSession), value = window.CWFieldAlertJournal.read(context);
+      opJournalReadWarning = window.CWFieldAlertJournal.legacyWarning(context);
+      return { context, value, states: window.CWFieldAlertJournal.states(value) };
+    } catch (error) {
+      opJournalReadWarning = error.message;
+      return { context: null, value: { entries: [] }, states: {} };
+    }
   }
 
-  function saveOpExceptionState(nextState) {
-    storageWrite(OP_EXCEPTION_STATE_KEY, nextState || {});
-  }
-
-  function opExceptionHistory() {
-    const value = storageRead(OP_EXCEPTION_HISTORY_KEY, []);
-    return Array.isArray(value) ? value : [];
-  }
-
-  function saveOpExceptionHistory(entries) {
-    storageWrite(OP_EXCEPTION_HISTORY_KEY, (entries || []).slice(-200));
-  }
-
-  function appendOpExceptionHistory(entry) {
-    const next = opExceptionHistory();
-    next.push({
-      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-      createdAt: new Date().toISOString(),
-      ...entry,
-    });
-    saveOpExceptionHistory(next);
-  }
-
-  function pushOpExceptionCommand(eventType, exception, state) {
-    const queue = storageRead(OP_EXCEPTION_COMMAND_BRIDGE_KEY, []);
-    const safeQueue = Array.isArray(queue) ? queue : [];
-    safeQueue.push({
-      eventType,
-      createdAt: new Date().toISOString(),
-      exceptionId: exception.id,
-      category: exception.category,
-      priority: exception.priority,
-      poolName: exception.poolName || current()?.pool?.name || "",
-      clientName: exception.clientName || current()?.client?.name || "",
-      state,
-    });
-    storageWrite(OP_EXCEPTION_COMMAND_BRIDGE_KEY, safeQueue.slice(-150));
+  function activePumpReminders() {
+    try { const rows = window.CWFieldReminders?.list('PUMP_MANUAL') || []; pumpRemindersError = ''; return rows.filter(row => row.status !== 'CLOSED'); }
+    catch (error) { pumpRemindersError = error.message; return []; }
   }
 
   function exceptionDurationLabel(isoStart) {
@@ -1205,10 +1176,11 @@
     const visit = current();
     const nowIso = new Date().toISOString();
     const pump = resolvePumpManualSignal(visit);
+    const pumpReminders = activePumpReminders();
 
-    if (pump.active) {
+    if (pump.active && !pumpReminders.some(row => row.poolId === (visit?.poolId || visit?.pool?.id))) {
       items.push({
-        id: `pump-manual:${String(visit?.id || "none")}`,
+        id: `pump-manual:${visitKey(visit)}:${String(pump.since || 'unknown')}`,
         category: "PUMP_MANUAL",
         title: "P0 - Bomba em manual",
         detail: `Quem ativou: ${pump.who} | Piscina: ${pump.poolName} | Duração: ${pump.duration} | Estado: ${pump.status}`,
@@ -1219,9 +1191,16 @@
       });
     }
 
+    pumpReminders.forEach(reminder => items.push({
+      id: `pump-manual:${reminder.visitType}:${reminder.localId}`,
+      category: 'PUMP_MANUAL', title: 'P0 - Bomba em manual', priority: 'P0',
+      detail: `${reminder.poolName || 'Piscina'} | ${reminder.clientName || 'Cliente'} | Confirmar modo automático até ${formatDate(reminder.dueAt)}`,
+      createdBy: reminder.technicianName || 'Técnico', createdAt: reminder.createdAt || nowIso, targetAction: 'pump',
+    }));
+
     activeWaterReminders().forEach((reminder) => {
       items.push({
-        id: `water-open:${String(reminder.localId || reminder.serverId || reminder.id || "none")}`,
+        id: `water-open:${reminder.visitType}:${String(reminder.localId || reminder.serverId || reminder.id || "none")}`,
         category: "WATER_OPEN",
         title: "P0 - Agua aberta",
         detail: `${reminder.poolName || "Piscina"} | ${reminder.clientName || "Cliente"} | ${waterReminderLabel(reminder)}`,
@@ -1232,11 +1211,12 @@
       });
     });
 
+    if (waterRemindersError || pumpRemindersError) items.push({ id: 'reminders-unavailable:device', category: 'REMINDER_UNAVAILABLE', title: 'P0 - Água e bombas por confirmar', priority: 'P0', detail: waterRemindersError || pumpRemindersError, createdBy: 'Sistema', createdAt: nowIso, targetAction: 'water' });
     const urgentProblems = pendingProblems.filter((problem) => String(problem.severity || "").toUpperCase() === "URGENTE");
     if (urgentProblems.length) {
       const first = urgentProblems[0];
       items.push({
-        id: `critical-problem:${String(first.visitId || visit?.id || "none")}`,
+        id: `critical-problem:${visit?.visitType || 'REGULAR'}:${String(first.visitId || visit?.id || "none")}:${visit?.poolId || visit?.pool?.id || 'none'}`,
         category: "CRITICAL_PROBLEM",
         title: "P0 - Problema critico",
         detail: `${urgentProblems.length} problema(s) critico(s) pendente(s).`,
@@ -1249,7 +1229,7 @@
 
     if (isVisitDelayed(visit)) {
       items.push({
-        id: `visit-delayed:${String(visit?.id || "none")}`,
+        id: `visit-delayed:${visitKey(visit)}:${visit?.poolId || visit?.pool?.id || 'none'}`,
         category: "VISIT_DELAYED",
         title: "P1 - Visita atrasada",
         detail: `${visit?.pool?.name || "Piscina"} com atraso face ao planeado.`,
@@ -1262,7 +1242,7 @@
 
     if (documentsLoaded && !opsSnapshot.docsReady) {
       items.push({
-        id: `docs-missing:${String(visit?.id || "none")}`,
+        id: `docs-missing:${Number($('#vehicleId')?.value) || 'none'}`,
         category: "DOC_MISSING",
         title: "P1 - Documento obrigatorio em falta",
         detail: opsSnapshot.docsBlockReason || "Documentacao da viatura incompleta para operacao segura.",
@@ -1277,98 +1257,41 @@
   }
 
   function ensureOperationalExceptionState(exceptions) {
-    const state = opExceptionState();
-    let changed = false;
-    const nowIso = new Date().toISOString();
-
-    exceptions.forEach((exception) => {
-      if (!state[exception.id]) {
-        state[exception.id] = {
-          status: "OPEN",
-          createdBy: exception.createdBy || "Sistema",
-          createdAt: exception.createdAt || nowIso,
-          receivedBy: actorName(),
-          receivedAt: nowIso,
-          openLogged: false,
-        };
-        changed = true;
+    const snapshot = readOpJournal(), context = snapshot.context;
+    if (context && !opJournalBusy) {
+      const prefix = window.CWFieldAlertJournal.key(context) + ':';
+      const missing = exceptions.filter(item => !snapshot.states[item.id] && !opJournalAttempts.has(prefix + item.id));
+      if (missing.length) {
+        missing.forEach(item => opJournalAttempts.add(prefix + item.id)); opJournalBusy = true;
+        window.CWFieldAlertJournal.record(context, missing, 'OPEN', actorName())
+          .then(() => { if (sameFieldSession()) opJournalWriteWarning = ''; })
+          .catch(error => { if (sameFieldSession()) opJournalWriteWarning = 'O histórico não ficou guardado. ' + error.message; })
+          .finally(() => { opJournalBusy = false; if (sameFieldSession()) renderInterruptBoard(); });
       }
-
-      if (!state[exception.id].openLogged) {
-        appendOpExceptionHistory({
-          action: "OPEN",
-          by: state[exception.id].createdBy || "Sistema",
-          exceptionId: exception.id,
-          title: exception.title,
-          detail: exception.detail,
-        });
-        pushOpExceptionCommand("OPEN", exception, state[exception.id]);
-        state[exception.id].openLogged = true;
-        changed = true;
-      }
-    });
-
-    if (changed) saveOpExceptionState(state);
-    return state;
+    }
+    return snapshot.states;
   }
 
-  function updateOperationalException(exceptionId, updater) {
-    const state = opExceptionState();
-    const currentState = state[exceptionId];
-    if (!currentState) return;
-    const nextState = { ...currentState };
-    updater(nextState);
-    state[exceptionId] = nextState;
-    saveOpExceptionState(state);
-    renderInterruptBoard();
+  async function recordOperationalException(exception, action) {
+    if (!sameFieldSession()) return;
+    try {
+      const context = window.CWFieldAlertJournal.scope(fieldWriteSession);
+      await window.CWFieldAlertJournal.record(context, [exception], action, actorName(), () => sameFieldSession() && collectOperationalExceptions().some(item => item.id === exception.id));
+      if (!sameFieldSession()) return;
+      opJournalWriteWarning = ''; renderInterruptBoard();
+      toast('Leitura guardada neste dispositivo. O alerta mantém-se até tratar a causa.');
+    } catch (error) {
+      if (!sameFieldSession()) return;
+      opJournalWriteWarning = 'A alteração não ficou guardada. ' + error.message; renderInterruptBoard(); toast(opJournalWriteWarning);
+    }
   }
 
   function assumeOperationalException(exception) {
-    updateOperationalException(exception.id, (nextState) => {
-      nextState.status = "ASSUMED";
-      nextState.assumedBy = actorName();
-      nextState.assumedAt = new Date().toISOString();
-      appendOpExceptionHistory({
-        action: "ASSUMED",
-        by: nextState.assumedBy,
-        exceptionId: exception.id,
-        title: exception.title,
-      });
-      pushOpExceptionCommand("ASSUMED", exception, nextState);
-    });
-    toast("Excecao assumida.");
+    return recordOperationalException(exception, 'ASSUMED');
   }
 
   function confirmOperationalException(exception) {
-    updateOperationalException(exception.id, (nextState) => {
-      nextState.status = "CONFIRMED";
-      nextState.confirmedBy = actorName();
-      nextState.confirmedAt = new Date().toISOString();
-      appendOpExceptionHistory({
-        action: "CONFIRMED",
-        by: nextState.confirmedBy,
-        exceptionId: exception.id,
-        title: exception.title,
-      });
-      pushOpExceptionCommand("CONFIRMED", exception, nextState);
-    });
-    toast("Excecao confirmada.");
-  }
-
-  function resolveOperationalException(exception) {
-    updateOperationalException(exception.id, (nextState) => {
-      nextState.status = "RESOLVED";
-      nextState.resolvedBy = actorName();
-      nextState.resolvedAt = new Date().toISOString();
-      appendOpExceptionHistory({
-        action: "RESOLVED",
-        by: nextState.resolvedBy,
-        exceptionId: exception.id,
-        title: exception.title,
-      });
-      pushOpExceptionCommand("RESOLVED", exception, nextState);
-    });
-    toast("Excecao resolvida.");
+    return recordOperationalException(exception, 'CONFIRMED');
   }
 
   function renderExceptionHistory(history) {
@@ -1377,7 +1300,7 @@
     }
     return history.slice(-6).reverse().map((entry) => `
       <div class="interrupt-item" data-history-entry="${esc(entry.id || "")}" style="border-style:dashed">
-        <strong>${esc(entry.action || "EVENT")}</strong>
+        <strong>${esc(({OPEN:'Alerta observado',ASSUMED:'Em tratamento local',CONFIRMED:'Leitura confirmada'})[entry.action] || 'Registo local')}</strong>
         <div>${esc(entry.title || "Excecao operacional")}</div>
         <div class="muted">${esc(formatDate(entry.createdAt))} | ${esc(entry.by || "Sistema")}</div>
       </div>
@@ -1409,8 +1332,8 @@
     const userName = String(window.CristalAuth?.parseUser?.().name || activeTechnician?.name || "").trim();
     const firstName = userName ? userName.split(/\s+/)[0] : "Técnico";
     const exceptions = collectOperationalExceptions().filter((item) => item && item.id);
-    const stateById = ensureOperationalExceptionState(exceptions);
-    const openExceptions = exceptions.filter((item) => (stateById[item.id]?.status || "OPEN") !== "RESOLVED");
+    ensureOperationalExceptionState(exceptions);
+    const openExceptions = exceptions;
     const openAlerts = openExceptions.length;
     const hasWaterOpen = openExceptions.some((item) => item.category === "WATER_OPEN");
     const hasManualPump = openExceptions.some((item) => item.category === "PUMP_MANUAL");
@@ -1533,55 +1456,51 @@
 
     const exceptions = collectOperationalExceptions().filter((item) => item && item.id);
     const stateById = ensureOperationalExceptionState(exceptions);
-    const openExceptions = exceptions.filter((item) => {
-      const status = stateById[item.id]?.status || "OPEN";
-      return status !== "RESOLVED";
-    });
-    const history = opExceptionHistory();
+    const openExceptions = exceptions;
+    const history = readOpJournal().value.entries;
+    const warning = [opJournalReadWarning, opJournalWriteWarning].filter(Boolean).join(' ');
 
     const historyList = $("#fieldAlertHistoryList");
-    if (historyList) historyList.innerHTML = renderExceptionHistory(history);
+    if (historyList) historyList.innerHTML = `<p>Leituras registadas nesta conta, neste dispositivo e neste dia. O fecho da causa é confirmado no respetivo registo.</p>${warning ? `<p role="status">${esc(warning)}</p>` : ''}` + renderExceptionHistory(history);
     const priorityNotice = $("#fieldPriorityNotice");
     if (priorityNotice) { priorityNotice.hidden = !openExceptions.length; priorityNotice.textContent = `${openExceptions.length} alerta(s) por resolver · Ver`; }
 
     if (!openExceptions.length) {
-      card.hidden = true;
+      card.hidden = !warning;
       summary.textContent = "Sem alertas críticos neste momento.";
-      list.innerHTML = "";
+      list.innerHTML = warning ? `<p role="status">${esc(warning)}</p><button type="button" data-interrupt-action="retry">Rever histórico guardado</button>` : '';
       return;
     }
 
     card.hidden = false;
     summary.textContent = openExceptions.length
-      ? "Fluxo interrompido por excecoes operacionais. Assumir, confirmar e resolver antes de continuar."
-      : "Sem excecoes abertas. Historico local disponivel para auditoria.";
+      ? "Trate a causa de cada alerta no respetivo registo. Assumir ou confirmar a leitura neste dispositivo mantém o aviso visível."
+      : "Sem causas ativas. Histórico de leitura local disponível.";
 
     const exceptionsHtml = openExceptions.map((item) => {
       const state = stateById[item.id] || {};
       const status = state.status || "OPEN";
       const canAssume = status === "OPEN";
       const canConfirm = ["ASSUMED", "OPEN"].includes(status);
-      const canResolve = status !== "RESOLVED";
       const createdAt = state.createdAt || item.createdAt || new Date().toISOString();
       return `
       <div class="interrupt-item" data-exception-id="${esc(item.id)}" data-exception-category="${esc(item.category)}">
         <strong>${esc(item.title)}</strong>
         <div>${esc(item.detail)}</div>
-        <div class="muted">Prioridade: ${esc(item.priority)} | Estado: ${esc(status)}</div>
+        <div class="muted">Prioridade: ${esc(item.priority)} | Leitura local: ${esc(({OPEN:'Por ler',ASSUMED:'Em tratamento',CONFIRMED:'Confirmada'})[status] || 'Por confirmar')}</div>
         <div class="muted">Responsabilidade: criou ${esc(state.createdBy || item.createdBy || "Sistema")} | recebeu ${esc(state.receivedBy || "Tecnico")}</div>
-        <div class="muted">Assumiu: ${esc(state.assumedBy || "pendente")} | Confirmou: ${esc(state.confirmedBy || "pendente")} | Resolveu: ${esc(state.resolvedBy || "pendente")}</div>
+        <div class="muted">Assumiu neste dispositivo: ${esc(state.assumedBy || "pendente")} | Confirmou leitura: ${esc(state.confirmedBy || "pendente")}</div>
         <div class="muted">Tempo em curso: ${esc(exceptionDurationLabel(createdAt))}</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
-          ${item.targetAction ? `<button type="button" data-interrupt-action="target" data-interrupt-target="${esc(item.targetAction)}" data-exception-id="${esc(item.id)}">Abrir</button>` : ""}
+          ${item.targetAction ? `<button type="button" data-interrupt-action="resolve" data-interrupt-target="${esc(item.targetAction)}" data-exception-id="${esc(item.id)}">Tratar causa</button>` : ""}
           ${canAssume ? `<button type="button" data-interrupt-action="assume" data-exception-id="${esc(item.id)}">Assumir</button>` : ""}
-          ${canConfirm ? `<button type="button" data-interrupt-action="confirm" data-exception-id="${esc(item.id)}">Confirmar</button>` : ""}
-          ${canResolve ? `<button type="button" data-interrupt-action="resolve" data-exception-id="${esc(item.id)}">Resolver</button>` : ""}
+          ${canConfirm ? `<button type="button" data-interrupt-action="confirm" data-exception-id="${esc(item.id)}">Confirmar leitura</button>` : ""}
         </div>
       </div>
     `;
     }).join("");
 
-    list.innerHTML = exceptionsHtml;
+    list.innerHTML = (warning ? `<p role="status">${esc(warning)}</p><button type="button" data-interrupt-action="retry">Rever histórico guardado</button>` : '') + exceptionsHtml;
   }
 
   function mapsSearchUrl(visit) {
@@ -3425,8 +3344,9 @@
       interruptList.dataset.actionsReady = "1";
       interruptList.addEventListener("click", (event) => {
         const actionButton = event.target.closest("[data-interrupt-action]");
-        if (!actionButton) return;
+        if (!actionButton || !sameFieldSession()) return;
         const action = actionButton.dataset.interruptAction;
+        if (action === 'retry') { opJournalAttempts.clear(); opJournalWriteWarning = ''; renderInterruptBoard(); return; }
         const exceptionId = actionButton.dataset.exceptionId;
         const exception = collectOperationalExceptions().find((item) => item.id === exceptionId);
         if (action === "assume" && exception) {
@@ -3437,13 +3357,15 @@
           confirmOperationalException(exception);
           return;
         }
-        if (action === "resolve" && exception) {
-          resolveOperationalException(exception);
-          return;
-        }
-        if (action === "target") {
-          const target = actionButton.dataset.interruptTarget;
+        if ((action === "target" || action === "resolve") && exception) {
+          const target = exception.targetAction;
           if (!target) return;
+          if (target === 'pump') {
+            switchFieldTab('more', true);
+            document.querySelector('#pumpReminderBanner')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            toast('Confirme o modo automático no registo da bomba. A leitura do alerta não fecha o lembrete.');
+            return;
+          }
           if (target === "problem") {
             switchFieldTab("more", true);
             showProblemPanel();
@@ -3851,6 +3773,8 @@
   });
   window.addEventListener('cw:extra-correction-confirmed',event=>{if(sameFieldSession()&&event.detail.owner===fieldWriteSession.owner&&event.detail.token===fieldWriteSession.token)void load();});
   window.addEventListener('cw:water-state-updated', () => { loadWaterRemindersFromStorage(); renderWaterReminders(); scheduleWaterReminders(); renderList(); renderNowBoard(current()); });
+  window.addEventListener('cw:alert-journal-updated', () => { if (sameFieldSession()) renderInterruptBoard(); });
+  window.addEventListener('storage', event => { if (sameFieldSession() && event.key?.startsWith('cwFieldAlertJournal:')) renderInterruptBoard(); });
   function renderIncompleteStatus(){void window.CWFieldIncomplete?.refresh();}
   window.addEventListener('cw:incomplete-confirmed',event=>{if(sameFieldSession()&&event.detail.owner===fieldWriteSession.owner&&event.detail.token===fieldWriteSession.token)void load({preserveNavigation:true});});
   void load();

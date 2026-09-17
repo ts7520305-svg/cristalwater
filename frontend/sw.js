@@ -1,12 +1,13 @@
 /* Public application shell only. Operational writes are owned by the field outbox. */
 importScripts('/cw-push-session.js');
-const CACHE = 'cristalwater-field-20260917-v49';
+const CACHE = 'cristalwater-field-20260917-v50';
 const APP_SHELL = ['/technician-field-mode','/technician-login','/cw-auth.js','/technician-auth-guard.js','/cw-field-offline.js','/cw-pump-reminders.js','/cw-field-reminders.js','/cw-field-recovery.js','/cw-field-photos.js','/cw-browser-push.js','/cw-push-session.js','/cw-proposal-requests.js','/cw-proposal-editor.js','/js/offline/offline-gps.js','/technician-gps','/technician-gps.js','/technician-field-mode.js','/cw-ui-feedback.js','/cw-auth-download.js','/crystal-os-v2-shell.js','/crystal-os-v2-nav.js','/cw-ui-kit.css','/cw-field-professional.css','/ui/foundation.css','/ui/core/navigation-context.js','/ui/design-system.js','/ui/state-adapter-v2.js'];
 self.addEventListener('install', event => {
   APP_SHELL.push('/cw-field-write-store.js', '/cw-field-internal-alert.js', '/cw-field-route-preview.js', '/cw-legacy-route-cache.js', '/js/offline/offline-queue.js', '/js/offline/offline-photos.js', '/technician', '/technician.html', '/technician.js', '/logo-cristalwater.png');
   APP_SHELL.push('/socket.io/socket.io.js', '/js/theme.js', '/js/pwa/install-prompt.js', '/js/push/push-init.js', '/js/push/push-realtime.js', '/cristal-help-data.js', '/cristal-assist.js', '/cristal-assist.css', '/css/splash.css', '/css/crystal-v25.css', '/icons/icon-512.png', '/icons/icon-192.png');
   APP_SHELL.push('/cw-field-day-review.js', '/crystal-os-v2-phase2-adapter.css', '/ui/design-system.css');
   APP_SHELL.push('/cw-legacy-visit-drafts.js');
+  APP_SHELL.push('/cw-field-alert-journal.js');
   APP_SHELL.push('/cw-field-route-cache.js', '/cw-field-documents.js', '/cw-extra-visit-correction.js', '/field-equipment-maintenance.js');
   APP_SHELL.push('/cw-legacy-workday.js','/cw-incomplete-workflow.js','/cw-field-incomplete.js','/cw-field-visit-drafts.js');
   event.waitUntil(caches.open(CACHE).then(cache=>Promise.all(APP_SHELL.map(url=>cache.add(url)))).then(()=>self.skipWaiting()));

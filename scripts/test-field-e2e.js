@@ -230,7 +230,7 @@ const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
             assert.equal((await prisma.operationalReminder.findUnique({where:{id:transferReminder.id}})).assignedToTechnicianId,receivingTech.id);
           } finally {await receiverContext.close();}
           await page.locator('#handoverRefresh').click();
-          await page.waitForFunction(id=>!document.querySelector(`[data-handover-reminder="${id}"]`),transferReminder.id);
+          await page.waitForFunction(id=>!document.querySelector(`[data-handover-reminder="${id}"]`)&&document.querySelector('#handoverStatus')?.textContent==='Sem lembretes ativos ou pedidos de passagem.',transferReminder.id);
           const transferClosed=await fetch(`${base}/api/technician/pump-reminders/${transferReminder.id}/close`,{method:'POST',headers:{Authorization:`Bearer ${receiverLogin.token}`}});
           assert.equal(transferClosed.status,200);
           console.log('PASS two technicians request and accept responsibility in separate mobile sessions');

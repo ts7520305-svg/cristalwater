@@ -94,6 +94,7 @@ scripts.push('test-field-modern-visit-drafts.js');
 scripts.push('test-field-team-leader-entry.js');
 scripts.push('test-field-complete-daily-route.js');
 scripts.push('test-field-document-recovery.js');
+scripts.push('test-field-alert-source.js');
 scripts.push('test-field-key-scope.js');
 function run(script){return new Promise(resolve=>{
  const output=fs.createWriteStream(path.join(evidence,script+'.log'));

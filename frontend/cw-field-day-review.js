@@ -143,6 +143,8 @@
     try {
       const [water,pump,incoming,targets]=await Promise.all(['water-reminders','pump-reminders','reminder-handovers/incoming','reminder-handovers/targets'].map(path=>handoverApi(path)));
       if(version!==handoverRevision||owner()!==principal||token!==window.CristalAuth?.getToken?.())return;
+      await window.CWFieldReminders?.sync?.();
+      if(version!==handoverRevision||owner()!==principal||token!==window.CristalAuth?.getToken?.())return;
       const outgoing=[...water.reminders,...pump.reminders].filter(row=>!row.isCompleted&&!row.transferredAway);
       for(const [row,isIncoming] of [...incoming.reminders.map(row=>[row,true]),...outgoing.map(row=>[row,false])]) {
         const card=document.createElement('section');card.className='day-review-group';card.dataset.handoverReminder=row.id;

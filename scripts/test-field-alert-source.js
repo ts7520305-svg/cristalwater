@@ -1,0 +1,107 @@
+'use strict';
+require('../src/loadEnv')();
+const assert = require('node:assert/strict'), { randomUUID } = require('node:crypto'), jwt = require('jsonwebtoken'), { chromium } = require('playwright');
+const { prisma } = require('../src/prismaClient'), { getJwtSecret } = require('../src/utils/jwtSecret');
+if (process.env.NODE_ENV !== 'test' || process.env.QA_MODE !== 'true' || process.env.QA_ENVIRONMENT_SAFE !== 'true') throw Error('Isolated QA required');
+const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002'; assert(['127.0.0.1', 'localhost'].includes(new URL(base).hostname));
+let browser;
+(async () => {
+  const tech = await prisma.technician.create({ data: { name: 'Alert owner', active: true } });
+  const other = await prisma.technician.create({ data: { name: 'Other alert owner', active: true } });
+  const client = await prisma.client.create({ data: { name: 'Alert source client', active: true } });
+  const pool = await prisma.pool.create({ data: { name: 'Alert source pool', clientId: client.id, active: true } });
+  const visit = await prisma.serviceVisit.create({ data: { clientId: client.id, poolId: pool.id, technicianId: tech.id, plannedDate: new Date(), date: new Date(), status: 'PLANNED' } });
+  const sign = person => jwt.sign({ id: person.id, role: 'TECHNICIAN' }, getJwtSecret(), { expiresIn: '1h' }), token = sign(tech), otherToken = sign(other);
+  const remote = [];
+  for (const kind of ['water', 'pump']) {
+    const localId = randomUUID(), response = await fetch(base + '/api/technician/' + kind + '-reminders', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ owner: 'TECH:' + tech.id, localId, visitType: 'REGULAR', visitId: visit.id, poolId: pool.id, clientId: client.id, dueAt: new Date(Date.now() + 3600000).toISOString(), openedAt: new Date().toISOString(), note: 'Keep physical alert active', flowState: 'HALF' }) });
+    assert.equal(response.status, 200); remote.push({ kind, localId, row: (await response.json()).reminder });
+  }
+  const legacy = { 'cw:tech-field:op-exception-state:v1': JSON.stringify({ ['water-open:server-' + remote[0].row.id]: { status: 'RESOLVED', openLogged: true, resolvedBy: 'Old unrelated user' } }), 'cw:tech-field:op-exception-history:v1': JSON.stringify([{ id: 'old', action: 'RESOLVED', title: 'PRIVATE OLD ACCOUNT HISTORY', by: 'Old unrelated user', createdAt: new Date().toISOString() }]), 'cw:tech-field:op-exception-command:v1': '[{"private":"OLD LOCAL COMMAND"}]' };
+  browser = await chromium.launch({ headless: true, executablePath: process.env.CW_CHROMIUM_PATH, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await context.route('**/*', route => new URL(route.request().url()).origin === new URL(base).origin ? route.continue() : route.abort());
+  await context.addInitScript(({ token, tech, legacy }) => {
+    if (!localStorage.getItem('qaAlertSession')) {
+      for (const key of ['token', 'cristalwater_jwt']) localStorage.setItem(key, token);
+      for (const key of ['user', 'cristalwater_user']) localStorage.setItem(key, JSON.stringify({ id: tech.id, name: tech.name, role: 'TECHNICIAN' }));
+      for (const [key, value] of Object.entries(legacy)) localStorage.setItem(key, value);
+      localStorage.setItem('qaAlertSession', '1');
+    }
+    const interval = window.setInterval; window.setInterval = (callback, delay, ...args) => [15000, 30000].includes(delay) ? 0 : interval(callback, delay, ...args);
+  }, { token, tech, legacy });
+  const page = await context.newPage(), errors = []; page.on('pageerror', error => errors.push(error.message)); page.on('dialog', dialog => dialog.accept()); page.setDefaultTimeout(10000);
+  await page.goto(base + '/technician-field-mode', { waitUntil: 'networkidle' }); await page.evaluate(() => CWFieldReminders.sync());
+  await page.locator('[data-field-tab-button="hoje"]').click();
+  assert.equal(await page.locator('#interruptList [data-exception-category="WATER_OPEN"]').count(), 1, 'Old RESOLVED state cannot hide active water');
+  await page.locator('#interruptList [data-exception-category="WATER_OPEN"] [data-interrupt-action="resolve"]').click();
+  assert.equal(await page.locator('#interruptList [data-exception-category="WATER_OPEN"]').count(), 1, 'Treat cause cannot hide active water');
+  assert.equal(await page.locator('#interruptList [data-exception-category="PUMP_MANUAL"]').count(), 1, 'Real pump reminders must reach the main alert board');
+  assert(!(await page.locator('#fieldAlertHistoryList').textContent()).includes('PRIVATE OLD ACCOUNT HISTORY'));
+  for (const [key, value] of Object.entries(legacy)) assert.equal(await page.evaluate(key => localStorage.getItem(key), key), value);
+  const journalKey = await page.evaluate(() => CWFieldAlertJournal.key(CWFieldAlertJournal.scope(CWFieldWriteStore.session())));
+  const journal = () => page.evaluate(key => JSON.parse(localStorage.getItem(key)), journalKey);
+  const raw = () => page.evaluate(key => localStorage.getItem(key), journalKey);
+  const waterId = await page.locator('#interruptList [data-exception-category="WATER_OPEN"]').getAttribute('data-exception-id');
+  const pumpId = await page.locator('#interruptList [data-exception-category="PUMP_MANUAL"]').getAttribute('data-exception-id');
+  const click = (id, action) => page.evaluate(({ id, action }) => document.querySelector(`[data-exception-id="${id}"] [data-interrupt-action="${action}"]`).click(), { id, action });
+  const status = (id, expected) => page.waitForFunction(({ id, expected }) => CWFieldAlertJournal.states(CWFieldAlertJournal.read(CWFieldAlertJournal.scope(CWFieldWriteStore.session())))[id]?.status === expected, { id, expected });
+  await status(waterId, 'OPEN'); await status(pumpId, 'OPEN');
+  await click(waterId, 'assume'); await status(waterId, 'ASSUMED');
+  const secondPage = await context.newPage(); await secondPage.goto(base + '/technician-field-mode', { waitUntil: 'networkidle' });
+  const confirmation = (tab, action) => tab.evaluate(async ({ id, action }) => {
+    const context = CWFieldAlertJournal.scope(CWFieldWriteStore.session()), entry = CWFieldAlertJournal.read(context).entries.find(entry => entry.exceptionId === id);
+    return CWFieldAlertJournal.record(context, [{ id, title: entry.title, detail: entry.detail, createdAt: entry.sourceCreatedAt, createdBy: entry.createdBy }], action, 'Alert owner');
+  }, { id: waterId, action });
+  await Promise.all([confirmation(page, 'CONFIRMED'), confirmation(secondPage, 'CONFIRMED')]);
+  await status(waterId, 'CONFIRMED'); await confirmation(secondPage, 'ASSUMED');
+  assert.deepEqual((await journal()).entries.filter(entry => entry.exceptionId === waterId).map(entry => entry.action), ['OPEN', 'ASSUMED', 'CONFIRMED']);
+  await click(pumpId, 'resolve');
+  for (const { row } of remote) assert.equal((await prisma.operationalReminder.findUnique({ where: { id: row.id } })).isCompleted, false);
+  assert.equal(await page.locator('#interruptList [data-exception-category="WATER_OPEN"]').count(), 1);
+  assert.equal(await page.locator('#interruptList [data-exception-category="PUMP_MANUAL"]').count(), 1);
+  await secondPage.close();
+  console.log('PASS active sources remain visible; physical records stay open; two tabs preserve one monotonic local history');
+  const beforeFault = await raw();
+  await page.evaluate(() => { window.qaAlertSet = Storage.prototype.setItem; Storage.prototype.setItem = function (key, value) { if (key.startsWith('cwFieldAlertJournal:')) throw Error('QA quota'); return qaAlertSet.call(this, key, value); }; });
+  await click(pumpId, 'confirm'); await page.waitForFunction(() => document.getElementById('interruptList').textContent.includes('A alteração não ficou guardada'));
+  assert.equal(await raw(), beforeFault); await status(pumpId, 'OPEN');
+  await page.evaluate(() => { Storage.prototype.setItem = function (key, value) { if (key.startsWith('cwFieldAlertJournal:')) return; return qaAlertSet.call(this, key, value); }; });
+  await click(pumpId, 'confirm'); await page.waitForFunction(() => document.getElementById('interruptList').textContent.includes('confirmar a gravação'));
+  assert.equal(await raw(), beforeFault); await page.evaluate(() => { Storage.prototype.setItem = qaAlertSet; });
+  await page.evaluate(key => localStorage.setItem(key, '{damaged'), journalKey); await page.reload({ waitUntil: 'networkidle' });
+  assert.match(await page.locator('#interruptList').textContent(), /ilegível/); assert.equal(await raw(), '{damaged');
+  assert.equal(await page.locator('#interruptList [data-exception-category="WATER_OPEN"]').count(), 1);
+  await page.evaluate(({ key, value }) => localStorage.setItem(key, value), { key: journalKey, value: beforeFault });
+  await page.evaluate(() => document.querySelector('[data-interrupt-action="retry"]').click()); await status(waterId, 'CONFIRMED');
+  await page.evaluate(() => navigator.serviceWorker.ready); await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
+  await context.setOffline(true); await page.reload({ waitUntil: 'domcontentloaded' }); await status(waterId, 'CONFIRMED');
+  assert.equal(await raw(), beforeFault); assert.equal(await page.locator('#interruptList [data-exception-category="PUMP_MANUAL"]').count(), 1);
+  await page.locator('[data-field-tab-button="hoje"]').click();
+  for (const width of [320, 390, 1440]) { await page.setViewportSize({ width, height: 900 }); assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)); }
+  await context.setOffline(false);
+  console.log('PASS quota, no readback and corruption preserve bytes and visible causes; cold offline reload retains both alerts and the account journal');
+  await page.evaluate(id => document.querySelector(`[data-water-close="${id}"]`).click(), await page.evaluate(() => CWFieldReminders.list('WATER_OPEN').find(row => row.status !== 'CLOSED').localId));
+  await page.waitForFunction(() => CWFieldReminders.list('WATER_OPEN').every(row => row.status === 'CLOSED'));
+  await page.evaluate(id => document.querySelector(`[data-pump-reminder="${id}"] button`).click(), await page.evaluate(() => CWFieldReminders.list('PUMP_MANUAL').find(row => row.status !== 'CLOSED').localId));
+  await page.waitForFunction(() => CWFieldReminders.list('PUMP_MANUAL').every(row => row.status === 'CLOSED')); await page.evaluate(() => CWFieldReminders.sync());
+  assert.equal(await page.locator('#interruptList [data-exception-category="WATER_OPEN"]').count(), 0); assert.equal(await page.locator('#interruptList [data-exception-category="PUMP_MANUAL"]').count(), 0);
+  for (const { row } of remote) assert.equal((await prisma.operationalReminder.findUnique({ where: { id: row.id } })).isCompleted, true);
+  assert((await journal()).entries.every(entry => entry.action !== 'RESOLVED'));
+  console.log('PASS only physical-close controls remove water/pump alerts and confirm closure on the server');
+  const beforeSwitch = await raw();
+  await page.evaluate(async key => {
+    window.qaLockEntered = new Promise(resolve => { navigator.locks.request(key, async () => { resolve(); await new Promise(release => { window.qaAlertRelease = release; }); }); }); await qaLockEntered;
+    const context = CWFieldAlertJournal.scope(CWFieldWriteStore.session()), entry = CWFieldAlertJournal.read(context).entries.find(entry => entry.action === 'OPEN');
+    window.qaAlertPending = CWFieldAlertJournal.record(context, [{ id: 'test-alert:late-session', title: entry.title, detail: entry.detail, createdAt: entry.sourceCreatedAt }], 'OPEN', 'Old account').then(() => 'unexpected success', error => error.message);
+  }, journalKey);
+  await page.evaluate(({ token, user }) => { for (const key of ['token', 'cristalwater_jwt']) localStorage.setItem(key, token); for (const key of ['user', 'cristalwater_user']) localStorage.setItem(key, JSON.stringify(user)); }, { token: otherToken, user: { id: other.id, name: other.name, role: 'TECHNICIAN' } });
+  assert.match(await page.evaluate(async () => { qaAlertRelease(); return qaAlertPending; }), /conta|sessão/);
+  assert.equal(await raw(), beforeSwitch); await page.waitForSelector('#fieldRouteSessionChanged'); await page.goto(base + '/technician-field-mode', { waitUntil: 'networkidle' });
+  assert(!(await page.locator('#fieldAlertHistoryList').textContent()).includes('Bomba em manual')); assert(!(await page.locator('#fieldAlertHistoryList').textContent()).includes('PRIVATE OLD ACCOUNT HISTORY'));
+  const separation = await page.evaluate(() => { const original = CWFieldRouteCache.today, first = CWFieldAlertJournal.scope(); CWFieldRouteCache.today = () => '2099-01-01'; try { const next = CWFieldAlertJournal.scope(); return { changed: CWFieldAlertJournal.key(first) !== CWFieldAlertJournal.key(next), same: CWFieldAlertJournal.same(first), entries: CWFieldAlertJournal.read(next).entries.length }; } finally { CWFieldRouteCache.today = original; } });
+  assert.deepEqual(separation, { changed: true, same: false, entries: 0 }); assert.equal(await raw(), beforeSwitch);
+  for (const [key, value] of Object.entries(legacy)) assert.equal(await page.evaluate(key => localStorage.getItem(key), key), value);
+  assert.equal(errors.length, 0, errors.join('\n'));
+  console.log('PASS locked writes cannot cross session changes; other accounts/days do not inherit the journal; legacy bytes stay untouched');
+})().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => { await browser?.close(); await prisma.$disconnect(); });
