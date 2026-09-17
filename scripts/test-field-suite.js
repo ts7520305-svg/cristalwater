@@ -98,6 +98,8 @@ scripts.push('test-field-alert-source.js');
 scripts.push('test-field-key-scope.js');
 scripts.push('test-field-operational-pages.js');
 scripts.push('test-field-admin-map-recovery.js');
+scripts.push('test-field-geographic-areas.js');
+scripts.push('test-field-multi-map.js');
 function run(script){return new Promise(resolve=>{
  const output=fs.createWriteStream(path.join(evidence,script+'.log'));
  const child=spawn(process.execPath,[path.join(__dirname,script)],{cwd:root,env:process.env,stdio:['ignore','pipe','pipe']});

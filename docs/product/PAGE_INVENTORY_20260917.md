@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `0a023e708d76051fac1edf45415005c26117a72a`. Gerado em 2026-09-17T17:05:18.213Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `d7a5f9994ccf885b01cb39f05ee0384b06a1f1fb`. Gerado em 2026-09-17T17:37:29.344Z. Inclui o estado dos ficheiros locais no momento da geração.
 
 101 ficheiros HTML: 94 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 147 scripts de integração/navegador ativos. 50 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 149 scripts de integração/navegador ativos. 52 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 As colunas de papéis distinguem o catálogo anterior dos indícios explícitos no HTML/scripts. Não são uma auditoria de autorização: as APIs, a atribuição atual e o comportamento real de cada perfil continuam a determinar o acesso.
 
@@ -65,7 +65,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /admin-pools | Entrada raiz | ADMIN | ADMIN | 2 |
 | /admin-priority | Entrada raiz | ADMIN | ADMIN | 2 |
 | /admin-reports | Entrada raiz | ADMIN | ADMIN | 0 |
-| /admin-rounds | Entrada raiz | ADMIN | ADMIN | 3 |
+| /admin-rounds | Entrada raiz | ADMIN | ADMIN | 4 |
 | /admin-security | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-service-log | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-suppliers | Entrada raiz | ADMIN | ADMIN | 0 |
@@ -103,9 +103,9 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /invoice-document | Entrada raiz | — | — | 4 |
 | /invoices | Entrada raiz | ADMIN | ADMIN | 6 |
 | /login | Entrada raiz | PUBLIC | — | 19 |
-| /map | Entrada raiz | ADMIN | ADMIN | 0 |
+| /map | Entrada raiz | ADMIN | ADMIN | 1 |
 | /metrics | Entrada raiz | ADMIN | ADMIN | 4 |
-| /multi-map | Entrada raiz | ADMIN | ADMIN | 0 |
+| /multi-map | Entrada raiz | ADMIN | ADMIN | 1 |
 | /notifications | Entrada raiz | ADMIN | ADMIN | 12 |
 | /operational-dashboard | Entrada raiz | ADMIN | ADMIN | 0 |
 | /profit-map | Entrada raiz | ADMIN | ADMIN | 0 |

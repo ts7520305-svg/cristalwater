@@ -1,0 +1,104 @@
+'use strict';
+require('../src/loadEnv')();
+const assert = require('node:assert/strict'), jwt = require('jsonwebtoken'), fs = require('node:fs'), path = require('node:path');
+const { chromium } = require('playwright'), { prisma } = require('../src/prismaClient'), { getJwtSecret } = require('../src/utils/jwtSecret');
+if (process.env.NODE_ENV !== 'test' || process.env.QA_MODE !== 'true' || process.env.QA_ENVIRONMENT_SAFE !== 'true') throw Error('Isolated QA required');
+const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002'; assert(['127.0.0.1','localhost'].includes(new URL(base).hostname));
+let browser;
+(async () => {
+  const stamp = Date.now(), admin = await prisma.user.findUniqueOrThrow({ where: { email: process.env.ADMIN_EMAIL } });
+  const user = { id: admin.id, userId: admin.id, role: 'ADMIN', principalType: 'USER' }, token = jwt.sign(user, getJwtSecret(), { expiresIn: '1h' });
+  const client = await prisma.client.create({ data: { name: 'QA multi '+stamp, active:true } });
+  const pool = await prisma.pool.create({ data: { name:'<img src=x onerror=alert(1)> Pool '+stamp, clientId:client.id, latitude:0, longitude:0 } });
+  const unknown = await prisma.pool.create({ data: { clientId:client.id, name:null, latitude:null, longitude:null } });
+  const a = await prisma.technician.create({ data: { name:'<b>Same name</b> '+stamp, active:true } }), b = await prisma.technician.create({ data: { name:a.name, active:true } });
+  const day = '2031-02-18', when = new Date(day+'T12:00:00Z');
+  const maxima = await Promise.all([prisma.serviceVisit.aggregate({_max:{id:true}}),prisma.extraVisit.aggregate({_max:{id:true}})]), sharedId = Math.max(...maxima.map(row=>row._max.id||0))+1;
+  const regular = await prisma.serviceVisit.create({ data: { id:sharedId, clientId:client.id, poolId:pool.id, technicianId:a.id, plannedDate:when, status:'PLANNED' } });
+  const extra = await prisma.extraVisit.create({ data: { id:sharedId, clientId:client.id, poolId:unknown.id, technicianId:b.id, scheduledAt:when, status:'PLANNED', billingMode:'NO_CHARGE', isBillable:false } });
+  for (const model of ['ServiceVisit','ExtraVisit']) await prisma.$queryRawUnsafe(`SELECT setval(pg_get_serial_sequence('"${model}"','id'), ${sharedId}, true)`);
+  const done = await prisma.serviceVisit.create({ data: { clientId:client.id, poolId:pool.id, technicianId:a.id, plannedDate:when, status:'DONE', endAt:when } });
+  const unassigned = await prisma.serviceVisit.create({ data: { clientId:client.id, poolId:null, technicianId:null, plannedDate:when, status:'PLANNED' } });
+  const cancelled = await prisma.serviceVisit.create({ data: { clientId:client.id, poolId:pool.id, technicianId:a.id, plannedDate:when, status:'CANCELLED' } });
+  const future = await prisma.serviceVisit.create({ data: { clientId:client.id, poolId:pool.id, technicianId:a.id, plannedDate:new Date('2031-02-19T12:00:00Z'), status:'PLANNED' } });
+  const snapshot = async () => ({ regular:await prisma.serviceVisit.findMany({where:{clientId:client.id},orderBy:{id:'asc'}}), extra:await prisma.extraVisit.findMany({where:{clientId:client.id},orderBy:{id:'asc'}}) });
+  const before = await snapshot();
+  const response = await fetch(base+'/api/technician/today?date='+day, {headers:{Authorization:'Bearer '+token}}), data = await response.json();
+  assert.equal(response.status,200); assert.equal(data.complete,true); assert.equal(data.technicianId,null);
+  assert(data.visits.some(v=>v.id===regular.id&&v.visitType==='REGULAR')); assert(data.visits.some(v=>v.id===extra.id&&v.visitType==='EXTRA'));
+  browser = await chromium.launch({headless:true,executablePath:process.env.CW_CHROMIUM_PATH,args:['--no-sandbox','--disable-dev-shm-usage']});
+  const context = await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
+  await context.addInitScript(({user,token})=>{
+    for(const k of ['token','cristalwater_jwt'])localStorage.setItem(k,token);
+    for(const k of ['user','cristalwater_user'])localStorage.setItem(k,JSON.stringify(user));
+    localStorage.setItem('cw_language','pt');localStorage.setItem('qaMultiDraft','preserved');
+    const later=window.setTimeout;window.setTimeout=(fn,ms,...args)=>later(fn,window.qaTimeout&&ms===20000?100:ms,...args);
+  },{user,token});
+  await context.route('**/*',r=>new URL(r.request().url()).origin===new URL(base).origin?r.continue():r.abort());
+  const page=await context.newPage(), errors=[], writes=[];
+  page.setDefaultTimeout(10000);page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(/\/api\/(rounds|round-planner|extra-visits|visits)(\/|\?|$)/.test(r.url())&&r.method()!=='GET')writes.push(r.url());});
+  const state=s=>page.waitForFunction(s=>document.getElementById('mapStatus').dataset.state===s,s);
+  const card=(type,id)=>page.locator('#mapList [data-record-id="'+type+':'+id+'"]');
+  await page.goto(base+'/multi-map',{waitUntil:'networkidle'});await page.locator('#mapDate').fill(day);await page.locator('#mapLoad').click();await state('ready');
+  assert.equal(await page.locator('#mapNotice').getAttribute('data-state'),'unavailable');
+  for(const [type,id] of [['REGULAR',regular.id],['EXTRA',extra.id],['REGULAR',done.id],['REGULAR',unassigned.id]])assert.equal(await card(type,id).count(),1);
+  for(const id of [cancelled.id,future.id])assert.equal(await card('REGULAR',id).count(),0);
+  assert.equal(await card('REGULAR',regular.id).locator('a').first().getAttribute('href'),'https://www.google.com/maps?q=0,0');
+  assert.equal(await card('EXTRA',extra.id).locator('a').count(),0);assert.equal(await card('REGULAR',unassigned.id).locator('a').count(),0);
+  assert.match(await card('EXTRA',extra.id).textContent(),new RegExp('Piscina #'+unknown.id));assert.match(await card('REGULAR',done.id).textContent(),/Concluída/);
+  assert.equal(await page.locator('#mapList img,#mapList b').count(),0);
+  for(const tech of [a,b])assert.match(await page.locator('#mapTechnician option[value="'+tech.id+'"]').textContent(),new RegExp('#'+tech.id+'$'));
+  await page.locator('#mapTechnician').selectOption(String(b.id));assert.equal(await page.locator('#mapList article').count(),1);assert.equal(await card('EXTRA',extra.id).count(),1);
+  await page.locator('#mapTechnician').selectOption('unassigned');assert.equal(await page.locator('#mapList article').count(),1);assert.equal(await card('REGULAR',unassigned.id).count(),1);
+  await page.locator('#mapTechnician').selectOption('all');
+  const visual=path.join(__dirname,'../reports/field-visual/multi-map-'+stamp);fs.mkdirSync(visual,{recursive:true});
+  for(const width of [320,390,1440]){
+    await page.setViewportSize({width,height:900});await page.evaluate(()=>scrollTo(0,0));
+    assert(await page.locator('.map-controls input,.map-controls select,.map-controls button,#mapList article').evaluateAll(nodes=>nodes.every(n=>{const r=n.getBoundingClientRect();return r.x>=0&&r.right<=innerWidth+1&&n.scrollWidth<=n.clientWidth+1;})));
+    await page.screenshot({path:path.join(visual,'multi-'+width+'.png')});
+  }
+  await page.locator('#mapDate').fill('2031-02-20');await state('idle');assert.equal(await page.locator('#mapList article').count(),0);assert(await page.locator('#mapTechnician').isDisabled());
+  await page.locator('#mapLoad').click();await state('empty');
+  await page.locator('#mapDate').fill('');await page.locator('#mapLoad').click();await state('error');
+  console.log('PASS multi real API: all technicians, regular/extra colliding IDs, same-name technicians, unassigned/missing pool, completed visits, cancellation/day scope, zero/missing coordinates, literal names and three widths');
+  await page.locator('#mapDate').fill(day);
+  let controlled=data,statusCode=200;
+  const endpoint='**/api/technician/today?*';await page.route(endpoint,r=>r.fulfill({status:statusCode,json:controlled}));
+  for(const change of [{complete:false},{hasMore:true},{total:data.total+1},{returned:0},{technicianId:a.id},{date:'2031-02-19'},{visits:[data.visits[0],data.visits[0]],total:2,returned:2},{visits:[{...data.visits[0],visitType:'UNKNOWN'}],total:1,returned:1}]){
+    controlled={...data,...change};await page.locator('#mapLoad').click();await state('error');assert.equal(await page.locator('#mapList article').count(),0);assert.equal(await page.locator('#mapTechnician option').count(),0);
+  }
+  for(const code of [202,503]){controlled=data;statusCode=code;await page.locator('#mapLoad').click();await state('error');}
+  // A complete response larger than the old 300-row limit remains fully visible.
+  const many=Array.from({length:305},(_,i)=>({...data.visits.find(v=>v.visitType==='REGULAR'&&v.id===regular.id),id:i+1}));
+  controlled={...data,visits:many,total:many.length,returned:many.length};statusCode=200;await page.locator('#mapLoad').click();await state('ready');assert.equal(await page.locator('#mapList article').count(),305);assert.equal(await card('REGULAR',305).count(),1);
+  await page.unroute(endpoint);
+  let entered,release;let arrival=new Promise(r=>entered=r),gate=new Promise(r=>release=r);
+  await page.route(endpoint,async r=>{entered();await gate;await r.fulfill({json:data});});
+  await page.locator('#mapLoad').click();await arrival;await page.locator('#mapDate').fill('2031-02-19');release();await page.waitForTimeout(100);await state('idle');assert.equal(await page.locator('#mapList article').count(),0);await page.unroute(endpoint);
+  await page.locator('#mapDate').fill(day);await page.evaluate(()=>window.qaTimeout=true);
+  let releaseTimeout,finishTimeout;const timeoutGate=new Promise(r=>releaseTimeout=r),timeoutFinished=new Promise(r=>finishTimeout=r);await page.route(endpoint,async r=>{await timeoutGate;await r.fulfill({json:data});finishTimeout();});
+  await page.locator('#mapLoad').click();await state('error');assert.match(await page.locator('#mapStatus').textContent(),/demorou demasiado/);assert(await page.locator('#mapLoad').isEnabled());releaseTimeout();await timeoutFinished;await page.unroute(endpoint);await page.evaluate(()=>window.qaTimeout=false);
+  await page.locator('#mapLoad').click();await state('ready');
+  arrival=new Promise(r=>entered=r);gate=new Promise(r=>release=r);await page.route(endpoint,async r=>{entered();await gate;await r.fulfill({json:data});});
+  await page.locator('#mapLoad').click();await arrival;await page.evaluate(()=>localStorage.setItem('cristalwater_user','changed'));release();await state('session');
+  assert.equal(await page.locator('#mapList article').count(),0);assert.equal(await page.locator('#mapTechnician option').count(),0);assert(await page.locator('#mapLoad').isDisabled());
+  assert.equal(await page.evaluate(()=>localStorage.getItem('qaMultiDraft')),'preserved');assert.deepEqual(errors,[]);assert.deepEqual(writes,[]);assert.deepEqual(await snapshot(),before);
+  console.log('PASS multi failure recovery: partial/wrong-scope/malformed responses rejected, 305 rows visible, old date ignored, timeout retry, changed session clears data and assignments remain unchanged; evidence '+visual);
+  await page.close();
+  await context.addInitScript(()=>{
+    window.qaLayers=[];window.qaPopups=[];
+    const group={addTo(){return this},clearLayers(){window.qaLayers=[]}};
+    window.L={map(){return{setView(){return this},fitBounds(){},invalidateSize(){},remove(){window.qaLayers=[]}}},layerGroup(){return group},tileLayer(){return{on(_,fn){window.qaTileError=fn;return this},addTo(){return this}}},marker(point){return{bindPopup(node){window.qaPopups.push({text:node.textContent,children:node.children.length});return this},addTo(){window.qaLayers.push(point);return this}}}};
+  });
+  const mapped=await context.newPage();mapped.on('pageerror',error=>errors.push(error.message));
+  await mapped.goto(base+'/multi-map',{waitUntil:'networkidle'});await mapped.locator('#mapDate').fill(day);await mapped.locator('#mapLoad').click();
+  await mapped.waitForFunction(()=>document.getElementById('mapStatus').dataset.state==='ready');
+  await mapped.locator('#mapTechnician').selectOption(String(a.id));assert.equal(await mapped.evaluate(()=>qaLayers.length),2);
+  assert(await mapped.evaluate(name=>qaPopups.some(p=>p.text.includes(name))&&qaPopups.every(p=>p.children===0),a.name));
+  await mapped.locator('#mapTechnician').selectOption(String(b.id));assert.equal(await mapped.evaluate(()=>qaLayers.length),0,'Filter removes previous technician markers even when selected visits have no coordinates');
+  await mapped.locator('#mapTechnician').selectOption(String(a.id));assert.equal(await mapped.evaluate(()=>qaLayers.length),2);
+  await mapped.evaluate(()=>qaTileError());assert(await mapped.locator('#map').isHidden());assert.equal(await mapped.locator('#mapList article').count(),2);
+  await mapped.locator('#mapDate').fill('2031-02-19');assert.equal(await mapped.locator('#mapList article').count(),0);assert.deepEqual(errors,[]);
+  console.log('PASS multi controlled map: filtering replaces markers, identity/status popup is literal, tile failure retains filtered list and date change clears it');
+  await context.close();
+})().catch(error=>{console.error(error);process.exitCode=1;}).finally(async()=>{await browser?.close();await prisma.$disconnect();});

@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-09-17T17:05:18.213Z",
-  "baseCommit": "0a023e708d76051fac1edf45415005c26117a72a",
+  "generatedAt": "2026-09-17T17:37:29.344Z",
+  "baseCommit": "d7a5f9994ccf885b01cb39f05ee0384b06a1f1fb",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 147,
+  "activeScriptsScanned": 149,
   "summary": {
     "htmlFiles": 101,
     "rootPages": 94,
     "nestedPages": 7,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 50,
+    "pagesWithLiteralTestReference": 52,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -1187,7 +1187,8 @@
       "testReferences": [
         "test-field-water-api.js",
         "test-route-os-acceptance.js",
-        "test-field-key-scope.js"
+        "test-field-key-scope.js",
+        "test-field-geographic-areas.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -2653,7 +2654,7 @@
       "file": "frontend/map.html",
       "route": "/map",
       "kind": "Entrada raiz",
-      "title": "Mapa Inteligente",
+      "title": "Áreas geográficas — Cristal Water",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -2668,21 +2669,24 @@
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/ui/foundation.css",
+        "/ui/design-system.css",
+        "/cw-admin-map.css",
         "/cristal-assist.css",
         "/cw-auth.js",
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
-        "/ui/design-system.css",
         "/admin-auth-guard.js",
-        "/ui/core/navigation-context.js",
+        "/cw-admin-map.js",
+        "/map.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
+        "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "testReferences": [
+        "test-field-geographic-areas.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -2730,7 +2734,7 @@
       "file": "frontend/multi-map.html",
       "route": "/multi-map",
       "kind": "Entrada raiz",
-      "title": "Mapa Multi Técnicos",
+      "title": "Visitas por técnico — Cristal Water",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -2745,12 +2749,13 @@
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/ui/foundation.css",
+        "/ui/design-system.css",
+        "/cw-admin-map.css",
         "/cristal-assist.css",
         "/cw-auth.js",
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
-        "/ui/design-system.css",
         "/admin-auth-guard.js",
+        "/cw-admin-map.js",
+        "/multi-map.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
         "/ui/core/navigation-context.js",
@@ -2759,7 +2764,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "testReferences": [
+        "test-field-multi-map.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {

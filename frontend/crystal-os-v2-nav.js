@@ -35,6 +35,8 @@
     '/admin-visits': { area: 'Operacao', title: 'Gestao de visitas' },
     '/admin-rounds': { area: 'Operacao', title: 'Rotas e rondas' },
     '/admin-live-map': { area: 'Operacao', title: 'Mapa operacional' },
+    '/multi-map': { area: 'Operação', title: 'Visitas por técnico' },
+    '/map': { area: 'Operação', title: 'Áreas geográficas' },
     '/route-map': { area: 'Operação', title: 'Sugestão de rota' },
     '/admin-clients': { area: 'Clientes', title: 'Lista de clientes' },
     '/admin-pools': { area: 'Piscinas', title: 'Lista de piscinas' },

@@ -2,6 +2,8 @@
 
 ## Ponto de retoma atual — 17/09/2026
 
+- TASK234–235 implementadas/testadas: /map passa de falsa atribuição para áreas geográficas explícitas, sem escrita, com ligação a Rotas e rondas. /multi-map consulta o dia real completo, regular/extra por identidade tipada, técnicos por ID, sem responsável e sem coordenadas. Lista/filtros continuam sem mapa; prazo de rede, mudança de dia/conta e marcadores antigos protegidos. Relatório `GEOGRAPHIC_AND_MULTI_MAP_RECOVERY_20260917.md`; final multi/navegação em `run-1789666581869`, áreas e regressão TASK233 em `run-1789666470821`. Cache v63, 128 grupos, sem migração/backend. Publicar e confirmar CI/restauro da árvore final.
+
 - TASK233 final confirmada no commit `083dc7f600e989236c2611eae5724dc0be35923a`, árvore `daf5d63e33ea82b26740da8197b70696bb7b1278`, CI `35250616882`: 126/126 grupos, 388 unitários/quatro técnicos, 21 scripts de navegador, 20 migrações, sintaxe de 539 JS backend/172 frontend/65 inline e restauro de 110 tabelas/32 ficheiros com linhas e hashes iguais em PostgreSQL 16. O grupo de recuperação dos mapas passou em 5161 ms. Este registo posterior altera apenas documentação; a evidência corresponde ao commit de código indicado.
 
 - Pedido atual do proprietário: continuar até fechar os critérios do sistema e deixar bloqueios externos para o final. Não declarar 100% sem evidência; não foi configurado reinício imediato após interrupção, que não é suportado pela automação exposta nesta sessão. Conservar este checkpoint e publicar os lotes testados na branch de trabalho, sem main/deploy/fornecedores reais/emissão fiscal.

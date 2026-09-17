@@ -1,6 +1,6 @@
 # Revisão pendente dos mapas e gráficos antigos
 
-Este registo conserva a triagem inicial. TASK233 trata /admin-map e /route-map, conforme `ADMIN_MAP_RECOVERY_20260917.md`; as restantes linhas continuam pendentes. Base de código: `e1b9ddc4353781de43d04f716ae725bea47dc306` (TASK231–232).
+Este registo conserva a triagem inicial. TASK233 trata /admin-map e /route-map, conforme `ADMIN_MAP_RECOVERY_20260917.md`; TASK234–235 tratam /map e /multi-map, conforme `GEOGRAPHIC_AND_MULTI_MAP_RECOVERY_20260917.md`. Permanecem /profit-map, o seu planeador e /technician-profit-dashboard. Base da triagem: `e1b9ddc4353781de43d04f716ae725bea47dc306` (TASK231–232).
 
 ## Evidência
 
@@ -32,3 +32,5 @@ O botão «Atribuir zonas» de /map só escreve associações na consola e apres
 A consulta autenticada em QA `run-1789664433390` confirmou /api/routes/auto-plan com HTTP 200 e `ok:false`; o servidor regista `Unknown field extras for include statement on model Pool`. A revisão do código também encontra planeamento baseado em User.role=tecnico e visitas antigas. A substituição de um nome de relação, por si só, não comprova a identidade, completude, período nem as fontes financeiras de um plano. /route-map da TASK233 usa o endpoint separado de sugestões regulares e não depende desse planeador.
 
 TASK233 fechada para /admin-map e /route-map no commit `083dc7f600e989236c2611eae5724dc0be35923a`, CI `35250616882` aprovado com 126 grupos e restauro de 110 tabelas/32 ficheiros. As falhas das restantes páginas nesta triagem continuam pendentes.
+
+TASK234–235 substituem a falsa atribuição por pré-visualização explícita e ligam /multi-map ao contrato diário completo existente. Não corrigem nem validam as fontes financeiras do planeador antigo. CI/restauro da nova árvore por confirmar.
