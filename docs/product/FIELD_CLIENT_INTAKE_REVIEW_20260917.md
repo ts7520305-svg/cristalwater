@@ -32,3 +32,30 @@ O ecrã real `/admin-reports` foi depois exercitado em Chromium, com conta ADMIN
 - Ao devolver HTTP 503 nas três fontes, a página apresenta valores zero e «Relatorios atualizados.» com estado de sucesso. A falha deixa de ser distinguível de ausência de atividade.
 
 A inspeção de `admin-reports.js` confirma a causa: `readJson` devolve fallbacks e `load` anuncia sucesso incondicionalmente; selectedMonth só é usado na legenda. Esta lacuna ainda não foi corrigida. Deverá ser tratada com fontes e período explícitos, erro/recuperação e preservação da diferença entre valor zero e informação indisponível, reutilizando os serviços financeiros existentes.
+
+Um segundo ensaio, `run-1789679035371` (2164 ms), confirmou a integração com routers, autenticação, base PGlite e página Chromium reais, sem substituir respostas HTTP no navegador, no commit `fcae79921350fac15251d4c4367b7985fb66d092`. A base isolada continha um documento de 93,40 €, saldo atual de 77,50 €, recebimentos de 12,34 € em fevereiro de 2058 e 3,56 € no primeiro instante de março, três relatórios guardados e dois registos de comunicação de meses diferentes. Não foram emitidos documentos nem contactados fornecedores: os registos foram criados diretamente para QA.
+
+As consultas financeiras existentes devolveram corretamente 12,34/3,56 € por mês e a consulta de relatórios filtrada devolveu um ADMIN em fevereiro. Ao selecionar fevereiro, a página continuou a apresentar aberto/pago de 0,00 €, zero faturas/pagamentos, três «relatórios administrativos» e as duas comunicações como «evento». Todos os três pedidos da página omitiram o período. Esta reprodução confirma montantes e contagens falsos na integração atual, além da falha de transporte do primeiro ensaio; não prova que o saldo atual seja um saldo histórico de fecho.
+
+### Fontes confirmadas para a retoma
+
+Inspeção de código em `fcae79921350fac15251d4c4367b7985fb66d092`, para preparar a correção seguinte:
+
+| Fonte atual | Contrato observado | Consequência para a correção |
+|---|---|---|
+| `adminReportsController.listMonthlyReports` | Aceita `month=AAAA-MM` e `type`; a página não os envia e conta todos os registos devolvidos. | Contar os relatórios guardados do período e tipo efetivamente indicados; não presumir que o JSON histórico de cada relatório é uma fonte financeira atual validada. |
+| `coreFlowRoutes`, GET `/dashboard` | Devolve contagens operacionais, incluindo `invoicesOpen`, mas não `financial`, `finance`, `counts.invoices` ou `counts.payments`, procurados pela página. Não lê o mês escolhido. | A integração atual não dispõe dos montantes/contagens anunciados, mesmo com HTTP 200. Usar fontes financeiras explícitas, sem converter propriedades ausentes em zero. O ensaio anterior com valores controlados verificou transporte/apresentação, não este apuramento real. |
+| `communicationRoutes`, GET `/` | Consulta todos os CommunicationLog por `createdAt`; o modelo tem `channel` e não `type`. Não contém estado de entrega. | Filtrar por mês, usar canal real, contar a população completa e limitar só a lista de últimas entradas. Apresentar registos de comunicação, sem os confundir com entrega confirmada ao destinatário. |
+| `cashReceiptReportService.payments/total` | Recebimentos por `Payment.paidAt`, intervalo UTC `[início, mês seguinte)`, exclusão de métodos internos e sem limite de página. `monthRef` aceita os anos 2000–2199. | Reutilizar esta definição de caixa e o ensaio `test-field-cash-reports.js`; definir o mesmo domínio de meses no formulário e na API. Um mês fora do contrato deve ser recusado, sem reapresentar dados globais. |
+| `clientCreditService.invoiceTotal/invoiceOpen/isReceivableInvoice` | Montante e saldo atuais do documento; rascunhos e documentos retirados não são recebíveis. | Distinguir documentos do mês de recebimentos nesse mês. O saldo atual de documentos de um mês não é o saldo histórico no fim desse mês; essa reconstrução não está demonstrada. |
+| `operationalValueReportService` | Referência mensal documental, atividade regular/extra, proveniência e margem desconhecida. | Reutilizar definições aplicáveis; não somar mensalidades, caixa e linhas extra como se fossem a mesma medida de receita ou lucro. |
+
+A proteção ADMIN de `/api/admin` e `/api/communications` já é instalada por `legacyAdministrationAccess` antes dos routers. A falta de autenticação dentro do ficheiro `communicationRoutes` não demonstra acesso público. Conservar e ensaiar esta proteção no novo percurso. O relatório global `getOutstandingDebtReport` tem limite explícito de 10000 documentos; não o reutilizar como um total mensal completo sem tratar essa limitação.
+
+Critérios concretos para o próximo lote:
+
+1. Contrato de leitura com mês validado, definição de cada métrica, período UTC e completude explícitos. Não criar pagamentos, emitir documentos, gerar relatórios ou enviar comunicações ao abrir o ecrã.
+2. Ensaiar dados reais de meses diferentes e fronteiras exatas, pagamentos internos, documentos retirados e população superior aos limites de apresentação. Confirmar o significado e a proveniência de cada montante.
+3. Separar vazio confirmado, zero confirmado, campo inválido e fonte indisponível. Uma falha parcial deve identificar a secção afetada, permitir recuperação e nunca anunciar atualização integral.
+4. Impedir que respostas atrasadas de outro mês, modo ou conta repovoem o ecrã; tornar explícita a data/período dos dados. Exercitar rede interrompida, resposta inválida, troca de conta e recarga.
+5. Rever apresentação a 320/390/1440 px, texto literal, títulos, controlos e estados acessíveis. Confirmar o CI/restauro da árvore que implementar a correção; este diagnóstico não a declara concluída.

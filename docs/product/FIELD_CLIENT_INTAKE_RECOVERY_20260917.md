@@ -2,7 +2,7 @@
 
 ## Estado
 
-Implementação e ensaios locais concluídos em 17/09/2026, sobre `1afc751eb3244e272732ea564aa4a74828f2ee51`. Publicação e CI/restauro nativo da árvore final por confirmar. Cache v68; runner com 137 grupos e 21 scripts de navegador. Sem migração: criação e aprovação usam a tabela existente FieldWriteRequest, com âmbitos próprios.
+Implementação e ensaios locais concluídos em 17/09/2026, sobre `1afc751eb3244e272732ea564aa4a74828f2ee51`. Publicados no commit `fcae79921350fac15251d4c4367b7985fb66d092`, árvore `6c115b4a385893da6e9f61d76fb5528154e08862`, na branch `work/field-readiness-20260915-simulation`. O [CI/restauro nativo 35273623727](https://github.com/ts7520305-svg/cristalwater/actions/runs/35273623727) foi aprovado. Cache v68; runner com 137 grupos e 21 scripts de navegador. Sem migração: criação e aprovação usam a tabela existente FieldWriteRequest, com âmbitos próprios.
 
 O diagnóstico anterior está em `FIELD_CLIENT_INTAKE_REVIEW_20260917.md`: resposta perdida/reenvio criava dois clientes, coordenadas/volume inválidos eram persistidos, a consulta técnica devolvia configurações alheias ao cadastro e a aprovação podia deixar cliente aprovado/piscina pendente com revisor enviado pelo navegador. As correções seguintes são deste fluxo; não se estendem automaticamente a outros escritores de clientes/piscinas.
 
@@ -43,9 +43,13 @@ Na administração, a aprovação é persistida antes do transporte. O painel mo
 | Painel ADMIN real | Texto literal, aprovação offline, reload, recusa por alteração concorrente, revisão explícita, resposta perdida após saída da lista, revisor de resposta falsificado e troca tardia de conta. |
 | Apresentação | 320/390/1440 px sem transbordo; botões de recuperação/aprovação visíveis. Aviso com contraste corrigido e medido; título humano do cadastro e ações ADMIN sem fragmentar o link. Capturas Chromium revistas. |
 
-API e regressão de autenticação aprovadas em `run-1789677722606` (3124/1132 ms). API final com várias piscinas e valores financeiros não nulos aprovada em `run-1789678107472` (3913 ms). Uma execução conjunta anterior, `run-1789678016004`, teve 401 num ensaio de falha que esperava 503; não é aprovação global. A mesma API passou na repetição isolada sem alteração de produção; nessa execução conjunta, UI de cadastro e regressão de ocorrências passaram em 10378/18982 ms. O CI PostgreSQL nativo continua obrigatório.
+API e regressão de autenticação aprovadas em `run-1789677722606` (3124/1132 ms). API final com várias piscinas e valores financeiros não nulos aprovada em `run-1789678107472` (3913 ms). Uma execução conjunta anterior, `run-1789678016004`, teve 401 num ensaio de falha que esperava 503; não é aprovação global. A mesma API passou na repetição isolada sem alteração de produção; nessa execução conjunta, UI de cadastro e regressão de ocorrências passaram em 10378/18982 ms. Essa falha não se repetiu no CI PostgreSQL nativo abaixo; a causa do ensaio local não foi estabelecida.
 
 UI com revisão do dia, contraste e regressão de material aprovada em `run-1789678174509` (12378/14716 ms). Ajuste final das ações ADMIN aprovado em `run-1789678272634` (12038 ms). 388 unitários e sintaxe de 543 JS backend/179 frontend/57 inline aprovados. Inventário: 101 HTML, 94 páginas de raiz, sete auxiliares, 56 referências literais, zero assets ausentes e zero divergências de guardas/catalogação; 158 scripts ativos. Referências literais não demonstram cobertura global.
+
+CI nativo confirmado em 17/09/2026 no commit/árvore indicados acima, execução `35273623727`, job `105378760444`, concluída às 21:09 UTC: 137/137 grupos únicos com código zero, 388 unitários em 62 ficheiros, quatro testes de técnicos, 21 scripts de navegador, 20 migrações aditivas e sintaxe de 543 JS backend/179 frontend/57 inline. Cadastro API/UI passou em 1939/9795 ms; material em 1255/13699 ms; ocorrências em 1918/19332 ms. O restauro em PostgreSQL 16 recuperou 110 tabelas e 32 ficheiros, com linhas e hashes iguais. Todas as etapas concluíram com sucesso.
+
+Backup local de código `backup/task243-local-20260917`. O checkpoint posterior altera apenas documentação, incluindo o diagnóstico da próxima correção ADMIN; a evidência de integração pertence ao commit de código acima.
 
 ## Limites
 
