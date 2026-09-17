@@ -75,7 +75,14 @@ async function generate(mode, body = {}) {
       const reservedRepairs = await reservedRepairIds(tx, candidateRepairs.map(repair => repair.id));
       const repairs = candidateRepairs.filter(repair => !reservedRepairs.has(repair.id));
       const reservedExtras = new Set((await tx.invoiceLine.findMany({where:{type:'EXTRA_VISIT',referenceId:{in:candidateExtras.map(visit=>visit.id)}},select:{referenceId:true}})).map(line=>line.referenceId));
-      const extras = candidateExtras.filter(visit=>!reservedExtras.has(visit.id));
+      const extras = candidateExtras.filter(visit=>!reservedExtras.has(visit.id)).filter(visit => {
+        if (!visit.pool || visit.pool.clientId !== clientId || (visit.clientId && visit.clientId !== clientId)) {
+          fail('Cliente e piscina da visita extra não correspondem. Reveja a associação antes de faturar.', 409);
+        }
+        // An explicit zero overrides stale fallback prices and must not claim a
+        // source that produces no invoice line (including rounding below 1 cent).
+        return sourceCents(visit.totalPrice ?? visit.unitPrice ?? visit.price) > 0;
+      });
       const repairCents = repairs.reduce((sum, r) => sum + sourceCents(mode === 'OPERATIONAL' ? r.totalPrice || r.unitPrice : r.totalPrice), 0);
       const serviceCents = mode === 'CORE' ? visits.reduce((sum, v) => sum + sourceCents(sourceAmount(v)), 0) : 0;
       const extraCents = extras.reduce((sum, v) => sum + sourceCents(v.totalPrice ?? v.unitPrice ?? v.price), 0);

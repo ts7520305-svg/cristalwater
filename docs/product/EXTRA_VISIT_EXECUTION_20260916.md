@@ -14,6 +14,8 @@ O antigo appendToBilling podia acrescentar o mesmo item em cada atualização e 
 
 Os antigos endpoints que marcavam todos os extras como faturados e enviavam PDFs sem documento passam a recusar a operação e indicar Faturas. A página de extras mostra fontes concluídas por faturar e abre esse ecrã; não executa faturação em lote. Os PDFs de extras usam a mesma seleção elegível. Faturas existentes e condições comerciais de visitas fechadas são preservadas. Alterar destino/atribuição/preço de uma visita iniciada ou já fotografada exige revisão; não é uma correção silenciosa da execução.
 
+A revisão posterior reproduziu uma marcação indevida de faturada quando totalPrice era zero e price conservava um valor antigo: não existia linha de fatura correspondente. A seleção final exige agora pelo menos um cêntimo segundo a precedência dos preços; zero explícito, unitPrice zero e arredondamento inferior a um cêntimo conservam billed=false. Associações contraditórias entre cliente e piscina recusam a geração para ambos os clientes, com rollback integral; uma correção explícita permite depois gerar uma única linha.
+
 ## Evidência
 
 - TASK210 publicada em a34a510773669cde146c0d71d12ac55c43686035, árvore 4e5107e968e497c67d59c3f7dff116b37a8648a2, CI 35150598966: 113 grupos e restauro de 109 tabelas/29 ficheiros.
@@ -22,6 +24,7 @@ Os antigos endpoints que marcavam todos os extras como faturados e enviavam PDFs
 - Regressão de fotografias/conclusões antigas aprovada em run-1789593920606; E2E dos três perfis, identidade das visitas e geração de faturas aprovados em run-1789594079244. O E2E revelou que uma atualização do painel podia fechar os detalhes dos envios durante uma repetição; o estado aberto é conservado e a lista é atualizada também após erros.
 - A fixture de PDF antigo passou a exigir uma visita concluída: planeadas e gratuitas não são fontes de cobrança. Validação final destes PDFs, interface administrativa e novo fluxo em run-1789594225557.
 - 388 unitários, quatro testes de técnicos, 17 scripts de navegador e sintaxe de 536 ficheiros backend aprovados. Dezanove migrações aplicadas à base anterior preservaram os dados e produziram o esquema atual. Runner ampliado para 114 grupos; confirmar CI/restauro da árvore publicada, com 110 tabelas esperadas.
+- Regressão de preço zero reproduzida em `run-1789595245543`; correção, associações contraditórias e toda a regressão de geração de faturas aprovadas em `run-1789595299307`. O commit local inicial da TASK211 é `7b2cf929332959bda3d4c6ad5a6ad6a199137d6b`; a publicação deste lote foi bloqueada pela revisão automática por exigir autorização explícita nesta conversa para o repositório público/destino. A branch remota continua na TASK210; não atribuir ao lote novo o resultado do CI anterior.
 
 ## Limites e próximos passos
 

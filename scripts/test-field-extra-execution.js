@@ -53,13 +53,22 @@ let browser;
   const reports=await prisma.monthlyReport.findMany({where:{clientId:client.id,type:'EXTRA_VISITS'}});assert.equal(reports.length,1);assert.equal(reports[0].data.items.length,1);assert.equal(reports[0].data.items[0].amount,35);
   console.log('PASS typed ownership, eight simultaneous starts/completions, private photo replay, immutable receipts, original regular visit and single stock/report effects');
   for(const mode of ['INCLUDED','NO_CHARGE']){const row=await extra({billingMode:mode,totalPrice:999,isBillable:true,includedInPackage:mode==='INCLUDED'});assert.equal((await api('POST',endpoint(row,'complete'),request())).status,200);}
+  const zeroExtras=[];
+  for(const prices of [{totalPrice:0,unitPrice:25,price:25},{totalPrice:null,unitPrice:0,price:25},{totalPrice:0.001,unitPrice:25,price:25}]){const row=await extra(prices);zeroExtras.push(row);assert.equal((await api('POST',endpoint(row,'complete'),request())).status,200);}
   const pendingPreview=await api('GET','/api/billing/extras',undefined,adminToken);assert.equal(pendingPreview.status,200);assert.equal(pendingPreview.body.data[client.id].total,35);
   for(const path of ['/api/extras/confirm','/api/billing/extras/confirm']){const result=await api('POST',path,{},adminToken);assert.equal(result.status,409);assert.equal(result.body.code,'INVOICE_REQUIRED');assert.equal((await prisma.extraVisit.findUnique({where:{id:visit.id}})).billed,false);}
   const month=new Date().toISOString().slice(0,7),invoice=await api('POST','/api/core/invoices/generate',{clientId:client.id,monthRef:month},adminToken);assert.equal(invoice.status,200,JSON.stringify(invoice));assert.equal(invoice.body.invoice.total,35);assert.equal(invoice.body.invoice.lines.filter(line=>line.type==='EXTRA_VISIT').length,1);
+  for(const row of zeroExtras){assert.equal((await prisma.extraVisit.findUnique({where:{id:row.id}})).billed,false,'A zero-priced extra must not be marked invoiced without an invoice line');assert.equal(await prisma.invoiceLine.count({where:{type:'EXTRA_VISIT',referenceId:row.id}}),0);}
   assert.equal((await api('POST',endpoint(visit,'complete'),completion)).status,200);assert.equal((await prisma.extraVisit.findUnique({where:{id:visit.id}})).billingStatus,'IN_INVOICE');
   await prisma.extraVisit.update({where:{id:visit.id},data:{billed:false,date:new Date('2099-02-01T12:00:00Z')}});
   const repeatedMonth=await api('POST','/api/core/invoices/generate',{clientId:client.id,monthRef:'2099-02'},adminToken);assert.equal(repeatedMonth.status,200,JSON.stringify(repeatedMonth));assert.equal(repeatedMonth.body.invoice.lines.filter(line=>line.type==='EXTRA_VISIT').length,0);
   assert.equal(await prisma.invoiceLine.count({where:{type:'EXTRA_VISIT',referenceId:visit.id}}),1);
+  const mismatchedClient=await prisma.client.create({data:{name:'Extra mismatched historical client',active:true,status:'ACTIVE',billingActive:true,monthlyFee:0}});
+  const mismatched=await extra({clientId:mismatchedClient.id,scheduledAt:new Date('2097-08-10T12:00:00Z'),status:'DONE'});
+  for(const clientId of [client.id,mismatchedClient.id]){const result=await api('POST','/api/core/invoices/generate',{clientId,monthRef:'2097-08'},adminToken);assert.equal(result.status,409,JSON.stringify(result));assert.equal(await prisma.invoice.count({where:{clientId,monthRef:'2097-08'}}),0);}
+  assert.equal((await prisma.extraVisit.findUnique({where:{id:mismatched.id}})).billed,false);assert.equal(await prisma.invoiceLine.count({where:{type:'EXTRA_VISIT',referenceId:mismatched.id}}),0);
+  await prisma.extraVisit.update({where:{id:mismatched.id},data:{clientId:client.id}});
+  const corrected=await api('POST','/api/core/invoices/generate',{clientId:client.id,monthRef:'2097-08'},adminToken);assert.equal(corrected.status,200,JSON.stringify(corrected));assert.equal(corrected.body.invoice.total,35);
   console.log('PASS included/free extras never become chargeable and existing invoice sources cannot be charged in another month even with an inconsistent old billing flag');
   const failVisit=await extra({billingMode:'EXTRA',totalPrice:35,isBillable:true}),failBody=request({products:[{name:'Extra chlorine',quantity:2,unit:'KG'}],workGuideId:work.id});
   const stockBefore=await prisma.workGuideItem.findUnique({where:{id:stock.id}}),reportsBefore=await prisma.monthlyReport.findMany({where:{clientId:client.id},orderBy:{id:'asc'}});
