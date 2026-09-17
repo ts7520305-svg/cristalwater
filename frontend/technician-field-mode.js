@@ -2882,6 +2882,7 @@
     for (const selector of [...draftFieldIds.map(id=>'#'+id),...checkIds.map(id=>'#'+id),'#startBtn','#finishBtn','#incompleteSave','#problemBtn','#saveProblemBtn','#openWaterBtn','#pumpReminderCreate','#sendAdminAlertBtn','#addDoseBtn','#galleryPhotoBtn','#photoInput','#galleryPhotoInput','[data-photo-type]','#doseRows input','#doseRows select','#doseRows button']) document.querySelectorAll(selector).forEach(node=>{node.disabled=readOnly;});
     for(const selector of ['#openWaterBtn','#pumpReminderCreate'])document.querySelectorAll(selector).forEach(node=>{node.disabled=!visit || !sameFieldSession();});
     if(extra)for(const selector of ['#problemBtn','#saveProblemBtn','#sendAdminAlertBtn'])document.querySelectorAll(selector).forEach(node=>{node.disabled=true;});
+    window.CWFieldStockRequest?.contextChanged();
     $("#progressText").textContent = visits.length ? `${visits.filter(isVisitDone).length} de ${visits.length} visitas concluídas` : "Sem visitas atribuídas";
 
     if (!visit) {
@@ -3132,70 +3133,10 @@
     renderInterruptBoard();
   }
 
-  function savePendingAdminAlert(payload, error) {
-    const saved = storageRead("cwPendingAdminAlerts", []);
-    saved.unshift({
-      ...payload,
-      syncError: error?.message || String(error || "Erro de ligacao"),
-      savedAt: new Date().toISOString(),
-    });
-    storageWrite("cwPendingAdminAlerts", saved.slice(0, 50));
-  }
-
   async function sendAdminStockAlert() {
-    const visit = current();
-    if (!requireRegularVisit(visit)) return;
-    const target = visitKey(visit);
-    const message = ($("#adminAlertMessage")?.value || "").trim();
-    const productName = ($("#stockProductName")?.value || "").trim();
-    const quantity = ($("#stockQuantity")?.value || "").trim();
-    const unit = ($("#stockUnit")?.value || "").trim();
-    const requestType = $("#adminAlertType")?.value || "STOCK_REQUEST";
-    const priority = $("#adminAlertPriority")?.value || "NORMAL";
-
-    if (!message && !productName) {
-      toast("Escreve o material em falta ou uma nota.");
-      return;
-    }
-
-    const payload = {
-      requestType,
-      priority,
-      productName,
-      quantity,
-      unit,
-      message: message || `Verificar stock: ${productName}`,
-      visitId: visit?.id || null,
-      poolId: visit?.pool?.id || null,
-      clientId: visit?.client?.id || null,
-      poolName: visit?.pool?.name || "",
-      clientName: visit?.client?.name || "",
-      vehicleId: ($("#vehicleId")?.value || localStorage.getItem("cwVehicleId") || "").trim(),
-      technicianId: ($("#technicianId")?.value || localStorage.getItem("cwTechnicianId") || "").trim(),
-      createdAt: new Date().toISOString(),
-    };
-
-    const button = $("#sendAdminAlertBtn");
-    if (button) button.disabled = true;
-    try {
-      await api("/api/technician/stock-reminders", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
-      if (!sameFieldSession() || visitKey() !== target) return;
-      ["adminAlertMessage", "stockProductName", "stockQuantity"].forEach((id) => {
-        const node = $(`#${id}`);
-        if (node) node.value = "";
-      });
-      const unitNode = $("#stockUnit");
-      if (unitNode) unitNode.value = unit || "";
-      toast(priority === "HIGH" ? "Aviso urgente enviado ao admin." : "Aviso enviado ao admin.");
-    } catch (error) {
-      savePendingAdminAlert(payload, error);
-      toast("Sem ligacao. Aviso guardado no telemovel.");
-    } finally {
-      if (button) button.disabled = !isRegularVisit();
-    }
+    if (!requireRegularVisit(current())) return;
+    if (!window.CWFieldStockRequest) { toast('Pedidos de material indisponíveis. Conserve o texto e reabra a página.'); return; }
+    return window.CWFieldStockRequest.send();
   }
 
   function addSectionHeader(section, title, hint) {

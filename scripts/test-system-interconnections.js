@@ -239,7 +239,9 @@ async function extraCommunicationChecks(monthRunId) {
   });
   check("alarme de agua aberta chega a alertas/notificacoes", Boolean(alarm.data.alert?.id && (alarm.data.notifications || []).length >= 2), `alerta ${alarm.data.alert?.id || "-"}`);
 
+  const stockTechToken = require('jsonwebtoken').sign({id:ctx.technician.id,role:'TECHNICIAN'},require('../src/utils/jwtSecret').getJwtSecret(),{expiresIn:'1h'});
   const stockReminder = await api("POST", "/api/technician/stock-reminders", {
+    visitId: plannedVisit.id,
     requestType: "STOCK_REQUEST",
     priority: "HIGH",
     productName: "Cloro Shock",
@@ -250,7 +252,7 @@ async function extraCommunicationChecks(monthRunId) {
     clientId: ctx.client.id,
     technicianId: ctx.technician.id,
     vehicleId: ctx.vehicle?.id || null,
-  });
+  }, [200], stockTechToken);
   check("aviso de stock do tecnico cria lembrete e notificacao", Boolean(stockReminder.data.notification?.id), `notificacao ${stockReminder.data.notification?.id || "-"}`);
 
   const portalToken = await ensureClientToken(ctx.client);

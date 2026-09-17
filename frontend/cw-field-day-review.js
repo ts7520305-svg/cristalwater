@@ -96,6 +96,7 @@
       const items = buildReview({ snapshot, water, pumps, outbox, drafts: window.CWFieldDraftSnapshot ? window.CWFieldDraftSnapshot() : {}, photos, online: navigator.onLine, verificationErrors });
       for(const item of await window.CWFieldIncomplete?.pendingSummary?.()||[])items.push(item);
       for(const item of await window.CWFieldEquipment?.pendingSummary?.()||[])items.push(item);
+      for(const item of await window.CWFieldStockRequest?.pendingSummary?.()||[])items.push(item);
       for(const draft of await window.CWExtraVisitCorrection?.pendingDrafts?.()||[])items.push({kind:'pending',text:`${draft.name} — rascunho de correção guardado, ainda não confirmado.`});
       for(const item of await window.CWFieldDraftSummary?.()||[])items.push(item);
       if(revision!==requestedRevision||owner()!==requestedOwner||token!==window.CristalAuth?.getToken?.())return;

@@ -761,91 +761,10 @@ router.post('/water-reminders/:id/alarm', waterHandler(req => waterReminderServi
 // AVISO ADMIN / STOCK EM CAMPO
 // ==========================================================
 
-router.post("/stock-reminders", async (req, res) => {
-  try {
-    const body = req.body || {};
-    const productName = String(body.productName || "").trim();
-    const message = String(body.message || "").trim();
-
-    if (!productName && !message) {
-      return res.status(400).json({
-        ok: false,
-        error: "Indique o material em falta ou uma nota para o administrador"
-      });
-    }
-
-    const requestType = String(body.requestType || "STOCK_REQUEST").toUpperCase();
-    const priority = String(body.priority || "NORMAL").toUpperCase();
-    const quantityText = [body.quantity, body.unit].filter(Boolean).join(" ");
-    const title = requestType === "ADMIN_NOTE"
-      ? "Nota do tecnico para administracao"
-      : requestType === "PURCHASE_REMINDER"
-        ? `Comprar material: ${productName || "material"}`
-        : `Stock em falta: ${productName || "material"}`;
-    const finalMessage = [
-      productName ? `Material: ${productName}` : "",
-      quantityText ? `Quantidade: ${quantityText}` : "",
-      message ? `Nota: ${message}` : "",
-      body.poolName ? `Piscina: ${body.poolName}` : "",
-      body.clientName ? `Cliente: ${body.clientName}` : "",
-      body.vehicleId ? `Viatura: ${body.vehicleId}` : "",
-    ].filter(Boolean).join("\n");
-
-    const reminder = await prisma.operationalReminder.create({
-      data: {
-        title,
-        description: finalMessage,
-        dueDate: new Date(),
-        clientId: body.clientId ? Number(body.clientId) : null,
-        poolId: body.poolId ? Number(body.poolId) : null,
-        assignedToTechnicianId: body.technicianId ? Number(body.technicianId) : null,
-      },
-    }).catch(() => null);
-
-    const notification = await prisma.notification.create({
-      data: {
-        clientId: body.clientId ? Number(body.clientId) : null,
-        type: priority === "HIGH" ? "STOCK_CRITICAL" : "STOCK",
-        eventType: "TECHNICIAN_STOCK_REQUEST",
-        title,
-        message: finalMessage || title,
-        role: "ADMIN",
-        severity: priority,
-        status: "PENDING",
-        metadata: {
-          source: "technician-field-mode",
-          requestType,
-          productName,
-          quantity: body.quantity || null,
-          unit: body.unit || null,
-          visitId: body.visitId || null,
-          poolId: body.poolId || null,
-          clientId: body.clientId || null,
-          vehicleId: body.vehicleId || null,
-          technicianId: body.technicianId || null,
-          reminderId: reminder?.id || null,
-        },
-      },
-    });
-
-    createNotifications("TECHNICIAN_STOCK_REQUEST", title, finalMessage || title)
-      .catch((error) => console.warn("stock reminder push warning:", error.message));
-
-    if (global.io) {
-      global.io.emit("new-notification", {
-        id: notification.id,
-        message: notification.message,
-        type: notification.type,
-        createdAt: notification.createdAt,
-        clientId: notification.clientId,
-      });
-    }
-
-    return res.json({ ok: true, reminder, notification });
-  } catch (err) {
-    console.error("stock reminder create error:", err);
-    return res.status(500).json({ ok: false, error: "Erro ao enviar aviso de stock" });
-  }
+router.post('/stock-reminders', async (req,res) => {
+  res.set('Cache-Control','private, no-store');
+  try { res.json(await require('../services/fieldStockRequestService').create(req.user,req.body||{})); }
+  catch(error) { res.status(error.statusCode||503).json({ok:false,code:error.code||'FIELD_STOCK_REQUEST_UNCONFIRMED',error:error.statusCode?error.message:'Pedido por confirmar. Repita o envio original.'}); }
 });
 
 // ==========================================================

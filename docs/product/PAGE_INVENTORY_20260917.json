@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-09-17T18:28:40.452Z",
-  "baseCommit": "29a63fbc7ae05427cae048cb189bf4f00278775b",
+  "generatedAt": "2026-09-17T19:13:43.985Z",
+  "baseCommit": "14d8e776825ea7e87848d1af8dae26f1176837f4",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 152,
+  "activeScriptsScanned": 154,
   "summary": {
     "htmlFiles": 101,
     "rootPages": 94,
@@ -101,6 +101,7 @@
         "test-field-alert-resolution.js",
         "test-field-alert-billing.js",
         "test-field-internal-alert-ui.js",
+        "test-field-stock-requests-ui.js",
         "test-field-extra-incomplete.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
@@ -1627,7 +1628,8 @@
         "test-field-alert-visibility.js",
         "test-field-alert-resolution.js",
         "test-field-alert-billing.js",
-        "test-field-internal-alert.js"
+        "test-field-internal-alert.js",
+        "test-field-stock-requests.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -2819,6 +2821,7 @@
         "test-field-notification-confirmation.js",
         "test-field-technical-proposals.js",
         "test-field-internal-alert.js",
+        "test-field-stock-requests.js",
         "test-field-extra-equipment.js",
         "test-notification-sound-browser.js"
       ],
@@ -3201,6 +3204,7 @@
         "/cw-proposal-requests.js",
         "/cw-proposal-editor.js",
         "/technician-field-mode.js",
+        "/cw-field-stock-request.js",
         "/cw-field-incomplete.js",
         "/cw-pump-reminders.js",
         "/cw-field-day-review.js",
@@ -3217,6 +3221,7 @@
         "test-field-technical-proposals.js",
         "test-field-proposal-recovery-ui.js",
         "test-field-write-recovery-ui.js",
+        "test-field-stock-requests-ui.js",
         "test-field-modern-route-recovery.js",
         "test-field-visit-types.js",
         "test-field-extra-execution.js",
