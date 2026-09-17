@@ -15,7 +15,7 @@ A revisão em API/base reais (`run-1789644423587`) abriu doze combinações de p
 
 `run-1789644599897` aprovou o grupo TEAM_LEADER ampliado: o menu real abre guia, histórico e perfil, sem atalhos ADMIN nem perda de sessão; os restantes percursos PIN/email, offline, recusa e recuperação de rascunhos continuam a passar. A revisão das doze combinações confirmou menu CLIENT nas três páginas genéricas e ADMIN na página de rentabilidade. As cinco páginas administrativas continuam a recusar o técnico quando abertas diretamente, conservando os dados locais.
 
-388 testes unitários aprovados localmente; sintaxe dos scripts alterados e diff verificados. Publicar e confirmar a árvore final no CI com 124 grupos, 17 scripts de navegador, 20 migrações existentes e restauro em PostgreSQL 16. A validação conjunta da TASK222–223 é distinta e não comprova automaticamente esta navegação posterior.
+388 testes unitários aprovados localmente; sintaxe dos scripts alterados e diff verificados. TASK224 confirmada no commit `9006df083a03e624bf25f2fef9b625a4d1ae5bcd`, árvore `7009dca7c1cbb3bfc115f977d10a8040ecc901f6`, CI `35216365688`: 124/124 grupos, 388 unitários/quatro técnicos, 17 scripts de navegador, 20 migrações e sintaxe de 539 ficheiros. Restauro de 110 tabelas e 32 ficheiros com linhas e hashes iguais em PostgreSQL 16. A validação conjunta da TASK222–223 é distinta e não foi usada como prova automática desta navegação posterior.
 
 ## Limites confirmados
 
@@ -25,3 +25,5 @@ A revisão em API/base reais (`run-1789644423587`) abriu doze combinações de p
 - O inventário estático e estas combinações não constituem uma revisão visual completa de todas as páginas, estados, idiomas e PDFs. As versões anteriores ficam no Git.
 
 Sem alterações a APIs, schema, main, deploy, serviços externos ou ao PNG não publicado perdido anteriormente.
+
+Atualização posterior: a TASK225 trata o erro da página de preferências e permite a entrada dos perfis autenticados, mantendo a autorização User no servidor. CLIENT/PIN recebem indisponibilidade explícita; uma identidade User autorizada consulta/grava o próprio registo. A ajuda e a configuração local antiga permanecem por rever.

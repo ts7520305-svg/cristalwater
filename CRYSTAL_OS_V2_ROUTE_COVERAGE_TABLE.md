@@ -76,7 +76,7 @@
 | /report-center | Report Center | ADMIN | Admin Route Index | /report-center | YES | Direct in V2 navigation |
 | /report-settings | Report Settings | ADMIN | Admin Route Index | /crystal-os-v2-route-index | YES | Reachable through Route Index |
 | /route-map | Route Map | ADMIN | Admin Route Index | /crystal-os-v2-route-index | YES | Reachable through Route Index |
-| /settings | Settings | ADMIN | Admin Route Index | /crystal-os-v2-route-index | YES | Reachable through Route Index |
+| /settings | Account sound preferences | ADMIN, CLIENT, TECHNICIAN, TEAM_LEADER | Account settings | /settings | YES | API retains User ownership; CLIENT/PIN receive an unavailable state |
 | /splash | Splash | ADMIN | Admin Route Index | /crystal-os-v2-route-index | YES | Reachable through Route Index |
 | /technician-field-mode | Technician Field Mode | TECHNICIAN, TEAM_LEADER | Technician Menu | /technician-field-mode | YES | Direct in V2 navigation |
 | /technician-gps | Technician Gps | TECHNICIAN, TEAM_LEADER | Technician Menu | /technician-gps | YES | ADMIN uses /admin-live-map; current field guard remains restricted |

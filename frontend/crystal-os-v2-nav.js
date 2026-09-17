@@ -277,7 +277,14 @@
   }
 
   function buildShell(role) {
-    const config = NAV[role] || NAV.ADMIN;
+    const base = NAV[role] || NAV.ADMIN;
+    const config = { ...base, groups: base.groups.map(group => ({ ...group, links: [...group.links] })) };
+    try {
+      const user = window.CristalAuth?.parseUser?.() || JSON.parse(localStorage.getItem('cristalwater_user') || localStorage.getItem('user') || '{}');
+      if (role === 'ADMIN' || user?.principalType === 'USER') {
+        config.groups[config.groups.length - 1].links.push(['/settings', 'Preferencias de som']);
+      }
+    } catch (_) {}
     const meta = computeMeta(role);
 
     const sidebar = document.createElement('aside');

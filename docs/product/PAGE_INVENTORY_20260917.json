@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-17T11:30:53.488Z",
-  "baseCommit": "aafd1c8f599574984f6ddc678f50c1691f90f8ad",
+  "generatedAt": "2026-09-17T11:57:00.888Z",
+  "baseCommit": "9006df083a03e624bf25f2fef9b625a4d1ae5bcd",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 141,
+  "activeScriptsScanned": 142,
   "summary": {
     "htmlFiles": 101,
     "rootPages": 94,
     "nestedPages": 7,
     "missingAssetReferences": 0,
     "pagesWithLiteralTestReference": 43,
-    "catalogueGuardDifferences": 3
+    "catalogueGuardDifferences": 2
   },
   "pages": [
     {
@@ -746,7 +746,8 @@
       ],
       "missingAssets": [],
       "testReferences": [
-        "test-field-notification-confirmation.js"
+        "test-field-notification-confirmation.js",
+        "test-account-notification-settings-browser.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -2992,19 +2993,25 @@
       "kind": "Entrada raiz",
       "title": "Configurações de Notificações",
       "catalogueRoles": [
-        "ADMIN"
+        "ADMIN",
+        "CLIENT",
+        "TECHNICIAN",
+        "TEAM_LEADER"
       ],
       "guardFiles": [
         "client-auth-guard.js"
       ],
       "explicitRoleHints": [
-        "CLIENT"
+        "ADMIN",
+        "CLIENT",
+        "TEAM_LEADER",
+        "TECHNICIAN"
       ],
-      "conditionalAccess": [],
+      "conditionalAccess": [
+        "Preferências: a API exige titularidade User; CLIENT/PIN podem receber estado indisponível"
+      ],
       "entryRedirects": {},
-      "catalogueRolesMissingFromGuard": [
-        "ADMIN"
-      ],
+      "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/cristal-assist.css",
         "/cw-auth.js",
@@ -3013,6 +3020,7 @@
         "/crystal-os-v2-foundation.css",
         "/crystal-os-v2-phase2-adapter.css",
         "/ui/design-system.css",
+        "/account-notification-settings.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
         "/ui/core/navigation-context.js",
@@ -3025,7 +3033,8 @@
         "test-field-access-api.js",
         "test-fcs-sec-tech-auth.js",
         "test-field-team-leader-entry.js",
-        "test-auth-entry-browser.js"
+        "test-auth-entry-browser.js",
+        "test-account-notification-settings-browser.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -3081,7 +3090,8 @@
       ],
       "missingAssets": [],
       "testReferences": [
-        "test-field-internal-chat-ui.js"
+        "test-field-internal-chat-ui.js",
+        "test-field-team-leader-entry.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },

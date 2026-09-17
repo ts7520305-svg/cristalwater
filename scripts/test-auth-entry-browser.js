@@ -41,6 +41,7 @@ async function clientGuardCases(browser){
   await context.route('http://guard.test/**',request=>{
    const url=new URL(request.request().url());
    if(url.pathname==='/client-auth-guard.js')return request.fulfill({contentType:'application/javascript',body:source('client-auth-guard.js')});
+   if(url.pathname==='/account-notification-settings.js')return request.fulfill({contentType:'application/javascript',body:source('account-notification-settings.js')});
    if(url.pathname==='/cw-auth.js'&&item.shared)return request.fulfill({contentType:'application/javascript',body:source('cw-auth.js')});
    if(url.pathname.startsWith('/api/'))return request.fulfill({json:{ok:true,settings:[]}});
    if(/\.(?:js|css)$/.test(url.pathname))return request.fulfill({contentType:url.pathname.endsWith('.js')?'application/javascript':'text/css',body:''});
@@ -58,7 +59,7 @@ async function clientGuardCases(browser){
   },{route,mode:item.storage});
   await page.goto('http://guard.test'+route);await page.waitForURL('http://guard.test'+expected);
   if(expected===route){
-   if(item.actual)await page.locator('#list input').first().waitFor();else await page.waitForFunction(()=>window.pageReady===true);
+   if(item.actual)await page.locator('#list select').first().waitFor();else await page.waitForFunction(()=>window.pageReady===true);
    assert.notEqual(await page.evaluate(()=>document.documentElement.style.visibility),'hidden',item.name);
    const aliases=await page.evaluate(()=>['token','cristalwater_jwt','user','cristalwater_user'].map(key=>localStorage.getItem(key)));
    assert.equal(aliases[0],token,item.name);assert.equal(aliases[1],token,item.name);assert.deepEqual(JSON.parse(aliases[2]),JSON.parse(aliases[3]));

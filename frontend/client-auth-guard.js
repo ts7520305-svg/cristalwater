@@ -39,7 +39,10 @@
     // Keep the existing administrator preview and the legacy chat redirect.
     if (role === 'ADMIN' && pathname === '/client_chat') { window.location.replace('/chat'); return; }
     const adminPreview = role === 'ADMIN' && pathname === '/client-portal';
-    if (role !== 'CLIENT' && !adminPreview) {
+    // Account preferences use server-side User ownership. CLIENT/PIN can receive
+    // an unavailable state; opening this page never grants access to that table.
+    const accountSettings = pathname === '/settings';
+    if (role !== 'CLIENT' && !adminPreview && !accountSettings) {
       window.location.replace(role === 'ADMIN' ? '/admin-master-control' : '/technician-field-mode');
       return;
     }

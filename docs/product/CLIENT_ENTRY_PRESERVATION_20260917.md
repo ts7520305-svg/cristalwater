@@ -23,7 +23,7 @@ O script também declarava `user` no âmbito global; a declaração própria da 
 | `run-1789643619187` | Grupo ampliado TEAM_LEADER aprovado: login real PIN/email, recuperação offline e entrada acidental nas páginas reais de pagamentos/configurações/portal sem perda da sessão nem do rascunho; retorno e edição continuam funcionais |
 | `run-1789642075142` | Pedidos de visita/avisos de pagamento do portal, histórico de conversas CLIENT/ADMIN e E2E completo de campo aprovados contra API/base reais |
 | Regressão de navegador | Os 17 scripts de `test:field-browser` aprovados, incluindo o grupo ampliado de entrada |
-| CI nativo | Primeira publicação `fec41686ad54124290514701341b9ac6d2b22f91`, árvore `9fcd6a970d4bd87be866134b6e04bd3e719cfaeb`, execução `35214915817`: falha em dois harnesses unitários antigos, antes da integração/restauro. Simulações corrigidas na TASK223; confirmar a árvore conjunta com os 124 grupos existentes, 20 migrações e restauro |
+| CI nativo | Primeira publicação `fec41686ad54124290514701341b9ac6d2b22f91`, árvore `9fcd6a970d4bd87be866134b6e04bd3e719cfaeb`, execução `35214915817`: falha em dois harnesses unitários antigos, antes da integração/restauro. Corrigidos na TASK223; árvore conjunta `d479d56580823f909a3a3933c17ebec6fd0d081e`, commit `aafd1c8f599574984f6ddc678f50c1691f90f8ad`, CI `35215588531` aprovado: 124/124 grupos, 388 unitários/quatro técnicos, 17 scripts de navegador, 20 migrações, sintaxe de 539 ficheiros e restauro de 110 tabelas/32 ficheiros com linhas/hashes iguais |
 
 O grupo de navegador usa fixtures de payload para exercitar a guarda e falhas de armazenamento; os grupos de integração usam credenciais assinadas e APIs reais. Os grupos existentes foram ampliados, sem acrescentar migrações ou endpoints.
 

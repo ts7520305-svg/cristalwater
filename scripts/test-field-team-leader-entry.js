@@ -78,7 +78,7 @@ let browser;
   await context.setOffline(false);
   console.log('PASS real TEAM_LEADER PIN login, assigned REGULAR/EXTRA route, forbidden foreign/admin resources and offline draft recovery');
 
-  for (const path of ['/client-payments', '/settings', '/client-portal']) {
+  for (const path of ['/client-payments', '/client-portal']) {
     await goto(path);
     await page.waitForURL('**/technician-field-mode');
     await page.waitForFunction(() => document.getElementById('fieldLoadError')?.hidden && document.querySelector('#visitList [data-visit-index]'));
@@ -87,7 +87,12 @@ let browser;
     await selectRegular();
     assert.equal(await page.locator('#notes').inputValue(), 'Rascunho da sessão PIN');
   }
-  console.log('PASS real client payment/settings/portal entry returns TEAM_LEADER to field with session and saved draft intact');
+  await goto('/settings');
+  await page.waitForFunction(() => document.getElementById('settingsStatus')?.dataset.state === 'unavailable');
+  assert.equal(await page.locator('#list select').count(), 0, 'PIN identity must not get User preferences by numeric ID');
+  assert.equal(await token(), pinToken); assert.equal(await page.evaluate(key => localStorage.getItem(key), pinKey), pinDraft);
+  assert.equal(await page.locator('#settingsNotices').getAttribute('href'), '/technician-chat#noticesTitle');
+  console.log('PASS client payment/portal entry returns TEAM_LEADER to field; account settings explains PIN refusal without losing session or draft');
 
   for (const [path, selector, expected] of [
     ['/technician', '#status', 'Rota atualizada'],
@@ -103,6 +108,7 @@ let browser;
       await goto('/technician');
       const menu = page.locator('.cw-v2-sidebar');
       assert.equal(await menu.locator('a[href^="/admin-"]').count(), 0, 'Technical menu must not offer administrative pages');
+      assert.equal(await menu.locator('a[href="/settings"]').count(), 0, 'PIN menu must not advertise unavailable User preferences');
       await menu.locator(`a[href="${path}"]`).first().click();
       await page.waitForURL(base + path);
     } else await goto(path);
@@ -129,6 +135,19 @@ let browser;
   await saved();
   const userDraft = await page.evaluate(key => localStorage.getItem(key), userKey);
   assert.equal(await page.evaluate(key => localStorage.getItem(key), pinKey), pinDraft);
+  await goto('/technician');
+  await page.locator('.cw-v2-sidebar a[href="/settings"]').click();
+  await page.waitForURL(base + '/settings');
+  await page.waitForFunction(() => document.getElementById('settingsStatus')?.dataset.state === 'ready');
+  await page.locator('[data-setting-type="ARRIVAL"]').selectOption('false');
+  await page.waitForFunction(() => document.getElementById('settingsStatus')?.dataset.state === 'saved');
+  assert.equal((await prisma.userNotificationSetting.findUniqueOrThrow({ where: { userId_type: { userId: user.id, type: 'ARRIVAL' } } })).sound, false);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForFunction(() => document.getElementById('settingsStatus')?.dataset.state === 'ready');
+  assert.equal(await page.locator('[data-setting-type="ARRIVAL"]').inputValue(), 'false');
+  assert.equal(await token(), userToken); assert.equal(await page.evaluate(key => localStorage.getItem(key), userKey), userDraft);
+  await goto('/technician-field-mode'); await selectRegular();
+  assert.equal(await page.locator('#notes').inputValue(), 'Rascunho da sessão email');
   await page.locator('#fieldLogoutBtn').click();
   await page.waitForURL('**/login');
   assert.equal(await page.evaluate(() => CristalAuth.getToken()), '');
