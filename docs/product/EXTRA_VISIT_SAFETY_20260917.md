@@ -19,12 +19,14 @@ Cada lembrete conserva `REGULAR` ou `EXTRA`, visita, piscina e cliente. Históri
 
 ## Validação
 
+Confirmação final em PostgreSQL 16: [CI 35182758842](https://github.com/ts7520305-svg/cristalwater/actions/runs/35182758842), commit `25c14c697aef8b8568e9cd296f3ff6594dad63e4`, árvore `0e5922326602148282172bc08553e1708327296f`. Aprovados 116/116 grupos de integração, 388 testes unitários, quatro testes de técnicos, 17 scripts de navegador, 19 migrações aditivas e sintaxe de 536 ficheiros backend. Restauro de 110 tabelas e 31 ficheiros carregados com linhas e hashes iguais. A atualização posterior deste relatório é apenas documental; não muda a árvore de código ensaiada.
+
 Revisão adicional: indicador de água na ronda corrigido para não confundir REGULAR e EXTRA com o mesmo número; o fecho atualiza a lista imediatamente. A reprodução falhou em `run-1789619069044`; correção, UUID ausente/inválido e normalização aprovados em `run-1789619754819`, juntamente com a regressão da API de água. O fluxo completo E2E passou localmente em `run-1789619835260`, com gravação assíncrona e corrupção da nova fila efetivamente verificadas.
 
 Quatro grupos dirigidos aprovados em `field-qa-runtime/run-1789618386006`: `test-field-extra-reminders`, `test-field-extra-execution`, `test-field-water-api` e `test-field-visit-types`. O ensaio novo cobre concorrência, IDs coincidentes, técnico/chefe alheio, pedido alterado, conclusão antes da sincronização, alerta, passagem, fecho, falha transacional da notificação, navegador real, perda de rede, recarregamento, confirmação incompleta, armazenamento cheio, duas janelas e resposta tardia após mudar de conta.
 
-388 testes unitários, quatro testes de técnicos incluídos nessa bateria, 17 scripts de navegador e sintaxe de 536 ficheiros backend aprovados localmente. Interface revista a 320, 390 e 1440 px; aviso pendente com contraste corrigido. Runner de integração passa a 116 grupos. Sem alteração de schema: mantêm-se as 19 migrações. A confirmação final em PostgreSQL 16 e o restauro correspondem ao workflow da publicação, a registar no checkpoint.
+388 testes unitários, quatro testes de técnicos, 17 scripts de navegador e sintaxe de 536 ficheiros backend também aprovados localmente. Interface revista a 320, 390 e 1440 px; aviso pendente com contraste corrigido. Runner de integração passa a 116 grupos. Sem alteração de schema: mantêm-se as 19 migrações.
 
 Os ensaios usam dados de QA e não verificam entrega push a telemóveis reais. Impedimentos, correções, regressos e equipamento de ExtraVisit continuam como trabalho separado.
 
-Primeiro CI da TASK213 (`35181296038`): 115/116 grupos aprovados; o E2E antigo esperava a bomba aparecer de forma síncrona e ainda usava as chaves/prefixos antigos. Ensaio migrado para aguardar a persistência, corromper/restaurar a fila atual e confirmar o lembrete REGULAR no servidor; o segundo CI deve confirmar a árvore final e o restauro.
+Primeiro CI da TASK213 (`35181296038`): 115/116 grupos aprovados; o E2E antigo esperava a bomba aparecer de forma síncrona e ainda usava as chaves/prefixos antigos. Ensaio migrado para aguardar a persistência, corromper/restaurar a fila atual e confirmar o lembrete REGULAR no servidor, sem retirar asserções. O segundo CI, indicado acima, confirmou a correção, todos os grupos e o restauro.
