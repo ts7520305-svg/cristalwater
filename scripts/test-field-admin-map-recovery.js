@@ -22,7 +22,12 @@ let browser;
  browser=await chromium.launch({headless:true,executablePath:process.env.CW_CHROMIUM_PATH,args:['--no-sandbox','--disable-dev-shm-usage']});
  const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'}),page=await context.newPage(),errors=[];
  page.setDefaultTimeout(10000);page.on('pageerror',e=>errors.push(e.message));
- await context.route('**/*',route=>new URL(route.request().url()).origin===new URL(base).origin?route.continue():route.abort());
+ let releaseAssets,holdAssets=true;const assetsGate=new Promise(resolve=>releaseAssets=resolve);
+ await context.route('**/*',async route=>{
+  const url=new URL(route.request().url());if(url.origin===new URL(base).origin)return route.continue();
+  if(holdAssets&&url.pathname.includes('/leaflet/'))await assetsGate;
+  return route.abort();
+ });
  await context.route('**/crystal-os-v2-nav.js',async route=>{await new Promise(r=>setTimeout(r,200));await route.continue();});
  await context.addInitScript(({user,token})=>{
   for(const key of ['token','cristalwater_jwt'])localStorage.setItem(key,token);
@@ -40,7 +45,9 @@ let browser;
   try { await page.waitForFunction(s=>document.getElementById('mapStatus').dataset.state===s,s); }
   catch(error){console.error('MAP STATE',await page.evaluate(()=>({path:location.pathname,status:document.getElementById('mapStatus')?.outerHTML})),errors);throw error;}
  };
- await goto('/admin-map');await state('ready');
+ await page.goto(base+'/admin-map',{waitUntil:'domcontentloaded'});await state('ready');
+ assert(await page.locator('#mapLoad').isEnabled(),'Operational controls work while external CSS and JS remain pending');
+ holdAssets=false;releaseAssets();await page.waitForLoadState('networkidle');
  assert.equal(await page.locator('#mapNotice').getAttribute('data-state'),'unavailable');
  const card=id=>page.locator('#mapList [data-record-id="'+id+'"]');
  assert.equal(await card(pools[0].id).locator('h2').textContent(),pools[0].name);assert.equal(await card(pools[0].id).locator('img').count(),0);
@@ -95,10 +102,16 @@ let browser;
   for(const k of ['user','cristalwater_user'])localStorage.setItem(k,JSON.stringify(user));
   window.qaLayers=[];window.qaPopups=[];
   const layer={addTo(){return this},clearLayers(){window.qaLayers=[]}};
-  window.L={map(){return{setView(){return this},fitBounds(){},invalidateSize(){},remove(){window.qaLayers=[]}}},layerGroup(){return layer},tileLayer(){return{on(_,fn){window.qaTileError=fn;return this},addTo(){return this}}},marker(coords){return{bindPopup(node){window.qaPopups.push({text:node.textContent,children:node.children.length});return this},addTo(){window.qaLayers.push(coords);return this}}},polyline(coords){return{addTo(){window.qaLayers.push(coords);return this}}}};
+  window.qaInstallLeaflet=()=>{window.L={map(){return{setView(){return this},fitBounds(){},invalidateSize(){},remove(){window.qaLayers=[]}}},layerGroup(){return layer},tileLayer(){return{on(_,fn){window.qaTileError=fn;return this},addTo(){return this}}},marker(coords){return{bindPopup(node){window.qaPopups.push({text:node.textContent,children:node.children.length});return this},addTo(){window.qaLayers.push(coords);return this}}},polyline(coords){return{addTo(){window.qaLayers.push(coords);return this}}}};};
  },{user,token});
- await mapped.route('**/*',r=>new URL(r.request().url()).origin===new URL(base).origin?r.continue():r.abort());
- const mapPage=await mapped.newPage();await mapPage.goto(base+'/admin-map',{waitUntil:'networkidle'});await mapPage.waitForFunction(()=>document.getElementById('mapStatus').dataset.state==='ready');
+ let releaseLibrary;const libraryGate=new Promise(resolve=>releaseLibrary=resolve);
+ await mapped.route('**/*',async r=>{
+  const url=new URL(r.request().url());if(url.origin===new URL(base).origin)return r.continue();
+  if(url.pathname.includes('/leaflet/')){await libraryGate;return r.fulfill({contentType:url.pathname.endsWith('.js')?'application/javascript':'text/css',body:url.pathname.endsWith('.js')?'window.qaInstallLeaflet();':''});}
+  return r.abort();
+ });
+ const mapPage=await mapped.newPage();await mapPage.goto(base+'/admin-map',{waitUntil:'domcontentloaded'});await mapPage.waitForFunction(()=>document.getElementById('mapStatus').dataset.state==='ready');
+ assert(await mapPage.locator('#map').isHidden());releaseLibrary();await mapPage.waitForFunction(()=>document.getElementById('mapNotice').dataset.state==='ready');assert(await mapPage.locator('#map').isVisible());
  const n=await mapPage.evaluate(()=>qaLayers.length);assert(n>=2);
  assert(await mapPage.evaluate(()=>qaLayers.some(p=>p[0]===0&&p[1]===0)));
  assert(await mapPage.evaluate(()=>qaPopups.every(p=>p.children===0)));

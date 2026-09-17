@@ -24,3 +24,9 @@ A leitura autenticada ADMIN em QA isolada `run-1789662888980` confirmou `/api/po
 `/admin-dashboard` verifica a existência de Chart/Leaflet antes de criar os gráficos, mas omitir um gráfico não equivale a informar claramente o utilizador de todas as falhas. `/metrics` passou a usar barras locais na TASK232.
 
 As bibliotecas externas bloqueadas simulam indisponibilidade; o ensaio não demonstra falha permanente do fornecedor. Devem também ser distinguidas falha da biblioteca, falha dos tiles e falha da consulta operacional. Permanecem pendentes a revisão dos restantes HTML/PDFs e os ensaios físicos/VPS descritos na matriz atual.
+
+## Revisão complementar na TASK233
+
+O botão «Atribuir zonas» de /map só escreve associações na consola e apresenta «Zonas atribuídas»; não persiste atribuições. Corrigir a alegação e definir um percurso verificável de pré-visualização/aprovação antes de implementar gravações. Não substituir isto por atribuição automática silenciosa.
+
+A consulta autenticada em QA `run-1789664433390` confirmou /api/routes/auto-plan com HTTP 200 e `ok:false`; o servidor regista `Unknown field extras for include statement on model Pool`. A revisão do código também encontra planeamento baseado em User.role=tecnico e visitas antigas. A substituição de um nome de relação, por si só, não comprova a identidade, completude, período nem as fontes financeiras de um plano. /route-map da TASK233 usa o endpoint separado de sugestões regulares e não depende desse planeador.

@@ -5,10 +5,10 @@
     const load = document.getElementById('mapLoad'), nearby = document.getElementById('mapNearby'), date = document.getElementById('mapDate'), tech = document.getElementById('mapTechnician');
     const keys = ['cristalwater_jwt','token','cristalwater_user','user'];
     const fingerprint = () => JSON.stringify(keys.map(key => localStorage.getItem(key)));
-    let identity = '', credential = '', invalid = false, sequence = 0, request, map, layers;
+    let identity = '', credential = '', invalid = false, sequence = 0, request, map, layers, confirmedRows = [];
     try { identity = fingerprint(); credential = localStorage.getItem('cristalwater_jwt') || localStorage.getItem('token') || ''; } catch (_) {}
     function state(kind, text) { status.dataset.state = kind; status.textContent = text; }
-    function clear() { list.replaceChildren(); if (layers) layers.clearLayers(); }
+    function clear() { confirmedRows = []; list.replaceChildren(); if (layers) layers.clearLayers(); }
     function busy(value) { list.setAttribute('aria-busy', String(value)); load.disabled = value || invalid; if (nearby) nearby.disabled = value || invalid; }
     function active() {
       let same = false; try { same = !!credential && identity === fingerprint(); } catch (_) {}
@@ -25,15 +25,17 @@
       notice.textContent = 'Mapa indisponível. Consulte a lista e abra a navegação de cada piscina.';
       notice.dataset.state = 'unavailable';
     }
-    try {
+    function initializeMap() { try {
       if (!window.L) fallback();
       else {
+        canvas.hidden = false;
         map = L.map(canvas).setView([37.1, -8.6], 10); layers = L.layerGroup().addTo(map);
         const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' });
         tiles.on('tileerror', fallback); tiles.addTo(map);
         notice.textContent = 'Os pontos com coordenadas confirmadas aparecem também no mapa.'; notice.dataset.state = 'ready';
       }
-    } catch (_) { fallback(); }
+    } catch (_) { fallback(); } }
+    initializeMap();
     window.addEventListener('cw:navigation-ready', () => map?.invalidateSize());
     window.addEventListener('resize', () => map?.invalidateSize());
     const validId = value => Number.isSafeInteger(value) && value > 0;
@@ -64,6 +66,7 @@
       return { response, data: await response.json() };
     }
     function render(rows) {
+      confirmedRows = rows;
       const points = [];
       for (const [index, row] of rows.entries()) {
         const article = document.createElement('article'), title = document.createElement('h2'), details = document.createElement('p'), links = document.createElement('div');
@@ -145,6 +148,20 @@
       }
       retry.addEventListener('click', technicians); void technicians();
     } else void query();
+    // Optional third-party assets must never block the page's own scripts or
+    // its operational query. Only build the map when both assets are ready.
+    if (!window.L) {
+      let cssReady = false, jsReady = false;
+      const ready = () => {
+        if (!cssReady || !jsReady || !active()) return;
+        initializeMap(); const rows = confirmedRows; clear(); render(rows);
+      };
+      const stylesheet = document.createElement('link'); stylesheet.rel = 'stylesheet'; stylesheet.href = 'https://unpkg.com/leaflet/dist/leaflet.css';
+      stylesheet.addEventListener('load', () => { cssReady = true; ready(); }); stylesheet.addEventListener('error', fallback);
+      const library = document.createElement('script'); library.async = true; library.src = 'https://unpkg.com/leaflet/dist/leaflet.js';
+      library.addEventListener('load', () => { jsReady = true; ready(); }); library.addEventListener('error', fallback);
+      document.head.append(stylesheet, library);
+    }
   }
   window.CWAdminMap = { start };
 })();

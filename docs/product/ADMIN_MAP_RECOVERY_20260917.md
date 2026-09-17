@@ -22,6 +22,8 @@ A triagem TASK229 e a leitura real `run-1789662888980` encontraram falha sem Lea
 
 O ensaio com mapa indisponível usa API real e bloqueia todos os recursos externos. Um adaptador Leaflet controlado verifica substituição de marcadores, popups literais e recuperação de falha dos tiles; não comprova disponibilidade real do fornecedor. A sintaxe passou em 539 JS backend, 172 frontend e 65 scripts inline.
 
-Cache v61; sem migração ou alteração de API. Runner passa a 126 grupos; inventário de 101 HTML, 50 páginas com referências literais em 147 scripts ativos e zero recursos locais em falta/divergências catálogo-guarda. Confirmar CI/restauro do commit publicado.
+Cache v62; sem migração ou alteração de API. Runner passa a 126 grupos; inventário de 101 HTML, 50 páginas com referências literais em 147 scripts ativos e zero recursos locais em falta/divergências catálogo-guarda. Confirmar CI/restauro do commit publicado.
+
+Reforço após a primeira publicação `0a023e708d76051fac1edf45415005c26117a72a`: biblioteca e estilos externos passam a carregar sem bloquear os scripts/consultas locais. `run-1789664644891` aprovou recursos retidos indefinidamente com controlos/lista utilizáveis, carregamento tardio do mapa com dados já confirmados e falha posterior dos tiles. O adaptador controlado cobre o contrato, sem comprovar disponibilidade do fornecedor. Confirmar o CI da versão final.
 
 Permanecem por tratar `/map`, `/multi-map`, `/profit-map` e o painel de lucro por técnico, conforme `MAP_CHART_REVIEW_20260917.md`. Estes dois ecrãs mantêm português; GPS físico, redes móveis e serviços de mapas externos exigem ensaio de campo.

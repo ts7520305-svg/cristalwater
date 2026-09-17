@@ -1,6 +1,6 @@
 # Inventário atual de páginas
 
-Base publicada: `8e564d309ef2cbf57eb781d4231951349d7f7090`. Gerado em 2026-09-17T16:55:39.913Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `0a023e708d76051fac1edf45415005c26117a72a`. Gerado em 2026-09-17T17:05:18.213Z. Inclui o estado dos ficheiros locais no momento da geração.
 
 101 ficheiros HTML: 94 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
