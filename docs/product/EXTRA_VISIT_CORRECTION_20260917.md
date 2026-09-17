@@ -9,7 +9,7 @@ O pedido conserva a identidade EXTRA, piscina, conta, UUID, versão consultada e
 ## Produtos, histórico e limites
 
 - O stock recebe apenas a diferença entre o consumo anterior e o consumo corrigido, com movimentos próprios de consumo ou devolução ligados a ExtraVisit. A visita regular com o mesmo número permanece intacta.
-- Produto e unidade são verificados na guia original aberta; histórico divergente, guia ambígua/encerrada ou saldo insuficiente impedem a alteração. Se a visita ainda não tinha consumos, a guia aberta da viatura atual é verificada.
+- Produto e unidade são verificados na guia original aberta; histórico divergente, guia ambígua/encerrada ou saldo insuficiente impedem a alteração. Se a visita não tinha consumos registados, não se presume a guia da viatura atual: a gestão precisa de reconciliar os produtos e a origem antes da correção de stock. Medições/checklist/notas continuam corrigíveis.
 - Falha depois de um ajuste parcial reverte os movimentos e saldos. Falha na notificação obrigatória reverte também execução, auditoria e comprovativo. O pedido original continua recuperável.
 - Horas, UUID da conclusão original, planeamento, instruções comerciais, campos de faturação e relatório mensal são conservados. Corrigir o registo técnico não recalcula preços ou documentos financeiros.
 - Histórico conserva antes/depois, motivo e autoria tipada. Recuperar um comprovativo já emitido depois de reatribuição não permite novas correções sem acesso atual.
@@ -25,6 +25,7 @@ Uma versão entretanto alterada exige consulta e revisão explícita das diferen
 - `run-1789622056227`: correção extra, execução extra, recuperação de escritas e identidade REGULAR/EXTRA aprovadas.
 - `run-1789622309766`: ensaio final da correção, E2E operacional e regressão água/bomba extra aprovados. Inclui seis pedidos simultâneos com o mesmo UUID, dois pedidos com a mesma versão, alteração do payload, guia fechada, falha transacional, resposta perdida, confirmação com piscina errada, rascunho preservado, conflito de duas janelas, quota/corrupção e resposta tardia após mudar de conta.
 - `run-1789622506497`: repetição final aprovada, incluindo reconhecimento explícito da recusa sem eliminar o comprovativo anterior.
+- `run-1789622702982`: revisão final aprovada; sem consumo original, o sistema recusa assumir a guia atual e mantém intactos o stock e a execução.
 - 388 testes unitários, quatro testes de técnicos, 17 scripts de navegador e sintaxe de 537 ficheiros backend aprovados localmente. Interface exercitada a 320/390/1440 px e captura mobile revista.
 - Runner integrado passa a 117 grupos; sem migração nova (19 existentes). Confirmar PostgreSQL 16 e restauro no CI da árvore publicada antes de marcar o lote validado remotamente.
 

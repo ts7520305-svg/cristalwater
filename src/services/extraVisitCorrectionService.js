@@ -37,14 +37,10 @@ async function reconcile(tx,visit,desiredRows,request) {
   for(const row of movements){if(!Number.isFinite(row.quantity)||row.quantity<=0||!row.unit)requests.fail('O histórico de stock precisa de revisão do escritório.',409);const key=productKey(row);actual.set(key,round((actual.get(key)||0)+(row.movementType==='RETURN'?-row.quantity:row.quantity)));}
   for(const key of new Set([...actual.keys(),...previous.keys()]))if(Math.abs((actual.get(key)||0)-(previous.get(key)?.quantity||0))>0.000001)requests.fail('O histórico de stock diverge do consumo da visita. Peça revisão ao escritório.',409);
   const originalGuides=[...new Set(movements.map(row=>row.workGuideId))];
-  let initialGuide;
-  if(!movements.length){
-    const tech=await tx.technician.findUnique({where:{id:visit.technicianId},select:{vehicleId:true}});
-    initialGuide=tech?.vehicleId ? await tx.workGuide.findFirst({where:{vehicleId:tech.vehicleId,status:'OPEN',OR:[{technicianId:visit.technicianId},{technicianId:null}]},orderBy:{id:'desc'}}) : null;
-  }
+  if(!movements.length)requests.fail('A visita não tem uma guia de consumo original identificada. O escritório deve reconciliar os produtos antes desta correção.',409);
   for(const item of deltas){
     const matches=[...new Set(movements.filter(row=>productKey(row)===item.key).map(row=>row.workGuideId))];
-    const guides=matches.length?matches:originalGuides.length?originalGuides:[initialGuide?.id];
+    const guides=matches.length?matches:originalGuides;
     if(guides.length!==1||!Number.isSafeInteger(guides[0]))requests.fail('A guia original não está identificada de forma única. Peça revisão do stock ao escritório.',409);
     item.guideId=guides[0];
   }
