@@ -8,7 +8,7 @@ O ensaio de 45 entradas reais da TASK229, com pedidos externos bloqueados, repro
 
 A leitura autenticada ADMIN em QA isolada `run-1789662888980` confirmou `/api/pools` com HTTP 200 e objeto `{ ok, pools }`, `/api/routes/optimize` e `/api/routes/multi-profit-route` com HTTP 404, e o endereço existente `/api/route/optimize` com HTTP 200 e array. O ensaio só consultou estes contratos; não validou nem corrigiu os mapas.
 
-| Página | Revisão do código atual | Critério para fechar |
+| Página | Falha identificada na triagem | Critério para fechar |
 |---|---|---|
 | `/admin-map` | Usa Leaflet externo sem guarda. `loadPools` e `loadRoute` aceitam apenas array, embora `/api/pools` responda `{ ok, pools }`. Coordenada zero é ignorada e os popups interpolam nomes. | Leitura validada, nomes literais, coordenadas válidas incluindo zero, falhas e ausência da biblioteca com alternativa utilizável. |
 | `/route-map` | Usa Leaflet sem guarda; pede `/api/routes/optimize`, mas o router de otimização está montado em `/api/route`. Falha de GPS é silenciada; nova carga não remove as camadas anteriores. | Endpoint existente, estado explícito de GPS/rede, nova consulta sem camadas antigas e exportação apenas de destinos confirmados. |
@@ -30,3 +30,5 @@ As bibliotecas externas bloqueadas simulam indisponibilidade; o ensaio não demo
 O botão «Atribuir zonas» de /map só escreve associações na consola e apresenta «Zonas atribuídas»; não persiste atribuições. Corrigir a alegação e definir um percurso verificável de pré-visualização/aprovação antes de implementar gravações. Não substituir isto por atribuição automática silenciosa.
 
 A consulta autenticada em QA `run-1789664433390` confirmou /api/routes/auto-plan com HTTP 200 e `ok:false`; o servidor regista `Unknown field extras for include statement on model Pool`. A revisão do código também encontra planeamento baseado em User.role=tecnico e visitas antigas. A substituição de um nome de relação, por si só, não comprova a identidade, completude, período nem as fontes financeiras de um plano. /route-map da TASK233 usa o endpoint separado de sugestões regulares e não depende desse planeador.
+
+TASK233 fechada para /admin-map e /route-map no commit `083dc7f600e989236c2611eae5724dc0be35923a`, CI `35250616882` aprovado com 126 grupos e restauro de 110 tabelas/32 ficheiros. As falhas das restantes páginas nesta triagem continuam pendentes.

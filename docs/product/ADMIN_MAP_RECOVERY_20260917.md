@@ -22,8 +22,14 @@ A triagem TASK229 e a leitura real `run-1789662888980` encontraram falha sem Lea
 
 O ensaio com mapa indisponível usa API real e bloqueia todos os recursos externos. Um adaptador Leaflet controlado verifica substituição de marcadores, popups literais e recuperação de falha dos tiles; não comprova disponibilidade real do fornecedor. A sintaxe passou em 539 JS backend, 172 frontend e 65 scripts inline.
 
-Cache v62; sem migração ou alteração de API. Runner passa a 126 grupos; inventário de 101 HTML, 50 páginas com referências literais em 147 scripts ativos e zero recursos locais em falta/divergências catálogo-guarda. Confirmar CI/restauro do commit publicado.
+Cache v62; sem migração ou alteração de API. Runner passa a 126 grupos; inventário de 101 HTML, 50 páginas com referências literais em 147 scripts ativos e zero recursos locais em falta/divergências catálogo-guarda. CI/restauro confirmados abaixo.
 
-Reforço após a primeira publicação `0a023e708d76051fac1edf45415005c26117a72a`: biblioteca e estilos externos passam a carregar sem bloquear os scripts/consultas locais. `run-1789664644891` aprovou recursos retidos indefinidamente com controlos/lista utilizáveis, carregamento tardio do mapa com dados já confirmados e falha posterior dos tiles. O adaptador controlado cobre o contrato, sem comprovar disponibilidade do fornecedor. Confirmar o CI da versão final.
+Reforço após a primeira publicação `0a023e708d76051fac1edf45415005c26117a72a`: biblioteca e estilos externos passam a carregar sem bloquear os scripts/consultas locais. `run-1789664644891` aprovou recursos retidos indefinidamente com controlos/lista utilizáveis, carregamento tardio do mapa com dados já confirmados e falha posterior dos tiles. O adaptador controlado cobre o contrato, sem comprovar disponibilidade do fornecedor. CI da versão final confirmado abaixo.
 
 Permanecem por tratar `/map`, `/multi-map`, `/profit-map` e o painel de lucro por técnico, conforme `MAP_CHART_REVIEW_20260917.md`. Estes dois ecrãs mantêm português; GPS físico, redes móveis e serviços de mapas externos exigem ensaio de campo.
+
+## Confirmação nativa final
+
+TASK233 final confirmada no commit `083dc7f600e989236c2611eae5724dc0be35923a`, árvore `daf5d63e33ea82b26740da8197b70696bb7b1278`, CI `35250616882`: 126/126 grupos, 388 unitários/quatro técnicos, 21 scripts de navegador, 20 migrações, sintaxe de 539 JS backend/172 frontend/65 inline e restauro de 110 tabelas/32 ficheiros com linhas e hashes iguais em PostgreSQL 16. O grupo de recuperação dos mapas passou em 5161 ms. Este registo posterior altera apenas documentação; a evidência corresponde ao commit de código indicado.
+
+Workflow: https://github.com/ts7520305-svg/cristalwater/actions/runs/35250616882.
