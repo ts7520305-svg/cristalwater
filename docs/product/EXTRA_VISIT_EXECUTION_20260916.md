@@ -1,5 +1,7 @@
 # Execução de visitas extra — TASK211
 
+Atualização em 17/09/2026: TASK211–212 publicadas e confirmadas no CI `35179629224`, com 115 grupos, 19 migrações e restauro de 110 tabelas/31 ficheiros. Água/bomba em ExtraVisit são tratadas posteriormente na TASK213 (`EXTRA_VISIT_SAFETY_20260917.md`).
+
 ## Resultado
 
 ExtraVisit tem agora início/fim, registo próprio de execução, comprovativo de conclusão e fotografias próprias. A migração é aditiva: conserva as visitas antigas, acrescenta ExtraVisitPhoto e identifica os consumos por extraVisitId nas duas tabelas de stock. Não cria ServiceVisits artificiais nem atribui dados históricos por coincidência numérica.

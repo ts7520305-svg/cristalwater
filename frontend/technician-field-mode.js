@@ -327,7 +327,7 @@
     const poolId = String(visit.pool?.id || visit.poolId || "");
     return activeWaterReminders().some((reminder) => {
       if (reminder.status === "CLOSED") return false;
-      if (isRegularVisit(visit) && visitId && String(reminder.visitId || "") === visitId) return true;
+      if ((visit.visitType || "REGULAR") === (reminder.visitType || "REGULAR") && visitId && String(reminder.visitId || "") === visitId) return true;
       if (poolId && String(reminder.poolId || "") === poolId) return true;
       return false;
     });
@@ -3899,7 +3899,7 @@
     persistModernRoute();
     render();
   });
-  window.addEventListener('cw:water-state-updated', () => { loadWaterRemindersFromStorage(); renderWaterReminders(); scheduleWaterReminders(); });
+  window.addEventListener('cw:water-state-updated', () => { loadWaterRemindersFromStorage(); renderWaterReminders(); scheduleWaterReminders(); renderList(); renderNowBoard(current()); });
   const incompleteKey=()=>`cwIncompleteVisits:${currentTechnicianId()}`;
   function readIncomplete(key=incompleteKey()) {
     const rows=JSON.parse(localStorage.getItem(key)||'{}');

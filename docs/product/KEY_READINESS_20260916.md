@@ -1,5 +1,7 @@
 # Chaves da ronda — TASK212
 
+Atualização em 17/09/2026: TASK211–212 publicadas e confirmadas no CI `35179629224`, com 115 grupos, 19 migrações e restauro de 110 tabelas/31 ficheiros. Água/bomba em ExtraVisit são tratadas posteriormente na TASK213 (`EXTRA_VISIT_SAFETY_20260917.md`).
+
 ## Falhas reproduzidas
 
 A bateria completa local `reports/field-suite/1789594640698` revelou que a lista matinal não encontrava uma chave associada a uma visita do dia em America/Chicago. A rota convertia AAAA-MM-DD em meia-noite UTC e depois calculava o dia local, consultando o dia anterior. O seletor administrativo também usava a data UTC para preencher o dia atual.

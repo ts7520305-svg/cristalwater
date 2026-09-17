@@ -70,12 +70,13 @@ async function notify(tx, reminder, eventType, role) {
 async function create(user, body = {}, kind = "WATER_OPEN") {
   const pump=kind==='PUMP_MANUAL';
   const dueDate = dueDateFor(body);
-  const localId = String(body.localId || randomUUID());
+  const localId = body.owner === undefined ? String(body.localId || randomUUID()) : String(body.localId || '').toLowerCase();
   if (!localId.trim() || localId.length > 160) fail(400, 'Identificador de lembrete inválido');
   const owner = body.owner === undefined ? null : fieldRequests.owner(user);
   if (owner && body.owner !== owner) fail(403, 'A conta do pedido mudou. Conserve o registo original');
   let requestPayload, payloadHash;
   if (owner) {
+    if (typeof body.localId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(body.localId)) fail(400, 'Conserve o identificador original do lembrete');
     requestPayload = Object.fromEntries(['visitType','visitId','poolId','clientId','dueAt','note','flowState','openedAt'].map(key => [key, body[key]]));
     if (!['REGULAR','EXTRA'].includes(body.visitType) || !['visitId','poolId','clientId'].every(key=>Number.isSafeInteger(body[key])&&body[key]>0&&body[key]<=2147483647) || typeof body.note !== 'string' || body.note.length>4000 || !['DRIP','HALF','FULL'].includes(body.flowState) || !Number.isFinite(Date.parse(body.openedAt)) || !Number.isFinite(Date.parse(body.dueAt))) fail(400, 'Conserve os dados originais do lembrete');
     payloadHash = fieldRequests.hash({kind, ...requestPayload});

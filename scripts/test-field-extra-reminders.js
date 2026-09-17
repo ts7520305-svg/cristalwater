@@ -21,6 +21,7 @@ let browser;
   for(const path of paths){
     const body=payload();
     assert.equal((await api('POST',path,body,null)).status,401);
+    for(const localId of [undefined,'',{},'not-a-request-id'])assert.equal((await api('POST',path,{...body,localId})).status,400);
     assert.equal((await api('POST',path,{...body,owner:`TECH:${other.id}`},otherToken)).status,403);
     assert.equal((await api('POST',path,{...body,owner:`TECH:${leader.id}`},leaderToken)).status,403);
     assert.equal((await api('POST',path,{...body,poolId:regularPool.id})).status,400);
@@ -28,6 +29,7 @@ let browser;
     const replies=await Promise.all(Array.from({length:6},()=>api('POST',path,body)));
     replies.forEach(reply=>assert.equal(reply.status,200,JSON.stringify(reply)));
     const row=replies[0].body.reminder;assert(replies.every(reply=>reply.body.reminder.id===row.id));assert.equal(row.metadata.visitType,'EXTRA');assert.equal(row.poolId,pool.id);assert.equal(replies[0].cache,'private, no-store');
+    assert.equal((await api('POST',path,{...body,localId:body.localId.toUpperCase()})).body.reminder.id,row.id);
     assert.equal((await api('POST',path,{...body,note:'Different request'})).status,409);
     assert.equal((await api('POST',path,{...body,visitType:'REGULAR',poolId:regularPool.id})).status,409);
     assert.equal(await prisma.technicalHistory.count({where:{poolId:pool.id,type:row.metadata.kind,message:'OPEN'}}),1);
@@ -63,11 +65,19 @@ let browser;
   await page.waitForFunction(()=>CWFieldReminders.list('WATER_OPEN').some(row=>!row.serverId)&&CWFieldReminders.list('PUMP_MANUAL').some(row=>!row.serverId));
   const pending=await page.evaluate(()=>['WATER_OPEN','PUMP_MANUAL'].map(kind=>CWFieldReminders.list(kind).find(row=>!row.serverId)));
   assert(pending.every(row=>row.visitType==='EXTRA'&&row.visitId===id&&row.poolId===pool.id));
+  await page.locator('[data-field-tab-button="hoje"]').click();await page.locator('#poolSegments [data-pool-filter="TODO"]').click();
+  assert.equal(await page.locator('#visitList [data-visit-index]').filter({hasText:'REGULAR safety pool'}).count(),1,'An EXTRA reminder must not mark a REGULAR visit with the same number');
+  await page.locator('#poolSegments [data-pool-filter="IN_PROGRESS"]').click();
+  assert.equal(await page.locator('#visitList [data-visit-index]').filter({hasText:'REGULAR safety pool'}).count(),0);
+  assert.equal(await page.locator('#visitList [data-visit-index]').filter({hasText:'EXTRA safety pool'}).locator('.chip').textContent(),'Água aberta');
   for(const width of [320,390,1440]){await page.setViewportSize({width,height:900});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));}
   if(process.env.CW_CAPTURE_UI){require('node:fs').mkdirSync('reports/field-ui',{recursive:true});await page.setViewportSize({width:390,height:844});await page.locator('[data-field-tab-button="more"]').click();await page.locator('.water-card').scrollIntoViewIfNeeded();await page.screenshot({path:'reports/field-ui/EXTRA_SAFETY_OFFLINE.png'});}
   await page.reload({waitUntil:'networkidle'});await page.waitForFunction(()=>CWFieldReminders?.list('PUMP_MANUAL').some(row=>!row.serverId));
   page.on('dialog',dialog=>dialog.accept());await page.locator('[data-field-tab-button="more"]').click();await page.locator(`[data-water-close="${pending[0].localId}"]`).click();await page.locator(`[data-pump-reminder="${pending[1].localId}"] button`).click();
   await page.waitForFunction(()=>['WATER_OPEN','PUMP_MANUAL'].every(kind=>CWFieldReminders.list(kind).some(row=>!row.serverId&&row.status==='CLOSED')));
+  assert.equal(await page.locator('#visitList [data-visit-index]').count(),0,'The active list must update immediately after physical closure');
+  await page.locator('[data-field-tab-button="hoje"]').click();await page.locator('#poolSegments [data-pool-filter="TODO"]').click();
+  for(const name of ['REGULAR safety pool','EXTRA safety pool'])assert.equal(await page.locator('#visitList [data-visit-index]').filter({hasText:name}).locator('.chip').textContent(),'Por iniciar','Physical closure must update the route immediately');
   await page.evaluate(()=>CWFieldReminders.sync());
   await page.unroute('**/api/technician/*-reminders**');
   // Reject a superficially successful close, then recover the exact pending physical confirmation.
@@ -83,6 +93,7 @@ let browser;
   assert((await page.evaluate(()=>CWFieldReminders.legacyWarning())).includes('antigos'));assert.equal(await page.evaluate(()=>localStorage.getItem('cwWaterReminders')),'[{"visitId":1,"note":"Ambiguous old owner"}]');
   await page.locator('[data-field-tab-button="hoje"]').click();
   assert.equal(await page.evaluate(()=>CWFieldVisitContext()?.id),id);
+  await context.route('**/api/technician/*-reminders**',route=>route.abort());
   const stateKey=`cwFieldReminders:v1:TECH:${tech.id}`;
   const quota=await page.evaluate(async key=>{const before=localStorage.getItem(key),original=Storage.prototype.setItem;Storage.prototype.setItem=function(name,value){if(name===key)throw Error('QA storage quota');return original.call(this,name,value);};let error;try{await CWFieldReminders.create('WATER_OPEN',{dueAt:new Date(Date.now()+3600000).toISOString()});}catch(failure){error=failure.message;}finally{Storage.prototype.setItem=original;}return {error,preserved:localStorage.getItem(key)===before};},stateKey);
   assert.equal(quota.error,'QA storage quota');assert(quota.preserved);
@@ -90,9 +101,12 @@ let browser;
   const simultaneous=await Promise.allSettled([page,secondPage].map(tab=>tab.evaluate(()=>CWFieldReminders.create('WATER_OPEN',{dueAt:new Date(Date.now()+3600000).toISOString()}))));
   assert.equal(simultaneous.filter(reply=>reply.status==='fulfilled').length,1,'Two tabs must preserve one active local reminder');await secondPage.close();
   console.log('PASS failed local storage sends nothing and simultaneous tabs preserve a single active reminder');
+  await page.evaluate(()=>CWFieldReminders.sync());
   let release,started;const waiting=new Promise(resolve=>{started=resolve;});const gate=new Promise(resolve=>{release=resolve;});
   await page.route('**/api/technician/water-reminders',async route=>{if(route.request().method()!=='POST')return route.continue();const response=await route.fetch();started();await gate;await route.fulfill({response}).catch(()=>{});});
-  const sending=page.evaluate(()=>CWFieldReminders.sync().catch(error=>error.message));await waiting;
+  await context.unroute('**/api/technician/*-reminders**');
+  const sending=page.evaluate(()=>CWFieldReminders.sync().catch(error=>error.message));
+  let deadline;try{await Promise.race([waiting,new Promise((_,reject)=>{deadline=setTimeout(()=>reject(Error('Delayed write did not reach the server')),15000);})]);}finally{clearTimeout(deadline);}
   const beforeSwitch=await page.evaluate(key=>localStorage.getItem(key),stateKey);
   const delayedLocal=Object.values(JSON.parse(beforeSwitch)).find(row=>row.payload&&!row.serverId);
   await page.evaluate(({token,other})=>{for(const key of ['token','cristalwater_jwt'])localStorage.setItem(key,token);for(const key of ['user','cristalwater_user'])localStorage.setItem(key,JSON.stringify({id:other.id,role:'TECHNICIAN'}));},{token:otherToken,other});
