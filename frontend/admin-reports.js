@@ -49,7 +49,7 @@
       if(!['total','receivableCount','excludedCount','unknownStatusCount','invalidAmountCount'].every(key=>integer(docs[key]))||docs.receivableCount+docs.excludedCount+docs.unknownStatusCount!==docs.total||docs.invalidAmountCount>docs.receivableCount||!amount(docs.amountCents)||!amount(docs.openAmountCents)||((docs.unknownStatusCount||docs.invalidAmountCount)&&(docs.amountCents!==null||docs.openAmountCents!==null)))fail();
       if((cash.paymentCount===0&&cash.amountCents!==0)||(docs.total===0&&(docs.amountCents!==0||docs.openAmountCents!==0)))fail();
     }else if(section==='reports'){
-      if(data.basis!=='MONTHLY_REPORT_MONTH'||!['total','adminCount','clientCount','otherCount'].every(key=>integer(data[key]))||data.total!==data.adminCount+data.clientCount+data.otherCount)fail();
+      if(data.basis!=='MONTHLY_REPORT_MONTH'||!['total','adminCount','clientCount','extraVisitsCount','otherCount'].every(key=>integer(data[key]))||data.total!==data.adminCount+data.clientCount+data.extraVisitsCount+data.otherCount)fail();
     }else{
       if(data.basis!=='COMMUNICATION_LOG_CREATED_AT_UTC'||data.deliveryConfirmed!==false||!integer(data.total)||data.latestLimit!==5||!Array.isArray(data.latest)||data.latest.length!==Math.min(data.total,5)||new Set(data.latest.map(row=>row?.id)).size!==data.latest.length)fail();
       let previous=null;
@@ -76,7 +76,7 @@
       review=[data.cash.amountCents,data.documents.amountCents,data.documents.openAmountCents].some(value=>value===null);
       if(review)text(content,'p','Há valores por rever: '+data.cash.invalidAmountCount+' recebimentos com montante inválido, '+data.documents.invalidAmountCount+' documentos com montantes inválidos/contraditórios e '+data.documents.unknownStatusCount+' com estado desconhecido. Um total que exceda a precisão permitida também fica por rever.').className='report-warning';
     }else if(section==='reports'){
-      metric(list,'Administrativos guardados',String(data.adminCount),'adminReports');metric(list,'De clientes guardados',String(data.clientCount),'clientReports');metric(list,'Outros tipos',String(data.otherCount),'otherReports');
+      metric(list,'Administrativos guardados',String(data.adminCount),'adminReports');metric(list,'De clientes guardados',String(data.clientCount),'clientReports');metric(list,'Relatórios de visitas extra',String(data.extraVisitsCount),'extraReports');metric(list,'Outros tipos',String(data.otherCount),'otherReports');
       text(content,'p','Contagem dos registos guardados com esta referência mensal. Não representa o envio ou a entrega de relatórios.');
       review=data.otherCount>0;
       if(review)text(content,'p','Existem tipos de relatório por rever.').className='report-warning';

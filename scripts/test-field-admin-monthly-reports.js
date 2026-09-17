@@ -32,7 +32,7 @@ let child;
   ...[' credit ','CREDIT_NOTE','ADJUSTMENT','credit_adjustment'].map(method=>({invoiceId:invoice.id,amount:999,method,paidAt:start})),
   ...Array.from({length:10001},()=>({invoiceId:invoice.id,amount:0.01,method:'CASH',paidAt:start}))
  ]});
- await prisma.monthlyReport.createMany({data:[{month:monthRef,type:'ADMIN',data:{private:'QA_PRIVATE_SNAPSHOT'}},{month:monthRef,type:'CLIENT',clientId:client.id,data:{}},{month:monthRef,type:'CLIENT',data:{}},{month:monthRef,type:'OTHER',data:{}},{month:'2097-03',type:'ADMIN',data:{}}]});
+ await prisma.monthlyReport.createMany({data:[{month:monthRef,type:'ADMIN',data:{private:'QA_PRIVATE_SNAPSHOT'}},{month:monthRef,type:'CLIENT',clientId:client.id,data:{}},{month:monthRef,type:'CLIENT',data:{}},{month:monthRef,type:'EXTRA_VISITS',clientId:client.id,data:{items:[{visitId:1},{visitId:2}]}},{month:monthRef,type:'OTHER',data:{}},{month:'2097-03',type:'ADMIN',data:{}}]});
  await prisma.communicationLog.createMany({data:[
   {channel:'EMAIL',message:'QA_PRIVATE_MESSAGE',clientId:client.id,createdAt:start},
   {channel:'PORTAL',message:'QA_PRIVATE_MESSAGE',clientId:client.id,createdAt:new Date(end-1)},
@@ -52,7 +52,7 @@ let child;
  assert.deepEqual(f.cash,{amountCents:14091,paymentCount:10005,invalidAmountCount:0});
  assert.deepEqual(f.documents,{total:10009,receivableCount:10005,excludedCount:4,unknownStatusCount:0,invalidAmountCount:0,amountCents:20841,openAmountCents:18651});
  assert.equal(f.basis.historicalClosingBalance,false);assert.equal(f.basis.internalCreditIncluded,false);
- assert.deepEqual(responses.reports.data,{basis:'MONTHLY_REPORT_MONTH',total:4,adminCount:1,clientCount:2,otherCount:1});
+ assert.deepEqual(responses.reports.data,{basis:'MONTHLY_REPORT_MONTH',total:5,adminCount:1,clientCount:2,extraVisitsCount:1,otherCount:1});
  const communications=responses.communications.data;assert.equal(communications.total,10003);assert.equal(communications.latestLimit,5);assert.equal(communications.latest.length,5);assert.equal(communications.deliveryConfirmed,false);
  for(let i=1;i<5;i++)assert(communications.latest[i-1].id>communications.latest[i].id);
  assert.equal((await call(path('financial','2097-03'))).body.data.cash.amountCents,700);

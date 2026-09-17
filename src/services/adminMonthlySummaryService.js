@@ -49,10 +49,10 @@ async function financial(db, monthRef) {
 
 async function reports(db, monthRef) {
   const groups = await db.monthlyReport.groupBy({by:['type'],where:{month:monthRef},_count:{_all:true}});
-  const result = {basis:'MONTHLY_REPORT_MONTH',total:0,adminCount:0,clientCount:0,otherCount:0};
+  const result = {basis:'MONTHLY_REPORT_MONTH',total:0,adminCount:0,clientCount:0,extraVisitsCount:0,otherCount:0};
   for (const group of groups) {
     result.total += group._count._all;
-    result[group.type === 'ADMIN' ? 'adminCount' : group.type === 'CLIENT' ? 'clientCount' : 'otherCount'] += group._count._all;
+    result[group.type === 'ADMIN' ? 'adminCount' : group.type === 'CLIENT' ? 'clientCount' : group.type === 'EXTRA_VISITS' ? 'extraVisitsCount' : 'otherCount'] += group._count._all;
   }
   return result;
 }
