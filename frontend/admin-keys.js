@@ -319,32 +319,48 @@ async function loadKeys() {
   }).join("") : '<div class="empty">Sem chaves registadas.</div>';
 }
 
+let morningRequest = 0;
+const keySession = () => localStorage.getItem('token') || localStorage.getItem('cw_token') || '';
+function clearMorning(message = 'Os filtros mudaram. Consulte novamente a lista de chaves.') {
+  morningRequest += 1;
+  const node = document.getElementById('morning');
+  if (node) node.textContent = message;
+}
 async function loadMorningKeys() {
   const date = val("date");
   const tech = val("technicianId");
+  const node = document.getElementById('morning'), session = keySession(), request = ++morningRequest;
+  node.textContent = 'A consultar as chaves necessárias…';
   const query = new URLSearchParams();
   if (date) query.set("date", date);
   if (tech) query.set("technicianId", tech);
+  try {
   const data = await api(`/api/keys/required/morning?${query.toString()}`);
-  const rows = data.keys || [];
-  document.getElementById("morning").innerHTML = `
+  if (request !== morningRequest || session !== keySession() || date !== val('date') || tech !== val('technicianId')) return;
+  if (!Array.isArray(data.keys) || data.count !== data.keys.length || (date && data.date !== date) || (tech && data.technicianId !== Number(tech))) throw Error('A resposta não confirma os filtros escolhidos. Consulte novamente.');
+  const rows = data.keys;
+  node.innerHTML = `
     <p><b>${esc(data.count)}</b> chave(s)/codigo(s) necessarios para ${esc(data.date || date || "hoje")}.</p>
     ${rows.length ? rows.map((key) => `
       <div class="key-alert">
         <strong>${esc(key.alertText || `${key.technicianName || "Tecnico"} precisa da chave ${key.keyCode}`)}</strong>
         <span class="pill">${esc(key.keyCode || key.keyName || "Chave")}</span>
+        <span class="pill">${key.visitType === 'EXTRA' ? 'Visita extra' : 'Visita regular'}</span>
         ${key.roundName ? `<span class="pill">Ronda: ${esc(key.roundName)}</span>` : ""}
         ${key.plannedDate ? `<span class="pill">${esc(formatDateTime(key.plannedDate))}</span>` : ""}
         <br>
         <small>${esc(key.clientName || "Cliente")} / ${esc(key.poolName || "Piscina")} ${key.poolZone ? `- ${esc(key.poolZone)}` : ""}</small>
         ${key.instructions ? `<br><small>${esc(key.instructions)}</small>` : ""}
         <div class="row-actions" style="margin-top:8px;justify-content:flex-start">
-          ${key.poolId ? `<a class="btn muted" href="/admin-pool-technical?poolId=${esc(key.poolId)}">Abrir ficha</a>` : ""}
-          ${key.visitId ? `<a class="btn muted" href="/admin-visits">Ver visitas</a>` : ""}
+          ${key.poolId ? `<a class="btn secondary" href="/admin-pool-technical?poolId=${esc(key.poolId)}">Abrir ficha</a>` : ""}
+          ${key.visitId ? `<a class="btn secondary" href="${key.visitType === 'EXTRA' ? '/admin-rounds' : '/admin-visits'}">Ver ${key.visitType === 'EXTRA' ? 'planeamento' : 'visitas'}</a>` : ""}
         </div>
       </div>
     `).join("") : '<div class="empty">Sem chaves necessarias para as visitas abertas neste dia.</div>'}
   `;
+  } catch (error) {
+    if (request === morningRequest && session === keySession()) node.textContent = 'Não foi possível consultar as chaves. ' + (error.message || 'Tente novamente.');
+  }
 }
 
 async function generateClientList() {
@@ -437,7 +453,10 @@ window.downloadCurrentReport = downloadCurrentReport;
 
 document.addEventListener("DOMContentLoaded", async () => {
   const date = document.getElementById("date");
-  if (date) date.value = new Date().toISOString().slice(0, 10);
+  const today = new Date();
+  if (date) date.value = [today.getFullYear(), String(today.getMonth() + 1).padStart(2, '0'), String(today.getDate()).padStart(2, '0')].join('-');
+  date?.addEventListener('change', () => clearMorning());
+  document.getElementById('technicianId')?.addEventListener('change', () => clearMorning());
   document.getElementById("clientId")?.addEventListener("change", () => renderPoolOptions(""));
   document.getElementById("poolId")?.addEventListener("change", syncClientFromPool);
 
@@ -448,3 +467,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     setStatus(error.message);
   }
 });
+window.addEventListener('storage', event => { if (!event.key || ['token','cw_token','user','cristalwater_user'].includes(event.key)) clearMorning('A sessão mudou. Reabra a página com a conta atual.'); });

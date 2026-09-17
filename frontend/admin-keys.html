@@ -19,12 +19,13 @@
     .danger{background:#dc3e3e;border-color:#dc3e3e;color:#fff}
     .muted{background:#eff5fc;color:#274766}
     .row{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #dfe8f2;padding:10px 0}
-    .row-main{min-width:0}
+    .row-main{min-width:0;overflow-wrap:anywhere}
     .row-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
     .pill{font-size:12px;border:1px solid #c6d8eb;border-radius:999px;padding:4px 8px;color:#466785;background:#f6faff;display:inline-flex;margin:2px 3px 2px 0}
     .hint{color:#56708b;font-size:13px;line-height:1.5}
     .field label{display:block;margin:0 0 6px;color:#4f6883;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
-    .key-alert{background:#fff7e9;border:1px solid #ecd3a7;border-radius:14px;padding:12px;margin-top:10px}
+    .key-alert{background:#fff7e9;border:1px solid #ecd3a7;border-radius:14px;padding:12px;margin-top:10px;overflow-wrap:anywhere}
+    .key-alert .pill{max-width:100%;box-sizing:border-box;white-space:normal;word-break:break-word}
     .key-alert strong{display:block;color:#855400}
     .empty{color:#56708b;padding:12px;border:1px dashed #c6d8eb;border-radius:12px;margin-top:10px;background:#f7fbff}
     .table-wrap{overflow:auto;border:1px solid #d9e5f1;border-radius:14px;margin-top:12px}
@@ -94,7 +95,7 @@
       </div>
       <br>
       <button class="primary" onclick="loadMorningKeys()">Ver chaves necessarias</button>
-      <div id="morning"></div>
+      <div id="morning" role="status" aria-live="polite"></div>
     </section>
 
     <section class="card">
