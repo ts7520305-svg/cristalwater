@@ -352,7 +352,12 @@
 
     document.body.classList.add('cw-v2-shell-enabled');
     document.body.setAttribute('data-cw-role', role);
-    const measureHeader = () => document.body.style.setProperty('--cw-navigation-header-height', Math.ceil(topWrap.getBoundingClientRect().height) + 'px');
+    document.documentElement.classList.add('cw-navigation-page');
+    const measureHeader = () => {
+      const height = Math.ceil(topWrap.getBoundingClientRect().height) + 'px';
+      document.body.style.setProperty('--cw-navigation-header-height', height);
+      document.documentElement.style.setProperty('--cw-navigation-header-height', height);
+    };
     if (window.ResizeObserver) new ResizeObserver(measureHeader).observe(topWrap);
     window.addEventListener('resize', measureHeader); measureHeader();
     window.dispatchEvent(new Event('cw:navigation-ready'));

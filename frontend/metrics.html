@@ -67,8 +67,7 @@ fetch("/api/metrics/productivity", { headers: authHeaders() })
     }
   });
 
-});
-
+})
 .catch(() => {
   document.getElementById("status").textContent = "Erro ao carregar métricas.";
 });

@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  const keys = ['name', 'clientId', 'type', 'zone', 'address', 'location', 'monthlyAmount', 'notes'];
+  const baseKeys = ['name', 'clientId', 'type', 'zone', 'address', 'location', 'monthlyAmount', 'notes'];
   const labels = {
     pt: ['Nome', 'Cliente', 'Tipo', 'Zona', 'Morada', 'Local na propriedade', 'Valor mensal (€)', 'Notas gerais'],
     en: ['Name', 'Customer', 'Type', 'Area', 'Address', 'Location on the property', 'Monthly amount (€)', 'General notes'],
@@ -22,10 +22,15 @@
   const serialized = value => JSON.stringify(canonical(value));
   const digest = async value => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))), byte => byte.toString(16).padStart(2, '0')).join('');
   const hash = value => digest(serialized(value));
-  const normalize = (key, value) => key === 'clientId' ? Number(value) : key === 'monthlyAmount' ? Number(String(value).trim().replace(',', '.')) : String(value ?? '').trim() || null;
-  const changes = (base, data) => Object.fromEntries(keys.filter(key => normalize(key, base[key]) !== normalize(key, data[key])).map(key => [key, normalize(key, data[key])]));
-  const equal = (a, b) => keys.every(key => normalize(key, a?.[key]) === normalize(key, b?.[key]));
+  const normalize = (key, value) => ['clientId', 'priority'].includes(key) ? Number(value) : key === 'monthlyAmount' ? Number(String(value).trim().replace(',', '.')) : String(value ?? '').trim() || null;
   function create(options = {}) {
+    // Keep the original editor's stored drafts/requests byte-compatible. The
+    // priority surface uses its own records and the same server version/lock.
+    const priorityMode = options.includePriority === true;
+    const keys = priorityMode ? ['priority', ...baseKeys] : baseKeys;
+    const changes = (base, data) => Object.fromEntries(keys.filter(key => normalize(key, base[key]) !== normalize(key, data[key])).map(key => [key, normalize(key, data[key])]));
+    const equal = (a, b) => keys.every(key => normalize(key, a?.[key]) === normalize(key, b?.[key]));
+    const priorityCopy = { pt: ['Prioridade', 'Normal', 'Alta', 'Urgente'], en: ['Priority', 'Normal', 'High', 'Urgent'], fr: ['Priorité', 'Normale', 'Haute', 'Urgente'], es: ['Prioridad', 'Normal', 'Alta', 'Urgente'], de: ['Priorität', 'Normal', 'Hoch', 'Dringend'] };
     const modal = document.createElement('div'); modal.id = 'poolEditModal'; modal.className = 'pool-edit-modal'; modal.hidden = true; modal.dataset.cwNoI18n = '';
     modal.innerHTML = `<div class="pool-edit-card" role="dialog" aria-modal="true" aria-labelledby="poolEditTitle"><div class="pool-edit-head"><div><h2 id="poolEditTitle"></h2><p id="poolEditSubtitle"></p></div><button id="poolEditClose" type="button">×</button></div>
       <form id="poolEditForm" data-cw-form-memory="managed" data-cw-state-managed="manual"><p id="poolEditStatus" role="status" aria-live="polite" hidden></p><section id="poolEditPending" hidden></section><div id="poolEditComparison"></div><div id="poolEditFields" class="pool-edit-fields"></div><p id="poolEditTransferHint"></p>
@@ -34,7 +39,7 @@
     const el = id => document.getElementById('poolEdit' + id), form = el('Form'), status = el('Status'), preview = el('Pending'), reviewBox = el('Comparison'), fieldBox = el('Fields');
     const banner = document.getElementById('poolEditPendingList'), save = el('Save'), retry = el('Retry'), review = el('Review'), apply = el('ApplyReview'), discard = el('Discard'), reload = el('Reload');
     const fields = Object.fromEntries(keys.map(key => {
-      const box = document.createElement('div'), label = document.createElement('label'), input = document.createElement(['clientId', 'type'].includes(key) ? 'select' : key === 'notes' ? 'textarea' : 'input');
+      const box = document.createElement('div'), label = document.createElement('label'), input = document.createElement(['clientId', 'type', 'priority'].includes(key) ? 'select' : key === 'notes' ? 'textarea' : 'input');
       box.className = 'pool-edit-field'; if (key === 'notes') box.classList.add('wide'); input.id = 'poolEdit' + key[0].toUpperCase() + key.slice(1); input.name = key; label.htmlFor = input.id;
       if (key === 'name') input.required = true; if (key === 'monthlyAmount') input.inputMode = 'decimal'; if (!['clientId', 'type'].includes(key)) input.maxLength = 10000;
       box.append(label, input); fieldBox.append(box); return [key, input];
@@ -43,7 +48,8 @@
     const token = () => localStorage.getItem('cristalwater_jwt') || localStorage.getItem('token') || '';
     try { credential = token(); } catch { unavailable = true; }
     const language = () => { const lang = String(window.CristalI18n?.readLanguage?.() || document.documentElement.lang || 'pt').slice(0, 2); return texts[lang] ? lang : 'pt'; };
-    const copy = index => texts[language()][index], key = id => `${owner}:${id}`, draftKey = id => 'cwPoolEditDraft:v1:' + key(id);
+    const copy = index => texts[language()][index], key = id => `${owner}:${id}`, draftKey = id => (priorityMode ? 'cwPoolPriorityEditDraft:v1:' : 'cwPoolEditDraft:v1:') + key(id);
+    const fieldLabel = field => field === 'priority' ? priorityCopy[language()][0] : labels[language()][baseKeys.indexOf(field)];
     const values = () => Object.fromEntries(keys.map(key => [key, fields[key].value]));
     const isCurrent = view => current === view && !invalidated;
     function note(index, view = current) { if (view) view.message = index; render(); }
@@ -56,7 +62,7 @@
     function assign(data) {
       for (const key of keys) {
         const value = String(data?.[key] ?? '');
-        if (['clientId', 'type'].includes(key) && !Array.from(fields[key].options).some(option => option.value === value)) fields[key].add(new Option(key === 'clientId' ? '#' + value : value || copy(39), value));
+        if (['clientId', 'type', 'priority'].includes(key) && !Array.from(fields[key].options).some(option => option.value === value)) fields[key].add(new Option(key === 'clientId' ? '#' + value : value || copy(39), value));
         fields[key].value = value;
       }
     }
@@ -73,6 +79,7 @@
     function display(field, value, names = current?.names || {}) {
       if (field === 'clientId') return `${names[value] || current?.catalog?.find(client => client.id === value)?.name || ''} (#${value})`.trim();
       if (field === 'monthlyAmount') return new Intl.NumberFormat(language(), { style: 'currency', currency: 'EUR' }).format(value);
+      if (field === 'priority') return priorityCopy[language()][value + 1] || String(value);
       if (field === 'type' && ['POOL', 'JACUZZI'].includes(value)) return copy(value === 'POOL' ? 37 : 38);
       return value || copy(32);
     }
@@ -89,18 +96,19 @@
       status.textContent = view?.message === undefined ? '' : copy(view.message); status.hidden = view?.message === undefined; status.dataset.tone = view?.message === 10 ? 'success' : 'info';
       el('Title').textContent = copy(0); el('Subtitle').textContent = copy(1); el('TransferHint').textContent = copy(35);
       for (const [button, index] of [[save, 2], [el('Cancel'), 3], [retry, 4], [review, 5], [apply, 6], [discard, 7], [reload, 33]]) button.textContent = copy(index);
-      el('Close').setAttribute('aria-label', copy(3)); keys.forEach((key, index) => { form.querySelector(`label[for="${fields[key].id}"]`).textContent = labels[language()][index]; });
+      el('Close').setAttribute('aria-label', copy(3)); keys.forEach(key => { form.querySelector(`label[for="${fields[key].id}"]`).textContent = fieldLabel(key); });
+      if (priorityMode) for (const option of fields.priority.options) if (['0', '1', '2'].includes(option.value)) option.textContent = priorityCopy[language()][Number(option.value) + 1];
       for (const option of fields.type.options) if (['POOL', 'JACUZZI', ''].includes(option.value)) option.textContent = copy(option.value === 'POOL' ? 37 : option.value === 'JACUZZI' ? 38 : 39);
       preview.replaceChildren(); preview.hidden = !view?.pending || invalidated;
       if (view?.pending && !invalidated) {
         const title = document.createElement('strong'); title.textContent = copy(24); preview.append(title);
-        for (const [field, value] of Object.entries(view.pending.submission.changes)) { const line = document.createElement('p'); line.textContent = `${labels[language()][keys.indexOf(field)]}: ${display(field, value, view.pending.names)}`; preview.append(line); }
+        for (const [field, value] of Object.entries(view.pending.submission.changes)) { const line = document.createElement('p'); line.textContent = `${fieldLabel(field)}: ${display(field, value, view.pending.names)}`; preview.append(line); }
       }
     }
     function access(mode, operation) { return new Promise((resolve, reject) => { const tx = db.transaction('edits', mode), request = operation(tx.objectStore('edits')); tx.oncomplete = () => resolve(request.result); tx.onabort = tx.onerror = () => reject(tx.error || Error('Storage failed')); }); }
     const read = async id => await access('readonly', store => store.get(key(id))) || { pending: null, confirmed: null }, write = (id, state) => access('readwrite', store => store.put(state, key(id)));
     const pick = pool => ({ id: pool.id, ...Object.fromEntries(keys.map(key => [key, pool[key]])) });
-    function validPool(pool, id) { return pool && pool.id === id && validId(pool.clientId) && typeof pool.monthlyAmount === 'number' && Number.isFinite(pool.monthlyAmount) && pool.monthlyAmount >= 0 && keys.every(key => Object.hasOwn(pool, key) && (['clientId', 'monthlyAmount'].includes(key) || pool[key] === null || typeof pool[key] === 'string')); }
+    function validPool(pool, id) { return pool && pool.id === id && validId(pool.clientId) && typeof pool.monthlyAmount === 'number' && Number.isFinite(pool.monthlyAmount) && pool.monthlyAmount >= 0 && (!priorityMode || Number.isSafeInteger(pool.priority) && pool.priority >= 0) && keys.every(key => Object.hasOwn(pool, key) && (['clientId', 'monthlyAmount', 'priority'].includes(key) || pool[key] === null || typeof pool[key] === 'string')); }
     function validBase(base, id) { return base && Object.keys(base).length === 2 && versionPattern.test(base.version) && validPool(base.pool, id) && Object.keys(base.pool).length === keys.length + 1; }
     function validValues(data) { return data && Object.keys(data).length === keys.length && keys.every(key => typeof data[key] === 'string' && data[key].length <= 10000); }
     function validNames(names) { return names && typeof names === 'object' && !Array.isArray(names) && Object.entries(names).every(([id, name]) => validId(Number(id)) && typeof name === 'string' && name.length <= 10000); }
@@ -147,7 +155,7 @@
         const user = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')), char => char.charCodeAt(0))));
         const id = Number(user.userId || user.id); if (String(user.role).toUpperCase() !== 'ADMIN' || !validId(id)) throw Error('Administrator required');
         owner = user.principalType === 'ENV_ADMIN' ? 'ENV_ADMIN:' + await digest(String(user.email || '').trim().toLowerCase()) : 'USER:' + id;
-        db = await new Promise((resolve, reject) => { const request = indexedDB.open('cw-pool-edits-v1', 1); request.onupgradeneeded = () => request.result.createObjectStore('edits'); request.onsuccess = () => resolve(request.result); request.onerror = request.onblocked = () => reject(Error('Storage unavailable')); });
+        db = await new Promise((resolve, reject) => { const request = indexedDB.open(priorityMode ? 'cw-pool-priority-edits-v1' : 'cw-pool-edits-v1', 1); request.onupgradeneeded = () => request.result.createObjectStore('edits'); request.onsuccess = () => resolve(request.result); request.onerror = request.onblocked = () => reject(Error('Storage unavailable')); });
         if (active()) await bannerRefresh();
       } catch { unavailable = true; note(12); } render();
     })();
@@ -169,7 +177,9 @@
     async function open(id, focusClient = false) {
       id = Number(id); if (!validId(id) || (current && !close())) return;
       const view = { id, base: null, loading: true, message: 8, lastRequestId: null, names: {}, catalog: [] }; current = view;
-      fields.clientId.replaceChildren(); fields.type.replaceChildren(new Option(copy(37), 'POOL'), new Option(copy(38), 'JACUZZI')); assign(null); reviewBox.replaceChildren(); modal.hidden = false; document.body.style.overflow = 'hidden'; render();
+      fields.clientId.replaceChildren(); fields.type.replaceChildren(new Option(copy(37), 'POOL'), new Option(copy(38), 'JACUZZI'));
+      if (priorityMode) fields.priority.replaceChildren(...[0, 1, 2].map(value => new Option(priorityCopy[language()][value + 1], String(value))));
+      assign(null); reviewBox.replaceChildren(); modal.hidden = false; document.body.style.overflow = 'hidden'; render();
       await ready; if (!active() || !isCurrent(view)) return;
       try {
         if (!db || unavailable) throw Error('No local storage'); const state = await checkState(await read(id), id); if (!active() || !isCurrent(view)) return;
@@ -182,7 +192,7 @@
           if (!draft) { assign(fresh.base.pool); view.message = undefined; } else { assign(draft.values); if (fresh.base.version !== view.base.version) { view.conflict = true; note(14, view); } else view.message = undefined; }
         }
       } catch { if (isCurrent(view)) note(unavailable ? 12 : 17, view); }
-      finally { if (isCurrent(view)) { view.loading = false; render(); if (!view.pending && !view.conflict) fields[focusClient ? 'clientId' : 'name'].focus(); } }
+      finally { if (isCurrent(view)) { view.loading = false; render(); if (!view.pending && !view.conflict) fields[priorityMode ? 'priority' : focusClient ? 'clientId' : 'name'].focus(); } }
     }
     function close() {
       const view = current; if (view?.base && !invalidated && !view.unavailable && !(view.discarded && equal(values(), view.base.pool)) && !saveDraft(view)) return false;
@@ -216,6 +226,7 @@
         if (state.confirmed && (view.lastRequestId === state.confirmed.record.requestId || (view.base.version === state.confirmed.record.base.version && equal(values(), state.confirmed.record.values)))) { applyConfirmation(view, state.confirmed.record, state.confirmed.result); return; }
         if (repeat) { view.pending = null; view.conflict = true; note(14, view); return; }
         const data = values(), patch = changes(view.base.pool, data);
+        if (priorityMode && Object.hasOwn(patch, 'priority') && !['0', '1', '2'].includes(data.priority)) { note(20, view); return; }
         if (!validValues(data) || !data.name.trim() || !validId(Number(data.clientId)) || !/^\d+(?:[.,]\d+)?$/.test(data.monthlyAmount.trim()) || !Number.isFinite(normalize('monthlyAmount', data.monthlyAmount)) || (Object.hasOwn(patch, 'type') && !['POOL', 'JACUZZI'].includes(patch.type))) { note(20, view); return; }
         if (!Object.keys(patch).length) { note(19, view); return; }
         const client = view.catalog.find(client => client.id === Number(data.clientId));
@@ -235,7 +246,7 @@
         if (mine !== old && mine !== actual) candidates.push({ source: 'draft', value: mine, label: 30 });
         if (pending && Object.hasOwn(pending.submission.changes, field)) { const value = pending.submission.changes[field]; if (!candidates.some(candidate => candidate.value === value)) candidates.push({ source: 'pending', value, label: 31 }); }
         if (candidates.length === 1) continue;
-        const section = document.createElement('section'); section.className = 'pool-edit-choice'; const title = document.createElement('strong'); title.textContent = labels[language()][keys.indexOf(field)]; section.append(title);
+        const section = document.createElement('section'); section.className = 'pool-edit-choice'; const title = document.createElement('strong'); title.textContent = fieldLabel(field); section.append(title);
         const select = document.createElement('select'); select.dataset.poolEditField = field; select.setAttribute('aria-label', title.textContent); select.add(new Option(copy(28), ''));
         for (const candidate of candidates) { candidate.allowed = field !== 'clientId' || candidate.value === snapshot.base.pool.clientId || snapshot.clients.some(client => client.id === candidate.value && client.selectable);
           const line = document.createElement('p'); line.textContent = `${copy(candidate.source === 'current' ? 25 : candidate.source === 'draft' ? 26 : 27)}: ${display(field, candidate.value, { ...view.names, ...pending?.names })}${candidate.allowed ? '' : ' — ' + copy(36)}`; section.append(line);
@@ -266,7 +277,7 @@
         view.base = revision.snapshot.base; view.names = names; view.pending = null; view.lastRequestId = null; view.conflict = false; view.review = null; clientOptions(view, revision.snapshot.clients); assign(data); reviewBox.replaceChildren(); note(22, view); channel?.postMessage('changed'); await bannerRefresh();
       }); } catch { if (active() && isCurrent(view)) note(18, view); } finally { working = false; render(); }
     }
-    const channel = typeof BroadcastChannel === 'function' ? new BroadcastChannel('cw-pool-edits') : null;
+    const channel = typeof BroadcastChannel === 'function' ? new BroadcastChannel(priorityMode ? 'cw-pool-priority-edits' : 'cw-pool-edits') : null;
     if (channel) channel.onmessage = () => void sync();
     form.onsubmit = event => { event.preventDefault(); void execute(); }; retry.onclick = () => void execute(true); review.onclick = () => void prepareReview(); apply.onclick = () => void applyReview();
     el('Cancel').onclick = close; el('Close').onclick = close; reload.onclick = () => current && void open(current.id);

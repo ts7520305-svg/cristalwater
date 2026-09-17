@@ -61,7 +61,7 @@ let browser;
       await page.setViewportSize({ width, height: 900 });
       assert.equal(await page.locator('.cw-lang-switch').evaluate(el => getComputedStyle(el).position === 'fixed'), false);
       await page.locator('#sheetEditComparison').scrollIntoViewIfNeeded();
-      const layout = await page.locator('.sheet-edit-recovery').evaluate(el => { const rect = el.getBoundingClientRect(), choice = el.querySelector('.sheet-edit-choice'), box = choice.getBoundingClientRect(), x = Math.max(0, Math.min(innerWidth - 1, (box.left + box.right) / 2)), y = Math.max(0, Math.min(innerHeight - 1, (box.top + box.bottom) / 2)); return { left: rect.left, right: rect.right, width: innerWidth, client: el.clientWidth, scroll: el.scrollWidth, foreground: el.contains(document.elementFromPoint(x, y)) }; });
+      const layout = await page.locator('.sheet-edit-recovery').evaluate(el => { const rect = el.getBoundingClientRect(), choice = el.querySelector('.sheet-edit-choice'), box = choice.getBoundingClientRect(), x = Math.max(0, Math.min(innerWidth - 1, (box.left + box.right) / 2)), y = Math.max(0, Math.min(innerHeight - 1, (box.top + box.bottom) / 2)); return { left: rect.left, right: rect.right, width: innerWidth, client: el.clientWidth, scroll: el.scrollWidth, top: box.top, bottom: box.bottom, hit: document.elementFromPoint(x, y)?.className, foreground: el.contains(document.elementFromPoint(x, y)) }; });
       assert(layout.left >= 0 && layout.right <= layout.width && layout.scroll <= layout.client + 1 && layout.foreground, `${lang}/${width}: ${JSON.stringify(layout)}`);
     }
   }

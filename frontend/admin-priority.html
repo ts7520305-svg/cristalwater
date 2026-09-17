@@ -26,6 +26,7 @@ select{padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.15);ba
   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
   <script src="/admin-auth-guard.js"></script>
   <link rel="stylesheet" href="/ui/design-system.css">
+  <link rel="stylesheet" href="/cw-pool-edit.css">
 </head>
 
 <body data-required-role="ADMIN">
@@ -37,81 +38,17 @@ select{padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.15);ba
 <main>
   <section class="panel" data-help-topic="pools">
     <h2>Prioridade das Piscinas</h2>
-    <p class="subtitle">Classifica por impacto operacional sem alterar estrutura de dados.</p>
+    <p class="subtitle">Consulte a prioridade atual. Abra a edição, reveja os dados e confirme a gravação.</p>
+    <p id="priorityStatus" role="status" aria-live="polite"></p>
+    <button id="priorityReload" type="button">Atualizar</button>
+    <div id="poolEditPendingList" hidden></div>
     <div id="list"></div>
   </section>
 </main>
 
-<script>
-const API = "/api";
-
-function authHeaders(extra = {}) {
-  const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
-  return {
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...extra,
-  };
-}
-
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-// ==========================================================
-// LOAD
-// ==========================================================
-
-async function load(){
-
-  const res = await fetch(`${API}/pools`, { headers: authHeaders() });
-  if (!res.ok) return;
-  const pools = await res.json();
-
-  const list = document.getElementById("list");
-  list.innerHTML = "";
-
-  pools.forEach(p => {
-
-    list.innerHTML += `
-      <div class="card">
-        <b>${escapeHtml(p.name)}</b><br>
-        Cliente: ${escapeHtml(p.client?.name || "-")}
-
-        <br><br>
-
-        Prioridade:
-        <select onchange="save(${p.id}, this.value)">
-          <option value="0" ${p.priority==0?"selected":""}>Normal</option>
-          <option value="1" ${p.priority==1?"selected":""}>Alta</option>
-          <option value="2" ${p.priority==2?"selected":""}>Urgente</option>
-        </select>
-      </div>
-    `;
-  });
-}
-
-// ==========================================================
-// SAVE
-// ==========================================================
-
-async function save(id, priority){
-
-  await fetch(`${API}/pools/priority/${id}`,{
-    method:"POST",
-    headers: authHeaders({ "Content-Type":"application/json" }),
-    body: JSON.stringify({ priority: Number(priority) })
-  });
-
-  console.log("✔ prioridade atualizada:", id, priority);
-}
-
-load();
-</script>
+<script src="/cw-admin-read.js"></script>
+<script src="/cw-pool-edit.js"></script>
+<script src="/admin-priority.js"></script>
 
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>

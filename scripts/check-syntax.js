@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
+const vm = require('node:vm');
 
 function walk(dir, out = []) {
   if (!fs.existsSync(dir)) return out;
@@ -33,5 +34,33 @@ for (const file of files) {
   }
 }
 function rootPath() { return path.join(__dirname, '..'); }
-if (ok) console.log(`✅ Syntax OK: ${files.length} backend JS files.`);
+// Browser scripts and inline HTML scripts can fail before their first network
+// request. Include them in the gate rather than relying on backend parsing.
+let frontendFiles = 0, inlineScripts = 0;
+function browserSyntax(source, filename, module = false) {
+  try {
+    if (module) {
+      const result = spawnSync(process.execPath, ['--check', '--input-type=module'], { input: source, encoding: 'utf8', timeout: 10000 });
+      if (result.error || result.status !== 0) throw Error(result.stderr || result.error?.message || 'Invalid module');
+    } else new vm.Script(source, { filename });
+  } catch (error) { ok = false; console.error(`Syntax check failed: ${filename}\n${error.message}`); }
+}
+function browserFiles(dir) {
+  for (const item of fs.readdirSync(dir, { withFileTypes: true })) {
+    const file = path.join(dir, item.name);
+    if (item.isDirectory()) { browserFiles(file); continue; }
+    if (file.endsWith('.js')) { frontendFiles++; browserSyntax(fs.readFileSync(file, 'utf8'), path.relative(rootPath(), file)); }
+    if (file.endsWith('.html')) {
+      let index = 0;
+      for (const match of fs.readFileSync(file, 'utf8').matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)) {
+        index++; if (/\bsrc\s*=/i.test(match[1])) continue;
+        const type = /\btype\s*=\s*["']?([^\s"'>]+)/i.exec(match[1])?.[1]?.toLowerCase();
+        if (type && !['module', 'text/javascript', 'application/javascript'].includes(type)) continue;
+        inlineScripts++; browserSyntax(match[2], path.relative(rootPath(), file) + ':inline-' + index, type === 'module');
+      }
+    }
+  }
+}
+browserFiles(path.join(rootPath(), 'frontend'));
+if (ok) console.log(`✅ Syntax OK: ${files.length} backend JS files, ${frontendFiles} frontend JS files and ${inlineScripts} inline scripts.`);
 process.exit(ok ? 0 : 1);

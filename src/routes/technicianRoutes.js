@@ -852,69 +852,31 @@ router.post("/stock-reminders", async (req, res) => {
 // RANKING
 // ==========================================================
 
-router.get("/ranking", async (req, res) => {
-
+router.get("/ranking", auth("ADMIN"), async (req, res) => {
+  res.set('Cache-Control', 'private, no-store');
   try {
-
-    const visits =
-      await prisma.serviceVisit.findMany();
-
-    const stats = {};
-
-    visits.forEach(v => {
-
-      const name =
-        v.technicianName ||
-        "Sem nome";
-
-      if (!stats[name]) {
-
-        stats[name] = {
-
-          name,
-
-          total: 0,
-
-          done: 0
-        };
-      }
-
-      stats[name].total++;
-
-      if (v.endAt) {
-        stats[name].done++;
-      }
+    const visits = await prisma.serviceVisit.findMany({
+      select: { technicianId: true, technicianName: true, status: true, endAt: true, technician: { select: { name: true } } },
     });
-
-    const result =
-      Object.values(stats)
-
-      .map(t => ({
-
-        ...t,
-
-        performance:
-          t.total > 0
-
-            ? Math.round(
-                (t.done / t.total) * 100
-              )
-
-            : 0
-      }))
-
-      .sort(
-        (a,b)=>
-          b.performance - a.performance
-      );
-
+    const stats = new Map();
+    for (const visit of visits) {
+      const status = String(visit.status || '').trim().toUpperCase();
+      if (['CANCELLED', 'CANCELED', 'CANCELADA', 'CANCELADO'].includes(status)) continue;
+      const name = visit.technician?.name || visit.technicianName || 'Sem técnico atribuído';
+      // Names can repeat or equal object prototype properties. Identity is the
+      // technician relation; old unassigned records remain a separate group.
+      const key = visit.technicianId ? 'TECH:' + visit.technicianId : 'LEGACY:' + name;
+      const row = stats.get(key) || { technicianId: visit.technicianId, name, total: 0, done: 0 };
+      row.total++;
+      if (visit.endAt || ['DONE', 'COMPLETED', 'CONCLUIDA', 'CONCLUIDO'].includes(status)) row.done++;
+      stats.set(key, row);
+    }
+    const result = [...stats.values()].map(row => ({ ...row, performance: Math.round(row.done / row.total * 100) }))
+      .sort((a, b) => b.performance - a.performance || b.done - a.done || a.name.localeCompare(b.name, 'pt') || (a.technicianId || 0) - (b.technicianId || 0));
     return res.json(result);
-
   } catch (err) {
-
-    console.error(err);
-
-    return res.status(500).json([]);
+    console.error('technician ranking error:', err);
+    return res.status(500).json({ ok: false, error: 'Erro ao carregar ranking.' });
   }
 });
 

@@ -15,51 +15,14 @@
 <body data-required-role="ADMIN">
 <main style="padding:16px;max-width:960px;margin:0 auto;">
   <h1>Ranking Técnicos</h1>
-  <p>Leitura equilibrada de produtividade, qualidade e consistencia operacional no periodo selecionado.</p>
+  <p>Conclusão das visitas regulares registadas, em todo o histórico. As visitas canceladas ficam excluídas.</p>
   <p id="status" aria-live="polite">A carregar ranking...</p>
+  <button id="rankingReload" type="button">Atualizar</button>
   <div id="ranking" class="card" style="padding:12px;">A carregar ranking...</div>
 </main>
 
-<script>
-function authHeaders(extra = {}) {
-  const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
-  return {
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...extra,
-  };
-}
-
-function esc(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-fetch("/api/technician/ranking", { headers: authHeaders() })
-.then(r=>r.ok ? r.json() : Promise.reject(new Error("Erro ao carregar ranking")))
-.then(data=>{
-  let html="";
-  (Array.isArray(data) ? data : []).forEach(t=>{
-    html+=`
-      <div>
-        <b>${esc(t.name)}</b><br>
-        Feitas: ${Number(t.done || 0)}/${Number(t.total || 0)} |
-        ${Number(t.performance || 0)}%
-      </div>
-      <hr>
-    `;
-  });
-  document.getElementById("ranking").innerHTML=html || "Sem dados de ranking.";
-  document.getElementById("status").textContent = "Ranking carregado.";
-});
-.catch(()=>{
-  document.getElementById("ranking").textContent = "Erro ao carregar ranking.";
-  document.getElementById("status").textContent = "Erro ao carregar ranking.";
-});
-</script>
+<script src="/cw-admin-read.js"></script>
+<script src="/ranking.js"></script>
 <script src="/crystal-os-v2-shell.js"></script>
 <script src="/crystal-os-v2-nav.js"></script>
 <script src="/ui/core/navigation-context.js"></script>
