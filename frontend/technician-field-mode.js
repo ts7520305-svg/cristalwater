@@ -30,7 +30,7 @@
   window.addEventListener('pagehide', () => { ++fieldWriteGeneration; ++routeRevision; });
   const sameFieldSession = () => window.CWFieldWriteStore?.same(fieldWriteSession);
   const startingVisits = new Set();
-  const extraVisitNotice = 'Visita extra: registe o trabalho, as medições, os produtos e as fotografias. Pode também registar água aberta ou bomba em manual. Depois de concluir, use “Corrigir registo” para rever os valores. Para impedimentos, contacte o escritório.';
+  const extraVisitNotice = 'Visita extra: registe o trabalho, as medições, os produtos e as fotografias. Pode também registar revisões de equipamento, água aberta ou bomba em manual. Depois de concluir, use “Corrigir registo” para rever os valores. Para impedimentos, contacte o escritório.';
   window.CWFieldVisitContext = () => sameFieldSession() && current() ? { id:current().id, visitType:current().visitType || 'REGULAR', poolId:current().poolId || current().pool?.id, clientId:current().clientId || current().client?.id || current().pool?.clientId, poolName:current().pool?.name, clientName:current().client?.name, technicianName:activeTechnician?.name || current().technician?.name } : null;
   let visitPhotos = [];
   let visitDrafts = {};
@@ -3022,7 +3022,7 @@
   function render() {
     renderIncompleteStatus();
     const visit = current();
-    window.dispatchEvent(new CustomEvent("cw:field-visit-selected", { detail: { visitId: isRegularVisit(visit) ? visit.id : null, visitType:visit?.visitType || null } }));
+    window.dispatchEvent(new CustomEvent("cw:field-visit-selected", { detail: { visitId: visit?.id || null, visitType:visit?.visitType || null, poolId:visit?.poolId || visit?.pool?.id || null, state:JSON.stringify([visit?.status,visit?.startAt,visit?.endAt]) } }));
     const extra = !!visit && !isRegularVisit(visit);
     document.body.classList.toggle('field-extra-selected',extra);
     const readOnly = extra && isVisitDone(visit);

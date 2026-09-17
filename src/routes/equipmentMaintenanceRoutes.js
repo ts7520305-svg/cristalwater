@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const auth = require('../middlewares/authMiddleware');
 const controller = require('../controllers/equipmentMaintenanceController');
+router.use((req, res, next) => { res.set('Cache-Control', 'private, no-store'); next(); });
 router.get('/notifications/config', auth('ADMIN'), controller.reminderConfiguration);
 router.put('/notifications/config', auth('ADMIN'), controller.configureReminders);
 router.post('/notifications/check', auth('ADMIN'), controller.checkReminders);

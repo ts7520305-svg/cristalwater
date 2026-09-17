@@ -1,5 +1,6 @@
 const { prisma } = require('../../prismaClient');
 const { createHash } = require('node:crypto');
+const requests = require('../../services/fieldWriteRequestService');
 const { normalizeRole } = require('../../utils/roles');
 const { civilDate, advance, dayLisbon } = require('../../services/equipmentMaintenanceCalendar');
 const fail = (status, message) => { throw Object.assign(new Error(message), { status }); };
@@ -58,43 +59,65 @@ async function update(user, planId, body) {
     return { ok: true, plan: publicPlan(plan) };
   });
 }
-async function listVisit(user, visitId) {
-  const vid = id(visitId);
-  // One read snapshot preserves the relationship between assignment and the returned pool plans.
-  const visit = await prisma.serviceVisit.findUnique({ where: { id: vid }, include: { pool: { select: { maintenancePlans: { include: { completions: { where: { visitId: vid }, select: { id: true } } }, orderBy: [{ nextDue: 'asc' }, { id: 'asc' }] } } } } });
-  owns(user, visit); const canComplete = open(visit);
-  return { ok: true, visitId: vid, canComplete, plans: (visit.pool?.maintenancePlans || []).map(p => ({ ...publicPlan(p), completedInVisit: p.completions.length > 0, canComplete: canComplete && p.active && p.completions.length === 0 })) };
+function visitKind(value = 'REGULAR') {
+  if (!['REGULAR','EXTRA'].includes(value)) fail(400, 'Tipo de visita inválido');
+  return value;
+}
+function completionWhere(planId, visitId, visitType) {
+  return visitType === 'EXTRA' ? { planId_extraVisitId: { planId, extraVisitId: visitId } } : { planId_visitId: { planId, visitId } };
+}
+async function listVisit(user, visitId, type) {
+  const vid = id(visitId), visitType = visitKind(type), field = visitType === 'EXTRA' ? 'extraVisitId' : 'visitId';
+  // The assignment, pool and completions come from one relation snapshot.
+  const visit = await prisma[visitType === 'EXTRA' ? 'extraVisit' : 'serviceVisit'].findUnique({ where: { id: vid }, include: { pool: { select: { maintenancePlans: { include: { completions: { where: { [field]: vid }, select: { id: true } } }, orderBy: [{ nextDue: 'asc' }, { id: 'asc' }] } } } } });
+  owns(user, visit); const canComplete = open(visit) && Boolean(visit.poolId);
+  return { ok: true, visitId: vid, visitType, poolId: visit.poolId, canComplete, plans: (visit.pool?.maintenancePlans || []).map(p => ({ ...publicPlan(p), completedInVisit: p.completions.length > 0, canComplete: canComplete && p.active && p.completions.length === 0 })) };
 }
 async function complete(user, planId, body = {}) {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) fail(400, 'Revisão inválida');
+  const modern = Object.hasOwn(body, 'visitType'), visitType = visitKind(body.visitType);
   const pid = id(planId), vid = id(body.visitId), expected = version(body.expectedVersion);
+  if (modern && (Object.keys(body).some(key => !['requestId','visitType','visitId','poolId','expectedVersion','notes','confirmed'].includes(key)) || typeof body.visitId !== 'number' || typeof body.poolId !== 'number')) fail(400, 'Conserve o contexto original da revisão');
+  const poolId = modern ? id(body.poolId) : null;
   if (body.confirmed !== true || typeof body.notes !== 'string' || body.notes.trim().length < 3 || body.notes.length > 3000) fail(400, 'Confirme a execução e descreva o que observou (3–3000 caracteres)');
   if (typeof body.requestId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(body.requestId)) fail(400, 'Identificador da operação inválido');
   const actor = identity(user), requestId = body.requestId.toLowerCase(), notes = body.notes.trim();
-  const fingerprint = createHash('sha256').update(JSON.stringify({ pid, vid, expected, notes, confirmed: true })).digest('hex');
+  const { requestId: ignored, ...payload } = body;
+  const request = modern ? requests.context(user, 'EQUIPMENT_MAINTENANCE', pid, requestId, payload) : null;
+  const fingerprint = modern ? request.payloadHash : createHash('sha256').update(JSON.stringify({ pid, vid, expected, notes, confirmed: true })).digest('hex');
+  const context = { planId: pid, visitType, visitId: vid, poolId, expectedVersion: expected };
   try { return await prisma.$transaction(async tx => {
-    await tx.$queryRaw`SELECT id FROM "ServiceVisit" WHERE id = ${vid} FOR UPDATE`;
-    const visit = await tx.serviceVisit.findUnique({ where: { id: vid } }); owns(user, visit);
+    // Recovery returns only this principal's original receipt, even after reassignment.
+    if (request) { const saved = await requests.recover(tx, request); if (saved) return saved; }
+    if (visitType === 'EXTRA') await tx.$queryRaw`SELECT id FROM "ExtraVisit" WHERE id = ${vid} FOR UPDATE`;
+    else await tx.$queryRaw`SELECT id FROM "ServiceVisit" WHERE id = ${vid} FOR UPDATE`;
+    const visit = await tx[visitType === 'EXTRA' ? 'extraVisit' : 'serviceVisit'].findUnique({ where: { id: vid } }); owns(user, visit);
+    const reject = (message, code) => request ? requests.confirm(tx, request, { ok: true, applied: false, context, code, message }) : fail(409, message);
+    if (modern && visit.poolId !== poolId) return reject('A piscina da visita mudou. Atualize a visita antes de preparar outra revisão.', 'EQUIPMENT_CONTEXT');
     await tx.$queryRaw`SELECT id FROM "EquipmentMaintenancePlan" WHERE id = ${pid} FOR UPDATE`;
     const plan = await tx.equipmentMaintenancePlan.findUnique({ where: { id: pid } });
     if (!plan || plan.poolId !== visit.poolId) fail(404, 'Plano não disponível nesta visita');
     const prior = await tx.equipmentMaintenanceCompletion.findUnique({ where: { requestId } });
     if (prior) {
-      if (prior.actor !== actor || prior.fingerprint !== fingerprint) fail(409, 'Este identificador já corresponde a outro registo');
+      if (modern || prior.actor !== actor || prior.fingerprint !== fingerprint) fail(409, 'Este identificador já corresponde a outro registo');
       return { ...prior.result, idempotent: true };
     }
-    if (await tx.equipmentMaintenanceCompletion.findUnique({ where: { planId_visitId: { planId: pid, visitId: vid } } })) fail(409, 'Este equipamento já foi revisto nesta visita');
-    if (!open(visit)) fail(409, 'Inicie a visita antes de registar a manutenção; visitas fechadas não aceitam alterações');
-    if (!plan.active || plan.version !== expected) fail(409, 'O plano foi alterado ou está em pausa. Atualize a lista');
+    if (await tx.equipmentMaintenanceCompletion.findUnique({ where: completionWhere(pid, vid, visitType) })) return reject('Este equipamento já foi revisto nesta visita.', 'EQUIPMENT_DUPLICATE');
+    if (!open(visit)) return reject('Inicie a visita antes de registar a manutenção; visitas fechadas não aceitam alterações.', 'EQUIPMENT_STATE');
+    if (!plan.active || plan.version !== expected) return reject('O plano foi alterado ou está em pausa. Atualize a lista e reveja as instruções.', 'EQUIPMENT_STALE');
     const now = new Date(); let nextDue;
-    try { nextDue = advance(dayLisbon(now), plan.intervalUnit, plan.intervalCount); } catch (e) { fail(409, e.message); }
+    try { nextDue = advance(dayLisbon(now), plan.intervalUnit, plan.intervalCount); } catch (e) { return reject(e.message, 'EQUIPMENT_STALE'); }
     const updated = await tx.equipmentMaintenancePlan.update({ where: { id: pid }, data: { nextDue, lastCompletedAt: now, version: { increment: 1 } } });
-    const result = { ok: true, idempotent: false, plan: publicPlan(updated, now), completedAt: now.toISOString() };
-    // Store a JSON-safe snapshot, never a mutable reference to the subsequent plan state.
-    const snapshot = JSON.parse(JSON.stringify(result));
-    await tx.equipmentMaintenanceCompletion.create({ data: { planId: pid, version: expected, visitId: vid, requestId, actor, fingerprint, notes, completedAt: now, result: snapshot } });
-    await tx.technicalHistory.create({ data: { poolId: plan.poolId, type: 'EQUIPMENT_MAINTENANCE', component: plan.component, message: plan.title, description: JSON.stringify({ planId: pid, version: expected, visitId: vid, requestId, actor, notes, instructions: plan.instructions, nextDue: nextDue.toISOString().slice(0, 10) }), status: 'COMPLETED', performedAt: now } });
-    await tx.userAuditLog.create({ data: { actor, action: 'EQUIPMENT_MAINTENANCE_COMPLETED', entity: 'EquipmentMaintenancePlan', entityId: String(pid), metadata: { visitId: vid, version: expected, requestId, nextDue: snapshot.plan.nextDue } } });
+    const result = { ok: true, idempotent: false, plan: publicPlan(updated, now), completedAt: now.toISOString(), ...(modern ? { applied: true, context } : {}) };
+    let snapshot = JSON.parse(JSON.stringify(result));
+    const completed = await tx.equipmentMaintenanceCompletion.create({ data: { planId: pid, version: expected, ...(visitType === 'EXTRA' ? { extraVisitId: vid } : { visitId: vid }), requestId, actor, fingerprint, notes, completedAt: now, result: snapshot } });
+    if (modern) {
+      snapshot = await requests.confirm(tx, request, { ...snapshot, completion: { id: completed.id, planId: pid, visitType, visitId: vid, poolId, version: expected, requestId, notes, completedAt: now.toISOString() } });
+      await tx.equipmentMaintenanceCompletion.update({ where: { id: completed.id }, data: { result: snapshot } });
+    }
+    await tx.technicalHistory.create({ data: { poolId: plan.poolId, type: 'EQUIPMENT_MAINTENANCE', component: plan.component, message: plan.title, description: JSON.stringify({ planId: pid, version: expected, visitType, visitId: vid, requestId, actor, notes, instructions: plan.instructions, nextDue: nextDue.toISOString().slice(0, 10) }), status: 'COMPLETED', performedAt: now } });
+    await tx.userAuditLog.create({ data: { actor, action: 'EQUIPMENT_MAINTENANCE_COMPLETED', entity: 'EquipmentMaintenancePlan', entityId: String(pid), metadata: { visitType, visitId: vid, poolId: plan.poolId, version: expected, requestId, nextDue: snapshot.plan.nextDue } } });
     return snapshot;
-  }); } catch (e) { if (e.code === 'P2002') fail(409, 'Esta operação ou versão já foi registada. Atualize a lista'); throw e; }
+  }, { maxWait: 15000, timeout: 20000 }); } catch (e) { if (e.code === 'P2002') fail(409, 'Esta operação ou versão já foi registada. Atualize a lista'); throw e; }
 }
-module.exports = { listPool, create, update, listVisit, complete, publicPlan };
+module.exports = { listPool, create, update, listVisit, complete, publicPlan, completionWhere };

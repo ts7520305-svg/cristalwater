@@ -1,6 +1,7 @@
 const { prisma } = require('../../prismaClient');
 const { normalizeRole } = require('../../utils/roles');
 const { civilDate, dayLisbon } = require('../../services/equipmentMaintenanceCalendar');
+const { completionWhere } = require('./EquipmentMaintenanceBusiness');
 const KEY = 'EQUIPMENT_MAINTENANCE_NOTIFICATIONS_ENABLED';
 const TYPE = 'EQUIPMENT_MAINTENANCE_DUE';
 const BATCH = 500;
@@ -21,11 +22,11 @@ async function configure(user, enabled) {
 }
 function visitCurrent(visit, today) {
   if (!visit || visit.endAt || terminal.has(String(visit.status).toUpperCase()) || !visit.technicianId || !visit.technician?.active || visit.technician.deletedAt) return false;
-  const scheduled = visit.plannedDate || visit.date;
+  const scheduled = visit.scheduledAt || visit.plannedDate || visit.date;
   return Boolean((scheduled && dayLisbon(new Date(scheduled)) === today) || (visit.startAt && dayLisbon(new Date(visit.startAt)) === today));
 }
 function planCurrent(plan, today) { return Boolean(plan && plan.active && plan.pool?.active && !plan.pool.deletedAt && plan.nextDue.toISOString().slice(0,10) <= today); }
-function keyFor(plan, role, visit) { return `equipment:${plan.id}:${plan.version}:${role}${visit ? `:${visit.id}:${visit.technicianId}` : ''}`; }
+function keyFor(plan, role, visit, visitType = 'REGULAR') { return `equipment:${plan.id}:${plan.version}:${role}${visit ? `${visitType === 'EXTRA' ? ':EXTRA' : ''}:${visit.id}:${visit.technicianId}` : ''}`; }
 async function current(notification, { db, now, enabled }) {
   if (!enabled || notification?.eventType !== TYPE || !['ADMIN','TECHNICIAN'].includes(notification.role)) return false;
   const meta = notification.metadata || {};
@@ -35,9 +36,11 @@ async function current(notification, { db, now, enabled }) {
   if (!planCurrent(plan, today) || plan.version !== meta.planVersion) return false;
   if (notification.role === 'ADMIN') return meta.maintenanceKey === keyFor(plan, 'ADMIN');
   if (!Number.isSafeInteger(meta.visitId) || !Number.isSafeInteger(meta.technicianId)) return false;
-  const visit = await db.serviceVisit.findUnique({ where: { id: meta.visitId }, include: { technician: { select: { active: true, deletedAt: true } } } });
-  if (!visitCurrent(visit, today) || visit.poolId !== plan.poolId || visit.technicianId !== meta.technicianId || meta.maintenanceKey !== keyFor(plan, 'TECHNICIAN', visit)) return false;
-  return !await db.equipmentMaintenanceCompletion.findUnique({ where: { planId_visitId: { planId: plan.id, visitId: visit.id } }, select: { id: true } });
+  const visitType = meta.visitType === undefined ? 'REGULAR' : meta.visitType;
+  if (!['REGULAR','EXTRA'].includes(visitType)) return false;
+  const visit = await db[visitType === 'EXTRA' ? 'extraVisit' : 'serviceVisit'].findUnique({ where: { id: meta.visitId }, include: { technician: { select: { active: true, deletedAt: true } } } });
+  if (!visitCurrent(visit, today) || visit.poolId !== plan.poolId || visit.technicianId !== meta.technicianId || meta.maintenanceKey !== keyFor(plan, 'TECHNICIAN', visit, visitType)) return false;
+  return !await db.equipmentMaintenanceCompletion.findUnique({ where: completionWhere(plan.id, visit.id, visitType), select: { id: true } });
 }
 async function isCurrentNotification(notification, { db = prisma, now = new Date() } = {}) {
   if (notification?.eventType !== TYPE) return true; // Only this module's notifications are filtered here.
@@ -63,8 +66,8 @@ async function run({ now = new Date() } = {}) {
     }
     if (!enabled) return report;
     const today = dayLisbon(date), dueDate = civilDate(today);
-    async function ensure(plan, role, visit) {
-      const maintenanceKey = keyFor(plan, role, visit);
+    async function ensure(plan, role, visit, visitType = 'REGULAR') {
+      const maintenanceKey = keyFor(plan, role, visit, visitType);
       const existing = await tx.notification.findFirst({ where: { eventType: TYPE, metadata: { path: ['maintenanceKey'], equals: maintenanceKey } } });
       if (existing) {
         // A reverted reassignment/configuration reuses the same row and preserves read state/push counters.
@@ -74,7 +77,7 @@ async function run({ now = new Date() } = {}) {
       await tx.notification.create({ data: { eventType: TYPE, type: TYPE, role, title: 'Manutenção preventiva por realizar',
         message: `${plan.title} — ${plan.pool.name || 'Piscina'}. Prazo: ${plan.nextDue.toISOString().slice(0,10)}. Consulte as instruções antes de executar.`,
         severity: 'WARNING', status: 'PENDING', metadata: { planId: plan.id, planVersion: plan.version, poolId: plan.poolId, maintenanceKey, dueDate: plan.nextDue.toISOString().slice(0,10),
-          ...(visit ? { visitId: visit.id, technicianId: visit.technicianId, href: '/technician-field-mode' } : { href: '/admin-operational-settings#equipmentMaintenancePanel' }) } } });
+          ...(visit ? { visitType, visitId: visit.id, technicianId: visit.technicianId, href: '/technician-field-mode' } : { href: '/admin-operational-settings#equipmentMaintenancePanel' }) } } });
       report.created++;
     }
     cursor = 0;
@@ -85,8 +88,11 @@ async function run({ now = new Date() } = {}) {
         report.plansChecked++; await ensure(plan, 'ADMIN');
         // Filter canonical visit day in Lisbon below; this broad range also includes ongoing visits begun today.
         const lower = new Date(+date - 2 * 86400000), upper = new Date(+date + 2 * 86400000);
-        const visits = await tx.serviceVisit.findMany({ where: { poolId: plan.poolId, endAt: null, technicianId: { not: null }, OR: [{ plannedDate: { gte: lower, lte: upper } }, { date: { gte: lower, lte: upper } }, { startAt: { gte: lower, lte: upper } }] }, include: { technician: { select: { active: true, deletedAt: true } } } });
-        for (const visit of visits) if (visitCurrent(visit, today) && !await tx.equipmentMaintenanceCompletion.findUnique({ where: { planId_visitId: { planId: plan.id, visitId: visit.id } }, select: { id: true } })) await ensure(plan, 'TECHNICIAN', visit);
+        for (const visitType of ['REGULAR','EXTRA']) {
+          const dates = visitType === 'EXTRA' ? ['scheduledAt','startAt'] : ['plannedDate','date','startAt'];
+          const visits = await tx[visitType === 'EXTRA' ? 'extraVisit' : 'serviceVisit'].findMany({ where: { poolId: plan.poolId, endAt: null, technicianId: { not: null }, OR: dates.map(field => ({ [field]: { gte: lower, lte: upper } })) }, include: { technician: { select: { active: true, deletedAt: true } } } });
+          for (const visit of visits) if (visitCurrent(visit, today) && !await tx.equipmentMaintenanceCompletion.findUnique({ where: completionWhere(plan.id, visit.id, visitType), select: { id: true } })) await ensure(plan, 'TECHNICIAN', visit, visitType);
+        }
       }
       cursor = plans[plans.length - 1].id;
     }

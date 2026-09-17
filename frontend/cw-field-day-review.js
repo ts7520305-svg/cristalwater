@@ -93,6 +93,7 @@
       const outbox = Object.fromEntries(completions.map(row => [row.scope+':'+row.resourceId, { visitId: row.resourceId, visitType:row.scope.startsWith('EXTRA_') ? 'EXTRA' : 'REGULAR', scope:row.scope, blocked: row.failure?.blocked, rejected:row.response?.applied===false ? row.response.message : null }]));
       if (Object.keys(read(`cwFieldVisitDrafts:${requestedOwner}`)).length) verificationErrors.push('Rascunhos antigos sem conta/tipo de visita confirmados');
       const items = buildReview({ snapshot, water, pumps, outbox, drafts: window.CWFieldDraftSnapshot ? window.CWFieldDraftSnapshot() : {}, photos, online: navigator.onLine, verificationErrors });
+      for(const item of await window.CWFieldEquipment?.pendingSummary?.()||[])items.push(item);
       for(const draft of await window.CWExtraVisitCorrection?.pendingDrafts?.()||[])items.push({kind:'pending',text:`${draft.name} — rascunho de correção guardado, ainda não confirmado.`});
       if(revision!==requestedRevision||owner()!==requestedOwner||token!==window.CristalAuth?.getToken?.())return;
       result.replaceChildren();

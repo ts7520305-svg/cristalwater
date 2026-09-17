@@ -1,90 +1,223 @@
 (() => {
   'use strict';
-  const root = document.getElementById('fieldEquipmentMaintenance');
-  if (!root) return;
+  const root = document.getElementById('fieldEquipmentMaintenance'), store = window.CWFieldWriteStore;
+  if (!root || !store) return;
+  const scope = 'EQUIPMENT_MAINTENANCE', captured = store.session();
   const list = document.getElementById('fieldEquipmentList'), status = document.getElementById('fieldEquipmentStatus'), refresh = document.getElementById('fieldEquipmentRefresh');
-  const readToken = () => localStorage.getItem('token') || localStorage.getItem('cristalwater_jwt');
-  const owner = readToken(), cache = new Map(), uncertain = new Map(), drafts = new Map();
-  let visitId = null, revision = 0, busy = false, closed = false;
-  function node(tag,text,parent) { const n=document.createElement(tag); if(text!=null)n.textContent=text; if(parent)parent.append(n); return n; }
-  function valid(id,rev) {
-    if (!owner || readToken() !== owner) { closed=true; root.hidden=true; list.replaceChildren();cache.clear();uncertain.clear();drafts.clear();return false; }
-    return !closed && id===visitId && rev===revision;
+  const queue = document.createElement('aside'); queue.id = 'cwEquipmentSyncStatus'; queue.className = 'card'; queue.hidden = true; root.before(queue);
+  let selected = null, revision = 0, busy = false, syncing = false, closed = false, queueRevision = 0;
+  const prefix = `cwEquipmentDraft:v1:${captured?.owner}:`, states = new Map();
+  const explain = value => /Failed to fetch|NetworkError|Load failed|fetch.*failed|aborted|timed out/i.test(String(value)) ? 'Não foi possível confirmar a ligação. O pedido continua guardado.' : String(value);
+  const positive = value => Number.isSafeInteger(value) && value > 0;
+  const key = visit => `${visit.visitType}:${visit.visitId}`;
+  const sameVisit = (a, b) => a && b && key(a) === key(b) && a.poolId === b.poolId;
+  const node = (tag, text, parent) => { const n = document.createElement(tag); if (text != null) n.textContent = text; if (parent) parent.append(n); return n; };
+  function protect() {
+    if (!captured || !store.same(captured)) { closed = true; ++revision; ++queueRevision; root.hidden = queue.hidden = true; list.replaceChildren(); queue.replaceChildren(); return false; }
+    return !closed;
   }
-  function today() { return new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Lisbon',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()); }
-  async function api(url,options,id,rev) {
-    if(!valid(id,rev))throw Error('Visita ou sessão alterada.');
-    const response=await fetch(url,{...options,cache:'no-store',headers:{Authorization:`Bearer ${owner}`,'Content-Type':'application/json'},signal:AbortSignal.timeout(12000)});
-    const data=await response.json();
-    if(!valid(id,rev))throw Error('Visita ou sessão alterada.');
-    if(!response.ok||data.ok===false){const error=Error(data.error||data.message||'Não foi possível confirmar.');error.status=response.status;throw error;}
+  function valid(visit, rev) { return protect() && sameVisit(visit, selected) && rev === revision; }
+  function assertSession() { if (!protect()) throw Error('A sessão mudou. Os dados da conta original foram preservados.'); }
+  function label(visit) { return `${visit.visitType === 'EXTRA' ? 'Visita extra' : 'Visita'} ${visit.visitId}`; }
+  function draftKey(visit, planId) { return prefix + key(visit) + ':' + planId; }
+  function parseDraft(raw, storageKey) {
+    let draft; try { draft = JSON.parse(raw); } catch (_) { throw Error('Rascunho de revisão ilegível. Preserve os dados e peça apoio ao escritório.'); }
+    if (draft?.v !== 1 || draft.owner !== captured.owner || !['REGULAR','EXTRA'].includes(draft.visitType) || !positive(draft.visitId) || !positive(draft.poolId) || !positive(draft.planId) || !positive(draft.expectedVersion) || !positive(draft.revision) || typeof draft.notes !== 'string' || draft.notes.length > 3000 || typeof draft.title !== 'string' || draftKey(draft, draft.planId) !== storageKey) throw Error('O rascunho de revisão precisa de verificação. Os dados foram preservados.');
+    return draft;
+  }
+  function draftState(visit, plan) {
+    const storageKey = draftKey(visit, plan.id), raw = localStorage.getItem(storageKey), draft = raw ? parseDraft(raw, storageKey) : null;
+    if (draft && draft.poolId !== visit.poolId) throw Error('A piscina deste rascunho mudou. Preserve as notas e peça apoio ao escritório.');
+    const state = { storageKey, raw, draft, saving: Promise.resolve(), failed: false, visit, plan };
+    states.set(storageKey, state); return state;
+  }
+  function saveDraft(state, notes) {
+    const value = { v: 1, owner: captured.owner, ...state.visit, planId: state.plan.id, expectedVersion: state.plan.version, title: state.plan.title, notes };
+    state.saving = state.saving.then(async () => {
+      assertSession(); if (!navigator.locks?.request) throw Error('Este navegador não permite proteger as notas entre janelas.');
+      await navigator.locks.request(state.storageKey, async () => {
+        assertSession(); if (localStorage.getItem(state.storageKey) !== state.raw) throw Error('Outra janela alterou estas notas. Atualize para recuperar o rascunho guardado.');
+        const next = JSON.stringify({ ...value, revision: (state.draft?.revision || 0) + 1 });
+        localStorage.setItem(state.storageKey, next); if (localStorage.getItem(state.storageKey) !== next) throw Error('As notas não ficaram guardadas.');
+        state.raw = next; state.draft = JSON.parse(next);
+      });
+    });
+    state.saving.catch(() => { state.failed = true; }); return state.saving;
+  }
+  function matching(row, draft) { return row.resourceId === draft.planId && sameVisit(row.payload, draft); }
+  async function cleanConfirmed(row) {
+    if (row.response?.applied !== true) return;
+    const storageKey = draftKey(row.payload, row.resourceId);
+    if (!navigator.locks?.request) return;
+    await navigator.locks.request(storageKey, async () => {
+      assertSession(); const raw = localStorage.getItem(storageKey); if (!raw) return;
+      const draft = parseDraft(raw, storageKey);
+      if (matching(row, draft) && draft.notes.trim() === row.payload.notes.trim()) { localStorage.removeItem(storageKey); states.delete(storageKey); }
+    });
+  }
+  async function discardDraft(storageKey, raw) {
+    assertSession(); const draft = parseDraft(raw, storageKey);
+    if ((await store.records(scope, captured)).some(row => matching(row, draft))) throw Error('Confirme primeiro o pedido guardado. As notas foram preservadas.');
+    if (!navigator.locks?.request) throw Error('Este navegador não permite proteger as notas entre janelas.');
+    await navigator.locks.request(storageKey, async () => {
+      assertSession(); if (localStorage.getItem(storageKey) !== raw) throw Error('Outra janela alterou estas notas. Atualize antes de descartar.');
+      localStorage.removeItem(storageKey); states.delete(storageKey);
+    });
+    if (sameVisit(draft, selected)) await load();
+    await renderQueue();
+  }
+  async function pendingSummary() {
+    assertSession(); const rows = await store.records(scope, captured, true), result = [];
+    for (const row of rows) {
+      if (!row.response) result.push({ kind: 'pending', text: `${label(row.payload)} — ${row.label}: revisão por confirmar no servidor${row.failure?.blocked ? '; precisa de apoio do escritório' : ''}.` });
+      else if (row.response.applied === false && !row.reviewedAt) result.push({ kind: 'pending', text: `${label(row.payload)} — revisão não aplicada: ${row.response.message}` });
+    }
+    for (const storageKey of Object.keys(localStorage).filter(name => name.startsWith(prefix))) {
+      const draft = parseDraft(localStorage.getItem(storageKey), storageKey);
+      if (draft.notes.trim() && !rows.some(row => matching(row, draft) && (!row.response || (row.response.applied && row.payload.notes.trim() === draft.notes.trim())))) result.push({ kind: 'pending', text: `${label(draft)} — ${draft.title}: notas de revisão guardadas, ainda não enviadas.` });
+    }
+    assertSession(); return result;
+  }
+  async function renderQueue() {
+    const rev = ++queueRevision; if (!protect()) return;
+    try {
+      const all = await store.records(scope, captured, true);
+      const rows = all.filter(row => !row.response || (row.response.applied === false && !row.reviewedAt));
+      const drafts = Object.keys(localStorage).filter(name => name.startsWith(prefix)).map(storageKey => { const raw = localStorage.getItem(storageKey); return { storageKey, raw, draft: parseDraft(raw, storageKey) }; }).filter(({draft}) => draft.notes.trim() && !all.some(row => matching(row, draft) && (!row.response || (row.response.applied && row.payload.notes.trim() === draft.notes.trim()))));
+      if (!protect() || rev !== queueRevision) return;
+      queue.replaceChildren(); queue.hidden = !rows.length && !drafts.length; if (queue.hidden) return;
+      node('h2', 'Revisões de equipamento por resolver', queue);
+      for (const row of rows) {
+        const article = node('div', null, queue); node('p', `${label(row.payload)} · ${row.label}`, article);
+        node('p', row.response ? 'Revisão não aplicada. ' + row.response.message : explain(row.failure?.message || 'Pedido guardado; aguarda confirmação do servidor.'), article);
+        const action = node('button', row.response ? 'Tomei conhecimento da recusa' : 'Repetir a mesma confirmação', article); action.type = 'button'; action.style.minHeight = '44px'; action.disabled = syncing || busy;
+        action.onclick = async () => {
+          action.disabled = true;
+          try { if (row.response) await store.acknowledgeRejection(row.requestId, captured); else { await send(row); if (sameVisit(row.payload, selected)) await load(true); } }
+          catch (error) { if (protect()) node('p', explain(error.message), article); }
+          finally { if (protect()) { action.disabled = false; await renderQueue(); } }
+        };
+      }
+      for (const {storageKey, raw, draft} of drafts) {
+        const details = node('details', null, queue); node('summary', `${label(draft)} · ${draft.title}: notas guardadas, ainda não enviadas`, details); node('p', draft.notes, details);
+        const discard = node('button', 'Descartar notas guardadas', details); discard.type = 'button'; discard.style.minHeight = '44px';
+        discard.onclick = async () => { discard.disabled = true; try { await discardDraft(storageKey, raw); } catch (error) { if (protect()) { node('p', error.message, details); discard.disabled = false; } } };
+      }
+    } catch (error) { if (protect() && rev === queueRevision) { queue.hidden = false; queue.replaceChildren(); node('p', error.message, queue); } }
+  }
+  function validateView(data, visit) {
+    if (data?.ok !== true || data.visitId !== visit.visitId || data.visitType !== visit.visitType || data.poolId !== visit.poolId || typeof data.canComplete !== 'boolean' || !Array.isArray(data.plans)) throw Error('A consulta não corresponde a esta visita e piscina.');
+    const ids = new Set();
+    for (const p of data.plans) {
+      if (!positive(p.id) || ids.has(p.id) || p.poolId !== visit.poolId || !positive(p.version) || !['FILTER','CHLORINATOR','PUMP','OTHER'].includes(p.component) || typeof p.title !== 'string' || typeof p.instructions !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(p.nextDue) || typeof p.active !== 'boolean' || typeof p.completedInVisit !== 'boolean' || typeof p.canComplete !== 'boolean') throw Error('A lista de revisões está incompleta. Atualize antes de registar.');
+      ids.add(p.id);
+    }
     return data;
   }
-  function render(data,id,rev,offline=false) {
+  const cacheKey = visit => `cwEquipmentCache:v1:${captured.owner}:${key(visit)}`;
+  function cached(visit) {
+    const raw = localStorage.getItem(cacheKey(visit)); if (!raw) return null;
+    const saved = JSON.parse(raw); if (saved.owner !== captured.owner || !Number.isFinite(Date.parse(saved.at))) throw Error('Consulta guardada inválida.');
+    validateView(saved.data, visit); return saved;
+  }
+  function render(data, visit, rev, rows, offline) {
     list.replaceChildren();
-    const plans=(data.plans||[]).filter(p=>p.active).sort((a,b)=>a.nextDue.localeCompare(b.nextDue));
-    if(!plans.length){node('p','Sem revisões preventivas ativas para esta visita.',list);return;}
-    for(const plan of plans){
-      const card=node('article',null,list);card.className='field-equipment-plan';
-      node('h3',plan.title,card);node('p',({FILTER:'Filtro',CHLORINATOR:'Clorador',PUMP:'Bomba',OTHER:'Outro'})[plan.component] || plan.component,card);
-      node('strong',`${plan.nextDue<today()?'Em atraso':plan.nextDue===today()?'Previsto para hoje':'Próxima revisão'} · ${plan.nextDue}`,card);
-      node('p',plan.instructions||'Consulte as instruções do equipamento e do escritório.',card);
-      node('p',`Última execução: ${plan.lastCompletedAt?new Date(plan.lastCompletedAt).toLocaleString('pt-PT'):'Sem execução registada'}`,card);
-      const pending=uncertain.get(`${id}:${plan.id}`);
-      if(pending && plan.version!==pending.body.expectedVersion)uncertain.delete(`${id}:${plan.id}`);
-      if(plan.completedInVisit){drafts.delete(`${id}:${plan.id}`);node('p','Revisão já registada nesta visita.',card);continue;}
-      if(offline || !data.canComplete || plan.canComplete === false){node('p',offline?'Consulta guardada; confirme a ligação para registar trabalho.':'Esta visita não permite registar revisões neste momento.',card);continue;}
-      const frozen=uncertain.get(`${id}:${plan.id}`);
-      if(frozen){
-        node('p','Resultado incerto. Atualize o estado ou repita a mesma confirmação. Os dados originais serão mantidos para evitar duplicações.',card);
-        const retry=node('button','Repetir a mesma confirmação',card);retry.type='button';retry.onclick=()=>submit(plan,frozen.body,id,rev);
+    const plans = data.plans.filter(p => p.active || p.completedInVisit).sort((a, b) => a.nextDue.localeCompare(b.nextDue));
+    if (!plans.length) { node('p', 'Sem revisões preventivas ativas para esta visita.', list); return; }
+    const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Lisbon', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+    for (const plan of plans) {
+      const card = node('article', null, list); card.className = 'field-equipment-plan';
+      node('h3', plan.title, card); node('p', ({ FILTER: 'Filtro', CHLORINATOR: 'Clorador', PUMP: 'Bomba', OTHER: 'Outro' })[plan.component], card);
+      node('strong', `${plan.nextDue < today ? 'Em atraso' : plan.nextDue === today ? 'Previsto para hoje' : 'Próxima revisão'} · ${plan.nextDue}`, card);
+      node('p', plan.instructions, card); node('p', `Última execução: ${plan.lastCompletedAt ? new Date(plan.lastCompletedAt).toLocaleString('pt-PT') : 'Sem execução registada'}`, card);
+      const related = rows.filter(row => row.resourceId === plan.id && sameVisit(row.payload, visit)), pending = related.find(row => !row.response);
+      if (pending) { node('p', 'Resultado incerto. O pedido original foi preservado. Use a confirmação guardada acima, mesmo que o plano já tenha mudado.', card); continue; }
+      if (related.some(row => row.response.applied === false && !row.reviewedAt)) node('p', 'Existe uma recusa por rever no aviso acima. As notas foram preservadas.', card);
+      let state; try { state = draftState(visit, plan); } catch (error) { node('p', error.message, card); continue; }
+      if (plan.completedInVisit) node('p', 'Revisão já registada nesta visita.', card);
+      if (offline || !data.canComplete || !plan.canComplete || plan.completedInVisit) {
+        if (!plan.completedInVisit) node('p', offline ? 'Consulta guardada; confirme a ligação para registar trabalho.' : 'Esta visita não permite registar revisões neste momento.', card);
+        if (state.draft?.notes) node('p', 'Notas guardadas: ' + state.draft.notes, card);
         continue;
       }
-      const label=node('label','Trabalho realizado / observações',card),notes=node('textarea',null,label);notes.rows=2;notes.maxLength=1000;notes.value=drafts.get(`${id}:${plan.id}`)||'';
-      const checkLabel=node('label',null,card);checkLabel.className='field-equipment-check';
-      const check=node('input',null,checkLabel);check.type='checkbox';node('span','Confirmo que executei esta revisão do equipamento.',checkLabel);
-      const action=node('button','Registar revisão realizada',card);action.type='button';action.disabled=true;
-      function ready(){action.disabled=!check.checked||notes.value.trim().length<3||busy;}
-      notes.oninput=()=>{drafts.set(`${id}:${plan.id}`,notes.value);ready();};check.onchange=ready;
-      action.onclick=()=>{if(!check.checked||notes.value.trim().length<3||busy)return;submit(plan,{visitId:id,expectedVersion:plan.version,requestId:crypto.randomUUID(),notes:notes.value.trim(),confirmed:true},id,rev);};
+      if (state.draft && state.draft.expectedVersion !== plan.version) node('p', 'O plano foi atualizado. Reveja as instruções atuais antes de confirmar as notas guardadas.', card);
+      const notesLabel = node('label', 'Trabalho realizado / observações', card), notes = node('textarea', null, notesLabel); notes.rows = 2; notes.maxLength = 3000; notes.value = state.draft?.notes || '';
+      const checkLabel = node('label', null, card); checkLabel.className = 'field-equipment-check';
+      const check = node('input', null, checkLabel); check.type = 'checkbox'; node('span', 'Confirmo que executei esta revisão do equipamento.', checkLabel);
+      const action = node('button', 'Registar revisão realizada', card); action.type = 'button'; action.disabled = true;
+      const ready = () => { action.disabled = !check.checked || notes.value.trim().length < 3 || busy || state.failed; };
+      notes.oninput = () => {
+        ready(); saveDraft(state, notes.value).then(() => { if (valid(visit, rev)) status.textContent = 'Notas guardadas neste dispositivo; revisão ainda não enviada.'; }).catch(error => { if (valid(visit, rev)) { status.textContent = error.message; ready(); } });
+      };
+      check.onchange = ready;
+      action.onclick = async () => {
+        if (busy || !check.checked || !valid(visit, rev)) return;
+        const confirmedNotes = notes.value.trim(); let prepared = false;
+        busy = true; ready(); refresh.disabled = true; notes.disabled = check.disabled = true;
+        try {
+          await saveDraft(state, confirmedNotes); if (!valid(visit, rev)) return;
+          const row = await store.prepare(scope, plan.id, { visitType: visit.visitType, visitId: visit.visitId, poolId: visit.poolId, expectedVersion: plan.version, notes: confirmedNotes, confirmed: true }, { label: plan.title }, captured);
+          prepared = true;
+          await send(row);
+        } catch (error) { if (valid(visit, rev)) status.textContent = 'Resultado incerto. ' + explain(error.message); }
+        finally { busy = false; if (valid(visit, rev)) { ready(); refresh.disabled = false; notes.disabled = check.disabled = false; } await renderQueue(); if (prepared && protect() && sameVisit(visit, selected)) await load(true); }
+      };
     }
   }
-  async function submit(plan,body,id,rev){
-    if(busy||!valid(id,rev))return;
-    if(!navigator.onLine){status.textContent='Sem ligação. A revisão ainda não foi registada.';return;}
-    busy=true;root.querySelectorAll('button,input,textarea').forEach(n=>n.disabled=true);
-    uncertain.set(`${id}:${plan.id}`,{body});
-    try{
-      await api(`/api/equipment-maintenance/plans/${plan.id}/complete`,{method:'POST',body:JSON.stringify(body)},id,rev);
-      if(valid(id,rev)){uncertain.delete(`${id}:${plan.id}`);drafts.delete(`${id}:${plan.id}`);status.textContent='Revisão registada no servidor.';await load(true);}
-    }catch(error){
-      if(valid(id,rev)){
-        if(error.status>=400&&error.status<500&&![408,425,429].includes(error.status))uncertain.delete(`${id}:${plan.id}`);
-        status.textContent=`${uncertain.has(`${id}:${plan.id}`)?'Resultado incerto. Atualize para verificar antes de continuar.':'Revisão não confirmada. Atualize o estado.'} ${error.message}`;
-        const saved=cache.get(id);if(saved)render(saved.data,id,rev,true);
+  async function send(row, automatic = false) {
+    const result = await store.send(row.requestId, captured, { automatic });
+    const saved = await store.get(row.requestId, captured); await cleanConfirmed(saved);
+    if (protect() && sameVisit(row.payload, selected)) status.textContent = result.applied ? 'Revisão registada no servidor.' : 'Revisão não aplicada. ' + result.message;
+    return result;
+  }
+  async function load(preserve = false) {
+    const visit = selected, rev = ++revision; if (!protect()) return;
+    refresh.disabled = true; list.replaceChildren();
+    if (!visit) { status.textContent = 'Escolha uma visita.'; refresh.disabled = false; return; }
+    if (!preserve) status.textContent = `A consultar equipamentos da ${label(visit).toLowerCase()}…`;
+    try {
+      const response = await fetch(`/api/equipment-maintenance/visits/${visit.visitId}?visitType=${visit.visitType}`, { cache: 'no-store', headers: { Authorization: 'Bearer ' + captured.token }, signal: AbortSignal.timeout(12000) });
+      const data = await response.json(); if (!valid(visit, rev)) return;
+      if (response.status !== 200) throw Object.assign(Error(data.error || 'Consulta indisponível.'), { status: response.status });
+      validateView(data, visit);
+      const rows = await store.records(scope, captured, true); if (!valid(visit, rev)) return;
+      for (const row of rows) await cleanConfirmed(row); if (!valid(visit, rev)) return;
+      let cacheWarning = '';
+      try { localStorage.setItem(cacheKey(visit), JSON.stringify({ owner: captured.owner, at: new Date().toISOString(), data })); } catch (_) { cacheWarning = ' Não foi possível guardar a consulta para uso sem rede.'; }
+      render(data, visit, rev, rows, !navigator.onLine);
+      if (!preserve) status.textContent = `Equipamentos da ${label(visit).toLowerCase()} atualizados.${cacheWarning}`;
+    } catch (error) {
+      if (!valid(visit, rev)) return;
+      let saved; if (![401,403,404].includes(error.status)) try { saved = cached(visit); } catch (_) { /* A malformed cache never replaces an authoritative response. */ }
+      if (saved) {
+        status.textContent = `Consulta guardada da ${label(visit).toLowerCase()}, de ${new Date(saved.at).toLocaleString('pt-PT')}. Não foi possível atualizar. ${error.message}`;
+        try { const rows = await store.records(scope, captured, true); if (valid(visit, rev)) render(saved.data, visit, rev, rows, true); } catch (failure) { if (valid(visit, rev)) status.textContent = failure.message; }
+      } else status.textContent = `Não foi possível consultar os equipamentos da ${label(visit).toLowerCase()}. ${error.message}`;
+    } finally { if (valid(visit, rev)) refresh.disabled = false; }
+  }
+  async function flush() {
+    if (syncing || busy || !protect() || !navigator.onLine) return;
+    syncing = true; let changed = false;
+    try {
+      for (const row of await store.records(scope, captured)) {
+        if (row.failure?.blocked || row.failure?.retryAt > Date.now()) continue;
+        try { await send(row, true); changed ||= sameVisit(row.payload, selected); } catch (_) { break; }
       }
-    }finally{busy=false;if(valid(id,revision))refresh.disabled=false;}
+    } finally { syncing = false; await renderQueue(); if (changed && protect() && !busy) await load(true); }
   }
-  async function load(preserve=false){
-    const id=visitId,rev=++revision;if(!valid(id,rev))return;
-    refresh.disabled=true;list.replaceChildren();
-    if(!id){status.textContent='Escolha uma visita.';refresh.disabled=false;return;}
-    if(!preserve)status.textContent=`A consultar equipamentos da visita ${id}...`;
-    try{
-      const data=await api(`/api/equipment-maintenance/visits/${id}`,{},id,rev);
-      cache.set(id,{data,at:new Date()});render(data,id,rev);
-      if(!preserve)status.textContent=`Equipamentos da visita ${id} atualizados.`;
-    }catch(error){if(valid(id,rev)){const saved=cache.get(id);status.textContent=saved?`Consulta guardada da visita ${id}, de ${saved.at.toLocaleString('pt-PT')}. Não foi possível atualizar.`:`Não foi possível consultar os equipamentos da visita ${id}. Tente atualizar.`;if(saved)render(saved.data,id,rev,true);}}
-    finally{if(valid(id,rev))refresh.disabled=false;}
-  }
-  window.addEventListener('cw:field-visit-selected',event=>{
-    const next=Number(event.detail?.visitId)||null;
-    if(next===visitId)return;
-    visitId=next;revision++;list.replaceChildren();load();
+  window.CWFieldEquipment = { pendingSummary, flush, render: renderQueue };
+  window.addEventListener('cw:field-visit-selected', event => {
+    const detail = event.detail || {}, next = positive(detail.visitId) && ['REGULAR','EXTRA'].includes(detail.visitType) ? { visitId: detail.visitId, visitType: detail.visitType, poolId: detail.poolId || null, state: detail.state || '' } : null;
+    if (sameVisit(next, selected) && next.state === selected.state) return;
+    selected = next; ++revision; list.replaceChildren(); load();
   });
-  refresh.onclick=()=>{if(!busy)load();};
-  window.addEventListener('storage',()=>valid(visitId,revision));
-  window.addEventListener('focus',()=>valid(visitId,revision));
-  const timer=setInterval(()=>valid(visitId,revision),500);
-  window.addEventListener('pagehide',()=>clearInterval(timer));
+  refresh.onclick = () => { if (!busy) load(); };
+  window.addEventListener('storage', () => { if (protect()) renderQueue(); });
+  window.addEventListener('focus', protect);
+  window.addEventListener('cw:field-write-change', renderQueue);
+  window.addEventListener('online', flush);
+  let timer;
+  function resume() { clearInterval(timer); timer = setInterval(() => { if (protect()) flush().catch(() => {}); }, 15000); renderQueue(); flush().catch(() => {}); }
+  window.addEventListener('pageshow', resume); window.addEventListener('pagehide', () => clearInterval(timer));
+  setInterval(protect, 500); resume();
 })();

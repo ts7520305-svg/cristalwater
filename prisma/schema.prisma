@@ -638,6 +638,7 @@ model ExtraVisit {
   execution         Json?
   completionRequestId String? @unique
   photos            ExtraVisitPhoto[]
+  maintenanceCompletions EquipmentMaintenanceCompletion[]
   id                Int             @id @default(autoincrement())
   clientId          Int?
   poolId            Int?
@@ -2378,7 +2379,8 @@ model EquipmentMaintenanceCompletion {
   id Int @id @default(autoincrement())
   planId Int
   version Int
-  visitId Int
+  visitId Int?
+  extraVisitId Int?
   requestId String @unique
   actor String
   fingerprint String
@@ -2386,8 +2388,11 @@ model EquipmentMaintenanceCompletion {
   completedAt DateTime @default(now())
   result Json
   plan EquipmentMaintenancePlan @relation(fields: [planId], references: [id], onDelete: Restrict)
-  visit ServiceVisit @relation(fields: [visitId], references: [id], onDelete: Restrict)
+  visit ServiceVisit? @relation(fields: [visitId], references: [id], onDelete: Restrict)
+  extraVisit ExtraVisit? @relation(fields: [extraVisitId], references: [id], onDelete: Restrict)
   @@unique([planId, version])
   @@unique([planId, visitId])
+  @@unique([planId, extraVisitId])
   @@index([visitId])
+  @@index([extraVisitId])
 }

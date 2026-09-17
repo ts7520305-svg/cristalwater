@@ -88,6 +88,7 @@ scripts.push('test-field-visit-types.js');
 scripts.push('test-field-extra-execution.js');
 scripts.push('test-field-extra-reminders.js');
 scripts.push('test-field-extra-correction.js');
+scripts.push('test-field-extra-equipment.js');
 scripts.push('test-field-key-scope.js');
 function run(script){return new Promise(resolve=>{
  const output=fs.createWriteStream(path.join(evidence,script+'.log'));
