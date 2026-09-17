@@ -81,25 +81,6 @@
       status.textContent='Configuração gravada.';
     });
   }
-  async function loadPending(){
-    const res = await fetch('/api/technician-intake/pending-review', { headers: authHeaders() });
-    const data = await parseJson(res, 'Erro ao carregar pendentes');
-    if(!data.clients.length){ pendingList.innerHTML='<div class="status">Sem fichas pendentes.</div>'; return; }
-    pendingList.innerHTML=data.clients.map(c=>`<div class="item"><strong>${c.name}</strong><br><small>${c.zone||''} · ${c.phone||''} · Piscinas: ${(c.pools||[]).length}</small><div class="actions"><button data-approve="${c.id}">Aprovar</button><a class="btn" href="/client-detail?id=${c.id}">Abrir ficha</a></div></div>`).join('');
-    pendingList.querySelectorAll('[data-approve]').forEach(btn=>btn.addEventListener('click',()=>approve(btn.dataset.approve)));
-  }
-  async function approve(id){
-    if(!confirm('Aprovar este cliente e ativar piscinas pendentes?')) return;
-    await withActionLock(`approve:${id}`, async ()=>{
-      const res = await fetch('/api/technician-intake/clients/'+id+'/approve',{
-        method:'POST',
-        headers:authHeaders({'Content-Type':'application/json'}),
-        body:JSON.stringify({actor:'admin'})
-      });
-      const data = await parseJson(res, 'Erro ao aprovar');
-      if(data.ok) loadPending();
-    }).catch((err)=>alert(err.message));
-  }
   function renderBackups(items){
     if(!backupList) return;
     if(!items || !items.length){
@@ -401,7 +382,6 @@
   if(savePermissionPolicyButton) savePermissionPolicyButton.addEventListener('click', ()=>savePermissionPolicy().catch((err)=>{ setAccessStatus(err.message); alert(err.message); }));
   if(saveTeamLeaderButton) saveTeamLeaderButton.addEventListener('click', ()=>saveTeamLeader().catch((err)=>{ setAccessStatus(err.message); alert(err.message); }));
   load().catch(err=>status.textContent=err.message);
-  loadPending().catch(err=>pendingList.textContent=err.message);
   loadReleaseSafety().catch(err=>{ if(releaseStatus) releaseStatus.textContent = err.message; });
   loadAccessControl().catch(err=>{ setAccessStatus(err.message); });
 })();

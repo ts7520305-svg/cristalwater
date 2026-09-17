@@ -80,6 +80,7 @@ scripts.push('test-field-internal-alert.js');
 scripts.push('test-field-internal-alert-ui.js');
 scripts.push('test-field-stock-requests.js','test-field-stock-requests-ui.js');
 scripts.push('test-field-problem-reports.js','test-field-problem-reports-ui.js');
+scripts.push('test-field-client-intake.js','test-field-client-intake-ui.js');
 scripts.push('test-field-route-preview.js');
 scripts.push('test-field-route-preview-ui.js');
 scripts.push('test-field-legacy-route-recovery.js');

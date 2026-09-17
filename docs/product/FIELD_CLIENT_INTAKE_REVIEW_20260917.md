@@ -1,6 +1,6 @@
 # Cadastro de clientes em campo — diagnóstico para a próxima correção
 
-Estado em 17/09/2026: diagnóstico reproduzido; implementação ainda pendente. Não faz parte das garantias dos pedidos de material ou ocorrências. Base examinada: `9b392f18a528608176d8e01d32dc294aa9850038`.
+Diagnóstico anterior preservado em 17/09/2026. Cadastro e aprovação foram depois implementados e ensaiados nas TASK242–243; ver `FIELD_CLIENT_INTAKE_RECOVERY_20260917.md` para estado do CI e limites. O relatório ADMIN no final continua por corrigir. Base examinada: `9b392f18a528608176d8e01d32dc294aa9850038`.
 
 ## Resultado observado
 
@@ -22,7 +22,7 @@ A falha da aprovação foi injetada no método `prisma.pool.updateMany` do proce
 
 A criação já usa uma transação para cliente/piscina, mas tolera falhas de tarefa/auditoria com `catch`. O comportamento em PostgreSQL nativo perante essas falhas precisa de um ensaio próprio. Não se deduz aprovação global nem sucesso falso desse padrão apenas por leitura de fonte.
 
-A próxima implementação deve tratar cadastro e aprovação separadamente: permissões limitadas ao necessário, validação explícita, autoria da sessão, escritas/auditoria obrigatórias, UUID/comprovativo, revisão de versões na aprovação e recuperação do formulário. Preservar fichas históricas e rascunhos existentes sem lhes atribuir autoria presumida. Os testes deverão cobrir reenvio, falhas em cada escrita, duas janelas, troca de conta e aprovação parcial.
+O âmbito de implementação identificado neste diagnóstico foi cadastro e aprovação separadamente: permissões limitadas ao necessário, validação explícita, autoria da sessão, escritas/auditoria obrigatórias, UUID/comprovativo, revisão de versões na aprovação e recuperação do formulário. Preservar fichas históricas e rascunhos existentes sem lhes atribuir autoria presumida. Os testes deverão cobrir reenvio, falhas em cada escrita, duas janelas, troca de conta e aprovação parcial.
 
 ## Relatório administrativo — diagnóstico separado
 

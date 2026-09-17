@@ -98,6 +98,10 @@
       for(const item of await window.CWFieldEquipment?.pendingSummary?.()||[])items.push(item);
       for(const item of await window.CWFieldStockRequest?.pendingSummary?.()||[])items.push(item);
       for(const item of await window.CWFieldProblemReport?.pendingSummary?.()||[])items.push(item);
+      const intakeSession=window.CWFieldWriteStore.session(),intakes=await window.CWFieldWriteStore.records('FIELD_CLIENT_INTAKE',intakeSession,true);
+      for(const row of intakes.filter(row=>!row.response))items.push({kind:'pending',text:row.payload.clientName+' — cadastro por confirmar. Abra Novo cliente em campo.'});
+      const intakeRaw=localStorage.getItem('cwFieldIntakeDraft:'+intakeSession.owner);
+      if(intakeRaw){let draft;try{draft=JSON.parse(intakeRaw);}catch(_){throw Error('Rascunho de cadastro ilegível. Preserve os dados.');}const keys=['clientName','phone','email','address','zone','poolName','poolType','volumeM3','latitude','longitude','notes'];if(!draft||Object.keys(draft).length!==14||Object.keys(draft).some(k=>!['v','owner','requestId',...keys].includes(k))||draft.v!==1||draft.owner!==intakeSession.owner||keys.some(k=>typeof draft[k]!=='string')||draft.requestId!==null&&!/^[0-9a-f-]{36}$/i.test(draft.requestId)||draft.requestId&&!intakes.some(row=>row.requestId===draft.requestId))throw Error('Rascunho de cadastro inválido. Preserve os dados.');if(keys.some(k=>draft[k]!=='')&&!intakes.some(row=>row.requestId===draft.requestId))items.push({kind:'pending',text:'Rascunho de cadastro por enviar. Abra Novo cliente em campo.'});}
       for(const draft of await window.CWExtraVisitCorrection?.pendingDrafts?.()||[])items.push({kind:'pending',text:`${draft.name} — rascunho de correção guardado, ainda não confirmado.`});
       for(const item of await window.CWFieldDraftSummary?.()||[])items.push(item);
       if(revision!==requestedRevision||owner()!==requestedOwner||token!==window.CristalAuth?.getToken?.())return;

@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-09-17T19:49:05.358Z",
-  "baseCommit": "0a1999de66f735a0c63538ed8df0b2975e2f0613",
+  "generatedAt": "2026-09-17T20:50:37.110Z",
+  "baseCommit": "1afc751eb3244e272732ea564aa4a74828f2ee51",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 156,
+  "activeScriptsScanned": 158,
   "summary": {
     "htmlFiles": 101,
     "rootPages": 94,
     "nestedPages": 7,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 55,
+    "pagesWithLiteralTestReference": 56,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -848,6 +848,8 @@
         "/crystal-os-v2-phase2-adapter.css",
         "/ui/design-system.css",
         "/admin-auth-guard.js",
+        "/cw-field-write-store.js",
+        "/cw-field-intake-review.js",
         "/admin-operational-settings.js",
         "/admin-data-protection.js",
         "/admin-equipment-maintenance.js",
@@ -862,7 +864,8 @@
       ],
       "missingAssets": [],
       "testReferences": [
-        "test-field-equipment-flow.js"
+        "test-field-equipment-flow.js",
+        "test-field-client-intake-ui.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -3095,6 +3098,7 @@
         "test-field-access-api.js",
         "test-fcs-sec-tech-auth.js",
         "test-field-notification-confirmation.js",
+        "test-field-client-intake.js",
         "test-field-team-leader-entry.js",
         "test-auth-entry-browser.js",
         "test-account-notification-settings-browser.js",
@@ -3226,6 +3230,7 @@
         "test-field-write-recovery-ui.js",
         "test-field-stock-requests-ui.js",
         "test-field-problem-reports-ui.js",
+        "test-field-client-intake-ui.js",
         "test-field-modern-route-recovery.js",
         "test-field-visit-types.js",
         "test-field-extra-execution.js",
@@ -3471,6 +3476,7 @@
         "/technician-auth-guard.js",
         "/ui/design-system.css",
         "/cw-ui-feedback.js",
+        "/cw-field-write-store.js",
         "/technician-new-client.js",
         "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
@@ -3478,7 +3484,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "testReferences": [
+        "test-field-client-intake-ui.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {

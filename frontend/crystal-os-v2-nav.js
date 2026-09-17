@@ -65,6 +65,7 @@
     '/help-center': { area: 'Ajuda', title: 'Centro de ajuda' },
     '/admin-security': { area: 'Configuracoes', title: 'Permissoes e seguranca' },
     '/technician-field-mode': { area: 'Tecnico em campo', title: 'Rota do dia' },
+    '/technician-new-client': { area: 'Técnico em campo', title: 'Novo cliente em campo' },
     '/technician-route': { area: 'Tecnico em campo', title: 'Sequencia da rota' },
     '/technician-visit': { area: 'Tecnico em campo', title: 'Execucao da visita' },
     '/technician-map': { area: 'Tecnico em campo', title: 'Navegacao GPS' },

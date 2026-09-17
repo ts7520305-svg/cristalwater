@@ -1,52 +1,24 @@
 (function(){
-  const ui = window.CwUi || {
-    success: (m) => console.log(m),
-    error: (m) => console.error(m),
-    info: (m) => console.info(m),
-  };
-  const box = document.getElementById('permissionBox');
-  const form = document.getElementById('form');
-  const result = document.getElementById('result');
-  const techId = localStorage.getItem('technicianId') || localStorage.getItem('cw_technician_id') || '';
-  document.getElementById('technicianId').value = techId;
-
-  async function checkPermission(){
-    try{
-      const res = await fetch('/api/technician-intake/settings');
-      const data = await res.json();
-      if(data.techniciansCanCreateClientsPools){
-        box.className='notice ok';
-        box.textContent = data.requireAdminReview ? 'Permissão ativa. As fichas criadas pelo técnico ficam pendentes para validação do administrador.' : 'Permissão ativa. As fichas criadas ficam imediatamente ativas.';
-        form.classList.remove('hidden');
-      }else{
-        box.className='notice';
-        box.textContent='Esta função está desligada na Central de Configurações. Pede ao administrador para ativar se for necessário.';
-      }
-    }catch(err){ box.textContent='Erro ao verificar permissões: '+err.message; }
-  }
-
-  document.getElementById('gpsBtn').addEventListener('click',()=>{
-    if(!navigator.geolocation){ ui.error('GPS nao disponivel neste aparelho.'); return; }
-    navigator.geolocation.getCurrentPosition((pos)=>{
-      form.latitude.value = pos.coords.latitude;
-      form.longitude.value = pos.coords.longitude;
-      ui.success('Localizacao guardada nesta ficha.');
-    },()=>ui.error('Nao foi possivel obter localizacao.'));
-  });
-
-  form.addEventListener('submit',async(ev)=>{
-    ev.preventDefault();
-    result.className='notice'; result.textContent='A guardar...';
-    const payload = Object.fromEntries(new FormData(form).entries());
-    try{
-      const res = await fetch('/api/technician-intake/client-with-pool',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-      const data = await res.json();
-      if(!res.ok || !data.ok) throw new Error(data.error || 'Erro ao guardar');
-      result.className='notice ok';
-      result.innerHTML=`Ficha criada com sucesso. Cliente #${data.client.id}, Piscina #${data.pool.id}. Estado: ${data.pendingReview ? 'pendente de validação admin' : 'ativo'}.`;
-      form.reset();
-    }catch(err){ result.className='notice'; result.textContent=err.message; }
-  });
-
-  checkPermission();
+  'use strict';
+  const store=window.CWFieldWriteStore,captured=store?.session(),form=document.getElementById('form'),status=document.getElementById('result'),permission=document.getElementById('permissionBox'),save=form.querySelector('[type=submit]'),retry=document.getElementById('intakeRetry'),gps=document.getElementById('gpsBtn');
+  const scope='FIELD_CLIENT_INTAKE',key='cwFieldIntakeDraft:'+captured?.owner,fields=['clientName','phone','email','address','zone','poolName','poolType','volumeM3','latitude','longitude','notes'],limits={clientName:200,phone:60,email:254,address:1000,zone:120,poolName:200,poolType:80,volumeM3:40,latitude:40,longitude:40,notes:5000};
+  const blank=()=>({v:1,owner:captured?.owner,...Object.fromEntries(fields.map(k=>[k,''])),requestId:null});
+  let draft=blank(),observed,state=null,ready=false,busy=false,conflict=false,closed=false,unsaved=false,revision=0,policy=null,gpsRevision=0;
+  const active=()=>!closed&&store?.same(captured),requireActive=()=>{if(!active())throw Error('A sessão mudou. Reabra com a conta original para recuperar a ficha.');};
+  const values=value=>Object.fromEntries(fields.map(k=>[k,value[k]])),same=(a,b)=>fields.every(k=>a[k]===b[k]);
+  function show(value){for(const k of fields)form.elements[k].value=value[k];paintGps();}
+  function paintGps(){const lat=form.elements.latitude.value,lng=form.elements.longitude.value;document.getElementById('gpsState').textContent=lat&&lng?'Coordenadas: '+lat+', '+lng:'Sem localização indicada.';}
+  function render(){const locked=busy||conflict||!ready||!active();for(const k of fields){const node=form.elements[k];if(node.tagName==='SELECT')node.disabled=locked||!!state;else node.readOnly=locked||!!state;}save.disabled=locked||!!state||policy?.techniciansCanCreateClientsPools===false;save.hidden=!!state;gps.disabled=locked||!!state;retry.hidden=!state;retry.disabled=locked;retry.textContent=state?.response?'Limpar ficha confirmada':'Confirmar ficha guardada';form.classList.remove('hidden');status.classList.remove('hidden');}
+  function read(){requireActive();const raw=localStorage.getItem(key);let value;try{value=raw?JSON.parse(raw):blank();}catch(_){throw Error('Rascunho ilegível. Preserve os dados e peça apoio ao escritório.');}if(!value||Object.keys(value).length!==14||Object.keys(value).some(k=>!Object.hasOwn(blank(),k))||value.v!==1||value.owner!==captured.owner||fields.some(k=>typeof value[k]!=='string'||value[k].length>limits[k])||!['','Privada','Condomínio','Hotel','Jacuzzi'].includes(value.poolType)||value.requestId!==null&&!/^[0-9a-f-]{36}$/i.test(value.requestId))throw Error('Rascunho inválido. Preserve os dados e peça apoio ao escritório.');if(observed===undefined)observed=raw;return value;}
+  function write(value){requireActive();read();if(localStorage.getItem(key)!==observed){conflict=true;throw Error('A ficha mudou noutra janela. Copie os dados desta janela e reabra para rever.');}const raw=JSON.stringify(value);localStorage.setItem(key,raw);if(localStorage.getItem(key)!==raw)throw Error('A gravação local não ficou confirmada.');observed=raw;draft=value;unsaved=false;}
+  async function refresh(){if(busy)return;const generation=++revision;if(!active()){show(blank());draft=blank();state=null;ready=false;status.textContent='A sessão mudou. Reabra com a conta original.';render();return;}try{const saved=read(),rows=await store.records(scope,captured,true);if(!active()||revision!==generation||busy)return;if(conflict){render();return;}if(!unsaved)draft=saved;state=rows.find(r=>!r.response)||(draft.requestId?rows.find(r=>r.requestId===draft.requestId):null);if(draft.requestId&&!state)throw Error('O envio do rascunho não foi encontrado. Preserve os dados.');if(state&&fields.some(k=>draft[k]!=='')&&!same(draft,state.payload))throw Error('O rascunho difere do envio guardado. Ambos foram preservados; peça revisão.');if(state){draft={...blank(),...state.payload,requestId:state.requestId};show(draft);}else if(!unsaved)show(draft);ready=true;const confirmed=state?.response||rows.filter(r=>r.response).at(-1)?.response;status.textContent=state&&!state.response?'Ficha guardada neste dispositivo, por confirmar. '+(state.failure?.message||'Use Confirmar ficha guardada.'):unsaved?'A ficha não ficou guardada. Conserve o texto.':confirmed?'Cliente #'+confirmed.intake.clientId+' e piscina #'+confirmed.intake.poolId+' registados. '+(confirmed.pendingReview?'Aguardam revisão do escritório.':'Cadastro ativo conforme a configuração. A ficha técnica e a ronda requerem preparação.'):'Rascunho desta conta; ainda não enviado.';render();}catch(e){if(active()&&generation===revision){conflict=true;status.textContent=e.message;render();}}}
+  function saveDraft(){if(busy||state||conflict||!ready)return;++revision;++gpsRevision;draft={...draft,...Object.fromEntries(fields.map(k=>[k,form.elements[k].value]))};unsaved=true;try{write(draft);status.textContent='Rascunho guardado neste dispositivo; ainda não enviado.';}catch(e){status.textContent='A ficha não ficou guardada. '+e.message;}paintGps();render();}
+  function clearConfirmed(){write(blank());state=null;show(draft);}
+  async function send(){if(busy||conflict||!ready)return;busy=true;render();let error='';try{requireActive();if(!navigator.locks?.request)throw Error('Este navegador não permite coordenar os envios. Preserve a ficha.');await navigator.locks.request('cw-field-intake-draft:'+captured.owner,{ifAvailable:true},async lock=>{if(!lock)throw Error('Outra janela está a tratar desta ficha.');requireActive();if(state?.response){clearConfirmed();return;}const value=state?{...draft,...state.payload,requestId:state.requestId}:{...draft,...Object.fromEntries(fields.map(k=>[k,form.elements[k].value]))};write(value);state=await store.prepare(scope,captured.technicianId,values(value),{label:value.clientName},captured);write({...value,requestId:state.requestId});await store.send(state.requestId,captured);state=await store.get(state.requestId,captured);clearConfirmed();});}catch(e){error=e.message;}finally{busy=false;if(!error||state||!active())await refresh();else render();if(error&&active())status.textContent=(state?.response?'Ficha já confirmada; rascunho preservado. ':state?'Ficha guardada, por confirmar. ':'A ficha não foi enviada. ')+error;}}
+  async function permissions(){try{requireActive();const response=await fetch('/api/technician-intake/settings',{headers:{Authorization:'Bearer '+captured.token},cache:'no-store',signal:AbortSignal.timeout(8000)}),data=await response.json();requireActive();if(!response.ok||data.ok!==true||['techniciansCanCreateClientsPools','requireAdminReview','poolsActiveByDefault'].some(k=>typeof data[k]!=='boolean'))throw Error('Permissão por confirmar.');policy=data;permission.textContent=!data.techniciansCanCreateClientsPools?'Cadastro desativado. Pode conservar o rascunho e confirmar um envio anterior.':data.requireAdminReview?'Cadastro permitido; as fichas requerem revisão do escritório.':'Cadastro permitido sem revisão obrigatória; a ficha técnica e a ronda serão preparadas pelo escritório.';document.getElementById('intakePolicy').textContent=data.requireAdminReview?'A ficha fica pendente de revisão. A gravação não confirma visita agendada.':'O cadastro fica ativo conforme a configuração; não agenda visitas nem ativa faturação.';}catch(e){if(active())permission.textContent='Não foi possível confirmar a permissão. Pode conservar o rascunho; o servidor verifica a permissão ao enviar.';}render();}
+  for(const k of fields){const node=form.elements[k];if(node.tagName!=='SELECT')node.maxLength=limits[k];node.addEventListener(node.tagName==='SELECT'?'change':'input',saveDraft);}
+  form.addEventListener('submit',event=>{event.preventDefault();void send();});retry.addEventListener('click',send);document.getElementById('intakeCheckPermission').addEventListener('click',permissions);
+  gps.addEventListener('click',()=>{if(!active()||state||busy||conflict||!ready)return;const generation=++gpsRevision;if(!navigator.geolocation){status.textContent='Localização indisponível; pode indicar as coordenadas.';return;}navigator.geolocation.getCurrentPosition(position=>{if(!active()||state||busy||generation!==gpsRevision)return;form.elements.latitude.value=String(position.coords.latitude);form.elements.longitude.value=String(position.coords.longitude);saveDraft();},()=>{if(active()&&generation===gpsRevision)status.textContent='Não foi possível obter a localização. As coordenadas anteriores foram conservadas.';},{timeout:10000,maximumAge:0});});
+  window.addEventListener('storage',event=>{if(event.key===key&&event.newValue!==observed&&!busy){conflict=true;status.textContent='A ficha mudou noutra janela. Copie os dados e reabra para rever.';render();}if(!active())refresh();});window.addEventListener('cw:field-write-change',refresh);window.addEventListener('pagehide',()=>{closed=true;++revision;++gpsRevision;});window.addEventListener('pageshow',()=>{closed=false;refresh();permissions();});setInterval(()=>{if(!active())refresh();},1000);
+  render();refresh();permissions();if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
 })();
