@@ -27,10 +27,12 @@ O registo da manutenção não conclui a visita, não altera medições/consumos
 
 ## Evidência local e publicação
 
+Confirmação final em PostgreSQL 16: [CI 35188698984](https://github.com/ts7520305-svg/cristalwater/actions/runs/35188698984), commit `8de555abda6d648486a7b980f8ce8fa1e249c494`, árvore `6a22afc8a9ba66c94fbfbd06d2cfa442d9470e61`. Aprovados 118/118 grupos, 388 testes unitários, quatro testes técnicos, 17 scripts de navegador, 20 migrações e sintaxe de 537 ficheiros backend. Restauro de 110 tabelas e 31 ficheiros com linhas e hashes iguais. Esta atualização posterior altera apenas documentação.
+
 - `run-1789624365514`: API antiga, avisos regulares e formulário real regular aprovados. A asserção antiga de painel vazio numa visita extra foi atualizada para a consulta extra sem planos; o ensaio de isolamento aprovado em `run-1789624693362`.
 - `run-1789624993582`: novo grupo completo extra, formulário regular, correção extra e recuperação das escritas de campo aprovados. Inclui seis pedidos iguais concorrentes, pedidos distintos concorrentes, resposta perdida depois de gravar, registo único, reatribuição, rollback de auditoria, avisos tipados e recarga do formulário real em Chromium.
 - Navegador: recusa reconhecida sem apagar o comprovativo, HTTP 202/corpo incompleto/tipo trocado, plano avançado sem confirmação, rascunho após recarga, duas janelas, quota/corrupção, consulta offline, mudança de conta e larguras 320/390/1280 px aprovados.
 - 388 testes unitários, quatro testes técnicos, 17 scripts de navegador e sintaxe de 537 ficheiros backend aprovados localmente. Runner integrado passa a 118 grupos. Capturas de pendência/confirmação revistas; o erro de transporte é apresentado em português.
 - As 20 migrações passaram no ensaio local, com esquema final idêntico ao Prisma. O ensaio verifica dados antigos, exclusividade da referência, chave estrangeira, unicidade e bloqueio de remoção, antes de comparar o esquema. Violações esperadas são capturadas dentro de subtransações PostgreSQL para não depender da tradução de erros do adaptador local.
 
-A confirmação do CI completo e do restauro em PostgreSQL 16 será registada após publicação da árvore de código. Impedimentos/regressos ExtraVisit e a concorrência geral dos rascunhos modernos continuam como trabalho seguinte.
+Código publicado e CI/restauro confirmados na branch de trabalho. Backup local `backup/task215-local-20260917`; PNG preexistente preservado com SHA256 `fba3c8189d9e0a31d96b378550736f865d30a4019f5e8d4d4487b15cfc543a71`. Impedimentos/regressos ExtraVisit e a concorrência geral dos rascunhos modernos continuam como trabalho seguinte.
