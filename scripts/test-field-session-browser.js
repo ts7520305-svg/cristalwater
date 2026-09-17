@@ -10,6 +10,8 @@ const deadline = setTimeout(() => { console.error('Session regression deadline e
   try {
     const page = await browser.newPage(); page.setDefaultTimeout(5000);
     let status = 401, held = null, hold = false, completions = 0; const sentBodies = [];
+    let notifyHeld;
+    const holdNext = () => { hold = true; return new Promise(resolve => { notifyHeld = resolve; }); };
     async function reply(route, responseStatus = status) {
       const request = route.request(), pathname = new URL(request.url()).pathname;
       let response = { error: 'QA status ' + responseStatus };
@@ -25,7 +27,7 @@ const deadline = setTimeout(() => { console.error('Session regression deadline e
       const pathname = new URL(route.request().url()).pathname;
       if (pathname.startsWith('/api/')) {
         if (pathname.endsWith('/complete')) { completions++; sentBodies.push(route.request().postDataJSON()); }
-        if (hold) { held = route; return; }
+        if (hold) { held = route; notifyHeld?.(); notifyHeld = null; return; }
         return reply(route);
       }
       return route.fulfill({ contentType: 'text/html', body: '<body><textarea id="notes">Trabalho em curso</textarea></body>' });
@@ -47,8 +49,8 @@ const deadline = setTimeout(() => { console.error('Session regression deadline e
     assert.match(await page.evaluate(() => CWFieldOffline.submitCompletion(5, { notes: 'Changed after confirmation' }).catch(e => e.message)), /correção/);
     console.log('PASS expiry preserves visible work; renewal recovers the original receipt and confirmed content cannot be replaced');
 
-    hold = true; await page.evaluate(() => { window.stale = fetch('/api/delayed').then(r => r.status); });
-    await page.waitForTimeout(50); assert(held); await login(tokens.newer);
+    const delayedHeld = holdNext(); await page.evaluate(() => { window.stale = fetch('/api/delayed').then(r => r.status); });
+    await delayedHeld; assert(held); await login(tokens.newer);
     await held.fulfill({ status: 401, json: {} }); held = null; hold = false;
     assert.equal(await page.evaluate(() => window.stale), 401); assert.equal(await page.evaluate(() => CristalAuth.isSessionExpired()), false);
     console.log('PASS delayed 401 cannot invalidate a newer login');
@@ -56,9 +58,9 @@ const deadline = setTimeout(() => { console.error('Session regression deadline e
     const photoId = randomUUID();
     const save = () => page.evaluate(async id => CWFieldPhotos.save(9, { localId: id, file: new Blob(['test'], { type: 'image/png' }), fileName: 'test.png' }), photoId);
     await save(); await login(tokens.second, 42); await save(); await login(tokens.newer);
-    hold = true; const countBefore = completions;
+    const uploadHeld = holdNext(), countBefore = completions;
     await page.evaluate(() => { window.upload = CWFieldOffline.submitCompletion(9, { notes: 'Owner 41' }).catch(e => e.message); });
-    await page.waitForTimeout(100); assert(held); assert.equal(held.request().headers().authorization, 'Bearer ' + tokens.newer);
+    await uploadHeld; assert(held); assert.equal(held.request().headers().authorization, 'Bearer ' + tokens.newer);
     await login(tokens.second, 42);
     // Wait for the session monitor to abort the held upload before any response.
     // A fast late response used to hide the raw AbortError in this path.

@@ -2,6 +2,10 @@
   if (window.__CW_V2_PHASE2_NAV__) return;
   window.__CW_V2_PHASE2_NAV__ = true;
 
+  if (!document.querySelector('link[href="/cw-shared-navigation.css"]')) {
+    const styles = document.createElement('link'); styles.rel = 'stylesheet'; styles.href = '/cw-shared-navigation.css'; document.head.appendChild(styles);
+  }
+
   const pathname = String(location.pathname || '/').replace(/\.html$/i, '').toLowerCase();
   const isAuthPage = ['/login', '/admin-login', '/technician-login', '/client-login'].includes(pathname);
 
@@ -301,7 +305,7 @@
 
     const subtitle = document.createElement('div');
     subtitle.textContent = 'Fluxo operacional unificado.';
-    subtitle.style.color = '#9fb1ca';
+    subtitle.style.color = '#516c74';
     subtitle.style.fontSize = '12px';
     sidebar.appendChild(subtitle);
 
@@ -310,7 +314,7 @@
 
     const top = document.createElement('header');
     top.className = 'cw-v2-topbar';
-    top.innerHTML = '<div class="cw-v2-context"><div class="cw-v2-context-kicker">' + meta.area + '</div><div class="cw-v2-context-title">' + meta.title + '</div><div class="cw-v2-breadcrumb" data-cw-breadcrumb>' + config.title + ' / ' + meta.area + ' / ' + meta.title + '</div></div><div class="cw-v2-search"><input type="search" placeholder="Pesquisar modulos, clientes, visitas" data-cw-search-input><span class="icon">⌕</span><div class="cw-v2-search-results" data-cw-search-results></div></div><div class="cw-v2-top-actions"><span class="cw-v2-pill success" data-offline-indicator>Online</span><button type="button" class="cw-v2-pill" data-cw-open-drawer>Menu</button></div>';
+    top.innerHTML = '<div class="cw-v2-context"><div class="cw-v2-context-kicker">' + meta.area + '</div><div class="cw-v2-context-title">' + meta.title + '</div><div class="cw-v2-breadcrumb" data-cw-breadcrumb>' + config.title + ' / ' + meta.area + ' / ' + meta.title + '</div></div><div class="cw-v2-search"><input type="search" placeholder="Pesquisar" aria-label="Pesquisar no menu" data-cw-search-input><span class="icon">⌕</span><div class="cw-v2-search-results" data-cw-search-results></div></div><div class="cw-v2-top-actions"><span class="cw-v2-pill success" data-offline-indicator>Online</span><button type="button" class="cw-v2-pill" data-cw-open-drawer>Menu</button></div>';
     topWrap.appendChild(top);
 
     const drawer = document.createElement('aside');
@@ -348,6 +352,10 @@
 
     document.body.classList.add('cw-v2-shell-enabled');
     document.body.setAttribute('data-cw-role', role);
+    const measureHeader = () => document.body.style.setProperty('--cw-navigation-header-height', Math.ceil(topWrap.getBoundingClientRect().height) + 'px');
+    if (window.ResizeObserver) new ResizeObserver(measureHeader).observe(topWrap);
+    window.addEventListener('resize', measureHeader); measureHeader();
+    window.dispatchEvent(new Event('cw:navigation-ready'));
   }
 
   function normalizeLinks() {

@@ -81,16 +81,17 @@ const fixture = role => {
         for (const width of [320, 390, 1440]) {
           await page.setViewportSize({ width, height: 1000 });
           await page.evaluate(() => scrollTo(0, 0));
+          await page.waitForFunction(() => parseFloat(getComputedStyle(document.body).paddingTop) >= document.querySelector('.cw-v2-shell-topbar').getBoundingClientRect().height);
           for (const selector of ['#helpTitle', '#search', '#topics .topic', '#detail', '#helpActions a']) {
             const bounds = await page.locator(selector).first().boundingBox(); assert(bounds && bounds.x >= -1 && bounds.x + bounds.width <= width + 1, role + '/' + language + ': ' + selector + ' must fit at ' + width);
           }
           const heading = await page.locator('#helpTitle').boundingBox(), topbar = await page.locator('.cw-v2-shell-topbar').boundingBox();
-          assert(heading.y >= topbar.y + topbar.height - 1 && heading.y < 260, 'The help heading must be immediately below the fixed header');
+          assert(heading.y >= topbar.y + topbar.height - 1 && heading.y < 260, role + '/' + language + '/' + width + ': help heading must be below the header: ' + JSON.stringify({ heading, topbar }));
           if (width === 1440) {
             const sidebar = await page.locator('.cw-v2-sidebar').boundingBox();
             assert(heading.x >= sidebar.x + sidebar.width - 1, 'Desktop help must sit beside the navigation');
           }
-          if (width === 320) assert(await page.locator('.cw-v2-mobile-nav a').evaluateAll(nodes => nodes.every(node => node.scrollWidth <= node.clientWidth + 1)), 'Mobile navigation labels must fit');
+          if (width === 320) assert(await page.locator('.cw-v2-mobile-primary a').evaluateAll(nodes => nodes.length > 0 && nodes.every(node => node.scrollWidth <= node.clientWidth + 1)), 'Mobile navigation labels must exist and fit');
           if (language === 'pt' && [320, 1440].includes(width)) await page.screenshot({ path: path.join(visual, role.toLowerCase() + '-' + width + '.png'), fullPage: true });
         }
         await page.keyboard.press('Control+k'); await checkLinks('.cw-command-results a'); await page.keyboard.press('Escape');

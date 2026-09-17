@@ -33,6 +33,13 @@ let browser;
   page.on('pageerror', error => errors.push(error.message));
   page.on('dialog', dialog => dialog.accept());
   const goto = async path => { await page.goto(base + path, { waitUntil: 'networkidle' }); };
+  const mobileMenu = async () => {
+    assert.equal(await page.locator('.cw-v2-shell-sidebar').isVisible(), false, 'Desktop navigation must stay hidden on a phone');
+    await page.locator('.cw-v2-shell-topbar [data-cw-open-drawer]').click();
+    const menu = page.locator('.cw-v2-drawer.is-open');
+    await menu.waitFor({ state: 'visible' });
+    return menu;
+  };
   const token = () => page.evaluate(() => CristalAuth.getToken());
   const api = (path, credential) => fetch(base + path, { headers: { Authorization: 'Bearer ' + credential } });
   const pinLogin = async pin => {
@@ -107,7 +114,7 @@ let browser;
   ]) {
     if (['/technician-guide', '/technician-history', '/technician-profile'].includes(path)) {
       await goto('/technician');
-      const menu = page.locator('.cw-v2-sidebar');
+      const menu = await mobileMenu();
       assert.equal(await menu.locator('a[href^="/admin-"]').count(), 0, 'Technical menu must not offer administrative pages');
       assert.equal(await menu.locator('a[href="/settings"]').count(), 0, 'PIN menu must not advertise unavailable User preferences');
       await menu.locator(`a[href="${path}"]`).first().click();
@@ -119,7 +126,7 @@ let browser;
   }
   console.log('PASS leader entry into modern/legacy field, visit, route, map and GPS; actual menu opens guide/history/profile without logout or administrative shortcuts');
 
-  await page.locator('.cw-v2-sidebar a[href="/help-center"]').click();
+  await (await mobileMenu()).locator('a[href="/help-center"]').click();
   await page.waitForURL(base + '/help-center');
   await page.locator('#topics [data-topic="safety"]').click();
   assert.equal(await page.locator('#detail a').getAttribute('href'), '/technician-field-mode');
@@ -154,7 +161,7 @@ let browser;
   const userDraft = await page.evaluate(key => localStorage.getItem(key), userKey);
   assert.equal(await page.evaluate(key => localStorage.getItem(key), pinKey), pinDraft);
   await goto('/technician');
-  await page.locator('.cw-v2-sidebar a[href="/settings"]').click();
+  await (await mobileMenu()).locator('a[href="/settings"]').click();
   await page.waitForURL(base + '/settings');
   await page.waitForFunction(() => document.getElementById('settingsStatus')?.dataset.state === 'ready');
   await page.locator('[data-setting-type="ARRIVAL"]').selectOption('false');

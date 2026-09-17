@@ -2,9 +2,8 @@
   if (window.__CW_V2_SHELL__) return;
   window.__CW_V2_SHELL__ = true;
 
-  const searchInput = document.querySelector('[data-cw-search-input]');
-  const searchResults = document.querySelector('[data-cw-search-results]');
-  const indicator = document.querySelector('[data-offline-indicator]');
+  let searchInput, searchResults, drawerTrigger;
+  const boundSearchInputs = new WeakSet();
 
   function loadStateAdapter() {
     if (window.CWV2StateAdapter?.start) {
@@ -285,19 +284,24 @@
 
   function closeDrawer() {
     const drawer = getDrawer();
-    if (!drawer) return;
+    if (!drawer || !drawer.classList.contains('is-open')) return;
     drawer.classList.remove('is-open');
     drawer.setAttribute('aria-hidden', 'true');
+    drawerTrigger?.focus();
   }
 
   function openDrawer() {
     const drawer = getDrawer();
     if (!drawer) return;
+    drawerTrigger = document.activeElement;
+    closeSearch();
     drawer.classList.add('is-open');
     drawer.setAttribute('aria-hidden', 'false');
+    drawer.querySelector('[data-cw-close-drawer], button, a[href]')?.focus();
   }
 
   function updateConnectionState() {
+    const indicator = document.querySelector('[data-offline-indicator]');
     if (!indicator) return;
     if (navigator.onLine) {
       indicator.textContent = 'Online';
@@ -319,19 +323,43 @@
     const list = Array.from(document.querySelectorAll('[data-shell-search]'));
     const term = String(query || '').trim().toLowerCase();
     if (!term) { closeSearch(); return; }
+    const seen = new Set();
     const matches = list.map((node) => ({ label: node.getAttribute('data-shell-search') || '', href: node.getAttribute('href') || node.getAttribute('data-shell-href') || '#' }))
-      .filter((item) => item.label.toLowerCase().includes(term)).slice(0, 8);
-    if (!matches.length) { searchResults.innerHTML = '<a href="#" onclick="return false">Sem resultados</a>'; searchResults.style.display = 'block'; return; }
-    searchResults.innerHTML = matches.map((item) => `<a href="${item.href}">${item.label}</a>`).join('');
+      .filter((item) => {
+        if (!item.label.toLowerCase().includes(term) || seen.has(item.href) || !item.href.startsWith('/') || item.href.startsWith('//')) return false;
+        seen.add(item.href); return true;
+      }).slice(0, 8);
+    searchResults.replaceChildren();
+    for (const item of matches) {
+      const link = document.createElement('a'); link.href = item.href; link.textContent = item.label;
+      searchResults.appendChild(link);
+    }
+    if (!matches.length) {
+      const empty = document.createElement('p'); empty.setAttribute('role', 'status'); empty.textContent = 'Sem resultados'; searchResults.appendChild(empty);
+    }
     searchResults.style.display = 'block';
   }
 
-  if (searchInput && searchResults) {
+  function bindNavigation() {
+    searchInput = document.querySelector('[data-cw-search-input]');
+    searchResults = document.querySelector('[data-cw-search-results]');
+    updateConnectionState();
+    if (!searchInput || !searchResults || boundSearchInputs.has(searchInput)) return;
+    boundSearchInputs.add(searchInput);
+    if (!searchInput.hasAttribute('aria-label')) searchInput.setAttribute('aria-label', searchInput.getAttribute('placeholder') || 'Pesquisar');
     searchInput.addEventListener('input', (event) => renderSearch(event.target.value));
     searchInput.addEventListener('focus', (event) => renderSearch(event.target.value));
-    document.addEventListener('click', (event) => { if (!searchResults.contains(event.target) && event.target !== searchInput) closeSearch(); });
-    document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeSearch(); });
+    searchInput.addEventListener('keydown', event => {
+      if (searchResults.style.display === 'none') return;
+      const first = searchResults.querySelector('a');
+      if (first && event.key === 'ArrowDown') { event.preventDefault(); first.focus(); }
+      if (first && event.key === 'Enter') { event.preventDefault(); first.click(); }
+    });
   }
+  document.addEventListener('click', event => { if (searchResults && !searchResults.contains(event.target) && event.target !== searchInput) closeSearch(); });
+  window.addEventListener('cw:navigation-ready', bindNavigation);
+  document.addEventListener('DOMContentLoaded', bindNavigation);
+  bindNavigation();
 
   document.addEventListener('click', (event) => {
     const openTrigger = event.target.closest('[data-cw-open-drawer]');
@@ -343,7 +371,18 @@
     if (event.target.closest('a[href]')) closeDrawer();
   });
 
-  document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeDrawer(); });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      if (searchResults?.contains(document.activeElement)) searchInput?.focus();
+      closeSearch(); closeDrawer();
+    }
+    const drawer = getDrawer();
+    if (event.key !== 'Tab' || !drawer?.classList.contains('is-open')) return;
+    const focusable = Array.from(drawer.querySelectorAll('a[href], button, summary, input, [tabindex="0"]')).filter(node => !node.disabled && node.getClientRects().length);
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+  });
   window.addEventListener('online', updateConnectionState);
   window.addEventListener('offline', updateConnectionState);
   updateConnectionState();
