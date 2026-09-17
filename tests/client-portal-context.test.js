@@ -113,21 +113,28 @@ describe('client portal asynchronous context isolation', () => {
 });
 
 describe('administrator client preview guard', () => {
+  function adminEntry(pathname) {
+    const user = JSON.stringify({ id: 99, role: 'ADMIN' });
+    const token = Buffer.from('{"alg":"HS256"}').toString('base64url') + '.' + Buffer.from(JSON.stringify({ id: 99, role: 'ADMIN', exp: Math.floor(Date.now() / 1000) + 3600 })).toString('base64url') + '.browser-fixture';
+    const records = new Map(Object.entries({ token, cristalwater_jwt: token, user, cristalwater_user: user, cw_client_id: '1', clientId: '1', 'cwFieldOutbox:41': 'pending-work' }));
+    const before = [...records];
+    const storage = { getItem: key => records.get(key) ?? null, setItem: vi.fn((key, value) => records.set(key, value)), removeItem: vi.fn(key => records.delete(key)), clear: vi.fn() };
+    const location = { pathname, href: pathname + '?clientId=1', replace: vi.fn() }, alert = vi.fn();
+    const document = { documentElement: { style: { visibility: 'visible' } } };
+    vm.runInNewContext(readFileSync(new URL('../frontend/client-auth-guard.js', import.meta.url), 'utf8'), { localStorage: storage, window: { location }, document, atob, alert, console });
+    expect([...records]).toEqual(before);
+    expect(storage.clear).not.toHaveBeenCalled(); expect(storage.removeItem).not.toHaveBeenCalled(); expect(alert).not.toHaveBeenCalled();
+    return { storage, location, document };
+  }
   it('redirects the old client chat link without ending the administrator session', () => {
-    const storage = { getItem: key => key === 'token' ? 'qa-token' : JSON.stringify({ id: 99, role: 'ADMIN' }), setItem: vi.fn(), clear: vi.fn() };
-    const location = { pathname: '/client_chat', replace: vi.fn() }, alert = vi.fn();
-    vm.runInNewContext(readFileSync(new URL('../frontend/client-auth-guard.js', import.meta.url), 'utf8'), { localStorage: storage, window: { location }, alert, console });
+    const { storage, location, document } = adminEntry('/client_chat');
     expect(location.replace).toHaveBeenCalledWith('/chat');
-    expect(storage.clear).not.toHaveBeenCalled(); expect(storage.setItem).not.toHaveBeenCalled(); expect(alert).not.toHaveBeenCalled();
+    expect(storage.setItem).not.toHaveBeenCalled(); expect(document.documentElement.style.visibility).toBe('hidden');
   });
   it('preserves admin session and does not set admin ID as client ID', () => {
-    const storage = { getItem: key => key === 'token' ? 'qa-token' : JSON.stringify({ id: 99, role: 'ADMIN' }), setItem: vi.fn(), clear: vi.fn() };
-    const location = { pathname: '/client-portal', href: '/client-portal?clientId=1' };
-    const alert = vi.fn();
-    vm.runInNewContext(readFileSync(new URL('../frontend/client-auth-guard.js', import.meta.url), 'utf8'), { localStorage: storage, window: { location }, alert, console });
-    expect(alert).not.toHaveBeenCalled();
-    expect(storage.clear).not.toHaveBeenCalled();
+    const { storage, location, document } = adminEntry('/client-portal');
     expect(storage.setItem).not.toHaveBeenCalled();
+    expect(location.replace).not.toHaveBeenCalled(); expect(document.documentElement.style.visibility).toBe('visible');
     expect(location.href).toBe('/client-portal?clientId=1');
   });
 });

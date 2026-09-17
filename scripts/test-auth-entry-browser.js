@@ -119,6 +119,34 @@ async function clientGuardCases(browser){
   await page.waitForFunction(()=>disconnected===3);
   console.log('PASS HTML login, account switch and cross-tab session change disconnect private sockets; logout preserves field outbox');
   await context.close();
+  const admin=await browser.newPage();admin.setDefaultTimeout(5000);let adminLogoutNavigation=0;const adminErrors=[];
+  admin.on('pageerror',error=>adminErrors.push(error.message));
+  const adminWork={'cwFieldOutbox:41':'pending-field-work','cwFieldDocuments:qa':'saved-guide','offline_visits':'unattributed-legacy-bytes','cw_language':'pt'};
+  await admin.addInitScript(work=>{
+   if(location.pathname!=='/admin-visits-dashboard')return;
+   const user=JSON.stringify({id:1,role:'ADMIN'}),token=btoa('{"alg":"HS256"}')+'.'+btoa(JSON.stringify({id:1,role:'ADMIN',exp:Math.floor(Date.now()/1000)+3600}))+'.browser-fixture';
+   for(const key of ['token','cristalwater_jwt','adminToken'])localStorage.setItem(key,token);
+   for(const key of ['user','cristalwater_user'])localStorage.setItem(key,user);
+   localStorage.setItem('clientId','7');localStorage.setItem('cw_client_id','7');
+   for(const [key,value]of Object.entries(work))localStorage.setItem(key,value);
+   Object.defineProperty(navigator,'serviceWorker',{configurable:true,value:{register:async()=>({}),getRegistration:()=>new Promise(resolve=>{window.finishAdminLogout=()=>resolve(null);})}});
+  },adminWork);
+  await admin.route('http://admin.test/**',route=>{
+   const pathname=new URL(route.request().url()).pathname;
+   if(pathname==='/login'){adminLogoutNavigation++;return route.fulfill({contentType:'text/html',body:'<p>Login</p>'});}
+   if(pathname==='/admin-visits-dashboard')return route.fulfill({contentType:'text/html',body:source('admin-visits-dashboard.html')});
+   if(['/cw-auth.js','/admin-auth-guard.js','/admin-visits-dashboard.js'].includes(pathname))return route.fulfill({contentType:'application/javascript',body:source(pathname.slice(1))});
+   if(pathname.startsWith('/api/'))return route.fulfill({json:{ok:true,visits:[]}});
+   return route.fulfill({contentType:pathname.endsWith('.css')?'text/css':'application/javascript',body:''});
+  });
+  await admin.goto('http://admin.test/admin-visits-dashboard');await admin.locator('#visits').getByRole('heading',{name:'Sem visitas'}).waitFor();
+  const adminLogout=admin.locator('#logoutBtn');await adminLogout.click();assert(await adminLogout.isDisabled());assert.equal(await adminLogout.getAttribute('aria-busy'),'true');
+  await adminLogout.dispatchEvent('click');assert.equal(adminLogoutNavigation,0);
+  await admin.evaluate(()=>window.finishAdminLogout());await admin.waitForURL('**/login');assert.equal(adminLogoutNavigation,1);
+  assert.deepEqual(await admin.evaluate(keys=>Object.fromEntries(keys.map(key=>[key,localStorage.getItem(key)])),Object.keys(adminWork)),adminWork);
+  assert.deepEqual(await admin.evaluate(()=>['token','cristalwater_jwt','adminToken','user','cristalwater_user','clientId','cw_client_id'].map(key=>localStorage.getItem(key))),Array(7).fill(null));
+  assert.deepEqual(adminErrors,[]);await admin.close();
+  console.log('PASS actual administrative visits page: shared logout, disabled repeated action, awaited cleanup, session removed and all saved work preserved');
   const field=await browser.newPage({viewport:{width:320,height:844}});let logoutNavigation=0;
   await field.addInitScript(()=>{
    if(location.pathname!=='/technician-field-mode')return;

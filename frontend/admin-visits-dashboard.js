@@ -73,7 +73,6 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     $('refreshBtn')?.addEventListener('click', loadVisits);
-    $('logoutBtn')?.addEventListener('click', () => { localStorage.clear(); location.href = '/login'; });
     $('searchInput')?.addEventListener('input', (e) => { state.search = e.target.value; render(); });
     $('statusFilter')?.addEventListener('change', (e) => { state.status = e.target.value; render(); });
     loadVisits();
