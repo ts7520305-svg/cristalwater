@@ -35,6 +35,7 @@
     '/admin-visits': { area: 'Operacao', title: 'Gestao de visitas' },
     '/admin-rounds': { area: 'Operacao', title: 'Rotas e rondas' },
     '/admin-live-map': { area: 'Operacao', title: 'Mapa operacional' },
+    '/route-map': { area: 'Operação', title: 'Sugestão de rota' },
     '/admin-clients': { area: 'Clientes', title: 'Lista de clientes' },
     '/admin-pools': { area: 'Piscinas', title: 'Lista de piscinas' },
     '/admin-pool-technical': { area: 'Piscinas', title: 'Ficha tecnica' },
@@ -374,6 +375,7 @@
   function ensureStatusSlots() {
     const pages = document.querySelectorAll('.empty,.status,[data-state]');
     pages.forEach((n) => {
+      if (n.closest('[data-cw-state-managed="manual"]')) return;
       const text = String(n.textContent || '').toLowerCase();
       if (text.includes('erro')) n.setAttribute('data-state', 'error');
       if (text.includes('sucesso')) n.setAttribute('data-state', 'success');

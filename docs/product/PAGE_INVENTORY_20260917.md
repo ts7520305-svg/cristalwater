@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `d924f8a6d1c4ea9ff68abdba15791f9d4ef7faba`. Gerado em 2026-09-17T16:23:10.316Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `8e564d309ef2cbf57eb781d4231951349d7f7090`. Gerado em 2026-09-17T16:55:39.913Z. Inclui o estado dos ficheiros locais no momento da geração.
 
 101 ficheiros HTML: 94 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 146 scripts de integração/navegador ativos. 48 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 147 scripts de integração/navegador ativos. 50 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 As colunas de papéis distinguem o catálogo anterior dos indícios explícitos no HTML/scripts. Não são uma auditoria de autorização: as APIs, a atribuição atual e o comportamento real de cada perfil continuam a determinar o acesso.
 
@@ -51,7 +51,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /admin-keys | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-live-map | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-login | Entrada raiz | PUBLIC | — | 3 |
-| /admin-map | Entrada raiz | ADMIN | ADMIN | 0 |
+| /admin-map | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-master-control | Entrada raiz | ADMIN | ADMIN | 4 |
 | /admin-menu | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-notifications | Entrada raiz | ADMIN | ADMIN | 3 |
@@ -112,7 +112,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /ranking | Entrada raiz | ADMIN | ADMIN | 1 |
 | /report-center | Entrada raiz | ADMIN | ADMIN | 0 |
 | /report-settings | Entrada raiz | ADMIN | ADMIN | 0 |
-| /route-map | Entrada raiz | ADMIN | ADMIN | 0 |
+| /route-map | Entrada raiz | ADMIN | ADMIN | 1 |
 | /settings | Entrada raiz | ADMIN, CLIENT, TECHNICIAN, TEAM_LEADER | ADMIN, CLIENT, TEAM_LEADER, TECHNICIAN | 7 |
 | /splash | Entrada raiz | ADMIN | — | 0 |
 | /technician-chat | Entrada raiz | — | — | 3 |

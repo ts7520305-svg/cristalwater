@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-09-17T16:23:10.316Z",
-  "baseCommit": "d924f8a6d1c4ea9ff68abdba15791f9d4ef7faba",
+  "generatedAt": "2026-09-17T16:55:39.913Z",
+  "baseCommit": "8e564d309ef2cbf57eb781d4231951349d7f7090",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 146,
+  "activeScriptsScanned": 147,
   "summary": {
     "htmlFiles": 101,
     "rootPages": 94,
     "nestedPages": 7,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 48,
+    "pagesWithLiteralTestReference": 50,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -600,7 +600,7 @@
       "file": "frontend/admin-map.html",
       "route": "/admin-map",
       "kind": "Entrada raiz",
-      "title": "Cristal Water - Mapa Operacional",
+      "title": "Mapa de piscinas — Cristal Water",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -614,25 +614,25 @@
       "entryRedirects": {},
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/manifest.webmanifest",
         "/ui/foundation.css",
+        "/ui/design-system.css",
+        "/cw-admin-map.css",
         "/cristal-assist.css",
         "/cw-auth.js",
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
         "/admin-auth-guard.js",
-        "/ui/design-system.css",
+        "/cw-admin-map.js",
         "/admin-map.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
         "/ui/core/navigation-context.js",
-        "/cw-admin-shortcuts.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "testReferences": [
+        "test-field-admin-map-recovery.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -2995,7 +2995,7 @@
       "file": "frontend/route-map.html",
       "route": "/route-map",
       "kind": "Entrada raiz",
-      "title": "Cristal Water - Mapa de Rotas",
+      "title": "Sugestão de rota — Cristal Water",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -3010,22 +3010,24 @@
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/ui/foundation.css",
+        "/ui/design-system.css",
+        "/cw-admin-map.css",
         "/cristal-assist.css",
         "/cw-auth.js",
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
         "/admin-auth-guard.js",
-        "/ui/design-system.css",
+        "/cw-admin-map.js",
         "/route-map.js",
-        "/ui/core/navigation-context.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
+        "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "testReferences": [
+        "test-field-admin-map-recovery.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {

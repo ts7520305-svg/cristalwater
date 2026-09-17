@@ -1,6 +1,6 @@
 # Revisão pendente dos mapas e gráficos antigos
 
-Esta é uma lista de defeitos e critérios para a próxima intervenção, não uma declaração de correção. Base de código: `e1b9ddc4353781de43d04f716ae725bea47dc306` (TASK231–232).
+Este registo conserva a triagem inicial. TASK233 trata /admin-map e /route-map, conforme `ADMIN_MAP_RECOVERY_20260917.md`; as restantes linhas continuam pendentes. Base de código: `e1b9ddc4353781de43d04f716ae725bea47dc306` (TASK231–232).
 
 ## Evidência
 

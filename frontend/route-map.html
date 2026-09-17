@@ -1,58 +1,23 @@
 <!doctype html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>Cristal Water - Mapa de Rotas</title>
+<html lang="pt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sugestão de rota — Cristal Water</title>
+<link rel="stylesheet" href="/ui/foundation.css"><link rel="stylesheet" href="/ui/design-system.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"><link rel="stylesheet" href="/cw-admin-map.css">
+<link rel="stylesheet" href="/cristal-assist.css"><script src="/cw-auth.js"></script><script src="/admin-auth-guard.js"></script></head>
+<body data-required-role="ADMIN"><main class="admin-map-page" data-cw-state-managed="manual" data-cw-form-memory="managed">
+<h1>Sugestão de rota</h1>
+<p>Visitas regulares planeadas para o técnico e dia escolhidos, a partir da sua localização atual. A ordem é uma sugestão por proximidade, sem trânsito ou horários. Não altera o planeamento nem inclui visitas extra ou já iniciadas.</p>
+<a href="/admin-map">Consultar piscinas</a>
+<div class="map-controls">
+<label>Dia<input id="mapDate" type="date" required></label><label>Técnico<select id="mapTechnician"></select></label><button id="mapTechniciansReload" type="button">Atualizar técnicos</button>
+<button id="mapLoad" type="button">Atualizar sugestão</button>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-
-<link rel="stylesheet" href="/ui/foundation.css">
-
-<style>
-body{margin:0}
-#map{height:100vh}
-.panel{
-position:absolute;
-top:10px;
-left:10px;
-background:white;
-padding:10px;
-z-index:999;
-}
-button{width:100%;margin:5px}
-</style>
-
-<link rel="stylesheet" href="/cristal-assist.css">
-  <script src="/cw-auth.js"></script>
-  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
-  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
-  <script src="/admin-auth-guard.js"></script>
-  <link rel="stylesheet" href="/ui/design-system.css">
-</head>
-
-<body data-required-role="ADMIN">
-
-<div style="padding:12px 16px 0">
-  <button type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
 </div>
-
-<div class="panel">
-<button onclick="loadRoute()">Carregar rota</button>
-<button onclick="openGoogle()">Google Maps</button>
-<button onclick="openWaze()">Waze</button>
-</div>
-
-<div id="map"></div>
-
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script src="/route-map.js"></script>
-
-<script src="/ui/core/navigation-context.js"></script>
-
-<script src="/cristal-help-data.js"></script>
-<script src="/cristal-assist.js"></script>
-  <script src="/crystal-os-v2-shell.js"></script>
-  <script src="/crystal-os-v2-nav.js"></script>
-  <script defer src="/ui/design-system.js"></script>
-</body>
-</html>
+<p id="mapStatus" role="status" aria-live="polite"></p>
+<p id="mapNotice" role="status"></p>
+<div id="map" role="region" aria-label="Mapa com localizações confirmadas"></div>
+<div id="mapList"></div>
+</main>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script><script src="/cw-admin-map.js"></script><script src="/route-map.js"></script>
+<script src="/cristal-help-data.js"></script><script src="/cristal-assist.js"></script><script src="/ui/core/navigation-context.js"></script><script src="/crystal-os-v2-shell.js"></script><script src="/crystal-os-v2-nav.js"></script><script defer src="/ui/design-system.js"></script>
+</body></html>
