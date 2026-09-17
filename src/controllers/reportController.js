@@ -1,17 +1,25 @@
 const { prisma } = require("../prismaClient");
+const { period } = require("../services/operationalValueReportService");
 
-function getMonthRef(date = new Date()) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  return `${y}-${m}`;
+function htmlText(value) {
+  return String(value ?? "").replace(/[&<>"']/g, character => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  })[character]);
 }
 
 async function getMonthlyPrintableReport(req, res) {
+  res.setHeader("Cache-Control", "private, no-store");
+  const query = req.query || {};
+  if (Object.keys(query).some(key => !["monthRef", "onlyRequiresInvoice"].includes(key)) ||
+      typeof query.monthRef !== "string" ||
+      (query.onlyRequiresInvoice !== undefined && !["true", "false"].includes(query.onlyRequiresInvoice))) {
+    return res.status(400).json({ ok: false, error: "Indique um mês AAAA-MM e um filtro de faturação válido." });
+  }
+  let monthRef;
+  try { ({ monthRef } = period({ monthRef: query.monthRef })); }
+  catch (_) { return res.status(400).json({ ok: false, error: "Mês inválido; use AAAA-MM entre 2000 e 2199." }); }
+  const onlyRequiresInvoice = query.onlyRequiresInvoice === "true";
   try {
-    const monthRef = String(req.query.monthRef || getMonthRef()).trim();
-    const onlyRequiresInvoice =
-      String(req.query.onlyRequiresInvoice || "false").toLowerCase() === "true";
-
     let invoices = await prisma.invoice.findMany({
       where: {
         monthRef,
@@ -75,11 +83,11 @@ async function getMonthlyPrintableReport(req, res) {
 
         ${invoices.map((inv) => `
           <div class="card">
-            <h2>${inv.client?.name || "-"}</h2>
+            <h2>${htmlText(inv.client?.name || "-")}</h2>
             <div class="muted">
-              Telefone: ${inv.client?.phone || "-"} |
-              Email: ${inv.client?.email || "-"} |
-              Morada: ${inv.client?.address || "-"}
+              Telefone: ${htmlText(inv.client?.phone || "-")} |
+              Email: ${htmlText(inv.client?.email || "-")} |
+              Morada: ${htmlText(inv.client?.address || "-")}
             </div>
             <div style="margin-top:8px;">
               Estado:
@@ -109,8 +117,8 @@ async function getMonthlyPrintableReport(req, res) {
               <tbody>
                 ${(inv.client?.pools || []).map((pool) => `
                   <tr>
-                    <td>${pool.name || "-"}</td>
-                    <td>${pool.zone || "-"}</td>
+                    <td>${htmlText(pool.name || "-")}</td>
+                    <td>${htmlText(pool.zone || "-")}</td>
                     <td>€ ${Number(pool.monthlyAmount || 0).toFixed(2)}</td>
                   </tr>
                 `).join("")}
@@ -131,9 +139,9 @@ async function getMonthlyPrintableReport(req, res) {
                 ${(inv.payments || []).length > 0 ? inv.payments.map((pay) => `
                   <tr>
                     <td>€ ${Number(pay.amount || 0).toFixed(2)}</td>
-                    <td>${pay.method || "-"}</td>
+                    <td>${htmlText(pay.method || "-")}</td>
                     <td>${pay.paidAt ? new Date(pay.paidAt).toLocaleString("pt-PT") : "-"}</td>
-                    <td>${pay.notes || "-"}</td>
+                    <td>${htmlText(pay.notes || "-")}</td>
                   </tr>
                 `).join("") : `
                   <tr>

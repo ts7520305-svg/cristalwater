@@ -14,7 +14,7 @@ const { prisma } =
 
 router.use(auth());
 
-router.get("/monthly-print", getMonthlyPrintableReport);
+router.get("/monthly-print", auth("ADMIN"), getMonthlyPrintableReport);
 
 router.get("/visit/:id", async (req, res) => {
 

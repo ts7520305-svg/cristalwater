@@ -2,6 +2,8 @@
 
 ## Ponto de retoma atual — 17/09/2026
 
+- TASK246 implementada/testada localmente após reprodução de exposição financeira: imprimível mensal exige ADMIN, valida mês/filtro e apresenta conteúdos guardados como texto literal. `REPORT_SETTINGS_PRINT_REVIEW_20260917.md`. `run-1789682083504`: acesso/HTML 2886 ms, API mensal 7687 ms, UI mensal 10516 ms; sintaxe 544/179/57. Runner 140 grupos, cache v69, sem migração. Publicar a árvore conjunta TASK244–246 e confirmar CI/restauro; configurações e abertura de relatórios têm defeitos reproduzidos no relatório e continuam pendentes.
+
 - TASK244–245 implementadas/testadas localmente: relatório ADMIN por mês e secção, caixa separada de documentos/saldo atual, contagens completas e fontes explícitas, falhas parciais sem zeros e recuperação independente. Recarga com formulário restaurado, sessão, BFCache e disposição/contraste corrigidos. `ADMIN_MONTHLY_REPORT_RECOVERY_20260917.md`. API `run-1789680466198` e UI final `run-1789681020764`; regressões de caixa/valores aprovadas. 388 unitários, sintaxe 544/179/57, cache v69, 139 grupos e nenhuma migração nova. Publicar e confirmar CI/restauro nativo.
 
 - TASK242–243 confirmadas no commit `fcae79921350fac15251d4c4367b7985fb66d092`, árvore `6c115b4a385893da6e9f61d76fb5528154e08862`, CI `35273623727`: 137/137 grupos, 388 unitários/quatro técnicos, 21 scripts de navegador, 20 migrações, sintaxe 543/179/57 e restauro de 110 tabelas/32 ficheiros com linhas/hashes iguais em PostgreSQL 16. Cadastro API/UI: 1939/9795 ms; material: 1255/13699 ms; ocorrências: 1918/19332 ms. Backup `backup/task243-local-20260917`. O registo posterior altera apenas documentação.
