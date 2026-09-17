@@ -65,97 +65,34 @@ button {
 
 <div id="list"></div>
 
-<button class="confirm" onclick="confirm()">✔ Confirmar Faturação</button>
+<p>Visitas extra concluídas e ainda por incluir numa fatura. Reveja o cliente e o mês em Faturas.</p>
+<a class="confirm" href="/invoices" style="display:inline-block;padding:14px;border-radius:8px">Abrir Faturas</a>
+<p id="extrasStatus" role="status"></p>
+<button type="button" id="extrasReload">Atualizar lista</button>
 
 <script>
-const API = "/api";
-const actionLock = new Set();
-
-function authHeaders(extra = {}) {
-  const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
-  return {
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...extra,
-  };
-}
-
-function esc(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-// ==========================================================
-// LOAD
-// ==========================================================
-
+let revision=0;
 async function load(){
-
-  const res = await fetch(`${API}/billing/extras`, { headers: authHeaders() });
-  const data = await res.json();
-
-  const list = document.getElementById("list");
-  list.innerHTML = "";
-
-  if (!data.ok) return;
-
-  Object.entries(data.data).forEach(([clientId, c]) => {
-
-    list.innerHTML += `
-      <div class="card">
-        <div class="total">${c.client}</div>
-
-        <ul>
-          ${c.items.map(i => `
-            <li>${esc(i.pool)} - €${Number(i.price || 0).toFixed(2)}</li>
-          `).join("")}
-        </ul>
-
-        <div class="total">Total: €${Number(c.total || 0).toFixed(2)}</div>
-
-        <button class="pdf" onclick="openPdf(${clientId})">
-          📄 Gerar PDF
-        </button>
-      </div>
-    `;
-  });
+  const version=++revision,token=window.CristalAuth?.getToken?.(),status=document.getElementById('extrasStatus'),list=document.getElementById('list');
+  status.textContent='A consultar visitas extra…';
+  try{
+    const response=await fetch('/api/billing/extras',{headers:{Authorization:'Bearer '+token},cache:'no-store',signal:AbortSignal.timeout(10000)}),data=await response.json();
+    if(version!==revision||token!==window.CristalAuth?.getToken?.())return;
+    if(!response.ok||data.ok!==true||!data.data||typeof data.data!=='object')throw Error('Não foi possível confirmar os extras. Tente novamente.');
+    list.replaceChildren();
+    for(const group of Object.values(data.data)){
+      const card=document.createElement('section');card.className='card';
+      const title=document.createElement('h3');title.textContent=group.client;card.append(title);
+      const items=document.createElement('ul');
+      for(const item of group.items){const row=document.createElement('li');row.textContent=item.pool+' — '+Number(item.price).toLocaleString('pt-PT',{style:'currency',currency:'EUR'});items.append(row);}
+      const total=document.createElement('p');total.className='total';total.textContent='Total por faturar: '+Number(group.total).toLocaleString('pt-PT',{style:'currency',currency:'EUR'});
+      card.append(items,total);list.append(card);
+    }
+    status.textContent=list.children.length?'Lista atualizada. A inclusão e o envio são confirmados em Faturas.':'Sem visitas extra concluídas por faturar.';
+  }catch(error){if(version===revision&&token===window.CristalAuth?.getToken?.())status.textContent='Lista por confirmar. '+error.message;}
 }
-
-// ==========================================================
-// PDF
-// ==========================================================
-
-function openPdf(clientId){
-  window.open(`${API}/invoice-pdf/extras/${clientId}`);
-}
-
-// ==========================================================
-// CONFIRMAR
-// ==========================================================
-
-async function confirm(){
-
-  if (actionLock.has("confirm")) return;
-  const ok = window.confirm("Confirmar faturação de extras visíveis? Esta ação altera estados financeiros.");
-  if (!ok) return;
-  actionLock.add("confirm");
-
-  try {
-    await fetch(`${API}/billing/extras/confirm`, {
-      method:"POST",
-      headers: authHeaders()
-    });
-
-    alert("✔ Extras faturados");
-    load();
-  } finally {
-    actionLock.delete("confirm");
-  }
-}
-
+document.getElementById('extrasReload').onclick=load;
+window.addEventListener('storage',event=>{if(['token','cristalwater_jwt','user','cristalwater_user',null].includes(event.key)){revision++;document.getElementById('list').replaceChildren();document.getElementById('extrasStatus').textContent='A sessão mudou. Atualize a lista.';}});
 load();
 </script>
 

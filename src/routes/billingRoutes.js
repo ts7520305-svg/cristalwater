@@ -3,8 +3,6 @@ const router = express.Router(); // 🔥 IMPORTANTE
 const auth = require("../middlewares/authMiddleware");
 const { prisma } = require("../prismaClient");
 const billingController = require("../controllers/billingController");
-const PDFDocument = require("pdfkit");
-const { sendExtrasInvoiceEmail } = require("../services/emailService");
 
 router.use(auth("ADMIN"));
 
@@ -28,10 +26,7 @@ router.get("/monthly", billingController.listMonthly);
 // ==========================================================
 router.get("/extras", async (req, res) => {
   try {
-    const extras = await prisma.extraVisit.findMany({
-      where:{ billed:false },
-      include:{ pool:{ include:{ client:true } } }
-    });
+    const extras = await require('../services/extraVisitBillingService').pending(prisma);
 
     const grouped = {};
 
@@ -96,62 +91,7 @@ router.get("/extras/history", async (req, res) => {
 // ==========================================================
 // CONFIRMAR + EMAIL + PDF
 // ==========================================================
-router.post("/extras/confirm", async (req, res) => {
-  try {
-    const extras = await prisma.extraVisit.findMany({
-      where:{ billed:false },
-      include:{ pool:{ include:{ client:true } } }
-    });
-
-    const grouped = {};
-
-    extras.forEach(e=>{
-      const client = e.pool.client;
-
-      if(!grouped[client.id]){
-        grouped[client.id] = { client, items:[], total:0 };
-      }
-
-      grouped[client.id].items.push(e);
-      grouped[client.id].total += e.price;
-    });
-
-    for(const id in grouped){
-
-      const g = grouped[id];
-      const doc = new PDFDocument();
-      const buffers = [];
-
-      doc.on("data", buffers.push.bind(buffers));
-
-      doc.on("end", async ()=>{
-        const pdf = Buffer.concat(buffers);
-        await sendExtrasInvoiceEmail(g.client, pdf);
-      });
-
-      doc.text(`Cliente: ${g.client.name}`);
-      g.items.forEach(e=>{
-        doc.text(`${e.pool.name} - €${e.price}`);
-      });
-
-      doc.text(`Total: €${g.total.toFixed(2)}`);
-      doc.end();
-    }
-
-    await prisma.extraVisit.updateMany({
-      where:{ billed:false },
-      data:{
-        billed:true,
-        billedAt:new Date()
-      }
-    });
-
-    res.json({ ok:true });
-
-  } catch {
-    res.json({ ok:false });
-  }
-});
+router.post('/extras/confirm', (req,res) => res.status(409).json({ok:false,code:'INVOICE_REQUIRED',error:'Abra Faturas e gere o documento do cliente e mês. Os extras só ficam faturados quando forem incluídos numa fatura.',next:'/invoices'}));
 
 // ==========================================================
 // 🔥 LUCRO REAL + ALERTAS

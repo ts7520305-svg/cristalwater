@@ -174,7 +174,7 @@ app.use(auditMiddleware);
 
 app.use(express.static(frontendPath));
 app.use(`${getUploadsPublicBasePath()}/documents`, (req,res)=>res.status(404).json({ok:false,error:'Utilize o download autenticado do documento.'}));
-app.use(getUploadsPublicBasePath(), require('./services/clientChatAttachmentService').protectLegacyUploads, express.static(uploadsPath));
+app.use(getUploadsPublicBasePath(), require('./services/fieldPhotoRequestService').protectExtraUploads, require('./services/clientChatAttachmentService').protectLegacyUploads, express.static(uploadsPath));
 
 const frontendPages = fs
   .readdirSync(frontendPath)
@@ -208,6 +208,7 @@ mount("/api/technician", technicianRoutes);
 mount("/api/clients", clientRoutes);
 mount("/api/pools", poolRoutes);
 mount("/api/visits", visitRoutes);
+mount("/api/field/extra-visits", require("./routes/extraVisitExecutionRoutes"));
 mount("/api/billing", billingRoutes);
 mount("/api/dashboard", dashboardRoutes);
 mount("/api/client-portal", clientPortalRoutes);

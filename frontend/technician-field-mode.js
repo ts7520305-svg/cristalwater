@@ -30,7 +30,7 @@
   window.addEventListener('pagehide', () => { ++fieldWriteGeneration; ++routeRevision; });
   const sameFieldSession = () => window.CWFieldWriteStore?.same(fieldWriteSession);
   const startingVisits = new Set();
-  const extraVisitNotice = 'Visita extra: consulta disponível. O registo de execução desta visita ainda exige confirmação pelo escritório. Não registe este trabalho noutra visita.';
+  const extraVisitNotice = 'Visita extra: registe o trabalho, as medições, os produtos e as fotografias. Para água aberta, bomba em manual, impedimentos ou correções após concluir, contacte o escritório.';
   window.CWFieldVisitContext = () => sameFieldSession() && current() ? { id:current().id, visitType:current().visitType || 'REGULAR', poolId:current().poolId || current().pool?.id } : null;
   let visitPhotos = [];
   let visitDrafts = {};
@@ -498,12 +498,20 @@
     return true;
   }
 
+  function requireExecutableVisit(visit = current()) {
+    if (!sameFieldSession()) { toast('A sessão mudou. Reabra a página com a conta original.'); return false; }
+    if (!visit?.id || !['REGULAR','EXTRA'].includes(visit.visitType || 'REGULAR')) { toast('Escolha uma visita.'); return false; }
+    if (visit.visitType === 'EXTRA' && isVisitDone(visit)) { toast('Visita extra concluída. Consulte o registo; correções exigem revisão pelo escritório.'); return false; }
+    return true;
+  }
+  const photoPreviewCache = new Map();
+
   const fieldDraftStorageKey = () => 'cwFieldVisitDrafts:v2:' + fieldWriteSession.owner;
   function readFieldDrafts() {
     const raw = localStorage.getItem(fieldDraftStorageKey());
     if (!raw) return {};
     let value; try { value = JSON.parse(raw); } catch (_) { throw Error('Rascunhos ilegíveis. Preserve os dados e peça apoio ao escritório.'); }
-    if (!value || value.v !== 2 || value.owner !== fieldWriteSession.owner || !value.drafts || typeof value.drafts !== 'object' || Array.isArray(value.drafts) || Object.entries(value.drafts).some(([key,draft])=>!/^visit-REGULAR-[1-9][0-9]*$/.test(key) || !draft || typeof draft !== 'object' || Array.isArray(draft))) throw Error('Rascunhos sem identidade válida. Preserve os dados e peça apoio ao escritório.');
+    if (!value || value.v !== 2 || value.owner !== fieldWriteSession.owner || !value.drafts || typeof value.drafts !== 'object' || Array.isArray(value.drafts) || Object.entries(value.drafts).some(([key,draft])=>!/^visit-(REGULAR|EXTRA)-[1-9][0-9]*$/.test(key) || !draft || typeof draft !== 'object' || Array.isArray(draft))) throw Error('Rascunhos sem identidade válida. Preserve os dados e peça apoio ao escritório.');
     return value.drafts;
   }
   window.CWFieldDraftSnapshot = () => { if (!sameFieldSession()) throw Error('Sessão alterada.'); return readFieldDrafts(); };
@@ -659,9 +667,10 @@
   function photosFromVisit(visit) {
     return (Array.isArray(visit?.photos) ? visit.photos : []).map((photo, itemIndex) => ({
       localId: `saved-photo-${visit?.id || "x"}-${photo?.id || itemIndex}`,
+      visitId: visit?.id, visitType: visit?.visitType || 'REGULAR',
       type: photo?.type || "AFTER",
       fileName: photo?.fileName || `Foto ${photo?.id || itemIndex + 1}`,
-      previewUrl: photo?.url || "",
+      previewUrl: isRegularVisit(visit) ? photo?.url || "" : "",
       url: photo?.url || "",
       status: "uploaded",
       error: "",
@@ -717,7 +726,7 @@
   function saveCurrentDraft() {
     if (!sameFieldSession()) return;
     const visit = current();
-    if (!isRegularVisit(visit)) return;
+    if (!visit?.id || (visit.visitType === 'EXTRA' && isVisitDone(visit))) return;
     const key = visitKey(visit);
     visitPhotosByKey[key] = visitPhotos;
     visitDrafts[key] = readVisitForm();
@@ -733,7 +742,6 @@
 
   function loadCurrentDraft() {
     const visit = current();
-    if (visit && !isRegularVisit(visit)) { applySavedVisitData(visit); return; }
     if (isVisitDone(visit)) {
       applySavedVisitData(visit);
       return;
@@ -742,7 +750,7 @@
     const draft = visitDrafts[key] || null;
     applyVisitForm(draft);
     visitPhotos = visitPhotosByKey[key] || (draft?.photos || []);
-    window.CWFieldPhotos.list(visit?.id, true, fieldWriteSession).then(pending => {
+    window.CWFieldPhotos.list(visit?.id, true, fieldWriteSession, visit?.visitType || 'REGULAR').then(pending => {
       if (!sameFieldSession() || visitKey(current()) !== key) { pending.forEach(photo => { if (photo.previewUrl) URL.revokeObjectURL(photo.previewUrl); }); return; }
       for(const photo of pending) { const position=visitPhotos.findIndex(p=>p.localId===photo.localId);if(position>=0){if(visitPhotos[position].previewUrl?.startsWith('blob:'))URL.revokeObjectURL(visitPhotos[position].previewUrl);visitPhotos[position]=photo;}else visitPhotos.push(photo); }
       renderPhotoList();
@@ -1473,7 +1481,7 @@
     const pendingRevision = ++fieldPendingRevision;
     if (photosValue) photosValue.textContent = '…';
     if (photosMeta) photosMeta.textContent = 'A verificar envios guardados';
-    Promise.resolve(isRegularVisit(visit) ? window.CWFieldOffline.pending(visit.id) : false).then(pendingVisit => {
+    Promise.resolve(visit ? window.CWFieldOffline.pending(visit.id, visit.visitType || 'REGULAR') : false).then(pendingVisit => {
       if (!sameFieldSession() || pendingRevision !== fieldPendingRevision) return;
       if (photosValue) photosValue.textContent = String(pendingPhotos + (pendingVisit ? 1 : 0));
       if (photosMeta) photosMeta.textContent = pendingVisit ? 'visita por confirmar' : pendingPhotos ? 'fotos por enviar' : 'envios pendentes nesta visita';
@@ -1490,7 +1498,7 @@
         setHeroButton(0, "Atualizar", "refresh", "primary");
         setHeroButton(1, "Ver agenda", "agenda", "secondary");
         setHeroButton(2, "Comunicar", "contact", "secondary");
-      } else if (!isRegularVisit(visit)) {
+      } else if (!isRegularVisit(visit) && isVisitDone(visit)) {
         setHeroButton(0, "Consultar visita extra", "continue", "primary");
         setHeroButton(1, "Navegar", "map", "secondary");
         setHeroButton(2, "Comunicar", "contact", "secondary");
@@ -2175,7 +2183,7 @@
 
     list.innerHTML = visitPhotos.map((photo) => `
       <div class="photo-item" data-photo-id="${esc(photo.localId)}">
-        <img class="photo-thumb" src="${esc(photo.previewUrl || photo.url || "")}" alt="Fotografia ${esc(photoTypeLabel(photo.type))}">
+        <img class="photo-thumb" ${photo.visitType === 'EXTRA' && photo.status === 'uploaded' ? `data-extra-photo-url="${esc(photo.url)}"` : `src="${esc(photo.previewUrl || photo.url || "")}"`} alt="Fotografia ${esc(photoTypeLabel(photo.type))}">
         <div class="photo-meta">
           <strong>${esc(photoTypeLabel(photo.type))}</strong>
           <span class="photo-status ${photo.status === "uploaded" ? "ok" : "warn"}">${esc(photoStatusText(photo))}</span>
@@ -2187,6 +2195,17 @@
         </div>
       </div>
     `).join("");
+
+    for (const node of list.querySelectorAll('[data-extra-photo-url]')) {
+      const url = node.dataset.extraPhotoUrl;
+      if (photoPreviewCache.has(url)) { node.src = photoPreviewCache.get(url); continue; }
+      if (!/^\/uploads\/(?:qa\/)?extra-visit-/.test(url)) continue;
+      fetch(url,{headers:{Authorization:'Bearer '+fieldWriteSession.token},cache:'no-store'}).then(async response=>{
+        if (!response.ok || !response.headers.get('content-type')?.startsWith('image/')) throw Error('Fotografia por confirmar.');
+        const file=await response.blob(); if (!sameFieldSession()) return;
+        const preview=URL.createObjectURL(file); photoPreviewCache.set(url,preview); if(node.isConnected)node.src=preview;
+      }).catch(()=>{if(node.isConnected)node.alt='Fotografia guardada no servidor; ligue à rede para consultar.';});
+    }
 
     list.querySelectorAll("[data-photo-retry]").forEach((button) => {
       button.addEventListener("click", () => {
@@ -2201,7 +2220,7 @@
         if (!photo || !sameFieldSession()) return;
         button.disabled = true;
         try {
-          await window.CWFieldPhotos.remove(photo.visitId || current()?.id, photo.localId, fieldWriteSession);
+          await window.CWFieldPhotos.remove(photo.visitId || current()?.id, photo.localId, fieldWriteSession, photo.visitType || 'REGULAR');
           if (photo.previewUrl?.startsWith("blob:")) URL.revokeObjectURL(photo.previewUrl);
           if (!sameFieldSession()) return;
           visitPhotos = visitPhotos.filter((item) => item.localId !== photo.localId);
@@ -2215,7 +2234,7 @@
   async function uploadPhoto(photo) {
     const generation = fieldWriteGeneration;
     if (!sameFieldSession()) { photoFeedback('A sessão mudou. Reabra a página com a conta original.'); return false; }
-    const visit = visits.find(v => isRegularVisit(v) && String(v.id) === String(photo?.visitId));
+    const visit = visits.find(v => (v.visitType || 'REGULAR') === (photo?.visitType || 'REGULAR') && String(v.id) === String(photo?.visitId));
     if (photo?.status === 'uploading') return false;
     if (!visit?.id || !(photo?.file instanceof Blob)) {
       photo.status = "pending";
@@ -2229,7 +2248,7 @@
     renderPhotoList();
 
     try {
-      const data = await window.CWFieldPhotos.send(visit.id, photo.localId, fieldWriteSession);
+      const data = await window.CWFieldPhotos.send(visit.id, photo.localId, fieldWriteSession, {}, visit.visitType || 'REGULAR');
       if (!sameFieldSession() || generation !== fieldWriteGeneration) return false;
       photo.status = "uploaded";
       photo.url = data.photo.url;
@@ -2245,7 +2264,7 @@
   }
 
   async function syncPendingPhotos(showFeedback = true) {
-    if (!isRegularVisit()) return false;
+    if (!current()?.id) return false;
     const target = visitKey();
     const pending = visitPhotos.filter((photo) => photo.status !== "uploaded");
     if (!pending.length) {
@@ -2271,7 +2290,7 @@
   }
 
   function pickPhoto(type, gallery = false) {
-    if (!requireRegularVisit()) { photoFeedback(extraVisitNotice); return; }
+    if (!requireExecutableVisit()) return;
     const input = $(gallery ? '#galleryPhotoInput' : '#photoInput');
     if (!input) return;
     selectedPhotoType = type || "AFTER";
@@ -2285,7 +2304,7 @@
   async function addSelectedPhoto(file, selection = selectedPhotoContext) {
     if (!file) return;
     if (!sameFieldSession() || (selection && (selection.generation !== fieldWriteGeneration || selection.visitKey !== visitKey()))) { photoFeedback('A visita ou a sessão mudou. Escolha novamente a fotografia na visita correta.'); return; }
-    if (!requireRegularVisit()) { photoFeedback(extraVisitNotice); return; }
+    if (!requireExecutableVisit()) return;
     const target = visitKey();
     if (!current()?.id) { photoFeedback('Escolha uma visita antes de adicionar fotografias.'); return; }
     if (!file.type.startsWith('image/') || !file.size || file.size > 25*1024*1024) {
@@ -2293,7 +2312,7 @@
     }
     const photo = {
       localId: crypto.randomUUID(),
-      visitId: current()?.id,
+      visitId: current()?.id, visitType:current()?.visitType || 'REGULAR', poolId:current()?.poolId || current()?.pool?.id,
       type: selection?.type || selectedPhotoType || "AFTER",
       file,
       fileName: file.name,
@@ -2301,7 +2320,7 @@
       status: "pending",
       error: "",
     };
-    try { await window.CWFieldPhotos.save(photo.visitId,photo,fieldWriteSession); }
+    try { await window.CWFieldPhotos.save(photo.visitId,photo,fieldWriteSession, current()?.visitType || 'REGULAR'); }
     catch(error) { URL.revokeObjectURL(photo.previewUrl);photoFeedback('Não foi possível guardar a fotografia neste dispositivo. Liberte espaço e tente novamente; a fotografia não foi adicionada.');return; }
     if (!sameFieldSession() || target !== visitKey()) { URL.revokeObjectURL(photo.previewUrl); return; }
     photoFeedback("Fotografia guardada neste telemóvel. Aguarda confirmação do envio.");
@@ -2894,7 +2913,7 @@
       const rowsHtml = rows.map(({ visit, i, code }) => {
       const location = visitLocation(visit);
       const done = isVisitDone(visit);
-      const status = !isRegularVisit(visit) ? `Extra / ${visit.status || 'Pendente'} / confirmação pelo escritório` : done ? "Feita / pode corrigir" : (visit.status || "Pendente");
+      const status = !isRegularVisit(visit) ? `Extra / ${isVisitDone(visit) ? 'Concluída' : visit.status || 'Pendente'}` : done ? "Feita / pode corrigir" : (visit.status || "Pendente");
       const techName = visit?.technician?.name || activeTechnician?.name || "Técnico";
       const taskType = pendingProblems.length ? "Reparação" : "Manutenção";
       const stateLabel = POOL_STATE[code] || POOL_STATE.TODO;
@@ -3130,7 +3149,7 @@
     render();
     if (isVisitDone(current())) {
       switchFieldTab("agora");
-      toast("Visita feita aberta para corrigir.");
+      toast(isRegularVisit(current()) ? 'Visita feita aberta para corrigir.' : 'Registo da visita extra concluída.');
     }
   }
 
@@ -3145,10 +3164,13 @@
     renderIncompleteStatus();
     const visit = current();
     window.dispatchEvent(new CustomEvent("cw:field-visit-selected", { detail: { visitId: isRegularVisit(visit) ? visit.id : null, visitType:visit?.visitType || null } }));
-    const readOnly = !!visit && !isRegularVisit(visit);
-    $('#fieldExtraVisitNotice').hidden = !readOnly;
-    $('#fieldExtraVisitNotice').textContent = readOnly ? extraVisitNotice : '';
+    const extra = !!visit && !isRegularVisit(visit);
+    document.body.classList.toggle('field-extra-selected',extra);
+    const readOnly = extra && isVisitDone(visit);
+    $('#fieldExtraVisitNotice').hidden = !extra;
+    $('#fieldExtraVisitNotice').textContent = extra ? extraVisitNotice : '';
     for (const selector of [...draftFieldIds.map(id=>'#'+id),...checkIds.map(id=>'#'+id),'#startBtn','#finishBtn','#incompleteSave','#problemBtn','#saveProblemBtn','#openWaterBtn','#pumpReminderCreate','#sendAdminAlertBtn','#addDoseBtn','#galleryPhotoBtn','#photoInput','#galleryPhotoInput','[data-photo-type]','#doseRows input','#doseRows select','#doseRows button']) document.querySelectorAll(selector).forEach(node=>{node.disabled=readOnly;});
+    if(extra)for(const selector of ['#incompleteSave','#problemBtn','#saveProblemBtn','#openWaterBtn','#pumpReminderCreate','#sendAdminAlertBtn'])document.querySelectorAll(selector).forEach(node=>{node.disabled=true;});
     $("#progressText").textContent = visits.length ? `${visits.filter(isVisitDone).length} de ${visits.length} visitas concluídas` : "Sem visitas atribuídas";
 
     if (!visit) {
@@ -3185,12 +3207,12 @@
       : (visit.assistSource === "tomorrow" ? "Ronda do proximo dia" : (visit.technician?.name || "Tecnico"));
     $("#nextMeta").textContent = `${visit.client?.name || "Cliente"} - ${sourceLabel} - ${readOnly ? 'Extra / ' + (visit.status || 'Pendente') : isVisitDone(visit) ? "Feita / correcao aberta" : (visit.status || "Pendente")}`;
     if ($("#startBtn")) {
-      $("#startBtn").textContent = readOnly ? "Execução pelo escritório" : isVisitDone(visit) ? "Rever registo" : "Iniciar visita";
+      $("#startBtn").textContent = readOnly ? "Consultar registo" : isVisitDone(visit) ? "Rever registo" : "Iniciar visita";
       $("#startBtn").dataset.cwCheckinRequired = String(!isVisitDone(visit));
       $("#startBtn").dataset.cwCheckinTarget = JSON.stringify([visit.visitType || 'REGULAR', visit.id, visit.pool?.id]);
       $("#startBtn").disabled = readOnly || startingVisits.has(visitKey(visit));
     }
-    $("#finishBtn").textContent = readOnly ? "Confirmação pelo escritório" : isVisitDone(visit) ? "Guardar correção" : "Concluir visita";
+    $("#finishBtn").textContent = readOnly ? "Visita extra concluída" : isVisitDone(visit) ? "Guardar correção" : "Concluir visita";
     renderAssistPanel();
     renderCorrectionSummary(visit);
     renderAccessCard(visit);
@@ -3215,6 +3237,7 @@
   function protectFieldRouteSession() {
     if (!sameFieldSession()) {
       if (routeSessionBlocked) return;
+      for(const url of photoPreviewCache.values())URL.revokeObjectURL(url); photoPreviewCache.clear();
       routeSessionBlocked = true; ++routeRevision; visits = []; index = 0; routeConfirmedAt = null; routeSnapshot = null;
       const main = document.querySelector('main.field'); main.inert = true; main.style.setProperty('display', 'none', 'important');
       const banner = document.createElement('section'); banner.id = 'fieldRouteSessionChanged'; banner.setAttribute('role', 'alert'); banner.style.cssText = 'padding:20px;background:#fff4ce;color:#624400';
@@ -3718,7 +3741,7 @@
         showAssistMode("help");
         return;
       }
-      if (!requireRegularVisit(visit) || startingVisits.has(visitKey(visit))) return;
+      if (!requireExecutableVisit(visit) || startingVisits.has(visitKey(visit))) return;
       if (isVisitDone(visit)) {
         switchFieldTab("agora");
         loadCurrentDraft();
@@ -3732,7 +3755,7 @@
         return;
       }
       startedAt = new Date();
-      if (!navigator.onLine) {
+      if (!navigator.onLine && isRegularVisit(visit)) {
         visits[index] = mergeVisitSnapshot(visit, { startAt: startedAt.toISOString() }, "IN_PROGRESS");
         saveCurrentDraft();
         const saved = persistModernRoute();
@@ -3744,7 +3767,7 @@
       const target = visitKey(visit);
       startingVisits.add(target);
       try {
-        const result = await api(`/api/operational-state/visits/${visit.id}/state`, {
+        const result = visit.visitType === 'EXTRA' ? await window.CWFieldOffline.submitExtraStart(visit,fieldWriteSession) : await api(`/api/operational-state/visits/${visit.id}/state`, {
           method: "POST",
           body: JSON.stringify({
             state: "IN_PROGRESS",
@@ -3766,7 +3789,7 @@
         if (sameFieldSession()) toast(error.message || "Nao foi possivel iniciar visita.");
       } finally {
         startingVisits.delete(target);
-        if (sameFieldSession()) startBtn.disabled = !isRegularVisit() || startingVisits.has(visitKey());
+        if (sameFieldSession()) startBtn.disabled = (current()?.visitType === 'EXTRA' && isVisitDone(current())) || startingVisits.has(visitKey());
       }
     };
   }
@@ -3881,7 +3904,7 @@
         showAssistMode("tomorrow");
         return;
       }
-      if (!requireRegularVisit(visit)) return;
+      if (!requireExecutableVisit(visit)) return;
       const target = visitKey(visit);
       const wasDone = isVisitDone(visit);
       try { readFieldDrafts(); } catch (error) { toast(error.message); return; }
@@ -3893,7 +3916,7 @@
       }
       $("#finishBtn").disabled = true;
       const photosReady = await syncPendingPhotos(false);
-      if (!sameFieldSession() || visitKey(current()) !== visitKey(visit)) { finishBtn.disabled = !isRegularVisit(); return; }
+      if (!sameFieldSession() || visitKey(current()) !== visitKey(visit)) { finishBtn.disabled = current()?.visitType === 'EXTRA' && isVisitDone(current()); return; }
       if (!photosReady && navigator.onLine) {
         $("#finishBtn").disabled = false;
         toast("Ha fotografias pendentes. Sincroniza ou remove antes de concluir.");
@@ -3918,7 +3941,7 @@
         notes: product.notes,
       }));
 
-      if (!sameFieldSession() || visitKey(current()) !== visitKey(visit)) { finishBtn.disabled = !isRegularVisit(); return; }
+      if (!sameFieldSession() || visitKey(current()) !== visitKey(visit)) { finishBtn.disabled = current()?.visitType === 'EXTRA' && isVisitDone(current()); return; }
 
       const body = {
         cleaned: $("#cleaned").checked,
@@ -3977,13 +4000,13 @@
           persistModernRoute();
           render();
           toast(`${visit.pool?.name || 'Piscina'}: correção guardada e stock reconciliado.`);
-          $("#finishBtn").disabled = !isRegularVisit();
+          $("#finishBtn").disabled = current()?.visitType === 'EXTRA' && isVisitDone(current());
           return;
         }
 
         // These fields are server-derived or already stored through the photo contract.
         const { startedAt: ignoredStart, completedAt: ignoredEnd, performedByTechnicianId: ignoredActor, performedByTechnicianName: ignoredName, photos: ignoredPhotos, problemCategory: ignoredCategory, ...completionBody } = body;
-        const completeResult = await window.CWFieldOffline.submitCompletion(visit.id, completionBody, fieldWriteSession);
+        const completeResult = await window.CWFieldOffline.submitCompletion(visit.id, visit.visitType === 'EXTRA' ? {...completionBody,visitType:'EXTRA',poolId:visit.poolId || visit.pool?.id} : completionBody, fieldWriteSession, visit.visitType || 'REGULAR');
         if (!sameFieldSession()) return;
         // Stock is consumed atomically by the completion transaction on the server.
         const stockUpdated = productsUsed.length > 0;
@@ -4004,15 +4027,15 @@
         }
         render();
       } catch (error) {
-        if (sameFieldSession()) { $("#finishBtn").disabled = !isRegularVisit(); toast(error.message); }
+        if (sameFieldSession()) { $("#finishBtn").disabled = current()?.visitType === 'EXTRA' && isVisitDone(current()); toast(error.message); }
       }
     };
   }
 
   window.addEventListener('cw:visit-synced', event => {
     if (!sameFieldSession() || event.detail.owner !== fieldWriteSession.owner || event.detail.token !== fieldWriteSession.token) return;
-    const position = visits.findIndex(v => isRegularVisit(v) && String(v.id) === String(event.detail.visitId));
-    if (position >= 0) visits[position] = mergeVisitSnapshot(visits[position], event.detail.visit, 'DONE');
+    const position = visits.findIndex(v => (v.visitType || 'REGULAR') === (event.detail.visitType || 'REGULAR') && String(v.id) === String(event.detail.visitId));
+    if (position >= 0 && !(isVisitDone(visits[position]) && event.detail.visit.status === 'IN_PROGRESS')) visits[position] = mergeVisitSnapshot(visits[position], event.detail.visit, event.detail.visit.status);
     persistModernRoute();
     render();
   });

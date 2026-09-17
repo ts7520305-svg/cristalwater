@@ -633,6 +633,11 @@ model ExtraVisitRule {
 }
 
 model ExtraVisit {
+  startAt           DateTime?
+  endAt             DateTime?
+  execution         Json?
+  completionRequestId String? @unique
+  photos            ExtraVisitPhoto[]
   id                Int             @id @default(autoincrement())
   clientId          Int?
   poolId            Int?
@@ -673,6 +678,16 @@ model ExtraVisit {
   @@index([userId])
   @@index([scheduledAt])
   @@index([status])
+}
+
+model ExtraVisitPhoto {
+  id Int @id @default(autoincrement())
+  extraVisitId Int
+  url String
+  type String @default("GENERAL")
+  createdAt DateTime @default(now())
+  extraVisit ExtraVisit @relation(fields: [extraVisitId], references: [id], onDelete: Restrict)
+  @@index([extraVisitId])
 }
 
 model MonthlyReport {
@@ -1763,6 +1778,7 @@ model VehicleStockMovement {
   vehicleId        Int?
   transportGuideId Int?
   workGuideId      Int?
+  extraVisitId     Int?
   visitId          Int?
   technicianId     Int?
   itemName         String
@@ -1778,6 +1794,7 @@ model VehicleStockMovement {
   @@index([transportGuideId])
   @@index([workGuideId])
   @@index([visitId])
+  @@index([extraVisitId])
   @@index([technicianId])
   @@index([movementType])
   @@index([createdAt])
@@ -1921,6 +1938,7 @@ model StockMovement {
   purchaseId       Int?
   transportGuideId Int?
   workGuideId      Int?
+  extraVisitId     Int?
   visitId          Int?
   clientId         Int?
   poolId           Int?
@@ -1937,6 +1955,7 @@ model StockMovement {
   @@index([transportGuideId])
   @@index([workGuideId])
   @@index([visitId])
+  @@index([extraVisitId])
   @@index([createdAt])
 }
 

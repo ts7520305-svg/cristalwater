@@ -1,7 +1,9 @@
 (function () {
   'use strict';
   const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  const scopes = ['VISIT_PHOTO', 'VISIT_COMPLETION', 'TECHNICIAN_ALERT'];
+  const scopes = ['VISIT_PHOTO', 'VISIT_COMPLETION', 'TECHNICIAN_ALERT', 'EXTRA_VISIT_START', 'EXTRA_VISIT_PHOTO', 'EXTRA_VISIT_COMPLETION'];
+  const photoScope = scope => ['VISIT_PHOTO','EXTRA_VISIT_PHOTO'].includes(scope);
+  const extraScope = scope => scope.startsWith('EXTRA_VISIT_');
   const id = value => Number.isSafeInteger(value) && value > 0;
   const canonical = value => Array.isArray(value) ? value.map(canonical) : value && typeof value === 'object' ? Object.fromEntries(Object.keys(value).sort().filter(key => value[key] !== undefined).map(key => [key, canonical(value[key])])) : value;
   const equal = (a, b) => JSON.stringify(canonical(a)) === JSON.stringify(canonical(b));
@@ -33,11 +35,14 @@
   function confirmation(response, record) {
     const receipt = response?.receipt;
     if (response?.ok !== true || !receipt || receipt.owner !== record.owner || receipt.requestId !== record.requestId || receipt.scope !== record.scope || receipt.resourceId !== record.resourceId || receipt.payloadHash !== record.payloadHash || !Number.isFinite(Date.parse(receipt.confirmedAt))) throw Error('Resposta incompleta. O pedido original continua por confirmar.');
-    if (record.scope === 'VISIT_PHOTO') {
-      if (!id(response.photo?.id) || response.photo.visitId !== record.resourceId || response.photo.type !== record.payload.type || !/^\/uploads\/(?:qa\/)?visit-/.test(response.photo.url) || response.sha256 !== record.payload.sha256 || response.size !== record.payload.size) throw Error('A confirmação não corresponde à fotografia guardada.');
+    if (photoScope(record.scope)) {
+      if (!id(response.photo?.id) || response.photo[extraScope(record.scope) ? 'extraVisitId' : 'visitId'] !== record.resourceId || response.photo.type !== record.payload.type || !(extraScope(record.scope) ? /^\/uploads\/(?:qa\/)?extra-visit-/ : /^\/uploads\/(?:qa\/)?visit-/).test(response.photo.url) || response.sha256 !== record.payload.sha256 || response.size !== record.payload.size) throw Error('A confirmação não corresponde à fotografia guardada.');
     } else if (record.scope === 'TECHNICIAN_ALERT') {
       if (!id(response.alert?.id) || response.alert.technicianId !== record.resourceId || response.alert.visitId !== record.payload.visitId || response.alert.message !== record.payload.message || response.alert.priority !== record.payload.priority || response.alert.recipientRole !== 'ADMIN' || !Number.isFinite(Date.parse(response.alert.createdAt))) throw Error('A confirmação não corresponde ao alerta original para a administração.');
+    } else if (record.scope === 'EXTRA_VISIT_START') {
+      if (response.visit?.id !== record.resourceId || response.visit.visitType !== 'EXTRA' || response.visit.poolId !== record.payload.poolId || response.visit.status !== 'IN_PROGRESS' || !Number.isFinite(Date.parse(response.visit.startAt)) || response.visit.endAt) throw Error('O início da visita extra ainda não está confirmado.');
     } else if (response.visit?.id !== record.resourceId || response.visit.status !== 'DONE' || response.visit.completionRequestId !== record.requestId || !Number.isFinite(Date.parse(response.visit.endAt))) throw Error('A conclusão desta visita ainda não está confirmada.');
+    if (extraScope(record.scope) && !photoScope(record.scope) && (response.visit.visitType !== 'EXTRA' || response.visit.poolId !== record.payload.poolId)) throw Error('A confirmação pertence a outra piscina ou tipo de visita.');
     return response;
   }
   async function validate(record, captured, bytes = false) {
@@ -45,7 +50,7 @@
     if (!record || Object.keys(record).some(field => !allowed.includes(field)) || record.owner !== captured.owner || !uuid.test(record.requestId) || record.key !== key(record) || !scopes.includes(record.scope) || !id(record.resourceId) || !record.payload || typeof record.payload !== 'object' || Array.isArray(record.payload) || !Number.isFinite(Date.parse(record.createdAt)) || await hash(envelope(record)) !== record.payloadHash) throw Error('Envio guardado inválido. Os dados foram preservados; peça apoio ao escritório.');
     if (record.scope === 'TECHNICIAN_ALERT' && (record.resourceId !== captured.technicianId || Object.keys(record.payload).some(field => !['message','visitId','priority'].includes(field)) || typeof record.payload.message !== 'string' || !record.payload.message.trim() || record.payload.message.length > 5000 || !['NORMAL','HIGH'].includes(record.payload.priority) || (record.payload.visitId !== null && !id(record.payload.visitId)))) throw Error('Alerta guardado inválido. Preserve os dados e peça revisão ao escritório.');
     if (record.response) confirmation(record.response, record);
-    else if (record.scope === 'VISIT_PHOTO') {
+    else if (photoScope(record.scope)) {
       if (!(record.file instanceof Blob) || !record.file.size || record.file.size > 25 * 1024 * 1024 || record.file.size !== record.payload.size || !['BEFORE','AFTER','PROBLEM','ACCESS','GENERAL'].includes(record.payload.type) || !/^[0-9a-f]{64}$/.test(record.payload.sha256) || (bytes && await digest(await record.file.arrayBuffer()) !== record.payload.sha256)) throw Error('Fotografia guardada inválida. Os dados foram preservados.');
     }
     return record;
@@ -66,7 +71,7 @@
   async function prepare(scope, resourceId, payload, options = {}, captured = session()) {
     return locked(`prepare:${scope}:${resourceId}`, captured, async () => {
       const previous = await records(scope, captured, true);
-      if (scope === 'VISIT_COMPLETION') { const existing = previous.find(record => record.resourceId === resourceId); if (existing) { if (!equal(existing.payload, payload)) throw Error(existing.response ? 'Esta conclusão já foi confirmada. Use o procedimento de correção da visita.' : 'Há uma conclusão diferente por confirmar. Conserve-a e peça revisão antes de alterar.'); return existing; } }
+      if (['VISIT_COMPLETION','EXTRA_VISIT_COMPLETION','EXTRA_VISIT_START'].includes(scope)) { const existing = previous.find(record => record.resourceId === resourceId); if (existing) { if (!equal(existing.payload, payload)) throw Error(existing.response ? 'Esta conclusão já foi confirmada. Use o procedimento de correção da visita.' : 'Há uma conclusão diferente por confirmar. Conserve-a e peça revisão antes de alterar.'); return existing; } }
       if (scope === 'TECHNICIAN_ALERT') { const existing = previous.find(record => !record.response); if (existing) { if (!equal(existing.payload, payload)) throw Error('Há um alerta diferente por confirmar. Preserve-o antes de preparar outro.'); return existing; } }
       const record = { owner: captured.owner, requestId: options.requestId || crypto.randomUUID(), scope, resourceId, payload: JSON.parse(JSON.stringify(payload)), createdAt: new Date().toISOString(), label: options.label || `Visita ${resourceId}`, ...(options.file ? { file: options.file, fileName: options.fileName || 'photo' } : {}) };
       record.key = key(record); record.payloadHash = await hash(envelope(record)); await validate(record, captured, true); requireSession(captured);
@@ -87,8 +92,8 @@
       if (options.automatic && record.failure?.blocked) throw Error(record.failure.message);
       await update(record, captured, current => ({ ...current, attemptedAt: current.attemptedAt || new Date().toISOString() }));
       const headers = { Authorization: 'Bearer ' + captured.token }; let body, endpoint;
-      if (record.scope === 'VISIT_PHOTO') { body = new FormData(); body.append('type', record.payload.type); body.append('requestId', record.requestId); body.append('photo', record.file, record.fileName); headers['X-CW-Field-Request'] = record.requestId; endpoint = `/api/visits/${record.resourceId}/photo`; }
-      else { headers['Content-Type'] = 'application/json'; body = JSON.stringify({ ...record.payload, requestId: record.requestId }); endpoint = record.scope === 'TECHNICIAN_ALERT' ? '/api/visits/internal-alert' : `/api/core/visits/${record.resourceId}/complete`; }
+      if (photoScope(record.scope)) { body = new FormData(); body.append('type', record.payload.type); body.append('requestId', record.requestId); body.append('photo', record.file, record.fileName); if(extraScope(record.scope))body.append('poolId', String(record.payload.poolId)); headers['X-CW-Field-Request'] = record.requestId; endpoint = extraScope(record.scope) ? `/api/field/extra-visits/${record.resourceId}/photo` : `/api/visits/${record.resourceId}/photo`; }
+      else { headers['Content-Type'] = 'application/json'; body = JSON.stringify({ ...record.payload, requestId: record.requestId }); endpoint = record.scope === 'TECHNICIAN_ALERT' ? '/api/visits/internal-alert' : extraScope(record.scope) ? `/api/field/extra-visits/${record.resourceId}/${record.scope === 'EXTRA_VISIT_START' ? 'start' : 'complete'}` : `/api/core/visits/${record.resourceId}/complete`; }
       const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 20000), check = setInterval(() => { if (!same(captured)) controller.abort(); }, 250);
       try {
         const response = await fetch(endpoint, { method: 'POST', headers, body, signal: controller.signal }); const result = await response.json(); requireSession(captured);

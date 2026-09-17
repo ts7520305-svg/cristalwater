@@ -27,7 +27,11 @@ let browser;
   assert.equal((await get(extras)).status, 401); assert.equal((await get(extras, foreign)).status, 404); assert.equal((await get(extras, tt)).status, 403);
   assert.equal((await get(extras, own)).status, 404); // Authorized, but this fixture has no extra visits.
   const pool = await prisma.pool.create({ data: { clientId: client.id, name: 'Piscina PDF' } });
-  await prisma.extraVisit.create({ data: { clientId: client.id, poolId: pool.id, price: 15, billed: false } });
+  const extra = await prisma.extraVisit.create({ data: { clientId: client.id, poolId: pool.id, price: 15, billed: false } });
+  assert.equal((await get(extras,own)).status,404,'Planned work is not a completed extra for billing');
+  await prisma.extraVisit.create({data:{clientId:client.id,poolId:pool.id,price:99,status:'DONE',billingMode:'NO_CHARGE'}});
+  assert.equal((await get(extras,own)).status,404,'A free extra is never a chargeable PDF source');
+  await prisma.extraVisit.update({where:{id:extra.id},data:{status:'DONE'}});
   for (const token of [own, at]) { const r = await get(extras, token); assert.equal(r.status, 200); assert.equal(r.data.subarray(0, 5).toString(), '%PDF-'); assert.equal(r.cache, 'private, no-store'); }
   for (const id of ['0', '-1', '1x', '2147483648']) assert.equal((await get(`/api/invoice-pdf/${id}`, at)).status, 400);
   await prisma.client.update({ where: { id: client.id }, data: { active: false } }); assert.equal((await get(path, own)).status, 401);

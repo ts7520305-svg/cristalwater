@@ -57,6 +57,6 @@ describe('field end-of-day review', () => {
   });
   it('keeps extra work visible when a regular visit with the same number has a queued completion', () => {
     const data=baseline();data.snapshot.visits=[{id:7,visitType:'EXTRA',name:'Extra pool'},{id:7,visitType:'REGULAR',name:'Regular pool'}];data.outbox={7:{visitId:7}};data.photos=[{visitId:7}];
-    const rows=buildReview(data);expect(rows).toHaveLength(3);expect(rows[0].text).toContain('Extra pool — visita extra por confirmar');expect(rows[1].text).toContain('Regular pool — conclusão');expect(rows[2].text).toContain('Regular pool — 1 fotografia');
+    const rows=buildReview(data);expect(rows).toHaveLength(3);expect(rows[0].text).toContain('Extra pool — visita extra por concluir');expect(rows[1].text).toContain('Regular pool — conclusão');expect(rows[2].text).toContain('Regular pool — 1 fotografia');
   });
 });

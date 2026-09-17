@@ -14,7 +14,7 @@
   function buildReview({ snapshot, water, pumps, outbox, drafts, photos, online, verificationErrors = [] }) {
     const items = [];
     const add = (kind, text) => items.push({ kind, text });
-    const name = id => snapshot.visits.find(v => (!v.visitType || v.visitType === 'REGULAR') && String(v.id) === String(id))?.name || `Visita ${id}`;
+    const name = (id,type='REGULAR') => snapshot.visits.find(v => (v.visitType || 'REGULAR') === type && String(v.id) === String(id))?.name || `Visita ${id}`;
     if (!online || !snapshot.confirmedAt) add('unknown', 'Ronda sem confirmação atual. Ligue à rede e atualize a agenda; podem existir alterações do escritório.');
     for (const section of verificationErrors) add('unknown', `${section}: não foi possível confirmar os dados no servidor. A revisão está incompleta.`);
     for (const reminder of water) {
@@ -26,12 +26,12 @@
       if (!reminder.serverId || reminder.closed) add('pending', `${reminder.poolName || name(reminder.visitId)} — estado da bomba por confirmar no servidor.`);
     }
     for (const visit of snapshot.visits) {
-      if (!visit.done && !visit.future && (visit.visitType === 'EXTRA' || !outbox[visit.id])) add('pending', `${visit.name} — ${visit.visitType === 'EXTRA' ? 'visita extra por confirmar pelo escritório' : 'trabalho por concluir'}. Combine o próximo passo com o escritório.`);
+      if (!visit.done && !visit.future && !Object.values(outbox).some(item=>String(item.visitId)===String(visit.id)&&(item.visitType || 'REGULAR')===(visit.visitType || 'REGULAR')&&item.scope!=='EXTRA_VISIT_START')) add('pending', `${visit.name} — ${visit.visitType === 'EXTRA' ? 'visita extra por concluir' : 'trabalho por concluir'}. Combine o próximo passo com o escritório.`);
     }
-    for (const item of Object.values(outbox)) add('pending', `${name(item.visitId)} — conclusão por confirmar no servidor${item.blocked ? '; precisa de apoio do escritório' : ''}.`);
+    for (const item of Object.values(outbox)) add('pending', `${name(item.visitId,item.visitType || 'REGULAR')} — ${item.scope === 'EXTRA_VISIT_START' ? 'início' : 'conclusão'} por confirmar no servidor${item.blocked ? '; precisa de apoio do escritório' : ''}.`);
     const photoCounts = new Map();
-    for (const photo of photos) photoCounts.set(photo.visitId, (photoCounts.get(photo.visitId) || 0) + 1);
-    for (const [id, count] of photoCounts) add('pending', `${name(id)} — ${count} fotografia(s) por enviar.`);
+    for (const photo of photos) { const key=(photo.visitType || 'REGULAR')+':'+photo.visitId; photoCounts.set(key,(photoCounts.get(key)||0)+1); }
+    for (const [key, count] of photoCounts) add('pending', `${name(key.split(':')[1],key.split(':')[0])} — ${count} fotografia(s) por enviar.`);
     for (const [id, draft] of Object.entries(drafts)) {
       if (draft.pendingProblems?.some(problem => !problem.synced)) add('pending', `${name(id.replace(/^visit-(?:REGULAR-)?/, ''))} — ocorrência guardada no telemóvel, por enviar.`);
     }
@@ -91,7 +91,7 @@
       if (remote?.[2].rows) pumps = mergeReminders(pumps, remote[2].rows, true);
       const legacyWater = read('cwWaterReminders', true);
       if (legacyWater.some(item => !item.technicianId || String(item.technicianId) === requestedOwner)) throw new Error('Lembretes antigos por reconciliar');
-      const outbox = Object.fromEntries(completions.map(row => [row.resourceId, { visitId: row.resourceId, blocked: row.failure?.blocked }]));
+      const outbox = Object.fromEntries(completions.map(row => [row.scope+':'+row.resourceId, { visitId: row.resourceId, visitType:row.scope.startsWith('EXTRA_') ? 'EXTRA' : 'REGULAR', scope:row.scope, blocked: row.failure?.blocked }]));
       if (Object.keys(read(`cwFieldVisitDrafts:${requestedOwner}`)).length) verificationErrors.push('Rascunhos antigos sem conta/tipo de visita confirmados');
       const items = buildReview({ snapshot, water, pumps, outbox, drafts: window.CWFieldDraftSnapshot ? window.CWFieldDraftSnapshot() : {}, photos, online: navigator.onLine, verificationErrors });
       result.replaceChildren();

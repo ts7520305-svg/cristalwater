@@ -76,69 +76,6 @@ function billingDataFromBody(body = {}) {
 // APPEND TO BILLING
 // ==========================================
 
-async function appendToBilling(extraVisit) {
-
-  if (!extraVisit) return;
-  if (extraVisit.status !== "DONE") return;
-
-  const pool = await prisma.pool.findUnique({
-    where: { id: extraVisit.poolId },
-    include: { client: true },
-  });
-
-  if (!pool?.client?.id) return;
-
-  const clientId = pool.client.id;
-  const month = new Date().toISOString().slice(0, 7);
-
-  const amount = Number(extraVisit.totalPrice || extraVisit.unitPrice || 0);
-  if (!amount) return;
-
-  let report = await prisma.monthlyReport.findFirst({
-    where: {
-      clientId,
-      month,
-      type: "EXTRA_VISITS",
-    },
-  });
-
-  if (!report) {
-    report = await prisma.monthlyReport.create({
-      data: {
-        clientId,
-        month,
-        type: "EXTRA_VISITS",
-        data: { items: [] },
-      },
-    });
-  }
-
-  const data = report.data || { items: [] };
-
-  data.items.push({
-    visitId: extraVisit.id,
-    source: "EXTRA_VISIT",
-    poolId: extraVisit.poolId,
-    clientId,
-    poolName: pool.name,
-    amount,
-    date: extraVisit.scheduledAt,
-    billingMode: extraVisit.billingMode || "EXTRA",
-    status: extraVisit.status || "DONE",
-    notes: extraVisit.notes || null,
-  });
-
-  await prisma.monthlyReport.update({
-    where: { id: report.id },
-    data: { data },
-  });
-
-  await prisma.extraVisit.update({
-    where: { id: extraVisit.id },
-    data: { billed: true, billedAt: new Date(), billingStatus: "IN_MONTHLY_REPORT" },
-  }).catch(() => null);
-}
-
 // ==========================================
 // CREATE
 // ==========================================
@@ -207,46 +144,41 @@ async function listExtraVisits(req, res) {
 // ==========================================
 
 async function updateExtraVisitStatus(req, res) {
-  try {
-    const id = Number(req.params.id);
-    const status = String(req.body.status || "").trim().toUpperCase();
-    if (!status) return res.status(400).json({ ok: false, error: "Estado obrigatorio" });
-
-    const updated = await prisma.extraVisit.update({
-      where: { id },
-      data: { status },
-    });
-
-    // 🔥 AGORA FUNCIONA
-    await appendToBilling(updated);
-
-    return res.json({
-      ok: true,
-      message: "Visita atualizada",
-      extraVisit: updated,
-    });
-
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ ok: false });
-  }
+  if (!req.body?.status || Object.keys(req.body).some(key => key !== 'status')) return res.status(400).json({ok:false,error:'Indique apenas o estado da visita.'});
+  return updateExtraVisit(req, res);
 }
 
 async function updateExtraVisit(req, res) {
   try {
     const id = Number(req.params.id);
     if (!Number.isInteger(id) || id <= 0) {
-      return res.status(400).json({ ok: false, error: "Visita extra invalida" });
+      throw Object.assign(new Error('Visita extra invalida'), {statusCode:400});
     }
 
+    const result = await prisma.$transaction(async tx => {
+    const billing = require('../services/extraVisitBillingService');
+    const fail = require('../services/fieldWriteRequestService').fail;
+    const before = await tx.extraVisit.findUnique({where:{id}});
+    if (!before) fail('Visita extra não encontrada.',404);
+    await billing.lockClient(tx,before);
+    await tx.$queryRaw`SELECT id FROM "ExtraVisit" WHERE id=${id} FOR UPDATE`;
     const body = req.body || {};
     const data = {};
-    const current = await prisma.extraVisit.findUnique({
+    const current = await tx.extraVisit.findUnique({
       where: { id },
       include: { technician: true },
     });
-    if (!current) return res.status(404).json({ ok: false, error: "Visita extra nao encontrada" });
+    if (!current) throw Object.assign(new Error('Visita extra nao encontrada'), {statusCode:404});
 
+    if (current.clientId !== before.clientId || current.poolId !== before.poolId) fail('A visita mudou. Atualize antes de editar.',409);
+    const reserved = current.billed || !!(await tx.invoiceLine.findFirst({where:{type:'EXTRA_VISIT',referenceId:id}}));
+    if (reserved && Object.entries(body).some(([key,value])=>key !== 'status' || value !== current.status)) fail('Visita já incluída em faturação. Conserve o documento e peça uma correção explícita.',409);
+    const hasPhotos = await tx.extraVisitPhoto.count({where:{extraVisitId:id}});
+    const terminal = ['DONE','COMPLETED','CONCLUIDA','CONCLUIDO','CANCELLED','CANCELED','SKIPPED','ARCHIVED'].includes(current.status) || !!current.endAt;
+    if (terminal && Object.entries(body).some(([key,value]) => key !== 'status' || value !== current.status)) fail('Visita fechada. Conserve o histórico e utilize um processo de correção.',409);
+    if ((current.startAt || hasPhotos) && ['poolId','technicianId','scheduledAt','billingMode','unitPrice','totalPrice','price'].some(key=>body[key]!==undefined)) fail('Visita iniciada. Confirme o registo antes de alterar atribuição, data ou condições comerciais.',409);
+    if (body.status !== undefined && !['PLANNED','IN_PROGRESS','DONE','CANCELLED','SKIPPED'].includes(body.status)) fail('Estado inválido.');
+    if (body.status === 'DONE' && Object.keys(body).some(key=>key !== 'status')) fail('Guarde as condições da visita antes de confirmar a conclusão.',409);
     const assignmentMode = normalizeAssignmentMode(body.assignmentMode);
     const noteParts = [];
     let technicianChanged = false;
@@ -257,9 +189,9 @@ async function updateExtraVisit(req, res) {
 
     if (body.poolId !== undefined) {
       const poolId = toNumber(body.poolId);
-      if (!poolId) return res.status(400).json({ ok: false, error: "Piscina invalida" });
-      const pool = await prisma.pool.findUnique({ where: { id: poolId }, select: { id: true, clientId: true } });
-      if (!pool) return res.status(404).json({ ok: false, error: "Piscina nao encontrada" });
+      if (!poolId) throw Object.assign(new Error('Piscina invalida'), {statusCode:400});
+      const pool = await tx.pool.findUnique({ where: { id: poolId }, select: { id: true, clientId: true } });
+      if (!pool) throw Object.assign(new Error('Piscina nao encontrada'), {statusCode:404});
       data.poolId = poolId;
       data.clientId = pool.clientId;
     }
@@ -267,11 +199,11 @@ async function updateExtraVisit(req, res) {
     if (body.technicianId !== undefined) {
       const technicianId = toNumber(body.technicianId) || null;
       if (technicianId) {
-        const technician = await prisma.technician.findUnique({
+        const technician = await tx.technician.findUnique({
           where: { id: technicianId },
           select: { id: true, name: true },
         });
-        if (!technician) return res.status(404).json({ ok: false, error: "Tecnico nao encontrado" });
+        if (!technician) throw Object.assign(new Error('Tecnico nao encontrado'), {statusCode:404});
         nextTechnicianName = technician.name;
         data.technicianId = technician.id;
       } else {
@@ -286,7 +218,7 @@ async function updateExtraVisit(req, res) {
 
     if (body.scheduledAt !== undefined) {
       const scheduledAt = toDate(body.scheduledAt);
-      if (!scheduledAt) return res.status(400).json({ ok: false, error: "Data da visita invalida" });
+      if (!scheduledAt) throw Object.assign(new Error('Data da visita invalida'), {statusCode:400});
       data.scheduledAt = scheduledAt;
       dateChanged = scheduledAt.getTime() !== new Date(current.scheduledAt || current.date).getTime();
       if (dateChanged) noteParts.push(`Data alterada para ${scheduledAt.toLocaleString("pt-PT")}`);
@@ -309,7 +241,9 @@ async function updateExtraVisit(req, res) {
       Object.assign(data, billingDataFromBody(body));
     }
 
-    const updated = await prisma.extraVisit.update({
+    if (body.status === 'IN_PROGRESS') data.startAt = current.startAt || new Date();
+    if (body.status === 'DONE' && !terminal) { data.startAt = current.startAt || new Date(); data.endAt = new Date(); }
+    const updated = await tx.extraVisit.update({
       where: { id },
       data,
       include: {
@@ -319,12 +253,14 @@ async function updateExtraVisit(req, res) {
       },
     });
 
-    if (updated.status === "DONE") await appendToBilling(updated);
-
-    return res.json({ ok: true, message: "Visita extra atualizada", extraVisit: updated });
+    if (updated.status === 'DONE') await billing.record(tx,updated);
+    if (!terminal) await tx.auditTrail.create({data:{eventType:'EXTRA_VISIT_ADMIN_UPDATED',entity:'ExtraVisit',entityId:id,poolId:updated.poolId,clientId:updated.clientId,action:'EXTRA_VISIT_ADMIN_UPDATED',metadata:{owner:require('../services/fieldWriteRequestService').owner(req.user),status:updated.status}}});
+    return tx.extraVisit.findUnique({where:{id},include:{pool:{include:{client:true}},client:true,technician:true}});
+    }, {maxWait:15000,timeout:20000});
+    return res.json({ ok: true, message: 'Visita extra atualizada', extraVisit: result });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ ok: false, error: "Erro ao atualizar visita extra" });
+    return res.status(err.statusCode || 500).json({ok:false,error:err.statusCode ? err.message : 'Não foi possível confirmar a alteração. Atualize antes de repetir.'});
   }
 }
 

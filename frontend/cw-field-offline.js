@@ -16,8 +16,8 @@
     if (error.status === 409) return 'O servidor detetou um conflito. Confirme a visita, os produtos e o stock com o escritório antes de repetir.';
     return error.message || 'Sem confirmação do servidor.';
   }
-  async function entries(captured = store.session()) { assertHistory(captured); return store.records('VISIT_COMPLETION', captured); }
-  async function pending(visitId) { return (await entries()).some(row => row.resourceId === Number(visitId)); }
+  async function entries(captured = store.session()) { assertHistory(captured); return (await store.records(null, captured)).filter(row=>['VISIT_COMPLETION','EXTRA_VISIT_COMPLETION','EXTRA_VISIT_START'].includes(row.scope)); }
+  async function pending(visitId, visitType = 'REGULAR') { return (await entries()).some(row => row.resourceId === Number(visitId) && row.scope === (visitType === 'EXTRA' ? 'EXTRA_VISIT_COMPLETION' : 'VISIT_COMPLETION')); }
   async function render() {
     const current = ++revision, captured = store.session();
     let banner = document.getElementById('cwFieldSyncStatus');
@@ -28,17 +28,18 @@
       await window.CWFieldPhotos?.assertHistory(captured);
       if (current !== revision || !store.same(captured)) return;
       document.getElementById('cwFieldStorageError')?.remove();
+      const expanded = banner.querySelector('details')?.open === true;
       banner.hidden = !rows.length; banner.replaceChildren();
       if (!rows.length) return;
       const summary = document.createElement('p'); summary.textContent = rows.length + ' visita(s) guardada(s) neste dispositivo, por confirmar no servidor.'; banner.append(summary);
       const details = document.createElement('details'), title = document.createElement('summary');
-      details.open = rows.some(row => row.failure); title.textContent = 'Ver envios pendentes'; title.style.minHeight = '44px'; details.append(title);
+      details.open = expanded || rows.some(row => row.failure); title.textContent = 'Ver envios pendentes'; title.style.minHeight = '44px'; details.append(title);
       for (const row of rows) {
         const item = document.createElement('div'); item.dataset.pendingVisit = row.resourceId; item.style.cssText = 'padding:12px 0;border-top:1px solid #d8be74';
         const name = document.createElement('strong'), info = document.createElement('p'), button = document.createElement('button');
         name.textContent = row.label; info.textContent = row.failure ? message(row.failure) : 'Aguarda sincronização automática.';
         button.type = 'button'; button.textContent = row.failure?.blocked ? 'Confirmado pelo escritório — tentar novamente' : 'Confirmar envio guardado'; button.style.cssText = 'min-height:44px;padding:10px;white-space:normal';
-        button.onclick = async () => { button.disabled = true; try { await retry(row.resourceId, captured); } catch (error) { if (store.same(captured)) info.textContent = message(error); } finally { button.disabled = false; } };
+        button.onclick = async () => { button.disabled = true; try { await send(row, captured); } catch (error) { if (store.same(captured)) info.textContent = message(error); } finally { if(store.same(captured))await render(); button.disabled = false; } };
         item.append(name, info, button); details.append(item);
       }
       banner.append(details);
@@ -52,21 +53,22 @@
   }
   async function send(row, captured, options = {}) {
     assertHistory(captured);
-    await window.CWFieldPhotos?.sync(row.resourceId, captured, options);
+    const visitType = row.scope.startsWith('EXTRA_') ? 'EXTRA' : 'REGULAR';
+    if (row.scope !== 'EXTRA_VISIT_START') await window.CWFieldPhotos?.sync(row.resourceId, captured, options, visitType);
     const result = await store.send(row.requestId, captured, options);
     if (!store.same(captured)) throw Error('A sessão mudou. O pedido foi preservado.');
-    window.dispatchEvent(new CustomEvent('cw:visit-synced', { detail: { visitId: row.resourceId, visit: result.visit, owner: captured.owner, token: captured.token } }));
+    window.dispatchEvent(new CustomEvent('cw:visit-synced', { detail: { visitId: row.resourceId, visitType, visit: result.visit, owner: captured.owner, token: captured.token } }));
     return result;
   }
-  async function submitCompletion(visitId, body, captured = store.session()) {
+  async function submitCompletion(visitId, body, captured = store.session(), visitType = 'REGULAR') {
     assertHistory(captured);
-    const row = await store.prepare('VISIT_COMPLETION', Number(visitId), body, { label: document.getElementById('nextTitle')?.textContent || 'Visita ' + visitId }, captured);
+    const row = await store.prepare(visitType === 'EXTRA' ? 'EXTRA_VISIT_COMPLETION' : 'VISIT_COMPLETION', Number(visitId), body, { label: document.getElementById('nextTitle')?.textContent || 'Visita ' + visitId }, captured);
     try { return await send(row, captured); }
     catch (error) { if (!store.same(captured)) throw error; throw Object.assign(Error('Visita guardada neste dispositivo. ' + message(error)), { status: error.status }); }
     finally { await render(); }
   }
-  async function retry(visitId, captured = store.session()) {
-    const row = (await entries(captured)).find(item => item.resourceId === Number(visitId));
+  async function retry(visitId, captured = store.session(), visitType = 'REGULAR') {
+    const row = (await entries(captured)).find(item => item.resourceId === Number(visitId) && item.scope === (visitType === 'EXTRA' ? 'EXTRA_VISIT_COMPLETION' : 'VISIT_COMPLETION'));
     try { if (row) return await send(row, captured); } finally { await render(); }
   }
   async function flush() {
@@ -82,7 +84,11 @@
     } catch (_) { /* render retains and reports unreadable history. */ }
     finally { flushing = false; await render(); }
   }
-  window.CWFieldOffline = { submitCompletion, flush, pending, render, retry, entries, assertHistory };
+  async function submitExtraStart(visit, captured = store.session()) {
+    const row = await store.prepare('EXTRA_VISIT_START',Number(visit.id),{visitType:'EXTRA',poolId:visit.poolId || visit.pool?.id},{label:'Início: '+(visit.pool?.name || visit.id)},captured);
+    try { return await send(row,captured); } finally { await render(); }
+  }
+  window.CWFieldOffline = { submitExtraStart, submitCompletion, flush, pending, render, retry, entries, assertHistory };
   window.addEventListener('cw:field-write-change', render);
   window.addEventListener('storage', render);
   window.addEventListener('online', flush);

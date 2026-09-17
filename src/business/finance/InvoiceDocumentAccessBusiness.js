@@ -21,7 +21,7 @@ async function invoice(rawId, user, db = prisma) {
 async function extras(rawId, user) {
   const { id, clientId } = scope(user, rawId);
   if (clientId && clientId !== id) fail('Documento não encontrado.', 404);
-  return prisma.extraVisit.findMany({ where: { billed: false, pool: { clientId: id } }, include: { pool: { include: { client: true } } } });
+  return require('../../services/extraVisitBillingService').pending(prisma, id);
 }
 async function sendable(rawId, user, db = prisma) {
   if (normalizeRole(user?.role) !== 'ADMIN') fail('Apenas a administração pode preparar envios.', 403);

@@ -176,10 +176,7 @@ router.get("/today", async (req, res) => {
       });
 
     const extraVisitWhere = {
-      scheduledAt: {
-        gte: dayQuery.start,
-        lt: dayQuery.end,
-      },
+      OR: [{scheduledAt:{gte:dayQuery.start,lt:dayQuery.end}},{startAt:{gte:dayQuery.start,lt:dayQuery.end}},{endAt:{gte:dayQuery.start,lt:dayQuery.end}}],
       status: {
         notIn: [
           "CANCELLED",
@@ -197,6 +194,7 @@ router.get("/today", async (req, res) => {
     const extraVisits = await prisma.extraVisit.findMany({
       where: extraVisitWhere,
       include: {
+        photos: true,
         technician: {
           include: {
             vehicle: true,
@@ -426,47 +424,10 @@ router.get("/today", async (req, res) => {
         scheduledAt:
           v.scheduledAt || null,
 
-        startAt:
-          null,
-
-        endAt:
-          null,
-
-        notes:
-          v.notes || null,
-
-        internalNotes:
-          null,
-
-        products:
-          null,
-
-        chemicalsJson:
-          null,
-
-        cleaned:
-          false,
-
-        brushed:
-          false,
-
-        vacuumed:
-          false,
-
-        basketCleaned:
-          false,
-
-        waterlineClean:
-          false,
-
-        backwashDone:
-          false,
-
-        photos:
-          [],
-
-        chemicals:
-          [],
+        ...require('../services/extraVisitExecutionService').project(v),
+        notes: v.execution?.notes ?? v.notes ?? null,
+        internalNotes: null,
+        chemicals: v.execution?.chemicalsJson || [],
 
         ...(showFinancialValues
           ? {

@@ -91,23 +91,6 @@ router.get("/history", async (req, res) => {
 // MARCAR COMO FATURADO
 // ==========================================================
 
-router.post("/confirm", async (req, res) => {
-  try {
-
-    await prisma.extraVisit.updateMany({
-      where: { billed: false },
-      data: {
-        billed: true,
-        billedAt: new Date() // 🔥 NOVO
-      }
-    });
-
-    res.json({ ok: true });
-
-  } catch (err) {
-    console.error("Erro faturar:", err);
-    res.json({ ok: false });
-  }
-});
+router.post('/confirm', (req,res) => res.status(409).json({ok:false,code:'INVOICE_REQUIRED',error:'Abra Faturas e gere o documento do cliente e mês. Os extras só ficam faturados quando forem incluídos numa fatura.',next:'/invoices'}));
 
 module.exports = router;

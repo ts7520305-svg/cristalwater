@@ -52,7 +52,7 @@ async function generate(mode, body = {}) {
       if (!Number.isSafeInteger(monthlyCents) || monthlyCents < 0) fail('Preço mensal inválido. Reveja a configuração do cliente.');
       const start = new Date(`${monthRef}-01T00:00:00Z`), end = new Date(start); end.setUTCMonth(end.getUTCMonth() + 1);
       const dates = { OR: [{ plannedDate: { gte: start, lt: end } }, { date: { gte: start, lt: end } }, { endAt: { gte: start, lt: end } }] };
-      const [candidateRepairs, visits, extras] = await Promise.all([
+      const [candidateRepairs, visits, candidateExtras] = await Promise.all([
         tx.repair.findMany({ where: { pool: { clientId }, paid: false,
           status: { in: mode === 'OPERATIONAL' ? ['DONE', 'QUOTED', 'APPROVED', 'QUOTE_REQUESTED'] : ['QUOTED', 'APPROVED', 'DONE'] },
           NOT: { status: { in: ['QUOTED', 'QUOTE_REQUESTED'] }, quotes: { some: {} } } }, include: { pool: true }, orderBy: { id: 'asc' } }),
@@ -64,7 +64,7 @@ async function generate(mode, body = {}) {
           { OR: [{ clientId }, { pool: { clientId } }] },
           { OR: [{ scheduledAt: { gte: start, lt: end } }, { date: { gte: start, lt: end } }] },
           { status: { in: ['DONE', 'COMPLETED', 'CONCLUIDA', 'CONCLUIDO'] } },
-          { OR: [{ isBillable: true }, { billingMode: 'EXTRA' }, { billingStatus: { in: ['PENDING', 'IN_MONTHLY_REPORT'] } }] },
+          { billingMode: 'EXTRA', includedInPackage: false },
           { billed: false },
           { OR: [{ totalPrice: { gt: 0 } }, { price: { gt: 0 } }, { unitPrice: { gt: 0 } }] },
         ] }, include: { pool: true }, orderBy: { id: 'asc' } }),
@@ -74,16 +74,18 @@ async function generate(mode, body = {}) {
       // releasing it requires an explicit correction, never monthly generation.
       const reservedRepairs = await reservedRepairIds(tx, candidateRepairs.map(repair => repair.id));
       const repairs = candidateRepairs.filter(repair => !reservedRepairs.has(repair.id));
+      const reservedExtras = new Set((await tx.invoiceLine.findMany({where:{type:'EXTRA_VISIT',referenceId:{in:candidateExtras.map(visit=>visit.id)}},select:{referenceId:true}})).map(line=>line.referenceId));
+      const extras = candidateExtras.filter(visit=>!reservedExtras.has(visit.id));
       const repairCents = repairs.reduce((sum, r) => sum + sourceCents(mode === 'OPERATIONAL' ? r.totalPrice || r.unitPrice : r.totalPrice), 0);
       const serviceCents = mode === 'CORE' ? visits.reduce((sum, v) => sum + sourceCents(sourceAmount(v)), 0) : 0;
-      const extraCents = extras.reduce((sum, v) => sum + sourceCents(sourceAmount(v)), 0);
+      const extraCents = extras.reduce((sum, v) => sum + sourceCents(v.totalPrice ?? v.unitPrice ?? v.price), 0);
       const totalCents = monthlyCents + repairCents + serviceCents + extraCents;
       if (!Number.isSafeInteger(totalCents) || totalCents < 0) fail('Total inválido. Reveja os serviços antes de gerar a fatura.');
       const lines = monthlyCents > 0 ? [line('MONTHLY', `Mensalidade ${monthRef}`, monthlyCents)] : [];
       if (mode === 'CORE') for (const v of visits) if (cent(sourceAmount(v)) > 0) lines.push(line('SERVICE', `Servico: ${v.pool?.name || `Visita ${v.id}`}`, cent(sourceAmount(v)), {
         referenceId: v.id, serviceDate: v.endAt || v.plannedDate || v.date || null, sourceMonth: monthRef, notes: v.notes || null,
       }));
-      for (const v of extras) if (cent(sourceAmount(v)) > 0) lines.push(line('EXTRA_VISIT', `Extra: ${v.pool?.name || `Visita extra ${v.id}`}`, cent(sourceAmount(v)), {
+      for (const v of extras) if (cent(v.totalPrice ?? v.unitPrice ?? v.price) > 0) lines.push(line('EXTRA_VISIT', `Extra: ${v.pool?.name || `Visita extra ${v.id}`}`, cent(v.totalPrice ?? v.unitPrice ?? v.price), {
         referenceId: v.id, serviceDate: v.scheduledAt || v.date || null, sourceMonth: monthRef, notes: v.notes || null,
       }));
       for (const r of repairs) {
