@@ -22,6 +22,10 @@ function period(query = {}) {
   return { monthRef, start, end };
 }
 const visitSelect = { id:true, technicianId:true, clientId:true, poolId:true, status:true, startAt:true, endAt:true, pool:{select:{clientId:true}} };
+// A full monthRef takes precedence over the two historical month formats.
+function documentMonthWhere(monthRef) {
+  return {OR:[{monthRef},{monthRef:null,month:monthRef},{monthRef:null,year:Number(monthRef.slice(0,4)),month:{in:[monthRef.slice(5),String(Number(monthRef.slice(5)))]}}]};
+}
 // A current pool owner cannot establish the customer of historical work.
 const clientOf = visit => visit.clientId || null;
 function baseRow(id, name, active) {
@@ -41,7 +45,7 @@ async function build(query, kind) {
       db.serviceVisit.findMany({where:{endAt:null,OR:[{plannedDate:between},{plannedDate:null,date:between}]},select:visitSelect}),
       db.extraVisit.findMany({where:{endAt:null,scheduledAt:between},select:visitSelect}),
       db.stockMovement.findMany({where:{createdAt:between},orderBy:{id:'asc'}}),
-      db.invoice.findMany({where:{OR:[{monthRef},{monthRef:null,month:monthRef},{monthRef:null,year:Number(monthRef.slice(0,4)),month:{in:[monthRef.slice(5),String(Number(monthRef.slice(5)))]}}]},include:{lines:true}}),
+      db.invoice.findMany({where:documentMonthWhere(monthRef),include:{lines:true}}),
       kind === 'client' ? db.payment.findMany({where:{paidAt:between},select:{id:true,amount:true,method:true,invoice:{select:{clientId:true}}}}) : []
     ]);
     const masters = kind === 'technician' ? technicians : clients, masterIds = new Set(masters.map(row=>row.id));
@@ -134,4 +138,4 @@ async function build(query, kind) {
       dataQuality:quality, ...(kind==='technician'?{technicians:result,ranking:result}:{clients:result})};
   },{isolationLevel:'RepeatableRead',maxWait:15000,timeout:30000});
 }
-module.exports = { period, technicians:query=>build(query||{},'technician'), clients:query=>build(query||{},'client') };
+module.exports = { period, documentMonthWhere, technicians:query=>build(query||{},'technician'), clients:query=>build(query||{},'client') };

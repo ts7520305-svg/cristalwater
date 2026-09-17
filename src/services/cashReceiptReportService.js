@@ -3,7 +3,7 @@ const { prisma } = require('../prismaClient');
 const { INTERNAL_PAYMENT_METHODS } = require('./invoicePaymentRequestService');
 const internalMethods = new Set(INTERNAL_PAYMENT_METHODS);
 const total = rows => rows.reduce((sum, row) => sum + Math.round(Number(row.amount || 0) * 100), 0) / 100;
-async function payments(monthRef) {
+async function payments(monthRef, db = prisma) {
   const where = {};
   if (monthRef !== undefined) {
     if (typeof monthRef !== 'string' || !/^(20\d{2}|21\d{2})-(0[1-9]|1[0-2])$/.test(monthRef)) throw Object.assign(new Error('Mês inválido; use AAAA-MM.'), { status: 400 });
@@ -11,7 +11,7 @@ async function payments(monthRef) {
     where.paidAt = { gte: start, lt: end };
   }
   // These are aggregate reports. A display-page limit must not truncate money.
-  const rows = await prisma.payment.findMany({ where, select: { amount: true, paidAt: true, method: true } });
+  const rows = await db.payment.findMany({ where, select: { amount: true, paidAt: true, method: true } });
   return rows.filter(row => !internalMethods.has(String(row.method || '').trim().toUpperCase()));
 }
 function monthly(rows) {

@@ -1,6 +1,6 @@
 # Cadastro de clientes em campo — diagnóstico para a próxima correção
 
-Diagnóstico anterior preservado em 17/09/2026. Cadastro e aprovação foram depois implementados e ensaiados nas TASK242–243; ver `FIELD_CLIENT_INTAKE_RECOVERY_20260917.md` para estado do CI e limites. O relatório ADMIN no final continua por corrigir. Base examinada: `9b392f18a528608176d8e01d32dc294aa9850038`.
+Diagnóstico anterior preservado em 17/09/2026. Cadastro e aprovação foram depois implementados e ensaiados nas TASK242–243; ver `FIELD_CLIENT_INTAKE_RECOVERY_20260917.md` para estado do CI e limites. O relatório ADMIN no final foi depois tratado nas TASK244–245; estado e limites em `ADMIN_MONTHLY_REPORT_RECOVERY_20260917.md`. As reproduções abaixo descrevem as bases anteriores. Base inicial examinada: `9b392f18a528608176d8e01d32dc294aa9850038`.
 
 ## Resultado observado
 

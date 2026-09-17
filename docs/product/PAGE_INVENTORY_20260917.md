@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `1afc751eb3244e272732ea564aa4a74828f2ee51`. Gerado em 2026-09-17T20:50:37.110Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `d3e7462d8fcbeeca420cf6c5a8f9ac67ac38139d`. Gerado em 2026-09-17T21:35:52.331Z. Inclui o estado dos ficheiros locais no momento da geração.
 
 101 ficheiros HTML: 94 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 158 scripts de integração/navegador ativos. 56 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 160 scripts de integração/navegador ativos. 57 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 As colunas de papéis distinguem o catálogo anterior dos indícios explícitos no HTML/scripts. Não são uma auditoria de autorização: as APIs, a atribuição atual e o comportamento real de cada perfil continuam a determinar o acesso.
 
@@ -64,7 +64,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /admin-pool-technical | Entrada raiz | ADMIN | ADMIN | 4 |
 | /admin-pools | Entrada raiz | ADMIN | ADMIN | 2 |
 | /admin-priority | Entrada raiz | ADMIN | ADMIN | 2 |
-| /admin-reports | Entrada raiz | ADMIN | ADMIN | 0 |
+| /admin-reports | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-rounds | Entrada raiz | ADMIN | ADMIN | 4 |
 | /admin-security | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-service-log | Entrada raiz | ADMIN | ADMIN | 0 |
