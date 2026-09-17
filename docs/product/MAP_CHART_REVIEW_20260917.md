@@ -1,6 +1,6 @@
 # Revisão pendente dos mapas e gráficos antigos
 
-Este registo conserva a triagem inicial. TASK233 trata /admin-map e /route-map, conforme `ADMIN_MAP_RECOVERY_20260917.md`; TASK234–235 tratam /map e /multi-map, conforme `GEOGRAPHIC_AND_MULTI_MAP_RECOVERY_20260917.md`. TASK236–237 tratam /profit-map, o seu planeador e os dois endereços de atividade/valores por técnico, conforme `OPERATIONAL_VALUES_AND_PLANNED_WORK_20260917.md`; ensaios locais aprovados, CI/restauro do lote ainda pendentes. Base da triagem: `e1b9ddc4353781de43d04f716ae725bea47dc306` (TASK231–232).
+Este registo conserva a triagem inicial. TASK233 trata /admin-map e /route-map, conforme `ADMIN_MAP_RECOVERY_20260917.md`; TASK234–235 tratam /map e /multi-map, conforme `GEOGRAPHIC_AND_MULTI_MAP_RECOVERY_20260917.md`. TASK236–237 tratam /profit-map, o seu planeador e os três consumidores de atividade/valores por técnico, incluindo Alertas financeiros, conforme `OPERATIONAL_VALUES_AND_PLANNED_WORK_20260917.md`; ensaios locais aprovados, CI/restauro do lote ainda pendentes. Base da triagem: `e1b9ddc4353781de43d04f716ae725bea47dc306` (TASK231–232).
 
 ## Evidência
 

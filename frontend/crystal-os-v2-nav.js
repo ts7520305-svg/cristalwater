@@ -37,6 +37,7 @@
     '/admin-live-map': { area: 'Operacao', title: 'Mapa operacional' },
     '/technician-profit': { area: 'Financeiro', title: 'Atividade e valores por técnico' },
     '/technician-profit-dashboard': { area: 'Financeiro', title: 'Atividade e valores por técnico' },
+    '/alerts-financial': { area: 'Financeiro', title: 'Alertas financeiros' },
     '/multi-map': { area: 'Operação', title: 'Visitas por técnico' },
     '/profit-map': { area: 'Operação', title: 'Trabalho planeado' },
     '/map': { area: 'Operação', title: 'Áreas geográficas' },

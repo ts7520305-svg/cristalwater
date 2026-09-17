@@ -24,9 +24,10 @@ const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['127.0.0.1',
  },{user,token});
  const page=await context.newPage(),errors=[];page.setDefaultTimeout(10000);page.on('pageerror',e=>errors.push(e.message));
  const state=s=>page.waitForFunction(s=>document.getElementById('reportStatus').dataset.state===s,s),card=id=>page.locator('#reportList [data-technician-id="'+id+'"]');
- for(const url of ['/technician-profit-dashboard','/technician-profit']){
+ for(const url of ['/technician-profit-dashboard','/technician-profit','/alerts-financial']){
   await page.goto(base+url,{waitUntil:'networkidle'});assert.equal(await page.locator('#reportMonth').inputValue(),new Date().toISOString().slice(0,7));
   await page.locator('#reportMonth').fill(monthRef);await page.locator('#reportLoad').click();await state('ready');
+  if(url==='/alerts-financial'){assert.match(await page.locator('.report-pending').textContent(),/margem por técnico está por apurar/);assert.doesNotMatch(await page.locator('main').textContent(),/Nenhum tecnico em prejuizo|Sem alertas financeiros ativos/);}
   assert.match(await card(tech.id).locator('h2').textContent(),new RegExp(stamp));assert.match(await card(tech.id).locator('h2').textContent(),/inativo/);
   assert.match(await card(tech.id).textContent(),/64,00/);assert.match(await card(tech.id).textContent(),/100,10/);assert.match(await card(missing.id).textContent(),/Mão de obra estimada: Por apurar/);
   assert.match(await card(tech.id).textContent(),/devolução 2; diferença -2/);assert.equal(await card(tech.id).locator('img,b').count(),0);
@@ -40,7 +41,7 @@ const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['127.0.0.1',
   assert(await page.locator('.report-controls input,.report-controls button,#reportList article').evaluateAll(nodes=>nodes.every(n=>{const r=n.getBoundingClientRect();return r.x>=0&&r.right<=innerWidth+1&&n.scrollWidth<=n.clientWidth+1;})));
   await page.screenshot({path:path.join(visual,'values-'+width+'.png')});
  }
- console.log('PASS both value report pages: actual API, current month, inactive identity, typed visits, unknown versus estimated cost, documentary source amounts, literal stock/names and three widths without external chart');
+ console.log('PASS both value report pages and financial alerts: actual API, current month, inactive identity, typed visits, unknown versus estimated cost, no false absence of losses, documentary source amounts, literal stock/names and three widths without external chart');
  const endpoint='**/api/billing/technician-profit?*';let payload=data,code=200;await page.route(endpoint,r=>r.fulfill({status:code,json:payload}));
  const altered=mutate=>{const copy=structuredClone(data);mutate(copy);return copy;};
  for(const bad of [{ok:true,ranking:[]},altered(d=>d.complete=false),altered(d=>d.monthRef='2035-08'),altered(d=>d.financialComplete=true),altered(d=>{d.technicians=[d.technicians[0],d.technicians[0]];d.total=d.returned=2;}),altered(d=>d.technicians.find(t=>t.id===tech.id).profit=0),altered(d=>d.technicians.find(t=>t.id===tech.id).confirmedExtraLinesAmount++),altered(d=>{const t=d.technicians.find(t=>t.id===tech.id);t.extraLineEvidence.push(t.extraLineEvidence[0]);t.extraLinesAmount=t.confirmedExtraLinesAmount*=2;})]){

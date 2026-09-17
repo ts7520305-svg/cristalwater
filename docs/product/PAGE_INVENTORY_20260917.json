@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-17T18:24:59.367Z",
-  "baseCommit": "f45082e48537cc22323c642a3ee0c01341176348",
+  "generatedAt": "2026-09-17T18:28:40.452Z",
+  "baseCommit": "29a63fbc7ae05427cae048cb189bf4f00278775b",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
   "activeScriptsScanned": 152,
   "summary": {
@@ -8,7 +8,7 @@
     "rootPages": 94,
     "nestedPages": 7,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 54,
+    "pagesWithLiteralTestReference": 55,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -1557,7 +1557,7 @@
       "file": "frontend/alerts-financial.html",
       "route": "/alerts-financial",
       "kind": "Entrada raiz",
-      "title": "Cristal Water - Alertas Financeiros",
+      "title": "Alertas financeiros — Cristal Water",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -1571,11 +1571,13 @@
       "entryRedirects": {},
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/cw-auth.js",
         "/ui/foundation.css",
-        "/cristal-assist.css",
         "/ui/design-system.css",
+        "/cw-value-report.css",
+        "/cristal-assist.css",
+        "/cw-auth.js",
         "/admin-auth-guard.js",
+        "/cw-value-report.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
         "/ui/core/navigation-context.js",
@@ -1584,7 +1586,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "testReferences": [
+        "test-field-operational-values-ui.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
