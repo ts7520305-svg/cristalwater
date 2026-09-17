@@ -2,7 +2,9 @@
 
 ## Estado
 
-Implementação e ensaios locais concluídos em 17/09/2026, preparados sobre `68df5a10ed918b994c1a156de6e42c0b3a0e612d`. Publicação e CI/restauro nativo da árvore final por confirmar. Cache v67; runner com 135 grupos. Sem migração: a tabela de comprovativos já existe e os preços de Repair já admitem null.
+Confirmada no commit `9b392f18a528608176d8e01d32dc294aa9850038`, árvore `bf2a27c11e44467f9b59cdbf5bd8d47cffa095b0`, CI `35267245025`: 135/135 grupos, 388 unitários/quatro técnicos, 21 scripts de navegador, 20 migrações aditivas, sintaxe de 542 JS backend/178 frontend/57 inline e restauro de 110 tabelas/32 ficheiros com linhas e hashes iguais em PostgreSQL 16. API de ocorrências: 1270 ms; UI: 20171 ms. Pedidos de material também passaram nesta árvore (1509/14988 ms).
+
+Preparada sobre `68df5a10ed918b994c1a156de6e42c0b3a0e612d` e integrada com a correção assíncrona do teste de material. Cache v67; nenhuma migração nova: a tabela de comprovativos já existe e os preços de Repair já admitem null. Backup local `backup/task241-local-20260917`. O registo posterior altera apenas documentação e não substitui o commit de código testado.
 
 ## Reprodução anterior à correção
 

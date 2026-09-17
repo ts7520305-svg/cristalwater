@@ -2,7 +2,9 @@
 
 ## Estado
 
-Implementação e verificação local concluídas em 17/09/2026, sobre `14d8e776825ea7e87848d1af8dae26f1176837f4`. Publicada inicialmente em `40fa9dc3068ba1bebf744abaa51b5a48a11a356f` e com âmbito final do lembrete em `68df5a10ed918b994c1a156de6e42c0b3a0e612d`. O CI `35264319158` passou 132/133 grupos: o novo teste UI lia a mensagem imediatamente após um envio assíncrono; recebeu o aviso anterior de quota, em vez de aguardar o estado final. Foi acrescentada espera explícita, conservando asserções de zero POST e texto preservado. CI/restauro da correção por confirmar. Cache v66; runner com 133 grupos; nenhuma migração de esquema.
+Confirmada no commit `b90e374c9356bb4c8256de00c9e59754087acb96`, árvore `b6dc513b7138bbc20d1daf6e1d49c42e475e6514`, CI `35266160067`: 133/133 grupos, 388 unitários/quatro técnicos, 21 scripts de navegador, 20 migrações aditivas, sintaxe de 541 JS backend/177 frontend/57 inline e restauro de 110 tabelas/32 ficheiros com linhas e hashes iguais em PostgreSQL 16. API de material: 1492 ms; UI: 14890 ms. Cache v66; nenhuma migração nova.
+
+Preparada sobre `14d8e776825ea7e87848d1af8dae26f1176837f4`, publicada inicialmente em `40fa9dc3068ba1bebf744abaa51b5a48a11a356f` e com âmbito final do lembrete em `68df5a10ed918b994c1a156de6e42c0b3a0e612d`. O CI `35264319158` passou 132/133 grupos: o novo teste UI lia a mensagem imediatamente após um envio assíncrono. A espera explícita conservou as asserções de zero POST/texto preservado; a correção passou localmente em `run-1789673813390` e no CI final acima. O registo posterior altera apenas documentação; a evidência pertence ao commit de código indicado.
 
 ## Diagnóstico e alteração
 
@@ -40,5 +42,5 @@ Execuções locais: `run-1789671922156` (API inicial), `run-1789672062023` (UI e
 - Recuperação explícita, no dispositivo original; navegador com IndexedDB, armazenamento local e Web Locks. Limpeza dos dados do dispositivo não é protegida por uma cópia remota do rascunho.
 - O formulário prepara pedidos associados a visitas REGULAR. Extras conservam a restrição anterior; o endpoint admite nota geral com visita/piscina explicitamente nulas. Não foi acrescentada migração de autoria da fila antiga.
 - A conta conserva um pedido de material por confirmar. Recusas por contexto/atribuição exigem revisão com o escritório; este lote não acrescenta cancelamento ou transferência de pedidos já tentados.
-- A inspeção encontrou percursos ainda por tratar separadamente: ocorrência em `saveProblem()` usa fallback de notas/lista global e criação sem UUID; entrada de novo cliente conserva envio/validação antigos; relatório administrativo não aplica o mês escolhido ao agregado e pode confundir falha com zeros. São achados de fonte, ainda sem reprodução runtime própria.
+- A ocorrência foi tratada nas TASK240–241 (`FIELD_PROBLEM_REPORT_RECOVERY_20260917.md`). O cadastro em campo foi depois reproduzido em QA (`FIELD_CLIENT_INTAKE_REVIEW_20260917.md`), continuando por corrigir. O relatório administrativo também foi reproduzido no ecrã real, com respostas HTTP controladas: omite o período e apresenta fontes indisponíveis como zeros/estado atualizado; continua por corrigir.
 - Revisão global de páginas/PDFs/idiomas, valorização histórica, planeamento avançado, vídeo/IA offline, aparelhos reais e serviços externos permanecem na matriz atual. Sem declaração de prontidão global.
