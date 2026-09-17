@@ -18,12 +18,12 @@
     if (!online || !snapshot.confirmedAt) add('unknown', 'Ronda sem confirmação atual. Ligue à rede e atualize a agenda; podem existir alterações do escritório.');
     for (const section of verificationErrors) add('unknown', `${section}: não foi possível confirmar os dados no servidor. A revisão está incompleta.`);
     for (const reminder of water) {
-      if (reminder.status !== 'CLOSED') add('critical', `${reminder.poolName || name(reminder.visitId)} — água aberta. Confirme o fecho físico ou contacte o responsável.`);
-      if (!reminder.serverId || reminder.syncError || (reminder.status === 'CLOSED' && !reminder.closeSyncedAt)) add('pending', `${reminder.poolName || name(reminder.visitId)} — estado da água por confirmar no servidor.`);
+      if (reminder.status !== 'CLOSED') add('critical', `${reminder.poolName || name(reminder.visitId,reminder.visitType || 'REGULAR')} — água aberta. Confirme o fecho físico ou contacte o responsável.`);
+      if (!reminder.serverId || reminder.syncError || (reminder.status === 'CLOSED' && !reminder.closeSyncedAt)) add('pending', `${reminder.poolName || name(reminder.visitId,reminder.visitType || 'REGULAR')} — estado da água por confirmar no servidor.`);
     }
     for (const reminder of Object.values(pumps)) {
-      if (!reminder.closed) add('critical', `${reminder.poolName || name(reminder.visitId)} — bomba em manual. Confirme o regresso físico a automático ou contacte o responsável.`);
-      if (!reminder.serverId || reminder.closed) add('pending', `${reminder.poolName || name(reminder.visitId)} — estado da bomba por confirmar no servidor.`);
+      if (!reminder.closed) add('critical', `${reminder.poolName || name(reminder.visitId,reminder.visitType || 'REGULAR')} — bomba em manual. Confirme o regresso físico a automático ou contacte o responsável.`);
+      if (!reminder.serverId || reminder.closed) add('pending', `${reminder.poolName || name(reminder.visitId,reminder.visitType || 'REGULAR')} — estado da bomba por confirmar no servidor.`);
     }
     for (const visit of snapshot.visits) {
       if (!visit.done && !visit.future && !Object.values(outbox).some(item=>String(item.visitId)===String(visit.id)&&(item.visitType || 'REGULAR')===(visit.visitType || 'REGULAR')&&item.scope!=='EXTRA_VISIT_START')) add('pending', `${visit.name} — ${visit.visitType === 'EXTRA' ? 'visita extra por concluir' : 'trabalho por concluir'}. Combine o próximo passo com o escritório.`);
@@ -82,15 +82,14 @@
       if (revision !== requestedRevision) return;
       if (owner() !== requestedOwner || token !== window.CristalAuth?.getToken?.()) { result.textContent = 'Sessão alterada. Repita a revisão com a conta atual.'; return; }
       let snapshot = window.CWFieldDaySnapshot();
-      let water = read(`cwWaterReminders:${requestedOwner}`, true);
-      let pumps = Object.values(read(`cwPumpReminders:${requestedOwner}`));
+      let water = window.CWFieldReminders.list('WATER_OPEN');
+      let pumps = window.CWFieldReminders.list('PUMP_MANUAL').filter(row=>row.status!=='CLOSED'||!row.closeSyncedAt);
       const verificationErrors = remote ? remote.filter(section=>section.error).map(section=>section.label) : ['Lembretes críticos'];
       if (remote?.[0].rows) snapshot = {confirmedAt:new Date().toISOString(),visits:remote[0].rows.map(visit=>({id:visit.id,visitType:visit.visitType || 'REGULAR',name:visit.pool?.name || `Visita ${visit.id}`,done:Boolean(visit.endAt) || ['DONE','COMPLETED','CONCLUIDA'].includes(String(visit.status).toUpperCase())}))};
       else snapshot = {...snapshot,confirmedAt:null};
       if (remote?.[1].rows) water = mergeReminders(water, remote[1].rows);
       if (remote?.[2].rows) pumps = mergeReminders(pumps, remote[2].rows, true);
-      const legacyWater = read('cwWaterReminders', true);
-      if (legacyWater.some(item => !item.technicianId || String(item.technicianId) === requestedOwner)) throw new Error('Lembretes antigos por reconciliar');
+      if (window.CWFieldReminders.legacyWarning()) verificationErrors.push('Lembretes antigos por reconciliar com o escritório');
       const outbox = Object.fromEntries(completions.map(row => [row.scope+':'+row.resourceId, { visitId: row.resourceId, visitType:row.scope.startsWith('EXTRA_') ? 'EXTRA' : 'REGULAR', scope:row.scope, blocked: row.failure?.blocked }]));
       if (Object.keys(read(`cwFieldVisitDrafts:${requestedOwner}`)).length) verificationErrors.push('Rascunhos antigos sem conta/tipo de visita confirmados');
       const items = buildReview({ snapshot, water, pumps, outbox, drafts: window.CWFieldDraftSnapshot ? window.CWFieldDraftSnapshot() : {}, photos, online: navigator.onLine, verificationErrors });

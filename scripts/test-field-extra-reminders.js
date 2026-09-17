@@ -1,0 +1,108 @@
+'use strict';
+require('../src/loadEnv')();
+const assert=require('node:assert/strict'),{randomUUID}=require('node:crypto'),jwt=require('jsonwebtoken'),{chromium}=require('playwright');
+const {prisma}=require('../src/prismaClient'),{getJwtSecret}=require('../src/utils/jwtSecret'),service=require('../src/services/waterReminderService');
+if(process.env.NODE_ENV!=='test'||process.env.QA_MODE!=='true'||process.env.QA_ENVIRONMENT_SAFE!=='true')throw Error('Isolated QA required');
+const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['127.0.0.1','localhost'].includes(new URL(base).hostname));
+let browser;
+(async()=>{
+  const client=await prisma.client.create({data:{name:'Extra safety client',active:true}});
+  const pool=await prisma.pool.create({data:{name:'EXTRA safety pool',clientId:client.id,active:true}}),regularPool=await prisma.pool.create({data:{name:'REGULAR safety pool',clientId:client.id,active:true}});
+  const tech=await prisma.technician.create({data:{name:'Extra safety technician',active:true}}),other=await prisma.technician.create({data:{name:'Extra safety substitute',active:true}});
+  const leader=await prisma.technician.create({data:{name:'Extra safety leader',active:true,role:'TEAM_LEADER'}});
+  const sign=(id,role='TECHNICIAN')=>jwt.sign({id,role},getJwtSecret(),{expiresIn:'1h'}),token=sign(tech.id),otherToken=sign(other.id),leaderToken=sign(leader.id,'TEAM_LEADER');
+  const max=await Promise.all([prisma.extraVisit.aggregate({_max:{id:true}}),prisma.serviceVisit.aggregate({_max:{id:true}})]),id=Math.max(...max.map(row=>row._max.id||0))+1;
+  const extra=await prisma.extraVisit.create({data:{id,clientId:client.id,poolId:pool.id,technicianId:tech.id,scheduledAt:new Date(),status:'PLANNED',internalNote:'Keep planner note'}});
+  const regular=await prisma.serviceVisit.create({data:{id,clientId:client.id,poolId:regularPool.id,technicianId:tech.id,date:new Date(),plannedDate:new Date(),status:'PLANNED',internalNotes:'Keep regular history'}});
+  for(const name of ['ExtraVisit','ServiceVisit'])await prisma.$queryRawUnsafe(`SELECT setval(pg_get_serial_sequence('"${name}"','id'),${id},true)`);
+  const api=async(method,path,body,credential=token)=>{const r=await fetch(base+path,{method,headers:{'Content-Type':'application/json',...(credential?{Authorization:'Bearer '+credential}:{})},...(body===undefined?{}:{body:JSON.stringify(body)})});return {status:r.status,body:await r.json(),cache:r.headers.get('cache-control')};};
+  const payload=(changes={})=>({owner:`TECH:${tech.id}`,localId:randomUUID(),visitType:'EXTRA',visitId:id,poolId:pool.id,clientId:client.id,dueAt:new Date(Date.now()-60000).toISOString(),openedAt:new Date(Date.now()-120000).toISOString(),note:'Safety state retained',flowState:'HALF',...changes});
+  const paths=['/api/technician/water-reminders','/api/technician/pump-reminders'];
+  for(const path of paths){
+    const body=payload();
+    assert.equal((await api('POST',path,body,null)).status,401);
+    assert.equal((await api('POST',path,{...body,owner:`TECH:${other.id}`},otherToken)).status,403);
+    assert.equal((await api('POST',path,{...body,owner:`TECH:${leader.id}`},leaderToken)).status,403);
+    assert.equal((await api('POST',path,{...body,poolId:regularPool.id})).status,400);
+    assert.equal((await api('POST',path,{...body,visitType:'UNKNOWN'})).status,400);
+    const replies=await Promise.all(Array.from({length:6},()=>api('POST',path,body)));
+    replies.forEach(reply=>assert.equal(reply.status,200,JSON.stringify(reply)));
+    const row=replies[0].body.reminder;assert(replies.every(reply=>reply.body.reminder.id===row.id));assert.equal(row.metadata.visitType,'EXTRA');assert.equal(row.poolId,pool.id);assert.equal(replies[0].cache,'private, no-store');
+    assert.equal((await api('POST',path,{...body,note:'Different request'})).status,409);
+    assert.equal((await api('POST',path,{...body,visitType:'REGULAR',poolId:regularPool.id})).status,409);
+    assert.equal(await prisma.technicalHistory.count({where:{poolId:pool.id,type:row.metadata.kind,message:'OPEN'}}),1);
+    await service.processOverdue();await service.processOverdue();
+    const overdue=await prisma.operationalReminder.findUniqueOrThrow({where:{id:row.id}});assert(overdue.metadata.alarmedAt);
+    const handover=await api('POST',`/api/technician/reminder-handovers/${row.id}/request`,{technicianId:other.id,reason:'Substituição ao fim do dia'});assert.equal(handover.status,200);
+    const accepted=await api('POST',`/api/technician/reminder-handovers/${row.id}/accept`,{handoverId:handover.body.reminder.metadata.handover.id},otherToken);assert.equal(accepted.status,200);assert.equal(accepted.body.reminder.metadata.visitType,'EXTRA');
+    assert.equal((await api('POST',`${path}/${row.id}/close`,{},token)).status,403);
+    const closed=await Promise.all([api('POST',`${path}/${row.id}/close`,{},otherToken),api('POST',`${path}/${row.id}/close`,{},otherToken)]);assert(closed.every(reply=>reply.status===200&&reply.body.reminder.isCompleted));
+    assert.equal(await prisma.notification.count({where:{eventType:row.metadata.kind+'_OVERDUE',status:{in:['PENDING','SENT']},metadata:{path:['reminderId'],equals:row.id}}}),0);
+    const hidden=await api('GET',path,undefined,leaderToken);assert(!hidden.body.reminders.some(item=>!item.transferredAway&&item.assignedToTechnicianId!==leader.id));
+  }
+  assert.deepEqual(await prisma.serviceVisit.findUnique({where:{id}}),regular);
+  const history=await prisma.extraVisit.findUnique({where:{id}});assert(history.internalNote.includes('Keep planner note'));assert(history.internalNote.includes('HANDOVER_ACCEPTED'));assert(history.internalNote.includes('CLOSED'));assert.equal(history.execution,null);assert.equal(history.billed,false);
+  const delayed=payload();await prisma.extraVisit.update({where:{id},data:{status:'DONE',endAt:new Date()}});
+  const delayedResult=await api('POST',paths[0],delayed);assert.equal(delayedResult.status,200,'Offline safety records must survive visit completion');await api('POST',`${paths[0]}/${delayedResult.body.reminder.id}/close`,{});
+  await prisma.extraVisit.update({where:{id},data:{status:'PLANNED',endAt:null}});
+  console.log('PASS typed EXTRA/REGULAR collision, owner/leader privacy, immutable retries, concurrent creation, offline completion, escalation, handover and physical closure');
+
+  const trigger=payload(),before=await prisma.extraVisit.findUnique({where:{id}});
+  await prisma.$executeRawUnsafe(`CREATE FUNCTION qa_extra_safety_failure() RETURNS trigger AS $$ BEGIN IF NEW."eventType"='WATER_OPEN_CREATED' AND NEW."metadata"->>'localId'='${trigger.localId}' THEN RAISE EXCEPTION 'QA safety notification failure'; END IF; RETURN NEW; END; $$ LANGUAGE plpgsql`);
+  await prisma.$executeRawUnsafe('CREATE TRIGGER qa_extra_safety_failure BEFORE INSERT ON "Notification" FOR EACH ROW EXECUTE FUNCTION qa_extra_safety_failure()');
+  try{assert.equal((await api('POST',paths[0],trigger)).status,500);assert.equal(await prisma.operationalReminder.count({where:{sourceKey:`water:TECH:${tech.id}:${trigger.localId}`}}),0);assert.deepEqual(await prisma.extraVisit.findUnique({where:{id}}),before);}finally{await prisma.$executeRawUnsafe('DROP TRIGGER qa_extra_safety_failure ON "Notification"');await prisma.$executeRawUnsafe('DROP FUNCTION qa_extra_safety_failure()');}
+  const recovered=await api('POST',paths[0],trigger);assert.equal(recovered.status,200);await api('POST',`${paths[0]}/${recovered.body.reminder.id}/close`,{});
+  console.log('PASS mandatory notification failure rolls back reminder and visit history; original request recovers');
+
+  browser=await chromium.launch({headless:true,executablePath:process.env.CW_CHROMIUM_PATH,args:['--no-sandbox','--disable-dev-shm-usage']});const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
+  await context.addInitScript(({token,tech,origin})=>{if(top!==window||location.origin!==origin||localStorage.getItem('qaSafetyAccount'))return;for(const key of ['token','cristalwater_jwt'])localStorage.setItem(key,token);for(const key of ['user','cristalwater_user'])localStorage.setItem(key,JSON.stringify({id:tech.id,role:'TECHNICIAN',name:tech.name}));localStorage.setItem('qaSafetyAccount','1');},{token,tech,origin:new URL(base).origin});
+  const page=await context.newPage();page.setDefaultTimeout(10000);const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  await page.goto(base+'/technician-field-mode',{waitUntil:'networkidle'});await page.locator('#visitList [data-visit-index]').filter({hasText:'EXTRA safety pool'}).click();await page.locator('[data-field-tab-button="agora"]').click();
+  await page.route('**/api/technician/*-reminders**',route=>route.abort());
+  await page.locator('[data-field-tab-button="more"]').click();await page.locator('#openWaterBtn').click();await page.locator('[data-field-tab-button="agora"]').click();await page.locator('#pumpReminderCreate').click();
+  await page.waitForFunction(()=>CWFieldReminders.list('WATER_OPEN').some(row=>!row.serverId)&&CWFieldReminders.list('PUMP_MANUAL').some(row=>!row.serverId));
+  const pending=await page.evaluate(()=>['WATER_OPEN','PUMP_MANUAL'].map(kind=>CWFieldReminders.list(kind).find(row=>!row.serverId)));
+  assert(pending.every(row=>row.visitType==='EXTRA'&&row.visitId===id&&row.poolId===pool.id));
+  for(const width of [320,390,1440]){await page.setViewportSize({width,height:900});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));}
+  if(process.env.CW_CAPTURE_UI){require('node:fs').mkdirSync('reports/field-ui',{recursive:true});await page.setViewportSize({width:390,height:844});await page.locator('[data-field-tab-button="more"]').click();await page.locator('.water-card').scrollIntoViewIfNeeded();await page.screenshot({path:'reports/field-ui/EXTRA_SAFETY_OFFLINE.png'});}
+  await page.reload({waitUntil:'networkidle'});await page.waitForFunction(()=>CWFieldReminders?.list('PUMP_MANUAL').some(row=>!row.serverId));
+  page.on('dialog',dialog=>dialog.accept());await page.locator('[data-field-tab-button="more"]').click();await page.locator(`[data-water-close="${pending[0].localId}"]`).click();await page.locator(`[data-pump-reminder="${pending[1].localId}"] button`).click();
+  await page.waitForFunction(()=>['WATER_OPEN','PUMP_MANUAL'].every(kind=>CWFieldReminders.list(kind).some(row=>!row.serverId&&row.status==='CLOSED')));
+  await page.evaluate(()=>CWFieldReminders.sync());
+  await page.unroute('**/api/technician/*-reminders**');
+  // Reject a superficially successful close, then recover the exact pending physical confirmation.
+  await page.route('**/api/technician/*-reminders/*/close',async route=>{const response=await route.fetch(),body=await response.json();body.reminder.isCompleted=false;await route.fulfill({json:body});});
+  await page.evaluate(()=>CWFieldReminders.sync());
+  const unconfirmed=await page.evaluate(()=>['WATER_OPEN','PUMP_MANUAL'].map(kind=>CWFieldReminders.list(kind).find(row=>row.payload&&row.status==='CLOSED')));assert(unconfirmed.every(row=>row.serverId&&row.syncError&&!row.closeSyncedAt),JSON.stringify(unconfirmed));
+  await page.unroute('**/api/technician/*-reminders/*/close');await page.evaluate(()=>CWFieldReminders.sync());
+  const confirmed=await page.evaluate(()=>['WATER_OPEN','PUMP_MANUAL'].map(kind=>CWFieldReminders.list(kind).find(row=>row.payload&&row.status==='CLOSED')));assert(confirmed.every(row=>row.closeSyncedAt&&!row.syncError));
+  for(const row of confirmed)assert.equal(await prisma.operationalReminder.count({where:{sourceKey:`${row.kind==='WATER_OPEN'?'water':'pump'}:TECH:${tech.id}:${row.localId}`}}),1);
+  console.log('PASS real mobile EXTRA controls, local persistence, reload, creation before offline closure and rejection of incomplete acknowledgements');
+
+  await page.evaluate(()=>localStorage.setItem('cwWaterReminders','[{"visitId":1,"note":"Ambiguous old owner"}]'));
+  assert((await page.evaluate(()=>CWFieldReminders.legacyWarning())).includes('antigos'));assert.equal(await page.evaluate(()=>localStorage.getItem('cwWaterReminders')),'[{"visitId":1,"note":"Ambiguous old owner"}]');
+  await page.locator('[data-field-tab-button="hoje"]').click();
+  assert.equal(await page.evaluate(()=>CWFieldVisitContext()?.id),id);
+  const stateKey=`cwFieldReminders:v1:TECH:${tech.id}`;
+  const quota=await page.evaluate(async key=>{const before=localStorage.getItem(key),original=Storage.prototype.setItem;Storage.prototype.setItem=function(name,value){if(name===key)throw Error('QA storage quota');return original.call(this,name,value);};let error;try{await CWFieldReminders.create('WATER_OPEN',{dueAt:new Date(Date.now()+3600000).toISOString()});}catch(failure){error=failure.message;}finally{Storage.prototype.setItem=original;}return {error,preserved:localStorage.getItem(key)===before};},stateKey);
+  assert.equal(quota.error,'QA storage quota');assert(quota.preserved);
+  const secondPage=await context.newPage();await secondPage.goto(base+'/technician-field-mode',{waitUntil:'networkidle'});await secondPage.waitForFunction(()=>CWFieldVisitContext()?.visitType==='EXTRA');
+  const simultaneous=await Promise.allSettled([page,secondPage].map(tab=>tab.evaluate(()=>CWFieldReminders.create('WATER_OPEN',{dueAt:new Date(Date.now()+3600000).toISOString()}))));
+  assert.equal(simultaneous.filter(reply=>reply.status==='fulfilled').length,1,'Two tabs must preserve one active local reminder');await secondPage.close();
+  console.log('PASS failed local storage sends nothing and simultaneous tabs preserve a single active reminder');
+  let release,started;const waiting=new Promise(resolve=>{started=resolve;});const gate=new Promise(resolve=>{release=resolve;});
+  await page.route('**/api/technician/water-reminders',async route=>{if(route.request().method()!=='POST')return route.continue();const response=await route.fetch();started();await gate;await route.fulfill({response}).catch(()=>{});});
+  const sending=page.evaluate(()=>CWFieldReminders.sync().catch(error=>error.message));await waiting;
+  const beforeSwitch=await page.evaluate(key=>localStorage.getItem(key),stateKey);
+  const delayedLocal=Object.values(JSON.parse(beforeSwitch)).find(row=>row.payload&&!row.serverId);
+  await page.evaluate(({token,other})=>{for(const key of ['token','cristalwater_jwt'])localStorage.setItem(key,token);for(const key of ['user','cristalwater_user'])localStorage.setItem(key,JSON.stringify({id:other.id,role:'TECHNICIAN'}));},{token:otherToken,other});
+  release();await sending;assert.equal(await page.evaluate(key=>localStorage.getItem(key),stateKey),beforeSwitch);
+  assert.equal(await page.evaluate(key=>localStorage.getItem(key),`cwFieldReminders:v1:TECH:${other.id}`),null);
+  await page.unroute('**/api/technician/water-reminders');
+  await page.evaluate(({token,tech})=>{for(const key of ['token','cristalwater_jwt'])localStorage.setItem(key,token);for(const key of ['user','cristalwater_user'])localStorage.setItem(key,JSON.stringify({id:tech.id,role:'TECHNICIAN',name:tech.name}));},{token,tech});
+  await page.reload({waitUntil:'networkidle'});await page.evaluate(()=>CWFieldReminders.sync());
+  const regained=await page.evaluate(localId=>CWFieldReminders.list('WATER_OPEN').find(row=>row.localId===localId),delayedLocal.localId);assert(regained.serverId);assert.equal(regained.payloadHash,delayedLocal.payloadHash);
+  assert.equal(await prisma.operationalReminder.count({where:{sourceKey:`water:TECH:${tech.id}:${delayedLocal.localId}`}}),1);
+  assert(errors.every(message=>/service.worker|registration|Failed to register/i.test(message)),JSON.stringify(errors));
+  console.log('PASS delayed response after account switch preserves the original queue and cannot write into another account');
+})().then(()=>console.log('RESULT=PASS')).catch(error=>{console.error(error);process.exitCode=1;}).finally(async()=>{await browser?.close();await prisma.$disconnect();});

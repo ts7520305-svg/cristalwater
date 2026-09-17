@@ -31,16 +31,9 @@
 
     const FLOW = { DRIP: 'A pingar', HALF: 'Meia aberta', FULL: 'Totalmente aberta' };
     const $ = (selector, root = document) => root.querySelector(selector);
-    const read = (key, fallback) => {
-      try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; } catch (_) { return fallback; }
-    };
-    const write = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {} };
-    const user = () => { try { return window.CristalAuth?.parseUser?.() || {}; } catch (_) { return {}; } };
-    const techId = () => String(user().technicianId || user().id || new URLSearchParams(location.search).get('technicianId') || localStorage.getItem('cwTechnicianId') || 'sem-tecnico');
-    const key = () => `cwWaterReminders:${techId()}`;
-    const rows = () => { const value = read(key(), []); return Array.isArray(value) ? value : []; };
-    const save = (value) => { write(key(), value || []); window.dispatchEvent(new Event('cw:water-state-updated')); };
-    const byId = (id) => rows().find((item) => String(item.localId || '') === String(id || '')) || null;
+    const reminders = window.CWFieldReminders;
+    const rows = () => reminders ? reminders.list('WATER_OPEN') : [];
+    const byId = id => rows().find(item => item.localId === id);
     const elapsed = (value) => {
       const date = new Date(value || 0);
       if (Number.isNaN(date.getTime())) return 'tempo por confirmar';
@@ -56,66 +49,7 @@
       node.classList.add('show');
       setTimeout(() => node.classList.remove('show'), 2400);
     };
-    const api = async (url, options = {}) => {
-      const response = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...options });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok || data.ok === false) throw new Error(data.error || data.message || 'Erro no servidor');
-      if (response.status === 202 || data.offline || data.status === 'PENDING_SYNC') throw new Error('Pendente de sincronização com o servidor');
-      if (!data.reminder?.id) throw new Error('O servidor não confirmou o registo da água');
-      return data;
-    };
-
-    async function refreshServerWater() {
-      if (!navigator.onLine) return;
-      const response = await fetch('/api/technician/water-reminders');
-      if (!response.ok) return;
-      const data = await response.json();
-      if (!Array.isArray(data.reminders)) return;
-      const list = rows();
-      for (const remote of data.reminders) {
-        let item = list.find(x => x.serverId === remote.id || x.localId === remote.metadata?.localId);
-        if (remote.transferredAway) { if (item) list.splice(list.indexOf(item),1); continue; }
-        if (item?.syncError) continue;
-        if (!item) { item = {localId:remote.metadata?.localId || `server-${remote.id}`}; list.push(item); }
-        Object.assign(item, remote.metadata || {}, {serverId:remote.id, technicianId:remote.assignedToTechnicianId, poolId:remote.poolId, clientId:remote.clientId, dueAt:remote.dueDate, createdAt:remote.createdAt, status:remote.isCompleted?'CLOSED':remote.metadata?.alarmedAt?'OVERDUE':'OPEN', syncError:''});
-      }
-      save(list);
-    }
-    let syncingWater = false;
-    async function syncPendingWaterState() {
-      if (!navigator.onLine || syncingWater) return;
-      syncingWater = true;
-      try {
-      for (const pending of rows()) {
-        if (!pending?.localId || !pending.syncError) continue;
-        let item = byId(pending.localId);
-        if (!item) continue;
-        try {
-          if (!item.serverId) {
-            const data = await api('/api/technician/water-reminders', { method: 'POST', body: JSON.stringify({ ...item, status: 'OPEN' }) });
-            // Re-read before saving: a user may have closed it during the request.
-            const next = rows(); item = next.find((entry) => entry.localId === pending.localId);
-            if (!item) continue;
-            item.serverId = data.reminder.id;
-            item.syncedAt = new Date().toISOString();
-            save(next);
-          }
-          if (item.status === 'CLOSED') {
-            await api(`/api/technician/water-reminders/${encodeURIComponent(item.serverId)}/close`, { method: 'POST', body: JSON.stringify(item) });
-          } else if (item.status === 'OVERDUE') {
-            await api(`/api/technician/water-reminders/${encodeURIComponent(item.serverId)}/alarm`, { method: 'POST', body: JSON.stringify(item) });
-          }
-          const next = rows(); const current = next.find((entry) => entry.localId === pending.localId);
-          if (current && current.status === item.status) {
-            current.syncError = '';
-            if (current.status === 'CLOSED') current.closeSyncedAt = new Date().toISOString();
-            save(next);
-          }
-        } catch (_) {}
-      }
-      } finally { syncingWater = false; }
-      await refreshServerWater().catch(() => {});
-    }
+    async function syncPendingWaterState() { await reminders?.sync(); }
 
     function enhance() {
       const card = $('.water-card');
@@ -154,7 +88,7 @@
         const reminder = byId(node.dataset.waterId);
         if (!reminder) return;
         const main = node.querySelector('.doc-number');
-        if (main) main.textContent = `Água aberta há ${elapsed(reminder.createdAt)}`;
+        if (main) main.textContent = reminder.status === 'CLOSED' ? 'Fecho físico confirmado; envio pendente' : `Água aberta há ${elapsed(reminder.createdAt)}`;
         let detail = node.querySelector('[data-water-flow-detail]');
         if (!detail) {
           detail = document.createElement('div');
@@ -173,51 +107,23 @@
     }
 
     async function openWater() {
-      const context = window.CWFieldVisitContext?.();
-      if (window.CWFieldVisitContext && (!context || context.visitType !== 'REGULAR')) return toast('Escolha uma visita regular. A execução da visita extra requer confirmação pelo escritório.');
-      const state = read('cw:tech-field:ui-state:v1', {});
-      const visitId = String(state.selectedVisitId || '');
-      if (!visitId) return toast('Seleciona uma piscina antes de marcar água aberta.');
+      if (!reminders) throw Error('Reabra a página para recuperar os lembretes.');
       const flowState = String($('#waterFlowState')?.value || 'FULL');
-      const userNote = String($('#waterNote')?.value || '').trim();
-      const createdAt = new Date();
+      const note = String($('#waterNote')?.value || '').trim();
       const safetyMinutes = Math.max(15, Math.min(1440, Number(localStorage.getItem('cwWaterSafetyMinutes')) || 120));
-      const reminder = {
-        localId: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-        status: 'OPEN', alerted: false, visitId,
-        poolName: String(state.selectedVisitTitle || $('#nextTitle')?.textContent || 'Piscina').trim(),
-        clientName: String($('#nextMeta')?.textContent || 'Cliente').split(' - ')[0].trim(),
-        technicianId: techId() === 'sem-tecnico' ? null : techId(), technicianName: String(user().name || ''),
-        flowState, userNote, note: `[Caudal: ${flowState}]${userNote ? ` ${userNote}` : ''}`,
-        createdAt: createdAt.toISOString(), dueAt: new Date(createdAt.getTime() + safetyMinutes * 60000).toISOString(),
-        reminderMode: 'SYSTEM_SAFETY', safetyMinutes,
-      };
-      const list = rows(); list.push(reminder); save(list); decorate();
-      toast('Água aberta registada. O aviso fica ativo até confirmares o fecho.');
-      try {
-        const data = await api('/api/technician/water-reminders', { method: 'POST', body: JSON.stringify(reminder) });
-        const next = rows(); const item = next.find((entry) => entry.localId === reminder.localId);
-        if (item) { item.serverId = data.reminder?.id || data.id || null; item.notificationId = data.notification?.id || null; item.syncError = ''; save(next); }
-      } catch (error) {
-        const next = rows(); const item = next.find((entry) => entry.localId === reminder.localId);
-        if (item) { item.syncError = error.message || 'Sem ligação ao servidor'; save(next); }
-      }
+      await reminders.create('WATER_OPEN', {flowState,note,dueAt:new Date(Date.now()+safetyMinutes*60000).toISOString()});
+      toast('Água aberta guardada neste telemóvel. A confirmar no servidor.');
       if ($('#waterNote')) $('#waterNote').value = '';
-      setTimeout(() => location.reload(), 120);
+      await reminders.sync();
     }
 
     async function closeWater(localId) {
-      const reminder = byId(localId);
-      if (!reminder || !window.confirm('Confirma que a torneira está totalmente fechada?')) return;
-      const list = rows(); const item = list.find((entry) => entry.localId === localId);
-      if (!item) return;
-      item.status = 'CLOSED'; item.closedAt = new Date().toISOString(); item.closeConfirmed = true; item.closeConfirmedBy = user().name || 'Técnico';
-      item.closeDurationMinutes = Math.max(0, Math.round((Date.now() - new Date(item.createdAt || Date.now()).getTime()) / 60000)); save(list);
-      toast('Água fechada confirmada.');
-      try { await api(`/api/technician/water-reminders/${encodeURIComponent(item.serverId || localId)}/close`, { method: 'POST', body: JSON.stringify(item) }); item.syncError = ''; item.closeSyncedAt = new Date().toISOString(); save(list); }
-      catch (error) { item.syncError = error.message || 'Fecho pendente de sincronização'; save(list); }
-      setTimeout(() => location.reload(), 120);
+      if (!byId(localId) || !window.confirm('Confirma que a torneira está totalmente fechada?')) return;
+      await reminders.mark('WATER_OPEN',localId,'close');
+      toast('Fecho guardado neste telemóvel. A confirmar no servidor.');
+      await reminders.sync();
     }
+    window.CWWaterReminders = {open:openWater,close:closeWater};
 
     document.addEventListener('click', (event) => {
       const openButton = event.target.closest('#openWaterBtn');
@@ -229,11 +135,11 @@
     const observer = new MutationObserver(() => {
       // Decoration changes child nodes. Do not observe our own writes.
       observer.disconnect();
-      try { decorate(); }
+      try { decorate(); } catch (error) { toast(error.message); }
       finally { observer.observe(document.body, { childList: true, subtree: true }); }
     });
     observer.observe(document.body, { childList: true, subtree: true });
-    setInterval(() => { decorate(); syncPendingWaterState().catch(() => {}); }, 30000);
+    setInterval(() => { try { decorate(); } catch (error) { toast(error.message); } }, 30000);
     window.addEventListener('online', () => syncPendingWaterState().catch(() => {}));
     decorate();
     syncPendingWaterState().catch(() => {});

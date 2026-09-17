@@ -30,12 +30,13 @@
   window.addEventListener('pagehide', () => { ++fieldWriteGeneration; ++routeRevision; });
   const sameFieldSession = () => window.CWFieldWriteStore?.same(fieldWriteSession);
   const startingVisits = new Set();
-  const extraVisitNotice = 'Visita extra: registe o trabalho, as medições, os produtos e as fotografias. Para água aberta, bomba em manual, impedimentos ou correções após concluir, contacte o escritório.';
-  window.CWFieldVisitContext = () => sameFieldSession() && current() ? { id:current().id, visitType:current().visitType || 'REGULAR', poolId:current().poolId || current().pool?.id } : null;
+  const extraVisitNotice = 'Visita extra: registe o trabalho, as medições, os produtos e as fotografias. Pode também registar água aberta ou bomba em manual. Para impedimentos ou correções após concluir, contacte o escritório.';
+  window.CWFieldVisitContext = () => sameFieldSession() && current() ? { id:current().id, visitType:current().visitType || 'REGULAR', poolId:current().poolId || current().pool?.id, clientId:current().clientId || current().client?.id || current().pool?.clientId, poolName:current().pool?.name, clientName:current().client?.name, technicianName:activeTechnician?.name || current().technician?.name } : null;
   let visitPhotos = [];
   let visitDrafts = {};
   let visitPhotosByKey = {};
   let waterReminders = [];
+  let waterRemindersError = '';
   let usedProducts = [];
   let activeWorkGuide = null;
   let activeWorkStock = [];
@@ -535,10 +536,6 @@
       localStorage.setItem(key, JSON.stringify(value));
       return true;
     } catch (_) { return false; }
-  }
-
-  function waterReminderStorageKey(technicianId = currentTechnicianId()) {
-    return `cwWaterReminders:${String(technicianId || "sem-tecnico").trim() || "sem-tecnico"}`;
   }
 
   function toast(message) {
@@ -2335,39 +2332,27 @@
     return waterReminders.filter((reminder) => reminder.status !== "CLOSED" && reminderBelongsToCurrentContext(reminder));
   }
 
-  function saveWaterReminders() {
-    waterReminders = waterReminders.filter(reminderBelongsToCurrentContext);
-    storageWrite(waterReminderStorageKey(), waterReminders);
-  }
-
-  function reminderBelongsToCurrentContext(reminder = {}) {
-    const technicianId = currentTechnicianId();
-    if (technicianId && reminder.technicianId && String(reminder.technicianId) !== String(technicianId)) return false;
-
-    return true;
-  }
+  function reminderBelongsToCurrentContext() { return sameFieldSession(); }
 
   function loadWaterRemindersFromStorage() {
-    const scoped = storageRead(waterReminderStorageKey(), null);
-    const legacy = storageRead("cwWaterReminders", []);
-    const source = Array.isArray(scoped) ? scoped : (Array.isArray(legacy) ? legacy : []);
-    waterReminders = source.filter(reminderBelongsToCurrentContext);
-    storageWrite(waterReminderStorageKey(), waterReminders);
+    try { waterReminders = window.CWFieldReminders?.list('WATER_OPEN') || []; waterRemindersError = ''; }
+    catch (error) { waterReminders = []; waterRemindersError = error.message; }
   }
 
   function waterReminderLabel(reminder) {
     const due = new Date(reminder.dueAt);
     if (Number.isNaN(due.getTime())) return "Hora por confirmar";
     const now = new Date();
-    if (reminder.status === "OVERDUE") return `Alerta enviado - previsto ${formatDate(due)}`;
+    if (reminder.status === "CLOSED") return "Torneira fechada; confirmação no servidor pendente";
+    if (reminder.status === "OVERDUE") return `Água por confirmar - previsto ${formatDate(due)}`;
     if (due <= now && reminder.status !== "CLOSED") return `Atrasado desde ${formatDate(due)}`;
     return `Lembrar em ${formatDate(due)}`;
   }
 
   function waterReminderSyncBadge(reminder) {
-    if (reminder.syncError) return '<span class="chip" style="background:rgba(255,107,107,.18);border-color:rgba(255,107,107,.5);color:#ffd0d0">Nao sincronizado</span>';
-    if (reminder.serverId) return '<span class="chip" style="background:rgba(51,209,122,.16);border-color:rgba(51,209,122,.5);color:#9affc6">Registado</span>';
-    return '<span class="chip" style="background:rgba(255,209,102,.16);border-color:rgba(255,209,102,.45);color:#ffd166">A sincronizar</span>';
+    if (reminder.syncError) return '<span class="chip" style="background:#fce4e4;border-color:#bd6464;color:#842020">Por confirmar</span>';
+    if (reminder.serverId) return '<span class="chip" style="background:#ddf4e7;border-color:#68a880;color:#185a30">Registado</span>';
+    return '<span class="chip" style="background:#fff0c6;border-color:#bd9c45;color:#604800">A sincronizar</span>';
   }
 
   function showWaterAlarmPopup(reminder) {
@@ -2384,7 +2369,9 @@
   function renderWaterReminders() {
     const list = $("#waterReminderList");
     if (!list) return;
-    const active = activeWaterReminders().sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt));
+    loadWaterRemindersFromStorage();
+    if (waterRemindersError) { list.textContent = waterRemindersError; return; }
+    const active = waterReminders.filter(row=>row.status!=="CLOSED" || !row.closeSyncedAt).sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt));
     if (!active.length) {
       list.innerHTML = '<div class="muted">Sem lembretes de agua aberta.</div>';
       renderInterruptBoard();
@@ -2400,15 +2387,15 @@
               <strong>${esc(reminder.poolName || "Piscina")}</strong>
               <div class="muted">${esc(reminder.clientName || "Cliente")} - ${esc(reminder.location || "Localizacao por confirmar")}</div>
               <div class="muted">${esc(reminder.note || "Sem nota adicional")}</div>
-              ${reminder.syncError ? `<div class="muted" style="color:#ffd0d0">Erro: ${esc(reminder.syncError)}</div>` : ""}
+              ${reminder.syncError ? `<div class="muted" style="color:#842020;background:#fce4e4;padding:4px;border-radius:4px"> ${esc(reminder.syncError)}</div>` : ""}
             </div>
             <div style="display:grid;gap:6px;justify-items:end">
-              <span class="chip">${overdue ? "ALARME" : "Aberta"}</span>
+              <span class="chip">${reminder.status === "CLOSED" ? "Fecho por enviar" : overdue ? "ALARME" : "Aberta"}</span>
               ${waterReminderSyncBadge(reminder)}
             </div>
           </div>
           <div class="doc-number" style="font-size:18px">${esc(waterReminderLabel(reminder))}</div>
-          <div class="water-actions">
+          <div class="water-actions" style="${reminder.status === "CLOSED" ? "display:none" : ""}">
             <button class="close" type="button" data-water-close="${esc(reminder.localId)}">Agua fechada</button>
             <button class="alarm" type="button" data-water-alarm="${esc(reminder.localId)}">Alertar equipa</button>
           </div>
@@ -2432,7 +2419,7 @@
   }
 
   function scheduleWaterReminder(reminder) {
-    if (!reminder?.localId || reminder.status === "CLOSED") return;
+    if (!reminder?.localId || reminder.status !== "OPEN") return;
     clearWaterTimer(reminder.localId);
     const dueMs = new Date(reminder.dueAt).getTime();
     if (!Number.isFinite(dueMs)) return;
@@ -2447,153 +2434,25 @@
     activeWaterReminders().forEach(scheduleWaterReminder);
   }
 
-  function waterDueFromInputs() {
-    const minutesRaw = ($("#waterMinutes")?.value || "").trim();
-    const timeRaw = ($("#waterCloseTime")?.value || "").trim();
-    const minutes = Number(minutesRaw.replace(",", "."));
-
-    if (Number.isFinite(minutes) && minutes > 0) {
-      return {
-        dueAt: new Date(Date.now() + minutes * 60 * 1000),
-        label: `${Math.round(minutes)} min`,
-        mode: "MINUTES",
-      };
-    }
-
-    if (timeRaw) {
-      const [hour, minute] = timeRaw.split(":").map(Number);
-      if (Number.isFinite(hour) && Number.isFinite(minute)) {
-        const due = new Date();
-        due.setHours(hour, minute, 0, 0);
-        if (due <= new Date()) due.setDate(due.getDate() + 1);
-        return {
-          dueAt: due,
-          label: due.toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" }),
-          mode: "CLOCK",
-        };
-      }
-    }
-
-    return null;
-  }
-
   async function createWaterReminder() {
-    const visit = current();
-    if (!requireRegularVisit(visit)) return;
-    if (!visit) {
-      toast("Seleciona uma piscina primeiro.");
-      return;
-    }
-
-    const due = waterDueFromInputs();
-    if (!due) {
-      toast("Indica os minutos ou a hora para fechar a agua.");
-      return;
-    }
-
-    const location = visitLocation(visit);
-    const reminder = {
-      localId: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-      status: "OPEN",
-      alerted: false,
-      visitId: visit.id || null,
-      poolId: visit.pool?.id || null,
-      clientId: visit.client?.id || null,
-      poolName: visit.pool?.name || "Piscina",
-      clientName: visit.client?.name || "Cliente",
-      location: location.address || visit.pool?.zone || "",
-      technicianId: currentTechnicianId() || visit.technician?.id || null,
-      technicianName: activeTechnician?.name || visit.technician?.name || "",
-      dueAt: due.dueAt.toISOString(),
-      reminderMode: due.mode,
-      note: ($("#waterNote")?.value || "").trim(),
-      createdAt: new Date().toISOString(),
-    };
-
-    waterReminders.push(reminder);
-    saveWaterReminders();
-    renderWaterReminders();
-    scheduleWaterReminder(reminder);
-    const waterMinutes = $("#waterMinutes");
-    const waterCloseTime = $("#waterCloseTime");
-    const waterNote = $("#waterNote");
-    if (waterMinutes) waterMinutes.value = "";
-    if (waterCloseTime) waterCloseTime.value = "";
-    if (waterNote) waterNote.value = "";
-
-    try {
-      const data = await api("/api/technician/water-reminders", {
-        method: "POST",
-        body: JSON.stringify(reminder),
-      });
-      reminder.serverId = data.reminder?.id || data.id || null;
-      reminder.notificationId = data.notification?.id || null;
-      reminder.syncError = "";
-      reminder.syncedAt = new Date().toISOString();
-      saveWaterReminders();
-      renderWaterReminders();
-      toast(`Agua aberta registada no sistema para ${due.label}.`);
-    } catch (error) {
-      reminder.syncError = error.message || "Sem ligacao ao servidor";
-      saveWaterReminders();
-      renderWaterReminders();
-      toast("Lembrete guardado no telemovel. Falhou o envio ao sistema.");
-    }
+    try { await window.CWWaterReminders?.open(); } catch (error) { toast(error.message); }
   }
 
   async function closeWaterReminder(localId) {
-    const reminder = waterReminders.find((item) => item.localId === localId);
-    if (!reminder) return;
-    reminder.status = "CLOSED";
-    reminder.closedAt = new Date().toISOString();
-    clearWaterTimer(localId);
-    saveWaterReminders();
-    renderWaterReminders();
-
-    try {
-      await api(`/api/technician/water-reminders/${encodeURIComponent(reminder.serverId || reminder.localId)}/close`, {
-        method: "POST",
-        body: JSON.stringify(reminder),
-      });
-      toast("Agua fechada registada no sistema.");
-    } catch (error) {
-      reminder.syncError = error.message || "Sem ligacao ao servidor";
-      saveWaterReminders();
-      toast("Agua fechada no telemovel. Falhou o envio ao sistema.");
-    }
+    try { await window.CWWaterReminders?.close(localId); } catch (error) { toast(error.message); }
   }
 
   async function escalateWaterReminder(localId, manual) {
-    const reminder = waterReminders.find((item) => item.localId === localId);
-    if (!reminder || reminder.status === "CLOSED") return;
-    reminder.status = "OVERDUE";
-    reminder.alerted = true;
-    reminder.alertedAt = new Date().toISOString();
-    saveWaterReminders();
-    renderWaterReminders();
-
-    if (navigator.vibrate) navigator.vibrate([300, 120, 300, 120, 500]);
-    toast(manual ? "Alerta enviado para a equipa." : "ALARME: verificar agua aberta.");
-    if (!manual) showWaterAlarmPopup(reminder);
-
+    if (!sameFieldSession()) return;
+    const reminder = window.CWFieldReminders?.list('WATER_OPEN').find(item=>item.localId===localId);
+    if (!reminder || reminder.status === 'CLOSED') return;
     try {
-      const data = await api(`/api/technician/water-reminders/${encodeURIComponent(reminder.serverId || reminder.localId)}/alarm`, {
-        method: "POST",
-        body: JSON.stringify({ ...reminder, manual }),
-      });
-      reminder.serverId = data.reminder?.id || reminder.serverId || null;
-      reminder.alertId = data.alert?.id || reminder.alertId || null;
-      reminder.notificationIds = Array.isArray(data.notifications) ? data.notifications.map((item) => item.id) : reminder.notificationIds;
-      reminder.syncError = "";
-      saveWaterReminders();
-      renderWaterReminders();
-      toast(manual ? "Alerta geral registado." : "Alarme geral enviado e registado.");
-    } catch (error) {
-      reminder.syncError = error.message || "Sem ligacao ao servidor";
-      saveWaterReminders();
-      renderWaterReminders();
-      toast("Alarme no telemovel, mas falhou o envio ao sistema.");
-    }
+      await window.CWFieldReminders.mark('WATER_OPEN',localId,'alarm');
+      if (navigator.vibrate) navigator.vibrate([300,120,300]);
+      toast('ALARME: verificar água aberta. A confirmar no servidor.');
+      if (!manual) showWaterAlarmPopup(reminder);
+      await window.CWFieldReminders.sync();
+    } catch (error) { toast(error.message); }
   }
 
   function renderTransportGuide(guide, items) {
@@ -3170,7 +3029,8 @@
     $('#fieldExtraVisitNotice').hidden = !extra;
     $('#fieldExtraVisitNotice').textContent = extra ? extraVisitNotice : '';
     for (const selector of [...draftFieldIds.map(id=>'#'+id),...checkIds.map(id=>'#'+id),'#startBtn','#finishBtn','#incompleteSave','#problemBtn','#saveProblemBtn','#openWaterBtn','#pumpReminderCreate','#sendAdminAlertBtn','#addDoseBtn','#galleryPhotoBtn','#photoInput','#galleryPhotoInput','[data-photo-type]','#doseRows input','#doseRows select','#doseRows button']) document.querySelectorAll(selector).forEach(node=>{node.disabled=readOnly;});
-    if(extra)for(const selector of ['#incompleteSave','#problemBtn','#saveProblemBtn','#openWaterBtn','#pumpReminderCreate','#sendAdminAlertBtn'])document.querySelectorAll(selector).forEach(node=>{node.disabled=true;});
+    for(const selector of ['#openWaterBtn','#pumpReminderCreate'])document.querySelectorAll(selector).forEach(node=>{node.disabled=!visit || !sameFieldSession();});
+    if(extra)for(const selector of ['#incompleteSave','#problemBtn','#saveProblemBtn','#sendAdminAlertBtn'])document.querySelectorAll(selector).forEach(node=>{node.disabled=true;});
     $("#progressText").textContent = visits.length ? `${visits.filter(isVisitDone).length} de ${visits.length} visitas concluídas` : "Sem visitas atribuídas";
 
     if (!visit) {
@@ -4039,7 +3899,7 @@
     persistModernRoute();
     render();
   });
-  window.addEventListener('cw:water-state-updated', () => { loadWaterRemindersFromStorage(); renderWaterReminders(); });
+  window.addEventListener('cw:water-state-updated', () => { loadWaterRemindersFromStorage(); renderWaterReminders(); scheduleWaterReminders(); });
   const incompleteKey=()=>`cwIncompleteVisits:${currentTechnicianId()}`;
   function readIncomplete(key=incompleteKey()) {
     const rows=JSON.parse(localStorage.getItem(key)||'{}');

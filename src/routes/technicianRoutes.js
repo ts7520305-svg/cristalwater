@@ -741,7 +741,7 @@ router.patch("/visits/:id/correction", async (req, res) => {
 const waterReminderService = require('../services/waterReminderService');
 function waterHandler(action) {
   return async (req, res) => {
-    try { return res.json(await action(req)); }
+    try { res.set('Cache-Control', 'private, no-store'); return res.json(await action(req)); }
     catch (error) {
       if (!error.statusCode) console.error('water reminder error:', error);
       return res.status(error.statusCode || 500).json({ ok: false, error: error.statusCode ? error.message : 'Erro ao guardar estado da água' });

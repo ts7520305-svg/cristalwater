@@ -3,7 +3,9 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { chromium } = require('playwright');
-const source = fs.readFileSync(path.join(__dirname, '../frontend/crystal-os-v2-shell.js'), 'utf8');
+const sources = ['cw-field-write-store.js','cw-field-reminders.js','crystal-os-v2-shell.js'].map(name=>fs.readFileSync(path.join(__dirname,'../frontend',name),'utf8'));
+const source = sources.join('\n');
+const {hash}=require('../src/services/fieldWriteRequestService');
 const html = `<meta charset="utf-8"><body><div id="nextTitle">Piscina de ensaio</div><div id="nextMeta">Cliente de ensaio</div><div id="accessList">Fechar o portão. Confirmar válvulas.</div><div class="water-card"><div class="muted"></div><div class="water-grid"><input id="waterMinutes"><input id="waterCloseTime"><input id="waterNote"></div></div><div id="toast"></div><button id="openWaterBtn">Água aberta</button><button id="startBtn">Iniciar visita</button><div id="waterReminderList"></div></body>`;
 const deadline = setTimeout(() => { console.error('FAIL: browser did not remain responsive'); process.exit(1); }, 25000);
 (async () => {
@@ -12,21 +14,29 @@ const deadline = setTimeout(() => { console.error('FAIL: browser did not remain 
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
     page.setDefaultTimeout(5000);
     page.on('pageerror', e => console.error('PAGE', e.message));
-    let mode = 'queued';
+    let mode = 'queued', saved;
+    const localKey='cwFieldReminders:v1:TECH:41';
     const requests = [];
-    await page.route('http://field.test/**', async (route) => {
+    await page.route('http://127.0.0.1:59998/**', async (route) => {
       const url = new URL(route.request().url());
       if (url.pathname.startsWith('/api/')) {
         requests.push({ method: route.request().method(), path: url.pathname, body: route.request().postDataJSON() });
-        return route.fulfill({ status: mode === 'queued' ? 202 : 200, contentType: 'application/json', body: JSON.stringify(mode === 'queued' ? { ok: true, offline: true, status: 'PENDING_SYNC' } : { ok: true, reminder: { id: 7 } }) });
+        if(route.request().method()==='GET')return route.fulfill({json:{ok:true,reminders:saved&&url.pathname.includes('water-reminders')?[saved]:[]}});
+        if(mode==='queued')return route.fulfill({status:202,json:{ok:true,offline:true,status:'PENDING_SYNC'}});
+        if(url.pathname.endsWith('/water-reminders')){const body=route.request().postDataJSON(),{owner,localId,...payload}=body;saved={id:7,sourceKey:`water:${owner}:${localId}`,assignedToTechnicianId:41,poolId:9,clientId:3,isCompleted:false,dueDate:body.dueAt,createdAt:body.openedAt,metadata:{...body,kind:'WATER_OPEN',payloadHash:hash({kind:'WATER_OPEN',...payload})}};}
+        if(url.pathname.endsWith('/close'))saved.isCompleted=true;
+        return route.fulfill({json:{ok:true,reminder:saved}});
       }
       return route.fulfill({ contentType: url.pathname.endsWith('.js') ? 'text/javascript' : 'text/html', body: url.pathname.endsWith('.js') ? '' : html });
     });
-    await page.goto('http://field.test/technician-field-mode');
+    await page.goto('http://127.0.0.1:59998/technician-field-mode');
     await page.evaluate(() => {
       localStorage.setItem('cwTechnicianId', '41');
       localStorage.setItem('cw:tech-field:ui-state:v1', JSON.stringify({ selectedVisitId: '5' }));
-      window.CristalAuth = { parseUser: () => ({ id: 41, name: 'Técnico QA' }) };
+      const token='qa.'+btoa(JSON.stringify({id:41,role:'TECHNICIAN'}))+'.qa';
+      localStorage.setItem('token',token);
+      window.CristalAuth = { getToken:()=>token, parseUser: () => ({ id: 41, name: 'Técnico QA' }) };
+      window.CWFieldVisitContext=()=>({id:5,visitType:'REGULAR',poolId:9,clientId:3,poolName:'Piscina de ensaio'});
       window.CWV2StateAdapter = { start() {} };
       window.starts = 0;
       document.querySelector('#startBtn').addEventListener('click', () => window.starts++);
@@ -45,8 +55,8 @@ const deadline = setTimeout(() => { console.error('FAIL: browser did not remain 
 
     // A 202 from the service worker is queued locally, not acknowledged by the server.
     await page.getByRole('button', { name: 'Água aberta', exact: true }).click();
-    await page.waitForFunction(() => JSON.parse(localStorage.getItem('cwWaterReminders:41') || '[]').some(r => r.syncError));
-    const pending = await page.evaluate(() => JSON.parse(localStorage.getItem('cwWaterReminders:41'))[0]);
+    await page.waitForFunction(() => Object.values(JSON.parse(localStorage.getItem('cwFieldReminders:v1:TECH:41') || '{}')).some(r => r.syncError));
+    const pending = await page.evaluate(() => Object.values(JSON.parse(localStorage.getItem('cwFieldReminders:v1:TECH:41')))[0]);
     assert.equal(pending.serverId == null, true);
     assert.ok(pending.syncError);
     console.log('PASS offline acknowledgement remains pending');
@@ -54,16 +64,13 @@ const deadline = setTimeout(() => { console.error('FAIL: browser did not remain 
     // A close made offline without a server id must sync creation before closure.
     await page.waitForTimeout(200);
     mode = 'online'; requests.length = 0;
-    await page.evaluate((item) => {
-      item.status = 'CLOSED'; item.syncError = 'offline';
-      localStorage.setItem('cwWaterReminders:41', JSON.stringify([item]));
-      window.CristalAuth = { parseUser: () => ({ id: 41 }) };
-      window.CWV2StateAdapter = { start() {} };
+    await page.evaluate(async (item) => {
+      await CWFieldReminders.mark('WATER_OPEN',item.localId,'close');
+      await CWFieldReminders.sync();
     }, pending);
-    await page.addScriptTag({ content: source });
-    await page.waitForFunction(() => JSON.parse(localStorage.getItem('cwWaterReminders:41'))[0].closeSyncedAt);
+    await page.waitForFunction(() => Object.values(JSON.parse(localStorage.getItem('cwFieldReminders:v1:TECH:41')))[0].closeSyncedAt);
     assert.deepEqual(requests.filter(r => r.method === 'POST').map(r => r.path), ['/api/technician/water-reminders', '/api/technician/water-reminders/7/close']);
-    const closed = await page.evaluate(() => JSON.parse(localStorage.getItem('cwWaterReminders:41'))[0]);
+    const closed = await page.evaluate(() => Object.values(JSON.parse(localStorage.getItem('cwFieldReminders:v1:TECH:41')))[0]);
     assert.equal(closed.status, 'CLOSED');
     assert.equal(closed.syncError, '');
     console.log('PASS offline close is replayed after creation');
