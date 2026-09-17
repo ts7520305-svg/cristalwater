@@ -36,7 +36,7 @@
   let currentDraftEntry = null;
   const visitDraftManager = window.CWFieldVisitDrafts.create(fieldWriteSession, { changed(entry, fill) {
     if (!sameFieldSession() || entry !== currentDraftEntry) return;
-    if (fill) { const draft=visitDraftManager.expand(entry); applyVisitForm(draft); visitPhotos=draft.photos || []; visitPhotosByKey[entry.key]=visitPhotos;renderPhotoList(); }
+    if (fill) { const draft=visitDraftManager.expand(entry); applyVisitForm(draft); visitPhotos=(draft.photos || []).map(photo=>({...photo,visitId:entry.id,visitType:entry.type}));visitPhotosByKey[entry.key]=visitPhotos;renderPhotoList(); }
     visitDraftManager.paint(entry);
   } });
   window.CWFieldDraftSummary = () => visitDraftManager.pendingSummary();

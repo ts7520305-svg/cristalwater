@@ -14,7 +14,7 @@ A escrita usa Web Locks por conta, compara o rascunho observado de cada visita e
 - Corrupção, conta ou piscina incompatível, falta de espaço, ausência de Web Locks e leitura diferente após gravação nunca produzem uma indicação de sucesso. A repetição local é explícita e os campos em memória são conservados.
 - A hora de início confirmada pelo servidor substitui a hora provisória local. A confirmação do início não cria uma falsa disputa de medições.
 
-O painel de diferenças está no conteúdo deslocável, separado da barra fixa de ações. Texto é inserido literalmente. Os botões não são recriados sem necessidade durante a gravação, preservando cliques ao sair de um campo. Impedimentos têm o seu próprio rascunho da TASK216; mudar de visita carrega ou limpa esse formulário pela identidade correta.
+O painel de diferenças está no conteúdo deslocável, separado da barra fixa de ações. Texto é inserido literalmente. Os botões não são recriados sem necessidade durante a gravação, preservando cliques ao sair de um campo. Fotografias são comparadas pela identidade, sem criar diferenças pelo nome local/servidor; a aplicação de uma escolha conserva a identidade tipada da visita para continuar a abrir fotografias EXTRA com autenticação. Impedimentos têm o seu próprio rascunho da TASK216; mudar de visita carrega ou limpa esse formulário pela identidade correta.
 
 ## Conclusão e correção
 
@@ -22,7 +22,7 @@ Antes de concluir, o formulário aguarda a gravação, verifica novamente o rasc
 
 O rascunho da correção REGULAR usa a mesma preservação local e distingue a fase de correção da execução original. Após resposta válida, a referência local acompanha o registo corrigido. O endpoint de correção REGULAR conserva o contrato anterior: este lote não lhe acrescenta um comprovativo transacional novo nem uma versão opaca no servidor. A correção EXTRA mantém o fluxo próprio da TASK214.
 
-A revisão de fim de dia inclui rascunhos não submetidos e estados de gravação/revisão por resolver. O service worker v45 inclui o módulo novo; dados operacionais não entram na cache pública. Sem migração nova: mantêm-se 20 migrações aditivas.
+A revisão de fim de dia inclui rascunhos não submetidos e estados de gravação/revisão por resolver. O service worker v46 inclui o módulo novo e a correção das fotografias; dados operacionais não entram na cache pública. Sem migração nova: mantêm-se 20 migrações aditivas.
 
 ## Evidência
 
@@ -30,6 +30,7 @@ A revisão de fim de dia inclui rascunhos não submetidos e estados de gravaçã
 - E2E e execução extra aprovados em `run-1789632544841`; recuperação da ronda e impedimentos extra em `run-1789632616245`; identidade dos tipos em `run-1789632892041`. Na árvore funcional final, `run-1789633193588` aprovou o novo grupo, o E2E completo e os impedimentos extra, incluindo os ajustes de interface.
 - 388 testes unitários, quatro testes técnicos, 17 scripts de navegador e sintaxe de 538 ficheiros backend aprovados. Runner integrado ampliado para 120 grupos.
 - Painel revisto a 320, 390 e 1440 px; captura `reports/field-ui/MODERN_DRAFT_CONFLICTS.png` inspecionada.
+- `run-1789633679364`: ensaio novo ampliado com fotografia EXTRA real após recarga e escolhas de revisão aprovado. Um único ficheiro extra, nenhuma fotografia na visita REGULAR com o mesmo número e miniatura privada legível após a revisão. Regressão de execução extra repetida com esta correção.
 
 Publicação, CI nativo e restauro deste lote ainda por confirmar. O adaptador local PGlite serve o ensaio funcional dirigido; não substitui PostgreSQL 16 nativo. PNG preexistente preservado com SHA256 `fba3c8189d9e0a31d96b378550736f865d30a4019f5e8d4d4487b15cfc543a71`.
 

@@ -7,6 +7,7 @@
   const labels = { ph:'pH',chlorine:'Cloro',alkalinity:'Alcalinidade',salt:'Sal',orp:'ORP',temperature:'Temperatura',notes:'Notas',cleaned:'Limpeza',vacuumed:'Aspiração',basketCleaned:'Cestos',brushed:'Escovagem',waterlineClean:'Linha de água',backwashDone:'Lavagem do filtro',usedProducts:'Produtos utilizados',pendingProblems:'Ocorrências',startedAt:'Início da visita',photos:'Fotografias' };
   const clone = value => JSON.parse(JSON.stringify(value));
   const equal = (a,b) => JSON.stringify(a) === JSON.stringify(b);
+  const sameField = (id,a,b) => id === 'photos' ? equal(a.map(photo=>photo.url ? [photo.url,photo.type] : [photo.localId,photo.type]).sort(),b.map(photo=>photo.url ? [photo.url,photo.type] : [photo.localId,photo.type]).sort()) : equal(a,b);
   const object = value => value && typeof value === 'object' && !Array.isArray(value);
   const visitKey = visit => `visit-${visit.visitType || 'REGULAR'}-${visit.id}`;
   const done = visit => !!visit.endAt || ['DONE','COMPLETED','CONCLUIDA'].includes(visit.status);
@@ -47,15 +48,15 @@
     function notify(entry, fill = false) { if (active()) hooks.changed(entry,fill); }
     function proposal(entry,id,value,source) {
       const rows = (entry.conflicts[id] || []).filter(row=>row.source !== source);
-      if (!equal(value,entry.fields[id])) rows.push({source,value:clone(value)});
+      if (!sameField(id,value,entry.fields[id])) rows.push({source,value:clone(value)});
       if (rows.length) entry.conflicts[id] = rows; else delete entry.conflicts[id];
     }
     function reconcile(entry, server) {
       for (const id of fields) {
         if (id === 'startedAt' && server[id]) { entry.fields[id]=server[id];delete entry.conflicts[id]; }
         else if (entry.conflicts[id]?.length) proposal(entry,id,server[id],'Servidor');
-        else if (equal(entry.fields[id],entry.baseline[id])) entry.fields[id] = clone(server[id]);
-        else if (!equal(server[id],entry.baseline[id]) && !equal(server[id],entry.fields[id])) proposal(entry,id,server[id],'Servidor');
+        else if (sameField(id,entry.fields[id],entry.baseline[id])) entry.fields[id] = clone(server[id]);
+        else if (!sameField(id,server[id],entry.baseline[id]) && !sameField(id,server[id],entry.fields[id])) proposal(entry,id,server[id],'Servidor');
         entry.baseline[id] = clone(server[id]);
       }
       entry.server = clone(server);
@@ -72,7 +73,7 @@
           if (saved && (!saved._draft || saved._draft.mode === mode) && !entry.readonly) {
             entry.original = saved; entry.fields = flatten(saved); entry.observedFields = clone(entry.fields);
             if (saved._draft) { entry.baseline = clone(saved._draft.baseline); entry.conflicts = clone(saved._draft.conflicts); }
-            else for (const id of fields) if (!equal(entry.fields[id],server[id])) proposal(entry,id,server[id],'Registo anterior');
+            else for (const id of fields) if (!sameField(id,entry.fields[id],server[id])) proposal(entry,id,server[id],'Registo anterior');
           }
         } catch (error) { entry.error = error.message; entry.invalid = true; }
       }
@@ -121,8 +122,8 @@
         if (!saved || saved._draft && saved._draft.mode !== entry.mode) throw Error('O rascunho foi removido ou pertence a outra fase da visita. Copie os campos e reabra a visita.');
         const remote = flatten(saved), reference = entry.observedFields;
         for (const id of fields) {
-          if (equal(entry.fields[id],reference[id])) { entry.fields[id] = clone(remote[id]); if (saved._draft?.conflicts[id]) entry.conflicts[id] = clone(saved._draft.conflicts[id]); }
-          else if (!equal(remote[id],reference[id]) && !equal(remote[id],entry.fields[id])) proposal(entry,id,remote[id],'Outra janela');
+          if (sameField(id,entry.fields[id],reference[id])) { entry.fields[id] = clone(remote[id]); if (saved._draft?.conflicts[id]) entry.conflicts[id] = clone(saved._draft.conflicts[id]);else delete entry.conflicts[id]; }
+          else if (!sameField(id,remote[id],reference[id]) && !sameField(id,remote[id],entry.fields[id])) proposal(entry,id,remote[id],'Outra janela');
         }
         entry.observed = currentRaw(drafts,entry); entry.observedFields = clone(remote); entry.external = false; entry.error = ''; notify(entry,true); await schedule(entry);
       } catch(error) { entry.error = error.message; notify(entry); }
@@ -181,7 +182,7 @@
       for(const [key,draft] of Object.entries(drafts)){
         const entry=[...entries.values()].find(item=>item.key===key);const meta=draft._draft;
         if(meta?.mode==='WORK'&&rows.some(row=>row.resourceId===meta.visitId&&row.scope===(meta.visitType==='EXTRA'?'EXTRA_VISIT_COMPLETION':'VISIT_COMPLETION')))continue;
-        if(!meta||Object.keys(meta.conflicts||{}).length||fields.some(id=>!equal(flatten(draft)[id],meta.baseline?.[id])))items.push({kind:'pending',text:`${entry?.name || key} — rascunho de trabalho guardado, ainda não submetido.`});
+        if(!meta||Object.keys(meta.conflicts||{}).length||fields.some(id=>!sameField(id,flatten(draft)[id],meta.baseline?.[id])))items.push({kind:'pending',text:`${entry?.name || key} — rascunho de trabalho guardado, ainda não submetido.`});
       }
       for(const entry of entries.values())if(entry.pending||entry.error||entry.external)items.push({kind:'unknown',text:`${entry.name} — rascunho por guardar ou comparar. Não feche esta janela.`});
       return items;
