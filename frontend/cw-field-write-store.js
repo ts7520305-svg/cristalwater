@@ -141,7 +141,14 @@
         await update(record, captured, current => { if (current.response && !equal(current.response, result)) throw Error('Confirmações incompatíveis. Os dados foram preservados.'); const next = { ...current, response: result }; delete next.file; delete next.failure; return next; });
         const saved = await get(requestId, captured); if (!equal(saved.response, result)) throw Error('A confirmação não ficou guardada neste dispositivo.');
         window.dispatchEvent(new Event('cw:field-write-change')); return result;
-      } catch (error) { if (same(captured)) await update(record, captured, current => current.response ? current : { ...current, failure: { message: String(error.message).slice(0, 500), status: error.status || null, retryAt: error.retryAt || null, blocked: error.status >= 400 && error.status < 500 && ![401,408,425,429].includes(error.status) } }).catch(() => {}); throw error; }
+      } catch (error) {
+        // Account changes can abort fetch before its response reaches the
+        // identity check. Keep the original request and explain the interruption.
+        requireSession(captured);
+        await update(record, captured, current => current.response ? current : { ...current, failure: { message: String(error.message).slice(0, 500), status: error.status || null, retryAt: error.retryAt || null, blocked: error.status >= 400 && error.status < 500 && ![401,408,425,429].includes(error.status) } }).catch(() => {});
+        requireSession(captured);
+        throw error;
+      }
       finally { clearTimeout(timer); clearInterval(check); }
     });
   }

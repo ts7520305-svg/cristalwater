@@ -118,6 +118,23 @@ let browser;
   }
   console.log('PASS leader entry into modern/legacy field, visit, route, map and GPS; actual menu opens guide/history/profile without logout or administrative shortcuts');
 
+  await page.locator('.cw-v2-sidebar a[href="/help-center"]').click();
+  await page.waitForURL(base + '/help-center');
+  await page.locator('#topics [data-topic="safety"]').click();
+  assert.equal(await page.locator('#detail a').getAttribute('href'), '/technician-field-mode');
+  assert.equal(await page.locator('#topics [data-topic="aiAdmin"]').count(), 0);
+  await page.keyboard.press('Control+k');
+  await page.locator('.cw-command').waitFor();
+  assert.equal(await page.locator('.cw-command-results a[href^="/admin-"]').count(), 0);
+  await page.keyboard.press('Escape');
+  await page.locator('#detail a').click();
+  await page.waitForURL(base + '/technician-field-mode');
+  await page.waitForFunction(() => document.querySelector('#visitList [data-visit-index]'));
+  await selectRegular();
+  assert.equal(await page.locator('#notes').inputValue(), 'Rascunho da sessão PIN');
+  assert.equal(await token(), pinToken);
+  console.log('PASS actual TEAM_LEADER menu, role help and quick commands return to the real route with original session and draft');
+
   await goto('/login');
   await page.locator('#email').fill(email);
   await page.locator('#password').fill(password);

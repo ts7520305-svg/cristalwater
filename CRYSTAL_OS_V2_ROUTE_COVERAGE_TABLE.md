@@ -62,7 +62,7 @@
 | /config-notifications | Config Notifications | ADMIN | Admin Route Index | /crystal-os-v2-route-index | YES | Reachable through Route Index |
 | /crystal-os-v2-route-index | Crystal Os V2 Route Index | ADMIN | Admin Route Index | /crystal-os-v2-route-index | YES | Direct in V2 navigation |
 | /dashboard | Dashboard | ADMIN | Admin Route Index | /crystal-os-v2-route-index | YES | Reachable through Route Index |
-| /help-center | Help Center | ADMIN | Admin Route Index | /crystal-os-v2-route-index | YES | Reachable through Route Index |
+| /help-center | Role help centre | ADMIN, CLIENT, TECHNICIAN, TEAM_LEADER | Role navigation | /help-center | YES | Topics and quick commands follow the authenticated role |
 | /incident-center | Incident Center | ADMIN | Admin Route Index | /crystal-os-v2-route-index | YES | Reachable through Route Index |
 | /invoices | Invoices | ADMIN | Admin Route Index | /invoices | YES | Direct in V2 navigation |
 | /login | Login | PUBLIC | Auth Entry | /crystal-os-v2-route-index | YES | Reachable through Route Index |

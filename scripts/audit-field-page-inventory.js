@@ -35,6 +35,7 @@ const pages = walk(frontend).filter(file => file.endsWith('.html')).sort().map(f
     if (route === '/client-portal') { roles.add('ADMIN'); conditionalAccess.push('ADMIN: pré-visualização existente do portal'); }
     if (route === '/client_chat') entryRedirects.ADMIN = '/chat';
     if (route === '/settings') { ['ADMIN', 'TECHNICIAN', 'TEAM_LEADER'].forEach(role => roles.add(role)); conditionalAccess.push('Preferências: a API exige titularidade User; CLIENT/PIN podem receber estado indisponível'); }
+    if (route === '/help-center') { ['ADMIN', 'TECHNICIAN', 'TEAM_LEADER'].forEach(role => roles.add(role)); conditionalAccess.push('Ajuda e comandos rápidos filtrados pelo perfil autenticado'); }
   }
   const searchRoute = topLevel ? route : '/' + relative;
   const escaped = searchRoute.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -46,7 +47,7 @@ const result = { generatedAt: new Date().toISOString(), baseCommit: execFileSync
 const escape = value => String(value || '—').replace(/\|/g, '\\|').replace(/[\r\n]/g, ' ');
 const differences = pages.filter(page => page.catalogueRolesMissingFromGuard.length);
 const markdown = [
-  '# TASK225 — Inventário atual de páginas', '',
+  '# TASK226 — Inventário atual de páginas', '',
   `Base publicada: \`${result.baseCommit}\`. Gerado em ${result.generatedAt}. Inclui as alterações locais do lote TASK225.`, '',
   `${result.summary.htmlFiles} ficheiros HTML: ${result.summary.rootPages} entradas de raiz e ${result.summary.nestedPages} ficheiros auxiliares/protótipos/testes. ${result.summary.missingAssetReferences} referências locais a scripts/estilos/recursos sem ficheiro correspondente.`, '',
   `Foram procuradas referências literais em ${scripts.size} scripts de integração/navegador ativos. ${result.summary.pagesWithLiteralTestReference} páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.`, '',
@@ -58,10 +59,10 @@ const markdown = [
   'O menu principal, o menu comum e o cabeçalho da frota deixam de encaminhar o administrador para guardas exclusivas de técnicos. As permissões dessas páginas técnicas permanecem iguais.', '',
   '## Diferenças a rever no catálogo', '',
   ...(differences.length ? ['| Página | Papéis do catálogo sem correspondência na guarda declarada |', '|---|---|', ...differences.map(page => `| ${page.route} | ${page.catalogueRolesMissingFromGuard.join(', ')} |`)] : ['Nenhuma diferença detetada nas páginas com ficheiro de guarda explícito.']), '',
-  'Estas diferenças são itens de revisão, não autorização para alargar acessos. TASK222 alinhou guias/GPS; TASK224 alinhou outras dezasseis entradas do catálogo com as guardas existentes, sem alterar permissões. TASK225 torna a página de preferências acessível aos quatro perfis autenticados, mantendo a titularidade User na API e um estado indisponível para CLIENT/PIN. Permanecem ajuda e configuração local antiga de notificações. As versões anteriores do catálogo/inventário estão no Git.', '',
+  'Estas diferenças são itens de revisão, não autorização para alargar acessos. TASK222 alinhou guias/GPS; TASK224 alinhou outras dezasseis entradas do catálogo com as guardas existentes, sem alterar permissões. TASK225 torna a página de preferências acessível aos quatro perfis autenticados, mantendo a titularidade User na API e um estado indisponível para CLIENT/PIN. TASK226 adapta a ajuda e os comandos rápidos ao perfil. Permanece a configuração local antiga de notificações. As versões anteriores do catálogo/inventário estão no Git.', '',
   '## Menu por perfil', '',
   'TASK224 escolhe a navegação pela indicação de papel da página, usando a sessão como segunda opção e o nome do URL apenas como último recurso. CLIENT deixa de receber o menu ADMIN nas páginas genéricas; a rentabilidade mantém menu ADMIN apesar do prefixo técnico. O menu técnico deixa de oferecer cinco destinos administrativos recusados e usa os percursos existentes para guias/stock, histórico e perfil. Registos de campo continuam na entrada Rota do dia e Visita; não há acesso novo ao inventário ou à gestão da frota.', '',
-  'No menu ADMIN, Configurações gerais continua a abrir a central administrativa. O atalho duplicado para a página de som foi removido. Avisos de manutenção abre os controlos existentes na central; não se apresenta essa capacidade como um editor geral de modelos/regras. TASK225 corrige a consulta/gravação de preferências em `/settings`, com confirmação exata, falhas visíveis, separação da identidade, cinco idiomas e estados de acesso recusado. A ajuda e a configuração local antiga de notificações ainda exigem revisão própria.', '',
+  'No menu ADMIN, Configurações gerais continua a abrir a central administrativa. O atalho duplicado para a página de som foi removido. Avisos de manutenção abre os controlos existentes na central; não se apresenta essa capacidade como um editor geral de modelos/regras. TASK225 corrige a consulta/gravação de preferências em `/settings`, com confirmação exata, falhas visíveis, separação da identidade, cinco idiomas e estados de acesso recusado. TASK226 permite ajuda por perfil; a configuração local antiga de notificações ainda exige revisão própria.', '',
   '## Inventário', '',
   '| Entrada | Tipo | Papéis no catálogo | Indícios de papel no código | Referências literais em QA |', '|---|---|---|---|---|',
   ...pages.map(page => `| ${escape(page.route)} | ${escape(page.kind)} | ${escape(page.catalogueRoles.join(', '))} | ${escape(page.explicitRoleHints.join(', '))} | ${page.testReferences.length} |`), '',

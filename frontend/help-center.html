@@ -6,59 +6,58 @@
   <title>Cristal Water · Centro de Ajuda</title>
   <link rel="stylesheet" href="/ui/foundation.css">
   <link rel="stylesheet" href="/cristal-assist.css">
+  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
+  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
+  <link rel="stylesheet" href="/ui/design-system.css">
   <style>
     *{box-sizing:border-box}
-    html, body{overflow-x:hidden}
-    body{margin:0;font-family:Arial,sans-serif;background:#050b16;color:#e8f7ff;}
-    .hero{padding:34px 24px 18px;max-width:1200px;margin:auto;}
-    .hero h1{font-size:clamp(32px,5vw,58px);margin:0 0 10px;color:#35d9ff;}
-    .hero p{max-width:820px;color:#91a8be;line-height:1.7;font-size:17px;}
-    .top-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px;}
-    .top-actions a{padding:12px 16px;border-radius:14px;text-decoration:none;background:linear-gradient(135deg,#35d9ff,#4f8cff);color:#03101d;font-weight:900;}
-    .wrap{max-width:1200px;margin:auto;padding:10px 24px 40px;display:grid;grid-template-columns:340px 1fr;gap:22px;}
-    .sidebar,.detail,.roadmap{background:linear-gradient(180deg,rgba(16,32,54,.94),rgba(8,18,32,.9));border:1px solid rgba(53,217,255,.24);border-radius:22px;box-shadow:0 24px 70px rgba(0,0,0,.45);padding:18px;}
-    input{width:100%;padding:14px;border-radius:14px;border:1px solid rgba(53,217,255,.32);background:rgba(0,0,0,.25);color:#e8f7ff;margin-bottom:14px;}
-    .topic{display:block;width:100%;text-align:left;margin-bottom:10px;padding:13px;border-radius:15px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.055);color:#e8f7ff;cursor:pointer;}
-    .topic strong{display:block;color:white;margin-bottom:5px;}.topic small{color:#91a8be;line-height:1.35;}
-    .topic.active{border-color:#35d9ff;background:rgba(53,217,255,.12);}
-    .detail h2{font-size:34px;color:#35d9ff;margin:0 0 10px;}.detail p{line-height:1.8;color:#cfe7f5;}.detail li{margin-bottom:8px;}
-    .roadmap{grid-column:1 / -1;}.roadmap-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}.roadmap-card{padding:15px;border-radius:16px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.045)}.roadmap-card b{color:#35d9ff;display:block;margin-bottom:7px}
-    @media(max-width:860px){.wrap{grid-template-columns:1fr}.hero{padding-top:24px}}
+    html,body{overflow-x:hidden}
+    body{margin:0;font-family:Arial,sans-serif;background:#f3f7f7;color:#173c43}
+    body.cw-role-help.cw-v2-shell-enabled{padding-left:280px;padding-top:92px}
+    body.cw-role-help>.cw-v2-shell-sidebar{position:fixed;background:#fff;color:#244b59}
+    body.cw-role-help>.cw-v2-shell-topbar{position:fixed;left:280px;top:0}
+    body.cw-role-help>.cw-v2-drawer,body.cw-role-help>.cw-v2-mobile-nav,body.cw-role-help>.cw-command-fab,body.cw-role-help>.cw-help-fab,body.cw-role-help>.cw-command,body.cw-role-help>.cw-command-backdrop,body.cw-role-help>.cw-drawer,body.cw-role-help>.cw-drawer-backdrop{position:fixed}
+    body.cw-role-help .cw-v2-sidebar a,body.cw-role-help .cw-v2-sidebar summary{color:#244b59}
+    body.cw-role-help>.cw-v2-drawer{z-index:1200}
+    body.cw-role-help .cw-v2-mobile-nav a{white-space:normal!important;overflow-wrap:anywhere;min-width:0;font-size:10px!important;padding:8px 2px!important}
+    .hero{padding:28px 24px 18px;max-width:1200px;margin:auto;min-width:0;overflow-wrap:anywhere}
+    .hero h1{font-size:clamp(28px,4vw,42px);margin:0 0 10px;color:#163d43}
+    .hero p{max-width:820px;color:#506a71;line-height:1.6;font-size:16px}
+    .top-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+    .top-actions a{display:inline-flex;align-items:center;min-height:44px;padding:10px 14px;border-radius:10px;text-decoration:none;background:#0c6c60;color:#fff;font-weight:700}
+    .help-shell{max-width:1200px;margin:auto;padding:10px 24px 40px;display:grid;grid-template-columns:300px minmax(0,1fr);gap:20px;align-items:start}
+    .help-shell .sidebar,.help-shell .detail{min-width:0;background:#fff;border:1px solid #d3e1e4;border-radius:16px;box-shadow:0 6px 24px rgba(25,60,67,.06);padding:18px;overflow-wrap:anywhere}
+    .help-shell label{display:block;color:#31535b;font-weight:700;margin-bottom:8px}
+    .help-shell input{width:100%;min-height:44px;padding:12px;border-radius:10px;border:1px solid #92acb3;background:#fff;color:#173c43;margin-bottom:14px}
+    .help-shell .topic{display:block;width:100%;min-height:44px;text-align:left;margin-bottom:10px;padding:13px;border-radius:10px;border:1px solid #d3e1e4;background:#f6f9fa;color:#173c43;cursor:pointer;box-shadow:none}
+    .help-shell .topic strong{display:block;color:#183e46;margin-bottom:5px}.help-shell .topic small{color:#516c74;line-height:1.4}
+    .help-shell .topic.active{border-color:#087564;background:#e7f5f0}
+    .help-shell .detail h2{font-size:clamp(24px,3vw,32px);color:#17474f;margin:0 0 12px}.help-shell .detail p{line-height:1.7;color:#35555d}.help-shell .detail li{margin-bottom:8px}
+    .help-shell .detail a{display:inline-flex;align-items:center;min-height:44px;margin-top:8px;padding:10px 14px;border-radius:10px;background:#0c6c60;color:#fff;text-decoration:none;font-weight:700}
+    .help-shell .topic:focus-visible,.hero a:focus-visible,.help-shell a:focus-visible{outline:3px solid #0c7564;outline-offset:3px}
+    @media(max-width:1200px){body.cw-role-help.cw-v2-shell-enabled{padding-left:0;padding-top:144px}body.cw-role-help>.cw-v2-shell-topbar{left:0}}
+    @media(max-width:860px){.help-shell{grid-template-columns:1fr}.hero{padding-top:20px}}
+    @media(max-width:480px){.hero,.help-shell{padding-left:14px;padding-right:14px}.help-shell .sidebar,.help-shell .detail{padding:14px}}
   </style>
   <script src="/cw-auth.js"></script>
   <script src="/client-auth-guard.js"></script>
-  <link rel="stylesheet" href="/ui/design-system.css">
 </head>
-<body class="cw-enterprise-theme" data-required-role="CLIENT">
-  <section class="hero">
-    <h1>❔ Centro de Ajuda Cristal Water</h1>
-    <p>Ajuda contextual para aprender cada função do sistema. Passa o cursor sobre botões, cartões e painéis para explicações rápidas. Usa <b>CTRL/CMD+K</b> para abrir o comando rápido.</p>
-    <div class="top-actions">
-      <a href="/admin-dashboard">🧠 Dashboard</a>
-      <a href="/admin-ai">🤖 Assistente interno</a>
-      <a href="/admin-rounds">🛰️ Rondas</a>
-      <a href="/technician">📱 Portal Técnico</a>
-      <a href="/admin-menu">⚡ Menu Enterprise</a>
-    </div>
+<body class="cw-enterprise-theme cw-role-help">
+  <section class="hero" data-cw-no-i18n>
+    <h1 id="helpTitle">Centro de Ajuda Cristal Water</h1>
+    <p id="helpIntro"></p>
+    <p id="helpStatus" role="status"></p>
+    <div class="top-actions" id="helpActions"></div>
   </section>
 
-  <main class="wrap">
+  <main class="wrap help-shell" data-cw-no-i18n>
     <aside class="sidebar">
-      <input id="search" placeholder="Pesquisar ajuda...">
+      <label for="search" id="searchLabel">Pesquisar ajuda</label>
+      <input id="search" type="search" placeholder="Pesquisar ajuda...">
       <div id="topics"></div>
+      <p id="emptyTopics" role="status" hidden></p>
     </aside>
     <section class="detail" id="detail"></section>
-    <section class="roadmap">
-      <h2>🚀 Evolução recomendada</h2>
-      <div class="roadmap-grid">
-        <div class="roadmap-card"><b>Rondas inteligentes</b>Otimização por distância, prioridade, tempo estimado, técnico disponível e urgência.</div>
-        <div class="roadmap-card"><b>Stock por viatura</b>Consumos automáticos por visita, reposição e custos reais por piscina.</div>
-        <div class="roadmap-card"><b>Portal cliente premium</b>Fotos, relatórios, pagamentos, mensagens e histórico sempre disponível.</div>
-        <div class="roadmap-card"><b>Ajuda e formação</b>Guias por função, onboarding de técnicos e explicação contextual em todos os módulos.</div>
-        <div class="roadmap-card"><b>IA operacional</b>Chat admin interno, ações pendentes de aprovação, alertas preditivos, scoring de risco, sugestões de rota e prioridades automáticas.</div>
-        <div class="roadmap-card"><b>Dashboards configuráveis</b>Widgets arrastáveis e vistas por função: admin, financeiro, técnico e cliente.</div>
-      </div>
-    </section>
   </main>
 
   <script src="/cristal-help-data.js"></script>

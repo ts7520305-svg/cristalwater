@@ -60,8 +60,11 @@ const deadline = setTimeout(() => { console.error('Session regression deadline e
     await page.evaluate(() => { window.upload = CWFieldOffline.submitCompletion(9, { notes: 'Owner 41' }).catch(e => e.message); });
     await page.waitForTimeout(100); assert(held); assert.equal(held.request().headers().authorization, 'Bearer ' + tokens.newer);
     await login(tokens.second, 42);
+    // Wait for the session monitor to abort the held upload before any response.
+    // A fast late response used to hide the raw AbortError in this path.
+    const interruptedUpload = await page.evaluate(() => window.upload);
     await held.fulfill({ status: 200, json: { photo: { id: 7, url: '/wrong-photo.jpg' } } }); held = null; hold = false;
-    assert.match(await page.evaluate(() => window.upload), /sessão mudou/i); assert.equal(completions, countBefore);
+    assert.match(interruptedUpload, /sessão mudou/i); assert.equal(completions, countBefore);
     assert.equal(await page.evaluate(async () => (await CWFieldPhotos.list(9)).length), 1); assert.equal(await page.evaluate(() => CWFieldOffline.pending(9)), false);
     await login(tokens.newer); assert.equal(await page.evaluate(async () => (await CWFieldPhotos.list(9)).length), 1); assert.equal(await page.evaluate(() => CWFieldOffline.pending(9)), true);
     await page.evaluate(() => CWFieldOffline.flush()); assert.equal(await page.evaluate(() => CWFieldOffline.pending(9)), false);

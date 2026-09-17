@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-17T11:57:00.888Z",
-  "baseCommit": "9006df083a03e624bf25f2fef9b625a4d1ae5bcd",
+  "generatedAt": "2026-09-17T12:27:13.920Z",
+  "baseCommit": "0f12bed82376b097f726f1532078f5cb8ab9019d",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 142,
+  "activeScriptsScanned": 143,
   "summary": {
     "htmlFiles": 101,
     "rootPages": 94,
     "nestedPages": 7,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 43,
-    "catalogueGuardDifferences": 2
+    "pagesWithLiteralTestReference": 45,
+    "catalogueGuardDifferences": 1
   },
   "pages": [
     {
@@ -1891,7 +1891,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "testReferences": [
+        "test-role-help-browser.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -2009,7 +2011,8 @@
       ],
       "missingAssets": [],
       "testReferences": [
-        "test-field-notification-confirmation.js"
+        "test-field-notification-confirmation.js",
+        "test-role-help-browser.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -2053,7 +2056,8 @@
       "missingAssets": [],
       "testReferences": [
         "test-field-team-leader-entry.js",
-        "test-auth-entry-browser.js"
+        "test-auth-entry-browser.js",
+        "test-role-help-browser.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -2106,7 +2110,8 @@
         "test-field-client-chat-history-ui.js",
         "test-field-client-portal-requests-ui.js",
         "test-field-team-leader-entry.js",
-        "test-auth-entry-browser.js"
+        "test-auth-entry-browser.js",
+        "test-role-help-browser.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -2236,7 +2241,8 @@
       "testReferences": [
         "test-field-client-chat-recovery-ui.js",
         "test-field-client-chat-history-ui.js",
-        "test-auth-entry-browser.js"
+        "test-auth-entry-browser.js",
+        "test-role-help-browser.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -2428,25 +2434,33 @@
       "kind": "Entrada raiz",
       "title": "Cristal Water · Centro de Ajuda",
       "catalogueRoles": [
-        "ADMIN"
+        "ADMIN",
+        "CLIENT",
+        "TECHNICIAN",
+        "TEAM_LEADER"
       ],
       "guardFiles": [
         "client-auth-guard.js"
       ],
       "explicitRoleHints": [
-        "CLIENT"
+        "ADMIN",
+        "CLIENT",
+        "TEAM_LEADER",
+        "TECHNICIAN"
       ],
-      "conditionalAccess": [],
+      "conditionalAccess": [
+        "Ajuda e comandos rápidos filtrados pelo perfil autenticado"
+      ],
       "entryRedirects": {},
-      "catalogueRolesMissingFromGuard": [
-        "ADMIN"
-      ],
+      "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/ui/foundation.css",
         "/cristal-assist.css",
+        "/crystal-os-v2-foundation.css",
+        "/crystal-os-v2-phase2-adapter.css",
+        "/ui/design-system.css",
         "/cw-auth.js",
         "/client-auth-guard.js",
-        "/ui/design-system.css",
         "/cristal-help-data.js",
         "/cristal-assist.js",
         "/help-center.js",
@@ -2456,7 +2470,10 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "testReferences": [
+        "test-field-team-leader-entry.js",
+        "test-role-help-browser.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -3091,7 +3108,8 @@
       "missingAssets": [],
       "testReferences": [
         "test-field-internal-chat-ui.js",
-        "test-field-team-leader-entry.js"
+        "test-field-team-leader-entry.js",
+        "test-role-help-browser.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -3174,6 +3192,7 @@
         "test-field-push-session-browser.js",
         "test-language-browser.js",
         "test-auth-entry-browser.js",
+        "test-role-help-browser.js",
         "test-field-briefing-browser.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
@@ -3258,7 +3277,8 @@
       ],
       "missingAssets": [],
       "testReferences": [
-        "test-field-team-leader-entry.js"
+        "test-field-team-leader-entry.js",
+        "test-role-help-browser.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -3438,7 +3458,8 @@
       ],
       "missingAssets": [],
       "testReferences": [
-        "test-field-team-leader-entry.js"
+        "test-field-team-leader-entry.js",
+        "test-role-help-browser.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },

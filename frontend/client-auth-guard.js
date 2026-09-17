@@ -41,8 +41,9 @@
     const adminPreview = role === 'ADMIN' && pathname === '/client-portal';
     // Account preferences use server-side User ownership. CLIENT/PIN can receive
     // an unavailable state; opening this page never grants access to that table.
-    const accountSettings = pathname === '/settings';
-    if (role !== 'CLIENT' && !adminPreview && !accountSettings) {
+    // The help centre selects static topics and shortcuts for the session role.
+    const sharedPage = ['/settings', '/help-center'].includes(pathname);
+    if (role !== 'CLIENT' && !adminPreview && !sharedPage) {
       window.location.replace(role === 'ADMIN' ? '/admin-master-control' : '/technician-field-mode');
       return;
     }

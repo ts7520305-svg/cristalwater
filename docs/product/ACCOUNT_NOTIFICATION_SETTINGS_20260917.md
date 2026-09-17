@@ -25,7 +25,7 @@ A revisão real TASK224 abriu `/settings` como CLIENT: a API respondeu 403, porq
 | `run-1789646198971` | Grupo TEAM_LEADER final aprovado: menu PIN não anuncia preferências User; o menu da sessão email abre a página e a gravação/recarga/regresso ao rascunho continuam a passar |
 | Novo grupo de navegador | Recusa não JSON, falha de rede, leitura inválida/conta alheia, respostas de gravação incompletas/discordantes/202, gravação com resposta perdida, ação repetida, atualização confirmada e resposta atrasada após troca de conta aprovadas. Cinco idiomas/três larguras aprovados |
 | Regressão local | 388 unitários, quatro técnicos, os 18 scripts de navegador e sintaxe de 539 ficheiros aprovados |
-| CI nativo | Publicar e confirmar a árvore final com 124 grupos de integração existentes, 18 scripts de navegador, 20 migrações e restauro |
+| CI nativo | Commit `0f12bed82376b097f726f1532078f5cb8ab9019d`, árvore `9dafae8ea9d89fb5cba6154ed799c40bc860b839`; CI `35218997083` aprovado: 124/124 grupos, 388 unitários/quatro técnicos, 18 scripts de navegador, 20 migrações, sintaxe de 539 ficheiros e restauro de 110 tabelas/32 ficheiros com linhas e hashes iguais em PostgreSQL 16 |
 
 O teste de navegador usa respostas controladas para exercitar falhas e confirmações contraditórias. O ensaio User/PIN usa APIs e base reais; não foi alargada a API para fazer o formulário passar. A guarda técnica continua a recusar perfis externos nos restantes percursos.
 

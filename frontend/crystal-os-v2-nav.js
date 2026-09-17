@@ -51,6 +51,7 @@
     '/admin-reports': { area: 'Relatorios e estatisticas', title: 'Relatorios' },
     '/report-center': { area: 'Relatorios e estatisticas', title: 'Centro de relatorios' },
     '/settings': { area: 'Configuracoes', title: 'Configuracoes' },
+    '/help-center': { area: 'Ajuda', title: 'Centro de ajuda' },
     '/admin-security': { area: 'Configuracoes', title: 'Permissoes e seguranca' },
     '/technician-field-mode': { area: 'Tecnico em campo', title: 'Rota do dia' },
     '/technician-route': { area: 'Tecnico em campo', title: 'Sequencia da rota' },
@@ -279,6 +280,7 @@
   function buildShell(role) {
     const base = NAV[role] || NAV.ADMIN;
     const config = { ...base, groups: base.groups.map(group => ({ ...group, links: [...group.links] })) };
+    if (role !== 'ADMIN') config.groups[config.groups.length - 1].links.push(['/help-center', 'Ajuda']);
     try {
       const user = window.CristalAuth?.parseUser?.() || JSON.parse(localStorage.getItem('cristalwater_user') || localStorage.getItem('user') || '{}');
       if (role === 'ADMIN' || user?.principalType === 'USER') {

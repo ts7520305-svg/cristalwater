@@ -1,8 +1,9 @@
 (function(){
   "use strict";
 
-  const topics = window.CRISTAL_HELP_TOPICS || {};
-  const quickActions = window.CRISTAL_QUICK_ACTIONS || [];
+  const topics = () => window.CristalHelp?.topics() || {};
+  const quickActions = () => window.CristalHelp?.actions() || [];
+  const words = () => window.CristalHelp?.words() || {};
   const LOGIN_PATHS = ["/", "/login", "/admin-login", "/client-login", "/technician-login"];
   const HELP_ENABLED_KEY = "cw_help_enabled";
   const HELP_MODE_KEY = "cw_help_mode";
@@ -18,8 +19,7 @@
   const isLoginPage = LOGIN_PATHS.includes(path);
 
   function isAuthenticatedArea(){
-    if(isLoginPage) return false;
-    return path.includes("admin") || path.includes("billing") || path.includes("invoice") || path.includes("incident") || path.includes("report") || path.includes("operational") || path.includes("dashboard") || path.includes("chat") || path.includes("client-") || path.includes("technician-");
+    return !isLoginPage && Boolean(window.CristalHelp?.session());
   }
 
   function helpEnabled(){
@@ -49,7 +49,8 @@
   }
 
   function getTopic(key){
-    return topics[key] || topics.default || { title:"Ajuda", summary:"Função do sistema.", detail:"", actions:[] };
+    const current = topics();
+    return (Object.hasOwn(current, key) && current[key]) || current.help || { title: words().help, summary: words().session, detail: '', actions: [] };
   }
 
   function classifyElement(el){
@@ -120,7 +121,7 @@
     const topic = getTopic(topicKey);
     if(!tooltip){ tooltip = document.createElement("div"); tooltip.className = "cw-tooltip"; tooltip.addEventListener("mouseenter", ()=>{ if(tooltip) tooltip.dataset.keep = "1"; }); tooltip.addEventListener("mouseleave", hideTooltipSoon); document.body.appendChild(tooltip); }
     tooltip.dataset.keep = "";
-    tooltip.innerHTML = `<b>${escapeHtml(topic.title)}</b><span>${escapeHtml(topic.summary)}</span><br><button type="button" data-cw-open-help="${escapeHtml(topicKey)}">Abrir ajuda →</button>`;
+    tooltip.innerHTML = `<b>${escapeHtml(topic.title)}</b><span>${escapeHtml(topic.summary)}</span><br><button type="button" data-cw-open-help="${escapeHtml(topicKey)}">${escapeHtml(words().help)} →</button>`;
     tooltip.querySelector("button")?.addEventListener("click", (e)=>{ e.preventDefault(); e.stopPropagation(); openDrawer(topicKey); hideTooltip(); });
     positionTooltip(event);
   }
@@ -139,7 +140,8 @@
   function renderTopicButton(key, topic){ return `<button type="button" class="cw-topic-btn" data-topic="${escapeHtml(key)}"><strong>${escapeHtml(topic.title)}</strong><small>${escapeHtml(topic.summary)}</small></button>`; }
   function renderDetail(key){
     const topic = getTopic(key); const actions = (topic.actions || []).map((item)=>`<li>${escapeHtml(item)}</li>`).join("");
-    return `<h3>${escapeHtml(topic.title)}</h3><p>${escapeHtml(topic.detail || topic.summary)}</p>${actions ? `<h4>Ações principais</h4><ul>${actions}</ul>` : ""}<a class="cw-help-full-link" href="/help-center?topic=${encodeURIComponent(key)}">Abrir centro completo →</a>`;
+    const safeKey = Object.hasOwn(topics(), key) ? key : 'help';
+    return `<h3>${escapeHtml(topic.title)}</h3><p>${escapeHtml(topic.detail || topic.summary)}</p>${actions ? `<h4>${escapeHtml(words().actions)}</h4><ul>${actions}</ul>` : ""}<a class="cw-help-full-link" href="/help-center?topic=${encodeURIComponent(safeKey)}">${escapeHtml(words().full)} →</a>`;
   }
 
   function openDrawer(topicKey="help"){
@@ -147,11 +149,11 @@
     setHelpEnabled(true);
     closeDrawer();
     drawerBackdrop = document.createElement("div"); drawerBackdrop.className = "cw-drawer-backdrop"; drawerBackdrop.addEventListener("click", closeDrawer);
-    drawer = document.createElement("aside"); drawer.className = "cw-drawer"; drawer.setAttribute("role", "dialog"); drawer.setAttribute("aria-label", "Ajuda Cristal Water");
-    const entries = Object.entries(topics).filter(([key])=>key !== "default");
-    drawer.innerHTML = `<header><h2>❔ Ajuda Cristal Water</h2><button class="cw-close" type="button" aria-label="Fechar">×</button></header>
-      <div class="cw-help-mode-row"><label><input type="checkbox" id="cwHelpHoverMode"> Mostrar dicas por hover prolongado</label><small>Long press 3s no mobile continua disponível.</small></div>
-      <input class="cw-help-search" placeholder="Pesquisar funcionalidade, ex: rondas, faturas, GPS...">
+    drawer = document.createElement("aside"); drawer.className = "cw-drawer"; drawer.setAttribute("role", "dialog"); drawer.setAttribute("aria-label", words().title); drawer.setAttribute('data-cw-no-i18n', '');
+    const entries = Object.entries(topics()).filter(([key])=>key !== "default");
+    drawer.innerHTML = `<header><h2>${escapeHtml(words().title)}</h2><button class="cw-close" type="button" aria-label="${escapeHtml(words().close)}">×</button></header>
+      <div class="cw-help-mode-row"><label><input type="checkbox" id="cwHelpHoverMode"> ${escapeHtml(words().hover)}</label><small>${escapeHtml(words().press)}</small></div>
+      <input class="cw-help-search" aria-label="${escapeHtml(words().search)}" placeholder="${escapeHtml(words().search)}">
       <div class="cw-topic-list">${entries.map(([key, topic])=>renderTopicButton(key, topic)).join("")}</div>
       <div class="cw-help-detail">${renderDetail(topicKey)}</div>`;
     document.body.appendChild(drawerBackdrop); document.body.appendChild(drawer);
@@ -170,12 +172,12 @@
     if(!isAuthenticatedArea()) return;
     closeCommand();
     commandBackdrop = document.createElement("div"); commandBackdrop.className = "cw-command-backdrop"; commandBackdrop.addEventListener("click", closeCommand);
-    command = document.createElement("section"); command.className = "cw-command"; command.setAttribute("role", "dialog"); command.setAttribute("aria-label", "Comando rápido Cristal Water");
-    command.innerHTML = `<header><h2>⚡ Comando rápido</h2><button class="cw-close" type="button" aria-label="Fechar">×</button></header><input class="cw-command-search" placeholder="Pesquisar: rondas, clientes, mapa, faturas..." autofocus><div class="cw-command-results"></div>`;
+    command = document.createElement("section"); command.className = "cw-command"; command.setAttribute("role", "dialog"); command.setAttribute("aria-label", words().command); command.setAttribute('data-cw-no-i18n', '');
+    command.innerHTML = `<header><h2>${escapeHtml(words().command)}</h2><button class="cw-close" type="button" aria-label="${escapeHtml(words().close)}">×</button></header><input class="cw-command-search" aria-label="${escapeHtml(words().search)}" placeholder="${escapeHtml(words().search)}" autofocus><div class="cw-command-results"></div>`;
     document.body.appendChild(commandBackdrop); document.body.appendChild(command);
     command.querySelector(".cw-close")?.addEventListener("click", closeCommand);
     const input = command.querySelector(".cw-command-search"); const results = command.querySelector(".cw-command-results");
-    function render(){ const q = lower(input.value); const list = quickActions.filter((item)=>{ const topic = getTopic(item.topic); const haystack = lower(`${item.label} ${topic.title} ${topic.summary} ${topic.detail}`); return !q || haystack.includes(q); }); results.innerHTML = list.map((item)=>{ const topic = getTopic(item.topic); return `<a class="cw-command-item" href="${escapeHtml(item.href)}"><span class="cw-command-icon">${escapeHtml(item.icon || "•")}</span><span><strong>${escapeHtml(item.label)}</strong><br><small>${escapeHtml(topic.summary)}</small></span></a>`; }).join(""); }
+    function render(){ const q = lower(input.value); const list = quickActions().filter((item)=>{ const topic = getTopic(item.topic); const haystack = lower(`${item.label} ${topic.title} ${topic.summary} ${topic.detail}`); return !q || haystack.includes(q); }); results.innerHTML = list.length ? list.map((item)=>{ const topic = getTopic(item.topic); return `<a class="cw-command-item" href="${escapeHtml(item.href)}"><span class="cw-command-icon">${escapeHtml(item.icon || "•")}</span><span><strong>${escapeHtml(item.label)}</strong><br><small>${escapeHtml(topic.summary)}</small></span></a>`; }).join("") : `<p role="status">${escapeHtml(words().empty)}</p>`; }
     input.addEventListener("input", render); input.addEventListener("keydown", (event)=>{ if(event.key === "Enter"){ const first = results.querySelector("a"); if(first) window.location.href = first.href; } });
     render(); setTimeout(()=>input.focus(), 30);
   }
@@ -184,10 +186,10 @@
   function escapeHtml(value){ return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;"); }
 
   function renderFabs(){
+    document.querySelectorAll('.cw-command-fab,.cw-help-fab').forEach(button => button.remove());
     if(!isAuthenticatedArea()) return;
-    if(document.querySelector(".cw-command-fab")) return;
-    const commandBtn = document.createElement("button"); commandBtn.type = "button"; commandBtn.className = "cw-command-fab"; commandBtn.title = "Comando rápido (CTRL/CMD+K)"; commandBtn.textContent = "⚡"; commandBtn.addEventListener("click", openCommand);
-    const helpBtn = document.createElement("button"); helpBtn.type = "button"; helpBtn.className = "cw-help-fab cw-help-fab-quiet"; helpBtn.title = "Ajuda discreta"; helpBtn.textContent = "?"; helpBtn.addEventListener("click", ()=>openDrawer(currentTooltipTopic || "help"));
+    const commandBtn = document.createElement("button"); commandBtn.type = "button"; commandBtn.className = "cw-command-fab"; commandBtn.title = words().command + ' (Ctrl/Cmd+K)'; commandBtn.setAttribute('aria-label', words().command); commandBtn.textContent = "⚡"; commandBtn.addEventListener("click", openCommand);
+    const helpBtn = document.createElement("button"); helpBtn.type = "button"; helpBtn.className = "cw-help-fab cw-help-fab-quiet"; helpBtn.title = words().help; helpBtn.setAttribute('aria-label', words().help); helpBtn.textContent = "?"; helpBtn.addEventListener("click", ()=>openDrawer(currentTooltipTopic || "help"));
     document.body.appendChild(commandBtn); document.body.appendChild(helpBtn);
   }
 
@@ -201,6 +203,9 @@
     renderFabs();
     annotateHelpables();
     setTimeout(annotateHelpables, 1000);
+    for (const event of ['storage', 'pageshow', 'cw-language-change']) window.addEventListener(event, () => {
+      closeDrawer(); closeCommand(); hideTooltip(); currentTooltipTopic = null; renderFabs();
+    });
     document.addEventListener("keydown", (event)=>{
       if((event.ctrlKey || event.metaKey) && lower(event.key) === "k"){ event.preventDefault(); openCommand(); }
       if((event.altKey) && lower(event.key) === "h"){ event.preventDefault(); openDrawer("help"); }
