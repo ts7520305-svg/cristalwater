@@ -30,7 +30,12 @@ async function clearTrigger() { if (!trigger) return; await prisma.$executeRawUn
   assert.equal(receipt.receipt.scope,'FIELD_STOCK_REQUEST');
   assert.equal(receipt.receipt.owner,'TECH:'+tech.id);
   assert.equal(await prisma.operationalReminder.count({where:{metadata:{path:['requestId'],equals:body.requestId}}}),1);
-  const reminder=await prisma.operationalReminder.findUniqueOrThrow({where:{id:receipt.stockRequest.reminderId}});assert.equal(reminder.assignedToTechnicianId,null);assert.equal(reminder.poolId,pool.id);assert.equal(reminder.clientId,client.id);
+  const reminder=await prisma.operationalReminder.findUniqueOrThrow({where:{id:receipt.stockRequest.reminderId}});assert.equal(reminder.assignedToTechnicianId,tech.id);assert.equal(reminder.poolId,pool.id);assert.equal(reminder.clientId,client.id);
+  const colleagueVisit=await prisma.serviceVisit.create({data:{clientId:client.id,poolId:pool.id,technicianId:other.id,plannedDate:new Date(),status:'PLANNED'}});
+  const route=async auth=>fetch(base+'/api/technician/today',{headers:{Authorization:'Bearer '+auth}}).then(response=>response.json());
+  const ownRoute=await route(credential),otherRoute=await route(otherCredential);
+  assert(ownRoute.visits.find(row=>row.id===visit.id&&row.visitType==='REGULAR').pool.operationalReminders.some(row=>row.id===reminder.id));
+  assert(!otherRoute.visits.find(row=>row.id===colleagueVisit.id&&row.visitType==='REGULAR').pool.operationalReminders.some(row=>row.id===reminder.id),'Reminder leaked into a colleague route for the same pool');
   assert.equal((await send({ ...body, message: 'Changed' })).status, 409); assert.equal((await send({ ...body, recipientRole: 'CLIENT' })).status, 400);
   assert.equal((await send(body, base, otherCredential)).status, 403); assert.equal((await send(body, base, clientCredential)).status, 403); assert.equal((await send(body, base, adminCredential)).status, 403);
   const notices = async auth => fetch(base + '/api/notifications', { headers: { Authorization: 'Bearer ' + auth } }).then(response => response.json());
