@@ -3028,7 +3028,7 @@
     window.dispatchEvent(new CustomEvent("cw:field-visit-selected", { detail: { visitId: visit?.id || null, visitType:visit?.visitType || null, poolId:visit?.poolId || visit?.pool?.id || null, state:JSON.stringify([visit?.status,visit?.startAt,visit?.endAt]) } }));
     const extra = !!visit && !isRegularVisit(visit);
     document.body.classList.toggle('field-extra-selected',extra);
-    const readOnly = extra && isVisitDone(visit);
+    const readOnly = !visit || !sameFieldSession() || (extra && isVisitDone(visit));
     $('#fieldExtraVisitNotice').hidden = !extra;
     $('#fieldExtraVisitNotice').textContent = extra ? extraVisitNotice : '';
     for (const selector of [...draftFieldIds.map(id=>'#'+id),...checkIds.map(id=>'#'+id),'#startBtn','#finishBtn','#incompleteSave','#problemBtn','#saveProblemBtn','#openWaterBtn','#pumpReminderCreate','#sendAdminAlertBtn','#addDoseBtn','#galleryPhotoBtn','#photoInput','#galleryPhotoInput','[data-photo-type]','#doseRows input','#doseRows select','#doseRows button']) document.querySelectorAll(selector).forEach(node=>{node.disabled=readOnly;});
@@ -3125,7 +3125,7 @@
       return;
     }
     const role = String(window.CristalAuth?.parseUser?.().role || "").toUpperCase().trim();
-    if (role && !["TECHNICIAN", "ADMIN"].includes(role)) {
+    if (role && !["TECHNICIAN", "TEAM_LEADER", "ADMIN"].includes(role)) {
       window.CristalAuth?.logout();
       return;
     }
@@ -3191,13 +3191,15 @@
     } catch (error) {
       if (!relevant()) return;
       routeConfirmedAt = null;
+      visits = []; index = 0; routeSnapshot = null; routeContext = null;
+      loadCurrentDraft();
+      render();
+      renderPhotoList();
       $("#fieldLoadError").hidden = false; $("#fieldLoadErrorText").textContent = error.message;
       $("#nextTitle").textContent = "Não foi possível carregar";
       $("#nextMeta").textContent = error.message;
       $("#progressText").textContent = "Verificar ligacao";
-      $("#connectionState").textContent = "Offline";
-      renderList();
-      updateFieldDashboard(null);
+      $("#connectionState").textContent = error.denied ? "Sessão por validar" : "Offline";
       renderCrewStatus();
     }
   }

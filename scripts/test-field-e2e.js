@@ -258,6 +258,7 @@ const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
           if(process.env.CW_CAPTURE_UI)await page.screenshot({path:'reports/field-ui/TECHNICIAN_VISIT.png',fullPage:false});
           await page.evaluate(()=>{window.__storageSet=Storage.prototype.setItem;Storage.prototype.setItem=function(key,value){if(key.startsWith('cwFieldVisitDrafts:'))throw new DOMException('Quota exceeded','QuotaExceededError');return window.__storageSet.call(this,key,value)}});
           await page.locator('#notes').fill('Teste de memória cheia');
+          await page.waitForFunction(()=>document.getElementById('fieldSaveStatus')?.dataset.state==='error');
           assert.equal(await page.locator('#fieldSaveStatus').getAttribute('data-state'),'error');
           await page.evaluate(()=>{Storage.prototype.setItem=window.__storageSet;delete window.__storageSet});
           console.log('PASS one navigation, 320/390/768px layout, touch targets and explicit local storage failure');
@@ -281,7 +282,7 @@ const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
           await page.locator('#addDoseBtn').click();
           await page.locator('[data-dose-field=name]').last().selectOption('Cloro E2E');
           await page.locator('[data-dose-field=quantity]').last().fill('1');
-          await page.waitForTimeout(200);
+          await page.waitForFunction(()=>document.getElementById('fieldSaveStatus')?.dataset.state==='saved');
           // Cold reload must keep both the assigned route and entered measurements.
           await page.evaluate(() => navigator.serviceWorker.ready);
           await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller));

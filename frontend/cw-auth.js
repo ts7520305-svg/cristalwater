@@ -142,7 +142,9 @@
     if(role){
       const user = parseUser();
       const current = String(user.role || '').toUpperCase().trim();
-      if(current && current !== String(role).toUpperCase().trim()){ logout(); return false; }
+      const required = String(role).toUpperCase().trim();
+      const fieldRole = required === 'TECHNICIAN' && current === 'TEAM_LEADER';
+      if(current && current !== required && !fieldRole){ logout(); return false; }
     }
     return true;
   }

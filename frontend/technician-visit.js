@@ -87,7 +87,7 @@ function requireVisitAccess() {
   }
   const user = window.CristalAuth.parseUser ? window.CristalAuth.parseUser() : {};
   const role = String(user.role || "").toUpperCase().trim();
-  if (!["TECHNICIAN", "ADMIN"].includes(role)) {
+  if (!["TECHNICIAN", "TEAM_LEADER", "ADMIN"].includes(role)) {
     window.CristalAuth.logout();
     return false;
   }

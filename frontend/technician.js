@@ -70,7 +70,7 @@ if (!token || !userRaw){
     redirectToLogin();
   }
 
-  if (user.role !== "TECHNICIAN"){
+  if (!["TECHNICIAN", "TEAM_LEADER"].includes(user.role)){
 
     redirectByRole(user.role);
   }

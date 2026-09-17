@@ -65,9 +65,10 @@
 
     const user = JSON.parse(userRaw || "{}");
     const role = String(user.role || "").toUpperCase().trim();
+    const tokenRole = String(decodePayload(token)?.role || "").toUpperCase().trim();
 
-    if (role !== "TECHNICIAN") {
-      redirectForRole(role, "forbidden");
+    if (role !== tokenRole || !["TECHNICIAN", "TEAM_LEADER"].includes(tokenRole)) {
+      redirectForRole(tokenRole, "forbidden");
       return;
     }
 

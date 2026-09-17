@@ -32,7 +32,9 @@ A revisão de fim de dia inclui rascunhos não submetidos e estados de gravaçã
 - Painel revisto a 320, 390 e 1440 px; captura `reports/field-ui/MODERN_DRAFT_CONFLICTS.png` inspecionada.
 - `run-1789633679364`: ensaio novo ampliado com fotografia EXTRA real após recarga e escolhas de revisão aprovado. Um único ficheiro extra, nenhuma fotografia na visita REGULAR com o mesmo número e miniatura privada legível após a revisão. Regressão de execução extra repetida com esta correção.
 
-Publicação, CI nativo e restauro deste lote ainda por confirmar. O adaptador local PGlite serve o ensaio funcional dirigido; não substitui PostgreSQL 16 nativo. PNG preexistente preservado com SHA256 `fba3c8189d9e0a31d96b378550736f865d30a4019f5e8d4d4487b15cfc543a71`.
+Confirmado no commit `040a51b13eafd278aa4079aa033e519b5a4c3ae5`, árvore `05b441850d08d08c98d20994ac00e81bcfb32e70`, CI `35200010394`: 120/120 grupos, 388 unitários/quatro técnicos, 17 scripts de navegador, 20 migrações aditivas, sintaxe de 538 ficheiros e restauro em PostgreSQL 16 de 110 tabelas/32 ficheiros com linhas e hashes iguais. O primeiro CI `35199421273` teve 119/120: a asserção E2E consultou o estado enquanto a gravação assíncrona ainda estava em curso. A TASK218 elimina essa corrida aguardando o resultado de erro/gravação antes de verificar ou recarregar. O E2E com essa espera passou localmente em `run-1789634421749`.
+
+O adaptador local PGlite serve o ensaio funcional dirigido; a confirmação acima usa PostgreSQL 16 nativo. PNG preexistente preservado com SHA256 `fba3c8189d9e0a31d96b378550736f865d30a4019f5e8d4d4487b15cfc543a71`.
 
 ## Limites e continuidade
 
