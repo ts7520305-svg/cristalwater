@@ -1627,99 +1627,10 @@ router.post('/visits', async (req, res) => {
   }
 });
 
-router.post('/visits/:id/problem', async (req, res) => {
-  try {
-    const id = toInt(req.params.id);
-    const body = req.body || {};
-    const message = String(body.message || body.problem || '').trim();
-    if (!message) return res.status(400).json({ ok: false, error: 'Descricao do problema obrigatoria' });
-
-    const visit = await db('serviceVisit').findUnique({
-      where: { id },
-      include: { pool: { include: { client: true } }, client: true, technician: true },
-    });
-    if (!visit) return res.status(404).json({ ok: false, error: 'Visita nao encontrada' });
-    if (!visit.poolId) return res.status(400).json({ ok: false, error: 'Visita sem piscina associada' });
-
-    const actorRole = String(req.user?.role || '').toUpperCase();
-    if (!roleMatches(actorRole, 'ADMIN')) {
-      const actorTechnicianId = toInt(req.user?.technicianId, toInt(req.user?.id));
-      if (!actorTechnicianId || toInt(visit.technicianId) !== actorTechnicianId) {
-        return res.status(403).json({ ok: false, error: 'Sem permissao para alterar visita de outro tecnico' });
-      }
-    }
-
-    const type = String(body.type || 'Problema em campo').trim();
-    const severity = String(body.severity || 'Normal').toUpperCase();
-    const priority = severity.includes('URG') || severity.includes('CRIT') ? 'HIGH' : 'NORMAL';
-    const problem = `${type}: ${message}`;
-
-    const repairResult = await RepairBusiness.createRepairTicket({
-      poolId: visit.poolId,
-      problem,
-      notes: [
-        `Reportado pelo tecnico no modo de campo.`,
-        `Visita #${visit.id}.`,
-        visit.technician?.name ? `Tecnico: ${visit.technician.name}.` : null,
-        body.notes || null,
-      ].filter(Boolean).join(' '),
-      status: 'PENDING',
-      priority,
-    }, body.actor || req.headers['x-user-email'] || 'ADMIN', prisma, {
-      context: {
-        pool: visit.pool,
-        clientId: visit.clientId || visit.pool?.clientId || visit.pool?.client?.id || null,
-      },
-      source: 'core-flow-route',
-    });
-
-    if (!repairResult?.ok) {
-      return res.status(repairResult?.status || 500).json({
-        ok: false,
-        error: repairResult?.error || 'Falha ao criar reparação',
-      });
-    }
-
-    const repair = repairResult.repair;
-
-    const alert = available('technicalAlert') ? await db('technicalAlert').create({
-      data: dataFor('technicalAlert', {
-        poolId: visit.poolId,
-        type,
-        message,
-        priority,
-        status: 'OPEN',
-      }),
-    }).catch(() => null) : null;
-
-    const clientId = visit.clientId || visit.pool?.clientId || visit.pool?.client?.id || null;
-    const notification = available('notification') ? await db('notification').create({
-      data: dataFor('notification', {
-        clientId,
-        type: priority === 'HIGH' ? 'CRITICAL' : 'ALERT',
-        eventType: 'FIELD_PROBLEM_REPORTED',
-        title: 'Problema reportado pelo tecnico',
-        message: `${visit.pool?.name || 'Piscina'} - ${problem}`,
-        role: 'ADMIN',
-        severity: priority,
-        metadata: { visitId: visit.id, poolId: visit.poolId, repairId: repair.id, alertId: alert?.id || null },
-      }),
-    }).catch(() => null) : null;
-
-    if (global.io && notification) {
-      global.io.emit('new-notification', {
-        id: notification.id,
-        message: notification.message,
-        type: notification.type,
-        createdAt: notification.createdAt,
-        clientId: notification.clientId,
-      });
-    }
-
-    return res.json({ ok: true, repair, alert, notification, next: 'ADMIN_REVIEW_REPAIR' });
-  } catch (error) {
-    return res.status(500).json({ ok: false, error: error.message });
-  }
+router.post('/visits/:id/problem', async (req,res) => {
+  res.set('Cache-Control','private, no-store');
+  try { res.json(await require('../services/fieldProblemReportService').create(req.user,Number(req.params.id),req.body||{})); }
+  catch(error) { res.status(error.statusCode||503).json({ok:false,code:error.code||'FIELD_PROBLEM_UNCONFIRMED',error:error.statusCode?error.message:'Ocorrência por confirmar. Repita o envio original.'}); }
 });
 
 router.post('/visits/:id/complete', async (req, res) => {

@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-09-17T19:13:43.985Z",
-  "baseCommit": "14d8e776825ea7e87848d1af8dae26f1176837f4",
+  "generatedAt": "2026-09-17T19:49:05.358Z",
+  "baseCommit": "0a1999de66f735a0c63538ed8df0b2975e2f0613",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 154,
+  "activeScriptsScanned": 156,
   "summary": {
     "htmlFiles": 101,
     "rootPages": 94,
@@ -102,6 +102,7 @@
         "test-field-alert-billing.js",
         "test-field-internal-alert-ui.js",
         "test-field-stock-requests-ui.js",
+        "test-field-problem-reports-ui.js",
         "test-field-extra-incomplete.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
@@ -2822,6 +2823,7 @@
         "test-field-technical-proposals.js",
         "test-field-internal-alert.js",
         "test-field-stock-requests.js",
+        "test-field-problem-reports.js",
         "test-field-extra-equipment.js",
         "test-notification-sound-browser.js"
       ],
@@ -3205,6 +3207,7 @@
         "/cw-proposal-editor.js",
         "/technician-field-mode.js",
         "/cw-field-stock-request.js",
+        "/cw-field-problem-report.js",
         "/cw-field-incomplete.js",
         "/cw-pump-reminders.js",
         "/cw-field-day-review.js",
@@ -3222,6 +3225,7 @@
         "test-field-proposal-recovery-ui.js",
         "test-field-write-recovery-ui.js",
         "test-field-stock-requests-ui.js",
+        "test-field-problem-reports-ui.js",
         "test-field-modern-route-recovery.js",
         "test-field-visit-types.js",
         "test-field-extra-execution.js",

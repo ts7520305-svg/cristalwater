@@ -2520,8 +2520,6 @@
       if (node) node.value = "";
     });
     updateAllReferenceStatuses();
-    const category = $("#problemCategory");
-    if (category) category.value = "Servico normal";
     checkIds.forEach((id) => {
       const node = $(`#${id}`);
       if (node) node.checked = false;
@@ -2883,6 +2881,7 @@
     for(const selector of ['#openWaterBtn','#pumpReminderCreate'])document.querySelectorAll(selector).forEach(node=>{node.disabled=!visit || !sameFieldSession();});
     if(extra)for(const selector of ['#problemBtn','#saveProblemBtn','#sendAdminAlertBtn'])document.querySelectorAll(selector).forEach(node=>{node.disabled=true;});
     window.CWFieldStockRequest?.contextChanged();
+    window.CWFieldProblemReport?.contextChanged();
     $("#progressText").textContent = visits.length ? `${visits.filter(isVisitDone).length} de ${visits.length} visitas concluídas` : "Sem visitas atribuídas";
 
     if (!visit) {
@@ -3056,6 +3055,7 @@
   }
 
   function showProblemPanel() {
+    if (window.CWFieldProblemReport) return window.CWFieldProblemReport.open();
     const panel = $("#problemPanel");
     if (!panel) return;
     panel.hidden = false;
@@ -3063,74 +3063,15 @@
   }
 
   function hideProblemPanel() {
+    if (window.CWFieldProblemReport) return window.CWFieldProblemReport.close();
     const panel = $("#problemPanel");
     if (panel) panel.hidden = true;
   }
 
   async function saveProblem() {
-    const visit = current();
-    if (!requireRegularVisit(visit)) return;
-    const target = visitKey(visit);
-    const category = $("#problemCategory")?.value || "Servico normal";
-    const type = $("#problemType")?.value || "Outro";
-    const severity = $("#problemSeverity")?.value || "Normal";
-    const message = ($("#problemText")?.value || "").trim();
-    if (!message) {
-      toast("Escreve o problema antes de guardar.");
-      return;
-    }
-
-    const report = {
-      visitId: visit?.id || null,
-      pool: visit?.pool?.name || "Piscina",
-      client: visit?.client?.name || "Cliente",
-      category,
-      type,
-      severity,
-      message,
-      createdAt: new Date().toISOString(),
-      synced: false,
-    };
-
-    const notes = $("#notes");
-    if (notes) {
-      const line = `${category.toUpperCase()} (${severity} - ${type}): ${message}`;
-      notes.value = `${notes.value}\n${line}`.trim();
-    }
-
-    const saveButton = $("#saveProblemBtn");
-    if (saveButton) saveButton.disabled = true;
-    try {
-      if (visit?.id) {
-        const result = await api(`/api/core/visits/${visit.id}/problem`, {
-          method: "POST",
-          body: JSON.stringify({ category, type, severity, message }),
-        });
-        report.synced = true;
-        report.repairId = result.repair?.id || null;
-        report.alertId = result.alert?.id || null;
-      }
-    } catch (error) {
-      report.syncError = error.message;
-    } finally {
-      if (saveButton) saveButton.disabled = !isRegularVisit();
-    }
-
-    if (!sameFieldSession() || visitKey() !== target) return;
-    pendingProblems.unshift(report);
-    const saved = JSON.parse(localStorage.getItem("cwFieldProblems") || "[]");
-    saved.unshift(report);
-    localStorage.setItem("cwFieldProblems", JSON.stringify(saved.slice(0, 50)));
-
-    const text = $("#problemText");
-    if (text) text.value = "";
-    hideProblemPanel();
-    if (report.synced) {
-      toast(severity === "Urgente" ? "Problema urgente registado." : "Problema registado.");
-    } else {
-      toast("Problema nas notas. Sera enviado ao concluir.");
-    }
-    renderInterruptBoard();
+    if (!requireRegularVisit(current())) return;
+    if (!window.CWFieldProblemReport) { toast('Ocorrências indisponíveis. Conserve o texto e reabra a página.'); return; }
+    return window.CWFieldProblemReport.send();
   }
 
   async function sendAdminStockAlert() {
@@ -3565,6 +3506,7 @@
       }
       if(visit.visitType==='EXTRA'&&isVisitDone(visit)){await window.CWExtraVisitCorrection.open(visit,fieldWriteSession);return;}
       if (!requireExecutableVisit(visit)) return;
+      if (pendingProblems.some(problem=>!problem.synced)) { toast('Há ocorrências antigas sem confirmação. Preserve as notas e confirme o registo com o escritório antes de concluir.'); switchFieldTab('more'); showProblemPanel(); return; }
       const target = visitKey(visit);
       const wasDone = isVisitDone(visit);
       const draftEntry = currentDraftEntry;
