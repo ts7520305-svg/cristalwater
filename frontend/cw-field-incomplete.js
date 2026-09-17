@@ -36,7 +36,7 @@
     const own=++revision,s={context,captured,snapshot:null,draft:null,queue:Promise.resolve(),busy:false};state=s;message='A confirmar a visita…';void render();
     try{
       s.draft=flow.read(scope,context,captured);
-      if(s.draft.value)for(const id of fields)$(id).value=s.draft.value.values[id]||'';
+      for(const id of fields)$(id).value=s.draft.value?.values[id]??(id==='shortageUnit'?'L':'');
       s.snapshot=await flow.view(context,captured);
       if(own!==revision||!same(s))return;
       message='';await render();

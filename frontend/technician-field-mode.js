@@ -33,7 +33,13 @@
   const extraVisitNotice = 'Visita extra: registe o trabalho, as medições, os produtos e as fotografias. Pode também registar revisões de equipamento, água aberta ou bomba em manual. Depois de concluir, use “Corrigir registo” para rever os valores. Pode registar impedimentos e combinar o regresso com o escritório.';
   window.CWFieldVisitContext = () => sameFieldSession() && current() ? { id:current().id, visitType:current().visitType || 'REGULAR', poolId:current().poolId || current().pool?.id, clientId:current().clientId || current().client?.id || current().pool?.clientId, poolName:current().pool?.name, clientName:current().client?.name, technicianName:activeTechnician?.name || current().technician?.name } : null;
   let visitPhotos = [];
-  let visitDrafts = {};
+  let currentDraftEntry = null;
+  const visitDraftManager = window.CWFieldVisitDrafts.create(fieldWriteSession, { changed(entry, fill) {
+    if (!sameFieldSession() || entry !== currentDraftEntry) return;
+    if (fill) { const draft=visitDraftManager.expand(entry); applyVisitForm(draft); visitPhotos=draft.photos || []; visitPhotosByKey[entry.key]=visitPhotos;renderPhotoList(); }
+    visitDraftManager.paint(entry);
+  } });
+  window.CWFieldDraftSummary = () => visitDraftManager.pendingSummary();
   let visitPhotosByKey = {};
   let waterReminders = [];
   let waterRemindersError = '';
@@ -53,7 +59,7 @@
   let activePoolFilter = "TODO";
   let opsSnapshot = { docsReady: false, done: 0, total: 0, pending: 0 };
   const waterTimers = new Map();
-  const draftFieldIds = ["ph", "chlorine", "alkalinity", "salt", "orp", "temperature", "notes", "incompleteReason", "incompleteNextStep", "shortageProduct", "shortageQuantity", "shortageUnit"];
+  const draftFieldIds = ["ph", "chlorine", "alkalinity", "salt", "orp", "temperature", "notes"];
   const checkIds = ["cleaned", "vacuumed", "basketCleaned", "brushed", "waterlineClean", "backwashDone"];
 
   const POOL_STATE = {
@@ -507,13 +513,8 @@
   }
   const photoPreviewCache = new Map();
 
-  const fieldDraftStorageKey = () => 'cwFieldVisitDrafts:v2:' + fieldWriteSession.owner;
   function readFieldDrafts() {
-    const raw = localStorage.getItem(fieldDraftStorageKey());
-    if (!raw) return {};
-    let value; try { value = JSON.parse(raw); } catch (_) { throw Error('Rascunhos ilegíveis. Preserve os dados e peça apoio ao escritório.'); }
-    if (!value || value.v !== 2 || value.owner !== fieldWriteSession.owner || !value.drafts || typeof value.drafts !== 'object' || Array.isArray(value.drafts) || Object.entries(value.drafts).some(([key,draft])=>!/^visit-(REGULAR|EXTRA)-[1-9][0-9]*$/.test(key) || !draft || typeof draft !== 'object' || Array.isArray(draft))) throw Error('Rascunhos sem identidade válida. Preserve os dados e peça apoio ao escritório.');
-    return value.drafts;
+    return visitDraftManager.read();
   }
   window.CWFieldDraftSnapshot = () => { if (!sameFieldSession()) throw Error('Sessão alterada.'); return readFieldDrafts(); };
 
@@ -675,8 +676,8 @@
     })).filter((photo) => photo.url);
   }
 
-  function applySavedVisitData(visit) {
-    applyVisitForm({
+  function savedVisitDraft(visit) {
+    return {
       values: {
         ph: inputValue(visit?.ph),
         chlorine: inputValue(visit?.chlorine),
@@ -697,7 +698,12 @@
       startedAt: visit?.startAt || null,
       pendingProblems: [],
       usedProducts: productsFromVisit(visit),
-    });
+      photos: photosFromVisit(visit),
+    };
+  }
+
+  function applySavedVisitData(visit) {
+    applyVisitForm(savedVisitDraft(visit));
     visitPhotos = photosFromVisit(visit);
     renderPhotoList();
   }
@@ -721,30 +727,25 @@
   }
 
   function saveCurrentDraft() {
-    if (!sameFieldSession()) return;
+    if (!sameFieldSession()) return Promise.resolve();
     const visit = current();
-    if (!visit?.id || (visit.visitType === 'EXTRA' && isVisitDone(visit))) return;
+    if (!visit?.id || !currentDraftEntry || currentDraftEntry.key !== visitKey(visit) || (visit.visitType === 'EXTRA' && isVisitDone(visit))) return Promise.resolve();
     const key = visitKey(visit);
     visitPhotosByKey[key] = visitPhotos;
-    visitDrafts[key] = readVisitForm();
-    const status = $("#fieldSaveStatus");
-    try {
-      const drafts = { ...readFieldDrafts(), [key]:visitDrafts[key] };
-      const raw = JSON.stringify({v:2,owner:fieldWriteSession.owner,drafts});
-      localStorage.setItem(fieldDraftStorageKey(), raw);
-      if (localStorage.getItem(fieldDraftStorageKey()) !== raw) throw Error('A gravação não foi confirmada.');
-      if (status) { status.dataset.state='saved'; status.textContent='Rascunho guardado neste telemóvel'; }
-    } catch (error) { if (status) { status.dataset.state='error'; status.textContent='Rascunho não guardado. Não feche a página. ' + error.message; } }
+    return visitDraftManager.save(currentDraftEntry,readVisitForm());
   }
 
   function loadCurrentDraft() {
     const visit = current();
-    if (isVisitDone(visit)) {
+    if (!visit) { currentDraftEntry=null;applyVisitForm(null);visitPhotos=[];visitDraftManager.paint(null);return; }
+    currentDraftEntry=visitDraftManager.bind(visit,savedVisitDraft(visit));
+    if (visit.visitType === 'EXTRA' && isVisitDone(visit)) {
       applySavedVisitData(visit);
+      visitDraftManager.paint(currentDraftEntry);
       return;
     }
     const key = visitKey(visit);
-    const draft = visitDrafts[key] || null;
+    const draft = visitDraftManager.expand(currentDraftEntry);
     applyVisitForm(draft);
     visitPhotos = visitPhotosByKey[key] || (draft?.photos || []);
     window.CWFieldPhotos.list(visit?.id, true, fieldWriteSession, visit?.visitType || 'REGULAR').then(pending => {
@@ -753,6 +754,7 @@
       renderPhotoList();
     }).catch(error=>{if(sameFieldSession())toast('Falha ao recuperar fotografias: '+error.message)});
     renderPhotoList();
+    visitDraftManager.paint(currentDraftEntry);
   }
 
   function validCoordinate(value, type) {
@@ -2661,6 +2663,7 @@
     updateFieldDashboard(current());
     renderCrewStatus();
 
+    visitDraftManager.paint(currentDraftEntry);
     if (showFeedback) toast(docsSource === "cache" ? "Documentos carregados em modo offline sincronizado." : "Guias atualizadas.");
   }
 
@@ -3082,6 +3085,7 @@
     updateFieldDashboard(visit);
     loadTechnicalProposals(currentPoolId());
     persistFieldUiState();
+    visitDraftManager.paint(currentDraftEntry);
   }
 
   function showRouteCacheWarning(message) {
@@ -3156,7 +3160,6 @@
       const liveState = options.preserveNavigation ? readFieldUiState() : fallbackState;
       const liveContract = options.preserveNavigation ? null : returnContract;
       applyReturnState(liveContract, liveState);
-      try { visitDrafts = readFieldDrafts(); } catch (error) { visitDrafts = {}; $('#fieldSaveStatus').textContent = error.message; }
       const oldDrafts = localStorage.getItem(`cwFieldVisitDrafts:${currentTechnicianId()}`);
       $('#fieldDraftHistory').hidden = !oldDrafts || oldDrafts === '{}';
       loadWaterRemindersFromStorage();
@@ -3744,17 +3747,12 @@
     const input = $(`#${id}`);
     if (!input) return;
     input.addEventListener("input", () => saveCurrentDraft());
-    input.addEventListener("change", () => saveCurrentDraft());
   });
 
   checkIds.forEach((id) => {
     const input = $(`#${id}`);
     if (!input) return;
     input.addEventListener("change", () => saveCurrentDraft());
-  });
-
-  window.addEventListener("beforeunload", () => {
-    saveCurrentDraft();
   });
 
   const finishBtn = $("#finishBtn");
@@ -3770,6 +3768,11 @@
       if (!requireExecutableVisit(visit)) return;
       const target = visitKey(visit);
       const wasDone = isVisitDone(visit);
+      const draftEntry = currentDraftEntry;
+      if (draftEntry?.submitting) return;
+      await saveCurrentDraft();
+      if (!sameFieldSession() || visitKey() !== target) return;
+      if (draftEntry.error || draftEntry.external || Object.keys(draftEntry.conflicts).length || draftEntry.request) { visitDraftManager.paint(draftEntry);toast($('#fieldSaveStatus').textContent);return; }
       try { readFieldDrafts(); } catch (error) { toast(error.message); return; }
       if (!wasDone && docsCompliance && !docsCompliance.readyForOperation) {
         switchFieldTab("docs", true);
@@ -3777,6 +3780,9 @@
         toast(docsCompliance.reason || "Bloqueio operacional: faltam documentos obrigatórios da viatura.");
         return;
       }
+      draftEntry.submitting = true;
+      visitDraftManager.paint(draftEntry);
+      try {
       $("#finishBtn").disabled = true;
       const photosReady = await syncPendingPhotos(false);
       if (!sameFieldSession() || visitKey(current()) !== visitKey(visit)) { finishBtn.disabled = current()?.visitType === 'EXTRA' && isVisitDone(current()); return; }
@@ -3837,10 +3843,11 @@
 
       try {
         if (wasDone) {
-          const result = await api(`/api/technician/visits/${visit.id}/correction`, {
+          await saveCurrentDraft();
+          const result = await visitDraftManager.prepare(draftEntry,()=>api(`/api/technician/visits/${visit.id}/correction`, {
             method: "PATCH",
             body: JSON.stringify(body),
-          });
+          }));
           if (!sameFieldSession()) return;
           if (result.visit?.id !== visit.id || result.visit?.poolId !== (visit.poolId || visit.pool?.id)) throw Error('A resposta não confirma a correção desta visita. Atualize a rota.');
           const updatedVisit = {
@@ -3859,6 +3866,8 @@
           };
           const position = visits.findIndex(row=>visitKey(row)===target);
           if (position >= 0) visits[position] = updatedVisit;
+          await visitDraftManager.acceptCorrection(draftEntry,savedVisitDraft(updatedVisit));
+          if (!sameFieldSession()) return;
           if (visitKey() === target) loadCurrentDraft();
           persistModernRoute();
           render();
@@ -3869,7 +3878,9 @@
 
         // These fields are server-derived or already stored through the photo contract.
         const { startedAt: ignoredStart, completedAt: ignoredEnd, performedByTechnicianId: ignoredActor, performedByTechnicianName: ignoredName, photos: ignoredPhotos, problemCategory: ignoredCategory, ...completionBody } = body;
-        const completeResult = await window.CWFieldOffline.submitCompletion(visit.id, visit.visitType === 'EXTRA' ? {...completionBody,visitType:'EXTRA',poolId:visit.poolId || visit.pool?.id} : completionBody, fieldWriteSession, visit.visitType || 'REGULAR');
+        await saveCurrentDraft();
+        const prepared = await visitDraftManager.prepare(draftEntry,()=>window.CWFieldOffline.prepareCompletion(visit.id, visit.visitType === 'EXTRA' ? {...completionBody,visitType:'EXTRA',poolId:visit.poolId || visit.pool?.id} : completionBody, fieldWriteSession, visit.visitType || 'REGULAR'));
+        const completeResult = await window.CWFieldOffline.sendPreparedCompletion(prepared,fieldWriteSession);
         if (!sameFieldSession()) return;
         // Stock is consumed atomically by the completion transaction on the server.
         const stockUpdated = productsUsed.length > 0;
@@ -3883,15 +3894,14 @@
         persistModernRoute();
         toast(`${visit.pool?.name || 'Piscina'}: ${stockUpdated ? 'visita concluída e stock atualizado.' : 'visita concluída.'}`);
         if (visitKey() === target && position >= 0) {
-          usedProducts = [];
-          saveCurrentDraft();
           index = nextPendingIndex(position);
           loadCurrentDraft();
         }
         render();
       } catch (error) {
-        if (sameFieldSession()) { $("#finishBtn").disabled = current()?.visitType === 'EXTRA' && isVisitDone(current()); toast(error.message); }
+        if (sameFieldSession()) { $("#finishBtn").disabled = current()?.visitType === 'EXTRA' && isVisitDone(current()); visitDraftManager.paint(currentDraftEntry);toast(error.message); }
       }
+      } finally { draftEntry.submitting=false; if(sameFieldSession())visitDraftManager.paint(currentDraftEntry); }
     };
   }
 

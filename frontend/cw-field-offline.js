@@ -63,12 +63,17 @@
     else window.dispatchEvent(new CustomEvent('cw:visit-synced', { detail: { visitId: row.resourceId, visitType, visit: result.visit, owner: captured.owner, token: captured.token } }));
     return result;
   }
-  async function submitCompletion(visitId, body, captured = store.session(), visitType = 'REGULAR') {
+  async function prepareCompletion(visitId, body, captured = store.session(), visitType = 'REGULAR') {
     assertHistory(captured);
-    const row = await store.prepare(visitType === 'EXTRA' ? 'EXTRA_VISIT_COMPLETION' : 'VISIT_COMPLETION', Number(visitId), body, { label: document.getElementById('nextTitle')?.textContent || 'Visita ' + visitId }, captured);
+    return store.prepare(visitType === 'EXTRA' ? 'EXTRA_VISIT_COMPLETION' : 'VISIT_COMPLETION', Number(visitId), body, { label: document.getElementById('nextTitle')?.textContent || 'Visita ' + visitId }, captured);
+  }
+  async function sendPreparedCompletion(row, captured = store.session()) {
     try { return await send(row, captured); }
     catch (error) { if (!store.same(captured)) throw error; throw Object.assign(Error('Visita guardada neste dispositivo. ' + message(error)), { status: error.status }); }
     finally { await render(); }
+  }
+  async function submitCompletion(visitId, body, captured = store.session(), visitType = 'REGULAR') {
+    return sendPreparedCompletion(await prepareCompletion(visitId,body,captured,visitType),captured);
   }
   async function retry(visitId, captured = store.session(), visitType = 'REGULAR') {
     const row = (await entries(captured)).find(item => item.resourceId === Number(visitId) && item.scope === (visitType === 'EXTRA' ? 'EXTRA_VISIT_COMPLETION' : 'VISIT_COMPLETION'));
@@ -91,7 +96,7 @@
     const row = await store.prepare('EXTRA_VISIT_START',Number(visit.id),{visitType:'EXTRA',poolId:visit.poolId || visit.pool?.id},{label:'Início: '+(visit.pool?.name || visit.id)},captured);
     try { return await send(row,captured); } finally { await render(); }
   }
-  window.CWFieldOffline = { submitExtraStart, submitCompletion, flush, pending, render, retry, entries, rejections, assertHistory };
+  window.CWFieldOffline = { submitExtraStart, submitCompletion, prepareCompletion, sendPreparedCompletion, flush, pending, render, retry, entries, rejections, assertHistory };
   window.addEventListener('cw:field-write-change', render);
   window.addEventListener('storage', render);
   window.addEventListener('online', flush);

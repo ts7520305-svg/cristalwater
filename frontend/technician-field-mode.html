@@ -1270,12 +1270,14 @@
     </section>
 
     <section class="field-action-sticky field-panel field-panel-agora" aria-label="Ações principais da visita">
-      <div id="fieldSaveStatus" role="status">Registe apenas o trabalho realizado nesta visita.</div>
+      <div id="fieldSaveStatus" role="status" data-cw-state-managed="manual">Registe apenas o trabalho realizado nesta visita.</div>
       <div class="actions">
         <button class="big ok" id="startBtn" type="button">Iniciar visita</button>
         <button class="big bad" id="finishBtn" type="button">Concluir visita</button>
       </div>
     </section>
+
+    <section class="card field-panel field-panel-agora" id="fieldDraftReview" aria-label="Rever diferenças do rascunho" hidden style="overflow-wrap:anywhere"></section>
 
     <section class="card field-panel field-panel-agora" id="incompleteVisitCard" data-cw-state-managed="manual">
       <details><summary style="min-height:48px;font-weight:700">Não consegui concluir esta visita</summary>
@@ -1630,6 +1632,7 @@
   <script src="/cw-auth-download.js"></script>
   <script src="/cw-browser-push.js"></script>
   <script src="/cw-field-write-store.js"></script>
+  <script src="/cw-field-visit-drafts.js"></script>
 <script src="/cw-incomplete-workflow.js"></script>
   <script src="/cw-field-reminders.js"></script>
   <script src="/cw-field-route-cache.js"></script>
