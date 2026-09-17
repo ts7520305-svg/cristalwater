@@ -33,4 +33,6 @@ A consulta autenticada em QA `run-1789664433390` confirmou /api/routes/auto-plan
 
 TASK233 fechada para /admin-map e /route-map no commit `083dc7f600e989236c2611eae5724dc0be35923a`, CI `35250616882` aprovado com 126 grupos e restauro de 110 tabelas/32 ficheiros. As falhas das restantes páginas nesta triagem continuam pendentes.
 
-TASK234–235 substituem a falsa atribuição por pré-visualização explícita e ligam /multi-map ao contrato diário completo existente. Não corrigem nem validam as fontes financeiras do planeador antigo. CI/restauro da nova árvore por confirmar.
+TASK234–235 substituem a falsa atribuição por pré-visualização explícita e ligam /multi-map ao contrato diário completo existente. Não corrigem nem validam as fontes financeiras do planeador antigo. CI `35254021003` aprovado no commit `8cd59cd3eb9842a82d4199eb9598a6250371b9d0`: 128 grupos e restauro de 110 tabelas/32 ficheiros.
+
+Revisão de fontes financeiras reproduzida em `run-1789666894641`, descrita em `PROFITABILITY_SOURCE_REVIEW_20260917.md`: a fonte antiga omite Technician, a alternativa usa constantes de receita/custo e trata devolução como consumo. O alias /technician-profit lê um campo total inexistente. Estes defeitos permanecem abertos; não basta trocar a biblioteca de gráficos.

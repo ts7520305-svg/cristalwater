@@ -22,6 +22,14 @@ Ambas reutilizam o carregamento opcional de Leaflet e CSS, lista com navegação
 - Sessão alterada e data modificada durante resposta atrasada não reativam resultados. Prazo de consulta acelerado pelo relógio do ensaio verifica erro e repetição. Snapshots das piscinas/zonas/atribuições/visitas mantêm-se iguais; o endpoint diário conserva o seu evento operacional de leitura já existente.
 - Capturas 320/390/1440 em `reports/field-visual/geographic-areas-1789666139382` e `reports/field-visual/multi-map-1789666523817`; revisão visual das versões móveis. Bibliotecas controladas verificam contratos, não disponibilidade real dos tiles/fornecedores.
 
-Runner passa de 126 para 128 grupos; confirmar a árvore publicada e o restauro nativo. Permanecem `/profit-map`, `/api/routes/auto-plan` e `/technician-profit-dashboard`, além de traduções destes ecrãs, revisão dos restantes HTML/PDFs e ensaios físicos/VPS. Não declarar conclusão global.
+Runner passa de 126 para 128 grupos; árvore publicada e restauro nativo confirmados abaixo. Permanecem `/profit-map`, `/api/routes/auto-plan` e `/technician-profit-dashboard`, além de traduções destes ecrãs, revisão dos restantes HTML/PDFs e ensaios físicos/VPS. Não declarar conclusão global.
 
 Sintaxe final: 539 JS backend, 174 frontend e 63 scripts inline aprovados. Inventário: 101 HTML, 52 páginas com referências literais em 149 scripts ativos, zero recursos locais em falta ou divergências catálogo/guarda; referências estáticas não equivalem a cobertura integral.
+
+## Confirmação nativa
+
+TASK234–235 confirmadas no commit `8cd59cd3eb9842a82d4199eb9598a6250371b9d0`, árvore `2265d0e249946dc0efaa7b35ee1b622181683ff2`, CI `35254021003`: 128/128 grupos, 388 unitários/quatro técnicos, 21 scripts de navegador, 20 migrações, sintaxe de 539 JS backend/174 frontend/63 inline e restauro de 110 tabelas/32 ficheiros com linhas e hashes iguais em PostgreSQL 16. Áreas geográficas passaram em 3579 ms, multi em 5252 ms e regressão TASK233 em 5195 ms. Backup local `backup/task235-local-20260917`. O registo posterior altera apenas documentação; esta evidência pertence ao commit de código indicado.
+
+Workflow: https://github.com/ts7520305-svg/cristalwater/actions/runs/35254021003.
+
+A investigação financeira durante o CI encontra-se em `PROFITABILITY_SOURCE_REVIEW_20260917.md`; é diagnóstico pendente, não correção incluída nestes 128 grupos.
