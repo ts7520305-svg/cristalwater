@@ -1,10 +1,10 @@
-# TASK226 — Inventário atual de páginas
+# TASK228 — Inventário atual de páginas
 
-Base publicada: `0f12bed82376b097f726f1532078f5cb8ab9019d`. Gerado em 2026-09-17T12:27:13.920Z. Inclui as alterações locais do lote TASK225.
+Base publicada: `bc5e4e35efccf89c9bb085a2ff5749ecb82c4e62`. Gerado em 2026-09-17T12:47:06.070Z. Inclui as alterações locais do lote TASK225.
 
 101 ficheiros HTML: 94 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 143 scripts de integração/navegador ativos. 45 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 144 scripts de integração/navegador ativos. 46 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 As colunas de papéis distinguem o catálogo anterior dos indícios explícitos no HTML/scripts. Não são uma auditoria de autorização: as APIs, a atribuição atual e o comportamento real de cada perfil continuam a determinar o acesso.
 
@@ -22,17 +22,15 @@ O menu principal, o menu comum e o cabeçalho da frota deixam de encaminhar o ad
 
 ## Diferenças a rever no catálogo
 
-| Página | Papéis do catálogo sem correspondência na guarda declarada |
-|---|---|
-| /config-notifications | ADMIN |
+Nenhuma diferença detetada nas páginas com ficheiro de guarda explícito.
 
-Estas diferenças são itens de revisão, não autorização para alargar acessos. TASK222 alinhou guias/GPS; TASK224 alinhou outras dezasseis entradas do catálogo com as guardas existentes, sem alterar permissões. TASK225 torna a página de preferências acessível aos quatro perfis autenticados, mantendo a titularidade User na API e um estado indisponível para CLIENT/PIN. TASK226 adapta a ajuda e os comandos rápidos ao perfil. Permanece a configuração local antiga de notificações. As versões anteriores do catálogo/inventário estão no Git.
+Estas diferenças são itens de revisão, não autorização para alargar acessos. TASK222 alinhou guias/GPS; TASK224 alinhou outras dezasseis entradas do catálogo com as guardas existentes, sem alterar permissões. TASK225 torna a página de preferências acessível aos quatro perfis autenticados, mantendo a titularidade User na API e um estado indisponível para CLIENT/PIN. TASK226 adapta a ajuda e os comandos rápidos ao perfil. TASK228 encaminha a configuração antiga para as preferências autenticadas; as chaves globais de som deixam de ser consumidas, conservando os bytes. As versões anteriores do catálogo/inventário estão no Git.
 
 ## Menu por perfil
 
 TASK224 escolhe a navegação pela indicação de papel da página, usando a sessão como segunda opção e o nome do URL apenas como último recurso. CLIENT deixa de receber o menu ADMIN nas páginas genéricas; a rentabilidade mantém menu ADMIN apesar do prefixo técnico. O menu técnico deixa de oferecer cinco destinos administrativos recusados e usa os percursos existentes para guias/stock, histórico e perfil. Registos de campo continuam na entrada Rota do dia e Visita; não há acesso novo ao inventário ou à gestão da frota.
 
-No menu ADMIN, Configurações gerais continua a abrir a central administrativa. O atalho duplicado para a página de som foi removido. Avisos de manutenção abre os controlos existentes na central; não se apresenta essa capacidade como um editor geral de modelos/regras. TASK225 corrige a consulta/gravação de preferências em `/settings`, com confirmação exata, falhas visíveis, separação da identidade, cinco idiomas e estados de acesso recusado. TASK226 permite ajuda por perfil; a configuração local antiga de notificações ainda exige revisão própria.
+No menu ADMIN, Configurações gerais continua a abrir a central administrativa. O atalho duplicado para a página de som foi removido. Avisos de manutenção abre os controlos existentes na central; não se apresenta essa capacidade como um editor geral de modelos/regras. TASK225 corrige a consulta/gravação de preferências em `/settings`, com confirmação exata, falhas visíveis, separação da identidade, cinco idiomas e estados de acesso recusado. TASK226 permite ajuda por perfil. TASK228 liga o som dos dois ecrãs administrativos à preferência atual da conta e à ativação explícita da página; a entrada antiga encaminha para /settings.
 
 ## Inventário
 
@@ -56,7 +54,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /admin-map | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-master-control | Entrada raiz | ADMIN | ADMIN | 4 |
 | /admin-menu | Entrada raiz | ADMIN | ADMIN | 0 |
-| /admin-notifications | Entrada raiz | ADMIN | ADMIN | 2 |
+| /admin-notifications | Entrada raiz | ADMIN | ADMIN | 3 |
 | /admin-onboarding | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-operational-flow | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-operational-settings | Entrada raiz | ADMIN | ADMIN | 1 |
@@ -97,7 +95,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /client_chat | Entrada raiz | CLIENT, ADMIN | CLIENT | 4 |
 | /client_tech | Entrada raiz | CLIENT | CLIENT | 0 |
 | /communications | Entrada raiz | ADMIN | ADMIN | 1 |
-| /config-notifications | Entrada raiz | ADMIN | CLIENT | 0 |
+| /config-notifications | Entrada raiz | ADMIN, CLIENT, TECHNICIAN, TEAM_LEADER | ADMIN, CLIENT, TEAM_LEADER, TECHNICIAN | 2 |
 | /crystal-os-v2-route-index | Entrada raiz | ADMIN | — | 0 |
 | /dashboard | Entrada raiz | ADMIN | ADMIN | 5 |
 | /help-center | Entrada raiz | ADMIN, CLIENT, TECHNICIAN, TEAM_LEADER | ADMIN, CLIENT, TEAM_LEADER, TECHNICIAN | 2 |
@@ -108,14 +106,14 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /map | Entrada raiz | ADMIN | ADMIN | 0 |
 | /metrics | Entrada raiz | ADMIN | ADMIN | 3 |
 | /multi-map | Entrada raiz | ADMIN | ADMIN | 0 |
-| /notifications | Entrada raiz | ADMIN | ADMIN | 11 |
+| /notifications | Entrada raiz | ADMIN | ADMIN | 12 |
 | /operational-dashboard | Entrada raiz | ADMIN | ADMIN | 0 |
 | /profit-map | Entrada raiz | ADMIN | ADMIN | 0 |
 | /ranking | Entrada raiz | ADMIN | ADMIN | 0 |
 | /report-center | Entrada raiz | ADMIN | ADMIN | 0 |
 | /report-settings | Entrada raiz | ADMIN | ADMIN | 0 |
 | /route-map | Entrada raiz | ADMIN | ADMIN | 0 |
-| /settings | Entrada raiz | ADMIN, CLIENT, TECHNICIAN, TEAM_LEADER | ADMIN, CLIENT, TEAM_LEADER, TECHNICIAN | 5 |
+| /settings | Entrada raiz | ADMIN, CLIENT, TECHNICIAN, TEAM_LEADER | ADMIN, CLIENT, TEAM_LEADER, TECHNICIAN | 7 |
 | /splash | Entrada raiz | ADMIN | — | 0 |
 | /technician-chat | Entrada raiz | — | — | 3 |
 | /technician-field-mode | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 26 |

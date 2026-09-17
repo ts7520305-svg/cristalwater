@@ -59,7 +59,7 @@
 | /client_chat | Client Chat | CLIENT, ADMIN | Customer Navigation | /crystal-os-v2-route-index | YES | Reachable through Route Index |
 | /client_tech | Client Tech | CLIENT | Customer Navigation | /crystal-os-v2-route-index | YES | Reachable through Route Index |
 | /communications | Communications | ADMIN | Admin Route Index | /communications | YES | Direct in V2 navigation |
-| /config-notifications | Config Notifications | ADMIN | Admin Route Index | /crystal-os-v2-route-index | YES | Reachable through Route Index |
+| /config-notifications | Legacy account settings entry | ADMIN, CLIENT, TECHNICIAN, TEAM_LEADER | Account settings alias | /settings | YES | Redirects to authenticated account preferences; preserves old local values |
 | /crystal-os-v2-route-index | Crystal Os V2 Route Index | ADMIN | Admin Route Index | /crystal-os-v2-route-index | YES | Direct in V2 navigation |
 | /dashboard | Dashboard | ADMIN | Admin Route Index | /crystal-os-v2-route-index | YES | Reachable through Route Index |
 | /help-center | Role help centre | ADMIN, CLIENT, TECHNICIAN, TEAM_LEADER | Role navigation | /help-center | YES | Topics and quick commands follow the authenticated role |

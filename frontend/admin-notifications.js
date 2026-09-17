@@ -18,10 +18,7 @@ const socket =
 // SOUND
 // ======================================================
 
-const notifySound =
-  new Audio(
-    "https://actions.google.com/sounds/v1/alarms/beep_short.ogg"
-  );
+// Sound is controlled by explicit page activation and current account settings.
 
 // ======================================================
 // INIT
@@ -306,9 +303,11 @@ socket.on(
   "new-notification",
   (data) => {
 
+    if (!CWNotificationRead.active()) return;
+
     loadNotifications();
 
-    notifySound.play();
+    void window.CWNotificationSound?.play(data);
 
     showToast(
       data.message ||

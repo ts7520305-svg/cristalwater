@@ -76,9 +76,19 @@ async function removeTrigger() {
   browser = await chromium.launch({ headless: true, ...(process.env.CW_CHROMIUM_PATH ? { executablePath: process.env.CW_CHROMIUM_PATH } : {}), args: ['--no-sandbox'] });
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await context.addInitScript(({ token, id }) => { for (const key of ['token','cristalwater_jwt']) localStorage.setItem(key, token); for (const key of ['user','cristalwater_user']) localStorage.setItem(key, JSON.stringify({ id, role: 'ADMIN' })); }, { token: at, id: admin.id });
+  const originalSound = await prisma.userNotificationSetting.findUnique({ where: { userId_type: { userId: admin.id, type: 'CHAT' } } });
   for (const path of ['/notifications', '/admin-notifications']) {
     const page = await context.newPage(); page.setDefaultTimeout(8000);
     await page.goto(base + path); await page.waitForFunction(() => document.querySelector('#list').textContent.includes('not in snapshot'));
+    await page.locator('#notificationSoundToggle').click();
+    await page.waitForFunction(() => document.getElementById('notificationSoundStatus')?.dataset.state === 'ready');
+    assert.equal((await call('/api/settings', at, { userId: admin.id, type: 'CHAT', sound: false })).status, 200);
+    await page.evaluate(() => localStorage.setItem('sound_CHAT', 'true'));
+    assert.equal(await page.evaluate(() => CWNotificationSound.play({ id: 2100000000, type: 'CHAT' })), false, 'Real disabled User preference overrides unattributed local value');
+    assert.equal((await call('/api/settings', at, { userId: admin.id, type: 'CHAT', sound: true })).status, 200);
+    assert.equal(await page.evaluate(() => CWNotificationSound.play({ id: 2100000001, type: 'CHAT_MESSAGE' })), true, 'Fresh real User preference permits the current account sound');
+    assert.equal(await page.evaluate(() => CWNotificationSound.play({ id: 2100000001, type: 'CHAT_MESSAGE' })), false, 'Same notice must not sound twice');
+    assert.equal(await page.evaluate(() => localStorage.getItem('sound_CHAT')), 'true');
     const before = await page.locator('#list').textContent();
     await page.route(base + '/api/notifications/read/**', route => route.fulfill({ status: 503, json: { ok: false } }));
     await page.evaluate(id => markRead(id), newer.id);
@@ -94,6 +104,9 @@ async function removeTrigger() {
     await page.close();
     await prisma.notification.update({ where: { id: newer.id }, data: { isRead: false, readAt: null } });
   }
+  if (originalSound) await prisma.userNotificationSetting.update({ where: { userId_type: { userId: admin.id, type: 'CHAT' } }, data: { sound: originalSound.sound } });
+  else await prisma.userNotificationSetting.delete({ where: { userId_type: { userId: admin.id, type: 'CHAT' } } });
+  console.log('PASS both administrative notification pages use fresh real account preferences and a gesture-enabled browser audio context, preserving legacy values');
   const customer = await prisma.client.create({ data: { name: 'Client notice recipient', active: true } });
   const clientNote = await prisma.notification.create({ data: { clientId: customer.id, role: 'CLIENT', type: 'INFO', title: '<img src=x onerror="window.noticeXss=1">', message: '<script>window.noticeXss=1</script> Texto literal do aviso' } });
   const clientContext = await browser.newContext({ viewport: { width: 390, height: 844 } });

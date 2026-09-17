@@ -16,4 +16,4 @@ Não altera UUID, conteúdo, titularidade, confirmação, política de repetiç�
 - O mesmo teste mantém as verificações de preservação das fotografias das duas contas, ausência de conclusão cruzada, regresso à conta original e recuperação do pedido.
 - Os 19 scripts de navegador passaram, incluindo cancelamento determinístico, ambas as filas de fotografias e recuperação na conta original. A primeira repetição sem controlar a ordem também passou, confirmando a corrida que o ensaio final agora força.
 - `run-1789647623689`: recuperação de escritas API, interface e E2E completo aprovados após a correção.
-- Confirmar CI/restauro da árvore conjunta TASK226–227 antes de declarar o lote fechado.
+- Árvore conjunta confirmada: commit `bc5e4e35efccf89c9bb085a2ff5749ecb82c4e62`, árvore `1b5d7378b1c89a03209e407dc43143e2b2a8cbea`, CI `35221384674`: 124/124 grupos, 388 unitários/quatro técnicos, 19 scripts de navegador, 20 migrações, sintaxe de 539 ficheiros e restauro de 110 tabelas/32 ficheiros com linhas/hashes iguais em PostgreSQL 16. A evidência corresponde a esse código; este registo posterior é documental.

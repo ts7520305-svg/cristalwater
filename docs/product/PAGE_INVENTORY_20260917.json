@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-17T12:27:13.920Z",
-  "baseCommit": "0f12bed82376b097f726f1532078f5cb8ab9019d",
+  "generatedAt": "2026-09-17T12:47:06.070Z",
+  "baseCommit": "bc5e4e35efccf89c9bb085a2ff5749ecb82c4e62",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 143,
+  "activeScriptsScanned": 144,
   "summary": {
     "htmlFiles": 101,
     "rootPages": 94,
     "nestedPages": 7,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 45,
-    "catalogueGuardDifferences": 1
+    "pagesWithLiteralTestReference": 46,
+    "catalogueGuardDifferences": 0
   },
   "pages": [
     {
@@ -735,6 +735,7 @@
         "/ui/design-system.css",
         "/socket.io/socket.io.js",
         "/cw-notification-read.js",
+        "/cw-notification-sound.js",
         "/admin-notifications.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
@@ -747,7 +748,8 @@
       "missingAssets": [],
       "testReferences": [
         "test-field-notification-confirmation.js",
-        "test-account-notification-settings-browser.js"
+        "test-account-notification-settings-browser.js",
+        "test-notification-sound-browser.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -2326,36 +2328,38 @@
       "file": "frontend/config-notifications.html",
       "route": "/config-notifications",
       "kind": "Entrada raiz",
-      "title": "Configuração Notificações",
+      "title": "Preferências de conta · Cristal Water",
       "catalogueRoles": [
-        "ADMIN"
+        "ADMIN",
+        "CLIENT",
+        "TECHNICIAN",
+        "TEAM_LEADER"
       ],
-      "guardFiles": [
-        "client-auth-guard.js"
-      ],
+      "guardFiles": [],
       "explicitRoleHints": [
-        "CLIENT"
+        "ADMIN",
+        "CLIENT",
+        "TEAM_LEADER",
+        "TECHNICIAN"
       ],
-      "conditionalAccess": [],
-      "entryRedirects": {},
-      "catalogueRolesMissingFromGuard": [
-        "ADMIN"
+      "conditionalAccess": [
+        "Alias estático; a sessão e titularidade User são verificadas no destino"
       ],
+      "entryRedirects": {
+        "ADMIN": "/settings",
+        "CLIENT": "/settings",
+        "TECHNICIAN": "/settings",
+        "TEAM_LEADER": "/settings"
+      },
+      "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/ui/foundation.css",
-        "/cristal-assist.css",
-        "/cw-auth.js",
-        "/client-auth-guard.js",
-        "/ui/design-system.css",
-        "/cristal-help-data.js",
-        "/cristal-assist.js",
-        "/ui/core/navigation-context.js",
-        "/crystal-os-v2-shell.js",
-        "/crystal-os-v2-nav.js",
-        "/ui/design-system.js"
+        "/ui/design-system.css"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "testReferences": [
+        "test-field-team-leader-entry.js",
+        "test-notification-sound-browser.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -2768,7 +2772,9 @@
         "/cw-auth.js",
         "/admin-auth-guard.js",
         "/ui/design-system.css",
+        "/socket.io/socket.io.js",
         "/cw-notification-read.js",
+        "/cw-notification-sound.js",
         "/notifications.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
@@ -2789,7 +2795,8 @@
         "test-field-notification-confirmation.js",
         "test-field-technical-proposals.js",
         "test-field-internal-alert.js",
-        "test-field-extra-equipment.js"
+        "test-field-extra-equipment.js",
+        "test-notification-sound-browser.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -3049,9 +3056,11 @@
       "testReferences": [
         "test-field-access-api.js",
         "test-fcs-sec-tech-auth.js",
+        "test-field-notification-confirmation.js",
         "test-field-team-leader-entry.js",
         "test-auth-entry-browser.js",
-        "test-account-notification-settings-browser.js"
+        "test-account-notification-settings-browser.js",
+        "test-notification-sound-browser.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },

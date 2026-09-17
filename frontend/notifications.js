@@ -15,102 +15,15 @@ if (typeof io !== "undefined") {
 }
 
 let notifications = [];
-let settings = [];
-
-let soundEnabled = false;
-let audioCtx = null;
-
-const user = JSON.parse(localStorage.user || "{}");
 
 // ==========================================================
 // INIT
 // ==========================================================
 
 window.onload = () => {
-  enableSound();
   requestPushPermission();
-  loadSettings();
   loadNotifications();
 };
-
-// ==========================================================
-// LOAD SETTINGS (DB)
-// ==========================================================
-
-async function loadSettings(){
-
-  if (!user.id) return;
-
-  try {
-    const res = await fetch(`${API}/settings/${user.id}`, { headers: authHeaders() });
-    const data = await res.json();
-
-    if (data.ok){
-      settings = data.settings || [];
-    }
-
-  } catch (err){
-    console.log(err);
-  }
-}
-
-// ==========================================================
-// VERIFICAR SOM (DB + fallback)
-// ==========================================================
-
-function isSoundEnabled(type){
-
-  const found = settings.find(s => s.type === type);
-
-  if (found) return found.sound;
-
-  // fallback antigo (compatibilidade)
-  const saved = localStorage.getItem("sound_" + type);
-  if (saved !== null) return saved === "true";
-
-  return false;
-}
-
-// ==========================================================
-// SOM
-// ==========================================================
-
-function enableSound(){
-  document.addEventListener("click", () => {
-
-    if (!soundEnabled){
-
-      try {
-        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-        soundEnabled = true;
-      } catch (_) {
-        soundEnabled = false;
-      }
-
-    }
-
-  }, { once:true });
-}
-
-function playSound(type){
-
-  if (!soundEnabled) return;
-  if (!isSoundEnabled(type)) return;
-
-  try {
-    const ctx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-    audioCtx = ctx;
-    const oscillator = ctx.createOscillator();
-    const gain = ctx.createGain();
-    oscillator.type = "sine";
-    oscillator.frequency.value = 880;
-    gain.gain.value = 0.02;
-    oscillator.connect(gain);
-    gain.connect(ctx.destination);
-    oscillator.start();
-    oscillator.stop(ctx.currentTime + 0.08);
-  } catch (_) {}
-}
 
 // ==========================================================
 // PUSH
@@ -140,11 +53,18 @@ if (socket){
 
   socket.on("new-notification", (n) => {
 
-    if (notifications.some(x => x.id === n.id)) return;
+    if (!CWNotificationRead.active()) return;
+
+    const existing = notifications.findIndex(x => x.id === n.id);
+    if (existing >= 0) {
+      // A legacy chat ID identifies the conversation, not an individual message.
+      if (!/^chat-[1-9]\d*$/.test(String(n.id)) || !Number.isFinite(Date.parse(n.createdAt)) || notifications[existing].createdAt === n.createdAt) return;
+      notifications.splice(existing, 1);
+    }
 
     notifications.unshift(n);
 
-    playSound(n.type);
+    void window.CWNotificationSound?.play(n);
     pushNotification(n.message);
 
     render();

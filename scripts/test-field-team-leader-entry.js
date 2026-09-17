@@ -87,7 +87,8 @@ let browser;
     await selectRegular();
     assert.equal(await page.locator('#notes').inputValue(), 'Rascunho da sessão PIN');
   }
-  await goto('/settings');
+  await goto('/config-notifications');
+  await page.waitForURL(base + '/settings');
   await page.waitForFunction(() => document.getElementById('settingsStatus')?.dataset.state === 'unavailable');
   assert.equal(await page.locator('#list select').count(), 0, 'PIN identity must not get User preferences by numeric ID');
   assert.equal(await token(), pinToken); assert.equal(await page.evaluate(key => localStorage.getItem(key), pinKey), pinDraft);
