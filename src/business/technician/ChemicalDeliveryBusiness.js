@@ -1,9 +1,9 @@
 const {prisma}=require('../../prismaClient');
-const {roleMatches}=require('../../utils/roles');
+const {normalizeRole}=require('../../utils/roles');
 const needs=require('./IncompleteVisitBusiness');
 const fail=(statusCode,message)=>{throw Object.assign(new Error(message),{statusCode});};
 const norm=value=>String(value||'').trim().replace(/\s+/g,' ').toUpperCase();
-function technician(user){if(!roleMatches(user?.role,'TECHNICIAN'))fail(403,'A receção deve ser confirmada pelo técnico responsável');return Number(user.technicianId||user.id);}
+function technician(user){if(!['TECHNICIAN','TEAM_LEADER'].includes(normalizeRole(user?.role)))fail(403,'A receção deve ser confirmada pelo técnico responsável');return Number(user.technicianId||user.id);}
 async function context(user,id,db=prisma){
   const technicianId=technician(user);
   const row=(await needs.shortages(user,db)).rows.find(row=>row.shortageId===Number(id));
