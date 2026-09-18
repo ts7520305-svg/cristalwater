@@ -6,6 +6,7 @@ const internalPayments = new Set(INTERNAL_PAYMENT_METHODS);
 const doneStates = new Set(['DONE','COMPLETED','CONCLUIDA','CONCLUIDO']);
 const stockTypes = new Set(['CONSUMPTION','RETURN','EMERGENCY_DISTRIBUTED_CONSUMPTION']);
 const normalize = value => String(value || '').trim().toUpperCase();
+const isCompletedVisitStatus = value => doneStates.has(normalize(value));
 const validId = value => Number.isSafeInteger(value) && value > 0;
 const cents = value => typeof value === 'number' && Number.isFinite(value) && Number.isSafeInteger(Math.round(value * 100)) ? Math.round(value * 100) : null;
 const fail = message => { throw Object.assign(new Error(message), { status: 400 }); };
@@ -58,12 +59,12 @@ async function build(query, kind) {
     }
     const owner = visit => kind === 'technician' ? visit.technicianId : clientOf(visit);
     for (const [type, visits] of [['REGULAR',regular],['EXTRA',extras]]) for (const visit of visits) {
-      if (!doneStates.has(normalize(visit.status))) { quality.excludedVisitStates++; continue; }
+      if (!isCompletedVisitStatus(visit.status)) { quality.excludedVisitStates++; continue; }
       const row = rowFor(owner(visit)); row.visitsDone++; row[type === 'REGULAR'?'regularDone':'extraDone']++;
       const minutes = visit.startAt && visit.endAt ? (visit.endAt-visit.startAt)/60000 : NaN;
       if (Number.isFinite(minutes) && minutes >= 0) row.minutes += minutes; else row.unknownDurations++;
     }
-    for (const visit of [...undatedRegular,...undatedExtras]) if (doneStates.has(normalize(visit.status))) { rowFor(owner(visit)).undatedCompleted++; quality.undatedCompleted++; }
+    for (const visit of [...undatedRegular,...undatedExtras]) if (isCompletedVisitStatus(visit.status)) { rowFor(owner(visit)).undatedCompleted++; quality.undatedCompleted++; }
 
     // Resolve typed source identities; never join the two visit tables by an untyped number.
     const regularIds = [...new Set(movements.map(m=>m.visitId).filter(validId))];
@@ -138,4 +139,4 @@ async function build(query, kind) {
       dataQuality:quality, ...(kind==='technician'?{technicians:result,ranking:result}:{clients:result})};
   },{isolationLevel:'RepeatableRead',maxWait:15000,timeout:30000});
 }
-module.exports = { period, documentMonthWhere, technicians:query=>build(query||{},'technician'), clients:query=>build(query||{},'client') };
+module.exports = { period, documentMonthWhere, isCompletedVisitStatus, technicians:query=>build(query||{},'technician'), clients:query=>build(query||{},'client') };

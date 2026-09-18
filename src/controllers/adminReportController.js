@@ -6,8 +6,8 @@
 const { prisma } = require("../prismaClient");
 const {
   generateAdminMonthlyReport,
-  generateClientMonthlyReport,
 } = require("../services/reportService");
+const { generate: generateClientMonthlyReport } = require('../business/client/ClientMonthlyReportBusiness');
 const { sendMonthlyReportEmails } = require("../services/reportEmailService");
 
 /**

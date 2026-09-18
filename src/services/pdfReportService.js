@@ -3,12 +3,14 @@
 // ==========================================
 
 const PDFDocument = require("pdfkit");
+const prepareFonts = require('./visitReportPdfFonts');
 
 /**
  * Gera PDF do relatório mensal do cliente
  */
 function generateMonthlyReportPDF(res, report) {
   const doc = new PDFDocument({ margin: 40 });
+  const fonts = prepareFonts(doc);
 
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader(
@@ -34,17 +36,25 @@ function generateMonthlyReportPDF(res, report) {
   // INFO CLIENTE
   doc
     .fontSize(12)
-    .text(`Cliente: ${report.data.client}`)
-    .text(`Mês: ${report.month}`)
-    .text(`Estado de pagamento: ${report.data.paymentStatus}`)
+    .text(fonts.format(`Cliente: ${report.data.client}`))
+    .text(fonts.format(`Mês: ${report.month}`))
+    .text(fonts.format(`Estado de pagamento: ${report.data.paymentStatus}`))
     .moveDown(1);
+
+  if (report.data.reportVersion === 2) {
+    doc.fontSize(10).fillColor('#444')
+      .text('Visitas regulares. Contagem pela data de fecho, em UTC.')
+      .text('Registos sem data de fecho ficam por confirmar, pelo mês planeado ou pela data antiga do registo.')
+      .text('Dados do cliente, instalações e pagamento correspondem ao registo na geração.')
+      .moveDown(1);
+  }
 
   // PISCINAS
   report.data.pools.forEach((pool) => {
     doc
       .fontSize(13)
       .fillColor("#000")
-      .text(`Piscina: ${pool.name}`, { underline: true })
+      .text(fonts.format(`Piscina: ${pool.name}`), { underline: true })
       .moveDown(0.3);
 
     doc
@@ -52,6 +62,9 @@ function generateMonthlyReportPDF(res, report) {
       .text(`Visitas realizadas: ${pool.totalVisits}`)
       .text(`Não realizadas: ${pool.notDone}`)
       .moveDown(0.8);
+    if (report.data.reportVersion === 2 && pool.unconfirmed) {
+      doc.fontSize(11).fillColor('#7c2d12').text(`Por confirmar: ${pool.unconfirmed} - falta a data de fecho.`).moveDown(0.8);
+    }
   });
 
   // RODAPÉ

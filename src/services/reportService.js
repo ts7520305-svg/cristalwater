@@ -66,45 +66,7 @@ async function generateAdminMonthlyReport() {
 /**
  * Gera relatório mensal por CLIENTE
  */
-async function generateClientMonthlyReport(clientId) {
-  const month = getLastMonthKey();
-
-  const exists = await prisma.monthlyReport.findFirst({
-    where: { month, type: "CLIENT", clientId },
-  });
-
-  if (exists) return exists;
-
-  const client = await prisma.client.findUnique({
-    where: { id: clientId },
-    include: {
-      pools: {
-        include: { serviceVisits: true },
-      },
-    },
-  });
-
-  if (!client) return null;
-
-  const pools = client.pools.map((p) => ({
-    name: p.name,
-    totalVisits: p.serviceVisits.length,
-    notDone: p.serviceVisits.filter(v => v.status === "NOT_DONE").length,
-  }));
-
-  return prisma.monthlyReport.create({
-    data: {
-      month,
-      type: "CLIENT",
-      clientId,
-      data: {
-        client: client.name,
-        paymentStatus: client.paymentStatus,
-        pools,
-      },
-    },
-  });
-}
+const generateClientMonthlyReport = require('../business/client/ClientMonthlyReportBusiness').generate;
 
 module.exports = {
   generateAdminMonthlyReport,
