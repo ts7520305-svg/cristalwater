@@ -156,6 +156,7 @@ async function getMonthlyPrintableReport(req, res) {
       </html>
     `;
 
+    res.set({ "X-CW-Report-Type": "monthly-print", "X-CW-Month-Ref": monthRef, "X-CW-Invoice-Filter": String(onlyRequiresInvoice), "X-Content-Type-Options": "nosniff" });
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     return res.send(html);
   } catch (err) {

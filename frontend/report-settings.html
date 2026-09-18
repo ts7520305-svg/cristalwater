@@ -156,7 +156,7 @@
       </div>
       <div>
         <label for="visitId">ID da visita para pré-visualizar</label>
-        <input id="visitId" placeholder="Ex: 4">
+        <input id="visitId" inputmode="numeric" autocomplete="off" placeholder="Ex: 4">
       </div>
     </div>
 
@@ -206,17 +206,16 @@
 
   <div class="card">
     <h2>Pré-visualização rápida</h2>
-    <div class="links">
-      <div class="link-box" id="clientLink">Relatório cliente: -</div>
-      <div class="link-box" id="adminLink">Relatório admin: -</div>
-    </div>
+    <p id="previewNotice">Carregue as configurações do cliente e indique uma visita.</p>
+    <p id="previewStatus" role="status" aria-live="polite" data-state="idle">Escolha a versão do relatório que pretende consultar.</p>
     <div class="row" style="margin-top:12px;">
-      <button onclick="openClientReport()">Abrir relatório cliente</button>
-      <button onclick="openAdminReport()">Abrir relatório admin</button>
+      <button type="button" id="openClientReport" disabled>Abrir relatório cliente</button>
+      <button type="button" id="openAdminReport" disabled>Abrir relatório admin</button>
     </div>
   </div>
 </main>
 
+<script src="/cw-report-download.js"></script>
 <script src="/report-settings.js"></script>
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>

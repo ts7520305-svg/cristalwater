@@ -11,7 +11,7 @@
   const values=()=>Object.fromEntries(fields.map(key=>[key,el(key).checked])),assign=value=>fields.forEach(key=>{el(key).checked=value?.[key]===true;});
   const selected=()=>/^[1-9]\d{0,9}$/.test(input.value.trim())&&id(Number(input.value.trim()))?Number(input.value.trim()):null;
   const text=(parent,tag,value)=>{const node=document.createElement(tag);node.textContent=value;parent.append(node);return node;};
-  let credential='',identity='',owner='',invalid=false,db,storageUnavailable=false,busy=false,view=null,observed=input.value,recoveryScan=0;
+  let credential='',identity='',owner='',invalid=false,db,storageUnavailable=false,busy=false,view=null,observed=input.value,recoveryScan=0,previewBusy=false,previewGeneration=0;
   const controllers=new Set(),channel=typeof BroadcastChannel==='function'?new BroadcastChannel('cw-report-settings-v1'):null;
   try {
     identity=fingerprint();credential=localStorage.getItem('cristalwater_jwt')||localStorage.getItem('token')||localStorage.getItem('adminToken')||'';
@@ -41,6 +41,11 @@
     el('reviewSettings').hidden=!view?.conflict||!!view?.pending;el('reviewSettings').disabled=invalid||busy;
     el('discardSettings').hidden=!view?.base||!!view?.pending||view?.needsRead;el('discardSettings').disabled=invalid||busy;
     el('prepareSettings').disabled=invalid||busy||!view?.revision;
+    const ready=!!view?.base&&!invalid&&!busy&&!view.pending&&!view.conflict&&!view.needsRead&&equal(values(),view.base.setting);
+    const visit=el('visitId').value.trim(),validVisit=/^[1-9]\d{0,9}$/.test(visit)&&id(Number(visit));
+    el('openClientReport').disabled=el('openAdminReport').disabled=!ready||!validVisit||previewBusy;
+    el('visitId').disabled=invalid;
+    el('previewNotice').textContent=ready?'A pré-visualização usa as opções guardadas deste cliente. A visita deve pertencer a este cliente.':'Carregue e confirme as opções guardadas. Guarde as alterações ou descarte o rascunho antes de pré-visualizar.';
   }
   function validateState(value,clientId){
     if(value?.ok!==true||value.reportSettingsVersion!==1||value.client?.id!==clientId||typeof value.client.name!=='string'||typeof value.client.active!=='boolean'||typeof value.editable!=='boolean'||!['DEFAULT','SAVED'].includes(value.source)||!validFields(value.setting)||!version.test(value.version)||(value.source==='DEFAULT'?value.savedAt!==null:typeof value.savedAt!=='string'||!Number.isFinite(Date.parse(value.savedAt))))throw Error('A resposta não confirma este cliente e as suas opções.');
@@ -88,10 +93,10 @@
     finally{clearTimeout(timer);controllers.delete(controller);}
   }
   function describe(v){el('loadedClient').textContent=v.base.client.name+' · cliente #'+v.id+(v.base.client.active?'':' · inativo')+' · '+(v.base.source==='DEFAULT'?'valores padrão, sem configuração gravada':'configuração guardada');}
-  function changeSelection(){if(!active())return;stop();observed=input.value;view=null;busy=false;assign(null);el('loadedClient').textContent='';el('settingsReview').hidden=true;note('idle','Carregue as configurações do cliente selecionado. Os rascunhos anteriores foram conservados.');controls();recoverList();}
+  function changeSelection(){if(!active())return;previewGeneration++;stop();observed=input.value;view=null;busy=false;assign(null);el('loadedClient').textContent='';el('settingsReview').hidden=true;note('idle','Carregue as configurações do cliente selecionado. Os rascunhos anteriores foram conservados.');controls();recoverList();}
   async function load(){
     if(!active()||busy)return;const clientId=selected();if(!clientId){note('error','Indique um ID de cliente válido.');return;}
-    const v={id:clientId,selection:input.value,base:null,pending:null,conflict:false,needsRead:false,draftUnavailable:false};view=v;observed=input.value;busy=true;assign(null);el('loadedClient').textContent='';el('settingsReview').hidden=true;note('loading','A confirmar o cliente e as configurações…');controls();
+    previewGeneration++;const v={id:clientId,selection:input.value,base:null,pending:null,conflict:false,needsRead:false,draftUnavailable:false};view=v;observed=input.value;busy=true;assign(null);el('loadedClient').textContent='';el('settingsReview').hidden=true;note('loading','A confirmar o cliente e as configurações…');controls();
     try{await ready;if(!current(v))return;const local=storageUnavailable?null:await readLocal(clientId);if(!current(v))return;
       let savedDraft=draft(clientId);
       if(local?.confirmed&&savedDraft?.requestId===local.confirmed.record.requestId){if(local.confirmed.result.applied){clearConfirmedDraft(local.confirmed.record);savedDraft=null;}else v.conflict=true;}
@@ -142,8 +147,19 @@
   window.addEventListener('storage',observe);window.addEventListener('focus',observe);document.addEventListener('visibilitychange',observe);setInterval(observe,500);
   window.addEventListener('pagehide',()=>{stop();if(view)view.needsRead=true;busy=false;controls();});window.addEventListener('pageshow',event=>{observe();if(event.persisted&&view)load();});
   window.addEventListener('online',()=>{if(active()){controls();recoverList();}});window.addEventListener('offline',()=>{if(active())controls();});
-  function refreshLinks(){const visitId=el('visitId').value.trim();el('clientLink').textContent='Relatório cliente: '+(visitId?'/api/report-visit/visit/'+visitId+'?role=CLIENT':'-');el('adminLink').textContent='Relatório admin: '+(visitId?'/api/report-visit/visit/'+visitId+'?role=ADMIN':'-');}
-  window.openClientReport=()=>{const value=el('visitId').value.trim();if(value)window.open('/api/report-visit/visit/'+encodeURIComponent(value)+'?role=CLIENT','_blank');};
-  window.openAdminReport=()=>{const value=el('visitId').value.trim();if(value)window.open('/api/report-visit/visit/'+encodeURIComponent(value)+'?role=ADMIN','_blank');};
-  el('visitId').addEventListener('input',refreshLinks);assign(null);controls();if(active())recoverList();
+  const preview=window.CristalReportDownloads.create({
+    context:()=>({generation:previewGeneration,client:input.value,visit:el('visitId').value,version:view?.base?.version,ready:!!view?.base&&!busy&&!view.pending&&!view.conflict&&!view.needsRead,options:values()}),
+    state:(kind,message)=>{previewBusy=kind==='loading';el('previewStatus').dataset.state=kind;el('previewStatus').textContent=message;el('previewStatus').setAttribute('role',['error','session'].includes(kind)?'alert':'status');if(kind==='session'){invalid=true;active();}controls();},
+  });
+  function openReport(reportView){
+    if(!active()||busy||previewBusy||!view?.base||view.pending||view.conflict||view.needsRead||!equal(values(),view.base.setting))return;
+    const visitId=el('visitId').value.trim();if(!/^[1-9]\d{0,9}$/.test(visitId)||!id(Number(visitId)))return;
+    preview.open('/api/report-visit/visit/'+visitId+'?view='+reportView+'&clientId='+view.id+'&settingsVersion='+encodeURIComponent(view.base.version),
+      {type:'application/pdf',headers:{'X-CW-Report-Type':'visit-pdf','X-CW-Visit-Id':visitId,'X-CW-Client-Id':String(view.id),'X-CW-Report-View':reportView,'X-CW-Settings-Version':view.base.version}});
+  }
+  el('openClientReport').addEventListener('click',()=>openReport('client'));el('openAdminReport').addEventListener('click',()=>openReport('admin'));
+  el('visitId').addEventListener('input',()=>{preview.cancel();controls();});
+  input.addEventListener('input',()=>preview.cancel());
+  for(const key of fields)el(key).addEventListener('change',()=>preview.cancel());
+  assign(null);controls();if(active())recoverList();
 })();

@@ -53,6 +53,12 @@
       font-weight: bold;
       cursor: pointer;
     }
+    .report-center-main { padding-bottom: 120px; }
+    .report-center-main .card { display: block !important; background: #fff; color: #1f2937; }
+    .report-center-main label, .report-center-main p { color: inherit; }
+    .report-center-main button { min-height: 44px; background: #1565c0; }
+    .report-center-main #status { overflow-wrap: anywhere; }
+    .report-center-main button:disabled { opacity: .6; cursor: default; }
   </style>
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
@@ -65,66 +71,24 @@
   <h1>Centro de Relatórios</h1>
 </header>
 
-<main>
+<main class="report-center-main" data-cw-state-managed="manual">
   <div class="card">
-    <label>Mês</label>
+    <label for="monthRef">Mês</label>
     <input type="month" id="monthRef">
 
-    <label>Tipo</label>
+    <label for="onlyRequiresInvoice">Tipo</label>
     <select id="onlyRequiresInvoice">
       <option value="false">Todos os clientes</option>
       <option value="true">Só clientes que requerem fatura</option>
     </select>
 
-    <button onclick="openPrintableReport()">Abrir relatório para imprimir / PDF</button>
-    <p id="status" aria-live="polite">Pronto.</p>
+    <button id="openPrintableReport" type="button">Abrir relatório para imprimir / PDF</button>
+    <p id="status" role="status" data-state="idle" aria-live="polite">Pronto.</p>
   </div>
 </main>
 
-<script>
-  function authHeaders(extra = {}) {
-    const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
-    return {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...extra,
-    };
-  }
-
-  function setStatus(message) {
-    const node = document.getElementById("status");
-    if (node) node.textContent = message;
-  }
-
-  function getCurrentMonthRef() {
-    const now = new Date();
-    const y = now.getFullYear();
-    const m = String(now.getMonth() + 1).padStart(2, "0");
-    return `${y}-${m}`;
-  }
-
-  document.getElementById("monthRef").value = getCurrentMonthRef();
-
-  async function openPrintableReport() {
-    const monthRef = document.getElementById("monthRef").value;
-    const onlyRequiresInvoice = document.getElementById("onlyRequiresInvoice").value;
-
-    const url =
-      `/api/reports/monthly-print?monthRef=${encodeURIComponent(monthRef)}&onlyRequiresInvoice=${encodeURIComponent(onlyRequiresInvoice)}`;
-
-    try {
-      setStatus("A preparar relatório...");
-      const res = await fetch(url, { headers: authHeaders() });
-      if (!res.ok) throw new Error("Erro ao preparar relatório");
-      const blob = await res.blob();
-      const objectUrl = URL.createObjectURL(blob);
-      window.open(objectUrl, "_blank");
-      setStatus("Relatório aberto.");
-      setTimeout(() => URL.revokeObjectURL(objectUrl), 30000);
-    } catch (_) {
-      setStatus("Erro ao abrir relatório.");
-    }
-  }
-</script>
+<script src="/cw-report-download.js"></script>
+<script src="/report-center.js"></script>
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
   <script src="/ui/core/navigation-context.js"></script>

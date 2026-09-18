@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-09-18T03:28:20.369Z",
-  "baseCommit": "086632dba7502413c087a6a8221b74c7cb0a2d6c",
+  "generatedAt": "2026-09-18T04:54:12.287Z",
+  "baseCommit": "b86cd7549a0c1f94c374a76bea07a01964d12191",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 163,
+  "activeScriptsScanned": 165,
   "summary": {
     "htmlFiles": 101,
     "rootPages": 94,
     "nestedPages": 7,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 58,
+    "pagesWithLiteralTestReference": 59,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -2218,7 +2218,8 @@
         "test-field-visit-briefing.js",
         "test-field-alert-billing.js",
         "test-field-credit-allocation.js",
-        "test-field-legacy-admin-access.js"
+        "test-field-legacy-admin-access.js",
+        "test-field-report-opening-ui.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -2657,6 +2658,7 @@
         "test-field-resilience.js",
         "test-field-invoice-document.js",
         "test-field-legacy-alert-access.js",
+        "test-field-report-opening-ui.js",
         "test-field-team-leader-entry.js",
         "test-auth-entry-browser.js"
       ],
@@ -2969,6 +2971,8 @@
         "/cw-auth.js",
         "/admin-auth-guard.js",
         "/ui/design-system.css",
+        "/cw-report-download.js",
+        "/report-center.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
         "/ui/core/navigation-context.js",
@@ -2977,7 +2981,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "testReferences": [
+        "test-field-report-opening-ui.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -3003,6 +3009,7 @@
         "/cw-auth.js",
         "/admin-auth-guard.js",
         "/ui/design-system.css",
+        "/cw-report-download.js",
         "/report-settings.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
@@ -3013,7 +3020,8 @@
       ],
       "missingAssets": [],
       "testReferences": [
-        "test-field-report-settings-ui.js"
+        "test-field-report-settings-ui.js",
+        "test-field-report-opening-ui.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -3103,6 +3111,7 @@
         "test-fcs-sec-tech-auth.js",
         "test-field-notification-confirmation.js",
         "test-field-client-intake.js",
+        "test-field-visit-report.js",
         "test-field-team-leader-entry.js",
         "test-auth-entry-browser.js",
         "test-account-notification-settings-browser.js",

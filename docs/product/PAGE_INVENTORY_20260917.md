@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `086632dba7502413c087a6a8221b74c7cb0a2d6c`. Gerado em 2026-09-18T03:28:20.369Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `b86cd7549a0c1f94c374a76bea07a01964d12191`. Gerado em 2026-09-18T04:54:12.287Z. Inclui o estado dos ficheiros locais no momento da geração.
 
 101 ficheiros HTML: 94 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 163 scripts de integração/navegador ativos. 58 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 165 scripts de integração/navegador ativos. 59 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 As colunas de papéis distinguem o catálogo anterior dos indícios explícitos no HTML/scripts. Não são uma auditoria de autorização: as APIs, a atribuição atual e o comportamento real de cada perfil continuam a determinar o acesso.
 
@@ -91,7 +91,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /client-payments | Entrada raiz | CLIENT | CLIENT | 3 |
 | /client-portal | Entrada raiz | CLIENT, ADMIN | ADMIN, CLIENT | 10 |
 | /client-wow | Entrada raiz | CLIENT | CLIENT | 0 |
-| /client | Entrada raiz | CLIENT | CLIENT | 6 |
+| /client | Entrada raiz | CLIENT | CLIENT | 7 |
 | /client_chat | Entrada raiz | CLIENT, ADMIN | CLIENT | 4 |
 | /client_tech | Entrada raiz | CLIENT | CLIENT | 0 |
 | /communications | Entrada raiz | ADMIN | ADMIN | 1 |
@@ -102,7 +102,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /incident-center | Entrada raiz | ADMIN | ADMIN | 0 |
 | /invoice-document | Entrada raiz | — | — | 4 |
 | /invoices | Entrada raiz | ADMIN | ADMIN | 6 |
-| /login | Entrada raiz | PUBLIC | — | 19 |
+| /login | Entrada raiz | PUBLIC | — | 20 |
 | /map | Entrada raiz | ADMIN | ADMIN | 1 |
 | /metrics | Entrada raiz | ADMIN | ADMIN | 4 |
 | /multi-map | Entrada raiz | ADMIN | ADMIN | 1 |
@@ -110,10 +110,10 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /operational-dashboard | Entrada raiz | ADMIN | ADMIN | 0 |
 | /profit-map | Entrada raiz | ADMIN | ADMIN | 1 |
 | /ranking | Entrada raiz | ADMIN | ADMIN | 1 |
-| /report-center | Entrada raiz | ADMIN | ADMIN | 0 |
-| /report-settings | Entrada raiz | ADMIN | ADMIN | 1 |
+| /report-center | Entrada raiz | ADMIN | ADMIN | 1 |
+| /report-settings | Entrada raiz | ADMIN | ADMIN | 2 |
 | /route-map | Entrada raiz | ADMIN | ADMIN | 1 |
-| /settings | Entrada raiz | ADMIN, CLIENT, TECHNICIAN, TEAM_LEADER | ADMIN, CLIENT, TEAM_LEADER, TECHNICIAN | 8 |
+| /settings | Entrada raiz | ADMIN, CLIENT, TECHNICIAN, TEAM_LEADER | ADMIN, CLIENT, TEAM_LEADER, TECHNICIAN | 9 |
 | /splash | Entrada raiz | ADMIN | — | 0 |
 | /technician-chat | Entrada raiz | — | — | 3 |
 | /technician-field-mode | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 29 |
