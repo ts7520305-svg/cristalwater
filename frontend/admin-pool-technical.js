@@ -387,6 +387,11 @@ async function loadSheet() {
   if (!sameSheetSession()) return;
   if (!pool || Number(pool.id) !== Number(poolId) || !pool.name || !Number.isFinite(pool.monthlyAmount)) throw new Error('Não foi possível carregar a ficha atual.');
   reminderPoolName = pool.name || `Piscina #${poolId}`;
+  for (const [id, kind] of [['poolMaintenanceBillingLink', 'EQUIPMENT'], ['poolServiceBillingLink', 'REMINDER']]) {
+    const link = document.getElementById(id);
+    link.href = `/admin-operational-settings?poolId=${encodeURIComponent(pool.id)}&maintenanceKind=${kind}#maintenanceBillingPanel`;
+    link.hidden = false;
+  }
   document.getElementById("subtitle").dataset.cwNoI18n = "";
   document.getElementById("subtitle").textContent = `${pool.client?.name || "Cliente"} - ${pool.name || "Piscina"}`;
   const operationalReminderLink = document.getElementById("poolOperationalReminderLink");
@@ -526,7 +531,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   sheetEditor = window.CWTechnicalSheetEdit.create({
     confirmed: loadSheet,
-    invalidated: () => { for (const id of ['subtitle', 'keyAccessList', 'history', 'technicalProposalSummary', 'technicalProposalAdminList', 'serviceReminders']) document.getElementById(id)?.replaceChildren(); },
+    invalidated: () => { for (const id of ['subtitle', 'keyAccessList', 'history', 'technicalProposalSummary', 'technicalProposalAdminList', 'serviceReminders']) document.getElementById(id)?.replaceChildren(); for (const id of ['poolMaintenanceBillingLink', 'poolServiceBillingLink']) { const link = document.getElementById(id); link.hidden = true; link.removeAttribute('href'); } },
   });
   void sheetEditor.open(poolId);
   loadSheet().catch(() => { /* Related panels can be refreshed without overwriting the draft. */ });

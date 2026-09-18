@@ -168,7 +168,7 @@
     .sheet-edit-choice select { width: 100%; background: white; color: #152e49; }
     #sheetEditPending p { white-space: pre-wrap; overflow-wrap: anywhere; }
     #sheetEditPendingList a { display: block; margin: 8px 0; }
-    #sheetForm [hidden] { display: none !important; }
+    #sheetForm [hidden], #poolMaintenanceBillingLink[hidden] { display: none !important; }
   </style>
   <link rel="stylesheet" href="/ui/design-system.css">
 </head>
@@ -183,6 +183,7 @@
       <div class="head-actions">
         <button class="btn" type="button" data-cw-back data-cw-fallback="/admin-pools">Voltar</button>
         <a class="btn" href="/admin-pools">Piscinas</a>
+        <a class="btn" id="poolMaintenanceBillingLink" hidden>Intervenções e cobrança</a>
         <a class="btn" href="/admin-master-control">Centro de Operacoes</a>
       </div>
     </div>
@@ -296,6 +297,7 @@
           <div class="row">
             <button type="button" id="createServiceReminderBtn" class="primary" onclick="createServiceReminder()">Criar lembrete</button>
             <a id="poolOperationalReminderLink" class="btn" href="/admin-crm">Lembrete operacional</a>
+            <a id="poolServiceBillingLink" class="btn" hidden>Rever serviços concluídos</a>
           </div>
           <span id="reminderStatus" class="muted" role="status" aria-live="polite"></span>
           <div id="serviceReminders" style="margin-top:12px">

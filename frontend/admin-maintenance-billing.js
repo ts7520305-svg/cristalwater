@@ -57,13 +57,13 @@
   }
   async function load(before = null) {
     if (!session()) return; controller?.abort(); controller = new AbortController(); const current = ++revision, pid = poolId, kind = el('mbKind').value;
-    rows = []; selected = null; nextBefore = null; el('mbRows').replaceChildren(); loading = Boolean(pid); renderControls(); if (!pid) return;
+    rows = []; selected = null; nextBefore = null; el('mbRows').replaceChildren(); el('mbTechnicalSheet').hidden = true; el('mbTechnicalSheet').removeAttribute('href'); loading = Boolean(pid); renderControls(); if (!pid) return;
     status('A consultar intervenções…');
     try {
       const response = await fetch(`/api/equipment-maintenance/pools/${pid}/billing?kind=${kind}${before ? `&before=${before}` : ''}`, { headers: { Authorization: `Bearer ${sessionToken}` }, cache: 'no-store', signal: AbortSignal.any([controller.signal, AbortSignal.timeout(20000)]) });
       const data = await response.json(); if (!session() || current !== revision) return;
       if (!response.ok || data.ok !== true || data.poolId !== pid || data.kind !== kind || !positive(data.clientId) || !Array.isArray(data.rows) || data.rows.some(row => row.kind !== kind || row.poolId !== pid || row.clientId !== data.clientId || !positive(row.sourceId) || !/^v1:[a-f0-9]{64}$/.test(row.expectedVersion))) throw Error(data.error || 'Não foi possível confirmar a lista de intervenções.');
-      rows = data.rows; nextBefore = data.nextBefore; el('mbContext').textContent = `${data.poolName} · ${data.clientName}`; renderRows(); if (!pending) status('Intervenções atualizadas.');
+      rows = data.rows; nextBefore = data.nextBefore; el('mbContext').textContent = `${data.poolName} · ${data.clientName}`; el('mbTechnicalSheet').href = `/admin-pool-technical?poolId=${pid}`; el('mbTechnicalSheet').hidden = false; renderRows(); if (!pending) status('Intervenções atualizadas.');
     } catch (error) { if (session() && current === revision) status(error.name === 'AbortError' ? 'Consulta cancelada. Atualize a lista.' : error.message); }
     finally { if (current === revision) { loading = false; renderControls(); } }
   }
@@ -117,8 +117,9 @@
     try { await navigator.locks.request(storageKey, { ifAvailable: true }, async lock => { if (!lock || !session()) return; const record = read(); if (record?.id !== pending.id || !record.rejection) throw Error('O pedido mudou noutra janela.'); forget(record); selected = null; await load(); }); }
     catch (error) { if (session()) status(error.message); } finally { busy = false; if (session()) renderControls(); }
   };
-  el('mbRefresh').onclick = () => load(); el('mbOlder').onclick = () => load(nextBefore); el('mbKind').onchange = () => load();
-  el('emPool').addEventListener('change', () => { poolId = Number(el('emPool').value) || 0; el('mbContext').textContent = poolId ? 'A consultar a piscina…' : 'Escolha uma piscina acima.'; void load(); });
+  el('mbRefresh').onclick = () => load(); el('mbOlder').onclick = () => load(nextBefore); el('mbKind').onchange = () => { const url = new URL(location.href); url.searchParams.set('maintenanceKind', el('mbKind').value); history.replaceState(null, '', url); void load(); };
+  document.addEventListener('cw:maintenance-pool-selected', event => { if (Number(el('emPool').value) !== event.detail?.poolId || !session()) return; poolId = event.detail.poolId; const kind = new URLSearchParams(location.search).get('maintenanceKind'); if (['EQUIPMENT','REMINDER'].includes(kind)) el('mbKind').value = kind; el('mbContext').textContent = poolId ? 'A consultar a piscina…' : 'Escolha uma piscina acima.'; void load(); });
+  const linkParams = new URLSearchParams(location.search); if (linkParams.getAll('maintenanceKind').length === 1 && ['EQUIPMENT','REMINDER'].includes(linkParams.get('maintenanceKind'))) el('mbKind').value = linkParams.get('maintenanceKind');
   try {
     const payload = JSON.parse(atob(sessionToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
     if (payload.role !== 'ADMIN' || !positive(Number(payload.id))) throw Error('Sessão administrativa inválida.');

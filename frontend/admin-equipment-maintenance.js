@@ -16,8 +16,9 @@
   for(const plan of plans){const card=node('article','',el('emPlans'));card.className='em-plan';node('h3',plan.title,card);node('p',`${plan.active?'Ativo':'Pausado'} · Próxima revisão: ${plan.nextDue} · Repetir a cada ${plan.intervalCount} ${plan.intervalUnit==='MONTHS'?'meses':'dias'}`,card);if(plan.overdue&&plan.active)node('strong','Revisão em atraso',card);if(plan.lastCompletedAt)node('p','Última execução: '+new Date(plan.lastCompletedAt).toLocaleString('pt-PT'),card);if(plan.instructions)node('p',plan.instructions,card);const b=node('button','Editar / pausar',card);b.type='button';b.className='btn';b.onclick=()=>{if(!busy)edit(plan);};}
  }
  async function load(){loaded=false;close();el('emPlans').replaceChildren();const d=await api(`/api/equipment-maintenance/pools/${poolId}`);plans=d.plans||[];loaded=true;render();status('Planos atualizados.');}
- el('emLoadPools').onclick=()=>run(async()=>{const d=await api('/api/core/pools');const select=el('emPool');select.replaceChildren(new Option('Escolher piscina',''));for(const pool of d.pools||[])select.append(new Option(`${pool.name} · ${pool.client?.name||'Cliente'} · #${pool.id}`,String(pool.id)));select.value=String(poolId||'');status('Selecione a piscina.');});
- el('emPool').onchange=()=>{if(!discard()){el('emPool').value=String(poolId||'');return;}poolId=Number(el('emPool').value);revision++;loaded=false;close();el('emPlans').replaceChildren();if(poolId)run(load);else controls();};
+ function announcePool(kind){const url=new URL(location.href);if(poolId)url.searchParams.set('poolId',String(poolId));else url.searchParams.delete('poolId');url.searchParams.set('maintenanceKind',kind||el('mbKind')?.value||'EQUIPMENT');history.replaceState(null,'',url);document.dispatchEvent(new CustomEvent('cw:maintenance-pool-selected',{detail:{poolId}}));}
+ el('emLoadPools').onclick=()=>run(async()=>{const d=await api('/api/core/pools');const select=el('emPool'),label=select.selectedOptions[0]?.textContent;select.replaceChildren(new Option('Escolher piscina',''));for(const pool of d.pools||[])select.append(new Option(`${pool.name} · ${pool.client?.name||'Cliente'} · #${pool.id}`,String(pool.id)));if(poolId&&!Array.from(select.options).some(option=>option.value===String(poolId)))select.append(new Option(label||`Piscina #${poolId}`,String(poolId)));select.value=String(poolId||'');status('Selecione a piscina.');});
+ el('emPool').onchange=()=>{if(!discard()){el('emPool').value=String(poolId||'');return;}poolId=Number(el('emPool').value);revision++;loaded=false;close();el('emPlans').replaceChildren();announcePool();if(poolId)run(load);else controls();};
  el('emNew').onclick=()=>edit(null);el('emCancel').onclick=()=>{if(discard())close();};el('emRefresh').onclick=()=>{if(discard())run(load);};
  el('emForm').oninput=()=>{dirty=true;};
  el('emUnit').onchange=()=>{el('emCount').max=el('emUnit').value==='MONTHS'?'120':'3650';dirty=true;};
@@ -26,5 +27,16 @@
   const id=editing?.id;if(editing)p.expectedVersion=editing.version;
   run(async()=>{try{await api(id?`/api/equipment-maintenance/plans/${id}`:`/api/equipment-maintenance/pools/${poolId}`,id?'PUT':'POST',p);}catch(e){loaded=false;close();el('emPlans').replaceChildren();throw Error(`${e.message} Atualize os planos para verificar o estado antes de voltar a guardar.`);}await load();status('Plano guardado. O técnico pode consultá-lo na visita desta piscina.');});
  };
+ async function openLinkedPool(){
+  const params=new URLSearchParams(location.search);if(!params.has('poolId'))return;
+  const target=params.get('poolId'),kind=params.get('maintenanceKind');
+  if(params.getAll('poolId').length!==1||!(/^[1-9]\d*$/.test(target))||!Number.isSafeInteger(Number(target))||Number(target)>2147483647||params.getAll('maintenanceKind').length>1||(kind!==null&&!['EQUIPMENT','REMINDER'].includes(kind))){status('Ligação à piscina inválida. Escolha a piscina manualmente.');return;}
+  await run(async()=>{
+   const data=await api(`/api/core/pools/${target}/technical-sheet`),pool=data.pool;
+   if(data.ok===false||!pool||pool.id!==Number(target)||typeof pool.name!=='string'||!pool.name||!pool.client||!Number.isSafeInteger(pool.client.id))throw Error('Não foi possível confirmar a piscina da ligação. Escolha a piscina manualmente.');
+   poolId=pool.id;revision++;el('emPool').replaceChildren(new Option('Escolher piscina',''),new Option(`${pool.name} · ${pool.client.name||'Cliente'} · #${pool.id}`,String(pool.id)));el('emPool').value=String(pool.id);announcePool(kind||'EQUIPMENT');await load();
+  });
+ }
  window.addEventListener('storage',()=>{try{session();}catch{}});controls();
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',openLinkedPool,{once:true});else void openLinkedPool();
 })();

@@ -112,12 +112,40 @@ const output = path.resolve('reports/maintenance-billing', String(Date.now())); 
   await context.addInitScript(({ token, id }) => { for (const key of ['token','cristalwater_jwt']) localStorage.setItem(key, token); for (const key of ['user','cristalwater_user']) localStorage.setItem(key, JSON.stringify({ id, role: 'ADMIN', name: 'Admin QA' })); }, { token, id: admin.id });
   const page = await context.newPage(); page.setDefaultTimeout(10000); const errors = []; page.on('pageerror', error => errors.push(error.message));
   const storageKey = `cwMaintenanceBilling:v1:ADMIN:${admin.id}`, pending = page.locator('#mbPending'), status = page.locator('#mbStatus');
-  async function open(tab = page) { await tab.goto(base + '/admin-operational-settings', { waitUntil: 'networkidle' }); await tab.locator('#emLoadPools').click(); await tab.locator(`#emPool option[value="${pool.id}"]`).waitFor({ state: 'attached' }); await tab.locator('#emPool').selectOption(String(pool.id)); await tab.locator('#mbStatus').filter({ hasText: 'Intervenções atualizadas.' }).waitFor(); }
+  async function open(tab = page) { await tab.goto(base + '/admin-operational-settings', { waitUntil: 'networkidle' }); await tab.locator('#emLoadPools').click(); await tab.locator(`#emPool option[value="${pool.id}"]`).waitFor({ state: 'attached' }); await tab.locator('#emPool').selectOption(String(pool.id)); await tab.locator('#mbStatus').filter({ hasText: 'Intervenções atualizadas.' }).waitFor(); if(await tab.locator('#mbKind').inputValue()!=='EQUIPMENT'){await tab.locator('#mbKind').selectOption('EQUIPMENT');await tab.locator('#mbStatus').filter({hasText:'Intervenções atualizadas.'}).waitFor();} }
   async function prepare(row, tab = page, mode = 'EXTRA') {
     await tab.locator(`#mbRows [data-mb-source="${row.kind}:${row.sourceId}"] [data-mb-review]`).click(); await tab.locator('#mbMode').selectOption(mode);
     if (mode === 'EXTRA') await tab.locator('#mbAmount').fill('45,67'); await tab.locator('#mbNote').fill('Valor acordado para esta intervenção.'); await tab.locator('#mbConfirmed').check();
   }
-  const lost = await equipment('Filtro <b>literal</b> QA'); await open(); await prepare(lost);
+  const lost = await equipment('Filtro <b>literal</b> QA');
+  const navigationBefore = [await prisma.invoice.count(), await prisma.operationalReminder.count({ where: { sourceKey: { startsWith: 'maintenance-billing:' } } })];
+  await page.goto(base + `/admin-pool-technical?poolId=${pool.id}`, { waitUntil: 'networkidle' });
+  await page.locator('#poolMaintenanceBillingLink').waitFor(); assert.match(await page.locator('#poolMaintenanceBillingLink').getAttribute('href'), new RegExp(`poolId=${pool.id}&maintenanceKind=EQUIPMENT`));
+  fs.mkdirSync(output, { recursive: true });
+  for(const width of [320,390,1440]){await page.setViewportSize({width,height:1000});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Technical-sheet link overflow ${width}`);await page.locator('.page-head').screenshot({path:path.join(output,`sheet-links-${width}.png`)});}
+  await page.route(base + '/api/core/pools', route => route.fulfill({ json: { ok: true, pools: [] } }));
+  await page.locator('#poolMaintenanceBillingLink').click(); await status.filter({ hasText: 'Intervenções atualizadas.' }).waitFor();
+  assert.equal(await page.locator('#emPool').inputValue(), String(pool.id)); assert.equal(await page.locator('#mbKind').inputValue(), 'EQUIPMENT');
+  await page.locator('#emLoadPools').click(); await page.locator('#emStatus').filter({ hasText: 'Selecione a piscina.' }).waitFor(); assert.equal(await page.locator('#emPool').inputValue(), String(pool.id), 'Exact linked pool survives an empty/general limited list');
+  await page.locator('#mbTechnicalSheet').click(); await page.locator('#poolServiceBillingLink').waitFor();
+  await page.locator('#poolServiceBillingLink').click(); await status.filter({ hasText: 'Intervenções atualizadas.' }).waitFor(); assert.equal(await page.locator('#mbKind').inputValue(), 'REMINDER');
+  await page.reload({ waitUntil: 'networkidle' }); await status.filter({ hasText: 'Intervenções atualizadas.' }).waitFor(); assert.equal(await page.locator('#emPool').inputValue(), String(pool.id)); assert.equal(await page.locator('#mbKind').inputValue(), 'REMINDER');
+  await page.unroute(base + '/api/core/pools');
+  const secondPool = await prisma.pool.create({data:{clientId:otherClient.id,name:'Piscina de outro cliente QA',active:true}});
+  await page.locator('#emLoadPools').click();await page.locator(`#emPool option[value="${secondPool.id}"]`).waitFor({state:'attached'});await page.locator('#emPool').selectOption(String(secondPool.id));await status.filter({hasText:'Intervenções atualizadas.'}).waitFor();
+  assert.equal(new URL(page.url()).searchParams.get('poolId'),String(secondPool.id));assert.match(await page.locator('#mbContext').textContent(),/Outro cliente QA/);assert.equal(await page.locator('#mbRows article').count(),0);
+  await page.reload({waitUntil:'networkidle'});await status.filter({hasText:'Intervenções atualizadas.'}).waitFor();assert.equal(await page.locator('#emPool').inputValue(),String(secondPool.id));
+  await page.locator('#mbTechnicalSheet').click();await page.locator('#subtitle').filter({hasText:'Piscina de outro cliente QA'}).waitFor();assert.equal(new URL(page.url()).searchParams.get('poolId'),String(secondPool.id));
+  for (const query of [`poolId=${pool.id}&poolId=2`, 'poolId=1.5', `poolId=${pool.id}&maintenanceKind=UNKNOWN`]) {
+    await page.goto(base + '/admin-operational-settings?' + query, { waitUntil: 'networkidle' }); await page.locator('#emStatus').filter({ hasText: 'Ligação à piscina inválida' }).waitFor(); assert.equal(await page.locator('#mbRows article').count(), 0); assert.equal(await page.locator('#mbTechnicalSheet').isVisible(), false);
+  }
+  await page.locator('#emLoadPools').click(); await page.locator(`#emPool option[value="${pool.id}"]`).waitFor({ state: 'attached' }); await page.locator('#emPool').selectOption(String(pool.id)); await status.filter({ hasText: 'Intervenções atualizadas.' }).waitFor(); assert(!page.url().includes('UNKNOWN'), 'Manual pool choice replaces an invalid link');
+  await page.route(base + `/api/core/pools/${pool.id}/technical-sheet`, async route => { const reply = await route.fetch(), data = await reply.json(); await route.fulfill({ response: reply, json: { ...data, pool: { ...data.pool, id: pool.id + 1 } } }); });
+  await page.goto(base + `/admin-operational-settings?poolId=${pool.id}`, { waitUntil: 'networkidle' }); await page.locator('#emStatus').filter({ hasText: 'Não foi possível confirmar a piscina' }).waitFor(); assert.equal(await page.locator('#mbRows article').count(), 0);
+  await page.unroute(base + `/api/core/pools/${pool.id}/technical-sheet`);
+  assert.deepEqual([await prisma.invoice.count(), await prisma.operationalReminder.count({ where: { sourceKey: { startsWith: 'maintenance-billing:' } } })], navigationBefore, 'Navigation never prepares a commercial decision');
+  console.log('PASS technical-sheet round trip, exact pool outside general listing, reminder tab/reload, invalid links and mismatched identity without commercial writes');
+  await open(); await prepare(lost);
   assert.match(await page.locator('#mbSource').textContent(), /<b>literal<\/b>/); assert.equal(await page.locator('#mbSource b').count(), 0);
   await page.locator('#mbCancel').click(); assert.equal(await receipt(lost), null); await prepare(lost);
   let sent = 0; await page.route(base + endpoint(lost), async route => { sent++; const reply = await route.fetch(); assert.equal(reply.status(), 200); await route.abort('failed'); });
