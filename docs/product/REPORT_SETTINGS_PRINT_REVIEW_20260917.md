@@ -2,6 +2,8 @@
 
 ## Estado e âmbito
 
+Adenda de 18/09: as configurações foram corrigidas nas TASK247–248 e confirmadas com a regressão TASK249 no commit `99cd623c472961ffc7bac33455ea8e6b00e8515a`, CI `35306180181`: 142/142 grupos e restauro de 110 tabelas/32 ficheiros. Contrato, recuperação e reproduções em `CLIENT_REPORT_SETTINGS_RECOVERY_20260918.md`. A abertura e os conteúdos/layout das saídas permanecem no próximo percurso.
+
 A revisão começou sobre `946a01f389ab3b37371ece483e4bfee463173dae`, depois das TASK244–245. O ensaio `run-1789681864927`, concluído em 4501 ms em PGlite isolado, HTTP real e Chromium, reproduziu oito comportamentos incorretos. A revisão de código acrescentou a interpolação direta dos campos guardados, indicada separadamente na tabela. O ensaio era um diagnóstico com asserções dos comportamentos incorretos, não uma aprovação funcional.
 
 A exposição do relatório mensal a perfis de cliente/campo e a interpretação de conteúdo como HTML foram corrigidas nesta TASK246. TASK244–246 confirmadas no commit `48e29bf00a35a63fae23e0c2176d17e7d4fa28dd`, árvore `30570153a8a715891e6f5d214fb497fccac98607`, [CI `35279447336`](https://github.com/ts7520305-svg/cristalwater/actions/runs/35279447336), job `105397748167`: 140/140 grupos, 388 unitários/quatro técnicos, 21 scripts de navegador, 20 migrações, sintaxe 544 JS backend/179 frontend/57 inline e restauro de 110 tabelas/32 ficheiros com linhas/hashes iguais em PostgreSQL 16. O CI terminou com sucesso em 17/09/2026 às 22:12 UTC; resultado confirmado em 18/09/2026. Os restantes pontos orientam a próxima implementação; esta revisão não declara o conjunto de configurações/PDFs concluído.
