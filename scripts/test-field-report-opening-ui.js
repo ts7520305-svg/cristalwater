@@ -96,6 +96,8 @@ let browser;
   await v.locator('#clientId').fill(String(client.id)); await v.locator('#loadSettings').click(); await v.waitForFunction(() => document.getElementById('status').dataset.state === 'ready');
   await prisma.clientReportSetting.create({ data: { clientId: client.id, showNotes: false } }); await preview.click(); await state(v, 'error', true); assert.match(await v.locator('#previewStatus').textContent(), /configurações/);
   await v.locator('#loadSettings').click(); await v.waitForFunction(() => document.getElementById('status').dataset.state === 'conflict'); await v.locator('#discardSettings').click(); await v.waitForFunction(() => document.getElementById('status').dataset.state === 'ready'); await v.locator('#openAdminReport').click(); await state(v, 'opened', true);
+  await prisma.client.update({where:{id:client.id},data:{archiveStatus:'ARQUIVADO'}});await v.locator('#loadSettings').click();await v.waitForFunction(()=>document.getElementById('status').dataset.state==='ready');
+  assert(await v.locator('#saveSettings').isDisabled());assert(await preview.isEnabled());await preview.click();await state(v,'opened',true);
   assert(requests.every(r => r.authorized && !r.url.includes(token)));
   // A session change after headers/body receipt still invalidates the old window.
   await p.evaluate(() => window.qaHoldBlob = true); await button.click(); await p.waitForFunction(() => window.qaBlobReady);

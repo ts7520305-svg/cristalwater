@@ -35,7 +35,9 @@
       return true;
     }
     async function open(href, expected) {
-      if (!observe()) return;
+      // Retire any old selection, then honor this fresh click in the same session.
+      observe();
+      try { if (!sameSession()) return; } catch (_) { return; }
       if (operation?.loading) return;
       let op;
       try {

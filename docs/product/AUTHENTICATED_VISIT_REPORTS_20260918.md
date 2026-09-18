@@ -2,7 +2,7 @@
 
 ## Estado
 
-Implementado e aprovado localmente; publicação e CI/restauro da árvore final por confirmar. Base anterior: `b86cd7549a0c1f94c374a76bea07a01964d12191`. Cache v73, sem migração nova. TASK250 trata a abertura nas páginas de configurações e centro de relatórios; TASK251 trata o acesso, as opções e a apresentação do relatório individual PDF/HTML.
+Implementado e aprovado localmente; publicação e CI/restauro da árvore final por confirmar. Base anterior: `b86cd7549a0c1f94c374a76bea07a01964d12191`. Cache v74, sem migração nova. TASK250 trata a abertura nas páginas de configurações e centro de relatórios; TASK251 trata o acesso, as opções e a apresentação do relatório individual PDF/HTML.
 
 ## Abertura no navegador
 
@@ -10,7 +10,7 @@ Implementado e aprovado localmente; publicação e CI/restauro da árvore final 
 - Só HTTP 200, tipo PDF/HTML correto, corpo não vazio com assinatura/marcador final esperados e cabeçalhos com a identidade esperada permitem abrir. Visita, cliente, apresentação e versão das configurações têm confirmação explícita; no mensal, mês e filtro têm confirmação explícita. Respostas parciais/202, redirecionamentos, tipos/identidades trocados, PDFs truncados e HTML incompleto são recusados.
 - A operação fica ligada ao token, aliases de conta, prazo de sessão e seleção. Mudanças de conta, cliente, visita, opções, mês/filtro, nova leitura das configurações, pagehide/BFCache e janela fechada invalidam a operação. Respostas tardias, incluindo depois da leitura do corpo, não abrem o documento. Uma geração de leitura distingue regressos rápidos à mesma seleção.
 - Prazo de 20 segundos e cancelamento por AbortController. URLs temporários são revogados ao invalidar a operação, ao fechar a janela ou após 60 segundos. Não há reabertura automática com o regresso da rede. Sessão expirada segue o logout comum, fecha a janela e conserva o trabalho local.
-- A pré-visualização exige um cliente confirmado, a configuração atual carregada e ausência de alterações/pedidos por confirmar. Rascunhos não são confundidos com opções guardadas. O servidor confirma que a visita pertence ao cliente e que a versão ainda corresponde à leitura.
+- A pré-visualização exige um cliente confirmado, a configuração atual carregada e ausência de alterações/pedidos por confirmar. Rascunhos não são confundidos com opções guardadas. Um cliente arquivado permanece consultável depois de uma leitura confirmada; a edição/gravação continua bloqueada. O servidor confirma que a visita pertence ao cliente e que a versão ainda corresponde à leitura.
 
 ## Conteúdo e acesso
 
@@ -35,7 +35,9 @@ O PDF mede linhas e permite a continuação de valores/notas extensas entre pág
 
 ## Revisão final de titularidade
 
-A primeira publicação `721ff7adb5ac79c9efbb01fa2abbb17e615c05d2` iniciou o CI `35309036752`. A revisão cruzada com o contrato de histórico identificou o fallback ao proprietário atual da piscina como insuficiente para provar titularidade de uma visita antiga. A correção seguinte exige o cliente direto da visita e acrescenta ensaios PDF/HTML de recusa para ausência/conflito. O primeiro CI não valida essa correção posterior. `run-1789707813021` aprovou a versão corrigida: API/PDF/HTML 1078 ms, abertura 8281 ms e proteção mensal 1287 ms, incluindo a reprodução do extrator.
+A primeira publicação `721ff7adb5ac79c9efbb01fa2abbb17e615c05d2` iniciou o CI `35309036752`. A revisão cruzada com o contrato de histórico identificou o fallback ao proprietário atual da piscina como insuficiente para provar titularidade de uma visita antiga. A correção seguinte exige o cliente direto da visita e acrescenta ensaios PDF/HTML de recusa para ausência/conflito. Publicada em `c9e190d8a19361ecadd955f50b25e09991533c16`, árvore `efe23cc0823500b36978891e2193b16f86bfdd7e`, CI `35309433429`. O primeiro CI não valida essa correção posterior. `run-1789707813021` aprovou a versão corrigida: API/PDF/HTML 1078 ms, abertura 8281 ms e proteção mensal 1287 ms, incluindo a reprodução do extrator.
+
+A revisão final da interface separa consulta de edição para clientes arquivados: a marca `editable:false` já desativa a gravação, mas não deve invalidar uma leitura bem-sucedida nem bloquear a consulta do PDF histórico. Regressão de navegador acrescentada; cache v74. Abertura e regressão das configurações aprovadas em `run-1789708090045` (8420/21885 ms). A reprodução anterior `run-1789708003696` encontrou ainda o primeiro clique após nova leitura consumido apenas pelo cancelamento da janela antiga: o helper passa a encerrar o contexto anterior e a atender o novo clique na mesma sessão. Esta correção posterior exige confirmação da sua própria árvore.
 
 ## Limites e próximo percurso
 

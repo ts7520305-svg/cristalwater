@@ -105,7 +105,7 @@
       const state=validateState(await request(v,'GET'),clientId);if(!current(v))return;
       if(!savedDraft){v.base=state;assign(state.setting);}else v.conflict=v.conflict||savedDraft.base.version!==state.version;
       describe(v);note(v.conflict?'conflict':'ready',v.conflict?'A versão atual mudou. Reveja as alterações; o rascunho foi conservado.':!state.editable?'Este cliente está arquivado ou indisponível para alteração.':savedDraft?'Rascunho recuperado. Confira as opções antes de guardar.':'Cliente e opções confirmados.');
-      if(!state.editable)v.needsRead=true;
+      // An archived client remains readable; field/save controls already use editable.
     }catch(error){if(current(v)){v.needsRead=true;note('error',error.message);}}
     finally{if(current(v)){busy=false;controls();recoverList();}}
   }
