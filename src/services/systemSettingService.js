@@ -4,6 +4,7 @@ const { prisma } = require('../prismaClient');
 const FIXED_SETTINGS = { MOBILE_PWA_ENABLED: 'true', OFFLINE_SYNC_ENABLED: 'true', AI_ADMIN_REQUIRE_APPROVAL: 'true' };
 function validateSetting(key) {
   if (Object.prototype.hasOwnProperty.call(FIXED_SETTINGS, key)) throw Object.assign(new Error('Esta capacidade está sempre ativa nesta versão e não pode ser desligada.'), { status: 409 });
+  if (String(key).startsWith('CLIENT_REPORT_LANGUAGE:')) throw Object.assign(new Error('Altere o idioma nas configurações do relatório do cliente, com revisão da versão atual.'), { status: 409 });
 }
 
 const DEFAULT_SETTINGS = {

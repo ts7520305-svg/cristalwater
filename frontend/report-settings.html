@@ -131,8 +131,11 @@
     .report-settings-main input[type="checkbox"] { width: 22px; height: 22px; flex-shrink: 0; }
     .report-settings-main fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
     .report-settings-main [hidden] { display: none !important; }
-    .report-settings-main table { width: 100%; table-layout: fixed; border-collapse: collapse; }
+    .report-settings-main table { width: 100%; min-width: 0; table-layout: fixed; border-collapse: collapse; }
     .report-settings-main th, .report-settings-main td { text-align: left; padding: 8px; border-bottom: 1px solid #d1d5db; }
+    #settingsReview th, #settingsReview td { padding: 8px 4px; }
+    #settingsReview th { font-size: 13px; text-transform: none; letter-spacing: normal; }
+    #settingsReview th:first-child { width: 42%; }
     #status { padding: 12px; border-radius: 8px; background: #edf4ff; color: #15385c; }
     #status[data-state="error"], #status[data-state="conflict"], #status[data-state="pending"] { background: #fff4de; color: #613900; }
   </style>
@@ -157,8 +160,9 @@
       <div>
         <label for="visitType">Tipo de visita</label>
         <select id="visitType" style="min-width:0;max-width:100%;appearance:none;text-overflow:ellipsis" data-cw-no-i18n><option value="REGULAR">Regular</option><option value="EXTRA">Extra</option></select>
-        <label for="reportLanguage">Idioma do relatório</label>
+        <label for="reportLanguage">Idioma nesta abertura</label>
         <select id="reportLanguage" style="min-width:0;max-width:100%" data-cw-no-i18n><option value="pt">Português</option><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option></select>
+        <p class="muted">Ao carregar o cliente, usa o idioma preferido. Pode escolher outro só para esta abertura.</p>
         <label for="visitId">ID da visita para pré-visualizar</label>
         <input id="visitId" inputmode="numeric" autocomplete="off" placeholder="Ex: 4">
       </div>
@@ -179,6 +183,10 @@
   </div>
 
   <div class="card">
+    <h2>Idioma preferido do cliente</h2>
+    <label for="preferredLanguage">Idioma dos relatórios individuais</label>
+    <select id="preferredLanguage" disabled style="min-width:0;max-width:100%" data-cw-no-i18n aria-describedby="preferredLanguageHelp"><option value="pt">Português</option><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option></select>
+    <p id="preferredLanguageHelp" class="muted">Fica guardado para este cliente com as configurações. Sem preferência guardada, usa português. As notas mantêm o texto original.</p>
     <h2>Campos visíveis no relatório do cliente</h2>
 
     <fieldset id="settingsFields" disabled><legend class="muted">As opções só ficam disponíveis depois de confirmar o cliente.</legend><div class="check-grid">

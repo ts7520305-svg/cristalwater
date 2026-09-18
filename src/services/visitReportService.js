@@ -25,7 +25,7 @@ async function read(actor, rawId, query = {}) {
       (query.role !== undefined && !['CLIENT', 'ADMIN'].includes(query.role)) ||
       (query.view !== undefined && query.role !== undefined) ||
       (query.settingsVersion !== undefined && (typeof query.settingsVersion !== 'string' || !/^report-settings-v1:[a-f0-9]{64}$/.test(query.settingsVersion)))) fail('Opções de relatório inválidas.');
-  const lang = language(query.lang);
+  const requestedLanguage = query.lang === undefined ? null : language(query.lang);
   const expectedClient = query.clientId === undefined ? null : id(query.clientId);
   const view = query.view || query.role?.toLowerCase() || (role === 'ADMIN' ? 'admin' : 'client');
   if (view === 'admin' && role !== 'ADMIN') fail('Acesso negado.', 403);
@@ -44,8 +44,9 @@ async function read(actor, rawId, query = {}) {
     const client = visit.client;
     if (!client) fail('A visita não tem um cliente confirmado.', 409);
     if (expectedClient !== null && expectedClient !== client.id) fail('A visita não pertence ao cliente selecionado.', 409);
-    const state = settingsService.snapshot(client);
+    const state = await settingsService.readSnapshot(tx, client);
     if (query.settingsVersion !== undefined && query.settingsVersion !== state.version) fail('As configurações mudaram. Carregue novamente antes de abrir o relatório.', 409);
+    const lang = requestedLanguage || state.preferredLanguage;
     if (visitType === 'EXTRA') visit = extraProjection(visit, translator(lang));
     return { visit, visitType, client, view, language: lang, setting: state.setting, settingsVersion: state.version };
   }, { isolationLevel: 'RepeatableRead', maxWait: 15000, timeout: 15000 });

@@ -8,7 +8,13 @@
   const equal=(a,b)=>JSON.stringify(canonical(a))===JSON.stringify(canonical(b));
   const hash=async value=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(canonical(value)))))).map(byte=>byte.toString(16).padStart(2,'0')).join('');
   const validFields=value=>value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).length===fields.length&&fields.every(key=>typeof value[key]==='boolean');
-  const values=()=>Object.fromEntries(fields.map(key=>[key,el(key).checked])),assign=value=>fields.forEach(key=>{el(key).checked=value?.[key]===true;});
+  const languages={pt:'Português',en:'English',fr:'Français',es:'Español'},validLanguage=value=>typeof value==='string'&&Object.hasOwn(languages,value);
+  const savedLanguage=state=>state?.preferredLanguage??'pt',recordLanguage=record=>record.preferredLanguage??savedLanguage(record.base);
+  const optionalLanguage=value=>!Object.hasOwn(value,'preferredLanguage')||validLanguage(value.preferredLanguage);
+  const values=()=>Object.fromEntries(fields.map(key=>[key,el(key).checked]));
+  function assign(value,preferredLanguage='pt'){fields.forEach(key=>{el(key).checked=value?.[key]===true;});el('preferredLanguage').value=preferredLanguage;}
+  const assignRecord=record=>assign(record.setting,recordLanguage(record));
+  const matches=state=>equal(values(),state.setting)&&el('preferredLanguage').value===savedLanguage(state);
   const selected=()=>/^[1-9]\d{0,9}$/.test(input.value.trim())&&id(Number(input.value.trim()))?Number(input.value.trim()):null;
   const text=(parent,tag,value)=>{const node=document.createElement(tag);node.textContent=value;parent.append(node);return node;};
   let credential='',identity='',owner='',invalid=false,db,storageUnavailable=false,busy=false,view=null,observed=input.value,recoveryScan=0,previewBusy=false,previewGeneration=0;
@@ -23,7 +29,7 @@
     owner='ADMIN:'+userId;
   }catch(_){invalid=true;}
   const slot=clientId=>owner+':'+clientId,draftKey=clientId=>'cwReportSettingsDraft:v1:'+slot(clientId);
-  const intent=record=>({clientId:record.clientId,expectedVersion:record.base.version,setting:record.setting});
+  const intent=record=>({clientId:record.clientId,expectedVersion:record.base.version,setting:record.setting,...(Object.hasOwn(record,'preferredLanguage')?{preferredLanguage:record.preferredLanguage}:{})});
   const envelope=record=>({v:1,scope:'CLIENT_REPORT_SETTINGS',resourceId:record.clientId,payload:intent(record)});
   function note(state,message){status.dataset.state=state;status.textContent=message;status.setAttribute('role',['error','session','conflict'].includes(state)?'alert':'status');}
   function stop(){for(const controller of controllers)controller.abort();controllers.clear();}
@@ -36,25 +42,26 @@
   function controls(){
     input.disabled=invalid;el('loadSettings').disabled=busy||invalid;
     el('settingsFields').disabled=invalid||busy||!view?.base||!view.base.editable||!!view.pending||view.conflict||view.needsRead;
-    el('saveSettings').disabled=el('settingsFields').disabled||storageUnavailable||view?.draftUnavailable||!navigator.locks?.request;
+    el('preferredLanguage').disabled=el('settingsFields').disabled;
+    el('saveSettings').disabled=el('settingsFields').disabled||storageUnavailable||view?.draftUnavailable||!navigator.locks?.request||!validLanguage(el('preferredLanguage').value);
     el('retrySettings').hidden=!view?.pending;el('retrySettings').disabled=invalid||busy||storageUnavailable||!navigator.onLine;
     el('reviewSettings').hidden=!view?.conflict||!!view?.pending;el('reviewSettings').disabled=invalid||busy;
     el('discardSettings').hidden=!view?.base||!!view?.pending||view?.needsRead;el('discardSettings').disabled=invalid||busy;
     el('prepareSettings').disabled=invalid||busy||!view?.revision;
-    const ready=!!view?.base&&!invalid&&!busy&&!view.pending&&!view.conflict&&!view.needsRead&&equal(values(),view.base.setting);
+    const ready=!!view?.base&&!invalid&&!busy&&!view.pending&&!view.conflict&&!view.needsRead&&matches(view.base);
     const visit=el('visitId').value.trim(),validVisit=/^[1-9]\d{0,9}$/.test(visit)&&id(Number(visit));
     el('openClientReport').disabled=el('openAdminReport').disabled=!ready||!validVisit||!['REGULAR','EXTRA'].includes(el('visitType').value)||!['pt','en','fr','es'].includes(el('reportLanguage').value)||previewBusy;
     el('visitId').disabled=el('visitType').disabled=el('reportLanguage').disabled=invalid;
     el('previewNotice').textContent=ready?'A pré-visualização usa as opções guardadas deste cliente. A visita deve pertencer a este cliente.':'Carregue e confirme as opções guardadas. Guarde as alterações ou descarte o rascunho antes de pré-visualizar.';
   }
-  function validateState(value,clientId){
-    if(value?.ok!==true||value.reportSettingsVersion!==1||value.client?.id!==clientId||typeof value.client.name!=='string'||typeof value.client.active!=='boolean'||typeof value.editable!=='boolean'||!['DEFAULT','SAVED'].includes(value.source)||!validFields(value.setting)||!version.test(value.version)||(value.source==='DEFAULT'?value.savedAt!==null:typeof value.savedAt!=='string'||!Number.isFinite(Date.parse(value.savedAt))))throw Error('A resposta não confirma este cliente e as suas opções.');
+  function validateState(value,clientId,allowLegacy=false){
+    if(value?.ok!==true||value.reportSettingsVersion!==1||value.client?.id!==clientId||typeof value.client.name!=='string'||typeof value.client.active!=='boolean'||typeof value.editable!=='boolean'||!['DEFAULT','SAVED'].includes(value.source)||!validFields(value.setting)||!optionalLanguage(value)||!allowLegacy&&!Object.hasOwn(value,'preferredLanguage')||!version.test(value.version)||(value.source==='DEFAULT'?value.savedAt!==null:typeof value.savedAt!=='string'||!Number.isFinite(Date.parse(value.savedAt))))throw Error('A resposta não confirma este cliente e as suas opções.');
     return value;
   }
-  function validDraft(draft,clientId){return draft?.schema===1&&draft.owner===owner&&draft.clientId===clientId&&validFields(draft.setting)&&(!draft.requestId||uuid.test(draft.requestId))&&validateState(draft.base,clientId);}
+  function validDraft(draft,clientId){return draft?.schema===1&&draft.owner===owner&&draft.clientId===clientId&&validFields(draft.setting)&&optionalLanguage(draft)&&(!draft.requestId||uuid.test(draft.requestId))&&validateState(draft.base,clientId,true);}
   function draft(clientId){const raw=sessionStorage.getItem(draftKey(clientId));if(!raw)return null;const result=JSON.parse(raw);if(!validDraft(result,clientId))throw Error('Rascunho inválido. Conserve os dados e peça assistência.');return result;}
   function saveDraft(v,setting=values(),requestId=null){
-    try{const value={schema:1,owner,clientId:v.id,base:v.base,setting,requestId};sessionStorage.setItem(draftKey(v.id),JSON.stringify(value));if(!equal(draft(v.id),value))throw Error('Draft not confirmed');v.draftUnavailable=false;return true;}
+    try{const value={schema:1,owner,clientId:v.id,base:v.base,setting,preferredLanguage:el('preferredLanguage').value,requestId};sessionStorage.setItem(draftKey(v.id),JSON.stringify(value));if(!equal(draft(v.id),value))throw Error('Draft not confirmed');v.draftUnavailable=false;return true;}
     catch(_){v.draftUnavailable=true;note('error','Não foi possível guardar o rascunho neste navegador. Conserve esta janela; não foi enviado um novo pedido.');controls();return false;}
   }
   function access(mode,work){return new Promise((resolve,reject)=>{if(!db)return reject(Error('Recuperação local indisponível.'));const tx=db.transaction('clients',mode);let result;tx.oncomplete=()=>resolve(typeof result==='function'?result():result?.result);tx.onerror=tx.onabort=()=>reject(Error('Não foi possível confirmar o armazenamento local.'));try{result=work(tx.objectStore('clients'));}catch(error){tx.abort();reject(error);}});}
@@ -62,11 +69,11 @@
     if(invalid||typeof indexedDB==='undefined'||!crypto.subtle){storageUnavailable=true;resolve();return;}
     try{const request=indexedDB.open('cw-report-settings-v1',1);request.onupgradeneeded=()=>request.result.createObjectStore('clients');request.onsuccess=()=>{db=request.result;resolve();};request.onerror=request.onblocked=()=>{storageUnavailable=true;resolve();};}catch(_){storageUnavailable=true;resolve();}
   });
-  async function validRecord(record,clientId){if(record?.schema!==1||record.owner!==owner||record.clientId!==clientId||!uuid.test(record.requestId)||!validFields(record.setting)||!validateState(record.base,clientId)||record.payloadHash!==await hash(envelope(record)))throw Error('O pedido guardado não pôde ser verificado. Conserve os dados e peça assistência.');}
+  async function validRecord(record,clientId){if(record?.schema!==1||record.owner!==owner||record.clientId!==clientId||!uuid.test(record.requestId)||!validFields(record.setting)||!optionalLanguage(record)||!validateState(record.base,clientId,true)||record.payloadHash!==await hash(envelope(record)))throw Error('O pedido guardado não pôde ser verificado. Conserve os dados e peça assistência.');}
   async function verify(result,record){
     const receipt=result?.receipt;
     if(result?.ok!==true||typeof result.applied!=='boolean'||!equal(result.context,intent(record))||receipt?.owner!==owner||receipt.scope!=='CLIENT_REPORT_SETTINGS'||receipt.resourceId!==record.clientId||receipt.requestId!==record.requestId||receipt.payloadHash!==record.payloadHash||typeof receipt.confirmedAt!=='string'||!Number.isFinite(Date.parse(receipt.confirmedAt)))throw Error('Resposta sem confirmação do pedido original.');
-    if(result.applied){validateState(result.state,record.clientId);if(!equal(result.state.setting,record.setting)||result.state.source!=='SAVED'||!id(result.auditId)||result.savedAt!==result.state.savedAt)throw Error('Gravação não confirmada.');}
+    if(result.applied){validateState(result.state,record.clientId,!Object.hasOwn(record,'preferredLanguage'));if(!equal(result.state.setting,record.setting)||Object.hasOwn(record,'preferredLanguage')&&result.state.preferredLanguage!==record.preferredLanguage||result.state.source!=='SAVED'||!id(result.auditId)||result.savedAt!==result.state.savedAt)throw Error('Gravação não confirmada.');}
     else if(!['REPORT_SETTINGS_STALE','REPORT_SETTINGS_UNAVAILABLE'].includes(result.code)||(result.currentVersion!==null&&!version.test(result.currentVersion)))throw Error('Recusa não confirmada.');
   }
   async function readLocal(clientId){
@@ -75,7 +82,7 @@
     if(entry.pending)await validRecord(entry.pending,clientId);if(entry.confirmed){await validRecord(entry.confirmed.record,clientId);await verify(entry.confirmed.result,entry.confirmed.record);}return entry;
   }
   async function writeLocal(entry){await access('readwrite',store=>store.put(entry,slot(entry.clientId)));if(!equal(await readLocal(entry.clientId),entry))throw Error('Pedido local não confirmado.');}
-  function clearConfirmedDraft(record){try{const value=draft(record.clientId);if(value&&(value.requestId===record.requestId||value.base.version===record.base.version&&equal(value.setting,record.setting)))sessionStorage.removeItem(draftKey(record.clientId));}catch(_){/* The durable acknowledgement prevents replacing an unconfirmed send. */}}
+  function clearConfirmedDraft(record){try{const value=draft(record.clientId);if(value&&(value.requestId===record.requestId||value.base.version===record.base.version&&equal(value.setting,record.setting)&&value.preferredLanguage===record.preferredLanguage))sessionStorage.removeItem(draftKey(record.clientId));}catch(_){/* The durable acknowledgement prevents replacing an unconfirmed send. */}}
   async function recoverList(){
     // Publish one complete scan; overlapping reads must never mix recovery rows.
     const scan=++recoveryScan;await ready;if(scan!==recoveryScan||!active())return;
@@ -92,7 +99,7 @@
     try{if(!current(v))throw Error('Contexto alterado.');const response=await fetch('/api/report-settings/'+v.id,{method,headers:{Authorization:'Bearer '+credential,'Content-Type':'application/json'},cache:'no-store',...(body?{body:JSON.stringify(body)}:{}),signal:controller.signal});if(!current(v))throw Error('Contexto alterado.');const data=await response.json();if(!current(v))throw Error('Contexto alterado.');if(response.status!==200||data?.ok!==true)throw Error([401,403].includes(response.status)?'A sessão não permite esta operação. Reabra a página com a conta correta.':'Não foi possível confirmar a operação. Conserve e repita o pedido original.');return data;}
     finally{clearTimeout(timer);controllers.delete(controller);}
   }
-  function describe(v){el('loadedClient').textContent=v.base.client.name+' · cliente #'+v.id+(v.base.client.active?'':' · inativo')+' · '+(v.base.source==='DEFAULT'?'valores padrão, sem configuração gravada':'configuração guardada');}
+  function describe(v){el('reportLanguage').value=savedLanguage(v.base);el('loadedClient').textContent=v.base.client.name+' · cliente #'+v.id+(v.base.client.active?'':' · inativo')+' · '+(v.base.source==='DEFAULT'?'valores padrão, sem configuração gravada':'configuração guardada')+' · idioma preferido: '+languages[savedLanguage(v.base)];}
   function changeSelection(){if(!active())return;previewGeneration++;stop();observed=input.value;view=null;busy=false;assign(null);el('loadedClient').textContent='';el('settingsReview').hidden=true;note('idle','Carregue as configurações do cliente selecionado. Os rascunhos anteriores foram conservados.');controls();recoverList();}
   async function load(){
     if(!active()||busy)return;const clientId=selected();if(!clientId){note('error','Indique um ID de cliente válido.');return;}
@@ -100,10 +107,10 @@
     try{await ready;if(!current(v))return;const local=storageUnavailable?null:await readLocal(clientId);if(!current(v))return;
       let savedDraft=draft(clientId);
       if(local?.confirmed&&savedDraft?.requestId===local.confirmed.record.requestId){if(local.confirmed.result.applied){clearConfirmedDraft(local.confirmed.record);savedDraft=null;}else v.conflict=true;}
-      if(local?.pending){v.pending=local.pending;v.base=local.pending.base;assign(local.pending.setting);describe(v);note('pending','Existe um pedido guardado para este cliente. Confirme esse pedido antes de alterar as opções.');return;}
-      if(savedDraft){v.base=savedDraft.base;assign(savedDraft.setting);describe(v);}
+      if(local?.pending){v.pending=local.pending;v.base=local.pending.base;assignRecord(local.pending);describe(v);note('pending','Existe um pedido guardado para este cliente. Confirme esse pedido antes de alterar as opções.');return;}
+      if(savedDraft){v.base=savedDraft.base;assignRecord(savedDraft);describe(v);}
       const state=validateState(await request(v,'GET'),clientId);if(!current(v))return;
-      if(!savedDraft){v.base=state;assign(state.setting);}else v.conflict=v.conflict||savedDraft.base.version!==state.version;
+      if(!savedDraft){v.base=state;assign(state.setting,savedLanguage(state));}else v.conflict=v.conflict||savedDraft.base.version!==state.version;
       describe(v);note(v.conflict?'conflict':'ready',v.conflict?'A versão atual mudou. Reveja as alterações; o rascunho foi conservado.':!state.editable?'Este cliente está arquivado ou indisponível para alteração.':savedDraft?'Rascunho recuperado. Confira as opções antes de guardar.':'Cliente e opções confirmados.');
       // An archived client remains readable; field/save controls already use editable.
     }catch(error){if(current(v)){v.needsRead=true;note('error',error.message);}}
@@ -116,30 +123,30 @@
     const local=await readLocal(v.id);if(!equal(local.pending,record))throw Error('O pedido guardado mudou. Conserve os dados.');
     await writeLocal({...local,pending:null,confirmed:{record,result}});channel?.postMessage({changed:true});if(!current(v))return;
     v.pending=null;v.needsRead=true;v.conflict=!result.applied;
-    if(result.applied){clearConfirmedDraft(record);v.base=result.state;assign(record.setting);describe(v);note('confirmed','Gravação confirmada. Carregue novamente para consultar a versão atual antes de outra alteração.');}
-    else{v.base=record.base;assign(record.setting);note('conflict',result.message||'O pedido não foi aplicado. Reveja a versão atual.');}
+    if(result.applied){clearConfirmedDraft(record);v.base=result.state;assign(result.state.setting,savedLanguage(result.state));describe(v);note('confirmed','Gravação confirmada. Carregue novamente para consultar a versão atual antes de outra alteração.');}
+    else{v.base=record.base;assignRecord(record);note('conflict',result.message||'O pedido não foi aplicado. Reveja a versão atual.');}
   }
   async function send(repeat){
-    const v=view;if(!v||!current(v)||busy)return;if(!repeat&&(!v.base||!v.base.editable||v.conflict||v.needsRead||v.pending||v.draftUnavailable))return;
+    const v=view;if(!v||!current(v)||busy)return;if(!repeat&&(!v.base||!v.base.editable||v.conflict||v.needsRead||v.pending||v.draftUnavailable||!validLanguage(el('preferredLanguage').value)))return;
     busy=true;note('saving',repeat?'A confirmar o pedido guardado…':'A guardar o pedido antes do envio…');controls();
     try{await locked(v,async()=>{
       const local=await readLocal(v.id);if(!current(v))return;
-      if(local.pending){v.pending=local.pending;v.base=local.pending.base;assign(local.pending.setting);describe(v);if(repeat)await transport(v,local.pending);else note('pending','Já existe um pedido. Use Confirmar pedido guardado.');return;}
+      if(local.pending){v.pending=local.pending;v.base=local.pending.base;assignRecord(local.pending);describe(v);if(repeat)await transport(v,local.pending);else note('pending','Já existe um pedido. Use Confirmar pedido guardado.');return;}
       if(repeat){note('idle','O pedido já foi tratado noutra janela. Carregue a versão atual.');v.needsRead=true;return;}
-      const setting=values();if(equal(setting,v.base.setting)){note('ready','Não há alterações para guardar.');return;}
-      const record={schema:1,owner,clientId:v.id,requestId:crypto.randomUUID(),base:v.base,setting};record.payloadHash=await hash(envelope(record));if(!current(v))return;if(!saveDraft(v,setting,record.requestId))return;
+      const setting=values();if(matches(v.base)){note('ready','Não há alterações para guardar.');return;}
+      const record={schema:1,owner,clientId:v.id,requestId:crypto.randomUUID(),base:v.base,setting,preferredLanguage:el('preferredLanguage').value};record.payloadHash=await hash(envelope(record));if(!current(v))return;if(!saveDraft(v,setting,record.requestId))return;
       await validRecord(record,v.id);await writeLocal({...local,pending:record});v.pending=record;channel?.postMessage({changed:true});if(current(v))await transport(v,record);
     });}catch(error){if(current(v))note(v.pending?'pending':'error',error.message);}
     finally{if(current(v)){busy=false;controls();recoverList();}}
   }
   async function review(){
     const v=view;if(!v?.base||!current(v)||busy||v.pending)return;busy=true;controls();
-    try{const mine=values(),fresh=validateState(await request(v,'GET'),v.id);if(!current(v))return;if(!fresh.editable)throw Error('O cliente já não está disponível para alteração.');const merged=Object.fromEntries(fields.map(key=>[key,mine[key]===v.base.setting[key]?fresh.setting[key]:mine[key]]));v.revision={fresh,setting:merged};const rows=el('reviewRows');rows.replaceChildren();for(const key of fields){const row=text(rows,'tr','');text(row,'th',names[key]);text(row,'td',fresh.setting[key]?'Mostrar':'Ocultar');text(row,'td',merged[key]?'Mostrar':'Ocultar');}el('settingsReview').hidden=false;note('conflict','Confira a versão atual e a proposta abaixo. Preparar a revisão não envia a gravação.');}
+    try{const mine=values(),mineLanguage=el('preferredLanguage').value,fresh=validateState(await request(v,'GET'),v.id);if(!current(v))return;if(!fresh.editable)throw Error('O cliente já não está disponível para alteração.');if(!validLanguage(mineLanguage))throw Error('Escolha um idioma válido.');const merged=Object.fromEntries(fields.map(key=>[key,mine[key]===v.base.setting[key]?fresh.setting[key]:mine[key]])),preferredLanguage=mineLanguage===savedLanguage(v.base)?savedLanguage(fresh):mineLanguage;v.revision={fresh,setting:merged,preferredLanguage};const rows=el('reviewRows');rows.replaceChildren();const languageRow=text(rows,'tr','');text(languageRow,'th','Idioma preferido');text(languageRow,'td',languages[savedLanguage(fresh)]);text(languageRow,'td',languages[preferredLanguage]);for(const key of fields){const row=text(rows,'tr','');text(row,'th',names[key]);text(row,'td',fresh.setting[key]?'Mostrar':'Ocultar');text(row,'td',merged[key]?'Mostrar':'Ocultar');}el('settingsReview').hidden=false;note('conflict','Confira a versão atual e a proposta abaixo. Preparar a revisão não envia a gravação.');}
     catch(error){if(current(v))note('error',error.message);}finally{if(current(v)){busy=false;controls();}}
   }
-  el('prepareSettings').addEventListener('click',()=>{const v=view;if(!v?.revision||!current(v)||busy)return;const revision=v.revision;v.base=revision.fresh;assign(revision.setting);v.pending=null;v.conflict=false;v.needsRead=false;if(!saveDraft(v,revision.setting))return;v.revision=null;el('settingsReview').hidden=true;describe(v);note('ready','Revisão preparada. Confira as opções e guarde para criar um novo pedido.');controls();});
+  el('prepareSettings').addEventListener('click',()=>{const v=view;if(!v?.revision||!current(v)||busy)return;const revision=v.revision;v.base=revision.fresh;assign(revision.setting,revision.preferredLanguage);v.pending=null;v.conflict=false;v.needsRead=false;if(!saveDraft(v,revision.setting))return;v.revision=null;el('settingsReview').hidden=true;describe(v);note('ready','Revisão preparada. Confira as opções e guarde para criar um novo pedido.');controls();});
   el('discardSettings').addEventListener('click',()=>{const v=view;if(!v?.base||!current(v)||busy||v.pending)return;try{sessionStorage.removeItem(draftKey(v.id));if(sessionStorage.getItem(draftKey(v.id)))throw Error('Draft retained');load();}catch(_){note('error','Não foi possível descartar o rascunho. Os dados foram conservados.');}});
-  for(const key of fields)el(key).addEventListener('change',()=>{const v=view;if(v?.base&&current(v)&&!busy&&!v.pending&&!v.conflict&&!v.needsRead){saveDraft(v);controls();}});
+  for(const key of [...fields,'preferredLanguage'])el(key).addEventListener('change',()=>{const v=view;if(v?.base&&current(v)&&!busy&&!v.pending&&!v.conflict&&!v.needsRead){saveDraft(v);controls();}});
   input.addEventListener('input',changeSelection);el('loadSettings').addEventListener('click',load);el('saveSettings').addEventListener('click',()=>send(false));el('retrySettings').addEventListener('click',()=>send(true));el('reviewSettings').addEventListener('click',review);
   function observe(){if(!active())return;if(input.value!==observed)changeSelection();}
   async function changedElsewhere(){if(!active())return;await recoverList();if(view&&!busy)load();}
@@ -148,11 +155,11 @@
   window.addEventListener('pagehide',()=>{stop();if(view)view.needsRead=true;busy=false;controls();});window.addEventListener('pageshow',event=>{observe();if(event.persisted&&view)load();});
   window.addEventListener('online',()=>{if(active()){controls();recoverList();}});window.addEventListener('offline',()=>{if(active())controls();});
   const preview=window.CristalReportDownloads.create({
-    context:()=>({generation:previewGeneration,client:input.value,visit:el('visitId').value,visitType:el('visitType').value,language:el('reportLanguage').value,version:view?.base?.version,ready:!!view?.base&&!busy&&!view.pending&&!view.conflict&&!view.needsRead,options:values()}),
+    context:()=>({generation:previewGeneration,client:input.value,visit:el('visitId').value,visitType:el('visitType').value,language:el('reportLanguage').value,preferredLanguage:el('preferredLanguage').value,version:view?.base?.version,ready:!!view?.base&&!busy&&!view.pending&&!view.conflict&&!view.needsRead,options:values()}),
     state:(kind,message)=>{previewBusy=kind==='loading';el('previewStatus').dataset.state=kind;el('previewStatus').textContent=message;el('previewStatus').setAttribute('role',['error','session'].includes(kind)?'alert':'status');if(kind==='session'){invalid=true;active();}controls();},
   });
   function openReport(reportView){
-    if(!active()||busy||previewBusy||!view?.base||view.pending||view.conflict||view.needsRead||!equal(values(),view.base.setting))return;
+    if(!active()||busy||previewBusy||!view?.base||view.pending||view.conflict||view.needsRead||!matches(view.base))return;
     const visitId=el('visitId').value.trim();if(!/^[1-9]\d{0,9}$/.test(visitId)||!id(Number(visitId)))return;
     const visitType=el('visitType').value;if(!['REGULAR','EXTRA'].includes(visitType))return;
     const lang=el('reportLanguage').value;if(!['pt','en','fr','es'].includes(lang))return;
@@ -164,6 +171,6 @@
   el('visitType').addEventListener('change',()=>{previewGeneration++;preview.cancel();controls();});
   el('visitId').addEventListener('input',()=>{preview.cancel();controls();});
   input.addEventListener('input',()=>preview.cancel());
-  for(const key of fields)el(key).addEventListener('change',()=>preview.cancel());
+  for(const key of [...fields,'preferredLanguage'])el(key).addEventListener('change',()=>{previewGeneration++;preview.cancel();});
   assign(null);controls();if(active())recoverList();
 })();
