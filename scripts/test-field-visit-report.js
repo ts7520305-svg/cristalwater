@@ -3,7 +3,7 @@ require('../src/loadEnv')();
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { inflateSync, deflateSync } = require('node:zlib');
+const { deflateSync } = require('node:zlib');
 const jwt = require('jsonwebtoken');
 const { prisma } = require('../src/prismaClient');
 const { getJwtSecret } = require('../src/utils/jwtSecret');
@@ -11,17 +11,7 @@ const { defaults, keys } = require('../src/services/clientReportSettingsDefaults
 if (process.env.NODE_ENV !== 'test' || process.env.QA_MODE !== 'true' || process.env.QA_ENVIRONMENT_SAFE !== 'true') throw Error('Isolated QA required');
 const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
 assert(['127.0.0.1', 'localhost'].includes(new URL(base).hostname));
-function pdfText(bytes) {
-  // Read the declared byte length. A CR byte at the end of compressed data is
-  // payload, not an optional part of the following newline before endstream.
-  const streams = [...bytes.toString('latin1').matchAll(/\d+ 0 obj\s*<<([\s\S]*?)>>\s*stream\r?\n/g)];
-  return streams.map(match => {
-    const length = Number([...match[1].matchAll(/\/Length (\d+)/g)].at(-1)?.[1]); assert(Number.isInteger(length) && length > 0);
-    const offset = match.index + match[0].length, stream = bytes.subarray(offset, offset + length);
-    return inflateSync(stream).toString('latin1');
-  })
-    .map(stream => [...stream.matchAll(/\[([^\]]+)\]\s*TJ/g)].map(match => [...match[1].matchAll(/<([a-f0-9]+)>/gi)].map(hex => Buffer.from(hex[1], 'hex').toString('latin1')).join('')).join('\n')).join('\n');
-}
+const pdfText = require('./lib/reportPdfText');
 (async () => {
   let compressed;
   for(let byte=0;byte<256;byte++){const candidate=deflateSync(Buffer.from('[<5055424c49435f4e4f5445>] TJ\n%'+String.fromCharCode(byte),'latin1'));if(candidate.at(-1)===13){compressed=candidate;break;}}
@@ -30,13 +20,14 @@ function pdfText(bytes) {
   const stamp = Date.now(), admin = await prisma.user.findUniqueOrThrow({ where: { email: process.env.ADMIN_EMAIL } });
   const sign = user => jwt.sign(user, getJwtSecret(), { expiresIn: '1h' });
   const token = sign({ id: admin.id, userId: admin.id, role: 'ADMIN', principalType: 'USER' });
+  const unicodeNames = 'Łukasz Žofie İpek François Björn Straße Ελληνικά Кириллица';
   const literal = '<img src=x onerror="window.qaInjected=1"> & <script>bad()</script>';
-  const client = await prisma.client.create({ data: { name: 'QA_CLIENT_' + stamp + ' ' + literal, address: 'PRIVATE_ADDRESS', active: true } });
+  const client = await prisma.client.create({ data: { name: 'QA_CLIENT_' + stamp + ' ' + unicodeNames + ' ' + literal, address: 'PRIVATE_ADDRESS', active: true } });
   const other = await prisma.client.create({ data: { name: 'QA_OTHER_' + stamp, active: true } });
   const pool = await prisma.pool.create({ data: { clientId: client.id, name: 'QA_POOL_' + stamp, zone: 'ZONE_MARKER', equipment: { create: { pumpType: 'PUMP_MARKER', brokenLightsCount: 3 } }, technicalRoom: { create: { notes: 'ROOM_MARKER' } } } });
   const tech = await prisma.technician.create({ data: { name: 'QA technician ' + stamp, active: true } });
   const leader = await prisma.technician.create({ data: { name: 'QA leader ' + stamp, role: 'TEAM_LEADER', active: true } });
-  const visit = await prisma.serviceVisit.create({ data: { clientId: client.id, poolId: pool.id, technicianId: tech.id, technicianName: 'TECH_PRIVATE', status: 'COMPLETED', plannedDate: new Date('2097-02-03T12:00:00Z'), startAt: new Date('2097-02-04T12:00:00Z'), endAt: new Date('2097-02-04T13:00:00Z'), ph: 7.2, chlorine: 1.5, salt: 4.1, temperature: 26, orpMv: 700, notes: 'PUBLIC_NOTE ' + literal, internalNotes: 'INTERNAL_SECRET', chemicals: { create: { name: 'CHEMICAL_MARKER', quantity: 2, unit: 'kg' } }, photos: { create: { url: 'PHOTO_REFERENCE ' + literal } } } });
+  const visit = await prisma.serviceVisit.create({ data: { clientId: client.id, poolId: pool.id, technicianId: tech.id, technicianName: 'TECH_PRIVATE', status: 'COMPLETED', plannedDate: new Date('2097-02-03T12:00:00Z'), startAt: new Date('2097-02-04T12:00:00Z'), endAt: new Date('2097-02-04T13:00:00Z'), ph: 7.2, chlorine: 1.5, salt: 4.1, temperature: 26, orpMv: 700, notes: 'PUBLIC_NOTE ' + literal, internalNotes: 'INTERNAL_SECRET', chemicals: { create: { name: 'CHEMICAL_MARKER Łukasz Ελληνικά', quantity: 2, unit: 'kg' } }, photos: { create: { url: 'PHOTO_REFERENCE ' + literal } } } });
   async function call(suffix = '', auth = token, route = 'report-visit', id = visit.id) {
     const response = await fetch(base + '/api/' + route + '/visit/' + id + suffix, { headers: auth ? { Authorization: 'Bearer ' + auth } : {} });
     const bytes = Buffer.from(await response.arrayBuffer()); return { status: response.status, headers: response.headers, bytes, text: bytes.subarray(0, 5).toString() === '%PDF-' ? pdfText(bytes) : bytes.toString() };
@@ -53,6 +44,8 @@ function pdfText(bytes) {
   result = await call(query); assert.equal(result.status, 200); assert.match(result.headers.get('cache-control'), /private.*no-store/);
   assert.equal(result.headers.get('x-cw-report-type'), 'visit-pdf'); assert.equal(result.headers.get('x-cw-client-id'), String(client.id)); assert.equal(result.headers.get('x-cw-visit-id'), String(visit.id)); assert.equal(result.headers.get('x-cw-report-view'), 'client'); assert.equal(result.headers.get('x-cw-settings-version'), state.version);
   assert.equal(result.bytes.subarray(0, 5).toString(), '%PDF-'); assert(result.text.includes('PUBLIC_NOTE'));
+  for (const word of unicodeNames.split(' ')) assert(result.text.includes(word), 'Lost Unicode name: ' + word);
+  assert.match(result.bytes.toString('latin1'), /\/ToUnicode/);assert.match(result.bytes.toString('latin1'), /\/FontFile2/);
   assert.equal((await call('', null)).status, 401);
   const clientToken = sign({ id: client.id, clientId: client.id, role: 'CLIENT', principalType: 'CLIENT' });
   const techToken = sign({ id: tech.id, technicianId: tech.id, role: 'TECHNICIAN', principalType: 'TECHNICIAN' });
@@ -91,9 +84,14 @@ function pdfText(bytes) {
   await prisma.serviceVisit.update({ where: { id: fallback.id }, data: { clientId: other.id } });
   assert.equal((await call('', token, 'report-visit', fallback.id)).status, 409);
   await prisma.clientReportSetting.update({ where: { clientId: client.id }, data: { ...defaults, showEquipment: true, showTechnicalRoom: true, showPhotos: true, showChemicals: true } });
-  await prisma.serviceVisit.update({ where: { id: visit.id }, data: { notes: 'LONG_NOTE_BEGIN ' + ('Observacao extensa da piscina, sem perda de conteudo. '.repeat(160)) + ' LONG_NOTE_END', internalNotes: 'INTERNAL_SECRET' } });
+  await prisma.serviceVisit.update({ where: { id: visit.id }, data: { notes: 'LONG_NOTE_BEGIN Jose\u0301 ' + unicodeNames + ' 漢 א ' + ('Observacao extensa da piscina, sem perda de conteudo. '.repeat(160)) + ' LONG_NOTE_END', internalNotes: 'INTERNAL_SECRET 🧪' } });
   const dir = path.join(__dirname, '../reports/field-visual/visit-report-' + stamp); fs.mkdirSync(dir, { recursive: true });
-  for (const view of ['client', 'admin']) { const doc = await call('?view=' + view); assert.equal(doc.status, 200); assert(doc.text.includes('LONG_NOTE_BEGIN')); assert(doc.text.includes('LONG_NOTE_END')); assert.equal(doc.text.includes('INTERNAL_SECRET'), view === 'admin'); assert.equal((doc.text.match(/registo atual \| [0-9]+\/[0-9]+/g)||[]).length, (doc.bytes.toString('latin1').match(/\/Type \/Page\b/g)||[]).length, 'Every page must have a footer without extra blank pages'); fs.writeFileSync(path.join(dir, view + '.pdf'), doc.bytes); }
+  for (const view of ['client', 'admin']) { const doc = await call('?view=' + view); assert.equal(doc.status, 200); assert(doc.text.includes('LONG_NOTE_BEGIN')); assert(doc.text.includes('LONG_NOTE_END')); assert(doc.text.includes('José'));assert(doc.text.includes('CHEMICAL_MARKER Łukasz Ελληνικά'));assert(doc.text.includes('[U+6F22]'));assert(doc.text.includes('[U+05D0]'));assert(doc.text.includes('Caracteres por confirmar'));assert.equal(doc.text.includes('[U+1F9EA]'),view==='admin');for(const word of unicodeNames.split(' '))assert(doc.text.includes(word)); assert.equal(doc.text.includes('INTERNAL_SECRET'), view === 'admin'); assert.equal((doc.text.match(/registo atual \| [0-9]+\/[0-9]+/g)||[]).length, (doc.bytes.toString('latin1').match(/\/Type \/Page\b/g)||[]).length, 'Every page must have a footer without extra blank pages'); fs.writeFileSync(path.join(dir, view + '.pdf'), doc.bytes); }
+  const original=await prisma.serviceVisit.findUniqueOrThrow({where:{id:visit.id}});assert(original.notes.includes('Jose\u0301')&&original.notes.includes('漢'));assert(original.internalNotes.includes('🧪'));
+  const originalHtml=await call('?view=client',token,'reports');assert(originalHtml.text.includes('漢')&&!originalHtml.text.includes('[U+6F22]'));
+  await prisma.serviceVisit.update({where:{id:visit.id},data:{notes:'VISIBLE_ASCII_ONLY'}});
+  const visibleOnly=await call('?view=client');assert(!visibleOnly.text.includes('Caracteres por confirmar'));assert(!visibleOnly.text.includes('[U+1F9EA]'));await prisma.serviceVisit.update({where:{id:visit.id},data:{notes:original.notes}});
+  console.log('PASS embedded fonts preserve Latin extended/Greek/Cyrillic, NFC text, explicit unsupported glyphs only for visible content, source unchanged and complete multipage text');
   console.log('PASS visit PDF/HTML: authenticated role and historical client ownership, client preview without internal notes, exact client/settings version, strict queries, private response contract, saved field visibility, missing/conflicting client refusal, literal HTML and side-effect-free reads');
   console.log('PDF_EVIDENCE ' + dir);
 })().catch(error => { console.error(error); process.exitCode = 1; }).finally(() => prisma.$disconnect());

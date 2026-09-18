@@ -1,8 +1,7 @@
 'use strict';
 require('../src/loadEnv')();
 const assert=require('node:assert/strict'),jwt=require('jsonwebtoken'),fs=require('node:fs/promises'),path=require('node:path');
-const {inflateSync}=require('node:zlib');
-function pdfText(bytes){return [...bytes.toString('latin1').matchAll(/\d+ 0 obj\s*<<([\s\S]*?)>>\s*stream\r?\n/g)].filter(m=>!/\/Subtype \/Image\b/.test(m[1])).map(m=>{const size=Number([...m[1].matchAll(/\/Length (\d+)/g)].at(-1)?.[1]),start=m.index+m[0].length;return inflateSync(bytes.subarray(start,start+size)).toString('latin1');}).map(s=>[...s.matchAll(/\[([^\]]+)\]\s*TJ/g)].map(m=>[...m[1].matchAll(/<([a-f0-9]+)>/gi)].map(h=>Buffer.from(h[1],'hex').toString('latin1')).join('')).join('\n')).join('\n');}
+const pdfText = require('./lib/reportPdfText');
 const {prisma}=require('../src/prismaClient'),{getJwtSecret}=require('../src/utils/jwtSecret'),{chromium}=require('playwright');
 if(process.env.NODE_ENV!=='test'||process.env.QA_MODE!=='true'||process.env.QA_ENVIRONMENT_SAFE!=='true')throw Error('Isolated QA required');
 const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['127.0.0.1','localhost'].includes(new URL(base).hostname));let browser;

@@ -1,7 +1,7 @@
 'use strict';
 require('../src/loadEnv')();
 const assert = require('node:assert/strict'), fs = require('node:fs/promises'), path = require('node:path');
-const { createHash, randomUUID } = require('node:crypto'), { inflateSync } = require('node:zlib');
+const { createHash, randomUUID } = require('node:crypto');
 const sharp = require('sharp'), jwt = require('jsonwebtoken');
 const { prisma } = require('../src/prismaClient'), { getJwtSecret } = require('../src/utils/jwtSecret');
 const { defaults } = require('../src/services/clientReportSettingsDefaults');
@@ -10,12 +10,7 @@ if (process.env.NODE_ENV !== 'test' || process.env.QA_MODE !== 'true' || process
 const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002'; assert(['127.0.0.1', 'localhost'].includes(new URL(base).hostname));
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const imageCount = bytes => (bytes.toString('latin1').match(/\/Subtype \/Image\b/g) || []).length;
-function pdfText(bytes) {
-  return [...bytes.toString('latin1').matchAll(/\d+ 0 obj\s*<<([\s\S]*?)>>\s*stream\r?\n/g)].filter(m => !/\/Subtype \/Image\b/.test(m[1])).map(m => {
-    const size = Number([...m[1].matchAll(/\/Length (\d+)/g)].at(-1)?.[1]), start = m.index + m[0].length;
-    return inflateSync(bytes.subarray(start, start + size)).toString('latin1');
-  }).map(s => [...s.matchAll(/\[([^\]]+)\]\s*TJ/g)].map(m => [...m[1].matchAll(/<([a-f0-9]+)>/gi)].map(h => Buffer.from(h[1], 'hex').toString('latin1')).join('')).join('\n')).join('\n');
-}
+const pdfText = require('./lib/reportPdfText');
 let browser, trap, symlinkPath;
 (async () => {
   const admin = await prisma.user.findUniqueOrThrow({ where: { email: process.env.ADMIN_EMAIL } });

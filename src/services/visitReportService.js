@@ -1,6 +1,7 @@
 'use strict';
 const { prisma } = require('../prismaClient');
 const PDFDocument = require('pdfkit');
+const prepareFonts = require('./visitReportPdfFonts');
 const reportPhotos = require('./visitReportPhotoService');
 const { normalizeRole } = require('../utils/roles');
 const settingsService = require('./clientReportSettingsService');
@@ -93,11 +94,19 @@ function renderPdf(report) {
     const chunks = [];
     doc.on("data", chunk => chunks.push(chunk)); doc.on("end", () => resolve(Buffer.concat(chunks))); doc.on("error", reject);
     try {
+      const fonts = prepareFonts(doc), safe = value => fonts.format(text(value));
+      const content = sections(report).map(section => ({ ...section, title: safe(section.title),
+        ...(section.body ? { body: safe(section.body) } : {}),
+        ...(section.empty ? { empty: safe(section.empty) } : {}),
+        ...(section.rows ? { rows: section.rows.map(([label, value]) => [safe(label), safe(value)]) } : {}),
+        ...(section.photos ? { photos: section.photos.map(photo => ({ ...photo, label: safe(photo.label), ...(photo.message ? { message: safe(photo.message) } : {}) })) } : {}),
+      }));
+      if (fonts.unsupported.size) content.push({ title: 'Caracteres por confirmar', body: 'Alguns caracteres não são suportados por este PDF e aparecem como [U+...]. Consulte o registo original para confirmar o texto.' });
       const width = doc.page.width - 96;
       function header() {
-        const font = doc._font?.name || "Helvetica", size = doc._fontSize || 10;
-        doc.fillColor("#145f86").font("Helvetica-Bold").fontSize(20).text("Cristal Water", 48, 34, { width, lineBreak: false });
-        doc.fillColor("#334155").font("Helvetica").fontSize(10).text(
+        const font = doc._font?.name || fonts.regular, size = doc._fontSize || 10;
+        doc.fillColor("#145f86").font(fonts.bold).fontSize(20).text("Cristal Water", 48, 34, { width, lineBreak: false });
+        doc.fillColor("#334155").font(fonts.regular).fontSize(10).text(
           (report.view === "admin" ? "Relatório técnico completo" : "Relatório de manutenção") + " | " + visitLabel(report),
           48, 62, { width, lineBreak: false });
         doc.strokeColor("#d3e2eb").moveTo(48, 83).lineTo(doc.page.width - 48, 83).stroke();
@@ -105,12 +114,12 @@ function renderPdf(report) {
       }
       doc.on("pageAdded", header); header();
       function space(height) { if (doc.y + height > doc.page.height - 58) doc.addPage(); }
-      function paragraph(value) { doc.font("Helvetica").fontSize(10).text(text(value), 48, doc.y, { width, lineGap: 3 }); doc.y += 12; }
-      for (const section of sections(report)) {
+      function paragraph(value) { doc.font(fonts.regular).fontSize(10).text(text(value), 48, doc.y, { width, lineGap: 3 }); doc.y += 12; }
+      for (const section of content) {
         const firstPhoto = section.photos?.[0];
         space(firstPhoto?.bytes ? firstPhoto.height * Math.min(width / firstPhoto.width, 290 / firstPhoto.height, 1) + 80 : section.photos?.length ? 105 : 70);
         const top = doc.y;
-        doc.fillColor("#145f86").font("Helvetica-Bold").fontSize(13).text(section.title, 48, top, { width });
+        doc.fillColor("#145f86").font(fonts.bold).fontSize(13).text(section.title, 48, top, { width });
         doc.y = Math.max(doc.y + 9, top + 27); doc.fillColor("#1f2937");
         if (section.photos) {
           if (!section.photos.length) paragraph(section.empty);
@@ -118,7 +127,7 @@ function renderPdf(report) {
             const scale = photo.bytes ? Math.min(width / photo.width, 290 / photo.height, 1) : 0;
             const height = photo.bytes ? photo.height * scale : 0;
             space(height + (photo.bytes ? 48 : 76));
-            doc.font("Helvetica-Bold").fontSize(10).text(photo.label, 48, doc.y, { width }); doc.y += 8;
+            doc.font(fonts.bold).fontSize(10).text(photo.label, 48, doc.y, { width }); doc.y += 8;
             if (photo.bytes) {
               const y = doc.y, imageWidth = photo.width * scale;
               doc.image(photo.bytes, 48 + (width - imageWidth) / 2, y, { width: imageWidth, height });
@@ -134,21 +143,21 @@ function renderPdf(report) {
           for (let index = 0; index < section.rows.length;) {
             const cells = section.rows.slice(index, index + 2);
             const heights = cells.map(([label, value]) => {
-              doc.font("Helvetica-Bold").fontSize(9); const labelHeight = doc.heightOfString(label, { width: cellWidth });
-              doc.font("Helvetica").fontSize(10); return labelHeight + 5 + doc.heightOfString(text(value), { width: cellWidth, lineGap: 2 });
+              doc.font(fonts.bold).fontSize(9); const labelHeight = doc.heightOfString(label, { width: cellWidth });
+              doc.font(fonts.regular).fontSize(10); return labelHeight + 5 + doc.heightOfString(text(value), { width: cellWidth, lineGap: 2 });
             });
             if (Math.max(...heights) > 180) {
               const [label, value] = section.rows[index++]; space(55);
-              doc.font("Helvetica-Bold").fontSize(10).text(label, 48, doc.y, { width }); doc.y += 4; paragraph(value);
+              doc.font(fonts.bold).fontSize(10).text(label, 48, doc.y, { width }); doc.y += 4; paragraph(value);
               continue;
             }
             const height = Math.max(...heights) + 14; space(height);
             const y = doc.y;
             cells.forEach(([label, value], column) => {
               const x = 48 + column * (cellWidth + 20);
-              doc.font("Helvetica-Bold").fontSize(9).text(label, x, y, { width: cellWidth });
+              doc.font(fonts.bold).fontSize(9).text(label, x, y, { width: cellWidth });
               const valueY = doc.y + 5;
-              doc.font("Helvetica").fontSize(10).text(text(value), x, valueY, { width: cellWidth, lineGap: 2 });
+              doc.font(fonts.regular).fontSize(10).text(text(value), x, valueY, { width: cellWidth, lineGap: 2 });
             });
             doc.x = 48; doc.y = y + height; index += cells.length;
           }
@@ -160,7 +169,7 @@ function renderPdf(report) {
         doc.switchToPage(page);
         const bottom = doc.page.margins.bottom;
         doc.page.margins.bottom = 0;
-        doc.font("Helvetica").fontSize(8).fillColor("#526476").text(
+        doc.font(fonts.regular).fontSize(8).fillColor("#526476").text(
           "Cristal Water | Dados da instalação: registo atual | " + (page + 1) + "/" + range.count,
           48, doc.page.height - 35, { width, align: "center", lineBreak: false });
         doc.page.margins.bottom = bottom;

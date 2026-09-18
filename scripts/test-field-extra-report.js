@@ -1,7 +1,7 @@
 "use strict";
 require('../src/loadEnv')();
 const assert = require('node:assert/strict'), fs = require('node:fs/promises'), path = require('node:path');
-const { inflateSync } = require('node:zlib'), { randomUUID, createHash } = require('node:crypto');
+const { randomUUID, createHash } = require('node:crypto');
 const jwt = require('jsonwebtoken'), sharp = require('sharp');
 const { prisma } = require('../src/prismaClient'), { getJwtSecret } = require('../src/utils/jwtSecret');
 const { defaults, keys } = require('../src/services/clientReportSettingsDefaults');
@@ -9,17 +9,12 @@ const { ensureUploadBaseDirReady, toPublicUploadUrl } = require('../src/config/u
 if (process.env.NODE_ENV !== 'test' || process.env.QA_MODE !== 'true' || process.env.QA_ENVIRONMENT_SAFE !== 'true') throw Error('Isolated QA required');
 const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002'; assert(['127.0.0.1','localhost'].includes(new URL(base).hostname));
 const images = bytes => (bytes.toString('latin1').match(/\/Subtype \/Image\b/g) || []).length;
-function pdfText(bytes) {
-  return [...bytes.toString('latin1').matchAll(/\d+ 0 obj\s*<<([\s\S]*?)>>\s*stream\r?\n/g)].filter(m => !/\/Subtype \/Image\b/.test(m[1])).map(m => {
-    const size = Number([...m[1].matchAll(/\/Length (\d+)/g)].at(-1)?.[1]), start = m.index + m[0].length;
-    return inflateSync(bytes.subarray(start, start + size)).toString('latin1');
-  }).map(s => [...s.matchAll(/\[([^\]]+)\]\s*TJ/g)].map(m => [...m[1].matchAll(/<([a-f0-9]+)>/gi)].map(h => Buffer.from(h[1], 'hex').toString('latin1')).join('')).join('\n')).join('\n');
-}
+const pdfText = require('./lib/reportPdfText');
 let browser;
 (async () => {
   const admin = await prisma.user.findUniqueOrThrow({ where: { email: process.env.ADMIN_EMAIL } });
   const user = { id: admin.id, role: 'ADMIN' }, sign = row => jwt.sign(row, getJwtSecret(), { expiresIn: '1h' }), token = sign(user);
-  const client = await prisma.client.create({ data: { name: 'EXTRA report client' } }), other = await prisma.client.create({ data: { name: 'Other EXTRA report client' } });
+  const client = await prisma.client.create({ data: { name: 'EXTRA report client Łukasz' } }), other = await prisma.client.create({ data: { name: 'Other EXTRA report client' } });
   const tech = await prisma.technician.create({ data: { name: 'Assigned extra technician', active: true } }), unassigned = await prisma.technician.create({ data: { name: 'Unassigned extra technician', active: true } });
   const clientToken = sign({ id: client.id, clientId: client.id, role: 'CLIENT' }), techToken = sign({ id: tech.id, technicianId: tech.id, role: 'TECHNICIAN' });
   const pool = await prisma.pool.create({ data: { clientId: client.id, name: 'EXTRA report pool' } });
@@ -45,7 +40,7 @@ let browser;
   const counters = () => Promise.all(['invoice','payment','monthlyReport','stockMovement','vehicleStockMovement','fieldWriteRequest','auditTrail','visitPhoto','extraVisitPhoto'].map(model => prisma[model].count())); const before = await counters();
   for (const route of ['report-visit','reports']) {
     let result = await call(undefined, token, route); assert.equal(result.status, 200); assert.equal(result.headers.get('x-cw-visit-type'), 'EXTRA'); assert.equal(result.headers.get('x-cw-report-type'), route === 'reports' ? 'extra-visit-html' : 'extra-visit-pdf');
-    for (const marker of ['Visita extra #'+id,'EXTRA_EXECUTION','EXTRA_CHEMICAL','7.3','DONE']) assert(result.text.includes(marker), marker);
+    for (const marker of ['Visita extra #'+id,'Łukasz','EXTRA_EXECUTION','EXTRA_CHEMICAL','7.3','DONE']) assert(result.text.includes(marker), marker);
     for (const marker of ['REGULAR_ONLY','PLANNING_PRIVATE','EXTRA_INTERNAL','FORGED_EXECUTION_SECRET','FORGED_STATUS','UNSUPPORTED_ALIAS']) assert(!result.text.includes(marker), marker);
     assert.equal((await call(undefined, clientToken, route)).status, 200); assert.equal((await call(undefined, techToken, route)).status, 200);
     for (const auth of [clientToken, techToken]) assert.equal((await call('visitType=EXTRA&view=admin', auth, route)).status, 403);
