@@ -18,7 +18,7 @@ Regressões do relatório regular, fotografias, EXTRA e alertas passaram em run-
 
 Poppler do sistema e pdfplumber confirmaram independentemente extração de texto, ausência de glifos NUL, rodapés e limites das imagens. Revistas 25 páginas: regular cliente/ADMIN com quatro/cinco páginas, EXTRA duas/três e fotografias cinco/seis. Evidência: reports/field-visual/visit-report-1789736144117, extra-report-1789736150723 e visit-photos-1789736147776. As páginas alteradas das fixtures finais foram novamente renderizadas/revistas em visit-report-1789736307225 e extra-report-1789736210315, incluindo nome de químico a negrito. Dados sintéticos, sem clientes reais.
 
-396 testes unitários/63 ficheiros e quatro técnicos aprovados. Sintaxe 555 backend/182 frontend/56 inline; 151 grupos operacionais e 21 migrações aditivas mantidos. CI nativo/restauro pendentes da publicação.
+396 testes unitários/63 ficheiros e quatro técnicos aprovados. Sintaxe 555 backend/182 frontend/56 inline; 151 grupos operacionais e 21 migrações aditivas mantidos. CI nativo e restauro aprovados no registo abaixo.
 
 ## Fonte e limites
 
@@ -27,3 +27,7 @@ DejaVuSans-Bold.ttf: 708920 bytes, SHA-256 5c1247acef7f2b8522a31742c76d6adcb5569
 Esta tarefa trata apenas a apresentação textual dos PDFs individuais. Tradução dos rótulos/mensagens e seleção explícita de idioma ainda são a próxima tarefa; os documentos continuam em português. Outros PDFs e referências fotográficas históricas não canónicas permanecem fora deste lote. Não confundir incorporação de fontes com tradução automática dos textos introduzidos pelo técnico.
 
 Dez ficheiros: dois serviços, fonte negrito, leitor de teste, quatro percursos e dois documentos. Publicação autorizada apenas na branch de trabalho, sem merge ou deploy. Frequência individual por cliente/época/instalação preservada, três ou mais conforme cada caso.
+
+## Aprovação nativa
+
+Commit `3e02fae84a327e2ef6c52c65de2321eabf303f6f`, árvore `066e9a64a9db6490403360c334d115f0ff0f07a0`, [CI 35347825706](https://github.com/ts7520305-svg/cristalwater/actions/runs/35347825706), job `105608481546`, concluído em 18/09/2026 às 13:17:33 UTC. 151/151 grupos distintos, todos com código zero e sem sinal; 396 unitários/63 ficheiros, quatro técnicos, gate de navegador, 21 migrações aditivas e sintaxe 555/182/56. Restauro isolado: 110 tabelas/46 ficheiros, com linhas e hashes iguais. Esta atualização posterior altera apenas os dois documentos e conserva o código/testes validados. Publicação na branch autorizada, sem merge ou deploy; backup `backup/report-fonts-local-20260918`.
