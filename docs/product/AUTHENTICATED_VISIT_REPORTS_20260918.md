@@ -2,7 +2,7 @@
 
 ## Estado
 
-Implementado e aprovado localmente; confirmação nativa da correção para ecrãs estreitos pendente. Publicação anterior: `1d858eeb8cd6ef23d89749368655535cfbd79c61`, árvore `e61fce900a08d6bc58ba0d9879e2e3517a11318a`, CI `35309723057`, job `105489052421`. Base do lote: `b86cd7549a0c1f94c374a76bea07a01964d12191`. Cache v75, sem migração nova. TASK250 trata a abertura nas páginas de configurações e centro de relatórios; TASK251 trata o acesso, as opções e a apresentação do relatório individual PDF/HTML.
+Implementado; confirmação nativa dos rótulos curtos do filtro pendente. A publicação anterior `0801655424f05c5e27bb0bc375ba1e133a12f815`, árvore `d953f5c771f3180465e3950c49408397246484c2`, CI `35310515176`, job `105491411353`, aprovou 143/144 grupos e identificou overflow interno no select. Base do lote: `b86cd7549a0c1f94c374a76bea07a01964d12191`. Cache v76, sem migração nova. TASK250 trata a abertura nas páginas de configurações e centro de relatórios; TASK251 trata o acesso, as opções e a apresentação do relatório individual PDF/HTML.
 
 ## Abertura no navegador
 
@@ -39,9 +39,15 @@ A primeira publicação `721ff7adb5ac79c9efbb01fa2abbb17e615c05d2` iniciou o CI 
 
 A revisão final da interface separa consulta de edição para clientes arquivados: a marca `editable:false` já desativa a gravação, mas não deve invalidar uma leitura bem-sucedida nem bloquear a consulta do PDF histórico. Regressão de navegador acrescentada; cache v74. Abertura e regressão das configurações aprovadas em `run-1789708090045` (8420/21885 ms). A reprodução anterior `run-1789708003696` encontrou ainda o primeiro clique após nova leitura consumido apenas pelo cancelamento da janela antiga: o helper passa a encerrar o contexto anterior e a atender o novo clique na mesma sessão. Esta correção posterior exige confirmação da sua própria árvore.
 
-## Limites e próximo percurso
+## Revisão em ecrãs estreitos
 
-O primeiro CI (`35309036752`) terminou com falha no ensaio de largura do centro de relatórios, após a abertura real do documento. O botão passa a permitir quebra de linha e os controlos/cartão deixam de impor largura mínima; o teste regista agora as medidas, fonte e overflow de cada elemento em caso de falha. Esta correção passou localmente em `run-1789708615654` (8401 ms), nas larguras 320/390/1440. Só o CI da árvore que inclui esta correção pode fechar o lote; o restauro do primeiro CI foi omitido devido à falha anterior.
+Os CI `35309036752`, `35309433429` e `35309723057` aprovaram 143/144 grupos e terminaram com falha no ensaio de largura do centro de relatórios, após a abertura real do documento; restauro omitido. O botão passa a permitir quebra de linha e os controlos/cartão deixam de impor largura mínima; o teste regista agora as medidas, fonte e overflow de cada elemento em caso de falha. Esta correção passou localmente em `run-1789708615654` (8401 ms), nas larguras 320/390/1440. A captura de 320 px confirma o botão em duas linhas e os controlos dentro do cartão. Só o CI da árvore que inclui esta correção pode fechar o lote.
+
+O CI `35310515176` voltou a aprovar 143/144 grupos. O novo diagnóstico isolou o problema: cartão, campo de mês e botão sem overflow; select dentro dos limites x=37/right=283, mas com 16 px de overflow interno numa largura de 320 px. A apresentação nativa do select no CI difere da usada localmente. Os rótulos passam a «Filtro de faturação», «Todos» e «Requer fatura», mantendo os valores false/true e a asserção integral de largura. Não se atribui esta falha ao botão nem se conta o ensaio local anterior como prova do navegador nativo.
+
+Abertura completa aprovada localmente após encurtar os rótulos: `run-1789709968047`, 8574 ms, incluindo os dois filtros, as três larguras, a consulta do cliente arquivado e as mudanças de contexto/sessão.
+
+## Limites e próximo percurso
 
 O imprimível mensal continua a usar os cálculos antigos (`Invoice.total`, `amountPaid`, `amountOpen` e lista de faturas), ainda sem o contrato financeiro revisto da API mensal. A autenticação da abertura não valida essas contas nem transforma número de faturas em número de clientes. Esse é o próximo trabalho.
 
@@ -56,4 +62,7 @@ As fotografias no relatório individual são referências textuais, explicitamen
 | Recebimentos | O imprimível lista pagamentos de cada fatura sem separar o mês do pagamento ou crédito interno; `cashReceiptReportService.js` usa `paidAt` UTC e exclui métodos internos. Não confundir crédito aplicado com dinheiro recebido. |
 | Contagem | A caixa «Clientes» usa `invoices.length`. Contar clientes distintos e documentos separadamente. |
 | Filtro e referência temporal | Manter explícito se o filtro se aplica a documentos/clientes/recebimentos, usar uma leitura consistente e indicar valores atuais, sem afirmar fecho histórico. |
+| Estados e instalações | O template transforma qualquer estado diferente de PAID/PARTIAL em PENDING e mostra a mensalidade atual de cada piscina sem a distinguir do valor faturado. Conservar estados reais e identificar o cadastro atual; não reconstruir preço histórico a partir dele. |
 | Acesso pelos alertas | `admin-alerts.js` e `alertPresentationService.js` produzem link direto `/api/reports/visit/:id`. O endpoint já tem projeção segura, mas a navegação ainda não envia Authorization. |
+
+Casos a preparar na próxima tarefa: várias faturas do mesmo cliente; documento sem vínculo ao cliente; mês guardado nos aliases históricos; rascunho/cancelado/depósito e estado desconhecido; aliases financeiros divergentes; recebimento no mês de documento de outro mês e pagamento posterior do documento selecionado; aplicação de crédito interno; filtro de faturação coerente nos detalhes e totais; zero registos distinguido de valores por rever. A lista deriva da leitura do código, não representa testes já executados do novo contrato mensal.
