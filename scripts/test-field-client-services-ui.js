@@ -7,7 +7,7 @@ const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['localhost',
 (async()=>{
   const admin=await prisma.user.findUniqueOrThrow({where:{email:process.env.ADMIN_EMAIL}}),user={id:admin.id,userId:admin.id,role:'ADMIN'},token=jwt.sign(user,getJwtSecret(),{expiresIn:'1h'});
   const client=await prisma.client.create({data:{name:'QA serviços <img src=x onerror=alert(1)> '+Date.now(),active:true,status:'ACTIVE'}}),other=await prisma.client.create({data:{name:'QA other services client',active:true}});
-  const tech=await prisma.technician.create({data:{name:'QA serviços technician',active:true}}),pool=await prisma.pool.create({data:{name:'Piscina principal QA',clientId:client.id,volumeM3:40,technicalSheet:{create:{volumeM3:40,disinfectionType:'SALT'}}}});
+  const tech=await prisma.technician.create({data:{name:'QA serviços technician com nome longo para confirmar a atribuição',active:true}}),pool=await prisma.pool.create({data:{name:'Piscina principal QA com designação longa para confirmar a instalação',clientId:client.id,volumeM3:40,technicalSheet:{create:{volumeM3:40,disinfectionType:'SALT'}}}});
   const errors=[],writes=[];
   browser=await chromium.launch({headless:true,executablePath:process.env.CW_CHROMIUM_PATH,args:['--no-sandbox','--disable-dev-shm-usage']});
   const context=await browser.newContext({viewport:{width:390,height:900},serviceWorkers:'block'});
@@ -23,12 +23,13 @@ const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['localhost',
   // Session drafts survive client switching and a page reload.
   await page.locator('#clientId').selectOption(String(other.id));await page.locator('#serviceLoad').click();await state('ready');await page.locator('#clientId').selectOption(String(client.id));await page.locator('#serviceLoad').click();await state('ready');assert.equal(await page.locator('[data-rule=count]').inputValue(),'6');
   assert.equal(await page.locator('.serviceSlot').count(),6,'All six draft slots survive changing client');
+  assert.deepEqual(await page.locator('.serviceSelection').allTextContents(),[pool.name,'Técnico: '+tech.name],'The complete pool and assignment names remain visible outside the shortened control');
   await page.reload({waitUntil:'networkidle'});await page.waitForFunction(id=>document.getElementById('clientId').value===String(id),client.id);await page.locator('#serviceLoad').click();await page.waitForFunction(()=>!document.getElementById('serviceFields').disabled);assert.equal(await page.locator('.serviceSlot').count(),6);
   await page.locator('#servicePreview').click();await state('preview');assert.match(await page.locator('#serviceImpact').textContent(),/150/);assert.equal(await page.locator('#servicePanel img').count(),0);
   const visual=path.resolve('reports/field-visual/client-services-'+Date.now());fs.mkdirSync(visual,{recursive:true});
   for(const width of [320,390,1440]){
     await page.setViewportSize({width,height:1000});await page.locator('#servicePanel').scrollIntoViewIfNeeded();
-    const overflows=await page.locator('#servicePanel,#servicePanel fieldset,#servicePanel input,#servicePanel select,#servicePanel textarea,#servicePanel button').evaluateAll(nodes=>nodes.filter(n=>n.getClientRects().length).map(n=>{const r=n.getBoundingClientRect();return{x:r.x,right:r.right,overflow:n.scrollWidth-n.clientWidth};}));assert(overflows.every(r=>r.x>=0&&r.right<=width+1&&r.overflow<=1),JSON.stringify({width,overflows}));await page.screenshot({path:path.join(visual,'services-'+width+'.png'),fullPage:true});
+    const overflows=await page.locator('#servicePanel,#servicePanel fieldset,#servicePanel input,#servicePanel select,#servicePanel textarea,#servicePanel button').evaluateAll(nodes=>nodes.filter(n=>n.getClientRects().length).map(n=>{const r=n.getBoundingClientRect();return{tag:n.tagName,field:n.dataset.rule||n.dataset.season||n.dataset.slot||n.id,x:r.x,right:r.right,overflow:n.scrollWidth-n.clientWidth};}));assert(overflows.every(r=>r.x>=0&&r.right<=width+1&&r.overflow<=1),JSON.stringify({width,overflows}));await page.screenshot({path:path.join(visual,'services-'+width+'.png'),fullPage:true});
   }
   await page.setViewportSize({width:390,height:900});
   for(const colorScheme of ['dark','light']){
