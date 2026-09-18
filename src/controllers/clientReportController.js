@@ -1,61 +1,28 @@
-// ==========================================
-// CRISTAL WATER - CLIENT REPORT CONTROLLER
-// ==========================================
+'use strict';
+const business = require('../business/client/ClientMonthlyReportBusiness');
+const { generateMonthlyReportPDF } = require('../services/pdfReportService');
 
-const { prisma } = require("../prismaClient");
-const { generateMonthlyReportPDF } = require("../services/pdfReportService");
-
-/**
- * LISTAR RELATÓRIOS DO CLIENTE
- */
-async function listClientReports(req, res, next) {
-  try {
-    const clientId = Number(req.params.clientId);
-
-    const reports = await prisma.monthlyReport.findMany({
-      where: {
-        type: "CLIENT",
-        clientId,
-      },
-      orderBy: { month: "desc" },
-    });
-
-    res.json({
-      count: reports.length,
-      reports,
-    });
-  } catch (err) {
-    next(err);
-  }
+function privateResponse(req, res, next) {
+  res.set({ 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff' });
+  next();
 }
 
-/**
- * GERAR PDF DO RELATÓRIO
- */
-async function downloadClientReportPDF(req, res, next) {
-  try {
-    const clientId = Number(req.params.clientId);
-    const reportId = Number(req.params.reportId);
-
-    const report = await prisma.monthlyReport.findFirst({
-      where: {
-        id: reportId,
-        clientId,
-        type: "CLIENT",
-      },
-    });
-
-    if (!report) {
-      return res.status(404).json({ error: "Relatório não encontrado" });
-    }
-
-    generateMonthlyReportPDF(res, report);
-  } catch (err) {
-    next(err);
-  }
+function sendError(res, error) {
+  if (!error.statusCode) console.error('Client monthly report unavailable:', error.name);
+  if (res.headersSent) return res.destroy();
+  return res.status(error.statusCode || 503).json({ ok: false, error: error.statusCode ? error.message : 'Não foi possível consultar o relatório. Tente novamente.' });
 }
 
-module.exports = {
-  listClientReports,
-  downloadClientReportPDF,
-};
+async function listClientReports(req, res) {
+  try { return res.json(await business.list(req.user, req.params.clientId)); }
+  catch (error) { return sendError(res, error); }
+}
+
+async function downloadClientReportPDF(req, res) {
+  try {
+    const report = await business.read(req.user, req.params.reportId ?? req.params.id, req.params.clientId);
+    return generateMonthlyReportPDF(res, report);
+  } catch (error) { return sendError(res, error); }
+}
+
+module.exports = { listClientReports, downloadClientReportPDF, privateResponse };

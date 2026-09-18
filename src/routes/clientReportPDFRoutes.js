@@ -10,7 +10,7 @@ const {
   downloadReportPDF,
 } = require("../controllers/clientReportPDFController");
 
-router.use(auth());
+router.use(require('../controllers/clientReportController').privateResponse, auth('CLIENT'));
 
 // GET /api/client/reports/:id/pdf
 router.get("/client/reports/:id/pdf", downloadReportPDF);

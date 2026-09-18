@@ -116,6 +116,7 @@ scripts.push('test-field-alert-report-opening.js');
 scripts.push('test-field-visit-report-photos.js');
 scripts.push('test-field-extra-report.js');
 scripts.push('test-field-maintenance-billing.js');
+scripts.push('test-field-client-monthly-report-access.js');
 function run(script){return new Promise(resolve=>{
  const output=fs.createWriteStream(path.join(evidence,script+'.log'));
  const child=spawn(process.execPath,[path.join(__dirname,script)],{cwd:root,env:process.env,stdio:['ignore','pipe','pipe']});
