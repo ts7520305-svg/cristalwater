@@ -18,6 +18,9 @@ if (process.argv[2] === 'worker') {
     finally { await prisma.$disconnect(); process.disconnect(); }
   });
 } else (async () => {
+  // Earlier typed-identity fixtures reserve explicit visit IDs without advancing the sequence.
+  // Keep automatic QA allocation above those rows; retain all 1001 volume assertions below.
+  await prisma.$queryRaw`SELECT setval(pg_get_serial_sequence('"ServiceVisit"','id'), GREATEST(COALESCE((SELECT MAX(id) FROM "ServiceVisit"),0), nextval(pg_get_serial_sequence('"ServiceVisit"','id'))), true)`;
   const now = new Date(), previous = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth()-1, 5, 12));
   const defaultMonth = previous.toISOString().slice(0,7);
   const client = await prisma.client.create({data:{name:'QA monthly ownership Álvaro Łukasz Ελληνικά',paymentStatus:'PAID'}});

@@ -25,6 +25,10 @@ O gerador CLIENT contava todas as visitas das piscinas atualmente ligadas ao cli
 - PDFs atual e antigo obtidos pelas rotas autorizadas em `reports/field-visual/client-monthly-generation-1789763239629/`, com fonte incorporada e texto extraído verificados. Ambos foram renderizados e revistos: uma página cada, nomes latinos/gregos, contagens e avisos legíveis, sem cortes ou sobreposições.
 - Gates locais: sintaxe 560 backend/183 frontend/56 inline; 396 unitários em 63 ficheiros e quatro testes técnicos aprovados. O runner passa de 153 para 154 grupos; mantêm-se as 21 migrações.
 
+Primeiro CI nativo: [run 35391811612](https://github.com/ts7520305-svg/cristalwater/actions/runs/35391811612), commit `d8132e2904b5ca0b75c8e25b41bfbba2bac7ec45`, job `105751653906`: 153/154 grupos aprovados; o novo grupo parou ao criar as 1001 visitas de ensaio, com P2002 no ID 3243. O teste anterior de relatórios EXTRA reserva um ID regular explícito acima da sequência automática. A preparação do novo grupo passa a avançar apenas a sequência QA de ServiceVisit até ao maior ID existente ou valor seguinte da sequência, sem apagar registos, ignorar duplicados ou reduzir o volume. O código de produção não mudou.
+
+`run-1789764573709`: relatório EXTRA e acesso mensal aprovados antes do novo grupo; este ultrapassou a antiga colisão, verificou os totais/volume, rollback, processos concorrentes e os dois PDFs. Continua a terminar com P2028 apenas no ensaio final de duas transações simultâneas, pela limitação PGlite já documentada. 396 unitários/63 ficheiros e quatro testes técnicos novamente aprovados. É obrigatória nova validação integral nativa e restauro; o primeiro CI não aprova a entrega.
+
 CI PostgreSQL 16 e restauro: pendentes da publicação desta árvore. A aprovação final deve citar o commit exato, 154 grupos distintos e o restauro de linhas/ficheiros. O resultado parcial local não substitui essa validação.
 
 ## Limites e próximo percurso
