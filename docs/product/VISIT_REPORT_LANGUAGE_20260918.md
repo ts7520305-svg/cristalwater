@@ -16,10 +16,14 @@ Run local `run-1789738019169`: relatório individual (incluindo traduções/UI),
 
 Evidência sintética em `reports/field-visual/visit-report-1789738024059`: oito PDFs cliente de duas páginas (quatro idiomas × dois tipos) e francês ADMIN de cinco páginas com nota longa e aviso Unicode. As 21 páginas foram renderizadas por Poppler do sistema, revistas visualmente e extraídas independentemente por pdfplumber; sem glifos NUL nem texto cortado, rodapés presentes. Interface revista em 320/390/1440 px, seletor dentro do ecrã. Dados de QA, sem clientes reais.
 
-CI nativo/restauro pendentes da publicação.
+CI nativo/restauro aprovados no registo abaixo.
 
 ## Ficheiros e limites
 
 Dez ficheiros: `visitReportLanguage.js`, `visitReportService.js`, `visitReportPhotoService.js`, `extraVisitReportProjection.js`, `report-settings.html`, `report-settings.js`, `sw.js`, `test-field-visit-report.js`, este documento e `CURRENT_WORK_CHECKPOINT.md`.
 
 Não é tradução automática das notas, nem tradução integral da aplicação ou dos outros documentos. Mensagens de erro da API/interface permanecem em português. Outros pontos de abertura, preferências por cliente, restantes idiomas e referências fotográficas históricas não canónicas são percursos seguintes. Cobertura Unicode mantém os limites documentados na TASK262. Publicação apenas na branch de trabalho autorizada, sem merge/deploy. Frequência por cliente/época/instalação continua caso a caso: três ou mais visitas quando necessário.
+
+## Aprovação nativa
+
+Commit `2c38a1f57975c979a69e0b47a1fd19df17e23bb2`, árvore `3d8096ef5a4e0ac08091fab542ffd6a20423023b`, [CI 35350556466](https://github.com/ts7520305-svg/cristalwater/actions/runs/35350556466), job `105617412562`, concluído em 18/09/2026 às 13:46:31 UTC. 151/151 grupos distintos com código zero e sem sinal, 396 unitários/63 ficheiros, quatro técnicos, gate de navegador, 21 migrações aditivas e sintaxe 556/182/56. Relatório individual com traduções/API/UI: 7561 ms. Restauro isolado de 110 tabelas/46 ficheiros, com linhas e hashes iguais. Cache v83. Esta atualização posterior altera apenas documentação e conserva o código/testes validados. Publicação na branch autorizada, sem merge/deploy. Backup `backup/report-language-local-20260918`.
