@@ -2,7 +2,7 @@
 
 ## Ponto de retoma atual — 18/09/2026
 
-- TASK252–253 implementadas e aprovadas localmente: fontes financeiras partilhadas com a API ADMIN, clientes/documentos distintos, recebimentos por data UTC, filtro pela marca do documento, montantes ambíguos por rever e impressão mensal revista. Publicação/CI nativo com restauro ainda por confirmar. `MONTHLY_PRINT_SOURCES_20260918.md`. Cache v76, sem migração nova.
+- TASK252–253 confirmadas no commit `cd04d24b942c42fdc5952bffe7a0521d33f635d0`, árvore `5395911431de78ac341b5bcfd277c304f5febc23`, [CI `35316029494`](https://github.com/ts7520305-svg/cristalwater/actions/runs/35316029494), job `105507752531`: 146/146 grupos, 388 testes unitários/62 ficheiros e quatro testes técnicos, 21 scripts no gate de navegador, 20 migrações, sintaxe de 549 JS backend/181 frontend/56 scripts inline e restauro de 110 tabelas/32 ficheiros com linhas e hashes iguais em PostgreSQL 16. CI concluído em 2026-09-18 06:57:26 UTC. Fontes financeiras comuns à API ADMIN e ao imprimível mensal, clientes/documentos distintos, recebimentos por data UTC, filtro documental e montantes ambíguos por rever; cinco páginas de PDF revistas. Cache v76, sem migração nova. `MONTHLY_PRINT_SOURCES_20260918.md`. Esta atualização posterior altera apenas documentação e mantém código/testes da árvore validada.
 - Próximo percurso após TASK252–253: abertura autenticada do relatório individual pelos alertas; depois incorporação de fotografias com autorização confirmada. Fontes/cálculos e apresentação do imprimível mensal foram tratados neste lote. EXTRA, fontes Unicode/traduções e restantes validações documentadas mantêm o seu âmbito próprio.
 
 ## Histórico dos checkpoints anteriores

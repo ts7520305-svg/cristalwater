@@ -4,7 +4,7 @@
 
 Implementado em 17/09/2026 sobre `d3e7462d8fcbeeca420cf6c5a8f9ac67ac38139d`. TASK244–246 confirmadas no commit `48e29bf00a35a63fae23e0c2176d17e7d4fa28dd`, árvore `30570153a8a715891e6f5d214fb497fccac98607`, [CI `35279447336`](https://github.com/ts7520305-svg/cristalwater/actions/runs/35279447336), job `105397748167`: 140/140 grupos, 388 unitários/quatro técnicos, 21 scripts de navegador, 20 migrações, sintaxe 544 JS backend/179 frontend/57 inline e restauro de 110 tabelas/32 ficheiros com linhas/hashes iguais em PostgreSQL 16. O CI terminou com sucesso em 17/09/2026 às 22:12 UTC; resultado confirmado em 18/09/2026. Cache v69; runner final com 140 grupos, sem migração nova. A proteção adicional do imprimível está em `REPORT_SETTINGS_PRINT_REVIEW_20260917.md`; o diagnóstico anterior está em `FIELD_CLIENT_INTAKE_REVIEW_20260917.md`.
 
-Adenda TASK252–253: as regras financeiras foram extraídas para `monthlyFinancialProjection.js` e são reutilizadas pelo imprimível mensal, preservando o formato agregado desta API. Regressão local aprovada, incluindo mais de 10000 registos; CI nativo do novo lote ainda por confirmar. Ver `MONTHLY_PRINT_SOURCES_20260918.md`.
+Adenda TASK252–253: as regras financeiras foram extraídas para `monthlyFinancialProjection.js` e são reutilizadas pelo imprimível mensal, preservando o formato agregado desta API. Regressão aprovada, incluindo mais de 10000 registos; CI `35316029494` com 146/146 grupos e restauro confirmado. Ver `MONTHLY_PRINT_SOURCES_20260918.md`.
 
 ## Contrato e fontes
 

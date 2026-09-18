@@ -55,7 +55,7 @@ Publicação de código final: `09faec4284d8247811c0b1b48402a2bf42fe8b1c`; backu
 
 ## Limites e próximo percurso
 
-Adenda TASK252–253: fontes/cálculos e apresentação do imprimível mensal tratados e aprovados localmente, com confirmação nativa ainda pendente. Ver `MONTHLY_PRINT_SOURCES_20260918.md`. O diagnóstico mensal abaixo conserva o estado anterior a esse lote; o acesso pelos alertas e a incorporação de fotografias continuam como próximos percursos.
+Adenda TASK252–253: fontes/cálculos e apresentação do imprimível mensal confirmados no CI `35316029494`, com 146/146 grupos e restauro aprovado. Ver `MONTHLY_PRINT_SOURCES_20260918.md`. O diagnóstico mensal abaixo conserva o estado anterior a esse lote; o acesso pelos alertas e a incorporação de fotografias continuam como próximos percursos.
 
 O imprimível mensal continua a usar os cálculos antigos (`Invoice.total`, `amountPaid`, `amountOpen` e lista de faturas), ainda sem o contrato financeiro revisto da API mensal. A autenticação da abertura não valida essas contas nem transforma número de faturas em número de clientes. Esse é o próximo trabalho.
 

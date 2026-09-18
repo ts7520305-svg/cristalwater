@@ -2,7 +2,7 @@
 
 ## Estado
 
-Implementação e validação local concluídas; publicação e CI nativo com restauro ainda por confirmar nesta revisão. Base: `9ede492f82ed1f5096ff4fffd34cd4e4e24d6068`, depois da aprovação TASK250–251. Branch `work/field-readiness-20260915-simulation`. Cache v76 conservada: o HTML é gerado no servidor com `private, no-store`; não há alteração de assets nem migração nova.
+TASK252–253 confirmadas no commit `cd04d24b942c42fdc5952bffe7a0521d33f635d0`, árvore `5395911431de78ac341b5bcfd277c304f5febc23`, [CI `35316029494`](https://github.com/ts7520305-svg/cristalwater/actions/runs/35316029494), job `105507752531`: 146/146 grupos, 388 testes unitários/62 ficheiros e quatro testes técnicos, 21 scripts no gate de navegador, 20 migrações, sintaxe de 549 JS backend/181 frontend/56 scripts inline e restauro de 110 tabelas/32 ficheiros com linhas e hashes iguais em PostgreSQL 16. CI concluído em 2026-09-18 06:57:26 UTC. Fontes financeiras comuns à API ADMIN e ao imprimível mensal, clientes/documentos distintos, recebimentos por data UTC, filtro documental e montantes ambíguos por rever; cinco páginas de PDF revistas. Cache v76, sem migração nova. `MONTHLY_PRINT_SOURCES_20260918.md`. Esta atualização posterior altera apenas documentação e mantém código/testes da árvore validada. Base: `9ede492f82ed1f5096ff4fffd34cd4e4e24d6068`, depois da aprovação TASK250–251. Branch `work/field-readiness-20260915-simulation`. Cache v76 conservada: o HTML é gerado no servidor com `private, no-store`; não há alteração de assets nem migração nova.
 
 ## Problema reproduzido
 
@@ -44,6 +44,12 @@ A apresentação foi ensaiada em 320/390/1440 px, com limites de cartões/docume
 O fixture visual tem dois documentos do mesmo cliente, nomes/contactos/instalações longos sem espaços e 42 linhas de notas. A primeira versão reservava uma coluna estreita às notas e gerava seis páginas. As notas passaram a ocupar a largura total da tabela; a revisão seguinte identificou uma página quase vazia causada por regras de não fragmentação. A regra foi corrigida e o PDF final tem quatro páginas, com o mês vazio numa página. As cinco páginas foram renderizadas por `/usr/bin/pdftoppm` e inspecionadas visualmente, incluindo a continuação da tabela e os rodapés.
 
 Evidência final: `reports/field-visual/monthly-print-1789713436508/`; renderização e prova local em `/tmp/task252-pdf-review/verified/`. A extração confirmou cada documento e as 42 linhas uma única vez e na ordem certa, marcadores inicial/final, rodapés i/N e todos os caracteres dentro das margens de segurança. A captura de 320 px foi revista. Os dados são artificiais de QA, não relatórios de clientes reais.
+
+## Confirmação nativa
+
+O CI identificado no estado aprovou todos os 146 grupos distintos, com código zero e sem omissões. Fontes do imprimível: 1558 ms; interface/PDF: 1077 ms; acesso: 1438 ms; API/interface ADMIN mensal: 4133/8464 ms; abertura autenticada: 8869 ms. As 20 migrações aditivas foram aplicadas; restauro confirmado em 110 tabelas/32 ficheiros, com linhas e hashes iguais. A aprovação inclui a projeção financeira partilhada e a paginação final.
+
+Publicação de código: `cd04d24b942c42fdc5952bffe7a0521d33f635d0`; backup local `backup/task252-local-20260918`. Esta atualização de aprovação altera apenas documentação.
 
 ## Limites e próximo percurso
 
