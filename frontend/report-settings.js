@@ -43,8 +43,8 @@
     el('prepareSettings').disabled=invalid||busy||!view?.revision;
     const ready=!!view?.base&&!invalid&&!busy&&!view.pending&&!view.conflict&&!view.needsRead&&equal(values(),view.base.setting);
     const visit=el('visitId').value.trim(),validVisit=/^[1-9]\d{0,9}$/.test(visit)&&id(Number(visit));
-    el('openClientReport').disabled=el('openAdminReport').disabled=!ready||!validVisit||previewBusy;
-    el('visitId').disabled=invalid;
+    el('openClientReport').disabled=el('openAdminReport').disabled=!ready||!validVisit||!['REGULAR','EXTRA'].includes(el('visitType').value)||previewBusy;
+    el('visitId').disabled=el('visitType').disabled=invalid;
     el('previewNotice').textContent=ready?'A pré-visualização usa as opções guardadas deste cliente. A visita deve pertencer a este cliente.':'Carregue e confirme as opções guardadas. Guarde as alterações ou descarte o rascunho antes de pré-visualizar.';
   }
   function validateState(value,clientId){
@@ -148,16 +148,18 @@
   window.addEventListener('pagehide',()=>{stop();if(view)view.needsRead=true;busy=false;controls();});window.addEventListener('pageshow',event=>{observe();if(event.persisted&&view)load();});
   window.addEventListener('online',()=>{if(active()){controls();recoverList();}});window.addEventListener('offline',()=>{if(active())controls();});
   const preview=window.CristalReportDownloads.create({
-    context:()=>({generation:previewGeneration,client:input.value,visit:el('visitId').value,version:view?.base?.version,ready:!!view?.base&&!busy&&!view.pending&&!view.conflict&&!view.needsRead,options:values()}),
+    context:()=>({generation:previewGeneration,client:input.value,visit:el('visitId').value,visitType:el('visitType').value,version:view?.base?.version,ready:!!view?.base&&!busy&&!view.pending&&!view.conflict&&!view.needsRead,options:values()}),
     state:(kind,message)=>{previewBusy=kind==='loading';el('previewStatus').dataset.state=kind;el('previewStatus').textContent=message;el('previewStatus').setAttribute('role',['error','session'].includes(kind)?'alert':'status');if(kind==='session'){invalid=true;active();}controls();},
   });
   function openReport(reportView){
     if(!active()||busy||previewBusy||!view?.base||view.pending||view.conflict||view.needsRead||!equal(values(),view.base.setting))return;
     const visitId=el('visitId').value.trim();if(!/^[1-9]\d{0,9}$/.test(visitId)||!id(Number(visitId)))return;
-    preview.open('/api/report-visit/visit/'+visitId+'?view='+reportView+'&clientId='+view.id+'&settingsVersion='+encodeURIComponent(view.base.version),
-      {type:'application/pdf',headers:{'X-CW-Report-Type':'visit-pdf','X-CW-Visit-Id':visitId,'X-CW-Client-Id':String(view.id),'X-CW-Report-View':reportView,'X-CW-Settings-Version':view.base.version}});
+    const visitType=el('visitType').value;if(!['REGULAR','EXTRA'].includes(visitType))return;
+    preview.open('/api/report-visit/visit/'+visitId+'?'+(visitType==='EXTRA'?'visitType=EXTRA&':'')+'view='+reportView+'&clientId='+view.id+'&settingsVersion='+encodeURIComponent(view.base.version),
+      {type:'application/pdf',headers:{'X-CW-Report-Type':visitType==='EXTRA'?'extra-visit-pdf':'visit-pdf','X-CW-Visit-Type':visitType,'X-CW-Visit-Id':visitId,'X-CW-Client-Id':String(view.id),'X-CW-Report-View':reportView,'X-CW-Settings-Version':view.base.version}});
   }
   el('openClientReport').addEventListener('click',()=>openReport('client'));el('openAdminReport').addEventListener('click',()=>openReport('admin'));
+  el('visitType').addEventListener('change',()=>{previewGeneration++;preview.cancel();controls();});
   el('visitId').addEventListener('input',()=>{preview.cancel();controls();});
   input.addEventListener('input',()=>preview.cancel());
   for(const key of fields)el(key).addEventListener('change',()=>preview.cancel());

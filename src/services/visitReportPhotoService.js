@@ -22,15 +22,17 @@ async function prepare(report) {
   if (report.view !== 'admin' && !report.setting.showPhotos) return [];
   const result = [], root = resolveUploadBaseDir(), started = Date.now();
   let total = 0;
-  const records = report.visit.photos || [];
+  const records = report.visit.photos || [], extra = report.visitType === 'EXTRA';
   for (const [index, photo] of records.slice(0, MAX_PHOTOS).entries()) {
     const entry = { id: photo.id, label: `Fotografia ${index + 1} - ${labels[photo.type] || 'Registo'}`, message: unavailable };
     result.push(entry);
     if (Date.now() - started > 10000) { entry.message = limited; continue; }
     const prefix = getUploadsPublicBasePath() + '/';
-    if (photo.visitId !== report.visit.id || typeof photo.url !== 'string' || !photo.url.startsWith(prefix)) continue;
+    if (photo[extra ? 'extraVisitId' : 'visitId'] !== report.visit.id || typeof photo.url !== 'string' || !photo.url.startsWith(prefix)) continue;
     const filename = photo.url.slice(prefix.length);
-    const match = /^visit-([1-9]\d*)-(BEFORE|AFTER|PROBLEM|ACCESS|GENERAL)-([a-f0-9]{64})\.([a-zA-Z]{3,4})$/.exec(filename);
+    const match = /^(extra-)?visit-([1-9]\d*)-(BEFORE|AFTER|PROBLEM|ACCESS|GENERAL)-([a-f0-9]{64})\.([a-zA-Z]{3,4})$/.exec(filename);
+    if (!match || Boolean(match[1]) !== extra) continue;
+    match.splice(1, 1);
     if (!match || !['png', 'jpg', 'jpeg', 'gif', 'webp', 'heic', 'avif'].includes(match[4].toLowerCase()) || Number(match[1]) !== report.visit.id || match[2] !== photo.type) continue;
     let file;
     try {

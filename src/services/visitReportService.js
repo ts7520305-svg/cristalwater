@@ -11,10 +11,30 @@ const date = value => value ? new Date(value).toLocaleString('pt-PT', { timeZone
 const yesNo = value => value ? 'Sim' : 'Não';
 const htmlText = value => text(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
+const visitLabel = report => (report.visitType === 'EXTRA' ? 'Visita extra #' : 'Visita #') + report.visit.id;
+function extraProjection(row) {
+  const execution = row.execution && typeof row.execution === 'object' && !Array.isArray(row.execution) ? row.execution : {};
+  const absent = value => value === undefined || value === null;
+  const reading = key => absent(execution[key]) ? 'Não registado' : typeof execution[key] === 'number' && Number.isFinite(execution[key]) ? execution[key] : 'Por confirmar';
+  const checks = Object.fromEntries(['cleaned','brushed','vacuumed','basketCleaned','waterlineClean','backwashDone'].map(key => [key, absent(execution[key]) ? null : typeof execution[key] === 'boolean' ? execution[key] : 'Por confirmar']));
+  const products = execution.chemicalsJson;
+  const validProducts = Array.isArray(products) && products.length <= 50 && products.every(p => p && typeof p.name === 'string' && p.name.trim() && p.name.length <= 200 && typeof p.quantity === 'number' && Number.isFinite(p.quantity) && p.quantity > 0 && typeof p.unit === 'string' && p.unit.trim() && p.unit.length <= 100);
+  return { ...row, ...checks, ...Object.fromEntries(['ph','chlorine','alkalinity','salt','temperature','orpMv'].map(key => [key, reading(key)])),
+    plannedDate: row.scheduledAt, technicianName: row.technician?.name,
+    chemicals: validProducts ? products.map(p => ({ name: p.name, quantity: p.quantity, unit: p.unit })) : [],
+    chemicalNotice: validProducts ? 'Nenhum químico registado.' : absent(products) ? 'Consumo não registado.' : 'Consumo por confirmar. Peça a revisão do registo.',
+    notes: typeof execution.notes === 'string' ? execution.notes || 'Sem observações registadas.' : absent(execution.notes) ? 'Observações de execução não registadas.' : 'Observações de execução por confirmar.',
+    internalNotes: typeof row.internalNote === 'string' ? row.internalNote : null,
+    planningNotes: typeof row.notes === 'string' ? row.notes : null,
+    problem: typeof execution.problem === 'string' ? execution.problem : null,
+  };
+}
+
 async function read(actor, rawId, query = {}) {
-  const visitId = id(rawId), role = normalizeRole(actor?.role);
+  const visitId = id(rawId), role = normalizeRole(actor?.role), visitType = query.visitType ?? 'REGULAR';
   if (!['ADMIN', 'CLIENT', 'TECHNICIAN', 'TEAM_LEADER'].includes(role)) fail('Acesso negado.', 403);
-  if (Object.keys(query).some(key => !['view', 'role', 'clientId', 'settingsVersion'].includes(key)) ||
+  if (!['REGULAR', 'EXTRA'].includes(visitType)) fail('Tipo de visita inválido.');
+  if (Object.keys(query).some(key => !['view', 'role', 'clientId', 'settingsVersion', 'visitType'].includes(key)) ||
       (query.view !== undefined && !['client', 'admin'].includes(query.view)) ||
       (query.role !== undefined && !['CLIENT', 'ADMIN'].includes(query.role)) ||
       (query.view !== undefined && query.role !== undefined) ||
@@ -23,10 +43,10 @@ async function read(actor, rawId, query = {}) {
   const view = query.view || query.role?.toLowerCase() || (role === 'ADMIN' ? 'admin' : 'client');
   if (view === 'admin' && role !== 'ADMIN') fail('Acesso negado.', 403);
   const report = await prisma.$transaction(async tx => {
-    const visit = await tx.serviceVisit.findUnique({ where: { id: visitId }, include: {
+    let visit = await tx[visitType === 'EXTRA' ? 'extraVisit' : 'serviceVisit'].findUnique({ where: { id: visitId }, include: {
       client: { include: { reportSetting: true } },
       pool: { include: { equipment: true, technicalRoom: true } },
-      chemicals: { orderBy: { id: 'asc' } }, photos: { orderBy: { id: 'asc' }, take: 24 }, _count: { select: { photos: true } },
+      ...(visitType === 'EXTRA' ? { technician: { select: { name: true } } } : { chemicals: { orderBy: { id: 'asc' } } }), photos: { orderBy: { id: 'asc' }, take: 24 }, _count: { select: { photos: true } },
     } });
     if (!visit) fail('Visita não encontrada.', 404);
     // The current pool owner cannot prove who owned a historical visit.
@@ -39,7 +59,8 @@ async function read(actor, rawId, query = {}) {
     if (expectedClient !== null && expectedClient !== client.id) fail('A visita não pertence ao cliente selecionado.', 409);
     const state = settingsService.snapshot(client);
     if (query.settingsVersion !== undefined && query.settingsVersion !== state.version) fail('As configurações mudaram. Carregue novamente antes de abrir o relatório.', 409);
-    return { visit, client, view, setting: state.setting, settingsVersion: state.version };
+    if (visitType === 'EXTRA') visit = extraProjection(visit);
+    return { visit, visitType, client, view, setting: state.setting, settingsVersion: state.version };
   }, { isolationLevel: 'RepeatableRead', maxWait: 15000, timeout: 15000 });
   report.photos = await reportPhotos.prepare(report);
   return report;
@@ -49,19 +70,24 @@ async function read(actor, rawId, query = {}) {
 function sections(report) {
   const { visit: v, client, setting, view } = report, show = key => view === 'admin' || setting[key];
   const result = [], general = [];
+  const extra = report.visitType === 'EXTRA', check = key => extra && typeof v[key] !== 'boolean' ? v[key] ?? 'Não registado' : yesNo(v[key]);
   const add = (key, label, value) => { if (show(key)) general.push([label, text(value)]); };
   add('showClientName', 'Cliente', client.name); add('showPoolName', 'Instalação', v.pool?.name);
   add('showZone', 'Zona', v.pool?.zone || client.zone); add('showAddress', 'Morada', v.pool?.address || client.address);
-  add('showTechnicianName', 'Técnico', v.technicianName); add('showStatus', 'Estado', v.status);
+  add('showTechnicianName', extra ? 'Técnico atribuído (registo atual)' : 'Técnico', v.technicianName); add('showStatus', 'Estado', v.status);
   add('showPlannedDate', 'Planeada (hora de Portugal)', date(v.plannedDate));
   add('showStartEnd', 'Início (hora de Portugal)', date(v.startAt)); add('showStartEnd', 'Fim (hora de Portugal)', date(v.endAt));
-  if (general.length) result.push({ title: 'Dados da visita', rows: general });
+  if (general.length) result.push({ title: extra ? 'Dados da visita extra' : 'Dados da visita', rows: general });
   if (show('showWaterParameters')) result.push({ title: 'Parâmetros da água', rows: [['pH', v.ph], ['Cloro', v.chlorine], ['Alcalinidade', v.alkalinity], ['Sal', v.salt], ['Temperatura', v.temperature], ['ORP (mV)', v.orpMv]] });
-  if (show('showChecklist')) result.push({ title: 'Trabalhos registados', rows: [['Limpeza geral', yesNo(v.cleaned)], ['Escovagem', yesNo(v.brushed)], ['Aspiração', yesNo(v.vacuumed)], ['Cestos limpos', yesNo(v.basketCleaned)], ['Linha de água limpa', yesNo(v.waterlineClean)], ['Retrolavagem', yesNo(v.backwashDone)]] });
-  if (show('showChemicals')) result.push({ title: 'Químicos aplicados', rows: v.chemicals.map((c, i) => [String(i + 1) + '. ' + c.name, text(c.quantity) + (c.unit ? ' ' + c.unit : '')]), empty: 'Nenhum químico registado.' });
+  if (show('showChecklist')) result.push({ title: 'Trabalhos registados', rows: [['Limpeza geral', check('cleaned')], ['Escovagem', check('brushed')], ['Aspiração', check('vacuumed')], ['Cestos limpos', check('basketCleaned')], ['Linha de água limpa', check('waterlineClean')], ['Retrolavagem', check('backwashDone')]] });
+  if (show('showChemicals')) result.push({ title: 'Químicos aplicados', rows: v.chemicals.map((c, i) => [String(i + 1) + '. ' + c.name, text(c.quantity) + (c.unit ? ' ' + c.unit : '')]), empty: v.chemicalNotice || 'Nenhum químico registado.' });
   if (show('showEquipment')) { const e = v.pool?.equipment; result.push({ title: 'Equipamento atual da instalação', rows: [['Bomba', e?.pumpType], ['Potência da bomba', e?.pumpPower], ['Filtro', e?.filterType], ['Meio filtrante', e?.filterMedia], ['Sistema de sal', e ? yesNo(e.saltSystem) : null], ['Quantidade de sal', e?.saltQuantity], ['Luzes', e?.lightsCount], ['Luzes avariadas', e?.brokenLightsCount], ['Tipo de luz', e?.lightsType]] }); }
   if (show('showTechnicalRoom')) { const t = v.pool?.technicalRoom; result.push({ title: 'Casa técnica - registo atual', rows: [['Estado', t?.condition], ['Localização', t?.locationNote], ['Ventilação', t?.ventilation], ['Elétrica', t?.electrical], ['Notas', t?.notes]] }); }
   if (show('showNotes')) result.push({ title: 'Observações', body: v.notes || 'Sem observações.' });
+  if (extra && view === 'admin') {
+    if (v.planningNotes) result.push({ title: 'Indicações de planeamento', body: v.planningNotes });
+    if (v.problem) result.push({ title: 'Ocorrência registada', body: v.problem });
+  }
   if (view === 'admin') result.push({ title: 'Notas internas', body: v.internalNotes || 'Sem notas internas.' });
   if (show('showPhotos')) result.push({ title: 'Fotografias da visita', photos: report.photos || [], empty: 'Nenhuma foto registada.' });
   return result;
@@ -69,17 +95,17 @@ function sections(report) {
 
 function headers(res, report, type) {
   res.set({ 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff',
-    'X-CW-Report-Type': type, 'X-CW-Visit-Id': String(report.visit.id), 'X-CW-Client-Id': String(report.client.id),
+    'X-CW-Report-Type': report.visitType === 'EXTRA' ? 'extra-' + type : type, 'X-CW-Visit-Type': report.visitType || 'REGULAR', 'X-CW-Visit-Id': String(report.visit.id), 'X-CW-Client-Id': String(report.client.id),
     'X-CW-Report-View': report.view, 'X-CW-Settings-Version': report.settingsVersion });
 }
 function html(report) {
   const title = report.view === 'admin' ? 'Relatório técnico completo' : 'Relatório de manutenção';
-  return `<!doctype html><html lang="pt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><style>body{font:15px/1.5 Arial,sans-serif;margin:32px;color:#1f2937}main{max-width:850px;margin:auto}h1{color:#125e88}section{margin:22px 0}h2{font-size:19px;border-bottom:1px solid #d4dfe7;padding-bottom:6px;break-after:avoid}dl{margin:0}dt{font-weight:bold;break-after:avoid}dd{margin:0 0 12px}p,dd,dt{white-space:pre-wrap;overflow-wrap:anywhere}figure{margin:16px 0;break-inside:avoid}figure img{display:block;max-width:100%;max-height:360px;width:auto;height:auto;margin:8px auto}figcaption{font-weight:bold;overflow-wrap:anywhere}button{min-height:44px;padding:8px 18px}footer{font-size:12px;color:#526476}@media print{button{display:none}body{margin:0}}</style></head><body><main><button onclick="window.print()">Imprimir / Guardar PDF</button><h1>Cristal Water</h1><p>${title} | Visita #${report.visit.id}</p>${sections(report).map(s => `<section><h2>${htmlText(s.title)}</h2>${s.photos ? (s.photos.length ? s.photos.map(p => `<figure><figcaption>${htmlText(p.label)}</figcaption>${p.bytes ? `<img src="data:image/jpeg;base64,${p.bytes.toString('base64')}" alt="${htmlText(p.label)}" width="${p.width}" height="${p.height}">` : `<p>${htmlText(p.message)}</p>`}</figure>`).join('') : `<p>${htmlText(s.empty)}</p>`) : s.body ? `<p>${htmlText(s.body)}</p>` : s.rows.length ? `<dl>${s.rows.map(([label, value]) => `<dt>${htmlText(label)}</dt><dd>${htmlText(value)}</dd>`).join('')}</dl>` : `<p>${htmlText(s.empty)}</p>`}</section>`).join('')}<footer>Documento gerado pelo sistema Cristal Water. Os dados da instalação correspondem ao registo atual.</footer></main></body></html>`;
+  return `<!doctype html><html lang="pt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><style>body{font:15px/1.5 Arial,sans-serif;margin:32px;color:#1f2937}main{max-width:850px;margin:auto}h1{color:#125e88}section{margin:22px 0}h2{font-size:19px;border-bottom:1px solid #d4dfe7;padding-bottom:6px;break-after:avoid}dl{margin:0}dt{font-weight:bold;break-after:avoid}dd{margin:0 0 12px}p,dd,dt{white-space:pre-wrap;overflow-wrap:anywhere}figure{margin:16px 0;break-inside:avoid}figure img{display:block;max-width:100%;max-height:360px;width:auto;height:auto;margin:8px auto}figcaption{font-weight:bold;overflow-wrap:anywhere}button{min-height:44px;padding:8px 18px}footer{font-size:12px;color:#526476}@media print{button{display:none}body{margin:0}}</style></head><body><main><button onclick="window.print()">Imprimir / Guardar PDF</button><h1>Cristal Water</h1><p>${title} | ${visitLabel(report)}</p>${sections(report).map(s => `<section><h2>${htmlText(s.title)}</h2>${s.photos ? (s.photos.length ? s.photos.map(p => `<figure><figcaption>${htmlText(p.label)}</figcaption>${p.bytes ? `<img src="data:image/jpeg;base64,${p.bytes.toString('base64')}" alt="${htmlText(p.label)}" width="${p.width}" height="${p.height}">` : `<p>${htmlText(p.message)}</p>`}</figure>`).join('') : `<p>${htmlText(s.empty)}</p>`) : s.body ? `<p>${htmlText(s.body)}</p>` : s.rows.length ? `<dl>${s.rows.map(([label, value]) => `<dt>${htmlText(label)}</dt><dd>${htmlText(value)}</dd>`).join('')}</dl>` : `<p>${htmlText(s.empty)}</p>`}</section>`).join('')}<footer>Documento gerado pelo sistema Cristal Water. Os dados da instalação correspondem ao registo atual.</footer></main></body></html>`;
 }
 function renderPdf(report) {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ size: "A4", margins: { top: 98, bottom: 58, left: 48, right: 48 }, bufferPages: true,
-      info: { Title: "Cristal Water - Visita " + report.visit.id, Author: "Cristal Water" } });
+      info: { Title: "Cristal Water - " + visitLabel(report), Author: "Cristal Water" } });
     const chunks = [];
     doc.on("data", chunk => chunks.push(chunk)); doc.on("end", () => resolve(Buffer.concat(chunks))); doc.on("error", reject);
     try {
@@ -88,7 +114,7 @@ function renderPdf(report) {
         const font = doc._font?.name || "Helvetica", size = doc._fontSize || 10;
         doc.fillColor("#145f86").font("Helvetica-Bold").fontSize(20).text("Cristal Water", 48, 34, { width, lineBreak: false });
         doc.fillColor("#334155").font("Helvetica").fontSize(10).text(
-          (report.view === "admin" ? "Relatório técnico completo" : "Relatório de manutenção") + " | Visita #" + report.visit.id,
+          (report.view === "admin" ? "Relatório técnico completo" : "Relatório de manutenção") + " | " + visitLabel(report),
           48, 62, { width, lineBreak: false });
         doc.strokeColor("#d3e2eb").moveTo(48, 83).lineTo(doc.page.width - 48, 83).stroke();
         doc.font(font).fontSize(size).fillColor("#1f2937"); doc.x = 48; doc.y = 98;
