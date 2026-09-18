@@ -1,7 +1,7 @@
 'use strict';
 const { prisma } = require('../../prismaClient');
 const { CLOSED_STATUSES, ALERT_NOTIFICATION_TYPES, ALERT_EVENT_TYPES, SERVICE_VISIT_INCLUDE,
-  metadataOf, numberOrNull, uniqueNumbers, extractVisitIdFromText, enrichAlert,
+  metadataOf, numberOrNull, uniqueNumbers, reportReference, legacyVisitMetadata, extractVisitIdFromText, enrichAlert,
   mapNotification, mapTechnicalAlert, mapVisitAlert, mapGenericAlert, isOpenStatus,
 } = require('../../services/alertPresentationService');
 const priority = { CRITICAL: 0, WARNING: 1, NORMAL: 2, LOW: 3 };
@@ -51,45 +51,57 @@ async function list() {
     const technicalVisitIds = technicalAlerts.map((alert) => extractVisitIdFromText(alert.message, alert.type));
     const knownVisitIds = new Set(visitAlerts.map(visit => visit.id));
     const linkedVisitIds = uniqueNumbers([
-      ...notificationContexts.map((row) => row.metadata.visitId),
+      ...notificationContexts.filter(({ metadata }) => reportReference(metadata)?.type === 'REGULAR' || legacyVisitMetadata(metadata)).map(({ metadata }) => metadata.visitId),
       ...technicalVisitIds,
     ]).filter(id => !knownVisitIds.has(id));
     const linkedRepairIds = uniqueNumbers(notificationContexts.map((row) => row.metadata.repairId));
 
-    const [linkedVisits, linkedRepairs] = await Promise.all([
+    const extraVisitIds = uniqueNumbers(notificationContexts.map(({ metadata }) => { const ref = reportReference(metadata); return ref?.type === 'EXTRA' ? ref.visitId : null; }));
+    const [linkedVisits, linkedRepairs, extraVisits] = await Promise.all([
       readLinked(tx.serviceVisit, linkedVisitIds, SERVICE_VISIT_INCLUDE),
       readLinked(tx.repair, linkedRepairIds, { pool: { include: { client: true } } }),
+      readLinked(tx.extraVisit, extraVisitIds, { client: true, pool: { include: { client: true } }, technician: true, photos: true }),
     ]);
 
     const visitMap = new Map([...visitAlerts, ...linkedVisits].map((visit) => [Number(visit.id), visit]));
+    const extraVisitMap = new Map(extraVisits.map(visit => [visit.id, visit]));
     const repairMap = new Map(linkedRepairs.map((repair) => [Number(repair.id), repair]));
     const notificationByTechnicalAlertId = new Map();
-    notificationContexts.forEach(({ metadata }) => {
-      const technicalAlertId = numberOrNull(metadata.alertId);
-      if (technicalAlertId) notificationByTechnicalAlertId.set(technicalAlertId, metadata);
+    notificationContexts.forEach(context => {
+      const technicalAlertId = numberOrNull(context.metadata.alertId);
+      if (technicalAlertId) {
+        const contexts = notificationByTechnicalAlertId.get(technicalAlertId) || [];
+        contexts.push(context); notificationByTechnicalAlertId.set(technicalAlertId, contexts);
+      }
     });
+    const linkedVisit = (ref, fallbackId) => ref ? (ref.type === 'EXTRA' ? extraVisitMap : visitMap).get(ref.visitId) : visitMap.get(numberOrNull(fallbackId));
 
     const alerts = [
-      ...notifications.map((notification) => {
+      ...notifications.map(notification => {
+        const metadata = metadataOf(notification), ref = reportReference(metadata), legacy = legacyVisitMetadata(metadata);
         const alert = mapNotification(notification);
-        return enrichAlert(alert, {
-          visit: visitMap.get(numberOrNull(alert.visitId)),
-          reportVisit: metadataOf(notification).visitType === 'REGULAR',
+        const visit = ref || legacy ? linkedVisit(ref, alert.visitId) : null;
+        const consistent = !ref || visit && (!alert.clientId || alert.clientId === visit.clientId) && (!alert.poolId || alert.poolId === visit.poolId) && (!metadata.clientId || metadata.clientId === visit.clientId);
+        return enrichAlert({ ...alert, visitId: ref?.visitId || alert.visitId }, {
+          visit: consistent ? visit : null,
+          visitType: ref?.type || (legacy ? 'REGULAR' : null), reportVisit: Boolean(ref),
           repair: repairMap.get(numberOrNull(alert.repairId)),
         });
       }),
-      ...technicalAlerts.map((technicalAlert) => {
+      ...technicalAlerts.map(technicalAlert => {
         const alert = mapTechnicalAlert(technicalAlert);
-        const linked = notificationByTechnicalAlertId.get(Number(technicalAlert.id)) || {};
+        const contexts = notificationByTechnicalAlertId.get(Number(technicalAlert.id)) || [];
+        const linked = contexts.at(-1)?.metadata || {}, refs = contexts.map(context => reportReference(context.metadata));
+        const ref = refs[0] && refs.every(item => item?.type === refs[0].type && item?.visitId === refs[0].visitId) ? refs[0] : null;
+        const legacy = contexts.every(context => legacyVisitMetadata(context.metadata));
         const parsedVisitId = extractVisitIdFromText(technicalAlert.message, technicalAlert.type);
-        const visitId = numberOrNull(linked.visitId) || parsedVisitId || null;
-        return enrichAlert({
-          ...alert,
-          visitId,
-          repairId: linked.repairId || null,
-        }, {
-          visit: visitMap.get(numberOrNull(visitId)),
-          reportVisit: linked.visitType === 'REGULAR' && Number(linked.visitId) === visitId,
+        const visitId = ref?.visitId || numberOrNull(linked.visitId) || parsedVisitId || null;
+        const visit = ref || legacy ? linkedVisit(ref, visitId) : null;
+        const consistent = !ref || visit && (!alert.poolId || alert.poolId === visit.poolId) && (!alert.clientId || alert.clientId === visit.clientId) && (!parsedVisitId || parsedVisitId === ref.visitId) &&
+          contexts.every(({ notification, metadata }) => (!notification.clientId || notification.clientId === visit.clientId) && (!metadata.clientId || metadata.clientId === visit.clientId) && (!metadata.poolId || metadata.poolId === visit.poolId));
+        return enrichAlert({ ...alert, visitId, repairId: linked.repairId || null }, {
+          visit: consistent ? visit : null,
+          visitType: ref?.type || (legacy ? 'REGULAR' : null), reportVisit: Boolean(ref) && consistent,
           repair: repairMap.get(numberOrNull(linked.repairId)),
           attachments: technicalAlert.attachments || [],
         });

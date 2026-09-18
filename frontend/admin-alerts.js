@@ -28,16 +28,16 @@ function invalidateAlertReport() {
 }
 function reportForAlert(alert) {
   const report = alert?.report;
-  return report?.type === 'REGULAR' && Number.isSafeInteger(report.visitId) && report.visitId > 0 &&
+  return ['REGULAR', 'EXTRA'].includes(report?.type) && report.type === alert.visitType && Number.isSafeInteger(report.visitId) && report.visitId > 0 &&
     Number.isSafeInteger(report.clientId) && report.clientId > 0 && report.clientId === alert.clientId && report.visitId === alert.visitId ? report : null;
 }
 function openAlertReport(reference) {
   if (!alertsSessionCurrent() || !alertsLoaded || !alertReports) return;
   const alert = filteredAlerts().find(row => row.id === reference), report = reportForAlert(alert);
   if (!report) return;
-  alertReportSelection = { reference, visitId: report.visitId, clientId: report.clientId };
-  alertReports.open(`/api/report-visit/visit/${report.visitId}?view=admin&clientId=${report.clientId}`,
-    { type: 'application/pdf', headers: { 'X-CW-Report-Type': 'visit-pdf', 'X-CW-Visit-Id': report.visitId,
+  alertReportSelection = { reference, visitType: report.type, visitId: report.visitId, clientId: report.clientId };
+  alertReports.open(`/api/report-visit/visit/${report.visitId}?${report.type === 'EXTRA' ? 'visitType=EXTRA&' : ''}view=admin&clientId=${report.clientId}`,
+    { type: 'application/pdf', headers: { 'X-CW-Report-Type': report.type === 'EXTRA' ? 'extra-visit-pdf' : 'visit-pdf', 'X-CW-Visit-Type': report.type, 'X-CW-Visit-Id': report.visitId,
       'X-CW-Client-Id': report.clientId, 'X-CW-Report-View': 'admin' } });
 }
 
@@ -190,7 +190,8 @@ function mergeAlertVisit(alert, visit) {
 }
 
 async function enrichAlertsWithVisits(alerts) {
-  const ids = Array.from(new Set((alerts || []).filter(alert => !alert.serviceNote).map(extractVisitId).filter(Boolean)));
+  const legacy = alert => !Object.prototype.hasOwnProperty.call(alert, 'serviceNote') && (!alert.visitType || alert.visitType === 'REGULAR');
+  const ids = Array.from(new Set((alerts || []).filter(legacy).map(extractVisitId).filter(Boolean)));
   if (!ids.length) return alerts;
 
   const pairs = await Promise.all(ids.slice(0, 80).map(async (id) => {
@@ -204,12 +205,14 @@ async function enrichAlertsWithVisits(alerts) {
   const visits = new Map(pairs.filter(([, visit]) => visit?.id));
   if (!visits.size) {
     return alerts.map((alert) => {
+      if (!legacy(alert)) return alert;
       const visitId = extractVisitId(alert);
       return visitId ? { ...alert, visitId, visitHref: `/admin-visits?visitId=${visitId}` } : alert;
     });
   }
 
   return alerts.map((alert) => {
+    if (!legacy(alert)) return alert;
     const visitId = extractVisitId(alert);
     return visitId && visits.has(visitId) ? mergeAlertVisit(alert, visits.get(visitId)) : alert;
   });
@@ -359,6 +362,7 @@ function renderAlertDetails(alert) {
   if (note?.alerts) detailRows.push(["Problema registado", note.alerts]);
   if (note?.reason) detailRows.push(["Motivo", note.reason]);
   if (note?.notes) detailRows.push(["Nota do tecnico", note.notes]);
+  if (note?.planningNotes) detailRows.push(["Indicações de planeamento", note.planningNotes]);
   if (note?.internalNotes) detailRows.push(["Nota interna", note.internalNotes]);
   if (note?.products) detailRows.push(["Produtos", note.products]);
   if (repair?.problem) detailRows.push(["Reparacao", repair.problem]);
@@ -750,16 +754,16 @@ function renderList() {
         <div class="alert-meta">
           <span><b>Cliente:</b> ${escapeHtml(alert.clientName || "Sem cliente")}</span>
           <span><b>Piscina/Jacuzzi:</b> ${escapeHtml(alert.poolName || "Nao associado")}</span>
-          <span class="${alert.technicianName ? "" : "missing"}"><b>Reportado por:</b> ${escapeHtml(alert.technicianName || "Tecnico por identificar")}</span>
+          <span class="${alert.technicianName ? "" : "missing"}"><b>${alert.visitType === "EXTRA" ? "Técnico associado" : "Reportado por"}:</b> ${escapeHtml(alert.technicianName || "Tecnico por identificar")}</span>
           <span><b>Data:</b> ${escapeHtml(formatDate(alert.createdAt))}</span>
-          ${alert.visitId ? `<span><b>Visita:</b> #${escapeHtml(alert.visitId)}</span>` : ""}
+          ${alert.visitId ? `<span><b>Visita${alert.visitType === "EXTRA" ? " extra" : ""}:</b> #${escapeHtml(alert.visitId)}</span>` : ""}
           ${alert.repairId ? `<span><b>Reparacao:</b> #${escapeHtml(alert.repairId)}</span>` : ""}
         </div>
       </div>
       <div class="alert-actions">
         ${alert.href ? `<a class="btn" href="${escapeHtml(alert.href)}">Abrir ficha</a>` : ""}
         ${alert.visitHref ? `<a class="btn note" href="${escapeHtml(alert.visitHref)}">Abrir visita</a>` : ""}
-        ${reportForAlert(alert) ? `<button class="btn note" type="button" data-report-alert="${escapeHtml(alert.id)}" ${alertReports ? "" : "disabled"}>Abrir relatório</button>` : alert.serviceNote ? `<p>Relatório por confirmar: reveja a associação da visita.</p>` : ""}
+        ${reportForAlert(alert) ? `<button class="btn" type="button" data-report-alert="${escapeHtml(alert.id)}" ${alertReports ? "" : "disabled"}>Abrir relatório${alert.report.type === "EXTRA" ? " extra" : ""}</button>` : alert.serviceNote || alert.visitId ? `<p>Relatório por confirmar: reveja a associação da visita.</p>` : ""}
         <button type="button" data-charge-alert="${escapeHtml(alert.id)}">Preparar rascunho</button>
         ${alert.resolutionRequirement ? `<p>${escapeHtml(alert.resolutionRequirement.message)}</p>` : ''}
         <button type="button" class="resolve" data-resolve-alert="${escapeHtml(alert.id)}" ${alertResolutions.size ? 'disabled' : ''}>${alert.resolutionRequirement ? 'Verificar resolucao' : 'Resolver'}</button>

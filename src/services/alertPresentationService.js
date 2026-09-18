@@ -1,4 +1,5 @@
 'use strict';
+const extraProjection = require('./extraVisitReportProjection');
 const { parseReference, resolutionVersion, requirement } = require('./alertResolutionStateService');
 
 const CLOSED_STATUSES = ["RESOLVED", "DONE", "CLOSED", "CANCELLED", "CANCELED", "ARCHIVED"];
@@ -59,6 +60,19 @@ function numberOrNull(value) {
 
 function uniqueNumbers(values) {
   return Array.from(new Set(values.map(numberOrNull).filter(Boolean)));
+}
+
+// Metadata must identify the table explicitly; a number alone is never report provenance.
+function reportReference(metadata = {}) {
+  const validId = value => (typeof value === 'number' || typeof value === 'string' && /^[1-9]\d*$/.test(value)) && Number.isSafeInteger(Number(value)) && Number(value) > 0 && Number(value) <= 2147483647 ? Number(value) : null;
+  const hasExtra = metadata.extraVisitId !== undefined && metadata.extraVisitId !== null;
+  const type = metadata.visitType ?? (hasExtra ? 'EXTRA' : null);
+  const visitId = validId(metadata.visitId ?? (hasExtra ? metadata.extraVisitId : null));
+  if (!['REGULAR', 'EXTRA'].includes(type) || !visitId || hasExtra && (type !== 'EXTRA' || validId(metadata.extraVisitId) !== visitId)) return null;
+  return { type, visitId };
+}
+function legacyVisitMetadata(metadata = {}) {
+  return metadata.visitType === undefined && metadata.extraVisitId === undefined;
 }
 
 function cleanText(value) {
@@ -139,20 +153,24 @@ function buildReadings(visit) {
     .map(([label, value]) => ({ label, value }));
 }
 
-function buildServiceNote(visit) {
+function buildServiceNote(visit, visitType) {
   if (!visit?.id) return null;
+  const extra = visitType === 'EXTRA';
+  if (extra) visit = extraProjection(visit);
   const photos = (visit.photos || []).map(mapPhoto).filter(Boolean);
   const attachments = (visit.attachments || []).map(mapAttachment).filter(Boolean);
   const products = productsSummary(visit.products, visit.chemicals);
   return {
     visitId: visit.id,
-    href: `/api/reports/visit/${visit.id}`,
+    href: `/api/reports/visit/${visit.id}${extra ? '?visitType=EXTRA' : ''}`,
+    visitType,
     status: visit.status || null,
     date: visit.endAt || visit.startAt || visit.plannedDate || visit.date || visit.createdAt || visit.updatedAt,
     reason: cleanText(visit.reason),
-    alerts: cleanText(visit.alerts),
+    alerts: cleanText(extra ? visit.problem : visit.alerts),
     notes: cleanText(visit.notes),
     internalNotes: cleanText(visit.internalNotes),
+    ...(extra ? { planningNotes: cleanText(visit.planningNotes) } : {}),
     products,
     readings: buildReadings(visit),
     photos,
@@ -173,8 +191,8 @@ function buildRepairNote(repair) {
   };
 }
 
-function enrichAlert(alert, { visit, repair, attachments = [], reportVisit = false } = {}) {
-  const serviceNote = buildServiceNote(visit);
+function enrichAlert(alert, { visit, repair, attachments = [], reportVisit = false, visitType = 'REGULAR' } = {}) {
+  const serviceNote = buildServiceNote(visit, visitType);
   const repairNote = buildRepairNote(repair);
   const directAttachments = attachments.map(mapAttachment).filter(Boolean);
   const media = [
@@ -202,10 +220,13 @@ function enrichAlert(alert, { visit, repair, attachments = [], reportVisit = fal
     clientName: alert.clientName || visit?.client?.name || visit?.pool?.client?.name || "",
     poolId: alert.poolId || visitPoolId,
     poolName: alert.poolName || visit?.pool?.name || "",
-    visitHref: visitId ? `/admin-visits?visitId=${visitId}` : null,
+    visitType,
+    href: visitType === 'EXTRA' ? buildHref({ clientId: alert.clientId || visitClientId, poolId: alert.poolId || visitPoolId }) : alert.href,
+    visitHref: visitId && visitType === 'REGULAR' ? `/admin-visits?visitId=${visitId}` : null,
     serviceNote,
-    report: reportVisit && visit?.clientId && (!alert.clientId || alert.clientId === visit.clientId) && (!alert.poolId || alert.poolId === visit.poolId)
-      ? { type: 'REGULAR', visitId: visit.id, clientId: visit.clientId } : null,
+    report: reportVisit && ['REGULAR', 'EXTRA'].includes(visitType) && visit?.clientId && visitId === visit.id &&
+      (!visit.pool?.clientId || visit.pool.clientId === visit.clientId) && (!alert.clientId || alert.clientId === visit.clientId) && (!alert.poolId || alert.poolId === visit.poolId)
+      ? { type: visitType, visitId: visit.id, clientId: visit.clientId } : null,
     repair: repairNote,
     media,
     hasServiceNote: Boolean(serviceNote),
@@ -353,4 +374,4 @@ function mapGenericAlert(alert) {
   };
 }
 
-module.exports = { CLOSED_STATUSES, ALERT_NOTIFICATION_TYPES, ALERT_EVENT_TYPES, SERVICE_VISIT_INCLUDE, parseReference, isOpenStatus, metadataOf, numberOrNull, uniqueNumbers, extractVisitIdFromText, enrichAlert, mapNotification, mapTechnicalAlert, mapVisitAlert, mapGenericAlert };
+module.exports = { CLOSED_STATUSES, ALERT_NOTIFICATION_TYPES, ALERT_EVENT_TYPES, SERVICE_VISIT_INCLUDE, parseReference, reportReference, legacyVisitMetadata, isOpenStatus, metadataOf, numberOrNull, uniqueNumbers, extractVisitIdFromText, enrichAlert, mapNotification, mapTechnicalAlert, mapVisitAlert, mapGenericAlert };
