@@ -55,11 +55,28 @@
         op.watch = setInterval(observe, 250);
         op.timeout = setTimeout(() => { if (operation === op) cancel('O relatório demorou demasiado. Tente abrir novamente.', 'error'); }, 20000);
         state('loading', 'A preparar o relatório…');
+        const headers = { ...expected.headers };
+        let preferredLanguage = null;
+        if (expected.clientPreference !== undefined) {
+          const clientId = expected.clientPreference;
+          if (!Number.isSafeInteger(clientId) || clientId < 1 || clientId > 2147483647 || !url.pathname.startsWith('/api/report-visit/visit/') || url.searchParams.get('clientId') !== String(clientId) || url.searchParams.has('lang')) throw Error('Cliente do relatório não confirmado.');
+          const settingsResponse = await fetch('/api/report-settings/' + clientId, { headers: { Authorization: 'Bearer ' + principal.token }, cache: 'no-store', redirect: 'error', signal: op.controller.signal });
+          if (!observe() || operation !== op) return;
+          if (settingsResponse.status !== 200) throw Error('Não foi possível confirmar o idioma do cliente. Tente novamente.');
+          const settings = await settingsResponse.json();
+          if (!observe() || operation !== op) return;
+          if (settings?.ok !== true || settings.reportSettingsVersion !== 1 || settings.client?.id !== clientId || !['pt', 'en', 'fr', 'es'].includes(settings.preferredLanguage) || typeof settings.version !== 'string' || !/^report-settings-v1:[a-f0-9]{64}$/.test(settings.version)) throw Error('A resposta não confirma o idioma deste cliente.');
+          preferredLanguage = settings.preferredLanguage;
+          url.searchParams.set('lang', preferredLanguage);
+          url.searchParams.set('settingsVersion', settings.version);
+          headers['Content-Language'] = preferredLanguage;
+          headers['X-CW-Settings-Version'] = settings.version;
+        }
         const response = await fetch(url.pathname + url.search, { headers: { Authorization: 'Bearer ' + principal.token }, cache: 'no-store', redirect: 'error', signal: op.controller.signal });
         if (!observe() || operation !== op) return;
         if (response.status !== 200) throw Error(response.status === 409 ? 'O cliente ou as configurações mudaram. Carregue novamente antes de abrir o relatório.' : [401, 403].includes(response.status) ? 'A sessão não permite abrir este relatório. Confirme a conta.' : 'Não foi possível preparar o relatório. Tente novamente.');
         const type = (response.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
-        if (type !== expected.type || Object.entries(expected.headers).some(([key, value]) => response.headers.get(key) !== String(value))) throw Error('A resposta não confirma o relatório selecionado. Tente novamente.');
+        if (type !== expected.type || Object.entries(headers).some(([key, value]) => response.headers.get(key) !== String(value))) throw Error('A resposta não confirma o relatório selecionado. Tente novamente.');
         const blob = await response.blob();
         if (!observe() || operation !== op) return;
         if (!blob.size) throw Error('O relatório recebido está vazio. Tente novamente.');
@@ -72,7 +89,7 @@
         popup.location.href = op.objectUrl;
         op.loading = false; clearTimeout(op.timeout);
         op.expiry = setTimeout(() => { if (op.objectUrl) { URL.revokeObjectURL(op.objectUrl); op.objectUrl = null; } }, 60000);
-        state('opened', 'Relatório aberto numa nova janela.');
+        state('opened', 'Relatório aberto numa nova janela.' + (preferredLanguage ? ' Idioma do cliente: ' + ({ pt: 'Português', en: 'English', fr: 'Français', es: 'Español' })[preferredLanguage] + '.' : ''));
       } catch (error) {
         if (op && operation !== op) return;
         if (op && !observe()) return;
