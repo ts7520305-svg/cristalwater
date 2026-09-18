@@ -19,3 +19,13 @@ Ensaio `run-1789725829902` em base descartável PGlite e Chromium 149: novo perc
 ## Continuação
 
 Fotografias autorizadas no relatório, relatórios EXTRA e fontes Unicode/traduções continuam pendentes. Não se presume o tipo de uma visita apenas pelo número. Publicação apenas na branch de trabalho; sem merge na principal, deploy, envios reais ou emissão fiscal.
+
+## TASK258 — Correção encontrada no CI
+
+O primeiro CI da TASK257 (`35333002169`, job `105561362821`, commit `7ebf7e4155bc1c689380c58c200d9fc5dbb1f483`, árvore `c258f717b6f90a8532b9dbc22b636a3adcf3a8e2`) passou 148/149 grupos, incluindo o novo relatório em 6708 ms. Falhou a mudança de idioma na ficha técnica e não executou o restauro.
+
+A causa era funcional: `cw-language-change` era emitido antes de substituir a preferência pendente. Os componentes que consultavam `readLanguage()` durante o evento liam o idioma anterior quando o respetivo PUT ainda não tinha confirmação. A atualização central grava agora a nova preferência pendente antes de traduzir e emitir o evento. As aplicações silenciosas continuam sem gravar no servidor; os dois pontos de entrada partilham a mesma ordem. Cache v80.
+
+Reprodução determinística com PUT de idioma indisponível: `run-1789727110570` falhou no título inglês, que conservava português. Após a correção, `run-1789727147807` aprovou a ficha técnica em cinco idiomas/320–1440 px, recuperação de idioma e abertura pelos alertas. O teste de idioma confirma ainda, dentro do evento síncrono, que a leitura corresponde à escolha anunciada enquanto a resposta anterior está retida. Não foram adicionadas esperas para esconder a falha, nem retiradas asserções.
+
+395 testes unitários/63 ficheiros e quatro testes técnicos aprovados. A confirmação nativa de todos os 149 grupos e do restauro permanece pendente até ao próximo CI.

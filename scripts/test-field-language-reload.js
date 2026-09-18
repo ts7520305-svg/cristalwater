@@ -38,7 +38,13 @@ let browser;
   await page.evaluate(() => CristalI18n.applyLanguage('de'));
   for (let i = 0; !committed && i < 100; i++) await new Promise(resolve => setTimeout(resolve, 20));
   assert(committed); assert.equal(await language(token), 'de');
-  await page.evaluate(() => CristalI18n.applyLanguage('pt'));
+  const immediate = await page.evaluate(() => {
+    let observed;
+    window.addEventListener('cw-language-change', event => { observed = { announced: event.detail.language, read: CristalI18n.readLanguage() }; }, { once: true });
+    CristalI18n.applyLanguage('pt');
+    return observed;
+  });
+  assert.deepEqual(immediate, { announced: 'pt', read: 'pt' }, 'Listeners must read the newest choice even while an older write is pending');
   await page.reload({ waitUntil: 'networkidle' }); release();
   const shown = await page.locator('html').getAttribute('lang');
   console.log(JSON.stringify({ lastChoice: 'pt', languageAfterReload: shown }));

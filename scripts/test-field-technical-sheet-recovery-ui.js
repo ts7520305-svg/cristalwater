@@ -55,6 +55,9 @@ let browser;
   await legacy(conflict.id, { pumpType: 'Current pump', technicalRoomNotes: 'Current room' }); await submit(page); const refused = (await stored(page, conflict.id)).pending;
   await page.locator('#sheetEditReview').click(); await idle(page); assert.equal(await page.locator('[data-sheet-edit-field="pumpType"]').inputValue(), ''); assert.equal(await page.locator('[data-sheet-edit-field="historyNote"]').inputValue(), 'draft');
   await page.locator('#sheetEditApplyReview').click(); assert.match(await page.locator('#status').textContent(), /Escolha/);
+  const languageEndpoint = `${base}/api/settings/language/me`;
+  // Keep the previous choice pending so rapid switches cannot depend on server timing.
+  await page.route(languageEndpoint, route => route.request().method() === 'PUT' ? route.fulfill({ status: 503, json: { error: 'QA preference unavailable' } }) : route.continue());
   for (const [lang, title] of Object.entries({ pt: 'Editar ficha técnica', en: 'Edit technical sheet', fr: 'Modifier la fiche technique', es: 'Editar ficha técnica', de: 'Technisches Datenblatt bearbeiten' })) {
     await page.locator('#cwLanguageSelect').selectOption(lang); assert.equal(await page.locator('#sheetEditTitle').textContent(), title); assert.equal(await page.locator('#zone').inputValue(), 'Urgente');
     for (const width of [320, 390, 1440]) {
@@ -71,6 +74,7 @@ let browser;
   assert.equal(await page.locator('#technicalRoomNotes').inputValue(), 'Current room'); await submit(page); assert.equal((await row(conflict.id)).equipment.pumpType, 'Current pump'); assert.equal(await count(conflict.id, 'TECHNICAL_SHEET_NOTE'), 1); assert.notEqual((await stored(page, conflict.id)).confirmed.record.requestId, refused.requestId);
   console.log('PASS field conflict choices, a separate new-note command, explicit save after review and readable review in five languages at 320/390/1440 px');
 
+  await page.unroute(languageEndpoint);
   const parallel = pools[3]; await open(page, parallel.id); await open(other, parallel.id); await page.locator('#pumpType').fill('First tab pump'); await page.locator('#historyNote').fill('First tab note'); await other.locator('#pumpType').fill('Second tab pump'); await other.locator('#historyNote').fill('Second tab note');
   let release, entered; const gate = new Promise(resolve => { release = resolve; }), started = new Promise(resolve => { entered = resolve; });
   await intercept(page, parallel.id, async route => { await route.fetch(); entered(); await gate; await route.fulfill({ status: 502, json: { error: 'QA held response' } }); });

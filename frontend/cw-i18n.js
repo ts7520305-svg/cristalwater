@@ -768,6 +768,8 @@
     document.documentElement.lang = normalized;
     document.body?.setAttribute("data-cw-language", normalized);
     saveUserLanguage(normalized);
+    // Publish the latest pending choice before listeners read the language.
+    if (!options.silent) syncRemoteLanguage(normalized);
     syncSelector(normalized);
     if (document.body) {
       translateTextNodes(normalized);
@@ -847,7 +849,6 @@
     wrapper.querySelector("select").addEventListener("change", (event) => {
       const language = normalizeLanguage(event.target.value);
       applyLanguage(language);
-      syncRemoteLanguage(language);
     });
   }
 
@@ -924,7 +925,6 @@
     readLanguage,
     applyLanguage(language) {
       applyLanguage(language);
-      syncRemoteLanguage(language);
     },
   };
 

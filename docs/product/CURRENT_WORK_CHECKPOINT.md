@@ -2,6 +2,8 @@
 
 ## Ponto de retoma atual — 18/09/2026
 
+- TASK258 corrige a ordem de atualização do idioma pendente antes de emitir `cw-language-change`. Primeiro CI da TASK257 `35333002169` passou 148/149 grupos (novo relatório aprovado) e não executou restauro: a ficha técnica lia a preferência anterior ainda pendente. Reprodução determinística falhou em `run-1789727110570`; ficha técnica/idioma/alertas aprovados após correção em `run-1789727147807`, 395 unitários/quatro técnicos. Cache v80. Ver `ALERT_REPORT_OPENING_20260918.md`. Publicar e confirmar todos os 149 grupos/restauro antes da aprovação final.
+
 - TASK257 implementada e verificada localmente: abertura autenticada de PDF administrativo pelos alertas, identidade de visita/cliente confirmada, ligações tipadas e cancelamento por filtro/atualização/sessão. `ALERT_REPORT_OPENING_20260918.md`. Novo grupo, faturação dos alertas e abertura anterior passaram em `run-1789725829902`; 395 unitários/quatro técnicos e sintaxe 552/182/56 aprovados. Runner 149 grupos, cache v79, sem migração. Publicar e confirmar CI/restauro desta árvore. Próximo percurso: fotografias autorizadas, EXTRA e fontes Unicode/traduções.
 
 - Cópia local recuperada do checkpoint publicado `6ca69f4c302459a160e20ff715331850c21bfdfc` em `/workspace/scratch/ce9e21520d3d/cristalwater`; a antiga pasta de trabalho já não estava disponível. O histórico e o lote sazonal permanecem no GitHub.
