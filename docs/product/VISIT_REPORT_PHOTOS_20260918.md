@@ -25,8 +25,16 @@ Navegador Chromium 149: seis imagens efetivamente descodificadas, zero pedidos s
 
 Ensaios locais: primeiro percurso aprovado em `run-1789729457088`; regressões do relatório individual, abertura das configurações/centro mensal e abertura pelos alertas aprovadas em `run-1789729652071`. Cobertura com GIF animado e limite de píxeis aprovada em `run-1789729741398`, limpeza do symlink confirmada em `run-1789729888038`; duas execuções intermédias identificaram apenas problemas na preparação do ensaio (fotogramas iguais otimizados para um e symlink residual), corrigidos sem retirar asserções. Último ensaio da árvore a publicar, incluindo extensão em maiúsculas e limpeza: `run-1789729966664`, aprovado. Evidência visual: `reports/field-visual/visit-photos-1789729748223`.
 
-395 testes unitários/63 ficheiros, quatro técnicos e sintaxe 553 backend/182 frontend/56 inline aprovados. Runner passa a 150 grupos. Sem migração ou alteração de cache de frontend. Dependência `sharp` 0.35.4 e respetivo lockfile, incluindo semver exigido pela dependência, confirmados com `npm ci`; requer Node >=20.9, e o CI usa Node 24. A aprovação final exige a mesma árvore publicada no CI nativo e restauro PostgreSQL 16.
+395 testes unitários/63 ficheiros, quatro técnicos e sintaxe 553 backend/182 frontend/56 inline aprovados. Runner passa a 150 grupos. Sem migração ou alteração de cache de frontend. Dependência `sharp` 0.35.4 e respetivo lockfile, incluindo semver exigido pela dependência, confirmados com `npm ci`; requer Node >=20.9, e o CI usa Node 24. A mesma árvore foi aprovada no CI nativo e no restauro PostgreSQL 16, conforme registo abaixo.
 
 Publicação apenas na branch de trabalho, com autorização existente; sem merge, deploy, envios reais ou emissão fiscal.
 
 Referências da dependência: [construtor e limites de descodificação](https://sharp.pixelplumbing.com/api-constructor/), [normalização e metadados de saída](https://sharp.pixelplumbing.com/api-output/).
+
+## Aprovação nativa final — 18/09/2026
+
+Commit de código `f6e96fce36820a406e6857fa590e672a4ccdc756`, árvore `febdf8ece417c15c7fa8557c99b2f2edda2d78cc`, [CI 35338685807](https://github.com/ts7520305-svg/cristalwater/actions/runs/35338685807), job `105579387696`, concluído às 11:30:59 UTC. Os 150 grupos distintos terminaram com código zero e sem sinal. Aprovados 395 testes unitários/63 ficheiros, quatro técnicos, gate de 21 scripts de navegador, 21 migrações aditivas e sintaxe 553/182/56.
+
+Restauro PostgreSQL 16: 110 tabelas e 44 ficheiros, com igualdade das linhas e hashes. Novo percurso de fotografias: 2005 ms; relatório individual: 1022 ms; abertura nas configurações/centro mensal: 8936 ms; abertura pelos alertas: 9152 ms. O CI valida a dependência nativa, os formatos exercitados e a remoção do symlink sintético antes do restauro.
+
+Backup local do código: `backup/visit-photos-local-20260918`. Esta atualização posterior altera apenas documentação e conserva o código/testes da árvore validada. Os limites acima mantêm-se; próxima tarefa: relatórios EXTRA, seguida das fontes Unicode/traduções e revisão das referências fotográficas históricas sem identidade canónica.
