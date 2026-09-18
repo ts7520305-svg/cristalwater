@@ -52,7 +52,7 @@ async function generate(mode, body = {}) {
       if (!Number.isSafeInteger(monthlyCents) || monthlyCents < 0) fail('Preço mensal inválido. Reveja a configuração do cliente.');
       const start = new Date(`${monthRef}-01T00:00:00Z`), end = new Date(start); end.setUTCMonth(end.getUTCMonth() + 1);
       const dates = { OR: [{ plannedDate: { gte: start, lt: end } }, { date: { gte: start, lt: end } }, { endAt: { gte: start, lt: end } }] };
-      const [candidateRepairs, visits, candidateExtras] = await Promise.all([
+      const [candidateRepairs, candidateVisits, candidateExtras] = await Promise.all([
         tx.repair.findMany({ where: { pool: { clientId }, paid: false,
           status: { in: mode === 'OPERATIONAL' ? ['DONE', 'QUOTED', 'APPROVED', 'QUOTE_REQUESTED'] : ['QUOTED', 'APPROVED', 'DONE'] },
           NOT: { status: { in: ['QUOTED', 'QUOTE_REQUESTED'] }, quotes: { some: {} } } }, include: { pool: true }, orderBy: { id: 'asc' } }),
@@ -69,6 +69,7 @@ async function generate(mode, body = {}) {
           { OR: [{ totalPrice: { gt: 0 } }, { price: { gt: 0 } }, { unitPrice: { gt: 0 } }] },
         ] }, include: { pool: true }, orderBy: { id: 'asc' } }),
       ]);
+      const visits=candidateVisits.filter(visit=>!require('../../services/clientServicePlan').included(visit));
       // The client/receipt lock serializes different months as well. A repair
       // remains reserved by any historical document, even a draft or withdrawal;
       // releasing it requires an explicit correction, never monthly generation.
@@ -110,6 +111,7 @@ async function generate(mode, body = {}) {
         lines: { create: lines },
       } });
       const credit = await applyClientCreditToInvoice(tx, invoice.id, { reference: `Fatura ${monthRef}`, notes: 'Abatimento automático na geração de fatura.' });
+      if(pricing.planId)await tx.userAuditLog.create({data:{action:'INVOICE_RATE_PLAN_APPLIED',actor:'SYSTEM:MONTHLY_GENERATION',entity:'Invoice',entityId:String(invoice.id),metadata:{clientId,monthRef,planId:pricing.planId,planVersion:pricing.planVersion,amount:pricing.amount,segments:pricing.segments}}});
       if (visits.length) {
         const claimed = await tx.serviceVisit.updateMany({ where: { id: { in: visits.map(v => v.id) }, billed: false }, data: { billed: true, billedAt: new Date() } });
         if (claimed.count !== visits.length) fail('Os serviços mudaram durante a geração. Consulte os dados antes de repetir.', 409);

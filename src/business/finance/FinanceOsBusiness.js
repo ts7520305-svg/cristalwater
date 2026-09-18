@@ -108,6 +108,7 @@ async function createDraftInvoice(payload = {}, actor = "finance-os", transactio
     if (ref != null && (!['string', 'number'].includes(typeof ref) || !/^\d+$/.test(String(ref)) || !Number.isSafeInteger(Number(ref)) || Number(ref) <= 0 || Number(ref) > 2147483647)) return { ok: false, status: 400, error: 'Referência de origem inválida' };
   }
   const repairIds = lineItems.filter(line => [line.type, line.lineType].some(type => String(type || '').trim().toUpperCase() === 'REPAIR') && line.referenceId != null).map(line => Number(line.referenceId));
+  const serviceIds = lineItems.filter(line => String(line.type || line.lineType || 'SERVICE').trim().toUpperCase() === 'SERVICE' && line.referenceId != null).map(line => Number(line.referenceId));
   if (new Set(repairIds).size !== repairIds.length) return { ok: false, status: 409, error: 'A reparação está repetida nas linhas da fatura' };
   const run = async tx => {
     await tx.$queryRaw`SELECT id FROM "Client" WHERE id = ${clientId} FOR NO KEY UPDATE`;
@@ -117,6 +118,7 @@ async function createDraftInvoice(payload = {}, actor = "finance-os", transactio
     if (monthRef !== null && await tx.invoice.findFirst({ where: { clientId, monthRef } })) return { ok: false, status: 409, error: "Já existe fatura para este mês" };
     if ((await reservedRepairIds(tx, repairIds)).size) return { ok: false, status: 409, error: 'Reparação já associada a uma fatura. Consulte o documento existente.' };
     if (repairIds.length && await tx.repair.count({ where: { id: { in: repairIds }, pool: { clientId } } }) !== repairIds.length) return { ok: false, status: 409, error: 'A referência não pertence a uma reparação deste cliente' };
+    if(serviceIds.length){const sources=await tx.serviceVisit.findMany({where:{id:{in:serviceIds}},select:{contractService:true}});if(sources.some(require('../../services/clientServicePlan').included))return {ok:false,status:409,error:'Esta visita está incluída no contrato mensal e não pode ser cobrada novamente como serviço avulso.'};}
   const dueDate = repository.toDate(payload.dueDate) || new Date(Date.now() + 15 * 86400000);
 
   const invoice = await tx.invoice.create({ data: {

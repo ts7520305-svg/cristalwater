@@ -1,7 +1,7 @@
 'use strict';
 const fail = message => { throw Object.assign(new Error(message), {status:400}); };
 function integer(value, min, max, label) {
-  if (typeof value === 'boolean' || value === '' || value === null || !Number.isInteger(Number(value)) || Number(value)<min || Number(value)>max) fail(label);
+  if (!['number','string'].includes(typeof value) || String(value).trim()==='' || !Number.isInteger(Number(value)) || Number(value)<min || Number(value)>max) fail(label);
   return Number(value);
 }
 function civil(value) {
@@ -32,14 +32,25 @@ function validate(input, money) {
       if(pools.has(poolId))fail('A mesma instalação não pode ter dois calendários na mesma época.');pools.add(poolId);
       const frequency=rule.frequency;
       if(!['WEEKLY','MONTHLY'].includes(frequency))fail('Escolha frequência semanal ou mensal.');
-      const count=frequency==='MONTHLY'?1:integer(rule.count,1,7,'Indique uma a sete visitas por semana.');
-      if(!Array.isArray(rule.days))fail('Indique os dias das visitas.');
-      const days=rule.days.map(day=>integer(day,frequency==='WEEKLY'?0:1,frequency==='WEEKLY'?6:31,'Dia de visita inválido.')).sort((a,b)=>a-b);
-      if(new Set(days).size!==days.length||(days.length&&days.length!==count))fail('O número de dias deve corresponder à frequência indicada.');
-      const at=rule.at;
-      if(typeof at!=='string'||!/^([01]\d|2[0-3]):[0-5]\d$/.test(at))fail('Indique uma hora válida para as visitas.');
+      const count=integer(rule.count,1,168,'Indique o número de visitas contratado.');
+      if(!Array.isArray(rule.slots)||rule.slots.length>count)fail('Os horários não podem exceder o número de visitas contratado.');
+      if(rule.days!==undefined||rule.at!==undefined)fail('Defina cada dia e horário nos períodos de visita.');
+      const slots=rule.slots.map(slot=>{
+        if(!slot||typeof slot!=='object'||Array.isArray(slot))fail('Horário de visita inválido.');
+        const day=integer(slot.day,frequency==='WEEKLY'?0:1,frequency==='WEEKLY'?6:31,'Dia de visita inválido.');
+        if(typeof slot.at!=='string'||!/^([01]\d|2[0-3]):[0-5]\d$/.test(slot.at))fail('Indique uma hora válida para cada visita.');
+        return {day,at:slot.at};
+      }).sort((a,b)=>a.day-b.day||a.at.localeCompare(b.at));
+      // Monthly dates 29–31 move to the last day of shorter months. Refuse
+      // schedules that would collapse two contracted visits onto the same slot.
+      for(const last of frequency==='MONTHLY'?[28,29,30,31]:[31]){
+        const keys=slots.map(slot=>Math.min(slot.day,last)+':'+slot.at);
+        if(new Set(keys).size!==keys.length)fail('Duas visitas não podem ter o mesmo dia e horário, incluindo meses mais curtos.');
+      }
       const technicianId=rule.technicianId==null||rule.technicianId===''?null:integer(rule.technicianId,1,2147483647,'Técnico inválido.');
-      return {poolId,frequency,count,days,at,technicianId};
+      const roundId=rule.roundId==null||rule.roundId===''?null:integer(rule.roundId,1,2147483647,'Ronda inválida.');
+      if(technicianId&&roundId)fail('Escolha um técnico ou a atribuição da ronda.');
+      return {poolId,frequency,count,slots,technicianId,roundId};
     }).sort((a,b)=>a.poolId-b.poolId);
     return season;
   });
@@ -53,18 +64,27 @@ function onDay(plan,day) {
 }
 function due(rule,day) {
   const date=new Date(day+'T12:00:00Z');
-  if(rule.frequency==='WEEKLY')return rule.days.includes(date.getUTCDay());
+  if(rule.frequency==='WEEKLY')return rule.slots.filter(slot=>slot.day===date.getUTCDay());
   const last=new Date(Date.UTC(date.getUTCFullYear(),date.getUTCMonth()+1,0)).getUTCDate();
-  return rule.days.some(value=>Math.min(value,last)===date.getUTCDate());
+  return rule.slots.filter(slot=>Math.min(slot.day,last)===date.getUTCDate());
 }
 function daysOfMonth(ref) {
   civil(ref+'-01');const result=[],date=new Date(ref+'-01T12:00:00Z');
   while(date.toISOString().slice(0,7)===ref){result.push(date.toISOString().slice(0,10));date.setUTCDate(date.getUTCDate()+1);}return result;
 }
 function localDate(day,at='12:00') {
-  civil(day);const [year,month,date]=day.split('-').map(Number),[hour,minute]=at.split(':').map(Number);
-  return new Date(year,month-1,date,hour,minute,0,0);
+  civil(day);
+  if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(at))fail('Hora inválida.');
+  const wall=Date.parse(day+'T'+at+':00Z');let instant=wall;
+  for(let i=0;i<3;i++){
+    const parts=Object.fromEntries(clock.formatToParts(new Date(instant)).map(p=>[p.type,p.value]));
+    const rendered=Date.parse(`${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}:00Z`);
+    const delta=wall-rendered;if(!delta)return new Date(instant);instant+=delta;
+  }
+  return null; // A nonexistent hour at the spring clock change needs review.
 }
-const localDay=date=>`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
-function serviceData(plan,season,day) {return {schema:1,planId:plan.id,planVersion:plan.version,period:season.key,label:season.label,services:season.services,day,billing:'INCLUDED_MONTHLY'};}
-module.exports={validate,onDay,due,daysOfMonth,localDate,localDay,serviceData,civil};
+const clock=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Lisbon',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+function localDay(date){const p=Object.fromEntries(clock.formatToParts(date).map(p=>[p.type,p.value]));return `${p.year}-${p.month}-${p.day}`;}
+function serviceData(plan,season,day,origin) {return {schema:1,planId:plan.id,planVersion:plan.version,period:season.key,label:season.label,services:season.services,day,billing:'INCLUDED_MONTHLY',origin};}
+function included(visit){return visit?.contractService?.billing==='INCLUDED_MONTHLY';}
+module.exports={validate,onDay,due,daysOfMonth,localDate,localDay,serviceData,civil,included};

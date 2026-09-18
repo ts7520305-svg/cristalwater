@@ -25,10 +25,11 @@
   const d=await api(`/api/settings/client-rates/${id}`);
   if(Number(select.value)!==id)return;
   currentId=id;version=d.plan?.version||0;
+  el('rateForm').hidden=!!d.plan?.snapshot?.servicePlan;
   el('rateClient').textContent=`${d.clientName} · ${version?'Versão '+version:'Sem plano por período'}`;
   el('rateBase').value=d.plan?d.plan.snapshot.baseCents/100:d.legacyBaseAmount;
   el('ratePeriods').replaceChildren();(d.plan?.snapshot.periods||[]).forEach(addPeriod);
-  el('ratePreview').textContent='';ready=true;dirty=false;status('Plano carregado.');
+  el('ratePreview').textContent='';ready=!d.plan?.snapshot?.servicePlan;dirty=false;status(ready?'Plano carregado.':'Preços definidos no acordo sazonal. Use Serviços e visitas por época para rever preço e calendário em conjunto.');
  }
  select.addEventListener('change',()=>{
   if(dirty && !window.confirm('Descartar as alterações por guardar?')){select.value=currentId||'';return;}
@@ -45,6 +46,7 @@
  });};
  el('rateSave').onclick=()=>{let p;try{p=payload();}catch(e){return status(e.message);}if(!window.confirm('Guardar os preços acordados para este cliente? As faturas existentes mantêm-se.'))return;run(async()=>{await api(`/api/settings/client-rates/${currentId}`,{method:'PUT',body:JSON.stringify(p)});await load();status('Nova versão guardada. Faturas existentes preservadas.');});};
  el('rateMonth').value=new Date().toISOString().slice(0,7);
+ window.addEventListener('cw:client-services-saved',()=>{ready=false;dirty=false;run(load);});
  window.addEventListener('storage',()=>{try{session();}catch{}});
  window.addEventListener('beforeunload',event=>{if(dirty){event.preventDefault();event.returnValue='';}});
  run(async()=>{const d=await api('/api/core/clients');for(const c of d.clients||[]){const option=document.createElement('option');option.value=c.id;option.textContent=c.name;select.append(option);}const id=new URLSearchParams(location.search).get('clientId');if(id)select.value=id;status('Escolha o cliente pelo nome.');});

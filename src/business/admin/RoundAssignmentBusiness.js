@@ -52,6 +52,12 @@ async function generateVisit(round,roundPool,plannedDate){
   const pool=roundPool.pool,from=new Date(plannedDate);from.setHours(0,0,0,0);
   const to=new Date(from);to.setDate(to.getDate()+1);
   return prisma.$transaction(async tx=>{
+    const currentPool=await tx.pool.findUnique({where:{id:pool.id},select:{clientId:true}});
+    if(!currentPool)return null;
+    await tx.$queryRaw`SELECT id FROM "Client" WHERE id = ${currentPool.clientId} FOR NO KEY UPDATE`;
+    // Seasonal contracts own the total calendar, including periods with no
+    // visits. Never add the old pool/round frequency on top of that agreement.
+    if((await require('../finance/ClientRateBusiness').latest(currentPool.clientId,tx))?.snapshot?.servicePlan)return null;
     if(round?.id)await tx.$queryRaw`SELECT id FROM "Round" WHERE id = ${round.id} FOR UPDATE`;
     await tx.$queryRaw`SELECT pg_advisory_xact_lock(${Number(pool.id)}::bigint)::text`;
     let activeRound=round;

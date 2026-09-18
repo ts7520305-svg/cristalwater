@@ -48,6 +48,7 @@ async function processClient(clientId, monthRef, batch) {
             status: monthly > 0 ? 'PENDING' : 'PAID', requiresInvoice: Boolean(client.requiresInvoice),
             lines: { create: [{ type: 'MONTHLY', description: `Mensalidade ${monthRef}`, quantity: 1, unitPrice: monthly, total: monthly }] },
           } });
+          if(pricing.planId)await tx.userAuditLog.create({data:{action:'INVOICE_RATE_PLAN_APPLIED',actor:'SYSTEM:INVOICE_PAGE',entity:'Invoice',entityId:String(invoice.id),metadata:{clientId,monthRef,planId:pricing.planId,planVersion:pricing.planVersion,amount:pricing.amount,segments:pricing.segments}}});
         }
         const credit = await applyClientCreditToInvoice(tx, invoice.id, {
           reference: `Fatura ${monthRef}`,

@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `9ede492f82ed1f5096ff4fffd34cd4e4e24d6068`. Gerado em 2026-09-18T06:30:16.512Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `b27462fcdca6862197bf79974f9c6ede9343f951`. Gerado em 2026-09-18T08:30:28.886Z. Inclui o estado dos ficheiros locais no momento da geração.
 
 101 ficheiros HTML: 94 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 167 scripts de integração/navegador ativos. 59 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 169 scripts de integração/navegador ativos. 60 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 As colunas de papéis distinguem o catálogo anterior dos indícios explícitos no HTML/scripts. Não são uma auditoria de autorização: as APIs, a atribuição atual e o comportamento real de cada perfil continuam a determinar o acesso.
 
@@ -38,7 +38,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 |---|---|---|---|---|
 | /admin-ai | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-alerts | Entrada raiz | ADMIN | ADMIN | 9 |
-| /admin-client-settings | Entrada raiz | ADMIN | ADMIN | 0 |
+| /admin-client-settings | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-clients | Entrada raiz | ADMIN | ADMIN | 2 |
 | /admin-collection | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-command-center | Entrada raiz | ADMIN | ADMIN | 0 |

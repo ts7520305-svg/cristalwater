@@ -1,6 +1,8 @@
 # Rascunho TASK254–256 — sazonalidade por cliente
 
-Estado: INCOMPLETO E NÃO TESTADO. A implementação foi interrompida em 18/09/2026 quando o ambiente devolveu 409 environment_offline / Environment is not connected. Não executar este rascunho em produção nem o confundir com a branch de trabalho aprovada.
+Registo histórico do rascunho: retomado pela implementação descrita em `SEASONAL_CLIENT_SERVICE_20260918.md`.
+
+Estado na interrupção: INCOMPLETO E NÃO TESTADO. A implementação foi interrompida em 18/09/2026 quando o ambiente devolveu 409 environment_offline / Environment is not connected. Não executar este rascunho em produção nem o confundir com a branch de trabalho aprovada.
 
 Base: 62fb82255301393a96df2c95f1749f12af852ecd, árvore ad3b02cb8f3dabd20532545824437b4052a8482f. A branch work/field-readiness-20260915-simulation permanece nessa base. A última aprovação de código continua a ser cd04d24b942c42fdc5952bffe7a0521d33f635d0, CI 35316029494 (146 grupos, 388 unitários, 20 migrações e restauro 110 tabelas/32 ficheiros).
 

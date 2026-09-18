@@ -16,7 +16,7 @@ function cents(value) {
 }
 function validate(payload = {}) {
   if (payload.servicePlan != null) {
-    if (Number(payload.baseMonthlyAmount)!==0 || !Array.isArray(payload.periods) || payload.periods.length) fail('O plano sazonal define o preço total; não o combine com preços antigos.');
+    if (cents(payload.baseMonthlyAmount)!==0 || !Array.isArray(payload.periods) || payload.periods.length) fail('O plano sazonal define o preço total; não o combine com preços antigos.');
     return {currency:'EUR',baseCents:0,periods:[],method:'CALENDAR_DAY_PRORATA',servicePlan:services.validate(payload.servicePlan,cents)};
   }
   const baseCents = cents(payload.baseMonthlyAmount);
@@ -61,12 +61,14 @@ async function read(id) {
   return {ok:true,clientId:client.id,clientName:client.name,plan,legacyBaseAmount:Math.round((Number(client.monthlyFee || client.monthlyAmount || 0)+(client.pools||[]).reduce((n,p)=>n+Number(p.monthlyAmount||0),0))*100)/100};
 }
 async function save(id, payload, actor) {
+  if(payload?.servicePlan!=null)fail('Use a simulação conjunta de serviços e calendário para guardar o acordo sazonal.',409);
   const snapshot = validate(payload), target = clientId(id);
   if (!Number.isSafeInteger(payload.expectedVersion) || payload.expectedVersion < 0) fail('Versão inválida');
   return prisma.$transaction(async tx => {
     await tx.$queryRaw`SELECT id FROM "Client" WHERE id = ${target} FOR UPDATE`;
     if (!await tx.client.findUnique({where:{id:target}})) fail('Cliente não encontrado',404);
     const previous = await latest(target,tx);
+    if(previous?.snapshot?.servicePlan)fail('Este cliente tem serviços sazonais. Reveja o acordo no editor de serviços e visitas.',409);
     if ((previous?.version || 0) !== payload.expectedVersion) fail('Plano alterado por outra sessão. Recarregue antes de gravar.',409);
     const plan = await tx.clientRatePlan.create({data:{clientId:target,version:payload.expectedVersion+1,snapshot,createdBy:actor}});
     await tx.userAuditLog.create({data:{action:'CLIENT_RATE_PLAN_SAVED',actor,entity:'ClientRatePlan',entityId:String(plan.id),metadata:{clientId:target,version:plan.version}}});
@@ -79,6 +81,6 @@ async function billing(client, ref, fallback, db=prisma) {
   if (!plan) return {amount:fallback,planVersion:null};
   const existing = await db.invoice.findUnique({where:{clientId_monthRef:{clientId:client.id,monthRef:ref}},select:{id:true}});
   if (existing) fail('Já existe fatura neste mês. O plano de preços não altera documentos existentes.',409);
-  return {...calculate(plan.snapshot,ref),planVersion:plan.version};
+  return {...calculate(plan.snapshot,ref),planVersion:plan.version,planId:plan.id};
 }
 module.exports = {validate,calculate,read,save,billing,latest};

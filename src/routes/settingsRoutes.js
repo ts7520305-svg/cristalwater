@@ -24,6 +24,12 @@ const clientRates = require('../controllers/clientRateController');
 router.get('/client-rates/:clientId', auth('ADMIN'), clientRates.read);
 router.put('/client-rates/:clientId', auth('ADMIN'), clientRates.save);
 router.post('/client-rates-preview', auth('ADMIN'), clientRates.preview);
+const clientServices = require('../controllers/clientServiceController');
+router.get('/client-services/:clientId', auth('ADMIN'), clientServices.read);
+router.post('/client-services/:clientId/preview', auth('ADMIN'), clientServices.preview);
+router.put('/client-services/:clientId', auth('ADMIN'), clientServices.save);
+router.post('/client-services/:clientId/calendar-preview', auth('ADMIN'), clientServices.calendarPreview);
+router.post('/client-services/:clientId/calendar', auth('ADMIN'), clientServices.generate);
 
 function notificationSettingsOwner(req, res, next) {
   const id = Number(req.params.userId ?? req.body?.userId);

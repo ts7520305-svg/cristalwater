@@ -829,7 +829,8 @@ async function generateWeek(force = false){
     const blockedText = blocked
       ? `, ${blocked} bloqueada(s) por ficha tecnica ou regras em falta`
       : "";
-    setStatus(`Semana gerada: ${data.total || 0} visita(s) criada(s), ${data.skipped || 0} ja existente(s)${blockedText}.`);
+    const seasonalText=data.seasonal&&(data.seasonal.pending||data.seasonal.review)?` Serviços sazonais: ${data.seasonal.pending||0} por planear e ${data.seasonal.review||0} a rever nas configurações do cliente.`:'';
+    setStatus(`Semana gerada: ${data.total || 0} visita(s) criada(s), ${data.skipped || 0} ja existente(s)${blockedText}.${seasonalText}`);
   }catch(err){ setStatus(err.message, "error"); }
 }
 

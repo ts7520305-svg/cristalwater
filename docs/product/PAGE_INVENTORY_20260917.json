@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-09-18T06:30:16.512Z",
-  "baseCommit": "9ede492f82ed1f5096ff4fffd34cd4e4e24d6068",
+  "generatedAt": "2026-09-18T08:30:28.886Z",
+  "baseCommit": "b27462fcdca6862197bf79974f9c6ede9343f951",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 167,
+  "activeScriptsScanned": 169,
   "summary": {
     "htmlFiles": 101,
     "rootPages": 94,
     "nestedPages": 7,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 59,
+    "pagesWithLiteralTestReference": 60,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -132,6 +132,7 @@
         "/admin-auth-guard.js",
         "/ui/design-system.css",
         "/admin-client-rates.js",
+        "/admin-client-services.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
         "/ui/core/navigation-context.js",
@@ -141,7 +142,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "testReferences": [
+        "test-field-client-services-ui.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {

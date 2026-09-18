@@ -2,6 +2,8 @@
 
 ## Pedido e estado
 
+Atualização de 18/09: o proprietário esclareceu «Três visitas ou mais, cada caso é um caso». O número deve ser configurável por cliente/época/instalação, sem teto comercial de três e sem impor a frequência do exemplo. A implementação e a evidência posteriores estão em `SEASONAL_CLIENT_SERVICE_20260918.md`; o diagnóstico inicial abaixo conserva o estado anterior à implementação.
+
 Requisito reforçado pelo utilizador em 18/09/2026: o mesmo cliente pode contratar serviços, frequências de visita e valores diferentes ao longo do ano. O exemplo dado é um condomínio com uma visita e um valor entre setembro e maio, passando a três visitas por semana e outro valor entre junho e agosto, com as visitas a refletirem-se no agendamento.
 
 Este documento regista o requisito e a verificação do código; não declara a funcionalidade integrada implementada. É a próxima prioridade, antes de continuar a abertura de relatórios pelos alertas. Nenhum cliente, preço, contrato, ronda ou visita real foi alterado. O exemplo «condomínio X» não identifica um cliente real e não contém valores monetários nem dias da semana aprovados.

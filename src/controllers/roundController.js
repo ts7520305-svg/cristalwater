@@ -195,8 +195,8 @@ async function generateWeek(req, res) {
     const result = roundCount > 0
       ? await generateFromRoundTemplates({ weekStart, force })
       : await generateFallbackFromPools({ weekStart });
-
-    return res.json({ ok: true, ...result });
+    const seasonal=await require('../services/clientServiceScheduleService').generateWeek(weekStart);
+    return res.json({ ok: true, ...result, total:result.total+seasonal.created, seasonal });
   } catch (err) {
     console.error("generateWeek error:", err);
     return res.status(500).json({ ok: false, error: "Erro ao gerar ronda semanal" });

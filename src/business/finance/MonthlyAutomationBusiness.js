@@ -32,7 +32,7 @@ async function monthly({ now = new Date(), preview = false, clientIds } = {}) {
       if (pricing.amount <= 0) continue;
       row.amount = pricing.amount;
         const result = await require('./FinanceOsBusiness').createDraftInvoice({ clientId: row.clientId, monthRef, requireActiveContract: true, dueDate: new Date(now.getTime() + 15 * DAY).toISOString(), notes: 'Mensalidade preparada automaticamente; rever antes de emitir. Não inclui serviços extra.', lines: [{ type: 'MONTHLY', description: `Mensalidade ${monthRef}`, quantity: 1, unitPrice: row.amount, total: row.amount }] }, 'monthly-scheduler', tx);
-        if (result.ok) { created++; await tx.userAuditLog.create({ data: { actor: 'monthly-scheduler', action: 'AUTO_MONTHLY_DRAFT', entity: 'Invoice', entityId: String(result.invoice.id), metadata: { monthRef, clientId: row.clientId, amount: row.amount } } }); }
+        if (result.ok) { created++; await tx.userAuditLog.create({ data: { actor: 'monthly-scheduler', action: 'AUTO_MONTHLY_DRAFT', entity: 'Invoice', entityId: String(result.invoice.id), metadata: { monthRef, clientId: row.clientId, amount: row.amount, ...(pricing.planId?{planId:pricing.planId,planVersion:pricing.planVersion,segments:pricing.segments}:{}) } } }); }
         else if (result.status !== 409) errors.push({ clientId: row.clientId, error: result.error });
     }
     return { ok: errors.length === 0, monthRef, created, errors };
