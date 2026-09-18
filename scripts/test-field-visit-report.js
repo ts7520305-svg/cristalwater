@@ -75,7 +75,7 @@ function pdfText(bytes) {
   assert.equal((await call(query)).status, 409, 'Changed settings must require a fresh preview');
   result = await call('?view=client');
   for (const marker of ['QA_CLIENT_', 'QA_POOL_', 'ZONE_MARKER', 'PRIVATE_ADDRESS', 'TECH_PRIVATE', 'COMPLETED', 'PUBLIC_NOTE', 'INTERNAL_SECRET', 'CHEMICAL_MARKER', 'PUMP_MARKER', 'ROOM_MARKER', 'PHOTO_REFERENCE']) assert(!result.text.includes(marker), marker);
-  const markers = { showPlannedDate: '03/02/2097', showStartEnd: '04/02/2097', showWaterParameters: '7.2', showChecklist: 'Limpeza geral', showClientName: 'QA_CLIENT_', showPoolName: 'QA_POOL_', showZone: 'ZONE_MARKER', showAddress: 'PRIVATE_ADDRESS', showTechnicianName: 'TECH_PRIVATE', showStatus: 'COMPLETED', showNotes: 'PUBLIC_NOTE', showChemicals: 'CHEMICAL_MARKER', showEquipment: 'PUMP_MARKER', showTechnicalRoom: 'ROOM_MARKER', showPhotos: 'PHOTO_REFERENCE' };
+  const markers = { showPlannedDate: '03/02/2097', showStartEnd: '04/02/2097', showWaterParameters: '7.2', showChecklist: 'Limpeza geral', showClientName: 'QA_CLIENT_', showPoolName: 'QA_POOL_', showZone: 'ZONE_MARKER', showAddress: 'PRIVATE_ADDRESS', showTechnicianName: 'TECH_PRIVATE', showStatus: 'COMPLETED', showNotes: 'PUBLIC_NOTE', showChemicals: 'CHEMICAL_MARKER', showEquipment: 'PUMP_MARKER', showTechnicalRoom: 'ROOM_MARKER', showPhotos: 'Fotografia indisponível' };
   for (const [field, marker] of Object.entries(markers)) {
     await prisma.clientReportSetting.update({ where: { clientId: client.id }, data: { ...allOff, [field]: true } });
     result = await call('?view=client'); assert.equal(result.status, 200); assert(result.text.includes(marker), field + ': ' + result.text); assert(!result.text.includes('INTERNAL_SECRET'));
