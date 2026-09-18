@@ -1,0 +1,52 @@
+'use strict';
+require('../src/loadEnv')();
+const assert=require('node:assert/strict'),jwt=require('jsonwebtoken');
+const {prisma}=require('../src/prismaClient'),{getJwtSecret}=require('../src/utils/jwtSecret'),{chromium}=require('playwright');
+if(process.env.NODE_ENV!=='test'||process.env.QA_MODE!=='true'||process.env.QA_ENVIRONMENT_SAFE!=='true')throw Error('Isolated QA required');
+const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['127.0.0.1','localhost'].includes(new URL(base).hostname));let browser;
+(async()=>{
+ const admin=await prisma.user.findUniqueOrThrow({where:{email:process.env.ADMIN_EMAIL}}),user={id:admin.id,userId:admin.id,role:'ADMIN'},token=jwt.sign(user,getJwtSecret(),{expiresIn:'1h'});
+ const client=await prisma.client.create({data:{name:'QA alert report '+Date.now()}}),other=await prisma.client.create({data:{name:'QA unrelated report'}});
+ const pool=await prisma.pool.create({data:{clientId:client.id,name:'QA report pool'}});
+ const visit=await prisma.serviceVisit.create({data:{clientId:client.id,poolId:pool.id,status:'DONE',alerts:'QA report opening',notes:'Original visit report'}});
+ const makeNotice=(visitType,clientId=client.id)=>prisma.notification.create({data:{clientId,type:'ALERT',message:'QA typed report '+visitType,metadata:{visitId:visit.id,visitType,poolId:pool.id}}});
+ const regular=await makeNotice('REGULAR'),extra=await makeNotice('EXTRA'),conflict=await makeNotice('REGULAR',other.id);
+ const ambiguous=await prisma.technicalAlert.create({data:{poolId:pool.id,type:'QA_REPORT',message:'Problema tecnico reportado na visita '+visit.id}});
+ const response=await fetch(base+'/api/alerts',{headers:{Authorization:'Bearer '+token}});assert.equal(response.status,200);const data=await response.json();
+ const find=id=>data.alerts.find(a=>a.id===id);
+ for(const id of ['visit-'+visit.id,'notification-'+regular.id])assert.deepEqual(find(id).report,{type:'REGULAR',visitId:visit.id,clientId:client.id});
+ for(const id of ['notification-'+extra.id,'notification-'+conflict.id,'technical-'+ambiguous.id])assert.equal(find(id).report,null);
+ browser=await chromium.launch({headless:true,executablePath:process.env.CW_CHROMIUM_PATH,args:['--no-sandbox','--disable-dev-shm-usage']});
+ const c=await browser.newContext({serviceWorkers:'block',viewport:{width:390,height:900}}),errors=[],requests=[];
+ await c.route('**/*',route=>new URL(route.request().url()).origin===new URL(base).origin?route.continue():route.abort());
+ await c.addInitScript(({user,token})=>{
+  for(const k of ['token','adminToken','cristalwater_jwt'])localStorage.setItem(k,token);
+  for(const k of ['user','cristalwater_user'])localStorage.setItem(k,JSON.stringify(user));
+  localStorage.setItem('cw_language','pt');window.qaPopups=[];window.qaCreated=[];window.qaRevoked=[];
+  window.open=()=>{if(window.qaBlocked)return null;const p={location:{},closed:false,close(){this.closed=true;}};qaPopups.push(p);return p;};
+  const create=URL.createObjectURL.bind(URL),revoke=URL.revokeObjectURL.bind(URL);
+  URL.createObjectURL=b=>{const u=create(b);qaCreated.push(u);return u;};URL.revokeObjectURL=u=>{qaRevoked.push(u);revoke(u);};
+ },{user,token});
+ const p=await c.newPage();p.setDefaultTimeout(12000);p.on('pageerror',e=>errors.push(e.message));
+ p.on('request',r=>{if(r.url().includes('/api/report-visit/'))requests.push({url:r.url(),authorization:r.headers().authorization});});
+ await p.goto(base+'/admin-alerts',{waitUntil:'networkidle'});
+ const button=p.locator('[data-report-alert="visit-'+visit.id+'"]'),state=kind=>p.waitForFunction(kind=>document.getElementById('alertReportStatus').dataset.state===kind,kind);
+ await button.waitFor();assert.equal(await p.locator('a[href^="/api/reports/visit/"]').count(),0);
+ for(const id of ['notification-'+extra.id,'notification-'+conflict.id,'technical-'+ambiguous.id])assert.equal(await p.locator('[data-report-alert="'+id+'"]').count(),0);
+ await p.evaluate(()=>window.qaBlocked=true);await button.click();await state('error');assert.equal(requests.length,0);await p.evaluate(()=>window.qaBlocked=false);
+ await button.click();await state('opened');assert.equal(await p.evaluate(async()=>(await(await fetch(qaCreated.at(-1))).text()).slice(0,5)),'%PDF-');
+ assert(requests.every(r=>r.authorization==='Bearer '+token&&!r.url.includes(token)));
+ await p.locator('#alertSearch').fill('no matching result');await state('idle');assert.equal(await p.evaluate(()=>qaPopups.at(-1).closed),true);assert.equal(await p.evaluate(()=>qaRevoked.length),1);await p.locator('#alertSearch').fill('');
+ const endpoint='**/api/report-visit/visit/*';
+ for(const mutation of [{headers:{'x-cw-client-id':String(other.id)}},{headers:{'x-cw-visit-id':String(visit.id+1)}},{headers:{'x-cw-report-view':'client'}},{body:'%PDF-truncated'},{status:503}]){
+  await p.route(endpoint,async route=>{const r=await route.fetch();await route.fulfill({response:r,...mutation,headers:{...r.headers(),...mutation.headers}});});
+  const before=await p.evaluate(()=>qaCreated.length);await button.click();await state('error');assert.equal(await p.evaluate(()=>qaCreated.length),before);assert.equal(await p.evaluate(()=>qaPopups.at(-1).closed),true);await p.unroute(endpoint);
+ }
+ let enter,release;const arrived=new Promise(r=>enter=r),gate=new Promise(r=>release=r);
+ await p.route(endpoint,async route=>{const r=await route.fetch();enter();await gate;await route.fulfill({response:r}).catch(()=>{});});
+ const before=await p.evaluate(()=>qaCreated.length);await button.click();await arrived;await p.locator('#refreshAlerts').click();await state('idle');release();await p.unroute(endpoint);assert.equal(await p.evaluate(()=>qaCreated.length),before);
+ await p.waitForFunction(()=>document.getElementById('alertsStatus').textContent==='Alertas carregados.');
+ await c.setOffline(true);await button.click();await state('error');await c.setOffline(false);const count=requests.length;await p.waitForTimeout(300);assert.equal(requests.length,count);
+ await button.click();await state('opened');await p.evaluate(()=>localStorage.setItem('user',JSON.stringify({id:999999,role:'ADMIN'})));await state('session');assert.equal(await p.evaluate(()=>qaPopups.at(-1).closed),true);assert(await button.isDisabled());
+ assert.deepEqual(errors,[]);console.log('PASS typed report provenance, EXTRA/ambiguous/client conflict blocked, authenticated real PDF, popup retry, response identity/truncation, filter/reload cancellation, offline and changed session');
+})().catch(e=>{console.error(e);process.exitCode=1;}).finally(async()=>{await browser?.close();await prisma.$disconnect();});

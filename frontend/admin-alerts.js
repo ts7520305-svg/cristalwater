@@ -14,6 +14,33 @@ let alertsRead = 0;
 const alertsAuthorization = authHeaders().Authorization;
 const alertResolutions = new Set();
 let alertBilling;
+let alertReportSelection = null;
+const alertReports = window.CristalReportDownloads?.create({
+  context: () => ({ read: alertsRead, selection: alertReportSelection }),
+  state: (kind, message) => {
+    const status = document.getElementById('alertReportStatus');
+    if (status) { status.textContent = message; status.dataset.state = kind; }
+    if (kind === 'session') document.querySelectorAll('[data-report-alert]').forEach(button => button.disabled = true);
+  },
+});
+function invalidateAlertReport() {
+  if (alertReportSelection) { alertReportSelection = null; alertReports?.cancel(); }
+}
+function reportForAlert(alert) {
+  const report = alert?.report;
+  return report?.type === 'REGULAR' && Number.isSafeInteger(report.visitId) && report.visitId > 0 &&
+    Number.isSafeInteger(report.clientId) && report.clientId > 0 && report.clientId === alert.clientId && report.visitId === alert.visitId ? report : null;
+}
+function openAlertReport(reference) {
+  if (!alertsSessionCurrent() || !alertsLoaded || !alertReports) return;
+  const alert = filteredAlerts().find(row => row.id === reference), report = reportForAlert(alert);
+  if (!report) return;
+  alertReportSelection = { reference, visitId: report.visitId, clientId: report.clientId };
+  alertReports.open(`/api/report-visit/visit/${report.visitId}?view=admin&clientId=${report.clientId}`,
+    { type: 'application/pdf', headers: { 'X-CW-Report-Type': 'visit-pdf', 'X-CW-Visit-Id': report.visitId,
+      'X-CW-Client-Id': report.clientId, 'X-CW-Report-View': 'admin' } });
+}
+
 let repairContextData = {
   clients: [],
   pools: [],
@@ -672,6 +699,7 @@ function setupRepairModal() {
 }
 
 function renderList() {
+  invalidateAlertReport();
   const list = document.getElementById("alertsList");
   const summary = document.getElementById("alertsSummary");
   if (!list) return;
@@ -731,7 +759,7 @@ function renderList() {
       <div class="alert-actions">
         ${alert.href ? `<a class="btn" href="${escapeHtml(alert.href)}">Abrir ficha</a>` : ""}
         ${alert.visitHref ? `<a class="btn note" href="${escapeHtml(alert.visitHref)}">Abrir visita</a>` : ""}
-        ${alert.serviceNote?.href ? `<a class="btn note" href="${escapeHtml(alert.serviceNote.href)}" target="_blank" rel="noopener">Relatorio</a>` : ""}
+        ${reportForAlert(alert) ? `<button class="btn note" type="button" data-report-alert="${escapeHtml(alert.id)}" ${alertReports ? "" : "disabled"}>Abrir relatório</button>` : alert.serviceNote ? `<p>Relatório por confirmar: reveja a associação da visita.</p>` : ""}
         <button type="button" data-charge-alert="${escapeHtml(alert.id)}">Preparar rascunho</button>
         ${alert.resolutionRequirement ? `<p>${escapeHtml(alert.resolutionRequirement.message)}</p>` : ''}
         <button type="button" class="resolve" data-resolve-alert="${escapeHtml(alert.id)}" ${alertResolutions.size ? 'disabled' : ''}>${alert.resolutionRequirement ? 'Verificar resolucao' : 'Resolver'}</button>
@@ -745,10 +773,12 @@ function renderList() {
   list.querySelectorAll("[data-charge-alert]").forEach((btn) => {
     btn.addEventListener("click", () => chargeAlert(btn.dataset.chargeAlert));
   });
+  list.querySelectorAll("[data-report-alert]").forEach(button => button.addEventListener("click", () => openAlertReport(button.dataset.reportAlert)));
   updateResolutionButtons();
 }
 
 async function loadAlerts() {
+  invalidateAlertReport();
   const own = ++alertsRead;
   const current = () => own === alertsRead && alertsSessionCurrent();
   if (!alertsSessionCurrent()) return false;

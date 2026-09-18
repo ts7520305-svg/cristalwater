@@ -173,7 +173,7 @@ function buildRepairNote(repair) {
   };
 }
 
-function enrichAlert(alert, { visit, repair, attachments = [] } = {}) {
+function enrichAlert(alert, { visit, repair, attachments = [], reportVisit = false } = {}) {
   const serviceNote = buildServiceNote(visit);
   const repairNote = buildRepairNote(repair);
   const directAttachments = attachments.map(mapAttachment).filter(Boolean);
@@ -204,6 +204,8 @@ function enrichAlert(alert, { visit, repair, attachments = [] } = {}) {
     poolName: alert.poolName || visit?.pool?.name || "",
     visitHref: visitId ? `/admin-visits?visitId=${visitId}` : null,
     serviceNote,
+    report: reportVisit && visit?.clientId && (!alert.clientId || alert.clientId === visit.clientId) && (!alert.poolId || alert.poolId === visit.poolId)
+      ? { type: 'REGULAR', visitId: visit.id, clientId: visit.clientId } : null,
     repair: repairNote,
     media,
     hasServiceNote: Boolean(serviceNote),

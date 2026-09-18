@@ -74,6 +74,7 @@ async function list() {
         const alert = mapNotification(notification);
         return enrichAlert(alert, {
           visit: visitMap.get(numberOrNull(alert.visitId)),
+          reportVisit: metadataOf(notification).visitType === 'REGULAR',
           repair: repairMap.get(numberOrNull(alert.repairId)),
         });
       }),
@@ -88,13 +89,14 @@ async function list() {
           repairId: linked.repairId || null,
         }, {
           visit: visitMap.get(numberOrNull(visitId)),
+          reportVisit: linked.visitType === 'REGULAR' && Number(linked.visitId) === visitId,
           repair: repairMap.get(numberOrNull(linked.repairId)),
           attachments: technicalAlert.attachments || [],
         });
       }),
       ...visitAlerts
         .filter((visit) => String(visit.alerts || visit.reason || visit.status || "").trim())
-        .map((visit) => enrichAlert(mapVisitAlert(visit), { visit })),
+        .map((visit) => enrichAlert(mapVisitAlert(visit), { visit, reportVisit: true })),
       ...genericAlerts.filter((alert) => isOpenStatus(alert.status)).map(mapGenericAlert),
     ].sort((a, b) => priority[a.priority] - priority[b.priority] || new Date(b.createdAt) - new Date(a.createdAt) || a.id.localeCompare(b.id));
 
