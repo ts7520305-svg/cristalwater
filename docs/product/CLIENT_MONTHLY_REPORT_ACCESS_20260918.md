@@ -21,7 +21,7 @@ O ensaio isolado `run-1789760692406` reproduziu HTTP 200 nos três percursos ond
 2. `GET /api/client-reports/:clientId/reports/:reportId/pdf`
 3. `GET /api/client/client/reports/:id/pdf`
 
-A terceira é a montagem histórica real de `clientReportPDFRoutes`; esta tarefa conserva o caminho. O comentário antigo e `frontend/client.js` usam um caminho diferente, `/api/client/reports/:id/pdf`. Esse ecrã antigo também pede uma lista numa rota não montada e abre o PDF sem Authorization. A abertura antiga precisa de revisão própria; não é declarada corrigida por esta alteração de autorização.
+A terceira é a montagem histórica real de `clientReportPDFRoutes`; esta tarefa conserva o caminho. O comentário antigo e `frontend/client.js` usam um caminho diferente, `/api/client/reports/:id/pdf`. Esse script antigo também pede uma lista numa rota não montada e abre o PDF sem Authorization, mas a pesquisa nas páginas atuais não encontrou uma inclusão de `client.js`. Não se confunde esse código legado com um percurso ativo do portal. O portal atual lista documentos pelo manifesto de `customerPortalService`; a entrada para relatórios mensais deve ser revista nesse contexto, sem reativar o script antigo.
 
 ## Verificação
 
@@ -30,13 +30,13 @@ A terceira é a montagem histórica real de `clientReportPDFRoutes`; esta tarefa
 - As contagens de documentos financeiros, pagamentos, auditoria e configurações, bem como os relatórios guardados, permanecem iguais durante a consulta. A mudança de estado da conta usada no ensaio é deliberada e pertence à fixture.
 - Runner ampliado de 152 para 153 grupos. Sem novas migrações; permanecem 21. Cache PWA v89 mantida, pois não há alteração de frontend.
 
-Gates locais aprovados: sintaxe de 559 ficheiros backend, 183 frontend e 56 scripts inline; 396 testes unitários em 63 ficheiros e quatro testes de técnicos. Confirmar CI PostgreSQL 16/restauro da árvore publicada antes de declarar a aprovação final.
+Gates locais aprovados: sintaxe de 559 ficheiros backend, 183 frontend e 56 scripts inline; 396 testes unitários em 63 ficheiros e quatro testes de técnicos. CI PostgreSQL 16 aprovado: commit `29762b05d89a9adab8e881d9c4d8e2ca84a3089b`, árvore `a0c6255ed361774706a36abf17bd4b8487ab41a8`, [run 35388203272](https://github.com/ts7520305-svg/cristalwater/actions/runs/35388203272), job `105740037646`, concluído em 18/09/2026 às 20:07:45 UTC. 153/153 grupos distintos, todos com código zero e sem sinal; novo teste de acesso em 566 ms. Confirmados 396 unitários/63 ficheiros, quatro técnicos, gate de navegador, 21 migrações aditivas e sintaxe 559/183/56. Restauro de 110 tabelas/46 ficheiros carregados, com linhas e hashes iguais. A atualização final altera apenas documentação e conserva o código/testes aprovados. Publicação na branch autorizada `work/field-readiness-20260915-simulation`, sem merge ou instalação no VPS.
 
 ## Limites e próximo percurso
 
 Esta tarefa fecha a autorização dos relatórios mensais guardados. Os relatórios individuais de visita mantêm as permissões e apresentações já testadas nas TASK250–267; o técnico continua a consultar o relatório permitido da visita que lhe está atribuída.
 
-O gerador histórico `generateClientMonthlyReport` em `reportService.js` ainda agrega visitas da instalação sem delimitar o mês do relatório. Esta leitura estática identifica um próximo ponto a reproduzir e corrigir; a presente tarefa não valida os seus cálculos nem reescreve relatórios antigos. A apresentação, os idiomas e o percurso de abertura mensal do cliente também exigem revisão própria. Instalação no VPS, testes físicos e fornecedores continuam pendentes.
+O gerador histórico `generateClientMonthlyReport` em `reportService.js` ainda agrega visitas da instalação sem delimitar o mês nem confirmar o cliente histórico da visita. A reprodução isolada `run-1789761345882` confirmou a lacuna: para agosto de 2026, uma visita concluída do cliente nesse mês produziu o total quatro, contando também duas visitas de outros meses e uma visita do titular anterior. Esse ensaio de diagnóstico terminou com falha, como esperado; não pertence aos 153 grupos da correção de acesso nem valida o cálculo mensal. A próxima tarefa deve corrigir e integrar este caso, conservando relatórios históricos para revisão explícita. A presente tarefa não reescreve os dados antigos. A apresentação, os idiomas e o percurso de abertura mensal do cliente também exigem revisão própria. Instalação no VPS, testes físicos e fornecedores continuam pendentes.
 
 ## Ficheiros (9)
 
