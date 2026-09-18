@@ -23,15 +23,16 @@ async function read(actor, rawId, query = {}) {
   return prisma.$transaction(async tx => {
     const visit = await tx.serviceVisit.findUnique({ where: { id: visitId }, include: {
       client: { include: { reportSetting: true } },
-      pool: { include: { client: { include: { reportSetting: true } }, equipment: true, technicalRoom: true } },
+      pool: { include: { equipment: true, technicalRoom: true } },
       chemicals: { orderBy: { id: 'asc' } }, photos: { orderBy: { id: 'asc' } },
     } });
     if (!visit) fail('Visita não encontrada.', 404);
-    const clientId = visit.clientId || visit.pool?.clientId;
+    // The current pool owner cannot prove who owned a historical visit.
+    const clientId = visit.clientId;
     if (role === 'CLIENT' && (!clientId || Number(actor.clientId || actor.id) !== clientId)) fail('Acesso negado.', 403);
     if (['TECHNICIAN', 'TEAM_LEADER'].includes(role) && (!visit.technicianId || Number(actor.technicianId || actor.id) !== visit.technicianId)) fail('Acesso negado.', 403);
     if (visit.clientId && visit.pool?.clientId && visit.clientId !== visit.pool.clientId) fail('A visita e a instalação têm clientes diferentes. Peça a revisão do registo.', 409);
-    const client = visit.client || visit.pool?.client;
+    const client = visit.client;
     if (!client) fail('A visita não tem um cliente confirmado.', 409);
     if (expectedClient !== null && expectedClient !== client.id) fail('A visita não pertence ao cliente selecionado.', 409);
     const state = settingsService.snapshot(client);

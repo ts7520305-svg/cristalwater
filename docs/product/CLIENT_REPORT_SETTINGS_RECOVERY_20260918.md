@@ -4,7 +4,7 @@
 
 TASK247–249 confirmadas conjuntamente no commit `99cd623c472961ffc7bac33455ea8e6b00e8515a`, árvore `bb6ae40168cd27d66dce3b008a4132ea3518ab35`, [CI `35306180181`](https://github.com/ts7520305-svg/cristalwater/actions/runs/35306180181), job `105478715580`: 142/142 grupos, 388 testes unitários/62 ficheiros e quatro testes técnicos, 21 scripts no gate de navegador, 20 migrações, sintaxe de 546 JS backend/179 frontend/57 scripts inline e restauro de 110 tabelas/32 ficheiros com linhas e hashes iguais em PostgreSQL 16. CI concluído em 18/09/2026 às 04:29 UTC. Cache v72, sem nova migração. Configurações API/interface: 1070/22814 ms; faturação de alertas: 14799 ms; impedimentos/regressos: 12586 ms; relatórios mensais API/interface: 4241/8563 ms; proteção do imprimível: 1391 ms. TASK247 corrige a API; TASK248 liga a interface ao cliente, conta e versão confirmados. A TASK249 fecha a regressão de sessão do acompanhamento administrativo.
 
-A abertura autenticada dos relatórios, os cálculos do imprimível mensal e a revisão dos conteúdos/layout dos PDFs continuam no lote seguinte. Os botões de pré-visualização antigos ainda abrem um URL sem Authorization, e `?role=CLIENT` não muda o papel autenticado usado pelo gerador. Esta alteração não afirma que esses percursos estejam corrigidos.
+Atualização TASK250–251: abertura autenticada nas configurações/centro mensal, pré-visualização CLIENT, opções no PDF/HTML e paginação individual implementadas; publicação `721ff7adb5ac79c9efbb01fa2abbb17e615c05d2`, confirmação nativa em curso. Ver `AUTHENTICATED_VISIT_REPORTS_20260918.md`. As observações de código no final deste relatório conservam o diagnóstico histórico anterior a essa alteração; os cálculos do imprimível mensal, abertura pelos alertas e incorporação autorizada das fotos permanecem por tratar.
 
 ## Leitura e gravação
 
@@ -54,7 +54,7 @@ Correção do painel publicada (cache v71) em `4d997baa22ad7cdb063943028df8eebb0
 Próximo percurso: abertura autenticada com tipo de conteúdo e contexto de mês/filtro/visita/sessão confirmados, prazo de rede, limpeza de object URLs e alternativa visível quando a janela é bloqueada. Depois rever fontes, texto escapado e apresentação dos relatórios individuais e do imprimível mensal, sem atribuir ao HTML antigo o contrato financeiro da nova API mensal.
 
 
-### Pontos de entrada para a próxima alteração
+### Diagnóstico histórico dos pontos de entrada, antes de TASK250–251
 
 Leitura de código, sem novo ensaio do conteúdo/layout de PDFs:
 
