@@ -2,7 +2,7 @@
 
 ## Estado e âmbito
 
-Adenda de 18/09: as configurações foram corrigidas nas TASK247–248 e confirmadas com a regressão TASK249 no commit `99cd623c472961ffc7bac33455ea8e6b00e8515a`, CI `35306180181`: 142/142 grupos e restauro de 110 tabelas/32 ficheiros. Contrato, recuperação e reproduções em `CLIENT_REPORT_SETTINGS_RECOVERY_20260918.md`. TASK250–251 tratam agora a abertura nas configurações/centro mensal e a apresentação individual; ver `AUTHENTICATED_VISIT_REPORTS_20260918.md`. O imprimível financeiro e as fotografias incorporadas continuam por rever.
+Adenda de 18/09: as configurações foram corrigidas nas TASK247–248 e confirmadas com a regressão TASK249 no commit `99cd623c472961ffc7bac33455ea8e6b00e8515a`, CI `35306180181`: 142/142 grupos e restauro de 110 tabelas/32 ficheiros. Contrato, recuperação e reproduções em `CLIENT_REPORT_SETTINGS_RECOVERY_20260918.md`. TASK250–251 confirmadas no CI `35311811075`, commit `09faec4284d8247811c0b1b48402a2bf42fe8b1c`, com 144/144 grupos e restauro de 110 tabelas/32 ficheiros: abertura nas configurações/centro mensal e apresentação individual; ver `AUTHENTICATED_VISIT_REPORTS_20260918.md`. O imprimível financeiro e as fotografias incorporadas continuam por rever.
 
 A revisão começou sobre `946a01f389ab3b37371ece483e4bfee463173dae`, depois das TASK244–245. O ensaio `run-1789681864927`, concluído em 4501 ms em PGlite isolado, HTTP real e Chromium, reproduziu oito comportamentos incorretos. A revisão de código acrescentou a interpolação direta dos campos guardados, indicada separadamente na tabela. O ensaio era um diagnóstico com asserções dos comportamentos incorretos, não uma aprovação funcional.
 

@@ -2,7 +2,7 @@
 
 ## Estado
 
-Implementado; confirmação nativa dos rótulos curtos do filtro pendente. A publicação anterior `0801655424f05c5e27bb0bc375ba1e133a12f815`, árvore `d953f5c771f3180465e3950c49408397246484c2`, CI `35310515176`, job `105491411353`, aprovou 143/144 grupos e identificou overflow interno no select. Base do lote: `b86cd7549a0c1f94c374a76bea07a01964d12191`. Cache v76, sem migração nova. TASK250 trata a abertura nas páginas de configurações e centro de relatórios; TASK251 trata o acesso, as opções e a apresentação do relatório individual PDF/HTML.
+TASK250–251 confirmadas no commit `09faec4284d8247811c0b1b48402a2bf42fe8b1c`, árvore `554ebeb89b0f2544932bb2f3f01e9fc56c178767`, [CI `35311811075`](https://github.com/ts7520305-svg/cristalwater/actions/runs/35311811075), job `105495236960`: 144/144 grupos, 388 testes unitários/62 ficheiros e quatro testes técnicos, 21 scripts no gate de navegador, 20 migrações, sintaxe de 547 JS backend/181 frontend/56 scripts inline e restauro de 110 tabelas/32 ficheiros com linhas e hashes iguais em PostgreSQL 16. CI concluído em 18/09/2026 às 05:57 UTC. Cache v76, sem nova migração. Abertura autenticada nas configurações/centro mensal, contexto e sessão confirmados, consulta de clientes arquivados, cliente histórico obrigatório, 15 opções no PDF/HTML, notas internas só para ADMIN e paginação individual revista. Esta atualização posterior altera apenas documentação e conserva o código/testes da árvore validada. Base do lote: `b86cd7549a0c1f94c374a76bea07a01964d12191`.
 
 ## Abertura no navegador
 
@@ -41,11 +41,17 @@ A revisão final da interface separa consulta de edição para clientes arquivad
 
 ## Revisão em ecrãs estreitos
 
-Os CI `35309036752`, `35309433429` e `35309723057` aprovaram 143/144 grupos e terminaram com falha no ensaio de largura do centro de relatórios, após a abertura real do documento; restauro omitido. O botão passa a permitir quebra de linha e os controlos/cartão deixam de impor largura mínima; o teste regista agora as medidas, fonte e overflow de cada elemento em caso de falha. Esta correção passou localmente em `run-1789708615654` (8401 ms), nas larguras 320/390/1440. A captura de 320 px confirma o botão em duas linhas e os controlos dentro do cartão. Só o CI da árvore que inclui esta correção pode fechar o lote.
+Os CI `35309036752`, `35309433429` e `35309723057` aprovaram 143/144 grupos e terminaram com falha no ensaio de largura do centro de relatórios, após a abertura real do documento; restauro omitido. O botão passa a permitir quebra de linha e os controlos/cartão deixam de impor largura mínima; o teste regista agora as medidas, fonte e overflow de cada elemento em caso de falha. Esta correção passou localmente em `run-1789708615654` (8401 ms), nas larguras 320/390/1440. A captura de 320 px confirma o botão em duas linhas e os controlos dentro do cartão. Essa passagem local não fechou o lote; a falha nativa e a correção final estão descritas abaixo.
 
 O CI `35310515176` voltou a aprovar 143/144 grupos. O novo diagnóstico isolou o problema: cartão, campo de mês e botão sem overflow; select dentro dos limites x=37/right=283, mas com 16 px de overflow interno numa largura de 320 px. A apresentação nativa do select no CI difere da usada localmente. Os rótulos passam a «Filtro de faturação», «Todos» e «Requer fatura», mantendo os valores false/true e a asserção integral de largura. Não se atribui esta falha ao botão nem se conta o ensaio local anterior como prova do navegador nativo.
 
 Abertura completa aprovada localmente após encurtar os rótulos: `run-1789709968047`, 8574 ms, incluindo os dois filtros, as três larguras, a consulta do cliente arquivado e as mudanças de contexto/sessão.
+
+## Confirmação nativa
+
+O CI final identificado no estado aprovou a abertura completa em 8922 ms, incluindo o filtro em ecrã estreito, o cliente arquivado, o primeiro clique após nova leitura e a limpeza por sessão/contexto. API/PDF/HTML individual: 950 ms; configurações API/interface: 1052/22690 ms; acesso ao imprimível: 1368 ms; regressões mensais API/interface: 4180/8441 ms. Todos os 144 grupos são distintos e têm código zero; nenhum foi omitido. O restauro terminou com 110 tabelas e 32 ficheiros e igualdade das linhas/hashes.
+
+Publicação de código final: `09faec4284d8247811c0b1b48402a2bf42fe8b1c`; backup local `backup/task251-filter-local-20260918`. Os quatro CI anteriores ficaram em 143/144 e não validam esta árvore. Este checkpoint de aprovação altera apenas documentação.
 
 ## Limites e próximo percurso
 
