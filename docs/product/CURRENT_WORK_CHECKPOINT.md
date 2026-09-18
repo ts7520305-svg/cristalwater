@@ -2,7 +2,7 @@
 
 ## Ponto de retoma atual — 18/09/2026
 
-- TASK250–251 implementadas e aprovadas localmente: abertura autenticada com cliente/visita/versão e mês/filtro, cancelamento por contexto/sessão, pré-visualização CLIENT sem notas internas, projeção PDF/HTML comum, cliente histórico obrigatório, 15 opções respeitadas e paginação revista. `AUTHENTICATED_VISIT_REPORTS_20260918.md`. Cache v74, 144 grupos, sem migração. Publicar e confirmar o CI/restauro da árvore final antes de fechar este lote. A última validação nativa anterior permanece TASK247–249 abaixo.
+- TASK250–251 implementadas e aprovadas localmente: abertura autenticada com cliente/visita/versão e mês/filtro, cancelamento por contexto/sessão, pré-visualização CLIENT sem notas internas, projeção PDF/HTML comum, cliente histórico obrigatório, 15 opções respeitadas e paginação revista. `AUTHENTICATED_VISIT_REPORTS_20260918.md`. Cache v75, 144 grupos, sem migração. O CI inicial `35309036752` falhou no ensaio de largura do centro; a correção posterior passou localmente em `run-1789708615654` (8401 ms), mas exige integração/restauro nativos da sua própria árvore. Publicação anterior: `1d858eeb8cd6ef23d89749368655535cfbd79c61`, CI `35309723057`. A última validação nativa anterior permanece TASK247–249 abaixo.
 - Próximo percurso após TASK250–251: fontes e cálculos do imprimível mensal; depois abertura do relatório pelo painel de alertas e incorporação autorizada de fotografias. Não repetir as lacunas antigas dos dois botões de pré-visualização ou da abertura mensal como defeitos atuais. Permanecem relatórios EXTRA, fontes Unicode/tradução e restantes validações documentadas.
 
 - TASK247–249 confirmadas conjuntamente no commit `99cd623c472961ffc7bac33455ea8e6b00e8515a`, árvore `bb6ae40168cd27d66dce3b008a4132ea3518ab35`, [CI `35306180181`](https://github.com/ts7520305-svg/cristalwater/actions/runs/35306180181), job `105478715580`: 142/142 grupos, 388 testes unitários/62 ficheiros e quatro testes técnicos, 21 scripts no gate de navegador, 20 migrações, sintaxe de 546 JS backend/179 frontend/57 scripts inline e restauro de 110 tabelas/32 ficheiros com linhas e hashes iguais em PostgreSQL 16. CI concluído em 18/09/2026 às 04:29 UTC. Cache v72, sem nova migração. Configurações API/interface: 1070/22814 ms; faturação de alertas: 14799 ms; impedimentos/regressos: 12586 ms; relatórios mensais API/interface: 4241/8563 ms; proteção do imprimível: 1391 ms. A atualização posterior altera apenas documentação e mantém código/testes da árvore validada.
@@ -412,4 +412,3 @@ Evidência atual da TASK120: 216 testes unitários, 4 testes de técnicos, os 15
 - docs/product/GLOBAL_VALIDATION_PHASE_PLAN.md
 - docs/product/FIELD_TEST_EXECUTION_PROTOCOL.md
 - docs/product/CERTIFIED_UI_FREEZE_REGISTER.md
-

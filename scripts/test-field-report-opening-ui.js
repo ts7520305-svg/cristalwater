@@ -76,7 +76,12 @@ let browser;
   await p.evaluate(() => dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }))); await state(p, 'idle');
   await p.evaluate(() => window.qaRealPopup = true); const popupPromise = p.waitForEvent('popup'); await button.click(); const popup = await popupPromise; await state(p, 'opened'); await popup.waitForURL('blob:**'); await popup.waitForLoadState('domcontentloaded'); assert((await popup.locator('body').textContent()).includes(client.name)); assert.equal(await popup.evaluate(() => opener), null); assert.equal(await popup.getByRole('button', { name: 'Imprimir / Guardar PDF' }).count(), 1); await popup.close(); await p.evaluate(() => window.qaRealPopup = false);
   const visual = path.join(__dirname, '../reports/field-visual/report-opening-' + stamp); fs.mkdirSync(visual, { recursive: true });
-  for (const width of [320, 390, 1440]) { await p.setViewportSize({ width, height: 900 }); assert(await p.locator('.report-center-main input,.report-center-main select,.report-center-main button,.report-center-main .card').evaluateAll(nodes => nodes.every(n => { const r = n.getBoundingClientRect(); return r.x >= 0 && r.right <= innerWidth + 1 && n.scrollWidth <= n.clientWidth + 1; }))); await p.screenshot({ path: path.join(visual, 'monthly-' + width + '.png'), fullPage: true }); }
+  for (const width of [320, 390, 1440]) {
+    await p.setViewportSize({ width, height: 900 });
+    const layout=await p.locator('.report-center-main input,.report-center-main select,.report-center-main button,.report-center-main .card').evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect(),css=getComputedStyle(n);return {tag:n.tagName,id:n.id,x:r.x,right:r.right,overflow:n.scrollWidth-n.clientWidth,whiteSpace:css.whiteSpace,font:css.fontSize};}));
+    assert(layout.every(row=>row.x>=0&&row.right<=width+1&&row.overflow<=1),JSON.stringify({width,layout}));
+    await p.screenshot({ path: path.join(visual, 'monthly-' + width + '.png'), fullPage: true });
+  }
   console.log('PASS monthly opening: real authenticated response and popup, blocked-window recovery, canonical selection, exact type/identity/status, truncated/empty replies, stale month/filter, timeout, offline without auto-open, BFCache and object URL cleanup');
   const v = await page('/report-settings'), pdfEndpoint = '**/api/report-visit/visit/*';
   assert(await v.locator('#openClientReport').isDisabled()); await v.locator('#clientId').fill(String(client.id)); await v.locator('#loadSettings').click(); await v.waitForFunction(() => document.getElementById('status').dataset.state === 'ready');

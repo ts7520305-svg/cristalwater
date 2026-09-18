@@ -2,7 +2,7 @@
 
 ## Estado
 
-Implementado e aprovado localmente; publicação e CI/restauro da árvore final por confirmar. Base anterior: `b86cd7549a0c1f94c374a76bea07a01964d12191`. Cache v74, sem migração nova. TASK250 trata a abertura nas páginas de configurações e centro de relatórios; TASK251 trata o acesso, as opções e a apresentação do relatório individual PDF/HTML.
+Implementado e aprovado localmente; confirmação nativa da correção para ecrãs estreitos pendente. Publicação anterior: `1d858eeb8cd6ef23d89749368655535cfbd79c61`, árvore `e61fce900a08d6bc58ba0d9879e2e3517a11318a`, CI `35309723057`, job `105489052421`. Base do lote: `b86cd7549a0c1f94c374a76bea07a01964d12191`. Cache v75, sem migração nova. TASK250 trata a abertura nas páginas de configurações e centro de relatórios; TASK251 trata o acesso, as opções e a apresentação do relatório individual PDF/HTML.
 
 ## Abertura no navegador
 
@@ -40,6 +40,8 @@ A primeira publicação `721ff7adb5ac79c9efbb01fa2abbb17e615c05d2` iniciou o CI 
 A revisão final da interface separa consulta de edição para clientes arquivados: a marca `editable:false` já desativa a gravação, mas não deve invalidar uma leitura bem-sucedida nem bloquear a consulta do PDF histórico. Regressão de navegador acrescentada; cache v74. Abertura e regressão das configurações aprovadas em `run-1789708090045` (8420/21885 ms). A reprodução anterior `run-1789708003696` encontrou ainda o primeiro clique após nova leitura consumido apenas pelo cancelamento da janela antiga: o helper passa a encerrar o contexto anterior e a atender o novo clique na mesma sessão. Esta correção posterior exige confirmação da sua própria árvore.
 
 ## Limites e próximo percurso
+
+O primeiro CI (`35309036752`) terminou com falha no ensaio de largura do centro de relatórios, após a abertura real do documento. O botão passa a permitir quebra de linha e os controlos/cartão deixam de impor largura mínima; o teste regista agora as medidas, fonte e overflow de cada elemento em caso de falha. Esta correção passou localmente em `run-1789708615654` (8401 ms), nas larguras 320/390/1440. Só o CI da árvore que inclui esta correção pode fechar o lote; o restauro do primeiro CI foi omitido devido à falha anterior.
 
 O imprimível mensal continua a usar os cálculos antigos (`Invoice.total`, `amountPaid`, `amountOpen` e lista de faturas), ainda sem o contrato financeiro revisto da API mensal. A autenticação da abertura não valida essas contas nem transforma número de faturas em número de clientes. Esse é o próximo trabalho.
 

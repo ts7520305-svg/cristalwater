@@ -54,9 +54,10 @@
       cursor: pointer;
     }
     .report-center-main { padding-bottom: 120px; }
-    .report-center-main .card { display: block !important; background: #fff; color: #1f2937; }
+    .report-center-main .card { display: block !important; min-width: 0; background: #fff; color: #1f2937; }
     .report-center-main label, .report-center-main p { color: inherit; }
-    .report-center-main button { min-height: 44px; background: #1565c0; }
+    .report-center-main input, .report-center-main select, .report-center-main button { min-width: 0; max-width: 100%; font-size: 16px; }
+    .report-center-main button { min-height: 44px; background: #1565c0; white-space: normal; overflow-wrap: anywhere; }
     .report-center-main #status { overflow-wrap: anywhere; }
     .report-center-main button:disabled { opacity: .6; cursor: default; }
   </style>
