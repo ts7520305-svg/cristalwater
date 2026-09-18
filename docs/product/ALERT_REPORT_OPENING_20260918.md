@@ -14,7 +14,7 @@ O relatório administrativo lê as configurações atuais no servidor; este pont
 
 Ensaio `run-1789725829902` em base descartável PGlite e Chromium 149: novo percurso, faturação dos alertas e abertura dos relatórios nas configurações/centro mensal aprovados. O novo grupo verifica projeção tipada, recusa de EXTRA/associação textual/cliente contraditório, PDF real com Authorization, janela bloqueada e nova tentativa, resposta de outra visita/cliente/apresentação, PDF truncado, 503, alteração do filtro e atualização durante a resposta, offline sem reabertura e troca de conta.
 
-395 testes unitários/63 ficheiros e quatro testes técnicos aprovados. Sintaxe de 552 JS backend/182 frontend/56 inline aprovada. Runner passa a 149 grupos; cache v79; sem migração nova. Confirmar a árvore publicada no CI nativo e no restauro antes de atribuir aprovação final.
+395 testes unitários/63 ficheiros e quatro testes técnicos aprovados. Sintaxe de 552 JS backend/182 frontend/56 inline aprovada. Runner passa a 149 grupos; cache v79; sem migração nova. A aprovação nativa e o restauro estão registados no final deste documento.
 
 ## Continuação
 
@@ -28,4 +28,10 @@ A causa era funcional: `cw-language-change` era emitido antes de substituir a pr
 
 Reprodução determinística com PUT de idioma indisponível: `run-1789727110570` falhou no título inglês, que conservava português. Após a correção, `run-1789727147807` aprovou a ficha técnica em cinco idiomas/320–1440 px, recuperação de idioma e abertura pelos alertas. O teste de idioma confirma ainda, dentro do evento síncrono, que a leitura corresponde à escolha anunciada enquanto a resposta anterior está retida. Não foram adicionadas esperas para esconder a falha, nem retiradas asserções.
 
-395 testes unitários/63 ficheiros e quatro testes técnicos aprovados. A confirmação nativa de todos os 149 grupos e do restauro permanece pendente até ao próximo CI.
+395 testes unitários/63 ficheiros e quatro testes técnicos aprovados. A confirmação nativa dos 149 grupos e do restauro consta abaixo.
+
+## Aprovação nativa final — 18/09/2026
+
+TASK257–258 confirmadas no commit `3ebcfd01309c32fe29476768930bb7c74b1b288a`, árvore `61c938e4a5ecf38cd25b6a0a857993e2a6bd994d`, [CI 35334809925](https://github.com/ts7520305-svg/cristalwater/actions/runs/35334809925), job `105567079628`, concluído às 10:43:23 UTC. Os 149 grupos distintos terminaram com código zero e sem sinal. Passaram 395 testes unitários/63 ficheiros, quatro testes técnicos, o gate de 21 scripts de navegador, 21 migrações aditivas e sintaxe 552/182/56. Restauro PostgreSQL 16: 110 tabelas e 32 ficheiros, com linhas e hashes iguais.
+
+Tempos dos percursos relevantes: recuperação de idioma 4499 ms; ficha técnica 21944 ms; abertura pelos alertas 8895 ms. A atualização posterior deste registo altera apenas documentação, conservando código e testes da árvore validada. Publicação na branch de trabalho autorizada, sem força. Backup local da correção: `backup/language-order-local-20260918`. Os limites funcionais e próximos percursos acima mantêm-se.
