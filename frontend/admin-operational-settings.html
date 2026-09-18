@@ -238,6 +238,29 @@
         <p id="equipmentRemindersStatus" role="status" aria-live="polite"></p>
       </div>
     </section>
+    <section class="panel" id="maintenanceBillingPanel" data-cw-no-i18n>
+      <h2>Intervenções e cobrança</h2>
+      <p>Escolha a piscina no painel de manutenção preventiva. Reveja cada execução ou lembrete de serviço concluído e indique se está incluído na mensalidade ou se é um extra.</p>
+      <p id="mbContext">Escolha uma piscina acima.</p>
+      <label for="mbKind">Intervenções a consultar</label>
+      <select id="mbKind"><option value="EQUIPMENT">Manutenções de equipamentos</option><option value="REMINDER">Lembretes de serviço concluídos</option></select>
+      <div class="actions"><button type="button" class="btn" id="mbRefresh">Atualizar intervenções</button><button type="button" class="btn" id="mbOlder" hidden>Ver registos anteriores</button></div>
+      <p id="mbStatus" role="status" aria-live="polite"></p>
+      <div id="mbPending" class="mb-card" hidden><p id="mbPendingSummary"></p><button type="button" class="btn" id="mbRetry">Repetir confirmação</button><button type="button" class="btn" id="mbCorrect" hidden>Rever dados</button></div>
+      <form id="mbReview" class="mb-card" hidden>
+        <h3>Rever condição comercial</h3><p id="mbSource"></p>
+        <label for="mbMode">Condição acordada</label><select id="mbMode" required><option value="">Escolher condição</option><option value="INCLUDED">Incluída na mensalidade</option><option value="EXTRA">Cobrar como extra</option></select>
+        <label for="mbAmount">Valor total do extra (EUR)</label><input id="mbAmount" inputmode="decimal" autocomplete="off" placeholder="Ex.: 45,00" maxlength="12" disabled>
+        <label for="mbNote">Nota da decisão</label><textarea id="mbNote" minlength="3" maxlength="2000" rows="3" required placeholder="Condição acordada com o cliente e o que este valor inclui"></textarea>
+        <p id="mbConfirmSummary"></p>
+        <label class="mb-confirm"><input id="mbConfirmed" type="checkbox" required><span>Conferi a intervenção, o cliente, o valor e se já existe outra cobrança deste trabalho.</span></label>
+        <div class="actions"><button class="btn" type="submit" id="mbSave">Confirmar decisão</button><button class="btn" type="button" id="mbCancel">Cancelar</button></div>
+      </form>
+      <div id="mbRows"></div>
+      <p>Um extra prepara um rascunho para revisão na faturação. A execução e o próximo lembrete mantêm o seu registo. Consulte o documento existente para alterações posteriores.</p>
+      <a class="btn" href="/invoices">Consultar documentos de faturação</a>
+      <style>#maintenanceBillingPanel{overflow-wrap:anywhere}#maintenanceBillingPanel label{display:block;margin:12px 0 6px}#maintenanceBillingPanel input:not([type=checkbox]),#maintenanceBillingPanel select,#maintenanceBillingPanel textarea{display:block;width:100%;max-width:100%;min-height:44px;padding:10px;box-sizing:border-box}#maintenanceBillingPanel button{min-height:44px;white-space:normal}#maintenanceBillingPanel .mb-card{border:1px solid #94a3b8;border-radius:12px;padding:12px;margin:12px 0}#maintenanceBillingPanel .actions{display:flex;gap:10px;flex-wrap:wrap}#maintenanceBillingPanel .mb-confirm{display:flex;align-items:center;gap:12px}#mbConfirmed{width:24px;height:24px;flex-shrink:0}#maintenanceBillingPanel>a.btn{display:inline-flex;max-width:100%;white-space:normal;align-items:center;text-decoration:none}#maintenanceBillingPanel [hidden]{display:none!important}</style>
+    </section>
   </main>
   <script src="/admin-auth-guard.js"></script>
   <script src="/cw-field-write-store.js"></script>
@@ -245,6 +268,7 @@
   <script src="/admin-operational-settings.js"></script>
   <script src="/admin-data-protection.js"></script>
   <script src="/admin-equipment-maintenance.js"></script>
+  <script src="/admin-maintenance-billing.js"></script>
   <script src="/admin-equipment-reminders.js"></script>
   <script src="/cristal-help-data.js"></script><script src="/cristal-assist.js"></script>
 <script src="/cw-admin-shortcuts.js"></script>

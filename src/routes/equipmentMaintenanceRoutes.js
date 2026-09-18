@@ -5,6 +5,8 @@ router.use((req, res, next) => { res.set('Cache-Control', 'private, no-store'); 
 router.get('/notifications/config', auth('ADMIN'), controller.reminderConfiguration);
 router.put('/notifications/config', auth('ADMIN'), controller.configureReminders);
 router.post('/notifications/check', auth('ADMIN'), controller.checkReminders);
+router.get('/pools/:poolId/billing', auth('ADMIN'), controller.listBilling);
+router.post('/billing/:kind/:id/review', auth('ADMIN'), controller.reviewBilling);
 router.get('/pools/:poolId', auth('ADMIN'), controller.listPool);
 router.post('/pools/:poolId', auth('ADMIN'), controller.create);
 router.put('/plans/:id', auth('ADMIN'), controller.update);
