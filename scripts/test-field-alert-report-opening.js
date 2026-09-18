@@ -74,8 +74,29 @@ const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['127.0.0.1',
  await button.click();await state('opened');assert.equal(await p.evaluate(()=>qaPopups.at(-2).closed),true);assert(pdfText(await opened()).includes('REGULAR_ORIGINAL_ONLY'));assert.equal(new URL(requests.at(-1).url).searchParams.get('visitType'),null);
  assert(requests.every(r=>r.authorization==='Bearer '+token&&!r.url.includes(token)));
  await p.locator('#alertSearch').fill('no matching result');await state('idle');assert.equal(await p.evaluate(()=>qaPopups.at(-1).closed),true);assert.equal(await p.evaluate(()=>qaRevoked.length),2);await p.locator('#alertSearch').fill('');
+ const language=p.locator('#alertReportLanguage');assert.equal(await language.inputValue(),'pt');
+ const titles={pt:'Relatório técnico completo',en:'Full technical report',fr:'Rapport technique complet',es:'Informe técnico completo'};
+ for(const lang of ['en','fr','es','pt']){
+  await language.selectOption(lang);
+  for(const [target,type,marker] of [[button,'REGULAR','REGULAR_ORIGINAL_ONLY'],[extraButton,'EXTRA','EXTRA_EXECUTION_ONLY']]){
+   await target.click();await state('opened');
+   const url=new URL(requests.at(-1).url);assert.equal(url.searchParams.get('lang'),lang);assert.equal(url.searchParams.get('visitType')||'REGULAR',type);
+   const content=pdfText(await opened());assert(content.includes(titles[lang]));assert(content.includes(marker));
+   if(type==='EXTRA')assert(content.includes('EXTRA_INTERNAL_ONLY'));
+  }
+ }
+ await language.selectOption('en');await state('idle');assert(await p.evaluate(()=>qaPopups.at(-1).closed));
+ // Returning to the same language still retires an older in-flight request.
+ let languageEnter,languageRelease;const languageArrived=new Promise(r=>languageEnter=r),languageGate=new Promise(r=>languageRelease=r);
+ const languageEndpoint='**/api/report-visit/visit/*';
+ await p.route(languageEndpoint,async route=>{const response=await route.fetch();languageEnter();await languageGate;await route.fulfill({response}).catch(()=>{});});
+ const beforeLanguage=await p.evaluate(()=>qaCreated.length);await extraButton.click();await languageArrived;await language.selectOption('fr');await state('idle');await language.selectOption('en');languageRelease();await p.unroute(languageEndpoint);assert.equal(await p.evaluate(()=>qaCreated.length),beforeLanguage);
+ await language.evaluate(el=>{el.add(new Option('Invalid','EN'));el.value='EN';el.dispatchEvent(new Event('change',{bubbles:true}));});
+ const beforeInvalid=requests.length;await button.click();await state('error');assert.equal(requests.length,beforeInvalid);await language.selectOption('pt');
+ for(const width of [320,390,1440]){await p.setViewportSize({width,height:900});await language.scrollIntoViewIfNeeded();assert(await language.evaluate(el=>{const r=el.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&r.height>=44;}));await p.locator('#alertReportLanguage').locator('xpath=..').screenshot({path:path.join(evidence,'language-'+width+'.png')});}
+ console.log('PASS alert REGULAR/EXTRA PT/EN/FR/ES, source notes retained, explicit request language, language-change cancellation including A-B-A and invalid selection refusal');
  const endpoint='**/api/report-visit/visit/*';
- for(const mutation of [{headers:{'x-cw-client-id':String(other.id)}},{headers:{'x-cw-visit-type':'EXTRA'}},{headers:{'x-cw-report-type':'extra-visit-pdf'}},{headers:{'x-cw-visit-id':String(visit.id+1)}},{headers:{'x-cw-report-view':'client'}},{body:'%PDF-truncated'},{status:503}]){
+ for(const mutation of [{headers:{'content-language':'en'}},{headers:{'content-language':''}},{headers:{'x-cw-client-id':String(other.id)}},{headers:{'x-cw-visit-type':'EXTRA'}},{headers:{'x-cw-report-type':'extra-visit-pdf'}},{headers:{'x-cw-visit-id':String(visit.id+1)}},{headers:{'x-cw-report-view':'client'}},{body:'%PDF-truncated'},{status:503}]){
   await p.route(endpoint,async route=>{const r=await route.fetch();await route.fulfill({response:r,...mutation,headers:{...r.headers(),...mutation.headers}});});
   const before=await p.evaluate(()=>qaCreated.length);await button.click();await state('error');assert.equal(await p.evaluate(()=>qaCreated.length),before);assert.equal(await p.evaluate(()=>qaPopups.at(-1).closed),true);await p.unroute(endpoint);
  }
@@ -86,6 +107,6 @@ const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['127.0.0.1',
  const before=await p.evaluate(()=>qaCreated.length);await extraButton.click();await arrived;await p.locator('#refreshAlerts').click();await state('idle');release();await p.unroute(endpoint);assert.equal(await p.evaluate(()=>qaCreated.length),before);
  await p.waitForFunction(()=>document.getElementById('alertsStatus').textContent==='Alertas carregados.');
  await c.setOffline(true);await extraButton.click();await state('error');await c.setOffline(false);const count=requests.length;await p.waitForTimeout(300);assert.equal(requests.length,count);
- await extraButton.click();await state('opened');await p.evaluate(()=>localStorage.setItem('user',JSON.stringify({id:999999,role:'ADMIN'})));await state('session');assert.equal(await p.evaluate(()=>qaPopups.at(-1).closed),true);assert(await button.isDisabled());assert(await extraButton.isDisabled());
+ await extraButton.click();await state('opened');await p.evaluate(()=>localStorage.setItem('user',JSON.stringify({id:999999,role:'ADMIN'})));await state('session');assert.equal(await p.evaluate(()=>qaPopups.at(-1).closed),true);assert(await button.isDisabled());assert(await extraButton.isDisabled());assert(await language.isDisabled());
  assert.deepEqual(errors,[]);assert.deepEqual(await counters(),beforeReads);console.log('PASS typed REGULAR/EXTRA alerts and technical links, colliding IDs, execution-only provenance, ambiguous/conflicting/missing sources blocked, no fallback to regular, authenticated PDFs, popup retry, response identity/truncation, filter/reload cancellation, offline and changed session');console.log('EXTRA_ALERT_REPORT_EVIDENCE '+evidence);
 })().catch(e=>{console.error(e);process.exitCode=1;}).finally(async()=>{await browser?.close();await prisma.$disconnect();});

@@ -16,11 +16,11 @@ const alertResolutions = new Set();
 let alertBilling;
 let alertReportSelection = null;
 const alertReports = window.CristalReportDownloads?.create({
-  context: () => ({ read: alertsRead, selection: alertReportSelection }),
+  context: () => ({ read: alertsRead, selection: alertReportSelection, language: document.getElementById('alertReportLanguage')?.value }),
   state: (kind, message) => {
     const status = document.getElementById('alertReportStatus');
     if (status) { status.textContent = message; status.dataset.state = kind; }
-    if (kind === 'session') document.querySelectorAll('[data-report-alert]').forEach(button => button.disabled = true);
+    if (kind === 'session') { document.querySelectorAll('[data-report-alert]').forEach(button => button.disabled = true); const language = document.getElementById('alertReportLanguage'); if (language) language.disabled = true; }
   },
 });
 function invalidateAlertReport() {
@@ -35,9 +35,11 @@ function openAlertReport(reference) {
   if (!alertsSessionCurrent() || !alertsLoaded || !alertReports) return;
   const alert = filteredAlerts().find(row => row.id === reference), report = reportForAlert(alert);
   if (!report) return;
-  alertReportSelection = { reference, visitType: report.type, visitId: report.visitId, clientId: report.clientId };
-  alertReports.open(`/api/report-visit/visit/${report.visitId}?${report.type === 'EXTRA' ? 'visitType=EXTRA&' : ''}view=admin&clientId=${report.clientId}`,
-    { type: 'application/pdf', headers: { 'X-CW-Report-Type': report.type === 'EXTRA' ? 'extra-visit-pdf' : 'visit-pdf', 'X-CW-Visit-Type': report.type, 'X-CW-Visit-Id': report.visitId,
+  const language = document.getElementById('alertReportLanguage')?.value;
+  if (!['pt', 'en', 'fr', 'es'].includes(language)) { alertReports.cancel('Escolha um idioma válido para o relatório.', 'error'); return; }
+  alertReportSelection = { language, reference, visitType: report.type, visitId: report.visitId, clientId: report.clientId };
+  alertReports.open(`/api/report-visit/visit/${report.visitId}?${report.type === 'EXTRA' ? 'visitType=EXTRA&' : ''}view=admin&clientId=${report.clientId}&lang=${language}`,
+    { type: 'application/pdf', headers: { 'Content-Language': language, 'X-CW-Report-Type': report.type === 'EXTRA' ? 'extra-visit-pdf' : 'visit-pdf', 'X-CW-Visit-Type': report.type, 'X-CW-Visit-Id': report.visitId,
       'X-CW-Client-Id': report.clientId, 'X-CW-Report-View': 'admin' } });
 }
 
@@ -1006,6 +1008,7 @@ function setupAlertBilling() {
 }
 
 function setupFilters() {
+  document.getElementById('alertReportLanguage')?.addEventListener('change', invalidateAlertReport);
   ["alertSearch", "alertPriorityFilter", "alertSourceFilter"].forEach((id) => {
     const el = document.getElementById(id);
     if (!el) return;
