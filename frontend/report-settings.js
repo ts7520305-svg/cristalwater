@@ -11,7 +11,7 @@
   const values=()=>Object.fromEntries(fields.map(key=>[key,el(key).checked])),assign=value=>fields.forEach(key=>{el(key).checked=value?.[key]===true;});
   const selected=()=>/^[1-9]\d{0,9}$/.test(input.value.trim())&&id(Number(input.value.trim()))?Number(input.value.trim()):null;
   const text=(parent,tag,value)=>{const node=document.createElement(tag);node.textContent=value;parent.append(node);return node;};
-  let credential='',identity='',owner='',invalid=false,db,storageUnavailable=false,busy=false,view=null,observed=input.value;
+  let credential='',identity='',owner='',invalid=false,db,storageUnavailable=false,busy=false,view=null,observed=input.value,recoveryScan=0;
   const controllers=new Set(),channel=typeof BroadcastChannel==='function'?new BroadcastChannel('cw-report-settings-v1'):null;
   try {
     identity=fingerprint();credential=localStorage.getItem('cristalwater_jwt')||localStorage.getItem('token')||localStorage.getItem('adminToken')||'';
@@ -72,12 +72,15 @@
   async function writeLocal(entry){await access('readwrite',store=>store.put(entry,slot(entry.clientId)));if(!equal(await readLocal(entry.clientId),entry))throw Error('Pedido local não confirmado.');}
   function clearConfirmedDraft(record){try{const value=draft(record.clientId);if(value&&(value.requestId===record.requestId||value.base.version===record.base.version&&equal(value.setting,record.setting)))sessionStorage.removeItem(draftKey(record.clientId));}catch(_){/* The durable acknowledgement prevents replacing an unconfirmed send. */}}
   async function recoverList(){
-    await ready;if(!active())return;const container=el('settingsRecovery');container.replaceChildren();
-    if(storageUnavailable||!navigator.locks?.request){text(container,'p','A recuperação local está indisponível. Pode consultar as opções, mas a gravação está bloqueada.');controls();return;}
-    try{const rows=await access('readonly',store=>{const keys=store.getAllKeys(),values=store.getAll();return()=>keys.result.map((key,index)=>[key,values.result[index]]);});if(!active())return;let count=0;
-      for(const [key,entry] of rows){if(typeof key!=='string'||!key.startsWith(owner+':'))continue;const clientId=Number(key.slice(owner.length+1));if(!id(clientId)||!entry||entry.owner!==owner||entry.clientId!==clientId)throw Error('Há dados de recuperação inválidos nesta conta.');const state=await readLocal(clientId);if(!active())return;if(!state.pending)continue;count++;const box=text(container,'div',''),record=state.pending;text(box,'p',record.base.client.name+' · cliente #'+clientId);const button=text(box,'button','Consultar pedido guardado');button.type='button';button.disabled=busy;button.addEventListener('click',()=>{input.value=String(clientId);changeSelection();load();});}
-      if(!count)text(container,'p','Não há pedidos por confirmar nesta conta.');
-    }catch(error){container.replaceChildren();text(container,'p',error.message);storageUnavailable=true;controls();}
+    // Publish one complete scan; overlapping reads must never mix recovery rows.
+    const scan=++recoveryScan;await ready;if(scan!==recoveryScan||!active())return;
+    const container=el('settingsRecovery'),fragment=document.createDocumentFragment();
+    if(storageUnavailable||!navigator.locks?.request){text(fragment,'p','A recuperação local está indisponível. Pode consultar as opções, mas a gravação está bloqueada.');container.replaceChildren(fragment);controls();return;}
+    try{const rows=await access('readonly',store=>{const keys=store.getAllKeys(),values=store.getAll();return()=>keys.result.map((key,index)=>[key,values.result[index]]);});if(scan!==recoveryScan||!active())return;let count=0;
+      for(const [key,entry] of rows){if(typeof key!=='string'||!key.startsWith(owner+':'))continue;const clientId=Number(key.slice(owner.length+1));if(!id(clientId)||!entry||entry.owner!==owner||entry.clientId!==clientId)throw Error('Há dados de recuperação inválidos nesta conta.');const state=await readLocal(clientId);if(scan!==recoveryScan||!active())return;if(!state.pending)continue;count++;const box=text(fragment,'div',''),record=state.pending;text(box,'p',record.base.client.name+' · cliente #'+clientId);const button=text(box,'button','Consultar pedido guardado');button.type='button';button.disabled=busy;button.addEventListener('click',()=>{input.value=String(clientId);changeSelection();load();});}
+      if(!count)text(fragment,'p','Não há pedidos por confirmar nesta conta.');
+      if(scan===recoveryScan&&active())container.replaceChildren(fragment);
+    }catch(error){if(scan!==recoveryScan||!active())return;container.replaceChildren();text(container,'p',error.message);storageUnavailable=true;controls();}
   }
   async function request(v,method,body){
     const controller=new AbortController();controllers.add(controller);const timer=setTimeout(()=>controller.abort(),20000);

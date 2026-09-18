@@ -59,6 +59,16 @@ const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['127.0.0.1',
  await load(p,a.id);await p.locator('#showPhotos').check();let lostReply,lostBody;
  await p.route(endpoint,async route=>{if(route.request().method()!=='POST')return route.continue();lostBody=route.request().postDataJSON();lostReply=await (await route.fetch()).json();await route.abort('failed');});
  await p.locator('#saveSettings').click();await state(p,'pending');await p.unroute(endpoint);assert.equal(await audits(),2);const lost=await local(p,a.id);assert.equal(lost.pending.requestId,lostBody.requestId);
+ // Deliver an older recovery scan after a newer scan to reproduce duplicate list rows.
+ await p.evaluate(()=>{
+  const transaction=IDBDatabase.prototype.transaction,getAll=IDBObjectStore.prototype.getAll;
+  IDBObjectStore.prototype.getAll=function(...args){if(this.name==='clients')this.transaction.qaRecoveryScan=true;return getAll.apply(this,args);};
+  IDBDatabase.prototype.transaction=function(...args){const tx=transaction.apply(this,args);if(this.name==='cw-report-settings-v1')Object.defineProperty(tx,'oncomplete',{set(fn){tx.addEventListener('complete',event=>{const deliver=()=>{fn.call(tx,event);if(tx.qaRecoveryScan)window.qaDeliveredScans=(window.qaDeliveredScans||0)+1;};if(tx.qaRecoveryScan&&window.qaHoldScan){window.qaHoldScan=false;window.qaReleaseScan=deliver;}else deliver();});}});return tx;};
+  window.qaHoldScan=true;dispatchEvent(new Event('online'));
+ });
+ await p.waitForFunction(()=>typeof window.qaReleaseScan==='function');const scanned=await p.evaluate(()=>window.qaDeliveredScans||0);await p.evaluate(()=>dispatchEvent(new Event('online')));await p.waitForFunction(count=>(window.qaDeliveredScans||0)>count,scanned);
+ await p.waitForFunction(()=>document.querySelectorAll('#settingsRecovery button').length===1);await p.evaluate(()=>window.qaReleaseScan());await p.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));assert.equal(await p.locator('#settingsRecovery button').count(),1,'An older scan must not append a duplicate recovery row');
+ console.log('PASS delayed older recovery scan cannot append duplicate rows after a newer scan');
  await external(a.id,{showChemicals:true});assert.equal(await audits(),3);await load(p,b.id);await p.locator('#showZone').uncheck();const bDraftKey='cwReportSettingsDraft:v1:'+owner+':'+b.id,bDraft=await p.evaluate(key=>sessionStorage.getItem(key),bDraftKey);
  await p.reload({waitUntil:'networkidle'});await p.locator('#settingsRecovery button').click();await state(p,'pending');assert.equal(await p.locator('#clientId').inputValue(),String(a.id));await p.locator('#retrySettings').click();await state(p,'confirmed');assert.equal(await audits(),3);assert.deepEqual((await local(p,a.id)).confirmed.result,lostReply);assert.equal(posts(p).at(-1).body.requestId,lostBody.requestId);assert(await p.locator('#saveSettings').isDisabled());assert.equal((await values(p)).showChemicals,false);assert.equal(await p.evaluate(key=>sessionStorage.getItem(key),bDraftKey),bDraft);await load(p,a.id);assert.equal((await values(p)).showChemicals,true);
  await p.locator('#showNotes').uncheck();let reply,original;
