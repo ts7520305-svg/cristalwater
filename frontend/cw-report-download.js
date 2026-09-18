@@ -2,19 +2,21 @@
   'use strict';
   const keys = ['cristalwater_jwt', 'token', 'adminToken', 'cristalwater_user', 'user'];
   const fingerprint = () => JSON.stringify(keys.map(key => localStorage.getItem(key)));
-  function session() {
+  function session(access) {
     const token = keys.slice(0, 3).map(key => localStorage.getItem(key)).find(Boolean) || '';
     const claims = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
-    const userId = Number(claims.userId || claims.id);
+    const client = access === 'CLIENT_MONTHLY' && claims.role === 'CLIENT';
+    const role = client ? 'CLIENT' : 'ADMIN';
+    const userId = Number(client ? claims.clientId ?? claims.id : claims.userId || claims.id);
     const users = keys.slice(3).map(key => localStorage.getItem(key)).filter(Boolean).map(JSON.parse);
-    if (claims.role !== 'ADMIN' || !Number.isSafeInteger(userId) || userId < 1 || !Number.isFinite(claims.exp) || claims.exp * 1000 <= Date.now() ||
+    if (claims.role !== role || client && claims.principalType && claims.principalType !== 'CLIENT' || !Number.isSafeInteger(userId) || userId < 1 || !Number.isFinite(claims.exp) || claims.exp * 1000 <= Date.now() ||
         keys.slice(0, 3).some(key => localStorage.getItem(key) && localStorage.getItem(key) !== token) ||
-        !users.length || users.some(user => user.role !== 'ADMIN' || Number(user.userId || user.id) !== userId)) throw Error('Sessão não confirmada. Reabra a página com a conta pretendida.');
-    return { token, identity: fingerprint(), expires: claims.exp * 1000 };
+        !users.length || users.some(user => user.role !== role || Number(client ? user.clientId ?? user.id : user.userId || user.id) !== userId)) throw Error('Sessão não confirmada. Reabra a página com a conta pretendida.');
+    return { token, identity: fingerprint(), expires: claims.exp * 1000, clientId: client ? userId : null };
   }
-  function create({ context, state }) {
+  function create({ context, state, access = 'ADMIN_REPORTS' }) {
     let principal, invalid = false, operation = null;
-    try { principal = session(); } catch (_) { invalid = true; }
+    try { principal = session(access); } catch (_) { invalid = true; }
     const sameSession = () => !invalid && principal && principal.identity === fingerprint() && principal.expires > Date.now();
     const snapshot = () => JSON.stringify(context());
     function close(op) {
@@ -34,6 +36,23 @@
       } catch (_) { cancel(); return false; }
       return true;
     }
+    function monthlyUrl(href, pdf) {
+      const url = new URL(href, location.href);
+      const match = (pdf ? /^\/api\/client-reports\/([1-9]\d{0,9})\/reports\/([1-9]\d{0,9})\/pdf$/ : /^\/api\/client-reports\/([1-9]\d{0,9})\/reports$/).exec(url.pathname);
+      if (access !== 'CLIENT_MONTHLY' || url.origin !== location.origin || url.username || url.password || url.hash || url.search || !match ||
+          match.slice(1).some(id => Number(id) > 2147483647) || principal.clientId !== null && Number(match[1]) !== principal.clientId) throw Error('Cliente do relatório não confirmado.');
+      return { url, clientId: match[1] };
+    }
+    async function readList(href, signal) {
+      if (!observe()) throw Error('Sessão não confirmada.');
+      const { url, clientId } = monthlyUrl(href, false), selection = snapshot();
+      const current = () => { if (signal?.aborted || !observe() || selection !== snapshot()) throw Error('A seleção mudou.'); };
+      const response = await fetch(url.pathname, { headers: { Authorization: 'Bearer ' + principal.token }, cache: 'no-store', redirect: 'error', signal });
+      current();
+      if (response.status !== 200 || (response.headers.get('content-type') || '').split(';')[0].trim().toLowerCase() !== 'application/json' ||
+          response.headers.get('X-CW-Report-Type') !== 'client-monthly-list' || response.headers.get('X-CW-Client-Id') !== clientId) throw Error('A resposta não confirma os relatórios deste cliente.');
+      const data = await response.json(); current(); return data;
+    }
     async function open(href, expected) {
       // Retire any old selection, then honor this fresh click in the same session.
       observe();
@@ -42,7 +61,7 @@
       let op;
       try {
         const url = new URL(href, location.href);
-        const allowed = /^\/api\/report-visit\/visit\/[1-9]\d*$/.test(url.pathname) || url.pathname === '/api/reports/monthly-print';
+        const allowed = access === 'CLIENT_MONTHLY' ? !!monthlyUrl(href, true) : /^\/api\/report-visit\/visit\/[1-9]\d*$/.test(url.pathname) || url.pathname === '/api/reports/monthly-print';
         if (url.origin !== location.origin || !allowed || url.username || url.password || url.hash) throw Error('Relatório fora da aplicação.');
         const selection = snapshot();
         if (operation) { close(operation); operation = null; }
@@ -101,7 +120,7 @@
     window.addEventListener('pagehide', () => cancel('Abra novamente o relatório ao regressar à página.'));
     window.addEventListener('pageshow', event => { if (event.persisted) { cancel('Confirme a seleção e abra novamente o relatório.'); observe(); } });
     document.addEventListener('visibilitychange', observe);
-    return { open, cancel, observe };
+    return { open, cancel, observe, readList };
   }
   window.CristalReportDownloads = { create };
 }());

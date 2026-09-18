@@ -33,6 +33,7 @@ const paymentRecovery = CWClientPortalRequest.create({ id: 'paymentNotice', kind
 function selectionIsCurrent(id, revision) {
   return clientId === id && clientSelectionRevision === revision;
 }
+const monthlyReports = window.CWClientMonthlyReports?.create({ context: () => ({ clientId, revision: clientSelectionRevision }), language: () => portalLanguage });
 function updatePortalActionAvailability() {
   ['sendBtn', 'visitRequestBtn', 'paymentNoticeBtn', 'photoBtn'].forEach(id => {
     const button = el(id);
@@ -911,6 +912,7 @@ function setOptionLabels() {
 
 function applyLanguage(language) {
   portalLanguage = normalizeLanguage(language);
+  monthlyReports?.sync();
   localStorage.setItem("cw_client_lang", portalLanguage);
   localStorage.setItem("cw_language", portalLanguage);
   document.documentElement.lang = portalLanguage;
@@ -1790,6 +1792,7 @@ async function chooseAdminClient(nextClientId, updateUrl = true) {
   });
   ++clientSelectionRevision;
   clientId = Number.isInteger(id) && id > 0 ? id : 0;
+  monthlyReports?.sync();
   const selectionRevision = clientSelectionRevision;
   loadedClientId = 0;
   lastPortalSnapshot = {};

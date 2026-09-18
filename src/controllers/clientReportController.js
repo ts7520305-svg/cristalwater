@@ -14,13 +14,18 @@ function sendError(res, error) {
 }
 
 async function listClientReports(req, res) {
-  try { return res.json(await business.list(req.user, req.params.clientId)); }
+  try {
+    const result = await business.list(req.user, req.params.clientId);
+    res.set({ 'X-CW-Report-Type': 'client-monthly-list', 'X-CW-Client-Id': req.params.clientId });
+    return res.json(result);
+  }
   catch (error) { return sendError(res, error); }
 }
 
 async function downloadClientReportPDF(req, res) {
   try {
     const report = await business.read(req.user, req.params.reportId ?? req.params.id, req.params.clientId);
+    res.set({ 'Content-Language': 'pt', 'X-CW-Report-Type': 'client-monthly-pdf', 'X-CW-Client-Id': String(report.clientId), 'X-CW-Report-Id': String(report.id), 'X-CW-Month-Ref': report.month });
     return generateMonthlyReportPDF(res, report);
   } catch (error) { return sendError(res, error); }
 }
