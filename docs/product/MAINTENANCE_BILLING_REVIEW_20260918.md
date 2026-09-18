@@ -27,7 +27,7 @@ O navegador conserva o pedido exato por conta antes de o enviar e coordena janel
 - 396 testes unitários/63 ficheiros e quatro testes de técnicos aprovados; sintaxe 558 backend/183 frontend/56 scripts inline. Runner passa a 152 grupos. Cache v88; 21 migrações existentes, sem migração nova.
 - A primeira tentativa do novo teste usou um alias de faturação mensal inexistente; o ensaio foi corrigido para chamar o negócio mensal efetivamente existente e verificar os 80 EUR independentes. Nenhuma rota de produto foi alterada para acomodar esse erro do teste.
 
-O CI PostgreSQL 16 e o restauro do commit publicado serão registados após a conclusão.
+CI final PostgreSQL 16 **aprovado**: commit `865bff33a7f8894167b0d6470f9478620f628141`, árvore `1d53a9723dbf90809372e9963bf76a030158b005`, [workflow 35382109354](https://github.com/ts7520305-svg/cristalwater/actions/runs/35382109354), job `105720461718`, concluído em 18/09/2026 às 19:01:09 UTC. 152/152 grupos distintos, todos com código zero e sem sinal; o novo percurso comercial completo demorou 8799 ms. 396 unitários/63 ficheiros, quatro técnicos, gate de navegador, 21 migrações aditivas e sintaxe 558/183/56 aprovados. Restauro isolado de 110 tabelas e 46 ficheiros carregados, com linhas e hashes iguais. Publicação na branch autorizada, sem merge/deploy. A atualização documental posterior conserva esta árvore de código/testes. Backups locais `backup/maintenance-billing-local-20260918` e `backup/maintenance-billing-context-local-20260918`.
 
 ## Âmbito e limites
 
