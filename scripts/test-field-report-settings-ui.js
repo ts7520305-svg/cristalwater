@@ -45,7 +45,8 @@ const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['127.0.0.1',
  for(const width of [320,390,1440]){
   await p.setViewportSize({width,height:900});await p.evaluate(()=>scrollTo(0,0));
   const layout=await p.locator('.report-settings-main,.report-settings-main .card,.report-settings-main label,.report-settings-main input:not([type=checkbox]),.report-settings-main button:not([hidden]),#loadedClient,#status').evaluateAll(nodes=>nodes.filter(n=>n.getClientRects().length).map(n=>{const r=n.getBoundingClientRect();return{x:r.x,right:r.right,overflow:n.scrollWidth-n.clientWidth,height:r.height,button:n.tagName==='BUTTON'};}));
-  assert(layout.every(r=>r.x>=0&&r.right<=width+1&&r.overflow<=1&&(!r.button||r.height>=44)),JSON.stringify({width,layout}));assert.equal(await p.locator('.report-settings-main .cw-v2-state-loading,.report-settings-main .loading').count(),0);await p.screenshot({path:path.join(visual,'defaults-'+width+'.png'),fullPage:true});
+  // Chromium may report 43.999969 for a 44px rectangle after the shell moves it.
+  assert(layout.every(r=>r.x>=0&&r.right<=width+1&&r.overflow<=1&&(!r.button||r.height>=43.99)),JSON.stringify({width,layout}));assert.equal(await p.locator('.report-settings-main .cw-v2-state-loading,.report-settings-main .loading').count(),0);await p.screenshot({path:path.join(visual,'defaults-'+width+'.png'),fullPage:true});
  }
  await p.setViewportSize({width:390,height:900});
  for(const colorScheme of ['dark','light']){
