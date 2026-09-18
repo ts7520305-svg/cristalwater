@@ -1,0 +1,412 @@
+'use strict';
+// Only application-owned labels and messages belong here; never translate stored free text.
+const messages = {
+  "Relatório técnico completo": {
+    "en": "Full technical report",
+    "fr": "Rapport technique complet",
+    "es": "Informe técnico completo"
+  },
+  "Relatório de manutenção": {
+    "en": "Maintenance report",
+    "fr": "Rapport d’entretien",
+    "es": "Informe de mantenimiento"
+  },
+  "Visita extra #": {
+    "en": "Extra visit #",
+    "fr": "Visite supplémentaire n°",
+    "es": "Visita extra n.º"
+  },
+  "Visita #": {
+    "en": "Visit #",
+    "fr": "Visite n°",
+    "es": "Visita n.º"
+  },
+  "Sim": {
+    "en": "Yes",
+    "fr": "Oui",
+    "es": "Sí"
+  },
+  "Não": {
+    "en": "No",
+    "fr": "Non",
+    "es": "No"
+  },
+  "Não registado": {
+    "en": "Not recorded",
+    "fr": "Non enregistré",
+    "es": "No registrado"
+  },
+  "Por confirmar": {
+    "en": "To be confirmed",
+    "fr": "À confirmer",
+    "es": "Por confirmar"
+  },
+  "Cliente": {
+    "en": "Client",
+    "fr": "Client",
+    "es": "Cliente"
+  },
+  "Instalação": {
+    "en": "Facility",
+    "fr": "Installation",
+    "es": "Instalación"
+  },
+  "Zona": {
+    "en": "Area",
+    "fr": "Zone",
+    "es": "Zona"
+  },
+  "Morada": {
+    "en": "Address",
+    "fr": "Adresse",
+    "es": "Dirección"
+  },
+  "Técnico atribuído (registo atual)": {
+    "en": "Assigned technician (current record)",
+    "fr": "Technicien affecté (fiche actuelle)",
+    "es": "Técnico asignado (registro actual)"
+  },
+  "Técnico": {
+    "en": "Technician",
+    "fr": "Technicien",
+    "es": "Técnico"
+  },
+  "Estado": {
+    "en": "Status",
+    "fr": "État",
+    "es": "Estado"
+  },
+  "Planeada (hora de Portugal)": {
+    "en": "Planned (Portugal time)",
+    "fr": "Prévue (heure du Portugal)",
+    "es": "Prevista (hora de Portugal)"
+  },
+  "Início (hora de Portugal)": {
+    "en": "Start (Portugal time)",
+    "fr": "Début (heure du Portugal)",
+    "es": "Inicio (hora de Portugal)"
+  },
+  "Fim (hora de Portugal)": {
+    "en": "End (Portugal time)",
+    "fr": "Fin (heure du Portugal)",
+    "es": "Fin (hora de Portugal)"
+  },
+  "Dados da visita extra": {
+    "en": "Extra visit details",
+    "fr": "Détails de la visite supplémentaire",
+    "es": "Datos de la visita extra"
+  },
+  "Dados da visita": {
+    "en": "Visit details",
+    "fr": "Détails de la visite",
+    "es": "Datos de la visita"
+  },
+  "Parâmetros da água": {
+    "en": "Water readings",
+    "fr": "Paramètres de l’eau",
+    "es": "Parámetros del agua"
+  },
+  "Cloro": {
+    "en": "Chlorine",
+    "fr": "Chlore",
+    "es": "Cloro"
+  },
+  "Alcalinidade": {
+    "en": "Alkalinity",
+    "fr": "Alcalinité",
+    "es": "Alcalinidad"
+  },
+  "Sal": {
+    "en": "Salt",
+    "fr": "Sel",
+    "es": "Sal"
+  },
+  "Temperatura": {
+    "en": "Temperature",
+    "fr": "Température",
+    "es": "Temperatura"
+  },
+  "Trabalhos registados": {
+    "en": "Recorded work",
+    "fr": "Travaux enregistrés",
+    "es": "Trabajos registrados"
+  },
+  "Limpeza geral": {
+    "en": "General cleaning",
+    "fr": "Nettoyage général",
+    "es": "Limpieza general"
+  },
+  "Escovagem": {
+    "en": "Brushing",
+    "fr": "Brossage",
+    "es": "Cepillado"
+  },
+  "Aspiração": {
+    "en": "Vacuuming",
+    "fr": "Aspiration",
+    "es": "Aspiración"
+  },
+  "Cestos limpos": {
+    "en": "Baskets cleaned",
+    "fr": "Paniers nettoyés",
+    "es": "Cestos limpios"
+  },
+  "Linha de água limpa": {
+    "en": "Waterline cleaned",
+    "fr": "Ligne d’eau nettoyée",
+    "es": "Línea de agua limpia"
+  },
+  "Retrolavagem": {
+    "en": "Backwash",
+    "fr": "Contre-lavage",
+    "es": "Contralavado"
+  },
+  "Químicos aplicados": {
+    "en": "Chemicals applied",
+    "fr": "Produits appliqués",
+    "es": "Productos aplicados"
+  },
+  "Nenhum químico registado.": {
+    "en": "No chemicals recorded.",
+    "fr": "Aucun produit enregistré.",
+    "es": "Ningún producto registrado."
+  },
+  "Equipamento atual da instalação": {
+    "en": "Current facility equipment",
+    "fr": "Équipements actuels de l’installation",
+    "es": "Equipamiento actual de la instalación"
+  },
+  "Bomba": {
+    "en": "Pump",
+    "fr": "Pompe",
+    "es": "Bomba"
+  },
+  "Potência da bomba": {
+    "en": "Pump power",
+    "fr": "Puissance de la pompe",
+    "es": "Potencia de la bomba"
+  },
+  "Filtro": {
+    "en": "Filter",
+    "fr": "Filtre",
+    "es": "Filtro"
+  },
+  "Meio filtrante": {
+    "en": "Filter media",
+    "fr": "Média filtrant",
+    "es": "Medio filtrante"
+  },
+  "Sistema de sal": {
+    "en": "Salt system",
+    "fr": "Système au sel",
+    "es": "Sistema salino"
+  },
+  "Quantidade de sal": {
+    "en": "Salt quantity",
+    "fr": "Quantité de sel",
+    "es": "Cantidad de sal"
+  },
+  "Luzes": {
+    "en": "Lights",
+    "fr": "Éclairages",
+    "es": "Luces"
+  },
+  "Luzes avariadas": {
+    "en": "Faulty lights",
+    "fr": "Éclairages en panne",
+    "es": "Luces averiadas"
+  },
+  "Tipo de luz": {
+    "en": "Light type",
+    "fr": "Type d’éclairage",
+    "es": "Tipo de luz"
+  },
+  "Casa técnica - registo atual": {
+    "en": "Plant room - current record",
+    "fr": "Local technique - fiche actuelle",
+    "es": "Sala técnica - registro actual"
+  },
+  "Localização": {
+    "en": "Location",
+    "fr": "Emplacement",
+    "es": "Ubicación"
+  },
+  "Ventilação": {
+    "en": "Ventilation",
+    "fr": "Ventilation",
+    "es": "Ventilación"
+  },
+  "Elétrica": {
+    "en": "Electrical",
+    "fr": "Électricité",
+    "es": "Electricidad"
+  },
+  "Notas": {
+    "en": "Notes",
+    "fr": "Notes",
+    "es": "Notas"
+  },
+  "Observações": {
+    "en": "Observations",
+    "fr": "Observations",
+    "es": "Observaciones"
+  },
+  "Sem observações.": {
+    "en": "No observations.",
+    "fr": "Aucune observation.",
+    "es": "Sin observaciones."
+  },
+  "Indicações de planeamento": {
+    "en": "Planning instructions",
+    "fr": "Consignes de planification",
+    "es": "Indicaciones de planificación"
+  },
+  "Ocorrência registada": {
+    "en": "Recorded issue",
+    "fr": "Incident enregistré",
+    "es": "Incidencia registrada"
+  },
+  "Notas internas": {
+    "en": "Internal notes",
+    "fr": "Notes internes",
+    "es": "Notas internas"
+  },
+  "Sem notas internas.": {
+    "en": "No internal notes.",
+    "fr": "Aucune note interne.",
+    "es": "Sin notas internas."
+  },
+  "Fotografias da visita": {
+    "en": "Visit photographs",
+    "fr": "Photos de la visite",
+    "es": "Fotografías de la visita"
+  },
+  "Nenhuma foto registada.": {
+    "en": "No photographs recorded.",
+    "fr": "Aucune photo enregistrée.",
+    "es": "Ninguna fotografía registrada."
+  },
+  "Imprimir / Guardar PDF": {
+    "en": "Print / Save PDF",
+    "fr": "Imprimer / Enregistrer le PDF",
+    "es": "Imprimir / Guardar PDF"
+  },
+  "Documento gerado pelo sistema Cristal Water. Os dados da instalação correspondem ao registo atual.": {
+    "en": "Document generated by Cristal Water. Facility details reflect the current record.",
+    "fr": "Document généré par Cristal Water. Les données de l’installation correspondent à la fiche actuelle.",
+    "es": "Documento generado por Cristal Water. Los datos de la instalación corresponden al registro actual."
+  },
+  "Caracteres por confirmar": {
+    "en": "Characters to confirm",
+    "fr": "Caractères à confirmer",
+    "es": "Caracteres por confirmar"
+  },
+  "Alguns caracteres não são suportados por este PDF e aparecem como [U+...]. Consulte o registo original para confirmar o texto.": {
+    "en": "Some characters are not supported by this PDF and appear as [U+...]. Check the original record to confirm the text.",
+    "fr": "Certains caractères ne sont pas pris en charge dans ce PDF et apparaissent sous la forme [U+...]. Consultez le document original pour vérifier le texte.",
+    "es": "Algunos caracteres no son compatibles con este PDF y aparecen como [U+...]. Consulte el registro original para confirmar el texto."
+  },
+  "Dados da instalação: registo atual": {
+    "en": "Facility details: current record",
+    "fr": "Données de l’installation : fiche actuelle",
+    "es": "Datos de la instalación: registro actual"
+  },
+  "Consumo não registado.": {
+    "en": "Consumption not recorded.",
+    "fr": "Consommation non enregistrée.",
+    "es": "Consumo no registrado."
+  },
+  "Consumo por confirmar. Peça a revisão do registo.": {
+    "en": "Consumption to be confirmed. Ask for the record to be reviewed.",
+    "fr": "Consommation à confirmer. Demandez une vérification de la fiche.",
+    "es": "Consumo por confirmar. Solicite la revisión del registro."
+  },
+  "Sem observações registadas.": {
+    "en": "No observations recorded.",
+    "fr": "Aucune observation enregistrée.",
+    "es": "Sin observaciones registradas."
+  },
+  "Observações de execução não registadas.": {
+    "en": "Work observations not recorded.",
+    "fr": "Observations des travaux non enregistrées.",
+    "es": "Observaciones de ejecución no registradas."
+  },
+  "Observações de execução por confirmar.": {
+    "en": "Work observations to be confirmed.",
+    "fr": "Observations des travaux à confirmer.",
+    "es": "Observaciones de ejecución por confirmar."
+  },
+  "Antes": {
+    "en": "Before",
+    "fr": "Avant",
+    "es": "Antes"
+  },
+  "Depois": {
+    "en": "After",
+    "fr": "Après",
+    "es": "Después"
+  },
+  "Problema": {
+    "en": "Problem",
+    "fr": "Problème",
+    "es": "Problema"
+  },
+  "Acesso": {
+    "en": "Access",
+    "fr": "Accès",
+    "es": "Acceso"
+  },
+  "Geral": {
+    "en": "General",
+    "fr": "Général",
+    "es": "General"
+  },
+  "Registo": {
+    "en": "Record",
+    "fr": "Enregistrement",
+    "es": "Registro"
+  },
+  "Fotografia": {
+    "en": "Photograph",
+    "fr": "Photo",
+    "es": "Fotografía"
+  },
+  "Fotografia indisponível. Peça a revisão do registo.": {
+    "en": "Photograph unavailable. Ask for the record to be reviewed.",
+    "fr": "Photo indisponible. Demandez une vérification de la fiche.",
+    "es": "Fotografía no disponible. Solicite la revisión del registro."
+  },
+  "Fotografia não incluída por exceder os limites do relatório.": {
+    "en": "Photograph omitted because it exceeds report limits.",
+    "fr": "Photo non incluse car elle dépasse les limites du rapport.",
+    "es": "Fotografía no incluida por superar los límites del informe."
+  },
+  " (primeiro fotograma)": {
+    "en": " (first frame)",
+    "fr": " (première image)",
+    "es": " (primer fotograma)"
+  },
+  "Outras fotografias": {
+    "en": "Other photographs",
+    "fr": "Autres photos",
+    "es": "Otras fotografías"
+  },
+  "{count} fotografia(s) não incluída(s). Limite de {limit} por relatório; consulte o registo da visita.": {
+    "en": "{count} photograph(s) omitted. Limit of {limit} per report; consult the visit record.",
+    "fr": "{count} photo(s) non incluse(s). Limite de {limit} par rapport ; consultez la fiche de visite.",
+    "es": "{count} fotografía(s) no incluida(s). Límite de {limit} por informe; consulte el registro de la visita."
+  }
+};
+const locales = Object.freeze({ pt: 'pt-PT', en: 'en-GB', fr: 'fr-FR', es: 'es-ES' });
+function language(value = 'pt') {
+  if (typeof value !== 'string' || !Object.hasOwn(locales, value)) throw Object.assign(Error('Idioma do relatório inválido.'), { statusCode: 400 });
+  return value;
+}
+function translator(value) {
+  const lang = language(value);
+  return (key, params = {}) => {
+    const message = lang === 'pt' ? key : messages[key]?.[lang] ?? key;
+    return message.replace(/\{(count|limit)\}/g, (match, name) => Object.hasOwn(params, name) ? String(params[name]) : match);
+  };
+}
+module.exports = { language, translator, locales };

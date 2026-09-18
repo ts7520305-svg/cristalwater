@@ -157,6 +157,8 @@
       <div>
         <label for="visitType">Tipo de visita</label>
         <select id="visitType" style="min-width:0;max-width:100%;appearance:none;text-overflow:ellipsis" data-cw-no-i18n><option value="REGULAR">Regular</option><option value="EXTRA">Extra</option></select>
+        <label for="reportLanguage">Idioma do relatório</label>
+        <select id="reportLanguage" style="min-width:0;max-width:100%" data-cw-no-i18n><option value="pt">Português</option><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option></select>
         <label for="visitId">ID da visita para pré-visualizar</label>
         <input id="visitId" inputmode="numeric" autocomplete="off" placeholder="Ex: 4">
       </div>
@@ -208,6 +210,7 @@
 
   <div class="card">
     <h2>Pré-visualização rápida</h2>
+    <p>O idioma aplica-se aos títulos e mensagens. As notas e os dados introduzidos mantêm o texto original.</p>
     <p id="previewNotice">Carregue as configurações do cliente e indique uma visita.</p>
     <p id="previewStatus" role="status" aria-live="polite" data-state="idle">Escolha a versão do relatório que pretende consultar.</p>
     <div class="row" style="margin-top:12px;">

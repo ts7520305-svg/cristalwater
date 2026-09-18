@@ -3,6 +3,7 @@ const fs = require('node:fs'), path = require('node:path');
 const { createHash } = require('node:crypto');
 const sharp = require('sharp');
 const { resolveUploadBaseDir, getUploadsPublicBasePath } = require('../config/uploadPath');
+const { translator } = require('./visitReportLanguage');
 const MAX_PHOTOS = 24, MAX_FILE = 25 * 1024 * 1024, MAX_TOTAL = 64 * 1024 * 1024;
 const labels = { BEFORE: 'Antes', AFTER: 'Depois', PROBLEM: 'Problema', ACCESS: 'Acesso', GENERAL: 'Geral' };
 const unavailable = 'Fotografia indisponível. Peça a revisão do registo.';
@@ -20,13 +21,14 @@ function raster(bytes) {
 // Never fetch a URL or follow a path supplied by a photo record.
 async function prepare(report) {
   if (report.view !== 'admin' && !report.setting.showPhotos) return [];
+  const t = translator(report.language);
   const result = [], root = resolveUploadBaseDir(), started = Date.now();
   let total = 0;
   const records = report.visit.photos || [], extra = report.visitType === 'EXTRA';
   for (const [index, photo] of records.slice(0, MAX_PHOTOS).entries()) {
-    const entry = { id: photo.id, label: `Fotografia ${index + 1} - ${labels[photo.type] || 'Registo'}`, message: unavailable };
+    const entry = { id: photo.id, label: `${t('Fotografia')} ${index + 1} - ${t(labels[photo.type] || 'Registo')}`, message: t(unavailable) };
     result.push(entry);
-    if (Date.now() - started > 10000) { entry.message = limited; continue; }
+    if (Date.now() - started > 10000) { entry.message = t(limited); continue; }
     const prefix = getUploadsPublicBasePath() + '/';
     if (photo[extra ? 'extraVisitId' : 'visitId'] !== report.visit.id || typeof photo.url !== 'string' || !photo.url.startsWith(prefix)) continue;
     const filename = photo.url.slice(prefix.length);
@@ -41,7 +43,7 @@ async function prepare(report) {
       file = await fs.promises.open(target, fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW || 0) | (fs.constants.O_NONBLOCK || 0));
       const stat = await file.stat();
       if (!stat.isFile() || !stat.size) continue;
-      if (stat.size > MAX_FILE || total + stat.size > MAX_TOTAL) { entry.message = limited; continue; }
+      if (stat.size > MAX_FILE || total + stat.size > MAX_TOTAL) { entry.message = t(limited); continue; }
       total += stat.size;
       // A bounded read also refuses a file replaced or enlarged after stat().
       const buffer = Buffer.alloc(stat.size + 1); let length = 0;
@@ -61,12 +63,12 @@ async function prepare(report) {
       const { data, info } = await pipeline.autoOrient().resize({ width: 1600, height: 1600, fit: 'inside', withoutEnlargement: true })
         .flatten({ background: '#ffffff' }).jpeg({ quality: 85 }).toBuffer({ resolveWithObject: true });
       Object.assign(entry, { bytes: data, width: info.width, height: info.height, message: null });
-      if (metadata.pages > 1) entry.label += ' (primeiro fotograma)';
+      if (metadata.pages > 1) entry.label += t(' (primeiro fotograma)');
     } catch (_) { /* A missing, unsupported or damaged image must not break the report. */ }
     finally { if (file) await file.close().catch(() => {}); }
   }
   const count = report.visit._count?.photos ?? records.length;
-  if (count > MAX_PHOTOS) result.push({ label: 'Outras fotografias', message: `${count - MAX_PHOTOS} fotografia(s) não incluída(s). Limite de ${MAX_PHOTOS} por relatório; consulte o registo da visita.` });
+  if (count > MAX_PHOTOS) result.push({ label: t('Outras fotografias'), message: t('{count} fotografia(s) não incluída(s). Limite de {limit} por relatório; consulte o registo da visita.', { count: count - MAX_PHOTOS, limit: MAX_PHOTOS }) });
   return result;
 }
 module.exports = { prepare };

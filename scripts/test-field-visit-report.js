@@ -93,5 +93,83 @@ const pdfText = require('./lib/reportPdfText');
   const visibleOnly=await call('?view=client');assert(!visibleOnly.text.includes('Caracteres por confirmar'));assert(!visibleOnly.text.includes('[U+1F9EA]'));await prisma.serviceVisit.update({where:{id:visit.id},data:{notes:original.notes}});
   console.log('PASS embedded fonts preserve Latin extended/Greek/Cyrillic, NFC text, explicit unsupported glyphs only for visible content, source unchanged and complete multipage text');
   console.log('PASS visit PDF/HTML: authenticated role and historical client ownership, client preview without internal notes, exact client/settings version, strict queries, private response contract, saved field visibility, missing/conflicting client refusal, literal HTML and side-effect-free reads');
+  // Explicit report language must never translate user text that happens to match a label.
+  const languageExpected = {
+    pt: ['Relatório de manutenção','Parâmetros da água','Fotografia indisponível','Sim','Não registado'],
+    en: ['Maintenance report','Water readings','Photograph unavailable','Yes','Not recorded'],
+    fr: ['Rapport d’entretien','Paramètres de l’eau','Photo indisponible','Oui','Non enregistré'],
+    es: ['Informe de mantenimiento','Parámetros del agua','Fotografía no disponible','Sí','No registrado'],
+  };
+  const allOn = Object.fromEntries(keys.map(key => [key, true]));
+  await prisma.clientReportSetting.update({where:{clientId:client.id},data:allOn});
+  await prisma.serviceVisit.update({where:{id:visit.id},data:{notes:'Sem observações.',cleaned:true}});
+  const extra = await prisma.extraVisit.create({data:{clientId:client.id,poolId:pool.id,status:'DONE',notes:'PLANNING_PRIVATE',internalNote:'INTERNAL_SECRET',execution:{notes:'Sem observações.',cleaned:true,brushed:false,ph:7.3,chemicalsJson:[{name:'Bomba',quantity:2,unit:'kg'}]},photos:{create:{type:'AFTER',url:'UNAVAILABLE'}}}});
+  const legacyExtra = await prisma.extraVisit.create({data:{clientId:client.id,poolId:pool.id,status:'DONE'}});
+  const beforeLanguage = await counts();
+  for (const [lang, expected] of Object.entries(languageExpected)) {
+    for(const route of ['report-visit','reports']) {
+      for(const [target, type] of [[visit.id,'REGULAR'],[extra.id,'EXTRA']]) {
+        const translated=await call('?view=client&lang='+lang+'&visitType='+type,token,route,target);
+        assert.equal(translated.status,200);assert.equal(translated.headers.get('content-language'),lang);
+        for(const marker of expected.slice(0,4))assert(translated.text.includes(marker),lang+' '+type+' missing '+marker);
+        assert(translated.text.includes('Sem observações.'),'User text was translated');
+        assert(!translated.text.includes('INTERNAL_SECRET'));assert(!translated.text.includes('PLANNING_PRIVATE'));
+        if(type==='EXTRA')assert(translated.text.includes('Bomba'),'Stored product name was translated');
+        if(route==='reports')assert(translated.text.includes('<html lang="'+lang+'">'));
+        else fs.writeFileSync(path.join(dir,lang+'-'+type.toLowerCase()+'.pdf'),translated.bytes);
+        const privateReport=await call('?view=admin&lang='+lang+'&visitType='+type,token,route,target);
+        assert.equal(privateReport.status,200);assert(privateReport.text.includes('INTERNAL_SECRET'));
+      }
+      const absent=await call('?view=client&visitType=EXTRA&lang='+lang,token,route,legacyExtra.id);
+      assert.equal(absent.status,200);assert(absent.text.includes(expected[4]));
+      const own=await call('?view=client&lang='+lang,clientToken,route);assert.equal(own.status,200);
+      assert.equal((await call('?view=admin&lang='+lang,clientToken,route)).status,403);
+      for(const bad of ['','de','EN','en-GB','__proto__','constructor','en&lang=fr','en&lang[x]=fr'])assert.equal((await call('?lang='+bad,token,route)).status,400,bad);
+    }
+  }
+  assert.deepEqual(await counts(),beforeLanguage);
+  assert.equal((await prisma.serviceVisit.findUniqueOrThrow({where:{id:visit.id}})).notes,'Sem observações.');
+  const malformed=await prisma.extraVisit.update({where:{id:legacyExtra.id},data:{execution:{ph:'bad',cleaned:'bad',notes:55,chemicalsJson:'bad'}}});
+  const review=await call('?view=client&visitType=EXTRA&lang=en',token,'reports',malformed.id);
+  for(const marker of ['To be confirmed','Consumption to be confirmed','Work observations to be confirmed'])assert(review.text.includes(marker));
+  // Translate generated photo limit notices without touching photograph bytes or storage.
+  const photoService=require('../src/services/visitReportPhotoService');
+  const overLimit=await photoService.prepare({language:'en',view:'admin',visit:{id:visit.id,photos:[],_count:{photos:27}}});
+  assert.equal(overLimit[0].label,'Other photographs');assert(overLimit[0].message.includes('3 photograph(s) omitted. Limit of 24'));
+  await prisma.serviceVisit.update({where:{id:visit.id},data:{notes:original.notes}});
+  const longFrench=await call('?view=admin&lang=fr');assert(longFrench.text.includes('LONG_NOTE_END'));assert(longFrench.text.includes('Caractères à confirmer'));fs.writeFileSync(path.join(dir,'fr-long-admin.pdf'),longFrench.bytes);
+  // Real browser selection, identity validation and cancellation when language changes.
+  const browser=await require('playwright').chromium.launch({headless:true,executablePath:process.env.CW_CHROMIUM_PATH,args:['--no-sandbox','--disable-dev-shm-usage']});
+  try {
+    const context=await browser.newContext({serviceWorkers:'block'}),errors=[];
+    await context.addInitScript(({token,id})=>{
+      for(const key of ['token','adminToken','cristalwater_jwt'])localStorage.setItem(key,token);
+      for(const key of ['user','cristalwater_user'])localStorage.setItem(key,JSON.stringify({id,role:'ADMIN'}));
+      localStorage.setItem('cw_language','pt');window.qaPopups=[];window.qaCreated=[];window.qaRevoked=[];
+      window.open=()=>{const p={location:{},closed:false,close(){this.closed=true;}};qaPopups.push(p);return p;};
+      const create=URL.createObjectURL.bind(URL),revoke=URL.revokeObjectURL.bind(URL);URL.createObjectURL=b=>{const u=create(b);qaCreated.push(u);return u;};URL.revokeObjectURL=u=>{qaRevoked.push(u);revoke(u);};
+    },{token,id:admin.id});
+    const page=await context.newPage();page.setDefaultTimeout(10000);page.on('pageerror',e=>errors.push(e.message));
+    await page.goto(base+'/report-settings',{waitUntil:'networkidle'});await page.locator('#clientId').fill(String(client.id));await page.locator('#loadSettings').click();await page.waitForFunction(()=>document.getElementById('loadedClient').textContent.includes('QA_CLIENT_'));
+    await page.locator('#visitId').fill(String(visit.id));
+    const choice=page.locator('#reportLanguage'),button=page.locator('#openClientReport'),state=kind=>page.waitForFunction(k=>document.getElementById('previewStatus').dataset.state===k,kind);
+    assert.equal(await choice.inputValue(),'pt');
+    for(const width of [320,390,1440]){await page.setViewportSize({width,height:900});assert(await choice.evaluate(e=>e.getBoundingClientRect().right<=innerWidth&&e.getBoundingClientRect().left>=0));await page.screenshot({path:path.join(dir,'language-'+width+'.png'),fullPage:true});}
+    for(const lang of ['en','fr','es','pt']){
+      await choice.selectOption(lang);await button.click();await state('opened');
+      const content=Buffer.from(await page.evaluate(async()=>Array.from(new Uint8Array(await(await fetch(qaCreated.at(-1))).arrayBuffer()))));assert(pdfText(content).includes(languageExpected[lang][0]));
+    }
+    await choice.selectOption('en');await state('idle');assert(await page.evaluate(()=>qaPopups.at(-1).closed));assert((await page.evaluate(()=>qaRevoked.length))>=4);
+    const endpoint='**/api/report-visit/visit/*';
+    await page.route(endpoint,async route=>{const response=await route.fetch();await route.fulfill({response,headers:{...response.headers(),'content-language':'pt'}});});
+    const beforeBlobs=await page.evaluate(()=>qaCreated.length);await button.click();await state('error');assert.equal(await page.evaluate(()=>qaCreated.length),beforeBlobs);await page.unroute(endpoint);
+    let enter,release;const arrived=new Promise(r=>enter=r),gate=new Promise(r=>release=r);
+    await page.route(endpoint,async route=>{const response=await route.fetch();enter();await gate;await route.fulfill({response}).catch(()=>{});});
+    await button.click();await arrived;await choice.selectOption('fr');await state('idle');release();await page.unroute(endpoint);assert.equal(await page.evaluate(()=>qaCreated.length),beforeBlobs);
+    await page.locator('#visitType').selectOption('EXTRA');await page.locator('#visitId').fill(String(extra.id));await button.click();await state('opened');
+    const extraPdf=Buffer.from(await page.evaluate(async()=>Array.from(new Uint8Array(await(await fetch(qaCreated.at(-1))).arrayBuffer()))));assert(pdfText(extraPdf).includes('Visite supplémentaire n°'+extra.id));
+    await page.evaluate(()=>localStorage.setItem('user',JSON.stringify({id:999999,role:'ADMIN'})));await state('session');assert(await choice.isDisabled());assert(await button.isDisabled());assert.deepEqual(errors,[]);
+  }finally{await browser.close();}
+  console.log('PASS PT/EN/FR/ES PDF and HTML, generated EXTRA notices, unchanged source text, private notes, strict language validation, responsive selector, response language identity and in-flight cancellation');
   console.log('PDF_EVIDENCE ' + dir);
 })().catch(error => { console.error(error); process.exitCode = 1; }).finally(() => prisma.$disconnect());
