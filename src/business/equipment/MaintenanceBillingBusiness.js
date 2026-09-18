@@ -43,10 +43,11 @@ async function list(user, poolId, query = {}) {
   const rows = records.slice(0, 25).map(row => projection(type, row, pool));
   const decisions = await prisma.operationalReminder.findMany({ where: { sourceKey: { in: rows.map(row => key(type, row.sourceId)) } }, select: { sourceKey: true, metadata: true } });
   const saved = new Map(decisions.map(row => [row.sourceKey, row.metadata.result]));
+  const contexts = new Map(decisions.map(row => [row.sourceKey, { clientId: row.metadata.source.clientId, clientName: row.metadata.source.clientName, poolId: row.metadata.source.poolId, poolName: row.metadata.source.poolName }]));
   const invoices = await prisma.invoice.findMany({ where: { id: { in: decisions.map(row => row.metadata.result.invoiceId).filter(positive) } }, select: { id: true, status: true } });
   const states = new Map(invoices.map(row => [row.id, row.status]));
   return { ok: true, kind: type, poolId: pid, clientId: pool.clientId, poolName: pool.name, clientName: pool.client.name,
-    rows: rows.map(row => { const decision = saved.get(key(type, row.sourceId)) || null; return { ...row, decision, invoiceStatus: decision?.invoiceId ? states.get(decision.invoiceId) || 'UNAVAILABLE' : null }; }),
+    rows: rows.map(row => { const decision = saved.get(key(type, row.sourceId)) || null; return { ...row, decision, reviewedFor: contexts.get(key(type, row.sourceId)) || null, invoiceStatus: decision?.invoiceId ? states.get(decision.invoiceId) || 'UNAVAILABLE' : null }; }),
     nextBefore: records.length > 25 ? rows.at(-1).sourceId : null };
 }
 async function review(user, rawKind, sourceId, body) {

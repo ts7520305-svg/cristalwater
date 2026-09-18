@@ -41,6 +41,7 @@
       const card = node('article', '', list); card.className = 'mb-card'; card.dataset.mbSource = `${row.kind}:${row.sourceId}`;
       node('h3', row.title, card); node('p', `Concluída: ${new Date(row.completedAt).toLocaleString('pt-PT')}${row.visitId ? ` · Visita ${row.visitType === 'EXTRA' ? 'extra' : 'regular'} #${row.visitId}` : ''}`, card); node('p', row.details, card);
       if (row.decision) {
+        node('p', `Decisão para ${row.reviewedFor.clientName} · ${row.reviewedFor.poolName}`, card);
         const invoiceLabel = { DRAFT: 'Rascunho', PENDING: 'Pendente', ISSUED: 'Emitido', PAID: 'Pago', PARTIAL: 'Pagamento parcial', CANCELLED: 'Cancelado', CANCELED: 'Cancelado', VOID: 'Anulado', UNAVAILABLE: 'Indisponível' }[row.invoiceStatus] || row.invoiceStatus;
         node('strong', row.decision.mode === 'INCLUDED' ? 'Incluída na mensalidade · Sem valor extra' : `Extra: ${(row.decision.amountCents / 100).toFixed(2)} EUR · Documento #${row.decision.invoiceId} · ${invoiceLabel}`, card);
         node('p', row.decision.note, card);
@@ -57,6 +58,7 @@
   async function load(before = null) {
     if (!session()) return; controller?.abort(); controller = new AbortController(); const current = ++revision, pid = poolId, kind = el('mbKind').value;
     rows = []; selected = null; nextBefore = null; el('mbRows').replaceChildren(); loading = Boolean(pid); renderControls(); if (!pid) return;
+    status('A consultar intervenções…');
     try {
       const response = await fetch(`/api/equipment-maintenance/pools/${pid}/billing?kind=${kind}${before ? `&before=${before}` : ''}`, { headers: { Authorization: `Bearer ${sessionToken}` }, cache: 'no-store', signal: AbortSignal.any([controller.signal, AbortSignal.timeout(20000)]) });
       const data = await response.json(); if (!session() || current !== revision) return;
