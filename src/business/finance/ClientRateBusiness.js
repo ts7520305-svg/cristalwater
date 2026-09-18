@@ -1,5 +1,6 @@
 const { prisma } = require('../../prismaClient');
 const DAY = 86400000;
+const services = require('../../services/clientServicePlan');
 function fail(message, status = 400) { const error = new Error(message); error.status = status; throw error; }
 function date(value) {
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) fail('Data inválida; use AAAA-MM-DD');
@@ -14,6 +15,10 @@ function cents(value) {
   return Math.round(n * 100);
 }
 function validate(payload = {}) {
+  if (payload.servicePlan != null) {
+    if (Number(payload.baseMonthlyAmount)!==0 || !Array.isArray(payload.periods) || payload.periods.length) fail('O plano sazonal define o preço total; não o combine com preços antigos.');
+    return {currency:'EUR',baseCents:0,periods:[],method:'CALENDAR_DAY_PRORATA',servicePlan:services.validate(payload.servicePlan,cents)};
+  }
   const baseCents = cents(payload.baseMonthlyAmount);
   if (!Array.isArray(payload.periods) || payload.periods.length > 200) fail('Indique até 200 períodos');
   const periods = payload.periods.map(p => {
@@ -36,7 +41,8 @@ function calculate(snapshot, ref) {
   const range = month(ref), segments = []; let weightedCents = 0;
   for (let d=range.start;d<range.end;d+=DAY) {
     const day = new Date(d).toISOString().slice(0,10);
-    const p = snapshot.periods.find(p => p.startsOn <= day && (!p.endsOn || p.endsOn >= day));
+    const season=services.onDay(snapshot.servicePlan,day);
+    const p = snapshot.servicePlan ? (season ? {monthlyCents:season.monthlyCents,startsOn:season.key,label:season.label} : {monthlyCents:0,startsOn:'OUTSIDE_CONTRACT',label:'Fora da vigência'}) : snapshot.periods.find(p => p.startsOn <= day && (!p.endsOn || p.endsOn >= day));
     const monthlyCents = p ? p.monthlyCents : snapshot.baseCents;
     weightedCents += monthlyCents;
     const source = p ? p.startsOn : 'BASE', previous = segments.at(-1);

@@ -463,6 +463,7 @@ model User {
 }
 
 model ServiceVisit {
+  contractService Json?
   maintenanceCompletions EquipmentMaintenanceCompletion[]
   completionRequestId String? @unique
   id             Int             @id @default(autoincrement())

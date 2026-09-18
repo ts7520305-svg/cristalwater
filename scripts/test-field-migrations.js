@@ -43,6 +43,7 @@ async function dbRejects(sql, expected) {
   const [oldCompletion] = await prisma.$queryRaw`INSERT INTO "EquipmentMaintenanceCompletion" ("planId","version","visitId","requestId","actor","fingerprint","notes","result") VALUES (${equipmentPlan.id},1,${visit.id},'migration-equipment','TECH:previous','unchanged','Retained execution','{"ok":true,"historical":true}'::jsonb) RETURNING id`;
   await prisma.$disconnect();
   cli(['db','execute','--file','prisma/migrations/20260917100000_extra_equipment_maintenance/migration.sql','--schema','prisma/schema.prisma']);
+  cli(['db','execute','--file','prisma/migrations/20260918090000_client_seasonal_service/migration.sql','--schema','prisma/schema.prisma']);
   const retainedCompletion = await prisma.equipmentMaintenanceCompletion.findUniqueOrThrow({where:{id:oldCompletion.id}});
   assert.equal(retainedCompletion.visitId,visit.id);assert.equal(retainedCompletion.extraVisitId,null);assert.equal(retainedCompletion.notes,'Retained execution');assert.deepEqual(retainedCompletion.result,{ok:true,historical:true});
   const completionData={planId:equipmentPlan.id,version:2,requestId:'migration-extra-equipment',actor:'TECH:previous',fingerprint:'extra',notes:'Extra execution',result:{ok:true}};
@@ -56,7 +57,7 @@ async function dbRejects(sql, expected) {
   await prisma.equipmentMaintenancePlan.delete({where:{id:equipmentPlan.id}});await prisma.pool.delete({where:{id:equipmentPool.id}});
   const savedVisit=await prisma.serviceVisit.findUnique({where:{id:visit.id}}),savedReminder=await prisma.operationalReminder.findUnique({where:{id:reminder.id}});
   const savedRound=await prisma.round.findUnique({where:{id:round.id}});assert.equal(savedRound.recurrence,'WEEKLY');assert.equal(savedRound.dayOfWeek,2);assert.equal(savedRound.startsOn,null);
-  assert.equal(savedVisit.notes,'Migration preserved visit');assert.equal(savedVisit.completionRequestId,null);
+  assert.equal(savedVisit.notes,'Migration preserved visit');assert.equal(savedVisit.completionRequestId,null);assert.equal(savedVisit.contractService,null);
   assert.equal(savedReminder.title,'Migration preserved reminder');assert.equal(savedReminder.sourceKey,null);
   assert.equal((await prisma.chatMessage.findUniqueOrThrow({where:{id:chat.id}})).text,'Migration preserved private message');
   const retained = await prisma.clientMessage.findMany({where:{id:{in:historical.map(row=>row.id)}},orderBy:{id:'asc'}});
@@ -76,6 +77,6 @@ async function dbRejects(sql, expected) {
   assert.equal(await prisma.technicalProposalRequest.count(),0);
   assert.equal(await prisma.fieldWriteRequest.count(),0);
   const savedExtra=await prisma.extraVisit.findUniqueOrThrow({where:{id:oldExtra.id}});assert.equal(savedExtra.notes,'Migration preserved extra');assert.equal(savedExtra.execution,null);assert.equal(savedExtra.startAt,null);assert.equal(savedExtra.endAt,null);assert.equal(savedExtra.completionRequestId,null);assert.equal(await prisma.extraVisitPhoto.count(),0);await prisma.extraVisit.delete({where:{id:oldExtra.id}});
-  console.log('PASS twenty additive migrations preserve previous data and match the current schema');
+  console.log('PASS twenty-one additive migrations preserve previous data and match the current schema');
  }finally{fs.rmSync(temp,{recursive:true,force:true})}
 })().catch(error=>{console.error(error);process.exitCode=1}).finally(()=>prisma.$disconnect());
