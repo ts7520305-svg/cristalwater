@@ -20,10 +20,18 @@ O grupo existente test-field-alert-report-opening.js é ampliado: IDs coincident
 
 Regressões da listagem completa, abertura EXTRA, relatório EXTRA nas configurações e faturação passaram em run-1789734444916. O primeiro ensaio em run-1789734363166 passou abertura/relatório/faturação, mas a carga massiva posterior encerrou a ligação PGlite durante a preparação. O ensaio final executa a carga massiva primeiro, na mesma ordem da suite nativa, e passou sem alterar as asserções. Revisão visual posterior em run-1789734510065 confirma o ajuste de contraste a 320/390/1440 px; imagens sintéticas em reports/field-visual/extra-alert-report-1789734517871.
 
-Confirmação final do percurso em run-1789734604213, incluindo asserção de contraste do botão >= 4,5:1, aprovada. CI nativo e restauro PostgreSQL 16 aguardam a publicação da árvore final.
+Confirmação final do percurso em run-1789734604213, incluindo asserção de contraste do botão >= 4,5:1, aprovada. CI nativo e restauro PostgreSQL 16 aprovados, conforme registo abaixo.
 
 ## Limites
 
 Esta tarefa abre relatórios de alertas que já entram na listagem; não cria novos tipos de alerta nem altera a resolução/faturação. Não converte toda conclusão EXTRA num alerta. Referências históricas sem tipo continuam a exigir revisão. Técnico/equipamento mantêm a natureza de registo atual. Fontes Unicode/tradução integral e referências fotográficas históricas não canónicas permanecem pendentes.
 
 Dez ficheiros: listagem, apresentação, projeção partilhada, serviço de relatório, interface, cache, teste de percurso, teste unitário e dois documentos. Publicação autorizada apenas na branch de trabalho, sem merge ou deploy. Frequência preservada por cliente/época/instalação: três ou mais visitas conforme cada caso.
+
+## Aprovação nativa final — 18/09/2026
+
+Commit de código `f9c367cc2fcdddc5195c829acb71961f1a4e9e10`, árvore `bb6432e52bcb4092638a660ad05e6c4c7fefa724`, [CI 35345084686](https://github.com/ts7520305-svg/cristalwater/actions/runs/35345084686), job `105599658291`, concluído às 12:47:37 UTC. Os 151 grupos distintos terminaram com código zero e sem sinal. Aprovados 396 unitários/63 ficheiros, quatro técnicos, gate de 21 scripts de navegador, 21 migrações aditivas e sintaxe 554/182/56.
+
+Restauro PostgreSQL 16: 110 tabelas e 46 ficheiros com igualdade de linhas e hashes. Abertura pelos alertas: 11586 ms; visibilidade completa: 4200 ms; faturação: 14632 ms; relatório EXTRA: 3250 ms; relatório regular: 986 ms; fotografias: 1848 ms; configurações/centro mensal: 9022 ms. Backup local `backup/extra-alert-report-local-20260918`. Esta atualização posterior altera apenas documentação e conserva o código/testes da árvore validada.
+
+Próxima tarefa: rever fontes e traduções dos documentos. Existe `src/assets/fonts/DejaVuSans.ttf` com licença no repositório; o relatório individual ainda usa Helvetica e rótulos portugueses. A adoção da fonte precisa de verificação de cobertura de caracteres, extração de texto e paginação. Referências fotográficas históricas permanecem por rever.
