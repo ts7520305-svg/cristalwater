@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `b86cd7549a0c1f94c374a76bea07a01964d12191`. Gerado em 2026-09-18T04:54:12.287Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `9ede492f82ed1f5096ff4fffd34cd4e4e24d6068`. Gerado em 2026-09-18T06:30:16.512Z. Inclui o estado dos ficheiros locais no momento da geração.
 
 101 ficheiros HTML: 94 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 165 scripts de integração/navegador ativos. 59 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 167 scripts de integração/navegador ativos. 59 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 As colunas de papéis distinguem o catálogo anterior dos indícios explícitos no HTML/scripts. Não são uma auditoria de autorização: as APIs, a atribuição atual e o comportamento real de cada perfil continuam a determinar o acesso.
 

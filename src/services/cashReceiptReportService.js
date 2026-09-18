@@ -2,6 +2,7 @@
 const { prisma } = require('../prismaClient');
 const { INTERNAL_PAYMENT_METHODS } = require('./invoicePaymentRequestService');
 const internalMethods = new Set(INTERNAL_PAYMENT_METHODS);
+const isCashPayment = row => !internalMethods.has(String(row.method || '').trim().toUpperCase());
 const total = rows => rows.reduce((sum, row) => sum + Math.round(Number(row.amount || 0) * 100), 0) / 100;
 async function payments(monthRef, db = prisma) {
   const where = {};
@@ -12,7 +13,7 @@ async function payments(monthRef, db = prisma) {
   }
   // These are aggregate reports. A display-page limit must not truncate money.
   const rows = await db.payment.findMany({ where, select: { amount: true, paidAt: true, method: true } });
-  return rows.filter(row => !internalMethods.has(String(row.method || '').trim().toUpperCase()));
+  return rows.filter(isCashPayment);
 }
 function monthly(rows) {
   const months = new Map();
@@ -22,4 +23,4 @@ function monthly(rows) {
   }
   return [...months].sort(([a], [b]) => a.localeCompare(b)).map(([monthRef, amount]) => ({ monthRef, amount: amount / 100 }));
 }
-module.exports = { payments, total, monthly };
+module.exports = { payments, total, monthly, isCashPayment };

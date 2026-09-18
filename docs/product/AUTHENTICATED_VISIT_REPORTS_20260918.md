@@ -55,13 +55,15 @@ Publicação de código final: `09faec4284d8247811c0b1b48402a2bf42fe8b1c`; backu
 
 ## Limites e próximo percurso
 
+Adenda TASK252–253: fontes/cálculos e apresentação do imprimível mensal tratados e aprovados localmente, com confirmação nativa ainda pendente. Ver `MONTHLY_PRINT_SOURCES_20260918.md`. O diagnóstico mensal abaixo conserva o estado anterior a esse lote; o acesso pelos alertas e a incorporação de fotografias continuam como próximos percursos.
+
 O imprimível mensal continua a usar os cálculos antigos (`Invoice.total`, `amountPaid`, `amountOpen` e lista de faturas), ainda sem o contrato financeiro revisto da API mensal. A autenticação da abertura não valida essas contas nem transforma número de faturas em número de clientes. Esse é o próximo trabalho.
 
 As fotografias no relatório individual são referências textuais, explicitamente identificadas. A incorporação das imagens autorizadas, relatórios EXTRA, caracteres fora das fontes latinas e tradução integral continuam por rever. O link direto de relatório nos alertas (`admin-alerts.js` / `alertPresentationService.js`) ainda precisa de um percurso autenticado próprio; esta tarefa fecha os dois pontos de entrada acima. Sem merge em main, deploy, fornecedores, envios reais ou emissão fiscal.
 
-### Pontos concretos da revisão mensal seguinte
+### Diagnóstico histórico para a revisão mensal TASK252–253
 
-| Tema | Código atual e critério de revisão |
+| Tema | Código anterior às TASK252–253 e critério de revisão |
 |---|---|
 | Universo de documentos | `reportController.js` usa só `monthRef`; `adminMonthlySummaryService.js` usa `documentMonthWhere` para os formatos históricos. |
 | Total e saldo | Imprimível soma aliases diretamente; a API mensal distingue aliases positivos contraditórios, valores por rever, documentos excluídos e saldo atual. |

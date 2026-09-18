@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-09-18T04:54:12.287Z",
-  "baseCommit": "b86cd7549a0c1f94c374a76bea07a01964d12191",
+  "generatedAt": "2026-09-18T06:30:16.512Z",
+  "baseCommit": "9ede492f82ed1f5096ff4fffd34cd4e4e24d6068",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 165,
+  "activeScriptsScanned": 167,
   "summary": {
     "htmlFiles": 101,
     "rootPages": 94,

@@ -13,6 +13,7 @@ prisma.$transaction = (work, options) => transaction(async db => {
 }, options);
 const app = express();
 app.use('/api/admin', require('../../src/routes/adminReportsRoutes'));
+app.use('/api/reports', require('../../src/routes/reportRoutes'));
 const server = app.listen(0,'127.0.0.1',() => process.send({port:server.address().port}));
 process.on('message',message => { fault=message.fault;process.send({configured:true}); });
 process.on('SIGTERM',() => server.close(async () => { await prisma.$disconnect();process.exit(0); }));

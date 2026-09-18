@@ -2,7 +2,7 @@
 
 ## Estado e âmbito
 
-Adenda de 18/09: as configurações foram corrigidas nas TASK247–248 e confirmadas com a regressão TASK249 no commit `99cd623c472961ffc7bac33455ea8e6b00e8515a`, CI `35306180181`: 142/142 grupos e restauro de 110 tabelas/32 ficheiros. Contrato, recuperação e reproduções em `CLIENT_REPORT_SETTINGS_RECOVERY_20260918.md`. TASK250–251 confirmadas no CI `35311811075`, commit `09faec4284d8247811c0b1b48402a2bf42fe8b1c`, com 144/144 grupos e restauro de 110 tabelas/32 ficheiros: abertura nas configurações/centro mensal e apresentação individual; ver `AUTHENTICATED_VISIT_REPORTS_20260918.md`. O imprimível financeiro e as fotografias incorporadas continuam por rever.
+Adenda de 18/09: as configurações foram corrigidas nas TASK247–248 e confirmadas com a regressão TASK249 no commit `99cd623c472961ffc7bac33455ea8e6b00e8515a`, CI `35306180181`: 142/142 grupos e restauro de 110 tabelas/32 ficheiros. Contrato, recuperação e reproduções em `CLIENT_REPORT_SETTINGS_RECOVERY_20260918.md`. TASK250–251 confirmadas no CI `35311811075`, commit `09faec4284d8247811c0b1b48402a2bf42fe8b1c`, com 144/144 grupos e restauro de 110 tabelas/32 ficheiros: abertura nas configurações/centro mensal e apresentação individual; ver `AUTHENTICATED_VISIT_REPORTS_20260918.md`. TASK252–253 tratam as fontes/cálculos e impressão mensal, com validação local aprovada e confirmação nativa ainda pendente; ver `MONTHLY_PRINT_SOURCES_20260918.md`. A abertura pelos alertas e as fotografias incorporadas permanecem no próximo percurso.
 
 A revisão começou sobre `946a01f389ab3b37371ece483e4bfee463173dae`, depois das TASK244–245. O ensaio `run-1789681864927`, concluído em 4501 ms em PGlite isolado, HTTP real e Chromium, reproduziu oito comportamentos incorretos. A revisão de código acrescentou a interpolação direta dos campos guardados, indicada separadamente na tabela. O ensaio era um diagnóstico com asserções dos comportamentos incorretos, não uma aprovação funcional.
 
@@ -30,7 +30,7 @@ Os cenários usaram apenas dados artificiais, serviços externos desativados e s
 
 A proteção aplica-se à rota mensal global. O relatório individual de visita conserva os controlos existentes de titularidade; o ensaio confirma que CLIENT e técnico da visita continuam a consultá-lo, enquanto outro cliente recebe 403. Não se mudou a autoridade para um parâmetro `role` fornecido pelo navegador.
 
-Este lote não redefine os cálculos antigos do imprimível: seleção por monthRef, totais documentais guardados, instalações atuais e pagamentos associados ao documento continuam a precisar de revisão de fontes. O título «Clientes» ainda conta documentos. Não atribuir a este HTML o contrato de caixa/saldo/contagens da nova API ADMIN das TASK244–245.
+Diagnóstico histórico da TASK246, anterior à correção TASK252–253: este lote não redefine os cálculos antigos do imprimível: seleção por monthRef, totais documentais guardados, instalações atuais e pagamentos associados ao documento continuam a precisar de revisão de fontes. O título «Clientes» ainda conta documentos. Não atribuir a este HTML o contrato de caixa/saldo/contagens da nova API ADMIN das TASK244–245.
 
 ## Validação e retoma
 
@@ -42,4 +42,4 @@ O runner passa a 140 grupos, com 21 scripts no gate de navegador; não há migra
 
 Validação nativa específica: imprimível em 1405 ms, API mensal em 4320 ms e interface mensal em 8504 ms; restantes regressões, migrações e restauro aprovados. Esta atualização posterior altera apenas documentação.
 
-Configurações por cliente tratadas nas TASK247–248. TASK250–251 tratam abertura autenticada das duas páginas, escolha da apresentação pelo ADMIN, projeção individual comum e texto escapado no HTML. O parâmetro de apresentação nunca concede autoridade. Próximo: cálculos/fontes do imprimível mensal, link nos alertas e incorporação autorizada de fotografias; ver `AUTHENTICATED_VISIT_REPORTS_20260918.md`.
+Configurações por cliente tratadas nas TASK247–248. TASK250–251 tratam abertura autenticada das duas páginas, escolha da apresentação pelo ADMIN, projeção individual comum e texto escapado no HTML. O parâmetro de apresentação nunca concede autoridade. Próximo: link autenticado nos alertas e incorporação autorizada de fotografias; fontes/cálculos mensais tratados nas TASK252–253, ver `MONTHLY_PRINT_SOURCES_20260918.md`.
