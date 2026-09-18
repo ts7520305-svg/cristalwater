@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `d3e7462d8fcbeeca420cf6c5a8f9ac67ac38139d`. Gerado em 2026-09-17T21:35:52.331Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `086632dba7502413c087a6a8221b74c7cb0a2d6c`. Gerado em 2026-09-18T03:28:20.369Z. Inclui o estado dos ficheiros locais no momento da geração.
 
 101 ficheiros HTML: 94 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 160 scripts de integração/navegador ativos. 57 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 163 scripts de integração/navegador ativos. 58 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 As colunas de papéis distinguem o catálogo anterior dos indícios explícitos no HTML/scripts. Não são uma auditoria de autorização: as APIs, a atribuição atual e o comportamento real de cada perfil continuam a determinar o acesso.
 
@@ -111,7 +111,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /profit-map | Entrada raiz | ADMIN | ADMIN | 1 |
 | /ranking | Entrada raiz | ADMIN | ADMIN | 1 |
 | /report-center | Entrada raiz | ADMIN | ADMIN | 0 |
-| /report-settings | Entrada raiz | ADMIN | ADMIN | 0 |
+| /report-settings | Entrada raiz | ADMIN | ADMIN | 1 |
 | /route-map | Entrada raiz | ADMIN | ADMIN | 1 |
 | /settings | Entrada raiz | ADMIN, CLIENT, TECHNICIAN, TEAM_LEADER | ADMIN, CLIENT, TEAM_LEADER, TECHNICIAN | 8 |
 | /splash | Entrada raiz | ADMIN | — | 0 |

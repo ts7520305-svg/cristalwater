@@ -120,6 +120,21 @@
         grid-template-columns: 1fr;
       }
     }
+    .report-settings-main { padding-bottom: 120px; }
+    .report-settings-main .card { display: block !important; background: #ffffff; color: #1f2937; overflow-wrap: anywhere; }
+    .report-settings-main .card p, .report-settings-main h2, .report-settings-main label, .report-settings-main li, .report-settings-main th, .report-settings-main td { color: inherit; }
+    .report-settings-main .muted { color: #475569; }
+    .report-settings-main button { min-height: 44px; background: #1565c0; }
+    .report-settings-main button:disabled { opacity: .6; cursor: default; }
+    .report-settings-main input:not([type="checkbox"]), .report-settings-main label { display: block; width: 100%; }
+    .report-settings-main label.inline { display: flex; }
+    .report-settings-main input[type="checkbox"] { width: 22px; height: 22px; flex-shrink: 0; }
+    .report-settings-main fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+    .report-settings-main [hidden] { display: none !important; }
+    .report-settings-main table { width: 100%; table-layout: fixed; border-collapse: collapse; }
+    .report-settings-main th, .report-settings-main td { text-align: left; padding: 8px; border-bottom: 1px solid #d1d5db; }
+    #status { padding: 12px; border-radius: 8px; background: #edf4ff; color: #15385c; }
+    #status[data-state="error"], #status[data-state="conflict"], #status[data-state="pending"] { background: #fff4de; color: #613900; }
   </style>
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
@@ -132,31 +147,37 @@
   <h1>Permissões do Relatório do Cliente</h1>
 </header>
 
-<main>
+<main class="report-settings-main" data-cw-state-managed="manual">
   <div class="card">
     <div class="row">
       <div>
-        <label>ID do cliente</label>
-        <input id="clientId" placeholder="Ex: 5">
+        <label for="clientId">ID do cliente</label>
+        <input id="clientId" inputmode="numeric" autocomplete="off" placeholder="Ex: 5">
       </div>
       <div>
-        <label>ID da visita para pré-visualizar</label>
+        <label for="visitId">ID da visita para pré-visualizar</label>
         <input id="visitId" placeholder="Ex: 4">
       </div>
     </div>
 
     <div class="row" style="margin-top:12px;">
-      <button onclick="loadSettings()">Carregar configurações</button>
-      <button class="btn-green" onclick="saveSettings()">Guardar configurações</button>
+      <button type="button" id="loadSettings">Carregar configurações</button>
+      <button type="button" id="saveSettings" class="btn-green" disabled>Guardar configurações</button>
     </div>
 
-    <div id="status" class="muted" style="margin-top:10px;">Pronto</div>
+    <p id="loadedClient"></p>
+    <div id="status" role="status" aria-live="polite" data-state="idle" style="margin-top:10px;">Escolha um cliente e carregue as configurações.</div>
+    <div class="row" style="margin-top:12px;">
+      <button type="button" id="retrySettings" hidden>Confirmar pedido guardado</button>
+      <button type="button" id="reviewSettings" hidden>Rever alterações</button>
+      <button type="button" id="discardSettings" hidden>Descartar rascunho</button>
+    </div>
   </div>
 
   <div class="card">
     <h2>Campos visíveis no relatório do cliente</h2>
 
-    <div class="check-grid">
+    <fieldset id="settingsFields" disabled><legend class="muted">As opções só ficam disponíveis depois de confirmar o cliente.</legend><div class="check-grid">
       <label class="inline"><input type="checkbox" id="showClientName"> Mostrar nome do cliente</label>
       <label class="inline"><input type="checkbox" id="showPoolName"> Mostrar nome da instalação</label>
       <label class="inline"><input type="checkbox" id="showZone"> Mostrar zona</label>
@@ -172,8 +193,16 @@
       <label class="inline"><input type="checkbox" id="showTechnicalRoom"> Mostrar casa técnica</label>
       <label class="inline"><input type="checkbox" id="showNotes"> Mostrar observações</label>
       <label class="inline"><input type="checkbox" id="showPhotos"> Mostrar fotos</label>
-    </div>
+    </div></fieldset>
   </div>
+
+  <section id="settingsReview" class="card" hidden aria-labelledby="reviewTitle">
+    <h2 id="reviewTitle">Rever a versão atual</h2>
+    <p>Confira as opções atuais e a proposta. Os campos que não alterou no rascunho conservam a escolha atual.</p>
+    <table><thead><tr><th>Campo</th><th>Atual</th><th>Proposta</th></tr></thead><tbody id="reviewRows"></tbody></table>
+    <button type="button" id="prepareSettings">Preparar gravação revista</button>
+  </section>
+  <section class="card" aria-labelledby="recoveryTitle"><h2 id="recoveryTitle">Pedidos por confirmar</h2><div id="settingsRecovery">A consultar os pedidos desta conta…</div></section>
 
   <div class="card">
     <h2>Pré-visualização rápida</h2>

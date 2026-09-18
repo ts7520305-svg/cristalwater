@@ -3,6 +3,7 @@ const path = require("path");
 const { prisma } = require("../prismaClient");
 const PDFDocument = require("pdfkit");
 const { roleMatches } = require("../utils/roles");
+const { effective: reportSettings } = require("../services/clientReportSettingsDefaults");
 
 // ==========================================================
 // HELPERS
@@ -47,25 +48,7 @@ function ensureSpace(doc, needed = 80) {
 }
 
 function getClientSetting(client) {
-  return (
-    client?.reportSetting || {
-      showClientName: true,
-      showPoolName: true,
-      showZone: true,
-      showAddress: false,
-      showTechnicianName: false,
-      showStatus: true,
-      showPlannedDate: true,
-      showStartEnd: false,
-      showWaterParameters: true,
-      showChecklist: true,
-      showChemicals: false,
-      showEquipment: false,
-      showTechnicalRoom: false,
-      showNotes: true,
-      showPhotos: false,
-    }
-  );
+  return reportSettings(client?.reportSetting);
 }
 
 function canShow(isAdmin, settingValue) {

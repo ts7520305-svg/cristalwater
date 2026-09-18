@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-09-17T21:35:52.331Z",
-  "baseCommit": "d3e7462d8fcbeeca420cf6c5a8f9ac67ac38139d",
+  "generatedAt": "2026-09-18T03:28:20.369Z",
+  "baseCommit": "086632dba7502413c087a6a8221b74c7cb0a2d6c",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 160,
+  "activeScriptsScanned": 163,
   "summary": {
     "htmlFiles": 101,
     "rootPages": 94,
     "nestedPages": 7,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 57,
+    "pagesWithLiteralTestReference": 58,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -3012,7 +3012,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "testReferences": [
+        "test-field-report-settings-ui.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {

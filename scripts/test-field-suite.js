@@ -83,6 +83,7 @@ scripts.push('test-field-problem-reports.js','test-field-problem-reports-ui.js')
 scripts.push('test-field-client-intake.js','test-field-client-intake-ui.js');
 scripts.push('test-field-admin-monthly-reports.js','test-field-admin-monthly-reports-ui.js');
 scripts.push('test-field-monthly-print-access.js');
+scripts.push('test-field-report-settings.js','test-field-report-settings-ui.js');
 scripts.push('test-field-route-preview.js');
 scripts.push('test-field-route-preview-ui.js');
 scripts.push('test-field-legacy-route-recovery.js');
