@@ -206,6 +206,31 @@ let browser;
   await page.unroute(endpoint(quota)); await page.reload({ waitUntil: 'networkidle' });
   await panel.getByRole('button', { name: 'Repetir confirmação', exact: true }).click();
   await status.filter({ hasText: 'Preparacao original confirmada' }).waitFor();
+  // A background return scan can reject after the billing session has changed.
+  const beforeSessionScan=await Promise.all([prisma.invoice.count(),prisma.fieldWriteRequest.count()]);
+  await page.evaluate(()=>{
+    const records=window.CWFieldWriteStore.records;
+    window.CWFieldWriteStore.records=async function(scope,captured,includeConfirmed){
+      if(scope==='VISIT_RETURN'&&!includeConfirmed&&!window.qaReturnScanEntered){
+        window.qaReturnScanEntered=true;clearInterval(window.qaReturnScanTrigger);
+        await new Promise(resolve=>window.qaReleaseReturnScan=resolve);
+        try{return await records.call(this,scope,captured,includeConfirmed);}finally{window.qaReturnScanDelivered=true;}
+      }
+      return records.call(this,scope,captured,includeConfirmed);
+    };
+    localStorage.setItem('qaRetainedSessionDraft','preserved');
+    window.qaReturnScanTrigger=setInterval(()=>dispatchEvent(new Event('online')),20);
+    dispatchEvent(new Event('online'));
+  });
+  await page.waitForFunction(()=>typeof window.qaReleaseReturnScan==='function');
+  await page.evaluate(()=>{localStorage.setItem('token','changed-during-return-scan');window.qaReleaseReturnScan();});
+  await page.waitForFunction(()=>window.qaReturnScanDelivered);
+  await page.evaluate(()=>new Promise(resolve=>setTimeout(resolve,100)));
+  assert.equal(await page.locator('#returnPendingPanel').isVisible(),false);
+  assert.match(await page.locator('#followupStatus').textContent(),/Sessão alterada/);
+  assert.equal(await page.evaluate(()=>localStorage.getItem('qaRetainedSessionDraft')),'preserved');
+  assert.deepEqual(await Promise.all([prisma.invoice.count(),prisma.fieldWriteRequest.count()]),beforeSessionScan);
+  console.log('PASS a delayed background return scan handles session rejection, clears old context and preserves drafts without another invoice or receipt');
   assert.deepEqual(errors, []); await context.close();
   console.log('PASS two windows cannot overwrite a request; changed sessions before and after send retain safe recovery under the original account');
 })().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => { if (browser) await browser.close(); await prisma.$disconnect(); });

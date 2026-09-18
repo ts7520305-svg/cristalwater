@@ -2,6 +2,7 @@
   'use strict';
   const store=window.CWFieldWriteStore,flow=window.CWIncompleteWorkflow,scope='VISIT_RETURN',forms=new WeakMap(),pageSession=store.adminSession();let refresh=async()=>{},syncing=false;
   const panel=document.createElement('section');panel.id='returnPendingPanel';panel.setAttribute('aria-live','polite');panel.hidden=true;document.getElementById('followupList').before(panel);
+  function sessionChanged(){panel.hidden=true;panel.replaceChildren();document.getElementById('followupList').replaceChildren();document.getElementById('shortagePreparation').replaceChildren();document.getElementById('followupStatus').textContent='Sessão alterada. Reabra a página; os pedidos foram preservados.';}
   const read=form=>({date:form.elements.date.value,technicianId:Number(form.elements.technicianId.value),instructions:form.elements.instructions.value.trim()});
   function queue(form){const s=forms.get(form);if(!s||!store.same(s.captured))return;const values=read(form);s.queue=s.queue.then(async()=>{s.draft=await flow.write(s.draft,s.context,values,s.draft.value?.snapshot||s.snapshot,s.captured);s.error=null;}).catch(error=>{s.error=error;s.message.textContent=error.message;});}
   async function mount(form,context,options){
@@ -39,12 +40,21 @@
     await render();
   }
   async function render(){
-    const captured=store.adminSession();if(!captured||!store.same(pageSession)){panel.hidden=true;document.getElementById('followupList').replaceChildren();document.getElementById('shortagePreparation').replaceChildren();document.getElementById('followupStatus').textContent='Sessão alterada. Reabra a página; os pedidos foram preservados.';return;}
+    const captured=store.adminSession();if(!captured||!store.same(pageSession)){sessionChanged();return;}
     try{
       const all=await store.records(scope,captured,true),rows=all.filter(r=>!r.response||r.response.applied===false&&!r.reviewedAt);if(!store.same(captured))return;panel.replaceChildren();panel.hidden=!rows.length;
       for(const row of rows){const p=document.createElement('p');p.textContent=`${row.label} — ${row.response?.message||'agendamento guardado, por confirmar'}${row.failure?.message?': '+row.failure.message:''}`;const button=document.createElement('button');button.type='button';button.className='cw-v2-btn';button.textContent=row.response?'Rever recusa e atualizar':'Confirmar pedido original';button.onclick=async()=>{button.disabled=true;try{if(row.response){await store.acknowledgeRejection(row.requestId,captured);const context={id:row.resourceId,visitType:row.payload.visitType,poolId:row.payload.poolId};const draft=flow.read(scope,context,captured),v=draft.value?.values;if(v&&v.date===row.payload.date&&Number(v.technicianId)===Number(row.payload.technicianId)&&v.instructions.trim()===row.payload.instructions.trim()&&draft.value.snapshot.baseVersion===row.payload.baseVersion)await flow.clear(draft,captured);await refresh();}else await send(row,captured,false);}catch(error){if(store.same(captured))p.textContent=`Pedido preservado. ${error.message}`;}finally{button.disabled=false;if(row.response)void render();}};panel.append(p,button);}
-    }catch(error){panel.hidden=false;panel.textContent=error.message;}
+    }catch(error){if(!store.same(captured)){sessionChanged();return;}panel.hidden=false;panel.textContent=error.message;}
   }
-  async function sync(){const captured=store.adminSession();if(syncing||!captured||!store.same(pageSession)||!navigator.onLine)return;syncing=true;try{for(const row of await store.records(scope,captured)){if(row.failure?.blocked||row.failure?.retryAt>Date.now())continue;try{await send(row,captured,true);}catch(_){}}}finally{syncing=false;void render();}}
+  async function sync(){
+    const captured=store.adminSession();if(syncing||!captured||!store.same(pageSession)||!navigator.onLine)return;syncing=true;
+    try{
+      const rows=await store.records(scope,captured);if(!store.same(captured))return;
+      for(const row of rows){if(!store.same(captured))return;if(row.failure?.blocked||row.failure?.retryAt>Date.now())continue;try{await send(row,captured,true);}catch(_){}}
+    }catch(error){
+      // A session can change during the queue read, before any send is attempted.
+      if(store.same(captured)){panel.hidden=false;panel.textContent=`Pedidos preservados. ${error.message}`;}
+    }finally{syncing=false;void render();}
+  }
   window.CWAdminIncomplete={mount,render};window.addEventListener('cw:field-write-change',render);window.addEventListener('online',sync);window.addEventListener('storage',()=>{if(!store.adminSession()){panel.hidden=true;for(const form of document.querySelectorAll('#followupList form'))for(const c of form.elements)c.disabled=true;}void render();});setInterval(sync,15000);setTimeout(sync,1000);void render();
 })();
