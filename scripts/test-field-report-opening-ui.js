@@ -51,6 +51,7 @@ let browser;
   assert((await p.evaluate(async () => (await (await fetch(qaPopups.at(-1).popup.location.href)).text()))).includes(client.name));
   await p.locator('#onlyRequiresInvoice').selectOption('true'); await state(p, 'idle'); assert.equal((await info(p)).closed, true); assert.equal((await info(p)).revoked, 1);
   const malformed = [
+    { headers: { 'content-language': 'en' } }, { headers: { 'content-language': '' } },
     { status: 202 }, { status: 403 }, { status: 503 },
     { headers: { 'content-type': 'application/json' }, body: '{}' },
     { headers: { 'x-cw-month-ref': '2097-05' } }, { headers: { 'x-cw-invoice-filter': 'false' } }, { headers: { 'x-cw-report-type': '' } },
@@ -69,6 +70,16 @@ let browser;
     await p.locator('#monthRef').fill(month); await p.locator('#onlyRequiresInvoice').selectOption('true'); const before = (await info(p)).created;
     await delayed(p, endpoint, () => button.click(), async () => { await change(); await state(p, 'idle'); }); assert.equal((await info(p)).created, before); assert.equal((await info(p)).closed, true);
   }
+  const language=p.locator('#reportLanguage');assert.equal(await language.inputValue(),'pt');
+  await p.locator('#monthRef').fill(month);
+  for(const [lang,title] of [['en','Monthly report'],['fr','Rapport mensuel'],['es','Informe mensual'],['pt','Relatório mensal']]){
+    await language.selectOption(lang);await button.click();await state(p,'opened');assert.equal(new URL(requests.at(-1).url).searchParams.get('lang'),lang);
+    const content=await p.evaluate(async()=>(await fetch(qaPopups.at(-1).popup.location.href)).text());assert(content.includes('<html lang="'+lang+'">'));assert(content.includes(title+' - '+month));assert(content.includes(client.name));
+  }
+  const beforeLanguage=(await info(p)).created;
+  await delayed(p,endpoint,()=>button.click(),async()=>{await language.selectOption('fr');await state(p,'idle');await language.selectOption('pt');});assert.equal((await info(p)).created,beforeLanguage);assert((await info(p)).closed);
+  await language.evaluate(el=>{el.add(new Option('Invalid','EN'));el.value='EN';el.dispatchEvent(new Event('change',{bubbles:true}));});const invalidCount=requests.length;await button.click();await state(p,'error');assert.equal(requests.length,invalidCount);await language.selectOption('pt');
+  console.log('PASS monthly language selection PT/EN/FR/ES, exact response language, invalid selection without request and cancellation on A-B-A language change');
   await p.locator('#monthRef').fill(month); await p.evaluate(() => window.qaTimeout = true);
   await delayed(p, endpoint, () => button.click(), async () => { await state(p, 'error'); assert.match(await p.locator('#status').textContent(), /demorou/); }); await p.evaluate(() => window.qaTimeout = false);
   await c.setOffline(true); await button.click(); await state(p, 'error'); await c.setOffline(false); const offlineCount = requests.length; await p.waitForTimeout(300); assert.equal(requests.length, offlineCount);
@@ -107,7 +118,7 @@ let browser;
   // A session change after headers/body receipt still invalidates the old window.
   await p.evaluate(() => window.qaHoldBlob = true); await button.click(); await p.waitForFunction(() => window.qaBlobReady);
   await v.evaluate(() => localStorage.setItem('cristalwater_user', JSON.stringify({ id: 999999, role: 'ADMIN' })));
-  await state(p, 'session'); await state(v, 'session', true); assert.equal((await info(p)).closed, true); assert.equal((await info(v)).closed, true);
+  await state(p, 'session'); assert(await language.isDisabled()); await state(v, 'session', true); assert.equal((await info(p)).closed, true); assert.equal((await info(v)).closed, true);
   const old = (await info(p)).created; await p.evaluate(() => qaReleaseBlob()); await p.waitForTimeout(100); assert.equal((await info(p)).created, old); assert.equal(await p.evaluate(() => localStorage.getItem('qaReportDraft')), 'preserved'); assert(await button.isDisabled()); assert.deepEqual(errors, []);
   console.log('PASS visit preview: requires confirmed saved settings, protected PDF and exact client/visit/view/version, foreign visit and stale settings refused, delayed visit/client ignored, late body after cross-tab account change discarded, drafts preserved and no page errors');
   await p.evaluate(({user,token})=>{for(const key of ['token','cristalwater_jwt','adminToken'])localStorage.setItem(key,token);for(const key of ['user','cristalwater_user'])localStorage.setItem(key,JSON.stringify(user));},{user,token});

@@ -33,12 +33,12 @@ let browser, child;
   const page=await browser.newPage(); const network=[],errors=[];
   await page.route('**/*',route=>{network.push(route.request().url());return route.abort();});page.on('pageerror',error=>errors.push(error.message));
   const snapshot=()=>Promise.all(['invoice','payment','clientReportSetting','monthlyReport','userAuditLog'].map(model=>prisma[model].count()));
-  async function call(filter=false, origin=base, month=monthRef) {
+  async function call(filter=false, origin=base, month=monthRef, lang) {
     const before=await snapshot();
-    const response=await fetch(origin+'/api/reports/monthly-print?'+new URLSearchParams({monthRef:month,onlyRequiresInvoice:String(filter)}),{headers:{Authorization:'Bearer '+token}});
+    const response=await fetch(origin+'/api/reports/monthly-print?'+new URLSearchParams({monthRef:month,onlyRequiresInvoice:String(filter),...(lang===undefined?{}:{lang})}),{headers:{Authorization:'Bearer '+token}});
     const body=await response.text();assert.match(response.headers.get('cache-control'),/private.*no-store/);assert.equal(response.headers.get('x-content-type-options'),'nosniff');
     assert.deepEqual(await snapshot(),before,'Report reads must not create records');
-    if(response.status===200){assert.equal(response.headers.get('x-cw-report-version'),'2');assert.equal(response.headers.get('x-cw-month-ref'),month);assert.equal(response.headers.get('x-cw-invoice-filter'),String(filter));await page.setContent(body);assert.equal(await page.locator('script,img,b').count(),0);}
+    if(response.status===200){assert.equal(response.headers.get('content-language'),lang||'pt');assert.equal(response.headers.get('x-cw-report-version'),'2');assert.equal(response.headers.get('x-cw-month-ref'),month);assert.equal(response.headers.get('x-cw-invoice-filter'),String(filter));await page.setContent(body);assert.equal(await page.locator('script,img,b').count(),0);}
     return {response,body};
   }
   const metric=async id=>(await page.locator('#metric-'+id).textContent()).replace(/\s+/g,' ').trim();
@@ -58,6 +58,50 @@ let browser, child;
     assert.deepEqual(api.data.cash,{amountCents:9000,paymentCount:5,invalidAmountCount:0});
   }
   await normal();
+  const languages = {
+    pt: {title:'Relatório mensal',review:'Por rever',amount:'195,00 €',open:'128,00 €',cash:'90,00 €',filtered:'50,00 €',warning:'Total de recebimentos por rever',document:'Totais documentais por rever'},
+    en: {title:'Monthly report',review:'To be reviewed',amount:'€195.00',open:'€128.00',cash:'€90.00',filtered:'€50.00',warning:'Receipt total needs review',document:'Document totals need review'},
+    fr: {title:'Rapport mensuel',review:'À vérifier',amount:'195,00 €',open:'128,00 €',cash:'90,00 €',filtered:'50,00 €',warning:'Total des encaissements à vérifier',document:'Totaux des documents à vérifier'},
+    es: {title:'Informe mensual',review:'Por revisar',amount:'195,00 €',open:'128,00 €',cash:'90,00 €',filtered:'50,00 €',warning:'Total de cobros por revisar',document:'Totales de documentos por revisar'},
+  };
+  const evidence=require('node:path').join(process.cwd(),'reports/field-visual/monthly-language-'+stamp);require('node:fs').mkdirSync(evidence,{recursive:true});
+  const originalNote='Saldo atual <script>window.injected=1</script> & "Por rever"';
+  await prisma.client.update({where:{id:clients[0].id},data:{name:'Por rever'}});
+  await prisma.payment.update({where:{id:payments[0].id},data:{notes:originalNote+' '+('Nota original sobre o recebimento. '.repeat(80))+' NOTE_END'}});
+  const records=()=>Promise.all([prisma.invoice.findMany({where:{clientId:{in:clients.map(c=>c.id)}},orderBy:{id:'asc'}}),prisma.payment.findMany({where:{invoiceId:{in:[a,legacy,legacyFull,draft,alias,canceled,deposit,previous].map(d=>d.id)}},orderBy:{id:'asc'}})]);
+  for(const [lang, expected] of Object.entries(languages)){
+    for(const filter of [false,true]){
+      const beforeRead=await records();
+      const translated=await call(filter,base,monthRef,lang);assert.deepEqual(await records(),beforeRead);assert.equal(translated.response.status,200);assert.equal(translated.response.headers.get('content-language'),lang);assert.equal(await page.locator('html').getAttribute('lang'),lang);
+      assert.equal(await page.locator('h1').textContent(),expected.title+' - '+monthRef);
+      assert.equal(await metric('document-amount'),expected.amount);assert.equal(await metric('current-open'),expected.open);assert.equal(await metric('cash-amount'),filter?expected.filtered:expected.cash);
+      assert.equal(await metric('client-count'),filter?'4':'5');assert.equal(await metric('document-count'),filter?'6':'7');assert.equal(await metric('payment-count'),filter?'4':'5');
+      assert.deepEqual(await ids('[data-payment-id]'),payments.slice(0,filter?4:5).map(row=>row.id));
+      assert.equal(await page.locator(`[data-document-id="${a.id}"] h2`).textContent(),'Por rever');
+      assert.equal(await page.locator(`[data-document-id="${canceled.id}"] [data-field="status"]`).textContent(),'CANCELLED');
+      assert((await page.locator('.notes').first().textContent()).includes(originalNote));assert.equal(await page.evaluate(()=>window.injected),undefined);
+      assert((await page.locator('.basis').textContent()).includes(start.toISOString()));assert((await page.locator('.basis').textContent()).includes(end.toISOString()));
+      if(!filter){await page.emulateMedia({media:'print'});await page.pdf({path:require('node:path').join(evidence,lang+'.pdf'),format:'A4',printBackground:true,preferCSSPageSize:true});await page.emulateMedia({media:'screen'});}
+    }
+    // Neither an invalid document nor invalid cash may turn into a partial confirmed total in another language.
+    await prisma.invoice.update({where:{id:a.id},data:{totalAmount:101}});
+    const bad=await prisma.payment.create({data:{invoiceId:a.id,amount:-1,method:'CASH',paidAt:start}});
+    await call(false,base,monthRef,lang);assert.equal(await metric('document-amount'),expected.review);assert.equal(await metric('current-open'),expected.review);assert.equal(await metric('cash-amount'),expected.review);
+    assert((await page.locator('#document-review').textContent()).startsWith(expected.document));assert((await page.locator('#cash-review').textContent()).startsWith(expected.warning));
+    if(lang==='fr'){await page.emulateMedia({media:'print'});await page.pdf({path:require('node:path').join(evidence,'fr-review.pdf'),format:'A4',printBackground:true,preferCSSPageSize:true});await page.emulateMedia({media:'screen'});}
+    await prisma.invoice.update({where:{id:a.id},data:{totalAmount:a.totalAmount}});await prisma.payment.delete({where:{id:bad.id}});
+    const empty=await call(false,base,'2198-11',lang);assert.equal(empty.response.status,200);assert.equal(await page.locator('#empty-documents,#empty-payments').count(),2);
+    for(const auth of [null,jwt.sign({id:clients[0].id,clientId:clients[0].id,role:'CLIENT',principalType:'CLIENT'},getJwtSecret(),{expiresIn:'1h'})]){
+      const denied=await fetch(base+'/api/reports/monthly-print?monthRef='+monthRef+'&lang='+lang,{headers:auth?{Authorization:'Bearer '+auth}:{}});assert([401,403].includes(denied.status));assert.equal(denied.headers.get('content-language'),null);
+    }
+  }
+
+  for(const value of ['', 'EN','en-GB','de','__proto__','constructor','en&lang=fr','en&lang[x]=fr']){
+    const invalid=await fetch(base+'/api/reports/monthly-print?monthRef='+monthRef+'&lang='+value,{headers:{Authorization:'Bearer '+token}});assert.equal(invalid.status,400,value);assert.equal(invalid.headers.get('content-language'),null);
+  }
+  await prisma.client.update({where:{id:clients[0].id},data:{name:clients[0].name}});await prisma.payment.update({where:{id:payments[0].id},data:{notes:null}});
+  console.log('PASS monthly PT/EN/FR/ES preserve exact amounts, populations, filters, warnings, UTC boundaries, literal notes, no writes, role restrictions and strict language validation');
+  console.log('MONTHLY_LANGUAGE_EVIDENCE '+evidence);
   await call(true);assert.equal(await metric('client-count'),'4');assert.equal(await metric('document-count'),'6');assert.equal(await metric('document-amount'),'195,00 €');assert.equal(await metric('current-open'),'128,00 €');assert.equal(await metric('cash-amount'),'50,00 €');assert.equal(await metric('payment-count'),'4');
   assert.deepEqual(await ids('[data-payment-id]'),payments.slice(0,4).map(row=>row.id));assert(!(await ids('[data-document-id]')).includes(draft.id));
   await prisma.invoice.update({where:{id:a.id},data:{totalAmount:101}});await call();assert.equal(await metric('document-amount'),'Por rever');assert.equal(await metric('current-open'),'Por rever');assert.equal(await metric('cash-amount'),'90,00 €');assert.equal(await page.locator('#document-review').count(),1);
