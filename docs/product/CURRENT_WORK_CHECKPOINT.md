@@ -1,10 +1,14 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Ponto de retoma atual — 17/09/2026
+## Ponto de retoma atual — 18/09/2026
 
-- TASK246 implementada/testada localmente após reprodução de exposição financeira: imprimível mensal exige ADMIN, valida mês/filtro e apresenta conteúdos guardados como texto literal. `REPORT_SETTINGS_PRINT_REVIEW_20260917.md`. `run-1789682083504`: acesso/HTML 2886 ms, API mensal 7687 ms, UI mensal 10516 ms; sintaxe 544/179/57. Runner 140 grupos, cache v69, sem migração. Publicar a árvore conjunta TASK244–246 e confirmar CI/restauro; configurações e abertura de relatórios têm defeitos reproduzidos no relatório e continuam pendentes.
+- TASK244–246 confirmadas no commit `48e29bf00a35a63fae23e0c2176d17e7d4fa28dd`, árvore `30570153a8a715891e6f5d214fb497fccac98607`, [CI `35279447336`](https://github.com/ts7520305-svg/cristalwater/actions/runs/35279447336), job `105397748167`: 140/140 grupos, 388 unitários/quatro técnicos, 21 scripts de navegador, 20 migrações, sintaxe 544 JS backend/179 frontend/57 inline e restauro de 110 tabelas/32 ficheiros com linhas/hashes iguais em PostgreSQL 16. O CI terminou com sucesso em 17/09/2026 às 22:12 UTC; resultado confirmado em 18/09/2026. API mensal 4320 ms; interface mensal 8504 ms; proteção do imprimível 1405 ms; caixa 1222/445 ms; valores operacionais 497 ms e respetiva interface 5760 ms. Cache v69, sem migração nova. A atualização posterior altera apenas documentação e mantém código/testes da árvore validada.
 
-- TASK244–245 implementadas/testadas localmente: relatório ADMIN por mês e secção, caixa separada de documentos/saldo atual, contagens completas e fontes explícitas, falhas parciais sem zeros e recuperação independente. Recarga com formulário restaurado, sessão, BFCache e disposição/contraste corrigidos. `ADMIN_MONTHLY_REPORT_RECOVERY_20260917.md`. API `run-1789680466198` e UI final `run-1789681020764`; regressões de caixa/valores aprovadas. 388 unitários, sintaxe 544/179/57, cache v69, 139 grupos e nenhuma migração nova. Publicar e confirmar CI/restauro nativo.
+- TASK246: imprimível mensal exige ADMIN, valida mês/filtro e apresenta conteúdos guardados como texto literal. Relatório `REPORT_SETTINGS_PRINT_REVIEW_20260917.md`. Configurações e abertura de relatórios têm defeitos reproduzidos nesse relatório e continuam pendentes.
+
+- Retoma do ambiente em 18/09: o checkout principal anterior deixou de estar disponível; a cópia antiga `cristalwater-task240` conserva ficheiros antigos e não deve ser usada como código atual. Reconstituir o checkout a partir da branch de trabalho e do checkpoint publicado antes da próxima alteração de código. Código, testes e histórico da versão validada estão preservados no GitHub; esta atualização usa os ficheiros do commit validado e altera apenas os quatro documentos do checkpoint.
+
+- TASK244–245: relatório ADMIN por mês/secção, caixa separada de documentos/saldo atual, contagens completas, EXTRA_VISITS reconhecido, fontes explícitas e recuperação independente sem falsos zeros. Recarga, sessão, BFCache, disposição e contraste corrigidos. `ADMIN_MONTHLY_REPORT_RECOVERY_20260917.md`. Contrato final local em `run-1789681375742`, regressão conjunta em `run-1789682083504`; confirmação nativa final no registo acima.
 
 - TASK242–243 confirmadas no commit `fcae79921350fac15251d4c4367b7985fb66d092`, árvore `6c115b4a385893da6e9f61d76fb5528154e08862`, CI `35273623727`: 137/137 grupos, 388 unitários/quatro técnicos, 21 scripts de navegador, 20 migrações, sintaxe 543/179/57 e restauro de 110 tabelas/32 ficheiros com linhas/hashes iguais em PostgreSQL 16. Cadastro API/UI: 1939/9795 ms; material: 1255/13699 ms; ocorrências: 1918/19332 ms. Backup `backup/task243-local-20260917`. O registo posterior altera apenas documentação.
 
@@ -18,7 +22,7 @@
 
 - TASK238–239 implementadas e verificadas localmente: pedidos de material/notas por conta e visita, confirmação exata, lembrete/notificação ADMIN/auditoria/comprovativo atómicos, reenvio sem duplicação, recuperação offline e revisão do dia. Histórico global conservado sem atribuição presumida. Relatório `FIELD_STOCK_REQUEST_RECOVERY_20260917.md`; base `14d8e776825ea7e87848d1af8dae26f1176837f4`, cache v66, 133 grupos e nenhuma migração. API/UI e regressões de tipo de visita, alerta antigo e interligações aprovadas; 388 unitários e sintaxe 541/177/57 aprovados. CI/restauro final confirmados no registo acima.
 
-- Próximo percurso após TASK244–245: configurações de relatórios e saídas imprimíveis/PDF. O diagnóstico anterior de mês/zeros em `FIELD_CLIENT_INTAKE_REVIEW_20260917.md` foi tratado neste lote; conservar a evidência sem o repetir como lacuna atual. Cadastro tratado nas TASK242–243, ocorrência nas TASK240–241. Rentabilidade histórica, revisão global e validações externas continuam na matriz.
+- Próximo percurso após TASK244–246: configurações por cliente, leitura sem escrita e gravação recuperável; abertura autenticada e confirmação do mês/filtro/sessão/janela. Reproduções em `REPORT_SETTINGS_PRINT_REVIEW_20260917.md`. A exposição global do imprimível mensal e o texto HTML foram tratados na TASK246; o restante conteúdo/layout/PDF individual permanece por rever. O diagnóstico anterior de mês/zeros em `FIELD_CLIENT_INTAKE_REVIEW_20260917.md` foi tratado neste lote; não o repetir como lacuna atual. Cadastro tratado nas TASK242–243, ocorrência nas TASK240–241. Rentabilidade histórica, revisão global e validações externas continuam na matriz.
 
 - TASK236–237 confirmadas no commit `c38567380cfdbccf75237cb11832acc6524abcc5`, árvore `5870d97ef8efe4fc55c658ef12daeda9f935ee34`, CI `35259181393`: 131/131 grupos, 388 testes unitários/quatro técnicos, 21 scripts de navegador, 20 migrações, sintaxe de 540 JS backend/176 frontend/57 inline e restauro de 110 tabelas/32 ficheiros com linhas e hashes iguais em PostgreSQL 16. Valores 748 ms; três interfaces 6625 ms; planeador 3499 ms. Backups `backup/task237-local-20260917` e `backup/task237-alerts-local-20260917`. O registo posterior altera apenas documentação e não substitui o commit testado.
 
@@ -395,3 +399,4 @@ Evidência atual da TASK120: 216 testes unitários, 4 testes de técnicos, os 15
 - docs/product/GLOBAL_VALIDATION_PHASE_PLAN.md
 - docs/product/FIELD_TEST_EXECUTION_PROTOCOL.md
 - docs/product/CERTIFIED_UI_FREEZE_REGISTER.md
+

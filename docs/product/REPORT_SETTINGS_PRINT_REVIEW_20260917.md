@@ -2,9 +2,9 @@
 
 ## Estado e âmbito
 
-A revisão começou sobre `946a01f389ab3b37371ece483e4bfee463173dae`, depois das TASK244–245. O ensaio `run-1789681864927`, concluído em 4501 ms em PGlite isolado, HTTP real e Chromium, reproduziu os defeitos abaixo. Era um diagnóstico com asserções dos comportamentos incorretos, não uma aprovação funcional.
+A revisão começou sobre `946a01f389ab3b37371ece483e4bfee463173dae`, depois das TASK244–245. O ensaio `run-1789681864927`, concluído em 4501 ms em PGlite isolado, HTTP real e Chromium, reproduziu oito comportamentos incorretos. A revisão de código acrescentou a interpolação direta dos campos guardados, indicada separadamente na tabela. O ensaio era um diagnóstico com asserções dos comportamentos incorretos, não uma aprovação funcional.
 
-A exposição do relatório mensal a perfis de cliente/campo e a interpretação de conteúdo como HTML foram corrigidas nesta TASK246. CI/restauro da árvore conjunta por confirmar. Os restantes pontos orientam a próxima implementação; esta revisão não declara o conjunto de configurações/PDFs concluído.
+A exposição do relatório mensal a perfis de cliente/campo e a interpretação de conteúdo como HTML foram corrigidas nesta TASK246. TASK244–246 confirmadas no commit `48e29bf00a35a63fae23e0c2176d17e7d4fa28dd`, árvore `30570153a8a715891e6f5d214fb497fccac98607`, [CI `35279447336`](https://github.com/ts7520305-svg/cristalwater/actions/runs/35279447336), job `105397748167`: 140/140 grupos, 388 unitários/quatro técnicos, 21 scripts de navegador, 20 migrações, sintaxe 544 JS backend/179 frontend/57 inline e restauro de 110 tabelas/32 ficheiros com linhas/hashes iguais em PostgreSQL 16. O CI terminou com sucesso em 17/09/2026 às 22:12 UTC; resultado confirmado em 18/09/2026. Os restantes pontos orientam a próxima implementação; esta revisão não declara o conjunto de configurações/PDFs concluído.
 
 ## Reproduções e tratamento
 
@@ -34,8 +34,11 @@ Este lote não redefine os cálculos antigos do imprimível: seleção por month
 
 `scripts/test-field-monthly-print-access.js` usa a API real, contas CLIENT/TECHNICIAN/TEAM_LEADER/ADMIN, filtros, limites de mês, query strings ambíguas e um documento real de outro cliente. A resposta efetiva é analisada por Chromium com os oito campos textuais marcados. A ação de imprimir permanece disponível; leituras não alteram contagens de documentos, pagamentos, configurações ou relatórios.
 
-O runner passa a 140 grupos, com 21 scripts no gate de navegador; não há migração ou novo recurso de frontend, e a cache permanece v69. A aprovação nativa final será registada após CI/restauro.
+O runner passa a 140 grupos, com 21 scripts no gate de navegador; não há migração ou novo recurso de frontend, e a cache permanece v69. O CI/restauro nativo da árvore conjunta foi aprovado conforme o registo acima.
 
-`run-1789682083504`: proteção do imprimível aprovada em 2886 ms, regressão da API mensal em 7687 ms e interface mensal em 10516 ms. Sintaxe aprovada em 544 JS backend, 179 frontend e 57 inline. Esta verificação usa schema bootstrap local; a prova de migração/restauro PostgreSQL fica no CI nativo.
+`run-1789682083504`: proteção do imprimível aprovada em 2886 ms, regressão da API mensal em 7687 ms e interface mensal em 10516 ms. Sintaxe aprovada em 544 JS backend, 179 frontend e 57 inline. Esta verificação usa schema bootstrap local; a prova de migração/restauro PostgreSQL foi confirmada no CI nativo.
+
+Validação nativa específica: imprimível em 1405 ms, API mensal em 4320 ms e interface mensal em 8504 ms; restantes regressões, migrações e restauro aprovados. Esta atualização posterior altera apenas documentação.
 
 Próximo lote: configurações por cliente com leitura sem escrita e gravação recuperável; abertura autenticada e validada de relatórios; depois revisão dos conteúdos, permissões e layout das saídas individuais/imprimíveis. A origem do PDF usa o papel autenticado e ignora `?role=CLIENT` para a apresentação ADMIN; isso é uma observação de código, não uma validação visual do PDF. O template HTML individual de visita também contém interpolações diretas e deve entrar nessa revisão.
+

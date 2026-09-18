@@ -2,7 +2,7 @@
 
 ## Estado
 
-Implementado e verificado localmente em 17/09/2026, sobre `d3e7462d8fcbeeca420cf6c5a8f9ac67ac38139d`. Publicação e CI/restauro nativo finais por confirmar. Cache v69; runner com 139 grupos e 21 scripts de navegador, sem migração nova. O diagnóstico anterior, incluindo as reproduções com respostas controladas e base real de QA, está em `FIELD_CLIENT_INTAKE_REVIEW_20260917.md`.
+Implementado em 17/09/2026 sobre `d3e7462d8fcbeeca420cf6c5a8f9ac67ac38139d`. TASK244–246 confirmadas no commit `48e29bf00a35a63fae23e0c2176d17e7d4fa28dd`, árvore `30570153a8a715891e6f5d214fb497fccac98607`, [CI `35279447336`](https://github.com/ts7520305-svg/cristalwater/actions/runs/35279447336), job `105397748167`: 140/140 grupos, 388 unitários/quatro técnicos, 21 scripts de navegador, 20 migrações, sintaxe 544 JS backend/179 frontend/57 inline e restauro de 110 tabelas/32 ficheiros com linhas/hashes iguais em PostgreSQL 16. O CI terminou com sucesso em 17/09/2026 às 22:12 UTC; resultado confirmado em 18/09/2026. Cache v69; runner final com 140 grupos, sem migração nova. A proteção adicional do imprimível está em `REPORT_SETTINGS_PRINT_REVIEW_20260917.md`; o diagnóstico anterior está em `FIELD_CLIENT_INTAKE_REVIEW_20260917.md`.
 
 ## Contrato e fontes
 
@@ -38,8 +38,15 @@ Os painéis declaram gestão manual de estado, evitando que o adaptador visual c
 - `run-1789680831584`: interface com correção da recarga e dos painéis aprovada em 11511 ms. O ensaio inicial que encontrou essas falhas não é usado como aprovação final.
 - `run-1789681020764`: interface final, incluindo contraste claro/escuro, aprovada em 11551 ms. Dados reais de dois meses, vazio, canais literais, HTTP 202/503, resposta HTML, dados malformados/incompletos/contraditórios, falha parcial/total, repetição independente, offline/retoma, prazos, respostas atrasadas, BFCache, duas janelas e conta original após reload.
 - `run-1789681375742`: contrato final com EXTRA_VISITS aprovado na API em 6402 ms e na interface em 10226 ms. Um relatório com duas visitas é contado uma vez; este tipo conhecido não coloca o painel em revisão. As restantes verificações de recuperação e contraste mantiveram-se aprovadas.
+- `run-1789682083504`: regressão conjunta após proteção do imprimível mensal: API 7687 ms, interface 10516 ms e acesso/HTML do imprimível 2886 ms; todos aprovados.
 - Regressão das três interfaces de valores operacionais aprovada em 6277 ms na execução local anterior à correção sintática do novo ensaio de contraste; esse conjunto não é apresentado como aprovação global.
 - 388 unitários em 62 ficheiros; sintaxe de 544 JS backend/179 frontend/57 inline aprovada. Inventário: 101 HTML, 94 entradas de raiz, sete auxiliares, 57 referências literais em 160 scripts ativos, zero assets ausentes e zero divergências de guardas/catalogação. Inventário não equivale a cobertura integral.
+
+## Publicação e validação nativa
+
+API mensal 4320 ms; interface mensal 8504 ms; proteção do imprimível 1405 ms; caixa 1222/445 ms; valores operacionais 497 ms e respetiva interface 5760 ms. As 140 linhas de resultado do runner têm scripts distintos e código zero. A evidência pertence à árvore de código indicada acima; este checkpoint posterior altera apenas documentação.
+
+A versão final das TASK244–245, antes da TASK246, também passou no CI `35278565342`, commit `946a01f389ab3b37371ece483e4bfee463173dae`: 139 grupos, API mensal 4090 ms, interface 8411 ms e restauro confirmado. A aprovação conjunta de 140 grupos inclui a correção do acesso e do HTML do imprimível.
 
 ## Limites e retoma
 
@@ -48,3 +55,4 @@ Os painéis declaram gestão manual de estado, evitando que o adaptador visual c
 - População acima de 10000 foi verificada funcionalmente. As leituras financeiras ainda materializam os registos; não é ensaio de dimensionamento, stress ou redundância de produção.
 - Página em português; revisão integral de traduções, relatórios imprimíveis/PDF, telefones reais e serviços externos permanece na matriz.
 - Próxima revisão: configurações de relatórios e saídas imprimíveis/PDF, cruzando os endpoints e consumidores já existentes. Não repetir a correção mensal deste ecrã.
+
