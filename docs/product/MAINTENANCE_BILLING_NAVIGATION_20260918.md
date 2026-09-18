@@ -21,7 +21,7 @@ A TASK268 entregou a revisão comercial de intervenções concluídas, mas obrig
 - Percurso real de equipamento aprovado em `run-1789758603212`; recuperação da ficha técnica aprovada em `run-1789758673666`. Nesses ensaios iniciais, o novo teste de navegação ainda identificou a seleção antiga restaurada pelo navegador; a versão final confirma o tipo do atalho após a leitura da piscina e o teste do percurso manual escolhe explicitamente o separador pretendido.
 - 396 unitários/63 ficheiros, quatro testes de técnicos e sintaxe 558 backend/183 frontend/56 scripts inline. O runner mantém 152 grupos; este percurso amplia o grupo comercial existente. Cache v89. Sem alterações de API ou migrações.
 
-Confirmar o CI PostgreSQL 16 e restauro da árvore publicada antes de declarar a validação final.
+CI PostgreSQL 16 aprovado: commit `de4a5d47b8bb9415c70bcfa237dc005938105e62`, árvore `09c531532766eabd04df38a3708056d65bbbdbc5`, [run 35385068962](https://github.com/ts7520305-svg/cristalwater/actions/runs/35385068962), job `105729950230`, concluído em 18/09/2026 às 19:34:02 UTC. 152/152 grupos distintos com código zero e sem sinal; 396 unitários/63 ficheiros, quatro técnicos, 21 migrações aditivas e sintaxe 558/183/56. Restauro de 110 tabelas e 46 ficheiros carregados, com linhas e hashes iguais. Publicado na branch autorizada `work/field-readiness-20260915-simulation`, sem merge ou instalação no VPS. O registo final altera apenas documentação e conserva o código/testes aprovados.
 
 ## Âmbito
 
