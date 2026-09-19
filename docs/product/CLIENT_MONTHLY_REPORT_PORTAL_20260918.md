@@ -22,7 +22,9 @@ Os relatórios mensais CLIENT guardados já tinham consulta autorizada e geraç�
 - O novo grupo cobre 14 meses e três páginas; PDF histórico e atual; respostas com identidade divergente, JSON inválido, PDF vazio/truncado, erro de autorização/servidor e resposta atrasada; cancelamento durante leitura do corpo, tempo excedido, modo sem rede, janela bloqueada e regresso pelo histórico. As verificações de largura incluem o painel, campos e botões a 320/390/1440 px.
 - Gates locais aprovados: sintaxe de 560 ficheiros backend, 184 frontend e 56 scripts inline; 396 testes unitários em 63 ficheiros e quatro testes técnicos. O runner integral passa de 154 para 155 grupos. Mantêm-se 21 migrações.
 
-Confirmar a árvore publicada no CI PostgreSQL 16 e o restauro antes de declarar a entrega aprovada. A aprovação de TASK271 não substitui a validação desta alteração.
+CI PostgreSQL 16 e restauro aprovados para o commit `447e0024a6c7f2dfa4de5402fbe4d18472aac584`, árvore `8270a57ec5126549d1acb2e515fa616db53682ee`: [run 35398149793](https://github.com/ts7520305-svg/cristalwater/actions/runs/35398149793), job `105771615641`, workflow concluído e atualizado em 18/09/2026 às 22:00:47 UTC. Confirmados 155/155 grupos distintos, todos com código zero e sem sinal; novo percurso mensal em 13799 ms, acesso mensal em 735 ms e geração mensal em 970 ms. Sintaxe 560/184/56, 396 unitários/63 ficheiros, quatro técnicos, 21 scripts do gate de navegador e 21 migrações aditivas aprovados. Restauro de 110 tabelas e 46 ficheiros carregados, com linhas e hashes iguais.
+
+A atualização final de 19/09/2026 altera apenas este relatório e o checkpoint, conservando o código/testes da árvore aprovada. Publicação na branch autorizada `work/field-readiness-20260915-simulation`, sem merge ou instalação no VPS. Backup local da implementação: `backup/client-monthly-portal-local-20260918`.
 
 ## Limites e próximo percurso
 
