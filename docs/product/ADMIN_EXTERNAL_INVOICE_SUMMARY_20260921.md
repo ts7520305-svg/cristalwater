@@ -29,7 +29,9 @@ Os valores, pagamentos, saldos, documentos e auditorias não são alterados por 
 - `/tmp/cw277-regression.log`: grupo novo, associação externa TASK275, revisão histórica TASK276, visibilidade de rascunhos e Finance OS aprovados. Imagens revistas do novo resumo: `reports/field-visual/external-invoice-summary-1790010134232/`. Ensaio final integral aprovado em `/tmp/cw277-final-test.log`; imagens finais, incluindo o cartão fiscal no viewport móvel, em `reports/field-visual/external-invoice-summary-1790010335561/`.
 - Gates locais: 396 unitários/63 ficheiros, quatro técnicos, 21 scripts de navegador e sintaxe 562 backend/185 frontend/56 inline aprovados. Node 24.19.0, Chromium 153 e PGlite com as 21 migrações existentes; operações externas desativadas.
 
-O CI PostgreSQL 16/restauro desta tarefa deve ser confirmado depois de publicar a árvore final. A aprovação de TASK276 está registada separadamente e não é apresentada como prova de TASK277.
+Publicada após autorização explícita do proprietário em 21/09/2026: commit `d0263d483f1eafaeeab8dd8b55ecdf4d6c3cc154`, árvore `24e3d3a681a247aa0f587d9294e257a16979a748`, idêntica ao lote local validado. A comparação atualizada confirmou que o GitHub ainda estava em TASK276 e não tinha alterações divergentes; atualização normal da mesma branch, sem força, merge ou deploy. A tentativa anterior tinha sido bloqueada pela revisão automática por não reconhecer autorização explícita; esse bloqueio foi resolvido pela instrução seguinte do proprietário. O envio usou a integração autenticada do GitHub após o Git local indicar ausência de credenciais. Backups locais preservados.
+
+[CI PostgreSQL 16 e restauro 35630490326](https://github.com/ts7520305-svg/cristalwater/actions/runs/35630490326), job `106435218129`, concluído com sucesso em 21/09/2026. Logs confirmam 160/160 grupos distintos com código zero e sem sinal, 396 unitários/63 ficheiros, quatro técnicos, 21 scripts de navegador, 21 migrações e sintaxe 562/185/56. O restauro recuperou 110 tabelas e 46 ficheiros com linhas/hashes iguais. Novo grupo do resumo em 32692 ms. A atualização posterior deste relatório é apenas documental.
 
 ## Continuação e limites
 

@@ -4,23 +4,13 @@
 // ==========================================
 
 const { prisma } = require("../prismaClient");
-
-/**
- * Retorna o mês anterior no formato YYYY-MM
- */
-function getLastMonthKey() {
-  const now = new Date();
-  const ref = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const year = ref.getFullYear();
-  const month = String(ref.getMonth() + 1).padStart(2, "0");
-  return `${year}-${month}`;
-}
+const { reportMonth } = require('./monthlyReportMonth');
 
 /**
  * Gera relatório mensal ADMIN
  */
-async function generateAdminMonthlyReport() {
-  const month = getLastMonthKey();
+async function generateAdminMonthlyReport(monthRef) {
+  const month = reportMonth(monthRef);
 
   const exists = await prisma.monthlyReport.findFirst({
     where: { month, type: "ADMIN" },
