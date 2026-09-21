@@ -5,6 +5,133 @@ const { EVENT_TYPES, emitFinanceEvent } = require("../../services/financeOsEvent
 const { preparePaymentRequest, executePaymentRequest, cashMethod } = require('../../services/invoicePaymentRequestService');
 const { reservedRepairIds } = require('../../services/repairInvoiceSourceService');
 const cashReceipts = require('../../services/cashReceiptReportService');
+const { createHash } = require('node:crypto');
+const { normalizeInvoice } = require('../../services/invoiceViewService');
+
+function externalFailure(message, status = 400) {
+  throw Object.assign(new Error(message), { status });
+}
+
+// Both internal numbering and external reference registration reserve the number
+// before locking an invoice. The association covers the complete document.
+async function reserveInvoiceNumber(tx, number, id) {
+  const key = `invoice-number:${number}`;
+  await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${key}))::text`;
+  const duplicate = await tx.invoice.findFirst({
+    where: { id: { not: id }, OR: [{ externalInvoiceNo: number }, { invoiceNumber: number }] }, select: { id: true },
+  });
+  if (duplicate) externalFailure(`Este número já está associado ao documento #${duplicate.id}.`, 409);
+}
+
+function externalSnapshot(invoice) {
+  return {
+    id: invoice.id, clientId: invoice.clientId, status: invoice.status, requiresInvoice: invoice.requiresInvoice,
+    amount: invoice.amount, total: invoice.total, totalAmount: invoice.totalAmount,
+    taxRate: invoice.taxRate, taxAmount: invoice.taxAmount, monthRef: invoice.monthRef, month: invoice.month,
+    client: Object.fromEntries(['name', 'requiresInvoice', 'fiscalName', 'fiscalNif', 'fiscalAddress', 'fiscalEmail'].map(key => [key, invoice.client?.[key] ?? null])),
+    lines: [...(invoice.lines || [])].sort((a, b) => a.id - b.id).map(line => ({
+      id: line.id, type: line.type, lineType: line.lineType, referenceId: line.referenceId,
+      description: line.description, quantity: line.quantity, unitPrice: line.unitPrice,
+      total: line.total, lineTotal: line.lineTotal, serviceDate: line.serviceDate, sourceMonth: line.sourceMonth, notes: line.notes,
+    })),
+  };
+}
+
+function externalReviewToken(invoice) {
+  return createHash('sha256').update(JSON.stringify(externalSnapshot(invoice))).digest('hex');
+}
+
+function externalRequested(invoice) { return Boolean(invoice.requiresInvoice || invoice.client?.requiresInvoice); }
+function externalEligible(invoice) { return externalRequested(invoice) && isReceivableInvoice(invoice) && invoiceTotal(invoice) > 0; }
+function externalRegistered(invoice) { return typeof invoice.externalInvoiceNo === 'string' && Boolean(invoice.externalInvoiceNo.trim()); }
+const externalSum = invoices => invoices.reduce((sum, row) => sum + toCents(invoiceTotal(row)), 0) / 100;
+
+async function listExternalInvoices(query = {}, flat = false) {
+  const status = String(query.status || 'pending').toLowerCase(), search = String(query.q || '').trim().toLocaleLowerCase('pt-PT');
+  if (!['pending', 'issued', 'missing-data', 'all'].includes(status)) externalFailure('Filtro inválido.');
+  const { rows, registrations } = await repository.transaction(async tx => {
+    const rows = await tx.client.findMany({
+    where: { OR: [{ requiresInvoice: true }, { invoices: { some: { OR: [{ requiresInvoice: true }, { externalInvoiceNo: { not: null } }, { invoiceIssued: true }] } } }] },
+    include: { pools: { select: { id: true } }, invoices: { include: { client: true, lines: { orderBy: { id: 'asc' } }, payments: true }, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }] } },
+    orderBy: [{ name: 'asc' }, { id: 'asc' }],
+    });
+    const registrations = await tx.auditTrail.findMany({ where: { action: 'EXTERNAL_INVOICE_REGISTERED', entity: 'Invoice', entityId: { in: rows.flatMap(client => client.invoices.map(invoice => invoice.id)) } }, orderBy: { id: 'desc' } });
+    return { rows, registrations };
+  });
+  const history = new Map();
+  for (const entry of registrations) if (!history.has(entry.entityId)) history.set(entry.entityId, entry);
+  const clients = rows.map(client => {
+    const invoices = client.invoices.filter(row => externalRegistered(row) || externalEligible(row)).map(row => ({
+      ...normalizeInvoice(row), externalReviewToken: externalReviewToken(row),
+      externalRegistration: history.get(row.id)?.metadata || null,
+      externalRegisteredAt: history.get(row.id)?.createdAt || null,
+      externalRegistrationAllowed: externalEligible(row) && !externalRegistered(row),
+      externalRegistrationStatus: externalRegistered(row) ? 'REGISTERED' : row.invoiceIssued ? 'NUMBER_MISSING' : 'PENDING',
+    }));
+    const pendingInvoices = invoices.filter(row => !externalRegistered(row)), issuedInvoices = invoices.filter(externalRegistered);
+    return {
+      id: client.id, name: client.name, email: client.email, phone: client.phone, zone: client.zone,
+      active: client.active, status: client.status, paymentReference: `CW-${String(client.id).padStart(6, '0')}`,
+      requiresInvoice: Boolean(client.requiresInvoice), fiscalName: client.fiscalName, fiscalNif: client.fiscalNif,
+      fiscalAddress: client.fiscalAddress, fiscalEmail: client.fiscalEmail, externalBillingNotes: client.externalBillingNotes,
+      fiscalDataComplete: ['fiscalName', 'fiscalNif', 'fiscalAddress', 'fiscalEmail'].every(key => typeof client[key] === 'string' && client[key].trim()),
+      poolsCount: client.pools.length, invoices, pendingInvoices, issuedInvoices,
+      pendingTotal: externalSum(pendingInvoices), issuedTotal: externalSum(issuedInvoices),
+      lastIssuedAt: issuedInvoices[0]?.updatedAt || issuedInvoices[0]?.issueDate || null,
+    };
+  }).filter(client => client.requiresInvoice || client.invoices.length);
+  if (flat) return { ok: true, invoices: clients.flatMap(client => client.invoices) };
+  const pending = clients.flatMap(client => client.pendingInvoices), issued = clients.flatMap(client => client.issuedInvoices);
+  return {
+    ok: true,
+    summary: { clients: clients.length, missingFiscalData: clients.filter(client => !client.fiscalDataComplete).length,
+      pendingInvoices: pending.length, issuedInvoices: issued.length, totalInvoices: pending.length + issued.length,
+      pendingTotal: externalSum(pending), issuedTotal: externalSum(issued) },
+    clients: clients.filter(client => (status === 'all' || (status === 'pending' && client.pendingInvoices.length) || (status === 'issued' && client.issuedInvoices.length) || (status === 'missing-data' && !client.fiscalDataComplete))
+      && (!search || [client.name, client.email, client.phone, client.zone, client.fiscalName, client.fiscalNif, client.fiscalAddress, client.fiscalEmail, client.paymentReference, ...client.issuedInvoices.map(row => row.externalInvoiceNo)].filter(Boolean).join(' ').toLocaleLowerCase('pt-PT').includes(search))),
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+async function registerExternalInvoice(rawId, payload, user) {
+  const id = Number(rawId);
+  if (!/^[1-9]\d*$/.test(String(rawId)) || !Number.isSafeInteger(id) || id > 2147483647) externalFailure('Documento inválido.');
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) externalFailure('Dados inválidos.');
+  const numbers = ['externalInvoiceNo', 'invoiceNumber', 'externalNumber'].filter(key => payload[key] !== undefined).map(key => payload[key]);
+  if (!numbers.length || numbers.some(number => typeof number !== 'string' || !number.trim() || number.length > 200 || /[\u0000-\u001f\u007f]/.test(number))) externalFailure('Indique um número de fatura externa válido, até 200 caracteres.');
+  const number = numbers[0].trim();
+  if (numbers.some(value => value.trim() !== number)) externalFailure('Os números indicados são diferentes.');
+  const reviewing = ['externalReviewToken', 'reviewedLineIds', 'expectedClientId'].some(key => payload[key] !== undefined);
+  if (reviewing && (typeof payload.externalReviewToken !== 'string' || !/^[a-f0-9]{64}$/.test(payload.externalReviewToken) || !Number.isInteger(payload.expectedClientId) || payload.expectedClientId <= 0 || !Array.isArray(payload.reviewedLineIds)
+    || payload.reviewedLineIds.some(value => !Number.isInteger(value) || value <= 0) || new Set(payload.reviewedLineIds).size !== payload.reviewedLineIds.length)) externalFailure('A confirmação dos serviços está incompleta. Atualize a lista.');
+  return repository.transaction(async tx => {
+    await reserveInvoiceNumber(tx, number, id);
+    await tx.$queryRaw`SELECT id FROM "Invoice" WHERE id = ${id} FOR UPDATE`;
+    await tx.$queryRaw`SELECT id FROM "InvoiceLine" WHERE "invoiceId" = ${id} ORDER BY id FOR UPDATE`;
+    const invoice = await tx.invoice.findUnique({ where: { id }, include: { client: true, lines: { orderBy: { id: 'asc' } }, payments: true } });
+    if (!invoice) externalFailure('Documento não encontrado.', 404);
+    if (reviewing && payload.expectedClientId !== invoice.clientId) externalFailure('O cliente do documento mudou. Atualize a lista.', 409);
+    if (externalRegistered(invoice)) {
+      if (invoice.externalInvoiceNo !== number) externalFailure('O número externo já está registado. O histórico não pode ser substituído por esta ação.', 409);
+      return { ok: true, invoice, idempotent: true };
+    }
+    if (!externalEligible(invoice)) externalFailure('Confirme o pedido de fatura e um documento válido com valor positivo. Rascunhos e documentos retirados não podem ser associados.', 409);
+    if (reviewing && (payload.externalReviewToken !== externalReviewToken(invoice) || JSON.stringify([...payload.reviewedLineIds].sort((a, b) => a - b)) !== JSON.stringify(invoice.lines.map(line => line.id)))) externalFailure('Os serviços ou dados do documento mudaram. Atualize e confirme novamente todas as linhas.', 409);
+    const snapshot = JSON.parse(JSON.stringify(externalSnapshot(invoice)));
+    const updated = await tx.invoice.update({ where: { id }, data: {
+      invoiceIssued: true, externalInvoiceNo: number,
+      notes: [invoice.notes, `Fatura oficial externa: ${number}`].filter(Boolean).join('\n'),
+    }, include: { client: true, lines: true, payments: true } });
+    await tx.communicationLog.create({ data: { clientId: invoice.clientId, channel: 'EXTERNAL_INVOICE', referenceId: id,
+      message: `Documento interno #${id} associado à fatura externa: ${number}` } });
+    await tx.auditTrail.create({ data: { action: 'EXTERNAL_INVOICE_REGISTERED', eventType: 'EXTERNAL_INVOICE_REGISTERED', entity: 'Invoice', entityId: id,
+      clientId: invoice.clientId, metadata: { actor: `ADMIN:${user?.id}`, kind: 'EXTERNAL_REFERENCE_ONLY', externalInvoiceNo: number,
+        association: 'WHOLE_INTERNAL_DOCUMENT', checklistConfirmed: reviewing, reviewToken: externalReviewToken(invoice), snapshot },
+      beforeJson: { invoiceIssued: invoice.invoiceIssued, externalInvoiceNo: invoice.externalInvoiceNo },
+      afterJson: { invoiceIssued: true, externalInvoiceNo: number } } });
+    return { ok: true, invoice: updated };
+  });
+}
 
 function monthRefFromDate(date = new Date()) {
   return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
@@ -164,17 +291,22 @@ async function issueInvoice(invoiceId, payload = {}, actor = "finance-os", trans
   const include = { client: true, lines: true, payments: true };
   const invoiceNumber = String(payload.invoiceNumber || payload.externalInvoiceNo || "").trim() || null;
   const run = async tx => {
+    if (invoiceNumber) {
+      try { await reserveInvoiceNumber(tx, invoiceNumber, id); }
+      catch (error) { if (error.status) return { ok: false, status: error.status, error: error.message }; throw error; }
+    }
     await tx.$queryRaw`SELECT id FROM "Invoice" WHERE id = ${id} FOR UPDATE`;
     const invoice = await tx.invoice.findUnique({ where: { id }, include });
     if (!invoice) return { ok: false, status: 404, error: "Fatura não encontrada" };
     const status = normalizeInvoiceStatus(invoice.status);
     if (NON_RECEIVABLE_STATUSES.includes(status) && !['DRAFT', 'RASCUNHO'].includes(status)) return { ok: false, status: 409, error: 'Documento retirado; não pode ser reaberto por emissão' };
-    if ((invoice.invoiceNumber && invoiceNumber && invoice.invoiceNumber !== invoiceNumber) || (invoice.externalInvoiceNo && invoiceNumber && invoice.externalInvoiceNo !== invoiceNumber)) return { ok: false, status: 409, error: 'O número do documento já está definido' };
+    if ((invoice.invoiceNumber && invoiceNumber && invoice.invoiceNumber !== invoiceNumber) || (invoice.externalInvoiceNo && payload.externalInvoiceNo && invoice.externalInvoiceNo !== payload.externalInvoiceNo.trim())) return { ok: false, status: 409, error: 'O número do documento já está definido' };
     if (invoice.invoiceIssued || status === 'ISSUED') return { ok: true, invoice: invoiceShape(invoice), alreadyIssued: true };
     if (!['DRAFT', 'RASCUNHO', 'PENDING'].includes(status) || invoicePaid(invoice) > 0 || invoice.payments.some(payment => Number(payment.amount) > 0 || Number(payment.amountCents) > 0)) return { ok: false, status: 409, error: 'O estado ou pagamentos do documento não permitem esta emissão' };
     const issued = await tx.invoice.update({ where: { id }, data: {
       status: 'ISSUED', invoiceIssued: true, invoiceNumber: invoiceNumber || invoice.invoiceNumber,
-      externalInvoiceNo: invoiceNumber || invoice.externalInvoiceNo, issueDate: invoice.issueDate || new Date(),
+      // An internal document number alone does not confirm an external invoice.
+      externalInvoiceNo: payload.externalInvoiceNo?.trim() || invoice.externalInvoiceNo, issueDate: invoice.issueDate || new Date(),
       notes: [invoice.notes, payload.notes].filter(Boolean).join('\n') || invoice.notes,
     }, include });
     await tx.auditTrail.create({ data: { eventType: 'FINANCE_INVOICE_ISSUED', action: 'FINANCE_INVOICE_ISSUED', entity: 'Invoice', entityId: id,
@@ -823,6 +955,8 @@ async function confirmPaymentAutomation(invoiceId, payload = {}, actor = "financ
 }
 
 module.exports = {
+  listExternalInvoices,
+  registerExternalInvoice,
   createDraftInvoice,
   issueInvoice,
   sendInvoice,

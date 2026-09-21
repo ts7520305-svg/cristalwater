@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cristal Water - Faturacao Oficial</title>
+  <title>Cristal Water - Faturação Oficial</title>
   <script src="/cw-auth.js"></script>
   <link rel="stylesheet" href="/ui/foundation.css">
 <link rel="stylesheet" href="/cristal-assist.css">
@@ -60,6 +60,20 @@
     .invoice-main span{display:block;margin-top:4px;color:var(--muted);font-size:12px}
     .invoice-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
     .empty{border:1px dashed rgba(125,211,252,.28);border-radius:14px;padding:18px;color:var(--muted);background:rgba(6,17,31,.52)}
+    .client-card > div,.invoice-main{min-width:0;overflow-wrap:anywhere}
+    .external-form{grid-template-columns:minmax(0,1fr)}
+    .external-form fieldset{min-width:0;margin:12px 0 0;padding:12px;border:1px solid var(--line);border-radius:10px}
+    .external-form legend{font-size:13px;font-weight:800}
+    .external-form p{font-size:13px;line-height:1.5}
+    .external-check{display:flex;align-items:flex-start;gap:10px;margin:12px 0;cursor:pointer}
+    .external-check input{width:20px;height:20px;min-height:20px;margin:2px 0;flex:none;accent-color:var(--ok)}
+    .external-check span{margin:0;font-size:14px}
+    .external-check small{display:block;color:var(--muted);margin-top:4px}
+    .external-number{display:block;margin:16px 0;font-size:13px}
+    .external-number input{margin-top:8px}
+    .external-warning,.external-result{color:var(--warn)}
+    button:disabled{cursor:default;opacity:.5}
+    details summary{cursor:pointer;padding:10px 0}
     @media(max-width:1100px){
       .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
       .toolbar{grid-template-columns:1fr}
@@ -78,6 +92,21 @@
   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
   <script src="/admin-auth-guard.js"></script>
   <link rel="stylesheet" href="/ui/design-system.css">
+  <style>
+    body .page .invoice-row{background:#f3f8fa;border-color:#c6d7e0;color:#183b4a}
+    body .page .invoice-main b,body .page .meta strong,body .page .metric b{color:#183b4a}
+    body .page .invoice-main span,body .page .meta,body .page .external-check small,body .page .metric span{color:#446575}
+    body .page .section-label{color:#275c82}
+    body .page .metric.warn b,body .page .external-warning,body .page .external-result{color:#805000}
+    body .page .external-form fieldset{border-color:#bfd3dd;color:#183b4a}
+    body .page .external-form p,body .page .external-number{color:#365766}
+    body .page .client-title{flex-wrap:wrap}
+    body .page .client-title h2{flex:1 1 180px}
+    body .page .pill{flex:0 1 auto;max-width:100%;background:#edf5f7;color:#275c63}
+    body .page .pill.warn{background:#fff4d6;color:#795000}
+    body .page .pill.ok{background:#e4f5ec;color:#165c3b}
+    body .page .empty,body .page .status{color:#365766}
+  </style>
 </head>
 <body data-required-role="ADMIN">
 
@@ -87,8 +116,8 @@
   <main class="page">
     <section class="page-head">
       <div>
-        <h1>Faturacao Oficial Externa</h1>
-        <p>Clientes que pedem fatura real noutro programa. Aqui consegues ver os dados fiscais, faturas internas pendentes, historico ja emitido e marcar o numero da fatura oficial externa.</p>
+        <h1>Faturação Oficial Externa</h1>
+        <p>A fatura com IVA é emitida no seu programa de faturação. Aqui pode conferir os serviços de cada documento interno e guardar o número da fatura externa correspondente. Os valores apresentados são os valores internos registados.</p>
       </div>
       <div class="head-actions">
         <a class="btn" href="/admin-clients">Clientes</a>
@@ -110,7 +139,7 @@
         </select>
         <button class="primary" id="searchBtn" type="button">Pesquisar</button>
       </div>
-      <div class="status" id="status">A carregar...</div>
+      <div class="status" id="status" role="status" aria-live="polite">A carregar...</div>
       <div class="client-list" id="list"></div>
     </section>
   </main>

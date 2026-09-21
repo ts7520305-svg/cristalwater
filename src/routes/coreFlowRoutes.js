@@ -10,6 +10,7 @@ const prismaModule = require('../prismaClient');
 const auth = require('../middlewares/authMiddleware');
 const { completeServiceVisit, VisitCompletionError } = require('../services/serviceVisitCompletionService');
 const CoreInvoicePaymentBusiness = require('../business/finance/CoreInvoicePaymentBusiness');
+const finance = require('../business/finance/FinanceOsBusiness');
 const { assertPoolReadyForRound } = require('../utils/poolReadiness');
 const { roleMatches, normalizeRole } = require('../utils/roles');
 const RepairBusiness = require('../business/repair/RepairBusiness');
@@ -1729,21 +1730,15 @@ router.post('/invoices/:id/pay', async (req, res) => {
 });
 
 router.get('/invoices/external', async (req, res) => {
-  const invoices = await safe('invoice.findMany.externalInvoices', [], () => db('invoice').findMany({
-    where: { requiresInvoice: true },
-    include: { client: true, lines: true, payments: true },
-    orderBy: { createdAt: 'desc' },
-    take: 500,
-  }));
-  return res.json({ ok: true, invoices });
+  res.set('Cache-Control', 'private, no-store');
+  try { return res.json(await finance.listExternalInvoices({ status: 'all' }, true)); }
+  catch (error) { return res.status(error.status || 500).json({ ok: false, error: error.status ? error.message : 'Não foi possível consultar a faturação externa.' }); }
 });
 
 router.post('/invoices/:id/mark-external-issued', async (req, res) => {
-  try {
-    const id = toInt(req.params.id);
-    const invoice = await db('invoice').update({ where: { id }, data: invoiceBaseData({ invoiceIssued: true, externalInvoiceNo: req.body?.externalInvoiceNo || undefined }) });
-    return res.json({ ok: true, invoice });
-  } catch (error) { return res.status(500).json({ ok: false, error: error.message }); }
+  res.set('Cache-Control', 'private, no-store');
+  try { return res.json(await finance.registerExternalInvoice(req.params.id, req.body, req.user)); }
+  catch (error) { return res.status(error.status || 500).json({ ok: false, error: error.status ? error.message : 'Não foi possível guardar o número externo. Consulte o histórico antes de repetir.' }); }
 });
 
 router.post('/simulate-full-flow', async (req, res) => {
