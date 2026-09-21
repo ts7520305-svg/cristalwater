@@ -582,7 +582,36 @@
             </div>
             <p id="monthlyOpenStatus" role="status" aria-live="polite"></p>
           </section>
-          <div class="list" id="documentList"><div class="empty">A carregar documentos...</div></div>
+          <section id="clientDocumentsPanel" data-cw-no-i18n data-cw-state-managed="manual" aria-labelledby="documentTitle">
+            <style>
+              #clientDocumentsPanel{min-width:0;overflow-wrap:anywhere;border-top:1px solid var(--cw-border,#cbd5e1);padding-top:20px}
+              #clientDocumentsPanel h3,#clientDocumentsPanel h4{margin:0}
+              .cw-document-tools,#documentPagination{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
+              .cw-document-tools label{flex:1 1 220px;min-width:0}
+              .cw-document-tools label span{display:block;margin-bottom:5px}
+              #clientDocumentsPanel input{width:100%;min-width:0;max-width:100%;box-sizing:border-box;min-height:44px;padding:8px;border:1px solid var(--cw-border,#cbd5e1);border-radius:10px}
+              #clientDocumentsPanel button{min-width:0;max-width:100%;min-height:44px;white-space:normal;overflow-wrap:anywhere}
+              #clientDocumentsPanel #documentList{display:block;max-height:none;overflow:visible;min-width:0}
+              #documentList .service-item{margin:10px 0;padding:12px;box-sizing:border-box;min-width:0}
+              #documentStatus:empty,#documentDownloadStatus:empty{display:none}
+              #documentPagination[hidden]{display:none}
+            </style>
+            <h3 id="documentTitle" data-document-text="0">Documentos disponíveis</h3>
+            <p class="muted" data-document-text="1">Pesquise e transfira os ficheiros partilhados consigo.</p>
+            <div class="cw-document-tools">
+              <label for="documentSearch"><span data-document-text="2">Pesquisar por título, tipo ou nome do ficheiro</span><input id="documentSearch" type="search" maxlength="200" autocomplete="off"></label>
+              <button class="btn" id="documentClear" type="button" data-document-text="3">Limpar pesquisa</button>
+              <button class="btn" id="documentRefresh" type="button" data-document-text="4">Atualizar</button>
+            </div>
+            <p id="documentStatus" role="status" aria-live="polite">A carregar documentos…</p>
+            <div class="list" id="documentList"></div>
+            <div id="documentPagination" hidden>
+              <button class="btn" id="documentPrevious" type="button" data-document-text="5">Anterior</button>
+              <span id="documentSummary" aria-live="polite"></span>
+              <button class="btn" id="documentNext" type="button" data-document-text="6">Seguinte</button>
+            </div>
+            <p id="documentDownloadStatus" role="status" aria-live="polite"></p>
+          </section>
         </section>
       </section>
 
@@ -642,6 +671,7 @@
   <script src="/cw-client-portal-request.js"></script>
   <script src="/cw-report-download.js"></script>
   <script src="/cw-client-monthly-reports.js"></script>
+  <script src="/cw-client-documents.js"></script>
   <script src="/client-portal.js"></script>
   <script src="/client-quotes.js"></script>
   <script src="/ui/core/navigation-context.js"></script>

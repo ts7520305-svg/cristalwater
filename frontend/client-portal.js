@@ -34,6 +34,7 @@ function selectionIsCurrent(id, revision) {
   return clientId === id && clientSelectionRevision === revision;
 }
 const monthlyReports = window.CWClientMonthlyReports?.create({ context: () => ({ clientId, revision: clientSelectionRevision }), language: () => portalLanguage });
+const clientDocuments = window.CWClientDocuments?.create({ context: () => ({ clientId, revision: clientSelectionRevision }), language: () => portalLanguage });
 function updatePortalActionAvailability() {
   ['sendBtn', 'visitRequestBtn', 'paymentNoticeBtn', 'photoBtn'].forEach(id => {
     const button = el(id);
@@ -913,6 +914,7 @@ function setOptionLabels() {
 function applyLanguage(language) {
   portalLanguage = normalizeLanguage(language);
   monthlyReports?.sync();
+  clientDocuments?.sync();
   localStorage.setItem("cw_client_lang", portalLanguage);
   localStorage.setItem("cw_language", portalLanguage);
   document.documentElement.lang = portalLanguage;
@@ -1555,27 +1557,6 @@ function renderNotifications(notifications = []) {
   list.querySelectorAll?.('[data-notice-read]').forEach(button=>button.addEventListener('click',()=>markPortalNotificationRead(notifications[Number(button.dataset.noticeRead)],button,button.nextElementSibling)));
 }
 
-function renderDocuments(documents = []) {
-  const list = el("documentList");
-  if (!list) return;
-  if (!documents.length) {
-    list.innerHTML = `<div class="empty">Sem documentos disponíveis.</div>`;
-    return;
-  }
-  list.innerHTML = documents.slice(0, 8).map((documentItem) => `
-    <article class="service-item">
-      <div class="service-head">
-        <div>
-          <div class="service-title">${esc(documentItem.title || documentItem.originalName || "Documento")}</div>
-          <div class="muted">${esc(documentItem.type || "Documento")}</div>
-        </div>
-        <a class="btn primary" href="${esc(documentItem.downloadUrl || documentItem.url || "#")}" target="_blank" rel="noopener">Abrir</a>
-      </div>
-      <div class="muted">${esc(documentItem.notes || "")}</div>
-    </article>
-  `).join("");
-}
-
 function renderPermissions(permissions = {}) {
   const list = el("permissionsList");
   if (!list) return;
@@ -1599,7 +1580,7 @@ async function loadCustomerExtras() {
   const selectionRevision = clientSelectionRevision;
   const revision = ++extrasLoadRevision;
   if (!requestedClient) return;
-  const sections=[['notifications','notificationList','notifications',renderNotifications],['documents','documentList','documents',renderDocuments],['permissions','permissionsList','permissions',renderPermissions]];
+  const sections=[['notifications','notificationList','notifications',renderNotifications],['permissions','permissionsList','permissions',renderPermissions]];
   await Promise.allSettled(sections.map(async ([endpoint,id,field,render])=>{
     try{
       const response=await fetch(`${API}/client-portal/${requestedClient}/${endpoint}`,{headers:portalAuthHeaders()});
@@ -1793,11 +1774,12 @@ async function chooseAdminClient(nextClientId, updateUrl = true) {
   ++clientSelectionRevision;
   clientId = Number.isInteger(id) && id > 0 ? id : 0;
   monthlyReports?.sync();
+  clientDocuments?.sync();
   const selectionRevision = clientSelectionRevision;
   loadedClientId = 0;
   lastPortalSnapshot = {};
   showNoClientSelectedState();
-  ['notificationList', 'documentList', 'permissionsList'].forEach(field => el(field)?.replaceChildren());
+  ['notificationList', 'permissionsList'].forEach(field => el(field)?.replaceChildren());
   const draft = clientDrafts.get(clientId);
   draftFields.forEach(field => { if (el(field)) el(field).value = draft?.values[field] || (field === 'paymentNoticeMethod' ? 'Transferencia' : ''); });
   if (el('photoInput')) {
