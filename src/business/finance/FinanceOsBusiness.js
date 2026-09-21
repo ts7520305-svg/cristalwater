@@ -14,13 +14,21 @@ function externalFailure(message, status = 400) {
 
 // Both internal numbering and external reference registration reserve the number
 // before locking an invoice. The association covers the complete document.
-async function reserveInvoiceNumber(tx, number, id) {
+async function lockInvoiceNumber(tx, number) {
   const key = `invoice-number:${number}`;
   await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${key}))::text`;
-  const duplicate = await tx.invoice.findFirst({
-    where: { id: { not: id }, OR: [{ externalInvoiceNo: number }, { invoiceNumber: number }] }, select: { id: true },
-  });
-  if (duplicate) externalFailure(`Este número já está associado ao documento #${duplicate.id}.`, 409);
+}
+// Same whitespace set as String.trim(), including historical non-breaking spaces.
+const referenceWhitespace = '\u0009\u000a\u000b\u000c\u000d\u0020\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000\ufeff';
+async function conflictingInvoiceIds(tx, number, id) {
+  const rows = await tx.$queryRaw`SELECT id FROM "Invoice" WHERE id <> ${id}
+    AND (btrim("externalInvoiceNo", ${referenceWhitespace}) = ${number} OR btrim("invoiceNumber", ${referenceWhitespace}) = ${number}) ORDER BY id`;
+  return rows.map(row => row.id);
+}
+async function reserveInvoiceNumber(tx, number, id) {
+  await lockInvoiceNumber(tx, number);
+  const duplicates = await conflictingInvoiceIds(tx, number, id);
+  if (duplicates.length) externalFailure(`Este número já está associado ao documento #${duplicates[0]}.`, 409);
 }
 
 function externalSnapshot(invoice) {
@@ -45,50 +53,102 @@ function externalRequested(invoice) { return Boolean(invoice.requiresInvoice || 
 function externalEligible(invoice) { return externalRequested(invoice) && isReceivableInvoice(invoice) && invoiceTotal(invoice) > 0; }
 function externalRegistered(invoice) { return typeof invoice.externalInvoiceNo === 'string' && Boolean(invoice.externalInvoiceNo.trim()); }
 const externalSum = invoices => invoices.reduce((sum, row) => sum + toCents(invoiceTotal(row)), 0) / 100;
+const externalHistoryActions = ['EXTERNAL_INVOICE_REGISTERED', 'EXTERNAL_INVOICE_REFERENCE_REVIEWED'];
+const validExternalNumber = value => typeof value === 'string' && Boolean(value.trim()) && value.length <= 200 && !/[\u0000-\u001f\u007f]/.test(value);
+
+function externalConfirmation(entry) {
+  const metadata = entry.metadata;
+  return metadata?.kind === 'EXTERNAL_REFERENCE_ONLY' && metadata.association === 'WHOLE_INTERNAL_DOCUMENT'
+    && (entry.action === 'EXTERNAL_INVOICE_REGISTERED' || metadata.decision === 'CONFIRM_EXTERNAL')
+    && typeof metadata.externalInvoiceNo === 'string' && Array.isArray(metadata.snapshot?.lines);
+}
+function referenceReview(invoice, history, conflicts) {
+  const number = invoice.externalInvoiceNo?.trim() || '';
+  const confirmations = history.filter(externalConfirmation);
+  const confirmation = confirmations.find(entry => entry.metadata.externalInvoiceNo.trim() === number
+    && entry.metadata.snapshot.id === invoice.id && entry.metadata.snapshot.clientId === invoice.clientId);
+  const internalMatch = Boolean(number && invoice.invoiceNumber?.trim() === number);
+  let status = number ? 'REVIEW_REQUIRED' : history.some(entry => entry.metadata?.decision === 'INTERNAL_ONLY') ? 'INTERNAL_ONLY' : 'NO_REFERENCE';
+  if (number && internalMatch) status = 'INTERNAL_MATCH';
+  if (confirmation) status = 'CONFIRMED';
+  if (confirmations.length && !confirmation) status = 'HISTORY_MISMATCH';
+  if (number && conflicts.length) status = 'DUPLICATE_REFERENCE';
+  if (number && !validExternalNumber(invoice.externalInvoiceNo)) status = 'INVALID_REFERENCE';
+  const needsReview = !['CONFIRMED', 'NO_REFERENCE', 'INTERNAL_ONLY'].includes(status);
+  const token = createHash('sha256').update(JSON.stringify({ snapshot: externalSnapshot(invoice),
+    invoiceNumber: invoice.invoiceNumber, externalInvoiceNo: invoice.externalInvoiceNo, invoiceIssued: invoice.invoiceIssued,
+    history: history.map(entry => ({ id: entry.id, action: entry.action, metadata: entry.metadata })), conflicts })).digest('hex');
+  return { status, needsReview, token, conflictInvoiceIds: conflicts,
+    canConfirm: Boolean(number && validExternalNumber(invoice.externalInvoiceNo) && !conflicts.length && !confirmations.length),
+    canMarkInternal: Boolean(internalMatch && validExternalNumber(invoice.externalInvoiceNo) && !confirmations.length),
+    confirmation: confirmation || null };
+}
+
+function referenceHistory(history) {
+  return history.map(entry => ({ id: entry.id, recordedAt: entry.createdAt, actor: entry.metadata?.actor || null,
+    decision: entry.metadata?.decision || 'REGISTER_EXTERNAL', reference: entry.metadata?.externalInvoiceNo || null,
+    note: entry.metadata?.note || null, snapshot: entry.metadata?.snapshot || null }));
+}
 
 async function listExternalInvoices(query = {}, flat = false) {
   const status = String(query.status || 'pending').toLowerCase(), search = String(query.q || '').trim().toLocaleLowerCase('pt-PT');
-  if (!['pending', 'issued', 'missing-data', 'all'].includes(status)) externalFailure('Filtro inválido.');
-  const { rows, registrations } = await repository.transaction(async tx => {
+  if (!['pending', 'issued', 'review', 'missing-data', 'all'].includes(status)) externalFailure('Filtro inválido.');
+  const { rows, registrations, references } = await repository.transaction(async tx => {
+    const registrations = await tx.auditTrail.findMany({ where: { action: { in: externalHistoryActions }, entity: 'Invoice' }, orderBy: { id: 'desc' } });
+    const reviewedIds = [...new Set(registrations.map(entry => entry.entityId).filter(Number.isInteger))];
     const rows = await tx.client.findMany({
-    where: { OR: [{ requiresInvoice: true }, { invoices: { some: { OR: [{ requiresInvoice: true }, { externalInvoiceNo: { not: null } }, { invoiceIssued: true }] } } }] },
+    where: { OR: [{ requiresInvoice: true }, { invoices: { some: { OR: [{ requiresInvoice: true }, { externalInvoiceNo: { not: null } }, { invoiceIssued: true }, { id: { in: reviewedIds } }] } } }] },
     include: { pools: { select: { id: true } }, invoices: { include: { client: true, lines: { orderBy: { id: 'asc' } }, payments: true }, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }] } },
     orderBy: [{ name: 'asc' }, { id: 'asc' }],
     });
-    const registrations = await tx.auditTrail.findMany({ where: { action: 'EXTERNAL_INVOICE_REGISTERED', entity: 'Invoice', entityId: { in: rows.flatMap(client => client.invoices.map(invoice => invoice.id)) } }, orderBy: { id: 'desc' } });
-    return { rows, registrations };
+    const references = await tx.invoice.findMany({ select: { id: true, invoiceNumber: true, externalInvoiceNo: true } });
+    return { rows, registrations, references };
   });
-  const history = new Map();
-  for (const entry of registrations) if (!history.has(entry.entityId)) history.set(entry.entityId, entry);
+  const history = new Map(), numberOwners = new Map();
+  for (const entry of registrations) { if (!history.has(entry.entityId)) history.set(entry.entityId, []); history.get(entry.entityId).push(entry); }
+  for (const row of references) for (const value of [row.invoiceNumber, row.externalInvoiceNo]) {
+    const number = value?.trim(); if (!number) continue;
+    if (!numberOwners.has(number)) numberOwners.set(number, new Set()); numberOwners.get(number).add(row.id);
+  }
   const clients = rows.map(client => {
-    const invoices = client.invoices.filter(row => externalRegistered(row) || externalEligible(row)).map(row => ({
+    const invoices = client.invoices.filter(row => externalRegistered(row) || externalEligible(row) || history.has(row.id)).map(row => {
+      const entries = history.get(row.id) || [];
+      const conflicts = [...(numberOwners.get(row.externalInvoiceNo?.trim()) || [])].filter(id => id !== row.id).sort((a, b) => a - b);
+      const { confirmation, ...review } = referenceReview(row, entries, conflicts);
+      return {
       ...normalizeInvoice(row), externalReviewToken: externalReviewToken(row),
-      externalRegistration: history.get(row.id)?.metadata || null,
-      externalRegisteredAt: history.get(row.id)?.createdAt || null,
-      externalRegistrationAllowed: externalEligible(row) && !externalRegistered(row),
+      externalRegistration: confirmation?.metadata || null,
+      externalRegisteredAt: confirmation?.createdAt || null,
+      externalReferenceReview: review, externalReferenceHistory: referenceHistory(entries),
+      externalRegistrationAllowed: externalEligible(row) && !externalRegistered(row) && !review.needsReview,
       externalRegistrationStatus: externalRegistered(row) ? 'REGISTERED' : row.invoiceIssued ? 'NUMBER_MISSING' : 'PENDING',
-    }));
-    const pendingInvoices = invoices.filter(row => !externalRegistered(row)), issuedInvoices = invoices.filter(externalRegistered);
+      };
+    });
+    const pendingInvoices = invoices.filter(row => !externalRegistered(row) && row.externalRegistrationAllowed), issuedInvoices = invoices.filter(externalRegistered);
+    const historyInvoices = invoices.filter(row => !externalRegistered(row) && !row.externalRegistrationAllowed);
     return {
       id: client.id, name: client.name, email: client.email, phone: client.phone, zone: client.zone,
       active: client.active, status: client.status, paymentReference: `CW-${String(client.id).padStart(6, '0')}`,
       requiresInvoice: Boolean(client.requiresInvoice), fiscalName: client.fiscalName, fiscalNif: client.fiscalNif,
       fiscalAddress: client.fiscalAddress, fiscalEmail: client.fiscalEmail, externalBillingNotes: client.externalBillingNotes,
       fiscalDataComplete: ['fiscalName', 'fiscalNif', 'fiscalAddress', 'fiscalEmail'].every(key => typeof client[key] === 'string' && client[key].trim()),
-      poolsCount: client.pools.length, invoices, pendingInvoices, issuedInvoices,
+      poolsCount: client.pools.length, invoices, pendingInvoices, issuedInvoices, historyInvoices,
       pendingTotal: externalSum(pendingInvoices), issuedTotal: externalSum(issuedInvoices),
       lastIssuedAt: issuedInvoices[0]?.updatedAt || issuedInvoices[0]?.issueDate || null,
     };
   }).filter(client => client.requiresInvoice || client.invoices.length);
   if (flat) return { ok: true, invoices: clients.flatMap(client => client.invoices) };
   const pending = clients.flatMap(client => client.pendingInvoices), issued = clients.flatMap(client => client.issuedInvoices);
+  const allInvoices = clients.flatMap(client => client.invoices);
   return {
     ok: true,
     summary: { clients: clients.length, missingFiscalData: clients.filter(client => !client.fiscalDataComplete).length,
-      pendingInvoices: pending.length, issuedInvoices: issued.length, totalInvoices: pending.length + issued.length,
+      pendingInvoices: pending.length, issuedInvoices: issued.length, totalInvoices: allInvoices.length,
+      confirmedReferences: allInvoices.filter(row => row.externalReferenceReview.status === 'CONFIRMED').length,
+      reviewReferences: allInvoices.filter(row => row.externalReferenceReview.needsReview).length,
       pendingTotal: externalSum(pending), issuedTotal: externalSum(issued) },
-    clients: clients.filter(client => (status === 'all' || (status === 'pending' && client.pendingInvoices.length) || (status === 'issued' && client.issuedInvoices.length) || (status === 'missing-data' && !client.fiscalDataComplete))
-      && (!search || [client.name, client.email, client.phone, client.zone, client.fiscalName, client.fiscalNif, client.fiscalAddress, client.fiscalEmail, client.paymentReference, ...client.issuedInvoices.map(row => row.externalInvoiceNo)].filter(Boolean).join(' ').toLocaleLowerCase('pt-PT').includes(search))),
+    clients: clients.filter(client => (status === 'all' || (status === 'pending' && client.pendingInvoices.length) || (status === 'issued' && client.issuedInvoices.length) || (status === 'review' && client.invoices.some(row => row.externalReferenceReview.needsReview)) || (status === 'missing-data' && !client.fiscalDataComplete))
+      && (!search || [client.name, client.email, client.phone, client.zone, client.fiscalName, client.fiscalNif, client.fiscalAddress, client.fiscalEmail, client.paymentReference, ...client.invoices.flatMap(row => [row.externalInvoiceNo, row.invoiceNumber, ...row.externalReferenceHistory.map(entry => entry.reference)])].filter(Boolean).join(' ').toLocaleLowerCase('pt-PT').includes(search))),
     generatedAt: new Date().toISOString(),
   };
 }
@@ -115,6 +175,8 @@ async function registerExternalInvoice(rawId, payload, user) {
       if (invoice.externalInvoiceNo !== number) externalFailure('O número externo já está registado. O histórico não pode ser substituído por esta ação.', 409);
       return { ok: true, invoice, idempotent: true };
     }
+    const history = await tx.auditTrail.findMany({ where: { entity: 'Invoice', entityId: id, action: { in: externalHistoryActions } } });
+    if (history.some(externalConfirmation)) externalFailure('O histórico contém uma confirmação externa anterior. Reveja a divergência antes de associar outra referência.', 409);
     if (!externalEligible(invoice)) externalFailure('Confirme o pedido de fatura e um documento válido com valor positivo. Rascunhos e documentos retirados não podem ser associados.', 409);
     if (reviewing && (payload.externalReviewToken !== externalReviewToken(invoice) || JSON.stringify([...payload.reviewedLineIds].sort((a, b) => a - b)) !== JSON.stringify(invoice.lines.map(line => line.id)))) externalFailure('Os serviços ou dados do documento mudaram. Atualize e confirme novamente todas as linhas.', 409);
     const snapshot = JSON.parse(JSON.stringify(externalSnapshot(invoice)));
@@ -130,6 +192,58 @@ async function registerExternalInvoice(rawId, payload, user) {
       beforeJson: { invoiceIssued: invoice.invoiceIssued, externalInvoiceNo: invoice.externalInvoiceNo },
       afterJson: { invoiceIssued: true, externalInvoiceNo: number } } });
     return { ok: true, invoice: updated };
+  });
+}
+
+async function reviewExternalReference(rawId, payload, user) {
+  const id = Number(rawId);
+  if (!/^[1-9]\d*$/.test(String(rawId)) || !Number.isSafeInteger(id) || id > 2147483647) externalFailure('Documento inválido.');
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload) || !['CONFIRM_EXTERNAL', 'INTERNAL_ONLY'].includes(payload.decision)
+    || !validExternalNumber(payload.externalInvoiceNo) || typeof payload.note !== 'string' || !payload.note.trim() || payload.note.length > 1000
+    || typeof payload.requestId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(payload.requestId)
+    || typeof payload.externalReferenceReviewToken !== 'string' || !/^[a-f0-9]{64}$/.test(payload.externalReferenceReviewToken)
+    || !Number.isInteger(payload.expectedClientId) || payload.expectedClientId <= 0 || payload.expectedClientId > 2147483647
+    || !Array.isArray(payload.reviewedLineIds) || payload.reviewedLineIds.some(value => !Number.isInteger(value) || value <= 0 || value > 2147483647)
+    || new Set(payload.reviewedLineIds).size !== payload.reviewedLineIds.length) externalFailure('Confirme a decisão, o motivo, o cliente e todas as linhas da referência.');
+  const intent = { id, requestId: payload.requestId, decision: payload.decision, note: payload.note.trim(),
+    externalInvoiceNo: payload.externalInvoiceNo, expectedClientId: payload.expectedClientId,
+    externalReferenceReviewToken: payload.externalReferenceReviewToken, reviewedLineIds: [...payload.reviewedLineIds].sort((a, b) => a - b) };
+  const fingerprint = createHash('sha256').update(JSON.stringify(intent)).digest('hex');
+  return repository.transaction(async tx => {
+    const key = `external-reference-review:${id}:${intent.requestId}`;
+    await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${key}))::text`;
+    const previous = await tx.auditTrail.findFirst({ where: { entity: 'Invoice', entityId: id, action: 'EXTERNAL_INVOICE_REFERENCE_REVIEWED', metadata: { path: ['requestId'], equals: intent.requestId } } });
+    if (previous) {
+      if (previous.metadata?.fingerprint !== fingerprint) externalFailure('Este pedido já registou outra decisão. Atualize e consulte o histórico.', 409);
+      return { ...previous.metadata.result, idempotent: true };
+    }
+    await lockInvoiceNumber(tx, intent.externalInvoiceNo.trim());
+    await tx.$queryRaw`SELECT id FROM "Invoice" WHERE id = ${id} FOR UPDATE`;
+    await tx.$queryRaw`SELECT id FROM "InvoiceLine" WHERE "invoiceId" = ${id} ORDER BY id FOR UPDATE`;
+    const invoice = await tx.invoice.findUnique({ where: { id }, include: { client: true, lines: { orderBy: { id: 'asc' } } } });
+    if (!invoice) externalFailure('Documento não encontrado.', 404);
+    if (invoice.clientId !== intent.expectedClientId || invoice.externalInvoiceNo !== intent.externalInvoiceNo) externalFailure('A referência ou o cliente mudou. Atualize e confirme novamente.', 409);
+    const history = await tx.auditTrail.findMany({ where: { entity: 'Invoice', entityId: id, action: { in: externalHistoryActions } }, orderBy: { id: 'desc' } });
+    const conflicts = await conflictingInvoiceIds(tx, intent.externalInvoiceNo.trim(), id);
+    const review = referenceReview(invoice, history, conflicts);
+    if (review.token !== intent.externalReferenceReviewToken || JSON.stringify(intent.reviewedLineIds) !== JSON.stringify(invoice.lines.map(line => line.id))) externalFailure('Os dados, serviços ou referências relacionadas mudaram. Atualize a revisão.', 409);
+    if (intent.decision === 'CONFIRM_EXTERNAL' ? !review.canConfirm : !review.canMarkInternal) externalFailure('Esta decisão não está disponível para a referência atual. Consulte os conflitos e o histórico.', 409);
+    const recordedAt = new Date();
+    const result = { ok: true, invoiceId: id, clientId: invoice.clientId, requestId: intent.requestId, decision: intent.decision,
+      reviewedReference: intent.externalInvoiceNo, externalInvoiceNo: intent.decision === 'INTERNAL_ONLY' ? null : invoice.externalInvoiceNo, recordedAt: recordedAt.toISOString() };
+    // Only the explicitly reviewed duplicate of this document's internal number
+    // can be removed from the fiscal field. Preserve the original in the audit.
+    if (intent.decision === 'INTERNAL_ONLY') await tx.invoice.update({ where: { id }, data: { externalInvoiceNo: null } });
+    await tx.communicationLog.create({ data: { clientId: invoice.clientId, channel: 'EXTERNAL_INVOICE_REVIEW', referenceId: id,
+      message: `Revisão do documento #${id}: ${intent.decision === 'INTERNAL_ONLY' ? 'apenas número interno' : 'fatura externa confirmada'} — ${intent.externalInvoiceNo}. ${intent.note}` } });
+    await tx.auditTrail.create({ data: { action: 'EXTERNAL_INVOICE_REFERENCE_REVIEWED', eventType: 'EXTERNAL_INVOICE_REFERENCE_REVIEWED', entity: 'Invoice', entityId: id,
+      clientId: invoice.clientId, createdAt: recordedAt,
+      beforeJson: { externalInvoiceNo: invoice.externalInvoiceNo, invoiceNumber: invoice.invoiceNumber, invoiceIssued: invoice.invoiceIssued },
+      afterJson: { externalInvoiceNo: result.externalInvoiceNo, invoiceNumber: invoice.invoiceNumber, invoiceIssued: invoice.invoiceIssued },
+      metadata: { actor: `ADMIN:${user?.id}`, kind: 'EXTERNAL_REFERENCE_ONLY', association: 'WHOLE_INTERNAL_DOCUMENT',
+        decision: intent.decision, requestId: intent.requestId, fingerprint, externalInvoiceNo: intent.externalInvoiceNo, note: intent.note,
+        checklistConfirmed: true, snapshot: JSON.parse(JSON.stringify(externalSnapshot(invoice))), result } } });
+    return result;
   });
 }
 
@@ -957,6 +1071,7 @@ async function confirmPaymentAutomation(invoiceId, payload = {}, actor = "financ
 module.exports = {
   listExternalInvoices,
   registerExternalInvoice,
+  reviewExternalReference,
   createDraftInvoice,
   issueInvoice,
   sendInvoice,

@@ -70,7 +70,13 @@
     .external-check span{margin:0;font-size:14px}
     .external-check small{display:block;color:var(--muted);margin-top:4px}
     .external-number{display:block;margin:16px 0;font-size:13px}
-    .external-number input{margin-top:8px}
+    .external-number input,.external-number select,.external-number textarea{margin-top:8px}
+    .external-number textarea{display:block;width:100%;min-height:80px;padding:10px;border:1px solid #bfd3dd;border-radius:10px;resize:vertical;font:inherit;color:#183b4a;background:#fff}
+    .reference-number{font-weight:800;overflow-wrap:anywhere}
+    .reference-review{border-left:4px solid #c88b14!important}
+    .reference-history{margin-top:12px}
+    .reference-history>div{padding:8px 0;border-top:1px solid #c6d7e0}
+    .reference-history p{white-space:pre-wrap}
     .external-warning,.external-result{color:var(--warn)}
     button:disabled{cursor:default;opacity:.5}
     details summary{cursor:pointer;padding:10px 0}
@@ -133,7 +139,8 @@
         <input id="search" placeholder="Pesquisar cliente, NIF, email fiscal, referencia ou zona">
         <select id="statusFilter" aria-label="Estado">
           <option value="pending">Pendentes de fatura oficial</option>
-          <option value="issued">Ja emitidas externamente</option>
+          <option value="review">Referências a rever</option>
+          <option value="issued">Referências registadas</option>
           <option value="missing-data">Dados fiscais incompletos</option>
           <option value="all">Todos os clientes com fatura oficial</option>
         </select>

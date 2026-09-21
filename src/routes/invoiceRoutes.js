@@ -71,4 +71,10 @@ router.post("/:id/mark-issued", async (req, res) => {
 
 router.post("/send-full/:invoiceId", sendInvoiceFull);
 
+router.post("/:id/review-external-reference", async (req, res) => {
+  res.set("Cache-Control", "private, no-store");
+  try { return res.json(await finance.reviewExternalReference(req.params.id, req.body, req.user)); }
+  catch (error) { return res.status(error.status || 500).json({ ok: false, error: error.status ? error.message : "Não foi possível confirmar a revisão. Consulte o histórico antes de repetir." }); }
+});
+
 module.exports = router;

@@ -1741,6 +1741,12 @@ router.post('/invoices/:id/mark-external-issued', async (req, res) => {
   catch (error) { return res.status(error.status || 500).json({ ok: false, error: error.status ? error.message : 'Não foi possível guardar o número externo. Consulte o histórico antes de repetir.' }); }
 });
 
+router.post('/invoices/:id/review-external-reference', async (req, res) => {
+  res.set('Cache-Control', 'private, no-store');
+  try { return res.json(await finance.reviewExternalReference(req.params.id, req.body, req.user)); }
+  catch (error) { return res.status(error.status || 500).json({ ok: false, error: error.status ? error.message : 'Não foi possível confirmar a revisão. Consulte o histórico antes de repetir.' }); }
+});
+
 router.post('/simulate-full-flow', async (req, res) => {
   const counts = await buildDashboardCounts();
   return res.json({

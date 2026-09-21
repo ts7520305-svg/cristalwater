@@ -52,8 +52,8 @@ function renderMetrics(summary = {}) {
     metric("Clientes com fatura", summary.clients || 0),
     metric("Pendentes oficiais", summary.pendingInvoices || 0, Number(summary.pendingInvoices || 0) ? "warn" : ""),
     metric("Valor pendente", money(summary.pendingTotal || 0), Number(summary.pendingTotal || 0) ? "warn" : ""),
-    metric("Ja emitidas", summary.issuedInvoices || 0),
-    metric("Dados incompletos", summary.missingFiscalData || 0, Number(summary.missingFiscalData || 0) ? "warn" : ""),
+    metric("Referências confirmadas", summary.confirmedReferences || 0),
+    metric("Referências por rever", summary.reviewReferences || 0, Number(summary.reviewReferences || 0) ? "warn" : ""),
   ].join("");
 }
 
@@ -65,21 +65,58 @@ function invoiceLabel(invoice) {
   return invoice.monthRef || invoice.month || `Fatura #${invoice.id}`;
 }
 
-function renderPendingInvoice(invoice) {
+function renderLineChecks(invoice) {
   const lines = invoice.lines || [];
+  return `${lines.length ? lines.map(line => `<label class="external-check"><input type="checkbox" data-line-id="${line.id}"><span>${esc(line.description)}<small>${esc(line.quantity)} × ${money(line.unitPrice)} · total ${money(line.total || line.lineTotal)}${line.serviceDate ? ' · ' + esc(fmtDate(line.serviceDate)) : ''}</small></span></label>`).join('') : '<label class="external-check"><input type="checkbox" data-whole-document><span>Conferi o documento completo, que não tem linhas discriminadas.</span></label>'}`;
+}
+function renderReferenceHistory(invoice) {
+  const history = invoice.externalReferenceHistory || [];
+  const labels = { INTERNAL_ONLY: 'Revisto como número interno', CONFIRM_EXTERNAL: 'Referência externa confirmada', REGISTER_EXTERNAL: 'Associação externa registada' };
+  return history.length ? `<details class="reference-history"><summary>Revisões e associações anteriores (${history.length})</summary>${history.map(entry => `<div><b>${esc(labels[entry.decision] || 'Revisão')} · ${esc(fmtDate(entry.recordedAt))}</b><p>${esc(entry.reference || 'Sem referência')}</p>${entry.note ? `<p>${esc(entry.note)}</p>` : ''}</div>`).join('')}</details>` : '';
+}
+function referenceMessage(review) {
+  const messages = {
+    INTERNAL_MATCH: 'Esta referência coincide com o número interno. Confirme se também corresponde a uma fatura emitida no programa externo.',
+    REVIEW_REQUIRED: 'Referência antiga sem confirmação registada. Confira o número e os serviços no programa externo.',
+    DUPLICATE_REFERENCE: 'Esta referência também é usada noutro documento. A confirmação externa fica bloqueada até esclarecer a associação.',
+    INVALID_REFERENCE: 'A referência antiga tem um formato inválido e precisa de revisão documental.',
+    HISTORY_MISMATCH: 'A referência atual diverge do histórico confirmado. Precisa de revisão documental antes de outra associação.',
+    INTERNAL_ONLY: 'Referência revista como número interno. O número anterior foi conservado no histórico.',
+    CONFIRMED: 'Referência externa confirmada.', NO_REFERENCE: 'Sem referência externa.',
+  };
+  return messages[review?.status] || 'Atualize para consultar a revisão.';
+}
+function renderReferenceReview(invoice) {
+  const review = invoice.externalReferenceReview, available = review.canConfirm || review.canMarkInternal;
+  return `<form class="invoice-row external-form reference-review" data-invoice-id="${invoice.id}" data-reference-review="true" data-cw-no-i18n="true">
+    <div class="invoice-main"><b>Documento #${invoice.id} · referência a rever</b>
+      <p class="reference-number">${esc(invoice.externalInvoiceNo || 'Sem referência atual')}</p>
+      <span>Número interno: ${esc(invoice.invoiceNumber || 'Sem número interno')} · ${money(invoiceTotal(invoice))} · ${esc(invoice.status)}</span>
+      <p>${esc(referenceMessage(review))}</p>
+      ${review.conflictInvoiceIds.length ? `<p>Documentos relacionados: ${review.conflictInvoiceIds.map(id => `<a href="/invoice-document?id=${id}">#${id}</a>`).join(', ')}</p>` : ''}
+      ${available ? `<fieldset><legend>Revisão da referência e dos serviços</legend>${renderLineChecks(invoice)}
+        <label class="external-number">Decisão<select name="referenceDecision" required><option value="">Selecione uma decisão</option>${review.canConfirm ? '<option value="CONFIRM_EXTERNAL">Fatura externa</option>' : ''}${review.canMarkInternal ? '<option value="INTERNAL_ONLY">Apenas interno</option>' : ''}</select></label>
+        <label class="external-number">Motivo ou nota da revisão<textarea name="referenceNote" maxlength="1000" required rows="3"></textarea></label>
+        <div class="invoice-actions"><button type="button" data-pdf-id="${invoice.id}">PDF interno</button><button class="ok" type="submit" disabled>Guardar revisão</button></div>
+      </fieldset>` : `<div class="invoice-actions"><button type="button" data-pdf-id="${invoice.id}">PDF interno</button></div>`}
+      <p class="external-result" role="status" aria-live="polite"></p>${renderReferenceHistory(invoice)}
+    </div></form>`;
+}
+
+function renderPendingInvoice(invoice) {
   return `<form class="invoice-row external-form" data-invoice-id="${invoice.id}" data-cw-no-i18n="true">
     <div class="invoice-main">
       <b>#${invoice.id} — ${esc(invoiceLabel(invoice))}</b>
       <span>${esc(invoice.status)} · total do documento ${money(invoiceTotal(invoice))} · aberto ${money(invoice.amountOpen)}</span>
-      ${invoice.externalRegistrationStatus === 'NUMBER_MISSING' ? '<p class="external-warning">Este documento está marcado como emitido, mas falta o número externo. Confirme o histórico.</p>' : ''}
+      ${invoice.externalReferenceReview.status === 'INTERNAL_ONLY' ? '<p class="external-warning">Referência revista como número interno. Associe a fatura externa quando estiver emitida.</p>' : invoice.externalRegistrationStatus === 'NUMBER_MISSING' ? '<p class="external-warning">Este documento está marcado como emitido, mas falta o número externo. Confirme o histórico.</p>' : ''}
       <fieldset>
         <legend>Serviços e ajustes abrangidos</legend>
         <p>Confirme todas as linhas deste documento. A associação é feita ao documento completo.</p>
-        ${lines.length ? lines.map(line => `<label class="external-check"><input type="checkbox" data-line-id="${line.id}"><span>${esc(line.description)}<small>${esc(line.quantity)} × ${money(line.unitPrice)} · total ${money(line.total || line.lineTotal)}${line.serviceDate ? ' · ' + esc(fmtDate(line.serviceDate)) : ''}</small></span></label>`).join('') : '<label class="external-check"><input type="checkbox" data-whole-document><span>Conferi o documento completo, que não tem linhas discriminadas.</span></label>'}
+        ${renderLineChecks(invoice)}
         <label class="external-number">Número da fatura emitida no programa externo<input name="externalInvoiceNo" maxlength="200" autocomplete="off" required aria-label="Número da fatura externa"></label>
         <div class="invoice-actions"><button type="button" data-pdf-id="${invoice.id}">PDF interno</button><button class="ok" type="submit" disabled>Guardar associação</button></div>
       </fieldset>
-      <p class="external-result" role="status" aria-live="polite"></p>
+      <p class="external-result" role="status" aria-live="polite"></p>${renderReferenceHistory(invoice)}
     </div>
   </form>`;
 }
@@ -89,9 +126,9 @@ function renderIssuedInvoice(invoice) {
   return `
     <div class="invoice-row issued">
       <div class="invoice-main">
-        <b>#${esc(invoice.id)} - ${esc(invoice.externalInvoiceNo || "Sem numero externo")}</b>
+        <b>#${esc(invoice.id)} - ${esc(invoice.externalInvoiceNo || "Sem numero externo")}</b><span class="pill ok">Referência externa confirmada</span>
         <span>${esc(invoiceLabel(invoice))} · ${money(invoiceTotal(invoice))}${invoice.externalRegisteredAt ? ' · associado em ' + esc(fmtDate(invoice.externalRegisteredAt)) : ''}</span>
-        ${snapshot ? `<details><summary>Serviços associados no registo</summary>${snapshot.lines.map(line => `<p>${esc(line.description)} · ${money(line.total || line.lineTotal)}</p>`).join('') || '<p>Documento sem linhas discriminadas.</p>'}<p>Total interno na associação: ${money(invoiceTotal(snapshot))}</p></details>` : '<span>Registo histórico sem checklist guardada.</span>'}
+        ${snapshot ? `<details><summary>Serviços associados no registo</summary>${snapshot.lines.map(line => `<p>${esc(line.description)} · ${money(line.total || line.lineTotal)}</p>`).join('') || '<p>Documento sem linhas discriminadas.</p>'}<p>Total interno na associação: ${money(invoiceTotal(snapshot))}</p></details>` : '<span>Registo histórico sem checklist guardada.</span>'}${renderReferenceHistory(invoice)}
       </div>
       <div class="invoice-actions">
         <button type="button" data-pdf-id="${Number(invoice.id)}">PDF interno</button>
@@ -103,7 +140,9 @@ function renderIssuedInvoice(invoice) {
 function renderClient(client) {
   const missing = !client.fiscalDataComplete;
   const pending = client.pendingInvoices || [];
-  const issued = client.issuedInvoices || [];
+  const issued = (client.issuedInvoices || []).filter(invoice => !invoice.externalReferenceReview.needsReview);
+  const review = [...client.pendingInvoices, ...client.issuedInvoices, ...client.historyInvoices].filter(invoice => invoice.externalReferenceReview.needsReview);
+  const history = (client.historyInvoices || []).filter(invoice => !invoice.externalReferenceReview.needsReview);
 
   return `
     <article class="client-card ${missing ? "missing-data" : ""}">
@@ -133,10 +172,12 @@ function renderClient(client) {
         </div>
       </div>
       <div>
-        <div class="section-label">Faturas oficiais</div>
+        <div class="section-label">Faturação externa</div>
         <div class="invoice-block">
+          ${review.length ? `<div class="section-label">Referências a rever (${review.length})</div>${review.map(renderReferenceReview).join('')}` : ''}
           ${pending.length ? pending.map(renderPendingInvoice).join("") : '<div class="empty">Sem faturas oficiais pendentes.</div>'}
-          ${issued.length ? `<details><summary>Histórico de números externos (${issued.length})</summary>${issued.map(renderIssuedInvoice).join("")}</details>` : ""}
+          ${issued.length ? `<details><summary>Referências externas confirmadas (${issued.length})</summary>${issued.map(renderIssuedInvoice).join("")}</details>` : ""}
+          ${history.map(invoice => `<div class="invoice-row"><div class="invoice-main"><b>Documento #${invoice.id}</b><p>${esc(referenceMessage(invoice.externalReferenceReview))}</p>${renderReferenceHistory(invoice)}</div></div>`).join('')}
         </div>
       </div>
     </article>
@@ -183,13 +224,24 @@ function validList(data) {
   const ids = new Set(), clients = new Set();
   const validId = id => Number.isInteger(id) && id > 0 && id <= 2147483647;
   return data.clients.every(client => {
-    if (!validId(client?.id) || clients.has(client.id) || !Array.isArray(client.pendingInvoices) || !Array.isArray(client.issuedInvoices)) return false;
+    if (!validId(client?.id) || clients.has(client.id) || !Array.isArray(client.pendingInvoices) || !Array.isArray(client.issuedInvoices) || !Array.isArray(client.historyInvoices) || !Array.isArray(client.invoices)) return false;
     clients.add(client.id);
-    return [...client.pendingInvoices, ...client.issuedInvoices].every(invoice => {
+    return [...client.pendingInvoices, ...client.issuedInvoices, ...client.historyInvoices].every(invoice => {
       if (!validId(invoice?.id) || ids.has(invoice.id) || invoice.clientId !== client.id || !Array.isArray(invoice.lines) || !/^[a-f0-9]{64}$/.test(invoice.externalReviewToken || '')) return false;
+      const review = invoice.externalReferenceReview;
+      if (!review || !['CONFIRMED', 'NO_REFERENCE', 'INTERNAL_ONLY', 'INTERNAL_MATCH', 'REVIEW_REQUIRED', 'DUPLICATE_REFERENCE', 'INVALID_REFERENCE', 'HISTORY_MISMATCH'].includes(review.status)
+        || !/^[a-f0-9]{64}$/.test(review.token || '') || typeof review.needsReview !== 'boolean' || typeof review.canConfirm !== 'boolean' || typeof review.canMarkInternal !== 'boolean'
+        || !Array.isArray(review.conflictInvoiceIds) || !review.conflictInvoiceIds.every(validId) || !Array.isArray(invoice.externalReferenceHistory)) return false;
+      if (review.needsReview !== !['CONFIRMED', 'NO_REFERENCE', 'INTERNAL_ONLY'].includes(review.status)
+        || (review.canConfirm && !['INTERNAL_MATCH', 'REVIEW_REQUIRED'].includes(review.status))
+        || (review.canMarkInternal && (!['INTERNAL_MATCH', 'DUPLICATE_REFERENCE'].includes(review.status) || !invoice.invoiceNumber || invoice.invoiceNumber.trim() !== invoice.externalInvoiceNo?.trim()))) return false;
+      if (review.status === 'CONFIRMED' && (invoice.externalRegistration?.snapshot?.id !== invoice.id || invoice.externalRegistration.snapshot.clientId !== client.id
+        || !Array.isArray(invoice.externalRegistration.snapshot.lines) || invoice.externalRegistration.externalInvoiceNo?.trim() !== invoice.externalInvoiceNo?.trim())) return false;
       ids.add(invoice.id);
       return invoice.lines.every(line => validId(line?.id)) && new Set(invoice.lines.map(line => line.id)).size === invoice.lines.length;
-    }) && client.pendingInvoices.every(invoice => invoice.externalRegistrationAllowed === true && !invoice.externalInvoiceNo?.trim())
+    }) && client.invoices.length === client.pendingInvoices.length + client.issuedInvoices.length + client.historyInvoices.length
+      && client.invoices.every(invoice => [...client.pendingInvoices, ...client.issuedInvoices, ...client.historyInvoices].some(row => row.id === invoice.id))
+      && client.pendingInvoices.every(invoice => invoice.externalRegistrationAllowed === true && !invoice.externalInvoiceNo?.trim())
       && client.issuedInvoices.every(invoice => typeof invoice.externalInvoiceNo === 'string' && invoice.externalInvoiceNo.trim());
   });
 }
@@ -212,10 +264,14 @@ async function load(savedMessage = '') {
 }
 function openPdf(id) { window.open(`/invoice-document?id=${Number(id)}`, '_blank', 'noopener'); }
 function formReady(form) {
-  const checks = [...form.querySelectorAll('input[type="checkbox"]')], number = form.elements.externalInvoiceNo.value.trim();
+  const checks = [...form.querySelectorAll('input[type="checkbox"]')];
+  if (form.dataset.referenceReview === 'true') return checks.length > 0 && checks.every(input => input.checked)
+    && ['CONFIRM_EXTERNAL', 'INTERNAL_ONLY'].includes(form.elements.referenceDecision?.value) && Boolean(form.elements.referenceNote?.value.trim()) && form.elements.referenceNote.value.length <= 1000;
+  const number = form.elements.externalInvoiceNo.value.trim();
   return checks.length > 0 && checks.every(input => input.checked) && number.length > 0 && number.length <= 200 && !/[\u0000-\u001f\u007f]/.test(number);
 }
 async function markIssued(id) {
+  id = Number(id);
   const form = el('list').querySelector(`form[data-invoice-id="${Number(id)}"]`);
   const client = state.clients.find(row => row.pendingInvoices.some(invoice => invoice.id === Number(id)));
   const invoice = client?.pendingInvoices.find(row => row.id === Number(id));
@@ -243,10 +299,44 @@ async function markIssued(id) {
   } finally { actionLock.delete(id); if (form.isConnected) { fieldset.disabled = false; form.querySelector('[type="submit"]').disabled = !formReady(form); } }
 }
 
+async function reviewReference(rawId) {
+  const id = Number(rawId), form = el('list').querySelector(`form[data-invoice-id="${id}"][data-reference-review]`);
+  const rows = client => [...client.pendingInvoices, ...client.issuedInvoices, ...client.historyInvoices];
+  const client = state.clients.find(row => rows(row).some(invoice => invoice.id === id));
+  const invoice = client && rows(client).find(row => row.id === id);
+  if (!form || !invoice || actionLock.has(id) || !formReady(form)) return;
+  const saved = context(), decision = form.elements.referenceDecision.value, note = form.elements.referenceNote.value.trim();
+  const fieldset = form.querySelector('fieldset'), result = form.querySelector('.external-result');
+  actionLock.add(id); fieldset.disabled = true; result.textContent = '';
+  try {
+    if (!current(saved)) throw Error('Sessão expirada. Entre novamente e atualize a lista.');
+    const internal = decision === 'INTERNAL_ONLY';
+    const allow = await ui.confirm(internal
+      ? 'Confirma que esta referência é apenas o número interno? Será retirada do campo fiscal e conservada no histórico. O número interno mantém-se.'
+      : 'Confirma que verificou esta referência no programa externo e que a fatura abrange todos os serviços e ajustes apresentados?', {
+      title: 'Confirmar revisão da referência', confirmText: 'Registar decisão',
+      details: `${client.name}\nDocumento #${id} · ${money(invoiceTotal(invoice))}\nReferência: ${invoice.externalInvoiceNo}\nDecisão: ${internal ? 'Apenas número interno' : 'Fatura externa confirmada'}\nMotivo: ${note}`,
+    });
+    if (!allow) return;
+    if (!current(saved)) throw Error('A sessão ou seleção mudou. Atualize e confirme novamente.');
+    const requestId = form.dataset.reviewRequestId || crypto.randomUUID(); form.dataset.reviewRequestId = requestId;
+    result.textContent = 'A guardar revisão…';
+    const data = await request(`/invoices/${id}/review-external-reference`, saved, {
+      requestId, decision, note, externalInvoiceNo: invoice.externalInvoiceNo, expectedClientId: client.id,
+      externalReferenceReviewToken: invoice.externalReferenceReview.token, reviewedLineIds: invoice.lines.map(line => line.id),
+    });
+    if (data.invoiceId !== id || data.clientId !== client.id || data.requestId !== requestId || data.decision !== decision
+      || data.reviewedReference !== invoice.externalInvoiceNo || data.externalInvoiceNo !== (internal ? null : invoice.externalInvoiceNo)) throw Error('A confirmação recebida não corresponde à revisão.');
+    if (current(saved)) await load(`Revisão do documento #${id} registada: ${internal ? 'apenas número interno' : 'referência externa confirmada'}.`);
+  } catch (error) {
+    if (form.isConnected) { result.textContent = `${error.message || 'Falha de ligação.'} Consulte o histórico ou repita a mesma decisão; uma revisão concluída não será duplicada.`; status(result.textContent, 'error'); }
+  } finally { actionLock.delete(id); if (form.isConnected) { fieldset.disabled = false; form.querySelector('[type="submit"]').disabled = !formReady(form); } }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const params = new URLSearchParams(location.search);
   const statusParam = String(params.get("status") || "").toLowerCase();
-  const allowedStatus = ["pending", "issued", "missing-data", "all"];
+  const allowedStatus = ["pending", "issued", "review", "missing-data", "all"];
   if (allowedStatus.includes(statusParam) && el("statusFilter")) {
     el("statusFilter").value = statusParam;
   }
@@ -256,9 +346,9 @@ document.addEventListener("DOMContentLoaded", () => {
   el('search')?.addEventListener('input', invalidate);
   el('list').addEventListener('input', event => {
     const form = event.target.closest('form[data-invoice-id]');
-    if (form) form.querySelector('[type="submit"]').disabled = !formReady(form);
+    if (form?.querySelector('[type="submit"]')) form.querySelector('[type="submit"]').disabled = !formReady(form);
   });
-  el('list').addEventListener('submit', event => { event.preventDefault(); const id = Number(event.target.dataset.invoiceId); if (id) markIssued(id); });
+  el('list').addEventListener('submit', event => { event.preventDefault(); const id = Number(event.target.dataset.invoiceId); if (id) event.target.dataset.referenceReview === 'true' ? reviewReference(id) : markIssued(id); });
   el('list').addEventListener('click', event => { const button = event.target.closest('[data-pdf-id]'); if (button) openPdf(button.dataset.pdfId); });
   window.addEventListener('storage', event => { if (!event.key || ['token', 'cristalwater_jwt', 'user', 'cristalwater_user'].includes(event.key)) { invalidate(); state.clients = []; state.summary = {}; render(); status('A sessão mudou. Atualize a lista.', 'error'); } });
   window.addEventListener('pagehide', invalidate);
