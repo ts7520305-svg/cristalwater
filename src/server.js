@@ -243,6 +243,7 @@ mount("/api/extra-visits", extraVisitRoutes);
 mount("/api/incidents", incidentRoutes);
 mount("/api/equipment-stock-os", equipmentStockOsRoutes);
 mount("/api/finance-os", financeOsRoutes);
+mount('/api/expenses', require('./routes/companyExpenseRoutes'));
 
 // Modules previously present but not wired in server.js
 mount("/api/repairs", repairRoutes);

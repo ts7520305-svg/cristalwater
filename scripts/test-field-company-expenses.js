@@ -1,0 +1,78 @@
+'use strict';
+require('../src/loadEnv')();
+const assert = require('node:assert/strict'), { randomUUID, createHash } = require('node:crypto'), { fork } = require('node:child_process'), jwt = require('jsonwebtoken');
+const { prisma } = require('../src/prismaClient'), { getJwtSecret } = require('../src/utils/jwtSecret');
+if (process.env.NODE_ENV !== 'test' || process.env.QA_MODE !== 'true' || process.env.QA_ENVIRONMENT_SAFE !== 'true') throw Error('Isolated QA required');
+const children = [];
+async function server() { const child = fork(require.resolve('./fixtures/expense-server'), [], { stdio: ['ignore', 'ignore', 'inherit', 'ipc'] }); children.push(child); const base = await new Promise((resolve, reject) => { child.once('message', m => resolve('http://127.0.0.1:' + m.port)); child.once('error', reject); }); return { base, configure: fault => new Promise(resolve => { child.once('message', resolve); child.send({ fault }); }) }; }
+(async () => {
+  const one = await server(), two = await server(), stamp = randomUUID(), month = '2006-04';
+  const user = await prisma.user.findUniqueOrThrow({ where: { email: process.env.ADMIN_EMAIL } }), other = await prisma.user.create({ data: { name: 'Expense other ADMIN', email: stamp + '@qa.invalid', password: 'unused', role: 'ADMIN', active: true, mustChangePassword: false } });
+  const sign = u => jwt.sign({ id: u.id, userId: u.id, principalType: 'USER', role: u.role }, getJwtSecret(), { expiresIn: '1h' }), token = sign(user);
+  async function api(path, body, expected = 200, base = one.base, credential = token) { const response = await fetch(base + '/api/expenses' + path, { method: body ? 'POST' : 'GET', headers: { ...(credential ? { Authorization: 'Bearer ' + credential } : {}), ...(body ? { 'Content-Type': 'application/json' } : {}) }, body: body ? JSON.stringify(body) : undefined }); const value = await response.json(); assert.equal(response.status, expected, JSON.stringify(value)); assert.match(response.headers.get('cache-control'), /no-store/); return value; }
+  const manual = (extra = {}) => ({ title: 'Despesa QA <img src=x>', supplierId: null, supplierName: 'Fornecedor ' + stamp, documentNumber: '', expenseDate: month + '-12', dueDate: month + '-30', amountCents: 10000, category: 'GENERAL', notes: '', sourceType: 'MANUAL', sourceId: null, sourceHash: null, confirmed: true, reason: '', ...extra });
+  const env = (command, expenseId, expectedVersion, data, requestId = randomUUID()) => ({ requestId, command, expenseId, expectedVersion, data });
+  const create = data => env('CREATE', null, null, data), send = (e, expected = 200, base = one.base, credential = token) => api('/commands', e, expected, base, credential);
+  const baseline = (await api('?monthRef=' + month)).summary, invoices = await prisma.invoice.count(), receipts = await prisma.payment.count(), actions = await prisma.aiAssistantAction.count();
+  await api('?monthRef=' + month, null, 401, one.base, null); await api('?monthRef=2006-13', null, 400); await api('?monthRef=' + month + '&unexpected=1', null, 400);
+  for (const role of ['CLIENT', 'TECHNICIAN']) { const account = await prisma.user.create({ data: { email: role + stamp + '@qa.invalid', password: 'unused', role, active: true } }); await api('?monthRef=' + month, null, 403, one.base, sign(account)); await api('?monthRef=' + month, null, 401, one.base, sign({ ...user, role })); }
+  for (const amountCents of [0, -1, 1.5, '100', null, 2147483648]) { const bad = create(manual({ amountCents })); await send(bad, 400); assert.equal(await prisma.expenseEvent.count({ where: { requestId: bad.requestId } }), 0); const cancelled = await api('/commands/cancel', bad); assert.equal(cancelled.applied, false); assert.equal((await send(bad)).code, 'CANCELLED_REQUEST'); }
+  const badDate = create(manual({ expenseDate: '2006-02-30' })); await send(badDate, 400);
+  const initial = create(manual({ documentNumber: 'CW-' + stamp }));
+  const concurrent = await Promise.all([send(initial), send(initial, 200, two.base)]); assert(concurrent.every(r => r.applied)); assert.equal(concurrent[0].expenseId, concurrent[1].expenseId); assert.equal(await prisma.expenseEvent.count({ where: { requestId: initial.requestId } }), 1);
+  const id = concurrent[0].expenseId; await send(initial, 409, one.base, sign(other));
+  const dupe = await send(create(manual({ documentNumber: 'cw-\u2003' + stamp.toUpperCase() }))); assert.equal(dupe.code, 'DOCUMENT_REGISTERED');
+  const canceledRequest = create(manual()); assert.equal((await api('/commands/cancel', canceledRequest)).applied, false); assert.equal((await send(canceledRequest)).code, 'CANCELLED_REQUEST');
+  const p1 = env('RECORD_PAYMENT', id, 1, { amountCents: 6000, paidOn: month + '-20', method: 'TRANSFER', reference: 'Bank ref QA' });
+  const p2 = env('RECORD_PAYMENT', id, 1, { ...p1.data });
+  const race = await Promise.all([send(p1), send(p2, 200, two.base)]); assert.equal(race.filter(r => r.applied).length, 1); assert.equal(race.filter(r => r.code === 'VERSION_CHANGED').length, 1);
+  let expense = (await api('/' + id)).expense; assert.equal(expense.paidCents, 6000); assert.equal(expense.openCents, 4000);
+  assert.equal((await send(env('RECORD_PAYMENT', id, expense.version, { ...p1.data, amountCents: 4001 }))).code, 'OVERPAYMENT');
+  const finalPay = await send(env('RECORD_PAYMENT', id, expense.version, { ...p1.data, amountCents: 4000 })); assert(finalPay.applied); expense = (await api('/' + id)).expense; assert.equal(expense.status, 'PAID');
+  assert.equal((await send(env('CANCEL', id, expense.version, { reason: 'Cannot erase paid expense' }))).applied, false);
+  const reverse = await send(env('REVERSE_PAYMENT', id, expense.version, { paymentId: finalPay.payment.id, reason: 'Wrong payment entry; no bank refund' })); assert(reverse.applied); expense = (await api('/' + id)).expense; assert.equal(expense.openCents, 4000);
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10); await send(env('RECORD_PAYMENT', id, expense.version, { ...p1.data, amountCents: 100, paidOn: tomorrow }), 400);
+  const purchase = await prisma.stockPurchase.create({ data: { supplierName: 'Stock ' + stamp, invoiceNumber: 'SOURCE-' + stamp, invoiceDate: new Date(month + '-15T00:00:00Z'), totalAmount: 120, items: { create: { productName: 'Chlorine QA', quantity: 2, unit: 'KG', unitCost: 60, totalCost: 120 } } }, include: { items: true } });
+  const originalPurchase = JSON.stringify(purchase), preview = (await api('/sources/STOCK_PURCHASE/' + purchase.id)).source;
+  const sourced = manual({ ...preview.suggested, sourceType: preview.type, sourceId: preview.id, sourceHash: preview.hash });
+  const imported = await Promise.all([send(create(sourced)), send(create(sourced), 200, two.base)]); assert.equal(imported.filter(r => r.applied).length, 1); assert.equal(imported.filter(r => r.code === 'SOURCE_REGISTERED').length, 1); const sourceId = imported.find(r => r.applied).expenseId;
+  assert.equal(JSON.stringify(await prisma.stockPurchase.findUnique({ where: { id: purchase.id }, include: { items: true } })), originalPurchase);
+  assert.equal((await api('/sources?type=STOCK_PURCHASE&q=' + encodeURIComponent(stamp))).rows.find(r => r.id === purchase.id).registeredExpenseId, sourceId);
+  await prisma.stockPurchase.update({ where: { id: purchase.id }, data: { totalAmount: 150 } });
+  const changed = (await api('/' + sourceId)).expense; assert.equal(changed.sourceChanged, true); assert.equal((await api('?monthRef=' + month)).summary.openAmountCents, null);
+  assert.equal((await send(env('RECORD_PAYMENT', sourceId, changed.version, { ...p1.data, amountCents: 100 }))).code, 'SOURCE_STALE');
+  const refreshed = (await api('/sources/STOCK_PURCHASE/' + purchase.id)).source; assert.equal(refreshed.suggested.amountCents, null);
+  const corrected = await send(env('EDIT', sourceId, changed.version, { ...sourced, amountCents: 15000, sourceHash: refreshed.hash, reason: 'Invoice checked; header corrected' })); assert(corrected.applied);
+  const history = (await api('/' + sourceId)).events; assert.equal(history.find(e => e.command === 'CREATE' && e.result.applied).result.after.sourceSnapshot.totalAmount, 120); assert.equal(history.find(e => e.command === 'EDIT').result.after.sourceSnapshot.totalAmount, 150);
+  const vehicle = await prisma.vehicleMaintenanceRecord.create({ data: { title: 'Manutenção QA', cost: 22.35, status: 'PENDING', dueDate: new Date('2006-04-01T00:00:00Z') } });
+  const vSource = (await api('/sources/VEHICLE_MAINTENANCE/' + vehicle.id)).source; assert.equal(vSource.suggested.expenseDate, null);
+  const v = await send(create(manual({ supplierName: 'Garage ' + stamp, category: 'VEHICLE', amountCents: 2235, sourceType: vSource.type, sourceId: vSource.id, sourceHash: vSource.hash, dueDate: null }))); assert(v.applied);
+  const cancelledExpense = await send(env('CANCEL', v.expenseId, v.version, { reason: 'Document entered in error' })); assert(cancelledExpense.applied); assert.equal((await api('/' + v.expenseId)).expense.openCents, 0);
+  assert((await send(env('REOPEN', v.expenseId, cancelledExpense.version, { reason: 'Correct invoice confirmed' }))).applied);
+  const evidenceBytes = Buffer.from('%PDF-1.4\nExpense QA evidence\n%%EOF'), sha256 = createHash('sha256').update(evidenceBytes).digest('hex');
+  expense = (await api('/' + id)).expense;
+  const attachment = env('ADD_EVIDENCE', id, expense.version, { name: 'despesa-qa.pdf', mime: 'application/pdf', size: evidenceBytes.length, sha256 });
+  async function attach(e, bytes = evidenceBytes, expected = 200) { const form = new FormData(); form.append('envelope', JSON.stringify(e)); form.append('file', new Blob([bytes], { type: 'application/pdf' }), e.data.name); const response = await fetch(one.base + '/api/expenses/evidence', { method: 'POST', headers: { Authorization: 'Bearer ' + token }, body: form }); const result = await response.json(); assert.equal(response.status, expected, JSON.stringify(result)); return result; }
+  const attached = await attach(attachment); assert(attached.applied); assert.equal((await attach(attachment)).evidence.id, attached.evidence.id);
+  const download = await fetch(one.base + '/api/expenses/' + id + '/evidence/' + attached.evidence.id, { headers: { Authorization: 'Bearer ' + token } }); assert.equal(download.status, 200); assert.match(download.headers.get('content-disposition'), /^attachment/); assert.match(download.headers.get('cache-control'), /no-store/); assert.equal(download.headers.get('x-content-sha256'), sha256); assert.deepEqual(Buffer.from(await download.arrayBuffer()), evidenceBytes);
+  await api('/' + sourceId + '/evidence/' + attached.evidence.id, null, 404); await api('/' + id + '/evidence/' + attached.evidence.id, null, 401, one.base, null);
+  expense = (await api('/' + id)).expense;
+  assert.equal((await attach({ ...attachment, requestId: randomUUID(), expectedVersion: expense.version })).code, 'EVIDENCE_EXISTS');
+  await attach({ ...attachment, requestId: randomUUID(), expectedVersion: expense.version }, Buffer.from('not a PDF'), 400);
+  const beforeProofs = await prisma.expenseEvidence.count(); await one.configure('audit');
+  const failingProof = { ...attachment, requestId: randomUUID(), expectedVersion: expense.version, data: { ...attachment.data, name: 'other.pdf', size: evidenceBytes.length + 1, sha256: createHash('sha256').update(Buffer.concat([evidenceBytes, Buffer.from('x')])).digest('hex') } };
+  const rejectedProof = await attach(failingProof, Buffer.concat([evidenceBytes, Buffer.from('x')]), 503); assert(!JSON.stringify(rejectedProof).includes('QA_PRIVATE')); await one.configure(null); assert.equal(await prisma.expenseEvidence.count(), beforeProofs); assert.equal((await api('/' + id)).expense.version, expense.version);
+  const failCreate = create(manual({ title: 'Must roll back ' + stamp })); const beforeExpenses = await prisma.companyExpense.count(); await one.configure('audit'); await send(failCreate, 503); await one.configure(null); assert.equal(await prisma.companyExpense.count(), beforeExpenses); assert.equal(await prisma.expenseEvent.count({ where: { requestId: failCreate.requestId } }), 0);
+  const failPayment = env('RECORD_PAYMENT', id, expense.version, { ...p1.data, amountCents: 100 }); const beforePayments = await prisma.expensePayment.count(); await one.configure('after-payment'); await send(failPayment, 503); await one.configure(null); assert.equal(await prisma.expensePayment.count(), beforePayments); assert.equal(await prisma.expenseEvent.count({ where: { requestId: failPayment.requestId } }), 0);
+  await one.configure('read'); const unavailable = await api('?monthRef=' + month, null, 503); assert(!JSON.stringify(unavailable).includes('QA_PRIVATE')); await one.configure(null);
+  const summary = (await api('?monthRef=' + month)).summary; assert.equal(summary.documentAmountCents - baseline.documentAmountCents, 27235); assert.equal(summary.paymentsAmountCents - baseline.paymentsAmountCents, 6000); assert.equal(summary.openAmountCents - baseline.openAmountCents, 21235); assert.equal(summary.completeOperatingCosts, false); assert.equal(summary.bankReconciled, false);
+  const ai = await fetch(one.base + '/api/ai-admin/chat', { method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify({ message: 'Que despesas e contas a pagar tenho? Qual o lucro?', monthRef: month, scope: 'finance' }) }).then(r => r.json()); assert.equal(ai.ok, true); assert.equal(ai.finance.expenses.documentAmountCents, summary.documentAmountCents); assert.match(ai.answer, /Despesas registadas/); assert.match(ai.answer, /Não posso calcular lucro/); assert.deepEqual(ai.actions, []);
+  for (const path of ['?monthRef=' + month + '&page=1e1', '/01', '/sources/STOCK_PURCHASE/1e1']) await api(path, null, 400);
+  const pagingMonth = '2006-05', pagingTitle = 'Pagination ' + stamp;
+  await prisma.companyExpense.createMany({data:Array.from({length:11},(_,i)=>({title:pagingTitle+' '+i,supplierName:'Page QA',documentNumber:'',expenseDate:new Date(pagingMonth+'-01T00:00:00Z'),amountCents:100,category:'GENERAL',notes:'',sourceType:'MANUAL',createdById:user.id}))});
+  const firstPage = await api('?monthRef=' + pagingMonth + '&q=' + encodeURIComponent(pagingTitle)), secondPage = await api('?monthRef=' + pagingMonth + '&q=' + encodeURIComponent(pagingTitle) + '&page=2');
+  assert.equal(firstPage.total,11);assert.equal(firstPage.rows.length,10);assert.equal(secondPage.rows.length,1);assert.equal(firstPage.summary.documentAmountCents,1100);assert.equal(secondPage.summary.documentAmountCents,1100);assert(!firstPage.rows.some(e=>e.id===secondPage.rows[0].id));
+  assert.equal(await prisma.invoice.count(), invoices); assert.equal(await prisma.payment.count(), receipts); assert.equal(await prisma.aiAssistantAction.count(), actions);
+  await prisma.user.update({ where: { id: other.id }, data: { active: false } }); await api('?monthRef=' + month, null, 401, one.base, sign(other));
+  console.log('PASS company expenses: active ADMIN, source/manual registration, exact request receipts, concurrent source/payment guards, duplicate documents, review after source changes, partial payments and reversals, private evidence and atomic rollback, monthly versus current totals and read-only financial AI');
+})().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => { for (const child of children) child.kill('SIGTERM'); await prisma.$disconnect(); });

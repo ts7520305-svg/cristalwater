@@ -1835,6 +1835,7 @@ model VehicleMaintenanceRecord {
   notes       String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  expense     CompanyExpense?
 
   @@index([vehicleId])
   @@index([type])
@@ -1898,6 +1899,7 @@ model StockPurchase {
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
   items         StockPurchaseItem[]
+  expense       CompanyExpense?
 
   @@index([supplierName])
   @@index([invoiceNumber])
@@ -2416,4 +2418,93 @@ model EquipmentMaintenanceCompletion {
   @@unique([planId, extraVisitId])
   @@index([visitId])
   @@index([extraVisitId])
+}
+
+// Confirmed obligations, distinct from stock consumption and bank transactions.
+model CompanyExpense {
+  id                   Int       @id @default(autoincrement())
+  title                String
+  supplierId           Int?
+  supplierName         String
+  documentNumber       String
+  documentKey          String?   @unique
+  expenseDate          DateTime  @db.Date
+  dueDate              DateTime? @db.Date
+  amountCents          Int
+  category             String
+  notes                String
+  sourceType           String
+  stockPurchaseId      Int?      @unique
+  maintenanceId        Int?      @unique
+  sourceHash           String?
+  sourceSnapshot       Json?
+  version              Int       @default(1)
+  cancelledAt          DateTime?
+  createdById          Int
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  stockPurchase        StockPurchase? @relation(fields: [stockPurchaseId], references: [id], onDelete: Restrict)
+  maintenance          VehicleMaintenanceRecord? @relation(fields: [maintenanceId], references: [id], onDelete: Restrict)
+  payments             ExpensePayment[]
+  evidence             ExpenseEvidence[]
+  events               ExpenseEvent[]
+
+  @@index([expenseDate])
+  @@index([dueDate])
+  @@index([supplierId])
+  @@index([category])
+}
+
+model ExpensePayment {
+  id           Int       @id @default(autoincrement())
+  expenseId    Int
+  amountCents  Int
+  paidOn       DateTime  @db.Date
+  method       String
+  reference    String
+  createdById  Int
+  createdAt    DateTime  @default(now())
+  reversedAt   DateTime?
+  reverseReason String?
+  expense      CompanyExpense @relation(fields: [expenseId], references: [id], onDelete: Restrict)
+
+  @@index([expenseId])
+  @@index([paidOn])
+}
+
+// One durable acknowledgement for each command, including explicit cancellation.
+model ExpenseEvent {
+  id           Int      @id @default(autoincrement())
+  requestId    String   @unique
+  actorId      Int
+  actorName    String
+  expenseId    Int?
+  command      String
+  payloadHash  String
+  request      Json
+  result       Json
+  createdAt    DateTime @default(now())
+  expense      CompanyExpense? @relation(fields: [expenseId], references: [id], onDelete: Restrict)
+
+  @@index([expenseId, id])
+  @@index([actorId])
+}
+
+// Small private evidence is committed atomically with its acknowledgement.
+model ExpenseEvidence {
+  id           Int       @id @default(autoincrement())
+  expenseId    Int
+  name         String
+  mime         String
+  size         Int
+  sha256       String
+  bytes        Bytes
+  createdById  Int
+  createdAt    DateTime  @default(now())
+  voidedAt     DateTime?
+  voidReason   String?
+  expense      CompanyExpense @relation(fields: [expenseId], references: [id], onDelete: Restrict)
+
+  @@index([expenseId])
+  @@unique([expenseId, sha256])
 }
