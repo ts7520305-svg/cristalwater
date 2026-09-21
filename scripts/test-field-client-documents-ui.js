@@ -175,7 +175,9 @@ let browser;
     await page.setViewportSize({ width, height: 1000 }); await page.locator('#clientDocumentsPanel').scrollIntoViewIfNeeded();
     const layout = await page.locator('#clientDocumentsPanel, #clientDocumentsPanel input, #clientDocumentsPanel button, #clientDocumentsPanel h4').evaluateAll(nodes => nodes.map(n => { const r = n.getBoundingClientRect(); return { id: n.id, x: r.x, right: r.right, overflow: n.scrollWidth - n.clientWidth, height: r.height, control: n.matches('input,button') }; }));
     await page.locator('#clientDocumentsPanel').screenshot({ path: path.join(evidence, 'documents-' + width + '.png') });
-    assert(layout.every(r => r.x >= 0 && r.right <= width + 1 && r.overflow <= 1 && (!r.control || r.height >= 44)), JSON.stringify({ width, layout }));
+    // Chromium can report 43.99998474121094 for a 44 px control after scrolling.
+    const rectangleTolerance = 0.001;
+    assert(layout.every(r => r.x >= 0 && r.right <= width + 1 && r.overflow <= 1 && (!r.control || r.height + rectangleTolerance >= 44)), JSON.stringify({ width, layout }));
   }
   await page.locator('#cwLanguageSelect').selectOption('pt'); await state(page, 'ready'); await save(current);
   await page.evaluate(() => dispatchEvent(new PageTransitionEvent('pagehide'))); assert.equal(await page.locator('#documentList article').count(), 0); assert.equal((await info(page)).created, (await info(page)).revoked);
