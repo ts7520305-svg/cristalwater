@@ -44,6 +44,24 @@ async function dbRejects(sql, expected) {
   await prisma.$disconnect();
   cli(['db','execute','--file','prisma/migrations/20260917100000_extra_equipment_maintenance/migration.sql','--schema','prisma/schema.prisma']);
   cli(['db','execute','--file','prisma/migrations/20260918090000_client_seasonal_service/migration.sql','--schema','prisma/schema.prisma']);
+  const oldReport = await prisma.monthlyReport.create({ data: { month:'2000-01', type:'CLIENT', clientId:oldClient.id, data:{preserved:true} } });
+  const oldMail = await prisma.emailLog.create({ data:{eventType:'MONTHLY_REPORT',status:'UNKNOWN',subject:'Retained email',text:'Retained content'} });
+  cli(['db','execute','--file','prisma/migrations/20260921190000_monthly_report_delivery/migration.sql','--schema','prisma/schema.prisma']);
+  assert.equal(await prisma.monthlyReportDelivery.count(),0);
+  assert.deepEqual(await prisma.monthlyReport.findUniqueOrThrow({where:{id:oldReport.id}}),oldReport);
+  assert.deepEqual(await prisma.emailLog.findUniqueOrThrow({where:{id:oldMail.id}}),oldMail);
+  const reservation = await prisma.monthlyReportDelivery.create({data:{reportId:oldReport.id,requestId:'migration-mail',recipient:'qa@qa.invalid',contentHash:'retained',mode:'MANUAL',requestedBy:1,emailLogId:oldMail.id}});
+  const secondReport = await prisma.monthlyReport.create({data:{month:'2000-02',type:'CLIENT',clientId:oldClient.id}});
+  const secondMail = await prisma.emailLog.create({data:{subject:'Second migration message'}});
+  await dbRejects(`INSERT INTO "MonthlyReportDelivery" ("reportId","requestId","recipient","contentHash","mode","emailLogId","updatedAt") VALUES (${secondReport.id},'migration-mail','qa@qa.invalid','same','MANUAL',${secondMail.id},CURRENT_TIMESTAMP)`,'23505');
+  await dbRejects(`INSERT INTO "MonthlyReportDelivery" ("reportId","requestId","recipient","contentHash","mode","emailLogId","updatedAt") VALUES (${secondReport.id},'new-mail','qa@qa.invalid','same','MANUAL',${oldMail.id},CURRENT_TIMESTAMP)`,'23505');
+  await prisma.emailLog.delete({where:{id:secondMail.id}});await prisma.monthlyReport.delete({where:{id:secondReport.id}});
+  await dbRejects(`DELETE FROM "MonthlyReport" WHERE id=${oldReport.id}`,['23001','23503']);
+  await dbRejects(`DELETE FROM "EmailLog" WHERE id=${oldMail.id}`,['23001','23503']);
+  await dbRejects(`INSERT INTO "MonthlyReportDelivery" ("reportId","requestId","recipient","contentHash","mode","emailLogId","updatedAt") VALUES (${oldReport.id},'another-mail','qa@qa.invalid','same','MANUAL',${oldMail.id},CURRENT_TIMESTAMP)`,'23505');
+  await dbRejects(`INSERT INTO "MonthlyReportDelivery" ("reportId","requestId","recipient","contentHash","mode","emailLogId","updatedAt") VALUES (2147483647,'missing-report','qa@qa.invalid','same','MANUAL',2147483647,CURRENT_TIMESTAMP)`,'23503');
+  await prisma.monthlyReportDelivery.delete({where:{id:reservation.id}});
+  await prisma.emailLog.delete({where:{id:oldMail.id}});await prisma.monthlyReport.delete({where:{id:oldReport.id}});
   const retainedCompletion = await prisma.equipmentMaintenanceCompletion.findUniqueOrThrow({where:{id:oldCompletion.id}});
   assert.equal(retainedCompletion.visitId,visit.id);assert.equal(retainedCompletion.extraVisitId,null);assert.equal(retainedCompletion.notes,'Retained execution');assert.deepEqual(retainedCompletion.result,{ok:true,historical:true});
   const completionData={planId:equipmentPlan.id,version:2,requestId:'migration-extra-equipment',actor:'TECH:previous',fingerprint:'extra',notes:'Extra execution',result:{ok:true}};
@@ -77,6 +95,6 @@ async function dbRejects(sql, expected) {
   assert.equal(await prisma.technicalProposalRequest.count(),0);
   assert.equal(await prisma.fieldWriteRequest.count(),0);
   const savedExtra=await prisma.extraVisit.findUniqueOrThrow({where:{id:oldExtra.id}});assert.equal(savedExtra.notes,'Migration preserved extra');assert.equal(savedExtra.execution,null);assert.equal(savedExtra.startAt,null);assert.equal(savedExtra.endAt,null);assert.equal(savedExtra.completionRequestId,null);assert.equal(await prisma.extraVisitPhoto.count(),0);await prisma.extraVisit.delete({where:{id:oldExtra.id}});
-  console.log('PASS twenty-one additive migrations preserve previous data and match the current schema');
+  console.log('PASS twenty-two additive migrations preserve previous data and match the current schema');
  }finally{fs.rmSync(temp,{recursive:true,force:true})}
 })().catch(error=>{console.error(error);process.exitCode=1}).finally(()=>prisma.$disconnect());

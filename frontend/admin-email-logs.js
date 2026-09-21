@@ -94,7 +94,7 @@ async function load() {
     } else {
       data.items.forEach(e => {
         const retryBtn =
-          e.status === "FAILED"
+          e.status === "FAILED" && e.eventType !== "MONTHLY_REPORT"
             ? `<button onclick="retryEmail(${e.id})">Reenviar</button>`
             : "";
 

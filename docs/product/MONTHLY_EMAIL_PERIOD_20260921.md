@@ -2,6 +2,8 @@
 
 Data: 21/09/2026. Branch: `work/field-readiness-20260915-simulation`.
 
+Continuação: a [TASK279](MONTHLY_EMAIL_CONFIRMATION_20260921.md) acrescenta revisão manual e reserva persistente, separa geração de envio e bloqueia o reenvio genérico dos emails mensais. O contrato de envio apenas com mês e os limites de duplicação descritos abaixo são o registo histórico da TASK278; o contrato atual está no documento da TASK279.
+
 ## Problema reproduzido
 
 A rota ADMIN montada em `/api/admin/reports/send-now` gerava relatórios do mês anterior e chamava um serviço que procurava o mês atual. Um ensaio isolado do código anterior, com data de 15/01/2026, produziu `generatedMonth: 2025-12` e `selectedForEmail: 2026-01` (`/tmp/cw278-probe.log`). O segundo serviço calculava o mês anterior em hora local. Ambos chamavam `sendAlertEmail`, função que o módulo de email já não exporta.

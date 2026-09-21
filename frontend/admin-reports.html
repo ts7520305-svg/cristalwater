@@ -37,6 +37,11 @@
     .reports-main .report-metrics dd { color:inherit; font-size:20px; font-weight:700; margin:0; text-align:right; overflow-wrap:anywhere; }
     .reports-main .report-source { border-top:1px solid #dbe3ed; padding-top:12px; color:#42576f; font-size:13px; }
     .reports-main [hidden] { display:none!important; }
+    .reports-main .mail-actions { display:flex; flex-wrap:wrap; gap:10px; margin:12px 0; }
+    .reports-main .mail-card { background:#fff; color:#172b42; border:1px solid #8799b1; border-radius:10px; padding:14px; margin:14px 0; overflow-wrap:anywhere; }
+    .reports-main .mail-card pre { white-space:pre-wrap; overflow-wrap:anywhere; font:inherit; line-height:1.5; padding:12px; background:#edf3fa; color:#172b42; max-height:280px; overflow:auto; }
+    .reports-main .mail-confirm { display:flex; align-items:flex-start; gap:10px; margin:14px 0; font-weight:600; color:inherit; }
+    .reports-main .mail-confirm input { width:22px; min-width:22px; min-height:22px; margin:2px 0; }
     @media(max-width:650px) { .reports-main .toolbar { grid-template-columns:1fr; } .reports-main .report-metrics { column-gap:10px; } .reports-main .panel { padding:14px; } }
     @media(prefers-color-scheme:dark) { .reports-main>h1,.reports-main>.intro { color:#edf3fa; } }
   </style>
@@ -81,8 +86,27 @@
     <div id="communications"></div>
     <button class="btn" data-report-retry="communications" type="button" hidden>Tentar novamente — comunicações</button>
   </section>
+  <section class="panel" id="mailPanel" aria-labelledby="mailTitle">
+    <h2 id="mailTitle">Relatórios mensais por email</h2>
+    <p id="mailStatus" class="section-status" role="status" aria-live="polite" data-state="idle">Escolha o mês acima e consulte os relatórios dos clientes.</p>
+    <div>
+      <p>Reveja o mês, o destinatário e o texto antes de confirmar cada envio. O texto enviado está em português.</p>
+      <p>Gerar guarda os relatórios em falta de um mês concluído, sem enviar emails nem alterar relatórios existentes.</p>
+      <div class="mail-actions">
+        <button class="btn" id="mailLoad" type="button">Consultar relatórios e envios</button>
+        <button class="btn" id="mailPrepare" type="button">Gerar relatórios em falta</button>
+      </div>
+      <div id="mailList"></div>
+      <div class="mail-actions" id="mailPaging" hidden>
+        <button class="btn" id="mailPrevious" type="button">Anterior</button>
+        <span id="mailPage" aria-live="polite"></span>
+        <button class="btn" id="mailNext" type="button">Seguinte</button>
+      </div>
+    </div>
+  </section>
 </main>
 <script src="/admin-reports.js"></script>
+<script src="/cw-monthly-email.js"></script>
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>

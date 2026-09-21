@@ -701,11 +701,30 @@ model MonthlyReport {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   client    Client?  @relation(fields: [clientId], references: [id])
+  delivery  MonthlyReportDelivery?
 
   @@unique([month, type, clientId])
   @@index([clientId])
   @@index([month])
   @@index([type])
+}
+
+model MonthlyReportDelivery {
+  id          Int      @id @default(autoincrement())
+  reportId    Int      @unique
+  requestId   String   @unique
+  recipient   String
+  contentHash String
+  requestedBy Int?
+  mode        String
+  status      String   @default("PENDING")
+  emailLogId  Int      @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  report      MonthlyReport @relation(fields: [reportId], references: [id], onDelete: Restrict)
+  emailLog    EmailLog @relation(fields: [emailLogId], references: [id], onDelete: Restrict)
+
+  @@index([status])
 }
 
 model Invoice {
@@ -939,6 +958,7 @@ model EmailLog {
   lastRetryAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  monthlyDelivery MonthlyReportDelivery?
 
   @@index([to])
   @@index([toEmail])

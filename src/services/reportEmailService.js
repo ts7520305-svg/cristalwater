@@ -1,7 +1,7 @@
 'use strict';
 const { prisma } = require('../prismaClient');
-const email = require('./emailService');
-const integrations = require('../config/externalIntegrations');
+const { createHash } = require('node:crypto');
+const canonical = value => Array.isArray(value) ? value.map(canonical) : value && typeof value === 'object' ? Object.fromEntries(Object.keys(value).sort().map(key => [key, canonical(value[key])])) : value;
 const { reportMonth } = require('./monthlyReportMonth');
 
 const tokens = value => new Set(String(value || '').toUpperCase().split(/[^A-Z_]+/).filter(Boolean));
@@ -36,55 +36,36 @@ function textFor(report) {
 
 // Read-only selection: the exact same validated month is used in the query,
 // subject and stored message. No report is generated or rewritten here.
-async function prepareMonthlyReportEmails({ monthRef, manual = false, clientOnly = false } = {}) {
+async function prepareMonthlyReportEmails({ monthRef, manual = false, clientOnly = false, db = prisma } = {}) {
   const month = reportMonth(monthRef, { required: manual });
-  const rule = await prisma.notificationRule.findFirst({ where: { eventType: 'MONTHLY_REPORT', active: true, channels: { contains: 'EMAIL' } }, orderBy: { id: 'asc' } });
+  const rule = await db.notificationRule.findFirst({ where: { eventType: 'MONTHLY_REPORT', active: true, channels: { contains: 'EMAIL' } }, orderBy: { id: 'asc' } });
   if (!rule || !tokens(rule.channels).has('EMAIL') || !rule.defaultEmail) return { monthRef: month, enabled: false, messages: [], skipped: [] };
   const roles = tokens(rule.roles), types = ['ADMIN', 'CLIENT'].filter(role => roles.has(role) && (!clientOnly || role === 'CLIENT'));
-  const reports = await prisma.monthlyReport.findMany({ where: { month, type: { in: types } }, include: { client: true }, orderBy: { id: 'asc' } });
+  const reports = await db.monthlyReport.findMany({ where: { month, type: { in: types } }, include: { client: true }, orderBy: { id: 'asc' } });
   const messages = [], skipped = [];
   for (const report of reports) {
     const to = report.type === 'CLIENT' ? report.client?.email : rule.config?.adminReportEmail;
-    const reject = reason => skipped.push({ reportId: report.id, clientId: report.clientId, reason });
+    const clientName = typeof report.data?.client === 'string' ? report.data.client : report.client?.name || 'Cliente #' + report.clientId;
+    const reject = reason => skipped.push({ reportId: report.id, clientId: report.clientId, clientName, reason });
     if (report.type === 'CLIENT' && (!report.client || report.client.id !== report.clientId || report.client.active === false)) { reject('CLIENT_UNAVAILABLE'); continue; }
     // Never infer a destination for an administrative report from a login alias.
     if (!singleEmail(to)) { reject('RECIPIENT_MISSING_OR_INVALID'); continue; }
+    if (manual && report.type === 'CLIENT' && report.data?.reportVersion !== 2) { reject('REPORT_REQUIRES_REVIEW'); continue; }
     const text = textFor(report);
     if (!text) { reject('REPORT_REQUIRES_REVIEW'); continue; }
     if (report.data.reportVersion === 2 && report.type === 'CLIENT') {
       const start = new Date(month + '-01T00:00:00Z'), end = new Date(start); end.setUTCMonth(end.getUTCMonth() + 1);
       if (report.data.period?.start !== start.toISOString() || report.data.period?.end !== end.toISOString() || report.data.period?.timeZone !== 'UTC') { reject('REPORT_PERIOD_MISMATCH'); continue; }
     }
-    messages.push({ reportId: report.id, clientId: report.clientId, payload: { to, subject: `Relatório Mensal${report.type === 'ADMIN' ? ' ADMIN' : ''} - ${month}`, text } });
+    const payload = { to, subject: `Relatório Mensal${report.type === 'ADMIN' ? ' ADMIN' : ''} - ${month}`, text };
+    const contentHash = createHash('sha256').update(JSON.stringify(canonical({ id: report.id, clientId: report.clientId, month, type: report.type, data: report.data, payload }))).digest('hex');
+    messages.push({ reportId: report.id, clientId: report.clientId, clientName, contentHash, payload });
   }
   return { monthRef: month, enabled: true, messages, skipped };
 }
 
 async function sendMonthlyReportEmails(options = {}) {
-  const plan = await prepareMonthlyReportEmails(options);
-  const result = { monthRef: plan.monthRef, sent: 0, failed: 0, uncertain: 0, logUnconfirmed: 0, skipped: plan.skipped.length, deliveryConfirmed: false, blocked: null };
-  if (!plan.enabled) return { ...result, blocked: 'RULE_DISABLED' };
-  if (!integrations.isEmailEnabled() || !integrations.areExternalNotificationsEnabled()) return { ...result, blocked: 'EMAIL_DISABLED' };
-  for (const message of plan.messages) {
-    // Store selected content before calling the provider. An uncertain outcome
-    // must not enter the legacy FAILED retry queue.
-    let log;
-    try {
-      log = await prisma.emailLog.create({ data: { ...message.payload, eventType: 'MONTHLY_REPORT', mode: options.manual ? 'MANUAL' : 'AUTOMATIC', status: 'PENDING' } });
-    } catch (_) { result.failed++; continue; }
-    let status = 'UNKNOWN', error = null;
-    try {
-      const response = await email.sendEmail(message.payload);
-      const addresses = values => Array.isArray(values) ? values.map(value => String(value?.address || value).toLowerCase()) : [];
-      const to = message.payload.to.toLowerCase(), accepted = addresses(response?.accepted), rejected = addresses(response?.rejected);
-      if (accepted.includes(to) && !rejected.includes(to)) { status = 'SENT'; result.sent++; }
-      else if (rejected.includes(to) && !accepted.includes(to)) { status = 'FAILED'; result.failed++; error = 'Destinatário recusado pelo serviço de email.'; }
-      else { result.uncertain++; error = 'O serviço não confirmou a aceitação deste destinatário.'; }
-    } catch (failure) { result.uncertain++; error = String(failure.message || 'Envio não confirmado').slice(0, 1000); }
-    try { await prisma.emailLog.update({ where: { id: log.id }, data: { status, error } }); }
-    catch (_) { result.logUnconfirmed++; }
-  }
-  return result;
+  return require('./monthlyReportDeliveryService').sendAutomatic(options);
 }
 
 module.exports = { prepareMonthlyReportEmails, sendMonthlyReportEmails };

@@ -1,52 +1,27 @@
-// ==========================================
-// CRISTAL WATER - ADMIN REPORT CONTROLLER
-// src/controllers/adminReportController.js
-// ==========================================
-
-const { prisma } = require("../prismaClient");
-const {
-  generateAdminMonthlyReport,
-} = require("../services/reportService");
+"use strict";
+const { prisma } = require('../prismaClient');
 const { generate: generateClientMonthlyReport } = require('../business/client/ClientMonthlyReportBusiness');
-const { sendMonthlyReportEmails } = require("../services/reportEmailService");
 const { manualReportMonth } = require('../services/monthlyReportMonth');
+const delivery = require('../services/monthlyReportDeliveryService');
 
-/**
- * POST /api/admin/reports/send-now
- * Gera relatórios e envia emails (se permitido)
- */
-async function sendReportsNow(req, res, next) {
+const action = work => async (req, res) => {
   res.set('Cache-Control', 'private, no-store');
-  try {
-    const monthRef = manualReportMonth(req.body);
-    // 1️⃣ Gera relatório ADMIN
-    await generateAdminMonthlyReport(monthRef);
-
-    // 2️⃣ Gera relatórios CLIENTE
-    const clients = await prisma.client.findMany({
-      where: { status: "ACTIVE" },
-      select: { id: true },
-    });
-
-    for (const c of clients) {
-      await generateClientMonthlyReport(c.id, monthRef);
-    }
-
-    // 3️⃣ Envio opcional por email (controlado por NotificationRule)
-    const result = await sendMonthlyReportEmails({ monthRef, manual: true });
-
-    res.json({
-      ok: true,
-      message: result.blocked ? 'Relatórios preparados; envio de email desativado.' : 'Processamento terminado. Consulte os resultados do envio.',
-      clients: clients.length,
-      ...result,
-    });
-  } catch (err) {
-    if (err.status === 400 || err.statusCode === 400) return res.status(400).json({ ok: false, error: err.message });
-    next(err);
+  try { res.json(await work(req)); }
+  catch (error) {
+    const status = error.statusCode || error.status;
+    if ([400,403,409,503].includes(status)) return res.status(status).json({ ok: false, code: error.code, error: error.message });
+    res.status(503).json({ ok: false, code: 'RESULT_UNAVAILABLE', error: 'Não foi possível confirmar a operação. Consulte o resultado antes de tentar novamente.' });
   }
-}
-
-module.exports = {
-  sendReportsNow,
 };
+
+const prepareReports = action(async req => {
+  const monthRef = manualReportMonth(req.body);
+  // An immutable snapshot must not freeze a month that is still in progress.
+  if (monthRef >= new Date().toISOString().slice(0,7)) throw Object.assign(Error('Escolha um mês concluído para gerar relatórios guardados.'), { statusCode: 400, code: 'MONTH_NOT_CLOSED' });
+  const clients = await prisma.client.findMany({ where: { status: 'ACTIVE', active: true }, select: { id: true } });
+  for (const client of clients) await generateClientMonthlyReport(client.id, monthRef);
+  return { ok: true, monthRef, clients: clients.length, prepared: true, sent: 0, deliveryConfirmed: false };
+});
+const previewReports = action(req => delivery.preview(req.user, manualReportMonth(req.query)));
+const sendReportsNow = action(req => delivery.sendConfirmed(req.user, req.body));
+module.exports = { prepareReports, previewReports, sendReportsNow };

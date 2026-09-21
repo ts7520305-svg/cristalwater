@@ -14,6 +14,7 @@ async function retryFailedEmails() {
   const failedEmails = await prisma.emailLog.findMany({
     where: {
       status: "FAILED",
+      OR: [{ eventType: null }, { eventType: { not: "MONTHLY_REPORT" } }],
     },
   });
 

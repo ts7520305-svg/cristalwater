@@ -28,6 +28,10 @@ async function retryFailed(req, res) {
       });
     }
 
+    if (emailLog.eventType === 'MONTHLY_REPORT') {
+      return res.status(409).json({ ok: false, message: 'Este relatório exige revisão no ecrã de relatórios. O reenvio genérico está bloqueado.' });
+    }
+
     if (emailLog.status !== "FAILED") {
       return res.status(400).json({
         ok: false,
