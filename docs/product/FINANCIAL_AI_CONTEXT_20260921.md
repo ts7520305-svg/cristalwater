@@ -24,7 +24,7 @@ O mês selecionado não reconstrói um fecho histórico. Custos completos, lucro
 
 O acesso usa a autenticação ADMIN canónica, incluindo conta ativa e mudança obrigatória de palavra-passe, com respostas privadas/sem cache. Conversas pertencem ao ADMIN que as criou: lista, detalhe e continuação não expõem conversas alheias nem atribuem automaticamente conversas antigas sem titular.
 
-O chat valida campos, mês, âmbito, mensagem e identidade da conversa antes de escrever. O histórico usado pelo modelo limita-se às últimas vinte mensagens compatíveis com o mesmo mês/âmbito. O percurso financeiro escreve apenas mensagens/conversa; não guarda nem executa propostas de alteração financeira, mesmo que um fornecedor devolva ações inesperadas.
+O chat valida campos, mês, âmbito, mensagem e identidade da conversa antes de escrever. Consulta as últimas vinte mensagens da conversa e envia ao modelo até oito compatíveis com o mesmo mês/âmbito. O percurso financeiro escreve apenas mensagens/conversa; não guarda nem executa propostas de alteração financeira, mesmo que um fornecedor devolva ações inesperadas.
 
 O fornecedor recebe apenas o contexto financeiro e o histórico compatível, sem ferramentas de pesquisa web. O esquema financeiro estrito contém resposta e recomendações, com propriedades adicionais recusadas. Resposta incompleta, recusa, JSON inválido ou falha do fornecedor passam para regras locais identificadas. Esta separação segue os requisitos de [Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs) para objetos estritos e tratamento de respostas incompletas/recusas. Campos de cliente são dados não confiáveis, não instruções; a interface apresenta-os como texto literal.
 
@@ -48,7 +48,9 @@ Primeira publicação: `9b737a69d714f3b16a0c1dccf7e380bec045dcc9`, árvore `7e23
 
 O grupo completo do portal, com a correção, passou localmente em `/tmp/cw280-document-measurement.log`, incluindo navegação, downloads, permissões, recuperação e medições nas três larguras. Sintaxe do script e `git diff --check` também passaram.
 
-Base `af690b5de4bb816ca9b1b28869906901a9ec71ea`; comparação com o GitHub sem divergência e principal `feature/technicians-v25` (`6f27081e1d183ff584a62255b016b373836734db`) como antepassado. Publicação autorizada na mesma branch, sem força; backups `backup/financial-ai-context-local-20260921` e `backup/financial-ai-measurement-local-20260921`. CI PostgreSQL 16/restauro da árvore com a correção de precisão ainda pendentes.
+Árvore final publicada no commit `2def0df3aec334495c438d13ce4eff6e67ae5dc1`, árvore `b8c367de5ddacf9b88454323074cb63778d26eea`, idêntica à local. [CI 35647075519](https://github.com/ts7520305-svg/cristalwater/actions/runs/35647075519), job `106490030863`, concluído com sucesso em 21/09/2026 às 20:07:50 UTC, após 19m48s. Logs confirmam 165/165 grupos distintos com código zero e sem sinal: API financeira 3975 ms, interface financeira 11261 ms e portal documental 16482 ms. Regressões dos emails mensais: período 4089 ms, reserva/envio 2054 ms e interface 9860 ms. 396 unitários/63 ficheiros, quatro técnicos, 21 scripts de navegador, 22 migrações e sintaxe 565/186/56 aprovados. Restauro PostgreSQL 16 de 111 tabelas e 46 ficheiros, com linhas e hashes iguais. A atualização final deste documento/checkpoint altera apenas documentação e conserva o código/testes da árvore aprovada.
+
+Base `af690b5de4bb816ca9b1b28869906901a9ec71ea`; comparação final com o GitHub sem divergência e principal `feature/technicians-v25` (`6f27081e1d183ff584a62255b016b373836734db`) como antepassado: zero commits exclusivos da principal e 294 desta branch no commit de código final. Publicação autorizada na mesma branch, sem força; backups `backup/financial-ai-context-local-20260921` e `backup/financial-ai-measurement-local-20260921`. Todas as integrações externas ficaram desativadas no ambiente QA; a IA externa foi simulada apenas no servidor local de teste.
 
 ## Ficheiros e continuação
 
