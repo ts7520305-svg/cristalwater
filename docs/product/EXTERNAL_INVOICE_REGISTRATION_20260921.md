@@ -43,9 +43,19 @@ O grupo novo cobre as duas rotas, IDs/tipos/aliases inválidos, ADMIN/CLIENT/aus
 
 No navegador real verifica checklist completa, cancelamento, confirmação do número, texto com apóstrofos/HTML inerte, primeira resposta perdida depois do commit, repetição sem duplicação, alteração dos serviços antes de guardar, mudança de seleção/sessão, identidade errada na resposta e lista inválida. Captura 320/390/1440 px e verifica ausência de excesso de largura. A revisão das primeiras imagens encontrou baixo contraste no tema claro; estilos corrigidos e imagens seguintes revistas.
 
-Primeiro grupo integral em `/tmp/cw275-test.log`; segundo em `/tmp/cw275-final-test.log`, imagens revistas em `reports/field-visual/external-invoice-1790005670497/`. `/tmp/cw275-regression.log` aprovou emissão interna, geração da página de faturas, cancelamento, notas de crédito e faturação atómica de reparações. O ensaio final `/tmp/cw275-complete.log` inclui o novo grupo e as regressões de emissão interna, Finance OS e reparações após distinguir os dois números.
+Primeiro grupo integral em `/tmp/cw275-test.log`; segundo em `/tmp/cw275-final-test.log`, imagens revistas em `reports/field-visual/external-invoice-1790005670497/`. `/tmp/cw275-regression.log` aprovou emissão interna, geração da página de faturas, cancelamento, notas de crédito e faturação atómica de reparações. O ensaio final `/tmp/cw275-complete.log` aprovou o novo grupo e as regressões de emissão interna, Finance OS e reparações após distinguir os dois números; imagens finais em `reports/field-visual/external-invoice-1790005812356/`.
 
-Runtime local: Node 24.19.0, PGlite, Chromium 153, 21 migrações existentes; serviços externos desligados e telemetria Prisma desativada. Gates: 396 unitários em 63 ficheiros, quatro técnicos, 21 scripts do navegador e sintaxe 562 backend/185 frontend/56 inline. CI PostgreSQL 16 e restauro do commit publicado ainda por confirmar.
+Runtime local: Node 24.19.0, PGlite, Chromium 153, 21 migrações existentes; serviços externos desligados e telemetria Prisma desativada. Gates: 396 unitários em 63 ficheiros, quatro técnicos, 21 scripts do navegador e sintaxe 562 backend/185 frontend/56 inline. CI PostgreSQL 16 e restauro do commit publicado aprovados, conforme o registo seguinte.
+
+## Publicação e validação nativa
+
+- Commit publicado: `113013a2cabc80358a566c190eac20308ca6f0ef`; árvore `13498153a088a8ea7436c1c615fd29d935288dff`, idêntica à versão local.
+- [CI 35621988931](https://github.com/ts7520305-svg/cristalwater/actions/runs/35621988931), job `106407029132`: concluído com sucesso, workflow atualizado em 21/09/2026 às 16:11:04 UTC; todas as etapas aprovadas.
+- 158/158 grupos distintos previstos no runner, todos com código zero e sem sinal de interrupção. Associação externa: 4985 ms; emissão interna: 589 ms; Finance OS: 544 ms; geração da página: 2726 ms; reparações: 854 ms; cancelamento: 665 ms; notas de crédito: 596 ms.
+- 396 unitários/63 ficheiros, quatro técnicos, 21 scripts do gate de navegador, 21 migrações aditivas e sintaxe 562 backend/185 frontend/56 inline aprovados.
+- Restauro PostgreSQL 16 de 110 tabelas e 46 ficheiros enviados aprovado, com igualdade das linhas da base de dados e dos hashes dos ficheiros.
+
+Publicação não forçada na branch autorizada. Backup local `backup/external-invoice-registration-local-20260921`. A atualização posterior à aprovação altera apenas este relatório e o checkpoint, conservando o código/testes do commit validado.
 
 ## Limites e continuação
 
