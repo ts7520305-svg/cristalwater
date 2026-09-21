@@ -14,13 +14,60 @@ function safeNumber(value) {
 }
 
 function readDocumentManifest() {
+  let file;
   try {
-    const raw = fs.readFileSync(DOCUMENT_MANIFEST_PATH, "utf8");
+    if (!fs.lstatSync(DOCUMENT_BASE_DIR).isDirectory()) throw Error('Invalid document directory');
+    try { file = fs.openSync(DOCUMENT_MANIFEST_PATH, fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW || 0) | (fs.constants.O_NONBLOCK || 0)); }
+    catch (error) { if (error.code === 'ENOENT') return []; throw error; }
+    const stat = fs.fstatSync(file);
+    if (!stat.isFile() || stat.size > 16 * 1024 * 1024) throw Error('Invalid document manifest');
+    const buffer = Buffer.alloc(stat.size + 1); let length = 0;
+    while (length < buffer.length) {
+      const count = fs.readSync(file, buffer, length, buffer.length - length, length);
+      if (!count) break;
+      length += count;
+    }
+    if (length !== stat.size) throw Error('Document manifest changed');
+    const raw = buffer.subarray(0, length).toString('utf8');
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) throw Error('Invalid document manifest');
+    return parsed;
   } catch {
-    return [];
+    throw Object.assign(Error('Não foi possível confirmar os documentos. Tente novamente.'), { statusCode: 503 });
+  } finally {
+    if (file !== undefined) fs.closeSync(file);
   }
+}
+
+function validDocumentFilename(value) {
+  return typeof value === 'string' && value.length > 0 && value.length <= 255 && !value.startsWith('.') &&
+    !/[\\/\x00-\x1f\x7f]/.test(value) && value !== 'manifest.json' && path.basename(value) === value;
+}
+
+async function openDocumentFile(filename) {
+  let file;
+  try {
+    if (!validDocumentFilename(filename) || !(await fs.promises.lstat(DOCUMENT_BASE_DIR)).isDirectory()) throw Object.assign(Error(), { code: 'ENOENT' });
+    file = await fs.promises.open(path.join(DOCUMENT_BASE_DIR, filename), fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW || 0) | (fs.constants.O_NONBLOCK || 0));
+    const stat = await file.stat();
+    if (!stat.isFile() || stat.nlink !== 1 || stat.size > 50 * 1024 * 1024) throw Object.assign(Error(), { code: 'ENOENT' });
+    return { file, size: stat.size };
+  } catch (error) {
+    if (file) await file.close().catch(() => {});
+    const missing = ['ENOENT', 'ENOTDIR', 'ELOOP', 'EISDIR', 'ENXIO'].includes(error.code);
+    throw Object.assign(Error(missing ? 'Documento não encontrado.' : 'Não foi possível abrir o documento. Tente novamente.'), { statusCode: missing ? 404 : 503 });
+  }
+}
+
+async function documentOwnershipSources(clientId, visitIds) {
+  return prisma.$transaction(async db => {
+    const client = await db.client.findUnique({ where: { id: clientId }, select: { id: true } });
+    const visits = [];
+    for (let offset = 0; offset < visitIds.length; offset += 1000) visits.push(...await db.serviceVisit.findMany({
+      where: { id: { in: visitIds.slice(offset, offset + 1000) } }, select: { id: true, clientId: true, poolId: true },
+    }));
+    return { client, visits };
+  }, { isolationLevel: 'RepeatableRead', maxWait: 15000, timeout: 20000 });
 }
 
 function normalizeDocument(document) {
@@ -213,56 +260,6 @@ async function listCustomerHistory(clientId) {
   }));
 }
 
-async function listCustomerDocuments(clientId) {
-  const [clientPools, visits] = await Promise.all([
-    prisma.pool.findMany({
-      where: { clientId },
-      select: { id: true },
-    }),
-    prisma.serviceVisit.findMany({
-      where: {
-        OR: [
-          { clientId },
-          { pool: { is: { clientId } } },
-        ],
-      },
-      select: { id: true, poolId: true },
-    }),
-  ]);
-
-  const poolIds = new Set((clientPools || []).map((pool) => String(pool.id)));
-  const visitIds = new Set((visits || []).map((visit) => String(visit.id)));
-  const docs = readDocumentManifest();
-
-  return docs
-    .filter((doc) => {
-      const ownerClientId = doc.clientId != null ? String(doc.clientId) : null;
-      const ownerPoolId = doc.poolId != null ? String(doc.poolId) : null;
-      const ownerVisitId = doc.visitId != null ? String(doc.visitId) : null;
-      if (ownerClientId && ownerClientId === String(clientId)) return true;
-      if (ownerPoolId && poolIds.has(ownerPoolId)) return true;
-      if (ownerVisitId && visitIds.has(ownerVisitId)) return true;
-      if (String(doc.entity || "").toUpperCase() === "CLIENT" && String(doc.entityId || "") === String(clientId)) return true;
-      return false;
-    })
-    .map((doc) => ({
-      ...normalizeDocument(doc),
-      downloadUrl: `/api/client-portal/${clientId}/documents/${doc.id}/download`,
-    }))
-    .sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
-}
-
-function resolveDocumentAccess(clientId, document, scope = {}) {
-  if (!document) return false;
-  const poolIds = new Set((scope.poolIds || []).map(String));
-  const visitIds = new Set((scope.visitIds || []).map(String));
-  if (String(document.clientId || "") === String(clientId)) return true;
-  if (String(document.entity || "").toUpperCase() === "CLIENT" && String(document.entityId || "") === String(clientId)) return true;
-  if (document.poolId != null && poolIds.has(String(document.poolId))) return true;
-  if (document.visitId != null && visitIds.has(String(document.visitId))) return true;
-  return false;
-}
-
 async function getClientOwnershipScope(clientId) {
   const [client, pools, visits] = await Promise.all([
     prisma.client.findUnique({
@@ -307,13 +304,14 @@ module.exports = {
   customerPermissions,
   createVisitRequest,
   getClientOwnershipScope,
-  listCustomerDocuments,
   listCustomerHistory,
   listCustomerMessages,
   listCustomerNotifications,
   markCustomerNotificationRead,
   readDocumentManifest,
-  resolveDocumentAccess,
+  validDocumentFilename,
+  openDocumentFile,
+  documentOwnershipSources,
   normalizeDocument,
   normalizeMessage,
   normalizeNotification,

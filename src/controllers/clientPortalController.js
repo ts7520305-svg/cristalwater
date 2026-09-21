@@ -692,7 +692,46 @@ async function notifyPayment(req, res) {
   } catch (error) { return business.sendError(res, error); }
 }
 
+function privateDocuments(req, res, next) {
+  res.set({ 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff' });
+  next();
+}
+
+function documentError(res, error) {
+  if (res.headersSent) return res.destroy();
+  return res.status(error.statusCode || 503).json({ ok: false, error: error.statusCode ? error.message : 'Não foi possível confirmar os documentos. Tente novamente.' });
+}
+
+async function listDocuments(req, res) {
+  try {
+    const result = await require('../business/portal/ClientDocumentBusiness').list(req.user, req.params.clientId);
+    res.set({ 'X-CW-Document-Type': 'client-document-list', 'X-CW-Client-Id': req.params.clientId });
+    return res.json(result);
+  } catch (error) { return documentError(res, error); }
+}
+
+async function downloadDocument(req, res) {
+  let document;
+  try {
+    document = await require('../business/portal/ClientDocumentBusiness').read(req.user, req.params.clientId, req.params.documentId);
+    if (req.aborted || res.destroyed) { await document.file.close(); return; }
+    res.attachment(document.name).type('application/octet-stream').set({
+      'X-CW-Document-Type': 'client-document-file', 'X-CW-Client-Id': String(document.clientId),
+      'X-CW-Document-Id': String(document.documentId), 'Content-Length': String(document.size), 'Accept-Ranges': 'none',
+    });
+    if (req.method === 'HEAD') { await document.file.close(); return res.end(); }
+    // Stream the already opened file descriptor: never reopen a manifest path after authorization.
+    require('node:stream').pipeline(document.file.createReadStream(), res, error => { if (error && !res.destroyed) res.destroy(); });
+  } catch (error) {
+    if (document?.file) await document.file.close().catch(() => {});
+    return documentError(res, error);
+  }
+}
+
 module.exports = {
   getClientPortal,
   notifyPayment,
+  privateDocuments,
+  listDocuments,
+  downloadDocument,
 };

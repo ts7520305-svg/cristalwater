@@ -6,18 +6,12 @@ const auth = require("../middlewares/authMiddleware");
 const {
   customerPermissions,
   createVisitRequest,
-  listCustomerDocuments,
   listCustomerHistory,
   listCustomerMessages,
   listCustomerNotifications,
   markCustomerNotificationRead,
-  readDocumentManifest,
-  resolveDocumentAccess,
   safeNumber,
 } = require("../services/customerPortalService");
-const { resolveUploadSubdir } = require("../config/uploadPath");
-
-const documentsBaseDir = resolveUploadSubdir("documents");
 
 async function getClientHistory(req, res) {
   try {
@@ -152,48 +146,8 @@ router.post("/:clientId(\\d+)/visit-requests", auth("CLIENT"), async (req, res) 
   } catch (error) { return business.sendError(res, error); }
 });
 
-router.get("/:clientId(\\d+)/documents", auth("CLIENT"), async (req, res) => {
-  const clientId = Number(req.params.clientId);
-  if (!ensureClientOwnership(req, res, clientId)) return;
-  const documents = await listCustomerDocuments(clientId);
-  return res.json({ ok: true, documents });
-});
-
-router.get("/:clientId(\\d+)/documents/:documentId/download", auth("CLIENT"), async (req, res, next) => {
-  try {
-  const clientId = Number(req.params.clientId);
-  if (!ensureClientOwnership(req, res, clientId)) return;
-  const documentId = Number(req.params.documentId);
-  if (!documentId) return res.status(400).json({ ok: false, error: "Documento inválido" });
-
-  const manifest = readDocumentManifest();
-  const document = manifest.find((item) => Number(item.id) === documentId) || null;
-  if (!document) return res.status(404).json({ ok: false, error: "Documento não encontrado" });
-
-  const scope = await prisma.$transaction(async (tx) => {
-    const [pools, visits] = await Promise.all([
-      tx.pool.findMany({ where: { clientId }, select: { id: true } }),
-      tx.serviceVisit.findMany({
-        where: {
-          OR: [
-            { clientId },
-            { pool: { is: { clientId } } },
-          ],
-        },
-        select: { id: true, poolId: true },
-      }),
-    ]);
-    return { poolIds: pools.map((pool) => pool.id), visitIds: visits.map((visit) => visit.id) };
-  });
-
-  if (!resolveDocumentAccess(clientId, document, scope)) {
-    return res.status(403).json({ ok: false, error: "Documento indisponível para este cliente" });
-  }
-
-  const filePath = require("path").join(documentsBaseDir, document.filename);
-  return res.download(filePath, document.originalName || document.title || `document-${documentId}`);
-  } catch (error) { next(error); }
-});
+router.get("/:clientId(\\d+)/documents", clientPortalController.privateDocuments, auth("CLIENT"), clientPortalController.listDocuments);
+router.get("/:clientId(\\d+)/documents/:documentId/download", clientPortalController.privateDocuments, auth("CLIENT"), clientPortalController.downloadDocument);
 
 router.get("/:clientId(\\d+)/dashboard", auth("CLIENT"), async (req, res) => {
   const clientId = Number(req.params.clientId);
