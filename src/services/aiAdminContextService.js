@@ -1,4 +1,5 @@
 const { prisma } = require("../prismaClient");
+const financial = require("./aiFinancialContextService");
 
 function startOfDay(d = new Date()) {
   const x = new Date(d);
@@ -12,30 +13,35 @@ function endOfDay(d = new Date()) {
   return x;
 }
 
-async function safeCount(model, where) {
-  try {
-    if (!prisma[model]) return 0;
-    return await prisma[model].count({ where });
-  } catch (_) {
-    return 0;
+function readers(unavailableSources) {
+  async function safeCount(model, where) {
+    try {
+      if (!prisma[model]) throw Error("Source missing");
+      return await prisma[model].count({ where });
+    } catch (_) {
+      unavailableSources.add(model); return null;
+    }
   }
+
+  async function safeFindMany(model, args) {
+    try {
+      if (!prisma[model]) throw Error("Source missing");
+      return await prisma[model].findMany(args);
+    } catch (_) {
+      unavailableSources.add(model); return [];
+    }
+  }
+  return { safeCount, safeFindMany };
 }
 
-async function safeFindMany(model, args) {
-  try {
-    if (!prisma[model]) return [];
-    return await prisma[model].findMany(args);
-  } catch (_) {
-    return [];
-  }
-}
-
-async function getOperationalContext() {
+async function getOperationalContext({ monthRef } = {}) {
+  const unavailableSources = new Set(), { safeCount, safeFindMany } = readers(unavailableSources);
   const now = new Date();
   const todayStart = startOfDay(now);
   const todayEnd = endOfDay(now);
 
   const [
+    finance,
     clientsActive,
     poolsActive,
     techniciansActive,
@@ -44,10 +50,10 @@ async function getOperationalContext() {
     visitsDoneToday,
     openAlerts,
     pendingRepairs,
-    pendingInvoices,
     pendingTasks,
     pendingAiActions
   ] = await Promise.all([
+    financial.snapshot(monthRef),
     safeCount("client", { active: true }),
     safeCount("pool", { active: true }),
     safeCount("technician", { active: true }),
@@ -56,7 +62,6 @@ async function getOperationalContext() {
     safeCount("serviceVisit", { status: "DONE", OR: [{ plannedDate: { gte: todayStart, lte: todayEnd } }, { date: { gte: todayStart, lte: todayEnd } }] }),
     safeCount("technicalAlert", { status: "OPEN" }),
     safeCount("repair", { status: { in: ["PENDING", "QUOTED", "APPROVED"] } }),
-    safeCount("invoice", { status: { in: ["PENDING", "OVERDUE", "DRAFT"] } }),
     safeCount("task", { status: { in: ["PENDENTE", "OPEN", "TODO"] } }),
     safeCount("aiAssistantAction", { status: "PENDING" })
   ]);
@@ -85,13 +90,6 @@ async function getOperationalContext() {
     take: 10
   });
 
-  const debtors = await safeFindMany("invoice", {
-    where: { status: { in: ["PENDING", "OVERDUE"] } },
-    include: { client: true },
-    orderBy: [{ dueDate: "asc" }, { createdAt: "asc" }],
-    take: 10
-  });
-
   const technicians = await safeFindMany("technician", {
     where: { active: true },
     select: { id: true, name: true, zone: true, vehicleId: true, active: true },
@@ -112,7 +110,11 @@ async function getOperationalContext() {
     take: 10
   });
 
+  const overdueCount = await safeCount("serviceVisit", { status: { notIn: ["DONE", "CANCELLED", "SKIPPED"] }, OR: [{ plannedDate: { lt: todayStart } }, { date: { lt: todayStart } }] });
   return {
+    finance,
+    unavailableSources: [...unavailableSources],
+    sampleLimits: { todayVisits:20, overdueVisits:10, criticalAlerts:10, technicians:40, rounds:20 },
     generatedAt: now.toISOString(),
     today: todayStart.toISOString().slice(0, 10),
     counters: {
@@ -122,10 +124,10 @@ async function getOperationalContext() {
       visitsToday,
       visitsInProgress,
       visitsDoneToday,
-      overdueVisits: overdueVisits.length,
+      overdueVisits: overdueCount,
       openAlerts,
       pendingRepairs,
-      pendingInvoices,
+      pendingInvoices: finance.receivables?.invoiceCount ?? null,
       pendingTasks,
       pendingAiActions
     },
@@ -141,16 +143,7 @@ async function getOperationalContext() {
       message: a.message,
       createdAt: a.createdAt
     })),
-    debtors: debtors.map((i) => ({
-      id: i.id,
-      clientId: i.clientId,
-      client: i.client?.name || null,
-      total: Number(i.totalAmount || i.total || i.amount || 0),
-      open: Number(i.amountOpen || 0),
-      status: i.status,
-      dueDate: i.dueDate,
-      monthRef: i.monthRef || i.month
-    })),
+    debtors: (finance.receivables?.topClients || []).map(row => ({ clientId:row.clientId, client:row.name, open:row.amountCents === null ? null : row.amountCents / 100, basis:'CURRENT_CLIENT_BALANCE', sampleOnly:finance.receivables.sampleOnly })),
     technicians,
     rounds: rounds.map((r) => ({
       id: r.id,

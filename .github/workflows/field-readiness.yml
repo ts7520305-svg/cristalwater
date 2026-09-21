@@ -9,7 +9,7 @@ permissions:
 jobs:
   field:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     services:
       postgres:
         image: postgres:16
@@ -34,6 +34,8 @@ jobs:
       WHATSAPP_ENABLED: 'false'
       FISCAL_ISSUING_ENABLED: 'false'
       WEBHOOKS_ENABLED: 'false'
+      ENABLE_ADMIN_AI_OPENAI: 'false'
+      ENABLE_ADMIN_AI_WEB: 'false'
     steps:
       - uses: actions/checkout@v4
         with:

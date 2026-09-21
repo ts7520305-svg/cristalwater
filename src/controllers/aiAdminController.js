@@ -1,3 +1,4 @@
+const financial = require("../services/aiFinancialContextService");
 const { FIXED_SETTINGS } = require('../services/systemSettingService');
 const { prisma } = require("../prismaClient");
 const { getOperationalContext } = require("../services/aiAdminContextService");
@@ -15,7 +16,8 @@ function adminId(req) {
 }
 
 async function status(req, res) {
-  const context = await getOperationalContext();
+  if (Object.keys(req.query).some(key => key !== "monthRef")) return res.status(400).json({ok:false,error:"Parâmetro de consulta inválido."});
+  const context = await getOperationalContext({monthRef:financial.month(req.query.monthRef)});
   const externalAiConfigured = Boolean(process.env.OPENAI_API_KEY);
   const externalAiEnabled =
     externalAiConfigured &&
@@ -41,20 +43,23 @@ async function status(req, res) {
     },
     requireApproval: FIXED_SETTINGS.AI_ADMIN_REQUIRE_APPROVAL === "true",
     allowedActions: getActionDefinitions(),
-    context
+    context,
+    financialRecommendations: financial.recommendations(context.finance)
   });
 }
 
 async function chat(req, res) {
-  const message = String(req.body?.message || "").trim();
-  if (!message) return res.status(400).json({ ok: false, error: "Mensagem obrigatória." });
-
-  let threadId = req.body?.threadId ? Number(req.body.threadId) : null;
-  if (threadId && !Number.isFinite(threadId)) threadId = null;
+  const body = req.body;
+  if (!body || Array.isArray(body) || typeof body !== 'object' || Object.keys(body).some(key=>!['message','threadId','monthRef','scope'].includes(key)) || typeof body.message !== 'string' || !body.message.trim() || body.message.length > 4000) return res.status(400).json({ok:false,error:'Escreva uma mensagem válida, até 4000 caracteres.'});
+  const message = body.message.trim(), monthRef = financial.month(body.monthRef), scope = body.scope === undefined ? 'operations' : body.scope;
+  if (!['finance','operations'].includes(scope)) return res.status(400).json({ok:false,error:'Escolha uma área válida.'});
+  let threadId = body.threadId ?? null;
+  if (threadId !== null && (!Number.isSafeInteger(threadId) || threadId <= 0)) return res.status(400).json({ok:false,error:'Conversa inválida.'});
 
   let thread = null;
   if (threadId) {
-    thread = await prisma.aiAssistantThread.findUnique({ where: { id: threadId } });
+    thread = await prisma.aiAssistantThread.findFirst({ where: { id:threadId, createdByUserId:adminId(req) } });
+    if (!thread) return res.status(404).json({ok:false,error:"Conversa não encontrada nesta conta."});
   }
   if (!thread) {
     thread = await prisma.aiAssistantThread.create({
@@ -68,7 +73,7 @@ async function chat(req, res) {
 
   const history = await prisma.aiAssistantMessage.findMany({
     where: { threadId },
-    orderBy: { createdAt: "asc" },
+    orderBy: { id: "desc" },
     take: 20
   });
 
@@ -77,25 +82,27 @@ async function chat(req, res) {
       threadId,
       role: "user",
       content: message,
+      metadata: { monthRef, scope },
       createdByUserId: adminId(req)
     }
   });
 
-  const context = await getOperationalContext();
-  const ai = await generateAiAdminResponse({ message, context, history });
+  const context = await getOperationalContext({monthRef});
+  const samePeriodHistory = history.filter(row=>row.metadata?.monthRef===monthRef && row.metadata?.scope===scope).reverse();
+  const ai = await generateAiAdminResponse({ message, context, history:samePeriodHistory, scope });
 
   await prisma.aiAssistantMessage.create({
     data: {
       threadId,
       role: "assistant",
       content: ai.answer,
-      metadata: { recommendations: ai.recommendations, mode: ai.mode },
+      metadata: { recommendations: ai.recommendations, mode: ai.mode, monthRef, scope, financialGeneratedAt:context.finance.generatedAt },
       createdByUserId: null
     }
   });
 
   const storedActions = [];
-  for (const action of ai.actions || []) {
+  for (const action of scope === "finance" ? [] : ai.actions || []) {
     const created = await storeAction({ threadId, action, admin: req.aiAdmin });
     if (created) storedActions.push(created);
   }
@@ -103,6 +110,8 @@ async function chat(req, res) {
   return res.json({
     ok: true,
     threadId,
+    monthRef, scope, finance:context.finance,
+    financialRecommendations:financial.recommendations(context.finance),
     answer: ai.answer,
     mode: ai.mode,
     recommendations: ai.recommendations || [],
@@ -112,6 +121,7 @@ async function chat(req, res) {
 
 async function threads(req, res) {
   const rows = await prisma.aiAssistantThread.findMany({
+    where: {createdByUserId:adminId(req)},
     orderBy: { updatedAt: "desc" },
     take: 50,
     include: { _count: { select: { messages: true, actions: true } } }
@@ -121,8 +131,9 @@ async function threads(req, res) {
 
 async function threadDetail(req, res) {
   const id = Number(req.params.id);
-  const thread = await prisma.aiAssistantThread.findUnique({
-    where: { id },
+  if (!Number.isSafeInteger(id) || id <= 0) return res.status(400).json({ok:false,error:"Conversa inválida."});
+  const thread = await prisma.aiAssistantThread.findFirst({
+    where: { id, createdByUserId:adminId(req) },
     include: { messages: { orderBy: { createdAt: "asc" } }, actions: { orderBy: { createdAt: "desc" } } }
   });
   if (!thread) return res.status(404).json({ ok: false, error: "Conversa não encontrada." });

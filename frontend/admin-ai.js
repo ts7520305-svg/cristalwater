@@ -1,263 +1,74 @@
 (function(){
-  "use strict";
-
-  const API = "/api/ai-admin";
-  let threadId = null;
-  let lastRecommendations = [];
-
-  const els = {
-    status: document.getElementById("aiStatus"),
-    messages: document.getElementById("messages"),
-    input: document.getElementById("messageInput"),
-    send: document.getElementById("sendBtn"),
-    refresh: document.getElementById("refreshBtn"),
-    kpis: document.getElementById("kpis"),
-    capabilities: document.getElementById("capabilities"),
-    recommendations: document.getElementById("recommendations"),
-    actions: document.getElementById("actions")
-  };
-
-  function token(){
-    return localStorage.getItem("token") || localStorage.getItem("adminToken") || "";
-  }
-
-  function headers(){
-    const authToken = token();
-    return {
-      "Content-Type": "application/json",
-      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
-    };
-  }
-
-  async function api(path, options = {}){
-    const res = await fetch(API + path, { ...options, headers: { ...headers(), ...(options.headers || {}) } });
-    const data = await res.json().catch(() => ({ ok:false, error:"Resposta inválida" }));
-    if(!res.ok || data.ok === false) throw new Error(data.error || data.message || `Erro ${res.status}`);
-    return data;
-  }
-
-  function escapeHtml(value){
-    return String(value ?? "")
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
-
-  function addMessage(role, text){
-    const div = document.createElement("div");
-    div.className = `msg ${role === "user" ? "user" : "ai"}`;
-    div.textContent = text;
-    els.messages.appendChild(div);
-    els.messages.scrollTop = els.messages.scrollHeight;
-  }
-
-  function renderKpis(context){
-    const c = context?.counters || {};
-    const items = [
-      ["Visitas hoje", c.visitsToday || 0],
-      ["Concluídas", c.visitsDoneToday || 0],
-      ["Atrasadas", c.overdueVisits || 0],
-      ["Alertas", c.openAlerts || 0],
-      ["Técnicos", c.techniciansActive || 0],
-      ["Cobranças", c.pendingInvoices || 0]
-    ];
-    els.kpis.innerHTML = items.map(([label, value]) => `<div class="kpi"><strong>${escapeHtml(value)}</strong><span>${escapeHtml(label)}</span></div>`).join("");
-  }
-
-  function renderCapabilities(status){
-    const configured = Boolean(status.externalAiConfigured);
-    const external = Boolean(status.externalAiEnabled ?? status.externalAiConfigured);
-    const web = Boolean(status.webAccess?.enabled);
-    const approval = status.requireApproval !== false;
-    const enabled = status.enabled !== false;
-    const items = [
-      {
-        title: "Leitura operacional",
-        desc: "Clientes, piscinas, visitas, alertas, rondas, cobranças e ações pendentes.",
-        state: enabled ? "Ativa" : "Off",
-        type: enabled ? "ok" : "off"
-      },
-      {
-        title: "Motor IA",
-        desc: external
-          ? `OpenAI ativo: ${status.model || "modelo definido"}`
-          : configured
-            ? "Chave OpenAI encontrada, mas o motor externo esta desligado."
-            : "Modo local com regras operacionais, sem chave OpenAI.",
-        state: external ? "Online" : (configured ? "Off" : "Local"),
-        type: external ? "ok" : "warn"
-      },
-      {
-        title: "Web",
-        desc: status.webAccess?.note || "Consulta web desligada.",
-        state: web ? "Ativa" : "Off",
-        type: web ? "ok" : "off"
-      },
-      {
-        title: "Segurança",
-        desc: "Alterações sensíveis ficam pendentes para aprovação do administrador.",
-        state: approval ? "Aprovação" : "Livre",
-        type: approval ? "ok" : "warn"
-      },
-      {
-        title: "Fornecedores",
-        desc: "A IA orienta; passwords são copiadas apenas no Gestor de fornecedores.",
-        state: "Seguro",
-        type: "ok"
-      }
-    ];
-
-    els.capabilities.innerHTML = items.map((item) => `
-      <div class="capability">
-        <div>
-          <strong>${escapeHtml(item.title)}</strong>
-          <span>${escapeHtml(item.desc)}</span>
-        </div>
-        <div class="cap-dot ${escapeHtml(item.type)}">${escapeHtml(item.state)}</div>
-      </div>
-    `).join("");
-  }
-
-  function renderRecommendations(list){
-    lastRecommendations = Array.isArray(list) ? list : [];
-    if(!lastRecommendations.length){
-      els.recommendations.innerHTML = '<div class="empty">Pergunta à IA por prioridades, riscos, rondas, cobranças ou fornecedores.</div>';
-      return;
-    }
-    els.recommendations.innerHTML = lastRecommendations.map((item) => {
-      if(typeof item === "string") return `<div class="rec">${escapeHtml(item)}</div>`;
-      const title = item.title || item.category || "Recomendação";
-      const text = item.summary || item.text || item.rationale || "";
-      return `<div class="rec"><strong>${escapeHtml(title)}</strong><br>${escapeHtml(text)}</div>`;
-    }).join("");
-  }
-
-  function renderActions(list){
-    if(!Array.isArray(list) || !list.length){
-      els.actions.innerHTML = '<div class="empty">Sem ações pendentes.</div>';
-      return;
-    }
-    els.actions.innerHTML = list.map((a) => {
-      const risk = a.risk || a.riskLevel || "MEDIUM";
-      const description = a.description || a.summary || "";
-      return `
-        <div class="action" data-action-id="${a.id}">
-          <h4>${escapeHtml(a.title || a.type || a.actionType)} <span class="risk ${escapeHtml(risk)}">${escapeHtml(risk)}</span></h4>
-          <p>${escapeHtml(description)}</p>
-          <small>${escapeHtml(a.type || a.actionType || "AI")} · #${escapeHtml(a.id)}</small>
-          <div class="action-buttons">
-            <button class="approve" data-approve="${a.id}">Aprovar e executar</button>
-            <button class="reject" data-reject="${a.id}">Rejeitar</button>
-          </div>
-        </div>`;
-    }).join("");
-  }
-
-  function statusText(data){
-    const external = Boolean(data.externalAiEnabled ?? data.externalAiConfigured);
-    if(!data.enabled) return "IA desativada";
-    if(external && data.webAccess?.enabled) return `OpenAI + Web - ${data.model}`;
-    if(external) return `OpenAI - ${data.model}`;
-    if(data.externalAiConfigured) return "OpenAI configurado - desligado";
-    return "Modo local - sem chave OpenAI";
-    if(!data.enabled) return "IA desativada";
-    if(data.externalAiConfigured && data.webAccess?.enabled) return `OpenAI + Web · ${data.model}`;
-    if(data.externalAiConfigured) return `OpenAI · ${data.model}`;
-    return "Modo local · sem chave OpenAI";
-  }
-
-  async function loadStatus(){
-    try{
-      const data = await api("/status");
-      els.status.textContent = statusText(data);
-      renderKpis(data.context);
-      renderCapabilities(data);
-      renderRecommendations(lastRecommendations);
-      await loadActions();
-      if(!els.messages.children.length){
-        addMessage("ai", "Estou ligada ao centro operacional Cristal Water. Posso analisar o dia, priorizar visitas, alertas, cobranças, rondas, fornecedores e preparar ações para aprovação. Se a web estiver ativa, também posso pesquisar informação externa quando pedires.");
-      }
-    }catch(err){
-      els.status.textContent = "Erro";
-      if(els.capabilities) els.capabilities.innerHTML = `<div class="empty">Erro ao carregar capacidades: ${escapeHtml(err.message)}</div>`;
-      addMessage("ai", `Erro ao carregar IA operacional: ${err.message}`);
-    }
-  }
-
-  async function loadActions(){
-    try{
-      const data = await api("/actions?status=PENDING&take=30");
-      renderActions(data.actions || []);
-    }catch(err){
-      els.actions.innerHTML = `<div class="empty">Erro ações: ${escapeHtml(err.message)}</div>`;
-    }
-  }
-
-  async function send(){
-    const message = els.input.value.trim();
-    if(!message) return;
-    els.input.value = "";
-    addMessage("user", message);
-    els.send.disabled = true;
-    els.send.textContent = "A pensar...";
-    try{
-      const data = await api("/chat", { method:"POST", body: JSON.stringify({ message, threadId }) });
-      threadId = data.threadId || threadId;
-      addMessage("ai", data.answer || data.reply || "Sem resposta.");
-      renderRecommendations(data.recommendations || []);
-      renderActions(data.actions || []);
-      await loadActions();
-    }catch(err){
-      addMessage("ai", `Erro: ${err.message}`);
-    }finally{
-      els.send.disabled = false;
-      els.send.textContent = "Enviar";
-      els.input.focus();
-    }
-  }
-
-  async function approve(id){
-    if(!confirm("Aprovar e executar esta ação IA?")) return;
-    try{
-      const data = await api(`/actions/${id}/approve`, { method:"POST", body: JSON.stringify({}) });
-      addMessage("ai", `Ação #${id} executada com sucesso. Estado: ${data.action?.status || "EXECUTED"}`);
-      await loadStatus();
-    }catch(err){
-      addMessage("ai", `Falha ao executar ação #${id}: ${err.message}`);
-      await loadActions();
-    }
-  }
-
-  async function reject(id){
-    const reason = prompt("Motivo da rejeição:", "Rejeitado pelo administrador") || "Rejeitado pelo administrador";
-    try{
-      await api(`/actions/${id}/reject`, { method:"POST", body: JSON.stringify({ reason }) });
-      addMessage("ai", `Ação #${id} rejeitada.`);
-      await loadActions();
-    }catch(err){
-      addMessage("ai", `Falha ao rejeitar ação #${id}: ${err.message}`);
-    }
-  }
-
-  els.send.addEventListener("click", send);
-  els.refresh.addEventListener("click", loadStatus);
-  els.input.addEventListener("keydown", (event) => {
-    if(event.key === "Enter" && (event.ctrlKey || event.metaKey)) send();
-  });
-  document.querySelectorAll("[data-prompt]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      els.input.value = btn.dataset.prompt;
-      send();
-    });
-  });
-  els.actions.addEventListener("click", (event) => {
-    const approveId = event.target?.dataset?.approve;
-    const rejectId = event.target?.dataset?.reject;
-    if(approveId) approve(approveId);
-    if(rejectId) reject(rejectId);
-  });
-
-  loadStatus();
+ 'use strict';
+ const el=id=>document.getElementById(id),keys=['cristalwater_jwt','token','adminToken','cristalwater_user','user'];
+ const month=el('aiMonth'),scope=el('aiScope'),input=el('messageInput'),messages=el('messages');
+ const fingerprint=()=>JSON.stringify(keys.map(key=>localStorage.getItem(key)));
+ const decode=token=>JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0))));
+ let principal,invalid=false,generation=0,busy=false,loaded=false,threadId=null,selection='';const requests=new Set();
+ try{const token=keys.slice(0,3).map(k=>localStorage.getItem(k)).find(Boolean),claims=decode(token),id=Number(claims.userId||claims.id),users=keys.slice(3).map(k=>localStorage.getItem(k)).filter(Boolean).map(JSON.parse);
+  if(claims.role!=='ADMIN'||!Number.isSafeInteger(id)||id<=0||!Number.isFinite(claims.exp)||claims.exp*1000<=Date.now()||!users.length||users.some(u=>u.role!=='ADMIN'||Number(u.userId||u.id)!==id)||keys.slice(0,3).some(k=>localStorage.getItem(k)&&localStorage.getItem(k)!==token))throw Error('session');
+  principal={token,id,identity:fingerprint(),expires:claims.exp*1000};
+ }catch(_){invalid=true;}
+ const currentSelection=()=>month.value+':'+scope.value,validMonth=()=>/^(20|21)\d{2}-(0[1-9]|1[0-2])$/.test(month.value);
+ const money=value=>value===null?'Por confirmar':new Intl.NumberFormat('pt-PT',{style:'currency',currency:'EUR'}).format(value/100);
+ const node=(parent,tag,text,cls)=>{const n=document.createElement(tag);n.textContent=text;if(cls)n.className=cls;parent.append(n);return n;};
+ function state(kind,text){el('aiStatus').dataset.state=kind;el('aiStatus').textContent=text;}
+ function cancel(){generation++;for(const r of requests)r.abort();requests.clear();busy=false;}
+ function clearData(){loaded=false;for(const id of ['financeMetrics','financeClients','financeBasis','recommendations','kpis','capabilities','actions'])el(id).replaceChildren();el('financeDetails').hidden=true;el('financeStatus').textContent='Dados ainda não consultados.';el('aiMode').textContent='';}
+ function controls(){const disabled=invalid||busy||!navigator.onLine||!validMonth();el('refreshBtn').disabled=disabled;el('sendBtn').disabled=disabled||!loaded;document.querySelectorAll('[data-prompt],#actions button').forEach(n=>n.disabled=disabled||!loaded);}
+ function active(){try{if(!invalid&&principal.identity===fingerprint()&&principal.expires>Date.now())return true;}catch(_){}invalid=true;cancel();clearData();messages.replaceChildren();input.value='';el('chatStatus').textContent='';threadId=null;state('session','A sessão mudou. Reabra esta página com a conta pretendida.');controls();return false;}
+ function changed(){cancel();clearData();messages.replaceChildren();threadId=null;selection=currentSelection();el('chatStatus').textContent='';const finance=scope.value==='finance';el('financePanel').hidden=!finance;el('financialPrompts').hidden=!finance;el('operationalPrompts').hidden=finance;el('operationalContext').hidden=finance;el('actionPanel').hidden=finance;if(active())state('idle','Consulte os dados para a área e mês escolhidos.');controls();}
+ function validateFinance(f){const end=new Date(month.value+'-01T00:00:00Z');end.setUTCMonth(end.getUTCMonth()+1);const cents=v=>v===null||Number.isSafeInteger(v)&&v>=0,count=v=>Number.isSafeInteger(v)&&v>=0;
+  if(!f||f.version!==1||f.monthRef!==month.value||f.currency!=='EUR'||!['READY','REVIEW','UNAVAILABLE'].includes(f.state)||!Number.isFinite(Date.parse(f.generatedAt))||f.period?.timeZone!=='UTC'||f.period.start!==month.value+'-01T00:00:00.000Z'||f.period.end!==end.toISOString()||f.sourceUnavailable!==(f.state==='UNAVAILABLE')||f.historicalClosingBalance!==false||f.limitApplied!==null||!Array.isArray(f.unavailable))throw Error('Dados financeiros não confirmados para este mês.');
+  if(f.state==='UNAVAILABLE'){if(f.cash!==null||f.receivables!==null||f.monthDocuments!==null||f.customerCredit!==null)throw Error('Fonte indisponível com valores inesperados.');return f;}
+  if(!f.cash||!f.receivables||!f.monthDocuments||!f.customerCredit||!cents(f.cash.amountCents)||!count(f.cash.paymentCount)||f.cash.internalCreditIncluded!==false||f.cash.basis!=='PAYMENT_PAID_AT_UTC'||f.receivables.basis!=='CURRENT_DOCUMENT_BALANCE'||f.receivables.asOf!==f.generatedAt||!cents(f.receivables.amountCents)||!cents(f.receivables.overdueAmountCents)||!cents(f.customerCredit.amountCents)||!cents(f.monthDocuments.amountCents)||!Array.isArray(f.receivables.topClients)||f.receivables.topClients.length>10)throw Error('Resumo financeiro incompleto.');
+  for(const row of f.receivables.topClients)if(!Number.isSafeInteger(row.clientId)||row.clientId<=0||typeof row.name!=='string'||!cents(row.amountCents)||!cents(row.overdueAmountCents))throw Error('Lista de saldos inválida.');
+  if(f.state==='READY'&&[f.cash.amountCents,f.receivables.amountCents,f.receivables.overdueAmountCents,f.customerCredit.amountCents,f.monthDocuments.amountCents].includes(null))throw Error('Totais por confirmar.');return f;
+ }
+ function renderFinance(f){el('financeMetrics').replaceChildren();el('financeClients').replaceChildren();el('financeDetails').hidden=true;
+  el('financeStatus').textContent='Mês dos recebimentos: '+f.monthRef+' · Consulta: '+new Date(f.generatedAt).toLocaleString('pt-PT')+' · '+({READY:'Dados disponíveis',REVIEW:'Há registos por rever',UNAVAILABLE:'Fonte indisponível'}[f.state]);
+  const rows=[['Recebido no mês',f.cash?.amountCents??null],['Por cobrar agora',f.receivables?.amountCents??null],['Vencido agora',f.receivables?.overdueAmountCents??null],['Crédito dos clientes',f.customerCredit?.amountCents??null]];
+  for(const [label,value]of rows){const card=node(el('financeMetrics'),'div','','kpi');node(card,'span',label);node(card,'strong',money(value));}
+  el('financeBasis').textContent='Recebimentos: pagamentos registados no mês em UTC, sem movimentos de crédito interno. Saldos em aberto e créditos: valores atuais de todos os meses, incluindo clientes inativos; não são o fecho histórico nem o saldo bancário.';
+  if(f.receivables?.topClients.length){el('financeDetails').hidden=false;for(const r of f.receivables.topClients)node(el('financeClients'),'p',r.name+' · #'+r.clientId+' · '+money(r.amountCents));node(el('financeClients'),'p',f.state==='REVIEW'?'Lista dos saldos identificados; existem registos por rever.':f.receivables.sampleOnly?'Dez maiores saldos; o total inclui todos os documentos.':'Lista completa dos clientes com saldo identificado.','ai-note');}
+ }
+ const allowedLinks=new Set(['/admin-reports','/admin-collection','/invoices']);
+ function recommendations(rows,structured=false){el('recommendations').replaceChildren();if(!Array.isArray(rows))throw Error('Recomendações indisponíveis.');for(const row of rows){const box=node(el('recommendations'),'div','','rec');if(structured){node(box,'strong',String(row.title||''));node(box,'p',String(row.explanation||''));if(allowedLinks.has(row.href)){const a=node(box,'a','Abrir registos');a.href=row.href;}}else node(box,'p',String(row));}if(!rows.length)node(el('recommendations'),'p','Sem recomendações nesta consulta.');}
+ function addMessage(role,text){node(messages,'div',text,'msg '+role);messages.scrollTop=messages.scrollHeight;}
+ async function api(path,body,revision){const controller=new AbortController();requests.add(controller);const timer=setTimeout(()=>controller.abort(),55000);
+  try{const response=await fetch('/api/ai-admin/'+path,{method:body?'POST':'GET',headers:{Authorization:'Bearer '+principal.token,...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined,signal:controller.signal,cache:'no-store',redirect:'error'});
+   if(!active()||revision!==generation||selection!==currentSelection())throw Error('Seleção alterada.');
+   if((response.headers.get('content-type')||'').split(';')[0].trim()!=='application/json')throw Error('Resposta indisponível.');const result=await response.json();if(response.status!==200||result?.ok!==true)throw Error(result?.error||'Não foi possível confirmar a operação.');return result;
+  }finally{clearTimeout(timer);requests.delete(controller);}
+ }
+ function renderActions(rows){el('actions').replaceChildren();if(!Array.isArray(rows))return;for(const a of rows){if(!Number.isSafeInteger(a.id))continue;const box=node(el('actions'),'div','','action');node(box,'strong',a.title||a.type);node(box,'p',a.description||'');const actions=node(box,'div','','action-buttons');for(const [type,label]of [['approve','Aprovar e executar'],['reject','Rejeitar']]){const b=node(actions,'button',label);b.type='button';b.addEventListener('click',()=>void action(a.id,type));}}}
+ async function load(){if(!active()||busy||!validMonth()||!navigator.onLine)return;cancel();clearData();selection=currentSelection();busy=true;controls();state('loading','A consultar os dados…');const revision=generation;
+  try{const result=await api('status?'+new URLSearchParams({monthRef:month.value}),null,revision);if(!active()||revision!==generation||selection!==currentSelection())return;const f=validateFinance(result.context?.finance);renderFinance(f);recommendations(result.financialRecommendations,true);
+   el('aiMode').textContent=result.externalAiEnabled?'IA externa configurada. Confirme as sugestões com os dados consultados.':'Análise por regras locais e dados da empresa. A IA externa está desligada.';
+   for(const [label,key]of [['Visitas hoje','visitsToday'],['Técnicos ativos','techniciansActive'],['Alertas','openAlerts'],['Documentos por cobrar','pendingInvoices']]){const box=node(el('kpis'),'div','','kpi');node(box,'span',label);node(box,'strong',String(result.context.counters?.[key]??'Por confirmar'));}
+   node(el('capabilities'),'p',result.context.unavailableSources?.length?'Existem fontes operacionais indisponíveis.':'As listas operacionais são amostras.','ai-note');
+   if(scope.value==='operations'){const pending=await api('actions?status=PENDING&take=30',null,revision);if(!active()||revision!==generation)return;renderActions(pending.actions);}
+   loaded=true;busy=false;state(f.state==='UNAVAILABLE'?'unavailable':f.state==='REVIEW'?'review':'ready',f.state==='UNAVAILABLE'?'Os dados financeiros estão indisponíveis. Não foram substituídos por zero.':f.state==='REVIEW'?'Há dados por confirmar. Reveja as limitações antes de decidir.':'Dados consultados. Pode conversar sobre a área selecionada.');controls();
+  }catch(error){if(active()&&revision===generation){busy=false;clearData();state('error',error.name==='AbortError'?'A consulta demorou demasiado. Tente novamente.':error.message);controls();}}
+ }
+ async function send(){if(!active()||busy||!loaded||!navigator.onLine)return;const message=input.value.trim();if(!message||message.length>4000)return;const revision=generation,selectedMonth=month.value,selectedScope=scope.value;busy=true;controls();addMessage('user',message);el('chatStatus').textContent='A preparar a resposta…';
+  try{const result=await api('chat',{message,threadId,monthRef:selectedMonth,scope:selectedScope},revision);if(!active()||revision!==generation||selection!==currentSelection())return;
+   if(result.monthRef!==selectedMonth||result.scope!==selectedScope||!Number.isSafeInteger(result.threadId)||result.threadId<=0||typeof result.answer!=='string'||!result.answer.trim()||!Array.isArray(result.actions)||selectedScope==='finance'&&result.actions.length)throw Error('Resposta não confirmada para esta conversa.');
+   const f=validateFinance(result.finance);threadId=result.threadId;renderFinance(f);addMessage('ai',result.answer);recommendations(result.recommendations);if(input.value.trim()===message)input.value='';
+   if(selectedScope==='operations')renderActions(result.actions);el('chatStatus').textContent=String(result.mode).startsWith('openai')?'Resposta da IA externa; confirme os valores nas fontes.':'Resposta baseada em regras locais e nos dados disponíveis.';
+  }catch(_){if(active()&&revision===generation)el('chatStatus').textContent='Não foi possível confirmar a resposta. A pergunta foi conservada; não foi reenviada automaticamente.';}
+  finally{if(active()&&revision===generation){busy=false;controls();}}
+ }
+ async function action(id,type){if(!active()||busy||scope.value!=='operations'||!loaded)return;if(type==='approve'&&!confirm('Aprovar e executar esta ação?'))return;const revision=generation;busy=true;controls();
+  try{const result=await api('actions/'+id+'/'+type,{reason:'Rejeitado pelo administrador'},revision);if(!active()||revision!==generation)return;if(type==='approve'&&result.action?.status!=='EXECUTED')throw Error('Execução não confirmada.');addMessage('ai',type==='approve'?'Ação executada e registada.':'Ação rejeitada.');busy=false;await load();}
+  catch(_){if(active()&&revision===generation){busy=false;el('chatStatus').textContent='Resultado da ação não confirmado. Consulte as ações antes de repetir.';controls();}}
+ }
+ month.value=new Date().toISOString().slice(0,7);el('refreshBtn').addEventListener('click',()=>void load());el('sendBtn').addEventListener('click',()=>void send());
+ input.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();void send();}});
+ document.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click',()=>{if(active()&&!busy){input.value=b.dataset.prompt;void send();}}));
+ month.addEventListener('input',changed);month.addEventListener('change',changed);scope.addEventListener('change',changed);
+ for(const event of ['storage','focus'])window.addEventListener(event,active);document.addEventListener('visibilitychange',active);
+ for(const method of ['setItem','removeItem','clear']){const original=Storage.prototype[method];Storage.prototype[method]=function(...args){const result=Reflect.apply(original,this,args);if(this===localStorage&&(method==='clear'||keys.includes(String(args[0]))))active();return result;};}
+ window.addEventListener('pagehide',changed);window.addEventListener('pageshow',e=>{if(e.persisted)changed();});window.addEventListener('online',controls);window.addEventListener('offline',controls);
+ setInterval(()=>{if(active()){if(selection!==currentSelection())changed();else controls();}},500);changed();if(!invalid)void load();
 })();

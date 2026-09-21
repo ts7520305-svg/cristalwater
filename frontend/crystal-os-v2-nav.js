@@ -48,6 +48,7 @@
     '/admin-technicians': { area: 'Tecnicos e equipa', title: 'Equipa tecnica' },
     '/admin-vehicles': { area: 'Tecnicos e equipa', title: 'Viaturas' },
     '/admin-crm': { area: 'Comercial', title: 'CRM e oportunidades' },
+    '/admin-ai': { area: 'Faturacao e financeiro', title: 'Gestão com IA' },
     '/billing': { area: 'Faturacao e financeiro', title: 'Visao financeira' },
     '/billing-center': { area: 'Faturacao e financeiro', title: 'Centro de cobrancas' },
     '/invoices': { area: 'Faturacao e financeiro', title: 'Faturas' },
@@ -126,6 +127,7 @@
         ]},
         { label: '7. Faturacao e financeiro', links: [
           ['/billing', 'Resumo financeiro'],
+          ['/admin-ai', 'Gestão com IA'],
           ['/billing-center', 'Centro de cobranca'],
           ['/invoices', 'Faturas'],
           ['/admin-payments', 'Pagamentos'],
