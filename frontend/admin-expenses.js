@@ -10,15 +10,16 @@
   const date = () => new Date().toISOString().slice(0, 10), positive = n => Number.isSafeInteger(n) && n > 0, cents = n => n === null || Number.isSafeInteger(n) && n >= 0;
   const statusNames = { OPEN: 'Por pagar', PARTIAL: 'Parcialmente paga', PAID: 'Paga', CANCELLED: 'Anulada', REVIEW: 'Por confirmar' };
   const sourceNames = { MANUAL: 'Registo manual', STOCK_PURCHASE: 'Compra de stock', VEHICLE_MAINTENANCE: 'Manutenção de viatura' }, paymentNames = { TRANSFER: 'Transferência', CARD: 'Cartão', CASH: 'Numerário', OTHER: 'Outro' };
-  const commandNames = { CREATE: 'Nova despesa', EDIT: 'Correção da despesa', CANCEL: 'Anulação da despesa', REOPEN: 'Reabertura', RECORD_PAYMENT: 'Registo de pagamento', REVERSE_PAYMENT: 'Correção de pagamento', ADD_EVIDENCE: 'Novo comprovativo', VOID_EVIDENCE: 'Anulação de comprovativo' };
+  const commandNames = { CREATE: 'Nova despesa', EDIT: 'Correção da despesa', CANCEL: 'Anulação da despesa', REOPEN: 'Reabertura', RECORD_PAYMENT: 'Registo de pagamento', REVERSE_PAYMENT: 'Correção de pagamento', ADD_EVIDENCE: 'Novo comprovativo', VOID_EVIDENCE: 'Anulação de comprovativo', ALLOCATE_COST: 'Atribuição de custo', REVIEW_COST: 'Revisão de atribuição', VOID_COST: 'Anulação de atribuição' };
   let principal, invalid = false, readEpoch = 0, detailEpoch = 0, formEpoch = 0, sourceEpoch = 0, preparingFile = false, page = 1, total = 0, selectedId = null, detail = null, source = null, sourcePage = 1, sourceTotal = 0, target = null, pending = null, writing = false, db = null, storageFailed = false, openedAfter = null;
   const controllers = new Set(), urls = new Set();
+  const costsUI = window.CWExpenseCosts.create({ el, node, button, money, amount, request, execute, active, note, controls, owner: () => principal?.owner || '', openExpense: openDetail, context: () => ({ expense: detail, epoch: readEpoch, detailEpoch, canRead: !invalid && !writing && navigator.onLine, canWrite: !invalid && !writing && !preparingFile && !pending && !storageFailed && !!db && navigator.onLine }) });
   function node(parent, tag, text, cls) { const n = document.createElement(tag); n.textContent = text; if (cls) n.className = cls; parent.append(n); return n; }
   function button(parent, text, work, write = false) { const b = node(parent, 'button', text); b.type = 'button'; if (write) b.dataset.write = ''; b.addEventListener('click', () => Promise.resolve().then(work).catch(error => { if (active()) note(error.message); })); return b; }
   function state(kind, text) { el('expenseStatus').dataset.state = kind; el('expenseStatus').textContent = text; }
   function note(text) { el('writeStatus').textContent = text; }
   function abort() { for (const controller of controllers) controller.abort(); controllers.clear(); for (const url of urls) URL.revokeObjectURL(url); urls.clear(); }
-  function clearRead() { readEpoch++; detailEpoch++; sourceEpoch++; formEpoch++; abort(); detail = null; selectedId = null; for (const id of ['expenseMetrics', 'expenseBasis', 'expenseRows', 'listSummary', 'detailTitle', 'detailFacts', 'paymentRows', 'evidenceRows', 'eventList']) el(id).replaceChildren(); el('expenseDetail').hidden = true; total = 0; }
+  function clearRead() { costsUI.clear(); readEpoch++; detailEpoch++; sourceEpoch++; formEpoch++; abort(); detail = null; selectedId = null; for (const id of ['expenseMetrics', 'expenseBasis', 'expenseRows', 'listSummary', 'detailTitle', 'detailFacts', 'paymentRows', 'evidenceRows', 'eventList']) el(id).replaceChildren(); el('expenseDetail').hidden = true; total = 0; }
   function active() {
     if (!invalid && principal && principal.fingerprint === identity() && principal.expires > Date.now()) return true;
     if (!invalid) { invalid = true; clearRead(); el('expenseForm').reset(); el('paymentForm').reset(); el('evidenceForm').reset(); el('expenseEditor').hidden = true; el('pendingPanel').hidden = true; el('pendingPreview').replaceChildren(); el('sourceRows').replaceChildren(); el('sourceReview').replaceChildren(); el('sourceStatus').replaceChildren(); el('editorTitle').replaceChildren(); source = null; note(''); }
@@ -34,7 +35,8 @@
     el('sourcePrevious').disabled = disabled || sourcePage <= 1; el('sourceNext').disabled = disabled || sourcePage * 10 >= sourceTotal;
     el('pendingPanel').hidden = !pending || invalid;
     try { el('newExpense').textContent = principal && sessionStorage.getItem('cw-expense-draft:' + principal.owner) ? 'Continuar rascunho' : 'Nova despesa'; } catch {}
-    if (pending && !invalid) { const e = pending.envelope, d = e.data; el('pendingPreview').textContent = [commandNames[e.command] + (e.expenseId ? ' · Despesa #' + e.expenseId : ''), d.title, d.supplierName, d.documentNumber ? 'Documento: ' + d.documentNumber : '', d.amountCents ? 'Montante: ' + money(d.amountCents) : '', d.expenseDate ? 'Data do documento: ' + d.expenseDate : '', d.dueDate ? 'Vencimento: ' + d.dueDate : '', d.paidOn ? 'Pagamento efetuado em: ' + d.paidOn : '', d.name ? 'Comprovativo: ' + d.name : '', d.reason ? 'Motivo: ' + d.reason : ''].filter(Boolean).join('\n'); }
+    costsUI.controls();
+    if (pending && !invalid) { const e = pending.envelope, d = e.data; el('pendingPreview').textContent = [commandNames[e.command] + (e.expenseId ? ' · Despesa #' + e.expenseId : ''), d.title, d.supplierName, d.documentNumber ? 'Documento: ' + d.documentNumber : '', d.amountCents ? 'Montante: ' + money(d.amountCents) : '', d.expenseDate ? 'Data do documento: ' + d.expenseDate : '', d.dueDate ? 'Vencimento: ' + d.dueDate : '', d.paidOn ? 'Pagamento efetuado em: ' + d.paidOn : '', d.name ? 'Comprovativo: ' + d.name : '', d.monthRef ? 'Mês da atribuição: ' + d.monthRef : '', d.targetType ? 'Destino: ' + ({COMPANY:'Empresa',CLIENT:'Cliente',REGULAR:'Visita regular',EXTRA:'Visita extra'}[d.targetType]) + (d.targetId ? ' #' + d.targetId : '') : '', d.reason ? 'Motivo: ' + d.reason : ''].filter(Boolean).join('\n'); }
   }
   async function access(mode, fn) { return new Promise((resolve, reject) => { const tx = db.transaction('state', mode), request = fn(tx.objectStore('state')); tx.oncomplete = () => resolve(request?.result); tx.onerror = tx.onabort = () => reject(tx.error || Error('Não foi possível guardar o pedido neste navegador.')); }); }
   const readLocal = kind => access('readonly', s => s.get(principal.owner + ':' + kind));
@@ -69,10 +71,11 @@
       el('listSummary').textContent = total + ' despesas encontradas · Página ' + page + ' de ' + Math.max(1, Math.ceil(total / 10));
       for (const e of result.rows) { const card = node(el('expenseRows'), 'article', ''); node(card, 'h3', e.title); node(card, 'p', e.supplierName + ' · ' + (e.documentNumber || 'Sem número de documento')); node(card, 'p', e.expenseDate + ' · ' + money(e.amountCents) + ' · ' + statusNames[e.status]); node(card, 'p', e.needsReview ? 'Há dados por rever.' : 'Por pagar: ' + money(e.openCents), 'badge'); button(card, 'Abrir despesa #' + e.id, () => openDetail(e.id)); }
       if (!total) node(el('expenseRows'), 'p', 'Não há despesas para estes filtros.'); state(s.state === 'REVIEW' ? 'review' : 'ready', s.state === 'REVIEW' ? 'Há despesas por rever. Os totais afetados ficam por confirmar.' : 'Despesas consultadas.');
+      await costsUI.load(true);
     } catch (error) { if (active() && epoch === readEpoch) { clearRead(); state('error', error.name === 'AbortError' ? 'A consulta demorou demasiado. Tente novamente.' : error.message); } } finally { controls(); }
   }
   async function openDetail(id) {
-    if (!active()) return; selectedId = id; detail = null; el('expenseDetail').hidden = true; el('expenseFile').value = ''; const epoch = readEpoch, revision = ++detailEpoch;
+    if (!active()) return; costsUI.draft(); selectedId = id; detail = null; el('expenseDetail').hidden = true; el('expenseFile').value = ''; const epoch = readEpoch, revision = ++detailEpoch;
     try {
       const result = await request('/' + id, {}, epoch); if (!active() || epoch !== readEpoch || revision !== detailEpoch || selectedId !== id) return;
       const e = result.expense; validateExpense(e); if (e.id !== id || !Array.isArray(e.payments) || !Array.isArray(e.evidence) || !Array.isArray(result.events)) throw Error('Detalhe não confirmado.'); detail = e;
@@ -83,6 +86,7 @@
       for (const p of e.payments) { const row = node(el('paymentRows'), 'div', '', 'row'); node(row, 'p', p.paidOn + ' · ' + money(p.amountCents) + ' · ' + paymentNames[p.method] + (p.reversedAt ? ' · Registo anulado: ' + p.reverseReason : '')); if (!p.reversedAt) button(row, 'Corrigir este registo de pagamento', () => reasonCommand('REVERSE_PAYMENT', { paymentId: p.id }, 'Motivo da correção. Esta ação não devolve dinheiro:'), true); }
       for (const f of e.evidence) { const row = node(el('evidenceRows'), 'div', '', 'row'); node(row, 'p', f.name + (f.voidedAt ? ' · Anulado: ' + f.voidReason : '')); if (!f.voidedAt) { button(row, 'Descarregar comprovativo', () => download(e.id, f)); button(row, 'Anular comprovativo', () => reasonCommand('VOID_EVIDENCE', { evidenceId: f.id }, 'Motivo da anulação deste comprovativo:'), true); } }
       for (const event of result.events) { const row = node(el('eventList'), 'div', '', 'row'); node(row, 'strong', commandNames[event.command] || event.command); node(row, 'p', event.actorName + ' · ' + new Date(event.createdAt).toLocaleString('pt-PT')); node(row, 'p', event.result.applied ? event.result.reason || 'Registo confirmado.' : event.result.message); if (event.result.before && event.result.after) node(row, 'p', 'Total anterior: ' + money(event.result.before.amountCents) + ' · Total confirmado: ' + money(event.result.after.amountCents)); }
+      costsUI.render(e);
       el('paymentAmount').value = e.openCents > 0 ? (e.openCents / 100).toFixed(2) : ''; el('paymentDate').value = date(); el('paymentDate').max = date(); el('expenseDetail').hidden = false; controls();
     } catch (error) { if (active() && epoch === readEpoch && revision === detailEpoch && selectedId === id) { detail = null; el('expenseDetail').hidden = true; note(error.message); } }
   }
@@ -121,6 +125,7 @@
     const c = result?.receipt, e = record.envelope;
     if (!result || result.ok !== true || !c || c.owner !== principal.owner || c.requestId !== e.requestId || c.command !== e.command || c.requestedExpenseId !== e.expenseId || c.expectedVersion !== e.expectedVersion || c.payloadHash !== record.payloadHash || !Number.isFinite(Date.parse(c.confirmedAt)) || typeof result.applied !== 'boolean' || result.applied && (!positive(result.expenseId) || !positive(result.version) || e.expenseId !== null && result.expenseId !== e.expenseId) || !result.applied && (typeof result.code !== 'string' || typeof result.message !== 'string')) throw Error('A confirmação não corresponde ao pedido original.');
     if (result.applied && ['CREATE','EDIT'].includes(e.command) && (result.after?.id !== result.expenseId || result.after.version !== result.version || !['title','supplierName','documentNumber','expenseDate','dueDate','amountCents','category','notes','sourceType','sourceId','sourceHash'].every(k => result.after[k] === e.data[k]))) throw Error('Despesa não confirmada.');
+    if (result.applied && ['ALLOCATE_COST','REVIEW_COST','VOID_COST'].includes(e.command)) { const a = result.allocation; if (!a || !positive(a.id) || a.expenseId !== e.expenseId || !positive(a.amountCents) || (e.command === 'ALLOCATE_COST' ? a.amountCents !== e.data.amountCents || a.monthRef !== e.data.monthRef || a.targetType !== e.data.targetType || (a.targetType === 'CLIENT' ? a.clientId : a.targetType === 'REGULAR' ? a.visitId : a.targetType === 'EXTRA' ? a.extraVisitId : null) !== e.data.targetId : a.id !== e.data.allocationId) || e.command !== 'VOID_COST' && a.targetHash !== e.data.targetHash || e.command === 'VOID_COST' && (!a.voidedAt || a.activeKey !== null)) throw Error('Atribuição não confirmada.'); }
     if (result.applied && e.command === 'RECORD_PAYMENT' && (result.payment?.expenseId !== e.expenseId || result.payment.amountCents !== e.data.amountCents || result.payment.paidOn !== e.data.paidOn || result.payment.method !== e.data.method || result.payment.reference !== e.data.reference)) throw Error('Pagamento não confirmado.');
     if (result.applied && e.command === 'ADD_EVIDENCE' && (result.evidence?.expenseId !== e.expenseId || result.evidence.sha256 !== e.data.sha256 || result.evidence.size !== e.data.size || result.evidence.name !== e.data.name)) throw Error('Comprovativo não confirmado.');
   }
@@ -128,7 +133,7 @@
     await verify(result, record); if (!active()) return;
     const stored = await readLocal('pending'); if (!active() || stored?.envelope.requestId !== record.envelope.requestId || stored.payloadHash !== record.payloadHash) throw Error('O pedido local mudou.');
     await access('readwrite', s => { s.put({ ...record, file: undefined, result }, principal.owner + ':confirmed'); return s.delete(principal.owner + ':pending'); });
-    if (!active()) return; pending = null;
+    if (!active()) return; pending = null; costsUI.receipt(result, record);
     if (result.applied && ['CREATE', 'EDIT'].includes(record.envelope.command)) { el('expenseEditor').hidden = true; el('expenseForm').reset(); sessionStorage.removeItem('cw-expense-draft:' + principal.owner); }
     if (result.applied && record.envelope.command === 'ADD_EVIDENCE') el('expenseFile').value = '';
     const followId = selectedId === record.envelope.expenseId ? result.expenseId || selectedId : selectedId;
@@ -194,7 +199,7 @@
   for (const name of ['storage', 'focus']) window.addEventListener(name, () => { if (active()) void syncPending(); }); document.addEventListener('visibilitychange', active);
   for (const method of ['setItem', 'removeItem', 'clear']) { const original = Storage.prototype[method]; Storage.prototype[method] = function (...args) { const result = Reflect.apply(original, this, args); if (this === localStorage && (method === 'clear' || keys.includes(String(args[0])))) active(); return result; }; }
   window.addEventListener('pagehide', () => { saveDraft(); clearRead(); }); window.addEventListener('pageshow', e => { if (e.persisted && active()) { clearRead(); state('idle', 'Consulte novamente os dados após regressar à página.'); controls(); } });
-  window.addEventListener('online', controls); window.addEventListener('offline', controls); setInterval(() => { if (active()) { if (observed && observed !== observedFilters()) changed(); controls(); } }, 500);
+  window.addEventListener('online', controls); window.addEventListener('offline', controls); setInterval(() => { if (active()) { if (observed && observed !== observedFilters()) changed(); costsUI.observe(); controls(); } }, 500);
   (async () => {
     try {
       const token = keys.slice(0, 3).map(k => localStorage.getItem(k)).find(Boolean), claims = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0)))), id = Number(claims.userId || claims.id), users = keys.slice(3).map(k => localStorage.getItem(k)).filter(Boolean).map(JSON.parse);

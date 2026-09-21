@@ -6,6 +6,13 @@ router.use((req, res, next) => { res.set('Cache-Control', 'private, no-store'); 
 const handle = work => (req, res, next) => Promise.resolve(work(req, res)).catch(next);
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: rules.maxEvidence, files: 1, fields: 1, fieldSize: 16000 } });
 router.get('/', handle(async (req, res) => res.json(await service.list(req.query))));
+router.get('/costs', handle(async (req, res) => res.json(await service.costReport(req.query))));
+router.get('/targets', handle(async (req, res) => res.json(await prisma.$transaction(db => service.costs.targets.list(db, req.query), { isolationLevel: 'RepeatableRead', timeout: 30000 }))));
+router.get('/targets/:type/:id', handle(async (req, res) => {
+  rules.object(req.query, []); const id = req.params.type === 'COMPANY' && req.params.id === '0' ? null : rules.queryId(req.params.id);
+  const target = await service.costs.targets.get(prisma, req.params.type, id);
+  if (!target) rules.fail('Destino não encontrado.', 404); res.json({ ok: true, target });
+}));
 router.get('/suppliers', handle(async (req, res) => {
   rules.object(req.query, []);
   res.json({ ok: true, suppliers: await prisma.supplierAccount.findMany({ select: { id: true, name: true, active: true }, orderBy: [{ name: 'asc' }, { id: 'asc' }] }) });

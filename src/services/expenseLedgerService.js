@@ -3,9 +3,9 @@ const { prisma } = require('../prismaClient');
 const { roleMatches } = require('../utils/roles');
 const { period } = require('./operationalValueReportService');
 const { sum } = require('./monthlyFinancialProjection');
-const r = require('./expenseLedgerRules'), sources = require('./expenseSourceService');
+const r = require('./expenseLedgerRules'), sources = require('./expenseSourceService'), costs = require('./expenseCostAllocationService');
 const evidenceSelect = { id: true, expenseId: true, name: true, mime: true, size: true, sha256: true, createdAt: true, voidedAt: true, voidReason: true };
-const include = { payments: { orderBy: { id: 'asc' } }, evidence: { select: evidenceSelect, orderBy: { id: 'asc' } } };
+const include = { expenseAllocations: { orderBy: { id: 'asc' } }, payments: { orderBy: { id: 'asc' } }, evidence: { select: evidenceSelect, orderBy: { id: 'asc' } } };
 const json = value => JSON.parse(JSON.stringify(value));
 function actor(user) {
   if (!roleMatches(user?.role, 'ADMIN')) r.fail('Acesso reservado à administração.', 403);
@@ -21,14 +21,14 @@ function view(row, hashes) {
 async function rows(db) {
   const expenses = await db.companyExpense.findMany({ include, orderBy: [{ expenseDate: 'desc' }, { id: 'desc' }] });
   const hashes = await sources.fingerprints(db, expenses);
-  return expenses.map(row => view(row, hashes));
+  return costs.decorate(db, expenses.map(row => view(row, hashes)));
 }
 function summarize(expenses, monthRef, generatedAt) {
   const active = expenses.filter(e => !e.cancelledAt), selected = active.filter(e => e.expenseDate.startsWith(monthRef));
   const review = active.filter(e => e.needsReview), due = r.day(generatedAt);
   const payments = expenses.flatMap(e => e.payments).filter(p => !p.reversedAt && p.paidOn.startsWith(monthRef));
   const categories = r.categories.map(category => ({ category, amountCents: selected.some(e => e.category === category && e.needsReview) ? null : sum(selected.filter(e => e.category === category).map(e => e.amountCents)) }));
-  return { version: 1, monthRef, currency: 'EUR', generatedAt: generatedAt.toISOString(), coverage: 'REGISTERED_EXPENSES_ONLY', completeOperatingCosts: false, bankReconciled: false, state: review.length ? 'REVIEW' : 'READY',
+  return { attribution: costs.summary(expenses, monthRef, generatedAt), version: 1, monthRef, currency: 'EUR', generatedAt: generatedAt.toISOString(), coverage: 'REGISTERED_EXPENSES_ONLY', completeOperatingCosts: false, bankReconciled: false, state: review.length ? 'REVIEW' : 'READY',
     documentAmountCents: selected.some(e => e.needsReview) ? null : sum(selected.map(e => e.amountCents)), documentCount: selected.length,
     paymentsAmountCents: sum(payments.map(p => p.amountCents)), paymentCount: payments.length,
     openAmountCents: review.length ? null : sum(active.map(e => e.openCents)), overdueAmountCents: review.length ? null : sum(active.filter(e => e.dueDate && e.dueDate < due).map(e => e.openCents)),
@@ -43,7 +43,7 @@ async function list(query) {
   return prisma.$transaction(async db => {
     const all = await rows(db), generatedAt = new Date();
     const filtered = all.filter(e => (scope === 'all' || e.expenseDate.startsWith(monthRef)) && (filter === 'ALL' || filter === 'OPEN' && !e.cancelledAt && (e.openCents > 0 || e.needsReview) || filter === 'REVIEW' && e.needsReview || e.status === filter) && (!q || r.normalized([e.title, e.supplierName, e.documentNumber].join(' ')).includes(r.normalized(q))));
-    return { ok: true, monthRef, scope, filter, q, page, pageSize: 10, total: filtered.length, summary: summarize(all, monthRef, generatedAt), rows: filtered.slice((page - 1) * 10, page * 10).map(({ payments, evidence, sourceSnapshot, ...e }) => ({ ...e, evidenceCount: evidence.filter(f => !f.voidedAt).length })) };
+    return { ok: true, monthRef, scope, filter, q, page, pageSize: 10, total: filtered.length, summary: summarize(all, monthRef, generatedAt), rows: filtered.slice((page - 1) * 10, page * 10).map(({ payments, evidence, allocations, sourceSnapshot, ...e }) => ({ ...e, evidenceCount: evidence.filter(f => !f.voidedAt).length })) };
   }, { isolationLevel: 'RepeatableRead', timeout: 30000, maxWait: 15000 });
 }
 async function detail(id) {
@@ -51,7 +51,7 @@ async function detail(id) {
   return prisma.$transaction(async db => {
     const row = await db.companyExpense.findUnique({ where: { id }, include }); if (!row) r.fail('Despesa não encontrada.', 404);
     const [hashes, events] = await Promise.all([sources.fingerprints(db, [row]), db.expenseEvent.findMany({ where: { expenseId: id }, orderBy: { id: 'desc' }, select: { id: true, actorName: true, command: true, createdAt: true, result: true } })]);
-    return { ok: true, expense: view(row, hashes), events };
+    return { ok: true, expense: (await costs.decorate(db, [view(row, hashes)]))[0], events };
   }, { isolationLevel: 'RepeatableRead', timeout: 30000, maxWait: 15000 });
 }
 const refused = (code, message, extra = {}) => ({ applied: false, code, message, ...extra });
@@ -90,17 +90,20 @@ async function apply(db, who, env, file, current) {
     const parsed = await expenseValues(db, env, current); if (parsed.applied === false) return parsed;
     const paid = current ? sum(current.payments.filter(p => !p.reversedAt).map(p => p.amountCents)) : 0;
     if (paid === null || parsed.data.amountCents < paid) return refused('BELOW_PAYMENTS', 'O total não pode ficar abaixo dos pagamentos válidos. Reveja primeiro os pagamentos.');
+    if (current && (costs.allocated(current) === null || parsed.data.amountCents < costs.allocated(current))) return refused('BELOW_ALLOCATIONS', 'O total não pode ficar abaixo das atribuições ativas. Corrija primeiro as atribuições.');
     const expense = current ? await db.companyExpense.update({ where: { id }, data: { ...parsed.data, version: { increment: 1 } } }) : await db.companyExpense.create({ data: { ...parsed.data, createdById: who.id } });
     return { applied: true, expenseId: expense.id, version: expense.version, before: small(current), after: small(expense), reason: d.reason };
   }
   if (command === 'CANCEL' || command === 'REOPEN') {
     r.object(d, ['reason']); const reason = r.text(d.reason, 500, true);
+    if (command === 'CANCEL' && costs.live(current).length) return refused('ACTIVE_ALLOCATIONS', 'Anule as atribuições ativas antes de anular esta despesa.');
     if (command === 'CANCEL' && (current.cancelledAt || current.payments.some(p => !p.reversedAt))) return refused('PAYMENTS_OR_CANCELLED', 'Só pode anular uma despesa sem pagamentos válidos.');
     if (command === 'REOPEN' && !current.cancelledAt) return refused('ALREADY_OPEN', 'A despesa já está aberta.');
     const expense = await db.companyExpense.update({ where: { id }, data: { cancelledAt: command === 'CANCEL' ? new Date() : null, version: { increment: 1 } } });
     return { applied: true, expenseId: id, version: expense.version, before: small(current), after: small(expense), reason };
   }
   if (current.cancelledAt) return refused('CANCELLED', 'A despesa está anulada.');
+  if (['ALLOCATE_COST', 'REVIEW_COST', 'VOID_COST'].includes(command)) return costs.apply(db, who, env, current);
   if (command === 'RECORD_PAYMENT') {
     r.object(d, ['amountCents', 'paidOn', 'method', 'reference']);
     const amountCents = r.money(d.amountCents), paidOn = r.date(d.paidOn), reference = r.text(d.reference, 180);
@@ -178,4 +181,6 @@ async function evidence(id, evidenceId) {
   if (item.bytes.length !== item.size || r.hash(Buffer.from(item.bytes)) !== item.sha256) r.fail('O comprovativo não pôde ser confirmado.', 503);
   return item;
 }
-module.exports = { list, detail, summary, command, receipt, evidence, actor, sources };
+async function costReport(query) { return prisma.$transaction(async db => costs.report(await rows(db), query), { isolationLevel: 'RepeatableRead', timeout: 30000, maxWait: 15000 }); }
+async function clientCosts(db, monthRef) { return costs.group(costs.entries(await rows(db), monthRef)); }
+module.exports = { list, detail, summary, command, receipt, evidence, actor, sources, costs, costReport, clientCosts };

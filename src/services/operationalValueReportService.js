@@ -49,6 +49,7 @@ async function build(query, kind) {
       db.invoice.findMany({where:documentMonthWhere(monthRef),include:{lines:true}}),
       kind === 'client' ? db.payment.findMany({where:{paidAt:between},select:{id:true,amount:true,method:true,invoice:{select:{clientId:true}}}}) : []
     ]);
+    const expenseCosts = kind === 'client' ? await require('./expenseLedgerService').clientCosts(db, monthRef) : [];
     const masters = kind === 'technician' ? technicians : clients, masterIds = new Set(masters.map(row=>row.id));
     const rows = new Map(masters.map(row=>[row.id,baseRow(row.id,row.name || (kind === 'technician'?'Técnico':'Cliente')+' #'+row.id,row.active)]));
     const quality = { undatedCompleted:0, excludedVisitStates:0, unallocatedMovements:0, invalidStockQuantities:0, excludedStockMovements:0, excludedDocuments:0, unallocatedDocumentLines:0, extraLinesNeedingReview:0, invalidPayments:0 };
@@ -122,6 +123,9 @@ async function build(query, kind) {
       row.stock.forEach(item=>{item.consumed=Number(item.consumed.toFixed(6));item.returned=Number(item.returned.toFixed(6));item.net=Number((item.consumed-item.returned).toFixed(6));delete item.key;});
       if (kind === 'client') {
         row.clientId=row.id;row.clientName=row.name;
+        const attributed = row.id === null ? null : expenseCosts.find(c => c.clientId === row.id);
+        row.registeredExpenseAmountCents = row.id === null ? null : attributed ? attributed.amountCents : 0; row.registeredExpenseReviewCount = attributed?.reviewCount || 0; row.registeredExpenseAllocationCount = attributed?.allocationCount || 0;
+        row.expenseCostCoverage = 'REGISTERED_EXPENSE_ATTRIBUTION';
         if (row.cashReceived !== null) row.cashReceived=(row.cashReceived||0)/100;
       } else {
         row.technicianId=row.id;row.technicianName=row.name;row.technician=row.name;row.visits=row.visitsDone;
@@ -135,7 +139,7 @@ async function build(query, kind) {
     }
     const result=[...rows.values()];
     return {ok:true,reportVersion:1,monthRef,generatedAt:new Date().toISOString(),complete:true,total:result.length,returned:result.length,limitApplied:null,financialComplete:false,
-      basis:{visits:'COMPLETED_END_AT_UTC',undatedVisits:'PLANNED_MONTH_WITHOUT_END_AT',stock:'STOCK_MOVEMENT_CREATED_AT_UTC',extraLines:'DOCUMENT_MONTH_REFERENCE_STORED_LINE_VALUE',cash:'PAYMENT_PAID_AT_UTC',labor:'CURRENT_CONFIGURED_RATE_ESTIMATE'},
+      basis:{expenseAttribution:'EXPLICIT_ALLOCATION_MONTH_NOT_FULL_COST',visits:'COMPLETED_END_AT_UTC',undatedVisits:'PLANNED_MONTH_WITHOUT_END_AT',stock:'STOCK_MOVEMENT_CREATED_AT_UTC',extraLines:'DOCUMENT_MONTH_REFERENCE_STORED_LINE_VALUE',cash:'PAYMENT_PAID_AT_UTC',labor:'CURRENT_CONFIGURED_RATE_ESTIMATE'},
       dataQuality:quality, ...(kind==='technician'?{technicians:result,ranking:result}:{clients:result})};
   },{isolationLevel:'RepeatableRead',maxWait:15000,timeout:30000});
 }

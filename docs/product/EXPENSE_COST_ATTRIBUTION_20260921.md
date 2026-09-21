@@ -1,0 +1,39 @@
+# TASK282 — Atribuição de despesas por cliente e serviço
+
+Data: 21/09/2026. Branch: `work/field-readiness-20260915-simulation`. Base: `fe2724980d8aa1c1999cf9f02251e5583fe36503`, que encerra a TASK281 aprovada. Implementação validada localmente; publicação e CI nativo por concluir.
+
+## Objetivo e percurso
+
+O registo de despesas confirma quanto a empresa deve, mas não identificava os clientes ou serviços a que cada valor dizia respeito. A área existente `/admin-expenses` passa a permitir a repartição de cada despesa entre clientes, visitas regulares concluídas, visitas extra concluídas e custos gerais da empresa. O administrador escolhe o mês da atribuição, confirma o destinatário e justifica a repartição. Clientes inativos podem receber atribuições históricas; os identificadores são apresentados para distinguir nomes iguais.
+
+A consulta de custos usa três níveis: clientes/custos gerais → destinos (cliente ou serviço) → despesas de origem. Pesquisa e paginação de dez em dez não truncam os totais. Os totais do mês de atribuição são separados dos documentos pela data da despesa, dos pagamentos já registados e do remanescente atual de todos os meses. A mesma despesa pode cobrir vários meses, sem ultrapassar o orçamento único da sua totalidade.
+
+## Integridade, correções e história
+
+`ExpenseAllocation` referencia a despesa e, conforme o destino, o cliente e uma das duas tabelas de visitas. Identidades REGULAR e EXTRA com o mesmo número permanecem distintas. O cliente é obtido diretamente do serviço; não é inferido do atual proprietário de uma piscina. Uma visita sem cliente confirmado ou sem estado concluído não é selecionável. A ausência de data de conclusão é assinalada, ficando o mês de atribuição sujeito a confirmação explícita.
+
+O total de atribuições ativas, em todos os destinos e meses, não pode exceder o montante da despesa. Um índice único e a validação do pedido impedem duas atribuições ativas da mesma despesa ao mesmo destino e mês. Corrigir montante, mês ou destinatário implica anular explicitamente a atribuição anterior e registar a nova; a anulação liberta apenas esse orçamento e mantém a história. A despesa não pode ser reduzida abaixo das atribuições ativas nem anulada enquanto as mantiver.
+
+Há fotografias da despesa e do destinatário. Alterações do documento/total/categoria/origem ou do cliente/estado/início/conclusão do serviço sinalizam as atribuições afetadas para revisão. Uma mudança de nome/atividade do cliente não reatribui valores. A confirmação de revisão atualiza as fotografias e conserva o estado anterior no evento de auditoria; não pode mudar silenciosamente o cliente de uma atribuição. Pagamentos e alterações de notas não são novas atribuições nem causam duplicação do custo.
+
+ALLOCATE_COST, REVIEW_COST e VOID_COST reutilizam o UUID, titular ADMIN, versão da despesa, recibo durável e transação da TASK281. O bloqueio da despesa serializa a utilização do orçamento e as correções; o destino e a origem são revistos sob bloqueio antes da escrita. Repetir o mesmo pedido devolve o resultado original. Falhas posteriores à escrita anulam a transação inteira. O cancelamento de um pedido ainda não aplicado impede a sua execução posterior.
+
+Os rascunhos de atribuição são separados por conta e despesa. O pedido confirmado no formulário é guardado antes do envio e pode ser consultado/repetido manualmente após falha de ligação ou recarga. Alterações de conta, mês, despesa ou seleção do destinatário invalidam respostas antigas. A confirmação recebida é confrontada com a atribuição enviada, incluindo montante, mês, tipo de visita, destino e fotografia. Os comprovativos e pagamentos privados existentes continuam ligados à despesa original.
+
+## Relatórios e gestão com IA
+
+`finance.expenses.attribution` apresenta montantes atribuídos no mês, repartição entre clientes/serviços e custos gerais, compras de stock atribuídas, valores atuais ainda por atribuir e revisões pendentes. Os dez clientes apresentados à IA são uma amostra identificada; os totais incluem todos os registos. A página de IA mostra estas bases e sinaliza valores incertos. As recomendações locais ajudam a completar a repartição e rever dados alterados, sem alterar preços, pagamentos ou serviços.
+
+O relatório ADMIN por cliente em `/api/finance-os/reports/customer-profitability` recebe `registeredExpenseAmountCents`, contagens e a cobertura `REGISTERED_EXPENSE_ATTRIBUTION`. As medições operacionais, estimativas de mão de obra e campos de lucro/custo completo mantêm os seus significados. A leitura permanece transacional e sem escritas em clientes, visitas, receitas ou movimentos de stock.
+
+Esta atribuição não é uma nova despesa, um segundo pagamento, uma valorização do consumo ou o apuramento da rentabilidade. Compras de stock e consumo são distintos; os montantes atribuídos não se somam novamente às despesas nem às estimativas de mão de obra. A cobertura é parcial, com lucro/custos completos por apurar. Faltam valorização histórica do consumo, custos reais completos de trabalho e restantes gastos, além da repartição adequada das receitas. IVA/faturação fiscal permanecem no programa externo; preços e frequências continuam específicos de cada cliente, época e instalação.
+
+## Migração e validação
+
+24.ª migração aditiva: `20260921230000_expense_cost_allocation`. Uma tabela nova, com referências restritivas, índice único ativo e verificações de montante positivo, mês válido, destino tipado, motivo obrigatório e estado de anulação. A migração preserva despesas, pagamentos, comprovativos, clientes e serviços existentes e coincide com o Prisma atual. São previstas 116 tabelas no restauro. Cache frontend v98; runner com 169 grupos.
+
+API nova aprovada: orçamento entre clientes/meses, concorrência, recibos, duplicações, alterações da despesa/destino, clientes históricos inativos, serviços com IDs iguais, rollback, paginação/totais completos, ligação à IA e relatório por cliente. Interface real aprovada em 320/390/1440 px e modo escuro: escolha de destino, navegação até às despesas, correções, montantes por rever, resposta perdida, recarga, repetição exata, resposta malformada e isolamento de sessão/seleção. O teste de revisão foi ajustado para aguardar a resposta real do comando, que só começa depois da consulta do destinatário.
+
+Regressões de despesas, IA financeira e valores operacionais aprovadas; 396 testes unitários/63 ficheiros, quatro técnicos, 21 scripts gerais de navegador e sintaxe 571 backend/188 frontend/57 inline. Migração desde o esquema anterior aprovada com 24 passos. Evidência local: `/tmp/cw282-final-costs.log`, `/tmp/cw282-final.log`, `/tmp/cw282-focused2.log`, `/tmp/cw282-regression.log`, `/tmp/cw282-migration.log`, `/tmp/cw282-unit.log`, `/tmp/cw282-tech.log`, `/tmp/cw282-syntax.log`, `/tmp/cw282-browser.log`; imagens em `reports/field-visual/expense-costs-*`. A última execução de API/interface confirma também revisão após mudança da hora de início e identificação de clientes com nomes iguais. CI PostgreSQL 16/restauro ainda por confirmar neste ponto.
+
+Próximo trabalho: completar a valorização do consumo e os custos reais de trabalho antes de calcular margens. Sem merge da branch principal, instalação no VPS, movimentos bancários, notificações, emissão fiscal ou fornecedor real de IA nesta etapa.

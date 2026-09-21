@@ -9,6 +9,7 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 model Client {
+  expenseAllocations ExpenseAllocation[]
   id                            Int                   @id @default(autoincrement())
   name                          String
   internalName                  String?
@@ -463,6 +464,7 @@ model User {
 }
 
 model ServiceVisit {
+  expenseAllocations ExpenseAllocation[]
   contractService Json?
   maintenanceCompletions EquipmentMaintenanceCompletion[]
   completionRequestId String? @unique
@@ -634,6 +636,7 @@ model ExtraVisitRule {
 }
 
 model ExtraVisit {
+  expenseAllocations ExpenseAllocation[]
   startAt           DateTime?
   endAt             DateTime?
   execution         Json?
@@ -2422,6 +2425,7 @@ model EquipmentMaintenanceCompletion {
 
 // Confirmed obligations, distinct from stock consumption and bank transactions.
 model CompanyExpense {
+  expenseAllocations ExpenseAllocation[]
   id                   Int       @id @default(autoincrement())
   title                String
   supplierId           Int?
@@ -2507,4 +2511,36 @@ model ExpenseEvidence {
 
   @@index([expenseId])
   @@unique([expenseId, sha256])
+}
+
+// Confirmed attribution of an existing expense; never a second cash movement.
+model ExpenseAllocation {
+  id Int @id @default(autoincrement())
+  expenseId Int
+  monthRef String
+  amountCents Int
+  targetType String
+  clientId Int?
+  visitId Int?
+  extraVisitId Int?
+  targetHash String
+  targetSnapshot Json
+  expenseHash String
+  expenseSnapshot Json
+  activeKey String? @unique
+  reason String
+  createdById Int
+  createdAt DateTime @default(now())
+  reviewedAt DateTime?
+  voidedAt DateTime?
+  voidReason String?
+  expense CompanyExpense @relation(fields: [expenseId], references: [id], onDelete: Restrict)
+  client Client? @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  visit ServiceVisit? @relation(fields: [visitId], references: [id], onDelete: Restrict)
+  extraVisit ExtraVisit? @relation(fields: [extraVisitId], references: [id], onDelete: Restrict)
+
+  @@index([expenseId])
+  @@index([monthRef, clientId])
+  @@index([visitId])
+  @@index([extraVisitId])
 }
