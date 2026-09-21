@@ -20,7 +20,11 @@ O ensaio isolado `run-1789790892945` confirmou HTTP 200 em dois casos indevidos:
 
 `run-1789791182694` aprovou a correção dos dois casos iniciais e a regressão de acesso mensal. O ensaio completo foi depois ampliado para titularidade histórica, identidades coincidentes, aliases, IDs grandes, duplicados, ficheiros inseguros, corrupção do manifesto, falha de leitura, substituição do caminho após abertura e interrupção da transferência. A preparação restaura a data da piscina depois da transferência deliberada de QA, mantendo a comparação integral dos dados.
 
-Em 21/09 o ambiente temporário anterior já não estava disponível. Foram repetidos com sucesso 396 testes unitários/63 ficheiros e quatro testes técnicos. A aprovação integral dos 156 grupos e do restauro deverá ser confirmada no CI PostgreSQL 16 do commit publicado; não se usa a aprovação da TASK272 como prova desta alteração.
+Em 21/09 o ambiente temporário anterior já não estava disponível. Foram repetidos com sucesso 396 testes unitários/63 ficheiros e quatro testes técnicos; sintaxe 562 backend/184 frontend/56 inline aprovada. A validação integral do ensaio ampliado foi efetuada no PostgreSQL 16 nativo, sem reduzir ou excluir asserções.
+
+CI e restauro aprovados para o commit `f626a6fddc042646266aed19e23fbbcc522f9899`, árvore `3a2da3489115d0551ef75518f64dff3b58e2fb34`: [run 35605561048](https://github.com/ts7520305-svg/cristalwater/actions/runs/35605561048), job `106351657752`, workflow concluído/atualizado em 21/09/2026 às 13:43:40 UTC. Confirmados 156/156 grupos distintos, todos com código zero e sem sinal; novo grupo de documentos em 1960 ms, acesso mensal em 794 ms, geração mensal em 997 ms e portal mensal em 14337 ms. Também aprovados os 396 unitários/63 ficheiros, quatro técnicos, gate do navegador, 21 migrações e sintaxe 562/184/56. Restauro de 110 tabelas e 46 ficheiros carregados, com linhas e hashes iguais.
+
+A atualização final altera apenas este relatório e o checkpoint, conservando o código/testes da árvore aprovada. Publicação na branch autorizada `work/field-readiness-20260915-simulation`, sem merge ou instalação no VPS. Backup local da implementação: `backup/client-document-access-local-20260921`.
 
 ## Limites e próxima etapa
 
