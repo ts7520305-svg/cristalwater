@@ -1,5 +1,6 @@
 const { prisma } = require("../prismaClient");
 const { isReceivableInvoice } = require('../services/clientCreditService');
+const { listExternalInvoices } = require('../business/finance/FinanceOsBusiness');
 
 const CLOSED_STATUSES = ["RESOLVED", "DONE", "CLOSED", "CANCELLED", "CANCELED", "ARCHIVED"];
 const ALERT_NOTIFICATION_TYPES = [
@@ -187,6 +188,7 @@ async function getAdminDashboardData(req = {}) {
     notificationAlerts,
     visits,
     visitAlerts,
+    externalBilling,
   ] = await Promise.all([
     prisma.client.findMany({
       include: { pools: true, invoices: true },
@@ -255,6 +257,9 @@ async function getAdminDashboardData(req = {}) {
       orderBy: [{ updatedAt: "desc" }, { date: "desc" }],
       take: 200,
     }).catch(() => []),
+    // Use the same eligibility, history and duplicate checks as /to-issue.
+    // A fiscal read failure must fail the summary, never masquerade as zero.
+    listExternalInvoices({ status: 'all' }),
   ]);
 
   const totalClients = clients.length;
@@ -266,13 +271,7 @@ async function getAdminDashboardData(req = {}) {
   const totalOpenAll = invoices.reduce((sum, invoice) => sum + invoiceOpen(invoice), 0);
   const openInvoicesAll = invoices.filter((invoice) => invoiceOpen(invoice) > 0);
   const overdueClientIds = new Set(openInvoicesAll.map((invoice) => invoice.clientId).filter(Boolean));
-  const officialInvoiceClients = clients.filter((client) => client.requiresInvoice);
-  const officialInvoicesAll = invoices.filter((invoice) => invoice.requiresInvoice || invoice.client?.requiresInvoice);
-  const officialPendingInvoices = officialInvoicesAll.filter((invoice) => (
-    invoiceTotal(invoice) > 0 &&
-    !invoice.invoiceIssued &&
-    !invoice.externalInvoiceNo
-  ));
+  const externalSummary = externalBilling.summary;
 
   const monthInvoices = receivableInvoices.filter((invoice) => invoiceMonthRef(invoice) === currentMonth);
   const monthBilled = monthInvoices.reduce((sum, invoice) => sum + invoiceTotal(invoice), 0);
@@ -377,10 +376,12 @@ async function getAdminDashboardData(req = {}) {
       overdueInvoices: openInvoicesAll.length,
       overdueClients: overdueClientIds.size,
       overdueAmount: totalOpenAll,
-      officialInvoiceClients: officialInvoiceClients.length,
-      officialInvoiceTotal: officialInvoicesAll.length,
-      officialInvoicePending: officialPendingInvoices.length,
-      officialInvoicePendingAmount: officialPendingInvoices.reduce((sum, invoice) => sum + invoiceTotal(invoice), 0),
+      officialInvoiceClients: externalSummary.clients,
+      officialInvoiceTotal: externalSummary.totalInvoices,
+      officialInvoicePending: externalSummary.pendingInvoices,
+      officialInvoicePendingAmount: externalSummary.pendingTotal,
+      officialInvoiceConfirmed: externalSummary.confirmedReferences,
+      officialInvoiceReview: externalSummary.reviewReferences,
       monthBilled,
       monthPaid,
       monthOpen,

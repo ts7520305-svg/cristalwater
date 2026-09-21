@@ -58,7 +58,7 @@ Runtime local: Node 24.19.0, PGlite, Chromium 153, 21 migrações existentes; se
 
 ## Publicação e validação nativa
 
-Publicação autorizada na branch de trabalho em preparação. A aprovação completa em PostgreSQL 16 e o restauro serão registados aqui depois de concluído o CI da árvore publicada; a validação da TASK275 não é usada como prova desta alteração.
+Commit `7c15fd91d0d5e7159ab0910a5904526e0da5f729`, árvore `cabae125bfadd865465c29b7d2bc258564b0abf4`, publicado na branch autorizada. [CI 35627561962](https://github.com/ts7520305-svg/cristalwater/actions/runs/35627561962), job `106425562327`, concluído com sucesso em 21/09/2026 às 17:02:28 UTC; todas as etapas aprovadas. Os logs confirmam 159/159 grupos distintos, todos com código zero e sem sinal, 396 unitários/63 ficheiros, quatro técnicos, 21 scripts de navegador, sintaxe 562/185/56 e restauro PostgreSQL 16 de 110 tabelas/46 ficheiros com igualdade de linhas e hashes. A retoma da TASK277 verificou o job concluído e os logs; os primeiros resultados de consulta do workflow ainda mostravam um estado antigo em execução.
 
 ## Limites e continuação
 

@@ -101,7 +101,10 @@ async function executeLiveMetricsWithBreaker() {
   }
 }
 
-router.get("/admin", auth("ADMIN"), async (req, res) => {
+router.get("/admin", (req, res, next) => {
+  res.set('Cache-Control', 'private, no-store');
+  next();
+}, auth("ADMIN"), async (req, res) => {
   try {
     if (typeof controller.getAdminDashboardData === "function") {
       const result = await controller.getAdminDashboardData(req);

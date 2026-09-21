@@ -123,6 +123,7 @@ scripts.push('test-field-client-documents-access.js');
 scripts.push('test-field-client-documents-ui.js');
 scripts.push('test-field-external-invoice-registration.js');
 scripts.push('test-field-external-reference-review.js');
+scripts.push('test-field-external-invoice-summary.js');
 function run(script){return new Promise(resolve=>{
  const output=fs.createWriteStream(path.join(evidence,script+'.log'));
  const child=spawn(process.execPath,[path.join(__dirname,script)],{cwd:root,env:process.env,stdio:['ignore','pipe','pipe']});

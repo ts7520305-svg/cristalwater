@@ -192,12 +192,43 @@ function renderTimeline(){
 // LOAD DASHBOARD
 // ======================================================
 
+let dashboardRequestVersion = 0;
+let dashboardRequestController = null;
+const dashboardSession = () => JSON.stringify([localStorage.getItem('token'), localStorage.getItem('user')]);
+
+function invalidateExternalInvoiceSummary(message = 'Resumo indisponível. Consultar o registo.'){
+  document.querySelectorAll('[data-external-invoice]').forEach(card => {
+    card.classList.remove('ok', 'bad');
+    card.classList.add('warn');
+    card.querySelector('strong').textContent = '—';
+    card.querySelector('small').textContent = message;
+    card.setAttribute('href', '/to-issue?status=all');
+  });
+}
+
+window.addEventListener('storage', event => {
+  if(event.key === null || ['token', 'user', 'cristalwater_jwt', 'cristalwater_user'].includes(event.key)){
+    dashboardRequestVersion++;
+    dashboardRequestController?.abort();
+    invalidateExternalInvoiceSummary('Sessão alterada. Atualize o resumo.');
+  }
+});
+
 async function loadDashboard(){
 
   const monthRef =
     document.getElementById("monthRef")?.value ||
     getCurrentMonthRef();
 
+  const version = ++dashboardRequestVersion;
+  dashboardRequestController?.abort();
+  const controller = new AbortController();
+  dashboardRequestController = controller;
+  const session = dashboardSession();
+  const current = () => version === dashboardRequestVersion && session === dashboardSession()
+    && monthRef === (document.getElementById('monthRef')?.value || getCurrentMonthRef());
+  const timeout = setTimeout(() => controller.abort(), 20000);
+  invalidateExternalInvoiceSummary('A atualizar o registo de faturas…');
   setStatus("A carregar inteligência operacional...");
 
   try {
@@ -206,11 +237,13 @@ async function loadDashboard(){
       await fetch(
         `${API}/dashboard/admin?monthRef=${encodeURIComponent(monthRef)}`,
         {
-          headers:
-            getAuthHeaders()
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+          cache: 'no-store',
+          signal: controller.signal
         }
       );
 
+    if(!current()) return;
     if(res.status === 401 || res.status === 403){
 
       adminLogout();
@@ -221,24 +254,31 @@ async function loadDashboard(){
     const data =
       await res.json();
 
-    if(!res.ok){
+    if(!current()) return;
+    if(!res.ok || data?.ok !== true){
 
       console.error(data);
 
       setStatus("Erro ao carregar");
+      invalidateExternalInvoiceSummary();
 
       return;
     }
 
     renderOperationalIntelligence(data);
 
-    setStatus("Resumo Operacional online");
+    setStatus(validExternalInvoiceSummary(data.summary)
+      ? "Resumo Operacional online" : "Resumo carregado; faturação externa indisponível");
 
   } catch(err){
 
+    if(!current()) return;
     console.error(err);
 
     setStatus("Erro ligação");
+    invalidateExternalInvoiceSummary();
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
@@ -448,7 +488,8 @@ function renderOperationalIntelligence(data = {}){
     overdueAmount,
     officialInvoiceClients,
     officialInvoicePending,
-    officialInvoicePendingAmount
+    officialInvoicePendingAmount,
+    externalInvoiceSummary: summary
   });
 
   renderAIState({
@@ -572,6 +613,35 @@ function renderAIState(info){
 // ROLE DASHBOARD
 // ======================================================
 
+function validExternalInvoiceSummary(summary){
+  const counts = ['officialInvoiceClients', 'officialInvoiceTotal', 'officialInvoicePending', 'officialInvoiceConfirmed', 'officialInvoiceReview'];
+  return summary && counts.every(key => Number.isSafeInteger(summary[key]) && summary[key] >= 0)
+    && Number.isFinite(summary.officialInvoicePendingAmount) && summary.officialInvoicePendingAmount >= 0
+    && summary.officialInvoicePending + summary.officialInvoiceConfirmed + summary.officialInvoiceReview <= summary.officialInvoiceTotal;
+}
+
+function externalInvoiceCards(summary){
+  const valid = validExternalInvoiceSummary(summary);
+  return [
+    {
+      externalKind: 'pending', label: 'Faturação externa',
+      value: valid ? String(summary.officialInvoicePending) : '—',
+      text: valid ? `${formatMoney(summary.officialInvoicePendingAmount)} em documentos por associar · ${summary.officialInvoiceConfirmed} referência(s) confirmada(s)`
+        : 'Resumo indisponível. Consultar o registo.',
+      href: valid && summary.officialInvoicePending > 0 ? '/to-issue?status=pending' : '/to-issue?status=all',
+      tone: !valid || summary.officialInvoicePending > 0 ? 'warn' : 'ok'
+    },
+    {
+      externalKind: 'review', label: 'Referências a rever',
+      value: valid ? String(summary.officialInvoiceReview) : '—',
+      text: valid ? (summary.officialInvoiceReview > 0 ? 'Conferir números e histórico no registo de faturas' : 'Sem referências pendentes de revisão')
+        : 'Resumo indisponível. Consultar o registo.',
+      href: valid && summary.officialInvoiceReview > 0 ? '/to-issue?status=review' : '/to-issue?status=all',
+      tone: !valid || summary.officialInvoiceReview > 0 ? 'warn' : 'ok'
+    }
+  ];
+}
+
 function renderAdminRoleDashboard(info){
 
   const box =
@@ -603,15 +673,6 @@ function renderAdminRoleDashboard(info){
 
   const overdueAmount =
     Number(info.overdueAmount || financeOpen || 0);
-
-  const officialInvoiceClients =
-    Number(info.officialInvoiceClients || 0);
-
-  const officialInvoicePending =
-    Number(info.officialInvoicePending || 0);
-
-  const officialInvoicePendingAmount =
-    Number(info.officialInvoicePendingAmount || 0);
 
   const fieldSignals =
     Number(info.overloaded || 0) +
@@ -658,15 +719,7 @@ function renderAdminRoleDashboard(info){
       href:"/invoices",
       tone:totalInvoices > 0 ? "ok" : "warn"
     },
-    {
-      label:"Fatura real",
-      value:String(officialInvoicePending),
-      text:officialInvoicePending > 0
-        ? `${officialInvoiceClients} cliente(s) · ${formatMoney(officialInvoicePendingAmount)} por emitir`
-        : `${officialInvoiceClients} cliente(s) com fatura oficial`,
-      href:officialInvoicePending > 0 ? "/to-issue?status=pending" : "/to-issue?status=all",
-      tone:officialInvoicePending > 0 ? "warn" : "ok"
-    },
+    ...externalInvoiceCards(info.externalInvoiceSummary),
     {
       label:"Em atraso",
       value:formatMoney(overdueAmount),
@@ -711,7 +764,7 @@ function renderAdminRoleDashboard(info){
     </div>
     <div class="role-grid">
       ${cards.map((card) => `
-        <a class="role-card ds-nav-link ${escapeHtml(card.tone)}" href="${escapeHtml(card.href)}">
+        <a class="role-card ds-nav-link ${escapeHtml(card.tone)}" href="${escapeHtml(card.href)}"${card.externalKind ? ` data-external-invoice="${card.externalKind}"` : ''}>
           <span>${escapeHtml(card.label)}</span>
           <strong>${escapeHtml(card.value)}</strong>
           <small>${escapeHtml(card.text)}</small>

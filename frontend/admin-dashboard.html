@@ -122,6 +122,8 @@ ROLE DASHBOARD
 
 .role-dashboard h2{
 
+  color:#eaffff;
+
   margin:0;
 
   font-size:24px;
@@ -161,7 +163,7 @@ ROLE DASHBOARD
 
   display:grid;
 
-  grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));
 
   gap:12px;
 }
@@ -207,6 +209,15 @@ ROLE DASHBOARD
 
 .ds-nav-link:hover{
   text-decoration:none;
+}
+
+.role-card.ds-nav-link{
+  display:grid;
+  align-items:start;
+  justify-content:stretch;
+  min-width:0;
+  color:#eaffff;
+  overflow-wrap:anywhere;
 }
 
 .role-card:hover{
@@ -876,6 +887,8 @@ RESPONSIVE
     <a class="role-card ds-nav-link" href="/admin-alerts"><span>Problemas</span><strong>-</strong><small>Alertas e reparacoes abertas</small></a>
     <a class="role-card ds-nav-link" href="/admin-rounds"><span>Equipa</span><strong>-</strong><small>Tecnicos, rondas e carga</small></a>
     <a class="role-card ds-nav-link" href="/billing"><span>Financeiro</span><strong>-</strong><small>Faturas e valores em aberto</small></a>
+    <a class="role-card ds-nav-link warn" data-external-invoice="pending" href="/to-issue?status=all"><span>Faturação externa</span><strong>—</strong><small>A consultar o registo de faturas…</small></a>
+    <a class="role-card ds-nav-link warn" data-external-invoice="review" href="/to-issue?status=all"><span>Referências a rever</span><strong>—</strong><small>A consultar o registo de faturas…</small></a>
   </div>
 
 </section>
