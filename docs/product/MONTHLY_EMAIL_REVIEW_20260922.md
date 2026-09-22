@@ -25,7 +25,7 @@ Lista por mês com paginação de seis, texto literal e preview exato do novo co
 
 API/UI finais e regressões de reparações: `/tmp/cw291-292-confirmed.log`. Regressões do período/envio mensal e interface anterior: `/tmp/cw291-292-final-focused.log` (esses grupos passaram; a falha posterior de stock está corrigida na TASK291). Reprodução do bloqueio por tentativa PENDING: `/tmp/cw292-sibling-reproduction.log`.
 
-401 testes unitários/64 ficheiros, incluindo cinco ensaios SMTP, aprovados em `/tmp/cw291-292-final-unit.log`; sintaxe 585/192/59 em `/tmp/cw291-292-final-syntax.log`. Runner com 184 grupos distintos, cache v107, 26 migrações e 119 tabelas mantidas; sem nova dependência. Confirmar CI e restauro do commit publicado.
+401 testes unitários/64 ficheiros, incluindo cinco ensaios SMTP, aprovados em `/tmp/cw291-292-final-unit.log`; sintaxe 585/192/59 em `/tmp/cw291-292-final-syntax.log`. Runner com 184 grupos distintos, cache v107, 26 migrações e 119 tabelas mantidas; sem nova dependência. CI e restauro finais confirmados abaixo.
 
 ## Limites
 
@@ -36,3 +36,11 @@ A evidência é declarada pela administração, sem consulta automática ao forn
 A primeira publicação é `963ef87c013c981519afe93c04ace5861e867071`, árvore `2ab1d8866783169452e44655993bb81dd3279df9`, CI inicial `35772194876`. A revisão posterior encontrou que a lista de seleção incluía também `EXTRA_VISITS`/outros tipos guardados em MonthlyReport, que a interface de email mensal não aceita. A consulta passa a oferecer exclusivamente CLIENT/ADMIN; a API recusa a associação explícita a outro tipo. Ligações históricas incompatíveis ficam visíveis e bloqueadas, sem ocultar os restantes registos.
 
 Os ensaios API e de navegador agora incluem um relatório EXTRA_VISITS no mesmo mês. Os cinco grupos de email, na ordem do runner (período, entrega, interface anterior, revisão e nova interface), passaram em `/tmp/cw292-report-type-final.log`. A sintaxe dos três ficheiros alterados foi verificada. O CI final deve corresponder à revisão posterior; a primeira execução não comprova esta correção.
+
+## Confirmação nativa final
+
+Revisão final publicada: `82105aeda7f86ac330b20b206764a4af7965ccef`, árvore `42b8d936efb75f92d294d993874750083e546599`, [CI 35773324382](https://github.com/ts7520305-svg/cristalwater/actions/runs/35773324382), job `106900160071`. As 17 etapas passaram entre 19:22:07 e 19:43:45 UTC de 22/09/2026 (21m38s). Logs conferidos contra os nomes do runner: 184/184 grupos distintos, todos com código zero/sem sinal; 401 unitários/64 ficheiros, quatro testes técnicos, gate geral do navegador, 26 migrações e sintaxe 585/192/59. Restauro PostgreSQL 16 aprovado: 119 tabelas e 46 ficheiros, com linhas e hashes iguais.
+
+Nova API de revisão/reenvio em 1751 ms e interface em 4402 ms; percursos mensais anteriores e de reparações também passaram. A primeira execução `35772194876`, commit `963ef87c013c981519afe93c04ace5861e867071`, aprovou 184 grupos e restauro; a execução final valida adicionalmente o filtro de tipos. Evidência durável: `evidence/20260922_tasks291_292_ci.json`.
+
+Publicação sem força, árvore remota igual à local; principal ancestral e inalterada em `6f27081e1d183ff584a62255b016b373836734db`. Backups locais `backup/repair-email-review-local-20260922` e `backup/monthly-email-types-local-20260922`. Encerramento apenas documental, preservando o código validado; sem merge/deploy/contactos reais.

@@ -21,8 +21,16 @@ Só são elegíveis reparações aprovadas, agendadas ou faturadas, sem data de 
 
 Regressões finais de comandos, interface, conclusão com reserva, prova financeira da execução e percurso operacional completo aprovadas em `/tmp/cw291-292-confirmed.log`. O percurso completo termina com reparação CLOSED e documento PAID. As falhas iniciais ficam em `/tmp/cw291-292-final-focused.log` e `/tmp/cw291-reservation-final.log`; a última incluía uma chamada incorreta do ensaio a uma função interna, corrigida para o agendamento público.
 
-401 testes unitários/64 ficheiros e sintaxe de 585 backend/192 frontend/59 scripts inline aprovados. Publicação conjunta com TASK292: runner de 184 grupos distintos, cache v107, sem esquema, migração ou dependência nova. Confirmar CI PostgreSQL 16/restauro do commit publicado; os testes locais não comprovam o ambiente VPS.
+401 testes unitários/64 ficheiros e sintaxe de 585 backend/192 frontend/59 scripts inline aprovados. Publicação conjunta com TASK292: runner de 184 grupos distintos, cache v107, sem esquema, migração ou dependência nova. CI PostgreSQL 16/restauro confirmado abaixo; estes ensaios não comprovam o ambiente VPS.
 
 ## Limites e continuação
 
 Ligação explícita à visita de origem, revisão de datas históricas e custos completos continuam separados. Valores/frequências caso a caso e emissão fiscal externa com registo do número de fatura. Sem merge, deploy ou contactos reais neste lote.
+
+## Confirmação nativa final
+
+Commit `82105aeda7f86ac330b20b206764a4af7965ccef`, árvore `42b8d936efb75f92d294d993874750083e546599`, [CI 35773324382](https://github.com/ts7520305-svg/cristalwater/actions/runs/35773324382), job `106900160071`, aprovado em 22/09/2026 entre 19:22:07 e 19:43:45 UTC (21m38s). As 17 etapas passaram. Conferidos os 184/184 grupos previstos, distintos, sem erro ou sinal, 401 unitários/64 ficheiros, quatro testes técnicos, gate geral de navegador, 26 migrações aditivas e sintaxe 585/192/59. Restauro PostgreSQL 16 de 119 tabelas/46 ficheiros, com linhas e hashes iguais.
+
+Declaração sem materiais em 789 ms; percurso operacional completo em 369 ms. Concorrência com agendamento/reserva, comandos, interface e provas financeiras da execução passaram. A primeira execução `35772194876` também aprovou o lote, mas a execução acima inclui ainda a correção final de tipos da TASK292. Evidência persistida em `evidence/20260922_tasks291_292_ci.json`.
+
+Código publicado na branch autorizada sem força, árvore igual à local, principal `feature/technicians-v25` ancestral e conservada em `6f27081e1d183ff584a62255b016b373836734db`. Encerramento posterior apenas documental. Não houve merge, deploy ou contactos reais.

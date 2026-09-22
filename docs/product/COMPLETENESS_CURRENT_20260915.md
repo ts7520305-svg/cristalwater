@@ -2,7 +2,7 @@
 
 ## Estado de retoma — 22/09/2026, TASK291–292
 
-Esta secção e `CURRENT_WORK_CHECKPOINT.md` prevalecem sobre os registos históricos abaixo. Primeira publicação: `963ef87c013c981519afe93c04ace5861e867071`, árvore `2ab1d8866783169452e44655993bb81dd3279df9`, na branch de trabalho. [CI inicial 35772194876](https://github.com/ts7520305-svg/cristalwater/actions/runs/35772194876). A revisão posterior filtra os tipos CLIENT/ADMIN na associação de emails, com cinco grupos de regressão aprovados; requer CI do commit final. Validação local: 401 testes unitários/64 ficheiros, percursos novos e regressões dirigidas aprovados; 184 grupos previstos no CI. Não é aprovação global de produção.
+Esta secção e `CURRENT_WORK_CHECKPOINT.md` prevalecem sobre os registos históricos abaixo. Versão final aprovada: `82105aeda7f86ac330b20b206764a4af7965ccef`, árvore `42b8d936efb75f92d294d993874750083e546599`, na branch de trabalho. [CI 35773324382](https://github.com/ts7520305-svg/cristalwater/actions/runs/35773324382), job `106900160071`, aprovado em 22/09/2026 às 19:43:45 UTC: 17 etapas, 184/184 grupos distintos previstos, 401 testes unitários/64 ficheiros, quatro testes técnicos, 26 migrações e restauro PostgreSQL 16 de 119 tabelas/46 ficheiros com linhas e hashes iguais. Inclui o filtro final CLIENT/ADMIN para emails. Evidência em `evidence/20260922_tasks291_292_ci.json`. O encerramento posterior altera apenas documentação. Não é aprovação global de produção.
 
 | Área atualizada | Implementado e verificado no âmbito | Limite ainda aberto |
 |---|---|---|
