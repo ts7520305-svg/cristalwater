@@ -3,6 +3,7 @@ const multer = require("multer");
 const auth = require("../middlewares/authMiddleware");
 const { roleIn } = require("../utils/roles");
 const controller = require("../controllers/repairController");
+const executionController = require("../controllers/repairExecutionController");
 const { resolveUploadSubdir } = require("../config/uploadPath");
 
 const router = express.Router();
@@ -54,6 +55,10 @@ const upload = multer({
 	},
 });
 
+router.get('/execution', allowRoles('ADMIN','TECHNICIAN'), executionController.list);
+router.get('/:id/execution', allowRoles('ADMIN','TECHNICIAN'), executionController.detail);
+router.get('/:id/execution/requests/:requestId', allowRoles('ADMIN','TECHNICIAN'), executionController.lookup);
+router.post('/:id/execution', allowRoles('ADMIN','TECHNICIAN'), executionController.complete);
 router.post('/quote-preview', allowRoles('ADMIN'), controller.previewQuote);
 router.post('/:id/quotes/:quoteId/publish', allowRoles('ADMIN'), require('../controllers/quotePortalController').publish);
 router.get('/:id/quotes', allowRoles('ADMIN'), controller.listQuotes);

@@ -50,6 +50,7 @@
     '/admin-crm': { area: 'Comercial', title: 'CRM e oportunidades' },
     '/admin-ai': { area: 'Faturacao e financeiro', title: 'Gestão com IA' },
     '/admin-revenue': { area: 'Faturacao e financeiro', title: 'Repartição de mensalidades' },
+    '/repair-execution': { area: 'Operacao', title: 'Execução de reparações' },
     '/admin-expenses': { area: 'Faturacao e financeiro', title: 'Despesas e contas a pagar' },
     '/billing': { area: 'Faturacao e financeiro', title: 'Visao financeira' },
     '/billing-center': { area: 'Faturacao e financeiro', title: 'Centro de cobrancas' },
@@ -125,6 +126,7 @@
           ['/admin-crm', 'CRM comercial'],
           ['/admin-onboarding', 'Onboarding de contratos'],
           ['/admin-alerts?scope=repairs', 'Reparacoes'],
+          ['/repair-execution', 'Execução de reparações'],
           ['/admin-company-closures', 'Obras']
         ]},
         { label: '7. Faturacao e financeiro', links: [
@@ -193,6 +195,7 @@
           ['/technician-field-mode', 'Rota do dia'],
           ['/technician-route', 'Proxima piscina'],
           ['/technician-visit', 'Iniciar / concluir visita'],
+          ['/repair-execution', 'Execução de reparações'],
           ['/technician-map', 'Navegacao GPS'],
           ['/technician-field-mode#syncPhotosBtn', 'Offline e sincronizacao']
         ]},

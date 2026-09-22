@@ -1283,7 +1283,7 @@ async function scheduleRepair(repairId, payload = {}, db = null, actor = "repair
   return repository.transaction(run);
 }
 
-async function completeRepair(repairId, db = null, actor = "repair-os", principal = null) {
+async function completeRepair(repairId, db = null, actor = "repair-os", principal = null, command = null) {
   const executionService = require("../../services/repairExecutionService");
   const run = async (tx) => {
     const prepared = await executionService.prepare(tx, repairId);
@@ -1312,13 +1312,14 @@ async function completeRepair(repairId, db = null, actor = "repair-os", principa
     }};
   };
   // A transaction supplied by a caller owns the commit and any later events.
-  if (db && !db.$transaction) { const {event,...result}=await run(db); return result; }
-  const {event,...result}=await (db||repository.prisma).$transaction(run,{maxWait:15000,timeout:15000});
+  const work = command === null ? run : tx => require('../../services/repairExecutionCommandService').apply(tx,principal,repairId,command,()=>run(tx));
+  if (db && !db.$transaction) { const {event,eventRepair,...result}=await work(db); return result; }
+  const {event,eventRepair,...result}=await (db||repository.prisma).$transaction(work,{maxWait:15000,timeout:15000});
   if (event) {
     const stock={...event,source:"repair-stock-consumption"};
     await emitRepairEvent(EVENT_TYPES.REPAIR_STOCK_CONSUMED,stock);
     await emitEquipmentStockEvent(STOCK_EVENT_TYPES.STOCK_CONSUMED,stock);
-    await emitFinanceEvent(FINANCE_EVENT_TYPES.FINANCE_INVOICE_DRAFT,{repairId:event.repairId,poolId:event.poolId,clientId:event.clientId,amount:Number(result.repair.totalPrice||0),source:"repair-stock-consumption"});
+    await emitFinanceEvent(FINANCE_EVENT_TYPES.FINANCE_INVOICE_DRAFT,{repairId:event.repairId,poolId:event.poolId,clientId:event.clientId,amount:Number((eventRepair||result.repair).totalPrice||0),source:"repair-stock-consumption"});
     await emitRepairEvent(EVENT_TYPES.REPAIR_COMPLETED,{repairId:event.repairId,poolId:event.poolId,actor:event.actor,reservationId:event.reservationId,stockConsumed:true,source:"repair-route"});
   }
   return result;
