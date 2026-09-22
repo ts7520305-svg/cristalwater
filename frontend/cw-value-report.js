@@ -27,6 +27,7 @@
     const sourceLines=new Set();
     for(const row of data.technicians){
       if(!row||(row.id!==null&&!id(row.id))||row.technicianId!==row.id||typeof row.name!=='string'||![true,false,null].includes(row.active)||!['regularDone','extraDone','visitsDone','undatedCompleted','unknownDurations','stockMovementCount','stockReviewCount','extraLinesReviewCount'].every(k=>integer(row[k]))||row.visitsDone!==row.regularDone+row.extraDone||row.unknownDurations>row.visitsDone||!amount(row.minutes)||row.minutes===null||!amount(row.extraLinesAmount)||!amount(row.confirmedExtraLinesAmount)||row.confirmedExtraLinesAmount===null||!amount(row.laborEstimate)||!['NOT_APPLICABLE','MISSING_RATE','AMBIGUOUS_RATE','CURRENT_RATE_PER_VISIT','CURRENT_HOURLY_RATE'].includes(row.laborEstimateBasis)||row.financialStatus!=='NOT_ESTABLISHED'||!['profitability','profit','cost','revenue','stockCost','laborCost','estimatedRevenue'].every(k=>row[k]===null))throw Error('Existem valores sem confirmação no relatório. Atualize para tentar novamente.');
+      if(!amount(row.valuedLaborAmountCents)||!integer(row.valuationCount)||!integer(row.valuationReviewCount))throw Error('Custos de trabalho confirmados incompletos.');
       if(!Array.isArray(row.stock)||!row.stock.every(s=>s&&typeof s.product==='string'&&typeof s.unit==='string'&&s.unit&&[s.consumed,s.returned,s.net].every(Number.isFinite)&&s.consumed>=0&&s.returned>=0&&Math.abs(s.net-(s.consumed-s.returned))<0.000002)||!Array.isArray(row.extraLineEvidence)||!row.extraLineEvidence.every(e=>e&&id(e.invoiceId)&&id(e.lineId)&&id(e.extraVisitId)&&amount(e.amount)&&e.amount!==null))throw Error('As fontes de stock ou de documentos estão incompletas.');
       if((row.extraLinesReviewCount>0&&row.extraLinesAmount!==null)||(row.extraLinesReviewCount===0&&row.extraLinesAmount!==row.confirmedExtraLinesAmount))throw Error('Existem valores documentais contraditórios.');
       let evidenceCents=0;
@@ -37,7 +38,7 @@
   function render(){
     if(!active()||!snapshot)return;
     list.replaceChildren();warnings.replaceChildren();
-    const visible=snapshot.technicians.filter(row=>!filter.checked||row.visitsDone||row.undatedCompleted||row.stockMovementCount||row.extraLineEvidence.length||row.extraLinesReviewCount);
+    const visible=snapshot.technicians.filter(row=>!filter.checked||row.visitsDone||row.undatedCompleted||row.stockMovementCount||row.extraLineEvidence.length||row.extraLinesReviewCount||row.valuationCount);
     for(const row of visible){
       const card=document.createElement('article');card.dataset.technicianId=row.id??'unassigned';
       text(card,'h2',row.name+(row.id?' · #'+row.id:'')+(row.active===false?' (inativo)':''));
@@ -48,7 +49,8 @@
       if(row.extraLinesReviewCount)text(card,'p',row.extraLinesReviewCount+' linhas exigem revisão de origem/ajustes. Parcela identificada: '+money(row.confirmedExtraLinesAmount)+'.');
       const rates={CURRENT_RATE_PER_VISIT:'tarifa atual por visita',CURRENT_HOURLY_RATE:'tarifa horária atual',AMBIGUOUS_RATE:'existem duas tarifas; falta confirmar qual aplicar',MISSING_RATE:'sem tarifa positiva configurada',NOT_APPLICABLE:'sem técnico confirmado'};
       text(card,'p','Mão de obra estimada: '+money(row.laborEstimate)+' ('+rates[row.laborEstimateBasis]+').');
-      text(card,'p','Custo histórico de produtos e margem total: por apurar.');
+      text(card,'p','Tempo valorizado com despesa confirmada: '+money(row.valuedLaborAmountCents===null?null:row.valuedLaborAmountCents/100)+' · '+row.valuationCount+' registos · '+row.valuationReviewCount+' por rever. Cobertura parcial; já incluído nas despesas atribuídas.');
+      text(card,'p','Custos completos e margem total: por apurar.');
       if(row.stock.length){
         text(card,'h3','Movimentos de produtos');const stock=document.createElement('ul');
         for(const item of row.stock)text(stock,'li',item.product+' · '+item.unit+': consumo '+quantity(item.consumed)+'; devolução '+quantity(item.returned)+'; diferença '+quantity(item.net)+'.');

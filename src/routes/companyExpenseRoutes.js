@@ -7,6 +7,8 @@ const handle = work => (req, res, next) => Promise.resolve(work(req, res)).catch
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: rules.maxEvidence, files: 1, fields: 1, fieldSize: 16000 } });
 router.get('/', handle(async (req, res) => res.json(await service.list(req.query))));
 router.get('/costs', handle(async (req, res) => res.json(await service.costReport(req.query))));
+router.get('/labor-technicians', handle(async (req, res) => { rules.object(req.query, []); res.json({ ok: true, technicians: await prisma.technician.findMany({ select: { id: true, name: true, active: true }, orderBy: [{ name: 'asc' }, { id: 'asc' }] }) }); }));
+router.get('/:id/valuation-preview', handle(async (req, res) => res.json(await service.valuationPreview(rules.queryId(req.params.id), req.query))));
 router.get('/targets', handle(async (req, res) => res.json(await prisma.$transaction(db => service.costs.targets.list(db, req.query), { isolationLevel: 'RepeatableRead', timeout: 30000 }))));
 router.get('/targets/:type/:id', handle(async (req, res) => {
   rules.object(req.query, []); const id = req.params.type === 'COMPANY' && req.params.id === '0' ? null : rules.queryId(req.params.id);

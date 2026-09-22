@@ -387,6 +387,7 @@ model TechnicalRoom {
 }
 
 model Technician {
+  expenseLaborBases ExpenseLaborBasis[]
   id                   Int                    @id @default(autoincrement())
   name                 String
   phone                String?
@@ -1911,6 +1912,7 @@ model StockPurchase {
 }
 
 model StockPurchaseItem {
+  costAllocations ExpenseAllocation[]
   id          Int               @id @default(autoincrement())
   purchaseId  Int
   productId   Int?
@@ -2425,6 +2427,7 @@ model EquipmentMaintenanceCompletion {
 
 // Confirmed obligations, distinct from stock consumption and bank transactions.
 model CompanyExpense {
+  laborBasis ExpenseLaborBasis?
   expenseAllocations ExpenseAllocation[]
   id                   Int       @id @default(autoincrement())
   title                String
@@ -2515,6 +2518,15 @@ model ExpenseEvidence {
 
 // Confirmed attribution of an existing expense; never a second cash movement.
 model ExpenseAllocation {
+  valuationType String @default("MANUAL")
+  valuationKey String?
+  valuationHash String?
+  valuationSnapshot Json?
+  quantity Decimal? @db.Decimal(18, 6)
+  quantityUnit String?
+  purchaseItemId Int?
+  activeMeasurementKey String? @unique
+  purchaseItem StockPurchaseItem? @relation(fields: [purchaseItemId], references: [id], onDelete: Restrict)
   id Int @id @default(autoincrement())
   expenseId Int
   monthRef String
@@ -2543,4 +2555,24 @@ model ExpenseAllocation {
   @@index([monthRef, clientId])
   @@index([visitId])
   @@index([extraVisitId])
+  @@index([valuationKey])
+  @@index([purchaseItemId])
+}
+
+// A confirmed expense and paid time establish this historical labor cost basis.
+model ExpenseLaborBasis {
+  id Int @id @default(autoincrement())
+  expenseId Int @unique
+  technicianId Int
+  periodStart DateTime @db.Date
+  periodEnd DateTime @db.Date
+  paidMinutes Int
+  reason String
+  createdById Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  expense CompanyExpense @relation(fields: [expenseId], references: [id], onDelete: Restrict)
+  technician Technician @relation(fields: [technicianId], references: [id], onDelete: Restrict)
+
+  @@index([technicianId, periodStart, periodEnd])
 }

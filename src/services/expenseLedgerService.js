@@ -4,8 +4,9 @@ const { roleMatches } = require('../utils/roles');
 const { period } = require('./operationalValueReportService');
 const { sum } = require('./monthlyFinancialProjection');
 const r = require('./expenseLedgerRules'), sources = require('./expenseSourceService'), costs = require('./expenseCostAllocationService');
+const valuation = require('./expenseValuationService');
 const evidenceSelect = { id: true, expenseId: true, name: true, mime: true, size: true, sha256: true, createdAt: true, voidedAt: true, voidReason: true };
-const include = { expenseAllocations: { orderBy: { id: 'asc' } }, payments: { orderBy: { id: 'asc' } }, evidence: { select: evidenceSelect, orderBy: { id: 'asc' } } };
+const include = { laborBasis: { include: { technician: { select: { id: true, name: true, active: true } } } }, expenseAllocations: { orderBy: { id: 'asc' } }, payments: { orderBy: { id: 'asc' } }, evidence: { select: evidenceSelect, orderBy: { id: 'asc' } } };
 const json = value => JSON.parse(JSON.stringify(value));
 function actor(user) {
   if (!roleMatches(user?.role, 'ADMIN')) r.fail('Acesso reservado à administração.', 403);
@@ -42,7 +43,7 @@ async function list(query) {
   if (!['month', 'all'].includes(scope) || !['ALL', 'OPEN', 'PAID', 'CANCELLED', 'REVIEW'].includes(filter)) r.fail('Filtro inválido.'); r.id(page);
   return prisma.$transaction(async db => {
     const all = await rows(db), generatedAt = new Date();
-    const filtered = all.filter(e => (scope === 'all' || e.expenseDate.startsWith(monthRef)) && (filter === 'ALL' || filter === 'OPEN' && !e.cancelledAt && (e.openCents > 0 || e.needsReview) || filter === 'REVIEW' && e.needsReview || e.status === filter) && (!q || r.normalized([e.title, e.supplierName, e.documentNumber].join(' ')).includes(r.normalized(q))));
+    const filtered = all.filter(e => (scope === 'all' || e.expenseDate.startsWith(monthRef)) && (filter === 'ALL' || filter === 'OPEN' && !e.cancelledAt && (e.openCents > 0 || e.needsReview) || filter === 'REVIEW' && (e.needsReview || e.allocationReviewCount > 0) || e.status === filter) && (!q || r.normalized([e.title, e.supplierName, e.documentNumber].join(' ')).includes(r.normalized(q))));
     return { ok: true, monthRef, scope, filter, q, page, pageSize: 10, total: filtered.length, summary: summarize(all, monthRef, generatedAt), rows: filtered.slice((page - 1) * 10, page * 10).map(({ payments, evidence, allocations, sourceSnapshot, ...e }) => ({ ...e, evidenceCount: evidence.filter(f => !f.voidedAt).length })) };
   }, { isolationLevel: 'RepeatableRead', timeout: 30000, maxWait: 15000 });
 }
@@ -103,6 +104,7 @@ async function apply(db, who, env, file, current) {
     return { applied: true, expenseId: id, version: expense.version, before: small(current), after: small(expense), reason };
   }
   if (current.cancelledAt) return refused('CANCELLED', 'A despesa está anulada.');
+  if (['SET_LABOR_BASIS', 'VALUE_MATERIAL', 'VALUE_LABOR'].includes(command)) return valuation.apply(db, who, env, current);
   if (['ALLOCATE_COST', 'REVIEW_COST', 'VOID_COST'].includes(command)) return costs.apply(db, who, env, current);
   if (command === 'RECORD_PAYMENT') {
     r.object(d, ['amountCents', 'paidOn', 'method', 'reference']);
@@ -183,4 +185,12 @@ async function evidence(id, evidenceId) {
 }
 async function costReport(query) { return prisma.$transaction(async db => costs.report(await rows(db), query), { isolationLevel: 'RepeatableRead', timeout: 30000, maxWait: 15000 }); }
 async function clientCosts(db, monthRef) { return costs.group(costs.entries(await rows(db), monthRef)); }
-module.exports = { list, detail, summary, command, receipt, evidence, actor, sources, costs, costReport, clientCosts };
+async function operationalCosts(db, monthRef) {
+  const entries = costs.entries(await rows(db), monthRef), technicianIds = [...new Set(entries.filter(a => a.valuationType === 'LABOR').map(a => a.valuationSnapshot?.source.service.technicianId).filter(Boolean))];
+  return { clients: costs.group(entries), technicians: technicianIds.map(technicianId => ({ technicianId, valuations: valuation.summary(entries.filter(a => a.valuationType === 'LABOR' && a.valuationSnapshot?.source.service.technicianId === technicianId)) })) };
+}
+async function valuationPreview(id, query) {
+  r.id(id); r.object(query, ['kind', 'targetType', 'targetId', 'purchaseItemId', 'quantity']); const selection = valuation.selection(query, true);
+  return prisma.$transaction(async db => { const expense = await db.companyExpense.findUnique({ where: { id }, include }); if (!expense) r.fail('Despesa não encontrada.', 404); return { ok: true, preview: await valuation.preview(db, expense, selection) }; }, { isolationLevel: 'RepeatableRead', timeout: 30000, maxWait: 15000 });
+}
+module.exports = { list, detail, summary, command, receipt, evidence, actor, sources, costs, costReport, clientCosts, valuationPreview, operationalCosts };

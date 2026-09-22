@@ -2,6 +2,7 @@
 const r = require('./expenseLedgerRules'), targets = require('./expenseCostTargets'), sources = require('./expenseSourceService');
 const { sum } = require('./monthlyFinancialProjection');
 const { period } = require('./operationalValueReportService');
+const valuation = require('./expenseValuationService');
 const json = value => JSON.parse(JSON.stringify(value));
 const refused = (code, message) => ({ applied: false, code, message });
 const live = expense => (expense.expenseAllocations || expense.allocations || []).filter(a => !a.voidedAt);
@@ -9,7 +10,7 @@ const allocated = expense => sum(live(expense).map(a => a.amountCents));
 function expenseSnapshot(e) { return { id: e.id, amountCents: e.amountCents, expenseDate: r.day(e.expenseDate), category: e.category, supplierName: e.supplierName, documentNumber: e.documentNumber, sourceType: e.sourceType, sourceId: e.stockPurchaseId || e.maintenanceId || null, sourceHash: e.sourceHash }; }
 async function decorate(db, expenses) {
   const current = await targets.current(db, expenses.flatMap(e => e.expenseAllocations));
-  return expenses.map(expense => {
+  return valuation.decorate(db, expenses.map(expense => {
     const { expenseAllocations, ...e } = expense, budget = allocated(expense), expenseHash = r.hash(expenseSnapshot(e));
     const budgetValid = budget !== null && budget >= 0 && budget <= e.amountCents;
     const allocations = expenseAllocations.map(a => {
@@ -18,23 +19,23 @@ async function decorate(db, expenses) {
       return { ...a, targetId: targets.targetId(a), targetLabel: a.targetSnapshot.label, clientName: target?.clientId === a.clientId ? target.clientName : a.targetSnapshot.clientName, needsReview: reasons.length > 0, reviewReasons: reasons, stockPurchase: a.expenseSnapshot.sourceType === 'STOCK_PURCHASE' || a.expenseSnapshot.category === 'STOCK' };
     });
     return { ...e, allocations, allocatedCents: budgetValid ? budget : null, unallocatedCents: e.cancelledAt ? 0 : budgetValid && !e.needsReview ? e.amountCents - budget : null, allocationReviewCount: allocations.filter(a => a.needsReview).length };
-  });
+  }));
 }
 function entries(expenses, monthRef) { return expenses.filter(e => !e.cancelledAt).flatMap(e => e.allocations.filter(a => !a.voidedAt && a.monthRef === monthRef).map(a => ({ ...a, expenseTitle: e.title, expenseDocument: e.documentNumber }))); }
 function group(rows, byTarget = false) {
   const groups = new Map();
   for (const a of rows) {
     const key = byTarget ? a.targetType + ':' + a.targetId : 'CLIENT:' + a.clientId;
-    if (!groups.has(key)) groups.set(key, { key, clientId: a.clientId, ...(byTarget ? { targetType: a.targetType, targetId: a.targetId } : {}), label: byTarget ? a.targetLabel : a.clientId === null ? 'Custos gerais da empresa' : (a.clientName || 'Cliente') + ' · #' + a.clientId, values: [], allocationCount: 0, reviewCount: 0, stockPurchaseCount: 0 });
-    const g = groups.get(key); g.values.push(a.amountCents); g.allocationCount++; if (a.needsReview) g.reviewCount++; if (a.stockPurchase) g.stockPurchaseCount++;
+    if (!groups.has(key)) groups.set(key, { key, clientId: a.clientId, ...(byTarget ? { targetType: a.targetType, targetId: a.targetId } : {}), label: byTarget ? a.targetLabel : a.clientId === null ? 'Custos gerais da empresa' : (a.clientName || 'Cliente') + ' · #' + a.clientId, values: [], valuationRows: [], allocationCount: 0, reviewCount: 0, stockPurchaseCount: 0 });
+    const g = groups.get(key); g.values.push(a.amountCents); g.valuationRows.push(a); g.allocationCount++; if (a.needsReview) g.reviewCount++; if (a.stockPurchase) g.stockPurchaseCount++;
   }
-  return [...groups.values()].map(({ values, ...g }) => ({ ...g, amountCents: g.reviewCount ? null : sum(values) })).sort((a, b) => (b.amountCents ?? -1) - (a.amountCents ?? -1) || a.key.localeCompare(b.key));
+  return [...groups.values()].map(({ values, valuationRows, ...g }) => ({ ...g, valuations: valuation.summary(valuationRows), amountCents: g.reviewCount ? null : sum(values) })).sort((a, b) => (b.amountCents ?? -1) - (a.amountCents ?? -1) || a.key.localeCompare(b.key));
 }
 function summary(expenses, monthRef, generatedAt) {
   const rows = entries(expenses, monthRef), clients = group(rows), active = expenses.filter(e => !e.cancelledAt), reviewCount = rows.filter(a => a.needsReview).length;
   const unallocatedReviewCount = active.filter(e => e.unallocatedCents === null).length;
   const total = list => list.some(a => a.needsReview) ? null : sum(list.map(a => a.amountCents));
-  return { version: 1, monthRef, currency: 'EUR', generatedAt: generatedAt.toISOString(), state: reviewCount || unallocatedReviewCount ? 'REVIEW' : 'READY', coverage: 'REGISTERED_EXPENSE_ATTRIBUTION', completeOperatingCosts: false, profit: null,
+  return { valuations: valuation.summary(rows), version: 1, monthRef, currency: 'EUR', generatedAt: generatedAt.toISOString(), state: reviewCount || unallocatedReviewCount ? 'REVIEW' : 'READY', coverage: 'REGISTERED_EXPENSE_ATTRIBUTION', completeOperatingCosts: false, profit: null,
     allocatedAmountCents: total(rows), clientAmountCents: total(rows.filter(a => a.clientId !== null)), companyAmountCents: total(rows.filter(a => a.clientId === null)), stockPurchaseAmountCents: total(rows.filter(a => a.stockPurchase)), allocationCount: rows.length, reviewCount,
     unallocatedAmountCents: sum(active.map(e => e.unallocatedCents)), unallocatedExpenseCount: active.filter(e => e.unallocatedCents > 0).length, unallocatedReviewCount,
     clientCount: clients.filter(c => c.clientId !== null).length, topClients: clients.filter(c => c.clientId !== null).slice(0, 10), topLimit: 10, sampleOnly: clients.filter(c => c.clientId !== null).length > 10, limitApplied: null,
@@ -53,7 +54,7 @@ function report(expenses, query, generatedAt = new Date()) {
     else { r.queryId(query.targetId); if (query.clientId === 'COMPANY' || query.targetType === 'CLIENT' && query.targetId !== query.clientId) r.fail('Contexto do cliente inválido.'); }
   }
   const all = entries(expenses, monthRef), clientId = query.clientId === 'COMPANY' ? null : Number(query.clientId), selected = mode === 'CLIENTS' ? all : all.filter(a => a.clientId === clientId);
-  const result = mode === 'CLIENTS' ? group(selected) : mode === 'TARGETS' ? group(selected, true) : selected.filter(a => a.targetType === query.targetType && (a.targetId || 0) === Number(query.targetId)).map(a => ({ id: a.id, expenseId: a.expenseId, clientId: a.clientId, targetType: a.targetType, targetId: a.targetId, label: a.expenseTitle, documentNumber: a.expenseDocument, targetLabel: a.targetLabel, amountCents: a.amountCents, monthRef: a.monthRef, needsReview: a.needsReview, reviewReasons: a.reviewReasons, stockPurchase: a.stockPurchase, reason: a.reason }));
+  const result = mode === 'CLIENTS' ? group(selected) : mode === 'TARGETS' ? group(selected, true) : selected.filter(a => a.targetType === query.targetType && (a.targetId || 0) === Number(query.targetId)).map(a => ({ id: a.id, expenseId: a.expenseId, clientId: a.clientId, targetType: a.targetType, targetId: a.targetId, label: a.expenseTitle, documentNumber: a.expenseDocument, targetLabel: a.targetLabel, amountCents: a.amountCents, monthRef: a.monthRef, needsReview: a.needsReview, reviewReasons: a.reviewReasons, stockPurchase: a.stockPurchase, valuationType: a.valuationType, quantity: a.quantity, quantityUnit: a.quantityUnit, reason: a.reason }));
   const filtered = result.filter(row => !q || r.normalized(row.label + ' ' + (row.documentNumber || '')).includes(r.normalized(q)));
   return { ok: true, selection: { monthRef, mode, clientId: query.clientId || null, targetType: query.targetType || null, targetId: query.targetId || null, q, page }, pageSize: 10, total: filtered.length, summary: summary(expenses, monthRef, generatedAt), rows: filtered.slice((page - 1) * 10, page * 10) };
 }
@@ -62,7 +63,8 @@ async function apply(db, who, env, expense) {
   if (command === 'VOID_COST') {
     r.object(d, ['allocationId', 'reason']); r.id(d.allocationId); const reason = r.text(d.reason, 500, true);
     const a = live(expense).find(a => a.id === d.allocationId); if (!a) return refused('ALLOCATION_STATE', 'Atribuição inexistente nesta despesa ou já anulada.');
-    const after = await db.expenseAllocation.update({ where: { id: a.id }, data: { voidedAt: new Date(), voidReason: reason, activeKey: null } });
+    if (a.valuationType !== 'MANUAL') await db.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${ 'expense-valuation:' + a.targetType + ':' + targets.targetId(a) }))::text`;
+    const after = await db.expenseAllocation.update({ where: { id: a.id }, data: { voidedAt: new Date(), voidReason: reason, activeKey: null, activeMeasurementKey: null } });
     const updated = await db.companyExpense.update({ where: { id: expense.id }, data: { version: { increment: 1 } } });
     return { applied: true, expenseId: expense.id, version: updated.version, allocation: after, allocationBefore: a, reason };
   }
@@ -72,6 +74,7 @@ async function apply(db, who, env, expense) {
   if (review) r.id(d.allocationId);
   const reason = r.text(d.reason, 500, true), before = review ? live(expense).find(a => a.id === d.allocationId) : null;
   if (review && !before) return refused('ALLOCATION_STATE', 'Atribuição inexistente nesta despesa ou já anulada.');
+  if (review && before.valuationType !== 'MANUAL') return refused('REVALUE_REQUIRED', 'Anule esta valorização e calcule novamente com as fontes atuais. O montante anterior fica no histórico.');
   const monthRef = review ? before.monthRef : period({ monthRef: d.monthRef }).monthRef;
   if (!review && (typeof d.monthRef !== 'string' || monthRef !== d.monthRef)) r.fail('Indique o mês da atribuição.');
   const amountCents = review ? before.amountCents : r.money(d.amountCents), type = review ? before.targetType : d.targetType, id = review ? targets.targetId(before) : d.targetId;
@@ -87,4 +90,4 @@ async function apply(db, who, env, expense) {
   const updated = await db.companyExpense.update({ where: { id: expense.id }, data: { version: { increment: 1 } } });
   return json({ applied: true, expenseId: expense.id, version: updated.version, allocation, allocationBefore: before, reason });
 }
-module.exports = { targets, allocated, live, decorate, summary, report, apply, entries, group };
+module.exports = { targets, allocated, live, decorate, summary, report, apply, entries, group, expenseSnapshot };
