@@ -2,6 +2,7 @@
 const { prisma } = require('../prismaClient');
 const cash = require('./cashReceiptReportService');
 const projection = require('./monthlyFinancialProjection');
+const revenue = require('./financialRevenueCoverageService');
 const { period, documentMonthWhere } = require('./operationalValueReportService');
 
 const unavailable = ['OPERATING_EXPENSES', 'PROFIT', 'BANK_BALANCE', 'CASHFLOW_FORECAST'];
@@ -17,12 +18,13 @@ async function snapshot(monthRef) {
       const ledger = require('./expenseLedgerService');
       const [payments, monthly, invoices, clients, expenseRows] = await Promise.all([
         cash.payments(selected, db),
-        db.invoice.findMany({ where:documentMonthWhere(selected), select:projection.documentSelect }),
+        db.invoice.findMany({ where:documentMonthWhere(selected), select:revenue.documentSelect }),
         db.invoice.findMany({ select:{ ...projection.documentSelect, id:true, clientId:true, dueDate:true, client:{ select:{ name:true } } } }),
         db.client.findMany({ select:{ creditBalance:true } }),
         ledger.rows(db)
       ]);
       const expenses = ledger.summarize(expenseRows, selected, generatedAt);
+      const revenueCoverage = await revenue.build(db, selected, generatedAt, monthly);
       const costCoverage = await require('./financialCostCoverageService').build(db, selected, generatedAt, expenseRows);
       const selectedProjection = projection.project(monthly, payments).summary, allProjection = projection.project(invoices, []).summary.documents;
       const groups = new Map(), balances = [], overdue = [];
@@ -41,7 +43,7 @@ async function snapshot(monthRef) {
       const creditValues = clients.map(row => projection.cents(row.creditBalance)), creditCents = projection.sum(creditValues);
       const topClients = [...groups.values()].map(row => ({ clientId:row.clientId, name:row.name, invoiceCount:row.invoiceCount, amountCents:projection.sum(row.amounts), overdueAmountCents:projection.sum(row.overdue) })).sort((a,b) => (b.amountCents || 0) - (a.amountCents || 0) || a.clientId-b.clientId).slice(0,10);
       const review = !known || creditCents === null || selectedProjection.cash.amountCents === null || selectedProjection.documents.amountCents === null || selectedProjection.documents.openAmountCents === null;
-      return { ...base, expenses, costCoverage, state:review || expenses.state === 'REVIEW' || expenses.attribution.state === 'REVIEW' ? 'REVIEW' : 'READY',
+      return { ...base, expenses, costCoverage, revenueCoverage, state:revenueCoverage.documents.review > 0 || revenueCoverage.lines.review > 0 || review || expenses.state === 'REVIEW' || expenses.attribution.state === 'REVIEW' ? 'REVIEW' : 'READY',
         cash:{ ...selectedProjection.cash, basis:'PAYMENT_PAID_AT_UTC', internalCreditIncluded:false },
         monthDocuments:selectedProjection.documents,
         receivables:{ amountCents:known ? projection.sum(balances) : null, overdueAmountCents:known ? projection.sum(overdue) : null, invoiceCount:known ? invoiceCount : null, overdueCount:known ? overdueCount : null, missingDueDateCount, clientCount:groups.size, topClients, topLimit:10, sampleOnly:groups.size>10, basis:'CURRENT_DOCUMENT_BALANCE', asOf:generatedAt.toISOString(), reviewCount:allProjection.unknownStatusCount + allProjection.invalidAmountCount },
@@ -50,13 +52,16 @@ async function snapshot(monthRef) {
       };
     }, { isolationLevel:'RepeatableRead', maxWait:15000, timeout:30000 });
   } catch (_) {
-    return { ...base, state:'UNAVAILABLE', cash:null, monthDocuments:null, receivables:null, customerCredit:null, expenses:null, costCoverage:null, sourceUnavailable:true };
+    return { ...base, state:'UNAVAILABLE', cash:null, monthDocuments:null, receivables:null, customerCredit:null, expenses:null, costCoverage:null, revenueCoverage:null, sourceUnavailable:true };
   }
 }
 
 function recommendations(finance) {
   if (!finance || finance.state === 'UNAVAILABLE') return [{ code:'SOURCE_UNAVAILABLE', title:'Confirmar a ligação aos dados', explanation:'A consulta financeira falhou. Não é possível concluir que os valores são zero.', href:'/admin-reports' }];
   const items = [];
+  const revenue = finance.revenueCoverage;
+  if (revenue?.documents.review > 0 || revenue?.lines.review > 0) items.push({code:'REVIEW_REVENUE_LINKS',title:'Rever os documentos e as ligações aos serviços',explanation:`Há ${revenue.documents.review} documentos excluídos da repartição por precisarem de revisão e ${revenue.lines.review} linhas com ligações por confirmar. Verifique valores, créditos, referências repetidas e o cliente original antes de usar estes montantes.`,href:'/invoices'});
+  if (revenue?.lines.monthly > 0 || revenue?.lines.unassigned > 0) items.push({code:'COMPLETE_REVENUE_ALLOCATION',title:'Completar a repartição dos valores documentados',explanation:`Há ${revenue.lines.monthly} linhas de mensalidades e ${revenue.lines.unassigned} de outras origens ainda sem repartição por serviço. Use o contrato e os registos históricos de cada cliente; não divida automaticamente pelo número de visitas.`,href:'/invoices'});
   const coverage = finance.costCoverage;
   if (coverage?.sourceIssues.total > 0) items.push({code:'RECONCILE_COST_SOURCES',title:'Conciliar as origens dos gastos',explanation:`Há ${coverage.sourceIssues.total} compras ou manutenções com ligação à despesa por confirmar, em todos os meses. Confira primeiro os registos existentes para evitar duplicações; isto não prova que estejam por pagar.`,href:'/admin-expenses'});
   if (coverage?.serviceIssues.total > 0 || coverage?.unassignedMovementCount > 0) items.push({code:'COMPLETE_SERVICE_MEASUREMENTS',title:'Completar os custos dos serviços',explanation:`Há ${coverage.serviceIssues.total} serviços com medições, datas ou valorizações por completar/rever e ${coverage.unassignedMovementCount} movimentos do mês sem um serviço único existente. A ausência de consumo registado não comprova custo zero.`,href:'/admin-expenses'});
@@ -89,6 +94,12 @@ function localAnswer(message, finance) {
     const c = finance.costCoverage;
     parts.push(`Cobertura dos custos: há ${c.sources.stock.unlinked} compras de stock e ${c.sources.vehicles.unlinked} manutenções concluídas sem ligação a uma despesa, considerando todos os meses. Há ainda ${c.sources.stock.review + c.sources.vehicles.review} origens/ligações por rever. Confirme se já foram registadas manualmente antes de criar despesas; não são automaticamente novas dívidas.`);
     parts.push(`Nos ${c.labor.total} serviços concluídos no mês, ${c.labor.valued} têm o tempo valorizado, ${c.labor.missing} não o têm e ${c.labor.review} precisam de revisão. Nos produtos/unidades por serviço com movimentos identificados, há ${c.materials.missing} consumos sem valorização, ${c.materials.partial} parcialmente valorizados e ${c.materials.review} por rever. ${c.noMaterialRecordVisits} serviços não têm consumo/devolução registado; isso não prova que o custo seja zero. Há ${c.undatedCompleted} serviços concluídos sem data de conclusão no mês planeado e ${c.unassignedMovementCount} movimentos do mês sem um serviço único existente. As devoluções posteriores também contam na consulta atual. Mesmo com estas lacunas resolvidas, faltam verificar os restantes gastos e a repartição das receitas antes de apurar margens.`);
+  }
+  if (finance.revenueCoverage && /receit|mensalid|repart|servi|marg|rent|falta|cobertura|melhori|otimiz|optimiz/.test(text)) {
+    const r = finance.revenueCoverage;
+    parts.push(`Valores documentados por serviço: ${euro(r.linkedServiceAmountCents)} com ligação única a visitas regulares/extra concluídas. Mensalidades ainda por repartir: ${euro(r.monthlyUnallocatedAmountCents)}; outras linhas sem repartição: ${euro(r.otherUnallocatedAmountCents)}; ligações de serviços por rever: ${euro(r.serviceReviewAmountCents)}. São parcelas de ${euro(r.reconciledDocumentAmountCents)} em documentos cujas linhas coincidem com o total, no mês do documento. ${r.documents.review} documentos precisam de revisão e não entram nestes valores; ${r.documents.excluded} rascunhos, documentos retirados ou depósitos de crédito ficam excluídos. Créditos, dívidas transportadas, impostos ou valores sem conciliação exigem revisão, sem serem somados como nova receita.`);
+    parts.push('Esta repartição não é dinheiro recebido nem receita completa do mês de execução. A data de conclusão de cada serviço pode pertencer a outro mês. O preço histórico guardado no documento prevalece sobre taxas atuais; mensalidades não são divididas automaticamente pelo número de visitas. Preços, frequências e serviços incluídos variam por cliente e época. Não calcule margens subtraindo estes valores aos custos de outro período.');
+    if (r.linkedServices.rows.length) parts.push('Ligações comprovadas' + (r.linkedServices.sampleOnly ? ' (primeiras dez, totais completos)' : '') + ':\n' + r.linkedServices.rows.map(row => `${row.clientName} (#${row.clientId}), ${row.type === 'REGULAR' ? 'visita regular' : 'visita extra'} #${row.id}, conclusão ${row.serviceMonth}, documento #${row.invoiceId}/linha #${row.lineId}: ${euro(row.amountCents)}.`).join('\n'));
   }
   if (/sistema|software|aplicac|automat/.test(text)) parts.push('Neste contexto consigo identificar melhorias nos registos financeiros. Não tenho medições de desempenho, falhas ou segurança do servidor para diagnosticar o sistema.');
   if (finance.state === 'REVIEW') parts.push('Há dados por rever. Os valores afetados permanecem por confirmar; os saldos identificados não substituem um total completo.');

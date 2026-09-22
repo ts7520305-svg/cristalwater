@@ -56,6 +56,11 @@
     <div id="financeMetrics" class="ai-metrics"></div>
     <p id="financeBasis" class="ai-note"></p>
     <details id="financeDetails" hidden><summary>Clientes com maiores saldos identificados</summary><div id="financeClients"></div></details>
+    <section aria-labelledby="revenueTitle"><h3 id="revenueTitle">Valores documentados por serviço</h3><div id="financeRevenueMetrics" class="ai-metrics"></div><p id="financeRevenueBasis" class="ai-note"></p>
+      <details id="financeRevenueServices" hidden><summary>Ligações comprovadas a serviços</summary><div id="financeRevenueServiceRows"></div></details>
+      <details id="financeRevenueIssues" hidden><summary>Documentos e linhas por repartir ou rever</summary><div id="financeRevenueIssueRows"></div></details>
+      <a href="/invoices">Consultar documentos de cobrança</a>
+    </section>
     <h3>Despesas e contas a pagar</h3><div id="financeExpenseMetrics" class="ai-metrics"></div><p id="financeExpenseBasis" class="ai-note"></p><a href="/admin-expenses">Abrir despesas e comprovativos</a>
     <h3>Atribuição das despesas</h3><div id="financeAllocationMetrics" class="ai-metrics"></div><p id="financeAllocationBasis" class="ai-note"></p><div id="financeValuationMetrics" class="ai-metrics"></div><p id="financeValuationBasis" class="ai-note"></p>
     <section aria-labelledby="coverageTitle"><h3 id="coverageTitle">O que falta nos custos</h3><div id="financeCoverageMetrics" class="ai-metrics"></div><p id="financeCoverageBasis" class="ai-note"></p>
@@ -72,6 +77,7 @@
       <button type="button" data-prompt="Que despesas e pagamentos foram registados no mês? Que contas estão por pagar?">Despesas e pagamentos</button>
       <button type="button" data-prompt="Que dados faltam para avaliar custos, margens e tesouraria?">Custos e margens</button>
       <button type="button" data-prompt="Que compras, manutenções e serviços têm dados de custos por completar?">O que falta registar?</button>
+      <button type="button" data-prompt="Que receitas documentadas estão ligadas a serviços e que mensalidades ou linhas faltam repartir?">Receitas por serviço</button>
       <button type="button" data-prompt="Que melhorias posso fazer na gestão financeira e no sistema com estes dados?">Melhorias</button>
     </div>
     <div class="quick-prompts" id="operationalPrompts" hidden>
