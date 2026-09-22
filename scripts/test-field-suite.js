@@ -130,6 +130,7 @@ scripts.push('test-field-monthly-email-review.js','test-field-monthly-email-revi
 scripts.push('test-field-credit-note-revenue.js');
 scripts.push('test-field-credit-revenue.js','test-field-credit-revenue-ui.js');
 scripts.push('test-field-financial-ai.js','test-field-financial-ai-ui.js');
+scripts.push('test-field-execution-values.js','test-field-execution-values-ui.js');
 scripts.push('test-field-company-expenses.js','test-field-company-expenses-ui.js');
 scripts.push('test-field-expense-costs.js','test-field-expense-costs-ui.js');
 scripts.push('test-field-expense-valuations.js','test-field-expense-valuations-ui.js');

@@ -9,6 +9,7 @@ const run = handler => (req,res,next) => Promise.resolve(handler(req,res,next)).
   res.status([400,401,403,404,409].includes(status) ? status : 503).json({ok:false,error:[400,401,403,404,409].includes(status) ? error.message : 'Não foi possível concluir a consulta. Tente novamente sem assumir que os valores são zero.'});
 });
 
+router.get('/execution-values',run(async(req,res)=>{res.set('Cache-Control','private, no-store');res.json(await require('../services/serviceExecutionValuesService').report(req.query));}));
 router.get("/status", run(controller.status));
 router.post("/chat", run(controller.chat));
 router.get("/threads", run(controller.threads));

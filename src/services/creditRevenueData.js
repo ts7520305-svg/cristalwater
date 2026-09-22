@@ -8,9 +8,12 @@ async function states(db,options={}) {
   if(Number.isSafeInteger(options))options={lineId:options};
   const allocations=await db.creditRevenueAllocation.findMany({orderBy:{id:'asc'}});
   const coverage=require('./financialRevenueCoverageService');
-  const invoices=await db.invoice.findMany({where:{OR:[{id:{in:allocations.map(a=>a.invoiceId)}},{lines:{some:{OR:[{type:{contains:'CREDIT_NOTE',mode:'insensitive'}},{lineType:{contains:'CREDIT_NOTE',mode:'insensitive'}}]}}}]},select:coverage.documentSelect});
-  if(!invoices.length&&!allocations.length)return [];
-  const {raw}=await coverage.partition(db,null,options.asOf||new Date(),invoices,options.monthlyStates);
+  let raw=options.raw;
+  if(!raw){
+    const invoices=await db.invoice.findMany({where:{OR:[{id:{in:allocations.map(a=>a.invoiceId)}},{lines:{some:{OR:[{type:{contains:'CREDIT_NOTE',mode:'insensitive'}},{lineType:{contains:'CREDIT_NOTE',mode:'insensitive'}}]}}}]},select:coverage.documentSelect});
+    if(!invoices.length&&!allocations.length)return [];
+    raw=(await coverage.partition(db,null,options.asOf||new Date(),invoices,options.monthlyStates)).raw;
+  }
   const sources=new Map(raw.sources.map(s=>[s.lineId,s])),targets=new Map(raw.targets.map(t=>[key(t),t]));
   const active=allocations.filter(a=>!a.voidedAt),reservedTargets=new Map();
   for(const a of active){const k=a.targetType+':'+a.targetId;reservedTargets.set(k,sum([reservedTargets.get(k)||0,a.amountCents]));}

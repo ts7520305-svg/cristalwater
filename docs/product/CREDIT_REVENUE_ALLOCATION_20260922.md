@@ -51,3 +51,7 @@ Commit `d3f45891ed267c1586f1abd3f711c0f12262e5b5`, árvore `c86eda1e1bcecde0180c
 Nova API/UI de atribuição: 33018/24087 ms; conciliação das notas 23198 ms; IA UI 23959 ms; cobertura documental 25438 ms; mensalidades API/UI 6770/10968 ms. Restauro PostgreSQL 16: 121 tabelas/46 ficheiros, linhas e hashes iguais. Evidência durável `evidence/20260922_task294_ci.json`.
 
 O encerramento posterior altera apenas documentação/evidência, preservando este código aprovado. TASK294 concluída neste âmbito; receita/custos completos, margens e validações de produção/campo permanecem pendentes.
+
+## Correção posterior — TASK295
+
+A lista `financeCreditAllocationRows` não era limpa pelo caminho comum da Gestão com IA após resposta inválida ou mudança de sessão. O caso foi reproduzido com uma asserção que falhou no código da TASK294. A TASK295 inclui essa lista na limpeza, estende a regressão e confirma que nomes e valores líquidos são removidos; corrige também a ligação da recomendação para `/admin-credit-revenue`. As provas financeiras e de escrita da TASK294 mantêm-se. Ver `EXECUTION_VALUES_20260922.md` para a consulta por execução e a nova validação.

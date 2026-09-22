@@ -32,6 +32,8 @@
     #aiPage .msg { padding:14px; border-radius:10px; white-space:pre-wrap; line-height:1.55; background:#edf3fa; color:#183047; }
     #aiPage .msg.user { background:#e8f6ef; color:#174d35; }
     #aiPage .rec,#aiPage .action,#aiPage .capability { border-top:1px solid #c5d3df; padding:12px 0; line-height:1.5; }
+    #aiPage #executionRows article { background:#fff; color:#183047; padding:14px; }
+    #aiPage h4 { color:inherit; }
     #aiPage .rec a { display:inline-flex; margin-top:8px; color:#155db1; min-height:44px; align-items:center; }
     #aiPage #kpis { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
     @media(max-width:800px) { #aiPage .ai-main { grid-template-columns:minmax(0,1fr); } #aiPage .ai-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } }
@@ -64,6 +66,7 @@
       <details id="financeRevenueIssues" hidden><summary>Documentos e linhas por repartir ou rever</summary><div id="financeRevenueIssueRows"></div></details>
       <a href="/invoices">Consultar documentos de cobrança</a>
     </section>
+    <section id="executionValuesPanel" hidden aria-labelledby="executionValuesTitle"><h3 id="executionValuesTitle">Receitas e custos por mês de execução</h3><div id="executionValues"></div></section>
     <h3>Despesas e contas a pagar</h3><div id="financeExpenseMetrics" class="ai-metrics"></div><p id="financeExpenseBasis" class="ai-note"></p><a href="/admin-expenses">Abrir despesas e comprovativos</a>
     <h3>Atribuição das despesas</h3><div id="financeAllocationMetrics" class="ai-metrics"></div><p id="financeAllocationBasis" class="ai-note"></p><div id="financeValuationMetrics" class="ai-metrics"></div><p id="financeValuationBasis" class="ai-note"></p>
     <section aria-labelledby="coverageTitle"><h3 id="coverageTitle">O que falta nos custos</h3><div id="financeCoverageMetrics" class="ai-metrics"></div><p id="financeCoverageBasis" class="ai-note"></p>
@@ -81,6 +84,7 @@
       <button type="button" data-prompt="Que dados faltam para avaliar custos, margens e tesouraria?">Custos e margens</button>
       <button type="button" data-prompt="Que compras, manutenções e serviços têm dados de custos por completar?">O que falta registar?</button>
       <button type="button" data-prompt="Que receitas documentadas estão ligadas a serviços e que mensalidades ou linhas faltam repartir?">Receitas por serviço</button>
+      <button type="button" data-prompt="Que receitas líquidas e custos conhecidos estão ligados aos serviços do mês de execução selecionado?">Valores por execução</button>
       <button type="button" data-prompt="Que melhorias posso fazer na gestão financeira e no sistema com estes dados?">Melhorias</button>
     </div>
     <div class="quick-prompts" id="operationalPrompts" hidden>
@@ -100,7 +104,7 @@
     <section id="actionPanel" hidden><h2>Ações pendentes de aprovação</h2><div id="actions"></div></section>
   </aside>
 </main>
-<script src="/admin-ai.js"></script><script src="/cristal-help-data.js"></script><script src="/cristal-assist.js"></script>
+<script src="/cw-execution-values.js"></script><script src="/admin-ai.js"></script><script src="/cristal-help-data.js"></script><script src="/cristal-assist.js"></script>
 <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{});}</script>
 <script src="/cw-admin-shortcuts.js"></script><script src="/ui/core/navigation-context.js"></script><script src="/crystal-os-v2-shell.js"></script><script src="/crystal-os-v2-nav.js"></script><script defer src="/ui/design-system.js"></script>
 </body></html>

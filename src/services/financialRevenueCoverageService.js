@@ -150,4 +150,11 @@ async function build(db,monthRef,generatedAt,invoices) {
   const attribution=data.financial(states,raw.sources,raw.targets);
   return {...result,version:7,creditNotes:{...result.creditNotes,serviceAllocation:attribution.state,attribution}};
 }
-module.exports = { documentSelect, build, partition, documentReason, lineType, references };
+async function reports(db,monthRef,generatedAt,invoices,allInvoices,expenses){
+  const complete=await partition(db,null,generatedAt,allInvoices);
+  const {raw,...result}=await partition(db,monthRef,generatedAt,invoices,complete.raw.monthlyStates);
+  const data=require('./creditRevenueData'),states=await data.states(db,{raw:complete.raw,asOf:generatedAt});
+  const attribution=data.financial(states,raw.sources,raw.targets),execution=require('./serviceExecutionValuesService');
+  return {revenueCoverage:{...result,version:7,creditNotes:{...result.creditNotes,serviceAllocation:attribution.state,attribution}},executionValues:execution.publicSummary(execution.build(monthRef,generatedAt,complete,states,expenses))};
+}
+module.exports = { documentSelect, build, reports, partition, documentReason, lineType, references };
