@@ -15,14 +15,14 @@ function documentMonth(invoice) {
   if (monthPattern.test(invoice.month)) return invoice.month;
   return /^(20|21)\d{2}$/.test(String(invoice.year)) && /^(0?[1-9]|1[0-2])$/.test(invoice.month) ? invoice.year + '-' + invoice.month.padStart(2,'0') : null;
 }
-function source(invoice, line) {
+function source(invoice, line, credits) {
   const documentMonthRef = documentMonth(invoice), monthRef = line.sourceMonth === null ? documentMonthRef : monthPattern.test(line.sourceMonth) ? line.sourceMonth : null;
-  const reason = coverage.documentReason(invoice) || (!documentMonthRef || !monthRef ? 'INVALID_PERIOD' : coverage.lineType(line) !== 'MONTHLY' ? 'NOT_MONTHLY' : !(projection.cents(line.total) > 0) ? 'EMPTY_LINE' : null);
+  const reason = coverage.documentReason(invoice,credits) || (!documentMonthRef || !monthRef ? 'INVALID_PERIOD' : coverage.lineType(line) !== 'MONTHLY' ? 'NOT_MONTHLY' : !(projection.cents(line.total) > 0) ? 'EMPTY_LINE' : null);
   // Payment timestamps, cash and status transitions among receivable states do not change the documented price.
   const snapshot = json({ invoiceId:invoice.id, lineId:line.id, clientId:invoice.clientId, documentMonth:documentMonthRef, monthRef,
     amountCents:projection.cents(line.total), documentAmountCents:projection.document(invoice).amountCents,
     lines:[...invoice.lines].sort((a,b)=>a.id-b.id) });
-  return { ...snapshot, lines:undefined, clientName:invoice.client.name, label:line.description, valid:!reason, excluded:projection.document(invoice).classification === 'EXCLUDED', reason, hash:r.hash(snapshot), snapshot };
+  return { ...snapshot, lines:undefined, creditNoteAmountCents:projection.sum((credits?.rows||[]).map(r=>r.amountCents)), clientName:invoice.client.name, label:line.description, valid:!reason, excluded:projection.document(invoice).classification === 'EXCLUDED', reason, hash:r.hash(snapshot), snapshot };
 }
 function target(type, row, references) {
   const facts = json({ type, id:row.id, clientId:row.clientId, poolId:row.poolId, status:normal(row.status), startAt:row.startAt, endAt:row.endAt,
@@ -67,7 +67,8 @@ async function states(db, lineId) {
   if (lineId && invoices.length) allocations = await db.revenueAllocation.findMany({where:{invoiceId:{in:invoices.map(i=>i.id)}},orderBy:{id:'asc'}});
   const targetMap = await targets(db, allocations.filter(a=>!a.voidedAt).map(a=>({type:a.targetType,id:a.targetId})));
   const sources = new Map();
-  for (const invoice of invoices) for (const line of invoice.lines) if ([line.type,line.lineType].map(normal).includes('MONTHLY') || allocations.some(a=>a.lineId===line.id)) sources.set(line.id,source(invoice,line));
+  const creditNotes=require('./creditNoteRevenueSourceService'),creditContext=await creditNotes.load(db,invoices),asOf=new Date();
+  for (const invoice of invoices) {const credits=creditNotes.match(creditContext,invoice,asOf);for (const line of invoice.lines) if ([line.type,line.lineType].map(normal).includes('MONTHLY') || allocations.some(a=>a.lineId===line.id)) sources.set(line.id,source(invoice,line,credits));}
   const ids = new Set([...sources.keys(),...allocations.map(a=>a.lineId)]);
   const rows = [...ids].sort((a,b)=>b-a).map(id=>state(sources.get(id),allocations.filter(a=>a.lineId===id),targetMap));
   const reviews = rows.flatMap(s=>s.allocations).filter(a=>a.needsReview);

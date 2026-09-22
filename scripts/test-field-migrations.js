@@ -149,6 +149,15 @@ async function dbRejects(sql, expected) {
   assert.deepEqual(await prisma.revenueEvent.findUniqueOrThrow({where:{id:monthlyEvent.id}}),monthlyEvent);
   await prisma.revenueAllocation.update({where:{id:monthlyAllocation.id},data:{activeKey:null,voidedAt:new Date(),voidReason:'Explicit correction'}});
   await prisma.revenueAllocation.delete({where:{id:monthlyAllocation.id}});await prisma.revenueEvent.delete({where:{id:monthlyEvent.id}});
+  cli(['db','execute','--file','prisma/migrations/20260922220000_credit_revenue_allocation/migration.sql','--schema','prisma/schema.prisma']);
+  assert.equal(await prisma.creditRevenueAllocation.count(),0);assert.equal(await prisma.creditRevenueEvent.count(),0);
+  const reduction=await prisma.creditRevenueAllocation.create({data:{invoiceId:previousMonthly.id,lineId:monthlyAllocation.lineId,clientId:oldClient.id,monthRef:'2006-09',amountCents:100,targetType:'MONTHLY_ALLOCATION',targetId:monthlyAllocation.id,targetLineId:monthlyAllocation.lineId,serviceType:'REGULAR',serviceId:visit.id,serviceMonth:'2006-09',sourceHash:'a'.repeat(64),sourceSnapshot:{historical:true},targetHash:'b'.repeat(64),targetSnapshot:{historical:true},reason:'Historical note attribution',createdById:1}});
+  const reductionEvent=await prisma.creditRevenueEvent.create({data:{requestId:'00000000-0000-4000-8000-000000000294',actorId:1,actorName:'Historical admin',lineId:reduction.lineId,command:'ALLOCATE',payloadHash:'c'.repeat(64),request:{historical:true},result:{ok:true,applied:true}}});
+  for(const assignment of [`"amountCents"=0`,`"targetType"='CLIENT'`,`"serviceType"='MONTHLY'`,`"monthRef"='2006-13'`,`"serviceMonth"='2006-13'`,`"voidedAt"=CURRENT_TIMESTAMP`,`"sourceHash"='invalid'`,`"reason"=''`])await dbRejects(`UPDATE "CreditRevenueAllocation" SET ${assignment} WHERE id=${reduction.id}`,'23514');
+  for(const assignment of [`"command"='EDIT'`,`"requestId"='invalid'`,`"payloadHash"='invalid'`])await dbRejects(`UPDATE "CreditRevenueEvent" SET ${assignment} WHERE id=${reductionEvent.id}`,'23514');
+  await dbRejects(`INSERT INTO "CreditRevenueEvent" ("requestId","actorId","actorName","lineId","command","payloadHash","request","result") SELECT "requestId","actorId","actorName","lineId","command","payloadHash","request","result" FROM "CreditRevenueEvent" WHERE id=${reductionEvent.id}`,'23505');
+  await prisma.creditRevenueAllocation.update({where:{id:reduction.id},data:{voidedAt:new Date(),voidReason:'Historical correction'}});
+  await prisma.creditRevenueAllocation.delete({where:{id:reduction.id}});await prisma.creditRevenueEvent.delete({where:{id:reductionEvent.id}});
   const retainedCompletion = await prisma.equipmentMaintenanceCompletion.findUniqueOrThrow({where:{id:oldCompletion.id}});
   assert.equal(retainedCompletion.visitId,visit.id);assert.equal(retainedCompletion.extraVisitId,null);assert.equal(retainedCompletion.notes,'Retained execution');assert.deepEqual(retainedCompletion.result,{ok:true,historical:true});
   const completionData={planId:equipmentPlan.id,version:2,requestId:'migration-extra-equipment',actor:'TECH:previous',fingerprint:'extra',notes:'Extra execution',result:{ok:true}};
@@ -182,6 +191,6 @@ async function dbRejects(sql, expected) {
   assert.equal(await prisma.technicalProposalRequest.count(),0);
   assert.equal(await prisma.fieldWriteRequest.count(),0);
   const savedExtra=await prisma.extraVisit.findUniqueOrThrow({where:{id:oldExtra.id}});assert.equal(savedExtra.notes,'Migration preserved extra');assert.equal(savedExtra.execution,null);assert.equal(savedExtra.startAt,null);assert.equal(savedExtra.endAt,null);assert.equal(savedExtra.completionRequestId,null);assert.equal(await prisma.extraVisitPhoto.count(),0);await prisma.extraVisit.delete({where:{id:oldExtra.id}});
-  console.log('PASS twenty-six additive migrations preserve previous data and match the current schema');
+  console.log('PASS twenty-seven additive migrations preserve previous data and match the current schema');
  }finally{fs.rmSync(temp,{recursive:true,force:true})}
 })().catch(error=>{console.error(error);process.exitCode=1}).finally(()=>prisma.$disconnect());

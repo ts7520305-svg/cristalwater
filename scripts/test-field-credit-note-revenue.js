@@ -30,10 +30,10 @@ if (process.env.NODE_ENV !== 'test' || process.env.QA_MODE !== 'true' || process
   assert.equal(r.linkedServices.rows[0].serviceMonth,'2004-05');
   assert(r.creditNotes.examples.rows.every(x=>x.recordedAt.slice(0,7)!==month));
   assert.equal(result.cash.amountCents,10000); assert.equal(result.customerCredit.amountCents-before.customerCredit.amountCents,3500);
-  assert.equal(r.completeRevenueAllocation,false); assert.equal(r.profit,null); assert.equal(r.creditNotes.serviceAllocation,'UNALLOCATED');
+  assert.equal(r.completeRevenueAllocation,false); assert.equal(r.profit,null); assert.equal(r.creditNotes.serviceAllocation,'PARTIAL');
   assert(financial.recommendations(result).some(x=>x.code==='REVIEW_CREDIT_NOTE_ALLOCATION'));
   const answer=financial.localAnswer('Créditos e margem dos serviços',result);
-  assert.match(answer,/antes das notas de crédito/);assert.match(answer,/não estão repartidas pelos serviços/);assert.match(answer,/Não posso calcular lucro/);
+  assert.match(answer,/antes das notas de crédito/);assert.match(answer,/Reduções atribuídas:.*por atribuir:/);assert.match(answer,/Não posso calcular lucro/);
   console.log('PASS documented credit preserves original service, exact reduction and cash');
 
   const doc = () => prisma.invoice.findUniqueOrThrow({where:{id:invoice.id},include:{lines:true,payments:true}});

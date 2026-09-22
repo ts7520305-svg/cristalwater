@@ -1,0 +1,12 @@
+'use strict';
+const router=require('express').Router(),service=require('../services/creditRevenueService'),r=require('../services/expenseLedgerRules');
+router.use((req,res,next)=>{res.set('Cache-Control','private, no-store');next();},require('../middlewares/authMiddleware')('ADMIN'));
+const handle=work=>(req,res,next)=>Promise.resolve(work(req,res)).catch(next);
+router.get('/sources',handle(async(req,res)=>res.json(await service.list(req.query))));
+router.get('/sources/:id',handle(async(req,res)=>{r.object(req.query,[]);res.json(await service.detail(r.queryId(req.params.id)));}));
+router.get('/sources/:id/targets',handle(async(req,res)=>res.json(await service.candidates(r.queryId(req.params.id),req.query))));
+router.get('/requests/:id',handle(async(req,res)=>{r.object(req.query,[]);res.json(await service.receipt(req.user,req.params.id));}));
+router.post('/commands',handle(async(req,res)=>res.json(await service.command(req.user,req.body))));
+router.post('/commands/cancel',handle(async(req,res)=>res.json(await service.command(req.user,req.body,true))));
+router.use((error,req,res,next)=>{if(res.headersSent)return next(error);const status=[400,401,403,404,409,503].includes(error.status)?error.status:503;res.status(status).json({ok:false,error:error.status?error.message:'Não foi possível confirmar a atribuição da redução. Consulte o resultado do pedido antes de repetir.'});});
+module.exports=router;

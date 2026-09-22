@@ -49,6 +49,7 @@
     '/admin-vehicles': { area: 'Tecnicos e equipa', title: 'Viaturas' },
     '/admin-crm': { area: 'Comercial', title: 'CRM e oportunidades' },
     '/admin-ai': { area: 'Faturacao e financeiro', title: 'Gestão com IA' },
+    '/admin-credit-revenue': { area: 'Faturacao e financeiro', title: 'Reduções por serviço' },
     '/admin-revenue': { area: 'Faturacao e financeiro', title: 'Repartição de mensalidades' },
     '/repair-execution': { area: 'Operacao', title: 'Execução de reparações' },
     '/admin-email-review': { area: 'Gestao', title: 'Revisão de emails' },
@@ -133,6 +134,7 @@
         { label: '7. Faturacao e financeiro', links: [
           ['/billing', 'Resumo financeiro'],
           ['/admin-ai', 'Gestão com IA'],
+          ['/admin-credit-revenue', 'Reduções por serviço'],
           ['/admin-revenue', 'Repartição de mensalidades'],
           ['/admin-expenses', 'Despesas e contas a pagar'],
           ['/billing-center', 'Centro de cobranca'],

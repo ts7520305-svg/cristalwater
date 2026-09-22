@@ -2620,3 +2620,51 @@ model RevenueEvent {
   @@index([lineId, createdAt])
   @@index([actorId, createdAt])
 }
+
+// Explicit reductions of documented service revenue. Historical IDs deliberately
+// survive removal of documents, monthly parcels and operational sources.
+model CreditRevenueAllocation {
+  id Int @id @default(autoincrement())
+  invoiceId Int
+  lineId Int
+  clientId Int
+  monthRef String
+  amountCents Int
+  targetType String
+  targetId Int
+  targetLineId Int
+  serviceType String
+  serviceId Int
+  serviceMonth String
+  sourceHash String
+  sourceSnapshot Json
+  targetHash String
+  targetSnapshot Json
+  reason String
+  createdById Int
+  createdAt DateTime @default(now())
+  voidedAt DateTime?
+  voidReason String?
+
+  @@index([lineId])
+  @@index([invoiceId])
+  @@index([monthRef, clientId])
+  @@index([targetType, targetId])
+  @@index([serviceType, serviceId])
+}
+
+model CreditRevenueEvent {
+  id Int @id @default(autoincrement())
+  requestId String @unique
+  actorId Int
+  actorName String
+  lineId Int
+  command String
+  payloadHash String
+  request Json
+  result Json
+  createdAt DateTime @default(now())
+
+  @@index([lineId, createdAt])
+  @@index([actorId, createdAt])
+}
