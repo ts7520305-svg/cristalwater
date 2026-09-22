@@ -28,6 +28,12 @@ A declaração regista a data atual do sistema e consome os materiais da reserva
 
 ## Publicação
 
-Publicação sem força apenas na branch autorizada. CI PostgreSQL 16 e restauro da árvore final pendentes; o encerramento exige verificar os registos completos. Principal preservada em `6f27081e1d183ff584a62255b016b373836734db`, sem merge, deploy ou contactos reais.
+Publicada sem força na branch `work/field-readiness-20260915-simulation`: commit `d4e8026a627b6ec4959a8997a8f11bbc0c64c8ad`, árvore `8e486f015c1af2c8c1c36acc9b4bb4db97d127d8`, igual à árvore local validada. Catorze ficheiros desde a base; cache v106, sem esquema, migrações ou dependências novas. Backup local `backup/repair-execution-interface-local-20260922` (`95e2232de9059c3fb9d79db28de5c659097c1e85`).
+
+[CI 35763873430](https://github.com/ts7520305-svg/cristalwater/actions/runs/35763873430), job `106868353584`, aprovado no commit acima. As 17 etapas passaram; job de 17:56:13 a 18:17:40 UTC de 22/09/2026, duração 21m27s. Os registos completos confirmam os 181/181 grupos distintos previstos no runner, todos com código zero e sem sinal, 396 testes unitários/63 ficheiros, quatro testes de técnico e gate geral do navegador. As 26 migrações aditivas preservam os dados anteriores e correspondem ao esquema atual; sintaxe 583 backend/191 frontend/59 inline aprovada. Restauro PostgreSQL 16: 119 tabelas e 46 ficheiros recuperados, com linhas da base de dados e hashes dos ficheiros iguais.
+
+Novo comando em 1288 ms e nova interface em 5068 ms. Conclusão da TASK289 em 3063 ms, conciliação da execução em 15062 ms, IA API/UI em 5287/18235 ms e percurso operacional antigo em 1027 ms. Faturação atómica, reserva mensal, pagamentos, origens documentais, mensalidades, manutenção e E2E também aprovados. Evidência consolidada em `/tmp/cw290-ci-evidence.json`.
+
+O encerramento altera apenas este documento e `CURRENT_WORK_CHECKPOINT.md`, preservando o código aprovado. Principal ancestral e inalterada em `6f27081e1d183ff584a62255b016b373836734db`, sem merge, deploy ou contactos reais.
 
 Próximo âmbito: definir uma declaração própria para reparações sem consumo de material e a eventual ligação explícita ao trabalho/visita de origem; preservar a distinção entre data de registo e data de execução. Períodos históricos e restantes origens/ajustes/custos continuam por estabelecer antes de margens ou previsões. Não transformar uma confirmação administrativa antiga em prova nova automaticamente.
