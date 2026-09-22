@@ -38,8 +38,27 @@ O ensaio real de navegador de Gestão com IA passa a usar uma reparação com no
 
 Validação local aprovada: oito grupos focados (nota de crédito, cobertura documental, mensalidades, manutenção, reparações, execução, IA API/interface), 401 testes unitários em 64 ficheiros e sintaxe 586 backend/192 frontend/59 inline. Notas e totais revistos visualmente em mobile/desktop. A preparação inicial do ensaio repetia a chave única cliente/mês: corrigida usando documentos avulsos com a referência mensal histórica existente. Não foi uma alteração às restrições da aplicação. Logs `/tmp/cw293-focused.log`, `/tmp/cw293-units.log`, `/tmp/cw293-syntax.log`.
 
-185 grupos previstos no runner; sem nova migração ou dependência, cache v108. Validação completa do commit publicado e restauro PostgreSQL 16 ainda por confirmar nesta preparação. As evidências serão acrescentadas depois da execução automática.
+185 grupos previstos no runner; sem nova migração ou dependência, cache v108. Validação completa do commit publicado e restauro PostgreSQL 16 aprovados, conforme o encerramento abaixo.
 
 ## Restante âmbito
 
 Repartir explicitamente notas pelos serviços, conciliar descontos/outros ajustes, completar custos atribuíveis e alinhar períodos antes de calcular margens. Não foram criadas notas fiscais externas, integrações bancárias, alterações no VPS ou contactos reais.
+
+Critérios de aceitação para a repartição futura, ainda não implementada:
+
+- Escolher explicitamente a nota original e os serviços/parcelas afetados, confirmando cliente, origem e motivo. O texto livre da nota não decide o destinatário.
+- Respeitar simultaneamente o saldo da nota e o valor ainda disponível do destino, considerando todas as notas. Parcelas por rever continuam reservadas até correção explícita; não libertar valor por desaparecimento de uma origem.
+- Guardar autor, fontes e valores originais, decisão e recibo atómicos; suportar concorrência, resposta perdida, repetição exata e anulação com histórico. Não alterar recebimentos ou voltar a disponibilizar crédito.
+- Manter a soma bruto menos reduções igual ao líquido, com remanescente não atribuído explícito. Uma mensalidade ajustada exige revisão das parcelas anteriores, sem divisão automática por visitas.
+- Apresentar receita líquida atribuída e custos comprovados pelo mesmo período de execução. Cobertura completa e margens só podem ser declaradas depois de fechar as restantes origens/custos, não apenas por concluir a repartição das notas.
+
+
+## Encerramento — 22/09/2026
+
+Código publicado sem força no commit `854e041d19283c0e7a73d25eec58279c8741fe0a`, árvore `3cf43ea87ff44fcace152152d4b2e4935817c986`, igual à validada localmente. Backup `backup/credit-note-revenue-local-20260922` (`18a092d1cd2766ea7d196af70b716ce6f9b591ba`). Principal `feature/technicians-v25` conservada no SHA `6f27081e1d183ff584a62255b016b373836734db`.
+
+[CI 35781492312](https://github.com/ts7520305-svg/cristalwater/actions/runs/35781492312), job `106927802133`, aprovado nas 17 etapas, entre 20:37:31 e 20:59:40 UTC (22m09s). Logs conferidos contra o runner: 185/185 grupos distintos previstos, todos com código zero/sem sinal; 401 unitários/64 ficheiros, quatro técnicos, gate geral do navegador, 26 migrações e sintaxe 586 backend/192 frontend/59 inline. Nova conciliação em 20194 ms; IA financeira UI em 21190 ms; cobertura documental em 21060 ms e repartição mensal em 5602 ms.
+
+Restauro PostgreSQL 16 aprovado: 119 tabelas/46 ficheiros, linhas e hashes iguais. Evidência durável `evidence/20260922_task293_ci.json`. A última confirmação local da conciliação/interface, incluindo a igualdade bruto menos notas igual a líquido e apresentação de zero, está em `/tmp/cw293-final.log`.
+
+Este encerramento altera apenas documentação/evidência, preservando o código aprovado. TASK293 concluída neste âmbito. Atribuição de reduções aos serviços, restantes origens/custos, período de execução e validações de produção/campo continuam pendentes.
