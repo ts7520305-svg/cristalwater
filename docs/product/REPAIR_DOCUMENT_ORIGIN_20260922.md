@@ -41,8 +41,17 @@ A interface valida versão, bases, contagens, somas, identidades, estados e amos
 - 396 testes unitários/63 ficheiros. Sintaxe 580 backend/190 frontend/58 inline. `git diff --check` aprovado. Runner 177 grupos, cache v104.
 - Evidência transitória: `/tmp/cw288-focused.log`, `/tmp/cw288-final-focused.log`, `/tmp/cw288-final-receipts-ui.log`, `/tmp/cw288-unit.log`, `/tmp/cw288-syntax.log`. O primeiro ensaio de falha no comprovativo revelou uma exceção não tratada no controlador de rascunhos: podia encerrar o processo. O controlador agora devolve erro controlado e sem detalhes privados, aconselhando consulta antes de repetir; o teste confirma o rollback e a continuidade do servidor. Não foram removidas asserções de integridade.
 
-## Publicação
+## Publicação e validação nativa
 
-CI nativo PostgreSQL 16 e restauro ainda pendentes nesta revisão; não declarar aprovação global com base apenas nos testes locais. Publicação apenas na branch de trabalho e sem força.
+Código publicado sem força na branch de trabalho: commit `c3c91a5b796fcbdb6f044c8cc1a07f44f2aa80c4`, árvore `23951f04116d052e1a960e3cfd04c4a337ed87c5`, igual à árvore local validada. Backup local `backup/repair-document-origin-local-20260922` (`7008c2094db1949a5b875ab4e5e96b854b48a80c`). Vinte ficheiros alterados, cache v104; principal preservada, sem merge ou deploy.
+
+[CI PostgreSQL 16 — 35750362285](https://github.com/ts7520305-svg/cristalwater/actions/runs/35750362285), job `106822576129`: aprovado em 22/09/2026, das 15:53:45 às 16:12:40 UTC, duração 18m55s. Identidade do commit e as 17 etapas confirmadas nos metadados; resultados conferidos nos logs completos:
+
+- 177/177 grupos distintos, todos com código zero e sem sinal; 396 unitários/63 ficheiros e quatro testes técnicos aprovados. Gate geral de navegador aprovado.
+- 26 migrações aditivas preservam os dados anteriores e coincidem com o esquema atual. Sintaxe: 580 ficheiros backend, 190 frontend e 58 scripts inline.
+- Nova origem de reparações em 20471 ms; faturação atómica em 880 ms, reserva mensal em 1824 ms e pagamentos em 750 ms. IA API/UI em 6007/16453 ms; cobertura documental em 16750 ms, repartição mensal API/UI em 4818/8880 ms, faturação de manutenção em 14759 ms e E2E em 29397 ms.
+- Restauro isolado PostgreSQL 16 aprovado: 119 tabelas e 46 ficheiros carregados, com igualdade das linhas e dos hashes dos ficheiros.
+
+Evidência compacta local: `/tmp/cw288-ci-evidence.json`. O encerramento posterior altera apenas este documento e `CURRENT_WORK_CHECKPOINT.md`, preservando todo o código e os testes da árvore aprovada. A aprovação desta etapa não transforma origem documental em prova de execução nem remove as limitações da cobertura financeira.
 
 Próximo âmbito: prova explícita da execução das reparações e alinhamento dos períodos; restantes origens/ajustes, revisão das linhas históricas e custos completos antes de margens ou previsões. Reconciliação de emails permanece separada.
