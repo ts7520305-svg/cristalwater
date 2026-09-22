@@ -449,13 +449,14 @@ async function consumeReservedRepairStock(repairId, payload = {}, db = null, act
     if (!repair) return { ok: false, status: 404, error: "Reparação não encontrada" };
 
     const reservation = await getRepairReservation(repair.id, tx);
-    if (!reservation) {
+    if (!reservation || reservation.status !== "APPROVED") {
       return { ok: false, status: 409, error: "Reserva de stock em falta" };
     }
 
     const items = reservationItemsFromLock(reservation)
       .map((item) => normalizeRepairStockItem(item, item?.scope || reservation?.payload?.scope || "CENTRAL", item?.vehicleId ?? reservation?.payload?.vehicleId ?? null))
-      .filter((item) => item.productName && item.quantity > 0);
+      .filter((item) => item.productName && item.quantity > 0)
+      .sort((a,b) => JSON.stringify([a.scope,a.vehicleId,a.productName,a.unit]).localeCompare(JSON.stringify([b.scope,b.vehicleId,b.productName,b.unit])));
 
     if (!items.length) {
       return { ok: false, status: 409, error: "Reserva de stock sem itens válidos" };
@@ -507,7 +508,7 @@ async function consumeReservedRepairStock(repairId, payload = {}, db = null, act
 
     const summary = summarizeRepairStockItems(items);
 
-    await repository.createTechnicalHistory(tx, {
+    await tx.technicalHistory.create({ data: {
       poolId: repair.poolId,
       type: "REPAIR_STOCK_CONSUMED",
       component: "Repair",
@@ -516,9 +517,9 @@ async function consumeReservedRepairStock(repairId, payload = {}, db = null, act
       status: "DONE",
       performedAt: new Date(),
       doneAt: new Date(),
-    });
+    } });
 
-    await repository.createAudit(tx, {
+    await tx.auditTrail.create({ data: {
       action: "REPAIR_STOCK_CONSUMED",
       eventType: "REPAIR_STOCK_CONSUMED",
       entity: "Repair",
@@ -527,9 +528,9 @@ async function consumeReservedRepairStock(repairId, payload = {}, db = null, act
       clientId: repair.pool?.client?.id || null,
       metadata: { actor, items, reservationId: reservation.id },
       message: `Stock consumido para reparação #${repair.id}`,
-    });
+    } });
 
-    await repository.createNotification(tx, {
+    await tx.notification.create({ data: {
       clientId: repair.pool?.client?.id || null,
       type: "REPAIR_STOCK_CONSUMED",
       eventType: "REPAIR_STOCK_CONSUMED",
@@ -539,41 +540,14 @@ async function consumeReservedRepairStock(repairId, payload = {}, db = null, act
       severity: "NORMAL",
       status: "PENDING",
       metadata: { repairId: repair.id, items },
-    });
-
-    await emitRepairEvent(EVENT_TYPES.REPAIR_STOCK_CONSUMED, {
-      repairId: repair.id,
-      poolId: repair.poolId,
-      clientId: repair.pool?.client?.id || null,
-      actor,
-      items,
-      reservationId: reservation.id,
-      source: "repair-stock-consumption",
-    });
-
-    await emitEquipmentStockEvent(STOCK_EVENT_TYPES.STOCK_CONSUMED, {
-      repairId: repair.id,
-      poolId: repair.poolId,
-      clientId: repair.pool?.client?.id || null,
-      actor,
-      items,
-      reservationId: reservation.id,
-      source: "repair-stock-consumption",
-    });
-
-    await emitFinanceEvent(FINANCE_EVENT_TYPES.FINANCE_INVOICE_DRAFT, {
-      repairId: repair.id,
-      poolId: repair.poolId,
-      clientId: repair.pool?.client?.id || null,
-      amount: Number(repair.totalPrice || 0),
-      source: "repair-stock-consumption",
-    });
+    } });
 
     return {
       ok: true,
       repair,
       reservation: finalizedReservation,
       consumed,
+      items,
     };
   };
 
@@ -1309,69 +1283,45 @@ async function scheduleRepair(repairId, payload = {}, db = null, actor = "repair
   return repository.transaction(run);
 }
 
-async function completeRepair(repairId, db = null, actor = "repair-os") {
+async function completeRepair(repairId, db = null, actor = "repair-os", principal = null) {
+  const executionService = require("../../services/repairExecutionService");
   const run = async (tx) => {
-    const repair = await repository.getRepair(repairId, tx);
-    if (!repair) return { ok: false, status: 404, error: "Reparação não encontrada" };
-
-    const transition = ensureRepairTransition(repair, "COMPLETE");
-    if (!transition.ok) return transition;
-
+    const prepared = await executionService.prepare(tx, repairId);
+    const {repair,clientId} = prepared;
+    if (prepared.existing) return {ok:true,repair,execution:prepared.existing,idempotent:true};
     const consumed = await consumeReservedRepairStock(repair.id, {}, tx, actor);
     if (!consumed.ok) return consumed;
-
-    const updatedRepair = await repository.updateRepair(tx, repairId, {
-      status: "DONE",
-      doneAt: new Date(),
-    });
-
-    await repository.createTechnicalHistory(tx, {
-      poolId: repair.poolId,
-      type: "REPAIR_COMPLETED",
-      component: "Repair",
-      message: "Reparação concluída",
-      description: JSON.stringify({ repairId: repair.id, actor, stockConsumed: true }),
-      status: "DONE",
-      performedAt: new Date(),
-      doneAt: new Date(),
-    });
-
-    await repository.createAudit(tx, {
-      action: "REPAIR_COMPLETED",
-      eventType: "REPAIR_COMPLETED",
-      entity: "Repair",
-      entityId: repair.id,
-      poolId: repair.poolId,
-      metadata: { actor, reservationId: consumed.reservation?.id || null },
-      message: `Reparação #${repair.id} concluída com consumo de stock`,
-    });
-
-    await repository.createNotification(tx, {
-      clientId: repair.pool?.client?.id || null,
-      type: "REPAIR_COMPLETED",
-      eventType: "REPAIR_COMPLETED",
-      title: "Reparação concluída",
-      message: `A reparação #${repair.id} foi concluída e o stock foi consumido.`,
-      role: "ADMIN",
-      severity: "NORMAL",
-      status: "PENDING",
-      metadata: { repairId: repair.id, reservationId: consumed.reservation?.id || null },
-    });
-
-    await emitRepairEvent(EVENT_TYPES.REPAIR_COMPLETED, {
-      repairId: repair.id,
-      poolId: repair.poolId,
-      actor,
-      reservationId: consumed.reservation?.id || null,
-      stockConsumed: true,
-      source: "repair-route",
-    });
-
-    return { ok: true, repair: updatedRepair };
+    const doneAt = new Date();
+    const updatedRepair = await repository.updateRepair(tx, repair.id, {status:"DONE",doneAt});
+    await tx.technicalHistory.create({data:{
+      poolId:repair.poolId,type:"REPAIR_COMPLETED",component:"Repair",message:"Reparação concluída",
+      description:JSON.stringify({repairId:repair.id,actor,stockConsumed:true}),status:"DONE",performedAt:doneAt,doneAt
+    }});
+    await tx.auditTrail.create({data:{
+      action:"REPAIR_COMPLETED",eventType:"REPAIR_COMPLETED",entity:"Repair",entityId:repair.id,poolId:repair.poolId,clientId,
+      metadata:{actor,reservationId:consumed.reservation.id},message:`Reparação #${repair.id} concluída com consumo de stock`
+    }});
+    const execution = await executionService.record(tx,{repair:updatedRepair,clientId,reservation:consumed.reservation,movements:consumed.consumed,actor,principal});
+    await tx.notification.create({data:{
+      clientId,type:"REPAIR_COMPLETED",eventType:"REPAIR_COMPLETED",title:"Reparação concluída",
+      message:`A reparação #${repair.id} foi concluída e o stock foi consumido.`,role:"ADMIN",severity:"NORMAL",status:"PENDING",
+      metadata:{repairId:repair.id,reservationId:consumed.reservation.id}
+    }});
+    return {ok:true,repair:updatedRepair,execution,idempotent:false,event:{
+      repairId:repair.id,poolId:repair.poolId,clientId,actor,items:consumed.items,reservationId:consumed.reservation.id
+    }};
   };
-
-  if (db) return run(db);
-  return repository.transaction(run);
+  // A transaction supplied by a caller owns the commit and any later events.
+  if (db && !db.$transaction) { const {event,...result}=await run(db); return result; }
+  const {event,...result}=await (db||repository.prisma).$transaction(run,{maxWait:15000,timeout:15000});
+  if (event) {
+    const stock={...event,source:"repair-stock-consumption"};
+    await emitRepairEvent(EVENT_TYPES.REPAIR_STOCK_CONSUMED,stock);
+    await emitEquipmentStockEvent(STOCK_EVENT_TYPES.STOCK_CONSUMED,stock);
+    await emitFinanceEvent(FINANCE_EVENT_TYPES.FINANCE_INVOICE_DRAFT,{...stock,amount:Number(result.repair.totalPrice||0)});
+    await emitRepairEvent(EVENT_TYPES.REPAIR_COMPLETED,{...event,stockConsumed:true,source:"repair-route"});
+  }
+  return result;
 }
 
 async function deleteRepair(repairId, db = null, actor = "repair-os") {

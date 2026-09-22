@@ -156,9 +156,14 @@ async function markSent(req, res) {
 }
 
 async function completeRepair(req, res) {
-  const result = await RepairBusiness.completeRepair(req.params.id, null, actor(req));
-  if (!result.ok) return res.status(result.status || 400).json({ ok: false, message: result.error || "Erro" });
-  return res.json({ ok: true, repair: result.repair || result });
+  try {
+    const result = await RepairBusiness.completeRepair(req.params.id, null, actor(req), req.user);
+    if (!result.ok) return res.status(result.status || 400).json({ ok: false, message: result.error || "Erro" });
+    return res.json({ ok: true, repair: result.repair, execution: result.execution, idempotent: Boolean(result.idempotent) });
+  } catch (error) {
+    const status=[400,403,404,409].includes(error.status||error.statusCode)?(error.status||error.statusCode):500;
+    return res.status(status).json({ok:false,message:status===500?'Não foi possível confirmar a conclusão. Consulte os registos antes de repetir.':error.message});
+  }
 }
 
 async function deleteRepair(req, res) {

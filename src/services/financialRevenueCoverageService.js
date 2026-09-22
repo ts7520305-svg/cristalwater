@@ -45,7 +45,7 @@ function documentReason(invoice) {
 // This read-only partition never distributes a monthly contract automatically.
 async function build(db, monthRef, generatedAt, invoices) {
   const maintenanceContext = await maintenance.load(db,invoices);
-  const repairContext = await repairs.load(db,invoices);
+  const repairContext = await repairs.load(db,invoices,generatedAt);
   const monthlyStates = await require('./monthlyRevenueData').states(db);
   const monthlyById = new Map(monthlyStates.map(s => [s.lineId, s]));
   const activeAllocations = monthlyStates.flatMap(s => s.allocations).filter(a => !a.voidedAt);
@@ -107,10 +107,12 @@ async function build(db, monthRef, generatedAt, invoices) {
       if (issue) issues.push({ ...identity, lineId: line.id, reason: issue });
     }
   }
-  return { version: 4, monthRef, currency: 'EUR', generatedAt: generatedAt.toISOString(), state: 'PARTIAL', completeRevenueAllocation: false, revenue: null, profit: null, limitApplied: null,
-    basis: { documents: 'DOCUMENT_MONTH_REFERENCE_CURRENT_VALUES', amounts: 'RECONCILED_DOCUMENT_LINES_ONLY', services: 'UNIQUE_TYPED_COMPLETED_SERVICE_CURRENT_STATE', maintenance:'ORIGINAL_EXTRA_DECISION_AND_CURRENT_COMPLETED_INTERVENTION', repairs:'ORIGINAL_DOCUMENT_LINE_AND_REPAIR_SNAPSHOT_NO_EXECUTION_PROOF', duplicates: 'RECEIVABLE_REFERENCES_ALL_MONTHS', cashIncluded: false, historicalClosingBalance: false },
+  const repairExecution={basis:require('./repairExecutionService').basis,total:linkedRepairs.length};
+  for(const state of ['CONFIRMED','UNCONFIRMED','REVIEW']){const rows=linkedRepairs.filter(r=>r.execution.state===state),key=state.toLowerCase();repairExecution[key+'Count']=rows.length;repairExecution[key+'AmountCents']=sum(rows.map(r=>r.amountCents));}
+  return { version: 5, monthRef, currency: 'EUR', generatedAt: generatedAt.toISOString(), state: 'PARTIAL', completeRevenueAllocation: false, revenue: null, profit: null, limitApplied: null,
+    basis: { documents: 'DOCUMENT_MONTH_REFERENCE_CURRENT_VALUES', amounts: 'RECONCILED_DOCUMENT_LINES_ONLY', services: 'UNIQUE_TYPED_COMPLETED_SERVICE_CURRENT_STATE', maintenance:'ORIGINAL_EXTRA_DECISION_AND_CURRENT_COMPLETED_INTERVENTION', repairs:'ORIGINAL_DOCUMENT_LINE_AND_SEPARATE_EXECUTION_CONFIRMATION', duplicates: 'RECEIVABLE_REFERENCES_ALL_MONTHS', cashIncluded: false, historicalClosingBalance: false },
     monthlyAllocations: { basis:'EXPLICIT_CONTRACT_SERVICE_ALLOCATION_CURRENT_STATE_ALL_MONTHS', activeCount:activeAllocations.length, reviewCount:activeAllocations.filter(a=>a.needsReview).length },
     documents, lines, reconciledDocumentAmountCents: sum(documentValues), linkedServiceAmountCents: sum(values.linked), maintenanceLinkedAmountCents: sum(values.maintenanceLinked), repairDocumentedAmountCents:sum(values.repairDocumented), monthlyAllocatedAmountCents: sum(values.monthlyAllocated), monthlyUnallocatedAmountCents: sum(values.monthly), otherUnallocatedAmountCents: sum(values.unassigned), serviceReviewAmountCents: sum(values.review),
-    linkedServices: sample(linked), linkedMaintenance: sample(linkedMaintenance), linkedRepairs:sample(linkedRepairs), issues: sample(issues) };
+    repairExecution, linkedServices: sample(linked), linkedMaintenance: sample(linkedMaintenance), linkedRepairs:sample(linkedRepairs), issues: sample(issues) };
 }
 module.exports = { documentSelect, build, documentReason, lineType, references };
