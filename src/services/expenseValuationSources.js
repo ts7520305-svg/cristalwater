@@ -20,19 +20,20 @@ const movementSelect = { id: true, movementType: true, productId: true, productN
 const itemSelect = { id: true, purchaseId: true, productId: true, productName: true, unit: true, quantity: true, unitCost: true, totalCost: true, lot: true, purchase: { select: { status: true, invoiceDate: true, totalAmount: true } } };
 const measurementKey = (type, id) => type + ':' + id;
 const targetId = a => a.targetType === 'REGULAR' ? a.visitId : a.extraVisitId;
-const selected = a => ({ kind: a.valuationType, targetType: a.targetType, targetId: targetId(a), purchaseItemId: a.purchaseItemId });
+const selected = a => ({ kind: a.valuationType, expenseId: a.expenseId, targetType: a.targetType, targetId: targetId(a), purchaseItemId: a.purchaseItemId });
 function laborBasis(b) { return b ? { id: b.id, expenseId: b.expenseId, technicianId: b.technicianId, periodStart: r.day(b.periodStart), periodEnd: r.day(b.periodEnd), paidMinutes: b.paidMinutes } : null; }
 async function prepare(db, allocations, extra = []) {
   const selections = [...allocations.filter(a => a.valuationType !== 'MANUAL').map(selected), ...extra];
   if (!selections.length) return { regular: new Map(), extra: new Map(), items: new Map(), movements: [], active: [] };
   const ids = type => [...new Set(selections.filter(s => s.targetType === type).map(s => s.targetId))];
   const regularIds = ids('REGULAR'), extraIds = ids('EXTRA'), itemIds = [...new Set(selections.map(s => s.purchaseItemId).filter(Boolean))];
+  const laborExpenseIds = [...new Set(selections.filter(s => s.kind === 'LABOR').map(s => s.expenseId).filter(Boolean))];
   const [regular, extras, items, movements, active] = await Promise.all([
     db.serviceVisit.findMany({ where: { id: { in: regularIds } }, select: visitSelect }),
     db.extraVisit.findMany({ where: { id: { in: extraIds } }, select: visitSelect }),
     db.stockPurchaseItem.findMany({ where: { id: { in: itemIds } }, select: itemSelect }),
     db.stockMovement.findMany({ where: { OR: [{ visitId: { in: regularIds } }, { extraVisitId: { in: extraIds } }] }, select: movementSelect, orderBy: { id: 'asc' } }),
-    db.expenseAllocation.findMany({ where: { voidedAt: null, valuationType: { not: 'MANUAL' } }, select: { id: true, expenseId: true, valuationType: true, valuationKey: true, purchaseItemId: true, quantity: true, amountCents: true, activeMeasurementKey: true } })
+    db.expenseAllocation.findMany({ where: { voidedAt: null, valuationType: { not: 'MANUAL' }, OR: [{ visitId: { in: regularIds } }, { extraVisitId: { in: extraIds } }, { purchaseItemId: { in: itemIds } }, { expenseId: { in: laborExpenseIds } }] }, select: { id: true, expenseId: true, valuationType: true, valuationKey: true, purchaseItemId: true, quantity: true, amountCents: true, activeMeasurementKey: true, valuationSnapshot: true } })
   ]);
   return { regular: new Map(regular.map(v => [v.id, v])), extra: new Map(extras.map(v => [v.id, v])), items: new Map(items.map(v => [v.id, v])), movements, active };
 }
@@ -88,6 +89,11 @@ function totals(rows) {
   return Number.isSafeInteger(cents) ? { units, cents } : null;
 }
 function reservations(data, expense, source, purchaseItemId) {
-  return { measured: totals(data.active.filter(a => a.valuationKey === source.key)), pool: totals(data.active.filter(a => source.kind === 'MATERIAL' ? a.valuationType === 'MATERIAL' && a.purchaseItemId === purchaseItemId : a.valuationType === 'LABOR' && a.expenseId === expense.id)) };
+  const poolRows = data.active.filter(a => source.kind === 'MATERIAL' ? a.valuationType === 'MATERIAL' && a.purchaseItemId === purchaseItemId : a.valuationType === 'LABOR' && a.expenseId === expense.id);
+  const basisMatches = poolRows.every(a => {
+    const c = a.valuationSnapshot?.calculation;
+    return c && quantity(c.baseQuantity) === source.totalQuantity && c.baseAmountCents === source.totalCents && c.quantityUnit === source.unit && c.method === source.method;
+  });
+  return { measured: totals(data.active.filter(a => a.valuationKey === source.key)), pool: totals(poolRows), basisMatches };
 }
 module.exports = { quantity, decimal, round, prepare, build, reservations, selected, totals, laborBasis };

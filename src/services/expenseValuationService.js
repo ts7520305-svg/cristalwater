@@ -27,9 +27,10 @@ async function preview(db, expense, choice, lock = false) {
     const source = await sources.source(db, expense.sourceType, expense.stockPurchaseId || expense.maintenanceId, lock);
     if (!source || source.hash !== expense.sourceHash || source.suggested.amountCents !== expense.amountCents) r.fail('Reveja o documento, as linhas e o total da origem da despesa.', 409);
   }
-  const prepared = await data.prepare(db, [], [choice]), source = data.build(prepared, expense, choice);
+  const prepared = await data.prepare(db, [], [{ ...choice, expenseId: expense.id }]), source = data.build(prepared, expense, choice);
   if (!source.valid) r.fail(source.errors.join(' '), 409);
   const reserved = data.reservations(prepared, expense, source, choice.purchaseItemId), { measured, pool } = reserved;
+  if (!reserved.basisMatches) r.fail('A base de custo mudou. Anule e recalcule as valorizações anteriores desta base antes de atribuir novos custos.', 409);
   if (!measured || !pool || measured.units > source.units || pool.units > source.totalQuantity || pool.cents > source.totalCents) r.fail('As quantidades ou custos já valorizados precisam de revisão.', 409);
   if (choice.kind === 'LABOR' && measured.units > 0n) r.fail('Este serviço já tem trabalho valorizado. Anule a valorização anterior antes de corrigir.', 409);
   const available = source.units - measured.units < source.totalQuantity - pool.units ? source.units - measured.units : source.totalQuantity - pool.units;
@@ -86,7 +87,7 @@ async function decorate(db, expenses) {
       if (!a.voidedAt) {
         const calculation = a.valuationSnapshot?.calculation; if (!calculation || a.quantity?.toString() !== calculation.quantity || a.quantityUnit !== calculation.quantityUnit || a.amountCents !== calculation.amountCents || source.valid && source.key !== a.valuationKey) reasons.push('VALUATION_RECORD_CHANGED');
         if (!source.valid || source.hash !== a.valuationHash || source.unit !== a.quantityUnit || source.visit?.clientId !== a.clientId) reasons.push('VALUATION_SOURCE_CHANGED');
-        if (source.valid) { const { measured, pool } = data.reservations(prepared, expense, source, a.purchaseItemId); if (!measured || !pool || measured.units > source.units || pool.units > source.totalQuantity || pool.cents > source.totalCents) reasons.push('VALUATION_BUDGET_CHANGED'); }
+        if (source.valid) { const { measured, pool, basisMatches } = data.reservations(prepared, expense, source, a.purchaseItemId); if (!basisMatches) reasons.push('VALUATION_BASIS_CHANGED'); if (!measured || !pool || measured.units > source.units || pool.units > source.totalQuantity || pool.cents > source.totalCents) reasons.push('VALUATION_BUDGET_CHANGED'); }
       }
       return { ...a, quantity: a.quantity?.toString() || null, needsReview: !!reasons.length, reviewReasons: reasons, valuationLabel: a.valuationSnapshot?.source.kind === 'MATERIAL' ? a.valuationSnapshot.source.item.productName : 'Tempo de trabalho', valuationMethod: a.valuationSnapshot?.calculation.method || null };
     });
