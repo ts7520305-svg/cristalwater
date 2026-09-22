@@ -24,23 +24,24 @@ let child;
   // Internal credit is a payment allocation, not another service or a reduction of the documented price.
   await prisma.payment.create({ data: { invoiceId: document.id, amount: 10, method: 'CREDIT', paidAt: new Date('2005-08-10Z') } });
   let r = await read();
-  assert.equal(r.linkedServiceAmountCents - before.linkedServiceAmountCents, 7500); assert.equal(r.monthlyUnallocatedAmountCents - before.monthlyUnallocatedAmountCents, 8000); assert.equal(r.otherUnallocatedAmountCents - before.otherUnallocatedAmountCents, 2000); assert.equal(r.reconciledDocumentAmountCents - before.reconciledDocumentAmountCents, 17500);
+  assert.equal(r.linkedServiceAmountCents - before.linkedServiceAmountCents, 7500); assert.equal(r.monthlyUnallocatedAmountCents - before.monthlyUnallocatedAmountCents, 8000); assert.equal(r.otherUnallocatedAmountCents - before.otherUnallocatedAmountCents, 1200); assert.equal(r.reconciledDocumentAmountCents - before.reconciledDocumentAmountCents, 17500);
   assert(r.linkedServices.rows.some(v => v.type === 'REGULAR' && v.id === sameId && v.serviceMonth === '2005-07')); assert(r.linkedServices.rows.some(v => v.type === 'EXTRA' && v.id === sameId && v.serviceMonth === month)); assert.equal(r.completeRevenueAllocation, false); assert.equal(r.revenue, null); assert.equal(r.profit, null);
+  assert(r.issues.rows.some(x=>x.lineId&&x.reason==='MAINTENANCE_DECISION_UNCONFIRMED'));assert.equal(r.serviceReviewAmountCents-before.serviceReviewAmountCents,800);
   const mainTotal = r.documents.total;
   await make([line('MONTHLY', 99)], { monthRef: '2005-09' }); assert.equal((await read()).documents.total, mainTotal);
   await make([line('MONTHLY', 1)], { month: '8' }); assert.equal((await read()).monthlyUnallocatedAmountCents - before.monthlyUnallocatedAmountCents, 8100);
   // A current pool owner cannot rewrite the client recorded directly on historical services.
   await prisma.pool.update({ where: { id: pool.id }, data: { clientId: other.id } }); assert.equal((await read()).linkedServiceAmountCents, r.linkedServiceAmountCents);
   const duplicate = await make([line('EXTRA_VISIT', 45, { referenceId: sameId })], { month: '2005-09', status: 'ISSUED' });
-  r = await read(); assert.equal(r.linkedServiceAmountCents - before.linkedServiceAmountCents, 3000); assert.equal(r.serviceReviewAmountCents - before.serviceReviewAmountCents, 4500); assert(r.issues.rows.some(i => i.reason === 'DUPLICATE_REFERENCE'));
+  r = await read(); assert.equal(r.linkedServiceAmountCents - before.linkedServiceAmountCents, 3000); assert.equal(r.serviceReviewAmountCents - before.serviceReviewAmountCents, 5300); assert(r.issues.rows.some(i => i.reason === 'DUPLICATE_REFERENCE'));
   await prisma.invoice.update({ where: { id: duplicate.id }, data: { status: 'DRAFT' } }); assert.equal((await read()).linkedServiceAmountCents - before.linkedServiceAmountCents, 7500);
-  await prisma.invoice.update({ where: { id: duplicate.id }, data: { status: 'UNKNOWN' } }); assert.equal((await read()).serviceReviewAmountCents - before.serviceReviewAmountCents, 4500);
+  await prisma.invoice.update({ where: { id: duplicate.id }, data: { status: 'UNKNOWN' } }); assert.equal((await read()).serviceReviewAmountCents - before.serviceReviewAmountCents, 5300);
   await prisma.invoice.update({ where: { id: duplicate.id }, data: { status: 'CANCELLED' } });
   for (const [patch, reason] of [[{ clientId: other.id }, 'CLIENT_MISMATCH'], [{ clientId: null }, 'CLIENT_MISMATCH'], [{ status: 'PENDING' }, 'SERVICE_NOT_COMPLETED'], [{ endAt: null }, 'MISSING_COMPLETION_DATE'], [{ contractService: { billing: 'INCLUDED_MONTHLY' } }, 'SERVICE_INCLUDED_OR_UNCONFIRMED']]) {
-    await prisma.serviceVisit.update({ where: { id: sameId }, data: patch }); r = await read(); assert.equal(r.serviceReviewAmountCents - before.serviceReviewAmountCents, 3000); assert(r.issues.rows.some(i => i.reason === reason), reason);
+    await prisma.serviceVisit.update({ where: { id: sameId }, data: patch }); r = await read(); assert.equal(r.serviceReviewAmountCents - before.serviceReviewAmountCents, 3800); assert(r.issues.rows.some(i => i.reason === reason), reason);
     await prisma.serviceVisit.update({ where: { id: sameId }, data: { clientId: regular.clientId, status: regular.status, endAt: regular.endAt, contractService: require('@prisma/client').Prisma.DbNull } });
   }
-  await prisma.extraVisit.update({ where: { id: sameId }, data: { includedInPackage: true } }); assert.equal((await read()).serviceReviewAmountCents - before.serviceReviewAmountCents, 4500); await prisma.extraVisit.update({ where: { id: sameId }, data: { includedInPackage: false } });
+  await prisma.extraVisit.update({ where: { id: sameId }, data: { includedInPackage: true } }); assert.equal((await read()).serviceReviewAmountCents - before.serviceReviewAmountCents, 5300); await prisma.extraVisit.update({ where: { id: sameId }, data: { includedInPackage: false } });
   const referenceCases = [[line('SERVICE', 2), 'MISSING_REFERENCE'], [line('EXTRA_VISIT', 3, { referenceId: 2147483000 }), 'MISSING_SERVICE']];
   for (const [row, reason] of referenceCases) { const created = await make([row]); r = await read(); assert(r.issues.rows.some(i => i.invoiceId === created.id && i.reason === reason)); await prisma.invoice.delete({ where: { id: created.id } }); }
   const cases = [
@@ -63,7 +64,7 @@ let child;
   const more = await prisma.serviceVisit.createManyAndReturn({ data: Array.from({ length: 13 }, () => ({ ...visitData })) });
   await make(more.map((v, i) => line('SERVICE', i === 0 ? 0 : 0.1, { referenceId: v.id })));
   r = await read(); assert.equal(r.linkedServices.total - before.linkedServices.total, 15); assert.equal(r.linkedServices.rows.length, 10); assert.equal(r.linkedServices.sampleOnly, true); assert.equal(r.linkedServiceAmountCents - before.linkedServiceAmountCents, 7620); assert.equal(r.limitApplied, null);
-  const malformedAlias = await make([line('SERVICE', 30, { lineType: 'EXTRA_VISIT', referenceId: sameId })], { month: '2005-10' }); r = await read(); assert.equal(r.serviceReviewAmountCents - before.serviceReviewAmountCents, 7500); await prisma.invoice.delete({ where: { id: malformedAlias.id } });
+  const malformedAlias = await make([line('SERVICE', 30, { lineType: 'EXTRA_VISIT', referenceId: sameId })], { month: '2005-10' }); r = await read(); assert.equal(r.serviceReviewAmountCents - before.serviceReviewAmountCents, 8300); await prisma.invoice.delete({ where: { id: malformedAlias.id } });
   for (let i = 0; i < 12; i++) await make([line('MONTHLY', 1)]); r = await read(); assert.equal(r.issues.rows.length, 10); assert.equal(r.issues.sampleOnly, true); assert.equal(r.monthlyUnallocatedAmountCents - before.monthlyUnallocatedAmountCents, 9300);
   const stored = async () => JSON.stringify(await Promise.all([prisma.invoice.findMany({ orderBy: { id: 'asc' }, include: { lines: true, payments: true } }), prisma.serviceVisit.findMany({ where: { clientId: client.id }, orderBy: { id: 'asc' } }), prisma.extraVisit.findMany({ where: { clientId: client.id }, orderBy: { id: 'asc' } })]));
   const original = await stored(), actions = await prisma.aiAssistantAction.count();
