@@ -49,7 +49,7 @@ let child;
     [[line('MONTHLY', 5)], { status: 'UNKNOWN' }, 'DOCUMENT_VALUES'],
     [[line('MONTHLY', 5)], { amountCents: 1 }, 'DOCUMENT_VALUES'],
     [[line('MONTHLY', 5)], { taxAmount: 1.15 }, 'TAX_UNALLOCATED'],
-    [[line('MONTHLY', 10), line('CREDIT_NOTE', -5)], {}, 'ADJUSTED_DOCUMENT'],
+    [[line('MONTHLY', 10), line('CREDIT_NOTE', -5)], {}, 'CREDIT_NOTE_ORIGIN_UNCONFIRMED'],
     [[line('MONTHLY', 5), line('ARREARS', 3)], {}, 'ADJUSTED_DOCUMENT'],
     [[line('UNRECOGNIZED', 5)], {}, 'UNSUPPORTED_LINE_TYPE'],
     [[line('MONTHLY', 5, { lineType: 'SERVICE' })], {}, 'CONFLICTING_LINE_TYPES'],

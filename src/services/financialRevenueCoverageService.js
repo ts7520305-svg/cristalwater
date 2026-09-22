@@ -5,11 +5,12 @@ const { isCompletedVisitStatus } = require('./operationalValueReportService');
 const { included } = require('./clientServicePlan');
 const maintenance = require('./financialMaintenanceRevenueService');
 const repairs = require('./repairRevenueSourceService');
+const creditNotes = require('./creditNoteRevenueSourceService');
 const normalize = value => String(value || '').trim().toUpperCase();
 const positiveId = value => Number.isSafeInteger(value) && value > 0;
 const types = { SERVICE: 'REGULAR', EXTRA_VISIT: 'EXTRA' };
 const lineSelect = { id: true, type: true, lineType: true, referenceId: true, total: true, lineTotal: true, quantity: true, unitPrice: true, description:true, notes:true, serviceDate:true, sourceMonth:true };
-const documentSelect = { ...projection.documentSelect, id: true, clientId: true, amountCents: true, totalCents: true, taxAmount: true, client: { select: { name: true } }, lines: { select: lineSelect } };
+const documentSelect = { ...projection.documentSelect, id: true, clientId: true, monthRef:true, month:true, year:true, amountCents: true, totalCents: true, taxAmount: true, client: { select: { name: true } }, lines: { select: lineSelect } };
 const visitSelect = { id: true, clientId: true, status: true, endAt: true };
 const sample = rows => ({ total: rows.length, limit: 10, sampleOnly: rows.length > 10, rows: rows.slice(0, 10) });
 function sum(values) { const result = projection.sum(values); if (result === null) throw Error('Revenue coverage total unavailable'); return result; }
@@ -21,14 +22,18 @@ function lineType(line) {
 }
 // Conflicting aliases reserve both typed identities for review, never just one.
 function references(line) { return positiveId(line.referenceId) ? [...new Set([line.type, line.lineType].map(normalize).map(t => types[t]).filter(Boolean))].map(type => type + ':' + line.referenceId) : []; }
-function documentReason(invoice) {
+function documentReason(invoice, credits = null) {
   const value = projection.document(invoice);
   if (value.classification !== 'RECEIVABLE') return 'DOCUMENT_VALUES';
   if (!invoice.lines.length) return 'NO_LINES';
   const tax = projection.cents(invoice.taxAmount);
   if (tax === null || tax > 0) return 'TAX_UNALLOCATED';
   if ([invoice.amountCents, invoice.totalCents].some(c => !Number.isSafeInteger(c) || c < 0 || c > 0 && c !== value.amountCents)) return 'DOCUMENT_VALUES';
+  if (credits?.reason) return credits.reason;
   for (const line of invoice.lines) {
+    // Only the read-only financial partition may recognize these reductions.
+    // Monthly allocation commands still require an unadjusted document.
+    if (credits && creditNotes.isNote(line) && credits.rows.some(r=>r.lineId===line.id)) continue;
     const aliases = [line.type, line.lineType].map(normalize);
     if (aliases.some(t => /CREDIT|DISCOUNT|ADJUST|ARREAR|CARRY|DEBT|BALANCE/.test(t)) || line.total < 0 || line.lineTotal < 0) return 'ADJUSTED_DOCUMENT';
     const type = lineType(line);
@@ -37,13 +42,14 @@ function documentReason(invoice) {
     const amount = projection.cents(line.total), alias = projection.cents(line.lineTotal);
     if (amount === null || alias === null || amount !== alias) return 'LINE_VALUES';
   }
-  if (sum(invoice.lines.map(line => projection.cents(line.total))) !== value.amountCents) return 'LINE_TOTAL_MISMATCH';
+  if (sum(invoice.lines.map(line => creditNotes.signedCents(line.total))) !== value.amountCents) return 'LINE_TOTAL_MISMATCH';
   return null;
 }
 
 // The month belongs to the document, not to cash receipt or service completion.
 // This read-only partition never distributes a monthly contract automatically.
 async function build(db, monthRef, generatedAt, invoices) {
+  const creditContext = await creditNotes.load(db,invoices);
   const maintenanceContext = await maintenance.load(db,invoices);
   const repairContext = await repairs.load(db,invoices,generatedAt);
   const monthlyStates = await require('./monthlyRevenueData').states(db);
@@ -63,15 +69,17 @@ async function build(db, monthRef, generatedAt, invoices) {
     for (const key of references(line)) counts.set(key, (counts.get(key) || 0) + 1);
   }
   const documents = { total: invoices.length, reconciled: 0, review: 0, excluded: 0 };
-  const lines = { total: 0, linked: 0, maintenanceLinked: 0, repairDocumented:0, monthly: 0, monthlyAllocated: 0, unassigned: 0, review: 0 };
-  const values = { linked: [], maintenanceLinked: [], repairDocumented:[], monthly: [], monthlyAllocated: [], unassigned: [], review: [] }, documentValues = [], issues = [], linked = [], linkedMaintenance = [], linkedRepairs = [];
+  const lines = { total: 0, linked: 0, maintenanceLinked: 0, repairDocumented:0, monthly: 0, monthlyAllocated: 0, unassigned: 0, review: 0, creditNotes:0 };
+  const values = { linked: [], maintenanceLinked: [], repairDocumented:[], monthly: [], monthlyAllocated: [], unassigned: [], review: [] }, documentValues = [], issues = [], linked = [], linkedMaintenance = [], linkedRepairs = [], linkedCredits = [];
   for (const invoice of [...invoices].sort((a, b) => a.id - b.id)) {
     if (projection.document(invoice).classification === 'EXCLUDED') { documents.excluded++; continue; }
     const identity = { invoiceId: invoice.id, clientId: invoice.clientId, clientName: invoice.client.name };
-    const reason = documentReason(invoice);
+    const credits = creditNotes.match(creditContext,invoice,generatedAt);
+    const reason = documentReason(invoice,credits);
     if (reason) { documents.review++; issues.push({ ...identity, lineId: null, reason }); continue; }
     documents.reconciled++; documentValues.push(projection.document(invoice).amountCents);
     for (const line of [...invoice.lines].sort((a, b) => a.id - b.id)) {
+      if (creditNotes.isNote(line)) { lines.total++; lines.creditNotes++; linkedCredits.push({ ...identity, ...credits.rows.find(r=>r.lineId===line.id) }); continue; }
       const type = lineType(line), targetType = types[type], amountCents = projection.cents(line.total);
       let bucket, issue;
       if (type === 'MONTHLY') {
@@ -109,10 +117,14 @@ async function build(db, monthRef, generatedAt, invoices) {
   }
   const repairExecution={basis:require('./repairExecutionService').basis,total:linkedRepairs.length};
   for(const state of ['CONFIRMED','UNCONFIRMED','REVIEW']){const rows=linkedRepairs.filter(r=>r.execution.state===state),key=state.toLowerCase();repairExecution[key+'Count']=rows.length;repairExecution[key+'AmountCents']=sum(rows.map(r=>r.amountCents));}
-  return { version: 5, monthRef, currency: 'EUR', generatedAt: generatedAt.toISOString(), state: 'PARTIAL', completeRevenueAllocation: false, revenue: null, profit: null, limitApplied: null,
-    basis: { documents: 'DOCUMENT_MONTH_REFERENCE_CURRENT_VALUES', amounts: 'RECONCILED_DOCUMENT_LINES_ONLY', services: 'UNIQUE_TYPED_COMPLETED_SERVICE_CURRENT_STATE', maintenance:'ORIGINAL_EXTRA_DECISION_AND_CURRENT_COMPLETED_INTERVENTION', repairs:'ORIGINAL_DOCUMENT_LINE_AND_SEPARATE_EXECUTION_CONFIRMATION', duplicates: 'RECEIVABLE_REFERENCES_ALL_MONTHS', cashIncluded: false, historicalClosingBalance: false },
+  const grossAmountCents=sum(Object.values(values).flat()), creditAmountCents=sum(linkedCredits.map(r=>r.amountCents)), netAmountCents=sum(documentValues);
+  if(grossAmountCents-creditAmountCents!==netAmountCents)throw Error('Revenue credit reconciliation unavailable');
+  return { version: 6, monthRef, currency: 'EUR', generatedAt: generatedAt.toISOString(), state: 'PARTIAL', completeRevenueAllocation: false, revenue: null, profit: null, limitApplied: null,
+    basis: { documents: 'DOCUMENT_MONTH_REFERENCE_CURRENT_VALUES', amounts: 'GROSS_DOCUMENT_LINES_LESS_CONFIRMED_CREDIT_NOTES', services: 'UNIQUE_TYPED_COMPLETED_SERVICE_CURRENT_STATE', maintenance:'ORIGINAL_EXTRA_DECISION_AND_CURRENT_COMPLETED_INTERVENTION', repairs:'ORIGINAL_DOCUMENT_LINE_AND_SEPARATE_EXECUTION_CONFIRMATION', duplicates: 'RECEIVABLE_REFERENCES_ALL_MONTHS', cashIncluded: false, historicalClosingBalance: false },
+    grossDocumentAmountCents:grossAmountCents,
+    creditNotes:{ basis:creditNotes.basis, total:linkedCredits.length, amountCents:creditAmountCents, creditReleasedCents:sum(linkedCredits.map(r=>r.creditReleasedCents)), serviceAllocation:'UNALLOCATED', cashIncluded:false, examples:sample(linkedCredits) },
     monthlyAllocations: { basis:'EXPLICIT_CONTRACT_SERVICE_ALLOCATION_CURRENT_STATE_ALL_MONTHS', activeCount:activeAllocations.length, reviewCount:activeAllocations.filter(a=>a.needsReview).length },
-    documents, lines, reconciledDocumentAmountCents: sum(documentValues), linkedServiceAmountCents: sum(values.linked), maintenanceLinkedAmountCents: sum(values.maintenanceLinked), repairDocumentedAmountCents:sum(values.repairDocumented), monthlyAllocatedAmountCents: sum(values.monthlyAllocated), monthlyUnallocatedAmountCents: sum(values.monthly), otherUnallocatedAmountCents: sum(values.unassigned), serviceReviewAmountCents: sum(values.review),
+    documents, lines, reconciledDocumentAmountCents: netAmountCents, linkedServiceAmountCents: sum(values.linked), maintenanceLinkedAmountCents: sum(values.maintenanceLinked), repairDocumentedAmountCents:sum(values.repairDocumented), monthlyAllocatedAmountCents: sum(values.monthlyAllocated), monthlyUnallocatedAmountCents: sum(values.monthly), otherUnallocatedAmountCents: sum(values.unassigned), serviceReviewAmountCents: sum(values.review),
     repairExecution, linkedServices: sample(linked), linkedMaintenance: sample(linkedMaintenance), linkedRepairs:sample(linkedRepairs), issues: sample(issues) };
 }
 module.exports = { documentSelect, build, documentReason, lineType, references };

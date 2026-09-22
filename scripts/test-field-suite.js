@@ -127,6 +127,7 @@ scripts.push('test-field-external-invoice-summary.js');
 scripts.push('test-field-monthly-email-period.js');
 scripts.push('test-field-monthly-email-delivery.js','test-field-monthly-email-ui.js');
 scripts.push('test-field-monthly-email-review.js','test-field-monthly-email-review-ui.js');
+scripts.push('test-field-credit-note-revenue.js');
 scripts.push('test-field-financial-ai.js','test-field-financial-ai-ui.js');
 scripts.push('test-field-company-expenses.js','test-field-company-expenses-ui.js');
 scripts.push('test-field-expense-costs.js','test-field-expense-costs-ui.js');
