@@ -243,7 +243,7 @@ function inferRepairParts(problem, explicitParts = []) {
 
 async function checkRepairStockAvailability(parts = [], options = {}) {
   const db = options.db || repository.prisma;
-  const balances = await stockRepository.listBalances({});
+  const balances = await stockRepository.listBalances({}, db);
   const reservedMap = await buildReservedStockMap(db, options.repairId || null);
   const balanceMap = new Map(
     (balances || []).map((item) => [
@@ -275,8 +275,17 @@ async function checkRepairStockAvailability(parts = [], options = {}) {
 
 async function reserveRepairStock(repairId, payload = {}, db = null, actor = "repair-os") {
   const run = async (tx) => {
-    const repair = await repository.getRepair(repairId, tx);
+    let repair = await repository.getRepair(repairId, tx);
     if (!repair) return { ok: false, status: 404, error: "Reparação não encontrada" };
+    if (tx.$queryRaw) {
+      const clientId=repair.pool.client.id,poolId=repair.poolId;
+      await tx.$queryRaw`SELECT id FROM "Client" WHERE id=${clientId} FOR UPDATE`;
+      await tx.$queryRaw`SELECT id FROM "Repair" WHERE id=${repair.id} FOR UPDATE`;
+      await tx.$queryRaw`SELECT id FROM "Pool" WHERE id=${poolId} FOR SHARE`;
+      repair=await repository.getRepair(repairId,tx);
+      if(!repair||repair.poolId!==poolId||repair.pool.client.id!==clientId)return {ok:false,status:409,error:"A reparação mudou. Consulte novamente."};
+      if(await tx.auditTrail.count({where:{entity:'Repair',entityId:repair.id,eventType:'REPAIR_EXECUTION_CONFIRMED'}}))return {ok:false,status:409,error:"Reparação com execução já declarada. Reveja o histórico antes de reservar materiais."};
+    }
     const status = normalizeText(repair.status).toUpperCase();
     if (["DONE", "CANCELLED", "CANCELED"].includes(status)) {
       return { ok: false, status: 409, error: "Reparação já encerrada" };
@@ -356,6 +365,7 @@ async function reserveRepairStock(repairId, payload = {}, db = null, actor = "re
     return { ok: true, repair, reservation, items: availability };
   };
 
+  if (db?.$transaction) return db.$transaction(run,{maxWait:15000,timeout:15000});
   if (db) return run(db);
   return repository.transaction(run);
 }
@@ -1205,9 +1215,16 @@ async function markRepairSent(repairId, payload = {}, db = null, actor = "repair
 
 async function scheduleRepair(repairId, payload = {}, db = null, actor = "repair-os") {
   const run = async (tx) => {
-    if (tx.$queryRaw) await tx.$queryRaw`SELECT id FROM "Repair" WHERE id = ${Number(repairId)} FOR UPDATE`;
+    const initial=await repository.getRepair(repairId,tx);
+    if(!initial)return {ok:false,status:404,error:"Reparação não encontrada"};
+    if (tx.$queryRaw) {
+      const clientId=initial.pool.client.id;
+      await tx.$queryRaw`SELECT id FROM "Client" WHERE id=${clientId} FOR UPDATE`;
+      await tx.$queryRaw`SELECT id FROM "Repair" WHERE id = ${Number(repairId)} FOR UPDATE`;
+    }
     const repair = await repository.getRepair(repairId, tx);
     if (!repair) return { ok: false, status: 404, error: "Reparação não encontrada" };
+    if(repair.poolId!==initial.poolId||repair.pool.client.id!==initial.pool.client.id)return {ok:false,status:409,error:"A reparação mudou. Consulte novamente."};
 
     if (repair.status === 'QUOTED' && tx.repairQuote && await tx.repairQuote.count({ where: { repairId: repair.id } })) return { ok: false, status: 409, error: 'Registe a aprovação da versão guardada antes de agendar' };
     const transition = ensureRepairTransition(repair, "SCHEDULE");
@@ -1279,6 +1296,7 @@ async function scheduleRepair(repairId, payload = {}, db = null, actor = "repair
     return { ok: true, repair: updated, reservation: reservation.reservation };
   };
 
+  if (db?.$transaction) return db.$transaction(run,{maxWait:15000,timeout:15000});
   if (db) return run(db);
   return repository.transaction(run);
 }
@@ -1286,29 +1304,32 @@ async function scheduleRepair(repairId, payload = {}, db = null, actor = "repair
 async function completeRepair(repairId, db = null, actor = "repair-os", principal = null, command = null) {
   const executionService = require("../../services/repairExecutionService");
   const run = async (tx) => {
-    const prepared = await executionService.prepare(tx, repairId);
+    const noMaterials=command?.noMaterials;
+    const prepared = await executionService.prepare(tx, repairId,{allowNoMaterials:!!principal&&executionService.validNoMaterials(noMaterials)});
     const {repair,clientId} = prepared;
     if (prepared.existing) return {ok:true,repair,execution:prepared.existing,idempotent:true};
-    const consumed = await consumeReservedRepairStock(repair.id, {}, tx, actor);
+    if(!!prepared.noMaterials!==!!noMaterials)throw Object.assign(Error('A declaração não corresponde aos materiais da reparação.'),{status:409});
+    const consumed = noMaterials?{ok:true,reservation:null,consumed:[],items:[]}:await consumeReservedRepairStock(repair.id, {}, tx, actor);
     if (!consumed.ok) return consumed;
+    const reservationId=consumed.reservation?.id??null,stockConsumed=!noMaterials;
     const doneAt = new Date();
     const updatedRepair = await repository.updateRepair(tx, repair.id, {status:"DONE",doneAt});
     await tx.technicalHistory.create({data:{
       poolId:repair.poolId,type:"REPAIR_COMPLETED",component:"Repair",message:"Reparação concluída",
-      description:JSON.stringify({repairId:repair.id,actor,stockConsumed:true}),status:"DONE",performedAt:doneAt,doneAt
+      description:JSON.stringify({repairId:repair.id,actor,stockConsumed,...(noMaterials?{noMaterials}:{})}),status:"DONE",performedAt:doneAt,doneAt
     }});
     await tx.auditTrail.create({data:{
       action:"REPAIR_COMPLETED",eventType:"REPAIR_COMPLETED",entity:"Repair",entityId:repair.id,poolId:repair.poolId,clientId,
-      metadata:{actor,reservationId:consumed.reservation.id},message:`Reparação #${repair.id} concluída com consumo de stock`
+      metadata:{actor,reservationId,...(noMaterials?{noMaterials}:{})},message:`Reparação #${repair.id} concluída ${noMaterials?'sem utilização de materiais':'com consumo de stock'}`
     }});
-    const execution = await executionService.record(tx,{repair:updatedRepair,clientId,reservation:consumed.reservation,movements:consumed.consumed,actor,principal});
+    const execution = await executionService.record(tx,{repair:updatedRepair,clientId,reservation:consumed.reservation,movements:consumed.consumed,actor,principal,noMaterials});
     await tx.notification.create({data:{
       clientId,type:"REPAIR_COMPLETED",eventType:"REPAIR_COMPLETED",title:"Reparação concluída",
-      message:`A reparação #${repair.id} foi concluída e o stock foi consumido.`,role:"ADMIN",severity:"NORMAL",status:"PENDING",
-      metadata:{repairId:repair.id,reservationId:consumed.reservation.id}
+      message:noMaterials?`A reparação #${repair.id} foi declarada concluída sem utilização de materiais.`:`A reparação #${repair.id} foi concluída e o stock foi consumido.`,role:"ADMIN",severity:"NORMAL",status:"PENDING",
+      metadata:{repairId:repair.id,reservationId}
     }});
     return {ok:true,repair:updatedRepair,execution,idempotent:false,event:{
-      repairId:repair.id,poolId:repair.poolId,clientId,actor,items:consumed.items,reservationId:consumed.reservation.id
+      repairId:repair.id,poolId:repair.poolId,clientId,actor,items:consumed.items,reservationId
     }};
   };
   // A transaction supplied by a caller owns the commit and any later events.
@@ -1316,11 +1337,13 @@ async function completeRepair(repairId, db = null, actor = "repair-os", principa
   if (db && !db.$transaction) { const {event,eventRepair,...result}=await work(db); return result; }
   const {event,eventRepair,...result}=await (db||repository.prisma).$transaction(work,{maxWait:15000,timeout:15000});
   if (event) {
+    if(event.reservationId!==null){
     const stock={...event,source:"repair-stock-consumption"};
     await emitRepairEvent(EVENT_TYPES.REPAIR_STOCK_CONSUMED,stock);
     await emitEquipmentStockEvent(STOCK_EVENT_TYPES.STOCK_CONSUMED,stock);
     await emitFinanceEvent(FINANCE_EVENT_TYPES.FINANCE_INVOICE_DRAFT,{repairId:event.repairId,poolId:event.poolId,clientId:event.clientId,amount:Number((eventRepair||result.repair).totalPrice||0),source:"repair-stock-consumption"});
-    await emitRepairEvent(EVENT_TYPES.REPAIR_COMPLETED,{repairId:event.repairId,poolId:event.poolId,actor:event.actor,reservationId:event.reservationId,stockConsumed:true,source:"repair-route"});
+    }
+    await emitRepairEvent(EVENT_TYPES.REPAIR_COMPLETED,{repairId:event.repairId,poolId:event.poolId,actor:event.actor,reservationId:event.reservationId,stockConsumed:event.reservationId!==null,source:"repair-route"});
   }
   return result;
 }

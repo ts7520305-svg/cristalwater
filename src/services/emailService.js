@@ -17,6 +17,9 @@ function createTransporter() {
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT || 465),
     secure: String(process.env.SMTP_SECURE || "true").toLowerCase() !== "false",
+    connectionTimeout: 20000,
+    greetingTimeout: 20000,
+    socketTimeout: 60000,
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
@@ -47,7 +50,16 @@ async function sendEmail(payload) {
     attachments: Array.isArray(payload.attachments) ? payload.attachments : undefined,
   };
 
-  return transporter.sendMail(message);
+  let timer;
+  try {
+    return await Promise.race([
+      transporter.sendMail(message),
+      new Promise((_,reject)=>{timer=setTimeout(()=>reject(Object.assign(Error('smtp_result_unconfirmed'),{statusCode:503})),90000);}),
+    ]);
+  } finally {
+    clearTimeout(timer);
+    if(typeof transporter.close==='function')transporter.close();
+  }
 }
 
 async function sendExtrasInvoiceEmail(client, pdfBuffer) {

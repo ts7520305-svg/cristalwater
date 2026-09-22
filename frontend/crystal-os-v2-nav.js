@@ -51,6 +51,7 @@
     '/admin-ai': { area: 'Faturacao e financeiro', title: 'Gestão com IA' },
     '/admin-revenue': { area: 'Faturacao e financeiro', title: 'Repartição de mensalidades' },
     '/repair-execution': { area: 'Operacao', title: 'Execução de reparações' },
+    '/admin-email-review': { area: 'Gestao', title: 'Revisão de emails' },
     '/admin-expenses': { area: 'Faturacao e financeiro', title: 'Despesas e contas a pagar' },
     '/billing': { area: 'Faturacao e financeiro', title: 'Visao financeira' },
     '/billing-center': { area: 'Faturacao e financeiro', title: 'Centro de cobrancas' },
@@ -167,6 +168,7 @@
           ['/admin-email-logs', 'Historico email']
         ]},
         { label: '12. Relatorios e estatisticas', links: [
+          ['/admin-email-review.html', 'Revisão de emails'],
           ['/admin-reports', 'Relatorios operacionais'],
           ['/report-center', 'Centro de exportacao'],
           ['/report-settings', 'Configuracao de relatorios'],

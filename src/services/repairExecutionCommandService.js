@@ -11,15 +11,16 @@ const select={id:true,poolId:true,problem:true,quantity:true,status:true,created
 const row=r=>({id:r.id,poolId:r.poolId,poolName:r.pool.name,problem:r.problem,quantity:r.quantity,status:r.status});
 async function inspect(tx,repairId){
   let prepared;
-  try{prepared=await execution.prepare(tx,repairId);}catch(e){if(e.status!==409)throw e;}
+  try{prepared=await execution.prepare(tx,repairId,{allowNoMaterials:true});}catch(e){if(e.status!==409)throw e;}
   const repair=await tx.repair.findUnique({where:{id:repairId},select});if(!repair)fail('Reparação não encontrada.',404);
   const proof=execution.evaluate(await execution.load(tx,[repairId]),repair,repair.pool.clientId);
-  const view={...row(repair),execution:proof,canConfirm:false,version:null,items:[],message:proof.state==='CONFIRMED'?'Execução já declarada e confirmada.':'Confirme o estado, a origem e a reserva com a administração. Históricos e trabalhos sem material exigem revisão própria.'};
+  const view={...row(repair),execution:proof,canConfirm:false,materialMode:null,version:null,items:[],message:proof.state==='CONFIRMED'?'Execução já declarada e confirmada.':'Confirme o estado, a origem e a reserva com a administração. Históricos e reservas incoerentes exigem revisão própria.'};
+  if(prepared?.noMaterials&&proof.state==='UNCONFIRMED')return {...view,canConfirm:true,materialMode:'NONE',version:writes.hash(JSON.parse(JSON.stringify({v:2,repair,reservation:null}))),message:'Esta reparação não tem reserva de materiais. Confirme apenas se o trabalho foi realizado sem utilizar materiais e descreva a intervenção. A data guardada é a do registo atual.'};
   if(!prepared?.reservation||proof.state!=='UNCONFIRMED')return view;
   const reservation=prepared.reservation,p=reservation.payload;
   const items=p.items.map(item=>({productName:item.productName.trim().toUpperCase(),unit:item.unit.trim().toUpperCase(),quantity:item.quantity,scope:String(item.scope||p.scope||'CENTRAL').trim().toUpperCase(),vehicleId:item.vehicleId??p.vehicleId??null}));
   if(items.some(i=>!['CENTRAL','VEHICLE'].includes(i.scope)||i.scope==='VEHICLE'&&!positive(i.vehicleId)||i.scope==='CENTRAL'&&i.vehicleId!==null))return view;
-  return {...view,canConfirm:true,version:writes.hash(JSON.parse(JSON.stringify({v:1,repair,reservation}))),items,message:'Confirme apenas se esta reparação foi executada e estes materiais foram utilizados. A confirmação regista a data atual e consome a reserva indicada.'};
+  return {...view,canConfirm:true,materialMode:'RESERVED',version:writes.hash(JSON.parse(JSON.stringify({v:1,repair,reservation}))),items,message:'Confirme apenas se esta reparação foi executada e estes materiais foram utilizados. A confirmação regista a data atual e consome a reserva indicada.'};
 }
 async function list(query){
   const q=typeof query.q==='string'?query.q.trim():'',page=query.page===undefined?1:id(query.page);
@@ -31,14 +32,14 @@ async function list(query){
 async function detail(value){const repairId=id(value);return prisma.$transaction(async tx=>({ok:true,detail:await inspect(tx,repairId)}),{maxWait:15000,timeout:15000});}
 function command(actor,value,body){
   const repairId=id(value);
-  if(!body||typeof body!=='object'||Array.isArray(body)||Object.keys(body).length!==4||Object.keys(body).some(k=>!['requestId','poolId','expectedVersion','confirmed'].includes(k))||!positive(body.poolId)||!sha(body.expectedVersion)||body.confirmed!==true)fail('Reveja a reparação e confirme os materiais antes de registar.');
-  const payload={poolId:body.poolId,expectedVersion:body.expectedVersion,confirmed:true};
+  if(!body||typeof body!=='object'||Array.isArray(body)||Object.keys(body).length!==(body.noMaterials===undefined?4:5)||Object.keys(body).some(k=>!['requestId','poolId','expectedVersion','confirmed','noMaterials'].includes(k))||!positive(body.poolId)||!sha(body.expectedVersion)||body.confirmed!==true||body.noMaterials!==undefined&&!execution.validNoMaterials(body.noMaterials))fail('Reveja a reparação e confirme os materiais ou descreva a intervenção sem materiais.');
+  const payload={poolId:body.poolId,expectedVersion:body.expectedVersion,confirmed:true,...(body.noMaterials?{noMaterials:body.noMaterials}:{})};
   return {request:writes.context(actor,scope,repairId,body.requestId,payload),payload};
 }
 async function apply(tx,actor,value,body,complete){
   const {request,payload}=command(actor,value,body),saved=await writes.recover(tx,request);if(saved)return saved;
   let view;try{view=await inspect(tx,request.resourceId);}catch(e){if(e.status!==404)throw e;}
-  if(!view?.canConfirm||view.poolId!==payload.poolId||view.version!==payload.expectedVersion)return writes.confirm(tx,request,{ok:true,applied:false,context:payload,code:'REPAIR_EXECUTION_CHANGED',message:'A reparação, a reserva ou a confirmação mudou. O pedido não foi aplicado. Consulte novamente antes de preparar outra confirmação.'});
+  if(!view?.canConfirm||view.poolId!==payload.poolId||view.version!==payload.expectedVersion||(view.materialMode==='NONE')!==!!payload.noMaterials)return writes.confirm(tx,request,{ok:true,applied:false,context:payload,code:'REPAIR_EXECUTION_CHANGED',message:'A reparação, a reserva ou a confirmação mudou. O pedido não foi aplicado. Consulte novamente antes de preparar outra confirmação.'});
   const result=await complete();
   if(!result.ok)fail(result.error||'Conclusão não confirmada.',result.status||409);
   const response=await writes.confirm(tx,request,{ok:true,applied:true,context:payload,repair:{id:result.repair.id,poolId:result.repair.poolId,status:result.repair.status,doneAt:result.repair.doneAt},execution:result.execution});

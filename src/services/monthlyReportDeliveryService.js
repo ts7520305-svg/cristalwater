@@ -17,10 +17,8 @@ const actorId = actor => {
 const blocked = plan => !plan.enabled ? 'RULE_DISABLED' : !integrations.isEmailEnabled() || !integrations.areExternalNotificationsEnabled() ? 'EMAIL_DISABLED' : null;
 const view = row => ({ reportId: row.reportId, requestId: row.requestId, recipient: row.recipient, status: row.status, createdAt: row.createdAt, updatedAt: row.updatedAt });
 
-async function legacyReview(db, monthRef) {
-  const history = await db.emailLog.findMany({ where: { eventType: 'MONTHLY_REPORT', monthlyDelivery: { is: null } }, select: { subject: true } });
-  return history.some(row => typeof row.subject !== 'string' || !/^Relatório Mensal(?: ADMIN)? - (20|21)\d{2}-(0[1-9]|1[0-2])$/.test(row.subject) || row.subject.endsWith(monthRef));
-}
+const reconciliation=require('./monthlyEmailReviewService');
+const legacyReview=reconciliation.legacyReview;
 
 async function preview(actor, monthRef) {
   const userId = actorId(actor), month = reportMonth(monthRef, { required: true });
@@ -28,11 +26,12 @@ async function preview(actor, monthRef) {
   // Include existing outcomes even when a recipient or rule has since changed.
   const deliveries = await prisma.monthlyReportDelivery.findMany({ where: { report: { month, type: 'CLIENT' } }, orderBy: { id: 'asc' } });
   const byReport = new Map(deliveries.map(row => [row.reportId, row]));
+  const reviewed=await reconciliation.reviewedReports(prisma,plan.messages.map(m=>m.reportId));
   const rows = plan.messages.map(message => {
     const delivery = byReport.get(message.reportId);
     return { reportId: message.reportId, clientId: message.clientId, clientName: message.clientName, ...message.payload,
-      delivery: delivery ? view(delivery) : null,
-      reviewToken: delivery ? null : jwt.sign({ purpose: 'MONTHLY_REPORT_REVIEW', userId, reportId: message.reportId, monthRef: month, recipient: message.payload.to, contentHash: message.contentHash }, getJwtSecret(), { algorithm: 'HS256', expiresIn: '15m' }) };
+      delivery: delivery ? view(delivery) : null, reviewed:reviewed.has(message.reportId),
+      reviewToken: delivery || reviewed.has(message.reportId) ? null : jwt.sign({ purpose: 'MONTHLY_REPORT_REVIEW', userId, reportId: message.reportId, monthRef: month, recipient: message.payload.to, contentHash: message.contentHash }, getJwtSecret(), { algorithm: 'HS256', expiresIn: '15m' }) };
   });
   return { ok: true, version: 1, monthRef: month, blocked: blocked(plan) || (await legacyReview(prisma, month) ? 'LEGACY_REVIEW_REQUIRED' : null), rows, skipped: plan.skipped, deliveries: deliveries.map(view), deliveryConfirmed: false };
 }
@@ -58,9 +57,11 @@ async function dispatch(expected) {
   let reserved;
   try {
     reserved = await prisma.$transaction(async db => {
+      await db.$queryRaw`SELECT id FROM "MonthlyReport" WHERE id=${expected.reportId} FOR UPDATE`;
       const existing = await db.monthlyReportDelivery.findFirst({ where: { OR: [{ reportId: expected.reportId }, { requestId: expected.requestId }] } });
       if (existing) return { replay: match(existing, expected) };
       const plan = await prepareMonthlyReportEmails({ monthRef: expected.monthRef, clientOnly: expected.clientOnly, manual: expected.mode === 'MANUAL', db });
+      if((await reconciliation.reviewedReports(db,[expected.reportId])).has(expected.reportId))fail('REVIEWED_HISTORY','Este relatório tem uma revisão de envio. Use o percurso de revisão antes de novo contacto.');
       if (await legacyReview(db, expected.monthRef)) fail('LEGACY_REVIEW_REQUIRED', 'Há registos antigos de envio deste mês sem ligação a um relatório. Reveja o histórico antes de enviar.');
       const disabled = blocked(plan);
       if (disabled) fail(disabled, 'O envio de email está desativado.', 503);
@@ -69,7 +70,7 @@ async function dispatch(expected) {
       const log = await db.emailLog.create({ data: { ...message.payload, eventType: 'MONTHLY_REPORT', mode: expected.mode, status: 'PENDING' } });
       const delivery = await db.monthlyReportDelivery.create({ data: { reportId: expected.reportId, requestId: expected.requestId, recipient: expected.recipient, contentHash: expected.contentHash, requestedBy: expected.requestedBy, mode: expected.mode, emailLogId: log.id } });
       return { delivery, payload: message.payload };
-    }, { isolationLevel: 'RepeatableRead', maxWait: 15000, timeout: 30000 });
+    }, { isolationLevel: 'ReadCommitted', maxWait: 15000, timeout: 30000 });
   } catch (error) {
     if (['P2002', 'P2034'].includes(error.code)) {
       const existing = await prisma.monthlyReportDelivery.findFirst({ where: { OR: [{ reportId: expected.reportId }, { requestId: expected.requestId }] } });

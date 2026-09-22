@@ -3,13 +3,15 @@ const { prisma } = require('../prismaClient');
 const { generate: generateClientMonthlyReport } = require('../business/client/ClientMonthlyReportBusiness');
 const { manualReportMonth } = require('../services/monthlyReportMonth');
 const delivery = require('../services/monthlyReportDeliveryService');
+const reviews = require('../services/monthlyEmailReviewService');
+const retries = require('../services/monthlyEmailRetryService');
 
 const action = work => async (req, res) => {
   res.set('Cache-Control', 'private, no-store');
   try { res.json(await work(req)); }
   catch (error) {
     const status = error.statusCode || error.status;
-    if ([400,403,409,503].includes(status)) return res.status(status).json({ ok: false, code: error.code, error: error.message });
+    if ([400,403,404,409,503].includes(status)) return res.status(status).json({ ok: false, code: error.code, error: error.message });
     res.status(503).json({ ok: false, code: 'RESULT_UNAVAILABLE', error: 'Não foi possível confirmar a operação. Consulte o resultado antes de tentar novamente.' });
   }
 };
@@ -24,4 +26,11 @@ const prepareReports = action(async req => {
 });
 const previewReports = action(req => delivery.preview(req.user, manualReportMonth(req.query)));
 const sendReportsNow = action(req => delivery.sendConfirmed(req.user, req.body));
-module.exports = { prepareReports, previewReports, sendReportsNow };
+module.exports = { prepareReports, previewReports, sendReportsNow,
+ listEmailReviews:action(req=>reviews.list(req.user,manualReportMonth(req.query))),
+ emailReviewDetail:action(req=>reviews.detail(req.user,Number(req.params.id),Number(req.query.reportId))),
+ reviewEmail:action(req=>reviews.review(req.user,Number(req.params.id),req.body)),
+ lookupEmailReview:action(req=>reviews.lookup(req.user,Number(req.params.id),req.params.requestId,req.query.payloadHash)),
+ previewEmailRetry:action(req=>retries.preview(req.user,Number(req.params.id))),
+ retryReviewedEmail:action(req=>retries.send(req.user,Number(req.params.id),req.body))
+};

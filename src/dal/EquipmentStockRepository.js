@@ -6,7 +6,6 @@ const prisma = global.__CRISTAL_WATER_PRISMA__ || prismaClient?.prisma || prisma
 const equipmentRepo = new BaseRepository(prisma.poolEquipment);
 const productRepo = new BaseRepository(prisma.inventoryProduct);
 const movementRepo = new BaseRepository(prisma.stockMovement);
-const balanceRepo = new BaseRepository(prisma.stockBalance);
 const historyRepo = new BaseRepository(prisma.technicalHistory);
 const attachmentRepo = new BaseRepository(prisma.attachment);
 const repairRepo = new BaseRepository(prisma.repair);
@@ -100,8 +99,8 @@ async function listProducts(where = {}) {
   });
 }
 
-async function listBalances(where = {}) {
-  return balanceRepo.findAll({
+async function listBalances(where = {}, db = prisma) {
+  return db.stockBalance.findMany({
     where,
     orderBy: [{ scope: "asc" }, { productName: "asc" }],
     take: 2000,

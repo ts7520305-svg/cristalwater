@@ -50,6 +50,7 @@
       if(!validId(row.reportId)||!validId(row.clientId)||!['clientName','to','subject','text'].every(key=>typeof row[key]==='string')||!row.subject.endsWith(selected)||!row.text.includes('Mês: '+selected))fail();
       const saved=body.deliveries.find(d=>d.reportId===row.reportId);
       if(saved){if(JSON.stringify(saved)!==JSON.stringify(row.delivery)||row.reviewToken!==null)fail();}
+      else if(row.reviewed===true){if(row.delivery!==null||row.reviewToken!==null)fail();}
       else {
         if(row.delivery!==null||typeof row.reviewToken!=='string')fail();
         let review;try{review=decode(row.reviewToken);}catch(_){fail();}
@@ -66,6 +67,7 @@
       node(card,'h3',row.clientName);node(card,'p','Mês: '+data.monthRef+' · Relatório #'+row.reportId);
       node(card,'p','Destinatário: '+row.to);node(card,'p','Assunto: '+row.subject);node(card,'pre',row.text);
       if(row.delivery){node(card,'p',outcomes[row.delivery.status]);if(row.delivery.recipient!==row.to)node(card,'p','Destinatário do envio registado: '+row.delivery.recipient);}
+      else if(row.reviewed===true){node(card,'p','Existe uma revisão do envio. Consulte o histórico antes de qualquer novo contacto.');}
       else{
         const label=node(card,'label','', 'mail-confirm'),check=document.createElement('input');check.type='checkbox';check.dataset.unavailable=String(!!data.blocked);label.append(check);node(label,'span','Confirmei o mês, o destinatário e o texto deste relatório.');
         const send=node(card,'button','Confirmar envio','btn');send.type='button';send.dataset.unavailable=String(!!data.blocked);check.addEventListener('change',controls);send.addEventListener('click',()=>{if(check.checked)void sendOne(row);});

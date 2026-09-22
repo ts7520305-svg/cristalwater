@@ -17,7 +17,7 @@ email.sendEmail = async payload => {
 };
 const transaction = prisma.$transaction.bind(prisma);
 prisma.$transaction = (work, options) => transaction(async db => {
-  const targets = { logCreate: ['emailLog','create'], reservation: ['monthlyReportDelivery','create'], logUpdate: ['emailLog','update'], resultUpdate: ['monthlyReportDelivery','update'] };
+  const targets = { reviewAudit:['auditTrail','create'], reviewReceipt:['fieldWriteRequest','create'], retryResult:['emailLog','updateMany'], logCreate: ['emailLog','create'], reservation: ['monthlyReportDelivery','create'], logUpdate: ['emailLog','update'], resultUpdate: ['monthlyReportDelivery','update'] };
   if (targets[fault]) { const [model, method] = targets[fault]; db[model][method] = async () => { throw Error('QA_PRIVATE persistence failure'); }; }
   return work(db);
 }, options);

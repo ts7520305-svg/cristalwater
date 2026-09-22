@@ -13,7 +13,7 @@ function owner(actor) {
   return `TECH:${tech}`;
 }
 function context(actor, scope, resourceId, requestId, payload) {
-  if (typeof requestId !== 'string' || !uuid.test(requestId) || !Number.isSafeInteger(resourceId) || resourceId <= 0 || !['VISIT_PHOTO', 'VISIT_COMPLETION', 'TECHNICIAN_ALERT', 'FIELD_STOCK_REQUEST', 'FIELD_PROBLEM_REPORT', 'FIELD_CLIENT_INTAKE', 'FIELD_CLIENT_APPROVAL', 'CLIENT_REPORT_SETTINGS', 'CLIENT_SERVICE_PLAN', 'CLIENT_SERVICE_GENERATION', 'EXTRA_VISIT_START', 'EXTRA_VISIT_PHOTO', 'EXTRA_VISIT_COMPLETION', 'EXTRA_VISIT_CORRECTION', 'EQUIPMENT_MAINTENANCE', 'VISIT_INCOMPLETE', 'VISIT_RETURN', 'REPAIR_EXECUTION'].includes(scope)) fail('Conserve o pedido de campo original.');
+  if (typeof requestId !== 'string' || !uuid.test(requestId) || !Number.isSafeInteger(resourceId) || resourceId <= 0 || !['VISIT_PHOTO', 'VISIT_COMPLETION', 'TECHNICIAN_ALERT', 'FIELD_STOCK_REQUEST', 'FIELD_PROBLEM_REPORT', 'FIELD_CLIENT_INTAKE', 'FIELD_CLIENT_APPROVAL', 'CLIENT_REPORT_SETTINGS', 'CLIENT_SERVICE_PLAN', 'CLIENT_SERVICE_GENERATION', 'EXTRA_VISIT_START', 'EXTRA_VISIT_PHOTO', 'EXTRA_VISIT_COMPLETION', 'EXTRA_VISIT_CORRECTION', 'EQUIPMENT_MAINTENANCE', 'VISIT_INCOMPLETE', 'VISIT_RETURN', 'REPAIR_EXECUTION', 'MONTHLY_EMAIL_REVIEW', 'MONTHLY_EMAIL_RETRY'].includes(scope)) fail('Conserve o pedido de campo original.');
   return { owner: owner(actor), requestId: requestId.toLowerCase(), scope, resourceId, payloadHash: hash({ v: 1, scope, resourceId, payload }) };
 }
 async function recover(tx, request) {
