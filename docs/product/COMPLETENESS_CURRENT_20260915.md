@@ -1,5 +1,31 @@
 # Cristal Water — matriz atual de conclusão
 
+## Estado de retoma — 22/09/2026, TASK291–292
+
+Esta secção e `CURRENT_WORK_CHECKPOINT.md` prevalecem sobre os registos históricos abaixo. Primeira publicação: `963ef87c013c981519afe93c04ace5861e867071`, árvore `2ab1d8866783169452e44655993bb81dd3279df9`, na branch de trabalho. [CI inicial 35772194876](https://github.com/ts7520305-svg/cristalwater/actions/runs/35772194876). A revisão posterior filtra os tipos CLIENT/ADMIN na associação de emails, com cinco grupos de regressão aprovados; requer CI do commit final. Validação local: 401 testes unitários/64 ficheiros, percursos novos e regressões dirigidas aprovados; 184 grupos previstos no CI. Não é aprovação global de produção.
+
+| Área atualizada | Implementado e verificado no âmbito | Limite ainda aberto |
+|---|---|---|
+| Serviços e preços sazonais | Acordo versionado, frequência por cliente/época, calendário semanal/mensal, simulação e aplicação recuperável; horários Lisboa, preços preservados e faturação mensal integrada. TASK254–256, `SEASONAL_CLIENT_SERVICE_20260918.md`. | Preço por visita no editor sazonal, exceções datadas e cadências adicionais não acrescentados. Três visitas não é limite. |
+| Relatórios de visitas e portal | Abertura autenticada pelos alertas, fotografias autorizadas, REGULAR/EXTRA, fontes Unicode e PT/EN/FR/ES com preferência do cliente. Gerador mensal corrigido por período/titular; portal e documentos autenticados. TASK257–274. | Revisão explícita de relatórios históricos, cobertura integral dos restantes PDFs/páginas e volume de produção. |
+| Faturação fiscal externa | Pedido com IVA, checklist do documento/serviços, número externo, concorrência e revisão de referências antigas; resumo administrativo com fontes explícitas. TASK275–277. | Associação atual a um documento interno completo; agrupamento/repartição fiscal exige modelo próprio. A app não emite a fatura fiscal. |
+| Custos e gestão com IA | Despesas/pagamentos, atribuição manual e valorização de materiais/tempo medido, cobertura incompleta explícita. TASK280–284; `COMPANY_EXPENSE_LEDGER_20260921.md`, `EXPENSE_MEASUREMENT_VALUATION_20260921.md`. | Restantes custos, base de trabalho composta, custos de reparações e alinhamento por período antes de margem completa. Compra, consumo e pagamento não são somados como o mesmo custo. |
+| Receitas por serviço | Linhas conciliadas, repartição explícita das mensalidades, manutenção com decisão comercial original, origem documental e declaração de execução das reparações. TASK285–290. | Ajustes/descontos/créditos, origens restantes e período de execução; receita completa e lucro permanecem por apurar. |
+| Reparações sem materiais | Descrição e confirmação explícitas, prova/recibo atómicos, sem consumir stock nem gerar fatura; concorrência com reserva/agendamento protegida. TASK291, `REPAIR_NO_MATERIALS_20260922.md`. | Datas históricas e eventual associação explícita à visita de origem; a declaração não prova execução física independente. |
+| Emails mensais | Mês/conteúdo revistos, reserva persistente, resultados verdadeiros e revisão auditável de incertezas; novo contacto exige confirmação separada, com bloqueio de tentativas concorrentes. TASK278–279 e TASK292, `MONTHLY_EMAIL_REVIEW_20260922.md`. | Consulta ao fornecedor e entrega reais, origens contraditórias e tratamento de volume; nesta validação só houve transporte simulado. |
+
+## Trabalho restante por fechar
+
+1. **Financeiro:** conciliar ajustes/descontos/créditos e restantes origens; completar custos atribuíveis e alinhar receita/custo pelo período de execução. Aceitação: montantes exatos, sem duplicação, fontes históricas preservadas, revisão das divergências e cobertura declarada antes de calcular margens.
+2. **Históricos e apresentação:** revisão explícita dos casos antigos ainda ambíguos e inventário dos ecrãs/PDFs/textos ainda não cobertos. Aceitação: lista finita por perfil, páginas/idiomas e estados de erro/vazio/carregamento ensaiados, sem repetir os percursos acima já concluídos.
+3. **Volume e operação prolongada:** cenário representativo da carteira, rotas, relatórios e dados históricos; medir latência e capacidade no ambiente real. Concorrência em QA não comprova dimensionamento nem redundância de produção.
+4. **VPS e fornecedores:** instalação da versão aprovada, HTTPS, arranque/supervisão, cópia externa, alertas de falha e restauro operacional; confirmar SMTP/push e integrações configuradas. Estado remoto não inferido do GitHub.
+5. **Piloto físico e requisitos avançados:** iPhone/Android, offline prolongado, GPS/fotografias/bateria/push e aceitação em campo. IA generativa offline, aprendizagem validada por piscina, vídeo e integrações de pagamento completas continuam requisitos separados sem aprovação integral.
+
+Sem percentagem global: faltam critérios fechados e evidência para os pontos acima. Principal `feature/technicians-v25` conservada em `6f27081e1d183ff584a62255b016b373836734db`; sem merge, deploy ou contactos reais neste lote.
+
+## Registos históricos até TASK253
+
 TASK252–253 confirmadas no commit `cd04d24b942c42fdc5952bffe7a0521d33f635d0`, árvore `5395911431de78ac341b5bcfd277c304f5febc23`, [CI `35316029494`](https://github.com/ts7520305-svg/cristalwater/actions/runs/35316029494), job `105507752531`: 146/146 grupos, 388 testes unitários/62 ficheiros e quatro testes técnicos, 21 scripts no gate de navegador, 20 migrações, sintaxe de 549 JS backend/181 frontend/56 scripts inline e restauro de 110 tabelas/32 ficheiros com linhas e hashes iguais em PostgreSQL 16. CI concluído em 2026-09-18 06:57:26 UTC. Fontes financeiras comuns à API ADMIN e ao imprimível mensal, clientes/documentos distintos, recebimentos por data UTC, filtro documental e montantes ambíguos por rever; cinco páginas de PDF revistas. Cache v76, sem migração nova. `MONTHLY_PRINT_SOURCES_20260918.md`. Esta atualização posterior altera apenas documentação e mantém código/testes da árvore validada.
 
 TASK250–251 confirmadas no commit `09faec4284d8247811c0b1b48402a2bf42fe8b1c`, árvore `554ebeb89b0f2544932bb2f3f01e9fc56c178767`, [CI `35311811075`](https://github.com/ts7520305-svg/cristalwater/actions/runs/35311811075), job `105495236960`: 144/144 grupos, 388 testes unitários/62 ficheiros e quatro testes técnicos, 21 scripts no gate de navegador, 20 migrações, sintaxe de 547 JS backend/181 frontend/56 scripts inline e restauro de 110 tabelas/32 ficheiros com linhas e hashes iguais em PostgreSQL 16. CI concluído em 18/09/2026 às 05:57 UTC. Cache v76, sem nova migração. Abertura autenticada nas configurações/centro mensal, contexto e sessão confirmados, consulta de clientes arquivados, cliente histórico obrigatório, 15 opções no PDF/HTML, notas internas só para ADMIN e paginação individual revista. `AUTHENTICATED_VISIT_REPORTS_20260918.md`. Esta atualização posterior altera apenas documentação e conserva o código/testes da árvore validada. O ponto de retoma posterior está acima; este parágrafo conserva a aprovação das TASK250–251.
@@ -18,7 +44,7 @@ TASK236–237 confirmadas no commit `c38567380cfdbccf75237cb11832acc6524abcc5`, 
 
 TASK229–232 confirmadas conjuntamente: CI `35246742375` aprovado no commit `e1b9ddc4353781de43d04f716ae725bea47dc306`, árvore `a2e1ff48ed352cf5b42d39770a628178efc051ab`: 125/125 grupos, 388 unitários/quatro técnicos, 21 scripts de navegador, 20 migrações, sintaxe de 539 JS backend/171 frontend/66 inline e restauro de 110 tabelas/32 ficheiros com linhas/hashes iguais em PostgreSQL 16. TASK228 confirmada no CI `35223295754`: 124 grupos, 20 scripts de navegador e restauro de 110 tabelas/32 ficheiros. Os CI das TASK229 e TASK230 falharam, respetivamente, por sobreposição no scroll da ficha técnica (corrigida/testada) e asserção antiga de propostas que confundia dígitos num hash com dados financeiros (reforçada na TASK232). A matriz cruza relatórios e rotas revistas; não constitui auditoria exaustiva de todas as páginas/APIs nem conclusão a 100%.
 
-## Implementação e evidência atual
+## Implementação e evidência históricas até TASK253
 
 | Área | Estado demonstrado | Evidência / limite |
 |---|---|---|
@@ -86,9 +112,9 @@ TASK229–232 confirmadas conjuntamente: CI `35246742375` aprovado no commit `e1
 | Retenção/backup | Pré-visualização e limpeza manual controlada de GPS; monitorização de idade da cópia local; restauro em QA | TASK96–98 e CI. Cópia externa, agendamento e alerta real de falha no VPS pendentes. Não há eliminação automática de histórico crítico. |
 | IA e evoluções avançadas | Sugestões e controlos humanos existentes | Aprendizagem validada por piscina, assistente generativo offline e vídeo completo continuam sem evidência de implementação integral. Não declarar estes pontos concluídos. |
 
-## Próximo trabalho no código
+## Prioridades históricas anteriores à TASK254
 
-Prioridade revista pelo utilizador em 18/09: plano sazonal por cliente, ligando serviços, frequência/dias de visita, agendamento e valor vigente; exemplo setembro–maio versus junho–agosto com três visitas por semana. `SEASONAL_CLIENT_SERVICE_REQUIREMENT_20260918.md` regista o requisito, as lacunas observadas e os critérios de fecho. Ainda não implementado como percurso integrado. Depois retomar abertura autenticada pelos alertas, fotografias autorizadas, EXTRA e fontes Unicode/traduções.
+Prioridade definida pelo utilizador em 18/09: plano sazonal por cliente, ligando serviços, frequência/dias de visita, agendamento e valor vigente; exemplo setembro–maio versus junho–agosto com três ou mais visitas por semana conforme o cliente. Esta prioridade foi implementada nas TASK254–256; abertura pelos alertas, fotografias, EXTRA, fontes e idiomas foram tratados nas TASK257–267. Consultar o estado de retoma no início deste documento antes de escolher trabalho; não repetir essas implementações.
 
 TASK211–212 publicadas com autorização explícita do utilizador e confirmadas no CI `35179629224`, incluindo 115 grupos/19 migrações/restauro de 110 tabelas e 31 ficheiros. A falha anterior do adaptador local não se repetiu em PostgreSQL 16. TASK213 confirmada no commit `25c14c697aef8b8568e9cd296f3ff6594dad63e4`, árvore `0e5922326602148282172bc08553e1708327296f`, CI `35182758842`: 116 grupos, 388 unitários/quatro técnicos, 17 scripts de navegador, 19 migrações e restauro de 110 tabelas/31 ficheiros. O E2E foi atualizado para a gravação assíncrona/fila atual; indicador da ronda e recuperação de água/bomba também passaram. A atualização posterior desta matriz altera apenas documentação.
 

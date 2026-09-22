@@ -30,3 +30,9 @@ API/UI finais e regressões de reparações: `/tmp/cw291-292-confirmed.log`. Reg
 ## Limites
 
 A evidência é declarada pela administração, sem consulta automática ao fornecedor. Não altera decisões fiscais, valores, frequências, clientes, documentos ou pagamentos. Não resolve automaticamente associações históricas contraditórias, entrega real de SMTP, VPS, traduções integrais ou piloto físico. Sem merge, deploy ou contactos reais neste lote.
+
+## Revisão final dos tipos de relatório
+
+A primeira publicação é `963ef87c013c981519afe93c04ace5861e867071`, árvore `2ab1d8866783169452e44655993bb81dd3279df9`, CI inicial `35772194876`. A revisão posterior encontrou que a lista de seleção incluía também `EXTRA_VISITS`/outros tipos guardados em MonthlyReport, que a interface de email mensal não aceita. A consulta passa a oferecer exclusivamente CLIENT/ADMIN; a API recusa a associação explícita a outro tipo. Ligações históricas incompatíveis ficam visíveis e bloqueadas, sem ocultar os restantes registos.
+
+Os ensaios API e de navegador agora incluem um relatório EXTRA_VISITS no mesmo mês. Os cinco grupos de email, na ordem do runner (período, entrega, interface anterior, revisão e nova interface), passaram em `/tmp/cw292-report-type-final.log`. A sintaxe dos três ficheiros alterados foi verificada. O CI final deve corresponder à revisão posterior; a primeira execução não comprova esta correção.

@@ -30,14 +30,16 @@ async function state(db,logId,reportId,loaded){
  const report=positive(targetId)?(loaded?loaded.reports.get(targetId):await db.monthlyReport.findUnique({where:{id:targetId}})):null;
  if(reportId!==undefined&&(!report||linkedId&&linkedId!==reportId))fail('O relatório escolhido não corresponde ao envio.',400);
  const known=period(log.subject);
- const associationMatches=!report||!known||known===report.month;
+ const supportedReport=!report||['CLIENT','ADMIN'].includes(report.type);
+ if(reportId!==undefined&&!supportedReport)fail('Escolha um relatório mensal de cliente ou administração.',400);
+ const associationMatches=supportedReport&&(!report||!known||known===report.month);
  if(reportId!==undefined&&!associationMatches)fail('O mês do relatório não corresponde ao assunto original.',400);
  const version=writes.hash({v:1,log:source(log),report:report?reportSource(report):null,delivery:json(log.monthlyDelivery),reviews:proofs.map(p=>({id:p.id,metadata:p.metadata})),retries:retries.map(p=>({id:p.id,metadata:p.metadata}))});
  const latest=proofs[0],m=latest?.metadata;let review=null;
  if(m){const {fingerprint,...snapshot}=m;const valid=associationMatches&&m.schema===1&&writes.hash(snapshot)===fingerprint&&m.logHash===writes.hash(source(log))&&report&&m.reportId===report.id&&m.reportHash===writes.hash(reportSource(report))&&['ACCEPTED','NOT_SENT'].includes(m.decision)&&text(m.reason)&&text(m.evidence)&&positive(m.actorId)&&latest.action===REVIEW;
   review={id:latest.id,valid:!!valid,decision:m.decision,reason:m.reason,evidence:m.evidence,reviewedAt:latest.createdAt};
  }
- return {log,report,known,linkedId,version,review,retries,parent,parentValid,associationMatches};
+ return {log,report,known,linkedId,version,review,retries,parent,parentValid,associationMatches,supportedReport};
 }
 async function reviewedReports(db,ids){
  const proofs=await db.auditTrail.findMany({where:{eventType:REVIEW,entity:'EmailLog'},select:{entityId:true,metadata:true}});
@@ -54,11 +56,11 @@ async function legacyReview(db,month){
  }
  return false;
 }
-const publicRow=s=>({emailLogId:s.log.id,reportId:s.report?.id??null,monthRef:s.report?.month??s.known,recipient:s.log.to||s.log.toEmail||'',subject:s.log.subject||'',text:s.log.text||'',status:s.log.status,createdAt:s.log.createdAt,version:s.version,review:s.review,reviewIssue:s.associationMatches?'':'O mês do assunto não corresponde ao relatório associado. Confira a origem deste registo antes de o rever ou reenviar.',retryReserved:s.retries.length>0,canReview:s.associationMatches&&['SENT','FAILED','UNKNOWN','PENDING'].includes(s.log.status)&&!s.retries.length,canRetry:s.associationMatches&&s.review?.valid===true&&s.review.decision==='NOT_SENT'&&!s.retries.length&&(['FAILED','UNKNOWN'].includes(s.log.status)||s.log.status==='PENDING'&&Date.now()-new Date(s.log.createdAt).getTime()>=30*60*1000)});
+const publicRow=s=>({emailLogId:s.log.id,reportId:s.report?.id??null,monthRef:s.report?.month??s.known,recipient:s.log.to||s.log.toEmail||'',subject:s.log.subject||'',text:s.log.text||'',status:s.log.status,createdAt:s.log.createdAt,version:s.version,review:s.review,reviewIssue:!s.supportedReport?'O relatório associado não é do tipo mensal de cliente ou administração. Confira a origem deste registo.':s.associationMatches?'':'O mês do assunto não corresponde ao relatório associado. Confira a origem deste registo antes de o rever ou reenviar.',retryReserved:s.retries.length>0,canReview:s.associationMatches&&['SENT','FAILED','UNKNOWN','PENDING'].includes(s.log.status)&&!s.retries.length,canRetry:s.associationMatches&&s.review?.valid===true&&s.review.decision==='NOT_SENT'&&!s.retries.length&&(['FAILED','UNKNOWN'].includes(s.log.status)||s.log.status==='PENDING'&&Date.now()-new Date(s.log.createdAt).getTime()>=30*60*1000)});
 async function list(actor,monthRef){
  admin(actor);const month=reportMonth(monthRef,{required:true});
  return prisma.$transaction(async db=>{
-  const reports=await db.monthlyReport.findMany({where:{month},orderBy:{id:'asc'},select:{id:true,clientId:true,type:true,data:true}});
+  const reports=await db.monthlyReport.findMany({where:{month,type:{in:['CLIENT','ADMIN']}},orderBy:{id:'asc'},select:{id:true,clientId:true,type:true,data:true}});
   const loaded=await context(db),logs=[...loaded.logs.values()].sort((a,b)=>b.id-a.id),rows=[];
   for(const log of logs){const s=await state(db,log.id,undefined,loaded);if((s.report?.month??s.known??month)!==month)continue;rows.push(publicRow(s));}
   return {ok:true,monthRef:month,rows,reports:reports.map(r=>({id:r.id,type:r.type,clientId:r.clientId,label:r.type==='CLIENT'?(typeof r.data?.client==='string'?r.data.client:'Cliente #'+r.clientId):'Administração'})),sent:0};
