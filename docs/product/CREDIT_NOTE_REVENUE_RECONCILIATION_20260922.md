@@ -1,5 +1,7 @@
 # TASK293 — conciliação de notas de crédito internas
 
+Evolução posterior: a TASK294 implementa a atribuição explícita das reduções e a nova confirmação de parcelas mensais brutas. Ver `CREDIT_REVENUE_ALLOCATION_20260922.md`; o contrato v6 e os limites abaixo descrevem o estado histórico desta TASK293.
+
 ## Problema e resultado
 
 Uma nota interna de crédito de 20 EUR sobre um serviço documentado de 100 EUR fazia desaparecer os 100 EUR da repartição financeira. A reprodução controlada falhou com `linkedServiceAmountCents=0`, quando devia conservar o valor original e distinguir a redução. Não havia erro no recebimento nem na emissão da nota: a análise recusava integralmente qualquer documento ajustado.

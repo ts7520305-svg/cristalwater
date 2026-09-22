@@ -36,8 +36,18 @@ Listas são amostras identificadas de dez; totais não são truncados. A interfa
 - Navegador real: 320/390/1440, conteúdo literal, seletor paginado, duplo clique, perda de resposta, recarga, repetição/cancelamento, recibo de âmbito diferente, duas janelas, dados alterados, offline, sessão e armazenamento inválido. Mensalidades e Gestão com IA também aprovados; apresentação móvel/desktop inspecionada.
 - Regressões aprovadas: conciliação de notas, repartição mensal, cobertura documental, manutenção, origem de reparação, confirmação de execução e IA financeira. Logs locais `/tmp/cw294-focused.log` (API aprovada; primeira preparação do navegador corrigida), `/tmp/cw294-browser.log` e `/tmp/cw294-regressions.log`.
 - 401 unitários/64 ficheiros. Sintaxe 589 backend/193 frontend/60 inline. Runner: 187 grupos distintos. Cache v109; sem dependência nova.
-- Migração aditiva 27: `CreditRevenueAllocation` e `CreditRevenueEvent`, índices, restrições de valores/tipos/meses/hashes/UUID e consistência da anulação; sem backfill ou alteração de dados anteriores. Aplicação das 27 migrações à estrutura anterior, preservação de dados e restrições aprovadas localmente (`/tmp/cw294-migrations.log`). Restauro PostgreSQL 16 sujeito à validação final publicada.
+- Migração aditiva 27: `CreditRevenueAllocation` e `CreditRevenueEvent`, índices, restrições de valores/tipos/meses/hashes/UUID e consistência da anulação; sem backfill ou alteração de dados anteriores. Aplicação das 27 migrações à estrutura anterior, preservação de dados e restrições aprovadas localmente (`/tmp/cw294-migrations.log`). Restauro PostgreSQL 16 aprovado no CI publicado, conforme o encerramento abaixo.
 
 ## Próximo âmbito
 
 Conciliar restantes ajustes/descontos e origens, completar custos (incluindo reparações) e relacionar receita/custos pelo mesmo período de execução antes de margens. Restantes históricos, apresentação/idiomas/volume, VPS, fornecedores e piloto físico continuam pendentes. Não houve merge, deploy ou contactos reais neste lote. A TASK294 não certifica produção ou execução física independente.
+
+## Publicação
+
+Commit `d3f45891ed267c1586f1abd3f711c0f12262e5b5`, árvore `c86eda1e1bcecde0180c8da436a60abfdc0ad03e`, publicada sem força e igual à árvore local. Backup `backup/credit-revenue-local-20260922` (`04c8baa9353b75e3bea24e4589670e296f7d4f94`). Principal `feature/technicians-v25` ancestral e inalterada em `6f27081e1d183ff584a62255b016b373836734db`.
+
+[CI 35786794837](https://github.com/ts7520305-svg/cristalwater/actions/runs/35786794837), job `106945450271`, aprovado nas 17 etapas entre 21:27:56 e 21:50:35 UTC de 22/09/2026 (22m39s). Conferidos os logs completos contra o runner: 187/187 grupos distintos previstos, código zero/sem sinal; 401 unitários/64 ficheiros, quatro técnicos, gate geral do navegador, 27 migrações e sintaxe 589 backend/193 frontend/60 inline.
+
+Nova API/UI de atribuição: 33018/24087 ms; conciliação das notas 23198 ms; IA UI 23959 ms; cobertura documental 25438 ms; mensalidades API/UI 6770/10968 ms. Restauro PostgreSQL 16: 121 tabelas/46 ficheiros, linhas e hashes iguais. Evidência durável `evidence/20260922_task294_ci.json`.
+
+O encerramento posterior altera apenas documentação/evidência, preservando este código aprovado. TASK294 concluída neste âmbito; receita/custos completos, margens e validações de produção/campo permanecem pendentes.
