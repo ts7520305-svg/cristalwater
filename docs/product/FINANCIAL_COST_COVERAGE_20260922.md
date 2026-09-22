@@ -10,6 +10,12 @@ As ligações de compras de stock e manutenções de viaturas abrangem todos os 
 
 Uma origem sem ligação pode já ter sido registada manualmente como despesa. O sistema pede conferência antes de criar outro registo; não declara automaticamente uma nova dívida nem que exista um pagamento em atraso. Estes indicadores contam registos e não acrescentam valores às despesas.
 
+## Utilização
+
+Em Gestão com IA, escolher Gestão financeira e o mês de análise, e carregar em Consultar dados. A secção O que falta nos custos distingue origens de todos os meses e serviços do mês selecionado. As listas expansíveis identificam compras, manutenções e visitas pelo tipo e número; as recomendações abrem o registo de despesas.
+
+Antes de registar uma origem sem ligação, conferir fornecedor/documento e despesas manuais existentes. Para tempo ou consumo por completar, usar a despesa confirmada e o percurso de valorização existente. Quando uma valorização estiver por rever, confirmar a alteração da fonte e anular/recalcular conforme as regras já existentes. A conversa explica estas lacunas, mas não executa as correções.
+
 ## Medições dos serviços
 
 Os serviços usam o mês de conclusão em UTC e mantêm identidades REGULAR/EXTRA separadas, mesmo com o mesmo número. Clientes e técnicos históricos inativos são incluídos. O tempo fica valorizado apenas quando há uma valorização ativa, válida e correspondente à duração completa. Falta de cliente/técnico/duração ou uma valorização alterada ficam por rever; anulações deixam de contar como valorização.
@@ -30,8 +36,15 @@ Sem migração ou dependência nova. Mantêm-se 25 migrações; cache frontend v
 
 ## Validação e publicação
 
-Primeira verificação local aprovada: novo grupo de cobertura, API da IA financeira e interface Chromium real, incluindo 320/390/1440 px, contraste com preferência escura, sessões, fontes indisponíveis e respostas malformadas. `/tmp/cw284-focused.log`. 396 testes unitários/63 ficheiros aprovados em `/tmp/cw284-unit.log`. Sintaxe em `/tmp/cw284-syntax.log`.
+Primeira verificação local aprovada: novo grupo de cobertura, API da IA financeira e interface Chromium real, incluindo 320/390/1440 px, contraste com preferência escura, sessões, fontes indisponíveis e respostas malformadas. `/tmp/cw284-focused.log`. 396 testes unitários/63 ficheiros aprovados em `/tmp/cw284-unit.log`. Sintaxe aprovada: 574 ficheiros backend, 189 frontend e 57 scripts inline em `/tmp/cw284-syntax.log`.
 
-A versão final do teste acrescenta uma despesa manual sem ligação e serviços com consumo na interface. Regressões de atribuições, valorizações e valores operacionais em `/tmp/cw284-final-local.log`. A regressão de despesas passou em `/tmp/cw284-regression.log`; essa invocação parou depois por um nome incorreto do script seguinte, corrigido na invocação final. Imagens em `reports/field-visual/financial-ai-*`, incluindo `coverage-320.png`, `coverage-390.png` e `coverage-1440.png`.
+A versão final do teste acrescenta uma despesa manual sem ligação e serviços com consumo na interface. Versão final do grupo de cobertura/interface e regressões de atribuições, valorizações e valores operacionais aprovadas em `/tmp/cw284-final-local.log`. A regressão de despesas passou em `/tmp/cw284-regression.log`; essa invocação parou depois por um nome incorreto do script seguinte, corrigido na invocação final. Imagens em `reports/field-visual/financial-ai-*`, incluindo `coverage-320.png`, `coverage-390.png` e `coverage-1440.png`.
 
-Publicar apenas na branch autorizada, com árvore igual à validada localmente e sem força. CI PostgreSQL 16 completo e restauro ainda por confirmar para esta alteração. Não há merge na principal, instalação no VPS, movimentos bancários, contactos ou fornecedor de IA real.
+Código publicado em `556c8ee9accb68e66b07cf1e36334c7f575c3dfb`, árvore `a8f6e1dfe7e6aa0f6ec704953b3e3ae4bc32bfd0`, igual à validada localmente, na mesma branch autorizada e sem força. Backup local `backup/financial-cost-coverage-local-20260922` (`f32a0920f47a9a15bb5a14d3dcafd7b2a25c8e82`); checkout sincronizado após confirmar igualdade das árvores. A principal `feature/technicians-v25` continua ancestral e no mesmo SHA `6f27081e1d183ff584a62255b016b373836734db`. [CI 35693325875](https://github.com/ts7520305-svg/cristalwater/actions/runs/35693325875), job `106634737471`, terminou às 06:21:41 UTC de 22/09/2026 em 15m56s, com 171/172 grupos aprovados. Restauro omitido devido à falha descrita abaixo; esta execução não aprova o conjunto. Não há merge na principal, instalação no VPS, movimentos bancários, contactos ou fornecedor de IA real.
+
+
+## Correção da espera no teste do portal
+
+O único grupo falhado foi `test-field-e2e.js`: depois de simular uma resposta 503 dos documentos, verificava de imediato a piscina, cujo pedido independente ainda mostrava «A carregar piscinas...». Os restantes 171 grupos passaram, incluindo cobertura nova (3410 ms), IA financeira API/interface (2442/10022 ms), despesas (1198/6153 ms), atribuições (1447/6880 ms), valorizações (2113/7342 ms) e valores operacionais (354/4814 ms). Também passaram 396 testes unitários/63 ficheiros, quatro técnicos, 21 scripts gerais de navegador, 25 migrações e sintaxe 574/189/57.
+
+O teste passa a reter deliberadamente a resposta saudável do portal até o erro documental estar visível, confirmar que a piscina ainda não foi apresentada, libertar essa resposta e aguardar a piscina esperada. Mantém as asserções da piscina e do erro documental, exercitando precisamente a ordem que falhou no CI; não acrescenta uma espera temporal arbitrária nem altera código do portal. Validação dirigida aprovada em `/tmp/cw284-e2e-wait.log`, incluindo percursos completos de técnico, cliente e administrador, sem falhas. Publicar a correção do teste com estes dois documentos e repetir CI/restauro antes de encerrar.

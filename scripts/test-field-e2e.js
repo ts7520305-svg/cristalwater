@@ -130,10 +130,23 @@ const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
           assert.equal(await page.locator('.cw-v2-mobile-nav a[aria-label=Pagamentos]').textContent(),'Conta');
           if(process.env.CW_CAPTURE_UI)await page.screenshot({path:'reports/field-ui/CLIENT_VIEWPORT.png',fullPage:false});
           await page.route('**/api/client-portal/*/documents',route=>route.fulfill({status:503,contentType:'application/json',body:'{"error":"Unavailable"}'}));
-          await page.reload({waitUntil:'domcontentloaded'});
-          await page.locator('#documentList [role=alert]').waitFor({state:'visible'});
-          assert(await page.locator('#documentList [role=alert]').isVisible());
-          assert.match(await page.locator('#poolsList').textContent(),/Piscina da Quinta/);
+          // Documents and pools load independently. Hold the portal response to
+          // exercise the document failure arriving before the healthy pool list.
+          let releasePortal, markPortalStarted;
+          const portalReleased=new Promise(resolve=>{releasePortal=resolve;});
+          const portalStarted=new Promise(resolve=>{markPortalStarted=resolve;});
+          const portalUrl=`**/api/client-portal/${client.id}?*`;
+          await page.route(portalUrl,async route=>{const response=await route.fetch();markPortalStarted();await portalReleased;await route.fulfill({response});});
+          try {
+            await page.reload({waitUntil:'domcontentloaded'});
+            await portalStarted;
+            await page.locator('#documentList [role=alert]').waitFor({state:'visible'});
+            assert(!(await page.locator('#poolsList').textContent()).includes(pool.name));
+            releasePortal();
+            await page.waitForFunction(name=>document.querySelector('#poolsList')?.textContent.includes(name),pool.name);
+            assert(await page.locator('#documentList [role=alert]').isVisible());
+            assert.match(await page.locator('#poolsList').textContent(),/Piscina da Quinta/);
+          } finally { releasePortal(); await page.unroute(portalUrl); }
           await page.unroute('**/api/client-portal/*/documents');
           await page.locator('#documentList button').click();
           await page.waitForFunction(()=>!document.querySelector('#documentList [role=alert]'));
