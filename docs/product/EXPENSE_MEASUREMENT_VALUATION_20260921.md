@@ -1,6 +1,6 @@
 # TASK283 — Valorização documentada de materiais e trabalho
 
-Início: 21/09/2026. Branch: `work/field-readiness-20260915-simulation`. Base: `b6539ba9ddc3b86bcf5978629096f85d5739f221`, encerramento da TASK282. Implementação e validação local concluídas. Publicação bloqueada em 22/09/2026: conector GitHub e gestão de plugins devolvem HTTP 400 `Invalid MCP request metadata`; `git push --dry-run` confirma ausência de autenticação direta. Nenhum commit desta tarefa foi enviado. CI PostgreSQL 16 e restauro continuam por confirmar.
+Início: 21/09/2026. Branch: `work/field-readiness-20260915-simulation`. Base: `b6539ba9ddc3b86bcf5978629096f85d5739f221`, encerramento da TASK282. Código publicado em 22/09/2026 no commit `7a39fd7aef42ebe98033e3ed4d0ce86dd7d43756`, árvore `d9ee77fbbd0859eecc76bfba2862862e01d48284`, igual à validada localmente. O erro de ligação anterior foi ultrapassado e a publicação foi feita na mesma branch, sem força. [CI 35687874189](https://github.com/ts7520305-svg/cristalwater/actions/runs/35687874189), job `106618482284`, terminou em 22/09/2026 às 04:59:54 UTC, em 17m46s: 170/171 grupos aprovados. A API de valorizações passou em PostgreSQL 16 (2302 ms); a única falha foi a medição de overflow do seletor de técnicos a 320 px. Restauro omitido, sem aprovação global desta execução.
 
 ## Percurso e significado dos valores
 
@@ -42,4 +42,8 @@ Comparação remota inicial: branch de trabalho alinhada, principal `feature/tec
 
 Próximo trabalho: completar os restantes gastos, a cobertura de custos e a repartição das receitas antes de apresentar margens. A reconciliação de emails e as bases salariais compostas permanecem percursos separados.
 
-Retoma após recuperação do acesso: consultar novamente a branch remota, publicar o commit local sem força, confirmar a mesma árvore e acompanhar os 171 grupos e o restauro completo. Backup local `backup/expense-measurement-valuation-local-20260922`. A skill de gestão de plugins foi consultada apenas para diagnóstico; não houve alteração de permissões ou ligações.
+A retoma confirmou a mesma base remota antes da publicação. O commit local `f77b59d8fed50bd4511f64f491d96c6af1068c6f` permanece no backup `backup/expense-measurement-valuation-local-20260922`; o checkout foi alinhado com o commit remoto depois de confirmar igualdade integral das árvores. A skill de gestão de plugins foi consultada apenas para diagnóstico; não houve alteração de permissões ou ligações. O encerramento altera apenas este documento e o checkpoint, após o CI e restauro.
+
+## Precisão da verificação visual após o primeiro CI
+
+O controlo de seleção estava entre x=35 e x=285, dentro do ecrã de 320 px, mas a implementação nativa reportou mais 245 px de scrollWidth para o nome completo da opção. O teste confundia a largura interna das opções com saída do controlo para fora do ecrã. A correção mantém os limites exteriores de todos os controlos e o overflow dos restantes elementos, mede também o overflow da página inteira e confirma que a identidade completa do técnico permanece legível no texto da base. Captura imagens antes das asserções e inclui tag/id nos diagnósticos. O código de produção mantém-se igual. A interface foi novamente validada localmente; a nova execução completa e o restauro são obrigatórios antes de encerrar. Evidência: `/tmp/cw283-native-select-fix.log`.
