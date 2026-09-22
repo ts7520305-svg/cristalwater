@@ -41,6 +41,9 @@ function documentReason(invoice) {
 // The month belongs to the document, not to cash receipt or service completion.
 // This read-only partition never distributes a monthly contract automatically.
 async function build(db, monthRef, generatedAt, invoices) {
+  const monthlyStates = await require('./monthlyRevenueData').states(db);
+  const monthlyById = new Map(monthlyStates.map(s => [s.lineId, s]));
+  const activeAllocations = monthlyStates.flatMap(s => s.allocations).filter(a => !a.voidedAt);
   const candidates = invoices.flatMap(i => i.lines).flatMap(references);
   const ids = type => [...new Set(candidates.filter(k => k.startsWith(type + ':')).map(k => Number(k.split(':')[1])))];
   const regularIds = ids('REGULAR'), extraIds = ids('EXTRA');
@@ -55,8 +58,8 @@ async function build(db, monthRef, generatedAt, invoices) {
     for (const key of references(line)) counts.set(key, (counts.get(key) || 0) + 1);
   }
   const documents = { total: invoices.length, reconciled: 0, review: 0, excluded: 0 };
-  const lines = { total: 0, linked: 0, monthly: 0, unassigned: 0, review: 0 };
-  const values = { linked: [], monthly: [], unassigned: [], review: [] }, documentValues = [], issues = [], linked = [];
+  const lines = { total: 0, linked: 0, monthly: 0, monthlyAllocated: 0, unassigned: 0, review: 0 };
+  const values = { linked: [], monthly: [], monthlyAllocated: [], unassigned: [], review: [] }, documentValues = [], issues = [], linked = [];
   for (const invoice of [...invoices].sort((a, b) => a.id - b.id)) {
     if (projection.document(invoice).classification === 'EXCLUDED') { documents.excluded++; continue; }
     const identity = { invoiceId: invoice.id, clientId: invoice.clientId, clientName: invoice.client.name };
@@ -66,7 +69,18 @@ async function build(db, monthRef, generatedAt, invoices) {
     for (const line of [...invoice.lines].sort((a, b) => a.id - b.id)) {
       const type = lineType(line), targetType = types[type], amountCents = projection.cents(line.total);
       let bucket, issue;
-      if (type === 'MONTHLY') { bucket = 'monthly'; issue = 'MONTHLY_UNALLOCATED'; }
+      if (type === 'MONTHLY') {
+        const state = monthlyById.get(line.id);
+        if (!state?.valid) { bucket = 'review'; issue = 'MONTHLY_ALLOCATION_REVIEW'; }
+        else {
+          values.monthlyAllocated.push(state.allocatedAmountCents);
+          values.monthly.push(state.availableAmountCents);
+          lines.total++;
+          if (state.availableAmountCents > 0) { lines.monthly++; issues.push({ ...identity, lineId:line.id, reason:'MONTHLY_UNALLOCATED' }); }
+          else lines.monthlyAllocated++;
+          continue;
+        }
+      }
       else if (!targetType) { bucket = 'unassigned'; issue = 'OTHER_SOURCE_UNALLOCATED'; }
       else {
         const key = targetType + ':' + line.referenceId, visit = current.get(key);
@@ -80,9 +94,10 @@ async function build(db, monthRef, generatedAt, invoices) {
       if (issue) issues.push({ ...identity, lineId: line.id, reason: issue });
     }
   }
-  return { version: 1, monthRef, currency: 'EUR', generatedAt: generatedAt.toISOString(), state: 'PARTIAL', completeRevenueAllocation: false, revenue: null, profit: null, limitApplied: null,
+  return { version: 2, monthRef, currency: 'EUR', generatedAt: generatedAt.toISOString(), state: 'PARTIAL', completeRevenueAllocation: false, revenue: null, profit: null, limitApplied: null,
     basis: { documents: 'DOCUMENT_MONTH_REFERENCE_CURRENT_VALUES', amounts: 'RECONCILED_DOCUMENT_LINES_ONLY', services: 'UNIQUE_TYPED_COMPLETED_SERVICE_CURRENT_STATE', duplicates: 'RECEIVABLE_REFERENCES_ALL_MONTHS', cashIncluded: false, historicalClosingBalance: false },
-    documents, lines, reconciledDocumentAmountCents: sum(documentValues), linkedServiceAmountCents: sum(values.linked), monthlyUnallocatedAmountCents: sum(values.monthly), otherUnallocatedAmountCents: sum(values.unassigned), serviceReviewAmountCents: sum(values.review),
+    monthlyAllocations: { basis:'EXPLICIT_CONTRACT_SERVICE_ALLOCATION_CURRENT_STATE_ALL_MONTHS', activeCount:activeAllocations.length, reviewCount:activeAllocations.filter(a=>a.needsReview).length },
+    documents, lines, reconciledDocumentAmountCents: sum(documentValues), linkedServiceAmountCents: sum(values.linked), monthlyAllocatedAmountCents: sum(values.monthlyAllocated), monthlyUnallocatedAmountCents: sum(values.monthly), otherUnallocatedAmountCents: sum(values.unassigned), serviceReviewAmountCents: sum(values.review),
     linkedServices: sample(linked), issues: sample(issues) };
 }
-module.exports = { documentSelect, build };
+module.exports = { documentSelect, build, documentReason, lineType, references };

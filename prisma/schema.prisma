@@ -2576,3 +2576,47 @@ model ExpenseLaborBasis {
 
   @@index([technicianId, periodStart, periodEnd])
 }
+
+// Historical identities intentionally have no FK: existing billing replacement /
+// deletion flows must remain possible; missing or changed sources require review.
+model RevenueAllocation {
+  id Int @id @default(autoincrement())
+  invoiceId Int
+  lineId Int
+  clientId Int
+  monthRef String
+  amountCents Int
+  targetType String
+  targetId Int
+  sourceHash String
+  sourceSnapshot Json
+  targetHash String
+  targetSnapshot Json
+  activeKey String? @unique
+  reason String
+  createdById Int
+  createdAt DateTime @default(now())
+  voidedAt DateTime?
+  voidReason String?
+
+  @@index([lineId])
+  @@index([invoiceId])
+  @@index([monthRef, clientId])
+  @@index([targetType, targetId])
+}
+
+model RevenueEvent {
+  id Int @id @default(autoincrement())
+  requestId String @unique
+  actorId Int
+  actorName String
+  lineId Int
+  command String
+  payloadHash String
+  request Json
+  result Json
+  createdAt DateTime @default(now())
+
+  @@index([lineId, createdAt])
+  @@index([actorId, createdAt])
+}
