@@ -36,8 +36,22 @@ Foi reproduzida e corrigida uma falha da TASK294: `financeCreditAllocationRows` 
 - 401 testes unitários em 64 ficheiros. Sintaxe: 590 backend, 194 frontend, 60 inline. Runner com 189 grupos distintos. Cache v110, sem esquema, migração ou dependência nova; continuam 27 migrações.
 - Timeout do job completo aumentado de 25 para 30 minutos: a execução anterior durou 22m39s e foram acrescentados dois grupos. Nenhuma etapa, asserção ou limite de consulta foi removido.
 
-Publicação e execução nativa PostgreSQL 16/restauro serão registadas abaixo após confirmação do CI desta versão. Validação local não equivale a aprovação de produção, dimensionamento ou piloto físico.
+Publicação e execução nativa PostgreSQL 16/restauro confirmadas abaixo para esta versão. Validação local não equivale a aprovação de produção, dimensionamento ou piloto físico.
 
 ## Próximo âmbito
 
 Restantes ajustes/descontos e origens de receita; custos de reparações e restantes gastos, base composta de trabalho e correção explícita das divergências de período. A vista implementada permite inspecionar valores parciais por execução, mas não elimina estas lacunas nem autoriza margens completas. Mantêm-se revisão de históricos/apresentação, volume, VPS/fornecedores e piloto físico como âmbitos separados.
+
+## Publicação e CI
+
+Código publicado sem força em `e7167807b2371edd4690b42ad7ebdc2fe5eee17a`, árvore `ea5b9942cc9b26bc872db5bffa2b24290b7ac0dc`, igual à validada localmente; backup `backup/execution-values-local-20260922` (`f3902f80f8e6997915fcb10250e4930b0479f36a`). [CI 35792699038](https://github.com/ts7520305-svg/cristalwater/actions/runs/35792699038), job `106964717518`, aprovado. Principal `feature/technicians-v25` conservada em `6f27081e1d183ff584a62255b016b373836734db`. Sem merge, deploy ou contactos reais.
+
+### Encerramento verificado — 22/09/2026
+
+- 17 etapas aprovadas, entre 22:30:02 e 22:55:06 UTC (25m04s), no commit publicado acima.
+- Logs completos: 189/189 grupos previstos distintos, sem faltas, extras, duplicados, códigos de erro ou sinais. API nova 19214 ms; navegador novo 26450 ms. IA financeira API/UI 9860/27741 ms; atribuição de notas API/UI 36218/25338 ms; mensalidades API/UI 8031/12030 ms.
+- 401 testes unitários/64 ficheiros, quatro testes técnicos e gate geral do navegador aprovados. Sintaxe 590/194/60. As 27 migrações preservaram os dados da estrutura anterior e coincidiram com o esquema atual.
+- Restauro PostgreSQL 16: 121 tabelas e 46 ficheiros carregados, com linhas da base de dados e hashes dos ficheiros iguais.
+- Evidência durável: `evidence/20260922_task295_ci.json`, com etapas, tempos e os 189 resultados individuais. O encerramento posterior altera apenas documentos, preservando o código validado.
+
+A aprovação cobre os cenários ensaiados neste ambiente isolado. Não comprova custos/receitas completos, volume de produção, entrega real por fornecedores, execução física de serviços ou instalação no VPS.
