@@ -40,6 +40,16 @@ Subtotais financeiros continuam pelo mês do documento. As parcelas não são no
 - Regressões locais: IA API/interface, cobertura documental e despesas aprovadas. 396 testes unitários em 63 ficheiros; sintaxe 578 backend/190 frontend/58 scripts inline. Prisma válido com ambiente QA. Artefactos de QA em `reports/field-visual/monthly-revenue-1790064623980`.
 - Evidência transitória: `/tmp/cw286-final-focused.log`, `/tmp/cw286-replacement.log` (API de substituição aprovada), `/tmp/cw286-final-ui.log`, `/tmp/cw286-migration.log`, `/tmp/cw286-unit.log`, `/tmp/cw286-syntax.log`, `/tmp/cw286-prisma.log`. Revisão final acrescentou o bloqueio de linhas novas/substituídas enquanto persistirem parcelas antigas do mesmo documento por rever, reproduzido na API. Primeiro ensaio corrigiu a expectativa de autenticação (token com papel divergente devolve 401, papel não autorizado canónico devolve 403); interface confirmou consulta explícita após restauro de filtros. Nenhuma proteção foi removida.
 
-Runner com 175 grupos. Cache v102. Publicação na mesma branch sem força; CI PostgreSQL 16 e restauro completo ainda por concluir neste registo. Sem merge/deploy/contactos reais.
+Runner com 175 grupos. Cache v102. Publicação e validação nativa concluídas conforme o encerramento abaixo. Sem merge/deploy/contactos reais.
 
 Próximo âmbito: conciliar outras origens/ajustes e período de execução, completar gastos e bases de trabalho antes de margens/previsões. Reconciliação de emails permanece separada.
+
+## Encerramento — GitHub e PostgreSQL 16
+
+Código publicado: `afb6e8107ab021c6eb9aa4e95e3666dd86198a20`, árvore `12a7721e01fa6155f4d845009fbf57b7ed35023a`, idêntica à validada localmente. Publicação sem força sobre `4c8f96eab8bf18bebae462612c634422384d336d`. Backup local: `backup/monthly-revenue-allocation-local-20260922` (`2a67fd6e93ff360f5e247c076e8b250aedbe855e`). Checkout alinhado, sem alterações pendentes nem divergência. Principal novamente confirmada inalterada e ancestral (`6f27081e1d183ff584a62255b016b373836734db`).
+
+[CI 35704078046](https://github.com/ts7520305-svg/cristalwater/actions/runs/35704078046), job `106668685193`: sucesso nas 17 etapas; início às 08:18:23 UTC e conclusão às 08:39:34 UTC de 22/09/2026, duração 21m11s. Logs confirmam 175/175 grupos distintos, todos com código zero e sem sinal; 396 testes unitários/63 ficheiros, quatro testes técnicos, 21 scripts gerais de navegador, 26 migrações preservando os dados anteriores e schema diff sem diferenças; sintaxe 578 backend/190 frontend/58 inline.
+
+Nova repartição API 6786 ms e UI 11154 ms; regressões IA API/interface 7776/19066 ms, cobertura documental 24789 ms, cobertura de custos 9866 ms, despesas 2398/7650 ms, atribuições de custos 3065/9693 ms, valorizações 3993/10774 ms, valores operacionais 571/5877 ms e E2E 31523 ms.
+
+Restauro isolado aprovado em PostgreSQL 16: 119 tabelas e 46 ficheiros, com linhas da base de dados e hashes dos ficheiros iguais. Esta atualização de encerramento altera apenas os dois documentos de contexto e preserva integralmente o código testado. TASK286 concluída neste âmbito; restantes origens/ajustes, período de execução e custos completos continuam necessários antes de margens ou previsões.
