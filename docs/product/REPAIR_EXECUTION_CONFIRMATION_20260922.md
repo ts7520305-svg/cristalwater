@@ -39,6 +39,8 @@ A amostra é explicitamente limitada a dez linhas, com totais completos. Revisõ
 
 ## Publicação
 
+Revisão do contrato de eventos após a primeira publicação `e40e6d4abf5818bf97411c8addd1b021e4bc487b`: os eventos financeiro e de conclusão conservam exatamente os campos anteriores, sem acrescentar itens ou identidade do cliente a novos canais. Acrescentado ensaio de campos exatos, emissão única e recuperação sem novo evento. A aprovação final deve corresponder à árvore desta revisão, não apenas ao primeiro CI `35757521043`.
+
 Publicação sem força apenas na branch de trabalho. CI nativo PostgreSQL 16 e restauro pendentes nesta revisão; aprovação local não equivale ao encerramento global. Principal preservada, sem merge/deploy ou contactos reais.
 
 Próximo âmbito: tornar a confirmação de execução acessível no percurso operacional adequado, com contexto e recuperação de pedidos, incluindo trabalhos sem consumo de material quando houver regra explícita. A data histórica da execução, restantes origens/ajustes e custos completos continuam por estabelecer antes de margens ou previsões. Não usar a nova confirmação para preencher períodos históricos automaticamente.

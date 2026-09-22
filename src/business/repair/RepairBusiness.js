@@ -1318,8 +1318,8 @@ async function completeRepair(repairId, db = null, actor = "repair-os", principa
     const stock={...event,source:"repair-stock-consumption"};
     await emitRepairEvent(EVENT_TYPES.REPAIR_STOCK_CONSUMED,stock);
     await emitEquipmentStockEvent(STOCK_EVENT_TYPES.STOCK_CONSUMED,stock);
-    await emitFinanceEvent(FINANCE_EVENT_TYPES.FINANCE_INVOICE_DRAFT,{...stock,amount:Number(result.repair.totalPrice||0)});
-    await emitRepairEvent(EVENT_TYPES.REPAIR_COMPLETED,{...event,stockConsumed:true,source:"repair-route"});
+    await emitFinanceEvent(FINANCE_EVENT_TYPES.FINANCE_INVOICE_DRAFT,{repairId:event.repairId,poolId:event.poolId,clientId:event.clientId,amount:Number(result.repair.totalPrice||0),source:"repair-stock-consumption"});
+    await emitRepairEvent(EVENT_TYPES.REPAIR_COMPLETED,{repairId:event.repairId,poolId:event.poolId,actor:event.actor,reservationId:event.reservationId,stockConsumed:true,source:"repair-route"});
   }
   return result;
 }
