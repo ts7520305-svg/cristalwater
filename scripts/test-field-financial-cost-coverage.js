@@ -1,0 +1,78 @@
+'use strict';
+require('../src/loadEnv')();
+const assert = require('node:assert/strict'), { randomUUID } = require('node:crypto'), { fork } = require('node:child_process'), jwt = require('jsonwebtoken');
+const { prisma } = require('../src/prismaClient'), { getJwtSecret } = require('../src/utils/jwtSecret');
+const ledger = require('../src/services/expenseLedgerService');
+if (process.env.NODE_ENV !== 'test' || process.env.QA_MODE !== 'true' || process.env.QA_ENVIRONMENT_SAFE !== 'true' || process.env.EMAIL_ENABLED !== 'false' || process.env.EXTERNAL_NOTIFICATIONS_ENABLED !== 'false') throw Error('Isolated QA required');
+let child;
+(async () => {
+  const month = '2009-04', stamp = randomUUID(), admin = await prisma.user.findUniqueOrThrow({ where:{ email:process.env.ADMIN_EMAIL } });
+  const token = jwt.sign({ id:admin.id, userId:admin.id, principalType:'USER', role:'ADMIN' }, getJwtSecret(), { expiresIn:'1h' });
+  child = fork(require.resolve('./fixtures/financial-ai-server'), [], { stdio:['ignore','ignore','inherit','ipc'] });
+  const base = await new Promise((resolve,reject) => { child.once('message',m=>resolve('http://127.0.0.1:'+m.port)); child.once('error',reject); });
+  const configure = m => new Promise(resolve=>{child.once('message',resolve);child.send(m);});
+  async function api(path,body) { const response = await fetch(base+'/api/ai-admin/'+path, { method:body?'POST':'GET', headers:{ Authorization:'Bearer '+token, 'Content-Type':'application/json' }, body:body?JSON.stringify(body):undefined }); assert.equal(response.status,200); return response.json(); }
+  async function read() { const f=(await api('status?monthRef='+month)).context.finance; assert.notEqual(f.state,'UNAVAILABLE'); return f; }
+  const before = (await read()).costCoverage;
+  const client = await prisma.client.create({ data:{ name:'Coverage '+stamp, active:false } }), technician = await prisma.technician.create({ data:{ name:'Coverage '+stamp, active:false, hourlyCost:900 } });
+  const pool = await prisma.pool.create({ data:{ clientId:client.id, name:'Coverage pool' } });
+  const common = { clientId:client.id, poolId:pool.id, technicianId:technician.id, status:'COMPLETED', startAt:new Date(month+'-10T08:00:00Z'), endAt:new Date(month+'-10T08:30:00Z') };
+  const id = 850000000 + Math.floor(Math.random()*1000000);
+  const regular = await prisma.serviceVisit.create({ data:{ ...common, id } });
+  await prisma.extraVisit.create({ data:{ ...common, id } });
+  const noStart = await prisma.serviceVisit.create({ data:{ ...common, startAt:null } }), noMaterial = await prisma.serviceVisit.create({ data:common }), zero = await prisma.serviceVisit.create({ data:common }), invalidMovement = await prisma.serviceVisit.create({ data:common });
+  await prisma.serviceVisit.create({ data:{ ...common, endAt:null, plannedDate:new Date(month+'-12T00:00:00Z') } });
+  await prisma.serviceVisit.create({ data:{ ...common, status:'PENDING' } });
+  const nextMonth = await prisma.serviceVisit.create({ data:{ ...common, endAt:new Date('2009-05-01T00:00:00Z') } });
+  const product = 'Coverage material '+stamp;
+  const movement = (visitId, quantity, extra={}) => prisma.stockMovement.create({ data:{ visitId, clientId:client.id, poolId:pool.id, productName:product, unit:'L', movementType:'CONSUMPTION', quantity, createdAt:new Date(month+'-10T10:00:00Z'), ...extra } });
+  await movement(id,3); await movement(id,1,{ movementType:'RETURN' }); await movement(null,2,{ extraVisitId:id });
+  await movement(zero.id,3); await movement(zero.id,3,{ movementType:'RETURN' }); await movement(invalidMovement.id,0);
+  await movement(null,5); await movement(2147483000,1); await movement(nextMonth.id,2); await movement(noMaterial.id,999,{ movementType:'TRANSFER' });
+  const purchases = [];
+  for (let i=0;i<13;i++) purchases.push(await prisma.stockPurchase.create({ data:{ supplierName:'Coverage source '+stamp+' '+i, invoiceDate:i===12?null:new Date('2009-03-01T00:00:00Z'), totalAmount:100, items:{ create:{ productName:product, unit:'L', quantity:10, unitCost:10, totalCost:100 } } }, include:{ items:true } }));
+  for (const status of ['CANCELLED','DRAFT','UNKNOWN']) await prisma.stockPurchase.create({ data:{ status, supplierName:'Excluded/review '+stamp, invoiceDate:new Date(month+'-01T00:00:00Z') } });
+  for (const [status,completedAt] of [['DONE',new Date(month+'-01T00:00:00Z')],['DONE',null],['PENDING',null],['CANCELLED',null],['UNKNOWN',null]]) await prisma.vehicleMaintenanceRecord.create({ data:{ title:'Coverage vehicle '+stamp, status, completedAt } });
+  let c = (await read()).costCoverage;
+  assert.equal(c.sources.stock.unlinked-before.sources.stock.unlinked,13); assert.equal(c.sources.stock.review-before.sources.stock.review,1); assert.equal(c.sources.stock.excluded-before.sources.stock.excluded,2); assert.equal(c.sources.stock.undated-before.sources.stock.undated,1);
+  assert.equal(c.sources.vehicles.unlinked-before.sources.vehicles.unlinked,2); assert.equal(c.sources.vehicles.review-before.sources.vehicles.review,1); assert.equal(c.sources.vehicles.excluded-before.sources.vehicles.excluded,2);
+  assert.equal(c.sourceIssues.sampleOnly,true); assert.equal(c.sourceIssues.rows.length,10); assert.equal(c.limitApplied,null); assert.equal(c.completeOperatingCosts,false); assert.equal(c.profit,null);
+  assert.equal(c.labor.total-before.labor.total,6); assert.equal(c.labor.missing-before.labor.missing,5); assert.equal(c.labor.review-before.labor.review,1);
+  assert.equal(c.materials.missing-before.materials.missing,2); assert.equal(c.materials.zeroNet-before.materials.zeroNet,1); assert.equal(c.materials.review-before.materials.review,1); assert.equal(c.noMaterialRecordVisits-before.noMaterialRecordVisits,2);
+  assert.equal(c.undatedCompleted-before.undatedCompleted,1); assert.equal(c.excludedVisitCount-before.excludedVisitCount,1); assert.equal(c.unassignedMovementCount-before.unassignedMovementCount,2);
+  assert(c.serviceIssues.rows.some(v=>v.type==='REGULAR'&&v.id===id)); assert(c.serviceIssues.rows.some(v=>v.type==='EXTRA'&&v.id===id));
+  const run = async (command,expenseId,data) => { const version=expenseId?(await ledger.detail(expenseId)).expense.version:null; const result=await ledger.command(admin,{ requestId:randomUUID(), command, expenseId, expectedVersion:version, data }); assert.equal(result.applied,true,JSON.stringify(result)); return result; };
+  const manual = extra => ({ title:'Coverage document '+stamp, supplierName:'Coverage employer '+stamp, supplierId:null, documentNumber:'', expenseDate:month+'-01', dueDate:null, amountCents:10000, category:'LABOR', notes:'', sourceType:'MANUAL', sourceId:null, sourceHash:null, confirmed:true, reason:'', ...extra });
+  async function register(p) { const source=await ledger.sources.source(prisma,'STOCK_PURCHASE',p.id); return (await run('CREATE',null,manual({ ...source.suggested, sourceType:source.type, sourceId:source.id, sourceHash:source.hash }))).expenseId; }
+  await run('CREATE',null,manual({title:'Already entered manually',supplierName:purchases[12].supplierName,category:'STOCK'}));
+  c=(await read()).costCoverage; assert.equal(c.sources.stock.unlinked-before.sources.stock.unlinked,13);
+  const first = await register(purchases[0]), second = await register(purchases[1]);
+  c=(await read()).costCoverage; assert.equal(c.sources.stock.unlinked-before.sources.stock.unlinked,11); assert.equal(c.sources.stock.linked-before.sources.stock.linked,2);
+  await prisma.stockPurchase.update({ where:{ id:purchases[0].id }, data:{ supplierName:'Changed '+stamp } }); c=(await read()).costCoverage; assert.equal(c.sources.stock.review-before.sources.stock.review,2);
+  await prisma.stockPurchase.update({ where:{ id:purchases[0].id }, data:{ supplierName:purchases[0].supplierName } });
+  const cancelled = await register(purchases[2]); await run('CANCEL',cancelled,{ reason:'Document cancelled after review' });
+  c=(await read()).costCoverage; assert.equal(c.sources.stock.review-before.sources.stock.review,2); assert.equal(c.sources.stock.unlinked-before.sources.stock.unlinked,10);
+  async function value(expenseId,kind,type,targetId,purchaseItemId=null,quantity=null) {
+    const query = { kind, targetType:type, targetId:String(targetId), ...(purchaseItemId?{ purchaseItemId:String(purchaseItemId) }:{}), ...(quantity?{ quantity }:{}) };
+    const p=(await ledger.valuationPreview(expenseId,query)).preview;
+    return run(kind==='MATERIAL'?'VALUE_MATERIAL':'VALUE_LABOR',expenseId,{ kind, targetType:type, targetId, targetHash:p.targetHash, monthRef:p.monthRef, purchaseItemId:p.purchaseItemId, quantity:p.quantity, amountCents:p.amountCents, valuationHash:p.valuationHash, previewHash:p.hash, reason:'Confirmed source and measurement', confirmed:true });
+  }
+  await value(first,'MATERIAL','REGULAR',id,purchases[0].items[0].id,'1');
+  c=(await read()).costCoverage; assert.equal(c.materials.partial-before.materials.partial,1); assert.equal(c.materials.missing-before.materials.missing,1);
+  await value(second,'MATERIAL','REGULAR',id,purchases[1].items[0].id,'1'); await value(first,'MATERIAL','EXTRA',id,purchases[0].items[0].id,'2');
+  const labor=(await run('CREATE',null,manual())).expenseId;
+  await run('SET_LABOR_BASIS',labor,{ technicianId:technician.id, periodStart:month+'-01', periodEnd:month+'-30', paidMinutes:60, reason:'Confirmed paid time', confirmed:true });
+  const valued=await value(labor,'LABOR','REGULAR',id); await value(labor,'LABOR','EXTRA',id);
+  const final=await read(); c=final.costCoverage; assert.equal(c.materials.valued-before.materials.valued,2); assert.equal(c.materials.partial-before.materials.partial,0); assert.equal(c.labor.valued-before.labor.valued,2); assert.equal(c.labor.missing-before.labor.missing,3);
+  assert(!c.serviceIssues.rows.some(v=>v.id===id)); assert.equal(final.expenses.attribution.valuations.laborAmountCents,10000);
+  await run('VOID_COST',labor,{ allocationId:valued.allocation.id, reason:'Correct recorded measurement' }); c=(await read()).costCoverage; assert.equal(c.labor.valued-before.labor.valued,1); assert.equal(c.labor.missing-before.labor.missing,4);
+  await movement(id,1,{ movementType:'RETURN', createdAt:new Date('2009-05-02T00:00:00Z') }); c=(await read()).costCoverage; assert.equal(c.materials.review-before.materials.review,2); assert.equal(c.materials.valued-before.materials.valued,1);
+  await movement(id,1,{ extraVisitId:id }); c=(await read()).costCoverage; assert.equal(c.unassignedMovementCount-before.unassignedMovementCount,3); assert(c.serviceIssues.rows.find(v=>v.type==='EXTRA'&&v.id===id).reasons.includes('MATERIAL_REVIEW'));
+  const stored = async () => JSON.stringify(await Promise.all([prisma.companyExpense.findMany({ orderBy:{id:'asc'} }),prisma.expenseAllocation.findMany({ orderBy:{id:'asc'} }),prisma.stockMovement.findMany({ orderBy:{id:'asc'} })]));
+  const original=await stored(), actionCount=await prisma.aiAssistantAction.count();
+  const chat=await api('chat',{ message:'Que custos faltam para apurar margens?', monthRef:month, scope:'finance' }); assert.match(chat.answer,/não são automaticamente novas dívidas/); assert.match(chat.answer,/parcialmente valorizados/); assert.match(chat.answer,/não prova que o custo seja zero/); assert.deepEqual(chat.actions,[]);
+  assert.equal(await stored(),original); assert.equal(await prisma.aiAssistantAction.count(),actionCount);
+  await configure({ provider:'success', reset:true }); await api('chat',{ message:'Explica a cobertura de custos', monthRef:month, scope:'finance' }); const sent=(await configure({})).calls.at(-1); assert.equal(JSON.parse(sent.input[1].content[0].text).platformContext.finance.costCoverage.materials.review,c.materials.review);
+  await configure({ fault:'coverage', reset:true }); const failed=(await api('status?monthRef='+month)).context.finance; assert.equal(failed.state,'UNAVAILABLE'); assert.equal(failed.costCoverage,null); assert.equal(failed.cash,null); const answer=await api('chat',{ message:'Que custos faltam?', monthRef:month, scope:'finance' }); assert.equal(answer.mode,'financial_source_unavailable'); assert.equal((await configure({})).calls.length,0); assert(!JSON.stringify(answer).includes('QA_PRIVATE'));
+  console.log('PASS cost coverage: complete source-link counts and bounded samples, cancelled/changed/manual links, typed visits, exact partial and full consumption, late returns, missing time/records versus zero, orphan/ambiguous references, voided valuations, read-only model context and unavailable sources');
+})().catch(error=>{console.error(error);process.exitCode=1;}).finally(async()=>{child?.kill('SIGTERM');await prisma.$disconnect();});

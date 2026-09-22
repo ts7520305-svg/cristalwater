@@ -45,7 +45,7 @@
     <h1>Gestão com IA</h1><p>Conversa sobre a empresa, com dados consultados e limites claros.</p>
     <div class="ai-toolbar">
       <label for="aiScope">Área<select id="aiScope"><option value="finance">Gestão financeira</option><option value="operations">Operações</option></select></label>
-      <label for="aiMonth">Mês dos recebimentos<input id="aiMonth" type="month" min="2000-01" max="2199-12" required></label>
+      <label for="aiMonth">Mês de análise<input id="aiMonth" type="month" min="2000-01" max="2199-12" required></label>
       <button id="refreshBtn" type="button">Consultar dados</button><a class="ai-link" href="/billing">Abrir financeiro</a>
     </div>
     <p id="aiStatus" class="ai-state" role="status" aria-live="polite" data-state="idle">A iniciar…</p>
@@ -58,6 +58,10 @@
     <details id="financeDetails" hidden><summary>Clientes com maiores saldos identificados</summary><div id="financeClients"></div></details>
     <h3>Despesas e contas a pagar</h3><div id="financeExpenseMetrics" class="ai-metrics"></div><p id="financeExpenseBasis" class="ai-note"></p><a href="/admin-expenses">Abrir despesas e comprovativos</a>
     <h3>Atribuição das despesas</h3><div id="financeAllocationMetrics" class="ai-metrics"></div><p id="financeAllocationBasis" class="ai-note"></p><div id="financeValuationMetrics" class="ai-metrics"></div><p id="financeValuationBasis" class="ai-note"></p>
+    <section aria-labelledby="coverageTitle"><h3 id="coverageTitle">O que falta nos custos</h3><div id="financeCoverageMetrics" class="ai-metrics"></div><p id="financeCoverageBasis" class="ai-note"></p>
+      <details id="financeCoverageSources" hidden><summary>Compras e manutenções a conferir</summary><div id="financeCoverageSourceRows"></div></details>
+      <details id="financeCoverageServices" hidden><summary>Serviços com dados ou custos por completar</summary><div id="financeCoverageServiceRows"></div></details>
+    </section>
     <p class="ai-note">Custos completos, lucro, margem, saldo bancário e previsão de tesouraria ainda não estão apurados. A faturação fiscal com IVA continua no programa externo.</p>
   </section>
   <section class="ai-panel" aria-labelledby="chatTitle">
@@ -67,6 +71,7 @@
       <button type="button" data-prompt="Quem deve mais e que cobranças devo priorizar?">Dívidas e prioridades</button>
       <button type="button" data-prompt="Que despesas e pagamentos foram registados no mês? Que contas estão por pagar?">Despesas e pagamentos</button>
       <button type="button" data-prompt="Que dados faltam para avaliar custos, margens e tesouraria?">Custos e margens</button>
+      <button type="button" data-prompt="Que compras, manutenções e serviços têm dados de custos por completar?">O que falta registar?</button>
       <button type="button" data-prompt="Que melhorias posso fazer na gestão financeira e no sistema com estes dados?">Melhorias</button>
     </div>
     <div class="quick-prompts" id="operationalPrompts" hidden>

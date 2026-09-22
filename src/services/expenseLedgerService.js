@@ -193,4 +193,4 @@ async function valuationPreview(id, query) {
   r.id(id); r.object(query, ['kind', 'targetType', 'targetId', 'purchaseItemId', 'quantity']); const selection = valuation.selection(query, true);
   return prisma.$transaction(async db => { const expense = await db.companyExpense.findUnique({ where: { id }, include }); if (!expense) r.fail('Despesa não encontrada.', 404); return { ok: true, preview: await valuation.preview(db, expense, selection) }; }, { isolationLevel: 'RepeatableRead', timeout: 30000, maxWait: 15000 });
 }
-module.exports = { list, detail, summary, command, receipt, evidence, actor, sources, costs, costReport, clientCosts, valuationPreview, operationalCosts };
+module.exports = { list, detail, summary, rows, summarize, command, receipt, evidence, actor, sources, costs, costReport, clientCosts, valuationPreview, operationalCosts };
