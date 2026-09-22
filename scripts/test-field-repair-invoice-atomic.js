@@ -22,6 +22,7 @@ const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002'; assert(['127.0.
     history: await prisma.technicalHistory.findMany({ where: { poolId: f.pool.id }, orderBy: { id: 'asc' } }),
     notifications: await prisma.notification.findMany({ where: { clientId: f.client.id }, orderBy: { id: 'asc' } }),
     audits: await prisma.auditTrail.findMany({ where: { entity: 'Repair', entityId: f.repair.id }, orderBy: { id: 'asc' } }),
+    sourceReceipts: await prisma.auditTrail.findMany({where:{eventType:'REPAIR_DOCUMENT_ORIGIN_RECORDED',clientId:f.client.id},orderBy:{id:'asc'}}),
   });
   const first = await fixture(), generated = await invoiceRepair(first);
   assert.equal(generated.status, 200, JSON.stringify(generated));

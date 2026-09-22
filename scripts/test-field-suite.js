@@ -134,6 +134,7 @@ scripts.push('test-field-financial-cost-coverage.js');
 scripts.push('test-field-financial-revenue-coverage.js');
 scripts.push('test-field-monthly-revenue.js','test-field-monthly-revenue-ui.js');
 scripts.push('test-field-maintenance-revenue.js');
+scripts.push('test-field-repair-revenue.js');
 function run(script){return new Promise(resolve=>{
  const output=fs.createWriteStream(path.join(evidence,script+'.log'));
  const child=spawn(process.execPath,[path.join(__dirname,script)],{cwd:root,env:process.env,stdio:['ignore','pipe','pipe']});

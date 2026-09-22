@@ -4,10 +4,11 @@ const { isReceivableInvoice } = require('./clientCreditService');
 const { isCompletedVisitStatus } = require('./operationalValueReportService');
 const { included } = require('./clientServicePlan');
 const maintenance = require('./financialMaintenanceRevenueService');
+const repairs = require('./repairRevenueSourceService');
 const normalize = value => String(value || '').trim().toUpperCase();
 const positiveId = value => Number.isSafeInteger(value) && value > 0;
 const types = { SERVICE: 'REGULAR', EXTRA_VISIT: 'EXTRA' };
-const lineSelect = { id: true, type: true, lineType: true, referenceId: true, total: true, lineTotal: true, quantity: true, unitPrice: true };
+const lineSelect = { id: true, type: true, lineType: true, referenceId: true, total: true, lineTotal: true, quantity: true, unitPrice: true, description:true, notes:true, serviceDate:true, sourceMonth:true };
 const documentSelect = { ...projection.documentSelect, id: true, clientId: true, amountCents: true, totalCents: true, taxAmount: true, client: { select: { name: true } }, lines: { select: lineSelect } };
 const visitSelect = { id: true, clientId: true, status: true, endAt: true };
 const sample = rows => ({ total: rows.length, limit: 10, sampleOnly: rows.length > 10, rows: rows.slice(0, 10) });
@@ -44,6 +45,7 @@ function documentReason(invoice) {
 // This read-only partition never distributes a monthly contract automatically.
 async function build(db, monthRef, generatedAt, invoices) {
   const maintenanceContext = await maintenance.load(db,invoices);
+  const repairContext = await repairs.load(db,invoices);
   const monthlyStates = await require('./monthlyRevenueData').states(db);
   const monthlyById = new Map(monthlyStates.map(s => [s.lineId, s]));
   const activeAllocations = monthlyStates.flatMap(s => s.allocations).filter(a => !a.voidedAt);
@@ -61,8 +63,8 @@ async function build(db, monthRef, generatedAt, invoices) {
     for (const key of references(line)) counts.set(key, (counts.get(key) || 0) + 1);
   }
   const documents = { total: invoices.length, reconciled: 0, review: 0, excluded: 0 };
-  const lines = { total: 0, linked: 0, maintenanceLinked: 0, monthly: 0, monthlyAllocated: 0, unassigned: 0, review: 0 };
-  const values = { linked: [], maintenanceLinked: [], monthly: [], monthlyAllocated: [], unassigned: [], review: [] }, documentValues = [], issues = [], linked = [], linkedMaintenance = [];
+  const lines = { total: 0, linked: 0, maintenanceLinked: 0, repairDocumented:0, monthly: 0, monthlyAllocated: 0, unassigned: 0, review: 0 };
+  const values = { linked: [], maintenanceLinked: [], repairDocumented:[], monthly: [], monthlyAllocated: [], unassigned: [], review: [] }, documentValues = [], issues = [], linked = [], linkedMaintenance = [], linkedRepairs = [];
   for (const invoice of [...invoices].sort((a, b) => a.id - b.id)) {
     if (projection.document(invoice).classification === 'EXCLUDED') { documents.excluded++; continue; }
     const identity = { invoiceId: invoice.id, clientId: invoice.clientId, clientName: invoice.client.name };
@@ -88,6 +90,10 @@ async function build(db, monthRef, generatedAt, invoices) {
         const result = maintenance.match(maintenanceContext,invoice,line); issue=result.reason; bucket=issue?'review':'maintenanceLinked';
         if(!issue){const {reason,...source}=result;linkedMaintenance.push({...identity,lineId:line.id,...source,amountCents});}
       }
+      else if (type === 'REPAIR') {
+        const result=repairs.match(repairContext,invoice,line);issue=result.reason;bucket=issue?'review':'repairDocumented';
+        if(!issue){const {reason,...source}=result;linkedRepairs.push({...identity,lineId:line.id,...source,amountCents});}
+      }
       else if (!targetType) { bucket = 'unassigned'; issue = 'OTHER_SOURCE_UNALLOCATED'; }
       else {
         const key = targetType + ':' + line.referenceId, visit = current.get(key);
@@ -101,10 +107,10 @@ async function build(db, monthRef, generatedAt, invoices) {
       if (issue) issues.push({ ...identity, lineId: line.id, reason: issue });
     }
   }
-  return { version: 3, monthRef, currency: 'EUR', generatedAt: generatedAt.toISOString(), state: 'PARTIAL', completeRevenueAllocation: false, revenue: null, profit: null, limitApplied: null,
-    basis: { documents: 'DOCUMENT_MONTH_REFERENCE_CURRENT_VALUES', amounts: 'RECONCILED_DOCUMENT_LINES_ONLY', services: 'UNIQUE_TYPED_COMPLETED_SERVICE_CURRENT_STATE', maintenance:'ORIGINAL_EXTRA_DECISION_AND_CURRENT_COMPLETED_INTERVENTION', duplicates: 'RECEIVABLE_REFERENCES_ALL_MONTHS', cashIncluded: false, historicalClosingBalance: false },
+  return { version: 4, monthRef, currency: 'EUR', generatedAt: generatedAt.toISOString(), state: 'PARTIAL', completeRevenueAllocation: false, revenue: null, profit: null, limitApplied: null,
+    basis: { documents: 'DOCUMENT_MONTH_REFERENCE_CURRENT_VALUES', amounts: 'RECONCILED_DOCUMENT_LINES_ONLY', services: 'UNIQUE_TYPED_COMPLETED_SERVICE_CURRENT_STATE', maintenance:'ORIGINAL_EXTRA_DECISION_AND_CURRENT_COMPLETED_INTERVENTION', repairs:'ORIGINAL_DOCUMENT_LINE_AND_REPAIR_SNAPSHOT_NO_EXECUTION_PROOF', duplicates: 'RECEIVABLE_REFERENCES_ALL_MONTHS', cashIncluded: false, historicalClosingBalance: false },
     monthlyAllocations: { basis:'EXPLICIT_CONTRACT_SERVICE_ALLOCATION_CURRENT_STATE_ALL_MONTHS', activeCount:activeAllocations.length, reviewCount:activeAllocations.filter(a=>a.needsReview).length },
-    documents, lines, reconciledDocumentAmountCents: sum(documentValues), linkedServiceAmountCents: sum(values.linked), maintenanceLinkedAmountCents: sum(values.maintenanceLinked), monthlyAllocatedAmountCents: sum(values.monthlyAllocated), monthlyUnallocatedAmountCents: sum(values.monthly), otherUnallocatedAmountCents: sum(values.unassigned), serviceReviewAmountCents: sum(values.review),
-    linkedServices: sample(linked), linkedMaintenance: sample(linkedMaintenance), issues: sample(issues) };
+    documents, lines, reconciledDocumentAmountCents: sum(documentValues), linkedServiceAmountCents: sum(values.linked), maintenanceLinkedAmountCents: sum(values.maintenanceLinked), repairDocumentedAmountCents:sum(values.repairDocumented), monthlyAllocatedAmountCents: sum(values.monthlyAllocated), monthlyUnallocatedAmountCents: sum(values.monthly), otherUnallocatedAmountCents: sum(values.unassigned), serviceReviewAmountCents: sum(values.review),
+    linkedServices: sample(linked), linkedMaintenance: sample(linkedMaintenance), linkedRepairs:sample(linkedRepairs), issues: sample(issues) };
 }
 module.exports = { documentSelect, build, documentReason, lineType, references };

@@ -110,6 +110,7 @@ async function generate(mode, body = {}) {
         status: mode === 'OPERATIONAL' || totalCents > 0 ? 'PENDING' : 'PAID', requiresInvoice: Boolean(client.requiresInvoice),
         lines: { create: lines },
       } });
+      if(repairs.length)await require('../../services/repairRevenueSourceService').record(tx,invoice.id,'SYSTEM:MONTHLY_GENERATION:'+mode,repairs);
       const credit = await applyClientCreditToInvoice(tx, invoice.id, { reference: `Fatura ${monthRef}`, notes: 'Abatimento automático na geração de fatura.' });
       if(pricing.planId)await tx.userAuditLog.create({data:{action:'INVOICE_RATE_PLAN_APPLIED',actor:'SYSTEM:MONTHLY_GENERATION',entity:'Invoice',entityId:String(invoice.id),metadata:{clientId,monthRef,planId:pricing.planId,planVersion:pricing.planVersion,amount:pricing.amount,segments:pricing.segments}}});
       if (visits.length) {

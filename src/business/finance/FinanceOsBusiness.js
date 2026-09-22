@@ -388,6 +388,7 @@ async function createDraftInvoice(payload = {}, actor = "finance-os", transactio
 
   const recalculated = await recalculateInvoice(tx, invoice.id);
   await tx.invoice.update({ where: { id: invoice.id }, data: { status: "DRAFT" } });
+  if(repairIds.length)await require('../../services/repairRevenueSourceService').record(tx,invoice.id,actor);
   const finalInvoice = invoiceShape({ ...(recalculated || invoice), status: "DRAFT" });
 
   return { ok: true, invoice: finalInvoice };

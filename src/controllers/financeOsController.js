@@ -12,7 +12,12 @@ function send(res, result, successStatus = 200) {
 }
 
 async function createDraftInvoice(req, res) {
-  return send(res, await business.createDraftInvoice(req.body || {}, actor(req)), 201);
+  try {
+    return send(res, await business.createDraftInvoice(req.body || {}, actor(req)), 201);
+  } catch (error) {
+    const known=[400,404,409].includes(error.status);
+    return res.status(known?error.status:500).json({ok:false,error:known?error.message:'Erro ao preparar documento. Consulte os registos antes de repetir.'});
+  }
 }
 
 async function issueInvoice(req, res) {
