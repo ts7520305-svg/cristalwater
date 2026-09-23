@@ -2671,3 +2671,29 @@ model CreditRevenueEvent {
   @@index([lineId, createdAt])
   @@index([actorId, createdAt])
 }
+
+// Explicitly declared work intervals retain their original identities after source deletion.
+model RepairWorkInterval {
+  id Int @id @default(autoincrement())
+  repairId Int
+  clientId Int
+  poolId Int
+  technicianId Int
+  technicianName String
+  startedAt DateTime
+  endedAt DateTime
+  durationSeconds Int
+  sourceHash String
+  snapshot Json
+  fingerprint String
+  reason String
+  createdBy String
+  createdAt DateTime @default(now())
+  activeKey String? @unique
+  voidedAt DateTime?
+  voidedBy String?
+  voidReason String?
+
+  @@index([repairId, createdAt])
+  @@index([technicianId, startedAt, endedAt])
+}

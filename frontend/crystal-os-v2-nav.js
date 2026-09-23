@@ -52,6 +52,7 @@
     '/admin-credit-revenue': { area: 'Faturacao e financeiro', title: 'Reduções por serviço' },
     '/admin-revenue': { area: 'Faturacao e financeiro', title: 'Repartição de mensalidades' },
     '/repair-execution': { area: 'Operacao', title: 'Execução de reparações' },
+    '/repair-work': { area: 'Operacao', title: 'Tempos de reparação' },
     '/admin-email-review': { area: 'Gestao', title: 'Revisão de emails' },
     '/admin-expenses': { area: 'Faturacao e financeiro', title: 'Despesas e contas a pagar' },
     '/billing': { area: 'Faturacao e financeiro', title: 'Visao financeira' },

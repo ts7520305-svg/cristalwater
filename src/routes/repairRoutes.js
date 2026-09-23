@@ -4,6 +4,7 @@ const auth = require("../middlewares/authMiddleware");
 const { roleIn } = require("../utils/roles");
 const controller = require("../controllers/repairController");
 const executionController = require("../controllers/repairExecutionController");
+const workController = require("../controllers/repairWorkController");
 const { resolveUploadSubdir } = require("../config/uploadPath");
 
 const router = express.Router();
@@ -56,6 +57,9 @@ const upload = multer({
 });
 
 router.get('/execution', allowRoles('ADMIN','TECHNICIAN'), executionController.list);
+router.get('/:id/work', allowRoles('ADMIN','TECHNICIAN'), workController.detail);
+router.get('/:id/work/requests/:requestId', allowRoles('ADMIN','TECHNICIAN'), workController.lookup);
+router.post('/:id/work', allowRoles('ADMIN','TECHNICIAN'), workController.command);
 router.get('/:id/execution', allowRoles('ADMIN','TECHNICIAN'), executionController.detail);
 router.get('/:id/execution/requests/:requestId', allowRoles('ADMIN','TECHNICIAN'), executionController.lookup);
 router.post('/:id/execution', allowRoles('ADMIN','TECHNICIAN'), executionController.complete);

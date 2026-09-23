@@ -174,7 +174,25 @@ async function dbRejects(sql, expected) {
   assert.deepEqual(await prisma.expenseAllocation.findUniqueOrThrow({where:{id:previousMaterial.id}}),previousMaterial);assert.deepEqual(await prisma.expenseAllocation.findUniqueOrThrow({where:{id:previousLabor.id}}),previousLabor);
   const repairMaterial=await prisma.expenseAllocation.create({data:{...materialData,targetType:'REPAIR',visitId:null,repairId:historyRepair.id,activeKey:'migration-repair-material'}});
   for(const assignment of [`"repairId"=NULL`,`"clientId"=NULL`,`"visitId"=${visit.id}`,`"purchaseItemId"=NULL`,`"quantity"=0`,`"quantityUnit"=''`,`"valuationHash"='bad'`,`"valuationSnapshot"=NULL`,`"valuationType"='MANUAL'`,`"activeMeasurementKey"='unsupported'`,`"valuationType"='LABOR',"purchaseItemId"=NULL,"quantityUnit"='SECOND',"activeMeasurementKey"='LABOR:REPAIR:${historyRepair.id}'`])await dbRejects(`UPDATE "ExpenseAllocation" SET ${assignment} WHERE id=${repairMaterial.id}`,'23514');
+  const historicalWorkReceipt=await prisma.fieldWriteRequest.create({data:{owner:'ADMIN:1',requestId:'00000000-0000-4000-8000-000000000298',scope:'REPAIR_EXECUTION',resourceId:historyRepair.id,payloadHash:'d'.repeat(64),response:{historical:true}}});
+  const historicalExecution=await prisma.auditTrail.create({data:{eventType:'REPAIR_EXECUTION_CONFIRMED',action:'REPAIR_EXECUTION_CONFIRMED',entity:'Repair',entityId:historyRepair.id,clientId:oldClient.id,poolId:equipmentPool.id,metadata:{historical:true}}});
+  const beforeWorkCosts=await prisma.$queryRaw`SELECT to_jsonb(a) AS row FROM "ExpenseAllocation" a ORDER BY id`;
+  cli(['db','execute','--file','prisma/migrations/20260923030000_repair_work_intervals/migration.sql','--schema','prisma/schema.prisma']);
+  assert.equal(await prisma.repairWorkInterval.count(),0);
+  assert.deepEqual(await prisma.$queryRaw`SELECT to_jsonb(a) AS row FROM "ExpenseAllocation" a ORDER BY id`,beforeWorkCosts);
+  assert.deepEqual(await prisma.repair.findUniqueOrThrow({where:{id:historyRepair.id}}),historyRepair);
+  assert.deepEqual(await prisma.auditTrail.findUniqueOrThrow({where:{id:historicalExecution.id}}),historicalExecution);
+  assert.deepEqual(await prisma.fieldWriteRequest.findUniqueOrThrow({where:{id:historicalWorkReceipt.id}}),historicalWorkReceipt);
+  const workData={repairId:historyRepair.id,clientId:oldClient.id,poolId:equipmentPool.id,technicianId:777,technicianName:'Historical technician',startedAt:new Date('2000-01-01T09:00:00Z'),endedAt:new Date('2000-01-01T10:00:00Z'),durationSeconds:3600,sourceHash:'a'.repeat(64),snapshot:{historical:true},fingerprint:'b'.repeat(64),reason:'Historical confirmed interval',createdBy:'ADMIN:1',createdAt:new Date('2000-01-02Z'),activeKey:'c'.repeat(64)};
+  const retainedWork=await prisma.repairWorkInterval.create({data:workData});
+  for(const assignment of [`"repairId"=0`,`"clientId"=0`,`"poolId"=0`,`"technicianId"=0`,`"technicianName"=''`,`"durationSeconds"=0`,`"durationSeconds"=3599`,`"startedAt"='2000-01-01 09:00:00.500'`,`"endedAt"="startedAt"`,`"createdAt"="startedAt"`,`"createdBy"='CLIENT:1'`,`"sourceHash"='bad'`,`"fingerprint"='bad'`,`"snapshot"='[]'`,`"reason"='   '`,`"activeKey"=NULL`,`"voidedAt"=CURRENT_TIMESTAMP`])await dbRejects(`UPDATE "RepairWorkInterval" SET ${assignment} WHERE id=${retainedWork.id}`,'23514');
+  await dbRejects(`INSERT INTO "RepairWorkInterval" ("repairId","clientId","poolId","technicianId","technicianName","startedAt","endedAt","durationSeconds","sourceHash","snapshot","fingerprint","reason","createdBy","createdAt","activeKey") SELECT "repairId","clientId","poolId","technicianId","technicianName","startedAt","endedAt","durationSeconds","sourceHash","snapshot","fingerprint","reason","createdBy","createdAt","activeKey" FROM "RepairWorkInterval" WHERE id=${retainedWork.id}`,'23505');
   await prisma.repair.delete({where:{id:historyRepair.id}});
+  assert.deepEqual(await prisma.repairWorkInterval.findUniqueOrThrow({where:{id:retainedWork.id}}),retainedWork);
+  await prisma.repairWorkInterval.update({where:{id:retainedWork.id},data:{voidedAt:new Date(),voidedBy:'ADMIN:1',voidReason:'Explicit historical correction',activeKey:null}});
+  await prisma.repairWorkInterval.create({data:workData});
+  await prisma.repairWorkInterval.deleteMany({where:{repairId:historyRepair.id}});
+  await prisma.fieldWriteRequest.delete({where:{id:historicalWorkReceipt.id}});await prisma.auditTrail.delete({where:{id:historicalExecution.id}});
   assert.deepEqual(await prisma.expenseAllocation.findUniqueOrThrow({where:{id:repairCost.id}}),repairCost);
   assert.deepEqual(await prisma.expenseAllocation.findUniqueOrThrow({where:{id:repairMaterial.id}}),repairMaterial);
   await prisma.expenseAllocation.deleteMany({where:{id:{in:[repairMaterial.id,previousMaterial.id,previousLabor.id]}}});
@@ -216,6 +234,6 @@ async function dbRejects(sql, expected) {
   assert.equal(await prisma.technicalProposalRequest.count(),0);
   assert.equal(await prisma.fieldWriteRequest.count(),0);
   const savedExtra=await prisma.extraVisit.findUniqueOrThrow({where:{id:oldExtra.id}});assert.equal(savedExtra.notes,'Migration preserved extra');assert.equal(savedExtra.execution,null);assert.equal(savedExtra.startAt,null);assert.equal(savedExtra.endAt,null);assert.equal(savedExtra.completionRequestId,null);assert.equal(await prisma.extraVisitPhoto.count(),0);await prisma.extraVisit.delete({where:{id:oldExtra.id}});
-  console.log('PASS twenty-nine additive migrations preserve previous data and match the current schema');
+  console.log('PASS thirty additive migrations preserve previous data and match the current schema');
  }finally{fs.rmSync(temp,{recursive:true,force:true})}
 })().catch(error=>{console.error(error);process.exitCode=1}).finally(()=>prisma.$disconnect());
