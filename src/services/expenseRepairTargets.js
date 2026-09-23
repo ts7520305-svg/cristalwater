@@ -3,9 +3,9 @@ const r = require('./expenseLedgerRules'), execution = require('./repairExecutio
 const select = { id: true, poolId: true, problem: true, quantity: true, createdAt: true, status: true, doneAt: true, pool: { select: { name: true } } };
 const proofFields = ['executionBasis', 'executionProofId', 'executionFingerprint', 'materialMode'];
 const positive = n => Number.isSafeInteger(n) && n > 0;
-async function read(db, ids) {
+async function read(db, ids, executionContext) {
   if (!ids.length) return [];
-  const [repairs, context] = await Promise.all([db.repair.findMany({ where: { id: { in: ids } }, select }), execution.load(db, ids)]);
+  const [repairs, context] = await Promise.all([db.repair.findMany({ where: { id: { in: ids } }, select }), executionContext || execution.load(db, ids)]);
   // The authenticated completion owns the historical client identity. A later
   // pool transfer, invoice or sale-price change must not move an expense.
   const clientIds = [...new Set([...context.proofs.values()].flat().map(p => p.clientId).filter(positive))];

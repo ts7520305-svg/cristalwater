@@ -165,8 +165,19 @@ async function dbRejects(sql, expected) {
   const historyRepair=await prisma.repair.create({data:{poolId:equipmentPool.id,problem:'Retained repair identity',quantity:1}});
   const repairCost=await prisma.expenseAllocation.create({data:{expenseId:expense.id,monthRef:'2000-01',amountCents:100,targetType:'REPAIR',clientId:oldClient.id,repairId:historyRepair.id,targetHash:'retained',targetSnapshot:{historical:true},expenseHash:'retained',expenseSnapshot:{historical:true},activeKey:'migration-repair',reason:'Confirmed historical expense',createdById:1}});
   for(const assignment of [`"repairId"=NULL`,`"repairId"=0`,`"repairId"=-1`,`"clientId"=NULL`,`"visitId"=${visit.id}`,`"extraVisitId"=${oldExtra.id}`,`"targetType"='CLIENT'`,`"valuationType"='MATERIAL'`,`"valuationType"='LABOR'`])await dbRejects(`UPDATE "ExpenseAllocation" SET ${assignment} WHERE id=${repairCost.id}`,'23514');
+  const materialData={...laborData,activeKey:'migration-material-before-repair',valuationType:'MATERIAL',purchaseItemId:retainedPurchaseItem.id,quantity:'1.125',quantityUnit:'L',activeMeasurementKey:null};
+  const previousMaterial=await prisma.expenseAllocation.create({data:materialData}),previousLabor=await prisma.expenseAllocation.create({data:{...laborData,activeKey:'migration-labor-before-repair'}});
+  await dbRejects(`UPDATE "ExpenseAllocation" SET "valuationType"='MATERIAL',"valuationKey"='${'a'.repeat(64)}',"valuationHash"='${'b'.repeat(64)}',"valuationSnapshot"='{}',"purchaseItemId"=${retainedPurchaseItem.id},"quantity"=1.125,"quantityUnit"='L' WHERE id=${repairCost.id}`,'23514');
+  const beforeMaterialUpgrade=await prisma.$queryRaw`SELECT to_jsonb(a) AS row FROM "ExpenseAllocation" a ORDER BY id`;
+  cli(['db','execute','--file','prisma/migrations/20260923020000_repair_material_valuation/migration.sql','--schema','prisma/schema.prisma']);
+  assert.deepEqual(await prisma.$queryRaw`SELECT to_jsonb(a) AS row FROM "ExpenseAllocation" a ORDER BY id`,beforeMaterialUpgrade);
+  assert.deepEqual(await prisma.expenseAllocation.findUniqueOrThrow({where:{id:previousMaterial.id}}),previousMaterial);assert.deepEqual(await prisma.expenseAllocation.findUniqueOrThrow({where:{id:previousLabor.id}}),previousLabor);
+  const repairMaterial=await prisma.expenseAllocation.create({data:{...materialData,targetType:'REPAIR',visitId:null,repairId:historyRepair.id,activeKey:'migration-repair-material'}});
+  for(const assignment of [`"repairId"=NULL`,`"clientId"=NULL`,`"visitId"=${visit.id}`,`"purchaseItemId"=NULL`,`"quantity"=0`,`"quantityUnit"=''`,`"valuationHash"='bad'`,`"valuationSnapshot"=NULL`,`"valuationType"='MANUAL'`,`"activeMeasurementKey"='unsupported'`,`"valuationType"='LABOR',"purchaseItemId"=NULL,"quantityUnit"='SECOND',"activeMeasurementKey"='LABOR:REPAIR:${historyRepair.id}'`])await dbRejects(`UPDATE "ExpenseAllocation" SET ${assignment} WHERE id=${repairMaterial.id}`,'23514');
   await prisma.repair.delete({where:{id:historyRepair.id}});
   assert.deepEqual(await prisma.expenseAllocation.findUniqueOrThrow({where:{id:repairCost.id}}),repairCost);
+  assert.deepEqual(await prisma.expenseAllocation.findUniqueOrThrow({where:{id:repairMaterial.id}}),repairMaterial);
+  await prisma.expenseAllocation.deleteMany({where:{id:{in:[repairMaterial.id,previousMaterial.id,previousLabor.id]}}});
   await prisma.expenseAllocation.delete({where:{id:repairCost.id}});
   await prisma.expenseEvidence.delete({where:{id:proof.id}});await prisma.expenseEvent.delete({where:{id:event.id}});await prisma.expensePayment.delete({where:{id:payment.id}});
   await dbRejects(`DELETE FROM "CompanyExpense" WHERE id=${expense.id}`,['23001','23503']);
@@ -205,6 +216,6 @@ async function dbRejects(sql, expected) {
   assert.equal(await prisma.technicalProposalRequest.count(),0);
   assert.equal(await prisma.fieldWriteRequest.count(),0);
   const savedExtra=await prisma.extraVisit.findUniqueOrThrow({where:{id:oldExtra.id}});assert.equal(savedExtra.notes,'Migration preserved extra');assert.equal(savedExtra.execution,null);assert.equal(savedExtra.startAt,null);assert.equal(savedExtra.endAt,null);assert.equal(savedExtra.completionRequestId,null);assert.equal(await prisma.extraVisitPhoto.count(),0);await prisma.extraVisit.delete({where:{id:oldExtra.id}});
-  console.log('PASS twenty-eight additive migrations preserve previous data and match the current schema');
+  console.log('PASS twenty-nine additive migrations preserve previous data and match the current schema');
  }finally{fs.rmSync(temp,{recursive:true,force:true})}
 })().catch(error=>{console.error(error);process.exitCode=1}).finally(()=>prisma.$disconnect());

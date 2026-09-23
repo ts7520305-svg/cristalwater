@@ -134,6 +134,7 @@ scripts.push('test-field-execution-values.js','test-field-execution-values-ui.js
 scripts.push('test-field-company-expenses.js','test-field-company-expenses-ui.js');
 scripts.push('test-field-expense-costs.js','test-field-expense-costs-ui.js');
 scripts.push('test-field-repair-costs.js','test-field-repair-costs-ui.js');
+scripts.push('test-field-repair-materials.js','test-field-repair-materials-ui.js');
 scripts.push('test-field-expense-valuations.js','test-field-expense-valuations-ui.js');
 scripts.push('test-field-financial-cost-coverage.js');
 scripts.push('test-field-financial-revenue-coverage.js');

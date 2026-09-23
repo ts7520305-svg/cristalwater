@@ -4,7 +4,7 @@ const { sum } = require('./monthlyFinancialProjection');
 const json = value => JSON.parse(JSON.stringify(value));
 const refused = (code, message) => ({ applied: false, code, message });
 function selection(value, query = false) {
-  if (!['MATERIAL', 'LABOR'].includes(value.kind) || !['REGULAR', 'EXTRA'].includes(value.targetType)) r.fail('Escolha materiais ou trabalho e uma visita concluída.');
+  if (!['MATERIAL', 'LABOR'].includes(value.kind) || !['REGULAR', 'EXTRA', 'REPAIR'].includes(value.targetType) || value.targetType === 'REPAIR' && value.kind !== 'MATERIAL') r.fail('Escolha materiais num serviço confirmado ou trabalho numa visita concluída.');
   const id = v => query ? r.queryId(v) : r.id(v);
   const purchaseItemId = value.kind === 'MATERIAL' ? id(value.purchaseItemId) : null;
   if (value.kind === 'LABOR' && value.purchaseItemId !== null && value.purchaseItemId !== undefined) r.fail('O trabalho não tem uma linha de compra de materiais.');
@@ -18,9 +18,11 @@ async function preview(db, expense, choice, lock = false) {
     await db.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${ 'expense-valuation:' + choice.targetType + ':' + choice.targetId }))::text`;
     // Serialize source edits and FK-linked movement inserts through the service row.
     if (choice.targetType === 'REGULAR') await db.$queryRaw`SELECT id FROM "ServiceVisit" WHERE id=${choice.targetId} FOR UPDATE`;
-    else await db.$queryRaw`SELECT id FROM "ExtraVisit" WHERE id=${choice.targetId} FOR UPDATE`;
-    await db.$queryRaw`SELECT id FROM "StockMovement" WHERE "visitId"=${choice.targetType === 'REGULAR' ? choice.targetId : null} OR "extraVisitId"=${choice.targetType === 'EXTRA' ? choice.targetId : null} FOR SHARE`;
+    else if (choice.targetType === 'EXTRA') await db.$queryRaw`SELECT id FROM "ExtraVisit" WHERE id=${choice.targetId} FOR UPDATE`;
+    if (choice.targetType !== 'REPAIR') await db.$queryRaw`SELECT id FROM "StockMovement" WHERE "visitId"=${choice.targetType === 'REGULAR' ? choice.targetId : null} OR "extraVisitId"=${choice.targetType === 'EXTRA' ? choice.targetId : null} FOR SHARE`;
   }
+  // Repair targets lock historical client -> repair -> proof -> movements,
+  // matching authenticated completion; they never borrow a visit's consumption.
   const target = await targets.get(db, choice.targetType, choice.targetId, lock);
   if (!target?.valid) r.fail('Reveja o serviço e o cliente antes de valorizar.', 409);
   if (expense.sourceType !== 'MANUAL') {
@@ -73,7 +75,7 @@ async function apply(db, who, env, expense) {
   const activeKey = r.hash({ expenseId: expense.id, monthRef: current.monthRef, type: choice.targetType, id: choice.targetId, valuationType: choice.kind, purchaseItemId: choice.purchaseItemId });
   if (expense.expenseAllocations.some(a => !a.voidedAt && a.activeKey === activeKey)) return refused('ALLOCATION_EXISTS', 'Já existe uma valorização desta origem para o serviço. Anule a anterior antes de corrigir.');
   const snapshot = require('./expenseCostAllocationService').expenseSnapshot(expense);
-  const allocation = await db.expenseAllocation.create({ data: { expenseId: expense.id, monthRef: current.monthRef, amountCents: current.amountCents, targetType: choice.targetType, clientId: current.clientId, visitId: choice.targetType === 'REGULAR' ? choice.targetId : null, extraVisitId: choice.targetType === 'EXTRA' ? choice.targetId : null, targetHash: current.targetHash, targetSnapshot: (await targets.get(db, choice.targetType, choice.targetId)).snapshot, expenseHash: r.hash(snapshot), expenseSnapshot: snapshot, activeKey, reason, createdById: who.id,
+  const allocation = await db.expenseAllocation.create({ data: { expenseId: expense.id, monthRef: current.monthRef, amountCents: current.amountCents, targetType: choice.targetType, clientId: current.clientId, visitId: choice.targetType === 'REGULAR' ? choice.targetId : null, extraVisitId: choice.targetType === 'EXTRA' ? choice.targetId : null, repairId: choice.targetType === 'REPAIR' ? choice.targetId : null, targetHash: current.targetHash, targetSnapshot: (await targets.get(db, choice.targetType, choice.targetId)).snapshot, expenseHash: r.hash(snapshot), expenseSnapshot: snapshot, activeKey, reason, createdById: who.id,
     valuationType: choice.kind, valuationKey: current.valuationKey, valuationHash: current.valuationHash, valuationSnapshot: { source: current.source, calculation: current.calculation }, quantity: current.quantity, quantityUnit: current.quantityUnit, purchaseItemId: current.purchaseItemId, activeMeasurementKey: choice.kind === 'LABOR' ? 'LABOR:' + choice.targetType + ':' + choice.targetId : null } });
   const updated = await db.companyExpense.update({ where: { id: expense.id }, data: { version: { increment: 1 } } });
   return json({ applied: true, expenseId: expense.id, version: updated.version, allocation, calculation: current.calculation, previewHash: current.hash, reason });
@@ -96,6 +98,6 @@ async function decorate(db, expenses) {
 }
 function summary(rows) {
   const valued = rows.filter(a => a.valuationType !== 'MANUAL'), total = kind => { const selected = valued.filter(a => a.valuationType === kind); return selected.some(a => a.needsReview) ? null : sum(selected.map(a => a.amountCents)); };
-  return { version: 1, coverage: 'CONFIRMED_EXPENSE_MEASUREMENTS', includedInExpenseAttribution: true, completeOperatingCosts: false, materialAmountCents: total('MATERIAL'), laborAmountCents: total('LABOR'), count: valued.length, reviewCount: valued.filter(a => a.needsReview).length, basis: { material: 'CONFIRMED_PURCHASE_LINE_NET_VISIT_CONSUMPTION', labor: 'CONFIRMED_EXPENSE_PAID_TIME', month: 'COMPLETED_VISIT_END_AT_UTC' } };
+  return { version: 2, coverage: 'CONFIRMED_EXPENSE_MEASUREMENTS', includedInExpenseAttribution: true, completeOperatingCosts: false, materialAmountCents: total('MATERIAL'), laborAmountCents: total('LABOR'), count: valued.length, reviewCount: valued.filter(a => a.needsReview).length, basis: { material: 'CONFIRMED_PURCHASE_LINE_SERVICE_CONSUMPTION', repairMaterial: 'AUTHENTICATED_REPAIR_PROOF_MOVEMENTS', labor: 'CONFIRMED_EXPENSE_PAID_TIME', month: 'CONFIRMED_SERVICE_EXECUTION_UTC' } };
 }
 module.exports = { selection, preview, apply, decorate, summary, data };

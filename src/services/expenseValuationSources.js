@@ -2,6 +2,7 @@
 const r = require('./expenseLedgerRules');
 const { normalizeProductName, normalizeUnit } = require('../utils/stockNormalizer');
 const { isCompletedVisitStatus } = require('./operationalValueReportService');
+const repairExecution = require('./repairExecutionService'), repairTargets = require('./expenseRepairTargets');
 const scale = 1000000n, max = 999999999999999999n;
 const quantity = value => {
   if (typeof value === 'number') {
@@ -19,37 +20,45 @@ const visitSelect = { id: true, clientId: true, poolId: true, technicianId: true
 const movementSelect = { id: true, movementType: true, productId: true, productName: true, unit: true, quantity: true, visitId: true, extraVisitId: true, clientId: true, poolId: true, createdAt: true };
 const itemSelect = { id: true, purchaseId: true, productId: true, productName: true, unit: true, quantity: true, unitCost: true, totalCost: true, lot: true, purchase: { select: { status: true, invoiceDate: true, totalAmount: true } } };
 const measurementKey = (type, id) => type + ':' + id;
-const targetId = a => a.targetType === 'REGULAR' ? a.visitId : a.extraVisitId;
+const targetId = a => a.targetType === 'REPAIR' ? a.repairId : a.targetType === 'REGULAR' ? a.visitId : a.extraVisitId;
 const selected = a => ({ kind: a.valuationType, expenseId: a.expenseId, targetType: a.targetType, targetId: targetId(a), purchaseItemId: a.purchaseItemId });
 function laborBasis(b) { return b ? { id: b.id, expenseId: b.expenseId, technicianId: b.technicianId, periodStart: r.day(b.periodStart), periodEnd: r.day(b.periodEnd), paidMinutes: b.paidMinutes } : null; }
 async function prepare(db, allocations, extra = []) {
   const selections = [...allocations.filter(a => a.valuationType !== 'MANUAL').map(selected), ...extra];
   if (!selections.length) return { regular: new Map(), extra: new Map(), items: new Map(), movements: [], active: [] };
   const ids = type => [...new Set(selections.filter(s => s.targetType === type).map(s => s.targetId))];
-  const regularIds = ids('REGULAR'), extraIds = ids('EXTRA'), itemIds = [...new Set(selections.map(s => s.purchaseItemId).filter(Boolean))];
+  const regularIds = ids('REGULAR'), extraIds = ids('EXTRA'), repairIds = ids('REPAIR'), itemIds = [...new Set(selections.map(s => s.purchaseItemId).filter(Boolean))];
   const laborExpenseIds = [...new Set(selections.filter(s => s.kind === 'LABOR').map(s => s.expenseId).filter(Boolean))];
-  const [regular, extras, items, movements, active] = await Promise.all([
+  const repairContext = repairIds.length ? await repairExecution.load(db, repairIds) : null, repairMovementIds = repairContext ? [...repairContext.movements.keys()] : [];
+  const [regular, extras, items, movements, active, repairs, owners] = await Promise.all([
     db.serviceVisit.findMany({ where: { id: { in: regularIds } }, select: visitSelect }),
     db.extraVisit.findMany({ where: { id: { in: extraIds } }, select: visitSelect }),
     db.stockPurchaseItem.findMany({ where: { id: { in: itemIds } }, select: itemSelect }),
     db.stockMovement.findMany({ where: { OR: [{ visitId: { in: regularIds } }, { extraVisitId: { in: extraIds } }] }, select: movementSelect, orderBy: { id: 'asc' } }),
-    db.expenseAllocation.findMany({ where: { voidedAt: null, valuationType: { not: 'MANUAL' }, OR: [{ visitId: { in: regularIds } }, { extraVisitId: { in: extraIds } }, { purchaseItemId: { in: itemIds } }, { expenseId: { in: laborExpenseIds } }] }, select: { id: true, expenseId: true, valuationType: true, valuationKey: true, purchaseItemId: true, quantity: true, amountCents: true, activeMeasurementKey: true, valuationSnapshot: true } })
+    db.expenseAllocation.findMany({ where: { voidedAt: null, valuationType: { not: 'MANUAL' }, OR: [{ visitId: { in: regularIds } }, { extraVisitId: { in: extraIds } }, { repairId: { in: repairIds } }, { purchaseItemId: { in: itemIds } }, { expenseId: { in: laborExpenseIds } }, ...repairMovementIds.map(id => ({ valuationSnapshot: { path: ['source', 'movements'], array_contains: [{ id }] } }))] }, select: { id: true, expenseId: true, targetType: true, visitId: true, extraVisitId: true, repairId: true, valuationType: true, valuationKey: true, purchaseItemId: true, quantity: true, amountCents: true, activeMeasurementKey: true, valuationSnapshot: true } }),
+    repairTargets.read(db, repairIds, repairContext),
+    repairMovementIds.length ? db.auditTrail.findMany({ where: { eventType: repairExecution.eventType, entity: 'Repair', OR: repairMovementIds.map(id => ({ metadata: { path: ['movements'], array_contains: [{ id }] } })) }, select: { id: true, entityId: true, metadata: true } }) : []
   ]);
-  return { regular: new Map(regular.map(v => [v.id, v])), extra: new Map(extras.map(v => [v.id, v])), items: new Map(items.map(v => [v.id, v])), movements, active };
+  const movementOwners = new Map(); for (const proof of owners) for (const movement of Array.isArray(proof.metadata?.movements) ? proof.metadata.movements : []) { if (!movement || !Number.isSafeInteger(movement.id) || movement.id <= 0) continue; const rows = movementOwners.get(movement.id) || []; rows.push(proof); movementOwners.set(movement.id, rows); }
+  return { regular: new Map(regular.map(v => [v.id, v])), extra: new Map(extras.map(v => [v.id, v])), repairs: new Map(repairs.map(t => [t.id, t])), repairContext, movementOwners, items: new Map(items.map(v => [v.id, v])), movements, active };
 }
 function build(data, expense, selection) {
   const { kind, targetType, targetId: id, purchaseItemId } = selection;
-  const visit = (targetType === 'REGULAR' ? data.regular : data.extra).get(id);
+  const repair = targetType === 'REPAIR' ? data.repairs?.get(id) : null;
+  if (targetType === 'REPAIR' && (kind !== 'MATERIAL' || !repair?.valid || repair.snapshot.materialMode !== 'RESERVED')) return { valid: false, errors: ['A reparação precisa de execução autenticada com consumo de materiais confirmado. O tempo de reparação ainda não é valorizável.'] };
+  const visit = repair ? { id, clientId: repair.clientId, poolId: repair.snapshot.poolId, status: 'CONFIRMED', startAt: null, endAt: new Date(repair.snapshot.endAt) } : (targetType === 'REGULAR' ? data.regular : data.extra).get(id);
   const errors = [], add = message => errors.push(message);
-  if (!visit || !visit.clientId || !isCompletedVisitStatus(visit.status) || !visit.endAt) return { valid: false, errors: ['Confirme a conclusão, data e cliente registados diretamente no serviço.'] };
+  if (!visit || !visit.clientId || !repair && !isCompletedVisitStatus(visit.status) || !visit.endAt) return { valid: false, errors: ['Confirme a conclusão, data e cliente registados diretamente no serviço.'] };
   const end = visit.endAt.getTime(), start = visit.startAt?.getTime();
-  const service = { ...visit, startAt: visit.startAt?.toISOString() || null, endAt: visit.endAt.toISOString() };
+  const service = repair ? Object.fromEntries(['type','id','clientId','poolId','status','startAt','endAt', ...repairTargets.proofFields].map(k => [k, repair.snapshot[k]])) : { ...visit, startAt: visit.startAt?.toISOString() || null, endAt: visit.endAt.toISOString() };
   let key, units, totalQuantity, totalCents, snapshot, label;
   if (kind === 'MATERIAL') {
     const item = data.items.get(purchaseItemId);
     if (!item || expense.sourceType !== 'STOCK_PURCHASE' || item.purchaseId !== expense.stockPurchaseId || !['STOCK', 'MATERIAL'].includes(expense.category)) return { valid: false, errors: ['Escolha uma linha da compra ligada a esta despesa de materiais.'] };
     const product = normalizeProductName(item.productName), unit = normalizeUnit(item.unit, '');
-    const movements = data.movements.filter(m => (targetType === 'REGULAR' ? m.visitId === id : m.extraVisitId === id) && ['CONSUMPTION', 'RETURN', 'EMERGENCY_DISTRIBUTED_CONSUMPTION'].includes(String(m.movementType).trim().toUpperCase()) && normalizeProductName(m.productName) === product && normalizeUnit(m.unit, '') === unit);
+    const proof = repair ? data.repairContext.proofs.get(id)[0] : null;
+    const candidates = repair ? proof.metadata.movements.map(m => data.repairContext.movements.get(m.id)) : data.movements.filter(m => targetType === 'REGULAR' ? m.visitId === id : m.extraVisitId === id);
+    const movements = candidates.filter(m => ['CONSUMPTION', 'RETURN', 'EMERGENCY_DISTRIBUTED_CONSUMPTION'].includes(String(m.movementType).trim().toUpperCase()) && normalizeProductName(m.productName) === product && normalizeUnit(m.unit, '') === unit);
     if (!product || !unit || !movements.length) add('Não há consumo identificado deste produto e unidade neste serviço.');
     let net = 0n;
     const productIds = new Set([item.productId, ...movements.map(m => m.productId)].filter(Boolean));
@@ -57,6 +66,11 @@ function build(data, expense, selection) {
     for (const m of movements) {
       const q = quantity(m.quantity);
       if (q === null || q <= 0n || m.visitId && m.extraVisitId || m.clientId && m.clientId !== visit.clientId || m.poolId && m.poolId !== visit.poolId) { add('Há movimentos com quantidade ou destinatário por confirmar.'); continue; }
+      if (repair) {
+        const owners = data.movementOwners.get(m.id) || [];
+        if (m.visitId !== null || m.extraVisitId !== null || m.movementType !== 'CONSUMPTION' || m.scopeTo !== 'REPAIR' || m.createdAt.getTime() > end || owners.length !== 1 || owners[0].id !== proof.id || owners[0].entityId !== id) add('O movimento de consumo não pertence exclusivamente à execução desta reparação.');
+        if (data.active.some(a => (a.targetType !== 'REPAIR' || a.repairId !== id) && Array.isArray(a.valuationSnapshot?.source?.movements) && a.valuationSnapshot.source.movements.some(other => other?.id === m.id))) add('Este consumo está reservado por outra valorização. Anule e reveja a atribuição anterior.');
+      }
       net += String(m.movementType).trim().toUpperCase() === 'RETURN' ? -q : q;
     }
     if (net <= 0n) add('O consumo líquido, depois das devoluções, tem de ser positivo.');
@@ -67,7 +81,7 @@ function build(data, expense, selection) {
     if (item.purchase.invoiceDate && item.purchase.invoiceDate.getTime() > end) add('A compra é posterior ao serviço. Reveja a origem histórica antes de valorizar.');
     totalCents = lineCents;
     key = r.hash({ kind, targetType, id, product, unit });
-    snapshot = { version: 1, kind, service, item: { ...item, purchase: { ...item.purchase, invoiceDate: r.day(item.purchase.invoiceDate) } }, movements: movements.map(m => ({ ...m, createdAt: m.createdAt.toISOString() })) };
+    snapshot = { version: repair ? 2 : 1, kind, service, item: { ...item, purchase: { ...item.purchase, invoiceDate: r.day(item.purchase.invoiceDate) } }, movements: movements.map(m => repair ? { ...Object.fromEntries(Object.keys(movementSelect).map(k => [k, m[k]])), scopeFrom: m.scopeFrom, scopeTo: m.scopeTo, createdAt: m.createdAt.toISOString() } : { ...m, createdAt: m.createdAt.toISOString() }) };
     label = item.productName + ' · ' + unit + ' · Linha #' + item.id + (item.lot ? ' · Lote ' + item.lot : '');
     return { valid: !errors.length, errors, key, kind, monthRef: service.endAt.slice(0, 7), units, totalQuantity, totalCents, snapshot, hash: r.hash(snapshot), label, unit, visit, method: 'CONFIRMED_PURCHASE_LINE', measurement: measurementKey(targetType, id) };
   }

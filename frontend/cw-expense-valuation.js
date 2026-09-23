@@ -17,11 +17,12 @@
       if (kind() !== 'MANUAL') { el('allocationAmount').value = ''; el('allocationMonth').value = ''; }
     }
     function controls() {
-      const repair = el('allocationType').value === 'REPAIR';
-      if (repair && kind() !== 'MANUAL') { invalidate(); el('valuationKind').value = 'MANUAL'; invalidate(); }
-      for (const option of el('valuationKind').options) option.disabled = repair && option.value !== 'MANUAL';
+      const c = host.context(), repair = el('allocationType').value === 'REPAIR';
+      const unavailable = value => repair && (value === 'LABOR' || value === 'MATERIAL' && (c.expense?.sourceType !== 'STOCK_PURCHASE' || host.target()?.snapshot?.materialMode === 'NONE'));
+      if (unavailable(kind())) { invalidate(); el('valuationKind').value = 'MANUAL'; invalidate(); }
+      for (const option of el('valuationKind').options) option.disabled = unavailable(option.value);
       el('repairCostBasis').hidden = !repair;
-      const c = host.context(), method = kind(), material = method === 'MATERIAL';
+      const method = kind(), material = method === 'MATERIAL';
       el('valuationBox').hidden = method === 'MANUAL'; el('valuationLotLabel').hidden = !material; el('valuationQuantityLabel').hidden = !material;
       el('allocationAmount').readOnly = method !== 'MANUAL'; el('allocationMonth').readOnly = method !== 'MANUAL';
       el('valuationCalculate').disabled = !c.canWrite; el('laborTechniciansRefresh').disabled = !c.canWrite;
@@ -58,16 +59,21 @@
       try { const saved = JSON.parse(sessionStorage.getItem(key())); if (saved && ['MANUAL','MATERIAL','LABOR'].includes(saved.kind)) { el('valuationKind').value = saved.kind; el('valuationLot').value = saved.lot || ''; el('valuationQuantity').value = saved.quantity || ''; for (const id of laborFields) if (typeof saved.labor?.[id] === 'string') { if (id === 'laborTechnician') wantedTechnician = saved.labor[id]; else el(id).value = saved.labor[id]; } } } catch {}
       el('laborBasisConfirmed').checked = false; invalidate(); controls(); if (!el('laborBasisBox').hidden) void loadTechnicians();
     }
+    function repairSource(source, target) {
+      const s = source?.service;
+      if (source?.version !== 2 || source.kind !== 'MATERIAL' || !s || s.type !== 'REPAIR' || s.materialMode !== 'RESERVED' || !['type','id','clientId','poolId','status','startAt','endAt','executionBasis','executionProofId','executionFingerprint','materialMode'].every(k => s[k] === target?.[k]) || !Array.isArray(source.movements) || !source.movements.length || new Set(source.movements.map(m => m.id)).size !== source.movements.length || !source.movements.every(m => positive(m.id) && m.movementType === 'CONSUMPTION' && m.scopeTo === 'REPAIR' && m.visitId === null && m.extraVisitId === null && m.clientId === s.clientId && m.poolId === s.poolId && typeof m.quantity === 'number' && m.quantity > 0 && Number.isFinite(m.quantity) && Number.isFinite(Date.parse(m.createdAt)) && Date.parse(m.createdAt) <= Date.parse(s.endAt))) throw Error('O consumo recebido não corresponde à execução desta reparação.');
+    }
     async function validatePreview(p) {
       const c = host.context(), t = host.target();
       if (!p || p.version !== 1 || p.expenseId !== editingId || p.expenseVersion !== c.expense?.version || p.kind !== kind() || p.targetType !== t?.type || p.targetId !== t?.id || p.clientId !== t?.clientId || p.targetHash !== t?.hash || !quantity(p.quantity) || !quantity(p.availableQuantity) || !positive(p.amountCents) || typeof p.label !== 'string' || !/^(20|21)\d{2}-(0[1-9]|1[0-2])$/.test(p.monthRef) || !/^[a-f0-9]{64}$/.test(p.valuationHash) || p.purchaseItemId !== (kind() === 'MATERIAL' ? Number(el('valuationLot').value) : null) || !p.calculation || p.calculation.amountCents !== p.amountCents || p.calculation.quantity !== p.quantity || p.calculation.quantityUnit !== p.quantityUnit || p.calculation.method !== (kind() === 'MATERIAL' ? 'CONFIRMED_PURCHASE_LINE' : 'CONFIRMED_EXPENSE_PAID_TIME') || !quantity(p.calculation.baseQuantity) || !positive(p.calculation.baseAmountCents) || p.source?.kind !== kind()) throw Error('Valorização incompleta ou de outro contexto.');
-      const { hash, ...value } = p; if (typeof hash !== 'string' || await host.hash(value) !== hash) throw Error('Os valores recebidos não correspondem à valorização confirmada.');
+      const { hash, ...value } = p; if (typeof hash !== 'string' || await host.hash(value) !== hash || await host.hash(p.source) !== p.valuationHash) throw Error('Os valores recebidos não correspondem à valorização confirmada.');
+      if (p.targetType === 'REPAIR') { repairSource(p.source, t.snapshot); if (p.source.item?.id !== p.purchaseItemId || p.source.item?.purchaseId !== c.expense.stockPurchaseId || p.monthRef !== t.snapshot.endAt.slice(0, 7)) throw Error('A compra ou o mês não correspondem à reparação revista.'); }
       return p;
     }
     async function calculate() {
       if (!active() || !host.context().canWrite || kind() === 'MANUAL') return;
       const t = host.target(); invalidate('A consultar consumo, tempo e base de custo…');
-      if (!t || !['REGULAR','EXTRA'].includes(t.type)) { el('valuationStatus').textContent = 'Escolha e reveja uma visita concluída.'; return; }
+      if (!t || !['REGULAR','EXTRA','REPAIR'].includes(t.type) || t.type === 'REPAIR' && kind() !== 'MATERIAL') { el('valuationStatus').textContent = 'Escolha e reveja um serviço confirmado; o tempo só é valorizado nas visitas.'; return; }
       const rev = ++revision, captured = signature(), query = { kind: kind(), targetType: t.type, targetId: String(t.id) };
       if (kind() === 'MATERIAL') { if (!positive(Number(el('valuationLot').value))) { el('valuationStatus').textContent = 'Escolha uma linha da compra ligada à despesa.'; return; } query.purchaseItemId = el('valuationLot').value; const q = el('valuationQuantity').value.trim().replace(',', '.'); if (q) query.quantity = q; }
       try {
@@ -82,7 +88,7 @@
       } catch (error) { if (active() && rev === revision) invalidate(error.message); } finally { controls(); }
     }
     function submit(reason) {
-      if (host.target()?.type === 'REPAIR' && kind() !== 'MANUAL') throw Error('Confirme uma parcela manual da despesa para esta reparação.');
+      if (host.target()?.type === 'REPAIR' && kind() === 'LABOR') throw Error('O tempo de reparação ainda não tem uma base medida confirmada.');
       if (kind() === 'MANUAL') return false;
       if (!preview || confirmedSelection !== signature() || !el('allocationConfirmed').checked || !host.context().canWrite) throw Error('Calcule e reveja o custo atual antes de confirmar.');
       const p = preview;
@@ -90,7 +96,7 @@
       return true;
     }
     function showSummary(value) {
-      if (!value || value.version !== 1 || value.coverage !== 'CONFIRMED_EXPENSE_MEASUREMENTS' || value.includedInExpenseAttribution !== true || value.completeOperatingCosts !== false || !cents(value.materialAmountCents) || !cents(value.laborAmountCents) || !count(value.count) || !count(value.reviewCount) || value.basis?.month !== 'COMPLETED_VISIT_END_AT_UTC' || value.basis?.material !== 'CONFIRMED_PURCHASE_LINE_NET_VISIT_CONSUMPTION' || value.basis?.labor !== 'CONFIRMED_EXPENSE_PAID_TIME') throw Error('Resumo de valorizações incompleto.');
+      if (!value || value.version !== 2 || value.coverage !== 'CONFIRMED_EXPENSE_MEASUREMENTS' || value.includedInExpenseAttribution !== true || value.completeOperatingCosts !== false || !cents(value.materialAmountCents) || !cents(value.laborAmountCents) || !count(value.count) || !count(value.reviewCount) || value.basis?.month !== 'CONFIRMED_SERVICE_EXECUTION_UTC' || value.basis?.material !== 'CONFIRMED_PURCHASE_LINE_SERVICE_CONSUMPTION' || value.basis?.repairMaterial !== 'AUTHENTICATED_REPAIR_PROOF_MOVEMENTS' || value.basis?.labor !== 'CONFIRMED_EXPENSE_PAID_TIME') throw Error('Resumo de valorizações incompleto.');
       el('valuationMetrics').replaceChildren(); for (const [label, amount] of [['Consumo valorizado', value.materialAmountCents], ['Tempo valorizado', value.laborAmountCents]]) { const card = node(el('valuationMetrics'), 'div', '', 'metric'); node(card, 'span', label); node(card, 'strong', money(amount)); }
       el('valuationSummaryBasis').textContent = 'Incluídos nos montantes atribuídos acima, pelo mês de conclusão do serviço. ' + value.count + ' valorizações · ' + value.reviewCount + ' por rever. Cobertura parcial: apenas consumos e tempos com base de custo confirmada.';
     }
@@ -100,7 +106,8 @@
       if (e.command === 'SET_LABOR_BASIS') { const b = result.laborBasis; if (!b || !positive(b.id) || b.expenseId !== e.expenseId || !['technicianId','periodStart','periodEnd','paidMinutes'].every(k => b[k] === d[k]) || result.version !== e.expectedVersion + 1) throw Error('Base de trabalho não confirmada.'); }
       if (['VALUE_MATERIAL','VALUE_LABOR'].includes(e.command)) {
         const a = result.allocation, c = result.calculation;
-        if (!a || !positive(a.id) || a.expenseId !== e.expenseId || a.valuationType !== d.kind || a.targetType !== d.targetType || (a.targetType === 'REGULAR' ? a.visitId : a.extraVisitId) !== d.targetId || a.targetHash !== d.targetHash || a.monthRef !== d.monthRef || a.amountCents !== d.amountCents || a.quantity !== d.quantity || a.purchaseItemId !== d.purchaseItemId || a.valuationHash !== d.valuationHash || a.voidedAt !== null || !a.activeKey || result.previewHash !== d.previewHash || result.version !== e.expectedVersion + 1 || !c || c.quantity !== d.quantity || c.amountCents !== d.amountCents || c.quantityUnit !== a.quantityUnit || !a.valuationSnapshot?.source || await host.hash(a.valuationSnapshot.source) !== d.valuationHash) throw Error('A confirmação não corresponde ao custo e às fontes revistos.');
+        if (!a || !positive(a.id) || a.expenseId !== e.expenseId || a.valuationType !== d.kind || a.targetType !== d.targetType || (a.targetType === 'REPAIR' ? a.repairId : a.targetType === 'REGULAR' ? a.visitId : a.extraVisitId) !== d.targetId || a.targetHash !== d.targetHash || a.monthRef !== d.monthRef || a.amountCents !== d.amountCents || a.quantity !== d.quantity || a.purchaseItemId !== d.purchaseItemId || a.valuationHash !== d.valuationHash || a.voidedAt !== null || !a.activeKey || result.previewHash !== d.previewHash || result.version !== e.expectedVersion + 1 || !c || c.quantity !== d.quantity || c.amountCents !== d.amountCents || c.quantityUnit !== a.quantityUnit || !a.valuationSnapshot?.source || await host.hash(a.valuationSnapshot.source) !== d.valuationHash) throw Error('A confirmação não corresponde ao custo e às fontes revistos.');
+        if (a.targetType === 'REPAIR') { repairSource(a.valuationSnapshot.source, a.targetSnapshot); if (a.clientId !== a.valuationSnapshot.source.service.clientId || a.monthRef !== a.targetSnapshot.endAt.slice(0, 7)) throw Error('O destinatário ou mês do consumo de reparação não está confirmado.'); }
       }
     }
     function receipt(result, record) { if (result.applied && ['SET_LABOR_BASIS','VALUE_MATERIAL','VALUE_LABOR','VOID_COST'].includes(record.envelope.command)) { try { sessionStorage.removeItem('cw-valuation-draft:' + host.owner() + ':' + record.envelope.expenseId); } catch {} editingId = null; } }

@@ -119,7 +119,7 @@
       for (const a of expense.allocations) {
         if (!positive(a.id) || a.expenseId !== expense.id || !positive(a.amountCents) || !validMonth(a.monthRef) || !types[a.targetType] || typeof a.targetLabel !== 'string' || typeof a.needsReview !== 'boolean') throw Error('Histórico de atribuições incompleto.');
         if (a.targetType === 'REPAIR') {
-          if (!positive(a.repairId) || a.targetId !== a.repairId || !positive(a.clientId) || a.visitId !== null || a.extraVisitId !== null || a.valuationType !== 'MANUAL') throw Error('Histórico da reparação incompleto.');
+          if (!positive(a.repairId) || a.targetId !== a.repairId || !positive(a.clientId) || a.visitId !== null || a.extraVisitId !== null || !['MANUAL','MATERIAL'].includes(a.valuationType)) throw Error('Histórico da reparação incompleto.');
           repairFacts({ id: a.repairId, clientId: a.clientId, label: a.targetLabel, clientName: a.targetSnapshot?.clientName, snapshot: a.targetSnapshot });
         }
         const row = node(el('allocationRows'), 'div', '', 'row'); node(row, 'strong', a.targetLabel + (a.clientName && a.targetType !== 'CLIENT' ? ' · ' + a.clientName : '')); node(row, 'p', a.monthRef + ' · ' + money(a.amountCents) + ' · ' + (a.voidedAt ? 'Anulada' : a.needsReview ? 'Por rever' : 'Confirmada')); node(row, 'p', a.voidReason || a.reason);
@@ -155,11 +155,11 @@
     async function verify(result, record) {
       await valuation.verify(result, record);
       const e = record.envelope, a = result.allocation;
-      if (!result.applied || !['ALLOCATE_COST','REVIEW_COST','VOID_COST'].includes(e.command) || a?.targetType !== 'REPAIR') return;
-      if (a.valuationType !== 'MANUAL' || !positive(a.repairId) || !positive(a.clientId) || a.visitId !== null || a.extraVisitId !== null || result.version !== e.expectedVersion + 1) throw Error('Atribuição da reparação não confirmada.');
+      if (!result.applied || !['ALLOCATE_COST','REVIEW_COST','VOID_COST','VALUE_MATERIAL'].includes(e.command) || a?.targetType !== 'REPAIR') return;
+      if (!['MANUAL','MATERIAL'].includes(a.valuationType) || ['ALLOCATE_COST','REVIEW_COST'].includes(e.command) && a.valuationType !== 'MANUAL' || !positive(a.repairId) || !positive(a.clientId) || a.visitId !== null || a.extraVisitId !== null || result.version !== e.expectedVersion + 1) throw Error('Atribuição da reparação não confirmada.');
       await verifiedTarget({ type: a.targetType, id: a.repairId, clientId: a.clientId, valid: true, hash: a.targetHash, label: a.targetSnapshot?.label, clientName: a.targetSnapshot?.clientName, snapshot: a.targetSnapshot });
       if (e.command !== 'VOID_COST' && (a.voidedAt !== null || !a.activeKey)) throw Error('Atribuição da reparação não está ativa.');
-      if (e.command !== 'ALLOCATE_COST' && !['id','expenseId','clientId','targetType','repairId','monthRef','amountCents'].every(k => a[k] === result.allocationBefore?.[k])) throw Error('A reparação, o cliente ou o período da atribuição mudou.');
+      if (['REVIEW_COST','VOID_COST'].includes(e.command) && !['id','expenseId','clientId','targetType','repairId','monthRef','amountCents','valuationType','purchaseItemId','quantity','quantityUnit','valuationHash','valuationKey'].every(k => a[k] === result.allocationBefore?.[k])) throw Error('A reparação, o cliente ou o período da atribuição mudou.');
     }
     return { clear, render, controls, load, receipt, draft, observe, verify };
   } };
