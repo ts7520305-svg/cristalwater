@@ -22,10 +22,18 @@ API e navegador novos: equipamento/lembrete, mesmo ID numérico, pais regulares/
 
 Regressões aprovadas: despesas/repartições, reparações, consulta por execução, bases compostas e correção de período em API e navegador; receitas de manutenções. O teste de período verifica também recibos anteriores à migração com hashes históricos. 401 testes unitários/64 ficheiros; sintaxe 598 JS backend, 200 JS frontend, 62 scripts inline. As 33 migrações preservam os dados anteriores e correspondem ao esquema atual de 125 tabelas. Layout a 320/390/1440 px e modo escuro, com conteúdo literal.
 
-Runner de 201 para 203 grupos; cache `cristalwater-field-20260923-v118`. Logs locais `/tmp/cw302-*.log`, visuais `reports/field-visual/maintenance-costs/`. O CI completo e o restauro PostgreSQL 16 da versão publicada ainda têm de ser confirmados antes do fecho.
+Runner de 201 para 203 grupos; cache `cristalwater-field-20260923-v118`. Logs locais `/tmp/cw302-*.log`, visuais `reports/field-visual/maintenance-costs/`. O CI completo e o restauro PostgreSQL 16 da versão publicada foram posteriormente confirmados conforme a evidência seguinte.
 
 ## Âmbito e próximos passos
 
 Base `21f855f7ac308637597de4c89458e327bf45589b`; publicação apenas na branch `work/field-readiness-20260915-simulation`, sem força. Principal `feature/technicians-v25` preservada em `6f27081e1d183ff584a62255b016b373836734db`. Sem merge, deploy ou contactos reais.
 
 Fecha a atribuição manual de despesas às duas origens de manutenção confirmadas. Restantes gastos/repartições entre técnicos e períodos, custos medidos próprios das manutenções, restantes ajustes/origens de receita, históricos, volume, VPS/fornecedores e piloto físico continuam abertos. Custos/receitas completos e margem por apurar; IVA e emissão fiscal externos, preços/frequências por cliente e época.
+
+## Publicação e CI
+
+Código publicado sem força e com árvore igual à validada localmente: commit `d39be03c084196cec5990211ae97786e261567a2`, árvore `7580c9c03c51984ee56c434ad5adf7a5ea609636`, [CI 35859868635](https://github.com/ts7520305-svg/cristalwater/actions/runs/35859868635), job `107177158222`: 17 etapas aprovadas entre 12:20:33 e 12:47:56 UTC de 23/09/2026 (27m23s). Logs completos conferidos: 203/203 grupos previstos distintos, código zero/sem sinal, sem falta ou duplicação; 401 unitários/64 ficheiros, quatro técnicos, gate geral do navegador, 33 migrações e sintaxe 598/200/62. Restauro PostgreSQL 16: 125 tabelas/46 ficheiros, linhas e hashes iguais.
+
+Despesas de manutenções API/UI aprovadas em 7539/9758 ms; correção de período API/UI 8922/9363 ms; consulta por execução API/UI 18910/25913 ms; receitas de manutenção 35078 ms. Todos os grupos previstos foram conferidos, sem falta, entrada inesperada, duplicação ou sinal.
+
+Evidência completa em `evidence/20260923_task302_ci.json`. Backup `backup/maintenance-cost-local-20260923` (`fafd40af2e7fcea707ac96f3130b9e2b3cdd950b`). O fecho posterior altera apenas documentação e conserva as árvores de código, migrações e testes aprovados. Restantes gastos/repartições, custos medidos próprios de manutenções, ajustes/origens de receita, históricos, volume, VPS/fornecedores e piloto físico continuam pendentes. Esta aprovação não comprova cobertura financeira completa ou operação em produção.
