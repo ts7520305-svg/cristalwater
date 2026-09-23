@@ -7,9 +7,11 @@
     let editingId = null, revision = 0, techRevision = 0, preview = null, confirmedSelection = '', technicians = [], wantedTechnician = '';
     const kind = () => el('valuationKind').value, key = () => 'cw-valuation-draft:' + host.owner() + ':' + editingId;
     const laborFields = ['laborTechnician', 'laborPaidMinutes', 'laborPeriodStart', 'laborPeriodEnd', 'laborBasisReason'];
-    const work = window.CWRepairLabor.create({ ...host, draft }, invalidate);
-    function signature() { const c = host.context(), t = host.target(); return JSON.stringify([c.epoch, c.detailEpoch, c.expense?.id, c.expense?.version, t?.type, t?.id, t?.hash, kind(), work.id(), el('valuationLot').value, kind() === 'MATERIAL' ? el('valuationQuantity').value : '', el('allocationAmount').value, el('allocationMonth').value]); }
+    const distribution = window.CWExpenseLaborDistribution.create(host, invalidate);
+    const work = window.CWRepairLabor.create({ ...host, draft, distribution }, invalidate);
+    function signature() { const c = host.context(), t = host.target(); return JSON.stringify([c.epoch, c.detailEpoch, c.expense?.id, c.expense?.version, t?.type, t?.id, t?.hash, kind(), distribution.id(), work.id(), el('valuationLot').value, kind() === 'MATERIAL' ? el('valuationQuantity').value : '', el('allocationAmount').value, el('allocationMonth').value]); }
     function draft() {
+      distribution.draft();
       if (!active() || !editingId || host.context().expense?.id !== editingId) return;
       try { sessionStorage.setItem(key(), JSON.stringify({ kind: kind(), workIntervalId: work.id(), lot: el('valuationLot').value, quantity: el('valuationQuantity').value, labor: Object.fromEntries(laborFields.map(id => [id, el(id).value || (id === 'laborTechnician' ? wantedTechnician : '')])) })); } catch { note('O rascunho da valorização não pôde ser guardado.'); }
     }
@@ -19,7 +21,7 @@
     }
     function controls() {
       const c = host.context(), repair = el('allocationType').value === 'REPAIR', maintenance = window.CWExpenseMaintenance.types.includes(el('allocationType').value);
-      const unavailable = value => maintenance && value !== 'MANUAL' || repair && (value === 'LABOR' && (c.expense?.sourceType !== 'MANUAL' || c.expense?.category !== 'LABOR' || !c.expense?.laborBasis) || value === 'MATERIAL' && (c.expense?.sourceType !== 'STOCK_PURCHASE' || host.target()?.snapshot?.materialMode === 'NONE'));
+      const unavailable = value => maintenance && value !== 'MANUAL' || repair && (value === 'LABOR' && (c.expense?.sourceType !== 'MANUAL' || c.expense?.category !== 'LABOR' || !c.expense?.laborBasis && !distribution.has()) || value === 'MATERIAL' && (c.expense?.sourceType !== 'STOCK_PURCHASE' || host.target()?.snapshot?.materialMode === 'NONE'));
       if (unavailable(kind())) { invalidate(); el('valuationKind').value = 'MANUAL'; invalidate(); }
       for (const option of el('valuationKind').options) option.disabled = unavailable(option.value);
       el('repairCostBasis').hidden = !repair;
@@ -28,10 +30,10 @@
       el('allocationAmount').readOnly = method !== 'MANUAL'; el('allocationMonth').readOnly = method !== 'MANUAL';
       el('valuationCalculate').disabled = !c.canWrite; el('laborTechniciansRefresh').disabled = !c.canWrite;
       for (const n of el('laborBasisForm').querySelectorAll('input,select,textarea,button')) n.disabled = !c.canWrite;
-      el('laborTechnician').disabled = !c.canWrite || !technicians.length; work.sync();
+      el('laborTechnician').disabled = !c.canWrite || !technicians.length; work.sync(); distribution.controls();
     }
     function clear() {
-      draft(); work.clear(); revision++; techRevision++; preview = null; confirmedSelection = ''; editingId = null; wantedTechnician = ''; technicians = [];
+      draft(); work.clear(); distribution.clear(); revision++; techRevision++; preview = null; confirmedSelection = ''; editingId = null; wantedTechnician = ''; technicians = [];
       for (const id of ['valuationPreview', 'valuationStatus', 'valuationMetrics', 'valuationSummaryBasis', 'laborBasisStatus', 'laborTechnician', 'valuationLot']) el(id).replaceChildren();
       el('laborBasisForm').reset(); el('valuationQuantity').value = ''; el('valuationKind').value = 'MANUAL'; el('laborBasisBox').hidden = true; el('valuationBox').hidden = true;
     }
@@ -58,7 +60,7 @@
       const blank = node(el('valuationLot'), 'option', 'Escolha uma linha da compra'); blank.value = '';
       if (expense.sourceType === 'STOCK_PURCHASE') for (const item of expense.sourceSnapshot?.items || []) { if (!positive(item.id) || typeof item.productName !== 'string' || typeof item.unit !== 'string') throw Error('Linha de compra incompleta.'); const option = node(el('valuationLot'), 'option', item.productName + ' · ' + item.unit + ' · Linha #' + item.id); option.value = String(item.id); }
       try { const saved = JSON.parse(sessionStorage.getItem(key())); if (saved && ['MANUAL','MATERIAL','LABOR'].includes(saved.kind)) { el('valuationKind').value = saved.kind; work.restore(saved.workIntervalId); el('valuationLot').value = saved.lot || ''; el('valuationQuantity').value = saved.quantity || ''; for (const id of laborFields) if (typeof saved.labor?.[id] === 'string') { if (id === 'laborTechnician') wantedTechnician = saved.labor[id]; else el(id).value = saved.labor[id]; } } } catch {}
-      el('laborBasisConfirmed').checked = false; invalidate(); controls(); if (!el('laborBasisBox').hidden) void loadTechnicians();
+      distribution.render(expense); el('laborBasisConfirmed').checked = false; invalidate(); controls(); if (!el('laborBasisBox').hidden) void loadTechnicians();
     }
     function repairSource(source, target) {
       const s = source?.service;
@@ -68,6 +70,7 @@
       const c = host.context(), t = host.target();
       if (!p || p.version !== 1 || p.expenseId !== editingId || p.expenseVersion !== c.expense?.version || p.kind !== kind() || p.targetType !== t?.type || p.targetId !== t?.id || p.clientId !== t?.clientId || p.targetHash !== t?.hash || !quantity(p.quantity) || !quantity(p.availableQuantity) || !positive(p.amountCents) || typeof p.label !== 'string' || !/^(20|21)\d{2}-(0[1-9]|1[0-2])$/.test(p.monthRef) || !/^[a-f0-9]{64}$/.test(p.valuationHash) || p.purchaseItemId !== (kind() === 'MATERIAL' ? Number(el('valuationLot').value) : null) || !p.calculation || p.calculation.amountCents !== p.amountCents || p.calculation.quantity !== p.quantity || p.calculation.quantityUnit !== p.quantityUnit || p.calculation.method !== (kind() === 'MATERIAL' ? 'CONFIRMED_PURCHASE_LINE' : 'CONFIRMED_EXPENSE_PAID_TIME') || !quantity(p.calculation.baseQuantity) || !positive(p.calculation.baseAmountCents) || p.source?.kind !== kind()) throw Error('Valorização incompleta ou de outro contexto.');
       const { hash, ...value } = p; if (typeof hash !== 'string' || await host.hash(value) !== hash || await host.hash(p.source) !== p.valuationHash) throw Error('Os valores recebidos não correspondem à valorização confirmada.');
+      if (p.kind === 'LABOR') { if ((p.laborPart ?? null) !== distribution.id()) throw Error('A parcela recebida não corresponde à seleção.'); await distribution.valuation(p,p.targetType,editingId,p.laborPart,true,t.snapshot); }
       if (p.targetType === 'REPAIR') { if (p.kind === 'LABOR') await work.preview(p,t,c.expense); else { repairSource(p.source, t.snapshot); if (p.source.item?.id !== p.purchaseItemId || p.source.item?.purchaseId !== c.expense.stockPurchaseId) throw Error('A compra não corresponde à reparação revista.'); } if (p.monthRef !== t.snapshot.endAt.slice(0, 7)) throw Error('O mês não corresponde à reparação revista.'); }
       return p;
     }
@@ -77,6 +80,7 @@
       if (!t || !['REGULAR','EXTRA','REPAIR'].includes(t.type)) { el('valuationStatus').textContent = 'Escolha e reveja um serviço com execução confirmada.'; return; }
       const rev = ++revision, captured = signature(), query = { kind: kind(), targetType: t.type, targetId: String(t.id) };
       if (kind() === 'MATERIAL') { if (!positive(Number(el('valuationLot').value))) { el('valuationStatus').textContent = 'Escolha uma linha da compra ligada à despesa.'; return; } query.purchaseItemId = el('valuationLot').value; const q = el('valuationQuantity').value.trim().replace(',', '.'); if (q) query.quantity = q; }
+      if (kind() === 'LABOR' && distribution.has()) { if (!distribution.selected()) { el('valuationStatus').textContent = 'Escolha uma parcela confirmada de trabalho.'; return; } query.laborPart = String(distribution.id()); }
       if (kind() === 'LABOR' && t.type === 'REPAIR') { const row = work.selection(); if (!row) { el('valuationStatus').textContent = 'Consulte e escolha um intervalo declarado e confirmado.'; return; } query.workIntervalId = String(row.id); }
       try {
         const result = await request('/' + editingId + '/valuation-preview?' + new URLSearchParams(query));
@@ -93,7 +97,7 @@
       if (kind() === 'MANUAL') return false;
       if (!preview || confirmedSelection !== signature() || !el('allocationConfirmed').checked || !host.context().canWrite) throw Error('Calcule e reveja o custo atual antes de confirmar.');
       const p = preview;
-      void host.execute(p.kind === 'MATERIAL' ? 'VALUE_MATERIAL' : 'VALUE_LABOR', { ...(p.workIntervalId ? { workIntervalId: p.workIntervalId } : {}), kind: p.kind, targetType: p.targetType, targetId: p.targetId, targetHash: p.targetHash, monthRef: p.monthRef, purchaseItemId: p.purchaseItemId, quantity: p.quantity, amountCents: p.amountCents, valuationHash: p.valuationHash, previewHash: p.hash, reason, confirmed: true });
+      void host.execute(p.kind === 'MATERIAL' ? 'VALUE_MATERIAL' : 'VALUE_LABOR', { ...(p.laborPart ? { laborPart: p.laborPart } : {}), ...(p.workIntervalId ? { workIntervalId: p.workIntervalId } : {}), kind: p.kind, targetType: p.targetType, targetId: p.targetId, targetHash: p.targetHash, monthRef: p.monthRef, purchaseItemId: p.purchaseItemId, quantity: p.quantity, amountCents: p.amountCents, valuationHash: p.valuationHash, previewHash: p.hash, reason, confirmed: true });
       return true;
     }
     function showSummary(value) {
@@ -102,16 +106,18 @@
       el('valuationSummaryBasis').textContent = 'Incluídos nos montantes atribuídos acima, pelo mês de conclusão do serviço. ' + value.count + ' valorizações · ' + value.reviewCount + ' por rever. Cobertura parcial: consumos, tempos registados nas visitas e intervalos declarados de reparações com base de custo confirmada.';
     }
     async function verify(result, record) {
+      await distribution.verify(result,record);
       const e = record.envelope, d = e.data;
       if (!result.applied) return;
       if (e.command === 'SET_LABOR_BASIS') { const b = result.laborBasis; if (!b || !positive(b.id) || b.expenseId !== e.expenseId || !['technicianId','periodStart','periodEnd','paidMinutes'].every(k => b[k] === d[k]) || result.version !== e.expectedVersion + 1) throw Error('Base de trabalho não confirmada.'); }
       if (['VALUE_MATERIAL','VALUE_LABOR'].includes(e.command)) {
         const a = result.allocation, c = result.calculation;
         if (!a || !positive(a.id) || a.expenseId !== e.expenseId || a.valuationType !== d.kind || a.targetType !== d.targetType || (a.targetType === 'REPAIR' ? a.repairId : a.targetType === 'REGULAR' ? a.visitId : a.extraVisitId) !== d.targetId || a.targetHash !== d.targetHash || a.monthRef !== d.monthRef || a.amountCents !== d.amountCents || a.quantity !== d.quantity || a.purchaseItemId !== d.purchaseItemId || a.valuationHash !== d.valuationHash || a.voidedAt !== null || !a.activeKey || result.previewHash !== d.previewHash || result.version !== e.expectedVersion + 1 || !c || c.quantity !== d.quantity || c.amountCents !== d.amountCents || c.quantityUnit !== a.quantityUnit || !a.valuationSnapshot?.source || await host.hash(a.valuationSnapshot.source) !== d.valuationHash) throw Error('A confirmação não corresponde ao custo e às fontes revistos.');
+        if (d.kind === 'LABOR') { await distribution.valuation({source:a.valuationSnapshot.source,calculation:c,quantity:a.quantity,quantityUnit:a.quantityUnit,amountCents:a.amountCents},a.targetType,e.expenseId,d.laborPart,false,a.targetSnapshot); if (await host.hash(c) !== await host.hash(a.valuationSnapshot.calculation)) throw Error('O cálculo do recibo mudou.'); }
         if (a.targetType === 'REPAIR') { if (d.kind === 'LABOR') await work.receipt(a,d,e.expenseId); else repairSource(a.valuationSnapshot.source, a.targetSnapshot); if (a.clientId !== a.valuationSnapshot.source.service.clientId || a.monthRef !== a.targetSnapshot.endAt.slice(0, 7)) throw Error('O destinatário ou mês do custo de reparação não está confirmado.'); }
       }
     }
-    function receipt(result, record) { if (result.applied && ['SET_LABOR_BASIS','VALUE_MATERIAL','VALUE_LABOR','VOID_COST'].includes(record.envelope.command)) { try { sessionStorage.removeItem('cw-valuation-draft:' + host.owner() + ':' + record.envelope.expenseId); } catch {} editingId = null; } }
+    function receipt(result, record) { distribution.receipt(result,record); if (result.applied && ['SET_LABOR_BASIS','VALUE_MATERIAL','VALUE_LABOR','VOID_COST','SET_LABOR_DISTRIBUTION','VOID_LABOR_DISTRIBUTION'].includes(record.envelope.command)) { try { sessionStorage.removeItem('cw-valuation-draft:' + host.owner() + ':' + record.envelope.expenseId); } catch {} editingId = null; } }
     el('valuationKind').addEventListener('change', () => { invalidate(); controls(); draft(); });
     for (const id of ['valuationQuantity','valuationLot']) el(id).addEventListener('input', () => { invalidate(); draft(); });
     el('valuationCalculate').addEventListener('click', () => void calculate());

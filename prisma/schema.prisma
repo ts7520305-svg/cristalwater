@@ -2428,6 +2428,7 @@ model EquipmentMaintenanceCompletion {
 // Confirmed obligations, distinct from stock consumption and bank transactions.
 model CompanyExpense {
   laborBasis ExpenseLaborBasis?
+  laborDistributions ExpenseLaborDistribution[]
   expenseAllocations ExpenseAllocation[]
   id                   Int       @id @default(autoincrement())
   title                String
@@ -2583,6 +2584,24 @@ model ExpenseLaborBasis {
   technician Technician @relation(fields: [technicianId], references: [id], onDelete: Restrict)
 
   @@index([technicianId, periodStart, periodEnd])
+}
+
+// Immutable confirmed parts of one paid document; not additional expenses.
+model ExpenseLaborDistribution {
+  id Int @id @default(autoincrement())
+  expenseId Int
+  amountCents Int
+  snapshot Json
+  fingerprint String
+  activeKey String? @unique
+  reason String
+  createdById Int
+  createdAt DateTime @default(now())
+  voidedAt DateTime?
+  voidReason String?
+  expense CompanyExpense @relation(fields: [expenseId], references: [id], onDelete: Restrict)
+
+  @@index([expenseId, createdAt])
 }
 
 // Historical identities intentionally have no FK: existing billing replacement /

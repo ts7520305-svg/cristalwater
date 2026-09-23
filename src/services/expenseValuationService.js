@@ -10,10 +10,12 @@ function selection(value, query = false) {
   if (value.kind === 'LABOR' && value.purchaseItemId !== null && value.purchaseItemId !== undefined) r.fail('O trabalho não tem uma linha de compra de materiais.');
   const repairLabor = value.targetType === 'REPAIR' && value.kind === 'LABOR';
   const workIntervalId = repairLabor ? id(value.workIntervalId) : null;
+  const hasPart=value.laborPart!==undefined&&value.laborPart!==null;
+  if(hasPart&&(value.kind!=='LABOR'||id(value.laborPart)>20))r.fail('Escolha uma parcela válida de trabalho.');
   if (!repairLabor && value.workIntervalId !== undefined && value.workIntervalId !== null) r.fail('O intervalo de reparação só pode ser usado no trabalho dessa reparação.');
   const quantity = value.quantity === undefined || value.quantity === null || value.quantity === '' ? null : value.quantity;
   if (quantity !== null && (typeof quantity !== 'string' || data.quantity(quantity) === null || data.quantity(quantity) <= 0n)) r.fail('Indique uma quantidade positiva com até seis casas decimais.');
-  return { kind: value.kind, targetType: value.targetType, targetId: id(value.targetId), purchaseItemId, quantity, ...(repairLabor ? { workIntervalId } : {}) };
+  return { kind: value.kind, targetType: value.targetType, targetId: id(value.targetId), purchaseItemId, quantity, ...(hasPart?{laborPart:id(value.laborPart)}:{}), ...(repairLabor ? { workIntervalId } : {}) };
 }
 async function preview(db, expense, choice, lock = false) {
   if (expense.cancelledAt) r.fail('A despesa está anulada.', 409);
@@ -58,12 +60,13 @@ async function preview(db, expense, choice, lock = false) {
   const already = sum(expense.expenseAllocations.filter(a => !a.voidedAt).map(a => a.amountCents));
   if (already === null || already + amountCents > expense.amountCents) r.fail('O custo excede o valor ainda por atribuir desta despesa. Reveja as atribuições existentes.', 409);
   const calculation = { quantity: data.decimal(q), quantityUnit: source.unit, amountCents, method: source.method, rounding: finalRemainder ? 'FINAL_POOL_REMAINDER' : 'NEAREST_CENT', poolQuantityBefore: data.decimal(pool.units), poolAmountBeforeCents: pool.cents, measuredQuantityBefore: data.decimal(measured.units), baseQuantity: data.decimal(source.totalQuantity), baseAmountCents: source.totalCents };
-  const result = { version: 1, ...(choice.workIntervalId ? { workIntervalId: choice.workIntervalId } : {}), expenseId: expense.id, expenseVersion: expense.version, kind: choice.kind, targetType: choice.targetType, targetId: choice.targetId, targetHash: target.hash, clientId: target.clientId, monthRef: source.monthRef, purchaseItemId: choice.purchaseItemId, valuationKey: source.key, valuationHash: source.hash, quantity: calculation.quantity, quantityUnit: source.unit, amountCents, availableQuantity: data.decimal(available), label: source.label, calculation, source: source.snapshot };
+  const result = { version: 1, ...(choice.laborPart ? {laborPart:choice.laborPart}:{}), ...(choice.workIntervalId ? { workIntervalId: choice.workIntervalId } : {}), expenseId: expense.id, expenseVersion: expense.version, kind: choice.kind, targetType: choice.targetType, targetId: choice.targetId, targetHash: target.hash, clientId: target.clientId, monthRef: source.monthRef, purchaseItemId: choice.purchaseItemId, valuationKey: source.key, valuationHash: source.hash, quantity: calculation.quantity, quantityUnit: source.unit, amountCents, availableQuantity: data.decimal(available), label: source.label, calculation, source: source.snapshot };
   return { ...result, hash: r.hash(result) };
 }
 async function apply(db, who, env, expense) {
   const d = env.data;
   if (env.command === 'SET_LABOR_BASIS') {
+    if(require('./expenseLaborDistributionService').active(expense).length)return refused('ACTIVE_DISTRIBUTION','A despesa tem uma repartição ativa. Use as parcelas ou anule primeiro essa repartição.');
     r.object(d, ['technicianId', 'periodStart', 'periodEnd', 'paidMinutes', 'reason', 'confirmed']);
     r.id(d.technicianId); r.id(d.paidMinutes); const reason = r.text(d.reason, 500, true), from = r.date(d.periodStart), until = r.date(d.periodEnd);
     if (d.confirmed !== true || from > until || d.paidMinutes > (until - from) / 60000 + 1440) r.fail('Confirme o período e os minutos efetivamente pagos ou abrangidos pelo documento.');
@@ -77,7 +80,7 @@ async function apply(db, who, env, expense) {
     const updated = await db.companyExpense.update({ where: { id: expense.id }, data: { version: { increment: 1 } } });
     return { applied: true, expenseId: expense.id, version: updated.version, laborBasis: data.laborBasis(basis), previousLaborBasis: data.laborBasis(expense.laborBasis), reason };
   }
-  r.object(d, ['kind', 'targetType', 'targetId', 'workIntervalId', 'targetHash', 'monthRef', 'purchaseItemId', 'quantity', 'amountCents', 'valuationHash', 'previewHash', 'reason', 'confirmed']);
+  r.object(d, ['kind', 'targetType', 'targetId', 'workIntervalId', 'laborPart', 'targetHash', 'monthRef', 'purchaseItemId', 'quantity', 'amountCents', 'valuationHash', 'previewHash', 'reason', 'confirmed']);
   if (d.kind !== (env.command === 'VALUE_MATERIAL' ? 'MATERIAL' : 'LABOR') || d.confirmed !== true || ![d.targetHash, d.valuationHash, d.previewHash].every(s => typeof s === 'string' && /^[a-f0-9]{64}$/.test(s))) r.fail('Reveja e confirme a valorização antes de guardar.');
   r.money(d.amountCents); const reason = r.text(d.reason, 500, true), choice = selection(d);
   let current;
@@ -104,7 +107,7 @@ async function decorate(db, expenses) {
       }
       return { ...a, quantity: a.quantity?.toString() || null, needsReview: !!reasons.length, reviewReasons: reasons, valuationLabel: a.valuationSnapshot?.source.kind === 'MATERIAL' ? a.valuationSnapshot.source.item.productName : 'Tempo de trabalho', valuationMethod: a.valuationSnapshot?.calculation.method || null };
     });
-    return { ...expense, allocations, laborBasis: expense.laborBasis ? { ...data.laborBasis(expense.laborBasis), technician: expense.laborBasis.technician, reason: expense.laborBasis.reason } : null, allocationReviewCount: allocations.filter(a => a.needsReview).length };
+    return require('./expenseLaborDistributionService').decorate({ ...expense, allocations, laborBasis: expense.laborBasis ? { ...data.laborBasis(expense.laborBasis), technician: expense.laborBasis.technician, reason: expense.laborBasis.reason } : null, allocationReviewCount: allocations.filter(a => a.needsReview).length });
   });
   return require('./laborCostCompositionIntegrity').decorate(db, decorated);
 }
@@ -112,15 +115,16 @@ function summary(rows) {
   const valued = rows.filter(a => a.valuationType !== 'MANUAL'), total = kind => { const selected = valued.filter(a => a.valuationType === kind); return selected.some(a => a.needsReview) ? null : sum(selected.map(a => a.amountCents)); };
   return { version: 3, coverage: 'CONFIRMED_EXPENSE_MEASUREMENTS', includedInExpenseAttribution: true, completeOperatingCosts: false, materialAmountCents: total('MATERIAL'), laborAmountCents: total('LABOR'), count: valued.length, reviewCount: valued.filter(a => a.needsReview).length, basis: { material: 'CONFIRMED_PURCHASE_LINE_SERVICE_CONSUMPTION', repairMaterial: 'AUTHENTICATED_REPAIR_PROOF_MOVEMENTS', repairLabor: 'CONFIRMED_DECLARED_REPAIR_INTERVAL_PAID_TIME', labor: 'CONFIRMED_EXPENSE_PAID_TIME', month: 'CONFIRMED_SERVICE_EXECUTION_UTC' } };
 }
-async function workIntervals(db, expense, repairId) {
-  if (expense.cancelledAt || expense.category !== 'LABOR' || expense.sourceType !== 'MANUAL' || !expense.laborBasis) r.fail('Confirme primeiro a base de trabalho desta despesa.', 409);
+async function workIntervals(db, expense, repairId, laborPart) {
+  const share=require('./expenseLaborDistributionService').selection(expense,laborPart),basis=share?.basis||data.laborBasis(expense.laborBasis);
+  if (expense.cancelledAt || expense.category !== 'LABOR' || expense.sourceType !== 'MANUAL' || share?.error || !basis) r.fail(share?.error||'Confirme primeiro a base de trabalho desta despesa.', 409);
   const target = await targets.get(db, 'REPAIR', repairId);
   if (!target?.valid) r.fail('Reveja a execução e o cliente da reparação.', 409);
   const prepared = await data.prepare(db, [], [{ kind: 'LABOR', expenseId: expense.id, targetType: 'REPAIR', targetId: repairId }]);
   const rows = [...prepared.workIntervals.values()].map(work => {
-    const source = data.build(prepared, expense, { kind: 'LABOR', targetType: 'REPAIR', targetId: repairId, workIntervalId: work.id });
+    const source = data.build(prepared, expense, { kind: 'LABOR', targetType: 'REPAIR', targetId: repairId, workIntervalId: work.id, ...(laborPart?{laborPart}:{}) });
     return { id: work.id, state: work.state, eligible: source.valid, errors: source.errors, workInterval: { id: work.id, fingerprint: work.fingerprint, snapshot: work.snapshot } };
   });
-  return { version: 1, expenseId: expense.id, expenseVersion: expense.version, repairId, targetHash: target.hash, basis: data.laborBasis(expense.laborBasis), rows };
+  return { version: 1, expenseId: expense.id, expenseVersion: expense.version, repairId, targetHash: target.hash, basis, ...(share?{laborPart,laborDistribution:share.proof}:{}), rows };
 }
 module.exports = { selection, preview, apply, decorate, summary, workIntervals, data };

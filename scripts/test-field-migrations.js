@@ -200,6 +200,7 @@ async function dbRejects(sql, expected) {
   await dbRejects(`INSERT INTO "ExpenseAllocation" ("expenseId","monthRef","amountCents","targetType","clientId","repairId","targetHash","targetSnapshot","expenseHash","expenseSnapshot","activeKey","reason","createdById","valuationType","valuationKey","valuationHash","valuationSnapshot","quantity","quantityUnit","activeMeasurementKey") SELECT "expenseId","monthRef","amountCents","targetType","clientId","repairId","targetHash","targetSnapshot","expenseHash","expenseSnapshot",'migration-duplicate-interval',"reason","createdById","valuationType","valuationKey","valuationHash","valuationSnapshot","quantity","quantityUnit","activeMeasurementKey" FROM "ExpenseAllocation" WHERE id=${repairLabor.id}`,'23505');
   await require('./fixtures/labor-composition-migration')({prisma,cli,dbRejects,repairLaborData,repairLabor,priorCostSelect});
   await require('./fixtures/maintenance-cost-migration')({prisma,cli,dbRejects,expenseId:expense.id,clientId:oldClient.id,completion:oldCompletion});
+  await require('./fixtures/labor-distribution-migration')({prisma,cli,dbRejects,expenseId:expense.id,repairLabor});
   for(const a of [repairCost,previousMaterial,previousLabor,repairMaterial,repairLabor])Object.assign(a,{maintenanceCompletionId:null,serviceReminderId:null});
   await prisma.repair.delete({where:{id:historyRepair.id}});
   assert.deepEqual(await prisma.repairWorkInterval.findUniqueOrThrow({where:{id:retainedWork.id}}),retainedWork);
@@ -252,6 +253,6 @@ async function dbRejects(sql, expected) {
   assert.equal(await prisma.technicalProposalRequest.count(),0);
   assert.equal(await prisma.fieldWriteRequest.count(),0);
   const savedExtra=await prisma.extraVisit.findUniqueOrThrow({where:{id:oldExtra.id}});assert.equal(savedExtra.notes,'Migration preserved extra');assert.equal(savedExtra.execution,null);assert.equal(savedExtra.startAt,null);assert.equal(savedExtra.endAt,null);assert.equal(savedExtra.completionRequestId,null);assert.equal(await prisma.extraVisitPhoto.count(),0);await prisma.extraVisit.delete({where:{id:oldExtra.id}});
-  console.log('PASS thirty-three additive migrations preserve previous data and match the current schema');
+  console.log('PASS thirty-four additive migrations preserve previous data and match the current schema');
  }finally{fs.rmSync(temp,{recursive:true,force:true})}
 })().catch(error=>{console.error(error);process.exitCode=1}).finally(()=>prisma.$disconnect());

@@ -6,7 +6,7 @@ const { sum } = require('./monthlyFinancialProjection');
 const r = require('./expenseLedgerRules'), sources = require('./expenseSourceService'), costs = require('./expenseCostAllocationService');
 const valuation = require('./expenseValuationService');
 const evidenceSelect = { id: true, expenseId: true, name: true, mime: true, size: true, sha256: true, createdAt: true, voidedAt: true, voidReason: true };
-const include = { laborBasis: { include: { technician: { select: { id: true, name: true, active: true } } } }, expenseAllocations: { orderBy: { id: 'asc' } }, payments: { orderBy: { id: 'asc' } }, evidence: { select: evidenceSelect, orderBy: { id: 'asc' } } };
+const include = { ...require('./expenseLaborDistributionService').include, laborBasis: { include: { technician: { select: { id: true, name: true, active: true } } } }, expenseAllocations: { orderBy: { id: 'asc' } }, payments: { orderBy: { id: 'asc' } }, evidence: { select: evidenceSelect, orderBy: { id: 'asc' } } };
 const json = value => JSON.parse(JSON.stringify(value));
 function actor(user) {
   if (!roleMatches(user?.role, 'ADMIN')) r.fail('Acesso reservado à administração.', 403);
@@ -103,7 +103,9 @@ async function apply(db, who, env, file, current) {
     const expense = await db.companyExpense.update({ where: { id }, data: { cancelledAt: command === 'CANCEL' ? new Date() : null, version: { increment: 1 } } });
     return { applied: true, expenseId: id, version: expense.version, before: small(current), after: small(expense), reason };
   }
+  if (command === 'VOID_LABOR_DISTRIBUTION') return require('./expenseLaborDistributionService').apply(db, who, env, current);
   if (current.cancelledAt) return refused('CANCELLED', 'A despesa está anulada.');
+  if (command === 'SET_LABOR_DISTRIBUTION') return require('./expenseLaborDistributionService').apply(db, who, env, current);
   if (['SET_LABOR_BASIS', 'VALUE_MATERIAL', 'VALUE_LABOR'].includes(command)) return valuation.apply(db, who, env, current);
   if (command === 'CORRECT_COST_PERIOD') return require('./expenseCostPeriodService').apply(db, who, env, current);
   if (['ALLOCATE_COST', 'REVIEW_COST', 'VOID_COST'].includes(command)) return costs.apply(db, who, env, current);
@@ -191,7 +193,7 @@ async function operationalCosts(db, monthRef) {
   return { clients: costs.group(entries), technicians: technicianIds.map(technicianId => ({ technicianId, valuations: valuation.summary(entries.filter(a => a.valuationType === 'LABOR' && (a.valuationSnapshot?.source.workInterval?.snapshot.technicianId || a.valuationSnapshot?.source.service.technicianId) === technicianId)) })) };
 }
 async function valuationPreview(id, query) {
-  r.id(id); r.object(query, ['kind', 'targetType', 'targetId', 'purchaseItemId', 'quantity', 'workIntervalId']); const selection = valuation.selection(query, true);
+  r.id(id); r.object(query, ['kind', 'targetType', 'targetId', 'purchaseItemId', 'quantity', 'workIntervalId', 'laborPart']); const selection = valuation.selection(query, true);
   return prisma.$transaction(async db => { const expense = await db.companyExpense.findUnique({ where: { id }, include }); if (!expense) r.fail('Despesa não encontrada.', 404); return { ok: true, preview: await valuation.preview(db, expense, selection) }; }, { isolationLevel: 'RepeatableRead', timeout: 30000, maxWait: 15000 });
 }
 async function costPeriodPreview(id, query) {
@@ -199,7 +201,11 @@ async function costPeriodPreview(id, query) {
   return prisma.$transaction(async db => { const expense = await db.companyExpense.findUnique({ where: { id }, include }); if (!expense) r.fail('Despesa não encontrada.', 404); return { ok: true, preview: await require('./expenseCostPeriodService').preview(db, expense, allocationId) }; }, { isolationLevel: 'RepeatableRead', timeout: 30000, maxWait: 15000 });
 }
 async function repairWorkIntervals(id, query) {
-  r.id(id); r.object(query, ['repairId']); const repairId = r.queryId(query.repairId);
-  return prisma.$transaction(async db => { const expense = await db.companyExpense.findUnique({ where: { id }, include }); if (!expense) r.fail('Despesa não encontrada.', 404); return { ok: true, intervals: await valuation.workIntervals(db, expense, repairId) }; }, { isolationLevel: 'RepeatableRead', timeout: 30000, maxWait: 15000 });
+  r.id(id); r.object(query, ['repairId','laborPart']); const repairId = r.queryId(query.repairId), laborPart=query.laborPart===undefined?undefined:r.queryId(query.laborPart);
+  return prisma.$transaction(async db => { const expense = await db.companyExpense.findUnique({ where: { id }, include }); if (!expense) r.fail('Despesa não encontrada.', 404); return { ok: true, intervals: await valuation.workIntervals(db, expense, repairId, laborPart) }; }, { isolationLevel: 'RepeatableRead', timeout: 30000, maxWait: 15000 });
 }
-module.exports = { costPeriodPreview, repairWorkIntervals, list, detail, summary, rows, summarize, command, receipt, evidence, actor, sources, costs, costReport, clientCosts, valuationPreview, operationalCosts };
+async function laborDistributionPreview(id,body){
+  r.id(id);r.object(body,['parts']);
+  return prisma.$transaction(async db=>{const expense=await db.companyExpense.findUnique({where:{id},include});if(!expense)r.fail('Despesa não encontrada.',404);return {ok:true,preview:await require('./expenseLaborDistributionService').preview(db,expense,body.parts)};},{isolationLevel:'RepeatableRead',timeout:30000,maxWait:15000});
+}
+module.exports = { laborDistributionPreview, costPeriodPreview, repairWorkIntervals, list, detail, summary, rows, summarize, command, receipt, evidence, actor, sources, costs, costReport, clientCosts, valuationPreview, operationalCosts };

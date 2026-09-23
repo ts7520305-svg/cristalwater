@@ -3,7 +3,7 @@
 // use the same sources without creating a recursive report dependency.
 const r = require('./expenseLedgerRules'), data = require('./expenseValuationSources'), targets = require('./expenseCostTargets');
 const json = v => JSON.parse(JSON.stringify(v)), hash = v => r.hash(json(v));
-const include = { laborBasis: { include: { technician: { select: { id: true, name: true } } } }, expenseAllocations: true };
+const include = { ...require('./expenseLaborDistributionService').include, laborBasis: { include: { technician: { select: { id: true, name: true } } } }, expenseAllocations: true };
 const ids = snapshot => snapshot?.components?.map(c => c.expenseId) || [];
 const same = (a, b) => hash(a) === hash(b);
 function facts(expenses) {
@@ -11,6 +11,7 @@ function facts(expenses) {
   const first = data.laborBasis(expenses[0].laborBasis);
   if (!first) r.fail('Confirme primeiro a base de trabalho de cada despesa.', 409);
   const components = expenses.map(e => {
+    if(require('./expenseLaborDistributionService').active(e).length)r.fail('Uma despesa repartida deve usar cada parcela própria; não pode entrar como documento inteiro nesta composição.',409);
     const b = data.laborBasis(e.laborBasis);
     if (e.cancelledAt || e.sourceType !== 'MANUAL' || e.category !== 'LABOR' || !b || !['technicianId', 'periodStart', 'periodEnd', 'paidMinutes'].every(k => b[k] === first[k])) r.fail('As despesas têm de confirmar o mesmo técnico, período e tempo pago.', 409);
     if (!e.laborBasis.technician) r.fail('Técnico não encontrado.', 409);

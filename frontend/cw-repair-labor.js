@@ -11,7 +11,8 @@
     const { el, node, hash, active, request } = host;
     let revision = 0, scope = '', rows = [], wanted = '';
     const needed = () => el('valuationKind').value === 'LABOR' && host.target()?.type === 'REPAIR';
-    const signature = () => { const c = host.context(), t = host.target(); return JSON.stringify([c.epoch,c.detailEpoch,c.expense?.id,c.expense?.version,t?.type,t?.id,t?.hash]); };
+    const selectedBasis = () => host.distribution ? host.distribution.basis() : host.context().expense?.laborBasis;
+    const signature = () => { const c = host.context(), t = host.target(); return JSON.stringify([c.epoch,c.detailEpoch,c.expense?.id,c.expense?.version,t?.type,t?.id,t?.hash,host.distribution?.id()]); };
     function clear(keepWanted = false) {
       revision++; rows = []; scope = '';
       if (!keepWanted) wanted = '';
@@ -39,13 +40,16 @@
     async function load() {
       if (!needed() || !active() || !host.context().canWrite) return;
       wanted = el('repairWorkInterval').value || wanted; clear(true); scope = signature();
-      invalidate(); const rev = ++revision, stamp = scope, c = host.context(), target = host.target(), b = paid(c.expense.laborBasis);
+      invalidate(); const rev = ++revision, stamp = scope, c = host.context(), target = host.target(), b = paid(selectedBasis()), part = host.distribution?.id();
       el('repairWorkStatus').textContent = 'A consultar intervalos e fontes…'; sync();
       try {
-        const response = await request('/' + c.expense.id + '/repair-work-intervals?repairId=' + target.id);
+        if (!b) throw Error('Escolha uma parcela confirmada de trabalho.');
+        const response = await request('/' + c.expense.id + '/repair-work-intervals?repairId=' + target.id + (part ? '&laborPart=' + part : ''));
         if (!active() || rev !== revision || stamp !== signature()) return;
         const v = response.intervals;
         if (!v || v.version !== 1 || v.expenseId !== c.expense.id || v.expenseVersion !== c.expense.version || v.repairId !== target.id || v.targetHash !== target.hash || await hash(v.basis) !== await hash(b) || !Array.isArray(v.rows) || new Set(v.rows.map(r => r.id)).size !== v.rows.length) throw Error('Os intervalos recebidos pertencem a outro contexto.');
+        if ((v.laborPart ?? null) !== (part ?? null) || !part && v.laborDistribution) throw Error('Os intervalos pertencem a outra parcela.');
+        if (part) await host.distribution.proof(v.laborDistribution,c.expense.id,part,true);
         for (const row of v.rows) {
           if (!positive(row.id) || row.workInterval?.id !== row.id || !['CONFIRMED','REVIEW','VOIDED'].includes(row.state) || typeof row.eligible !== 'boolean' || !Array.isArray(row.errors) || !row.errors.every(x => typeof x === 'string')) throw Error('Lista de intervalos incompleta.');
           // Historical evidence may itself need review. Never offer it for valuation.
@@ -61,7 +65,7 @@
       } catch (error) { if (active() && rev === revision && stamp === signature()) { rows = []; el('repairWorkInterval').replaceChildren(); el('repairWorkSelection').replaceChildren(); el('repairWorkStatus').textContent = error.message; } } finally { sync(); }
     }
     async function validateSource(source, target, expectedId, expectedBasis) {
-      if (source?.version !== 3 || source.kind !== 'LABOR' || source.workBasis !== basisName || source.workInterval?.id !== expectedId || !fields.every(k => source.service?.[k] === target?.[k])) throw Error('A origem do trabalho não corresponde à reparação revista.');
+      if (source?.version !== (source?.laborDistribution ? 5 : 3) || source.kind !== 'LABOR' || source.workBasis !== basisName || source.workInterval?.id !== expectedId || !fields.every(k => source.service?.[k] === target?.[k])) throw Error('A origem do trabalho não corresponde à reparação revista.');
       const s = await validateWork(source.workInterval,target), b = source.basis;
       if (!b || !positive(b.id) || !positive(b.expenseId) || !positive(b.paidMinutes) || !within(s,b) || !positive(source.expenseAmountCents) || expectedBasis && await hash(b) !== await hash(paid(expectedBasis))) throw Error('A base paga não corresponde ao intervalo revisto.');
       return s;
@@ -69,8 +73,8 @@
     async function preview(value, target, expense) {
       const row = selection();
       if (!row || value.workIntervalId !== row.id || await hash(value.source.workInterval) !== await hash(row.workInterval)) throw Error('O intervalo mudou. Consulte e reveja a seleção.');
-      const s = await validateSource(value.source,target.snapshot,row.id,expense.laborBasis);
-      if (value.source.basis.expenseId !== expense.id || value.source.expenseAmountCents !== expense.amountCents || value.quantity !== String(s.durationSeconds) || value.quantityUnit !== 'SECOND' || value.calculation.baseQuantity !== String(expense.laborBasis.paidMinutes * 60) || value.calculation.baseAmountCents !== expense.amountCents) throw Error('A duração ou custo de base não corresponde ao intervalo confirmado.');
+      const b = selectedBasis(), s = await validateSource(value.source,target.snapshot,row.id,b);
+      if (value.source.basis.expenseId !== expense.id || value.source.expenseAmountCents !== expense.amountCents || value.quantity !== String(s.durationSeconds) || value.quantityUnit !== 'SECOND' || value.calculation.baseQuantity !== String(b.paidMinutes * 60) || value.calculation.baseAmountCents !== (host.distribution?.selected()?.amountCents ?? expense.amountCents)) throw Error('A duração ou custo de base não corresponde ao intervalo confirmado.');
     }
     async function receipt(a, d, expenseId) {
       const s = await validateSource(a.valuationSnapshot?.source,a.targetSnapshot,d.workIntervalId);

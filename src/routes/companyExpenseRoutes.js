@@ -11,6 +11,7 @@ router.get('/labor-technicians', handle(async (req, res) => { rules.object(req.q
 router.get('/:id/repair-work-intervals', handle(async (req, res) => res.json(await service.repairWorkIntervals(rules.queryId(req.params.id), req.query))));
 router.get('/:id/cost-period-preview', handle(async (req, res) => res.json(await service.costPeriodPreview(rules.queryId(req.params.id), req.query))));
 router.get('/:id/valuation-preview', handle(async (req, res) => res.json(await service.valuationPreview(rules.queryId(req.params.id), req.query))));
+router.post('/:id/labor-distribution-preview', handle(async (req,res) => { rules.object(req.query,[]); res.json(await service.laborDistributionPreview(rules.queryId(req.params.id),req.body)); }));
 router.get('/targets', handle(async (req, res) => res.json(await prisma.$transaction(db => service.costs.targets.list(db, req.query), { isolationLevel: 'RepeatableRead', timeout: 30000 }))));
 router.get('/targets/:type/:id', handle(async (req, res) => {
   rules.object(req.query, []); const id = req.params.type === 'COMPANY' && req.params.id === '0' ? null : rules.queryId(req.params.id);

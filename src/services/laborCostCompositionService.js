@@ -39,7 +39,7 @@ async function valuePreview(db, basisId, choice, lock = false) {
 async function candidates(query) {
   r.object(query, ['q','page']); const q = r.text(query.q || '', 160), page = r.queryId(query.page || '1');
   return read(async db => {
-    const rows = await db.companyExpense.findMany({ where: { category: 'LABOR', sourceType: 'MANUAL', cancelledAt: null, laborBasis: { isNot: null }, ...(q ? { OR: ['title','supplierName','documentNumber'].map(key => ({ [key]: { contains: q, mode: 'insensitive' } })) } : {}) }, include: integrity.include, orderBy: { id: 'desc' }, skip: (page-1)*10, take: 11 });
+    const rows = await db.companyExpense.findMany({ where: { category: 'LABOR', sourceType: 'MANUAL', cancelledAt: null, laborBasis: { isNot: null }, laborDistributions: { none: { voidedAt: null } }, ...(q ? { OR: ['title','supplierName','documentNumber'].map(key => ({ [key]: { contains: q, mode: 'insensitive' } })) } : {}) }, include: integrity.include, orderBy: { id: 'desc' }, skip: (page-1)*10, take: 11 });
     return { ok: true, page, q, hasMore: rows.length > 10, rows: rows.slice(0,10).map(e => ({ expenseId: e.id, version: e.version, title: e.title, documentNumber: e.documentNumber, amountCents: e.amountCents, technicianName: e.laborBasis.technician.name, basis: valuation.data.laborBasis(e.laborBasis) })) };
   });
 }

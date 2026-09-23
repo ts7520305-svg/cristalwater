@@ -1,7 +1,7 @@
 'use strict';
 const crypto = require('node:crypto');
 const categories = ['STOCK', 'MATERIAL', 'FUEL', 'VEHICLE', 'LABOR', 'INSURANCE', 'GENERAL'];
-const commands = ['CREATE', 'EDIT', 'CANCEL', 'REOPEN', 'RECORD_PAYMENT', 'REVERSE_PAYMENT', 'ADD_EVIDENCE', 'VOID_EVIDENCE', 'ALLOCATE_COST', 'REVIEW_COST', 'VOID_COST', 'CORRECT_COST_PERIOD', 'SET_LABOR_BASIS', 'VALUE_MATERIAL', 'VALUE_LABOR'];
+const commands = ['CREATE', 'EDIT', 'CANCEL', 'REOPEN', 'RECORD_PAYMENT', 'REVERSE_PAYMENT', 'ADD_EVIDENCE', 'VOID_EVIDENCE', 'ALLOCATE_COST', 'REVIEW_COST', 'VOID_COST', 'CORRECT_COST_PERIOD', 'SET_LABOR_BASIS', 'SET_LABOR_DISTRIBUTION', 'VOID_LABOR_DISTRIBUTION', 'VALUE_MATERIAL', 'VALUE_LABOR'];
 const maxEvidence = 5 * 1024 * 1024;
 function fail(message, status = 400) { throw Object.assign(new Error(message), { status }); }
 function object(value, allowed) {
@@ -29,7 +29,7 @@ function envelope(body) {
   if (typeof body.requestId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(body.requestId) || !commands.includes(body.command)) fail('Pedido de despesa inválido.');
   if (body.command === 'CREATE') { if (body.expenseId !== null || body.expectedVersion !== null) fail('Contexto de criação inválido.'); }
   else { id(body.expenseId); id(body.expectedVersion); }
-  if (!body.data || typeof body.data !== 'object' || Array.isArray(body.data) || Object.values(body.data).some(v => v !== null && !['string', 'number', 'boolean'].includes(typeof v)) || JSON.stringify(body.data).length > 10000) fail('Conteúdo do pedido inválido.');
+  if (!body.data || typeof body.data !== 'object' || Array.isArray(body.data) || Object.entries(body.data).some(([k,v]) => v !== null && !['string', 'number', 'boolean'].includes(typeof v) && !(body.command==='SET_LABOR_DISTRIBUTION'&&k==='parts'&&Array.isArray(v))) || JSON.stringify(body.data).length > 10000) fail('Conteúdo do pedido inválido.');
   return { requestId: body.requestId.toLowerCase(), command: body.command, expenseId: body.expenseId, expectedVersion: body.expectedVersion, data: body.data };
 }
 function expenseData(d) {
