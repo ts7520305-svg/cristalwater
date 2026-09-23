@@ -8,7 +8,7 @@ const key=(type,id,clientId)=>type+':'+id+':'+clientId;
 function sum(values){const n=projection.sum(values);if(n===null)throw Error('Execution values unavailable');return n;}
 function costPeriod(a){
   const s=a.targetSnapshot;if(!s||s.type!==a.targetType||s.id!==a.targetId||s.clientId!==a.clientId||a.reviewReasons.includes('TARGET_CHANGED'))return null;
-  const fields=['type','id','clientId','poolId','status','startAt','endAt'];
+  const fields=require('./expenseCostTargets').executionFields(a.targetType);
   if(r.hash(Object.fromEntries(fields.map(k=>[k,s[k]])))!==a.targetHash||typeof s.endAt!=='string')return null;
   const date=new Date(s.endAt);return Number.isFinite(+date)&&date.toISOString()===s.endAt&&month(s.endAt.slice(0,7))?s.endAt.slice(0,7):null;
 }
@@ -44,7 +44,7 @@ function build(monthRef,generatedAt,partition,creditStates,expenses){
   }
   const active=expenses.flatMap(e=>e.allocations.filter(a=>!a.voidedAt).map(a=>({...a,expenseTitle:e.title,expenseDocument:e.documentNumber,expenseDate:e.expenseDate,expenseCancelled:!!e.cancelledAt})));
   let costUnplacedCount=0,costPeriodMismatchAllMonths=0;
-  for(const a of active.filter(a=>['REGULAR','EXTRA'].includes(a.targetType))){
+  for(const a of active.filter(a=>['REGULAR','EXTRA','REPAIR'].includes(a.targetType))){
     const executionMonth=costPeriod(a);if(!executionMonth){costUnplacedCount++;continue;}
     const state=a.needsReview||a.expenseCancelled?'REVIEW':a.monthRef!==executionMonth?'PERIOD_MISMATCH':'CONFIRMED';
     if(state==='PERIOD_MISMATCH')costPeriodMismatchAllMonths++;
@@ -54,12 +54,12 @@ function build(monthRef,generatedAt,partition,creditStates,expenses){
   }
   // Unplaced/changed service costs remain visible globally and also block a
   // matching service's cost total; absence of a usable record is never zero cost.
-  const unplaced=active.filter(a=>['REGULAR','EXTRA'].includes(a.targetType)&&!costPeriod(a));
+  const unplaced=active.filter(a=>['REGULAR','EXTRA','REPAIR'].includes(a.targetType)&&!costPeriod(a));
   const rows=[...groups.values()].sort((a,b)=>a.clientId-b.clientId||a.serviceType.localeCompare(b.serviceType)||a.serviceId-b.serviceId).map(g=>{
     const rv=revenue(g.revenueSources),cs=costs(g.costSources),unplacedCount=unplaced.filter(a=>key(a.targetType,a.targetId,a.clientId)===g.key).length;
     return {...g,revenue:{...rv,state:!rv.sourceCount?'MISSING':rv.pendingCount?'PENDING':'CONFIRMED',netAmountCents:rv.sourceCount&&!rv.pendingCount?rv.confirmedNetAmountCents:null},costs:{...cs,unplacedCount,amountCents:cs.knownCostCount&&!cs.reviewCount&&!cs.periodMismatchCount&&!unplacedCount?cs.knownCostAmountCents:null},completeRevenue:false,completeOperatingCosts:false,profit:null};
   });
-  const allMonths={documentReviewCount:partition.documents.review,lineReviewCount:partition.lines.review,repairExecutionReviewCount:partition.repairExecution.reviewCount,monthlyAllocationReviewCount:partition.monthlyAllocations.reviewCount,creditAllocationReviewCount:creditStates.reduce((n,s)=>n+s.reviewCount,0),costAllocationReviewCount:active.filter(a=>a.needsReview||a.expenseCancelled).length,costUnplacedCount,costPeriodMismatchCount:costPeriodMismatchAllMonths,nonServiceCostAllocationCount:active.filter(a=>!['REGULAR','EXTRA'].includes(a.targetType)).length};
+  const allMonths={documentReviewCount:partition.documents.review,lineReviewCount:partition.lines.review,repairExecutionReviewCount:partition.repairExecution.reviewCount,monthlyAllocationReviewCount:partition.monthlyAllocations.reviewCount,creditAllocationReviewCount:creditStates.reduce((n,s)=>n+s.reviewCount,0),costAllocationReviewCount:active.filter(a=>a.needsReview||a.expenseCancelled).length,costUnplacedCount,costPeriodMismatchCount:costPeriodMismatchAllMonths,nonServiceCostAllocationCount:active.filter(a=>!['REGULAR','EXTRA','REPAIR'].includes(a.targetType)).length};
   const rv=revenue(rows.flatMap(g=>g.revenueSources)),cs=costs(rows.flatMap(g=>g.costSources));
   const summary={version:1,monthRef,currency:'EUR',generatedAt:generatedAt.toISOString(),state:Object.entries(allMonths).some(([k,v])=>k!=='nonServiceCostAllocationCount'&&v>0)?'REVIEW':'PARTIAL',completeRevenue:false,completeOperatingCosts:false,profit:null,limitApplied:null,
     basis:{services:'SERVICES_WITH_ELIGIBLE_REVENUE_OR_EXPENSE_ATTRIBUTION',period:'CONFIRMED_SERVICE_EXECUTION_MONTH_UTC',revenue:'CURRENT_DOCUMENT_VALUES_ALL_DOCUMENT_MONTHS',costs:'EXPLICIT_ATTRIBUTION_MATCHING_EXECUTION_MONTH',stock:'PURCHASE_ATTRIBUTION_SEPARATE_FROM_MEASURED_CONSUMPTION',cashIncluded:false,historicalClosingBalance:false},

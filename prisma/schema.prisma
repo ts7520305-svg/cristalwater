@@ -2535,6 +2535,8 @@ model ExpenseAllocation {
   clientId Int?
   visitId Int?
   extraVisitId Int?
+  // Historical identity survives deletion of the operational repair.
+  repairId Int?
   targetHash String
   targetSnapshot Json
   expenseHash String
@@ -2555,6 +2557,7 @@ model ExpenseAllocation {
   @@index([monthRef, clientId])
   @@index([visitId])
   @@index([extraVisitId])
+  @@index([repairId])
   @@index([valuationKey])
   @@index([purchaseItemId])
 }

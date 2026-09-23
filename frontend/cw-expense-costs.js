@@ -2,7 +2,7 @@
   'use strict';
   window.CWExpenseCosts = { create(host) {
     const { el, node, button, money, amount, request, active, note } = host;
-    const types = { COMPANY: 'Custos gerais da empresa', CLIENT: 'Cliente', REGULAR: 'Visita regular', EXTRA: 'Visita extra' };
+    const types = { COMPANY: 'Custos gerais da empresa', CLIENT: 'Cliente', REGULAR: 'Visita regular', EXTRA: 'Visita extra', REPAIR: 'Reparação' };
     const positive = n => Number.isSafeInteger(n) && n > 0, count = n => Number.isSafeInteger(n) && n >= 0, cents = n => n === null || count(n);
     const validMonth = s => /^(20|21)\d{2}-(0[1-9]|1[0-2])$/.test(s), key = id => 'cw-cost-draft:' + host.owner() + ':' + id;
     let revision = 0, pickerRevision = 0, reportPage = 1, reportTotal = 0, pickerPage = 1, pickerTotal = 0, chosen = null, client = null, editingId = null;
@@ -10,6 +10,12 @@
     const valuation = window.CWExpenseValuation.create({ ...host, target: () => chosen });
     function context() { const c = host.context(); return { ...c, stamp: c.epoch + ':' + c.detailEpoch + ':' + c.expense?.id }; }
     function validTarget(t) { if (!t || !types[t.type] || !(t.type === 'COMPANY' ? t.id === null && t.clientId === null : positive(t.id) && positive(t.clientId)) || t.valid !== true || !/^[a-f0-9]{64}$/.test(t.hash) || typeof t.label !== 'string') throw Error('Destino não confirmado.'); return t; }
+    function repairFacts(t) {
+      const s = t.snapshot;
+      if (!s || s.type !== 'REPAIR' || s.id !== t.id || s.clientId !== t.clientId || !positive(s.poolId) || s.status !== 'CONFIRMED' || s.startAt !== null || typeof s.endAt !== 'string' || !Number.isFinite(Date.parse(s.endAt)) || new Date(s.endAt).toISOString() !== s.endAt || s.executionBasis !== 'EXPLICIT_AUTHENTICATED_REPAIR_COMPLETION' || !positive(s.executionProofId) || !/^[a-f0-9]{64}$/.test(s.executionFingerprint) || !['NONE','RESERVED'].includes(s.materialMode) || s.label !== t.label || s.clientName !== t.clientName) throw Error('Execução da reparação não confirmada.');
+      return Object.fromEntries(['type','id','clientId','poolId','status','startAt','endAt','executionBasis','executionProofId','executionFingerprint','materialMode'].map(k => [k, s[k]]));
+    }
+    async function verifiedTarget(t) { validTarget(t); if (t.type === 'REPAIR' && await host.hash(repairFacts(t)) !== t.hash) throw Error('A execução recebida não corresponde à reparação selecionada.'); return t; }
     function capture() { return { ...view, monthRef: el('expenseMonth').value, q: el('costSearch').value.trim(), page: reportPage }; }
     const normalized = q => ({ monthRef: q.monthRef, mode: q.mode, clientId: q.clientId || null, targetType: q.targetType || null, targetId: q.targetId || null, q: q.q, page: q.page });
     function controls() {
@@ -70,9 +76,11 @@
       const rev = ++pickerRevision, stamp = context().stamp;
       const result = await request('/targets/' + row.type + '/' + (row.id || 0));
       if (!active() || rev !== pickerRevision || stamp !== context().stamp || el('allocationBox').hidden) return;
-      pickerSelection = ''; const value = validTarget(result.target); if (value.type !== row.type || value.id !== row.id) throw Error('Destino diferente do selecionado.');
-      if (value.type === 'CLIENT' && ['REGULAR', 'EXTRA'].includes(el('allocationType').value)) { client = value; chosen = null; pickerPage = 1; el('allocationSearch').value = ''; picked(); await lookup(); }
-      else { if (value.type !== el('allocationType').value || ['REGULAR','EXTRA'].includes(value.type) && value.clientId !== client?.id) throw Error('O destino já não corresponde ao cliente selecionado.'); chosen = value; if (value.type === 'CLIENT') client = value; el('allocationTargets').replaceChildren(); pickerTotal = 0; picked(); controls(); }
+      const value = await verifiedTarget(result.target);
+      if (!active() || rev !== pickerRevision || stamp !== context().stamp || el('allocationBox').hidden) return;
+      pickerSelection = ''; if (value.type !== row.type || value.id !== row.id) throw Error('Destino diferente do selecionado.');
+      if (value.type === 'CLIENT' && ['REGULAR', 'EXTRA', 'REPAIR'].includes(el('allocationType').value)) { client = value; chosen = null; pickerPage = 1; el('allocationSearch').value = ''; picked(); await lookup(); }
+      else { if (value.type !== el('allocationType').value || ['REGULAR','EXTRA','REPAIR'].includes(value.type) && value.clientId !== client?.id) throw Error('O destino já não corresponde ao cliente selecionado.'); chosen = value; if (value.type === 'CLIENT') client = value; el('allocationTargets').replaceChildren(); pickerTotal = 0; picked(); controls(); }
     }
     async function lookup() {
       if (!active() || !context().canWrite || !editingId) return;
@@ -85,6 +93,8 @@
         const result = await request('/targets?' + new URLSearchParams(query));
         if (!active() || rev !== pickerRevision || stamp !== context().stamp || pickerSelection !== JSON.stringify([el('allocationType').value, el('allocationSearch').value.trim(), client?.id || null, pickerPage])) return;
         if (result.type !== queryType || result.q !== q || result.page !== page || result.clientId !== (queryType === 'CLIENT' ? null : client.id) || result.pageSize !== 10 || !count(result.total) || !Array.isArray(result.rows) || result.rows.length > 10) throw Error('Destinos não confirmados.');
+        for (const row of result.rows) { await verifiedTarget(row); if (row.type !== queryType || queryType !== 'CLIENT' && row.clientId !== Number(query.clientId)) throw Error('Destino de outro cliente ou serviço.'); }
+        if (!active() || rev !== pickerRevision || stamp !== context().stamp || pickerSelection !== JSON.stringify([el('allocationType').value, el('allocationSearch').value.trim(), client?.id || null, pickerPage])) return;
         pickerTotal = result.total; el('allocationPickerStatus').textContent = result.total + ' resultados · Página ' + page;
         for (const row of result.rows) { validTarget(row); const box = node(el('allocationTargets'), 'article', ''); node(box, 'p', row.label); button(box, queryType === 'CLIENT' && type !== 'CLIENT' ? 'Escolher cliente' : 'Rever destino', () => choose(row), true); }
       } catch (error) { if (active() && rev === pickerRevision && stamp === context().stamp) el('allocationPickerStatus').textContent = error.message; } finally { host.controls(); }
@@ -93,7 +103,10 @@
       const stamp = context().stamp, rev = ++pickerRevision, id = editingId;
       const result = await request('/targets/' + allocation.targetType + '/' + (allocation.targetId || 0));
       if (!active() || rev !== pickerRevision || stamp !== context().stamp || id !== editingId) return;
-      const target = validTarget(result.target); if (target.clientId !== allocation.clientId) throw Error('O cliente mudou. Anule a atribuição anterior antes de a registar para outro cliente.');
+      const target = await verifiedTarget(result.target);
+      if (!active() || rev !== pickerRevision || stamp !== context().stamp || id !== editingId) return;
+      if (target.type !== allocation.targetType || target.id !== allocation.targetId) throw Error('Destino diferente do selecionado.');
+      if (target.clientId !== allocation.clientId) throw Error('O cliente mudou. Anule a atribuição anterior antes de a registar para outro cliente.');
       const reason = prompt('Reviu ' + target.label + ' e o documento da despesa. Indique o motivo da confirmação:');
       if (reason?.trim() && active() && stamp === context().stamp) await host.execute('REVIEW_COST', { allocationId: allocation.id, targetHash: target.hash, reason: reason.trim(), confirmed: true });
     }
@@ -105,6 +118,10 @@
       el('allocationBox').hidden = !!expense.cancelledAt; el('allocationBasis').textContent = 'Atribuído, em todos os meses: ' + money(expense.allocatedCents) + ' · Por atribuir: ' + money(expense.unallocatedCents) + '. ' + expense.allocationReviewCount + ' atribuições por rever.'; valuation.render(expense); picked();
       for (const a of expense.allocations) {
         if (!positive(a.id) || a.expenseId !== expense.id || !positive(a.amountCents) || !validMonth(a.monthRef) || !types[a.targetType] || typeof a.targetLabel !== 'string' || typeof a.needsReview !== 'boolean') throw Error('Histórico de atribuições incompleto.');
+        if (a.targetType === 'REPAIR') {
+          if (!positive(a.repairId) || a.targetId !== a.repairId || !positive(a.clientId) || a.visitId !== null || a.extraVisitId !== null || a.valuationType !== 'MANUAL') throw Error('Histórico da reparação incompleto.');
+          repairFacts({ id: a.repairId, clientId: a.clientId, label: a.targetLabel, clientName: a.targetSnapshot?.clientName, snapshot: a.targetSnapshot });
+        }
         const row = node(el('allocationRows'), 'div', '', 'row'); node(row, 'strong', a.targetLabel + (a.clientName && a.targetType !== 'CLIENT' ? ' · ' + a.clientName : '')); node(row, 'p', a.monthRef + ' · ' + money(a.amountCents) + ' · ' + (a.voidedAt ? 'Anulada' : a.needsReview ? 'Por rever' : 'Confirmada')); node(row, 'p', a.voidReason || a.reason);
         if (a.stockPurchase && a.valuationType === 'MANUAL') node(row, 'p', 'Atribuição de compra de stock; não comprova o consumo.');
         if (a.valuationType !== 'MANUAL') { node(row, 'p', (a.valuationType === 'MATERIAL' ? 'Consumo valorizado: ' : 'Tempo valorizado: ') + a.quantity + ' ' + (a.quantityUnit === 'SECOND' ? 'segundos' : a.quantityUnit)); if (a.needsReview) node(row, 'p', 'A origem mudou. Anule e calcule novamente para confirmar o novo custo.'); }
@@ -112,8 +129,11 @@
       }
     }
     function receipt(result, record) { valuation.receipt(result, record); if (result.applied && ['ALLOCATE_COST','REVIEW_COST','VOID_COST','SET_LABOR_BASIS','VALUE_MATERIAL','VALUE_LABOR'].includes(record.envelope.command)) { try { sessionStorage.removeItem(key(record.envelope.expenseId)); } catch {} editingId = null; } }
-    el('allocationForm').addEventListener('submit', event => { event.preventDefault(); try {
+    el('allocationForm').addEventListener('submit', async event => { event.preventDefault(); try {
       if (!active() || !context().canWrite || editingId !== context().expense?.id || !chosen || !el('allocationConfirmed').checked || chosen.type !== el('allocationType').value || !validMonth(el('allocationMonth').value)) throw Error('Reveja o destino, mês e montante antes de confirmar.');
+      const stamp = context().stamp, selected = chosen, signature = () => JSON.stringify([el('allocationType').value, el('allocationMonth').value, el('allocationAmount').value, el('allocationReason').value, el('valuationKind').value]), captured = signature();
+      if (selected.type === 'REPAIR') await verifiedTarget(selected);
+      if (!active() || !context().canWrite || stamp !== context().stamp || selected !== chosen || signature() !== captured || !el('allocationConfirmed').checked) return;
       const reason = el('allocationReason').value.trim(); if (!reason) throw Error('Explique como confirmou esta atribuição.');
       if (valuation.submit(reason)) return;
       void host.execute('ALLOCATE_COST', { monthRef: el('allocationMonth').value, amountCents: amount(el('allocationAmount').value), targetType: chosen.type, targetId: chosen.id, targetHash: chosen.hash, reason, confirmed: true });
@@ -132,6 +152,15 @@
       if (reportSelection && reportSelection !== JSON.stringify(capture())) { revision++; reportSelection = ''; reportPage = 1; reportTotal = 0; el('costRows').replaceChildren(); el('costStatus').textContent = 'Consulte a seleção atual.'; }
       if (pickerSelection && pickerSelection !== JSON.stringify([el('allocationType').value, el('allocationSearch').value.trim(), client?.id || null, pickerPage])) { pickerRevision++; pickerSelection = ''; el('allocationTargets').replaceChildren(); }
     }
-    return { clear, render, controls, load, receipt, draft, observe, verify: valuation.verify };
+    async function verify(result, record) {
+      await valuation.verify(result, record);
+      const e = record.envelope, a = result.allocation;
+      if (!result.applied || !['ALLOCATE_COST','REVIEW_COST','VOID_COST'].includes(e.command) || a?.targetType !== 'REPAIR') return;
+      if (a.valuationType !== 'MANUAL' || !positive(a.repairId) || !positive(a.clientId) || a.visitId !== null || a.extraVisitId !== null || result.version !== e.expectedVersion + 1) throw Error('Atribuição da reparação não confirmada.');
+      await verifiedTarget({ type: a.targetType, id: a.repairId, clientId: a.clientId, valid: true, hash: a.targetHash, label: a.targetSnapshot?.label, clientName: a.targetSnapshot?.clientName, snapshot: a.targetSnapshot });
+      if (e.command !== 'VOID_COST' && (a.voidedAt !== null || !a.activeKey)) throw Error('Atribuição da reparação não está ativa.');
+      if (e.command !== 'ALLOCATE_COST' && !['id','expenseId','clientId','targetType','repairId','monthRef','amountCents'].every(k => a[k] === result.allocationBefore?.[k])) throw Error('A reparação, o cliente ou o período da atribuição mudou.');
+    }
+    return { clear, render, controls, load, receipt, draft, observe, verify };
   } };
 })();

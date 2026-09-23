@@ -17,6 +17,10 @@
       if (kind() !== 'MANUAL') { el('allocationAmount').value = ''; el('allocationMonth').value = ''; }
     }
     function controls() {
+      const repair = el('allocationType').value === 'REPAIR';
+      if (repair && kind() !== 'MANUAL') { invalidate(); el('valuationKind').value = 'MANUAL'; invalidate(); }
+      for (const option of el('valuationKind').options) option.disabled = repair && option.value !== 'MANUAL';
+      el('repairCostBasis').hidden = !repair;
       const c = host.context(), method = kind(), material = method === 'MATERIAL';
       el('valuationBox').hidden = method === 'MANUAL'; el('valuationLotLabel').hidden = !material; el('valuationQuantityLabel').hidden = !material;
       el('allocationAmount').readOnly = method !== 'MANUAL'; el('allocationMonth').readOnly = method !== 'MANUAL';
@@ -78,6 +82,7 @@
       } catch (error) { if (active() && rev === revision) invalidate(error.message); } finally { controls(); }
     }
     function submit(reason) {
+      if (host.target()?.type === 'REPAIR' && kind() !== 'MANUAL') throw Error('Confirme uma parcela manual da despesa para esta reparação.');
       if (kind() === 'MANUAL') return false;
       if (!preview || confirmedSelection !== signature() || !el('allocationConfirmed').checked || !host.context().canWrite) throw Error('Calcule e reveja o custo atual antes de confirmar.');
       const p = preview;
