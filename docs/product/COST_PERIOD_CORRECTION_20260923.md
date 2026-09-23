@@ -21,10 +21,18 @@ Os dois novos grupos API/Playwright passam em ambiente isolado. Cobrem valores e
 
 Regressões de custos gerais, custos de reparações, consulta por execução e bases compostas aprovadas em API e navegador. 401 testes unitários em 64 ficheiros; sintaxe 597 JS backend, 199 JS frontend e 62 scripts inline. Layout verificado a 320/390/1440 px e em modo escuro; dados tratados como texto literal. Logs locais `/tmp/cw301-*.log`; imagens de QA em `reports/field-visual/cost-period/`.
 
-O runner passa de 199 para 201 grupos. Sem alterações ao esquema ou novas dependências: mantêm-se 32 migrações e 125 tabelas. Cache `cristalwater-field-20260923-v117`. O CI completo e o restauro PostgreSQL 16 da versão publicada ainda têm de ser confirmados antes do fecho.
+O runner passa de 199 para 201 grupos. Sem alterações ao esquema ou novas dependências: mantêm-se 32 migrações e 125 tabelas. Cache `cristalwater-field-20260923-v117`. O CI completo e o restauro PostgreSQL 16 da versão publicada foram posteriormente confirmados conforme a evidência seguinte.
 
 ## Âmbito e limites
 
 Base de trabalho `79e0b1968558806e74b7e8ba08ba72e8102e0c60`; publicação apenas na branch `work/field-readiness-20260915-simulation`, sem força. Principal `feature/technicians-v25` preservada em `6f27081e1d183ff584a62255b016b373836734db`. Sem merge, deploy, fornecedores ou contactos reais.
 
 Fecha a correção explícita de divergências em repartições manuais com execução atual confirmada. Restantes gastos/repartições entre técnicos ou períodos, restantes origens/ajustes de receita, históricos, volume, VPS/fornecedores e piloto físico continuam em aberto. Custos e receitas completos, lucro e margem permanecem por apurar. IVA e emissão fiscal externos; preços/frequências por cliente e época.
+
+## Publicação e CI
+
+Código publicado sem força e com árvore igual à validada localmente: commit `d61a707e9086aa96be6db55f2f7e83760899dbc7`, árvore `34d58c34e330df90cdf1b5279a5debe10def6401`, [CI 35852316939](https://github.com/ts7520305-svg/cristalwater/actions/runs/35852316939), job `107152642746`: 17 etapas aprovadas entre 11:03:29 e 11:27:53 UTC de 23/09/2026 (24m24s). Logs completos conferidos: 201/201 grupos previstos distintos, código zero/sem sinal, sem falta ou duplicação; 401 unitários/64 ficheiros, quatro técnicos, gate geral do navegador, 32 migrações e sintaxe 597/199/62. Restauro PostgreSQL 16: 125 tabelas/46 ficheiros, linhas e hashes iguais.
+
+Correção de período API/UI aprovada em 7829/8184 ms; custos API/UI 2609/8903 ms; custos de reparações API/UI 6144/8645 ms; composição API/UI 4723/4863 ms. Todos os grupos previstos foram conferidos, sem falta, entrada inesperada, duplicação ou sinal.
+
+Evidência completa em `evidence/20260923_task301_ci.json`. Backup `backup/cost-period-local-20260923` (`3b0d3aee45efa308e9649c3d02125783d27ec4ca`). O fecho posterior altera apenas documentação e conserva as árvores de código, migrações e testes aprovados. Restantes gastos/repartições, ajustes/origens de receita, históricos, volume, VPS/fornecedores e piloto físico continuam pendentes. Esta aprovação não comprova cobertura financeira completa ou operação em produção.
