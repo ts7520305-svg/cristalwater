@@ -18,8 +18,8 @@
       if (kind() !== 'MANUAL') { el('allocationAmount').value = ''; el('allocationMonth').value = ''; }
     }
     function controls() {
-      const c = host.context(), repair = el('allocationType').value === 'REPAIR';
-      const unavailable = value => repair && (value === 'LABOR' && (c.expense?.sourceType !== 'MANUAL' || c.expense?.category !== 'LABOR' || !c.expense?.laborBasis) || value === 'MATERIAL' && (c.expense?.sourceType !== 'STOCK_PURCHASE' || host.target()?.snapshot?.materialMode === 'NONE'));
+      const c = host.context(), repair = el('allocationType').value === 'REPAIR', maintenance = window.CWExpenseMaintenance.types.includes(el('allocationType').value);
+      const unavailable = value => maintenance && value !== 'MANUAL' || repair && (value === 'LABOR' && (c.expense?.sourceType !== 'MANUAL' || c.expense?.category !== 'LABOR' || !c.expense?.laborBasis) || value === 'MATERIAL' && (c.expense?.sourceType !== 'STOCK_PURCHASE' || host.target()?.snapshot?.materialMode === 'NONE'));
       if (unavailable(kind())) { invalidate(); el('valuationKind').value = 'MANUAL'; invalidate(); }
       for (const option of el('valuationKind').options) option.disabled = unavailable(option.value);
       el('repairCostBasis').hidden = !repair;

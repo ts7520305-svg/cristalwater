@@ -25,6 +25,7 @@ async function server() { const child = fork(require.resolve('./fixtures/expense
     const results = await Promise.all([send(e),send(e,200,two)]); assert(results.every(r=>r.applied)); assert.equal(results.filter(r=>r.replayed).length,1); const result=results[0];
     assert.equal(await prisma.expenseEvent.count({where:{requestId:e.requestId}}),1); assert.deepEqual((await api('/requests/'+e.requestId)).allocation,result.allocation);
     assert.equal(result.version,p.expenseVersion+1); assert.equal(result.allocation.clientId,f.client.id); assert.equal(result.allocation.targetType,a.targetType); assert.notEqual(result.allocation.id,a.id);
+    await require('./fixtures/cost-period-receipt-compat')(result,e,'ADMIN:'+admin.id);
     assert.equal(result.allocationVoided.activeKey,null); assert(result.allocationVoided.voidedAt); assert.deepEqual(result.allocationBefore,p.allocationBefore);
     for(const k of ['amountCents','targetType','clientId','visitId','extraVisitId','repairId','targetHash','targetSnapshot','expenseHash','expenseSnapshot']) assert.deepEqual(result.allocation[k],p.allocationBefore[k]);
     const after=await detail(id); assert.equal(after.allocatedCents,before.allocatedCents); assert.equal(after.unallocatedCents,before.unallocatedCents); assert.equal(after.paidCents,before.paidCents); assert.equal(after.openCents,before.openCents); assert.deepEqual(after.payments,before.payments); assert.deepEqual(after.evidence,before.evidence);

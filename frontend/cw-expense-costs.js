@@ -2,7 +2,8 @@
   'use strict';
   window.CWExpenseCosts = { create(host) {
     const { el, node, button, money, amount, request, active, note } = host;
-    const types = { COMPANY: 'Custos gerais da empresa', CLIENT: 'Cliente', REGULAR: 'Visita regular', EXTRA: 'Visita extra', REPAIR: 'Reparação' };
+    const types = { COMPANY: 'Custos gerais da empresa', CLIENT: 'Cliente', REGULAR: 'Visita regular', EXTRA: 'Visita extra', REPAIR: 'Reparação', MAINTENANCE_EQUIPMENT: 'Manutenção de equipamento', MAINTENANCE_REMINDER: 'Lembrete de serviço' };
+    const maintenance = window.CWExpenseMaintenance, serviceTypes = ['REGULAR','EXTRA','REPAIR',...maintenance.types];
     const positive = n => Number.isSafeInteger(n) && n > 0, count = n => Number.isSafeInteger(n) && n >= 0, cents = n => n === null || count(n);
     const validMonth = s => /^(20|21)\d{2}-(0[1-9]|1[0-2])$/.test(s), key = id => 'cw-cost-draft:' + host.owner() + ':' + id;
     let revision = 0, pickerRevision = 0, reportPage = 1, reportTotal = 0, pickerPage = 1, pickerTotal = 0, chosen = null, client = null, editingId = null;
@@ -16,7 +17,7 @@
       if (!s || s.type !== 'REPAIR' || s.id !== t.id || s.clientId !== t.clientId || !positive(s.poolId) || s.status !== 'CONFIRMED' || s.startAt !== null || typeof s.endAt !== 'string' || !Number.isFinite(Date.parse(s.endAt)) || new Date(s.endAt).toISOString() !== s.endAt || s.executionBasis !== 'EXPLICIT_AUTHENTICATED_REPAIR_COMPLETION' || !positive(s.executionProofId) || !/^[a-f0-9]{64}$/.test(s.executionFingerprint) || !['NONE','RESERVED'].includes(s.materialMode) || s.label !== t.label || s.clientName !== t.clientName) throw Error('Execução da reparação não confirmada.');
       return Object.fromEntries(['type','id','clientId','poolId','status','startAt','endAt','executionBasis','executionProofId','executionFingerprint','materialMode'].map(k => [k, s[k]]));
     }
-    async function verifiedTarget(t) { validTarget(t); if (t.type === 'REPAIR' && await host.hash(repairFacts(t)) !== t.hash) throw Error('A execução recebida não corresponde à reparação selecionada.'); return t; }
+    async function verifiedTarget(t) { validTarget(t); if (t.type === 'REPAIR' && await host.hash(repairFacts(t)) !== t.hash) throw Error('A execução recebida não corresponde à reparação selecionada.'); if(maintenance.types.includes(t.type)) await maintenance.verifyTarget(t,host.hash); return t; }
     function capture() { return { ...view, monthRef: el('expenseMonth').value, q: el('costSearch').value.trim(), page: reportPage }; }
     const normalized = q => ({ monthRef: q.monthRef, mode: q.mode, clientId: q.clientId || null, targetType: q.targetType || null, targetId: q.targetId || null, q: q.q, page: q.page });
     function controls() {
@@ -80,8 +81,8 @@
       const value = await verifiedTarget(result.target);
       if (!active() || rev !== pickerRevision || stamp !== context().stamp || el('allocationBox').hidden) return;
       pickerSelection = ''; if (value.type !== row.type || value.id !== row.id) throw Error('Destino diferente do selecionado.');
-      if (value.type === 'CLIENT' && ['REGULAR', 'EXTRA', 'REPAIR'].includes(el('allocationType').value)) { client = value; chosen = null; pickerPage = 1; el('allocationSearch').value = ''; picked(); await lookup(); }
-      else { if (value.type !== el('allocationType').value || ['REGULAR','EXTRA','REPAIR'].includes(value.type) && value.clientId !== client?.id) throw Error('O destino já não corresponde ao cliente selecionado.'); chosen = value; if (value.type === 'CLIENT') client = value; el('allocationTargets').replaceChildren(); pickerTotal = 0; picked(); controls(); }
+      if (value.type === 'CLIENT' && serviceTypes.includes(el('allocationType').value)) { client = value; chosen = null; pickerPage = 1; el('allocationSearch').value = ''; picked(); await lookup(); }
+      else { if (value.type !== el('allocationType').value || serviceTypes.includes(value.type) && value.clientId !== client?.id) throw Error('O destino já não corresponde ao cliente selecionado.'); chosen = value; if (value.type === 'CLIENT') client = value; el('allocationTargets').replaceChildren(); pickerTotal = 0; picked(); controls(); }
     }
     async function lookup() {
       if (!active() || !context().canWrite || !editingId) return;
@@ -119,6 +120,7 @@
       el('allocationBox').hidden = !!expense.cancelledAt; el('allocationBasis').textContent = 'Atribuído, em todos os meses: ' + money(expense.allocatedCents) + ' · Por atribuir: ' + money(expense.unallocatedCents) + '. ' + expense.allocationReviewCount + ' atribuições por rever.'; valuation.render(expense); picked();
       for (const a of expense.allocations) {
         if (!positive(a.id) || a.expenseId !== expense.id || !positive(a.amountCents) || !validMonth(a.monthRef) || !types[a.targetType] || typeof a.targetLabel !== 'string' || typeof a.needsReview !== 'boolean') throw Error('Histórico de atribuições incompleto.');
+        if (maintenance.types.includes(a.targetType)) { const t=maintenance.allocation(a); if(a.targetId!==t.id)throw Error('Identidade da manutenção incompleta.'); maintenance.facts(t); }
         if (a.targetType === 'REPAIR') {
           if (!positive(a.repairId) || a.targetId !== a.repairId || !positive(a.clientId) || a.visitId !== null || a.extraVisitId !== null || !['MANUAL','MATERIAL','LABOR'].includes(a.valuationType)) throw Error('Histórico da reparação incompleto.');
           repairFacts({ id: a.repairId, clientId: a.clientId, label: a.targetLabel, clientName: a.targetSnapshot?.clientName, snapshot: a.targetSnapshot });
@@ -128,14 +130,14 @@
         if (a.targetType === 'REPAIR' && a.valuationType === 'LABOR') { const w = a.valuationSnapshot?.source.workInterval, t = w?.snapshot; if (!positive(w?.id) || t?.repairId !== a.repairId || t?.clientId !== a.clientId || !positive(t?.technicianId)) throw Error('Intervalo de trabalho histórico incompleto.'); node(row, 'p', 'Intervalo declarado #' + w.id + ' · ' + t.technicianName + ' · ' + window.CWRepairLabor.formatTime(t.startedAt) + ' a ' + window.CWRepairLabor.formatTime(t.endedAt)); }
         if (a.valuationType !== 'MANUAL') { node(row, 'p', (a.valuationType === 'MATERIAL' ? 'Consumo valorizado: ' : 'Tempo valorizado: ') + a.quantity + ' ' + (a.quantityUnit === 'SECOND' ? 'segundos' : a.quantityUnit)); if (a.needsReview) node(row, 'p', 'A origem mudou. Anule e calcule novamente para confirmar o novo custo.'); }
         if (a.laborCostGroupId || a.valuationSnapshot?.composition) { const link = node(row, 'a', 'Consultar custo composto'); const basisId = a.laborCostBasisId || a.valuationSnapshot?.composition?.basisId; link.href = '/labor-cost-bases' + (positive(basisId) ? '?basisId=' + basisId : ''); }
-        else if (!a.voidedAt) { if (a.valuationType === 'MANUAL' && !a.needsReview && ['REGULAR','EXTRA','REPAIR'].includes(a.targetType) && validMonth(a.targetSnapshot?.endAt?.slice(0, 7)) && a.monthRef !== a.targetSnapshot.endAt.slice(0, 7)) { node(row, 'p', 'Execução em ' + a.targetSnapshot.endAt.slice(0, 7) + ' (UTC): mês diferente da atribuição.'); button(row, 'Rever correção do mês', () => period.review(a), true); } if (a.needsReview && a.valuationType === 'MANUAL') button(row, 'Rever atribuição', () => review(a), true); button(row, 'Anular atribuição', async () => { const stamp = context().stamp, reason = prompt('Motivo da correção desta atribuição. Os pagamentos mantêm-se:'); if (reason?.trim() && stamp === context().stamp && active()) await host.execute('VOID_COST', { allocationId: a.id, reason: reason.trim() }); }, true); }
+        else if (!a.voidedAt) { if (a.valuationType === 'MANUAL' && !a.needsReview && serviceTypes.includes(a.targetType) && validMonth(a.targetSnapshot?.endAt?.slice(0, 7)) && a.monthRef !== a.targetSnapshot.endAt.slice(0, 7)) { node(row, 'p', 'Execução em ' + a.targetSnapshot.endAt.slice(0, 7) + ' (UTC): mês diferente da atribuição.'); button(row, 'Rever correção do mês', () => period.review(a), true); } if (a.needsReview && a.valuationType === 'MANUAL') button(row, 'Rever atribuição', () => review(a), true); button(row, 'Anular atribuição', async () => { const stamp = context().stamp, reason = prompt('Motivo da correção desta atribuição. Os pagamentos mantêm-se:'); if (reason?.trim() && stamp === context().stamp && active()) await host.execute('VOID_COST', { allocationId: a.id, reason: reason.trim() }); }, true); }
       }
     }
     function receipt(result, record) { valuation.receipt(result, record); period.receipt(result, record); if (result.applied && ['ALLOCATE_COST','REVIEW_COST','VOID_COST','SET_LABOR_BASIS','VALUE_MATERIAL','VALUE_LABOR'].includes(record.envelope.command)) { try { sessionStorage.removeItem(key(record.envelope.expenseId)); } catch {} editingId = null; } }
     el('allocationForm').addEventListener('submit', async event => { event.preventDefault(); try {
       if (!active() || !context().canWrite || editingId !== context().expense?.id || !chosen || !el('allocationConfirmed').checked || chosen.type !== el('allocationType').value || !validMonth(el('allocationMonth').value)) throw Error('Reveja o destino, mês e montante antes de confirmar.');
       const stamp = context().stamp, selected = chosen, signature = () => JSON.stringify([el('allocationType').value, el('allocationMonth').value, el('allocationAmount').value, el('allocationReason').value, el('valuationKind').value]), captured = signature();
-      if (selected.type === 'REPAIR') await verifiedTarget(selected);
+      if (selected.type === 'REPAIR' || maintenance.types.includes(selected.type)) await verifiedTarget(selected);
       if (!active() || !context().canWrite || stamp !== context().stamp || selected !== chosen || signature() !== captured || !el('allocationConfirmed').checked) return;
       const reason = el('allocationReason').value.trim(); if (!reason) throw Error('Explique como confirmou esta atribuição.');
       if (valuation.submit(reason)) return;
@@ -156,7 +158,7 @@
       if (pickerSelection && pickerSelection !== JSON.stringify([el('allocationType').value, el('allocationSearch').value.trim(), client?.id || null, pickerPage])) { pickerRevision++; pickerSelection = ''; el('allocationTargets').replaceChildren(); }
     }
     async function verify(result, record) {
-      await valuation.verify(result, record); await period.verify(result, record);
+      await valuation.verify(result, record); await period.verify(result, record); await maintenance.receipt(result,record,host.hash);
       const e = record.envelope, a = result.allocation;
       if (!result.applied || !['ALLOCATE_COST','REVIEW_COST','VOID_COST','VALUE_MATERIAL','VALUE_LABOR'].includes(e.command) || a?.targetType !== 'REPAIR') return;
       if (!['MANUAL','MATERIAL','LABOR'].includes(a.valuationType) || ['ALLOCATE_COST','REVIEW_COST'].includes(e.command) && a.valuationType !== 'MANUAL' || !positive(a.repairId) || !positive(a.clientId) || a.visitId !== null || a.extraVisitId !== null || result.version !== e.expectedVersion + 1) throw Error('Atribuição da reparação não confirmada.');

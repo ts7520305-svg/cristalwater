@@ -2537,6 +2537,9 @@ model ExpenseAllocation {
   extraVisitId Int?
   // Historical identity survives deletion of the operational repair.
   repairId Int?
+  // Historical maintenance identities remain available after source deletion.
+  maintenanceCompletionId Int?
+  serviceReminderId Int?
   targetHash String
   targetSnapshot Json
   expenseHash String
@@ -2558,6 +2561,8 @@ model ExpenseAllocation {
   @@index([visitId])
   @@index([extraVisitId])
   @@index([repairId])
+  @@index([maintenanceCompletionId])
+  @@index([serviceReminderId])
   @@index([valuationKey])
   @@index([purchaseItemId])
 }

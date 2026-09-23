@@ -10,7 +10,7 @@ async function preview(db, expense, allocationId, lock = false) {
   if (!a) return refused('ALLOCATION_STATE', 'A atribuição já foi anulada ou não pertence a esta despesa.');
   if (a.valuationType !== 'MANUAL' || emptyValuation.some(k => a[k] !== null) || await db.laborCostValuationPart.findUnique({ where: { allocationId } })) return refused('REVALUE_REQUIRED', 'Esta correção aplica-se a repartições manuais. Reveja a valorização na respetiva origem.');
   const type = a.targetType, id = targets.targetId(a);
-  if (!['REGULAR', 'EXTRA', 'REPAIR'].includes(type)) return refused('SERVICE_REQUIRED', 'Escolha uma atribuição a um serviço com execução confirmada.');
+  if (!targets.serviceTypes.includes(type)) return refused('SERVICE_REQUIRED', 'Escolha uma atribuição a um serviço com execução confirmada.');
   const budget = costs.allocated(expense), paid = require('./monthlyFinancialProjection').sum(expense.payments.filter(p => !p.reversedAt).map(p => p.amountCents));
   if (expense.cancelledAt || budget === null || budget < a.amountCents || budget > expense.amountCents || paid === null || paid > expense.amountCents) return refused('EXPENSE_REVIEW', 'Reveja primeiro os valores e o estado da despesa.');
   if (expense.sourceType !== 'MANUAL') {
@@ -37,7 +37,7 @@ async function apply(db, who, env, expense) {
   if (p.hash !== d.previewHash || p.fromMonth !== d.fromMonth || p.toMonth !== d.toMonth || p.amountCents !== d.amountCents) return refused('PREVIEW_CHANGED', 'A correção mudou. Consulte e confirme novamente o mês da execução.');
   const before = p.allocationBefore;
   const allocationVoided = await db.expenseAllocation.update({ where: { id: before.id }, data: { voidedAt: new Date(), voidReason: reason, activeKey: null } });
-  const preserved = Object.fromEntries(['expenseId', 'amountCents', 'targetType', 'clientId', 'visitId', 'extraVisitId', 'repairId', 'targetHash', 'targetSnapshot', 'expenseHash', 'expenseSnapshot'].map(k => [k, before[k]]));
+  const preserved = Object.fromEntries(['expenseId', 'amountCents', 'targetType', 'clientId', 'visitId', 'extraVisitId', 'repairId', 'maintenanceCompletionId', 'serviceReminderId', 'targetHash', 'targetSnapshot', 'expenseHash', 'expenseSnapshot'].map(k => [k, before[k]]));
   const allocation = await db.expenseAllocation.create({ data: { ...preserved, monthRef: p.toMonth, activeKey: r.hash({ expenseId: expense.id, monthRef: p.toMonth, type: p.targetType, id: p.targetId }), reason, createdById: who.id } });
   const updated = await db.companyExpense.update({ where: { id: expense.id }, data: { version: { increment: 1 } } });
   return json({ applied: true, expenseId: expense.id, version: updated.version, preview: p, allocationBefore: before, allocationVoided, allocation, reason });
