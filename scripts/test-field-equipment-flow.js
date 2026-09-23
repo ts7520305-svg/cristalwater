@@ -39,9 +39,12 @@ async function openContext(mobile){const context=await browser.newContext({viewp
    const card=field.page.locator('#fieldEquipmentList .field-equipment-plan').filter({hasText:plan.title});await card.waitFor();
    const action=card.getByRole('button',{name:'Registar revisão realizada',exact:true});assert.equal(await action.isDisabled(),true,'Unconfirmed work cannot be submitted');
    await field.page.setViewportSize({width:390,height:1200});await screenshot(field.page,'technician-before','#fieldEquipmentMaintenance');await field.page.setViewportSize({width:390,height:844});
-   await card.locator('textarea').fill('Vedação e manómetro verificados; filtro em condições de funcionamento.');assert.equal(await action.isDisabled(),true);await card.locator('input[type=checkbox]').check();await action.click();
+   await card.getByRole('button',{name:'Marcar início',exact:true}).click();
+   await card.locator('textarea').fill('Vedação e manómetro verificados; filtro em condições de funcionamento.');assert.equal(await action.isDisabled(),true);
+   await card.getByRole('button',{name:'Marcar fim',exact:true}).click();await card.locator('input[type=checkbox]').check();await action.click();
    await field.page.locator('#fieldEquipmentStatus').filter({hasText:'Revisão registada no servidor.'}).waitFor();
    const completed=await prisma.equipmentMaintenanceCompletion.findMany({where:{planId:plan.id,visitId:visit.id}});assert.equal(completed.length,1);assert.equal(completed[0].notes,'Vedação e manómetro verificados; filtro em condições de funcionamento.');
+   assert(completed[0].result.completion.workTime.durationMs>0);assert.equal(completed[0].result.completion.workTime.origin.technicianId,tech.id);assert.equal(completed[0].result.completion.workTime.origin.visitId,visit.id);
    const updated=await prisma.equipmentMaintenancePlan.findUnique({where:{id:plan.id}});assert.equal(updated.version,plan.version+1);assert.equal(updated.nextDue.toISOString().slice(0,10),plusThreeMonths(lisbonDay(completed[0].completedAt)));assert(updated.lastCompletedAt);
    assert.equal(await prisma.technicalHistory.count({where:{poolId:pool.id,type:'EQUIPMENT_MAINTENANCE',message:plan.title}}),1);
    await field.page.locator('#fieldEquipmentRefresh').click();await card.getByText(new RegExp(updated.nextDue.toISOString().slice(0,10))).waitFor();assert.equal(await prisma.equipmentMaintenanceCompletion.count({where:{planId:plan.id}}),1,'Refresh must not repeat completion');

@@ -9,6 +9,18 @@
   const prefix = `cwEquipmentDraft:v1:${captured?.owner}:`, states = new Map();
   const explain = value => /Failed to fetch|NetworkError|Load failed|fetch.*failed|aborted|timed out/i.test(String(value)) ? 'Não foi possível confirmar a ligação. O pedido continua guardado.' : String(value);
   const positive = value => Number.isSafeInteger(value) && value > 0;
+  const instant = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value) && Number.isFinite(Date.parse(value)) && new Date(value).toISOString() === value;
+  const validTime = value => value && Object.keys(value).length === 2 && instant(value.startAt) && (value.endAt === null || instant(value.endAt) && Date.parse(value.endAt) > Date.parse(value.startAt));
+  const sameTime = (a, b) => !a && !b || !!a && !!b && a.startAt === b.startAt && a.endAt === b.endAt;
+  const hasDraft = draft => draft.notes.trim() || draft.workTime;
+  const acknowledgedDraft = (row, draft) => row.response.applied && row.payload.notes.trim() === draft.notes.trim() && sameTime(row.payload.workTime, draft.workTime);
+  function timeText(value) {
+    const format = at => new Date(at).toLocaleString('pt-PT', { timeZoneName: 'short' });
+    if (!value) return 'Tempo próprio não registado.';
+    if (!value.endAt) return 'Início: ' + format(value.startAt) + '. Falta marcar o fim.';
+    const seconds = Math.floor((Date.parse(value.endAt) - Date.parse(value.startAt)) / 1000);
+    return `${format(value.startAt)} → ${format(value.endAt)} · ${Math.floor(seconds / 60)} min ${seconds % 60} s registados.`;
+  }
   const key = visit => `${visit.visitType}:${visit.visitId}`;
   const sameVisit = (a, b) => a && b && key(a) === key(b) && a.poolId === b.poolId;
   const node = (tag, text, parent) => { const n = document.createElement(tag); if (text != null) n.textContent = text; if (parent) parent.append(n); return n; };
@@ -23,6 +35,7 @@
   function parseDraft(raw, storageKey) {
     let draft; try { draft = JSON.parse(raw); } catch (_) { throw Error('Rascunho de revisão ilegível. Preserve os dados e peça apoio ao escritório.'); }
     if (draft?.v !== 1 || draft.owner !== captured.owner || !['REGULAR','EXTRA'].includes(draft.visitType) || !positive(draft.visitId) || !positive(draft.poolId) || !positive(draft.planId) || !positive(draft.expectedVersion) || !positive(draft.revision) || typeof draft.notes !== 'string' || draft.notes.length > 3000 || typeof draft.title !== 'string' || draftKey(draft, draft.planId) !== storageKey) throw Error('O rascunho de revisão precisa de verificação. Os dados foram preservados.');
+    if (Object.hasOwn(draft, 'workTime') && !validTime(draft.workTime)) throw Error('O tempo guardado precisa de verificação. Os dados foram preservados.');
     return draft;
   }
   function draftState(visit, plan) {
@@ -31,8 +44,8 @@
     const state = { storageKey, raw, draft, saving: Promise.resolve(), failed: false, visit, plan };
     states.set(storageKey, state); return state;
   }
-  function saveDraft(state, notes) {
-    const value = { v: 1, owner: captured.owner, ...state.visit, planId: state.plan.id, expectedVersion: state.plan.version, title: state.plan.title, notes };
+  function saveDraft(state, notes, workTime) {
+    const value = { v: 1, owner: captured.owner, ...state.visit, planId: state.plan.id, expectedVersion: state.plan.version, title: state.plan.title, notes, ...(workTime ? { workTime } : {}) };
     state.saving = state.saving.then(async () => {
       assertSession(); if (!navigator.locks?.request) throw Error('Este navegador não permite proteger as notas entre janelas.');
       await navigator.locks.request(state.storageKey, async () => {
@@ -52,7 +65,7 @@
     await navigator.locks.request(storageKey, async () => {
       assertSession(); const raw = localStorage.getItem(storageKey); if (!raw) return;
       const draft = parseDraft(raw, storageKey);
-      if (matching(row, draft) && draft.notes.trim() === row.payload.notes.trim()) { localStorage.removeItem(storageKey); states.delete(storageKey); }
+      if (matching(row, draft) && acknowledgedDraft(row, draft)) { localStorage.removeItem(storageKey); states.delete(storageKey); }
     });
   }
   async function discardDraft(storageKey, raw) {
@@ -74,7 +87,7 @@
     }
     for (const storageKey of Object.keys(localStorage).filter(name => name.startsWith(prefix))) {
       const draft = parseDraft(localStorage.getItem(storageKey), storageKey);
-      if (draft.notes.trim() && !rows.some(row => matching(row, draft) && (!row.response || (row.response.applied && row.payload.notes.trim() === draft.notes.trim())))) result.push({ kind: 'pending', text: `${label(draft)} — ${draft.title}: notas de revisão guardadas, ainda não enviadas.` });
+      if (hasDraft(draft) && !rows.some(row => matching(row, draft) && (!row.response || acknowledgedDraft(row, draft)))) result.push({ kind: 'pending', text: `${label(draft)} — ${draft.title}: ${draft.workTime ? 'notas e tempo' : 'notas de revisão'} guardados, ainda não enviados.` });
     }
     assertSession(); return result;
   }
@@ -83,7 +96,7 @@
     try {
       const all = await store.records(scope, captured, true);
       const rows = all.filter(row => !row.response || (row.response.applied === false && !row.reviewedAt));
-      const drafts = Object.keys(localStorage).filter(name => name.startsWith(prefix)).map(storageKey => { const raw = localStorage.getItem(storageKey); return { storageKey, raw, draft: parseDraft(raw, storageKey) }; }).filter(({draft}) => draft.notes.trim() && !all.some(row => matching(row, draft) && (!row.response || (row.response.applied && row.payload.notes.trim() === draft.notes.trim()))));
+      const drafts = Object.keys(localStorage).filter(name => name.startsWith(prefix)).map(storageKey => { const raw = localStorage.getItem(storageKey); return { storageKey, raw, draft: parseDraft(raw, storageKey) }; }).filter(({draft}) => hasDraft(draft) && !all.some(row => matching(row, draft) && (!row.response || acknowledgedDraft(row, draft))));
       if (!protect() || rev !== queueRevision) return;
       queue.replaceChildren(); queue.hidden = !rows.length && !drafts.length; if (queue.hidden) return;
       node('h2', 'Revisões de equipamento por resolver', queue);
@@ -100,7 +113,8 @@
       }
       for (const {storageKey, raw, draft} of drafts) {
         const details = node('details', null, queue); node('summary', `${label(draft)} · ${draft.title}: notas guardadas, ainda não enviadas`, details); node('p', draft.notes, details);
-        const discard = node('button', 'Descartar notas guardadas', details); discard.type = 'button'; discard.style.minHeight = '44px';
+        if (draft.workTime) node('p', timeText(draft.workTime), details);
+        const discard = node('button', draft.workTime ? 'Descartar notas e tempo guardados' : 'Descartar notas guardadas', details); discard.type = 'button'; discard.style.minHeight = '44px';
         discard.onclick = async () => { discard.disabled = true; try { await discardDraft(storageKey, raw); } catch (error) { if (protect()) { node('p', error.message, details); discard.disabled = false; } } };
       }
     } catch (error) { if (protect() && rev === queueRevision) { queue.hidden = false; queue.replaceChildren(); node('p', error.message, queue); } }
@@ -134,20 +148,47 @@
       if (pending) { node('p', 'Resultado incerto. O pedido original foi preservado. Use a confirmação guardada acima, mesmo que o plano já tenha mudado.', card); continue; }
       if (related.some(row => row.response.applied === false && !row.reviewedAt)) node('p', 'Existe uma recusa por rever no aviso acima. As notas foram preservadas.', card);
       let state; try { state = draftState(visit, plan); } catch (error) { node('p', error.message, card); continue; }
-      if (plan.completedInVisit) node('p', 'Revisão já registada nesta visita.', card);
+      if (plan.completedInVisit) {
+        node('p', 'Revisão já registada nesta visita.', card);
+        const saved = plan.completion?.workTime;
+        node('p', saved?.state === 'REVIEW' ? 'Tempo por rever: o intervalo ou a visita de origem mudou.' : timeText(saved?.record), card);
+        if (saved?.state === 'REVIEW' && validTime({ startAt: saved.record?.startAt, endAt: saved.record?.endAt })) node('p', 'Registo original: ' + timeText(saved.record), card);
+      }
       if (offline || !data.canComplete || !plan.canComplete || plan.completedInVisit) {
         if (!plan.completedInVisit) node('p', offline ? 'Consulta guardada; confirme a ligação para registar trabalho.' : 'Esta visita não permite registar revisões neste momento.', card);
         if (state.draft?.notes) node('p', 'Notas guardadas: ' + state.draft.notes, card);
+        if (state.draft?.workTime) node('p', 'Tempo guardado: ' + timeText(state.draft.workTime), card);
         continue;
       }
       if (state.draft && state.draft.expectedVersion !== plan.version) node('p', 'O plano foi atualizado. Reveja as instruções atuais antes de confirmar as notas guardadas.', card);
       const notesLabel = node('label', 'Trabalho realizado / observações', card), notes = node('textarea', null, notesLabel); notes.rows = 2; notes.maxLength = 3000; notes.value = state.draft?.notes || '';
+      let workTime = state.draft?.workTime || null;
+      const timeBox = node('fieldset', null, card); timeBox.className = 'field-equipment-time';
+      node('legend', 'Tempo desta revisão (opcional)', timeBox);
+      node('p', 'Marque o início e o fim enquanto realiza o trabalho. Confirme as horas do dispositivo antes de enviar.', timeBox);
+      const timeStatus = node('p', null, timeBox); timeStatus.setAttribute('role', 'status');
+      const start = node('button', 'Marcar início', timeBox), end = node('button', 'Marcar fim', timeBox), clear = node('button', 'Limpar tempo registado', timeBox);
+      for (const button of [start, end, clear]) button.type = 'button';
       const checkLabel = node('label', null, card); checkLabel.className = 'field-equipment-check';
       const check = node('input', null, checkLabel); check.type = 'checkbox'; node('span', 'Confirmo que executei esta revisão do equipamento.', checkLabel);
       const action = node('button', 'Registar revisão realizada', card); action.type = 'button'; action.disabled = true;
-      const ready = () => { action.disabled = !check.checked || notes.value.trim().length < 3 || busy || state.failed; };
+      const ready = () => {
+        action.disabled = !check.checked || notes.value.trim().length < 3 || busy || state.failed || !!workTime && !workTime.endAt;
+        start.disabled = busy || state.failed || !!workTime; end.disabled = busy || state.failed || !workTime || !!workTime.endAt; clear.disabled = busy || state.failed || !workTime;
+        timeStatus.textContent = timeText(workTime);
+      };
+      const saveTime = async next => {
+        if (busy || !valid(visit, rev)) return;
+        workTime = next; check.checked = false; ready();
+        try { await saveDraft(state, notes.value, workTime); if (valid(visit, rev)) { status.textContent = 'Tempo guardado neste dispositivo; revisão ainda não enviada.'; await renderQueue(); } }
+        catch (error) { if (valid(visit, rev)) { status.textContent = error.message; ready(); } }
+      };
+      start.onclick = () => saveTime({ startAt: new Date().toISOString(), endAt: null });
+      end.onclick = () => { const endAt = new Date().toISOString(); if (Date.parse(endAt) <= Date.parse(workTime.startAt)) { status.textContent = 'O relógio do dispositivo mudou. Reveja o início antes de marcar o fim.'; return; } return saveTime({ ...workTime, endAt }); };
+      clear.onclick = () => saveTime(null);
+      ready();
       notes.oninput = () => {
-        ready(); saveDraft(state, notes.value).then(() => { if (valid(visit, rev)) status.textContent = 'Notas guardadas neste dispositivo; revisão ainda não enviada.'; }).catch(error => { if (valid(visit, rev)) { status.textContent = error.message; ready(); } });
+        ready(); saveDraft(state, notes.value, workTime).then(() => { if (valid(visit, rev)) status.textContent = 'Notas guardadas neste dispositivo; revisão ainda não enviada.'; }).catch(error => { if (valid(visit, rev)) { status.textContent = error.message; ready(); } });
       };
       check.onchange = ready;
       action.onclick = async () => {
@@ -155,8 +196,8 @@
         const confirmedNotes = notes.value.trim(); let prepared = false;
         busy = true; ready(); refresh.disabled = true; notes.disabled = check.disabled = true;
         try {
-          await saveDraft(state, confirmedNotes); if (!valid(visit, rev)) return;
-          const row = await store.prepare(scope, plan.id, { visitType: visit.visitType, visitId: visit.visitId, poolId: visit.poolId, expectedVersion: plan.version, notes: confirmedNotes, confirmed: true }, { label: plan.title }, captured);
+          await saveDraft(state, confirmedNotes, workTime); if (!valid(visit, rev)) return;
+          const row = await store.prepare(scope, plan.id, { visitType: visit.visitType, visitId: visit.visitId, poolId: visit.poolId, expectedVersion: plan.version, notes: confirmedNotes, confirmed: true, ...(workTime ? { workTime } : {}) }, { label: plan.title }, captured);
           prepared = true;
           await send(row);
         } catch (error) { if (valid(visit, rev)) status.textContent = 'Resultado incerto. ' + explain(error.message); }
