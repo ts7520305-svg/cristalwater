@@ -26,6 +26,14 @@ Regressões locais aprovadas: valorização de despesas, correção do mês no n
 
 ## Publicação e limites
 
-Base `901c3a9254aef707525245d1348ac82002080fd9`, fecho TASK307. Publicação autorizada em `work/field-readiness-20260915-simulation`. O resultado do CI nativo e do restauro será acrescentado no fecho documental; a validação local não os substitui.
+Base `901c3a9254aef707525245d1348ac82002080fd9`, fecho TASK307. Publicação autorizada em `work/field-readiness-20260915-simulation`. O CI nativo e o restauro desta árvore estão aprovados conforme a evidência abaixo.
 
 Permanecem abertos os consumos próprios de materiais, tempos de lembretes, repartições entre meses e restantes custos/receitas. Não há margem ou lucro completos, certificação de presença física, merge na principal, deploy no VPS ou contacto com fornecedores reais nesta etapa.
+
+## CI e fecho
+
+Código publicado `040d2b46c6f16908e6b9e3b3882ebfb2308e61ce`, árvore `199569a05bbff270a14a7c3c44e091186411fe38`, igual à validada localmente. [CI 35928674518](https://github.com/ts7520305-svg/cristalwater/actions/runs/35928674518), job `107409794869`, aprovado entre 2026-09-23T22:30:04Z e 2026-09-23T22:55:57Z (25m53s). 17 etapas aprovadas; 211/211 grupos previstos distintos, sem falha, falta, entrada inesperada ou duplicação. 409 unitários/65 ficheiros, quatro testes técnicos, gate geral de navegador, sintaxe 603/202/62 e 35 migrações. Restauro PostgreSQL 16 de 126 tabelas/46 ficheiros, com linhas e hashes iguais.
+
+Evidência em `evidence/20260923_task308_ci.json`, com os 211 resultados e hash SHA256 do log. O fecho posterior altera apenas documentação e conserva o código e os testes aprovados.
+
+Próxima etapa: origens e quantidades próprias de materiais nas manutenções, seguidas da repartição compatível com os consumos da visita. Tempos de lembretes, repartições entre meses e cobertura financeira integral continuam abertos.
