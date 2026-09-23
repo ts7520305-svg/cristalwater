@@ -23,6 +23,14 @@ O cenário inicial falhou com a classificação reproduzida e passou depois da c
 
 ## Publicação e próximo âmbito
 
-Base `c3461e4e2860968a468bddf75df7e3769470b763`. Publicar apenas em `work/field-readiness-20260915-simulation`, sem força, e confirmar o CI completo e o restauro PostgreSQL 16 da versão final antes do fecho. Principal `feature/technicians-v25` preservada em `6f27081e1d183ff584a62255b016b373836734db`; sem merge, deploy ou contactos reais.
+Base `c3461e4e2860968a468bddf75df7e3769470b763`. Publicada apenas em `work/field-readiness-20260915-simulation`, sem força, com CI completo e restauro PostgreSQL 16 da versão final confirmados abaixo. Principal `feature/technicians-v25` preservada em `6f27081e1d183ff584a62255b016b373836734db`; sem merge, deploy ou contactos reais.
 
 Corrige a classificação de trabalho já valorizado na cobertura de visitas REGULAR/EXTRA. Não acrescenta custos medidos próprios das manutenções nem altera o denominador para reparações/manutenções. Restantes gastos, ajustes/origens de receita, históricos, volume, fornecedores/VPS e piloto físico continuam abertos. Custos/receitas completos, lucro e margem permanecem por apurar.
+
+## CI da versão final
+
+Código `d93f3e2ffea493140d6f3621438f9a5e3b10d511`, árvore `0da598fa0fe424c6ea5ae80a4e7e2a6ab294c29b`, igual à validada localmente. [CI 35912816866](https://github.com/ts7520305-svg/cristalwater/actions/runs/35912816866), job `107356686960`: 17 etapas aprovadas em 23/09/2026 entre 19:58:12 e 20:27:00 UTC, 28m48s.
+
+Logs completos conferidos: 209/209 grupos previstos distintos, todos com código zero e sem sinal; sem falha, omissão, grupo inesperado ou duplicação. O novo grupo de cobertura composta passou em 29700 ms. Passaram também 409 unitários/65 ficheiros, quatro testes técnicos, o gate geral do navegador, 35 migrações e sintaxe 601/201/62. Restauro PostgreSQL 16: 126 tabelas/46 ficheiros, linhas da base de dados e hashes dos ficheiros iguais.
+
+Evidência completa em [evidence/20260923_task306_ci.json](evidence/20260923_task306_ci.json). O fecho posterior altera apenas documentação e conserva as árvores de código, migrações e testes aprovados. O ponto de retoma distingue esta correção das restantes lacunas financeiras; não atribui cobertura completa nem prontidão de produção.
