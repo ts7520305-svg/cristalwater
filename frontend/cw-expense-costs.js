@@ -119,11 +119,12 @@
       for (const a of expense.allocations) {
         if (!positive(a.id) || a.expenseId !== expense.id || !positive(a.amountCents) || !validMonth(a.monthRef) || !types[a.targetType] || typeof a.targetLabel !== 'string' || typeof a.needsReview !== 'boolean') throw Error('Histórico de atribuições incompleto.');
         if (a.targetType === 'REPAIR') {
-          if (!positive(a.repairId) || a.targetId !== a.repairId || !positive(a.clientId) || a.visitId !== null || a.extraVisitId !== null || !['MANUAL','MATERIAL'].includes(a.valuationType)) throw Error('Histórico da reparação incompleto.');
+          if (!positive(a.repairId) || a.targetId !== a.repairId || !positive(a.clientId) || a.visitId !== null || a.extraVisitId !== null || !['MANUAL','MATERIAL','LABOR'].includes(a.valuationType)) throw Error('Histórico da reparação incompleto.');
           repairFacts({ id: a.repairId, clientId: a.clientId, label: a.targetLabel, clientName: a.targetSnapshot?.clientName, snapshot: a.targetSnapshot });
         }
         const row = node(el('allocationRows'), 'div', '', 'row'); node(row, 'strong', a.targetLabel + (a.clientName && a.targetType !== 'CLIENT' ? ' · ' + a.clientName : '')); node(row, 'p', a.monthRef + ' · ' + money(a.amountCents) + ' · ' + (a.voidedAt ? 'Anulada' : a.needsReview ? 'Por rever' : 'Confirmada')); node(row, 'p', a.voidReason || a.reason);
         if (a.stockPurchase && a.valuationType === 'MANUAL') node(row, 'p', 'Atribuição de compra de stock; não comprova o consumo.');
+        if (a.targetType === 'REPAIR' && a.valuationType === 'LABOR') { const w = a.valuationSnapshot?.source.workInterval, t = w?.snapshot; if (!positive(w?.id) || t?.repairId !== a.repairId || t?.clientId !== a.clientId || !positive(t?.technicianId)) throw Error('Intervalo de trabalho histórico incompleto.'); node(row, 'p', 'Intervalo declarado #' + w.id + ' · ' + t.technicianName + ' · ' + window.CWRepairLabor.formatTime(t.startedAt) + ' a ' + window.CWRepairLabor.formatTime(t.endedAt)); }
         if (a.valuationType !== 'MANUAL') { node(row, 'p', (a.valuationType === 'MATERIAL' ? 'Consumo valorizado: ' : 'Tempo valorizado: ') + a.quantity + ' ' + (a.quantityUnit === 'SECOND' ? 'segundos' : a.quantityUnit)); if (a.needsReview) node(row, 'p', 'A origem mudou. Anule e calcule novamente para confirmar o novo custo.'); }
         if (!a.voidedAt) { if (a.needsReview && a.valuationType === 'MANUAL') button(row, 'Rever atribuição', () => review(a), true); button(row, 'Anular atribuição', async () => { const stamp = context().stamp, reason = prompt('Motivo da correção desta atribuição. Os pagamentos mantêm-se:'); if (reason?.trim() && stamp === context().stamp && active()) await host.execute('VOID_COST', { allocationId: a.id, reason: reason.trim() }); }, true); }
       }
@@ -155,10 +156,11 @@
     async function verify(result, record) {
       await valuation.verify(result, record);
       const e = record.envelope, a = result.allocation;
-      if (!result.applied || !['ALLOCATE_COST','REVIEW_COST','VOID_COST','VALUE_MATERIAL'].includes(e.command) || a?.targetType !== 'REPAIR') return;
-      if (!['MANUAL','MATERIAL'].includes(a.valuationType) || ['ALLOCATE_COST','REVIEW_COST'].includes(e.command) && a.valuationType !== 'MANUAL' || !positive(a.repairId) || !positive(a.clientId) || a.visitId !== null || a.extraVisitId !== null || result.version !== e.expectedVersion + 1) throw Error('Atribuição da reparação não confirmada.');
+      if (!result.applied || !['ALLOCATE_COST','REVIEW_COST','VOID_COST','VALUE_MATERIAL','VALUE_LABOR'].includes(e.command) || a?.targetType !== 'REPAIR') return;
+      if (!['MANUAL','MATERIAL','LABOR'].includes(a.valuationType) || ['ALLOCATE_COST','REVIEW_COST'].includes(e.command) && a.valuationType !== 'MANUAL' || !positive(a.repairId) || !positive(a.clientId) || a.visitId !== null || a.extraVisitId !== null || result.version !== e.expectedVersion + 1) throw Error('Atribuição da reparação não confirmada.');
       await verifiedTarget({ type: a.targetType, id: a.repairId, clientId: a.clientId, valid: true, hash: a.targetHash, label: a.targetSnapshot?.label, clientName: a.targetSnapshot?.clientName, snapshot: a.targetSnapshot });
       if (e.command !== 'VOID_COST' && (a.voidedAt !== null || !a.activeKey)) throw Error('Atribuição da reparação não está ativa.');
+      if (e.command === 'VOID_COST' && a.valuationType === 'LABOR' && (a.activeMeasurementKey !== null || await host.hash(a.valuationSnapshot) !== await host.hash(result.allocationBefore?.valuationSnapshot))) throw Error('O intervalo ou as fontes da anulação mudaram.');
       if (['REVIEW_COST','VOID_COST'].includes(e.command) && !['id','expenseId','clientId','targetType','repairId','monthRef','amountCents','valuationType','purchaseItemId','quantity','quantityUnit','valuationHash','valuationKey'].every(k => a[k] === result.allocationBefore?.[k])) throw Error('A reparação, o cliente ou o período da atribuição mudou.');
     }
     return { clear, render, controls, load, receipt, draft, observe, verify };

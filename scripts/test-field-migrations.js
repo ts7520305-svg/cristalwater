@@ -187,11 +187,25 @@ async function dbRejects(sql, expected) {
   const retainedWork=await prisma.repairWorkInterval.create({data:workData});
   for(const assignment of [`"repairId"=0`,`"clientId"=0`,`"poolId"=0`,`"technicianId"=0`,`"technicianName"=''`,`"durationSeconds"=0`,`"durationSeconds"=3599`,`"startedAt"='2000-01-01 09:00:00.500'`,`"endedAt"="startedAt"`,`"createdAt"="startedAt"`,`"createdBy"='CLIENT:1'`,`"sourceHash"='bad'`,`"fingerprint"='bad'`,`"snapshot"='[]'`,`"reason"='   '`,`"activeKey"=NULL`,`"voidedAt"=CURRENT_TIMESTAMP`])await dbRejects(`UPDATE "RepairWorkInterval" SET ${assignment} WHERE id=${retainedWork.id}`,'23514');
   await dbRejects(`INSERT INTO "RepairWorkInterval" ("repairId","clientId","poolId","technicianId","technicianName","startedAt","endedAt","durationSeconds","sourceHash","snapshot","fingerprint","reason","createdBy","createdAt","activeKey") SELECT "repairId","clientId","poolId","technicianId","technicianName","startedAt","endedAt","durationSeconds","sourceHash","snapshot","fingerprint","reason","createdBy","createdAt","activeKey" FROM "RepairWorkInterval" WHERE id=${retainedWork.id}`,'23505');
+  const repairLaborSnapshot={source:{version:3,kind:'LABOR',workBasis:'EXPLICIT_AUTHENTICATED_REPAIR_WORK_INTERVAL',workInterval:{id:retainedWork.id,fingerprint:retainedWork.fingerprint,snapshot:{repairId:historyRepair.id,clientId:oldClient.id}}},calculation:{historical:true}};
+  const repairLaborData={...laborData,targetType:'REPAIR',visitId:null,repairId:historyRepair.id,valuationSnapshot:repairLaborSnapshot,activeKey:'migration-repair-labor',activeMeasurementKey:'LABOR:REPAIR:'+historyRepair.id+':INTERVAL:'+retainedWork.id};
+  const beforeLaborCosts=await prisma.$queryRaw`SELECT to_jsonb(a) AS row FROM "ExpenseAllocation" a ORDER BY id`;
+  cli(['db','execute','--file','prisma/migrations/20260923040000_repair_labor_valuation/migration.sql','--schema','prisma/schema.prisma']);
+  assert.deepEqual(await prisma.$queryRaw`SELECT to_jsonb(a) AS row FROM "ExpenseAllocation" a ORDER BY id`,beforeLaborCosts);
+  assert.deepEqual(await prisma.repairWorkInterval.findUniqueOrThrow({where:{id:retainedWork.id}}),retainedWork);
+  assert.deepEqual(await prisma.fieldWriteRequest.findUniqueOrThrow({where:{id:historicalWorkReceipt.id}}),historicalWorkReceipt);
+  const repairLabor=await prisma.expenseAllocation.create({data:repairLaborData});
+  for(const assignment of [`"quantity"=0.5`,`"purchaseItemId"=${retainedPurchaseItem.id}`,`"quantityUnit"='MINUTE'`,`"activeMeasurementKey"='LABOR:REPAIR:${historyRepair.id}'`,`"valuationSnapshot"='{}'`,`"valuationSnapshot"=jsonb_set("valuationSnapshot",'{source,workInterval,id}','0')`,`"valuationSnapshot"=jsonb_set("valuationSnapshot",'{source,workInterval,id}','2147483648')`,`"valuationSnapshot"=jsonb_set("valuationSnapshot",'{source,workInterval,snapshot,repairId}','0')`,`"valuationSnapshot"=jsonb_set("valuationSnapshot",'{source,workInterval,snapshot,clientId}','0')`,`"valuationSnapshot"=jsonb_set("valuationSnapshot",'{source,workBasis}','"WRONG"')`])await dbRejects(`UPDATE "ExpenseAllocation" SET ${assignment} WHERE id=${repairLabor.id}`,'23514');
+  await dbRejects(`INSERT INTO "ExpenseAllocation" ("expenseId","monthRef","amountCents","targetType","clientId","repairId","targetHash","targetSnapshot","expenseHash","expenseSnapshot","activeKey","reason","createdById","valuationType","valuationKey","valuationHash","valuationSnapshot","quantity","quantityUnit","activeMeasurementKey") SELECT "expenseId","monthRef","amountCents","targetType","clientId","repairId","targetHash","targetSnapshot","expenseHash","expenseSnapshot",'migration-duplicate-interval',"reason","createdById","valuationType","valuationKey","valuationHash","valuationSnapshot","quantity","quantityUnit","activeMeasurementKey" FROM "ExpenseAllocation" WHERE id=${repairLabor.id}`,'23505');
   await prisma.repair.delete({where:{id:historyRepair.id}});
   assert.deepEqual(await prisma.repairWorkInterval.findUniqueOrThrow({where:{id:retainedWork.id}}),retainedWork);
   await prisma.repairWorkInterval.update({where:{id:retainedWork.id},data:{voidedAt:new Date(),voidedBy:'ADMIN:1',voidReason:'Explicit historical correction',activeKey:null}});
   await prisma.repairWorkInterval.create({data:workData});
   await prisma.repairWorkInterval.deleteMany({where:{repairId:historyRepair.id}});
+  assert.deepEqual(await prisma.expenseAllocation.findUniqueOrThrow({where:{id:repairLabor.id}}),repairLabor);
+  await prisma.expenseAllocation.update({where:{id:repairLabor.id},data:{voidedAt:new Date(),voidReason:'Explicit correction',activeKey:null,activeMeasurementKey:null}});
+  const revalued=await prisma.expenseAllocation.create({data:repairLaborData});
+  await prisma.expenseAllocation.deleteMany({where:{id:{in:[repairLabor.id,revalued.id]}}});
   await prisma.fieldWriteRequest.delete({where:{id:historicalWorkReceipt.id}});await prisma.auditTrail.delete({where:{id:historicalExecution.id}});
   assert.deepEqual(await prisma.expenseAllocation.findUniqueOrThrow({where:{id:repairCost.id}}),repairCost);
   assert.deepEqual(await prisma.expenseAllocation.findUniqueOrThrow({where:{id:repairMaterial.id}}),repairMaterial);
@@ -234,6 +248,6 @@ async function dbRejects(sql, expected) {
   assert.equal(await prisma.technicalProposalRequest.count(),0);
   assert.equal(await prisma.fieldWriteRequest.count(),0);
   const savedExtra=await prisma.extraVisit.findUniqueOrThrow({where:{id:oldExtra.id}});assert.equal(savedExtra.notes,'Migration preserved extra');assert.equal(savedExtra.execution,null);assert.equal(savedExtra.startAt,null);assert.equal(savedExtra.endAt,null);assert.equal(savedExtra.completionRequestId,null);assert.equal(await prisma.extraVisitPhoto.count(),0);await prisma.extraVisit.delete({where:{id:oldExtra.id}});
-  console.log('PASS thirty additive migrations preserve previous data and match the current schema');
+  console.log('PASS thirty-one additive migrations preserve previous data and match the current schema');
  }finally{fs.rmSync(temp,{recursive:true,force:true})}
 })().catch(error=>{console.error(error);process.exitCode=1}).finally(()=>prisma.$disconnect());

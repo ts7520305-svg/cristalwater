@@ -55,6 +55,22 @@ async function overlaps(db, technicianId, startedAt, endedAt, exceptId = null) {
   const relevant = v => v.endAt ? v.endAt > v.startAt : ['IN_PROGRESS', 'STARTED', 'IN_EXECUTION'].includes(String(v.status).trim().toUpperCase());
   return repairs.length > 0 || regular.some(relevant) || extra.some(relevant);
 }
+async function inspectRow(db, row, target, knownTechnicians) {
+  const reasons = [];
+  if (!intact(row)) reasons.push('INTERVAL_EVIDENCE_CHANGED');
+  if (!target?.valid || target.hash !== row.sourceHash) reasons.push('EXECUTION_EVIDENCE_CHANGED');
+  if (!knownTechnicians.has(row.technicianId)) reasons.push('TECHNICIAN_MISSING');
+  if (!row.voidedAt && await overlaps(db, row.technicianId, row.startedAt, row.endedAt, row.id)) reasons.push('RECORDED_TIME_OVERLAP');
+  return { ...json(row), recordHash: recordHash(row), state: row.voidedAt ? 'VOIDED' : reasons.length ? 'REVIEW' : 'CONFIRMED', reviewReasons: reasons, canVoid: !row.voidedAt };
+}
+// Internal financial reads use the same evidence and overlap checks as the work page.
+async function readForValuation(db, repairIds, preparedTargets) {
+  if (!repairIds.length) return new Map();
+  const rows = await db.repairWorkInterval.findMany({ where: { repairId: { in: repairIds } }, orderBy: [{ startedAt: 'asc' }, { id: 'asc' }] });
+  const technicians = new Set((await db.technician.findMany({ where: { id: { in: [...new Set(rows.map(r => r.technicianId))] } }, select: { id: true } })).map(t => t.id));
+  const reviewed = await Promise.all(rows.map(row => inspectRow(db, row, preparedTargets.get(row.repairId), technicians)));
+  return new Map(reviewed.map(row => [row.id, row]));
+}
 async function inspect(db, actor, repairId, preparedTarget) {
   const who = authority(actor);
   const [target, repair, all, technicians] = await Promise.all([
@@ -66,14 +82,7 @@ async function inspect(db, actor, repairId, preparedTarget) {
   if (!repair && !all.some(r => allowed(who, r.technicianId))) fail('Reparação ou histórico não encontrado.', 404);
   const knownTechnicians = new Set(technicians.map(t => t.id));
   const visible = all.filter(r => allowed(who, r.technicianId));
-  const rows = await Promise.all(visible.map(async row => {
-    const reasons = [];
-    if (!intact(row)) reasons.push('INTERVAL_EVIDENCE_CHANGED');
-    if (!target?.valid || target.hash !== row.sourceHash) reasons.push('EXECUTION_EVIDENCE_CHANGED');
-    if (!knownTechnicians.has(row.technicianId)) reasons.push('TECHNICIAN_MISSING');
-    if (!row.voidedAt && await overlaps(db, row.technicianId, row.startedAt, row.endedAt, row.id)) reasons.push('RECORDED_TIME_OVERLAP');
-    return { ...json(row), recordHash: recordHash(row), state: row.voidedAt ? 'VOIDED' : reasons.length ? 'REVIEW' : 'CONFIRMED', reviewReasons: reasons, canVoid: !row.voidedAt };
-  }));
+  const rows = await Promise.all(visible.map(row => inspectRow(db, row, target, knownTechnicians)));
   const confirmed = rows.filter(r => r.state === 'CONFIRMED'), totalSeconds = confirmed.reduce((sum, r) => sum + r.durationSeconds, 0);
   if (!Number.isSafeInteger(totalSeconds)) fail('A duração acumulada precisa de revisão.', 409);
   const source = { hash: target?.valid ? target.hash : null, facts: target?.valid ? facts(target) : null,
@@ -152,4 +161,4 @@ async function lookup(actor, value, requestId, payloadHash) {
   if (saved.scope !== scope || saved.resourceId !== repairId || saved.payloadHash !== payloadHash) fail('O pedido não corresponde ao intervalo guardado.', 409);
   return { ok: true, found: true, result: saved.response };
 }
-module.exports = { detail, command, lookup, inspect, intact, basis, scope };
+module.exports = { detail, command, lookup, inspect, intact, readForValuation, basis, scope };

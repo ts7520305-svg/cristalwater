@@ -8,6 +8,7 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: rul
 router.get('/', handle(async (req, res) => res.json(await service.list(req.query))));
 router.get('/costs', handle(async (req, res) => res.json(await service.costReport(req.query))));
 router.get('/labor-technicians', handle(async (req, res) => { rules.object(req.query, []); res.json({ ok: true, technicians: await prisma.technician.findMany({ select: { id: true, name: true, active: true }, orderBy: [{ name: 'asc' }, { id: 'asc' }] }) }); }));
+router.get('/:id/repair-work-intervals', handle(async (req, res) => res.json(await service.repairWorkIntervals(rules.queryId(req.params.id), req.query))));
 router.get('/:id/valuation-preview', handle(async (req, res) => res.json(await service.valuationPreview(rules.queryId(req.params.id), req.query))));
 router.get('/targets', handle(async (req, res) => res.json(await prisma.$transaction(db => service.costs.targets.list(db, req.query), { isolationLevel: 'RepeatableRead', timeout: 30000 }))));
 router.get('/targets/:type/:id', handle(async (req, res) => {

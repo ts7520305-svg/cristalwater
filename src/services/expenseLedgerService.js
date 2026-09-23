@@ -186,11 +186,15 @@ async function evidence(id, evidenceId) {
 async function costReport(query) { return prisma.$transaction(async db => costs.report(await rows(db), query), { isolationLevel: 'RepeatableRead', timeout: 30000, maxWait: 15000 }); }
 async function clientCosts(db, monthRef) { return costs.group(costs.entries(await rows(db), monthRef)); }
 async function operationalCosts(db, monthRef) {
-  const entries = costs.entries(await rows(db), monthRef), technicianIds = [...new Set(entries.filter(a => a.valuationType === 'LABOR').map(a => a.valuationSnapshot?.source.service.technicianId).filter(Boolean))];
-  return { clients: costs.group(entries), technicians: technicianIds.map(technicianId => ({ technicianId, valuations: valuation.summary(entries.filter(a => a.valuationType === 'LABOR' && a.valuationSnapshot?.source.service.technicianId === technicianId)) })) };
+  const entries = costs.entries(await rows(db), monthRef), technicianIds = [...new Set(entries.filter(a => a.valuationType === 'LABOR').map(a => (a.valuationSnapshot?.source.workInterval?.snapshot.technicianId || a.valuationSnapshot?.source.service.technicianId)).filter(Boolean))];
+  return { clients: costs.group(entries), technicians: technicianIds.map(technicianId => ({ technicianId, valuations: valuation.summary(entries.filter(a => a.valuationType === 'LABOR' && (a.valuationSnapshot?.source.workInterval?.snapshot.technicianId || a.valuationSnapshot?.source.service.technicianId) === technicianId)) })) };
 }
 async function valuationPreview(id, query) {
-  r.id(id); r.object(query, ['kind', 'targetType', 'targetId', 'purchaseItemId', 'quantity']); const selection = valuation.selection(query, true);
+  r.id(id); r.object(query, ['kind', 'targetType', 'targetId', 'purchaseItemId', 'quantity', 'workIntervalId']); const selection = valuation.selection(query, true);
   return prisma.$transaction(async db => { const expense = await db.companyExpense.findUnique({ where: { id }, include }); if (!expense) r.fail('Despesa não encontrada.', 404); return { ok: true, preview: await valuation.preview(db, expense, selection) }; }, { isolationLevel: 'RepeatableRead', timeout: 30000, maxWait: 15000 });
 }
-module.exports = { list, detail, summary, rows, summarize, command, receipt, evidence, actor, sources, costs, costReport, clientCosts, valuationPreview, operationalCosts };
+async function repairWorkIntervals(id, query) {
+  r.id(id); r.object(query, ['repairId']); const repairId = r.queryId(query.repairId);
+  return prisma.$transaction(async db => { const expense = await db.companyExpense.findUnique({ where: { id }, include }); if (!expense) r.fail('Despesa não encontrada.', 404); return { ok: true, intervals: await valuation.workIntervals(db, expense, repairId) }; }, { isolationLevel: 'RepeatableRead', timeout: 30000, maxWait: 15000 });
+}
+module.exports = { repairWorkIntervals, list, detail, summary, rows, summarize, command, receipt, evidence, actor, sources, costs, costReport, clientCosts, valuationPreview, operationalCosts };
