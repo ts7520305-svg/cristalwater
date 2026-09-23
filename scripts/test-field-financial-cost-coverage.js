@@ -19,11 +19,13 @@ let child;
   const common = { clientId:client.id, poolId:pool.id, technicianId:technician.id, status:'COMPLETED', startAt:new Date(month+'-10T08:00:00Z'), endAt:new Date(month+'-10T08:30:00Z') };
   const id = 850000000 + Math.floor(Math.random()*1000000);
   const regular = await prisma.serviceVisit.create({ data:{ ...common, id } });
-  await prisma.extraVisit.create({ data:{ ...common, id } });
-  const noStart = await prisma.serviceVisit.create({ data:{ ...common, startAt:null } }), noMaterial = await prisma.serviceVisit.create({ data:common }), zero = await prisma.serviceVisit.create({ data:common }), invalidMovement = await prisma.serviceVisit.create({ data:common });
+  await prisma.extraVisit.create({ data:{ ...common, id, startAt:new Date(month+'-10T08:30:00Z'), endAt:new Date(month+'-10T09:00:00Z') } });
+  // Coverage samples keep their durations and counts, with distinct recorded days.
+  const onDay=offset=>({...common,startAt:new Date(+common.startAt+offset*86400000),endAt:new Date(+common.endAt+offset*86400000)});
+  const noStart = await prisma.serviceVisit.create({ data:{ ...common, startAt:null } }), noMaterial = await prisma.serviceVisit.create({ data:onDay(1) }), zero = await prisma.serviceVisit.create({ data:onDay(2) }), invalidMovement = await prisma.serviceVisit.create({ data:onDay(3) });
   await prisma.serviceVisit.create({ data:{ ...common, endAt:null, plannedDate:new Date(month+'-12T00:00:00Z') } });
-  await prisma.serviceVisit.create({ data:{ ...common, status:'PENDING' } });
-  const nextMonth = await prisma.serviceVisit.create({ data:{ ...common, endAt:new Date('2009-05-01T00:00:00Z') } });
+  await prisma.serviceVisit.create({ data:{ ...onDay(4), status:'PENDING' } });
+  const nextMonth = await prisma.serviceVisit.create({ data:{ ...common, startAt:new Date('2009-04-30T23:30:00Z'), endAt:new Date('2009-05-01T00:00:00Z') } });
   const product = 'Coverage material '+stamp;
   const movement = (visitId, quantity, extra={}) => prisma.stockMovement.create({ data:{ visitId, clientId:client.id, poolId:pool.id, productName:product, unit:'L', movementType:'CONSUMPTION', quantity, createdAt:new Date(month+'-10T10:00:00Z'), ...extra } });
   await movement(id,3); await movement(id,1,{ movementType:'RETURN' }); await movement(null,2,{ extraVisitId:id });
