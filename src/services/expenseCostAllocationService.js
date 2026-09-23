@@ -10,7 +10,7 @@ const allocated = expense => sum(live(expense).map(a => a.amountCents));
 function expenseSnapshot(e) { return { id: e.id, amountCents: e.amountCents, expenseDate: r.day(e.expenseDate), category: e.category, supplierName: e.supplierName, documentNumber: e.documentNumber, sourceType: e.sourceType, sourceId: e.stockPurchaseId || e.maintenanceId || null, sourceHash: e.sourceHash }; }
 async function decorate(db, expenses) {
   const current = await targets.current(db, expenses.flatMap(e => e.expenseAllocations));
-  return valuation.decorate(db, expenses.map(expense => {
+  return require('./maintenanceLaborShareService').decorate(db, await valuation.decorate(db, expenses.map(expense => {
     const { expenseAllocations, ...e } = expense, budget = allocated(expense), expenseHash = r.hash(expenseSnapshot(e));
     const budgetValid = budget !== null && budget >= 0 && budget <= e.amountCents;
     const allocations = expenseAllocations.map(a => {
@@ -19,9 +19,9 @@ async function decorate(db, expenses) {
       return { ...a, targetId: targets.targetId(a), targetLabel: a.targetSnapshot.label, clientName: target?.clientId === a.clientId ? target.clientName : a.targetSnapshot.clientName, needsReview: reasons.length > 0, reviewReasons: reasons, stockPurchase: a.expenseSnapshot.sourceType === 'STOCK_PURCHASE' || a.expenseSnapshot.category === 'STOCK' };
     });
     return { ...e, allocations, allocatedCents: budgetValid ? budget : null, unallocatedCents: e.cancelledAt ? 0 : budgetValid && !e.needsReview ? e.amountCents - budget : null, allocationReviewCount: allocations.filter(a => a.needsReview).length };
-  }));
+  })));
 }
-function entries(expenses, monthRef) { return expenses.filter(e => !e.cancelledAt).flatMap(e => e.allocations.filter(a => !a.voidedAt && a.monthRef === monthRef).map(a => ({ ...a, expenseTitle: e.title, expenseDocument: e.documentNumber }))); }
+function entries(expenses, monthRef) { return expenses.filter(e => !e.cancelledAt).flatMap(e => require('./maintenanceLaborShareService').project(e.allocations).filter(a => !a.voidedAt && a.monthRef === monthRef).map(a => ({ ...a, expenseTitle: e.title, expenseDocument: e.documentNumber }))); }
 function group(rows, byTarget = false) {
   const groups = new Map();
   for (const a of rows) {
@@ -54,7 +54,7 @@ function report(expenses, query, generatedAt = new Date()) {
     else { r.queryId(query.targetId); if (query.clientId === 'COMPANY' || query.targetType === 'CLIENT' && query.targetId !== query.clientId) r.fail('Contexto do cliente inválido.'); }
   }
   const all = entries(expenses, monthRef), clientId = query.clientId === 'COMPANY' ? null : Number(query.clientId), selected = mode === 'CLIENTS' ? all : all.filter(a => a.clientId === clientId);
-  const result = mode === 'CLIENTS' ? group(selected) : mode === 'TARGETS' ? group(selected, true) : selected.filter(a => a.targetType === query.targetType && (a.targetId || 0) === Number(query.targetId)).map(a => ({ id: a.id, expenseId: a.expenseId, clientId: a.clientId, targetType: a.targetType, targetId: a.targetId, label: a.expenseTitle, documentNumber: a.expenseDocument, targetLabel: a.targetLabel, amountCents: a.amountCents, monthRef: a.monthRef, needsReview: a.needsReview, reviewReasons: a.reviewReasons, stockPurchase: a.stockPurchase, valuationType: a.valuationType, quantity: a.quantity, quantityUnit: a.quantityUnit, reason: a.reason }));
+  const result = mode === 'CLIENTS' ? group(selected) : mode === 'TARGETS' ? group(selected, true) : selected.filter(a => a.targetType === query.targetType && (a.targetId || 0) === Number(query.targetId)).map(a => ({ id: a.id, expenseId: a.expenseId, clientId: a.clientId, targetType: a.targetType, targetId: a.targetId, label: a.expenseTitle, documentNumber: a.expenseDocument, targetLabel: a.targetLabel, amountCents: a.amountCents, monthRef: a.monthRef, needsReview: a.needsReview, reviewReasons: a.reviewReasons, stockPurchase: a.stockPurchase, valuationType: a.valuationType, quantity: a.quantity, quantityUnit: a.quantityUnit, reason: a.reason, ...(a.sourceAllocationId ? {sourceAllocationId:a.sourceAllocationId,costAttributionBasis:a.costAttributionBasis,maintenanceShareId:a.maintenanceShareId||null} : {}) }));
   const filtered = result.filter(row => !q || r.normalized(row.label + ' ' + (row.documentNumber || '')).includes(r.normalized(q)));
   return { ok: true, selection: { monthRef, mode, clientId: query.clientId || null, targetType: query.targetType || null, targetId: query.targetId || null, q, page }, pageSize: 10, total: filtered.length, summary: summary(expenses, monthRef, generatedAt), rows: filtered.slice((page - 1) * 10, page * 10) };
 }
@@ -63,6 +63,7 @@ async function apply(db, who, env, expense) {
   if (command === 'VOID_COST') {
     r.object(d, ['allocationId', 'reason']); r.id(d.allocationId); const reason = r.text(d.reason, 500, true);
     const a = live(expense).find(a => a.id === d.allocationId); if (!a) return refused('ALLOCATION_STATE', 'Atribuição inexistente nesta despesa ou já anulada.');
+    if (await require('./maintenanceLaborShareService').hasActive(db, [a])) return refused('ACTIVE_MAINTENANCE_SHARES', 'Anule primeiro as parcelas deste custo atribuídas a manutenções.');
     if (a.valuationSnapshot?.composition || await db.laborCostValuationPart.findUnique({ where: { allocationId: a.id } })) return refused('COMPOSITE_VOID_REQUIRED', 'Anule todas as parcelas na base composta de trabalho.');
     if (a.valuationType !== 'MANUAL') await db.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${ 'expense-valuation:' + a.targetType + ':' + targets.targetId(a) }))::text`;
     const after = await db.expenseAllocation.update({ where: { id: a.id }, data: { voidedAt: new Date(), voidReason: reason, activeKey: null, activeMeasurementKey: null } });

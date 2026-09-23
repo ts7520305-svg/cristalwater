@@ -107,6 +107,7 @@ async function apply(db, who, env, file, current) {
   if (current.cancelledAt) return refused('CANCELLED', 'A despesa está anulada.');
   if (command === 'SET_LABOR_DISTRIBUTION') return require('./expenseLaborDistributionService').apply(db, who, env, current);
   if (['SET_LABOR_BASIS', 'VALUE_MATERIAL', 'VALUE_LABOR'].includes(command)) return valuation.apply(db, who, env, current);
+  if (require('./maintenanceLaborShareService').commands.includes(command)) return require('./maintenanceLaborShareService').apply(db, who, env, current);
   if (command === 'CORRECT_COST_PERIOD') return require('./expenseCostPeriodService').apply(db, who, env, current);
   if (['ALLOCATE_COST', 'REVIEW_COST', 'VOID_COST'].includes(command)) return costs.apply(db, who, env, current);
   if (command === 'RECORD_PAYMENT') {
@@ -196,6 +197,15 @@ async function valuationPreview(id, query) {
   r.id(id); r.object(query, ['kind', 'targetType', 'targetId', 'purchaseItemId', 'quantity', 'workIntervalId', 'laborPart']); const selection = valuation.selection(query, true);
   return prisma.$transaction(async db => { const expense = await db.companyExpense.findUnique({ where: { id }, include }); if (!expense) r.fail('Despesa não encontrada.', 404); return { ok: true, preview: await valuation.preview(db, expense, selection) }; }, { isolationLevel: 'RepeatableRead', timeout: 30000, maxWait: 15000 });
 }
+async function maintenanceLabor(id, query, preview = false) {
+  r.id(id); r.object(query, preview ? ['allocationId','completionId'] : ['allocationId','page']);
+  const allocationId = r.queryId(query.allocationId), selection = r.queryId(preview ? query.completionId : query.page || '1');
+  return prisma.$transaction(async db => {
+    const expense = await db.companyExpense.findUnique({ where: { id }, include }); if (!expense) r.fail('Despesa não encontrada.', 404);
+    const service = require('./maintenanceLaborShareService');
+    return { ok: true, [preview ? 'preview' : 'candidates']: await service[preview ? 'preview' : 'candidates'](db, expense, allocationId, selection) };
+  }, { isolationLevel: 'RepeatableRead', timeout: 30000, maxWait: 15000 });
+}
 async function costPeriodPreview(id, query) {
   r.id(id); r.object(query, ['allocationId']); const allocationId = r.queryId(query.allocationId);
   return prisma.$transaction(async db => { const expense = await db.companyExpense.findUnique({ where: { id }, include }); if (!expense) r.fail('Despesa não encontrada.', 404); return { ok: true, preview: await require('./expenseCostPeriodService').preview(db, expense, allocationId) }; }, { isolationLevel: 'RepeatableRead', timeout: 30000, maxWait: 15000 });
@@ -208,4 +218,4 @@ async function laborDistributionPreview(id,body){
   r.id(id);r.object(body,['parts']);
   return prisma.$transaction(async db=>{const expense=await db.companyExpense.findUnique({where:{id},include});if(!expense)r.fail('Despesa não encontrada.',404);return {ok:true,preview:await require('./expenseLaborDistributionService').preview(db,expense,body.parts)};},{isolationLevel:'RepeatableRead',timeout:30000,maxWait:15000});
 }
-module.exports = { laborDistributionPreview, costPeriodPreview, repairWorkIntervals, list, detail, summary, rows, summarize, command, receipt, evidence, actor, sources, costs, costReport, clientCosts, valuationPreview, operationalCosts };
+module.exports = { view, maintenanceLabor, laborDistributionPreview, costPeriodPreview, repairWorkIntervals, list, detail, summary, rows, summarize, command, receipt, evidence, actor, sources, costs, costReport, clientCosts, valuationPreview, operationalCosts };

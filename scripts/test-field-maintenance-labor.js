@@ -1,0 +1,115 @@
+'use strict';
+require('../src/loadEnv')();
+const assert = require('node:assert/strict'), fs = require('node:fs'), path = require('node:path'), { randomUUID } = require('node:crypto'), { fork } = require('node:child_process');
+const jwt = require('jsonwebtoken'), { chromium } = require('playwright'), { prisma } = require('../src/prismaClient'), { getJwtSecret } = require('../src/utils/jwtSecret');
+const ledger = require('../src/services/expenseLedgerService'), execution = require('../src/services/serviceExecutionValuesService');
+if (process.env.NODE_ENV !== 'test' || process.env.QA_MODE !== 'true' || process.env.QA_ENVIRONMENT_SAFE !== 'true' || process.env.EMAIL_ENABLED !== 'false' || process.env.EXTERNAL_NOTIFICATIONS_ENABLED !== 'false') throw Error('Isolated QA required');
+let f, browser; const children = [];
+async function server() { const child = fork(require.resolve('./fixtures/expense-server'), [], { stdio: ['ignore','ignore','inherit','ipc'] }); children.push(child); const base = await new Promise((resolve, reject) => { child.once('message', m => resolve('http://127.0.0.1:' + m.port)); child.once('error', reject); }); return { base, configure: fault => new Promise(resolve => { child.once('message', resolve); child.send({ fault }); }) }; }
+(async () => {
+  const admin = await prisma.user.findUniqueOrThrow({ where: { email: process.env.ADMIN_EMAIL } }), token = jwt.sign({ id: admin.id, userId: admin.id, principalType: 'USER', role: 'ADMIN' }, getJwtSecret(), { expiresIn: '1h' });
+  f = await require('./fixtures/maintenance-labor-data')(admin); const one = await server(), two = await server();
+  async function api(url, body, status = 200, server = one, credential = token) { const response = await fetch(server.base + url, { method: body ? 'POST' : 'GET', headers: { ...(credential ? { Authorization: 'Bearer ' + credential } : {}), ...(body ? { 'Content-Type': 'application/json' } : {}) }, body: body ? JSON.stringify(body) : undefined }); const result = await response.json(); assert.equal(response.status, status, JSON.stringify(result)); return result; }
+  const detail = async id => (await api('/api/expenses/' + id)).expense;
+  const preview = async (a, id) => (await api('/api/expenses/' + a.expenseId + '/maintenance-labor-preview?allocationId=' + a.id + '&completionId=' + id)).preview;
+  const create = p => ({ requestId: randomUUID(), command: 'SHARE_MAINTENANCE_LABOR', expenseId: p.expenseId, expectedVersion: p.expenseVersion, data: { allocationId: p.allocationId, completionId: p.completionId, amountCents: p.amountCents, previewHash: p.hash, reason: 'Tempo próprio e parcela conferidos', confirmed: true } });
+  const send = (body, status = 200, server = one) => api('/api/expenses/commands', body, status, server);
+  async function voidRequest(result) { return { requestId: randomUUID(), command: 'VOID_MAINTENANCE_LABOR_SHARE', expenseId: result.expenseId, expectedVersion: (await detail(result.expenseId)).version, data: { allocationId: result.share.allocationId, shareId: result.share.id, shareHash: result.shareHash, reason: 'Devolver esta parcela à visita após revisão', confirmed: true } }; }
+  async function report() { return api('/api/expenses/costs?' + new URLSearchParams({ monthRef: f.month, mode: 'TARGETS', clientId: f.client.id })); }
+  const late = await f.late(); assert.equal((await preview(late.allocation, late.review.id)).code, 'MAINTENANCE_PERIOD_REVIEW');
+  const expenseId = await f.salary(), a = await f.value(expenseId); assert.equal(a.amountCents, 100);
+  const original = JSON.stringify(await prisma.expenseAllocation.findUniqueOrThrow({ where: { id: a.id } })), bases = JSON.stringify(await prisma.expenseLaborBasis.findMany({ where: { expenseId } }));
+  await api('/api/expenses/' + expenseId + '/maintenance-labor-candidates?allocationId=' + a.id, null, 401, one, null);
+  const techToken = jwt.sign({ id: f.tech.id, technicianId: f.tech.id, role: 'TECHNICIAN' }, getJwtSecret(), { expiresIn: '1h' });
+  await api('/api/expenses/' + expenseId + '/maintenance-labor-preview?allocationId=' + a.id + '&completionId=' + f.reviews[0].id, null, 403, one, techToken);
+  await api('/api/expenses/' + expenseId + '/maintenance-labor-preview?allocationId=0&completionId=1', null, 400);
+  let list = (await api('/api/expenses/' + expenseId + '/maintenance-labor-candidates?allocationId=' + a.id)).candidates; assert.equal(list.total, 14); assert.equal(list.rows.length, 10); assert(list.rows.every(r => r.workTimeState === 'MISSING'));
+  list = (await api('/api/expenses/' + expenseId + '/maintenance-labor-candidates?allocationId=' + a.id + '&page=2')).candidates; assert.equal(list.rows.length, 4); assert.equal(list.rows.filter(r => r.workTimeState === 'RECORDED').length, 3);
+  assert.equal((await preview(a, f.missing[0].id)).code, 'MAINTENANCE_TIME_REQUIRED'); assert.equal((await preview(a, f.extraReviews[0].id)).code, 'MAINTENANCE_SOURCE_REVIEW');
+  const stale = create(await preview(a, f.reviews[0].id));
+  assert((await f.send('RECORD_PAYMENT', expenseId, { amountCents: 200, paidOn: new Date().toISOString().slice(0, 10), method: 'TRANSFER', reference: 'QA paid' })).applied);
+  assert.equal((await send(stale)).code, 'VERSION_CHANGED');
+  const paymentBefore = JSON.stringify(await prisma.expensePayment.findMany({ where: { expenseId } }));
+  const p = await preview(a, f.reviews[0].id); assert(p.available, JSON.stringify(p)); assert.equal(p.amountCents, 33); assert.equal(p.remainingAmountCents, 67);
+  for (const data of [{ ...create(p).data, confirmed: false }, { ...create(p).data, extra: true }, { ...create(p).data, amountCents: -1 }]) await send({ ...create(p), data }, 400);
+  const forged = create(p); forged.data.amountCents++; assert.equal((await send(forged)).code, 'PREVIEW_CHANGED');
+  const request = create(p); request.data.reason = '  Tempo próprio e parcela conferidos  '; const race = await Promise.all([send(request), send(request, 200, two)]); assert(race.every(r => r.applied)); assert.equal(race[0].shareHash, race[1].shareHash); const first = race[0];
+  assert.equal(await prisma.expenseEvent.count({ where: { requestId: request.requestId } }), 1); await send({ ...request, data: { ...request.data, reason: 'Different reason' } }, 409);
+  assert.equal((await preview(a, f.reviews[0].id)).code, 'MAINTENANCE_ALREADY_SHARED');
+  const secondRequest = create(await preview(a, f.reviews[1].id)), thirdStale = create(await preview(a, f.reviews[2].id));
+  const racers = await Promise.all([send(secondRequest), send(thirdStale, 200, two)]); assert.equal(racers.filter(r => r.applied).length, 1); assert.equal(racers.filter(r => r.code === 'VERSION_CHANGED').length, 1);
+  const second = racers.find(r => r.applied), remaining = f.reviews.find(r => ![first.share.completionId, second.share.completionId].includes(r.id));
+  const thirdPreview = await preview(a, remaining.id); assert.equal(thirdPreview.amountCents, 34); assert.equal(thirdPreview.rounding, 'FINAL_PARENT_REMAINDER'); const third = await send(create(thirdPreview)); assert(third.applied);
+  let cost = await report(); assert.equal(cost.rows.reduce((n, row) => n + row.amountCents, 0), 100); assert.equal(cost.rows.find(row => row.targetType === 'REGULAR').amountCents, 0); assert.deepEqual(cost.rows.filter(row => row.targetType === 'MAINTENANCE_EQUIPMENT').map(row => row.amountCents).sort(), [33,33,34]);
+  const finance = await require('../src/services/aiFinancialContextService').snapshot(f.month); assert.equal(finance.expenses.attribution.allocatedAmountCents, (await report()).summary.allocatedAmountCents); assert.equal(finance.executionValues.costs.knownCostAmountCents, (await execution.report({monthRef:f.month})).summary.costs.knownCostAmountCents);
+  const own = (await execution.report({ monthRef: f.month, q: String(f.client.id) })).rows.filter(row => row.clientId === f.client.id); assert.equal(own.reduce((n, row) => n + row.costs.amountCents, 0), 100); assert(own.every(row => row.profit === null && row.completeOperatingCosts === false));
+  const executionChild = await execution.report({ monthRef: f.month, mode: 'COSTS', serviceType: 'MAINTENANCE_EQUIPMENT', serviceId: String(first.share.completionId), clientId: String(f.client.id) }); assert.equal(executionChild.rows[0].sourceAllocationId, a.id); assert.equal(executionChild.rows[0].maintenanceShareId, first.share.id);
+  assert.equal((await ledger.clientCosts(prisma, f.month)).find(row => row.clientId === f.client.id).amountCents, 100);
+  assert.equal((await ledger.operationalCosts(prisma, f.month)).technicians.find(row => row.technicianId === f.tech.id).valuations.laborAmountCents, 100);
+  assert.equal((await f.send('VOID_COST', expenseId, { allocationId: a.id, reason: 'Parent cannot be removed before its shares' })).code, 'ACTIVE_MAINTENANCE_SHARES');
+  const spare = await f.salary(); await api('/api/expenses/' + spare + '/valuation-preview?kind=LABOR&targetType=REGULAR&targetId=' + f.sameId, null, 409);
+  // Historical/late source changes require review, while exact recovery stays immutable.
+  const source = await prisma.equipmentMaintenanceCompletion.findUniqueOrThrow({ where: { id: first.share.completionId } });
+  for (const change of ['removed','changed']) {
+    const result = structuredClone(source.result); if (change === 'removed') delete result.completion.workTime; else result.completion.workTime.durationMs++;
+    await prisma.equipmentMaintenanceCompletion.update({ where: { id: source.id }, data: { result } });
+    assert.equal((await detail(expenseId)).allocations[0].maintenanceShareReview, true); assert((await report()).rows.every(row => row.amountCents === null));
+    assert.deepEqual((await api('/api/expenses/requests/' + request.requestId)).share, first.share);
+    await prisma.equipmentMaintenanceCompletion.update({ where: { id: source.id }, data: { result: source.result } });
+  }
+  await prisma.serviceVisit.update({ where: { id: f.sameId }, data: { clientId: f.other.id } }); assert((await detail(expenseId)).allocations[0].needsReview); await prisma.serviceVisit.update({ where: { id: f.sameId }, data: { clientId: f.client.id } });
+  await prisma.expenseAllocation.update({where:{id:a.id},data:{voidedAt:new Date(),voidReason:'QA late change',activeKey:null,activeMeasurementKey:null}}); assert((await report()).rows.every(row=>row.amountCents===null)); assert((await execution.report({monthRef:f.month,mode:'COSTS',serviceType:'MAINTENANCE_EQUIPMENT',serviceId:String(first.share.completionId),clientId:String(f.client.id)})).rows.every(row=>row.state==='REVIEW')); await prisma.expenseAllocation.update({where:{id:a.id},data:{voidedAt:null,voidReason:null,activeKey:a.activeKey,activeMeasurementKey:a.activeMeasurementKey}});
+  const event = await prisma.expenseEvent.findUniqueOrThrow({ where: { requestId: request.requestId } }); await prisma.expenseEvent.update({ where: { id: event.id }, data: { payloadHash: 'a'.repeat(64) } }); assert((await detail(expenseId)).allocations[0].maintenanceShareReview); assert.equal((await send(await voidRequest(first))).code, 'MAINTENANCE_SHARE_STATE'); await prisma.expenseEvent.update({ where: { id: event.id }, data: { payloadHash: event.payloadHash } });
+  assert.equal(JSON.stringify(await prisma.expenseAllocation.findUniqueOrThrow({ where: { id: a.id } })), original); assert.equal(JSON.stringify(await prisma.expenseLaborBasis.findMany({ where: { expenseId } })), bases); assert.equal(JSON.stringify(await prisma.expensePayment.findMany({ where: { expenseId } })), paymentBefore);
+  // Source review does not prevent explicitly undoing a sound historical share.
+  await prisma.serviceVisit.update({ where: { id: f.sameId }, data: { endAt: new Date(+f.endAt + 1) } }); assert((await send(await voidRequest(first))).applied); await prisma.serviceVisit.update({ where: { id: f.sameId }, data: { endAt: f.endAt } });
+  for (const result of [second, third]) assert((await send(await voidRequest(result))).applied);
+  assert.equal((await detail(expenseId)).allocations[0].maintenanceParentAmountCents, 100);
+  const pendingCreate = create(await preview(a, f.reviews[0].id)), beforeVersion = (await detail(expenseId)).version;
+  for (const fault of ['audit','after-payment']) { await one.configure(fault); await send(pendingCreate, 503); await one.configure(null); assert.equal((await detail(expenseId)).version, beforeVersion); assert.equal(await prisma.expenseEvent.count({ where: { requestId: pendingCreate.requestId } }), 0); }
+  const saved = await send(pendingCreate), pendingVoid = await voidRequest(saved); await one.configure('audit'); await send(pendingVoid, 503); await one.configure(null); assert((await detail(expenseId)).allocations[0].maintenanceShares.some(s => s.share.id === saved.share.id && !s.voidedAt)); assert((await send(pendingVoid)).applied);
+  // A paid-cost composition permits explicit per-document shares, but its joint
+  // void cannot orphan them. Equal numeric visit IDs retain their typed identity.
+  const componentIds = [await f.salary(f.extraTech.id, 2000), await f.salary(f.extraTech.id, 1000)].sort((a, b) => a - b);
+  const compositionPreview = (await api('/api/labor-cost-bases/basis-preview', { expenseIds: componentIds })).preview;
+  const compositionCommand = (command, resourceId, data) => ({ requestId: randomUUID(), command, resourceId, data: { ...data, reason: 'Base e parcela de manutenção conferidas', confirmed: true } });
+  const composition = await api('/api/labor-cost-bases/commands', compositionCommand('CREATE', componentIds[0], { expenseIds: componentIds, previewHash: compositionPreview.hash })); assert(composition.applied); f.basisIds.push(composition.basis.id);
+  const cp = (await api('/api/labor-cost-bases/' + composition.basis.id + '/valuation-preview?kind=LABOR&targetType=EXTRA&targetId=' + f.sameId)).preview;
+  const group = await api('/api/labor-cost-bases/commands', compositionCommand('VALUE', composition.basis.id, { choice: cp.choice, previewHash: cp.hash })); assert(group.applied);
+  const part = group.group.snapshot.parts[0], extraShare = await send(create(await preview(part, f.extraReviews[0].id))); assert(extraShare.applied);
+  assert.equal((await preview(part, f.reviews[0].id)).code, 'MAINTENANCE_SOURCE_REVIEW');
+  const groupRow = () => api('/api/labor-cost-bases/' + composition.basis.id).then(result => result.groups.find(row => row.id === group.group.id));
+  const voidGroup = async () => api('/api/labor-cost-bases/commands', compositionCommand('VOID_VALUE', composition.basis.id, { groupId: group.group.id, recordHash: (await groupRow()).recordHash }));
+  assert.equal((await voidGroup()).code, 'COMPOSITION_REVIEW'); assert((await send(await voidRequest(extraShare))).applied); assert((await voidGroup()).applied);
+  // Real UI, real API and the existing durable expense outbox: altered/lost
+  // acknowledgement, same-command retry, one double click and browser reload.
+  browser = await chromium.launch({ headless: true, executablePath: process.env.CW_CHROMIUM_PATH, args: ['--no-sandbox','--disable-dev-shm-usage'] });
+  const context = await browser.newContext({ viewport: { width: 390, height: 950 }, serviceWorkers: 'block' });
+  await context.route('**/*', route => new URL(route.request().url()).origin === one.base ? route.continue() : route.abort());
+  await context.addInitScript(({ token, id }) => { if (top !== window) return; window.CW_API_ORIGIN = location.origin; for (const k of ['cristalwater_jwt','token','adminToken']) localStorage.setItem(k, token); for (const k of ['cristalwater_user','user']) localStorage.setItem(k, JSON.stringify({ id, role: 'ADMIN' })); }, { token, id: admin.id });
+  const page = await context.newPage(), errors = [], posts = []; page.setDefaultTimeout(20000); page.on('pageerror', error => errors.push(error.message)); page.on('request', request => { if (request.method() === 'POST' && new URL(request.url()).pathname === '/api/expenses/commands') posts.push(request.postDataJSON()); });
+  const ready = () => page.waitForFunction(() => ['ready','review'].includes(document.getElementById('expenseStatus')?.dataset.state));
+  const settled = () => page.waitForFunction(() => document.getElementById('pendingPanel').hidden && !document.getElementById('expenseRefresh').disabled && document.getElementById('writeStatus').textContent.includes('Operação confirmada'));
+  const pending = () => page.waitForFunction(() => !document.getElementById('pendingPanel').hidden && !document.getElementById('checkPending').disabled);
+  const allocationRow = page.locator('[data-allocation-id="' + a.id + '"]');
+  async function open() { await page.goto(one.base + '/admin-expenses?expenseId=' + expenseId + '&allocationId=' + a.id, { waitUntil: 'domcontentloaded' }); await ready(); await allocationRow.waitFor({ state: 'visible' }); }
+  async function choose(id = f.reviews[0].id) { await allocationRow.getByRole('button', { name: 'Repartir com manutenção', exact: true }).click(); await page.waitForFunction(() => document.getElementById('maintenanceLaborStatus').textContent.includes('14 revisões')); await page.locator('#maintenanceLaborNext').click(); await page.getByRole('button', { name: 'Calcular parcela #' + id, exact: true }).click(); await page.waitForFunction(() => document.getElementById('maintenanceLaborStatus').textContent.includes('Reveja a parcela')); }
+  async function submit(twice = false) { await page.locator('#maintenanceLaborReason').fill('Tempo e valor da revisão conferidos'); await page.locator('#maintenanceLaborConfirmed').check(); if (twice) await page.locator('#maintenanceLaborSubmit').evaluate(button => { button.click(); button.click(); }); else await page.locator('#maintenanceLaborSubmit').click(); }
+  await open(); await choose(); assert.match(await page.locator('#maintenanceLaborFacts').textContent(), /Fica na visita: 0,67/); assert.equal(await page.locator('#maintenanceLaborFacts img').count(), 0);
+  await page.locator('#maintenanceLaborReason').fill('Rascunho desta manutenção'); await page.locator('#maintenanceLaborClose').click(); await choose(); assert.equal(await page.locator('#maintenanceLaborReason').inputValue(), 'Rascunho desta manutenção');
+  const output = path.resolve('reports/field-visual/maintenance-labor'); fs.mkdirSync(output, { recursive: true });
+  for (const width of [320,390,1440]) { await page.setViewportSize({ width, height: 1000 }); await page.locator('#maintenanceLaborBox').evaluate(n => n.scrollIntoView({ block: 'start' })); assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)); await page.screenshot({ path: path.join(output, 'share-' + width + '.png') }); }
+  const endpoint = '**/api/expenses/commands'; await page.route(endpoint, async route => { const response = await route.fetch(), result = await response.json(); result.share.preview.workTime.durationMs++; await route.fulfill({ json: result }); });
+  const beforePosts = posts.length; await submit(true); await pending(); assert.equal(posts.length - beforePosts, 1); const sent = posts.at(-1); await page.unroute(endpoint); assert.match(await page.locator('#pendingPreview').textContent(), new RegExp('Manutenção #' + f.reviews[0].id));
+  await page.locator('#retryPending').click(); await settled(); assert.deepEqual(posts.at(-1), sent); assert.equal(await prisma.expenseEvent.count({ where: { requestId: sent.requestId } }), 1);
+  const shareRow = page.locator('[data-maintenance-share-id="' + sent.requestId + '"]'); await shareRow.getByRole('button', { name: 'Anular parcela da manutenção' }).click(); await page.locator('#maintenanceLaborReason').fill('Repor custo da visita'); await page.locator('#maintenanceLaborConfirmed').check();
+  await page.route(endpoint, async route => { await route.fetch(); await route.abort('failed'); }); await page.locator('#maintenanceLaborSubmit').click(); await pending(); const lost = posts.at(-1); await page.unroute(endpoint);
+  await page.reload({ waitUntil: 'domcontentloaded' }); await ready(); await pending(); const postCount = posts.length; await page.locator('#checkPending').click(); await settled(); assert.equal(posts.length, postCount); assert.equal((await prisma.expenseEvent.findUniqueOrThrow({ where: { requestId: lost.requestId } })).result.applied, true);
+  await open(); const pattern = '**/api/expenses/' + expenseId + '/maintenance-labor-preview?*'; await page.route(pattern, async route => { const response = await route.fetch(), body = await response.json(); body.preview.remainingAmountCents++; await route.fulfill({ json: body }); });
+  await allocationRow.getByRole('button', { name: 'Repartir com manutenção' }).click(); await page.locator('#maintenanceLaborNext').click(); await page.getByRole('button', { name: 'Calcular parcela #' + f.reviews[0].id, exact: true }).click(); await page.waitForFunction(() => /não corresponde|não confirmada/.test(document.getElementById('maintenanceLaborStatus').textContent)); assert(await page.locator('#maintenanceLaborSubmit').isDisabled()); await page.unroute(pattern);
+  await choose(); const originalMonth = await page.locator('#expenseMonth').inputValue(); await page.locator('#expenseMonth').fill('2001-02'); await page.locator('#expenseMonth').fill(originalMonth); assert(await page.locator('#maintenanceLaborBox').isHidden());
+  await open(); await choose(); const countBeforeSession = posts.length; await page.evaluate(() => { const user = localStorage.getItem('user'); localStorage.setItem('user', JSON.stringify({ id: 999999, role: 'ADMIN' })); localStorage.setItem('user', user); }); await page.waitForFunction(() => document.getElementById('expenseStatus').dataset.state === 'session'); assert(await page.locator('#maintenanceLaborBox').isHidden()); assert.equal(posts.length, countBeforeSession); assert.deepEqual(errors, []);
+  assert.equal(JSON.stringify(await prisma.expensePayment.findMany({ where: { expenseId } })), paymentBefore); assert.equal(JSON.stringify(await prisma.expenseAllocation.findUniqueOrThrow({ where: { id: a.id } })), original);
+  await f.cleanup(); f = null;
+  console.log('PASS maintenance labor share: own recorded time and confirmed target, typed parents, paginated missing time, exact cents and final remainder, conserved expense/payment/time pools and execution/client/technician projections, concurrency/replay/immutable recovery, changed source and tampered journal review, source-independent explicit undo, standalone/composed void guards, atomic receipt/version rollback, real browser preview/reason/draft/layout 320/390/1440, forged and lost receipts, double-click and identical retry, reload and account/filter isolation');
+})().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => { await browser?.close(); for (const child of children) child.kill('SIGTERM'); await prisma.$disconnect(); });

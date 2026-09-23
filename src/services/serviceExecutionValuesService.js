@@ -42,7 +42,7 @@ function build(monthRef,generatedAt,partition,creditStates,expenses){
     const reductionAmountCents=sum(allocations.map(a=>a.amountCents));if(reductionAmountCents>t.amountCents)throw Error('Execution reduction exceeds source');
     ensure(t.serviceType,t.serviceId,t.clientId,t.clientName).revenueSources.push({serviceType:t.serviceType,serviceId:t.serviceId,clientId:t.clientId,kind:t.type,targetId:t.id,lineId:t.lineId,invoiceId:t.invoiceId,documentMonth:t.documentMonth,serviceMonth:monthRef,label:t.label,grossAmountCents:t.amountCents,reductionAmountCents,netAmountCents:confirmed?t.amountCents-reductionAmountCents:null,confirmed,state:confirmed?'CONFIRMED':notes.some(s=>!s.valid)?'CREDIT_REVIEW':'CREDIT_PENDING'});
   }
-  const active=expenses.flatMap(e=>e.allocations.filter(a=>!a.voidedAt).map(a=>({...a,expenseTitle:e.title,expenseDocument:e.documentNumber,expenseDate:e.expenseDate,expenseCancelled:!!e.cancelledAt})));
+  const active=expenses.flatMap(e=>require('./maintenanceLaborShareService').project(e.allocations).filter(a=>!a.voidedAt).map(a=>({...a,expenseTitle:e.title,expenseDocument:e.documentNumber,expenseDate:e.expenseDate,expenseCancelled:!!e.cancelledAt})));
   let costUnplacedCount=0,costPeriodMismatchAllMonths=0;
   for(const a of active.filter(a=>Object.hasOwn(types,a.targetType))){
     const executionMonth=costPeriod(a);if(!executionMonth){costUnplacedCount++;continue;}
@@ -50,7 +50,7 @@ function build(monthRef,generatedAt,partition,creditStates,expenses){
     if(state==='PERIOD_MISMATCH')costPeriodMismatchAllMonths++;
     if(executionMonth!==monthRef)continue;
     const kind=a.valuationType==='MATERIAL'?'MATERIAL':a.valuationType==='LABOR'?'LABOR':a.stockPurchase?'PURCHASE':'OTHER';
-    ensure(a.targetType,a.targetId,a.clientId,a.clientName||a.targetSnapshot.clientName||'Cliente histórico').costSources.push({serviceType:a.targetType,serviceId:a.targetId,clientId:a.clientId,id:a.id,expenseId:a.expenseId,label:a.expenseTitle,documentNumber:a.expenseDocument,expenseDate:a.expenseDate,allocationMonth:a.monthRef,serviceMonth:executionMonth,amountCents:a.amountCents,kind,state,reason:a.reason});
+    ensure(a.targetType,a.targetId,a.clientId,a.clientName||a.targetSnapshot.clientName||'Cliente histórico').costSources.push({serviceType:a.targetType,serviceId:a.targetId,clientId:a.clientId,id:a.id,expenseId:a.expenseId,label:a.expenseTitle,documentNumber:a.expenseDocument,expenseDate:a.expenseDate,allocationMonth:a.monthRef,serviceMonth:executionMonth,amountCents:a.amountCents,kind,state,reason:a.reason,...(a.sourceAllocationId?{sourceAllocationId:a.sourceAllocationId,costAttributionBasis:a.costAttributionBasis,maintenanceShareId:a.maintenanceShareId||null}:{})});
   }
   // Unplaced/changed service costs remain visible globally and also block a
   // matching service's cost total; absence of a usable record is never zero cost.

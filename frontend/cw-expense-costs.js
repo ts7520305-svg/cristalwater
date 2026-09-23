@@ -8,7 +8,7 @@
     const validMonth = s => /^(20|21)\d{2}-(0[1-9]|1[0-2])$/.test(s), key = id => 'cw-cost-draft:' + host.owner() + ':' + id;
     let revision = 0, pickerRevision = 0, reportPage = 1, reportTotal = 0, pickerPage = 1, pickerTotal = 0, chosen = null, client = null, editingId = null;
     let view = { mode: 'CLIENTS' }, label = '', reportSelection = '', pickerSelection = '';
-    const period = window.CWExpenseCostPeriod.create(host);
+    const period = window.CWExpenseCostPeriod.create(host), maintenanceLabor = window.CWExpenseMaintenanceLabor.create(host);
     const valuation = window.CWExpenseValuation.create({ ...host, target: () => chosen });
     function context() { const c = host.context(); return { ...c, stamp: c.epoch + ':' + c.detailEpoch + ':' + c.expense?.id }; }
     function validTarget(t) { if (!t || !types[t.type] || !(t.type === 'COMPANY' ? t.id === null && t.clientId === null : positive(t.id) && positive(t.clientId)) || t.valid !== true || !/^[a-f0-9]{64}$/.test(t.hash) || typeof t.label !== 'string') throw Error('Destino não confirmado.'); return t; }
@@ -26,15 +26,15 @@
       for (const id of ['allocationRefresh', 'allocationChangeClient']) el(id).disabled = !c.canWrite;
       el('allocationPrevious').disabled = !c.canWrite || pickerPage <= 1; el('allocationNext').disabled = !c.canWrite || pickerPage * 10 >= pickerTotal;
       el('costSearch').disabled = !c.canRead;
-      document.querySelectorAll('#allocationForm input,#allocationForm select,#allocationForm textarea').forEach(n => n.disabled = !c.canWrite); valuation.controls(); period.controls();
+      document.querySelectorAll('#allocationForm input,#allocationForm select,#allocationForm textarea').forEach(n => n.disabled = !c.canWrite); valuation.controls(); period.controls(); maintenanceLabor.controls();
     }
     function draft() {
-      valuation.draft();
+      valuation.draft(); maintenanceLabor.draft();
       if (!active() || !editingId || el('allocationBox').hidden || context().expense?.id !== editingId) return;
       try { sessionStorage.setItem(key(editingId), JSON.stringify({ type: el('allocationType').value, monthRef: el('allocationMonth').value, amount: el('allocationAmount').value, reason: el('allocationReason').value, chosen, client })); } catch { note('O rascunho da atribuição não pôde ser guardado.'); }
     }
     function clear() {
-      draft(); valuation.clear(); period.clear(); revision++; pickerRevision++; chosen = client = null; editingId = null;
+      draft(); valuation.clear(); period.clear(); maintenanceLabor.clear(); revision++; pickerRevision++; chosen = client = null; editingId = null;
       for (const id of ['costMetrics', 'costRows', 'costBasis', 'costStatus', 'allocationRows', 'allocationTargets', 'allocationTarget', 'allocationBasis', 'allocationPickerStatus']) el(id).replaceChildren();
       el('allocationForm').reset(); el('allocationBox').hidden = true; reportTotal = pickerTotal = 0;
       if (!context().canRead) { view = { mode: 'CLIENTS' }; label = ''; el('costSearch').value = ''; }
@@ -114,7 +114,7 @@
     }
     function render(expense) {
       if (!Array.isArray(expense.allocations) || !cents(expense.allocatedCents) || !cents(expense.unallocatedCents) || !count(expense.allocationReviewCount)) throw Error('Atribuições da despesa incompletas.');
-      period.clear(); editingId = expense.id; chosen = client = null; pickerRevision++; pickerPage = 1; pickerTotal = 0;
+      maintenanceLabor.clear(); period.clear(); editingId = expense.id; chosen = client = null; pickerRevision++; pickerPage = 1; pickerTotal = 0;
       el('allocationRows').replaceChildren(); el('allocationTargets').replaceChildren(); el('allocationForm').reset(); el('allocationType').value = 'CLIENT'; el('allocationMonth').value = expense.expenseDate.slice(0, 7); el('allocationAmount').value = expense.unallocatedCents > 0 ? (expense.unallocatedCents / 100).toFixed(2) : '';
       try { const saved = JSON.parse(sessionStorage.getItem(key(expense.id))); if (saved && types[saved.type]) { el('allocationType').value = saved.type; el('allocationMonth').value = saved.monthRef || ''; el('allocationAmount').value = saved.amount || ''; el('allocationReason').value = saved.reason || ''; chosen = saved.chosen; client = saved.client; if (chosen) validTarget(chosen); } } catch { chosen = client = null; }
       el('allocationBox').hidden = !!expense.cancelledAt; el('allocationBasis').textContent = 'Atribuído, em todos os meses: ' + money(expense.allocatedCents) + ' · Por atribuir: ' + money(expense.unallocatedCents) + '. ' + expense.allocationReviewCount + ' atribuições por rever.'; valuation.render(expense); picked();
@@ -126,6 +126,7 @@
           repairFacts({ id: a.repairId, clientId: a.clientId, label: a.targetLabel, clientName: a.targetSnapshot?.clientName, snapshot: a.targetSnapshot });
         }
         const row = node(el('allocationRows'), 'div', '', 'row'); row.dataset.allocationId = a.id; node(row, 'strong', a.targetLabel + (a.clientName && a.targetType !== 'CLIENT' ? ' · ' + a.clientName : '')); node(row, 'p', a.monthRef + ' · ' + money(a.amountCents) + ' · ' + (a.voidedAt ? 'Anulada' : a.needsReview ? 'Por rever' : 'Confirmada')); node(row, 'p', a.voidReason || a.reason);
+        maintenanceLabor.render(row, a);
         if (!a.voidedAt && a.reviewReasons?.includes('RECORDED_TIME_OVERLAP')) node(row, 'p', 'Há tempo sobreposto deste técnico noutra visita ou reparação. Reveja os horários registados antes de confirmar o custo.');
         if (a.stockPurchase && a.valuationType === 'MANUAL') node(row, 'p', 'Atribuição de compra de stock; não comprova o consumo.');
         if (a.targetType === 'REPAIR' && a.valuationType === 'LABOR') { const w = a.valuationSnapshot?.source.workInterval, t = w?.snapshot; if (!positive(w?.id) || t?.repairId !== a.repairId || t?.clientId !== a.clientId || !positive(t?.technicianId)) throw Error('Intervalo de trabalho histórico incompleto.'); node(row, 'p', 'Intervalo declarado #' + w.id + ' · ' + t.technicianName + ' · ' + window.CWRepairLabor.formatTime(t.startedAt) + ' a ' + window.CWRepairLabor.formatTime(t.endedAt)); }
@@ -135,7 +136,7 @@
         else if (!a.voidedAt) { if (a.valuationType === 'MANUAL' && !a.needsReview && serviceTypes.includes(a.targetType) && validMonth(a.targetSnapshot?.endAt?.slice(0, 7)) && a.monthRef !== a.targetSnapshot.endAt.slice(0, 7)) { node(row, 'p', 'Execução em ' + a.targetSnapshot.endAt.slice(0, 7) + ' (UTC): mês diferente da atribuição.'); button(row, 'Rever correção do mês', () => period.review(a), true); } if (a.needsReview && a.valuationType === 'MANUAL') button(row, 'Rever atribuição', () => review(a), true); button(row, 'Anular atribuição', async () => { const stamp = context().stamp, reason = prompt('Motivo da correção desta atribuição. Os pagamentos mantêm-se:'); if (reason?.trim() && stamp === context().stamp && active()) await host.execute('VOID_COST', { allocationId: a.id, reason: reason.trim() }); }, true); }
       }
     }
-    function receipt(result, record) { valuation.receipt(result, record); period.receipt(result, record); if (result.applied && ['ALLOCATE_COST','REVIEW_COST','VOID_COST','SET_LABOR_BASIS','VALUE_MATERIAL','VALUE_LABOR'].includes(record.envelope.command)) { try { sessionStorage.removeItem(key(record.envelope.expenseId)); } catch {} editingId = null; } }
+    function receipt(result, record) { valuation.receipt(result, record); period.receipt(result, record); maintenanceLabor.receipt(result, record); if (result.applied && ['ALLOCATE_COST','REVIEW_COST','VOID_COST','SET_LABOR_BASIS','VALUE_MATERIAL','VALUE_LABOR'].includes(record.envelope.command)) { try { sessionStorage.removeItem(key(record.envelope.expenseId)); } catch {} editingId = null; } }
     el('allocationForm').addEventListener('submit', async event => { event.preventDefault(); try {
       if (!active() || !context().canWrite || editingId !== context().expense?.id || !chosen || !el('allocationConfirmed').checked || chosen.type !== el('allocationType').value || !validMonth(el('allocationMonth').value)) throw Error('Reveja o destino, mês e montante antes de confirmar.');
       const stamp = context().stamp, selected = chosen, signature = () => JSON.stringify([el('allocationType').value, el('allocationMonth').value, el('allocationAmount').value, el('allocationReason').value, el('valuationKind').value]), captured = signature();
@@ -155,12 +156,12 @@
     el('costSearch').addEventListener('input', () => { revision++; reportPage = 1; reportTotal = 0; el('costRows').replaceChildren(); el('costStatus').textContent = 'Consulte a pesquisa selecionada.'; controls(); });
     el('costPrevious').addEventListener('click', () => { reportPage--; void load(); }); el('costNext').addEventListener('click', () => { reportPage++; void load(); });
     function observe() {
-      valuation.observe(); period.observe();
+      valuation.observe(); period.observe(); maintenanceLabor.observe();
       if (reportSelection && reportSelection !== JSON.stringify(capture())) { revision++; reportSelection = ''; reportPage = 1; reportTotal = 0; el('costRows').replaceChildren(); el('costStatus').textContent = 'Consulte a seleção atual.'; }
       if (pickerSelection && pickerSelection !== JSON.stringify([el('allocationType').value, el('allocationSearch').value.trim(), client?.id || null, pickerPage])) { pickerRevision++; pickerSelection = ''; el('allocationTargets').replaceChildren(); }
     }
     async function verify(result, record) {
-      await valuation.verify(result, record); await period.verify(result, record); await maintenance.receipt(result,record,host.hash);
+      await valuation.verify(result, record); await period.verify(result, record); await maintenanceLabor.verify(result, record); await maintenance.receipt(result,record,host.hash);
       const e = record.envelope, a = result.allocation;
       if (!result.applied || !['ALLOCATE_COST','REVIEW_COST','VOID_COST','VALUE_MATERIAL','VALUE_LABOR'].includes(e.command) || a?.targetType !== 'REPAIR') return;
       if (!['MANUAL','MATERIAL','LABOR'].includes(a.valuationType) || ['ALLOCATE_COST','REVIEW_COST'].includes(e.command) && a.valuationType !== 'MANUAL' || !positive(a.repairId) || !positive(a.clientId) || a.visitId !== null || a.extraVisitId !== null || result.version !== e.expectedVersion + 1) throw Error('Atribuição da reparação não confirmada.');

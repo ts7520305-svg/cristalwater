@@ -46,15 +46,19 @@ async function check(db, input, visit, visitType, completedAt) {
   if (await conflict(db, input, visit, visitType)) return 'O técnico tem tempo registado em simultâneo noutro serviço. Reveja os horários antes de confirmar.';
   return null;
 }
-async function describe(db, rows, visit, visitType) {
-  const expected = origin(visit, visitType), views = new Map(), proofs = await receipts(db, rows);
-  const candidates = rows.filter(row => sound(time(row))), conflicts = await recorded.conflicts(db, candidates.map(row => ({ type: visitType, id: visit.id, technicianId: time(row).origin.technicianId, startAt: new Date(time(row).startAt), endAt: new Date(time(row).endAt) })));
+async function prepareRead(db, groups) {
+  const proofs = await receipts(db, groups.flatMap(g => g.rows));
+  const conflicts = await recorded.conflicts(db, groups.flatMap(g => g.rows.filter(row => sound(time(row))).map(row => ({ type: g.visitType, id: g.visit.id, technicianId: time(row).origin.technicianId, startAt: new Date(time(row).startAt), endAt: new Date(time(row).endAt) }))));
+  return { proofs, conflicts };
+}
+async function describe(db, rows, visit, visitType, prepared) {
+  const expected = origin(visit, visitType), views = new Map(), { proofs, conflicts } = prepared || await prepareRead(db, [{ rows, visit, visitType }]);
   for (const row of rows) {
     const record = time(row);
     if (!record) { views.set(row.id, { state: hadTime(row, proofs) ? 'REVIEW' : 'MISSING', record: null }); continue; }
-    const review = !sound(record) || !intact(row, proofs) || Object.entries(expected).some(([key, value]) => record.origin?.[key] !== value) || !within(record, visit, row.completedAt) || rows.some(other => other.id !== row.id && time(other) && (!sound(time(other)) || overlaps(record, time(other)))) || conflicts.has(visitType + ':' + visit.id);
+    const review = !sound(record) || !intact(row, proofs) || Object.entries(expected).some(([key, value]) => record.origin?.[key] !== value) || !within(record, visit, row.completedAt) || rows.some(other => other.id !== row.id && hadTime(other, proofs) && (!sound(time(other)) || !intact(other, proofs) || overlaps(record, time(other)))) || conflicts.has(visitType + ':' + visit.id);
     views.set(row.id, { state: review ? 'REVIEW' : 'RECORDED', record });
   }
   return views;
 }
-module.exports = { parse, create, check, describe, selection };
+module.exports = { parse, create, check, describe, selection, prepareRead };

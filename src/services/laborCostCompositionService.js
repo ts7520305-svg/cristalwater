@@ -124,6 +124,7 @@ async function apply(db, who, resourceId, payload) {
   await db.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${ 'expense-valuation:' + p.targetType + ':' + p.targetId }))::text`;
   const allocations = await db.expenseAllocation.findMany({where:{id:{in:current.parts.map(x=>x.allocationId)}}});
   if (allocations.length !== current.parts.length || !same(current.parts.map(x=>x.allocationId).sort((a,b)=>a-b),current.snapshot.parts.map(x=>x.id).sort((a,b)=>a-b)) || allocations.some(a=>a.voidedAt||!integrity.ids(basis.snapshot).includes(a.expenseId))) r.fail('As parcelas estão incompletas. É necessária revisão antes da anulação.',409);
+  if (await require('./maintenanceLaborShareService').hasActive(db, allocations)) r.fail('Anule primeiro as parcelas deste custo atribuídas a manutenções.',409);
   for (const a of allocations) {
     await db.expenseAllocation.update({where:{id:a.id},data:{voidedAt:changes.voidedAt,voidReason:reason,activeKey:null,activeMeasurementKey:null}});
     await db.companyExpense.update({where:{id:a.expenseId},data:{version:{increment:1}}});
