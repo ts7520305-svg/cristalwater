@@ -5,6 +5,7 @@ const handle=work=>(req,res,next)=>Promise.resolve(work(req,res)).catch(next);
 router.get('/',handle(async(req,res)=>res.json(await service.list(req.query))));
 router.get('/candidates',handle(async(req,res)=>res.json(await service.candidates(req.query))));
 router.post('/basis-preview',handle(async(req,res)=>{r.object(req.body,['expenseIds']);res.json({ok:true,preview:await service.read(db=>service.basisPreview(db,req.body.expenseIds))});}));
+router.post('/component-preview',handle(async(req,res)=>{r.object(req.query,[]);r.object(req.body,['components']);res.json({ok:true,preview:await service.read(db=>service.componentPreview(db,req.body.components))});}));
 router.get('/:id/valuation-preview',handle(async(req,res)=>{r.object(req.query,['kind','targetType','targetId','workIntervalId']);const choice=valuation.selection(req.query,true);if(choice.kind!=='LABOR')r.fail('Escolha trabalho.');res.json({ok:true,preview:await service.read(db=>service.valuePreview(db,r.queryId(req.params.id),choice))});}));
 router.get('/requests/:requestId',handle(async(req,res)=>res.json(await service.receipt(req.user,req.params.requestId,req.query))));
 router.post('/commands',handle(async(req,res)=>res.json(await service.command(req.user,req.body))));

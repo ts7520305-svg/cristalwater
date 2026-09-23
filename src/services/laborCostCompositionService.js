@@ -2,6 +2,7 @@
 const { prisma } = require('../prismaClient'), { roleMatches } = require('../utils/roles');
 const r = require('./expenseLedgerRules'), writes = require('./fieldWriteRequestService'), integrity = require('./laborCostCompositionIntegrity');
 const valuation = require('./expenseValuationService'), targets = require('./expenseCostTargets');
+const componentService=require('./laborCostComponentService');
 const { json, hash, same } = integrity, scope = 'LABOR_COST_COMPOSITION';
 const sha = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
 const read = work => prisma.$transaction(work, { isolationLevel: 'RepeatableRead', timeout: 30000, maxWait: 15000 });
@@ -17,6 +18,12 @@ async function basisPreview(db, expenseIds, lock = false) {
   const snapshot = integrity.facts(expenses), result = { version: 1, snapshot, fingerprint: hash(snapshot), expenseVersions: expenses.map(e => ({ expenseId: e.id, version: e.version })), technicianName: expenses[0].laborBasis.technician.name };
   return { ...result, hash: hash(result) };
 }
+async function componentPreview(db,selected,lock=false){
+  componentService.choices(selected);
+  const expenses=await integrity.expensesFor(db,{components:selected},lock),snapshot=integrity.facts(expenses,selected),first=componentService.select(expenses[0],selected[0].laborPart);
+  const result={version:1,snapshot,fingerprint:hash(snapshot),expenseVersions:expenses.map(e=>({expenseId:e.id,version:e.version})),technicianName:first.technicianName};
+  return {...result,hash:hash(result)};
+}
 async function valuePreview(db, basisId, choice, lock = false) {
   let basis = await db.laborCostBasis.findUnique({ where: { id: basisId } });
   if (!basis) r.fail('Base composta não encontrada.', 404);
@@ -27,7 +34,8 @@ async function valuePreview(db, basisId, choice, lock = false) {
   // Calculate every component before inserting any reservation. The first call
   // acquires the existing typed measurement/repair-work locks for the whole group.
   for (const expense of expenses) {
-    try { components.push(await valuation.preview(db, expense, choice, lock)); }
+    const selected=basis.snapshot.components.find(c=>c.expenseId===expense.id),part=selected.laborDistribution?.partIndex;
+    try { components.push(await valuation.preview(db, expense, {...choice,...(part?{laborPart:part}:{})}, lock)); }
     catch (error) { if (error.status === 409) r.fail('Despesa #' + expense.id + ': ' + error.message, 409); throw error; }
   }
   const first = components[0];
@@ -37,10 +45,13 @@ async function valuePreview(db, basisId, choice, lock = false) {
   return { ...value, hash: hash(value) };
 }
 async function candidates(query) {
-  r.object(query, ['q','page']); const q = r.text(query.q || '', 160), page = r.queryId(query.page || '1');
+  r.object(query, ['q','page','includeParts']); const q = r.text(query.q || '', 160), page = r.queryId(query.page || '1');
+  if(query.includeParts!==undefined&&query.includeParts!=='true')r.fail('Seleção de componentes inválida.');
+  const parts=query.includeParts==='true';
   return read(async db => {
-    const rows = await db.companyExpense.findMany({ where: { category: 'LABOR', sourceType: 'MANUAL', cancelledAt: null, laborBasis: { isNot: null }, laborDistributions: { none: { voidedAt: null } }, ...(q ? { OR: ['title','supplierName','documentNumber'].map(key => ({ [key]: { contains: q, mode: 'insensitive' } })) } : {}) }, include: integrity.include, orderBy: { id: 'desc' }, skip: (page-1)*10, take: 11 });
-    return { ok: true, page, q, hasMore: rows.length > 10, rows: rows.slice(0,10).map(e => ({ expenseId: e.id, version: e.version, title: e.title, documentNumber: e.documentNumber, amountCents: e.amountCents, technicianName: e.laborBasis.technician.name, basis: valuation.data.laborBasis(e.laborBasis) })) };
+    const eligibility=parts?{OR:[{laborBasis:{isNot:null}},{laborDistributions:{some:{voidedAt:null}}}]}:{laborBasis:{isNot:null},laborDistributions:{none:{voidedAt:null}}};
+    const rows = await db.companyExpense.findMany({ where: { category: 'LABOR', sourceType: 'MANUAL', cancelledAt: null, AND:[eligibility,...(q?[{OR:['title','supplierName','documentNumber'].map(key=>({[key]:{contains:q,mode:'insensitive'}}))}]:[])] }, include: integrity.include, orderBy: { id: 'desc' }, skip: (page-1)*10, take: 11 });
+    return { ok: true, ...(parts?{version:2}:{}), page, q, hasMore: rows.length > 10, rows: rows.slice(0,10).map(e => ({ expenseId: e.id, version: e.version, title: e.title, documentNumber: e.documentNumber, amountCents: e.amountCents, ...(parts?{options:componentService.options(e)}:{technicianName:e.laborBasis.technician.name,basis:valuation.data.laborBasis(e.laborBasis)}) })) };
   });
 }
 async function list(query) {
@@ -62,10 +73,10 @@ async function detail(id, query = {}) {
 }
 function envelope(body) {
   r.object(body, ['requestId','resourceId','command','data']); r.id(body.resourceId);
-  const d = body.data; r.object(d, ['expenseIds','choice','previewHash','recordHash','groupId','reason','confirmed']);
+  const d = body.data; r.object(d, ['expenseIds','components','choice','previewHash','recordHash','groupId','reason','confirmed']);
   if (d.confirmed !== true || !['CREATE','VALUE','VOID_BASIS','VOID_VALUE'].includes(body.command)) r.fail('Reveja e confirme o pedido.');
   r.text(d.reason, 500, true);
-  if (body.command === 'CREATE') { r.object(d,['expenseIds','previewHash','reason','confirmed']); componentIds(d.expenseIds); if (body.resourceId !== d.expenseIds[0] || !sha(d.previewHash)) r.fail('Reveja os documentos da composição.'); }
+  if (body.command === 'CREATE') { const parts=Object.hasOwn(d,'components');r.object(d,[parts?'components':'expenseIds','previewHash','reason','confirmed']); const ids=parts?componentService.choices(d.components).map(c=>c.expenseId):componentIds(d.expenseIds); if (body.resourceId !== ids[0] || !sha(d.previewHash)) r.fail('Reveja os documentos e parcelas da composição.'); }
   if (body.command === 'VALUE') { r.object(d,['choice','previewHash','reason','confirmed']); r.object(d.choice,['kind','targetType','targetId','purchaseItemId','quantity','workIntervalId']); if (d.choice.kind !== 'LABOR' || d.choice.quantity !== null || d.choice.purchaseItemId !== null || !sha(d.previewHash) || !same(valuation.selection(d.choice), d.choice)) r.fail('Reveja o intervalo e a valorização completa.'); }
   if (body.command.startsWith('VOID_')) { r.object(d,body.command==='VOID_VALUE'?['groupId','recordHash','reason','confirmed']:['recordHash','reason','confirmed']); if (!sha(d.recordHash)) r.fail('Consulte o registo antes de anular.'); if(body.command==='VOID_VALUE')r.id(d.groupId); }
   return json({ command: body.command, data: d });
@@ -73,8 +84,8 @@ function envelope(body) {
 async function apply(db, who, resourceId, payload) {
   const { command, data: d } = payload, reason = r.text(d.reason, 500, true);
   if (command === 'CREATE') {
-    const preview = await basisPreview(db, d.expenseIds, true); if (preview.hash !== d.previewHash) r.fail('Os documentos ou as bases mudaram. Calcule e reveja novamente.', 409);
-    const activeKey = r.hash(d.expenseIds); await db.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${ 'labor-cost-basis:' + activeKey }))::text`;
+    const preview = d.components?await componentPreview(db,d.components,true):await basisPreview(db, d.expenseIds, true); if (preview.hash !== d.previewHash) r.fail('Os documentos ou as bases mudaram. Calcule e reveja novamente.', 409);
+    const activeKey = componentService.activeKey(preview.snapshot); await db.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${ 'labor-cost-basis:' + activeKey }))::text`;
     if (await db.laborCostBasis.findUnique({ where: { activeKey } })) r.fail('Estes documentos já têm uma composição ativa.', 409);
     const basis = await db.laborCostBasis.create({ data: { snapshot: preview.snapshot, fingerprint: preview.fingerprint, technicianName: preview.technicianName, activeKey, reason, createdBy: who.owner } });
     return { basis: record(basis), recordHash: hash(record(basis)), preview };
@@ -82,7 +93,7 @@ async function apply(db, who, resourceId, payload) {
   if (command === 'VALUE') {
     const preview = await valuePreview(db, resourceId, d.choice, true); if (preview.hash !== d.previewHash) r.fail('O intervalo, os documentos ou os saldos mudaram. Calcule e reveja novamente.', 409);
     const group = await db.laborCostValuation.create({ data: { basisId: resourceId, snapshot: {}, fingerprint: '0'.repeat(64), reason, createdBy: who.owner } });
-    const marker = { version: 1, basisId: resourceId, basisFingerprint: preview.basisFingerprint, groupId: group.id, primaryExpenseId: preview.components[0].expenseId, expenseIds: preview.components.map(p => p.expenseId) };
+    const marker = componentService.marker(preview.basisSnapshot,resourceId,preview.basisFingerprint,group.id);
     const target = await targets.get(db, preview.targetType, preview.targetId), parts = [];
     for (const p of preview.components) {
       const snapshot = preview.basisSnapshot.components.find(c => c.expenseId === p.expenseId).expense;
@@ -93,7 +104,7 @@ async function apply(db, who, resourceId, payload) {
       await db.laborCostValuationPart.create({ data: { groupId: group.id, allocationId: a.id, expenseId: a.expenseId } });
       await db.companyExpense.update({ where: { id: p.expenseId }, data: { version: { increment: 1 } } });
     }
-    const snapshot = { version: 1, basisId: resourceId, basisFingerprint: preview.basisFingerprint, preview, parts };
+    const snapshot = { version: preview.basisSnapshot.version, basisId: resourceId, basisFingerprint: preview.basisFingerprint, preview, parts };
     const saved = await db.laborCostValuation.update({ where: { id: group.id }, data: { snapshot, fingerprint: hash(snapshot) } });
     return { group: record(saved), recordHash: hash(record(saved)), preview };
   }
@@ -137,4 +148,4 @@ async function receipt(user, requestId, query) {
   if(!saved)return{ok:true,found:false};if(saved.scope!==scope||saved.resourceId!==resourceId||saved.payloadHash!==query.payloadHash)r.fail('O identificador pertence a outro pedido.',409);
   return{ok:true,found:true,result:saved.response};
 }
-module.exports={scope,record,componentIds,basisPreview,valuePreview,candidates,list,detail,command,receipt,read};
+module.exports={scope,record,componentIds,basisPreview,componentPreview,valuePreview,candidates,list,detail,command,receipt,read};

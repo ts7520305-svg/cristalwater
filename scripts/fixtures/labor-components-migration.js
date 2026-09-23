@@ -1,0 +1,15 @@
+'use strict';
+module.exports=async function({prisma,cli,dbRejects,repairLaborData,repairLabor,priorCostSelect}){
+ const assert=require('node:assert/strict'),tables=['ExpenseAllocation','CompanyExpense','ExpenseEvent','ExpensePayment','ExpenseLaborBasis','ExpenseLaborDistribution','LaborCostBasis','LaborCostValuation','LaborCostValuationPart','FieldWriteRequest'];
+ const snapshot=async()=>Promise.all(tables.map(table=>prisma.$queryRawUnsafe('SELECT to_jsonb(a) AS row FROM "'+table+'" a ORDER BY id'))),before=await snapshot();
+ cli(['db','execute','--file','prisma/migrations/20260923080000_labor_cost_components/migration.sql','--schema','prisma/schema.prisma']);
+ assert.deepEqual(await snapshot(),before);
+ const expenseId=repairLabor.expenseId,marker={version:2,basisId:1,basisFingerprint:'a'.repeat(64),groupId:1,primaryExpenseId:2147483646,expenseIds:[2147483646,expenseId],components:[{expenseId:2147483646,distributionId:null,laborPart:null},{expenseId,distributionId:null,laborPart:null}]};
+ const whole=await prisma.expenseAllocation.create({select:priorCostSelect,data:{...repairLaborData,activeKey:'migration-components-part',valuationSnapshot:{...repairLaborData.valuationSnapshot,composition:marker},activeMeasurementKey:repairLaborData.activeMeasurementKey+':COMPONENT:'+expenseId}});
+ const source={...repairLaborData.valuationSnapshot.source,version:5,basis:{id:1,expenseId},laborDistribution:{id:1,partIndex:2,fingerprint:'b'.repeat(64),snapshot:{version:1,basis:'CONFIRMED_EXPENSE_LABOR_DISTRIBUTION',expense:{id:expenseId}}}},composition={...marker,components:[marker.components[0],{expenseId,distributionId:1,laborPart:2}]};
+ await prisma.expenseAllocation.update({select:priorCostSelect,where:{id:whole.id},data:{valuationSnapshot:{...repairLaborData.valuationSnapshot,source,composition}}});
+ for(const change of [`"activeMeasurementKey"='wrong'`,`"valuationSnapshot"=jsonb_set("valuationSnapshot",'{composition,version}','1')`,`"valuationSnapshot"="valuationSnapshot"#-'{composition,components}'`,`"valuationSnapshot"=jsonb_set("valuationSnapshot",'{composition,components}','[]')`,`"valuationSnapshot"=jsonb_set("valuationSnapshot",'{composition,components,1,distributionId}','2')`,`"valuationSnapshot"=jsonb_set("valuationSnapshot",'{composition,components,1,laborPart}','1')`,`"valuationSnapshot"=jsonb_set("valuationSnapshot",'{composition,components,1,expenseId}','0')`,`"valuationSnapshot"=jsonb_set("valuationSnapshot",'{source,laborDistribution,partIndex}','1')`,`"valuationSnapshot"=jsonb_set("valuationSnapshot",'{source,version}','3')`])await dbRejects(`UPDATE "ExpenseAllocation" SET ${change} WHERE id=${whole.id}`,'23514');
+ await prisma.expenseAllocation.update({select:priorCostSelect,where:{id:whole.id},data:{voidedAt:new Date(),voidReason:'Joint historical correction',activeKey:null,activeMeasurementKey:null}});
+ await dbRejects(`UPDATE "ExpenseAllocation" SET "valuationSnapshot"=jsonb_set("valuationSnapshot",'{composition,components,1,laborPart}','3') WHERE id=${whole.id}`,'23514');
+ await prisma.expenseAllocation.delete({select:priorCostSelect,where:{id:whole.id}});assert.deepEqual(await snapshot(),before);
+};
