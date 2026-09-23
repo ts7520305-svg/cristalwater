@@ -1,0 +1,13 @@
+'use strict';
+const router=require('express').Router(),service=require('../services/laborCostCompositionService'),r=require('../services/expenseLedgerRules'),valuation=require('../services/expenseValuationService');
+router.use((req,res,next)=>{res.set('Cache-Control','private, no-store');next();},require('../middlewares/authMiddleware')('ADMIN'));
+const handle=work=>(req,res,next)=>Promise.resolve(work(req,res)).catch(next);
+router.get('/',handle(async(req,res)=>res.json(await service.list(req.query))));
+router.get('/candidates',handle(async(req,res)=>res.json(await service.candidates(req.query))));
+router.post('/basis-preview',handle(async(req,res)=>{r.object(req.body,['expenseIds']);res.json({ok:true,preview:await service.read(db=>service.basisPreview(db,req.body.expenseIds))});}));
+router.get('/:id/valuation-preview',handle(async(req,res)=>{r.object(req.query,['kind','targetType','targetId','workIntervalId']);const choice=valuation.selection(req.query,true);if(choice.kind!=='LABOR')r.fail('Escolha trabalho.');res.json({ok:true,preview:await service.read(db=>service.valuePreview(db,r.queryId(req.params.id),choice))});}));
+router.get('/requests/:requestId',handle(async(req,res)=>res.json(await service.receipt(req.user,req.params.requestId,req.query))));
+router.post('/commands',handle(async(req,res)=>res.json(await service.command(req.user,req.body))));
+router.get('/:id',handle(async(req,res)=>res.json(await service.detail(r.queryId(req.params.id),req.query))));
+router.use((error,req,res,next)=>{if(res.headersSent)return next(error);const status=error.status||error.statusCode;res.status([400,401,403,404,409].includes(status)?status:503).json({ok:false,error:status?error.message:'Não foi possível confirmar a operação. Consulte o pedido original antes de repetir.'});});
+module.exports=router;

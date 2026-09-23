@@ -63,6 +63,7 @@ async function apply(db, who, env, expense) {
   if (command === 'VOID_COST') {
     r.object(d, ['allocationId', 'reason']); r.id(d.allocationId); const reason = r.text(d.reason, 500, true);
     const a = live(expense).find(a => a.id === d.allocationId); if (!a) return refused('ALLOCATION_STATE', 'Atribuição inexistente nesta despesa ou já anulada.');
+    if (a.valuationSnapshot?.composition || await db.laborCostValuationPart.findUnique({ where: { allocationId: a.id } })) return refused('COMPOSITE_VOID_REQUIRED', 'Anule todas as parcelas na base composta de trabalho.');
     if (a.valuationType !== 'MANUAL') await db.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${ 'expense-valuation:' + a.targetType + ':' + targets.targetId(a) }))::text`;
     const after = await db.expenseAllocation.update({ where: { id: a.id }, data: { voidedAt: new Date(), voidReason: reason, activeKey: null, activeMeasurementKey: null } });
     const updated = await db.companyExpense.update({ where: { id: expense.id }, data: { version: { increment: 1 } } });

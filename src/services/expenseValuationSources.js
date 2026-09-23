@@ -107,12 +107,22 @@ function totals(rows) {
   for (const row of rows) { const q = quantity(row.quantity); if (q === null || q <= 0n || !Number.isSafeInteger(row.amountCents) || row.amountCents <= 0) return null; units += q; cents += row.amountCents; }
   return Number.isSafeInteger(cents) ? { units, cents } : null;
 }
+function measurementTotals(rows) {
+  const unique = [], groups = new Map();
+  for (const row of rows) {
+    const id = row.valuationSnapshot?.composition?.groupId;
+    if (!id) { unique.push(row); continue; }
+    if (groups.has(id)) { const first = groups.get(id); if (quantity(first.quantity) !== quantity(row.quantity) || first.valuationKey !== row.valuationKey) return null; }
+    else { groups.set(id, row); unique.push(row); }
+  }
+  return totals(unique);
+}
 function reservations(data, expense, source, purchaseItemId) {
   const poolRows = data.active.filter(a => source.kind === 'MATERIAL' ? a.valuationType === 'MATERIAL' && a.purchaseItemId === purchaseItemId : a.valuationType === 'LABOR' && a.expenseId === expense.id);
   const basisMatches = poolRows.every(a => {
     const c = a.valuationSnapshot?.calculation;
     return c && quantity(c.baseQuantity) === source.totalQuantity && c.baseAmountCents === source.totalCents && c.quantityUnit === source.unit && c.method === source.method;
   });
-  return { measured: totals(data.active.filter(a => a.valuationKey === source.key)), pool: totals(poolRows), basisMatches };
+  return { measured: measurementTotals(data.active.filter(a => a.valuationKey === source.key)), pool: totals(poolRows), basisMatches };
 }
 module.exports = { quantity, decimal, round, prepare, build, reservations, selected, totals, laborBasis };

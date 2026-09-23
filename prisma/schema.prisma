@@ -2697,3 +2697,43 @@ model RepairWorkInterval {
   @@index([repairId, createdAt])
   @@index([technicianId, startedAt, endedAt])
 }
+
+// Immutable compositions and valuation groups retain their historical identities.
+model LaborCostBasis {
+  id Int @id @default(autoincrement())
+  snapshot Json
+  fingerprint String
+  technicianName String
+  activeKey String? @unique
+  reason String
+  createdBy String
+  createdAt DateTime @default(now())
+  voidedAt DateTime?
+  voidedBy String?
+  voidReason String?
+  groups LaborCostValuation[]
+}
+model LaborCostValuation {
+  id Int @id @default(autoincrement())
+  basisId Int
+  snapshot Json
+  fingerprint String
+  reason String
+  createdBy String
+  createdAt DateTime @default(now())
+  voidedAt DateTime?
+  voidedBy String?
+  voidReason String?
+  basis LaborCostBasis @relation(fields: [basisId], references: [id], onDelete: Restrict)
+  parts LaborCostValuationPart[]
+  @@index([basisId])
+}
+model LaborCostValuationPart {
+  id Int @id @default(autoincrement())
+  groupId Int
+  allocationId Int @unique
+  expenseId Int
+  group LaborCostValuation @relation(fields: [groupId], references: [id], onDelete: Restrict)
+  @@unique([groupId, expenseId])
+  @@index([expenseId])
+}

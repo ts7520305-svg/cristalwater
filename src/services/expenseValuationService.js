@@ -93,7 +93,7 @@ async function apply(db, who, env, expense) {
 }
 async function decorate(db, expenses) {
   const prepared = await data.prepare(db, expenses.flatMap(e => e.allocations));
-  return expenses.map(expense => {
+  const decorated = expenses.map(expense => {
     const allocations = expense.allocations.map(a => {
       if (a.valuationType === 'MANUAL') return { ...a, quantity: null };
       const source = data.build(prepared, expense, data.selected(a)), reasons = [...a.reviewReasons];
@@ -106,6 +106,7 @@ async function decorate(db, expenses) {
     });
     return { ...expense, allocations, laborBasis: expense.laborBasis ? { ...data.laborBasis(expense.laborBasis), technician: expense.laborBasis.technician, reason: expense.laborBasis.reason } : null, allocationReviewCount: allocations.filter(a => a.needsReview).length };
   });
+  return require('./laborCostCompositionIntegrity').decorate(db, decorated);
 }
 function summary(rows) {
   const valued = rows.filter(a => a.valuationType !== 'MANUAL'), total = kind => { const selected = valued.filter(a => a.valuationType === kind); return selected.some(a => a.needsReview) ? null : sum(selected.map(a => a.amountCents)); };

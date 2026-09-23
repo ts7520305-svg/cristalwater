@@ -244,6 +244,7 @@ mount("/api/incidents", incidentRoutes);
 mount("/api/equipment-stock-os", equipmentStockOsRoutes);
 mount("/api/finance-os", financeOsRoutes);
 mount('/api/expenses', require('./routes/companyExpenseRoutes'));
+mount('/api/labor-cost-bases', require('./routes/laborCostCompositionRoutes'));
 mount('/api/revenue-allocations', require('./routes/monthlyRevenueRoutes'));
 mount('/api/credit-revenue-allocations', require('./routes/creditRevenueRoutes'));
 

@@ -1,0 +1,22 @@
+'use strict';
+module.exports=async function({prisma,cli,dbRejects,repairLaborData,repairLabor}){
+ const assert=require('node:assert/strict');
+ const before=await prisma.$queryRaw`SELECT to_jsonb(a) AS row FROM "ExpenseAllocation" a ORDER BY id`;
+ cli(['db','execute','--file','prisma/migrations/20260923050000_labor_cost_composition/migration.sql','--schema','prisma/schema.prisma']);
+ assert.deepEqual(await prisma.$queryRaw`SELECT to_jsonb(a) AS row FROM "ExpenseAllocation" a ORDER BY id`,before);
+ assert.equal(await prisma.laborCostBasis.count(),0);assert.equal(await prisma.laborCostValuation.count(),0);assert.equal(await prisma.laborCostValuationPart.count(),0);
+ const basis=await prisma.laborCostBasis.create({data:{snapshot:{historical:true},fingerprint:'a'.repeat(64),technicianName:'Retained technician',activeKey:'b'.repeat(64),reason:'Confirmed historical composition',createdBy:'ADMIN:1'}});
+ for(const assignment of [`"fingerprint"='bad'`,`"snapshot"='[]'`,`"reason"=' '`,`"createdBy"='CLIENT:1'`,`"activeKey"=NULL`,`"voidedAt"=CURRENT_TIMESTAMP`])await dbRejects(`UPDATE "LaborCostBasis" SET ${assignment} WHERE id=${basis.id}`,'23514');
+ await dbRejects(`INSERT INTO "LaborCostBasis" ("snapshot","fingerprint","technicianName","activeKey","reason","createdBy") SELECT "snapshot","fingerprint","technicianName","activeKey","reason","createdBy" FROM "LaborCostBasis" WHERE id=${basis.id}`,'23505');
+ const group=await prisma.laborCostValuation.create({data:{basisId:basis.id,snapshot:{historical:true},fingerprint:'c'.repeat(64),reason:'Confirmed group',createdBy:'ADMIN:1'}});
+ const marker={version:1,basisId:basis.id,basisFingerprint:basis.fingerprint,groupId:group.id,primaryExpenseId:2147483646,expenseIds:[2147483646,repairLabor.expenseId]};
+ const part=await prisma.expenseAllocation.create({data:{...repairLaborData,activeKey:'migration-composed-part',valuationSnapshot:{...repairLaborData.valuationSnapshot,composition:marker},activeMeasurementKey:repairLaborData.activeMeasurementKey+':COMPONENT:'+repairLabor.expenseId}});
+ const membership=await prisma.laborCostValuationPart.create({data:{groupId:group.id,allocationId:part.id,expenseId:part.expenseId}});
+ for(const assignment of [`"activeMeasurementKey"='wrong'`,`"valuationSnapshot"=jsonb_set("valuationSnapshot",'{composition,expenseIds}','[]')`,`"valuationSnapshot"=jsonb_set("valuationSnapshot",'{composition,basisFingerprint}','"bad"')`,`"valuationSnapshot"=jsonb_set("valuationSnapshot",'{composition,primaryExpenseId}','0')`,`"valuationSnapshot"=jsonb_set("valuationSnapshot",'{composition,groupId}','0')`,`"valuationSnapshot"="valuationSnapshot"-'composition'`])await dbRejects(`UPDATE "ExpenseAllocation" SET ${assignment} WHERE id=${part.id}`,'23514');
+ await dbRejects(`INSERT INTO "LaborCostValuationPart" ("groupId","allocationId","expenseId") VALUES (${group.id},${part.id},2147483646)`,'23505');
+ await dbRejects(`INSERT INTO "LaborCostValuationPart" ("groupId","allocationId","expenseId") VALUES (${group.id},2147483646,${part.expenseId})`,'23505');
+ await dbRejects(`DELETE FROM "LaborCostBasis" WHERE id=${basis.id}`,['23001','23503']);await dbRejects(`DELETE FROM "LaborCostValuation" WHERE id=${group.id}`,['23001','23503']);
+ await prisma.expenseAllocation.update({where:{id:part.id},data:{voidedAt:new Date(),voidReason:'Joint historical correction',activeKey:null,activeMeasurementKey:null}});
+ assert.deepEqual(await prisma.expenseAllocation.findUniqueOrThrow({where:{id:repairLabor.id}}),repairLabor);
+ await prisma.laborCostValuationPart.delete({where:{id:membership.id}});await prisma.laborCostValuation.delete({where:{id:group.id}});await prisma.laborCostBasis.delete({where:{id:basis.id}});await prisma.expenseAllocation.delete({where:{id:part.id}});
+};
