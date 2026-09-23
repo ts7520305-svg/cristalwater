@@ -24,7 +24,17 @@ Navegador novo: parcelas explícitas, rascunho sem consentimento, prévia forjad
 
 Regressões locais aprovadas: valorização de despesas, reparações, bases compostas, correção de período, despesas de manutenções e administração das despesas. 401 unitários/64 ficheiros; sintaxe 599 JS backend, 201 JS frontend e 62 inline. As 34 migrações preservam os registos anteriores e correspondem ao esquema de 126 tabelas. Runner 203 → 205 grupos; cache `cristalwater-field-20260923-v119`. Sem dependências novas. Logs `/tmp/cw303-*.log`; visuais `/tmp/cw-labor-distribution-qa/`.
 
-O CI completo e o restauro PostgreSQL 16 da versão publicada ainda têm de ser confirmados antes do fecho.
+O CI completo e o restauro PostgreSQL 16 da versão publicada foram confirmados conforme a evidência seguinte.
+
+Conferência local adicional, independente do runner: um documento de 350 cêntimos totalmente valorizado ficou em 34 cêntimos nas visitas de janeiro, 50 nas visitas de fevereiro e 266 nas reparações pelo respetivo mês de conclusão. Nas reparações, os técnicos mantêm 66/200 cêntimos; o cliente original inativo conserva os custos depois de transferir a piscina. Nenhum pagamento inventado; cobertura completa falsa e lucro nulo. Ensaio isolado `/tmp/cw303-projection-check.cjs`, log `/tmp/cw303-projection-check.log`.
+
+## Publicação e CI
+
+Código publicado sem força e com árvore igual à validada localmente: commit `84418ee80c5b526e679fbf8b1ae1246f607e320e`, árvore `a8ca66d0e4c5d3c73454b533bed9e50c84f66550`, [CI 35892421500](https://github.com/ts7520305-svg/cristalwater/actions/runs/35892421500), job `107287909433`: 17 etapas aprovadas entre 16:58:21 e 17:27:00 UTC de 23/09/2026 (28m39s). Logs completos conferidos: 205/205 grupos previstos distintos, código zero/sem sinal, sem falta ou duplicação; 401 unitários/64 ficheiros, quatro técnicos, gate geral do navegador, 34 migrações e sintaxe 599/201/62. Restauro PostgreSQL 16: 126 tabelas/46 ficheiros, linhas e hashes iguais.
+
+Repartição de trabalho API/UI aprovada em 3541/9549 ms; bases compostas API/UI 5838/5531 ms; trabalho de reparações API/UI 4549/13335 ms; consulta por execução API/UI 20274/27169 ms. Todos os grupos previstos foram conferidos, sem falta, entrada inesperada, duplicação ou sinal.
+
+Evidência completa em `evidence/20260923_task303_ci.json`. Backup `backup/labor-distribution-local-20260923` (`64b3eaa3b63617d7b25107f0e66be9f3269532a6`). O fecho posterior altera apenas documentação e preserva as árvores de código, migrações e testes aprovados. Não é aprovação de produção nem cobertura financeira completa.
 
 ## Âmbito e próximos passos
 
