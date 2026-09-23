@@ -145,6 +145,7 @@ scripts.push('test-field-labor-components.js','test-field-labor-components-ui.js
 scripts.push('test-field-work-time-costs.js');
 scripts.push('test-field-expense-valuations.js','test-field-expense-valuations-ui.js');
 scripts.push('test-field-financial-cost-coverage.js');
+scripts.push('test-field-composed-cost-coverage.js');
 scripts.push('test-field-financial-revenue-coverage.js');
 scripts.push('test-field-monthly-revenue.js','test-field-monthly-revenue-ui.js');
 scripts.push('test-field-maintenance-revenue.js');

@@ -92,9 +92,13 @@ async function build(db, monthRef, generatedAt, expenses) {
   for (const visit of visits) {
     const entry = byVisit.get(visitKey(visit.type,visit.id)), reasons = [];
     const allocations = entry.allocations.filter(a => a.valuationType === 'LABOR');
+    // The ledger has already verified every composition and its membership.
+    // Its monetary parts represent one measurement; standalone valuations retain
+    // distinct identities, and a changed part still requires review below.
+    const measurements = new Set(allocations.map(a => Number.isSafeInteger(a.laborCostGroupId) && a.laborCostGroupId > 0 && a.valuationSnapshot?.composition?.groupId === a.laborCostGroupId ? 'GROUP:' + a.laborCostGroupId : 'ALLOCATION:' + a.id));
     const duration = visit.startAt ? visit.endAt - visit.startAt : NaN;
     const valid = visit.clientId && visit.technicianId && Number.isSafeInteger(duration) && duration > 0;
-    const laborState = !valid || allocations.length > 1 || allocations.some(a => a.needsReview || quantity(a.quantity) !== BigInt(duration) * 1000n) ? 'review' : allocations.length ? 'valued' : 'missing';
+    const laborState = !valid || measurements.size > 1 || allocations.some(a => a.needsReview || quantity(a.quantity) !== BigInt(duration) * 1000n) ? 'review' : allocations.length ? 'valued' : 'missing';
     labor[laborState]++;
     if (laborState !== 'valued') reasons.push('LABOR_' + laborState.toUpperCase());
     if (!entry.groups.size && !entry.invalid) { noMaterialRecordVisits++; reasons.push('NO_MATERIAL_RECORD'); }
