@@ -45,10 +45,18 @@ Validação local em PGlite e Chromium 149:
 - Navegador: escolha explícita, revisão, consentimento invalidado, pré-visualização de outro cliente e recibo adulterado recusados, resposta perdida/recarregamento/consulta exata, anulação, escolhas REGULAR/EXTRA tipadas, leituras e sessão A–B–A, texto literal e visual móvel/escuro.
 - Regressões API/UI de atribuições de despesas, valorização de visitas, materiais e trabalho de reparações aprovadas. 401 unitários/64 ficheiros; sintaxe 596 backend/198 frontend/62 inline; 32 migrações preservam dados e coincidem com o modelo.
 
-Logs locais `/tmp/cw300-api.log`, `/tmp/cw300-ui.log`, `/tmp/cw300-final.log`, `/tmp/cw300-regression.log`, `/tmp/cw300-migrations.log`, `/tmp/cw300-unit.log`, `/tmp/cw300-syntax.log`; imagens revistas em `/tmp/cw-labor-composition-qa/`. O ensaio local não substitui a confirmação dos 199 grupos e do restauro em PostgreSQL 16 da versão publicada.
+Logs locais `/tmp/cw300-api.log`, `/tmp/cw300-ui.log`, `/tmp/cw300-final.log`, `/tmp/cw300-regression.log`, `/tmp/cw300-migrations.log`, `/tmp/cw300-unit.log`, `/tmp/cw300-syntax.log`; imagens revistas em `/tmp/cw-labor-composition-qa/`. Os 199 grupos completos, concorrência nativa e restauro foram posteriormente confirmados no CI PostgreSQL 16 da versão publicada, conforme a evidência abaixo.
 
 ## Publicação e continuidade
 
-Base `a5c9677558d29403a98626eef297730a4a4330a0`, branch `work/field-readiness-20260915-simulation`. Principal `feature/technicians-v25` preservada em `6f27081e1d183ff584a62255b016b373836734db`. Publicação/CI nativo por confirmar neste registo local; fecho só depois de conferir todos os grupos e o restauro. Sem merge, instalação no VPS ou contactos reais.
+Base `a5c9677558d29403a98626eef297730a4a4330a0`, branch `work/field-readiness-20260915-simulation`. Principal `feature/technicians-v25` preservada em `6f27081e1d183ff584a62255b016b373836734db`. Publicação e CI nativo confirmados conforme a secção seguinte. Sem merge, instalação no VPS ou contactos reais.
 
 Próximo: restantes gastos operacionais, correção explícita das divergências de período e restantes origens/ajustes de receita. Repartir documentos de vários técnicos/períodos continua a exigir um modelo explícito. IVA/emissão fiscal externos, valores e frequências por cliente/época; revisão histórica, volume, fornecedores e piloto físico continuam pendentes. Esta tarefa não declara prontidão global de produção.
+
+## Publicação e CI
+
+Código publicado sem força e com árvore igual à validada localmente: commit `caf9c080d9f4759065d2410ea42ca513f15e4d22`, árvore `d4227989ca9415e24deb6c087053ee536b509375`, [CI 35847654216](https://github.com/ts7520305-svg/cristalwater/actions/runs/35847654216), job `107137596134`: 17 etapas aprovadas entre 10:14:40 e 10:37:31 UTC de 23/09/2026 (22m51s). Logs completos conferidos: 199/199 grupos previstos distintos, código zero/sem sinal, sem falta ou duplicação; 401 unitários/64 ficheiros, quatro técnicos, gate geral do navegador, 32 migrações e sintaxe 596/198/62. Restauro PostgreSQL 16: 125 tabelas/46 ficheiros, linhas e hashes iguais.
+
+API/UI de composição aprovadas em 4998/5055 ms; trabalho de reparações API/UI 3995/10252 ms; materiais API/UI 3212/9565 ms; valorização de visitas API/UI 3285/8973 ms. Todos os grupos previstos foram conferidos, sem falta, entrada inesperada, duplicação ou sinal.
+
+Evidência completa em `evidence/20260923_task300_ci.json`. Backup `backup/labor-composition-local-20260923` (`0ab4f1ebf267ae3b419a776ae73eb8aa920986f9`). O fecho posterior altera apenas documentação e conserva as árvores de código, migrações e testes aprovados. Restantes gastos, repartições entre técnicos/períodos, divergências temporais e restantes receitas continuam pendentes; não se apura margem completa. Esta aprovação não abrange instalação no VPS, fornecedores reais ou piloto físico.
