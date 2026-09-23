@@ -42,10 +42,18 @@ A 31.ª migração altera a restrição das valorizações e acrescenta a restri
 - Navegador Chromium 149: seleção explícita e rascunho sem consentimento, fontes/recibos adulterados mesmo com impressões recalculadas, respostas atrasadas, clique duplo, perda de resposta, consulta/repetição exata, histórico/anulação, custos em Gestão com IA, sessão A–B–A e texto literal.
 - API/UI de valorização de visitas e materiais de reparações passaram; API de tempos da TASK298 também passou. Visuais 320/390/1440 e modo escuro revistos. 401 unitários/64 ficheiros e sintaxe 593 backend/196 frontend/61 scripts inline aprovados. 31 migrações aprovadas.
 
-Validação local com PGlite e Chromium 149. Logs `/tmp/cw299-api-regressions.log`, `/tmp/cw299-ui.log`, `/tmp/cw299-final.log`, `/tmp/cw299-migrations.log`, `/tmp/cw299-unit.log` e `/tmp/cw299-syntax.log`. Visuais finais em `reports/field-visual/repair-labor-1790153852974/`. O runner passa a 197 grupos. Confirmar o CI nativo PostgreSQL 16 da versão publicada, incluindo concorrência e restauro, antes do fecho.
+Validação local com PGlite e Chromium 149. Logs `/tmp/cw299-api-regressions.log`, `/tmp/cw299-ui.log`, `/tmp/cw299-final.log`, `/tmp/cw299-migrations.log`, `/tmp/cw299-unit.log` e `/tmp/cw299-syntax.log`. Visuais finais em `reports/field-visual/repair-labor-1790153852974/`. Os 197 grupos completos, concorrência nativa e restauro foram posteriormente confirmados no CI PostgreSQL 16 da versão publicada, conforme a evidência abaixo.
 
 ## Continuidade e limites
 
 Base `21b7bd48012ba621e46e66787f4695f3e26a30ce`, branch `work/field-readiness-20260915-simulation`. Principal `feature/technicians-v25` conservada em `6f27081e1d183ff584a62255b016b373836734db`; sem merge, instalação no VPS ou contactos reais.
 
 Próximo: base composta de custo do trabalho e restantes gastos, correção explícita das divergências de período e restantes origens/ajustes de receita, mantendo os custos parciais e as fontes históricas. Encargos de vários documentos não cabem ainda numa única valorização do intervalo. Históricos/apresentação, volume, fornecedores reais e piloto físico continuam por fechar. IVA e emissão fiscal permanecem externos; preços e frequências dependem de cada cliente/época.
+
+## Publicação e CI
+
+Código publicado sem força e com árvore igual à validada localmente: commit `78679215a438b09bc65169a1970e6474026f342a`, árvore `93189e38cde3d450ae2165f400927dec3cb5803a`, [CI 35840505468](https://github.com/ts7520305-svg/cristalwater/actions/runs/35840505468), job `107114162074`: 17 etapas aprovadas entre 09:01:43 e 09:25:29 UTC de 23/09/2026 (23m46s). Logs completos conferidos: 197/197 grupos previstos distintos, código zero/sem sinal, sem falta ou duplicação; 401 unitários/64 ficheiros, quatro técnicos, gate geral do navegador, 31 migrações e sintaxe 593/196/61. Restauro PostgreSQL 16: 122 tabelas/46 ficheiros, linhas e hashes iguais.
+
+API/UI de trabalho valorizado aprovadas em 3537/11646 ms; tempos declarados API/UI 1979/5212 ms; materiais de reparações API/UI 3317/10397 ms; valorização de visitas API/UI 3649/9606 ms. Todos os grupos previstos foram conferidos sem falta, entrada inesperada, duplicação ou sinal.
+
+Evidência completa em `evidence/20260923_task299_ci.json`. Backup `backup/repair-labor-local-20260923` (`6a24dc60d70ad4f0f5364e76385b90fa8d187bfd`). O fecho posterior altera apenas documentação e conserva a árvore do código, migrações e testes aprovados. Base composta/restantes gastos, correção explícita de períodos e restantes receitas continuam pendentes; não se apura margem completa. Esta aprovação não abrange instalação no VPS, fornecedores reais ou piloto físico.
