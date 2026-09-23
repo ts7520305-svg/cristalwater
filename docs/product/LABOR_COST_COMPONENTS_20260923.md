@@ -23,7 +23,13 @@ API e navegador novos em `test-field-labor-components.js` e `test-field-labor-co
 
 Verificação local aprovada: novos API/UI, regressões de composição anterior, repartição do trabalho, reparações, valorização de despesas, correção de período, consulta por execução e despesas de manutenções; 401 unitários/64 ficheiros. Sintaxe: 600 JS backend, 201 frontend e 62 inline. As 35 migrações preservam os registos e correspondem ao esquema. Runner 205 → 207 grupos; cache `cristalwater-field-20260923-v120`; sem novas dependências. Logs `/tmp/cw304-*.log`; visuais `/tmp/cw-labor-components-qa/`.
 
-CI completo e restauro PostgreSQL 16 da versão publicada ainda por confirmar; a validação local não os substitui.
+## Publicação e CI
+
+Código publicado sem força e com árvore igual à validada localmente: commit `d5907d1fedb3846c0a3f2b4868a7d2da6f56775e`, árvore `30ba6e6acf140480fd926c9f67246d1a455e9eef`, [CI 35899443972](https://github.com/ts7520305-svg/cristalwater/actions/runs/35899443972), job `107311560519`: 17 etapas aprovadas entre 18:00:04 e 18:26:40 UTC de 23/09/2026 (26m36s). Logs completos conferidos: 207/207 grupos previstos distintos, código zero/sem sinal, sem falta, entrada inesperada ou duplicação; 401 unitários/64 ficheiros, quatro técnicos, gate geral do navegador, 35 migrações e sintaxe 600/201/62. Restauro PostgreSQL 16: 126 tabelas/46 ficheiros, linhas e hashes iguais.
+
+Composição de parcelas API/UI aprovada em 5537/5117 ms; composição anterior 6095/5284 ms; repartição por técnico/período 4206/9114 ms; trabalho de reparações 4239/11453 ms; consulta por execução 16279/22018 ms. Todos os grupos previstos foram conferidos, sem falta, entrada inesperada, duplicação ou sinal.
+
+Evidência completa em `evidence/20260923_task304_ci.json`. Backup `backup/labor-components-local-20260923` (`bb0d76a07b675f56c5084ebf91712762f605f4fd`). O fecho posterior altera apenas documentação e preserva as árvores de código, migrações e testes aprovados. Não é aprovação de produção nem cobertura financeira completa.
 
 ## Âmbito e próximos passos
 
