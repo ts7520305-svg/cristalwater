@@ -105,6 +105,7 @@ async function apply(db, who, env, file, current) {
   }
   if (current.cancelledAt) return refused('CANCELLED', 'A despesa está anulada.');
   if (['SET_LABOR_BASIS', 'VALUE_MATERIAL', 'VALUE_LABOR'].includes(command)) return valuation.apply(db, who, env, current);
+  if (command === 'CORRECT_COST_PERIOD') return require('./expenseCostPeriodService').apply(db, who, env, current);
   if (['ALLOCATE_COST', 'REVIEW_COST', 'VOID_COST'].includes(command)) return costs.apply(db, who, env, current);
   if (command === 'RECORD_PAYMENT') {
     r.object(d, ['amountCents', 'paidOn', 'method', 'reference']);
@@ -193,8 +194,12 @@ async function valuationPreview(id, query) {
   r.id(id); r.object(query, ['kind', 'targetType', 'targetId', 'purchaseItemId', 'quantity', 'workIntervalId']); const selection = valuation.selection(query, true);
   return prisma.$transaction(async db => { const expense = await db.companyExpense.findUnique({ where: { id }, include }); if (!expense) r.fail('Despesa não encontrada.', 404); return { ok: true, preview: await valuation.preview(db, expense, selection) }; }, { isolationLevel: 'RepeatableRead', timeout: 30000, maxWait: 15000 });
 }
+async function costPeriodPreview(id, query) {
+  r.id(id); r.object(query, ['allocationId']); const allocationId = r.queryId(query.allocationId);
+  return prisma.$transaction(async db => { const expense = await db.companyExpense.findUnique({ where: { id }, include }); if (!expense) r.fail('Despesa não encontrada.', 404); return { ok: true, preview: await require('./expenseCostPeriodService').preview(db, expense, allocationId) }; }, { isolationLevel: 'RepeatableRead', timeout: 30000, maxWait: 15000 });
+}
 async function repairWorkIntervals(id, query) {
   r.id(id); r.object(query, ['repairId']); const repairId = r.queryId(query.repairId);
   return prisma.$transaction(async db => { const expense = await db.companyExpense.findUnique({ where: { id }, include }); if (!expense) r.fail('Despesa não encontrada.', 404); return { ok: true, intervals: await valuation.workIntervals(db, expense, repairId) }; }, { isolationLevel: 'RepeatableRead', timeout: 30000, maxWait: 15000 });
 }
-module.exports = { repairWorkIntervals, list, detail, summary, rows, summarize, command, receipt, evidence, actor, sources, costs, costReport, clientCosts, valuationPreview, operationalCosts };
+module.exports = { costPeriodPreview, repairWorkIntervals, list, detail, summary, rows, summarize, command, receipt, evidence, actor, sources, costs, costReport, clientCosts, valuationPreview, operationalCosts };

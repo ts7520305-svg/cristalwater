@@ -1,7 +1,7 @@
 'use strict';
 const crypto = require('node:crypto');
 const categories = ['STOCK', 'MATERIAL', 'FUEL', 'VEHICLE', 'LABOR', 'INSURANCE', 'GENERAL'];
-const commands = ['CREATE', 'EDIT', 'CANCEL', 'REOPEN', 'RECORD_PAYMENT', 'REVERSE_PAYMENT', 'ADD_EVIDENCE', 'VOID_EVIDENCE', 'ALLOCATE_COST', 'REVIEW_COST', 'VOID_COST', 'SET_LABOR_BASIS', 'VALUE_MATERIAL', 'VALUE_LABOR'];
+const commands = ['CREATE', 'EDIT', 'CANCEL', 'REOPEN', 'RECORD_PAYMENT', 'REVERSE_PAYMENT', 'ADD_EVIDENCE', 'VOID_EVIDENCE', 'ALLOCATE_COST', 'REVIEW_COST', 'VOID_COST', 'CORRECT_COST_PERIOD', 'SET_LABOR_BASIS', 'VALUE_MATERIAL', 'VALUE_LABOR'];
 const maxEvidence = 5 * 1024 * 1024;
 function fail(message, status = 400) { throw Object.assign(new Error(message), { status }); }
 function object(value, allowed) {

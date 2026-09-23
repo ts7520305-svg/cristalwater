@@ -128,7 +128,7 @@
           node(card, 'h4', 'Despesa #' + row.expenseId + ' · Atribuição #' + row.id);
           node(card, 'p', row.label + ' · ' + (row.documentNumber || 'Sem número de documento') + ' · Data ' + row.expenseDate);
           node(card, 'p', money(row.amountCents) + ' · ' + ({MATERIAL: 'Consumo valorizado', LABOR: 'Tempo valorizado', OTHER: 'Outro custo atribuído', PURCHASE: 'Compra atribuída; não comprova consumo'}[row.kind]) + ' · Atribuição ' + row.allocationMonth + ' · Execução ' + row.serviceMonth + ' · ' + ({CONFIRMED: 'Confirmado neste registo', REVIEW: 'Por rever; excluído dos custos conhecidos', PERIOD_MISMATCH: 'Mês diferente; excluído dos custos alinhados'}[row.state]));
-          node(card, 'p', row.reason, 'ai-note'); const a = node(card, 'a', 'Abrir registo de despesas'); a.href = '/admin-expenses';
+          node(card, 'p', row.reason, 'ai-note'); const a = node(card, 'a', row.state === 'PERIOD_MISMATCH' ? 'Rever mês na despesa' : 'Abrir despesa e atribuição'); a.href = '/admin-expenses?expenseId=' + row.expenseId + '&allocationId=' + row.id;
         }
       }
       if (!data.rows.length) node(el('executionRows'), 'p', 'Sem resultados nesta página. Altere a pesquisa ou volte à lista de serviços.');

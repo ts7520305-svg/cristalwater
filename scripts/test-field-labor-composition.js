@@ -34,6 +34,7 @@ async function server(){const c=fork(require.resolve('./fixtures/expense-server'
  const receipt=await api('/api/labor-cost-bases/requests/'+request.requestId+'?'+new URLSearchParams({resourceId:composition.id,payloadHash:race[0].receipt.payloadHash}));assert.deepEqual(receipt.result,race[0]);
  await api('/api/labor-cost-bases/requests/'+request.requestId+'?'+new URLSearchParams({resourceId:composition.id,payloadHash:'a'.repeat(64)}),null,409);
  for(const e of [a,b])assert.equal((await expense(e)).allocations[0].needsReview,false);
+ for(const part of first.snapshot.parts)assert.equal((await api('/api/expenses/'+part.expenseId+'/cost-period-preview?allocationId='+part.id)).preview.code,'REVALUE_REQUIRED');
  await preview(composition,choice(f.first),409);await api('/api/expenses/'+other.expenseId+'/valuation-preview?kind=LABOR&targetType=REPAIR&targetId='+f.reserved.id+'&workIntervalId='+f.first.id,null,409);
  const ea=await expense(a),partial=await api('/api/expenses/commands',{requestId:randomUUID(),command:'VOID_COST',expenseId:ea.id,expectedVersion:ea.version,data:{allocationId:first.snapshot.parts[0].id,reason:'Tentar anulação parcial'}});assert.equal(partial.code,'COMPOSITE_VOID_REQUIRED');
  let d=await detail(composition);assert.equal(d.groups[0].state,'CONFIRMED');assert.equal((await send(cmd('VOID_BASIS',composition.id,{recordHash:d.basis.recordHash}))).code,'COMPOSITION_REVIEW');

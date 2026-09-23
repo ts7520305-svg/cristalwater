@@ -6,7 +6,7 @@ const express = require('express'), path = require('node:path'), { prisma } = re
 let fault = null;
 const transaction = prisma.$transaction.bind(prisma);
 prisma.$transaction = (work, options) => transaction(async db => {
-  for (const [model, method, match] of [['expenseEvent', 'create', 'audit'], ['companyExpense', 'update', 'after-payment'], ['companyExpense', 'findMany', 'read'], ['laborCostValuationPart', 'create', 'composition-part'], ['fieldWriteRequest', 'create', 'composition-receipt']]) {
+  for (const [model, method, match] of [['expenseAllocation', 'create', 'period-create'], ['expenseEvent', 'create', 'audit'], ['companyExpense', 'update', 'after-payment'], ['companyExpense', 'findMany', 'read'], ['laborCostValuationPart', 'create', 'composition-part'], ['fieldWriteRequest', 'create', 'composition-receipt']]) {
     const original = db[model][method].bind(db[model]); db[model][method] = (...args) => { if (fault === match) throw Error('QA_PRIVATE_EXPENSE_FAILURE'); return original(...args); };
   }
   return work(db);
