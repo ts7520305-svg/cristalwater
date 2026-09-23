@@ -142,6 +142,7 @@ scripts.push('test-field-cost-period.js','test-field-cost-period-ui.js');
 scripts.push('test-field-maintenance-costs.js','test-field-maintenance-costs-ui.js');
 scripts.push('test-field-labor-distribution.js','test-field-labor-distribution-ui.js');
 scripts.push('test-field-labor-components.js','test-field-labor-components-ui.js');
+scripts.push('test-field-work-time-costs.js');
 scripts.push('test-field-expense-valuations.js','test-field-expense-valuations-ui.js');
 scripts.push('test-field-financial-cost-coverage.js');
 scripts.push('test-field-financial-revenue-coverage.js');

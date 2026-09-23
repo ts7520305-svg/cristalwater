@@ -45,15 +45,9 @@ function intact(row) {
     && (row.voidedAt ? row.activeKey === null : row.activeKey === activeKey(row));
 }
 async function overlaps(db, technicianId, startedAt, endedAt, exceptId = null) {
-  const where = { technicianId, startAt: { lt: endedAt }, OR: [{ endAt: { gt: startedAt } }, { endAt: null }] };
-  const [repairs, regular, extra] = await Promise.all([
-    db.repairWorkInterval.findMany({ where: { technicianId, voidedAt: null, startedAt: { lt: endedAt }, endedAt: { gt: startedAt }, ...(exceptId ? { id: { not: exceptId } } : {}) }, select: { id: true } }),
-    db.serviceVisit.findMany({ where, select: { id: true, status: true, startAt: true, endAt: true } }),
-    db.extraVisit.findMany({ where, select: { id: true, status: true, startAt: true, endAt: true } })
-  ]);
-  // Open visits are relevant only while work is recorded as in progress.
-  const relevant = v => v.endAt ? v.endAt > v.startAt : ['IN_PROGRESS', 'STARTED', 'IN_EXECUTION'].includes(String(v.status).trim().toUpperCase());
-  return repairs.length > 0 || regular.some(relevant) || extra.some(relevant);
+  return (await require('./recordedWorkTimeService').conflicts(db, [
+    { type: 'REPAIR_INTERVAL', id: exceptId, technicianId, startAt: startedAt, endAt: endedAt }
+  ])).size > 0;
 }
 async function inspectRow(db, row, target, knownTechnicians) {
   const reasons = [];

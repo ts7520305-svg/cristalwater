@@ -101,6 +101,7 @@ async function decorate(db, expenses) {
       if (a.valuationType === 'MANUAL') return { ...a, quantity: null };
       const source = data.build(prepared, expense, data.selected(a)), reasons = [...a.reviewReasons];
       if (!a.voidedAt) {
+        if (source.errorCodes?.includes('RECORDED_TIME_OVERLAP')) reasons.push('RECORDED_TIME_OVERLAP');
         const calculation = a.valuationSnapshot?.calculation; if (!calculation || !a.valuationSnapshot?.source || r.hash(a.valuationSnapshot.source) !== a.valuationHash || a.quantity?.toString() !== calculation.quantity || a.quantityUnit !== calculation.quantityUnit || a.amountCents !== calculation.amountCents || source.valid && (source.key !== a.valuationKey || a.valuationType === 'LABOR' && data.quantity(a.quantity) !== source.units)) reasons.push('VALUATION_RECORD_CHANGED');
         if (!source.valid || source.hash !== a.valuationHash || source.unit !== a.quantityUnit || source.visit?.clientId !== a.clientId) reasons.push('VALUATION_SOURCE_CHANGED');
         if (source.valid) { const { measured, pool, basisMatches } = data.reservations(prepared, expense, source, a.purchaseItemId); if (!basisMatches) reasons.push('VALUATION_BASIS_CHANGED'); if (!measured || !pool || measured.units > source.units || pool.units > source.totalQuantity || pool.cents > source.totalCents) reasons.push('VALUATION_BUDGET_CHANGED'); }

@@ -17,7 +17,7 @@ async function server() { const child = fork(require.resolve('./fixtures/expense
  const client = await prisma.client.create({ data: { name: 'Valuation customer ' + stamp, active: false } }), otherClient = await prisma.client.create({ data: { name: 'Other customer ' + stamp } });
  const pool = await prisma.pool.create({ data: { name: 'Valuation pool', clientId: client.id } });
  const id = 900000000 + Math.floor(Math.random() * 1000000), common = { clientId: client.id, poolId: pool.id, technicianId: tech.id, status: 'COMPLETED', startAt: new Date(month + '-10T08:00:00Z'), endAt: new Date(month + '-10T09:30:00Z') };
- const regular = await prisma.serviceVisit.create({ data: { ...common, id } }), extra = await prisma.extraVisit.create({ data: { ...common, id, endAt: new Date(month + '-10T08:30:00Z') } });
+ const regular = await prisma.serviceVisit.create({ data: { ...common, id } }), extra = await prisma.extraVisit.create({ data: { ...common, id, startAt: new Date(month + '-10T10:00:00Z'), endAt: new Date(month + '-10T10:30:00Z') } });
  const product = await prisma.inventoryProduct.create({ data: { name: 'Chemical ' + stamp, unit: 'L', defaultCost: 9999 } });
  const movement = (type, visit, amount, overrides = {}) => prisma.stockMovement.create({ data: { movementType: type, visitId: visit === 'REGULAR' ? id : null, extraVisitId: visit === 'EXTRA' ? id : null, productId: product.id, productName: product.name, unit: 'L', quantity: amount, clientId: client.id, poolId: pool.id, technicianId: tech.id, createdAt: new Date(month + '-10T10:00:00Z'), ...overrides } });
  await movement('CONSUMPTION', 'REGULAR', 6); await movement('RETURN', 'REGULAR', 1); await movement('CONSUMPTION', 'EXTRA', 3); await movement('TRANSFER', 'REGULAR', 1000);
@@ -41,7 +41,7 @@ async function server() { const child = fork(require.resolve('./fixtures/expense
  await voidValue(bought.expenseId, material.allocation.id); await voidValue(bought2.expenseId, remainder.allocation.id);
  const revised = await value(bought.expenseId, 'MATERIAL', 'REGULAR', id, bought.item.id, '4'); assert.equal(revised.allocation.amountCents, 4000);
  assert.equal((await api('/requests/' + firstCommand.requestId)).allocation.amountCents, 3000);
- const raceVisit = await prisma.serviceVisit.create({ data: { ...common } });
+ const raceVisit = await prisma.serviceVisit.create({ data: { ...common, technicianId: null } });
  await movement('CONSUMPTION', 'REGULAR', 3, { visitId: raceVisit.id });
  const [a, b] = await Promise.all([preview(bought.expenseId, 'MATERIAL', 'REGULAR', raceVisit.id, bought.item.id, '2'), preview(bought2.expenseId, 'MATERIAL', 'REGULAR', raceVisit.id, bought2.item.id, '2')]);
  const races = await Promise.all([send(command(a)), send(command(b), 200, two.base)]); assert.equal(races.filter(r => r.applied).length, 1); assert.equal(races.filter(r => r.code === 'VALUATION_REVIEW').length, 1);
@@ -59,18 +59,18 @@ async function server() { const child = fork(require.resolve('./fixtures/expense
  // The same visit time change also invalidates the material valuation snapshot.
  await voidValue(bought.expenseId, revised.allocation.id); await value(bought.expenseId, 'MATERIAL', 'REGULAR', id, bought.item.id, '4');
  const beforeClientChange = await detail(laborId); await prisma.serviceVisit.update({ where: { id }, data: { clientId: otherClient.id } }); assert((await detail(laborId)).allocations.find(a => a.id === updatedLabor.allocation.id).needsReview); await preview(secondLaborId, 'LABOR', 'REGULAR', id, null, null, 409); await prisma.serviceVisit.update({ where: { id }, data: { clientId: client.id } }); assert.equal((await detail(laborId)).allocationReviewCount, beforeClientChange.allocationReviewCount);
- const tooLong = await prisma.serviceVisit.create({ data: { ...common, endAt: new Date(month + '-10T16:00:00Z') } }); await preview(laborId, 'LABOR', 'REGULAR', tooLong.id, null, null, 409);
+ const tooLong = await prisma.serviceVisit.create({ data: { ...common, startAt: new Date(month + '-12T08:00:00Z'), endAt: new Date(month + '-12T16:00:00Z') } }); await preview(laborId, 'LABOR', 'REGULAR', tooLong.id, null, null, 409);
  const noStart = await prisma.serviceVisit.create({ data: { ...common, startAt: null } }); await preview(laborId, 'LABOR', 'REGULAR', noStart.id, null, null, 409);
  const outside = await prisma.serviceVisit.create({ data: { ...common, startAt: new Date('2001-02-28T23:30:00Z'), endAt: new Date(month + '-01T00:30:00Z') } }); await preview(laborId, 'LABOR', 'REGULAR', outside.id, null, null, 409);
- const shortVisit = await prisma.serviceVisit.create({ data: { ...common, endAt: new Date(month + '-10T08:10:00Z') } });
+ const shortVisit = await prisma.serviceVisit.create({ data: { ...common, startAt: new Date(month + '-11T08:00:00Z'), endAt: new Date(month + '-11T08:10:00Z') } });
  const pending = command(await preview(laborId, 'LABOR', 'REGULAR', shortVisit.id)); const priorCount = await prisma.expenseAllocation.count(), priorVersion = (await detail(laborId)).version;
  await one.configure('audit'); await send(pending, 503); await one.configure(null); assert.equal(await prisma.expenseAllocation.count(), priorCount); assert.equal(await prisma.expenseEvent.count({ where: { requestId: pending.requestId } }), 0); assert.equal((await detail(laborId)).version, priorVersion);
  await one.configure('after-payment'); await send(pending, 503); await one.configure(null); assert.equal(await prisma.expenseAllocation.count(), priorCount); assert.equal((await detail(laborId)).version, priorVersion); assert((await send(pending)).applied);
- const cancelledVisit = await prisma.serviceVisit.create({ data: { ...common, endAt: new Date(month + '-10T08:01:00Z') } }); const cancelled = command(await preview(laborId, 'LABOR', 'REGULAR', cancelledVisit.id)); assert.equal((await api('/commands/cancel', cancelled)).code, 'CANCELLED_REQUEST'); assert.equal((await send(cancelled)).code, 'CANCELLED_REQUEST');
- const changed = command(await preview(laborId, 'LABOR', 'REGULAR', cancelledVisit.id)); await prisma.serviceVisit.update({ where: { id: cancelledVisit.id }, data: { endAt: new Date(month + '-10T08:02:00Z') } }); const changedResult = await send(changed); assert.equal(changedResult.code, 'VALUATION_REVIEW'); assert.match(changedResult.message, /tempo do serviço mudou/);
+ const cancelledVisit = await prisma.serviceVisit.create({ data: { ...common, startAt: new Date(month + '-11T09:00:00Z'), endAt: new Date(month + '-11T09:01:00Z') } }); const cancelled = command(await preview(laborId, 'LABOR', 'REGULAR', cancelledVisit.id)); assert.equal((await api('/commands/cancel', cancelled)).code, 'CANCELLED_REQUEST'); assert.equal((await send(cancelled)).code, 'CANCELLED_REQUEST');
+ const changed = command(await preview(laborId, 'LABOR', 'REGULAR', cancelledVisit.id)); await prisma.serviceVisit.update({ where: { id: cancelledVisit.id }, data: { endAt: new Date(month + '-11T09:02:00Z') } }); const changedResult = await send(changed); assert.equal(changedResult.code, 'VALUATION_REVIEW'); assert.match(changedResult.message, /tempo do serviço mudou/);
  // Exact decimal quantities and the final cent stay within the purchased quantity and line total.
  const tiny = await purchase(3, 0.006666666666, 'Tiny ' + stamp, 'L', 0.02);
- const tinyA = await prisma.serviceVisit.create({ data: common }), tinyB = await prisma.serviceVisit.create({ data: common });
+ const tinyA = await prisma.serviceVisit.create({ data: { ...common, technicianId: null } }), tinyB = await prisma.serviceVisit.create({ data: { ...common, technicianId: null } });
  for (const [visitId, quantity] of [[tinyA.id, 1], [tinyB.id, 2]]) await movement('CONSUMPTION', 'REGULAR', quantity, { visitId, productName: tiny.item.productName });
  assert.equal((await value(tiny.expenseId, 'MATERIAL', 'REGULAR', tinyA.id, tiny.item.id, '1')).allocation.amountCents, 1);
  assert.equal((await value(tiny.expenseId, 'MATERIAL', 'REGULAR', tinyB.id, tiny.item.id, '2')).allocation.amountCents, 1); assert.equal((await detail(tiny.expenseId)).unallocatedCents, 0);
@@ -84,8 +84,8 @@ async function server() { const child = fork(require.resolve('./fixtures/expense
  const chat = await fetch(one.base + '/api/ai-admin/chat', { method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify({ message: 'Quais os custos de materiais e trabalho? Qual o lucro?', scope: 'finance', monthRef: month }) }).then(r => r.json()); assert(chat.ok); assert.equal(chat.finance.expenses.attribution.valuations.laborAmountCents, 16000); assert.match(chat.answer, /tempo valorizado/); assert.match(chat.answer, /Não posso calcular lucro/); assert.deepEqual(chat.actions, []); assert.equal(await prisma.aiAssistantAction.count(), actionCount); assert.equal(await prisma.payment.count(), paymentCount);
  assert.equal((await prisma.extraVisit.findUniqueOrThrow({ where: { id } })).clientId, extra.clientId); assert.equal((await prisma.stockMovement.findUniqueOrThrow({ where: { id: correction.id } })).quantity, 1);
  // A corrected cost base cannot make the last service absorb costs calculated on an older base.
- const halfHour = { ...common, endAt: new Date(month + '-10T08:30:00Z') };
- const repriceA = await prisma.serviceVisit.create({ data: halfHour }), repriceB = await prisma.serviceVisit.create({ data: halfHour });
+ const halfHour = { ...common, startAt: new Date(month + '-14T08:00:00Z'), endAt: new Date(month + '-14T08:30:00Z') };
+ const repriceA = await prisma.serviceVisit.create({ data: halfHour }), repriceB = await prisma.serviceVisit.create({ data: { ...halfHour, startAt: new Date(month + '-14T08:30:00Z'), endAt: new Date(month + '-14T09:00:00Z') } });
  const repriceLabor = await create(manual({ amountCents: 10000 })); assert((await setBasis(repriceLabor, { paidMinutes: 60 })).applied);
  const priorLabor = await value(repriceLabor, 'LABOR', 'REGULAR', repriceA.id); assert.equal(priorLabor.allocation.amountCents, 5000);
  const waitingLabor = command(await preview(repriceLabor, 'LABOR', 'REGULAR', repriceB.id));
@@ -107,7 +107,7 @@ async function server() { const child = fork(require.resolve('./fixtures/expense
  await voidValue(e.id, priorMaterial.allocation.id);
  for (const visit of [repriceA, repriceB]) assert.equal((await value(e.id, 'MATERIAL', 'REGULAR', visit.id, repricePurchase.item.id, '1')).allocation.amountCents, 10000);
  assert.equal((await detail(e.id)).unallocatedCents, 0);
- const quantityVisit = await prisma.serviceVisit.create({ data: halfHour }); await movement('CONSUMPTION', 'REGULAR', 1, { visitId: quantityVisit.id, productName: repricePurchase.item.productName });
+ const quantityVisit = await prisma.serviceVisit.create({ data: { ...halfHour, technicianId: null } }); await movement('CONSUMPTION', 'REGULAR', 1, { visitId: quantityVisit.id, productName: repricePurchase.item.productName });
  await prisma.stockPurchaseItem.update({ where: { id: repricePurchase.item.id }, data: { quantity: 4, unitCost: 50 } });
  const quantitySource = (await api('/sources/STOCK_PURCHASE/' + repricePurchase.p.id)).source; e = await detail(repricePurchase.expenseId);
  assert((await send(env('EDIT', e.id, e.version, manual({ ...quantitySource.suggested, sourceType: quantitySource.type, sourceId: quantitySource.id, sourceHash: quantitySource.hash, reason: 'Corrected purchase quantity with the same documented total' })))).applied);

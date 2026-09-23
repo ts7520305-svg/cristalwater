@@ -41,8 +41,13 @@ async function prepare(db, allocations, extra = []) {
   ]);
   const movementOwners = new Map(); for (const proof of owners) for (const movement of Array.isArray(proof.metadata?.movements) ? proof.metadata.movements : []) { if (!movement || !Number.isSafeInteger(movement.id) || movement.id <= 0) continue; const rows = movementOwners.get(movement.id) || []; rows.push(proof); movementOwners.set(movement.id, rows); }
   const repairMap = new Map(repairs.map(t => [t.id, t])), workRepairIds = [...new Set(selections.filter(s => s.kind === 'LABOR' && s.targetType === 'REPAIR').map(s => s.targetId))];
-  const workIntervals = await repairWork.readForValuation(db, workRepairIds, repairMap);
-  return { regular: new Map(regular.map(v => [v.id, v])), extra: new Map(extras.map(v => [v.id, v])), repairs: repairMap, workIntervals, repairContext, movementOwners, items: new Map(items.map(v => [v.id, v])), movements, active };
+  const laborVisits = new Set(selections.filter(s => s.kind === 'LABOR' && s.targetType !== 'REPAIR').map(s => s.targetType + ':' + s.targetId));
+  const spans = [...regular.map(row => ({ ...row, type: 'REGULAR' })), ...extras.map(row => ({ ...row, type: 'EXTRA' }))].filter(row => laborVisits.has(row.type + ':' + row.id));
+  const [workIntervals, workTimeConflicts] = await Promise.all([
+    repairWork.readForValuation(db, workRepairIds, repairMap),
+    require('./recordedWorkTimeService').conflicts(db, spans)
+  ]);
+  return { regular: new Map(regular.map(v => [v.id, v])), extra: new Map(extras.map(v => [v.id, v])), repairs: repairMap, workIntervals, workTimeConflicts, repairContext, movementOwners, items: new Map(items.map(v => [v.id, v])), movements, active };
 }
 function build(data, expense, selection) {
   const { kind, targetType, targetId: id, purchaseItemId } = selection;
@@ -87,6 +92,7 @@ function build(data, expense, selection) {
     label = item.productName + ' · ' + unit + ' · Linha #' + item.id + (item.lot ? ' · Lote ' + item.lot : '');
     return { valid: !errors.length, errors, key, kind, monthRef: service.endAt.slice(0, 7), units, totalQuantity, totalCents, snapshot, hash: r.hash(snapshot), label, unit, visit, method: 'CONFIRMED_PURCHASE_LINE', measurement: measurementKey(targetType, id) };
   }
+  if (!repair && data.workTimeConflicts?.has(targetType + ':' + id)) return { valid: false, errorCodes: ['RECORDED_TIME_OVERLAP'], errors: ['Este técnico tem tempo registado em simultâneo noutra visita ou reparação. Reveja os horários antes de valorizar o trabalho.'] };
   const share=require('./expenseLaborDistributionService').selection(expense,selection.laborPart);
   if(share?.error)return {valid:false,errors:[share.error]};
   const basis = share?.basis || laborBasis(expense.laborBasis), work = repair ? data.workIntervals?.get(selection.workIntervalId) : null;
