@@ -6,13 +6,14 @@ module.exports = async function (admin) {
   const month = new Date().toISOString().slice(0, 7), tag = 'Maintenance labor ' + randomUUID(), startAt = new Date(month + '-01T00:00:00.000Z'), endAt = new Date(+startAt + 3000);
   const client = await prisma.client.create({ data: { name: tag + ' <img src=x>' } }), other = await prisma.client.create({ data: { name: tag + ' other' } }), pool = await prisma.pool.create({ data: { clientId: client.id, name: tag } });
   const tech = await prisma.technician.create({ data: { name: tag, active: true } }), extraTech = await prisma.technician.create({ data: { name: tag + ' extra', active: true } });
-  const sameId = randomInt(710000000, 790000000), plans = [], completions = [], expenseIds = [], basisIds = [], visitIds = [sameId];
+  const sameId = randomInt(710000000, 790000000), plans = [], completions = [], expenseIds = [], basisIds = [], requests = [], visitIds = [sameId];
   const regular = await prisma.serviceVisit.create({ data: { id: sameId, poolId: pool.id, clientId: client.id, technicianId: tech.id, status: 'IN_PROGRESS', startAt } });
   const extra = await prisma.extraVisit.create({ data: { id: sameId, poolId: pool.id, clientId: client.id, technicianId: extraTech.id, status: 'IN_PROGRESS', startAt } });
   async function complete(visitType, index, own = true, visitId = sameId, visitStart = startAt) {
     const p = (await equipment.create(admin, pool.id, { component: 'FILTER', title: tag + ' ' + visitType + ' ' + visitId + ' ' + index + (own ? ' recorded' : ' missing'), instructions: 'Revisão com tempo próprio confirmado', intervalUnit: 'MONTHS', intervalCount: 1, nextDue: month + '-01' })).plan;
     plans.push(p.id);
-    const result = await equipment.complete(admin, p.id, { requestId: randomUUID(), visitType, visitId, poolId: pool.id, expectedVersion: p.version, notes: 'Tempo da revisão registado no terreno', confirmed: true, ...(own ? { workTime: { startAt: new Date(+visitStart + index * 1000).toISOString(), endAt: new Date(+visitStart + (index + 1) * 1000).toISOString() } } : {}) });
+    const requestId = randomUUID(); requests.push(requestId);
+    const result = await equipment.complete(admin, p.id, { requestId, visitType, visitId, poolId: pool.id, expectedVersion: p.version, notes: 'Tempo da revisão registado no terreno', confirmed: true, ...(own ? { workTime: { startAt: new Date(+visitStart + index * 1000).toISOString(), endAt: new Date(+visitStart + (index + 1) * 1000).toISOString() } } : {}) });
     if (!result.applied) throw Error(JSON.stringify(result));
     const id = result.completion.id; completions.push(id);
     const source = (await billing.list(admin, pool.id, { kind: 'EQUIPMENT' })).rows.find(s => s.sourceId === id);
@@ -41,12 +42,12 @@ module.exports = async function (admin) {
     const id = await salary(tech.id, 2000, start.toISOString().slice(0,7)); return {review,allocation:await value(id,'REGULAR',visit.id)};
   }
   async function cleanup() {
-    await prisma.fieldWriteRequest.deleteMany({ where: { OR: [{ scope: 'EQUIPMENT_MAINTENANCE', resourceId: { in: plans } }, { scope: 'LABOR_COST_COMPOSITION', resourceId: { in: [...basisIds, ...expenseIds] } }] } });
+    await prisma.fieldWriteRequest.deleteMany({ where: { owner: 'ADMIN:' + admin.id, requestId: { in: requests } } });
     await prisma.laborCostValuationPart.deleteMany({ where: { group: { basisId: { in: basisIds } } } }); await prisma.laborCostValuation.deleteMany({ where: { basisId: { in: basisIds } } }); await prisma.laborCostBasis.deleteMany({ where: { id: { in: basisIds } } });
     for (const model of ['expenseEvent','expensePayment','expenseAllocation','expenseLaborBasis']) await prisma[model].deleteMany({ where: { expenseId: { in: expenseIds } } }); await prisma.companyExpense.deleteMany({ where: { id: { in: expenseIds } } });
     await prisma.operationalReminder.deleteMany({ where: { sourceKey: { in: completions.map(id => 'maintenance-billing:EQUIPMENT:' + id) } } });
     await prisma.technicalHistory.deleteMany({ where: { poolId: pool.id, type: 'EQUIPMENT_MAINTENANCE' } }); await prisma.equipmentMaintenanceCompletion.deleteMany({ where: { id: { in: completions } } }); await prisma.equipmentMaintenancePlan.deleteMany({ where: { id: { in: plans } } });
     await prisma.serviceVisit.deleteMany({ where: { id: {in:visitIds} } }); await prisma.extraVisit.delete({ where: { id: sameId } });
   }
-  return { month, tag, startAt, endAt, sameId, client, other, pool, tech, extraTech, regular, extra, reviews, extraReviews, missing, expenseIds, basisIds, salary, value, send, late, cleanup };
+  return { month, tag, startAt, endAt, sameId, client, other, pool, tech, extraTech, regular, extra, reviews, extraReviews, missing, expenseIds, basisIds, requests, salary, value, send, late, cleanup };
 };
