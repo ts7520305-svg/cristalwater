@@ -31,6 +31,6 @@ TASK337: [CI 36051791089](https://github.com/ts7520305-svg/cristalwater/actions/
 
 ## Publicação e continuação
 
-Base `70982c23c2f8b813a9d478de02c1198826ffa49b`. Preparada para publicação na branch `work/field-readiness-20260915-simulation`; CI e restauro deste novo código ainda por confirmar. [Evidência local](evidence/20260924_task340_local.json).
+Base `70982c23c2f8b813a9d478de02c1198826ffa49b`. Branch `work/field-readiness-20260915-simulation`. Publicada em `b76869a384da7f6e4caac2fe09b59bdf2993f48d`, árvore `6bdc5928e9baadbc6cb4c11424ae759522410721`, idêntica à validada localmente. [CI 36057362407](https://github.com/ts7520305-svg/cristalwater/actions/runs/36057362407) em execução; os 237 grupos e o restauro nativo continuam por confirmar. [Evidência local](evidence/20260924_task340_local.json).
 
 Continuar os resultados do CI e a fila finita de páginas, incluindo os critérios históricos, financeiros e multilingues ainda abertos. Sem merge, deploy, contactos reais ou alterações à produção. Esta tarefa não declara a aplicação completa.

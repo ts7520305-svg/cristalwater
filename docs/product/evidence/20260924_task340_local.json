@@ -111,12 +111,20 @@
     "20260924_task337_ci.json",
     "20260924_task338_ci.json"
   ],
-  "newNativeStatus": "pending publication and CI; not approved",
+  "newNativeStatus": "in_progress; 237 groups and native restore not yet approved",
   "limits": [
     "Regular visits only, explicit UTC day",
     "Current pool details and inferred associations are labelled, not historical proof",
     "GPS by current user email is not attributed to a historical vehicle",
     "Visual QA in pt-PT; five-language and universal page review remain open",
     "Two tracked brand images not materialized locally"
-  ]
+  ],
+  "publication": {
+    "commit": "b76869a384da7f6e4caac2fe09b59bdf2993f48d",
+    "tree": "6bdc5928e9baadbc6cb4c11424ae759522410721",
+    "localTreeMatched": true,
+    "runId": 36057362407,
+    "nativeStatus": "in_progress",
+    "mainUnchanged": "6f27081e1d183ff584a62255b016b373836734db"
+  }
 }
