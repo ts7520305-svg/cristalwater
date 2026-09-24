@@ -27,7 +27,13 @@ Dezasseis novos testes unitários verificam aritmética, limites entre documento
 
 O grupo `test-field-maintenance-materials.js` usa API, base isolada e navegador reais: permissões, paginação, ausência distinta de zero, mês incompatível, três parcelas 33/33/34 cêntimos, duas compras a disputar a mesma quantidade em dois processos, pai regular/extra de ID igual, correção de origens, recibos históricos, devoluções, proteção da atribuição original e rollback de versão/evento. Confere pagamentos, stock e atribuições originais e as projeções por execução/cliente/IA. No navegador verifica vírgula decimal, rascunho/recarregamento, prévia e confirmação alteradas, resposta perdida, reenvio idêntico, duplo clique, isolamento de filtros/conta e layout.
 
-Regressões dirigidas aprovadas: repartição do trabalho TASK308, materiais próprios TASK309 e valorização de despesas. Mantém 35 migrações/126 tabelas; não há dependências novas. O runner passa de 212 para 213 grupos. CI nativo e restauro desta árvore por confirmar antes do fecho.
+Regressões dirigidas aprovadas: repartição do trabalho TASK308, materiais próprios TASK309 e valorização de despesas. Mantém 35 migrações/126 tabelas; não há dependências novas. O runner passa de 212 para 213 grupos.
+
+## Aprovação nativa
+
+Código publicado `a3fcf2eebea304bd95f522517a9ded35290c494e`, árvore `c0c61d9f24953e9a2eec5976ed7a9ded45e79c52`, idêntica à validada localmente. [CI 35961381889](https://github.com/ts7520305-svg/cristalwater/actions/runs/35961381889), job `107510488522`, aprovado de 2026-09-24T05:45:47Z a 2026-09-24T06:13:58Z (28m11s), com todas as 17 etapas aprovadas. O inventário do runner foi comparado com o log: 213/213 grupos distintos, sem falhas, omissões, entradas inesperadas ou duplicações; grupo novo aprovado em 10427 ms. Confirmados 437 unitários/67 ficheiros, quatro testes técnicos, gate geral de navegador, sintaxe 606/204/62 e 35 migrações aditivas com preservação de dados e correspondência ao esquema atual.
+
+O restauro PostgreSQL 16 recuperou 126 tabelas e 46 ficheiros, comparando as linhas de cada tabela e os hashes dos ficheiros. Evidência verificável: [evidence/20260924_task310_ci.json](evidence/20260924_task310_ci.json), com todos os grupos, etapas e hash do log. O fecho posterior modifica apenas documentação. A aprovação é desta árvore de código; não certifica produção nem os requisitos ainda abertos.
 
 Base `ac2d3a9a181775fca09404d8ed8aa5a67bc5a314`, fecho documental TASK309. Publicação apenas em `work/field-readiness-20260915-simulation`. Principal `feature/technicians-v25` conservada em `6f27081e1d183ff584a62255b016b373836734db`; sem merge, deploy, alterações de produção ou contactos reais.
 

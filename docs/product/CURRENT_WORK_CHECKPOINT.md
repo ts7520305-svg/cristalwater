@@ -3,8 +3,8 @@
 ## Retoma atual — 24/09/2026, TASK310
 
 - O utilizador pediu continuar até o sistema estar completo, sem parar depois de cada tarefa implementável. Prosseguir a matriz até surgir uma dependência real, mantendo as restrições de produção/contactos abaixo.
-- Base `ac2d3a9a181775fca09404d8ed8aa5a67bc5a314`, fecho TASK309. TASK310 implementada e aprovada localmente: repartição do custo MATERIAL original pelas declarações compatíveis de equipamento, limites conjuntos entre compras, cêntimos/quantidades conservados, revisão, anulação e recuperação no navegador. Relatório [MAINTENANCE_MATERIAL_SHARE_20260924.md](MAINTENANCE_MATERIAL_SHARE_20260924.md).
-- 437 unitários/67 ficheiros, sintaxe 606/204/62, grupo API/navegador novo e regressões TASK308/TASK309/valorização aprovados. Runner 213 grupos, cache v125, 35 migrações/126 tabelas, sem novas dependências. Publicar e confirmar CI nativo/restauro da árvore nova; a aprovação TASK309 abaixo não aprova a TASK310.
+- Base `ac2d3a9a181775fca09404d8ed8aa5a67bc5a314`, fecho TASK309. TASK310 aprovada: repartição do custo MATERIAL original pelas declarações compatíveis de equipamento, limites conjuntos entre compras, cêntimos/quantidades conservados, revisão, anulação e recuperação no navegador. Relatório [MAINTENANCE_MATERIAL_SHARE_20260924.md](MAINTENANCE_MATERIAL_SHARE_20260924.md).
+- Código publicado `a3fcf2eebea304bd95f522517a9ded35290c494e`, árvore `c0c61d9f24953e9a2eec5976ed7a9ded45e79c52`, igual à validada localmente. [CI 35961381889](https://github.com/ts7520305-svg/cristalwater/actions/runs/35961381889), job `107510488522`, aprovado entre 2026-09-24T05:45:47Z e 2026-09-24T06:13:58Z (28m11s). 17 etapas e 213/213 grupos previstos distintos, sem falha, falta, entrada inesperada ou duplicação; 437 unitários/67 ficheiros, quatro testes técnicos, gate geral de navegador, sintaxe 606/204/62 e 35 migrações. Restauro PostgreSQL 16 de 126 tabelas/46 ficheiros, com linhas e hashes iguais. Evidência [evidence/20260924_task310_ci.json](evidence/20260924_task310_ci.json). Cache v125, sem novas migrações/tabelas/dependências. O fecho posterior altera apenas documentação; a aprovação refere-se ao código e árvore acima.
 
 ## Aprovação anterior — TASK309
 
@@ -17,7 +17,7 @@
 
 ## Próxima ação
 
-1. Confirmar CI completo/restauro e fechar a TASK310. Prosseguir com TASK311: correção/anulação explícita de declarações de materiais de equipamento, conservando o original, recibos recuperáveis e revisão das parcelas afetadas. A repartição monetária TASK310 já está implementada; não repetir TASK300–310. Materiais/tempos próprios de lembretes e repartições entre meses continuam abertos.
+1. Prosseguir com TASK311: correção/anulação explícita de declarações de materiais de equipamento, conservando o original, recibos recuperáveis e revisão das parcelas afetadas. A repartição monetária TASK310 está aprovada no CI e restauro; não repetir TASK300–310. Materiais/tempos próprios de lembretes e repartições entre meses continuam abertos.
 2. Continuar restantes gastos/ajustes/origens de receita e os pontos da [matriz atual](COMPLETENESS_CURRENT_20260915.md): históricos/ecrãs/PDFs/idiomas, volume e operação prolongada, VPS/fornecedores e piloto físico. Custos/receitas completos e lucro por apurar; não atribuir percentagem global sem critérios fechados. IA generativa offline/aprendizagem por piscina/vídeo e integrações completas continuam requisitos separados sem aprovação integral.
 
 ## Autorizações e regras vigentes
