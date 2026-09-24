@@ -90,7 +90,12 @@
     }
   ],
   "nativeCI": {
-    "status": "not_published_yet",
+    "status": "in_progress",
+    "run": 36053066253,
+    "job": 107813196189,
+    "headSha": "2f808da1dc86b2f03ba432e1357f3c52a672bc5e",
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36053066253",
+    "expectedGroups": 235,
     "approved": false
   },
   "restore": {
@@ -102,5 +107,25 @@
     "No duplicate renderer or equivalent unit tests added",
     "Monthly concurrent generation and full restore require native PostgreSQL CI",
     "No merge, production deployment or real provider contacts"
-  ]
+  ],
+  "publication": {
+    "commit": "2f808da1dc86b2f03ba432e1357f3c52a672bc5e",
+    "tree": "caaa43f40687bd3856bc1c2b46d8a192292961da",
+    "parent": "08dfea0711b6236f2896317e4eeebac52fc10f86",
+    "files": 14,
+    "exactValidatedTree": true,
+    "branch": "work/field-readiness-20260915-simulation",
+    "forced": false
+  },
+  "previousNative336": {
+    "run": 36048931532,
+    "job": 107799314394,
+    "groups": 233,
+    "passed": 232,
+    "failedScripts": [
+      "test-field-extra-execution.js"
+    ],
+    "restore": "skipped",
+    "evidence": "20260924_task336_initial_failure.json"
+  }
 }

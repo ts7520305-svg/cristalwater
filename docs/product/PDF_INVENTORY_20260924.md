@@ -27,7 +27,7 @@ As sete famílias distintas da visita usam `documentPdfService.js`; as guias con
 
 ## Pendências finitas
 
-1. Confirmar os 235 grupos e o restauro PostgreSQL nativo do CI integrado TASK338, incluindo concorrência da geração mensal.
+1. Confirmar os 235 grupos e o restauro PostgreSQL nativo do [CI 36053066253](https://github.com/ts7520305-svg/cristalwater/actions/runs/36053066253) (TASK338), incluindo concorrência da geração mensal.
 2. Traduzir os modelos ainda exclusivamente PT, se incluídos no critério multilingue final; os cinco idiomas da interface mensal não traduzem o PDF guardado. Não declarar cobertura multilingue integral destes modelos.
 3. Completar o inventário e revisão das páginas HTML/impressão, separado deste inventário PDF.
 4. A TASK336 acrescentou confirmação histórica explícita para o cliente já registado. Conservar a separação entre inspeção administrativa, confirmação com evidência e partilha autorizada; cliente ausente continua por resolver.

@@ -37,3 +37,9 @@ Ambiente local isolado, PGlite com protocolo PostgreSQL, 40 migrações aditivas
 Base integrada `08dfea0711b6236f2896317e4eeebac52fc10f86`. Sem novas migrações ou dependências; cache v150. Mantêm-se a apresentação portuguesa e a natureza não fiscal. O controlador antigo de recibos continua sem rota montada. O [inventário de PDFs](PDF_INVENTORY_20260924.md) conserva as pendências de idiomas, HTML/impressão, histórico e volume.
 
 A publicação é apenas no ramo `work/field-readiness-20260915-simulation`. A aprovação integral dos 235 grupos e o restauro PostgreSQL 16 dependem do CI deste código. Sem merge, deploy ou contactos reais.
+
+## Publicação
+
+Publicada em `2f808da1dc86b2f03ba432e1357f3c52a672bc5e`, árvore `caaa43f40687bd3856bc1c2b46d8a192292961da`, idêntica à validada localmente. [CI 36053066253](https://github.com/ts7520305-svg/cristalwater/actions/runs/36053066253), job `107813196189`, em execução; os 235 grupos e o restauro PostgreSQL nativo ainda não estão aprovados. Branch principal conservada em `6f27081e1d183ff584a62255b016b373836734db`.
+
+O CI da TASK336 foi entretanto conferido integralmente: 232 dos 233 grupos aprovados, com a mesma falha da visita de ensaio deixada na base para extras e restauro omitido. A confirmação histórica passou no CI. [Evidência inicial](evidence/20260924_task336_initial_failure.json). As correções estão integradas nas TASK337/338; o novo CI conserva a sua própria validação.

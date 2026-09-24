@@ -2,7 +2,7 @@
 
 ## Publicação
 
-Publicada em `55544f548bc073aadac574770786920f0d0ba68b`, árvore `cd534409b7c9d6afae8bb06b6e5503d47684c52c`, idêntica à validada. [CI 36048931532](https://github.com/ts7520305-svg/cristalwater/actions/runs/36048931532), job `107799314394`, em execução; aprovação completa e restauro por confirmar. [Evidência local](evidence/20260924_task336_local.json).
+Publicada em `55544f548bc073aadac574770786920f0d0ba68b`, árvore `cd534409b7c9d6afae8bb06b6e5503d47684c52c`, idêntica à validada. [CI 36048931532](https://github.com/ts7520305-svg/cristalwater/actions/runs/36048931532), job `107799314394`, terminou com 232/233 grupos aprovados e apenas a falha de dados históricos deixados para o ensaio de extras; restauro omitido. O novo grupo de confirmação histórica passou. Correções nas TASK337/338, com oito grupos integrados locais aprovados. [Falha inicial verificada](evidence/20260924_task336_initial_failure.json); confirmar CI/restauro integrado. [Evidência local](evidence/20260924_task336_local.json).
 
 ## Âmbito
 

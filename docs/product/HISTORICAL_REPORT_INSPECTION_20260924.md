@@ -36,11 +36,11 @@ Sem novas tabelas, migrações ou dependências. Cache v148. Confirmar o CI comp
 
 ## Publicação
 
-Código `93fb9aa452017b0391b4116c204c58256711ba1f`, árvore `2a6cc16c4e84e18965a24e132a57e19b3917ad65`, igual à preparada localmente. Publicado sem force na branch de trabalho existente. [CI 36045589129](https://github.com/ts7520305-svg/cristalwater/actions/runs/36045589129) iniciado; conclusão/restauro pendentes. Branch principal conservada em `6f27081e1d183ff584a62255b016b373836734db`.
+Código `93fb9aa452017b0391b4116c204c58256711ba1f`, árvore `2a6cc16c4e84e18965a24e132a57e19b3917ad65`, igual à preparada localmente. Publicado sem force na branch de trabalho existente. [CI 36045589129](https://github.com/ts7520305-svg/cristalwater/actions/runs/36045589129) falhou em dois dos 231 grupos; restauro omitido. [Evidência inicial](evidence/20260924_task334_initial_failure.json). Branch principal conservada em `6f27081e1d183ff584a62255b016b373836734db`.
 
 ## Continuação — TASK336
 
-A confirmação explícita foi acrescentada na [TASK336](HISTORICAL_REPORT_ORIGIN_20260924.md), mantendo esta consulta administrativa separada. Exige cliente/instalação presentes na visita concluída, evidência e motivo; não permite selecionar outro cliente nem atribuir um cliente ausente. O relatório confirmado usa dados históricos revistos e conserva os bloqueios de acesso ao novo titular. Código `55544f548bc073aadac574770786920f0d0ba68b`; validação local aprovada, CI/restauro integrado em curso.
+A confirmação explícita foi acrescentada na [TASK336](HISTORICAL_REPORT_ORIGIN_20260924.md), mantendo esta consulta administrativa separada. Exige cliente/instalação presentes na visita concluída, evidência e motivo; não permite selecionar outro cliente nem atribuir um cliente ausente. O relatório confirmado usa dados históricos revistos e conserva os bloqueios de acesso ao novo titular. Código `55544f548bc073aadac574770786920f0d0ba68b`; validação local aprovada; o CI inicial teve 232/233 grupos aprovados e falhou apenas no cenário de extras deixado pelo ensaio histórico, corrigido nas TASK337/338. [Evidência inicial](evidence/20260924_task336_initial_failure.json); confirmar CI/restauro integrado.
 
 
 ## Atualização CI — TASK337
