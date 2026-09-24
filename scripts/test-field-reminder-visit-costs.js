@@ -30,7 +30,20 @@ async function cleanup(){
   const create=p=>({requestId:randomUUID(),command:'SHARE_MAINTENANCE_'+p.allocationBefore.valuationType,expenseId:p.expenseId,expectedVersion:p.expenseVersion,data:{allocationId:p.allocationId,...costRules.selection(p),...(p.allocationBefore.valuationType==='MATERIAL'?{quantity:p.quantity}:{}),amountCents:p.amountCents,previewHash:p.hash,reason:'Parcelas próprias e custo original conferidos',confirmed:true}});
   const send=(b,status=200,instance=one)=>api('/api/expenses/commands',b,status,instance);
   async function undo(s){const e=await detail(s.expenseId);const v=await send({requestId:randomUUID(),command:'VOID_MAINTENANCE_'+s.share.preview.allocationBefore.valuationType+'_SHARE',expenseId:s.expenseId,expectedVersion:e.version,data:{allocationId:s.share.allocationId,shareId:s.share.id,shareHash:s.shareHash,reason:'Anulação expressa para devolver a parcela à visita',confirmed:true}});assert(v.applied,JSON.stringify(v));return v;}
+  // Exercise a database that already has an unrelated reminder at the next
+  // equipment ID. Never delete/rewrite another group's reminder to force the
+  // typed-ID collision: move only this isolated QA sequence past occupied IDs.
+  const [sequence]=await prisma.$queryRaw`SELECT last_value::text, is_called FROM "EquipmentMaintenanceCompletion_id_seq"`;
+  const nextId=Number(sequence.last_value)+(sequence.is_called?1:0);
+  const existing=await prisma.generalReminder.findUnique({where:{id:nextId}});
+  const sentinel=existing||await prisma.generalReminder.create({data:{id:nextId,title:'QA pre-existing reminder '+randomUUID(),dueAt:new Date(),status:'OPEN'}});
+  if(!existing)reminders.push(sentinel);
+  const [reminderMax,equipmentMax]=await Promise.all([prisma.generalReminder.aggregate({_max:{id:true}}),prisma.equipmentMaintenanceCompletion.aggregate({_max:{id:true}})]);
+  const firstFree=Math.max(Number(sequence.last_value),reminderMax._max.id||0,equipmentMax._max.id||0)+1;
+  assert(firstFree<2147483500,'QA identifier range exhausted');
+  await prisma.$queryRaw`SELECT setval(pg_get_serial_sequence('"EquipmentMaintenanceCompletion"','id'),${BigInt(firstFree)},false)::text`;
   const f=await require('./fixtures/maintenance-material-data')(admin);fixtures.push(f);
+  assert.deepEqual(await prisma.generalReminder.findUnique({where:{id:sentinel.id}}),sentinel);
   while(Date.now()<+f.endAt)await new Promise(r=>setTimeout(r,100));
   const data=q=>({technicianId:f.tech.id,materials:{mode:'DECLARED',items:[{productName:f.product.name.toUpperCase(),unit:'KG',quantity:q}]},workTime:null});
   const r1=await reminder(f,data('0.2'),'REGULAR',f.reviews[0].id),r2=await reminder(f,data('0.1'));

@@ -3,7 +3,8 @@
 ## Retoma atual — 24/09/2026, TASK317 em validação
 
 - Base `740f1378a3d4b97f750bf3284515364e8618fb87`, fecho TASK316. Implementada a repartição dos custos confirmados MATERIAL/LABOR da visita pelas parcelas próprias dos lembretes: destinos tipados, comprovativo completo, saldos comuns com equipamento e entre compras, projeção financeira, revisão, custos afetados ao anular recursos e anulação recuperável. [REMINDER_VISIT_COSTS_20260924.md](REMINDER_VISIT_COSTS_20260924.md).
-- 489 unitários/72 ficheiros, quatro testes técnicos e sintaxe 616/215/62 aprovados. Grupo API/navegador novo e oito regressões dirigidas aprovados localmente. Cache v132; 220 grupos, 38 migrações existentes, sem tabelas/dependências novas. Confirmar publicação e CI/restauro do commit exato antes de fechar.
+- Código publicado `46025c4cf9c025abd1fe48f1a441270564100ec6`. O CI inicial `36006695285` passou 219/220 grupos; o grupo novo falhou ao preparar um ID de lembrete já existente. Restauro não executado. Correção isolada do ensaio: sequência de equipamento preparada acima dos IDs ocupados, sentinela conservada e colisão tipada real mantida. Confirmar novo CI/restauro completo, previsto em conjunto com a TASK318, antes de declarar aprovação.
+- 489 unitários/72 ficheiros e quatro testes técnicos; sintaxe 616/215/62. Cache v132; 220 grupos, 38 migrações, sem novas tabelas/dependências. A implementação de múltiplos intervalos TASK318 foi preparada e testada separadamente; só será publicada depois desta correção.
 
 ## Aprovação anterior — TASK316
 
