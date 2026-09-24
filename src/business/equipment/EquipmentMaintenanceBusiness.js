@@ -4,6 +4,7 @@ const requests = require('../../services/fieldWriteRequestService');
 const { normalizeRole } = require('../../utils/roles');
 const { civilDate, advance, dayLisbon } = require('../../services/equipmentMaintenanceCalendar');
 const workTimes = require('../../services/equipmentWorkTimeService');
+const materialRecords = require('../../services/equipmentMaterialsService');
 const fail = (status, message) => { throw Object.assign(new Error(message), { status }); };
 function id(value) { if (!/^[1-9]\d*$/.test(String(value)) || !Number.isSafeInteger(Number(value)) || Number(value) > 2147483647) fail(400, 'Identificador inválido'); return Number(value); }
 function version(value) { if (typeof value !== 'number' || !Number.isInteger(value) || value < 1 || value > 2147483646) fail(400, 'Versão inválida'); return value; }
@@ -69,19 +70,25 @@ function completionWhere(planId, visitId, visitType) {
 }
 async function listVisit(user, visitId, type) {
   const vid = id(visitId), visitType = visitKind(type), field = visitType === 'EXTRA' ? 'extraVisitId' : 'visitId';
+  return prisma.$transaction(async tx => {
   // The assignment, pool and completions come from one relation snapshot.
-  const visit = await prisma[visitType === 'EXTRA' ? 'extraVisit' : 'serviceVisit'].findUnique({ where: { id: vid }, include: { pool: { select: { maintenancePlans: { include: { completions: { where: { [field]: vid }, select: workTimes.selection } }, orderBy: [{ nextDue: 'asc' }, { id: 'asc' }] } } } } });
+  const visit = await tx[visitType === 'EXTRA' ? 'extraVisit' : 'serviceVisit'].findUnique({ where: { id: vid }, include: { pool: { select: { maintenancePlans: { include: { completions: { where: { [field]: vid }, select: workTimes.selection } }, orderBy: [{ nextDue: 'asc' }, { id: 'asc' }] } } } } });
   owns(user, visit); const canComplete = open(visit) && Boolean(visit.poolId);
-  const plans = visit.pool?.maintenancePlans || [], times = await workTimes.describe(prisma, plans.flatMap(p => p.completions), visit, visitType);
-  return { ok: true, visitId: vid, visitType, poolId: visit.poolId, canComplete, plans: plans.map(p => ({ ...publicPlan(p), completedInVisit: p.completions.length > 0, canComplete: canComplete && p.active && p.completions.length === 0, completion: p.completions[0] ? { id: p.completions[0].id, completedAt: p.completions[0].completedAt, workTime: times.get(p.completions[0].id) } : null })) };
+  // Include every sibling, even if a plan's current pool was changed outside this workflow.
+  const rows = await tx.equipmentMaintenanceCompletion.findMany({ where: { [field]: vid }, select: workTimes.selection });
+  const plans = visit.pool?.maintenancePlans || [], times = await workTimes.describe(tx, rows, visit, visitType), materials = await materialRecords.describe(tx, rows, visit, visitType);
+  return { ok: true, visitId: vid, visitType, poolId: visit.poolId, canComplete, plans: plans.map(p => ({ ...publicPlan(p), completedInVisit: p.completions.length > 0, canComplete: canComplete && p.active && p.completions.length === 0, completion: p.completions[0] ? { id: p.completions[0].id, completedAt: p.completions[0].completedAt, workTime: times.get(p.completions[0].id), materials: materials.get(p.completions[0].id) } : null })) };
+  }, { isolationLevel: 'RepeatableRead', maxWait: 15000, timeout: 20000 });
 }
 async function complete(user, planId, body = {}) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) fail(400, 'Revisão inválida');
   const modern = Object.hasOwn(body, 'visitType'), visitType = visitKind(body.visitType);
   const pid = id(planId), vid = id(body.visitId), expected = version(body.expectedVersion);
-  if (modern && (Object.keys(body).some(key => !['requestId','visitType','visitId','poolId','expectedVersion','notes','confirmed','workTime'].includes(key)) || typeof body.visitId !== 'number' || typeof body.poolId !== 'number')) fail(400, 'Conserve o contexto original da revisão');
+  if (modern && (Object.keys(body).some(key => !['requestId','visitType','visitId','poolId','expectedVersion','notes','confirmed','workTime','materials'].includes(key)) || typeof body.visitId !== 'number' || typeof body.poolId !== 'number')) fail(400, 'Conserve o contexto original da revisão');
   if (!modern && Object.hasOwn(body, 'workTime')) fail(400, 'Atualize a aplicação antes de registar tempos de revisão.');
+  if (!modern && Object.hasOwn(body, 'materials')) fail(400, 'Atualize a aplicação antes de registar materiais de revisão.');
   const inputTime = Object.hasOwn(body, 'workTime') ? workTimes.parse(body.workTime) : null;
+  const inputMaterials = Object.hasOwn(body, 'materials') ? materialRecords.parse(body.materials) : null;
   const poolId = modern ? id(body.poolId) : null;
   if (body.confirmed !== true || typeof body.notes !== 'string' || body.notes.trim().length < 3 || body.notes.length > 3000) fail(400, 'Confirme a execução e descreva o que observou (3–3000 caracteres)');
   if (typeof body.requestId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(body.requestId)) fail(400, 'Identificador da operação inválido');
@@ -112,16 +119,17 @@ async function complete(user, planId, body = {}) {
     const now = new Date(); let nextDue;
     if (inputTime) { const issue = await workTimes.check(tx, inputTime, visit, visitType, now); if (issue) return reject(issue, 'EQUIPMENT_WORK_TIME'); }
     const workTime = inputTime ? workTimes.create(inputTime, visit, visitType) : null;
+    const materials = inputMaterials ? materialRecords.create(inputMaterials, visit, visitType) : null;
     try { nextDue = advance(dayLisbon(now), plan.intervalUnit, plan.intervalCount); } catch (e) { return reject(e.message, 'EQUIPMENT_STALE'); }
     const updated = await tx.equipmentMaintenancePlan.update({ where: { id: pid }, data: { nextDue, lastCompletedAt: now, version: { increment: 1 } } });
     const result = { ok: true, idempotent: false, plan: publicPlan(updated, now), completedAt: now.toISOString(), ...(modern ? { applied: true, context } : {}) };
     let snapshot = JSON.parse(JSON.stringify(result));
     const completed = await tx.equipmentMaintenanceCompletion.create({ data: { planId: pid, version: expected, ...(visitType === 'EXTRA' ? { extraVisitId: vid } : { visitId: vid }), requestId, actor, fingerprint, notes, completedAt: now, result: snapshot } });
     if (modern) {
-      snapshot = await requests.confirm(tx, request, { ...snapshot, completion: { id: completed.id, planId: pid, visitType, visitId: vid, poolId, version: expected, requestId, notes, completedAt: now.toISOString(), ...(workTime ? { workTime } : {}) } });
+      snapshot = await requests.confirm(tx, request, { ...snapshot, completion: { id: completed.id, planId: pid, visitType, visitId: vid, poolId, version: expected, requestId, notes, completedAt: now.toISOString(), ...(workTime ? { workTime } : {}), ...(materials ? { materials } : {}) } });
       await tx.equipmentMaintenanceCompletion.update({ where: { id: completed.id }, data: { result: snapshot } });
     }
-    await tx.technicalHistory.create({ data: { poolId: plan.poolId, type: 'EQUIPMENT_MAINTENANCE', component: plan.component, message: plan.title, description: JSON.stringify({ planId: pid, version: expected, visitType, visitId: vid, requestId, actor, notes, instructions: plan.instructions, nextDue: nextDue.toISOString().slice(0, 10), ...(workTime ? { workTime } : {}) }), status: 'COMPLETED', performedAt: now } });
+    await tx.technicalHistory.create({ data: { poolId: plan.poolId, type: 'EQUIPMENT_MAINTENANCE', component: plan.component, message: plan.title, description: JSON.stringify({ planId: pid, version: expected, visitType, visitId: vid, requestId, actor, notes, instructions: plan.instructions, nextDue: nextDue.toISOString().slice(0, 10), ...(workTime ? { workTime } : {}), ...(materials ? { materials } : {}) }), status: 'COMPLETED', performedAt: now } });
     await tx.userAuditLog.create({ data: { actor, action: 'EQUIPMENT_MAINTENANCE_COMPLETED', entity: 'EquipmentMaintenancePlan', entityId: String(pid), metadata: { visitType, visitId: vid, poolId: plan.poolId, version: expected, requestId, nextDue: snapshot.plan.nextDue } } });
     return snapshot;
   }, { maxWait: 15000, timeout: 20000 }); } catch (e) { if (e.code === 'P2002') fail(409, 'Esta operação ou versão já foi registada. Atualize a lista'); throw e; }

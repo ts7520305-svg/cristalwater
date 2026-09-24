@@ -12,8 +12,22 @@
   const instant = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value) && Number.isFinite(Date.parse(value)) && new Date(value).toISOString() === value;
   const validTime = value => value && Object.keys(value).length === 2 && instant(value.startAt) && (value.endAt === null || instant(value.endAt) && Date.parse(value.endAt) > Date.parse(value.startAt));
   const sameTime = (a, b) => !a && !b || !!a && !!b && a.startAt === b.startAt && a.endAt === b.endAt;
-  const hasDraft = draft => draft.notes.trim() || draft.workTime;
-  const acknowledgedDraft = (row, draft) => row.response.applied && row.payload.notes.trim() === draft.notes.trim() && sameTime(row.payload.workTime, draft.workTime);
+  const validMaterialDraft = value => value && ['NONE', 'DECLARED'].includes(value.mode) && Array.isArray(value.items) && value.items.length <= 20 && Object.keys(value).length === 2 && value.items.every(item => item && Object.keys(item).length === 3 && [['productName', 160], ['unit', 24], ['quantity', 30]].every(([key, max]) => typeof item[key] === 'string' && item[key].length <= max)) && (value.mode !== 'NONE' || !value.items.length);
+  const hasDraft = draft => draft.notes.trim() || draft.workTime || draft.materials;
+  function sameMaterials(a, b) { try { return !a && !b || !!a && !!b && JSON.stringify(store.equipmentMaterials(a)) === JSON.stringify(store.equipmentMaterials(b)); } catch (_) { return false; } }
+  const acknowledgedDraft = (row, draft) => row.response.applied && row.payload.notes.trim() === draft.notes.trim() && sameTime(row.payload.workTime, draft.workTime) && sameMaterials(row.payload.materials, draft.materials);
+  function materialsText(value) {
+    if (!value) return 'Materiais próprios não registados.';
+    if (value.mode === 'NONE') return 'Sem materiais, por declaração explícita.';
+    return 'Materiais declarados: ' + (Array.isArray(value.items) ? value.items.map(item => `${item.productName || '(produto por indicar)'} · ${item.quantity || '?'} ${item.unit || '(unidade por indicar)'}`).join('; ') : 'registo por rever');
+  }
+  function materialsView(saved, parent) {
+    const box = node('div', null, parent); box.className = 'field-equipment-material-view'; box.style.overflowWrap = 'anywhere';
+    node('p', ({ MISSING: 'Materiais próprios não registados.', NONE: 'Sem materiais, por declaração explícita.', DECLARED: 'Materiais declarados; aguardam o fecho e os consumos da visita.', MATCHED: 'Quantidades compatíveis com o consumo líquido atual da visita.', REVIEW: 'Materiais por rever: a declaração, a origem ou o consumo da visita não permite confirmar a repartição.' })[saved?.state] || 'Materiais próprios não registados.', box);
+    if (saved?.record?.mode === 'DECLARED') node('p', materialsText(saved.record), box);
+    if (saved?.state === 'MATCHED') for (const line of saved.comparison?.lines || []) node('p', `${line.productName} · ${line.unit}: visita ${line.visitQuantity}; total declarado nas revisões ${line.declaredMaintenanceQuantity}; ainda sem parcela declarada ${line.unassignedQuantity}.`, box);
+    if (saved?.record?.mode === 'DECLARED') node('small', 'Esta declaração não movimenta stock nem atribui custo em euros. Inclua estas quantidades no consumo total da visita uma única vez.', box);
+  }
   function timeText(value) {
     const format = at => new Date(at).toLocaleString('pt-PT', { timeZoneName: 'short' });
     if (!value) return 'Tempo próprio não registado.';
@@ -36,6 +50,7 @@
     let draft; try { draft = JSON.parse(raw); } catch (_) { throw Error('Rascunho de revisão ilegível. Preserve os dados e peça apoio ao escritório.'); }
     if (draft?.v !== 1 || draft.owner !== captured.owner || !['REGULAR','EXTRA'].includes(draft.visitType) || !positive(draft.visitId) || !positive(draft.poolId) || !positive(draft.planId) || !positive(draft.expectedVersion) || !positive(draft.revision) || typeof draft.notes !== 'string' || draft.notes.length > 3000 || typeof draft.title !== 'string' || draftKey(draft, draft.planId) !== storageKey) throw Error('O rascunho de revisão precisa de verificação. Os dados foram preservados.');
     if (Object.hasOwn(draft, 'workTime') && !validTime(draft.workTime)) throw Error('O tempo guardado precisa de verificação. Os dados foram preservados.');
+    if (Object.hasOwn(draft, 'materials') && !validMaterialDraft(draft.materials)) throw Error('Os materiais guardados precisam de verificação. Os dados foram preservados.');
     return draft;
   }
   function draftState(visit, plan) {
@@ -44,8 +59,8 @@
     const state = { storageKey, raw, draft, saving: Promise.resolve(), failed: false, visit, plan };
     states.set(storageKey, state); return state;
   }
-  function saveDraft(state, notes, workTime) {
-    const value = { v: 1, owner: captured.owner, ...state.visit, planId: state.plan.id, expectedVersion: state.plan.version, title: state.plan.title, notes, ...(workTime ? { workTime } : {}) };
+  function saveDraft(state, notes, workTime, materials) {
+    const value = { v: 1, owner: captured.owner, ...state.visit, planId: state.plan.id, expectedVersion: state.plan.version, title: state.plan.title, notes, ...(workTime ? { workTime } : {}), ...(materials ? { materials: structuredClone(materials) } : {}) };
     state.saving = state.saving.then(async () => {
       assertSession(); if (!navigator.locks?.request) throw Error('Este navegador não permite proteger as notas entre janelas.');
       await navigator.locks.request(state.storageKey, async () => {
@@ -87,7 +102,7 @@
     }
     for (const storageKey of Object.keys(localStorage).filter(name => name.startsWith(prefix))) {
       const draft = parseDraft(localStorage.getItem(storageKey), storageKey);
-      if (hasDraft(draft) && !rows.some(row => matching(row, draft) && (!row.response || acknowledgedDraft(row, draft)))) result.push({ kind: 'pending', text: `${label(draft)} — ${draft.title}: ${draft.workTime ? 'notas e tempo' : 'notas de revisão'} guardados, ainda não enviados.` });
+      if (hasDraft(draft) && !rows.some(row => matching(row, draft) && (!row.response || acknowledgedDraft(row, draft)))) result.push({ kind: 'pending', text: `${label(draft)} — ${draft.title}: rascunho de revisão guardado, ainda não enviado.` });
     }
     assertSession(); return result;
   }
@@ -112,9 +127,10 @@
         };
       }
       for (const {storageKey, raw, draft} of drafts) {
-        const details = node('details', null, queue); node('summary', `${label(draft)} · ${draft.title}: notas guardadas, ainda não enviadas`, details); node('p', draft.notes, details);
+        const details = node('details', null, queue); node('summary', `${label(draft)} · ${draft.title}: rascunho guardado, ainda não enviado`, details); node('p', draft.notes, details);
         if (draft.workTime) node('p', timeText(draft.workTime), details);
-        const discard = node('button', draft.workTime ? 'Descartar notas e tempo guardados' : 'Descartar notas guardadas', details); discard.type = 'button'; discard.style.minHeight = '44px';
+        if (draft.materials) node('p', materialsText(draft.materials), details);
+        const discard = node('button', draft.materials ? 'Descartar rascunho com materiais' : draft.workTime ? 'Descartar notas e tempo guardados' : 'Descartar notas guardadas', details); discard.type = 'button'; discard.style.minHeight = '44px';
         discard.onclick = async () => { discard.disabled = true; try { await discardDraft(storageKey, raw); } catch (error) { if (protect()) { node('p', error.message, details); discard.disabled = false; } } };
       }
     } catch (error) { if (protect() && rev === queueRevision) { queue.hidden = false; queue.replaceChildren(); node('p', error.message, queue); } }
@@ -153,34 +169,72 @@
         const saved = plan.completion?.workTime;
         node('p', saved?.state === 'REVIEW' ? 'Tempo por rever: o intervalo ou a visita de origem mudou.' : timeText(saved?.record), card);
         if (saved?.state === 'REVIEW' && validTime({ startAt: saved.record?.startAt, endAt: saved.record?.endAt })) node('p', 'Registo original: ' + timeText(saved.record), card);
+        materialsView(plan.completion?.materials, card);
       }
       if (offline || !data.canComplete || !plan.canComplete || plan.completedInVisit) {
         if (!plan.completedInVisit) node('p', offline ? 'Consulta guardada; confirme a ligação para registar trabalho.' : 'Esta visita não permite registar revisões neste momento.', card);
         if (state.draft?.notes) node('p', 'Notas guardadas: ' + state.draft.notes, card);
         if (state.draft?.workTime) node('p', 'Tempo guardado: ' + timeText(state.draft.workTime), card);
+        if (state.draft?.materials) node('p', 'Rascunho: ' + materialsText(state.draft.materials), card);
         continue;
       }
       if (state.draft && state.draft.expectedVersion !== plan.version) node('p', 'O plano foi atualizado. Reveja as instruções atuais antes de confirmar as notas guardadas.', card);
       const notesLabel = node('label', 'Trabalho realizado / observações', card), notes = node('textarea', null, notesLabel); notes.rows = 2; notes.maxLength = 3000; notes.value = state.draft?.notes || '';
       let workTime = state.draft?.workTime || null;
+      let materials = state.draft?.materials || null;
       const timeBox = node('fieldset', null, card); timeBox.className = 'field-equipment-time';
       node('legend', 'Tempo desta revisão (opcional)', timeBox);
       node('p', 'Marque o início e o fim enquanto realiza o trabalho. Confirme as horas do dispositivo antes de enviar.', timeBox);
       const timeStatus = node('p', null, timeBox); timeStatus.setAttribute('role', 'status');
       const start = node('button', 'Marcar início', timeBox), end = node('button', 'Marcar fim', timeBox), clear = node('button', 'Limpar tempo registado', timeBox);
       for (const button of [start, end, clear]) button.type = 'button';
+      const materialBox = node('fieldset', null, card); materialBox.className = 'field-equipment-materials'; materialBox.style.minWidth = '0';
+      node('legend', 'Materiais desta revisão (opcional)', materialBox);
+      node('p', 'Declare apenas a parte usada nesta revisão. Use o nome e a unidade do consumo da visita, sem conversões. Estas quantidades já fazem parte do total da visita: não as some novamente. A declaração não retira stock nem atribui euros.', materialBox);
+      const modeLabel = node('label', 'Registo de materiais', materialBox), materialMode = node('select', null, modeLabel);
+      materialMode.style.cssText = 'display:block;width:100%;min-width:0';
+      for (const [value, text] of [['', 'Não registar materiais agora'], ['NONE', 'Confirmar sem materiais'], ['DECLARED', 'Indicar materiais usados']]) { const option = node('option', text, materialMode); option.value = value; }
+      materialMode.value = materials?.mode || '';
+      const materialRows = node('div', null, materialBox), addMaterial = node('button', 'Adicionar material', materialBox), materialStatus = node('p', null, materialBox); addMaterial.type = 'button'; materialStatus.setAttribute('role', 'status');
       const checkLabel = node('label', null, card); checkLabel.className = 'field-equipment-check';
       const check = node('input', null, checkLabel); check.type = 'checkbox'; node('span', 'Confirmo que executei esta revisão do equipamento.', checkLabel);
       const action = node('button', 'Registar revisão realizada', card); action.type = 'button'; action.disabled = true;
       const ready = () => {
-        action.disabled = !check.checked || notes.value.trim().length < 3 || busy || state.failed || !!workTime && !workTime.endAt;
+        let materialValid = true; try { if (materials) store.equipmentMaterials(materials); materialStatus.textContent = ''; } catch (error) { materialValid = false; materialStatus.textContent = error.message; }
+        action.disabled = !check.checked || notes.value.trim().length < 3 || busy || state.failed || !!workTime && !workTime.endAt || !materialValid;
         start.disabled = busy || state.failed || !!workTime; end.disabled = busy || state.failed || !workTime || !!workTime.endAt; clear.disabled = busy || state.failed || !workTime;
+        materialMode.disabled = busy || state.failed; addMaterial.disabled = busy || state.failed || (materials?.items.length || 0) >= 20; addMaterial.hidden = materials?.mode !== 'DECLARED';
+        materialRows.querySelectorAll('input,button').forEach(input => { input.disabled = busy || state.failed; });
         timeStatus.textContent = timeText(workTime);
       };
+      const saveMaterials = () => {
+        check.checked = false; ready();
+        saveDraft(state, notes.value, workTime, materials).then(() => { if (valid(visit, rev)) { status.textContent = 'Materiais guardados neste dispositivo; revisão ainda não enviada.'; renderQueue(); } }).catch(error => { if (valid(visit, rev)) { status.textContent = error.message; ready(); } });
+      };
+      function renderMaterials() {
+        materialRows.replaceChildren();
+        for (const [index, item] of (materials?.mode === 'DECLARED' ? materials.items : []).entries()) {
+          const line = node('div', null, materialRows); line.className = 'field-equipment-material-line'; line.style.cssText = 'display:grid;gap:8px;min-width:0;margin:12px 0';
+          for (const [field, text, limit] of [['productName', 'Produto', 160], ['quantity', 'Quantidade', 30], ['unit', 'Unidade', 24]]) {
+            const label = node('label', `${text} ${index + 1}`, line), input = node('input', null, label); input.type = 'text'; input.maxLength = limit; input.value = item[field]; input.dataset.materialField = field; input.style.cssText = 'display:block;width:100%;min-width:0;box-sizing:border-box'; if (field === 'quantity') input.inputMode = 'decimal';
+            input.oninput = () => { if (busy || !valid(visit, rev)) return; materials = { ...materials, items: materials.items.map((row, i) => i === index ? { ...row, [field]: field === 'quantity' ? input.value.replace(',', '.') : input.value } : row) }; saveMaterials(); };
+          }
+          const remove = node('button', 'Remover material ' + (index + 1), line); remove.type = 'button'; remove.onclick = () => { if (busy || !valid(visit, rev)) return; materials = { ...materials, items: materials.items.filter((_, i) => i !== index) }; renderMaterials(); saveMaterials(); };
+        }
+        ready();
+      }
+      materialMode.onchange = () => {
+        if (busy || !valid(visit, rev)) return;
+        if (materials?.items.some(item => Object.values(item).some(value => value.trim())) && materialMode.value !== 'DECLARED') { materialMode.value = materials.mode; status.textContent = 'Remova primeiro as linhas de materiais para mudar este registo. As quantidades foram preservadas.'; return; }
+        materials = materialMode.value ? { mode: materialMode.value, items: materialMode.value === 'DECLARED' ? [{ productName: '', unit: '', quantity: '' }] : [] } : null;
+        renderMaterials(); saveMaterials();
+      };
+      addMaterial.onclick = () => { if (busy || !valid(visit, rev) || materials?.mode !== 'DECLARED' || materials.items.length >= 20) return; materials = { ...materials, items: [...materials.items, { productName: '', unit: '', quantity: '' }] }; renderMaterials(); saveMaterials(); };
+      renderMaterials();
       const saveTime = async next => {
         if (busy || !valid(visit, rev)) return;
         workTime = next; check.checked = false; ready();
-        try { await saveDraft(state, notes.value, workTime); if (valid(visit, rev)) { status.textContent = 'Tempo guardado neste dispositivo; revisão ainda não enviada.'; await renderQueue(); } }
+        try { await saveDraft(state, notes.value, workTime, materials); if (valid(visit, rev)) { status.textContent = 'Tempo guardado neste dispositivo; revisão ainda não enviada.'; await renderQueue(); } }
         catch (error) { if (valid(visit, rev)) { status.textContent = error.message; ready(); } }
       };
       start.onclick = () => saveTime({ startAt: new Date().toISOString(), endAt: null });
@@ -188,7 +242,7 @@
       clear.onclick = () => saveTime(null);
       ready();
       notes.oninput = () => {
-        ready(); saveDraft(state, notes.value, workTime).then(() => { if (valid(visit, rev)) status.textContent = 'Notas guardadas neste dispositivo; revisão ainda não enviada.'; }).catch(error => { if (valid(visit, rev)) { status.textContent = error.message; ready(); } });
+        ready(); saveDraft(state, notes.value, workTime, materials).then(() => { if (valid(visit, rev)) status.textContent = 'Notas guardadas neste dispositivo; revisão ainda não enviada.'; }).catch(error => { if (valid(visit, rev)) { status.textContent = error.message; ready(); } });
       };
       check.onchange = ready;
       action.onclick = async () => {
@@ -196,8 +250,8 @@
         const confirmedNotes = notes.value.trim(); let prepared = false;
         busy = true; ready(); refresh.disabled = true; notes.disabled = check.disabled = true;
         try {
-          await saveDraft(state, confirmedNotes, workTime); if (!valid(visit, rev)) return;
-          const row = await store.prepare(scope, plan.id, { visitType: visit.visitType, visitId: visit.visitId, poolId: visit.poolId, expectedVersion: plan.version, notes: confirmedNotes, confirmed: true, ...(workTime ? { workTime } : {}) }, { label: plan.title }, captured);
+          await saveDraft(state, confirmedNotes, workTime, materials); if (!valid(visit, rev)) return;
+          const row = await store.prepare(scope, plan.id, { visitType: visit.visitType, visitId: visit.visitId, poolId: visit.poolId, expectedVersion: plan.version, notes: confirmedNotes, confirmed: true, ...(workTime ? { workTime } : {}), ...(materials ? { materials: store.equipmentMaterials(materials) } : {}) }, { label: plan.title }, captured);
           prepared = true;
           await send(row);
         } catch (error) { if (valid(visit, rev)) status.textContent = 'Resultado incerto. ' + explain(error.message); }
