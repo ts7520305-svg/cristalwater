@@ -1,10 +1,10 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 24/09/2026, TASK319 em validação
+## Retoma atual — 24/09/2026, TASK319 aprovada
 
-- Base `139367880c03caedae6e15e978a9b644adb1da10`, fecho aprovado TASK317–318. TASK319 implementada: até 20 intervalos nos lembretes independentes; duração/custo pela soma, pausas disponíveis para outras intervenções, provas antigas conservadas, fontes financeiras simples/distribuídas/compostas e anulação com os custos originais conservados. [REMINDER_INDEPENDENT_INTERVALS_20260924.md](REMINDER_INDEPENDENT_INTERVALS_20260924.md).
-- 501 unitários/72 ficheiros, quatro técnicos, sintaxe 616/215/62, novo grupo API/navegador e seis regressões aprovados localmente. Migração 39 estende duas restrições financeiras sem alterar linhas existentes; percurso de atualização anterior e esquema atual conferidos em QA local. Sem novas tabelas/dependências. 20 ficheiros, cache v134 e runner com 222 grupos.
-- Publicar este lote e conferir CI/restauro do commit exato; não declarar aprovação nativa antecipadamente. Durante o CI, prosseguir múltiplos intervalos próprios de equipamento em preparação isolada, preservando as provas e limites comuns.
+- TASK319 aprovada: até 20 intervalos próprios nos lembretes independentes, custos pela soma sem pausas, comprovativos anteriores conservados, períodos e orçamentos pagos partilhados, revisão/anulação e recuperação. [REMINDER_INDEPENDENT_INTERVALS_20260924.md](REMINDER_INDEPENDENT_INTERVALS_20260924.md).
+- Código publicado `eeb04087a6a25dae36eb4299472a207a8abd8506`, árvore `45f519cd7728813ffe1d4ccf3ba170686e5c1de3`, igual à validada localmente. [CI 36015629947](https://github.com/ts7520305-svg/cristalwater/actions/runs/36015629947), job `107687301311`, aprovado entre 2026-09-24T14:49:42Z e 2026-09-24T15:13:23Z (23m41s): 17 etapas, 222/222 grupos previstos distintos, sem falhas, faltas, entradas inesperadas ou duplicações; 501 unitários/72 ficheiros, quatro técnicos, gate geral de navegador, sintaxe 616/215/62 e 39 migrações. Restauro PostgreSQL 16 de 127 tabelas/46 ficheiros, com linhas e hashes iguais. Evidência [evidence/20260924_task319_ci.json](evidence/20260924_task319_ci.json). Cache v134, uma migração nova sem novas tabelas/dependências. O fecho posterior altera apenas documentação; a aprovação refere-se ao código e árvore acima.
+- TASK320 em preparação isolada: pausa/retoma e repartição pelos vários intervalos próprios do equipamento. Concluir a validação e publicar o lote seguinte; não tratar a preparação local como aprovação nativa.
 
 ## Aprovação anterior — TASK317–318
 
@@ -59,7 +59,7 @@
 
 ## Próxima ação
 
-1. Fechar CI/restauro TASK319 e prosseguir múltiplos intervalos de equipamento (TASK320), repartições entre meses e revisão histórica de registos antigos sem recibo verificável. Não repetir TASK300–319. Conservar comprovativos, sobreposições e saldos.
+1. Prosseguir múltiplos intervalos de equipamento (TASK320), repartições entre meses e revisão histórica de registos antigos sem recibo verificável. Não repetir TASK300–319. Conservar comprovativos, sobreposições e saldos.
 2. Continuar restantes gastos/ajustes/origens de receita e os pontos da [matriz atual](COMPLETENESS_CURRENT_20260915.md): históricos/ecrãs/PDFs/idiomas, volume e operação prolongada, VPS/fornecedores e piloto físico. Custos/receitas completos e lucro por apurar; não atribuir percentagem global sem critérios fechados. IA generativa offline/aprendizagem por piscina/vídeo e integrações completas continuam requisitos separados sem aprovação integral.
 
 ## Autorizações e regras vigentes
