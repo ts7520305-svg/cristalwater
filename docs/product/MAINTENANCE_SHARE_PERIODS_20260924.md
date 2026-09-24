@@ -35,7 +35,7 @@ Os dois editores mostram o mês da visita, o mês da manutenção, o remanescent
 - Histórico adulterado bloqueia a confirmação de zero mesmo num mês sem parcelas legíveis. As projeções por execução e as despesas atribuídas conservam o mês da origem.
 - Navegador real: meses explícitos, revisão administrativa incorporada, proposta e recibo adulterados com hashes recalculados, rascunho após recarga, confirmação dupla, resposta perdida e recuperação por consulta sem novo POST, anulação, materiais de lembrete e isolamento de sessão. Larguras 320/390/1440 e modo escuro.
 - Quatro regressões dirigidas aprovadas: repartição de trabalho, materiais, custos de lembretes associados e correção administrativa de tempos.
-- Runner com 225 grupos; cache `cristalwater-field-20260924-v137`. Sem novas migrações, tabelas ou dependências; mantêm-se 39 migrações. CI nativo e restauro deste lote pendentes nesta versão documental.
+Código publicado `8716f28f1f65356a7f96d5d1e6b4c0b8e54501ac`, árvore `2cd063a52b3e25521375167cf016f775349a83a3`, igual à validada localmente. [CI 36028499817](https://github.com/ts7520305-svg/cristalwater/actions/runs/36028499817), job `107731010439`, aprovado entre 2026-09-24T16:36:05Z e 2026-09-24T17:06:54Z (30m49s): 17 etapas, 225/225 grupos previstos distintos, sem falhas, faltas, entradas inesperadas ou duplicações; 519 unitários/75 ficheiros, quatro técnicos, gate geral de navegador, sintaxe 617/216/62 e 39 migrações. Restauro PostgreSQL 16 de 127 tabelas/46 ficheiros, com linhas e hashes iguais. Evidência [evidence/20260924_task322_ci.json](evidence/20260924_task322_ci.json). Cache v137, sem novas migrações/tabelas/dependências. O fecho posterior altera apenas documentação; a aprovação refere-se ao código e árvore acima.
 
 ## Continuação
 
