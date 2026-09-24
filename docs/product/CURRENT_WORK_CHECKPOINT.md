@@ -1,10 +1,16 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 24/09/2026, TASK320 aprovada
+## Retoma atual — 24/09/2026, TASK321 aprovada
+
+- TASK321 aprovada: correção, completamento e anulação administrativa de tempos de equipamento, com origem técnica confirmada, original e recibo conservados, histórico próprio e revisão explícita dos custos afetados. [EQUIPMENT_TIME_CORRECTIONS_20260924.md](EQUIPMENT_TIME_CORRECTIONS_20260924.md).
+- Código publicado `ad8c81a0299fd3f672c627a690727f6963af751a`, árvore `b53867b93f8a0dd8a9bf653393ee81d658546aa3`, igual à validada localmente. [CI 36024090516](https://github.com/ts7520305-svg/cristalwater/actions/runs/36024090516), job `107716065271`, aprovado entre 2026-09-24T15:58:45Z e 2026-09-24T16:30:43Z (31m58s): 17 etapas, 224/224 grupos previstos distintos, sem falhas, faltas, entradas inesperadas ou duplicações; 513 unitários/74 ficheiros, quatro técnicos, gate geral de navegador, sintaxe 617/216/62 e 39 migrações. Restauro PostgreSQL 16 de 127 tabelas/46 ficheiros, com linhas e hashes iguais. Evidência [evidence/20260924_task321_ci.json](evidence/20260924_task321_ci.json). Cache v136, sem novas migrações/tabelas/dependências. O fecho posterior altera apenas documentação; a aprovação refere-se ao código e árvore acima.
+- TASK322 em implementação e validação: parcelas de trabalho e materiais entre o mês da visita e o mês da manutenção, comprovativos originais e reservas conservados. Concluir a validação e publicar o lote seguinte; não tratar a preparação local como aprovação nativa.
+
+## Aprovação anterior — TASK320
 
 - TASK320 aprovada: pausa/retoma com até 20 intervalos próprios de equipamento, milissegundos conservados, duração/custo pela soma sem pausas, saldos comuns com lembretes, comprovativos antigos preservados e recuperação. [EQUIPMENT_WORK_INTERVALS_20260924.md](EQUIPMENT_WORK_INTERVALS_20260924.md).
 - Código publicado `d201f216ade1e292a8d0a795f339c26922731825`, árvore `19fc5c961ab998f33762c3a8a311146f6506067d`, igual à validada localmente. [CI 36019143572](https://github.com/ts7520305-svg/cristalwater/actions/runs/36019143572), job `107699265852`, aprovado entre 2026-09-24T15:17:58Z e 2026-09-24T15:49:18Z (31m20s): 17 etapas, 223/223 grupos previstos distintos, sem falhas, faltas, entradas inesperadas ou duplicações; 507 unitários/73 ficheiros, quatro técnicos, gate geral de navegador, sintaxe 616/215/62 e 39 migrações. Restauro PostgreSQL 16 de 127 tabelas/46 ficheiros, com linhas e hashes iguais. Evidência [evidence/20260924_task320_ci.json](evidence/20260924_task320_ci.json). Cache v135, sem novas migrações/tabelas/dependências. O fecho posterior altera apenas documentação; a aprovação refere-se ao código e árvore acima.
-- TASK321 em implementação e validação: correção/completamento/anulação administrativa de tempos de equipamento, original conservado e revisão dos custos afetados. Concluir a validação e publicar o lote seguinte; não tratar a preparação local como aprovação nativa.
+
 
 ## Aprovação anterior — TASK319
 
@@ -64,7 +70,7 @@
 
 ## Próxima ação
 
-1. Prosseguir correções/revisão histórica de tempos de equipamento (TASK321), repartições entre meses e registos antigos sem recibo verificável. Não repetir TASK300–320. Conservar comprovativos, sobreposições e saldos.
+1. Concluir as repartições entre meses (TASK322), depois rever registos antigos sem recibo verificável. Não repetir TASK300–321. Conservar comprovativos, sobreposições e saldos.
 2. Continuar restantes gastos/ajustes/origens de receita e os pontos da [matriz atual](COMPLETENESS_CURRENT_20260915.md): históricos/ecrãs/PDFs/idiomas, volume e operação prolongada, VPS/fornecedores e piloto físico. Custos/receitas completos e lucro por apurar; não atribuir percentagem global sem critérios fechados. IA generativa offline/aprendizagem por piscina/vídeo e integrações completas continuam requisitos separados sem aprovação integral.
 
 ## Autorizações e regras vigentes
@@ -79,4 +85,4 @@ A app assinala os serviços que pedem fatura com IVA e regista checklist/número
 
 Este ficheiro foi reduzido ao estado atual para evitar truncar a retoma. O conteúdo anterior está integralmente preservado, sem alterações, em [archive/WORK_CHECKPOINT_THROUGH_TASK305_20260923.md](archive/WORK_CHECKPOINT_THROUGH_TASK305_20260923.md), copiado do commit TASK305 antes deste fecho documental. Esse arquivo contém estados antigos e próximos passos já superados; não os tratar como a fase ativa.
 
-O checkpoint e o relatório TASK320 prevalecem para escolher a próxima tarefa. Relatórios individuais e `docs/product/evidence/` conservam os critérios e os resultados anteriores, incluindo [LABOR_COST_COMPONENTS_20260923.md](LABOR_COST_COMPONENTS_20260923.md) e [evidence/20260923_task304_ci.json](evidence/20260923_task304_ci.json).
+O checkpoint e o relatório TASK321 prevalecem para escolher a próxima tarefa. Relatórios individuais e `docs/product/evidence/` conservam os critérios e os resultados anteriores, incluindo [LABOR_COST_COMPONENTS_20260923.md](LABOR_COST_COMPONENTS_20260923.md) e [evidence/20260923_task304_ci.json](evidence/20260923_task304_ci.json).
