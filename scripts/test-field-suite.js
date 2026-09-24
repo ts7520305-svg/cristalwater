@@ -112,6 +112,7 @@ scripts.push('test-field-operational-values.js');
 scripts.push('test-field-operational-values-ui.js');
 scripts.push('test-field-planned-work.js');
 scripts.push('test-field-client-services.js','test-field-client-services-ui.js');
+scripts.push('test-field-client-service-pricing.js');
 scripts.push('test-field-alert-report-opening.js');
 scripts.push('test-field-visit-report-photos.js');
 scripts.push('test-field-extra-report.js');
