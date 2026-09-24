@@ -1,5 +1,13 @@
 # Cristal Water — matriz atual de conclusão
 
+## Retoma atual — 24/09/2026, TASK340 validada localmente
+
+Registo diário ADMIN com dia UTC/filtros estritos, fotografia consistente, falhas sem listas vazias, cliente original conservado, guias/viaturas inferidas identificadas, materiais REGULAR/EXTRA separados, limites explícitos e eventos paginados. Navegador protege sessão, respostas tardias, filtros, erro, offline e timeout; contraste revisto em 320/390/1440. 600 unitários/82 ficheiros, quatro técnicos, sintaxe 627/220/62 e dois grupos API/Chromium/administrativos aprovados. 40 migrações locais, cache v152, runner com 237 grupos. [Relatório](DAILY_SERVICE_LOG_RELIABILITY_20260924.md) e [evidência local](evidence/20260924_task340_local.json). Preparada para publicação; CI/restauro deste código por confirmar.
+
+TASK337 e TASK338 aprovadas integralmente no CI PostgreSQL: respetivamente 234/234 e 235/235 grupos esperados distintos, 17 etapas e restauro de 127 tabelas/48 e 46 ficheiros, com linhas e hashes iguais. Evidências [TASK337](evidence/20260924_task337_ci.json) e [TASK338](evidence/20260924_task338_ci.json). A geração mensal concorrente passou no ambiente nativo. TASK339 ainda em execução no último controlo, sem aprovação antecipada.
+
+Inventário atualizado: 115 HTML, 77 páginas com referência literal em 258 scripts ativos, 38 na fila de pesquisa; nenhum recurso ausente no índice. A validação visual deste lote é PT-PT, não prova os cinco idiomas nem todas as páginas. Retomar o CI novo e a fila finita, preservando originais/recibos e os critérios ainda abertos. Sem merge/deploy/contactos reais.
+
 ## Estado de retoma — 24/09/2026, TASK339 publicada
 
 Publicada em `e20b0d47f42b2eee0a6862cb97e58f553c33b1bc`, árvore `e5f44c27429fbeefb14581d96f6b6db6e69fe210`, idêntica à validada localmente. [CI 36054372854](https://github.com/ts7520305-svg/cristalwater/actions/runs/36054372854) em execução; os 236 grupos e o restauro nativo continuam por confirmar.

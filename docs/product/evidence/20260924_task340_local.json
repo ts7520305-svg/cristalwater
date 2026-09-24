@@ -1,0 +1,122 @@
+{
+  "task": "TASK340",
+  "checkedAt": "2026-09-24T20:47:31.193171+00:00",
+  "base": "70982c23c2f8b813a9d478de02c1198826ffa49b",
+  "branch": "work/field-readiness-20260915-simulation",
+  "unit": {
+    "tests": 600,
+    "files": 82
+  },
+  "technicianTests": 4,
+  "syntax": {
+    "backend": 627,
+    "frontend": 220,
+    "inline": 62
+  },
+  "groups": [
+    "test-field-daily-service-log.js",
+    "test-administration-os-operational.js"
+  ],
+  "expectedNativeGroups": 237,
+  "cache": "v152",
+  "environment": {
+    "database": "PGlite isolated; not native restore",
+    "browser": "normal Chromium; pt-PT",
+    "migrations": 40,
+    "realContacts": false,
+    "productionWrites": false
+  },
+  "sourceSha256": {
+    "frontend/admin-service-log.html": "4876e6724701105ed15e0e330592de3577b9009f5617600cb10b8c2896a3589a",
+    "frontend/admin-service-log.js": "e93fb148a1cb54b4688134af0a4e0f4622a7c14413ab396935cf5024bf807d7a",
+    "frontend/sw.js": "5fe52a5c2ba37503af045e09245e1b81385795ae413c6ab1c41150c767adaf9a",
+    "scripts/test-field-suite.js": "e8a8b113bb7f72e067502dc757fb7ced4759ccbc0291e62d3cb627086de253c9",
+    "scripts/test-field-daily-service-log.js": "80cb54561f5994ea1a945496e3bf0c35755de31b823d9adfeedbfd28935a085a",
+    "src/routes/coreFlowRoutes.js": "1978b76a441bcdbd019e3363ee713ce1a6b0284f84afb933d93f348d2900fade",
+    "src/services/dailyServiceLogService.js": "0231a6abfec65cf1b4066eaf54ef57bbad6969a016bd1d5f4a1e614909d38579",
+    "tests/daily-service-log.test.js": "e6325e54efa49ccb1d2f582a10faeb579fcb193210fcbe69d72f9c2bfd60466f"
+  },
+  "logs": {
+    "cw340-unit.log": {
+      "sha256": "6a95a479cd15070ea02b0050515f4d346a0d10fbd4443bf8c5c798cd81596496",
+      "passLines": [
+        " Test Files  82 passed (82)",
+        "      Tests  600 passed (600)"
+      ]
+    },
+    "cw340-tech.log": {
+      "sha256": "37658d8d570864e7550eda1b04f91bd71e38832fc3b31c4a57c52bec31261103",
+      "passLines": [
+        " Test Files  1 passed (1)",
+        "      Tests  4 passed (4)"
+      ]
+    },
+    "cw340-syntax.log": {
+      "sha256": "abc8fb7f82dc7ae1fee3eda6b21150ee8b27c82252f795c4b1336c3fd6aa172c",
+      "passLines": [
+        "✅ Syntax OK: 627 backend JS files, 220 frontend JS files and 62 inline scripts."
+      ]
+    },
+    "cw340-integrated.log": {
+      "sha256": "6f6c3aba2e57016e7d24aa01502d230fc258c84f275a226393097b59355eff4a",
+      "passLines": [
+        "PASS daily API: exact UTC day/filters, ADMIN-only, original client, typed stock links, explicit inferred vehicle/guide origins, private projection, event dates, GPS scope, 501-row limit and sanitized source failure",
+        "PASS daily browser: current filters, real/empty/partial/error states, long names at 320/390/1440, zero GPS coordinates, explicit event pagination, failed filters, offline recovery, timeout, late day replies, account change and unchanged sources",
+        "✅ ADMINISTRATION OS OPERATIONAL ACCEPTANCE OK"
+      ]
+    }
+  },
+  "screenshots": [
+    {
+      "path": "reports/field-visual/daily-service-log/daily-1440.png",
+      "sha256": "e258cfbe9a8ddcc1b23313412d607df8915942472b2bbf7783be2870dfb45c49",
+      "reviewed": true
+    },
+    {
+      "path": "reports/field-visual/daily-service-log/daily-320.png",
+      "sha256": "eea1f69d273d7482922bf58fa0e2bd27daa241b23c2e147e186d4caa6b9c08c1",
+      "reviewed": true
+    },
+    {
+      "path": "reports/field-visual/daily-service-log/daily-390.png",
+      "sha256": "0d844c5aeb7d863473c727352cf686404916a394642ab97dc25e31d754f141db",
+      "reviewed": true
+    },
+    {
+      "path": "reports/field-visual/daily-service-log/daily-service-1440.png",
+      "sha256": "f8f22eb481e749b29f49d2acd1d2db91a065ed7c48a2a7ce06f57c499d69cf43",
+      "reviewed": true
+    },
+    {
+      "path": "reports/field-visual/daily-service-log/daily-service-320.png",
+      "sha256": "faab359bbec9eba29e46e6015af62db33b9c350decdabb995135c29d499b972f",
+      "reviewed": true
+    },
+    {
+      "path": "reports/field-visual/daily-service-log/daily-service-390.png",
+      "sha256": "e6cdf409f8637e4e43d6d121e3362bfcb5270245de0d89b00630059f072d0310",
+      "reviewed": true
+    }
+  ],
+  "inventory": {
+    "htmlFiles": 115,
+    "rootPages": 108,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 77,
+    "catalogueGuardDifferences": 0
+  },
+  "previousNativeApprovals": [
+    "20260924_task337_ci.json",
+    "20260924_task338_ci.json"
+  ],
+  "newNativeStatus": "pending publication and CI; not approved",
+  "limits": [
+    "Regular visits only, explicit UTC day",
+    "Current pool details and inferred associations are labelled, not historical proof",
+    "GPS by current user email is not attributed to a historical vehicle",
+    "Visual QA in pt-PT; five-language and universal page review remain open",
+    "Two tracked brand images not materialized locally"
+  ]
+}

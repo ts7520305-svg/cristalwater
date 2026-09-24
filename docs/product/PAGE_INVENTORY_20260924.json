@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-24T20:17:10.674Z",
-  "baseCommit": "31e18feec8ed4e87f9d6c80b47f217870ef5fe1a",
+  "generatedAt": "2026-09-24T20:44:14.929Z",
+  "baseCommit": "70982c23c2f8b813a9d478de02c1198826ffa49b",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 257,
+  "activeScriptsScanned": 258,
   "summary": {
     "htmlFiles": 115,
     "rootPages": 108,
     "nestedPages": 7,
     "unavailableLocalAssetReferences": 2,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 76,
+    "pagesWithLiteralTestReference": 77,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -1551,7 +1551,7 @@
       "file": "frontend/admin-service-log.html",
       "route": "/admin-service-log",
       "kind": "Entrada raiz",
-      "title": "Cristal Water LDA - Registo Diario",
+      "title": "Cristal Water LDA - Registo diário",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -1579,7 +1579,9 @@
       "unavailableLocalAssets": [],
       "languageAssets": [],
       "directPrintAction": false,
-      "testReferences": [],
+      "testReferences": [
+        "test-field-daily-service-log.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {

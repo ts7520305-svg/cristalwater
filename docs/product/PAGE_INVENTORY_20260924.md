@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `31e18feec8ed4e87f9d6c80b47f217870ef5fe1a`. Gerado em 2026-09-24T20:17:10.674Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `70982c23c2f8b813a9d478de02c1198826ffa49b`. Gerado em 2026-09-24T20:44:14.929Z. Inclui o estado dos ficheiros locais no momento da geração.
 
 115 ficheiros HTML: 108 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 257 scripts de integração/navegador ativos. 76 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 258 scripts de integração/navegador ativos. 77 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 2 referências existem no índice Git mas não estão materializadas nesta cópia local; não são classificadas como ficheiros ausentes da aplicação.
 
@@ -73,7 +73,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /admin-revenue | Entrada raiz | — | ADMIN | 1 |
 | /admin-rounds | Entrada raiz | ADMIN | ADMIN | 4 |
 | /admin-security | Entrada raiz | ADMIN | ADMIN | 0 |
-| /admin-service-log | Entrada raiz | ADMIN | ADMIN | 0 |
+| /admin-service-log | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-suppliers | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-technicians | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-test-center | Entrada raiz | ADMIN | ADMIN | 0 |
@@ -168,7 +168,6 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 - /admin-payments — Entrada raiz; papéis declarados: ADMIN.
 - /admin-pool-calculator — Entrada raiz; papéis declarados: ADMIN.
 - /admin-security — Entrada raiz; papéis declarados: ADMIN.
-- /admin-service-log — Entrada raiz; papéis declarados: ADMIN.
 - /admin-suppliers — Entrada raiz; papéis declarados: ADMIN.
 - /admin-technicians — Entrada raiz; papéis declarados: ADMIN.
 - /admin-test-center — Entrada raiz; papéis declarados: ADMIN.
