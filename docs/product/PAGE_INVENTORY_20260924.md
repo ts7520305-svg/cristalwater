@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `70982c23c2f8b813a9d478de02c1198826ffa49b`. Gerado em 2026-09-24T20:44:14.929Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `0b3ef23a4cb769c79150d36c0329c5478ec17270`. Gerado em 2026-09-24T21:35:22.379Z. Inclui o estado dos ficheiros locais no momento da geração.
 
 115 ficheiros HTML: 108 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 258 scripts de integração/navegador ativos. 77 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 259 scripts de integração/navegador ativos. 78 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 2 referências existem no índice Git mas não estão materializadas nesta cópia local; não são classificadas como ficheiros ausentes da aplicação.
 
@@ -44,7 +44,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /admin-clients | Entrada raiz | ADMIN | ADMIN | 2 |
 | /admin-collection | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-command-center | Entrada raiz | ADMIN | ADMIN | 0 |
-| /admin-company-closures | Entrada raiz | ADMIN | ADMIN | 0 |
+| /admin-company-closures | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-core-flow | Entrada raiz | ADMIN | — | 0 |
 | /admin-credit-revenue | Entrada raiz | — | ADMIN | 1 |
 | /admin-crm | Entrada raiz | ADMIN | ADMIN | 4 |
@@ -157,7 +157,6 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 ## Fila finita sem referência literal em QA
 
 - /admin-command-center — Entrada raiz; papéis declarados: ADMIN.
-- /admin-company-closures — Entrada raiz; papéis declarados: ADMIN.
 - /admin-core-flow — Entrada raiz; papéis declarados: ADMIN.
 - /admin-email-logs — Entrada raiz; papéis declarados: ADMIN.
 - /admin-live-map — Entrada raiz; papéis declarados: ADMIN.

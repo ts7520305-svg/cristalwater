@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-24T20:44:14.929Z",
-  "baseCommit": "70982c23c2f8b813a9d478de02c1198826ffa49b",
+  "generatedAt": "2026-09-24T21:35:22.379Z",
+  "baseCommit": "0b3ef23a4cb769c79150d36c0329c5478ec17270",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 258,
+  "activeScriptsScanned": 259,
   "summary": {
     "htmlFiles": 115,
     "rootPages": 108,
     "nestedPages": 7,
     "unavailableLocalAssetReferences": 2,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 77,
+    "pagesWithLiteralTestReference": 78,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -325,6 +325,7 @@
         "/crystal-os-v2-foundation.css",
         "/crystal-os-v2-phase2-adapter.css",
         "/ui/design-system.css",
+        "/cw-company-closure-rules.js",
         "/admin-company-closures.js",
         "/cw-admin-shortcuts.js",
         "/ui/core/navigation-context.js",
@@ -336,7 +337,9 @@
       "unavailableLocalAssets": [],
       "languageAssets": [],
       "directPrintAction": false,
-      "testReferences": [],
+      "testReferences": [
+        "test-field-company-closures.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {

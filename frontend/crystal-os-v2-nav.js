@@ -137,7 +137,7 @@
           ['/admin-onboarding', 'Onboarding de contratos'],
           ['/admin-alerts?scope=repairs', 'Reparacoes'],
           ['/repair-execution', 'Execução de reparações'],
-          ['/admin-company-closures', 'Obras']
+          ['/admin-company-closures', 'Férias e encerramentos']
         ]},
         { label: '7. Faturacao e financeiro', links: [
           ['/billing', 'Resumo financeiro'],
@@ -166,7 +166,7 @@
           ['/admin-alerts?scope=repairs', 'Alertas tecnicos']
         ]},
         { label: '10. Obras e logistica', links: [
-          ['/admin-company-closures', 'Planeamento operacional'],
+          ['/admin-company-closures', 'Férias e encerramentos'],
           ['/admin-vehicles#works', 'Guias e assinaturas'],
           ['/admin-vehicles', 'Frota']
         ]},

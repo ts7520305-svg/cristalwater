@@ -1,5 +1,13 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 24/09/2026, TASK341 validada localmente
+
+Encerramentos com versão revista, pedido único, comprovativo recuperável, concorrência protegida, origem autenticada e auditoria atómica. Cancelar o diálogo não altera dados; metadados antigos são conservados; avisos não se duplicam. Lista/impacto com limites explícitos, prioridade sem origem por rever, datas UTC inclusivas, sessão, offline, quota, timeout e respostas tardias protegidos. 606 unitários/83 ficheiros, quatro técnicos, sintaxe 628/221/62 e três grupos integrados aprovados. 40 migrações existentes, cache v153, runner com 238 grupos. [Relatório](COMPANY_CLOSURE_RELIABILITY_20260924.md) e [evidência local](evidence/20260924_task341_local.json). Preparada para publicação; CI/restauro deste código por confirmar.
+
+TASK339 e TASK340 aprovadas integralmente: 236/236 e 237/237 grupos esperados distintos, 17 etapas em cada CI e restauro de 127 tabelas/47 ficheiros em ambos, com linhas e hashes iguais. Evidências [TASK339](evidence/20260924_task339_ci.json) e [TASK340](evidence/20260924_task340_ci.json).
+
+Inventário: 115 HTML, 78 páginas com referência literal em 259 scripts ativos, 37 na fila de pesquisa. Este lote não implementa pausa/reagendamento automático nem integração dos encerramentos no portal; as preferências são identificadas como tal. Prioridades históricas, idiomas, restantes páginas e dependências de produção mantêm critérios abertos. Sem merge/deploy/contactos reais.
+
 ## Retoma atual — 24/09/2026, TASK340 publicada
 
 Registo diário ADMIN com dia UTC/filtros estritos, fotografia consistente, falhas sem listas vazias, cliente original conservado, guias/viaturas inferidas identificadas, materiais REGULAR/EXTRA separados, limites explícitos e eventos paginados. Navegador protege sessão, respostas tardias, filtros, erro, offline e timeout; contraste revisto em 320/390/1440. 600 unitários/82 ficheiros, quatro técnicos, sintaxe 627/220/62 e dois grupos API/Chromium/administrativos aprovados. 40 migrações locais, cache v152, runner com 237 grupos. [Relatório](DAILY_SERVICE_LOG_RELIABILITY_20260924.md) e [evidência local](evidence/20260924_task340_local.json). Publicada em `b76869a384da7f6e4caac2fe09b59bdf2993f48d`, árvore `6bdc5928e9baadbc6cb4c11424ae759522410721`, idêntica à validada localmente. [CI 36057362407](https://github.com/ts7520305-svg/cristalwater/actions/runs/36057362407) em execução; os 237 grupos e o restauro nativo continuam por confirmar.

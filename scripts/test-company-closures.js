@@ -4,11 +4,11 @@ const path = require('path');
 const root = path.join(__dirname, '..');
 const checks = [
   ['schema CompanyClosure', 'prisma/schema.prisma', /model CompanyClosure/],
-  ['route file', 'src/routes/companyClosureRoutes.js', /router\.post\("\/"/],
+  ['route file', 'src/routes/companyClosureRoutes.js', /router\.post\(['"]\/['"]/],
   ['server mount', 'src/server.js', /\/api\/company-closures/],
   ['frontend html', 'frontend/admin-company-closures.html', /Modo Férias/],
-  ['frontend js', 'frontend/admin-company-closures.js', /generate-notifications/],
-  ['notification integration', 'src/routes/companyClosureRoutes.js', /COMPANY_CLOSURE_CLIENT_NOTICE/],
+  ['frontend js', 'frontend/admin-company-closures.js', /NOTIFY/],
+  ['notification integration', 'src/services/companyClosureService.js', /COMPANY_CLOSURE_CLIENT_NOTICE/],
   ['route impact preview', 'src/routes/companyClosureRoutes.js', /route-impact/],
   ['templates', 'src/routes/companyClosureRoutes.js', /NATAL/],
 ];

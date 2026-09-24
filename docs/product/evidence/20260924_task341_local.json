@@ -1,0 +1,124 @@
+{
+  "task": "TASK341",
+  "checkedAt": "2026-09-24T21:39:55.238Z",
+  "base": "0b3ef23a4cb769c79150d36c0329c5478ec17270",
+  "branch": "work/field-readiness-20260915-simulation",
+  "unit": {
+    "tests": 606,
+    "files": 83
+  },
+  "technicianTests": 4,
+  "syntax": {
+    "backend": 628,
+    "frontend": 221,
+    "inline": 62
+  },
+  "groups": [
+    "test-field-company-closures.js",
+    "test-field-legacy-admin-access.js",
+    "test-administration-os-operational.js"
+  ],
+  "staticAcceptance": "test-company-closures.js passed",
+  "expectedNativeGroups": 238,
+  "cache": "v153",
+  "environment": {
+    "database": "PGlite isolated; not native restore",
+    "browser": "normal Chromium",
+    "migrations": 40,
+    "realContacts": false,
+    "productionWrites": false
+  },
+  "sourceSha256": {
+    "frontend/admin-company-closures.html": "bce02027b88b361b530cb9e3ba737b6669ccecb9f65356fb6d717fe24dbf0cb6",
+    "frontend/admin-company-closures.js": "fe481c2503b64492f969cadd9ee833860793a829258c19ebf69cd7ed2e9bacd6",
+    "frontend/cw-company-closure-rules.js": "846bc000eac6083f4dad69e0dfb4af16c266dfaee4035e408415058508a8a1c8",
+    "frontend/crystal-os-v2-nav.js": "571a4dac04445cece133e9afe543f18927d64f41965c0dc68af84b7573f06ced",
+    "frontend/sw.js": "8dce146772dbeca49bce02477a78cdd93924f272d853afb07758f65724c476d5",
+    "scripts/test-company-closures.js": "385982e220618c275ce7da551f607b48e8404c27fb9aaa43222d0e5cbd6afaf4",
+    "scripts/test-field-suite.js": "6f5b0cc6ecc1dffd6d9ede6aba74ac76aebe14fd5dfa0528dfb5518f801a5d8b",
+    "scripts/test-field-company-closures.js": "b1cce4b27835f9bc075c33749808c8bfa54b909d52e74b6620f54dc2d85156a5",
+    "src/routes/companyClosureRoutes.js": "62c934608037921c8783c7743f525aee2090c3e35cfba02fcd21b2376908c84b",
+    "src/services/companyClosureService.js": "e9a5d67b7a3885c1eee4617ce523504e7d619939dfe7f3ecb1575bdf7d50fa35",
+    "src/services/fieldWriteRequestService.js": "81e7578ed4d9b8287f8231f9178e6fc5f8d1719e3b9fe579614fb8983115fc21",
+    "tests/company-closure-rules.test.js": "67ad673cb8e4e80740ed039b122870dbaa8d3598f4ee54b732d62ca741c1bc26"
+  },
+  "logs": {
+    "cw341-final-unit.log": {
+      "sha256": "3eed73ea3b9f8af5a91a2f52de5545268e0adeee9eb3d0e3657baa61b4985859",
+      "passLines": [
+        " Test Files  83 passed (83)",
+        "      Tests  606 passed (606)"
+      ]
+    },
+    "cw341-tech.log": {
+      "sha256": "2e5ee0c0500ff241bb3a35ccd281353115295e1b9ff8490e881bd388232ad8aa",
+      "passLines": [
+        " Test Files  1 passed (1)",
+        "      Tests  4 passed (4)"
+      ]
+    },
+    "cw341-final-syntax.log": {
+      "sha256": "66ab1096d5ff4da98303bf0f04b7802373137fd01df25e865159cb786fa09ec4",
+      "passLines": [
+        "✅ Syntax OK: 628 backend JS files, 221 frontend JS files and 62 inline scripts."
+      ]
+    },
+    "cw341-final-integrated.log": {
+      "sha256": "b4c93569fe8220686038f5440a2ef4366a6737f7ef5f9e6f1801b3fd7fe77699",
+      "passLines": [
+        "PASS closures API: exact dates and inclusive final day, ADMIN-only, server actor, immutable metadata, receipts/reuse/recovery ownership, stale review, audit rollback, no duplicate notices, template dates, active clients only, explicit limits and unchanged visits/money",
+        "PASS closures browser: escaped historical text, partial/empty/error/filter states, 320/390/1440, cancelled/empty dialogs never write, lost-response recovery, stale conflicts, late filter replies, quota refusal, receipt identity, timeout, offline retention, account partition and unchanged visits/money",
+        "PASS legacy administration reads, mutations, aliases and AI require active ADMIN; refused requests are inert, administration and canonical field/client routes remain usable",
+        "✅ ADMINISTRATION OS OPERATIONAL ACCEPTANCE OK"
+      ]
+    },
+    "cw341-final-visual.log": {
+      "sha256": "b21b9f3e5481b094e19b933f49f26925a35f2743c84c77107891e6a15ab47d50",
+      "passLines": [
+        "PASS closures API: exact dates and inclusive final day, ADMIN-only, server actor, immutable metadata, receipts/reuse/recovery ownership, stale review, audit rollback, no duplicate notices, template dates, active clients only, explicit limits and unchanged visits/money",
+        "PASS closures browser: escaped historical text, partial/empty/error/filter states, 320/390/1440, cancelled/empty dialogs never write, lost-response recovery, stale conflicts, late filter replies, quota refusal, receipt identity, timeout, offline retention, account partition and unchanged visits/money"
+      ]
+    }
+  },
+  "screenshots": [
+    {
+      "path": "reports/field-visual/company-closures/closures-320.png",
+      "sha256": "d21828331054247bb8d460165e8216e413e53a5dd5645af76b31efb273e8a158",
+      "reviewed": true
+    },
+    {
+      "path": "reports/field-visual/company-closures/closures-390.png",
+      "sha256": "8b73e506b1d9a07f1f36f5c6e86b0feec463ed4c1ecfa1824ee98a2801f7dc65",
+      "reviewed": true
+    },
+    {
+      "path": "reports/field-visual/company-closures/closures-1440.png",
+      "sha256": "0f663db90471efe6b4dc90473662bd5c68aa21187855759c30e13a9b3386684e",
+      "reviewed": true
+    }
+  ],
+  "inventory": {
+    "htmlFiles": 115,
+    "rootPages": 108,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 78,
+    "catalogueGuardDifferences": 0
+  },
+  "activeScriptsScanned": 259,
+  "previousNativeApprovals": [
+    "20260924_task339_ci.json",
+    "20260924_task340_ci.json"
+  ],
+  "newNativeStatus": "pending publication and CI; not approved",
+  "limitations": [
+    "No automatic pause or replanning of visits",
+    "No new client portal integration; flags remain explicit preferences",
+    "Priority is unconfirmed because no historical ServiceVisit priority exists",
+    "Prior intervals and emitted notices are preserved, not rewritten or deleted",
+    "Old mutation URLs require the reviewed durable envelope (428 otherwise)",
+    "Visual QA in PT; five-language and universal page review remain open",
+    "Two tracked brand images not materialized locally"
+  ]
+}

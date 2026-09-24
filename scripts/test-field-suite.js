@@ -43,6 +43,7 @@ scripts.push('test-field-invoice-pdf-access.js');
 scripts.push('test-field-financial-document-pdf.js');
 scripts.push('test-field-authenticated-document-opening.js');
 scripts.push('test-field-daily-service-log.js');
+scripts.push('test-field-company-closures.js');
 scripts.push('test-field-financial-pdf.js');
 scripts.push('test-field-invoice-document.js');
 scripts.push('test-field-legacy-alert-access.js');
