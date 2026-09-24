@@ -79,8 +79,9 @@ async function inspect(tx,ctx,{monthRef,editing=false,onlyDays=null,now=new Date
   for(const day of days){
     const season=calendar.onDay(ctx.snapshot.servicePlan,day);if(!season)continue;
     for(const rule of season.schedules){
+      if(!calendar.activeCycle(rule,day))continue;
       const pool=ctx.poolMap.get(rule.poolId),base={poolId:pool.id,poolName:pool.name||'Piscina '+pool.id,day,period:season.label};
-      if(rule.slots.length!==rule.count){uncertain.add(pool.id+':'+day);pending.push({...base,reason:`Faltam horários: ${rule.slots.length} de ${rule.count} visitas por ${rule.frequency==='WEEKLY'?'semana':'mês'}.`});continue;}
+      if(rule.slots.length!==rule.count){uncertain.add(pool.id+':'+day);pending.push({...base,reason:`Faltam horários: ${rule.slots.length} de ${rule.count} visitas por ${calendar.cadenceLabel(rule)}.`});continue;}
       for(const slot of calendar.due(rule,day)){
         const date=calendar.localDate(day,slot.at),assigned=date?assignment(rule,ctx,date):{technician:null};
         const readiness=ctx.readiness.get(pool.id);

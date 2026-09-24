@@ -51,3 +51,39 @@ describe('seasonal services share calendar and agreed price',()=>{
     }
   });
 });
+
+describe('anchored seasonal recurrence',()=>{
+  const recurring=(frequency,interval,anchorOn,slots)=>{
+    const input=fixture();input.servicePlan.seasons[0].schedules[0]={...rule([1]),frequency,interval,anchorOn,slots,count:slots.length};
+    return rates.validate(input).servicePlan.seasons[0].schedules[0];
+  };
+  it('keeps alternate weeks continuous across year and season boundaries',()=>{
+    const r=recurring('WEEKLY',2,'2027-12-20',[{day:1,at:'08:00'},{day:5,at:'16:00'}]);
+    const dates=['2027-12-20','2027-12-24','2027-12-27','2027-12-31','2028-01-03','2028-01-07','2028-01-10'];
+    expect(dates.map(d=>calendar.due(r,d).length)).toEqual([1,1,0,0,1,1,0]);
+    expect(calendar.due(r,'2027-12-06')).toEqual([]);
+  });
+  it('starts on the reference date and uses Monday weeks even when it is a Sunday',()=>{
+    const r=recurring('WEEKLY',2,'2028-01-02',[{day:0,at:'09:00'},{day:1,at:'09:00'}]);
+    expect(['2027-12-27','2028-01-02','2028-01-03','2028-01-10','2028-01-16'].map(d=>calendar.due(r,d).length)).toEqual([0,1,0,1,1]);
+  });
+  it('supports quarterly visits and leap-month end without resetting at January',()=>{
+    const r=recurring('MONTHLY',3,'2027-11-15',[{day:31,at:'09:00'}]);
+    expect(['2027-08-31','2027-11-30','2027-12-31','2028-01-31','2028-02-29','2028-05-31','2028-11-30'].map(d=>calendar.due(r,d).length)).toEqual([0,1,0,0,1,1,1]);
+  });
+  it('preserves old snapshots and the agreed monthly price',()=>{
+    const input=fixture(),old=rates.validate(input);input.servicePlan.seasons[0].schedules[0].interval=1;
+    expect(rates.validate(input)).toEqual(old);
+    Object.assign(input.servicePlan.seasons[0].schedules[0],{interval:2,anchorOn:'2027-01-01'});
+    expect(rates.calculate(rates.validate(input),'2028-02').amount).toBe(100);
+  });
+  it('validates interval, reference dates, and count per active cycle',()=>{
+    for(const [interval,anchor] of [[0,'2027-01-01'],[true,'2027-01-01'],[1.5,'2027-01-01'],[53,'2027-01-01'],[2,null],[2,'2027-02-29'],[1,'2027-01-01']])expect(()=>recurring('WEEKLY',interval,anchor,[{day:1,at:'08:00'}])).toThrow();
+    expect(()=>recurring('MONTHLY',25,'2027-01-01',[{day:1,at:'08:00'}])).toThrow();
+  });
+  it('matches an independent two-year alternate-week count',()=>{
+    const r=recurring('WEEKLY',2,'2027-01-04',[{day:1,at:'08:00'}]);let found=0;
+    for(let n=0;n<730;n++){const d=new Date(Date.UTC(2027,0,4+n)).toISOString().slice(0,10);if(calendar.due(r,d).length)found++;}
+    expect(found).toBe(53);
+  });
+});

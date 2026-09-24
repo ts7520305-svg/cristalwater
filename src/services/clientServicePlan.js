@@ -32,6 +32,9 @@ function validate(input, money) {
       if(pools.has(poolId))fail('A mesma instalação não pode ter dois calendários na mesma época.');pools.add(poolId);
       const frequency=rule.frequency;
       if(!['WEEKLY','MONTHLY'].includes(frequency))fail('Escolha frequência semanal ou mensal.');
+      const interval=rule.interval==null?1:integer(rule.interval,1,frequency==='WEEKLY'?52:24,'Intervalo de repetição inválido.');
+      const anchorOn=interval>1?civil(rule.anchorOn):null;
+      if(interval===1&&rule.anchorOn)fail('Uma data de referência exige um intervalo superior a um.');
       const count=integer(rule.count,1,168,'Indique o número de visitas contratado.');
       if(!Array.isArray(rule.slots)||rule.slots.length>count)fail('Os horários não podem exceder o número de visitas contratado.');
       if(rule.days!==undefined||rule.at!==undefined)fail('Defina cada dia e horário nos períodos de visita.');
@@ -50,7 +53,7 @@ function validate(input, money) {
       const technicianId=rule.technicianId==null||rule.technicianId===''?null:integer(rule.technicianId,1,2147483647,'Técnico inválido.');
       const roundId=rule.roundId==null||rule.roundId===''?null:integer(rule.roundId,1,2147483647,'Ronda inválida.');
       if(technicianId&&roundId)fail('Escolha um técnico ou a atribuição da ronda.');
-      return {poolId,frequency,count,slots,technicianId,roundId};
+      return {poolId,frequency,count,slots,technicianId,roundId,...(interval>1?{interval,anchorOn}:{})};
     }).sort((a,b)=>a.poolId-b.poolId);
     return season;
   });
@@ -64,10 +67,20 @@ function onDay(plan,day) {
 }
 function due(rule,day) {
   const date=new Date(day+'T12:00:00Z');
+  if(!activeCycle(rule,day))return [];
   if(rule.frequency==='WEEKLY')return rule.slots.filter(slot=>slot.day===date.getUTCDay());
   const last=new Date(Date.UTC(date.getUTCFullYear(),date.getUTCMonth()+1,0)).getUTCDate();
   return rule.slots.filter(slot=>Math.min(slot.day,last)===date.getUTCDate());
 }
+function activeCycle(rule,day) {
+  if(!rule.interval||rule.interval===1)return true;
+  if(day<rule.anchorOn)return false;
+  const date=new Date(day+'T12:00:00Z'),anchor=new Date(rule.anchorOn+'T12:00:00Z');
+  const monday=d=>+d-((d.getUTCDay()+6)%7)*86400000;
+  const elapsed=rule.frequency==='WEEKLY'?(monday(date)-monday(anchor))/604800000:(date.getUTCFullYear()-anchor.getUTCFullYear())*12+date.getUTCMonth()-anchor.getUTCMonth();
+  return elapsed%rule.interval===0;
+}
+function cadenceLabel(rule){return rule.interval>1?`ciclo de ${rule.interval} ${rule.frequency==='WEEKLY'?'semanas':'meses'}`:rule.frequency==='WEEKLY'?'semana':'mês';}
 function daysOfMonth(ref) {
   civil(ref+'-01');const result=[],date=new Date(ref+'-01T12:00:00Z');
   while(date.toISOString().slice(0,7)===ref){result.push(date.toISOString().slice(0,10));date.setUTCDate(date.getUTCDate()+1);}return result;
@@ -87,4 +100,4 @@ const clock=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Lisbon',year:'nume
 function localDay(date){const p=Object.fromEntries(clock.formatToParts(date).map(p=>[p.type,p.value]));return `${p.year}-${p.month}-${p.day}`;}
 function serviceData(plan,season,day,origin) {return {schema:1,planId:plan.id,planVersion:plan.version,period:season.key,label:season.label,services:season.services,day,billing:'INCLUDED_MONTHLY',origin};}
 function included(visit){return visit?.contractService?.billing==='INCLUDED_MONTHLY';}
-module.exports={validate,onDay,due,daysOfMonth,localDate,localDay,serviceData,civil,included};
+module.exports={validate,onDay,due,activeCycle,cadenceLabel,daysOfMonth,localDate,localDay,serviceData,civil,included};

@@ -84,4 +84,21 @@ const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['localhost',
   await prisma.$executeRawUnsafe(`CREATE TRIGGER ${trigger} BEFORE INSERT ON "UserAuditLog" FOR EACH ROW EXECUTE FUNCTION ${trigger}()`);
   try{assert.equal((await call(path,atomicRequest,'PUT')).status,500);assert.equal((await rates.latest(client.id)).version,5);assert.equal(await prisma.serviceVisit.count({where:{clientId:client.id}}),beforeAtomic);assert.equal(await prisma.fieldWriteRequest.count({where:{requestId:atomicRequest.requestId}}),0);}finally{await prisma.$executeRawUnsafe(`DROP TRIGGER ${trigger} ON "UserAuditLog"`);await prisma.$executeRawUnsafe(`DROP FUNCTION ${trigger}()`);}
   console.log('PASS incomplete schedules remain explicit pending, legacy calendar suppressed, unrelated clients unchanged, weekly service generator repeats safely');
+  // Additional cadences use an absolute reference, independent of season/year boundaries.
+  const cyc=await prisma.client.create({data:{name:'QA anchored cycles',active:true,status:'ACTIVE'}}),cyclePools=[];
+  for(const name of ['Fortnightly','Quarterly'])cyclePools.push(await prisma.pool.create({data:{clientId:cyc.id,name,volumeM3:40,technicalSheet:{create:{volumeM3:40,disinfectionType:'SALT'}}}}));
+  const cyclePath='/api/settings/client-services/'+cyc.id,cycleInput={baseMonthlyAmount:0,periods:[],expectedVersion:0,monthRef:'2032-01',servicePlan:{startsOn:'2032-01-01',endsOn:'2032-12-31',seasons:[{label:'Cadências próprias',services:'Visitas acordadas',fromMonth:1,toMonth:12,monthlyAmount:180,schedules:[{...rule([1]),poolId:cyclePools[0].id,interval:2,anchorOn:'2032-01-05'},{poolId:cyclePools[1].id,technicianId:tech.id,frequency:'MONTHLY',interval:3,anchorOn:'2031-11-15',count:1,slots:[{day:31,at:'09:00'}]}]}]}};
+  const cp=await ok(cyclePath+'/preview',cycleInput),cycleRequest={...cycleInput,reviewToken:cp.reviewToken,requestId:randomUUID()};assert.equal(cp.pricing.amount,180);
+  const cycleReplies=await Promise.all([ok(cyclePath,cycleRequest,'PUT'),ok(cyclePath,cycleRequest,'PUT')]);assert.deepEqual(cycleReplies[0],cycleReplies[1]);
+  const firstCyclePlan=await rates.latest(cyc.id);
+  for(let m=2;m<=12;m++){const body={expectedVersion:1,monthRef:'2032-'+String(m).padStart(2,'0')},p=await ok(cyclePath+'/calendar-preview',body);assert.equal(p.pricing.amount,180);await ok(cyclePath+'/calendar',{...body,reviewToken:p.reviewToken,requestId:randomUUID()});}
+  const cycleVisits=await prisma.serviceVisit.findMany({where:{clientId:cyc.id},orderBy:{plannedDate:'asc'}});
+  const expectedWeeks=[];for(let d=Date.parse('2032-01-05T12:00:00Z');d<Date.parse('2033-01-01T00:00:00Z');d+=14*86400000)expectedWeeks.push(new Date(d).toISOString().slice(0,10));
+  assert.deepEqual(cycleVisits.filter(v=>v.poolId===cyclePools[0].id).map(v=>calendar.localDay(v.plannedDate)),expectedWeeks);
+  assert.deepEqual(cycleVisits.filter(v=>v.poolId===cyclePools[1].id).map(v=>calendar.localDay(v.plannedDate)),['2032-02-29','2032-05-31','2032-08-31','2032-11-30']);
+  const revisedCycle=structuredClone(cycleInput);revisedCycle.expectedVersion=1;revisedCycle.servicePlan.seasons[0].schedules[0].interval=3;
+  const priorVisit=cycleVisits.find(v=>v.poolId===cyclePools[0].id);await prisma.serviceVisit.update({where:{id:priorVisit.id},data:{startAt:priorVisit.plannedDate}});
+  const cr=await ok(cyclePath+'/preview',revisedCycle);assert(cr.summary.preserve>0);assert(cr.summary.cancel>0);await ok(cyclePath,{...revisedCycle,reviewToken:cr.reviewToken,requestId:randomUUID()},'PUT');
+  assert.deepEqual(await prisma.clientRatePlan.findUnique({where:{id:firstCyclePlan.id}}),firstCyclePlan);assert.equal((await ok(cyclePath,cycleRequest,'PUT')).planVersion,1);
+  console.log('PASS anchored two-week and quarterly cadences over twelve real months, leap-day adjustment, concurrent replay, unchanged monthly price and preserved original agreements/execution');
 })().catch(error=>{console.error(error);process.exitCode=1;}).finally(()=>prisma.$disconnect());
