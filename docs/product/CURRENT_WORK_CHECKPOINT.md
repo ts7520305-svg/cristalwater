@@ -4,7 +4,8 @@
 
 - TASK322 aprovada: parcelas de trabalho e materiais entre meses de execução de visitas, equipamentos e lembretes associados, originais e saldos conjuntos conservados, anulação explícita e totais por rever quando o histórico é ilegível. [MAINTENANCE_SHARE_PERIODS_20260924.md](MAINTENANCE_SHARE_PERIODS_20260924.md).
 - Código publicado `8716f28f1f65356a7f96d5d1e6b4c0b8e54501ac`, árvore `2cd063a52b3e25521375167cf016f775349a83a3`, igual à validada localmente. [CI 36028499817](https://github.com/ts7520305-svg/cristalwater/actions/runs/36028499817), job `107731010439`, aprovado entre 2026-09-24T16:36:05Z e 2026-09-24T17:06:54Z (30m49s): 17 etapas, 225/225 grupos previstos distintos, sem falhas, faltas, entradas inesperadas ou duplicações; 519 unitários/75 ficheiros, quatro técnicos, gate geral de navegador, sintaxe 617/216/62 e 39 migrações. Restauro PostgreSQL 16 de 127 tabelas/46 ficheiros, com linhas e hashes iguais. Evidência [evidence/20260924_task322_ci.json](evidence/20260924_task322_ci.json). Cache v137, sem novas migrações/tabelas/dependências. O fecho posterior altera apenas documentação; a aprovação refere-se ao código e árvore acima.
-- TASK323 validada localmente: revisão administrativa da origem histórica, sem recriar o recibo técnico antigo. Publicar e confirmar o CI/restauro. TASK324 em validação: declaração de materiais baseada nessa origem e parcelas de custo com os dois comprovativos administrativos.
+- TASK323 publicada em `f78e3a9dfb45dcda2ff3567232488ec1ca9f6a31`: revisão administrativa da origem histórica, sem recriar o recibo técnico antigo. CI [36032648096](https://github.com/ts7520305-svg/cristalwater/actions/runs/36032648096), job `107744950692`: sintaxe, unitários, técnicos e gate geral de navegador aprovados; grupos integrados e restauro ainda sem fecho confirmado nesta retoma.
+- TASK324 recuperada da cópia isolada com os 17 hashes iguais à versão validada: 531 unitários, quatro técnicos, API/navegador e regressões descritas em [EQUIPMENT_HISTORICAL_MATERIALS_20260924.md](EQUIPMENT_HISTORICAL_MATERIALS_20260924.md). Declaração de materiais baseada na origem histórica e parcelas com os dois comprovativos administrativos; 227 grupos previstos. Confirmar publicação e CI/restauro antes de declarar aprovação completa.
 
 ## Aprovação anterior — TASK321
 
@@ -76,7 +77,7 @@
 
 ## Próxima ação
 
-1. Publicar e confirmar a revisão de origem histórica (TASK323), concluir os materiais históricos (TASK324) e prosseguir os tempos históricos. Não repetir TASK300–322. Conservar comprovativos, sobreposições e saldos.
+1. Confirmar CI/restauro da revisão de origem histórica (TASK323) e dos materiais históricos (TASK324), e prosseguir os tempos históricos. Não repetir TASK300–322. Conservar comprovativos, sobreposições e saldos.
 2. Continuar restantes gastos/ajustes/origens de receita e os pontos da [matriz atual](COMPLETENESS_CURRENT_20260915.md): históricos/ecrãs/PDFs/idiomas, volume e operação prolongada, VPS/fornecedores e piloto físico. Custos/receitas completos e lucro por apurar; não atribuir percentagem global sem critérios fechados. IA generativa offline/aprendizagem por piscina/vídeo e integrações completas continuam requisitos separados sem aprovação integral.
 
 ## Autorizações e regras vigentes

@@ -50,7 +50,7 @@ async function ownMaterials(db, parents) {
     db.stockMovement.findMany({ where, select: { id:true,movementType:true,productId:true,productName:true,unit:true,quantity:true,visitId:true,extraVisitId:true,poolId:true,clientId:true,technicianId:true,createdAt:true }, orderBy: { id: 'asc' } })
   ]);
   const receipts = rows.length ? await db.fieldWriteRequest.findMany({ where: { scope: 'EQUIPMENT_MAINTENANCE', requestId: { in: rows.map(row => row.requestId) } }, select: { owner:true,requestId:true,resourceId:true,payloadHash:true,response:true } }) : [];
-  const revisions = await require('./equipmentMaterialReviewJournal').read(db, rows, receipts);
+  const revisions = await require('./equipmentHistoryMaterialSource').qualify(db, await require('./equipmentMaterialReviewJournal').read(db, rows, receipts));
   const result = new Map();
   for (const [visitType, visits] of [['REGULAR', regular], ['EXTRA', extra]]) for (const visit of visits) {
     const field = visitType === 'REGULAR' ? 'visitId' : 'extraVisitId';
@@ -133,7 +133,7 @@ async function preview(db, expense, allocationId, completionId, selectedQuantity
   const [target, views, state] = await Promise.all([targets.get(db, 'MAINTENANCE_EQUIPMENT', completionId), ownMaterials(db, [a]), journal(db)]), m = views.get(completionId);
   if (!target?.valid || target.clientId !== a.clientId || target.snapshot.originVisitType !== a.targetType || target.snapshot.originVisitId !== parentId(a)) return refused('MAINTENANCE_SOURCE_REVIEW', 'A manutenção tem de pertencer a esta visita e cliente, com execução e decisão confirmadas.');
   if (m?.state !== 'MATCHED') return refused('MAINTENANCE_MATERIALS_REQUIRED', 'Registe os materiais e confirme a compatibilidade com o consumo líquido desta visita.');
-  let period; try { period = rules.sharePeriod(a, target, 1); } catch (error) { return refused('MAINTENANCE_PERIOD_REVIEW', error.message); }
+  let period; try { period = rules.sharePeriod(a, target, m.record.schema===2?7:1); } catch (error) { return refused('MAINTENANCE_PERIOD_REVIEW', error.message); }
   if (live(a.maintenanceMaterialShares).some(s => s.share.completionId === completionId)) return refused('MAINTENANCE_ALREADY_SHARED', 'Esta manutenção já tem uma parcela ativa desta atribuição. Anule-a antes de corrigir.');
   const item = m.record.items.find(line => sameProduct(line, productOf(a)));
   if (!item) return refused('MAINTENANCE_PRODUCT_REQUIRED', 'Este produto e unidade não foram declarados nesta revisão.');
@@ -142,7 +142,7 @@ async function preview(db, expense, allocationId, completionId, selectedQuantity
   const chosen = selectedQuantity === null ? available > 0n ? decimal(available) : '0' : selectedQuantity;
   const calc = rules.calculation(a.amountCents, parentQuantity, used, maintenanceUsed, item.quantity, chosen);
   if (state.review || !calc) return refused('MAINTENANCE_SHARE_BUDGET', 'A quantidade tem de caber na revisão e na atribuição, incluindo todas as compras, e permitir uma parcela positiva em cêntimos.');
-  const allocationBefore = allocationFacts(a), value = { ...period, basis, expenseId: expense.id, expenseVersion: expense.version, allocationId, completionId, allocationBefore, allocationHash: r.hash(allocationBefore), parentQuantity, quantity: decimal(quantity(chosen)), material: { ...productOf(a), declaredQuantity: item.quantity }, used, maintenanceUsed, materials: m.record, materialsHash: r.hash(m.record), consumptionSource: m.comparison.source, consumptionHash: m.comparison.sourceHash, target, ...calc };
+  const allocationBefore = allocationFacts(a), value = { ...period, basis, expenseId: expense.id, expenseVersion: expense.version, allocationId, completionId, allocationBefore, allocationHash: r.hash(allocationBefore), parentQuantity, quantity: decimal(quantity(chosen)), material: { ...productOf(a), declaredQuantity: item.quantity }, used, maintenanceUsed, materials: m.record, ...(m.record.schema===2 ? { materialRevision: m.materialRevision } : {}), materialsHash: r.hash(m.record), consumptionSource: m.comparison.source, consumptionHash: m.comparison.sourceHash, target, ...calc };
   try { return json(await rules.verify({ available: true, ...value, hash: r.hash(value) }, r.hash)); } catch (_) { return refused('MAINTENANCE_SHARE_REVIEW', 'As provas dos materiais ou da atribuição precisam de revisão.'); }
 }
 async function reminderPreview(db, expense, a, reminderId, selectedQuantity) {

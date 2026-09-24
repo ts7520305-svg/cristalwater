@@ -162,6 +162,7 @@ scripts.push('test-field-equipment-intervals.js');
 scripts.push('test-field-equipment-time-review.js');
 scripts.push('test-field-maintenance-share-period.js');
 scripts.push('test-field-equipment-history-review.js');
+scripts.push('test-field-equipment-history-materials.js');
 scripts.push('test-field-financial-revenue-coverage.js');
 scripts.push('test-field-monthly-revenue.js','test-field-monthly-revenue-ui.js');
 scripts.push('test-field-maintenance-revenue.js');

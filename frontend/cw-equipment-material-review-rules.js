@@ -22,11 +22,16 @@
   }
   const origin = o => fields(o, ['visitType','visitId','poolId','clientId','technicianId']) && ['REGULAR','EXTRA'].includes(o.visitType) && ['visitId','poolId','clientId','technicianId'].every(k => positive(o[k]));
   async function record(r, hash) {
-    if (!fields(r, ['schema','basis','mode','items','origin']) || r.schema !== 1 || r.basis !== 'DECLARED_EQUIPMENT_MATERIALS' || !origin(r.origin) || await hash(input({ mode: r.mode, items: r.items })) !== await hash({ mode: r.mode, items: r.items })) fail(); return r;
+    if (!fields(r, ['schema','basis','mode','items','origin',...(r?.schema===2?['originReviewHash']:[])]) || ![1,2].includes(r.schema) || r.schema===2&&!sha(r.originReviewHash) || r.basis !== 'DECLARED_EQUIPMENT_MATERIALS' || !origin(r.origin) || await hash(input({ mode: r.mode, items: r.items })) !== await hash({ mode: r.mode, items: r.items })) fail(); return r;
   }
   const facts = p => { const { available, hash, ...v } = p; return v; };
   async function preview(p, hash) {
-    if (p?.available !== true || p.schema !== 1 || p.basis !== basis || !positive(p.completionId) || !origin(p.origin) || !sha(p.hash) || await hash(facts(p)) !== p.hash || !sha(p.baseHash) || await hash(p.original) !== p.baseHash || p.original?.id !== p.completionId || !iso(p.original.completedAt) || !sha(p.original.resultHash) || !sha(p.original.receiptHash) || !sha(p.sourceHash) || !sha(p.targetHash) || !p.previous || !(p.previous.headHash === null || sha(p.previous.headHash)) || !['ORIGINAL','REPLACE','WITHDRAW'].includes(p.previous.action) || !['REPLACE','WITHDRAW'].includes(p.proposed?.action)) fail();
+    if (p?.available !== true || ![1,2].includes(p.schema) || p.basis !== basis || !positive(p.completionId) || !origin(p.origin) || !sha(p.hash) || await hash(facts(p)) !== p.hash || !sha(p.baseHash) || await hash(p.original) !== p.baseHash || p.original?.id !== p.completionId || !iso(p.original.completedAt) || !sha(p.original.resultHash) || !sha(p.original.receiptHash) || !sha(p.sourceHash) || !sha(p.targetHash) || !p.previous || !(p.previous.headHash === null || sha(p.previous.headHash)) || !['ORIGINAL','REPLACE','WITHDRAW'].includes(p.previous.action) || !['REPLACE','WITHDRAW'].includes(p.proposed?.action)) fail();
+    if (p.schema === 2) {
+      const rules = typeof module === 'object' && module.exports ? require('./cw-equipment-history-rules') : globalThis.CWEquipmentHistoryRules;
+      const proof = await rules.revision(p.originReview, hash), source = proof.revision.preview;
+      if (source.completionId !== p.completionId || source.baseHash !== p.baseHash || source.proposed.action !== 'REPLACE' || p.proposed.action === 'REPLACE' && (await hash(source.origin) !== await hash(p.origin) || source.targetHash !== p.targetHash || p.proposed.record?.schema !== 2 || p.proposed.record.originReviewHash !== proof.hash) || p.proposed.action === 'WITHDRAW' && (p.previous.record?.schema !== 2 || p.previous.record.originReviewHash !== proof.hash)) fail();
+    } else if (Object.hasOwn(p, 'originReview') || p.previous.record?.schema === 2 || p.proposed.record?.schema === 2) fail();
     if (p.previous.record !== null) await record(p.previous.record, hash);
     if (p.proposed.action === 'WITHDRAW') { if (p.proposed.record !== null || p.previous.record === null) fail(); }
     else { await record(p.proposed.record, hash); if (await hash(p.proposed.record.origin) !== await hash(p.origin) || await hash(p.previous.record) === await hash(p.proposed.record)) fail(); }
@@ -40,6 +45,7 @@
     if (!value.applied) { if (typeof value.code !== 'string' || typeof value.message !== 'string' || value.revision !== undefined || value.revisionHash !== undefined) fail(); return value; }
     const revision = value.revision, p = await preview(revision?.preview, hash);
     if (revision.schema !== 1 || revision.id !== requestId || revision.owner !== owner || revision.completionId !== completionId || !iso(revision.createdAt) || revision.reason !== body.reason || body.reason.trim() !== body.reason || body.reason.length < 3 || body.reason.length > 500 || p.completionId !== completionId || p.hash !== body.previewHash || p.proposed.action !== body.action || body.confirmed !== true || await hash(body.materials) !== await hash(p.proposed.record ? { mode: p.proposed.record.mode, items: p.proposed.record.items } : null) || await hash(revision) !== value.revisionHash) fail();
+    if(p.schema===2 && Date.parse(revision.createdAt)<Date.parse(p.originReview.revision.createdAt))fail();
     return value;
   }
   return { scope, basis, fields, positive, uuid, sha, iso, input, origin, record, facts, preview, response };

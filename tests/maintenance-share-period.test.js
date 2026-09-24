@@ -10,7 +10,7 @@ const target = endAt => ({ snapshot: { endAt } });
 function proof(parent, child, version = 1) { const a = source(parent), t = target(child); return { allocationBefore: a, target: t, ...rules.sharePeriod(a, t, version) }; }
 describe('maintenance shares between execution months', () => {
   it('keeps old same-month versions and shapes without adding period fields', () => {
-    for (const version of [1,2,3,4,5]) {
+    for (const version of [1,2,3,4,5,7]) {
       const p = proof('2026-02-01T00:00:00.000Z', '2026-02-28T23:59:59.999Z', version);
       expect(p.version).toBe(version); expect(p).not.toHaveProperty('period'); expect(rules.verifyPeriod(p, version)).toBe(p);
     }

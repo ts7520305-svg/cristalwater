@@ -41,3 +41,32 @@ describe('explicit administrative equipment historical review',()=>{
     const f=fixture();expect(await c.CWEquipmentHistoryRules.legacy(f.source)).toBe(true);expect(clone(await c.CWEquipmentHistoryRules.response(f.response,f.body,'ADMIN:5',1,r.hash))).toEqual(f.response);
   });
 });
+
+const materialReview=require('../frontend/cw-equipment-material-review-rules'),materials=require('../src/services/equipmentMaterialsService');
+function materialFixture(){
+  const f=fixture(),originReview={revision:f.response.revision,hash:f.response.revisionHash},input={mode:'DECLARED',items:[{productName:'CLORO',unit:'KG',quantity:'0.1'}]};
+  const proposed=materials.create(input,{id:3,clientId:7,poolId:6,technicianId:4},'REGULAR',originReview.hash);
+  const value={schema:2,basis:materialReview.basis,completionId:1,origin:proposed.origin,original:f.p.original,baseHash:f.p.baseHash,originReview,previous:{headHash:null,action:'ORIGINAL',record:null},proposed:{action:'REPLACE',record:proposed},targetHash:f.p.targetHash,sourceHash:'c'.repeat(64),beforeState:'MISSING',afterState:'MATCHED',afterReasons:[],affectedShares:[]};
+  return {...value,available:true,hash:r.hash(value)};
+}
+const materialHash=p=>({...p,hash:r.hash(materialReview.facts(p))});
+describe('historical equipment material dependency proofs',()=>{
+  it('binds the later declaration to a separate administrative origin without altering its original',async()=>{
+    const p=materialFixture(),original=clone(p.original);expect(await materialReview.preview(p,r.hash)).toBe(p);expect(materials.sound(p.proposed.record)).toBe(true);expect(p.original).toEqual(original);expect(p.original.record).toBe(null);expect(p.original.receiptHash).toBe(r.hash([]));
+  });
+  it('rejects missing or incompatible attestation and record bindings even after rehashing',async()=>{
+    for(const change of [p=>delete p.originReview,p=>p.schema=1,p=>p.proposed.record.schema=1,p=>delete p.proposed.record.originReviewHash,p=>p.proposed.record.originReviewHash='a'.repeat(64),p=>p.targetHash='e'.repeat(64),p=>p.origin.technicianId=99,p=>p.originReview.revision.preview.proposed.record.evidence='']){const p=materialFixture();change(p);await expect(materialReview.preview(materialHash(p),r.hash)).rejects.toThrow();}
+  });
+  it('allows explicit withdrawal with the previous origin proof after the current technician changes',async()=>{
+    const p=materialFixture();p.previous={headHash:'d'.repeat(64),action:'REPLACE',record:p.proposed.record};p.proposed={action:'WITHDRAW',record:null};p.origin={...p.origin,technicianId:99};p.beforeState='REVIEW';p.afterState='WITHDRAWN';expect(await materialReview.preview(materialHash(p),r.hash)).toBeTruthy();p.previous.record.originReviewHash='f'.repeat(64);await expect(materialReview.preview(materialHash(p),r.hash)).rejects.toThrow();
+  });
+  it('keeps modern declarations on their original schema without a historical marker',async()=>{
+    const p=materialFixture();p.schema=1;delete p.originReview;delete p.proposed.record.originReviewHash;p.proposed.record.schema=1;expect(await materialReview.preview(materialHash(p),r.hash)).toBeTruthy();expect(materials.sound(p.proposed.record)).toBe(true);p.proposed.record.extra=true;expect(materials.sound(p.proposed.record)).toBe(false);
+  });
+  it('requires a new resource record when the origin evidence changes even with identical quantities',async()=>{
+    const p=materialFixture(),old=clone(p.proposed.record);p.originReview.revision.reason='Consulta suplementar do arquivo';p.originReview.hash=r.hash(p.originReview.revision);p.previous={headHash:'d'.repeat(64),action:'REPLACE',record:old};p.proposed.record.originReviewHash=p.originReview.hash;p.beforeState='REVIEW';const checked=await materialReview.preview(materialHash(p),r.hash);expect(checked.previous.record.items).toEqual(checked.proposed.record.items);expect(checked.previous.record.originReviewHash).not.toBe(checked.proposed.record.originReviewHash);
+  });
+  it('verifies the full nested historical material proof in the browser too',async()=>{
+    const c=vm.createContext({crypto:webcrypto,TextEncoder});for(const name of ['cw-maintenance-material-rules','cw-equipment-material-review-rules','cw-equipment-history-rules'])vm.runInContext(fs.readFileSync(new URL('../frontend/'+name+'.js',import.meta.url),'utf8'),c);const p=materialFixture();expect(clone(await c.CWEquipmentMaterialReviewRules.preview(p,r.hash))).toEqual(p);
+  });
+});

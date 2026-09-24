@@ -26,13 +26,13 @@ function parse(value) {
 function origin(visit, visitType) {
   return { visitType, visitId: visit.id, poolId: visit.poolId, clientId: visit.clientId, technicianId: visit.technicianId };
 }
-function create(input, visit, visitType) {
+function create(input, visit, visitType, originReviewHash = null) {
   if (![visit.id, visit.poolId, visit.clientId, visit.technicianId].every(positive)) throw Object.assign(Error('Confirme o cliente, a piscina e o técnico da visita antes de declarar materiais.'), { status: 400 });
-  return { schema: 1, basis, ...input, origin: origin(visit, visitType) };
+  return { schema: originReviewHash ? 2 : 1, basis, ...input, origin: origin(visit, visitType), ...(originReviewHash ? { originReviewHash } : {}) };
 }
 function sound(record) {
   try {
-    return keys(record, ['schema', 'basis', 'mode', 'items', 'origin']) && record.schema === 1 && record.basis === basis && hash(parse({ mode: record.mode, items: record.items })) === hash({ mode: record.mode, items: record.items }) && keys(record.origin, ['visitType', 'visitId', 'poolId', 'clientId', 'technicianId']) && ['REGULAR', 'EXTRA'].includes(record.origin.visitType) && ['visitId', 'poolId', 'clientId', 'technicianId'].every(k => positive(record.origin[k]));
+    return keys(record, ['schema', 'basis', 'mode', 'items', 'origin', ...(record?.schema===2?['originReviewHash']:[])]) && [1,2].includes(record.schema) && (record.schema!==2 || /^[a-f0-9]{64}$/.test(record.originReviewHash)) && record.basis === basis && hash(parse({ mode: record.mode, items: record.items })) === hash({ mode: record.mode, items: record.items }) && keys(record.origin, ['visitType', 'visitId', 'poolId', 'clientId', 'technicianId']) && ['REGULAR', 'EXTRA'].includes(record.origin.visitType) && ['visitId', 'poolId', 'clientId', 'technicianId'].every(k => positive(record.origin[k]));
   } catch (_) { return false; }
 }
 const recordOf = row => row.result?.completion?.materials;
@@ -54,8 +54,9 @@ function assess(rows, visit, visitType, receipts, movements, revisions = new Map
     if (changed && revision.valid && revision.action === 'WITHDRAW' && hash(revision.history.at(-1).revision.preview.origin) === hash(expected)) {
       views.set(row.id, { state: 'WITHDRAWN', record: null, original: recordOf(row) || null, revision: { headHash: revision.headHash, action: revision.action }, comparison: null, reasons: [] }); continue;
     }
-    const valid = sound(record) && (changed ? revision.valid : intact(row, receipts)) && hash(record.origin) === hash(expected);
+    const valid = sound(record) && (record?.schema!==2 || changed && revision.originReviewValid===true && record.originReviewHash===revision.originReview?.hash) && (changed ? revision.valid : intact(row, receipts)) && hash(record.origin) === hash(expected);
     views.set(row.id, { state: valid ? record.mode === 'NONE' ? 'NONE' : 'DECLARED' : 'REVIEW', record: record || null, comparison: null, reasons: valid ? [] : ['DECLARATION_OR_ORIGIN_CHANGED'] });
+    if (changed && record?.schema===2) views.get(row.id).materialRevision = revision.history.at(-1);
     if (changed) Object.assign(views.get(row.id), { original: recordOf(row) || null, revision: { headHash: revision.headHash, action: revision.action } });
     if (!valid) { siblingsInvalid = true; continue; }
     for (const item of record.items) {
@@ -104,7 +105,7 @@ async function readInputs(db, rows, visit, visitType) {
     rows.length ? db.fieldWriteRequest.findMany({ where: { scope: 'EQUIPMENT_MAINTENANCE', requestId: { in: rows.map(r => r.requestId) } }, select: { owner: true, requestId: true, resourceId: true, payloadHash: true, response: true } }) : [],
     db.stockMovement.findMany({ where: visitType === 'EXTRA' ? { extraVisitId: visit.id } : { visitId: visit.id }, select: movementSelection, orderBy: { id: 'asc' } })
   ]);
-  const revisions = await require('./equipmentMaterialReviewJournal').read(db, rows, receipts);
+  const revisions = await require('./equipmentHistoryMaterialSource').qualify(db, await require('./equipmentMaterialReviewJournal').read(db, rows, receipts));
   const associated = await require('./reminderVisitResourceJournal').reservations(db, visit, visitType);
   return { receipts, movements, revisions, associated };
 }
