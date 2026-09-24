@@ -45,6 +45,6 @@ Inventário: 115 HTML; 78 páginas com referência literal nos 259 scripts ativo
 
 ## Publicação e retoma
 
-Base `0b3ef23a4cb769c79150d36c0329c5478ec17270`; preparada para publicação na branch `work/field-readiness-20260915-simulation`. CI e restauro do novo código ainda por confirmar. [Evidência local](evidence/20260924_task341_local.json).
+Base `0b3ef23a4cb769c79150d36c0329c5478ec17270`; branch `work/field-readiness-20260915-simulation`. Publicada em `09f23f2573b87e83413b6a4c2ecf7aa7307b31dd`, árvore `f114aaf5deff6224b51ceda02b346e3b1cc7018c`, idêntica à validada localmente. [CI 36063033475](https://github.com/ts7520305-svg/cristalwater/actions/runs/36063033475) em execução; os 238 grupos e o restauro nativo continuam por confirmar. [Evidência local](evidence/20260924_task341_local.json).
 
 Continuar a fila de páginas e os critérios históricos, financeiros e multilingues ainda abertos. O reagendamento operacional e a integração dos encerramentos no portal são trabalhos separados, não capacidades declaradas como concluídas por este lote. Sem merge, deploy ou contactos reais.

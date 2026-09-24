@@ -111,7 +111,7 @@
     "20260924_task339_ci.json",
     "20260924_task340_ci.json"
   ],
-  "newNativeStatus": "pending publication and CI; not approved",
+  "newNativeStatus": "in_progress; 238 groups and native restore not yet approved",
   "limitations": [
     "No automatic pause or replanning of visits",
     "No new client portal integration; flags remain explicit preferences",
@@ -120,5 +120,13 @@
     "Old mutation URLs require the reviewed durable envelope (428 otherwise)",
     "Visual QA in PT; five-language and universal page review remain open",
     "Two tracked brand images not materialized locally"
-  ]
+  ],
+  "publication": {
+    "commit": "09f23f2573b87e83413b6a4c2ecf7aa7307b31dd",
+    "tree": "f114aaf5deff6224b51ceda02b346e3b1cc7018c",
+    "localTreeMatched": true,
+    "runId": 36063033475,
+    "nativeStatus": "in_progress",
+    "mainUnchanged": "6f27081e1d183ff584a62255b016b373836734db"
+  }
 }

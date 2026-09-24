@@ -1,8 +1,8 @@
 # Cristal Water — matriz atual de conclusão
 
-## Estado de retoma — 24/09/2026, TASK341 validada localmente
+## Estado de retoma — 24/09/2026, TASK341 publicada
 
-Encerramentos com versão revista, pedido único, comprovativo recuperável, concorrência protegida, origem autenticada e auditoria atómica. Cancelar o diálogo não altera dados; metadados antigos são conservados; avisos não se duplicam. Lista/impacto com limites explícitos, prioridade sem origem por rever, datas UTC inclusivas, sessão, offline, quota, timeout e respostas tardias protegidos. 606 unitários/83 ficheiros, quatro técnicos, sintaxe 628/221/62 e três grupos integrados aprovados. 40 migrações existentes, cache v153, runner com 238 grupos. [Relatório](COMPANY_CLOSURE_RELIABILITY_20260924.md) e [evidência local](evidence/20260924_task341_local.json). Preparada para publicação; CI/restauro deste código por confirmar.
+Encerramentos com versão revista, pedido único, comprovativo recuperável, concorrência protegida, origem autenticada e auditoria atómica. Cancelar o diálogo não altera dados; metadados antigos são conservados; avisos não se duplicam. Lista/impacto com limites explícitos, prioridade sem origem por rever, datas UTC inclusivas, sessão, offline, quota, timeout e respostas tardias protegidos. 606 unitários/83 ficheiros, quatro técnicos, sintaxe 628/221/62 e três grupos integrados aprovados. 40 migrações existentes, cache v153, runner com 238 grupos. [Relatório](COMPANY_CLOSURE_RELIABILITY_20260924.md) e [evidência local](evidence/20260924_task341_local.json). Publicada em `09f23f2573b87e83413b6a4c2ecf7aa7307b31dd`, árvore `f114aaf5deff6224b51ceda02b346e3b1cc7018c`, idêntica à validada localmente. [CI 36063033475](https://github.com/ts7520305-svg/cristalwater/actions/runs/36063033475) em execução; os 238 grupos e o restauro nativo continuam por confirmar.
 
 TASK339 e TASK340 aprovadas integralmente: 236/236 e 237/237 grupos esperados distintos, 17 etapas em cada CI e restauro de 127 tabelas/47 ficheiros em ambos, com linhas e hashes iguais. Evidências [TASK339](evidence/20260924_task339_ci.json) e [TASK340](evidence/20260924_task340_ci.json).
 
