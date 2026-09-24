@@ -52,7 +52,11 @@ O novo grupo `test-field-reminder-materials.js` verifica permissões, identidade
 
 O navegador Chromium passou seleção de origem, rascunho sem consentimento, prévia e movimento adulterados, bloqueio offline, duplo clique, resposta perdida e consulta/reenvio exatos. A atribuição MATERIAL valida a fórmula e o mês, apresenta os custos afetados na reposição e conserva a reserva até à anulação financeira. Mudança de conta limpa a informação apresentada. Layout a 320/390/1440 px, sem transbordo horizontal, e capturas claro/escuro revistas em `reports/field-visual/reminder-materials/`.
 
-Regressões dirigidas: recursos e custo do trabalho dos lembretes, materiais e conclusão sem materiais das reparações, correção de materiais de equipamento e repartição MATERIAL das manutenções. O runner passa a 217 grupos. A validação local usa PostgreSQL embebido; o CI completo com PostgreSQL 16 e restauro da árvore publicada tem de ser confirmado antes do fecho.
+Regressões dirigidas: recursos e custo do trabalho dos lembretes, materiais e conclusão sem materiais das reparações, correção de materiais de equipamento e repartição MATERIAL das manutenções. O runner passa a 217 grupos. A validação local usa PostgreSQL embebido.
+
+## CI completo e restauro aprovados
+
+Código publicado `4b966f74f59a314eadfdfdaf2bea7b1a44b22e8e`, árvore `b8540fd7142ea73d66a328d35c63081c22825d27`, igual à validada localmente. [CI 35984014393](https://github.com/ts7520305-svg/cristalwater/actions/runs/35984014393), job `107582317108`, aprovado entre 2026-09-24T09:53:44Z e 2026-09-24T10:24:06Z (30m22s): 17 etapas, 217/217 grupos previstos distintos, sem falhas, faltas, entradas inesperadas ou duplicações; 473 unitários/71 ficheiros, quatro testes técnicos, gate geral de navegador, sintaxe 611/211/62 e 38 migrações. Restauro PostgreSQL 16 de 127 tabelas/46 ficheiros, com linhas e hashes iguais. Evidência [evidence/20260924_task314_ci.json](evidence/20260924_task314_ci.json). Cache v129, uma migração nova, sem tabelas/dependências novas. O fecho posterior altera apenas documentação; a aprovação refere-se ao código e árvore acima.
 
 ## Continuação e limites
 
