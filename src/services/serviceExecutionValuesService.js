@@ -42,7 +42,7 @@ function build(monthRef,generatedAt,partition,creditStates,expenses){
     const reductionAmountCents=sum(allocations.map(a=>a.amountCents));if(reductionAmountCents>t.amountCents)throw Error('Execution reduction exceeds source');
     ensure(t.serviceType,t.serviceId,t.clientId,t.clientName).revenueSources.push({serviceType:t.serviceType,serviceId:t.serviceId,clientId:t.clientId,kind:t.type,targetId:t.id,lineId:t.lineId,invoiceId:t.invoiceId,documentMonth:t.documentMonth,serviceMonth:monthRef,label:t.label,grossAmountCents:t.amountCents,reductionAmountCents,netAmountCents:confirmed?t.amountCents-reductionAmountCents:null,confirmed,state:confirmed?'CONFIRMED':notes.some(s=>!s.valid)?'CREDIT_REVIEW':'CREDIT_PENDING'});
   }
-  const active=expenses.flatMap(e=>require('./maintenanceLaborShareService').project(e.allocations).filter(a=>!a.voidedAt).map(a=>({...a,expenseTitle:e.title,expenseDocument:e.documentNumber,expenseDate:e.expenseDate,expenseCancelled:!!e.cancelledAt})));
+  const active=expenses.flatMap(e=>require('./maintenanceCostShareService').project(e.allocations).filter(a=>!a.voidedAt).map(a=>({...a,expenseTitle:e.title,expenseDocument:e.documentNumber,expenseDate:e.expenseDate,expenseCancelled:!!e.cancelledAt})));
   let costUnplacedCount=0,costPeriodMismatchAllMonths=0;
   for(const a of active.filter(a=>Object.hasOwn(types,a.targetType))){
     const executionMonth=costPeriod(a);if(!executionMonth){costUnplacedCount++;continue;}

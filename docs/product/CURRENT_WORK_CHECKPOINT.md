@@ -1,6 +1,12 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 24/09/2026, TASK309
+## Retoma atual — 24/09/2026, TASK310
+
+- O utilizador pediu continuar até o sistema estar completo, sem parar depois de cada tarefa implementável. Prosseguir a matriz até surgir uma dependência real, mantendo as restrições de produção/contactos abaixo.
+- Base `ac2d3a9a181775fca09404d8ed8aa5a67bc5a314`, fecho TASK309. TASK310 implementada e aprovada localmente: repartição do custo MATERIAL original pelas declarações compatíveis de equipamento, limites conjuntos entre compras, cêntimos/quantidades conservados, revisão, anulação e recuperação no navegador. Relatório [MAINTENANCE_MATERIAL_SHARE_20260924.md](MAINTENANCE_MATERIAL_SHARE_20260924.md).
+- 437 unitários/67 ficheiros, sintaxe 606/204/62, grupo API/navegador novo e regressões TASK308/TASK309/valorização aprovados. Runner 213 grupos, cache v125, 35 migrações/126 tabelas, sem novas dependências. Publicar e confirmar CI nativo/restauro da árvore nova; a aprovação TASK309 abaixo não aprova a TASK310.
+
+## Aprovação anterior — TASK309
 
 - Repositório: `ts7520305-svg/cristalwater`; branch de publicação: `work/field-readiness-20260915-simulation`.
 - Base: `efda938141f3275b46490d8dfdd9ee50c6b147fd`, fecho documental da TASK308.
@@ -11,7 +17,7 @@
 
 ## Próxima ação
 
-1. TASK310: repartir explicitamente o custo MATERIAL já confirmado da visita pelas declarações compatíveis de equipamento. Preservar a atribuição/linha de compra e os orçamentos originais, sem novo consumo nem nova valorização da mesma quantidade. As origens/quantidades próprias estão implementadas e aprovadas na TASK309; a repartição monetária ainda não. Não repetir TASK300–309. Correção/anulação das declarações, materiais/tempos próprios de lembretes e repartições entre meses continuam abertos.
+1. Confirmar CI completo/restauro e fechar a TASK310. Prosseguir com TASK311: correção/anulação explícita de declarações de materiais de equipamento, conservando o original, recibos recuperáveis e revisão das parcelas afetadas. A repartição monetária TASK310 já está implementada; não repetir TASK300–310. Materiais/tempos próprios de lembretes e repartições entre meses continuam abertos.
 2. Continuar restantes gastos/ajustes/origens de receita e os pontos da [matriz atual](COMPLETENESS_CURRENT_20260915.md): históricos/ecrãs/PDFs/idiomas, volume e operação prolongada, VPS/fornecedores e piloto físico. Custos/receitas completos e lucro por apurar; não atribuir percentagem global sem critérios fechados. IA generativa offline/aprendizagem por piscina/vídeo e integrações completas continuam requisitos separados sem aprovação integral.
 
 ## Autorizações e regras vigentes
@@ -26,4 +32,4 @@ A app assinala os serviços que pedem fatura com IVA e regista checklist/número
 
 Este ficheiro foi reduzido ao estado atual para evitar truncar a retoma. O conteúdo anterior está integralmente preservado, sem alterações, em [archive/WORK_CHECKPOINT_THROUGH_TASK305_20260923.md](archive/WORK_CHECKPOINT_THROUGH_TASK305_20260923.md), copiado do commit TASK305 antes deste fecho documental. Esse arquivo contém estados antigos e próximos passos já superados; não os tratar como a fase ativa.
 
-A matriz atual e o relatório TASK309 prevalecem para escolher a próxima tarefa. Relatórios individuais e `docs/product/evidence/` conservam os critérios e os resultados anteriores, incluindo [LABOR_COST_COMPONENTS_20260923.md](LABOR_COST_COMPONENTS_20260923.md) e [evidence/20260923_task304_ci.json](evidence/20260923_task304_ci.json).
+A matriz atual e o relatório TASK310 prevalecem para escolher a próxima tarefa. Relatórios individuais e `docs/product/evidence/` conservam os critérios e os resultados anteriores, incluindo [LABOR_COST_COMPONENTS_20260923.md](LABOR_COST_COMPONENTS_20260923.md) e [evidence/20260923_task304_ci.json](evidence/20260923_task304_ci.json).
