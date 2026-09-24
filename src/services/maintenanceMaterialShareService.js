@@ -53,7 +53,7 @@ async function ownMaterials(db, parents) {
   const result = new Map();
   for (const [visitType, visits] of [['REGULAR', regular], ['EXTRA', extra]]) for (const visit of visits) {
     const field = visitType === 'REGULAR' ? 'visitId' : 'extraVisitId';
-    for (const [id, view] of materials.assess(rows.filter(row => row[field] === visit.id), visit, visitType, receipts, movements.filter(m => m[field] === visit.id), revisions)) result.set(id, view);
+    for (const [id, view] of materials.assess(rows.filter(row => row[field] === visit.id), visit, visitType, receipts, movements.filter(m => m[field] === visit.id), revisions, await require('./reminderVisitResourceJournal').reservations(db, visit, visitType))) result.set(id, view);
   }
   return result;
 }

@@ -33,20 +33,23 @@ async function context(db,reminderId,lock=false,selection=null){
   const selectedParent=chosen?await parent(db,chosen.type,chosen.id,lock):null;
   if(lock&&selectedParent?.technicianId)await db.$queryRaw`SELECT id FROM "Technician" WHERE id=${selectedParent.technicianId} FOR SHARE`;
   const technician=selectedParent?.technicianId?await db.technician.findUnique({where:{id:selectedParent.technicianId},select:{id:true,name:true}}):null;
+  const associated=await require('./reminderVisitResourceJournal').journal(db,reminderId);
   const blockers=[];
+  if(!associated.valid)blockers.push({code:'HISTORY_REVIEW',message:'Reveja os comprovativos das parcelas associadas.'});
+  if(associated.active)blockers.push({code:'ACTIVE_ASSOCIATED_RESOURCES',message:'Anule primeiro as parcelas próprias do lembrete associado.',href:'/reminder-resources?associated=1&reminderId='+reminderId});
   if(!journal.valid||resource.available&&!resource.journalValid||!materials.valid)blockers.push({code:'HISTORY_REVIEW',message:'Reveja os comprovativos das associações, dos recursos e dos movimentos de materiais.'});
   if(materials.active)blockers.push({code:'ACTIVE_MATERIALS',message:'Reveja e anule o consumo próprio, confirmando primeiro a reposição no stock.',href:'/reminder-materials?reminderId='+reminderId});
   if(resource.active?.length)blockers.push({code:'ACTIVE_RESOURCES',message:'Reveja e anule a declaração de recursos próprios antes de associar o lembrete.',href:'/reminder-resources?reminderId='+reminderId});
   for(const a of costs)blockers.push({code:'ACTIVE_COST',message:'Anule expressamente o custo próprio #'+a.id+' antes de associar o lembrete.',allocationId:a.id,expenseId:a.expenseId,amountCents:a.amountCents,groupId:a.valuationSnapshot?.composition?.groupId||null,href:'/admin-expenses?expenseId='+a.expenseId});
   const target=resource.target||null,targetHash=resource.targetHash||null;
-  const contextHash=writes.hash({source,targetHash,headHash:journal.headHash,journalValid:journal.valid,resources:resource.contextHash||null,materialHash:materials.headHash,materialValid:materials.valid,costs:costs.map(a=>writes.hash(json(a)))});
+  const contextHash=writes.hash({source,targetHash,headHash:journal.headHash,journalValid:journal.valid,resources:resource.contextHash||null,materialHash:materials.headHash,materialValid:materials.valid,costs:costs.map(a=>writes.hash(json(a))),...(associated.headHash||!associated.valid?{associated:{hash:associated.headHash,valid:associated.valid}}:{})});
   for(const row of journal.records){if(row.voidResult)continue;const p=row.result.event.preview,reasons=[];
     if(!journal.valid)reasons.push('ASSOCIATION_EVIDENCE_CHANGED');
     if(writes.hash(source)!==p.sourceHash)reasons.push('REMINDER_CHANGED');
-    if(target?.decisionFingerprint!==p.target.decisionFingerprint)reasons.push('COMMERCIAL_DECISION_CHANGED');
+    if(target?.clientId!==p.origin.clientId||target?.poolId!==p.origin.poolId||target?.decisionFingerprint!==p.target.decisionFingerprint)reasons.push('COMMERCIAL_DECISION_CHANGED');
     if(writes.hash(selectedParent)!==p.parentHash)reasons.push('VISIT_CHANGED');
     if(!technician)reasons.push('TECHNICIAN_MISSING');
-    if(blockers.some(b=>b.code!=='HISTORY_REVIEW'))reasons.push('INDEPENDENT_RESOURCES_OR_COSTS');
+    if(blockers.some(b=>!['HISTORY_REVIEW','ACTIVE_ASSOCIATED_RESOURCES'].includes(b.code)))reasons.push('INDEPENDENT_RESOURCES_OR_COSTS');
     row.reasons=reasons;row.state=reasons.length?'REVIEW':'CONFIRMED';
   }
   const canLink=!blockers.length&&!journal.active&&resource.canDeclare===true;

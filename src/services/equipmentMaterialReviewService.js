@@ -37,7 +37,7 @@ async function context(db, completionId, lock = false) {
   if (!visit) return refuse('ORIGIN_REVIEW', 'Visita de origem indisponível.');
   const inputs = await materials.readInputs(db, rows, visit, p.visitType), state = inputs.revisions.get(completionId);
   if (lock) for (const source of rows) await db.$queryRaw`SELECT id FROM "FieldWriteRequest" WHERE (scope='EQUIPMENT_MAINTENANCE' AND "requestId"=${source.requestId}) OR (scope='EQUIPMENT_MATERIAL_REVIEW' AND "resourceId"=${source.id}) FOR SHARE`;
-  const views = materials.assess(rows, visit, p.visitType, inputs.receipts, inputs.movements, inputs.revisions), view = views.get(completionId);
+  const views = materials.assess(rows, visit, p.visitType, inputs.receipts, inputs.movements, inputs.revisions, inputs.associated), view = views.get(completionId);
   const ownOriginal = rows.find(s => s.id === completionId), original = journal.original(ownOriginal, inputs.receipts);
   // A later administrative declaration has its own author/date. It never
   // supplies a fictitious technician receipt to old, unverifiable records.
@@ -60,8 +60,8 @@ async function calculate(db, completionId, body, lock = false) {
   if (shares.review) return refuse('MATERIAL_COST_HISTORY_REVIEW', 'O histórico das parcelas de materiais precisa de revisão antes de confirmar os efeitos desta alteração.');
   const affectedShares = shares.records.filter(s => !s.voidedAt && s.share.preview.allocationBefore.targetType === c.origin.visitType && require('./maintenanceMaterialShareService').rules.parentId(s.share.preview.allocationBefore) === c.origin.visitId).map(s => ({ id: s.share.id, hash: s.hash, expenseId: s.share.expenseId, allocationId: s.share.allocationId, completionId: s.share.completionId, amountCents: s.share.preview.amountCents, quantity: s.share.preview.quantity })).sort((a, b) => a.id.localeCompare(b.id));
   const tentative = new Map(c.inputs.revisions); tentative.set(completionId, { valid: true, headHash: '0'.repeat(64), ...proposed, history: [{ revision: { preview: { origin: c.origin } } }] });
-  const after = materials.assess(c.rows, c.visit, c.origin.visitType, c.inputs.receipts, c.inputs.movements, tentative).get(completionId);
-  const value = { schema: 1, basis: rules.basis, completionId, origin: c.origin, original: c.original, baseHash: c.originalHash, previous, proposed, targetHash: c.target.hash, sourceHash: r.hash(json({ visit: c.visit, originals: c.rows.map(row => journal.original(row, c.inputs.receipts)), revisions: [...c.inputs.revisions].map(([id, s]) => ({ id, valid: s.valid, headHash: s.headHash })), movements: c.inputs.movements })), beforeState: c.current.state, afterState: after.state, afterReasons: after.reasons, affectedShares };
+  const after = materials.assess(c.rows, c.visit, c.origin.visitType, c.inputs.receipts, c.inputs.movements, tentative, c.inputs.associated).get(completionId);
+  const value = { schema: 1, basis: rules.basis, completionId, origin: c.origin, original: c.original, baseHash: c.originalHash, previous, proposed, targetHash: c.target.hash, sourceHash: r.hash(json({ visit: c.visit, originals: c.rows.map(row => journal.original(row, c.inputs.receipts)), revisions: [...c.inputs.revisions].map(([id, s]) => ({ id, valid: s.valid, headHash: s.headHash })), movements: c.inputs.movements, ...(c.inputs.associated.records.length || !c.inputs.associated.valid ? {associated:c.inputs.associated} : {}) })), beforeState: c.current.state, afterState: after.state, afterReasons: after.reasons, affectedShares };
   return rules.preview({ available: true, ...value, hash: r.hash(value) }, r.hash);
 }
 async function detail(user, completionId) { admin(user); const cid = id(completionId); return prisma.$transaction(async db => ({ ok: true, declaration: publicContext(await context(db, cid)) }), { isolationLevel: 'RepeatableRead', maxWait: 15000, timeout: 20000 }); }

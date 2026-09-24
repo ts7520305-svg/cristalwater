@@ -43,3 +43,39 @@ describe('explicit reminder visit association',()=>{
     expect((await read([row(a,1)])).active.id).toBe(a.event.id);
   });
 });
+
+const ownRules=require('../frontend/cw-reminder-visit-resource-rules'),ownHistory=require('../src/services/reminderVisitResourceJournal');
+function ownFixture(){
+  const association=fixture(),p=association.event.preview;
+  const selection={action:'DECLARE',recordId:null,data:{technicianId:3,materials:{mode:'DECLARED',items:[{productName:'SAL',unit:'KG',quantity:'0.333333'}]},workTime:{startedAt:'2008-07-11T10:10:00.000Z',endedAt:'2008-07-11T10:20:00.000Z'}}};
+  const peers=[{type:'EQUIPMENT',id:1,reminderId:null,hash:sha,materials:{mode:'DECLARED',items:[{productName:'SAL',unit:'KG',quantity:'0.666667'}]},workTime:{startedAt:p.parent.startAt,endedAt:'2008-07-11T10:10:00.000Z'}}];
+  const movements=[{id:1,productId:null,productName:'SAL',unit:'KG',quantity:'1.25',movementType:'CONSUMPTION',visitId:null,extraVisitId:1,poolId:4,clientId:2,technicianId:3,createdAt:p.parent.startAt},{id:2,productId:null,productName:'SAL',unit:'KG',quantity:'0.25',movementType:'RETURN',visitId:null,extraVisitId:1,poolId:4,clientId:2,technicianId:3,createdAt:p.parent.endAt}];
+  const value={schema:1,basis:ownRules.basis,reminderId:1,selection,contextHash:sha,previousHash:null,origin:{...p.origin,visitType:'EXTRA',visitId:1,associationId:association.event.id},association,parent:p.parent,peers,movements,comparison:{materials:[{...selection.data.materials.items[0],visitQuantity:'1',reservedQuantity:'0.666667',remainingQuantity:'0'}],durationSeconds:600},affectedShares:[],original:null};
+  const preview={available:true,...value,hash:hash(value)},body={requestId:'d145d52b-922a-40eb-936f-9b8bc0a0ee44',...selection,previewHash:preview.hash,reason:'Parcelas próprias conferidas',confirmed:true};
+  const event={schema:1,basis:ownRules.basis,id:body.requestId,owner,reminderId:1,reason:body.reason,createdAt:'2008-07-14T12:00:00.000Z',preview},receipt={...writes.context({id:1,role:'ADMIN'},ownRules.scope,1,body.requestId,(({requestId,...v})=>v)(body)),confirmedAt:event.createdAt};
+  return {ok:true,applied:true,envelope:body,event,eventHash:hash(event),receipt};
+}
+function ownRehash(r){const p=r.event.preview;p.hash=hash(ownRules.facts(p));r.envelope={...r.envelope,...p.selection,previewHash:p.hash};r.eventHash=hash(r.event);r.receipt.payloadHash=writes.context({id:1,role:'ADMIN'},ownRules.scope,1,r.envelope.requestId,(({requestId,...v})=>v)(r.envelope)).payloadHash;return r;}
+const ownVerify=r=>ownRules.response(r,r.envelope,owner,1,hash);
+describe('associated reminder resource conservation',()=>{
+  it('conserves six decimal quantities after returns and adjacent work periods in Node and browser',async()=>{
+    const r=ownFixture();await expect(ownVerify(r)).resolves.toEqual(r);
+    const c=vm.createContext({});for(const name of ['cw-maintenance-material-rules','cw-equipment-material-review-rules','cw-reminder-resource-rules','cw-reminder-visit-rules','cw-reminder-visit-resource-rules'])vm.runInContext(fs.readFileSync(new URL('../frontend/'+name+'.js',import.meta.url),'utf8'),c);
+    expect(clone(await c.CWReminderVisitResourceRules.response(r,r.envelope,owner,1,hash))).toEqual(r);
+  });
+  it('rejects rehashed over-allocation, wrong parent types, changed origins and duplicate movements',async()=>{
+    for(const change of [p=>p.selection.data.materials.items[0].quantity='0.333334',p=>p.selection.data.materials.items[0].unit='kg',p=>p.movements[0].visitId=1,p=>p.movements[0].extraVisitId=null,p=>p.movements[1].quantity='0.5',p=>p.movements[0].clientId=9,p=>p.movements.push(clone(p.movements[0])),p=>p.origin.associationId=p.peers[0].hash,p=>p.peers.push(clone(p.peers[0])),p=>p.comparison.materials[0].remainingQuantity='1']){const r=ownFixture();change(r.event.preview);await expect(ownVerify(ownRehash(r))).rejects.toThrow();}
+  });
+  it('rejects overlapping work, parent overrun, different technicians and double time inheritance',async()=>{
+    for(const change of [p=>p.selection.data.workTime.startedAt=p.parent.startAt,p=>p.selection.data.workTime.endedAt='2008-07-11T11:00:01.000Z',p=>p.selection.data.technicianId=4,p=>p.selection.data.workTime.startedAt='2008-07-11T10:10:00.001Z',p=>p.comparison.durationSeconds=3600]){const r=ownFixture();change(r.event.preview);await expect(ownVerify(ownRehash(r))).rejects.toThrow();}
+  });
+  it('retains unknown resources separately from an explicit zero-material declaration',()=>{
+    const r=ownFixture(),p=r.event.preview,d={technicianId:3,materials:null,workTime:p.selection.data.workTime};expect(ownRules.compare(d,p.parent,p.peers,[])).toEqual({materials:[],durationSeconds:600});
+    expect(ownRules.compare({...d,materials:{mode:'NONE',items:[]},workTime:null},p.parent,p.peers,[])).toEqual({materials:[],durationSeconds:null});expect(()=>ownRules.compare({...d,workTime:null},p.parent,[],[])).toThrow();
+  });
+  it('keeps reservations blocked on duplicated or corrupted original receipts',async()=>{
+    const r=ownFixture(),row={resourceId:1,owner,requestId:r.event.id,payloadHash:r.receipt.payloadHash,response:r};
+    for(const rows of [[row,row],[{...row,payloadHash:sha}]])expect((await ownHistory.journal({fieldWriteRequest:{findMany:async()=>rows}},1)).valid).toBe(false);
+    expect((await ownHistory.journal({fieldWriteRequest:{findMany:async()=>[row]}},1)).active.id).toBe(r.event.id);
+  });
+});

@@ -43,20 +43,25 @@ async function check(db, input, visit, visitType, completedAt) {
   // The caller holds the parent visit lock, serializing every plan in this visit.
   const rows = await db.equipmentMaintenanceCompletion.findMany({ where: visitType === 'EXTRA' ? { extraVisitId: visit.id } : { visitId: visit.id }, select: selection }), proofs = await receipts(db, rows);
   if (rows.some(row => hadTime(row, proofs) && (!sound(time(row)) || !intact(row, proofs) || overlaps(input, time(row))))) return 'Já existe tempo registado noutra revisão desta visita. Reveja os intervalos antes de confirmar.';
+  const associated = await require('./reminderVisitResourceJournal').reservations(db, visit, visitType);
+  if (!associated.valid || associated.records.some(r => r.workTime && overlaps(input, {startAt:r.workTime.startedAt,endAt:r.workTime.endedAt}))) return 'O intervalo coincide com uma parcela de lembrete ou existe uma declaração por rever.';
   if (await conflict(db, input, visit, visitType)) return 'O técnico tem tempo registado em simultâneo noutro serviço. Reveja os horários antes de confirmar.';
   return null;
 }
 async function prepareRead(db, groups) {
   const proofs = await receipts(db, groups.flatMap(g => g.rows));
   const conflicts = await recorded.conflicts(db, groups.flatMap(g => g.rows.filter(row => sound(time(row))).map(row => ({ type: g.visitType, id: g.visit.id, technicianId: time(row).origin.technicianId, startAt: new Date(time(row).startAt), endAt: new Date(time(row).endAt) }))));
-  return { proofs, conflicts };
+  const associated = new Map();
+  for (const g of groups) associated.set(g.visitType+':'+g.visit.id, await require('./reminderVisitResourceJournal').reservations(db,g.visit,g.visitType));
+  return { proofs, conflicts, associated };
 }
 async function describe(db, rows, visit, visitType, prepared) {
-  const expected = origin(visit, visitType), views = new Map(), { proofs, conflicts } = prepared || await prepareRead(db, [{ rows, visit, visitType }]);
+  const expected = origin(visit, visitType), views = new Map(), { proofs, conflicts, associated } = prepared || await prepareRead(db, [{ rows, visit, visitType }]);
   for (const row of rows) {
     const record = time(row);
     if (!record) { views.set(row.id, { state: hadTime(row, proofs) ? 'REVIEW' : 'MISSING', record: null }); continue; }
-    const review = !sound(record) || !intact(row, proofs) || Object.entries(expected).some(([key, value]) => record.origin?.[key] !== value) || !within(record, visit, row.completedAt) || rows.some(other => other.id !== row.id && hadTime(other, proofs) && (!sound(time(other)) || !intact(other, proofs) || overlaps(record, time(other)))) || conflicts.has(visitType + ':' + visit.id);
+    const own = associated?.get(visitType+':'+visit.id);
+    const review = own?.valid === false || own?.records.some(r => r.workTime && overlaps(record,{startAt:r.workTime.startedAt,endAt:r.workTime.endedAt})) || !sound(record) || !intact(row, proofs) || Object.entries(expected).some(([key, value]) => record.origin?.[key] !== value) || !within(record, visit, row.completedAt) || rows.some(other => other.id !== row.id && hadTime(other, proofs) && (!sound(time(other)) || !intact(other, proofs) || overlaps(record, time(other)))) || conflicts.has(visitType + ':' + visit.id);
     views.set(row.id, { state: review ? 'REVIEW' : 'RECORDED', record });
   }
   return views;
