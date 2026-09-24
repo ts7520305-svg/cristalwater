@@ -22,7 +22,10 @@ function validate(input, money) {
     const label=typeof row.label==='string'?row.label.trim():'';
     const services=typeof row.services==='string'?row.services.trim():'';
     if(!label||label.length>120||!services||services.length>2000)fail('Indique a designação e os serviços de cada época.');
-    const season={key:'SEASON_'+(index+1),label,services,fromMonth:integer(row.fromMonth,1,12,'Mês inicial inválido.'),toMonth:integer(row.toMonth,1,12,'Mês final inválido.'),monthlyCents:money(row.monthlyAmount)};
+    const billing=row.billing===undefined?'INCLUDED_MONTHLY':row.billing;if(!['INCLUDED_MONTHLY','PER_VISIT'].includes(billing))fail('Escolha mensalidade ou preço por visita.');
+    if(billing==='PER_VISIT'&&row.monthlyAmount!==undefined&&row.monthlyAmount!==''&&money(row.monthlyAmount)!==0)fail('O preço por visita não pode somar uma mensalidade na mesma época.');
+    if(billing==='INCLUDED_MONTHLY'&&row.visitAmount!==undefined&&row.visitAmount!==''&&money(row.visitAmount)!==0)fail('A mensalidade inclui as visitas; não acrescente um preço por visita.');
+    const season={key:'SEASON_'+(index+1),label,services,fromMonth:integer(row.fromMonth,1,12,'Mês inicial inválido.'),toMonth:integer(row.toMonth,1,12,'Mês final inválido.'),monthlyCents:billing==='PER_VISIT'?0:money(row.monthlyAmount),...(billing==='PER_VISIT'?{billing,visitCents:money(row.visitAmount)}:{})};
     for(const month of months(season)){if(occupied.has(month))fail('As épocas não podem sobrepor meses.');occupied.add(month);}
     if(!Array.isArray(row.schedules)||row.schedules.length>50)fail('Indique até cinquenta instalações por época.');
     const pools=new Set();
@@ -59,7 +62,8 @@ function validate(input, money) {
   });
   if(occupied.size!==12)fail('Defina todos os meses do ano, incluindo épocas sem visitas.');
   const exceptions=validateExceptions(input.exceptions,startsOn,endsOn);
-  return {schema:1,startsOn,endsOn,billing:'INCLUDED_MONTHLY',seasons,...(exceptions.length?{exceptions}:{})};
+  const variable=seasons.some(s=>s.billing==='PER_VISIT');
+  return {schema:variable?2:1,startsOn,endsOn,billing:variable?'BY_SEASON':'INCLUDED_MONTHLY',seasons,...(exceptions.length?{exceptions}:{})};
 }
 function validateExceptions(input,startsOn,endsOn){
   if(input===undefined)return [];

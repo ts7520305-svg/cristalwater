@@ -60,11 +60,12 @@ async function partition(db, monthRef, generatedAt, invoices, suppliedMonthlySta
   const ids = type => [...new Set(candidates.filter(k => k.startsWith(type + ':')).map(k => Number(k.split(':')[1])))];
   const regularIds = ids('REGULAR'), extraIds = ids('EXTRA');
   const [regular, extra, allReferences] = await Promise.all([
-    db.serviceVisit.findMany({ where: { id: { in: regularIds } }, select: { ...visitSelect, contractService: true } }),
+    db.serviceVisit.findMany({ where: { id: { in: regularIds } }, select: { ...visitSelect, contractService: true, reason:true, revenue:true } }),
     db.extraVisit.findMany({ where: { id: { in: extraIds } }, select: { ...visitSelect, includedInPackage: true, billingMode: true } }),
     db.invoiceLine.findMany({ where: { referenceId: { in: [...new Set([...regularIds, ...extraIds])] } }, select: { ...lineSelect, invoice: { select: { status: true, lines: { select: { type: true, lineType: true } } } } } })
   ]);
-  const current = new Map([...regular.map(v => ['REGULAR:' + v.id, v]), ...extra.map(v => ['EXTRA:' + v.id, v])]), counts = new Map();
+  const priceService=require('./clientServicePricing'),priced=regular.filter(require('./clientServicePlan').perVisit),priceSources=await priceService.plans(db,priced),priceById=new Map(priced.map(v=>[v.id,v]));
+  const current = new Map([...regular.map(({reason,revenue,...v}) => ['REGULAR:' + v.id, v]), ...extra.map(v => ['EXTRA:' + v.id, v])]), counts = new Map();
   for (const line of allReferences) {
     if (!isReceivableInvoice(line.invoice) || line.invoice.lines.some(l => [l.type, l.lineType].map(normalize).includes('CREDIT_DEPOSIT'))) continue;
     for (const key of references(line)) counts.set(key, (counts.get(key) || 0) + 1);
@@ -125,6 +126,7 @@ async function partition(db, monthRef, generatedAt, invoices, suppliedMonthlySta
         issue = !positiveId(line.referenceId) ? 'MISSING_REFERENCE' : !visit ? 'MISSING_SERVICE' : counts.get(key) !== 1 ? 'DUPLICATE_REFERENCE' :
           visit.clientId !== invoice.clientId ? 'CLIENT_MISMATCH' : !isCompletedVisitStatus(visit.status) ? 'SERVICE_NOT_COMPLETED' : !visit.endAt ? 'MISSING_COMPLETION_DATE' :
           (targetType === 'REGULAR' ? included(visit) : visit.includedInPackage || normalize(visit.billingMode) !== 'EXTRA') ? 'SERVICE_INCLUDED_OR_UNCONFIRMED' : null;
+        if(!issue&&targetType==='REGULAR'&&priceById.has(visit.id)){try{const expected=priceService.price(priceById.get(visit.id),priceSources);if(expected!==amountCents||line.quantity!==1||projection.cents(line.unitPrice)!==expected)issue='SERVICE_PRICE_REVIEW';}catch(_){issue='SERVICE_PRICE_REVIEW';}}
         bucket = issue ? 'review' : 'linked';
         if (!issue) {const serviceMonth=visit.endAt.toISOString().slice(0,7);linked.push({ ...identity, lineId: line.id, type: targetType, id: visit.id, serviceMonth, amountCents });target(invoice,line,'LINE',line.id,targetType,visit.id,serviceMonth,amountCents,visit,(targetType==='REGULAR'?'Visita regular #':'Visita extra #')+visit.id+' · '+line.description);}
       }

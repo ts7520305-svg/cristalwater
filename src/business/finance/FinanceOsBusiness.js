@@ -360,6 +360,7 @@ async function createDraftInvoice(payload = {}, actor = "finance-os", transactio
     if ((await reservedRepairIds(tx, repairIds)).size) return { ok: false, status: 409, error: 'Reparação já associada a uma fatura. Consulte o documento existente.' };
     if (repairIds.length && await tx.repair.count({ where: { id: { in: repairIds }, pool: { clientId } } }) !== repairIds.length) return { ok: false, status: 409, error: 'A referência não pertence a uma reparação deste cliente' };
     if(serviceIds.length){const sources=await tx.serviceVisit.findMany({where:{id:{in:serviceIds}},select:{contractService:true}});if(sources.some(require('../../services/clientServicePlan').included))return {ok:false,status:409,error:'Esta visita está incluída no contrato mensal e não pode ser cobrada novamente como serviço avulso.'};}
+  try{await require('../../services/clientServicePricing').validateLines(tx,clientId,lineItems);}catch(error){if(error.code==='SERVICE_PRICE_REVIEW')return {ok:false,status:409,error:error.message};throw error;}
   const dueDate = repository.toDate(payload.dueDate) || new Date(Date.now() + 15 * 86400000);
 
   const invoice = await tx.invoice.create({ data: {

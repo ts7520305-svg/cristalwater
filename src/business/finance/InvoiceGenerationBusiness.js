@@ -1,6 +1,7 @@
 'use strict';
 const { prisma } = require('../../prismaClient');
 const clientRates = require('./ClientRateBusiness');
+const seasonalPricing=require('../../services/clientServicePricing'),serviceCalendar=require('../../services/clientServicePlan');
 const { applyClientCreditToInvoice } = require('../../services/clientCreditService');
 const { reservedRepairIds } = require('../../services/repairInvoiceSourceService');
 const include = { lines: true, payments: true, client: true };
@@ -69,7 +70,8 @@ async function generate(mode, body = {}) {
           { OR: [{ totalPrice: { gt: 0 } }, { price: { gt: 0 } }, { unitPrice: { gt: 0 } }] },
         ] }, include: { pool: true }, orderBy: { id: 'asc' } }),
       ]);
-      const visits=candidateVisits.filter(visit=>!require('../../services/clientServicePlan').included(visit));
+      const seasonal=await seasonalPricing.collect(tx,clientId,monthRef);
+      const visits=candidateVisits.filter(visit=>!serviceCalendar.included(visit)&&!serviceCalendar.perVisit(visit));
       // The client/receipt lock serializes different months as well. A repair
       // remains reserved by any historical document, even a draft or withdrawal;
       // releasing it requires an explicit correction, never monthly generation.
@@ -85,11 +87,12 @@ async function generate(mode, body = {}) {
         return sourceCents(visit.totalPrice ?? visit.unitPrice ?? visit.price) > 0;
       });
       const repairCents = repairs.reduce((sum, r) => sum + sourceCents(mode === 'OPERATIONAL' ? r.totalPrice || r.unitPrice : r.totalPrice), 0);
-      const serviceCents = mode === 'CORE' ? visits.reduce((sum, v) => sum + sourceCents(sourceAmount(v)), 0) : 0;
+      const serviceCents = seasonal.amountCents+(mode === 'CORE' ? visits.reduce((sum, v) => sum + sourceCents(sourceAmount(v)), 0) : 0);
       const extraCents = extras.reduce((sum, v) => sum + sourceCents(v.totalPrice ?? v.unitPrice ?? v.price), 0);
       const totalCents = monthlyCents + repairCents + serviceCents + extraCents;
       if (!Number.isSafeInteger(totalCents) || totalCents < 0) fail('Total inválido. Reveja os serviços antes de gerar a fatura.');
-      const lines = monthlyCents > 0 ? [line('MONTHLY', `Mensalidade ${monthRef}`, monthlyCents)] : [];
+      if(totalCents===0&&pricing.variableCharges)fail('Ainda não há visitas concluídas com valor para faturar neste mês.',409);
+      const lines = [...(monthlyCents > 0 ? [line('MONTHLY', `Mensalidade ${monthRef}`, monthlyCents)] : []),...seasonal.lines];
       if (mode === 'CORE') for (const v of visits) if (cent(sourceAmount(v)) > 0) lines.push(line('SERVICE', `Servico: ${v.pool?.name || `Visita ${v.id}`}`, cent(sourceAmount(v)), {
         referenceId: v.id, serviceDate: v.endAt || v.plannedDate || v.date || null, sourceMonth: monthRef, notes: v.notes || null,
       }));
@@ -113,6 +116,7 @@ async function generate(mode, body = {}) {
       if(repairs.length)await require('../../services/repairRevenueSourceService').record(tx,invoice.id,'SYSTEM:MONTHLY_GENERATION:'+mode,repairs);
       const credit = await applyClientCreditToInvoice(tx, invoice.id, { reference: `Fatura ${monthRef}`, notes: 'Abatimento automático na geração de fatura.' });
       if(pricing.planId)await tx.userAuditLog.create({data:{action:'INVOICE_RATE_PLAN_APPLIED',actor:'SYSTEM:MONTHLY_GENERATION',entity:'Invoice',entityId:String(invoice.id),metadata:{clientId,monthRef,planId:pricing.planId,planVersion:pricing.planVersion,amount:pricing.amount,segments:pricing.segments}}});
+      await seasonalPricing.claim(tx,seasonal.ids);
       if (visits.length) {
         const claimed = await tx.serviceVisit.updateMany({ where: { id: { in: visits.map(v => v.id) }, billed: false }, data: { billed: true, billedAt: new Date() } });
         if (claimed.count !== visits.length) fail('Os serviços mudaram durante a geração. Consulte os dados antes de repetir.', 409);
@@ -125,7 +129,7 @@ async function generate(mode, body = {}) {
       const result = { ok: true, invoice: full, creditUsed: credit.creditUsed || 0 };
       if (mode === 'CORE') return { ...result, lines: { monthly: monthlyCents / 100, services: serviceCents / 100, extras: extraCents / 100, repairs: repairCents / 100 }, next: 'PAYMENT' };
       if (mode === 'CORE_LEGACY') return { ...result, next: 'PAYMENT' };
-      return { ...result, lines: { monthly: monthlyCents / 100, repairs: repairCents / 100 }, nextStep: 'PAYMENT' };
+      return { ...result, lines: { monthly: monthlyCents / 100, repairs: repairCents / 100,...(seasonal.ids.length?{services:seasonal.amountCents/100}:{}) }, nextStep: 'PAYMENT' };
     }, { maxWait: 15000, timeout: 15000 });
   } catch (error) {
     if (error.code === 'P2002') await refuseExisting(prisma, where);

@@ -1,6 +1,7 @@
 'use strict';
 const { prisma } = require('../../prismaClient');
 const clientRates = require('./ClientRateBusiness');
+const seasonalPricing=require('../../services/clientServicePricing');
 const { applyClientCreditToInvoice } = require('../../services/clientCreditService');
 const { getMonthRef, normalizeInvoice } = require('../../services/invoiceViewService');
 const include = { client: true, lines: true, payments: true };
@@ -41,13 +42,16 @@ async function processClient(clientId, monthRef, batch) {
           const fallback = Number(client.monthlyFee || 0) || client.pools.reduce((sum, pool) => sum + Number(pool.monthlyAmount || 0), 0);
           const pricing = await clientRates.billing(client, monthRef, fallback, tx), cents = Math.round(Number(pricing.amount) * 100);
           if (!Number.isSafeInteger(cents) || cents < 0) fail('Preço mensal inválido. Reveja a configuração do cliente.');
-          monthly = cents / 100;
+          const seasonal=await seasonalPricing.collect(tx,clientId,monthRef),totalCents=cents+seasonal.amountCents;if(!Number.isSafeInteger(totalCents))fail('Total do contrato inválido.');
+          if(!totalCents&&pricing.variableCharges){if(batch)return {clientId,status:'NOTHING_TO_INVOICE',invoiceId:null,amount:0,creditUsed:0};fail('Ainda não há visitas concluídas com valor para faturar neste mês.',409);}
+          monthly = totalCents / 100;
           invoice = await tx.invoice.create({ data: {
             clientId, monthRef, month: monthRef, year: Number(monthRef.slice(0, 4)),
             total: monthly, totalAmount: monthly, amount: monthly, amountOpen: monthly, amountPaid: 0,
             status: monthly > 0 ? 'PENDING' : 'PAID', requiresInvoice: Boolean(client.requiresInvoice),
-            lines: { create: [{ type: 'MONTHLY', description: `Mensalidade ${monthRef}`, quantity: 1, unitPrice: monthly, total: monthly }] },
+            lines: { create: [...(cents>0||!pricing.variableCharges?[{type:'MONTHLY',description:`Mensalidade ${monthRef}`,quantity:1,unitPrice:cents/100,total:cents/100}]:[]),...seasonal.lines] },
           } });
+          await seasonalPricing.claim(tx,seasonal.ids);
           if(pricing.planId)await tx.userAuditLog.create({data:{action:'INVOICE_RATE_PLAN_APPLIED',actor:'SYSTEM:INVOICE_PAGE',entity:'Invoice',entityId:String(invoice.id),metadata:{clientId,monthRef,planId:pricing.planId,planVersion:pricing.planVersion,amount:pricing.amount,segments:pricing.segments}}});
         }
         const credit = await applyClientCreditToInvoice(tx, invoice.id, {

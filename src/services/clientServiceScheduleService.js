@@ -1,7 +1,7 @@
 'use strict';
 const {Prisma}=require('@prisma/client');
 const {prisma}=require('../prismaClient');
-const calendar=require('./clientServicePlan');
+const calendar=require('./clientServicePlan'),pricing=require('./clientServicePricing');
 const requests=require('./fieldWriteRequestService');
 const {requestReceipt}=require('./visitReceiptService');
 const {getPoolRoundReadiness}=require('../utils/poolReadiness');
@@ -15,7 +15,7 @@ const slotKey=(poolId,date)=>poolId+':'+iso(date);
 const dayKey=(poolId,date)=>poolId+':'+calendar.localDay(date);
 const actorName=actor=>requests.owner(actor);
 const authorize=actor=>{if(!roleMatches(actor?.role,'ADMIN'))fail('Apenas a administração pode alterar o acordo.',403);};
-const publicAction=action=>({action:action.action,visitId:action.visit?.id||null,poolId:action.poolId,poolName:action.poolName,day:action.day,at:action.at||null,technicianName:action.technician?.name||action.visit?.technicianName||null,reason:action.reason});
+const publicAction=action=>({action:action.action,visitId:action.visit?.id||null,poolId:action.poolId,poolName:action.poolName,day:action.day,at:action.at||null,technicianName:action.technician?.name||action.visit?.technicianName||null,reason:action.reason,...(action.season?.billing==='PER_VISIT'?{billing:'PER_VISIT',unitAmount:action.season.visitCents/100}:{})});
 function version(value){if(!Number.isSafeInteger(value)||value<0)fail('Versão inválida.');return value;}
 function requestInput(body,editing){
   const monthRef=body.monthRef;calendar.daysOfMonth(monthRef);
@@ -39,6 +39,7 @@ async function context(tx,clientId,snapshot){
   const client=await tx.client.findUnique({where:{id:clientId}});if(!client)fail('Cliente não encontrado.',404);
   const previous=await rates().latest(clientId,tx),plan=snapshot||previous?.snapshot;
   if(!plan?.servicePlan)fail('Este cliente ainda não tem um acordo de serviços sazonais.',409);
+  if(!snapshot)await pricing.verify(tx,previous);
   const pools=await tx.pool.findMany({where:{clientId},orderBy:{id:'asc'}}),poolMap=new Map(pools.map(p=>[p.id,p]));
   const rules=calendar.allRules(plan.servicePlan);
   const roundIds=[...new Set(rules.map(r=>r.roundId).filter(Boolean))].sort((a,b)=>a-b);
@@ -90,12 +91,14 @@ async function inspect(tx,ctx,{monthRef,editing=false,onlyDays=null,now=new Date
       }
     }
   }
+  const priceSources=await pricing.plans(tx,visits.filter(calendar.perVisit));
   const actions=[],occupied=new Set(),blockedDays=new Set();
   for(const visit of visits){
     const key=slotKey(visit.poolId,visit.plannedDate),day=calendar.localDay(visit.plannedDate),target=desired.get(key);
     const base={visit,poolId:visit.poolId,poolName:ctx.poolMap.get(visit.poolId)?.name||'Piscina '+visit.poolId,day};
     occupied.add(key);
     if(visit.clientId&&visit.clientId!==ctx.client.id){blockedDays.add(dayKey(visit.poolId,visit.plannedDate));actions.push({...base,action:'REVIEW',reason:'Associação de cliente contraditória; visita preservada.'});continue;}
+    if(calendar.perVisit(visit)){try{pricing.price(visit,priceSources);}catch(_){blockedDays.add(dayKey(visit.poolId,visit.plannedDate));actions.push({...base,action:'REVIEW',reason:'O preço original ou o comprovativo do acordo precisa de revisão; visita preservada.'});continue;}}
     if(!untouched(visit)){
       if(!calendar.included(visit)||!target)blockedDays.add(dayKey(visit.poolId,visit.plannedDate));
       actions.push({...base,action:'PRESERVE',reason:'Visita manual, atribuída/reagendada, iniciada, concluída ou histórica: preservada.'});continue;
@@ -111,7 +114,7 @@ async function inspect(tx,ctx,{monthRef,editing=false,onlyDays=null,now=new Date
     // new dates within the explicitly simulated month (or the weekly window).
     if(!(onlyDays||monthDays).includes(target.day))continue;
     if(blockedDays.has(dayKey(target.poolId,target.date)))actions.push({...target,action:'REVIEW',reason:'Já existe trabalho manual/histórico neste dia. Reveja-o antes de acrescentar visitas.'});
-    else actions.push({...target,action:'CREATE',reason:'Visita incluída no contrato mensal.'+(target.exception?' Exceção nesta data: '+target.exception.reason:'')});
+    else actions.push({...target,action:'CREATE',reason:(target.season.billing==='PER_VISIT'?'Visita com preço unitário acordado; cobrança apenas após conclusão.':'Visita incluída no contrato mensal.')+(target.exception?' Exceção nesta data: '+target.exception.reason:'')});
   }
   actions.sort((a,b)=>a.day.localeCompare(b.day)||a.poolId-b.poolId||(a.at||'').localeCompare(b.at||'')||(a.visit?.id||0)-(b.visit?.id||0));
   const summary={create:0,update:0,cancel:0,keep:0,preserve:0,review:0,pending:pending.length};for(const a of actions)summary[a.action.toLowerCase()]++;
@@ -125,6 +128,7 @@ async function preview(clientId,body,editing){
     const ctx=await context(tx,clientId,input.snapshot);
     if((ctx.previous?.version||0)!==input.expectedVersion)fail('O acordo mudou. Recarregue e reveja a simulação.',409);
     const result=exposed(await inspect(tx,ctx,{monthRef:input.monthRef,editing}));
+    if(editing&&input.snapshot.servicePlan.schema===2)result.planHash=requests.hash(input.snapshot);
     result.payloadHash=requests.hash({v:1,scope:editing?'CLIENT_SERVICE_PLAN':'CLIENT_SERVICE_GENERATION',resourceId:clientId,payload:{...input,reviewToken:result.reviewToken}});
     return result;
   },{maxWait:15000,timeout:30000});
@@ -140,8 +144,8 @@ async function apply(tx,plan,inspection,{addOnly=false}={}){
       results.push({action:'CANCEL',id:v.id});continue;
     }
     const origin={plannedDate:iso(action.date),technicianId:action.technician.id,roundId:action.roundId};
-    const data={technicianId:action.technician.id,technicianName:action.technician.name,roundId:action.roundId,contractService:calendar.serviceData(plan,action.season,action.day,origin,action.exception),...(v&&v.notes===v.contractService?.services?{notes:action.season.services}:{})};
-    const saved=v?await tx.serviceVisit.update({where:{id:v.id},data}):await tx.serviceVisit.create({data:{...data,clientId:inspection.clientId,poolId:action.poolId,plannedDate:action.date,status:'PLANNED',reason:'AUTO_CLIENT_SERVICE',revenue:0,notes:action.season.services}});
+    const data={technicianId:action.technician.id,technicianName:action.technician.name,roundId:action.roundId,contractService:calendar.serviceData(plan,action.season,action.day,origin,action.exception),...(action.season.billing==='PER_VISIT'?{revenue:action.season.visitCents/100}:calendar.perVisit(v)?{revenue:0}:{}),...(v&&v.notes===v.contractService?.services?{notes:action.season.services}:{})};
+    const saved=v?await tx.serviceVisit.update({where:{id:v.id},data}):await tx.serviceVisit.create({data:{...data,clientId:inspection.clientId,poolId:action.poolId,plannedDate:action.date,status:'PLANNED',reason:'AUTO_CLIENT_SERVICE',revenue:action.season.billing==='PER_VISIT'?action.season.visitCents/100:0,notes:action.season.services}});
     if(!v||v.technicianId!==saved.technicianId)await requestReceipt(tx,saved,`client-service-${plan.id}-${saved.id}`,'CLIENT_SERVICE');
     results.push({action:action.action,id:saved.id});
   }
@@ -160,7 +164,7 @@ async function write(clientId,body,actor,editing){
     const plan=editing?await tx.clientRatePlan.create({data:{clientId,version:input.expectedVersion+1,snapshot:input.snapshot,createdBy:actorName(actor)}}):ctx.previous;
     const applied=await apply(tx,plan,inspection);
     await tx.userAuditLog.create({data:{action:editing?'CLIENT_SERVICE_PLAN_SAVED':'CLIENT_SERVICE_CALENDAR_APPLIED',actor:actorName(actor),entity:'ClientRatePlan',entityId:String(plan.id),metadata:{clientId,version:plan.version,monthRef:input.monthRef,applied,pending:inspection.pending,review:inspection.actions.filter(a=>a.action==='REVIEW').map(publicAction)}}});
-    return requests.confirm(tx,request,{ok:true,clientId,planVersion:plan.version,planId:plan.id,monthRef:input.monthRef,applied,summary:inspection.summary,pending:inspection.pending});
+    return requests.confirm(tx,request,{ok:true,clientId,planVersion:plan.version,planId:plan.id,monthRef:input.monthRef,...(editing&&input.snapshot.servicePlan.schema===2?{pricingProof:{schema:1,planHash:requests.hash(plan.snapshot),reviewToken:body.reviewToken}}:{}),applied,summary:inspection.summary,pending:inspection.pending});
   },{maxWait:15000,timeout:30000});
 }
 async function generateWeek(weekStart){

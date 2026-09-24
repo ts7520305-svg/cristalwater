@@ -9,9 +9,9 @@ function date(value) {
   return n.getTime();
 }
 function cents(value) {
-  if (!['number','string'].includes(typeof value) || String(value).trim() === '') fail('Valor mensal obrigatório');
+  if (!['number','string'].includes(typeof value) || String(value).trim() === '') fail('Valor obrigatório');
   const n = Number(value);
-  if (!Number.isFinite(n) || n < 0 || n > 10000000 || Math.abs(n * 100 - Math.round(n * 100)) > 0.000001) fail('Valor mensal inválido; use até duas casas decimais');
+  if (!Number.isFinite(n) || n < 0 || n > 10000000 || Math.abs(n * 100 - Math.round(n * 100)) > 0.000001) fail('Valor inválido; use até duas casas decimais');
   return Math.round(n * 100);
 }
 function validate(payload = {}) {
@@ -38,6 +38,7 @@ function month(ref) {
   return { start, end:end.getTime(), days:(end.getTime()-start)/DAY };
 }
 function calculate(snapshot, ref) {
+  if(snapshot.servicePlan?.schema===2)return require('../../../frontend/cw-client-service-pricing').calculate(snapshot.servicePlan,ref);
   const range = month(ref), segments = []; let weightedCents = 0;
   for (let d=range.start;d<range.end;d+=DAY) {
     const day = new Date(d).toISOString().slice(0,10);
@@ -79,6 +80,7 @@ async function billing(client, ref, fallback, db=prisma) {
   month(ref);
   const plan = await latest(client.id,db);
   if (!plan) return {amount:fallback,planVersion:null};
+  await require('../../services/clientServicePricing').verify(db,plan);
   const existing = await db.invoice.findUnique({where:{clientId_monthRef:{clientId:client.id,monthRef:ref}},select:{id:true}});
   if (existing) fail('Já existe fatura neste mês. O plano de preços não altera documentos existentes.',409);
   return {...calculate(plan.snapshot,ref),planVersion:plan.version,planId:plan.id};
