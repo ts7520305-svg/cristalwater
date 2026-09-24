@@ -1,0 +1,21 @@
+{
+  "task": "TASK326",
+  "commit": "47261ccf12e577ce6181bda193135d9786d5d9c3",
+  "workflowRun": 36036452634,
+  "job": 107757638833,
+  "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36036452634",
+  "conclusion": "failure",
+  "passed": {
+    "migration": true,
+    "syntax": true,
+    "unitTests": 543,
+    "technicianTests": 4
+  },
+  "failedStep": "npm test && npm run test:technician && npm run test:field-browser",
+  "failedScript": "scripts/test-field-browser.js",
+  "failure": "Timeout awaiting closeSyncedAt at line 71 after an offline water reminder closure",
+  "fieldSuite": "skipped",
+  "restore": "skipped",
+  "logExcerpt": "2026-09-24T17:47:09.0463286Z > cristalwater-backend@22.6.7 test:technician\n2026-09-24T17:47:09.0464128Z > vitest run tests/technician-business.test.js\n2026-09-24T17:47:09.0464523Z \n2026-09-24T17:47:09.3351854Z \n2026-09-24T17:47:09.3356209Z  RUN  v4.1.11 /home/runner/work/cristalwater/cristalwater\n2026-09-24T17:47:09.3357504Z \n2026-09-24T17:47:09.5627873Z  ✓ tests/technician-business.test.js (4 tests) 40ms\n2026-09-24T17:47:09.5651851Z \n2026-09-24T17:47:09.5656658Z  Test Files  1 passed (1)\n2026-09-24T17:47:09.5657799Z       Tests  4 passed (4)\n2026-09-24T17:47:09.5658720Z    Start at  17:47:09\n2026-09-24T17:47:09.5659900Z    Duration  222ms (transform 39ms, setup 0ms, import 53ms, tests 40ms, environment 0ms)\n2026-09-24T17:47:09.5662452Z \n2026-09-24T17:47:09.6922107Z \n2026-09-24T17:47:09.6922909Z > cristalwater-backend@22.6.7 test:field-browser\n2026-09-24T17:47:09.6930947Z > node scripts/test-field-browser.js && node scripts/test-field-session-browser.js && node scripts/test-field-push-session-browser.js && node scripts/test-field-map-browser.js && node scripts/test-client-notifications-browser.js && node scripts/test-commercial-quotes-browser.js && node scripts/test-client-rates-browser.js && node scripts/test-language-browser.js && node scripts/test-data-protection-browser.js && node scripts/test-auth-entry-browser.js && node scripts/test-account-notification-settings-browser.js && node scripts/test-role-help-browser.js && node scripts/test-shared-navigation-browser.js && node scripts/test-notification-sound-browser.js && node scripts/test-client-quotes-browser.js && node scripts/test-equipment-admin-browser.js && node scripts/test-field-equipment-browser.js && node scripts/test-equipment-reminders-browser.js && node scripts/test-inventory-count-browser.js && node scripts/test-inventory-writes-browser.js && node scripts/test-field-briefing-browser.js\n2026-09-24T17:47:09.6935629Z \n2026-09-24T17:47:11.7654837Z PASS responsive mobile field screen and explicit check-in\n2026-09-24T17:47:11.8848772Z PASS offline acknowledgement remains pending\n2026-09-24T17:47:17.2628804Z page.waitForFunction: Timeout 5000ms exceeded.\n2026-09-24T17:47:17.2629534Z     at /home/runner/work/cristalwater/cristalwater/scripts/test-field-browser.js:71:16 {\n2026-09-24T17:47:17.2629996Z   log: [],\n2026-09-24T17:47:17.2630216Z   name: 'TimeoutError'\n2026-09-24T17:47:17.2630443Z }\n2026-09-24T17:47:17.2885259Z ##[error]Process completed with exit code 1.\n2026-09-24T17:47:17.2977701Z ##[group]Run actions/upload-artifact@v4",
+  "resolution": "A new sync request made while a pass was active shared that pass but did not schedule another. Deterministic regressions reproduced the missed closure. The fix drains a subsequent pass before resolving callers, serially."
+}

@@ -22,3 +22,13 @@ A interface mostra a quantidade restante e o stock de origem. Rascunhos antigos 
 - Os ensaios de API/navegador e migração deste lote ainda não foram executados nesta retoma: não há PostgreSQL local disponível. Devem passar no CI antes de declarar a TASK326 aprovada. Nenhuma migração foi aplicada a produção.
 
 O lote mantém 228 grupos no runner, ampliando grupos existentes. Cache v141, 40 migrações, sem novas tabelas ou dependências. O CI e o restauro das TASK323–325 também ainda aguardavam fecho confirmado na última consulta.
+
+## Falha inicial e correção da sincronização de campo
+
+O CI do commit `47261ccf12e577ce6181bda193135d9786d5d9c3` passou a migração, a sintaxe, os 543 unitários e os quatro testes técnicos. Falhou no teste geral de navegador anterior aos integrados, a aguardar a sincronização de um fecho de água offline; o restauro ficou por executar. [Evidência inicial](evidence/20260924_task326_initial_failure.json).
+
+O problema foi reproduzido de forma determinística: a passagem atual já tinha percorrido os avisos de água quando foi pedido o fecho. `sync()` devolvia a promessa dessa passagem e não garantia a execução do novo pedido. A correção conserva a serialização e faz outra passagem antes de resolver os pedidos concorrentes. Três testes cobrem fecho durante sincronização, vários chamadores sem duplicação e mudança de conta com preservação do fecho local. O teste de navegador original mantém-se inalterado. Cache v142.
+
+A execução da migração está confirmada no CI inicial; a correção ainda precisa do CI completo, dos percursos de devolução e do restauro antes da aprovação.
+
+A correção passou localmente a sintaxe, 546 testes unitários em 77 ficheiros e quatro testes técnicos.

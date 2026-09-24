@@ -99,7 +99,7 @@
       rows[`${kind}:${localId}`]={...old,owner:captured.owner,kind,localId,serverId:remote.id,visitId:meta.visitId,visitType:meta.visitType||'REGULAR',poolId:remote.poolId,clientId:remote.clientId,technicianId:remote.assignedToTechnicianId,technicianName:meta.technicianName,poolName:meta.poolName,clientName:meta.clientName,flowState:meta.flowState,note:remote.description||'',openedAt:meta.openedAt,createdAt:meta.openedAt||remote.createdAt,dueAt:remote.dueDate,status,closed:status==='CLOSED',syncError:remote.isCompleted?'':old?.syncError||'',...(remote.isCompleted?{closeSyncedAt:new Date().toISOString()}:{}),...(meta.alarmedAt?{alarmedAt:meta.alarmedAt}:{})};
     });
   }
-  let syncing=false, currentSync=null;
+  let syncing=false, currentSync=null, syncRequested=false;
   async function flush() {
     if (syncing || !navigator.onLine || !captured) return;
     session(); syncing=true;
@@ -140,7 +140,12 @@
     } finally { syncing=false; }
   }
   function sync() {
-    if (!currentSync) currentSync=flush().finally(()=>{currentSync=null;});
+    syncRequested=true;
+    // A request can arrive after this pass already visited its reminder kind.
+    // Drain one further pass before resolving all callers; never run in parallel.
+    if (!currentSync) currentSync=(async()=>{
+      do { syncRequested=false; await flush(); } while (syncRequested);
+    })().finally(()=>{currentSync=null;});
     return currentSync;
   }
   window.CWFieldReminders={create,mark,list,sync,legacyWarning,context};

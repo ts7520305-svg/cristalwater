@@ -37,3 +37,7 @@ A página abre pela revisão comercial de equipamentos e mostra o original, a de
 ## Continuação
 
 Integrar a origem administrativa verificada nas declarações históricas de recursos, conservando a ausência do comprovativo técnico original e revendo explicitamente os custos quando a origem ou os recursos mudam. Mantêm-se os restantes critérios da matriz, incluindo cobertura financeira integral, operação prolongada e dependências de produção.
+
+## Fecho no CI
+
+O commit `f78e3a9dfb45dcda2ff3567232488ec1ca9f6a31` passou as 17 etapas, os 226 grupos distintos e o restauro de 127 tabelas/46 ficheiros com dados e hashes iguais. [Evidência](evidence/20260924_task323_ci.json). A aprovação refere-se ao código dessa versão.
