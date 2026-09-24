@@ -3,8 +3,9 @@
   const commands = ['SHARE_MAINTENANCE_LABOR','VOID_MAINTENANCE_LABOR_SHARE'], basis = 'CONFIRMED_PARENT_COST_TIME_SHARE';
   const fields = ['id','expenseId','monthRef','amountCents','targetType','clientId','visitId','extraVisitId','repairId','maintenanceCompletionId','serviceReminderId','targetHash','targetSnapshot','expenseHash','expenseSnapshot','activeKey','reason','createdById','createdAt','reviewedAt','voidedAt','voidReason','valuationType','valuationKey','valuationHash','valuationSnapshot','quantity','quantityUnit','purchaseItemId','activeMeasurementKey'];
   const positive = n => Number.isSafeInteger(n) && n > 0, count = n => Number.isSafeInteger(n) && n >= 0, iso = s => typeof s === 'string' && Number.isFinite(Date.parse(s)) && new Date(s).toISOString() === s;
-  const workIntervals=w=>w?.schema===2?w.intervals:[{startAt:w?.startAt,endAt:w?.endAt}];
+  const workIntervals=w=>Array.isArray(w?.intervals)?w.intervals:[{startAt:w?.startAt,endAt:w?.endAt}];
   function soundTime(w){
+    if(w?.schema===3){const {originReviewHash,...base}=w;return /^[a-f0-9]{64}$/.test(originReviewHash)&&soundTime({...base,schema:Array.isArray(base.intervals)?2:1});}
     if(w?.schema===1)return w.basis==='DECLARED_EQUIPMENT_WORK_INTERVAL'&&iso(w.startAt)&&iso(w.endAt)&&w.durationMs===Date.parse(w.endAt)-Date.parse(w.startAt)&&positive(w.durationMs);
     return w?.schema===2&&w.basis==='DECLARED_EQUIPMENT_WORK_INTERVALS'&&Object.keys(w).length===5&&Array.isArray(w.intervals)&&w.intervals.length>0&&w.intervals.length<=20&&w.intervals.every((t,i,a)=>t&&Object.keys(t).length===3&&iso(t.startAt)&&iso(t.endAt)&&positive(t.durationMs)&&t.durationMs===Date.parse(t.endAt)-Date.parse(t.startAt)&&(!i||Date.parse(t.startAt)>=Date.parse(a[i-1].endAt)))&&positive(w.durationMs)&&w.durationMs===w.intervals.reduce((n,t)=>n+t.durationMs,0);
   }
@@ -32,7 +33,8 @@
         return p;
       }
       const { available, hash: signature, ...value } = p || {}, a = p?.allocationBefore, w = p?.workTime, t = p?.target, u = p?.used;
-      window.CWMaintenanceMaterialRules.verifyPeriod(p, p?.workTimeRevision!==undefined?5:w?.schema===2?4:1);
+      window.CWMaintenanceMaterialRules.verifyPeriod(p, w?.schema===3?8:p?.workTimeRevision!==undefined?5:w?.schema===2?4:1);
+      if(w?.schema===3&&!p.workTimeRevision)throw Error('A origem histórica e a declaração dos tempos precisam de revisão.');
       if (available !== true || p.basis !== basis || p.expenseId !== expenseId || version !== null && p.expenseVersion !== version || !positive(p.expenseVersion) || !positive(p.allocationId) || !positive(p.completionId) || !a || a.id !== p.allocationId || a.expenseId !== expenseId || a.valuationType !== 'LABOR' || !['REGULAR','EXTRA'].includes(a.targetType) || a.quantityUnit !== 'SECOND' || a.voidedAt !== null || !positive(a.amountCents) || !positive(p.parentDurationMs) || !positive(p.amountCents) || !count(p.remainingAmountCents) || !count(p.remainingDurationMs) || !count(u?.durationMs) || !count(u.amountCents) || !Array.isArray(u.shares) || !soundTime(w) || !iso(a.targetSnapshot?.startAt) || !iso(a.targetSnapshot.endAt) || workIntervals(w).some(t=>t.startAt<a.targetSnapshot.startAt||t.endAt>a.targetSnapshot.endAt) || t?.type !== 'MAINTENANCE_EQUIPMENT' || t.id !== p.completionId || t.clientId !== a.clientId) throw Error('Repartição do trabalho não confirmada.');
       const parentId = a.targetType === 'REGULAR' ? a.visitId : a.extraVisitId;
       if (!positive(parentId) || w.origin?.visitType !== a.targetType || w.origin.visitId !== parentId || w.origin.clientId !== a.clientId || w.origin.poolId !== t.snapshot.poolId || !positive(w.origin.technicianId) || w.origin.technicianId!==a.valuationSnapshot?.source?.service?.technicianId || t.snapshot.originVisitType !== a.targetType || t.snapshot.originVisitId !== parentId || u.durationMs + w.durationMs > p.parentDurationMs) throw Error('A manutenção não corresponde à visita e ao tempo selecionados.');
@@ -49,11 +51,12 @@
       node(facts, 'p', 'Origem: ' + p.allocationBefore.targetSnapshot.label + ' · Despesa #' + p.expenseId + ' · Atribuição #' + p.allocationId);
       node(facts, 'p', 'Tempo deste serviço: ' + (p.workTime.durationMs / 1000) + ' s · Tempo valorizado da visita: ' + (p.parentDurationMs / 1000) + ' s · ' + p.monthRef + ' (UTC)');
       if (p.period) node(facts, 'p', 'Mês da visita: '+p.period.parentMonthRef+' · Mês da manutenção: '+p.monthRef+' (UTC). '+(removing?'A anulação retira a parcela do mês da manutenção e devolve-a ao mês da visita.':'O remanescente fica no mês da visita; esta parcela passa para o mês da manutenção.'));
-      if (p.workTime.schema === 2) {
+      if (Array.isArray(p.workTime.intervals)) {
         for (const [i,w] of p.workTime.intervals.entries()) node(facts, 'p', 'Intervalo '+(i+1)+': '+w.startAt+' → '+w.endAt+' · '+(w.durationMs/1000)+' s (UTC)');
         node(facts, 'p', 'As pausas entre intervalos ficam excluídas da duração e do custo.');
       }
       if(p.workTimeRevision)node(facts,'p','Tempos corrigidos pela administração: '+p.workTimeRevision.revision.owner+' · '+new Date(p.workTimeRevision.revision.createdAt).toLocaleString('pt-PT')+' · '+p.workTimeRevision.revision.reason);
+      if(p.workTime.schema===3){const h=p.workTimeRevision.revision.preview.originReview.revision;node(facts,'p','Tempos históricos com origem revista por '+h.owner+' em '+new Date(h.createdAt).toLocaleString('pt-PT')+'.');node(facts,'p','Evidência histórica: '+h.preview.proposed.record.evidence);node(facts,'p','O recibo técnico original está indisponível. Esta parcela usa a declaração administrativa e o custo confirmado da visita.');}
       node(facts, 'p', 'Custo original: ' + money(p.allocationBefore.amountCents) + ' · Já repartido: ' + money(p.used.amountCents));
       node(facts, 'strong', (removing ? 'Valor a devolver à visita: ' : 'Parcela para esta manutenção: ') + money(p.amountCents));
       if (!removing) node(facts, 'p', 'Fica na visita: ' + money(p.remainingAmountCents));

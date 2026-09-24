@@ -27,7 +27,8 @@ async function validPreview(p) {
   try {
     const { available, hash, ...value } = p, a = p.allocationBefore, w = p.workTime, t = p.target;
     const calc = calculation(a.amountCents, p.parentDurationMs, p.used, w.durationMs);
-    periods.verifyPeriod(p, p.workTimeRevision!==undefined?5:w?.schema===2?4:1);
+    periods.verifyPeriod(p, w?.schema===3?8:p.workTimeRevision!==undefined?5:w?.schema===2?4:1);
+    if(w?.schema===3&&!p.workTimeRevision)return false;
     if(p.workTimeRevision!==undefined)await time.journal.rules.share(p,r.hash);
     return available === true && p.basis === basis && sha(hash) && r.hash(value) === hash && positive(p.expenseId) && positive(p.expenseVersion) && positive(p.allocationId) && p.allocationId === a.id && a.expenseId === p.expenseId && a.valuationType === 'LABOR' && ['REGULAR','EXTRA'].includes(a.targetType) && a.quantityUnit === 'SECOND' && a.voidedAt === null && duration(a) === p.parentDurationMs && r.hash(a) === p.allocationHash && positive(a.clientId) && positive(parentId(a)) && iso(a.targetSnapshot?.endAt) &&
       p.reminderId === undefined && t.type === 'MAINTENANCE_EQUIPMENT' && t.id === p.completionId && positive(t.id) && t.valid === true && t.clientId === a.clientId && t.snapshot?.originVisitType === a.targetType && t.snapshot.originVisitId === parentId(a) && iso(t.snapshot.endAt) && r.hash(Object.fromEntries(targets.executionFields(t.type).map(k => [k, t.snapshot[k]]))) === t.hash &&
@@ -138,7 +139,7 @@ async function preview(db, expense, allocationId, completionId, lock = false, re
   const w = times.get(completionId);
   if (!target?.valid || target.clientId !== a.clientId || target.snapshot.originVisitType !== a.targetType || target.snapshot.originVisitId !== parentId(a)) return refused('MAINTENANCE_SOURCE_REVIEW', 'A manutenção tem de pertencer a esta visita e cliente, com execução e decisão confirmadas.');
   if (w?.state !== 'RECORDED') return refused('MAINTENANCE_TIME_REQUIRED', 'Registe e confirme o tempo próprio desta revisão antes de repartir o custo.');
-  let period; try { period = periods.sharePeriod(a, target, w.revision?5:w.record.schema===2?4:1); } catch (error) { return refused('MAINTENANCE_PERIOD_REVIEW', error.message); }
+  let period; try { period = periods.sharePeriod(a, target, w.record.schema===3?8:w.revision?5:w.record.schema===2?4:1); } catch (error) { return refused('MAINTENANCE_PERIOD_REVIEW', error.message); }
   if (live(a.maintenanceShares).some(s => s.share.completionId === completionId)) return refused('MAINTENANCE_ALREADY_SHARED', 'Esta manutenção já tem uma parcela ativa deste custo. Anule-a antes de corrigir.');
   const used = budget(a.maintenanceShares), parentDurationMs = duration(a), calc = calculation(a.amountCents, parentDurationMs, used, w.record.durationMs);
   if (!calc) return refused('MAINTENANCE_SHARE_BUDGET', 'O intervalo não permite atribuir um custo positivo em cêntimos dentro do tempo e valor restantes da visita.');

@@ -70,3 +70,30 @@ describe('historical equipment material dependency proofs',()=>{
     const c=vm.createContext({crypto:webcrypto,TextEncoder});for(const name of ['cw-maintenance-material-rules','cw-equipment-material-review-rules','cw-equipment-history-rules'])vm.runInContext(fs.readFileSync(new URL('../frontend/'+name+'.js',import.meta.url),'utf8'),c);const p=materialFixture();expect(clone(await c.CWEquipmentMaterialReviewRules.preview(p,r.hash))).toEqual(p);
   });
 });
+
+const timeReview=require('../frontend/cw-equipment-time-review-rules'),timeSource=require('../src/services/equipmentWorkTimeService');
+function historicalTimeFixture(multiple=true){
+  const f=fixture(),originReview={revision:f.response.revision,hash:f.response.revisionHash},visit={id:3,clientId:7,poolId:6,technicianId:4,startAt:new Date(f.p.parent.startAt)},one={startAt:f.p.parent.startAt,endAt:'2009-04-02T11:00:00.001Z'},record=timeSource.create(multiple?{intervals:[one,{startAt:'2009-04-02T11:00:00.003Z',endAt:'2009-04-02T11:00:00.005Z'}]}:one,visit,'REGULAR',originReview.hash);
+  const value={schema:2,basis:timeReview.basis,completionId:1,origin:f.p.origin,original:f.p.original,baseHash:f.p.baseHash,originReview,previous:{headHash:null,action:'ORIGINAL',record:null},proposed:{action:'REPLACE',record},targetHash:f.p.targetHash,sourceHash:'c'.repeat(64),beforeState:'MISSING',afterState:'RECORDED',afterReasons:[],affectedShares:[]};return {...value,available:true,hash:r.hash(value)};
+}
+const timeHash=p=>({...p,hash:r.hash(timeReview.facts(p))});
+describe('historical equipment own work proof',()=>{
+  it('conserves single/multiple input shapes and positive milliseconds with a separate origin proof',async()=>{
+    for(const multi of [true,false]){const p=historicalTimeFixture(multi),w=p.proposed.record;expect(await timeReview.preview(p,r.hash)).toBe(p);expect(timeSource.sound(w)).toBe(true);expect(w.schema).toBe(3);expect(w.durationMs).toBe(multi?3:1);expect(Object.hasOwn(timeReview.asInput(w),'intervals')).toBe(multi);expect(p.original.record).toBe(null);}
+  });
+  it('refuses missing or substituted origin proofs and time outside the original completion',async()=>{
+    for(const change of [p=>delete p.originReview,p=>p.schema=1,p=>p.proposed.record.originReviewHash='a'.repeat(64),p=>p.proposed.record.origin.technicianId=99,p=>p.targetHash='e'.repeat(64),p=>p.proposed.record.intervals[0].durationMs=2,p=>p.proposed.record.durationMs=4,p=>p.proposed.record.intervals[1].endAt='2009-04-03T11:00:00.005Z']){const p=historicalTimeFixture();change(p);await expect(timeReview.preview(timeHash(p),r.hash)).rejects.toThrow();}
+  });
+  it('allows a proved withdrawal after a technician change without manufacturing a zero-time record',async()=>{
+    const p=historicalTimeFixture();p.previous={headHash:'d'.repeat(64),action:'REPLACE',record:p.proposed.record};p.proposed={action:'WITHDRAW',record:null};p.origin={...p.origin,technicianId:99};p.beforeState='REVIEW';p.afterState='WITHDRAWN';expect(await timeReview.preview(timeHash(p),r.hash)).toBeTruthy();p.previous.record.originReviewHash='f'.repeat(64);await expect(timeReview.preview(timeHash(p),r.hash)).rejects.toThrow();
+  });
+  it('binds the financial proof to both the time declaration and its commercial target',async()=>{
+    const p=historicalTimeFixture(),e={schema:1,id:requestId,owner:'ADMIN:5',completionId:1,reason:'Conferência dos intervalos históricos',createdAt:later,preview:p},value={completionId:1,workTime:p.proposed.record,workTimeRevision:{revision:e,hash:r.hash(e)},target:{hash:p.targetHash}};expect(await timeReview.share(value,r.hash)).toBe(value);await expect(timeReview.share({...value,target:{hash:'f'.repeat(64)}},r.hash)).rejects.toThrow();e.createdAt=at;value.workTimeRevision.hash=r.hash(e);await expect(timeReview.share(value,r.hash)).rejects.toThrow();
+  });
+  it('reserves historical times conservatively when their origin is no longer current',()=>{
+    const p=historicalTimeFixture(),row={id:1,result:{}},state={valid:true,headHash:'a'.repeat(64),action:'REPLACE',record:p.proposed.record,history:[{revision:{preview:p}}],originReview:p.originReview,originReviewValid:false,originOriginalValid:true};const view=timeSource.effective(row,{proofs:new Map(),revisions:new Map([[1,state]])});expect(view.valid).toBe(false);expect(view.had).toBe(true);expect(view.record.durationMs).toBe(3);state.originReviewValid=true;expect(timeSource.effective(row,{proofs:new Map(),revisions:new Map([[1,state]])}).valid).toBe(true);
+  });
+  it('uses the same historical time verifier in browser and Node',async()=>{
+    const c=vm.createContext({crypto:webcrypto,TextEncoder});for(const name of ['cw-maintenance-material-rules','cw-equipment-material-review-rules','cw-equipment-history-rules','cw-equipment-time-review-rules'])vm.runInContext(fs.readFileSync(new URL('../frontend/'+name+'.js',import.meta.url),'utf8'),c);const p=historicalTimeFixture();expect(clone(await c.CWEquipmentTimeReviewRules.preview(p,r.hash))).toEqual(p);
+  });
+});

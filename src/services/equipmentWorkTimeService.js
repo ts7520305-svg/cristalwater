@@ -20,8 +20,9 @@ function parse(value) {
 function origin(visit, visitType) {
   return { visitType, visitId: visit.id, poolId: visit.poolId, clientId: visit.clientId, technicianId: visit.technicianId, visitStartAt: visit.startAt?.toISOString() || null };
 }
-function create(input, visit, visitType) {
-  return input.intervals ? {schema:2,basis:multipleBasis,intervals:input.intervals.map(w=>({...w,durationMs:Date.parse(w.endAt)-Date.parse(w.startAt)})),durationMs:duration(input),origin:origin(visit,visitType)} : { schema: 1, basis, ...input, durationMs: Date.parse(input.endAt) - Date.parse(input.startAt), origin: origin(visit, visitType) };
+function create(input, visit, visitType, originReviewHash = null) {
+  const record = input.intervals ? {schema:2,basis:multipleBasis,intervals:input.intervals.map(w=>({...w,durationMs:Date.parse(w.endAt)-Date.parse(w.startAt)})),durationMs:duration(input),origin:origin(visit,visitType)} : { schema: 1, basis, ...input, durationMs: Date.parse(input.endAt) - Date.parse(input.startAt), origin: origin(visit, visitType) };
+  return originReviewHash ? {...record,schema:3,originReviewHash} : record;
 }
 function time(row) { return row.result?.completion?.workTime; }
 const selection = { id: true, requestId: true, planId: true, fingerprint: true, completedAt: true, result: true };
@@ -36,6 +37,7 @@ function intact(row, proofs) {
 const hadTime = (row, proofs) => time(row) || proofs.get(row.requestId + ':' + row.id)?.response?.completion?.workTime;
 function sound(record) {
   if(!record||!positive(record.origin?.technicianId))return false;
+  if(record.schema===3){const {originReviewHash,...base}=record;return /^[a-f0-9]{64}$/.test(originReviewHash)&&sound({...base,schema:Array.isArray(base.intervals)?2:1});}
   if(record.schema===1)return record.basis===basis&&single({startAt:record.startAt,endAt:record.endAt})&&record.durationMs===duration(record);
   return record.schema===2&&record.basis===multipleBasis&&Object.keys(record).length===5&&Array.isArray(record.intervals)&&valid({intervals:record.intervals.map(w=>({startAt:w?.startAt,endAt:w?.endAt}))})&&record.intervals.every(w=>Object.keys(w).length===3&&w.durationMs===Date.parse(w.endAt)-Date.parse(w.startAt))&&positive(record.durationMs)&&record.durationMs===duration(record);
 }
@@ -47,10 +49,10 @@ async function conflict(db, input, visit, visitType) {
   return (await recorded.conflicts(db, intervals(input).map(w=>({type:visitType,id:visit.id,technicianId:visit.technicianId,startAt:new Date(w.startAt),endAt:new Date(w.endAt)})))).size > 0;
 }
 async function readState(db,rows){
-  const proofs=await receipts(db,rows),revisions=await journal.read(db,rows,[...proofs.values()]);return {proofs,revisions};
+  const proofs=await receipts(db,rows),revisions=await require('./equipmentHistoricalResourceSource').qualify(db,await journal.read(db,rows,[...proofs.values()]));return {proofs,revisions};
 }
 function effective(row,{proofs,revisions}){
-  const state=revisions.get(row.id),changed=!!state?.headHash,record=changed?state.record:time(row),valid=!!state?.valid&&intact(row,proofs);
+  const state=revisions.get(row.id),changed=!!state?.headHash,record=changed?state.record:time(row),historical=state?.history.at(-1)?.revision.preview.schema===2,valid=!!state?.valid&&(historical ? state.action==='WITHDRAW' ? state.originOriginalValid===true : state.originReviewValid===true&&record?.schema===3&&record.originReviewHash===state.originReview?.hash : intact(row,proofs));
   return {record,valid,had:!state?.valid||changed&&state.action!=='WITHDRAW'||!changed&&!!hadTime(row,proofs),withdrawn:changed&&state.action==='WITHDRAW',revision:changed?{headHash:state.headHash,action:state.action,proof:state.history.at(-1)}:null};
 }
 async function check(db,input,visit,visitType,completedAt,excludeId=null){
