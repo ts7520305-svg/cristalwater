@@ -41,7 +41,11 @@ O grupo `test-field-reminder-labor.js` executa duas APIs sobre a base isolada e 
 
 No navegador, passou seleção de horas independentes, rascunho sem consentimento, origem/técnico/duração/cêntimos adulterados, resposta atrasada após mudar e repor o tipo de serviço, bloqueio offline, duplo clique, resposta perdida, recuperação sem novo POST e reenvio idêntico. A anulação apresenta os custos afetados e o custo fica por rever até à anulação financeira. A composição mista passa revisão da fórmula, resposta perdida e consulta do comprovativo, revisão após anular as horas e anulação conjunta. Mudança de conta limpa a informação. Layout a 320/390/1440 px sem transbordo, com capturas claro/escuro revistas em `reports/field-visual/reminder-labor/`.
 
-Regressões dirigidas: recursos dos lembretes, custo/intervalos de reparações, parcelas e composições de trabalho e repartição LABOR das manutenções, incluindo percursos de navegador. O runner passa a 216 grupos. A validação local usa PostgreSQL embebido; o CI completo com PostgreSQL 16 e restauro da árvore publicada ainda tem de ser confirmado antes do fecho.
+Regressões dirigidas: recursos dos lembretes, custo/intervalos de reparações, parcelas e composições de trabalho e repartição LABOR das manutenções, incluindo percursos de navegador. O runner passa a 216 grupos. A validação local usa PostgreSQL embebido. O CI completo com PostgreSQL 16 e restauro da árvore publicada foi aprovado.
+
+## Aprovação nativa e restauro
+
+Código publicado `1f9c13657f258cc92194baccea106dc58fcc3a77`, árvore `8fa7fdb714a66e7be45a17a8f3600b6b762b8fc5`, igual à validada localmente. [CI 35977334441](https://github.com/ts7520305-svg/cristalwater/actions/runs/35977334441), job `107560800871`, aprovado entre 2026-09-24T08:47:41Z e 2026-09-24T09:16:36Z (28m55s): 17 etapas, 216/216 grupos previstos distintos, sem falhas, faltas, entradas inesperadas ou duplicações; 466 unitários/70 ficheiros, quatro testes técnicos, gate geral de navegador, sintaxe 610/209/62 e 37 migrações. Restauro PostgreSQL 16 de 127 tabelas/46 ficheiros, com linhas e hashes iguais. Evidência [evidence/20260924_task313_ci.json](evidence/20260924_task313_ci.json). Cache v128, uma migração nova, sem tabelas/dependências novas. O fecho posterior altera apenas documentação; a aprovação refere-se ao código e árvore acima.
 
 ## Continuação e limites
 
