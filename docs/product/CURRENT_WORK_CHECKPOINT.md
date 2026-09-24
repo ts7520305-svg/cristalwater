@@ -1,10 +1,10 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 24/09/2026, TASK316 em validação
+## Retoma atual — 24/09/2026, TASK316 aprovada
 
-- Base `de87855877492ce56699b261007feb0cea8184e0`, fecho TASK315. Implementadas as parcelas próprias de materiais e trabalho de lembretes associados a visitas REGULAR/EXTRA, com limites comuns com equipamentos, comprovativos recuperáveis e anulação explícita. [REMINDER_VISIT_RESOURCES_20260924.md](REMINDER_VISIT_RESOURCES_20260924.md).
-- 484 testes unitários/72 ficheiros, quatro testes técnicos e sintaxe 615/214/62 aprovados. Novo grupo API/navegador e nove regressões dirigidas aprovados localmente; validação nativa e restauro pendentes. Cache v131; 219 grupos, 38 migrações existentes. Não apresentar esta alteração como aprovada no CI antes da execução do commit final.
-- Publicar apenas na branch de trabalho, sem forçar a referência. Confirmar que a base remota não mudou e que a árvore publicada coincide com a testada. Guardar o resultado do CI/restauro neste relatório e checkpoint.
+- Base `de87855877492ce56699b261007feb0cea8184e0`, fecho TASK315. TASK316 aprovada: parcelas próprias de materiais e trabalho de lembretes associados a visitas REGULAR/EXTRA, limites comuns com equipamentos, comprovativos recuperáveis e anulação explícita. [REMINDER_VISIT_RESOURCES_20260924.md](REMINDER_VISIT_RESOURCES_20260924.md).
+- Código publicado `c40219b8a5f7572d85ea82352fd9ed2eda27b6e5`, árvore `dba564ada3bc1be52784204e2942cf7ded578d4b`, igual à validada localmente. [CI 36001740454](https://github.com/ts7520305-svg/cristalwater/actions/runs/36001740454), job `107639801788`, aprovado entre 2026-09-24T12:51:27Z e 2026-09-24T13:21:49Z (30m22s): 17 etapas, 219/219 grupos previstos distintos, sem falhas, faltas, entradas inesperadas ou duplicações; 484 unitários/72 ficheiros, quatro testes técnicos, gate geral de navegador, sintaxe 615/214/62 e 38 migrações. Restauro PostgreSQL 16 de 127 tabelas/46 ficheiros, com linhas e hashes iguais. Evidência [evidence/20260924_task316_ci.json](evidence/20260924_task316_ci.json). Cache v131, sem novas migrações/tabelas/dependências. O fecho posterior altera apenas documentação; a aprovação refere-se ao código e árvore acima.
+- Prosseguir TASK317, repartição dos custos confirmados da visita pelos recursos próprios dos lembretes. A preparação local da tarefa seguinte ainda não representa aprovação ou publicação.
 
 ## Aprovação anterior — TASK315
 
@@ -48,7 +48,7 @@
 
 ## Próxima ação
 
-1. Fechar a validação/publicação da TASK316 acima. Depois prosseguir TASK317: repartir custos confirmados do pai pelas parcelas próprias dos lembretes associados, preservando limites comuns e os originais. Não repetir TASK300–316. Múltiplos intervalos separados, repartições entre meses e correção de registos antigos sem recibo verificável continuam abertos.
+1. Prosseguir TASK317: repartir custos confirmados do pai pelas parcelas próprias dos lembretes associados, preservando limites comuns e os originais. Não repetir TASK300–316. Múltiplos intervalos separados, repartições entre meses e correção de registos antigos sem recibo verificável continuam abertos.
 2. Continuar restantes gastos/ajustes/origens de receita e os pontos da [matriz atual](COMPLETENESS_CURRENT_20260915.md): históricos/ecrãs/PDFs/idiomas, volume e operação prolongada, VPS/fornecedores e piloto físico. Custos/receitas completos e lucro por apurar; não atribuir percentagem global sem critérios fechados. IA generativa offline/aprendizagem por piscina/vídeo e integrações completas continuam requisitos separados sem aprovação integral.
 
 ## Autorizações e regras vigentes

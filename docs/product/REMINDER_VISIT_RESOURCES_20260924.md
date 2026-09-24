@@ -42,9 +42,11 @@ Base remota `de87855877492ce56699b261007feb0cea8184e0`, fecho da TASK315. A recu
 - Grupo novo: `scripts/test-field-reminder-visit-resources.js`. API com duas instâncias, materiais fracionários/devoluções, limites com equipamentos reais, concorrência por quantidade e horário, origem REGULAR/EXTRA com o mesmo ID, revisão de custo existente sem alteração do original, pedido desatualizado, sobreposição externa, corrupção de comprovativo, remoção de origem e rollback de três escritas.
 - Navegador: rascunho, técnico fixo, prévia das quantidades, offline, duplo clique, resposta perdida e consulta sem duplicação, anulação e isolamento de sessão. Capturas 320/390/1440 e modo escuro em `reports/field-visual/reminder-visit-resources/`.
 - Nove regressões dirigidas aprovadas: associações, recursos, materiais e trabalho dos lembretes; materiais de equipamento, correções, tempos, repartição MATERIAL e repartição LABOR.
-- Runner com 219 grupos. A aprovação final PostgreSQL 16 e restauro deve ser registada para o commit publicado, sem reutilizar a aprovação da TASK315.
+- 219/219 grupos aprovados no PostgreSQL 16, incluindo o grupo novo de API/navegador (8,582 s), e restauro completo aprovado.
 
-Os ensaios locais usam base descartável e fornecedores externos desligados. Publicação e resultado do CI: pendentes nesta versão documental; confirmar antes de fechar a tarefa.
+Os ensaios usam base descartável e fornecedores externos desligados.
+
+Código publicado `c40219b8a5f7572d85ea82352fd9ed2eda27b6e5`, árvore `dba564ada3bc1be52784204e2942cf7ded578d4b`, igual à validada localmente. [CI 36001740454](https://github.com/ts7520305-svg/cristalwater/actions/runs/36001740454), job `107639801788`, aprovado entre 2026-09-24T12:51:27Z e 2026-09-24T13:21:49Z (30m22s): 17 etapas, 219/219 grupos previstos distintos, sem falhas, faltas, entradas inesperadas ou duplicações; 484 unitários/72 ficheiros, quatro testes técnicos, gate geral de navegador, sintaxe 615/214/62 e 38 migrações. Restauro PostgreSQL 16 de 127 tabelas/46 ficheiros, com linhas e hashes iguais. Evidência [evidence/20260924_task316_ci.json](evidence/20260924_task316_ci.json). Cache v131, sem novas migrações/tabelas/dependências. O fecho posterior altera apenas documentação; a aprovação refere-se ao código e árvore acima.
 
 ## Continuação
 
