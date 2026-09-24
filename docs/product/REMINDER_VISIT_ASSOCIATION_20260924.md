@@ -50,7 +50,9 @@ O grupo `test-field-reminder-visits.js` verifica permissões, identificadores li
 
 O navegador Chromium verifica seleção explícita e rascunho, prévia adulterada com hashes recalculados, origem alterada desde a lista, offline, duplo clique, resposta perdida, recuperação por consulta e reenvio, invalidação de resposta atrasada, bloqueio no ecrã de recursos, anulação e isolamento entre contas. Capturas claro/escuro e layouts 320/390/1440 px são revistos em `reports/field-visual/reminder-visits/`.
 
-Passaram as seis regressões dirigidas: recursos, materiais e valorização do trabalho dos lembretes; atribuição de custos a manutenções, respetivo navegador e correção do mês. O grupo novo passou também após os ajustes finais da pesquisa e da confirmação da anulação. O runner passa a 218 grupos. Confirmar o CI completo com PostgreSQL 16/restauro da árvore publicada antes do fecho.
+Passaram as seis regressões dirigidas: recursos, materiais e valorização do trabalho dos lembretes; atribuição de custos a manutenções, respetivo navegador e correção do mês. O grupo novo passou também após os ajustes finais da pesquisa e da confirmação da anulação. O runner passa a 218 grupos.
+
+Código publicado `01c6d4be9728d3b2c306c7931a909902d0210c44`, árvore `410dd2a7aa742f91857b245da73eeafe972a3fb1`, igual à validada localmente. [CI 35990442576](https://github.com/ts7520305-svg/cristalwater/actions/runs/35990442576), job `107602993569`, aprovado entre 2026-09-24T10:59:56Z e 2026-09-24T11:26:39Z (26m43s): 17 etapas, 218/218 grupos previstos distintos, sem falhas, faltas, entradas inesperadas ou duplicações; 479 unitários/72 ficheiros, quatro testes técnicos, gate geral de navegador, sintaxe 613/213/62 e 38 migrações. Restauro PostgreSQL 16 de 127 tabelas/46 ficheiros, com linhas e hashes iguais. Evidência [evidence/20260924_task315_ci.json](evidence/20260924_task315_ci.json). Cache v130, sem novas migrações/tabelas/dependências. O fecho posterior altera apenas documentação; a aprovação refere-se ao código e árvore acima.
 
 ## Continuação e limites
 

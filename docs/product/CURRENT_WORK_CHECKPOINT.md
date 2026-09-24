@@ -2,7 +2,8 @@
 
 ## Retoma atual — 24/09/2026, TASK315
 
-- TASK315 implementada e validada localmente: associação explícita de lembretes a visitas REGULAR/EXTRA, cliente/piscina/técnico históricos, seleção paginada, bloqueio de recursos e custos próprios, concorrência entre associação/declaração/atribuição, original conservado e anulação recuperável. [REMINDER_VISIT_ASSOCIATION_20260924.md](REMINDER_VISIT_ASSOCIATION_20260924.md). Base `4ac49251b106dc9cbd06d2d72e5d2e80edac8c3a`, fecho TASK314. Passaram 479 unitários/72 ficheiros, sintaxe 613/213/62, novo grupo API/navegador e seis regressões dirigidas. Runner 218 grupos, cache v130, sem novas migrações/tabelas/dependências; permanecem 38 migrações. Publicar e confirmar CI/restauro desta árvore antes do fecho.
+- TASK315 aprovada no CI completo e restauro: associação explícita de lembretes a visitas REGULAR/EXTRA, origem histórica, seleção paginada, bloqueio de recursos e custos independentes, concorrência entre associação/declaração/atribuição, original conservado e anulação recuperável. [REMINDER_VISIT_ASSOCIATION_20260924.md](REMINDER_VISIT_ASSOCIATION_20260924.md). Base `4ac49251b106dc9cbd06d2d72e5d2e80edac8c3a`, fecho TASK314.
+- Código publicado `01c6d4be9728d3b2c306c7931a909902d0210c44`, árvore `410dd2a7aa742f91857b245da73eeafe972a3fb1`, igual à validada localmente. [CI 35990442576](https://github.com/ts7520305-svg/cristalwater/actions/runs/35990442576), job `107602993569`, aprovado entre 2026-09-24T10:59:56Z e 2026-09-24T11:26:39Z (26m43s): 17 etapas, 218/218 grupos previstos distintos, sem falhas, faltas, entradas inesperadas ou duplicações; 479 unitários/72 ficheiros, quatro testes técnicos, gate geral de navegador, sintaxe 613/213/62 e 38 migrações. Restauro PostgreSQL 16 de 127 tabelas/46 ficheiros, com linhas e hashes iguais. Evidência [evidence/20260924_task315_ci.json](evidence/20260924_task315_ci.json). Cache v130, sem novas migrações/tabelas/dependências. O fecho posterior altera apenas documentação; a aprovação refere-se ao código e árvore acima.
 
 ## Aprovação anterior — TASK314
 
@@ -41,7 +42,7 @@
 
 ## Próxima ação
 
-1. Publicar, confirmar CI/restauro e fechar TASK315. Prosseguir TASK316: declaração das parcelas próprias de materiais e trabalho de lembretes associados, com conferência contra a execução da visita e limites comuns entre os serviços associados, antes de repartir custos confirmados do pai. Não repetir TASK300–315. Múltiplos intervalos separados, repartições entre meses e correção de registos antigos sem recibo verificável continuam abertos.
+1. Prosseguir TASK316: declaração das parcelas próprias de materiais e trabalho de lembretes associados, com conferência contra a execução da visita e limites comuns entre os serviços associados, antes de repartir custos confirmados do pai. Não repetir TASK300–315. Múltiplos intervalos separados, repartições entre meses e correção de registos antigos sem recibo verificável continuam abertos.
 2. Continuar restantes gastos/ajustes/origens de receita e os pontos da [matriz atual](COMPLETENESS_CURRENT_20260915.md): históricos/ecrãs/PDFs/idiomas, volume e operação prolongada, VPS/fornecedores e piloto físico. Custos/receitas completos e lucro por apurar; não atribuir percentagem global sem critérios fechados. IA generativa offline/aprendizagem por piscina/vídeo e integrações completas continuam requisitos separados sem aprovação integral.
 
 ## Autorizações e regras vigentes
