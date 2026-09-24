@@ -41,6 +41,7 @@ scripts.push('test-field-invoice-issue.js');
 scripts.push('test-field-invoice-delivery.js');
 scripts.push('test-field-invoice-pdf-access.js');
 scripts.push('test-field-financial-document-pdf.js');
+scripts.push('test-field-financial-pdf.js');
 scripts.push('test-field-invoice-document.js');
 scripts.push('test-field-legacy-alert-access.js');
 scripts.push('test-field-invoice-chat.js');

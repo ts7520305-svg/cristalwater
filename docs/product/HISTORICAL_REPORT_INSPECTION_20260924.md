@@ -46,3 +46,7 @@ A confirmação explícita foi acrescentada na [TASK336](HISTORICAL_REPORT_ORIGI
 ## Atualização CI — TASK337
 
 O CI `36045589129` terminou com 229/231 grupos aprovados e restauro omitido. O seletor do editor foi corrigido na TASK335. A visita EXTRA ambígua criada neste ensaio passa a ser explicitamente sem cobrança na TASK337, para não bloquear corretamente a consulta comercial global do ensaio seguinte. Conserva a divergência histórica, os originais e todas as verificações de privacidade. A sequência completa de inspeção histórica e execução de extras passou em API e Chromium. [Evidência inicial](evidence/20260924_task334_initial_failure.json) e [validação TASK337](FINANCIAL_DOCUMENT_PDF_RELIABILITY_20260924.md). Confirmar CI/restauro integrados.
+
+## Continuação — isolamento dos dados na TASK338
+
+Mantém a classificação sem cobrança do cenário histórico da TASK337 e limpa os registos e fotografias exclusivos do ensaio após verificar os invariantes. A sequência completa com execução de extras passou novamente em API/Chromium sobre a base integrada. A prévia global de faturação devolve agora o estado HTTP de erro para origens contraditórias; não altera o bloqueio de dados históricos. [Relatório](FINANCIAL_PDF_RELIABILITY_20260924.md).

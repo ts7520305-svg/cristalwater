@@ -25,6 +25,7 @@ router.get("/monthly", billingController.listMonthly);
 // EXTRAS NÃO FATURADOS
 // ==========================================================
 router.get("/extras", async (req, res) => {
+  res.set('Cache-Control','private, no-store');
   try {
     const extras = await require('../services/extraVisitBillingService').pending(prisma);
 
@@ -47,8 +48,8 @@ router.get("/extras", async (req, res) => {
 
     res.json({ ok:true, data:grouped });
 
-  } catch {
-    res.json({ ok:false });
+  } catch (error) {
+    res.status(error.statusCode||error.status||503).json({ok:false,error:(error.statusCode||error.status)?error.message:'Não foi possível consultar os extras. Tente novamente.'});
   }
 });
 

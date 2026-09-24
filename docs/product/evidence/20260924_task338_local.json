@@ -1,0 +1,106 @@
+{
+  "task": "TASK338",
+  "date": "2026-09-24",
+  "status": "local_approved_native_pending",
+  "baseCommit": "08dfea0711b6236f2896317e4eeebac52fc10f86",
+  "integratedCommits": [
+    "dea120f545d638bd83597bdb5815b41900163029",
+    "08dfea0711b6236f2896317e4eeebac52fc10f86"
+  ],
+  "main": "6f27081e1d183ff584a62255b016b373836734db",
+  "unit": {
+    "files": 81,
+    "passed": 592
+  },
+  "technician": {
+    "passed": 4
+  },
+  "syntax": {
+    "backend": 626,
+    "frontend": 220,
+    "inline": 62
+  },
+  "additiveMigrations": 40,
+  "runtime": "Isolated PGlite PostgreSQL protocol and multiprocess Chromium; providers/background jobs disabled",
+  "integration": {
+    "scripts": [
+      "test-field-financial-document-pdf.js",
+      "test-field-financial-pdf.js",
+      "test-field-invoice-pdf-access.js",
+      "test-field-invoice-document.js",
+      "test-field-document-recovery.js",
+      "test-field-guide-pdf.js",
+      "test-field-report-history-review.js",
+      "test-field-extra-execution.js"
+    ],
+    "exitCode": 0,
+    "allSequentialOnIntegratedCode": true
+  },
+  "expectedNativeGroups": 235,
+  "expectedGroupsUnique": true,
+  "serviceWorkerVersion": 150,
+  "newMigrations": 0,
+  "newDependencies": 0,
+  "visual": {
+    "invoicePages": 6,
+    "extraPages": 1,
+    "inspectedInvoicePages": [
+      1,
+      2
+    ],
+    "inspectedExtraPages": [
+      1
+    ],
+    "viewportWidths": [
+      320,
+      390,
+      1440
+    ]
+  },
+  "validatedCodeSha256": {
+    "src/controllers/invoicePdfController.js": "59af58048bfafaef0885bafee2e7f0c64de827db32db93654f1fb697b3e0b152",
+    "src/business/finance/InvoiceDocumentAccessBusiness.js": "9af9aecd826f9b1d71a55512337fe062073f9a5f01f64318aa33f5f82d2089e6",
+    "src/routes/billingRoutes.js": "29645de2c605473a6f2e887c9b93118ad52196666666f87c83a1ad789882e20c",
+    "frontend/cw-auth-download.js": "efb4aa4189d74538098a026a313e9a82af594b4bfac43723518885a416539b71",
+    "frontend/sw.js": "127590d243b3c813fe83159929fa468fcd30d959be67ff9f056d4cc7fd260c2b",
+    "scripts/test-field-financial-pdf.js": "75297525f9580cbfd62172e3636cbc7f73787462a81291f7041a87750a8eb0b6",
+    "scripts/test-field-report-history-review.js": "5a57298aace252d84ca429ca680fa665a14f33e6b4ee86cd6da356741909e41f",
+    "scripts/test-field-suite.js": "3c9a372dd3b68e03d7d1f62c424dae9c5deb237bd026ed456e8e77780bd182d9"
+  },
+  "logs": [
+    {
+      "path": "/tmp/cw338-unit.log",
+      "sha256": "0242fa0185ddfbb6b96f1071de7eab28232fff5050a47cb27f95c120a431b7fc",
+      "exitCode": 0
+    },
+    {
+      "path": "/tmp/cw338-tech.log",
+      "sha256": "e943b1b73120774146750055e7063f845f66aacd4ea7ba2ff6f52132156214bc",
+      "exitCode": 0
+    },
+    {
+      "path": "/tmp/cw338-syntax.log",
+      "sha256": "1b1387b91e52744bac1c2a9107298dc6a129b27f34f18208d2d355a79be3ebc1",
+      "exitCode": 0
+    },
+    {
+      "path": "/tmp/cw338-integrated-api-browser.log",
+      "sha256": "801a3cada10c51947f71d44a9cbb73f328e0550a7f36c83c73360a07eee54ecb",
+      "exitCode": 0
+    }
+  ],
+  "nativeCI": {
+    "status": "not_published_yet",
+    "approved": false
+  },
+  "restore": {
+    "status": "pending_native_ci",
+    "approved": false
+  },
+  "scopeLimits": [
+    "Existing TASK337 shared renderer, models, non-fiscal labels and source totals preserved",
+    "No duplicate renderer or equivalent unit tests added",
+    "Monthly concurrent generation and full restore require native PostgreSQL CI",
+    "No merge, production deployment or real provider contacts"
+  ]
+}

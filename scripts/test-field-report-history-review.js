@@ -8,7 +8,7 @@ const pdfText = require('./lib/reportPdfText');
 if (process.env.NODE_ENV !== 'test' || process.env.QA_MODE !== 'true' || process.env.QA_ENVIRONMENT_SAFE !== 'true') throw Error('Isolated QA required');
 const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
 assert(['127.0.0.1', 'localhost'].includes(new URL(base).hostname));
-let browser;
+let browser, fixture;const files=[];
 (async () => {
   const admin = await prisma.user.findUniqueOrThrow({ where: { email: process.env.ADMIN_EMAIL } });
   const sign = data => jwt.sign(data, getJwtSecret(), { expiresIn: '1h' });
@@ -21,12 +21,14 @@ let browser;
   const createRegular = () => prisma.serviceVisit.create({ data: { clientId: old.id, poolId: pool.id, technicianId: tech.id, technicianName: 'RECORDED_TECH', status: 'COMPLETED', notes: 'REGULAR_RECORDED ' + literal, internalNotes: 'REGULAR_PRIVATE', ph: 7.3, startAt: new Date('2026-01-10T09:00:00Z'), endAt: new Date('2026-01-10T09:30:00Z'), chemicals: { create: { name: 'RECORDED_CHEMICAL', quantity: 2, unit: 'kg' } } } });
   const regular = await createRegular();
   const extra = await prisma.extraVisit.create({ data: { clientId: old.id, poolId: pool.id, technicianId: tech.id, status: 'DONE', billingMode: 'NO_CHARGE', isBillable: false, notes: 'EXTRA_PLANNING', internalNote: 'EXTRA_PRIVATE', execution: { notes: 'EXTRA_RECORDED ' + literal, ph: 7.4, cleaned: true } } });
+  fixture={old,owner,tech,pool,regular,extra};
   const photo = await sharp({ create: { width: 160, height: 100, channels: 3, background: '#1a7799' } }).jpeg().toBuffer();
   const sha = createHash('sha256').update(photo).digest('hex'), uploadRoot = ensureUploadBaseDirReady();
   for (const type of ['REGULAR', 'EXTRA']) {
     const visitId = type === 'EXTRA' ? extra.id : regular.id;
     const filename = `${type === 'EXTRA' ? 'extra-' : ''}visit-${visitId}-AFTER-${sha}.jpg`;
     await fs.writeFile(path.join(uploadRoot, filename), photo);
+    files.push(path.join(uploadRoot,filename));
     await prisma[type === 'EXTRA' ? 'extraVisitPhoto' : 'visitPhoto'].create({ data: { [type === 'EXTRA' ? 'extraVisitId' : 'visitId']: visitId, type: 'AFTER', url: toPublicUploadUrl(filename) } });
   }
   const settings = async () => (await (await fetch(base + '/api/report-settings/' + old.id, { headers: { Authorization: 'Bearer ' + token } })).json());
@@ -131,4 +133,10 @@ let browser;
   assert.deepEqual(await prisma.extraVisit.findUniqueOrThrow({ where: { id: extra.id } }), browserBeforeExtra);
   console.log('PASS historical report inspection: explicit ADMIN-only REGULAR/EXTRA, original client, live facility withheld, four languages/PDF/HTML/photos, strict context/settings, source unchanged, archived client, responsive UI, forged origin, cancellation, offline retry and session change');
   console.log('REPORT_HISTORY_EVIDENCE ' + evidence);
-})().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => { if (browser) await browser.close(); await prisma.$disconnect(); });
+})().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => {
+  if(browser)await browser.close();
+  // Contradictory records belong only to this read-only test. Leaving them in
+  // the shared suite makes the later global extra-billing preview require review.
+  if(fixture){const{old,owner,tech,pool,regular,extra}=fixture;await prisma.extraVisitPhoto.deleteMany({where:{extraVisitId:extra.id}});await prisma.extraVisit.delete({where:{id:extra.id}});await prisma.serviceVisit.delete({where:{id:regular.id}});await prisma.poolEquipment.deleteMany({where:{poolId:pool.id}});await prisma.technicalRoom.deleteMany({where:{poolId:pool.id}});await prisma.pool.delete({where:{id:pool.id}});await prisma.clientReportSetting.deleteMany({where:{clientId:old.id}});await prisma.client.deleteMany({where:{id:{in:[old.id,owner.id]}}});await prisma.technician.delete({where:{id:tech.id}});}
+  for(const file of files)await fs.rm(file,{force:true});await prisma.$disconnect();
+});

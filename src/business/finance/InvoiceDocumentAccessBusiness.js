@@ -6,7 +6,7 @@ function fail(message, status) { throw Object.assign(new Error(message), { statu
 function scope(user, rawId) {
   const id = Number(rawId), role = normalizeRole(user?.role);
   if (!['ADMIN', 'CLIENT'].includes(role)) fail('Sem permissão para documentos financeiros.', 403);
-  if (!/^\d+$/.test(String(rawId)) || !Number.isSafeInteger(id) || id <= 0 || id > 2147483647) fail('Documento inválido.', 400);
+  if (!/^[1-9]\d*$/.test(String(rawId)) || !Number.isSafeInteger(id) || id <= 0 || id > 2147483647) fail('Documento inválido.', 400);
   const clientId = role === 'CLIENT' ? Number(user.clientId || user.id) : null;
   if (role === 'CLIENT' && (!Number.isSafeInteger(clientId) || clientId <= 0)) fail('Sessão inválida.', 403);
   return { id, clientId };
@@ -14,14 +14,16 @@ function scope(user, rawId) {
 async function invoice(rawId, user, db = prisma) {
   const { id, clientId } = scope(user, rawId);
   const row = await db.invoice.findFirst({ where: { id, ...(clientId ? { clientId, status: { notIn: NON_RECEIVABLE_STATUSES } } : {}) },
-    include: { client: true, lines: true, payments: true } });
+    include: { client: true, lines: { orderBy: { id: 'asc' } }, payments: true } });
   if (!row || (clientId && NON_RECEIVABLE_STATUSES.includes(String(row.status || '').trim().toUpperCase()))) fail('Documento não encontrado.', 404);
   return row;
 }
 async function extras(rawId, user) {
   const { id, clientId } = scope(user, rawId);
   if (clientId && clientId !== id) fail('Documento não encontrado.', 404);
-  return require('../../services/extraVisitBillingService').pending(prisma, id);
+  const rows=await require('../../services/extraVisitBillingService').pending(prisma,id);
+  if(rows.some(row=>row.clientId!==id))fail('O cliente original de uma visita extra precisa de confirmação.',409);
+  return rows;
 }
 async function sendable(rawId, user, db = prisma) {
   if (normalizeRole(user?.role) !== 'ADMIN') fail('Apenas a administração pode preparar envios.', 403);
