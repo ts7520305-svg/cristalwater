@@ -1,5 +1,9 @@
 # TASK336 — Confirmação dos dados históricos de relatórios individuais
 
+## Publicação
+
+Publicada em `55544f548bc073aadac574770786920f0d0ba68b`, árvore `cd534409b7c9d6afae8bb06b6e5503d47684c52c`, idêntica à validada. [CI 36048931532](https://github.com/ts7520305-svg/cristalwater/actions/runs/36048931532), job `107799314394`, em execução; aprovação completa e restauro por confirmar. [Evidência local](evidence/20260924_task336_local.json).
+
 ## Âmbito
 
 A consulta administrativa da TASK334 permite inspecionar uma visita com cliente divergente, mas não confirma os dados para partilha. Este lote acrescenta uma revisão explícita REGULAR/EXTRA para a visita concluída que conserva um cliente e uma instalação identificados no registo original.
@@ -27,7 +31,7 @@ Base integrada: TASK334 `93fb9aa452017b0391b4116c204c58256711ba1f` e TASK335 de 
 - QA isolada com 40 migrações aditivas: API de dois processos, mesmo ID REGULAR/EXTRA, acesso do cliente original e recusa dos restantes, prova exata/repetição/corrida entre revisões, alteração técnica, corrupção de comprovativo, anulação e rollback de comprovativo/histórico/auditoria.
 - PDF/HTML nos quatro idiomas, opções do cliente, notas privadas, fotos tipadas, alteração depois do limite de 24 fotos e invariância de visitas/stock/finanças. Os nomes/moradas/equipamento/casa técnica do novo titular ficam ausentes das duas representações.
 - Chromium real: entrada pelas configurações, rascunho/recarregamento, proposta e resposta adulteradas, perda da resposta depois da gravação, duplo clique, offline, pedido local alterado, quota, idioma preferido, comprovativo do PDF errado, anulação e isolamento de conta. Larguras 320/390/1440 e modo escuro; duas páginas do PDF francês de cliente inspecionadas visualmente.
-- Regressões aprovadas: `test-field-report-history-review.js`, `test-field-visit-report.js`, `test-field-extra-report.js`, `test-field-visit-report-photos.js`, `test-field-report-opening-ui.js` e `test-field-client-services-ui.js`.
+- Regressões aprovadas: `test-field-report-history-review.js`, `test-field-visit-report.js`, `test-field-extra-report.js`, `test-field-visit-report-photos.js`, `test-field-report-opening-ui.js` `test-field-client-services-ui.js` e `test-field-guide-pdf.js`.
 
 Na preparação do novo ensaio corrigiram-se o nome do router da fixture, a localização da preferência de idioma e a ordem de remoção dos dados com chaves estrangeiras. Estas correções pertencem ao teste; não relaxam nenhuma validação da aplicação.
 

@@ -1,0 +1,105 @@
+{
+  "task": "TASK336",
+  "status": "local-validation-passed-native-pending",
+  "commit": "55544f548bc073aadac574770786920f0d0ba68b",
+  "tree": "cd534409b7c9d6afae8bb06b6e5503d47684c52c",
+  "parent": "93695172b5611154046423ef75bc5261fd9e79c1",
+  "workflowRun": 36048931532,
+  "job": 107799314394,
+  "sourceFiles": {
+    "frontend/cw-visit-report-origin-rules.js": "10c7afd9726ba5e77b70ff4d76bec54f1f6d35da0ee5746b48eee2580cdd5843",
+    "frontend/visit-report-review.html": "ba9e01ff6e25bb859d2e949f4b3685602d5c156aae671aefbb1fc38c4018d99d",
+    "frontend/visit-report-review.js": "e4f66143866fc9372b87e51a6b97e4c2f51001d179a495b0b94a9578272a0eda",
+    "frontend/report-settings.js": "d400bb6753a776959a16657315900375f5ed26568327a053bbdbd06f7fcc295b",
+    "frontend/sw.js": "faaeb3944afe65b7a97eb6d05a86cc26ca618a6a6c8d1db6a93ce3c3a439db99",
+    "src/services/visitReportOriginService.js": "c5ba6f18c2b4b3027ffd1229e119c4bdd56cd1c9cf436075a54e4a4473144a3e",
+    "src/services/fieldWriteRequestService.js": "04c70f68ec879b9964c0a9db4fb2b83c3c3ef95234f5a24abd36f72de1646f2c",
+    "src/services/visitReportService.js": "1a0fcf849cb615f34a4a5ac3671c39a7d2e4e64cf0d319cb2d81221218ee5a0e",
+    "src/services/visitReportLanguage.js": "edd5d8ca17124a6b628a7437e18f6735b897cc38805af55d8c9fc0e6dd91ab41",
+    "src/routes/reportVisitRoutes.js": "978541584b1e7f3945b6d5965958be75d01146c1a0d6e7f419ff977062e5b4df",
+    "src/controllers/reportVisitController.js": "4c90c98571d01a9285fe10a32baaece9d24a42218408ba23705474df2aa9a2a7",
+    "tests/visit-report-origin.test.js": "b9695cb376f8dbdc3d2c308ccab85b8e1770662b3e2602d5ab747e32b43fdde6",
+    "scripts/fixtures/report-origin-server.js": "8ed3c14db32b05140e5eb7c008c45e791ee8ef7aa74ef8dd8b46550e39e2e384",
+    "scripts/test-field-visit-report-origin.js": "93554bbefceab907da17329fcfa0c395ef20748069113b46e5c05ca5d2d3dfd0",
+    "scripts/test-field-suite.js": "7db7269f4eac08b70a1cd7741bba86f3c6472fbe647385841b4b51c3217f4d91",
+    "docs/product/HISTORICAL_REPORT_ORIGIN_20260924.md": "d5d8a45951682b77af7a6fe10244d0f49248c4a5771dc6ed49674b346b31761a",
+    "docs/product/CURRENT_WORK_CHECKPOINT.md": "6869d91fe93448f085959a3d140bbf16f18372c4c058c63facde31fd086358fc",
+    "docs/product/COMPLETENESS_CURRENT_20260915.md": "49cdc8e0dc768d24a7ba69de2a83d59578afcb2d46f817b6f924dd43c0693d06"
+  },
+  "unit": {
+    "tests": 587,
+    "files": 80,
+    "technicianTests": 4
+  },
+  "syntax": {
+    "backend": 624,
+    "frontend": 220,
+    "inline": 62
+  },
+  "additiveMigrationsAppliedInLocalQA": 40,
+  "expectedDistinctNativeFieldGroups": 233,
+  "localFieldGroups": [
+    "test-field-visit-report-origin.js",
+    "test-field-report-history-review.js",
+    "test-field-visit-report.js",
+    "test-field-extra-report.js",
+    "test-field-visit-report-photos.js",
+    "test-field-report-opening-ui.js",
+    "test-field-client-services-ui.js",
+    "test-field-guide-pdf.js"
+  ],
+  "logs": {
+    "unit": {
+      "file": "cw336-root-unit.log",
+      "sha256": "a180d7111d1b72528e5a4b4315417827685175bebca51edb5b0087dbb97f829d"
+    },
+    "technician": {
+      "file": "cw336-root-tech.log",
+      "sha256": "9c3d5ea3b9e5451769eb280cb53b4049c9e9103ec94b2cf5f856b6442ef40ea8"
+    },
+    "syntax": {
+      "file": "cw336-root-syntax.log",
+      "sha256": "53951c0eeae00068059bef0395c7b2b6a82cda9a21b9cae9a670c2f3dd584a31"
+    },
+    "originApiAndBrowser": {
+      "file": "cw-historical-report-final.log",
+      "sha256": "28ca3c3ecb5b1d66f13490ae899e8961cfeb285c3340f5b42183302abafbbf3a"
+    },
+    "inspectionAndEditor": {
+      "file": "cw-historical-report-browser-integrated.log",
+      "sha256": "4b8cc908d368c5b6803d3bfa56ddd83fc87985fc6be89d186a10969d54289d6c"
+    },
+    "existingReportRegressions": {
+      "file": "cw-historical-report-regressions.log",
+      "sha256": "ef8062b7fe46fa224c75e02fee2d3b19a9aafa92a9e1eed771ef3924966bfaa5"
+    },
+    "guideAndFinalEditor": {
+      "file": "cw336-guide-editor-integrated.log",
+      "sha256": "0efc1c40622e1b76c38ad77da15734aee3deface07030545091dc131a7763cd9"
+    }
+  },
+  "browser": {
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "darkMode": true,
+    "draftReload": true,
+    "lostResponseExactRecovery": true,
+    "forgedPreviewAndReceipt": true,
+    "offlineSameRequestId": true,
+    "localRequestTamperingRejectedBeforePost": true,
+    "quotaPreservesInputs": true,
+    "preferredLanguageAndPdfIdentity": true,
+    "accountChangeClearsPresentation": true
+  },
+  "visualReview": {
+    "pdf": "French confirmed client report, first two pages",
+    "screen": "320px light and 390px dark review form; browser layout bounds at all three widths"
+  },
+  "nativeRestoreApproved": false,
+  "main": "6f27081e1d183ff584a62255b016b373836734db",
+  "productionDeployment": false,
+  "realProvidersOrContacts": false
+}
