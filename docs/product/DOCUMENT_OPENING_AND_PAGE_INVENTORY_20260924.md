@@ -39,6 +39,6 @@ Ambiente isolado: PGlite, Chromium normal e 40 migrações aditivas; sem contact
 
 ## Publicação e continuação
 
-Base inicial `08dfea0711b6236f2896317e4eeebac52fc10f86`; integrada a publicação TASK338 `31e18feec8ed4e87f9d6c80b47f217870ef5fe1a` antes do ensaio final. Publicação em preparação na branch `work/field-readiness-20260915-simulation`.
+Base inicial `08dfea0711b6236f2896317e4eeebac52fc10f86`; integrada a publicação TASK338 `31e18feec8ed4e87f9d6c80b47f217870ef5fe1a` antes do ensaio final. Publicação na branch `work/field-readiness-20260915-simulation`. Publicada em `e20b0d47f42b2eee0a6862cb97e58f553c33b1bc`, árvore `e5f44c27429fbeefb14581d96f6b6db6e69fe210`, idêntica à validada localmente. [CI 36054372854](https://github.com/ts7520305-svg/cristalwater/actions/runs/36054372854) em execução; os 236 grupos e o restauro nativo continuam por confirmar.
 
 Retomar os CI pendentes e a fila finita do inventário, preservando as provas existentes. Os critérios de capacidade em produção, VPS/fornecedores, piloto físico e IA avançada continuam separados. Sem merge, deploy ou envio real a terceiros.

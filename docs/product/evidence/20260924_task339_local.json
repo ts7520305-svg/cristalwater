@@ -103,7 +103,9 @@
     "unsafeAttachments": "download original bytes as application/octet-stream"
   },
   "ci": {
-    "status": "not started for TASK339",
+    "runId": 36054372854,
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36054372854",
+    "status": "in_progress",
     "fullSuiteApproved": false,
     "nativeRestoreApproved": false
   },
@@ -111,5 +113,8 @@
     "Static page references are not universal visual/functional acceptance",
     "Concurrent monthly generation still needs native PostgreSQL validation; no transaction changes",
     "Full production deployment, providers and physical pilot remain separate"
-  ]
+  ],
+  "commit": "e20b0d47f42b2eee0a6862cb97e58f553c33b1bc",
+  "tree": "e5f44c27429fbeefb14581d96f6b6db6e69fe210",
+  "mainUnchanged": "6f27081e1d183ff584a62255b016b373836734db"
 }

@@ -1,6 +1,8 @@
 # Cristal Water — matriz atual de conclusão
 
-## Estado de retoma — 24/09/2026, TASK339 em publicação
+## Estado de retoma — 24/09/2026, TASK339 publicada
+
+Publicada em `e20b0d47f42b2eee0a6862cb97e58f553c33b1bc`, árvore `e5f44c27429fbeefb14581d96f6b6db6e69fe210`, idêntica à validada localmente. [CI 36054372854](https://github.com/ts7520305-svg/cristalwater/actions/runs/36054372854) em execução; os 236 grupos e o restauro nativo continuam por confirmar.
 
 TASK339 estende a abertura autenticada às guias/seguros/anexos: identidade e PDF completo, URLs canónicos, sessão/expiração, timeout/cancelamento, revogação após mudança de conta e anexos inseguros descarregados como bytes inertes. Conserva o contrato financeiro TASK338 e as guias antigas sem viatura, pelas permissões existentes. 595 unitários/81 ficheiros, quatro técnicos, sintaxe 626/220/62 e seis grupos API/Chromium aprovados; 40 migrações locais, cache v151, runner com 236 grupos. [Relatório](DOCUMENT_OPENING_AND_PAGE_INVENTORY_20260924.md) e [evidência local](evidence/20260924_task339_local.json). Inventário de [115 páginas](PAGE_INVENTORY_20260924.md) concluído; as 39 sem referência literal são uma fila de pesquisa de evidência, não uma conclusão de ausência de testes. CI completo/restauro por confirmar. A aplicação ainda tem critérios por fechar.
 
