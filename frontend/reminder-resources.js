@@ -8,6 +8,7 @@
   const check=(ok,message='Os dados precisam de revisão.')=>{if(!ok)throw Error(message);};
   const identity=()=>JSON.stringify(keys.map(k=>localStorage.getItem(k))), params=new URLSearchParams(location.search);
   const reminderId=Number(params.get('reminderId')), expectedPool=params.has('poolId')?Number(params.get('poolId')):null;
+  el('materialsLink').href='/reminder-materials?reminderId='+reminderId;
   const controllers=new Set(); let principal,db,pending,detail,reviewed,invalid=false,storageFailed=false,busy=false,loading=false,hydrated=false,editEpoch=0,readEpoch=0;
   let draft={action:'DECLARE',technicianId:'',materialMode:'UNKNOWN',items:[{productName:'',unit:'',quantity:''}],hasWork:false,startedAt:'',endedAt:'',reason:''};
   const node=(parent,tag,text)=>{const n=document.createElement(tag);n.textContent=text;parent.append(n);return n;};

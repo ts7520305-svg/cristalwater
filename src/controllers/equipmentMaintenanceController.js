@@ -3,10 +3,15 @@ const reminders = require('../business/equipment/EquipmentMaintenanceReminderBus
 const billing = require('../business/equipment/MaintenanceBillingBusiness');
 const materials = require('../services/equipmentMaterialReviewService');
 const resources = require('../services/reminderResourceService');
+const reminderMaterials = require('../services/reminderMaterialService');
 const resourceHandle = fn => async (req, res) => { try { res.json(await fn(req)); } catch (e) { res.status(e.status || e.statusCode || 503).json({ ok:false,error:e.status || e.statusCode ? e.message : 'Não foi possível confirmar os recursos do lembrete. Conserve o pedido e consulte o resultado.' }); } };
 const materialHandle = fn => async (req, res) => { try { res.json(await fn(req)); } catch (e) { res.status(e.status || e.statusCode || 503).json({ ok: false, error: e.status || e.statusCode ? e.message : 'Não foi possível confirmar os materiais. Conserve o pedido e consulte o resultado antes de repetir.' }); } };
 const handle = fn => async (req, res, next) => { try { res.json(await fn(req)); } catch (e) { if (e.code === 'P2002') return res.status(409).json({ ok: false, error: 'Já existe um plano com este título nesta piscina. Atualize a lista ou escolha outro título.' }); if (e.status || e.statusCode) return res.status(e.status || e.statusCode).json({ ok: false, error: e.message }); next(e); } };
 module.exports = {
+  reminderMaterials: resourceHandle(req => reminderMaterials.detail(req.user, req.params.id)),
+  previewReminderMaterials: resourceHandle(req => reminderMaterials.preview(req.user, req.params.id, req.body)),
+  consumeReminderMaterials: resourceHandle(req => reminderMaterials.command(req.user, req.params.id, req.body)),
+  recoverReminderMaterials: resourceHandle(req => reminderMaterials.recover(req.user, req.params.requestId)),
   reminderResources: resourceHandle(req => resources.detail(req.user, req.params.id)),
   previewReminderResources: resourceHandle(req => resources.preview(req.user, req.params.id, req.body)),
   declareReminderResources: resourceHandle(req => resources.command(req.user, req.params.id, req.body)),

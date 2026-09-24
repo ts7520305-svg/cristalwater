@@ -81,6 +81,8 @@ async function calculate(db, reminderId, body, lock = false) {
   if (body.action === 'VOID') {
     const row = c.records.find(r => r.id === body.recordId);
     if (!row?.canVoid) return refuse('DECLARATION_REVIEW', 'A declaração mudou, já foi anulada ou o comprovativo precisa de revisão.');
+    const materials = await require('./reminderMaterialService').journal(db,reminderId);
+    if (!materials.valid || materials.active) return refuse('MATERIAL_CONSUMPTION_REVIEW', 'Reveja e anule expressamente o consumo de materiais deste lembrete antes de anular os recursos. A reposição e os custos afetados são confirmados no histórico dos materiais.');
     origin = row.snapshot.preview.origin; recordHash = row.fingerprint;
     const costs = await db.expenseAllocation.findMany({ where:{ targetType:'MAINTENANCE_REMINDER',serviceReminderId:reminderId,valuationType:'LABOR',voidedAt:null,valuationSnapshot:{ path:['source','workInterval','id'],equals:row.id } },orderBy:{ id:'asc' } });
     affectedCosts = costs.map(a => ({ allocationId:a.id,expenseId:a.expenseId,amountCents:a.amountCents,workIntervalId:row.id,groupId:a.valuationSnapshot?.composition?.groupId || null,allocationHash:writes.hash(json(a)) }));

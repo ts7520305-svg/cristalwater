@@ -45,18 +45,20 @@ async function prepare(db, allocations, extra = []) {
   const repairMap = new Map(repairs.map(t => [t.id, t])), workRepairIds = [...new Set(selections.filter(s => s.kind === 'LABOR' && s.targetType === 'REPAIR').map(s => s.targetId))];
   const laborVisits = new Set(selections.filter(s => s.kind === 'LABOR' && s.targetType !== 'REPAIR').map(s => s.targetType + ':' + s.targetId));
   const spans = [...regular.map(row => ({ ...row, type: 'REGULAR' })), ...extras.map(row => ({ ...row, type: 'EXTRA' }))].filter(row => laborVisits.has(row.type + ':' + row.id));
-  const [workIntervals, workTimeConflicts, reminderIntervals] = await Promise.all([
+  const materialReminderIds=[...new Set(selections.filter(s=>s.kind==='MATERIAL'&&s.targetType==='MAINTENANCE_REMINDER').map(s=>s.targetId))];
+  const [workIntervals, workTimeConflicts, reminderIntervals, reminderMaterials] = await Promise.all([
     repairWork.readForValuation(db, workRepairIds, repairMap),
     require('./recordedWorkTimeService').conflicts(db, spans),
-    reminderWork.read(db,reminderIds)
+    reminderWork.read(db,reminderIds),
+    Promise.all(materialReminderIds.map(async id=>[id,await require('./reminderMaterialService').read(db,id)]))
   ]);
-  return { regular: new Map(regular.map(v => [v.id, v])), extra: new Map(extras.map(v => [v.id, v])), repairs: repairMap, reminders:new Map(reminders.map(t=>[t.id,t])), workIntervals, reminderIntervals, workTimeConflicts, repairContext, movementOwners, items: new Map(items.map(v => [v.id, v])), movements, active };
+  return { regular: new Map(regular.map(v => [v.id, v])), extra: new Map(extras.map(v => [v.id, v])), repairs: repairMap, reminders:new Map(reminders.map(t=>[t.id,t])), reminderMaterials:new Map(reminderMaterials), workIntervals, reminderIntervals, workTimeConflicts, repairContext, movementOwners, items: new Map(items.map(v => [v.id, v])), movements, active };
 }
 function build(data, expense, selection) {
   const { kind, targetType, targetId: id, purchaseItemId } = selection;
   if(!['REGULAR','EXTRA','REPAIR','MAINTENANCE_REMINDER'].includes(targetType))return {valid:false,errors:['Escolha um serviço com origem própria confirmada.']};
   const reminder=targetType==='MAINTENANCE_REMINDER'?data.reminders?.get(id):null;
-  if(targetType==='MAINTENANCE_REMINDER'&&(!reminder?.valid||kind!=='LABOR'))return {valid:false,errors:['Confirme a execução do lembrete e escolha trabalho declarado. Os materiais exigem conferência de consumo própria.']};
+  if(targetType==='MAINTENANCE_REMINDER'&&!reminder?.valid)return {valid:false,errors:['Confirme a execução e a decisão comercial do lembrete.']};
   const repair = targetType === 'REPAIR' ? data.repairs?.get(id) : null;
   if (targetType === 'REPAIR' && (!repair?.valid || kind === 'MATERIAL' && repair.snapshot.materialMode !== 'RESERVED')) return { valid: false, errors: ['A reparação precisa de execução autenticada válida e, para materiais, consumo confirmado.'] };
   const independent=repair||reminder;
@@ -67,11 +69,13 @@ function build(data, expense, selection) {
   const service = reminder ? reminderWork.rules.facts(reminder.snapshot) : repair ? Object.fromEntries(['type','id','clientId','poolId','status','startAt','endAt', ...repairTargets.proofFields].map(k => [k, repair.snapshot[k]])) : { ...visit, startAt: visit.startAt?.toISOString() || null, endAt: visit.endAt.toISOString() };
   let key, units, totalQuantity, totalCents, snapshot, label;
   if (kind === 'MATERIAL') {
-    const item = data.items.get(purchaseItemId);
+    const item = data.items?.get(purchaseItemId);
     if (!item || expense.sourceType !== 'STOCK_PURCHASE' || item.purchaseId !== expense.stockPurchaseId || !['STOCK', 'MATERIAL'].includes(expense.category)) return { valid: false, errors: ['Escolha uma linha da compra ligada a esta despesa de materiais.'] };
     const product = normalizeProductName(item.productName), unit = normalizeUnit(item.unit, '');
+    const materialContext=reminder?data.reminderMaterials?.get(id):null,consumption=materialContext?.active;
+    if(reminder&&(!materialContext?.valid||!consumption||consumption.state!=='CONFIRMED'))return {valid:false,errors:['Confirme o consumo próprio dos materiais deste lembrete, com declaração e stock de origem verificáveis.']};
     const proof = repair ? data.repairContext.proofs.get(id)[0] : null;
-    const candidates = repair ? proof.metadata.movements.map(m => data.repairContext.movements.get(m.id)) : data.movements.filter(m => targetType === 'REGULAR' ? m.visitId === id : m.extraVisitId === id);
+    const candidates = reminder ? consumption.result.event.movements.map(m=>({...m,createdAt:new Date(m.createdAt)})) : repair ? proof.metadata.movements.map(m => data.repairContext.movements.get(m.id)) : data.movements.filter(m => targetType === 'REGULAR' ? m.visitId === id : m.extraVisitId === id);
     const movements = candidates.filter(m => ['CONSUMPTION', 'RETURN', 'EMERGENCY_DISTRIBUTED_CONSUMPTION'].includes(String(m.movementType).trim().toUpperCase()) && normalizeProductName(m.productName) === product && normalizeUnit(m.unit, '') === unit);
     if (!product || !unit || !movements.length) add('Não há consumo identificado deste produto e unidade neste serviço.');
     let net = 0n;
@@ -95,7 +99,7 @@ function build(data, expense, selection) {
     if (item.purchase.invoiceDate && item.purchase.invoiceDate.getTime() > end) add('A compra é posterior ao serviço. Reveja a origem histórica antes de valorizar.');
     totalCents = lineCents;
     key = r.hash({ kind, targetType, id, product, unit });
-    snapshot = { version: repair ? 2 : 1, kind, service, item: { ...item, purchase: { ...item.purchase, invoiceDate: r.day(item.purchase.invoiceDate) } }, movements: movements.map(m => repair ? { ...Object.fromEntries(Object.keys(movementSelect).map(k => [k, m[k]])), scopeFrom: m.scopeFrom, scopeTo: m.scopeTo, createdAt: m.createdAt.toISOString() } : { ...m, createdAt: m.createdAt.toISOString() }) };
+    snapshot = { version: reminder ? 8 : repair ? 2 : 1, kind, service, item: { ...item, purchase: { ...item.purchase, invoiceDate: r.day(item.purchase.invoiceDate) } }, movements: movements.map(m => repair ? { ...Object.fromEntries(Object.keys(movementSelect).map(k => [k, m[k]])), scopeFrom: m.scopeFrom, scopeTo: m.scopeTo, createdAt: m.createdAt.toISOString() } : { ...m, createdAt: m.createdAt.toISOString() }), ...(reminder?{materialBasis:require('./reminderMaterialService').rules.basis,consumption:consumption.result}:{}) };
     label = item.productName + ' · ' + unit + ' · Linha #' + item.id + (item.lot ? ' · Lote ' + item.lot : '');
     return { valid: !errors.length, errors, key, kind, monthRef: service.endAt.slice(0, 7), units, totalQuantity, totalCents, snapshot, hash: r.hash(snapshot), label, unit, visit, method: 'CONFIRMED_PURCHASE_LINE', measurement: measurementKey(targetType, id) };
   }

@@ -11,14 +11,14 @@
   }
   async function verifyTarget(t,hash) { if(t.valid!==true || await hash(facts(t))!==t.hash)throw Error('A origem recebida não corresponde à manutenção selecionada.');return t; }
   function allocation(a) {
-    if(!a || !types.includes(a.targetType) || !(a.valuationType==='MANUAL'||a.targetType==='MAINTENANCE_REMINDER'&&a.valuationType==='LABOR') || !positive(targetId(a)) || a.visitId!==null || a.extraVisitId!==null || a.repairId!==null || (a.targetType==='MAINTENANCE_EQUIPMENT'?a.serviceReminderId!==null:a.maintenanceCompletionId!==null))throw Error('Atribuição da manutenção não confirmada.');
+    if(!a || !types.includes(a.targetType) || !(a.valuationType==='MANUAL'||a.targetType==='MAINTENANCE_REMINDER'&&['LABOR','MATERIAL'].includes(a.valuationType)) || !positive(targetId(a)) || a.visitId!==null || a.extraVisitId!==null || a.repairId!==null || (a.targetType==='MAINTENANCE_EQUIPMENT'?a.serviceReminderId!==null:a.maintenanceCompletionId!==null))throw Error('Atribuição da manutenção não confirmada.');
     return {type:a.targetType,id:targetId(a),clientId:a.clientId,valid:true,hash:a.targetHash,label:a.targetSnapshot?.label,clientName:a.targetSnapshot?.clientName,snapshot:a.targetSnapshot};
   }
   async function receipt(result,record,hash) {
     const e=record.envelope,a=result.allocation;
     if(!result.applied || !['ALLOCATE_COST','REVIEW_COST','VOID_COST'].includes(e.command) || !types.includes(a?.targetType))return;
     await verifyTarget(allocation(a),hash);
-    if(e.command==='VOID_COST'&&a.targetType==='MAINTENANCE_REMINDER'&&a.valuationType==='LABOR'&&(a.activeMeasurementKey!==null||!['quantity','quantityUnit','purchaseItemId','valuationHash','valuationKey'].every(k=>a[k]===result.allocationBefore?.[k])||await hash(a.valuationSnapshot)!==await hash(result.allocationBefore?.valuationSnapshot)))throw Error('A anulação não conserva o intervalo e as fontes do custo original.');
+    if(e.command==='VOID_COST'&&a.targetType==='MAINTENANCE_REMINDER'&&['LABOR','MATERIAL'].includes(a.valuationType)&&(a.activeMeasurementKey!==null||!['quantity','quantityUnit','purchaseItemId','valuationHash','valuationKey'].every(k=>a[k]===result.allocationBefore?.[k])||await hash(a.valuationSnapshot)!==await hash(result.allocationBefore?.valuationSnapshot)))throw Error('A anulação não conserva a medição e as fontes do custo original.');
     if(result.version!==e.expectedVersion+1 || e.command!=='VOID_COST' && (a.voidedAt!==null || !a.activeKey) || e.command==='ALLOCATE_COST' && (a.targetType!==e.data.targetType||targetId(a)!==e.data.targetId) || ['REVIEW_COST','VOID_COST'].includes(e.command) && !['id','expenseId','clientId','targetType','visitId','extraVisitId','repairId','maintenanceCompletionId','serviceReminderId','monthRef','amountCents','valuationType'].every(k=>a[k]===result.allocationBefore?.[k]))throw Error('O recibo não conserva a atribuição original da manutenção.');
   }
   window.CWExpenseMaintenance={types,fields,targetId,facts,verifyTarget,allocation,receipt};

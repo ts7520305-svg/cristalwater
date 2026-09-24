@@ -4,7 +4,7 @@ const { sum } = require('./monthlyFinancialProjection');
 const json = value => JSON.parse(JSON.stringify(value));
 const refused = (code, message) => ({ applied: false, code, message });
 function selection(value, query = false) {
-  if (!['MATERIAL', 'LABOR'].includes(value.kind) || !['REGULAR', 'EXTRA', 'REPAIR', 'MAINTENANCE_REMINDER'].includes(value.targetType) || value.targetType === 'MAINTENANCE_REMINDER' && value.kind !== 'LABOR') r.fail('Escolha materiais ou trabalho num serviço com execução confirmada. Nos lembretes, escolha trabalho declarado.');
+  if (!['MATERIAL', 'LABOR'].includes(value.kind) || !['REGULAR', 'EXTRA', 'REPAIR', 'MAINTENANCE_REMINDER'].includes(value.targetType)) r.fail('Escolha materiais ou trabalho num serviço com execução confirmada.');
   const id = v => query ? r.queryId(v) : r.id(v);
   const purchaseItemId = value.kind === 'MATERIAL' ? id(value.purchaseItemId) : null;
   if (value.kind === 'LABOR' && value.purchaseItemId !== null && value.purchaseItemId !== undefined) r.fail('O trabalho não tem uma linha de compra de materiais.');
@@ -39,12 +39,18 @@ async function preview(db, expense, choice, lock = false) {
     await db.$queryRawUnsafe('SELECT id FROM "Technician" WHERE id=$1 FOR SHARE', work.technicianId);
     await db.$queryRawUnsafe('SELECT id FROM "RepairWorkInterval" WHERE id=$1 FOR SHARE', choice.workIntervalId);
   }
-  if (lock && choice.targetType === 'MAINTENANCE_REMINDER') {
+  if (lock && choice.targetType === 'MAINTENANCE_REMINDER' && choice.kind === 'LABOR') {
     const work = await db.reminderResourceDeclaration.findUnique({ where: { id: choice.workIntervalId }, select: { technicianId: true, reminderId: true } });
     if (!work || work.reminderId !== choice.targetId) r.fail('Intervalo de trabalho não encontrado neste lembrete.', 409);
     await db.$queryRawUnsafe('SELECT pg_advisory_xact_lock(hashtext($1))::text', 'repair-work-technician:' + work.technicianId);
     await db.$queryRawUnsafe('SELECT id FROM "Technician" WHERE id=$1 FOR SHARE', work.technicianId);
     await db.$queryRawUnsafe('SELECT id FROM "ReminderResourceDeclaration" WHERE id=$1 FOR SHARE', choice.workIntervalId);
+  }
+  if (lock && choice.targetType === 'MAINTENANCE_REMINDER' && choice.kind === 'MATERIAL') {
+    await db.$queryRaw`SELECT id FROM "ReminderResourceDeclaration" WHERE "reminderId"=${choice.targetId} FOR SHARE`;
+    await db.$queryRaw`SELECT id FROM "FieldWriteRequest" WHERE scope IN ('REMINDER_RESOURCES','REMINDER_MATERIAL_CONSUMPTION') AND "resourceId"=${choice.targetId} FOR SHARE`;
+    const material=await require('./reminderMaterialService').journal(db,choice.targetId);
+    for(const movementId of [...material.movementIds].sort((a,b)=>a-b))await db.$queryRaw`SELECT id FROM "StockMovement" WHERE id=${movementId} FOR SHARE`;
   }
   if (expense.sourceType !== 'MANUAL') {
     const source = await sources.source(db, expense.sourceType, expense.stockPurchaseId || expense.maintenanceId, lock);

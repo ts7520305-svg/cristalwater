@@ -303,6 +303,10 @@ async function reserveRepairStock(repairId, payload = {}, db = null, actor = "re
       return { ok: false, status: 400, error: "Nenhum item de stock válido para reservar" };
     }
 
+    // New reservations and independent reminder consumption share the same
+    // physical inventory locks. A reservation cannot appear after its stock
+    // has been checked and consumed by another service.
+    for (const item of [...items].sort((a,b) => JSON.stringify([a.scope,a.vehicleId,a.productName,a.unit]).localeCompare(JSON.stringify([b.scope,b.vehicleId,b.productName,b.unit])))) await stockRepository.lockBalance(tx,item);
     const availability = await checkRepairStockAvailability(items, { db: tx, repairId: repair.id });
     const shortage = availability.filter((item) => !item.inStock);
     if (shortage.length) {
