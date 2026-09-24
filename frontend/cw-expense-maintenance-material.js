@@ -55,10 +55,11 @@
         if (!data || data.expenseId !== c.expense.id || data.expenseVersion !== c.expense.version || data.allocationId !== selected.id || data.page !== page || data.pageSize !== 10 || !count(data.total) || !Array.isArray(data.rows) || data.rows.length > 10 || typeof data.available !== 'boolean') throw Error('Lista de revisões não confirmada.');
         total = data.total; el('maintenanceMaterialStatus').textContent = data.available ? total + ' revisões · Página ' + page + ' · ' + data.material.productName + ' / ' + data.material.unit : data.message;
         for (const row of data.rows) {
-          if (!positive(row.id) || typeof row.label !== 'string' || !['MISSING','NONE','DECLARED','MATCHED','REVIEW'].includes(row.materialsState) || typeof row.shared !== 'boolean' || typeof row.targetConfirmed !== 'boolean' || row.availableQuantity !== null && quantity(row.availableQuantity) === null) throw Error('Revisão recebida incompleta.');
+          if (!positive(row.id) || typeof row.label !== 'string' || !['MISSING','NONE','DECLARED','MATCHED','REVIEW','WITHDRAWN'].includes(row.materialsState) || typeof row.shared !== 'boolean' || typeof row.targetConfirmed !== 'boolean' || row.availableQuantity !== null && quantity(row.availableQuantity) === null) throw Error('Revisão recebida incompleta.');
           const card = node(el('maintenanceMaterialCandidates'), 'article', '', 'row'); node(card, 'strong', row.label);
           node(card, 'p', row.shared ? 'Parcela já atribuída neste documento.' : row.materialsState === 'NONE' ? 'Sem materiais, confirmado.' : row.materialsState === 'MISSING' ? 'Falta registar os materiais próprios.' : row.materialsState !== 'MATCHED' ? 'Consumo ou declaração por confirmar.' : !row.targetConfirmed ? 'Execução ou decisão comercial por confirmar.' : row.declaredQuantity === null ? 'Este produto não foi declarado.' : 'Declarado: ' + row.declaredQuantity + ' · Ainda sem parcela, entre todas as compras: ' + row.availableQuantity);
           if (!row.shared && row.targetConfirmed && row.materialsState === 'MATCHED' && quantity(row.availableQuantity) > 0n) button(card, 'Rever materiais #' + row.id, () => choose(row.id), true);
+          const link = node(card, 'a', 'Consultar / corrigir declaração'); link.href = '/equipment-material-review?completionId=' + row.id;
         }
       } catch (error) { if (active() && rev === revision && stamp === context().stamp) { el('maintenanceMaterialCandidates').replaceChildren(); el('maintenanceMaterialStatus').textContent = error.message; } } finally { controls(); }
     }

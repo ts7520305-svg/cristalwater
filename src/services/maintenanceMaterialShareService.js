@@ -49,10 +49,11 @@ async function ownMaterials(db, parents) {
     db.stockMovement.findMany({ where, select: { id:true,movementType:true,productId:true,productName:true,unit:true,quantity:true,visitId:true,extraVisitId:true,poolId:true,clientId:true,technicianId:true,createdAt:true }, orderBy: { id: 'asc' } })
   ]);
   const receipts = rows.length ? await db.fieldWriteRequest.findMany({ where: { scope: 'EQUIPMENT_MAINTENANCE', requestId: { in: rows.map(row => row.requestId) } }, select: { owner:true,requestId:true,resourceId:true,payloadHash:true,response:true } }) : [];
+  const revisions = await require('./equipmentMaterialReviewJournal').read(db, rows, receipts);
   const result = new Map();
   for (const [visitType, visits] of [['REGULAR', regular], ['EXTRA', extra]]) for (const visit of visits) {
     const field = visitType === 'REGULAR' ? 'visitId' : 'extraVisitId';
-    for (const [id, view] of materials.assess(rows.filter(row => row[field] === visit.id), visit, visitType, receipts, movements.filter(m => m[field] === visit.id))) result.set(id, view);
+    for (const [id, view] of materials.assess(rows.filter(row => row[field] === visit.id), visit, visitType, receipts, movements.filter(m => m[field] === visit.id), revisions)) result.set(id, view);
   }
   return result;
 }

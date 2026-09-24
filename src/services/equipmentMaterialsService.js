@@ -43,14 +43,19 @@ function intact(row, receipts) {
   const matches = receiptFor(row, receipts), proof = matches[0], c = row.result?.completion, r = row.result?.receipt;
   return matches.length === 1 && proof.resourceId === row.planId && proof.payloadHash === row.fingerprint && proof.owner === r?.owner && r?.scope === 'EQUIPMENT_MAINTENANCE' && r.requestId === row.requestId && r.resourceId === row.planId && r.payloadHash === row.fingerprint && row.result?.applied === true && c?.planId === row.planId && c.requestId === row.requestId && c.completedAt === row.completedAt.toISOString() && hash(proof.response) === hash(row.result);
 }
-function assess(rows, visit, visitType, receipts, movements) {
+function assess(rows, visit, visitType, receipts, movements, revisions = new Map()) {
   const expected = origin(visit, visitType), views = new Map(), totals = new Map();
   let siblingsInvalid = false;
   for (const row of rows) {
-    const record = recordOf(row), hadRecord = Object.hasOwn(row.result?.completion || {}, 'materials') || receiptFor(row, receipts).some(p => Object.hasOwn(p.response.completion, 'materials'));
+    const revision = revisions.get(row.id), changed = revision && (revision.headHash || !revision.valid);
+    const record = changed ? revision.record : recordOf(row), hadRecord = changed || Object.hasOwn(row.result?.completion || {}, 'materials') || receiptFor(row, receipts).some(p => Object.hasOwn(p.response.completion, 'materials'));
     if (!hadRecord) { views.set(row.id, { state: 'MISSING', record: null, comparison: null, reasons: [] }); continue; }
-    const valid = sound(record) && intact(row, receipts) && hash(record.origin) === hash(expected);
+    if (changed && revision.valid && revision.action === 'WITHDRAW' && hash(revision.history.at(-1).revision.preview.origin) === hash(expected)) {
+      views.set(row.id, { state: 'WITHDRAWN', record: null, original: recordOf(row) || null, revision: { headHash: revision.headHash, action: revision.action }, comparison: null, reasons: [] }); continue;
+    }
+    const valid = sound(record) && (changed ? revision.valid : intact(row, receipts)) && hash(record.origin) === hash(expected);
     views.set(row.id, { state: valid ? record.mode === 'NONE' ? 'NONE' : 'DECLARED' : 'REVIEW', record: record || null, comparison: null, reasons: valid ? [] : ['DECLARATION_OR_ORIGIN_CHANGED'] });
+    if (changed) Object.assign(views.get(row.id), { original: recordOf(row) || null, revision: { headHash: revision.headHash, action: revision.action } });
     if (!valid) { siblingsInvalid = true; continue; }
     for (const item of record.items) {
       const key = productKey(item); totals.set(key, (totals.get(key) || 0n) + quantity(item.quantity));
@@ -86,17 +91,23 @@ function assess(rows, visit, visitType, receipts, movements) {
       if (net < declared) reasons.add('DECLARATIONS_EXCEED_NET_CONSUMPTION');
       lines.push({ ...item, visitQuantity: net >= 0n ? decimal(net) : null, declaredMaintenanceQuantity: decimal(declared), unassignedQuantity: net >= declared ? decimal(net - declared) : null });
     }
-    const source = { schema: 1, basis: 'CURRENT_NET_VISIT_CONSUMPTION', visit: { ...expected, status: visit.status, startAt: visit.startAt?.toISOString() || null, endAt: visit.endAt.toISOString() }, declarations: rows.filter(r => recordOf(r)).map(r => ({ id: r.id, fingerprint: r.fingerprint, materials: recordOf(r) })).sort((a, b) => a.id - b.id), movements: [...sourceMovements.values()].sort((a, b) => a.id - b.id) };
+    const declarations = rows.filter(r => views.get(r.id).record || views.get(r.id).revision).map(r => ({ id: r.id, fingerprint: r.fingerprint, materials: views.get(r.id).record, ...(views.get(r.id).revision ? { revision: views.get(r.id).revision } : {}) })).sort((a, b) => a.id - b.id);
+    const source = { schema: 1, basis: 'CURRENT_NET_VISIT_CONSUMPTION', visit: { ...expected, status: visit.status, startAt: visit.startAt?.toISOString() || null, endAt: visit.endAt.toISOString() }, declarations, movements: [...sourceMovements.values()].sort((a, b) => a.id - b.id) };
     view.comparison = { lines, source, sourceHash: hash(source) };
     view.state = reasons.size ? 'REVIEW' : 'MATCHED'; view.reasons = [...reasons];
   }
   return views;
 }
-async function describe(db, rows, visit, visitType) {
+async function readInputs(db, rows, visit, visitType) {
   const [receipts, movements] = await Promise.all([
     rows.length ? db.fieldWriteRequest.findMany({ where: { scope: 'EQUIPMENT_MAINTENANCE', requestId: { in: rows.map(r => r.requestId) } }, select: { owner: true, requestId: true, resourceId: true, payloadHash: true, response: true } }) : [],
     rows.length ? db.stockMovement.findMany({ where: visitType === 'EXTRA' ? { extraVisitId: visit.id } : { visitId: visit.id }, select: movementSelection, orderBy: { id: 'asc' } }) : []
   ]);
-  return assess(rows, visit, visitType, receipts, movements);
+  const revisions = await require('./equipmentMaterialReviewJournal').read(db, rows, receipts);
+  return { receipts, movements, revisions };
 }
-module.exports = { parse, create, sound, describe, assess, selection };
+async function describe(db, rows, visit, visitType) {
+  const { receipts, movements, revisions } = await readInputs(db, rows, visit, visitType);
+  return assess(rows, visit, visitType, receipts, movements, revisions);
+}
+module.exports = { parse, create, sound, describe, assess, selection, readInputs, intact, recordOf };

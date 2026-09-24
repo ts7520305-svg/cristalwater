@@ -23,7 +23,8 @@
   }
   function materialsView(saved, parent) {
     const box = node('div', null, parent); box.className = 'field-equipment-material-view'; box.style.overflowWrap = 'anywhere';
-    node('p', ({ MISSING: 'Materiais próprios não registados.', NONE: 'Sem materiais, por declaração explícita.', DECLARED: 'Materiais declarados; aguardam o fecho e os consumos da visita.', MATCHED: 'Quantidades compatíveis com o consumo líquido atual da visita.', REVIEW: 'Materiais por rever: a declaração, a origem ou o consumo da visita não permite confirmar a repartição.' })[saved?.state] || 'Materiais próprios não registados.', box);
+    node('p', ({ MISSING: 'Materiais próprios não registados.', WITHDRAWN: 'Declaração de materiais anulada pela administração. Os materiais utilizados estão por confirmar.', NONE: 'Sem materiais, por declaração explícita.', DECLARED: 'Materiais declarados; aguardam o fecho e os consumos da visita.', MATCHED: 'Quantidades compatíveis com o consumo líquido atual da visita.', REVIEW: 'Materiais por rever: a declaração, a origem ou o consumo da visita não permite confirmar a repartição.' })[saved?.state] || 'Materiais próprios não registados.', box);
+    if (saved?.revision) node('p', 'Declaração revista pela administração; o registo original foi conservado.', box);
     if (saved?.record?.mode === 'DECLARED') node('p', materialsText(saved.record), box);
     if (saved?.state === 'MATCHED') for (const line of saved.comparison?.lines || []) node('p', `${line.productName} · ${line.unit}: visita ${line.visitQuantity}; total declarado nas revisões ${line.declaredMaintenanceQuantity}; ainda sem parcela declarada ${line.unassignedQuantity}.`, box);
     if (saved?.record?.mode === 'DECLARED') node('small', 'Esta declaração não movimenta stock nem atribui custo em euros. Inclua estas quantidades no consumo total da visita uma única vez.', box);

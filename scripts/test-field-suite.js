@@ -149,6 +149,7 @@ scripts.push('test-field-composed-cost-coverage.js');
 scripts.push('test-field-equipment-work-time.js','test-field-maintenance-labor.js');
 scripts.push('test-field-maintenance-materials.js');
 scripts.push('test-field-equipment-materials.js');
+scripts.push('test-field-equipment-material-review.js');
 scripts.push('test-field-financial-revenue-coverage.js');
 scripts.push('test-field-monthly-revenue.js','test-field-monthly-revenue-ui.js');
 scripts.push('test-field-maintenance-revenue.js');

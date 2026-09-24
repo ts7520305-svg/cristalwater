@@ -1,8 +1,12 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 24/09/2026, TASK310
+## Retoma atual — 24/09/2026, TASK311
 
 - O utilizador pediu continuar até o sistema estar completo, sem parar depois de cada tarefa implementável. Prosseguir a matriz até surgir uma dependência real, mantendo as restrições de produção/contactos abaixo.
+- Base `43d15160583e5d709f30ceeb4bf5ed68f5e71aae`, fecho TASK310. TASK311 implementada: correção/completamento/NONE/anulação de materiais pela administração, original e recibo técnico conservados, história própria, revisão das parcelas MATERIAL e custos LABOR intactos. [EQUIPMENT_MATERIAL_CORRECTIONS_20260924.md](EQUIPMENT_MATERIAL_CORRECTIONS_20260924.md). 449 unitários/68 ficheiros, sintaxe 608/206/62, API/navegador novo e regressões TASK308–310 aprovados localmente. Runner 214 grupos, cache v126, sem migrações/tabelas/dependências novas. Publicar e confirmar CI completo/restauro desta árvore antes do fecho; a aprovação TASK310 abaixo não aprova a TASK311.
+
+## Aprovação anterior — TASK310
+
 - Base `ac2d3a9a181775fca09404d8ed8aa5a67bc5a314`, fecho TASK309. TASK310 aprovada: repartição do custo MATERIAL original pelas declarações compatíveis de equipamento, limites conjuntos entre compras, cêntimos/quantidades conservados, revisão, anulação e recuperação no navegador. Relatório [MAINTENANCE_MATERIAL_SHARE_20260924.md](MAINTENANCE_MATERIAL_SHARE_20260924.md).
 - Código publicado `a3fcf2eebea304bd95f522517a9ded35290c494e`, árvore `c0c61d9f24953e9a2eec5976ed7a9ded45e79c52`, igual à validada localmente. [CI 35961381889](https://github.com/ts7520305-svg/cristalwater/actions/runs/35961381889), job `107510488522`, aprovado entre 2026-09-24T05:45:47Z e 2026-09-24T06:13:58Z (28m11s). 17 etapas e 213/213 grupos previstos distintos, sem falha, falta, entrada inesperada ou duplicação; 437 unitários/67 ficheiros, quatro testes técnicos, gate geral de navegador, sintaxe 606/204/62 e 35 migrações. Restauro PostgreSQL 16 de 126 tabelas/46 ficheiros, com linhas e hashes iguais. Evidência [evidence/20260924_task310_ci.json](evidence/20260924_task310_ci.json). Cache v125, sem novas migrações/tabelas/dependências. O fecho posterior altera apenas documentação; a aprovação refere-se ao código e árvore acima.
 
@@ -17,7 +21,7 @@
 
 ## Próxima ação
 
-1. Prosseguir com TASK311: correção/anulação explícita de declarações de materiais de equipamento, conservando o original, recibos recuperáveis e revisão das parcelas afetadas. A repartição monetária TASK310 está aprovada no CI e restauro; não repetir TASK300–310. Materiais/tempos próprios de lembretes e repartições entre meses continuam abertos.
+1. Confirmar CI/restauro e fechar TASK311. Prosseguir TASK312: materiais e tempos próprios de lembretes de serviço, com origens/execução confirmadas, declaração explícita e histórico recuperável. A repartição monetária TASK310 está aprovada; TASK311 já está implementada. Não repetir TASK300–311. Repartições entre meses e correção de registos antigos sem recibo verificável continuam abertos.
 2. Continuar restantes gastos/ajustes/origens de receita e os pontos da [matriz atual](COMPLETENESS_CURRENT_20260915.md): históricos/ecrãs/PDFs/idiomas, volume e operação prolongada, VPS/fornecedores e piloto físico. Custos/receitas completos e lucro por apurar; não atribuir percentagem global sem critérios fechados. IA generativa offline/aprendizagem por piscina/vídeo e integrações completas continuam requisitos separados sem aprovação integral.
 
 ## Autorizações e regras vigentes
@@ -32,4 +36,4 @@ A app assinala os serviços que pedem fatura com IVA e regista checklist/número
 
 Este ficheiro foi reduzido ao estado atual para evitar truncar a retoma. O conteúdo anterior está integralmente preservado, sem alterações, em [archive/WORK_CHECKPOINT_THROUGH_TASK305_20260923.md](archive/WORK_CHECKPOINT_THROUGH_TASK305_20260923.md), copiado do commit TASK305 antes deste fecho documental. Esse arquivo contém estados antigos e próximos passos já superados; não os tratar como a fase ativa.
 
-A matriz atual e o relatório TASK310 prevalecem para escolher a próxima tarefa. Relatórios individuais e `docs/product/evidence/` conservam os critérios e os resultados anteriores, incluindo [LABOR_COST_COMPONENTS_20260923.md](LABOR_COST_COMPONENTS_20260923.md) e [evidence/20260923_task304_ci.json](evidence/20260923_task304_ci.json).
+A matriz atual e o relatório TASK311 prevalecem para escolher a próxima tarefa. Relatórios individuais e `docs/product/evidence/` conservam os critérios e os resultados anteriores, incluindo [LABOR_COST_COMPONENTS_20260923.md](LABOR_COST_COMPONENTS_20260923.md) e [evidence/20260923_task304_ci.json](evidence/20260923_task304_ci.json).
