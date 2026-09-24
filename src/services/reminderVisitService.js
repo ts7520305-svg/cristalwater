@@ -37,6 +37,9 @@ async function context(db,reminderId,lock=false,selection=null){
   const blockers=[];
   if(!associated.valid)blockers.push({code:'HISTORY_REVIEW',message:'Reveja os comprovativos das parcelas associadas.'});
   if(associated.active)blockers.push({code:'ACTIVE_ASSOCIATED_RESOURCES',message:'Anule primeiro as parcelas próprias do lembrete associado.',href:'/reminder-resources?associated=1&reminderId='+reminderId});
+  const shares=!associated.active?await require('./reminderVisitCostSource').activeShares(db,reminderId):{valid:true,rows:[]};
+  if(!shares.valid)blockers.push({code:'HISTORY_REVIEW',message:'Reveja os comprovativos das parcelas financeiras.'});
+  for(const s of shares.rows)blockers.push({code:'ACTIVE_VISIT_COST',message:'Anule expressamente a parcela financeira antes de alterar a associação.',...s,href:'/admin-expenses?expenseId='+s.expenseId});
   if(!journal.valid||resource.available&&!resource.journalValid||!materials.valid)blockers.push({code:'HISTORY_REVIEW',message:'Reveja os comprovativos das associações, dos recursos e dos movimentos de materiais.'});
   if(materials.active)blockers.push({code:'ACTIVE_MATERIALS',message:'Reveja e anule o consumo próprio, confirmando primeiro a reposição no stock.',href:'/reminder-materials?reminderId='+reminderId});
   if(resource.active?.length)blockers.push({code:'ACTIVE_RESOURCES',message:'Reveja e anule a declaração de recursos próprios antes de associar o lembrete.',href:'/reminder-resources?reminderId='+reminderId});

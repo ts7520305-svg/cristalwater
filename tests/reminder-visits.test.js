@@ -57,6 +57,38 @@ function ownFixture(){
 }
 function ownRehash(r){const p=r.event.preview;p.hash=hash(ownRules.facts(p));r.envelope={...r.envelope,...p.selection,previewHash:p.hash};r.eventHash=hash(r.event);r.receipt.payloadHash=writes.context({id:1,role:'ADMIN'},ownRules.scope,1,r.envelope.requestId,(({requestId,...v})=>v)(r.envelope)).payloadHash;return r;}
 const ownVerify=r=>ownRules.response(r,r.envelope,owner,1,hash);
+const costRules=require('../frontend/cw-reminder-visit-cost-rules'),materialRules=require('../frontend/cw-maintenance-material-rules');
+async function costFixture(kind='MATERIAL'){
+  const resource=ownFixture(),p=resource.event.preview,d=p.selection.data;
+  const a={id:8,expenseId:9,monthRef:'2008-07',amountCents:100,targetType:'EXTRA',clientId:2,visitId:null,extraVisitId:1,repairId:null,maintenanceCompletionId:null,serviceReminderId:null,targetSnapshot:{startAt:p.parent.startAt,endAt:p.parent.endAt},voidedAt:null,valuationType:kind,quantity:kind==='MATERIAL'?'1':'3600',quantityUnit:kind==='MATERIAL'?'KG':'SECOND',purchaseItemId:kind==='MATERIAL'?7:null,valuationSnapshot:{source:{service:{technicianId:3},item:{id:7,productName:'SAL'}}}};
+  const source={schema:1,basis:'CURRENT_ASSOCIATED_REMINDER_RESOURCES',resourceId:resource.event.id,resourceHash:resource.eventHash,parent:p.parent,peers:p.peers,movements:p.movements,comparison:ownRules.compare(d,p.parent,p.peers,p.movements)};
+  const base={version:2,basis:kind==='MATERIAL'?materialRules.basis:'CONFIRMED_PARENT_COST_TIME_SHARE',expenseId:9,expenseVersion:1,allocationId:8,completionId:null,reminderId:1,monthRef:'2008-07',allocationBefore:a,allocationHash:hash(a),resources:resource,resourcesHash:resource.eventHash,resourceSource:source,resourceSourceHash:hash(source),target:await costRules.target(resource,hash,'Cliente histórico')};
+  if(kind==='MATERIAL')Object.assign(base,{parentQuantity:'1',quantity:'0.333333',material:{productName:'SAL',unit:'KG',declaredQuantity:'0.333333'},used:{quantity:'0',amountCents:0,shares:[]},maintenanceUsed:{quantity:'0',shares:[]},materials:d.materials,materialsHash:hash(d.materials)});
+  else {const w={schema:1,basis:'DECLARED_REMINDER_VISIT_WORK_INTERVAL',startAt:d.workTime.startedAt,endAt:d.workTime.endedAt,durationMs:600000,origin:p.origin};Object.assign(base,{parentDurationMs:3600000,used:{durationMs:0,amountCents:0,shares:[]},workTime:w,workTimeHash:hash(w)});}
+  Object.assign(base,kind==='MATERIAL'?materialRules.calculation(100,'1',base.used,base.maintenanceUsed,'0.333333','0.333333'):costRules.timeCalculation(100,3600000,base.used,600000));
+  return {available:true,...base,hash:hash(base)};
+}
+const costRehash=p=>{const {available,hash:signature,...v}=p;p.hash=hash(v);return p;};
+describe('associated reminder financial conservation',()=>{
+  it('verifies original resource receipts and both cost calculations identically in Node and browser',async()=>{
+    const c=vm.createContext({});for(const name of ['cw-maintenance-material-rules','cw-equipment-material-review-rules','cw-reminder-resource-rules','cw-reminder-visit-rules','cw-reminder-visit-resource-rules','cw-reminder-visit-cost-rules'])vm.runInContext(fs.readFileSync(new URL('../frontend/'+name+'.js',import.meta.url),'utf8'),c);
+    for(const kind of ['MATERIAL','LABOR']){const p=await costFixture(kind);expect(clone(await c.CWReminderVisitCostRules.verify(p,hash))).toEqual(await costRules.verify(p,hash));expect(p.amountCents).toBe(kind==='MATERIAL'?33:17);}
+    expect(await materialRules.verify(await costFixture(),hash)).toEqual(await costFixture());
+  });
+  it('keeps equipment and reminder identities distinct even when numeric ids coincide',()=>{
+    expect(costRules.identity({completionId:1})).not.toBe(costRules.identity({completionId:null,reminderId:1}));expect(costRules.selection({completionId:null,reminderId:1})).toEqual({reminderId:1});expect(costRules.matchesRequest({completionId:null,reminderId:1},{reminderId:'1'})).toBe(false);expect(costRules.matchesRequest({completionId:null,reminderId:1},{reminderId:1,completionId:1})).toBe(false);
+  });
+  it('rejects rehashed parent, recipient, technician, quantity and expense substitutions',async()=>{
+    for(const change of [p=>p.reminderId=2,p=>p.completionId=1,p=>p.allocationBefore.targetType='REGULAR',p=>p.allocationBefore.valuationSnapshot.source.service.technicianId=4,p=>p.allocationBefore.clientId=3,p=>p.resourceSource.parent.endAt='2008-07-11T11:01:00.000Z',p=>p.material.declaredQuantity='1',p=>p.quantity='1',p=>p.target.snapshot.originVisitId=9,p=>p.expenseId=10]){const p=await costFixture();change(p);p.allocationHash=hash(p.allocationBefore);p.resourceSourceHash=hash(p.resourceSource);await expect(costRules.verify(costRehash(p),hash)).rejects.toThrow();}
+  });
+  it('rejects altered embedded originals, independent receipts, overdrawn budgets and double time inheritance',async()=>{
+    for(const change of [p=>p.resources.receipt.scope='REMINDER_RESOURCES',p=>p.resources.event.preview.selection.data.workTime.endedAt=p.resourceSource.parent.endAt,p=>p.used.amountCents=100,p=>p.used.durationMs=3600000,p=>p.workTime.durationMs=3600000,p=>p.amountCents=100]){const p=await costFixture('LABOR');change(p);p.workTimeHash=hash(p.workTime);await expect(costRules.verify(costRehash(p),hash)).rejects.toThrow();}
+  });
+  it('conserves cents on the final shared duration and refuses non-positive and excessive parts',()=>{
+    const first=costRules.timeCalculation(100,3,{durationMs:0,amountCents:0},1),second=costRules.timeCalculation(100,3,{durationMs:1,amountCents:first.amountCents},1),last=costRules.timeCalculation(100,3,{durationMs:2,amountCents:first.amountCents+second.amountCents},1);
+    expect([first.amountCents,second.amountCents,last.amountCents]).toEqual([33,33,34]);expect(last.remainingAmountCents).toBe(0);expect(costRules.timeCalculation(1,100,{durationMs:0,amountCents:0},1)).toBeNull();expect(costRules.timeCalculation(100,3,{durationMs:3,amountCents:100},1)).toBeNull();
+  });
+});
 describe('associated reminder resource conservation',()=>{
   it('conserves six decimal quantities after returns and adjacent work periods in Node and browser',async()=>{
     const r=ownFixture();await expect(ownVerify(r)).resolves.toEqual(r);

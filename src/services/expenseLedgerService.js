@@ -198,23 +198,27 @@ async function valuationPreview(id, query) {
   r.id(id); r.object(query, ['kind', 'targetType', 'targetId', 'purchaseItemId', 'quantity', 'workIntervalId', 'laborPart']); const selection = valuation.selection(query, true);
   return prisma.$transaction(async db => { const expense = await db.companyExpense.findUnique({ where: { id }, include }); if (!expense) r.fail('Despesa não encontrada.', 404); return { ok: true, preview: await valuation.preview(db, expense, selection) }; }, { isolationLevel: 'RepeatableRead', timeout: 30000, maxWait: 15000 });
 }
+function maintenanceShareQuery(query, preview, material = false) {
+  r.object(query, preview ? ['allocationId','completionId','reminderId',...(material ? ['quantity'] : [])] : ['allocationId','page','targetType']);
+  const reminderMode = preview ? query.reminderId !== undefined : query.targetType === 'MAINTENANCE_REMINDER';
+  if (preview && reminderMode && query.completionId !== undefined || !preview && query.targetType !== undefined && !['MAINTENANCE_EQUIPMENT','MAINTENANCE_REMINDER'].includes(query.targetType)) r.fail('Escolha um destino de manutenção válido.');
+  return { reminderMode, allocationId: r.queryId(query.allocationId), selection: r.queryId(preview ? reminderMode ? query.reminderId : query.completionId : query.page || '1') };
+}
 async function maintenanceLabor(id, query, preview = false) {
-  r.id(id); r.object(query, preview ? ['allocationId','completionId'] : ['allocationId','page']);
-  const allocationId = r.queryId(query.allocationId), selection = r.queryId(preview ? query.completionId : query.page || '1');
+  r.id(id); const { allocationId, selection, reminderMode } = maintenanceShareQuery(query, preview);
   return prisma.$transaction(async db => {
     const expense = await db.companyExpense.findUnique({ where: { id }, include }); if (!expense) r.fail('Despesa não encontrada.', 404);
     const service = require('./maintenanceLaborShareService');
-    return { ok: true, [preview ? 'preview' : 'candidates']: await service[preview ? 'preview' : 'candidates'](db, expense, allocationId, selection) };
+    return { ok: true, [preview ? 'preview' : 'candidates']: preview ? await service.preview(db, expense, allocationId, selection, false, reminderMode) : await service.candidates(db, expense, allocationId, selection, reminderMode) };
   }, { isolationLevel: 'RepeatableRead', timeout: 30000, maxWait: 15000 });
 }
 async function maintenanceMaterial(id, query, preview = false) {
-  r.id(id); r.object(query, preview ? ['allocationId','completionId','quantity'] : ['allocationId','page']);
-  const allocationId = r.queryId(query.allocationId), selection = r.queryId(preview ? query.completionId : query.page || '1'), service = require('./maintenanceMaterialShareService');
+  r.id(id); const { allocationId, selection, reminderMode } = maintenanceShareQuery(query, preview, true), service = require('./maintenanceMaterialShareService');
   const quantity = query.quantity === undefined || query.quantity === '' ? null : query.quantity;
   if (quantity !== null && (service.rules.quantity(quantity) === null || service.rules.quantity(quantity) <= 0n)) r.fail('Indique uma quantidade positiva com até seis casas decimais.');
   return prisma.$transaction(async db => {
     const expense = await db.companyExpense.findUnique({ where: { id }, include }); if (!expense) r.fail('Despesa não encontrada.', 404);
-    return { ok: true, [preview ? 'preview' : 'candidates']: preview ? await service.preview(db, expense, allocationId, selection, quantity) : await service.candidates(db, expense, allocationId, selection) };
+    return { ok: true, [preview ? 'preview' : 'candidates']: preview ? await service.preview(db, expense, allocationId, selection, quantity, false, reminderMode) : await service.candidates(db, expense, allocationId, selection, reminderMode) };
   }, { isolationLevel: 'RepeatableRead', timeout: 30000, maxWait: 15000 });
 }
 async function costPeriodPreview(id, query) {

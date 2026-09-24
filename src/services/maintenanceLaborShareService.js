@@ -2,6 +2,7 @@
 // Secondary attribution of an existing cost. The original allocation remains
 // the sole reservation against its salary/charge basis and measured visit time.
 const r = require('./expenseLedgerRules'), targets = require('./expenseCostTargets'), time = require('./equipmentWorkTimeService'), quantities = require('./expenseValuationSources');
+const reminders = require('./reminderVisitCostSource'), { identity } = reminders.rules;
 const commands = ['SHARE_MAINTENANCE_LABOR', 'VOID_MAINTENANCE_LABOR_SHARE'];
 const basis = 'CONFIRMED_PARENT_COST_TIME_SHARE';
 const fields = ['id','expenseId','monthRef','amountCents','targetType','clientId','visitId','extraVisitId','repairId','maintenanceCompletionId','serviceReminderId','targetHash','targetSnapshot','expenseHash','expenseSnapshot','activeKey','reason','createdById','createdAt','reviewedAt','voidedAt','voidReason','valuationType','valuationKey','valuationHash','valuationSnapshot','quantity','quantityUnit','purchaseItemId','activeMeasurementKey'];
@@ -19,10 +20,7 @@ function budget(rows) {
   return { durationMs, amountCents, shares: active.map(s => ({ id: s.share.id, hash: s.hash })).sort((a, b) => a.id.localeCompare(b.id)) };
 }
 function calculation(totalCents, totalMs, used, ownMs) {
-  if (!positive(totalCents) || !positive(totalMs) || !positive(ownMs) || !count(used.durationMs) || !count(used.amountCents) || used.durationMs + ownMs > totalMs || used.amountCents > totalCents) return null;
-  const final = used.durationMs + ownMs === totalMs, amountCents = final ? totalCents - used.amountCents : Number(quantities.round(BigInt(totalCents) * BigInt(ownMs), BigInt(totalMs)));
-  if (!positive(amountCents) || used.amountCents + amountCents > totalCents) return null;
-  return { amountCents, rounding: final ? 'FINAL_PARENT_REMAINDER' : 'NEAREST_CENT', remainingAmountCents: totalCents - used.amountCents - amountCents, remainingDurationMs: totalMs - used.durationMs - ownMs };
+  return reminders.rules.timeCalculation(totalCents, totalMs, used, ownMs);
 }
 function validPreview(p) {
   try {
@@ -46,7 +44,8 @@ async function journal(db, expenseIds) {
     if (!e.result.applied) continue;
     if (e.command === commands[0]) {
       const p = s?.preview, prior = state.records.filter(row => row.share.allocationId === s?.allocationId);
-      if (!s || s.schema !== 1 || s.id !== e.requestId || s.expenseId !== e.expenseId || s.allocationId !== d.allocationId || s.completionId !== d.completionId || s.createdById !== e.actorId || !iso(s.createdAt) || s.reason !== reason || e.result.reason !== reason || !validPreview(p) || p.expenseVersion !== e.request.expectedVersion || p.expenseId !== s.expenseId || p.allocationId !== s.allocationId || p.completionId !== s.completionId || p.hash !== d.previewHash || p.amountCents !== d.amountCents || d.confirmed !== true || r.hash(s) !== e.result.shareHash || r.hash(budget(prior)) !== r.hash(p.used) || live(prior).some(row => row.share.completionId === s.completionId)) { state.review = true; continue; }
+      let verified = validPreview(p); if (p?.version === 2) { try { await reminders.rules.verify(p, r.hash); verified = true; } catch (_) { verified = false; } }
+      if (!s || s.schema !== 1 || s.id !== e.requestId || s.expenseId !== e.expenseId || s.allocationId !== d.allocationId || !reminders.rules.matchesRequest(s, d) || s.createdById !== e.actorId || !iso(s.createdAt) || s.reason !== reason || e.result.reason !== reason || !verified || p.expenseVersion !== e.request.expectedVersion || p.expenseId !== s.expenseId || p.allocationId !== s.allocationId || p.reminderId !== s.reminderId || p.completionId !== s.completionId || p.hash !== d.previewHash || p.amountCents !== d.amountCents || d.confirmed !== true || r.hash(s) !== e.result.shareHash || r.hash(budget(prior)) !== r.hash(p.used) || live(prior).some(row => identity(row.share) === identity(s))) { state.review = true; continue; }
       state.records.push({ share: s, hash: e.result.shareHash, voidedAt: null, voidReason: null });
     } else {
       const previous = state.records.find(row => row.share.id === d.shareId);
@@ -71,9 +70,10 @@ async function ownTimes(db, parents) {
 }
 async function decorate(db, expenses) {
   const states = await journal(db, expenses.map(e => e.id)), records = [...states.values()].flatMap(s => live(s.records));
-  const [current, times] = await Promise.all([
-    require('./expenseMaintenanceTargets').read(db, 'MAINTENANCE_EQUIPMENT', [...new Set(records.map(s => s.share.completionId))]),
-    ownTimes(db, records.map(s => ({ type: s.share.preview.allocationBefore.targetType, id: parentId(s.share.preview.allocationBefore) })))
+  const [current, times, reminderViews] = await Promise.all([
+    require('./expenseMaintenanceTargets').read(db, 'MAINTENANCE_EQUIPMENT', [...new Set(records.filter(s => s.share.reminderId === undefined).map(s => s.share.completionId))]),
+    ownTimes(db, records.map(s => ({ type: s.share.preview.allocationBefore.targetType, id: parentId(s.share.preview.allocationBefore) }))),
+    reminders.read(db, records.filter(s => s.share.reminderId !== undefined).map(s => s.share.reminderId))
   ]);
   const byTarget = new Map(current.map(t => [t.id, t]));
   return expenses.map(e => {
@@ -82,8 +82,9 @@ async function decorate(db, expenses) {
     const allocations = e.allocations.map(a => {
       const rows = state.records.filter(s => s.share.allocationId === a.id), active = live(rows), used = budget(rows);
       const shares = rows.map(s => {
-        const p = s.share.preview, t = byTarget.get(s.share.completionId), w = times.get(s.share.completionId);
-        const needsReview = !s.voidedAt && (state.review || a.voidedAt !== null || a.needsReview || p.allocationHash !== r.hash(allocationFacts(a)) || !t?.valid || t.hash !== p.target.hash || w?.state !== 'RECORDED' || r.hash(w?.record || null) !== p.workTimeHash);
+        const p = s.share.preview, reminder = reminderViews.get(s.share.reminderId), t = s.share.reminderId === undefined ? byTarget.get(s.share.completionId) : reminder?.target, w = times.get(s.share.completionId);
+        const sourceReview = s.share.reminderId === undefined ? w?.state !== 'RECORDED' || r.hash(w?.record || null) !== p.workTimeHash : !reminder?.valid || reminder.resourcesHash !== p.resourcesHash || r.hash(reminder.workTime) !== p.workTimeHash;
+        const needsReview = !s.voidedAt && (state.review || a.voidedAt !== null || a.needsReview || p.allocationHash !== r.hash(allocationFacts(a)) || !t?.valid || t.hash !== p.target.hash || sourceReview);
         return { ...s, needsReview };
       });
       const invalidBudget = active.length > 0 && (!positive(duration(a)) || used.durationMs > duration(a) || used.amountCents > a.amountCents), review = state.review || invalidBudget || shares.some(s => s.needsReview);
@@ -102,7 +103,7 @@ function project(allocations) {
     const parent = { ...a, voidedAt: null, amountCents: remainder, sourceAllocationId: a.id, costAttributionBasis: basis, quantity: duration(a) >= used.durationMs ? quantities.decimal(BigInt(duration(a) - used.durationMs) * 1000n) : a.quantity };
     return [parent, ...shares.map(s => {
       const p = s.share.preview;
-      return { ...a, voidedAt: null, sourceAllocationId: a.id, maintenanceShareId: s.share.id, costAttributionBasis: basis, targetType: 'MAINTENANCE_EQUIPMENT', targetId: s.share.completionId, maintenanceCompletionId: s.share.completionId, visitId: null, extraVisitId: null, targetHash: p.target.hash, targetSnapshot: p.target.snapshot, targetLabel: p.target.label, clientName: p.target.clientName, amountCents: p.amountCents, quantity: quantities.decimal(BigInt(p.workTime.durationMs) * 1000n), reason: s.share.reason, needsReview: a.needsReview || s.needsReview };
+      return { ...a, voidedAt: null, sourceAllocationId: a.id, maintenanceShareId: s.share.id, costAttributionBasis: basis, targetType: p.target.type, targetId: p.target.id, maintenanceCompletionId: s.share.completionId, serviceReminderId: s.share.reminderId ?? null, visitId: null, extraVisitId: null, targetHash: p.target.hash, targetSnapshot: p.target.snapshot, targetLabel: p.target.label, clientName: p.target.clientName, amountCents: p.amountCents, quantity: quantities.decimal(BigInt(p.workTime.durationMs) * 1000n), reason: s.share.reason, needsReview: a.needsReview || s.needsReview };
     })];
   });
 }
@@ -113,18 +114,23 @@ async function sourceAllocation(db, expense, allocationId) {
   const decorated = (await require('./expenseCostAllocationService').decorate(db, [require('./expenseLedgerService').view(expense, hashes)]))[0];
   return decorated.allocations.find(row => row.id === a.id);
 }
-async function candidates(db, expense, allocationId, page) {
+async function candidates(db, expense, allocationId, page, reminderMode = false) {
   const a = await sourceAllocation(db, expense, allocationId);
   if (!a || a.needsReview || expense.cancelledAt) return { available: false, message: 'Confirme primeiro o custo de trabalho da visita e as suas origens.', rows: [], total: 0, page, pageSize: 10, allocationId, expenseId: expense.id, expenseVersion: expense.version };
+  if (reminderMode) {
+    const list = await reminders.candidates(db, a, page);
+    return { available: true, targetType: 'MAINTENANCE_REMINDER', expenseId: expense.id, expenseVersion: expense.version, allocationId, page, pageSize: 10, total: list.total, rows: list.rows.map(v => ({ id: v.id, label: v.label, workTimeState: !v.valid ? 'REVIEW' : v.workTime ? 'RECORDED' : 'MISSING', durationMs: v.workTime?.durationMs || null, targetConfirmed: v.valid, shared: live(a.maintenanceShares).some(s => s.share.reminderId === v.id) })) };
+  }
   const where = a.targetType === 'REGULAR' ? { visitId: parentId(a) } : { extraVisitId: parentId(a) };
   const [total, rows, times] = await Promise.all([db.equipmentMaintenanceCompletion.count({ where }), db.equipmentMaintenanceCompletion.findMany({ where, orderBy: { id: 'desc' }, skip: (page - 1) * 10, take: 10, select: { id: true } }), ownTimes(db, [{ type: a.targetType, id: parentId(a) }])]);
   const targetRows = await require('./expenseMaintenanceTargets').read(db, 'MAINTENANCE_EQUIPMENT', rows.map(row => row.id));
   return { available: true, expenseId: expense.id, expenseVersion: expense.version, allocationId, page, pageSize: 10, total, rows: rows.map(row => targetRows.find(t => t.id === row.id)).filter(Boolean).map(t => ({ id: t.id, label: t.label, workTimeState: times.get(t.id)?.state || 'MISSING', durationMs: times.get(t.id)?.record?.durationMs || null, targetConfirmed: t.valid, shared: live(a.maintenanceShares).some(s => s.share.completionId === t.id) })) };
 }
-async function preview(db, expense, allocationId, completionId, lock = false) {
-  if (lock) await require('./expenseMaintenanceTargets').get(db, 'MAINTENANCE_EQUIPMENT', completionId, true);
+async function preview(db, expense, allocationId, completionId, lock = false, reminderMode = false) {
+  if (lock) { if (reminderMode) await reminders.current(db, completionId, true); else await require('./expenseMaintenanceTargets').get(db, 'MAINTENANCE_EQUIPMENT', completionId, true); }
   const a = await sourceAllocation(db, expense, allocationId);
   if (!a || a.needsReview || expense.cancelledAt) return refused('PARENT_COST_REVIEW', 'Confirme primeiro o custo de trabalho da visita e as suas origens.');
+  if (reminderMode) return reminderPreview(db, expense, a, completionId);
   const [target, times] = await Promise.all([targets.get(db, 'MAINTENANCE_EQUIPMENT', completionId), ownTimes(db, [{ type: a.targetType, id: parentId(a) }])]);
   const w = times.get(completionId);
   if (!target?.valid || target.clientId !== a.clientId || target.snapshot.originVisitType !== a.targetType || target.snapshot.originVisitId !== parentId(a)) return refused('MAINTENANCE_SOURCE_REVIEW', 'A manutenção tem de pertencer a esta visita e cliente, com execução e decisão confirmadas.');
@@ -138,25 +144,37 @@ async function preview(db, expense, allocationId, completionId, lock = false) {
   if (!validPreview(p)) return refused('MAINTENANCE_SHARE_REVIEW', 'As provas da repartição precisam de revisão.');
   return json(p);
 }
+async function reminderPreview(db, expense, a, reminderId) {
+  const view = await reminders.current(db, reminderId), target = view.target, workTime = view.workTime;
+  if (!view.valid || !workTime || target.clientId !== a.clientId || target.snapshot.originVisitType !== a.targetType || target.snapshot.originVisitId !== parentId(a)) return refused('REMINDER_RESOURCES_REVIEW', 'Confirme a associação e o tempo próprio do lembrete nesta visita.');
+  if (target.snapshot.endAt.slice(0, 7) !== a.monthRef || a.targetSnapshot.endAt.slice(0, 7) !== a.monthRef) return refused('MAINTENANCE_PERIOD_REVIEW', 'O lembrete, a visita e a atribuição têm de pertencer ao mesmo mês UTC.');
+  if (live(a.maintenanceShares).some(s => s.share.reminderId === reminderId)) return refused('MAINTENANCE_ALREADY_SHARED', 'Este lembrete já tem uma parcela ativa deste custo. Anule-a antes de corrigir.');
+  const used = budget(a.maintenanceShares), parentDurationMs = duration(a), calc = calculation(a.amountCents, parentDurationMs, used, workTime.durationMs);
+  if (!calc) return refused('MAINTENANCE_SHARE_BUDGET', 'O intervalo tem de caber no tempo e no valor ainda disponíveis da visita.');
+  const allocationBefore = allocationFacts(a), value = { version: 2, basis, expenseId: expense.id, expenseVersion: expense.version, allocationId: a.id, completionId: null, reminderId, monthRef: a.monthRef, allocationBefore, allocationHash: r.hash(allocationBefore), parentDurationMs, used, workTime, workTimeHash: r.hash(workTime), ...reminders.evidence(view), target, ...calc };
+  try { return json(await reminders.rules.verify({ available: true, ...value, hash: r.hash(value) }, r.hash)); } catch (_) { return refused('MAINTENANCE_SHARE_REVIEW', 'As provas da repartição precisam de revisão.'); }
+}
 async function hasActive(db, allocations) {
   const states = await journal(db, [...new Set(allocations.map(a => a.expenseId))]);
   return allocations.some(a => { const s = states.get(a.expenseId); return s.review || live(s.records).some(row => row.share.allocationId === a.id); });
 }
 async function apply(db, who, env, expense) {
   const d = env.data, create = env.command === commands[0];
-  r.object(d, create ? ['allocationId','completionId','amountCents','previewHash','reason','confirmed'] : ['allocationId','shareId','shareHash','reason','confirmed']);
+  r.object(d, create ? ['allocationId','completionId','reminderId','amountCents','previewHash','reason','confirmed'] : ['allocationId','shareId','shareHash','reason','confirmed']);
   r.id(d.allocationId); const reason = r.text(d.reason, 500, true);
   if (d.confirmed !== true) r.fail('Reveja e confirme a repartição.');
   let result;
   if (create) {
-    r.id(d.completionId); r.money(d.amountCents); if (!sha(d.previewHash)) r.fail('Consulte o cálculo antes de confirmar.');
-    const p = await preview(db, expense, d.allocationId, d.completionId, true); if (!p.available) return p;
+    const reminderMode = d.reminderId !== undefined; if (reminderMode && d.completionId !== undefined) r.fail('Escolha apenas um destino para a parcela.');
+    r.id(reminderMode ? d.reminderId : d.completionId); r.money(d.amountCents); if (!sha(d.previewHash)) r.fail('Consulte o cálculo antes de confirmar.');
+    const p = await preview(db, expense, d.allocationId, reminderMode ? d.reminderId : d.completionId, true, reminderMode); if (!p.available) return p;
     if (p.hash !== d.previewHash || p.amountCents !== d.amountCents) return refused('PREVIEW_CHANGED', 'A repartição mudou. Consulte e confirme novamente o cálculo.');
-    const share = { schema: 1, id: env.requestId, expenseId: expense.id, allocationId: d.allocationId, completionId: d.completionId, preview: p, reason, createdAt: new Date().toISOString(), createdById: who.id };
+    const share = { schema: 1, id: env.requestId, expenseId: expense.id, allocationId: d.allocationId, completionId: reminderMode ? null : d.completionId, ...(reminderMode ? { reminderId: d.reminderId } : {}), preview: p, reason, createdAt: new Date().toISOString(), createdById: who.id };
     result = { share, shareHash: r.hash(share) };
   } else {
     if (typeof d.shareId !== 'string' || !/^[0-9a-f-]{36}$/.test(d.shareId) || !sha(d.shareHash)) r.fail('Consulte a parcela antes de anular.');
-    const state = (await journal(db, [expense.id])).get(expense.id), row = state.records.find(s => s.share.id === d.shareId && s.share.allocationId === d.allocationId);
+    let state = (await journal(db, [expense.id])).get(expense.id), row = state.records.find(s => s.share.id === d.shareId && s.share.allocationId === d.allocationId);
+    if (row?.share.reminderId !== undefined) { const a = row.share.preview.allocationBefore; await db.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${ 'maintenance-material-share:' + a.targetType + ':' + parentId(a) }))::text`; state = (await journal(db, [expense.id])).get(expense.id); row = state.records.find(s => s.share.id === d.shareId && s.share.allocationId === d.allocationId); }
     if (state.review || !row || row.voidedAt || row.hash !== d.shareHash) return refused('MAINTENANCE_SHARE_STATE', 'A parcela mudou, está anulada ou o histórico precisa de revisão.');
     result = { share: row.share, shareHash: row.hash, voidedAt: new Date().toISOString() };
   }

@@ -47,6 +47,7 @@
     return { value, target: Object.fromEntries(targetFields.map(k => [k, t.snapshot[k]])) };
   }
   async function verify(p, hash, allocation) {
+    if (p?.version === 2) return (typeof module === 'object' && module.exports ? require('./cw-reminder-visit-cost-rules') : globalThis.CWReminderVisitCostRules).verify(p, hash, allocation);
     const f = facts(p);
     const declared = p.consumptionSource.declarations.find(row => row.id === p.completionId).materials;
     const checked = await Promise.all([hash(f.value), hash(p.allocationBefore), hash(p.materials), hash(p.consumptionSource), hash(f.target), hash(declared)]);
