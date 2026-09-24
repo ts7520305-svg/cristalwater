@@ -20,7 +20,7 @@ let browser;
   const literal = '<script>HISTORICAL_LITERAL</script>';
   const createRegular = () => prisma.serviceVisit.create({ data: { clientId: old.id, poolId: pool.id, technicianId: tech.id, technicianName: 'RECORDED_TECH', status: 'COMPLETED', notes: 'REGULAR_RECORDED ' + literal, internalNotes: 'REGULAR_PRIVATE', ph: 7.3, startAt: new Date('2026-01-10T09:00:00Z'), endAt: new Date('2026-01-10T09:30:00Z'), chemicals: { create: { name: 'RECORDED_CHEMICAL', quantity: 2, unit: 'kg' } } } });
   const regular = await createRegular();
-  const extra = await prisma.extraVisit.create({ data: { clientId: old.id, poolId: pool.id, technicianId: tech.id, status: 'DONE', notes: 'EXTRA_PLANNING', internalNote: 'EXTRA_PRIVATE', execution: { notes: 'EXTRA_RECORDED ' + literal, ph: 7.4, cleaned: true } } });
+  const extra = await prisma.extraVisit.create({ data: { clientId: old.id, poolId: pool.id, technicianId: tech.id, status: 'DONE', billingMode: 'NO_CHARGE', isBillable: false, notes: 'EXTRA_PLANNING', internalNote: 'EXTRA_PRIVATE', execution: { notes: 'EXTRA_RECORDED ' + literal, ph: 7.4, cleaned: true } } });
   const photo = await sharp({ create: { width: 160, height: 100, channels: 3, background: '#1a7799' } }).jpeg().toBuffer();
   const sha = createHash('sha256').update(photo).digest('hex'), uploadRoot = ensureUploadBaseDirReady();
   for (const type of ['REGULAR', 'EXTRA']) {

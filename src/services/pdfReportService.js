@@ -1,82 +1,33 @@
-// ==========================================
-// CRISTAL WATER - PDF REPORT SERVICE
-// ==========================================
+"use strict";
+const { writePdfResponse, line, section, paragraph } = require('./documentPdfService');
+const unreadable = () => { throw Object.assign(Error('O relatório guardado está incompleto ou ilegível. Peça revisão ao escritório.'), { statusCode: 409 }); };
+const count = value => { if (!Number.isSafeInteger(value) || value < 0) unreadable(); return value; };
 
-const PDFDocument = require("pdfkit");
-const prepareFonts = require('./visitReportPdfFonts');
-
-/**
- * Gera PDF do relatório mensal do cliente
- */
-function generateMonthlyReportPDF(res, report) {
-  const doc = new PDFDocument({ margin: 40 });
-  const fonts = prepareFonts(doc);
-
-  res.setHeader("Content-Type", "application/pdf");
-  res.setHeader(
-    "Content-Disposition",
-    `attachment; filename=relatorio-${report.month}.pdf`
-  );
-
-  doc.pipe(res);
-
-  // CABEÇALHO
-  doc
-    .fontSize(22)
-    .fillColor("#007bff")
-    .text("Cristal Water", { align: "center" })
-    .moveDown(0.5);
-
-  doc
-    .fontSize(16)
-    .fillColor("#000")
-    .text("Relatório Mensal", { align: "center" })
-    .moveDown(1);
-
-  // INFO CLIENTE
-  doc
-    .fontSize(12)
-    .text(fonts.format(`Cliente: ${report.data.client}`))
-    .text(fonts.format(`Mês: ${report.month}`))
-    .text(fonts.format(`Estado de pagamento: ${report.data.paymentStatus}`))
-    .moveDown(1);
-
-  if (report.data.reportVersion === 2) {
-    doc.fontSize(10).fillColor('#444')
-      .text('Visitas regulares. Contagem pela data de fecho, em UTC.')
-      .text('Registos sem data de fecho ficam por confirmar, pelo mês planeado ou pela data antiga do registo.')
-      .text('Dados do cliente, instalações e pagamento correspondem ao registo na geração.')
-      .moveDown(1);
+async function generateMonthlyReportPDF(res, report) {
+  // Validate the saved snapshot before response bytes; never reconstruct history
+  // using the client's current pools, names, payment state or visit totals.
+  const data = report.data;
+  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(report.month) || !data || typeof data.client !== 'string' || !Array.isArray(data.pools)) unreadable();
+  const blocks = [];
+  line(blocks, 'Cliente', data.client);
+  line(blocks, 'Mês', report.month);
+  line(blocks, 'Estado de pagamento guardado', data.paymentStatus);
+  if (data.reportVersion === 2) {
+    paragraph(blocks, 'Visitas regulares. Contagem pela data de fecho, em UTC.');
+    paragraph(blocks, 'Registos sem data de fecho ficam por confirmar, pelo mês planeado ou pela data antiga do registo.');
   }
-
-  // PISCINAS
-  report.data.pools.forEach((pool) => {
-    doc
-      .fontSize(13)
-      .fillColor("#000")
-      .text(fonts.format(`Piscina: ${pool.name}`), { underline: true })
-      .moveDown(0.3);
-
-    doc
-      .fontSize(11)
-      .text(`Visitas realizadas: ${pool.totalVisits}`)
-      .text(`Não realizadas: ${pool.notDone}`)
-      .moveDown(0.8);
-    if (report.data.reportVersion === 2 && pool.unconfirmed) {
-      doc.fontSize(11).fillColor('#7c2d12').text(`Por confirmar: ${pool.unconfirmed} - falta a data de fecho.`).moveDown(0.8);
+  paragraph(blocks, 'Dados do cliente, instalações e pagamento correspondem ao relatório guardado; esta consulta não atualiza o histórico.');
+  if (!data.pools.length) paragraph(blocks, 'Sem piscinas registadas neste relatório.');
+  for (const pool of data.pools) {
+    if (!pool || typeof pool.name !== 'string') unreadable();
+    section(blocks, `Piscina: ${pool.name}`);
+    paragraph(blocks, `Visitas realizadas: ${count(pool.totalVisits)}`);
+    paragraph(blocks, `Não realizadas: ${count(pool.notDone)}`);
+    if (data.reportVersion === 2 && pool.unconfirmed != null) {
+      count(pool.unconfirmed);
+      if (pool.unconfirmed) paragraph(blocks, `Por confirmar: ${pool.unconfirmed} - falta a data de fecho.`);
     }
-  });
-
-  // RODAPÉ
-  doc
-    .moveDown(2)
-    .fontSize(10)
-    .fillColor("#666")
-    .text("Cristal Water • Manutenção de Piscinas", { align: "center" });
-
-  doc.end();
+  }
+  await writePdfResponse(res, `relatorio-${report.month}.pdf`, 'Relatório Mensal', output => output.push(...blocks), { disposition: 'attachment', reference: `Relatório #${report.id}` });
 }
-
-module.exports = {
-  generateMonthlyReportPDF,
-};
+module.exports = { generateMonthlyReportPDF };

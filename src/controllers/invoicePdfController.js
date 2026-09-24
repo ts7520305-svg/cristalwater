@@ -1,153 +1,29 @@
+"use strict";
 const documents = require('../business/finance/InvoiceDocumentAccessBusiness');
-const PDFDocument = require("pdfkit");
-
-// ==========================================================
-// HELPERS
-// ==========================================================
-
-function formatMoney(v) {
-  return `€ ${Number(v || 0).toFixed(2)}`;
-}
-
-function formatDate(d) {
-  if (!d) return "-";
-  return new Date(d).toLocaleDateString("pt-PT");
-}
-
-// ==========================================================
-// 🔵 PDF NORMAL (JÁ TINHAS)
-// ==========================================================
+const { writePdfResponse } = require('../services/documentPdfService');
+const { invoiceBlocks, extrasBlocks } = require('../services/financialDocumentPdfService');
 
 async function generateInvoicePdf(req, res) {
   try {
-    const invoiceId = Number(req.params.id);
-
-    if (!invoiceId) {
-      return res.status(400).send("ID inválido");
-    }
-
     const invoice = await documents.invoice(req.params.id, req.user);
-
-    if (!invoice) {
-      return res.status(404).send("Fatura não encontrada");
-    }
-
-    const doc = new PDFDocument({ margin: 40 });
-
-    res.setHeader('Cache-Control', 'private, no-store');
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      `inline; filename="fatura-${invoiceId}.pdf"`
-    );
-
-    doc.pipe(res);
-
-    doc.fontSize(22).text("Cristal Water", { align: "center" });
-    doc.moveDown(0.3);
-    doc.fontSize(14).text("Fatura / Conta Corrente", { align: "center" });
-
-    doc.moveDown(1);
-
-    doc.fontSize(12);
-    doc.text(`Cliente: ${invoice.client?.name || "-"}`);
-    doc.text(`Mês: ${invoice.monthRef}`);
-    doc.moveDown(1);
-
-    doc.fontSize(14).text("Serviços");
-    doc.moveDown(0.5);
-
-    invoice.lines.forEach((l, i) => {
-      doc.text(`${i + 1}. ${l.description} — ${formatMoney(l.total)}`);
-    });
-
-    doc.moveDown(1);
-
-    doc.fontSize(14).text("Resumo");
-    doc.moveDown(0.5);
-
-    doc.text(`Total: ${formatMoney(invoice.total)}`);
-    doc.text(`Pago: ${formatMoney(invoice.amountPaid)}`);
-    doc.text(`Em aberto: ${formatMoney(invoice.amountOpen)}`);
-
-    doc.end();
-
-  } catch (err) {
-    console.error(err);
-    res.status(err.status || 500).send(err.status ? err.message : "Erro ao gerar PDF");
+    const blocks = invoiceBlocks(invoice);
+    await writePdfResponse(res, `documento-interno-${invoice.id}.pdf`, 'Conta corrente — Documento interno', output => output.push(...blocks), { reference: `Documento #${invoice.id}` });
+  } catch (error) {
+    if (res.headersSent) return res.destroy();
+    res.status(error.status || 500).send(error.status ? error.message : 'Erro ao gerar PDF');
   }
 }
-
-// ==========================================================
-// 🔥 NOVO — PDF EXTRAS POR CLIENTE
-// ==========================================================
 
 async function generateExtrasPdf(req, res) {
   try {
-
-    const clientId = Number(req.params.id);
-
     const extras = await documents.extras(req.params.id, req.user);
-
-    if (!extras.length) {
-      return res.status(404).send("Sem extras");
-    }
-
-    const clientName = extras[0].pool.client.name;
-
-    let total = 0;
-
-    const doc = new PDFDocument({ margin: 40 });
-
-    res.setHeader('Cache-Control', 'private, no-store');
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      `inline; filename="extras-${clientId}.pdf"`
-    );
-
-    doc.pipe(res);
-
-    // HEADER
-    doc.fontSize(22).text("Cristal Water", { align: "center" });
-    doc.moveDown();
-    doc.fontSize(14).text("Faturação de Extras", { align: "center" });
-
-    doc.moveDown(1);
-
-    doc.fontSize(12);
-    doc.text(`Cliente: ${clientName}`);
-    doc.moveDown();
-
-    doc.text("Serviços Extra:");
-    doc.moveDown();
-
-    extras.forEach(e => {
-
-      doc.text(
-        `${formatDate(e.scheduledAt)} — ${e.pool.name} — ${formatMoney(e.price)}`
-      );
-
-      total += e.price;
-    });
-
-    doc.moveDown();
-
-    doc.fontSize(14).text(`Total: ${formatMoney(total)}`);
-
-    doc.end();
-
-  } catch (err) {
-    console.error(err);
-    res.status(err.status || 500).send(err.status ? err.message : "Erro PDF extras");
+    if (!extras.length) return res.status(404).send('Sem extras');
+    const blocks = extrasBlocks(extras);
+    await writePdfResponse(res, `extras-${Number(req.params.id)}.pdf`, 'Extras — Documento interno', output => output.push(...blocks), { reference: `Cliente #${Number(req.params.id)}` });
+  } catch (error) {
+    if (res.headersSent) return res.destroy();
+    const status = error.status || error.statusCode;
+    res.status(status || 500).send(status ? error.message : 'Erro ao gerar PDF de extras');
   }
 }
-
-// ==========================================================
-// EXPORT
-// ==========================================================
-
-module.exports = {
-  generateInvoicePdf,
-  generateExtrasPdf // 🔥 NOVO
-};
+module.exports = { generateInvoicePdf, generateExtrasPdf };

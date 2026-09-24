@@ -1,0 +1,181 @@
+{
+  "task": "TASK337",
+  "checkedAt": "2026-09-24T19:54:09.774792+00:00",
+  "baseCommit": "93695172b5611154046423ef75bc5261fd9e79c1",
+  "branch": "work/field-readiness-20260915-simulation",
+  "environment": {
+    "database": "isolated PGlite PostgreSQL protocol",
+    "browser": "Chromium normal multiprocess; single-process workaround removed from scratch harness",
+    "migrations": 40,
+    "externalSends": false,
+    "productionWrites": false
+  },
+  "unit": {
+    "passed": 592,
+    "files": 81
+  },
+  "technician": {
+    "passed": 4
+  },
+  "syntax": {
+    "backend": 626,
+    "frontend": 220,
+    "inline": 62
+  },
+  "integrationPassed": [
+    "test-field-financial-document-pdf.js",
+    "test-field-invoice-pdf-access.js",
+    "test-field-commercial-quotes.js",
+    "test-field-client-monthly-report-access.js",
+    "test-field-guide-pdf.js",
+    "test-field-client-monthly-reports-ui.js",
+    "test-field-report-history-review.js",
+    "test-field-extra-execution.js"
+  ],
+  "additionalIncomplete": [
+    {
+      "script": "test-field-client-monthly-generation.js",
+      "stage": "independent connection writer during repeatable-read transaction",
+      "error": "P2028 transaction timeout in local PGlite",
+      "status": "native PostgreSQL CI required; test and application transaction guarantees unchanged"
+    }
+  ],
+  "visualReview": {
+    "pages": 7,
+    "invoice": 2,
+    "extras": 1,
+    "quote": 2,
+    "monthly": 2,
+    "status": "all pages rendered and visually inspected"
+  },
+  "runnerExpectedGroups": 234,
+  "sourceSha256": {
+    "scripts/test-field-report-history-review.js": "37e7005cf859fcb589fcf92f4eaa96aebf03144445fb78d80b3195ebf44feca2",
+    "scripts/test-field-suite.js": "0360d44eabc9ca82a98a8b10abdbfc9ce9510e42c1f4f486a4cab28bda5584c2",
+    "scripts/test-field-financial-document-pdf.js": "f95d8ab172bb15775b9035394792a24e52b0a2d02e262bd38ed6265c222543c7",
+    "src/controllers/clientReportController.js": "af40223d31e3108297428d4216064f2709c98f24dac65fcbfa5561a9c8b23c88",
+    "src/controllers/invoicePdfController.js": "93a2ab52a63427e2c57375d768f300037e8df10bcf5c9f37bf48a4af85b09ec1",
+    "src/controllers/repairController.js": "b44c3bf074d767d8d05f7e68ac27277758949fc9a01fd0a85378558881da73ee",
+    "src/services/guidePdfService.js": "0ac819fd58b536cf82f9266d73737c760394df25610957fd7d9acd4d41d4f661",
+    "src/services/pdfReportService.js": "30604a835c08f132f16c9d882c05867d76e8f25069a325c1c49dc4c91f38f927",
+    "src/services/documentPdfService.js": "707822837d743f6e4d5f7d8ef78326b9d6b54ddb9e71be23eb99607b8db8da40",
+    "src/services/financialDocumentPdfService.js": "2a3997f33253a0ee56e99ff187f4e2bfac75498816e5135bcad64e811c7a2e59",
+    "tests/financial-document-pdf.test.js": "69ea42203b4f2328259060e8de73e06563e019bae210a561818b3fcb5c163603"
+  },
+  "logs": {
+    "cw336-unit.log": {
+      "sha256": "3c53665dfd3345411f9e301f172dd0e2b892ac83d05f6e189f72324770ff0a7c",
+      "passLines": []
+    },
+    "cw336-tech.log": {
+      "sha256": "47ffcb345cf1ef8958bebcdf527307d705bf1f6882c6dd53e514464db8ed559b",
+      "passLines": []
+    },
+    "cw336-syntax.log": {
+      "sha256": "7ead19979199ed9bff1864b9b5886e2cf412e85a1c6d91373353c85de33989ef",
+      "passLines": []
+    },
+    "cw336-pdf-regression.log": {
+      "sha256": "e65c326322d4ad4c4a4fb9890454cbce78874ae883608c423f4a314babc53ef0",
+      "passLines": [
+        "PASS financial PDFs: Unicode, page counts, references, non-fiscal labels, exact source amounts, quote privacy, stored monthly history, complete failures, ownership and read-only sources",
+        "PASS invoice PDFs require an active principal, administration or exact client ownership; withdrawn drafts and extras do not leak",
+        "PASS actual invoice page opens an authenticated PDF blob and changed sessions cannot display the old response",
+        "PASS quote preview, fractional labor, tax, immutable versions, concurrent editors, stale approval, explicit approval, protected commercial routes and legacy overwrite guards",
+        "PASS expired quote cannot be approved",
+        "PASS saved monthly reports: typed ownership, colliding IDs, legacy client identities, roles, private GET/HEAD and ranges, exact IDs/types, inactive client, read-only history and unchanged PDFs"
+      ]
+    },
+    "cw336-final-regression.log": {
+      "sha256": "06470d882faf47748e4a4890767ec47e79a23cacd9e5df77d0fb6271000cff3f",
+      "passLines": [
+        "PASS financial PDFs: Unicode, page counts, references, non-fiscal labels, exact source amounts, quote privacy, stored monthly history, complete failures, ownership and read-only sources",
+        "PASS guide PDFs: four endpoints, Unicode, long content, page counts, private cache, role/vehicle isolation, alternate ID rejection, missing/provisional records and unchanged sources",
+        "PASS monthly portal: exact list/PDF identity, 14 months and pagination, current/legacy files, malformed responses, cancellation, timeout, offline, five languages and responsive layouts"
+      ]
+    },
+    "cw336-final-api.log": {
+      "sha256": "0de7d15015841b49f49aec384c0872a719d1ca86de36eb4f954c6757e632f455",
+      "passLines": [
+        "PASS financial PDFs: Unicode, page counts, references, non-fiscal labels, exact source amounts, quote privacy, stored monthly history, complete failures, ownership and read-only sources"
+      ]
+    },
+    "cw336-monthly-browser.log": {
+      "sha256": "7a1bd49756955b14abea882e5063f9f0d67fed99d8fc2ceefe48d6e5d121d08d",
+      "passLines": [
+        "PASS monthly portal: exact list/PDF identity, 14 months and pagination, current/legacy files, malformed responses, cancellation, timeout, offline, five languages and responsive layouts",
+        "PASS administrator preview: exact customer, A-B-A late list and PDF cancellation, empty history and cleared selection",
+        "PASS session switch across tabs and actual 401 lifecycle; reports, visit counts and financial records preserved"
+      ]
+    },
+    "cw336-history-extra.log": {
+      "sha256": "984e620d6e9b1ceb9d353201ac13bf60681b36e03d987dcee019944ab91c121e",
+      "passLines": [
+        "PASS historical report inspection: explicit ADMIN-only REGULAR/EXTRA, original client, live facility withheld, four languages/PDF/HTML/photos, strict context/settings, source unchanged, archived client, responsive UI, forged origin, cancellation, offline retry and session change",
+        "PASS typed ownership, eight simultaneous starts/completions, private photo replay, immutable receipts, original regular visit and single stock/report effects",
+        "PASS included/free extras never become chargeable and existing invoice sources cannot be charged in another month even with an inconsistent old billing flag",
+        "PASS invalid quantities, units, identity fields and failed receipt persistence roll back completion, both stock ledgers and audit",
+        "PASS real mobile start, typed draft/photo, offline reload/completion, lost committed response, recovery, protected image and completed read-only record"
+      ]
+    },
+    "cw337-integrated-unit.log": {
+      "sha256": "4c5994522cfec3ab56960b731419e29e04c4ca42c9e6847c89dd2c9c5be6009f"
+    },
+    "cw337-integrated-tech.log": {
+      "sha256": "0d55c79b53c478337f2165a4f9c26db8ae4aeb205b5ac2015c6eb0b95b67b0cb"
+    },
+    "cw337-integrated-syntax.log": {
+      "sha256": "1b1387b91e52744bac1c2a9107298dc6a129b27f34f18208d2d355a79be3ebc1"
+    }
+  },
+  "pdfArtifacts": {
+    "invoice.pdf": {
+      "sha256": "067dbeac27c642804bc8f0d074e247671a323d2a26e581400eccccd985cd0efb",
+      "pages": 2,
+      "reproduce": "Run scripts/test-field-financial-document-pdf.js in isolated QA"
+    },
+    "extras.pdf": {
+      "sha256": "936014d05a9899d4b6c5b331ee34fab441fc1045aff3b0c72eb425c70ce35035",
+      "pages": 1,
+      "reproduce": "Run scripts/test-field-financial-document-pdf.js in isolated QA"
+    },
+    "quote.pdf": {
+      "sha256": "00be541b62327baf117c51cef50023239ab8766621ecf1f87fdf78c10e4866a6",
+      "pages": 2,
+      "reproduce": "Run scripts/test-field-financial-document-pdf.js in isolated QA"
+    },
+    "monthly.pdf": {
+      "sha256": "45c325172bbefa2d9a02a7366099bb5cea5efd5a55b726f14b1da940f22effa5",
+      "pages": 2,
+      "reproduce": "Run scripts/test-field-financial-document-pdf.js in isolated QA"
+    }
+  },
+  "ci": {
+    "status": "not yet started for TASK337",
+    "fullSuiteApproved": false,
+    "nativeRestoreApproved": false
+  },
+  "integratedBaseCommit": "c807600878f5a87dc5f0e4a366a4bb67dece7765",
+  "firstValidationUnit": {
+    "passed": 584,
+    "files": 80
+  },
+  "integratedRegression": {
+    "base": "c807600878f5a87dc5f0e4a366a4bb67dece7765",
+    "scripts": [
+      "test-field-financial-document-pdf.js",
+      "test-field-report-history-review.js",
+      "test-field-extra-execution.js"
+    ],
+    "exitCode": 0,
+    "passLines": [
+      "PASS financial PDFs: Unicode, page counts, references, non-fiscal labels, exact source amounts, quote privacy, stored monthly history, complete failures, ownership and read-only sources",
+      "PASS historical report inspection: explicit ADMIN-only REGULAR/EXTRA, original client, live facility withheld, four languages/PDF/HTML/photos, strict context/settings, source unchanged, archived client, responsive UI, forged origin, cancellation, offline retry and session change",
+      "PASS typed ownership, eight simultaneous starts/completions, private photo replay, immutable receipts, original regular visit and single stock/report effects",
+      "PASS included/free extras never become chargeable and existing invoice sources cannot be charged in another month even with an inconsistent old billing flag",
+      "PASS invalid quantities, units, identity fields and failed receipt persistence roll back completion, both stock ledgers and audit",
+      "PASS real mobile start, typed draft/photo, offline reload/completion, lost committed response, recovery, protected image and completed read-only record"
+    ],
+    "logSha256": "47019e7e629fb0588964a4884522bf72e62410ea0d255bead15508850c236d1b"
+  }
+}

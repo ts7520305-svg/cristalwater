@@ -26,7 +26,7 @@ async function downloadClientReportPDF(req, res) {
   try {
     const report = await business.read(req.user, req.params.reportId ?? req.params.id, req.params.clientId);
     res.set({ 'Content-Language': 'pt', 'X-CW-Report-Type': 'client-monthly-pdf', 'X-CW-Client-Id': String(report.clientId), 'X-CW-Report-Id': String(report.id), 'X-CW-Month-Ref': report.month });
-    return generateMonthlyReportPDF(res, report);
+    return await generateMonthlyReportPDF(res, report);
   } catch (error) { return sendError(res, error); }
 }
 

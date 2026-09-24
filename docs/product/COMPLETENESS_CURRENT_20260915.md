@@ -1,5 +1,9 @@
 # Cristal Water — matriz atual de conclusão
 
+## Estado de retoma — 24/09/2026, TASK337 em publicação
+
+PDFs financeiros internos e mensal guardado com Unicode, paginação, referência em todas as páginas, resposta completa, cache privada e originais conservados. Orçamento sem custos/margens/notas internas; documentos financeiros explicitamente não fiscais. 592 unitários/81 ficheiros, quatro técnicos, sintaxe 626/220/62 e oito grupos API/Chromium aprovados; sete páginas PDF revistas. Runner com 234 grupos. Concorrência da geração mensal incompleta no PGlite (`P2028`); confirmar no CI PostgreSQL nativo. [Relatório](FINANCIAL_DOCUMENT_PDF_RELIABILITY_20260924.md), [inventário finito](PDF_INVENTORY_20260924.md) e [evidência local](evidence/20260924_task337_local.json). Publicação e CI por confirmar. A TASK334 terminou com duas falhas de ensaio, corrigidas nas TASK335 e TASK337 e reproduzidas localmente; [evidência inicial](evidence/20260924_task334_initial_failure.json). A aplicação completa continua com critérios por fechar.
+
 ## Estado de retoma — 24/09/2026, TASK336 publicada
 
 TASK336 acrescenta confirmação explícita dos dados históricos para o cliente já registado em visitas REGULAR/EXTRA concluídas. Conserva originais, exige evidência/motivo, permite substituir/anular com comprovativo recuperável e protege dados atuais do novo titular em PDF/HTML. 587 unitários/80 ficheiros, quatro técnicos, sintaxe e API/navegador aprovados localmente; runner com 233 grupos. [Relatório](HISTORICAL_REPORT_ORIGIN_20260924.md). Publicada em `55544f548bc073aadac574770786920f0d0ba68b`, árvore `cd534409b7c9d6afae8bb06b6e5503d47684c52c`, idêntica à validada. [CI 36048931532](https://github.com/ts7520305-svg/cristalwater/actions/runs/36048931532), job `107799314394`, em execução; aprovação completa e restauro por confirmar.

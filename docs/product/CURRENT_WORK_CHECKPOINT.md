@@ -1,6 +1,15 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 24/09/2026, TASK336 publicada
+## Retoma atual — 24/09/2026, TASK337 em publicação
+
+- PDFs financeiros internos e mensal guardado com Unicode, paginação, referência em todas as páginas, resposta completa, cache privada e originais conservados. Orçamento sem custos/margens/notas internas; documentos financeiros explicitamente não fiscais. 592 unitários/81 ficheiros, quatro técnicos, sintaxe 626/220/62 e oito grupos API/Chromium aprovados; sete páginas PDF revistas. Runner com 234 grupos. Concorrência da geração mensal incompleta no PGlite (`P2028`); confirmar no CI PostgreSQL nativo. [Relatório](FINANCIAL_DOCUMENT_PDF_RELIABILITY_20260924.md), [inventário finito](PDF_INVENTORY_20260924.md) e [evidência local](evidence/20260924_task337_local.json).
+- TASK334 terminou com 229/231 grupos aprovados, restauro omitido. O seletor foi corrigido na TASK335; a visita ambígua de teste passa a ser explicitamente sem cobrança na TASK337, conservando a divergência e o bloqueio comercial. A sequência inspeção histórica → execução de extras passou integralmente. [Evidência inicial](evidence/20260924_task334_initial_failure.json).
+- Executor local de navegador: usar `/tmp/cw309-runtime/qa336-normal-browser.mjs` com `CW_QA_ROOT` desta cópia. A opção antiga `--single-process` partilhava o armazenamento de contextos e falsificava a troca de contas; remover apenas essa opção do executor temporário resolveu o ensaio completo sem alterar os testes.
+- Próxima retoma: verificar CI TASK337 e TASK335, incluindo restauro; depois inventário de HTML/impressão e critérios históricos ainda abertos. A aprovação completa do novo código ainda não está confirmada.
+
+- Integrada a TASK336 publicada entretanto (`c807600878f5a87dc5f0e4a366a4bb67dece7765`), preservando confirmação histórica, fontes, frontend e testes. 592 unitários, quatro técnicos e sintaxe 626/220/62 aprovados após a integração; documentos financeiros, inspeção histórica e execução de extras repetidos integralmente em API/navegador após a integração.
+
+## Estado anterior — TASK336 publicada
 
 - Autorização vigente: continuar todas as tarefas implementáveis sem parar entre etapas, testar e publicar na branch de trabalho. Sem merge/deploy/contactos reais.
 - TASK326 aprovada no CI completo: código `b0b3b7f95c8ae5255bdf1cd1262c1565b3f23e89`, árvore `28c722ffaabc37c022dd7cb4fea24b8a5f6ab218`, CI [36037714762](https://github.com/ts7520305-svg/cristalwater/actions/runs/36037714762), job `107761849340`. 17 etapas, 229/229 grupos distintos previstos, 548 unitários/77 ficheiros, quatro técnicos, 40 migrações; restauro de 127 tabelas/46 ficheiros com linhas e hashes iguais. [Evidência](evidence/20260924_task326_ci.json). A falha inicial de fecho offline e correção `db6bd0f4da86b541452c0733e67f92cd6bae3287` permanecem registadas; este sucesso corresponde ao complemento com devoluções parciais.

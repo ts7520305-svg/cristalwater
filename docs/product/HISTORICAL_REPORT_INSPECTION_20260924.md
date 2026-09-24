@@ -41,3 +41,8 @@ Código `93fb9aa452017b0391b4116c204c58256711ba1f`, árvore `2a6cc16c4e84e18965a
 ## Continuação — TASK336
 
 A confirmação explícita foi acrescentada na [TASK336](HISTORICAL_REPORT_ORIGIN_20260924.md), mantendo esta consulta administrativa separada. Exige cliente/instalação presentes na visita concluída, evidência e motivo; não permite selecionar outro cliente nem atribuir um cliente ausente. O relatório confirmado usa dados históricos revistos e conserva os bloqueios de acesso ao novo titular. Código `55544f548bc073aadac574770786920f0d0ba68b`; validação local aprovada, CI/restauro integrado em curso.
+
+
+## Atualização CI — TASK337
+
+O CI `36045589129` terminou com 229/231 grupos aprovados e restauro omitido. O seletor do editor foi corrigido na TASK335. A visita EXTRA ambígua criada neste ensaio passa a ser explicitamente sem cobrança na TASK337, para não bloquear corretamente a consulta comercial global do ensaio seguinte. Conserva a divergência histórica, os originais e todas as verificações de privacidade. A sequência completa de inspeção histórica e execução de extras passou em API e Chromium. [Evidência inicial](evidence/20260924_task334_initial_failure.json) e [validação TASK337](FINANCIAL_DOCUMENT_PDF_RELIABILITY_20260924.md). Confirmar CI/restauro integrados.

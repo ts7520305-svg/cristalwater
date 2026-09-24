@@ -1,5 +1,6 @@
 const CommercialQuote = require('../business/repair/CommercialQuoteBusiness');
-const PDFDocument = require("pdfkit");
+const { writePdfResponse } = require("../services/documentPdfService");
+const { repairBlocks } = require("../services/financialDocumentPdfService");
 const RepairBusiness = require("../business/repair/RepairBusiness");
 
 function actor(req) {
@@ -24,73 +25,18 @@ async function recordRepairPhoto(req, res) {
 }
 
 async function repairPdf(req, res) {
-  const result = await RepairBusiness.getRepairDetail(req.params.id);
-  if (!result.ok) {
-    return res.status(result.status || 404).json({ ok: false, message: result.error || "Reparação não encontrada" });
+  try {
+    const result = await RepairBusiness.getRepairDetail(req.params.id);
+    if (!result.ok) return res.status(result.status || 404).json({ ok: false, message: result.error || "Reparação não encontrada" });
+    const repair = result.repair;
+    const latest = (await CommercialQuote.list(repair.id))[0];
+    const blocks = repairBlocks(repair, latest);
+    await writePdfResponse(res, `reparacao_${repair.id}.pdf`, 'Orçamento / Reparação de Piscina', output => output.push(...blocks), { reference: `Reparação #${repair.id}` });
+  } catch (error) {
+    if (res.headersSent) return res.destroy();
+    const status = error.status || error.statusCode;
+    return res.status(status || 503).json({ ok: false, message: status ? error.message : 'Não foi possível gerar o orçamento. Tente novamente.' });
   }
-
-  const repair = result.repair;
-  const latest = (await CommercialQuote.list(repair.id))[0];
-  const quote = latest?.snapshot;
-  const doc = new PDFDocument({ size: "A4", margin: 50 });
-  doc.font(require("node:path").join(__dirname, "../assets/fonts/DejaVuSans.ttf"));
-  const fileName = `reparacao_${repair.id}.pdf`;
-
-  res.setHeader("Content-Type", "application/pdf");
-  res.setHeader("Content-Disposition", `inline; filename="${fileName}"`);
-  doc.pipe(res);
-
-  doc.fontSize(22).fillColor("#1e88e5").text("Cristal Water", { align: "left" });
-  doc.moveDown(0.2).fontSize(12).fillColor("#444444").text("Orçamento / Reparação de Piscina", { align: "left" });
-  doc.moveDown(1);
-  doc.strokeColor("#1e88e5").lineWidth(1).moveTo(50, doc.y).lineTo(545, doc.y).stroke();
-  doc.moveDown(1);
-
-  doc.fontSize(14).fillColor("#111111").text("Dados do cliente", { underline: true });
-  doc.moveDown(0.5);
-  doc.fontSize(11).fillColor("#222222");
-  doc.text(`Cliente: ${repair.pool?.client?.name || "-"}`);
-  doc.text(`Telefone: ${repair.pool?.client?.phone || "-"}`);
-  doc.text(`Morada: ${repair.pool?.client?.address || "-"}`);
-  doc.text(`Piscina: ${repair.pool?.name || "-"}`);
-  doc.text(`Local: ${repair.pool?.location || "-"}`);
-  doc.moveDown(1);
-
-  doc.fontSize(14).fillColor("#111111").text("Detalhes da reparação", { underline: true });
-  doc.moveDown(0.5);
-  doc.fontSize(11).fillColor("#222222");
-  doc.text(`ID da reparação: ${repair.id}`);
-  doc.text(`Problema: ${repair.problem || "-"}`);
-  doc.text(`Quantidade: ${repair.quantity || 0}`);
-  doc.text(`Prioridade: ${repair.priority || "-"}`);
-  doc.text(`Estado: ${repair.status || "-"}`);
-  doc.text(`Data: ${new Date(repair.createdAt).toLocaleDateString("pt-PT")}`);
-  // Internal repair notes never belong in a customer quotation.
-  doc.moveDown(1);
-
-  doc.fontSize(14).fillColor("#111111").text("Valores", { underline: true });
-  doc.moveDown(0.5);
-  doc.fontSize(11).fillColor("#222222");
-  if (quote) {
-    for (const line of quote.lines) {
-      doc.text(`${line.description} — ${line.quantity} × ${line.unitPrice.toFixed(2)} EUR = ${line.total.toFixed(2)} EUR`);
-    }
-    doc.moveDown(0.5);
-    doc.text(`Desconto: ${quote.discount.toFixed(2)} EUR`);
-    doc.text(`Subtotal sem IVA: ${quote.net.toFixed(2)} EUR`);
-    doc.text(`IVA (${quote.taxPercent}%): ${quote.tax.toFixed(2)} EUR`);
-    doc.text(`Total: ${quote.total.toFixed(2)} EUR`);
-    doc.text(`Versão: ${latest.version} | Válido até: ${new Date(quote.validUntil).toLocaleDateString('pt-PT')}`);
-    if (quote.terms) doc.text(`Condições: ${quote.terms}`);
-  } else {
-    doc.text(`Preço unitário: ${Number(repair.unitPrice || 0).toFixed(2)} EUR`);
-    doc.text(`Total sem IVA: ${Number(repair.totalPrice || 0).toFixed(2)} EUR`);
-    doc.text('Estimativa antiga. Rever os valores no editor de orçamento detalhado.');
-  }
-  doc.moveDown(1.2);
-  doc.fontSize(10).fillColor("#555555").text("Documento gerado automaticamente pelo sistema Cristal Water.", { align: "left" });
-
-  doc.end();
 }
 
 async function quoteRepair(req, res) {
