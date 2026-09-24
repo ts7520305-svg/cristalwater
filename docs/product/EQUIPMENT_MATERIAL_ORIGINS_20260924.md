@@ -27,10 +27,18 @@ Doze testes unitários novos cobrem validação/canonicalização partilhada com
 
 `test-field-equipment-materials.js` usa API, base isolada e navegador reais: permissões, reenvio concorrente, recibo/histórico, rollback de auditoria/recibo, fecho real de visita extra consumindo a guia uma única vez, alterações de stock/origem e orçamento conjunto. No navegador verifica rascunho sem notas, recarregamento, duas janelas, confirmação danificada/perdida, reenvio idêntico, estados de leitura, texto literal e 320/390/1440 px. Regressões dirigidas: interface antiga de revisões, tempos próprios e repartição monetária do trabalho.
 
-O ambiente local foi recuperado após perda dos ficheiros temporários anteriores; dependências auxiliares e configuração de fontes do navegador ficaram apenas no runtime de QA. Não há dependências novas no projecto, migração ou tabela nova: mantém 35 migrações/126 tabelas. O runner passa de 211 para 212 grupos. A aprovação nativa e o restauro desta árvore devem ser confirmados antes do fecho.
+O ambiente local foi recuperado após perda dos ficheiros temporários anteriores; dependências auxiliares e configuração de fontes do navegador ficaram apenas no runtime de QA. Não há dependências novas no projecto, migração ou tabela nova: mantém 35 migrações/126 tabelas. O runner passa de 211 para 212 grupos. A aprovação nativa e o restauro desta árvore foram confirmados abaixo.
+
+## Aprovação nativa e restauro — 24/09/2026
+
+Código publicado `e88d447a6bb2d549d3d7d54eecb3ff383d6401bc`, árvore `eeb025c1b78d5b66a3f981bb35063399200b61eb`, igual à validada localmente. [CI 35955642747](https://github.com/ts7520305-svg/cristalwater/actions/runs/35955642747), job `107493273824`, concluído com sucesso entre 2026-09-24T04:26:19Z e 2026-09-24T04:55:23Z (29m04s de execução do workflow). Todas as 17 etapas passaram.
+
+Foram conferidos os resultados dos 212 grupos contra o inventário do runner nesse commit: 212 distintos, todos aprovados, sem falta, falha, duplicação ou entrada inesperada. O grupo novo `test-field-equipment-materials.js` passou em 2946 ms. Passaram também os 421 unitários/66 ficheiros, quatro testes técnicos, gate geral de navegador, sintaxe 604/202/62 e preservação de dados/esquema nas 35 migrações aditivas.
+
+O restauro isolado em PostgreSQL 16 confirmou 126 tabelas e 46 ficheiros, comparando as linhas da base e os hashes dos ficheiros. A evidência [evidence/20260924_task309_ci.json](evidence/20260924_task309_ci.json) conserva os resultados de cada grupo, as etapas, as referências exatas e o SHA-256 do log obtido. O fecho posterior altera apenas documentação; esta aprovação refere-se ao código e árvore acima, não a produção ou a custos completos.
 
 ## Retoma
 
 Base `efda938141f3275b46490d8dfdd9ee50c6b147fd`, fecho TASK308. Publicação apenas em `work/field-readiness-20260915-simulation`; principal `feature/technicians-v25` preservada em `6f27081e1d183ff584a62255b016b373836734db`. Sem merge, deploy, produção ou contactos reais.
 
-Depois da aprovação: repartir explicitamente o custo MATERIAL confirmado da visita pelas declarações compatíveis, preservando a atribuição/linha de compra, quantidades e cêntimos originais. Não voltar a consumir nem a valorizar a mesma quantidade. Materiais de lembretes, tempos próprios de lembretes, repartições entre meses, restantes custos/receitas e operação física permanecem abertos; não declarar cobertura financeira ou lucro completos.
+Próxima etapa, TASK310: repartir explicitamente o custo MATERIAL confirmado da visita pelas declarações compatíveis, preservando a atribuição/linha de compra, quantidades e cêntimos originais. Não voltar a consumir nem a valorizar a mesma quantidade. Materiais de lembretes, tempos próprios de lembretes, repartições entre meses, restantes custos/receitas e operação física permanecem abertos; não declarar cobertura financeira ou lucro completos.
