@@ -1,4 +1,4 @@
-const PDFDocument = require("pdfkit");
+const { writePdfResponse, line, section, paragraph, tableRows } = require("../services/guidePdfService");
 
 const { prisma } = require("../prismaClient");
 const { toPublicUploadUrl } = require("../config/uploadPath");
@@ -238,7 +238,7 @@ function fmtDate(v) {
   if (!v) return "-";
   const d = new Date(v);
   if (Number.isNaN(d.getTime())) return "-";
-  return d.toLocaleString("pt-PT", { dateStyle: "short", timeStyle: "short" });
+  return d.toLocaleString("pt-PT", { dateStyle: "short", timeStyle: "short", timeZone: "Europe/Lisbon" });
 }
 function normalize(v) {
   return String(v ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
@@ -670,45 +670,6 @@ function groupMovementTotals(movements, keyFn) {
   }
   return Array.from(totals.values());
 }
-function writePdfResponse(res, filename, title, draw) {
-  const doc = new PDFDocument({ size: "A4", margin: 42, info: { Title: title, Author: COMPANY_NAME } });
-  res.setHeader("Content-Type", "application/pdf");
-  res.setHeader("Content-Disposition", `inline; filename="${filename}"`);
-  doc.pipe(res);
-
-  doc.font("Helvetica-Bold").fontSize(20).fillColor("#0f2f46").text(COMPANY_NAME);
-  doc.moveDown(0.2);
-  doc.font("Helvetica-Bold").fontSize(15).fillColor("#111827").text(title);
-  doc.font("Helvetica").fontSize(9).fillColor("#6b7280").text(`Gerado em ${fmtDate(new Date())}`);
-  doc.moveDown(1);
-
-  draw(doc);
-  doc.end();
-}
-function line(doc, label, value) {
-  doc.font("Helvetica-Bold").fontSize(10).fillColor("#111827").text(`${label}: `, { continued: true });
-  doc.font("Helvetica").fillColor("#111827").text(text(value));
-}
-function section(doc, title) {
-  if (doc.y > 710) doc.addPage();
-  doc.moveDown(0.7);
-  doc.font("Helvetica-Bold").fontSize(12).fillColor("#0f766e").text(title);
-  doc.moveTo(doc.x, doc.y + 3).lineTo(553, doc.y + 3).strokeColor("#d1d5db").stroke();
-  doc.moveDown(0.5);
-}
-function tableRows(doc, rows, emptyText) {
-  if (!rows.length) {
-    doc.font("Helvetica").fontSize(10).fillColor("#6b7280").text(emptyText);
-    return;
-  }
-  rows.forEach((row, index) => {
-    if (doc.y > 720) doc.addPage();
-    doc.font("Helvetica-Bold").fontSize(10).fillColor("#111827").text(`${index + 1}. ${text(row.title)}`);
-    doc.font("Helvetica").fontSize(9).fillColor("#374151").text(row.meta || "-");
-    if (row.notes) doc.fillColor("#6b7280").text(row.notes);
-    doc.moveDown(0.35);
-  });
-}
 async function findVehicleInsurance(vehicleId) {
   const records = await prisma.vehicleMaintenanceRecord.findMany({
     where: { vehicleId: n(vehicleId) },
@@ -923,7 +884,7 @@ async function downloadTransportGuidePdf(req, res) {
     const guide = await prisma.transportGuide.findUnique({ where: { id }, include: { vehicle: true, items: true } });
     if (!guide) return res.status(404).json({ ok: false, error: "Guia AT nao encontrada." });
 
-    writePdfResponse(res, pdfName("guia-at", guide.codeAT || guide.id), "Guia de Transporte AT", (doc) => {
+    await writePdfResponse(res, pdfName("guia-at", guide.codeAT || guide.id), "Guia de Transporte AT", (doc) => {
       line(doc, "Empresa", COMPANY_NAME);
       line(doc, "Numero guia AT", guide.codeAT || `Guia #${guide.id}`);
       line(doc, "Matricula", guide.vehicle?.plate || guide.vehicleId);
@@ -1172,7 +1133,7 @@ async function downloadVehicleInsurancePdf(req, res) {
     const { vehicle, insurance } = await vehicleInsurancePayload(vehicleId);
     if (!vehicle) return res.status(404).json({ ok: false, error: "Viatura nao encontrada." });
 
-    writePdfResponse(res, pdfName("seguro-viatura", vehicle.plate || vehicle.id), "Ficha de Seguro da Viatura", (doc) => {
+    await writePdfResponse(res, pdfName("seguro-viatura", vehicle.plate || vehicle.id), "Ficha de Seguro da Viatura", (doc) => {
       line(doc, "Empresa", COMPANY_NAME);
       line(doc, "Matricula", vehicle.plate);
       line(doc, "Viatura", `${text(vehicle.name)} ${text(vehicle.brand, "")} ${text(vehicle.model, "")}`.trim());
@@ -1185,8 +1146,8 @@ async function downloadVehicleInsurancePdf(req, res) {
         line(doc, "Estado", insurance.status);
         line(doc, "Notas", insurance.notes || "-");
       } else {
-        doc.font("Helvetica-Bold").fillColor("#b45309").text("Seguro nao registado no sistema.");
-        doc.font("Helvetica").fillColor("#374151").text("O administrador deve inserir o seguro como manutencao/documento da viatura para aparecer aqui automaticamente.");
+        paragraph(doc, "Seguro não registado no sistema.");
+        paragraph(doc, "O administrador deve inserir o seguro como manutenção/documento da viatura para aparecer aqui automaticamente.");
       }
     });
   } catch (err) {
@@ -1210,7 +1171,7 @@ async function downloadWorkGuidePdf(req, res) {
     const productTotals = groupMovementTotals(movements, (move) => move.itemName);
     const locationTotals = groupMovementTotals(movements, (move) => move.locationLabel);
 
-    writePdfResponse(res, pdfName("guia-obra", workGuide.id), "Guia de Obra / Saida de Material", (doc) => {
+    await writePdfResponse(res, pdfName("guia-obra", workGuide.id), "Guia de Obra / Saida de Material", (doc) => {
       const atReference = workGuide.guide?.codeAT || workGuide.guideId || "AT EM FALTA - GUIA PROVISORIA";
       line(doc, "Empresa", COMPANY_NAME);
       line(doc, "Guia de obra", `#${workGuide.id}`);
@@ -1267,9 +1228,8 @@ async function downloadWorkGuidePdf(req, res) {
       line(doc, "Quimicos usados", totalByUnit(workGuide.items, "usedQty", isChemicalItem));
 
       section(doc, "Assinaturas");
-      doc.moveDown(1.2);
-      doc.font("Helvetica").fillColor("#111827").text("Tecnico: ________________________________", { continued: true });
-      doc.text("   Responsavel: ________________________________");
+      paragraph(doc, "Técnico: ________________________________");
+      paragraph(doc, "Responsável: ________________________________");
     });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });

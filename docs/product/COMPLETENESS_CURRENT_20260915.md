@@ -1,5 +1,9 @@
 # Cristal Water — matriz atual de conclusão
 
+## Estado de retoma — 24/09/2026, TASK335 validada localmente
+
+PDFs operacionais com Unicode, paginação e cache privada, validação de IDs antes do controlo da viatura e correção do seletor antigo que falhou nos CI TASK332–333. 579 unitários, quatro técnicos, sintaxe e cinco grupos API/navegador aprovados localmente; seis páginas PDF revistas. [Relatório](GUIDE_PDF_RELIABILITY_20260924.md). Runner com 232 grupos; CI integrado/restauro por confirmar. Os dois CI anteriores terminaram com 229/230 grupos aprovados e não fizeram restauro. A tarefa cobre estes PDFs e não fecha todo o inventário de apresentação ou os critérios históricos.
+
 ## Estado de retoma — 24/09/2026, TASK334 publicada
 
 TASK334 acrescenta consulta administrativa explícita dos relatórios históricos com cliente divergente. Conserva os registos, omite os dados atuais da instalação e mantém a origem por rever e os acessos de clientes bloqueados. 576 unitários, quatro técnicos, sintaxe e quatro grupos API/navegador aprovados localmente; PDF/HTML em PT/EN/FR/ES e revisão visual. [Relatório](HISTORICAL_REPORT_INSPECTION_20260924.md). Publicada em `93fb9aa452017b0391b4116c204c58256711ba1f`; CI `36045589129` iniciado, aprovação completa/restauro por confirmar; não constitui atestado de titularidade nem fecho dos critérios históricos.

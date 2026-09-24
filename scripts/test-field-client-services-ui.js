@@ -23,7 +23,8 @@ const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['localhost',
   // Session drafts survive client switching and a page reload.
   await page.locator('#clientId').selectOption(String(other.id));await page.locator('#serviceLoad').click();await state('ready');await page.locator('#clientId').selectOption(String(client.id));await page.locator('#serviceLoad').click();await state('ready');assert.equal(await page.locator('[data-rule=count]').inputValue(),'6');
   assert.equal(await page.locator('.serviceSlot').count(),6,'All six draft slots survive changing client');
-  assert.deepEqual(await page.locator('.serviceSelection').allTextContents(),[pool.name,'Técnico: '+tech.name],'The complete pool and assignment names remain visible outside the shortened control');
+  assert.equal(await season.locator('[data-season=billing] + .serviceSelection').textContent(),'Mensalidade com visitas incluídas');
+  assert.deepEqual(await page.locator('.serviceRule .serviceSelection').allTextContents(),[pool.name,'Técnico: '+tech.name],'The complete pool and assignment names remain visible outside the shortened control');
   await page.reload({waitUntil:'networkidle'});await page.waitForFunction(id=>document.getElementById('clientId').value===String(id),client.id);await page.locator('#serviceLoad').click();await page.waitForFunction(()=>!document.getElementById('serviceFields').disabled);assert.equal(await page.locator('.serviceSlot').count(),6);
   await page.locator('#servicePreview').click();await state('preview');assert.match(await page.locator('#serviceImpact').textContent(),/150/);assert.equal(await page.locator('#servicePanel img').count(),0);
   const visual=path.resolve('reports/field-visual/client-services-'+Date.now());fs.mkdirSync(visual,{recursive:true});

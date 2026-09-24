@@ -15,6 +15,18 @@ function allowRoles(...roles) {
 }
 
 router.use(auth());
+// Scope checks inspect the raw path. Reject alternate ID spellings before
+// decoding/numeric coercion can select a different vehicle's record or PDF.
+router.use((req, res, next) => {
+  const match = req.path.match(/^\/(stock|transport|vehicles|work|maintenance)\/([^/]+)(?:\/|$)/i);
+  if (match) {
+    const [, resource, segment] = match;
+    const action = resource === 'work' && ['start', 'consume'].includes(segment) || resource === 'vehicles' && segment === 'assign';
+    const id = resource === 'transport' && segment === 'latest' ? req.path.split('/')[3] : segment;
+    if (req.path !== req.path.toLowerCase() || (!action && (!/^[1-9]\d*$/.test(id || '') || Number(id) > 2147483647))) return res.status(400).json({ ok: false, error: 'Identificador de documento inválido.' });
+  }
+  next();
+});
 router.use(require('../middlewares/fieldVehicleScope'));
 // Related technicians/clients are operational context, not credential records.
 router.use((req, res, next) => {

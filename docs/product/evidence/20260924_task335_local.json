@@ -1,0 +1,57 @@
+{
+  "task": "TASK335",
+  "baseCommit": "81d543938f95aa68fb253d4cb7847fd5d91dc1b7",
+  "validatedAt": "2026-09-24T19:24:51.211625+00:00",
+  "environment": "Isolated PGlite with PostgreSQL protocol socket; Chromium; 40 additive migrations; outbound providers disabled",
+  "unitTests": {
+    "passed": 579,
+    "files": 79
+  },
+  "technicianTests": {
+    "passed": 4
+  },
+  "syntax": {
+    "backend": 623,
+    "frontend": 218,
+    "inline": 62
+  },
+  "integrationGroupsExpected": 232,
+  "passedScripts": [
+    "test-field-guide-pdf.js",
+    "test-field-document-recovery.js",
+    "test-field-write-recovery.js",
+    "test-field-client-services-ui.js",
+    "test-field-client-service-pricing.js"
+  ],
+  "visualReview": {
+    "transport": 1,
+    "work": 3,
+    "insurance": 2,
+    "latest": "same transport layout"
+  },
+  "codeSha256": {
+    "src/controllers/guideController.js": "99a1fe36b4f6952d11ce877ef6e66199d2a0f538a0f63ed733b154270af7529e",
+    "src/services/guidePdfService.js": "5a4dc562c859ea96454e1cf381e85a53967e5961dfaaabc3d852baee77698940",
+    "src/routes/guideRoutes.js": "602b163801aeea57f5aeea9710c05566c49ca7d627415659ed1c9c97a48d3615",
+    "scripts/test-field-guide-pdf.js": "25b8e0b7fcf554559a135073fcabc79f042b0c28bc27fb71abc22e05183b70a8",
+    "scripts/test-field-client-services-ui.js": "292f95e43ebde0ac705f53c4d6bd9301aad647c1c7c73448fc9a02e64f201157",
+    "scripts/test-field-suite.js": "bf2f443941b8f68cd172188925168b6e10efa23131772dca5634cb493e6a989f",
+    "tests/guide-pdf.test.js": "1cd4648ff2ac55c61087e781d8d1a93af20d790b99f2e0b007cf14f01272e65d"
+  },
+  "localLogSha256": {
+    "cw335-unit.log": "20db5f92291ef416548e338c5c0612edb70e4a80fd24735af3c389c7148b5407",
+    "cw335-tech.log": "216c312c54fdd3ec1e8e15902d948046483b892eba2a5a7f99c87b7aee59b969",
+    "cw335-syntax.log": "20c338e5ba194403cb13f24e71c4ea47fec0e45e6c4a4eef8090b80b54494871",
+    "cw335-guide-qa.log": "872ef651f7caddbda08c96b620495c999081605e4efe3292011e432181f92c09",
+    "cw335-final-regression.log": "8b0cea355eb1ac25088f7eadcefdf9175a60706d3e820699410275170a6e06bd",
+    "cw335-access-regression.log": "a12268562996fec4d4dbb64b3890146370d279b657eb30fcaabce288ce3c85a5"
+  },
+  "pdfSha256": {
+    "latest.pdf": "d3bf6a064e7d894fd35060670f382de45239a097bccee273d64d89df90f3c0a0",
+    "transport.pdf": "c87f67a3ae1500f5c41de214ccc8bc535774a00ad08a68ec9110b0a5486171e1",
+    "insurance.pdf": "5c42c2affdf3d91fd37017980ff1584d66c98188af022f592c8f5285a129a9f0",
+    "work.pdf": "6087523f282c2ce27cd1ebea8555986d8727d51fc1800993ba48757346d190a8"
+  },
+  "nativeCi": "not yet run for this code",
+  "restore": "pending native CI"
+}

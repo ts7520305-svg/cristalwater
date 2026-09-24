@@ -22,3 +22,7 @@ O primeiro ensaio visual contou incorretamente o deslocamento interno do texto l
 Completa a interface dos comprovativos TASK330 e da cobrança TASK331. Um preço aplica-se às visitas das instalações do acordo naquela época; preços diferentes por instalação/horário não foram acrescentados. Documentos fiscais continuam externos. PGlite e Chromium locais não substituem o CI PostgreSQL 16/restauro nem um piloto físico. Publicação apenas na branch de trabalho; sem deploy, contactos reais ou migrações novas.
 
 Inclui o fecho documental da TASK326 com os 229 grupos e restauro nativo aprovados em `b0b3b7f95c8ae5255bdf1cd1262c1565b3f23e89`; essa aprovação não é atribuída ao código posterior.
+
+## Resultado nativo confirmado durante a TASK335
+
+O CI deste lote terminou com 229/230 grupos distintos aprovados. Falhou apenas o seletor antigo de nomes completos no editor, que passou a recolher a descrição da forma de cobrança; o restauro foi omitido. A TASK335 delimita o seletor à regra e verifica separadamente a cobrança. A regressão local passou; aprovação nativa do código integrado ainda por confirmar. [Evidência original](evidence/20260924_task332_initial_failure.json).

@@ -9,3 +9,7 @@ Passaram 576 testes unitários em 78 ficheiros, quatro testes técnicos e sintax
 A documentação atualiza o fecho da TASK326 com os 229 grupos e o restauro PostgreSQL 16 de 127 tabelas/46 ficheiros aprovados. Essa aprovação pertence a `b0b3b7f95c8ae5255bdf1cd1262c1565b3f23e89`; não aprova os lotes posteriores. CI e restauro do presente lote permanecem pendentes até confirmação nativa.
 
 Sem migrações, dependências, alterações de produção ou contactos reais. Cobertura financeira integral e operação de produção continuam por confirmar.
+
+## Resultado nativo confirmado durante a TASK335
+
+O CI deste lote terminou com 229/230 grupos distintos aprovados. Falhou apenas o seletor antigo de nomes completos no editor, que passou a recolher a descrição da forma de cobrança; o restauro foi omitido. A TASK335 delimita o seletor à regra e verifica separadamente a cobrança. A regressão local passou; aprovação nativa do código integrado ainda por confirmar. [Evidência original](evidence/20260924_task333_initial_failure.json).
