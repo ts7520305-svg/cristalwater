@@ -11,7 +11,7 @@ async function current(db, reminderId, lock = false) {
   const proof = row.result, p = proof.event.preview, data = p.selection.data;
   const target = await rules.target(proof, r.hash, c.clientName);
   const source = { schema: 1, basis: 'CURRENT_ASSOCIATED_REMINDER_RESOURCES', resourceId: row.id, resourceHash: row.hash, parent: c.parent, peers: c.peers, movements: c.movements, comparison: journal.rules.compare(data, c.parent, c.peers, c.movements) };
-  const workTime = data.workTime ? { schema: 1, basis: 'DECLARED_REMINDER_VISIT_WORK_INTERVAL', startAt: data.workTime.startedAt, endAt: data.workTime.endedAt, durationMs: Date.parse(data.workTime.endedAt) - Date.parse(data.workTime.startedAt), origin: p.origin } : null;
+  const workTime = rules.workRecord(data, p.origin);
   return { id: reminderId, valid: true, label: target.label, target, resources: proof, resourcesHash: row.hash, resourceSource: source, resourceSourceHash: r.hash(source), materials: data.materials, workTime };
 }
 async function read(db, ids) {

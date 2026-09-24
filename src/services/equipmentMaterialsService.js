@@ -93,7 +93,7 @@ function assess(rows, visit, visitType, receipts, movements, revisions = new Map
       lines.push({ ...item, visitQuantity: net >= 0n ? decimal(net) : null, declaredMaintenanceQuantity: decimal(declared), unassignedQuantity: net >= declared ? decimal(net - declared) : null });
     }
     const declarations = rows.filter(r => views.get(r.id).record || views.get(r.id).revision).map(r => ({ id: r.id, fingerprint: r.fingerprint, materials: views.get(r.id).record, ...(views.get(r.id).revision ? { revision: views.get(r.id).revision } : {}) })).sort((a, b) => a.id - b.id);
-    const source = { schema: 1, basis: 'CURRENT_NET_VISIT_CONSUMPTION', visit: { ...expected, status: visit.status, startAt: visit.startAt?.toISOString() || null, endAt: visit.endAt.toISOString() }, declarations, ...(associated.records.some(r => r.materials !== null) || !associated.valid ? { associatedDeclarations: associated.records.filter(r => r.materials !== null).map(({workTime,...r}) => r), associatedValid: associated.valid } : {}), movements: [...sourceMovements.values()].sort((a, b) => a.id - b.id) };
+    const source = { schema: 1, basis: 'CURRENT_NET_VISIT_CONSUMPTION', visit: { ...expected, status: visit.status, startAt: visit.startAt?.toISOString() || null, endAt: visit.endAt.toISOString() }, declarations, ...(associated.records.some(r => r.materials !== null) || !associated.valid ? { associatedDeclarations: associated.records.filter(r => r.materials !== null).map(({workTime,workIntervals,...r}) => r), associatedValid: associated.valid } : {}), movements: [...sourceMovements.values()].sort((a, b) => a.id - b.id) };
     view.comparison = { lines, source, sourceHash: hash(source) };
     view.state = reasons.size ? 'REVIEW' : 'MATCHED'; view.reasons = [...reasons];
   }

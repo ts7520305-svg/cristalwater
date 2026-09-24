@@ -44,7 +44,7 @@ async function check(db, input, visit, visitType, completedAt) {
   const rows = await db.equipmentMaintenanceCompletion.findMany({ where: visitType === 'EXTRA' ? { extraVisitId: visit.id } : { visitId: visit.id }, select: selection }), proofs = await receipts(db, rows);
   if (rows.some(row => hadTime(row, proofs) && (!sound(time(row)) || !intact(row, proofs) || overlaps(input, time(row))))) return 'Já existe tempo registado noutra revisão desta visita. Reveja os intervalos antes de confirmar.';
   const associated = await require('./reminderVisitResourceJournal').reservations(db, visit, visitType);
-  if (!associated.valid || associated.records.some(r => r.workTime && overlaps(input, {startAt:r.workTime.startedAt,endAt:r.workTime.endedAt}))) return 'O intervalo coincide com uma parcela de lembrete ou existe uma declaração por rever.';
+  if (!associated.valid || associated.records.some(r => require('./reminderVisitResourceJournal').rules.intervals(r).some(w => overlaps(input, {startAt:w.startedAt,endAt:w.endedAt})))) return 'O intervalo coincide com uma parcela de lembrete ou existe uma declaração por rever.';
   if (await conflict(db, input, visit, visitType)) return 'O técnico tem tempo registado em simultâneo noutro serviço. Reveja os horários antes de confirmar.';
   return null;
 }
@@ -61,7 +61,7 @@ async function describe(db, rows, visit, visitType, prepared) {
     const record = time(row);
     if (!record) { views.set(row.id, { state: hadTime(row, proofs) ? 'REVIEW' : 'MISSING', record: null }); continue; }
     const own = associated?.get(visitType+':'+visit.id);
-    const review = own?.valid === false || own?.records.some(r => r.workTime && overlaps(record,{startAt:r.workTime.startedAt,endAt:r.workTime.endedAt})) || !sound(record) || !intact(row, proofs) || Object.entries(expected).some(([key, value]) => record.origin?.[key] !== value) || !within(record, visit, row.completedAt) || rows.some(other => other.id !== row.id && hadTime(other, proofs) && (!sound(time(other)) || !intact(other, proofs) || overlaps(record, time(other)))) || conflicts.has(visitType + ':' + visit.id);
+    const review = own?.valid === false || own?.records.some(r => require('./reminderVisitResourceJournal').rules.intervals(r).some(w => overlaps(record,{startAt:w.startedAt,endAt:w.endedAt}))) || !sound(record) || !intact(row, proofs) || Object.entries(expected).some(([key, value]) => record.origin?.[key] !== value) || !within(record, visit, row.completedAt) || rows.some(other => other.id !== row.id && hadTime(other, proofs) && (!sound(time(other)) || !intact(other, proofs) || overlaps(record, time(other)))) || conflicts.has(visitType + ':' + visit.id);
     views.set(row.id, { state: review ? 'REVIEW' : 'RECORDED', record });
   }
   return views;

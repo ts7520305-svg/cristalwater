@@ -35,7 +35,8 @@ async function reservations(db,visit,visitType){
     const ap=p.association.event.preview,technician=await db.technician.findUnique({where:{id:p.origin.technicianId},select:{id:true}});
     const intact=s.valid&&a?.valid&&a.active?.id===p.origin.associationId&&writes.hash(a.active.result)===writes.hash(p.association)&&writes.hash(json(source))===ap.sourceHash&&writes.hash(parent)===ap.parentHash&&target?.snapshot.decisionFingerprint===ap.target.decisionFingerprint&&target.clientId===p.origin.clientId&&target.snapshot.poolId===p.origin.poolId&&!!technician;
     if(!intact)valid=false;
-    records.push({type:'REMINDER',id:row.id,reminderId,hash:row.hash,materials:p.selection.data.materials,workTime:p.selection.data.workTime});
+    const data=p.selection.data;
+    records.push({type:'REMINDER',id:row.id,reminderId,hash:row.hash,materials:data.materials,...(data.workIntervals===undefined?{workTime:data.workTime}:{workIntervals:data.workIntervals})});
   }
   records.sort((a,b)=>a.id.localeCompare(b.id));return {valid,records};
 }

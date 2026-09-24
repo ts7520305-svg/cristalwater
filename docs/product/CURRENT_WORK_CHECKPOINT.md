@@ -1,6 +1,12 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 24/09/2026, TASK317 em validação
+## Retoma atual — 24/09/2026, TASK318 em validação
+
+- Base `dc30d3d6f5a6edd83abe43f8563c9c8e175c93bc`, correção do ensaio TASK317. TASK318 implementada: até 20 intervalos próprios dos lembretes associados, soma sem pausas, limites e sobreposições comuns com equipamento, originais conservados e repartição MATERIAL/LABOR pelos comprovativos novos. [REMINDER_VISIT_INTERVALS_20260924.md](REMINDER_VISIT_INTERVALS_20260924.md).
+- 494 unitários/72 ficheiros, quatro técnicos e sintaxe 616/215/62 aprovados. API/navegador novo e seis regressões dirigidas aprovados localmente; campos em 320/390/1440 e modo escuro revistos. 19 ficheiros; cache v133; runner com 221 grupos e 38 migrações existentes. Sem novas tabelas/dependências.
+- Publicar este lote e conferir CI/restauro do commit exato. Essa aprovação deverá fechar em conjunto as TASK317–318, conservando o CI inicial falhado e a correção de dados do ensaio. Ainda não declarar aprovação nativa nem sistema concluído.
+
+## Validação anterior — TASK317, aprovação conjunta pendente
 
 - Base `740f1378a3d4b97f750bf3284515364e8618fb87`, fecho TASK316. Implementada a repartição dos custos confirmados MATERIAL/LABOR da visita pelas parcelas próprias dos lembretes: destinos tipados, comprovativo completo, saldos comuns com equipamento e entre compras, projeção financeira, revisão, custos afetados ao anular recursos e anulação recuperável. [REMINDER_VISIT_COSTS_20260924.md](REMINDER_VISIT_COSTS_20260924.md).
 - Código publicado `46025c4cf9c025abd1fe48f1a441270564100ec6`. O CI inicial `36006695285` passou 219/220 grupos; o grupo novo falhou ao preparar um ID de lembrete já existente. Restauro não executado. Correção isolada do ensaio: sequência de equipamento preparada acima dos IDs ocupados, sentinela conservada e colisão tipada real mantida. Confirmar novo CI/restauro completo, previsto em conjunto com a TASK318, antes de declarar aprovação.
@@ -53,7 +59,7 @@
 
 ## Próxima ação
 
-1. Fechar a publicação/validação da TASK317 acima. Depois prosseguir múltiplos intervalos próprios e a sua valorização, conservando comprovativos, sobreposições e saldos. Não repetir TASK300–317. Repartições entre meses e correção de registos antigos sem recibo verificável continuam abertas.
+1. Fechar publicação e CI/restauro conjunto das TASK317–318. Depois prosseguir múltiplos intervalos nos percursos independentes e de equipamento, repartições entre meses e revisão histórica de registos antigos sem recibo verificável. Não repetir TASK300–318. Conservar comprovativos, sobreposições e saldos.
 2. Continuar restantes gastos/ajustes/origens de receita e os pontos da [matriz atual](COMPLETENESS_CURRENT_20260915.md): históricos/ecrãs/PDFs/idiomas, volume e operação prolongada, VPS/fornecedores e piloto físico. Custos/receitas completos e lucro por apurar; não atribuir percentagem global sem critérios fechados. IA generativa offline/aprendizagem por piscina/vídeo e integrações completas continuam requisitos separados sem aprovação integral.
 
 ## Autorizações e regras vigentes

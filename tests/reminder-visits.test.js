@@ -58,14 +58,14 @@ function ownFixture(){
 function ownRehash(r){const p=r.event.preview;p.hash=hash(ownRules.facts(p));r.envelope={...r.envelope,...p.selection,previewHash:p.hash};r.eventHash=hash(r.event);r.receipt.payloadHash=writes.context({id:1,role:'ADMIN'},ownRules.scope,1,r.envelope.requestId,(({requestId,...v})=>v)(r.envelope)).payloadHash;return r;}
 const ownVerify=r=>ownRules.response(r,r.envelope,owner,1,hash);
 const costRules=require('../frontend/cw-reminder-visit-cost-rules'),materialRules=require('../frontend/cw-maintenance-material-rules');
-async function costFixture(kind='MATERIAL'){
-  const resource=ownFixture(),p=resource.event.preview,d=p.selection.data;
+async function costFixture(kind='MATERIAL',resource=ownFixture()){
+  const p=resource.event.preview,d=p.selection.data;
   const a={id:8,expenseId:9,monthRef:'2008-07',amountCents:100,targetType:'EXTRA',clientId:2,visitId:null,extraVisitId:1,repairId:null,maintenanceCompletionId:null,serviceReminderId:null,targetSnapshot:{startAt:p.parent.startAt,endAt:p.parent.endAt},voidedAt:null,valuationType:kind,quantity:kind==='MATERIAL'?'1':'3600',quantityUnit:kind==='MATERIAL'?'KG':'SECOND',purchaseItemId:kind==='MATERIAL'?7:null,valuationSnapshot:{source:{service:{technicianId:3},item:{id:7,productName:'SAL'}}}};
   const source={schema:1,basis:'CURRENT_ASSOCIATED_REMINDER_RESOURCES',resourceId:resource.event.id,resourceHash:resource.eventHash,parent:p.parent,peers:p.peers,movements:p.movements,comparison:ownRules.compare(d,p.parent,p.peers,p.movements)};
-  const base={version:2,basis:kind==='MATERIAL'?materialRules.basis:'CONFIRMED_PARENT_COST_TIME_SHARE',expenseId:9,expenseVersion:1,allocationId:8,completionId:null,reminderId:1,monthRef:'2008-07',allocationBefore:a,allocationHash:hash(a),resources:resource,resourcesHash:resource.eventHash,resourceSource:source,resourceSourceHash:hash(source),target:await costRules.target(resource,hash,'Cliente histórico')};
+  const base={version:p.schema+1,basis:kind==='MATERIAL'?materialRules.basis:'CONFIRMED_PARENT_COST_TIME_SHARE',expenseId:9,expenseVersion:1,allocationId:8,completionId:null,reminderId:1,monthRef:'2008-07',allocationBefore:a,allocationHash:hash(a),resources:resource,resourcesHash:resource.eventHash,resourceSource:source,resourceSourceHash:hash(source),target:await costRules.target(resource,hash,'Cliente histórico')};
   if(kind==='MATERIAL')Object.assign(base,{parentQuantity:'1',quantity:'0.333333',material:{productName:'SAL',unit:'KG',declaredQuantity:'0.333333'},used:{quantity:'0',amountCents:0,shares:[]},maintenanceUsed:{quantity:'0',shares:[]},materials:d.materials,materialsHash:hash(d.materials)});
-  else {const w={schema:1,basis:'DECLARED_REMINDER_VISIT_WORK_INTERVAL',startAt:d.workTime.startedAt,endAt:d.workTime.endedAt,durationMs:600000,origin:p.origin};Object.assign(base,{parentDurationMs:3600000,used:{durationMs:0,amountCents:0,shares:[]},workTime:w,workTimeHash:hash(w)});}
-  Object.assign(base,kind==='MATERIAL'?materialRules.calculation(100,'1',base.used,base.maintenanceUsed,'0.333333','0.333333'):costRules.timeCalculation(100,3600000,base.used,600000));
+  else {const w=costRules.workRecord(d,p.origin);Object.assign(base,{parentDurationMs:3600000,used:{durationMs:0,amountCents:0,shares:[]},workTime:w,workTimeHash:hash(w)});}
+  Object.assign(base,kind==='MATERIAL'?materialRules.calculation(100,'1',base.used,base.maintenanceUsed,'0.333333','0.333333'):costRules.timeCalculation(100,3600000,base.used,base.workTime.durationMs));
   return {available:true,...base,hash:hash(base)};
 }
 const costRehash=p=>{const {available,hash:signature,...v}=p;p.hash=hash(v);return p;};
@@ -109,5 +109,41 @@ describe('associated reminder resource conservation',()=>{
     const r=ownFixture(),row={resourceId:1,owner,requestId:r.event.id,payloadHash:r.receipt.payloadHash,response:r};
     for(const rows of [[row,row],[{...row,payloadHash:sha}]])expect((await ownHistory.journal({fieldWriteRequest:{findMany:async()=>rows}},1)).valid).toBe(false);
     expect((await ownHistory.journal({fieldWriteRequest:{findMany:async()=>[row]}},1)).active.id).toBe(r.event.id);
+  });
+});
+
+function multiFixture(){
+  const r=ownFixture(),p=r.event.preview,d=p.selection.data;
+  d.workIntervals=[d.workTime,{startedAt:'2008-07-11T10:40:00.000Z',endedAt:'2008-07-11T10:50:00.000Z'}];delete d.workTime;
+  p.schema=2;r.event.schema=2;p.comparison=ownRules.compare(d,p.parent,p.peers,p.movements);return ownRehash(r);
+}
+describe('multiple own intervals in an associated reminder',()=>{
+  it('verifies the exact intervals and their material/labor proofs in Node and browser',async()=>{
+    const c=vm.createContext({});for(const name of ['cw-maintenance-material-rules','cw-equipment-material-review-rules','cw-reminder-resource-rules','cw-reminder-visit-rules','cw-reminder-visit-resource-rules','cw-reminder-visit-cost-rules'])vm.runInContext(fs.readFileSync(new URL('../frontend/'+name+'.js',import.meta.url),'utf8'),c);
+    const r=multiFixture();expect(clone(await c.CWReminderVisitResourceRules.response(r,r.envelope,owner,1,hash))).toEqual(await ownVerify(r));expect(r.event.preview.comparison.durationSeconds).toBe(1200);
+    for(const kind of ['MATERIAL','LABOR']){const p=await costFixture(kind,r);expect(p.version).toBe(3);expect(clone(await c.CWReminderVisitCostRules.verify(p,hash))).toEqual(await costRules.verify(p,hash));expect(p.amountCents).toBe(33);if(kind==='MATERIAL')expect(await materialRules.verify(p,hash)).toEqual(p);else {expect(p.workTime.intervals).toHaveLength(2);expect(p.workTime.durationMs).toBe(1200000);expect(p.workTime.startAt).toBeUndefined();}}
+    const legacy=ownFixture();await expect(ownVerify(legacy)).resolves.toEqual(legacy);expect((await costFixture('LABOR')).workTime.schema).toBe(1);
+  });
+  it('rejects mixed shapes, empty, oversized, unsorted, duplicated and overlapping intervals',()=>{
+    const d=multiFixture().event.preview.selection.data;
+    const twenty=Array.from({length:20},(_,i)=>({startedAt:new Date(Date.parse(d.workIntervals[0].startedAt)+2000*i).toISOString(),endedAt:new Date(Date.parse(d.workIntervals[0].startedAt)+2000*i+1000).toISOString()}));
+    expect(ownRules.resourceInput({...d,workIntervals:twenty}).workIntervals).toHaveLength(20);
+    for(const changed of [{...d,workTime:null},{...d,workIntervals:[]},{...d,workIntervals:null},{...d,workIntervals:[...twenty,twenty[19]]},{...d,workIntervals:[...d.workIntervals].reverse()},{...d,workIntervals:[d.workIntervals[0],d.workIntervals[0]]},{...d,workIntervals:[{...d.workIntervals[0],startedAt:'2008-07-11T10:10:00.001Z'}]},{...d,workIntervals:[{...d.workIntervals[0],endedAt:d.workIntervals[0].startedAt}]}])expect(()=>ownRules.resourceInput(changed)).toThrow();
+  });
+  it('checks every interval against the parent and new peers while leaving gaps available',()=>{
+    const p=multiFixture().event.preview,d=p.selection.data,peer={type:'REMINDER',id:'d145d52b-922a-40eb-936f-9b8bc0a0ee55',reminderId:2,hash:sha,materials:null,workIntervals:[{startedAt:'2008-07-11T10:20:00.000Z',endedAt:'2008-07-11T10:40:00.000Z'}]};
+    expect(ownRules.compare(d,p.parent,[...p.peers,peer],p.movements).durationSeconds).toBe(1200);
+    for(const w of [{...peer.workIntervals[0],endedAt:'2008-07-11T10:40:01.000Z'},{...peer.workIntervals[0],startedAt:'2008-07-11T10:19:59.000Z'}])expect(()=>ownRules.compare(d,p.parent,[{...peer,workIntervals:[w]}],p.movements)).toThrow();
+    expect(()=>ownRules.compare({...d,workIntervals:[d.workIntervals[0],{...d.workIntervals[1],endedAt:'2008-07-11T11:00:01.000Z'}]},p.parent,p.peers,p.movements)).toThrow();
+  });
+  it('refuses rehashed costs that bill pauses, change one interval or downgrade a new proof',async()=>{
+    for(const change of [p=>p.workTime.durationMs=2400000,p=>p.workTime.intervals[1].startAt=p.workTime.intervals[0].endAt,p=>p.version=2,p=>p.amountCents=67,p=>p.workTime.schema=1]){const p=await costFixture('LABOR',multiFixture());change(p);p.workTimeHash=hash(p.workTime);await expect(costRules.verify(costRehash(p),hash)).rejects.toThrow();}
+    for(const change of [r=>r.event.schema=1,r=>r.event.preview.schema=1,r=>r.event.preview.comparison.durationSeconds=2400]){const r=multiFixture();change(r);await expect(ownVerify(ownRehash(r))).rejects.toThrow();}
+  });
+  it('keeps the complete multiple-interval original in an explicit void and the verified journal',async()=>{
+    const original=multiFixture(),r=clone(original),p=r.event.preview;p.selection={action:'VOID',recordId:original.event.id,data:null};p.previousHash=original.eventHash;p.original=original;for(const k of ['association','parent','peers','movements','comparison'])p[k]=null;
+    r.event.id=r.envelope.requestId=r.receipt.requestId='d145d52b-922a-40eb-936f-9b8bc0a0ee66';ownRehash(r);await expect(ownVerify(r)).resolves.toEqual(r);
+    const rows=[original,r].map(v=>({resourceId:1,owner,requestId:v.event.id,payloadHash:v.receipt.payloadHash,response:v}));const s=await ownHistory.journal({fieldWriteRequest:{findMany:async()=>rows}},1);expect(s.valid).toBe(true);expect(s.active).toBeNull();expect(s.records[0].result).toEqual(original);
+    const broken=clone(r);broken.event.preview.original.event.preview.selection.data.workIntervals[1].startedAt=original.event.preview.selection.data.workIntervals[0].endedAt;await expect(ownVerify(ownRehash(broken))).rejects.toThrow();
   });
 });

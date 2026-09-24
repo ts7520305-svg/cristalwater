@@ -11,6 +11,13 @@
   const identity = p => p.reminderId === undefined ? 'MAINTENANCE_EQUIPMENT:' + p.completionId : 'MAINTENANCE_REMINDER:' + p.reminderId;
   const selection = p => p.reminderId === undefined ? { completionId: p.completionId } : { reminderId: p.reminderId };
   const matchesRequest = (s, d) => s.reminderId === undefined ? d.reminderId === undefined && s.completionId === d.completionId : s.completionId === null && d.completionId === undefined && s.reminderId === d.reminderId;
+  function workRecord(data, origin) {
+    const intervals = resources.intervals(data).map(w => ({ startAt:w.startedAt, endAt:w.endedAt, durationMs:Date.parse(w.endedAt)-Date.parse(w.startedAt) }));
+    if (!intervals.length) return null;
+    return data.workIntervals === undefined
+      ? { schema:1, basis:'DECLARED_REMINDER_VISIT_WORK_INTERVAL', ...intervals[0], origin }
+      : { schema:2, basis:'DECLARED_REMINDER_VISIT_WORK_INTERVALS', intervals, durationMs:intervals.reduce((sum,w)=>sum+w.durationMs,0), origin };
+  }
   async function target(resource, hash, clientName) {
     const p = resource.event.preview, a = p.association.event.preview, facts = {
       ...a.target, originVisitType: p.origin.visitType, originVisitId: p.origin.visitId,
@@ -28,9 +35,10 @@
   }
   async function verify(p, hash, allocation) {
     const a = p?.allocationBefore, t = p?.target, proof = p?.resources, c = p?.resourceSource;
-    if (p?.available !== true || p.version !== 2 || !positive(p.expenseId) || !positive(p.expenseVersion) || !positive(p.allocationId) || !positive(p.reminderId) || p.completionId !== null || !a || a.id !== p.allocationId || a.expenseId !== p.expenseId || !['MATERIAL','LABOR'].includes(a.valuationType) || !['REGULAR','EXTRA'].includes(a.targetType) || !positive(parentId(a)) || a.voidedAt !== null || a.monthRef !== p.monthRef || !positive(a.clientId) || !positive(a.amountCents) || !iso(a.targetSnapshot?.startAt) || !iso(a.targetSnapshot.endAt) || a.targetSnapshot.endAt.slice(0, 7) !== p.monthRef || !sha(p.hash) || !sha(p.allocationHash) || !Array.isArray(p.used?.shares) || p.used.shares.some(s => !resources.uuid(s.id) || !sha(s.hash))) fail();
+    if (p?.available !== true || ![2,3].includes(p.version) || !positive(p.expenseId) || !positive(p.expenseVersion) || !positive(p.allocationId) || !positive(p.reminderId) || p.completionId !== null || !a || a.id !== p.allocationId || a.expenseId !== p.expenseId || !['MATERIAL','LABOR'].includes(a.valuationType) || !['REGULAR','EXTRA'].includes(a.targetType) || !positive(parentId(a)) || a.voidedAt !== null || a.monthRef !== p.monthRef || !positive(a.clientId) || !positive(a.amountCents) || !iso(a.targetSnapshot?.startAt) || !iso(a.targetSnapshot.endAt) || a.targetSnapshot.endAt.slice(0, 7) !== p.monthRef || !sha(p.hash) || !sha(p.allocationHash) || !Array.isArray(p.used?.shares) || p.used.shares.some(s => !resources.uuid(s.id) || !sha(s.hash))) fail();
     await resources.response(proof, proof?.envelope, proof?.receipt?.owner, p.reminderId, hash);
     const original = proof.event.preview, origin = original.origin, data = original.selection.data;
+    if (p.version !== original.schema + 1) fail();
     if (proof.applied !== true || original.selection.action !== 'DECLARE' || origin.visitType !== a.targetType || origin.visitId !== parentId(a) || origin.clientId !== a.clientId || origin.technicianId !== a.valuationSnapshot?.source?.service?.technicianId || proof.eventHash !== p.resourcesHash || c?.schema !== 1 || c.basis !== 'CURRENT_ASSOCIATED_REMINDER_RESOURCES' || c.resourceId !== proof.event.id || c.resourceHash !== proof.eventHash || await hash(c.parent) !== await hash(original.parent) || c.parent.startAt !== a.targetSnapshot.startAt || c.parent.endAt !== a.targetSnapshot.endAt || !Array.isArray(c.peers) || !Array.isArray(c.movements) || c.peers.some(peer => peer.type === 'REMINDER' && peer.reminderId === p.reminderId) || await hash(resources.compare(data, c.parent, c.peers, c.movements)) !== await hash(c.comparison) || await hash(c) !== p.resourceSourceHash) fail();
     const expectedTarget = await target(proof, hash, t?.clientName);
     if (!t || typeof t.clientName !== 'string' || await hash(t) !== await hash(expectedTarget) || t.snapshot.endAt.slice(0, 7) !== p.monthRef || t.snapshot.poolId !== origin.poolId || t.snapshot.status !== 'CONFIRMED') fail();
@@ -40,12 +48,12 @@
       if (p.basis !== material.basis || m?.mode !== 'DECLARED' || lines.length !== 1 || !item || !sameProduct(item, productOf(a)) || item.productName !== productOf(a).productName || item.unit !== productOf(a).unit || item.declaredQuantity !== lines[0].quantity || a.quantityUnit !== item.unit || a.purchaseItemId !== a.valuationSnapshot.source.item.id || !positive(a.purchaseItemId) || quantity(a.quantity) === null || p.parentQuantity !== decimal(quantity(a.quantity)) || quantity(p.quantity) === null || p.quantity !== decimal(quantity(p.quantity)) || !Array.isArray(p.maintenanceUsed?.shares) || p.maintenanceUsed.shares.some(s => !resources.uuid(s.id) || !sha(s.hash)) || await hash(m) !== p.materialsHash || await hash(p.materials) !== p.materialsHash) fail();
       calculation = material.calculation(a.amountCents, p.parentQuantity, p.used, p.maintenanceUsed, item.declaredQuantity, p.quantity);
     } else {
-      const w = data.workTime, measured = quantity(String(a.quantity)), record = w && { schema: 1, basis: 'DECLARED_REMINDER_VISIT_WORK_INTERVAL', startAt: w.startedAt, endAt: w.endedAt, durationMs: Date.parse(w.endedAt) - Date.parse(w.startedAt), origin };
+      const measured = quantity(String(a.quantity)), record = workRecord(data, origin);
       if (p.basis !== 'CONFIRMED_PARENT_COST_TIME_SHARE' || !record || a.quantityUnit !== 'SECOND' || measured === null || measured !== BigInt(p.parentDurationMs) * 1000n || await hash(record) !== p.workTimeHash || await hash(p.workTime) !== p.workTimeHash) fail();
       calculation = timeCalculation(a.amountCents, p.parentDurationMs, p.used, record.durationMs);
     }
     if (!calculation || Object.entries(calculation).some(([k, v]) => p[k] !== v) || await hash(value(p)) !== p.hash || await hash(a) !== p.allocationHash || allocation && await hash(allocationFacts(allocation)) !== p.allocationHash) fail();
     return p;
   }
-  return { targetFields, identity, selection, matchesRequest, target, timeCalculation, verify };
+  return { targetFields, identity, selection, matchesRequest, target, workRecord, timeCalculation, verify };
 });

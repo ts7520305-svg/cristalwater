@@ -44,7 +44,7 @@ async function journal(db, expenseIds) {
     if (!e.result.applied) continue;
     if (e.command === commands[0]) {
       const p = s?.preview, prior = state.records.filter(row => row.share.allocationId === s?.allocationId);
-      let verified = validPreview(p); if (p?.version === 2) { try { await reminders.rules.verify(p, r.hash); verified = true; } catch (_) { verified = false; } }
+      let verified = validPreview(p); if ([2,3].includes(p?.version)) { try { await reminders.rules.verify(p, r.hash); verified = true; } catch (_) { verified = false; } }
       if (!s || s.schema !== 1 || s.id !== e.requestId || s.expenseId !== e.expenseId || s.allocationId !== d.allocationId || !reminders.rules.matchesRequest(s, d) || s.createdById !== e.actorId || !iso(s.createdAt) || s.reason !== reason || e.result.reason !== reason || !verified || p.expenseVersion !== e.request.expectedVersion || p.expenseId !== s.expenseId || p.allocationId !== s.allocationId || p.reminderId !== s.reminderId || p.completionId !== s.completionId || p.hash !== d.previewHash || p.amountCents !== d.amountCents || d.confirmed !== true || r.hash(s) !== e.result.shareHash || r.hash(budget(prior)) !== r.hash(p.used) || live(prior).some(row => identity(row.share) === identity(s))) { state.review = true; continue; }
       state.records.push({ share: s, hash: e.result.shareHash, voidedAt: null, voidReason: null });
     } else {
@@ -150,8 +150,8 @@ async function reminderPreview(db, expense, a, reminderId) {
   if (target.snapshot.endAt.slice(0, 7) !== a.monthRef || a.targetSnapshot.endAt.slice(0, 7) !== a.monthRef) return refused('MAINTENANCE_PERIOD_REVIEW', 'O lembrete, a visita e a atribuição têm de pertencer ao mesmo mês UTC.');
   if (live(a.maintenanceShares).some(s => s.share.reminderId === reminderId)) return refused('MAINTENANCE_ALREADY_SHARED', 'Este lembrete já tem uma parcela ativa deste custo. Anule-a antes de corrigir.');
   const used = budget(a.maintenanceShares), parentDurationMs = duration(a), calc = calculation(a.amountCents, parentDurationMs, used, workTime.durationMs);
-  if (!calc) return refused('MAINTENANCE_SHARE_BUDGET', 'O intervalo tem de caber no tempo e no valor ainda disponíveis da visita.');
-  const allocationBefore = allocationFacts(a), value = { version: 2, basis, expenseId: expense.id, expenseVersion: expense.version, allocationId: a.id, completionId: null, reminderId, monthRef: a.monthRef, allocationBefore, allocationHash: r.hash(allocationBefore), parentDurationMs, used, workTime, workTimeHash: r.hash(workTime), ...reminders.evidence(view), target, ...calc };
+  if (!calc) return refused('MAINTENANCE_SHARE_BUDGET', 'O tempo declarado tem de caber na duração e no valor ainda disponíveis da visita.');
+  const allocationBefore = allocationFacts(a), value = { version: view.resources.event.preview.schema + 1, basis, expenseId: expense.id, expenseVersion: expense.version, allocationId: a.id, completionId: null, reminderId, monthRef: a.monthRef, allocationBefore, allocationHash: r.hash(allocationBefore), parentDurationMs, used, workTime, workTimeHash: r.hash(workTime), ...reminders.evidence(view), target, ...calc };
   try { return json(await reminders.rules.verify({ available: true, ...value, hash: r.hash(value) }, r.hash)); } catch (_) { return refused('MAINTENANCE_SHARE_REVIEW', 'As provas da repartição precisam de revisão.'); }
 }
 async function hasActive(db, allocations) {

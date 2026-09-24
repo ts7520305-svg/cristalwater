@@ -21,7 +21,7 @@
       el('maintenanceLaborNext').disabled = !c.canWrite || page * 10 >= total || !!voiding;
     }
     async function verifyPreview(p, expenseId, version, allocation) {
-      if (p?.version === 2) {
+      if ([2,3].includes(p?.version)) {
         await window.CWReminderVisitCostRules.verify(p, hash, allocation);
         if (p.expenseId !== expenseId || version !== null && p.expenseVersion !== version) throw Error('A parcela não corresponde à despesa selecionada.');
         return p;
@@ -41,6 +41,10 @@
       node(facts, 'strong', p.target.label + ' · ' + p.target.clientName);
       node(facts, 'p', 'Origem: ' + p.allocationBefore.targetSnapshot.label + ' · Despesa #' + p.expenseId + ' · Atribuição #' + p.allocationId);
       node(facts, 'p', 'Tempo deste serviço: ' + (p.workTime.durationMs / 1000) + ' s · Tempo valorizado da visita: ' + (p.parentDurationMs / 1000) + ' s · ' + p.monthRef + ' (UTC)');
+      if (p.workTime.schema === 2) {
+        for (const [i,w] of p.workTime.intervals.entries()) node(facts, 'p', 'Intervalo '+(i+1)+': '+w.startAt+' → '+w.endAt+' · '+(w.durationMs/1000)+' s (UTC)');
+        node(facts, 'p', 'As pausas entre intervalos ficam excluídas da duração e do custo.');
+      }
       node(facts, 'p', 'Custo original: ' + money(p.allocationBefore.amountCents) + ' · Já repartido: ' + money(p.used.amountCents));
       node(facts, 'strong', (removing ? 'Valor a devolver à visita: ' : 'Parcela para esta manutenção: ') + money(p.amountCents));
       if (!removing) node(facts, 'p', 'Fica na visita: ' + money(p.remainingAmountCents));
