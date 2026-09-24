@@ -10,7 +10,7 @@
   window.CWRepairLabor = { formatTime, create(host, invalidate) {
     const { el, node, hash, active, request } = host;
     let revision = 0, scope = '', rows = [], wanted = '';
-    const needed = () => el('valuationKind').value === 'LABOR' && host.target()?.type === 'REPAIR';
+    const needed = () => el('valuationKind').value === 'LABOR' && ['REPAIR','MAINTENANCE_REMINDER'].includes(host.target()?.type);
     const selectedBasis = () => host.distribution ? host.distribution.basis() : host.context().expense?.laborBasis;
     const signature = () => { const c = host.context(), t = host.target(); return JSON.stringify([c.epoch,c.detailEpoch,c.expense?.id,c.expense?.version,t?.type,t?.id,t?.hash,host.distribution?.id()]); };
     function clear(keepWanted = false) {
@@ -26,6 +26,7 @@
       el('repairWorkInterval').disabled = !host.context().canWrite || !rows.some(r => r.eligible);
     }
     async function validateWork(work, target) {
+      if (target?.type === 'MAINTENANCE_REMINDER') return window.CWReminderLaborRules.work(work,target,hash);
       const s = work?.snapshot;
       if (!positive(work?.id) || !sha(work.fingerprint) || !s || s.version !== 1 || s.basis !== basisName || s.repairId !== target?.id || s.clientId !== target?.clientId || s.poolId !== target?.poolId || !positive(s.technicianId) || typeof s.technicianName !== 'string' || !s.technicianName.trim() || !positive(s.durationSeconds) || !utc(s.startedAt) || !utc(s.endedAt) || Date.parse(s.endedAt) - Date.parse(s.startedAt) !== s.durationSeconds * 1000 || !Number.isFinite(Date.parse(s.repairCreatedAt)) || Date.parse(s.startedAt) < Date.parse(s.repairCreatedAt) || Date.parse(s.endedAt) > Date.parse(target.endAt) || !Number.isFinite(Date.parse(s.createdAt)) || Date.parse(s.createdAt) < Date.parse(s.endedAt) || typeof s.reason !== 'string' || s.reason.trim().length < 5 || typeof s.createdBy !== 'string' || !/^(ADMIN|TECH|USER:TECH):[1-9]\d*$/.test(s.createdBy) || !fields.every(k => s.source?.[k] === target?.[k]) || !sha(s.sourceHash)) throw Error('O intervalo recebido não corresponde à reparação revista.');
       if (await hash(s) !== work.fingerprint || await hash(s.source) !== s.sourceHash || await hash(Object.fromEntries(fields.map(k => [k,target[k]]))) !== s.sourceHash) throw Error('A prova do intervalo de trabalho não corresponde à execução revista.');
@@ -35,7 +36,7 @@
     function selection() { return rows.find(r => r.id === Number(el('repairWorkInterval').value) && r.eligible) || null; }
     function describe() {
       const row = selection(), s = row?.workInterval.snapshot;
-      el('repairWorkSelection').textContent = s ? s.technicianName + ' · ' + formatTime(s.startedAt) + ' a ' + formatTime(s.endedAt) + ' · ' + s.durationSeconds + ' segundos declarados e confirmados. ' + s.reason : '';
+      el('repairWorkSelection').textContent = s ? (row.technicianName || s.technicianName) + ' · ' + formatTime(s.startedAt) + ' a ' + formatTime(s.endedAt) + ' · ' + s.durationSeconds + ' segundos declarados e confirmados. ' + s.reason : '';
     }
     async function load() {
       if (!needed() || !active() || !host.context().canWrite) return;
@@ -44,10 +45,11 @@
       el('repairWorkStatus').textContent = 'A consultar intervalos e fontes…'; sync();
       try {
         if (!b) throw Error('Escolha uma parcela confirmada de trabalho.');
-        const response = await request('/' + c.expense.id + '/repair-work-intervals?repairId=' + target.id + (part ? '&laborPart=' + part : ''));
+        const reminder = target.type === 'MAINTENANCE_REMINDER';
+        const response = await request('/' + c.expense.id + (reminder ? '/reminder-work-intervals?reminderId=' : '/repair-work-intervals?repairId=') + target.id + (part ? '&laborPart=' + part : ''));
         if (!active() || rev !== revision || stamp !== signature()) return;
         const v = response.intervals;
-        if (!v || v.version !== 1 || v.expenseId !== c.expense.id || v.expenseVersion !== c.expense.version || v.repairId !== target.id || v.targetHash !== target.hash || await hash(v.basis) !== await hash(b) || !Array.isArray(v.rows) || new Set(v.rows.map(r => r.id)).size !== v.rows.length) throw Error('Os intervalos recebidos pertencem a outro contexto.');
+        if (!v || v.version !== 1 || v.expenseId !== c.expense.id || v.expenseVersion !== c.expense.version || (reminder ? v.reminderId : v.repairId) !== target.id || v.targetHash !== target.hash || await hash(v.basis) !== await hash(b) || !Array.isArray(v.rows) || new Set(v.rows.map(r => r.id)).size !== v.rows.length) throw Error('Os intervalos recebidos pertencem a outro contexto.');
         if ((v.laborPart ?? null) !== (part ?? null) || !part && v.laborDistribution) throw Error('Os intervalos pertencem a outra parcela.');
         if (part) await host.distribution.proof(v.laborDistribution,c.expense.id,part,true);
         for (const row of v.rows) {
@@ -58,13 +60,14 @@
         if (!active() || rev !== revision || stamp !== signature()) return;
         rows = v.rows;
         const blank = node(el('repairWorkInterval'),'option','Escolha o intervalo confirmado'); blank.value = '';
-        for (const row of rows) { const s = row.workInterval?.snapshot; const option = node(el('repairWorkInterval'),'option','#' + row.id + ' · ' + (typeof s?.technicianName === 'string' ? s.technicianName : 'Técnico por rever') + ' · ' + formatTime(s?.startedAt) + (row.eligible ? '' : ' · indisponível')); option.value = String(row.id); option.disabled = !row.eligible; }
+        for (const row of rows) { const s = row.workInterval?.snapshot; const option = node(el('repairWorkInterval'),'option','#' + row.id + ' · ' + (row.technicianName || (typeof s?.technicianName === 'string' ? s.technicianName : 'Técnico por rever')) + ' · ' + formatTime(s?.startedAt) + (row.eligible ? '' : ' · indisponível')); option.value = String(row.id); option.disabled = !row.eligible; }
         if (rows.some(r => r.eligible && String(r.id) === wanted)) el('repairWorkInterval').value = wanted;
-        el('repairWorkStatus').textContent = rows.some(r => r.eligible) ? 'Escolha o intervalo e calcule o custo atual. Os limites de tempo e valor são partilhados com as visitas desta despesa.' : 'Sem intervalos elegíveis para este técnico e período. Consulte os tempos da reparação e a base da despesa.';
+        el('repairWorkStatus').textContent = rows.some(r => r.eligible) ? 'Escolha o intervalo e calcule o custo atual. Os limites de tempo e valor são partilhados com as visitas, reparações e lembretes desta despesa.' : 'Sem intervalos elegíveis para este técnico e período. Consulte os tempos declarados do serviço e a base da despesa.';
         describe();
       } catch (error) { if (active() && rev === revision && stamp === signature()) { rows = []; el('repairWorkInterval').replaceChildren(); el('repairWorkSelection').replaceChildren(); el('repairWorkStatus').textContent = error.message; } } finally { sync(); }
     }
     async function validateSource(source, target, expectedId, expectedBasis) {
+      if (target?.type === 'MAINTENANCE_REMINDER') return window.CWReminderLaborRules.source(source,target,expectedId,expectedBasis,hash);
       if (source?.version !== (source?.laborDistribution ? 5 : 3) || source.kind !== 'LABOR' || source.workBasis !== basisName || source.workInterval?.id !== expectedId || !fields.every(k => source.service?.[k] === target?.[k])) throw Error('A origem do trabalho não corresponde à reparação revista.');
       const s = await validateWork(source.workInterval,target), b = source.basis;
       if (!b || !positive(b.id) || !positive(b.expenseId) || !positive(b.paidMinutes) || !within(s,b) || !positive(source.expenseAmountCents) || expectedBasis && await hash(b) !== await hash(paid(expectedBasis))) throw Error('A base paga não corresponde ao intervalo revisto.');
@@ -74,11 +77,17 @@
       const row = selection();
       if (!row || value.workIntervalId !== row.id || await hash(value.source.workInterval) !== await hash(row.workInterval)) throw Error('O intervalo mudou. Consulte e reveja a seleção.');
       const b = selectedBasis(), s = await validateSource(value.source,target.snapshot,row.id,b);
+      if (target.type === 'MAINTENANCE_REMINDER') window.CWReminderLaborRules.calculation(value,s,b,host.distribution?.selected()?.amountCents ?? expense.amountCents);
       if (value.source.basis.expenseId !== expense.id || value.source.expenseAmountCents !== expense.amountCents || value.quantity !== String(s.durationSeconds) || value.quantityUnit !== 'SECOND' || value.calculation.baseQuantity !== String(b.paidMinutes * 60) || value.calculation.baseAmountCents !== (host.distribution?.selected()?.amountCents ?? expense.amountCents)) throw Error('A duração ou custo de base não corresponde ao intervalo confirmado.');
     }
     async function receipt(a, d, expenseId) {
       const s = await validateSource(a.valuationSnapshot?.source,a.targetSnapshot,d.workIntervalId);
-      if (a.valuationSnapshot.source.basis.expenseId !== expenseId || a.quantity !== String(s.durationSeconds) || a.quantityUnit !== 'SECOND' || a.activeMeasurementKey !== 'LABOR:REPAIR:' + a.repairId + ':INTERVAL:' + d.workIntervalId) throw Error('O recibo não corresponde ao intervalo valorizado.');
+      if (a.targetType === 'MAINTENANCE_REMINDER') {
+        const source=a.valuationSnapshot.source,part=source.laborDistribution;
+        const amount=part ? part.snapshot.parts?.find(p=>p.index===part.partIndex)?.amountCents : source.expenseAmountCents;
+        window.CWReminderLaborRules.calculation({...a,calculation:a.valuationSnapshot.calculation},s,source.basis,amount);
+      }
+      if (a.valuationSnapshot.source.basis.expenseId !== expenseId || a.quantity !== String(s.durationSeconds) || a.quantityUnit !== 'SECOND' || a.activeMeasurementKey !== 'LABOR:' + a.targetType + ':' + (a.targetType === 'MAINTENANCE_REMINDER' ? a.serviceReminderId : a.repairId) + ':INTERVAL:' + d.workIntervalId) throw Error('O recibo não corresponde ao intervalo valorizado.');
     }
     el('repairWorkRefresh').addEventListener('click', () => void load());
     el('repairWorkInterval').addEventListener('change', () => { wanted = el('repairWorkInterval').value; invalidate(); describe(); host.draft?.(); });

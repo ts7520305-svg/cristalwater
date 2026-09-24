@@ -225,8 +225,12 @@ async function repairWorkIntervals(id, query) {
   r.id(id); r.object(query, ['repairId','laborPart']); const repairId = r.queryId(query.repairId), laborPart=query.laborPart===undefined?undefined:r.queryId(query.laborPart);
   return prisma.$transaction(async db => { const expense = await db.companyExpense.findUnique({ where: { id }, include }); if (!expense) r.fail('Despesa não encontrada.', 404); return { ok: true, intervals: await valuation.workIntervals(db, expense, repairId, laborPart) }; }, { isolationLevel: 'RepeatableRead', timeout: 30000, maxWait: 15000 });
 }
+async function reminderWorkIntervals(id, query) {
+  r.id(id); r.object(query, ['reminderId','laborPart']); const reminderId = r.queryId(query.reminderId), laborPart=query.laborPart===undefined?undefined:r.queryId(query.laborPart);
+  return prisma.$transaction(async db => { const expense = await db.companyExpense.findUnique({ where: { id }, include }); if (!expense) r.fail('Despesa não encontrada.', 404); return { ok: true, intervals: await valuation.workIntervals(db, expense, reminderId, laborPart, 'MAINTENANCE_REMINDER') }; }, { isolationLevel: 'RepeatableRead', timeout: 30000, maxWait: 15000 });
+}
 async function laborDistributionPreview(id,body){
   r.id(id);r.object(body,['parts']);
   return prisma.$transaction(async db=>{const expense=await db.companyExpense.findUnique({where:{id},include});if(!expense)r.fail('Despesa não encontrada.',404);return {ok:true,preview:await require('./expenseLaborDistributionService').preview(db,expense,body.parts)};},{isolationLevel:'RepeatableRead',timeout:30000,maxWait:15000});
 }
-module.exports = { view, maintenanceMaterial, maintenanceLabor, laborDistributionPreview, costPeriodPreview, repairWorkIntervals, list, detail, summary, rows, summarize, command, receipt, evidence, actor, sources, costs, costReport, clientCosts, valuationPreview, operationalCosts };
+module.exports = { view, maintenanceMaterial, maintenanceLabor, laborDistributionPreview, costPeriodPreview, repairWorkIntervals, reminderWorkIntervals, list, detail, summary, rows, summarize, command, receipt, evidence, actor, sources, costs, costReport, clientCosts, valuationPreview, operationalCosts };

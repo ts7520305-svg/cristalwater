@@ -3,6 +3,7 @@ const r = require('./expenseLedgerRules');
 const { normalizeProductName, normalizeUnit } = require('../utils/stockNormalizer');
 const { isCompletedVisitStatus } = require('./operationalValueReportService');
 const repairExecution = require('./repairExecutionService'), repairTargets = require('./expenseRepairTargets'), repairWork = require('./repairWorkService');
+const reminderWork = require('./reminderLaborSourceService'), maintenanceTargets = require('./expenseMaintenanceTargets');
 const scale = 1000000n, max = 999999999999999999n;
 const quantity = value => {
   if (typeof value === 'number') {
@@ -20,44 +21,50 @@ const visitSelect = { id: true, clientId: true, poolId: true, technicianId: true
 const movementSelect = { id: true, movementType: true, productId: true, productName: true, unit: true, quantity: true, visitId: true, extraVisitId: true, clientId: true, poolId: true, createdAt: true };
 const itemSelect = { id: true, purchaseId: true, productId: true, productName: true, unit: true, quantity: true, unitCost: true, totalCost: true, lot: true, purchase: { select: { status: true, invoiceDate: true, totalAmount: true } } };
 const measurementKey = (type, id) => type + ':' + id;
-const targetId = a => a.targetType === 'REPAIR' ? a.repairId : a.targetType === 'REGULAR' ? a.visitId : a.extraVisitId;
-const selected = a => ({ kind: a.valuationType, expenseId: a.expenseId, targetType: a.targetType, targetId: targetId(a), purchaseItemId: a.purchaseItemId, ...(a.valuationSnapshot?.source?.laborDistribution ? {laborPart:a.valuationSnapshot.source.laborDistribution.partIndex}:{}), ...(a.targetType === 'REPAIR' && a.valuationType === 'LABOR' ? { workIntervalId: a.valuationSnapshot?.source?.workInterval?.id } : {}) });
+const targetId = a => a.targetType === 'MAINTENANCE_REMINDER' ? a.serviceReminderId : a.targetType === 'REPAIR' ? a.repairId : a.targetType === 'REGULAR' ? a.visitId : a.extraVisitId;
+const selected = a => ({ kind: a.valuationType, expenseId: a.expenseId, targetType: a.targetType, targetId: targetId(a), purchaseItemId: a.purchaseItemId, ...(a.valuationSnapshot?.source?.laborDistribution ? {laborPart:a.valuationSnapshot.source.laborDistribution.partIndex}:{}), ...(['REPAIR','MAINTENANCE_REMINDER'].includes(a.targetType) && a.valuationType === 'LABOR' ? { workIntervalId: a.valuationSnapshot?.source?.workInterval?.id } : {}) });
 function laborBasis(b) { return b ? { id: b.id, expenseId: b.expenseId, technicianId: b.technicianId, periodStart: r.day(b.periodStart), periodEnd: r.day(b.periodEnd), paidMinutes: b.paidMinutes } : null; }
 async function prepare(db, allocations, extra = []) {
   const selections = [...allocations.filter(a => a.valuationType !== 'MANUAL').map(selected), ...extra];
   if (!selections.length) return { regular: new Map(), extra: new Map(), items: new Map(), movements: [], active: [] };
   const ids = type => [...new Set(selections.filter(s => s.targetType === type).map(s => s.targetId))];
-  const regularIds = ids('REGULAR'), extraIds = ids('EXTRA'), repairIds = ids('REPAIR'), itemIds = [...new Set(selections.map(s => s.purchaseItemId).filter(Boolean))];
+  const regularIds = ids('REGULAR'), extraIds = ids('EXTRA'), repairIds = ids('REPAIR'), reminderIds = ids('MAINTENANCE_REMINDER'), itemIds = [...new Set(selections.map(s => s.purchaseItemId).filter(Boolean))];
   const laborExpenseIds = [...new Set(selections.filter(s => s.kind === 'LABOR').map(s => s.expenseId).filter(Boolean))];
   const repairContext = repairIds.length ? await repairExecution.load(db, repairIds) : null, repairMovementIds = repairContext ? [...repairContext.movements.keys()] : [];
-  const [regular, extras, items, movements, active, repairs, owners] = await Promise.all([
+  const [regular, extras, items, movements, active, repairs, owners, reminders] = await Promise.all([
     db.serviceVisit.findMany({ where: { id: { in: regularIds } }, select: visitSelect }),
     db.extraVisit.findMany({ where: { id: { in: extraIds } }, select: visitSelect }),
     db.stockPurchaseItem.findMany({ where: { id: { in: itemIds } }, select: itemSelect }),
     db.stockMovement.findMany({ where: { OR: [{ visitId: { in: regularIds } }, { extraVisitId: { in: extraIds } }] }, select: movementSelect, orderBy: { id: 'asc' } }),
-    db.expenseAllocation.findMany({ where: { voidedAt: null, valuationType: { not: 'MANUAL' }, OR: [{ visitId: { in: regularIds } }, { extraVisitId: { in: extraIds } }, { repairId: { in: repairIds } }, { purchaseItemId: { in: itemIds } }, { expenseId: { in: laborExpenseIds } }, ...repairMovementIds.map(id => ({ valuationSnapshot: { path: ['source', 'movements'], array_contains: [{ id }] } }))] }, select: { id: true, expenseId: true, targetType: true, visitId: true, extraVisitId: true, repairId: true, valuationType: true, valuationKey: true, purchaseItemId: true, quantity: true, amountCents: true, activeMeasurementKey: true, valuationSnapshot: true } }),
+    db.expenseAllocation.findMany({ where: { voidedAt: null, valuationType: { not: 'MANUAL' }, OR: [{ visitId: { in: regularIds } }, { extraVisitId: { in: extraIds } }, { repairId: { in: repairIds } }, { serviceReminderId: { in: reminderIds } }, { purchaseItemId: { in: itemIds } }, { expenseId: { in: laborExpenseIds } }, ...repairMovementIds.map(id => ({ valuationSnapshot: { path: ['source', 'movements'], array_contains: [{ id }] } }))] }, select: { id: true, expenseId: true, targetType: true, visitId: true, extraVisitId: true, repairId: true, serviceReminderId: true, valuationType: true, valuationKey: true, purchaseItemId: true, quantity: true, amountCents: true, activeMeasurementKey: true, valuationSnapshot: true } }),
     repairTargets.read(db, repairIds, repairContext),
-    repairMovementIds.length ? db.auditTrail.findMany({ where: { eventType: repairExecution.eventType, entity: 'Repair', OR: repairMovementIds.map(id => ({ metadata: { path: ['movements'], array_contains: [{ id }] } })) }, select: { id: true, entityId: true, metadata: true } }) : []
+    repairMovementIds.length ? db.auditTrail.findMany({ where: { eventType: repairExecution.eventType, entity: 'Repair', OR: repairMovementIds.map(id => ({ metadata: { path: ['movements'], array_contains: [{ id }] } })) }, select: { id: true, entityId: true, metadata: true } }) : [],
+    maintenanceTargets.read(db,'MAINTENANCE_REMINDER',reminderIds)
   ]);
   const movementOwners = new Map(); for (const proof of owners) for (const movement of Array.isArray(proof.metadata?.movements) ? proof.metadata.movements : []) { if (!movement || !Number.isSafeInteger(movement.id) || movement.id <= 0) continue; const rows = movementOwners.get(movement.id) || []; rows.push(proof); movementOwners.set(movement.id, rows); }
   const repairMap = new Map(repairs.map(t => [t.id, t])), workRepairIds = [...new Set(selections.filter(s => s.kind === 'LABOR' && s.targetType === 'REPAIR').map(s => s.targetId))];
   const laborVisits = new Set(selections.filter(s => s.kind === 'LABOR' && s.targetType !== 'REPAIR').map(s => s.targetType + ':' + s.targetId));
   const spans = [...regular.map(row => ({ ...row, type: 'REGULAR' })), ...extras.map(row => ({ ...row, type: 'EXTRA' }))].filter(row => laborVisits.has(row.type + ':' + row.id));
-  const [workIntervals, workTimeConflicts] = await Promise.all([
+  const [workIntervals, workTimeConflicts, reminderIntervals] = await Promise.all([
     repairWork.readForValuation(db, workRepairIds, repairMap),
-    require('./recordedWorkTimeService').conflicts(db, spans)
+    require('./recordedWorkTimeService').conflicts(db, spans),
+    reminderWork.read(db,reminderIds)
   ]);
-  return { regular: new Map(regular.map(v => [v.id, v])), extra: new Map(extras.map(v => [v.id, v])), repairs: repairMap, workIntervals, workTimeConflicts, repairContext, movementOwners, items: new Map(items.map(v => [v.id, v])), movements, active };
+  return { regular: new Map(regular.map(v => [v.id, v])), extra: new Map(extras.map(v => [v.id, v])), repairs: repairMap, reminders:new Map(reminders.map(t=>[t.id,t])), workIntervals, reminderIntervals, workTimeConflicts, repairContext, movementOwners, items: new Map(items.map(v => [v.id, v])), movements, active };
 }
 function build(data, expense, selection) {
   const { kind, targetType, targetId: id, purchaseItemId } = selection;
+  if(!['REGULAR','EXTRA','REPAIR','MAINTENANCE_REMINDER'].includes(targetType))return {valid:false,errors:['Escolha um serviço com origem própria confirmada.']};
+  const reminder=targetType==='MAINTENANCE_REMINDER'?data.reminders?.get(id):null;
+  if(targetType==='MAINTENANCE_REMINDER'&&(!reminder?.valid||kind!=='LABOR'))return {valid:false,errors:['Confirme a execução do lembrete e escolha trabalho declarado. Os materiais exigem conferência de consumo própria.']};
   const repair = targetType === 'REPAIR' ? data.repairs?.get(id) : null;
   if (targetType === 'REPAIR' && (!repair?.valid || kind === 'MATERIAL' && repair.snapshot.materialMode !== 'RESERVED')) return { valid: false, errors: ['A reparação precisa de execução autenticada válida e, para materiais, consumo confirmado.'] };
-  const visit = repair ? { id, clientId: repair.clientId, poolId: repair.snapshot.poolId, status: 'CONFIRMED', startAt: null, endAt: new Date(repair.snapshot.endAt) } : (targetType === 'REGULAR' ? data.regular : data.extra).get(id);
+  const independent=repair||reminder;
+  const visit = independent ? { id, clientId: independent.clientId, poolId: independent.snapshot.poolId, status: 'CONFIRMED', startAt: null, endAt: new Date(independent.snapshot.endAt) } : (targetType === 'REGULAR' ? data.regular : data.extra).get(id);
   const errors = [], add = message => errors.push(message);
-  if (!visit || !visit.clientId || !repair && !isCompletedVisitStatus(visit.status) || !visit.endAt) return { valid: false, errors: ['Confirme a conclusão, data e cliente registados diretamente no serviço.'] };
+  if (!visit || !visit.clientId || !independent && !isCompletedVisitStatus(visit.status) || !visit.endAt) return { valid: false, errors: ['Confirme a conclusão, data e cliente registados diretamente no serviço.'] };
   const end = visit.endAt.getTime(); let start = visit.startAt?.getTime();
-  const service = repair ? Object.fromEntries(['type','id','clientId','poolId','status','startAt','endAt', ...repairTargets.proofFields].map(k => [k, repair.snapshot[k]])) : { ...visit, startAt: visit.startAt?.toISOString() || null, endAt: visit.endAt.toISOString() };
+  const service = reminder ? reminderWork.rules.facts(reminder.snapshot) : repair ? Object.fromEntries(['type','id','clientId','poolId','status','startAt','endAt', ...repairTargets.proofFields].map(k => [k, repair.snapshot[k]])) : { ...visit, startAt: visit.startAt?.toISOString() || null, endAt: visit.endAt.toISOString() };
   let key, units, totalQuantity, totalCents, snapshot, label;
   if (kind === 'MATERIAL') {
     const item = data.items.get(purchaseItemId);
@@ -92,13 +99,14 @@ function build(data, expense, selection) {
     label = item.productName + ' · ' + unit + ' · Linha #' + item.id + (item.lot ? ' · Lote ' + item.lot : '');
     return { valid: !errors.length, errors, key, kind, monthRef: service.endAt.slice(0, 7), units, totalQuantity, totalCents, snapshot, hash: r.hash(snapshot), label, unit, visit, method: 'CONFIRMED_PURCHASE_LINE', measurement: measurementKey(targetType, id) };
   }
-  if (!repair && data.workTimeConflicts?.has(targetType + ':' + id)) return { valid: false, errorCodes: ['RECORDED_TIME_OVERLAP'], errors: ['Este técnico tem tempo registado em simultâneo noutra visita ou reparação. Reveja os horários antes de valorizar o trabalho.'] };
+  if (!independent && data.workTimeConflicts?.has(targetType + ':' + id)) return { valid: false, errorCodes: ['RECORDED_TIME_OVERLAP'], errors: ['Este técnico tem tempo registado em simultâneo noutra visita, reparação ou lembrete. Reveja os horários antes de valorizar o trabalho.'] };
   const share=require('./expenseLaborDistributionService').selection(expense,selection.laborPart);
   if(share?.error)return {valid:false,errors:[share.error]};
-  const basis = share?.basis || laborBasis(expense.laborBasis), work = repair ? data.workIntervals?.get(selection.workIntervalId) : null;
+  const basis = share?.basis || laborBasis(expense.laborBasis), work = reminder ? data.reminderIntervals?.get(selection.workIntervalId) : repair ? data.workIntervals?.get(selection.workIntervalId) : null;
   if (repair && (!work || work.repairId !== id || work.clientId !== repair.clientId || work.sourceHash !== repair.hash || work.state !== 'CONFIRMED')) return { valid: false, errors: ['Escolha um intervalo declarado e confirmado desta reparação, sem anulação ou sobreposição por rever.'] };
-  const technicianId = repair ? work.technicianId : visit.technicianId, laborEnd = repair ? Date.parse(work.endedAt) : end;
-  if (repair) start = Date.parse(work.startedAt);
+  if (reminder && (!work || work.reminderId !== id || work.clientId !== reminder.clientId || work.sourceHash !== reminder.hash || work.state !== 'CONFIRMED')) return { valid:false,errorCodes:work?.reviewReasons?.includes('RECORDED_TIME_OVERLAP')?['RECORDED_TIME_OVERLAP']:[],errors:['Escolha um intervalo próprio confirmado deste lembrete, sem anulação, sobreposição ou origem por rever.'] };
+  const technicianId = independent ? work.technicianId : visit.technicianId, laborEnd = independent ? Date.parse(work.endedAt) : end;
+  if (independent) start = Date.parse(work.startedAt);
   if (expense.category !== 'LABOR' || expense.sourceType !== 'MANUAL' || !basis || basis.technicianId !== technicianId) return { valid: false, errors: ['Confirme a base de trabalho da despesa e o técnico deste intervalo ou serviço.'] };
   if (!Number.isFinite(start) || start >= laborEnd) add('O serviço precisa de início e fim válidos para apurar o tempo.');
   const from = Date.parse(basis.periodStart + 'T00:00:00Z'), until = Date.parse(basis.periodEnd + 'T00:00:00Z') + 86400000;
@@ -106,9 +114,9 @@ function build(data, expense, selection) {
   units = Number.isSafeInteger(laborEnd - start) && laborEnd > start ? BigInt(laborEnd - start) * 1000n : null;
   totalQuantity = Number.isSafeInteger(basis.paidMinutes) && basis.paidMinutes > 0 ? BigInt(basis.paidMinutes) * 60n * scale : null;
   if (!totalQuantity || !units) add('Confirme o tempo pago e o tempo do serviço.');
-  key = r.hash({ kind, targetType, id, ...(repair ? { workIntervalId: work.id } : {}) }); totalCents = share ? share.part.amountCents : expense.amountCents;
-  snapshot = { version: share ? repair ? 5 : 4 : repair ? 3 : 1, kind, service, basis, expenseAmountCents: expense.amountCents, ...(share?{laborDistribution:share.proof}:{}), ...(repair ? { workBasis: repairWork.basis, workInterval: { id: work.id, fingerprint: work.fingerprint, snapshot: work.snapshot } } : {}) };
-  return { valid: !errors.length, errors, key, kind, monthRef: service.endAt.slice(0, 7), units, totalQuantity, totalCents, snapshot, hash: r.hash(snapshot), label: (repair ? 'Intervalo declarado #' + work.id + ' · ' + work.technicianName + ' · ' + work.startedAt + ' a ' + work.endedAt + ' · ' : '') + 'Tempo do técnico #' + technicianId + ' · ' + basis.periodStart + ' a ' + basis.periodEnd, unit: 'SECOND', visit, method: 'CONFIRMED_EXPENSE_PAID_TIME', measurement: measurementKey(targetType, id) };
+  key = r.hash({ kind, targetType, id, ...(independent ? { workIntervalId: work.id } : {}) }); totalCents = share ? share.part.amountCents : expense.amountCents;
+  snapshot = { version: reminder ? share ? 7 : 6 : share ? repair ? 5 : 4 : repair ? 3 : 1, kind, service, basis, expenseAmountCents: expense.amountCents, ...(share?{laborDistribution:share.proof}:{}), ...(independent ? { workBasis: reminder ? reminderWork.basis : repairWork.basis, workInterval: { id: work.id, fingerprint: work.fingerprint, snapshot: work.snapshot } } : {}) };
+  return { valid: !errors.length, errors, key, kind, monthRef: service.endAt.slice(0, 7), units, totalQuantity, totalCents, snapshot, hash: r.hash(snapshot), label: (independent ? 'Intervalo declarado #' + work.id + ' · ' + work.technicianName + ' · ' + work.startedAt + ' a ' + work.endedAt + ' · ' : '') + 'Tempo do técnico #' + technicianId + ' · ' + basis.periodStart + ' a ' + basis.periodEnd, unit: 'SECOND', visit, method: 'CONFIRMED_EXPENSE_PAID_TIME', measurement: measurementKey(targetType, id) };
 }
 function totals(rows) {
   let units = 0n, cents = 0;

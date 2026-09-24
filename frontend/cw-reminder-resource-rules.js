@@ -22,8 +22,11 @@
     if (p?.available !== true || p.schema !== 1 || p.basis !== basis || !positive(p.reminderId) || !origin(p.origin) || p.origin.reminderId !== p.reminderId || !sha(p.contextHash) || !sha(p.hash) || await hash(facts(p)) !== p.hash || !['DECLARE','VOID'].includes(p.action)) fail();
     if (p.action === 'VOID') {
       if (!positive(p.recordId) || !sha(p.recordHash) || p.proposed !== null || p.source !== null || p.target !== null || p.sourceHash !== null || p.targetHash !== null || p.durationSeconds !== null) fail();
+      // Older receipts did not carry cost impacts. Their original hashes remain valid.
+      if (p.affectedCosts !== undefined && (!Array.isArray(p.affectedCosts) || p.affectedCosts.some((c,i,a) => !fields(c,['allocationId','expenseId','amountCents','workIntervalId','groupId','allocationHash']) || !positive(c.allocationId) || !positive(c.expenseId) || !positive(c.amountCents) || c.workIntervalId !== p.recordId || c.groupId !== null && !positive(c.groupId) || !sha(c.allocationHash) || i > 0 && c.allocationId <= a[i-1].allocationId))) fail();
       return p;
     }
+    if (p.affectedCosts !== undefined) fail();
     const s = p.source, t = p.target, d = input(p.proposed);
     if (p.recordId !== null || p.recordHash !== null || await hash(d) !== await hash(p.proposed) || d.technicianId !== p.origin.technicianId || !s || s.id !== p.reminderId || s.clientId !== p.origin.clientId || s.poolId !== p.origin.poolId || !['TECHNICAL_PERIODIC_SERVICE','POOL_SERVICE_REMINDER'].includes(s.category) || !['DONE','COMPLETED','CLOSED'].includes(s.status) || !iso(s.completedAt) || s.technicianId !== null && s.technicianId !== d.technicianId || await hash(s) !== p.sourceHash) fail();
     if (!t || t.type !== 'MAINTENANCE_REMINDER' || t.id !== p.reminderId || t.clientId !== s.clientId || t.poolId !== s.poolId || t.status !== 'CONFIRMED' || t.endAt !== s.completedAt || t.startAt !== null || t.originVisitType !== null || t.originVisitId !== null || t.executionBasis !== 'CONFIRMED_MAINTENANCE_EXECUTION_AND_DECISION' || !positive(t.decisionId) || !sha(t.decisionFingerprint) || !sha(t.executionFingerprint) || await hash(t) !== p.targetHash) fail();

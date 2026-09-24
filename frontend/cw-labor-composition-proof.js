@@ -46,7 +46,7 @@
     basisFacts(p?.basisSnapshot);await distributionHashes(p.basisSnapshot);
     check(p.version===1&&id(p.basisId)&&p.basisFingerprint===await hash(p.basisSnapshot)&&p.hash===await hash(without(p,'hash'))&&equal(p.choice,choice||p.choice));
     if(selectedBasis)check(p.basisId===selectedBasis.id&&p.basisFingerprint===selectedBasis.fingerprint&&equal(p.basisSnapshot,selectedBasis.snapshot));
-    check(p.choice.kind==='LABOR'&&p.choice.quantity===null&&p.choice.purchaseItemId===null&&['REGULAR','EXTRA','REPAIR'].includes(p.targetType)&&p.targetType===p.choice.targetType&&id(p.targetId)&&p.targetId===p.choice.targetId&&id(p.clientId)&&/^(20|21)\d\d-\d\d$/.test(p.monthRef)&&p.quantityUnit==='SECOND'&&units(p.quantity)>0n&&cents(p.amountCents)&&p.components?.length===p.basisSnapshot.components.length);
+    check(p.choice.kind==='LABOR'&&p.choice.quantity===null&&p.choice.purchaseItemId===null&&['REGULAR','EXTRA','REPAIR','MAINTENANCE_REMINDER'].includes(p.targetType)&&p.targetType===p.choice.targetType&&id(p.targetId)&&p.targetId===p.choice.targetId&&id(p.clientId)&&/^(20|21)\d\d-\d\d$/.test(p.monthRef)&&p.quantityUnit==='SECOND'&&units(p.quantity)>0n&&cents(p.amountCents)&&p.components?.length===p.basisSnapshot.components.length);
     let total=0;
     for(const [i,c] of p.components.entries()) {
       const original=p.basisSnapshot.components[i],s=c.source,k=c.calculation,q=units(c.quantity),base=units(k?.baseQuantity),before=units(k?.poolQuantityBefore);
@@ -59,9 +59,13 @@
         const w=s.workInterval,t=w?.snapshot;
         check(s.version===(original.laborDistribution?5:3)&&s.workBasis==='EXPLICIT_AUTHENTICATED_REPAIR_WORK_INTERVAL'&&id(w?.id)&&w.id===p.choice.workIntervalId&&c.workIntervalId===w.id&&w.fingerprint===await hash(t)&&t?.repairId===p.targetId&&t.clientId===p.clientId);
         start=t.startedAt;end=t.endedAt;tech=t.technicianId;
+      }else if(p.targetType==='MAINTENANCE_REMINDER') {
+        const t=await window.CWReminderLaborRules.source(s,target?.snapshot||s.service,p.choice.workIntervalId,original.laborBasis,hash);
+        check(c.workIntervalId===s.workInterval.id&&c.targetHash===t.sourceHash);
+        start=t.startedAt;end=t.endedAt;tech=t.technicianId;
       }else check(s.version===(original.laborDistribution?4:1)&&c.workIntervalId===undefined&&p.choice.workIntervalId===undefined);
       check(iso(start)&&iso(end)&&tech===p.basisSnapshot.technicianId&&Date.parse(end)>Date.parse(start)&&BigInt(Date.parse(end)-Date.parse(start))*1000n===q&&Date.parse(start)>=Date.parse(p.basisSnapshot.periodStart+'T00:00:00Z')&&Date.parse(end)<=Date.parse(p.basisSnapshot.periodEnd+'T00:00:00Z')+86400000);
-      check(c.valuationKey===await hash({kind:'LABOR',targetType:p.targetType,id:p.targetId,...(p.targetType==='REPAIR'?{workIntervalId:p.choice.workIntervalId}:{})}));
+      check(c.valuationKey===await hash({kind:'LABOR',targetType:p.targetType,id:p.targetId,...(['REPAIR','MAINTENANCE_REMINDER'].includes(p.targetType)?{workIntervalId:p.choice.workIntervalId}:{})}));
       check(k&&k.quantity===c.quantity&&k.quantityUnit==='SECOND'&&k.method==='CONFIRMED_EXPENSE_PAID_TIME'&&k.baseAmountCents===componentAmount(original)&&base===BigInt(p.basisSnapshot.paidMinutes)*60000000n&&before!==null&&before>=0n&&q<=base-before&&Number.isSafeInteger(k.poolAmountBeforeCents)&&k.poolAmountBeforeCents>=0&&k.poolAmountBeforeCents<=k.baseAmountCents&&k.measuredQuantityBefore==='0');
       const final=q===base-before,amount=final?BigInt(k.baseAmountCents-k.poolAmountBeforeCents):(2n*q*BigInt(k.baseAmountCents)+base)/(2n*base);
       check(k.rounding===(final?'FINAL_POOL_REMAINDER':'NEAREST_CENT')&&cents(c.amountCents)&&c.amountCents===Number(amount)&&k.amountCents===c.amountCents&&c.amountCents<=k.baseAmountCents-k.poolAmountBeforeCents);total+=c.amountCents;
@@ -75,6 +79,7 @@
       const c=p.components[i],marker={version:s.version,basisId:row.basisId,basisFingerprint:p.basisFingerprint,groupId:row.id,primaryExpenseId:p.components[0].expenseId,expenseIds:p.components.map(c=>c.expenseId),...(s.version===2?{components:identities(p.basisSnapshot)}:{})},e=p.basisSnapshot.components[i].expense;
       check(id(a.id)&&a.expenseId===c.expenseId&&a.valuationType==='LABOR'&&a.purchaseItemId===null&&['monthRef','amountCents','targetType','clientId','targetHash','valuationKey','valuationHash','quantity','quantityUnit'].every(k=>a[k]===c[k])&&a.createdById===Number(row.createdBy.slice(6))&&a.reason===row.reason&&iso(a.createdAt)&&equal(a.expenseSnapshot,e)&&a.expenseHash===await hash(e)&&equal(a.valuationSnapshot,{source:c.source,calculation:c.calculation,composition:marker}));
       check(a.visitId===(c.targetType==='REGULAR'?c.targetId:null)&&a.extraVisitId===(c.targetType==='EXTRA'?c.targetId:null)&&a.repairId===(c.targetType==='REPAIR'?c.targetId:null));
+      if(c.targetType==='MAINTENANCE_REMINDER')check(a.serviceReminderId===c.targetId&&a.targetSnapshot?.type===c.targetType&&await hash(window.CWReminderLaborRules.facts(a.targetSnapshot))===c.targetHash);
       check(a.activeMeasurementKey==='LABOR:'+c.targetType+':'+c.targetId+(c.workIntervalId?':INTERVAL:'+c.workIntervalId:'')+(i?':COMPONENT:'+c.expenseId:''));
       check(a.activeKey===await hash({expenseId:c.expenseId,monthRef:c.monthRef,type:c.targetType,id:c.targetId,valuationType:'LABOR',purchaseItemId:null,...(c.workIntervalId?{workIntervalId:c.workIntervalId}:{})}));
     }

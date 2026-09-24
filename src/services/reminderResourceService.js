@@ -71,12 +71,19 @@ async function context(db, reminderId, lock = false, input = null) {
   return { available:true,reminderId,source,target:targetFacts,targetHash:target?.hash || null,sourceHash:writes.hash(source),contextHash,title:source?.title || 'Lembrete removido — histórico preservado',clientName:target?.clientName || '',poolName:pool?.name || '',technicians,records,active,journalValid,canDeclare:!!target?.valid && !!source && ['TECHNICAL_PERIODIC_SERVICE','POOL_SERVICE_REMINDER'].includes(source.category) && journalValid && active.length === 0 };
 }
 async function calculate(db, reminderId, body, lock = false) {
-  parse(body); const c = await context(db, reminderId, lock, body); if (!c.available) return c;
+  parse(body);
+  // Share the valuation lock before the declaration lock. Creation, cost undo and
+  // resource void then agree on exactly which original costs remain reserved.
+  if (lock) await db.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${ 'expense-valuation:MAINTENANCE_REMINDER:' + reminderId }))::text`;
+  const c = await context(db, reminderId, lock, body); if (!c.available) return c;
+  let affectedCosts;
   let origin, proposed = null, recordHash = null, source = null, target = null, targetHash = null, sourceHash = null, durationSeconds = null;
   if (body.action === 'VOID') {
     const row = c.records.find(r => r.id === body.recordId);
     if (!row?.canVoid) return refuse('DECLARATION_REVIEW', 'A declaração mudou, já foi anulada ou o comprovativo precisa de revisão.');
     origin = row.snapshot.preview.origin; recordHash = row.fingerprint;
+    const costs = await db.expenseAllocation.findMany({ where:{ targetType:'MAINTENANCE_REMINDER',serviceReminderId:reminderId,valuationType:'LABOR',voidedAt:null,valuationSnapshot:{ path:['source','workInterval','id'],equals:row.id } },orderBy:{ id:'asc' } });
+    affectedCosts = costs.map(a => ({ allocationId:a.id,expenseId:a.expenseId,amountCents:a.amountCents,workIntervalId:row.id,groupId:a.valuationSnapshot?.composition?.groupId || null,allocationHash:writes.hash(json(a)) }));
   } else {
     if (!c.canDeclare) return refuse('REMINDER_SOURCE_REVIEW', c.active.length ? 'Já existe uma declaração ativa. Reveja e anule a declaração anterior antes de a substituir.' : 'Confirme a conclusão e a decisão comercial do lembrete. Reveja os comprovativos existentes.');
     proposed = rules.input(body.data); source = c.source; target = c.target; targetHash = c.targetHash; sourceHash = c.sourceHash;
@@ -90,7 +97,7 @@ async function calculate(db, reminderId, body, lock = false) {
       durationSeconds = (endedAt-startedAt)/1000;
     }
   }
-  const value = { schema:1,basis:rules.basis,reminderId,action:body.action,recordId:body.recordId,recordHash,origin,contextHash:c.contextHash,source,sourceHash,target,targetHash,proposed,durationSeconds };
+  const value = { schema:1,basis:rules.basis,reminderId,action:body.action,recordId:body.recordId,recordHash,origin,contextHash:c.contextHash,source,sourceHash,target,targetHash,proposed,durationSeconds,...(affectedCosts ? { affectedCosts } : {}) };
   return rules.preview({ available:true,...value,hash:writes.hash(value) }, writes.hash);
 }
 async function detail(actor, value) { admin(actor); const rid=id(value); return prisma.$transaction(async db => ({ ok:true,detail:await context(db,rid) }), { isolationLevel:'RepeatableRead',maxWait:15000,timeout:20000 }); }

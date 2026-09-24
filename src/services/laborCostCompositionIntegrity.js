@@ -26,7 +26,7 @@ async function inspectBasis(db, basis, expenses) {
   } catch (e) { if (![400,409].includes(e.status)&&!(e instanceof TypeError)) throw e; return { state: 'REVIEW', reviewReasons: ['COMPOSITION_SOURCE_CHANGED'] }; }
 }
 const allocationFields = ['id','expenseId','monthRef','amountCents','targetType','clientId','visitId','extraVisitId','repairId','targetHash','targetSnapshot','expenseHash','expenseSnapshot','activeKey','reason','createdById','createdAt','valuationType','valuationKey','valuationHash','valuationSnapshot','quantity','quantityUnit','purchaseItemId','activeMeasurementKey'];
-function allocationFacts(a) { return json(Object.fromEntries(allocationFields.map(k => [k, k === 'quantity' ? a[k]?.toString() : a[k]]))); }
+function allocationFacts(a) { return json(Object.fromEntries([...allocationFields, ...(a.targetType === 'MAINTENANCE_REMINDER' ? ['serviceReminderId'] : [])].map(k => [k, k === 'quantity' ? a[k]?.toString() : a[k]]))); }
 async function inspectGroups(db, groups) {
   const status = new Map();
   for (const group of groups) {

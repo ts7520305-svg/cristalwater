@@ -4,27 +4,28 @@ const { sum } = require('./monthlyFinancialProjection');
 const json = value => JSON.parse(JSON.stringify(value));
 const refused = (code, message) => ({ applied: false, code, message });
 function selection(value, query = false) {
-  if (!['MATERIAL', 'LABOR'].includes(value.kind) || !['REGULAR', 'EXTRA', 'REPAIR'].includes(value.targetType)) r.fail('Escolha materiais ou trabalho num serviço com execução confirmada.');
+  if (!['MATERIAL', 'LABOR'].includes(value.kind) || !['REGULAR', 'EXTRA', 'REPAIR', 'MAINTENANCE_REMINDER'].includes(value.targetType) || value.targetType === 'MAINTENANCE_REMINDER' && value.kind !== 'LABOR') r.fail('Escolha materiais ou trabalho num serviço com execução confirmada. Nos lembretes, escolha trabalho declarado.');
   const id = v => query ? r.queryId(v) : r.id(v);
   const purchaseItemId = value.kind === 'MATERIAL' ? id(value.purchaseItemId) : null;
   if (value.kind === 'LABOR' && value.purchaseItemId !== null && value.purchaseItemId !== undefined) r.fail('O trabalho não tem uma linha de compra de materiais.');
-  const repairLabor = value.targetType === 'REPAIR' && value.kind === 'LABOR';
-  const workIntervalId = repairLabor ? id(value.workIntervalId) : null;
+  const independentLabor = ['REPAIR', 'MAINTENANCE_REMINDER'].includes(value.targetType) && value.kind === 'LABOR';
+  const workIntervalId = independentLabor ? id(value.workIntervalId) : null;
   const hasPart=value.laborPart!==undefined&&value.laborPart!==null;
   if(hasPart&&(value.kind!=='LABOR'||id(value.laborPart)>20))r.fail('Escolha uma parcela válida de trabalho.');
-  if (!repairLabor && value.workIntervalId !== undefined && value.workIntervalId !== null) r.fail('O intervalo de reparação só pode ser usado no trabalho dessa reparação.');
+  if (!independentLabor && value.workIntervalId !== undefined && value.workIntervalId !== null) r.fail('O intervalo declarado só pode ser usado no trabalho da sua reparação ou lembrete.');
   const quantity = value.quantity === undefined || value.quantity === null || value.quantity === '' ? null : value.quantity;
   if (quantity !== null && (typeof quantity !== 'string' || data.quantity(quantity) === null || data.quantity(quantity) <= 0n)) r.fail('Indique uma quantidade positiva com até seis casas decimais.');
-  return { kind: value.kind, targetType: value.targetType, targetId: id(value.targetId), purchaseItemId, quantity, ...(hasPart?{laborPart:id(value.laborPart)}:{}), ...(repairLabor ? { workIntervalId } : {}) };
+  return { kind: value.kind, targetType: value.targetType, targetId: id(value.targetId), purchaseItemId, quantity, ...(hasPart?{laborPart:id(value.laborPart)}:{}), ...(independentLabor ? { workIntervalId } : {}) };
 }
 async function preview(db, expense, choice, lock = false) {
   if (expense.cancelledAt) r.fail('A despesa está anulada.', 409);
   if (lock) {
     await db.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${ 'expense-valuation:' + choice.targetType + ':' + choice.targetId }))::text`;
+    if (choice.targetType === 'MAINTENANCE_REMINDER') await db.$queryRawUnsafe('SELECT pg_advisory_xact_lock(hashtext($1))::text', 'reminder-resources:' + choice.targetId);
     // Serialize source edits and FK-linked movement inserts through the service row.
     if (choice.targetType === 'REGULAR') await db.$queryRaw`SELECT id FROM "ServiceVisit" WHERE id=${choice.targetId} FOR UPDATE`;
     else if (choice.targetType === 'EXTRA') await db.$queryRaw`SELECT id FROM "ExtraVisit" WHERE id=${choice.targetId} FOR UPDATE`;
-    if (choice.targetType !== 'REPAIR') await db.$queryRaw`SELECT id FROM "StockMovement" WHERE "visitId"=${choice.targetType === 'REGULAR' ? choice.targetId : null} OR "extraVisitId"=${choice.targetType === 'EXTRA' ? choice.targetId : null} FOR SHARE`;
+    if (['REGULAR', 'EXTRA'].includes(choice.targetType)) await db.$queryRaw`SELECT id FROM "StockMovement" WHERE "visitId"=${choice.targetType === 'REGULAR' ? choice.targetId : null} OR "extraVisitId"=${choice.targetType === 'EXTRA' ? choice.targetId : null} FOR SHARE`;
   }
   if (lock && choice.targetType === 'REPAIR' && choice.kind === 'LABOR') await db.$queryRawUnsafe('SELECT pg_advisory_xact_lock(hashtext($1))::text', 'repair-work:' + choice.targetId);
   // Repair targets lock historical client -> repair -> proof -> movements,
@@ -37,6 +38,13 @@ async function preview(db, expense, choice, lock = false) {
     await db.$queryRawUnsafe('SELECT pg_advisory_xact_lock(hashtext($1))::text', 'repair-work-technician:' + work.technicianId);
     await db.$queryRawUnsafe('SELECT id FROM "Technician" WHERE id=$1 FOR SHARE', work.technicianId);
     await db.$queryRawUnsafe('SELECT id FROM "RepairWorkInterval" WHERE id=$1 FOR SHARE', choice.workIntervalId);
+  }
+  if (lock && choice.targetType === 'MAINTENANCE_REMINDER') {
+    const work = await db.reminderResourceDeclaration.findUnique({ where: { id: choice.workIntervalId }, select: { technicianId: true, reminderId: true } });
+    if (!work || work.reminderId !== choice.targetId) r.fail('Intervalo de trabalho não encontrado neste lembrete.', 409);
+    await db.$queryRawUnsafe('SELECT pg_advisory_xact_lock(hashtext($1))::text', 'repair-work-technician:' + work.technicianId);
+    await db.$queryRawUnsafe('SELECT id FROM "Technician" WHERE id=$1 FOR SHARE', work.technicianId);
+    await db.$queryRawUnsafe('SELECT id FROM "ReminderResourceDeclaration" WHERE id=$1 FOR SHARE', choice.workIntervalId);
   }
   if (expense.sourceType !== 'MANUAL') {
     const source = await sources.source(db, expense.sourceType, expense.stockPurchaseId || expense.maintenanceId, lock);
@@ -90,7 +98,7 @@ async function apply(db, who, env, expense) {
   if (expense.expenseAllocations.some(a => !a.voidedAt && a.activeKey === activeKey)) return refused('ALLOCATION_EXISTS', 'Já existe uma valorização desta origem para o serviço. Anule a anterior antes de corrigir.');
   const snapshot = require('./expenseCostAllocationService').expenseSnapshot(expense);
   const allocation = await db.expenseAllocation.create({ data: { expenseId: expense.id, monthRef: current.monthRef, amountCents: current.amountCents, targetType: choice.targetType, clientId: current.clientId, visitId: choice.targetType === 'REGULAR' ? choice.targetId : null, extraVisitId: choice.targetType === 'EXTRA' ? choice.targetId : null, repairId: choice.targetType === 'REPAIR' ? choice.targetId : null, targetHash: current.targetHash, targetSnapshot: (await targets.get(db, choice.targetType, choice.targetId)).snapshot, expenseHash: r.hash(snapshot), expenseSnapshot: snapshot, activeKey, reason, createdById: who.id,
-    valuationType: choice.kind, valuationKey: current.valuationKey, valuationHash: current.valuationHash, valuationSnapshot: { source: current.source, calculation: current.calculation }, quantity: current.quantity, quantityUnit: current.quantityUnit, purchaseItemId: current.purchaseItemId, activeMeasurementKey: choice.kind === 'LABOR' ? 'LABOR:' + choice.targetType + ':' + choice.targetId + (choice.workIntervalId ? ':INTERVAL:' + choice.workIntervalId : '') : null } });
+    serviceReminderId: choice.targetType === 'MAINTENANCE_REMINDER' ? choice.targetId : null, valuationType: choice.kind, valuationKey: current.valuationKey, valuationHash: current.valuationHash, valuationSnapshot: { source: current.source, calculation: current.calculation }, quantity: current.quantity, quantityUnit: current.quantityUnit, purchaseItemId: current.purchaseItemId, activeMeasurementKey: choice.kind === 'LABOR' ? 'LABOR:' + choice.targetType + ':' + choice.targetId + (choice.workIntervalId ? ':INTERVAL:' + choice.workIntervalId : '') : null } });
   const updated = await db.companyExpense.update({ where: { id: expense.id }, data: { version: { increment: 1 } } });
   return json({ applied: true, expenseId: expense.id, version: updated.version, allocation, calculation: current.calculation, previewHash: current.hash, reason });
 }
@@ -116,16 +124,17 @@ function summary(rows) {
   const valued = rows.filter(a => a.valuationType !== 'MANUAL'), total = kind => { const selected = valued.filter(a => a.valuationType === kind); return selected.some(a => a.needsReview) ? null : sum(selected.map(a => a.amountCents)); };
   return { version: 3, coverage: 'CONFIRMED_EXPENSE_MEASUREMENTS', includedInExpenseAttribution: true, completeOperatingCosts: false, materialAmountCents: total('MATERIAL'), laborAmountCents: total('LABOR'), count: valued.length, reviewCount: valued.filter(a => a.needsReview).length, basis: { material: 'CONFIRMED_PURCHASE_LINE_SERVICE_CONSUMPTION', repairMaterial: 'AUTHENTICATED_REPAIR_PROOF_MOVEMENTS', repairLabor: 'CONFIRMED_DECLARED_REPAIR_INTERVAL_PAID_TIME', labor: 'CONFIRMED_EXPENSE_PAID_TIME', month: 'CONFIRMED_SERVICE_EXECUTION_UTC' } };
 }
-async function workIntervals(db, expense, repairId, laborPart) {
+async function workIntervals(db, expense, targetId, laborPart, targetType = 'REPAIR') {
+  if (!['REPAIR','MAINTENANCE_REMINDER'].includes(targetType)) r.fail('Escolha uma reparação ou lembrete.');
   const share=require('./expenseLaborDistributionService').selection(expense,laborPart),basis=share?.basis||data.laborBasis(expense.laborBasis);
   if (expense.cancelledAt || expense.category !== 'LABOR' || expense.sourceType !== 'MANUAL' || share?.error || !basis) r.fail(share?.error||'Confirme primeiro a base de trabalho desta despesa.', 409);
-  const target = await targets.get(db, 'REPAIR', repairId);
-  if (!target?.valid) r.fail('Reveja a execução e o cliente da reparação.', 409);
-  const prepared = await data.prepare(db, [], [{ kind: 'LABOR', expenseId: expense.id, targetType: 'REPAIR', targetId: repairId }]);
-  const rows = [...prepared.workIntervals.values()].map(work => {
-    const source = data.build(prepared, expense, { kind: 'LABOR', targetType: 'REPAIR', targetId: repairId, workIntervalId: work.id, ...(laborPart?{laborPart}:{}) });
-    return { id: work.id, state: work.state, eligible: source.valid, errors: source.errors, workInterval: { id: work.id, fingerprint: work.fingerprint, snapshot: work.snapshot } };
+  const target = await targets.get(db, targetType, targetId);
+  if (!target?.valid) r.fail('Reveja a execução e o cliente do serviço.', 409);
+  const prepared = await data.prepare(db, [], [{ kind: 'LABOR', expenseId: expense.id, targetType, targetId }]);
+  const rows = [...(targetType === 'REPAIR' ? prepared.workIntervals : prepared.reminderIntervals).values()].map(work => {
+    const source = data.build(prepared, expense, { kind: 'LABOR', targetType, targetId, workIntervalId: work.id, ...(laborPart?{laborPart}:{}) });
+    return { id: work.id, state: work.state, eligible: source.valid, errors: source.errors, ...(targetType === 'MAINTENANCE_REMINDER' ? { technicianName: work.technicianName } : {}), workInterval: { id: work.id, fingerprint: work.fingerprint, snapshot: work.snapshot } };
   });
-  return { version: 1, expenseId: expense.id, expenseVersion: expense.version, repairId, targetHash: target.hash, basis, ...(share?{laborPart,laborDistribution:share.proof}:{}), rows };
+  return { version: 1, expenseId: expense.id, expenseVersion: expense.version, ...(targetType === 'REPAIR' ? {repairId:targetId} : {reminderId:targetId}), targetHash: target.hash, basis, ...(share?{laborPart,laborDistribution:share.proof}:{}), rows };
 }
 module.exports = { selection, preview, apply, decorate, summary, workIntervals, data };
