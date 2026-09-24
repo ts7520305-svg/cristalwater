@@ -1,0 +1,115 @@
+{
+  "task": "TASK339",
+  "checkedAt": "2026-09-24T20:21:23.213391+00:00",
+  "base": "31e18feec8ed4e87f9d6c80b47f217870ef5fe1a",
+  "initialBase": "08dfea0711b6236f2896317e4eeebac52fc10f86",
+  "branch": "work/field-readiness-20260915-simulation",
+  "unit": {
+    "tests": 595,
+    "files": 81
+  },
+  "technicianTests": 4,
+  "syntax": {
+    "backend": 626,
+    "frontend": 220,
+    "inline": 62
+  },
+  "environment": {
+    "database": "PGlite isolated; not native restore",
+    "browser": "normal Chromium",
+    "migrations": 40,
+    "realContacts": false,
+    "productionWrites": false
+  },
+  "groups": [
+    "test-field-authenticated-document-opening.js",
+    "test-field-financial-pdf.js",
+    "test-field-invoice-pdf-access.js",
+    "test-field-chat-attachments.js",
+    "test-field-guide-pdf.js",
+    "test-field-document-recovery.js"
+  ],
+  "expectedNativeGroups": 236,
+  "cache": "v151",
+  "sourceSha256": {
+    "frontend/cw-auth-download.js": "9ff116941c887fbf970af5dd49fae7f18ba8e9052af5d06b642563f927287e1b",
+    "frontend/sw.js": "0295704a259fa5bc71af075f4cd34c37f070470e989d731649017fac9ae8b2f9",
+    "scripts/audit-field-page-inventory.js": "fcd99f86484cc5efe4fe2d4a1cb3a6fdc67f8e79b3b444f464ba7bdb9e9a4043",
+    "scripts/test-field-invoice-pdf-access.js": "10058e18693b19dc4f01ee17e1ee4f886bcbbdac1398c4b17d83ea6691b798c4",
+    "scripts/test-field-suite.js": "79c9fd598c5334a9e09c7734767a67ebad3dde6fc714637865ba3efc8920e461",
+    "src/controllers/guideController.js": "52ac5c986389d0433c2c1d28abc88c0330e49a9368a72fa8fd74ed50fb093d78",
+    "src/services/clientChatAttachmentService.js": "6cec3243d09cf4a785d09052e8fde8b8e9de613a758f04558fc363d86d780c47",
+    "src/services/documentPdfService.js": "1d1bc89817d7090132ceebc36bee443015b58c054070f97b70cf9545b095f26e",
+    "tests/auth-download.test.js": "4934f39ecd4b96b8a9b356b59aa6d7ec668ef61b4bceff96b4b36610257fe60f",
+    "tests/rc2-security-hardening-routes.test.js": "1940830388362ab1ff1c8d0ad594e62ae7fe556e80531a8e73508d0120f0b391",
+    "scripts/test-field-authenticated-document-opening.js": "da1180dc71aeea83acedc35910149af3634ba765bd08967f3fdb715b088d542a"
+  },
+  "logs": {
+    "cw339-unit.log": {
+      "sha256": "df8689d8d30f4082ae478ea338b2efcde9595e6175a7d7132a1e35853fc5a1c9",
+      "passLines": []
+    },
+    "cw339-tech.log": {
+      "sha256": "466fc6ba1b2d94bd97374971c37d90c5a76af796da73caf60e2cb001a38dda2d",
+      "passLines": []
+    },
+    "cw339-syntax.log": {
+      "sha256": "1b1387b91e52744bac1c2a9107298dc6a129b27f34f18208d2d355a79be3ebc1",
+      "passLines": []
+    },
+    "cw339-documents.log": {
+      "sha256": "3277367cd59cd6975740fe6aed714df8d11dde33404b0fa480faa2dcf792e51f",
+      "passLines": [
+        "PASS six real PDF endpoints confirm document/client/vehicle identity and complete content through the authenticated browser reader",
+        "PASS wrong identity/MIME, HTML, truncated PDF, missing private headers, partial/redirect/error replies, blocked windows, timeout, cancellation, account/body changes, expiry and noncanonical URLs",
+        "PASS displayed files revoked on account change, HTML attachments preserved as inert downloads, owner binding and unchanged original financial/guide/chat records",
+        "PASS financial PDFs: Unicode and missing glyph markers, full long text, repeat headers/page counts, stored invoice totals, cent sum and effective extra price, unchanged sources, exact ADMIN/CLIENT ownership, withdrawn documents, missing/changed historical client refusal, canonical IDs, complete private response, render failure, browser identity/MIME/truncation/session/timeout/offline checks",
+        "PASS invoice PDFs require an active principal, administration or exact client ownership; withdrawn drafts and extras do not leak",
+        "PASS actual invoice page opens an authenticated PDF blob and changed sessions cannot display the old response",
+        "PASS new and historical chat attachments require active ownership; aliases, range and HEAD remain private, upload names never collide, unsafe file types download inertly, actual chat/portal use authenticated links",
+        "PASS guide PDFs: four endpoints, Unicode, long content, page counts, private cache, role/vehicle isolation, alternate ID rejection, missing/provisional records and unchanged sources",
+        "PASS guide responses omit related credentials; failed document/stock/vehicle reads and corrupt official-document metadata cannot claim an empty successful response",
+        "PASS real documents grouped by typed account/role/vehicle/day; legacy bytes preserved; mixed refresh keeps original section timestamp and current source honest",
+        "PASS quota, missing readback, corrupt cache and wrong vehicle do not overwrite saved bytes or claim offline persistence",
+        "PASS late reply cannot replace newer documents; cold offline reload retains section provenance; even a non-JSON 403 blocks cached operational documents",
+        "PASS editing vehicle invalidates visible documents; another account on the same vehicle cannot inherit cache; current account must consult again and day changes invalidate provenance"
+      ]
+    },
+    "cw339-final-opening.log": {
+      "sha256": "27fb5bf835c25b4a60892e8e56cd864932a7151aa803b7e34f4414d94477d5d0",
+      "passLines": [
+        "PASS six real PDF endpoints and two historical guides without vehicles confirm document/client/vehicle identity and complete content through the authenticated browser reader",
+        "PASS wrong identity/MIME, HTML, truncated PDF, missing private headers, partial/redirect/error replies, blocked windows, timeout, cancellation, account/body changes, expiry and noncanonical URLs",
+        "PASS displayed files revoked on account change, HTML attachments preserved as inert downloads, owner binding and unchanged original financial/guide/chat records"
+      ]
+    }
+  },
+  "inventory": {
+    "htmlFiles": 115,
+    "rootPages": 108,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 76,
+    "catalogueGuardDifferences": 0
+  },
+  "inventorySha256": {
+    "PAGE_INVENTORY_20260924.json": "74534f752723c37cff99bb3ebe5b147e726519a17c6dbe4714d3df27c7717fee",
+    "PAGE_INVENTORY_20260924.md": "828adbcede6143655a3f5048e18df1bbae84ede0484ff6dd9ecbac271ec45f03"
+  },
+  "compatibility": {
+    "financialProtocol": "TASK338 invoice-pdf / extra-billing-pdf / X-CW-Invoice-Id unchanged",
+    "historicalGuidesWithoutVehicle": "transport/work by exact guide ID, explicit unassigned header, existing API roles unchanged",
+    "unsafeAttachments": "download original bytes as application/octet-stream"
+  },
+  "ci": {
+    "status": "not started for TASK339",
+    "fullSuiteApproved": false,
+    "nativeRestoreApproved": false
+  },
+  "limits": [
+    "Static page references are not universal visual/functional acceptance",
+    "Concurrent monthly generation still needs native PostgreSQL validation; no transaction changes",
+    "Full production deployment, providers and physical pilot remain separate"
+  ]
+}

@@ -64,6 +64,7 @@ async function download(req, res) {
     const file = await physical(relative), rows = await references(file.relative);
     if (!allowed(req.user, rows)) fail(404, 'Anexo não encontrado.');
     res.type(contentType(file.target)); res.set('X-Content-Type-Options', 'nosniff');
+    res.set({ 'X-CW-Document-Type': 'chat-attachment', 'X-CW-Message-Id': String(id) });
     return res.download(file.target, path.basename(message.fileName || file.target), { cacheControl: false }, error => { if (error && !res.headersSent) respondError(res, Object.assign(error, { statusCode: 404 })); });
   } catch (error) { return respondError(res, error); }
 }

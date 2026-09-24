@@ -898,7 +898,7 @@ async function downloadTransportGuidePdf(req, res) {
         title: item.name,
         meta: `${text(item.type, "MATERIAL")} | ${n(item.quantity, 0) || 0} ${text(item.unit, "UN")}`
       })), "Sem material registado nesta guia.");
-    });
+    }, { identity: { 'X-CW-Document-Type': 'transport-guide', 'X-CW-Document-Id': guide.id, 'X-CW-Vehicle-Id': guide.vehicleId ?? 'unassigned' } });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
   }
@@ -1149,7 +1149,7 @@ async function downloadVehicleInsurancePdf(req, res) {
         paragraph(doc, "Seguro não registado no sistema.");
         paragraph(doc, "O administrador deve inserir o seguro como manutenção/documento da viatura para aparecer aqui automaticamente.");
       }
-    });
+    }, { identity: { 'X-CW-Document-Type': 'vehicle-insurance', 'X-CW-Vehicle-Id': vehicle.id } });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
   }
@@ -1230,7 +1230,7 @@ async function downloadWorkGuidePdf(req, res) {
       section(doc, "Assinaturas");
       paragraph(doc, "Técnico: ________________________________");
       paragraph(doc, "Responsável: ________________________________");
-    });
+    }, { identity: { 'X-CW-Document-Type': 'work-guide', 'X-CW-Document-Id': workGuide.id, 'X-CW-Vehicle-Id': workGuide.vehicleId ?? 'unassigned' } });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
   }

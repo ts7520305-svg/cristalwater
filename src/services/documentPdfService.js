@@ -92,6 +92,9 @@ async function writePdfResponse(res, filename, title, draw, options = {}) {
   res.setHeader('Content-Disposition', `${options.disposition === "attachment" ? "attachment" : "inline"}; filename="${filename}"`);
   res.setHeader('Cache-Control', 'private, no-store');
   res.setHeader('X-Content-Type-Options', 'nosniff');
+  if (options.identity) {
+    for (const [key, value] of Object.entries(options.identity)) res.setHeader(key, String(value));
+  }
   res.send(buffer);
 }
 

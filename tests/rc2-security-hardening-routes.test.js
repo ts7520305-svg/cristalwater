@@ -52,7 +52,7 @@ describe("RC2 security hardening route guards", () => {
     const helper = read("frontend/cw-auth-download.js");
     const admin = read("frontend/admin-vehicles.js");
     const technician = read("frontend/technician-field-mode.js");
-    expect(helper).toMatch(/Authorization: `Bearer \$\{token\}`/);
+    expect(helper).toMatch(/Authorization: 'Bearer ' \+ session\.token/);
     expect(helper).toMatch(/URL\.createObjectURL/);
     expect(admin).toMatch(/data-auth-download/);
     expect(technician).toMatch(/data-auth-download/);

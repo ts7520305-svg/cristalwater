@@ -1,6 +1,12 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 24/09/2026, TASK338 publicada
+## Retoma atual — 24/09/2026, TASK339 em publicação
+
+- TASK339 estende a abertura autenticada às guias/seguros/anexos: identidade e PDF completo, URLs canónicos, sessão/expiração, timeout/cancelamento, revogação após mudança de conta e anexos inseguros descarregados como bytes inertes. Conserva o contrato financeiro TASK338 e as guias antigas sem viatura, pelas permissões existentes. 595 unitários/81 ficheiros, quatro técnicos, sintaxe 626/220/62 e seis grupos API/Chromium aprovados; 40 migrações locais, cache v151, runner com 236 grupos. [Relatório](DOCUMENT_OPENING_AND_PAGE_INVENTORY_20260924.md) e [evidência local](evidence/20260924_task339_local.json).
+- Inventário finito atualizado: [115 HTML](PAGE_INVENTORY_20260924.md), 108 entradas e sete auxiliares; 76 páginas com referência literal nos 257 scripts ativos, 39 para pesquisa de evidência. Nenhum recurso ausente no índice; duas imagens apenas não materializadas. Não equivale à revisão visual universal. Impressão HTML e abertura de PDF distinguidas.
+- Retomar CI TASK339, TASK338 `36053066253` e TASK337 `36051791089`, incluindo restauro nativo; depois a fila finita de páginas e os critérios financeiros/históricos ainda abertos. Mantêm-se as dependências de produção/fornecedores/piloto físico/IA avançada. Sem merge/deploy/contactos reais.
+
+## Estado anterior — TASK338 publicada
 
 - Base integrada `08dfea0711b6236f2896317e4eeebac52fc10f86`, conservando a TASK337 completa e os seus modelos não fiscais, reparações, relatórios mensais e testes. Identidade da resposta e abertura autenticada da conta corrente/extras, controlo de sessão após leituras assíncronas, PDF completo, tempo limite e revisão do cliente histórico ausente. Erro HTTP da prévia global corrigido e limpeza apenas dos dados próprios do ensaio histórico; conserva `NO_CHARGE`.
 - 592 unitários/81 ficheiros, quatro técnicos, sintaxe 626/220/62 e oito grupos de API/Chromium em sequência aprovados após integração. 40 migrações locais, três páginas PDF revistas, cache v150 e runner com 235 grupos distintos. [Relatório](FINANCIAL_PDF_RELIABILITY_20260924.md) e [evidência](evidence/20260924_task338_local.json). Publicada em `2f808da1dc86b2f03ba432e1357f3c52a672bc5e`, árvore `caaa43f40687bd3856bc1c2b46d8a192292961da`, idêntica à validada localmente. [CI 36053066253](https://github.com/ts7520305-svg/cristalwater/actions/runs/36053066253), job `107813196189`, em execução; os 235 grupos e o restauro PostgreSQL nativo ainda não estão aprovados.

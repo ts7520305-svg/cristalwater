@@ -1,5 +1,9 @@
 # Cristal Water — matriz atual de conclusão
 
+## Estado de retoma — 24/09/2026, TASK339 em publicação
+
+TASK339 estende a abertura autenticada às guias/seguros/anexos: identidade e PDF completo, URLs canónicos, sessão/expiração, timeout/cancelamento, revogação após mudança de conta e anexos inseguros descarregados como bytes inertes. Conserva o contrato financeiro TASK338 e as guias antigas sem viatura, pelas permissões existentes. 595 unitários/81 ficheiros, quatro técnicos, sintaxe 626/220/62 e seis grupos API/Chromium aprovados; 40 migrações locais, cache v151, runner com 236 grupos. [Relatório](DOCUMENT_OPENING_AND_PAGE_INVENTORY_20260924.md) e [evidência local](evidence/20260924_task339_local.json). Inventário de [115 páginas](PAGE_INVENTORY_20260924.md) concluído; as 39 sem referência literal são uma fila de pesquisa de evidência, não uma conclusão de ausência de testes. CI completo/restauro por confirmar. A aplicação ainda tem critérios por fechar.
+
 ## Estado de retoma — 24/09/2026, TASK338 publicada
 
 Abertura de PDFs financeiros com identidade, MIME, início/fim completos e sessão conferidos antes de mostrar o documento. Cliente histórico ausente/divergente recusado; consulta e erro HTTP da prévia corrigidos. Conserva os modelos e o gerador da TASK337 e acrescenta limpeza dos dados próprios do ensaio histórico. 592 unitários/81 ficheiros, quatro técnicos, sintaxe 626/220/62, oito grupos API/Chromium integrados, 40 migrações locais e três páginas PDF revistas. Runner com 235 grupos, cache v150. [Relatório](FINANCIAL_PDF_RELIABILITY_20260924.md) e [evidência](evidence/20260924_task338_local.json). Publicada em `2f808da1dc86b2f03ba432e1357f3c52a672bc5e`, árvore `caaa43f40687bd3856bc1c2b46d8a192292961da`, idêntica à validada localmente. [CI 36053066253](https://github.com/ts7520305-svg/cristalwater/actions/runs/36053066253), job `107813196189`, em execução; os 235 grupos e o restauro PostgreSQL nativo ainda não estão aprovados.

@@ -21,7 +21,7 @@ As sete famílias distintas da visita usam `documentPdfService.js`; as guias con
 
 ## Fora destas dez rotas
 
-- `/api/reports/visit/:id`, `/api/reports/monthly-print` e a página de documento financeiro são HTML imprimível, não outros geradores PDF. Devem constar do inventário separado de páginas/impressão.
+- `/api/reports/visit/:id`, `/api/reports/monthly-print` são HTML imprimível, não outros geradores PDF. A página `/invoice-document` é uma entrada pública para abrir o PDF autenticado, sem apresentar os dados financeiros no HTML. Ambos constam do inventário separado de páginas/impressão.
 - Anexos oficiais, faturas fiscais externas, fotografias e PDFs enviados por utilizadores não são modelos gerados pela aplicação; mantêm os controlos de ficheiros existentes.
 - `src/controllers/paymentController.js` contém um gerador antigo de recibo em PDFKit sem importação/montagem no percurso ativo. As rotas de pagamento atuais usam o serviço financeiro próprio. Não foi ativado, corrigido ou apresentado como funcionalidade disponível.
 

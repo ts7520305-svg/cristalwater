@@ -54,18 +54,19 @@ let browser;
   }, invoice.id);
   assert(displayed.url.startsWith('blob:')); assert.equal(displayed.bytes, '%PDF-'); assert.equal(displayed.opener, null); assert.equal(displayed.closed, false);
   for (const phase of ['response', 'body']) {
-    const stopped = await page.evaluate(async ({ path, token, phase }) => {
+    const stopped = await page.evaluate(async ({ path, token, phase, clientId }) => {
       localStorage.setItem('cristalwater_jwt', token);
       const original = window.fetch, popup = { location: {}, close() { this.closed = true; } };
       window.open = () => popup;
       window.fetch = async () => {
         if (phase === 'response') localStorage.setItem('cristalwater_jwt', 'changed');
-        return { ok: true, blob: async () => { localStorage.setItem('cristalwater_jwt', 'changed'); return new Blob(['private']); } };
+        const headers = new Headers({ 'Content-Type': 'application/pdf', 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff', 'X-CW-Document-Type': 'invoice-pdf', 'X-CW-Invoice-Id': path.split('/').pop(), 'X-CW-Client-Id': String(clientId) });
+        return { status: 200, headers, blob: async () => { localStorage.setItem('cristalwater_jwt', 'changed'); return new Blob(['private']); } };
       };
       try { await CristalDownloads.open(path); return { error: false }; }
       catch (error) { return { error: error.message, closed: popup.closed, url: popup.location.href || null }; }
       finally { window.fetch = original; localStorage.setItem('cristalwater_jwt', token); }
-    }, { path, token: at, phase });
+    }, { path, token: at, phase, clientId: client.id });
     assert.match(stopped.error, /sessão mudou/); assert.equal(stopped.closed, true); assert.equal(stopped.url, null);
   }
   console.log('PASS actual invoice page opens an authenticated PDF blob and changed sessions cannot display the old response');
