@@ -87,3 +87,32 @@ describe('anchored seasonal recurrence',()=>{
     expect(found).toBe(53);
   });
 });
+
+describe('dated service exceptions',()=>{
+  const exception=(changes={})=>({poolId:1,day:'2028-02-29',action:'REPLACE',reason:'Horário combinado',slots:[{at:'10:00'},{at:'15:00'}],technicianId:2,...changes});
+  const plan=exceptions=>{const f=fixture();f.servicePlan.exceptions=exceptions;return rates.validate(f).servicePlan;};
+  it('replaces only the selected installation/date and retains the following recurring dates',()=>{
+    const p=plan([exception()]);expect(calendar.rulesForDay(p,'2028-02-29')[0].slots.map(s=>s.at)).toEqual(['10:00','15:00']);
+    expect(calendar.rulesForDay(p,'2028-02-28')[0].technicianId).toBe(1);expect(calendar.rulesForDay(p,'2028-02-29')[0].technicianId).toBe(2);
+    expect(calendar.rulesForDay(p,'2029-02-28')).toEqual([]);
+  });
+  it('allows a day without visits and a replacement outside an active recurrence cycle',()=>{
+    const p=plan([exception({day:'2028-02-28',action:'SKIP',slots:[],technicianId:null})]);expect(calendar.rulesForDay(p,'2028-02-28')).toEqual([]);
+    p.seasons[0].schedules[0].interval=2;p.seasons[0].schedules[0].anchorOn='2028-03-01';p.exceptions=[exception()];
+    const r=calendar.rulesForDay(p,'2028-02-29')[0];expect(calendar.due(r,'2028-02-29')).toHaveLength(2);
+  });
+  it('validates unique dates, real dates, owner IDs, times and explicit intent',()=>{
+    for(const e of [exception({day:'2027-02-29'}),exception({day:'2029-01-01'}),exception({poolId:true}),exception({reason:''}),exception({action:'SKIP'}),exception({slots:[]}),exception({slots:[{at:'25:00'}]}),exception({slots:[{at:'10:00'},{at:'10:00'}]}),exception({roundId:1}),exception({billing:'FREE'})])expect(()=>plan([e])).toThrow();
+    expect(()=>plan([exception(),exception()])).toThrow();expect(()=>plan(null)).toThrow();
+  });
+  it('preserves old snapshots and monthly billing, including all skipped days',()=>{
+    const f=fixture(),original=rates.validate(f);f.servicePlan.exceptions=[];expect(rates.validate(f)).toEqual(original);
+    f.servicePlan.exceptions=calendar.daysOfMonth('2028-02').map(day=>exception({day,action:'SKIP',slots:[],technicianId:null}));
+    expect(rates.calculate(rates.validate(f),'2028-02').amount).toBe(100);
+  });
+  it('includes exception-only installations and keeps the original reason in visit provenance',()=>{
+    const e=exception({poolId:7}),p=plan([e]),r=calendar.rulesForDay(p,e.day).find(r=>r.poolId===7);
+    expect(calendar.allRules(p).some(r=>r.poolId===7)).toBe(true);
+    const data=calendar.serviceData({id:2,version:3},p.seasons[0],e.day,{},r.exception);expect(data.exception).toEqual({...e,roundId:null});expect(data.billing).toBe('INCLUDED_MONTHLY');expect(data).not.toHaveProperty('monthlyCents');
+  });
+});

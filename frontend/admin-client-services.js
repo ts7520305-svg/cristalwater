@@ -9,6 +9,7 @@
     <div class="serviceGrid"><label>Início do contrato<input id="serviceStart" type="date" required min="2000-01-01" max="2199-12-31"></label><label>Fim (opcional)<input id="serviceEnd" type="date" min="2000-01-01" max="2199-12-31"></label></div>
     <p>As épocas repetem-se anualmente dentro da vigência. Pode atravessar dezembro (por exemplo, setembro a maio). Defina todos os meses, mesmo quando não há visitas.</p>
     <div id="serviceSeasons"></div><button type="button" id="serviceAddSeason">Adicionar época</button>
+    <h4>Exceções em datas específicas</h4><p>Escolha uma instalação e data para ficar sem visitas ou usar horários próprios nesse dia. Os horários próprios substituem todos os horários habituais da instalação nessa data. A mensalidade mantém o valor acordado.</p><div id="serviceExceptions"></div><button type="button" id="serviceAddException">Adicionar exceção</button>
     <label>Mês a planear<input id="serviceMonth" type="month" min="2000-01" max="2199-12" required></label>
     <p>Horários de Portugal continental. Num calendário mensal, dias 29–31 passam para o último dia dos meses mais curtos. Horários em falta ficam por planear.</p>
     <button type="submit" id="servicePreview">Simular acordo e visitas</button><button type="button" id="serviceCalendarPreview">Simular mês do acordo guardado</button>
@@ -23,7 +24,7 @@
   const token=()=>window.CristalAuth?.getToken?.()||localStorage.getItem('token');
   function identity(){try{const t=token(),claim=JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))),u=JSON.parse(localStorage.getItem('user')||localStorage.getItem('cristalwater_user')||'null'),id=Number(claim.userId||claim.id);if(claim.role!=='ADMIN'||!Number.isSafeInteger(id)||id<=0||u&&Number(u.userId||u.id)!==id)return null;return {token:t,owner:'ADMIN:'+id};}catch{return null;}}
   captured=identity();
-  function session(){const now=identity();if(!captured||now?.owner!==captured.owner||now.token!==captured.token){ready=false;current=null;simulation=null;panel.querySelector('#serviceSeasons').replaceChildren();el('serviceClient').textContent='';el('serviceImpact').replaceChildren();el('serviceStart').value='';el('serviceEnd').value='';status('Sessão alterada. Reabra com a conta original para recuperar o envio.','session');controls();throw Error('Sessão alterada.');}}
+  function session(){const now=identity();if(!captured||now?.owner!==captured.owner||now.token!==captured.token){ready=false;current=null;simulation=null;panel.querySelector('#serviceSeasons').replaceChildren();el('serviceClient').textContent='';el('serviceImpact').replaceChildren();el('serviceStart').value='';el('serviceEnd').value='';el('serviceExceptions').replaceChildren();status('Sessão alterada. Reabra com a conta original para recuperar o envio.','session');controls();throw Error('Sessão alterada.');}}
   const key=()=>`cwClientServices:v1:${captured.owner}:${current}`;
   const draftKey=()=>key()+':draft';
   function readRecord(){const raw=localStorage.getItem(key());if(!raw)return {schema:1,owner:captured.owner,clientId:current};const record=JSON.parse(raw);if(record.schema!==1||record.owner!==captured.owner||record.clientId!==current||record.pending&&(!record.pending.body?.requestId||!record.pending.payloadHash||!['SAVE','GENERATE'].includes(record.pending.kind)))throw Error('Os dados de recuperação precisam de revisão. Foram preservados.');return record;}
@@ -66,9 +67,22 @@
     for(const input of row.querySelectorAll('[data-season]'))input.value=value[input.dataset.season]??(input.dataset.season==='monthlyAmount'&&value.monthlyCents!=null?value.monthlyCents/100:'');
     (value.schedules||[]).forEach(s=>addRule(row,s));row.querySelector('.addRule').onclick=()=>{addRule(row);changed();};row.querySelector('.removeSeason').onclick=()=>{row.remove();changed();};el('serviceSeasons').append(row);
   }
-  function form(){return {startsOn:el('serviceStart').value,endsOn:el('serviceEnd').value||null,seasons:[...el('serviceSeasons').children].map(row=>({...Object.fromEntries([...row.querySelectorAll('[data-season]')].map(x=>[x.dataset.season,x.value])),schedules:[...row.querySelectorAll('.serviceRule')].map(rule=>{const get=name=>rule.querySelector(`[data-rule=${name}]`).value,a=get('assignment');return {poolId:get('poolId'),frequency:get('frequency'),count:get('count'),...(Number(get('interval'))>1?{interval:get('interval'),anchorOn:get('anchorOn')}:{}),technicianId:a.startsWith('T:')?Number(a.slice(2)):null,roundId:a.startsWith('R:')?Number(a.slice(2)):null,slots:[...rule.querySelectorAll('.serviceSlot')].map(s=>({day:s.querySelector('select').value,at:s.querySelector('input').value}))};})}))};}
-  function fill(plan){el('serviceStart').value=plan?.startsOn||'';el('serviceEnd').value=plan?.endsOn||'';el('serviceSeasons').replaceChildren();(plan?.seasons||[]).forEach(addSeason);}
-  function changed(){if(!ready||busy||pending)return;simulation=null;dirty=true;el('serviceImpact').replaceChildren();try{session();sessionStorage.setItem(draftKey(),JSON.stringify({schema:1,version,plan:form(),monthRef:el('serviceMonth').value}));}catch(error){storageOK=false;status('Não foi possível guardar o rascunho. Preserve os dados antes de sair.','error');}controls();}
+  function addException(value={}){
+    const row=document.createElement('fieldset');row.className='serviceException';row.innerHTML='<legend>Exceção numa data</legend><div class="serviceGrid"><label>Instalação<select data-exception="poolId" required></select></label><label>Data<input data-exception="day" type="date" min="2000-01-01" max="2199-12-31" required></label><label>Alteração<select data-exception="action"><option value="SKIP">Sem visitas nessa data</option><option value="REPLACE">Horários próprios nessa data</option></select></label></div><label>Motivo<textarea data-exception="reason" maxlength="500" rows="2" required></textarea></label><fieldset class="exceptionVisits" hidden disabled><legend>Visitas nesta data</legend><label>Atribuição<select data-exception="assignment"></select></label><div class="exceptionSlots"></div><button type="button" class="addExceptionSlot">Adicionar horário</button></fieldset><button type="button" class="removeException">Remover exceção</button>';
+    const pool=row.querySelector('[data-exception=poolId]');pool.append(option('','Escolher instalação'));for(const p of options.pools)pool.append(option(p.id,p.name||'Piscina '+p.id));pool.value=value.poolId??'';showSelection(pool);
+    for(const key of ['day','reason'])row.querySelector('[data-exception='+key+']').value=value[key]||'';
+    const assigned=row.querySelector('[data-exception=assignment]');assigned.append(option('','Por atribuir'));for(const t of options.technicians)assigned.append(option('T:'+t.id,'Técnico: '+t.name));for(const r of options.rounds)assigned.append(option('R:'+r.id,'Atribuição da ronda: '+r.name));
+    const selected=value.technicianId?'T:'+value.technicianId:value.roundId?'R:'+value.roundId:'';if(selected&&![...assigned.options].some(o=>o.value===selected))assigned.append(option(selected,'Atribuição anterior indisponível — rever'));assigned.value=selected;showSelection(assigned);
+    const addTime=(value={})=>{const line=document.createElement('div');line.className='serviceSlot exceptionSlot';line.innerHTML='<label>Hora<input type="time" required></label><button type="button">Remover horário</button>';line.querySelector('input').value=value.at||'';line.querySelector('button').onclick=()=>{line.remove();changed();};row.querySelector('.exceptionSlots').append(line);};
+    (value.slots||[]).forEach(addTime);row.querySelector('.addExceptionSlot').onclick=()=>{addTime();changed();};
+    const action=row.querySelector('[data-exception=action]'),visits=row.querySelector('.exceptionVisits');action.value=value.action||'SKIP';const mode=()=>{visits.hidden=action.value==='SKIP';visits.disabled=visits.hidden;};mode();action.onchange=()=>{mode();if(action.value==='REPLACE'&&!row.querySelector('.exceptionSlot'))addTime();changed();};
+    row.querySelector('.removeException').onclick=()=>{row.remove();changed();};el('serviceExceptions').append(row);
+  }
+  function exceptionForm(){return [...el('serviceExceptions').children].map(row=>{const get=k=>row.querySelector('[data-exception='+k+']').value,action=get('action'),a=action==='REPLACE'?get('assignment'):'';return {poolId:get('poolId'),day:get('day'),action,reason:get('reason'),technicianId:a.startsWith('T:')?Number(a.slice(2)):null,roundId:a.startsWith('R:')?Number(a.slice(2)):null,slots:action==='REPLACE'?[...row.querySelectorAll('.exceptionSlot input')].map(i=>({at:i.value})):[]};});}
+  function form(){return {startsOn:el('serviceStart').value,endsOn:el('serviceEnd').value||null,exceptions:exceptionForm(),seasons:[...el('serviceSeasons').children].map(row=>({...Object.fromEntries([...row.querySelectorAll('[data-season]')].map(x=>[x.dataset.season,x.value])),schedules:[...row.querySelectorAll('.serviceRule')].map(rule=>{const get=name=>rule.querySelector(`[data-rule=${name}]`).value,a=get('assignment');return {poolId:get('poolId'),frequency:get('frequency'),count:get('count'),...(Number(get('interval'))>1?{interval:get('interval'),anchorOn:get('anchorOn')}:{}),technicianId:a.startsWith('T:')?Number(a.slice(2)):null,roundId:a.startsWith('R:')?Number(a.slice(2)):null,slots:[...rule.querySelectorAll('.serviceSlot')].map(s=>({day:s.querySelector('select').value,at:s.querySelector('input').value}))};})}))};}
+  function fill(plan){el('serviceStart').value=plan?.startsOn||'';el('serviceEnd').value=plan?.endsOn||'';el('serviceSeasons').replaceChildren();(plan?.seasons||[]).forEach(addSeason);el('serviceExceptions').replaceChildren();(plan?.exceptions||[]).forEach(addException);}
+  function saveDraft(){if(!ready||busy||pending)return;try{session();sessionStorage.setItem(draftKey(),JSON.stringify({schema:1,version,dirty,plan:form(),monthRef:el('serviceMonth').value}));}catch(error){storageOK=false;status('Não foi possível guardar o rascunho. Preserve os dados antes de sair.','error');}}
+  function changed(){if(!ready||busy||pending)return;simulation=null;dirty=true;el('serviceImpact').replaceChildren();saveDraft();controls();}
   async function load(){
     const clientId=Number(select.value);if(!clientId)throw Error('Escolha um cliente pelo nome.');
     const ticket=++sequence;ready=false;simulation=null;el('serviceImpact').replaceChildren();status('A carregar o acordo…','loading');
@@ -80,7 +94,7 @@
     fill(result.plan?.snapshot?.servicePlan);el('serviceMonth').value=new Date().toISOString().slice(0,7);
     const record=readRecord();pending=record.pending||null;
     const draft=JSON.parse(sessionStorage.getItem(draftKey())||'null');
-    if(draft){if(draft.schema!==1||!draft.plan)throw Error('Rascunho inválido. Os dados foram preservados.');fill(draft.plan);el('serviceMonth').value=draft.monthRef;dirty=true;if(draft.version!==version){status('Existe uma versão mais recente. O seu rascunho foi preservado; reveja todos os campos e simule novamente.','conflict');}}
+    if(draft){if(draft.schema!==1||!draft.plan)throw Error('Rascunho inválido. Os dados foram preservados.');fill(draft.plan);el('serviceMonth').value=draft.monthRef;dirty=draft.dirty!==false||draft.version!==version;if(draft.version!==version){status('Existe uma versão mais recente. O seu rascunho foi preservado; reveja todos os campos e simule novamente.','conflict');}}
     ready=true;
     status(pending?(pending.refused?'O envio foi recusado. Recarregue para rever antes de preparar outro.':'Há um envio por confirmar. Recupere a confirmação antes de alterar o acordo.'):dirty?'Rascunho recuperado. Reveja-o e simule antes de guardar.':'Acordo carregado. Configure os serviços e a frequência acordados.',pending?'pending':'ready');
   }
@@ -121,8 +135,9 @@
     }
   }
   el('serviceLoad').onclick=()=>run(load);
+  el('serviceAddException').onclick=()=>{addException();changed();};
   el('serviceAddSeason').onclick=()=>{addSeason();changed();};
-  el('serviceForm').addEventListener('input',event=>{if(event.target.id!=='serviceMonth')changed();else{simulation=null;controls();}});
+  el('serviceForm').addEventListener('input',event=>{if(event.target.id!=='serviceMonth')changed();else{simulation=null;saveDraft();controls();}});
   el('serviceForm').addEventListener('change',event=>{if(event.target.id!=='serviceMonth')changed();});
   el('serviceForm').onsubmit=event=>{event.preventDefault();run(()=>simulate('SAVE'));};
   el('serviceCalendarPreview').onclick=()=>run(()=>simulate('GENERATE'));
@@ -132,7 +147,7 @@
   }));
   el('serviceRetry').onclick=()=>run(()=>locked(send));
   el('serviceResolve').onclick=()=>run(()=>locked(async()=>{const record=readRecord();if(!record.pending?.refused)throw Error('Recupere primeiro a confirmação.');writeRecord({...record,history:[...(record.history||[]),record.pending],pending:null});pending=null;await load();status('Recusa conservada. Reveja o rascunho face ao acordo atual e simule novamente.','ready');}));
-  select.addEventListener('change',()=>{sequence++;current=null;ready=false;pending=null;simulation=null;options=null;el('serviceClient').textContent='';el('serviceSeasons').replaceChildren();el('serviceStart').value='';el('serviceEnd').value='';el('serviceImpact').replaceChildren();status('Carregue o acordo do cliente selecionado.');controls();});
+  select.addEventListener('change',()=>{sequence++;current=null;ready=false;pending=null;simulation=null;options=null;el('serviceClient').textContent='';el('serviceSeasons').replaceChildren();el('serviceStart').value='';el('serviceEnd').value='';el('serviceExceptions').replaceChildren();el('serviceImpact').replaceChildren();status('Carregue o acordo do cliente selecionado.');controls();});
   window.addEventListener('storage',event=>{try{session();if(current&&event.key===key()){pending=readRecord().pending||null;simulation=null;status('A ficha foi usada noutra janela. Recarregue ou recupere a confirmação.','conflict');controls();}}catch{}});
   window.addEventListener('pageshow',()=>{try{session();simulation=null;controls();}catch{}});
   setInterval(()=>{try{session();}catch{}},1000);

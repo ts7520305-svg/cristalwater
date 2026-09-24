@@ -58,7 +58,39 @@ function validate(input, money) {
     return season;
   });
   if(occupied.size!==12)fail('Defina todos os meses do ano, incluindo épocas sem visitas.');
-  return {schema:1,startsOn,endsOn,billing:'INCLUDED_MONTHLY',seasons};
+  const exceptions=validateExceptions(input.exceptions,startsOn,endsOn);
+  return {schema:1,startsOn,endsOn,billing:'INCLUDED_MONTHLY',seasons,...(exceptions.length?{exceptions}:{})};
+}
+function validateExceptions(input,startsOn,endsOn){
+  if(input===undefined)return [];
+  if(!Array.isArray(input)||input.length>500)fail('Indique até 500 exceções datadas.');
+  const keys=new Set();
+  return input.map(row=>{
+    if(!row||typeof row!=='object'||Array.isArray(row)||Object.keys(row).some(k=>!['poolId','day','action','reason','slots','technicianId','roundId'].includes(k)))fail('Exceção datada inválida.');
+    const poolId=integer(row.poolId,1,2147483647,'Instalação da exceção inválida.'),day=civil(row.day),reason=typeof row.reason==='string'?row.reason.trim():'';
+    if(day<startsOn||endsOn&&day>endsOn)fail('A exceção deve estar dentro da vigência do contrato.');
+    if(!reason||reason.length>500)fail('Indique o motivo da exceção, até 500 caracteres.');
+    const key=poolId+':'+day;if(keys.has(key))fail('Só pode haver uma exceção por instalação e data.');keys.add(key);
+    if(!['SKIP','REPLACE'].includes(row.action)||!Array.isArray(row.slots))fail('Escolha sem visitas ou horários próprios para a data.');
+    const technicianId=row.technicianId==null||row.technicianId===''?null:integer(row.technicianId,1,2147483647,'Técnico inválido.'),roundId=row.roundId==null||row.roundId===''?null:integer(row.roundId,1,2147483647,'Ronda inválida.');
+    if(technicianId&&roundId)fail('Escolha um técnico ou a atribuição da ronda.');
+    if(row.action==='SKIP'&&(row.slots.length||technicianId||roundId))fail('Uma data sem visitas não pode ter horários ou atribuição.');
+    if(row.action==='REPLACE'&&(!row.slots.length||row.slots.length>168))fail('Indique os horários próprios da data.');
+    const slots=row.slots.map(slot=>{if(!slot||Object.keys(slot).length!==1||typeof slot.at!=='string'||!/^([01]\d|2[0-3]):[0-5]\d$/.test(slot.at))fail('Hora da exceção inválida.');return {at:slot.at};}).sort((a,b)=>a.at.localeCompare(b.at));
+    if(new Set(slots.map(s=>s.at)).size!==slots.length)fail('Os horários da exceção não podem repetir-se.');
+    return {poolId,day,action:row.action,reason,slots,technicianId,roundId};
+  }).sort((a,b)=>a.day.localeCompare(b.day)||a.poolId-b.poolId);
+}
+function allRules(plan){return [...plan.seasons.flatMap(s=>s.schedules),...(plan.exceptions||[])];}
+function rulesForDay(plan,day){
+  const season=onDay(plan,day);if(!season)return [];
+  const rules=new Map(season.schedules.map(rule=>[rule.poolId,rule]));
+  for(const exception of plan.exceptions||[]){
+    if(exception.day!==day)continue;
+    if(exception.action==='SKIP')rules.delete(exception.poolId);
+    else rules.set(exception.poolId,{poolId:exception.poolId,frequency:'WEEKLY',count:exception.slots.length,slots:exception.slots.map(s=>({day:new Date(day+'T12:00:00Z').getUTCDay(),at:s.at})),technicianId:exception.technicianId,roundId:exception.roundId,exception});
+  }
+  return [...rules.values()].sort((a,b)=>a.poolId-b.poolId);
 }
 function onDay(plan,day) {
   if(!plan||day<plan.startsOn||(plan.endsOn&&day>plan.endsOn))return null;
@@ -98,6 +130,6 @@ function localDate(day,at='12:00') {
 }
 const clock=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Lisbon',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
 function localDay(date){const p=Object.fromEntries(clock.formatToParts(date).map(p=>[p.type,p.value]));return `${p.year}-${p.month}-${p.day}`;}
-function serviceData(plan,season,day,origin) {return {schema:1,planId:plan.id,planVersion:plan.version,period:season.key,label:season.label,services:season.services,day,billing:'INCLUDED_MONTHLY',origin};}
+function serviceData(plan,season,day,origin,exception) {return {schema:1,planId:plan.id,planVersion:plan.version,period:season.key,label:season.label,services:season.services,day,billing:'INCLUDED_MONTHLY',origin,...(exception?{exception}:{})};}
 function included(visit){return visit?.contractService?.billing==='INCLUDED_MONTHLY';}
-module.exports={validate,onDay,due,activeCycle,cadenceLabel,daysOfMonth,localDate,localDay,serviceData,civil,included};
+module.exports={validate,onDay,due,activeCycle,cadenceLabel,allRules,rulesForDay,daysOfMonth,localDate,localDay,serviceData,civil,included};

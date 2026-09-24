@@ -40,7 +40,7 @@ async function context(tx,clientId,snapshot){
   const previous=await rates().latest(clientId,tx),plan=snapshot||previous?.snapshot;
   if(!plan?.servicePlan)fail('Este cliente ainda não tem um acordo de serviços sazonais.',409);
   const pools=await tx.pool.findMany({where:{clientId},orderBy:{id:'asc'}}),poolMap=new Map(pools.map(p=>[p.id,p]));
-  const rules=plan.servicePlan.seasons.flatMap(s=>s.schedules);
+  const rules=calendar.allRules(plan.servicePlan);
   const roundIds=[...new Set(rules.map(r=>r.roundId).filter(Boolean))].sort((a,b)=>a-b);
   if(roundIds.length)await tx.$queryRaw`SELECT id FROM "Round" WHERE id IN (${Prisma.join(roundIds)}) ORDER BY id FOR UPDATE`;
   const rounds=await tx.round.findMany({where:{id:{in:roundIds}},include:{pools:true,technicians:{include:{technician:true}},assignments:{include:{technician:true},orderBy:{id:'desc'}}}});
@@ -78,7 +78,7 @@ async function inspect(tx,ctx,{monthRef,editing=false,onlyDays=null,now=new Date
   const desired=new Map(),pending=[],uncertain=new Set();
   for(const day of days){
     const season=calendar.onDay(ctx.snapshot.servicePlan,day);if(!season)continue;
-    for(const rule of season.schedules){
+    for(const rule of calendar.rulesForDay(ctx.snapshot.servicePlan,day)){
       if(!calendar.activeCycle(rule,day))continue;
       const pool=ctx.poolMap.get(rule.poolId),base={poolId:pool.id,poolName:pool.name||'Piscina '+pool.id,day,period:season.label};
       if(rule.slots.length!==rule.count){uncertain.add(pool.id+':'+day);pending.push({...base,reason:`Faltam horários: ${rule.slots.length} de ${rule.count} visitas por ${calendar.cadenceLabel(rule)}.`});continue;}
@@ -86,7 +86,7 @@ async function inspect(tx,ctx,{monthRef,editing=false,onlyDays=null,now=new Date
         const date=calendar.localDate(day,slot.at),assigned=date?assignment(rule,ctx,date):{technician:null};
         const readiness=ctx.readiness.get(pool.id);
         if(!date||!assigned.technician||!readiness.ok){uncertain.add(pool.id+':'+day);pending.push({...base,at:slot.at,reason:!date?'Hora inexistente na mudança de hora.':!readiness.ok?readiness.message:'Técnico ou atribuição da ronda por definir/indisponível.'});continue;}
-        desired.set(slotKey(pool.id,date),{...base,at:slot.at,date,season,technician:assigned.technician,roundId:assigned.roundId||null});
+        desired.set(slotKey(pool.id,date),{...base,at:slot.at,date,season,exception:rule.exception,technician:assigned.technician,roundId:assigned.roundId||null});
       }
     }
   }
@@ -101,7 +101,7 @@ async function inspect(tx,ctx,{monthRef,editing=false,onlyDays=null,now=new Date
       actions.push({...base,action:'PRESERVE',reason:'Visita manual, atribuída/reagendada, iniciada, concluída ou histórica: preservada.'});continue;
     }
     if(uncertain.has(dayKey(visit.poolId,visit.plannedDate))){actions.push({...base,action:'REVIEW',reason:'Calendário pendente: visita existente preservada para revisão.'});continue;}
-    if(!target){actions.push({...base,action:'CANCEL',reason:'Fora dos dias/horários ou vigência do acordo revisto.'});continue;}
+    if(!target){const exception=ctx.snapshot.servicePlan.exceptions?.find(e=>e.poolId===visit.poolId&&e.day===day);actions.push({...base,action:'CANCEL',reason:exception?'Exceção nesta data: '+exception.reason:'Fora dos dias/horários ou vigência do acordo revisto.'});continue;}
     const same=!editing&&visit.contractService.planVersion===ctx.previous?.version&&visit.technicianId===target.technician.id&&visit.roundId===target.roundId;
     actions.push({...base,...target,action:same?'KEEP':'UPDATE',reason:same?'Visita contratada já agendada.':'Atualizar a versão, serviços e atribuição da visita futura.'});
   }
@@ -111,7 +111,7 @@ async function inspect(tx,ctx,{monthRef,editing=false,onlyDays=null,now=new Date
     // new dates within the explicitly simulated month (or the weekly window).
     if(!(onlyDays||monthDays).includes(target.day))continue;
     if(blockedDays.has(dayKey(target.poolId,target.date)))actions.push({...target,action:'REVIEW',reason:'Já existe trabalho manual/histórico neste dia. Reveja-o antes de acrescentar visitas.'});
-    else actions.push({...target,action:'CREATE',reason:'Visita incluída no contrato mensal.'});
+    else actions.push({...target,action:'CREATE',reason:'Visita incluída no contrato mensal.'+(target.exception?' Exceção nesta data: '+target.exception.reason:'')});
   }
   actions.sort((a,b)=>a.day.localeCompare(b.day)||a.poolId-b.poolId||(a.at||'').localeCompare(b.at||'')||(a.visit?.id||0)-(b.visit?.id||0));
   const summary={create:0,update:0,cancel:0,keep:0,preserve:0,review:0,pending:pending.length};for(const a of actions)summary[a.action.toLowerCase()]++;
@@ -140,7 +140,7 @@ async function apply(tx,plan,inspection,{addOnly=false}={}){
       results.push({action:'CANCEL',id:v.id});continue;
     }
     const origin={plannedDate:iso(action.date),technicianId:action.technician.id,roundId:action.roundId};
-    const data={technicianId:action.technician.id,technicianName:action.technician.name,roundId:action.roundId,contractService:calendar.serviceData(plan,action.season,action.day,origin),...(v&&v.notes===v.contractService?.services?{notes:action.season.services}:{})};
+    const data={technicianId:action.technician.id,technicianName:action.technician.name,roundId:action.roundId,contractService:calendar.serviceData(plan,action.season,action.day,origin,action.exception),...(v&&v.notes===v.contractService?.services?{notes:action.season.services}:{})};
     const saved=v?await tx.serviceVisit.update({where:{id:v.id},data}):await tx.serviceVisit.create({data:{...data,clientId:inspection.clientId,poolId:action.poolId,plannedDate:action.date,status:'PLANNED',reason:'AUTO_CLIENT_SERVICE',revenue:0,notes:action.season.services}});
     if(!v||v.technicianId!==saved.technicianId)await requestReceipt(tx,saved,`client-service-${plan.id}-${saved.id}`,'CLIENT_SERVICE');
     results.push({action:action.action,id:saved.id});

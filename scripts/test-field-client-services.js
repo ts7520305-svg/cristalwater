@@ -101,4 +101,19 @@ const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['localhost',
   const cr=await ok(cyclePath+'/preview',revisedCycle);assert(cr.summary.preserve>0);assert(cr.summary.cancel>0);await ok(cyclePath,{...revisedCycle,reviewToken:cr.reviewToken,requestId:randomUUID()},'PUT');
   assert.deepEqual(await prisma.clientRatePlan.findUnique({where:{id:firstCyclePlan.id}}),firstCyclePlan);assert.equal((await ok(cyclePath,cycleRequest,'PUT')).planVersion,1);
   console.log('PASS anchored two-week and quarterly cadences over twelve real months, leap-day adjustment, concurrent replay, unchanged monthly price and preserved original agreements/execution');
+  const dated=structuredClone(revisedCycle);dated.expectedVersion=2;dated.monthRef='2032-02';dated.servicePlan.exceptions=[
+    {poolId:cyclePools[0].id,day:'2032-01-05',action:'SKIP',reason:'Pedido posterior ao início da visita',slots:[]},
+    {poolId:cyclePools[0].id,day:'2032-02-16',action:'SKIP',reason:'Instalação fechada nesta data',slots:[]},
+    {poolId:cyclePools[0].id,day:'2032-02-17',action:'REPLACE',reason:'Dois horários acordados em substituição',slots:[{at:'10:00'},{at:'16:00'}],technicianId:otherTech.id}
+  ];
+  const badDated=structuredClone(dated);badDated.servicePlan.exceptions[0].poolId=foreign.id;assert.equal((await call(cyclePath+'/preview',badDated)).status,400);
+  const datedPreview=await ok(cyclePath+'/preview',dated);assert.equal(datedPreview.pricing.amount,180);assert(datedPreview.actions.some(a=>a.action==='CANCEL'&&a.day==='2032-02-16'&&a.reason.includes('fechada')));assert(datedPreview.actions.some(a=>a.action==='PRESERVE'&&a.visitId===priorVisit.id));assert.equal(datedPreview.actions.filter(a=>a.action==='CREATE'&&a.day==='2032-02-17').length,2);
+  const datedRequest={...dated,reviewToken:datedPreview.reviewToken,requestId:randomUUID()},altered=structuredClone(datedRequest);altered.servicePlan.exceptions[1].reason='Outro motivo depois da simulação';assert.equal((await call(cyclePath,altered,'PUT')).status,409);
+  const datedReplies=await Promise.all([ok(cyclePath,datedRequest,'PUT'),ok(cyclePath,datedRequest,'PUT')]);assert.deepEqual(datedReplies[0],datedReplies[1]);
+  const originals=await prisma.serviceVisit.findMany({where:{clientId:cyc.id,poolId:cyclePools[0].id},orderBy:{plannedDate:'asc'}});assert.equal(originals.find(v=>calendar.localDay(v.plannedDate)==='2032-02-16').status,'CANCELLED');
+  const custom=originals.filter(v=>calendar.localDay(v.plannedDate)==='2032-02-17');assert.equal(custom.length,2);assert(custom.every(v=>v.technicianId===otherTech.id&&v.contractService.exception.reason==='Dois horários acordados em substituição'&&v.revenue===0));assert((await prisma.serviceVisit.findUnique({where:{id:priorVisit.id}})).startAt);
+  const beforeWeek=await prisma.serviceVisit.count({where:{clientId:cyc.id}});await scheduler.generateWeek(calendar.localDate('2032-02-16'));assert.equal(await prisma.serviceVisit.count({where:{clientId:cyc.id}}),beforeWeek);
+  const restored=structuredClone(revisedCycle);restored.expectedVersion=3;restored.monthRef='2032-02';const restorePreview=await ok(cyclePath+'/preview',restored);assert(restorePreview.actions.some(a=>a.action==='CREATE'&&a.day==='2032-02-16'));assert.equal(restorePreview.actions.filter(a=>a.action==='CANCEL'&&a.day==='2032-02-17').length,2);await ok(cyclePath,{...restored,reviewToken:restorePreview.reviewToken,requestId:randomUUID()},'PUT');
+  assert.deepEqual(await prisma.clientRatePlan.findUnique({where:{id:firstCyclePlan.id}}),firstCyclePlan);assert.equal((await ok(cyclePath,datedRequest,'PUT')).planVersion,3);
+  console.log('PASS dated skip/replace, foreign installation rejected, reviewed reason and attribution, started visit preserved, weekly generation idempotent and removal restores normal schedule without deleting history');
 })().catch(error=>{console.error(error);process.exitCode=1;}).finally(()=>prisma.$disconnect());
