@@ -222,6 +222,7 @@ async function dbRejects(sql, expected) {
   assert.deepEqual(await prisma.repairWorkInterval.findUniqueOrThrow({where:{id:retainedWork.id}}),retainedWork);
   await prisma.repairWorkInterval.update({where:{id:retainedWork.id},data:{voidedAt:new Date(),voidedBy:'ADMIN:1',voidReason:'Explicit historical correction',activeKey:null}});
   await prisma.repairWorkInterval.create({data:workData});
+  await require('./fixtures/reminder-return-migration')({prisma,cli,dbRejects,materialData});
   await prisma.repairWorkInterval.deleteMany({where:{repairId:historyRepair.id}});
   assert.deepEqual(await prisma.expenseAllocation.findUniqueOrThrow({where:{id:repairLabor.id}}),repairLabor);
   await prisma.expenseAllocation.update({where:{id:repairLabor.id},data:{voidedAt:new Date(),voidReason:'Explicit correction',activeKey:null,activeMeasurementKey:null}});
@@ -269,6 +270,6 @@ async function dbRejects(sql, expected) {
   assert.equal(await prisma.technicalProposalRequest.count(),0);
   assert.equal(await prisma.fieldWriteRequest.count(),0);
   const savedExtra=await prisma.extraVisit.findUniqueOrThrow({where:{id:oldExtra.id}});assert.equal(savedExtra.notes,'Migration preserved extra');assert.equal(savedExtra.execution,null);assert.equal(savedExtra.startAt,null);assert.equal(savedExtra.endAt,null);assert.equal(savedExtra.completionRequestId,null);assert.equal(await prisma.extraVisitPhoto.count(),0);await prisma.extraVisit.delete({where:{id:oldExtra.id}});
-  console.log('PASS thirty-nine additive migrations preserve previous data and match the current schema');
+  console.log('PASS forty additive migrations preserve previous data and match the current schema');
  }finally{fs.rmSync(temp,{recursive:true,force:true})}
 })().catch(error=>{console.error(error);process.exitCode=1}).finally(()=>prisma.$disconnect());

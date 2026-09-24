@@ -75,7 +75,7 @@ function build(data, expense, selection) {
     const materialContext=reminder?data.reminderMaterials?.get(id):null,consumption=materialContext?.active;
     if(reminder&&(!materialContext?.valid||!consumption||consumption.state!=='CONFIRMED'))return {valid:false,errors:['Confirme o consumo próprio dos materiais deste lembrete, com declaração e stock de origem verificáveis.']};
     const proof = repair ? data.repairContext.proofs.get(id)[0] : null;
-    const candidates = reminder ? consumption.result.event.movements.map(m=>({...m,createdAt:new Date(m.createdAt)})) : repair ? proof.metadata.movements.map(m => data.repairContext.movements.get(m.id)) : data.movements.filter(m => targetType === 'REGULAR' ? m.visitId === id : m.extraVisitId === id);
+    const candidates = reminder ? [...consumption.result.event.movements,...consumption.returns.flatMap(v=>v.event.movements)].map(m=>({...m,createdAt:new Date(m.createdAt)})) : repair ? proof.metadata.movements.map(m => data.repairContext.movements.get(m.id)) : data.movements.filter(m => targetType === 'REGULAR' ? m.visitId === id : m.extraVisitId === id);
     const movements = candidates.filter(m => ['CONSUMPTION', 'RETURN', 'EMERGENCY_DISTRIBUTED_CONSUMPTION'].includes(String(m.movementType).trim().toUpperCase()) && normalizeProductName(m.productName) === product && normalizeUnit(m.unit, '') === unit);
     if (!product || !unit || !movements.length) add('Não há consumo identificado deste produto e unidade neste serviço.');
     let net = 0n;
@@ -99,7 +99,8 @@ function build(data, expense, selection) {
     if (item.purchase.invoiceDate && item.purchase.invoiceDate.getTime() > end) add('A compra é posterior ao serviço. Reveja a origem histórica antes de valorizar.');
     totalCents = lineCents;
     key = r.hash({ kind, targetType, id, product, unit });
-    snapshot = { version: reminder ? 8 : repair ? 2 : 1, kind, service, item: { ...item, purchase: { ...item.purchase, invoiceDate: r.day(item.purchase.invoiceDate) } }, movements: movements.map(m => repair ? { ...Object.fromEntries(Object.keys(movementSelect).map(k => [k, m[k]])), scopeFrom: m.scopeFrom, scopeTo: m.scopeTo, createdAt: m.createdAt.toISOString() } : { ...m, createdAt: m.createdAt.toISOString() }), ...(reminder?{materialBasis:require('./reminderMaterialService').rules.basis,consumption:consumption.result}:{}) };
+    const lastReturn=reminder?consumption.returns.findLastIndex(v=>v.event.movements.some(m=>normalizeProductName(m.productName)===product&&normalizeUnit(m.unit,'')===unit)):-1,returns=reminder?consumption.returns.slice(0,lastReturn+1):[];
+    snapshot = { version: reminder ? returns.length?11:8 : repair ? 2 : 1, kind, service, item: { ...item, purchase: { ...item.purchase, invoiceDate: r.day(item.purchase.invoiceDate) } }, movements: movements.map(m => repair ? { ...Object.fromEntries(Object.keys(movementSelect).map(k => [k, m[k]])), scopeFrom: m.scopeFrom, scopeTo: m.scopeTo, createdAt: m.createdAt.toISOString() } : { ...m, createdAt: m.createdAt.toISOString() }), ...(reminder?{materialBasis:require('./reminderMaterialService').rules.basis,consumption:consumption.result,...(returns.length?{returns}:{})}:{}) };
     label = item.productName + ' · ' + unit + ' · Linha #' + item.id + (item.lot ? ' · Lote ' + item.lot : '');
     return { valid: !errors.length, errors, key, kind, monthRef: service.endAt.slice(0, 7), units, totalQuantity, totalCents, snapshot, hash: r.hash(snapshot), label, unit, visit, method: 'CONFIRMED_PURCHASE_LINE', measurement: measurementKey(targetType, id) };
   }

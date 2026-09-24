@@ -44,8 +44,13 @@ async function journal(db,reminderId) {
       const e=v.event,p=e.preview;
       if(p.previousHash!==headHash)throw Error('Chain changed');
       for(const m of e.movements) { if(seen.has(m.id)||!byId.has(m.id)||writes.hash(m)!==writes.hash(byId.get(m.id)))throw Error('Movement changed'); seen.add(m.id); }
-      if(p.selection.action==='CONSUME') { if(active)throw Error('Duplicate consumption'); active={id:e.id,result:v,hash:v.eventHash,voidResult:null,state:'CONFIRMED'}; records.push(active); }
-      else { if(!active||p.selection.recordId!==active.id||writes.hash(p.original)!==writes.hash(active.result))throw Error('Reversal changed'); active.voidResult=v; active.state='VOIDED'; active=null; }
+      if(p.selection.action==='CONSUME') { if(active)throw Error('Duplicate consumption'); active={id:e.id,result:v,hash:v.eventHash,voidResult:null,state:'CONFIRMED',returns:[]}; records.push(active); }
+      else {
+        if(!active||p.selection.recordId!==active.id||writes.hash(p.original)!==writes.hash(active.result))throw Error('Reversal changed');
+        if(p.schema===2){if(writes.hash(p.previousReturns)!==writes.hash(rules.returnRefs(active.returns))||writes.hash(p.returnedBefore)!==writes.hash(rules.quantities(active.result,active.returns)))throw Error('Changed return history');}
+        else if(active.returns.length)throw Error('Missing partial return history');
+        if(p.selection.action==='RETURN')active.returns.push(v);else {active.voidResult=v;active.state='VOIDED';active=null;}
+      }
       headHash=v.eventHash;
     } catch (_) { valid=false; }
   }
@@ -92,10 +97,13 @@ async function calculate(db,reminderId,body,locked=false) {
   const c=await read(db,reminderId),r=c.resources;
   if(!c.valid)return refuse('MATERIAL_HISTORY_REVIEW','O histórico ou os movimentos de stock precisam de revisão.');
   let declaration=null,original=null,origin,items=null,affectedCosts=null;
-  if(body.action==='REVERSE') {
+  if(body.action!=='CONSUME') {
     if(!c.active||c.active.id!==body.recordId)return refuse('CONSUMPTION_CHANGED','O consumo já foi anulado ou mudou.');
     original=c.active.result; origin=original.event.preview.origin;
-    const oldItems=original.event.preview.items;
+    const returned=rules.quantities(original,c.active.returns),remaining=original.event.preview.items.map((i,n)=>({...i,quantity:rules.decimal(rules.quantity(i.quantity)-rules.quantity(returned[n].quantity))}));
+    if(body.action==='RETURN'&&body.items.some(i=>!remaining[i.itemIndex-1]||rules.quantity(i.quantity)>rules.quantity(remaining[i.itemIndex-1].quantity)))return refuse('RETURN_LIMIT','A devolução excede a quantidade ainda consumida.');
+    const oldItems=body.action==='RETURN'?body.items.map(i=>({...remaining[i.itemIndex-1],quantity:i.quantity})):remaining.filter(i=>rules.quantity(i.quantity)>0n);
+    if(body.action==='RETURN'&&remaining.every(i=>rules.quantity(i.quantity)===(rules.quantity(body.items.find(v=>v.itemIndex===i.itemIndex)?.quantity||'0'))))return refuse('RETURN_TOTAL','Para repor todo o restante, escolha anular consumo e repor no stock original.');
     if(locked)for(const old of [...oldItems].sort((a,b)=>JSON.stringify([a.balance.scope,a.balance.vehicleId,a.balance.productName,a.balance.unit]).localeCompare(JSON.stringify([b.balance.scope,b.balance.vehicleId,b.balance.productName,b.balance.unit]))))await stock.lockBalance(db,old.balance);
     if(locked)for(const old of [...oldItems].sort((a,b)=>a.balance.id-b.balance.id))await db.$queryRaw`SELECT id FROM "StockBalance" WHERE id=${old.balance.id} FOR UPDATE`;
     const current=await db.stockBalance.findMany({where:{id:{in:oldItems.map(i=>i.balance.id)}}});items=[];
@@ -105,7 +113,7 @@ async function calculate(db,reminderId,body,locked=false) {
       items.push({itemIndex:old.itemIndex,balance:b,quantity:old.quantity,afterQuantity:rules.decimal(rules.quantity(b.quantity)+rules.quantity(old.quantity))});
     }
     const costs=await db.expenseAllocation.findMany({where:{targetType:'MAINTENANCE_REMINDER',serviceReminderId:reminderId,valuationType:'MATERIAL',voidedAt:null,valuationSnapshot:{path:['source','consumption','event','id'],equals:body.recordId}},orderBy:{id:'asc'}});
-    affectedCosts=costs.map(a=>({allocationId:a.id,expenseId:a.expenseId,amountCents:a.amountCents,allocationHash:writes.hash(json(a))}));
+    affectedCosts=costs.filter(a=>body.action!=='RETURN'||!a.valuationSnapshot?.source?.item||oldItems.some(i=>rules.normalize(i.balance.productName)===rules.normalize(a.valuationSnapshot.source.item.productName)&&rules.normalize(i.balance.unit)===rules.normalize(a.valuationSnapshot.source.item.unit))).map(a=>({allocationId:a.id,expenseId:a.expenseId,amountCents:a.amountCents,allocationHash:writes.hash(json(a))}));
   } else {
     const d=r.active?.find(row=>row.id===body.declarationId);
     if(c.active)return refuse('ACTIVE_CONSUMPTION','Já existe consumo ativo neste lembrete. Anule-o expressamente antes de corrigir.');
@@ -136,7 +144,8 @@ async function calculate(db,reminderId,body,locked=false) {
       items.push({itemIndex:n+1,balance:b,quantity:d.quantity,afterQuantity:rules.decimal(available-q),reservedQuantity:rules.decimal(reservedQuantity),reservationHash:reservations.hash});
     }
   }
-  const value={schema:1,basis:rules.basis,reminderId,selection:body,origin,previousHash:c.headHash,contextHash:writes.hash({headHash:c.headHash,valid:c.valid,declaration:declaration?writes.hash(declaration):null,resourceState:body.action==='CONSUME'?r.contextHash:null}),declaration,original,items,affectedCosts};
+  const returning=body.action==='RETURN'||body.action==='REVERSE'&&c.active.returns.length>0;
+  const value={schema:returning?2:1,...(returning?{returnedBefore:rules.quantities(original,c.active.returns),previousReturns:rules.returnRefs(c.active.returns)}:{}),basis:rules.basis,reminderId,selection:body,origin,previousHash:c.headHash,contextHash:writes.hash({headHash:c.headHash,valid:c.valid,declaration:declaration?writes.hash(declaration):null,resourceState:body.action==='CONSUME'?r.contextHash:null}),declaration,original,items,affectedCosts};
   return rules.preview({available:true,...value,hash:writes.hash(value)},writes.hash);
 }
 async function preview(actor,value,body) { admin(actor);const rid=id(value);parse(body);return prisma.$transaction(async db=>({ok:true,preview:await calculate(db,rid,body)}),{isolationLevel:'RepeatableRead',timeout:25000,maxWait:15000}); }
@@ -146,7 +155,7 @@ async function command(actor,value,body) {
     const saved=await writes.recover(db,request);if(saved)return saved;
     const p=await calculate(db,reminderId,{action:body.action,recordId:body.recordId,declarationId:body.declarationId,items:body.items},true);
     if(!p.available||p.hash!==body.previewHash)return writes.confirm(db,request,{ok:true,applied:false,envelope:body,code:p.code||'PREVIEW_CHANGED',message:p.message||'A origem, o saldo ou os custos mudaram. Reveja e confirme novamente.'});
-    const reverse=body.action==='REVERSE',items=p.items,createdAt=new Date(),movements=[];
+    const reverse=body.action!=='CONSUME',items=p.items,createdAt=new Date(),movements=[];
     // Acquire every physical balance in stable order before changing any item.
     for(const item of [...items].sort((a,b)=>JSON.stringify([a.balance.scope,a.balance.vehicleId,a.balance.productName,a.balance.unit]).localeCompare(JSON.stringify([b.balance.scope,b.balance.vehicleId,b.balance.productName,b.balance.unit]))))await stock.lockBalance(db,item.balance);
     for(const item of items) {
@@ -155,13 +164,13 @@ async function command(actor,value,body) {
       // calculate. Store the exact reviewed quantity without changing product
       // identity or filling in an unknown category from a generic default.
       await db.stockBalance.update({where:{id:b.id},data:{quantity:Number(item.afterQuantity)}});
-      const m=await db.stockMovement.create({data:{movementType:reverse?'RETURN':'CONSUMPTION',scopeFrom:reverse?'REMINDER':b.scope,scopeTo:reverse?b.scope:'REMINDER',vehicleId:b.vehicleId,productId:b.productId,productName:b.productName,category:b.category,unit:b.unit,quantity:q,clientId:p.origin.clientId,poolId:p.origin.poolId,technicianId:p.origin.technicianId,createdBy:owner,createdAt,notes:(reverse?'Anulação do consumo '+body.recordId:'Consumo próprio')+' · Lembrete #'+reminderId+' · '+requestId}});
+      const m=await db.stockMovement.create({data:{movementType:reverse?'RETURN':'CONSUMPTION',scopeFrom:reverse?'REMINDER':b.scope,scopeTo:reverse?b.scope:'REMINDER',vehicleId:b.vehicleId,productId:b.productId,productName:b.productName,category:b.category,unit:b.unit,quantity:q,clientId:p.origin.clientId,poolId:p.origin.poolId,technicianId:p.origin.technicianId,createdBy:owner,createdAt,notes:(body.action==='RETURN'?'Devolução parcial do consumo '+body.recordId:reverse?'Anulação do consumo '+body.recordId:'Consumo próprio')+' · Lembrete #'+reminderId+' · '+requestId}});
       movements.push(movementFacts(m));
     }
-    const event={schema:1,basis:rules.basis,id:requestId,owner,reminderId,reason:body.reason,createdAt:createdAt.toISOString(),preview:p,movements};
+    const event={schema:p.schema,basis:rules.basis,id:requestId,owner,reminderId,reason:body.reason,createdAt:createdAt.toISOString(),preview:p,movements};
     const result=await writes.confirm(db,request,{ok:true,applied:true,envelope:body,event,eventHash:writes.hash(event)});
     await rules.response(result,body,owner,reminderId,writes.hash);
-    await db.technicalHistory.create({data:{poolId:p.origin.poolId,type:rules.scope,status:reverse?'REVERSED':'CONSUMED',message:'Materiais do lembrete #'+reminderId+': '+body.reason,description:JSON.stringify({requestId,eventHash:result.eventHash,movementIds:movements.map(m=>m.id)}),performedAt:createdAt}});
+    await db.technicalHistory.create({data:{poolId:p.origin.poolId,type:rules.scope,status:body.action==='RETURN'?'PARTIALLY_RETURNED':reverse?'REVERSED':'CONSUMED',message:'Materiais do lembrete #'+reminderId+': '+body.reason,description:JSON.stringify({requestId,eventHash:result.eventHash,movementIds:movements.map(m=>m.id)}),performedAt:createdAt}});
     await db.userAuditLog.create({data:{actor:owner,action:rules.scope,entity:'GeneralReminder',entityId:String(reminderId),metadata:{requestId,eventHash:result.eventHash,action:body.action}}});
     return result;
   },{isolationLevel:'ReadCommitted',timeout:30000,maxWait:15000});
