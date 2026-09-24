@@ -16,17 +16,19 @@ const htmlText = value => text(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', 
 const visitLabel = report => translator(report.language)(report.visitType === 'EXTRA' ? 'Visita extra #' : 'Visita #') + report.visit.id;
 const extraProjection = require('./extraVisitReportProjection');
 const reportTitle = report => translator(report.language)(report.historicalReview ? 'Revisão administrativa da visita' : report.view === 'admin' ? 'Relatório técnico completo' : 'Relatório de manutenção');
+const reportFooter = report => report.historicalReview ? 'Revisão administrativa: registo da visita' : report.historicalOrigin ? 'Dados da instalação: revisão histórica identificada' : 'Dados da instalação: registo atual';
 
 async function read(actor, rawId, query = {}) {
   const visitId = id(rawId), role = normalizeRole(actor?.role), visitType = query.visitType ?? 'REGULAR';
   if (!['ADMIN', 'CLIENT', 'TECHNICIAN', 'TEAM_LEADER'].includes(role)) fail('Acesso negado.', 403);
   if (!['REGULAR', 'EXTRA'].includes(visitType)) fail('Tipo de visita inválido.');
-  if (Object.keys(query).some(key => !['view', 'role', 'clientId', 'settingsVersion', 'visitType', 'lang', 'history'].includes(key)) ||
+  if (Object.keys(query).some(key => !['view', 'role', 'clientId', 'settingsVersion', 'visitType', 'lang', 'history', 'historyVersion'].includes(key)) ||
       (query.history !== undefined && query.history !== 'review') ||
       (query.view !== undefined && !['client', 'admin'].includes(query.view)) ||
       (query.role !== undefined && !['CLIENT', 'ADMIN'].includes(query.role)) ||
       (query.view !== undefined && query.role !== undefined) ||
       (query.settingsVersion !== undefined && (typeof query.settingsVersion !== 'string' || !/^report-settings-v1:[a-f0-9]{64}$/.test(query.settingsVersion)))) fail('Opções de relatório inválidas.');
+  if(query.historyVersion!==undefined&&(query.history!==undefined||typeof query.historyVersion!=='string'||!/^visit-report-origin-v1:[a-f0-9]{64}$/.test(query.historyVersion)))fail('Versão da revisão histórica inválida.');
   const requestedLanguage = query.lang === undefined ? null : language(query.lang);
   const expectedClient = query.clientId === undefined ? null : id(query.clientId);
   const view = query.view || query.role?.toLowerCase() || (role === 'ADMIN' ? 'admin' : 'client');
@@ -46,9 +48,11 @@ async function read(actor, rawId, query = {}) {
     if (role === 'CLIENT' && (!clientId || Number(actor.clientId || actor.id) !== clientId)) fail('Acesso negado.', 403);
     if (['TECHNICIAN', 'TEAM_LEADER'].includes(role) && (!visit.technicianId || Number(actor.technicianId || actor.id) !== visit.technicianId)) fail('Acesso negado.', 403);
     const differentClient = !!(visit.clientId && visit.pool?.clientId && visit.clientId !== visit.pool.clientId);
-    if (differentClient && !historicalReview) fail('A visita e a instalação têm clientes diferentes. Peça a revisão do registo.', 409);
+    const historicalOrigin=historicalReview?null:await require('./visitReportOriginService').reportReview(tx,visitType,visit);
+    if(query.historyVersion!==undefined&&query.historyVersion!=='visit-report-origin-v1:'+historicalOrigin?.hash)fail('A revisão histórica mudou. Consulte antes de abrir o relatório.',409);
+    if (differentClient && !historicalReview && !historicalOrigin) fail('A visita e a instalação têm clientes diferentes. Peça a revisão do registo.', 409);
     if (historicalReview && !differentClient) fail('Esta visita não apresenta uma diferença de cliente com a instalação atual. Consulte o relatório habitual.', 409);
-    const client = visit.client;
+    let client = visit.client;
     if (!client) fail('A visita não tem um cliente confirmado.', 409);
     if (expectedClient !== null && expectedClient !== client.id) fail('A visita não pertence ao cliente selecionado.', 409);
     const state = await settingsService.readSnapshot(tx, client);
@@ -58,7 +62,8 @@ async function read(actor, rawId, query = {}) {
     // This is a read-only administrative inspection, never an ownership attestation
     // or permission to share with either client. Do not project live facility data.
     if (historicalReview) visit = { ...visit, pool: null, client: null, technician: null, ...(visitType === 'EXTRA' ? { technicianName: null } : {}) };
-    return { visit, visitType, client: historicalReview ? { id: client.id, name: client.name } : client, view, historicalReview, language: lang, setting: state.setting, settingsVersion: state.version };
+    if(historicalOrigin){const d=historicalOrigin.details;client={...client,name:historicalOrigin.client.name,address:d.address||null,zone:d.zone||null};visit={...visit,pool:{id:visit.poolId,clientId:client.id,name:d.poolName,address:d.address||null,zone:d.zone||null,equipment:null,technicalRoom:null}};}
+    return { visit, visitType, client: historicalReview ? { id: client.id, name: client.name } : client, view, historicalReview, historicalOrigin, language: lang, setting: state.setting, settingsVersion: state.version };
   }, { isolationLevel: 'RepeatableRead', maxWait: 15000, timeout: 15000 });
   report.photos = await reportPhotos.prepare(report);
   return report;
@@ -85,28 +90,30 @@ function sections(report) {
   if (show('showWaterParameters')) result.push({ title: t("Parâmetros da água"), rows: [['pH', v.ph], [t("Cloro"), v.chlorine], [t("Alcalinidade"), v.alkalinity], [t("Sal"), v.salt], [t("Temperatura"), v.temperature], ['ORP (mV)', v.orpMv]] });
   if (show('showChecklist')) result.push({ title: t("Trabalhos registados"), rows: [[t("Limpeza geral"), check('cleaned')], [t("Escovagem"), check('brushed')], [t("Aspiração"), check('vacuumed')], [t("Cestos limpos"), check('basketCleaned')], [t("Linha de água limpa"), check('waterlineClean')], [t("Retrolavagem"), check('backwashDone')]] });
   if (show('showChemicals')) result.push({ title: t("Químicos aplicados"), rows: v.chemicals.map((c, i) => [String(i + 1) + '. ' + c.name, text(c.quantity) + (c.unit ? ' ' + c.unit : '')]), empty: v.chemicalNotice || t("Nenhum químico registado.") });
-  if (!report.historicalReview && show('showEquipment')) { const e = v.pool?.equipment; result.push({ title: t("Equipamento atual da instalação"), rows: [[t("Bomba"), e?.pumpType], [t("Potência da bomba"), e?.pumpPower], [t("Filtro"), e?.filterType], [t("Meio filtrante"), e?.filterMedia], [t("Sistema de sal"), e ? yesNo(e.saltSystem, t) : null], [t("Quantidade de sal"), e?.saltQuantity], [t("Luzes"), e?.lightsCount], [t("Luzes avariadas"), e?.brokenLightsCount], [t("Tipo de luz"), e?.lightsType]] }); }
-  if (!report.historicalReview && show('showTechnicalRoom')) { const room = v.pool?.technicalRoom; result.push({ title: t("Casa técnica - registo atual"), rows: [[t("Estado"), room?.condition], [t("Localização"), room?.locationNote], [t("Ventilação"), room?.ventilation], [t("Elétrica"), room?.electrical], [t("Notas"), room?.notes]] }); }
+  if (!report.historicalReview && !report.historicalOrigin && show('showEquipment')) { const e = v.pool?.equipment; result.push({ title: t("Equipamento atual da instalação"), rows: [[t("Bomba"), e?.pumpType], [t("Potência da bomba"), e?.pumpPower], [t("Filtro"), e?.filterType], [t("Meio filtrante"), e?.filterMedia], [t("Sistema de sal"), e ? yesNo(e.saltSystem, t) : null], [t("Quantidade de sal"), e?.saltQuantity], [t("Luzes"), e?.lightsCount], [t("Luzes avariadas"), e?.brokenLightsCount], [t("Tipo de luz"), e?.lightsType]] }); }
+  if (!report.historicalReview && !report.historicalOrigin && show('showTechnicalRoom')) { const room = v.pool?.technicalRoom; result.push({ title: t("Casa técnica - registo atual"), rows: [[t("Estado"), room?.condition], [t("Localização"), room?.locationNote], [t("Ventilação"), room?.ventilation], [t("Elétrica"), room?.electrical], [t("Notas"), room?.notes]] }); }
   if (show('showNotes')) result.push({ title: t("Observações"), body: v.notes || t("Sem observações.") });
   if (extra && view === 'admin') {
     if (v.planningNotes) result.push({ title: t("Indicações de planeamento"), body: v.planningNotes });
     if (v.problem) result.push({ title: t("Ocorrência registada"), body: v.problem });
   }
   if (view === 'admin') result.push({ title: t("Notas internas"), body: v.internalNotes || t("Sem notas internas.") });
+  if(report.historicalOrigin){const h=report.historicalOrigin;result.push({title:t('Origem histórica revista'),body:t('Os dados da instalação foram confirmados para esta visita. Os dados atuais do equipamento e da casa técnica não estão incluídos.')+' '+t('Revisão registada:')+' '+date(h.createdAt,report.language)});if(view==='admin')result.push({title:t('Evidência da revisão administrativa'),body:h.details.evidence+'\n'+t('Motivo:')+' '+h.reason});}
   if (show('showPhotos')) result.push({ title: t("Fotografias da visita"), photos: report.photos || [], empty: t("Nenhuma foto registada.") });
   return result;
 }
 
 function headers(res, report, type) {
+  if(report.historicalOrigin)res.set('X-CW-History-Version','visit-report-origin-v1:'+report.historicalOrigin.hash);
   res.set({ 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff',
     'X-CW-Report-Type': report.visitType === 'EXTRA' ? 'extra-' + type : type, 'X-CW-Visit-Type': report.visitType || 'REGULAR', 'X-CW-Visit-Id': String(report.visit.id), 'X-CW-Client-Id': String(report.client.id),
     'Content-Language': language(report.language), 'X-CW-Report-View': report.view, 'X-CW-Settings-Version': report.settingsVersion,
-    'X-CW-Report-Origin': report.historicalReview ? 'historical-review' : 'current' });
+    'X-CW-Report-Origin': report.historicalReview ? 'historical-review' : report.historicalOrigin ? 'historical-confirmed' : 'current' });
 }
 function html(report) {
   const t = translator(report.language);
   const title = reportTitle(report);
-  return `<!doctype html><html lang="${language(report.language)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><style>body{font:15px/1.5 Arial,sans-serif;margin:32px;color:#1f2937}main{max-width:850px;margin:auto}h1{color:#125e88}section{margin:22px 0}h2{font-size:19px;border-bottom:1px solid #d4dfe7;padding-bottom:6px;break-after:avoid}dl{margin:0}dt{font-weight:bold;break-after:avoid}dd{margin:0 0 12px}p,dd,dt{white-space:pre-wrap;overflow-wrap:anywhere}figure{margin:16px 0;break-inside:avoid}figure img{display:block;max-width:100%;max-height:360px;width:auto;height:auto;margin:8px auto}figcaption{font-weight:bold;overflow-wrap:anywhere}button{min-height:44px;padding:8px 18px}footer{font-size:12px;color:#526476}@media print{button{display:none}body{margin:0}}</style></head><body><main><button onclick="window.print()">${htmlText(t("Imprimir / Guardar PDF"))}</button><h1>Cristal Water</h1><p>${title} | ${visitLabel(report)}</p>${sections(report).map(s => `<section><h2>${htmlText(s.title)}</h2>${s.photos ? (s.photos.length ? s.photos.map(p => `<figure><figcaption>${htmlText(p.label)}</figcaption>${p.bytes ? `<img src="data:image/jpeg;base64,${p.bytes.toString('base64')}" alt="${htmlText(p.label)}" width="${p.width}" height="${p.height}">` : `<p>${htmlText(p.message)}</p>`}</figure>`).join('') : `<p>${htmlText(s.empty)}</p>`) : s.body ? `<p>${htmlText(s.body)}</p>` : s.rows.length ? `<dl>${s.rows.map(([label, value]) => `<dt>${htmlText(label)}</dt><dd>${htmlText(value)}</dd>`).join('')}</dl>` : `<p>${htmlText(s.empty)}</p>`}</section>`).join('')}<footer>${htmlText(t(report.historicalReview ? "Revisão administrativa: registo da visita" : "Documento gerado pelo sistema Cristal Water. Os dados da instalação correspondem ao registo atual."))}</footer></main></body></html>`;
+  return `<!doctype html><html lang="${language(report.language)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><style>body{font:15px/1.5 Arial,sans-serif;margin:32px;color:#1f2937}main{max-width:850px;margin:auto}h1{color:#125e88}section{margin:22px 0}h2{font-size:19px;border-bottom:1px solid #d4dfe7;padding-bottom:6px;break-after:avoid}dl{margin:0}dt{font-weight:bold;break-after:avoid}dd{margin:0 0 12px}p,dd,dt{white-space:pre-wrap;overflow-wrap:anywhere}figure{margin:16px 0;break-inside:avoid}figure img{display:block;max-width:100%;max-height:360px;width:auto;height:auto;margin:8px auto}figcaption{font-weight:bold;overflow-wrap:anywhere}button{min-height:44px;padding:8px 18px}footer{font-size:12px;color:#526476}@media print{button{display:none}body{margin:0}}</style></head><body><main><button onclick="window.print()">${htmlText(t("Imprimir / Guardar PDF"))}</button><h1>Cristal Water</h1><p>${title} | ${visitLabel(report)}</p>${sections(report).map(s => `<section><h2>${htmlText(s.title)}</h2>${s.photos ? (s.photos.length ? s.photos.map(p => `<figure><figcaption>${htmlText(p.label)}</figcaption>${p.bytes ? `<img src="data:image/jpeg;base64,${p.bytes.toString('base64')}" alt="${htmlText(p.label)}" width="${p.width}" height="${p.height}">` : `<p>${htmlText(p.message)}</p>`}</figure>`).join('') : `<p>${htmlText(s.empty)}</p>`) : s.body ? `<p>${htmlText(s.body)}</p>` : s.rows.length ? `<dl>${s.rows.map(([label, value]) => `<dt>${htmlText(label)}</dt><dd>${htmlText(value)}</dd>`).join('')}</dl>` : `<p>${htmlText(s.empty)}</p>`}</section>`).join('')}<footer>${htmlText(t(report.historicalReview ? "Revisão administrativa: registo da visita" : report.historicalOrigin ? "Documento gerado pelo sistema Cristal Water. Os dados históricos da instalação correspondem à revisão identificada." : "Documento gerado pelo sistema Cristal Water. Os dados da instalação correspondem ao registo atual."))}</footer></main></body></html>`;
 }
 function renderPdf(report) {
   const t = translator(report.language);
@@ -192,7 +199,7 @@ function renderPdf(report) {
         const bottom = doc.page.margins.bottom;
         doc.page.margins.bottom = 0;
         doc.font(fonts.regular).fontSize(8).fillColor("#526476").text(
-          "Cristal Water | " + t(report.historicalReview ? 'Revisão administrativa: registo da visita' : "Dados da instalação: registo atual") + " | " + (page + 1) + "/" + range.count,
+          "Cristal Water | " + t(reportFooter(report)) + " | " + (page + 1) + "/" + range.count,
           48, doc.page.height - 35, { width, align: "center", lineBreak: false });
         doc.page.margins.bottom = bottom;
       }

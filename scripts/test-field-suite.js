@@ -175,6 +175,7 @@ scripts.push('test-field-repair-revenue.js');
 scripts.push('test-field-repair-execution.js','test-field-repair-execution-revenue.js');
 scripts.push('test-field-repair-execution-command.js',
   'test-field-repair-no-materials.js','test-field-repair-execution-ui.js');
+scripts.push('test-field-visit-report-origin.js');
 function run(script){return new Promise(resolve=>{
  const output=fs.createWriteStream(path.join(evidence,script+'.log'));
  const child=spawn(process.execPath,[path.join(__dirname,script)],{cwd:root,env:process.env,stdio:['ignore','pipe','pipe']});

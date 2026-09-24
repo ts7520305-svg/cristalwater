@@ -29,6 +29,8 @@
     owner='ADMIN:'+userId;
   }catch(_){invalid=true;}
   const slot=clientId=>owner+':'+clientId,draftKey=clientId=>'cwReportSettingsDraft:v1:'+slot(clientId);
+  const reviewOrigin=document.createElement('button');reviewOrigin.type='button';reviewOrigin.id='reviewReportOrigin';reviewOrigin.textContent='Confirmar dados históricos';el('openHistoryReport').after(reviewOrigin);
+  reviewOrigin.addEventListener('click',()=>{const visit=el('visitId').value.trim(),type=el('visitType').value;if(!active()||busy||previewBusy||!/^[1-9]\d{0,9}$/.test(visit)||!id(Number(visit))||!['REGULAR','EXTRA'].includes(type))return;location.assign('/visit-report-review.html?'+new URLSearchParams({visitType:type,visitId:visit}));});
   const intent=record=>({clientId:record.clientId,expectedVersion:record.base.version,setting:record.setting,...(Object.hasOwn(record,'preferredLanguage')?{preferredLanguage:record.preferredLanguage}:{})});
   const envelope=record=>({v:1,scope:'CLIENT_REPORT_SETTINGS',resourceId:record.clientId,payload:intent(record)});
   function note(state,message){status.dataset.state=state;status.textContent=message;status.setAttribute('role',['error','session','conflict'].includes(state)?'alert':'status');}
@@ -50,6 +52,7 @@
     el('prepareSettings').disabled=invalid||busy||!view?.revision;
     const ready=!!view?.base&&!invalid&&!busy&&!view.pending&&!view.conflict&&!view.needsRead&&matches(view.base);
     const visit=el('visitId').value.trim(),validVisit=/^[1-9]\d{0,9}$/.test(visit)&&id(Number(visit));
+    reviewOrigin.disabled=invalid||busy||previewBusy||!validVisit||!['REGULAR','EXTRA'].includes(el('visitType').value);
     el('openHistoryReport').disabled=el('openClientReport').disabled=el('openAdminReport').disabled=!ready||!validVisit||!['REGULAR','EXTRA'].includes(el('visitType').value)||!['pt','en','fr','es'].includes(el('reportLanguage').value)||previewBusy;
     el('visitId').disabled=el('visitType').disabled=el('reportLanguage').disabled=invalid;
     el('previewNotice').textContent=ready?'A pré-visualização usa as opções guardadas deste cliente. A visita deve pertencer a este cliente.':'Carregue e confirme as opções guardadas. Guarde as alterações ou descarte o rascunho antes de pré-visualizar.';
