@@ -41,3 +41,7 @@ Os pedidos conservam rascunho, confirmação explícita, UUID e recuperação pe
 ## Continuação
 
 Prosseguir os tempos históricos e as suas parcelas de trabalho com a mesma separação de comprovativos. Mantêm-se os restantes critérios de custos/receitas completos, documentos, volume, operação prolongada e dependências de produção.
+
+## Aprovação nativa
+
+Código `ccecaafc76d6c53f5f81964ec3de15bd4cc4b468`, árvore `1bb1d385b42c13a140da3a111b40b8e6d119b6dd`. [CI 36034151220](https://github.com/ts7520305-svg/cristalwater/actions/runs/36034151220), job `107749961198`, aprovado de 2026-09-24T17:25:06Z a 2026-09-24T17:58:46Z (33m40s): 17 etapas, 227/227 grupos previstos distintos, sem falhas, faltas, entradas inesperadas ou duplicações; 531 unitários/76 ficheiros, quatro técnicos, navegador geral, sintaxe 619/217/62 e 39 migrações. Restauro PostgreSQL 16 de 127 tabelas/46 ficheiros, com linhas e hashes iguais. [Evidência](evidence/20260924_task324_ci.json). Cache v139, sem novas migrações/tabelas/dependências. A aprovação refere-se a este código e árvore; alterações posteriores têm validação própria.
