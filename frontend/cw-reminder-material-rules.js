@@ -78,6 +78,7 @@
     await response(p.original,p.original?.envelope,p.original?.event?.owner,p.reminderId,hash);
     const original=p.original.event.preview.items;
     if(!p.original.applied||p.original.event.id!==p.selection.recordId||await hash(p.origin)!==await hash(p.original.event.preview.origin)||!Array.isArray(p.previousReturns)||p.previousReturns.some((v,n,a)=>!fields(v,['id','hash'])||!uuid(v.id)||!sha(v.hash)||a.findIndex(x=>x.id===v.id)!==n)||p.selection.action==='REVERSE'&&!p.previousReturns.length||!Array.isArray(p.returnedBefore)||p.returnedBefore.length!==original.length||p.returnedBefore.some((v,n)=>!fields(v,['itemIndex','quantity'])||v.itemIndex!==n+1||quantity(v.quantity)===null||decimal(quantity(v.quantity))!==v.quantity||quantity(v.quantity)>quantity(original[n].quantity))||!Array.isArray(p.items)||!p.items.length||p.items.length>original.length||!Array.isArray(p.affectedCosts)||p.affectedCosts.some((c,n,a)=>!fields(c,['allocationId','expenseId','amountCents','allocationHash'])||![c.allocationId,c.expenseId,c.amountCents].every(positive)||!sha(c.allocationHash)||n>0&&c.allocationId<=a[n-1].allocationId))fail();
+    if(p.previousHash!==(p.previousReturns.at(-1)?.hash||p.original.eventHash)||!p.previousReturns.length&&p.returnedBefore.some(v=>quantity(v.quantity)!==0n)||p.previousReturns.length&&!p.returnedBefore.some(v=>quantity(v.quantity)>0n))fail();
     const remaining=original.map((i,n)=>quantity(i.quantity)-quantity(p.returnedBefore[n].quantity)),expected=p.selection.action==='RETURN'?p.selection.items:original.filter((_,n)=>remaining[n]>0n).map(i=>({itemIndex:i.itemIndex,quantity:decimal(remaining[i.itemIndex-1])}));
     if(p.items.length!==expected.length)fail();
     for(const [n,row]of p.items.entries()){
@@ -89,7 +90,8 @@
   async function net(original,returns,hash){
     await response(original,original?.envelope,original?.event?.owner,original?.event?.reminderId,hash);if(!original.applied||original.event.preview.selection.action!=='CONSUME'||!Array.isArray(returns))fail();const previous=[];let head=original.eventHash;
     for(const value of returns){await response(value,value?.envelope,value?.event?.owner,original.event.reminderId,hash);const p=value.event?.preview;if(!value.applied||p?.selection.action!=='RETURN'||await hash(p.original)!==await hash(original)||p.previousHash!==head||await hash(p.previousReturns)!==await hash(returnRefs(previous))||await hash(p.returnedBefore)!==await hash(quantities(original,previous)))fail();previous.push(value);head=value.eventHash;}
-    return {returned:quantities(original,returns),headHash:head,movements:[...original.event.movements,...returns.flatMap(v=>v.event.movements)]};
+    const movements=[...original.event.movements,...returns.flatMap(v=>v.event.movements)];if(new Set(movements.map(m=>m.id)).size!==movements.length)fail();
+    return {returned:quantities(original,returns),headHash:head,movements};
   }
   async function source(s, target, hash) {
     if (![8,11].includes(s?.version) || s.kind !== 'MATERIAL' || s.materialBasis !== basis || !target || target.type !== 'MAINTENANCE_REMINDER' || await hash(s.service) !== await hash(Object.fromEntries(targetFields.map(k => [k,target[k]])))) fail();
