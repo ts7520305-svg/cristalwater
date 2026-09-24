@@ -32,3 +32,8 @@ Base de trabalho: `81d543938f95aa68fb253d4cb7847fd5d91dc1b7`. Publicação apena
 ## Publicação
 
 Publicada em `4325bf01e173b3f94df42f2281aebf3de5f7f0c5`, árvore `a7c9a7a0548ad718383c90d2b795dd55f6a96849`, idêntica à validada localmente. [CI 36048130043](https://github.com/ts7520305-svg/cristalwater/actions/runs/36048130043) em execução; aprovação completa e restauro por confirmar.
+
+
+## Resultado do CI inicial
+
+O CI `36048130043`, job `107796650083`, terminou com 231/232 grupos distintos aprovados. Apenas `test-field-extra-execution.js` falhou: uma visita ambígua criada no ensaio histórico anterior mantinha a cobrança EXTRA por omissão e bloqueava corretamente a consulta comercial global. A TASK337 torna essa fixture explicitamente sem cobrança e conserva o bloqueio e a divergência histórica. A sequência dos dois ensaios passou integralmente em API/Chromium, também depois da integração da TASK336. O seletor do editor corrigido nesta TASK335 passou no CI. Restauro omitido nessa execução; [evidência inicial](evidence/20260924_task335_initial_failure.json). Novo código e CI constam da [TASK337](FINANCIAL_DOCUMENT_PDF_RELIABILITY_20260924.md).

@@ -32,4 +32,7 @@ O runner passa de 233 para 234 grupos. As provas locais constam de [evidence/202
 
 ## Publicação
 
-Base inicial `93695172b5611154046423ef75bc5261fd9e79c1`; integrada depois a confirmação histórica TASK336 de `c807600878f5a87dc5f0e4a366a4bb67dece7765`, conservando todos os ficheiros e testes. Publicação em preparação na branch `work/field-readiness-20260915-simulation`. Sem merge, deploy ou contactos reais.
+Base inicial `93695172b5611154046423ef75bc5261fd9e79c1`; integrada depois a confirmação histórica TASK336 de `c807600878f5a87dc5f0e4a366a4bb67dece7765`, conservando todos os ficheiros e testes. Publicação na branch `work/field-readiness-20260915-simulation`. Publicada em `dea120f545d638bd83597bdb5815b41900163029`, árvore `0f91183d159862a19d6f8b62b86cdcd7491e5a8a`, idêntica à preparada localmente. [CI 36051791089](https://github.com/ts7520305-svg/cristalwater/actions/runs/36051791089) em execução; os 234 grupos e o restauro nativo ainda não estão aprovados. Sem merge, deploy ou contactos reais.
+
+
+O CI TASK335 terminou entretanto com 231/232 grupos aprovados, falhando apenas no mesmo cenário de extras contaminado pela visita histórica de teste. A correção está incluída nesta TASK337 e passou na sequência integrada local. O seletor do editor passou no CI TASK335. Restauro omitido nessa execução anterior; [evidência](evidence/20260924_task335_initial_failure.json).

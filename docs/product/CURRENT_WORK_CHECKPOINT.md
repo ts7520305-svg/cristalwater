@@ -1,11 +1,13 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 24/09/2026, TASK337 em publicação
+## Retoma atual — 24/09/2026, TASK337 publicada
+
+- Publicada em `dea120f545d638bd83597bdb5815b41900163029`, árvore `0f91183d159862a19d6f8b62b86cdcd7491e5a8a`, idêntica à preparada localmente. [CI 36051791089](https://github.com/ts7520305-svg/cristalwater/actions/runs/36051791089) em execução; os 234 grupos e o restauro nativo ainda não estão aprovados.
 
 - PDFs financeiros internos e mensal guardado com Unicode, paginação, referência em todas as páginas, resposta completa, cache privada e originais conservados. Orçamento sem custos/margens/notas internas; documentos financeiros explicitamente não fiscais. 592 unitários/81 ficheiros, quatro técnicos, sintaxe 626/220/62 e oito grupos API/Chromium aprovados; sete páginas PDF revistas. Runner com 234 grupos. Concorrência da geração mensal incompleta no PGlite (`P2028`); confirmar no CI PostgreSQL nativo. [Relatório](FINANCIAL_DOCUMENT_PDF_RELIABILITY_20260924.md), [inventário finito](PDF_INVENTORY_20260924.md) e [evidência local](evidence/20260924_task337_local.json).
 - TASK334 terminou com 229/231 grupos aprovados, restauro omitido. O seletor foi corrigido na TASK335; a visita ambígua de teste passa a ser explicitamente sem cobrança na TASK337, conservando a divergência e o bloqueio comercial. A sequência inspeção histórica → execução de extras passou integralmente. [Evidência inicial](evidence/20260924_task334_initial_failure.json).
 - Executor local de navegador: usar `/tmp/cw309-runtime/qa336-normal-browser.mjs` com `CW_QA_ROOT` desta cópia. A opção antiga `--single-process` partilhava o armazenamento de contextos e falsificava a troca de contas; remover apenas essa opção do executor temporário resolveu o ensaio completo sem alterar os testes.
-- Próxima retoma: verificar CI TASK337 e TASK335, incluindo restauro; depois inventário de HTML/impressão e critérios históricos ainda abertos. A aprovação completa do novo código ainda não está confirmada.
+- Próxima retoma: verificar CI TASK337 `36051791089` e conservar resultado TASK336 `36048931532`; depois inventário de HTML/impressão e critérios históricos ainda abertos. TASK335 terminou com 231/232 grupos aprovados, falhando apenas no cenário de extras corrigido aqui; restauro omitido. [Evidência](evidence/20260924_task335_initial_failure.json). A aprovação completa do novo código ainda não está confirmada.
 
 - Integrada a TASK336 publicada entretanto (`c807600878f5a87dc5f0e4a366a4bb67dece7765`), preservando confirmação histórica, fontes, frontend e testes. 592 unitários, quatro técnicos e sintaxe 626/220/62 aprovados após a integração; documentos financeiros, inspeção histórica e execução de extras repetidos integralmente em API/navegador após a integração.
 
