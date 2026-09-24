@@ -157,6 +157,7 @@ scripts.push('test-field-reminder-visits.js');
 scripts.push('test-field-reminder-visit-resources.js');
 scripts.push('test-field-reminder-visit-costs.js');
 scripts.push('test-field-reminder-visit-intervals.js');
+scripts.push('test-field-reminder-intervals.js');
 scripts.push('test-field-financial-revenue-coverage.js');
 scripts.push('test-field-monthly-revenue.js','test-field-monthly-revenue-ui.js');
 scripts.push('test-field-maintenance-revenue.js');

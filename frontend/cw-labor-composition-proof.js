@@ -54,7 +54,7 @@
       check(s?.kind==='LABOR'&&s.expenseAmountCents===original.expense.amountCents&&equal(s.basis,original.laborBasis)&&s.service?.id===p.targetId&&s.service.clientId===p.clientId&&iso(s.service.endAt)&&s.service.endAt.slice(0,7)===p.monthRef);
       check(equal(s.laborDistribution,original.laborDistribution)&&c.laborPart===(original.laborDistribution?.partIndex));
       if(target)check(c.targetHash===target.hash&&p.clientId===target.clientId&&p.targetType===target.type&&p.targetId===target.id);
-      let start=s.service.startAt,end=s.service.endAt,tech=s.service.technicianId;
+      let start=s.service.startAt,end=s.service.endAt,tech=s.service.technicianId,measured=null;
       if(p.targetType==='REPAIR') {
         const w=s.workInterval,t=w?.snapshot;
         check(s.version===(original.laborDistribution?5:3)&&s.workBasis==='EXPLICIT_AUTHENTICATED_REPAIR_WORK_INTERVAL'&&id(w?.id)&&w.id===p.choice.workIntervalId&&c.workIntervalId===w.id&&w.fingerprint===await hash(t)&&t?.repairId===p.targetId&&t.clientId===p.clientId);
@@ -62,9 +62,9 @@
       }else if(p.targetType==='MAINTENANCE_REMINDER') {
         const t=await window.CWReminderLaborRules.source(s,target?.snapshot||s.service,p.choice.workIntervalId,original.laborBasis,hash);
         check(c.workIntervalId===s.workInterval.id&&c.targetHash===t.sourceHash);
-        start=t.startedAt;end=t.endedAt;tech=t.technicianId;
+        start=t.startedAt;end=t.endedAt;tech=t.technicianId;measured=BigInt(t.durationSeconds)*1000000n;
       }else check(s.version===(original.laborDistribution?4:1)&&c.workIntervalId===undefined&&p.choice.workIntervalId===undefined);
-      check(iso(start)&&iso(end)&&tech===p.basisSnapshot.technicianId&&Date.parse(end)>Date.parse(start)&&BigInt(Date.parse(end)-Date.parse(start))*1000n===q&&Date.parse(start)>=Date.parse(p.basisSnapshot.periodStart+'T00:00:00Z')&&Date.parse(end)<=Date.parse(p.basisSnapshot.periodEnd+'T00:00:00Z')+86400000);
+      check(iso(start)&&iso(end)&&tech===p.basisSnapshot.technicianId&&Date.parse(end)>Date.parse(start)&&(measured??BigInt(Date.parse(end)-Date.parse(start))*1000n)===q&&Date.parse(start)>=Date.parse(p.basisSnapshot.periodStart+'T00:00:00Z')&&Date.parse(end)<=Date.parse(p.basisSnapshot.periodEnd+'T00:00:00Z')+86400000);
       check(c.valuationKey===await hash({kind:'LABOR',targetType:p.targetType,id:p.targetId,...(['REPAIR','MAINTENANCE_REMINDER'].includes(p.targetType)?{workIntervalId:p.choice.workIntervalId}:{})}));
       check(k&&k.quantity===c.quantity&&k.quantityUnit==='SECOND'&&k.method==='CONFIRMED_EXPENSE_PAID_TIME'&&k.baseAmountCents===componentAmount(original)&&base===BigInt(p.basisSnapshot.paidMinutes)*60000000n&&before!==null&&before>=0n&&q<=base-before&&Number.isSafeInteger(k.poolAmountBeforeCents)&&k.poolAmountBeforeCents>=0&&k.poolAmountBeforeCents<=k.baseAmountCents&&k.measuredQuantityBefore==='0');
       const final=q===base-before,amount=final?BigInt(k.baseAmountCents-k.poolAmountBeforeCents):(2n*q*BigInt(k.baseAmountCents)+base)/(2n*base);

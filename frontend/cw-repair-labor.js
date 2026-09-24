@@ -36,7 +36,7 @@
     function selection() { return rows.find(r => r.id === Number(el('repairWorkInterval').value) && r.eligible) || null; }
     function describe() {
       const row = selection(), s = row?.workInterval.snapshot;
-      el('repairWorkSelection').textContent = s ? (row.technicianName || s.technicianName) + ' · ' + formatTime(s.startedAt) + ' a ' + formatTime(s.endedAt) + ' · ' + s.durationSeconds + ' segundos declarados e confirmados. ' + s.reason : '';
+      el('repairWorkSelection').textContent = s ? (row.technicianName || s.technicianName) + ' · ' + (s.workIntervals ? window.CWReminderLaborRules.describe(s) : formatTime(s.startedAt) + ' a ' + formatTime(s.endedAt)) + ' · ' + s.durationSeconds + ' segundos declarados e confirmados. ' + s.reason : '';
     }
     async function load() {
       if (!needed() || !active() || !host.context().canWrite) return;
@@ -60,7 +60,7 @@
         if (!active() || rev !== revision || stamp !== signature()) return;
         rows = v.rows;
         const blank = node(el('repairWorkInterval'),'option','Escolha o intervalo confirmado'); blank.value = '';
-        for (const row of rows) { const s = row.workInterval?.snapshot; const option = node(el('repairWorkInterval'),'option','#' + row.id + ' · ' + (row.technicianName || (typeof s?.technicianName === 'string' ? s.technicianName : 'Técnico por rever')) + ' · ' + formatTime(s?.startedAt) + (row.eligible ? '' : ' · indisponível')); option.value = String(row.id); option.disabled = !row.eligible; }
+        for (const row of rows) { const s = row.workInterval?.snapshot; const option = node(el('repairWorkInterval'),'option','#' + row.id + ' · ' + (row.technicianName || (typeof s?.technicianName === 'string' ? s.technicianName : 'Técnico por rever')) + ' · ' + (s?.workIntervals ? s.workIntervals.length+' intervalos · '+s.durationSeconds+' segundos efetivos' : formatTime(s?.startedAt)) + (row.eligible ? '' : ' · indisponível')); option.value = String(row.id); option.disabled = !row.eligible; }
         if (rows.some(r => r.eligible && String(r.id) === wanted)) el('repairWorkInterval').value = wanted;
         el('repairWorkStatus').textContent = rows.some(r => r.eligible) ? 'Escolha o intervalo e calcule o custo atual. Os limites de tempo e valor são partilhados com as visitas, reparações e lembretes desta despesa.' : 'Sem intervalos elegíveis para este técnico e período. Consulte os tempos declarados do serviço e a base da despesa.';
         describe();

@@ -6,7 +6,7 @@ const require=createRequire(import.meta.url),r=require('../src/services/fieldWri
 const clone=v=>JSON.parse(JSON.stringify(v)),sha='a'.repeat(64),uuid='d145d52b-922a-40eb-936f-9b8bc0a0ee11',owner='ADMIN:1';
 const data={technicianId:3,materials:{mode:'DECLARED',items:[{productName:'CLORO',unit:'KG',quantity:'0.25'}]},workTime:{startedAt:'2000-01-01T10:00:00.000Z',endedAt:'2000-01-01T11:00:00.000Z'}};
 function preview(){const source={id:1,title:'Serviço',description:null,category:'POOL_SERVICE_REMINDER',status:'DONE',completedAt:'2000-01-01T12:00:00.000Z',clientId:2,poolId:4,technicianId:null},target={type:'MAINTENANCE_REMINDER',id:1,clientId:2,poolId:4,status:'CONFIRMED',startAt:null,endAt:source.completedAt,executionBasis:'CONFIRMED_MAINTENANCE_EXECUTION_AND_DECISION',decisionId:5,decisionFingerprint:sha,executionFingerprint:sha,originVisitType:null,originVisitId:null};const p={schema:1,basis:rules.basis,reminderId:1,action:'DECLARE',recordId:null,recordHash:null,origin:{reminderId:1,clientId:2,poolId:4,technicianId:3},contextHash:sha,source,sourceHash:r.hash(source),target,targetHash:r.hash(target),proposed:clone(data),durationSeconds:3600};return {available:true,...p,hash:r.hash(p)};}
-function result(p=preview()){const body={requestId:uuid,action:p.action,recordId:p.recordId,data:p.proposed,previewHash:p.hash,reason:'Recursos conferidos',confirmed:true},request=r.context({id:1,role:'ADMIN'},rules.scope,1,uuid,(({requestId,...v})=>v)(body)),event={schema:1,basis:rules.basis,id:uuid,owner,reminderId:1,recordId:9,reason:body.reason,createdAt:'2000-01-02T00:00:00.000Z',preview:p};return {body,value:{ok:true,applied:true,envelope:body,event,eventHash:r.hash(event),receipt:{...request,confirmedAt:event.createdAt}}};}
+function result(p=preview()){const body={requestId:uuid,action:p.action,recordId:p.recordId,data:p.proposed,previewHash:p.hash,reason:'Recursos conferidos',confirmed:true},request=r.context({id:1,role:'ADMIN'},rules.scope,1,uuid,(({requestId,...v})=>v)(body)),event={schema:p.schema,basis:rules.basis,id:uuid,owner,reminderId:1,recordId:9,reason:body.reason,createdAt:'2000-01-02T00:00:00.000Z',preview:p};return {body,value:{ok:true,applied:true,envelope:body,event,eventHash:r.hash(event),receipt:{...request,confirmedAt:event.createdAt}}};}
 describe('independent reminder resources',()=>{
   it('uses the same canonical material and work rules in Node and the browser',()=>{
     const c=vm.createContext({});for(const name of ['cw-maintenance-material-rules','cw-equipment-material-review-rules','cw-reminder-resource-rules'])vm.runInContext(fs.readFileSync(new URL('../frontend/'+name+'.js',import.meta.url),'utf8'),c);
@@ -31,4 +31,24 @@ describe('independent reminder resources',()=>{
   });
   it('retains refusal receipts without accepting a fabricated declaration',async()=>{const {body,value}=result();const refusal={ok:true,applied:false,envelope:body,code:'PREVIEW_CHANGED',message:'Reveja a origem.',receipt:value.receipt};await expect(rules.response(refusal,body,owner,1,r.hash)).resolves.toBe(refusal);await expect(rules.response({...refusal,event:value.event},body,owner,1,r.hash)).rejects.toThrow();});
   it('requires an explicit preserved record for voiding, without a fabricated current source',async()=>{const original=preview(),p={...original,action:'VOID',recordId:9,recordHash:sha,source:null,sourceHash:null,target:null,targetHash:null,proposed:null,durationSeconds:null};p.hash=r.hash(rules.facts(p));const {body,value}=result(p);await expect(rules.response(value,body,owner,1,r.hash)).resolves.toBe(value);p.recordHash=null;p.hash=r.hash(rules.facts(p));await expect(rules.preview(p,r.hash)).rejects.toThrow();});
+  it('sums separated intervals and preserves one-second touching boundaries',async()=>{
+    const p=preview();p.schema=2;p.proposed={technicianId:3,materials:null,workIntervals:[{startedAt:'2000-01-01T10:00:00.000Z',endedAt:'2000-01-01T10:00:01.000Z'},{startedAt:'2000-01-01T11:00:00.000Z',endedAt:'2000-01-01T11:00:02.000Z'}]};p.durationSeconds=3;p.hash=r.hash(rules.facts(p));
+    const {body,value}=result(p);await expect(rules.response(value,body,owner,1,r.hash)).resolves.toBe(value);expect(rules.duration(p.proposed)).toBe(3);
+    const continuous={...p.proposed,workIntervals:[p.proposed.workIntervals[0],{startedAt:p.proposed.workIntervals[0].endedAt,endedAt:'2000-01-01T10:00:02.000Z'}]};expect(rules.duration(rules.input(continuous))).toBe(2);
+  });
+  it('limits arrays to 20 ordered intervals without accepting empty, duplicate or mixed shapes',()=>{
+    const intervals=Array.from({length:20},(_,i)=>({startedAt:new Date(Date.UTC(2000,0,1,10,0,i*2)).toISOString(),endedAt:new Date(Date.UTC(2000,0,1,10,0,i*2+1)).toISOString()}));
+    const d={technicianId:3,materials:null,workIntervals:intervals};expect(rules.input(d)).toEqual(d);
+    for(const invalid of [{...d,workIntervals:[]},{...d,workIntervals:[...intervals,intervals[0]]},{...d,workIntervals:[intervals[1],intervals[0]]},{...d,workIntervals:[intervals[0],intervals[0]]},{...d,workTime:data.workTime}])expect(()=>rules.input(invalid)).toThrow();
+  });
+  it('rejects a rehashed multi preview that charges pauses, changes schema or exceeds completion',async()=>{
+    const p=preview();p.schema=2;p.proposed={technicianId:3,materials:null,workIntervals:[data.workTime,{startedAt:'2000-01-01T11:30:00.000Z',endedAt:'2000-01-01T12:00:00.000Z'}]};p.durationSeconds=5400;
+    for(const change of [v=>v.durationSeconds=7200,v=>v.schema=1,v=>v.proposed.workIntervals[1].endedAt='2000-01-01T12:00:01.000Z']){const v=clone(p);change(v);v.hash=r.hash(rules.facts(v));await expect(rules.preview(v,r.hash)).rejects.toThrow();}
+  });
+
+  it('excludes all spans of the same identity without concealing a different overlapping service',async()=>{
+    const visit=(id,start,end)=>({id,type:'REGULAR',technicianId:1,status:'DONE',startAt:new Date(start*1000),endAt:new Date(end*1000)}),own=[visit(1,0,100),visit(1,20,90)],other=visit(2,30,80),requested=visit(1,40,50),db={serviceVisit:{findMany:async()=>[...own,other]},extraVisit:{findMany:async()=>[]},repairWorkInterval:{findMany:async()=>[]},reminderResourceDeclaration:{findMany:async()=>[]}};
+    const {conflicts}=require('../src/services/recordedWorkTimeService');expect(await conflicts(db,[requested])).toEqual(new Set(['REGULAR:1']));db.serviceVisit.findMany=async()=>own;expect(await conflicts(db,[requested])).toEqual(new Set());
+  });
+
 });

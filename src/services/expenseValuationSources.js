@@ -115,12 +115,12 @@ function build(data, expense, selection) {
   if (!Number.isFinite(start) || start >= laborEnd) add('O serviço precisa de início e fim válidos para apurar o tempo.');
   const from = Date.parse(basis.periodStart + 'T00:00:00Z'), until = Date.parse(basis.periodEnd + 'T00:00:00Z') + 86400000;
   if (start < from || laborEnd > until) add('O intervalo não está inteiramente dentro do período pago confirmado.');
-  units = Number.isSafeInteger(laborEnd - start) && laborEnd > start ? BigInt(laborEnd - start) * 1000n : null;
+  units = reminder ? Number.isSafeInteger(work.snapshot.durationSeconds)&&work.snapshot.durationSeconds>0 ? BigInt(work.snapshot.durationSeconds)*scale : null : Number.isSafeInteger(laborEnd - start) && laborEnd > start ? BigInt(laborEnd - start) * 1000n : null;
   totalQuantity = Number.isSafeInteger(basis.paidMinutes) && basis.paidMinutes > 0 ? BigInt(basis.paidMinutes) * 60n * scale : null;
   if (!totalQuantity || !units) add('Confirme o tempo pago e o tempo do serviço.');
   key = r.hash({ kind, targetType, id, ...(independent ? { workIntervalId: work.id } : {}) }); totalCents = share ? share.part.amountCents : expense.amountCents;
-  snapshot = { version: reminder ? share ? 7 : 6 : share ? repair ? 5 : 4 : repair ? 3 : 1, kind, service, basis, expenseAmountCents: expense.amountCents, ...(share?{laborDistribution:share.proof}:{}), ...(independent ? { workBasis: reminder ? reminderWork.basis : repairWork.basis, workInterval: { id: work.id, fingerprint: work.fingerprint, snapshot: work.snapshot } } : {}) };
-  return { valid: !errors.length, errors, key, kind, monthRef: service.endAt.slice(0, 7), units, totalQuantity, totalCents, snapshot, hash: r.hash(snapshot), label: (independent ? 'Intervalo declarado #' + work.id + ' · ' + work.technicianName + ' · ' + work.startedAt + ' a ' + work.endedAt + ' · ' : '') + 'Tempo do técnico #' + technicianId + ' · ' + basis.periodStart + ' a ' + basis.periodEnd, unit: 'SECOND', visit, method: 'CONFIRMED_EXPENSE_PAID_TIME', measurement: measurementKey(targetType, id) };
+  snapshot = { version: reminder ? work.snapshot.version===2 ? share ? 10 : 9 : share ? 7 : 6 : share ? repair ? 5 : 4 : repair ? 3 : 1, kind, service, basis, expenseAmountCents: expense.amountCents, ...(share?{laborDistribution:share.proof}:{}), ...(independent ? { workBasis: reminder ? reminderWork.basis : repairWork.basis, workInterval: { id: work.id, fingerprint: work.fingerprint, snapshot: work.snapshot } } : {}) };
+  return { valid: !errors.length, errors, key, kind, monthRef: service.endAt.slice(0, 7), units, totalQuantity, totalCents, snapshot, hash: r.hash(snapshot), label: (independent ? 'Trabalho declarado #' + work.id + ' · ' + work.technicianName + ' · ' + (reminder?reminderWork.rules.describe(work.snapshot):work.startedAt+' a '+work.endedAt) + ' · ' : '') + 'Tempo do técnico #' + technicianId + ' · ' + basis.periodStart + ' a ' + basis.periodEnd, unit: 'SECOND', visit, method: 'CONFIRMED_EXPENSE_PAID_TIME', measurement: measurementKey(targetType, id) };
 }
 function totals(rows) {
   let units = 0n, cents = 0;

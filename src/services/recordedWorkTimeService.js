@@ -26,8 +26,9 @@ function index(rows) {
     rows.sort((a, b) => a.start - b.start);
     let first = null, second = null;
     for (const row of rows) {
-      if (!first || row.end > first.end) { second = first; first = row; }
-      else if (!second || row.end > second.end) second = row;
+      const distinct = new Map();
+      for (const item of [first, second, row].filter(Boolean)) if (!distinct.has(item.key) || item.end > distinct.get(item.key).end) distinct.set(item.key, item);
+      [first, second] = [...distinct.values()].sort((a,b) => b.end-a.end);
       row.first = first; row.second = second;
     }
   }
@@ -54,13 +55,23 @@ async function conflicts(db, requested) {
     db.serviceVisit.findMany({ where: { OR: visitWindows }, select }),
     db.extraVisit.findMany({ where: { OR: visitWindows }, select }),
     db.repairWorkInterval.findMany({ where: { voidedAt: null, OR: repairWindows }, select: { id: true, technicianId: true, startedAt: true, endedAt: true } }),
-    db.reminderResourceDeclaration.findMany({ where: { voidedAt: null, OR: repairWindows }, select: { id: true, technicianId: true, startedAt: true, endedAt: true } })
+    db.reminderResourceDeclaration.findMany({ where: { voidedAt: null, OR: repairWindows } })
   ]);
+  // Bounds serve the indexed query only. Verified declarations contribute each
+  // actual interval; damaged evidence conservatively reserves the whole span.
+  const multiple = reminders.filter(row => row.snapshot?.preview?.schema === 2);
+  const receipts = multiple.length ? await db.fieldWriteRequest.findMany({ where: { scope:'REMINDER_RESOURCES',resourceId:{in:[...new Set(multiple.map(row=>row.reminderId))]} } }) : [];
+  const reminderSpans = (await Promise.all(reminders.map(async row => {
+    if (row.snapshot?.preview?.schema === 2 && await require('./reminderResourceService').intact(row,receipts)) {
+      return require('../../frontend/cw-reminder-resource-rules').intervals(row.snapshot.preview.proposed).map(w => span({...row,type:'REMINDER_RESOURCE',startAt:new Date(w.startedAt),endAt:new Date(w.endedAt)}));
+    }
+    return [span({...row,type:'REMINDER_RESOURCE',startAt:row.startedAt,endAt:row.endedAt})];
+  }))).flat();
   const candidates = [
     ...regular.map(row => span({ ...row, type: 'REGULAR' }, true)),
     ...extra.map(row => span({ ...row, type: 'EXTRA' }, true)),
     ...repairs.map(row => span({ ...row, type: 'REPAIR_INTERVAL', startAt: row.startedAt, endAt: row.endedAt })),
-    ...reminders.map(row => span({ ...row, type: 'REMINDER_RESOURCE', startAt: row.startedAt, endAt: row.endedAt }))
+    ...reminderSpans
   ].filter(Boolean);
   const groups = index(candidates);
   return new Set(spans.filter(row => intersects(groups, row)).map(row => row.key));

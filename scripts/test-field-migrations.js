@@ -205,6 +205,18 @@ async function dbRejects(sql, expected) {
   await require('./fixtures/reminder-resources-migration')({prisma,cli,dbRejects});
   await require('./fixtures/reminder-labor-migration')({prisma,cli,dbRejects,repairLaborData});
   await require('./fixtures/reminder-material-migration')({prisma,cli,dbRejects,materialData});
+  // Preserve a real legacy reminder allocation while extending the allowed proof formats.
+  {
+    const reminderId=123,workId=456,expenseId=repairLaborData.expenseId,clientId=repairLaborData.clientId,technicianId=789;
+    const source={version:6,kind:'LABOR',workBasis:'CONFIRMED_INDEPENDENT_REMINDER_WORK',service:{type:'MAINTENANCE_REMINDER',id:reminderId,clientId},basis:{id:1,expenseId,technicianId},workInterval:{id:workId,fingerprint:'a'.repeat(64),snapshot:{version:1,basis:'CONFIRMED_INDEPENDENT_REMINDER_WORK',reminderId,clientId,technicianId,durationSeconds:60,declaration:{applied:true,event:{recordId:workId,preview:{action:'DECLARE'}}}}}};
+    const data={...repairLaborData,targetType:'MAINTENANCE_REMINDER',repairId:null,serviceReminderId:reminderId,quantity:'60',activeKey:'migration-reminder-intervals',activeMeasurementKey:'LABOR:MAINTENANCE_REMINDER:'+reminderId+':INTERVAL:'+workId,valuationSnapshot:{source,calculation:{retained:true}}},row=await prisma.expenseAllocation.create({data});
+    const tables=['ReminderResourceDeclaration','FieldWriteRequest','ExpenseAllocation','CompanyExpense','ExpensePayment','ExpenseEvent','ExpenseLaborDistribution','LaborCostBasis','LaborCostValuation','LaborCostValuationPart'],snapshot=()=>Promise.all(tables.map(t=>prisma.$queryRawUnsafe('SELECT to_jsonb(a) AS row FROM "'+t+'" a ORDER BY id'))),before=await snapshot();
+    cli(['db','execute','--file','prisma/migrations/20260924150000_reminder_multiple_intervals/migration.sql','--schema','prisma/schema.prisma']);assert.deepEqual(await snapshot(),before);assert.deepEqual(await prisma.expenseAllocation.findUniqueOrThrow({where:{id:row.id}}),row);
+    const times=[{startedAt:'2008-07-11T10:00:00.000Z',endedAt:'2008-07-11T10:00:20.000Z'},{startedAt:'2008-07-11T10:05:00.000Z',endedAt:'2008-07-11T10:05:40.000Z'}],next=JSON.parse(JSON.stringify(source));next.version=9;Object.assign(next.workInterval.snapshot,{version:2,workIntervals:times,startedAt:times[0].startedAt,endedAt:times[1].endedAt});Object.assign(next.workInterval.snapshot.declaration.event,{schema:2,preview:{schema:2,action:'DECLARE',durationSeconds:60,proposed:{workIntervals:times}}});
+    await prisma.expenseAllocation.update({where:{id:row.id},data:{valuationSnapshot:{source:next,calculation:{retained:true}}}});
+    for(const assignment of [`"valuationSnapshot"=jsonb_set("valuationSnapshot",'{source,version}','6')`,`"valuationSnapshot"=jsonb_set("valuationSnapshot",'{source,version}','10')`,`"valuationSnapshot"=jsonb_set("valuationSnapshot",'{source,workInterval,snapshot,version}','1')`,`"valuationSnapshot"=jsonb_set("valuationSnapshot",'{source,workInterval,snapshot,workIntervals}','[]')`,`"valuationSnapshot"="valuationSnapshot"#-'{source,workInterval,snapshot,workIntervals}'`,`"valuationSnapshot"=jsonb_set("valuationSnapshot",'{source,workInterval,snapshot,declaration,event,preview,durationSeconds}','340')`,`"valuationSnapshot"=jsonb_set("valuationSnapshot",'{source,workInterval,snapshot,declaration,event,schema}','1')`,`"quantity"=340`])await dbRejects(`UPDATE "ExpenseAllocation" SET ${assignment} WHERE id=${row.id}`,'23514');
+    const distribution={id:1,partIndex:2,fingerprint:'b'.repeat(64),snapshot:{version:1,basis:'CONFIRMED_EXPENSE_LABOR_DISTRIBUTION',expense:{id:expenseId}}};await prisma.expenseAllocation.update({where:{id:row.id},data:{valuationSnapshot:{source:{...next,version:10,laborDistribution:distribution},calculation:{retained:true}}}});await dbRejects(`UPDATE "ExpenseAllocation" SET "valuationSnapshot"=jsonb_set("valuationSnapshot",'{source,version}','7') WHERE id=${row.id}`,'23514');await prisma.expenseAllocation.delete({where:{id:row.id}});
+  }
   for(const a of [repairCost,previousMaterial,previousLabor,repairMaterial,repairLabor])Object.assign(a,{maintenanceCompletionId:null,serviceReminderId:null});
   await prisma.repair.delete({where:{id:historyRepair.id}});
   assert.deepEqual(await prisma.repairWorkInterval.findUniqueOrThrow({where:{id:retainedWork.id}}),retainedWork);
@@ -257,6 +269,6 @@ async function dbRejects(sql, expected) {
   assert.equal(await prisma.technicalProposalRequest.count(),0);
   assert.equal(await prisma.fieldWriteRequest.count(),0);
   const savedExtra=await prisma.extraVisit.findUniqueOrThrow({where:{id:oldExtra.id}});assert.equal(savedExtra.notes,'Migration preserved extra');assert.equal(savedExtra.execution,null);assert.equal(savedExtra.startAt,null);assert.equal(savedExtra.endAt,null);assert.equal(savedExtra.completionRequestId,null);assert.equal(await prisma.extraVisitPhoto.count(),0);await prisma.extraVisit.delete({where:{id:oldExtra.id}});
-  console.log('PASS thirty-eight additive migrations preserve previous data and match the current schema');
+  console.log('PASS thirty-nine additive migrations preserve previous data and match the current schema');
  }finally{fs.rmSync(temp,{recursive:true,force:true})}
 })().catch(error=>{console.error(error);process.exitCode=1}).finally(()=>prisma.$disconnect());

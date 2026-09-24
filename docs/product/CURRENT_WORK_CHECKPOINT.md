@@ -1,6 +1,12 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 24/09/2026, TASK317–318 aprovadas
+## Retoma atual — 24/09/2026, TASK319 em validação
+
+- Base `139367880c03caedae6e15e978a9b644adb1da10`, fecho aprovado TASK317–318. TASK319 implementada: até 20 intervalos nos lembretes independentes; duração/custo pela soma, pausas disponíveis para outras intervenções, provas antigas conservadas, fontes financeiras simples/distribuídas/compostas e anulação com os custos originais conservados. [REMINDER_INDEPENDENT_INTERVALS_20260924.md](REMINDER_INDEPENDENT_INTERVALS_20260924.md).
+- 501 unitários/72 ficheiros, quatro técnicos, sintaxe 616/215/62, novo grupo API/navegador e seis regressões aprovados localmente. Migração 39 estende duas restrições financeiras sem alterar linhas existentes; percurso de atualização anterior e esquema atual conferidos em QA local. Sem novas tabelas/dependências. 20 ficheiros, cache v134 e runner com 222 grupos.
+- Publicar este lote e conferir CI/restauro do commit exato; não declarar aprovação nativa antecipadamente. Durante o CI, prosseguir múltiplos intervalos próprios de equipamento em preparação isolada, preservando as provas e limites comuns.
+
+## Aprovação anterior — TASK317–318
 
 - TASK317–318 aprovadas em conjunto: custos próprios dos lembretes associados e até 20 intervalos de trabalho, com pausas excluídas, saldos comuns com equipamento, comprovativos antigos preservados, revisão, anulação e recuperação. [Custos](REMINDER_VISIT_COSTS_20260924.md) e [intervalos](REMINDER_VISIT_INTERVALS_20260924.md).
 - Código integrado publicado `f2057605c48529349bdb249d3b4e6bb668f3678a`, árvore `611f4ef5bd0fb56d8157d3b18e88788aa74de351`, igual à validada localmente. [CI 36011196233](https://github.com/ts7520305-svg/cristalwater/actions/runs/36011196233), job `107672038955`, aprovado entre 2026-09-24T14:13:14Z e 2026-09-24T14:46:11Z (32m57s): 17 etapas, 221/221 grupos previstos distintos, sem falhas, faltas, entradas inesperadas ou duplicações; 494 unitários/72 ficheiros, quatro testes técnicos, gate geral de navegador, sintaxe 616/215/62 e 38 migrações. Restauro PostgreSQL 16 de 127 tabelas/46 ficheiros, com linhas e hashes iguais. Evidência [evidence/20260924_task317_task318_ci.json](evidence/20260924_task317_task318_ci.json). Cache v133, sem novas migrações/tabelas/dependências. O fecho posterior altera apenas documentação; a aprovação refere-se ao código e árvore acima.
@@ -53,7 +59,7 @@
 
 ## Próxima ação
 
-1. Prosseguir múltiplos intervalos nos percursos independentes e de equipamento, repartições entre meses e revisão histórica de registos antigos sem recibo verificável. Não repetir TASK300–318. Conservar comprovativos, sobreposições e saldos.
+1. Fechar CI/restauro TASK319 e prosseguir múltiplos intervalos de equipamento (TASK320), repartições entre meses e revisão histórica de registos antigos sem recibo verificável. Não repetir TASK300–319. Conservar comprovativos, sobreposições e saldos.
 2. Continuar restantes gastos/ajustes/origens de receita e os pontos da [matriz atual](COMPLETENESS_CURRENT_20260915.md): históricos/ecrãs/PDFs/idiomas, volume e operação prolongada, VPS/fornecedores e piloto físico. Custos/receitas completos e lucro por apurar; não atribuir percentagem global sem critérios fechados. IA generativa offline/aprendizagem por piscina/vídeo e integrações completas continuam requisitos separados sem aprovação integral.
 
 ## Autorizações e regras vigentes
@@ -68,4 +74,4 @@ A app assinala os serviços que pedem fatura com IVA e regista checklist/número
 
 Este ficheiro foi reduzido ao estado atual para evitar truncar a retoma. O conteúdo anterior está integralmente preservado, sem alterações, em [archive/WORK_CHECKPOINT_THROUGH_TASK305_20260923.md](archive/WORK_CHECKPOINT_THROUGH_TASK305_20260923.md), copiado do commit TASK305 antes deste fecho documental. Esse arquivo contém estados antigos e próximos passos já superados; não os tratar como a fase ativa.
 
-O checkpoint e o relatório TASK317 prevalecem para escolher a próxima tarefa. Relatórios individuais e `docs/product/evidence/` conservam os critérios e os resultados anteriores, incluindo [LABOR_COST_COMPONENTS_20260923.md](LABOR_COST_COMPONENTS_20260923.md) e [evidence/20260923_task304_ci.json](evidence/20260923_task304_ci.json).
+O checkpoint e o relatório TASK319 prevalecem para escolher a próxima tarefa. Relatórios individuais e `docs/product/evidence/` conservam os critérios e os resultados anteriores, incluindo [LABOR_COST_COMPONENTS_20260923.md](LABOR_COST_COMPONENTS_20260923.md) e [evidence/20260923_task304_ci.json](evidence/20260923_task304_ci.json).

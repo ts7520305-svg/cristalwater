@@ -4,12 +4,13 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 const require=createRequire(import.meta.url),writes=require('../src/services/fieldWriteRequestService'),resource=require('../frontend/cw-reminder-resource-rules'),rules=require('../frontend/cw-reminder-labor-rules'),sources=require('../src/services/expenseValuationSources');
 const clone=v=>JSON.parse(JSON.stringify(v)),hash=writes.hash,sha='a'.repeat(64),requestId='d145d52b-922a-40eb-936f-9b8bc0a0ee11',owner='ADMIN:1';
-function fixture(){
+function fixture(multi=false){
   const source={id:1,title:'Serviço',description:null,category:'POOL_SERVICE_REMINDER',status:'DONE',completedAt:'2008-07-11T12:00:00.000Z',clientId:2,poolId:4,technicianId:null},target={type:'MAINTENANCE_REMINDER',id:1,clientId:2,poolId:4,status:'CONFIRMED',startAt:null,endAt:source.completedAt,executionBasis:'CONFIRMED_MAINTENANCE_EXECUTION_AND_DECISION',decisionId:5,decisionFingerprint:sha,executionFingerprint:sha,originVisitType:null,originVisitId:null};
   const proposed={technicianId:3,materials:{mode:'NONE',items:[]},workTime:{startedAt:'2008-07-11T10:00:00.000Z',endedAt:'2008-07-11T10:01:00.000Z'}},p={schema:1,basis:resource.basis,reminderId:1,action:'DECLARE',recordId:null,recordHash:null,origin:{reminderId:1,clientId:2,poolId:4,technicianId:3},contextHash:sha,source,sourceHash:hash(source),target,targetHash:hash(target),proposed,durationSeconds:60};
-  const preview={available:true,...p,hash:hash(p)},body={requestId,action:'DECLARE',recordId:null,data:proposed,previewHash:preview.hash,reason:'Recursos conferidos',confirmed:true},event={schema:1,basis:resource.basis,id:requestId,owner,reminderId:1,recordId:9,reason:body.reason,createdAt:'2008-07-12T00:00:00.000Z',preview},request=writes.context({id:1,role:'ADMIN'},resource.scope,1,requestId,(({requestId,...v})=>v)(body)),declaration={ok:true,applied:true,envelope:body,event,eventHash:hash(event),receipt:{...request,confirmedAt:event.createdAt}};
-  const row={id:9,reminderId:1,clientId:2,poolId:4,technicianId:3,startedAt:proposed.workTime.startedAt,endedAt:proposed.workTime.endedAt,snapshot:event,result:declaration},snapshot=require('../src/services/reminderLaborSourceService').snapshot(row),work={id:9,fingerprint:hash(snapshot),snapshot},basis={id:7,expenseId:8,technicianId:3,periodStart:'2008-07-01',periodEnd:'2008-07-31',paidMinutes:3};
-  const value={version:6,kind:'LABOR',service:target,basis,expenseAmountCents:100,workBasis:rules.basis,workInterval:work};
+  if(multi){p.schema=2;proposed.workIntervals=[{startedAt:proposed.workTime.startedAt,endedAt:'2008-07-11T10:00:20.000Z'},{startedAt:'2008-07-11T10:05:00.000Z',endedAt:'2008-07-11T10:05:40.000Z'}];delete proposed.workTime;}
+  const preview={available:true,...p,hash:hash(p)},body={requestId,action:'DECLARE',recordId:null,data:proposed,previewHash:preview.hash,reason:'Recursos conferidos',confirmed:true},event={schema:p.schema,basis:resource.basis,id:requestId,owner,reminderId:1,recordId:9,reason:body.reason,createdAt:'2008-07-12T00:00:00.000Z',preview},request=writes.context({id:1,role:'ADMIN'},resource.scope,1,requestId,(({requestId,...v})=>v)(body)),declaration={ok:true,applied:true,envelope:body,event,eventHash:hash(event),receipt:{...request,confirmedAt:event.createdAt}};
+  const row={id:9,reminderId:1,clientId:2,poolId:4,technicianId:3,startedAt:resource.intervals(proposed)[0].startedAt,endedAt:resource.intervals(proposed).at(-1).endedAt,snapshot:event,result:declaration},snapshot=require('../src/services/reminderLaborSourceService').snapshot(row),work={id:9,fingerprint:hash(snapshot),snapshot},basis={id:7,expenseId:8,technicianId:3,periodStart:'2008-07-01',periodEnd:'2008-07-31',paidMinutes:3};
+  const value={version:multi?9:6,kind:'LABOR',service:target,basis,expenseAmountCents:100,workBasis:rules.basis,workInterval:work};
   return {row,work,target,basis,value,preview};
 }
 const calculated=(before='0',cents=0,amount=33)=>({quantity:'60',quantityUnit:'SECOND',availableQuantity:'60',amountCents:amount,calculation:{quantity:'60',quantityUnit:'SECOND',amountCents:amount,method:'CONFIRMED_EXPENSE_PAID_TIME',rounding:before==='120'?'FINAL_POOL_REMAINDER':'NEAREST_CENT',poolQuantityBefore:before,poolAmountBeforeCents:cents,measuredQuantityBefore:'0',baseQuantity:'180',baseAmountCents:100}});
@@ -47,4 +48,20 @@ describe('independent reminder labor valuation',()=>{
   it('does not add null reminder fields to prior composed-cost receipt projections',()=>{
     const {allocationFacts}=require('../src/services/laborCostCompositionIntegrity');expect(allocationFacts({targetType:'REPAIR',serviceReminderId:null})).not.toHaveProperty('serviceReminderId');expect(allocationFacts({targetType:'MAINTENANCE_REMINDER',serviceReminderId:1})).toHaveProperty('serviceReminderId',1);
   });
+  it('projects immutable separated intervals without charging the enclosing span',async()=>{
+    const f=fixture(true);expect(f.work.snapshot.version).toBe(2);expect(f.work.snapshot.durationSeconds).toBe(60);expect(Date.parse(f.work.snapshot.endedAt)-Date.parse(f.work.snapshot.startedAt)).toBe(340000);await expect(rules.source(f.value,f.target,9,f.basis,hash)).resolves.toBe(f.work.snapshot);
+    const expense={id:8,category:'LABOR',sourceType:'MANUAL',amountCents:100,laborBasis:{...f.basis,periodStart:new Date('2008-07-01Z'),periodEnd:new Date('2008-07-31Z')},laborDistributions:[]},prepared={reminders:new Map([[1,{valid:true,clientId:2,hash:hash(f.target),snapshot:f.target}]]),reminderIntervals:new Map([[9,{...f.work,reminderId:1,clientId:2,technicianId:3,startedAt:f.work.snapshot.startedAt,endedAt:f.work.snapshot.endedAt,sourceHash:hash(f.target),state:'CONFIRMED'}]]),active:[]};
+    const built=sources.build(prepared,expense,{kind:'LABOR',targetType:'MAINTENANCE_REMINDER',targetId:1,workIntervalId:9,purchaseItemId:null});expect(built.valid).toBe(true);expect(built.units).toBe(60000000n);expect(built.snapshot).toEqual(f.value);expect(built.label).toContain('pausas excluídas');
+    expect(rules.calculation(calculated(),f.work.snapshot,f.basis,100).amountCents).toBe(33);
+  });
+  it('rejects altered interval projections and older source tags even after rehashing',async()=>{
+    for(const change of [s=>s.durationSeconds=340,s=>s.workIntervals[1].startedAt='2008-07-11T10:00:20.000Z',s=>s.workIntervals.reverse(),s=>delete s.workIntervals,s=>s.version=1]){const f=fixture(true);change(f.work.snapshot);f.work.fingerprint=hash(f.work.snapshot);await expect(rules.work(f.work,f.target,hash)).rejects.toThrow();}
+    for(const version of [6,7,8,10]){const f=fixture(true);f.value.version=version;await expect(rules.source(f.value,f.target,9,f.basis,hash)).rejects.toThrow();}
+    const f=fixture(true);f.value.laborDistribution={partIndex:1};f.value.version=10;await expect(rules.source(f.value,f.target,9,f.basis,hash)).resolves.toBe(f.work.snapshot);
+  });
+  it('validates new multi proofs identically in browser and Node while retaining legacy ones',async()=>{
+    const c=vm.createContext({});for(const name of ['cw-maintenance-material-rules','cw-equipment-material-review-rules','cw-reminder-resource-rules','cw-reminder-labor-rules'])vm.runInContext(fs.readFileSync(new URL('../frontend/'+name+'.js',import.meta.url),'utf8'),c);
+    for(const multi of [false,true]){const f=fixture(multi);expect(clone(await c.CWReminderLaborRules.source(f.value,f.target,9,f.basis,hash))).toEqual(await rules.source(f.value,f.target,9,f.basis,hash));}
+  });
+
 });

@@ -19,8 +19,8 @@ async function intact(row, receipts) {
     const saved = receipts.find(r => r.owner === row.owner && r.requestId === row.requestId), result = row.result;
     if (!saved || writes.hash(saved.response) !== writes.hash(result) || saved.scope !== rules.scope || saved.resourceId !== row.reminderId || saved.payloadHash !== result.receipt?.payloadHash) return false;
     await rules.response(result, result.envelope, row.owner, row.reminderId, writes.hash);
-    const e = result.event, p = e.preview, d = p.proposed;
-    if (!result.applied || p.action !== 'DECLARE' || e.recordId !== row.id || writes.hash(row.snapshot) !== row.fingerprint || row.fingerprint !== result.eventHash || writes.hash(row.snapshot) !== writes.hash(e) || row.createdAt.toISOString() !== e.createdAt || row.clientId !== p.origin.clientId || row.poolId !== p.origin.poolId || row.technicianId !== d.technicianId || (row.startedAt?.toISOString() || null) !== (d.workTime?.startedAt || null) || (row.endedAt?.toISOString() || null) !== (d.workTime?.endedAt || null)) return false;
+    const e = result.event, p = e.preview, d = p.proposed, times=rules.intervals(d);
+    if (!result.applied || p.action !== 'DECLARE' || e.recordId !== row.id || writes.hash(row.snapshot) !== row.fingerprint || row.fingerprint !== result.eventHash || writes.hash(row.snapshot) !== writes.hash(e) || row.createdAt.toISOString() !== e.createdAt || row.clientId !== p.origin.clientId || row.poolId !== p.origin.poolId || row.technicianId !== d.technicianId || (row.startedAt?.toISOString() || null) !== (times[0]?.startedAt || null) || (row.endedAt?.toISOString() || null) !== (times.at(-1)?.endedAt || null)) return false;
     const voids = receipts.filter(r => r.response?.applied === true && r.response?.event?.preview?.action === 'VOID' && r.response.event.recordId === row.id);
     if (!row.voidedAt) return row.activeKey === 'REMINDER:' + row.reminderId && row.voidedBy === null && row.voidReason === null && voids.length === 0;
     if (row.activeKey !== null || voids.length !== 1) return false;
@@ -48,9 +48,10 @@ async function context(db, reminderId, lock = false, input = null) {
   ]);
   if (!reminder && !rows.length) return refuse('NOT_FOUND', 'Lembrete ou histórico não encontrado.');
   const source = reminder ? json(reminder) : null, targetFacts = facts(target), known = new Set(technicians.map(t => t.id));
-  const overlaps = await require('./recordedWorkTimeService').conflicts(db, rows.filter(r => !r.voidedAt && r.startedAt).map(workRow));
+  const verified=new Map(await Promise.all(rows.map(async row=>[row.id,await intact(row,receipts)])));
+  const overlaps = await require('./recordedWorkTimeService').conflicts(db, rows.filter(r => !r.voidedAt && r.startedAt).flatMap(row=>verified.get(row.id)?rules.intervals(row.snapshot.preview.proposed).map(w=>({...workRow(row),startAt:new Date(w.startedAt),endAt:new Date(w.endedAt)})):[workRow(row)]));
   const records = await Promise.all(rows.map(async row => {
-    const valid = await intact(row, receipts), reasons = [];
+    const valid = verified.get(row.id), reasons = [];
     if (!valid) reasons.push('DECLARATION_EVIDENCE_CHANGED');
     if (!target?.valid || target.hash !== row.snapshot?.preview?.targetHash || writes.hash(source) !== row.snapshot?.preview?.sourceHash) reasons.push('EXECUTION_EVIDENCE_CHANGED');
     if (!known.has(row.technicianId)) reasons.push('TECHNICIAN_MISSING');
@@ -77,13 +78,13 @@ async function calculate(db, reminderId, body, lock = false) {
   if (lock) await db.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${ 'expense-valuation:MAINTENANCE_REMINDER:' + reminderId }))::text`;
   const c = await context(db, reminderId, lock, body); if (!c.available) return c;
   let affectedCosts;
-  let origin, proposed = null, recordHash = null, source = null, target = null, targetHash = null, sourceHash = null, durationSeconds = null;
+  let origin, proposed = null, recordHash = null, source = null, target = null, targetHash = null, sourceHash = null, durationSeconds = null, schema=1;
   if (body.action === 'VOID') {
     const row = c.records.find(r => r.id === body.recordId);
     if (!row?.canVoid) return refuse('DECLARATION_REVIEW', 'A declaração mudou, já foi anulada ou o comprovativo precisa de revisão.');
     const materials = await require('./reminderMaterialService').journal(db,reminderId);
     if (!materials.valid || materials.active) return refuse('MATERIAL_CONSUMPTION_REVIEW', 'Reveja e anule expressamente o consumo de materiais deste lembrete antes de anular os recursos. A reposição e os custos afetados são confirmados no histórico dos materiais.');
-    origin = row.snapshot.preview.origin; recordHash = row.fingerprint;
+    origin = row.snapshot.preview.origin; recordHash = row.fingerprint; schema=row.snapshot.preview.schema;
     const costs = await db.expenseAllocation.findMany({ where:{ targetType:'MAINTENANCE_REMINDER',serviceReminderId:reminderId,valuationType:'LABOR',voidedAt:null,valuationSnapshot:{ path:['source','workInterval','id'],equals:row.id } },orderBy:{ id:'asc' } });
     affectedCosts = costs.map(a => ({ allocationId:a.id,expenseId:a.expenseId,amountCents:a.amountCents,workIntervalId:row.id,groupId:a.valuationSnapshot?.composition?.groupId || null,allocationHash:writes.hash(json(a)) }));
   } else {
@@ -92,14 +93,14 @@ async function calculate(db, reminderId, body, lock = false) {
     if (!c.technicians.some(t => t.id === proposed.technicianId) || source.technicianId !== null && source.technicianId !== proposed.technicianId) return refuse('TECHNICIAN_REVIEW', 'Identifique o técnico da execução. Tem de corresponder ao técnico atribuído ao lembrete.');
     origin = { reminderId,clientId:source.clientId,poolId:source.poolId,technicianId:proposed.technicianId };
     if (!rules.origin(origin)) return refuse('REMINDER_ORIGIN_REVIEW', 'Confirme o cliente, a piscina e o técnico da execução.');
-    if (proposed.workTime) {
-      const startedAt = new Date(proposed.workTime.startedAt), endedAt = new Date(proposed.workTime.endedAt);
-      if (endedAt > new Date(source.completedAt) || endedAt > new Date()) return refuse('WORK_TIME_BOUNDS', 'O trabalho deve terminar até à conclusão do lembrete e não pode estar no futuro.');
-      if ((await require('./recordedWorkTimeService').conflicts(db, [{ type:'REMINDER_RESOURCE',id:null,technicianId:proposed.technicianId,startAt:startedAt,endAt:endedAt }])).size) return refuse('WORK_TIME_CONFLICT', 'Este técnico já tem trabalho registado nesse intervalo. Exclua tempos de outras intervenções.');
-      durationSeconds = (endedAt-startedAt)/1000;
+    const times=rules.intervals(proposed);schema=proposed.workIntervals===undefined?1:2;
+    if (times.length) {
+      if (times.some(w=>Date.parse(w.endedAt)>Date.parse(source.completedAt)||Date.parse(w.endedAt)>Date.now())) return refuse('WORK_TIME_BOUNDS', 'O trabalho deve terminar até à conclusão do lembrete e não pode estar no futuro.');
+      if ((await require('./recordedWorkTimeService').conflicts(db,times.map(w=>({type:'REMINDER_RESOURCE',id:null,technicianId:proposed.technicianId,startAt:new Date(w.startedAt),endAt:new Date(w.endedAt)})))).size) return refuse('WORK_TIME_CONFLICT', 'Este técnico já tem trabalho registado nesse intervalo. Exclua tempos de outras intervenções.');
+      durationSeconds = rules.duration(proposed);
     }
   }
-  const value = { schema:1,basis:rules.basis,reminderId,action:body.action,recordId:body.recordId,recordHash,origin,contextHash:c.contextHash,source,sourceHash,target,targetHash,proposed,durationSeconds,...(affectedCosts ? { affectedCosts } : {}) };
+  const value = { schema,basis:rules.basis,reminderId,action:body.action,recordId:body.recordId,recordHash,origin,contextHash:c.contextHash,source,sourceHash,target,targetHash,proposed,durationSeconds,...(affectedCosts ? { affectedCosts } : {}) };
   return rules.preview({ available:true,...value,hash:writes.hash(value) }, writes.hash);
 }
 async function detail(actor, value) { admin(actor); const rid=id(value); return prisma.$transaction(async db => ({ ok:true,detail:await context(db,rid) }), { isolationLevel:'RepeatableRead',maxWait:15000,timeout:20000 }); }
@@ -112,10 +113,10 @@ async function command(actor, value, body) {
     if(!p.available || p.hash!==body.previewHash)return writes.confirm(db,request,{ ok:true,applied:false,envelope:body,code:p.code || 'PREVIEW_CHANGED',message:p.message || 'A execução, o técnico ou o histórico mudou. Atualize e confirme novamente.' });
     const createdAt=new Date(); let recordId=body.recordId;
     if(body.action==='DECLARE') {
-      const d=p.proposed;
-      const row=await db.reminderResourceDeclaration.create({ data:{ reminderId,clientId:p.origin.clientId,poolId:p.origin.poolId,technicianId:d.technicianId,owner,requestId,fingerprint:'0'.repeat(64),snapshot:{},result:{},createdAt,activeKey:'REMINDER:'+reminderId,startedAt:d.workTime ? new Date(d.workTime.startedAt) : null,endedAt:d.workTime ? new Date(d.workTime.endedAt) : null } }); recordId=row.id;
+      const d=p.proposed,times=rules.intervals(d);
+      const row=await db.reminderResourceDeclaration.create({ data:{ reminderId,clientId:p.origin.clientId,poolId:p.origin.poolId,technicianId:d.technicianId,owner,requestId,fingerprint:'0'.repeat(64),snapshot:{},result:{},createdAt,activeKey:'REMINDER:'+reminderId,startedAt:times.length ? new Date(times[0].startedAt) : null,endedAt:times.length ? new Date(times.at(-1).endedAt) : null } }); recordId=row.id;
     } else await db.reminderResourceDeclaration.update({ where:{ id:recordId },data:{ activeKey:null,voidedAt:createdAt,voidedBy:owner,voidReason:body.reason } });
-    const event={ schema:1,basis:rules.basis,id:requestId,owner,reminderId,recordId,reason:body.reason,createdAt:createdAt.toISOString(),preview:p };
+    const event={ schema:p.schema,basis:rules.basis,id:requestId,owner,reminderId,recordId,reason:body.reason,createdAt:createdAt.toISOString(),preview:p };
     const result=await writes.confirm(db,request,{ ok:true,applied:true,envelope:body,event,eventHash:writes.hash(event) });
     await rules.response(result,body,owner,reminderId,writes.hash);
     if(body.action==='DECLARE')await db.reminderResourceDeclaration.update({ where:{ id:recordId },data:{ snapshot:event,fingerprint:result.eventHash,result } });

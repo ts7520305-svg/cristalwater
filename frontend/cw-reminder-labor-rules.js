@@ -13,13 +13,15 @@
   const within=(s,b)=>!!b&&positive(b.id)&&positive(b.expenseId)&&positive(b.paidMinutes)&&b.technicianId===s.technicianId&&Date.parse(s.startedAt)>=Date.parse(b.periodStart+'T00:00:00Z')&&Date.parse(s.endedAt)<=Date.parse(b.periodEnd+'T00:00:00Z')+86400000;
   async function work(value,target,hash){
     const s=value?.snapshot,d=s?.declaration,e=d?.event,p=e?.preview;
-    if(!positive(value?.id)||!sha(value.fingerprint)||!s||!d||!e||s.version!==1||s.basis!==basis||target?.type!==type||s.reminderId!==target.id||s.clientId!==target.clientId||s.poolId!==target.poolId||!positive(s.technicianId)||s.technicianName!=='Técnico #'+s.technicianId||!positive(s.durationSeconds)||!iso(s.startedAt)||!iso(s.endedAt)||!iso(s.createdAt)||Date.parse(s.createdAt)<Date.parse(s.endedAt)||await hash(s)!==value.fingerprint)fail();
+    if(!positive(value?.id)||!sha(value.fingerprint)||!s||!d||!e||![1,2].includes(s.version)||s.basis!==basis||target?.type!==type||s.reminderId!==target.id||s.clientId!==target.clientId||s.poolId!==target.poolId||!positive(s.technicianId)||s.technicianName!=='Técnico #'+s.technicianId||!positive(s.durationSeconds)||!iso(s.startedAt)||!iso(s.endedAt)||!iso(s.createdAt)||Date.parse(s.createdAt)<Date.parse(s.endedAt)||await hash(s)!==value.fingerprint)fail();
     await resources.response(d,d.envelope,e.owner,s.reminderId,hash);
-    if(!d.applied||e.recordId!==value.id||p.action!=='DECLARE'||!p.proposed.workTime||p.origin.technicianId!==s.technicianId||p.origin.clientId!==s.clientId||p.origin.poolId!==s.poolId||p.proposed.workTime.startedAt!==s.startedAt||p.proposed.workTime.endedAt!==s.endedAt||p.durationSeconds!==s.durationSeconds||s.createdAt!==e.createdAt||s.createdBy!==e.owner||s.reason!==e.reason||await hash(s.source)!==s.sourceHash||s.sourceHash!==p.targetHash||await hash(facts(target))!==s.sourceHash)fail();
+    const times=resources.intervals(p.proposed);
+    if(!d.applied||e.recordId!==value.id||p.action!=='DECLARE'||!times.length||s.version!==p.schema||p.origin.technicianId!==s.technicianId||p.origin.clientId!==s.clientId||p.origin.poolId!==s.poolId||times[0].startedAt!==s.startedAt||times[times.length-1].endedAt!==s.endedAt||p.durationSeconds!==s.durationSeconds||s.version===2&&await hash(s.workIntervals)!==await hash(p.proposed.workIntervals)||s.version===1&&s.workIntervals!==undefined||s.createdAt!==e.createdAt||s.createdBy!==e.owner||s.reason!==e.reason||await hash(s.source)!==s.sourceHash||s.sourceHash!==p.targetHash||await hash(facts(target))!==s.sourceHash)fail();
     return s;
   }
   async function source(value,target,expectedId,expectedBasis,hash){
-    if(value?.version!==(value?.laborDistribution?7:6)||value.kind!=='LABOR'||value.workBasis!==basis||value.workInterval?.id!==expectedId||await hash(value.service)!==await hash(facts(target)))fail();
+    const version=value?.workInterval?.snapshot?.version===2?(value?.laborDistribution?10:9):(value?.laborDistribution?7:6);
+    if(value?.version!==version||value.kind!=='LABOR'||value.workBasis!==basis||value.workInterval?.id!==expectedId||await hash(value.service)!==await hash(facts(target)))fail();
     const s=await work(value.workInterval,target,hash);
     if(!positive(value.expenseAmountCents)||!within(s,value.basis)||expectedBasis&&await hash(value.basis)!==await hash(paid(expectedBasis)))fail();
     return s;
@@ -32,5 +34,6 @@
     if(c.rounding!==(final?'FINAL_POOL_REMAINDER':'NEAREST_CENT')||value.amountCents!==amount||value.amountCents+c.poolAmountBeforeCents>amountCents)fail();
     return c;
   }
-  return {basis,type,fields,facts,paid,within,work,source,calculation};
+  const describe=s=>s.workIntervals?s.workIntervals.map(w=>w.startedAt+' a '+w.endedAt).join(' · ')+' · '+s.durationSeconds+' segundos efetivos; pausas excluídas':s.startedAt+' a '+s.endedAt;
+  return {basis,type,fields,facts,paid,within,work,source,calculation,describe};
 });
