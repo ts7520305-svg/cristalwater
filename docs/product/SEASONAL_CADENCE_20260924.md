@@ -19,3 +19,8 @@ Ensaios executados em PGlite/socket e Chromium isolados, com fornecedores extern
 ## CI inicial e preparação temporal corrigida
 
 O CI inicial da TASK327, [36038686127](https://github.com/ts7520305-svg/cristalwater/actions/runs/36038686127), job `107765087773`, executou os 229 grupos: 228 passaram e `test-field-equipment-history-time.js` falhou com `VISIT_REVIEW`. O restauro ficou por executar. O ensaio arredondava a conclusão para o segundo seguinte; numa execução rápida, a associação do lembrete chegava antes dessa hora. A proteção da aplicação recusou corretamente a conclusão futura. O ensaio passa a aguardar esse instante durante a preparação, conservando os 180 segundos, a conclusão original do equipamento e todas as verificações da aplicação. [Evidência inicial](evidence/20260924_task327_initial_failure.json). Confirmar um novo CI completo e restauro antes de aprovar o lote.
+
+
+## Aprovação nativa do conjunto de calendário
+
+TASK328 aprovada, incluindo as cadências da TASK327: código `b000c06d7dc178b960464b240d409e860cf52937`, árvore `06e34b4b51fc60ae0128021fd6478e8e674b2007`. [CI 36039651544](https://github.com/ts7520305-svg/cristalwater/actions/runs/36039651544), job `107768352309`, com 17 etapas e 229/229 grupos distintos previstos aprovados, 559 unitários/77 ficheiros, quatro técnicos, sintaxe 620/217/62 e 40 migrações. Job de 18:12:49Z a 18:42:07Z de 24/09/2026; restauro PostgreSQL 16 de 127 tabelas/46 ficheiros com linhas e hashes iguais. [Evidência](evidence/20260924_task328_ci.json). A falha inicial da TASK327 e a correção temporal posterior permanecem documentadas; esta aprovação aplica-se apenas ao código e árvore identificados.

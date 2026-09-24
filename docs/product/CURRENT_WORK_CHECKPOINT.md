@@ -1,17 +1,20 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 24/09/2026, TASK332 publicada; TASK333 validada localmente
+## Retoma atual — 24/09/2026, TASK328 aprovada; TASK333 publicada
 
 - Autorização vigente: continuar todas as tarefas implementáveis sem parar entre etapas, testar e publicar na branch de trabalho. Sem merge/deploy/contactos reais.
 - TASK326 aprovada no CI completo: código `b0b3b7f95c8ae5255bdf1cd1262c1565b3f23e89`, árvore `28c722ffaabc37c022dd7cb4fea24b8a5f6ab218`, CI [36037714762](https://github.com/ts7520305-svg/cristalwater/actions/runs/36037714762), job `107761849340`. 17 etapas, 229/229 grupos distintos previstos, 548 unitários/77 ficheiros, quatro técnicos, 40 migrações; restauro de 127 tabelas/46 ficheiros com linhas e hashes iguais. [Evidência](evidence/20260924_task326_ci.json). A falha inicial de fecho offline e correção `db6bd0f4da86b541452c0733e67f92cd6bae3287` permanecem registadas; este sucesso corresponde ao complemento com devoluções parciais.
 - TASK327 publicada `893b4fc99a4d1fd4827f08a05e0ef65fa7d2b859`: cadências semanais/mensais ancoradas, API/navegador locais aprovados. CI `36038686127` falhou num teste antigo de tempos históricos: o arredondamento superior podia colocar o fim da visita no futuro. A correção da TASK333 aguarda o instante arredondado na preparação do ensaio, conservando todas as validações e o intervalo original. API e navegador passaram; confirmar um novo CI/restauro. [Falha inicial](evidence/20260924_task327_initial_failure.json).
-- TASK328 publicada `b000c06d7dc178b960464b240d409e860cf52937`: exceções por instalação/data, mês e rascunhos recuperáveis, API/navegador aprovados. CI `36039651544` ainda em execução na última consulta. [Relatório](SEASONAL_EXCEPTIONS_20260924.md).
+- TASK328 aprovada, incluindo as cadências da TASK327: código `b000c06d7dc178b960464b240d409e860cf52937`, árvore `06e34b4b51fc60ae0128021fd6478e8e674b2007`. [CI 36039651544](https://github.com/ts7520305-svg/cristalwater/actions/runs/36039651544), job `107768352309`, com 17 etapas e 229/229 grupos distintos previstos aprovados, 559 unitários/77 ficheiros, quatro técnicos, sintaxe 620/217/62 e 40 migrações. Job de 18:12:49Z a 18:42:07Z de 24/09/2026; restauro PostgreSQL 16 de 127 tabelas/46 ficheiros com linhas e hashes iguais. [Evidência](evidence/20260924_task328_ci.json). A falha inicial da TASK327 e a correção temporal posterior permanecem documentadas; esta aprovação aplica-se apenas ao código e árvore identificados.
 - TASK329 publicada `fa1230f9ddd39031eb3476dc0a56a39560dd5ffb`: cópia SQL agendada com diário atómico, exclusão de sobreposição, hash e estado de falha visível; templates systemd preparados, sem instalar/ativar no VPS. CI `36040579488` em curso. [Relatório](SCHEDULED_BACKUPS_20260924.md).
 - TASK330 publicada `a3c17b90508a418512e5eb703312bfe9feae5b91`: comprovação do preço original por visita, calendário/atribuição/exceção e recibo do acordo. CI `36041163997` em curso. [Relatório](SERVICE_PRICE_PROOFS_20260924.md).
 - TASK331 publicada `891a767545ed38fc72e766efc6238b9cf4e801ca`, árvore `5a8a331fff501f49e92b188cb4f12aaa9a55caf3`: cinco percursos de faturação integrados, reservas/documentos históricos preservados, épocas mistas/gratuitas, revisão independente de receitas. API local aprovada. CI `36041753365` em curso. [Relatório](SERVICE_PRICE_BILLING_20260924.md).
-- TASK332 completa o editor sazonal do preço por visita, validação independente dos valores e recuperação exata. 573 unitários/78 ficheiros, quatro técnicos, sintaxe 622/218/62; API e Chromium reais com 40 migrações, larguras 320/390/1440, rascunhos/cadências/exceções, perda de resposta, prova falsa, offline e sessão aprovados. Runner alargado a 230 grupos; Publicada em `1f3c8621fd7f059dfb8cadf1bce86553efbb564e`; confirmar CI/restauro do código integrado. [Relatório](SERVICE_PRICE_EDITOR_20260924.md).
+- TASK332 publicada em `1f3c8621fd7f059dfb8cadf1bce86553efbb564e`, árvore `ef8eb81453c640c7347906b83544821cd02c8dbe`; CI `36042944183` em curso. Completa o editor sazonal do preço por visita, validação independente dos valores e recuperação exata. 573 unitários/78 ficheiros, quatro técnicos, sintaxe 622/218/62; API e Chromium reais com 40 migrações, larguras 320/390/1440, rascunhos/cadências/exceções, perda de resposta, prova falsa, offline e sessão aprovados. Runner alargado a 230 grupos; confirmar CI/restauro do código integrado. [Relatório](SERVICE_PRICE_EDITOR_20260924.md).
 
-- TASK333: preparação temporal corrigida, leitura de preços limitada antes dos bloqueios e três casos de normalização/compatibilidade. 576 unitários/78 ficheiros, quatro técnicos, sintaxe 622/218/62 e API/navegador de tempos históricos aprovados localmente. [Relatório](CI_HISTORY_TIME_FIX_20260924.md). Publicar e confirmar CI completo/restauro; continuar os critérios abertos.
+
+
+- TASK333 publicada em `48b16c1f3828c5197082763f95f6748f2996fdaf`, árvore `a4befb3811dc950de300b6cc37dd2ae878207adb`, CI [36043258018](https://github.com/ts7520305-svg/cristalwater/actions/runs/36043258018), job `107780383688`, em execução. Preparação temporal corrigida sem alterar proteções, leitura limitada antes dos bloqueios e três casos de compatibilidade. 576 unitários/78 ficheiros, quatro técnicos, sintaxe 622/218/62 e API/navegador de tempos históricos aprovados. [Relatório](CI_HISTORY_TIME_FIX_20260924.md).
+- Próximo âmbito em análise: revisão explícita da origem dos relatórios históricos quando a instalação mudou de titular, conservando o cliente original, os dados e os comprovativos. Não presumir que o titular atual pode consultar a visita antiga nem revelar automaticamente dados atuais da instalação ao titular anterior.
 
 ## Aprovações anteriores — TASK323–325
 
@@ -97,7 +100,7 @@
 
 ## Próxima ação
 
-1. Concluir publicação TASK332; corrigir o arredondamento futuro no ensaio de tempos históricos e executar a regressão. Confirmar o CI/restauro da versão integrada sem atribuir aprovações antigas às alterações novas.
+1. TASK333 publicada; confirmar CI/restauro integrado. Não repetir os ensaios já aprovados sem uma falha concreta.
 2. Atualizar a matriz com cadências, exceções, preço por visita e agendamento de backups preparado. Prosseguir custos/ajustes/origens ainda por fechar e inventário de apresentação. Não repetir TASK300–332.
 3. Manter separados os critérios de volume/produção/fornecedores/piloto físico e IA offline/aprendizagem/vídeo. Não atribuir percentagem global ou lucro completo sem critérios e fontes fechados.
 
