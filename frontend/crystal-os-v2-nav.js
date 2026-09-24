@@ -57,6 +57,7 @@
     '/labor-cost-bases': { area: 'Faturacao e financeiro', title: 'Bases compostas de trabalho' },
     '/equipment-material-review': { area: 'Operacao', title: 'Materiais de equipamento' },
     '/equipment-time-review': { area: 'Operacao', title: 'Tempos de equipamento' },
+    '/equipment-history-review': { area: 'Operacao', title: 'Origem histórica do equipamento' },
     '/reminder-resources': { area: 'Operacao', title: 'Recursos do lembrete' },
     '/reminder-materials': { area: 'Operacao', title: 'Materiais do lembrete' },
     '/reminder-visits': { area: 'Operacao', title: 'Visita do lembrete' },

@@ -1,7 +1,7 @@
 (function () {
   'use strict';
-  const el=id=>document.getElementById(id),timeMode=document.body.dataset.reviewType==='time',resourceField=timeMode?'workTime':'materials',kind=timeMode?'time':'material',proof=timeMode?window.CWEquipmentTimeReviewRules:window.CWEquipmentMaterialReviewRules;
-  const itemFields=timeMode?[['startAt','Início (UTC)',30],['endAt','Fim (UTC)',30]]:[['productName','Produto',160],['unit','Unidade',24],['quantity','Quantidade',30]],emptyItem=()=>Object.fromEntries(itemFields.map(([k])=>[k,''])),asInput=v=>!v?null:timeMode?proof.asInput(v):{mode:v.mode,items:v.items};
+  const el=id=>document.getElementById(id),timeMode=document.body.dataset.reviewType==='time',historyMode=document.body.dataset.reviewType==='history',resourceField=historyMode?'originReview':timeMode?'workTime':'materials',kind=historyMode?'history':timeMode?'time':'material',proof=historyMode?window.CWEquipmentHistoryRules:timeMode?window.CWEquipmentTimeReviewRules:window.CWEquipmentMaterialReviewRules;
+  const itemFields=historyMode?[['technicianId','Técnico histórico confirmado',10],['evidence','Evidência histórica consultada',2000]]:timeMode?[['startAt','Início (UTC)',30],['endAt','Fim (UTC)',30]]:[['productName','Produto',160],['unit','Unidade',24],['quantity','Quantidade',30]],emptyItem=()=>Object.fromEntries(itemFields.map(([k])=>[k,''])),asInput=v=>!v?null:historyMode||timeMode?proof.asInput(v):{mode:v.mode,items:v.items};
   const keys = ['cristalwater_jwt','token','adminToken','cristalwater_user','user'];
   const canonical = v => Array.isArray(v) ? v.map(canonical) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().filter(k => v[k] !== undefined).map(k => [k, canonical(v[k])])) : v;
   const hash = async v => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(canonical(v)))))].map(n => n.toString(16).padStart(2, '0')).join('');
@@ -9,7 +9,7 @@
   const check = (v, message = 'Os dados precisam de revisão.') => { if (!v) throw Error(message); };
   const identity = () => JSON.stringify(keys.map(k => localStorage.getItem(k)));
   const params = new URLSearchParams(location.search), completionId = Number(params.get('completionId')), expectedPool = params.has('poolId') ? Number(params.get('poolId')) : null;
-  const states = timeMode?{MISSING:'Tempo próprio não registado',RECORDED:'Intervalos confirmados',REVIEW:'Tempo próprio por rever',WITHDRAWN:'Declaração anulada; tempo por confirmar'}:{ MISSING:'Materiais não registados',NONE:'Sem materiais, confirmado',DECLARED:'Aguarda consumos e fecho da visita',MATCHED:'Compatível com o consumo líquido da visita',REVIEW:'Materiais por rever',WITHDRAWN:'Declaração anulada; materiais por confirmar' };
+  const states = historyMode?{MISSING:'Origem histórica por rever',ATTESTED:'Origem revista pela administração',REVIEW:'Origem ou histórico por rever',WITHDRAWN:'Declaração histórica anulada'}:timeMode?{MISSING:'Tempo próprio não registado',RECORDED:'Intervalos confirmados',REVIEW:'Tempo próprio por rever',WITHDRAWN:'Declaração anulada; tempo por confirmar'}:{ MISSING:'Materiais não registados',NONE:'Sem materiais, confirmado',DECLARED:'Aguarda consumos e fecho da visita',MATCHED:'Compatível com o consumo líquido da visita',REVIEW:'Materiais por rever',WITHDRAWN:'Declaração anulada; materiais por confirmar' };
   const controllers = new Set(); let principal, invalid = false, storageFailed = false, busy = false, loading = false, draftHydrated = false, db, pending, detail, reviewed, editEpoch = 0, readEpoch = 0;
   let draft = { action: 'DECLARED', items: [emptyItem()], reason:'' };
   const node = (parent, tag, text) => { const n = document.createElement(tag); n.textContent = text; parent.append(n); return n; };
@@ -34,26 +34,28 @@
     el('pendingPanel').hidden = !pending || invalid;
     if (pending && !invalid) el('pendingText').textContent = 'Revisão #' + pending.completionId + '\n' + (pending.body.action === 'WITHDRAW' ? 'Anular declaração' : materialText(pending.body[resourceField])) + '\nMotivo: ' + pending.body.reason;
   }
-  function materialText(record) { if(timeMode){if(!record)return 'Tempo próprio por confirmar.';const rows=proof.intervals(record);return Array.isArray(rows)?rows.map((w,i)=>'Intervalo '+(i+1)+': '+w?.startAt+' → '+w?.endAt+' (UTC)').join('\n')+'\n'+rows.reduce((n,w)=>n+(Date.parse(w?.endAt)-Date.parse(w?.startAt))/1000,0).toLocaleString('pt-PT',{maximumFractionDigits:3})+' segundos efetivos; pausas excluídas.':'Intervalos por rever.';} return !record ? 'Materiais por confirmar.' : record.mode === 'NONE' ? 'Sem materiais, por declaração explícita.' : record.items.map(i => i.productName + ' · ' + i.quantity + ' ' + i.unit).join('\n'); }
+  function materialText(record) { if(historyMode)return record?'Técnico histórico #'+(record.origin?.technicianId||record.technicianId)+(record.origin?' · Origem '+record.origin.visitType+' #'+record.origin.visitId:'')+'\nEvidência: '+record.evidence:'Sem declaração administrativa de origem. O registo técnico original permanece conservado.'; if(timeMode){if(!record)return 'Tempo próprio por confirmar.';const rows=proof.intervals(record);return Array.isArray(rows)?rows.map((w,i)=>'Intervalo '+(i+1)+': '+w?.startAt+' → '+w?.endAt+' (UTC)').join('\n')+'\n'+rows.reduce((n,w)=>n+(Date.parse(w?.endAt)-Date.parse(w?.startAt))/1000,0).toLocaleString('pt-PT',{maximumFractionDigits:3})+' segundos efetivos; pausas excluídas.':'Intervalos por rever.';} return !record ? 'Materiais por confirmar.' : record.mode === 'NONE' ? 'Sem materiais, por declaração explícita.' : record.items.map(i => i.productName + ' · ' + i.quantity + ' ' + i.unit).join('\n'); }
   function drawRecord(parent, record) { node(parent, 'pre', materialText(record)); }
   function clearPreview() { editEpoch++; reviewed = null; el('confirmed').checked = false; el('preview').replaceChildren(); el('previewSection').hidden = true; controls(); }
   const draftKey = () => 'cw-equipment-'+kind+'-draft:' + principal.owner + ':' + completionId;
-  function validDraft(value) { return value && (timeMode?['DECLARED','WITHDRAW']:['DECLARED','NONE','WITHDRAW']).includes(value.action) && Array.isArray(value.items) && value.items.length <= 20 && typeof value.reason === 'string' && value.reason.length <= 500 && value.items.every(i => proof.fields(i,itemFields.map(([k])=>k)) && itemFields.every(([k,title,max]) => typeof i[k] === 'string' && i[k].length <= max)); }
+  function validDraft(value) { return value && (timeMode||historyMode?['DECLARED','WITHDRAW']:['DECLARED','NONE','WITHDRAW']).includes(value.action) && Array.isArray(value.items) && value.items.length <= (historyMode?1:20) && (!historyMode||value.items.length===1) && typeof value.reason === 'string' && value.reason.length <= 500 && value.items.every(i => proof.fields(i,itemFields.map(([k])=>k)) && itemFields.every(([k,title,max]) => typeof i[k] === 'string' && i[k].length <= max)); }
   function saveDraft() { if (!active()) return; draftHydrated = true; try { sessionStorage.setItem(draftKey(), JSON.stringify(draft)); } catch (_) { storageFailed = true; note('Não foi possível conservar o rascunho neste navegador.'); controls(); } }
   function drawItems() {
-    el('items').replaceChildren(); el('items').hidden = draft.action !== 'DECLARED'; el('addItem').hidden = draft.action !== 'DECLARED'; el('withdrawNote').hidden = draft.action !== 'WITHDRAW';
+    el('items').replaceChildren(); el('items').hidden = draft.action !== 'DECLARED'; el('addItem').hidden = historyMode || draft.action !== 'DECLARED'; el('withdrawNote').hidden = draft.action !== 'WITHDRAW';
     for (const [index, item] of draft.items.entries()) {
       const card = node(el('items'), 'article', ''), fields = node(card, 'div', ''); fields.className = 'item';
       for (const [key, title, max] of itemFields) {
-        const label = node(fields, 'label', title), input = node(label, 'input', ''); input.value = item[key]; input.maxLength = max; input.dataset[timeMode?'time':'material']=key;if(timeMode){input.type='datetime-local';input.step='0.001';} input.dataset.index = index; if (key === 'quantity') input.inputMode = 'decimal';
+        const label = node(fields, 'label', title), input = node(label, historyMode?(key==='technicianId'?'select':'textarea'):'input', ''); if(historyMode&&key==='technicianId'){node(input,'option','Escolha o técnico confirmado').value='';if(detail?.origin?.technicianId)node(input,'option',detail.technicianName+' (#'+detail.origin.technicianId+')').value=String(detail.origin.technicianId);}input.value = item[key]; input.maxLength = max; input.dataset[historyMode?'history':timeMode?'time':'material']=key;if(timeMode){input.type='datetime-local';input.step='0.001';} input.dataset.index = index; if (key === 'quantity') input.inputMode = 'decimal';
         input.oninput = () => { if (!active() || busy || pending) return; item[key] = input.value; clearPreview(); saveDraft(); };
       }
+      if(historyMode)continue;
       const remove = node(card,'button',timeMode?'Remover intervalo':'Remover produto'); remove.type = 'button'; remove.className = 'secondary';
       remove.onclick = () => { if (!active() || busy || pending) return; draft.items.splice(index, 1); clearPreview(); saveDraft(); drawItems(); };
     }
     controls();
   }
   function payload() {
+    if(historyMode)return {action:draft.action==='WITHDRAW'?'WITHDRAW':'REPLACE',originReview:draft.action==='WITHDRAW'?null:proof.input({technicianId:Number(draft.items[0]?.technicianId),evidence:draft.items[0]?.evidence.trim()})};
     if(timeMode)return {action:draft.action==='WITHDRAW'?'WITHDRAW':'REPLACE',workTime:draft.action==='WITHDRAW'?null:proof.input({intervals:draft.items.map(i=>({startAt:new Date(i.startAt+'Z').toISOString(),endAt:new Date(i.endAt+'Z').toISOString()}))})};
     return { action: draft.action === 'WITHDRAW' ? 'WITHDRAW' : 'REPLACE', materials: draft.action === 'WITHDRAW' ? null : proof.input({ mode: draft.action, items: draft.action === 'NONE' ? [] : draft.items.map(i => ({ ...i, quantity: i.quantity.trim().replace(',', '.') })) }) };
   }
@@ -71,17 +73,19 @@
     for (const id of ['original','current','history']) el(id).replaceChildren(); controls(); status('A consultar a revisão…');
     try {
       check(proof.positive(completionId) && (expectedPool === null || proof.positive(expectedPool)), 'Abra uma revisão a partir das manutenções de equipamento.');
-      const value = (await request('/completions/'+completionId+'/'+(timeMode?'work-time':'materials'))).declaration;
+      const value = (await request('/completions/'+completionId+'/'+(historyMode?'history':timeMode?'work-time':'materials'))).declaration;
       if (!active() || ticket !== readEpoch) return;
       check(value?.available, value?.message); check(value.completionId === completionId && proof.origin(value.origin) && (expectedPool === null || value.origin.poolId === expectedPool) && await hash(value.original) === value.originalHash && value.original.id === completionId && Array.isArray(value.history) && typeof value.editable === 'boolean' && typeof value.journalValid === 'boolean' && Object.hasOwn(states, value.current?.state));
+      if(historyMode)check(value.source?.id===completionId&&await hash(value.source)===value.sourceHash&&await hash(value.source.result)===value.original.resultHash);
       for (const event of value.history) { await proof.preview(event.revision?.preview, hash); check(await hash(event.revision) === event.hash && event.revision.completionId === completionId); }
       if (!active() || ticket !== readEpoch) return; detail = value;
-      if (!draftHydrated) { const record = value.current.record; if(timeMode&&record){try{proof.record(record);draft={action:'DECLARED',items:proof.intervals(record).map(w=>({startAt:w.startAt.slice(0,-1),endAt:w.endAt.slice(0,-1)})),reason:''};}catch(_){draft={action:'DECLARED',items:[emptyItem()],reason:''};}}else if (record && ['NONE','DECLARED'].includes(record.mode) && Array.isArray(record.items)) draft = { action:record.mode,items:record.items.map(i => ({ ...i })),reason:'' }; draftHydrated = true; el('action').value = draft.action; drawItems(); }
+      if (!draftHydrated) { const record = value.current.record; if(historyMode&&record){proof.record(record);draft={action:'DECLARED',items:[{technicianId:String(record.origin.technicianId),evidence:record.evidence}],reason:''};}else if(timeMode&&record){try{proof.record(record);draft={action:'DECLARED',items:proof.intervals(record).map(w=>({startAt:w.startAt.slice(0,-1),endAt:w.endAt.slice(0,-1)})),reason:''};}catch(_){draft={action:'DECLARED',items:[emptyItem()],reason:''};}}else if (record && ['NONE','DECLARED'].includes(record.mode) && Array.isArray(record.items)) draft = { action:record.mode,items:record.items.map(i => ({ ...i })),reason:'' }; draftHydrated = true; el('action').value = draft.action; drawItems(); }
+      if(historyMode)drawItems();
       el('title').textContent = value.title; const o = value.origin;
       el('origin').textContent = 'Revisão #' + completionId + ' · ' + date(value.original.completedAt) + ' · Visita ' + (o.visitType === 'EXTRA' ? 'extra' : 'regular') + ' #' + o.visitId + ' · Cliente: ' + value.clientName + ' (#' + o.clientId + ') · Piscina: ' + value.poolName + ' (#' + o.poolId + ') · Técnico: ' + value.technicianName + ' (#' + o.technicianId + ')';
       el('back').href = '/admin-operational-settings?poolId=' + o.poolId + '&maintenanceKind=EQUIPMENT#equipmentMaintenancePanel';
-      drawRecord(el('original'), value.original.record); node(el('current'), 'strong', states[value.current.state]); drawRecord(el('current'), value.current.record); el('eligibility').textContent = value.message;
-      for (const event of [...value.history].reverse()) { const r = event.revision, article = node(el('history'), 'article', ''); node(article, 'h3', (r.preview.proposed.action === 'WITHDRAW' ? 'Declaração anulada' : 'Declaração corrigida') + ' · ' + date(r.createdAt)); node(article, 'p', r.owner + ' · ' + r.reason); drawRecord(article, r.preview.proposed.record); node(article, 'p', r.preview.affectedShares.length + (timeMode?' parcelas de trabalho assinaladas para revisão.':' parcelas de materiais assinaladas para revisão.')); }
+      drawRecord(el('original'), value.original.record);if(historyMode){node(el('original'),'p','Identificador de autoria no original: '+value.source.actor+' · Pedido: '+value.source.requestId);node(el('original'),'pre',value.source.notes);node(el('original'),'p',value.technicalReceiptAvailable?'Existe um comprovativo técnico neste registo.':'Comprovativo técnico original indisponível. A autoria técnica não é presumida.');} node(el('current'), 'strong', states[value.current.state]); drawRecord(el('current'), value.current.record); el('eligibility').textContent = value.message;
+      for (const event of [...value.history].reverse()) { const r = event.revision, article = node(el('history'), 'article', ''); node(article, 'h3', (r.preview.proposed.action === 'WITHDRAW' ? 'Declaração anulada' : 'Declaração corrigida') + ' · ' + date(r.createdAt)); node(article, 'p', r.owner + ' · ' + r.reason); drawRecord(article, r.preview.proposed.record); node(article, 'p', historyMode?'Declaração administrativa com evidência e data próprias; original conservado.':r.preview.affectedShares.length + (timeMode?' parcelas de trabalho assinaladas para revisão.':' parcelas de materiais assinaladas para revisão.')); }
       if (!value.history.length) node(el('history'), 'p', value.journalValid ? 'Ainda não há alterações administrativas.' : 'O histórico precisa de revisão.');
       el('detailSection').hidden = false; el('editSection').hidden = !value.editable; el('historySection').hidden = false; status(value.journalValid ? 'Revisão consultada. O original e o histórico estão disponíveis abaixo.' : 'Histórico por confirmar. Novas alterações estão bloqueadas.');
     } catch (error) { if (active() && ticket === readEpoch) status(error.message); }
@@ -97,6 +101,7 @@
       if (!active() || ticket !== editEpoch || read !== readEpoch) return; reviewed = p;
       const box = el('preview'); node(box, 'h4', 'Declaração proposta'); drawRecord(box, p.proposed.record); node(box, 'p', states[p.afterState]);
       if (p.afterState === 'REVIEW') node(box, 'p', 'As quantidades ou os consumos precisam de conferência. Esta declaração ficará por rever e não permite confirmar novas parcelas de custo.');
+      if(historyMode){node(box,'p','A declaração ficará atribuída à administração e à data da confirmação. Não recria um recibo técnico nem regista tempos, consumos ou valores.');el('previewSection').hidden=false;note('Confira a evidência e a origem; indique o motivo e confirme a revisão histórica.');return;}
       node(box, 'h4', 'Custos que precisarão de revisão');
       if (!p.affectedShares.length) node(box, 'p', timeMode?'Não há parcelas ativas de trabalho desta revisão.':'Não há parcelas ativas de materiais desta visita.');
       for (const s of p.affectedShares) { const line = node(box, 'p', 'Revisão #' + s.completionId + ' · ' + (timeMode?(s.durationMs/1000).toLocaleString('pt-PT',{maximumFractionDigits:3})+' segundos':s.quantity+' unidades') + ' · Parcela original ' + money(s.amountCents) + ' · '); const link = node(line, 'a', 'Abrir despesa #' + s.expenseId); link.href = '/admin-expenses?expenseId=' + s.expenseId + '&allocationId=' + s.allocationId; }
@@ -122,7 +127,7 @@
       let matched = false; try { matched = equal(payload(), {action:row.body.action,[resourceField]:row.body[resourceField]}); } catch (_) {}
       if (matched) { sessionStorage.removeItem(draftKey()); draft.reason = ''; el('reason').value = ''; }
     }
-    note(result.applied ? 'Alteração confirmada. O original e as parcelas afetadas ficaram conservados no histórico.' : result.message + ' O resultado ficou guardado.'); await load();
+    note(result.applied ? (historyMode?'Revisão histórica confirmada. A evidência, o autor e a data ficaram conservados; o original mantém-se.':'Alteração confirmada. O original e as parcelas afetadas ficaram conservados no histórico.') : result.message + ' O resultado ficou guardado.'); await load();
   }
   async function execute(mode) {
     if (!active() || busy || storageFailed || !db || !navigator.onLine) return;

@@ -7,6 +7,10 @@ router.put('/notifications/config', auth('ADMIN'), controller.configureReminders
 router.post('/notifications/check', auth('ADMIN'), controller.checkReminders);
 router.get('/pools/:poolId/billing', auth('ADMIN'), controller.listBilling);
 router.post('/billing/:kind/:id/review', auth('ADMIN'), controller.reviewBilling);
+router.get('/history-review-requests/:requestId', auth('ADMIN'), controller.recoverHistory);
+router.get('/completions/:id/history', auth('ADMIN'), controller.history);
+router.post('/completions/:id/history-preview', auth('ADMIN'), controller.previewHistory);
+router.post('/completions/:id/history-review', auth('ADMIN'), controller.reviewHistory);
 router.get('/time-review-requests/:requestId', auth('ADMIN'), controller.recoverWorkTime);
 router.get('/completions/:id/work-time', auth('ADMIN'), controller.workTime);
 router.post('/completions/:id/time-preview', auth('ADMIN'), controller.previewWorkTime);

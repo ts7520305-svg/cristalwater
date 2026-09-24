@@ -1,0 +1,39 @@
+(function(root,factory){
+  'use strict';
+  const rawHash=typeof module==='object'&&module.exports?async value=>require('node:crypto').createHash('sha256').update(value).digest('hex'):async value=>[...new Uint8Array(await root.crypto.subtle.digest('SHA-256',new root.TextEncoder().encode(value)))].map(n=>n.toString(16).padStart(2,'0')).join('');
+  if(typeof module==='object'&&module.exports)module.exports=factory(require('./cw-equipment-material-review-rules'),rawHash);
+  else root.CWEquipmentHistoryRules=factory(root.CWEquipmentMaterialReviewRules,rawHash);
+})(typeof globalThis!=='undefined'?globalThis:this,function(common,rawHash){
+  'use strict';
+  const {fields,positive,uuid,sha,iso,origin}=common,scope='EQUIPMENT_HISTORY_REVIEW',basis='ADMIN_EQUIPMENT_HISTORY_REVIEW',recordBasis='ADMIN_DECLARED_EQUIPMENT_ORIGIN';
+  const sourceFields=['id','planId','version','visitId','extraVisitId','requestId','actor','fingerprint','notes','completedAt','result'];
+  const targetFields=['type','id','clientId','poolId','status','startAt','endAt','executionBasis','decisionId','decisionFingerprint','executionFingerprint','originVisitType','originVisitId'];
+  const fail=()=>{throw Error('A origem histórica ou o comprovativo administrativo precisa de revisão. Conserve o pedido original.');};
+  const text=(s,min,max)=>typeof s==='string'&&s===s.trim()&&s.length>=min&&s.length<=max;
+  async function legacy(s){
+    if(!fields(s,sourceFields)||![s.id,s.planId,s.version].every(positive)||!uuid(s.requestId)||!sha(s.fingerprint)||!text(s.actor,1,160)||!text(s.notes,3,3000)||!iso(s.completedAt)||!((positive(s.visitId)&&s.extraVisitId===null)||(positive(s.extraVisitId)&&s.visitId===null))||!fields(s.result,['ok','idempotent','plan','completedAt'])||s.result.ok!==true||s.result.idempotent!==false||s.result.completedAt!==s.completedAt||s.result.plan?.id!==s.planId||s.result.plan.version!==s.version+1||!positive(s.result.plan.poolId)||typeof s.result.plan.title!=='string')return false;
+    return s.fingerprint===await rawHash(JSON.stringify({pid:s.planId,vid:s.visitId||s.extraVisitId,expected:s.version,notes:s.notes,confirmed:true}));
+  }
+  function input(v){if(!fields(v,['technicianId','evidence'])||!positive(v.technicianId)||!text(v.evidence,10,2000))fail();return {technicianId:v.technicianId,evidence:v.evidence};}
+  function record(v){if(!fields(v,['schema','basis','origin','evidence'])||v.schema!==1||v.basis!==recordBasis||!origin(v.origin)||!text(v.evidence,10,2000))fail();return v;}
+  const asInput=v=>v?input({technicianId:record(v).origin.technicianId,evidence:v.evidence}):null;
+  const facts=p=>{const{available,hash,...v}=p;return v;};
+  async function preview(p,hash){
+    if(!fields(p,['available','schema','basis','completionId','origin','original','baseHash','source','sourceHash','parent','target','targetHash','previous','proposed','beforeState','afterState','afterReasons','affectedShares','hash'])||p.available!==true||p.schema!==1||p.basis!==basis||!positive(p.completionId)||!origin(p.origin)||!sha(p.hash)||await hash(facts(p))!==p.hash||!sha(p.baseHash)||await hash(p.original)!==p.baseHash||!sha(p.sourceHash)||await hash(p.source)!==p.sourceHash||!await legacy(p.source)||!fields(p.original,['id','planId','requestId','fingerprint','completedAt','resultHash','receiptHash','record'])||p.original.record!==null||p.original.receiptHash!==await hash([])||['id','planId','requestId','fingerprint','completedAt'].some(k=>p.original[k]!==p.source[k])||p.original.id!==p.completionId||p.original.resultHash!==await hash(p.source.result)||!fields(p.previous,['headHash','action','record'])||p.previous.headHash!==null&&!sha(p.previous.headHash)||!['ORIGINAL','REPLACE','WITHDRAW'].includes(p.previous.action)||!fields(p.proposed,['action','record'])||!['REPLACE','WITHDRAW'].includes(p.proposed.action))fail();
+    const parent=p.parent,o=p.origin,t=p.target,s=p.source;
+    if(!fields(parent,['type','id','clientId','poolId','technicianId','status','startAt','endAt'])||parent.type!==o.visitType||parent.id!==o.visitId||parent.clientId!==o.clientId||parent.poolId!==o.poolId||parent.technicianId!==o.technicianId||o.visitId!==(s.visitId||s.extraVisitId)||o.visitType!==(s.extraVisitId?'EXTRA':'REGULAR')||o.poolId!==s.result.plan.poolId||!sha(p.targetHash)||t?.hash!==p.targetHash||t.type!=='MAINTENANCE_EQUIPMENT'||t.id!==p.completionId||await hash(Object.fromEntries(targetFields.map(k=>[k,t.snapshot?.[k]])))!==t.hash)fail();
+    if((p.previous.action==='ORIGINAL')!==(p.previous.headHash===null)||p.previous.action==='REPLACE'&&p.previous.record===null||p.previous.action!=='REPLACE'&&p.previous.record!==null)fail();if(p.previous.record!==null)record(p.previous.record);
+    if(p.proposed.action==='WITHDRAW'){if(p.proposed.record!==null||p.previous.record===null||p.afterState!=='WITHDRAWN')fail();}
+    else {const v=record(p.proposed.record);if(await hash(v.origin)!==await hash(o)||await hash(v)===await hash(p.previous.record)||t.valid!==true||t.clientId!==o.clientId||t.snapshot.poolId!==o.poolId||t.snapshot.originVisitType!==o.visitType||t.snapshot.originVisitId!==o.visitId||t.snapshot.endAt!==s.completedAt||t.snapshot.status!=='CONFIRMED'||t.snapshot.executionBasis!=='CONFIRMED_MAINTENANCE_EXECUTION_AND_DECISION'||!positive(t.snapshot.decisionId)||!sha(t.snapshot.decisionFingerprint)||!sha(t.snapshot.executionFingerprint)||!['DONE','COMPLETED','CONCLUIDA','CONCLUIDO'].includes(String(parent.status).toUpperCase())||!iso(parent.startAt)||!iso(parent.endAt)||Date.parse(parent.startAt)>Date.parse(s.completedAt)||Date.parse(parent.endAt)<=Date.parse(parent.startAt)||p.afterState!=='ATTESTED')fail();}
+    if(!['MISSING','ATTESTED','REVIEW','WITHDRAWN'].includes(p.beforeState)||!Array.isArray(p.afterReasons)||p.afterReasons.length||!Array.isArray(p.affectedShares)||p.affectedShares.length)fail();return p;
+  }
+  async function revision(proof,hash){const e=proof?.revision;if(!fields(proof,['revision','hash'])||!fields(e,['schema','id','owner','completionId','reason','createdAt','preview'])||e.schema!==1||!uuid(e.id)||!/^ADMIN:[1-9]\d*$/.test(e.owner)||!text(e.reason,3,500)||!iso(e.createdAt)||!sha(proof.hash)||await hash(e)!==proof.hash)fail();const p=await preview(e.preview,hash);if(e.completionId!==p.completionId||Date.parse(e.createdAt)<Date.parse(p.original.completedAt))fail();return proof;}
+  function command(body){if(!fields(body,['requestId','action','originReview','previewHash','reason','confirmed'])||!uuid(body.requestId)||!sha(body.previewHash)||!['REPLACE','WITHDRAW'].includes(body.action)||!text(body.reason,3,500)||body.confirmed!==true)fail();if(body.action==='WITHDRAW'){if(body.originReview!==null)fail();}else input(body.originReview);return body;}
+  async function response(v,body,owner,id,hash){
+    command(body);const{requestId,...payload}=body,c=v?.receipt;
+    if(v?.ok!==true||typeof v.applied!=='boolean'||!/^ADMIN:[1-9]\d*$/.test(owner)||!positive(id)||!fields(c,['owner','requestId','scope','resourceId','payloadHash','confirmedAt'])||c.owner!==owner||c.scope!==scope||c.resourceId!==id||c.requestId!==requestId||!iso(c.confirmedAt)||c.payloadHash!==await hash({v:1,scope,resourceId:id,payload})||await hash(v.envelope)!==await hash(body))fail();
+    if(!v.applied){if(typeof v.code!=='string'||typeof v.message!=='string'||v.revision!==undefined||v.revisionHash!==undefined)fail();return v;}
+    const e=(await revision({revision:v.revision,hash:v.revisionHash},hash)).revision,p=e.preview;if(e.id!==requestId||e.owner!==owner||e.completionId!==id||e.reason!==body.reason||p.hash!==body.previewHash||p.proposed.action!==body.action||await hash(asInput(p.proposed.record))!==await hash(body.originReview)||Date.parse(c.confirmedAt)<Date.parse(e.createdAt))fail();return v;
+  }
+  return {scope,basis,recordBasis,sourceFields,fields,positive,uuid,sha,iso,origin,input,record,asInput,legacy,facts,preview,revision,command,response};
+});
