@@ -130,6 +130,7 @@ function localDate(day,at='12:00') {
 }
 const clock=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Lisbon',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
 function localDay(date){const p=Object.fromEntries(clock.formatToParts(date).map(p=>[p.type,p.value]));return `${p.year}-${p.month}-${p.day}`;}
-function serviceData(plan,season,day,origin,exception) {return {schema:1,planId:plan.id,planVersion:plan.version,period:season.key,label:season.label,services:season.services,day,billing:'INCLUDED_MONTHLY',origin,...(exception?{exception}:{})};}
+function serviceData(plan,season,day,origin,exception) {const priced=season.billing==='PER_VISIT';return {schema:priced?2:1,planId:plan.id,planVersion:plan.version,period:season.key,label:season.label,services:season.services,day,billing:priced?'PER_VISIT':'INCLUDED_MONTHLY',origin,...(exception?{exception}:{})};}
+function perVisit(visit){return visit?.contractService?.billing==='PER_VISIT'||visit?.contractService?.schema===2;}
 function included(visit){return visit?.contractService?.billing==='INCLUDED_MONTHLY';}
-module.exports={validate,onDay,due,activeCycle,cadenceLabel,allRules,rulesForDay,daysOfMonth,localDate,localDay,serviceData,civil,included};
+module.exports={validate,onDay,due,activeCycle,cadenceLabel,allRules,rulesForDay,daysOfMonth,localDate,localDay,serviceData,civil,included,perVisit};
