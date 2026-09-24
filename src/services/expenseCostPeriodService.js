@@ -18,6 +18,7 @@ async function preview(db, expense, allocationId, lock = false) {
     if (!source || source.hash !== expense.sourceHash) return refused('SOURCE_STALE', 'Reveja primeiro a origem alterada da despesa.');
   }
   if (a.expenseHash !== r.hash(costs.expenseSnapshot(expense)) || a.expenseHash !== r.hash(a.expenseSnapshot)) return refused('EXPENSE_STALE', 'Reveja primeiro a atribuição face ao documento atual.');
+  if (lock && type === 'MAINTENANCE_REMINDER') await db.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${ 'expense-valuation:' + type + ':' + id }))::text`;
   const target = await targets.get(db, type, id, lock), facts = Object.fromEntries(targets.executionFields(type).map(k => [k, a.targetSnapshot?.[k]]));
   if (!target?.valid || target.hash !== a.targetHash || target.clientId !== a.clientId || r.hash(facts) !== a.targetHash || facts.type !== type || facts.id !== id || facts.clientId !== a.clientId) return refused('TARGET_STALE', 'O serviço ou o cliente mudou. Reveja primeiro a atribuição e a execução.');
   const endAt = target.snapshot.endAt, toMonth = endAt?.slice(0, 7);

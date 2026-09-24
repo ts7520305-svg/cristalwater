@@ -153,6 +153,7 @@ scripts.push('test-field-equipment-material-review.js');
 scripts.push('test-field-reminder-resources.js');
 scripts.push('test-field-reminder-labor.js');
 scripts.push('test-field-reminder-materials.js');
+scripts.push('test-field-reminder-visits.js');
 scripts.push('test-field-financial-revenue-coverage.js');
 scripts.push('test-field-monthly-revenue.js','test-field-monthly-revenue-ui.js');
 scripts.push('test-field-maintenance-revenue.js');

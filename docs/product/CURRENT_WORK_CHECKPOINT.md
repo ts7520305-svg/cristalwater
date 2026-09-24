@@ -1,6 +1,10 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 24/09/2026, TASK314
+## Retoma atual — 24/09/2026, TASK315
+
+- TASK315 implementada e validada localmente: associação explícita de lembretes a visitas REGULAR/EXTRA, cliente/piscina/técnico históricos, seleção paginada, bloqueio de recursos e custos próprios, concorrência entre associação/declaração/atribuição, original conservado e anulação recuperável. [REMINDER_VISIT_ASSOCIATION_20260924.md](REMINDER_VISIT_ASSOCIATION_20260924.md). Base `4ac49251b106dc9cbd06d2d72e5d2e80edac8c3a`, fecho TASK314. Passaram 479 unitários/72 ficheiros, sintaxe 613/213/62, novo grupo API/navegador e seis regressões dirigidas. Runner 218 grupos, cache v130, sem novas migrações/tabelas/dependências; permanecem 38 migrações. Publicar e confirmar CI/restauro desta árvore antes do fecho.
+
+## Aprovação anterior — TASK314
 
 - TASK314 aprovada no CI completo e restauro: consumo próprio dos materiais do lembrete, origem explícita por produto, stock e reservas de reparações protegidos, custo pela linha histórica de compra, limites comuns, reposição e anulação financeira explícitas. [REMINDER_MATERIAL_CONSUMPTION_20260924.md](REMINDER_MATERIAL_CONSUMPTION_20260924.md). Base `8c5d5bdf8cf1df4a66c5f249696cb4b22825c6eb`, fecho TASK313.
 - Código publicado `4b966f74f59a314eadfdfdaf2bea7b1a44b22e8e`, árvore `b8540fd7142ea73d66a328d35c63081c22825d27`, igual à validada localmente. [CI 35984014393](https://github.com/ts7520305-svg/cristalwater/actions/runs/35984014393), job `107582317108`, aprovado entre 2026-09-24T09:53:44Z e 2026-09-24T10:24:06Z (30m22s): 17 etapas, 217/217 grupos previstos distintos, sem falhas, faltas, entradas inesperadas ou duplicações; 473 unitários/71 ficheiros, quatro testes técnicos, gate geral de navegador, sintaxe 611/211/62 e 38 migrações. Restauro PostgreSQL 16 de 127 tabelas/46 ficheiros, com linhas e hashes iguais. Evidência [evidence/20260924_task314_ci.json](evidence/20260924_task314_ci.json). Cache v129, uma migração nova, sem tabelas/dependências novas. O fecho posterior altera apenas documentação; a aprovação refere-se ao código e árvore acima.
@@ -37,7 +41,7 @@
 
 ## Próxima ação
 
-1. TASK314 fechada com CI/restauro aprovados. Prosseguir TASK315: associação explícita de lembretes a visitas REGULAR/EXTRA, prevenindo dupla declaração/atribuição e conservando origens e histórico. Não repetir TASK300–314. Múltiplos intervalos separados, repartições entre meses e correção de registos antigos sem recibo verificável continuam abertos.
+1. Publicar, confirmar CI/restauro e fechar TASK315. Prosseguir TASK316: declaração das parcelas próprias de materiais e trabalho de lembretes associados, com conferência contra a execução da visita e limites comuns entre os serviços associados, antes de repartir custos confirmados do pai. Não repetir TASK300–315. Múltiplos intervalos separados, repartições entre meses e correção de registos antigos sem recibo verificável continuam abertos.
 2. Continuar restantes gastos/ajustes/origens de receita e os pontos da [matriz atual](COMPLETENESS_CURRENT_20260915.md): históricos/ecrãs/PDFs/idiomas, volume e operação prolongada, VPS/fornecedores e piloto físico. Custos/receitas completos e lucro por apurar; não atribuir percentagem global sem critérios fechados. IA generativa offline/aprendizagem por piscina/vídeo e integrações completas continuam requisitos separados sem aprovação integral.
 
 ## Autorizações e regras vigentes
@@ -52,4 +56,4 @@ A app assinala os serviços que pedem fatura com IVA e regista checklist/número
 
 Este ficheiro foi reduzido ao estado atual para evitar truncar a retoma. O conteúdo anterior está integralmente preservado, sem alterações, em [archive/WORK_CHECKPOINT_THROUGH_TASK305_20260923.md](archive/WORK_CHECKPOINT_THROUGH_TASK305_20260923.md), copiado do commit TASK305 antes deste fecho documental. Esse arquivo contém estados antigos e próximos passos já superados; não os tratar como a fase ativa.
 
-A matriz atual e o relatório TASK314 prevalecem para escolher a próxima tarefa. Relatórios individuais e `docs/product/evidence/` conservam os critérios e os resultados anteriores, incluindo [LABOR_COST_COMPONENTS_20260923.md](LABOR_COST_COMPONENTS_20260923.md) e [evidence/20260923_task304_ci.json](evidence/20260923_task304_ci.json).
+A matriz atual e o relatório TASK315 prevalecem para escolher a próxima tarefa. Relatórios individuais e `docs/product/evidence/` conservam os critérios e os resultados anteriores, incluindo [LABOR_COST_COMPONENTS_20260923.md](LABOR_COST_COMPONENTS_20260923.md) e [evidence/20260923_task304_ci.json](evidence/20260923_task304_ci.json).

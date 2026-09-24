@@ -65,7 +65,7 @@ async function apply(db, who, env, expense) {
     const a = live(expense).find(a => a.id === d.allocationId); if (!a) return refused('ALLOCATION_STATE', 'Atribuição inexistente nesta despesa ou já anulada.');
     if (await require('./maintenanceCostShareService').hasActive(db, [a])) return refused('ACTIVE_MAINTENANCE_SHARES', 'Anule primeiro as parcelas deste custo atribuídas a manutenções.');
     if (a.valuationSnapshot?.composition || await db.laborCostValuationPart.findUnique({ where: { allocationId: a.id } })) return refused('COMPOSITE_VOID_REQUIRED', 'Anule todas as parcelas na base composta de trabalho.');
-    if (a.valuationType !== 'MANUAL') await db.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${ 'expense-valuation:' + a.targetType + ':' + targets.targetId(a) }))::text`;
+    if (a.valuationType !== 'MANUAL' || a.targetType === 'MAINTENANCE_REMINDER') await db.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${ 'expense-valuation:' + a.targetType + ':' + targets.targetId(a) }))::text`;
     const after = await db.expenseAllocation.update({ where: { id: a.id }, data: { voidedAt: new Date(), voidReason: reason, activeKey: null, activeMeasurementKey: null } });
     const updated = await db.companyExpense.update({ where: { id: expense.id }, data: { version: { increment: 1 } } });
     return { applied: true, expenseId: expense.id, version: updated.version, allocation: after, allocationBefore: a, reason };
@@ -82,6 +82,7 @@ async function apply(db, who, env, expense) {
   const amountCents = review ? before.amountCents : r.money(d.amountCents), type = review ? before.targetType : d.targetType, id = review ? targets.targetId(before) : d.targetId;
   if (!targets.types.includes(type)) r.fail('Destino inválido.');
   if (expense.sourceType !== 'MANUAL') { const source = await sources.source(db, expense.sourceType, expense.stockPurchaseId || expense.maintenanceId, true); if (!source || source.hash !== expense.sourceHash) return refused('SOURCE_STALE', 'Reveja primeiro a origem alterada da despesa.'); }
+  if (type === 'MAINTENANCE_REMINDER') await db.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${ 'expense-valuation:' + type + ':' + id }))::text`;
   const target = await targets.get(db, type, id, true);
   if (!target?.valid || target.hash !== d.targetHash || before && target.clientId !== before.clientId) return refused('TARGET_STALE', 'O cliente ou serviço mudou. Reveja o destino; uma mudança de cliente exige anular a atribuição anterior.');
   const budget = allocated(expense); if (budget === null || budget > expense.amountCents || !review && budget + amountCents > expense.amountCents) return refused('OVERALLOCATION', 'O montante excede o valor ainda por atribuir desta despesa, incluindo todos os meses.');

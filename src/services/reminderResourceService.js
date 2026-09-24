@@ -68,7 +68,7 @@ async function context(db, reminderId, lock = false, input = null) {
   }
   const active = records.filter(r => !r.voidedAt);
   const contextHash = writes.hash({ source,target:target?.hash || null,journalValid,records:records.map(r => ({ id:r.id,fingerprint:r.fingerprint,voidedAt:r.voidedAt,voidedBy:r.voidedBy,voidReason:r.voidReason,state:r.state,reasons:r.reasons })),technicians:[...technicians].sort((a,b) => a.id-b.id) });
-  return { available:true,reminderId,source,target:targetFacts,targetHash:target?.hash || null,sourceHash:writes.hash(source),contextHash,title:source?.title || 'Lembrete removido — histórico preservado',clientName:target?.clientName || '',poolName:pool?.name || '',technicians,records,active,journalValid,canDeclare:!!target?.valid && !!source && ['TECHNICAL_PERIODIC_SERVICE','POOL_SERVICE_REMINDER'].includes(source.category) && journalValid && active.length === 0 };
+  return { available:true,reminderId,source,target:targetFacts,targetHash:target?.hash || null,sourceHash:writes.hash(source),contextHash,title:source?.title || 'Lembrete removido — histórico preservado',clientName:target?.clientName || '',poolName:pool?.name || '',technicians,records,active,journalValid,warning:target?.warning||null,canDeclare:!!target?.valid && !!source && ['TECHNICAL_PERIODIC_SERVICE','POOL_SERVICE_REMINDER'].includes(source.category) && journalValid && active.length === 0 };
 }
 async function calculate(db, reminderId, body, lock = false) {
   parse(body);
@@ -87,7 +87,7 @@ async function calculate(db, reminderId, body, lock = false) {
     const costs = await db.expenseAllocation.findMany({ where:{ targetType:'MAINTENANCE_REMINDER',serviceReminderId:reminderId,valuationType:'LABOR',voidedAt:null,valuationSnapshot:{ path:['source','workInterval','id'],equals:row.id } },orderBy:{ id:'asc' } });
     affectedCosts = costs.map(a => ({ allocationId:a.id,expenseId:a.expenseId,amountCents:a.amountCents,workIntervalId:row.id,groupId:a.valuationSnapshot?.composition?.groupId || null,allocationHash:writes.hash(json(a)) }));
   } else {
-    if (!c.canDeclare) return refuse('REMINDER_SOURCE_REVIEW', c.active.length ? 'Já existe uma declaração ativa. Reveja e anule a declaração anterior antes de a substituir.' : 'Confirme a conclusão e a decisão comercial do lembrete. Reveja os comprovativos existentes.');
+    if (!c.canDeclare) return refuse('REMINDER_SOURCE_REVIEW', c.active.length ? 'Já existe uma declaração ativa. Reveja e anule a declaração anterior antes de a substituir.' : c.warning || 'Confirme a conclusão e a decisão comercial do lembrete. Reveja os comprovativos existentes.');
     proposed = rules.input(body.data); source = c.source; target = c.target; targetHash = c.targetHash; sourceHash = c.sourceHash;
     if (!c.technicians.some(t => t.id === proposed.technicianId) || source.technicianId !== null && source.technicianId !== proposed.technicianId) return refuse('TECHNICIAN_REVIEW', 'Identifique o técnico da execução. Tem de corresponder ao técnico atribuído ao lembrete.');
     origin = { reminderId,clientId:source.clientId,poolId:source.poolId,technicianId:proposed.technicianId };

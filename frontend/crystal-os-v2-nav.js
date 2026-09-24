@@ -58,6 +58,7 @@
     '/equipment-material-review': { area: 'Operacao', title: 'Materiais de equipamento' },
     '/reminder-resources': { area: 'Operacao', title: 'Recursos do lembrete' },
     '/reminder-materials': { area: 'Operacao', title: 'Materiais do lembrete' },
+    '/reminder-visits': { area: 'Operacao', title: 'Visita do lembrete' },
     '/admin-expenses': { area: 'Faturacao e financeiro', title: 'Despesas e contas a pagar' },
     '/billing': { area: 'Faturacao e financeiro', title: 'Visao financeira' },
     '/billing-center': { area: 'Faturacao e financeiro', title: 'Centro de cobrancas' },
