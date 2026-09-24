@@ -1,16 +1,10 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 24/09/2026, TASK318 em validação
+## Retoma atual — 24/09/2026, TASK317–318 aprovadas
 
-- Base `dc30d3d6f5a6edd83abe43f8563c9c8e175c93bc`, correção do ensaio TASK317. TASK318 implementada: até 20 intervalos próprios dos lembretes associados, soma sem pausas, limites e sobreposições comuns com equipamento, originais conservados e repartição MATERIAL/LABOR pelos comprovativos novos. [REMINDER_VISIT_INTERVALS_20260924.md](REMINDER_VISIT_INTERVALS_20260924.md).
-- 494 unitários/72 ficheiros, quatro técnicos e sintaxe 616/215/62 aprovados. API/navegador novo e seis regressões dirigidas aprovados localmente; campos em 320/390/1440 e modo escuro revistos. 19 ficheiros; cache v133; runner com 221 grupos e 38 migrações existentes. Sem novas tabelas/dependências.
-- Publicar este lote e conferir CI/restauro do commit exato. Essa aprovação deverá fechar em conjunto as TASK317–318, conservando o CI inicial falhado e a correção de dados do ensaio. Ainda não declarar aprovação nativa nem sistema concluído.
-
-## Validação anterior — TASK317, aprovação conjunta pendente
-
-- Base `740f1378a3d4b97f750bf3284515364e8618fb87`, fecho TASK316. Implementada a repartição dos custos confirmados MATERIAL/LABOR da visita pelas parcelas próprias dos lembretes: destinos tipados, comprovativo completo, saldos comuns com equipamento e entre compras, projeção financeira, revisão, custos afetados ao anular recursos e anulação recuperável. [REMINDER_VISIT_COSTS_20260924.md](REMINDER_VISIT_COSTS_20260924.md).
-- Código publicado `46025c4cf9c025abd1fe48f1a441270564100ec6`. O CI inicial `36006695285` passou 219/220 grupos; o grupo novo falhou ao preparar um ID de lembrete já existente. Restauro não executado. Correção isolada do ensaio: sequência de equipamento preparada acima dos IDs ocupados, sentinela conservada e colisão tipada real mantida. Confirmar novo CI/restauro completo, previsto em conjunto com a TASK318, antes de declarar aprovação.
-- 489 unitários/72 ficheiros e quatro testes técnicos; sintaxe 616/215/62. Cache v132; 220 grupos, 38 migrações, sem novas tabelas/dependências. A implementação de múltiplos intervalos TASK318 foi preparada e testada separadamente; só será publicada depois desta correção.
+- TASK317–318 aprovadas em conjunto: custos próprios dos lembretes associados e até 20 intervalos de trabalho, com pausas excluídas, saldos comuns com equipamento, comprovativos antigos preservados, revisão, anulação e recuperação. [Custos](REMINDER_VISIT_COSTS_20260924.md) e [intervalos](REMINDER_VISIT_INTERVALS_20260924.md).
+- Código integrado publicado `f2057605c48529349bdb249d3b4e6bb668f3678a`, árvore `611f4ef5bd0fb56d8157d3b18e88788aa74de351`, igual à validada localmente. [CI 36011196233](https://github.com/ts7520305-svg/cristalwater/actions/runs/36011196233), job `107672038955`, aprovado entre 2026-09-24T14:13:14Z e 2026-09-24T14:46:11Z (32m57s): 17 etapas, 221/221 grupos previstos distintos, sem falhas, faltas, entradas inesperadas ou duplicações; 494 unitários/72 ficheiros, quatro testes técnicos, gate geral de navegador, sintaxe 616/215/62 e 38 migrações. Restauro PostgreSQL 16 de 127 tabelas/46 ficheiros, com linhas e hashes iguais. Evidência [evidence/20260924_task317_task318_ci.json](evidence/20260924_task317_task318_ci.json). Cache v133, sem novas migrações/tabelas/dependências. O fecho posterior altera apenas documentação; a aprovação refere-se ao código e árvore acima.
+- O CI inicial da TASK317 (`36006695285`) falhou por colisão de ID nos dados do ensaio e não executou o restauro. A correção `dc30d3d6f5a6edd83abe43f8563c9c8e175c93bc` conserva o registo anterior e mantém o teste de IDs tipados iguais. Está incluída no commit integrado aprovado. A evidência inicial permanece em [evidence/20260924_task317_ci_initial_failure.json](evidence/20260924_task317_ci_initial_failure.json).
 
 ## Aprovação anterior — TASK316
 
@@ -59,7 +53,7 @@
 
 ## Próxima ação
 
-1. Fechar publicação e CI/restauro conjunto das TASK317–318. Depois prosseguir múltiplos intervalos nos percursos independentes e de equipamento, repartições entre meses e revisão histórica de registos antigos sem recibo verificável. Não repetir TASK300–318. Conservar comprovativos, sobreposições e saldos.
+1. Prosseguir múltiplos intervalos nos percursos independentes e de equipamento, repartições entre meses e revisão histórica de registos antigos sem recibo verificável. Não repetir TASK300–318. Conservar comprovativos, sobreposições e saldos.
 2. Continuar restantes gastos/ajustes/origens de receita e os pontos da [matriz atual](COMPLETENESS_CURRENT_20260915.md): históricos/ecrãs/PDFs/idiomas, volume e operação prolongada, VPS/fornecedores e piloto físico. Custos/receitas completos e lucro por apurar; não atribuir percentagem global sem critérios fechados. IA generativa offline/aprendizagem por piscina/vídeo e integrações completas continuam requisitos separados sem aprovação integral.
 
 ## Autorizações e regras vigentes
