@@ -26,13 +26,14 @@
       el('maintenanceLaborNext').disabled = !c.canWrite || page * 10 >= total || !!voiding;
     }
     async function verifyPreview(p, expenseId, version, allocation) {
-      if ([2,3].includes(p?.version)) {
+      if (p?.reminderId !== undefined) {
         await window.CWReminderVisitCostRules.verify(p, hash, allocation);
         if (p.expenseId !== expenseId || version !== null && p.expenseVersion !== version) throw Error('A parcela não corresponde à despesa selecionada.');
         return p;
       }
       const { available, hash: signature, ...value } = p || {}, a = p?.allocationBefore, w = p?.workTime, t = p?.target, u = p?.used;
-      if (available !== true || p.version !== (p.workTimeRevision!==undefined?5:w?.schema===2?4:1) || p.basis !== basis || p.expenseId !== expenseId || version !== null && p.expenseVersion !== version || !positive(p.expenseVersion) || !positive(p.allocationId) || !positive(p.completionId) || !a || a.id !== p.allocationId || a.expenseId !== expenseId || a.valuationType !== 'LABOR' || !['REGULAR','EXTRA'].includes(a.targetType) || a.quantityUnit !== 'SECOND' || a.voidedAt !== null || a.monthRef !== p.monthRef || !positive(a.amountCents) || !positive(p.parentDurationMs) || !positive(p.amountCents) || !count(p.remainingAmountCents) || !count(p.remainingDurationMs) || !count(u?.durationMs) || !count(u.amountCents) || !Array.isArray(u.shares) || !soundTime(w) || !iso(a.targetSnapshot?.startAt) || !iso(a.targetSnapshot.endAt) || a.targetSnapshot.endAt.slice(0, 7) !== p.monthRef || workIntervals(w).some(t=>t.startAt<a.targetSnapshot.startAt||t.endAt>a.targetSnapshot.endAt) || t?.type !== 'MAINTENANCE_EQUIPMENT' || t.id !== p.completionId || t.clientId !== a.clientId || t.snapshot?.endAt?.slice(0, 7) !== p.monthRef) throw Error('Repartição do trabalho não confirmada.');
+      window.CWMaintenanceMaterialRules.verifyPeriod(p, p?.workTimeRevision!==undefined?5:w?.schema===2?4:1);
+      if (available !== true || p.basis !== basis || p.expenseId !== expenseId || version !== null && p.expenseVersion !== version || !positive(p.expenseVersion) || !positive(p.allocationId) || !positive(p.completionId) || !a || a.id !== p.allocationId || a.expenseId !== expenseId || a.valuationType !== 'LABOR' || !['REGULAR','EXTRA'].includes(a.targetType) || a.quantityUnit !== 'SECOND' || a.voidedAt !== null || !positive(a.amountCents) || !positive(p.parentDurationMs) || !positive(p.amountCents) || !count(p.remainingAmountCents) || !count(p.remainingDurationMs) || !count(u?.durationMs) || !count(u.amountCents) || !Array.isArray(u.shares) || !soundTime(w) || !iso(a.targetSnapshot?.startAt) || !iso(a.targetSnapshot.endAt) || workIntervals(w).some(t=>t.startAt<a.targetSnapshot.startAt||t.endAt>a.targetSnapshot.endAt) || t?.type !== 'MAINTENANCE_EQUIPMENT' || t.id !== p.completionId || t.clientId !== a.clientId) throw Error('Repartição do trabalho não confirmada.');
       const parentId = a.targetType === 'REGULAR' ? a.visitId : a.extraVisitId;
       if (!positive(parentId) || w.origin?.visitType !== a.targetType || w.origin.visitId !== parentId || w.origin.clientId !== a.clientId || w.origin.poolId !== t.snapshot.poolId || !positive(w.origin.technicianId) || w.origin.technicianId!==a.valuationSnapshot?.source?.service?.technicianId || t.snapshot.originVisitType !== a.targetType || t.snapshot.originVisitId !== parentId || u.durationMs + w.durationMs > p.parentDurationMs) throw Error('A manutenção não corresponde à visita e ao tempo selecionados.');
       const final = u.durationMs + w.durationMs === p.parentDurationMs;
@@ -47,6 +48,7 @@
       node(facts, 'strong', p.target.label + ' · ' + p.target.clientName);
       node(facts, 'p', 'Origem: ' + p.allocationBefore.targetSnapshot.label + ' · Despesa #' + p.expenseId + ' · Atribuição #' + p.allocationId);
       node(facts, 'p', 'Tempo deste serviço: ' + (p.workTime.durationMs / 1000) + ' s · Tempo valorizado da visita: ' + (p.parentDurationMs / 1000) + ' s · ' + p.monthRef + ' (UTC)');
+      if (p.period) node(facts, 'p', 'Mês da visita: '+p.period.parentMonthRef+' · Mês da manutenção: '+p.monthRef+' (UTC). '+(removing?'A anulação retira a parcela do mês da manutenção e devolve-a ao mês da visita.':'O remanescente fica no mês da visita; esta parcela passa para o mês da manutenção.'));
       if (p.workTime.schema === 2) {
         for (const [i,w] of p.workTime.intervals.entries()) node(facts, 'p', 'Intervalo '+(i+1)+': '+w.startAt+' → '+w.endAt+' · '+(w.durationMs/1000)+' s (UTC)');
         node(facts, 'p', 'As pausas entre intervalos ficam excluídas da duração e do custo.');
@@ -110,7 +112,7 @@
       }
       for (const s of a.maintenanceShares) {
         const item = node(row, 'div', '', 'row'); item.dataset.maintenanceShareId = s.share.id;
-        node(item, 'strong', s.share.preview.target.label); node(item, 'p', money(s.share.preview.amountCents) + ' · ' + (s.voidedAt ? 'Parcela anulada' : s.needsReview ? 'Parcela por rever' : 'Parcela confirmada')); node(item, 'p', s.voidReason || s.share.reason);
+        node(item, 'strong', s.share.preview.target.label); node(item, 'p', money(s.share.preview.amountCents) + ' · ' + (s.voidedAt ? 'Parcela anulada' : s.needsReview ? 'Parcela por rever' : 'Parcela confirmada')); node(item, 'p', s.voidReason || s.share.reason); if(s.share.preview.period)node(item,'p','Mês da manutenção: '+s.share.preview.monthRef+' · Origem na visita: '+s.share.preview.period.parentMonthRef+' (UTC)');
         if (!s.voidedAt) button(item, 'Anular parcela da manutenção', () => remove(s), true);
       }
       if (!a.voidedAt && !a.needsReview && a.valuationType === 'LABOR' && ['REGULAR','EXTRA'].includes(a.targetType)) button(row, 'Repartir com manutenção', () => review(a), true);

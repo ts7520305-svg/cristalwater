@@ -76,7 +76,7 @@ async function decorate(db, expenses) {
       const review = a.valuationType === 'MATERIAL' && state.review || invalidBudget || shares.some(s => s.needsReview);
       return { ...a, maintenanceMaterialShares: shares, maintenanceMaterialShareReview: !!review, maintenanceMaterialSharedAmountCents: review ? null : used.amountCents, maintenanceMaterialParentAmountCents: review ? null : a.amountCents - used.amountCents, maintenanceMaterialSharedQuantity: review ? null : used.quantity, maintenanceMaterialParentQuantity: review || total === null ? null : decimal(total - quantity(used.quantity)), needsReview: a.needsReview || !!review, reviewReasons: [...a.reviewReasons, ...(review ? ['MAINTENANCE_MATERIAL_SHARE_REVIEW'] : [])] };
     });
-    return { ...e, allocations, allocationReviewCount: allocations.filter(a => a.needsReview).length };
+    return { ...e, allocations, maintenanceShareHistoryReview: e.maintenanceShareHistoryReview || state.review, allocationReviewCount: allocations.filter(a => a.needsReview).length };
   });
 }
 function project(allocations) {
@@ -87,7 +87,7 @@ function project(allocations) {
     const parent = { ...a, voidedAt: null, amountCents: remainder, quantity: decimal(total - quantity(used.quantity)), sourceAllocationId: a.id, costAttributionBasis: basis };
     return [parent, ...shares.map(s => {
       const p = s.share.preview;
-      return { ...a, voidedAt: null, sourceAllocationId: a.id, maintenanceShareId: s.share.id, costAttributionBasis: basis, targetType: p.target.type, targetId: p.target.id, maintenanceCompletionId: s.share.completionId, serviceReminderId: s.share.reminderId ?? null, visitId: null, extraVisitId: null, targetHash: p.target.hash, targetSnapshot: p.target.snapshot, targetLabel: p.target.label, clientName: p.target.clientName, amountCents: p.amountCents, quantity: p.quantity, reason: s.share.reason, needsReview: a.needsReview || s.needsReview };
+      return { ...a, voidedAt: null, sourceAllocationId: a.id, maintenanceShareId: s.share.id, monthRef: p.monthRef, ...(p.period ? { sourceMonthRef: p.period.parentMonthRef } : {}), costAttributionBasis: basis, targetType: p.target.type, targetId: p.target.id, maintenanceCompletionId: s.share.completionId, serviceReminderId: s.share.reminderId ?? null, visitId: null, extraVisitId: null, targetHash: p.target.hash, targetSnapshot: p.target.snapshot, targetLabel: p.target.label, clientName: p.target.clientName, amountCents: p.amountCents, quantity: p.quantity, reason: s.share.reason, needsReview: a.needsReview || s.needsReview };
     })];
   });
 }
@@ -133,7 +133,7 @@ async function preview(db, expense, allocationId, completionId, selectedQuantity
   const [target, views, state] = await Promise.all([targets.get(db, 'MAINTENANCE_EQUIPMENT', completionId), ownMaterials(db, [a]), journal(db)]), m = views.get(completionId);
   if (!target?.valid || target.clientId !== a.clientId || target.snapshot.originVisitType !== a.targetType || target.snapshot.originVisitId !== parentId(a)) return refused('MAINTENANCE_SOURCE_REVIEW', 'A manutenção tem de pertencer a esta visita e cliente, com execução e decisão confirmadas.');
   if (m?.state !== 'MATCHED') return refused('MAINTENANCE_MATERIALS_REQUIRED', 'Registe os materiais e confirme a compatibilidade com o consumo líquido desta visita.');
-  if (target.snapshot.endAt.slice(0, 7) !== a.monthRef || a.targetSnapshot.endAt.slice(0, 7) !== a.monthRef) return refused('MAINTENANCE_PERIOD_REVIEW', 'A visita, manutenção e atribuição têm de pertencer ao mesmo mês de execução (UTC).');
+  let period; try { period = rules.sharePeriod(a, target, 1); } catch (error) { return refused('MAINTENANCE_PERIOD_REVIEW', error.message); }
   if (live(a.maintenanceMaterialShares).some(s => s.share.completionId === completionId)) return refused('MAINTENANCE_ALREADY_SHARED', 'Esta manutenção já tem uma parcela ativa desta atribuição. Anule-a antes de corrigir.');
   const item = m.record.items.find(line => sameProduct(line, productOf(a)));
   if (!item) return refused('MAINTENANCE_PRODUCT_REQUIRED', 'Este produto e unidade não foram declarados nesta revisão.');
@@ -142,13 +142,13 @@ async function preview(db, expense, allocationId, completionId, selectedQuantity
   const chosen = selectedQuantity === null ? available > 0n ? decimal(available) : '0' : selectedQuantity;
   const calc = rules.calculation(a.amountCents, parentQuantity, used, maintenanceUsed, item.quantity, chosen);
   if (state.review || !calc) return refused('MAINTENANCE_SHARE_BUDGET', 'A quantidade tem de caber na revisão e na atribuição, incluindo todas as compras, e permitir uma parcela positiva em cêntimos.');
-  const allocationBefore = allocationFacts(a), value = { version: 1, basis, expenseId: expense.id, expenseVersion: expense.version, allocationId, completionId, monthRef: a.monthRef, allocationBefore, allocationHash: r.hash(allocationBefore), parentQuantity, quantity: decimal(quantity(chosen)), material: { ...productOf(a), declaredQuantity: item.quantity }, used, maintenanceUsed, materials: m.record, materialsHash: r.hash(m.record), consumptionSource: m.comparison.source, consumptionHash: m.comparison.sourceHash, target, ...calc };
+  const allocationBefore = allocationFacts(a), value = { ...period, basis, expenseId: expense.id, expenseVersion: expense.version, allocationId, completionId, allocationBefore, allocationHash: r.hash(allocationBefore), parentQuantity, quantity: decimal(quantity(chosen)), material: { ...productOf(a), declaredQuantity: item.quantity }, used, maintenanceUsed, materials: m.record, materialsHash: r.hash(m.record), consumptionSource: m.comparison.source, consumptionHash: m.comparison.sourceHash, target, ...calc };
   try { return json(await rules.verify({ available: true, ...value, hash: r.hash(value) }, r.hash)); } catch (_) { return refused('MAINTENANCE_SHARE_REVIEW', 'As provas dos materiais ou da atribuição precisam de revisão.'); }
 }
 async function reminderPreview(db, expense, a, reminderId, selectedQuantity) {
   const [view, state] = await Promise.all([reminders.current(db, reminderId), journal(db)]), target = view.target;
   if (!view.valid || target.clientId !== a.clientId || target.snapshot.originVisitType !== a.targetType || target.snapshot.originVisitId !== parentId(a) || view.materials?.mode !== 'DECLARED') return refused('REMINDER_RESOURCES_REVIEW', 'Confirme a associação e os materiais próprios deste lembrete na mesma visita.');
-  if (target.snapshot.endAt.slice(0, 7) !== a.monthRef || a.targetSnapshot.endAt.slice(0, 7) !== a.monthRef) return refused('MAINTENANCE_PERIOD_REVIEW', 'O lembrete, a visita e a atribuição têm de pertencer ao mesmo mês UTC.');
+  let period; try { period = rules.sharePeriod(a, target, view.resources.event.preview.schema + 1); } catch (error) { return refused('MAINTENANCE_PERIOD_REVIEW', error.message); }
   if (live(a.maintenanceMaterialShares).some(s => s.share.reminderId === reminderId)) return refused('MAINTENANCE_ALREADY_SHARED', 'Este lembrete já tem uma parcela ativa desta atribuição. Anule-a antes de corrigir.');
   const item = view.materials.items.find(line => sameProduct(line, productOf(a)));
   if (!item) return refused('MAINTENANCE_PRODUCT_REQUIRED', 'Este produto e unidade não foram declarados no lembrete.');
@@ -156,7 +156,7 @@ async function reminderPreview(db, expense, a, reminderId, selectedQuantity) {
   const remaining = quantity(parentQuantity) - quantity(used.quantity), ownRemaining = quantity(item.quantity) - quantity(maintenanceUsed.quantity), available = remaining < ownRemaining ? remaining : ownRemaining;
   const chosen = selectedQuantity === null ? available > 0n ? decimal(available) : '0' : selectedQuantity, calc = rules.calculation(a.amountCents, parentQuantity, used, maintenanceUsed, item.quantity, chosen);
   if (state.review || !calc) return refused('MAINTENANCE_SHARE_BUDGET', 'A quantidade tem de caber no lembrete e na atribuição, incluindo todas as compras e os restantes serviços.');
-  const allocationBefore = allocationFacts(a), value = { version: view.resources.event.preview.schema + 1, basis, expenseId: expense.id, expenseVersion: expense.version, allocationId: a.id, completionId: null, reminderId, monthRef: a.monthRef, allocationBefore, allocationHash: r.hash(allocationBefore), parentQuantity, quantity: decimal(quantity(chosen)), material: { ...productOf(a), declaredQuantity: item.quantity }, used, maintenanceUsed, materials: view.materials, materialsHash: r.hash(view.materials), ...reminders.evidence(view), target, ...calc };
+  const allocationBefore = allocationFacts(a), value = { ...period, basis, expenseId: expense.id, expenseVersion: expense.version, allocationId: a.id, completionId: null, reminderId, allocationBefore, allocationHash: r.hash(allocationBefore), parentQuantity, quantity: decimal(quantity(chosen)), material: { ...productOf(a), declaredQuantity: item.quantity }, used, maintenanceUsed, materials: view.materials, materialsHash: r.hash(view.materials), ...reminders.evidence(view), target, ...calc };
   try { return json(await rules.verify({ available: true, ...value, hash: r.hash(value) }, r.hash)); } catch (_) { return refused('MAINTENANCE_SHARE_REVIEW', 'As provas dos materiais ou da atribuição precisam de revisão.'); }
 }
 async function hasActive(db, allocations) {

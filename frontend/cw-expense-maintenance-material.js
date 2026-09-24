@@ -26,6 +26,7 @@
       node(box, 'p', 'Origem: ' + p.allocationBefore.targetSnapshot.label + ' · Despesa #' + p.expenseId + ' · Atribuição #' + p.allocationId + ' · Linha de compra #' + p.allocationBefore.purchaseItemId);
       node(box, 'p', p.material.productName + ' · ' + p.quantity + ' ' + p.material.unit + ' nesta parcela · Declaração: ' + p.material.declaredQuantity + ' ' + p.material.unit);
       node(box, 'p', 'Já repartido neste serviço, em todas as compras: ' + p.maintenanceUsed.quantity + ' ' + p.material.unit + ' · ' + p.monthRef + ' (UTC)');
+      if(p.period)node(box,'p','Mês da visita: '+p.period.parentMonthRef+' · Mês da manutenção: '+p.monthRef+' (UTC). '+(removing?'A anulação retira a parcela do mês da manutenção e devolve-a ao mês da visita.':'O remanescente fica no mês da visita; esta parcela passa para o mês da manutenção.'));
       node(box, 'p', 'Custo original: ' + money(p.allocationBefore.amountCents) + ' / ' + p.parentQuantity + ' ' + p.material.unit + ' · Já repartido nesta atribuição: ' + money(p.used.amountCents));
       node(box, 'strong', (removing ? 'Valor a devolver à visita: ' : 'Parcela para esta manutenção: ') + money(p.amountCents));
       if (!removing) node(box, 'p', 'Fica na visita: ' + money(p.remainingAmountCents) + ' / ' + p.remainingQuantity + ' ' + p.material.unit + ' · Ainda sem parcela neste serviço: ' + p.remainingMaintenanceQuantity + ' ' + p.material.unit);
@@ -77,7 +78,7 @@
         if (a.maintenanceMaterialShareReview) node(row, 'p', 'Reveja o histórico e as origens dos materiais antes de usar estes custos.');
       }
       for (const s of a.maintenanceMaterialShares) {
-        const item = node(row, 'div', '', 'row'); item.dataset.maintenanceMaterialShareId = s.share.id; node(item, 'strong', s.share.preview.target.label); node(item, 'p', s.share.preview.quantity + ' ' + s.share.preview.material.unit + ' · ' + money(s.share.preview.amountCents) + ' · ' + (s.voidedAt ? 'Parcela anulada' : s.needsReview ? 'Parcela por rever' : 'Parcela confirmada')); node(item, 'p', s.voidReason || s.share.reason);
+        const item = node(row, 'div', '', 'row'); item.dataset.maintenanceMaterialShareId = s.share.id; node(item, 'strong', s.share.preview.target.label); node(item, 'p', s.share.preview.quantity + ' ' + s.share.preview.material.unit + ' · ' + money(s.share.preview.amountCents) + ' · ' + (s.voidedAt ? 'Parcela anulada' : s.needsReview ? 'Parcela por rever' : 'Parcela confirmada')); node(item, 'p', s.voidReason || s.share.reason); if(s.share.preview.period)node(item,'p','Mês da manutenção: '+s.share.preview.monthRef+' · Origem na visita: '+s.share.preview.period.parentMonthRef+' (UTC)');
         if (!s.voidedAt) button(item, 'Anular parcela de materiais', () => remove(s).catch(error => note(error.message)), true);
       }
       if (!a.voidedAt && !a.needsReview && a.valuationType === 'MATERIAL' && ['REGULAR','EXTRA'].includes(a.targetType)) button(row, 'Repartir materiais com manutenção', () => review(a), true);

@@ -54,12 +54,15 @@
         const s = summary(result.summary, query.monthRef); valuation.showSummary(s.valuations); reportTotal = result.total;
         for (const [title, value] of [['Atribuído no mês', s.allocatedAmountCents], ['A clientes e serviços', s.clientAmountCents], ['Custos gerais no mês', s.companyAmountCents], ['Por atribuir agora · todos os meses', s.unallocatedAmountCents]]) { const box = node(el('costMetrics'), 'div', '', 'metric'); node(box, 'span', title); node(box, 'strong', money(value)); }
         el('costBasis').textContent = 'Mês da atribuição: ' + s.monthRef + ' · Consulta: ' + new Date(s.generatedAt).toLocaleString('pt-PT') + '. Totais de todas as atribuições do mês, independentemente da pesquisa abaixo. ' + s.reviewCount + ' atribuições por rever. Compras de stock atribuídas: ' + money(s.stockPurchaseAmountCents) + '; o consumo valorizado é discriminado abaixo.';
+        if (!count(s.unplacedShareReviewCount ?? 0) || s.unplacedShareReviewCount > 0 && (s.state !== 'REVIEW' || s.allocatedAmountCents !== null)) throw Error('Histórico mensal das parcelas não confirmado.');
+        if (s.unplacedShareReviewCount) el('costBasis').textContent += ' Há históricos de parcelas sem mês verificável. Os totais mensais ficam por confirmar até à revisão dessas origens.';
         el('costStatus').textContent = (label || 'Clientes e custos gerais') + ' · ' + result.total + ' resultados · Página ' + reportPage + '. ' + (s.state === 'REVIEW' ? 'Existem valores por confirmar.' : 'Atribuições consultadas.');
         for (const row of result.rows) {
           if (typeof row.label !== 'string' || !cents(row.amountCents) || !(row.clientId === null || positive(row.clientId))) throw Error('Linha de custos inválida.');
           const card = node(el('costRows'), 'article', ''); node(card, 'h3', row.label); node(card, 'p', money(row.amountCents));
           if (query.mode === 'ALLOCATIONS') {
             if (!positive(row.id) || !positive(row.expenseId) || row.monthRef !== query.monthRef || row.clientId !== (query.clientId === 'COMPANY' ? null : Number(query.clientId)) || row.targetType !== query.targetType || (row.targetId || 0) !== Number(query.targetId) || typeof row.needsReview !== 'boolean') throw Error('Atribuição não confirmada para este destino.');
+            if(row.sourceMonthRef!==undefined){if(!validMonth(row.sourceMonthRef)||!positive(row.sourceAllocationId)||typeof row.maintenanceShareId!=='string')throw Error('Mês de origem da parcela não confirmado.');node(card,'p','Parcela em '+row.monthRef+' · Atribuição original em '+row.sourceMonthRef+' (UTC)');}
             node(card, 'p', row.targetLabel + ' · ' + (row.needsReview ? 'Por rever' : 'Atribuição confirmada')); node(card, 'p', row.reason); button(card, 'Abrir despesa #' + row.expenseId, () => host.openExpense(row.expenseId));
           } else {
             if (!count(row.allocationCount) || !count(row.reviewCount)) throw Error('Totais por destino incompletos.');

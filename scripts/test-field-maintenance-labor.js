@@ -16,7 +16,7 @@ async function server() { const child = fork(require.resolve('./fixtures/expense
   const send = (body, status = 200, server = one) => api('/api/expenses/commands', body, status, server);
   async function voidRequest(result) { return { requestId: randomUUID(), command: 'VOID_MAINTENANCE_LABOR_SHARE', expenseId: result.expenseId, expectedVersion: (await detail(result.expenseId)).version, data: { allocationId: result.share.allocationId, shareId: result.share.id, shareHash: result.shareHash, reason: 'Devolver esta parcela à visita após revisão', confirmed: true } }; }
   async function report() { return api('/api/expenses/costs?' + new URLSearchParams({ monthRef: f.month, mode: 'TARGETS', clientId: f.client.id })); }
-  const late = await f.late(); assert.equal((await preview(late.allocation, late.review.id)).code, 'MAINTENANCE_PERIOD_REVIEW');
+  const late = await f.late(), latePreview = await preview(late.allocation, late.review.id); assert.equal(latePreview.version, 6); assert.equal(latePreview.period.parentMonthRef, late.allocation.monthRef); assert.equal(latePreview.monthRef, f.month);
   const expenseId = await f.salary(), a = await f.value(expenseId); assert.equal(a.amountCents, 100);
   const original = JSON.stringify(await prisma.expenseAllocation.findUniqueOrThrow({ where: { id: a.id } })), bases = JSON.stringify(await prisma.expenseLaborBasis.findMany({ where: { expenseId } }));
   await api('/api/expenses/' + expenseId + '/maintenance-labor-candidates?allocationId=' + a.id, null, 401, one, null);

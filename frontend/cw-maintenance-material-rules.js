@@ -20,6 +20,19 @@
   const productOf = a => ({ productName: normalize(a.valuationSnapshot?.source?.item?.productName), unit: normalize(a.quantityUnit) });
   const parentKey = a => a.targetType + ':' + parentId(a);
   const materialKey = a => JSON.stringify([parentKey(a), productOf(a).productName, productOf(a).unit]);
+  // A secondary share follows its own confirmed completion month. The original
+  // allocation and its paid/stock reserves always retain the parent's month.
+  function sharePeriod(a, target, legacyVersion) {
+    const parent = a?.targetSnapshot?.endAt, child = target?.snapshot?.endAt;
+    if (!iso(parent) || !iso(child) || !/^(20|21)\d{2}-(0[1-9]|1[0-2])$/.test(a?.monthRef) || parent.slice(0, 7) !== a.monthRef || !/^(20|21)\d{2}-(0[1-9]|1[0-2])$/.test(child.slice(0, 7))) throw Error('Confirme os meses de execução da visita e da manutenção (UTC).');
+    const monthRef = child.slice(0, 7);
+    return monthRef === a.monthRef ? { version: legacyVersion, monthRef } : { version: 6, monthRef, period: { schema: 1, basis: 'CONFIRMED_EXECUTION_MONTHS_UTC', parentMonthRef: a.monthRef, maintenanceMonthRef: monthRef } };
+  }
+  function verifyPeriod(p, legacyVersion) {
+    const expected = sharePeriod(p?.allocationBefore, p?.target, legacyVersion), actual = p?.period;
+    if (p.version !== expected.version || p.monthRef !== expected.monthRef || (!expected.period ? Object.hasOwn(p, 'period') : !actual || typeof actual !== 'object' || Array.isArray(actual) || Object.keys(actual).length !== 4 || Object.entries(expected.period).some(([k, v]) => actual[k] !== v))) throw Error('Os meses da parcela não correspondem à visita e à manutenção confirmadas.');
+    return p;
+  }
   function calculation(totalCents, parentQuantity, used, maintenanceUsed, declaredQuantity, selectedQuantity) {
     const total = quantity(parentQuantity), consumed = quantity(used?.quantity), ownUsed = quantity(maintenanceUsed?.quantity), declared = quantity(declaredQuantity), selected = quantity(selectedQuantity);
     if (!positive(totalCents) || !count(used?.amountCents) || [total, consumed, ownUsed, declared, selected].some(q => q === null) || total <= 0n || declared <= 0n || selected <= 0n || consumed > total || ownUsed > declared || used.amountCents > totalCents) return null;
@@ -33,8 +46,9 @@
   function facts(p) {
     const fail = () => { throw Error('Repartição dos materiais não confirmada.'); };
     const a = p?.allocationBefore, t = p?.target, m = p?.materials, c = p?.consumptionSource, item = p?.material;
-    if (!p || p.available !== true || p.version !== 1 || p.basis !== basis || !positive(p.expenseId) || !positive(p.expenseVersion) || !positive(p.allocationId) || !positive(p.completionId) || !a || a.id !== p.allocationId || a.expenseId !== p.expenseId || a.valuationType !== 'MATERIAL' || !['REGULAR','EXTRA'].includes(a.targetType) || !positive(parentId(a)) || a.voidedAt !== null || a.monthRef !== p.monthRef || !positive(a.clientId) || !positive(a.purchaseItemId) || !positive(a.amountCents) || !sha(p.hash) || !sha(p.allocationHash)) fail();
-    if (!iso(a.targetSnapshot?.endAt) || a.targetSnapshot.endAt.slice(0, 7) !== p.monthRef || t?.type !== 'MAINTENANCE_EQUIPMENT' || t.id !== p.completionId || t.valid !== true || t.clientId !== a.clientId || t.snapshot?.type !== t.type || t.snapshot.id !== t.id || t.snapshot.clientId !== a.clientId || !positive(t.snapshot.poolId) || t.snapshot.status !== 'CONFIRMED' || !iso(t.snapshot.endAt) || t.snapshot.endAt.slice(0, 7) !== p.monthRef || t.snapshot.originVisitType !== a.targetType || t.snapshot.originVisitId !== parentId(a) || t.snapshot.executionBasis !== 'CONFIRMED_MAINTENANCE_EXECUTION_AND_DECISION' || !positive(t.snapshot.decisionId) || !sha(t.snapshot.decisionFingerprint) || !sha(t.snapshot.executionFingerprint) || t.label !== t.snapshot.label || t.clientName !== t.snapshot.clientName) fail();
+    verifyPeriod(p, 1);
+    if (!p || p.available !== true || p.reminderId !== undefined || p.basis !== basis || !positive(p.expenseId) || !positive(p.expenseVersion) || !positive(p.allocationId) || !positive(p.completionId) || !a || a.id !== p.allocationId || a.expenseId !== p.expenseId || a.valuationType !== 'MATERIAL' || !['REGULAR','EXTRA'].includes(a.targetType) || !positive(parentId(a)) || a.voidedAt !== null || !positive(a.clientId) || !positive(a.purchaseItemId) || !positive(a.amountCents) || !sha(p.hash) || !sha(p.allocationHash)) fail();
+    if (t?.type !== 'MAINTENANCE_EQUIPMENT' || t.id !== p.completionId || t.valid !== true || t.clientId !== a.clientId || t.snapshot?.type !== t.type || t.snapshot.id !== t.id || t.snapshot.clientId !== a.clientId || !positive(t.snapshot.poolId) || t.snapshot.status !== 'CONFIRMED' || t.snapshot.originVisitType !== a.targetType || t.snapshot.originVisitId !== parentId(a) || t.snapshot.executionBasis !== 'CONFIRMED_MAINTENANCE_EXECUTION_AND_DECISION' || !positive(t.snapshot.decisionId) || !sha(t.snapshot.decisionFingerprint) || !sha(t.snapshot.executionFingerprint) || t.label !== t.snapshot.label || t.clientName !== t.snapshot.clientName) fail();
     if (m?.schema !== 1 || m.basis !== 'DECLARED_EQUIPMENT_MATERIALS' || m.mode !== 'DECLARED' || !Array.isArray(m.items) || !m.items.length || m.items.length > 20 || m.origin?.visitType !== a.targetType || m.origin.visitId !== parentId(a) || m.origin.clientId !== a.clientId || m.origin.poolId !== t.snapshot.poolId || !positive(m.origin.technicianId) || m.origin.technicianId !== a.valuationSnapshot?.source?.service?.technicianId || !item || !sameProduct(item, productOf(a)) || item.productName !== normalize(item.productName) || item.unit !== normalize(item.unit) || !item.productName || !item.unit || a.quantityUnit !== item.unit || a.purchaseItemId !== a.valuationSnapshot?.source?.item?.id) fail();
     const line = m.items.filter(row => sameProduct(row, item));
     if (line.length !== 1 || item.declaredQuantity !== line[0].quantity || !Array.isArray(c?.declarations) || c.schema !== 1 || c.basis !== 'CURRENT_NET_VISIT_CONSUMPTION' || c.visit?.visitType !== a.targetType || c.visit.visitId !== parentId(a) || c.visit.clientId !== a.clientId || c.visit.poolId !== m.origin.poolId || c.visit.technicianId !== m.origin.technicianId || c.visit.endAt !== a.targetSnapshot.endAt || !Array.isArray(c.movements) || !c.movements.length) fail();
@@ -47,12 +61,12 @@
     return { value, target: Object.fromEntries(targetFields.map(k => [k, t.snapshot[k]])) };
   }
   async function verify(p, hash, allocation) {
-    if ([2,3].includes(p?.version)) return (typeof module === 'object' && module.exports ? require('./cw-reminder-visit-cost-rules') : globalThis.CWReminderVisitCostRules).verify(p, hash, allocation);
+    if (p?.reminderId !== undefined) return (typeof module === 'object' && module.exports ? require('./cw-reminder-visit-cost-rules') : globalThis.CWReminderVisitCostRules).verify(p, hash, allocation);
     const f = facts(p);
     const declared = p.consumptionSource.declarations.find(row => row.id === p.completionId).materials;
     const checked = await Promise.all([hash(f.value), hash(p.allocationBefore), hash(p.materials), hash(p.consumptionSource), hash(f.target), hash(declared)]);
     if (checked.some((value, i) => value !== [p.hash, p.allocationHash, p.materialsHash, p.consumptionHash, p.target.hash, p.materialsHash][i]) || allocation && await hash(allocationFacts(allocation)) !== p.allocationHash) throw Error('O cálculo não corresponde aos materiais selecionados.');
     return p;
   }
-  return { basis, commands, fields, positive, count, iso, sha, normalize, quantity, decimal, parentId, parentKey, materialKey, productOf, sameProduct, allocationFacts, calculation, facts, verify };
+  return { basis, commands, fields, positive, count, iso, sha, normalize, quantity, decimal, parentId, parentKey, materialKey, productOf, sameProduct, allocationFacts, sharePeriod, verifyPeriod, calculation, facts, verify };
 });

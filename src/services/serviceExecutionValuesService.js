@@ -50,7 +50,7 @@ function build(monthRef,generatedAt,partition,creditStates,expenses){
     if(state==='PERIOD_MISMATCH')costPeriodMismatchAllMonths++;
     if(executionMonth!==monthRef)continue;
     const kind=a.valuationType==='MATERIAL'?'MATERIAL':a.valuationType==='LABOR'?'LABOR':a.stockPurchase?'PURCHASE':'OTHER';
-    ensure(a.targetType,a.targetId,a.clientId,a.clientName||a.targetSnapshot.clientName||'Cliente histórico').costSources.push({serviceType:a.targetType,serviceId:a.targetId,clientId:a.clientId,id:a.id,expenseId:a.expenseId,label:a.expenseTitle,documentNumber:a.expenseDocument,expenseDate:a.expenseDate,allocationMonth:a.monthRef,serviceMonth:executionMonth,amountCents:a.amountCents,kind,state,reason:a.reason,...(a.sourceAllocationId?{sourceAllocationId:a.sourceAllocationId,costAttributionBasis:a.costAttributionBasis,maintenanceShareId:a.maintenanceShareId||null}:{})});
+    ensure(a.targetType,a.targetId,a.clientId,a.clientName||a.targetSnapshot.clientName||'Cliente histórico').costSources.push({serviceType:a.targetType,serviceId:a.targetId,clientId:a.clientId,id:a.id,expenseId:a.expenseId,label:a.expenseTitle,documentNumber:a.expenseDocument,expenseDate:a.expenseDate,allocationMonth:a.monthRef,serviceMonth:executionMonth,amountCents:a.amountCents,kind,state,reason:a.reason,...(a.sourceAllocationId?{sourceAllocationId:a.sourceAllocationId,costAttributionBasis:a.costAttributionBasis,maintenanceShareId:a.maintenanceShareId||null,...(a.sourceMonthRef?{sourceMonthRef:a.sourceMonthRef}:{})}:{})});
   }
   // Unplaced/changed service costs remain visible globally and also block a
   // matching service's cost total; absence of a usable record is never zero cost.
