@@ -1,11 +1,12 @@
 'use strict';
-const r = require('./fieldWriteRequestService'), rules = require('../../frontend/cw-equipment-material-review-rules');
+const r = require('./fieldWriteRequestService');
+function create(rules, field) {
 const json = value => JSON.parse(JSON.stringify(value));
 function original(row, receipts) {
-  return { id: row.id, planId: row.planId, requestId: row.requestId, fingerprint: row.fingerprint, completedAt: row.completedAt.toISOString(), resultHash: r.hash(row.result), receiptHash: r.hash(receipts.filter(p => p.requestId === row.requestId)), record: row.result?.completion?.materials || null };
+  return { id: row.id, planId: row.planId, requestId: row.requestId, fingerprint: row.fingerprint, completedAt: row.completedAt.toISOString(), resultHash: r.hash(row.result), receiptHash: r.hash(receipts.filter(p => p.requestId === row.requestId)), record: row.result?.completion?.[field] || null };
 }
 async function read(db, rows, receipts) {
-  const states = new Map(rows.map(row => [row.id, { valid: true, headHash: null, action: 'ORIGINAL', record: row.result?.completion?.materials || null, history: [] }]));
+  const states = new Map(rows.map(row => [row.id, { valid: true, headHash: null, action: 'ORIGINAL', record: row.result?.completion?.[field] || null, history: [] }]));
   if (!rows.length) return states;
   const events = await db.fieldWriteRequest.findMany({ where: { scope: rules.scope, resourceId: { in: rows.map(row => row.id) } }, orderBy: { id: 'asc' } });
   const byId = new Map(rows.map(row => [row.id, row]));
@@ -22,4 +23,6 @@ async function read(db, rows, receipts) {
   }
   return states;
 }
-module.exports = { original, read, rules };
+return { original, read, rules };
+}
+module.exports = { ...create(require('../../frontend/cw-equipment-material-review-rules'), 'materials'), create };

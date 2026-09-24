@@ -1,6 +1,7 @@
 'use strict';
 const recorded = require('./recordedWorkTimeService');
 const { hash } = require('./fieldWriteRequestService');
+const journal=require('./equipmentMaterialReviewJournal').create(require('../../frontend/cw-equipment-time-review-rules'),'workTime');
 const basis = 'DECLARED_EQUIPMENT_WORK_INTERVAL', multipleBasis = 'DECLARED_EQUIPMENT_WORK_INTERVALS';
 const intervals = value => Array.isArray(value?.intervals) ? value.intervals.filter(w=>w&&typeof w==='object') : value?.intervals === undefined && value ? [{startAt:value.startAt,endAt:value.endAt}] : [];
 const duration = value => intervals(value).reduce((sum,w)=>sum+Date.parse(w.endAt)-Date.parse(w.startAt),0);
@@ -45,32 +46,38 @@ function within(input, visit, completedAt) {
 async function conflict(db, input, visit, visitType) {
   return (await recorded.conflicts(db, intervals(input).map(w=>({type:visitType,id:visit.id,technicianId:visit.technicianId,startAt:new Date(w.startAt),endAt:new Date(w.endAt)})))).size > 0;
 }
-async function check(db, input, visit, visitType, completedAt) {
-  if (!within(input, visit, completedAt)) return 'O tempo da revisão tem de ficar dentro da visita iniciada, com técnico atribuído, e não pode terminar no futuro.';
+async function readState(db,rows){
+  const proofs=await receipts(db,rows),revisions=await journal.read(db,rows,[...proofs.values()]);return {proofs,revisions};
+}
+function effective(row,{proofs,revisions}){
+  const state=revisions.get(row.id),changed=!!state?.headHash,record=changed?state.record:time(row),valid=!!state?.valid&&intact(row,proofs);
+  return {record,valid,had:!state?.valid||changed&&state.action!=='WITHDRAW'||!changed&&!!hadTime(row,proofs),withdrawn:changed&&state.action==='WITHDRAW',revision:changed?{headHash:state.headHash,action:state.action,proof:state.history.at(-1)}:null};
+}
+async function check(db,input,visit,visitType,completedAt,excludeId=null){
+  if(!within(input,visit,completedAt))return 'O tempo da revisão tem de ficar dentro da visita iniciada, com técnico atribuído, e não pode terminar no futuro.';
   // The caller holds the parent visit lock, serializing every plan in this visit.
-  const rows = await db.equipmentMaintenanceCompletion.findMany({ where: visitType === 'EXTRA' ? { extraVisitId: visit.id } : { visitId: visit.id }, select: selection }), proofs = await receipts(db, rows);
-  if (rows.some(row => hadTime(row, proofs) && (!sound(time(row)) || !intact(row, proofs) || overlaps(input, time(row))))) return 'Já existe tempo registado noutra revisão desta visita. Reveja os intervalos antes de confirmar.';
-  const associated = await require('./reminderVisitResourceJournal').reservations(db, visit, visitType);
-  if (!associated.valid || associated.records.some(r => require('./reminderVisitResourceJournal').rules.intervals(r).some(w => overlaps(input, {startAt:w.startedAt,endAt:w.endedAt})))) return 'O intervalo coincide com uma parcela de lembrete ou existe uma declaração por rever.';
-  if (await conflict(db, input, visit, visitType)) return 'O técnico tem tempo registado em simultâneo noutro serviço. Reveja os horários antes de confirmar.';
+  const rows=(await db.equipmentMaintenanceCompletion.findMany({where:visitType==='EXTRA'?{extraVisitId:visit.id}:{visitId:visit.id},select:selection})).filter(row=>row.id!==excludeId),state=await readState(db,rows),expected=origin(visit,visitType);
+  if(rows.some(row=>{const w=effective(row,state);return w.withdrawn&&(!w.valid||hash(w.revision.proof.revision.preview.origin)!==hash(Object.fromEntries(Object.entries(expected).filter(([k])=>k!=='visitStartAt'))))||w.had&&(!w.valid||!sound(w.record)||!within(w.record,visit,row.completedAt)||Object.entries(expected).some(([k,v])=>w.record.origin?.[k]!==v)||overlaps(input,w.record));}))return 'Já existe tempo registado noutra revisão desta visita. Reveja os intervalos antes de confirmar.';
+  const associated=await require('./reminderVisitResourceJournal').reservations(db,visit,visitType);
+  if(!associated.valid||associated.records.some(r=>require('./reminderVisitResourceJournal').rules.intervals(r).some(w=>overlaps(input,{startAt:w.startedAt,endAt:w.endedAt}))))return 'O intervalo coincide com uma parcela de lembrete ou existe uma declaração por rever.';
+  if(await conflict(db,input,visit,visitType))return 'O técnico tem tempo registado em simultâneo noutro serviço. Reveja os horários antes de confirmar.';
   return null;
 }
-async function prepareRead(db, groups) {
-  const proofs = await receipts(db, groups.flatMap(g => g.rows));
-  const conflicts = await recorded.conflicts(db, groups.flatMap(g => g.rows.filter(row => sound(time(row))).flatMap(row => intervals(time(row)).map(w=>({type:g.visitType,id:g.visit.id,technicianId:time(row).origin.technicianId,startAt:new Date(w.startAt),endAt:new Date(w.endAt)})))));
-  const associated = new Map();
-  for (const g of groups) associated.set(g.visitType+':'+g.visit.id, await require('./reminderVisitResourceJournal').reservations(db,g.visit,g.visitType));
-  return { proofs, conflicts, associated };
+async function prepareRead(db,groups){
+  const state=await readState(db,groups.flatMap(g=>g.rows));
+  const conflicts=await recorded.conflicts(db,groups.flatMap(g=>g.rows.flatMap(row=>{const w=effective(row,state).record;return sound(w)?intervals(w).map(i=>({type:g.visitType,id:g.visit.id,technicianId:w.origin.technicianId,startAt:new Date(i.startAt),endAt:new Date(i.endAt)})):[];})));
+  const associated=new Map();for(const g of groups)associated.set(g.visitType+':'+g.visit.id,await require('./reminderVisitResourceJournal').reservations(db,g.visit,g.visitType));
+  return {...state,conflicts,associated};
 }
-async function describe(db, rows, visit, visitType, prepared) {
-  const expected = origin(visit, visitType), views = new Map(), { proofs, conflicts, associated } = prepared || await prepareRead(db, [{ rows, visit, visitType }]);
-  for (const row of rows) {
-    const record = time(row);
-    if (!record) { views.set(row.id, { state: hadTime(row, proofs) ? 'REVIEW' : 'MISSING', record: null }); continue; }
-    const own = associated?.get(visitType+':'+visit.id);
-    const review = own?.valid === false || own?.records.some(r => require('./reminderVisitResourceJournal').rules.intervals(r).some(w => overlaps(record,{startAt:w.startedAt,endAt:w.endedAt}))) || !sound(record) || !intact(row, proofs) || Object.entries(expected).some(([key, value]) => record.origin?.[key] !== value) || !within(record, visit, row.completedAt) || rows.some(other => other.id !== row.id && hadTime(other, proofs) && (!sound(time(other)) || !intact(other, proofs) || overlaps(record, time(other)))) || conflicts.has(visitType + ':' + visit.id);
-    views.set(row.id, { state: review ? 'REVIEW' : 'RECORDED', record });
+async function describe(db,rows,visit,visitType,prepared){
+  const state=prepared||await prepareRead(db,[{rows,visit,visitType}]),expected=origin(visit,visitType),views=new Map(),own=state.associated.get(visitType+':'+visit.id);
+  for(const row of rows){
+    const w=effective(row,state),record=w.record,extra=w.revision?{original:time(row)||null,revision:w.revision}:{};
+    if(w.withdrawn&&w.valid&&hash(w.revision.proof.revision.preview.origin)===hash(Object.fromEntries(Object.entries(expected).filter(([k])=>k!=='visitStartAt')))){views.set(row.id,{state:'WITHDRAWN',record:null,...extra});continue;}
+    if(!record){views.set(row.id,{state:w.had||w.withdrawn?'REVIEW':'MISSING',record:null,...extra});continue;}
+    const review=own?.valid===false||own?.records.some(r=>require('./reminderVisitResourceJournal').rules.intervals(r).some(i=>overlaps(record,{startAt:i.startedAt,endAt:i.endedAt})))||!w.valid||!sound(record)||Object.entries(expected).some(([k,v])=>record.origin?.[k]!==v)||!within(record,visit,row.completedAt)||rows.some(other=>{if(other.id===row.id)return false;const t=effective(other,state);return t.had&&(!t.valid||!sound(t.record)||overlaps(record,t.record));})||state.conflicts.has(visitType+':'+visit.id);
+    views.set(row.id,{state:review?'REVIEW':'RECORDED',record,...extra});
   }
   return views;
 }
-module.exports = { parse, create, check, describe, selection, prepareRead, intervals, sound };
+module.exports={parse,create,check,describe,selection,prepareRead,intervals,sound,journal,readState,effective,within};

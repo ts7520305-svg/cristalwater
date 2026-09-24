@@ -40,7 +40,7 @@
     for (const row of rows) {
       const card = node('article', '', list); card.className = 'mb-card'; card.dataset.mbSource = `${row.kind}:${row.sourceId}`;
       node('h3', row.title, card); node('p', `Concluída: ${new Date(row.completedAt).toLocaleString('pt-PT')}${row.visitId ? ` · Visita ${row.visitType === 'EXTRA' ? 'extra' : 'regular'} #${row.visitId}` : ''}`, card); node('p', row.details, card);
-      if (row.kind === 'EQUIPMENT') { const link = node('a', 'Consultar / corrigir materiais', card); link.href = '/equipment-material-review?completionId=' + row.sourceId + '&poolId=' + row.poolId; }
+      if (row.kind === 'EQUIPMENT') { const timeLink=node('a','Consultar / corrigir tempos',card);timeLink.href='/equipment-time-review.html?completionId='+row.sourceId+'&poolId='+row.poolId;const link = node('a', 'Consultar / corrigir materiais', card); link.href = '/equipment-material-review?completionId=' + row.sourceId + '&poolId=' + row.poolId; }
       if (row.kind === 'REMINDER') { const link = node('a', 'Materiais e horas do lembrete', card); link.href = '/reminder-resources?reminderId=' + row.sourceId + '&poolId=' + row.poolId; }
       if (row.decision) {
         node('p', `Decisão para ${row.reviewedFor.clientName} · ${row.reviewedFor.poolName}`, card);

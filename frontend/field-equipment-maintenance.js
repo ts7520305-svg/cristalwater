@@ -12,6 +12,7 @@
   const instant = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value) && Number.isFinite(Date.parse(value)) && new Date(value).toISOString() === value;
   const times=store.equipmentTimes,lastTime=value=>times(value).at(-1);
   const validTime=value=>{try{store.equipmentTime(value,true);return true;}catch(_){return false;}};
+  const storedTimeInput=v=>Array.isArray(v?.intervals)?{intervals:v.intervals.map(w=>({startAt:w?.startAt,endAt:w?.endAt}))}:{startAt:v?.startAt,endAt:v?.endAt};
   const sameTime=(a,b)=>!a&&!b||!!a&&!!b&&JSON.stringify(store.equipmentTime(a,true))===JSON.stringify(store.equipmentTime(b,true));
   const validMaterialDraft = value => value && ['NONE', 'DECLARED'].includes(value.mode) && Array.isArray(value.items) && value.items.length <= 20 && Object.keys(value).length === 2 && value.items.every(item => item && Object.keys(item).length === 3 && [['productName', 160], ['unit', 24], ['quantity', 30]].every(([key, max]) => typeof item[key] === 'string' && item[key].length <= max)) && (value.mode !== 'NONE' || !value.items.length);
   const hasDraft = draft => draft.notes.trim() || draft.workTime || draft.materials;
@@ -170,8 +171,9 @@
       if (plan.completedInVisit) {
         node('p', 'Revisão já registada nesta visita.', card);
         const saved = plan.completion?.workTime;
-        node('p', saved?.state === 'REVIEW' ? 'Tempo por rever: o intervalo ou a visita de origem mudou.' : timeText(saved?.record), card);
-        if (saved?.state === 'REVIEW' && validTime(Array.isArray(saved.record?.intervals)?{intervals:saved.record.intervals.map(w=>({startAt:w?.startAt,endAt:w?.endAt}))}:{startAt:saved.record?.startAt,endAt:saved.record?.endAt})) node('p', 'Registo original: ' + timeText(saved.record), card);
+        node('p',saved?.state==='WITHDRAWN'?'Declaração de tempo anulada pela administração; tempo próprio por confirmar.':saved?.state==='REVIEW'?'Tempo por rever: os intervalos ou a visita de origem mudaram.':timeText(saved?.record),card);
+        if(saved?.revision){node('p','Tempos revistos pela administração; o registo original foi conservado.',card);if(saved.original)node('p',validTime(storedTimeInput(saved.original))?'Registo original: '+timeText(saved.original):'O registo original precisa de verificação.',card);}
+        if (saved?.state === 'REVIEW' && validTime(storedTimeInput(saved.record))) node('p', 'Registo original: ' + timeText(saved.record), card);
         materialsView(plan.completion?.materials, card);
       }
       if (offline || !data.canComplete || !plan.canComplete || plan.completedInVisit) {

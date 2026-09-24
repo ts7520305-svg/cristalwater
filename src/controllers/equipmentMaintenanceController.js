@@ -2,14 +2,19 @@ const business = require('../business/equipment/EquipmentMaintenanceBusiness');
 const reminders = require('../business/equipment/EquipmentMaintenanceReminderBusiness');
 const billing = require('../business/equipment/MaintenanceBillingBusiness');
 const materials = require('../services/equipmentMaterialReviewService');
+const times = require('../services/equipmentTimeReviewService');
 const resources = require('../services/reminderResourceService');
 const reminderMaterials = require('../services/reminderMaterialService');
 const visitResources = require('../services/reminderVisitResourceService');
 const reminderVisits = require('../services/reminderVisitService');
-const resourceHandle = fn => async (req, res) => { try { res.json(await fn(req)); } catch (e) { res.status(e.status || e.statusCode || 503).json({ ok:false,error:e.status || e.statusCode ? e.message : 'Não foi possível confirmar os recursos do lembrete. Conserve o pedido e consulte o resultado.' }); } };
+const resourceHandle = fn => async (req, res) => { try { res.json(await fn(req)); } catch (e) { res.status(e.status || e.statusCode || 503).json({ ok:false,error:e.status || e.statusCode ? e.message : 'Não foi possível confirmar os recursos da intervenção. Conserve o pedido e consulte o resultado.' }); } };
 const materialHandle = fn => async (req, res) => { try { res.json(await fn(req)); } catch (e) { res.status(e.status || e.statusCode || 503).json({ ok: false, error: e.status || e.statusCode ? e.message : 'Não foi possível confirmar os materiais. Conserve o pedido e consulte o resultado antes de repetir.' }); } };
 const handle = fn => async (req, res, next) => { try { res.json(await fn(req)); } catch (e) { if (e.code === 'P2002') return res.status(409).json({ ok: false, error: 'Já existe um plano com este título nesta piscina. Atualize a lista ou escolha outro título.' }); if (e.status || e.statusCode) return res.status(e.status || e.statusCode).json({ ok: false, error: e.message }); next(e); } };
 module.exports = {
+  workTime: resourceHandle(req => times.detail(req.user, req.params.id)),
+  previewWorkTime: resourceHandle(req => times.preview(req.user, req.params.id, req.body)),
+  reviewWorkTime: resourceHandle(req => times.command(req.user, req.params.id, req.body)),
+  recoverWorkTime: resourceHandle(req => times.recover(req.user, req.params.requestId)),
   visitResources: resourceHandle(req => visitResources.detail(req.user, req.params.id)),
   previewVisitResources: resourceHandle(req => visitResources.preview(req.user, req.params.id, req.body)),
   declareVisitResources: resourceHandle(req => visitResources.command(req.user, req.params.id, req.body)),

@@ -22,11 +22,12 @@ function budget(rows) {
 function calculation(totalCents, totalMs, used, ownMs) {
   return reminders.rules.timeCalculation(totalCents, totalMs, used, ownMs);
 }
-function validPreview(p) {
+async function validPreview(p) {
   try {
     const { available, hash, ...value } = p, a = p.allocationBefore, w = p.workTime, t = p.target;
     const calc = calculation(a.amountCents, p.parentDurationMs, p.used, w.durationMs);
-    return available === true && p.version === (w.schema===2?4:1) && p.basis === basis && sha(hash) && r.hash(value) === hash && positive(p.expenseId) && positive(p.expenseVersion) && positive(p.allocationId) && p.allocationId === a.id && a.expenseId === p.expenseId && a.valuationType === 'LABOR' && ['REGULAR','EXTRA'].includes(a.targetType) && a.quantityUnit === 'SECOND' && a.voidedAt === null && duration(a) === p.parentDurationMs && r.hash(a) === p.allocationHash && p.monthRef === a.monthRef && positive(a.clientId) && positive(parentId(a)) && iso(a.targetSnapshot?.endAt) && a.targetSnapshot.endAt.slice(0, 7) === p.monthRef &&
+    if(p.workTimeRevision!==undefined)await time.journal.rules.share(p,r.hash);
+    return available === true && p.version === (p.workTimeRevision!==undefined?5:w.schema===2?4:1) && p.basis === basis && sha(hash) && r.hash(value) === hash && positive(p.expenseId) && positive(p.expenseVersion) && positive(p.allocationId) && p.allocationId === a.id && a.expenseId === p.expenseId && a.valuationType === 'LABOR' && ['REGULAR','EXTRA'].includes(a.targetType) && a.quantityUnit === 'SECOND' && a.voidedAt === null && duration(a) === p.parentDurationMs && r.hash(a) === p.allocationHash && p.monthRef === a.monthRef && positive(a.clientId) && positive(parentId(a)) && iso(a.targetSnapshot?.endAt) && a.targetSnapshot.endAt.slice(0, 7) === p.monthRef &&
       t.type === 'MAINTENANCE_EQUIPMENT' && t.id === p.completionId && positive(t.id) && t.valid === true && t.clientId === a.clientId && t.snapshot?.originVisitType === a.targetType && t.snapshot.originVisitId === parentId(a) && iso(t.snapshot.endAt) && t.snapshot.endAt.slice(0, 7) === p.monthRef && r.hash(Object.fromEntries(targets.executionFields(t.type).map(k => [k, t.snapshot[k]]))) === t.hash &&
       time.sound(w) && w.origin?.visitType === a.targetType && w.origin.visitId === parentId(a) && w.origin.clientId === a.clientId && w.origin.poolId === t.snapshot.poolId && positive(w.origin.technicianId) && w.origin.technicianId === a.valuationSnapshot?.source?.service?.technicianId && time.intervals(w).every(i=>Date.parse(i.startAt)>=Date.parse(a.targetSnapshot.startAt)&&Date.parse(i.endAt)<=Date.parse(a.targetSnapshot.endAt)) && r.hash(w) === p.workTimeHash && calc && Object.entries(calc).every(([k, v]) => p[k] === v);
   } catch { return false; }
@@ -44,7 +45,7 @@ async function journal(db, expenseIds) {
     if (!e.result.applied) continue;
     if (e.command === commands[0]) {
       const p = s?.preview, prior = state.records.filter(row => row.share.allocationId === s?.allocationId);
-      let verified = validPreview(p); if ([2,3].includes(p?.version)) { try { await reminders.rules.verify(p, r.hash); verified = true; } catch (_) { verified = false; } }
+      let verified = await validPreview(p); if ([2,3].includes(p?.version)) { try { await reminders.rules.verify(p, r.hash); verified = true; } catch (_) { verified = false; } }
       if (!s || s.schema !== 1 || s.id !== e.requestId || s.expenseId !== e.expenseId || s.allocationId !== d.allocationId || !reminders.rules.matchesRequest(s, d) || s.createdById !== e.actorId || !iso(s.createdAt) || s.reason !== reason || e.result.reason !== reason || !verified || p.expenseVersion !== e.request.expectedVersion || p.expenseId !== s.expenseId || p.allocationId !== s.allocationId || p.reminderId !== s.reminderId || p.completionId !== s.completionId || p.hash !== d.previewHash || p.amountCents !== d.amountCents || d.confirmed !== true || r.hash(s) !== e.result.shareHash || r.hash(budget(prior)) !== r.hash(p.used) || live(prior).some(row => identity(row.share) === identity(s))) { state.review = true; continue; }
       state.records.push({ share: s, hash: e.result.shareHash, voidedAt: null, voidReason: null });
     } else {
@@ -83,7 +84,7 @@ async function decorate(db, expenses) {
       const rows = state.records.filter(s => s.share.allocationId === a.id), active = live(rows), used = budget(rows);
       const shares = rows.map(s => {
         const p = s.share.preview, reminder = reminderViews.get(s.share.reminderId), t = s.share.reminderId === undefined ? byTarget.get(s.share.completionId) : reminder?.target, w = times.get(s.share.completionId);
-        const sourceReview = s.share.reminderId === undefined ? w?.state !== 'RECORDED' || r.hash(w?.record || null) !== p.workTimeHash : !reminder?.valid || reminder.resourcesHash !== p.resourcesHash || r.hash(reminder.workTime) !== p.workTimeHash;
+        const sourceReview = s.share.reminderId === undefined ? w?.state !== 'RECORDED' || r.hash(w?.record || null) !== p.workTimeHash || (w?.revision?.headHash||null)!==(p.workTimeRevision?.hash||null) : !reminder?.valid || reminder.resourcesHash !== p.resourcesHash || r.hash(reminder.workTime) !== p.workTimeHash;
         const needsReview = !s.voidedAt && (state.review || a.voidedAt !== null || a.needsReview || p.allocationHash !== r.hash(allocationFacts(a)) || !t?.valid || t.hash !== p.target.hash || sourceReview);
         return { ...s, needsReview };
       });
@@ -127,7 +128,7 @@ async function candidates(db, expense, allocationId, page, reminderMode = false)
   return { available: true, expenseId: expense.id, expenseVersion: expense.version, allocationId, page, pageSize: 10, total, rows: rows.map(row => targetRows.find(t => t.id === row.id)).filter(Boolean).map(t => ({ id: t.id, label: t.label, workTimeState: times.get(t.id)?.state || 'MISSING', durationMs: times.get(t.id)?.record?.durationMs || null, targetConfirmed: t.valid, shared: live(a.maintenanceShares).some(s => s.share.completionId === t.id) })) };
 }
 async function preview(db, expense, allocationId, completionId, lock = false, reminderMode = false) {
-  if (lock) { if (reminderMode) await reminders.current(db, completionId, true); else await require('./expenseMaintenanceTargets').get(db, 'MAINTENANCE_EQUIPMENT', completionId, true); }
+  if (lock) { if (reminderMode) await reminders.current(db, completionId, true); else {const source=await db.equipmentMaintenanceCompletion.findUnique({where:{id:completionId},select:{visitId:true,extraVisitId:true}});if(source)await db.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${ 'maintenance-material-share:'+(source.extraVisitId?'EXTRA':'REGULAR')+':'+(source.extraVisitId||source.visitId) }))::text`;await require('./expenseMaintenanceTargets').get(db, 'MAINTENANCE_EQUIPMENT', completionId, true);} }
   const a = await sourceAllocation(db, expense, allocationId);
   if (!a || a.needsReview || expense.cancelledAt) return refused('PARENT_COST_REVIEW', 'Confirme primeiro o custo de trabalho da visita e as suas origens.');
   if (reminderMode) return reminderPreview(db, expense, a, completionId);
@@ -139,9 +140,9 @@ async function preview(db, expense, allocationId, completionId, lock = false, re
   if (live(a.maintenanceShares).some(s => s.share.completionId === completionId)) return refused('MAINTENANCE_ALREADY_SHARED', 'Esta manutenção já tem uma parcela ativa deste custo. Anule-a antes de corrigir.');
   const used = budget(a.maintenanceShares), parentDurationMs = duration(a), calc = calculation(a.amountCents, parentDurationMs, used, w.record.durationMs);
   if (!calc) return refused('MAINTENANCE_SHARE_BUDGET', 'O intervalo não permite atribuir um custo positivo em cêntimos dentro do tempo e valor restantes da visita.');
-  const allocationBefore = allocationFacts(a), value = { version: w.record.schema===2?4:1, basis, expenseId: expense.id, expenseVersion: expense.version, allocationId, completionId, monthRef: a.monthRef, allocationBefore, allocationHash: r.hash(allocationBefore), parentDurationMs, used, workTime: w.record, workTimeHash: r.hash(w.record), target, ...calc };
+  const allocationBefore = allocationFacts(a), value = { version: w.revision?5:w.record.schema===2?4:1, ...(w.revision?{workTimeRevision:w.revision.proof}:{}), basis, expenseId: expense.id, expenseVersion: expense.version, allocationId, completionId, monthRef: a.monthRef, allocationBefore, allocationHash: r.hash(allocationBefore), parentDurationMs, used, workTime: w.record, workTimeHash: r.hash(w.record), target, ...calc };
   const p = { available: true, ...value, hash: r.hash(value) };
-  if (!validPreview(p)) return refused('MAINTENANCE_SHARE_REVIEW', 'As provas da repartição precisam de revisão.');
+  if (!await validPreview(p)) return refused('MAINTENANCE_SHARE_REVIEW', 'As provas da repartição precisam de revisão.');
   return json(p);
 }
 async function reminderPreview(db, expense, a, reminderId) {
@@ -174,7 +175,7 @@ async function apply(db, who, env, expense) {
   } else {
     if (typeof d.shareId !== 'string' || !/^[0-9a-f-]{36}$/.test(d.shareId) || !sha(d.shareHash)) r.fail('Consulte a parcela antes de anular.');
     let state = (await journal(db, [expense.id])).get(expense.id), row = state.records.find(s => s.share.id === d.shareId && s.share.allocationId === d.allocationId);
-    if (row?.share.reminderId !== undefined) { const a = row.share.preview.allocationBefore; await db.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${ 'maintenance-material-share:' + a.targetType + ':' + parentId(a) }))::text`; state = (await journal(db, [expense.id])).get(expense.id); row = state.records.find(s => s.share.id === d.shareId && s.share.allocationId === d.allocationId); }
+    if (row) { const a = row.share.preview.allocationBefore; await db.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${ 'maintenance-material-share:' + a.targetType + ':' + parentId(a) }))::text`; state = (await journal(db, [expense.id])).get(expense.id); row = state.records.find(s => s.share.id === d.shareId && s.share.allocationId === d.allocationId); }
     if (state.review || !row || row.voidedAt || row.hash !== d.shareHash) return refused('MAINTENANCE_SHARE_STATE', 'A parcela mudou, está anulada ou o histórico precisa de revisão.');
     result = { share: row.share, shareHash: row.hash, voidedAt: new Date().toISOString() };
   }
