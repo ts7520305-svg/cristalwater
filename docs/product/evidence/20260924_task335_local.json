@@ -52,6 +52,10 @@
     "insurance.pdf": "5c42c2affdf3d91fd37017980ff1584d66c98188af022f592c8f5285a129a9f0",
     "work.pdf": "6087523f282c2ce27cd1ebea8555986d8727d51fc1800993ba48757346d190a8"
   },
-  "nativeCi": "not yet run for this code",
-  "restore": "pending native CI"
+  "nativeCi": "in_progress; no complete approval yet",
+  "restore": "pending native CI",
+  "publishedCommit": "4325bf01e173b3f94df42f2281aebf3de5f7f0c5",
+  "publishedTree": "a7c9a7a0548ad718383c90d2b795dd55f6a96849",
+  "workflowRunId": 36048130043,
+  "workflowUrl": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36048130043"
 }

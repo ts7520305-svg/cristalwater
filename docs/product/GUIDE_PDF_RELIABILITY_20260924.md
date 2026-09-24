@@ -28,3 +28,7 @@ Os CI da TASK332 (`36042944183`) e TASK333 (`36043258018`) executaram 230 grupos
 As evidências originais permanecem em [TASK332](evidence/20260924_task332_initial_failure.json) e [TASK333](evidence/20260924_task333_initial_failure.json). Em ambos, o restauro foi omitido. A correção e o percurso de preços passaram localmente; confirmar o CI integrado antes de declarar aprovação desses lotes. Uma primeira chamada local usou um nome inexistente para o teste de preços; a invocação corrigida executou os três grupos previstos e terminou com código zero.
 
 Base de trabalho: `81d543938f95aa68fb253d4cb7847fd5d91dc1b7`. Publicação apenas em `work/field-readiness-20260915-simulation`, sem merge, deploy ou contactos reais. [Evidência local](evidence/20260924_task335_local.json).
+
+## Publicação
+
+Publicada em `4325bf01e173b3f94df42f2281aebf3de5f7f0c5`, árvore `a7c9a7a0548ad718383c90d2b795dd55f6a96849`, idêntica à validada localmente. [CI 36048130043](https://github.com/ts7520305-svg/cristalwater/actions/runs/36048130043) em execução; aprovação completa e restauro por confirmar.

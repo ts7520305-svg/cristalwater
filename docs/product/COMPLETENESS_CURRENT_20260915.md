@@ -1,8 +1,8 @@
 # Cristal Water — matriz atual de conclusão
 
-## Estado de retoma — 24/09/2026, TASK335 validada localmente
+## Estado de retoma — 24/09/2026, TASK335 publicada
 
-PDFs operacionais com Unicode, paginação e cache privada, validação de IDs antes do controlo da viatura e correção do seletor antigo que falhou nos CI TASK332–333. 579 unitários, quatro técnicos, sintaxe e cinco grupos API/navegador aprovados localmente; seis páginas PDF revistas. [Relatório](GUIDE_PDF_RELIABILITY_20260924.md). Runner com 232 grupos; CI integrado/restauro por confirmar. Os dois CI anteriores terminaram com 229/230 grupos aprovados e não fizeram restauro. A tarefa cobre estes PDFs e não fecha todo o inventário de apresentação ou os critérios históricos.
+PDFs operacionais com Unicode, paginação e cache privada, validação de IDs antes do controlo da viatura e correção do seletor antigo que falhou nos CI TASK332–333. 579 unitários, quatro técnicos, sintaxe e cinco grupos API/navegador aprovados localmente; seis páginas PDF revistas. [Relatório](GUIDE_PDF_RELIABILITY_20260924.md). Publicada em `4325bf01e173b3f94df42f2281aebf3de5f7f0c5`, árvore `a7c9a7a0548ad718383c90d2b795dd55f6a96849`, idêntica à validada localmente. [CI 36048130043](https://github.com/ts7520305-svg/cristalwater/actions/runs/36048130043) em execução; aprovação completa e restauro por confirmar. Runner com 232 grupos. Os dois CI anteriores terminaram com 229/230 grupos aprovados e não fizeram restauro. A tarefa cobre estes PDFs e não fecha todo o inventário de apresentação ou os critérios históricos.
 
 ## Estado de retoma — 24/09/2026, TASK334 publicada
 
