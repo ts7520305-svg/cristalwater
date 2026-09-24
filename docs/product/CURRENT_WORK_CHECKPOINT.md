@@ -1,6 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 24/09/2026, TASK311
+## Retoma atual — 24/09/2026, TASK312
+
+- Base `8751e7550a6a6f9ad79abdb6899ff1d771988d4a`, fecho TASK311. TASK312 implementada e validada localmente: declaração administrativa dos materiais e de um intervalo próprio de lembrete independente, origem/cliente/técnico confirmados, anulação sem reescrever o original, recibo recuperável e sobreposições entre visitas/reparações/lembretes. [REMINDER_RESOURCE_ORIGINS_20260924.md](REMINDER_RESOURCE_ORIGINS_20260924.md).
+- 458 testes unitários/69 ficheiros, sintaxe 609/208/62, atualização de 36 migrações com preservação e esquema final igual, novo grupo API/navegador e regressões dirigidas de tempos/custos de reparações e manutenções aprovados. Runner 215 grupos, cache v127, uma tabela/migração nova e nenhuma dependência nova. Publicar e confirmar CI completo/restauro desta árvore antes do fecho. A aprovação TASK311 abaixo não aprova esta tarefa.
+
+## Aprovação anterior — TASK311
 
 - O utilizador pediu continuar até o sistema estar completo, sem parar depois de cada tarefa implementável. Prosseguir a matriz até surgir uma dependência real, mantendo as restrições de produção/contactos abaixo.
 - Base `43d15160583e5d709f30ceeb4bf5ed68f5e71aae`, fecho TASK310. TASK311 aprovada: correção/completamento/NONE/anulação de materiais pela administração, original e recibo técnico conservados, história própria, revisão das parcelas MATERIAL e custos LABOR intactos. [EQUIPMENT_MATERIAL_CORRECTIONS_20260924.md](EQUIPMENT_MATERIAL_CORRECTIONS_20260924.md).
@@ -22,7 +27,7 @@
 
 ## Próxima ação
 
-1. Prosseguir TASK312: materiais e tempos próprios de lembretes de serviço, com origens/execução confirmadas, declaração explícita e histórico recuperável. TASK310 e TASK311 estão aprovadas no CI completo e restauro. Não repetir TASK300–311. Repartições entre meses e correção de registos antigos sem recibo verificável continuam abertos.
+1. Confirmar CI/restauro e fechar TASK312. Prosseguir TASK313: valorização explícita do tempo independente dos lembretes por despesa/base paga confirmada, preservando limites conjuntos e fontes/recibos. Não repetir TASK300–312. Associação a visitas, múltiplos intervalos separados, consumo/valorização dos materiais dos lembretes, repartições entre meses e correção de registos antigos sem recibo verificável continuam abertos.
 2. Continuar restantes gastos/ajustes/origens de receita e os pontos da [matriz atual](COMPLETENESS_CURRENT_20260915.md): históricos/ecrãs/PDFs/idiomas, volume e operação prolongada, VPS/fornecedores e piloto físico. Custos/receitas completos e lucro por apurar; não atribuir percentagem global sem critérios fechados. IA generativa offline/aprendizagem por piscina/vídeo e integrações completas continuam requisitos separados sem aprovação integral.
 
 ## Autorizações e regras vigentes
@@ -37,4 +42,4 @@ A app assinala os serviços que pedem fatura com IVA e regista checklist/número
 
 Este ficheiro foi reduzido ao estado atual para evitar truncar a retoma. O conteúdo anterior está integralmente preservado, sem alterações, em [archive/WORK_CHECKPOINT_THROUGH_TASK305_20260923.md](archive/WORK_CHECKPOINT_THROUGH_TASK305_20260923.md), copiado do commit TASK305 antes deste fecho documental. Esse arquivo contém estados antigos e próximos passos já superados; não os tratar como a fase ativa.
 
-A matriz atual e o relatório TASK311 prevalecem para escolher a próxima tarefa. Relatórios individuais e `docs/product/evidence/` conservam os critérios e os resultados anteriores, incluindo [LABOR_COST_COMPONENTS_20260923.md](LABOR_COST_COMPONENTS_20260923.md) e [evidence/20260923_task304_ci.json](evidence/20260923_task304_ci.json).
+A matriz atual e o relatório TASK312 prevalecem para escolher a próxima tarefa. Relatórios individuais e `docs/product/evidence/` conservam os critérios e os resultados anteriores, incluindo [LABOR_COST_COMPONENTS_20260923.md](LABOR_COST_COMPONENTS_20260923.md) e [evidence/20260923_task304_ci.json](evidence/20260923_task304_ci.json).

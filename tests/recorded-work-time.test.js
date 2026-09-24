@@ -4,8 +4,8 @@ const require = createRequire(import.meta.url);
 const { conflicts, key } = require('../src/services/recordedWorkTimeService');
 const date = n => new Date(Date.UTC(2004, 0, 1) + n * 1000);
 const visit = (id, start, end, extra = {}) => ({ id, type: 'REGULAR', technicianId: 1, status: 'DONE', startAt: date(start), endAt: end === null ? null : date(end), ...extra });
-function database(regular = [], extra = [], repairs = []) {
-  return { serviceVisit: { findMany: vi.fn(async () => regular) }, extraVisit: { findMany: vi.fn(async () => extra) }, repairWorkInterval: { findMany: vi.fn(async () => repairs) } };
+function database(regular = [], extra = [], repairs = [], reminders = []) {
+  return { serviceVisit: { findMany: vi.fn(async () => regular) }, extraVisit: { findMany: vi.fn(async () => extra) }, repairWorkInterval: { findMany: vi.fn(async () => repairs) }, reminderResourceDeclaration: { findMany: vi.fn(async () => reminders) } };
 }
 describe('recorded technician time across typed services', () => {
   it('allows adjacent endpoints and excludes only the same typed identity', async () => {
@@ -43,6 +43,14 @@ describe('recorded technician time across typed services', () => {
     expect(db.serviceVisit.findMany).not.toHaveBeenCalled();
     db.serviceVisit.findMany.mockRejectedValue(Error('unavailable'));
     await expect(conflicts(db, [visit(1, 0, 60)])).rejects.toThrow('unavailable');
+  });
+  it('reserves independent reminder work across clients and excludes only its own declaration', async () => {
+    const row=visit(1,0,60), reminder={id:1,technicianId:1,startedAt:date(0),endedAt:date(60)}, db=database([row],[],[],[reminder]);
+    expect(await conflicts(db,[row])).toEqual(new Set(['REGULAR:1']));
+    expect(db.reminderResourceDeclaration.findMany.mock.calls[0][0].where.voidedAt).toBe(null);
+    expect(await conflicts(database([],[],[],[reminder]),[{...row,type:'REMINDER_RESOURCE'}])).toEqual(new Set());
+    db.reminderResourceDeclaration.findMany.mockRejectedValue(Error('reminder history unavailable'));
+    await expect(conflicts(db,[row])).rejects.toThrow('reminder history unavailable');
   });
   it('batches reads by technician without narrowing to the selected client or month', async () => {
     const db = database();

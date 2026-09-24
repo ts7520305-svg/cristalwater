@@ -13,7 +13,7 @@ prisma.$transaction = (work, options) => transaction(async db => {
 }, options);
 const app = express(); app.use(express.json({ limit: '32kb' })); app.use('/api/expenses', require('../../src/routes/companyExpenseRoutes')); app.use('/api/labor-cost-bases', require('../../src/routes/laborCostCompositionRoutes')); app.use('/api/ai-admin', require('../../src/routes/aiAdminRoutes'));
 app.use('/api/equipment-maintenance', require('../../src/routes/equipmentMaintenanceRoutes'));
-for (const page of ['admin-expenses', 'admin-ai', 'labor-cost-bases', 'equipment-material-review']) app.get('/' + page, (req, res) => res.sendFile(path.resolve(__dirname, '../../frontend/' + page + '.html')));
+for (const page of ['admin-expenses', 'admin-ai', 'labor-cost-bases', 'equipment-material-review', 'reminder-resources']) app.get('/' + page, (req, res) => res.sendFile(path.resolve(__dirname, '../../frontend/' + page + '.html')));
 app.use(express.static(path.resolve(__dirname, '../../frontend')));
 const server = app.listen(0, '127.0.0.1', () => process.send({ port: server.address().port }));
 process.on('message', message => { fault = message.fault || null; process.send({ configured: true }); });

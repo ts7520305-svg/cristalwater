@@ -50,15 +50,17 @@ async function conflicts(db, requested) {
   if (!windows.size) return new Set();
   const visitWindows = [...windows.values()].map(row => ({ technicianId: row.technicianId, startAt: { lt: new Date(row.end) }, OR: [{ endAt: { gt: new Date(row.start) } }, { endAt: null }] }));
   const repairWindows = [...windows.values()].map(row => ({ technicianId: row.technicianId, startedAt: { lt: new Date(row.end) }, endedAt: { gt: new Date(row.start) } }));
-  const [regular, extra, repairs] = await Promise.all([
+  const [regular, extra, repairs, reminders] = await Promise.all([
     db.serviceVisit.findMany({ where: { OR: visitWindows }, select }),
     db.extraVisit.findMany({ where: { OR: visitWindows }, select }),
-    db.repairWorkInterval.findMany({ where: { voidedAt: null, OR: repairWindows }, select: { id: true, technicianId: true, startedAt: true, endedAt: true } })
+    db.repairWorkInterval.findMany({ where: { voidedAt: null, OR: repairWindows }, select: { id: true, technicianId: true, startedAt: true, endedAt: true } }),
+    db.reminderResourceDeclaration.findMany({ where: { voidedAt: null, OR: repairWindows }, select: { id: true, technicianId: true, startedAt: true, endedAt: true } })
   ]);
   const candidates = [
     ...regular.map(row => span({ ...row, type: 'REGULAR' }, true)),
     ...extra.map(row => span({ ...row, type: 'EXTRA' }, true)),
-    ...repairs.map(row => span({ ...row, type: 'REPAIR_INTERVAL', startAt: row.startedAt, endAt: row.endedAt }))
+    ...repairs.map(row => span({ ...row, type: 'REPAIR_INTERVAL', startAt: row.startedAt, endAt: row.endedAt })),
+    ...reminders.map(row => span({ ...row, type: 'REMINDER_RESOURCE', startAt: row.startedAt, endAt: row.endedAt }))
   ].filter(Boolean);
   const groups = index(candidates);
   return new Set(spans.filter(row => intersects(groups, row)).map(row => row.key));

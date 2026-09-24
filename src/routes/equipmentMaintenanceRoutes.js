@@ -11,6 +11,10 @@ router.get('/material-review-requests/:requestId', auth('ADMIN'), controller.rec
 router.get('/completions/:id/materials', auth('ADMIN'), controller.materials);
 router.post('/completions/:id/material-preview', auth('ADMIN'), controller.previewMaterials);
 router.post('/completions/:id/material-review', auth('ADMIN'), controller.reviewMaterials);
+router.get('/reminder-resource-requests/:requestId', auth('ADMIN'), controller.recoverReminderResources);
+router.get('/reminders/:id/resources', auth('ADMIN'), controller.reminderResources);
+router.post('/reminders/:id/resource-preview', auth('ADMIN'), controller.previewReminderResources);
+router.post('/reminders/:id/resources', auth('ADMIN'), controller.declareReminderResources);
 router.get('/pools/:poolId', auth('ADMIN'), controller.listPool);
 router.post('/pools/:poolId', auth('ADMIN'), controller.create);
 router.put('/plans/:id', auth('ADMIN'), controller.update);

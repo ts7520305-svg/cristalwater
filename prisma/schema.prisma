@@ -1750,6 +1750,32 @@ model GeneralReminder {
   @@index([technicianId])
 }
 
+// Declarations retain the confirmed source and identity after a reminder changes
+// or is deleted, following the existing RepairWorkInterval history model.
+model ReminderResourceDeclaration {
+  id Int @id @default(autoincrement())
+  reminderId Int
+  clientId Int
+  poolId Int
+  technicianId Int
+  owner String
+  requestId String
+  fingerprint String
+  snapshot Json
+  result Json
+  startedAt DateTime?
+  endedAt DateTime?
+  createdAt DateTime @default(now())
+  activeKey String? @unique
+  voidedAt DateTime?
+  voidedBy String?
+  voidReason String?
+
+  @@unique([owner, requestId])
+  @@index([reminderId, createdAt])
+  @@index([technicianId, startedAt, endedAt])
+}
+
 model SupplierAccount {
   id                Int                 @id @default(autoincrement())
   name              String
