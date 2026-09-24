@@ -23,7 +23,7 @@ function price(visit,sources){
 }
 async function collect(db,clientId,monthRef){
  const start=new Date(monthRef+'-01T00:00:00Z'),end=new Date(start);end.setUTCMonth(end.getUTCMonth()+1);
- let rows=await db.serviceVisit.findMany({where:{clientId,billed:false,status:{in:['DONE','COMPLETED','CONCLUIDA','CONCLUIDO']},endAt:{gte:start,lt:end},OR:[{contractService:{path:['billing'],equals:'PER_VISIT'}},{contractService:{path:['schema'],equals:2}}]},include:{pool:{select:{name:true}}},orderBy:{id:'asc'}});
+ let rows=await db.serviceVisit.findMany({where:{clientId,billed:false,status:{in:['DONE','COMPLETED','CONCLUIDA','CONCLUIDO']},endAt:{gte:start,lt:end},OR:[{contractService:{path:['billing'],equals:'PER_VISIT'}},{contractService:{path:['schema'],equals:2}}]},include:{pool:{select:{name:true}}},orderBy:{id:'asc'},take:10001});
  if(rows.length>10000)fail();for(const row of rows)await db.$queryRaw`SELECT id FROM "ServiceVisit" WHERE id=${row.id} FOR UPDATE`;
  if(rows.length)rows=await db.serviceVisit.findMany({where:{id:{in:rows.map(r=>r.id)},clientId,billed:false,status:{in:['DONE','COMPLETED','CONCLUIDA','CONCLUIDO']},endAt:{gte:start,lt:end}},include:{pool:{select:{name:true}}},orderBy:{id:'asc'}});
  const sources=await plans(db,rows),reserved=new Set((await db.invoiceLine.findMany({where:{referenceId:{in:rows.map(r=>r.id)},OR:[{type:'SERVICE'},{lineType:'SERVICE'}]},select:{referenceId:true}})).map(l=>l.referenceId)),lines=[],ids=[];let amountCents=0;

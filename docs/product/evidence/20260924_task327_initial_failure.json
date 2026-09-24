@@ -1,0 +1,181 @@
+{
+  "task": "TASK327",
+  "commit": "893b4fc99a4d1fd4827f08a05e0ef65fa7d2b859",
+  "tree": "998b227de3977cf811d431f228f32ad2bbf11ba3",
+  "workflowRun": 36038686127,
+  "job": 107765087773,
+  "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36038686127",
+  "conclusion": "failure",
+  "startedAt": "2026-09-24T18:04:18Z",
+  "completedAt": "2026-09-24T18:32:59Z",
+  "steps": [
+    {
+      "name": "Set up job",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 1,
+      "started_at": "2026-09-24T18:04:22Z",
+      "completed_at": "2026-09-24T18:04:23Z"
+    },
+    {
+      "name": "Initialize containers",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 2,
+      "started_at": "2026-09-24T18:04:23Z",
+      "completed_at": "2026-09-24T18:04:44Z"
+    },
+    {
+      "name": "Run actions/checkout@v4",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 3,
+      "started_at": "2026-09-24T18:04:44Z",
+      "completed_at": "2026-09-24T18:04:55Z"
+    },
+    {
+      "name": "Run actions/setup-node@v4",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 4,
+      "started_at": "2026-09-24T18:04:55Z",
+      "completed_at": "2026-09-24T18:04:58Z"
+    },
+    {
+      "name": "Run npm ci",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 5,
+      "started_at": "2026-09-24T18:04:58Z",
+      "completed_at": "2026-09-24T18:05:09Z"
+    },
+    {
+      "name": "Run npx prisma validate && npx prisma generate",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 6,
+      "started_at": "2026-09-24T18:05:09Z",
+      "completed_at": "2026-09-24T18:05:12Z"
+    },
+    {
+      "name": "Verify additive upgrade from the previous schema",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 7,
+      "started_at": "2026-09-24T18:05:12Z",
+      "completed_at": "2026-09-24T18:05:50Z"
+    },
+    {
+      "name": "Run npx playwright install --with-deps chromium",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 8,
+      "started_at": "2026-09-24T18:05:50Z",
+      "completed_at": "2026-09-24T18:06:35Z"
+    },
+    {
+      "name": "Run npm run check:syntax",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 9,
+      "started_at": "2026-09-24T18:06:35Z",
+      "completed_at": "2026-09-24T18:06:48Z"
+    },
+    {
+      "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 10,
+      "started_at": "2026-09-24T18:06:48Z",
+      "completed_at": "2026-09-24T18:07:47Z"
+    },
+    {
+      "name": "Run node scripts/test-field-suite.js",
+      "status": "completed",
+      "conclusion": "failure",
+      "number": 11,
+      "started_at": "2026-09-24T18:07:47Z",
+      "completed_at": "2026-09-24T18:32:51Z"
+    },
+    {
+      "name": "Restore database and uploaded files in isolated QA",
+      "status": "completed",
+      "conclusion": "skipped",
+      "number": 12,
+      "started_at": "2026-09-24T18:32:51Z",
+      "completed_at": "2026-09-24T18:32:51Z"
+    },
+    {
+      "name": "Run actions/upload-artifact@v4",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 13,
+      "started_at": "2026-09-24T18:32:51Z",
+      "completed_at": "2026-09-24T18:32:55Z"
+    },
+    {
+      "name": "Post Run actions/setup-node@v4",
+      "status": "completed",
+      "conclusion": "skipped",
+      "number": 24,
+      "started_at": "2026-09-24T18:32:55Z",
+      "completed_at": "2026-09-24T18:32:55Z"
+    },
+    {
+      "name": "Post Run actions/checkout@v4",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 25,
+      "started_at": "2026-09-24T18:32:55Z",
+      "completed_at": "2026-09-24T18:32:55Z"
+    },
+    {
+      "name": "Stop containers",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 26,
+      "started_at": "2026-09-24T18:32:55Z",
+      "completed_at": "2026-09-24T18:32:55Z"
+    },
+    {
+      "name": "Complete job",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 27,
+      "started_at": "2026-09-24T18:32:55Z",
+      "completed_at": "2026-09-24T18:32:55Z"
+    }
+  ],
+  "fieldSuite": {
+    "expected": 229,
+    "passed": 228,
+    "failed": [
+      {
+        "script": "test-field-equipment-history-time.js",
+        "code": 1,
+        "signal": null,
+        "ms": 1695
+      }
+    ],
+    "missing": [],
+    "unexpected": [],
+    "duplicates": []
+  },
+  "restore": {
+    "executed": false,
+    "conclusion": "skipped"
+  },
+  "jobLogSha256": "ab7185dee39f6556d71d9c6601bf5ddb40dcea90611086ecd5ba409a20c7315f",
+  "failure": {
+    "script": "test-field-equipment-history-time.js",
+    "code": "VISIT_REVIEW",
+    "location": "scripts/test-field-equipment-history-time.js:28",
+    "message": "Escolha uma visita concluída, com técnico, início e fim confirmados.",
+    "diagnosis": "The fixture rounds endAt up to the next second; a fast run can link the reminder before that timestamp. Production rejects a future completion correctly.",
+    "correction": "Wait for the rounded whole-second instant during fixture setup before marking the visit DONE. Retain the original equipment completion, full 180-second interval and unchanged production validation."
+  },
+  "scope": {
+    "nativeApproval": false,
+    "productionChanged": false
+  }
+}

@@ -116,3 +116,21 @@ describe('dated service exceptions',()=>{
     const data=calendar.serviceData({id:2,version:3},p.seasons[0],e.day,{},r.exception);expect(data.exception).toEqual({...e,roundId:null});expect(data.billing).toBe('INCLUDED_MONTHLY');expect(data).not.toHaveProperty('monthlyCents');
   });
 });
+
+
+describe('seasonal price normalization and legacy compatibility',()=>{
+  const shared=require('../frontend/cw-client-service-pricing');
+  const mixed=()=>{const f=fixture();Object.assign(f.servicePlan.seasons[1],{billing:'PER_VISIT',monthlyAmount:0,visitAmount:'17.23'});return f;};
+  it('uses identical monthly and unit amounts in backend and browser for a mixed agreement',()=>{
+    const input=mixed(),snapshot=rates.validate(input);expect(snapshot.servicePlan.schema).toBe(2);expect(snapshot.servicePlan.billing).toBe('BY_SEASON');expect(rates.calculate(snapshot,'2028-02').amount).toBe(100);
+    for(const month of ['2028-02','2028-06'])expect(shared.calculate(shared.fromInput(input.servicePlan),month)).toEqual(rates.calculate(snapshot,month));
+    const june=rates.calculate(snapshot,'2028-06');expect(june.amount).toBe(0);expect(june.perVisitRates).toEqual([{period:'SEASON_2',label:'Junho a agosto',unitAmount:17.23}]);
+  });
+  it('rejects contradictory charges, absent unit prices, fractions of cents and unsupported modes',()=>{
+    for(const change of [s=>s.monthlyAmount=1,s=>delete s.visitAmount,s=>s.visitAmount='1.005',s=>s.visitAmount=true,s=>s.visitAmount=-1,s=>s.visitAmount='10000000.01',s=>s.billing='HOURLY']){const input=mixed();change(input.servicePlan.seasons[1]);expect(()=>rates.validate(input)).toThrow();}
+    const input=fixture();input.servicePlan.seasons[0].visitAmount=1;expect(()=>rates.validate(input)).toThrow();
+  });
+  it('preserves normalized legacy snapshots when the monthly choice is explicit',()=>{
+    const old=rates.validate(fixture()),input=fixture();input.servicePlan.seasons.forEach(s=>Object.assign(s,{billing:'INCLUDED_MONTHLY',visitAmount:0}));expect(rates.validate(input)).toEqual(old);
+  });
+});

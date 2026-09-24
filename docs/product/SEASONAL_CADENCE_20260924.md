@@ -14,3 +14,8 @@ Os acordos semanais/mensais anteriores conservam a estrutura normalizada origina
 - Chromium real: edição, referência, rascunho após recarga, gravação da versão e preço preservado. Regressões do editor a 320/390/1440, claro/escuro, resposta perdida, offline, armazenamento indisponível e mudança de conta aprovadas.
 
 Ensaios executados em PGlite/socket e Chromium isolados, com fornecedores externos desligados. O CI completo em PostgreSQL 16 e restauro desta alteração permanece pendente. Exceções datadas e preço por visita continuam requisitos próprios.
+
+
+## CI inicial e preparação temporal corrigida
+
+O CI inicial da TASK327, [36038686127](https://github.com/ts7520305-svg/cristalwater/actions/runs/36038686127), job `107765087773`, executou os 229 grupos: 228 passaram e `test-field-equipment-history-time.js` falhou com `VISIT_REVIEW`. O restauro ficou por executar. O ensaio arredondava a conclusão para o segundo seguinte; numa execução rápida, a associação do lembrete chegava antes dessa hora. A proteção da aplicação recusou corretamente a conclusão futura. O ensaio passa a aguardar esse instante durante a preparação, conservando os 180 segundos, a conclusão original do equipamento e todas as verificações da aplicação. [Evidência inicial](evidence/20260924_task327_initial_failure.json). Confirmar um novo CI completo e restauro antes de aprovar o lote.

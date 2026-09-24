@@ -9,7 +9,11 @@ async function server(){const c=fork(require.resolve('./fixtures/expense-server'
 (async()=>{
   const admin=await prisma.user.findUniqueOrThrow({where:{email:process.env.ADMIN_EMAIL}}),token=jwt.sign({id:admin.id,userId:admin.id,principalType:'USER',role:'ADMIN'},getJwtSecret(),{expiresIn:'1h'}),one=await server(),two=await server();
   f=await require('./fixtures/equipment-history-material-data')(admin);const otherTech=await prisma.technician.create({data:{name:'QA unrelated historical time',active:true}});await prisma.extraVisit.update({where:{id:f.sameId},data:{technicianId:otherTech.id}});await prisma.serviceVisit.update({where:{id:f.race.id},data:{technicianId:otherTech.id}});
-  const endAt=new Date(Math.ceil(Date.now()/1000)*1000),startAt=new Date(+endAt-180000);await prisma.serviceVisit.update({where:{id:f.sameId},data:{startAt,endAt}});
+  const endAt=new Date(Math.ceil(Date.now()/1000)*1000),startAt=new Date(+endAt-180000);
+  // Reminder intervals require whole seconds. Let that instant arrive before
+  // marking the visit DONE, keeping the original equipment completion inside it.
+  await new Promise(resolve=>setTimeout(resolve,Math.max(0,+endAt-Date.now())+1));assert(+endAt<=Date.now());
+  await prisma.serviceVisit.update({where:{id:f.sameId},data:{startAt,endAt}});
   const span=(a,b)=>({startAt:new Date(+startAt+a*1000).toISOString(),endAt:new Date(+startAt+b*1000).toISOString()}),intervals=(...pairs)=>({intervals:pairs.map(([a,b])=>span(a,b))}),cid=f.legacy.id,base='/api/equipment-maintenance/completions/'+cid;
   async function api(path,body=null,status=200,instance=one,credential=token){const res=await fetch(instance.base+path,{method:body?'POST':'GET',headers:{...(credential?{Authorization:'Bearer '+credential}:{}),...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined}),v=await res.json();assert.equal(res.status,status,JSON.stringify(v));return v;}
   const detail=async()=>(await api(base+'/work-time')).declaration;

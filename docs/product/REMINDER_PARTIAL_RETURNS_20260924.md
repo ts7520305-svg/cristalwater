@@ -1,6 +1,8 @@
 # TASK326 — Devoluções parciais de materiais de lembretes
 
-Base: TASK325, `a7bd88b90d24841fb4a3d6ce9e32e5e2e72ef063`. Lote preparado para validação na branch de trabalho; não é uma entrega em produção.
+Base: TASK325, `a7bd88b90d24841fb4a3d6ce9e32e5e2e72ef063`. Implementação inicial conservada abaixo; o fecho atual inclui a correção offline e o complemento de prova.
+
+TASK326 aprovada no CI completo: código `b0b3b7f95c8ae5255bdf1cd1262c1565b3f23e89`, árvore `28c722ffaabc37c022dd7cb4fea24b8a5f6ab218`. [CI 36037714762](https://github.com/ts7520305-svg/cristalwater/actions/runs/36037714762), job `107761849340`, com 17 etapas aprovadas, 229/229 grupos distintos previstos, 548 unitários/77 ficheiros, quatro técnicos, sintaxe 620/217/62 e 40 migrações. Restauro PostgreSQL 16 de 127 tabelas/46 ficheiros, com linhas e hashes iguais. Job entre 17:55:59Z e 18:27:47Z de 24/09/2026; execução encerrada às 18:27:50Z. [Evidência](evidence/20260924_task326_ci.json). A falha inicial permanece documentada; esta aprovação inclui a correção offline e o complemento de prova das devoluções/custos líquidos. Não é uma aprovação de alterações posteriores nem de produção.
 
 ## Comportamento
 
@@ -19,9 +21,9 @@ A interface mostra a quantidade restante e o stock de origem. Rascunhos antigos 
 - Ensaio integrado ampliado: devolver 0,25 de 1 kg, conservar 100 cêntimos já atribuídos, recuperar o mesmo UUID em duas instâncias, rollback e anular só os 0,75 kg restantes.
 - Ensaio de navegador ampliado: rascunho de devolução, resposta perdida, clique duplo, recuperação sem novo POST, histórico, valorização de 0,75 kg em 25 cêntimos e larguras 320/390/1440.
 - Migração adicional preserva as origens financeiras anteriores e admite a versão 11. O ensaio compara os dados antes/depois e recusa comprovativos incompletos.
-- Os ensaios de API/navegador e migração deste lote ainda não foram executados nesta retoma: não há PostgreSQL local disponível. Devem passar no CI antes de declarar a TASK326 aprovada. Nenhuma migração foi aplicada a produção.
+- Na preparação inicial, a execução integrada ainda estava pendente. Foi posteriormente executada na base isolada e no CI PostgreSQL 16 aprovado acima. Nenhuma migração foi aplicada a produção.
 
-O lote mantém 228 grupos no runner, ampliando grupos existentes. Cache v141, 40 migrações, sem novas tabelas ou dependências. O CI e o restauro das TASK323–325 também ainda aguardavam fecho confirmado na última consulta.
+O lote mantém 228 grupos no runner, ampliando grupos existentes. Cache v141, 40 migrações, sem novas tabelas ou dependências. As TASK323–326 têm agora CI completo e restauro confirmados; os números deste parágrafo descrevem o lote inicial.
 
 ## Falha inicial e correção da sincronização de campo
 
@@ -29,6 +31,6 @@ O CI do commit `47261ccf12e577ce6181bda193135d9786d5d9c3` passou a migração, a
 
 O problema foi reproduzido de forma determinística: a passagem atual já tinha percorrido os avisos de água quando foi pedido o fecho. `sync()` devolvia a promessa dessa passagem e não garantia a execução do novo pedido. A correção conserva a serialização e faz outra passagem antes de resolver os pedidos concorrentes. Três testes cobrem fecho durante sincronização, vários chamadores sem duplicação e mudança de conta com preservação do fecho local. O teste de navegador original mantém-se inalterado. Cache v142.
 
-A execução da migração está confirmada no CI inicial; a correção ainda precisa do CI completo, dos percursos de devolução e do restauro antes da aprovação.
+A execução da migração está confirmada no CI inicial; a correção e o complemento passaram depois no CI completo e restauro identificados acima.
 
 A correção passou localmente a sintaxe, 546 testes unitários em 77 ficheiros e quatro testes técnicos.
