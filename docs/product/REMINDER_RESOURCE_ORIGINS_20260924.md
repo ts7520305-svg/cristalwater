@@ -42,7 +42,11 @@ O ensaio de atualização executou as 36 migrações sobre o esquema anterior, p
 
 O navegador Chromium passou rascunho/recarregamento, normalização de quantidades, fuso Europe/Lisbon, instantes UTC, prévia e resposta adulteradas, duplo clique, reenvio idêntico, resposta perdida com consulta, anulação recuperada, prévia atrasada, recusa obsoleta com rascunho conservado, offline e mudança de conta. Layout a 320/390/1440 px sem transbordo horizontal. Registos e capturas locais em `reports/field-visual/reminder-resources/`.
 
-Regressões dirigidas aprovadas: registo de trabalho das reparações, valorização LABOR das reparações, repartição LABOR das manutenções e correção de materiais de equipamento, incluindo os respetivos percursos de API e navegador. Os ensaios locais utilizam PostgreSQL embebido. O CI completo com PostgreSQL 16 e restauro desta árvore ainda tem de ser confirmado. O runner passa a 215 grupos; não há dependências novas.
+Regressões dirigidas aprovadas: registo de trabalho das reparações, valorização LABOR das reparações, repartição LABOR das manutenções e correção de materiais de equipamento, incluindo os respetivos percursos de API e navegador. Os ensaios locais utilizam PostgreSQL embebido. O CI completo com PostgreSQL 16 e restauro desta árvore foi confirmado, conforme a evidência abaixo. O runner passa a 215 grupos; não há dependências novas.
+
+## Aprovação nativa e restauro
+
+Código publicado `23a0770622c97a46dd4cd47252fb9d12f325fbf7`, árvore `bff43046d2523da13ccef3d9f2cdd00f607aa69d`, igual à validada localmente. [CI 35970699669](https://github.com/ts7520305-svg/cristalwater/actions/runs/35970699669), job `107539495069`, aprovado entre 2026-09-24T07:38:23Z e 2026-09-24T08:08:19Z (29m56s): 17 etapas, 215/215 grupos previstos distintos, sem falhas, faltas, entradas inesperadas ou duplicações; 458 unitários/69 ficheiros, quatro testes técnicos, gate geral de navegador, sintaxe 609/208/62 e 36 migrações. Restauro PostgreSQL 16 de 127 tabelas/46 ficheiros, com linhas e hashes iguais. Evidência [evidence/20260924_task312_ci.json](evidence/20260924_task312_ci.json). Cache v127, uma tabela/migração nova, sem dependências novas. O fecho posterior altera apenas documentação; a aprovação refere-se ao código e árvore acima.
 
 ## Continuação e limites
 
