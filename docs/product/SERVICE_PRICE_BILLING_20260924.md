@@ -14,3 +14,7 @@ Os cinco percursos — CORE, OPERATIONAL, CORE_LEGACY, página de faturação e 
 - O primeiro ensaio local detetou a dependência do cálculo partilhado ainda não integrada; o ficheiro foi acrescentado e o ensaio completo da API voltou a passar.
 
 Ensaios locais em PGlite/socket, com provedores desligados. O editor e a inclusão do novo ensaio API/navegador no runner são a continuação imediata. Não há novas migrações ou dependências. CI nativo e restauro desta integração ainda pendentes. A app continua a produzir documentos internos; a fatura fiscal é emitida externamente.
+
+## Confirmação CI TASK331
+
+Aprovado o código `891a767545ed38fc72e766efc6238b9cf4e801ca`, árvore `5a8a331fff501f49e92b188cb4f12aaa9a55caf3`: [CI 36041753365](https://github.com/ts7520305-svg/cristalwater/actions/runs/36041753365), job `107775342255`, 17 etapas e 229 grupos distintos sem falhas, 569 unitários/quatro técnicos. Restauro PostgreSQL 16 de 127 tabelas/46 ficheiros com linhas/hashes iguais às 19:03:03Z de 24/09/2026. [Evidência](evidence/20260924_task331_ci.json). O editor e as alterações posteriores das TASK332–334 têm validação própria.

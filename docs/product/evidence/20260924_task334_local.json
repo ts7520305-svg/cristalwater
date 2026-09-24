@@ -49,6 +49,9 @@
     "src/services/visitReportLanguage.js": "a98b1839a3ce94f97e141198cebaabc60e05cae5865bd49b25e8d7706bdeb9d6",
     "src/services/visitReportService.js": "916f2fd51f50c71aab510814ff3a735c72db479e6f8152d388fa9748a3047beb"
   },
-  "ciStatus": "pending publication and native PostgreSQL 16 full suite/restore",
-  "productionValidated": false
+  "ciStatus": "in_progress; native PostgreSQL 16 full suite/restore not yet confirmed",
+  "productionValidated": false,
+  "publishedCommit": "93fb9aa452017b0391b4116c204c58256711ba1f",
+  "publishedTree": "2a6cc16c4e84e18965a24e132a57e19b3917ad65",
+  "workflowRun": 36045589129
 }

@@ -33,3 +33,7 @@ Uma primeira asserção final comparava `updatedAt` com o valor anterior a uma m
 Esta consulta não atesta a titularidade histórica, não corrige/atribui o cliente e não desbloqueia o relatório para clientes ou técnicos. A eventual confirmação administrativa da origem e uma disponibilização posterior ao cliente exigem um fluxo próprio, com evidência, histórico e tratamento explícito das contradições. Visitas sem cliente confirmado continuam bloqueadas.
 
 Sem novas tabelas, migrações ou dependências. Cache v148. Confirmar o CI completo e restauro PostgreSQL 16 do commit publicado; os ensaios locais e o sucesso de versões anteriores não substituem essa confirmação. Sem merge, deploy ou contactos reais.
+
+## Publicação
+
+Código `93fb9aa452017b0391b4116c204c58256711ba1f`, árvore `2a6cc16c4e84e18965a24e132a57e19b3917ad65`, igual à preparada localmente. Publicado sem force na branch de trabalho existente. [CI 36045589129](https://github.com/ts7520305-svg/cristalwater/actions/runs/36045589129) iniciado; conclusão/restauro pendentes. Branch principal conservada em `6f27081e1d183ff584a62255b016b373836734db`.

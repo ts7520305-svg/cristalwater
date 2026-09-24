@@ -1,12 +1,12 @@
 # Cristal Water — matriz atual de conclusão
 
-## Estado de retoma — 24/09/2026, TASK334 local
+## Estado de retoma — 24/09/2026, TASK334 publicada
 
-TASK334 acrescenta consulta administrativa explícita dos relatórios históricos com cliente divergente. Conserva os registos, omite os dados atuais da instalação e mantém a origem por rever e os acessos de clientes bloqueados. 576 unitários, quatro técnicos, sintaxe e quatro grupos API/navegador aprovados localmente; PDF/HTML em PT/EN/FR/ES e revisão visual. [Relatório](HISTORICAL_REPORT_INSPECTION_20260924.md). Publicação/CI completo/restauro por confirmar; não constitui atestado de titularidade nem fecho dos critérios históricos.
+TASK334 acrescenta consulta administrativa explícita dos relatórios históricos com cliente divergente. Conserva os registos, omite os dados atuais da instalação e mantém a origem por rever e os acessos de clientes bloqueados. 576 unitários, quatro técnicos, sintaxe e quatro grupos API/navegador aprovados localmente; PDF/HTML em PT/EN/FR/ES e revisão visual. [Relatório](HISTORICAL_REPORT_INSPECTION_20260924.md). Publicada em `93fb9aa452017b0391b4116c204c58256711ba1f`; CI `36045589129` iniciado, aprovação completa/restauro por confirmar; não constitui atestado de titularidade nem fecho dos critérios históricos.
 
 TASK328 aprovada, incluindo as cadências da TASK327: código `b000c06d7dc178b960464b240d409e860cf52937`, árvore `06e34b4b51fc60ae0128021fd6478e8e674b2007`. [CI 36039651544](https://github.com/ts7520305-svg/cristalwater/actions/runs/36039651544), job `107768352309`, com 17 etapas e 229/229 grupos distintos previstos aprovados, 559 unitários/77 ficheiros, quatro técnicos, sintaxe 620/217/62 e 40 migrações. Job de 18:12:49Z a 18:42:07Z de 24/09/2026; restauro PostgreSQL 16 de 127 tabelas/46 ficheiros com linhas e hashes iguais. [Evidência](evidence/20260924_task328_ci.json). A falha inicial da TASK327 e a correção temporal posterior permanecem documentadas; esta aprovação aplica-se apenas ao código e árvore identificados.
 
-TASK323–326 e TASK329–330 também têm CI completo e restauro aprovados, com evidências individuais conservadas. Backups agendados e preço por visita têm implementação posterior com validação própria. O editor foi publicado na TASK332, com API e navegador locais aprovados. A correção temporal e a normalização suplementar foram publicadas na TASK333; CI/restauro integrado em execução. Cobertura financeira integral, operação prolongada e produção permanecem abertas.
+TASK323–326 e TASK329–331 também têm CI completo e restauro aprovados, com evidências individuais conservadas. Backups agendados e preço por visita têm implementação posterior com validação própria. O editor foi publicado na TASK332, com API e navegador locais aprovados. A correção temporal e a normalização suplementar foram publicadas na TASK333; CI/restauro integrado em execução. Cobertura financeira integral, operação prolongada e produção permanecem abertas.
 
 ### Aprovação anterior — TASK322
 
