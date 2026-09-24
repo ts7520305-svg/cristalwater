@@ -1,6 +1,13 @@
 'use strict';
 // Only application-owned labels and messages belong here; never translate stored free text.
 const messages = {
+  "Revisão administrativa da visita": {"en": "Administrative visit review", "fr": "Examen administratif de la visite", "es": "Revisión administrativa de la visita"},
+  "Origem por rever": {"en": "Origin requires review", "fr": "Origine à vérifier", "es": "Origen pendiente de revisión"},
+  "O cliente registado na visita difere do cliente atual da instalação. Esta consulta não confirma a titularidade histórica nem autoriza a partilha com clientes. Os dados atuais da instalação foram omitidos.": {"en": "The client recorded on the visit differs from the current facility client. This review does not confirm historical ownership or authorize sharing with clients. Current facility data has been omitted.", "fr": "Le client enregistré pour la visite diffère du client actuel de l’installation. Cet examen ne confirme pas la titularité historique et n’autorise pas le partage avec les clients. Les données actuelles de l’installation ont été omises.", "es": "El cliente registrado en la visita difiere del cliente actual de la instalación. Esta consulta no confirma la titularidad histórica ni autoriza compartirla con clientes. Se han omitido los datos actuales de la instalación."},
+  "Cliente registado na visita (ID)": {"en": "Client recorded on the visit (ID)", "fr": "Client enregistré pour la visite (ID)", "es": "Cliente registrado en la visita (ID)"},
+  "Nome na ficha atual desse cliente": {"en": "Name on that client’s current record", "fr": "Nom dans la fiche actuelle de ce client", "es": "Nombre en la ficha actual de ese cliente"},
+  "Instalação registada na visita (ID)": {"en": "Facility recorded on the visit (ID)", "fr": "Installation enregistrée pour la visite (ID)", "es": "Instalación registrada en la visita (ID)"},
+  "Revisão administrativa: registo da visita": {"en": "Administrative review: visit record", "fr": "Examen administratif : fiche de visite", "es": "Revisión administrativa: registro de la visita"},
   "Relatório técnico completo": {
     "en": "Full technical report",
     "fr": "Rapport technique complet",

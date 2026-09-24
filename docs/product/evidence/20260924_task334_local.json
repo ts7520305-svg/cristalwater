@@ -1,0 +1,54 @@
+{
+  "task": "TASK334",
+  "baseCommit": "a153c45518d07088466544177fdfa63d1ee20775",
+  "validatedAt": "2026-09-24T19:00:34.382018+00:00",
+  "environment": "Isolated local PGlite with PostgreSQL protocol socket; Chromium; 40 additive migrations; no real messages or deployment",
+  "unitTests": {
+    "files": 78,
+    "passed": 576
+  },
+  "technicianTests": {
+    "passed": 4
+  },
+  "syntax": {
+    "backend": 622,
+    "frontend": 218,
+    "inline": 62
+  },
+  "integrationGroupsExpected": 231,
+  "passedScripts": [
+    "test-field-visit-report.js",
+    "test-field-report-history-review.js",
+    "test-field-extra-report.js",
+    "test-field-report-opening-ui.js"
+  ],
+  "visualReview": {
+    "pdfs": [
+      "pt-regular.pdf",
+      "fr-extra.pdf"
+    ],
+    "pagesReviewed": 4,
+    "browserWidths": [
+      320,
+      390,
+      1440
+    ],
+    "scope": "Historical review PDFs and added report-settings controls; not an audit of every page"
+  },
+  "initialTestCorrections": [
+    "The final preservation assertion now compares against the state after the test deliberately changes and restores clientId; read-only checks retain updatedAt equality.",
+    "Historical report fixtures use auto-generated EXTRA IDs to preserve the sequence for subsequent regression groups."
+  ],
+  "sourceSha256": {
+    "frontend/report-settings.html": "9eda133d701e167feb33d82d1b46e2f6bd9993ed4c4483fdec19eaef20f35a24",
+    "frontend/report-settings.js": "c23c5000b3bbde92b6d7a16fa72d896521c92d5d6fde4ae2cbe28eb693b028ad",
+    "frontend/sw.js": "8d10eba59f93f8e3bbe2fd76e826380dfb5020ad75c566669edf0e739e165e74",
+    "scripts/test-field-suite.js": "5bbb4a2bf9bb412be0578e6494d5ed54c6695749227170ba90f4837eaca9c332",
+    "scripts/test-field-report-history-review.js": "3a251251c7f811f43d794c9228bd8b0e5a5d6712dacb4f4bab31df6a1305ef30",
+    "src/controllers/reportVisitController.js": "42440eec569dd14209e4b3497de68a61a865ef1c240c7a545e620052e267d1b2",
+    "src/services/visitReportLanguage.js": "a98b1839a3ce94f97e141198cebaabc60e05cae5865bd49b25e8d7706bdeb9d6",
+    "src/services/visitReportService.js": "916f2fd51f50c71aab510814ff3a735c72db479e6f8152d388fa9748a3047beb"
+  },
+  "ciStatus": "pending publication and native PostgreSQL 16 full suite/restore",
+  "productionValidated": false
+}

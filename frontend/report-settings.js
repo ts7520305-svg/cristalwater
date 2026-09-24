@@ -50,7 +50,7 @@
     el('prepareSettings').disabled=invalid||busy||!view?.revision;
     const ready=!!view?.base&&!invalid&&!busy&&!view.pending&&!view.conflict&&!view.needsRead&&matches(view.base);
     const visit=el('visitId').value.trim(),validVisit=/^[1-9]\d{0,9}$/.test(visit)&&id(Number(visit));
-    el('openClientReport').disabled=el('openAdminReport').disabled=!ready||!validVisit||!['REGULAR','EXTRA'].includes(el('visitType').value)||!['pt','en','fr','es'].includes(el('reportLanguage').value)||previewBusy;
+    el('openHistoryReport').disabled=el('openClientReport').disabled=el('openAdminReport').disabled=!ready||!validVisit||!['REGULAR','EXTRA'].includes(el('visitType').value)||!['pt','en','fr','es'].includes(el('reportLanguage').value)||previewBusy;
     el('visitId').disabled=el('visitType').disabled=el('reportLanguage').disabled=invalid;
     el('previewNotice').textContent=ready?'A pré-visualização usa as opções guardadas deste cliente. A visita deve pertencer a este cliente.':'Carregue e confirme as opções guardadas. Guarde as alterações ou descarte o rascunho antes de pré-visualizar.';
   }
@@ -158,14 +158,15 @@
     context:()=>({generation:previewGeneration,client:input.value,visit:el('visitId').value,visitType:el('visitType').value,language:el('reportLanguage').value,preferredLanguage:el('preferredLanguage').value,version:view?.base?.version,ready:!!view?.base&&!busy&&!view.pending&&!view.conflict&&!view.needsRead,options:values()}),
     state:(kind,message)=>{previewBusy=kind==='loading';el('previewStatus').dataset.state=kind;el('previewStatus').textContent=message;el('previewStatus').setAttribute('role',['error','session'].includes(kind)?'alert':'status');if(kind==='session'){invalid=true;active();}controls();},
   });
-  function openReport(reportView){
+  function openReport(reportView,historicalReview=false){
     if(!active()||busy||previewBusy||!view?.base||view.pending||view.conflict||view.needsRead||!matches(view.base))return;
     const visitId=el('visitId').value.trim();if(!/^[1-9]\d{0,9}$/.test(visitId)||!id(Number(visitId)))return;
     const visitType=el('visitType').value;if(!['REGULAR','EXTRA'].includes(visitType))return;
     const lang=el('reportLanguage').value;if(!['pt','en','fr','es'].includes(lang))return;
-    preview.open('/api/report-visit/visit/'+visitId+'?'+(visitType==='EXTRA'?'visitType=EXTRA&':'')+'lang='+lang+'&view='+reportView+'&clientId='+view.id+'&settingsVersion='+encodeURIComponent(view.base.version),
-      {type:'application/pdf',headers:{'Content-Language':lang,'X-CW-Report-Type':visitType==='EXTRA'?'extra-visit-pdf':'visit-pdf','X-CW-Visit-Type':visitType,'X-CW-Visit-Id':visitId,'X-CW-Client-Id':String(view.id),'X-CW-Report-View':reportView,'X-CW-Settings-Version':view.base.version}});
+    preview.open('/api/report-visit/visit/'+visitId+'?'+(visitType==='EXTRA'?'visitType=EXTRA&':'')+(historicalReview?'history=review&':'')+'lang='+lang+'&view='+reportView+'&clientId='+view.id+'&settingsVersion='+encodeURIComponent(view.base.version),
+      {type:'application/pdf',headers:{...(historicalReview?{'X-CW-Report-Origin':'historical-review'}:{}),'Content-Language':lang,'X-CW-Report-Type':visitType==='EXTRA'?'extra-visit-pdf':'visit-pdf','X-CW-Visit-Type':visitType,'X-CW-Visit-Id':visitId,'X-CW-Client-Id':String(view.id),'X-CW-Report-View':reportView,'X-CW-Settings-Version':view.base.version}});
   }
+  el('openHistoryReport').addEventListener('click',()=>openReport('admin',true));
   el('openClientReport').addEventListener('click',()=>openReport('client'));el('openAdminReport').addEventListener('click',()=>openReport('admin'));
   el('reportLanguage').addEventListener('change',()=>{previewGeneration++;preview.cancel();controls();});
   el('visitType').addEventListener('change',()=>{previewGeneration++;preview.cancel();controls();});

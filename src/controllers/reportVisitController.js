@@ -7,7 +7,7 @@ async function generateVisitReport(req, res) {
     const report = await reportService.read(req.user, req.params.id, req.query);
     const bytes = await reportService.renderPdf(report);
     reportService.headers(res, report, "visit-pdf");
-    res.type("application/pdf").set("Content-Disposition", `inline; filename="relatorio-visita-${report.visitType === 'EXTRA' ? 'extra-' : ''}${report.visit.id}-${report.view}.pdf"`).send(bytes);
+    res.type("application/pdf").set("Content-Disposition", `inline; filename="relatorio-visita-${report.visitType === 'EXTRA' ? 'extra-' : ''}${report.visit.id}-${report.view}${report.historicalReview ? "-historical-review" : ""}.pdf"`).send(bytes);
   } catch (error) {
     if (!error.statusCode) console.error("generateVisitReport error:", error);
     res.status(error.statusCode || 503).json({ ok: false, error: error.statusCode ? error.message : "Não foi possível gerar o relatório. Tente novamente." });
