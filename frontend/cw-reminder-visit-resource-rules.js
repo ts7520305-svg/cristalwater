@@ -34,9 +34,9 @@
     const ownTimes=intervals(data);
     const seen=new Set(),totals=new Map();
     for(const p of peers){
-      if(!fields(p,['type','id','reminderId','hash','materials',p.workIntervals===undefined?'workTime':'workIntervals'])||!sha(p.hash)||(p.type==='EQUIPMENT'?!positive(p.id)||p.reminderId!==null||p.workIntervals!==undefined:p.type!=='REMINDER'||!uuid(p.id)||!positive(p.reminderId))||seen.has(p.type+':'+p.id))fail();seen.add(p.type+':'+p.id);
+      if(!fields(p,['type','id','reminderId','hash','materials',p.workIntervals===undefined?'workTime':'workIntervals'])||!sha(p.hash)||(p.type==='EQUIPMENT'?!positive(p.id)||p.reminderId!==null:p.type!=='REMINDER'||!uuid(p.id)||!positive(p.reminderId))||seen.has(p.type+':'+p.id))fail();seen.add(p.type+':'+p.id);
       if(p.materials!==null){resources.input({technicianId:parent.technicianId,materials:p.materials,workTime:null});for(const i of p.materials.items)totals.set(key(i),(totals.get(key(i))||0n)+quantity(i.quantity));}
-      if(p.workIntervals!==undefined)resourceInput({technicianId:parent.technicianId,materials:null,workIntervals:p.workIntervals});
+      if(p.workIntervals!==undefined){if(p.type==='REMINDER')resourceInput({technicianId:parent.technicianId,materials:null,workIntervals:p.workIntervals});else if(!Array.isArray(p.workIntervals)||p.workIntervals.length<1||p.workIntervals.length>20||p.workIntervals.some((w,i,a)=>i&&Date.parse(w.startedAt)<Date.parse(a[i-1].endedAt)))fail();}
       for(const w of intervals(p)){if(!fields(w,['startedAt','endedAt'])||!iso(w.startedAt)||!iso(w.endedAt)||Date.parse(w.endedAt)<=Date.parse(w.startedAt))fail();if(Date.parse(w.startedAt)<Date.parse(parent.startAt)||Date.parse(w.endedAt)>Date.parse(parent.endAt)||ownTimes.some(own=>overlap(own,w)))fail();}
     }
     if(ownTimes.some(w=>Date.parse(w.startedAt)<Date.parse(parent.startAt)||Date.parse(w.endedAt)>Date.parse(parent.endAt)))fail();

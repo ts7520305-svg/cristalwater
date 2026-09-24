@@ -1,21 +1,26 @@
 'use strict';
 const recorded = require('./recordedWorkTimeService');
 const { hash } = require('./fieldWriteRequestService');
-const basis = 'DECLARED_EQUIPMENT_WORK_INTERVAL';
+const basis = 'DECLARED_EQUIPMENT_WORK_INTERVAL', multipleBasis = 'DECLARED_EQUIPMENT_WORK_INTERVALS';
+const intervals = value => Array.isArray(value?.intervals) ? value.intervals.filter(w=>w&&typeof w==='object') : value?.intervals === undefined && value ? [{startAt:value.startAt,endAt:value.endAt}] : [];
+const duration = value => intervals(value).reduce((sum,w)=>sum+Date.parse(w.endAt)-Date.parse(w.startAt),0);
 const positive = n => Number.isSafeInteger(n) && n > 0;
 const instant = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value) && Number.isFinite(Date.parse(value)) && new Date(value).toISOString() === value;
-function valid(value) {
+function single(value) {
   return !!value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 2 && instant(value.startAt) && instant(value.endAt) && Date.parse(value.endAt) > Date.parse(value.startAt);
+}
+function valid(value) {
+  return value?.intervals === undefined ? single(value) : Object.keys(value).length === 1 && Array.isArray(value.intervals) && value.intervals.length > 0 && value.intervals.length <= 20 && value.intervals.every((w,i,a)=>single(w)&&(!i||Date.parse(w.startAt)>=Date.parse(a[i-1].endAt)));
 }
 function parse(value) {
   if (!valid(value)) throw Object.assign(new Error('Indique início e fim válidos para o trabalho, com o fim posterior ao início.'), { status: 400 });
-  return { startAt: value.startAt, endAt: value.endAt };
+  return value.intervals ? {intervals:value.intervals.map(w=>({startAt:w.startAt,endAt:w.endAt}))} : { startAt: value.startAt, endAt: value.endAt };
 }
 function origin(visit, visitType) {
   return { visitType, visitId: visit.id, poolId: visit.poolId, clientId: visit.clientId, technicianId: visit.technicianId, visitStartAt: visit.startAt?.toISOString() || null };
 }
 function create(input, visit, visitType) {
-  return { schema: 1, basis, ...input, durationMs: Date.parse(input.endAt) - Date.parse(input.startAt), origin: origin(visit, visitType) };
+  return input.intervals ? {schema:2,basis:multipleBasis,intervals:input.intervals.map(w=>({...w,durationMs:Date.parse(w.endAt)-Date.parse(w.startAt)})),durationMs:duration(input),origin:origin(visit,visitType)} : { schema: 1, basis, ...input, durationMs: Date.parse(input.endAt) - Date.parse(input.startAt), origin: origin(visit, visitType) };
 }
 function time(row) { return row.result?.completion?.workTime; }
 const selection = { id: true, requestId: true, planId: true, fingerprint: true, completedAt: true, result: true };
@@ -29,14 +34,16 @@ function intact(row, proofs) {
 }
 const hadTime = (row, proofs) => time(row) || proofs.get(row.requestId + ':' + row.id)?.response?.completion?.workTime;
 function sound(record) {
-  return !!record && record.schema === 1 && record.basis === basis && valid({ startAt: record.startAt, endAt: record.endAt }) && record.durationMs === Date.parse(record.endAt) - Date.parse(record.startAt) && positive(record.origin?.technicianId);
+  if(!record||!positive(record.origin?.technicianId))return false;
+  if(record.schema===1)return record.basis===basis&&single({startAt:record.startAt,endAt:record.endAt})&&record.durationMs===duration(record);
+  return record.schema===2&&record.basis===multipleBasis&&Object.keys(record).length===5&&Array.isArray(record.intervals)&&valid({intervals:record.intervals.map(w=>({startAt:w?.startAt,endAt:w?.endAt}))})&&record.intervals.every(w=>Object.keys(w).length===3&&w.durationMs===Date.parse(w.endAt)-Date.parse(w.startAt))&&positive(record.durationMs)&&record.durationMs===duration(record);
 }
-function overlaps(a, b) { return Date.parse(a.startAt) < Date.parse(b.endAt) && Date.parse(b.startAt) < Date.parse(a.endAt); }
+function overlaps(a, b) { return intervals(a).some(x=>intervals(b).some(y=>Date.parse(x.startAt)<Date.parse(y.endAt)&&Date.parse(y.startAt)<Date.parse(x.endAt))); }
 function within(input, visit, completedAt) {
-  return positive(visit.technicianId) && visit.startAt instanceof Date && Date.parse(input.startAt) >= +visit.startAt && Date.parse(input.endAt) <= +completedAt && (!visit.endAt || Date.parse(input.endAt) <= +visit.endAt);
+  return positive(visit.technicianId) && visit.startAt instanceof Date && intervals(input).length>0 && intervals(input).every(w=>Date.parse(w.startAt)>=+visit.startAt&&Date.parse(w.endAt)<=+completedAt&&(!visit.endAt||Date.parse(w.endAt)<=+visit.endAt));
 }
 async function conflict(db, input, visit, visitType) {
-  return (await recorded.conflicts(db, [{ type: visitType, id: visit.id, technicianId: visit.technicianId, startAt: new Date(input.startAt), endAt: new Date(input.endAt) }])).size > 0;
+  return (await recorded.conflicts(db, intervals(input).map(w=>({type:visitType,id:visit.id,technicianId:visit.technicianId,startAt:new Date(w.startAt),endAt:new Date(w.endAt)})))).size > 0;
 }
 async function check(db, input, visit, visitType, completedAt) {
   if (!within(input, visit, completedAt)) return 'O tempo da revisão tem de ficar dentro da visita iniciada, com técnico atribuído, e não pode terminar no futuro.';
@@ -50,7 +57,7 @@ async function check(db, input, visit, visitType, completedAt) {
 }
 async function prepareRead(db, groups) {
   const proofs = await receipts(db, groups.flatMap(g => g.rows));
-  const conflicts = await recorded.conflicts(db, groups.flatMap(g => g.rows.filter(row => sound(time(row))).map(row => ({ type: g.visitType, id: g.visit.id, technicianId: time(row).origin.technicianId, startAt: new Date(time(row).startAt), endAt: new Date(time(row).endAt) }))));
+  const conflicts = await recorded.conflicts(db, groups.flatMap(g => g.rows.filter(row => sound(time(row))).flatMap(row => intervals(time(row)).map(w=>({type:g.visitType,id:g.visit.id,technicianId:time(row).origin.technicianId,startAt:new Date(w.startAt),endAt:new Date(w.endAt)})))));
   const associated = new Map();
   for (const g of groups) associated.set(g.visitType+':'+g.visit.id, await require('./reminderVisitResourceJournal').reservations(db,g.visit,g.visitType));
   return { proofs, conflicts, associated };
@@ -66,4 +73,4 @@ async function describe(db, rows, visit, visitType, prepared) {
   }
   return views;
 }
-module.exports = { parse, create, check, describe, selection, prepareRead };
+module.exports = { parse, create, check, describe, selection, prepareRead, intervals, sound };

@@ -10,8 +10,9 @@
   const explain = value => /Failed to fetch|NetworkError|Load failed|fetch.*failed|aborted|timed out/i.test(String(value)) ? 'Não foi possível confirmar a ligação. O pedido continua guardado.' : String(value);
   const positive = value => Number.isSafeInteger(value) && value > 0;
   const instant = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value) && Number.isFinite(Date.parse(value)) && new Date(value).toISOString() === value;
-  const validTime = value => value && Object.keys(value).length === 2 && instant(value.startAt) && (value.endAt === null || instant(value.endAt) && Date.parse(value.endAt) > Date.parse(value.startAt));
-  const sameTime = (a, b) => !a && !b || !!a && !!b && a.startAt === b.startAt && a.endAt === b.endAt;
+  const times=store.equipmentTimes,lastTime=value=>times(value).at(-1);
+  const validTime=value=>{try{store.equipmentTime(value,true);return true;}catch(_){return false;}};
+  const sameTime=(a,b)=>!a&&!b||!!a&&!!b&&JSON.stringify(store.equipmentTime(a,true))===JSON.stringify(store.equipmentTime(b,true));
   const validMaterialDraft = value => value && ['NONE', 'DECLARED'].includes(value.mode) && Array.isArray(value.items) && value.items.length <= 20 && Object.keys(value).length === 2 && value.items.every(item => item && Object.keys(item).length === 3 && [['productName', 160], ['unit', 24], ['quantity', 30]].every(([key, max]) => typeof item[key] === 'string' && item[key].length <= max)) && (value.mode !== 'NONE' || !value.items.length);
   const hasDraft = draft => draft.notes.trim() || draft.workTime || draft.materials;
   function sameMaterials(a, b) { try { return !a && !b || !!a && !!b && JSON.stringify(store.equipmentMaterials(a)) === JSON.stringify(store.equipmentMaterials(b)); } catch (_) { return false; } }
@@ -32,6 +33,7 @@
   function timeText(value) {
     const format = at => new Date(at).toLocaleString('pt-PT', { timeZoneName: 'short' });
     if (!value) return 'Tempo próprio não registado.';
+    if(value.intervals){const ms=value.intervals.reduce((sum,w)=>sum+(w.endAt?Date.parse(w.endAt)-Date.parse(w.startAt):0),0);return value.intervals.map((w,i)=>'Intervalo '+(i+1)+': '+format(w.startAt)+(w.endAt?' → '+format(w.endAt):'. Falta marcar o fim.')).join('\n')+'\n'+(ms/1000).toLocaleString('pt-PT',{maximumFractionDigits:3})+' segundos efetivos; pausas excluídas.';}
     if (!value.endAt) return 'Início: ' + format(value.startAt) + '. Falta marcar o fim.';
     const seconds = Math.floor((Date.parse(value.endAt) - Date.parse(value.startAt)) / 1000);
     return `${format(value.startAt)} → ${format(value.endAt)} · ${Math.floor(seconds / 60)} min ${seconds % 60} s registados.`;
@@ -169,7 +171,7 @@
         node('p', 'Revisão já registada nesta visita.', card);
         const saved = plan.completion?.workTime;
         node('p', saved?.state === 'REVIEW' ? 'Tempo por rever: o intervalo ou a visita de origem mudou.' : timeText(saved?.record), card);
-        if (saved?.state === 'REVIEW' && validTime({ startAt: saved.record?.startAt, endAt: saved.record?.endAt })) node('p', 'Registo original: ' + timeText(saved.record), card);
+        if (saved?.state === 'REVIEW' && validTime(Array.isArray(saved.record?.intervals)?{intervals:saved.record.intervals.map(w=>({startAt:w?.startAt,endAt:w?.endAt}))}:{startAt:saved.record?.startAt,endAt:saved.record?.endAt})) node('p', 'Registo original: ' + timeText(saved.record), card);
         materialsView(plan.completion?.materials, card);
       }
       if (offline || !data.canComplete || !plan.canComplete || plan.completedInVisit) {
@@ -185,10 +187,10 @@
       let materials = state.draft?.materials || null;
       const timeBox = node('fieldset', null, card); timeBox.className = 'field-equipment-time';
       node('legend', 'Tempo desta revisão (opcional)', timeBox);
-      node('p', 'Marque o início e o fim enquanto realiza o trabalho. Confirme as horas do dispositivo antes de enviar.', timeBox);
-      const timeStatus = node('p', null, timeBox); timeStatus.setAttribute('role', 'status');
-      const start = node('button', 'Marcar início', timeBox), end = node('button', 'Marcar fim', timeBox), clear = node('button', 'Limpar tempo registado', timeBox);
-      for (const button of [start, end, clear]) button.type = 'button';
+      node('p', 'Marque o início e o fim de cada período de trabalho. Retome após uma pausa, até 20 intervalos; as pausas não contam para a duração nem para o custo. Confirme as horas do dispositivo antes de enviar.', timeBox);
+      const timeStatus = node('p', null, timeBox); timeStatus.setAttribute('role', 'status');timeStatus.style.whiteSpace='pre-line';timeStatus.style.overflowWrap='anywhere';
+      const start=node('button','Marcar início',timeBox),end=node('button','Marcar fim',timeBox),resume=node('button','Retomar trabalho',timeBox),removeTime=node('button','Remover último intervalo',timeBox),clear=node('button','Limpar tempo registado',timeBox);
+      for (const button of [start, end, resume, removeTime, clear]) button.type = 'button';
       const materialBox = node('fieldset', null, card); materialBox.className = 'field-equipment-materials'; materialBox.style.minWidth = '0';
       node('legend', 'Materiais desta revisão (opcional)', materialBox);
       node('p', 'Declare apenas a parte usada nesta revisão. Use o nome e a unidade do consumo da visita, sem conversões. Estas quantidades já fazem parte do total da visita: não as some novamente. A declaração não retira stock nem atribui euros.', materialBox);
@@ -202,8 +204,9 @@
       const action = node('button', 'Registar revisão realizada', card); action.type = 'button'; action.disabled = true;
       const ready = () => {
         let materialValid = true; try { if (materials) store.equipmentMaterials(materials); materialStatus.textContent = ''; } catch (error) { materialValid = false; materialStatus.textContent = error.message; }
-        action.disabled = !check.checked || notes.value.trim().length < 3 || busy || state.failed || !!workTime && !workTime.endAt || !materialValid;
-        start.disabled = busy || state.failed || !!workTime; end.disabled = busy || state.failed || !workTime || !!workTime.endAt; clear.disabled = busy || state.failed || !workTime;
+        action.disabled = !check.checked || notes.value.trim().length < 3 || busy || state.failed || !!workTime && !lastTime(workTime)?.endAt || !materialValid;
+        start.disabled = busy || state.failed || !!workTime; end.disabled = busy || state.failed || !workTime || !!lastTime(workTime)?.endAt; clear.disabled = busy || state.failed || !workTime;
+        resume.disabled=busy||state.failed||!lastTime(workTime)?.endAt||times(workTime).length>=20;resume.hidden=!workTime;removeTime.hidden=times(workTime).length<2;removeTime.disabled=busy||state.failed;
         materialMode.disabled = busy || state.failed; addMaterial.disabled = busy || state.failed || (materials?.items.length || 0) >= 20; addMaterial.hidden = materials?.mode !== 'DECLARED';
         materialRows.querySelectorAll('input,button').forEach(input => { input.disabled = busy || state.failed; });
         timeStatus.textContent = timeText(workTime);
@@ -234,12 +237,15 @@
       renderMaterials();
       const saveTime = async next => {
         if (busy || !valid(visit, rev)) return;
+        if(next&&!validTime(next)){status.textContent='Reveja os intervalos guardados antes de continuar.';return;}
         workTime = next; check.checked = false; ready();
         try { await saveDraft(state, notes.value, workTime, materials); if (valid(visit, rev)) { status.textContent = 'Tempo guardado neste dispositivo; revisão ainda não enviada.'; await renderQueue(); } }
         catch (error) { if (valid(visit, rev)) { status.textContent = error.message; ready(); } }
       };
       start.onclick = () => saveTime({ startAt: new Date().toISOString(), endAt: null });
-      end.onclick = () => { const endAt = new Date().toISOString(); if (Date.parse(endAt) <= Date.parse(workTime.startAt)) { status.textContent = 'O relógio do dispositivo mudou. Reveja o início antes de marcar o fim.'; return; } return saveTime({ ...workTime, endAt }); };
+      end.onclick=()=>{const endAt=new Date().toISOString(),last=lastTime(workTime);if(!last||Date.parse(endAt)<=Date.parse(last.startAt)){status.textContent='O relógio do dispositivo mudou. Reveja o início antes de marcar o fim.';return;}return saveTime(workTime.intervals?{intervals:times(workTime).map((w,i,a)=>i===a.length-1?{...w,endAt}:w)}:{...workTime,endAt});};
+      resume.onclick=()=>{const startAt=new Date().toISOString(),last=lastTime(workTime);if(!last?.endAt||times(workTime).length>=20)return;if(Date.parse(startAt)<Date.parse(last.endAt)){status.textContent='O relógio do dispositivo mudou. O novo início tem de ser posterior ao fim guardado.';return;}return saveTime({intervals:[...times(workTime),{startAt,endAt:null}]});};
+      removeTime.onclick=()=>{const remaining=times(workTime).slice(0,-1);return saveTime(remaining.length>1?{intervals:remaining}:remaining[0]||null);};
       clear.onclick = () => saveTime(null);
       ready();
       notes.oninput = () => {
