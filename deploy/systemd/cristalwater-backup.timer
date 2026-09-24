@@ -1,0 +1,11 @@
+[Unit]
+Description=Copia diaria da base de dados Cristal Water
+
+[Timer]
+OnCalendar=*-*-* 03:30:00 Europe/Lisbon
+RandomizedDelaySec=10min
+Persistent=true
+Unit=cristalwater-backup.service
+
+[Install]
+WantedBy=timers.target

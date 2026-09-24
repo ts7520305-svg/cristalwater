@@ -8,7 +8,7 @@ const { Prisma, PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient({ log: ["warn", "error"] });
 
-const backupDir = path.resolve(__dirname, "..", "..", "backups");
+const backupDir = path.resolve(process.env.BACKUP_DIRECTORY || path.join(__dirname, "..", "..", "backups"));
 
 function ensureBackupDir() {
   fs.mkdirSync(backupDir, { recursive: true });

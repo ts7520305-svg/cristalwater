@@ -1,0 +1,24 @@
+[Unit]
+Description=Copia SQL local agendada da Cristal Water
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=cristalwater
+Group=cristalwater
+WorkingDirectory=/opt/cristalwater/current
+EnvironmentFile=/opt/cristalwater/shared/.env
+Environment=BACKUP_DIRECTORY=/opt/cristalwater/shared/backups
+Environment=SCHEDULED_BACKUP_ENABLED=true
+ExecStart=/usr/bin/env node scripts/run-scheduled-backup.js
+TimeoutStartSec=10min
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/cristalwater/shared/backups
+
+[Install]
+WantedBy=multi-user.target
