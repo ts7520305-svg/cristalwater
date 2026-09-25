@@ -111,7 +111,7 @@
     "pagesWithoutLiteralTestReference": 35
   },
   "limits": [
-    "Native CI and PostgreSQL restore of TASK346 and TASK347 remain pending.",
+    "Native CI and PostgreSQL restore of TASK347 remain pending; TASK346 is confirmed in 20260925_task346_ci.json.",
     "Drafts before Save live in the same tab session; recovery after closing the tab is not guaranteed.",
     "Prepared requests retain the persistent storage and same-UUID receipts from TASK346.",
     "Malformed draft bytes are preserved; automatic repair or destructive cleanup is not provided.",

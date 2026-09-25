@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-09-25T06:35:13.456Z",
-  "baseCommit": "88bfaf8dd55bbf4e79c656572f505614816468be",
+  "generatedAt": "2026-09-25T07:02:32.441Z",
+  "baseCommit": "884a227e6ebb3f139e2b95411d34b74efb26b80e",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 267,
+  "activeScriptsScanned": 268,
   "summary": {
     "htmlFiles": 115,
     "rootPages": 108,
@@ -1218,6 +1218,7 @@
         "/cw-auth.js",
         "/admin-auth-guard.js",
         "/ui/design-system.css",
+        "/cw-pool-calculator-copy.js",
         "/cw-pool-calculator-rules.js",
         "/cw-pool-calculator-store.js",
         "/cw-pool-calculator-drafts.js",
@@ -1237,7 +1238,8 @@
       "testReferences": [
         "test-field-pool-calculator-state.js",
         "test-field-pool-calculator-recovery.js",
-        "test-field-pool-calculator-drafts.js"
+        "test-field-pool-calculator-drafts.js",
+        "test-field-pool-calculator-languages.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },

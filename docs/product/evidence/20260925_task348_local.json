@@ -1,0 +1,141 @@
+{
+  "task": "TASK348",
+  "checkedAt": "2026-09-25T07:07:28.677692+00:00",
+  "baseCommit": "884a227e6ebb3f139e2b95411d34b74efb26b80e",
+  "sourceSha256": {
+    "frontend/admin-pool-calculator.html": "076e6cb553c635b2ab61b3a101c52aee2aaa3ba9e563b6d5f3989ee9fcdbcde0",
+    "frontend/admin-pool-calculator.js": "219bf4d684f394e5d3a125abb1a7a51def3ba6c3f29ce16773e62b1369e918c0",
+    "frontend/cw-pool-calculator-copy.js": "554e6c2d6e2304882a5eeee1bd74ece596d28259432c9775d6f659e9079676d3",
+    "frontend/sw.js": "dce2ece0387c939991649d8e1ec4aa25e212120ca07f930f7ba58fc315a9982f",
+    "scripts/test-field-pool-calculator-languages.js": "9dcf23d87ac2b10a59cb4322ad93c49dc890bf1b572ff685de8b0fe00ceab0ff",
+    "scripts/test-field-suite.js": "186f931434bf17a91c45d5c4efa956777c1b7134eab6b0af6c080881f2cbabac",
+    "tests/pool-calculator-copy.test.js": "4262843824b8427d808daf09151ccb7426e602593469768f3d87aaa99f83d8cc"
+  },
+  "unitTests": {
+    "passed": 626,
+    "files": 87
+  },
+  "technicianTests": {
+    "passed": 4,
+    "files": 1
+  },
+  "syntax": {
+    "backend": 631,
+    "frontend": 228,
+    "inline": 62
+  },
+  "integration": {
+    "distinctGroups": 4,
+    "scripts": [
+      "test-field-pool-calculator-state.js",
+      "test-field-pool-calculator-languages.js",
+      "test-field-pool-calculator-drafts.js",
+      "test-field-pool-calculator-recovery.js"
+    ],
+    "result": "success"
+  },
+  "finalLanguageRerun": {
+    "script": "test-field-pool-calculator-languages.js",
+    "result": "success",
+    "log": "/tmp/cw348-languages-final.log"
+  },
+  "passLines": [
+    "PASS isolated schema: 40 additive migrations",
+    "PASS pool calculator: real pool/profile and empty-profile separation, nulls and initial values, original CIRCULAR and precision, stored chemistry ownership, source text literal, selected-pool and input races, malformed/failed/offline/timeout responses, dirty discard/clear, three real saves, same-request recovery after reload and one divergent confirmation refused, page history, account switch/reload/expiry, 320/390/1440 and original other pools unchanged",
+    "PASS isolated schema: 40 additive migrations",
+    "PASS calculator five languages: all labels/actions/results, accessibility, 320/390/1440, draft reload and language history without new requests, in-flight preview, offline/quota/session, exact zero/precision/unknown enums/source literals, one confirmed write with unchanged pending UUID/hash/body and one durable conflict; other pool and money unchanged",
+    "PASS calculator drafts: precise/zero fields and reviewed version survive reload; pools/accounts/tabs isolated; failed fresh read and declined discard preserve bytes; stale drafts block writes; quota/ignored writes retry and partial numeric input remains editable; corrupt/foreign bytes untouched; expiry clears private view; pending handoff/recovery/confirmed cleanup exact; four applied writes, one durable rejection, normalized visible fields require a fresh preview, other pool and money unchanged; conflict 320/390/1440",
+    "PASS calculator browser recovery: quota and ignored storage before POST, receipt-quota after commit, divergent body and owner headers refused, reload recovery without fresh pool read, persisted conflict with explicit discard, offline exact request/account isolation, two-tab exclusion, corrupt/hash-mismatched bytes preserved, pending UI 320/390/1440, eight confirmed changes and unchanged money",
+    "PASS isolated schema: 40 additive migrations",
+    "PASS calculator five languages: all labels/actions/results, accessibility, 320/390/1440, draft reload and language history without new requests, in-flight preview, offline/quota/session, exact zero/precision/unknown enums/source literals, one confirmed write with unchanged pending UUID/hash/body and one durable conflict; other pool and money unchanged"
+  ],
+  "logs": {
+    "/tmp/cw348-unit.log": "e629d939b92bcebeb483d6ec5563e1d125ede31ad193273f7b7d183b1713b8dd",
+    "/tmp/cw348-tech.log": "b925336b8d691e8d3bce593d85552cb04ddaf8e07d52d7d16c57771dc7301f61",
+    "/tmp/cw348-syntax.log": "5bf0e363ac77e7117afbb7be2b6883e820ad0886cb91bbf14ac1b71b61230857",
+    "/tmp/cw348-state.log": "fe75a949abeb973ac0130020c58373381bbd8d2ed50e0b3ea47521343fcf41bf",
+    "/tmp/cw348-browser-final.log": "5b8205ad3a2214663fa6905190b8521f567a0a9a6b611407a2f6d0cf8892486a",
+    "/tmp/cw348-languages-final.log": "4d48051fc146d0375092f5cbf304318bf4414b7f0e3073f2bac2ed016a32f527"
+  },
+  "runtime": {
+    "database": "PGlite 0.5.8 / pglite-socket 0.2.11, isolated",
+    "additiveMigrations": 40,
+    "chromium": "@sparticuz/chromium 153.0.0, normal multiple processes, web security retained",
+    "runnerSha256": "5bd8f95926470bd82fabef27148ed54a55532bdf80d8dbc557dd19b244486b2b",
+    "preloadSha256": "74ba6986b731dfe5120836cb841c25bed62d334014aa588379558293deb6ec7a"
+  },
+  "screenshots": {
+    "reports/field-visual/pool-calculator-languages/calculator-de-1440.png": "722d21605c5a30c11e9ae13bc4177174b8389391b4215f05f95b6be133b3884e",
+    "reports/field-visual/pool-calculator-languages/calculator-de-320.png": "c0937936df25a497f8e47b04d077cd4d120e2e15b455265d240e903be24e532f",
+    "reports/field-visual/pool-calculator-languages/calculator-de-390.png": "6709d097c04597b2997ef36dbce322dc013b203b7de3c975a4997b2ef29028af",
+    "reports/field-visual/pool-calculator-languages/calculator-en-1440.png": "b5f259395573b77d6a24eecc0be22ad7ed6ca6bbdd7e320c26556fa3da0c1108",
+    "reports/field-visual/pool-calculator-languages/calculator-en-320.png": "c6bd6de736e7cdfe128586e1411205fd46613cffeb23f3f9198aca10d38c9c88",
+    "reports/field-visual/pool-calculator-languages/calculator-en-390.png": "8a9becec1de4fb070b3417d70e15a66601edeb71af84119e26247ba6a7ba73b4",
+    "reports/field-visual/pool-calculator-languages/calculator-es-1440.png": "86aed8d39467c6a0c7782bae3c29d2525b94dd64e53295f4f53e6a5c0de9a24e",
+    "reports/field-visual/pool-calculator-languages/calculator-es-320.png": "be46d73759a36df8cc930af2f9a226e0a65d00826b5b94101cf6b2af79a0dac0",
+    "reports/field-visual/pool-calculator-languages/calculator-es-390.png": "17ddb86b141649e82814f4d924cd224cabd244703ed5547aaa346f84f907d3d3",
+    "reports/field-visual/pool-calculator-languages/calculator-fr-1440.png": "200958cbc6fa4f9977d037e3ee7cd9b65bd15d91f659534e49eccf5efbf35099",
+    "reports/field-visual/pool-calculator-languages/calculator-fr-320.png": "28a91c956affafe60ee4b375402519d44d8e32f622ef33196082e9497308896b",
+    "reports/field-visual/pool-calculator-languages/calculator-fr-390.png": "a4d160ef73c093046015230a4ee800268db0aa330ed78a2b217f822a92c31857",
+    "reports/field-visual/pool-calculator-languages/calculator-pt-1440.png": "1c0f679061ef939fa010f256d74f6f3cd7a2e2e1da550f8b6becbe993170e9be",
+    "reports/field-visual/pool-calculator-languages/calculator-pt-320.png": "ee0fb3b6d8863e71d45328dec9c562dd4c80b066e3e474b198edb38843f01ad9",
+    "reports/field-visual/pool-calculator-languages/calculator-pt-390.png": "3a593a2cac24444e1bd758a285c38058604fa6086f6414729a667c72c93c0968",
+    "reports/field-visual/pool-calculator-languages/header-de-320.png": "83ba3ca20035e1858b62187ec8393e9afeb62c4f5bff1bb2529c370b414d6ee1",
+    "reports/field-visual/pool-calculator-languages/header-en-320.png": "c61ef236c9a6dc817d881db2adbe647ddf5db22f75fabc96392897ab4c5f359f",
+    "reports/field-visual/pool-calculator-languages/header-es-320.png": "c190ceb06e0b58e50d1ed3201a33c908dc5b5bad23ee5decdb779ea440c9eb28",
+    "reports/field-visual/pool-calculator-languages/header-fr-320.png": "73ff643c2b7e108f6944954a23a5184ba16819fb933905018ee0cf2b46e66ec2",
+    "reports/field-visual/pool-calculator-languages/header-pt-320.png": "9fafbfd5ad7ad8b42ff1962784207b51fba10e72456757cb4412354695ba2957",
+    "reports/field-visual/pool-calculator-languages/results-de-1440.png": "c6633e09fe71e8854ffdb43123bd1730e9bcc17ac85dd4e48bcf63d2592c82c0",
+    "reports/field-visual/pool-calculator-languages/results-de-320.png": "e1a145a04c2a391953d6fb424a04c6e0afa518cd9a0faa293efbe5048caac90b",
+    "reports/field-visual/pool-calculator-languages/results-de-390.png": "1740decdda6db07ac7692e58bcfd0a62084016fa5877db924d5be57e9b078b2b"
+  },
+  "reviewedWidths": [
+    320,
+    390,
+    1440
+  ],
+  "reviewedLanguages": [
+    "pt",
+    "en",
+    "fr",
+    "es",
+    "de"
+  ],
+  "visualReviewSamples": [
+    "calculator-de-320.png",
+    "calculator-fr-390.png",
+    "calculator-en-1440.png",
+    "header-de-320.png",
+    "results-de-320.png",
+    "results-de-1440.png"
+  ],
+  "cache": "v160",
+  "fieldSuiteExpectedGroups": 247,
+  "inventory": {
+    "htmlFiles": 115,
+    "rootPages": 108,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 80,
+    "catalogueGuardDifferences": 0,
+    "activeScripts": 268,
+    "pagesWithoutLiteralTestReference": 35
+  },
+  "limits": [
+    "Native CI and PostgreSQL restore of TASK348 remain pending.",
+    "TASK347 native CI remains in progress at the last check; TASK346 is verified separately.",
+    "This localization covers the calculator-owned header and content; shared navigation/assistant and browser-native messages retain their existing contracts.",
+    "User source text and unknown historical options are kept verbatim, not translated.",
+    "Existing formulas are preserved; this is not a scientific validation.",
+    "Pre-save drafts are tab-session storage, not guaranteed after tab closure; durable prepared requests retain the TASK346 contract.",
+    "Unversioned compatibility callers and remaining application/production criteria retain their separate scope."
+  ],
+  "testPreparation": [
+    "The first language run correctly showed recovered draft status after a reload; the test expectation was corrected to distinguish retained from recovered drafts.",
+    "The final language run additionally covers switching during save confirmation, empty/failed reads and unsupported language fallback."
+  ],
+  "previousNativeProofs": [
+    "20260925_task346_ci.json"
+  ]
+}

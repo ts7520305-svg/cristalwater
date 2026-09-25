@@ -23,6 +23,7 @@
   <link rel="stylesheet" href="/ui/design-system.css">
   <style>
     #poolCalculatorHeader{background:#fff;color:#183c46}
+    #poolCalculatorHeader select{background:#fff;color:#183c46;border-color:#91adb7;width:auto} #poolCalculatorHeader label{color:#45636d} #poolCalculatorHeader .toolbar>div{display:flex;align-items:center;gap:8px} #poolCalculatorHeader label{margin:0}
     #poolCalculatorHeader h1{color:#183c46} #poolCalculatorHeader .sub{color:#45636d}
     #poolCalculator{color:#183c46;grid-template-columns:minmax(290px,380px) minmax(0,1fr)}
     #poolCalculator .card{background:#fff;color:#183c46}
@@ -40,17 +41,17 @@
   </style>
 </head>
 <body data-required-role="ADMIN">
-  <header id="poolCalculatorHeader">
-    <div><h1>Calculadora Técnica da Piscina</h1><div class="sub">Cubicagem, filtracao, sal, eletrolise, producao de cloro e bomba de calor numa so ferramenta.</div></div>
-    <div class="toolbar"><button class="btn2" type="button" data-cw-back data-cw-fallback="/admin-pools">Voltar</button><button class="btn2" onclick="location.href='/admin-pools'">Piscinas</button><button class="btn2" onclick="location.href='/admin-dashboard'">Dashboard</button><button data-calculator-action="save" disabled onclick="saveAndCalculate()">Guardar cálculo</button></div>
+  <header id="poolCalculatorHeader" data-cw-no-i18n>
+    <div><h1 data-calculator-copy="title">Calculadora Técnica da Piscina</h1><div class="sub" data-calculator-copy="subtitle">Cubicagem, filtração, sal, eletrólise, produção de cloro e bomba de calor numa só ferramenta.</div></div>
+    <div class="toolbar"><div><label for="calculatorLanguage" data-calculator-copy="language">Idioma</label><select id="calculatorLanguage"><option value="pt">Português</option><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option></select></div><button class="btn2" type="button" data-cw-back data-cw-fallback="/admin-pools" data-calculator-copy="back">Voltar</button><button class="btn2" onclick="location.href='/admin-pools'" data-calculator-copy="pools">Piscinas</button><button class="btn2" onclick="location.href='/admin-dashboard'" data-calculator-copy="dashboard">Dashboard</button><button data-calculator-action="save" disabled onclick="saveAndCalculate()" data-calculator-copy="save">Guardar cálculo</button></div>
   </header>
-  <main class="wrap" id="poolCalculator" data-cw-form-memory="managed" data-cw-state-managed="manual">
+  <main class="wrap" id="poolCalculator" data-cw-no-i18n data-cw-form-memory="managed" data-cw-state-managed="manual">
     <section class="card">
-      <div class="toolbar" style="justify-content:space-between"><span class="badge" id="poolBadge">Piscina</span><button class="btn2" data-calculator-action="reload" onclick="loadPool()">Recarregar</button></div>
-      <p class="note">Cada cálculo usa os campos da piscina selecionada. Resultados indicativos: os valores iniciais e as medições guardadas devem ser revistos antes de guardar.</p>
+      <div class="toolbar" style="justify-content:space-between"><span class="badge" id="poolBadge">Piscina</span><button class="btn2" data-calculator-action="reload" onclick="loadPool()" data-calculator-copy="reload">Recarregar</button></div>
+      <p class="note" data-calculator-copy="intro">Cada cálculo usa os campos da piscina selecionada. Resultados indicativos: os valores iniciais e as medições guardadas devem ser revistos antes de guardar.</p>
       <div class="grid">
         <div class="full"><label>Piscina</label><select id="poolId" onchange="onPoolChange()"></select></div>
-        <div><label>Formato</label><select id="shape"><option value="RECTANGULAR">Retangular</option><option value="OVAL">Oval</option><option value="ROUND">Redonda</option><option value="KIDNEY">Rim / forma livre</option><option value="FREEFORM">Irregular</option></select></div>
+        <div><label>Formato</label><select id="shape"><option value="RECTANGULAR" data-calculator-copy="RECTANGULAR">Retangular</option><option value="OVAL" data-calculator-copy="OVAL">Oval</option><option value="ROUND" data-calculator-copy="ROUND">Redonda</option><option value="KIDNEY" data-calculator-copy="KIDNEY">Rim / forma livre</option><option value="FREEFORM" data-calculator-copy="FREEFORM">Irregular</option></select></div>
         <div><label>Fator forma livre</label><input id="shapeFactor" type="number" step="0.01" placeholder="0.80"></div>
         <div><label>Comprimento m</label><input id="lengthM" type="number" step="0.01"></div>
         <div><label>Largura m</label><input id="widthM" type="number" step="0.01"></div>
@@ -66,7 +67,7 @@
         <div><label>Caudal bomba m³/h</label><input id="pumpFlowM3h" type="number" step="0.1"></div>
         <div><label>Potência bomba cv/hp</label><input id="pumpPowerHp" type="number" step="0.1"></div>
         <div><label>Nº médio banhistas</label><input id="bathersAverage" type="number" step="1"></div>
-        <div><label>Carga</label><select id="poolLoad"><option>NORMAL</option><option>LOW</option><option>HIGH</option></select></div>
+        <div><label>Carga</label><select id="poolLoad"><option value="NORMAL" data-calculator-copy="NORMAL">Normal</option><option value="LOW" data-calculator-copy="LOW">Baixa</option><option value="HIGH" data-calculator-copy="HIGH">Alta</option></select></div>
       </div>
       <hr style="border-color:var(--line);border-style:solid;border-width:1px 0 0;margin:16px 0">
       <div class="grid">
@@ -84,37 +85,37 @@
       </div>
       <hr style="border-color:var(--line);border-style:solid;border-width:1px 0 0;margin:16px 0">
       <div class="grid">
-        <div><label>Bomba calor mono/trifásica</label><select id="heatPumpPhase"><option value="">Não definido</option><option>MONOFASICA</option><option>TRIFASICA</option></select></div>
+        <div><label>Bomba calor mono/trifásica</label><select id="heatPumpPhase"><option value="" data-calculator-copy="undefinedPhase">Não definido</option><option value="MONOFASICA" data-calculator-copy="MONOFASICA">Monofásica</option><option value="TRIFASICA" data-calculator-copy="TRIFASICA">Trifásica</option></select></div>
         <div><label>Potência térmica kW</label><input id="heatPumpThermalKw" type="number" step="0.1"></div>
         <div><label>Potência elétrica kW</label><input id="heatPumpElectricalKw" type="number" step="0.1"></div>
         <div><label>COP</label><input id="cop" type="number" step="0.1" value="5"></div>
         <div><label>Temperatura atual °C</label><input id="currentWaterTempC" type="number" step="0.1"></div>
         <div><label>Temperatura alvo °C</label><input id="targetWaterTempC" type="number" step="0.1" value="27"></div>
-        <div><label>Cobertura</label><select id="covered"><option value="false">Sem cobertura</option><option value="true">Com cobertura</option></select></div>
+        <div><label>Cobertura</label><select id="covered"><option value="false" data-calculator-copy="uncovered">Sem cobertura</option><option value="true" data-calculator-copy="withCover">Com cobertura</option></select></div>
         <div><label>Fator perdas</label><input id="ambientLossFactor" type="number" step="0.01" placeholder="auto"></div>
         <div class="full"><label>Notas</label><textarea id="notes"></textarea></div>
       </div>
-      <div class="toolbar" style="margin-top:14px"><button data-calculator-action="preview" disabled onclick="previewCalculation()">Calcular sem guardar</button><button class="btn3" data-calculator-action="save" disabled onclick="saveAndCalculate()">Guardar na ficha da piscina</button><button class="btnDanger" data-calculator-action="clear" disabled onclick="clearInputs()">Limpar campos</button></div>
+      <div class="toolbar" style="margin-top:14px"><button data-calculator-action="preview" disabled onclick="previewCalculation()" data-calculator-copy="preview">Calcular sem guardar</button><button class="btn3" data-calculator-action="save" disabled onclick="saveAndCalculate()" data-calculator-copy="saveRecord">Guardar na ficha da piscina</button><button class="btnDanger" data-calculator-action="clear" disabled onclick="clearInputs()" data-calculator-copy="clear">Limpar campos</button></div>
       <p class="status" id="status" role="status" aria-live="polite"></p>
-      <p id="draftStatus" class="note" role="status" aria-live="polite"></p><button id="retryDraft" type="button" hidden onclick="retryCalculatorDraft()">Conservar novamente o rascunho</button>
-      <div id="recovery" hidden><p class="note">Os campos deste pedido ficam conservados neste navegador e nesta conta até à confirmação. Podes fechar a página e voltar.</p><button id="recoverRequest" type="button" onclick="recoverCalculation()">Confirmar pedido guardado</button></div>
+      <p id="draftStatus" class="note" role="status" aria-live="polite"></p><button id="retryDraft" type="button" hidden onclick="retryCalculatorDraft()" data-calculator-copy="retryDraft">Conservar novamente o rascunho</button>
+      <div id="recovery" hidden><p class="note" data-calculator-copy="recoveryNote">Os campos deste pedido ficam conservados neste navegador e nesta conta até à confirmação. Podes fechar a página e voltar.</p><button id="recoverRequest" type="button" onclick="recoverCalculation()" data-calculator-copy="recoverRequest">Confirmar pedido guardado</button></div>
     </section>
 
     <section>
       <div class="kpiGrid">
-        <div class="kpi"><span>Cubicagem</span><b id="kVolume">-</b></div>
-        <div class="kpi"><span>Área</span><b id="kArea">-</b></div>
-        <div class="kpi"><span>Sal a adicionar</span><b id="kSalt">-</b></div>
-        <div class="kpi"><span>Bomba calor</span><b id="kHeat">-</b></div>
+        <div class="kpi"><span data-calculator-copy="volume">Cubicagem</span><b id="kVolume">-</b></div>
+        <div class="kpi"><span data-calculator-copy="area">Área</span><b id="kArea">-</b></div>
+        <div class="kpi"><span data-calculator-copy="addSalt">Sal a adicionar</span><b id="kSalt">-</b></div>
+        <div class="kpi"><span data-calculator-copy="heatPump">Bomba de calor</span><b id="kHeat">-</b></div>
       </div>
-      <div class="card" style="margin-top:14px"><h3>Recomendações automáticas</h3><div id="recommendations"></div></div>
+      <div class="card" style="margin-top:14px"><h3 data-calculator-copy="recommendations">Recomendações automáticas</h3><div id="recommendations"></div></div>
       <div class="sections">
-        <div class="card result"><h3>💧 Geometria</h3><div id="geometry"></div></div>
-        <div class="card result"><h3>🔁 Filtração</h3><div id="filtration"></div></div>
-        <div class="card result"><h3>🧂 Salinidade</h3><div id="salt"></div></div>
-        <div class="card result"><h3>⚡ Máquina de sal</h3><div id="chlorination"></div></div>
-        <div class="card result"><h3>🧪 Química</h3><div id="chemistry"></div></div>
-        <div class="card result full"><h3>🔥 Bomba de calor</h3><div id="heatPump"></div></div>
+        <div class="card result"><h3 data-calculator-copy="geometry">💧 Geometria</h3><div id="geometry"></div></div>
+        <div class="card result"><h3 data-calculator-copy="filtration">🔁 Filtração</h3><div id="filtration"></div></div>
+        <div class="card result"><h3 data-calculator-copy="salt">🧂 Salinidade</h3><div id="salt"></div></div>
+        <div class="card result"><h3 data-calculator-copy="chlorination">⚡ Máquina de sal</h3><div id="chlorination"></div></div>
+        <div class="card result"><h3 data-calculator-copy="chemistry">🧪 Química</h3><div id="chemistry"></div></div>
+        <div class="card result full"><h3 data-calculator-copy="heatHeading">🔥 Bomba de calor</h3><div id="heatPump"></div></div>
       </div>
     </section>
   </main>
@@ -137,6 +138,7 @@
       });
     })();
   </script>
+  <script src="/cw-pool-calculator-copy.js"></script>
   <script src="/cw-pool-calculator-rules.js"></script>
   <script src="/cw-pool-calculator-store.js"></script>
   <script src="/cw-pool-calculator-drafts.js"></script>

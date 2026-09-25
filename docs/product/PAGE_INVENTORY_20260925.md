@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `88bfaf8dd55bbf4e79c656572f505614816468be`. Gerado em 2026-09-25T06:35:13.456Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `884a227e6ebb3f139e2b95411d34b74efb26b80e`. Gerado em 2026-09-25T07:02:32.441Z. Inclui o estado dos ficheiros locais no momento da geração.
 
 115 ficheiros HTML: 108 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 267 scripts de integração/navegador ativos. 80 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 268 scripts de integração/navegador ativos. 80 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 2 referências existem no índice Git mas não estão materializadas nesta cópia local; não são classificadas como ficheiros ausentes da aplicação.
 
@@ -65,7 +65,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /admin-operational-settings | Entrada raiz | ADMIN | ADMIN | 6 |
 | /admin-payment-settings | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-payments | Entrada raiz | ADMIN | ADMIN | 1 |
-| /admin-pool-calculator | Entrada raiz | ADMIN | ADMIN | 3 |
+| /admin-pool-calculator | Entrada raiz | ADMIN | ADMIN | 4 |
 | /admin-pool-technical | Entrada raiz | ADMIN | ADMIN | 9 |
 | /admin-pools | Entrada raiz | ADMIN | ADMIN | 2 |
 | /admin-priority | Entrada raiz | ADMIN | ADMIN | 2 |

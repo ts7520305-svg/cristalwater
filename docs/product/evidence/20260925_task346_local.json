@@ -151,7 +151,6 @@
     "pagesWithoutLiteralTestReference": 35
   },
   "limits": [
-    "Native CI and PostgreSQL restore of this commit remain pending.",
     "The durable browser request starts on Save; unsent edits are not persisted across full reload.",
     "Existing compatibility writes are atomic but retain their unversioned, non-idempotent contract.",
     "Existing calculation formulas are preserved; this is not a scientific validation or five-language certification.",
@@ -177,8 +176,9 @@
     "ciRun": 36102243450,
     "ciJob": 107967027838,
     "ciUrl": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36102243450",
-    "status": "in_progress",
-    "nativeRestoreConfirmed": false,
-    "checkedAt": "2026-09-25T06:18:59.341Z"
+    "status": "success",
+    "nativeRestoreConfirmed": true,
+    "checkedAt": "2026-09-25T06:59:39.224Z",
+    "nativeEvidence": "20260925_task346_ci.json"
   }
 }

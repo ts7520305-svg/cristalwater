@@ -1,6 +1,9 @@
 (function(){
   'use strict';
-  const R=window.CWPoolCalculatorRules,fields=R.fieldKeys;
+  const R=window.CWPoolCalculatorRules,fields=R.fieldKeys,copy=window.CWPoolCalculatorCopy;
+  const urlLanguage=()=>{const values=new URLSearchParams(location.search).getAll('lang');return values.length===1&&Object.hasOwn(copy,values[0])?values[0]:'pt';};
+  let language=urlLanguage(),statusKey='',draftKey='',badgePool=null,currentCalculation=null;
+  const t=(key,values={})=>copy[language][key].replace(/\{(\w+)\}/g,(_,name)=>String(values[name]??'{'+name+'}'));
   const $=id=>document.getElementById(id),root=$('poolCalculator'),keys=['cristalwater_jwt','token','adminToken','cristalwater_user','user'];
   const defaults=Object.fromEntries(fields.map(id=>[id,$(id).value]));
   const blocks=['geometry','filtration','salt','chlorination','heatPump','chemistry','recommendations'];
@@ -23,7 +26,7 @@
   }catch(_){invalid=true;}
   if(!invalid)try{drafts=window.CWPoolCalculatorDrafts.open(session.owner,sessionStorage);}catch(_){}
   function abort(){sequence++;if(request){request.controller.abort();clearTimeout(request.timer);request=null;}}
-  function clearResults(){resultInput=null;for(const id of blocks)$(id).replaceChildren();for(const id of ['kVolume','kArea','kSalt','kHeat'])$(id).textContent='-';}
+  function clearResults(){currentCalculation=null;resultInput=null;for(const id of blocks)$(id).replaceChildren();for(const id of ['kVolume','kArea','kSalt','kHeat'])$(id).textContent='-';}
   function controls(){
     const blocked=invalid||suspended||loading||saving||uncertain||storageBlocked||draftBlocked||draftStale||!!durable?.pending||!loadedId;
     for(const id of fields)$(id).disabled=invalid||suspended||loading||saving||uncertain||storageBlocked||draftStale||!!durable?.pending||!loadedId;
@@ -35,36 +38,48 @@
     $('retryDraft').disabled=invalid||suspended||loading||saving||!loadedId;
     root.setAttribute('aria-busy',String(loading||saving));
   }
-  function status(state,message){root.dataset.state=state;$('status').textContent=message;$('status').setAttribute('role',['error','session','uncertain','storage','conflict','draft-error'].includes(state)?'alert':'status');controls();if(['uncertain','storage','conflict','draft-error'].includes(state)&&!root.hidden)$('status').scrollIntoView({block:'center'});}
-  function blank(){$('draftStatus').textContent='';for(const id of fields)$(id).value='';$('poolBadge').textContent='Piscina';clearResults();}
+  function status(state,key){statusKey=key;root.dataset.state=state;$('status').textContent=t(key);$('status').setAttribute('role',['error','session','uncertain','storage','conflict','draft-error'].includes(state)?'alert':'status');controls();if(['uncertain','storage','conflict','draft-error'].includes(state)&&!root.hidden)$('status').scrollIntoView({block:'center'});}
+  function draftMessage(key){draftKey=key;$('draftStatus').textContent=key?t(key):'';}
+  function poolLabel(pool){return (pool.client?.name?pool.client.name+' · ':'')+(pool.name||t('poolId')+' #'+pool.id);}
+  function renderBadge(){$('poolBadge').textContent=badgePool?(badgePool.client?.name||t('client'))+' · '+(badgePool.name||t('poolId')+' #'+badgePool.id):t('poolId');}
+  function applyLanguage(){
+    document.documentElement.lang=language;document.title='Cristal Water · '+t('title');$('calculatorLanguage').value=language;$('calculatorLanguage').setAttribute('aria-label',t('language'));
+    document.querySelectorAll('[data-calculator-copy]').forEach(node=>{node.textContent=t(node.dataset.calculatorCopy);});
+    for(const id of ['poolId',...fields]){const control=$(id),label=document.querySelector('label[for="'+id+'"]');label.textContent=t(id);control.setAttribute('aria-label',t(id));control.querySelectorAll('[data-original-option]').forEach(option=>{option.textContent=t('storedOption',{value:option.value});});}
+    $('ambientLossFactor').placeholder=t('automatic');renderBadge();
+    $('poolId').querySelectorAll('[data-empty-pool-name]').forEach(option=>{option.textContent=(option.dataset.clientName?option.dataset.clientName+' · ':'')+t('poolId')+' #'+option.value;});
+    if(statusKey)$('status').textContent=t(statusKey);draftMessage(draftKey);
+    if(currentCalculation&&resultInput&&same(payload(),resultInput))renderCalculation(currentCalculation);
+  }
+  function blank(){draftMessage('');badgePool=null;for(const id of fields)$(id).value='';renderBadge();clearResults();}
   function active(){
     try{if(!invalid&&session.identity===fingerprint()&&session.expires>Date.now())return true;}catch(_){}
     invalid=true;abort();loadedId=null;baseline=null;loading=false;saving=false;blank();$('poolId').replaceChildren();poolsReady=false;
-    status('session','A sessão mudou ou expirou. Volta a entrar e reabre a calculadora.');return false;
+    status('session','session');return false;
   }
   function setFields(values={}){
     for(const id of fields){
       const control=$(id);control.querySelectorAll?.('[data-original-option]').forEach(option=>option.remove());
       const value=values[id]===undefined||values[id]===null?defaults[id]:String(values[id]);
       if(control.tagName==='SELECT'&&value!==''&&![...control.options].some(option=>option.value===value)){
-        const option=document.createElement('option');option.value=value;option.textContent=value+' (valor guardado)';option.dataset.originalOption='true';control.append(option);
+        const option=document.createElement('option');option.value=value;option.textContent=t('storedOption',{value});option.dataset.originalOption='true';control.append(option);
       }
       control.value=value;
     }
   }
   function fill(data){
     setFields(data.fields);review=data;
-    $('poolBadge').textContent=(data.pool.client?.name||'Cliente')+' · '+(data.pool.name||'Piscina #'+data.pool.id);
+    badgePool=data.pool;renderBadge();
     baseline=payload();
   }
   const dirty=()=>!!baseline&&!same(payload(),baseline);
-  function discard(mode){return !(dirty()||uncertain||draftStale)||window.confirm(mode==='switch'?'Conservar o rascunho desta piscina e abrir a piscina selecionada?':uncertain||draftStale?'A ficha mudou ou este pedido não foi aplicado. Descartar estes campos e carregar a versão atual?':'Descartar as alterações ainda não guardadas nesta piscina?');}
-  function draftFailure(){draftBlocked=true;clearResults();$('draftStatus').textContent='Não foi possível conservar ou validar o rascunho. Mantém este separador aberto: os campos visíveis ainda não foram guardados. O rascunho anterior foi conservado.';$('draftStatus').setAttribute('role','alert');controls();}
+  function discard(mode){return !(dirty()||uncertain||draftStale)||window.confirm(mode==='switch'?t('confirmSwitch'):uncertain||draftStale?t('confirmConflict'):t('confirmDiscard'));}
+  function draftFailure(){draftBlocked=true;clearResults();draftMessage('draftFailure');$('draftStatus').setAttribute('role','alert');controls();}
   function conserveDraft(){
     if(!review||!loadedId||invalid||suspended||durable?.pending)return false;
-    try{if(fields.some(id=>$(id).validity.badInput))throw Error('Incomplete numeric field');drafts.save(review,payload());draftBlocked=false;$('draftStatus').textContent='Rascunho conservado neste separador e nesta conta. A ficha só muda ao guardar.';$('draftStatus').setAttribute('role','status');controls();return true;}catch(_){draftFailure();return false;}
+    try{if(fields.some(id=>$(id).validity.badInput))throw Error('Incomplete numeric field');drafts.save(review,payload());draftBlocked=false;draftMessage('draftKept');$('draftStatus').setAttribute('role','status');controls();return true;}catch(_){draftFailure();return false;}
   }
-  function retryCalculatorDraft(){if(active()&&!suspended&&!saving&&!loading&&!durable?.pending&&loadedId&&conserveDraft())status(draftStale?'conflict':'edited',draftStale?'A ficha mudou. O rascunho foi conservado; recarrega para rever a versão atual.':'Rascunho conservado. Calcula novamente para consultar os campos atuais.');}
+  function retryCalculatorDraft(){if(active()&&!suspended&&!saving&&!loading&&!durable?.pending&&loadedId&&conserveDraft())status(draftStale?'conflict':'edited',draftStale?'draftStale':'draftRetried');}
   function validCalculation(c){
     if(!c||typeof c!=='object'||!Number.isFinite(Date.parse(c.generatedAt))||!Array.isArray(c.recommendations)||!c.recommendations.every(x=>typeof x==='string'))return false;
     for(const key of ['geometry','filtration','salt','chlorination','heatPump']){
@@ -93,19 +108,19 @@
   }
   function writeUrl(id){const url=new URL(location.href);url.searchParams.delete('id');url.searchParams.set('poolId',id);history.replaceState(null,'',url);}
   async function loadPools(){
-    if(!active()||suspended)return;abort();const generation=sequence;loading=true;loadedId=null;baseline=null;poolsReady=false;blank();status('loading','A carregar piscinas…');
+    if(!active()||suspended)return;abort();const generation=sequence;loading=true;loadedId=null;baseline=null;poolsReady=false;blank();status('loading','loadingPools');
     try{
       const data=await read('/api/pools');if(generation!==sequence)return;
       if(!Array.isArray(data.pools)||data.pools.some(p=>!positive(p.id)||typeof p.name!=='string')||new Set(data.pools.map(p=>p.id)).size!==data.pools.length)throw Error('Invalid pools');
       $('poolId').replaceChildren();
-      for(const pool of data.pools){const option=document.createElement('option');option.value=String(pool.id);option.textContent=(pool.client?.name?pool.client.name+' · ':'')+(pool.name||'Piscina #'+pool.id);$('poolId').append(option);}
+      for(const pool of data.pools){const option=document.createElement('option');option.value=String(pool.id);option.textContent=poolLabel(pool);if(!pool.name){option.dataset.emptyPoolName='true';option.dataset.clientName=pool.client?.name||'';}$('poolId').append(option);}
       poolsReady=true;loading=false;
-      if(!data.pools.length){status('empty','Não há piscinas disponíveis.');return;}
+      if(!data.pools.length){status('empty','empty');return;}
       const selected=selectionFromUrl();
-      if(selected===false||selected!==null&&!data.pools.some(p=>String(p.id)===selected)){$('poolId').value='';status('error','A piscina indicada não está disponível. Escolhe uma piscina da lista.');return;}
+      if(selected===false||selected!==null&&!data.pools.some(p=>String(p.id)===selected)){$('poolId').value='';status('error','unavailable');return;}
       if(selected!==null)$('poolId').value=selected;
       await loadPool(true,'restore');
-    }catch(_){if(active()&&!suspended&&generation===sequence){loading=false;poolsReady=false;$('poolId').replaceChildren();status('error','Não foi possível carregar as piscinas. Tenta recarregar.');}}
+    }catch(_){if(active()&&!suspended&&generation===sequence){loading=false;poolsReady=false;$('poolId').replaceChildren();status('error','poolsError');}}
   }
   async function loadPool(confirmed=false,mode='reload'){
     if(!active()||suspended||saving||storageBlocked||draftBlocked||durable?.pending)return;
@@ -114,34 +129,34 @@
     if(!confirmed&&!discard(mode)){$('poolId').value=loadedId||'';if(loadedId)writeUrl(loadedId);return;}
     if(mode==='switch'&&loadedId&&dirty()&&!conserveDraft()){$('poolId').value=loadedId;writeUrl(loadedId);return;}
     abort();const generation=sequence;uncertain=false;draftStale=false;loadedId=null;baseline=null;loading=true;blank();
-    if(!validId(target)){loading=false;status('error','Escolhe uma piscina válida.');return;}
-    writeUrl(target);status('loading','A carregar a ficha da piscina selecionada…');
+    if(!validId(target)){loading=false;status('error','invalidPool');return;}
+    writeUrl(target);status('loading','loadingPool');
     try{
       const data=await read('/api/pool-calculations/'+target+'/edit-state',undefined,true);
       if(generation!==sequence||$('poolId').value!==target)return;
       if(!R.state(data)||data.poolId!==Number(target))throw Error('Pool mismatch');
       if(durable?.confirmed&&!durable.confirmed.result.applied)durable=await store.clear();
       if(!active()||suspended||generation!==sequence)return;
-      let saved;try{saved=drafts.read(Number(target));if(mode==='reload'){drafts.discard(Number(target));saved=null;}else if(durable?.confirmed?.result.applied&&window.CWPoolCalculatorDrafts.sameRequest(saved,durable.confirmed.record)){drafts.finish(durable.confirmed.record);saved=null;}}catch(_){fill(data);loadedId=target;loading=false;draftFailure();status('draft-error','O rascunho guardado não pôde ser confirmado. Conservámos os bytes originais; nenhum novo pedido será enviado.');return;}
+      let saved;try{saved=drafts.read(Number(target));if(mode==='reload'){drafts.discard(Number(target));saved=null;}else if(durable?.confirmed?.result.applied&&window.CWPoolCalculatorDrafts.sameRequest(saved,durable.confirmed.record)){drafts.finish(durable.confirmed.record);saved=null;}}catch(_){fill(data);loadedId=target;loading=false;draftFailure();status('draft-error','draftInvalid');return;}
       fill(saved?saved.review:data);loadedId=target;loading=false;clearResults();
-      if(saved){setFields(saved.fields);draftStale=saved.review.version!==data.version;$('draftStatus').textContent='Rascunho recuperado neste separador, para esta piscina e esta conta.';status(draftStale?'conflict':'edited',draftStale?'A ficha mudou desde a revisão deste rascunho. Os campos foram conservados; recarrega para descartar e consultar a versão atual.':'Rascunho recuperado. Calcula novamente antes de consultar os resultados.');return;}
-      resultInput=payload();status('ready','Ficha carregada. Calcula para consultar os resultados dos campos visíveis. Os campos em falta usam os valores iniciais indicados; as medições químicas guardadas pertencem ao último cálculo desta piscina.');
-    }catch(_){if(active()&&!suspended&&generation===sequence){loading=false;loadedId=null;baseline=null;blank();status('error','Não foi possível confirmar a ficha desta piscina. Tenta recarregar.');}}
+      if(saved){setFields(saved.fields);draftStale=saved.review.version!==data.version;draftMessage('draftRecovered');status(draftStale?'conflict':'edited',draftStale?'draftStale':'recovered');return;}
+      resultInput=payload();status('ready','ready');
+    }catch(_){if(active()&&!suspended&&generation===sequence){loading=false;loadedId=null;baseline=null;blank();status('error','poolError');}}
   }
   function changed(){
     if(!active()||suspended||loading||saving||uncertain||storageBlocked||draftStale||durable?.pending||!loadedId)return;
-    abort();clearResults();conserveDraft();status('edited','Campos alterados. Calcula novamente para obter resultados correspondentes a estes valores.');
+    abort();clearResults();conserveDraft();status('edited','edited');
   }
   function validInputs(){return fields.every(id=>$(id).validity.valid&&($(id).type!=='number'||$(id).value===''||Number.isFinite(Number($(id).value))));}
-  function storageFailure(){storageBlocked=true;saving=false;clearResults();status('storage','Não foi possível conservar ou validar o pedido neste navegador, ou outra janela o alterou. Os campos continuam visíveis. Reabre a página para verificar o pedido guardado antes de continuar.');}
+  function storageFailure(){storageBlocked=true;saving=false;clearResults();status('storage','storageError');}
   function restore(record){
-    loadedId=String(record.poolId);const option=document.createElement('option');option.value=loadedId;option.textContent=(record.review.pool.client?.name||'Cliente')+' · '+record.review.pool.name;
+    loadedId=String(record.poolId);const option=document.createElement('option');option.value=loadedId;option.textContent=poolLabel(record.review.pool);if(!record.review.pool.name){option.dataset.emptyPoolName='true';option.dataset.clientName=record.review.pool.client?.name||'';}
     $('poolId').replaceChildren(option);poolsReady=true;fill(record.review);setFields(record.command.fields);writeUrl(loadedId);clearResults();
   }
   async function recoverCalculation(){
     if(!active()||suspended||saving||storageBlocked||!durable?.pending)return;
     try{if(!store.unchanged()){storageFailure();return;}}catch(_){storageFailure();return;}
-    abort();const generation=sequence,record=durable.pending;saving=true;uncertain=true;clearResults();status('saving','A confirmar o pedido guardado…');
+    abort();const generation=sequence,record=durable.pending;saving=true;uncertain=true;clearResults();status('saving','confirming');
     try{
       const recovered=await read('/api/pool-calculations/requests/'+record.command.requestId,undefined,true);
       if(typeof recovered.found!=='boolean')throw Error('Invalid recovery');
@@ -151,15 +166,15 @@
       durable=await store.confirm(result);
       if(!active()||suspended||generation!==sequence)return;
       saving=false;uncertain=!result.applied;
-      if(result.applied){fill(result.state);draftStale=false;try{drafts.finish(record);$('draftStatus').textContent='O pedido foi confirmado; o rascunho correspondente foi concluído.';}catch(_){draftFailure();}const unchanged=R.equal(payload(),record.command.fields);if(unchanged){renderCalculation(result.calculation);resultInput=payload();}else clearResults();status('saved',unchanged?'Gravação confirmada para este pedido. Recarrega para consultar eventuais alterações posteriores.':'Gravação confirmada. Os campos apresentados seguem os valores guardados; calcula novamente para consultar os resultados destes campos.');}
-      else {restore(record);status('conflict',result.message+' Os teus campos foram conservados.');}
-    }catch(_){if(active()&&!suspended&&generation===sequence){saving=false;uncertain=true;clearResults();status('uncertain','A resposta não foi confirmada. O pedido e os campos continuam guardados neste navegador. Usa «Confirmar pedido guardado» para verificar o mesmo pedido.');}}
+      if(result.applied){fill(result.state);draftStale=false;try{drafts.finish(record);draftMessage('draftFinished');}catch(_){draftFailure();}const unchanged=R.equal(payload(),record.command.fields);if(unchanged){renderCalculation(result.calculation);resultInput=payload();}else clearResults();status('saved',unchanged?'saved':'savedRecalculate');}
+      else {restore(record);status('conflict',result.code);}
+    }catch(_){if(active()&&!suspended&&generation===sequence){saving=false;uncertain=true;clearResults();status('uncertain','uncertain');}}
   }
   async function calculate(save){
     if(!active()||suspended||loading||saving||uncertain||storageBlocked||draftBlocked||draftStale||durable?.pending||!loadedId||loadedId!==$('poolId').value)return;
-    if(!validInputs()||!R.fields(payload())){clearResults();status('error','Revê os campos numéricos assinalados antes de calcular.');fields.find(id=>!$(id).validity.valid)&&$(fields.find(id=>!$(id).validity.valid)).reportValidity();return;}
+    if(!validInputs()||!R.fields(payload())){clearResults();status('error','invalidInputs');fields.find(id=>!$(id).validity.valid)&&$(fields.find(id=>!$(id).validity.valid)).reportValidity();return;}
     abort();const generation=sequence,target=loadedId,input=payload();clearResults();saving=save;
-    status(save?'saving':'previewing',save?'A conservar o pedido antes de guardar…':'A calcular os valores atuais…');
+    status(save?'saving':'previewing',save?'preparing':'calculating');
     if(save){
       if(!conserveDraft()){saving=false;controls();return;}
       try{durable=await store.prepare(review,input);}catch(_){if(active()&&!suspended&&generation===sequence)storageFailure();return;}
@@ -170,45 +185,51 @@
       const data=await read('/api/pool-calculations/preview',input);
       if(generation!==sequence||!active()||suspended||loadedId!==target||$('poolId').value!==target||!same(payload(),input))return;
       if(!validCalculation(data.calculation))throw Error('Unconfirmed calculation');
-      renderCalculation(data.calculation);resultInput=input;status('preview','Pré-visualização calculada para os campos atuais. Ainda não foi guardada.');
-    }catch(_){if(active()&&!suspended&&generation===sequence){clearResults();status('error','Não foi possível confirmar o cálculo. Os campos foram conservados; tenta novamente.');}}
+      renderCalculation(data.calculation);resultInput=input;status('preview','calculated');
+    }catch(_){if(active()&&!suspended&&generation===sequence){clearResults();status('error','calculationError');}}
   }
   async function start(){
     if(!active())return;
     try{durable=await store.read();}catch(_){if(active())storageFailure();return;}
     if(!active()||suspended)return;
-    if(durable.pending){restore(durable.pending);uncertain=true;status('uncertain','Existe um pedido por confirmar nesta conta. Os campos foram recuperados; confirma o pedido guardado antes de continuar.');return;}
-    if(durable.confirmed&&!durable.confirmed.result.applied){restore(durable.confirmed.record);uncertain=true;status('conflict',durable.confirmed.result.message+' Os teus campos foram conservados.');return;}
+    if(durable.pending){restore(durable.pending);uncertain=true;status('uncertain','pending');return;}
+    if(durable.confirmed&&!durable.confirmed.result.applied){restore(durable.confirmed.record);uncertain=true;status('conflict',durable.confirmed.result.code);return;}
     await loadPools();
   }
   function renderBlock(id,rows){$(id).innerHTML=rows.join('');}
   function renderCalculation(c){
+    currentCalculation=c;
     const input=payload(),number=id=>input[id]===''?null:Number(input[id]),has=id=>number(id)!==null&&Number.isFinite(number(id)),positive=id=>has(id)&&number(id)>0;
     const shape=input.shape.toUpperCase(),area=positive('surfaceM2')||(['ROUND','CIRCULAR'].includes(shape)?positive('diameterM'):['RECTANGULAR','OVAL','KIDNEY','FREEFORM'].includes(shape)&&positive('lengthM')&&positive('widthM')&&(!['KIDNEY','FREEFORM'].includes(shape)||positive('shapeFactor')));
     const volume=positive('volumeM3')||area&&(positive('averageDepthM')||positive('depthMinM')&&positive('depthMaxM'));
     const filtration=volume&&positive('pumpFlowM3h'),salt=volume&&has('saltCurrentPpm')&&number('saltCurrentPpm')>=0&&positive('targetSalinityPpm');
     const chlorination=volume&&positive('chlorinatorGph')&&has('chlorineCurrentPpm')&&number('chlorineCurrentPpm')>=0&&positive('targetChlorinePpm');
     const heat=volume&&has('currentWaterTempC')&&has('targetWaterTempC')&&positive('heatPumpThermalKw');
-    const missing=text=>['<p class="note">Dados insuficientes. '+esc(text)+'</p>'];
+    const missing=key=>['<p class="note">'+esc(t('insufficient',{detail:t(key)}))+'</p>'],displayRow=(key,value)=>row(t(key),value);
+    // Translate only known generated text; unexpected source text remains literal and escaped.
+    const knownNote=(key,value)=>value===copy.pt[key]?t(key):value;
+    const formulaKeys={'custom':'customFormula','round: π × r²':'roundFormula','oval: π × (L/2) × (W/2)':'ovalFormula','kidney/freeform approximation: L × W × factor':'kidneyFormula','freeform approximation: L × W × factor':'freeFormula','rectangular: L × W':'rectangleFormula'};
+    const formula=Object.hasOwn(formulaKeys,c.geometry.formula)?t(formulaKeys[c.geometry.formula]):c.geometry.formula;
+    const hours=c.filtration.idealFiltrationHoursDay,program=c.filtration.suggestedProgram==='Dividir em 2-3 períodos/dia. Base: '+hours+'h/dia.'?t('program',{hours}):knownNote('needFlow',c.filtration.suggestedProgram);
     $('kVolume').textContent=volume?fmt(c.geometry.volumeM3,' m³'):'-';$('kArea').textContent=area?fmt(c.geometry.surfaceM2,' m²'):'-';$('kSalt').textContent=salt?fmt(c.salt.saltKgToAdd,' kg'):'-';$('kHeat').textContent=heat?fmt(c.heatPump.estimatedHoursToTarget,' h'):'-';
     const recommendations=[];
-    if(salt)recommendations.push('Sal para o alvo indicado: '+fmt(c.salt.saltKgToAdd,' kg')+'.');
-    if(filtration)recommendations.push(c.filtration.suggestedProgram);
-    if(chlorination)recommendations.push('Produção diária estimada: '+fmt(c.chlorination.estimatedDailyProductionHours,' h/dia')+'.');
-    if(heat)recommendations.push('Tempo de aquecimento estimado: '+fmt(c.heatPump.estimatedHoursToTarget,' h')+'.');
-    $('recommendations').innerHTML=(recommendations.length?recommendations:['Completa os dados indicados em cada secção para consultar as estimativas.']).map(x=>'<div class="rec">'+esc(x)+'</div>').join('');
-    renderBlock('geometry',area||volume?[row('Formato',c.geometry.shape),row('Fórmula',area?c.geometry.formula:'Volume manual indicado'),row('Área',area?fmt(c.geometry.surfaceM2,' m²'):'-'),row('Cubicagem',volume?fmt(c.geometry.volumeM3,' m³'):'-'),row('Litros',volume?fmt(c.geometry.volumeLitres,' L'):'-')] : missing("Indica a cubicagem ou as dimensões e a profundidade."));
-    renderBlock('filtration',filtration?[row('Caudal bomba',fmt(c.filtration.pumpFlowM3h,' m³/h')),row('1 recirculação',fmt(c.filtration.oneTurnoverHours,' h')),row('Mínimo diário',fmt(c.filtration.minimumFiltrationHoursDay,' h')),row('Ideal diário',fmt(c.filtration.idealFiltrationHoursDay,' h')),row('Programa',c.filtration.suggestedProgram)] : missing("Indica o volume e o caudal da bomba."));
-    renderBlock('salt',salt?[row('Sal atual',fmt(c.salt.saltCurrentPpm,' ppm')),row('Sal alvo',fmt(c.salt.targetSalinityPpm,' ppm')),row('Falta',fmt(c.salt.saltMissingPpm,' ppm')),row('Adicionar',fmt(c.salt.saltKgToAdd,' kg')),row('Nota',c.salt.note)] : missing("Indica o volume, a salinidade medida e o alvo. Um campo vazio não significa zero."));
-    renderBlock('chlorination',chlorination?[row('Máquina',fmt(c.chlorination.chlorinatorGph,' g/h')),row('Cloro para alvo',fmt(c.chlorination.chlorineGramsToReachTarget,' g')),row('Horas até alvo',fmt(c.chlorination.chlorinatorHoursToReachTarget,' h')),row('Procura diária estimada',fmt(c.chlorination.estimatedDailyChlorineGrams,' g/dia')),row('Horas produção/dia',fmt(c.chlorination.estimatedDailyProductionHours,' h')),row('Máquina ideal',c.chlorination.idealChlorinatorRangeGph)] : missing("Indica o volume, o cloro medido, o alvo e a produção da máquina."));
-    renderBlock('heatPump',heat?[row('Temperatura atual',fmt(c.heatPump.currentWaterTempC,' °C')),row('Temperatura alvo',fmt(c.heatPump.targetWaterTempC,' °C')),row('Subida necessária',fmt(c.heatPump.deltaT,' °C')),row('Cobertura',c.heatPump.covered?'Sim':'Não'),row('Energia térmica ajustada',fmt(c.heatPump.thermalEnergyKwhAdjusted,' kWh')),row('Consumo elétrico estimado',fmt(c.heatPump.estimatedElectricKwh,' kWh')),row('Horas até alvo',fmt(c.heatPump.estimatedHoursToTarget,' h')),row('Nota',c.heatPump.note)] : missing("Indica o volume, as temperaturas e a potência térmica da bomba."));
+    if(salt)recommendations.push(t('saltAdvice',{value:fmt(c.salt.saltKgToAdd,' kg')}));
+    if(filtration)recommendations.push(program);
+    if(chlorination)recommendations.push(t('chlorineAdvice',{value:fmt(c.chlorination.estimatedDailyProductionHours,t('hoursDay'))}));
+    if(heat)recommendations.push(t('heatAdvice',{value:fmt(c.heatPump.estimatedHoursToTarget,' h')}));
+    $('recommendations').innerHTML=(recommendations.length?recommendations:[t('needData')]).map(x=>'<div class="rec">'+esc(x)+'</div>').join('');
+    renderBlock('geometry',area||volume?[displayRow('shape',['RECTANGULAR','OVAL','ROUND','KIDNEY','FREEFORM'].includes(c.geometry.shape)?t(c.geometry.shape):c.geometry.shape),displayRow('formula',area?formula:t('manualVolume')),displayRow('area',area?fmt(c.geometry.surfaceM2,' m²'):'-'),displayRow('volume',volume?fmt(c.geometry.volumeM3,' m³'):'-'),displayRow('litres',volume?fmt(c.geometry.volumeLitres,' L'):'-')] : missing('needGeometry'));
+    renderBlock('filtration',filtration?[displayRow('flow',fmt(c.filtration.pumpFlowM3h,' m³/h')),displayRow('turnover',fmt(c.filtration.oneTurnoverHours,' h')),displayRow('dailyMinimum',fmt(c.filtration.minimumFiltrationHoursDay,' h')),displayRow('dailyIdeal',fmt(c.filtration.idealFiltrationHoursDay,' h')),displayRow('programLabel',program)] : missing('needFiltration'));
+    renderBlock('salt',salt?[displayRow('currentSalt',fmt(c.salt.saltCurrentPpm,' ppm')),displayRow('targetSalt',fmt(c.salt.targetSalinityPpm,' ppm')),displayRow('missingSalt',fmt(c.salt.saltMissingPpm,' ppm')),displayRow('add',fmt(c.salt.saltKgToAdd,' kg')),displayRow('note',knownNote('saltNote',c.salt.note))] : missing('needSalt'));
+    renderBlock('chlorination',chlorination?[displayRow('machine',fmt(c.chlorination.chlorinatorGph,' g/h')),displayRow('chlorineTarget',fmt(c.chlorination.chlorineGramsToReachTarget,' g')),displayRow('hoursTarget',fmt(c.chlorination.chlorinatorHoursToReachTarget,' h')),displayRow('dailyDemand',fmt(c.chlorination.estimatedDailyChlorineGrams,t('gramsDay'))),displayRow('productionHours',fmt(c.chlorination.estimatedDailyProductionHours,' h')),displayRow('idealMachine',c.chlorination.idealChlorinatorRangeGph)] : missing('needChlorination'));
+    renderBlock('heatPump',heat?[displayRow('currentTemperature',fmt(c.heatPump.currentWaterTempC,' °C')),displayRow('targetTemperature',fmt(c.heatPump.targetWaterTempC,' °C')),displayRow('rise',fmt(c.heatPump.deltaT,' °C')),displayRow('covered',t(c.heatPump.covered?'yes':'no')),displayRow('thermalEnergy',fmt(c.heatPump.thermalEnergyKwhAdjusted,' kWh')),displayRow('electricEnergy',fmt(c.heatPump.estimatedElectricKwh,' kWh')),displayRow('hoursTarget',fmt(c.heatPump.estimatedHoursToTarget,' h')),displayRow('note',knownNote('heatNote',c.heatPump.note))] : missing('needHeat'));
     const chem=c.chemistry,rows=[];
-    if(chem){for(const [key,label,suffix] of [['alkalinityCurrentPpm','Alcalinidade atual',' ppm'],['targetAlkalinityPpm','Alcalinidade alvo',' ppm'],['bicarbonateKgToAdd','Bicarbonato estimado',' kg'],['phCurrent','pH atual',''],['targetPh','pH alvo',''],['phMinusKgEstimate','pH- estimado',' kg'],['phPlusKgEstimate','pH+ estimado',' kg'],['orpCurrentMv','ORP / Redox atual',' mV'],['targetOrpMv','ORP / Redox alvo',' mV']])if(chem[key]!==null&&chem[key]!==undefined&&(!['bicarbonateKgToAdd','phMinusKgEstimate','phPlusKgEstimate'].includes(key)||positive('volumeM3')))rows.push(row(label,fmt(chem[key],suffix)));}
-    renderBlock('chemistry',rows.length?rows:['<p class="note">Preenche as medições e calcula para consultar este resultado. Um campo vazio não é uma medição de zero.</p>']);
+    if(chem){for(const [key,label,suffix] of [['alkalinityCurrentPpm','currentAlkalinity',' ppm'],['targetAlkalinityPpm','targetAlkalinity',' ppm'],['bicarbonateKgToAdd','bicarbonate',' kg'],['phCurrent','phCurrent',''],['targetPh','targetPh',''],['phMinusKgEstimate','phMinus',' kg'],['phPlusKgEstimate','phPlus',' kg'],['orpCurrentMv','currentOrp',' mV'],['targetOrpMv','targetOrp',' mV']])if(chem[key]!==null&&chem[key]!==undefined&&(!['bicarbonateKgToAdd','phMinusKgEstimate','phPlusKgEstimate'].includes(key)||positive('volumeM3')))rows.push(displayRow(label,fmt(chem[key],suffix)));}
+    renderBlock('chemistry',rows.length?rows:['<p class="note">'+esc(t('needChemistry'))+'</p>']);
   }
   function clearInputs(){
-    if(!active()||suspended||loading||saving||uncertain||storageBlocked||draftBlocked||draftStale||durable?.pending||!loadedId||!window.confirm('Limpar os campos desta piscina e repor os valores iniciais? A ficha guardada só muda se guardares.'))return;
-    abort();setFields();clearResults();conserveDraft();status('edited','Campos repostos nos valores iniciais. A ficha guardada não foi alterada.');
+    if(!active()||suspended||loading||saving||uncertain||storageBlocked||draftBlocked||draftStale||durable?.pending||!loadedId||!window.confirm(t('confirmClear')))return;
+    abort();setFields();clearResults();conserveDraft();status('edited','cleared');
   }
   Object.assign(window,{loadPool:()=>loadPool(),onPoolChange:()=>loadPool(false,'switch'),previewCalculation:()=>calculate(false),saveAndCalculate:()=>calculate(true),clearInputs,recoverCalculation,retryCalculatorDraft});
   for(const id of fields)$(id).addEventListener('input',changed);
@@ -216,8 +237,9 @@
   window.addEventListener('storage',event=>{if(active()&&(event.key===store.key||event.key===null)){try{if(!store.unchanged())storageFailure();}catch(_){storageFailure();}}});window.addEventListener('focus',active);document.addEventListener('visibilitychange',()=>{if(!document.hidden)active();});
   window.addEventListener('beforeunload',event=>{if(!invalid&&(dirty()||saving||uncertain)){event.preventDefault();event.returnValue='';}});
   window.addEventListener('pagehide',()=>{suspended=true;if(saving){saving=false;uncertain=true;}abort();loading=false;clearResults();root.hidden=true;controls();});
-  window.addEventListener('pageshow',event=>{if(event.persisted){suspended=false;root.hidden=false;if(!active())return;controls();if(draftBlocked){draftFailure();return;}if(draftStale){status('conflict','A ficha mudou desde a revisão deste rascunho. Os campos foram conservados; recarrega para rever a versão atual.');return;}if(dirty()||uncertain){status(uncertain?'uncertain':'edited',uncertain?'Pedido conservado. Confirma o pedido guardado antes de continuar.':'Campos não guardados conservados. Recalcula antes de consultar resultados.');}else loadPool(true,'restore');}});
-  window.addEventListener('popstate',()=>{if(!active()||suspended)return;if(saving||durable?.pending||storageBlocked||draftBlocked){if(loadedId)writeUrl(loadedId);return;}const selected=selectionFromUrl();if(!selected||![...$('poolId').options].some(o=>o.value===selected)){if(loadedId)writeUrl(loadedId);return;}$('poolId').value=selected;loadPool(false,'switch');});
+  window.addEventListener('pageshow',event=>{if(event.persisted){suspended=false;root.hidden=false;if(!active())return;language=urlLanguage();applyLanguage();controls();if(draftBlocked){draftFailure();return;}if(draftStale){status('conflict','draftStale');return;}if(dirty()||uncertain){status(uncertain?'uncertain':'edited',uncertain?'pending':'historyDraft');}else loadPool(true,'restore');}});
+  window.addEventListener('popstate',()=>{if(!active()||suspended)return;language=urlLanguage();applyLanguage();if(saving||durable?.pending||storageBlocked||draftBlocked){if(loadedId)writeUrl(loadedId);return;}const selected=selectionFromUrl();if(!selected||![...$('poolId').options].some(o=>o.value===selected)){if(loadedId)writeUrl(loadedId);return;}if(selected===loadedId)return;$('poolId').value=selected;loadPool(false,'switch');});
   setInterval(()=>{if(active()&&!suspended&&!loading&&!saving&&!uncertain&&resultInput&&!same(payload(),resultInput))changed();},300);
-  controls();start();
+  $('calculatorLanguage').addEventListener('change',()=>{active();language=$('calculatorLanguage').value;const url=new URL(location.href);url.searchParams.set('lang',language);history.replaceState(null,'',url);applyLanguage();});
+  applyLanguage();controls();start();
 }());
