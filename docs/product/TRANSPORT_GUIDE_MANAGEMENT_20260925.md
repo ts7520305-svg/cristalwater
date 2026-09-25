@@ -41,6 +41,6 @@ TASK368 permanece com gate nativo em execução na última consulta. O resultado
 
 [Evidência local e hashes](evidence/20260925_task369_local.json). Cache v180; runner de 274 grupos. Inventário: 119 HTML, 107 páginas com referência literal em 295 scripts ativos, 12 na fila, zero recursos locais inexistentes e dois recursos indexados não materializados. Referência literal não comprova conclusão de um módulo.
 
-Lote preparado para a branch `work/field-readiness-20260915-simulation`; publicação e gate PostgreSQL nativo/restauro deste lote por registar.
+Publicada em `8ade13c23b59404961469de6b8f388c769cc2dd9`, árvore `4221ebc7913fac0aa1da54a8c562ae64730675d7`, idêntica à preparada e validada localmente, na branch `work/field-readiness-20260915-simulation`. [CI 36189626318](https://github.com/ts7520305-svg/cristalwater/actions/runs/36189626318), job `108251326109`, em execução. O gate PostgreSQL nativo de **274 grupos e restauro permanece por confirmar**.
 
 **Próxima revisão: documentos oficiais/anexos das guias em `/admin-vehicles`.** O upload antigo substitui metadados em `SystemSetting` e grava auditoria separadamente; rever versões, associação, tipos/conteúdo, autoria, falhas e recuperação. Fecho manual de obra, manutenção/custos, atribuições, presets e regras de alerta continuam na fila. Escolha automática de material por nome em visitas não foi redesenhada. Conciliação histórica, volume, VPS/cópias operacionais e piloto físico permanecem abertos. Sem merge/deploy/contactos reais; aplicação não declarada completa.
