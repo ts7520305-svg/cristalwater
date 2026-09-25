@@ -162,8 +162,8 @@ async function setupPeopleAndFleet() {
     });
     created.technicians.push(technician);
 
-    const vehicle = await call("POST", "/api/guides/vehicles", {
-      plate: `QA-${String(i).padStart(2, "0")}-${String(runId).slice(-2)}`,
+    const vehicle = await require("./helpers/create-reviewed-vehicle")(call, {
+      plate: `QA-${String(i).padStart(2, "0")}-${String(runId).slice(-8)}`,
       name: `Viatura QA Real ${i}`,
       brand: "Toyota",
       model: "Proace",
@@ -171,18 +171,18 @@ async function setupPeopleAndFleet() {
       currentKm: 10000 + i * 100,
       notes: `Teste real mensal ${runId}`,
     });
-    created.vehicles.push(vehicle.data.vehicle);
+    created.vehicles.push(vehicle);
 
     await call("POST", "/api/guides/vehicles/assign", {
       technicianId: technician.id,
-      vehicleId: vehicle.data.vehicle.id,
+      vehicleId: vehicle.id,
       startKm: 10000 + i * 100,
       notes: `Inicio de mes QA real ${runId}`,
     });
 
     const guide = await call("POST", "/api/guides/transport", {
       codeAT: `AT-${runId}-${i}`,
-      vehicleId: vehicle.data.vehicle.id,
+      vehicleId: vehicle.id,
       technicianId: technician.id,
       validFrom: iso(1, 7),
       validUntil: iso(30, 20),

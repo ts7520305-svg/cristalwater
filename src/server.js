@@ -202,6 +202,7 @@ mount("/api/push", require("./routes/browserPushRoutes"));
 mount("/api/admin-auth", require("./routes/adminAuthRoutes"));
 mount("/api/users", userRoutes);
 mount("/api/technicians", technicianCrudRoutes);
+mount("/api/fleet-management", require("./routes/fleetManagementRoutes"));
 mount("/api/technician-stats", technicianStatsRoutes);
 mount("/api/technician-auth", technicianAuthRoutes);
 mount("/api/technician", technicianRoutes);

@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-25T15:59:14.834Z",
-  "baseCommit": "9dc43c0637c9c0a79d580d5259a9b641fcf8fb52",
+  "generatedAt": "2026-09-25T16:53:49.843Z",
+  "baseCommit": "01f71a05c88ab6bd3aa4e96f6152254137d4d927",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 285,
+  "activeScriptsScanned": 287,
   "summary": {
     "htmlFiles": 115,
     "rootPages": 108,
     "nestedPages": 7,
     "unavailableLocalAssetReferences": 2,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 102,
+    "pagesWithLiteralTestReference": 103,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -1843,14 +1843,17 @@
         "/cw-auth.js",
         "/ui/foundation.css",
         "/ui/design-system.css",
+        "/cw-fleet-management.css",
         "/admin-auth-guard.js",
         "/cw-auth-download.js",
         "/cw-operational-risk.js",
+        "/cw-fleet-management-rules.js",
+        "/cw-fleet-management-copy.js",
+        "/cw-fleet-management.js",
         "/admin-vehicles.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
         "/cw-admin-shortcuts.js",
-        "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
         "/ui/design-system.js"
@@ -1859,7 +1862,9 @@
       "unavailableLocalAssets": [],
       "languageAssets": [],
       "directPrintAction": false,
-      "testReferences": [],
+      "testReferences": [
+        "test-field-fleet-management-ui.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -3240,6 +3245,7 @@
         "test-field-payment-retry-ui.js",
         "test-field-invoice-pdf-access.js",
         "test-field-admin-catalogue.js",
+        "test-field-fleet-management-ui.js",
         "test-field-invoice-document.js",
         "test-field-extra-execution.js",
         "test-field-execution-values-ui.js"

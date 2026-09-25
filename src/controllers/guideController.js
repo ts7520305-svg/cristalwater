@@ -107,40 +107,9 @@ async function listVehicles(req, res) {
   }
 }
 
-async function createVehicle(req, res) {
-  try {
-    const { plate, name, brand, model, year, currentKm, notes, status } = req.body;
-    if (!plate) return res.status(400).json({ ok: false, error: "Matrícula obrigatória" });
-    const vehicle = await prisma.vehicle.upsert({
-      where: { plate: String(plate).trim().toUpperCase() },
-      update: { name, brand, model, year: n(year), currentKm: n(currentKm), notes, status: status || "ACTIVE", active: true, archiveStatus: "ATIVO", deletedAt: null },
-      create: { plate: String(plate).trim().toUpperCase(), name, brand, model, year: n(year), currentKm: n(currentKm), notes, status: status || "ACTIVE", active: true, archiveStatus: "ATIVO", deletedAt: null }
-    });
-    await audit(req, "VEHICLE_UPSERT", "Vehicle", vehicle.id, { plate: vehicle.plate });
-    res.json({ ok: true, vehicle });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
-}
+async function createVehicle(req,res) { return require('./fleetManagementController').legacy(req,res); }
 
-async function updateVehicle(req, res) {
-  try {
-    const id = n(req.params.id);
-    const body = req.body || {};
-    const data = {};
-    if (body.plate !== undefined) data.plate = String(body.plate).trim().toUpperCase();
-    if (body.name !== undefined) data.name = body.name || null;
-    if (body.brand !== undefined) data.brand = body.brand || null;
-    if (body.model !== undefined) data.model = body.model || null;
-    if (body.year !== undefined) data.year = n(body.year);
-    if (body.currentKm !== undefined) data.currentKm = n(body.currentKm);
-    if (body.notes !== undefined) data.notes = body.notes || null;
-    if (body.status !== undefined) data.status = body.status || 'ACTIVE';
-    if (body.active !== undefined) data.active = Boolean(body.active);
-    if (body.archiveStatus !== undefined) data.archiveStatus = body.archiveStatus;
-    const vehicle = await prisma.vehicle.update({ where: { id }, data });
-    await audit(req, "VEHICLE_UPDATE", "Vehicle", id, data);
-    res.json({ ok: true, vehicle });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
-}
+async function updateVehicle(req,res) { return require('./fleetManagementController').legacy(req,res); }
 
 async function assignTechnicianVehicle(req, res) {
   try {
@@ -156,34 +125,9 @@ async function assignTechnicianVehicle(req, res) {
 }
 
 
-async function deleteVehicle(req, res) {
-  try {
-    const id = n(req.params.id);
-    const [workGuides, transportGuides, logs] = await Promise.all([
-      prisma.workGuide.count({ where: { vehicleId: id } }).catch(() => 0),
-      prisma.transportGuide.count({ where: { vehicleId: id } }).catch(() => 0),
-      prisma.technicianVehicleLog.count({ where: { vehicleId: id } }).catch(() => 0),
-    ]);
-    if ((workGuides + transportGuides + logs) > 0) {
-      const vehicle = await prisma.vehicle.update({ where: { id }, data: { active: false, status: 'ARCHIVED', archiveStatus: 'ARQUIVADO', deletedAt: new Date() } });
-      await audit(req, 'VEHICLE_ARCHIVE_BY_DELETE', 'Vehicle', id, { workGuides, transportGuides, logs });
-      return res.json({ ok: true, archived: true, vehicle, message: 'Viatura arquivada porque tem histórico associado.' });
-    }
-    await prisma.vehicle.delete({ where: { id } });
-    await audit(req, 'VEHICLE_DELETE', 'Vehicle', id, {});
-    return res.json({ ok: true, deleted: true });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
-}
+async function deleteVehicle(req,res) { return require('./fleetManagementController').legacy(req,res); }
 
-async function restoreVehicle(req, res) {
-  try {
-    const id = n(req.params.id);
-    const vehicle = await prisma.vehicle.update({ where: { id }, data: { active: true, status: 'ACTIVE', archiveStatus: 'ATIVO', deletedAt: null } });
-    await audit(req, 'VEHICLE_RESTORE', 'Vehicle', id, {});
-    res.json({ ok: true, vehicle });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
-}
-
+async function restoreVehicle(req,res) { return require('./fleetManagementController').legacy(req,res); }
 
 async function getVehiclePreset(vehicleId) {
   const row = await prisma.systemSetting.findUnique({ where: { key: `vehicle_preset_${vehicleId}` } }).catch(() => null);

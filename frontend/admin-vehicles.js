@@ -2,6 +2,13 @@ const API = "/api/guides";
 const RISK_API = "/api/operational-risk";
 
 let VEHICLES = [];
+let RISK_AVAILABLE=false, legacyLoad=0, vehicleChoiceRead=0, riskRead=0;
+const LEGACY_TOKEN=localStorage.getItem('token')||localStorage.getItem('cristalwater_jwt')||localStorage.getItem('adminToken');
+function requirePageSession(){if(!window.CWFleetPageSession?.isCurrent())throw Error('A sessão mudou ou expirou. Reabra a página com a conta correta.');}
+function clearLegacy(){legacyLoad++;vehicleChoiceRead++;riskRead++;VEHICLES=[];GUIDES=[];WORK_GUIDES=[];RISK_AVAILABLE=false;for(const id of ['guides','works','movements','riskRules','riskSummary'])el(id)?.replaceChildren();for(const input of document.querySelectorAll('main input,main select,main textarea,main button'))if(!input.closest('#fleetManager')){if('value' in input)input.value='';input.disabled=true;}}
+window.addEventListener('cw:fleet-session-ended',clearLegacy);window.addEventListener('pagehide',clearLegacy);
+window.addEventListener('pageshow',()=>{if(window.CWFleetPageSession?.isCurrent()){for(const input of document.querySelectorAll('main input,main select,main textarea,main button'))if(!input.closest('#fleetManager'))input.disabled=false;load();}});
+window.addEventListener('cw:fleet-updated',()=>refreshVehicleChoices().catch(()=>{if(window.CWFleetPageSession?.isCurrent()){VEHICLES=[];renderVehicleChoices();}}));
 let GUIDES = [];
 let WORK_GUIDES = [];
 let RISK_SUMMARY = { issues: [], byVehicleId: {}, byTechnicianId: {}, byClientId: {}, counts: {} };
@@ -25,21 +32,6 @@ const RISK_NUMBER_LABELS = [
   ["stockLowThreshold", "Limite stock baixo"],
 ];
 
-const DEFAULT_RISK_RULES = {
-  overduePayments: true,
-  missingTransportGuide: true,
-  missingTransportGuideDocument: true,
-  missingWorkGuide: true,
-  vehicleInsuranceExpiring: true,
-  vehicleInspectionExpiring: true,
-  lowVehicleStock: true,
-  pendingOperationalLocks: true,
-  technicianLinkedVehicleIssues: true,
-  insuranceWarningDays: 30,
-  inspectionWarningDays: 30,
-  stockLowThreshold: 1,
-};
-
 function el(id) {
   return document.getElementById(id);
 }
@@ -59,7 +51,8 @@ function esc(value) {
 }
 
 function authHeaders(extra = {}) {
-  const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt") || localStorage.getItem("adminToken");
+  requirePageSession();
+  const token = LEGACY_TOKEN;
   return {
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...extra,
@@ -73,6 +66,7 @@ async function j(url, opt = {}) {
     ...opt,
   });
   const data = await response.json().catch(() => ({}));
+  requirePageSession();
   if (!response.ok || data.ok === false) {
     throw new Error(data.error || data.message || "Erro");
   }
@@ -86,6 +80,7 @@ async function riskRequest(path, opt = {}) {
     ...opt,
   });
   const data = await response.json().catch(() => ({}));
+  requirePageSession();
   if (!response.ok || data.ok === false) {
     throw new Error(data.error || data.message || "Erro ao carregar riscos");
   }
@@ -129,235 +124,6 @@ function groupIssues(issues, key) {
 
 function normalizeText(value) {
   return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-}
-
-function daysUntil(value) {
-  if (!value) return null;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-  date.setHours(0, 0, 0, 0);
-  return Math.ceil((date.getTime() - start.getTime()) / 86400000);
-}
-
-function addClientRiskIssue(issues, data) {
-  issues.push({
-    id: data.id || [data.type, data.targetType, data.targetId, data.vehicleId, data.technicianId].filter(Boolean).join(":"),
-    severity: data.severity || "WARNING",
-    type: data.type,
-    targetType: data.targetType,
-    targetId: data.targetId == null ? null : Number(data.targetId),
-    vehicleId: data.vehicleId == null ? null : Number(data.vehicleId),
-    technicianId: data.technicianId == null ? null : Number(data.technicianId),
-    clientId: data.clientId == null ? null : Number(data.clientId),
-    title: data.title || "Atencao",
-    message: data.message || "",
-    href: data.href || "/admin-vehicles",
-    source: "BROWSER_RISK",
-  });
-}
-
-function addTechLinkedIssues(issues, vehicle, vehicleIssue, rules) {
-  if (rules.technicianLinkedVehicleIssues === false) return;
-  (vehicle.assignedTechnicians || []).filter((tech) => tech.active !== false).forEach((tech) => {
-    addClientRiskIssue(issues, {
-      ...vehicleIssue,
-      id: `TECH_LINK:${vehicleIssue.id || vehicleIssue.type}:${tech.id}`,
-      type: "TECHNICIAN_LINKED_VEHICLE_RISK",
-      targetType: "Technician",
-      targetId: tech.id,
-      technicianId: tech.id,
-      vehicleId: vehicle.id,
-      title: `Viatura ${vehicle.plate}: ${vehicleIssue.title}`,
-      source: "BROWSER_RISK",
-    });
-  });
-}
-
-function isInsuranceRecord(record) {
-  return /seguro|apolice|apol/.test(normalizeText(`${record?.type || ""} ${record?.title || ""} ${record?.notes || ""}`));
-}
-
-function isInspectionRecord(record) {
-  return /inspecao|inspec|ipo|vistoria/.test(normalizeText(`${record?.type || ""} ${record?.title || ""} ${record?.notes || ""}`));
-}
-
-function latestRecord(records, vehicleId, predicate) {
-  return records
-    .filter((record) => Number(record.vehicleId) === Number(vehicleId) && predicate(record))
-    .sort((a, b) => new Date(b.dueDate || b.createdAt).getTime() - new Date(a.dueDate || a.createdAt).getTime())[0] || null;
-}
-
-async function loadRiskRulesFallback() {
-  try {
-    const data = await j("/api/settings/global/OPERATIONAL_RISK_RULES");
-    return { ...DEFAULT_RISK_RULES, ...JSON.parse(data.value || "{}") };
-  } catch (_) {
-    return { ...DEFAULT_RISK_RULES };
-  }
-}
-
-async function loadRiskFromExistingApis() {
-  const rules = await loadRiskRulesFallback();
-  const [vehiclesData, guidesData, worksData, maintenanceData] = await Promise.all([
-    j(`${API}/vehicles?active=all`).catch(() => ({ vehicles: [] })),
-    j(`${API}/transport`).catch(() => ({ guides: [] })),
-    j(`${API}/work`).catch(() => ({ workGuides: [] })),
-    j(`${API}/maintenance`).catch(() => ({ records: [] })),
-  ]);
-
-  const vehicles = (vehiclesData.vehicles || []).filter((vehicle) => vehicle.active !== false);
-  const guides = guidesData.guides || [];
-  const works = worksData.workGuides || [];
-  const maintenance = maintenanceData.records || [];
-  const issues = [];
-
-  vehicles.forEach((vehicle) => {
-    const vehicleLabel = vehicle.plate || `Viatura ${vehicle.id}`;
-    const assignedTechs = (vehicle.assignedTechnicians || []).filter((tech) => tech.active !== false);
-    const activeGuide = guides.find((guide) => Number(guide.vehicleId) === Number(vehicle.id) && guide.status === "ACTIVE");
-    const openWork = works.find((work) => Number(work.vehicleId) === Number(vehicle.id) && work.status === "OPEN");
-
-    if (rules.missingTransportGuide !== false) {
-      let vehicleIssue = null;
-      if (openWork && !openWork.guideId) {
-        vehicleIssue = {
-          id: `MISSING_AT:${vehicle.id}:${openWork.id}`,
-          type: "MISSING_TRANSPORT_GUIDE",
-          severity: "CRITICAL",
-          targetType: "Vehicle",
-          targetId: vehicle.id,
-          vehicleId: vehicle.id,
-          technicianId: openWork.technicianId || null,
-          title: "Guia AT em falta",
-          message: `Falta guia de transporte AT para ${vehicleLabel}. A guia de obra #${openWork.id} esta provisoria.`,
-        };
-      } else if (assignedTechs.length && !activeGuide) {
-        vehicleIssue = {
-          id: `NO_ACTIVE_AT:${vehicle.id}`,
-          type: "MISSING_TRANSPORT_GUIDE",
-          severity: "CRITICAL",
-          targetType: "Vehicle",
-          targetId: vehicle.id,
-          vehicleId: vehicle.id,
-          title: "Sem guia AT ativa",
-          message: `${vehicleLabel} tem tecnico associado mas nao tem guia de transporte AT ativa.`,
-        };
-      }
-      if (vehicleIssue) {
-        addClientRiskIssue(issues, vehicleIssue);
-        addTechLinkedIssues(issues, vehicle, vehicleIssue, rules);
-      }
-    }
-
-    if (rules.missingTransportGuideDocument !== false && activeGuide && !activeGuide.officialDocument?.url) {
-      const vehicleIssue = {
-        id: `MISSING_AT_FILE:${activeGuide.id}`,
-        type: "MISSING_TRANSPORT_GUIDE_DOCUMENT",
-        severity: "WARNING",
-        targetType: "TransportGuide",
-        targetId: activeGuide.id,
-        vehicleId: vehicle.id,
-        title: "Ficheiro AT oficial em falta",
-        message: `${vehicleLabel} tem guia AT ${activeGuide.codeAT || `#${activeGuide.id}`} sem ficheiro oficial anexado.`,
-      };
-      addClientRiskIssue(issues, vehicleIssue);
-      addTechLinkedIssues(issues, vehicle, vehicleIssue, rules);
-    }
-
-    if (rules.missingWorkGuide !== false && (activeGuide || assignedTechs.length) && !openWork) {
-      const vehicleIssue = {
-        id: `MISSING_WORK:${vehicle.id}`,
-        type: "MISSING_WORK_GUIDE",
-        severity: "WARNING",
-        targetType: "Vehicle",
-        targetId: vehicle.id,
-        vehicleId: vehicle.id,
-        title: "Guia de obra em falta",
-        message: `${vehicleLabel} ainda nao tem guia de obra aberta para o dia/ronda atual.`,
-      };
-      addClientRiskIssue(issues, vehicleIssue);
-      addTechLinkedIssues(issues, vehicle, vehicleIssue, rules);
-    }
-
-    if (rules.vehicleInsuranceExpiring !== false) {
-      const insurance = latestRecord(maintenance, vehicle.id, isInsuranceRecord);
-      const left = daysUntil(insurance?.dueDate);
-      let vehicleIssue = null;
-      if (!insurance) {
-        vehicleIssue = { id: `NO_INSURANCE:${vehicle.id}`, type: "VEHICLE_INSURANCE_MISSING", severity: "CRITICAL", targetType: "Vehicle", targetId: vehicle.id, vehicleId: vehicle.id, title: "Seguro nao registado", message: `${vehicleLabel} nao tem seguro registado no sistema.` };
-      } else if (left !== null && left < 0) {
-        vehicleIssue = { id: `INSURANCE_OVERDUE:${vehicle.id}`, type: "VEHICLE_INSURANCE_OVERDUE", severity: "CRITICAL", targetType: "Vehicle", targetId: vehicle.id, vehicleId: vehicle.id, title: "Seguro expirado", message: `${vehicleLabel} tem seguro expirado.` };
-      } else if (left !== null && left <= Number(rules.insuranceWarningDays || 30)) {
-        vehicleIssue = { id: `INSURANCE_EXPIRING:${vehicle.id}`, type: "VEHICLE_INSURANCE_EXPIRING", severity: "WARNING", targetType: "Vehicle", targetId: vehicle.id, vehicleId: vehicle.id, title: "Seguro a acabar", message: `${vehicleLabel} tem seguro a acabar em ${left} dia(s).` };
-      }
-      if (vehicleIssue) {
-        addClientRiskIssue(issues, vehicleIssue);
-        addTechLinkedIssues(issues, vehicle, vehicleIssue, rules);
-      }
-    }
-
-    if (rules.vehicleInspectionExpiring !== false) {
-      const inspection = latestRecord(maintenance, vehicle.id, isInspectionRecord);
-      const left = daysUntil(inspection?.dueDate);
-      let vehicleIssue = null;
-      if (!inspection) {
-        vehicleIssue = { id: `NO_INSPECTION:${vehicle.id}`, type: "VEHICLE_INSPECTION_MISSING", severity: "WARNING", targetType: "Vehicle", targetId: vehicle.id, vehicleId: vehicle.id, title: "Inspecao nao registada", message: `${vehicleLabel} nao tem inspecao/IPO registada no sistema.` };
-      } else if (left !== null && left < 0) {
-        vehicleIssue = { id: `INSPECTION_OVERDUE:${vehicle.id}`, type: "VEHICLE_INSPECTION_OVERDUE", severity: "CRITICAL", targetType: "Vehicle", targetId: vehicle.id, vehicleId: vehicle.id, title: "Inspecao vencida", message: `${vehicleLabel} tem inspecao vencida.` };
-      } else if (left !== null && left <= Number(rules.inspectionWarningDays || 30)) {
-        vehicleIssue = { id: `INSPECTION_EXPIRING:${vehicle.id}`, type: "VEHICLE_INSPECTION_EXPIRING", severity: "WARNING", targetType: "Vehicle", targetId: vehicle.id, vehicleId: vehicle.id, title: "Inspecao a acabar", message: `${vehicleLabel} tem inspecao a acabar em ${left} dia(s).` };
-      }
-      if (vehicleIssue) {
-        addClientRiskIssue(issues, vehicleIssue);
-        addTechLinkedIssues(issues, vehicle, vehicleIssue, rules);
-      }
-    }
-
-    if (rules.lowVehicleStock !== false && openWork) {
-      const lowItems = (openWork.items || []).filter((item) => Number(item.quantity || 0) <= Number(rules.stockLowThreshold || 1));
-      if (!(openWork.items || []).length || lowItems.length) {
-        const names = lowItems.slice(0, 5).map((item) => `${item.name} (${item.quantity} ${item.unit || "UN"})`).join(", ");
-        const vehicleIssue = {
-          id: `LOW_STOCK:${vehicle.id}:${openWork.id}`,
-          type: lowItems.length ? "VEHICLE_STOCK_LOW" : "VEHICLE_STOCK_EMPTY",
-          severity: lowItems.some((item) => Number(item.quantity || 0) <= 0) ? "CRITICAL" : "WARNING",
-          targetType: "WorkGuide",
-          targetId: openWork.id,
-          vehicleId: vehicle.id,
-          technicianId: openWork.technicianId || null,
-          title: lowItems.length ? "Material baixo/em falta" : "Stock da viatura sem linhas",
-          message: lowItems.length ? `${vehicleLabel} tem material baixo ou em falta: ${names}.` : `${vehicleLabel} tem guia de obra aberta mas sem material carregado.`,
-        };
-        addClientRiskIssue(issues, vehicleIssue);
-        addTechLinkedIssues(issues, vehicle, vehicleIssue, rules);
-      }
-    }
-  });
-
-  return {
-    ok: true,
-    generatedAt: new Date().toISOString(),
-    rules,
-    counts: {
-      total: issues.length,
-      critical: issues.filter((issue) => issue.severity === "CRITICAL").length,
-      warning: issues.filter((issue) => issue.severity !== "CRITICAL").length,
-    },
-    issues,
-    byVehicleId: groupIssues(issues, "vehicleId"),
-    byTechnicianId: groupIssues(issues, "technicianId"),
-    byClientId: groupIssues(issues, "clientId"),
-  };
-}
-
-function issueText(issue) {
-  return `${issue.title || "Atencao"}: ${issue.message || ""}`.trim();
-}
-
-function cleanRiskAnchor(value) {
-  return String(value || "").split(":")[0].trim();
 }
 
 function riskHref(issue) {
@@ -532,46 +298,12 @@ function renderRiskPanel() {
   }
 }
 
-async function loadRiskState() {
-  try {
-    RISK_SUMMARY = await riskRequest("/summary");
-    RISK_RULES = RISK_SUMMARY.rules || {};
-  } catch (error) {
-    console.warn(error);
-    RISK_SUMMARY = await loadRiskFromExistingApis();
-    RISK_RULES = RISK_SUMMARY.rules || {};
-  }
-  renderRiskPanel();
-}
-
-async function saveRiskRules() {
-  const nextRules = {};
-  document.querySelectorAll("[data-risk-key]").forEach((input) => {
-    nextRules[input.dataset.riskKey] = input.type === "checkbox" ? input.checked : Number(input.value || 0);
-  });
-  try {
-    await riskRequest("/rules", {
-      method: "PUT",
-      body: JSON.stringify({ rules: nextRules }),
-    });
-  } catch (_) {
-    await j("/api/settings/global/OPERATIONAL_RISK_RULES", {
-      method: "PUT",
-      body: JSON.stringify({
-        value: JSON.stringify({ ...DEFAULT_RISK_RULES, ...nextRules }),
-        notes: "Regras dos alertas visuais operacionais.",
-      }),
-    });
-  }
-  await load();
-}
-
-function vehicleOptions() {
-  return VEHICLES
-    .filter((vehicle) => vehicle.active !== false)
-    .map((vehicle) => `<option value="${vehicle.id}">${esc(vehicle.plate)} - ${esc(vehicle.name || "")}</option>`)
-    .join("");
-}
+function riskUnavailable(message){RISK_AVAILABLE=false;RISK_SUMMARY={issues:[],byVehicleId:{},byTechnicianId:{},byClientId:{},counts:{}};RISK_RULES={};el('riskSummary').textContent=message;el('riskRules').replaceChildren();el('saveRiskRulesButton').disabled=true;window.dispatchEvent(new Event('cw:fleet-risk-unavailable'));}
+async function loadRiskState(){const turn=++riskRead;RISK_AVAILABLE=false;el('saveRiskRulesButton').disabled=true;try{const summary=await riskRequest('/summary');if(turn!==riskRead)return;if(!Array.isArray(summary.issues)||!summary.rules||!RISK_RULE_LABELS.every(([k])=>typeof summary.rules[k]==='boolean')||!RISK_NUMBER_LABELS.every(([k])=>Number.isFinite(summary.rules[k])&&summary.rules[k]>=0)||!summary.counts||!['total','critical','warning'].every(k=>Number.isSafeInteger(summary.counts[k])&&summary.counts[k]>=0))throw Error('Incomplete risk summary');RISK_SUMMARY=summary;RISK_RULES=summary.rules;RISK_AVAILABLE=true;renderRiskPanel();el('saveRiskRulesButton').disabled=false;window.dispatchEvent(new CustomEvent('cw:fleet-risk-ready',{detail:summary}));}catch(error){if(turn===riskRead&&window.CWFleetPageSession?.isCurrent())riskUnavailable('Não foi possível confirmar os alertas. Atualize para voltar a tentar.');}}
+async function saveRiskRules(){if(!RISK_AVAILABLE)return;const nextRules={};document.querySelectorAll('[data-risk-key]').forEach(input=>{nextRules[input.dataset.riskKey]=input.type==='checkbox'?input.checked:Number(input.value);});try{await riskRequest('/rules',{method:'PUT',body:JSON.stringify({rules:nextRules})});await loadRiskState();}catch(_){if(window.CWFleetPageSession?.isCurrent())riskUnavailable('A gravação das regras não está confirmada. Atualize os alertas antes de voltar a guardar.');}}
+function renderVehicleChoices(){for(const id of ['guideVehicle','workVehicle','maintVehicle']){const select=el(id);if(!select)continue;const selected=select.value;select.replaceChildren();const blank=document.createElement('option');blank.value='';blank.textContent='Escolher viatura…';select.append(blank);for(const vehicle of VEHICLES.filter(v=>v.active!==false&&!v.deletedAt)){const option=document.createElement('option');option.value=String(vehicle.id);option.textContent=vehicle.plate+' — '+(vehicle.name||'');select.append(option);}if(selected&&!Array.from(select.options).some(o=>o.value===selected)){const unavailable=document.createElement('option');unavailable.value=selected;unavailable.textContent='Viatura #'+selected+' indisponível — escolha outra';unavailable.disabled=true;select.append(unavailable);}select.value=selected;}}
+async function refreshVehicleChoices(){const turn=++vehicleChoiceRead,response=await j(`${API}/vehicles?active=all`);if(turn!==vehicleChoiceRead)return;if(!Array.isArray(response.vehicles))throw Error('Lista de viaturas incompleta.');VEHICLES=response.vehicles;renderVehicleChoices();}
+function selectedVehicle(id){const value=Number(val(id));if(!value||!VEHICLES.some(v=>v.id===value&&v.active!==false&&!v.deletedAt)){alert('Escolha uma viatura disponível antes de continuar.');return false;}return true;}
 
 function renderGuideItems(items = []) {
   if (!items.length) return `<p class="muted">Sem materiais.</p>`;
@@ -622,9 +354,11 @@ async function uploadTransportGuideDocument(id, input) {
 
   const response = await fetch(`${API}/transport/${encodeURIComponent(id)}/document`, {
     method: "POST",
+    headers: authHeaders(),
     body: formData,
   });
   const data = await response.json().catch(() => ({}));
+  requirePageSession();
   if (!response.ok || data.ok === false) {
     throw new Error(data.error || data.message || "Erro ao enviar ficheiro da AT");
   }
@@ -640,40 +374,6 @@ async function replaceTransportGuideDocument(id, input) {
   } catch (error) {
     alert(error.message);
   }
-}
-
-function renderVehicles() {
-  const target = el("vehicles");
-  if (!target) return;
-  target.innerHTML = VEHICLES.map((vehicle) => {
-    const issues = vehicleIssues(vehicle.id);
-    return `
-      <div class="card ${riskClass(issues)}" data-risk-target-type="Vehicle" data-risk-target-id="${esc(vehicle.id)}" data-risk-vehicle-id="${esc(vehicle.id)}" data-risk-anchor="${esc(vehicle.plate || vehicle.name || vehicle.id)}" data-risk-issue-types="${esc(riskIssueTypes(issues))}">
-        <strong>${esc(vehicle.plate)}</strong>
-        <span class="badge ${vehicle.active ? "" : "off"}">${esc(vehicle.status || "ACTIVE")}</span>
-        ${renderRiskBadges(issues)}
-
-        <div class="muted">
-          ${esc(vehicle.name || "")} - ${esc(vehicle.brand || "")} ${esc(vehicle.model || "")} - Km ${esc(vehicle.currentKm || 0)}
-        </div>
-        ${renderAssignedTechnicians(vehicle)}
-
-        <div class="muted ${issues.length ? "cw-risk-line" : ""}">
-          Guia obra atual: ${vehicle.workGuides?.[0]?.id || "-"} - guia AT: ${vehicle.transportGuides?.[0]?.codeAT || vehicle.transportGuides?.[0]?.id || "-"}
-        </div>
-
-        <div class="links">
-          <button class="btn" onclick="editVehicle(${vehicle.id})">Editar</button>
-          ${
-            vehicle.active
-              ? `<button class="btn warn" onclick="archiveVehicle(${vehicle.id})">Arquivar</button>`
-              : `<button class="btn primary" onclick="restoreVehicle(${vehicle.id})">Restaurar</button>`
-          }
-          <button class="btn warn" onclick="deleteVehicle(${vehicle.id})">Eliminar</button>
-        </div>
-      </div>
-    `;
-  }).join("") || `<p class="muted">Sem viaturas.</p>`;
 }
 
 function renderTransportGuides() {
@@ -758,28 +458,28 @@ function renderWorkGuides() {
 }
 
 async function load() {
+  const turn=++legacyLoad;
   try {
+    requirePageSession();
     await loadRiskState();
+    if(turn!==legacyLoad)return;
 
-    const vehiclesResponse = await j(`${API}/vehicles?active=all`);
-    VEHICLES = vehiclesResponse.vehicles || [];
-
-    ["guideVehicle", "workVehicle", "maintVehicle"].forEach((id) => {
-      const select = el(id);
-      if (select) select.innerHTML = vehicleOptions();
-    });
-    renderVehicles();
+    await refreshVehicleChoices();
+    if(turn!==legacyLoad)return;
 
     const guidesResponse = await j(`${API}/transport`);
+    if(turn!==legacyLoad)return;
     GUIDES = guidesResponse.guides || [];
     renderTransportGuides();
 
     const workResponse = await j(`${API}/work`);
+    if(turn!==legacyLoad)return;
     WORK_GUIDES = workResponse.workGuides || [];
     renderWorkGuides();
     setTimeout(focusStoredRiskTarget, 150);
 
     const movementsResponse = await j(`${API}/movements?limit=30`);
+    if(turn!==legacyLoad)return;
     const movements = movementsResponse.movements || [];
     el("movements").innerHTML = `
       <h3>Ultimos movimentos</h3>
@@ -795,75 +495,8 @@ async function load() {
       }
     `;
   } catch (error) {
-    alert(error.message);
+    if(turn===legacyLoad&&window.CWFleetPageSession?.isCurrent())alert(error.message);
   }
-}
-
-async function saveVehicle() {
-  await j(`${API}/vehicles`, {
-    method: "POST",
-    body: JSON.stringify({
-      plate: val("plate"),
-      name: val("vname"),
-      brand: val("brand"),
-      model: val("model"),
-      currentKm: val("km"),
-      status: val("status"),
-    }),
-  });
-  await load();
-}
-
-async function editVehicle(id) {
-  const vehicle = VEHICLES.find((item) => Number(item.id) === Number(id));
-  if (!vehicle) return;
-
-  const newPlate = prompt("Matricula", vehicle.plate || "");
-  if (newPlate === null) return;
-  const name = prompt("Nome", vehicle.name || "");
-  if (name === null) return;
-  const brand = prompt("Marca", vehicle.brand || "");
-  if (brand === null) return;
-  const model = prompt("Modelo", vehicle.model || "");
-  if (model === null) return;
-  const currentKm = prompt("Km atual", vehicle.currentKm || 0);
-  if (currentKm === null) return;
-  const status = prompt("Estado", vehicle.status || "ACTIVE");
-  if (status === null) return;
-
-  await j(`${API}/vehicles/${id}`, {
-    method: "PUT",
-    body: JSON.stringify({
-      plate: newPlate,
-      name,
-      brand,
-      model,
-      currentKm,
-      status,
-      active: status !== "ARCHIVED",
-      archiveStatus: status === "ARCHIVED" ? "ARQUIVADO" : "ATIVO",
-    }),
-  });
-  await load();
-}
-
-async function archiveVehicle(id) {
-  await j(`${API}/vehicles/${id}`, {
-    method: "PUT",
-    body: JSON.stringify({ active: false, status: "ARCHIVED", archiveStatus: "ARQUIVADO" }),
-  });
-  await load();
-}
-
-async function restoreVehicle(id) {
-  await j(`${API}/vehicles/${id}/restore`, { method: "POST" });
-  await load();
-}
-
-async function deleteVehicle(id) {
-  if (!confirm("Eliminar viatura se nao tiver historico; se tiver historico, sera arquivada. Continuar?")) return;
-  await j(`${API}/vehicles/${id}`, { method: "DELETE" });
-  await load();
 }
 
 function addGuideItem() {
@@ -880,6 +513,7 @@ function addGuideItem() {
 }
 
 async function createTransportGuide() {
+  if(!selectedVehicle("guideVehicle"))return;
   const items = [...el("guideItems").children]
     .map((row) => ({
       name: row.children[0].value,
@@ -973,6 +607,7 @@ async function cancelTransportGuide(id) {
 }
 
 async function startWorkGuide() {
+  if(!selectedVehicle("workVehicle"))return;
   const response = await j(`${API}/work/start`, {
     method: "POST",
     body: JSON.stringify({
@@ -1009,6 +644,7 @@ async function closeWork(id) {
 }
 
 async function createMaintenance() {
+  if(!selectedVehicle("maintVehicle"))return;
   await j(`${API}/maintenance`, {
     method: "POST",
     body: JSON.stringify({
@@ -1031,7 +667,6 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   }
   if (!el("guideItems")?.children.length) addGuideItem();
-  load();
 });
 
 window.load = load;

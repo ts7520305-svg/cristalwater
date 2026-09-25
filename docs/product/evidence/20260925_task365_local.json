@@ -1,0 +1,212 @@
+{
+  "task": "TASK365",
+  "baseCommit": "01f71a05c88ab6bd3aa4e96f6152254137d4d927",
+  "validatedAt": "2026-09-25T16:53:49.285158+00:00",
+  "sourceHashes": {
+    "frontend/admin-vehicles.html": "90bdfba570db9b535cf5675a12345cff9cc1dfe41c6525a6cb0e082deb09649f",
+    "frontend/admin-vehicles.js": "4a715e7c831af1435c2d24d8ec3872a0a58701671a59cc31990a9d9e1093404c",
+    "frontend/cw-fleet-management-copy.js": "391c1f67bdcf07873fcb026d23158960f45d6cae30bdd6e7a1aa1de010ce5011",
+    "frontend/cw-fleet-management-rules.js": "f089096038fea81d96f815cc617a02b374158649f6ada92e38d094cae9d78d88",
+    "frontend/cw-fleet-management.css": "29004f7bc3f486593027897bbf564ec1e68eb458d391ad46072984a8958b3f80",
+    "frontend/cw-fleet-management.js": "5f152d44b626ab2e1e020176b3802ab0c0ee0bf9dc9a13fbac0acf521f94f6ce",
+    "frontend/cw-operational-risk.js": "0173d3c82cf9fc0a24da5e57d39f32b05dd4fb1e5a2a80bad952559d58d22696",
+    "frontend/sw.js": "2c92fa11884e763a1f8421ddef6bf00d1c99f09d8e486f3050f8f89eb8b5129c",
+    "scripts/fixtures/internal-chat-server.js": "8e224ad4eede3d3030c6d7dd9a00718bc36df3c53bbba06e760c3cf97a80ba20",
+    "scripts/helpers/create-reviewed-technician.js": "dbf333454bea7288c34b394ae582e6e0d51db0bd4a61f3959e3748fc60faa787",
+    "scripts/helpers/create-reviewed-vehicle.js": "720035166b1668b9396123c1c5a0f4a2bc2554f9efd85a1de7c0f20fb63e9578",
+    "scripts/test-field-fleet-management-ui.js": "1c7c7784362202bbaa06c985c0c84ebd157f0f8cfe73d2b1d669c0c441feafc9",
+    "scripts/test-field-fleet-management.js": "5175150b36a14253dcc347a059f47987e279f5be02f97d6667f2f05b3f02f189",
+    "scripts/test-field-suite.js": "486076d3e426899891feff6f4db0efd12ec88e21e5a929e0fbca39cb7be1e2a4",
+    "scripts/test-field-two-year-api.js": "bc72ab9c2a612ee6b45930dd7d3ffbea9d0f8a42d787565f3e1d70e4a04c9d71",
+    "scripts/test-real-month-flow-api.js": "90a6610060d0a4ebc0a4b9ba5ce565f0a20215330eb2520f701ff42cca6a1146",
+    "src/controllers/fleetManagementController.js": "c23615dda298d66ef42fcbb007ac72d8a398eb62812921621fd2f11a0ae36309",
+    "src/controllers/guideController.js": "ae8dee43c429afb8fed6b6fd9a83f9987c37aa2652452d9326c26b855a010e95",
+    "src/routes/fleetManagementRoutes.js": "c1afb7c5445fe535b6ec55e2d8e45372c58ebcee7fe4d309709c2da9434f7ec5",
+    "src/server.js": "d5956d479ab6f36b74e2d2db3b57431bdf8a76d0203f0e4e14cddf7cbb9bb46f",
+    "src/services/fieldWriteRequestService.js": "31d50fe68ab5c0fa8e4f12f61748c60bae2c1f989a9201edd6ccf503170d585a",
+    "src/services/fleetManagementService.js": "241007c2654186aadf230499a1c06da51fc0efc3431c69566bce2e8034ed04d6",
+    "tests/fleet-management.test.js": "685d0a9b92e65fa1f40003e9fc09642ae2555ff0d7f4d7a394efc37226cf805d"
+  },
+  "unitTests": {
+    "passed": 760,
+    "files": 102,
+    "new": 15,
+    "fleetRules": 12,
+    "responseWrapperRegressions": 3
+  },
+  "technicianTests": 4,
+  "syntax": {
+    "backend": 649,
+    "frontend": 261,
+    "inline": 44,
+    "finalChangedScriptsCheckedSeparately": true
+  },
+  "schema": {
+    "newMigrations": 0,
+    "existingAdditiveMigrationsApplied": 42,
+    "runtime": "PGlite 0.5.8 / pglite-socket 0.2.11; isolated test data; not native PostgreSQL"
+  },
+  "integrationGroups": [
+    {
+      "script": "scripts/test-field-fleet-management.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-fleet-management-ui.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-shared-navigation-browser.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-guide-pdf.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-technician-management.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-real-month-flow-api.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-two-year-api.js",
+      "code": 0
+    }
+  ],
+  "logs": {
+    "/tmp/cw365-api.log": "dd17e5a76e47d82784c9f3b4b157d7172fd78319e9c93d3aa31fe484578c31dd",
+    "/tmp/cw365-ui.log": "493cf81823467dccd8c7b16cadfa69a8e49bb1818fb44bf6d78bd064ba74dc8f",
+    "/tmp/cw365-ui-simulations.log": "1326b209acc7137d6c856bd50160fedcaed55b8ded5bd815cb91ed93b13323b2",
+    "/tmp/cw365-two-year-fixed.log": "fbd9a20d8477e287791f82b3dd70a35d55cf1c8ed3f59fbc05277c9e10af14a2",
+    "/tmp/cw365-final-integrations.log": "4a9ac5e47bb64a979d2f9d01c972bc82c484733a603d28586b5839e698ab15b4",
+    "/tmp/cw365-final-visual-ui.log": "c75b290e139ac2a3a99e35b07f87a26effb0d3175abba29daf91d0916cb87d92",
+    "/tmp/cw365-final-unit.log": "52fcc4f767066c2ac1617a215270ceeb9978e46c37e1c6fb0f39d6c05313212a",
+    "/tmp/cw365-technician.log": "1c3e56847c9adf7a44876b983b8952a28d10323122911feb1fccec308897be3b",
+    "/tmp/cw365-final-syntax.log": "afd9bdab944fe14948e93e1c37808638378f5f570132370d639c2d077e17faea"
+  },
+  "validationNotes": [
+    {
+      "kind": "FIXTURE_CASE_MISMATCH",
+      "attempt": "/tmp/cw365-ui.log",
+      "resolution": "Uppercase generated plate fixture to match reviewed normalization; assertions retained; full browser group repeated successfully."
+    },
+    {
+      "kind": "PRIOR_TASK364_HELPER_REGRESSION",
+      "attempt": "/tmp/cw365-ui-simulations.log",
+      "resolution": "HTTP status checked only when numeric; direct/data/body receipts validated for both helpers; three unit tests and full two-year simulation passed after repair."
+    },
+    {
+      "kind": "MOBILE_HEADING_RENDERING",
+      "resolution": "Removed generic header styling from nested fleet heading; complete browser group repeated, final German 320px title visually verified."
+    }
+  ],
+  "browser": {
+    "engine": "Chromium 153, multiple processes, web security active",
+    "screenshots": 24,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "hashes": {
+      "reports/field-visual/fleet-management/card-de-320.png": "8149371e7c8dfe89045af86f86077629e86f6c4c42a5370ee77a0980029f57e7",
+      "reports/field-visual/fleet-management/card-pt-1440.png": "7946367dfb16e08a3672d16c44a70244c9e9be829d558f27810a2b37961eae8a",
+      "reports/field-visual/fleet-management/card-pt-390.png": "359f6bac13124b224f7879860794bacf56521c09c78f75b0a1dbd32cfc7e40cd",
+      "reports/field-visual/fleet-management/de-1440.png": "46a3fe1f09aba21042785571a9f6dadef1f867a1d39845857b8ef563c2fcd5c0",
+      "reports/field-visual/fleet-management/de-320.png": "77a7bc44a9bd2b1ca91efcb6c6d5c2c8d7c37285d69e506462edc879e70f4f9f",
+      "reports/field-visual/fleet-management/de-390.png": "83f6d8a4eafc05682962c6ed9fc05984659adb4d6a03195de38e87c2c4dec215",
+      "reports/field-visual/fleet-management/directory-de-320.png": "1f8999f1e04b2533b1966c3212a5bf66c2cbfe787b519bd54937811ab617b415",
+      "reports/field-visual/fleet-management/directory-pt-1440.png": "bcc762612adbeee4533073a14c91cd5ea0ff0705750b1e386ef9f0c92013f21d",
+      "reports/field-visual/fleet-management/directory-pt-390.png": "1a4546f6d2938147630f8535d4b3c26fe631765781ee2d5c07ada01b17d65172",
+      "reports/field-visual/fleet-management/en-1440.png": "e7e00eb127c82383f9b089df68e3b07e5459eaa8a544e296939e3f81b92714db",
+      "reports/field-visual/fleet-management/en-320.png": "45f1619ce438dafc7f44cc49ce092984451990fc7f43f9a167c0d742b613e82e",
+      "reports/field-visual/fleet-management/en-390.png": "29f29840d9abc4a32a4bd57176617d30d4b3a44377b71de95e53257122444e4e",
+      "reports/field-visual/fleet-management/es-1440.png": "7a5d4c276a3279870617c65eca1d2a1445a5d9cffa245d6fd937d0d2aa2397ba",
+      "reports/field-visual/fleet-management/es-320.png": "09ec04ecb4c0b6f96a54521afcfe0db1c2e748b818969ec1891c998281eb6e47",
+      "reports/field-visual/fleet-management/es-390.png": "6212e0f01e9aed7325bf0c5b52904e358cee18ee5c37ca0abe64853e1b471c39",
+      "reports/field-visual/fleet-management/fr-1440.png": "178ba750eabfd2b188ea424f0c11c3750aba7ce5bec6eff56bd7212a9d03d5a5",
+      "reports/field-visual/fleet-management/fr-320.png": "29ed34c03af8dce1ade93bdbd7501da78ae204f365ab3403c1f878c5cd38e1ad",
+      "reports/field-visual/fleet-management/fr-390.png": "4d4b881c9208b3dc6d562d106e0afc839273e75e991cd0262460ca55351bb226",
+      "reports/field-visual/fleet-management/pt-1440.png": "03460e2be861392007940572238267f15c9238d5470ea8790d6577ae3366da2f",
+      "reports/field-visual/fleet-management/pt-320.png": "3eddbfa4cb9186ec101e33368c0581e245e061f5fa4fba9f631509a619dda811",
+      "reports/field-visual/fleet-management/pt-390.png": "84756ae6d62e2b876d4889c3dc46de5ecd7ce8251365d9ac72777ea2d27ede0c",
+      "reports/field-visual/fleet-management/review-de-320.png": "53b66b25a24171ad8ead05520a8bbadd0ee30fd9b3fe2d2680df5223f5962016",
+      "reports/field-visual/fleet-management/review-pt-1440.png": "717520847ddc0fda3e8c8cee5a338c0061e8933536732073cda613416dd5e18a",
+      "reports/field-visual/fleet-management/review-pt-390.png": "2895e28e624e10027f68654b499dbd8d1739d926e179b7eb94d8e9d1a54cc8fa"
+    },
+    "visuallyReviewed": [
+      "pt-390.png",
+      "de-320.png",
+      "review-pt-1440.png",
+      "review-de-320.png",
+      "card-de-320.png",
+      "card-pt-1440.png"
+    ],
+    "relatedRecordsAndUnrelatedBusinessCountsUnchanged": true,
+    "sharedSelectorsRisksAndAccountChangeVerified": true
+  },
+  "runnerGroups": 266,
+  "cacheVersion": "v176",
+  "inventory": {
+    "htmlFiles": 115,
+    "rootPages": 108,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 103,
+    "catalogueGuardDifferences": 0,
+    "activeScriptsScanned": 287,
+    "remainingLiteralQueue": 12
+  },
+  "publication": {
+    "status": "PREPARED_NATIVE_CI_PENDING",
+    "branch": "work/field-readiness-20260915-simulation",
+    "mainBranch": "feature/technicians-v25",
+    "mainShaUnchanged": "6f27081e1d183ff584a62255b016b373836734db",
+    "nativeGroupsExpected": 266,
+    "nativeRestore": "PENDING"
+  },
+  "previousCI": [
+    {
+      "task": 363,
+      "status": "PASSED",
+      "groups": 262,
+      "evidence": "docs/product/evidence/20260925_task363_ci.json",
+      "restore": "PASSED_127_TABLES_47_FILES"
+    },
+    {
+      "task": 364,
+      "codeSha": "cf96f66886fc06d938b43722de072adea7482cbc",
+      "runId": 36158832545,
+      "jobId": 108150001251,
+      "status": "in_progress",
+      "groupsExpected": 264,
+      "migrationGate": "PASSED",
+      "restore": "PENDING",
+      "knownLocalRegression": "Two-year helper raw status mismatch; repaired and rerun in TASK365."
+    }
+  ],
+  "limits": [
+    "Native PostgreSQL 266-group suite and restore pending for this code.",
+    "Reviewed operations cover vehicle records; guide creation/upload/closure, material movements, maintenance and risk-rule writes retain separate workflows requiring further review.",
+    "Related usage counts are checked at commit but do not lock all related rows.",
+    "No reconciliation or rewrite of historical plates, guides, costs, assignments, presets or official documents.",
+    "Vehicle catalogue membership is separate from operating status.",
+    "Forms and proof remain in memory; only owner-scoped request reference persists in the same tab.",
+    "Existing shared navigation and neighboring forms retain existing translations; no physical device pilot.",
+    "Two common binary assets are unavailable locally; transient common network notice is visible after injected failures in some screenshots.",
+    "Historical scripts outside the active runner using legacy vehicle writers need adaptation.",
+    "Historical reconciliation, production volume, VPS and operational backups remain pending.",
+    "No merge, deploy or real external contact."
+  ]
+}

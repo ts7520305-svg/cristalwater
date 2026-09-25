@@ -5,6 +5,11 @@
   window.__CW_OPERATIONAL_RISK__ = true;
 
   const path = String(location.pathname || "").replace(/\.html$/i, "").toLowerCase();
+  const managedFleet = path === '/admin-vehicles';
+  const fleetCurrent = () => !managedFleet || !!window.CWFleetPageSession?.isCurrent();
+  let fleetRiskRead = 0;
+  const clearFleetRisk = () => { if(managedFleet){fleetRiskRead++;window.__CW_OPERATIONAL_RISK_SUMMARY__=null;document.getElementById('cwOperationalRiskPanel')?.remove();document.querySelectorAll('.cw-risk-inline-list,.cw-side-risk-count').forEach(el=>el.remove());document.querySelectorAll('.cw-side-risk,.cw-side-risk-critical,.cw-risk-card,.cw-risk-jump-target,.cw-risk-focus').forEach(el=>el.classList.remove('cw-side-risk','cw-side-risk-critical','cw-risk-card','cw-risk-jump-target','cw-risk-focus'));} };
+  if(managedFleet){window.addEventListener('cw:fleet-session-ended',clearFleetRisk);window.addEventListener('cw:fleet-risk-unavailable',clearFleetRisk);window.addEventListener('pagehide',clearFleetRisk);window.addEventListener('cw:fleet-risk-ready',event=>{if(fleetCurrent()){clearFleetRisk();showRisk(event.detail,fleetRiskRead);}});}
   const isAdmin = path.includes("admin") || path.includes("billing") || path.includes("invoice") || path.includes("to-issue") || path.includes("dashboard");
   if (!isAdmin || ["/login", "/admin-login"].includes(path)) return;
 
@@ -33,8 +38,10 @@
   }
 
   async function api(url) {
+    if(!fleetCurrent())throw Error('Session changed');
     const response = await fetch(url, { cache: "no-store" });
     const data = await response.json().catch(() => ({}));
+    if(!fleetCurrent())throw Error('Session changed');
     if (!response.ok || data.ok === false) throw new Error(data.error || data.message || "Erro");
     return data;
   }
@@ -281,7 +288,8 @@
   async function loadSummary() {
     try {
       return await api("/api/operational-risk/summary");
-    } catch (_) {
+    } catch (error) {
+      if(managedFleet)throw error;
       return fallbackSummary();
     }
   }
@@ -550,14 +558,20 @@
     focusStoredRiskTarget();
   }
 
-  async function bootRisk() {
-    setupRiskNavigation();
-    const summary = await loadSummary();
+  function showRisk(summary, turn) {
+    if(!fleetCurrent()||managedFleet&&turn!==fleetRiskRead)return;
     window.__CW_OPERATIONAL_RISK_SUMMARY__ = summary;
     renderGlobalPanel(summary);
     markSidebar(summary);
     markCurrentPage(summary);
-    setTimeout(() => markCurrentPage(summary), 800);
+    setTimeout(() => { if(fleetCurrent()&&(!managedFleet||turn===fleetRiskRead))markCurrentPage(summary); }, 800);
+  }
+
+  async function bootRisk() {
+    setupRiskNavigation();
+    const turn=++fleetRiskRead;
+    let summary;try{summary=await loadSummary();if(managedFleet&&(!Array.isArray(summary.issues)||!summary.counts||!['total','critical','warning'].every(k=>Number.isSafeInteger(summary.counts[k])&&summary.counts[k]>=0)))throw Error('Incomplete risk summary');}catch(_){if(turn===fleetRiskRead)clearFleetRisk();return;}
+    showRisk(summary,turn);
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bootRisk);

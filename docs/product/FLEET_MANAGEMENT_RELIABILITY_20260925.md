@@ -1,0 +1,52 @@
+# TASK365 — gestão de viaturas com preservação dos registos
+
+## Problema e âmbito
+
+Em `/admin-vehicles`, criar por matrícula podia atualizar e reativar silenciosamente uma viatura existente. A edição usava campos predefinidos, convertia quilómetros ausentes em zero e podia sobrescrever atributos omitidos. Alterar estado, arquivar e restaurar não tinha revisão ligada ao registo consultado nem comprovativo recuperável. A atualização das listas também substituía a viatura escolhida nos formulários vizinhos.
+
+Este lote revê o registo da viatura: criação, dados, estado operacional, arquivo e reposição. Guias, itens, consumos, manutenção, custos, atribuições e documentos oficiais mantêm os seus registos. Os comandos desses módulos permanecem para revisão própria; a página completa não é declarada concluída.
+
+## Comportamento
+
+- Criação nunca faz atualização por matrícula. Matrícula existente, incluindo diferenças de maiúsculas ou espaços exteriores e registos arquivados, exige usar o registo existente. Duas criações revistas concorrentes da mesma matrícula produzem uma criação e uma recusa, sem substituir dados.
+- Operações com campos próprios. Editar preserva estado e atributos fora do formulário; mudar estado só altera estado/data da viatura. Quilómetros e ano opcionais mantêm `null`; zero é um valor explícito. Matrícula e textos são validados, notas aceitam várias linhas. Arquivar conserva a linha e todas as relações. Restaurar exige escolher o estado operacional, sem assumir «ativa». Pertença ao catálogo e estado operacional são conceitos separados na revisão.
+- A revisão apresenta ID/matrícula, dados anteriores, proposta e oito contagens de relações. Prova assinada de cinco minutos liga administrador, UUID, campos, versão da viatura e contagens consultadas. Mudança detetada exige nova revisão. O commit bloqueia a viatura, serializa os escritores deste fluxo e confirma alteração, auditoria e comprovativo na mesma transação. As contagens não constituem um bloqueio de todas as relações e a revisão não certifica dados externos ou conformidade fiscal.
+- Pedido por administrador/UUID. Resposta perdida, reinício de processo e repetições concorrentes recuperam o mesmo resultado. Conteúdo ou proprietário diferentes são recusados. Consulta não escreve; encerrar uma tentativa grava a anulação e impede gravação tardia, ou devolve o comprovativo de uma operação já concluída. Falha na auditoria ou no comprovativo reverte a alteração.
+- Formulário, proposta e prova ficam em memória. Só `{version, owner, operation, vehicleId, requestId}` permanece no mesmo separador/conta. A referência é escrita e relida antes do envio; quota, escrita ignorada ou bytes ilegíveis impedem envio e preservam o conteúdo anterior. Recarregar permite consultar/anular; repetir exige o corpo original ainda em memória. Não há reenvio automático.
+- Pesquisa, idioma e paginação não mudam a viatura em preparação. Trocar exige descartar explicitamente. Sessão incoerente/expirada, mudança real de conta ou suspensão limpam campos, provas e listas e impedem respostas atrasadas. Diretório ADMIN privado, páginas de 25, total e filtros. Pacote parcial, erro e lista vazia válida têm estados distintos.
+- Os seletores de guias, obra e manutenção começam sem escolha implícita e conservam a escolha após gravar uma viatura. Se esta for arquivada ou ficar indisponível, a seleção fica identificada e indisponível; não é substituída pela primeira opção. Os formulários e dados vizinhos também são limpos e bloqueados quando muda a sessão.
+- Nesta página, falha ou resposta incompleta dos alertas aparece como indisponibilidade; não produz totais zero nem regras predefinidas. Regras ficam bloqueadas até nova leitura válida. Falha de gravação não usa um segundo escritor como alternativa. O resumo comum, marcas e contagens de navegação são retirados quando deixam de ser confirmados ou a sessão termina. O comportamento de fallback das outras páginas permanece para revisão própria.
+- Conteúdo próprio em PT/EN/FR/ES/DE, texto de dados inerte, controlos de pelo menos 44 px e confirmação de 24 px numa etiqueta clicável. Corrigida a interferência dos estilos globais de `header` no título do componente móvel. A navegação, alertas e formulários antigos conservam os idiomas existentes.
+- Leitores antigos de viaturas conservam os formatos usados pelos restantes módulos. Escritores antigos de criar/editar/arquivar/restaurar recebem 409 e exigem revisão. Atribuição de técnico, guias e manutenção não foram substituídas por esses escritores.
+
+## Validação
+
+**760 testes unitários em 102 ficheiros**, incluindo quinze novos: doze das regras da frota e três dos auxiliares de integração. Quatro testes técnicos aprovados. Sintaxe: 649 backend, 261 frontend e 44 inline; últimas alterações JavaScript verificadas separadamente. Sem dependências, tabelas ou migrações novas; as **42 migrações existentes** foram aplicadas no ambiente isolado.
+
+Sete grupos distintos aprovados:
+
+1. `test-field-fleet-management.js`: API real, autorização/privacidade, campos e versões, matrículas duplicadas, dois processos/reinício e cinco repetições concorrentes, colisão de duas criações revistas, rollback da auditoria/comprovativo, prova caducada/alterada, anulação, estados e paginação. Comparação de todos os atributos das relações de técnico, guias/itens, movimentos, manutenção/custos, atribuição, documento oficial e preset após editar/arquivar/restaurar.
+2. `test-field-fleet-management-ui.js`: página/API reais, confirmação explícita e duplo clique uma vez, zero/nulo, estado/arquivo/reposição, resposta perdida/recarga, offline/repetição exata, anulação, quota/escrita ignorada/bytes corrompidos, pacote parcial e pesquisas concorrentes. Cinco idiomas e três larguras, suspensão/regresso, duas contas reais em separadores com respostas de revisão/commit atrasadas e expiração. Seletores vizinhos estáveis, opção arquivada indisponível, alertas indisponíveis/incompletos sem fallback de leitura/gravação e limpeza dos formulários/marcas partilhados. Repetido depois dos ajustes finais do cabeçalho.
+3. `test-shared-navigation-browser.js`: oito páginas, quatro larguras, perfis existentes, gaveta/foco/teclado/pesquisa e indicação offline. Conserva o âmbito de navegação, sem executar os comandos de negócio de todas as páginas.
+4. `test-field-guide-pdf.js`: quatro endpoints PDF, Unicode/conteúdo longo/páginas, privacidade, isolamento por papel/viatura, IDs alternativos e dados ausentes/provisórios, sem alterar as fontes.
+5. `test-field-technician-management.js`: repetição da API de técnicos, incluindo contactos/custos/histórico, PIN, revogação de sessões, resposta perdida/concorrência e viatura associada.
+6. `test-real-month-flow-api.js`: cinco clientes, nove piscinas/jacuzzis, três técnicos/viaturas, 54 visitas, químicos/reparações, faturação/pagamentos e mensagens sintéticas. Criação de viaturas adaptada à API revista, sem reduzir as verificações existentes.
+7. `test-field-two-year-api.js`: 731 datas e 312 visitas, 24 meses/72 faturas/144 pagamentos parciais concorrentes e histórico GPS. Simulação acelerada; não representa dois anos contínuos de serviço.
+
+A retoma detetou uma regressão do auxiliar de técnicos publicado na TASK364: `status: CONFIRMED` no corpo JSON era comparado ao estado HTTP 200. O resultado local anterior da simulação de dois anos precedia essa alteração final e não validava essa versão do auxiliar. A correção distingue estado HTTP numérico de comprovativo da aplicação; os testes cobrem respostas diretas, com `data` e com `body`, e recusam HTTP 403. A simulação de dois anos foi repetida integralmente e passou. Relatório/evidência anteriores retificados, sem apagar os registos originais. A primeira falha do navegador deste lote foi uma matrícula sintética em minúsculas comparada literalmente após normalização; o fixture foi alinhado com a regra e as verificações mantidas.
+
+Vinte e quatro capturas em `reports/field-visual/fleet-management/`: cinco idiomas × 320/390/1440, três revisões, três diretórios e três cartões. Revistos cabeçalho/formulário, revisão e cartões em móvel/desktop. O aviso transitório comum de rede aparece em parte das capturas após as falhas deliberadas. Dois recursos binários comuns não materializados localmente permanecem uma limitação visual conhecida. Sem piloto físico iPhone/Android.
+
+Runtime isolado PGlite 0.5.8/pglite-socket 0.2.11 e Chromium 153 com múltiplos processos/segurança web ativa. Dados sintéticos e saídas externas desligadas. Testes próprios confirmam contadores de negócio não relacionados e registos associados intactos. PGlite não é apresentado como PostgreSQL nativo. Cache **v176**, runner **266 grupos distintos**. Inventário: 115 HTML, 103 referenciados em 287 scripts ativos, **12 na fila de pesquisa**; zero recursos ausentes do repositório ou divergências de guardas. Referência literal não certifica conclusão do módulo.
+
+## CI e publicação
+
+TASK363 confirmada em [262/262 grupos e restauro PostgreSQL nativo](evidence/20260925_task363_ci.json), 17 etapas, 41 migrações e 127 tabelas/47 ficheiros com linhas e hashes iguais, em 40m50s. TASK364 continua por confirmar no último controlo; a migração passou, mas o auxiliar da simulação tem a regressão descrita acima, corrigida neste lote.
+
+Publicação deste lote na branch de trabalho em preparação. O CI completo de 266 grupos e restauro PostgreSQL nativo deste código permanece por confirmar. [Evidência local](evidence/20260925_task365_local.json).
+
+## Retoma e limites
+
+Continuar em `/admin-vehicles`: revisão de criação/anexo de guias, abertura/fecho de obra, consumo/movimentos e manutenção/custos, incluindo atomicidade, identidade, concorrência e preservação dos documentos. Os comandos antigos desses módulos e a gravação das regras de alerta não ganharam o protocolo de revisão/idempotência da viatura. As contagens consultadas não congelam todas as linhas relacionadas. Escritores históricos fora do runner que ainda criam viaturas diretamente precisam de adaptação antes de reutilização.
+
+Confirmar CIs/restauro; manter abertos conciliação histórica, volume, VPS/cópias operacionais e piloto físico. Estado de viatura e contagem de documentos não comprovam circulação, execução de visitas ou validade fiscal. Sem merge, deploy ou contactos reais; aplicação não declarada completa.

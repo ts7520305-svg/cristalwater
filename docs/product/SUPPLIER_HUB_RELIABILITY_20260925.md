@@ -39,7 +39,7 @@ Runtime PGlite isolado e Chromium com múltiplos processos/segurança web ativa.
 
 ## CI e publicação
 
-Publicada em `c564ca08a91e069362e9e1c623fd0538d4750a96`, árvore `fc33ddb671a49e3aebb6134cdedbb8b49b7d413a`, idêntica à preparada e validada localmente. [CI 36154446240](https://github.com/ts7520305-svg/cristalwater/actions/runs/36154446240), job `108135454917`, em execução; os 262 grupos e o restauro PostgreSQL nativo deste lote continuam por confirmar.
+Publicada em `c564ca08a91e069362e9e1c623fd0538d4750a96`, árvore `fc33ddb671a49e3aebb6134cdedbb8b49b7d413a`, idêntica à preparada e validada localmente. [CI 36154446240](https://github.com/ts7520305-svg/cristalwater/actions/runs/36154446240), job `108135454917`, aprovado: 262/262 grupos esperados distintos, 17 etapas, 41 migrações e restauro de 127 tabelas/47 ficheiros com linhas e hashes iguais, em 40m50s. [Evidência nativa](evidence/20260925_task363_ci.json).
 
 TASK362 confirmada: [CI 36150863744](https://github.com/ts7520305-svg/cristalwater/actions/runs/36150863744), job `108123470461`, aprovado: 260/260 grupos esperados distintos, 17 etapas, 41 migrações e restauro de 127 tabelas/47 ficheiros com linhas e hashes iguais, em 42m54s. [Evidência nativa](evidence/20260925_task362_ci.json).
 
