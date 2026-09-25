@@ -8,7 +8,7 @@
     POPUP: 'Permita a abertura de uma nova janela para consultar o documento.',
     UNAVAILABLE: 'A sua sessão não permite consultar este documento ou o documento já não está disponível.',
     UNCONFIRMED: 'A resposta não confirma o documento selecionado. Volte a tentar.',
-    INCOMPLETE: 'O PDF recebido está incompleto. Volte a tentar.',
+    INCOMPLETE: 'O documento recebido está incompleto. Volte a tentar.',
     TIMEOUT: 'O documento demorou demasiado. Volte a tentar.',
     CANCELLED: 'A abertura foi cancelada. Pode abrir novamente o documento.',
     RETRY: 'Não foi possível abrir o documento. Volte a tentar.'
@@ -23,12 +23,16 @@
       if (!Number.isFinite(claims.exp) || claims.exp * 1000 <= Date.now() || keys.slice(0, 3).some(key => localStorage.getItem(key) && localStorage.getItem(key) !== token)) throw Error();
       const clientId = String(claims.role).toUpperCase() === 'CLIENT' ? String(claims.clientId || claims.id) : null;
       if (clientId !== null && !positive(clientId)) throw Error();
-      return { token, clientId, fingerprint: fingerprint(), expires: claims.exp * 1000 };
+      const role=String(claims.role).toUpperCase(),user=String(claims.userId||claims.id),tech=String(claims.technicianId||claims.id);
+      const owner=role==='ADMIN'&&positive(user)?'ADMIN:'+user:['TECHNICIAN','TEAM_LEADER'].includes(role)&&positive(tech)?(claims.principalType==='USER'&&positive(user)?'USER:'+user+':TECH:'+tech:'TECH:'+tech):null;
+      return { token, clientId, owner, fingerprint: fingerprint(), expires: claims.exp * 1000 };
     } catch (_) { throw failure('SESSION'); }
   }
   function target(href) {
     const url = new URL(href, location.href), p = url.pathname;
     if (url.origin !== location.origin || url.username || url.password || url.search || url.hash || href !== p && href !== url.origin + p) throw failure('INVALID_DOCUMENT');
+    const guideFile=/^\/api\/transport-guide-documents\/([1-9]\d{0,9})\/files\/([1-9]\d{0,9})$/.exec(p);
+    if(guideFile&&positive(guideFile[1])&&positive(guideFile[2]))return {path:p,type:'guide-attachment',headers:{'X-CW-Document-Type':'guide-attachment','X-CW-Guide-Id':guideFile[1],'X-CW-Document-Id':guideFile[2]},attachment:true};
     const definitions = [
       [/^\/api\/invoice-pdf\/([1-9]\d{0,9})$/, 'invoice-pdf', 'X-CW-Invoice-Id'],
       [/^\/api\/invoice-pdf\/extras\/([1-9]\d{0,9})$/, 'extra-billing-pdf', 'X-CW-Client-Id'],
@@ -36,11 +40,12 @@
       [/^\/api\/guides\/transport\/latest\/([1-9]\d{0,9})\/pdf$/, 'transport-guide', 'X-CW-Vehicle-Id'],
       [/^\/api\/guides\/work\/([1-9]\d{0,9})\/pdf$/, 'work-guide', 'X-CW-Document-Id'],
       [/^\/api\/guides\/vehicles\/([1-9]\d{0,9})\/insurance\/pdf$/, 'vehicle-insurance', 'X-CW-Vehicle-Id'],
+      [/^\/api\/transport-guide-documents\/current\/([1-9]\d{0,9})$/, 'guide-attachment', 'X-CW-Guide-Id'],
       [/^\/api\/client-messages\/attachments\/([1-9]\d{0,9})$/, 'chat-attachment', 'X-CW-Message-Id']
     ];
     for (const [pattern, type, key] of definitions) {
       const match = pattern.exec(p);
-      if (match && positive(match[1])) return { path: p, type, headers: { 'X-CW-Document-Type': type, [key]: match[1] }, attachment: type === 'chat-attachment' };
+      if (match && positive(match[1])) return { path: p, type, headers: { 'X-CW-Document-Type': type, [key]: match[1] }, attachment: ['chat-attachment','guide-attachment'].includes(type) };
     }
     throw failure('INVALID_DOCUMENT');
   }
@@ -86,7 +91,10 @@
         if (!positive(response.headers.get(scopeKey)) && !unassigned || document.type === 'transport-guide' && !positive(response.headers.get('X-CW-Document-Id')) ||
             session.clientId !== null && scopeKey === 'X-CW-Client-Id' && response.headers.get(scopeKey) !== session.clientId) throw failure('UNCONFIRMED');
       }
+      if(document.type==='guide-attachment'&&(!session.owner||response.headers.get('X-CW-Owner')!==session.owner||!positive(response.headers.get('X-CW-Guide-Id'))||!positive(response.headers.get('X-CW-Vehicle-Id'))&&response.headers.get('X-CW-Vehicle-Id')!=='unassigned'||!positive(response.headers.get('X-CW-Document-Id'))&&response.headers.get('X-CW-Document-Id')!=='legacy'||!/^[a-f0-9]{64}$/.test(response.headers.get('X-CW-SHA256')||'')))throw failure('UNCONFIRMED');
       const blob = await response.blob(); current(op);
+      if(document.type==='guide-attachment'){if(blob.size<=0||blob.size>25*1024*1024)throw failure('INCOMPLETE');const bytes=await blob.arrayBuffer();const hash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(x=>x.toString(16).padStart(2,'0')).join('');current(op);if(hash!==response.headers.get('X-CW-SHA256'))throw failure('INCOMPLETE');}
+
       if (!document.attachment) {
         const start = await blob.slice(0, 5).text(), end = await blob.slice(-32).text(); current(op);
         if (start !== '%PDF-' || !/%%EOF\s*$/.test(end)) throw failure('INCOMPLETE');

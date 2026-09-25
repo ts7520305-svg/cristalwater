@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-25T20:55:46.617Z",
-  "baseCommit": "3782ee7dc16f992177c95158c42d7798917405a7",
+  "generatedAt": "2026-09-25T21:48:04.095Z",
+  "baseCommit": "c021b820b917c3330899280fe67e3d2cd4ed9221",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 295,
+  "activeScriptsScanned": 297,
   "summary": {
-    "htmlFiles": 119,
-    "rootPages": 112,
+    "htmlFiles": 120,
+    "rootPages": 113,
     "nestedPages": 7,
     "unavailableLocalAssetReferences": 2,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 107,
+    "pagesWithLiteralTestReference": 108,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -1866,7 +1866,8 @@
         "test-field-fleet-management-ui.js",
         "test-field-vehicle-consumption-ui.js",
         "test-field-transport-guide-items-ui.js",
-        "test-field-transport-guide-manage-ui.js"
+        "test-field-transport-guide-manage-ui.js",
+        "test-field-transport-guide-documents-ui.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -4167,6 +4168,7 @@
         "test-field-visit-briefing.js",
         "test-field-legacy-entry.js",
         "test-field-admin-catalogue.js",
+        "test-field-transport-guide-documents-ui.js",
         "test-field-technical-proposals.js",
         "test-field-proposal-recovery-ui.js",
         "test-field-write-recovery-ui.js",
@@ -4826,6 +4828,41 @@
       "testReferences": [
         "test-field-transport-guide-create.js",
         "test-field-transport-guide-create-ui.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/transport-guide-documents.html",
+      "route": "/transport-guide-documents",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Documentos da guia",
+      "catalogueRoles": [],
+      "guardFiles": [],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/cw-transport-guide-create.css",
+        "/cw-vehicle-consumption-rules.js",
+        "/cw-transport-guide-rules.js",
+        "/cw-transport-guide-copy.js",
+        "/cw-transport-items-rules.js",
+        "/cw-transport-items-copy.js",
+        "/cw-transport-documents-rules.js",
+        "/cw-transport-documents-copy.js",
+        "/cw-auth-download.js",
+        "/cw-transport-guide-documents.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-transport-guide-documents.js",
+        "test-field-transport-guide-documents-ui.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },

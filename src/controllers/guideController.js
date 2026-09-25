@@ -1,7 +1,6 @@
 const { writePdfResponse, line, section, paragraph, tableRows } = require("../services/guidePdfService");
 
 const { prisma } = require("../prismaClient");
-const { toPublicUploadUrl } = require("../config/uploadPath");
 
 const COMPANY_NAME = "Cristal Water LDA";
 
@@ -36,7 +35,9 @@ function parseOfficialDocument(row) {
   try {
     const document = JSON.parse(row.value);
     if (!document || typeof document.url !== 'string' || !document.url.trim()) throw Error('Invalid document');
-    return document;
+    const id=Number(row.key.replace('transport_guide_at_document_',''));
+    if(!Number.isSafeInteger(id)||id<1||document.guideId!==undefined&&document.guideId!==id)throw Error('Invalid document association');
+    return {...document,url:document.storage==='DATABASE'&&Number.isSafeInteger(document.versionId)&&document.versionId>0?'/api/transport-guide-documents/'+id+'/files/'+document.versionId:'/api/transport-guide-documents/current/'+id};
   } catch (_) {
     throw Error('O registo do documento oficial está ilegível. Confirme-o no escritório.');
   }
@@ -398,53 +399,7 @@ async function getLatestTransportGuide(req, res) {
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
 }
 
-async function uploadTransportGuideDocument(req, res) {
-  try {
-    const id = n(req.params.id);
-    const guide = await prisma.transportGuide.findUnique({ where: { id }, include: { vehicle: true } });
-    if (!guide) return res.status(404).json({ ok: false, error: "Guia AT nao encontrada." });
-    if (!req.file) return res.status(400).json({ ok: false, error: "Ficheiro da AT obrigatorio." });
-
-    const document = {
-      guideId: id,
-      codeAT: guide.codeAT || null,
-      vehicleId: guide.vehicleId || null,
-      vehiclePlate: guide.vehicle?.plate || null,
-      url: toPublicUploadUrl("guides", req.file.filename),
-      filename: req.file.filename,
-      originalName: req.file.originalname,
-      mimeType: req.file.mimetype,
-      size: req.file.size,
-      uploadedAt: new Date().toISOString(),
-      uploadedBy: req.headers["x-user-email"] || req.headers["x-actor"] || "SYSTEM"
-    };
-
-    await prisma.systemSetting.upsert({
-      where: { key: transportGuideDocumentKey(id) },
-      update: {
-        value: JSON.stringify(document),
-        notes: "Ficheiro oficial da guia de transporte AT anexado pelo administrador."
-      },
-      create: {
-        key: transportGuideDocumentKey(id),
-        value: JSON.stringify(document),
-        notes: "Ficheiro oficial da guia de transporte AT anexado pelo administrador."
-      }
-    });
-
-    await audit(req, "TRANSPORT_GUIDE_AT_DOCUMENT_UPLOAD", "TransportGuide", id, {
-      codeAT: guide.codeAT,
-      vehicleId: guide.vehicleId,
-      originalName: req.file.originalname,
-      size: req.file.size,
-      mimeType: req.file.mimetype
-    });
-
-    res.json({ ok: true, document, message: "Ficheiro oficial da AT anexado a guia." });
-  } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
-  }
-}
+const uploadTransportGuideDocument = require('./transportGuideDocumentController').legacy;
 
 async function getTransportGuideDocument(req, res) {
   try {

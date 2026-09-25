@@ -353,35 +353,10 @@ function renderOfficialDocument(doc) {
   `;
 }
 
-async function uploadTransportGuideDocument(id, input) {
-  const fileInput = typeof input === "string" ? el(input) : input;
-  if (!fileInput?.files?.[0]) return null;
-
-  const formData = new FormData();
-  formData.append("document", fileInput.files[0]);
-
-  const response = await fetch(`${API}/transport/${encodeURIComponent(id)}/document`, {
-    method: "POST",
-    headers: authHeaders(),
-    body: formData,
-  });
-  const data = await response.json().catch(() => ({}));
+function manageTransportGuideDocuments(id) {
   requirePageSession();
-  if (!response.ok || data.ok === false) {
-    throw new Error(data.error || data.message || "Erro ao enviar ficheiro da AT");
-  }
-
-  fileInput.value = "";
-  return data.document;
-}
-
-async function replaceTransportGuideDocument(id, input) {
-  try {
-    await uploadTransportGuideDocument(id, input);
-    await load();
-  } catch (error) {
-    alert(error.message);
-  }
+  const lang = document.getElementById('fleetLanguage')?.value || new URL(location.href).searchParams.get('lang') || 'pt';
+  location.href = '/transport-guide-documents?' + new URLSearchParams({ ...(id ? { guideId: String(id) } : {}), lang });
 }
 
 function renderTransportGuides() {
@@ -406,12 +381,8 @@ function renderTransportGuides() {
         ${renderGuideItems(guide.items || [])}
 
         <div class="links">
-          ${guide.officialDocument?.url ? `<a class="btn primary" target="_blank" rel="noopener" href="${esc(guide.officialDocument.url)}">Abrir AT oficial</a>` : ""}
-          <label class="btn upload-inline">
-            <span>Anexar / substituir AT</span>
-            <small>PDF ou imagem oficial</small>
-            <input type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.xml,.txt,application/pdf,image/*" onchange="replaceTransportGuideDocument(${guide.id}, this)">
-          </label>
+          ${guide.officialDocument?.url ? `<a class="btn primary" data-auth-download target="_blank" rel="noopener" href="${esc(guide.officialDocument.url)}">Abrir AT oficial</a>` : ""}
+          <button class="btn primary" onclick="manageTransportGuideDocuments(${guide.id})">Documentos e versões</button>
           <button class="btn" onclick="editTransportGuide(${guide.id})">Editar guia</button>
           <button class="btn" onclick="editTransportGuideItems(${guide.id})">Editar materiais</button>
           <button class="btn warn" onclick="closeTransportGuide(${guide.id})">Fechar</button>
@@ -576,4 +547,4 @@ async function createMaintenance() {
 
 window.load = load;
 window.saveRiskRules = saveRiskRules;
-window.replaceTransportGuideDocument = replaceTransportGuideDocument;
+window.manageTransportGuideDocuments = manageTransportGuideDocuments;

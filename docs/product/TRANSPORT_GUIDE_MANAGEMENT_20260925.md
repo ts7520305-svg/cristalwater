@@ -35,7 +35,7 @@ O navegador entra pelo botão real do histórico e testa «Manter/Alterar/Limpar
 
 [TASK367, CI 36182594290](https://github.com/ts7520305-svg/cristalwater/actions/runs/36182594290), job `108228289199`: **269/270 grupos aprovados**, migrações/sintaxe/unitários aprovados, **restauro não executado** após a falha. O teste de recuperação documental esperava documentos «Válidos» para um segundo técnico na mesma viatura, embora a leitura atual corretamente devolva apenas a obra do técnico autenticado. A expectativa antiga expirou na linha 143. O teste agora exige comprovativo da própria conta, obra nula, stock/movimentos vazios, estado «Rever» e preservação da cópia da primeira conta. A autorização do servidor foi mantida; o grupo foi repetido integralmente com sucesso. [Evidência nativa](evidence/20260925_task367_ci.json).
 
-TASK368 permanece com gate nativo em execução na última consulta. O resultado dessa revisão anterior não é inferido a partir dos testes locais.
+TASK368 terminou em 271/272 grupos aprovados, com a mesma expectativa antiga no teste de recuperação documental; restauro não executado. Correção incluída na TASK369, mantendo a autorização do servidor. [Evidência nativa](evidence/20260925_task368_ci.json).
 
 ## Publicação e retoma
 

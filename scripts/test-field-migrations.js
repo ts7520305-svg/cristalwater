@@ -278,6 +278,24 @@ async function dbRejects(sql, expected) {
   assert.deepEqual(retained.map(row=>row.text),['Historical one','Historical two']);assert(retained.every(row=>row.actorKey===null&&row.requestId===null&&row.payloadHash===null&&row.legacyKey===null&&row.isReadByClient===false));
   assert.equal(await prisma.clientChatLegacyRecord.count(),0);assert.equal(await prisma.clientChatImport.count(),0);
   assert.equal(await prisma.internalChatMessage.count(),0);assert.equal(await prisma.internalChatImport.count(),0);
+  // New attachment storage leaves every historical guide, item and legacy pointer intact.
+  {
+    const guide=await prisma.transportGuide.create({data:{codeAT:'MIGRATION-ORIGINAL',status:'CLOSED',notes:'Exact historical note',items:{create:{name:'Retained salt',unit:'KG',quantity:2.25}}},include:{items:true}});
+    const setting=await prisma.systemSetting.create({data:{key:'transport_guide_at_document_'+guide.id,value:'{original unparsed legacy bytes',notes:'Original metadata'}});
+    cli(['db','execute','--file','prisma/migrations/20260925211500_transport_guide_attachments/migration.sql','--schema','prisma/schema.prisma']);
+    assert.equal(await prisma.transportGuideAttachment.count(),0);
+    assert.deepEqual(await prisma.transportGuide.findUniqueOrThrow({where:{id:guide.id},include:{items:true}}),guide);
+    assert.deepEqual(await prisma.systemSetting.findUniqueOrThrow({where:{id:setting.id}}),setting);
+    const bytes=Buffer.from([0,1,127,128,255]),sha256=require('node:crypto').createHash('sha256').update(bytes).digest('hex');
+    const data={guideId:guide.id,kind:'FILE',originalName:'migration.txt',mimeType:'text/plain',size:bytes.length,sha256,bytes,createdBy:'ADMIN:1',reason:'Preserved binary bytes',requestId:'migration-file'};
+    const file=await prisma.transportGuideAttachment.create({data});assert.deepEqual(Buffer.from(file.bytes),bytes);
+    for(const assignment of [`"kind"='OTHER'`,`"size"=6`,`"size"=NULL`,`"sha256"=NULL`,`"sha256"='bad'`,`"bytes"=NULL`,`"createdBy"='TECH:1'`])await dbRejects(`UPDATE "TransportGuideAttachment" SET ${assignment} WHERE id=${file.id}`,'23514');
+    await dbRejects(`DELETE FROM "TransportGuide" WHERE id=${guide.id}`,['23001','23503']);
+    await dbRejects(`UPDATE "TransportGuideAttachment" SET "guideId"=2147483647 WHERE id=${file.id}`,'23503');
+    await dbRejects(`INSERT INTO "TransportGuideAttachment" ("guideId","kind","originalName","mimeType","size","sha256","bytes","createdBy","reason","requestId") SELECT "guideId","kind","originalName","mimeType","size","sha256","bytes","createdBy","reason","requestId" FROM "TransportGuideAttachment" WHERE id=${file.id}`,'23505');
+    const legacy=await prisma.transportGuideAttachment.create({data:{guideId:guide.id,kind:'LEGACY',originalName:'missing.pdf',mimeType:'application/pdf',legacyRecord:JSON.parse(JSON.stringify(setting)),createdBy:'ADMIN:1',reason:'Preserved unreadable legacy record',requestId:'migration-file'}});assert.equal(legacy.bytes,null);assert.deepEqual(legacy.legacyRecord,JSON.parse(JSON.stringify(setting)));
+    await prisma.transportGuideAttachment.deleteMany({where:{guideId:guide.id}});await prisma.systemSetting.delete({where:{id:setting.id}});await prisma.transportGuide.delete({where:{id:guide.id}});
+  }
   await prisma.webPushSubscription.create({data:{endpoint:'https://fcm.googleapis.com/fcm/send/migration-qa',role:'TECHNICIAN',principalId:999999,subscription:{},active:false}});
   await prisma.$disconnect();
   cli(['migrate','diff','--from-schema-datasource','prisma/schema.prisma','--to-schema-datamodel','prisma/schema.prisma','--exit-code']);
@@ -291,6 +309,6 @@ async function dbRejects(sql, expected) {
   assert.equal(await prisma.technicalProposalRequest.count(),0);
   assert.equal(await prisma.fieldWriteRequest.count(),0);
   const savedExtra=await prisma.extraVisit.findUniqueOrThrow({where:{id:oldExtra.id}});assert.equal(savedExtra.notes,'Migration preserved extra');assert.equal(savedExtra.execution,null);assert.equal(savedExtra.startAt,null);assert.equal(savedExtra.endAt,null);assert.equal(savedExtra.completionRequestId,null);assert.equal(await prisma.extraVisitPhoto.count(),0);await prisma.extraVisit.delete({where:{id:oldExtra.id}});
-  console.log('PASS forty-two additive migrations preserve previous data and match the current schema');
+  console.log('PASS forty-three additive migrations preserve previous data and match the current schema');
  }finally{fs.rmSync(temp,{recursive:true,force:true})}
 })().catch(error=>{console.error(error);process.exitCode=1}).finally(()=>prisma.$disconnect());

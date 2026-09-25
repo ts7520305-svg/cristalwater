@@ -20,6 +20,7 @@ app.use('/api/vehicle-consumption', require('../../src/routes/vehicleConsumption
 app.use('/api/transport-guide-create', require('../../src/routes/transportGuideCreationRoutes'));
 app.use('/api/transport-guide-items', require('../../src/routes/transportGuideItemsRoutes'));
 app.use('/api/transport-guide-manage', require('../../src/routes/transportGuideManageRoutes'));
+app.use('/api/transport-guide-documents', require('../../src/routes/transportGuideDocumentRoutes'));
 app.use('/api/technicians', require('../../src/routes/technicianCrudRoutes'));
 app.use('/api/suppliers', require('../../src/routes/supplierHubRoutes'));
 app.use('/api/operational-flow', require('../../src/routes/operationalFlowRoutes'));

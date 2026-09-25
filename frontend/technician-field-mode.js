@@ -1644,7 +1644,7 @@
   }
 
   function docButton(href, label) {
-    const protectedDownload = String(href || "").startsWith("/api/guides/") ? " data-auth-download" : "";
+    const protectedDownload = (String(href || "").startsWith("/api/guides/") || String(href || "").startsWith("/api/transport-guide-documents/")) ? " data-auth-download" : "";
     return `<a class="doc-btn"${protectedDownload} href="${esc(href)}" target="_blank" rel="noopener">${esc(label)}</a>`;
   }
 

@@ -1376,6 +1376,7 @@ model TransportGuide {
   vehicle         Vehicle?             @relation(fields: [vehicleId], references: [id])
   items           TransportGuideItem[]
   workGuides      WorkGuide[]
+  attachments     TransportGuideAttachment[]
 
   @@index([vehicleId])
   @@index([status])
@@ -2788,4 +2789,25 @@ model LaborCostValuationPart {
   group LaborCostValuation @relation(fields: [groupId], references: [id], onDelete: Restrict)
   @@unique([groupId, expenseId])
   @@index([expenseId])
+}
+
+// Immutable guide versions: file bytes and the acknowledgement commit together.
+model TransportGuideAttachment {
+  id           Int      @id @default(autoincrement())
+  guideId      Int
+  kind         String
+  originalName String
+  mimeType     String
+  size         Int?
+  sha256       String?
+  bytes        Bytes?
+  legacyRecord Json?
+  createdBy    String
+  reason       String
+  requestId    String
+  createdAt    DateTime @default(now())
+  guide        TransportGuide @relation(fields: [guideId], references: [id], onDelete: Restrict)
+
+  @@index([guideId, id])
+  @@unique([createdBy, requestId, kind])
 }

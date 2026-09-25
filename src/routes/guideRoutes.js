@@ -1,9 +1,7 @@
 const express = require("express");
-const multer = require("multer");
 const auth = require("../middlewares/authMiddleware");
 const { roleIn } = require("../utils/roles");
 const router = express.Router();
-const { resolveUploadSubdir } = require("../config/uploadPath");
 
 const c = require("../controllers/guideController");
 
@@ -35,34 +33,6 @@ router.use((req, res, next) => {
   next();
 });
 
-const guideUploadDir = resolveUploadSubdir("guides");
-
-const guideDocumentUpload = multer({
-  storage: multer.diskStorage({
-    destination: guideUploadDir,
-    filename: (req, file, cb) => {
-      const safeName = String(file.originalname || "guia-at")
-        .replace(/[^a-zA-Z0-9_.-]/g, "_")
-        .slice(-120);
-      cb(null, `${Date.now()}-${safeName}`);
-    }
-  }),
-  limits: { fileSize: 25 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    const nameOk = /\.(pdf|png|jpe?g|webp|xml|txt)$/i.test(file.originalname || "");
-    const mimeOk = [
-      "application/pdf",
-      "application/xml",
-      "text/xml",
-      "text/plain",
-      "image/png",
-      "image/jpeg",
-      "image/webp"
-    ].includes(file.mimetype);
-    cb(null, nameOk || mimeOk);
-  }
-});
-
 // Frota / veículos
 router.get("/vehicles", allowRoles("ADMIN", "TECHNICIAN"), c.listVehicles);
 router.post("/vehicles", allowRoles("ADMIN"), c.createVehicle);
@@ -80,7 +50,7 @@ router.get("/transport", allowRoles("ADMIN", "TECHNICIAN"), c.listTransportGuide
 router.get("/transport/latest/:vehicleId", allowRoles("ADMIN", "TECHNICIAN"), c.getLatestTransportGuide);
 router.get("/transport/latest/:vehicleId/pdf", allowRoles("ADMIN", "TECHNICIAN"), c.downloadLatestTransportGuidePdf);
 router.get("/transport/:id/document", allowRoles("ADMIN", "TECHNICIAN"), c.getTransportGuideDocument);
-router.post("/transport/:id/document", allowRoles("ADMIN"), guideDocumentUpload.single("document"), c.uploadTransportGuideDocument);
+router.post("/transport/:id/document", allowRoles("ADMIN"), c.uploadTransportGuideDocument);
 router.get("/transport/:id/pdf", allowRoles("ADMIN", "TECHNICIAN"), c.downloadTransportGuidePdf);
 router.post("/transport", allowRoles("ADMIN"), c.createTransportGuide);
 router.put("/transport/:id", allowRoles("ADMIN"), c.updateTransportGuide);

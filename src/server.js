@@ -174,7 +174,7 @@ app.use(auditMiddleware);
 
 app.use(express.static(frontendPath));
 app.use(`${getUploadsPublicBasePath()}/documents`, (req,res)=>res.status(404).json({ok:false,error:'Utilize o download autenticado do documento.'}));
-app.use(getUploadsPublicBasePath(), require('./services/fieldPhotoRequestService').protectExtraUploads, require('./services/clientChatAttachmentService').protectLegacyUploads, express.static(uploadsPath));
+app.use(getUploadsPublicBasePath(), require('./services/transportGuideDocumentFiles').protectUploads, require('./services/fieldPhotoRequestService').protectExtraUploads, require('./services/clientChatAttachmentService').protectLegacyUploads, express.static(uploadsPath));
 
 const frontendPages = fs
   .readdirSync(frontendPath)
@@ -207,6 +207,7 @@ mount("/api/vehicle-consumption", require("./routes/vehicleConsumptionRoutes"));
 mount("/api/transport-guide-create", require("./routes/transportGuideCreationRoutes"));
 mount("/api/transport-guide-items", require("./routes/transportGuideItemsRoutes"));
 mount("/api/transport-guide-manage", require("./routes/transportGuideManageRoutes"));
+mount("/api/transport-guide-documents", require("./routes/transportGuideDocumentRoutes"));
 mount("/api/technician-stats", technicianStatsRoutes);
 mount("/api/technician-auth", technicianAuthRoutes);
 mount("/api/technician", technicianRoutes);

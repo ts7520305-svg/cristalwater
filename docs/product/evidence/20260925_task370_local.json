@@ -1,0 +1,260 @@
+{
+  "task": "TASK370",
+  "baseCommit": "c021b820b917c3330899280fe67e3d2cd4ed9221",
+  "validatedAt": "2026-09-25T21:49:28.701926+00:00",
+  "sourceHashes": {
+    "frontend/admin-vehicles.html": "ab92bfaf7652e1c66978739be1aa6bfe4047873e4430333b32af0c8aadb4809f",
+    "frontend/admin-vehicles.js": "a799d94270faa64a5cba53a76d231871c8424ed8ddce74635451f81a4355aef7",
+    "frontend/cw-auth-download.js": "56f08dfaece3e7a348036ceb9afa8c90311dd9b05b07ac2fb8da79f453b91dc5",
+    "frontend/cw-transport-documents-copy.js": "cace659c1a2e402d13c3654138bc231f9d0926ca6bae449103f41d9bd4df0f23",
+    "frontend/cw-transport-documents-rules.js": "4005cb61a84247d04a5b9a930c4b7e311f53444f9eb98cc63708b72c4b038249",
+    "frontend/cw-transport-guide-documents.js": "441eb39ca444156d20c69bcfffa86ba166b02488355bb69f341af9e8acfdd861",
+    "frontend/sw.js": "cd58d69c82032baf810b3a278fd2a9d94f4c3338b453d4324636aaa0103be224",
+    "frontend/technician-field-mode.js": "7df81f5dcf9506bf9846e2791808af8da0c0dd501dd20580f6a880c7b45b085d",
+    "frontend/transport-guide-documents.html": "886cad123a5fcf25601f33df50d39fdb5f140e6c1b14b18cef6306d279de1487",
+    "prisma/migrations/20260925211500_transport_guide_attachments/migration.sql": "a00855fe18400d22be8627d4b58b991d505a57738ba94cccfa9494b2415e9409",
+    "prisma/schema.prisma": "8846715eb9449b35ad64b4b07de74620d6bbd92da0691d4bc9a798fd299e4e8b",
+    "scripts/fixtures/internal-chat-server.js": "060be182d3d753e96430bf2134748092ebe55e1228bba348126ebc77be667445",
+    "scripts/helpers/transport-guide-document-fixture.js": "c84d797380dac68825c5656641e42f11002f6017fee743cb7186fa5db3bd5a8e",
+    "scripts/test-field-migrations.js": "462e6038a7bc6f7ca1cb660c618560e34c33fd512f5f9665cbc67d89155a8b5e",
+    "scripts/test-field-restore.js": "33cb9ce7cf7905f9e4242000d8044b49fd091367b7890a275c2bc8d7aea9a986",
+    "scripts/test-field-suite.js": "618875bd918b4499c116706d6ca880a424717571364a45b4abe1ba199217104f",
+    "scripts/test-field-transport-guide-documents-ui.js": "8d650cea447362948969a651a0c274942928db2fc02c64987f0d74db732c5b9d",
+    "scripts/test-field-transport-guide-documents.js": "20fe6a1b62f5b203c7ad9c091f1a2a5f4d09d03fa9176a173d09eb711ecf5fa5",
+    "src/controllers/guideController.js": "9ed7a8de7aa2856dae8e3397945f4248f6880a88fe1d074dae5029cdf0a1dc27",
+    "src/controllers/transportGuideDocumentController.js": "34ff1b362fac84d730434664c837e0c66308431ff7b634b190b8e04a589e7fe4",
+    "src/routes/guideRoutes.js": "bf56087bb494a769d221fd3153aed23482760ef03a0845a08c6a2121c3f8a7d8",
+    "src/routes/transportGuideDocumentRoutes.js": "066f1290708e850c039734a8901c4c86ba680434dce12d5ca0f87a180988f861",
+    "src/server.js": "0bc6149eee4b888c4c6ad36681fdd1c73a6f70260869099cc2e364b60df82fb1",
+    "src/services/fieldWriteRequestService.js": "8ee11e40af249d7f98fd92332814ac0a51c0e2dee70481e3360523578ad6e60d",
+    "src/services/transportGuideDocumentFiles.js": "235a99d07a03e47e76b0b66589e3ca516639531044d6de22728d9bb2d3ae06ca",
+    "src/services/transportGuideDocumentService.js": "dced4f80914041e6f561dd90fadcf3290d2eb8b7d30e87bbfc1ec1a3fcf64582",
+    "tests/transport-guide-documents.test.js": "296532f605ddeea73c43ee5fd1b7976d1e44c3ae36f174b282ec88b7a8fe7464"
+  },
+  "unitTests": {
+    "passed": 840,
+    "files": 107,
+    "new": 14
+  },
+  "technicianTests": 4,
+  "syntax": {
+    "backend": 666,
+    "frontend": 276,
+    "inline": 44,
+    "finalChangedScriptsCheckedSeparately": true
+  },
+  "schema": {
+    "newMigrations": 1,
+    "totalAdditiveMigrationsApplied": 43,
+    "newTables": [
+      "TransportGuideAttachment"
+    ],
+    "migrationPreservationProbe": "PASS",
+    "nativeMigrationGate": "PENDING",
+    "runtime": "PGlite 0.5.8 / pglite-socket 0.2.11; isolated synthetic data, not native PostgreSQL"
+  },
+  "integrationGroups": [
+    {
+      "script": "scripts/test-field-transport-guide-documents.js",
+      "code": 0,
+      "log": "/tmp/cw370-api-final.log",
+      "sha256": "04079efa681efed84c016d29342d2fe8c7dd94d214af5901c6392d8083244d4c"
+    },
+    {
+      "script": "scripts/test-field-transport-guide-documents-ui.js",
+      "code": 0,
+      "log": "/tmp/cw370-ui-final.log",
+      "sha256": "9857c6af41a95f2e0be7d812362a2e9721b99bca356086dad69abc7b2adde1ce"
+    },
+    {
+      "script": "scripts/test-field-chat-attachments.js",
+      "code": 0,
+      "log": "/tmp/cw370-api-verified.log",
+      "sha256": "366c309041381dd77a6e453cbe723c922d6fe1bdcc2aaed38e91b0e4b7152742"
+    },
+    {
+      "script": "scripts/test-field-authenticated-document-opening.js",
+      "code": 0,
+      "log": "/tmp/cw370-ui-regressions.log",
+      "sha256": "fd0c288ae42eb15cebdf90ce316c84b9284156ba68fa2b4ab173ea291346f896"
+    },
+    {
+      "script": "scripts/test-field-document-recovery.js",
+      "code": 0,
+      "log": "/tmp/cw370-ui-regressions.log",
+      "sha256": "fd0c288ae42eb15cebdf90ce316c84b9284156ba68fa2b4ab173ea291346f896"
+    },
+    {
+      "script": "scripts/test-field-guide-pdf.js",
+      "code": 0,
+      "log": "/tmp/cw370-ui-regressions.log",
+      "sha256": "fd0c288ae42eb15cebdf90ce316c84b9284156ba68fa2b4ab173ea291346f896"
+    },
+    {
+      "script": "scripts/test-field-fleet-management-ui.js",
+      "code": 0,
+      "log": "/tmp/cw370-fleet-regressions.log",
+      "sha256": "92e96706e73bc69e6f88528149eac23082ec7a4b9fd9ddb0746a84c0d7ffe0d2"
+    },
+    {
+      "script": "scripts/test-field-transport-guide-create-ui.js",
+      "code": 0,
+      "log": "/tmp/cw370-fleet-regressions.log",
+      "sha256": "92e96706e73bc69e6f88528149eac23082ec7a4b9fd9ddb0746a84c0d7ffe0d2"
+    },
+    {
+      "script": "scripts/test-field-transport-guide-items-ui.js",
+      "code": 0,
+      "log": "/tmp/cw370-fleet-regressions.log",
+      "sha256": "92e96706e73bc69e6f88528149eac23082ec7a4b9fd9ddb0746a84c0d7ffe0d2"
+    },
+    {
+      "script": "scripts/test-field-transport-guide-manage-ui.js",
+      "code": 0,
+      "log": "/tmp/cw370-fleet-regressions.log",
+      "sha256": "92e96706e73bc69e6f88528149eac23082ec7a4b9fd9ddb0746a84c0d7ffe0d2"
+    },
+    {
+      "script": "scripts/test-field-navigation-preferences.js",
+      "code": 0,
+      "log": "/tmp/cw370-fleet-regressions.log",
+      "sha256": "92e96706e73bc69e6f88528149eac23082ec7a4b9fd9ddb0746a84c0d7ffe0d2"
+    }
+  ],
+  "logs": {
+    "/tmp/cw370-api-final.log": "04079efa681efed84c016d29342d2fe8c7dd94d214af5901c6392d8083244d4c",
+    "/tmp/cw370-api-first.log": "3bdc253a6578231126ba91aa37d07aaf5046407f56c3df02cb6f5e3f33835802",
+    "/tmp/cw370-api-fourth.log": "04079efa681efed84c016d29342d2fe8c7dd94d214af5901c6392d8083244d4c",
+    "/tmp/cw370-api-second.log": "669571c6c5e4a460bc5520f7cb56c8b9296f0968ca3f7f556764544195cb8165",
+    "/tmp/cw370-api-third.log": "b20579f04a3056b964411d498981a5f77b5c8c8aaa11a52b911b99bbab9477a3",
+    "/tmp/cw370-api-verified.log": "366c309041381dd77a6e453cbe723c922d6fe1bdcc2aaed38e91b0e4b7152742",
+    "/tmp/cw370-fleet-regressions.log": "92e96706e73bc69e6f88528149eac23082ec7a4b9fd9ddb0746a84c0d7ffe0d2",
+    "/tmp/cw370-migration.log": "37a888de5f776febc78a07191e887261bf14493e0effcf8795af5bdaf13899a2",
+    "/tmp/cw370-prisma-validate.log": "c0b14253666994f5b4f0c9e7c4aa1eb1b2e3464249fa4f1f1a2bfd4922b03102",
+    "/tmp/cw370-prisma.log": "89070a7ef8580ce4931bd6649502ef1df53be0db169d993f053d489ea14370a9",
+    "/tmp/cw370-syntax.log": "f71d5a256d04f6ea8d79322f675a33241dda1f44aae9284baaa953db8b299fa1",
+    "/tmp/cw370-technician.log": "b1139a08bada29591568adbce23bb04efff264cbb8d04fae564df483aa77e38c",
+    "/tmp/cw370-ui-final.log": "9857c6af41a95f2e0be7d812362a2e9721b99bca356086dad69abc7b2adde1ce",
+    "/tmp/cw370-ui-first.log": "4e551124d3c08205d184c9688ae5f54d08628f36be3a8f6fcb8f8156d89e44fd",
+    "/tmp/cw370-ui-regressions.log": "fd0c288ae42eb15cebdf90ce316c84b9284156ba68fa2b4ab173ea291346f896",
+    "/tmp/cw370-ui-verified.log": "7e4c0c03cc479e355055e3e3a971e26c586156e5deefaf6ebf3b550574b7f1dc",
+    "/tmp/cw370-units.log": "11db915a907d798ed2df6884d5cd3656e718ef2b17baf82fac5549d89adaf8e4"
+  },
+  "validationNotes": [
+    {
+      "kind": "LEGACY_PAGE_ERROR",
+      "resolution": "Removed the window export referring to the deleted legacy upload function; exported the reviewed documents entry instead. Full browser and fleet groups passed after the correction."
+    },
+    {
+      "kind": "UPLOAD_BOUNDARIES",
+      "resolution": "Verified Busboy inclusive part/file limits in installed source. One payload plus one file allowed; duplicate fields/files refused. Parser permits the boundary byte while the descriptor caps actual content at exactly 26214400 bytes; exact and over-limit HTTP cases passed."
+    },
+    {
+      "kind": "TEST_PREPARATION",
+      "resolution": "Corrected the old upload route in the test and included technicianId in the authenticated User technician token. Two independent local DB runners shared a QA upload directory; filenames/aliases now use UUIDs to avoid collisions. Full API repeated successfully; earlier logs retained."
+    },
+    {
+      "kind": "FIELD_BROWSER_SELECTOR",
+      "resolution": "Additional real technician link test initially looked in the summary card. Corrected to transportGuideBox, which holds the actual official-file button. Full browser group passed, including authenticated field download and hash check."
+    },
+    {
+      "kind": "PREVIOUS_NATIVE_FAILURE",
+      "resolution": "TASK368 ran exactly 272 expected groups: 271 passed, document recovery failed on the prior cross-technician expectation already fixed in TASK369. Restore skipped. Corrected document recovery passed locally unchanged."
+    }
+  ],
+  "browser": {
+    "engine": "Chromium 153, multiple processes, web security active",
+    "screenshots": 18,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "hashes": {
+      "reports/field-visual/transport-guide-documents/de-1440.png": "f13d2f789ce62b9f35a9580be78673b414cd33173189fc4251d1d7607cfd7298",
+      "reports/field-visual/transport-guide-documents/de-320.png": "16157e8ccc21f970d7328dfe54c741b001c1560549617262d73234dabffd6ae8",
+      "reports/field-visual/transport-guide-documents/de-390.png": "968334dc87b107fa2ffaf64a7d0e9c08dbbeba07fd1b0701c46bce19c42df2c8",
+      "reports/field-visual/transport-guide-documents/en-1440.png": "ce5506877f9b16dc779ae5a795edd01ff490cdae8f5182d2b9b605763521ecfe",
+      "reports/field-visual/transport-guide-documents/en-320.png": "3d6bbca13aecc5c60217541231ae451ceae7c66940aeee32a5ea1f5ff974493d",
+      "reports/field-visual/transport-guide-documents/en-390.png": "d130aa0e1b646cec6bf287d0127820a2a565949db884c580144793dade1630c2",
+      "reports/field-visual/transport-guide-documents/es-1440.png": "36ed936bc5355377a3fa1b0ecb05788aebad5f4b0be6cfdd68c03b82a5d1e48c",
+      "reports/field-visual/transport-guide-documents/es-320.png": "d4b60211bae66daa5c07c726a75d5c320fe508a48e222a4f0a9822e8a344139a",
+      "reports/field-visual/transport-guide-documents/es-390.png": "d948e70f5a49e0e2542049155ae25ca102b49ad0bef13d4b12c86a59679ff9cd",
+      "reports/field-visual/transport-guide-documents/fr-1440.png": "df3053a059942e00fd48052580daa4a67d18695f7929239e3ee425a96c5f4d27",
+      "reports/field-visual/transport-guide-documents/fr-320.png": "4cb34496a889c489786bba2538bed09e4449192e546b62674c9155c7b2532dc9",
+      "reports/field-visual/transport-guide-documents/fr-390.png": "d97b2d104c2d87ca5156bcca8bcce3e91cf7853ce6426ae8cf1410f00990cb7b",
+      "reports/field-visual/transport-guide-documents/pt-1440.png": "192ed2d5139a6bf37fa703fddb93fef3ad2680a35bbbc7346caa90c4bed6108f",
+      "reports/field-visual/transport-guide-documents/pt-320.png": "989444c61ce27b3c9d85d029dfe22d60d22e1fccbe15f72a0d92197119967091",
+      "reports/field-visual/transport-guide-documents/pt-390.png": "48a789e21bc1bd343d5663ca801c9f4e48b2f136ba80e7ed5bb0d1f4a7e655b6",
+      "reports/field-visual/transport-guide-documents/review-de-320.png": "1b6fa6f962a4faa06f46c387e0ed6017fcb66ad7e88f864f4fbd05ca7632cb3b",
+      "reports/field-visual/transport-guide-documents/review-pt-1440.png": "37dec62d2065a997de2836d2fcebd07ce136d929b1aa62a464d10007a2f839a2",
+      "reports/field-visual/transport-guide-documents/review-pt-390.png": "5d58fb2395bb2c4ab5ba16900af51b141d430c3965ab763d23935a652614d001"
+    },
+    "visuallyReviewed": [
+      "de-320.png",
+      "review-pt-1440.png"
+    ],
+    "entry": "actual ADMIN history button and technician transport-guide file button",
+    "identity": "ADMIN User writes; current active assigned technician/team leader file access; exact owner/guide/version/hash checks"
+  },
+  "runnerGroups": 276,
+  "cacheVersion": "v181",
+  "inventory": {
+    "htmlFiles": 120,
+    "rootPages": 113,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 108,
+    "catalogueGuardDifferences": 0,
+    "activeScriptsScanned": 297,
+    "remainingLiteralQueue": 12
+  },
+  "publication": {
+    "status": "READY_NATIVE_CI_PENDING",
+    "branch": "work/field-readiness-20260915-simulation",
+    "mainBranch": "feature/technicians-v25",
+    "mainShaUnchanged": "6f27081e1d183ff584a62255b016b373836734db",
+    "nativeGroupsExpected": 276,
+    "nativeRestore": "PENDING",
+    "nativeRestoreProbe": "Checks a non-empty binary attachment after dump/restore; 128 tables expected"
+  },
+  "previousCI": [
+    {
+      "task": 368,
+      "codeSha": "5f7d8cae657fac440f824f24c7e76c6397162c6e",
+      "runId": 36186019162,
+      "jobId": 108239427314,
+      "status": "FAILED",
+      "groupsPassed": 271,
+      "groupsExpected": 272,
+      "nativeRestore": "SKIPPED",
+      "evidence": "20260925_task368_ci.json"
+    },
+    {
+      "task": 369,
+      "codeSha": "8ade13c23b59404961469de6b8f388c769cc2dd9",
+      "runId": 36189626318,
+      "jobId": 108251326109,
+      "status": "IN_PROGRESS_AT_FINAL_CHECK",
+      "groupsExpected": 274,
+      "nativeRestore": "PENDING"
+    }
+  ],
+  "limits": [
+    "Native PostgreSQL 276-group suite, full schema diff and restore remain required.",
+    "File validation is bounded structural PDF/image/UTF-8/XML checking, not full PDF/XML conformance, malware scanning or fiscal certification.",
+    "Unreferenced older disk files are retained without inventing lost guide/version associations.",
+    "Document/database capacity and operational archival/backup policies remain to be validated.",
+    "Manual work closing, maintenance/costs, assignments, presets and alert rules require separate review.",
+    "Historical reconciliation, volume, VPS and physical pilot remain open.",
+    "No merge, deployment or real external contact."
+  ]
+}
