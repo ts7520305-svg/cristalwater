@@ -1,0 +1,53 @@
+{
+  "task": "TASK354",
+  "checkedAt": "2026-09-25T10:13:57.563592+00:00",
+  "baseCommit": "60d16e279ec841379d12aa6c20a20c8ae01c6e13",
+  "scope": "Regression tests only; no product defect reproduced in these two pages and no runtime code changed.",
+  "sourceSha256": {
+    "scripts/test-field-payment-ledger.js": "dcbcc6118ad7dffb12717bee84a3d644895f3a305c15019eb2335e5de9e32ee5",
+    "scripts/test-field-extra-history.js": "ccb3bbd4904983d27ff31158b1e54035c647a35204ecef0c890880bcacca0e12"
+  },
+  "integration": {
+    "distinctGroups": 2,
+    "results": [
+      {
+        "script": "scripts/test-field-payment-ledger.js",
+        "code": 0
+      },
+      {
+        "script": "scripts/test-field-extra-history.js",
+        "code": 0
+      }
+    ]
+  },
+  "passLines": [
+    "PASS isolated schema: 40 additive migrations",
+    "PASS payment ledger API: ADMIN ownership, private typed response, 105 records in three ordered pages, exact dates and filters, literal wildcard search, original values and credit classification, invalid filters and access refused, sanitized failures and no writes",
+    "PASS payment reload: account change preserves the URL search and selected customer after browser form restoration",
+    "PASS payment ledger browser: real paginated history, five languages and reload, literal originals and anomalous amounts, 320/390/1440, filters and empty distinct from error, incompatible responses/identity refused, offline/timeout, late replies, history restoration, account switch and expiry, no writes or original changes",
+    "PASS isolated schema: 40 additive migrations",
+    "PASS extra history API: 105 original-client rows across three ordered pages, moved pool and missing relations, exact prices/sub-cents/tiny/negative/zero and null timestamps, UTC boundary and literal wildcard filters, unbilled excluded, typed private ADMIN access, sanitized failure and no writes",
+    "PASS extra history reload: account change preserves literal URL search and selected customer after form restoration",
+    "PASS extra history browser: three pages, exact tiny/large/negative prices, original client warning and literal text, five languages at 320/390/1440, filter invalidation, malformed and late responses, offline/timeout, page history, account reload/expiry; all original rows and money unchanged"
+  ],
+  "logs": {
+    "/tmp/cw354-before.log": "d5d7a6c96e1ffc1a2de5a891cf638e22e40d9bf0df14b8c0778ac93e9beb4c2f",
+    "/tmp/cw354-extra.log": "9c5c1e1c3f373a5474009c93c161f47b6f4b6b13913d0e6645697ff0de034f75"
+  },
+  "syntax": "node --check succeeded for both changed scripts; git diff --check clean",
+  "priorGeneralValidation": "TASK353: 645 unit tests / 91 files, 4 technician tests, syntax 634/236/53; not rerun for this tests-only task.",
+  "fieldSuiteExpectedGroups": 251,
+  "cache": "v165",
+  "additiveMigrations": 40,
+  "runtime": {
+    "runnerSha256": "5bd8f95926470bd82fabef27148ed54a55532bdf80d8dbc557dd19b244486b2b",
+    "preloadSha256": "74ba6986b731dfe5120836cb841c25bed62d334014aa588379558293deb6ec7a",
+    "database": "Isolated PGlite with existing 40 migrations",
+    "browser": "Chromium 153, multiprocess with web security retained"
+  },
+  "limits": [
+    "Native CI and PostgreSQL restore for this test extension await publication.",
+    "Real iPhone/Android pilot and production capacity remain separate.",
+    "No merge, deployment or real contacts."
+  ]
+}
