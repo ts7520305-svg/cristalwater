@@ -8,6 +8,9 @@
 
   const pathname = String(location.pathname || '/').replace(/\.html$/i, '').toLowerCase();
   const isAuthPage = ['/login', '/admin-login', '/technician-login', '/client-login'].includes(pathname);
+  if (!isAuthPage && !document.querySelector('script[src="/cw-navigation-preferences.js"]')) {
+    const preferences = document.createElement('script'); preferences.src = '/cw-navigation-preferences.js'; preferences.defer = true; document.head.appendChild(preferences);
+  }
 
   const roleForPath = (() => {
     if (pathname.startsWith('/technician')) return 'TECHNICIAN';
@@ -191,7 +194,7 @@
         { label: '13. Configuracoes', links: [
           ['/admin-operational-settings', 'Configuracoes gerais'],
           ['/admin-security', 'Utilizadores e permissoes'],
-          ['/admin-ui-settings', 'Tema e interface'],
+          ['/admin-ui-settings', 'Preferências de navegação'],
           ['/help-center', 'Ajuda']
         ]}
       ],

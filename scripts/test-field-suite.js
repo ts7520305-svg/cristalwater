@@ -63,6 +63,7 @@ scripts.push('test-field-security-review.js');
 scripts.push('test-field-admin-catalogue.js');
 scripts.push('test-field-admin-onboarding.js');
 scripts.push('test-field-admin-onboarding-ui.js');
+scripts.push('test-field-navigation-preferences.js');
 scripts.push('test-field-financial-pdf.js');
 scripts.push('test-field-invoice-document.js');
 scripts.push('test-field-legacy-alert-access.js');

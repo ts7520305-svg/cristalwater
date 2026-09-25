@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-25T13:57:21.204Z",
-  "baseCommit": "f7f16af059ba3b41d986433e298fe6742ccf1add",
+  "generatedAt": "2026-09-25T14:49:16.928Z",
+  "baseCommit": "9246adca99e330171990be7a82b5a550746adfe2",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 280,
+  "activeScriptsScanned": 281,
   "summary": {
     "htmlFiles": 115,
     "rootPages": 108,
     "nestedPages": 7,
     "unavailableLocalAssetReferences": 2,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 99,
+    "pagesWithLiteralTestReference": 100,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -945,7 +945,8 @@
       "languageAssets": [],
       "directPrintAction": false,
       "testReferences": [
-        "test-field-admin-catalogue.js"
+        "test-field-admin-catalogue.js",
+        "test-field-navigation-preferences.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -1776,7 +1777,7 @@
       "file": "frontend/admin-ui-settings.html",
       "route": "/admin-ui-settings",
       "kind": "Entrada raiz",
-      "title": "Cristal Water · Configuração Visual",
+      "title": "Preferências de navegação · Cristal Water",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -1790,28 +1791,27 @@
       "entryRedirects": {},
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/manifest.webmanifest",
-        "/cristal-assist.css",
-        "/cw-auth.js",
         "/ui/foundation.css",
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
         "/ui/design-system.css",
+        "/cw-navigation-preferences.css",
+        "/cw-appearance.css",
+        "/cw-auth.js",
         "/admin-auth-guard.js",
-        "/admin-ui-settings.js",
-        "/cristal-help-data.js",
-        "/cristal-assist.js",
-        "/cw-admin-shortcuts.js",
+        "/cw-navigation-preferences.js",
+        "/cw-appearance-copy.js",
         "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
+        "/admin-ui-settings.js",
         "/ui/design-system.js"
       ],
       "missingAssets": [],
       "unavailableLocalAssets": [],
       "languageAssets": [],
       "directPrintAction": false,
-      "testReferences": [],
+      "testReferences": [
+        "test-field-navigation-preferences.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -2888,7 +2888,8 @@
       "languageAssets": [],
       "directPrintAction": false,
       "testReferences": [
-        "test-field-admin-catalogue.js"
+        "test-field-admin-catalogue.js",
+        "test-field-navigation-preferences.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -3104,6 +3105,7 @@
       "languageAssets": [],
       "directPrintAction": false,
       "testReferences": [
+        "test-field-navigation-preferences.js",
         "test-field-team-leader-entry.js",
         "test-role-help-browser.js",
         "test-shared-navigation-browser.js"

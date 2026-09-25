@@ -1,90 +1,10 @@
 <!doctype html>
-<html lang="pt">
-<head>
-  <link rel="manifest" href="/manifest.webmanifest">
-  <meta name="theme-color" content="#050b16">
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Cristal Water · Configuração Visual</title>
-  <link rel="stylesheet" href="/cristal-assist.css">
-  <style>
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#050b16;color:#e8f7ff;overflow-x:hidden}
-    header{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 24px;background:rgba(5,12,24,.86);border-bottom:1px solid rgba(53,217,255,.28);backdrop-filter:blur(16px)}
-    header h1{margin:0;font-size:28px;overflow-wrap:anywhere} header p{margin:6px 0 0;color:#91a8be}
-    .links{display:flex;gap:10px;flex-wrap:wrap}.links a{color:#e8f7ff;text-decoration:none;border:1px solid rgba(53,217,255,.24);background:rgba(255,255,255,.06);border-radius:14px;padding:10px 12px;font-weight:800}
-    main{padding:22px;display:grid;grid-template-columns:1fr 1fr;gap:18px}.panel{min-width:0;border:1px solid rgba(53,217,255,.24);border-radius:24px;padding:20px;background:linear-gradient(180deg,rgba(16,32,54,.88),rgba(8,18,32,.92));box-shadow:0 24px 70px rgba(0,0,0,.4)}
-    h2{margin-top:0;color:#35d9ff}.theme-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.theme-card{padding:16px;border-radius:20px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.055);cursor:pointer}.theme-card.active{border-color:#35d9ff;box-shadow:0 0 0 3px rgba(53,217,255,.14)}.preview{height:90px;border-radius:16px;margin-bottom:12px;border:1px solid rgba(255,255,255,.16)}.dark{background:radial-gradient(circle at 15% 20%,#35d9ff55,transparent 35%),linear-gradient(135deg,#050b16,#071728)}.mid{background:radial-gradient(circle at 15% 20%,#68d8ff55,transparent 35%),linear-gradient(135deg,#111827,#253249)}.light{background:radial-gradient(circle at 15% 20%,#0b86e844,transparent 35%),linear-gradient(135deg,#fff,#edf4fb)}
-    .density-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.density{padding:14px;border-radius:18px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.055);color:#e8f7ff;cursor:pointer;font-weight:900}.density.active{border-color:#35d9ff;background:rgba(53,217,255,.12)}
-    .module-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.module-grid a{padding:14px;border-radius:18px;text-decoration:none;color:#e8f7ff;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.10);font-weight:800}.module-grid small{display:block;color:#91a8be;margin-top:4px;font-weight:400}
-    .note{color:#91a8be;line-height:1.5}.ok{color:#27f5a7;font-weight:900}@media(max-width:980px){header{flex-direction:column;align-items:flex-start;padding:16px}main{grid-template-columns:1fr;padding:14px}.theme-cards,.density-row,.module-grid{grid-template-columns:1fr}}@media(max-width:640px){.links{flex-direction:column;align-items:stretch}.links a{width:100%}.panel{padding:14px}}
-  </style>
-  <script src="/cw-auth.js"></script>
-  <link rel="stylesheet" href="/ui/foundation.css">
-  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
-  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
-  <link rel="stylesheet" href="/ui/design-system.css">
-</head>
-<body data-required-role="ADMIN">
-
-  <div style="padding:12px 16px 0">
-    <button type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
-  </div>
-  <header>
-    <div><h1>🎨 Configuração Visual</h1><p>Temas, densidade de informação e acessos rápidos da plataforma Cristal Water.</p></div>
-    <nav class="links"><a href="/admin-dashboard">Dashboard</a><a href="/admin-ai">IA</a><a href="/help-center?topic=themes">Ajuda</a></nav>
-  </header>
-  <main>
-    <section class="panel" data-help-topic="themes">
-      <h2>Temas</h2>
-      <p class="note">Escolhe o estilo visual. A opção fica guardada neste computador.</p>
-      <div class="theme-cards">
-        <button class="theme-card" data-set-theme="dark"><div class="preview dark"></div><strong>Escuro futurista</strong><small>Ideal para sala de comando e uso prolongado.</small></button>
-        <button class="theme-card" data-set-theme="mid"><div class="preview mid"></div><strong>Meio termo</strong><small>Equilíbrio para trabalho diário.</small></button>
-        <button class="theme-card" data-set-theme="light"><div class="preview light"></div><strong>Claro</strong><small>Ideal para escritório e maior legibilidade.</small></button>
-      </div>
-    </section>
-    <section class="panel" data-help-topic="themes">
-      <h2>Densidade</h2>
-      <p class="note">Controla se queres ver mais informação no ecrã ou botões maiores.</p>
-      <div class="density-row">
-        <button class="density" data-set-density="compact">Compacto<br><small>Mais dados</small></button>
-        <button class="density" data-set-density="comfort">Normal<br><small>Equilibrado</small></button>
-        <button class="density" data-set-density="large">Grande<br><small>Campo/mobile</small></button>
-      </div>
-      <p class="note"><span class="ok">Atalhos:</span> CTRL/CMD+K abre comando rápido. CTRL/CMD+SHIFT+T alterna tema.</p>
-    </section>
-    <section class="panel" data-help-topic="dashboard">
-      <h2>Acessos recomendados</h2>
-      <div class="module-grid">
-        <a href="/admin-dashboard">🧠 Dashboard<small>Centro operacional</small></a>
-        <a href="/admin-ai">🤖 IA Operacional<small>Copiloto admin</small></a>
-        <a href="/admin-rounds">🛰️ Rondas<small>Planeamento semanal</small></a>
-        <a href="/admin-live-map">🌍 Mapa Live<small>GPS e operação</small></a>
-        <a href="/billing">💶 Financeiro<small>Cobranças e faturas</small></a>
-        <a href="/incident-center">🚨 Incidentes<small>SLA e alertas críticos</small></a>
-        <a href="/admin-crm">📇 Lembretes<small>Lembretes e agendamentos</small></a>
-        <a href="/admin-suppliers">🔗 Fornecedores<small>Links rápidos</small></a>
-        <a href="/admin-security">🔐 Segurança<small>Users/passwords</small></a>
-        
-        <a href="/admin-operational-settings">⚙️ Configurações<small>Permissões e mobile</small></a>
-      </div>
-    </section>
-    <section class="panel" data-help-topic="help">
-      <h2>Ajuda contextual</h2>
-      <p class="note">Passa o cursor sobre botões, cards e menus para ver explicações rápidas. Clica em “Saber mais” para abrir o centro de ajuda diretamente no tópico certo.</p>
-      <p class="note">Este sistema serve para treinar novos técnicos/admins sem manual separado.</p>
-    </section>
-  </main>
-  <script src="/admin-auth-guard.js"></script>
-  <script src="/admin-ui-settings.js"></script>
-  <script src="/cristal-help-data.js"></script>
-  <script src="/cristal-assist.js"></script>
-<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
-<script src="/cw-admin-shortcuts.js"></script>
-  <script src="/ui/core/navigation-context.js"></script>
-  <script src="/crystal-os-v2-shell.js"></script>
-  <script src="/crystal-os-v2-nav.js"></script>
-  <script defer src="/ui/design-system.js"></script>
-</body>
-</html>
+<html lang="pt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Preferências de navegação · Cristal Water</title><link rel="stylesheet" href="/ui/foundation.css"><link rel="stylesheet" href="/ui/design-system.css"><link rel="stylesheet" href="/cw-navigation-preferences.css"><link rel="stylesheet" href="/cw-appearance.css"><script src="/cw-auth.js"></script><script src="/admin-auth-guard.js"></script></head>
+<body id="appearancePage" data-required-role="ADMIN"><main id="appearance" data-cw-state-managed="manual" data-cw-form-memory="managed" data-cw-no-i18n>
+<header class="panel"><h1 data-appearance-copy="title">Preferências de navegação</h1><p data-appearance-copy="intro"></p><nav class="toolbar"><a class="button" data-destination="/admin-master-control" href="/admin-master-control" data-appearance-copy="center">Centro de operações</a><label><span data-appearance-copy="language">Idioma</span><select id="appearanceLanguage"><option value="pt">Português</option><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option></select></label></nav></header>
+<section class="panel"><p id="appearanceStatus" class="notice" role="status" aria-live="polite"></p><p data-appearance-copy="scope"></p><a id="appearanceLogin" class="button" href="/login" data-appearance-copy="login" hidden>Voltar a entrar</a></section>
+<div class="layout"><form id="appearanceForm" class="panel" novalidate><h2 data-appearance-copy="options"></h2><label><span data-appearance-copy="theme"></span><select id="preferenceTheme"><option value="system" data-appearance-copy="system"></option><option value="light" data-appearance-copy="light"></option><option value="dark" data-appearance-copy="dark"></option></select></label><label><span data-appearance-copy="density"></span><select id="preferenceDensity"><option value="compact" data-appearance-copy="compact"></option><option value="comfort" data-appearance-copy="comfort"></option><option value="large" data-appearance-copy="large"></option></select></label><p data-appearance-copy="densityHint"></p><div class="toolbar"><button id="savePreferences" type="submit" data-appearance-copy="save">Guardar e aplicar</button><button id="loadPreferences" type="button" class="secondary" data-appearance-copy="reload">Carregar escolha guardada</button><button id="resetPreferences" type="button" class="secondary" data-appearance-copy="reset">Repor predefinições</button></div></form>
+<section class="panel"><h2 data-appearance-copy="preview"></h2><p data-appearance-copy="previewHint"></p><div id="appearancePreview" class="preview" aria-label="Pré-visualização"><div data-appearance-copy="clients"></div><div data-appearance-copy="pools"></div></div><h2 data-appearance-copy="current"></h2><dl id="savedAppearance"></dl><nav class="toolbar"><a class="button" data-destination="/admin-menu" href="/admin-menu" data-appearance-copy="menu">Abrir menu</a><a class="button" data-destination="/crystal-os-v2-route-index" href="/crystal-os-v2-route-index" data-appearance-copy="catalogue">Abrir índice</a></nav></section></div>
+<section class="panel"><p data-appearance-copy="local"></p><p id="legacyAppearance" class="notice" data-appearance-copy="legacy" hidden></p></section>
+<noscript><p>Ative o JavaScript e entre como administrador para escolher as preferências de navegação.</p><a href="/login">Entrar</a></noscript>
+</main><script src="/cw-navigation-preferences.js"></script><script src="/cw-appearance-copy.js"></script><script src="/ui/core/navigation-context.js"></script><script src="/crystal-os-v2-shell.js"></script><script src="/crystal-os-v2-nav.js"></script><script src="/admin-ui-settings.js"></script><script defer src="/ui/design-system.js"></script></body></html>

@@ -243,6 +243,6 @@
     document.querySelector(".cw-theme-fab")?.remove();
     document.querySelector(".cw-theme-panel")?.remove();
   }
-  function init(){ if(pageAllowsControls()) document.body.classList.add("cw-enterprise-theme"); applyTheme(getTheme()); applyDensity(getDensity()); renderControls(); document.addEventListener("keydown", (event)=>{ if((event.ctrlKey || event.metaKey) && event.shiftKey && String(event.key).toLowerCase() === "t"){ event.preventDefault(); const idx = THEMES.indexOf(getTheme()); applyTheme(THEMES[(idx + 1) % THEMES.length]); } }); }
+  function init(){ if(document.querySelector('script[src="/crystal-os-v2-nav.js"]')) return; if(pageAllowsControls()) document.body.classList.add("cw-enterprise-theme"); applyTheme(getTheme()); applyDensity(getDensity()); renderControls(); document.addEventListener("keydown", (event)=>{ if((event.ctrlKey || event.metaKey) && event.shiftKey && String(event.key).toLowerCase() === "t"){ event.preventDefault(); const idx = THEMES.indexOf(getTheme()); applyTheme(THEMES[(idx + 1) % THEMES.length]); } }); }
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();

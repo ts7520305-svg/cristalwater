@@ -59,25 +59,37 @@
   "unconfirmedRegressions": [
     {
       "script": "scripts/test-field-pool-edit-atomicity.js",
-      "status": "FAILED_LOCALLY_NATIVE_PENDING",
+      "status": "LOCAL_FAILURE_RESOLVED_BY_NATIVE_CI",
       "logs": [
         "/tmp/cw361-integration.log",
         "/tmp/cw361-pool-regression.log"
       ],
-      "observed": "PGlite wire UnexpectedMessage/prepared statement already exists; retry returned 401 during a SQL fault test"
+      "observed": "PGlite wire UnexpectedMessage/prepared statement already exists; retry returned 401 during a SQL fault test",
+      "nativeResolution": {
+        "script": "test-field-pool-edit-atomicity.js",
+        "code": 0,
+        "signal": null,
+        "ms": 865
+      }
     },
     {
       "script": "scripts/test-field-client-intake.js",
-      "status": "FAILED_LOCALLY_NATIVE_PENDING",
+      "status": "LOCAL_FAILURE_RESOLVED_BY_NATIVE_CI",
       "log": "/tmp/cw361-final-ui.log",
-      "observed": "Creation, retries, mandatory-write rollback and permission sections passed; approval fault test in second HTTP process returned 401 instead of 503; child stderr was not captured, cause not independently proven"
+      "observed": "Creation, retries, mandatory-write rollback and permission sections passed; approval fault test in second HTTP process returned 401 instead of 503; child stderr was not captured, cause not independently proven",
+      "nativeResolution": {
+        "script": "test-field-client-intake.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1752
+      }
     }
   ],
   "migrationChecks": {
     "optionalSerialMissingColumn": "PASSED_PGLITE",
     "legacySerialPreservedOnRepeat": "PASSED_PGLITE",
     "uniqueSqlState23505": "PASSED_PGLITE",
-    "nativeUpgradeAndSchemaDiff": "PENDING_CI",
+    "nativeUpgradeAndSchemaDiff": "PASSED_NATIVE_CI",
     "officialUpgradeScriptIncludesNewMigration": true
   },
   "logs": {
@@ -193,8 +205,8 @@
     "20260925_task360_ci.json"
   ],
   "limitations": [
-    "Two existing fault-injection regression groups failed locally and require native CI confirmation; no claim that they passed",
-    "Native PostgreSQL upgrade/full 259-group suite/restore not yet verified for this code",
+    "Two existing fault-injection groups failed locally; both subsequently passed native CI without test changes",
+    "Native PostgreSQL upgrade, all 259 expected groups and restore subsequently passed; see 20260925_task361_ci.json",
     "Duplicate detection is exact serial or address/location/type within this creation flow, not universal historical reconciliation",
     "Owned local draft and signed pending proof are browser storage, not cross-device backup",
     "Complete active option lists not verified at production volume",
@@ -203,7 +215,7 @@
     "Historical reconciliation, production volume, VPS/providers/backups and physical pilot remain open"
   ],
   "publication": {
-    "status": "PUBLISHED_CI_IN_PROGRESS",
+    "status": "PUBLISHED_NATIVE_CI_PASSED",
     "branch": "work/field-readiness-20260915-simulation",
     "principalUnchanged": "6f27081e1d183ff584a62255b016b373836734db",
     "codeSha": "0c71fffacff52c495eaca4695e277e6a1723efb5",
@@ -212,9 +224,12 @@
     "nativeCI": {
       "runId": 36145083182,
       "jobId": 108104107654,
-      "status": "in_progress",
+      "status": "completed",
       "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36145083182",
-      "expectedGroups": 259
+      "expectedGroups": 259,
+      "conclusion": "success",
+      "actualGroups": 259,
+      "evidence": "20260925_task361_ci.json"
     }
   }
 }

@@ -1,0 +1,199 @@
+{
+  "task": "TASK362",
+  "baseCommit": "9246adca99e330171990be7a82b5a550746adfe2",
+  "validatedAt": "2026-09-25T14:54:35.780981+00:00",
+  "sourceHashes": {
+    "frontend/admin-ui-settings.html": "27a8e7dd1db7da6a37f95f1e2887ea2fc1a41407d54a35da23a2c25a46808257",
+    "frontend/admin-ui-settings.js": "95ce9adb555337065580096625ada721ed50cb986408e69927d95c2b04a036ec",
+    "frontend/cw-appearance-copy.js": "148033765c5d379b49bbf15da51d0cb62131132d9535fc1be74e0dfb8b19955c",
+    "frontend/cw-appearance.css": "a7049c01e1a2b92170ec00128e8d88fa02619a46e320e971100ac38f5fd2dc3f",
+    "frontend/cw-navigation-preferences.js": "c374400a38a5e594d5ab9a7bd5a1ee11a3f66efe9efadbfae39bac523ecd89a0",
+    "frontend/cw-navigation-preferences.css": "a7932b9f9e0465745a2ba0ffa4d3e391d594968ab01a9045d55bb7f1ae88ccf6",
+    "frontend/cw-shared-navigation.css": "40b4943eedd19b9694f378869f58b76e4bb3cb01aba7954210c33d4811e31eef",
+    "frontend/crystal-os-v2-nav.js": "94bca7a15196af48a4652aba6372fc3c22c2a8debbcf10e582720639ddabe0fe",
+    "frontend/crystal-os-v2-shell.js": "7a42d8bdb7600479b7f27b16da2191c4e0e6c619062b4c70f5d1299448b12b51",
+    "frontend/cristal-assist.js": "1766c92947d37e52c38960b2eef11cc41d9575d4e37c916eccc590edb71dfc6b",
+    "frontend/cw-auth.js": "3758a9876e10d88c14b60ea7cdb204209b1739b83284bc05e8d5e723aa15dc71",
+    "frontend/admin-auth-guard.js": "8927751815231c2f00caf076f81f24ade055b28526e82b99f7265b504446ce1e",
+    "frontend/sw.js": "1cf52543a98a265bf08558bef16af1a1fee47e278d8db3b8a8b8ab9306e452bc",
+    "scripts/test-field-navigation-preferences.js": "89e6666d552af713a08361ff96984f7be856c80cd96b14230952339258c3dd79",
+    "scripts/test-shared-navigation-browser.js": "3af7fa34359dc8488b7e5f13deb4da1bf59be986428d74b3e0075dfde605a07e",
+    "scripts/test-role-help-browser.js": "3fac7e33256dd3841289780b77612df36f6b60c735c8ec0be5f3fa94c6998acc",
+    "scripts/test-field-admin-catalogue.js": "742f7bcc2707235e4d2375987bdf801475e29b1be7bdb4d39eaa6df208bb3f5b",
+    "scripts/test-field-suite.js": "f223967e5d9684e10b6a6614bacb843ba7e048a2cfbde9430670e3e957213ab0",
+    "tests/navigation-preferences.test.js": "ba1eb838027079e369be03df17f002b625cf671c94fd3de3a0fc8d747c5336cd"
+  },
+  "unitTests": {
+    "passed": 720,
+    "files": 99,
+    "new": 10,
+    "finalFocusedPassed": 18,
+    "finalFocusedFiles": 2
+  },
+  "technicianTests": {
+    "passed": 4,
+    "files": 1
+  },
+  "syntax": {
+    "backend": 642,
+    "frontend": 254,
+    "inline": 45,
+    "finalChangedScriptsCheckedSeparately": true
+  },
+  "integrationGroups": [
+    "scripts/test-field-navigation-preferences.js",
+    "scripts/test-shared-navigation-browser.js",
+    "scripts/test-role-help-browser.js",
+    "scripts/test-field-admin-catalogue.js"
+  ],
+  "finalPreferenceGroupRepeated": true,
+  "logs": {
+    "/tmp/cw362-focused.log": "1d478ebc79c9cecc5e4e047d4fae07e555ea6336e9255ab2f18f0adea53ca487",
+    "/tmp/cw362-final-focused.log": "e00c487eee5a8ec9bf8e722869a9ada734225c140327d468f85eaa4a810331b0",
+    "/tmp/cw362-unit.log": "2b04916bc02752f28b08b89edab173a4bed2fd7dac9649392c970af520ad2a7a",
+    "/tmp/cw362-tech.log": "085105d9469313d2d2fcd2ec1a5e447394e07708698c22017db65497a6e745fe",
+    "/tmp/cw362-syntax.log": "c25183fb2ee6f21d2e729cec5f5ee0ee17d061526c6f125a0baed51f36ffa7e6",
+    "/tmp/cw362-integration.log": "b41b1e7d5ab8aac6d0b9fe6eecf81ac0f4ce1d4bf6614f74b0ce84d92ea804a0",
+    "/tmp/cw362-final-preferences.log": "7924c5e0a9bfcb4d562a88d34e1ff681f0ab10517cbb1f27a795d3606fd9bbd2"
+  },
+  "runtime": {
+    "database": "PGlite 0.5.8 / pglite-socket 0.2.11, isolated",
+    "existingAdditiveMigrations": 41,
+    "newMigrations": 0,
+    "chromium": "@sparticuz/chromium 153.0.0, multiple processes, web security retained",
+    "runnerSha256": "5bd8f95926470bd82fabef27148ed54a55532bdf80d8dbc557dd19b244486b2b",
+    "preloadSha256": "74ba6986b731dfe5120836cb841c25bed62d334014aa588379558293deb6ec7a"
+  },
+  "fixture": {
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "palettes": [
+      "light",
+      "dark"
+    ],
+    "densityChoices": [
+      "compact",
+      "comfort",
+      "large"
+    ],
+    "minimumLinkTouchHeightPx": 44,
+    "minimumMeasuredLinkAndPlaceholderContrast": 4.5,
+    "initialPreferencePageApiCalls": 0,
+    "businessWrites": 0,
+    "businessCountsUnchanged": true,
+    "defaultPreferenceWrites": 0,
+    "saveReloads": 0,
+    "ownedPreferences": true,
+    "legacyKeysAndPendingWorkPreserved": true,
+    "twoWindowConflictPreservesDraft": true,
+    "storageThrowAndIgnoredWritesRefused": true,
+    "corruptAndWrongOwnerBytesPreserved": true,
+    "bfcacheAndChangedExpiredSession": true,
+    "offlineSave": true,
+    "realMessages": 0,
+    "sharedNavigationPages": 8,
+    "sharedNavigationWidths": 4,
+    "helpProfiles": 4,
+    "catalogueEntries": 68,
+    "catalogueDistinctDestinations": 67,
+    "catalogueAnchors": 6
+  },
+  "cache": "v173",
+  "fieldSuiteExpectedGroups": 260,
+  "inventory": {
+    "htmlFiles": 115,
+    "rootPages": 108,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 100,
+    "catalogueGuardDifferences": 0,
+    "activeScripts": 281,
+    "pagesWithoutLiteralTestReference": 15,
+    "remainingRoutes": [
+      "/admin-suppliers",
+      "/admin-technicians",
+      "/admin-vehicles",
+      "/admin-visits",
+      "/incident-center",
+      "/operational-dashboard",
+      "/reminder-materials",
+      "/reminder-visits",
+      "/tests/test_extra.html",
+      "/ui/views/demo.html",
+      "/v26/admin-prototype.html",
+      "/v26/client-prototype.html",
+      "/v26/index.html",
+      "/v26/technician-prototype.html",
+      "/v26/technician/index.html"
+    ]
+  },
+  "screenshots": {
+    "reports/field-visual/navigation-preferences/de-dark-1440.png": "581986fab15ffa33e1782bf9a2110b45ff570e53401e9b515970c8b8e333b3cf",
+    "reports/field-visual/navigation-preferences/de-dark-320.png": "4f22aa242153117a7617eafdf941d58be5347beeccdc14b9d79849dd4ce69e1c",
+    "reports/field-visual/navigation-preferences/de-dark-390.png": "335cf83506481b15119fd067a897c3c8c914f3e266ac3cca05f2449ca6c03a0b",
+    "reports/field-visual/navigation-preferences/de-light-1440.png": "74caa07f5fd201dc521048a22eb2e5466e932e38961e22d8d7568b6614669a09",
+    "reports/field-visual/navigation-preferences/de-light-320.png": "b1ff19ab851847532319682ca5484f3015e89ea4d6e72171fa2b629ed244dc2a",
+    "reports/field-visual/navigation-preferences/de-light-390.png": "0d8ae1555e1212e18d7928dfeb99b0b3819d895d4d0033900e494f19e513ea5c",
+    "reports/field-visual/navigation-preferences/en-dark-1440.png": "bab45f40c15b44ad793ac928d2f8ed23c6dfec204a3ec3b2d5339eb85f160c45",
+    "reports/field-visual/navigation-preferences/en-dark-320.png": "3058534e042e85a651b461a6bc2f4acefa2202fdae803615facf64ffc0660b2d",
+    "reports/field-visual/navigation-preferences/en-dark-390.png": "d2144cea6b91486ccf3899c63f4d7123e0b5e3de53bea4aee2375c40da90b10b",
+    "reports/field-visual/navigation-preferences/en-light-1440.png": "f4d5414cc456b0c7d28f0f7d0f1bacf6cf68e89a8b854d4217e88ae41ee6e2d6",
+    "reports/field-visual/navigation-preferences/en-light-320.png": "f7fd7508fbe65b213a7d118978e9f95d2bb347c5c7f4e90f7ebd7838a817f78d",
+    "reports/field-visual/navigation-preferences/en-light-390.png": "2dd2773a474ff6f64343b7e095bf3c77e45e7d1b3e5136c796779d2d1abe5b74",
+    "reports/field-visual/navigation-preferences/es-dark-1440.png": "17c7f9868050a512be1195f4bcf554a42c24597d90dba758f5e09dc77eaa6ed1",
+    "reports/field-visual/navigation-preferences/es-dark-320.png": "293c26281078525e485fa2b4613659e0232ed11d93dfc6e74b023d3e1f35999d",
+    "reports/field-visual/navigation-preferences/es-dark-390.png": "2a79ca5e35f9c22b4c9dcc21d459067b9543dbbc88e446a4c81faba5426927be",
+    "reports/field-visual/navigation-preferences/es-light-1440.png": "0a6384d002f7d1e6419347ee06ca048bf21f70b8fc0c65f8685e3c5fce5af7ce",
+    "reports/field-visual/navigation-preferences/es-light-320.png": "645b9c8e186251939ad161897989657391b5f392bb2736cf76580880517b804b",
+    "reports/field-visual/navigation-preferences/es-light-390.png": "ace86746b23590b3c03c85f7c3da555d4e73d94b61b93589293c14a53cae8a51",
+    "reports/field-visual/navigation-preferences/fr-dark-1440.png": "95cbf05f25980f609adee8138c635ab34e02eee6bbe23d9bc22688fd8f530a93",
+    "reports/field-visual/navigation-preferences/fr-dark-320.png": "a23ead2f5160f99172d6ec64c91f371c1bf17668c348f485209fe44733a396db",
+    "reports/field-visual/navigation-preferences/fr-dark-390.png": "4e510d4ce8d2b413f87440786414b8a2e0407bd2ab5a53a0631fa19256c650ab",
+    "reports/field-visual/navigation-preferences/fr-light-1440.png": "ced6881a3d7b38feadc565184002b2bf651b44696fc3ba4f5cfe7951478e241c",
+    "reports/field-visual/navigation-preferences/fr-light-320.png": "e9150d26d299a826d2c3af8eeaa5df8c34e34c9f027befd4ca005065d637ffb4",
+    "reports/field-visual/navigation-preferences/fr-light-390.png": "e3bcb0caa4632bd87ba4faa9a329aab855096a375b18ef4c7cfef192da4bee88",
+    "reports/field-visual/navigation-preferences/navigation-dark-comfort.png": "a03cbc5533a359f13b0e3cdc48b1ece2631cef1c6d0afd79c0842edb100e2a87",
+    "reports/field-visual/navigation-preferences/navigation-dark-compact.png": "af252e9214c923b21caab8d3894d5de7804c01ab7f847b838549662d1c8e4c90",
+    "reports/field-visual/navigation-preferences/navigation-dark-large.png": "8c8b4914d36067cee95c5f45adc003504658e863de81031c87b6fbb01bbe8bfd",
+    "reports/field-visual/navigation-preferences/pt-dark-1440.png": "ce5e82d9357a8c5a7b341a0195c0893b04571e561767ad503b04b39e7f9fc8c1",
+    "reports/field-visual/navigation-preferences/pt-dark-320.png": "c8281d3cc2f8417082e6374a4beecaf958dd12fe0acaad3fc6bb556864a7cc65",
+    "reports/field-visual/navigation-preferences/pt-dark-390.png": "6446775cf6a090bf28507ed7a536fb18bafb58b96b022c3538d2d813e3833b5f",
+    "reports/field-visual/navigation-preferences/pt-light-1440.png": "13667546020fd5af3b8ea72584b94f1f7d1f873b7e62e1579b5f29f5a90815cc",
+    "reports/field-visual/navigation-preferences/pt-light-320.png": "fb5a350daed7c81367474760a2f956e75b1d0b754e488ba7507b19ac449d3dc9",
+    "reports/field-visual/navigation-preferences/pt-light-390.png": "8da637b64083a91af0b81ac25b40519fa9c09d40165f54e5b5adb8cc71961ce2"
+  },
+  "visualReview": [
+    "pt-light-390.png",
+    "pt-dark-1440.png",
+    "de-dark-320.png",
+    "navigation-dark-large.png"
+  ],
+  "previousNativeCI": "20260925_task361_ci.json",
+  "limitations": [
+    "Preferences apply to ADMIN navigation and this preference page; work pages keep their own themes and density",
+    "Preferences are browser-local and are not synchronised across devices",
+    "Detected cross-window conflicts are protected; storage is not a distributed transaction",
+    "Malformed owned preference bytes are preserved and not automatically repaired",
+    "Legacy interfaces without the modern navigation, including classic technician theme, retain their prior behaviour",
+    "Shared navigation translations and unavailable local binary assets retain their prior limits",
+    "Standalone navigation tests isolate business scripts; they do not certify each business module",
+    "Native PostgreSQL full 260-group suite and restore pending for this code",
+    "Historical reconciliation, production volume, VPS/providers/backups and physical pilot remain open"
+  ],
+  "publication": {
+    "status": "READY_FOR_WORK_BRANCH_NATIVE_CI_PENDING",
+    "branch": "work/field-readiness-20260915-simulation",
+    "principalUnchanged": "6f27081e1d183ff584a62255b016b373836734db"
+  }
+}
