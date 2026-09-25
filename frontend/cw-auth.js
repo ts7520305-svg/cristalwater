@@ -182,7 +182,8 @@
         }
         return res;
       }catch(err){
-        toast('Ligação instável. A sessão foi mantida e os dados serão preservados.');
+        // A cancelled stale read is not a connection failure; its caller owns the state.
+        if(err?.name !== 'AbortError') toast('Ligação instável. A sessão foi mantida e os dados serão preservados.');
         throw err;
       }
     };

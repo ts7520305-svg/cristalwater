@@ -1,0 +1,141 @@
+{
+  "task": "TASK345",
+  "checkedAt": "2026-09-25T05:35:07.057508+00:00",
+  "baseCommit": "8b167546ad7ddf8b1f554d469548b5ed61c7e8ab",
+  "sourceSha256": {
+    "frontend/admin-pool-calculator.html": "b72e1c6d7a76eb38020c396efe366e8780916686122e02069fef6dc551537be8",
+    "frontend/admin-pool-calculator.js": "3a6d972ef5a834c20e0b7472a678b19231e55329d831556b3d3be2e6d5bbbb3d",
+    "frontend/cw-auth.js": "3758a9876e10d88c14b60ea7cdb204209b1739b83284bc05e8d5e723aa15dc71",
+    "frontend/sw.js": "c46f090b9860122f59209f73e9e1763d73ac2bbaf7f370bc8c5263eb59ecc572",
+    "scripts/test-field-suite.js": "aef2dbe181113e1dd8b7cd972c30bdc840131055f379f40ac44cc8c70e615133",
+    "scripts/test-field-pool-calculator-state.js": "aa052b3d067a44e9ee757a77c1a84d73df6146750a4ca1bdf5a8b3b7282fd5f7"
+  },
+  "unitTests": {
+    "passed": 614,
+    "files": 84
+  },
+  "technicianTests": 4,
+  "syntax": {
+    "backend": 630,
+    "frontend": 224,
+    "inline": 62
+  },
+  "integration": [
+    {
+      "script": "scripts/test-field-pool-calculator-state.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-pool-calculations.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-legacy-admin-access.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-session-browser.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-auth-entry-browser.js",
+      "code": 0
+    }
+  ],
+  "finalVisualAndCalculatorRerun": {
+    "script": "scripts/test-field-pool-calculator-state.js",
+    "code": 0
+  },
+  "passLines": [
+    "PASS isolated schema: 40 additive migrations",
+    "PASS pool calculator: real pool/profile and empty-profile separation, nulls and initial values, original CIRCULAR and precision, stored chemistry ownership, source text literal, selected-pool and input races, malformed/failed/offline/timeout responses, dirty discard/clear, two real saves with lost-response verification and one divergent confirmation refused, page history, account switch/reload/expiry, 320/390/1440 and original other pools unchanged",
+    "OK: volume 75m3",
+    "OK: salt 75kg for +1000ppm/75m3",
+    "OK: filtration hours calculated",
+    "OK: chlorinator hours calculated",
+    "OK: heat pump hours calculated",
+    "OK: PoolCalculationProfile model exists",
+    "OK: Pool relation exists",
+    "OK: file src/routes/poolCalculationRoutes.js",
+    "OK: file src/controllers/poolCalculationController.js",
+    "OK: file src/services/poolCalculationService.js",
+    "OK: file frontend/admin-pool-calculator.html",
+    "OK: file frontend/admin-pool-calculator.js",
+    "OK: route mounted",
+    "PASS legacy administration reads, mutations, aliases and AI require active ADMIN; refused requests are inert, administration and canonical field/client routes remain usable",
+    "PASS expiry preserves visible work; renewal recovers the original receipt and confirmed content cannot be replaced",
+    "PASS delayed 401 cannot invalidate a newer login",
+    "PASS account switch preserves both photo queues and prevents cross-account completion",
+    "PASS permanent rejection blocks automatic resends and replacement; manual review reuses the same UUID/content",
+    "PASS Retry-After prevents early automatic and manual sends; original request resumes after the pause",
+    "PASS malformed and unattributed historical queues remain untouched and block accidental replacement",
+    "SESSION RESULT=PASS",
+    "PASS client guard: 24 entry cases, preserved drafts/documents/corrupt legacy bytes, expiry/identity validation, storage failure, administrator preview/chat and real settings script",
+    "PASS login.js repeated login, retry, exact password and no token logging",
+    "PASS admin-login.js repeated login, retry, exact password and no token logging",
+    "PASS client-login.js repeated login, retry, exact password and no token logging",
+    "PASS technician-login.js repeated login, retry, exact password and no token logging",
+    "PASS HTML login, account switch and cross-tab session change disconnect private sockets; logout preserves field outbox",
+    "PASS actual administrative visits page: shared logout, disabled repeated action, awaited cleanup, session removed and all saved work preserved",
+    "PASS actual technician page: visible logout, 320px Spanish header, no network overlap, busy guard and preserved pending work"
+  ],
+  "logs": {
+    "/tmp/cw345-unit.log": "843e36567e70f0d5d7e105b482b78194ad18f09e94a79d6bbe91becd57729de3",
+    "/tmp/cw345-tech.log": "ff00a81c22a1bacd79844d5bc63d9fb087549c3281805421472f3ecf52818f12",
+    "/tmp/cw345-final-syntax.log": "42f7d48f5b65a36b1aa4dd1338ba6cccf0138eaf3eba366788f81cf686d2db9d",
+    "/tmp/cw345-final-integrated.log": "bb18884067d260102b986ce38a7bc488dd3faa8878d847a21e2944bb2dae0739",
+    "/tmp/cw345-visual-final.log": "6985f2b0ca2905cbff9d8d3301a0a274a128b2d38815da5108b37c327663f0fb"
+  },
+  "runtime": {
+    "database": "PGlite 0.5.8 / pglite-socket 0.2.11, isolated",
+    "additiveMigrations": 40,
+    "chromium": "@sparticuz/chromium 153.0.0, normal multiple processes, web security retained",
+    "runnerSha256": "5bd8f95926470bd82fabef27148ed54a55532bdf80d8dbc557dd19b244486b2b",
+    "preloadSha256": "74ba6986b731dfe5120836cb841c25bed62d334014aa588379558293deb6ec7a"
+  },
+  "screenshots": {
+    "reports/field-visual/pool-calculator/calculator-pt-1440.png": "9f5815ceb5fca52b8171cd7b2ead7cb46c8a5ccd1b61d2f1e4946d8f5f322284",
+    "reports/field-visual/pool-calculator/calculator-pt-320.png": "ea5a0f50ba5337c8471854d6ec107d1b9e35a3caeb93d8fa509bcdcdb3c724aa",
+    "reports/field-visual/pool-calculator/calculator-pt-390.png": "42ba90acc5527fedcda93e6e7526819f1a7f1ca10d51d4e8fe23349aafaecc4c",
+    "reports/field-visual/pool-calculator/calculator-results-pt-1440.png": "73f4e352b35522853c6571abc343d38d10b09388cedbfaea1579267452350003",
+    "reports/field-visual/pool-calculator/calculator-results-pt-320.png": "39922186a83a3455715ad930738133eec72cfff962ec25134576ded6016a7014",
+    "reports/field-visual/pool-calculator/calculator-results-pt-390.png": "2c7775e5f31707b04aa7d45e1c42d2129e4ade291fde9029554b3623104beb92"
+  },
+  "reviewedWidths": [
+    320,
+    390,
+    1440
+  ],
+  "reviewedLanguages": [
+    "pt"
+  ],
+  "fieldSuiteExpectedGroups": 243,
+  "cache": "v157",
+  "inventory": {
+    "htmlFiles": 115,
+    "rootPages": 108,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 80,
+    "catalogueGuardDifferences": 0,
+    "activeScripts": 264,
+    "pagesWithoutLiteralTestReference": 35
+  },
+  "limits": [
+    "Native CI and PostgreSQL restore of this commit remain pending.",
+    "Existing server formulas and persistence APIs are unchanged; atomic versioned writes and a durable calculator receipt remain open.",
+    "Reload after an uncertain write reads the current state; it is not recovery of an immutable receipt.",
+    "Visual review is PT-PT, not certification of five languages.",
+    "Missing-input display is gated in this page; legacy raw API calculations retain existing defaults."
+  ],
+  "testPreparation": [
+    "Reused the isolated real database and ADMIN browser harness.",
+    "Marked the root as state-managed after the common adapter left a loading/error style on the entire form.",
+    "Reviewed contrast and result labels in six screenshots.",
+    "Verified explicit zero differs from missing input.",
+    "Verified differing main/profile volumes are preserved and results only describe the visible fields after preview.",
+    "Compared normalized save replies and refused a stale same-pool confirmation.",
+    "Suppressed only AbortError toasts; retained real connection errors and ran session/login regressions."
+  ]
+}

@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-25T04:59:12.543Z",
-  "baseCommit": "2ee3589fb394f0d8912c5550aa43bc502e80329d",
+  "generatedAt": "2026-09-25T05:35:07.015Z",
+  "baseCommit": "8b167546ad7ddf8b1f554d469548b5ed61c7e8ab",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 263,
+  "activeScriptsScanned": 264,
   "summary": {
     "htmlFiles": 115,
     "rootPages": 108,
     "nestedPages": 7,
     "unavailableLocalAssetReferences": 2,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 79,
+    "pagesWithLiteralTestReference": 80,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -1231,7 +1231,9 @@
       "unavailableLocalAssets": [],
       "languageAssets": [],
       "directPrintAction": false,
-      "testReferences": [],
+      "testReferences": [
+        "test-field-pool-calculator-state.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {

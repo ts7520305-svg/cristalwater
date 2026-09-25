@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `2ee3589fb394f0d8912c5550aa43bc502e80329d`. Gerado em 2026-09-25T04:59:12.543Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `8b167546ad7ddf8b1f554d469548b5ed61c7e8ab`. Gerado em 2026-09-25T05:35:07.015Z. Inclui o estado dos ficheiros locais no momento da geração.
 
 115 ficheiros HTML: 108 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 263 scripts de integração/navegador ativos. 79 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 264 scripts de integração/navegador ativos. 80 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 2 referências existem no índice Git mas não estão materializadas nesta cópia local; não são classificadas como ficheiros ausentes da aplicação.
 
@@ -65,7 +65,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /admin-operational-settings | Entrada raiz | ADMIN | ADMIN | 6 |
 | /admin-payment-settings | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-payments | Entrada raiz | ADMIN | ADMIN | 1 |
-| /admin-pool-calculator | Entrada raiz | ADMIN | ADMIN | 0 |
+| /admin-pool-calculator | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-pool-technical | Entrada raiz | ADMIN | ADMIN | 9 |
 | /admin-pools | Entrada raiz | ADMIN | ADMIN | 2 |
 | /admin-priority | Entrada raiz | ADMIN | ADMIN | 2 |
@@ -164,7 +164,6 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 - /admin-onboarding — Entrada raiz; papéis declarados: ADMIN.
 - /admin-operational-flow — Entrada raiz; papéis declarados: ADMIN.
 - /admin-payment-settings — Entrada raiz; papéis declarados: ADMIN.
-- /admin-pool-calculator — Entrada raiz; papéis declarados: ADMIN.
 - /admin-security — Entrada raiz; papéis declarados: ADMIN.
 - /admin-suppliers — Entrada raiz; papéis declarados: ADMIN.
 - /admin-technicians — Entrada raiz; papéis declarados: ADMIN.
