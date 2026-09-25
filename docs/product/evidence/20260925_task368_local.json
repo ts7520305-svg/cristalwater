@@ -185,12 +185,16 @@
     "remainingLiteralQueue": 12
   },
   "publication": {
-    "status": "READY_NATIVE_CI_PENDING",
+    "status": "PUBLISHED_NATIVE_CI_PENDING",
     "branch": "work/field-readiness-20260915-simulation",
     "mainBranch": "feature/technicians-v25",
     "mainShaUnchanged": "6f27081e1d183ff584a62255b016b373836734db",
     "nativeGroupsExpected": 272,
-    "nativeRestore": "PENDING"
+    "nativeRestore": "PENDING",
+    "codeSha": "5f7d8cae657fac440f824f24c7e76c6397162c6e",
+    "treeSha": "7762edf035ceb4d315e8d767691f6157c4783c95",
+    "runId": 36186019162,
+    "jobId": 108239427314
   },
   "previousCI": [
     {

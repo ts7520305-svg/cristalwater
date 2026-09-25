@@ -35,7 +35,7 @@ A regressão antiga de consumo confundia a sequência textual `997`, possível n
 
 ## Publicação e retoma
 
-Validada localmente para publicação na branch `work/field-readiness-20260915-simulation`. O gate nativo de 272 grupos e restauro deste lote permanece pendente.
+Publicada em `5f7d8cae657fac440f824f24c7e76c6397162c6e`, árvore `7762edf035ceb4d315e8d767691f6157c4783c95`, idêntica à preparada e validada localmente, na branch `work/field-readiness-20260915-simulation`. [CI 36186019162](https://github.com/ts7520305-svg/cristalwater/actions/runs/36186019162), job `108239427314`, em execução. O gate PostgreSQL nativo de **272 grupos e restauro permanece por confirmar**.
 
 TASK367 já publicada em `1ceb2b90d054949d1125eedd993c7c34e06365a1`, árvore `79c2e69555d59d450b593b028d9f89bf42860f24`. [CI 36182594290](https://github.com/ts7520305-svg/cristalwater/actions/runs/36182594290), job `108228289199`, ainda em execução na última consulta; não declarar aprovados os 270 grupos nem o restauro sem a evidência final.
 
