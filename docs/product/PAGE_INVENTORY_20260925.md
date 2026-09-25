@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `e4f0e06481c398ef2670e6fd0d0307bb9a1077e8`. Gerado em 2026-09-25T17:42:55.000Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `c6e9804597e30d5328606c258feaf311b13ea3c3`. Gerado em 2026-09-25T19:44:12.969Z. Inclui o estado dos ficheiros locais no momento da geração.
 
-116 ficheiros HTML: 109 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
+117 ficheiros HTML: 110 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 289 scripts de integração/navegador ativos. 104 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 291 scripts de integração/navegador ativos. 105 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 2 referências existem no índice Git mas não estão materializadas nesta cópia local; não são classificadas como ficheiros ausentes da aplicação.
 
@@ -146,6 +146,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /technician | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 11 |
 | /tests/test_extra.html | Auxiliar/protótipo/teste | — | — | 0 |
 | /to-issue | Entrada raiz | ADMIN | ADMIN | 3 |
+| /transport-guide-create | Entrada raiz | — | ADMIN | 2 |
 | /ui/views/demo.html | Auxiliar/protótipo/teste | — | — | 0 |
 | /v26/admin-prototype.html | Auxiliar/protótipo/teste | — | — | 0 |
 | /v26/client-prototype.html | Auxiliar/protótipo/teste | — | — | 0 |

@@ -1,0 +1,6 @@
+'use strict';
+module.exports=async function createReviewedTransportGuide(call,input){
+ const proposal={vehicleId:input.vehicleId,workGuideId:null,technicianId:input.technicianId??null,startKm:input.startKm??null,codeAT:input.codeAT||'',origin:input.origin||'QA warehouse',destination:input.destination||'QA route',notes:input.notes||'Explicit QA initial stock',validFrom:new Date(input.validFrom).toISOString(),validUntil:input.validUntil?new Date(input.validUntil).toISOString():null,isDraft:input.isDraft??true,items:input.items.map(i=>({workItemId:null,name:i.name,type:i.type,unit:i.unit,quantity:String(i.quantity)}))};
+ const raw=await call('POST','/api/transport-guide-create/review',proposal),review=raw.data||raw.body||raw;if(typeof raw.status==='number'&&raw.status!==200)throw Error('QA transport review failed: '+raw.status);
+ const saved=await call('POST','/api/transport-guide-create/commit',{proposal,requestId:review.requestId,reviewToken:review.reviewToken}),result=saved.data||saved.body||saved;if(typeof saved.status==='number'&&saved.status!==200)throw Error('QA transport commit failed: '+saved.status);if(result.status!=='CONFIRMED'||!result.result?.guide?.id)throw Error('QA transport creation was not confirmed');return result.result;
+};

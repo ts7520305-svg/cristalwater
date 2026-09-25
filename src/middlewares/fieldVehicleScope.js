@@ -1,7 +1,7 @@
 const {prisma}=require('../prismaClient');
 const {normalizeRole}=require('../utils/roles');
 module.exports=async(req,res,next)=>{
- if(normalizeRole(req.user?.role)!=='TECHNICIAN')return next();
+ if(!['TECHNICIAN','TEAM_LEADER'].includes(normalizeRole(req.user?.role)))return next();
  try{
   const technicianId=Number(req.user.technicianId||req.user.id);
   const technician=await prisma.technician.findUnique({where:{id:technicianId},select:{vehicleId:true}});

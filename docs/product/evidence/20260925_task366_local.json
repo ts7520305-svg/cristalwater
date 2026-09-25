@@ -164,19 +164,21 @@
     "remainingLiteralQueue": 12
   },
   "publication": {
-    "status": "PUBLISHED_NATIVE_CI_PENDING",
+    "status": "PUBLISHED_NATIVE_CI_PASSED",
     "branch": "work/field-readiness-20260915-simulation",
     "mainBranch": "feature/technicians-v25",
     "mainShaUnchanged": "6f27081e1d183ff584a62255b016b373836734db",
     "nativeGroupsExpected": 268,
-    "nativeRestore": "PENDING",
+    "nativeRestore": "PASSED_127_TABLES_47_FILES",
     "codeSha": "91746fcb43f631f2e05e02457df53c4ccfba13dc",
     "treeSha": "7fde5c761aeef26a7394702477056f523fae4d18",
     "runId": 36169342475,
     "jobId": 108184782991,
     "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36169342475",
     "recordedAt": "2026-09-25T17:50:12.026356+00:00",
-    "preparedTreeEqualsPublishedTree": true
+    "preparedTreeEqualsPublishedTree": true,
+    "nativeGroupsPassed": 268,
+    "nativeEvidence": "docs/product/evidence/20260925_task366_ci.json"
   },
   "previousCI": [
     {
@@ -192,7 +194,7 @@
     }
   ],
   "limits": [
-    "Native PostgreSQL 268-group suite and restore pending for this code.",
+    "TASK366 native PostgreSQL 268-group suite and restore verified; later code needs its own gate.",
     "Manual consumption of one existing WorkGuideItem only; optional regular ServiceVisit association, no extra-visit picker.",
     "Legacy guide creation/update/synchronization/upload/closure and maintenance/risk-rule writers still require review; they do not all share these locks.",
     "New list is read-only; the legacy stock GET may still synchronize or create work-guide data.",

@@ -55,6 +55,22 @@ function buildTx(overrides = {}) {
 }
 
 describe("Service visit completion real operation flow", () => {
+  for (const change of [{status:'CLOSED'}, {guideId:401}, {vehicleId:11}, {technicianId:6}]) {
+    it('refuses stock writes when the selected work changes before its lock: '+JSON.stringify(change), async () => {
+      const tx=buildTx(), selected={id:700,vehicleId:10,guideId:400,technicianId:5,status:'OPEN'};
+      tx.serviceVisit.findUnique.mockResolvedValue({id:91,status:'PLANNED',endAt:null,technicianId:5});
+      tx.serviceVisit.updateMany.mockResolvedValue({count:1});
+      tx.chemicalUsage.deleteMany.mockResolvedValue({count:0});
+      tx.chemicalUsage.createMany.mockResolvedValue({count:1});
+      tx.workGuide.findFirst.mockResolvedValue(selected);
+      tx.workGuide.findUnique.mockResolvedValue({...selected,...change});
+      await expect(completeServiceVisit({$transaction:fn=>fn(tx)},91,{vehicleId:10,products:[{name:'Salt',quantity:1,unit:'KG'}]})).rejects.toMatchObject({statusCode:409,code:'WORK_GUIDE_CHANGED'});
+      expect(tx.workGuideItem.findMany).not.toHaveBeenCalled();
+      expect(tx.workGuideItem.updateMany).not.toHaveBeenCalled();
+      expect(tx.vehicleStockMovement.create).not.toHaveBeenCalled();
+      expect(tx.stockMovement.create).not.toHaveBeenCalled();
+    });
+  }
   it("completes a field visit with chemistry, products and stock/history traceability", async () => {
     const tx = buildTx();
 
@@ -92,6 +108,7 @@ describe("Service visit completion real operation flow", () => {
       status: "OPEN",
       createdAt: new Date(),
     });
+    tx.workGuide.findUnique.mockImplementation(() => tx.workGuide.findFirst());
     tx.workGuideItem.findMany.mockResolvedValue([
       { id: 1, name: "Cloro", type: "CHEMICAL", unit: "KG", quantity: 10, usedQty: 0 },
       { id: 2, name: "pH-", type: "CHEMICAL", unit: "KG", quantity: 6, usedQty: 1 },
@@ -143,6 +160,7 @@ describe("Service visit completion real operation flow", () => {
     });
 
     expect(tx.workGuideItem.updateMany).toHaveBeenCalledTimes(2);
+    expect(tx.$queryRaw.mock.calls.some(([sql]) => String(sql).includes('"WorkGuide"') && String(sql).includes('FOR UPDATE'))).toBe(true);
     expect(tx.vehicleStockMovement.create).toHaveBeenCalledTimes(2);
     expect(tx.stockMovement.create).toHaveBeenCalledTimes(2);
     expect(tx.technicalHistory.create).toHaveBeenCalledWith({

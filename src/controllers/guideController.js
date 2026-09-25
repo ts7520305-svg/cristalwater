@@ -213,16 +213,6 @@ function combineNotes(current, addition) {
   const parts = [current, addition].map((part) => String(part || "").trim()).filter(Boolean);
   return parts.length ? Array.from(new Set(parts)).join(" | ") : null;
 }
-async function assignedTechnicianId(vehicleId, fallback = null) {
-  const explicit = n(fallback);
-  if (explicit) return explicit;
-  const technician = await prisma.technician.findFirst({
-    where: { vehicleId: n(vehicleId), active: true },
-    orderBy: { id: "asc" },
-    select: { id: true }
-  }).catch(() => null);
-  return technician?.id || null;
-}
 async function syncWorkGuideItemsWithTransportGuide(workGuideId, guideItems) {
   const existing = await prisma.workGuideItem.findMany({ where: { workGuideId: n(workGuideId) } });
   const existingByKey = new Map(existing.map((item) => [itemKey(item), item]));
@@ -258,95 +248,6 @@ async function syncWorkGuideItemsWithTransportGuide(workGuideId, guideItems) {
       await prisma.workGuideItem.delete({ where: { id: item.id } }).catch(() => null);
     }
   }
-}
-async function closePreviousVehicleGuides(vehicleId, newTransportGuideId, req) {
-  const vehId = n(vehicleId);
-  if (!vehId) return;
-  const previousWorkGuides = await prisma.workGuide.findMany({
-    where: {
-      vehicleId: vehId,
-      status: "OPEN",
-      guideId: newTransportGuideId ? { not: n(newTransportGuideId) } : undefined
-    },
-    select: { id: true, guideId: true, notes: true }
-  }).catch(() => []);
-  for (const guide of previousWorkGuides) {
-    await prisma.workGuide.update({
-      where: { id: guide.id },
-      data: {
-        status: "CLOSED",
-        closedAt: new Date(),
-        notes: combineNotes(guide.notes, `Fechada automaticamente pela nova guia AT #${newTransportGuideId}.`)
-      }
-    }).catch(() => null);
-    await audit(req, "WORK_GUIDE_AUTO_CLOSE_BY_NEW_TRANSPORT", "WorkGuide", guide.id, { vehicleId: vehId, previousTransportGuideId: guide.guideId, newTransportGuideId });
-  }
-
-  await prisma.transportGuide.updateMany({
-    where: { vehicleId: vehId, status: "ACTIVE", id: { not: n(newTransportGuideId) } },
-    data: { status: "CLOSED", closedAt: new Date() }
-  }).catch(() => null);
-}
-async function getOrCreateWorkGuideForTransportGuide({ guide, vehicleId, technicianId, startKm, notes, req }) {
-  const vehId = n(vehicleId) || n(guide?.vehicleId);
-  if (!guide?.id || !vehId) return null;
-  const techId = await assignedTechnicianId(vehId, technicianId);
-
-  let workGuide = await prisma.workGuide.findFirst({
-    where: { guideId: guide.id, vehicleId: vehId },
-    orderBy: { createdAt: "desc" },
-    include: { vehicle: true, technician: true, guide: { include: { items: true, vehicle: true } }, items: true }
-  });
-
-  if (workGuide) {
-    const data = {};
-    if (techId && !workGuide.technicianId) data.technicianId = techId;
-    if (startKm != null && workGuide.startKm == null) data.startKm = n(startKm);
-    if (notes) data.notes = combineNotes(workGuide.notes, notes);
-    if (workGuide.status !== "OPEN" && guide.status === "ACTIVE") {
-      data.status = "OPEN";
-      data.closedAt = null;
-    }
-    if (Object.keys(data).length) {
-      workGuide = await prisma.workGuide.update({
-        where: { id: workGuide.id },
-        data,
-        include: { vehicle: true, technician: true, guide: { include: { items: true, vehicle: true } }, items: true }
-      });
-    }
-    await syncWorkGuideItemsWithTransportGuide(workGuide.id, guide.items || workGuide.guide?.items || []);
-    workGuide = await prisma.workGuide.findUnique({
-      where: { id: workGuide.id },
-      include: { vehicle: true, technician: true, guide: { include: { items: true, vehicle: true } }, items: true }
-    });
-    return { workGuide, reused: true };
-  }
-
-  workGuide = await prisma.workGuide.create({
-    data: {
-      guideId: guide.id,
-      vehicleId: vehId,
-      technicianId: techId,
-      startKm: n(startKm),
-      notes: notes || "Gerada automaticamente a partir da guia de transporte AT atual.",
-      status: "OPEN",
-      isDraft: false,
-      inheritedFromId: guide.id,
-      items: {
-        create: arr(guide.items).map(i => ({
-          name: i.name,
-          type: i.type,
-          unit: i.unit || "UN",
-          initialQty: n(i.quantity, 0) || 0,
-          quantity: n(i.quantity, 0) || 0,
-          usedQty: 0
-        }))
-      }
-    },
-    include: { vehicle: true, technician: true, guide: { include: { items: true, vehicle: true } }, items: true }
-  });
-  await audit(req, "WORK_GUIDE_AUTO_CREATE_FROM_TRANSPORT", "WorkGuide", workGuide.id, { vehicleId: vehId, technicianId: techId, guideId: guide.id });
-  return { workGuide, reused: false };
 }
 async function notifyMissingTransportGuide({ req, vehicleId, technicianId, workGuideId, reason }) {
   const vehId = n(vehicleId);
@@ -437,101 +338,6 @@ async function resolveMissingTransportGuide({ req, vehicleId, workGuideId, trans
       metadata: { vehicleId: n(vehicleId), workGuideId: guideId, transportGuideId: n(transportGuideId), codeAT: codeAT || null }
     }
   }).catch(() => null);
-}
-async function provisionalGuideItemsForVehicle(vehicleId) {
-  const preset = normalizeGuideItems(await getVehiclePreset(vehicleId));
-  if (preset.length) return { items: preset, source: "VEHICLE_PRESET" };
-
-  const last = await latestTransportGuide(vehicleId);
-  const lastItems = normalizeGuideItems(last?.items || []);
-  if (lastItems.length) return { items: lastItems, source: "LAST_GUIDE", inheritedFromId: last?.id || null };
-
-  return { items: [], source: "EMPTY" };
-}
-async function createProvisionalWorkGuide({ vehicleId, technicianId, startKm, notes, req }) {
-  const vehId = n(vehicleId);
-  const techId = await assignedTechnicianId(vehId, technicianId);
-  const open = await prisma.workGuide.findFirst({
-    where: { vehicleId: vehId, status: "OPEN" },
-    orderBy: { createdAt: "desc" },
-    include: { vehicle: true, technician: true, guide: { include: { items: true, vehicle: true } }, items: true }
-  }).catch(() => null);
-
-  if (open) {
-    await notifyMissingTransportGuide({ req, vehicleId: vehId, technicianId: techId, workGuideId: open.id, reason: "OPEN_WORK_GUIDE_WITHOUT_ACTIVE_AT" });
-    return { workGuide: open, reused: true, missingTransportGuide: !open.guideId };
-  }
-
-  const provisional = await provisionalGuideItemsForVehicle(vehId);
-  const workGuide = await prisma.workGuide.create({
-    data: {
-      guideId: null,
-      vehicleId: vehId,
-      technicianId: techId,
-      startKm: n(startKm),
-      notes: combineNotes(notes, `Guia de obra provisoria: guia AT em falta por indisponibilidade/problema na AT. Stock inicial: ${provisional.source}.`),
-      status: "OPEN",
-      isDraft: true,
-      inheritedFromId: provisional.inheritedFromId || null,
-      items: {
-        create: provisional.items.map(i => ({
-          name: i.name,
-          type: i.type,
-          unit: i.unit || "UN",
-          initialQty: n(i.quantity, 0) || 0,
-          quantity: n(i.quantity, 0) || 0,
-          usedQty: 0
-        }))
-      }
-    },
-    include: { vehicle: true, technician: true, guide: { include: { items: true, vehicle: true } }, items: true }
-  });
-
-  await notifyMissingTransportGuide({ req, vehicleId: vehId, technicianId: techId, workGuideId: workGuide.id, reason: "AT_UNAVAILABLE_START_DAY" });
-  await audit(req, "WORK_GUIDE_PROVISIONAL_START_MISSING_AT", "WorkGuide", workGuide.id, { vehicleId: vehId, technicianId: techId, itemSource: provisional.source, itemCount: provisional.items.length });
-  return { workGuide, reused: false, missingTransportGuide: true, provisionalSource: provisional.source };
-}
-async function attachTransportGuideToOpenProvisionalWorkGuide({ guide, vehicleId, technicianId, startKm, notes, req }) {
-  const vehId = n(vehicleId) || n(guide?.vehicleId);
-  if (!guide?.id || !vehId) return null;
-
-  let workGuide = await prisma.workGuide.findFirst({
-    where: { vehicleId: vehId, status: "OPEN", guideId: null },
-    orderBy: { createdAt: "desc" },
-    include: { vehicle: true, technician: true, guide: { include: { items: true, vehicle: true } }, items: true }
-  }).catch(() => null);
-  if (!workGuide) return null;
-
-  const techId = await assignedTechnicianId(vehId, technicianId || workGuide.technicianId);
-  workGuide = await prisma.workGuide.update({
-    where: { id: workGuide.id },
-    data: {
-      guideId: guide.id,
-      technicianId: techId || workGuide.technicianId,
-      startKm: workGuide.startKm == null && startKm != null ? n(startKm) : workGuide.startKm,
-      isDraft: false,
-      inheritedFromId: guide.id,
-      notes: combineNotes(workGuide.notes, notes || `Guia AT ${guide.codeAT || guide.id} associada automaticamente a guia de obra provisoria.`)
-    },
-    include: { vehicle: true, technician: true, guide: { include: { items: true, vehicle: true } }, items: true }
-  });
-
-  await syncWorkGuideItemsWithTransportGuide(workGuide.id, guide.items || []);
-  await prisma.vehicleStockMovement.updateMany({
-    where: { workGuideId: workGuide.id, transportGuideId: null },
-    data: { transportGuideId: guide.id }
-  }).catch(() => null);
-  await prisma.stockMovement.updateMany({
-    where: { workGuideId: workGuide.id, transportGuideId: null },
-    data: { transportGuideId: guide.id }
-  }).catch(() => null);
-  await resolveMissingTransportGuide({ req, vehicleId: vehId, workGuideId: workGuide.id, transportGuideId: guide.id, codeAT: guide.codeAT });
-  await audit(req, "WORK_GUIDE_LINK_TRANSPORT_GUIDE", "WorkGuide", workGuide.id, { vehicleId: vehId, transportGuideId: guide.id, codeAT: guide.codeAT });
-
-  return prisma.workGuide.findUnique({
-    where: { id: workGuide.id },
-    include: { vehicle: true, technician: true, guide: { include: { items: true, vehicle: true } }, items: true }
-  });
 }
 function movementMetadataFromNotes(notes) {
   const raw = String(notes || "").trim();
@@ -643,83 +449,7 @@ async function listTransportGuides(req, res) {
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
 }
 
-async function createTransportGuide(req, res) {
-  try {
-    const { codeAT, vehicleId, validFrom, validUntil, origin, destination, notes } = req.body;
-    const vehId = n(vehicleId);
-    if (!vehId) return res.status(400).json({ ok: false, error: 'vehicleId obrigatório.' });
-
-    const importMode = String(req.body.importMode || req.body.sourceMode || '').toUpperCase();
-    const wantsLast = importMode === 'LAST_GUIDE' || req.body.importFromLast === true;
-    const wantsPreset = importMode === 'VEHICLE_PRESET' || req.body.useVehiclePreset === true;
-
-    let guideItems = normalizeGuideItems(req.body.items);
-    let sourceInfo = { mode: 'MANUAL', guideId: null };
-    let inheritedFromId = null;
-
-    // Importar não bloqueia: se o frontend enviar items, esses items editados prevalecem.
-    // Se não enviar items, o sistema carrega automaticamente a última guia ou o preset.
-    if (!guideItems.length && wantsLast) {
-      const last = await latestTransportGuide(vehId);
-      guideItems = normalizeGuideItems(last?.items || []);
-      sourceInfo = { mode: 'LAST_GUIDE', guideId: last?.id || null, codeAT: last?.codeAT || null };
-      inheritedFromId = last?.id || null;
-    }
-    if (!guideItems.length && wantsPreset) {
-      guideItems = normalizeGuideItems(await getVehiclePreset(vehId));
-      sourceInfo = { mode: 'VEHICLE_PRESET' };
-    }
-
-    const guide = await prisma.transportGuide.create({
-      data: {
-        codeAT: codeAT || null,
-        vehicleId: vehId,
-        validFrom: dateOrNull(validFrom) || new Date(),
-        validUntil: dateOrNull(validUntil),
-        origin, destination,
-        notes: [notes, sourceInfo.mode !== 'MANUAL' ? `Origem stock inicial: ${sourceInfo.mode}${sourceInfo.codeAT ? ` (${sourceInfo.codeAT})` : ''}` : null].filter(Boolean).join(' | ') || null,
-        status: 'ACTIVE',
-        isDraft: req.body.isDraft === undefined ? true : Boolean(req.body.isDraft),
-        inheritedFromId,
-        items: { create: guideItems }
-      },
-      include: { vehicle: true, items: true }
-    });
-
-    for (const i of guide.items) {
-      await prisma.vehicleStockMovement.create({ data: { vehicleId: guide.vehicleId, transportGuideId: guide.id, itemName: i.name, itemType: i.type, unit: i.unit, quantity: i.quantity, movementType: 'LOAD', source: sourceInfo.mode || 'TRANSPORT_GUIDE', notes: 'Carga inicial da guia AT. Valores editáveis antes/depois de emitir.' } }).catch(()=>null);
-    }
-    const linkedProvisionalWorkGuide = await attachTransportGuideToOpenProvisionalWorkGuide({
-      guide,
-      vehicleId: vehId,
-      technicianId: req.body.technicianId,
-      startKm: req.body.startKm,
-      notes: "Guia de transporte AT associada a guia de obra que ja estava em andamento.",
-      req
-    });
-    await closePreviousVehicleGuides(vehId, guide.id, req);
-    const workGuideResult = linkedProvisionalWorkGuide
-      ? { workGuide: linkedProvisionalWorkGuide, reused: true, linkedProvisional: true }
-      : await getOrCreateWorkGuideForTransportGuide({
-          guide,
-          vehicleId: vehId,
-          technicianId: req.body.technicianId,
-          startKm: req.body.startKm,
-          notes: "Guia de obra gerada automaticamente porque foi adicionada uma nova guia de transporte.",
-          req
-        });
-    await audit(req, 'TRANSPORT_GUIDE_CREATE', 'TransportGuide', guide.id, { codeAT: guide.codeAT, vehicleId: guide.vehicleId, sourceInfo, itemCount: guide.items.length });
-    res.json({
-      ok: true,
-      guide,
-      workGuide: workGuideResult?.workGuide || null,
-      sourceInfo,
-      message: linkedProvisionalWorkGuide
-        ? 'Guia AT criada e associada a guia de obra que ja estava em andamento.'
-        : 'Guia AT criada. A guia de obra desta referencia foi gerada automaticamente e a anterior ficou guardada.'
-    });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
-}
+const createTransportGuide = require('./transportGuideCreationController').legacy;
 
 async function updateTransportGuide(req, res) {
   try {
@@ -908,53 +638,12 @@ async function listWorkGuides(req, res) {
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
 }
 
-async function startWorkGuide(req, res) {
+async function startWorkGuide(req,res) {
   try {
-    const { technicianId, vehicleId, transportGuideId, startKm, notes } = req.body;
-    const vehId = n(vehicleId); const techId = n(technicianId);
-    if (!vehId) return res.status(400).json({ ok: false, error: "vehicleId obrigatório" });
-    const guide = transportGuideId
-      ? await prisma.transportGuide.findUnique({ where: { id: n(transportGuideId) }, include: { items: true, vehicle: true } })
-      : await strictActiveTransportGuide(vehId);
-    if (!guide) {
-      const provisional = await createProvisionalWorkGuide({
-        vehicleId: vehId,
-        technicianId: techId,
-        startKm,
-        notes,
-        req
-      });
-      if (startKm != null) await prisma.vehicle.update({ where: { id: vehId }, data: { currentKm: n(startKm) } }).catch(()=>null);
-      return res.json({
-        ok: true,
-        workGuide: provisional.workGuide,
-        reused: Boolean(provisional.reused),
-        missingTransportGuide: true,
-        provisionalSource: provisional.provisionalSource || null,
-        message: provisional.reused
-          ? "Guia de obra aberta sem guia AT ativa. Alerta mantido para associar a guia AT assim que possivel."
-          : "Dia iniciado com guia de obra provisoria. Guia AT em falta: foi criado alerta para resolver assim que possivel."
-      });
-    }
-
-    const result = await getOrCreateWorkGuideForTransportGuide({
-      guide,
-      vehicleId: vehId,
-      technicianId: techId,
-      startKm,
-      notes,
-      req
-    });
-    const workGuide = result?.workGuide;
-    if (startKm != null) await prisma.vehicle.update({ where: { id: vehId }, data: { currentKm: n(startKm) } }).catch(()=>null);
-    await audit(req, result?.reused ? "WORK_GUIDE_REUSE" : "WORK_GUIDE_START", "WorkGuide", workGuide.id, { vehicleId: vehId, technicianId: techId, guideId: guide.id });
-    res.json({
-      ok: true,
-      workGuide,
-      reused: Boolean(result?.reused),
-      message: result?.reused ? "Guia de obra existente reutilizada para esta guia AT." : "Guia de obra criada para a guia AT atual."
-    });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+    const result=await require('../services/workGuideOpeningService').start(req.user,req.body);
+    if(result.missingTransportGuide&&!result.reused)await notifyMissingTransportGuide({req,vehicleId:result.workGuide.vehicleId,technicianId:result.workGuide.technicianId,workGuideId:result.workGuide.id,reason:'AT_UNAVAILABLE_START_DAY'});
+    res.json({ok:true,...result,message:result.reused?'Guia existente conservada, sem reiniciar saldos.':result.missingTransportGuide?'Obra provisória criada; reveja a associação AT na administração.':'Guia de obra criada.'});
+  } catch(e) { res.status(e.statusCode||503).json({ok:false,error:e.statusCode?e.message:'Não foi possível confirmar a abertura da obra.'}); }
 }
 
 const consumeMaterial = require('./vehicleConsumptionController').legacy;
@@ -973,11 +662,10 @@ async function closeWorkGuide(req, res) {
 async function getVehicleStock(req, res) {
   try {
     const vehicleId = n(req.params.vehicleId);
-    const transportGuide = await strictActiveTransportGuide(vehicleId);
-    const result = transportGuide
-      ? await getOrCreateWorkGuideForTransportGuide({ guide: transportGuide, vehicleId, technicianId: req.query.technicianId, req })
-      : null;
-    let workGuide = result?.workGuide || await prisma.workGuide.findFirst({ where: { vehicleId, status: "OPEN" }, orderBy: { createdAt: "desc" }, include: { items: true, technician: true, guide: { include: { items: true, vehicle: true } }, vehicle: true } });
+    res.set('Cache-Control','private, no-store');
+    const candidates=await prisma.workGuide.findMany({where:{vehicleId,status:'OPEN',...(req.fieldVehicleId?{technicianId:Number(req.user.technicianId||req.user.id)}:{})},orderBy:{createdAt:'desc'},take:2,include:{items:true,technician:true,guide:{include:{items:true,vehicle:true}},vehicle:true}});
+    if(candidates.length>1)return res.status(409).json({ok:false,error:'Existem várias guias abertas. Reveja-as na administração.'});
+    const workGuide=candidates[0]||null;
     const transportGuideDocument = workGuide?.guideId
       ? await getTransportGuideOfficialDocument(workGuide.guideId)
       : null;

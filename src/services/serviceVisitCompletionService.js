@@ -271,13 +271,21 @@ async function registerAutomaticProductConsumption(tx, visit, body, products) {
   const items = Array.isArray(products) ? products.filter((item) => item && item.quantity > 0) : [];
   if (!items.length) return;
 
-  const workGuide = await resolveWorkGuide(tx, visit, body);
-  if (!workGuide) {
+  const selectedGuide = await resolveWorkGuide(tx, visit, body);
+  if (!selectedGuide) {
     throw new VisitCompletionError(
       409,
       "WORK_GUIDE_REQUIRED",
       "Nao e possivel consumir produtos sem guia de obra/viatura ativa."
     );
+  }
+
+  // Transport creation can close or associate this work while the visit is preparing.
+  // Lock and re-read before touching its items; both writers use work -> items order.
+  await tx.$queryRaw`SELECT id FROM "WorkGuide" WHERE id = ${selectedGuide.id} FOR UPDATE`;
+  const workGuide = await tx.workGuide.findUnique({ where: { id: selectedGuide.id } });
+  if (!workGuide || workGuide.status !== 'OPEN' || workGuide.vehicleId !== selectedGuide.vehicleId || workGuide.technicianId !== selectedGuide.technicianId || workGuide.guideId !== selectedGuide.guideId) {
+    throw new VisitCompletionError(409, 'WORK_GUIDE_CHANGED', 'A guia de obra mudou ou foi fechada. Atualize a visita antes de consumir produtos.');
   }
 
   const guideItems = await tx.workGuideItem.findMany({

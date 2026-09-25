@@ -25,7 +25,7 @@ function check(name) { report.checks.push(name); console.log('PASS ' + name); }
     const technician = await require('./helpers/create-reviewed-technician')(call, { name: `Long QA ${i} ${stamp}`, email: `long-${stamp}-${i}@qa.test`, pin: `91230${i}` });
     const vehicle = await require('./helpers/create-reviewed-vehicle')(call, { plate: `LY-${i}-${String(stamp).slice(-8)}`, name: `Long QA ${i}` });
     await call('POST', '/api/guides/vehicles/assign', { technicianId: technician.id, vehicleId: vehicle.id, startKm: 100 });
-    const guides = await call('POST', '/api/guides/transport', { codeAT: `QA-LONG-${stamp}-${i}`, vehicleId: vehicle.id, technicianId: technician.id, validFrom: '2027-01-01T00:00:00Z', validUntil: '2029-01-01T00:00:00Z', origin: 'QA warehouse', destination: 'QA route', isDraft: false, items: [{ name: 'Cloro pastilhas', type: 'CHEMICAL', unit: 'KG', quantity: 1000 }] });
+    const guides = await require('./helpers/create-reviewed-transport-guide')(call, { codeAT: `QA-LONG-${stamp}-${i}`, vehicleId: vehicle.id, technicianId: technician.id, validFrom: '2027-01-01T00:00:00Z', validUntil: '2029-01-01T00:00:00Z', origin: 'QA warehouse', destination: 'QA route', isDraft: false, items: [{ name: 'Cloro pastilhas', type: 'CHEMICAL', unit: 'KG', quantity: 1000 }] });
     assert(guides.workGuide);
     teams.push({ technician, vehicle, guide: guides.workGuide });
   }

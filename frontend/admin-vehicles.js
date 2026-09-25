@@ -499,49 +499,11 @@ async function load() {
   }
 }
 
-function addGuideItem() {
-  const row = document.createElement("div");
-  row.className = "item-row";
-  row.innerHTML = `
-    <input placeholder="Nome">
-    <input placeholder="Tipo">
-    <input placeholder="Un">
-    <input type="number" placeholder="Qtd">
-    <button class="btn warn" onclick="this.parentElement.remove()">x</button>
-  `;
-  el("guideItems").appendChild(row);
-}
-
-async function createTransportGuide() {
-  if(!selectedVehicle("guideVehicle"))return;
-  const items = [...el("guideItems").children]
-    .map((row) => ({
-      name: row.children[0].value,
-      type: row.children[1].value,
-      unit: row.children[2].value,
-      quantity: Number(row.children[3].value || 0),
-    }))
-    .filter((item) => item.name);
-
-  const created = await j(`${API}/transport`, {
-    method: "POST",
-    body: JSON.stringify({
-      vehicleId: val("guideVehicle"),
-      codeAT: val("codeAT"),
-      origin: val("origin"),
-      destination: val("destination"),
-      items,
-    }),
-  });
-
-  const documentInput = el("guideDocument");
-  if (documentInput?.files?.[0] && created?.guide?.id) {
-    await uploadTransportGuideDocument(created.guide.id, documentInput);
-  }
-
-  el("guideItems").innerHTML = "";
-  addGuideItem();
-  await load();
+function createTransportGuide() {
+  requirePageSession();
+  const vehicle=selectedVehicle('guideVehicle');if(!vehicle)return;
+  const language=document.getElementById('fleetLanguage')?.value||'pt';
+  location.href='/transport-guide-create?vehicleId='+encodeURIComponent(val('guideVehicle'))+'&lang='+encodeURIComponent(language);
 }
 
 async function editTransportGuide(id) {
@@ -646,16 +608,6 @@ async function createMaintenance() {
   await load();
 }
 
-window.addEventListener("DOMContentLoaded", () => {
-  const guideDocument = el("guideDocument");
-  const guideDocumentName = el("guideDocumentName");
-  if (guideDocument && guideDocumentName) {
-    guideDocument.addEventListener("change", () => {
-      guideDocumentName.textContent = guideDocument.files?.[0]?.name || "Nenhum ficheiro escolhido";
-    });
-  }
-  if (!el("guideItems")?.children.length) addGuideItem();
-});
 
 window.load = load;
 window.saveRiskRules = saveRiskRules;

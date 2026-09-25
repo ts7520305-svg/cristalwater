@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-25T17:42:55.000Z",
-  "baseCommit": "e4f0e06481c398ef2670e6fd0d0307bb9a1077e8",
+  "generatedAt": "2026-09-25T19:44:12.969Z",
+  "baseCommit": "c6e9804597e30d5328606c258feaf311b13ea3c3",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 289,
+  "activeScriptsScanned": 291,
   "summary": {
-    "htmlFiles": 116,
-    "rootPages": 109,
+    "htmlFiles": 117,
+    "rootPages": 110,
     "nestedPages": 7,
     "unavailableLocalAssetReferences": 2,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 104,
+    "pagesWithLiteralTestReference": 105,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -4793,6 +4793,37 @@
         "test-field-external-invoice-registration.js",
         "test-field-external-reference-review.js",
         "test-field-external-invoice-summary.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/transport-guide-create.html",
+      "route": "/transport-guide-create",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Nova guia de transporte",
+      "catalogueRoles": [],
+      "guardFiles": [],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/cw-transport-guide-create.css",
+        "/cw-vehicle-consumption-rules.js",
+        "/cw-onboarding-rules.js",
+        "/cw-transport-guide-rules.js",
+        "/cw-transport-guide-copy.js",
+        "/cw-transport-guide-create.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-transport-guide-create.js",
+        "test-field-transport-guide-create-ui.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },

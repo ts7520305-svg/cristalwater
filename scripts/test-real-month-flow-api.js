@@ -180,7 +180,7 @@ async function setupPeopleAndFleet() {
       notes: `Inicio de mes QA real ${runId}`,
     });
 
-    const guide = await call("POST", "/api/guides/transport", {
+    const guide = await require("./helpers/create-reviewed-transport-guide")(call, {
       codeAT: `AT-${runId}-${i}`,
       vehicleId: vehicle.id,
       technicianId: technician.id,
@@ -199,8 +199,8 @@ async function setupPeopleAndFleet() {
       ],
       notes: `Guia AT real QA ${runId}`,
     });
-    created.transportGuides.push(guide.data.guide);
-    if (guide.data.workGuide) created.workGuides.push(guide.data.workGuide);
+    created.transportGuides.push(guide.guide);
+    if (guide.workGuide) created.workGuides.push(guide.workGuide);
   }
 }
 
