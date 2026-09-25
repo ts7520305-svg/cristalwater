@@ -10,7 +10,7 @@
   const identity = () => JSON.stringify(keys.map(k => localStorage.getItem(k)));
   const params = new URLSearchParams(location.search), completionId = Number(params.get('completionId')), expectedPool = params.has('poolId') ? Number(params.get('poolId')) : null;
   const states = historyMode?{MISSING:'Origem histórica por rever',ATTESTED:'Origem revista pela administração',REVIEW:'Origem ou histórico por rever',WITHDRAWN:'Declaração histórica anulada'}:timeMode?{MISSING:'Tempo próprio não registado',RECORDED:'Intervalos confirmados',REVIEW:'Tempo próprio por rever',WITHDRAWN:'Declaração anulada; tempo por confirmar'}:{ MISSING:'Materiais não registados',NONE:'Sem materiais, confirmado',DECLARED:'Aguarda consumos e fecho da visita',MATCHED:'Compatível com o consumo líquido da visita',REVIEW:'Materiais por rever',WITHDRAWN:'Declaração anulada; materiais por confirmar' };
-  const controllers = new Set(); let principal, invalid = false, storageFailed = false, busy = false, loading = false, draftHydrated = false, db, pending, detail, reviewed, editEpoch = 0, readEpoch = 0;
+  const controllers = new Set(); let principal, invalid = false, storageFailed = false, busy = false, loading = true, draftHydrated = false, db, pending, detail, reviewed, editEpoch = 0, readEpoch = 0;
   let draft = { action: 'DECLARED', items: [emptyItem()], reason:'' };
   const node = (parent, tag, text) => { const n = document.createElement(tag); n.textContent = text; parent.append(n); return n; };
   const status = text => { el('status').textContent = text; }, note = text => { el('writeStatus').textContent = text; };

@@ -2398,7 +2398,7 @@
       <div class="doc-subtitle">Stock final da viatura</div>
       ${renderItems(stockRows, "work")}
       ${renderStockSummary(stockRows)}
-      <div class="doc-actions">${docButton(`/api/guides/work/${encodeURIComponent(workGuide.id)}/pdf`, "Abrir PDF guia de obra")}</div>
+      <div class="doc-actions">${docButton(`/api/guides/work/${encodeURIComponent(workGuide.id)}/pdf`, "Abrir PDF guia de obra")} <a class="cw-btn" href="/work-guide-close?workGuideId=${encodeURIComponent(workGuide.id)}">Rever fecho da guia</a></div>
     `;
   }
 

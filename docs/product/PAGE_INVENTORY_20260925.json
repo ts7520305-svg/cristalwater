@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-25T21:48:04.095Z",
-  "baseCommit": "c021b820b917c3330899280fe67e3d2cd4ed9221",
+  "generatedAt": "2026-09-25T22:25:51.766Z",
+  "baseCommit": "9e442bcfa1f5295fb3df48ae65f5c8a8d29cad9a",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 297,
+  "activeScriptsScanned": 299,
   "summary": {
-    "htmlFiles": 120,
-    "rootPages": 113,
+    "htmlFiles": 121,
+    "rootPages": 114,
     "nestedPages": 7,
     "unavailableLocalAssetReferences": 2,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 108,
+    "pagesWithLiteralTestReference": 109,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -1867,6 +1867,7 @@
         "test-field-vehicle-consumption-ui.js",
         "test-field-transport-guide-items-ui.js",
         "test-field-transport-guide-manage-ui.js",
+        "test-field-work-guide-close-ui.js",
         "test-field-transport-guide-documents-ui.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
@@ -4168,6 +4169,7 @@
         "test-field-visit-briefing.js",
         "test-field-legacy-entry.js",
         "test-field-admin-catalogue.js",
+        "test-field-work-guide-close-ui.js",
         "test-field-transport-guide-documents-ui.js",
         "test-field-technical-proposals.js",
         "test-field-proposal-recovery-ui.js",
@@ -4288,6 +4290,7 @@
       "directPrintAction": false,
       "testReferences": [
         "test-field-vehicle-consumption-ui.js",
+        "test-field-work-guide-close-ui.js",
         "test-field-team-leader-entry.js",
         "test-role-help-browser.js"
       ],
@@ -5132,6 +5135,35 @@
       "testReferences": [
         "test-field-admin-day.js",
         "test-field-visit-report-origin.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/work-guide-close.html",
+      "route": "/work-guide-close",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Fechar guia de obra",
+      "catalogueRoles": [],
+      "guardFiles": [],
+      "explicitRoleHints": [],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/cw-work-guide-close.css",
+        "/cw-vehicle-consumption-rules.js",
+        "/cw-vehicle-consumption-copy.js",
+        "/cw-work-guide-close-rules.js",
+        "/cw-work-guide-close-copy.js",
+        "/cw-work-guide-close.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-work-guide-close.js",
+        "test-field-work-guide-close-ui.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     }

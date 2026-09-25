@@ -66,7 +66,8 @@ async function startDay() {
       }),
     });
     workGuideId.value = response.workGuide?.id || "";
-    closeId.value = response.workGuide?.id || "";
+    const closeLink = document.getElementById("closeWorkLink");
+    if (closeLink) closeLink.href = "/work-guide-close?workGuideId=" + encodeURIComponent(response.workGuide?.id || "");
     vehicleStock.value = vehicle.value;
     setStatus(response.message || "Guia iniciada com sucesso.");
     await loadStock();
@@ -145,19 +146,10 @@ async function loadStock() {
 }
 
 
-async function closeGuide() {
+function closeGuide() {
   if (!window.CristalAuth?.requireAuth("TECHNICIAN")) return;
-
-  try {
-    setStatus("A fechar guia de obra.");
-    await j(`${API}/work/${closeId.value || workGuideId.value}/close`, {
-      method: "POST",
-      body: JSON.stringify({ endKm: endKm.value }),
-    });
-    setStatus("Guia fechada com sucesso.");
-  } catch (error) {
-    setStatus(error.message || "Nao foi possivel fechar guia.", "error");
-  }
+  const id=document.getElementById('closeId')?.value||document.getElementById('workGuideId')?.value;
+  location.href='/work-guide-close'+(/^[1-9]\d{0,9}$/.test(id)?'?workGuideId='+encodeURIComponent(id):'');
 }
 
 init();

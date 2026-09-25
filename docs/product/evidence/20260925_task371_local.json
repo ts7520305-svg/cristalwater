@@ -1,0 +1,245 @@
+{
+  "task": "TASK371",
+  "baseCommit": "9e442bcfa1f5295fb3df48ae65f5c8a8d29cad9a",
+  "validatedAt": "2026-09-25T22:28:37.093150+00:00",
+  "sourceHashes": {
+    "frontend/admin-vehicles.js": "e27bba418a71af04f314b5922220438132b21b39f350eb15e4524155d5566b62",
+    "frontend/cw-work-guide-close-copy.js": "718ade30259bde78c682d2315e07860fc90fe22babf3fa22e38c1e32b5b7d5f4",
+    "frontend/cw-work-guide-close-rules.js": "4fb3083170c5b8edb19b51e24954ae3dce94af75d8bbfe79c619b3c509566c49",
+    "frontend/cw-work-guide-close.css": "3e8903ab63e3f0c66ecee7b217677dfc27ed17ad8fcd58da8813077b8b5c8045",
+    "frontend/cw-work-guide-close.js": "7b18a552de453037488407f3384b25eb9e1581564dc58b9ccebcfab0b23488bf",
+    "frontend/equipment-material-review.js": "6ebd9bf3c458b93a090bd6831c6860400e2fc538fbde6b21dc5d25285f927290",
+    "frontend/sw.js": "b6e0d3563c28fc0824a127de09a59a587633d3aeb321593505b7f6e735b8701a",
+    "frontend/technician-field-mode.js": "822a56c90391e7850119e4d354ace55e84266b7012d7ebe0e9ac82101dd38b4f",
+    "frontend/technician-guide.html": "309f7090cc3671da880f67ee166a5c31b8eb3c8727303009f4539d50fd5eb561",
+    "frontend/technician-guide.js": "72224349260367a6e62b525c7aa1a902e3c32e624f98fd0999f4b5a53f08291c",
+    "frontend/work-guide-close.html": "595ae542e05d3c71402ceddd42172bb7c843143ddea0815e029b8be3670ad1b9",
+    "scripts/fixtures/internal-chat-server.js": "a2e9f46c54f4925214a3ac170bdf227ca3f11de8795ea81e97616fda7c968fe4",
+    "scripts/test-field-equipment-time-review.js": "8d6f2b61896839474389f3dacd3dcd76e1e00d2d4f9573919fc5797cd52a7dcd",
+    "scripts/test-field-suite.js": "a0cd3aabd95fb6b52fdf1a9eb083c7f87587afea25dee545ecefd366d0274fd6",
+    "scripts/test-field-work-guide-close-ui.js": "4f85ffb8e050c3866147b59026bbcb3e7a53ad4288a7554999c14d9b0ca31a66",
+    "scripts/test-field-work-guide-close.js": "f7f4406ca04feb68700415ec1c2e4f9cb27962687449b19dcfb55fa424e9393d",
+    "src/controllers/guideController.js": "bf95bd4cc2718648b281b3033c00135d532af12bbac93c8657dd9669ef488bdb",
+    "src/controllers/workGuideCloseController.js": "41d353da787613a922a31704b1e6436ea7d6486e05bc5d2a382b41e9e286a8a5",
+    "src/routes/workGuideCloseRoutes.js": "9f16964e095e5777fdf638878deeb7176379ddcc948a2085efc9b4669e94fe71",
+    "src/server.js": "68c7b498a37acf02ab28a1f8ac03a7ffb7daf23b90e0cf051d20ffdd0f6c20c6",
+    "src/services/fieldWriteRequestService.js": "60330cdc2d0a69cb5857a5d3e75df1007f65e382938956e55041fd0caf90a18e",
+    "src/services/workGuideCloseService.js": "7babf1762cac8c9fcc049118528d9c598b5edbf77eeea14662b481bae8074b0e",
+    "tests/work-guide-close.test.js": "65620f73c56b7e146d1b8ce61f34f61bc16e87afd7e97e32787d3334b3ea317a"
+  },
+  "unitTests": {
+    "passed": 857,
+    "files": 108,
+    "new": 17
+  },
+  "technicianTests": 4,
+  "syntax": {
+    "backend": 669,
+    "frontend": 279,
+    "inline": 44,
+    "finalChangedScriptsCheckedSeparately": true
+  },
+  "schema": {
+    "newMigrations": 0,
+    "totalAdditiveMigrationsApplied": 43,
+    "tablesExpected": 128,
+    "runtime": "PGlite 0.5.8 / pglite-socket 0.2.11; isolated synthetic data, not native PostgreSQL"
+  },
+  "integrationGroups": [
+    {
+      "script": "scripts/test-field-work-guide-close.js",
+      "code": 0,
+      "log": "/tmp/cw371-api.log",
+      "sha256": "f0cf9692dead61310f0a07a771e023d6f1fdc0dfc4317765d0930fe7bbab1b66"
+    },
+    {
+      "script": "scripts/test-field-work-guide-close-ui.js",
+      "code": 0,
+      "log": "/tmp/cw371-ui-final.log",
+      "sha256": "a0b64e529991d1b4aae0efeb038c24f800024a1a4ccf1f49b00044c1566663d9"
+    },
+    {
+      "script": "scripts/test-field-equipment-time-review.js",
+      "code": 0,
+      "log": "/tmp/cw371-time-review.log",
+      "sha256": "39f4563825f22d36b2b6e788972bde37d733a0dd856657f8ace8e5169f2b0786"
+    },
+    {
+      "script": "scripts/test-field-transport-guide-manage.js",
+      "code": 0,
+      "log": "/tmp/cw371-regressions.log",
+      "sha256": "ea118baec8d30823be3d4471b622eecc84718bc29efa464c7e9b01e6df4e8414"
+    },
+    {
+      "script": "scripts/test-field-vehicle-consumption.js",
+      "code": 0,
+      "log": "/tmp/cw371-regression-vehicle-consumption.log",
+      "sha256": "dc2ff5a99dd1d3c140fc58428d1a0ce4d9c2442090f685a4f8665dbd8a1c3cad"
+    },
+    {
+      "script": "scripts/test-field-equipment-material-review.js",
+      "code": 0,
+      "log": "/tmp/cw371-regression-equipment-material-review.log",
+      "sha256": "2f394308004675fa77e4b37084771c1a0af411900c3391c0747a26167380e8ab"
+    },
+    {
+      "script": "scripts/test-field-equipment-history-review.js",
+      "code": 0,
+      "log": "/tmp/cw371-regression-equipment-history-review.log",
+      "sha256": "1e7eae8b9cf002ba697ebed4c1d3f33204f5e87806d76a43d8aa01d6554a6a51"
+    },
+    {
+      "script": "scripts/test-field-fleet-management-ui.js",
+      "code": 0,
+      "log": "/tmp/cw371-browser-regressions.log",
+      "sha256": "48b834c4eaa7cdee8508f1233ce4b591a40712f7d385353214503490869b2f85"
+    },
+    {
+      "script": "scripts/test-field-transport-guide-manage-ui.js",
+      "code": 0,
+      "log": "/tmp/cw371-browser-regressions.log",
+      "sha256": "48b834c4eaa7cdee8508f1233ce4b591a40712f7d385353214503490869b2f85"
+    },
+    {
+      "script": "scripts/test-field-document-recovery.js",
+      "code": 0,
+      "log": "/tmp/cw371-browser-regressions.log",
+      "sha256": "48b834c4eaa7cdee8508f1233ce4b591a40712f7d385353214503490869b2f85"
+    },
+    {
+      "script": "scripts/test-field-navigation-preferences.js",
+      "code": 0,
+      "log": "/tmp/cw371-browser-regressions.log",
+      "sha256": "48b834c4eaa7cdee8508f1233ce4b591a40712f7d385353214503490869b2f85"
+    }
+  ],
+  "logs": {
+    "/tmp/cw371-api.log": "f0cf9692dead61310f0a07a771e023d6f1fdc0dfc4317765d0930fe7bbab1b66",
+    "/tmp/cw371-browser-regressions.log": "48b834c4eaa7cdee8508f1233ce4b591a40712f7d385353214503490869b2f85",
+    "/tmp/cw371-regression-equipment-history-review.log": "1e7eae8b9cf002ba697ebed4c1d3f33204f5e87806d76a43d8aa01d6554a6a51",
+    "/tmp/cw371-regression-equipment-material-review.log": "2f394308004675fa77e4b37084771c1a0af411900c3391c0747a26167380e8ab",
+    "/tmp/cw371-regression-vehicle-consumption.log": "dc2ff5a99dd1d3c140fc58428d1a0ce4d9c2442090f685a4f8665dbd8a1c3cad",
+    "/tmp/cw371-regressions.log": "ea118baec8d30823be3d4471b622eecc84718bc29efa464c7e9b01e6df4e8414",
+    "/tmp/cw371-syntax.log": "b10eaa678fb6ff540fd025d5b9bc620229120ea5463c5b4cf9f01bcc4c64b06d",
+    "/tmp/cw371-technician.log": "30307e95a7a57ed26919b00bb049c74d832eef54bf480a73dfc266820d4d780a",
+    "/tmp/cw371-time-review.log": "39f4563825f22d36b2b6e788972bde37d733a0dd856657f8ace8e5169f2b0786",
+    "/tmp/cw371-ui-final.log": "a0b64e529991d1b4aae0efeb038c24f800024a1a4ccf1f49b00044c1566663d9",
+    "/tmp/cw371-ui-fixed.log": "a0b64e529991d1b4aae0efeb038c24f800024a1a4ccf1f49b00044c1566663d9",
+    "/tmp/cw371-ui.log": "ec779a9c1e8ca0be00859b6b45d33d7e6e266df3ab7b17317c664792bd6f7f58",
+    "/tmp/cw371-units.log": "9edf5060707c61a33908fbe73e405c85469026a7dc638c396eb669991b5930b8"
+  },
+  "validationNotes": [
+    {
+      "kind": "PREVIOUS_NATIVE_FAILURE",
+      "resolution": "TASK369 ran all 274 expected groups, 273 passed; only equipment time recovery failed on a disabled checkPending button. Boot briefly enabled recovery before loading the initial history. The shared editor starts with loading=true; the test waits for initial history plus enabled recovery before intercepting the subsequent history request. No timeout increase or assertion removal. Full time/material/history groups passed locally."
+    },
+    {
+      "kind": "LOCAL_QA_PREPARATION",
+      "resolution": "Added the production closure router to the isolated second-process HTTP fixture after its missing route produced HTML instead of JSON. Entire API group then passed, including loss/restart/two-process races and four SQL rollback sites."
+    },
+    {
+      "kind": "MOBILE_CSS_SCOPE",
+      "resolution": "Initial UI group found controls below 44px because reused CSS was scoped to another root. Added a dedicated scoped stylesheet; entire browser group passed. Final screenshots additionally verify full selected text below the native select, stable checkbox width, appropriate preserved-consumption wording and spacing."
+    },
+    {
+      "kind": "LOCAL_RUNTIME_LIMIT",
+      "resolution": "The old consumption group encountered PGlite socket prepared-statement collision 42P05 after another rollback-heavy group in the same process. Full consumption/material/history groups each passed with fresh isolated databases; the original failure log is retained and hashed. Native PostgreSQL gate remains required."
+    }
+  ],
+  "browser": {
+    "engine": "Chromium 153, multiple processes, web security active",
+    "screenshots": 18,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "hashes": {
+      "reports/field-visual/work-guide-close/de-1440.png": "8480f76a0c02e6941e941e2b76762cfa824c76150a3298412ac59882ce023327",
+      "reports/field-visual/work-guide-close/de-320.png": "2a33c413e0116f123b13870f6b627bb77148c850f97428a59aa8eba5629f9423",
+      "reports/field-visual/work-guide-close/de-390.png": "d637fc16e5f81c12018bc9be73c655f4df919a68e0e37f3ec103821806252912",
+      "reports/field-visual/work-guide-close/en-1440.png": "3edb82a8cd1f7fe3e6776d759ea7a5f8bb18c761f54b1d37e9da824794cb68b7",
+      "reports/field-visual/work-guide-close/en-320.png": "2939808e686aed2b6d6d61ece23eb12fb078c8131918bc7f2112f5262c83f895",
+      "reports/field-visual/work-guide-close/en-390.png": "e20daea197bdf160bcd4794c52738f1498fa1cf868f3f00ce4700956e4d6b5d0",
+      "reports/field-visual/work-guide-close/es-1440.png": "b93dc0cc34d9e294619e0e9a8924bd0bd1fbb024ea9309d1b975ce09ce738db0",
+      "reports/field-visual/work-guide-close/es-320.png": "60b5cc2d5fc18d4947c6904965412057f785e27ac2d82873d8466d3e5caf61fa",
+      "reports/field-visual/work-guide-close/es-390.png": "e073a51810b10864a2608c6246456f67bdc7d6df932f3963a61fcaaccd5faa84",
+      "reports/field-visual/work-guide-close/fr-1440.png": "12b0948abc8b883b5d686d6383e3cc80db71110ab757cd379707dd5350c9e0d2",
+      "reports/field-visual/work-guide-close/fr-320.png": "f859cc47fb7e2ca171d01a7cd3bce09890cd2777df4aaef3c66a291946e673a9",
+      "reports/field-visual/work-guide-close/fr-390.png": "1381c309b27d5e2534f615b83d5fa0f3a9b5a122e02c2835d3272b1e38654115",
+      "reports/field-visual/work-guide-close/pt-1440.png": "0e2c039c82b7073147bc1a2e077edd91cbd66ded0cb63a835d6d3f4e05777fc0",
+      "reports/field-visual/work-guide-close/pt-320.png": "186eda985308fe254bae832725b29acd1574d7355fdc6e440050d60a2161b04f",
+      "reports/field-visual/work-guide-close/pt-390.png": "10420d7e72bf8769b320f4fda9df39341264848b4da4767e29e720563ddb736e",
+      "reports/field-visual/work-guide-close/review-de-320.png": "6de7ba26c56cdd4eb5e92940f8a3752197aaa0338d874dbb4b8fb3933a3c406d",
+      "reports/field-visual/work-guide-close/review-pt-1440.png": "c9aaedc6ba44601b6f2daa30da98edbd6a1a21478687674119484bf22f394cea",
+      "reports/field-visual/work-guide-close/review-pt-390.png": "15a5cca2e9de0b9f9365059c68bd8c9d120d1d7414d02c6bc41a0d378accd4b6"
+    },
+    "visuallyReviewed": [
+      "de-320.png",
+      "review-pt-1440.png"
+    ],
+    "entry": "actual ADMIN work history, field document centre and legacy technician guide link",
+    "identity": "ADMIN, TECHNICIAN and TEAM_LEADER; both PIN/technician and associated User identities; own work/current vehicle"
+  },
+  "runnerGroups": 278,
+  "cacheVersion": "v182",
+  "inventory": {
+    "htmlFiles": 121,
+    "rootPages": 114,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 109,
+    "catalogueGuardDifferences": 0,
+    "activeScriptsScanned": 299,
+    "remainingLiteralQueue": 12
+  },
+  "publication": {
+    "status": "READY_NATIVE_CI_PENDING",
+    "branch": "work/field-readiness-20260915-simulation",
+    "mainBranch": "feature/technicians-v25",
+    "mainShaUnchanged": "6f27081e1d183ff584a62255b016b373836734db",
+    "nativeGroupsExpected": 278,
+    "nativeRestore": "PENDING",
+    "nativeRestoreProbe": "Existing binary attachment dump/restore and 128 tables"
+  },
+  "previousCI": [
+    {
+      "task": 369,
+      "codeSha": "8ade13c23b59404961469de6b8f388c769cc2dd9",
+      "runId": 36189626318,
+      "jobId": 108251326109,
+      "status": "FAILED",
+      "groupsPassed": 273,
+      "groupsExpected": 274,
+      "nativeRestore": "SKIPPED",
+      "evidence": "20260925_task369_ci.json"
+    },
+    {
+      "task": 370,
+      "codeSha": "33f8ccf7f73294cd480c9bd18d021139a66a6e29",
+      "runId": 36193770611,
+      "jobId": 108264772521,
+      "status": "IN_PROGRESS_AT_FINAL_CHECK",
+      "groupsExpected": 276,
+      "nativeRestore": "PENDING",
+      "migrationGate": "PASSED_43",
+      "syntaxUnitBrowserGate": "PASSED"
+    }
+  ],
+  "limits": [
+    "Native PostgreSQL 278-group suite and restore remain required.",
+    "Maximum 100 stock rows in a review; incoherent historical data require separate review.",
+    "Closure preserves transport state and stock; it does not implicitly reopen work or resolve operational alerts.",
+    "Maintenance/costs, assignments, presets and alert rules require separate review.",
+    "Historical reconciliation, document volume/archival policy, VPS and physical pilot remain open.",
+    "No merge, deployment or real external contact."
+  ]
+}

@@ -429,7 +429,7 @@ function renderWorkGuides() {
         <div class="links">
           <a class="btn primary" data-auth-download target="_blank" rel="noopener" href="/api/guides/work/${workGuide.id}/pdf">PDF guia obra</a>
           ${workGuide.guide?.id ? `<a class="btn" data-auth-download target="_blank" rel="noopener" href="/api/guides/transport/${workGuide.guide.id}/pdf">PDF guia AT</a>` : `<span class="btn warn">AT em falta</span>`}
-          <button class="btn" onclick="closeWork(${workGuide.id})">Fechar</button>
+          ${workGuide.status === "OPEN" ? `<button class="btn" onclick="closeWork(${workGuide.id})">Rever fecho</button>` : ""}
         </div>
       </div>
     `;
@@ -519,14 +519,10 @@ async function startWorkGuide() {
 }
 
 
-async function closeWork(id) {
-  const endKm = prompt("Km final?");
-  if (endKm === null) return;
-  await j(`${API}/work/${id}/close`, {
-    method: "POST",
-    body: JSON.stringify({ endKm }),
-  });
-  await load();
+function closeWork(id) {
+  requirePageSession();
+  const lang=new URL(location.href).searchParams.get('lang');
+  location.href='/work-guide-close?workGuideId='+encodeURIComponent(id)+(lang?'&lang='+encodeURIComponent(lang):'');
 }
 
 async function createMaintenance() {

@@ -494,14 +494,7 @@ async function startWorkGuide(req,res) {
 const consumeMaterial = require('./vehicleConsumptionController').legacy;
 
 async function closeWorkGuide(req, res) {
-  try {
-    const id = n(req.params.id);
-    const { endKm, notes } = req.body;
-    const wg = await prisma.workGuide.update({ where: { id }, data: { status: "CLOSED", endKm: n(endKm), notes, closedAt: new Date() }, include: { items: true, vehicle: true, technician: true } });
-    if (endKm != null && wg.vehicleId) await prisma.vehicle.update({ where: { id: wg.vehicleId }, data: { currentKm: n(endKm) } }).catch(()=>null);
-    await audit(req, "WORK_GUIDE_CLOSE", "WorkGuide", id, { endKm, notes });
-    res.json({ ok: true, workGuide: wg });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  return require('./workGuideCloseController').legacy(req, res);
 }
 
 async function getVehicleStock(req, res) {

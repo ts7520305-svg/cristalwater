@@ -1,5 +1,9 @@
 # TASK369 — Dados e estado das guias de transporte
 
+## Atualização de CI — TASK371
+
+TASK369 terminou em **273/274 grupos aprovados**; apenas o ensaio de recuperação de tempos falhou por uma janela entre a recuperação local e a leitura inicial. A recuperação de documentos passou. Restauro não executado. A TASK371 corrige a inicialização do editor e sincroniza o teste com o fim dessa leitura; grupo integral aprovado localmente. [Evidência nativa](evidence/20260925_task369_ci.json).
+
 ## Comportamento entregue
 
 O antigo PUT de metadados apagava `validUntil` quando o campo era omitido, misturava edição e transição livre de estado e podia fechar a guia de transporte deixando a obra aberta. A resolução de pendências e a auditoria eram gravações separadas. O novo percurso `/transport-guide-manage`, acessível pelos botões de editar/fechar/anular no histórico da frota, exige ADMIN User, motivo e revisão explícita antes de confirmar.
