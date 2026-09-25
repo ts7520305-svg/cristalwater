@@ -35,6 +35,7 @@ const pages = walk(frontend).filter(file => file.endsWith('.html')).sort().map(f
   }
   for (const match of html.matchAll(/(?:data-required-role=["']|requireAuth\(\s*['"])(ADMIN|CLIENT|TECHNICIAN|TEAM_LEADER)/g)) roles.add(match[1]);
   const declaredRoles = catalogue.get(route)?.roles || [], conditionalAccess = [], entryRedirects = {};
+  if (route === '/vehicle-consumption') { ['ADMIN','TECHNICIAN','TEAM_LEADER'].forEach(role => roles.add(role)); conditionalAccess.push('Sessão coerente verificada no componente; API privada, atribuição atual de viatura e técnico para os perfis de campo.'); }
   if (route === '/invoice-document') { roles.add('PUBLIC'); conditionalAccess.push('Entrada pública sem dados financeiros; abrir PDF exige ADMIN ou CLIENT titular na API'); }
   if (route === '/config-notifications') { for (const role of ['ADMIN', 'CLIENT', 'TECHNICIAN', 'TEAM_LEADER']) { roles.add(role); entryRedirects[role] = '/settings'; } conditionalAccess.push('Alias estático; a sessão e titularidade User são verificadas no destino'); }
   if (['/admin-command-center','/admin-core-flow','/admin-operational-flow','/client-wow','/splash'].includes(route) && assets.includes('/cw-admin-legacy-entry.js')) {

@@ -620,18 +620,6 @@ async function startWorkGuide() {
   await load();
 }
 
-async function consume() {
-  await j(`${API}/work/consume`, {
-    method: "POST",
-    body: JSON.stringify({
-      workGuideId: val("consumeWork"),
-      name: val("consumeName"),
-      quantity: val("consumeQty"),
-      visitId: val("consumeVisit"),
-    }),
-  });
-  await load();
-}
 
 async function closeWork(id) {
   const endKm = prompt("Km final?");

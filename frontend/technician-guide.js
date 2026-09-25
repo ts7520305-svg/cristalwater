@@ -144,29 +144,6 @@ async function loadStock() {
   }
 }
 
-async function consume() {
-  if (!window.CristalAuth?.requireAuth("TECHNICIAN")) return;
-
-  try {
-    setStatus("A registar consumo.");
-    await j(`${API}/work/consume`, {
-      method: "POST",
-      body: JSON.stringify({
-        workGuideId: workGuideId.value,
-        name: itemName.value,
-        quantity: qty.value,
-        visitId: visitId.value,
-        technicianId: techId.value,
-        location: movementLocation.value,
-        notes: movementNotes.value,
-      }),
-    });
-    setStatus("Consumo registado.");
-    await loadStock();
-  } catch (error) {
-    setStatus(error.message || "Nao foi possivel registar consumo.", "error");
-  }
-}
 
 async function closeGuide() {
   if (!window.CristalAuth?.requireAuth("TECHNICIAN")) return;

@@ -957,67 +957,7 @@ async function startWorkGuide(req, res) {
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
 }
 
-async function consumeMaterial(req, res) {
-  try {
-    const { workGuideId, name, quantity, visitId, technicianId, notes } = req.body;
-    const qty = n(quantity, 0);
-    if (!workGuideId || !name || qty <= 0) return res.status(400).json({ ok: false, error: "workGuideId, name e quantity são obrigatórios" });
-    let item = await prisma.workGuideItem.findFirst({ where: { workGuideId: n(workGuideId), name: String(name) } });
-    if (!item) {
-      const candidates = await prisma.workGuideItem.findMany({ where: { workGuideId: n(workGuideId) } }).catch(() => []);
-      item = candidates.find((candidate) => normalize(candidate.name) === normalize(name)) || null;
-    }
-    if (!item) return res.status(404).json({ ok: false, error: "Item não encontrado" });
-    if (item.quantity < qty) return res.status(400).json({ ok: false, error: "Stock insuficiente", available: item.quantity });
-    const updated = await prisma.workGuideItem.update({ where: { id: item.id }, data: { quantity: item.quantity - qty, usedQty: (item.usedQty || 0) + qty } });
-    const wg = await prisma.workGuide.findUnique({ where: { id: n(workGuideId) } });
-    const visit = visitId
-      ? await prisma.serviceVisit.findUnique({
-          where: { id: n(visitId) },
-          include: { pool: { include: { client: true } }, client: true }
-        }).catch(() => null)
-      : null;
-    const movementNotes = movementNotesPayload(req.body || {}, visit, notes);
-    const techId = n(technicianId) || wg?.technicianId || visit?.technicianId || null;
-    const movement = await prisma.vehicleStockMovement.create({
-      data: {
-        vehicleId: wg?.vehicleId,
-        transportGuideId: wg?.guideId,
-        workGuideId: wg?.id,
-        visitId: n(visitId),
-        technicianId: techId,
-        itemName: item.name,
-        itemType: item.type,
-        unit: item.unit,
-        quantity: qty,
-        movementType: "CONSUMPTION",
-        source: visitId ? "VISIT" : "MANUAL",
-        notes: movementNotes
-      }
-    }).catch(()=>null);
-    await prisma.stockMovement.create({
-      data: {
-        movementType: "CONSUMPTION",
-        scopeFrom: "VEHICLE",
-        vehicleId: wg?.vehicleId || null,
-        productName: item.name,
-        category: item.type || "MATERIAL",
-        unit: item.unit || "UN",
-        quantity: qty,
-        transportGuideId: wg?.guideId || null,
-        workGuideId: wg?.id || null,
-        visitId: n(visitId),
-        clientId: n(req.body.clientId) || visit?.clientId || visit?.client?.id || visit?.pool?.clientId || null,
-        poolId: n(req.body.poolId) || visit?.poolId || visit?.pool?.id || null,
-        technicianId: techId,
-        notes: movementNotes,
-        createdBy: req.headers["x-user-email"] || req.headers["x-actor"] || "TECHNICIAN"
-      }
-    }).catch(() => null);
-    await audit(req, "WORK_GUIDE_CONSUME", "WorkGuideItem", item.id, { workGuideId, name, quantity: qty, visitId, vehicleId: wg?.vehicleId, transportGuideId: wg?.guideId });
-    res.json({ ok: true, item: updated, movement });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
-}
+const consumeMaterial = require('./vehicleConsumptionController').legacy;
 
 async function closeWorkGuide(req, res) {
   try {

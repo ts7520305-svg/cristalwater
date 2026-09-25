@@ -1809,48 +1809,6 @@
     }
   }
 
-  async function consumeVisitProducts(visit, products) {
-    if (!products.length) return [];
-    const vehicleId = ($("#vehicleId")?.value || localStorage.getItem("cwVehicleId") || "").trim();
-    const technicianId = ($("#technicianId")?.value || localStorage.getItem("cwTechnicianId") || "").trim();
-    const location = visitLocation(visit);
-    const readings = {
-      ph: $("#ph")?.value,
-      chlorine: $("#chlorine")?.value,
-      alkalinity: $("#alkalinity")?.value,
-      salt: $("#salt")?.value,
-      orp: $("#orp")?.value,
-      temperature: $("#temperature")?.value,
-    };
-
-    const results = [];
-    for (const product of products) {
-      const result = await api("/api/guides/work/consume", {
-        method: "POST",
-        body: JSON.stringify({
-          workGuideId: activeWorkGuide.id,
-          name: product.name,
-          quantity: product.quantity,
-          unit: product.unit,
-          visitId: visit?.id || null,
-          technicianId,
-          vehicleId,
-          poolId: visit?.pool?.id || visit?.poolId || null,
-          clientId: visit?.client?.id || visit?.clientId || visit?.pool?.clientId || null,
-          poolName: visit?.pool?.name || "",
-          clientName: visit?.client?.name || visit?.pool?.client?.name || "",
-          location: location.label,
-          latitude: location.lat,
-          longitude: location.lng,
-          notes: product.notes || `Dosagem aplicada na visita ${visit?.id || ""}`.trim(),
-          ...readings,
-        }),
-      });
-      results.push(result);
-    }
-    await loadGuides(false);
-    return results;
-  }
 
   function listOf(value) {
     return Array.isArray(value) ? value : [];

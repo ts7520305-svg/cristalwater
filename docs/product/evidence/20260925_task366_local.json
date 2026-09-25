@@ -1,0 +1,198 @@
+{
+  "task": "TASK366",
+  "baseCommit": "e4f0e06481c398ef2670e6fd0d0307bb9a1077e8",
+  "validatedAt": "2026-09-25T17:46:39.915172+00:00",
+  "sourceHashes": {
+    "frontend/admin-vehicles.html": "c74b919e477be18ae275fc7f360852c2e79e8a8880dc781b96808ade6bcda439",
+    "frontend/admin-vehicles.js": "90954307da2a248d640ebca36732c5a571b7055070222b5bcf74e8a746554b06",
+    "frontend/cw-vehicle-consumption-copy.js": "379dc705a33fb3cb70a43133613af5b2f5901f67194f8f650b6344a938ed5baf",
+    "frontend/cw-vehicle-consumption-rules.js": "988655845f7b7657c96ab8ca711d4f6de514ae6b89c10683c29c4eda376b270e",
+    "frontend/cw-vehicle-consumption.css": "b6101d1a57e16e69d4904c80089546441665152b9c930ddb45ddf8029bc1ca38",
+    "frontend/cw-vehicle-consumption.js": "de8d318fb6e4974c2f5bdb953f09d55fb77fa13af3f54f1e80da9d8bc16581b5",
+    "frontend/sw.js": "baf4953467fef930c8e6ed9f1edd108f47e5eef25a88474b991c92e298895c69",
+    "frontend/technician-field-mode.js": "d667bafccf8aec571b2fffb5bcc073328be119b004bf4ee69293f278fbc9cc60",
+    "frontend/technician-guide.html": "79bf3791ee54b02889cc462b4703aabf8a7a0b9ea77530561568cbeb8f90cb14",
+    "frontend/technician-guide.js": "01472457141d21212610dc4e96056258e5e6661bb1d1b082d2799eed8546c3a1",
+    "frontend/vehicle-consumption.html": "579cf5a7eb8c8776bb642218a01a1779d9836e828db2d72626e02ca720c78413",
+    "scripts/audit-field-page-inventory.js": "017ed5958476ebd1d21f39dee0563a83911c4ca5eb1bbd4b7b47a5bad519cd5e",
+    "scripts/fixtures/internal-chat-server.js": "31004561dd52db3ee84a29f884272ab2d502ac05e79f6934578bea4e1e6f0eef",
+    "scripts/helpers/vehicle-consumption-fixture.js": "0bcfedcf9dc0eeb050931e3f9b3c65a04bb05fc085f22b83e2b343119db73d74",
+    "scripts/test-field-suite.js": "21a197b5f2a4c12c1ff174db5e85cb2cc80a15caa9c6add4f6fb4a5cc792f66e",
+    "scripts/test-field-vehicle-consumption-ui.js": "d37eb16e28d5e112ad5623b2b6eaa6ce3ea978ad40a267ac87c1481f41feb945",
+    "scripts/test-field-vehicle-consumption.js": "3c7f5907f0f4fe894fb7e603eb689a8d5fbfa4b3f6b77c0fa2d592209de1c396",
+    "src/controllers/guideController.js": "398c8ee58bf525f1063d54a51ddae86de608ac0ac0c8f9ceff1334c01cc8d660",
+    "src/controllers/vehicleConsumptionController.js": "1996296ff935bcf7a6b6913dbef94e033beba21a72e334b18ad6e7e59eb78128",
+    "src/routes/vehicleConsumptionRoutes.js": "47714f16c1e88e7472708cc0d66e3982670f1c8f142d60ae5bd06ebf988e5d67",
+    "src/server.js": "2c0e5a38bb5b1d629018e767ec7e7343ef6877a942d77d2c036b8f61ec954b81",
+    "src/services/fieldWriteRequestService.js": "16379b7037332223bf2f6bca7b026e3cb2906b4ab7fe692515e7e8e26f3c6147",
+    "src/services/vehicleConsumptionService.js": "d1a3a7da2504d60387204885d34b46e32ab69d479556c94d7bd47fd4fba3e883",
+    "tests/vehicle-consumption.test.js": "6192da0e92faadfbd9a9bb6dccd98b719d5cdbff5c5767350e0086ba5c3b304a"
+  },
+  "unitTests": {
+    "passed": 772,
+    "files": 103,
+    "new": 12
+  },
+  "technicianTests": 4,
+  "syntax": {
+    "backend": 652,
+    "frontend": 264,
+    "inline": 44,
+    "finalChangedScriptsCheckedSeparately": true
+  },
+  "schema": {
+    "newMigrations": 0,
+    "existingAdditiveMigrationsApplied": 42,
+    "runtime": "PGlite 0.5.8 / pglite-socket 0.2.11; isolated synthetic test data; not native PostgreSQL"
+  },
+  "integrationGroups": [
+    {
+      "script": "scripts/test-field-vehicle-consumption.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-vehicle-consumption-ui.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-fleet-management.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-fleet-management-ui.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-equipment-stock-os-operational.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-guide-pdf.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-authenticated-document-opening.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-shared-navigation-browser.js",
+      "code": 0
+    }
+  ],
+  "logs": {
+    "/tmp/cw366-unit.log": "3a70170b31fa23abeacef68f83b8536b80833f17c7201f842dd8239b546a793d",
+    "/tmp/cw366-tech.log": "019e6dd5aafca7ad19e8e48595c90a146c697c0c92c22e0ac24d96a58f016c5e",
+    "/tmp/cw366-syntax.log": "a3da792c693f3eb2d9ff6b2cfa2da04eed6c688d267e3f56a960187bfb16bd5c",
+    "/tmp/cw366-api.log": "c44e283aa4ef82edb35796213bd125b6e8fb227b44d0c89802b42a70bc84e54a",
+    "/tmp/cw366-ui.log": "b0151a0a3b4b77682ff23ce266ded5438cf7d435d972f4510228e26868854327",
+    "/tmp/cw366-regressions.log": "4d47d11bae39cd9aaeb8680af0ba408234ceeb93bd00cf162d8f482aa9e64484",
+    "/tmp/cw366-final-regressions.log": "77df54e6fc54f35dee7470c2bc44646b45a1378ce55b7524b1736fe817b0ef30"
+  },
+  "validationNotes": [
+    {
+      "kind": "PGLITE_SQL_FAILURE_CONNECTION",
+      "resolution": "Each of four injected SQL failure points uses a separate real HTTP child; data rollback checked before restarting that child. A prototype reused the affected PGlite connection and failed a later authentication read."
+    },
+    {
+      "kind": "LEGACY_REGRESSION_LOCAL_PORT",
+      "resolution": "Stock operational regression initially attempted its default port 3002, while this runtime uses 3016; rerun with EQUIPMENT_STOCK_OS_BASE_URL set to the isolated server, with assertions unchanged."
+    },
+    {
+      "kind": "MOBILE_BOX_AND_LINK_SIZE",
+      "resolution": "Return link now inline-flex with 44px height; root uses border-box. Full browser group repeated; document-level horizontal overflow asserted at all three widths."
+    }
+  ],
+  "browser": {
+    "engine": "Chromium 153, multiple processes, web security active",
+    "screenshots": 18,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "hashes": {
+      "reports/field-visual/vehicle-consumption/de-1440.png": "b29f3d9696ca0aec8ca482ea643c9adb2d055c83a8a797b4ff1a5147688e09c9",
+      "reports/field-visual/vehicle-consumption/de-320.png": "c49c56adb697a78f9ed427071f4e58fca0e6b141af6d248d7f37e2e89099a8f1",
+      "reports/field-visual/vehicle-consumption/de-390.png": "c71390ed789b4e0a64c0df1b7165540566b9148eec1aa87d694b2be35330babc",
+      "reports/field-visual/vehicle-consumption/en-1440.png": "c4dc0b43067bbccd0f31c1832a9eaa205c580d15cc770f8a39c1d7d682ae293f",
+      "reports/field-visual/vehicle-consumption/en-320.png": "8f5bd00a1d55de1d7fbb1b2292fa657248ed6036fbbe80d6a413275f77b040c3",
+      "reports/field-visual/vehicle-consumption/en-390.png": "cc79ede860e8e61a323824f469a0da92e0c03b118b5804c0f1f46d94f268332d",
+      "reports/field-visual/vehicle-consumption/es-1440.png": "eb5976752fc6f26169c7d8d30845db37105968d8f585ada94f4a3cbef36e116e",
+      "reports/field-visual/vehicle-consumption/es-320.png": "f2f1f089ae71a88db1a2e8475c039a2445a6078713958d75020921e62a788cea",
+      "reports/field-visual/vehicle-consumption/es-390.png": "06fc6745eeeaba51ce342a14476b61e6fd7667ee2e7de9d23b8a750bdd11c48f",
+      "reports/field-visual/vehicle-consumption/fr-1440.png": "412c7dbdf34b3efbf694e672bafe11db24931fd593312653bb0dd9ea7f0a32c5",
+      "reports/field-visual/vehicle-consumption/fr-320.png": "5d2da3442f4cdda618c857b58919e6c5c3fc4cc3b9b6489d0fe6171e48042cd8",
+      "reports/field-visual/vehicle-consumption/fr-390.png": "c9a8ee7f0b6b1419a19d5386eb0b74bc0d4b5d6df2b4df8d4d49135c6f1b10b4",
+      "reports/field-visual/vehicle-consumption/pt-1440.png": "fa390aac2407bde3f984a2927747f009c9ca0ae89b69707df9d968bdb406dbba",
+      "reports/field-visual/vehicle-consumption/pt-320.png": "d4a257e6c88108d6b482c4e48afd2f7c9f26cc83e428d72b25be25f78871ff64",
+      "reports/field-visual/vehicle-consumption/pt-390.png": "4b6dc739f67e61c4b48977741d2acee78cb5461373aa200af014b84b0c980776",
+      "reports/field-visual/vehicle-consumption/review-de-320.png": "f3c27e953b69757e977e449ef02de69d946b5a011e369d20dc60ef5b499f0b53",
+      "reports/field-visual/vehicle-consumption/review-pt-1440.png": "30f2413cc283e9330e0207e46a68e771e1884f5571288f32d3cef104197ef38b",
+      "reports/field-visual/vehicle-consumption/review-pt-390.png": "47be36a9c417b4d47e851010dab10b860c43064df03c1d60fa82973a133af48b"
+    },
+    "visuallyReviewed": [
+      "pt-390.png",
+      "de-320.png",
+      "review-pt-1440.png"
+    ],
+    "profiles": [
+      "ADMIN User",
+      "TECHNICIAN PIN",
+      "TECHNICIAN User",
+      "TEAM_LEADER PIN",
+      "TEAM_LEADER User"
+    ]
+  },
+  "runnerGroups": 268,
+  "cacheVersion": "v177",
+  "inventory": {
+    "htmlFiles": 116,
+    "rootPages": 109,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 104,
+    "catalogueGuardDifferences": 0,
+    "activeScriptsScanned": 289,
+    "remainingLiteralQueue": 12
+  },
+  "publication": {
+    "status": "PREPARED",
+    "branch": "work/field-readiness-20260915-simulation",
+    "mainBranch": "feature/technicians-v25",
+    "mainShaUnchanged": "6f27081e1d183ff584a62255b016b373836734db",
+    "nativeGroupsExpected": 268,
+    "nativeRestore": "PENDING"
+  },
+  "previousCI": [
+    {
+      "task": 365,
+      "codeSha": "fe20bd28939fcb3f6e41ab7721e453bd90109401",
+      "runId": 36164614104,
+      "jobId": 108169212881,
+      "status": "IN_PROGRESS_AT_LAST_CHECK",
+      "groupsExpected": 266,
+      "nativeRestore": "PENDING"
+    }
+  ],
+  "limits": [
+    "Native PostgreSQL 268-group suite and restore pending for this code.",
+    "Manual consumption of one existing WorkGuideItem only; optional regular ServiceVisit association, no extra-visit picker.",
+    "Legacy guide creation/update/synchronization/upload/closure and maintenance/risk-rule writers still require review; they do not all share these locks.",
+    "New list is read-only; the legacy stock GET may still synchronize or create work-guide data.",
+    "No reconciliation of historical balances, names, units or duplicate guides; unsupported decimal balances require review.",
+    "25 guides per page; item lists within a guide are not separately paginated.",
+    "No visit completion, water readings, chemical usage or billing added by this manual flow; users are told not to repeat already recorded visit consumption.",
+    "Only owner-scoped reference persists; form and proof remain in memory.",
+    "Historical scripts outside active runner that use old consume endpoints require adaptation.",
+    "Volume, VPS, operational backups and physical pilot remain open.",
+    "No merge, deploy or real external contact."
+  ]
+}

@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-25T16:53:49.843Z",
-  "baseCommit": "01f71a05c88ab6bd3aa4e96f6152254137d4d927",
+  "generatedAt": "2026-09-25T17:42:55.000Z",
+  "baseCommit": "e4f0e06481c398ef2670e6fd0d0307bb9a1077e8",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 287,
+  "activeScriptsScanned": 289,
   "summary": {
-    "htmlFiles": 115,
-    "rootPages": 108,
+    "htmlFiles": 116,
+    "rootPages": 109,
     "nestedPages": 7,
     "unavailableLocalAssetReferences": 2,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 103,
+    "pagesWithLiteralTestReference": 104,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -1863,7 +1863,8 @@
       "languageAssets": [],
       "directPrintAction": false,
       "testReferences": [
-        "test-field-fleet-management-ui.js"
+        "test-field-fleet-management-ui.js",
+        "test-field-vehicle-consumption-ui.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -4282,6 +4283,7 @@
       "languageAssets": [],
       "directPrintAction": false,
       "testReferences": [
+        "test-field-vehicle-consumption-ui.js",
         "test-field-team-leader-entry.js",
         "test-role-help-browser.js"
       ],
@@ -4923,6 +4925,39 @@
       "languageAssets": [],
       "directPrintAction": false,
       "testReferences": [],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/vehicle-consumption.html",
+      "route": "/vehicle-consumption",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Consumo manual",
+      "catalogueRoles": [],
+      "guardFiles": [],
+      "explicitRoleHints": [
+        "ADMIN",
+        "TEAM_LEADER",
+        "TECHNICIAN"
+      ],
+      "conditionalAccess": [
+        "Sessão coerente verificada no componente; API privada, atribuição atual de viatura e técnico para os perfis de campo."
+      ],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/cw-vehicle-consumption.css",
+        "/cw-vehicle-consumption-rules.js",
+        "/cw-vehicle-consumption-copy.js",
+        "/cw-vehicle-consumption.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-vehicle-consumption.js",
+        "test-field-vehicle-consumption-ui.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {

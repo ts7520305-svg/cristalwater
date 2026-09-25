@@ -1,0 +1,39 @@
+# TASK366 — consumo manual de material da viatura
+
+## Problema e âmbito
+
+O comando antigo escolhia o primeiro item pelo nome, alterava o saldo antes de criar os movimentos e ignorava falhas nesses movimentos e na auditoria. Materiais com o mesmo nome podiam ser confundidos; repetições após uma resposta perdida podiam deduzir novamente. Não havia revisão vinculada ao saldo, à guia e à atribuição atual.
+
+O novo percurso `/vehicle-consumption`, acessível a partir de `/admin-vehicles` e `/technician-guide`, trata o consumo manual de uma linha de material. ADMIN pode selecionar as guias abertas disponíveis; TECHNICIAN e TEAM_LEADER, por PIN ou conta User associada, ficam limitados à sua viatura e à sua guia atribuídas. O consumo automático no fecho da visita mantém o percurso próprio. O ecrã explica que não deve ser registado novamente aqui.
+
+## Comportamento
+
+- Escolha pelo ID do item dentro da guia de obra, com nome, unidade, matrícula e ID da guia visíveis. Não existe correspondência aproximada por nome nem unidade inferida. Diretório privado, pesquisa por matrícula/material e filtro exato de guia, com páginas de 25 guias. A consulta nova não chama o leitor antigo de stock que pode sincronizar/criar guias.
+- Quantidade decimal positiva, até 1 000 000, no máximo seis casas decimais. Vírgula e ponto são aceites no formulário; a API exige representação canónica sem expoentes ou separadores de milhares. Cálculo em unidades milionésimas seguras: consumir 0,1 e depois 0,2 de 0,3 termina em zero, sem resíduo binário. Saldos antigos incompatíveis exigem revisão; não são corrigidos implicitamente. Quantidade inicial e restantes atributos do item são preservados.
+- Motivo obrigatório; local e ID de visita regular opcionais. A visita tem de corresponder ao técnico da guia e à relação atual piscina/cliente. A revisão apresenta essas identidades, sem contactos, PINs ou custos. Não acrescenta análises de água, produtos de visita ou faturação. Associação a visita extra não está incluída neste formulário.
+- Revisão com prova assinada de cinco minutos, ligada à conta, UUID, proposta, guia, item, saldo, viatura, guia AT, atribuição e visita consultados. Mostra o saldo disponível, consumo e saldo final, unidade, destino e guia provisória sem AT quando aplicável. Guia fechada, viatura arquivada, transporte fechado ou associação incompatível impedem a gravação.
+- Confirmação com bloqueios das linhas relevantes e transação única para atualizar quantidade/consumo do item, criar os dois movimentos (`VehicleStockMovement` e `StockMovement`), auditoria e comprovativo. Duas revisões independentes do mesmo saldo permitem uma confirmação; a outra exige nova revisão. Os dados de autoria vêm da sessão.
+- Pedido por proprietário/UUID. Resposta perdida, reinício de processo e repetições simultâneas devolvem o comprovativo original. Alterar corpo/proprietário é recusado. GET consulta sem escrever; encerrar regista a anulação, impedindo uma gravação posterior desse pedido, ou recupera uma confirmação já existente.
+- Campos e prova ficam apenas em memória. Só `{version, owner, workGuideId, itemId, requestId}` é guardado por conta/separador. A referência é escrita e relida antes do envio. Quota, escrita ignorada ou bytes inválidos bloqueiam a operação e preservam os dados existentes. Recarregar permite consultar/anular; repetir exige o envio original ainda em memória. Não existe reenvio automático.
+- Filtros e idioma mantêm o material em preparação. Sessão incoerente/expirada, troca real de conta ou suspensão retiram os dados e impedem respostas tardias. Há estados distintos para carregamento, vazio, indisponibilidade, preparação, revisão, confirmação desconhecida e comprovativo. Conteúdo próprio em PT/EN/FR/ES/DE, dados apresentados como texto, controlos com 44 px e confirmação de 24 px.
+- Os dois endpoints antigos de consumo de guias passam a responder 409 com indicação da revisão. Os formulários antigos dão acesso ao novo percurso. A função sem chamadas que enviava consumos separados no modo de campo foi retirada; a conclusão de visita no servidor mantém o seu escritor de stock.
+
+## Validação
+
+772 testes unitários em 103 ficheiros, incluindo doze novos; quatro testes técnicos. Sintaxe: 652 ficheiros backend, 264 frontend e 44 scripts inline. Sem dependências, tabelas ou migrações novas. Ambiente local isolado com as 42 migrações existentes, PGlite 0.5.8/pglite-socket 0.2.11 e Chromium 153 em múltiplos processos, com segurança web ativa. Estes ensaios não substituem o gate PostgreSQL nativo.
+
+Oito grupos locais distintos aprovados. Os grupos e hashes finais ficam na [evidência local](evidence/20260925_task366_local.json). A API verifica cinco combinações de perfil/autenticação, privacidade, seleção entre nomes duplicados, decimais até zero, resposta perdida/reinício, repetições concorrentes, colisão de revisões independentes, quatro pontos de rollback, alteração de saldo/atribuição/guia/transporte, prova expirada, anulação, paginação e preservação das relações. Cada falha injetada usa um processo HTTP isolado, reiniciado antes do ponto seguinte; isso evita reutilizar uma ligação que o adaptador PGlite possa encerrar após o erro SQL. A invariância dos dados é verificada antes do reinício.
+
+O navegador usa a página e API reais: ADMIN, técnicos e chefes de equipa por PIN/User; material/unidade, revisão/comprovativo, clique repetido, perda de resposta/recarga, offline/repetição/anulação, prova antiga, armazenamento indisponível/ignorado/corrompido, pacote parcial, pesquisas concorrentes, filtro/idioma sem trocar o alvo, suspensão/regresso, conta diferente durante revisão/commit e expiração. Dezoito capturas cobrem cinco idiomas e larguras 320/390/1440; verificam-se também margens, ausência de deslocação horizontal do documento e dimensões dos controlos. A revisão visual identificou e corrigiu o link de retorno sem altura útil e o cálculo das margens do contentor móvel.
+
+As regressões abrangem a gestão de frota API/navegador, stock operacional/consumo de visita, PDFs de guias, abertura autenticada de documentos e navegação comum. O primeiro arranque da regressão de stock apontou para a porta local predefinida errada; foi repetido com `EQUIPMENT_STOCK_OS_BASE_URL` explícito para a aplicação isolada, mantendo as verificações.
+
+Cache v177. Runner com 268 grupos distintos. Inventário atualizado: 116 HTML, 104 com referência literal em 289 scripts ativos, 12 na fila, sem recursos locais ausentes da aplicação; dois recursos já existentes no índice Git continuam não materializados nesta cópia. Referências literais não declaram módulos completos.
+
+## Publicação e retoma
+
+Publicação preparada na branch `work/field-readiness-20260915-simulation`. Commit, árvore e CI serão registados após confirmação. O gate nativo de 268 grupos e restauro deste lote permanece por confirmar.
+
+Continuar em `/admin-vehicles`, começando pela criação/anexo de guias de transporte e pela sincronização com guias de obra. A auditoria encontrou criação e atualização de itens em várias operações separadas, movimentos com falhas ignoradas e um leitor de stock com efeitos de escrita. Abertura/fecho de obra, documentos oficiais/anexos, manutenção/custos e regras de alerta conservam revisão própria. Os escritores antigos de guias ainda não partilham integralmente este protocolo de bloqueio e podem alterar itens posteriormente; a transação nova não os torna globalmente atómicos.
+
+Sem conciliação ou reescrita do histórico. Número de itens por guia ainda não tem paginação própria. Validação de volume, PostgreSQL/restauro, VPS/cópias operacionais e piloto físico permanecem abertos. Sem merge, deploy ou contactos reais; aplicação não declarada completa.

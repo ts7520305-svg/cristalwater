@@ -201,13 +201,9 @@
 
     <section class="card">
       <h2>Registar consumo</h2>
-      <div class="field"><label for="workGuideId">ID guia obra</label><input id="workGuideId" type="number" placeholder="ID guia obra"></div>
-      <div class="field"><label for="itemName">Produto/material</label><input id="itemName" placeholder="Produto/material"></div>
-      <div class="field"><label for="qty">Quantidade</label><input id="qty" type="number" placeholder="Quantidade"></div>
-      <div class="field"><label for="visitId">ID visita opcional</label><input id="visitId" type="number" placeholder="ID visita opcional"></div>
-      <div class="field"><label for="movementLocation">Local/piscina</label><input id="movementLocation" placeholder="Local/piscina se nao houver visita"></div>
-      <div class="field"><label for="movementNotes">Notas do consumo</label><input id="movementNotes" placeholder="Notas do consumo"></div>
-      <button class="btn warn" onclick="consume()" type="button">Consumir material</button>
+      <p>Escolha o material pelo seu identificador e reveja o saldo antes de confirmar.</p>
+      <a class="btn warn" href="/vehicle-consumption">Rever consumo manual</a>
+      <input id="workGuideId" type="hidden">
     </section>
 
     <section class="card">
