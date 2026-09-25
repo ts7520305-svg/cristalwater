@@ -47,7 +47,7 @@ Runtime PGlite 0.5.8/pglite-socket 0.2.11 isolado; Chromium 153 com múltiplos p
 
 TASK362 confirmada em [260/260 grupos e restauro nativo](evidence/20260925_task362_ci.json), 17 etapas, 41 migrações e 42m54s. Restauro de 127 tabelas/47 ficheiros com linhas e hashes iguais. No último controlo, [CI TASK363 36154446240](https://github.com/ts7520305-svg/cristalwater/actions/runs/36154446240), job `108135454917`, permanecia em execução; 262 grupos/restauro por confirmar.
 
-TASK364 preparada para publicação na branch de trabalho. Os 264 grupos completos, atualização nativa e restauro deste lote aguardam CI. A evidência local identifica fontes, capturas, testes e limites; a aprovação anterior não aprova este código.
+Publicada em `cf96f66886fc06d938b43722de072adea7482cbc`, árvore `1012701073ec20edfbd0e2ece41814abc56cc1c2`, idêntica à preparada e validada localmente. [CI 36158832545](https://github.com/ts7520305-svg/cristalwater/actions/runs/36158832545), job `108150001251`, em execução; os 264 grupos completos, atualização e restauro PostgreSQL nativo deste lote continuam por confirmar. A evidência local identifica fontes, capturas, testes e limites; a aprovação anterior não aprova este código.
 
 ## Retoma e limites
 

@@ -1,10 +1,10 @@
 # Cristal Water — matriz atual de conclusão
 
-## Retoma atual — 25/09/2026, TASK364 preparada
+## Retoma atual — 25/09/2026, TASK364 publicada
 
 Gestão de técnicos com revisão explícita de identidade/alteração, preservação de contactos/custos/histórico, associação de viatura e arquivo sem eliminação. PINs novos com hash e sem valor predefinido; listas sem PIN. Versão persistente de acesso invalida sessões PIN/User associadas e não recupera tokens antigos ao reativar. Pedido por administrador/UUID, gravação/auditoria/comprovativo atómicos, recuperação e anulação persistente. Campos em memória, referência por conta/separador, limpeza na suspensão/troca de sessão, erros visíveis e cinco idiomas próprios. Logs de pedidos ocultam também credenciais internas. Migração aditiva 42, cache v175 e runner 264 grupos. [Relatório](TECHNICIAN_MANAGEMENT_RELIABILITY_20260925.md) e [evidência local](evidence/20260925_task364_local.json).
 
-745 unitários/101 ficheiros, quatro técnicos, sintaxe 646/258/44, Prisma e preservação SQL aprovados. Nove grupos locais: API e navegador de técnicos, autenticação PIN, proteção de contas, navegação comum, mês simulado, dois anos acelerados, visitas e rondas. Vinte e quatro capturas em 320/390/1440. Publicação a concluir; CI nativo e restauro da TASK364 pendentes.
+745 unitários/101 ficheiros, quatro técnicos, sintaxe 646/258/44, Prisma e preservação SQL aprovados. Nove grupos locais: API e navegador de técnicos, autenticação PIN, proteção de contas, navegação comum, mês simulado, dois anos acelerados, visitas e rondas. Vinte e quatro capturas em 320/390/1440. Publicada em `cf96f66886fc06d938b43722de072adea7482cbc`, árvore `1012701073ec20edfbd0e2ece41814abc56cc1c2`, idêntica à preparada e validada localmente. [CI 36158832545](https://github.com/ts7520305-svg/cristalwater/actions/runs/36158832545), job `108150001251`, em execução; os 264 grupos completos, atualização e restauro PostgreSQL nativo deste lote continuam por confirmar.
 
 TASK362 confirmada em 260/260 grupos, 17 etapas e restauro de 127 tabelas/47 ficheiros iguais, em 42m54s. TASK363 (`36154446240`, job `108135454917`) continua em execução no último controlo. Inventário: 115 HTML, 102 referenciados em 285 scripts ativos e 13 na fila. Retomar os CIs e `/admin-vehicles`. Contas User, rondas/custos e PINs históricos não são migrados implicitamente; volume de verificação bcrypt, logs históricos, conciliação, VPS/cópias operacionais e piloto físico mantêm revisão própria. Sem merge/deploy/contactos reais; aplicação não declarada completa.
 

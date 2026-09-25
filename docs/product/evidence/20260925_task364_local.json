@@ -194,10 +194,19 @@
     "remainingLiteralQueue": 13
   },
   "publication": {
-    "status": "PREPARED_NATIVE_CI_PENDING",
+    "status": "PUBLISHED_NATIVE_CI_PENDING",
     "branch": "work/field-readiness-20260915-simulation",
     "mainBranch": "feature/technicians-v25",
-    "mainShaUnchanged": "6f27081e1d183ff584a62255b016b373836734db"
+    "mainShaUnchanged": "6f27081e1d183ff584a62255b016b373836734db",
+    "codeSha": "cf96f66886fc06d938b43722de072adea7482cbc",
+    "treeSha": "1012701073ec20edfbd0e2ece41814abc56cc1c2",
+    "preparedTreeEqualsPublishedTree": true,
+    "recordedAt": "2026-09-25T16:09:38.334492+00:00",
+    "runId": 36158832545,
+    "jobId": 108150001251,
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36158832545",
+    "nativeGroupsExpected": 264,
+    "nativeRestore": "PENDING"
   },
   "previousCI": [
     {
