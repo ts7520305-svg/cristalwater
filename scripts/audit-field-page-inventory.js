@@ -37,7 +37,7 @@ const pages = walk(frontend).filter(file => file.endsWith('.html')).sort().map(f
   const declaredRoles = catalogue.get(route)?.roles || [], conditionalAccess = [], entryRedirects = {};
   if (route === '/invoice-document') { roles.add('PUBLIC'); conditionalAccess.push('Entrada pública sem dados financeiros; abrir PDF exige ADMIN ou CLIENT titular na API'); }
   if (route === '/config-notifications') { for (const role of ['ADMIN', 'CLIENT', 'TECHNICIAN', 'TEAM_LEADER']) { roles.add(role); entryRedirects[role] = '/settings'; } conditionalAccess.push('Alias estático; a sessão e titularidade User são verificadas no destino'); }
-  if (['/admin-command-center','/admin-core-flow','/admin-operational-flow'].includes(route) && assets.includes('/cw-admin-legacy-entry.js')) {
+  if (['/admin-command-center','/admin-core-flow','/admin-operational-flow','/client-wow','/splash'].includes(route) && assets.includes('/cw-admin-legacy-entry.js')) {
     Object.assign(entryRedirects,{ADMIN:'/admin-master-control',CLIENT:'/client-portal',TECHNICIAN:'/technician-field-mode',TEAM_LEADER:'/technician-field-mode'});
     conditionalAccess.push('Entrada neutra: encaminha uma identidade coerente para a área do perfil; identidade inválida abre login. Não concede acesso a dados; guardas e APIs do destino continuam a autenticar.');
   }

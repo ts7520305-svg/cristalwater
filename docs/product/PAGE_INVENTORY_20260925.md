@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `b47814984fcb21a57b0318dbb7ae0d9721f05250`. Gerado em 2026-09-25T09:14:36.906Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `3b4b318e552c298488be5306694238df04972b64`. Gerado em 2026-09-25T09:37:02.662Z. Inclui o estado dos ficheiros locais no momento da geração.
 
 115 ficheiros HTML: 108 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 271 scripts de integração/navegador ativos. 87 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 271 scripts de integração/navegador ativos. 89 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 2 referências existem no índice Git mas não estão materializadas nesta cópia local; não são classificadas como ficheiros ausentes da aplicação.
 
@@ -96,7 +96,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /client-notifications | Entrada raiz | CLIENT | CLIENT | 3 |
 | /client-payments | Entrada raiz | CLIENT | CLIENT | 4 |
 | /client-portal | Entrada raiz | CLIENT, ADMIN | ADMIN, CLIENT | 17 |
-| /client-wow | Entrada raiz | CLIENT | CLIENT | 0 |
+| /client-wow | Entrada raiz | CLIENT | CLIENT | 1 |
 | /client | Entrada raiz | CLIENT | CLIENT | 13 |
 | /client_chat | Entrada raiz | CLIENT, ADMIN | CLIENT | 4 |
 | /client_tech | Entrada raiz | CLIENT | CLIENT | 1 |
@@ -129,7 +129,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /report-settings | Entrada raiz | ADMIN | ADMIN | 6 |
 | /route-map | Entrada raiz | ADMIN | ADMIN | 1 |
 | /settings | Entrada raiz | ADMIN, CLIENT, TECHNICIAN, TEAM_LEADER | ADMIN, CLIENT, TEAM_LEADER, TECHNICIAN | 9 |
-| /splash | Entrada raiz | ADMIN | — | 0 |
+| /splash | Entrada raiz | ADMIN | — | 1 |
 | /technician-chat | Entrada raiz | — | — | 3 |
 | /technician-field-mode | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 34 |
 | /technician-gps | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 2 |
@@ -170,13 +170,11 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 - /admin-vehicles — Entrada raiz; papéis declarados: ADMIN.
 - /admin-visits — Entrada raiz; papéis declarados: ADMIN.
 - /billing-center — Entrada raiz; papéis declarados: ADMIN.
-- /client-wow — Entrada raiz; papéis declarados: CLIENT.
 - /crystal-os-v2-route-index — Entrada raiz; papéis declarados: ADMIN.
 - /incident-center — Entrada raiz; papéis declarados: ADMIN.
 - /operational-dashboard — Entrada raiz; papéis declarados: ADMIN.
 - /reminder-materials — Entrada raiz; papéis declarados: ADMIN.
 - /reminder-visits — Entrada raiz; papéis declarados: ADMIN.
-- /splash — Entrada raiz; papéis declarados: ADMIN.
 - /tests/test_extra.html — Auxiliar/protótipo/teste; papéis declarados: —.
 - /ui/views/demo.html — Auxiliar/protótipo/teste; papéis declarados: —.
 - /v26/admin-prototype.html — Auxiliar/protótipo/teste; papéis declarados: —.

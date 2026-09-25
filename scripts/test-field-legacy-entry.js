@@ -20,7 +20,7 @@ let browser;
   {name:'storage unavailable',role:'ADMIN',storage:true,target:'/login?reason=guard_error'}
  ];
  let checked=0;
- const aliases=['/admin-command-center','/admin-core-flow','/admin-operational-flow'];assert.deepEqual(R.aliases,aliases);
+ const aliases=['/admin-command-center','/admin-core-flow','/admin-operational-flow','/client-wow','/splash'];assert.deepEqual(R.aliases,aliases);
  for(const alias of aliases)for(const item of cases){
   const context=await browser.newContext({serviceWorkers:'block'}),page=await context.newPage(),errors=[],destinations=[],apiRequests=[];page.setDefaultTimeout(6000);page.on('pageerror',e=>errors.push(e.message));
   const claims={id:7,role:item.role,exp:item.expired?1:Math.floor(Date.now()/1000)+3600},credential=token(claims),user=JSON.stringify({id:item.other?8:7,role:item.role,name:'João'}),identity=item.missing?{}:item.canonical?{cristalwater_jwt:credential,cristalwater_user:user}:{token:credential,user};if(item.conflict)identity.adminToken=token({...claims,id:8});const expected={...work,...identity};
@@ -39,5 +39,16 @@ let browser;
   for(const width of [320,390,1440]){await page.setViewportSize({width,height:900});assert(await page.locator('main').evaluate(n=>n.scrollWidth<=n.clientWidth+1));await page.locator('main .grid .card').first().scrollIntoViewIfNeeded();await page.screenshot({path:path.join(output,name+'-'+width+'.png')});}
   await page.locator('main .grid .card a').first().click();await page.waitForURL(origin+'/client-portal');assert.deepEqual(errors,[]);for(const [key,value] of Object.entries(work))assert.equal(await page.evaluate(key=>localStorage.getItem(key),key),value);await context.close();
  }
+ // No JavaScript must still leave a usable same-origin login link.
+ for(const entry of ['/client-wow','/splash']){
+  const context=await browser.newContext({javaScriptEnabled:false,viewport:{width:320,height:700}}),page=await context.newPage();
+  await context.route('**/*',route=>route.fulfill({contentType:route.request().resourceType()==='document'?'text/html':'text/css',body:route.request().resourceType()==='document'?source(entry.slice(1)+'.html'):''}));
+  await page.goto(origin+entry);assert.equal(await page.locator('#legacyEntryLink').getAttribute('href'),'/login');assert(await page.locator('#legacyEntryLink').isVisible());assert((await page.locator('noscript').textContent()).includes('JavaScript'));assert(await page.locator('main').evaluate(n=>n.scrollWidth<=n.clientWidth+1));await context.close();
+ }
+ // The retained script for older cached HTML only forwards one supported language.
+ for(const [query,target] of [['?lang=fr&clientId=999&token=PRIVATE&returnTo=https://bad.test','/client-portal?lang=fr'],['?lang=pt&lang=de','/client-portal'],['?lang=bad','/client-portal']]){
+  const context=await browser.newContext(),page=await context.newPage();await context.route('**/*',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><a id="portalLink" href="/client-portal">Portal</a>'}));await page.goto(origin+'/client-wow'+query);await page.addScriptTag({content:source('client-wow.js')});assert.equal(await page.locator('#portalLink').getAttribute('href'),target);await context.close();
+ }
+ console.log('PASS client/splash fallback: login remains usable without JavaScript at 320px; old cached portal link strips arbitrary parameters and repeated/unknown languages');
  console.log('PASS legacy entry: '+checked+' actual alias HTML cases, extension/slash variants, four roles and identity/expiry/storage refusal, one fixed same-origin destination, only supported language forwarded, no API calls or stored-byte changes; two actual client menus open the portal without self-loop, 320/390/1440');
 })().catch(error=>{console.error(error);process.exitCode=1;}).finally(async()=>{await browser?.close();});

@@ -12,7 +12,7 @@
   root.location.replace(target);
 }(typeof window==='undefined'?globalThis:window,function(){
   'use strict';
-  const aliases=Object.freeze(['/admin-command-center','/admin-core-flow','/admin-operational-flow']);
+  const aliases=Object.freeze(['/admin-command-center','/admin-core-flow','/admin-operational-flow','/client-wow','/splash']);
   const keys=Object.freeze(['cristalwater_jwt','token','adminToken','cristalwater_user','user']);
   const positive=v=>Number.isSafeInteger(v)&&v>0&&v<=2147483647;
   function destination(values,search='',now=Date.now()){

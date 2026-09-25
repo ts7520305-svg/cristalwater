@@ -1,0 +1,104 @@
+{
+  "task": "TASK352",
+  "checkedAt": "2026-09-25T09:39:11.541525+00:00",
+  "baseCommit": "3b4b318e552c298488be5306694238df04972b64",
+  "sourceSha256": {
+    "frontend/client-wow.html": "e44dd68a8a94953ebcb8fea9d52d3b48ae4ebb9bee9420baf4f9ed05e298579d",
+    "frontend/client-wow.js": "763852db10b0e1e9dd77f060cf32074465159c56948bc7df9e11233c3483055a",
+    "frontend/splash.html": "b48d3d6582e032c1e952cc7a29d235a5ca64ea5aa43d89a8bef17944ad99362c",
+    "frontend/cw-admin-legacy-entry.js": "07407ea75719e7dbf0f31c982f69806cdc465ae20c0ddf5a22751f3a813a028e",
+    "frontend/sw.js": "80164caa654db731bdd9069f75485a3dad3e2047428ec54b7683fd80aa9c51c8",
+    "scripts/audit-field-page-inventory.js": "441f582d60a1641fb7283cb88a025e38a46111881901c8d5241f700889a6b016",
+    "scripts/test-field-legacy-entry.js": "3ca1082835a06cab39c1a6852a9b222cde6875194bbef93df63700c40ff8cdef"
+  },
+  "unitTests": {
+    "passed": 639,
+    "files": 90
+  },
+  "technicianTests": {
+    "passed": 4,
+    "files": 1
+  },
+  "syntax": {
+    "backend": 633,
+    "frontend": 234,
+    "inline": 54
+  },
+  "integration": {
+    "distinctGroups": 2,
+    "scripts": [
+      "test-field-legacy-entry.js",
+      "test-auth-entry-browser.js"
+    ],
+    "result": "success"
+  },
+  "finalEntryRerun": {
+    "script": "test-field-legacy-entry.js",
+    "result": "success",
+    "log": "/tmp/cw352-final-entry.log"
+  },
+  "entryCases": 50,
+  "noJavaScriptCases": 2,
+  "cachedCompatibilityCases": 3,
+  "passLines": [
+    "PASS isolated schema: 40 additive migrations",
+    "PASS legacy entry: 50 actual alias HTML cases, extension/slash variants, four roles and identity/expiry/storage refusal, one fixed same-origin destination, only supported language forwarded, no API calls or stored-byte changes; two actual client menus open the portal without self-loop, 320/390/1440",
+    "PASS client guard: 24 entry cases, preserved drafts/documents/corrupt legacy bytes, expiry/identity validation, storage failure, administrator preview/chat and real settings script",
+    "PASS login.js repeated login, retry, exact password and no token logging",
+    "PASS admin-login.js repeated login, retry, exact password and no token logging",
+    "PASS client-login.js repeated login, retry, exact password and no token logging",
+    "PASS technician-login.js repeated login, retry, exact password and no token logging",
+    "PASS HTML login, account switch and cross-tab session change disconnect private sockets; logout preserves field outbox",
+    "PASS actual administrative visits page: shared logout, disabled repeated action, awaited cleanup, session removed and all saved work preserved",
+    "PASS actual technician page: visible logout, 320px Spanish header, no network overlap, busy guard and preserved pending work",
+    "PASS isolated schema: 40 additive migrations",
+    "PASS client/splash fallback: login remains usable without JavaScript at 320px; old cached portal link strips arbitrary parameters and repeated/unknown languages",
+    "PASS legacy entry: 50 actual alias HTML cases, extension/slash variants, four roles and identity/expiry/storage refusal, one fixed same-origin destination, only supported language forwarded, no API calls or stored-byte changes; two actual client menus open the portal without self-loop, 320/390/1440"
+  ],
+  "logs": {
+    "/tmp/cw352-unit.log": "ab131fad187fe800ea84ab1db2cc03272804e6ff4649102387b614df5edf9a39",
+    "/tmp/cw352-tech.log": "3209c6040927443ce41185b6c7165f263c56242454b7d3eb91fb47b83fc3cf70",
+    "/tmp/cw352-syntax.log": "55a6d29af124f60bdf8dfb8d8135e636b7cbb7fb180760ee32c41e7094144e7c",
+    "/tmp/cw352-integration.log": "174b08b56419c5c7711e3a93b66cc6d9343e30424b0a53962fd9cbc3c2c171f6",
+    "/tmp/cw352-final-entry.log": "73b72450a88dd81259e06b115ce7ddd0e8bfaa3f52c130c184b3a86e5795305e"
+  },
+  "runtime": {
+    "database": "PGlite 0.5.8 / pglite-socket 0.2.11, isolated",
+    "additiveMigrations": 40,
+    "chromium": "@sparticuz/chromium 153.0.0, normal multiple processes, web security retained",
+    "runnerSha256": "5bd8f95926470bd82fabef27148ed54a55532bdf80d8dbc557dd19b244486b2b",
+    "preloadSha256": "74ba6986b731dfe5120836cb841c25bed62d334014aa588379558293deb6ec7a"
+  },
+  "regeneratedMenuScreenshots": {
+    "reports/field-visual/legacy-entry/client-dashboard-1440.png": "ba83bdf8d1554fc4172775fa78773b8d614084f4534bd0714ab81aebf11d0664",
+    "reports/field-visual/legacy-entry/client-dashboard-320.png": "082dd0f065ee079063432ef9feefad1c905baf31f69e1166d277c9832eb7b7ef",
+    "reports/field-visual/legacy-entry/client-dashboard-390.png": "e11067de371859e63ddf4df64530c78452a8decd17702004a3808f346248f5ca",
+    "reports/field-visual/legacy-entry/client-menu-1440.png": "4ccc4e80c5ffe25f9672aebe67271160c63246e536c6936f18699b9d6ead4fee",
+    "reports/field-visual/legacy-entry/client-menu-320.png": "7cf526ee3bc1ebbc0837d5a87801b58fe79a388b1804c39e50a94e38fc612305",
+    "reports/field-visual/legacy-entry/client-menu-390.png": "a44488015546241045f4acb7b624b53503e222d65b58e3e2e319b1bfde048049"
+  },
+  "cache": "v164",
+  "fieldSuiteExpectedGroups": 250,
+  "inventory": {
+    "htmlFiles": 115,
+    "rootPages": 108,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 89,
+    "catalogueGuardDifferences": 0,
+    "activeScripts": 271,
+    "pagesWithoutLiteralTestReference": 26
+  },
+  "limits": [
+    "Native CI and PostgreSQL restore of TASK352 remain pending.",
+    "TASK351 remains in progress at the last check.",
+    "Entry scenarios use fixture credentials and controlled destinations; navigation does not replace API authentication.",
+    "The no-JavaScript fallback is Portuguese; no five-language visual certification is claimed.",
+    "Two indexed images are not materialized locally; remaining page and production criteria retain their own scope."
+  ],
+  "testPreparation": [
+    "The first inventory edit stopped on an exact-string mismatch before modifying that script; the correct match was applied and the inventory regenerated.",
+    "The final entry run adds no-JavaScript and old cached-link compatibility checks."
+  ]
+}
