@@ -161,15 +161,18 @@
     "runId": 36150863744,
     "jobId": 108123470461,
     "codeSha": "c2be6caa8649e1d7ab3fc47aef29d5f85c07ac49",
-    "status": "in_progress",
+    "status": "completed",
     "expectedGroups": 260,
-    "nativeRestore": "PENDING"
+    "nativeRestore": "PASSED_127_TABLES_47_FILES",
+    "conclusion": "success",
+    "actualGroups": 260,
+    "evidence": "docs/product/evidence/20260925_task362_ci.json"
   },
   "initialVerificationFindings": [
     "Initial browser opening failed; corrected textarea type assignment and explicit state ownership, then passed repeated full affected groups."
   ],
   "limits": [
-    "Native PostgreSQL full suite and restore pending for TASK362/TASK363.",
+    "Native PostgreSQL full suite and restore confirmed for TASK362; TASK363 remains pending.",
     "No physical iPhone/Android or clipboard pilot.",
     "Historical administration snapshots were not rewritten.",
     "Encryption key/format unchanged; no automatic repair of old ciphertext.",

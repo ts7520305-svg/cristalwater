@@ -30,20 +30,14 @@ function auditMiddleware(req, res, next){
 }
 
 function safeBody(body){
-
-  if (!body) return null;
-
-  const clone = { ...body };
-
-  delete clone.password;
-  delete clone.currentPassword;
-  delete clone.newPassword;
-  delete clone.confirmPassword;
-  delete clone.reviewToken;
-  delete clone.pin;
-  delete clone.token;
-
-  return clone;
+  const secrets = new Set(['password','currentpassword','newpassword','confirmpassword','reviewtoken','pin','token']);
+  function redact(value, depth = 0) {
+    if (value === null || typeof value !== 'object') return value;
+    if (depth >= 16) return '[nested data omitted]';
+    if (Array.isArray(value)) return value.map(item => redact(item, depth + 1));
+    return Object.fromEntries(Object.entries(value).filter(([key]) => !secrets.has(key.toLowerCase())).map(([key, item]) => [key, redact(item, depth + 1)]));
+  }
+  return body ? redact(body) : null;
 }
 
 module.exports = auditMiddleware;

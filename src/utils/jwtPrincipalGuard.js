@@ -10,6 +10,8 @@ function toEpochSeconds(dateValue) {
   return Math.floor(ts / 1000);
 }
 
+function technicianVersionMatches(decoded,tech){const version=decoded.techAuthVersion===undefined?0:decoded.techAuthVersion;return Number.isInteger(version)&&version>=0&&version===Number(tech.authVersion||0);}
+
 async function validateJwtPrincipal(decoded = {}) {
   const role = normalizeRole(decoded.role);
   if (decoded.principalType === 'ENV_ADMIN') {
@@ -21,8 +23,8 @@ async function validateJwtPrincipal(decoded = {}) {
     if (!user || !user.active || normalizeRole(user.role) !== role) return {ok:false,reason:'user-invalid'};
     if (toEpochSeconds(user.passwordChangedAt) > Number(decoded.iat || 0)) return {ok:false,reason:'password-changed'};
     if (['TECHNICIAN','TEAM_LEADER'].includes(role) && decoded.technicianId) {
-      const tech = await prisma.technician.findUnique({where:{id:Number(decoded.technicianId)},select:{email:true,active:true}});
-      if (!tech || !tech.active || tech.email !== user.email) return {ok:false,reason:'technician-link-invalid'};
+      const tech = await prisma.technician.findUnique({where:{id:Number(decoded.technicianId)},select:{email:true,active:true,deletedAt:true,authVersion:true}});
+      if (!tech || !tech.active || tech.deletedAt || tech.email !== user.email || !technicianVersionMatches(decoded,tech)) return {ok:false,reason:'technician-link-invalid'};
     }
     return {ok:true};
   }
@@ -68,12 +70,13 @@ async function validateJwtPrincipal(decoded = {}) {
 
     const tech = await prisma.technician.findUnique({
       where: { id: technicianId },
-      select: { id: true, active: true, role: true },
+      select: { id: true, active: true, role: true, deletedAt: true, authVersion: true },
     });
 
     if (role === "TEAM_LEADER" && normalizeRole(tech?.role) !== "TEAM_LEADER") return {ok:false,reason:"leader-role-changed"};
     if (!tech) return { ok: false, reason: "technician-missing" };
-    if (tech.active === false) return { ok: false, reason: "technician-inactive" };
+    if (tech.active === false || tech.deletedAt) return { ok: false, reason: "technician-inactive" };
+    if (!technicianVersionMatches(decoded,tech)) return {ok:false,reason:"technician-access-changed"};
     return { ok: true };
   }
 

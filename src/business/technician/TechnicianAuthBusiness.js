@@ -5,6 +5,7 @@ const { normalizeRole } = require("../../utils/roles");
 const { getJwtSecret } = require("../../utils/jwtSecret");
 
 const JWT_SECRET = getJwtSecret();
+const pins=require("../../services/technicianPinService");
 
 async function loginTechnician(payload = {}) {
   const { pin } = payload;
@@ -18,21 +19,11 @@ async function loginTechnician(payload = {}) {
   }
 
   const cleanPin = String(pin).trim();
-  const tech = await prisma.technician.findFirst({
-    where: {
-      pin: cleanPin,
-      active: true,
-    },
-    orderBy: { id: "asc" },
-  });
-
-  if (!tech) {
-    return {
-      ok: false,
-      status: 401,
-      message: "PIN inválido (não existe técnico com este PIN)",
-    };
-  }
+  if(cleanPin.length>72)return {ok:false,status:401,message:'Credenciais inválidas'};
+  const matches=await pins.findMatches(prisma,cleanPin,{activeOnly:true,stopAfter:2});
+  if(matches.length!==1)return {ok:false,status:401,message:'Credenciais inválidas'};
+  const tech=await prisma.technician.findUnique({where:{id:matches[0]}});
+  if(!tech?.active||tech.deletedAt||!await pins.matches(cleanPin,tech.pin)||!['TECHNICIAN','TEAM_LEADER'].includes(normalizeRole(tech.role)))return {ok:false,status:401,message:'Credenciais inválidas'};
 
   const role = normalizeRole(tech.role || "TECHNICIAN");
   const language = await getLanguageForIdentity(
@@ -46,6 +37,8 @@ async function loginTechnician(payload = {}) {
       {
         id: tech.id,
         technicianId: tech.id,
+        principalType: 'TECHNICIAN',
+        techAuthVersion: tech.authVersion,
         name: tech.name,
         role,
         language,

@@ -153,14 +153,14 @@ async function createPool(client, payload) {
 
 async function setupPeopleAndFleet() {
   for (let i = 1; i <= 3; i += 1) {
-    const { data } = await call("POST", "/api/core/technicians", {
+    const technician = await require("./helpers/create-reviewed-technician")(call, {
       name: `QA Real Tecnico ${i} ${runId}`,
       email: `qa.real.tecnico.${i}.${runId}@cristalwater.test`,
       phone: `91000000${i}`,
-      pin: `90${i}${i}`,
+      pin: `90${i}${i}73`,
       zone: i === 1 ? "Cascais" : i === 2 ? "Sintra" : "Lisboa",
     });
-    created.technicians.push(data.technician);
+    created.technicians.push(technician);
 
     const vehicle = await call("POST", "/api/guides/vehicles", {
       plate: `QA-${String(i).padStart(2, "0")}-${String(runId).slice(-2)}`,
@@ -174,7 +174,7 @@ async function setupPeopleAndFleet() {
     created.vehicles.push(vehicle.data.vehicle);
 
     await call("POST", "/api/guides/vehicles/assign", {
-      technicianId: data.technician.id,
+      technicianId: technician.id,
       vehicleId: vehicle.data.vehicle.id,
       startKm: 10000 + i * 100,
       notes: `Inicio de mes QA real ${runId}`,
@@ -183,7 +183,7 @@ async function setupPeopleAndFleet() {
     const guide = await call("POST", "/api/guides/transport", {
       codeAT: `AT-${runId}-${i}`,
       vehicleId: vehicle.data.vehicle.id,
-      technicianId: data.technician.id,
+      technicianId: technician.id,
       validFrom: iso(1, 7),
       validUntil: iso(30, 20),
       origin: "Armazem Cristal Water",

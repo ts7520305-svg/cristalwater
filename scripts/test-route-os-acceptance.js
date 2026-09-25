@@ -195,16 +195,14 @@ async function main() {
   assertStep([200, 201].includes(user.status), "Falha ao criar utilizador do workday.");
   assertStep(Number.isInteger(userId) && userId > 0, "Utilizador criado sem ID valido.");
 
-  const technician = await request("POST", "/api/technicians", {
+  const technician = await require("./helpers/create-reviewed-technician")(request, {
     name: `Route OS Technician ${suffix}`,
     email: `route-os-tech-${suffix}@cristalwater.pt`,
     phone: "930000000",
-    role: "TECHNICIAN",
-    active: true,
     pin,
-  });
+  }, {response:true});
 
-  assertStep(technician.status === 201, "Falha ao criar tecnico.");
+  assertStep(technician.status === 200, "Falha ao criar tecnico.");
   assertStep(Number.isInteger(technician.body?.id), "Tecnico criado sem ID valido.");
 
   const login = await request("POST", "/api/technician-auth/login", { pin });
@@ -401,7 +399,7 @@ async function main() {
   const elapsedMs = Date.now() - startedAt;
   const ok =
     user.status === 200 &&
-    technician.status === 201 &&
+    technician.status === 200 &&
     login.status === 200 &&
     [200, 201].includes(workdayStart.status) &&
     workdayStatus.status === 200 &&

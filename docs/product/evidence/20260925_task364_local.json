@@ -1,0 +1,232 @@
+{
+  "task": "TASK364",
+  "baseCommit": "9dc43c0637c9c0a79d580d5259a9b641fcf8fb52",
+  "validatedAt": "2026-09-25T16:06:52.105455+00:00",
+  "sourceHashes": {
+    "frontend/admin-technicians.html": "36c8a1e4bb38c8c3e46acfcbb294430d75ec46d7c25d024408601b1fd9b31290",
+    "frontend/admin-technicians.js": "281ed3e4c70550a39c931ea4c1e1b2f09ef24034ae0393f7b8ff852e8db55529",
+    "frontend/cw-technician-management-copy.js": "17dc463ff136c9dc4bfc0341a5c202e6e72a1c5f006f761b66c813c71de95b50",
+    "frontend/cw-technician-management-rules.js": "0ec75bf19afd9543e3191aea5cc9756c57e4959f983b7ba832ed627b63d97f20",
+    "frontend/cw-technician-management.css": "f21c348eaa38e317dba065360fc5d2103b40ceaf0a87004c8e6abdfc1b5db56e",
+    "frontend/sw.js": "8b4481801d2dabb4f65ab5cf7b78016cb4c6f0de6e6af415b36299afc82bb89a",
+    "prisma/migrations/20260925160000_technician_access_version/migration.sql": "a8f5919742ad2ea5f5c260785d1942a3a37c3e8d9b9311135806e941c9ecbc8c",
+    "prisma/schema.prisma": "b6a7143384e90555b3df992679d7b3bb8f459f693f30fc00859e354a98a5d2c2",
+    "scripts/fixtures/internal-chat-server.js": "535835f530221ee2d544bc82c9e54004fefbe0b527e81724138674848c22ec5e",
+    "scripts/helpers/create-reviewed-technician.js": "ea40dac60855809fa7bd2550a7b9bedd3fa000a0a878b1f2349828c49b0478d6",
+    "scripts/test-field-migrations.js": "f5a7bcc1d5822b31f8742e27f5fedbaba0a953c289c4f5163f2fecad5634e035",
+    "scripts/test-field-suite.js": "95fcbbc46caf1668fb1c8513b6110829a12b41821959a8f0bcfa50d8cb693754",
+    "scripts/test-field-technician-management-ui.js": "1a50e2aee4e0f324409857e819c6a742fec564e0b6d647b6a8c55191e69d1c0c",
+    "scripts/test-field-technician-management.js": "1df4ec8c8795fd2d3c9102265dc7d9a2918afb570d3fcd93a3fa85aa0c21b93f",
+    "scripts/test-field-two-year-api.js": "e629daf604b3aafb47dbfadd2f3b9661a37ed70e177f5299ee971a9d298951b3",
+    "scripts/test-real-month-flow-api.js": "1d6ba9cd329596b5307381163ea3d714e6457779470f0fb6be916051c1de9aff",
+    "scripts/test-route-os-acceptance.js": "8ec7fbae6771549a9adff81dd638ebb378ea8947e5424de3fbcaff987c5444c7",
+    "scripts/test-visit-os-operational.js": "922471cbdc5b671c28e8f9805e99bf3c1bec74b3e4893289f6a930af38bb48e6",
+    "src/business/technician/TechnicianAuthBusiness.js": "4e51b6e1dd32bac615f0eb72a161293f445a7a0cc379f91da1e75430e044f4a1",
+    "src/controllers/authController.js": "2f0b5105c969347633a60215e11f7bae7e9d5d9ec230453912204d593481bc49",
+    "src/controllers/technicianManagementController.js": "70fd070a0162bdab5d03c1f09133b81fef80c356d076dba92260d5d99bb5099c",
+    "src/middlewares/auditMiddleware.js": "a0073e64fe4ea52dc775bb5083c67986ae3571e5b1e5a7d19b239f509563231b",
+    "src/routes/coreFlowRoutes.js": "6ea7ebed644f819d12b06f454d57cf6de370e072d134bc6b54a26a9be4f331f7",
+    "src/routes/technicianCrudRoutes.js": "8750764916558f3a2ab7a485c3c6d5486c8938cb706e14e3a39789d2ea620463",
+    "src/services/fieldWriteRequestService.js": "33d4f93fd635e11e85bae76a9a045dcb16fcbab937d2a8460702848b093251dc",
+    "src/services/technicianManagementService.js": "f71c53ebd2b28acd0b18c45d76c9de0d4fc2e8823caf104db6f03db37d220dba",
+    "src/services/technicianPinService.js": "e1f4d72a4b75543275649471293e67a57d54fd9220b850eac0aa75889df5db44",
+    "src/utils/jwtPrincipalGuard.js": "1e2a9e1d2b8d25eec3d3e94b4b13dceb467c607de7120f286ca880a12724a844",
+    "tests/technician-management.test.js": "b91fb2b0a190cb28198696707917ed1373d920a3bb78c6ab063c4107dcf07e2f"
+  },
+  "unitTests": {
+    "passed": 745,
+    "files": 101,
+    "new": 12,
+    "fullSuiteAfterRecursiveAuditFix": true
+  },
+  "technicianTests": {
+    "passed": 4
+  },
+  "syntax": {
+    "backend": 646,
+    "frontend": 258,
+    "inline": 44,
+    "finalChangedScriptsCheckedSeparately": true
+  },
+  "prisma": "VALIDATED_AND_GENERATED",
+  "integrationGroups": [
+    {
+      "script": "scripts/test-field-technician-management.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-technician-management-ui.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-fcs-sec-tech-auth.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-real-month-flow-api.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-two-year-api.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-account-access.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-shared-navigation-browser.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-visit-os-operational.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-route-os-acceptance.js",
+      "code": 0
+    }
+  ],
+  "finalSecurityGroupsRepeated": [
+    "scripts/test-field-technician-management.js",
+    "scripts/test-field-account-access.js"
+  ],
+  "finalBrowserGroupRepeated": true,
+  "logs": {
+    "/tmp/cw364-api.log": "ce018404f6839512986482f195991b129024eef53b67843c2711f1ee89e95a6f",
+    "/tmp/cw364-browser-regressions.log": "3c5a658261bac233b5b02870ee930a27d4ee1ec9f0c183c3105a0db90b711ab8",
+    "/tmp/cw364-final-integration.log": "233d03264a47d2cabd532a3a31fe256312a431a612590339598b05d38bf09d57",
+    "/tmp/cw364-route-visit.log": "69081c4807bbef4f565c930db40376c2bfe6653fbcf9eed61a507a8e9871f383",
+    "/tmp/cw364-final-security.log": "2ec3229a9d73da4bf3bb0141c8a68e5b1fa0a330b839544fb976a2e6646b12c4",
+    "/tmp/cw364-unit.log": "d5a53a11a285a8c17c20046117fb612f71234eab9a1d4cb26a0201fc186a91cd",
+    "/tmp/cw364-final-unit.log": "52c60a8014ad5928b4c35b5d270606d8e01e06c80cab599381ceac6a2959e995",
+    "/tmp/cw364-technician.log": "a84ea4ed59242d7a8270a409f56336e14bd932683b6a7f30bf3aa2c84f0b4083",
+    "/tmp/cw364-syntax.log": "44d1abb678611fc47531ee125c13da7f27b95337a6136c3c53f649bf76d5effd",
+    "/tmp/cw364-prisma.log": "6a1064f82096fd3570da5536b4c643729d141a6b8627b98978f81ed4cc893ae4",
+    "/tmp/cw364-migration.log": "a9f7f822e1281b5b1064f3f4b62e8da23437f757e7bf64d1df1d510cd0f2d4fe"
+  },
+  "migration": {
+    "new": "20260925160000_technician_access_version",
+    "totalAdditive": 42,
+    "localPreservation": "PASS_PGLITE_41_PRIOR_THEN_42ND_ALL_EXISTING_TECHNICIAN_COLUMNS_EQUAL_DEFAULT_ZERO_NEGATIVE_REJECTED",
+    "nativePreservation": "PENDING_CI"
+  },
+  "runtime": {
+    "database": "PGlite 0.5.8 / pglite-socket 0.2.11, isolated",
+    "chromium": "153.0.0, multiple processes, web security retained",
+    "runnerSha256": "5bd8f95926470bd82fabef27148ed54a55532bdf80d8dbc557dd19b244486b2b",
+    "preloadSha256": "74ba6986b731dfe5120836cb841c25bed62d334014aa588379558293deb6ec7a"
+  },
+  "fixture": {
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "screenshots": {
+      "reports/field-visual/technician-management/card-de-320.png": "ba4f93c9f68bd1f8f48a3a3159a0da3600a1c2e09ea9ba3080f6f53702b598dd",
+      "reports/field-visual/technician-management/card-pt-1440.png": "c96e945dc4ce20b5de0a61c742b5c8c74c15769a5974e9a45e596a375553f2fe",
+      "reports/field-visual/technician-management/card-pt-390.png": "9c5674977f972e5f53cc45bd7fcd59f58362dfdbdc2222448456d0ff9c31f8ba",
+      "reports/field-visual/technician-management/de-1440.png": "4d19d1b08ab4f41e6a4d5d39ce8840be794d83dbf009ed09fba624ae1fcc015e",
+      "reports/field-visual/technician-management/de-320.png": "09b9af69761d826064f98f3e08b9d61aaeaf659465712601b30df6e7e68656c9",
+      "reports/field-visual/technician-management/de-390.png": "5dec388aacc7c06f7e8a61198d80af0868e6be9cd68b3c05e421c28f9482a62a",
+      "reports/field-visual/technician-management/directory-de-320.png": "f1a72005b26af0385612e0e69535feceab975a470c9cfef349ae8bc1c2dd23e0",
+      "reports/field-visual/technician-management/directory-pt-1440.png": "a54d696d6c3b27e647d197703bc32afad63f1b19d102f303931f3086129bf168",
+      "reports/field-visual/technician-management/directory-pt-390.png": "9910161015d88f19ffad1d388726702aa9606c0615af1db2f69630b7b5f6a8f7",
+      "reports/field-visual/technician-management/en-1440.png": "c9b68c86bf2fcb45c05c9e37985f4bd3f72671ff8db627957f01a87050e9b612",
+      "reports/field-visual/technician-management/en-320.png": "0ebb4e3dbe3e55b2cf23067113c38402cd6345e82544270c1c4ac8d4fdebf4e1",
+      "reports/field-visual/technician-management/en-390.png": "5403ed5dd202c03dd2d69e0a4d73b896777923c0457dda3934adf0141f40c74c",
+      "reports/field-visual/technician-management/es-1440.png": "c5701ea8b109143ceec52355aa706dfaca516f31d15d2a742585a816ce1f5992",
+      "reports/field-visual/technician-management/es-320.png": "caa0f87d2a661cd29a9af3e71e2d6694b4478b23041589c82ad7474a7e7dfdb3",
+      "reports/field-visual/technician-management/es-390.png": "d447a4ada087eba31aa8d7ba0ab38c324f5e6a8c6ba662629e39c5b2d42c21eb",
+      "reports/field-visual/technician-management/fr-1440.png": "32526e58eff33833a6ed57a036b87ba5a981f586ad9534715e73e7a7f75f9fe0",
+      "reports/field-visual/technician-management/fr-320.png": "862f2699b3864d7b67c6af36ba1a1dccb13d13131dbf5ad3f45934503e6eccef",
+      "reports/field-visual/technician-management/fr-390.png": "0a32c3a390c1940151b15582347135216a94220bb3f824c2dedc9b3bfa8908cd",
+      "reports/field-visual/technician-management/pt-1440.png": "dfc5e4747506c61b76dfe302fcb0759f78221dbd9bb0ebdc5cabfd2ff20fdef1",
+      "reports/field-visual/technician-management/pt-320.png": "3080a62b297819df55654b6ecb200906ff0b23c70b4128838f3690b70ac0d83c",
+      "reports/field-visual/technician-management/pt-390.png": "7824005f10be7beab8ca049dddc535e024f89391a23ba9694886fcc41b1d71bd",
+      "reports/field-visual/technician-management/review-de-320.png": "7e267577274981d172a0f9271f35144c805ec51e8a7198eb0c5ae73c0942e2e7",
+      "reports/field-visual/technician-management/review-pt-1440.png": "eb2ac271e9662833be4972e922fb85ee7c2ee1ebb9688907a9f08c8dfcea8f4f",
+      "reports/field-visual/technician-management/review-pt-390.png": "749594911efe3ab373a05cc51d8438f6f17b25da8af71612ad756e91f1ac4664"
+    },
+    "visuallyReviewed": [
+      "pt-390.png",
+      "de-320.png",
+      "review-pt-1440.png",
+      "review-de-320.png",
+      "directory-pt-390.png",
+      "card-pt-390.png",
+      "card-de-320.png",
+      "card-pt-1440.png"
+    ],
+    "businessCountsUnchanged": [
+      "client",
+      "pool",
+      "serviceVisit",
+      "extraVisit",
+      "invoice",
+      "payment",
+      "chatMessage",
+      "emailLog",
+      "roundTechnician",
+      "workGuide"
+    ],
+    "userAndVehicleColumnsUnchanged": true
+  },
+  "runnerGroups": 264,
+  "cacheVersion": "v175",
+  "inventory": {
+    "htmlFiles": 115,
+    "rootPages": 108,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 102,
+    "catalogueGuardDifferences": 0,
+    "activeScriptsScanned": 285,
+    "remainingLiteralQueue": 13
+  },
+  "publication": {
+    "status": "PREPARED_NATIVE_CI_PENDING",
+    "branch": "work/field-readiness-20260915-simulation",
+    "mainBranch": "feature/technicians-v25",
+    "mainShaUnchanged": "6f27081e1d183ff584a62255b016b373836734db"
+  },
+  "previousCI": [
+    {
+      "task": 362,
+      "status": "PASSED",
+      "groups": 260,
+      "evidence": "docs/product/evidence/20260925_task362_ci.json",
+      "restore": "PASSED_127_TABLES_47_FILES"
+    },
+    {
+      "task": 363,
+      "codeSha": "c564ca08a91e069362e9e1c623fd0538d4750a96",
+      "runId": 36154446240,
+      "jobId": 108135454917,
+      "status": "in_progress",
+      "groupsExpected": 262,
+      "restore": "PENDING"
+    }
+  ],
+  "limits": [
+    "Native PostgreSQL full 264-group suite, migration and restore pending for this code; TASK363 CI remains pending.",
+    "Legacy plaintext PINs and historical request logs are not rewritten.",
+    "New PIN verification scans stored PIN hashes by pages; production latency/volume remains a gate.",
+    "User records are not deactivated or created; existing User-only workday access retains its existing rules.",
+    "No automatic changes to routes, visits, costs, assignments or history.",
+    "Forms and review proofs remain in page memory only; only the owned submission reference survives reload in the same tab.",
+    "Historical scripts outside the active runner still using legacy technician writers require adaptation before reuse.",
+    "Two unavailable local shared binary assets, existing shared-navigation translations and physical iPhone/Android pilot remain limitations.",
+    "Historical reconciliation, production volume, VPS and operational backups remain pending.",
+    "No real external contact, merge or deploy."
+  ]
+}

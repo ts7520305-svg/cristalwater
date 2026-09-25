@@ -188,11 +188,10 @@
     "Legacy interfaces without the modern navigation, including classic technician theme, retain their prior behaviour",
     "Shared navigation translations and unavailable local binary assets retain their prior limits",
     "Standalone navigation tests isolate business scripts; they do not certify each business module",
-    "Native PostgreSQL full 260-group suite and restore pending for this code",
     "Historical reconciliation, production volume, VPS/providers/backups and physical pilot remain open"
   ],
   "publication": {
-    "status": "PUBLISHED_CI_IN_PROGRESS",
+    "status": "PUBLISHED_NATIVE_CI_PASSED",
     "branch": "work/field-readiness-20260915-simulation",
     "principalUnchanged": "6f27081e1d183ff584a62255b016b373836734db",
     "codeSha": "c2be6caa8649e1d7ab3fc47aef29d5f85c07ac49",
@@ -201,9 +200,18 @@
     "nativeCI": {
       "runId": 36150863744,
       "jobId": 108123470461,
-      "status": "in_progress",
+      "status": "completed",
       "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36150863744",
-      "expectedGroups": 260
+      "expectedGroups": 260,
+      "conclusion": "success",
+      "actualGroups": 260,
+      "evidence": "docs/product/evidence/20260925_task362_ci.json",
+      "restore": {
+        "tables": 127,
+        "files": 47,
+        "rowsMatch": true,
+        "fileHashesMatch": true
+      }
     }
   }
 }

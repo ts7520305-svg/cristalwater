@@ -394,6 +394,7 @@ model Technician {
   phone                String?
   email                String?                @unique
   pin                  String?
+  authVersion          Int                    @default(0)
   role                 String                 @default("TECHNICIAN")
   zone                 String?
   vehicleId            Int?

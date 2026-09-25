@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-25T15:24:21.011Z",
-  "baseCommit": "4b1942739a822c323426d75f01c12807cdf8d170",
+  "generatedAt": "2026-09-25T15:59:14.834Z",
+  "baseCommit": "9dc43c0637c9c0a79d580d5259a9b641fcf8fb52",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 283,
+  "activeScriptsScanned": 285,
   "summary": {
     "htmlFiles": 115,
     "rootPages": 108,
     "nestedPages": 7,
     "unavailableLocalAssetReferences": 2,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 101,
+    "pagesWithLiteralTestReference": 102,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -1672,7 +1672,7 @@
       "file": "frontend/admin-technicians.html",
       "route": "/admin-technicians",
       "kind": "Entrada raiz",
-      "title": "Cristal Water LDA - Tecnicos",
+      "title": "Cristal Water — Gestão de técnicos",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -1687,17 +1687,17 @@
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/cw-auth.js",
-        "/ui/foundation.css",
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
-        "/ui/design-system.css",
         "/admin-auth-guard.js",
-        "/cw-ui-feedback.js",
-        "/cw-operational-risk.js",
+        "/manifest.webmanifest",
+        "/ui/foundation.css",
+        "/ui/design-system.css",
+        "/cristal-assist.css",
+        "/cw-technician-management.css",
+        "/cw-technician-management-rules.js",
+        "/cw-technician-management-copy.js",
         "/admin-technicians.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
-        "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
         "/ui/design-system.js"
@@ -1706,7 +1706,9 @@
       "unavailableLocalAssets": [],
       "languageAssets": [],
       "directPrintAction": false,
-      "testReferences": [],
+      "testReferences": [
+        "test-field-technician-management-ui.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -3335,6 +3337,7 @@
         "test-field-resilience.js",
         "test-field-legacy-entry.js",
         "test-field-admin-catalogue.js",
+        "test-field-technician-management.js",
         "test-field-invoice-document.js",
         "test-field-legacy-alert-access.js",
         "test-field-report-opening-ui.js",

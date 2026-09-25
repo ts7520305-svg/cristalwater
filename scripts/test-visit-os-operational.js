@@ -167,13 +167,11 @@ async function main() {
     notes: "Equipamento de teste do Visit OS",
   });
 
-  const technician = await request("POST", "/api/technicians", {
+  const technician = await require("./helpers/create-reviewed-technician")(request, {
     name: `Visit OS Technician ${suffix}`,
     email: `visit-os-gps-${suffix}@cristalwater.pt`,
     phone: "920000000",
-    role: "TECHNICIAN",
-    active: true,
-  });
+  }, {response:true});
 
   const visitStart = await request("POST", "/api/visits/start", {
     poolId: pool.body.pool.id,
@@ -246,7 +244,7 @@ async function main() {
     client.status === 201 &&
     pool.status === 201 &&
     equipment.status === 201 &&
-    technician.status === 201 &&
+    technician.status === 200 &&
     visitStart.status === 200 &&
     gps.status === 200 &&
     gps.body?.ok !== false &&

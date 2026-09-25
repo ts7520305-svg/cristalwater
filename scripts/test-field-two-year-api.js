@@ -22,7 +22,7 @@ function check(name) { report.checks.push(name); console.log('PASS ' + name); }
   assert(auth);
   const teams = [], customers = [], visitIds = [];
   for (let i = 0; i < 2; i++) {
-    const technician = (await call('POST', '/api/core/technicians', { name: `Long QA ${i} ${stamp}`, email: `long-${stamp}-${i}@qa.test`, pin: '9123' })).technician;
+    const technician = await require('./helpers/create-reviewed-technician')(call, { name: `Long QA ${i} ${stamp}`, email: `long-${stamp}-${i}@qa.test`, pin: `91230${i}` });
     const vehicle = (await call('POST', '/api/guides/vehicles', { plate: `LY-${i}-${String(stamp).slice(-5)}`, name: `Long QA ${i}` })).vehicle;
     await call('POST', '/api/guides/vehicles/assign', { technicianId: technician.id, vehicleId: vehicle.id, startKm: 100 });
     const guides = await call('POST', '/api/guides/transport', { codeAT: `QA-LONG-${stamp}-${i}`, vehicleId: vehicle.id, technicianId: technician.id, validFrom: '2027-01-01T00:00:00Z', validUntil: '2029-01-01T00:00:00Z', origin: 'QA warehouse', destination: 'QA route', isDraft: false, items: [{ name: 'Cloro pastilhas', type: 'CHEMICAL', unit: 'KG', quantity: 1000 }] });

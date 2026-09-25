@@ -316,18 +316,6 @@ function poolBaseData(body, clientId = undefined, options = {}) {
     deletedAt: body.deletedAt === undefined ? (forCreate ? null : undefined) : body.deletedAt,
   });
 }
-function technicianBaseData(body) {
-  const has = (key) => Object.prototype.hasOwnProperty.call(body || {}, key);
-  return dataFor('technician', {
-    name: body.name == null ? undefined : String(body.name).trim(),
-    email: body.email || null,
-    phone: body.phone || null,
-    pin: has('pin') ? (body.pin || null) : undefined,
-    zone: body.zone || null,
-    vehicleId: body.vehicleId == null ? undefined : toInt(body.vehicleId),
-    active: body.active == null ? true : truthy(body.active),
-  });
-}
 function invoiceBaseData(data) { return dataFor('invoice', data); }
 function serviceVisitBaseData(data) { return dataFor('serviceVisit', data); }
 function repairBaseData(data) { return dataFor('repair', data); }
@@ -1295,56 +1283,14 @@ router.delete('/pools/:id', async (req, res) => {
   } catch (error) { return res.status(500).json({ ok: false, error: error.message }); }
 });
 
-router.get('/technicians', async (req, res) => {
-  const technicians = await safe('technician.findMany', [], () => db('technician').findMany({
-    where: truthy(req.query.includeInactive) ? {} : { active: true }, orderBy: { name: 'asc' } }));
-  return res.json({ ok: true, technicians });
+router.get('/technicians', async (req,res)=>{
+ res.set('Cache-Control','private, no-store');try{const rows=await prisma.technician.findMany({where:truthy(req.query.includeInactive)?{}:{active:true},orderBy:[{name:'asc'},{id:'asc'}]});res.json({ok:true,technicians:rows.map(require('../services/technicianManagementService').safe)});}catch(_){res.status(503).json({ok:false,error:'Não foi possível confirmar os técnicos.'});}
 });
-
-router.post('/technicians', async (req, res) => {
-  try {
-    const body = req.body || {};
-    if (!body.name) return res.status(400).json({ ok: false, error: 'Nome do técnico obrigatório' });
-
-    const technician = await db('technician').create({
-      data: technicianBaseData({ ...body, active: true }),
-    });
-
-    return res.json({ ok: true, technician });
-  } catch (error) {
-    return res.status(500).json({ ok: false, error: error.message });
-  }
-});
-
-
-router.put('/technicians/:id', async (req, res) => {
-  try {
-    const id = toInt(req.params.id);
-    const body = req.body || {};
-    const technician = await db('technician').update({ where: { id }, data: technicianBaseData(body) });
-    return res.json({ ok: true, technician });
-  } catch (error) { return res.status(500).json({ ok: false, error: error.message }); }
-});
-
-router.post('/technicians/:id/restore', async (req, res) => {
-  try {
-    const id = toInt(req.params.id);
-    const technician = await db('technician').update({ where: { id }, data: dataFor('technician', { active: true }) });
-    return res.json({ ok: true, technician });
-  } catch (error) { return res.status(500).json({ ok: false, error: error.message }); }
-});
-
-router.delete('/technicians/:id', async (req, res) => {
-  try {
-    const id = toInt(req.params.id);
-    if (await hasOperationalHistory('technician', id)) {
-      const technician = await db('technician').update({ where: { id }, data: dataFor('technician', { active: false }) });
-      return res.json({ ok: true, archived: true, technician, message: 'Técnico desativado porque tem histórico associado.' });
-    }
-    await db('technician').delete({ where: { id } });
-    return res.json({ ok: true, deleted: true });
-  } catch (error) { return res.status(500).json({ ok: false, error: error.message }); }
-});
+const technicianManagement=require('../controllers/technicianManagementController');
+router.post('/technicians',technicianManagement.legacy);
+router.put('/technicians/:id',technicianManagement.legacy);
+router.post('/technicians/:id/restore',technicianManagement.legacy);
+router.delete('/technicians/:id',technicianManagement.legacy);
 
 router.get('/rounds', async (req, res) => {
   const rounds = await safe('round.findMany.withRelations', [], () => db('round').findMany({

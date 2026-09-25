@@ -34,9 +34,9 @@ async function buildTokenUser(user) {
     language,
   };
   if (["TECHNICIAN", "TEAM_LEADER"].includes(role)) {
-    const technician = await prisma.technician.findFirst({where:{email:user.email,active:true},select:{id:true}});
+    const technician = await prisma.technician.findFirst({where:{email:user.email,active:true,deletedAt:null},select:{id:true,authVersion:true}});
     safeUser.technicianId = technician?.id || null;
-    if (technician) safeUser.id = technician.id;
+    if (technician) { safeUser.id = technician.id; safeUser.techAuthVersion = technician.authVersion; }
   }
   const token = jwt.sign(safeUser, JWT_SECRET, { expiresIn: "7d" });
   return { token, user: safeUser };
