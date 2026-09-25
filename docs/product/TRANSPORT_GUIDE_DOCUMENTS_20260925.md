@@ -38,7 +38,7 @@ O ensaio local da migração compara guia, materiais e registo legado antes/depo
 
 [Evidência local e hashes](evidence/20260925_task370_local.json). Cache v181; runner com 276 grupos; 43 migrações, uma nova tabela, nenhuma dependência nova. Inventário: 120 HTML, 108 páginas com referência literal em 297 scripts ativos, 12 na fila, zero referências locais inexistentes e dois recursos indexados não materializados.
 
-Lote preparado para `work/field-readiness-20260915-simulation`; publicação e gate PostgreSQL nativo de 276 grupos/restauro por registar. O restauro inclui agora a tabela de versões e o ensaio explícito dos bytes; não foi executado localmente.
+Publicada em `33f8ccf7f73294cd480c9bd18d021139a66a6e29`, árvore `cd82930cc832e6447784117505620ec22ffe2c83`, idêntica à preparada e validada localmente, na branch `work/field-readiness-20260915-simulation`. [CI 36193770611](https://github.com/ts7520305-svg/cristalwater/actions/runs/36193770611), job `108264772521`, em execução. O gate PostgreSQL nativo de **276 grupos e restauro permanece por confirmar**. O restauro inclui agora a tabela de versões e o ensaio explícito dos bytes; não foi executado localmente.
 
 TASK368: 271/272 grupos aprovados, falha no teste antigo de recuperação documental e restauro não executado. [Evidência nativa](evidence/20260925_task368_ci.json). A correção está na TASK369, cujo gate de 274 grupos permanece em execução na última consulta. A autorização do servidor foi conservada; a regressão passou localmente nesta etapa.
 

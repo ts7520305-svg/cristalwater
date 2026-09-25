@@ -218,13 +218,20 @@
     "remainingLiteralQueue": 12
   },
   "publication": {
-    "status": "READY_NATIVE_CI_PENDING",
+    "status": "PUBLISHED_NATIVE_CI_PENDING",
     "branch": "work/field-readiness-20260915-simulation",
     "mainBranch": "feature/technicians-v25",
     "mainShaUnchanged": "6f27081e1d183ff584a62255b016b373836734db",
     "nativeGroupsExpected": 276,
     "nativeRestore": "PENDING",
-    "nativeRestoreProbe": "Checks a non-empty binary attachment after dump/restore; 128 tables expected"
+    "nativeRestoreProbe": "Checks a non-empty binary attachment after dump/restore; 128 tables expected",
+    "codeSha": "33f8ccf7f73294cd480c9bd18d021139a66a6e29",
+    "treeSha": "cd82930cc832e6447784117505620ec22ffe2c83",
+    "treeMatchesLocal": true,
+    "runId": 36193770611,
+    "jobId": 108264772521,
+    "nativeSuite": "PENDING_WORKFLOW_RUNNING",
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36193770611"
   },
   "previousCI": [
     {
