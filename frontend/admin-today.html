@@ -1,114 +1,26 @@
 <!doctype html>
-<html lang="pt">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#0f1723">
-  <title>Cristal Water · Hoje</title>
-  <script src="/cw-auth.js"></script>
-  <link rel="stylesheet" href="/ui/foundation.css">
-  <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
-  <link rel="stylesheet" href="/cw-premium-admin-phase1.css">
-  <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
-  <link rel="stylesheet" href="/ui/design-system.css">
-  <style>
-    .cw-no-margin { margin: 0; }
-  </style>
-</head>
-<body class="admin-shell" data-required-role="ADMIN">
-  <div class="cw-v2-app">
-    <aside class="cw-v2-sidebar" aria-label="Navegacao principal">
-      <div class="cw-v2-brand">
-        <img src="/logo-cristalwater.png" alt="Cristal Water">
-        <div>
-          <b>Cristal Water</b>
-          <small>Administrador</small>
-        </div>
-      </div>
-      <nav class="cw-v2-nav" aria-label="Navegacao rapida">
-        <a href="/admin-master-control" data-shell-search="Centro de comando">Centro de comando</a>
-        <a class="is-active" href="/admin-today" data-shell-search="Hoje">Hoje</a>
-        <a href="/admin-visits" data-shell-search="Visitas">Visitas</a>
-        <a href="/admin-rounds" data-shell-search="Rondas">Rondas</a>
-        <a href="/admin-alerts" data-shell-search="Alertas">Alertas</a>
-        <a href="/admin-menu" data-shell-search="Menu completo">Menu completo</a>
-      </nav>
-      <div class="cw-today-stamp">Execucao outdoor-first e contexto persistente</div>
-    </aside>
-
-    <main class="cw-v2-main">
-      <header class="cw-v2-topbar">
-        <div class="cw-v2-search">
-          <input id="searchVisits" type="search" placeholder="Filtrar visitas por piscina, cliente, tecnico ou estado">
-          <span class="icon">⌕</span>
-        </div>
-        <div class="cw-v2-top-actions">
-          <button class="cw-v2-btn cw-mobile-back" type="button" data-cw-action="back">Voltar</button>
-          <span id="todayDate" class="cw-v2-pill">--</span>
-          <button id="refreshBtn" class="cw-v2-btn primary" type="button">Atualizar</button>
-          <button class="cw-v2-btn" type="button" data-cw-open-drawer>Menu</button>
-        </div>
-      </header>
-
-      <section class="cw-context-row" aria-label="Contexto de navegacao">
-        <button class="cw-v2-btn" type="button" data-cw-action="back">Voltar</button>
-        <span class="cw-context-path">Hoje</span>
-      </section>
-
-      <section class="cw-today-head" aria-label="Contexto da operacao de hoje">
-        <div>
-          <h1>Hoje</h1>
-          <p>Prioridades do dia com leitura rapida e acao em campo sem friccao.</p>
-        </div>
-        <span id="status" class="cw-today-stamp">A carregar operacao...</span>
-      </section>
-
-      <section class="cw-kpi-grid" aria-label="Resumo rapido de hoje">
-        <article class="cw-kpi-card total">
-          <span>Total</span>
-          <b id="total">0</b>
-        </article>
-        <article class="cw-kpi-card done">
-          <span>Concluidas</span>
-          <b id="done">0</b>
-        </article>
-        <article class="cw-kpi-card pending">
-          <span>Pendentes</span>
-          <b id="pending">0</b>
-        </article>
-        <article class="cw-kpi-card not-done">
-          <span>Falhadas</span>
-          <b id="notDone">0</b>
-        </article>
-      </section>
-
-      <section class="cw-list-block" aria-label="Lista de visitas de hoje">
-        <div class="cw-list-head">
-          <h2 class="cw-no-margin">Timeline agrupada por estado</h2>
-          <a class="cw-v2-btn" href="/admin-visits">Abrir modulo completo</a>
-        </div>
-        <div class="cw-mini-actions">
-          <a class="cw-v2-btn" href="/admin-rounds">Ver planeamento</a>
-          <a class="cw-v2-btn" href="/admin-technicians">Ver equipa</a>
-        </div>
-        <div id="listGroups" class="cw-list-groups">
-          <div class="cw-v2-state-loading">A carregar visitas do dia...</div>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <nav class="cw-v2-mobile-nav" aria-label="Navegacao movel administrador">
-    <a href="/admin-master-control">Centro</a>
-    <a class="is-active" href="/admin-today">Hoje</a>
-    <a href="/admin-visits">Visitas</a>
-    <a href="/admin-alerts">Alertas</a>
-    <a href="/admin-menu">Menu</a>
-  </nav>
-
-  <script src="/admin-auth-guard.js"></script>
-  <script src="/admin-today.js"></script>
-  <script src="/cw-admin-premium-controls.js"></script>
-  <script defer src="/ui/design-system.js"></script>
-</body>
-</html>
+<html lang="pt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>Visitas do dia · Cristal Water</title>
+<link rel="stylesheet" href="/ui/foundation.css"><link rel="stylesheet" href="/ui/design-system.css"><script src="/cw-auth.js"></script><script src="/admin-auth-guard.js"></script>
+<style>
+#adminDay{max-width:1280px;margin:auto;padding:20px;min-width:0;color:#183c46}#adminDay *{box-sizing:border-box}#adminDay h1{margin:0;font-size:clamp(24px,4vw,34px)}#adminDay h2{font-size:20px;margin:0}#adminDay .panel,#adminDay .visit-card{background:#fff;color:#183c46;border:1px solid #bed2d8;border-radius:12px;padding:18px;margin:14px 0;min-width:0;overflow-wrap:anywhere}#adminDay > header{backdrop-filter:none}
+#adminDay .toolbar,#adminDay .pagination{display:flex;gap:10px;flex-wrap:wrap;align-items:center}#adminDay .filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:end}#adminDay label{display:grid;gap:5px;font-weight:600;min-width:0}
+#adminDay input,#adminDay select{width:100%;min-width:0;color:#183c46;background:#fff;border:1px solid #91adb7;padding:10px;border-radius:8px}#adminDay input[type=date]{appearance:none;min-height:44px;max-width:100%}
+#adminDay button,#adminDay .button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 14px;border:1px solid #13716f;border-radius:8px;background:#096665;color:#fff;text-decoration:none;white-space:normal;max-width:100%;font:inherit;cursor:pointer}#adminDay button:disabled{opacity:.5;cursor:default}#adminDay :focus-visible{outline:3px solid #087d79;outline-offset:3px}#adminDay .muted,#adminDay dt{color:#45636d}
+#adminDay .summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}#adminDay .summary>div{padding:10px;border:1px solid #bed2d8;border-radius:8px}#adminDay .summary strong{display:block;font-size:24px}#adminDay dl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}#adminDay dd{margin:4px 0 0;font-weight:600;white-space:pre-wrap}#adminDay .note,#dayStatus{padding:12px;background:#edf6f7;border-radius:8px}#dayStatus[data-state=error],#dayStatus[data-state=invalid],#dayStatus[data-state=session]{background:#fff0ed;color:#842f20}#adminDay .visit-state{font-weight:700}
+#adminDay details{margin:14px 0}#adminDay summary{cursor:pointer;font-weight:600}#dayFilters>.toolbar{margin-top:14px}#adminDay #dayLanguage{width:auto!important;max-width:100%}
+@media(max-width:650px){#adminDay{padding:12px}#adminDay .filters,#adminDay dl{grid-template-columns:1fr}#adminDay .summary{grid-template-columns:repeat(2,minmax(0,1fr))}#adminDay .panel,#adminDay .visit-card{padding:14px}}
+</style></head><body data-required-role="ADMIN">
+<main id="adminDay" data-cw-state-managed="manual">
+<header class="panel"><h1 data-day-copy="title">Visitas do dia</h1><p class="muted" data-day-copy="subtitle"></p><nav class="toolbar"><a class="button" href="/admin-master-control" data-day-copy="center">Centro</a><a class="button" href="/admin-rounds" data-day-copy="planning">Planeamento</a><a class="button" href="/multi-map" data-day-copy="map">Mapa</a><label for="dayLanguage" data-day-copy="language">Idioma</label><select id="dayLanguage"><option value="pt">Português</option><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option></select></nav></header>
+<section class="panel"><p id="dayStatus" role="status" aria-live="polite">A confirmar as visitas…</p><p id="daySelected"></p><p id="dayChecked" class="muted"></p><div class="summary" id="daySummary"></div><form id="dayFilters" autocomplete="off" novalidate><div class="filters">
+<label><span data-day-copy="date"></span><input id="dayDate" type="date" min="2000-01-01" max="2199-12-31"><small data-day-copy="dateHint"></small></label>
+<label><span data-day-copy="search"></span><input id="daySearch" type="search" maxlength="120"></label>
+<label><span data-day-copy="group"></span><select id="dayGroup"><option value="" data-day-copy="all"></option><option value="PLANNED" data-day-copy="PLANNED"></option><option value="IN_PROGRESS" data-day-copy="IN_PROGRESS"></option><option value="DONE" data-day-copy="DONE"></option><option value="NOT_DONE" data-day-copy="NOT_DONE"></option><option value="CANCELLED" data-day-copy="CANCELLED"></option><option value="OTHER" data-day-copy="OTHER"></option></select></label>
+<label><span data-day-copy="kind"></span><select id="dayKind"><option value="" data-day-copy="all"></option><option value="REGULAR" data-day-copy="REGULAR"></option><option value="EXTRA" data-day-copy="EXTRA"></option></select></label></div>
+<div class="toolbar"><button id="refreshDay" type="submit" data-day-copy="refresh"></button><button id="selectToday" type="button" data-day-copy="today"></button></div></form>
+<details><summary data-day-copy="reading">Como ler este resumo</summary><p class="muted" data-day-copy="basis"></p><p class="note" data-day-copy="statusNote"></p></details>
+<nav class="pagination"><button id="dayFirst" type="button" data-day-copy="first"></button><button id="dayPrevious" type="button" data-day-copy="previous"></button><button id="dayNext" type="button" data-day-copy="next"></button></nav><div id="dayRows" role="list"></div>
+<nav class="pagination"><button id="dayFirstBottom" type="button" data-day-copy="first"></button><button id="dayPreviousBottom" type="button" data-day-copy="previous"></button><button id="dayNextBottom" type="button" data-day-copy="next"></button></nav>
+</section></main>
+<script src="/cw-admin-day-rules.js"></script><script src="/cw-admin-day-copy.js"></script><script src="/admin-today.js"></script><script src="/ui/core/navigation-context.js"></script><script src="/crystal-os-v2-shell.js"></script><script src="/crystal-os-v2-nav.js"></script><script defer src="/ui/design-system.js"></script>
+</body></html>

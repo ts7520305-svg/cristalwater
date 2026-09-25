@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `2179e6d30359a1a02484531bed8a50bd928a0a18`. Gerado em 2026-09-25T11:25:17.938Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `f5c7d06cf8e4d90fb7d510c35af34dd12000186d`. Gerado em 2026-09-25T11:49:08.952Z. Inclui o estado dos ficheiros locais no momento da geração.
 
 115 ficheiros HTML: 108 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 275 scripts de integração/navegador ativos. 93 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 276 scripts de integração/navegador ativos. 94 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 2 referências existem no índice Git mas não estão materializadas nesta cópia local; não são classificadas como ficheiros ausentes da aplicação.
 
@@ -77,7 +77,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /admin-suppliers | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-technicians | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-test-center | Entrada raiz | ADMIN | ADMIN | 0 |
-| /admin-today | Entrada raiz | ADMIN | ADMIN | 0 |
+| /admin-today | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-ui-settings | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-vehicles | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-visits-dashboard | Entrada raiz | ADMIN | ADMIN | 1 |
@@ -152,7 +152,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /v26/index.html | Auxiliar/protótipo/teste | — | — | 0 |
 | /v26/technician-prototype.html | Auxiliar/protótipo/teste | — | — | 0 |
 | /v26/technician/index.html | Auxiliar/protótipo/teste | — | — | 0 |
-| /visit-report-review | Entrada raiz | — | ADMIN | 1 |
+| /visit-report-review | Entrada raiz | — | ADMIN | 2 |
 
 ## Fila finita sem referência literal em QA
 
@@ -162,7 +162,6 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 - /admin-suppliers — Entrada raiz; papéis declarados: ADMIN.
 - /admin-technicians — Entrada raiz; papéis declarados: ADMIN.
 - /admin-test-center — Entrada raiz; papéis declarados: ADMIN.
-- /admin-today — Entrada raiz; papéis declarados: ADMIN.
 - /admin-ui-settings — Entrada raiz; papéis declarados: ADMIN.
 - /admin-vehicles — Entrada raiz; papéis declarados: ADMIN.
 - /admin-visits — Entrada raiz; papéis declarados: ADMIN.

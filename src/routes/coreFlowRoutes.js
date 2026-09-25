@@ -19,6 +19,8 @@ const BrainKnowledge = require('../system/knowledge/BrainKnowledge');
 const prisma = prismaModule.prisma || prismaModule.default || prismaModule;
 const router = express.Router();
 
+router.use('/visits/day/page',(req,res,next)=>{res.set({'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'});res.vary('Authorization');next();});
+
 const adminAuth = auth('ADMIN');
 const technicianAuth = auth('TECHNICIAN');
 router.use((req, res, next) => {
@@ -33,6 +35,11 @@ router.use((req, res, next) => {
     return technicianAuth(req, res, next);
   }
   return adminAuth(req, res, next);
+});
+
+router.get('/visits/day/page',async(req,res)=>{
+  try{const result=await require('../services/adminDayService').read(req.user,req.query);res.set({'X-CW-Admin-Day':'admin-day-v1','X-CW-Owner':result.owner});return res.json(result);}
+  catch(error){const status=[400,403].includes(error.statusCode)?error.statusCode:503;return res.status(status).json({ok:false,message:status===503?'Não foi possível confirmar as visitas do dia.':error.message});}
 });
 
 // Simulação desativada em produção: todas as ações core usam dados reais via Prisma.

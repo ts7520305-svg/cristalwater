@@ -1,0 +1,128 @@
+{
+  "task": "TASK358",
+  "baseCommit": "f5c7d06cf8e4d90fb7d510c35af34dd12000186d",
+  "validatedAt": "2026-09-25T11:54:54.259416+00:00",
+  "sourceHashes": {
+    ".github/workflows/field-readiness.yml": "f535f81ae953faad8ecfa6f5f368841f1675b55086c4fb5670036768f3f4dda9",
+    "frontend/admin-today.html": "a2659fa84a491595ff0740e5a0d84340a9c4224b6f50224cf6100b01d9e9dcb6",
+    "frontend/admin-today.js": "62011c13219c5752a26291b4aa47271755afb96ac2d64072dcf2a3401d3e7cff",
+    "frontend/cw-admin-day-rules.js": "ae0e36b7588b53e609883c1475b67ded97928a634aa5191d800f29411e4c3589",
+    "frontend/cw-admin-day-copy.js": "4b6468346aa14cce271de5139225d8bfbd2830662395584475a2fb350bb44989",
+    "frontend/sw.js": "534e29455574e583e77eb4bcb85c255a7b0501c7546b640e43ab35f414e2a997",
+    "src/routes/coreFlowRoutes.js": "866a216db494a7dd921be9195a4d0abe3706f21eedfa6999cc5c559b99788f16",
+    "src/services/adminDayService.js": "8f8d4ed2a20315921beee9073f583b79873c69d3a9d0ebf4d152628245f05f43",
+    "scripts/test-field-admin-day.js": "73d463e354f21456b4fd46fb1365a064a15ef6faa6ae5a0ed96641a7074afba6",
+    "scripts/test-field-suite.js": "b12353bdd613b26657039655c57e85cef1c25ddd9af8145b8764a911b20a8113",
+    "tests/admin-day.test.js": "e49b9a13fe40c346e1f6d3915ed98d17c158a9110a27c5e0e8e2ba331f76a33d"
+  },
+  "unitTests": {
+    "passed": 676,
+    "files": 95
+  },
+  "technicianTests": {
+    "passed": 4,
+    "files": 1
+  },
+  "syntax": {
+    "backend": 638,
+    "frontend": 245,
+    "inline": 49,
+    "finalChangedScripts": "node --check passed",
+    "workflow": "YAML parsed; timeout 50 minutes; all validation/restore steps retained"
+  },
+  "integrationGroups": [
+    "scripts/test-field-admin-day.js",
+    "scripts/test-field-legacy-admin-access.js",
+    "scripts/test-field-extra-incomplete.js"
+  ],
+  "finalRepeatedGroup": "scripts/test-field-admin-day.js",
+  "fixture": {
+    "regularInDay": 55,
+    "extraInDay": 7,
+    "pageCounts": [
+      50,
+      12
+    ],
+    "total": 62,
+    "groups": {
+      "PLANNED": 48,
+      "IN_PROGRESS": 2,
+      "DONE": 3,
+      "NOT_DONE": 4,
+      "CANCELLED": 2,
+      "OTHER": 3
+    },
+    "otherDayRowsExcluded": 5,
+    "clockChangeHours": [
+      23,
+      25
+    ],
+    "browserTimeZone": "America/Los_Angeles",
+    "queryTimeZone": "Europe/Lisbon",
+    "originalVisitRowsUnchanged": true,
+    "browserWrites": 0,
+    "realMessages": 0
+  },
+  "logs": {
+    "/tmp/cw358-unit.log": "b89be06d83582e029094248f8f9ab220a4759f4ef780365ab02b7f89151cb0cd",
+    "/tmp/cw358-tech.log": "7f29356cdae36f756d45b32e5c733a1ab49f5ca84532a3bb9f505f3d6b4bab02",
+    "/tmp/cw358-syntax.log": "1d3312f5a65d010a057224cbaf65163681eae8380b477ff1a2ad6c2caae1b676",
+    "/tmp/cw358-integration.log": "4488b3f3a285d4b4c413d36ab87da5c6c1a43d5fbfc136d6be241e563840be2b",
+    "/tmp/cw358-final-day.log": "81f625673569b8117a618986b171f961a4db995999d80a79c2416b53d26602a4"
+  },
+  "runtime": {
+    "database": "PGlite 0.5.8 / pglite-socket 0.2.11, isolated",
+    "additiveMigrations": 40,
+    "chromium": "@sparticuz/chromium 153.0.0, normal multiple processes, web security retained",
+    "runnerSha256": "5bd8f95926470bd82fabef27148ed54a55532bdf80d8dbc557dd19b244486b2b",
+    "preloadSha256": "74ba6986b731dfe5120836cb841c25bed62d334014aa588379558293deb6ec7a"
+  },
+  "cache": "v169",
+  "fieldSuiteExpectedGroups": 255,
+  "inventory": {
+    "htmlFiles": 115,
+    "rootPages": 108,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 94,
+    "catalogueGuardDifferences": 0,
+    "activeScripts": 276,
+    "pagesWithoutLiteralTestReference": 21
+  },
+  "screenshots": {
+    "reports/field-visual/admin-day/de-1440-visit.png": "b9e8252d19753e0dd2d65a0e59001ef07525ec50d16e9a5078d0eb8f261d7caa",
+    "reports/field-visual/admin-day/de-1440.png": "d805057f772095191525d36b0b7eb104929d220791894bc57e3bc7d5d19a4820",
+    "reports/field-visual/admin-day/de-320-visit.png": "77928c049f6943881fa4c4b27995e7a22cab93d9c627f7f52702e3a1ab97fab3",
+    "reports/field-visual/admin-day/de-320.png": "9db29c1a051d1be96904e1edea9e167875a1f6236ad4d52c0f045b6577bde821",
+    "reports/field-visual/admin-day/de-390-visit.png": "2f965032e2ab8ad79dcee3a7a434285ce8e0cd9b66d3055bf0e239031d2a760d",
+    "reports/field-visual/admin-day/de-390.png": "3cd93383ae064a0ecfea9455c9e3c6c740ce20cfef8cf8322e378a7838c77b3f",
+    "reports/field-visual/admin-day/en-1440-visit.png": "51ac301f5ab328e317f40b0853054f9b7e3a3869286c788ce5daaef0f8502c80",
+    "reports/field-visual/admin-day/en-1440.png": "4b73561ee0dee6e534e6c896dd6a3f1151b7e2db5d11ef9b46d90aa21cda5e50",
+    "reports/field-visual/admin-day/en-320-visit.png": "d37be364cd228528dcca1426232294e0ddaff801608175735f6ae3963649c60c",
+    "reports/field-visual/admin-day/en-320.png": "18ae6d853bef9675d280e5515ed277089b1b8a64377a1cd48cb01eaca87a3649",
+    "reports/field-visual/admin-day/en-390-visit.png": "2d9e77676e86a5b47b64800ff0166506a0356329217e359d68ad32deab199d71",
+    "reports/field-visual/admin-day/en-390.png": "b470ef55e77ef4af002943cef35489c8c3310e5f0775d669bc45e8f92b1d8200",
+    "reports/field-visual/admin-day/es-1440-visit.png": "20b96184ea0b623251e8d81282adac8c7c0d3ad28c14cd90aa25c8d6e143392c",
+    "reports/field-visual/admin-day/es-1440.png": "df3a50c982e031d89fb7db24055d5d654e79e5f153d114c3f05f9cfc0ccf023d",
+    "reports/field-visual/admin-day/es-320-visit.png": "43f9c0e40fc74434fb8bf68193a19ae427e053ee993d2219f85c9e1713f878b0",
+    "reports/field-visual/admin-day/es-320.png": "33d7104af81e745e0ebbd8b20b234a24603009a9d28d6e0c0ba92a22dc3619d7",
+    "reports/field-visual/admin-day/es-390-visit.png": "12fcd9a93b3f8d2edb9c6e7ff69ba4dcb119ccd22004f89fd59b9c8d788d4050",
+    "reports/field-visual/admin-day/es-390.png": "bf4de3d4cc6f6a1717be84d21d1ad458545a59e1f1458f632554de83e34814cd",
+    "reports/field-visual/admin-day/fr-1440-visit.png": "b7367ebaccd85ff5da4df4fe7749f2d8f9276af893b1d748e8173b165b9b2c93",
+    "reports/field-visual/admin-day/fr-1440.png": "1542e818df4a776d5900357e73af657595360db1df17340d4160b99b1d9e9e4b",
+    "reports/field-visual/admin-day/fr-320-visit.png": "368f1442c62d96969f7a3446c8f6d21b5acb41a06304275565443a75828675a4",
+    "reports/field-visual/admin-day/fr-320.png": "d88099a3f5e9b06a842be7d6cf3d0aae0fb081443de703218803797c8f4c17c1",
+    "reports/field-visual/admin-day/fr-390-visit.png": "59f4f13e4d0fc70671100c1a69d13503c1fb872e822127f303c6ece4e7c4963f",
+    "reports/field-visual/admin-day/fr-390.png": "3ea51a1db28e26423d732adbea3fdd420fecd169f95c7e0f83559d2a5cd424fd",
+    "reports/field-visual/admin-day/pt-1440-visit.png": "3512ff04654523ff3381476cca60acc44fe6a2c6603f797efbb16c23a07e684e",
+    "reports/field-visual/admin-day/pt-1440.png": "05046d12f33a5227d35367db91b31aaebe83187b041b7fabd787c8b9f9e02a7e",
+    "reports/field-visual/admin-day/pt-320-visit.png": "8de39a5344d6839979599d23cce4f8162c08ce3ee843c8efd5c36478cf28e184",
+    "reports/field-visual/admin-day/pt-320.png": "8767c20142c795b42bfac81ad5de64f4d7971886186cb6ce21670314942caa86",
+    "reports/field-visual/admin-day/pt-390-visit.png": "586114b939e0b2e2a2ebebbae0332483c47ac2d250b3e3cee843045a2dbc5694",
+    "reports/field-visual/admin-day/pt-390.png": "e553e2862e75f347509775908f3ee059759be6c54bbd99fd5738d3a1f0d8fe94"
+  },
+  "publication": {
+    "status": "LOCAL_VALIDATED_PENDING_PUBLICATION"
+  }
+}

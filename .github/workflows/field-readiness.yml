@@ -9,8 +9,8 @@ permissions:
 jobs:
   field:
     runs-on: ubuntu-latest
-    # TASK343 took 33m06s with 241 groups; retain room for the ledger and restore.
-    timeout-minutes: 40
+    # TASK356 took 38m34s with 253 groups; allow the growing suite and native restore to finish.
+    timeout-minutes: 50
     services:
       postgres:
         image: postgres:16

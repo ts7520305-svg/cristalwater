@@ -1,295 +1,33 @@
-const API = "/api/core";
-const CONTEXT_KEY = "cw-admin-today-context";
-
-const state = {
-  visits: [],
-  filter: "",
-  restoreScrollY: null,
-  scrollRestored: false,
-  navigationLocked: false,
-};
-
-const $ = (selector) => document.querySelector(selector);
-
-function esc(value) {
-  return String(value ?? "").replace(/[&<>'"]/g, (char) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    "'": "&#39;",
-    '"': "&quot;",
-  }[char]));
-}
-
-function normalize(text) {
-  return String(text || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-}
-
-function statusTone(status) {
-  const value = normalize(status).replaceAll("_", " ");
-  if (value.includes("done") || value.includes("conclu")) return "done";
-  if (value.includes("not done") || value.includes("cancel")) return "not-done";
-  if (value.includes("pend") || value.includes("planned") || value.includes("progress")) return "pending";
-  return "other";
-}
-
-function formatStatus(status) {
-  const value = String(status || "").trim();
-  if (!value) return "Sem estado";
-  return value.replaceAll("_", " ");
-}
-
-function countByTone(visits = []) {
-  return visits.reduce((acc, visit) => {
-    const tone = statusTone(visit.status);
-    if (tone === "done") acc.done += 1;
-    else if (tone === "not-done") acc.notDone += 1;
-    else acc.pending += 1;
-    return acc;
-  }, { done: 0, pending: 0, notDone: 0 });
-}
-
-function formatDate(value) {
-  if (!value) return "sem horario";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return String(value);
-  return date.toLocaleString("pt-PT", {
-    day: "2-digit",
-    month: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-function setStatus(text, tone) {
-  const el = $("#status");
-  if (!el) return;
-  el.textContent = text;
-  el.classList.remove("status-critical", "status-warn", "status-ok");
-  if (tone === "critical") el.classList.add("status-critical");
-  if (tone === "warn") el.classList.add("status-warn");
-  if (tone === "ok") el.classList.add("status-ok");
-}
-
-function writeContext(force = false) {
-  if (state.navigationLocked && !force) return;
-  const payload = {
-    filter: state.filter,
-    scrollY: window.scrollY,
-  };
-  sessionStorage.setItem(CONTEXT_KEY, JSON.stringify(payload));
-}
-
-function readContext() {
-  const raw = sessionStorage.getItem(CONTEXT_KEY);
-  if (!raw) return;
-  try {
-    const parsed = JSON.parse(raw);
-    state.filter = String(parsed.filter || "");
-    state.restoreScrollY = Number.isFinite(parsed.scrollY) ? parsed.scrollY : null;
-    state.scrollRestored = false;
-    const search = $("#searchVisits");
-    if (search) search.value = state.filter;
-  } catch (_error) {
-    sessionStorage.removeItem(CONTEXT_KEY);
-  }
-}
-
-function restoreScrollIfNeeded() {
-  if (state.scrollRestored || !Number.isFinite(state.restoreScrollY)) return;
-  const targetY = state.restoreScrollY;
-  let attempts = 0;
-  const tryRestore = () => {
-    window.scrollTo({ top: targetY, behavior: "auto" });
-    attempts += 1;
-    if (Math.abs(window.scrollY - targetY) <= 8 || attempts >= 10) {
-      state.scrollRestored = true;
-      return;
-    }
-    requestAnimationFrame(tryRestore);
-  };
-  requestAnimationFrame(tryRestore);
-}
-
-function matchesFilter(visit, filter) {
-  if (!filter) return true;
-  const pool = visit.pool?.name || "";
-  const client = visit.client?.name || "";
-  const technician = visit.technician?.name || visit.technicianName || "";
-  const status = formatStatus(visit.status);
-  const bag = normalize(`${pool} ${client} ${technician} ${status}`);
-  return bag.includes(normalize(filter));
-}
-
-function bucketKey(visit) {
-  const status = normalize(visit.status).replaceAll("_", " ");
-  if (status.includes("done") || status.includes("conclu")) return "done";
-  if (status.includes("progress") || status.includes("execu")) return "in_progress";
-
-  const when = new Date(visit.plannedDate || visit.date || visit.scheduledAt || visit.createdAt || 0).getTime();
-  if (Number.isFinite(when) && when < Date.now()) return "late";
-  return "upcoming";
-}
-
-function renderVisitItem(visit) {
-  const pool = visit.pool?.name || "Piscina sem nome";
-  const client = visit.client?.name || "Cliente nao definido";
-  const technician = visit.technician?.name || visit.technicianName || "Sem tecnico";
-  const status = formatStatus(visit.status);
-  const tone = statusTone(status);
-  const scheduledAt = visit.plannedDate || visit.date || visit.scheduledAt || visit.createdAt;
-  const visitId = visit.id ? `#${visit.id}` : "";
-  return `
-    <article class="cw-today-item">
-      <div class="cw-today-item-main">
-        <b>${esc(pool)}</b>
-        <div class="meta">${esc(client)} · ${esc(technician)} · ${esc(formatDate(scheduledAt))}</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        <span class="cw-status-pill ${esc(tone)}">${esc(status)}</span>
-        <a class="cw-v2-btn" href="/admin-visits${visit.id ? `?visitId=${encodeURIComponent(visit.id)}` : ""}">Abrir ${esc(visitId)}</a>
-      </div>
-    </article>
-  `;
-}
-
-function renderList() {
-  const list = $("#listGroups");
-  if (!list) return;
-
-  const shown = state.visits.filter((visit) => matchesFilter(visit, state.filter));
-  if (!shown.length) {
-    list.innerHTML = '<div class="cw-v2-state-empty">Sem visitas para este filtro. Ajusta o termo ou abre o planeamento.</div>';
-    return;
-  }
-
-  const groups = {
-    late: { title: "Atrasadas", items: [] },
-    in_progress: { title: "Em execução", items: [] },
-    upcoming: { title: "Próximas", items: [] },
-    done: { title: "Concluídas", items: [] },
-  };
-
-  shown.forEach((visit) => {
-    const key = bucketKey(visit);
-    groups[key].items.push(visit);
-  });
-
-  list.innerHTML = Object.values(groups).map((group) => `
-    <section class="cw-list-group">
-      <header>
-        <h3>${esc(group.title)}</h3>
-        <span class="pill">${group.items.length}</span>
-      </header>
-      <div class="cw-list">
-        ${group.items.length ? group.items.map(renderVisitItem).join("") : '<div class="cw-v2-state-empty">Sem itens neste grupo.</div>'}
-      </div>
-    </section>
-  `).join("");
-}
-
-function renderSummary(summary) {
-  $("#total").textContent = Number(summary.total || 0);
-  $("#done").textContent = Number(summary.done || 0);
-  $("#pending").textContent = Number(summary.pending || 0);
-  $("#notDone").textContent = Number(summary.notDone || 0);
-
-  const issues = Number(summary.pending || 0) + Number(summary.notDone || 0);
-  if (issues === 0) {
-    setStatus("Dia estavel: sem pendencias criticas.", "ok");
-  } else if (Number(summary.notDone || 0) > 0) {
-    setStatus(`Atencao: ${issues} visita(s) exigem acao.`, "critical");
-  } else {
-    setStatus(`Existem ${issues} visita(s) pendentes para fechar.`, "warn");
-  }
-}
-
-function fromCoreDashboardPayload(data) {
-  const visits = Array.isArray(data.nextVisits) ? data.nextVisits : [];
-  const counts = countByTone(visits);
-  return {
-    visits,
-    summary: {
-      total: visits.length,
-      done: counts.done,
-      pending: counts.pending,
-      notDone: counts.notDone,
-    },
-  };
-}
-
-async function load() {
-  const refresh = $("#refreshBtn");
-  try {
-    if (refresh) {
-      refresh.disabled = true;
-      refresh.textContent = "A atualizar...";
-    }
-
-    const response = await fetch(`${API}/dashboard`, { cache: "no-store" });
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || data.message || `Erro HTTP ${response.status}`);
-    }
-
-    const mapped = fromCoreDashboardPayload(data);
-    state.visits = mapped.visits;
-    renderSummary(mapped.summary);
-    renderList();
-    restoreScrollIfNeeded();
-    setTimeout(restoreScrollIfNeeded, 160);
-  } catch (error) {
-    setStatus(error.message || "Erro ao carregar operacao de hoje.", "critical");
-    const list = $("#listGroups");
-    if (list) list.innerHTML = '<div class="cw-v2-state-error">Falha ao carregar visitas. Tenta atualizar novamente.</div>';
-  } finally {
-    if (refresh) {
-      refresh.disabled = false;
-      refresh.textContent = "Atualizar";
-    }
-  }
-}
-
-function bind() {
-  const refresh = $("#refreshBtn");
-  if (refresh) refresh.addEventListener("click", load);
-
-  const search = $("#searchVisits");
-  if (search) {
-    search.addEventListener("input", (event) => {
-      state.filter = String(event.target.value || "");
-      renderList();
-      writeContext();
-    });
-  }
-
-  window.addEventListener("scroll", writeContext, { passive: true });
-  window.addEventListener("cw:navigate-away", () => {
-    writeContext(true);
-    state.navigationLocked = true;
-  });
-
-  document.addEventListener("click", (event) => {
-    const action = event.target.closest('[data-cw-action="menu"],[data-cw-action="home"],[data-cw-action="back"]');
-    if (!action) return;
-    writeContext(true);
-    state.navigationLocked = true;
-  });
-
-  const stamp = $("#todayDate");
-  if (stamp) {
-    stamp.textContent = new Date().toLocaleString("pt-PT", {
-      weekday: "short",
-      day: "2-digit",
-      month: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  readContext();
-  bind();
-  load();
-});
+(function(){
+ 'use strict';
+ const R=window.CWAdminDayRules,copy=window.CWAdminDayCopy,$=id=>document.getElementById(id),panel=$('adminDay'),keys=['cristalwater_jwt','token','adminToken','cristalwater_user','user'],fingerprint=()=>JSON.stringify(keys.map(k=>localStorage.getItem(k))),filterIds={date:'dayDate',q:'daySearch',group:'dayGroup',kind:'dayKind'};
+ let session=null,invalid=false,suspended=false,sequence=0,request=null,data=null,state='loading',page=1,selection=null,urlInvalid=false,language='pt';const t=key=>copy[language][key],node=(tag,content,className)=>{const el=document.createElement(tag);el.textContent=content;if(className)el.className=className;return el;};
+ try{const token=keys.slice(0,3).map(k=>localStorage.getItem(k)).find(Boolean),claims=JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))),id=Number(claims.userId||claims.id),users=keys.slice(3).map(k=>localStorage.getItem(k)).filter(Boolean).map(JSON.parse);
+  if(claims.role!=='ADMIN'||!R.positive(id)||!Number.isFinite(claims.exp)||claims.exp*1000<=Date.now()||!users.length||users.some(u=>u.role!=='ADMIN'||Number(u.userId||u.id)!==id)||keys.slice(0,3).some(k=>localStorage.getItem(k)&&localStorage.getItem(k)!==token))throw Error();session={token,owner:'ADMIN:'+id,identity:fingerprint(),expires:claims.exp*1000};
+ }catch(_){invalid=true;state='session';}
+ function abort(){sequence++;if(request){request.controller.abort();clearTimeout(request.timer);request=null;}}
+ function active(){try{if(!invalid&&session.identity===fingerprint()&&session.expires>Date.now())return true;}catch(_){}invalid=true;abort();data=null;selection=null;page=1;for(const id of Object.values(filterIds))$(id).value='';state='session';render();return false;}
+ function current(requestedPage=page){return R.filters({...Object.fromEntries(Object.entries(filterIds).map(([key,id])=>[key,$(id).value])),page:String(requestedPage)});}
+ function writeUrl(){const url=new URL(location.href);for(const [key,id] of Object.entries(filterIds))$(id).value?url.searchParams.set(key,$(id).value):url.searchParams.delete(key);url.searchParams.set('page',String(page));url.searchParams.set('lang',language);history.replaceState(null,'',url);}
+ function fromUrl(){const url=new URL(location.href),raw=Object.fromEntries([...Object.keys(filterIds),'page'].filter(k=>url.searchParams.has(k)).map(k=>[k,url.searchParams.get(k)]));for(const [key,id] of Object.entries(filterIds))$(id).value=raw[key]||'';const f=R.filters(raw);page=f?.page??NaN;urlInvalid=!f||[...Object.keys(filterIds),'page'].some(k=>url.searchParams.getAll(k).length>1);language=Object.hasOwn(copy,url.searchParams.get('lang'))?url.searchParams.get('lang'):'pt';}
+ const locale=()=>({pt:'pt-PT',en:'en-GB',fr:'fr-FR',es:'es-ES',de:'de-DE'})[language],date=value=>value?new Intl.DateTimeFormat(locale(),{dateStyle:'medium',timeStyle:'short',timeZone:R.timeZone}).format(new Date(value)):t('notGiven'),name=value=>value?((value.name??t('notGiven'))+' · #'+value.id):t('notGiven');
+ function fact(parent,label,value){const p=node('div','');p.append(node('dt',label),node('dd',value));parent.append(p);}
+ function link(parent,label,url){const a=node('a',label,'button');a.href=url;a.addEventListener('click',event=>{if(!active()||!data||state!=='ready'||!R.equal(current(),selection))event.preventDefault();});parent.append(a);}
+ function render(){
+  document.documentElement.lang=language;document.title=t('title')+' · Cristal Water';$('dayLanguage').value=language;for(const el of panel.querySelectorAll('[data-day-copy]'))el.textContent=t(el.dataset.dayCopy);$('daySearch').placeholder=t('searchHint');panel.dataset.state=state;panel.setAttribute('aria-busy',String(state==='loading'));
+  $('dayStatus').dataset.state=state;$('dayStatus').textContent=state==='ready'?t('ready').replace('{page}',page).replace('{pages}',data.pages).replace('{total}',data.total):t(state);$('dayStatus').setAttribute('role',['error','invalid','session'].includes(state)?'alert':'status');$('daySelected').textContent=data?t('selectedDay')+': '+data.day+' · '+R.timeZone:'';$('dayChecked').textContent=data?t('asOf')+' '+date(data.asOf)+' · '+R.timeZone:'';
+  const usable=!!data&&['ready','outside','empty'].includes(state);for(const suffix of ['', 'Bottom']){$('dayFirst'+suffix).disabled=invalid||suspended||!usable||page===1;$('dayPrevious'+suffix).disabled=invalid||suspended||!usable||!data.hasPrevious;$('dayNext'+suffix).disabled=invalid||suspended||!usable||!data.hasNext;}
+  for(const id of ['refreshDay','selectToday',...Object.values(filterIds)])$(id).disabled=invalid||suspended;const summary=$('daySummary');summary.replaceChildren();for(const group of ['total',...R.groups]){const box=node('div',''),value=node('strong',data?String(data.totals[group]):'—');value.dataset.dayTotal=group;box.append(node('span',t(group)),value);summary.append(box);}
+  const list=$('dayRows');list.replaceChildren();if(!data)return;for(const row of data.rows){const card=node('article','','visit-card');card.dataset.visitKey=row.key;card.dataset.visitGroup=row.group;card.setAttribute('role','listitem');card.append(node('h2',t(row.kind)+' #'+row.id+' · '+name(row.pool)),node('p',t(row.group),'visit-state'));const facts=node('dl','');fact(facts,t('client'),name(row.client));fact(facts,t('technician'),name(row.technician));if(row.recordedTechnicianName!==null)fact(facts,t('recordedName'),row.recordedTechnicianName);if(row.legacyUser)fact(facts,t('legacyUser'),name(row.legacyUser));fact(facts,t('scheduled'),date(row.scheduledAt)+(row.scheduleSource==='date'?' · '+t('fallbackDate'):''));fact(facts,t('start'),date(row.startAt));fact(facts,t('end'),date(row.endAt));fact(facts,t('originalStatus'),row.status);card.append(facts);const actions=node('nav','','toolbar');if(row.pool)link(actions,t('poolSheet'),'/admin-pool-technical?poolId='+row.pool.id);if(row.group==='DONE'&&row.endAt)link(actions,t('review'),'/visit-report-review?'+new URLSearchParams({visitType:row.kind,visitId:String(row.id)}));card.append(actions);list.append(card);}
+ }
+ async function load(requestedPage=1){
+  if(!active()||suspended)return;abort();data=null;page=requestedPage;selection=current();if(urlInvalid||!selection){state='invalid';render();return;}const chosen=selection,generation=sequence;writeUrl();state='loading';render();const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);request={controller,timer};
+  try{const query=new URLSearchParams();for(const [key,value] of Object.entries(chosen))if(value!=='')query.set(key,String(value));const response=await fetch('/api/core/visits/day/page?'+query,{headers:{Authorization:'Bearer '+session.token},signal:controller.signal,cache:'no-store',redirect:'error'});if(!active()||suspended||generation!==sequence)return;if([401,403].includes(response.status)){invalid=true;active();return;}if(response.status!==200||response.headers.get('x-cw-admin-day')!=='admin-day-v1'||response.headers.get('x-cw-owner')!==session.owner||response.headers.get('cache-control')!=='private, no-store'||!(response.headers.get('content-type')||'').startsWith('application/json'))throw Error('Unconfirmed daily visits');const result=await response.json();if(!active()||suspended||generation!==sequence)return;if(!R.equal(chosen,current())||!R.packet(result,chosen,session.owner))throw Error('Invalid daily visits');data=result;if(!chosen.date){$('dayDate').value=result.day;selection=current();writeUrl();}state=result.rows.length?'ready':result.total===0?'empty':'outside';render();
+  }catch(_){if(active()&&!suspended&&generation===sequence){data=null;state='error';render();}}finally{clearTimeout(timer);if(generation===sequence){request=null;render();}}
+ }
+ function changed(){if(!active()||suspended)return;abort();data=null;urlInvalid=false;page=1;state='filters';render();}
+ for(const id of Object.values(filterIds))$(id).addEventListener('input',changed);$('dayFilters').addEventListener('submit',event=>{event.preventDefault();load(1);});$('selectToday').addEventListener('click',()=>{if(active()){$('dayDate').value='';urlInvalid=false;load(1);}});
+ for(const suffix of ['', 'Bottom']){$('dayFirst'+suffix).addEventListener('click',()=>load(1));$('dayPrevious'+suffix).addEventListener('click',()=>load(page-1));$('dayNext'+suffix).addEventListener('click',()=>load(page+1));}
+ $('dayLanguage').addEventListener('change',()=>{language=$('dayLanguage').value;const url=new URL(location.href);url.searchParams.set('lang',language);history.replaceState(null,'',url);render();});window.addEventListener('storage',()=>active());window.addEventListener('focus',()=>active());document.addEventListener('visibilitychange',()=>{if(!document.hidden)active();});window.addEventListener('pagehide',()=>{suspended=true;abort();data=null;state='loading';render();});window.addEventListener('pageshow',()=>{suspended=false;if(active()){fromUrl();load(page);}});window.addEventListener('popstate',()=>{if(active()){fromUrl();load(page);}});setInterval(()=>{if(active()&&data&&!R.equal(current(),selection))changed();},1000);
+ for(const id of ['dayStatus','daySelected','dayChecked','daySummary','dayRows'])$(id).dataset.cwStateManaged='manual';fromUrl();render();active();
+}());

@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-25T11:25:17.938Z",
-  "baseCommit": "2179e6d30359a1a02484531bed8a50bd928a0a18",
+  "generatedAt": "2026-09-25T11:49:08.952Z",
+  "baseCommit": "f5c7d06cf8e4d90fb7d510c35af34dd12000186d",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 275,
+  "activeScriptsScanned": 276,
   "summary": {
     "htmlFiles": 115,
     "rootPages": 108,
     "nestedPages": 7,
     "unavailableLocalAssetReferences": 2,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 93,
+    "pagesWithLiteralTestReference": 94,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -1725,7 +1725,7 @@
       "file": "frontend/admin-today.html",
       "route": "/admin-today",
       "kind": "Entrada raiz",
-      "title": "Cristal Water · Hoje",
+      "title": "Visitas do dia · Cristal Water",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -1739,22 +1739,25 @@
       "entryRedirects": {},
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/cw-auth.js",
         "/ui/foundation.css",
-        "/crystal-os-v2-foundation.css",
-        "/cw-premium-admin-phase1.css",
-        "/crystal-os-v2-phase2-adapter.css",
         "/ui/design-system.css",
+        "/cw-auth.js",
         "/admin-auth-guard.js",
+        "/cw-admin-day-rules.js",
+        "/cw-admin-day-copy.js",
         "/admin-today.js",
-        "/cw-admin-premium-controls.js",
+        "/ui/core/navigation-context.js",
+        "/crystal-os-v2-shell.js",
+        "/crystal-os-v2-nav.js",
         "/ui/design-system.js"
       ],
       "missingAssets": [],
       "unavailableLocalAssets": [],
       "languageAssets": [],
       "directPrintAction": false,
-      "testReferences": [],
+      "testReferences": [
+        "test-field-admin-day.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -4907,6 +4910,7 @@
       "languageAssets": [],
       "directPrintAction": false,
       "testReferences": [
+        "test-field-admin-day.js",
         "test-field-visit-report-origin.js"
       ],
       "visualReview": "Não reavaliada por este inventário"

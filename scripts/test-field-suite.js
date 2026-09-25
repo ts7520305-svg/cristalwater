@@ -58,6 +58,7 @@ scripts.push('test-field-collection-summary.js');
 scripts.push('test-field-email-history.js');
 scripts.push('test-field-live-map.js');
 scripts.push('test-field-payment-policy-review.js');
+scripts.push('test-field-admin-day.js');
 scripts.push('test-field-financial-pdf.js');
 scripts.push('test-field-invoice-document.js');
 scripts.push('test-field-legacy-alert-access.js');
