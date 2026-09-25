@@ -29,7 +29,7 @@ Runtime PGlite isolado, 40 migrações existentes, Chromium com múltiplos proce
 
 TASK358 confirmada em [255/255 grupos e restauro PostgreSQL nativo](evidence/20260925_task358_ci.json): 17 etapas aprovadas, 676 unitários, quatro técnicos, 127 tabelas e 47 ficheiros com linhas e hashes iguais; duração 36m40s. TASK359, execução `36134907116` e job `108070540081`, permanece em execução no último controlo.
 
-PUBLICATION_PENDING_TASK360
+Publicada em `685ba2b44dd95befd6f9bf8194a1082fafbae0a9`, árvore `5c2317073ef6c23c5521caf84c1eb59717282e46`, idêntica à preparada e validada localmente. [CI 36138136641](https://github.com/ts7520305-svg/cristalwater/actions/runs/36138136641), job `108081104612`, em execução; os 257 grupos e o restauro PostgreSQL nativo deste lote continuam por confirmar.
 
 Este lote valida a navegação e o catálogo. As permissões e os dados continuam a ser confirmados nos destinos e nas APIs existentes. O grupo de navegação comum isola os scripts de negócio; não equivale a rever integralmente as oito páginas. O catálogo não cria favoritos pessoais, não certifica a saúde dos módulos nem publica em produção. Conciliação histórica, volume, infraestrutura/VPS, cópias de segurança operacionais, serviços externos e piloto físico iPhone/Android continuam pendentes. Sem merge, deploy ou contactos reais; aplicação não declarada completa.
 

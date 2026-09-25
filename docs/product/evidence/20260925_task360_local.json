@@ -152,12 +152,18 @@
     "Historical reconciliation, production volume, VPS/providers/backups and physical pilot remain open"
   ],
   "publication": {
-    "status": "LOCAL_VALIDATED_PUBLICATION_PENDING",
+    "status": "PUBLISHED_CI_IN_PROGRESS",
     "branch": "work/field-readiness-20260915-simulation",
     "principalUnchanged": "6f27081e1d183ff584a62255b016b373836734db",
     "nativeCI": {
-      "status": "not_started",
+      "runId": 36138136641,
+      "jobId": 108081104612,
+      "status": "in_progress",
+      "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36138136641",
       "expectedGroups": 257
-    }
+    },
+    "codeSha": "685ba2b44dd95befd6f9bf8194a1082fafbae0a9",
+    "treeSha": "5c2317073ef6c23c5521caf84c1eb59717282e46",
+    "recordedAt": "2026-09-25T13:00:11.435060+00:00"
   }
 }
