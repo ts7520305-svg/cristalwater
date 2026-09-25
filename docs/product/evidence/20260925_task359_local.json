@@ -113,9 +113,17 @@
   ],
   "previousNativeCI": "20260925_task357_ci.json",
   "publication": {
-    "status": "LOCAL_VALIDATED_PENDING_PUBLICATION",
+    "status": "PUBLISHED_CI_IN_PROGRESS",
     "branch": "work/field-readiness-20260915-simulation",
     "principalUnchanged": "6f27081e1d183ff584a62255b016b373836734db",
-    "nativeCI": "pending"
+    "nativeCI": {
+      "runId": 36134907116,
+      "jobId": 108070540081,
+      "status": "in_progress",
+      "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36134907116",
+      "expectedGroups": 256
+    },
+    "codeSha": "01df73fd483ddbf588e6e966639d9da627bf5a54",
+    "treeSha": "92ac20917eefe71ce6724017107a03e470b9252f"
   }
 }
