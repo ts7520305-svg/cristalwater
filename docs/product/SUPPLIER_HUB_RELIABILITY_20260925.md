@@ -39,7 +39,7 @@ Runtime PGlite isolado e Chromium com múltiplos processos/segurança web ativa.
 
 ## CI e publicação
 
-Verificações locais concluídas; publicação na branch de trabalho em preparação. O código/tree publicados e o novo CI serão registados após confirmar a atualização remota.
+Publicada em `c564ca08a91e069362e9e1c623fd0538d4750a96`, árvore `fc33ddb671a49e3aebb6134cdedbb8b49b7d413a`, idêntica à preparada e validada localmente. [CI 36154446240](https://github.com/ts7520305-svg/cristalwater/actions/runs/36154446240), job `108135454917`, em execução; os 262 grupos e o restauro PostgreSQL nativo deste lote continuam por confirmar.
 
 No último controlo, TASK362 (`c2be6caa8649e1d7ab3fc47aef29d5f85c07ac49`) continuava em execução no [CI 36150863744](https://github.com/ts7520305-svg/cristalwater/actions/runs/36150863744), job `108123470461`: gates de migrações/sintaxe/unitários/navegador geral aprovados, suite de 260 grupos ainda a executar e restauro por confirmar. Não se infere aprovação completa deste estado.
 
