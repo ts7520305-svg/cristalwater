@@ -30,7 +30,7 @@ Na revisão de tempos, a inicialização podia habilitar por instantes a consult
 
 Evidência detalhada em [20260925_task371_local.json](evidence/20260925_task371_local.json). 857 unitários em 108 ficheiros, quatro técnicos e sintaxe 669 backend/279 frontend/44 scripts inline. Onze grupos locais distintos aprovados: nova API e navegador, gestão de transporte, consumo, revisões partilhadas, frota, documentos e preferências de navegação, em ambiente isolado com dados sintéticos. Dezoito capturas, cinco idiomas e larguras 320/390/1440. Nenhuma migração nova: permanecem as 43 migrações e 128 tabelas. Cache v182; runner passa a 278 grupos.
 
-Publicação preparada na branch de trabalho; commit e CI serão registados após publicação. PostgreSQL nativo, suite integral e restauro permanecem por confirmar. A execução local usa PGlite e Chromium, não substitui esse gate. TASK370 ainda em execução na última consulta; último gate integral aprovado continua a ser TASK366, 268/268 e restauro.
+Publicada em `e66cc0f4d953d477e88a8a60ad5fb967f953c793`, árvore `bfdeed5b118bed6973c8ea35107e3c3bcdd711e0`, idêntica à preparada e validada localmente, na branch `work/field-readiness-20260915-simulation`. [CI 36196942259](https://github.com/ts7520305-svg/cristalwater/actions/runs/36196942259), job `108274831921`, em execução. PostgreSQL nativo, suite integral e restauro permanecem por confirmar. A execução local usa PGlite e Chromium, não substitui esse gate. TASK370 ainda em execução na última consulta; último gate integral aprovado continua a ser TASK366, 268/268 e restauro.
 
 ## Continuação
 

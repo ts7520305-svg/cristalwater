@@ -202,13 +202,19 @@
     "remainingLiteralQueue": 12
   },
   "publication": {
-    "status": "READY_NATIVE_CI_PENDING",
+    "status": "PUBLISHED_NATIVE_CI_PENDING",
     "branch": "work/field-readiness-20260915-simulation",
     "mainBranch": "feature/technicians-v25",
     "mainShaUnchanged": "6f27081e1d183ff584a62255b016b373836734db",
     "nativeGroupsExpected": 278,
     "nativeRestore": "PENDING",
-    "nativeRestoreProbe": "Existing binary attachment dump/restore and 128 tables"
+    "nativeRestoreProbe": "Existing binary attachment dump/restore and 128 tables",
+    "codeSha": "e66cc0f4d953d477e88a8a60ad5fb967f953c793",
+    "codeTree": "bfdeed5b118bed6973c8ea35107e3c3bcdd711e0",
+    "remoteTreeMatchesPrepared": true,
+    "runId": 36196942259,
+    "jobId": 108274831921,
+    "nativeStatus": "IN_PROGRESS"
   },
   "previousCI": [
     {
