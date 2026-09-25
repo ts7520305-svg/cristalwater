@@ -4,7 +4,14 @@ const auth = require("../middlewares/authMiddleware");
 const { prisma } = require("../prismaClient");
 const billingController = require("../controllers/billingController");
 
+router.use('/extras/history', (req,res,next)=>{res.set({'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'});res.vary('Authorization');next();});
 router.use(auth("ADMIN"));
+
+router.get('/extras/history/page', async (req,res)=>{
+  res.set('X-CW-Extra-History','extra-history-v1');
+  try{const result=await require('../services/extraHistoryService').read(req.user,req.query);res.set('X-CW-Owner',result.owner).json(result);}
+  catch(error){const known=[400,403,404].includes(error.statusCode);res.status(known?error.statusCode:503).json({ok:false,error:known?error.message:'Não foi possível confirmar o histórico de extras. Tente novamente.'});}
+});
 
 // ==========================================================
 // GERAR MENSALIDADES
@@ -60,21 +67,21 @@ router.get("/extras/history", async (req, res) => {
   try {
     const extras = await prisma.extraVisit.findMany({
       where:{ billed:true },
-      include:{ pool:{ include:{ client:true } } },
+      include:{ client:{select:{id:true,name:true}},pool:{select:{name:true}} },
       orderBy:{ billedAt:"desc" }
     });
 
     const grouped = {};
 
     extras.forEach(e=>{
-      const id = e.pool.client.id;
+      const id = e.clientId ?? 'UNASSIGNED';
 
       if(!grouped[id]){
-        grouped[id] = { client:e.pool.client.name, total:0, items:[] };
+        grouped[id] = { client:e.client?.name ?? 'Cliente não registado', total:0, items:[] };
       }
 
       grouped[id].items.push({
-        pool:e.pool.name,
+        pool:e.pool?.name ?? 'Piscina não registada',
         price:e.price,
         date:e.billedAt
       });
@@ -85,7 +92,7 @@ router.get("/extras/history", async (req, res) => {
     res.json({ ok:true, data:grouped });
 
   } catch {
-    res.json({ ok:false });
+    res.status(503).json({ ok:false });
   }
 });
 

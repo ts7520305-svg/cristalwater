@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `884a227e6ebb3f139e2b95411d34b74efb26b80e`. Gerado em 2026-09-25T07:02:32.441Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `6c32cc6f59ffdd75f40e10d5a957de906cf7ac9a`. Gerado em 2026-09-25T07:33:54.246Z. Inclui o estado dos ficheiros locais no momento da geração.
 
 115 ficheiros HTML: 108 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 268 scripts de integração/navegador ativos. 80 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 269 scripts de integração/navegador ativos. 81 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 2 referências existem no índice Git mas não estão materializadas nesta cópia local; não são classificadas como ficheiros ausentes da aplicação.
 
@@ -86,8 +86,8 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /alerts | Entrada raiz | ADMIN | ADMIN | 7 |
 | /billing-center | Entrada raiz | ADMIN | ADMIN | 0 |
 | /billing-extras | Entrada raiz | ADMIN | ADMIN | 1 |
-| /billing-history | Entrada raiz | ADMIN | ADMIN | 0 |
-| /billing | Entrada raiz | ADMIN | ADMIN | 4 |
+| /billing-history | Entrada raiz | ADMIN | ADMIN | 1 |
+| /billing | Entrada raiz | ADMIN | ADMIN | 5 |
 | /chat | Entrada raiz | ADMIN | ADMIN | 15 |
 | /client-dashboard | Entrada raiz | CLIENT | CLIENT | 0 |
 | /client-history | Entrada raiz | CLIENT | CLIENT | 1 |
@@ -173,7 +173,6 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 - /admin-vehicles — Entrada raiz; papéis declarados: ADMIN.
 - /admin-visits — Entrada raiz; papéis declarados: ADMIN.
 - /billing-center — Entrada raiz; papéis declarados: ADMIN.
-- /billing-history — Entrada raiz; papéis declarados: ADMIN.
 - /client-dashboard — Entrada raiz; papéis declarados: CLIENT.
 - /client-menu — Entrada raiz; papéis declarados: CLIENT.
 - /client-wow — Entrada raiz; papéis declarados: CLIENT.

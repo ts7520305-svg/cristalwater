@@ -111,7 +111,6 @@
     "pagesWithoutLiteralTestReference": 35
   },
   "limits": [
-    "Native CI and PostgreSQL restore of TASK347 remain pending; TASK346 is confirmed in 20260925_task346_ci.json.",
     "Drafts before Save live in the same tab session; recovery after closing the tab is not guaranteed.",
     "Prepared requests retain the persistent storage and same-UUID receipts from TASK346.",
     "Malformed draft bytes are preserved; automatic repair or destructive cleanup is not provided.",
@@ -131,8 +130,9 @@
     "ciRun": 36104043162,
     "ciJob": 107972529268,
     "ciUrl": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36104043162",
-    "status": "in_progress",
-    "nativeRestoreConfirmed": false,
-    "checkedAt": "2026-09-25T06:43:04.661Z"
+    "status": "success",
+    "nativeRestoreConfirmed": true,
+    "checkedAt": "2026-09-25T07:32:39.845Z",
+    "nativeEvidence": "20260925_task347_ci.json"
   }
 }

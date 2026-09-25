@@ -51,6 +51,7 @@ scripts.push('test-field-pool-calculator-state.js');
 scripts.push('test-field-pool-calculator-writes.js','test-field-pool-calculator-recovery.js');
 scripts.push('test-field-pool-calculator-drafts.js');
 scripts.push('test-field-pool-calculator-languages.js');
+scripts.push('test-field-extra-history.js');
 scripts.push('test-field-financial-pdf.js');
 scripts.push('test-field-invoice-document.js');
 scripts.push('test-field-legacy-alert-access.js');

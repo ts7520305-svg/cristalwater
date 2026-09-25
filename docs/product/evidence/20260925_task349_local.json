@@ -1,0 +1,131 @@
+{
+  "task": "TASK349",
+  "checkedAt": "2026-09-25T07:36:19.926924+00:00",
+  "baseCommit": "6c32cc6f59ffdd75f40e10d5a957de906cf7ac9a",
+  "sourceSha256": {
+    "frontend/billing-history.html": "75c91d11e536f90798737077b5f29368673e95de798e47642f07c42f65bc65bb",
+    "frontend/billing-history.js": "f0b89dff3bd40ed71c6079580a289111684cc756b414e5b4dd39ed37ed3b801f",
+    "frontend/cw-extra-history-rules.js": "cc0b25c2dc56f72820590683e513c316ca5669052ecc9730ef5d5d3c9b233cc2",
+    "frontend/cw-extra-history-copy.js": "db7bf49281a48236f608b2df032be29e993e3a609907e020916ead269a12ea3f",
+    "frontend/sw.js": "6db565b432fdf076dfb6a24e345290c7fc53ae2fe4a2ac71ff251b3ad02046c8",
+    "src/routes/billingRoutes.js": "d14f69e272d28667765818fd637556ba39099a4443ba57a7d23d2e576b35e06e",
+    "src/services/extraHistoryService.js": "e9b1e505e3af52735fdd36cec301dc42511af0a5c8546a91beee3aa3c7854d66",
+    "scripts/test-field-extra-history.js": "7b4f883b023ca982e71a1195e07ea5ac9101e7065ae17c9f638aad08b538d757",
+    "scripts/test-field-suite.js": "ed5651404116a3f5af9f2e47586c8d6c67de3586f89f8c50d3f6e3d2ccdeaa21",
+    "tests/extra-history-rules.test.js": "eab19b5344750df9aa09ea9ab7301b18e861d25d77e3383b41e0d47dd91e31ac"
+  },
+  "unitTests": {
+    "passed": 631,
+    "files": 88
+  },
+  "technicianTests": {
+    "passed": 4,
+    "files": 1
+  },
+  "syntax": {
+    "backend": 632,
+    "frontend": 231,
+    "inline": 61
+  },
+  "integration": {
+    "distinctGroups": 3,
+    "scripts": [
+      "test-field-extra-history.js",
+      "test-field-payment-ledger.js",
+      "test-field-legacy-admin-access.js"
+    ],
+    "result": "success"
+  },
+  "finalHistoryRerun": {
+    "script": "test-field-extra-history.js",
+    "result": "success",
+    "log": "/tmp/cw349-final-history.log"
+  },
+  "passLines": [
+    "PASS isolated schema: 40 additive migrations",
+    "PASS extra history API: 105 original-client rows across three ordered pages, moved pool and missing relations, exact prices/sub-cents/tiny/negative/zero and null timestamps, UTC boundary and literal wildcard filters, unbilled excluded, typed private ADMIN access, sanitized failure and no writes",
+    "PASS extra history browser: three pages, exact tiny/large/negative prices, original client warning and literal text, five languages at 320/390/1440, filter invalidation, malformed and late responses, offline/timeout, page history, account reload/expiry; all original rows and money unchanged",
+    "PASS payment ledger API: ADMIN ownership, private typed response, 105 records in three ordered pages, exact dates and filters, literal wildcard search, original values and credit classification, invalid filters and access refused, sanitized failures and no writes",
+    "PASS payment ledger browser: real paginated history, five languages and reload, literal originals and anomalous amounts, 320/390/1440, filters and empty distinct from error, incompatible responses/identity refused, offline/timeout, late replies, history restoration, account switch and expiry, no writes or original changes",
+    "PASS legacy administration reads, mutations, aliases and AI require active ADMIN; refused requests are inert, administration and canonical field/client routes remain usable",
+    "PASS isolated schema: 40 additive migrations",
+    "PASS extra history API: 105 original-client rows across three ordered pages, moved pool and missing relations, exact prices/sub-cents/tiny/negative/zero and null timestamps, UTC boundary and literal wildcard filters, unbilled excluded, typed private ADMIN access, sanitized failure and no writes",
+    "PASS extra history browser: three pages, exact tiny/large/negative prices, original client warning and literal text, five languages at 320/390/1440, filter invalidation, malformed and late responses, offline/timeout, page history, account reload/expiry; all original rows and money unchanged"
+  ],
+  "logs": {
+    "/tmp/cw349-unit.log": "1cbdd1f5a486ef97d00b68ba0f9cd17ed440dcfd70bf961000a708f305253e3a",
+    "/tmp/cw349-tech.log": "ff057381784dafe4d6a4e860bc3895a481e9318e06672eb830e5a461b8ef0b6f",
+    "/tmp/cw349-syntax.log": "d6877be2851d4dc28e09c99977702029edffe36b633fe1657b4f685e0f98e453",
+    "/tmp/cw349-integration.log": "58c882f54190fc7d621b3d119eac1ec52effbf095d952e82a314417cec53a3cf",
+    "/tmp/cw349-final-history.log": "d86c28dbeee067b628ecbf1850591fba83042fa966244e453683314000f3bc58"
+  },
+  "runtime": {
+    "database": "PGlite 0.5.8 / pglite-socket 0.2.11, isolated",
+    "additiveMigrations": 40,
+    "chromium": "@sparticuz/chromium 153.0.0, normal multiple processes, web security retained",
+    "runnerSha256": "5bd8f95926470bd82fabef27148ed54a55532bdf80d8dbc557dd19b244486b2b",
+    "preloadSha256": "74ba6986b731dfe5120836cb841c25bed62d334014aa588379558293deb6ec7a"
+  },
+  "screenshots": {
+    "reports/field-visual/extra-history/extra-history-de-1440.png": "147cabf5b2d378583c649590bc4c1c87a1359e15bc6623487970045da85229a0",
+    "reports/field-visual/extra-history/extra-history-de-320.png": "f950cb20d775eb445bb657705881a04d2e8a38f5b8738814ae925f1e41535e5f",
+    "reports/field-visual/extra-history/extra-history-de-390.png": "e48f2c028e1e3a866857f985d42b9a68ad17a85fe165eb369fef286f3e7d74d2",
+    "reports/field-visual/extra-history/extra-history-en-1440.png": "add5579d6392af7f36b25120ce09ee63b54eee3078e16174664d70ed473d196d",
+    "reports/field-visual/extra-history/extra-history-en-320.png": "e21cd27517dc0d6faa47ea8aedc272e909b6be94fceb0d00c7d63c2addf0d1d9",
+    "reports/field-visual/extra-history/extra-history-en-390.png": "5dbd9bf31b7272d7a4ac59821f8900a5ae476f0164c22c7488436aa309a0fe73",
+    "reports/field-visual/extra-history/extra-history-es-1440.png": "59bd01bee9632326fc8c09dca24bcac51ec46e211534a283ad096961dce44c52",
+    "reports/field-visual/extra-history/extra-history-es-320.png": "a1752a5c05f78d52da3c30c75958172b0488bf820463ea933b1e23e5b2745123",
+    "reports/field-visual/extra-history/extra-history-es-390.png": "3d36d61ece02f743bb3e47fdf0f57dab3e2c65cf627d5fbb492a8d0f9982514a",
+    "reports/field-visual/extra-history/extra-history-fr-1440.png": "d9c4d8636734940856e99237f54e128f66f05f2a42e5b753e72dcea5850d3c27",
+    "reports/field-visual/extra-history/extra-history-fr-320.png": "711f81d5b75e907636680c73ec874b8970636a97bd55f9ce558efe1c812f78ca",
+    "reports/field-visual/extra-history/extra-history-fr-390.png": "51b6d860cb5f675e57e7db37f200b34dbbaf1334d1b7118b1dd6b86dec95375b",
+    "reports/field-visual/extra-history/extra-history-pt-1440.png": "4f2034c0e8bd7bd9259465665fc818711336876ba9fbf0779cec672e0416495e",
+    "reports/field-visual/extra-history/extra-history-pt-320.png": "ca28ff8ecd250e86fb01b6317c156050128e5e19dab5962abedf5662a4260901",
+    "reports/field-visual/extra-history/extra-history-pt-390.png": "31eb2fa646b19b29eea877ce8aab3c586d9f887bf5f9f743a38adae2b0d4e09f"
+  },
+  "reviewedWidths": [
+    320,
+    390,
+    1440
+  ],
+  "reviewedLanguages": [
+    "pt",
+    "en",
+    "fr",
+    "es",
+    "de"
+  ],
+  "visualReviewSamples": [
+    "extra-history-de-320.png",
+    "extra-history-fr-390.png",
+    "extra-history-en-1440.png"
+  ],
+  "cache": "v161",
+  "fieldSuiteExpectedGroups": 248,
+  "inventory": {
+    "htmlFiles": 115,
+    "rootPages": 108,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 81,
+    "catalogueGuardDifferences": 0,
+    "activeScripts": 269,
+    "pagesWithoutLiteralTestReference": 34
+  },
+  "limits": [
+    "Native CI and PostgreSQL restore of TASK349 remain pending.",
+    "TASK348 remains in progress at the last check; TASK347 has separate native CI/restore proof.",
+    "The billed marker and recorded visit price are not reconciled document amounts, payment confirmation or fiscal issuance.",
+    "Every page is a new consistent read; the entire history is not frozen across requests.",
+    "The old grouped endpoint retains its unpaginated compatibility total; the new UI does not consume it.",
+    "Shared navigation/assistant languages and remaining application/production criteria retain separate scope."
+  ],
+  "testPreparation": [
+    "The initial copy generation tried to require a browser-only dictionary; it failed before writing UI files and was rerun in an isolated VM.",
+    "The final history run includes the legacy grouping/null-association fix and malformed owner/type/cache headers."
+  ],
+  "previousNativeProofs": [
+    "20260925_task347_ci.json"
+  ]
+}

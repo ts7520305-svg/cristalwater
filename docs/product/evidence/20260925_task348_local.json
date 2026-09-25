@@ -124,7 +124,7 @@
   },
   "limits": [
     "Native CI and PostgreSQL restore of TASK348 remain pending.",
-    "TASK347 native CI remains in progress at the last check; TASK346 is verified separately.",
+    "TASK346 and TASK347 have verified native CI and restore evidence; this does not approve TASK348.",
     "This localization covers the calculator-owned header and content; shared navigation/assistant and browser-native messages retain their existing contracts.",
     "User source text and unknown historical options are kept verbatim, not translated.",
     "Existing formulas are preserved; this is not a scientific validation.",

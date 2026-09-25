@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-25T07:02:32.441Z",
-  "baseCommit": "884a227e6ebb3f139e2b95411d34b74efb26b80e",
+  "generatedAt": "2026-09-25T07:33:54.246Z",
+  "baseCommit": "6c32cc6f59ffdd75f40e10d5a957de906cf7ac9a",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 268,
+  "activeScriptsScanned": 269,
   "summary": {
     "htmlFiles": 115,
     "rootPages": 108,
     "nestedPages": 7,
     "unavailableLocalAssetReferences": 2,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 80,
+    "pagesWithLiteralTestReference": 81,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -2086,7 +2086,7 @@
       "file": "frontend/billing-history.html",
       "route": "/billing-history",
       "kind": "Entrada raiz",
-      "title": "Histórico Faturação",
+      "title": "Cristal Water · Histórico de extras",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -2101,15 +2101,19 @@
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/manifest.webmanifest",
+        "/ui/foundation.css",
         "/cristal-assist.css",
         "/cw-auth.js",
-        "/ui/foundation.css",
+        "/admin-auth-guard.js",
         "/crystal-os-v2-foundation.css",
         "/crystal-os-v2-phase2-adapter.css",
-        "/admin-auth-guard.js",
         "/ui/design-system.css",
+        "/cw-extra-history-rules.js",
+        "/cw-extra-history-copy.js",
+        "/billing-history.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
+        "/cw-admin-shortcuts.js",
         "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
@@ -2119,7 +2123,9 @@
       "unavailableLocalAssets": [],
       "languageAssets": [],
       "directPrintAction": false,
-      "testReferences": [],
+      "testReferences": [
+        "test-field-extra-history.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -2162,6 +2168,7 @@
       "directPrintAction": false,
       "testReferences": [
         "test-field-credit-adjustment.js",
+        "test-field-extra-history.js",
         "test-field-extra-execution.js",
         "test-field-extra-correction.js",
         "test-field-maintenance-billing.js"
