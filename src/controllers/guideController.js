@@ -269,37 +269,6 @@ async function notifyMissingTransportGuide({ req, vehicleId, technicianId, workG
     });
   }
 }
-async function resolveMissingTransportGuide({ req, vehicleId, workGuideId, transportGuideId, codeAT }) {
-  const guideId = n(workGuideId);
-  if (!guideId) return;
-
-  await prisma.operationalLock.updateMany({
-    where: {
-      lockType: "MISSING_TRANSPORT_GUIDE",
-      entity: "WorkGuide",
-      entityId: guideId,
-      status: "PENDING"
-    },
-    data: {
-      status: "RESOLVED",
-      resolvedAt: new Date(),
-      approvedBy: req?.headers?.["x-user-email"] || req?.headers?.["x-actor"] || "SYSTEM"
-    }
-  }).catch(() => null);
-
-  const vehicle = vehicleId ? await prisma.vehicle.findUnique({ where: { id: n(vehicleId) } }).catch(() => null) : null;
-  await prisma.notification.create({
-    data: {
-      type: "INFO",
-      eventType: "TRANSPORT_GUIDE_ASSOCIATED",
-      title: "Guia AT associada",
-      message: `Guia de obra #${guideId} associada a guia AT ${codeAT || transportGuideId || ""} ${vehicle?.plate ? `(${vehicle.plate})` : ""}.`.trim(),
-      role: "ADMIN",
-      severity: "INFO",
-      metadata: { vehicleId: n(vehicleId), workGuideId: guideId, transportGuideId: n(transportGuideId), codeAT: codeAT || null }
-    }
-  }).catch(() => null);
-}
 function movementMetadataFromNotes(notes) {
   const raw = String(notes || "").trim();
   if (!raw) return { userNotes: "", location: "", readings: null };
@@ -412,33 +381,7 @@ async function listTransportGuides(req, res) {
 
 const createTransportGuide = require('./transportGuideCreationController').legacy;
 
-async function updateTransportGuide(req, res) {
-  try {
-    const id = n(req.params.id);
-    const { status, codeAT, validFrom, validUntil, origin, destination, notes, isDraft } = req.body;
-    const guide = await prisma.transportGuide.update({
-      where: { id },
-      data: { status, codeAT, validFrom: dateOrNull(validFrom) || undefined, validUntil: dateOrNull(validUntil), origin, destination, notes, isDraft: isDraft === undefined ? undefined : Boolean(isDraft), closedAt: status === "CLOSED" ? new Date() : undefined },
-      include: { vehicle: true, items: true, workGuides: true }
-    });
-    const linkedWorkGuide = await prisma.workGuide.findFirst({
-      where: { guideId: id },
-      orderBy: { createdAt: "desc" }
-    }).catch(() => null);
-    if (linkedWorkGuide && (codeAT || status === "ACTIVE")) {
-      await resolveMissingTransportGuide({
-        req,
-        vehicleId: guide.vehicleId,
-        workGuideId: linkedWorkGuide.id,
-        transportGuideId: guide.id,
-        codeAT: guide.codeAT
-      });
-    }
-    await audit(req, "TRANSPORT_GUIDE_UPDATE", "TransportGuide", id, req.body);
-    res.json({ ok: true, guide });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
-}
-
+const updateTransportGuide = require('./transportGuideManageController').legacy;
 
 async function getLatestTransportGuide(req, res) {
   try {

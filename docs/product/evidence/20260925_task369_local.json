@@ -1,0 +1,236 @@
+{
+  "task": "TASK369",
+  "baseCommit": "3782ee7dc16f992177c95158c42d7798917405a7",
+  "validatedAt": "2026-09-25T21:04:19.476580+00:00",
+  "sourceHashes": {
+    "frontend/admin-vehicles.js": "54dbc84090d16c4b61603aad8bb85eac2ae6f0a5f56f13a50725055e1ea93655",
+    "frontend/cw-transport-guide-manage.js": "161fae859870d85569d2c7b4553e5edd55eb2ca98c94fed73448b6273d14dac5",
+    "frontend/cw-transport-manage-copy.js": "f9573eea9b1b4694a10cff01aba935aa10dc12df631fc4a72189c9a7b20bd2be",
+    "frontend/cw-transport-manage-rules.js": "97950c97ed447249bd6f630795225daf2e90b1bd0e9a4ef4e94a5deaefac7559",
+    "frontend/sw.js": "b9052b46ad4862a77526e22df4021bd4bba82cf7857f7a1cf2cd6a37a86cedfa",
+    "frontend/transport-guide-manage.html": "050d74dc508819403e80f6f584b6ca3fd518400eded5e41cfad2168fcf0dc9da",
+    "scripts/fixtures/internal-chat-server.js": "8746a848521c3a10e7d0e45a199f34b31c1cb5efd019a1182e46b6e49605846e",
+    "scripts/test-field-document-recovery.js": "9dbfe2440023dab400a197436a767dcb4e8b8a011c85e14e5562d460832c52d5",
+    "scripts/test-field-suite.js": "84875d11b3a0a5a266c3af0c47efacb0a90ebd8af699c53a7deae878aa850976",
+    "scripts/test-field-transport-guide-manage-ui.js": "2ff7436f8b4d09582fdff33d16e91312aa8b94424198b07f47e1911cea4f579b",
+    "scripts/test-field-transport-guide-manage.js": "7abe286f760ca4ae056f1f2a3aee7d786d14b3c1bd41170c52e0b01cab37afeb",
+    "src/controllers/guideController.js": "1719476f0625b420299b0ff999ed191c6f743e8e4425555d688ffb098f2c1663",
+    "src/controllers/transportGuideManageController.js": "52f31746352e9f518ce28bf4a17fabdb008fa3d47776ca0110e49aedc42c0b45",
+    "src/routes/transportGuideManageRoutes.js": "f4df13883c574339106d999c79e060ed388d957aa1a2d544ef14924bb2c75dd7",
+    "src/server.js": "dd03c4ae0cc814433043e2b14a7200bff09d615867d0f5d21cdfe674b45ef1bc",
+    "src/services/fieldWriteRequestService.js": "b6d5e004252bfd641449e0661d3d8016c8744f8ed4e39f74997a3c4d551d8350",
+    "src/services/transportGuideManageService.js": "d6dfb05d2ec3ff4e45152a1ac326912c582d37d80e711eed3baef03293ece2c4",
+    "tests/transport-guide-manage.test.js": "3d3fc1e42187df406665ee3bd3f8c000fb751b955e3ed9e34db2e93f0040f120"
+  },
+  "unitTests": {
+    "passed": 826,
+    "files": 106,
+    "new": 21
+  },
+  "technicianTests": 4,
+  "syntax": {
+    "backend": 662,
+    "frontend": 273,
+    "inline": 44,
+    "finalChangedScriptsCheckedSeparately": true
+  },
+  "schema": {
+    "newMigrations": 0,
+    "existingAdditiveMigrationsApplied": 42,
+    "runtime": "PGlite 0.5.8 / pglite-socket 0.2.11, isolated synthetic data; not native PostgreSQL"
+  },
+  "integrationGroups": [
+    {
+      "script": "scripts/test-field-transport-guide-manage.js",
+      "code": 0,
+      "log": "/tmp/cw369-api-verified.log",
+      "sha256": "ac2fad734d4a3eae9ac4dc3de6b9ac6437e82744e8f99513d505fa3fde18145e"
+    },
+    {
+      "script": "scripts/test-field-transport-guide-manage-ui.js",
+      "code": 0,
+      "log": "/tmp/cw369-ui-verified.log",
+      "sha256": "27a9feec234bd1829b01b2dabc36566a714d5c23536f430c12fc0457961f8e45"
+    },
+    {
+      "script": "scripts/test-field-document-recovery.js",
+      "code": 0,
+      "log": "/tmp/cw369-ui-verified.log",
+      "sha256": "27a9feec234bd1829b01b2dabc36566a714d5c23536f430c12fc0457961f8e45"
+    },
+    {
+      "script": "scripts/test-field-transport-guide-create-ui.js",
+      "code": 0,
+      "log": "/tmp/cw369-ui-regressions.log",
+      "sha256": "d13b24a16b819c9c2a0680e85724d8cb5bd4f65fa8379be41d7b7ea3e7fa1ca2"
+    },
+    {
+      "script": "scripts/test-field-transport-guide-items-ui.js",
+      "code": 0,
+      "log": "/tmp/cw369-ui-regressions.log",
+      "sha256": "d13b24a16b819c9c2a0680e85724d8cb5bd4f65fa8379be41d7b7ea3e7fa1ca2"
+    },
+    {
+      "script": "scripts/test-field-fleet-management-ui.js",
+      "code": 0,
+      "log": "/tmp/cw369-ui-regressions.log",
+      "sha256": "d13b24a16b819c9c2a0680e85724d8cb5bd4f65fa8379be41d7b7ea3e7fa1ca2"
+    },
+    {
+      "script": "scripts/test-field-guide-pdf.js",
+      "code": 0,
+      "log": "/tmp/cw369-browser-final.log",
+      "sha256": "9a31c76164bccc94b50e4003a2475dc087d09088cbb3fe3ff4314e5926d1dbbe"
+    },
+    {
+      "script": "scripts/test-field-authenticated-document-opening.js",
+      "code": 0,
+      "log": "/tmp/cw369-browser-final.log",
+      "sha256": "9a31c76164bccc94b50e4003a2475dc087d09088cbb3fe3ff4314e5926d1dbbe"
+    },
+    {
+      "script": "scripts/test-field-navigation-preferences.js",
+      "code": 0,
+      "log": "/tmp/cw369-browser-final.log",
+      "sha256": "9a31c76164bccc94b50e4003a2475dc087d09088cbb3fe3ff4314e5926d1dbbe"
+    },
+    {
+      "script": "scripts/test-equipment-stock-os-operational.js",
+      "code": 0,
+      "log": "/tmp/cw369-stock-consumption.log",
+      "sha256": "9f5ea2995f2229505a5aee50cd94ddaea0b3c0159a7ff95433f767aa501d43c9"
+    },
+    {
+      "script": "scripts/test-field-vehicle-consumption.js",
+      "code": 0,
+      "log": "/tmp/cw369-stock-consumption.log",
+      "sha256": "9f5ea2995f2229505a5aee50cd94ddaea0b3c0159a7ff95433f767aa501d43c9"
+    }
+  ],
+  "logs": {
+    "/tmp/cw369-api-verified.log": "ac2fad734d4a3eae9ac4dc3de6b9ac6437e82744e8f99513d505fa3fde18145e",
+    "/tmp/cw369-api.log": "4ffaf7f15df190c1ef4b69375d502f44758b2af721fb1f92a9a24ba3cf35bf57",
+    "/tmp/cw369-browser-final.log": "9a31c76164bccc94b50e4003a2475dc087d09088cbb3fe3ff4314e5926d1dbbe",
+    "/tmp/cw369-document-recovery-fixed.log": "6a408ba530258cd10215ec37555f0723dd04ef0dbbc155155b62fe3f6bf8796f",
+    "/tmp/cw369-document-recovery.log": "29ff49ca7965e4afca08cff82ac36a7e4f08b3efcac3b0ccf106e43ddc8364fb",
+    "/tmp/cw369-stock-consumption.log": "9f5ea2995f2229505a5aee50cd94ddaea0b3c0159a7ff95433f767aa501d43c9",
+    "/tmp/cw369-syntax.log": "9e2e692dc0a9b174bd35adcc2ad2bb44b8b91423e9579c33c098d109d39f88a7",
+    "/tmp/cw369-technician.log": "f14ada039fe469182f125d2403cd1f12326ab4ce51d94f61d2049f67fcb13e67",
+    "/tmp/cw369-ui-fixed.log": "b9f55097e1a4693338f788743827f19c73dd4f33fdf5c3fc4241178874f043ed",
+    "/tmp/cw369-ui-regressions.log": "d13b24a16b819c9c2a0680e85724d8cb5bd4f65fa8379be41d7b7ea3e7fa1ca2",
+    "/tmp/cw369-ui-verified.log": "27a9feec234bd1829b01b2dabc36566a714d5c23536f430c12fc0457961f8e45",
+    "/tmp/cw369-ui.log": "cf27c8b7bee9443c33dc8ecc45604079021097cbaa315071bb117cc7f4f5f481",
+    "/tmp/cw369-units-verified.log": "75a9d4418d037794247ec6f29ebb8439e25780836402c35bb7c7bb2385c10f38"
+  },
+  "validationNotes": [
+    {
+      "kind": "PREVIOUS_NATIVE_FAILURE",
+      "resolution": "TASK367 executed 270 expected groups; 269 passed. Document recovery expected another technician to inherit the first technician work guide because they shared a vehicle. Corrected test requires null work/empty stock and movements, review-required document state, own confirmed cache and preservation of the original account cache. Server authorization unchanged. Full browser group passed locally. Native restore was skipped."
+    },
+    {
+      "kind": "JSONB_RECOVERY",
+      "resolution": "Recovered plan validation originally compared object property order. Canonical content comparison now accepts PostgreSQL JSONB ordering without accepting different fields; unit test and real lost-response/restart/retry passed."
+    },
+    {
+      "kind": "UI_PREPARATION",
+      "resolution": "Fixed a copied fixture import and assignment to the read-only textarea type property. Entire browser group rerun passed; failure logs retained."
+    },
+    {
+      "kind": "STATE_EDGE_CASES",
+      "resolution": "Reopen checks the selected work technician current assignment/active status under lock. Cancelling a historically closed guide with a still-open work preserves the old guide closure but timestamps the newly closed work at confirmation."
+    }
+  ],
+  "browser": {
+    "engine": "Chromium 153, multiple processes, web security active",
+    "screenshots": 18,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "hashes": {
+      "reports/field-visual/transport-guide-manage/de-1440.png": "b913df3568e54635ea073ea5a231a16ecbc5b0331f87f303a74285aa742bf7a2",
+      "reports/field-visual/transport-guide-manage/de-320.png": "c095c1dfcdd7aec03580b052ba168b80201abd3603586251341683a3ec3af240",
+      "reports/field-visual/transport-guide-manage/de-390.png": "e7f8bf85f836a8a92f70892d34c3d12538ca238ee189461c3c2245389be3db09",
+      "reports/field-visual/transport-guide-manage/en-1440.png": "d035997ea81f58cfdd07389c0fc3a2a19d7e898119e57ffbb9c8566abdac1eb8",
+      "reports/field-visual/transport-guide-manage/en-320.png": "7a65de9930d2aba7cd2762704f39ca566d6db1a547fc99e6773c7b5b36a0ef36",
+      "reports/field-visual/transport-guide-manage/en-390.png": "2590c41e04b310fe4367e8457e2006fa6d8b78b34b6d0204c7d2cc91015aea03",
+      "reports/field-visual/transport-guide-manage/es-1440.png": "f9dcc239d2620fc7874a34da49b6540ab588f0fd9b7e130f0e2a99519d9b5a3d",
+      "reports/field-visual/transport-guide-manage/es-320.png": "776718a7088c483d5dd7c398d18f6a0b6fefc3849fa493574e94378828c3144a",
+      "reports/field-visual/transport-guide-manage/es-390.png": "0d344eaaed0febfd5e76d32a9cc4639f3484eb798e3c3810c7ade77d990151e3",
+      "reports/field-visual/transport-guide-manage/fr-1440.png": "19934b4ed179edcf3461403f288216ea899dd63617d93379e2a14ab9491349a2",
+      "reports/field-visual/transport-guide-manage/fr-320.png": "9b49b5c704eb2a0de7ef9c69e407f58df01ff8e08f0da409ef84e825146476a3",
+      "reports/field-visual/transport-guide-manage/fr-390.png": "42edad2d60196bc0e46e75865020c1ced545999c71d3de63deb14bd636861583",
+      "reports/field-visual/transport-guide-manage/pt-1440.png": "5e5906b76b8719d35ce320805cbdfd34544cc02b626059edb373a7175bf7c528",
+      "reports/field-visual/transport-guide-manage/pt-320.png": "7d2e27aa6f63dd81c680737cf7129b030589db316055db59e2d4ea423356f54f",
+      "reports/field-visual/transport-guide-manage/pt-390.png": "f7a515ff5213e50d642485e39cc4a60a5f0edeb0af5768577214172b72d0b62d",
+      "reports/field-visual/transport-guide-manage/review-de-320.png": "7dac35fbed40101aa23696b45900baa62367712cabd9e2ba61e0a227fa7b4bb6",
+      "reports/field-visual/transport-guide-manage/review-pt-1440.png": "a7fb78d840f1a7265ed302576b9736d26440253c7f75e58a79b30bfaf8bac4de",
+      "reports/field-visual/transport-guide-manage/review-pt-390.png": "7ddd954410d0076a7f51f2ab4ea7ad907256b01ac6b45c8c7d1cfd8a8470e643"
+    },
+    "visuallyReviewed": [
+      "de-320.png",
+      "review-pt-1440.png"
+    ],
+    "entry": "actual /admin-vehicles edit history button preserves guideId/action/language; close/cancel entry wrappers use the same reviewed page",
+    "identity": "ADMIN User only; scoped/session-bound field references; no draft contents stored"
+  },
+  "runnerGroups": 274,
+  "cacheVersion": "v180",
+  "inventory": {
+    "htmlFiles": 119,
+    "rootPages": 112,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 107,
+    "catalogueGuardDifferences": 0,
+    "activeScriptsScanned": 295,
+    "remainingLiteralQueue": 12
+  },
+  "publication": {
+    "status": "READY_NATIVE_CI_PENDING",
+    "branch": "work/field-readiness-20260915-simulation",
+    "mainBranch": "feature/technicians-v25",
+    "mainShaUnchanged": "6f27081e1d183ff584a62255b016b373836734db",
+    "nativeGroupsExpected": 274,
+    "nativeRestore": "PENDING"
+  },
+  "previousCI": [
+    {
+      "task": 367,
+      "codeSha": "1ceb2b90d054949d1125eedd993c7c34e06365a1",
+      "runId": 36182594290,
+      "jobId": 108228289199,
+      "status": "FAILED",
+      "groupsPassed": 269,
+      "groupsExpected": 270,
+      "nativeRestore": "SKIPPED",
+      "evidence": "20260925_task367_ci.json"
+    },
+    {
+      "task": 368,
+      "codeSha": "5f7d8cae657fac440f824f24c7e76c6397162c6e",
+      "runId": 36186019162,
+      "jobId": 108239427314,
+      "status": "IN_PROGRESS_AT_FINAL_CHECK",
+      "groupsExpected": 272,
+      "nativeRestore": "PENDING"
+    }
+  ],
+  "limits": [
+    "Native PostgreSQL 274-group suite and restore remain required.",
+    "Internal metadata/status only; attached official file and fiscal issue/validation unchanged.",
+    "No historical stock reconciliation, silent reassignment or stock reset.",
+    "Official attachment versioning, manual work closing, maintenance/costs, assignments, presets and alert rules still require separate review.",
+    "Volume, VPS/operational backup and physical pilot remain open.",
+    "No merge, deployment or real external contact."
+  ]
+}

@@ -514,27 +514,14 @@ function createTransportGuide() {
   location.href='/transport-guide-create?vehicleId='+encodeURIComponent(val('guideVehicle'))+'&lang='+encodeURIComponent(language);
 }
 
-async function editTransportGuide(id) {
-  const guide = GUIDES.find((item) => Number(item.id) === Number(id));
+function manageTransportGuide(id, action) {
+  requirePageSession();
+  const guide = GUIDES.find(item => Number(item.id) === Number(id));
   if (!guide) return;
-
-  const codeAT = prompt("Codigo AT", guide.codeAT || "");
-  if (codeAT === null) return;
-  const origin = prompt("Origem", guide.origin || "");
-  if (origin === null) return;
-  const destination = prompt("Destino", guide.destination || "");
-  if (destination === null) return;
-  const status = prompt("Estado", guide.status || "ACTIVE");
-  if (status === null) return;
-  const notes = prompt("Notas", guide.notes || "");
-  if (notes === null) return;
-
-  await j(`${API}/transport/${id}`, {
-    method: "PUT",
-    body: JSON.stringify({ codeAT, origin, destination, status, notes }),
-  });
-  await load();
+  const lang = new URL(location.href).searchParams.get('lang') || document.documentElement.lang || 'pt';
+  location.href = '/transport-guide-manage?' + new URLSearchParams({ guideId: String(guide.id), action, lang });
 }
+function editTransportGuide(id) { manageTransportGuide(id, 'EDIT'); }
 
 function editTransportGuideItems(id) {
   const guide = GUIDES.find(item => Number(item.id) === Number(id));
@@ -543,17 +530,8 @@ function editTransportGuideItems(id) {
   location.href = '/transport-guide-items?' + new URLSearchParams({ guideId: String(guide.id), lang });
 }
 
-async function closeTransportGuide(id) {
-  if (!confirm("Fechar esta guia AT?")) return;
-  await j(`${API}/transport/${id}`, { method: "PUT", body: JSON.stringify({ status: "CLOSED" }) });
-  await load();
-}
-
-async function cancelTransportGuide(id) {
-  if (!confirm("Anular esta guia AT?")) return;
-  await j(`${API}/transport/${id}`, { method: "PUT", body: JSON.stringify({ status: "CANCELLED" }) });
-  await load();
-}
+function closeTransportGuide(id) { manageTransportGuide(id, 'CLOSE'); }
+function cancelTransportGuide(id) { manageTransportGuide(id, 'CANCEL'); }
 
 async function startWorkGuide() {
   if(!selectedVehicle("workVehicle"))return;

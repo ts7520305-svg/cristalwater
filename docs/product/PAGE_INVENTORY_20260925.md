@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `1ceb2b90d054949d1125eedd993c7c34e06365a1`. Gerado em 2026-09-25T20:24:56.723Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `3782ee7dc16f992177c95158c42d7798917405a7`. Gerado em 2026-09-25T20:55:46.617Z. Inclui o estado dos ficheiros locais no momento da geração.
 
-118 ficheiros HTML: 111 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
+119 ficheiros HTML: 112 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 293 scripts de integração/navegador ativos. 106 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 295 scripts de integração/navegador ativos. 107 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 2 referências existem no índice Git mas não estão materializadas nesta cópia local; não são classificadas como ficheiros ausentes da aplicação.
 
@@ -79,7 +79,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /admin-test-center | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-today | Entrada raiz | ADMIN | ADMIN | 2 |
 | /admin-ui-settings | Entrada raiz | ADMIN | ADMIN | 1 |
-| /admin-vehicles | Entrada raiz | ADMIN | ADMIN | 3 |
+| /admin-vehicles | Entrada raiz | ADMIN | ADMIN | 4 |
 | /admin-visits-dashboard | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-visits | Entrada raiz | ADMIN | ADMIN | 0 |
 | /alerts-financial | Entrada raiz | ADMIN | ADMIN | 1 |
@@ -148,6 +148,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /to-issue | Entrada raiz | ADMIN | ADMIN | 3 |
 | /transport-guide-create | Entrada raiz | — | ADMIN | 2 |
 | /transport-guide-items | Entrada raiz | — | ADMIN | 2 |
+| /transport-guide-manage | Entrada raiz | — | ADMIN | 2 |
 | /ui/views/demo.html | Auxiliar/protótipo/teste | — | — | 0 |
 | /v26/admin-prototype.html | Auxiliar/protótipo/teste | — | — | 0 |
 | /v26/client-prototype.html | Auxiliar/protótipo/teste | — | — | 0 |

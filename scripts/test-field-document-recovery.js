@@ -140,8 +140,16 @@ let browser; const releases = [];
   await open(); await page.waitForFunction(() => document.getElementById('fieldDocsValue')?.textContent === 'Rever');
   const otherKey = await keyFor(); assert.notEqual(otherKey, key); assert.equal(await raw(otherKey), null); assert.equal(await raw(key), accountRaw);
   assert(!(await page.locator('#workGuideBox').textContent()).includes('Document chlorine'));
-  await page.unroute('**/api/guides/**'); await refresh(); await ready();
-  assert.equal(JSON.parse(await raw(otherKey)).owner, 'TECH:' + other.id, 'A shared vehicle guide is allowed only after this account receives its own server confirmation');
+  await page.unroute('**/api/guides/**'); await refresh();
+  await page.waitForFunction(key => { const saved = JSON.parse(localStorage.getItem(key) || 'null'); return saved?.sections?.work?.data?.workGuide === null; }, otherKey);
+  const otherSaved = JSON.parse(await raw(otherKey));
+  assert.equal(otherSaved.owner, 'TECH:' + other.id);
+  assert.equal(otherSaved.sections.work.data.workGuide, null, "Another technician does not inherit the first technician's work guide");
+  assert.deepEqual(otherSaved.sections.work.data.stock, []);
+  assert.deepEqual(otherSaved.sections.work.data.movements, []);
+  assert.equal(await page.locator('#fieldDocsValue').textContent(), 'Rever');
+  assert(!(await page.locator('#workGuideBox').textContent()).includes('Document chlorine'));
+  assert.equal(await raw(key), accountRaw);
   const daySeparation = await page.evaluate(id => {
     const current = CWFieldDocuments.scope(CWFieldWriteStore.session(), id), original = CWFieldRouteCache.today;
     CWFieldRouteCache.today = () => '2099-01-01';

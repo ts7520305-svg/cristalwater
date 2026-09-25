@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-25T20:24:56.723Z",
-  "baseCommit": "1ceb2b90d054949d1125eedd993c7c34e06365a1",
+  "generatedAt": "2026-09-25T20:55:46.617Z",
+  "baseCommit": "3782ee7dc16f992177c95158c42d7798917405a7",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 293,
+  "activeScriptsScanned": 295,
   "summary": {
-    "htmlFiles": 118,
-    "rootPages": 111,
+    "htmlFiles": 119,
+    "rootPages": 112,
     "nestedPages": 7,
     "unavailableLocalAssetReferences": 2,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 106,
+    "pagesWithLiteralTestReference": 107,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -1865,7 +1865,8 @@
       "testReferences": [
         "test-field-fleet-management-ui.js",
         "test-field-vehicle-consumption-ui.js",
-        "test-field-transport-guide-items-ui.js"
+        "test-field-transport-guide-items-ui.js",
+        "test-field-transport-guide-manage-ui.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -4857,6 +4858,41 @@
       "testReferences": [
         "test-field-transport-guide-items.js",
         "test-field-transport-guide-items-ui.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/transport-guide-manage.html",
+      "route": "/transport-guide-manage",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Dados e estado da guia",
+      "catalogueRoles": [],
+      "guardFiles": [],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/cw-transport-guide-create.css",
+        "/cw-vehicle-consumption-rules.js",
+        "/cw-transport-guide-rules.js",
+        "/cw-transport-guide-copy.js",
+        "/cw-transport-items-rules.js",
+        "/cw-transport-items-copy.js",
+        "/cw-onboarding-rules.js",
+        "/cw-transport-manage-rules.js",
+        "/cw-transport-manage-copy.js",
+        "/cw-transport-guide-manage.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-transport-guide-manage.js",
+        "test-field-transport-guide-manage-ui.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },

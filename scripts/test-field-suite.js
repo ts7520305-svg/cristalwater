@@ -70,6 +70,7 @@ scripts.push('test-field-fleet-management.js','test-field-fleet-management-ui.js
 scripts.push('test-field-vehicle-consumption.js','test-field-vehicle-consumption-ui.js');
 scripts.push('test-field-transport-guide-create.js','test-field-transport-guide-create-ui.js');
 scripts.push('test-field-transport-guide-items.js','test-field-transport-guide-items-ui.js');
+scripts.push('test-field-transport-guide-manage.js','test-field-transport-guide-manage-ui.js');
 scripts.push('test-field-financial-pdf.js');
 scripts.push('test-field-invoice-document.js');
 scripts.push('test-field-legacy-alert-access.js');
