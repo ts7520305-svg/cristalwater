@@ -31,7 +31,7 @@ Runtime PGlite isolado, 41 migrações existentes e Chromium em múltiplos proce
 
 TASK361 confirmada em [259/259 grupos no PostgreSQL nativo](evidence/20260925_task361_ci.json), 17 etapas e 40m52s. As duas regressões que tinham falhado localmente passaram sem alteração dos testes. A atualização de 41 migrações e o restauro de 127 tabelas/47 ficheiros passaram, com linhas e hashes iguais. O registo da TASK361 foi atualizado com esta resolução.
 
-TASK362 validada localmente e preparada para publicação na branch de trabalho. O CI nativo dos 260 grupos e o restauro deste lote continuam por confirmar.
+Publicada em `c2be6caa8649e1d7ab3fc47aef29d5f85c07ac49`, árvore `5644d9f38dd223926a191e3b036bc511d6d7b31c`, idêntica à preparada e validada localmente. [CI 36150863744](https://github.com/ts7520305-svg/cristalwater/actions/runs/36150863744), job `108123470461`, em execução; os 260 grupos e o restauro PostgreSQL nativo deste lote continuam por confirmar.
 
 ## Retoma
 
