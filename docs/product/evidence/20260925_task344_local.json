@@ -1,0 +1,114 @@
+{
+  "task": "TASK344",
+  "checkedAt": "2026-09-25T05:00:19.421515+00:00",
+  "baseCommit": "2ee3589fb394f0d8912c5550aa43bc502e80329d",
+  "sourceSha256": {
+    ".github/workflows/field-readiness.yml": "895b041ca95eab0aedba74c0f120b4363ed7478aefbf2b6ba8c104a89e2fbde1",
+    "frontend/admin-payments.html": "f4084f1edac3caf631c8ac230d38c84ee342a02f088d4ecd7ca3e7140e07749a",
+    "frontend/admin-payments.js": "06b7efcbb18d430cc9b0da3fc6483b135b33b64c6b49f938f569cf6db2fa062d",
+    "frontend/cw-payment-ledger-copy.js": "edc6fc5705ba0a7ed09c862a0e6f408eea27e1fa1e1bdc10bb48ffc14fd4c69f",
+    "frontend/cw-payment-ledger-rules.js": "f504a5045a55996de47c8828fad702714ddceccf907ed9a8e78fe84e6e8b3c50",
+    "frontend/sw.js": "202422a9add011f15fb723b921a7c0fd9b8280f748cc133914681bb11db4a685",
+    "src/middlewares/legacyAdministrationAccess.js": "7efce372caef9dd72313fb7f80786515276a29f5a287380a6da093cfe9466da8",
+    "src/routes/adminPaymentRoutes.js": "ce0797141af83c30bf5794606242d2e3a615e5e30d806c9a0ea610288f9c9e8f",
+    "src/services/adminPaymentLedgerService.js": "2f64390ed90b0423a764b8f7bdc447fef6bd8d303ff9df9f4bf463783000de79",
+    "scripts/test-field-payment-ledger.js": "3b9dcea2dcd77436fea4f96fc8d7958776904570f1bd57c5322f0cfcbf7e3395",
+    "scripts/test-field-suite.js": "ceedd89c5c0e4da01ab5d98d87ffb21d59f66b03bb7b5f063bf37ceebbea8bd2",
+    "tests/payment-ledger-rules.test.js": "06235dfc6d6b050d52104b6017db1d4d9a7942b4a09790941fcdd011bff2971a"
+  },
+  "unitTests": {
+    "passed": 614,
+    "files": 84
+  },
+  "technicianTests": 4,
+  "syntax": {
+    "backend": 630,
+    "frontend": 224,
+    "inline": 62
+  },
+  "integration": [
+    {
+      "script": "scripts/test-field-payment-ledger.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-surplus-ledger.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-legacy-admin-access.js",
+      "code": 0
+    }
+  ],
+  "passLines": [
+    "PASS isolated schema: 40 additive migrations",
+    "PASS payment ledger API: ADMIN ownership, private typed response, 105 records in three ordered pages, exact dates and filters, literal wildcard search, original values and credit classification, invalid filters and access refused, sanitized failures and no writes",
+    "PASS payment ledger browser: real paginated history, five languages and reload, literal originals and anomalous amounts, 320/390/1440, filters and empty distinct from error, incompatible responses/identity refused, offline/timeout, late replies, history restoration, account switch and expiry, no writes or original changes",
+    "PASS the whole receipt appears in both ledgers; the surplus is a zero-value deposit document with one payment and one replayable acknowledgement",
+    "PASS deposits made at the same clock instant have unique identities; receiving credit does not mark other debt as paid",
+    "PASS a failed surplus record rolls back the invoice payment, credit, deposit and receipt; retry records the entire amount once",
+    "PASS legacy administration reads, mutations, aliases and AI require active ADMIN; refused requests are inert, administration and canonical field/client routes remain usable"
+  ],
+  "logs": {
+    "/tmp/cw344-unit.log": "7042e33133f63d8ca487bf559079acb6460cc5ce9cba50da90ad077b59391ce3",
+    "/tmp/cw344-syntax.log": "42f7d48f5b65a36b1aa4dd1338ba6cccf0138eaf3eba366788f81cf686d2db9d",
+    "/tmp/cw344-tech.log": "9b27a0c3da3d4df2b5a8f4c2405c49d535fb70ad01b41bb88af1edf06bf780f5",
+    "/tmp/cw344-final-integrated.log": "9c80c7ab823389c5358d216bd93ee2f965757dcee97f13926c7212d8b9e3be79"
+  },
+  "runtime": {
+    "database": "PGlite 0.5.8 / pglite-socket 0.2.11, isolated",
+    "additiveMigrations": 40,
+    "chromium": "@sparticuz/chromium 153.0.0, normal multiple processes, web security retained",
+    "runnerSha256": "5bd8f95926470bd82fabef27148ed54a55532bdf80d8dbc557dd19b244486b2b",
+    "preloadSha256": "74ba6986b731dfe5120836cb841c25bed62d334014aa588379558293deb6ec7a"
+  },
+  "screenshots": {
+    "reports/field-visual/payment-ledger/ledger-de-390.png": "9b003761806e3258ce30a9db98852cd34b75a83195faf55232d9f05f5a5d5202",
+    "reports/field-visual/payment-ledger/ledger-en-390.png": "94ff7ccb0c7c3bc90fc9799eb75614cd81e007315ed0fe3db8d2efb08078abb4",
+    "reports/field-visual/payment-ledger/ledger-es-390.png": "29518a1f2bb3b20510a46407e98e4058c2b5e54ddc653a4be37dc7ebca831431",
+    "reports/field-visual/payment-ledger/ledger-fr-390.png": "9ec9a35f82c035931f029e2b4cf0b782c96fd95fab8cd626dd262ad283da03ae",
+    "reports/field-visual/payment-ledger/ledger-pt-1440.png": "9d42f60e9d036ee4c890b6421e758c630b080e4116985af2c9cf58df3a925e81",
+    "reports/field-visual/payment-ledger/ledger-pt-320.png": "479bf82da4e00f6505f7e3cbc8a275c38181bf74c7ff172122ee29b62b562332",
+    "reports/field-visual/payment-ledger/ledger-pt-390.png": "eafa9fb85f92225384718ea025ef87f5ec7922a7e8694ef9e35d1f4ddc028a55"
+  },
+  "reviewedWidths": [
+    320,
+    390,
+    1440
+  ],
+  "queryLanguages": [
+    "pt",
+    "en",
+    "fr",
+    "es",
+    "de"
+  ],
+  "fieldSuiteExpectedGroups": 242,
+  "cache": "v156",
+  "nativeCiTimeoutMinutes": 40,
+  "inventory": {
+    "htmlFiles": 115,
+    "rootPages": 108,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 79,
+    "catalogueGuardDifferences": 0,
+    "activeScripts": 263,
+    "pagesWithoutLiteralTestReference": 36
+  },
+  "limits": [
+    "Native CI and PostgreSQL restore of this commit remain pending.",
+    "Each page is a fresh consistent query, not a frozen snapshot across navigation.",
+    "Includes internal credit records; the page does not calculate a cash total, debt or balance.",
+    "The query interface is available in five languages; shared navigation and original source text retain their existing language.",
+    "Existing compatibility ledgers and all financial write routes are preserved."
+  ],
+  "testPreparation": [
+    "Used the existing Vitest ESM import convention.",
+    "Applied private cache headers before the earlier ADMIN gate, including refused reads.",
+    "The count-corruption case uses a count contradictory to the returned page; a different plausible first-page total cannot be independently disproved by that page.",
+    "Marked filters as managed so the shared navigation memory cannot restore another query over the URL selection.",
+    "Native CI timeout increased from 35 to 40 minutes after the verified TASK343 run took 33m06s, before adding this group."
+  ]
+}

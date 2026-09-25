@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-25T04:09:08.087Z",
-  "baseCommit": "d8874ecdc1f0964c68902cb3685c4babcbb5bba8",
+  "generatedAt": "2026-09-25T04:59:12.543Z",
+  "baseCommit": "2ee3589fb394f0d8912c5550aa43bc502e80329d",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 262,
+  "activeScriptsScanned": 263,
   "summary": {
     "htmlFiles": 115,
     "rootPages": 108,
     "nestedPages": 7,
     "unavailableLocalAssetReferences": 2,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 78,
+    "pagesWithLiteralTestReference": 79,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -1174,6 +1174,8 @@
         "/crystal-os-v2-foundation.css",
         "/crystal-os-v2-phase2-adapter.css",
         "/ui/design-system.css",
+        "/cw-payment-ledger-rules.js",
+        "/cw-payment-ledger-copy.js",
         "/admin-payments.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
@@ -1187,7 +1189,9 @@
       "unavailableLocalAssets": [],
       "languageAssets": [],
       "directPrintAction": false,
-      "testReferences": [],
+      "testReferences": [
+        "test-field-payment-ledger.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -2197,6 +2201,7 @@
       "testReferences": [
         "test-system-interconnections.js",
         "test-field-authenticated-document-opening.js",
+        "test-field-payment-ledger.js",
         "test-field-invoice-chat.js",
         "test-field-chat-identity.js",
         "test-field-client-chat-privacy.js",

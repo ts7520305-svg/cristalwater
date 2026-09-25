@@ -2,7 +2,7 @@
 
 O formulário administrativo permite rever e editar um encerramento existente sem o duplicar. A revisão utiliza o identificador e a versão originais; uma alteração concorrente exige carregar explicitamente a versão atual. [Evidência local](evidence/20260925_task343_local.json).
 
-Publicada em `432dc009e6c109f66a1a0647be9254cb16e7e6c7`, árvore `95284b5ba4b4d0958c5e3c0a75a92e7252eefb10`, idêntica à preparada e validada localmente. [CI 36093788647](https://github.com/ts7520305-svg/cristalwater/actions/runs/36093788647), job `107941585249`, em execução. Os 241 grupos e o restauro nativo ainda não estão confirmados.
+Publicada em `432dc009e6c109f66a1a0647be9254cb16e7e6c7`, árvore `95284b5ba4b4d0958c5e3c0a75a92e7252eefb10`, idêntica à preparada e validada localmente. [CI 36093788647](https://github.com/ts7520305-svg/cristalwater/actions/runs/36093788647), job `107941585249`, aprovado: 241/241 grupos esperados distintos, sem faltas, entradas inesperadas, duplicações ou falhas; 17 etapas aprovadas e restauro PostgreSQL de 127 tabelas/47 ficheiros com linhas e hashes iguais. [Evidência nativa](evidence/20260925_task343_ci.json).
 
 ## Comportamento entregue
 
@@ -24,6 +24,6 @@ Capturas de 320, 390 e 1440 píxeis revistas; sem overflow horizontal nos ensaio
 
 ## Critérios ainda abertos
 
-O CI PostgreSQL e o restauro nativo desta publicação requerem confirmação própria. TASK342 tem [240/240 grupos, 17 etapas e restauro de 127 tabelas/47 ficheiros confirmados](evidence/20260925_task342_ci.json) no CI `36091953492`; TASK341 tem 238/238 grupos e restauro de 127 tabelas/47 ficheiros confirmados. Os resultados de um lote não aprovam antecipadamente outro.
+O CI PostgreSQL e o restauro nativo desta publicação estão confirmados na evidência acima. TASK342 tem [240/240 grupos, 17 etapas e restauro de 127 tabelas/47 ficheiros confirmados](evidence/20260925_task342_ci.json) no CI `36091953492`; TASK341 tem 238/238 grupos e restauro de 127 tabelas/47 ficheiros confirmados. Os resultados de um lote não aprovam antecipadamente outro.
 
 O inventário mantém 115 HTML, 78 páginas com referência literal em 262 scripts ativos e 37 na fila de pesquisa. Este lote não fecha todas as páginas, idiomas, prioridades históricas, reagendamento ou dependências de produção. Sem merge, deploy ou contactos reais.

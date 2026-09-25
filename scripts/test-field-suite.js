@@ -46,6 +46,7 @@ scripts.push('test-field-daily-service-log.js');
 scripts.push('test-field-company-closures.js');
 scripts.push('test-field-client-closures.js', 'test-field-client-closures-ui.js');
 scripts.push('test-field-company-closure-edit.js');
+scripts.push('test-field-payment-ledger.js');
 scripts.push('test-field-financial-pdf.js');
 scripts.push('test-field-invoice-document.js');
 scripts.push('test-field-legacy-alert-access.js');

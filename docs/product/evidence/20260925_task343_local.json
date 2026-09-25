@@ -86,7 +86,7 @@
     "pagesWithoutLiteralTestReference": 37
   },
   "limits": [
-    "Native CI and PostgreSQL restore of this commit remain pending.",
+    "Native CI and PostgreSQL restore were verified after publication; see 20260925_task343_ci.json.",
     "Editing does not pause or replan visits and does not reissue previous notices.",
     "Only explicitly changed calendar days use complete UTC boundaries; untouched historical instants and nullable values are preserved.",
     "The edit form refuses historical options it cannot represent.",
@@ -100,7 +100,8 @@
     "tree": "95284b5ba4b4d0958c5e3c0a75a92e7252eefb10",
     "runId": 36093788647,
     "jobId": 107941585249,
-    "status": "in_progress",
-    "nativeRestoreConfirmed": false
+    "status": "success",
+    "nativeRestoreConfirmed": true,
+    "evidence": "20260925_task343_ci.json"
   }
 }

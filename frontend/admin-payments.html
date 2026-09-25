@@ -42,6 +42,26 @@
       font-weight: 800;
       color: var(--ds-text-muted);
     }
+    #paymentLedger{max-width:1440px;margin:auto;min-width:0;color:#183c46}
+    #paymentLedger .card{min-width:0;background:#fff;color:#183c46}
+    #paymentLedger .finance-toolbar{grid-template-columns:repeat(3,minmax(0,1fr));align-items:end}
+    #paymentLedger input,#paymentLedger select{width:100%;min-width:0;color:#183c46;background:#fff;border:1px solid #91adb7}
+    #paymentLedger .finance-filters label,#paymentLedger .text-muted{color:#45636d}
+    #paymentLedger :focus-visible{outline:3px solid #087d79;outline-offset:3px}
+    #paymentLedger button:disabled{opacity:.5;cursor:default}
+    #paymentLedger .payment-pagination{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+    #paymentLedger #paymentsStatus{padding:12px;background:#edf6f7;color:#194c59;border-radius:8px;scroll-margin-top:125px}
+    #paymentLedger #paymentsStatus[data-state=error],#paymentLedger #paymentsStatus[data-state=invalid],#paymentLedger #paymentsStatus[data-state=session]{background:#fff0ed;color:#842f20}
+    #paymentLedger #tableBox{display:grid;gap:12px;min-width:0}
+    #paymentLedger .payment-card{border:1px solid #bed2d8;border-radius:12px;padding:16px;min-width:0;overflow-wrap:anywhere}
+    #paymentLedger .payment-card-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}
+    #paymentLedger .payment-card h2{font-size:18px;margin:0}#paymentLedger .payment-amount{font-size:21px}
+    #paymentLedger .payment-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0}
+    #paymentLedger dt{color:#45636d;font-size:13px}#paymentLedger dd{margin:3px 0 0;font-weight:600}
+    #paymentLedger details{margin:10px 0}#paymentLedger summary{cursor:pointer;font-weight:700}
+    #paymentLedger .payment-notes{white-space:pre-wrap}#paymentLedger .payment-review{padding:10px;background:#fff6df;color:#644313;border-radius:8px}
+    #paymentLedger .payment-credit{font-weight:700;color:#075a67}#paymentLedger .payment-card .cw-v2-btn{margin-top:8px;white-space:normal;max-width:100%}
+    @media(max-width:600px){#paymentLedger{padding:10px}#paymentLedger .finance-toolbar,#paymentLedger .payment-facts{grid-template-columns:1fr}#paymentLedger .card{padding:14px}}
     @media (max-width: 920px) {
       .finance-toolbar {
         grid-template-columns: 1fr;
@@ -58,43 +78,47 @@
 <body data-required-role="ADMIN">
 
   <main>
-    <section class="finance-shell page">
+    <section class="finance-shell page" id="paymentLedger" data-cw-form-memory="managed">
       <header class="card finance-head">
         <div>
-          <h1>Pagamentos</h1>
-          <p class="text-muted">Controlo de pagamentos, filtros por metodo e acesso rapido ao cliente.</p>
+          <h1 data-ledger-copy="title">Pagamentos</h1>
+          <p class="text-muted" data-ledger-copy="subtitle">Consulta dos registos originais por cliente, método e data.</p>
         </div>
         <div class="finance-nav">
-          <a class="cw-v2-btn" href="/admin-master-control">Centro</a>
-          <a class="cw-v2-btn" href="/admin-notifications">Notificacoes</a>
-          <a class="cw-v2-btn" href="/billing-center">Cobrancas</a>
+          <a class="cw-v2-btn" href="/admin-master-control" data-ledger-copy="center">Centro</a>
+          <a class="cw-v2-btn" href="/admin-notifications" data-ledger-copy="notifications">Notificações</a>
+          <a class="cw-v2-btn" href="/billing-center" data-ledger-copy="billing">Cobranças</a>
+          <label for="paymentLanguage" data-ledger-copy="language">Idioma</label><select id="paymentLanguage"><option value="pt">Português</option><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option></select>
         </div>
       </header>
 
       <section class="card">
-    <div class="finance-toolbar">
+    <form id="paymentFilters" class="finance-toolbar" autocomplete="off" novalidate>
       <div class="finance-filters">
-        <label for="paymentSearch">Pesquisa</label>
-        <input id="paymentSearch" type="search" placeholder="Pesquisar cliente, referencia ou metodo">
+        <label for="paymentSearch" data-ledger-copy="search">Pesquisa</label>
+        <input id="paymentSearch" type="search" maxlength="120">
       </div>
       <div class="finance-filters">
-        <label for="paymentMethodFilter">Metodo de pagamento</label>
-        <select id="paymentMethodFilter">
-          <option value="">Todos os metodos</option>
-          <option value="MBWAY">MB WAY</option>
-          <option value="TRANSFER">Transferencia</option>
-          <option value="CASH">Numerario</option>
-          <option value="CARD">Cartao</option>
-        </select>
+        <label for="paymentMethodFilter" data-ledger-copy="method">Método de pagamento</label>
+        <input id="paymentMethodFilter" list="paymentMethods" maxlength="80"><datalist id="paymentMethods"><option value="MBWAY"><option value="TRANSFER"><option value="CASH"><option value="CARD"><option value="CREDIT"><option value="MANUAL"></datalist>
       </div>
-      <button class="cw-v2-btn primary" id="refreshPayments" type="button"><span>Atualizar</span></button>
-    </div>
+      <div class="finance-filters"><label for="paymentClientId" data-ledger-copy="clientId">ID do cliente</label><input id="paymentClientId" inputmode="numeric"></div>
+      <div class="finance-filters"><label for="paymentFrom" data-ledger-copy="from">Desde</label><input id="paymentFrom" placeholder="YYYY-MM-DD" inputmode="numeric"></div>
+      <div class="finance-filters"><label for="paymentTo" data-ledger-copy="to">Até</label><input id="paymentTo" placeholder="YYYY-MM-DD" inputmode="numeric"></div>
+      <button class="cw-v2-btn primary" id="refreshPayments" type="submit" data-ledger-copy="refresh">Atualizar</button>
+    </form>
+    <p class="text-muted" data-ledger-copy="basis"></p><p class="text-muted" data-ledger-copy="names"></p><p class="text-muted" data-ledger-copy="dateNote"></p>
     <div id="paymentsStatus" class="status" role="status" aria-live="polite">A carregar pagamentos...</div>
-    <div id="tableBox"></div>
+    <p id="paymentChecked" class="text-muted"></p>
+    <nav class="payment-pagination"><button id="paymentFirst" type="button" data-ledger-copy="first">Primeira página</button><button id="paymentPrevious" type="button" data-ledger-copy="previous">Anterior</button><button id="paymentNext" type="button" data-ledger-copy="next">Seguinte</button></nav>
+    <div id="tableBox" role="list"></div>
+    <nav class="payment-pagination"><button id="paymentFirstBottom" type="button" data-ledger-copy="first">Primeira página</button><button id="paymentPreviousBottom" type="button" data-ledger-copy="previous">Anterior</button><button id="paymentNextBottom" type="button" data-ledger-copy="next">Seguinte</button></nav>
       </section>
     </section>
   </main>
 
+  <script src="/cw-payment-ledger-rules.js"></script>
+  <script src="/cw-payment-ledger-copy.js"></script>
   <script src="/admin-payments.js"></script>
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>

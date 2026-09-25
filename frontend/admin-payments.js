@@ -1,157 +1,78 @@
-const API = "/api";
-const queryParams = new URLSearchParams(location.search);
-const queryClientId = Number(queryParams.get("clientId") || 0);
-let allPayments = [];
-
-window.onload = () => {
-  document.getElementById("refreshPayments")?.addEventListener("click", loadPayments);
-  document.getElementById("paymentSearch")?.addEventListener("input", renderPayments);
-  document.getElementById("paymentMethodFilter")?.addEventListener("change", renderPayments);
-  if (!hasValidJwtPayload()) {
-    setStatus("Sessão inválida. A redirecionar para login...", "error");
-    location.replace("/login");
-    return;
+(function(){
+  'use strict';
+  const R=window.CWPaymentLedgerRules,copy=window.CWPaymentLedgerCopy,$=id=>document.getElementById(id),panel=$('paymentLedger');
+  const keys=['cristalwater_jwt','token','adminToken','cristalwater_user','user'],fingerprint=()=>JSON.stringify(keys.map(k=>localStorage.getItem(k)));
+  const filterIds={q:'paymentSearch',clientId:'paymentClientId',method:'paymentMethodFilter',from:'paymentFrom',to:'paymentTo'};
+  let session=null,invalid=false,suspended=false,sequence=0,request=null,data=null,state='loading',page=1,selection=null,urlInvalid=false;
+  const params=new URLSearchParams(location.search);let language=Object.hasOwn(copy,params.get('lang'))?params.get('lang'):'pt';
+  const t=key=>copy[language][key],node=(tag,content,className)=>{const el=document.createElement(tag);el.textContent=content;if(className)el.className=className;return el;};
+  try{
+    const token=keys.slice(0,3).map(k=>localStorage.getItem(k)).find(Boolean),claims=JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))),id=Number(claims.userId||claims.id),users=keys.slice(3).map(k=>localStorage.getItem(k)).filter(Boolean).map(JSON.parse);
+    if(claims.role!=='ADMIN'||!R.positive(id)||!Number.isFinite(claims.exp)||claims.exp*1000<=Date.now()||!users.length||users.some(u=>u.role!=='ADMIN'||Number(u.userId||u.id)!==id)||keys.slice(0,3).some(k=>localStorage.getItem(k)&&localStorage.getItem(k)!==token))throw Error();
+    session={token,owner:'ADMIN:'+id,identity:fingerprint(),expires:claims.exp*1000};
+  }catch(_){invalid=true;state='session';}
+  function abort(){sequence++;if(request){request.controller.abort();clearTimeout(request.timer);request=null;}}
+  function active(){
+    try{if(!invalid&&session.identity===fingerprint()&&session.expires>Date.now())return true;}catch(_){}
+    invalid=true;abort();data=null;selection=null;page=1;for(const id of Object.values(filterIds))$(id).value='';state='session';render();return false;
   }
-  loadPayments();
-};
-
-function authHeaders(extra = {}) {
-  const token = localStorage.getItem("token");
-  return {
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...extra,
-  };
-}
-
-function hasValidJwtPayload() {
-  const token = localStorage.getItem("token") || localStorage.getItem("cristalwater_jwt");
-  if (!token || token.split(".").length !== 3) return false;
-  try {
-    const payload = token.split(".")[1];
-    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
-    const decoded = atob(normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "="));
-    const data = JSON.parse(decoded);
-    return typeof data === "object" && data !== null;
-  } catch (_) {
-    return false;
-  }
-}
-
-function setStatus(message, tone = "info") {
-  const box = document.getElementById("paymentsStatus");
-  if (!box) return;
-  box.textContent = message;
-  box.className = `status ${tone === "info" ? "" : tone}`.trim();
-}
-
-async function loadPayments() {
-  setStatus("A carregar pagamentos...");
-
-  try {
-    const res = await fetch(`${API}/admin/payments/ledger/all`, { headers: authHeaders() });
-    const data = await res.json();
-    if (!res.ok || data.ok === false) {
-      setStatus(data.error || "Erro ao carregar pagamentos.", "error");
-      allPayments = [];
-      renderPayments();
-      return;
+  function current(requestedPage=page){return R.filters({...Object.fromEntries(Object.entries(filterIds).map(([key,id])=>[key,$(id).value])),page:String(requestedPage)});}
+  function writeUrl(){const url=new URL(location.href);for(const [key,id] of Object.entries(filterIds)){$(id).value?url.searchParams.set(key,$(id).value):url.searchParams.delete(key);}url.searchParams.set('page',String(page));url.searchParams.set('lang',language);history.replaceState(null,'',url);}
+  function fromUrl(){const url=new URL(location.href);for(const [key,id] of Object.entries(filterIds))$(id).value=url.searchParams.get(key)||'';const rawPage=url.searchParams.get('page')||'1';page=/^[1-9]\d*$/.test(rawPage)?Number(rawPage):NaN;urlInvalid=[...Object.keys(filterIds),'page'].some(key=>url.searchParams.getAll(key).length>1);language=Object.hasOwn(copy,url.searchParams.get('lang'))?url.searchParams.get('lang'):language;}
+  const locale=()=>({pt:'pt-PT',en:'en-GB',fr:'fr-FR',es:'es-ES',de:'de-DE'})[language];
+  function date(value){return new Intl.DateTimeFormat(locale(),{dateStyle:'medium',timeStyle:'medium',timeZone:'UTC'}).format(new Date(value));}
+  function amount(row){return row.amountCents===null?row.amountRaw+' EUR':new Intl.NumberFormat(locale(),{style:'currency',currency:'EUR'}).format(row.amountCents/100);}
+  function fact(parent,label,value){const part=node('div','');part.append(node('dt',label),node('dd',value));parent.append(part);}
+  function render(){
+    document.documentElement.lang=language;document.title=t('title')+' · Cristal Water';$('paymentLanguage').value=language;
+    for(const el of panel.querySelectorAll('[data-ledger-copy]'))el.textContent=t(el.dataset.ledgerCopy);
+    for(const [id,key] of [['paymentSearch','searchHint'],['paymentMethodFilter','allMethods'],['paymentClientId','allClients']])$(id).placeholder=t(key);
+    panel.dataset.state=state;panel.setAttribute('aria-busy',String(state==='loading'));$('paymentsStatus').dataset.state=state;
+    $('paymentsStatus').textContent=state==='ready'?t('range').replace('{page}',page).replace('{pages}',data.pages).replace('{total}',data.total):t(state)||'';
+    $('paymentsStatus').setAttribute('role',['error','invalid','session'].includes(state)?'alert':'status');
+    $('paymentChecked').textContent=data?t('asOf')+' '+date(data.asOf)+' UTC':'';
+    const usable=!!data&&['ready','outside','empty'].includes(state);
+    for(const suffix of ['', 'Bottom']){$('paymentFirst'+suffix).disabled=invalid||suspended||!usable||page===1;$('paymentPrevious'+suffix).disabled=invalid||suspended||!usable||!data.hasPrevious;$('paymentNext'+suffix).disabled=invalid||suspended||!usable||!data.hasNext;}
+    $('refreshPayments').disabled=invalid||suspended;for(const id of Object.values(filterIds))$(id).disabled=invalid||suspended;
+    const list=$('tableBox');list.replaceChildren();if(!data)return;
+    for(const row of data.payments){
+      const card=node('article','','payment-card');card.dataset.paymentId=row.id;card.setAttribute('role','listitem');
+      const head=node('div','','payment-card-head');head.append(node('h2','#'+row.id),node('strong',amount(row),'payment-amount'));card.append(head);
+      const facts=node('dl','','payment-facts');fact(facts,t('client'),row.clientName+' · CW-'+String(row.clientId).padStart(6,'0'));
+      fact(facts,t('document'),'#'+row.invoiceId+(row.documentReference?' · '+row.documentReference:'')+' · '+row.documentStatus+(row.monthRef?' · '+row.monthRef:''));
+      fact(facts,t('methodOriginal'),row.method??t('notGiven'));fact(facts,t('paidAt'),date(row.paidAt));card.append(facts);
+      if(row.internalCredit)card.append(node('p',t('credit'),'payment-credit'));
+      if(row.amountReview!=='MATCH')card.append(node('p',t({LEGACY_ZERO_CENTS:'legacy',CONFLICT:'conflict',INVALID_AMOUNT:'invalidAmount'}[row.amountReview]),'payment-review'));
+      const details=node('details',''),summary=node('summary',t('raw')),original=node('dl','','payment-facts');fact(original,t('raw'),row.amountRaw+' EUR');fact(original,t('stored'),String(row.storedAmountCents));details.append(summary,original);if(row.notes!==null){details.append(node('h3',t('notes')),node('p',row.notes,'payment-notes'));}card.append(details);
+      const link=node('a',t('chat'),'cw-v2-btn');link.href='/chat?clientId='+row.clientId;link.addEventListener('click',event=>{if(!active()||state!=='ready'||!R.equal(current(),selection))event.preventDefault();});card.append(link);list.append(card);
     }
-
-    allPayments = Array.isArray(data.payments) ? data.payments : [];
-    renderPayments();
-    setStatus(`${allPayments.length} pagamento(s) carregado(s).`, "ok");
-  } catch (err) {
-    console.error(err);
-    allPayments = [];
-    renderPayments();
-    setStatus("Erro de ligacao ao carregar pagamentos.", "error");
   }
-}
-
-function filteredPayments() {
-  let payments = [...allPayments];
-  if (queryClientId) payments = payments.filter((p) => Number(p.invoice?.clientId) === queryClientId);
-
-  const query = String(document.getElementById("paymentSearch")?.value || "").toLowerCase().trim();
-  const method = String(document.getElementById("paymentMethodFilter")?.value || "").toUpperCase();
-
-  return payments.filter((p) => {
-    const clientId = p.invoice?.clientId || null;
-    const clientName = p.invoice?.client?.name || `Cliente ${clientId ?? "-"}`;
-    const reference = clientId ? `CW-${String(Number(clientId)).padStart(6, "0")}` : "-";
-    const hay = `${reference} ${clientName} ${p.method || ""}`.toLowerCase();
-    const matchText = !query || hay.includes(query);
-    const matchMethod = !method || String(p.method || "").toUpperCase() === method;
-    return matchText && matchMethod;
-  });
-}
-
-function renderPayments() {
-  const tableBox = document.getElementById("tableBox");
-  const payments = filteredPayments();
-
-  if (!payments.length) {
-      tableBox.innerHTML = `<div class="empty-state"><h3>Sem pagamentos</h3><p class="text-muted">Sem pagamentos registados para este filtro.</p></div>`;
-    if (allPayments.length) setStatus("Sem resultados para os filtros atuais.", "ok");
-    return;
+  async function load(requestedPage=1){
+    if(!active()||suspended)return;const moved=requestedPage!==page;abort();data=null;page=requestedPage;selection=current();
+    if(urlInvalid||!selection){state='invalid';render();return;}
+    const chosen=selection,generation=sequence;writeUrl();state='loading';render();
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);request={controller,timer};
+    try{
+      const query=new URLSearchParams();for(const [key,value] of Object.entries(chosen))if(value!==null&&value!=='')query.set(key,String(value));
+      const response=await fetch('/api/admin/payments/ledger/page?'+query,{headers:{Authorization:'Bearer '+session.token},signal:controller.signal,cache:'no-store',redirect:'error'});
+      if(!active()||suspended||generation!==sequence)return;
+      if([401,403].includes(response.status)){invalid=true;active();return;}
+      if(response.status!==200||response.headers.get('x-cw-ledger')!=='admin-payments-v1'||response.headers.get('x-cw-owner')!==session.owner||response.headers.get('cache-control')!=='private, no-store'||!(response.headers.get('content-type')||'').startsWith('application/json'))throw Error('Unconfirmed payment response');
+      const result=await response.json();if(!active()||suspended||generation!==sequence)return;
+      if(!R.equal(chosen,current())||!R.packet(result,chosen,session.owner))throw Error('Invalid payment page');
+      data=result;state=result.payments.length?'ready':result.total===0?'empty':'outside';render();if(moved)$('paymentsStatus').scrollIntoView({block:'start'});
+    }catch(_){if(active()&&!suspended&&generation===sequence){data=null;state='error';render();}}
+    finally{clearTimeout(timer);if(generation===sequence){request=null;render();}}
   }
-
-  let html = `
-        <div class="ds-table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Referencia</th>
-            <th>Cliente</th>
-            <th>Invoice</th>
-            <th>Valor</th>
-            <th>Método</th>
-            <th>Data</th>
-            <th>Ação</th>
-          </tr>
-        </thead>
-        <tbody>
-    `;
-
-  payments.forEach((p) => {
-    const clientId = p.invoice?.clientId || null;
-    const clientName = p.invoice?.client?.name || `Cliente ${clientId ?? "-"}`;
-    const reference = clientId ? `CW-${String(Number(clientId)).padStart(6, "0")}` : "-";
-
-    html += `
-        <tr>
-          <td>${p.id}</td>
-          <td><strong>${escapeHtml(reference)}</strong></td>
-          <td>${escapeHtml(clientName)}</td>
-          <td>${p.invoiceId}</td>
-          <td>${Number(p.amount || 0).toFixed(2)} €</td>
-          <td>${escapeHtml(p.method || "-")}</td>
-          <td>${new Date(p.paidAt).toLocaleString("pt-PT")}</td>
-          <td>
-            ${clientId ? `
-              <button class="cw-v2-btn" onclick="openClient(${clientId})" title="Abrir situação do cliente" aria-label="Abrir cliente ${escapeHtml(clientName)}">
-                <span aria-hidden="true">🔎</span><span>Abrir cliente</span>
-              </button>
-            ` : "-"}
-          </td>
-        </tr>
-      `;
-  });
-
-  html += `</tbody></table></div>`;
-  tableBox.innerHTML = html;
-}
-
-function openClient(clientId) {
-  window.location.href = `/chat?clientId=${clientId}`;
-}
-
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
+  function changed(){if(!active()||suspended)return;abort();data=null;urlInvalid=false;page=1;state='filters';render();}
+  for(const id of Object.values(filterIds))$(id).addEventListener('input',changed);
+  $('paymentFilters').addEventListener('submit',event=>{event.preventDefault();load(1);});
+  for(const suffix of ['', 'Bottom']){$('paymentFirst'+suffix).addEventListener('click',()=>load(1));$('paymentPrevious'+suffix).addEventListener('click',()=>load(page-1));$('paymentNext'+suffix).addEventListener('click',()=>load(page+1));}
+  $('paymentLanguage').addEventListener('change',()=>{language=$('paymentLanguage').value;const url=new URL(location.href);url.searchParams.set('lang',language);history.replaceState(null,'',url);render();});
+  window.addEventListener('storage',()=>active());window.addEventListener('focus',()=>active());document.addEventListener('visibilitychange',()=>{if(!document.hidden)active();});
+  window.addEventListener('pagehide',()=>{suspended=true;abort();data=null;state='loading';render();});window.addEventListener('pageshow',event=>{if(event.persisted){suspended=false;fromUrl();load(page);}});
+  window.addEventListener('popstate',()=>{if(active()){fromUrl();load(page);}});
+  setInterval(()=>{if(!active()||suspended)return;if(data&&!R.equal(current(),selection))changed();},300);
+  for(const id of ['tableBox','paymentsStatus','paymentChecked'])$(id).dataset.cwStateManaged='manual';
+  fromUrl();render();if(active())load(page);
+}());
