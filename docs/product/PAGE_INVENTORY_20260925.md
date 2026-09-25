@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `07f6a5756e8e6f0b228da6ea87667100786eaa8e`. Gerado em 2026-09-25T10:56:39.814Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `2179e6d30359a1a02484531bed8a50bd928a0a18`. Gerado em 2026-09-25T11:25:17.938Z. Inclui o estado dos ficheiros locais no momento da geração.
 
 115 ficheiros HTML: 108 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 274 scripts de integração/navegador ativos. 92 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 275 scripts de integração/navegador ativos. 93 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 2 referências existem no índice Git mas não estão materializadas nesta cópia local; não são classificadas como ficheiros ausentes da aplicação.
 
@@ -62,8 +62,8 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /admin-notifications | Entrada raiz | ADMIN | ADMIN | 3 |
 | /admin-onboarding | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-operational-flow | Entrada raiz | ADMIN | ADMIN | 1 |
-| /admin-operational-settings | Entrada raiz | ADMIN | ADMIN | 6 |
-| /admin-payment-settings | Entrada raiz | ADMIN | ADMIN | 0 |
+| /admin-operational-settings | Entrada raiz | ADMIN | ADMIN | 7 |
+| /admin-payment-settings | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-payments | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-pool-calculator | Entrada raiz | ADMIN | ADMIN | 4 |
 | /admin-pool-technical | Entrada raiz | ADMIN | ADMIN | 9 |
@@ -158,7 +158,6 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 
 - /admin-menu — Entrada raiz; papéis declarados: ADMIN.
 - /admin-onboarding — Entrada raiz; papéis declarados: ADMIN.
-- /admin-payment-settings — Entrada raiz; papéis declarados: ADMIN.
 - /admin-security — Entrada raiz; papéis declarados: ADMIN.
 - /admin-suppliers — Entrada raiz; papéis declarados: ADMIN.
 - /admin-technicians — Entrada raiz; papéis declarados: ADMIN.

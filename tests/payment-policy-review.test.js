@@ -1,0 +1,14 @@
+import {describe,it,expect} from 'vitest';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url),R=require('../frontend/cw-payment-policy-rules'),S=require('../src/services/paymentPolicyReviewService'),{normalizeBool}=require('../src/services/systemSettingService');
+const now='2026-09-25T12:00:00.000Z',rows=[{key:R.portalKey,value:'true',updatedAt:new Date(now)},{key:R.legacyKeys[0],value:'DISABLED',updatedAt:new Date(now)}];
+const packet={ok:true,version:1,owner:'ADMIN:1',asOf:now,timeZone:'UTC',readOnly:true,legacyApplied:false,portal:{setting:S.project(R.portalKey,rows),enabled:true,defaultEnabled:false},legacy:R.legacyKeys.map(key=>S.project(key,rows))};
+describe('payment policy review',()=>{
+ it('reports missing records without inventing saved true values',()=>{expect(S.project(R.portalKey,[])).toEqual({key:R.portalKey,source:'MISSING',raw:null,updatedAt:null,recognized:true});expect(R.runtimeEnabled(null)).toBe(false);for(const key of R.legacyKeys)expect(S.project(key,[]).raw).toBeNull();});
+ it('matches the live portal parser including case and no whitespace trimming',()=>{for(const raw of [null,'','true','TRUE','1','yes','sim','ON','false','FALSE','0','no','nao','não','off',' true ','false!','garbage'])expect(R.runtimeEnabled(raw)).toBe(normalizeBool(raw,false));expect(R.recognized(R.portalKey,' true ')).toBe(false);});
+ it('keeps exact old values and distinguishes malformed values from disabled',()=>{const raw='<img src=x onerror=alert(1)> 50%_';expect(S.project(R.legacyKeys[1],[{key:R.legacyKeys[1],value:raw,updatedAt:new Date(now)}])).toMatchObject({raw,recognized:false});expect(R.recognized(R.legacyKeys[1],'TRUE')).toBe(false);expect(R.recognized(R.legacyKeys[1],'false')).toBe(true);});
+ it('does not let an old DISABLED policy override an enabled portal',()=>{expect(R.packet(packet,'ADMIN:1')).toBe(true);expect(packet.legacy[0].raw).toBe('DISABLED');expect(packet.portal.enabled).toBe(true);});
+ it('refuses a mixed owner, invented scope, missing or duplicated settings',()=>{for(const change of [{owner:'ADMIN:2'},{legacyApplied:true},{readOnly:false},{legacy:[]},{legacy:[packet.legacy[0],packet.legacy[0],...packet.legacy.slice(2)]},{portal:{...packet.portal,enabled:false}},{portal:{...packet.portal,defaultEnabled:true}}])expect(R.packet({...packet,...change},'ADMIN:1')).toBe(false);});
+ it('refuses malformed timestamps and false source declarations',()=>{for(const change of [{source:'MISSING'},{raw:true},{updatedAt:'2026-09-25'},{recognized:false}])expect(R.record({...packet.portal.setting,...change},R.portalKey)).toBe(false);});
+ it('rejects permissions and ambiguous query parameters before reading',async()=>{const db={$transaction:()=>{throw Error('Unexpected lookup');}};await expect(S.read({id:1,role:'CLIENT'},{},db)).rejects.toMatchObject({statusCode:403});await expect(S.read({id:1,role:'ADMIN'},{policy:'DISABLED'},db)).rejects.toMatchObject({statusCode:400});});
+});

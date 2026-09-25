@@ -1,17 +1,11 @@
-const express = require("express");
-const router = express.Router();
-
-const {
-  getRules,
-  updateRule,
-  getPaymentPolicy,
-  updatePaymentPolicy,
-} = require("../controllers/notificationRuleController");
-
-router.get("/", getRules);
-router.put("/:id", updateRule);
-
-router.get("/payment-policy", getPaymentPolicy);
-router.put("/payment-policy", updatePaymentPolicy);
-
-module.exports = router;
+"use strict";
+const router=require('express').Router(),auth=require('../middlewares/authMiddleware');
+const {getRules,updateRule,getPaymentPolicy,updatePaymentPolicy,reviewPaymentPolicy}=require('../controllers/notificationRuleController');
+router.use((req,res,next)=>{res.set({'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'});res.vary('Authorization');next();});
+router.use(auth('ADMIN'));
+router.get('/payment-policy/review',reviewPaymentPolicy);
+router.get('/payment-policy',getPaymentPolicy);
+router.put('/payment-policy',updatePaymentPolicy);
+router.get('/',getRules);
+router.put('/:id',updateRule);
+module.exports=router;

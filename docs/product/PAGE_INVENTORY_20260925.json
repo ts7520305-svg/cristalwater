@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-25T10:56:39.814Z",
-  "baseCommit": "07f6a5756e8e6f0b228da6ea87667100786eaa8e",
+  "generatedAt": "2026-09-25T11:25:17.938Z",
+  "baseCommit": "2179e6d30359a1a02484531bed8a50bd928a0a18",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 274,
+  "activeScriptsScanned": 275,
   "summary": {
     "htmlFiles": 115,
     "rootPages": 108,
     "nestedPages": 7,
     "unavailableLocalAssetReferences": 2,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 92,
+    "pagesWithLiteralTestReference": 93,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -1105,6 +1105,7 @@
       "directPrintAction": false,
       "testReferences": [
         "test-field-equipment-flow.js",
+        "test-field-payment-policy-review.js",
         "test-field-client-intake-ui.js",
         "test-field-maintenance-billing.js",
         "test-data-protection-browser.js",
@@ -1117,7 +1118,7 @@
       "file": "frontend/admin-payment-settings.html",
       "route": "/admin-payment-settings",
       "kind": "Entrada raiz",
-      "title": "Cristal Water - Configuração de Lembretes",
+      "title": "Lembretes de pagamento · Cristal Water",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -1131,17 +1132,13 @@
       "entryRedirects": {},
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/manifest.webmanifest",
-        "/cristal-assist.css",
-        "/cw-auth.js",
         "/ui/foundation.css",
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
-        "/admin-auth-guard.js",
         "/ui/design-system.css",
-        "/cristal-help-data.js",
-        "/cristal-assist.js",
-        "/cw-admin-shortcuts.js",
+        "/cw-auth.js",
+        "/admin-auth-guard.js",
+        "/cw-payment-policy-rules.js",
+        "/cw-payment-policy-copy.js",
+        "/admin-payment-settings.js",
         "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
@@ -1151,7 +1148,9 @@
       "unavailableLocalAssets": [],
       "languageAssets": [],
       "directPrintAction": false,
-      "testReferences": [],
+      "testReferences": [
+        "test-field-payment-policy-review.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {

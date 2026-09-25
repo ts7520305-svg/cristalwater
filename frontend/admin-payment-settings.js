@@ -1,0 +1,30 @@
+(function(){
+ 'use strict';
+ const R=window.CWPaymentPolicyRules,copy=window.CWPaymentPolicyCopy,$=id=>document.getElementById(id),panel=$('paymentPolicy'),keys=['cristalwater_jwt','token','adminToken','cristalwater_user','user'],fingerprint=()=>JSON.stringify(keys.map(k=>localStorage.getItem(k)));
+ let session=null,invalid=false,suspended=false,sequence=0,request=null,data=null,state='loading',language='pt';
+ const t=key=>copy[language][key],node=(tag,content)=>{const el=document.createElement(tag);el.textContent=content;return el;};
+ function fromUrl(){const lang=new URL(location.href).searchParams.get('lang');language=Object.hasOwn(copy,lang)?lang:'pt';}
+ try{const token=keys.slice(0,3).map(k=>localStorage.getItem(k)).find(Boolean),claims=JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))),id=Number(claims.userId||claims.id),users=keys.slice(3).map(k=>localStorage.getItem(k)).filter(Boolean).map(JSON.parse);
+  if(claims.role!=='ADMIN'||!R.positive(id)||!Number.isFinite(claims.exp)||claims.exp*1000<=Date.now()||!users.length||users.some(u=>u.role!=='ADMIN'||Number(u.userId||u.id)!==id)||keys.slice(0,3).some(k=>localStorage.getItem(k)&&localStorage.getItem(k)!==token))throw Error();session={token,owner:'ADMIN:'+id,identity:fingerprint(),expires:claims.exp*1000};
+ }catch(_){invalid=true;state='session';}
+ function abort(){sequence++;if(request){request.controller.abort();clearTimeout(request.timer);request=null;}}
+ function active(){try{if(!invalid&&session.identity===fingerprint()&&session.expires>Date.now())return true;}catch(_){}invalid=true;abort();data=null;state='session';render();return false;}
+ const date=value=>new Intl.DateTimeFormat(({pt:'pt-PT',en:'en-GB',fr:'fr-FR',es:'es-ES',de:'de-DE'})[language],{dateStyle:'medium',timeStyle:'medium',timeZone:'UTC'}).format(new Date(value));
+ function fact(parent,label,value,raw=false){const part=node('div',''),dd=node('dd','');dd.append(node(raw?'code':'span',value));part.append(node('dt',label),dd);parent.append(part);}
+ function facts(parent,row){parent.replaceChildren();fact(parent,t('source'),t(row.source));fact(parent,t('raw'),row.raw===null?t('notGiven'):row.raw===''?t('emptyString'):row.raw,true);fact(parent,t('updated'),row.updatedAt?date(row.updatedAt)+' UTC':t('notGiven'));}
+ function render(){
+  document.documentElement.lang=language;document.title=t('title')+' · Cristal Water';$('policyLanguage').value=language;for(const el of panel.querySelectorAll('[data-policy-copy]'))el.textContent=t(el.dataset.policyCopy);
+  panel.dataset.state=state;panel.setAttribute('aria-busy',String(state==='loading'));$('policyStatus').dataset.state=state;$('policyStatus').textContent=t(state);$('policyStatus').setAttribute('role',['error','session'].includes(state)?'alert':'status');$('policyChecked').textContent=data?t('checked')+' '+date(data.asOf)+' UTC':'';$('refreshPolicy').disabled=invalid||suspended;$('policyContent').hidden=!data;
+  $('portalState').textContent='';$('portalFacts').replaceChildren();$('legacyPolicyRows').replaceChildren();$('portalInvalid').hidden=true;
+  if(!data)return;const p=data.portal,r=p.setting;$('portalState').textContent=t(!r.recognized?'unknown':r.source==='MISSING'?'defaultOff':p.enabled?'enabled':'disabled');$('portalInvalid').hidden=r.recognized;facts($('portalFacts'),r);
+  const labels=['policy','whatsapp','email','internal'];for(const [i,row] of data.legacy.entries()){const card=node('article','');card.className='legacy-card';card.dataset.legacyKey=row.key;card.setAttribute('role','listitem');card.append(node('h3',t(labels[i])));const interpretation=row.raw===null?t('notGiven'):!row.recognized?t('legacyUnknown'):i===0?t(row.raw):t(row.raw==='true'?'yes':'no');card.append(node('p',interpretation));const dl=node('dl','');facts(dl,row);card.append(dl);$('legacyPolicyRows').append(card);}
+ }
+ async function load(){
+  if(!active()||suspended)return;abort();data=null;state='loading';render();const generation=sequence,controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);request={controller,timer};
+  try{const response=await fetch('/api/notification-rules/payment-policy/review',{headers:{Authorization:'Bearer '+session.token},signal:controller.signal,cache:'no-store',redirect:'error'});if(!active()||suspended||generation!==sequence)return;if([401,403].includes(response.status)){invalid=true;active();return;}if(response.status!==200||response.headers.get('x-cw-payment-policy')!=='payment-policy-review-v1'||response.headers.get('x-cw-owner')!==session.owner||response.headers.get('cache-control')!=='private, no-store'||!(response.headers.get('content-type')||'').startsWith('application/json'))throw Error('Unconfirmed payment settings');const result=await response.json();if(!active()||suspended||generation!==sequence)return;if(!R.packet(result,session.owner))throw Error('Invalid payment settings');data=result;state='ready';render();
+  }catch(_){if(active()&&!suspended&&generation===sequence){data=null;state='error';render();}}finally{clearTimeout(timer);if(generation===sequence){request=null;render();}}
+ }
+ $('refreshPolicy').addEventListener('click',load);$('policyLanguage').addEventListener('change',()=>{language=$('policyLanguage').value;const url=new URL(location.href);url.searchParams.set('lang',language);history.replaceState(null,'',url);render();});
+ window.addEventListener('storage',()=>active());window.addEventListener('focus',()=>active());document.addEventListener('visibilitychange',()=>{if(!document.hidden)active();});window.addEventListener('pagehide',()=>{suspended=true;abort();data=null;state='loading';render();});window.addEventListener('pageshow',()=>{suspended=false;if(active()){fromUrl();load();}});window.addEventListener('popstate',()=>{if(active()){fromUrl();render();}});setInterval(active,1000);
+ for(const id of ['policyStatus','policyChecked','portalState','portalFacts','legacyPolicyRows'])$(id).dataset.cwStateManaged='manual';fromUrl();render();active();
+}());

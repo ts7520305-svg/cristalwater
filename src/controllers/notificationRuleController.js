@@ -34,126 +34,13 @@ async function updateRule(req, res, next) {
   }
 }
 
-async function getSettingValue(key, fallbackValue) {
-  const setting = await prisma.systemSetting.findUnique({
-    where: { key },
-  });
-
-  if (!setting || setting.value === undefined || setting.value === null || setting.value === "") {
-    return fallbackValue;
-  }
-
-  return String(setting.value);
+// These legacy values have no consumer in the current reminder workflows.
+// Refuse old forms instead of acknowledging a global policy that is not applied.
+function unavailablePaymentPolicy(req,res){
+  return res.status(409).json({ok:false,code:'PAYMENT_POLICY_REVIEW_REQUIRED',applied:false,message:'As opções antigas não controlam os lembretes. Consulte /admin-payment-settings e use as configurações operacionais para os avisos no portal.'});
 }
-
-async function setSettingValue(key, value, notes = null) {
-  return prisma.systemSetting.upsert({
-    where: { key },
-    update: {
-      value: String(value),
-      notes,
-    },
-    create: {
-      key,
-      value: String(value),
-      notes,
-    },
-  });
+async function reviewPaymentPolicy(req,res){
+  try{const result=await require('../services/paymentPolicyReviewService').read(req.user,req.query);res.set({'X-CW-Payment-Policy':'payment-policy-review-v1','X-CW-Owner':result.owner});return res.json(result);}
+  catch(error){const status=[400,403].includes(error.statusCode)?error.statusCode:503;return res.status(status).json({ok:false,message:status===503?'Não foi possível confirmar a configuração dos lembretes.':error.message});}
 }
-
-// ===============================
-// GET CONFIG GLOBAL DE PAGAMENTOS
-// ===============================
-async function getPaymentPolicy(req, res) {
-  try {
-    const policy = await getSettingValue("payment_reminder_policy", "OVERDUE_ONLY");
-    const whatsappEnabled = await getSettingValue("payment_reminder_default_whatsapp", "true");
-    const emailEnabled = await getSettingValue("payment_reminder_default_email", "true");
-    const internalEnabled = await getSettingValue("payment_reminder_default_internal", "true");
-
-    res.json({
-      ok: true,
-      config: {
-        policy,
-        defaultWhatsapp: whatsappEnabled === "true",
-        defaultEmail: emailEnabled === "true",
-        defaultInternal: internalEnabled === "true",
-      },
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      ok: false,
-      message: "Erro ao obter configuração de pagamentos",
-    });
-  }
-}
-
-// ===============================
-// UPDATE CONFIG GLOBAL DE PAGAMENTOS
-// ===============================
-async function updatePaymentPolicy(req, res) {
-  try {
-    const {
-      policy,
-      defaultWhatsapp,
-      defaultEmail,
-      defaultInternal,
-    } = req.body;
-
-    if (!["OVERDUE_ONLY", "ALL_CLIENTS", "DISABLED"].includes(policy)) {
-      return res.status(400).json({
-        ok: false,
-        message: "Política inválida",
-      });
-    }
-
-    await setSettingValue(
-      "payment_reminder_policy",
-      policy,
-      "Política global de lembretes de pagamento"
-    );
-
-    await setSettingValue(
-      "payment_reminder_default_whatsapp",
-      Boolean(defaultWhatsapp),
-      "Canal global por defeito - WhatsApp"
-    );
-
-    await setSettingValue(
-      "payment_reminder_default_email",
-      Boolean(defaultEmail),
-      "Canal global por defeito - Email"
-    );
-
-    await setSettingValue(
-      "payment_reminder_default_internal",
-      Boolean(defaultInternal),
-      "Canal global por defeito - Notificação interna"
-    );
-
-    res.json({
-      ok: true,
-      message: "Configuração global de pagamentos atualizada com sucesso",
-      config: {
-        policy,
-        defaultWhatsapp: Boolean(defaultWhatsapp),
-        defaultEmail: Boolean(defaultEmail),
-        defaultInternal: Boolean(defaultInternal),
-      },
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      ok: false,
-      message: "Erro ao atualizar configuração global",
-    });
-  }
-}
-
-module.exports = {
-  getRules,
-  updateRule,
-  getPaymentPolicy,
-  updatePaymentPolicy,
-};
+module.exports={getRules,updateRule,getPaymentPolicy:unavailablePaymentPolicy,updatePaymentPolicy:unavailablePaymentPolicy,reviewPaymentPolicy};

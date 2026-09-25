@@ -52,4 +52,4 @@ async function getAllSettings() {
   return { defaults: DEFAULT_SETTINGS, rows, map, fixed: FIXED_SETTINGS };
 }
 
-module.exports = { DEFAULT_SETTINGS, FIXED_SETTINGS, validateSetting, getSetting, getBooleanSetting, setSetting, getAllSettings };
+module.exports = { normalizeBool, DEFAULT_SETTINGS, FIXED_SETTINGS, validateSetting, getSetting, getBooleanSetting, setSetting, getAllSettings };

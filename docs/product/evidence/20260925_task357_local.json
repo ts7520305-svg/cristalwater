@@ -1,0 +1,115 @@
+{
+  "task": "TASK357",
+  "baseCommit": "2179e6d30359a1a02484531bed8a50bd928a0a18",
+  "validatedAt": "2026-09-25T11:27:44.518602+00:00",
+  "sourceHashes": {
+    "frontend/admin-payment-settings.html": "22d9f54fef04b89ace9ddeb6e2ff4f1a4f16f367de626a5eab3d17e33e8e0ceb",
+    "frontend/admin-payment-settings.js": "720f8cbb690df0719ebd65357db04922423122620eb64137ebb11e4226d1f985",
+    "frontend/cw-payment-policy-rules.js": "33ea589e030083ae2406613b63d423f8b16231b54a8dfe2d13af7f21ff3ad56f",
+    "frontend/cw-payment-policy-copy.js": "8e7a67600ad4c10f99dff00823e741c39d7a35e6006733b4408c3adcc95f027c",
+    "frontend/admin-operational-settings.html": "08b203fed7c221295257ebc7c0222616befee2d07dc4ca84ad6bbda29c44c51c",
+    "frontend/sw.js": "6ffcb284ebea5b2419e89bd029ca3eb95d8bd36c9f0ecb408ec6e099aa1a6187",
+    "src/controllers/notificationRuleController.js": "f60d681a1906febc474be32e10c20ce4ad7eca8b75c60f62833fd7a944f7b658",
+    "src/routes/notificationRuleRoutes.js": "461642ccdb9aec3ab6fb5efa19bc44e3480b390d78952b26b66ecc23e9ff2435",
+    "src/services/paymentPolicyReviewService.js": "d7f5daa5f1db3859e5ecb0d5f8f57cecf512429f13bef4e86eacdd79cc088aa8",
+    "src/services/systemSettingService.js": "5ed6b0b876c9f204c6a277c92b65a6a586797e82f4c492890482109a881f3d28",
+    "src/middlewares/legacyAdministrationAccess.js": "dc0b43f656a4b626a9448112c944c31337f3c574311146e7f91dd36376af358f",
+    "scripts/test-field-payment-policy-review.js": "15eb124d941e890f8589f6940e64d441cb1cbc826f7d2d5f2e27be626ea54cb4",
+    "scripts/test-field-suite.js": "1430af65661032ba8b1416a876c5a09c9c13a1d34c38fef44cfaa253d7e7d4ee",
+    "tests/payment-policy-review.test.js": "59e8f507405c3a60225a3b8ce6429699de16240edfe76ab7b4f134bd63b17577"
+  },
+  "unitTests": {
+    "passed": 665,
+    "files": 94
+  },
+  "technicianTests": {
+    "passed": 4,
+    "files": 1
+  },
+  "syntax": {
+    "backend": 637,
+    "frontend": 243,
+    "inline": 49,
+    "finalChangedScripts": "node --check passed"
+  },
+  "integrationGroups": [
+    "scripts/test-field-payment-policy-review.js",
+    "scripts/test-field-legacy-admin-access.js",
+    "scripts/test-field-billing-automation.js",
+    "scripts/test-field-manual-invoice-reminder.js"
+  ],
+  "finalRepeatedGroup": "scripts/test-field-payment-policy-review.js",
+  "fixture": {
+    "keysRead": 5,
+    "legacyKeys": 4,
+    "portalEnabledWithLegacyDisabled": true,
+    "missingRowsCreated": 0,
+    "originalSettingsUnchanged": true,
+    "legacyPutApplied": false,
+    "browserWrites": 0,
+    "realMessages": 0
+  },
+  "logs": {
+    "/tmp/cw357-unit.log": "413e3951e7dfd5b54d8d4acaa11e968fa4b6e6084ceff99b5f7e8f8393451377",
+    "/tmp/cw357-tech.log": "c40db2ac19f1b32498d968182c079564fd5936bd238ae607cf9d53eb803adfc5",
+    "/tmp/cw357-syntax.log": "798f3ba7089e4e52182050b6811e220294cb97ea71ca31e41ed33b5de5b6a550",
+    "/tmp/cw357-integration.log": "309c4caf8e9e18a5b8c9e414c92fbbb42814c022a0b380b0480f779fd967d642",
+    "/tmp/cw357-final-policy.log": "c46aa6356ae9e8724c92ce00640b1850aee3432813ef9a477274b341dbd29537"
+  },
+  "runtime": {
+    "database": "PGlite 0.5.8 / pglite-socket 0.2.11, isolated",
+    "additiveMigrations": 40,
+    "chromium": "@sparticuz/chromium 153.0.0, normal multiple processes, web security retained",
+    "runnerSha256": "5bd8f95926470bd82fabef27148ed54a55532bdf80d8dbc557dd19b244486b2b",
+    "preloadSha256": "74ba6986b731dfe5120836cb841c25bed62d334014aa588379558293deb6ec7a"
+  },
+  "cache": "v168",
+  "fieldSuiteExpectedGroups": 254,
+  "inventory": {
+    "htmlFiles": 115,
+    "rootPages": 108,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 93,
+    "catalogueGuardDifferences": 0,
+    "activeScripts": 275,
+    "pagesWithoutLiteralTestReference": 22
+  },
+  "screenshots": {
+    "reports/field-visual/payment-policy/de-1440-legacy.png": "1474080af48860ad96ed915705a3ef8d7fd072eb412884937719da1c8827cbbd",
+    "reports/field-visual/payment-policy/de-1440.png": "655307a08f9684db7e4a5646cc31bc2ae9b6b48af2dfe1e6b725af2b4e80e82f",
+    "reports/field-visual/payment-policy/de-320-legacy.png": "6f5e05b076c39d1b4e85afb8b41b00bc4322076583c129d6d42d26522afb96c1",
+    "reports/field-visual/payment-policy/de-320.png": "dd9308a0123dd1c8a8311ab72242bcf84209463f6f58797fc8a482422ad79f57",
+    "reports/field-visual/payment-policy/de-390-legacy.png": "fbd1ed004e71ceb12b133084f3c92719fae6fcd4d931dfe3dd52b11a16d7f63c",
+    "reports/field-visual/payment-policy/de-390.png": "8751af51175e6b3addd0b21f2f6f8c89bb05e35cb49f5a40acf6a6ca8be2453e",
+    "reports/field-visual/payment-policy/en-1440-legacy.png": "99b703d41855fff14bd1c99b67ef35c1722425ab290f5abbcebe12fda7c37b75",
+    "reports/field-visual/payment-policy/en-1440.png": "9be2c7f932f79771577458e8328fe42b3b719d0698a935b3928b9ed780ef479c",
+    "reports/field-visual/payment-policy/en-320-legacy.png": "9c309ab644f6f513082cd05d6ec818fd68e069a2c0d4264a2385955881a1d59a",
+    "reports/field-visual/payment-policy/en-320.png": "4d17154ec9eb164ffe0d517a174efa16ee4668c782f36dfb5ecb3a2d3ad876f8",
+    "reports/field-visual/payment-policy/en-390-legacy.png": "96a6415c7deb9ab0f83adaa3fc55e2543c22e47204b2efc06d78b691ea28d8f0",
+    "reports/field-visual/payment-policy/en-390.png": "b64012922a32c6f188f8ac153463a54c4af054cb822585a1fae6ed2eda100345",
+    "reports/field-visual/payment-policy/es-1440-legacy.png": "1c7ccc4b3a5460c67f56122eb7799b39a1f81969a2359e8cd91e8b711cfb9b95",
+    "reports/field-visual/payment-policy/es-1440.png": "3649fcc8ef0125f59b335369c1f9c867bbc0835a6993337b6c173bb639c31190",
+    "reports/field-visual/payment-policy/es-320-legacy.png": "b2417783ccd30d8282df26589b54d6973a387ea326ee43544d6447a3656b0af8",
+    "reports/field-visual/payment-policy/es-320.png": "8015341354cce579f6318d8053c29c0c1ce7a421b37f3edba32b21242bd5e53f",
+    "reports/field-visual/payment-policy/es-390-legacy.png": "879af4216de412c79ada1ac5493028c80db6bf536e1b5cf7ed808d6f7e528e1a",
+    "reports/field-visual/payment-policy/es-390.png": "593bee44b5df78b9b71d1d6b4de9a20747af31784815d83d0cf45214d88665e8",
+    "reports/field-visual/payment-policy/fr-1440-legacy.png": "380e1b39dc5519fe13282c9ef982bc4edb7b608cf39b327adcca2893a4061a3f",
+    "reports/field-visual/payment-policy/fr-1440.png": "22eee53c7e89fd3a3694c966cd95bc257f03b885b1c0aecc6499400699d9d99b",
+    "reports/field-visual/payment-policy/fr-320-legacy.png": "c6a9684e0b815246e673ae110e6ae8505b5d28e79170455c830cd9b27d014119",
+    "reports/field-visual/payment-policy/fr-320.png": "1f6194b3b987f746e8347e25abcd7bff561fd7be792f9c83d89e315809ca6d59",
+    "reports/field-visual/payment-policy/fr-390-legacy.png": "9ec181f1fa694678f772f9fb49dc5c28bb6bfed780936b25e30ca80a518dc153",
+    "reports/field-visual/payment-policy/fr-390.png": "c607229610081c4a45367752f875e51db7c9bb7c690e0dd16628c72eefed791c",
+    "reports/field-visual/payment-policy/pt-1440-legacy.png": "1847f5db071c35ccbf4af1dc7257f737be4f2a9c56abf3ce43f4907800c76fbe",
+    "reports/field-visual/payment-policy/pt-1440.png": "3bf7d8a322504cda12c1f5198598df8056c2e6e933f5ddb827fb200b044cd0c7",
+    "reports/field-visual/payment-policy/pt-320-legacy.png": "2125613e8aefcb897b14e33fa2976d42195599d14fef08fe8f3021c85898bc27",
+    "reports/field-visual/payment-policy/pt-320.png": "f27a6f9a6521e17cc35a95e159848bfd6e21315ad38a8316c1c66c8683a46dea",
+    "reports/field-visual/payment-policy/pt-390-legacy-invalid.png": "26deb7b38cf896f23aff22ac552cd0ca3655cefce596b8928ccdd112e0ddb8ca",
+    "reports/field-visual/payment-policy/pt-390-legacy.png": "67540331dfdf9e85b4a75aa98018de92531bc8909785756fff61820348fa6a58",
+    "reports/field-visual/payment-policy/pt-390.png": "8f2a27742bd9c27282e7a0c1d8b8e5328d6da1b4b8d21c99bd191eda3a988b35"
+  },
+  "publication": {
+    "status": "LOCAL_VALIDATED_PENDING_PUBLICATION"
+  }
+}
