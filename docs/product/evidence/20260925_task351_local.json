@@ -152,5 +152,16 @@
     "Historical readings do not certify current water quality; absent units are not inferred.",
     "Legacy grouped responses retain existing caps; remaining portal states/aggregates, shared navigation/assistant, photo/PDF paths and production criteria retain their own scope.",
     "Two indexed images are not materialized in the local checkout."
-  ]
+  ],
+  "publication": {
+    "commit": "5527c23813bc05f8f169877e549f6fa541807811",
+    "tree": "c248fd50ca532e8aa1c06d0a0b92ec0d51063cda",
+    "branch": "work/field-readiness-20260915-simulation",
+    "ciRun": 36117730155,
+    "ciJob": 108015663264,
+    "ciUrl": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36117730155",
+    "status": "in_progress",
+    "nativeRestoreConfirmed": false,
+    "checkedAt": "2026-09-25T09:19:44.712611+00:00"
+  }
 }
