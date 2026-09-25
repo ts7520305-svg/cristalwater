@@ -110,6 +110,13 @@
     "reports/field-visual/payment-policy/pt-390.png": "8f2a27742bd9c27282e7a0c1d8b8e5328d6da1b4b8d21c99bd191eda3a988b35"
   },
   "publication": {
-    "status": "LOCAL_VALIDATED_PENDING_PUBLICATION"
+    "branch": "work/field-readiness-20260915-simulation",
+    "codeCommit": "d49bcd81eee9cd7c7d63af4c6b5716a4202a1de4",
+    "tree": "8d2542ddbc9ba9f5f24af31630a744fd3b8d7da7",
+    "exactStagedTreeConfirmed": true,
+    "runId": 36129627534,
+    "jobId": 108053651745,
+    "ciStatus": "in_progress",
+    "nativeRestore": "PENDING"
   }
 }
