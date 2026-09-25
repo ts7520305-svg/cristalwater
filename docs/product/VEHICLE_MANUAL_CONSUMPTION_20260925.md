@@ -32,7 +32,9 @@ Cache v177. Runner com 268 grupos distintos. Inventário atualizado: 116 HTML, 1
 
 ## Publicação e retoma
 
-Publicação preparada na branch `work/field-readiness-20260915-simulation`. Commit, árvore e CI serão registados após confirmação. O gate nativo de 268 grupos e restauro deste lote permanece por confirmar.
+Publicada em `91746fcb43f631f2e05e02457df53c4ccfba13dc`, árvore `7fde5c761aeef26a7394702477056f523fae4d18`, idêntica à preparada e validada localmente, na branch `work/field-readiness-20260915-simulation`. [CI 36169342475](https://github.com/ts7520305-svg/cristalwater/actions/runs/36169342475), job `108184782991`, em execução. O gate nativo de **268 grupos e restauro deste lote permanece por confirmar**.
+
+TASK365: [CI 36164614104](https://github.com/ts7520305-svg/cristalwater/actions/runs/36164614104), job `108169212881`, aprovado: **266/266 grupos esperados distintos**, 17 etapas, 42 migrações e restauro de 127 tabelas/47 ficheiros com linhas e hashes iguais, em 44m17s. [Evidência nativa](evidence/20260925_task365_ci.json).
 
 Continuar em `/admin-vehicles`, começando pela criação/anexo de guias de transporte e pela sincronização com guias de obra. A auditoria encontrou criação e atualização de itens em várias operações separadas, movimentos com falhas ignoradas e um leitor de stock com efeitos de escrita. Abertura/fecho de obra, documentos oficiais/anexos, manutenção/custos e regras de alerta conservam revisão própria. Os escritores antigos de guias ainda não partilham integralmente este protocolo de bloqueio e podem alterar itens posteriormente; a transação nova não os torna globalmente atómicos.
 
