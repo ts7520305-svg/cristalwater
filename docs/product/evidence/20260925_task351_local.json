@@ -1,0 +1,156 @@
+{
+  "task": "TASK351",
+  "checkedAt": "2026-09-25T09:17:16.283643+00:00",
+  "baseCommit": "b47814984fcb21a57b0318dbb7ae0d9721f05250",
+  "sourceSha256": {
+    "frontend/client-history.html": "564dfaff645da8d917acda8e5e68384243d11a89611925ac51fc0873711d8d7b",
+    "frontend/client-history.js": "2338e6befd43cc71d5fa1df216ef9ca3b0ef4e62f801a4180205623109d8b95e",
+    "frontend/client_tech.html": "d4628e296ea6e0fcb1702b371d88896369b07889d722af378b366834fe379a4a",
+    "frontend/cw-client-technical-rules.js": "3f5d55c4e2bc628a37a9b5662428bfb07b566965cfb97c6a13e4434696b70f26",
+    "frontend/cw-client-technical-copy.js": "ed8acd12e4e20bc551d7c5bdc033cd2c0deb62d2fb6265e81974a594049a0373",
+    "frontend/sw.js": "6b869bc150fe87a397fbafb7d34714e8a0cb5d0f415790e324a5fd30bb2f71be",
+    "src/routes/clientPortalRoutes.js": "2f6e5132e05dbac3760dbf74c8daa67062b3c815f485231b60325e57cde6f6b1",
+    "src/controllers/clientPortalController.js": "27d5ee477c59359faf1bb283aeb8dc98951c2b4e24e82c89ca2b01816786b012",
+    "src/services/customerPortalService.js": "562ed959cf4651d9e9aa371cdb5e8f98f862ab4696608982bb93c0404a81ccfd",
+    "src/services/clientTechnicalHistoryService.js": "c4b0284e39c3a962a865e4a3d2d59d53e9eeb0ad795ddb7c61ecd7ff2c01a6cc",
+    "scripts/test-field-suite.js": "eb8b52451ed2113c5e1e5efeaa8d735083f55e92525a32cc9c33df185c314551",
+    "scripts/test-field-client-technical-history.js": "286fc990c9fe5c634f31f9274350cb1c8c032554d384cb8342286ef2afe1134c",
+    "tests/client-technical-history.test.js": "2a4fb028717aeef6f33d60a8139647eba8642eea5be768b24dc8bbf571f3dcb8",
+    "tests/customer-portal-service.test.js": "23af6b7a767116a0f589b0e11241bf6f0096c67d506600e2e8a83d1cdd47d009"
+  },
+  "unitTests": {
+    "passed": 639,
+    "files": 90
+  },
+  "technicianTests": {
+    "passed": 4,
+    "files": 1
+  },
+  "syntax": {
+    "backend": 633,
+    "frontend": 234,
+    "inline": 55
+  },
+  "integration": {
+    "distinctGroups": 4,
+    "scripts": [
+      "test-field-client-technical-history.js",
+      "test-auth-entry-browser.js",
+      "test-field-client-closures.js",
+      "test-field-client-portal-requests.js"
+    ],
+    "result": "success"
+  },
+  "finalIntegration": {
+    "scripts": [
+      "test-field-client-technical-history.js",
+      "test-field-client-portal-requests.js"
+    ],
+    "result": "success",
+    "log": "/tmp/cw351-final-integration.log"
+  },
+  "passLines": [
+    "PASS isolated schema: 40 additive migrations",
+    "PASS client technical history API: 106 own visits across three stable pages, original client after pool transfer, unassigned rows excluded, missing pool/dates and exact zero/null/negative/precise readings, public projection and legacy history/latest/portal isolation, typed identities and ADMIN read, private GET/HEAD, UTC filters, sanitized failure and no writes",
+    "PASS client technical history browser: actual technical and history pages, three pages, five own-page languages, 320/390/1440, literal source text and exact readings, no administrative controls, session-derived client despite URL override, filters and empty/error distinct, malformed/late/timeout/offline responses, history and account expiry, original rows and stored work unchanged",
+    "PASS client guard: 24 entry cases, preserved drafts/documents/corrupt legacy bytes, expiry/identity validation, storage failure, administrator preview/chat and real settings script",
+    "PASS login.js repeated login, retry, exact password and no token logging",
+    "PASS admin-login.js repeated login, retry, exact password and no token logging",
+    "PASS client-login.js repeated login, retry, exact password and no token logging",
+    "PASS technician-login.js repeated login, retry, exact password and no token logging",
+    "PASS HTML login, account switch and cross-tab session change disconnect private sockets; logout preserves field outbox",
+    "PASS actual administrative visits page: shared logout, disabled repeated action, awaited cleanup, session removed and all saved work preserved",
+    "PASS actual technician page: visible logout, 320px Spanish header, no network overlap, busy guard and preserved pending work",
+    "PASS client closures API: authenticated customer ownership and ADMIN preview, typed identity collisions refused, public field whitelist, future/current/hidden/cancelled/expired states, exact UTC boundaries, source preservation, explicit cap, no writes or external sends, sanitized failure",
+    "PASS isolated schema: 40 additive migrations",
+    "PASS client technical history API: 106 own visits across three stable pages, original client after pool transfer, unassigned rows excluded, missing pool/dates and exact zero/null/negative/precise readings, public projection and legacy history/latest/portal isolation, typed identities and ADMIN read, private GET/HEAD, UTC filters, sanitized failure and no writes",
+    "PASS client technical history browser: actual technical and history pages, three pages, five own-page languages, 320/390/1440, literal source text and exact readings, no administrative controls, session-derived client despite URL override, filters and empty/error distinct, malformed/late/timeout/offline responses, history and account expiry, original rows and stored work unchanged",
+    "PASS VISIT_REQUEST: two HTTP processes, concurrent requests, immutable receipt after notification deletion/read/name changes, conflicts, identity and lost response recovery",
+    "PASS PAYMENT_NOTICE: two HTTP processes, concurrent requests, immutable receipt after notification deletion/read/name changes, conflicts, identity and lost response recovery",
+    "PASS mandatory audit/notification/receipt rollback, strict inputs, restart replay, post-commit events and unchanged money/scheduling"
+  ],
+  "logs": {
+    "/tmp/cw351-unit.log": "7ab7cc416125b6c52a80b9dc38e63760d08c3733d8f4a323c5c348336c5b8125",
+    "/tmp/cw351-tech.log": "317bf2eb1c45eec08dffab73fc1b6dc0cdf07ed586ee4a6c95a8ba6a367cfc70",
+    "/tmp/cw351-syntax.log": "2dd5093c2eb4ab1e36bc4238e87887d837c622b988421c0bb9f345ac50d603cd",
+    "/tmp/cw351-integration.log": "c22f8f7f17a724b4eb0785b0d5470a334b7faff1d4e3bfdca28f8efc625c3947",
+    "/tmp/cw351-final-integration.log": "7b3aab36005844c3c04c4097016e844d412a11b1d977251e981c9780c90a3a06"
+  },
+  "runtime": {
+    "database": "PGlite 0.5.8 / pglite-socket 0.2.11, isolated",
+    "additiveMigrations": 40,
+    "chromium": "@sparticuz/chromium 153.0.0, normal multiple processes, web security retained",
+    "runnerSha256": "5bd8f95926470bd82fabef27148ed54a55532bdf80d8dbc557dd19b244486b2b",
+    "preloadSha256": "74ba6986b731dfe5120836cb841c25bed62d334014aa588379558293deb6ec7a"
+  },
+  "screenshots": {
+    "reports/field-visual/client-technical-history/client-history-pt-1440.png": "13ee4b34ae47e4ec201b0120ea6807d136385b2669c6ce19a18a58efb9eeb862",
+    "reports/field-visual/client-technical-history/client-history-pt-320.png": "8f212fa3f86d716aff8c4e1cbbb8125ddf68d9cd759dadec571276dc1461003b",
+    "reports/field-visual/client-technical-history/client-history-pt-390.png": "c8d35fa5f49740a3e73da9b1242522b69c0885c13d071700212b1c8c148ed972",
+    "reports/field-visual/client-technical-history/client-technical-de-1440.png": "7ddee1657bc5f0ccd9b1470cd4357b995eed7ab2a15e2efa2e2518b729dba966",
+    "reports/field-visual/client-technical-history/client-technical-de-320.png": "1e1a2d4887b43ba6cea044950010b38d5fa7a6e5dec93442fff92278c3568e5d",
+    "reports/field-visual/client-technical-history/client-technical-de-390.png": "bb0d1f8684a5a2491f3e3d7124b504db136a8529387c0856bc06d4202cbb1338",
+    "reports/field-visual/client-technical-history/client-technical-en-1440.png": "32453a512bc5c7884a7fa3451d1f4a39d061dc2c982919fba3504c57c18b763f",
+    "reports/field-visual/client-technical-history/client-technical-en-320.png": "fc0ed9c91b5f49dc9270d32d1f99e894f0e3c8af56fdb0be8a9cb4a1ac8d0c99",
+    "reports/field-visual/client-technical-history/client-technical-en-390.png": "2dbcbdfb1d1fcd14b8d7171ae60b4e5b4777afc2a8ed86ca9803a382f7099c83",
+    "reports/field-visual/client-technical-history/client-technical-es-1440.png": "cb73255a39bede1a5e7c6fdad5094743138863f62174ce72d350510f9ec07f02",
+    "reports/field-visual/client-technical-history/client-technical-es-320.png": "04a4bf86f845c4b07d88e08584f9eefea9c9cf27370d7bcbc1af419122622323",
+    "reports/field-visual/client-technical-history/client-technical-es-390.png": "ee42987a9d5202e7a55573c2610c146e650c54304d39e00ee09858a2c4058192",
+    "reports/field-visual/client-technical-history/client-technical-fr-1440.png": "52a3f5f38cea2f571f2e23c8ad53b6b5a3815a05a451350dbee522e1ab5449ac",
+    "reports/field-visual/client-technical-history/client-technical-fr-320.png": "d05e122444bf8961d7ca66f6503dacbe8845c2baad947cbdc39f14a0d4d15786",
+    "reports/field-visual/client-technical-history/client-technical-fr-390.png": "a34df839d4380c783fa2604f45860c53c3f2f6c179dc635a63561d37d11e304b",
+    "reports/field-visual/client-technical-history/client-technical-pt-1440.png": "20cff77221a136ddb20526c4426ee2923532fb5c42a856156cb08c9c541b208f",
+    "reports/field-visual/client-technical-history/client-technical-pt-320.png": "32cd1d7787ffb48c7f7e3b171f034b8a167d4f84a149875f66c0ff5a38ad3711",
+    "reports/field-visual/client-technical-history/client-technical-pt-390.png": "c33a7cb3428585d20498079cc5fe240fe5c005b33456d68065542c6de5a8c44c",
+    "reports/field-visual/client-technical-history/client-technical-readings-de-1440.png": "f8d5600fed02f9766044a2ec4afdf220364485a56eb8c8a947603047c4bf7932",
+    "reports/field-visual/client-technical-history/client-technical-readings-de-320.png": "f6a1a6b5398c1667a82481e86e03cba149533e1c29b9fbfe31b427881fac0e95",
+    "reports/field-visual/client-technical-history/client-technical-readings-de-390.png": "2e626c825ed0bd0ad0ce9c0c521c74b33b01fdb80f58a1de353225644ba16fdb"
+  },
+  "reviewedWidths": [
+    320,
+    390,
+    1440
+  ],
+  "technicalPageLanguages": [
+    "pt",
+    "en",
+    "fr",
+    "es",
+    "de"
+  ],
+  "historyPageVisualLanguages": [
+    "pt"
+  ],
+  "visualReviewSamples": [
+    "client-technical-de-320.png",
+    "client-technical-fr-390.png",
+    "client-technical-en-1440.png",
+    "client-technical-readings-de-320.png",
+    "client-technical-readings-de-1440.png"
+  ],
+  "cache": "v163",
+  "fieldSuiteExpectedGroups": 250,
+  "inventory": {
+    "htmlFiles": 115,
+    "rootPages": 108,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 87,
+    "catalogueGuardDifferences": 0,
+    "activeScripts": 271,
+    "pagesWithoutLiteralTestReference": 28
+  },
+  "previousNativeProofs": [
+    "20260925_task349_ci.json",
+    "20260925_task350_ci.json"
+  ],
+  "limits": [
+    "Native CI and PostgreSQL restore of TASK351 remain pending.",
+    "Each page is a fresh consistent read; the complete history is not frozen across requests.",
+    "Unattributed client records are excluded, not assigned to the current pool owner or rewritten.",
+    "Historical readings do not certify current water quality; absent units are not inferred.",
+    "Legacy grouped responses retain existing caps; remaining portal states/aggregates, shared navigation/assistant, photo/PDF paths and production criteria retain their own scope.",
+    "Two indexed images are not materialized in the local checkout."
+  ]
+}

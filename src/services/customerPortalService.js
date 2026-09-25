@@ -174,25 +174,8 @@ async function listCustomerMessages(clientId) {
 
 async function listCustomerHistory(clientId) {
   const visits = await prisma.serviceVisit.findMany({
-    where: {
-      OR: [
-        { clientId },
-        { pool: { is: { clientId } } },
-      ],
-    },
-    include: {
-      pool: {
-        include: {
-          client: true,
-          equipment: true,
-          technicalSheet: true,
-          technicalAlerts: { where: { status: { in: ["OPEN", "IN_PROGRESS"] } } },
-        },
-      },
-      technician: true,
-      photos: true,
-      chemicals: true,
-    },
+    where: { clientId },
+    select: require('./clientTechnicalHistoryService').publicSelect,
     orderBy: [
       { plannedDate: "desc" },
       { date: "desc" },
@@ -225,8 +208,6 @@ async function listCustomerHistory(clientId) {
       status: visit.status || "PLANNED",
       technicianName: visit.technicianName || visit.technician?.name || "Cristal Water",
       notes: visit.notes || null,
-      internalNotes: visit.internalNotes || null,
-      alerts: visit.alerts || null,
       products: visit.products || null,
       ph: visit.ph ?? null,
       chlorine: visit.chlorine ?? null,

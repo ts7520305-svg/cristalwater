@@ -95,6 +95,9 @@ describe("customerPortalService", () => {
     const result = await listCustomerHistory(7);
 
     expect(result).toHaveLength(1);
+    expect(mockServiceVisitFindMany.mock.calls[0][0].where).toEqual({ clientId: 7 });
+    expect(result[0].serviceVisits[0]).not.toHaveProperty('internalNotes');
+    expect(result[0].serviceVisits[0]).not.toHaveProperty('alerts');
     expect(result[0]).toEqual(
       expect.objectContaining({
         poolId: 20,

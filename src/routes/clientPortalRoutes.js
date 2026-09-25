@@ -20,8 +20,7 @@ async function getClientHistory(req, res) {
     const visits = pools.flatMap((pool) => pool.serviceVisits || []);
     res.json({ ok: true, pools, visits });
   } catch (err) {
-    console.error(err);
-    res.json({ ok: false, pools: [], visits: [] });
+    res.status(503).json({ ok: false, error: 'Não foi possível confirmar o histórico. Tente novamente.' });
   }
 }
 
@@ -29,14 +28,13 @@ async function getLatestVisit(req, res) {
   try {
     const clientId = Number(req.params.clientId);
     const visit = await prisma.serviceVisit.findFirst({
-      where: { pool: { is: { clientId } } },
-      include: { pool: true, photos: true },
-      orderBy: { startAt: "desc" },
+      where: { clientId },
+      select: require('../services/clientTechnicalHistoryService').publicSelect,
+      orderBy: [{ date: 'desc' }, { id: 'desc' }],
     });
     res.json({ ok: true, visit });
   } catch (err) {
-    console.error(err);
-    res.json({ ok: false, visit: null });
+    res.status(503).json({ ok: false, error: 'Não foi possível confirmar a visita. Tente novamente.' });
   }
 }
 
@@ -45,13 +43,14 @@ function clientAuthClientId(req) {
 }
 
 function ensureClientOwnership(req, res, clientId) {
-  if (req.user?.role === "ADMIN" && req.method === "GET") return true;
-  const authClientId = ["CLIENT", "CUSTOMER"].includes(req.user?.role) ? clientAuthClientId(req) : 0;
-  if (!authClientId || authClientId !== Number(clientId)) {
-    res.status(403).json({ ok: false, error: "Acesso reservado ao cliente autenticado." });
+  try {
+    if (req.user?.role === 'ADMIN' && !['GET', 'HEAD'].includes(req.method)) throw Object.assign(Error('Acesso reservado ao cliente autenticado.'), { statusCode: 403 });
+    require('../utils/clientReadScope').scope(req.user, String(clientId));
+    return true;
+  } catch (error) {
+    res.status(error.statusCode || 403).json({ ok: false, error: 'Acesso reservado ao cliente autenticado.' });
     return false;
   }
-  return true;
 }
 
 const quotePortal = require('../controllers/quotePortalController');
@@ -63,20 +62,20 @@ router.post('/:clientId(\\d+)/quotes/:quoteId/decision', auth('CLIENT'), (req, r
 });
 
 // Aliases usados pelos frontends atuais.
-router.get("/history/:clientId", auth("CLIENT"), async (req, res) => {
+router.get("/history/:clientId", clientPortalController.privateDocuments, auth("CLIENT"), async (req, res) => {
   const clientId = Number(req.params.clientId);
   if (!ensureClientOwnership(req, res, clientId)) return;
   return getClientHistory(req, res);
 });
-router.get("/latest/:clientId", auth("CLIENT"), async (req, res) => {
+router.get("/latest/:clientId", clientPortalController.privateDocuments, auth("CLIENT"), async (req, res) => {
   const clientId = Number(req.params.clientId);
   if (!ensureClientOwnership(req, res, clientId)) return;
   return getLatestVisit(req, res);
 });
-router.get("/:clientId(\\d+)/history", auth("CLIENT"), (req, res) => {
+router.get("/:clientId(\\d+)/history", clientPortalController.privateDocuments, auth("CLIENT"), (req, res) => {
   if (ensureClientOwnership(req, res, req.params.clientId)) return getClientHistory(req, res);
 });
-router.get("/:clientId(\\d+)/latest", auth("CLIENT"), (req, res) => {
+router.get("/:clientId(\\d+)/latest", clientPortalController.privateDocuments, auth("CLIENT"), (req, res) => {
   if (ensureClientOwnership(req, res, req.params.clientId)) return getLatestVisit(req, res);
 });
 
@@ -147,6 +146,18 @@ router.post("/:clientId(\\d+)/visit-requests", auth("CLIENT"), async (req, res) 
 });
 
 router.get("/:clientId(\\d+)/documents", clientPortalController.privateDocuments, auth("CLIENT"), clientPortalController.listDocuments);
+
+router.get('/:clientId(\\d+)/technical-history', clientPortalController.privateDocuments, auth('CLIENT'), async (req, res) => {
+  res.vary('Authorization');
+  try {
+    const result = await require('../services/clientTechnicalHistoryService').read(req.user, req.params.clientId, req.query);
+    res.set({ 'X-CW-Portal-Type': 'technical-history-v1', 'X-CW-Client-Id': String(result.clientId) });
+    return res.json(result);
+  } catch (error) {
+    const known = [400, 403, 404].includes(error.statusCode);
+    return res.status(known ? error.statusCode : 503).json({ ok: false, error: known ? error.message : 'Não foi possível confirmar o histórico técnico. Tente novamente.' });
+  }
+});
 router.get("/:clientId(\\d+)/documents/:documentId/download", clientPortalController.privateDocuments, auth("CLIENT"), clientPortalController.downloadDocument);
 
 router.get('/:clientId(\\d+)/company-closures', clientPortalController.privateDocuments, auth('CLIENT'), async (req, res) => {

@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-25T07:46:58.959Z",
-  "baseCommit": "72e542f98938d51099c4454b6680dc76dc9d4d07",
+  "generatedAt": "2026-09-25T09:14:36.906Z",
+  "baseCommit": "b47814984fcb21a57b0318dbb7ae0d9721f05250",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 270,
+  "activeScriptsScanned": 271,
   "summary": {
     "htmlFiles": 115,
     "rootPages": 108,
     "nestedPages": 7,
     "unavailableLocalAssetReferences": 2,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 86,
+    "pagesWithLiteralTestReference": 87,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -2286,7 +2286,7 @@
       "file": "frontend/client-history.html",
       "route": "/client-history",
       "kind": "Entrada raiz",
-      "title": "Cristal Water - Historico do Cliente",
+      "title": "Cristal Water · Histórico técnico",
       "catalogueRoles": [
         "CLIENT"
       ],
@@ -2300,23 +2300,18 @@
       "entryRedirects": {},
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/manifest.webmanifest",
-        "/client-auth-guard.js",
         "/ui/foundation.css",
-        "/cristal-assist.css",
         "/cw-auth.js",
-        "/css/crystal-v25.css",
+        "/client-auth-guard.js",
         "/crystal-os-v2-foundation.css",
         "/crystal-os-v2-phase2-adapter.css",
-        "/cw-block2-shell.css",
         "/ui/design-system.css",
+        "/cw-client-technical-rules.js",
+        "/cw-client-technical-copy.js",
         "/client-history.js",
-        "/cristal-help-data.js",
-        "/cristal-assist.js",
         "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
-        "/cw-block2-shell.js",
         "/ui/design-system.js"
       ],
       "missingAssets": [],
@@ -2325,6 +2320,7 @@
       "directPrintAction": false,
       "testReferences": [
         "test-field-legacy-entry.js",
+        "test-field-client-technical-history.js",
         "test-role-help-browser.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
@@ -2563,6 +2559,7 @@
         "test-field-client-closures.js",
         "test-field-client-closures-ui.js",
         "test-field-legacy-entry.js",
+        "test-field-client-technical-history.js",
         "test-field-invoice-chat.js",
         "test-field-chat-attachments.js",
         "test-field-client-chat-recovery-ui.js",
@@ -2728,7 +2725,7 @@
       "file": "frontend/client_tech.html",
       "route": "/client_tech",
       "kind": "Entrada raiz",
-      "title": "Cristal Water - Parametros da Piscina",
+      "title": "Cristal Water · Histórico técnico",
       "catalogueRoles": [
         "CLIENT"
       ],
@@ -2742,28 +2739,27 @@
       "entryRedirects": {},
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/manifest.webmanifest",
         "/ui/foundation.css",
-        "/cristal-assist.css",
         "/cw-auth.js",
+        "/client-auth-guard.js",
         "/crystal-os-v2-foundation.css",
         "/crystal-os-v2-phase2-adapter.css",
-        "/cw-block2-shell.css",
-        "/client-auth-guard.js",
         "/ui/design-system.css",
-        "/cristal-help-data.js",
-        "/cristal-assist.js",
+        "/cw-client-technical-rules.js",
+        "/cw-client-technical-copy.js",
+        "/client-history.js",
         "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
-        "/cw-block2-shell.js",
         "/ui/design-system.js"
       ],
       "missingAssets": [],
       "unavailableLocalAssets": [],
       "languageAssets": [],
       "directPrintAction": false,
-      "testReferences": [],
+      "testReferences": [
+        "test-field-client-technical-history.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {

@@ -22,8 +22,8 @@ A evidência conserva hashes das fontes, logs e seis capturas. Cache v162, runne
 
 ## Estado e limites
 
-Publicada em `40659d55428fd2a7fa58469d9f74726af922bc20`, árvore `63df7d69deb3cdcd23068a5aa49cef2a7f8f3809`, idêntica à preparada e validada localmente. [CI 36110064522](https://github.com/ts7520305-svg/cristalwater/actions/runs/36110064522), job `107991263446`, em execução; os 249 grupos e o restauro PostgreSQL nativo deste lote continuam por confirmar.
+Publicada em `40659d55428fd2a7fa58469d9f74726af922bc20`, árvore `63df7d69deb3cdcd23068a5aa49cef2a7f8f3809`, idêntica à preparada e validada localmente. [CI 36110064522](https://github.com/ts7520305-svg/cristalwater/actions/runs/36110064522), job `107991263446`, aprovado: 249/249 grupos esperados distintos, 17 etapas e restauro de 127 tabelas/47 ficheiros com linhas e hashes iguais. [Evidência nativa](evidence/20260925_task350_ci.json).
 
-TASK348 confirmada em [247/247 grupos esperados e restauro PostgreSQL](evidence/20260925_task348_ci.json), 17 etapas e 127 tabelas/47 ficheiros com linhas e hashes iguais. TASK349 permanece em execução no último controlo.
+TASK348 confirmada em [247/247 grupos esperados e restauro PostgreSQL](evidence/20260925_task348_ci.json), 17 etapas e 127 tabelas/47 ficheiros com linhas e hashes iguais. TASK349 confirmada em [248/248 grupos e restauro nativo](evidence/20260925_task349_ci.json) de 127 tabelas/47 ficheiros com linhas e hashes iguais.
 
 O novo ensaio de entradas é de navegação, com credenciais de teste e destinos controlados; não substitui a autorização do servidor. A revisão visual é PT e não certifica cinco idiomas destas páginas ou de toda a navegação comum. A assinatura das credenciais, o conteúdo do portal e as APIs mantêm os respetivos contratos e testes. Restantes páginas, históricos financeiros e critérios de produção continuam abertos. Sem merge, deploy ou contactos reais; aplicação não declarada completa.

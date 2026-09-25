@@ -263,12 +263,7 @@ async function loadClientVisits(clientId, now) {
   until.setDate(until.getDate() + 60);
   until.setHours(23, 59, 59, 999);
 
-  const clientFilter = {
-    OR: [
-      { clientId },
-      { pool: { is: { clientId } } },
-    ],
-  };
+  const clientFilter = { clientId };
 
   const serviceVisits = await safeFindMany("serviceVisit", {
     where: {
@@ -585,18 +580,8 @@ async function getClientPortal(req, res) {
     const [visits, serviceHistory, invoices] = await Promise.all([
       loadClientVisits(client.id, now),
       safeFindMany("serviceVisit", {
-        where: {
-          OR: [
-            { clientId: client.id },
-            { pool: { is: { clientId: client.id } } },
-          ],
-        },
-        include: {
-          pool: true,
-          technician: true,
-          photos: true,
-          chemicals: true,
-        },
+        where: { clientId: client.id },
+        select: { ...require('../services/clientTechnicalHistoryService').publicSelect, createdAt: true, reason: true, cleaned: true, brushed: true, vacuumed: true, basketCleaned: true, waterlineClean: true, backwashDone: true },
         orderBy: [
           { plannedDate: "desc" },
           { date: "desc" },

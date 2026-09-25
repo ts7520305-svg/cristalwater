@@ -126,8 +126,6 @@
     "20260925_task348_ci.json"
   ],
   "limits": [
-    "Native CI and PostgreSQL restore of TASK350 remain pending.",
-    "TASK349 remains in progress at the last check.",
     "Entry browser scenarios use fixture credentials and controlled destinations; this checks navigation, not cryptographic authentication or destination business behavior.",
     "Visual review covers Portuguese client menus and three widths, not five-language certification of these pages or shared navigation.",
     "Two indexed images are not materialized in this local checkout.",
@@ -140,8 +138,9 @@
     "ciRun": 36110064522,
     "ciJob": 107991263446,
     "ciUrl": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36110064522",
-    "status": "in_progress",
-    "nativeRestoreConfirmed": false,
-    "checkedAt": "2026-09-25T07:55:27.000318+00:00"
+    "status": "success",
+    "nativeRestoreConfirmed": true,
+    "checkedAt": "2026-09-25T09:01:58.435Z",
+    "nativeEvidence": "20260925_task350_ci.json"
   }
 }

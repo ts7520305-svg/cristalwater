@@ -114,7 +114,6 @@
     "pagesWithoutLiteralTestReference": 34
   },
   "limits": [
-    "Native CI and PostgreSQL restore of TASK349 remain pending.",
     "The billed marker and recorded visit price are not reconciled document amounts, payment confirmation or fiscal issuance.",
     "Every page is a new consistent read; the entire history is not frozen across requests.",
     "The old grouped endpoint retains its unpaginated compatibility total; the new UI does not consume it.",
@@ -135,8 +134,9 @@
     "ciRun": 36108653641,
     "ciJob": 107986874329,
     "ciUrl": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36108653641",
-    "status": "in_progress",
-    "nativeRestoreConfirmed": false,
-    "checkedAt": "2026-09-25T07:39:00.645530+00:00"
+    "status": "success",
+    "nativeRestoreConfirmed": true,
+    "checkedAt": "2026-09-25T09:01:57.706Z",
+    "nativeEvidence": "20260925_task349_ci.json"
   }
 }
