@@ -123,6 +123,13 @@
     "reports/field-visual/admin-day/pt-390.png": "e553e2862e75f347509775908f3ee059759be6c54bbd99fd5738d3a1f0d8fe94"
   },
   "publication": {
-    "status": "LOCAL_VALIDATED_PENDING_PUBLICATION"
+    "branch": "work/field-readiness-20260915-simulation",
+    "codeCommit": "ebdf20f416237d00887cc5885e3981424cf1cb65",
+    "tree": "b34e8630d904e038ec065040b32b5332fb2d35b8",
+    "exactStagedTreeConfirmed": true,
+    "runId": 36132083159,
+    "jobId": 108061430098,
+    "ciStatus": "in_progress",
+    "nativeRestore": "PENDING"
   }
 }
