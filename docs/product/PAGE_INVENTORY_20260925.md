@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `6c32cc6f59ffdd75f40e10d5a957de906cf7ac9a`. Gerado em 2026-09-25T07:33:54.246Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `72e542f98938d51099c4454b6680dc76dc9d4d07`. Gerado em 2026-09-25T07:46:58.959Z. Inclui o estado dos ficheiros locais no momento da geração.
 
 115 ficheiros HTML: 108 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 269 scripts de integração/navegador ativos. 81 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 270 scripts de integração/navegador ativos. 86 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 2 referências existem no índice Git mas não estão materializadas nesta cópia local; não são classificadas como ficheiros ausentes da aplicação.
 
@@ -43,9 +43,9 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /admin-client-settings | Entrada raiz | ADMIN | ADMIN | 2 |
 | /admin-clients | Entrada raiz | ADMIN | ADMIN | 2 |
 | /admin-collection | Entrada raiz | ADMIN | ADMIN | 1 |
-| /admin-command-center | Entrada raiz | ADMIN | ADMIN | 0 |
+| /admin-command-center | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-company-closures | Entrada raiz | ADMIN | ADMIN | 2 |
-| /admin-core-flow | Entrada raiz | ADMIN | — | 0 |
+| /admin-core-flow | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-credit-revenue | Entrada raiz | — | ADMIN | 1 |
 | /admin-crm | Entrada raiz | ADMIN | ADMIN | 4 |
 | /admin-dashboard | Entrada raiz | ADMIN | ADMIN | 1 |
@@ -57,11 +57,11 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /admin-live-map | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-login | Entrada raiz | PUBLIC | — | 3 |
 | /admin-map | Entrada raiz | ADMIN | ADMIN | 1 |
-| /admin-master-control | Entrada raiz | ADMIN | ADMIN | 4 |
+| /admin-master-control | Entrada raiz | ADMIN | ADMIN | 5 |
 | /admin-menu | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-notifications | Entrada raiz | ADMIN | ADMIN | 3 |
 | /admin-onboarding | Entrada raiz | ADMIN | ADMIN | 0 |
-| /admin-operational-flow | Entrada raiz | ADMIN | ADMIN | 0 |
+| /admin-operational-flow | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-operational-settings | Entrada raiz | ADMIN | ADMIN | 6 |
 | /admin-payment-settings | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-payments | Entrada raiz | ADMIN | ADMIN | 1 |
@@ -89,13 +89,13 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /billing-history | Entrada raiz | ADMIN | ADMIN | 1 |
 | /billing | Entrada raiz | ADMIN | ADMIN | 5 |
 | /chat | Entrada raiz | ADMIN | ADMIN | 15 |
-| /client-dashboard | Entrada raiz | CLIENT | CLIENT | 0 |
-| /client-history | Entrada raiz | CLIENT | CLIENT | 1 |
+| /client-dashboard | Entrada raiz | CLIENT | CLIENT | 1 |
+| /client-history | Entrada raiz | CLIENT | CLIENT | 2 |
 | /client-login | Entrada raiz | PUBLIC | — | 2 |
-| /client-menu | Entrada raiz | CLIENT | CLIENT | 0 |
-| /client-notifications | Entrada raiz | CLIENT | CLIENT | 2 |
-| /client-payments | Entrada raiz | CLIENT | CLIENT | 3 |
-| /client-portal | Entrada raiz | CLIENT, ADMIN | ADMIN, CLIENT | 15 |
+| /client-menu | Entrada raiz | CLIENT | CLIENT | 1 |
+| /client-notifications | Entrada raiz | CLIENT | CLIENT | 3 |
+| /client-payments | Entrada raiz | CLIENT | CLIENT | 4 |
+| /client-portal | Entrada raiz | CLIENT, ADMIN | ADMIN, CLIENT | 16 |
 | /client-wow | Entrada raiz | CLIENT | CLIENT | 0 |
 | /client | Entrada raiz | CLIENT | CLIENT | 13 |
 | /client_chat | Entrada raiz | CLIENT, ADMIN | CLIENT | 4 |
@@ -112,7 +112,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /invoice-document | Entrada raiz | — | PUBLIC | 6 |
 | /invoices | Entrada raiz | ADMIN | ADMIN | 7 |
 | /labor-cost-bases | Entrada raiz | — | ADMIN | 4 |
-| /login | Entrada raiz | PUBLIC | — | 21 |
+| /login | Entrada raiz | PUBLIC | — | 22 |
 | /map | Entrada raiz | ADMIN | ADMIN | 1 |
 | /metrics | Entrada raiz | ADMIN | ADMIN | 4 |
 | /multi-map | Entrada raiz | ADMIN | ADMIN | 1 |
@@ -131,7 +131,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /settings | Entrada raiz | ADMIN, CLIENT, TECHNICIAN, TEAM_LEADER | ADMIN, CLIENT, TEAM_LEADER, TECHNICIAN | 9 |
 | /splash | Entrada raiz | ADMIN | — | 0 |
 | /technician-chat | Entrada raiz | — | — | 3 |
-| /technician-field-mode | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 33 |
+| /technician-field-mode | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 34 |
 | /technician-gps | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 2 |
 | /technician-guide | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 2 |
 | /technician-history | Entrada raiz | — | TEAM_LEADER, TECHNICIAN | 2 |
@@ -156,13 +156,10 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 
 ## Fila finita sem referência literal em QA
 
-- /admin-command-center — Entrada raiz; papéis declarados: ADMIN.
-- /admin-core-flow — Entrada raiz; papéis declarados: ADMIN.
 - /admin-email-logs — Entrada raiz; papéis declarados: ADMIN.
 - /admin-live-map — Entrada raiz; papéis declarados: ADMIN.
 - /admin-menu — Entrada raiz; papéis declarados: ADMIN.
 - /admin-onboarding — Entrada raiz; papéis declarados: ADMIN.
-- /admin-operational-flow — Entrada raiz; papéis declarados: ADMIN.
 - /admin-payment-settings — Entrada raiz; papéis declarados: ADMIN.
 - /admin-security — Entrada raiz; papéis declarados: ADMIN.
 - /admin-suppliers — Entrada raiz; papéis declarados: ADMIN.
@@ -173,8 +170,6 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 - /admin-vehicles — Entrada raiz; papéis declarados: ADMIN.
 - /admin-visits — Entrada raiz; papéis declarados: ADMIN.
 - /billing-center — Entrada raiz; papéis declarados: ADMIN.
-- /client-dashboard — Entrada raiz; papéis declarados: CLIENT.
-- /client-menu — Entrada raiz; papéis declarados: CLIENT.
 - /client-wow — Entrada raiz; papéis declarados: CLIENT.
 - /client_tech — Entrada raiz; papéis declarados: CLIENT.
 - /crystal-os-v2-route-index — Entrada raiz; papéis declarados: ADMIN.

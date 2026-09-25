@@ -1,0 +1,136 @@
+{
+  "task": "TASK350",
+  "checkedAt": "2026-09-25T07:53:13.073739+00:00",
+  "baseCommit": "72e542f98938d51099c4454b6680dc76dc9d4d07",
+  "sourceSha256": {
+    "frontend/admin-command-center.html": "e103a5db752ad566f94a9cbfe3fb91531c1db830cf3fd591a26ebc499ed39f25",
+    "frontend/admin-core-flow.html": "e103a5db752ad566f94a9cbfe3fb91531c1db830cf3fd591a26ebc499ed39f25",
+    "frontend/admin-operational-flow.html": "e103a5db752ad566f94a9cbfe3fb91531c1db830cf3fd591a26ebc499ed39f25",
+    "frontend/cw-admin-legacy-entry.js": "2d1436bcf83cbaad24a71514b482c3a5f10b1a7e1bfc52f051b0b0020b5209cd",
+    "frontend/client-dashboard.html": "a7fb0ff625b973e414eea74b116150e176cbccd527682e716223154e6905370a",
+    "frontend/client-menu.html": "37b4fd823d1b02c46bae3b30e6aaf7f0df116b61ca186f2bbd805d6562d98aa8",
+    "frontend/sw.js": "4e6ebd4493fbbc8d839cedd3bfbe0e76b805a23756ac83a085fa710ef28e4875",
+    "scripts/audit-field-page-inventory.js": "c41591e3175752108ff58d0c1b3ad153f0a82037ce7316112f88cf80adabf774",
+    "scripts/test-field-suite.js": "8cbe36652cdb2d4197dae5fa1a6fae5c17b50f5641fa99cb104a3d1a7adf0894",
+    "scripts/test-field-legacy-entry.js": "043e6db33bbfd035a3cb68ff054b6f8a2542b05650358caae765df5232a39b08",
+    "tests/admin-legacy-entry.test.js": "eac60ccfe8c625c367f1f670844e0b8a72bdfdb07f86a40fa957e6bc64d9a99c"
+  },
+  "unitTests": {
+    "passed": 635,
+    "files": 89
+  },
+  "technicianTests": {
+    "passed": 4,
+    "files": 1
+  },
+  "syntax": {
+    "backend": 632,
+    "frontend": 232,
+    "inline": 58
+  },
+  "integration": {
+    "distinctGroups": 3,
+    "scripts": [
+      "test-field-legacy-entry.js",
+      "test-auth-entry-browser.js",
+      "test-shared-navigation-browser.js"
+    ],
+    "result": "success"
+  },
+  "finalEntryRerun": {
+    "script": "test-field-legacy-entry.js",
+    "result": "success",
+    "log": "/tmp/cw350-final-entry.log"
+  },
+  "passLines": [
+    "PASS isolated schema: 40 additive migrations",
+    "PASS legacy entry: 30 actual alias HTML cases, extension/slash variants, four roles and identity/expiry/storage refusal, one fixed same-origin destination, only supported language forwarded, no API calls or stored-byte changes; two actual client menus open the portal without self-loop, 320/390/1440",
+    "PASS client guard: 24 entry cases, preserved drafts/documents/corrupt legacy bytes, expiry/identity validation, storage failure, administrator preview/chat and real settings script",
+    "PASS login.js repeated login, retry, exact password and no token logging",
+    "PASS admin-login.js repeated login, retry, exact password and no token logging",
+    "PASS client-login.js repeated login, retry, exact password and no token logging",
+    "PASS technician-login.js repeated login, retry, exact password and no token logging",
+    "PASS HTML login, account switch and cross-tab session change disconnect private sockets; logout preserves field outbox",
+    "PASS actual administrative visits page: shared logout, disabled repeated action, awaited cleanup, session removed and all saved work preserved",
+    "PASS actual technician page: visible logout, 320px Spanish header, no network overlap, busy guard and preserved pending work",
+    "PASS navigation admin-vehicles/ADMIN: four widths, drawer focus, delayed binding, safe unique search, actual keyboard link and offline indicator",
+    "PASS navigation help-center/ADMIN: four widths, drawer focus, delayed binding, safe unique search, actual keyboard link and offline indicator",
+    "PASS navigation settings/ADMIN: four widths, drawer focus, delayed binding, safe unique search, actual keyboard link and offline indicator",
+    "PASS navigation client-dashboard/CLIENT: four widths, drawer focus, delayed binding, safe unique search, actual keyboard link and offline indicator",
+    "PASS navigation client-menu/CLIENT: four widths, drawer focus, delayed binding, safe unique search, actual keyboard link and offline indicator",
+    "PASS navigation technician-new-client/TECHNICIAN: four widths, drawer focus, delayed binding, safe unique search, actual keyboard link and offline indicator",
+    "PASS navigation technician-guide/TECHNICIAN: four widths, drawer focus, delayed binding, safe unique search, actual keyboard link and offline indicator",
+    "PASS navigation technician-route/TEAM_LEADER: four widths, drawer focus, delayed binding, safe unique search, actual keyboard link and offline indicator",
+    "PASS isolated schema: 40 additive migrations",
+    "PASS legacy entry: 30 actual alias HTML cases, extension/slash variants, four roles and identity/expiry/storage refusal, one fixed same-origin destination, only supported language forwarded, no API calls or stored-byte changes; two actual client menus open the portal without self-loop, 320/390/1440"
+  ],
+  "logs": {
+    "/tmp/cw350-unit.log": "352065feb13348b8da6d37362078f9b946f4acbf565799cb321ec44f0202e05d",
+    "/tmp/cw350-tech.log": "7799eb90726eb301e5c2451b530403311b372a6377e26dc27e47ba516710d648",
+    "/tmp/cw350-syntax.log": "c4af7a4fc9ad1bf86352111329b4b8f340360edd1a2241aa31ef7a884e5cf735",
+    "/tmp/cw350-integration.log": "faafc9d2136705276d7c68a09a13b34e43b935a469a66762d2992d94fe095e1f",
+    "/tmp/cw350-final-entry.log": "2d27e85ad78755767e44ba146fbc30dbf57daaf312c2e1f773c1da88ebb365c2"
+  },
+  "runtime": {
+    "database": "PGlite 0.5.8 / pglite-socket 0.2.11, isolated",
+    "additiveMigrations": 40,
+    "chromium": "@sparticuz/chromium 153.0.0, normal multiple processes, web security retained",
+    "runnerSha256": "5bd8f95926470bd82fabef27148ed54a55532bdf80d8dbc557dd19b244486b2b",
+    "preloadSha256": "74ba6986b731dfe5120836cb841c25bed62d334014aa588379558293deb6ec7a"
+  },
+  "entryCases": 30,
+  "entryScope": [
+    "/admin-command-center",
+    "/admin-core-flow",
+    "/admin-operational-flow"
+  ],
+  "clientMenuScope": [
+    "/client-dashboard",
+    "/client-menu"
+  ],
+  "screenshots": {
+    "reports/field-visual/legacy-entry/client-dashboard-1440.png": "d79f0c686677a6ca3ecf35d44e78c3e4415240a03fcfb17fc478c5aa7f63888b",
+    "reports/field-visual/legacy-entry/client-dashboard-320.png": "082dd0f065ee079063432ef9feefad1c905baf31f69e1166d277c9832eb7b7ef",
+    "reports/field-visual/legacy-entry/client-dashboard-390.png": "e11067de371859e63ddf4df64530c78452a8decd17702004a3808f346248f5ca",
+    "reports/field-visual/legacy-entry/client-menu-1440.png": "4ccc4e80c5ffe25f9672aebe67271160c63246e536c6936f18699b9d6ead4fee",
+    "reports/field-visual/legacy-entry/client-menu-320.png": "7cf526ee3bc1ebbc0837d5a87801b58fe79a388b1804c39e50a94e38fc612305",
+    "reports/field-visual/legacy-entry/client-menu-390.png": "a44488015546241045f4acb7b624b53503e222d65b58e3e2e319b1bfde048049"
+  },
+  "reviewedWidths": [
+    320,
+    390,
+    1440
+  ],
+  "reviewedLanguages": [
+    "pt"
+  ],
+  "visualReviewSamples": [
+    "client-dashboard-320.png",
+    "client-menu-390.png",
+    "client-dashboard-1440.png"
+  ],
+  "cache": "v162",
+  "fieldSuiteExpectedGroups": 249,
+  "inventory": {
+    "htmlFiles": 115,
+    "rootPages": 108,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 86,
+    "catalogueGuardDifferences": 0,
+    "activeScripts": 270,
+    "pagesWithoutLiteralTestReference": 29
+  },
+  "previousNativeProofs": [
+    "20260925_task348_ci.json"
+  ],
+  "limits": [
+    "Native CI and PostgreSQL restore of TASK350 remain pending.",
+    "TASK349 remains in progress at the last check.",
+    "Entry browser scenarios use fixture credentials and controlled destinations; this checks navigation, not cryptographic authentication or destination business behavior.",
+    "Visual review covers Portuguese client menus and three widths, not five-language certification of these pages or shared navigation.",
+    "Two indexed images are not materialized in this local checkout.",
+    "Remaining page, financial-history and production criteria retain their own scope."
+  ]
+}

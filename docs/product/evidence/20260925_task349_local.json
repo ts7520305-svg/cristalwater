@@ -115,7 +115,6 @@
   },
   "limits": [
     "Native CI and PostgreSQL restore of TASK349 remain pending.",
-    "TASK348 remains in progress at the last check; TASK347 has separate native CI/restore proof.",
     "The billed marker and recorded visit price are not reconciled document amounts, payment confirmation or fiscal issuance.",
     "Every page is a new consistent read; the entire history is not frozen across requests.",
     "The old grouped endpoint retains its unpaginated compatibility total; the new UI does not consume it.",
@@ -126,7 +125,8 @@
     "The final history run includes the legacy grouping/null-association fix and malformed owner/type/cache headers."
   ],
   "previousNativeProofs": [
-    "20260925_task347_ci.json"
+    "20260925_task347_ci.json",
+    "20260925_task348_ci.json"
   ],
   "publication": {
     "commit": "ee8ca0dd9ccf51b038d7c1fba339a443b5c8b6e8",

@@ -123,8 +123,6 @@
     "pagesWithoutLiteralTestReference": 35
   },
   "limits": [
-    "Native CI and PostgreSQL restore of TASK348 remain pending.",
-    "TASK346 and TASK347 have verified native CI and restore evidence; this does not approve TASK348.",
     "This localization covers the calculator-owned header and content; shared navigation/assistant and browser-native messages retain their existing contracts.",
     "User source text and unknown historical options are kept verbatim, not translated.",
     "Existing formulas are preserved; this is not a scientific validation.",
@@ -145,8 +143,9 @@
     "ciRun": 36106189648,
     "ciJob": 107979138585,
     "ciUrl": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36106189648",
-    "status": "in_progress",
-    "nativeRestoreConfirmed": false,
-    "checkedAt": "2026-09-25T07:09:37.810265+00:00"
+    "status": "success",
+    "nativeRestoreConfirmed": true,
+    "checkedAt": "2026-09-25T07:47:23.894Z",
+    "nativeEvidence": "20260925_task348_ci.json"
   }
 }
