@@ -171,7 +171,14 @@
     "docs/product/evidence/20260925_task345_ci.json"
   ],
   "publication": {
-    "status": "not_published",
-    "nativeRestoreConfirmed": false
+    "commit": "738f7042737a403c730fc818c0c63ca925ce41e8",
+    "tree": "e90ee57242eca4231ff140006949d269d5e46126",
+    "branch": "work/field-readiness-20260915-simulation",
+    "ciRun": 36102243450,
+    "ciJob": 107967027838,
+    "ciUrl": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36102243450",
+    "status": "in_progress",
+    "nativeRestoreConfirmed": false,
+    "checkedAt": "2026-09-25T06:18:59.341Z"
   }
 }
