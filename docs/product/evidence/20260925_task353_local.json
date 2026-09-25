@@ -1,0 +1,122 @@
+{
+  "task": "TASK353",
+  "checkedAt": "2026-09-25T10:06:05.635497+00:00",
+  "baseCommit": "b0a000d9df20d47dc1079e2db4fe17966525b492",
+  "sourceSha256": {
+    "frontend/billing-center.html": "c39046f8adbe6d9d9813d672f2d8a493a35ab1fa65c208c3e2651454f54cb39b",
+    "frontend/billing-center.js": "d3cbae18e131d06e1a14a84bc98fbe4c1132a80b9aba07ce3e79b63941b45bbf",
+    "frontend/cw-collection-summary-rules.js": "ca63e9c6fa1f38cc9c9496213165ba3b6ddb1748497aacba0d176196117b3b5d",
+    "frontend/cw-collection-summary-copy.js": "09cfd5fbff98a598f59af40be07912b4ab1af2de6097a21dbbfafe9ede24801a",
+    "frontend/sw.js": "6d6950a3571f089cdd2da4ce184345b5a52927755eb1e5206870860069a30613",
+    "src/services/collectionSummaryService.js": "8887c3f5b7b7b12348e6d3cb0616fe98af9749a667d1b90967d51b18393af40e",
+    "src/routes/adminPaymentRoutes.js": "5983c03e09a16c69368d316fa972070cd83103e7bf9ce347dd9baf63f8af44ad",
+    "src/middlewares/legacyAdministrationAccess.js": "7698858ecb67f36f116547f872d52c992e80ddb1d157ceff41623a0d7e3677d2",
+    "scripts/test-field-suite.js": "23154621b73059c64ff593dec6597b737b91b6129abdcf5cf68cafde030d27b5",
+    "scripts/test-field-collection-summary.js": "2445706b2999ba9429bca7e3c1a68b9308d024f2c0402c47764e8fe9cc5a120b",
+    "tests/collection-summary.test.js": "643b8ec7e9c4227faca987146a664e5824c536b646cade430cc3ce9eded3fc17"
+  },
+  "unitTests": {
+    "passed": 645,
+    "files": 91
+  },
+  "technicianTests": {
+    "passed": 4,
+    "files": 1
+  },
+  "syntax": {
+    "backend": 634,
+    "frontend": 236,
+    "inline": 53
+  },
+  "integration": {
+    "distinctGroups": 3,
+    "results": [
+      {
+        "script": "scripts/test-field-collection-summary.js",
+        "code": 0
+      },
+      {
+        "script": "scripts/test-field-client-receipts-ui.js",
+        "code": 0
+      },
+      {
+        "script": "scripts/test-field-legacy-admin-access.js",
+        "code": 0
+      }
+    ]
+  },
+  "passLines": [
+    "PASS isolated schema: 40 additive migrations",
+    "PASS collection API: 55 active/paused/inactive debtors, 57 open documents, exact 13241 cents and 2222 overdue cents, full filtered totals across two pages, literal search, private ADMIN ownership, denied roles and sanitized failures, originals and credit untouched",
+    "PASS collection browser: real 50/5 pagination and full totals, separate customer/payment states, safe document links, five languages in 320/390/1440, literal text, empty/error distinction, stale totals cleared, invalid packets, offline/timeout, late replies, page restoration, account change and expiry, no writes or messages",
+    "PASS mobile/desktop navigation, cancellation, duplicate clicks and two tabs; lost acknowledgement retains the literal immutable receipt across reload",
+    "PASS wrong identity/month/amount/allocations cannot clear the receipt; original recovery is applied once; partial debt remains visible and a stale form cannot pay",
+    "PASS failed refresh preserves the prior list and blocks payments; quota sends nothing; corrupt pending data is retained for review",
+    "PASS a changed session hides client data and the late acknowledgement; the original account recovers without duplication",
+    "PASS changing month invalidates an open form; an old query cannot overwrite the latest month",
+    "PASS server rejection needs explicit review; failed refresh cannot discard the rejected receipt",
+    "PASS a fully paid client disappearing from the list still retains recoverable surplus acknowledgement; initial load failure never displays invented zero debt",
+    "PASS legacy administration reads, mutations, aliases and AI require active ADMIN; refused requests are inert, administration and canonical field/client routes remain usable"
+  ],
+  "logs": {
+    "/tmp/cw353-unit.log": "02d13c3ec29301b32d855ed1fb355070a1ae350327a9c2cd23302e1888d6735d",
+    "/tmp/cw353-tech.log": "d9e73e76ba54a689facd7217ad1447b4eb7d9285398864fb99576bc2004af851",
+    "/tmp/cw353-final-syntax.log": "c3c8feecee4725772dec531a7b827ea8a6883318aef5313e0f8338d2becf2a58",
+    "/tmp/cw353-integration.log": "45f407d03154fa1ad1b6995fe7c6ca9e18378e67cbba61607fc71b0239c5e74f"
+  },
+  "runtime": {
+    "database": "PGlite 0.5.8 / pglite-socket 0.2.11, isolated",
+    "additiveMigrations": 40,
+    "chromium": "@sparticuz/chromium 153.0.0, normal multiple processes, web security retained",
+    "runnerSha256": "5bd8f95926470bd82fabef27148ed54a55532bdf80d8dbc557dd19b244486b2b",
+    "preloadSha256": "74ba6986b731dfe5120836cb841c25bed62d334014aa588379558293deb6ec7a"
+  },
+  "cache": "v165",
+  "fieldSuiteExpectedGroups": 251,
+  "inventory": {
+    "htmlFiles": 115,
+    "rootPages": 108,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 90,
+    "catalogueGuardDifferences": 0,
+    "activeScripts": 272,
+    "pagesWithoutLiteralTestReference": 25
+  },
+  "screenshots": {
+    "reports/field-visual/collection-summary/de-1440.png": "3755bc7db2fc3083c4651b2fe9c8980c47b4feb8802084f79b6e73e088042789",
+    "reports/field-visual/collection-summary/de-320.png": "0c02a58bc66bbde567bd3f99270ea4008ed81c49e3eaea4ecf16ff2ceb4fdb19",
+    "reports/field-visual/collection-summary/de-390.png": "c24b0e3a6e8c5a33975fba91988dd1f6648a3383cfe067478049b63a74eade14",
+    "reports/field-visual/collection-summary/en-1440.png": "edc1633ffed4b01d23c06445575b8ca1524a33efa5407b8cccb3411a95a951c3",
+    "reports/field-visual/collection-summary/en-320.png": "3b9cc8db8130ebdf774706453f2f2930918c1bc6eabce7ce6bec586f4ea71257",
+    "reports/field-visual/collection-summary/en-390.png": "530b6cb1d8bc8298bc90e98bbb06f1fbc882aee7476a30ca5ddfb0c0c4c48536",
+    "reports/field-visual/collection-summary/es-1440.png": "4a60bb68a55303d11a8315361ecb7f1ae6f8d2c52a1735d4a8c2843b10982d54",
+    "reports/field-visual/collection-summary/es-320.png": "42a874fdf6e7f6ae761ba7ece90f507acff6c732a6b680e690aa3cdb73bc0b3a",
+    "reports/field-visual/collection-summary/es-390.png": "4264b0d087aaff54166f91081e864ccaca64051d16df28baa23d79f09ec5aeb7",
+    "reports/field-visual/collection-summary/fr-1440.png": "533d3f2be9d0ffb717e29e9245d9aff7198fb48f92f70a684499295edf55774e",
+    "reports/field-visual/collection-summary/fr-320.png": "cce2be02902ca5c822f757826763d0232960c0afd0a816e3834d2d35f185cfd8",
+    "reports/field-visual/collection-summary/fr-390.png": "a7cf3ebc94ca6616dbd9944f332cc21d200af776de2f68ac612b40232f5b0fa6",
+    "reports/field-visual/collection-summary/pt-1440.png": "62e442a9f48700e7f763a5079f7557e8be0feef34d216f7f483112e41a6a6d5f",
+    "reports/field-visual/collection-summary/pt-320.png": "037d1ce07d43d50b2121fee8eab15593ad4d94fdf226b0855f2a888cf131371a",
+    "reports/field-visual/collection-summary/pt-390.png": "7371a0d0613016915a059f49e3392f04780a2c3f2ed58b98910ebe121b61a01c"
+  },
+  "nativeCI": {
+    "TASK351": "success, 250 expected distinct groups and native restore verified",
+    "TASK352": {
+      "runId": 36119724596,
+      "state": "in_progress at last check"
+    },
+    "TASK353": "pending publication"
+  },
+  "limits": [
+    "The shared invoiceOpen balance rule and per-document rounding are retained; historical source reconciliation is separate.",
+    "The server reads customer document projections to aggregate before paging; production volume and latency remain unverified.",
+    "Five languages cover page-owned text; shared navigation and destination pages retain separate review.",
+    "Native CI/restore for TASK353 remains pending; no merge, deployment or real contacts."
+  ],
+  "validationRepairs": [
+    "Added private response headers before the earlier administration gate after the refusal-header test failed.",
+    "Moved the first query to pageshow after reproducing browser-restored form fields on account change/reload; kept and passed the original checks."
+  ]
+}

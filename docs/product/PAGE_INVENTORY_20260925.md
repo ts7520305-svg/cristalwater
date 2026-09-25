@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `3b4b318e552c298488be5306694238df04972b64`. Gerado em 2026-09-25T09:37:02.662Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `b0a000d9df20d47dc1079e2db4fe17966525b492`. Gerado em 2026-09-25T09:59:13.084Z. Inclui o estado dos ficheiros locais no momento da geração.
 
 115 ficheiros HTML: 108 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 271 scripts de integração/navegador ativos. 89 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 272 scripts de integração/navegador ativos. 90 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 2 referências existem no índice Git mas não estão materializadas nesta cópia local; não são classificadas como ficheiros ausentes da aplicação.
 
@@ -84,7 +84,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /admin-visits | Entrada raiz | ADMIN | ADMIN | 0 |
 | /alerts-financial | Entrada raiz | ADMIN | ADMIN | 1 |
 | /alerts | Entrada raiz | ADMIN | ADMIN | 7 |
-| /billing-center | Entrada raiz | ADMIN | ADMIN | 0 |
+| /billing-center | Entrada raiz | ADMIN | ADMIN | 1 |
 | /billing-extras | Entrada raiz | ADMIN | ADMIN | 1 |
 | /billing-history | Entrada raiz | ADMIN | ADMIN | 1 |
 | /billing | Entrada raiz | ADMIN | ADMIN | 5 |
@@ -169,7 +169,6 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 - /admin-ui-settings — Entrada raiz; papéis declarados: ADMIN.
 - /admin-vehicles — Entrada raiz; papéis declarados: ADMIN.
 - /admin-visits — Entrada raiz; papéis declarados: ADMIN.
-- /billing-center — Entrada raiz; papéis declarados: ADMIN.
 - /crystal-os-v2-route-index — Entrada raiz; papéis declarados: ADMIN.
 - /incident-center — Entrada raiz; papéis declarados: ADMIN.
 - /operational-dashboard — Entrada raiz; papéis declarados: ADMIN.

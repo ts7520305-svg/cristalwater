@@ -1,297 +1,35 @@
-<!DOCTYPE html>
-<html lang="pt">
-<head>
-  <link rel="manifest" href="/manifest.webmanifest">
-  <meta name="theme-color" content="#050b16">
-  <meta charset="UTF-8" />
-  <title>Centro de Cobranças - Cristal Water</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="/ui/foundation.css">
-
-  <style>
-    * { box-sizing: border-box; }
-    html, body { overflow-x: hidden; }
-
-    body {
-      margin: 0;
-      padding: 20px;
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      color: #1f2937;
-    }
-
-    h1, h2, h3 {
-      margin-top: 0;
-    }
-
-    .topbar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .action-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border: none;
-      border-radius: 10px;
-      padding: 12px 14px;
-      background: #2563eb;
-      color: white;
-      font-weight: bold;
-      text-decoration: none;
-      cursor: pointer;
-    }
-
-    .action-btn:hover {
-      opacity: 0.95;
-    }
-
-    .icon {
-      font-size: 16px;
-      line-height: 1;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-bottom: 20px;
-    }
-
-    .card {
-      background: white;
-      border-radius: 14px;
-      padding: 18px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    }
-
-    .card-title {
-      font-size: 14px;
-      color: #6b7280;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .card-value {
-      font-size: 28px;
-      font-weight: bold;
-      margin-top: 10px;
-    }
-
-    .card-sub {
-      margin-top: 8px;
-      color: #6b7280;
-      font-size: 13px;
-    }
-
-    .panel {
-      background: white;
-      border-radius: 14px;
-      padding: 18px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-      margin-bottom: 20px;
-    }
-
-    .panel-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-
-    .filters {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    input, select {
-      padding: 10px;
-      border: 1px solid #d1d5db;
-      border-radius: 10px;
-      min-width: 220px;
-    }
-
-    .table-wrap {
-      width: 100%;
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 980px;
-    }
-
-    th, td {
-      text-align: left;
-      padding: 12px;
-      border-bottom: 1px solid #e5e7eb;
-      font-size: 14px;
-      vertical-align: middle;
-    }
-
-    th {
-      background: #f9fafb;
-    }
-
-    .actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .mini-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      border: none;
-      border-radius: 8px;
-      padding: 8px 10px;
-      color: white;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .btn-chat { background: #2563eb; }
-    .btn-browser { background: #16a34a; }
-    .btn-api { background: #111827; }
-    .btn-open { background: #7c3aed; }
-
-    .status-pill {
-      display: inline-block;
-      padding: 5px 8px;
-      border-radius: 999px;
-      color: white;
-      font-size: 12px;
-      font-weight: bold;
-    }
-
-    .s-active { background: #16a34a; }
-    .s-paused { background: #d97706; }
-
-    .empty {
-      color: #6b7280;
-      padding: 16px 0;
-    }
-
-    .small {
-      color: #6b7280;
-      font-size: 12px;
-    }
-
-    .status {
-      border: 1px solid #d5dde8;
-      background: #f9fbff;
-      color: #334155;
-      border-radius: 10px;
-      padding: 10px 12px;
-      margin-bottom: 12px;
-      font-weight: 700;
-    }
-
-    .status.error {
-      border-color: #efc0c7;
-      background: #fff3f5;
-      color: #8b1f2a;
-    }
-
-    .status.ok {
-      border-color: #b9e2ca;
-      background: #f2fbf6;
-      color: #165434;
-    }
-
-    @media (max-width: 760px) {
-      body {
-        padding: 12px;
-      }
-
-      input, select {
-        min-width: 100%;
-      }
-
-      .panel-header {
-        align-items: stretch;
-      }
-    }
-  </style>
-<link rel="stylesheet" href="/cristal-assist.css">
-  <script src="/cw-auth.js"></script>
-  <script src="/admin-auth-guard.js"></script>
-  <link rel="stylesheet" href="/ui/design-system.css">
-</head>
-<body data-required-role="ADMIN">
-
-  <h1>Centro de Cobranças</h1>
-
-  <div class="topbar">
-    <a class="action-btn" href="/admin-dashboard" title="Voltar ao dashboard">
-      <span class="icon">🏠</span><span>Dashboard</span>
-    </a>
-
-    <a class="action-btn" href="/admin-notifications" title="Abrir notificacoes">
-      <span class="icon">🔔</span><span>Notificações</span>
-    </a>
-
-    <a class="action-btn" href="/communications" title="Ver historico de comunicacoes">
-      <span class="icon">💬</span><span>Comunicações</span>
-    </a>
-  </div>
-
-  <div class="grid">
-    <div class="card">
-      <div class="card-title"><span class="icon">👥</span> Clientes com dívida</div>
-      <div class="card-value" id="sumDebtors">-</div>
-      <div class="card-sub">Clientes com cobranças em aberto</div>
-    </div>
-
-    <div class="card">
-      <div class="card-title"><span class="icon">💸</span> Total em aberto</div>
-      <div class="card-value" id="sumOpen">-</div>
-      <div class="card-sub">Montante total em dívida</div>
-    </div>
-
-    <div class="card">
-      <div class="card-title"><span class="icon">📄</span> Cobranças abertas</div>
-      <div class="card-value" id="sumInvoices">-</div>
-      <div class="card-sub">Total de faturas/cobranças em atraso</div>
-    </div>
-  </div>
-
-  <div class="panel">
-    <div class="panel-header">
-      <h2>Lista de cobrança</h2>
-      <div class="filters">
-        <input id="search" placeholder="Pesquisar cliente, zona, telefone..." aria-label="Pesquisar cliente" />
-        <select id="statusFilter" aria-label="Filtrar por estado">
-          <option value="">Todos os estados</option>
-          <option value="ACTIVE">Ativo</option>
-          <option value="PAUSED">Em pausa</option>
-        </select>
-        <button class="action-btn" onclick="loadBillingCenter()" title="Atualizar dados">
-          <span class="icon">🔄</span><span>Atualizar</span>
-        </button>
-      </div>
-    </div>
-
-    <div id="billingStatus" class="status" role="status" aria-live="polite">A carregar dados de cobranca...</div>
-    <div id="tableBox"></div>
-  </div>
-
-  <script src="/billing-center.js"></script>
-<script src="/cristal-help-data.js"></script>
-<script src="/cristal-assist.js"></script>
-<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
-  <script src="/ui/core/navigation-context.js"></script>
-  <script src="/crystal-os-v2-shell.js"></script>
-  <script src="/crystal-os-v2-nav.js"></script>
-  <script defer src="/ui/design-system.js"></script>
-</body>
-</html>
+<!doctype html>
+<html lang="pt"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>Centro de cobranças · Cristal Water</title>
+<link rel="stylesheet" href="/ui/foundation.css"><link rel="stylesheet" href="/ui/design-system.css"><script src="/cw-auth.js"></script><script src="/admin-auth-guard.js"></script>
+<style>
+#collectionSummary{max-width:1280px;margin:auto;padding:20px;min-width:0;color:#183c46}#collectionSummary *{box-sizing:border-box}#collectionSummary h1{margin:0;font-size:clamp(24px,4vw,34px)}
+#collectionSummary .panel,#collectionSummary .collection-card{background:#fff;color:#183c46;border:1px solid #bed2d8;border-radius:12px;padding:18px;margin:14px 0;min-width:0;overflow-wrap:anywhere}
+#collectionSummary .toolbar,#collectionSummary .pagination,#collectionSummary .card-head{display:flex;gap:10px;flex-wrap:wrap;align-items:center}#collectionSummary .card-head{justify-content:space-between}#collectionSummary h2{font-size:19px;margin:0}
+#collectionSummary .filters{display:grid;grid-template-columns:2fr 1fr auto;gap:12px;align-items:end}#collectionSummary label{display:grid;gap:5px;min-width:0;font-weight:600}
+#collectionSummary input,#collectionSummary select{width:100%;min-width:0;color:#183c46;background:#fff;border:1px solid #91adb7;padding:10px;border-radius:8px}
+#collectionSummary button,#collectionSummary .button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 14px;border:1px solid #13716f;border-radius:8px;background:#096665;color:#fff;text-decoration:none;white-space:normal;max-width:100%;font:inherit;cursor:pointer}
+#collectionSummary button:disabled{opacity:.5;cursor:default}#collectionSummary :focus-visible{outline:3px solid #087d79;outline-offset:3px}#collectionSummary .muted,#collectionSummary dt{color:#45636d}
+#collectionSummary .summary,#collectionSummary dl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}#collectionSummary .summary strong{display:block;font-size:23px;margin-top:5px}#collectionSummary dd{margin:4px 0 0;font-weight:600}#collectionSummary .amount{font-size:23px}#collectionSummary .note{padding:10px;background:#edf6f7;border-radius:8px}
+#billingStatus{padding:12px;background:#edf6f7;border-radius:8px;scroll-margin-top:125px}#billingStatus[data-state=error],#billingStatus[data-state=invalid],#billingStatus[data-state=session]{background:#fff0ed;color:#842f20}
+#collectionLanguage{width:auto!important}#collectionSummary .pagination{margin:12px 0}
+@media(max-width:650px){#collectionSummary{padding:12px}#collectionSummary .filters,#collectionSummary .summary,#collectionSummary dl{grid-template-columns:1fr}#collectionSummary .panel,#collectionSummary .collection-card{padding:14px}}
+</style></head><body data-required-role="ADMIN">
+<main id="collectionSummary" data-cw-state-managed="manual">
+<header class="panel"><h1 data-collection-copy="title">Centro de cobranças</h1><p class="muted" data-collection-copy="subtitle"></p>
+<nav class="toolbar"><a class="button" href="/admin-master-control" data-collection-copy="center">Centro</a><a class="button" href="/admin-payments" data-collection-copy="payments">Pagamentos</a><a class="button" href="/invoices" data-collection-copy="documents">Documentos</a>
+<label for="collectionLanguage" data-collection-copy="language">Idioma</label><select id="collectionLanguage"><option value="pt">Português</option><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option></select></nav></header>
+<section class="panel"><form id="collectionFilters" class="filters" autocomplete="off" novalidate>
+<label><span data-collection-copy="search">Pesquisa</span><input id="collectionSearch" type="search" maxlength="120"></label>
+<label><span data-collection-copy="paymentStatus">Estado do pagamento</span><select id="collectionStatus"><option value="" data-collection-copy="all">Todos</option><option value="PENDING" data-collection-copy="PENDING">Por pagar</option><option value="OVERDUE" data-collection-copy="OVERDUE">Em atraso</option></select></label>
+<button id="refreshCollection" type="submit" data-collection-copy="refresh">Atualizar</button></form>
+<p class="muted" data-collection-copy="basis"></p><p class="muted" data-collection-copy="creditNote"></p>
+<div id="billingStatus" role="status" aria-live="polite">A confirmar cobranças…</div><p id="collectionChecked" class="muted"></p>
+<div class="summary"><div><span data-collection-copy="clients">Clientes com dívida</span><strong id="sumDebtors">—</strong></div><div><span data-collection-copy="openTotal">Total em aberto</span><strong id="sumOpen">—</strong></div><div><span data-collection-copy="openDocuments">Documentos em aberto</span><strong id="sumInvoices">—</strong></div></div><p id="overdueSummary" class="note"></p>
+<nav class="pagination"><button id="collectionFirst" type="button" data-collection-copy="first"></button><button id="collectionPrevious" type="button" data-collection-copy="previous"></button><button id="collectionNext" type="button" data-collection-copy="next"></button></nav>
+<div id="tableBox" role="list"></div>
+<nav class="pagination"><button id="collectionFirstBottom" type="button" data-collection-copy="first"></button><button id="collectionPreviousBottom" type="button" data-collection-copy="previous"></button><button id="collectionNextBottom" type="button" data-collection-copy="next"></button></nav>
+</section></main>
+<script src="/cw-collection-summary-rules.js"></script><script src="/cw-payment-ledger-copy.js"></script><script src="/cw-collection-summary-copy.js"></script><script src="/billing-center.js"></script>
+<script src="/ui/core/navigation-context.js"></script><script src="/crystal-os-v2-shell.js"></script><script src="/crystal-os-v2-nav.js"></script><script defer src="/ui/design-system.js"></script>
+</body></html>

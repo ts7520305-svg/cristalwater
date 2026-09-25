@@ -23,7 +23,7 @@ Inventário: 115 HTML, 87 páginas com referência literal em 271 scripts ativos
 
 ## Estado e limites
 
-Publicada em `5527c23813bc05f8f169877e549f6fa541807811`, árvore `c248fd50ca532e8aa1c06d0a0b92ec0d51063cda`, idêntica à preparada e validada localmente. [CI 36117730155](https://github.com/ts7520305-svg/cristalwater/actions/runs/36117730155), job `108015663264`, em execução; os 250 grupos e o restauro PostgreSQL nativo deste lote continuam por confirmar.
+Publicada em `5527c23813bc05f8f169877e549f6fa541807811`, árvore `c248fd50ca532e8aa1c06d0a0b92ec0d51063cda`, idêntica à preparada e validada localmente. [CI 36117730155](https://github.com/ts7520305-svg/cristalwater/actions/runs/36117730155), job `108015663264`, aprovado: 250/250 grupos esperados distintos, 17 etapas e restauro PostgreSQL de 127 tabelas/47 ficheiros com linhas e hashes iguais. [Evidência nativa](evidence/20260925_task351_ci.json).
 
 TASK349 e TASK350 confirmadas respetivamente em [248/248](evidence/20260925_task349_ci.json) e [249/249](evidence/20260925_task350_ci.json) grupos esperados distintos, 17 etapas cada e restauro PostgreSQL de 127 tabelas/47 ficheiros com linhas e hashes iguais.
 

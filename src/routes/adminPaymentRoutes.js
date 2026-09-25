@@ -10,7 +10,13 @@ const {
 } = require("../controllers/adminPaymentController");
 
 router.use('/ledger/page', (req,res,next)=>{res.set({'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','X-CW-Ledger':'admin-payments-v1'});res.vary('Authorization');next();});
+router.use('/collection/page', (req,res,next)=>{res.set({'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','X-CW-Collection':'collection-summary-v1'});res.vary('Authorization');next();});
 router.use(auth("ADMIN"));
+
+router.get('/collection/page', async (req,res)=>{
+  try {const result=await require('../services/collectionSummaryService').read(req.user,req.query);res.set('X-CW-Owner',result.owner).json(result);}
+  catch(error){const known=[400,403].includes(error.statusCode);res.status(known?error.statusCode:503).json({ok:false,error:known?error.message:'Não foi possível confirmar as cobranças. Tente novamente.'});}
+});
 
 router.get('/ledger/page', async (req,res)=>{
   try {const result=await require('../services/adminPaymentLedgerService').read(req.user,req.query);res.set('X-CW-Owner',result.owner).json(result);}
