@@ -250,6 +250,7 @@ model TechnicalProposalRequest {
 model Pool {
   maintenancePlans EquipmentMaintenancePlan[]
   id                    Int                     @id @default(autoincrement())
+  serialNumber          String?                 @unique
   clientId              Int
   name                  String?
   location              String?

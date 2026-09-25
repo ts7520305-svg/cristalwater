@@ -136,7 +136,7 @@
         ]},
         { label: '6. Comercial', links: [
           ['/admin-crm', 'CRM comercial'],
-          ['/admin-onboarding', 'Onboarding de contratos'],
+          ['/admin-onboarding', 'Entrada guiada'],
           ['/admin-alerts?scope=repairs', 'Reparacoes'],
           ['/repair-execution', 'Execução de reparações'],
           ['/admin-company-closures', 'Férias e encerramentos']

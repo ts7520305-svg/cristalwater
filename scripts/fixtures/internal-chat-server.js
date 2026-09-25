@@ -15,6 +15,7 @@ app.use((req, res, next) => {
   };
   next();
 });
+app.use('/api/operational-flow', require('../../src/routes/operationalFlowRoutes'));
 app.use('/api/internal-chat', require('../../src/routes/internalChatRoutes'));
 app.use('/api/chat', require('../../src/routes/chatRoutes'));
 app.use('/api/clientChat', require('../../src/routes/clientChatRoutes'));

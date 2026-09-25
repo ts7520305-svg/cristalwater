@@ -1,0 +1,210 @@
+{
+  "task": "TASK361",
+  "baseCommit": "f7f16af059ba3b41d986433e298fe6742ccf1add",
+  "validatedAt": "2026-09-25T14:04:00.590473+00:00",
+  "sourceHashes": {
+    "frontend/admin-onboarding.html": "896da65fa6b10740da915d128f89573ad0bbb78459f0d29b7ec37a8fc2ae9468",
+    "frontend/admin-onboarding.js": "eea5349d5acb5f65f6f77930e8093dd252f679d230134410b2be7e3978312c31",
+    "frontend/cw-onboarding-rules.js": "5af5bd588609a4740ed4e25b49094b3260f27614d3379bc09d3588ed420805a7",
+    "frontend/cw-onboarding-copy.js": "35192d88c4bd07a00c1809e89a6018c118629136f1dc7d59e3f836c5d3a5cc80",
+    "frontend/cw-onboarding.css": "89f95c894892eb34a35fd259f4003a0487191160f65a5e50f233b6e9a0d520e5",
+    "frontend/crystal-os-v2-nav.js": "aeacddbc3d52e9d73628e59cbbbe06fe825b315936dffd1cf51e12ce6f8cc4bd",
+    "frontend/sw.js": "a017b57d6791b85ade5250b621787b331418ca41093e7297f022dcf66fafd0a9",
+    "frontend/admin-auth-guard.js": "8927751815231c2f00caf076f81f24ade055b28526e82b99f7265b504446ce1e",
+    "frontend/cw-auth.js": "3758a9876e10d88c14b60ea7cdb204209b1739b83284bc05e8d5e723aa15dc71",
+    "prisma/schema.prisma": "9d1ff60624e4651cbeba0d704947c57badd20136d131d7f2b509015dfe14278d",
+    "prisma/migrations/20260925140000_onboarding_pool_serial/migration.sql": "6795aeb260f7788a956ab9ee856486f4b1a3e9c2aa4fff43dab275b522543bc6",
+    "scripts/fixtures/internal-chat-server.js": "ce59715b3acdab0bd83b24e1efb11469c1e6a7adc45f7570df6c4cc1456efffb",
+    "scripts/test-field-admin-onboarding.js": "d565be9ab2fe94122f856a51bd906f04cc64c7991b53d9fdb745b8b339b95a9d",
+    "scripts/test-field-admin-onboarding-ui.js": "3877d2ce7e5da6a075314eb2cad51c8425475920c5362e49c5046eb8279e456b",
+    "scripts/test-field-migrations.js": "2048f8fc7ce06821b3ea47b4d5f4d81ecd20c1a1a57dd40355338e46a51b3595",
+    "scripts/test-field-suite.js": "8d1b6ee9399f405bd75fe5c747272a1111282f19e2838f1060880a862bd17652",
+    "src/controllers/adminOnboardingController.js": "68a648d7191558ca01524621ebf63c120a68b5b6ef84417d0f27edff39ff557b",
+    "src/services/adminOnboardingService.js": "1719d065c9869252e58bf885bd09e8a265a557a1738178ee06b5c56dab569032",
+    "src/routes/operationalFlowRoutes.js": "ae87ba6d68b107f70a8a0bb7906c367ee9db5f159aa20a13829fb35f691e35e1",
+    "src/services/fieldWriteRequestService.js": "1934f6cb2a519ba7601830a88d9854824b2c9b21c059ce7c7e1d2e702a3719ce",
+    "tests/admin-onboarding.test.js": "8cd4d7181f2fe492a2015bfd7eab88f7ba9c92a443dab44720c7e0b691818f14"
+  },
+  "unitTests": {
+    "passed": 710,
+    "files": 98,
+    "new": 12,
+    "finalFocusedPassed": 20,
+    "finalFocusedFiles": 2
+  },
+  "technicianTests": {
+    "passed": 4,
+    "files": 1
+  },
+  "syntax": {
+    "backend": 642,
+    "frontend": 252,
+    "inline": 46,
+    "finalMigrationScriptCheckedSeparately": true
+  },
+  "prismaSchema": "VALID",
+  "integrationGroups": [
+    {
+      "script": "scripts/test-field-admin-onboarding.js",
+      "status": "PASSED",
+      "log": "/tmp/cw361-api.log",
+      "repeatedPass": "/tmp/cw361-integration.log"
+    },
+    {
+      "script": "scripts/test-field-admin-onboarding-ui.js",
+      "status": "PASSED",
+      "log": "/tmp/cw361-final-ui.log"
+    }
+  ],
+  "unconfirmedRegressions": [
+    {
+      "script": "scripts/test-field-pool-edit-atomicity.js",
+      "status": "FAILED_LOCALLY_NATIVE_PENDING",
+      "logs": [
+        "/tmp/cw361-integration.log",
+        "/tmp/cw361-pool-regression.log"
+      ],
+      "observed": "PGlite wire UnexpectedMessage/prepared statement already exists; retry returned 401 during a SQL fault test"
+    },
+    {
+      "script": "scripts/test-field-client-intake.js",
+      "status": "FAILED_LOCALLY_NATIVE_PENDING",
+      "log": "/tmp/cw361-final-ui.log",
+      "observed": "Creation, retries, mandatory-write rollback and permission sections passed; approval fault test in second HTTP process returned 401 instead of 503; child stderr was not captured, cause not independently proven"
+    }
+  ],
+  "migrationChecks": {
+    "optionalSerialMissingColumn": "PASSED_PGLITE",
+    "legacySerialPreservedOnRepeat": "PASSED_PGLITE",
+    "uniqueSqlState23505": "PASSED_PGLITE",
+    "nativeUpgradeAndSchemaDiff": "PENDING_CI",
+    "officialUpgradeScriptIncludesNewMigration": true
+  },
+  "logs": {
+    "/tmp/cw361-unit.log": "6fbf7dda0f790490e2b3464866b2359fb2ff98e9480198033644caf6f830ca3b",
+    "/tmp/cw361-tech.log": "4f1133316cb6ac4eaacf9674091a5d2c07cebba7a3415ad5f6710dca9292303f",
+    "/tmp/cw361-final-focused.log": "08296d2d61f19614ad44d30a59d23eb605461c51105996056cc071dade156598",
+    "/tmp/cw361-final-syntax.log": "5efc07c599b3382f0d3f3b708708666157d0bd32e8ea9a077e0f45b71010d6e3",
+    "/tmp/cw361-prisma.log": "c0b14253666994f5b4f0c9e7c4aa1eb1b2e3464249fa4f1f1a2bfd4922b03102",
+    "/tmp/cw361-api.log": "d04b027b9cd5fca4b2283b9dfa1be4374edf652867a49569296092e757fbc923",
+    "/tmp/cw361-integration.log": "16c02e6b3c491748572f6ea6a79b849b39c2d47ec70bf49186ae8f3a9dbece2b",
+    "/tmp/cw361-final-ui.log": "9065118b9480f316ada835585ade6afb1ac14b8daf7070f7420ad87eb243a88a",
+    "/tmp/cw361-pool-regression.log": "c385ba17c3bfd5a2da7c7f6096d6e5257c95a93a46615852ba0619f80acaf2e5",
+    "/tmp/cw361-native-integration.log": "e5df1dcfd22576807c48dd18c5557ea250b3ebae9b5ffb63852f261c0f18ddf3",
+    "/tmp/cw361-serial-migration.log": "553ec59d0c018486388dacd13c43f0b640ea78293c7e60f9f771fc3b42c8149e",
+    "/tmp/cw361-final-server.log": "8b5f349a638380c4cdb6e9a6df998831f1b351c9bf2178239bca1eed4cae9fee"
+  },
+  "runtime": {
+    "database": "PGlite 0.5.8 / pglite-socket 0.2.11, isolated",
+    "additiveMigrations": 41,
+    "tables": 127,
+    "chromium": "@sparticuz/chromium 153.0.0, multiple processes, web security retained",
+    "browserTimezone": "America/New_York",
+    "nativePostgresAttempt": "NOT_STARTED: environment maps only UID 0; chown to service user failed EINVAL; no restrictions bypassed",
+    "runnerSha256": "5bd8f95926470bd82fabef27148ed54a55532bdf80d8dbc557dd19b244486b2b",
+    "preloadSha256": "74ba6986b731dfe5120836cb841c25bed62d334014aa588379558293deb6ec7a"
+  },
+  "fixture": {
+    "mandatoryWriteFaults": 9,
+    "concurrentExactRetries": 6,
+    "httpProcesses": 2,
+    "distinctRequestsForSamePool": 2,
+    "browserClientsCreated": 3,
+    "browserSecondPoolPut": 0,
+    "realMessages": 0,
+    "accountBoundDraft": true,
+    "legacyUnownedBytesPreserved": true,
+    "recoveryDoesNotAutomaticallyPost": true,
+    "ambiguousRefusalPreservesPendingRequest": true,
+    "malformedRecoveryRepliesRefused": true,
+    "twoWindowsProtected": true,
+    "unrelatedFinancialAndMessageCountsUnchanged": true
+  },
+  "cache": "v172",
+  "fieldSuiteExpectedGroups": 259,
+  "inventory": {
+    "htmlFiles": 115,
+    "rootPages": 108,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 99,
+    "catalogueGuardDifferences": 0,
+    "activeScripts": 280,
+    "pagesWithoutLiteralTestReference": 16,
+    "remainingRoutes": [
+      "/admin-suppliers",
+      "/admin-technicians",
+      "/admin-ui-settings",
+      "/admin-vehicles",
+      "/admin-visits",
+      "/incident-center",
+      "/operational-dashboard",
+      "/reminder-materials",
+      "/reminder-visits",
+      "/tests/test_extra.html",
+      "/ui/views/demo.html",
+      "/v26/admin-prototype.html",
+      "/v26/client-prototype.html",
+      "/v26/index.html",
+      "/v26/technician-prototype.html",
+      "/v26/technician/index.html"
+    ]
+  },
+  "screenshots": {
+    "reports/field-visual/admin-onboarding/de-1440-review.png": "62e090cd431bf6dd033667e931bb1f5dcf1a385da43b41516dd1e3452e08333e",
+    "reports/field-visual/admin-onboarding/de-1440.png": "8e3c2b6c5bab6d3054a3289866417d4f47931562d5b67d8a6653a428aeb318c4",
+    "reports/field-visual/admin-onboarding/de-320-review.png": "6a1ba13c634c1a45cade57019c2da12b063861b70aede575ada3601895d1097c",
+    "reports/field-visual/admin-onboarding/de-320.png": "a3a4d02556d8a980320936e729909e7ddac3f6a8b05969ea9f00189194faca80",
+    "reports/field-visual/admin-onboarding/de-390-review.png": "476e2ab3188789c70ad79522d9427b7bf42a98b51833f1b8fba11b3c696fa052",
+    "reports/field-visual/admin-onboarding/de-390.png": "d22f573adc36691fb64b39470a1ffe3c5d75d77170d9b163b4cf0de349088f56",
+    "reports/field-visual/admin-onboarding/en-1440-review.png": "b10353a6ee2a6137b3c6ccd6f32956fb84ed5196d990e086e5ff1c99a4500fc0",
+    "reports/field-visual/admin-onboarding/en-1440.png": "7855c952145fa4b50b6e4d971094d17651192bf04a243dfcb78582e2feb37882",
+    "reports/field-visual/admin-onboarding/en-320-review.png": "94137f3b482d9a05dc4ab8abfc1e31e6291edae685d23bdf278b4a82865bc3f1",
+    "reports/field-visual/admin-onboarding/en-320.png": "377aedbc37d3ed9a0a4b8423928148f1d58bb77583130da3345b6dca2f1d38d2",
+    "reports/field-visual/admin-onboarding/en-390-review.png": "2a9edda6525710b299c679bef7a76481cf76b56d57f27fd7289bf1820ba0c38b",
+    "reports/field-visual/admin-onboarding/en-390.png": "6db7a696d49f60a1cd130962f2593e9f1896c8cd6048b38eb1a8dccaead079ea",
+    "reports/field-visual/admin-onboarding/es-1440-review.png": "a02e0ce895e41fb00634e71db2a41025bcf12109a9cb474b6a9e726794f2d89b",
+    "reports/field-visual/admin-onboarding/es-1440.png": "34cdfbe49116821e397f604550f7764cc279a72ad27c73466cae7ecf4900ea01",
+    "reports/field-visual/admin-onboarding/es-320-review.png": "54574f5b6251ec80054b1dad7be3402b856f61c15beb089b731070c9cf223eab",
+    "reports/field-visual/admin-onboarding/es-320.png": "2135d97651134171956778ff2f93550bb163f4087f4230bf665ded414ce9741a",
+    "reports/field-visual/admin-onboarding/es-390-review.png": "94576a53a33ab9e5f1d0d0f1da59c68c354d5b3246201a444f30d9ee0118666c",
+    "reports/field-visual/admin-onboarding/es-390.png": "e23ffd3d7d48136acaab0ce06c5850a55267baf116806139900e09fc05f8256b",
+    "reports/field-visual/admin-onboarding/fr-1440-review.png": "4ce09d2bad272eded142fb59123bac6e3473327fa4ecca6512f2b8fd852fe354",
+    "reports/field-visual/admin-onboarding/fr-1440.png": "eefe9409de7065b5c6f56ba84463404e0f61ab449cf256bc5c5a1ed9226ad8a2",
+    "reports/field-visual/admin-onboarding/fr-320-review.png": "0da5789b0141b257628800b7ace0c2091a45aa59312cd2fe7e552359fb5854f6",
+    "reports/field-visual/admin-onboarding/fr-320.png": "28cd0a8e020eb69b3ea07c6e4f1c6410950c8f30527c1b7aac6c37955a3bae83",
+    "reports/field-visual/admin-onboarding/fr-390-review.png": "20c6a064ecf73fc1288010ceacddfd5b0e75f9b35f023f0cd6f66f29da5da83a",
+    "reports/field-visual/admin-onboarding/fr-390.png": "5e960239841d4c541434b4002fac8172ef8cffbf9f8cdbdab04126350c80ef66",
+    "reports/field-visual/admin-onboarding/pt-1440-review.png": "1f5d713f6e22bc9173f471769a8b703eae2777204d0e05cde1560c7d3c2996bd",
+    "reports/field-visual/admin-onboarding/pt-1440.png": "98246e04db80fece334fedae19198dc357581e976452013b0a3a7eaaf98c99de",
+    "reports/field-visual/admin-onboarding/pt-320-review.png": "1e2ff7bb61ba05156d918dfeb4546dcc4b24d1e057f59d9c315f5f4e82ae0651",
+    "reports/field-visual/admin-onboarding/pt-320.png": "df14149f80ec1bf04d7bd3f89c30cd58a7bd590f5821a98171b33653b6516f55",
+    "reports/field-visual/admin-onboarding/pt-390-review.png": "744aab740217d35d6b60f4f21f8eb17e56707e87e941e24ba09ac62848df95c4",
+    "reports/field-visual/admin-onboarding/pt-390.png": "c65726b5c7c1f2431e4b595d505e0f9f6f571a8978af6706a1aa2b71ed28baf1"
+  },
+  "visualReview": [
+    "pt-390.png",
+    "pt-1440.png",
+    "de-320-review.png"
+  ],
+  "previousNativeCI": [
+    "20260925_task359_ci.json",
+    "20260925_task360_ci.json"
+  ],
+  "limitations": [
+    "Two existing fault-injection regression groups failed locally and require native CI confirmation; no claim that they passed",
+    "Native PostgreSQL upgrade/full 259-group suite/restore not yet verified for this code",
+    "Duplicate detection is exact serial or address/location/type within this creation flow, not universal historical reconciliation",
+    "Owned local draft and signed pending proof are browser storage, not cross-device backup",
+    "Complete active option lists not verified at production volume",
+    "Other operational-flow routes, permanent team assignment and calculator keep separate workflows",
+    "Shared navigation translations and missing local binary assets retain prior limitations",
+    "Historical reconciliation, production volume, VPS/providers/backups and physical pilot remain open"
+  ],
+  "publication": {
+    "status": "READY_FOR_WORK_BRANCH_NATIVE_CI_PENDING",
+    "branch": "work/field-readiness-20260915-simulation",
+    "principalUnchanged": "6f27081e1d183ff584a62255b016b373836734db"
+  }
+}

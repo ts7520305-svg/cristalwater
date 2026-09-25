@@ -11,6 +11,7 @@ const {
 const prisma = prismaModule.prisma || prismaModule.default || prismaModule;
 const router = express.Router();
 
+router.use((req,res,next)=>{if(req.path.startsWith('/onboard')){res.set({'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'});res.vary('Authorization');}next();});
 router.use(auth('ADMIN'));
 
 function asyncHandler(fn) {
@@ -29,39 +30,6 @@ function toDate(value) {
   if (!value) return new Date();
   const d = new Date(value);
   return Number.isNaN(d.getTime()) ? new Date() : d;
-}
-
-function optionalNumber(value) {
-  if (value === undefined || value === null || value === '') return undefined;
-  const n = Number(value);
-  return Number.isFinite(n) ? n : undefined;
-}
-
-function optionalText(value) {
-  if (value === undefined) return undefined;
-  if (value === null) return null;
-  const text = String(value).trim();
-  return text || null;
-}
-
-function technicalSheetPayload(source = {}, pool = {}) {
-  const treatment = optionalText(source.disinfectionType || source.treatmentType || pool.disinfectionType || pool.type) || 'CLORO';
-  return Object.fromEntries(Object.entries({
-    volumeM3: optionalNumber(source.volumeM3 ?? pool.volumeM3) ?? 0,
-    disinfectionType: treatment,
-    targetPhMin: optionalNumber(source.targetPhMin),
-    targetPhMax: optionalNumber(source.targetPhMax),
-    targetChlorineMin: optionalNumber(source.targetChlorineMin),
-    targetChlorineMax: optionalNumber(source.targetChlorineMax),
-    targetAlkalinityMin: optionalNumber(source.targetAlkalinityMin),
-    targetAlkalinityMax: optionalNumber(source.targetAlkalinityMax),
-    targetOrpMinMv: optionalNumber(source.targetOrpMinMv),
-    filterBrandModel: optionalText(source.filterBrandModel),
-    pumpHorsePower: optionalNumber(source.pumpHorsePower),
-    chlorinatorModel: optionalText(source.chlorinatorModel),
-    technicalRoomLocation: optionalText(source.technicalRoomLocation),
-    specialObservations: optionalText(source.specialObservations || source.notes),
-  }).filter(([, value]) => value !== undefined));
 }
 
 const VISIT_COMPLETABLE_STATUSES = new Set(['PLANNED', 'IN_PROGRESS', 'A_CAMINHO', 'ON_ROUTE', 'STARTED', 'EM_EXECUCAO', 'EM EXECUCAO']);
@@ -189,155 +157,11 @@ router.get('/bootstrap', asyncHandler(async (req, res) => {
   res.json({ ok: true, clients, pools, technicians, rounds });
 }));
 
-router.post('/onboard', asyncHandler(async (req, res) => {
-  const body = req.body || {};
-  const clientInput = body.client || {};
-  const poolInput = body.pool || {};
-  const technicalInput = body.technicalSheet || body.technical || {};
-  const techId = body.technicianId ? Number(body.technicianId) : null;
-  const roundInput = body.round || {};
-  const createVisit = body.createVisit !== false;
-
-  if (!clientInput.name) return res.status(400).json({ ok: false, error: 'Nome do cliente é obrigatório.' });
-
-  const poolAddress = String(poolInput.address || clientInput.address || '').trim();
-  const poolLocation = String(poolInput.location || poolInput.zone || clientInput.zone || '').trim();
-  const poolType = String(poolInput.type || 'POOL').trim();
-  const wantsPool = Boolean(poolInput.name || poolInput.type || poolInput.volumeM3 || poolInput.address || poolInput.location);
-
-  if (wantsPool && poolAddress && poolLocation && poolType) {
-    const existingPool = await model('pool').findFirst({
-      where: { address: poolAddress, location: poolLocation, type: poolType },
-    });
-    if (existingPool) {
-      return res.status(409).json({ ok: false, error: 'Ja existe uma infraestrutura registada exatamente com este tipo e nesta localizacao/morada.' });
-    }
-  }
-
-  const result = await prisma.$transaction(async (tx) => {
-    const client = await tx.client.create({
-      data: {
-        name: clientInput.name,
-        internalName: clientInput.internalName || null,
-        email: clientInput.email || null,
-        phone: clientInput.phone || null,
-        address: clientInput.address || null,
-        zone: clientInput.zone || null,
-        notes: clientInput.notes || null,
-        status: 'SETUP',
-        active: true,
-        billingActive: false,
-        paymentStatus: 'BILLING_DISABLED',
-        monthlyFee: toNumber(clientInput.monthlyFee, 0),
-        monthlyAmount: toNumber(clientInput.monthlyAmount ?? clientInput.monthlyFee, 0),
-        paymentStatus: 'BILLING_DISABLED',
-        source: 'OPERATIONAL_FLOW',
-      },
-    });
-
-    let pool = null;
-    if (poolInput.name || poolInput.type || poolInput.volumeM3) {
-      pool = await tx.pool.create({
-        data: {
-          clientId: client.id,
-          name: poolInput.name || `Piscina ${client.name}`,
-          type: poolInput.type || 'POOL',
-          address: poolInput.address || client.address || null,
-          location: poolInput.location || poolInput.zone || client.zone || null,
-          zone: poolInput.zone || client.zone || null,
-          volumeM3: poolInput.volumeM3 ? toNumber(poolInput.volumeM3) : null,
-          monthlyAmount: toNumber(poolInput.monthlyAmount ?? client.monthlyFee, 0),
-          serviceFrequency: Math.max(1, parseInt(poolInput.serviceFrequency || '1', 10)),
-          estimatedMinutes: Math.max(10, parseInt(poolInput.estimatedMinutes || '30', 10)),
-          scheduleMode: 'FLOW_CONTROLLED',
-          active: true,
-          notes: poolInput.notes || null,
-        },
-      });
-
-      if (tx.poolCalculationProfile?.create) {
-        await tx.poolCalculationProfile.create({
-          data: {
-            poolId: pool.id,
-            shape: poolInput.shape || 'RECTANGULAR',
-            volumeM3: pool.volumeM3 || null,
-            bathersAverage: toNumber(poolInput.bathersAverage, 0),
-            covered: Boolean(poolInput.covered),
-            notes: 'Criado pelo fluxo operacional guiado.',
-          },
-        }).catch(() => null);
-      }
-
-      if (tx.technicalSheet?.upsert) {
-        const sheetData = technicalSheetPayload(technicalInput, {
-          ...poolInput,
-          volumeM3: pool.volumeM3,
-          type: pool.type,
-          disinfectionType: technicalInput.disinfectionType || poolInput.disinfectionType || poolInput.treatmentType,
-        });
-        await tx.technicalSheet.upsert({
-          where: { poolId: pool.id },
-          update: sheetData,
-          create: {
-            poolId: pool.id,
-            ...sheetData,
-          },
-        }).catch(() => null);
-      }
-    }
-
-    let round = null;
-    let roundPool = null;
-    let roundTechnician = null;
-
-    if (pool && (roundInput.assign || roundInput.name || roundInput.id)) {
-      const readiness = await getPoolRoundReadiness(tx, pool.id);
-      if (readiness.ok) {
-        if (roundInput.id) round = await tx.round.findUnique({ where: { id: Number(roundInput.id) } });
-        if (!round) round = await getOrCreateRound(roundInput, tx);
-        const count = await tx.roundPool.count({ where: { roundId: round.id } });
-        roundPool = await tx.roundPool.upsert({
-          where: { roundId_poolId: { roundId: round.id, poolId: pool.id } },
-          update: {},
-          create: { roundId: round.id, poolId: pool.id, order: count + 1 },
-        });
-        if (techId) {
-          roundTechnician = await tx.roundTechnician.upsert({
-            where: { roundId_technicianId: { roundId: round.id, technicianId: techId } },
-            update: {},
-            create: { roundId: round.id, technicianId: techId },
-          });
-        }
-      }
-    }
-
-    let visit = null;
-    if (pool && createVisit) {
-      visit = await tx.serviceVisit.create({
-        data: {
-          clientId: client.id,
-          poolId: pool.id,
-          technicianId: techId || null,
-          roundId: round?.id || null,
-          plannedDate: toDate(body.plannedDate),
-          date: toDate(body.plannedDate),
-          status: techId ? 'PLANNED' : 'PENDING_TECHNICIAN',
-          reason: 'FIRST_SERVICE',
-          notes: 'Visita criada automaticamente pelo fluxo operacional.',
-          revenue: toNumber(pool?.monthlyAmount ?? client.monthlyAmount, 0),
-        },
-      });
-    }
-
-    return { client, pool, round, roundPool, roundTechnician, visit };
-  });
-
-  if (!result.pool) await createPending(`Cliente ${result.client.name} sem piscina/jacuzzi.`, result.client.id, { step: 'POOL_REQUIRED' });
-  if (result.pool && !result.round) await createPending(`Piscina ${result.pool.name} sem ronda atribuída.`, result.client.id, { step: 'ROUND_REQUIRED', poolId: result.pool.id });
-  if (result.pool && result.round && !result.visit?.technicianId) await createPending(`Piscina ${result.pool.name} sem técnico atribuído.`, result.client.id, { step: 'TECHNICIAN_REQUIRED', poolId: result.pool.id, roundId: result.round.id });
-
-  res.json({ ok: true, flowStatus: result.visit?.technicianId ? 'READY_FOR_SERVICE' : 'PENDING_ASSIGNMENT', ...result });
-}));
+const onboarding = require('../controllers/adminOnboardingController');
+router.get('/onboard/options', onboarding.options);
+router.post('/onboard/review', onboarding.review);
+router.get('/onboard/result/:requestId', onboarding.result);
+router.post('/onboard', onboarding.create);
 
 router.post('/assign-pool', asyncHandler(async (req, res) => {
   const poolId = Number(req.body.poolId);

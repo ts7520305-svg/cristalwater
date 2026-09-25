@@ -223,6 +223,23 @@ async function dbRejects(sql, expected) {
   await prisma.repairWorkInterval.update({where:{id:retainedWork.id},data:{voidedAt:new Date(),voidedBy:'ADMIN:1',voidReason:'Explicit historical correction',activeKey:null}});
   await prisma.repairWorkInterval.create({data:workData});
   await require('./fixtures/reminder-return-migration')({prisma,cli,dbRejects,materialData});
+  // The optional serial existed in a legacy SQL migration but not in the baseline Prisma schema.
+  {
+    const serialMigration='prisma/migrations/20260925140000_onboarding_pool_serial/migration.sql';
+    const snapshot=async()=>(await prisma.$queryRaw`SELECT to_jsonb(p) AS row FROM "Pool" p ORDER BY id`).map(p=>p.row);
+    const original=await snapshot();
+    cli(['db','execute','--file',serialMigration,'--schema','prisma/schema.prisma']);
+    assert.deepEqual(await snapshot(),original.map(p=>({serialNumber:null,...p})));
+    await prisma.$executeRaw`UPDATE "Pool" SET "serialNumber"='QA preserved serial / 000123' WHERE id=${equipmentPool.id}`;
+    const retained=await snapshot();
+    cli(['db','execute','--file',serialMigration,'--schema','prisma/schema.prisma']);
+    assert.deepEqual(await snapshot(),retained);
+    const extraPool=await prisma.pool.create({data:{clientId:oldClient.id,name:'Migration serial uniqueness'},select:{id:true,serialNumber:true}});
+    assert.equal(extraPool.serialNumber,null);
+    await dbRejects(`UPDATE "Pool" SET "serialNumber"='QA preserved serial / 000123' WHERE id=${extraPool.id}`,'23505');
+    assert.equal((await prisma.pool.findUniqueOrThrow({where:{serialNumber:'QA preserved serial / 000123'},select:{id:true}})).id,equipmentPool.id);
+    await prisma.pool.delete({where:{id:extraPool.id}});
+  }
   await prisma.repairWorkInterval.deleteMany({where:{repairId:historyRepair.id}});
   assert.deepEqual(await prisma.expenseAllocation.findUniqueOrThrow({where:{id:repairLabor.id}}),repairLabor);
   await prisma.expenseAllocation.update({where:{id:repairLabor.id},data:{voidedAt:new Date(),voidReason:'Explicit correction',activeKey:null,activeMeasurementKey:null}});
@@ -270,6 +287,6 @@ async function dbRejects(sql, expected) {
   assert.equal(await prisma.technicalProposalRequest.count(),0);
   assert.equal(await prisma.fieldWriteRequest.count(),0);
   const savedExtra=await prisma.extraVisit.findUniqueOrThrow({where:{id:oldExtra.id}});assert.equal(savedExtra.notes,'Migration preserved extra');assert.equal(savedExtra.execution,null);assert.equal(savedExtra.startAt,null);assert.equal(savedExtra.endAt,null);assert.equal(savedExtra.completionRequestId,null);assert.equal(await prisma.extraVisitPhoto.count(),0);await prisma.extraVisit.delete({where:{id:oldExtra.id}});
-  console.log('PASS forty additive migrations preserve previous data and match the current schema');
+  console.log('PASS forty-one additive migrations preserve previous data and match the current schema');
  }finally{fs.rmSync(temp,{recursive:true,force:true})}
 })().catch(error=>{console.error(error);process.exitCode=1}).finally(()=>prisma.$disconnect());

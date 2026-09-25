@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-25T12:53:56.534Z",
-  "baseCommit": "64e3eb797678d0029682690952564efbd6901f1b",
+  "generatedAt": "2026-09-25T13:57:21.204Z",
+  "baseCommit": "f7f16af059ba3b41d986433e298fe6742ccf1add",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 278,
+  "activeScriptsScanned": 280,
   "summary": {
     "htmlFiles": 115,
     "rootPages": 108,
     "nestedPages": 7,
     "unavailableLocalAssetReferences": 2,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 98,
+    "pagesWithLiteralTestReference": 99,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -384,7 +384,9 @@
       "route": "/admin-credit-revenue",
       "kind": "Entrada raiz",
       "title": "Cristal Water — Reduções por serviço",
-      "catalogueRoles": [],
+      "catalogueRoles": [
+        "ADMIN"
+      ],
       "guardFiles": [
         "admin-auth-guard.js"
       ],
@@ -557,7 +559,9 @@
       "route": "/admin-email-review",
       "kind": "Entrada raiz",
       "title": "Revisão de emails · Cristal Water",
-      "catalogueRoles": [],
+      "catalogueRoles": [
+        "ADMIN"
+      ],
       "guardFiles": [],
       "explicitRoleHints": [],
       "conditionalAccess": [],
@@ -586,7 +590,9 @@
       "route": "/admin-expenses",
       "kind": "Entrada raiz",
       "title": "Cristal Water — Despesas e contas a pagar",
-      "catalogueRoles": [],
+      "catalogueRoles": [
+        "ADMIN"
+      ],
       "guardFiles": [
         "admin-auth-guard.js"
       ],
@@ -994,7 +1000,7 @@
       "file": "frontend/admin-onboarding.html",
       "route": "/admin-onboarding",
       "kind": "Entrada raiz",
-      "title": "Cristal Water LDA - Entrada Guiada",
+      "title": "Entrada guiada · Cristal Water",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -1008,25 +1014,26 @@
       "entryRedirects": {},
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/cw-auth.js",
         "/ui/foundation.css",
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
         "/ui/design-system.css",
+        "/cw-onboarding.css",
+        "/cw-auth.js",
         "/admin-auth-guard.js",
-        "/admin-onboarding.js",
-        "/cristal-help-data.js",
-        "/cristal-assist.js",
+        "/cw-onboarding-rules.js",
+        "/cw-onboarding-copy.js",
         "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
+        "/admin-onboarding.js",
         "/ui/design-system.js"
       ],
       "missingAssets": [],
       "unavailableLocalAssets": [],
       "languageAssets": [],
       "directPrintAction": false,
-      "testReferences": [],
+      "testReferences": [
+        "test-field-admin-onboarding-ui.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -1306,6 +1313,7 @@
         "test-field-service-reminders.js",
         "test-field-reminder-lifecycle.js",
         "test-field-admin-catalogue.js",
+        "test-field-admin-onboarding-ui.js",
         "test-field-technical-sheet-atomicity.js",
         "test-field-technical-sheet-recovery-ui.js",
         "test-field-technical-proposals.js",
@@ -1461,7 +1469,9 @@
       "route": "/admin-revenue",
       "kind": "Entrada raiz",
       "title": "Cristal Water — Repartição de mensalidades",
-      "catalogueRoles": [],
+      "catalogueRoles": [
+        "ADMIN"
+      ],
       "guardFiles": [
         "admin-auth-guard.js"
       ],
@@ -3233,7 +3243,9 @@
       "route": "/labor-cost-bases",
       "kind": "Entrada raiz",
       "title": "Cristal Water — Bases compostas de trabalho",
-      "catalogueRoles": [],
+      "catalogueRoles": [
+        "ADMIN"
+      ],
       "guardFiles": [
         "admin-auth-guard.js"
       ],
@@ -3755,7 +3767,9 @@
       "route": "/repair-execution",
       "kind": "Entrada raiz",
       "title": "Cristal Water — Execução de reparações",
-      "catalogueRoles": [],
+      "catalogueRoles": [
+        "ADMIN"
+      ],
       "guardFiles": [],
       "explicitRoleHints": [],
       "conditionalAccess": [],
@@ -4036,7 +4050,9 @@
       "route": "/technician-chat",
       "kind": "Entrada raiz",
       "title": "Equipa · Cristal Water",
-      "catalogueRoles": [],
+      "catalogueRoles": [
+        "ADMIN"
+      ],
       "guardFiles": [],
       "explicitRoleHints": [],
       "conditionalAccess": [],
