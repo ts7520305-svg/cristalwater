@@ -125,7 +125,14 @@
     "Repeated the draft group after guarding navigation during a conservation failure and preserving stale-draft state on page-history return."
   ],
   "publication": {
-    "status": "not_published",
-    "nativeRestoreConfirmed": false
+    "commit": "e40168e5fbf274d1e0a070f8805e2c86cfa1cdc4",
+    "tree": "550fe7470c468ce9ee84577608e23fca1a0c553e",
+    "branch": "work/field-readiness-20260915-simulation",
+    "ciRun": 36104043162,
+    "ciJob": 107972529268,
+    "ciUrl": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36104043162",
+    "status": "in_progress",
+    "nativeRestoreConfirmed": false,
+    "checkedAt": "2026-09-25T06:43:04.661Z"
   }
 }
