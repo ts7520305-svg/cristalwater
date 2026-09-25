@@ -27,9 +27,13 @@ const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002'; assert(['127.0.
   const list = await call('/api/users', at); assert.equal(list.status, 200); assert(!list.body.some(u => 'password' in u));
   assert.equal((await call('/api/security/status', at)).status, 200);
   const newPassword = randomUUID();
-  assert.equal((await call(`/api/security/users/${victim.id}/reset-password`, at, 'POST', { newPassword, actor: 'forged-actor' })).status, 200);
+  assert.equal((await call(`/api/security/users/${victim.id}/reset-password`, at, 'POST', { newPassword, actor: 'forged-actor' })).status, 409);
+  const review = await call(`/api/security/users/${victim.id}/password-review`, at);
+  assert.equal(review.status, 200);
+  assert.equal((await call(`/api/security/users/${victim.id}/reset-password`, at, 'POST', { newPassword, reviewToken: review.body.reviewToken, actor: 'forged-actor' })).status, 400);
+  assert.equal((await call(`/api/security/users/${victim.id}/reset-password`, at, 'POST', { newPassword, reviewToken: review.body.reviewToken })).status, 200);
   const saved = await prisma.user.findUniqueOrThrow({ where: { id: victim.id } }); assert(await bcrypt.compare(newPassword, saved.password)); assert(saved.passwordChangedAt);
-  const audit = await prisma.userAuditLog.findFirstOrThrow({ where: { entityId: String(victim.id), action: 'PASSWORD_CHANGED' }, orderBy: { id: 'desc' } }); assert.equal(audit.actor, `ADMIN:${admin.id}`);
+  const audit = await prisma.userAuditLog.findFirstOrThrow({ where: { entityId: String(victim.id), action: 'PASSWORD_RESET_REVIEWED' }, orderBy: { id: 'desc' } }); assert.equal(audit.actor, `ADMIN:${admin.id}`);
   assert.equal((await call(`/api/security/users/${victim.id}/identity`, at, 'PUT', { name: 'Updated QA', actor: 'forged-actor' })).status, 200);
   const identityAudit = await prisma.userAuditLog.findFirstOrThrow({ where: { entityId: String(victim.id), action: 'IDENTITY_UPDATED' }, orderBy: { id: 'desc' } }); assert.equal(identityAudit.actor, `ADMIN:${admin.id}`);
   const logger = require('../src/services/loggerService'), oldAudit = logger.audit; let recorded;

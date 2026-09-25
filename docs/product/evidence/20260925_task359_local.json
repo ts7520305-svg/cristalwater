@@ -1,0 +1,121 @@
+{
+  "task": "TASK359",
+  "baseCommit": "e40117887c3ad1c23fe3c85fba17d75a6d11e38b",
+  "validatedAt": "2026-09-25T12:24:45.805372+00:00",
+  "sourceHashes": {
+    "frontend/admin-security.html": "18dd9ff07a2c1e06acb2f58c69e3755d45ca1af261b3547385d36738b8598e67",
+    "frontend/admin-security.js": "929597e7f0a865ccc1872db729d2a869db0fd2c2469ba831aa189839a799fe08",
+    "frontend/cw-security-rules.js": "dd98de2a641c4bf11e8ddc37ec7fd5a27469894aa8b80e9df6af7b8a9ea2b7b4",
+    "frontend/cw-security-copy.js": "cbe75a8fcc3c14a877b5b4966ce10775e53bcd1785f40aab928feb61a98f749e",
+    "frontend/sw.js": "8c7e44656b7af187e7276251ea3ef742993e5a439730844d40ca216354a45d6d",
+    "src/controllers/securityController.js": "b8a347c4e17b87daaa683bab14acfe472568fd04ff7ad9d696e18f94a06dc6b3",
+    "src/controllers/securityReviewController.js": "e5d4dbff3a60d7881570c12d930a62636880f1f91b69fa6e977cb5d32669bcc2",
+    "src/services/securityReviewService.js": "996363fb88f760eef6a0aba51ea8c956432348f0101b772172101a806211ee56",
+    "src/routes/securityRoutes.js": "741fabdc5e4d949cbd8aee840541850e37775caa468162809ff9c60c44581eb3",
+    "src/middlewares/auditMiddleware.js": "8056717fbe402930633e46e4c613c7700e741c664891c9235bd1b3c149861344",
+    "scripts/test-field-security-review.js": "e299c2f1b1b6ffc29af9299f4ccc22e74837aa8602ec33e509e21eec8f438785",
+    "scripts/test-field-account-access.js": "90da6049d7f1880852f70f0eed4139564bf76b268f57eae781b621bd0589c8a8",
+    "scripts/test-field-suite.js": "7b00056cd2c8bc96dec2d8cb8b7f167e7086fc54e0a4c8df723bb5fe8c149471",
+    "tests/security-review.test.js": "71ad6930f063077c38407a83a9609441281db216e0e2ee723dfb3b36a3c0a666"
+  },
+  "unitTests": {
+    "passed": 690,
+    "files": 96
+  },
+  "technicianTests": {
+    "passed": 4,
+    "files": 1
+  },
+  "syntax": {
+    "backend": 640,
+    "frontend": 247,
+    "inline": 48
+  },
+  "integrationGroups": [
+    "scripts/test-field-security-review.js",
+    "scripts/test-field-account-access.js",
+    "scripts/test-field-legacy-admin-access.js"
+  ],
+  "logs": {
+    "/tmp/cw359-unit.log": "96092df567a3539f427d094b65e6588e8eb8ec93142d2ceea7a68ab38b43e011",
+    "/tmp/cw359-tech.log": "ed629fde55fd129516167c83500156f30f4133a030fac2aeab7cc95536f0af11",
+    "/tmp/cw359-syntax.log": "7d0ad433cad973cf17d60a7fa8b725737f11cebbb8826d9b5f81ae4b94c10986",
+    "/tmp/cw359-integration.log": "79b6fdfb0a48a4bf2f7018f19abc574cdc13ca8ab443764eb692d26bae06226a"
+  },
+  "runtime": {
+    "database": "PGlite 0.5.8 / pglite-socket 0.2.11, isolated",
+    "additiveMigrations": 40,
+    "chromium": "@sparticuz/chromium 153.0.0, normal multiple processes, web security retained",
+    "runnerSha256": "5bd8f95926470bd82fabef27148ed54a55532bdf80d8dbc557dd19b244486b2b",
+    "preloadSha256": "74ba6986b731dfe5120836cb841c25bed62d334014aa588379558293deb6ec7a"
+  },
+  "fixture": {
+    "isolatedAccounts": 27,
+    "atomicAuditRollback": true,
+    "concurrentSameProofOneChange": true,
+    "conflictingReplayRefused": true,
+    "browserPostAttempts": 3,
+    "browserCommittedChanges": 2,
+    "browserRecoveryWrites": 0,
+    "passwordPersistence": false,
+    "unrelatedAccountsPreserved": true,
+    "realMessages": 0
+  },
+  "cache": "v170",
+  "fieldSuiteExpectedGroups": 256,
+  "inventory": {
+    "htmlFiles": 115,
+    "rootPages": 108,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 95,
+    "catalogueGuardDifferences": 0,
+    "activeScripts": 277,
+    "pagesWithoutLiteralTestReference": 20
+  },
+  "screenshots": {
+    "reports/field-visual/security-review/de-1440-review.png": "93d1a62d0a2b9082b42f887b65e0d86cc6d696476824f57f6e3b11d512f1f3d8",
+    "reports/field-visual/security-review/de-1440.png": "424ca1338884fbd7ec2e89ec60309b530d9a87a00d41e9bbec351a97b5e88f8f",
+    "reports/field-visual/security-review/de-320-review.png": "208f23080cfaa3697d9d02b7fc2db48966c10ff765fb823ae950bc290df93de3",
+    "reports/field-visual/security-review/de-320.png": "904a0a0e94245bca863a3099974ae8fc8c1ff5ce280a62cb1af901a17a959d37",
+    "reports/field-visual/security-review/de-390-review.png": "54f67558647d5db0801bb1006ab8453d38b8f63231300664b603b0b11bbc0e07",
+    "reports/field-visual/security-review/de-390.png": "ac00224e3345aa68f6a12ad724869042fc739778ec83dce9dc6740f48cd1c96b",
+    "reports/field-visual/security-review/en-1440-review.png": "97d6c52f9cd3f644def6b31e77ae116363d19d63edc174d92e610e274baef28f",
+    "reports/field-visual/security-review/en-1440.png": "6299a9fdacbf30ee32dd8e3d4947064af3606e0c6674a7a6dfc5f53017e30f09",
+    "reports/field-visual/security-review/en-320-review.png": "ec65d740f619130ffa943d24464cd8b29258bc26d890b1b7f7ee17f2eb4c1ac4",
+    "reports/field-visual/security-review/en-320.png": "30fd6d2137351d00fc2a611c71fdbe5e24e481150ee372bf55155f4bf31c53ec",
+    "reports/field-visual/security-review/en-390-review.png": "f237ff5d19ab58a22c528c6006a1a152ef852cb1cb9b2941591b2f91646861e9",
+    "reports/field-visual/security-review/en-390.png": "4652267769c95ec841c457bf8ad37d6a92d897f388203dc425f6984dbaed4e58",
+    "reports/field-visual/security-review/es-1440-review.png": "4bbab8218891bb3f1587a710bab915943c1297ae7eab5aa562fd1c6bb8b9be40",
+    "reports/field-visual/security-review/es-1440.png": "3295d9aa60a93ac4b2ada00ffd99e68495058586cc74be68537225fa33e957be",
+    "reports/field-visual/security-review/es-320-review.png": "e3485e1951b1354914725d20da313b54ae3447d41c76173b451b15add50bd287",
+    "reports/field-visual/security-review/es-320.png": "c25b848931978bbad88c72f33f5bca0e9462e390252264f32ced9aa07d43d56f",
+    "reports/field-visual/security-review/es-390-review.png": "efb0daa99937a39e5893ad37d8d385d86ad5da66c2fe386429ce62b0a3adf0d4",
+    "reports/field-visual/security-review/es-390.png": "7699b61b08aab89daf100d097908a4d366c8c3d6045867f65f7a46885e533cef",
+    "reports/field-visual/security-review/fr-1440-review.png": "538ef0e9a6d305069ed095e99d591a966f8c5ab368291f762d8b03d856a19fc1",
+    "reports/field-visual/security-review/fr-1440.png": "7edf38eff53c786c7cbcd19c89f51af3548334b58ebe73037d50fb45eed13ab0",
+    "reports/field-visual/security-review/fr-320-review.png": "4d6789bb1385e06bcfa80e6b86b7ccbf397b3dc65f95d0677573ad040a76fc78",
+    "reports/field-visual/security-review/fr-320.png": "90e8a25abef0e9050d3f59eb437acbbe7c1f08f2eddaffe5e053ac0d94b40e62",
+    "reports/field-visual/security-review/fr-390-review.png": "d52ec4d9cb7e98186159be2f8419b82b161f450610a738cbfce2c368582bb11f",
+    "reports/field-visual/security-review/fr-390.png": "ddb3f70153ce737553f56379b9ea236215d0914d3dcb6a052914bf8b9e5e21b5",
+    "reports/field-visual/security-review/pt-1440-review.png": "87100ab18e7454d45c70c392d28c58b9d0dae1a9d2a58bc413bf01e5afaffad7",
+    "reports/field-visual/security-review/pt-1440.png": "823c0aeb030c57a38bf36faf0ca039427897e9299bb8ca1c183451da9cffeea2",
+    "reports/field-visual/security-review/pt-320-review.png": "082f7ac6d3d48a03e3e6c0091f0a0244523709c187d15838f09b00e53a446d3a",
+    "reports/field-visual/security-review/pt-320.png": "6bab75fc5ed543409789eaefc883c8f5b4eb5189bbbfe50101d0373fe4f2954d",
+    "reports/field-visual/security-review/pt-390-review.png": "7154f9cab3fcac4605ac45fb1f36f3232d036210009507047e35b918b875ada3",
+    "reports/field-visual/security-review/pt-390.png": "c7d452331bcae38687ef908070f758e5758efac38ba8528453ebc172fd3bd98f"
+  },
+  "visualReview": [
+    "pt-390.png",
+    "pt-1440.png",
+    "de-320-review.png"
+  ],
+  "previousNativeCI": "20260925_task357_ci.json",
+  "publication": {
+    "status": "LOCAL_VALIDATED_PENDING_PUBLICATION",
+    "branch": "work/field-readiness-20260915-simulation",
+    "principalUnchanged": "6f27081e1d183ff584a62255b016b373836734db",
+    "nativeCI": "pending"
+  }
+}

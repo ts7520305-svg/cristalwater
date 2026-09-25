@@ -1,0 +1,14 @@
+(function(root,factory){const value=factory();if(typeof module==='object'&&module.exports)module.exports=value;else root.CWSecurityRules=value;}(typeof globalThis==='object'?globalThis:this,function(){
+ 'use strict';
+ const positive=n=>Number.isInteger(n)&&n>0&&n<=2147483647,integer=n=>Number.isSafeInteger(n)&&n>=0,text=v=>typeof v==='string',nullable=v=>v===null||text(v),iso=v=>text(v)&&Number.isFinite(Date.parse(v))&&new Date(v).toISOString()===v;
+ function id(v){return typeof v==='string'&&/^[1-9]\d{0,9}$/.test(v)&&positive(Number(v))?Number(v):null;}
+ function page(query={}){if(!query||Array.isArray(query)||Object.keys(query).some(k=>k!=='page'))return null;const p=query.page===undefined?1:id(query.page);return p&&p<=1000000?p:null;}
+ function password(v){return text(v)&&Array.from(v).length>=12&&new TextEncoder().encode(v).length<=72&&!/[\u0000]/u.test(v)&&!Array.from(v).some(c=>{const n=c.codePointAt(0);return n>=0xd800&&n<=0xdfff;});}
+ const uuid=v=>text(v)&&/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(v);
+ const account=a=>a&&positive(a.id)&&nullable(a.name)&&text(a.email)&&text(a.role)&&typeof a.active==='boolean';
+ const base=(p,owner)=>p&&p.ok===true&&p.version===1&&p.owner===owner&&iso(p.asOf);
+ function consolePacket(p,owner,n){return Boolean(base(p,owner)&&p.page===n&&p.size===25&&p.totals&&['users','active','locked','audit'].every(k=>integer(p.totals[k]))&&p.totals.active<=p.totals.users&&p.totals.locked<=p.totals.users&&Array.isArray(p.users)&&p.users.length===Math.min(25,Math.max(0,p.totals.users-(n-1)*25))&&p.users.every((a,i)=>account(a)&&(!i||a.id>p.users[i-1].id))&&Array.isArray(p.audit)&&p.audit.length===Math.min(20,p.totals.audit)&&p.audit.every((a,i)=>positive(a.id)&&iso(a.createdAt)&&text(a.action)&&nullable(a.actor)&&nullable(a.entity)&&nullable(a.entityId)&&(!i||a.createdAt<p.audit[i-1].createdAt||(a.createdAt===p.audit[i-1].createdAt&&a.id<p.audit[i-1].id))));}
+ function reviewPacket(p,owner,target){return Boolean(base(p,owner)&&account(p.target)&&p.target.id===target&&typeof p.target.mustChangePassword==='boolean'&&(p.target.lockedUntil===null||iso(p.target.lockedUntil))&&iso(p.target.updatedAt)&&(p.target.passwordChangedAt===null||iso(p.target.passwordChangedAt))&&uuid(p.requestId)&&text(p.reviewToken)&&p.reviewToken.length>50&&p.reviewToken.length<2000&&iso(p.expiresAt)&&Date.parse(p.expiresAt)>Date.parse(p.asOf)&&Date.parse(p.expiresAt)-Date.parse(p.asOf)<=300000);}
+ function resultPacket(p,owner,target,requestId){return Boolean(base(p,owner)&&p.targetId===target&&p.requestId===requestId&&uuid(requestId)&&['CONFIRMED','UNCONFIRMED'].includes(p.status)&&(p.status==='UNCONFIRMED'?p.receipt===null:p.receipt&&positive(p.receipt.auditId)&&iso(p.receipt.changedAt)&&p.receipt.actor===owner));}
+ return {positive,id,page,password,uuid,iso,account,consolePacket,reviewPacket,resultPacket};
+}));

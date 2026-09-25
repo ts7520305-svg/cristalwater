@@ -1,0 +1,4 @@
+'use strict';
+const service=require('../services/securityReviewService');
+const respond=fn=>async(req,res)=>{try{res.set({'X-CW-Security':'security-review-v1','X-CW-Owner':service.owner(req.user)});const packet=await fn(req);res.set({'X-CW-Security':'security-review-v1','X-CW-Owner':packet.owner});res.json(packet);}catch(error){const known=typeof error.code==='string'&&error.code.startsWith('SECURITY_');res.status(known?error.statusCode:503).json({ok:false,version:1,owner:res.get('X-CW-Owner')||null,code:known?error.code:'SECURITY_UNAVAILABLE'});}};
+module.exports={read:respond(req=>service.read(req.user,req.query)),review:respond(req=>service.review(req.user,req.params.id,req.query)),result:respond(req=>service.readResult(req.user,req.params.id,req.params.requestId,req.query)),reset:respond(req=>{if(Object.keys(req.query).length)throw Object.assign(Error(),{code:'SECURITY_INVALID_REQUEST',statusCode:400});return service.reset(req.user,req.params.id,req.body);})};

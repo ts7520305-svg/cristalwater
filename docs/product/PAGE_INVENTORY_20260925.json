@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-25T11:49:08.952Z",
-  "baseCommit": "f5c7d06cf8e4d90fb7d510c35af34dd12000186d",
+  "generatedAt": "2026-09-25T12:21:58.153Z",
+  "baseCommit": "e40117887c3ad1c23fe3c85fba17d75a6d11e38b",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 276,
+  "activeScriptsScanned": 277,
   "summary": {
     "htmlFiles": 115,
     "rootPages": 108,
     "nestedPages": 7,
     "unavailableLocalAssetReferences": 2,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 94,
+    "pagesWithLiteralTestReference": 95,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -1531,7 +1531,7 @@
       "file": "frontend/admin-security.html",
       "route": "/admin-security",
       "kind": "Entrada raiz",
-      "title": "Cristal Water · Segurança",
+      "title": "Segurança e contas · Cristal Water",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -1545,18 +1545,13 @@
       "entryRedirects": {},
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/manifest.webmanifest",
-        "/cristal-assist.css",
-        "/cw-auth.js",
         "/ui/foundation.css",
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
         "/ui/design-system.css",
+        "/cw-auth.js",
         "/admin-auth-guard.js",
+        "/cw-security-rules.js",
+        "/cw-security-copy.js",
         "/admin-security.js",
-        "/cristal-help-data.js",
-        "/cristal-assist.js",
-        "/cw-admin-shortcuts.js",
         "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
@@ -1566,7 +1561,9 @@
       "unavailableLocalAssets": [],
       "languageAssets": [],
       "directPrintAction": false,
-      "testReferences": [],
+      "testReferences": [
+        "test-field-security-review.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {

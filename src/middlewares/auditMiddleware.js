@@ -38,6 +38,8 @@ function safeBody(body){
   delete clone.password;
   delete clone.currentPassword;
   delete clone.newPassword;
+  delete clone.confirmPassword;
+  delete clone.reviewToken;
   delete clone.pin;
   delete clone.token;
 
