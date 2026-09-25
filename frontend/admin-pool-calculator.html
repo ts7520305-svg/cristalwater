@@ -34,7 +34,7 @@
     #poolCalculator .resultRow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr)}
     #poolCalculator .kpiGrid{scroll-margin-top:125px}
     #poolCalculator #status{padding:12px;background:#edf6f7;color:#194c59;border-radius:8px;scroll-margin-top:120px}
-    #poolCalculator[data-state=error] #status,#poolCalculator[data-state=uncertain] #status,#poolCalculator[data-state=session] #status,#poolCalculator[data-state=conflict] #status,#poolCalculator[data-state=storage] #status{background:#fff0ed;color:#842f20}
+    #poolCalculator[data-state=error] #status,#poolCalculator[data-state=uncertain] #status,#poolCalculator[data-state=session] #status,#poolCalculator[data-state=conflict] #status,#poolCalculator[data-state=storage] #status,#poolCalculator[data-state=draft-error] #status{background:#fff0ed;color:#842f20}
     #poolCalculator :focus-visible{outline:3px solid #087d79;outline-offset:3px}
     @media(max-width:1100px){#poolCalculator{grid-template-columns:minmax(0,1fr)}}
   </style>
@@ -96,6 +96,7 @@
       </div>
       <div class="toolbar" style="margin-top:14px"><button data-calculator-action="preview" disabled onclick="previewCalculation()">Calcular sem guardar</button><button class="btn3" data-calculator-action="save" disabled onclick="saveAndCalculate()">Guardar na ficha da piscina</button><button class="btnDanger" data-calculator-action="clear" disabled onclick="clearInputs()">Limpar campos</button></div>
       <p class="status" id="status" role="status" aria-live="polite"></p>
+      <p id="draftStatus" class="note" role="status" aria-live="polite"></p><button id="retryDraft" type="button" hidden onclick="retryCalculatorDraft()">Conservar novamente o rascunho</button>
       <div id="recovery" hidden><p class="note">Os campos deste pedido ficam conservados neste navegador e nesta conta até à confirmação. Podes fechar a página e voltar.</p><button id="recoverRequest" type="button" onclick="recoverCalculation()">Confirmar pedido guardado</button></div>
     </section>
 
@@ -138,6 +139,7 @@
   </script>
   <script src="/cw-pool-calculator-rules.js"></script>
   <script src="/cw-pool-calculator-store.js"></script>
+  <script src="/cw-pool-calculator-drafts.js"></script>
   <script src="/admin-pool-calculator.js"></script>
   <script src="/cristal-help-data.js"></script>
   <script src="/cristal-assist.js"></script>

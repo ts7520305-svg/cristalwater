@@ -1,0 +1,131 @@
+{
+  "task": "TASK347",
+  "checkedAt": "2026-09-25T06:40:52.341529+00:00",
+  "baseCommit": "88bfaf8dd55bbf4e79c656572f505614816468be",
+  "sourceSha256": {
+    "frontend/admin-pool-calculator.html": "bc75cab379e622ba76dd839a5cbe07cdde69dea557a1b555e80a65a8df00cda0",
+    "frontend/admin-pool-calculator.js": "1d87d52d928ab2099296a7f69f89751b6bfc0787c38a2b1b728b4420d0d86b0b",
+    "frontend/cw-pool-calculator-drafts.js": "fefc7170a498b42a48dc6d61149c485651dda4db7a61885a79f1c6f59fe3a9e6",
+    "frontend/sw.js": "eabb08b4e377a98fdb5f8e1c271550f526f37152f5a7649309aae4e26ffabc3a",
+    "scripts/test-field-pool-calculator-drafts.js": "8ea0382c60aa55074be7c5603baca92de6f10ad4178a5d3242845b313e760d58",
+    "scripts/test-field-pool-calculator-recovery.js": "8eceba01a7651d421035a4fd549e81efbd6e8f4a1ce5645d5132e8b730c69ea6",
+    "scripts/test-field-suite.js": "34f792e99b8a7ef54ee82005a947046c88659410036b6370202f65b1dede4f43",
+    "tests/pool-calculator-drafts.test.js": "15be6a73bedf4c406afe2015230c268e417d586db7a2cd09dc184d31574f05ae"
+  },
+  "unitTests": {
+    "passed": 624,
+    "files": 86
+  },
+  "technicianTests": 4,
+  "syntax": {
+    "backend": 631,
+    "frontend": 227,
+    "inline": 62
+  },
+  "integration": [
+    {
+      "script": "scripts/test-field-pool-calculator-state.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-pool-calculator-recovery.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-pool-calculator-drafts.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-pool-calculator-writes.js",
+      "code": 0
+    }
+  ],
+  "browserRerun": [
+    {
+      "script": "scripts/test-field-pool-calculator-drafts.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-pool-calculator-state.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-pool-calculator-recovery.js",
+      "code": 0
+    }
+  ],
+  "finalHistoryRerun": [
+    {
+      "script": "scripts/test-field-pool-calculator-drafts.js",
+      "code": 0
+    }
+  ],
+  "passLines": [
+    "PASS isolated schema: 40 additive migrations",
+    "PASS pool calculator: real pool/profile and empty-profile separation, nulls and initial values, original CIRCULAR and precision, stored chemistry ownership, source text literal, selected-pool and input races, malformed/failed/offline/timeout responses, dirty discard/clear, three real saves, same-request recovery after reload and one divergent confirmation refused, page history, account switch/reload/expiry, 320/390/1440 and original other pools unchanged",
+    "PASS calculator browser recovery: quota and ignored storage before POST, receipt-quota after commit, divergent body and owner headers refused, reload recovery without fresh pool read, persisted conflict with explicit discard, offline exact request/account isolation, two-tab exclusion, corrupt/hash-mismatched bytes preserved, pending UI 320/390/1440, eight confirmed changes and unchanged money",
+    "PASS calculator drafts: precise/zero fields and reviewed version survive reload; pools/accounts/tabs isolated; failed fresh read and declined discard preserve bytes; stale drafts block writes; quota and ignored writes retry; corrupt/foreign bytes untouched; expiry clears private view; pending handoff/recovery/confirmed cleanup exact; three applied writes, one durable rejection, other pool and money unchanged; conflict 320/390/1440",
+    "PASS reviewed calculator writes: access/private headers, strict read/commands, original nulls/zero/parent-profile divergence, mandatory audit/receipt/parent rollback, atomic legacy rollback, two HTTP workers same/different requests, unchanged-timestamp conflict, compatibility conflict, finite calculation refusal, real lost response and process restart, durable rejected receipts, owner/scope/resource reuse refusal, empty-profile creation and recovery after deletion; money unchanged",
+    "PASS calculator drafts: precise/zero fields and reviewed version survive reload; pools/accounts/tabs isolated; failed fresh read and declined discard preserve bytes; stale drafts block writes; quota/ignored writes retry and partial numeric input remains editable; corrupt/foreign bytes untouched; expiry clears private view; pending handoff/recovery/confirmed cleanup exact; four applied writes, one durable rejection, normalized visible fields require a fresh preview, other pool and money unchanged; conflict 320/390/1440"
+  ],
+  "logs": {
+    "/tmp/cw347-unit.log": "14ac68645c1f1091c1910a823779449ea6c7042fbad60bb37f6ce56f196a5f2c",
+    "/tmp/cw347-tech.log": "828f40139dafcd2df1f9fd79ab451f5d346f2bc23d4ce42af0dc57026f83833c",
+    "/tmp/cw347-syntax.log": "d82b1362ff864ddfa76fc62a25a29777576968be43ab93b5e2f0f218f77902b4",
+    "/tmp/cw347-regression.log": "d57217e38b4ff01af146ea60950e81f4bcbcede867845bca10d37b554d1adcba",
+    "/tmp/cw347-drafts.log": "bd81f60c87dc2c1a7bed6a40ce06cb49c9fb42abddab185fa93e7cf96124fe4f",
+    "/tmp/cw347-final-browser.log": "129dff28170b44c1d0e5863fc27d0c7592f6f92151c3ee9be6ffddb14f778be9",
+    "/tmp/cw347-history-final.log": "5e9e68fcee03c9d4a4f9e9da0e54f5b97df455841e9f15feb3128dc8c86be000"
+  },
+  "runtime": {
+    "database": "PGlite 0.5.8 / pglite-socket 0.2.11, isolated",
+    "additiveMigrations": 40,
+    "chromium": "@sparticuz/chromium 153.0.0, normal multiple processes, web security retained",
+    "runnerSha256": "5bd8f95926470bd82fabef27148ed54a55532bdf80d8dbc557dd19b244486b2b",
+    "preloadSha256": "74ba6986b731dfe5120836cb841c25bed62d334014aa588379558293deb6ec7a"
+  },
+  "screenshots": {
+    "reports/field-visual/pool-calculator-drafts/draft-conflict-1440.png": "d66608283f7e66dd2a43024c6cc02ea42e2b02a2bd45239c987d9c3cb24b2938",
+    "reports/field-visual/pool-calculator-drafts/draft-conflict-320.png": "104fd9833fb616a1bff27523a2a3eb2644492defa7556ef60e39d492cb5845f1",
+    "reports/field-visual/pool-calculator-drafts/draft-conflict-390.png": "4a3c4b6f28d41223fb0cf758d0f21ab545bffd5758b9f6d6322348accfb5c278"
+  },
+  "reviewedWidths": [
+    320,
+    390,
+    1440
+  ],
+  "reviewedLanguages": [
+    "pt"
+  ],
+  "cache": "v159",
+  "fieldSuiteExpectedGroups": 246,
+  "inventory": {
+    "htmlFiles": 115,
+    "rootPages": 108,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 80,
+    "catalogueGuardDifferences": 0,
+    "activeScripts": 267,
+    "pagesWithoutLiteralTestReference": 35
+  },
+  "limits": [
+    "Native CI and PostgreSQL restore of TASK346 and TASK347 remain pending.",
+    "Drafts before Save live in the same tab session; recovery after closing the tab is not guaranteed.",
+    "Prepared requests retain the persistent storage and same-UUID receipts from TASK346.",
+    "Malformed draft bytes are preserved; automatic repair or destructive cleanup is not provided.",
+    "The interface review is PT-PT; formulas, full localization and unversioned compatibility callers retain their separate scope."
+  ],
+  "testPreparation": [
+    "Adapted the existing recovery quota expectations to the newly recovered unsent draft instead of silently resetting it.",
+    "Kept invalid intermediate numeric input editable and refused to replace its previous conserved numeric value.",
+    "Required a fresh preview when the confirmed state displays normalized fields different from the original calculation input.",
+    "The normalization regression reads the actual parent volume after prior geometry edits instead of assuming the fixture initial volume.",
+    "Repeated the draft group after guarding navigation during a conservation failure and preserving stale-draft state on page-history return."
+  ],
+  "publication": {
+    "status": "not_published",
+    "nativeRestoreConfirmed": false
+  }
+}

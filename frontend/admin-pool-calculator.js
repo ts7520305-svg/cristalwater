@@ -12,7 +12,7 @@
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fmt=(value,suffix='')=>value===null||value===undefined?'-':String(value)+suffix;
   const row=(label,value)=>'<div class="resultRow"><span>'+esc(label)+'</span><span class="value">'+esc(value??'-')+'</span></div>';
-  let session=null,invalid=false,suspended=false,sequence=0,request=null,poolsReady=false,loadedId=null,baseline=null,resultInput=null,loading=false,saving=false,uncertain=false,review=null,store=null,durable=null,storageBlocked=false;
+  let session=null,invalid=false,suspended=false,sequence=0,request=null,poolsReady=false,loadedId=null,baseline=null,resultInput=null,loading=false,saving=false,uncertain=false,review=null,store=null,durable=null,storageBlocked=false,drafts=null,draftBlocked=false,draftStale=false;
   try{
     const token=keys.slice(0,3).map(k=>localStorage.getItem(k)).find(Boolean);
     const claims=JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))),id=Number(claims.userId||claims.id);
@@ -21,19 +21,22 @@
     session={token,identity:fingerprint(),expires:claims.exp*1000,owner:'ADMIN:'+id};
     store=window.CWPoolCalculatorStore.open(session.owner);
   }catch(_){invalid=true;}
+  if(!invalid)try{drafts=window.CWPoolCalculatorDrafts.open(session.owner,sessionStorage);}catch(_){}
   function abort(){sequence++;if(request){request.controller.abort();clearTimeout(request.timer);request=null;}}
   function clearResults(){resultInput=null;for(const id of blocks)$(id).replaceChildren();for(const id of ['kVolume','kArea','kSalt','kHeat'])$(id).textContent='-';}
   function controls(){
-    const blocked=invalid||suspended||loading||saving||uncertain||storageBlocked||!!durable?.pending||!loadedId;
-    for(const id of fields)$(id).disabled=blocked;
-    document.querySelectorAll('[data-calculator-action]').forEach(button=>{const action=button.dataset.calculatorAction;button.disabled=action==='reload'?invalid||suspended||saving||storageBlocked||!!durable?.pending:blocked;});
-    $('poolId').disabled=invalid||suspended||saving||uncertain||storageBlocked||!!durable?.pending||!poolsReady;
+    const blocked=invalid||suspended||loading||saving||uncertain||storageBlocked||draftBlocked||draftStale||!!durable?.pending||!loadedId;
+    for(const id of fields)$(id).disabled=invalid||suspended||loading||saving||uncertain||storageBlocked||draftStale||!!durable?.pending||!loadedId;
+    document.querySelectorAll('[data-calculator-action]').forEach(button=>{const action=button.dataset.calculatorAction;button.disabled=action==='reload'?invalid||suspended||saving||storageBlocked||draftBlocked||!!durable?.pending:blocked;});
+    $('poolId').disabled=invalid||suspended||saving||uncertain||storageBlocked||draftBlocked||!!durable?.pending||!poolsReady;
     $('recovery').hidden=invalid||storageBlocked||!durable?.pending;
     $('recoverRequest').disabled=invalid||suspended||saving||storageBlocked;
+    $('retryDraft').hidden=invalid||!draftBlocked||!!durable?.pending;
+    $('retryDraft').disabled=invalid||suspended||loading||saving||!loadedId;
     root.setAttribute('aria-busy',String(loading||saving));
   }
-  function status(state,message){root.dataset.state=state;$('status').textContent=message;$('status').setAttribute('role',['error','session','uncertain','storage','conflict'].includes(state)?'alert':'status');controls();if(['uncertain','storage','conflict'].includes(state)&&!root.hidden)$('status').scrollIntoView({block:'center'});}
-  function blank(){for(const id of fields)$(id).value='';$('poolBadge').textContent='Piscina';clearResults();}
+  function status(state,message){root.dataset.state=state;$('status').textContent=message;$('status').setAttribute('role',['error','session','uncertain','storage','conflict','draft-error'].includes(state)?'alert':'status');controls();if(['uncertain','storage','conflict','draft-error'].includes(state)&&!root.hidden)$('status').scrollIntoView({block:'center'});}
+  function blank(){$('draftStatus').textContent='';for(const id of fields)$(id).value='';$('poolBadge').textContent='Piscina';clearResults();}
   function active(){
     try{if(!invalid&&session.identity===fingerprint()&&session.expires>Date.now())return true;}catch(_){}
     invalid=true;abort();loadedId=null;baseline=null;loading=false;saving=false;blank();$('poolId').replaceChildren();poolsReady=false;
@@ -55,7 +58,13 @@
     baseline=payload();
   }
   const dirty=()=>!!baseline&&!same(payload(),baseline);
-  function discard(){return !(dirty()||uncertain)||window.confirm(uncertain?'Este pedido não foi aplicado. Descartar estes campos e carregar a versão atual?':'Descartar as alterações ainda não guardadas nesta piscina?');}
+  function discard(mode){return !(dirty()||uncertain||draftStale)||window.confirm(mode==='switch'?'Conservar o rascunho desta piscina e abrir a piscina selecionada?':uncertain||draftStale?'A ficha mudou ou este pedido não foi aplicado. Descartar estes campos e carregar a versão atual?':'Descartar as alterações ainda não guardadas nesta piscina?');}
+  function draftFailure(){draftBlocked=true;clearResults();$('draftStatus').textContent='Não foi possível conservar ou validar o rascunho. Mantém este separador aberto: os campos visíveis ainda não foram guardados. O rascunho anterior foi conservado.';$('draftStatus').setAttribute('role','alert');controls();}
+  function conserveDraft(){
+    if(!review||!loadedId||invalid||suspended||durable?.pending)return false;
+    try{if(fields.some(id=>$(id).validity.badInput))throw Error('Incomplete numeric field');drafts.save(review,payload());draftBlocked=false;$('draftStatus').textContent='Rascunho conservado neste separador e nesta conta. A ficha só muda ao guardar.';$('draftStatus').setAttribute('role','status');controls();return true;}catch(_){draftFailure();return false;}
+  }
+  function retryCalculatorDraft(){if(active()&&!suspended&&!saving&&!loading&&!durable?.pending&&loadedId&&conserveDraft())status(draftStale?'conflict':'edited',draftStale?'A ficha mudou. O rascunho foi conservado; recarrega para rever a versão atual.':'Rascunho conservado. Calcula novamente para consultar os campos atuais.');}
   function validCalculation(c){
     if(!c||typeof c!=='object'||!Number.isFinite(Date.parse(c.generatedAt))||!Array.isArray(c.recommendations)||!c.recommendations.every(x=>typeof x==='string'))return false;
     for(const key of ['geometry','filtration','salt','chlorination','heatPump']){
@@ -95,15 +104,16 @@
       const selected=selectionFromUrl();
       if(selected===false||selected!==null&&!data.pools.some(p=>String(p.id)===selected)){$('poolId').value='';status('error','A piscina indicada não está disponível. Escolhe uma piscina da lista.');return;}
       if(selected!==null)$('poolId').value=selected;
-      await loadPool(true);
+      await loadPool(true,'restore');
     }catch(_){if(active()&&!suspended&&generation===sequence){loading=false;poolsReady=false;$('poolId').replaceChildren();status('error','Não foi possível carregar as piscinas. Tenta recarregar.');}}
   }
-  async function loadPool(confirmed=false){
-    if(!active()||suspended||saving||storageBlocked||durable?.pending)return;
+  async function loadPool(confirmed=false,mode='reload'){
+    if(!active()||suspended||saving||storageBlocked||draftBlocked||durable?.pending)return;
     if(!poolsReady){await loadPools();return;}
     const target=$('poolId').value;
-    if(!confirmed&&!discard()){$('poolId').value=loadedId||'';if(loadedId)writeUrl(loadedId);return;}
-    abort();const generation=sequence;uncertain=false;loadedId=null;baseline=null;loading=true;blank();
+    if(!confirmed&&!discard(mode)){$('poolId').value=loadedId||'';if(loadedId)writeUrl(loadedId);return;}
+    if(mode==='switch'&&loadedId&&dirty()&&!conserveDraft()){$('poolId').value=loadedId;writeUrl(loadedId);return;}
+    abort();const generation=sequence;uncertain=false;draftStale=false;loadedId=null;baseline=null;loading=true;blank();
     if(!validId(target)){loading=false;status('error','Escolhe uma piscina válida.');return;}
     writeUrl(target);status('loading','A carregar a ficha da piscina selecionada…');
     try{
@@ -112,13 +122,15 @@
       if(!R.state(data)||data.poolId!==Number(target))throw Error('Pool mismatch');
       if(durable?.confirmed&&!durable.confirmed.result.applied)durable=await store.clear();
       if(!active()||suspended||generation!==sequence)return;
-      fill(data);loadedId=target;loading=false;clearResults();resultInput=payload();
-      status('ready','Ficha carregada. Calcula para consultar os resultados dos campos visíveis. Os campos em falta usam os valores iniciais indicados; as medições químicas guardadas pertencem ao último cálculo desta piscina.');
+      let saved;try{saved=drafts.read(Number(target));if(mode==='reload'){drafts.discard(Number(target));saved=null;}else if(durable?.confirmed?.result.applied&&window.CWPoolCalculatorDrafts.sameRequest(saved,durable.confirmed.record)){drafts.finish(durable.confirmed.record);saved=null;}}catch(_){fill(data);loadedId=target;loading=false;draftFailure();status('draft-error','O rascunho guardado não pôde ser confirmado. Conservámos os bytes originais; nenhum novo pedido será enviado.');return;}
+      fill(saved?saved.review:data);loadedId=target;loading=false;clearResults();
+      if(saved){setFields(saved.fields);draftStale=saved.review.version!==data.version;$('draftStatus').textContent='Rascunho recuperado neste separador, para esta piscina e esta conta.';status(draftStale?'conflict':'edited',draftStale?'A ficha mudou desde a revisão deste rascunho. Os campos foram conservados; recarrega para descartar e consultar a versão atual.':'Rascunho recuperado. Calcula novamente antes de consultar os resultados.');return;}
+      resultInput=payload();status('ready','Ficha carregada. Calcula para consultar os resultados dos campos visíveis. Os campos em falta usam os valores iniciais indicados; as medições químicas guardadas pertencem ao último cálculo desta piscina.');
     }catch(_){if(active()&&!suspended&&generation===sequence){loading=false;loadedId=null;baseline=null;blank();status('error','Não foi possível confirmar a ficha desta piscina. Tenta recarregar.');}}
   }
   function changed(){
-    if(!active()||suspended||loading||saving||uncertain||storageBlocked||durable?.pending||!loadedId)return;
-    abort();clearResults();status('edited','Campos alterados. Calcula novamente para obter resultados correspondentes a estes valores.');
+    if(!active()||suspended||loading||saving||uncertain||storageBlocked||draftStale||durable?.pending||!loadedId)return;
+    abort();clearResults();conserveDraft();status('edited','Campos alterados. Calcula novamente para obter resultados correspondentes a estes valores.');
   }
   function validInputs(){return fields.every(id=>$(id).validity.valid&&($(id).type!=='number'||$(id).value===''||Number.isFinite(Number($(id).value))));}
   function storageFailure(){storageBlocked=true;saving=false;clearResults();status('storage','Não foi possível conservar ou validar o pedido neste navegador, ou outra janela o alterou. Os campos continuam visíveis. Reabre a página para verificar o pedido guardado antes de continuar.');}
@@ -139,16 +151,17 @@
       durable=await store.confirm(result);
       if(!active()||suspended||generation!==sequence)return;
       saving=false;uncertain=!result.applied;
-      if(result.applied){fill(result.state);renderCalculation(result.calculation);resultInput=payload();status('saved','Gravação confirmada para este pedido. Recarrega para consultar eventuais alterações posteriores.');}
+      if(result.applied){fill(result.state);draftStale=false;try{drafts.finish(record);$('draftStatus').textContent='O pedido foi confirmado; o rascunho correspondente foi concluído.';}catch(_){draftFailure();}const unchanged=R.equal(payload(),record.command.fields);if(unchanged){renderCalculation(result.calculation);resultInput=payload();}else clearResults();status('saved',unchanged?'Gravação confirmada para este pedido. Recarrega para consultar eventuais alterações posteriores.':'Gravação confirmada. Os campos apresentados seguem os valores guardados; calcula novamente para consultar os resultados destes campos.');}
       else {restore(record);status('conflict',result.message+' Os teus campos foram conservados.');}
     }catch(_){if(active()&&!suspended&&generation===sequence){saving=false;uncertain=true;clearResults();status('uncertain','A resposta não foi confirmada. O pedido e os campos continuam guardados neste navegador. Usa «Confirmar pedido guardado» para verificar o mesmo pedido.');}}
   }
   async function calculate(save){
-    if(!active()||suspended||loading||saving||uncertain||storageBlocked||durable?.pending||!loadedId||loadedId!==$('poolId').value)return;
+    if(!active()||suspended||loading||saving||uncertain||storageBlocked||draftBlocked||draftStale||durable?.pending||!loadedId||loadedId!==$('poolId').value)return;
     if(!validInputs()||!R.fields(payload())){clearResults();status('error','Revê os campos numéricos assinalados antes de calcular.');fields.find(id=>!$(id).validity.valid)&&$(fields.find(id=>!$(id).validity.valid)).reportValidity();return;}
     abort();const generation=sequence,target=loadedId,input=payload();clearResults();saving=save;
     status(save?'saving':'previewing',save?'A conservar o pedido antes de guardar…':'A calcular os valores atuais…');
     if(save){
+      if(!conserveDraft()){saving=false;controls();return;}
       try{durable=await store.prepare(review,input);}catch(_){if(active()&&!suspended&&generation===sequence)storageFailure();return;}
       saving=false;if(!active()||suspended||generation!==sequence)return;
       await recoverCalculation();return;
@@ -194,17 +207,17 @@
     renderBlock('chemistry',rows.length?rows:['<p class="note">Preenche as medições e calcula para consultar este resultado. Um campo vazio não é uma medição de zero.</p>']);
   }
   function clearInputs(){
-    if(!active()||suspended||loading||saving||uncertain||storageBlocked||durable?.pending||!loadedId||!window.confirm('Limpar os campos desta piscina e repor os valores iniciais? A ficha guardada só muda se guardares.'))return;
-    abort();setFields();clearResults();status('edited','Campos repostos nos valores iniciais. A ficha guardada não foi alterada.');
+    if(!active()||suspended||loading||saving||uncertain||storageBlocked||draftBlocked||draftStale||durable?.pending||!loadedId||!window.confirm('Limpar os campos desta piscina e repor os valores iniciais? A ficha guardada só muda se guardares.'))return;
+    abort();setFields();clearResults();conserveDraft();status('edited','Campos repostos nos valores iniciais. A ficha guardada não foi alterada.');
   }
-  Object.assign(window,{loadPool:()=>loadPool(),onPoolChange:()=>loadPool(),previewCalculation:()=>calculate(false),saveAndCalculate:()=>calculate(true),clearInputs,recoverCalculation});
+  Object.assign(window,{loadPool:()=>loadPool(),onPoolChange:()=>loadPool(false,'switch'),previewCalculation:()=>calculate(false),saveAndCalculate:()=>calculate(true),clearInputs,recoverCalculation,retryCalculatorDraft});
   for(const id of fields)$(id).addEventListener('input',changed);
-  for(const id of [...blocks,'status','poolBadge','kVolume','kArea','kSalt','kHeat'])$(id).dataset.cwStateManaged='manual';
+  for(const id of [...blocks,'status','draftStatus','poolBadge','kVolume','kArea','kSalt','kHeat'])$(id).dataset.cwStateManaged='manual';
   window.addEventListener('storage',event=>{if(active()&&(event.key===store.key||event.key===null)){try{if(!store.unchanged())storageFailure();}catch(_){storageFailure();}}});window.addEventListener('focus',active);document.addEventListener('visibilitychange',()=>{if(!document.hidden)active();});
   window.addEventListener('beforeunload',event=>{if(!invalid&&(dirty()||saving||uncertain)){event.preventDefault();event.returnValue='';}});
   window.addEventListener('pagehide',()=>{suspended=true;if(saving){saving=false;uncertain=true;}abort();loading=false;clearResults();root.hidden=true;controls();});
-  window.addEventListener('pageshow',event=>{if(event.persisted){suspended=false;root.hidden=false;if(!active())return;if(dirty()||uncertain){status(uncertain?'uncertain':'edited',uncertain?'Pedido conservado. Confirma o pedido guardado antes de continuar.':'Campos não guardados conservados. Recalcula antes de consultar resultados.');}else loadPool(true);}});
-  window.addEventListener('popstate',()=>{if(!active()||suspended)return;if(saving||durable?.pending||storageBlocked){if(loadedId)writeUrl(loadedId);return;}const selected=selectionFromUrl();if(!selected||![...$('poolId').options].some(o=>o.value===selected)){if(loadedId)writeUrl(loadedId);return;}$('poolId').value=selected;loadPool();});
+  window.addEventListener('pageshow',event=>{if(event.persisted){suspended=false;root.hidden=false;if(!active())return;controls();if(draftBlocked){draftFailure();return;}if(draftStale){status('conflict','A ficha mudou desde a revisão deste rascunho. Os campos foram conservados; recarrega para rever a versão atual.');return;}if(dirty()||uncertain){status(uncertain?'uncertain':'edited',uncertain?'Pedido conservado. Confirma o pedido guardado antes de continuar.':'Campos não guardados conservados. Recalcula antes de consultar resultados.');}else loadPool(true,'restore');}});
+  window.addEventListener('popstate',()=>{if(!active()||suspended)return;if(saving||durable?.pending||storageBlocked||draftBlocked){if(loadedId)writeUrl(loadedId);return;}const selected=selectionFromUrl();if(!selected||![...$('poolId').options].some(o=>o.value===selected)){if(loadedId)writeUrl(loadedId);return;}$('poolId').value=selected;loadPool(false,'switch');});
   setInterval(()=>{if(active()&&!suspended&&!loading&&!saving&&!uncertain&&resultInput&&!same(payload(),resultInput))changed();},300);
   controls();start();
 }());
