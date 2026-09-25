@@ -31,7 +31,7 @@ Cache **v172**, runner com **259 grupos distintos**. Inventário: 115 HTML, 99 p
 
 TASK359 confirmada em [256/256 grupos e restauro PostgreSQL nativo](evidence/20260925_task359_ci.json), 17 etapas e duração 36m51s. TASK360 confirmada em [257/257 grupos e restauro nativo](evidence/20260925_task360_ci.json), 17 etapas e duração 37m12s. Ambos restauraram 127 tabelas e 47 ficheiros com linhas e hashes iguais.
 
-TASK361 validada localmente nos termos acima e preparada para publicação na branch de trabalho. O CI nativo deste lote continua por confirmar.
+Publicada em `0c71fffacff52c495eaca4695e277e6a1723efb5`, árvore `5d9105f48d76f2445ba670496391df6873d00e9d`, idêntica à preparada e validada localmente nos termos acima. [CI 36145083182](https://github.com/ts7520305-svg/cristalwater/actions/runs/36145083182), job `108104107654`, em execução; os 259 grupos, as duas regressões, a atualização de esquema e o restauro PostgreSQL nativo deste lote continuam por confirmar.
 
 ## Limites e retoma
 
