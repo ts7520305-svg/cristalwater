@@ -149,6 +149,18 @@ router.post("/:clientId(\\d+)/visit-requests", auth("CLIENT"), async (req, res) 
 router.get("/:clientId(\\d+)/documents", clientPortalController.privateDocuments, auth("CLIENT"), clientPortalController.listDocuments);
 router.get("/:clientId(\\d+)/documents/:documentId/download", clientPortalController.privateDocuments, auth("CLIENT"), clientPortalController.downloadDocument);
 
+router.get('/:clientId(\\d+)/company-closures', clientPortalController.privateDocuments, auth('CLIENT'), async (req, res) => {
+  try {
+    const result = await require('../services/clientClosureService').list(req.user, req.params.clientId, req.query);
+    res.vary('Authorization');
+    res.set({ 'X-CW-Portal-Type': 'company-closure-list', 'X-CW-Client-Id': String(result.clientId) });
+    return res.json(result);
+  } catch (error) {
+    const known = [400, 403, 404].includes(error.statusCode);
+    return res.status(known ? error.statusCode : 503).json({ ok: false, error: known ? error.message : 'Não foi possível confirmar os avisos de encerramento. Tente novamente.' });
+  }
+});
+
 router.get("/:clientId(\\d+)/dashboard", auth("CLIENT"), async (req, res) => {
   const clientId = Number(req.params.clientId);
   if (!ensureClientOwnership(req, res, clientId)) return;

@@ -504,6 +504,24 @@
         </aside>
       </section>
 
+      <section class="cw-v2-card" id="clientClosuresPanel" data-cw-no-i18n data-cw-state-managed="manual" aria-labelledby="clientClosureTitle">
+        <style>
+          #clientClosuresPanel{min-width:0;overflow-wrap:anywhere}
+          #clientClosuresPanel .section-head{flex-wrap:wrap;gap:12px}
+          #clientClosuresPanel h2{font-size:clamp(20px,5vw,24px);line-height:1.25}
+          #clientClosuresPanel h3,#clientClosuresPanel h4{margin:12px 0 8px}
+          #clientClosuresPanel button{min-height:44px;max-width:100%;white-space:normal}
+          #clientClosureList{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px}
+          #clientClosureList article{min-width:0;overflow-wrap:anywhere;padding:16px;border:1px solid var(--cw-border,#cbd5e1);border-radius:14px}
+          .client-closure-message{white-space:pre-wrap}
+        </style>
+        <div class="section-head"><h2 id="clientClosureTitle" data-client-closure-text="0">Férias e encerramentos</h2><button class="cw-v2-btn" type="button" id="clientClosureRefresh" data-client-closure-text="2">Atualizar</button></div>
+        <p class="muted" data-client-closure-text="1">Avisos da Cristal Water para preparar as próximas visitas.</p>
+        <p id="clientClosureStatus" role="status" aria-live="polite"></p>
+        <div id="clientClosureList"></div>
+        <p id="clientClosureHelp" class="muted" data-client-closure-text="12" hidden></p>
+      </section>
+
       <section class="cw-v2-card" id="agenda">
         <div class="section-head"><h2 id="scheduleTitle">Próximas visitas</h2><span class="pill" id="scheduleLang">PT</span></div>
         <div class="schedule-grid" id="poolScheduleList"><div class="empty">A carregar agendamento...</div></div>
@@ -672,6 +690,7 @@
   <script src="/cw-report-download.js"></script>
   <script src="/cw-client-monthly-reports.js"></script>
   <script src="/cw-client-documents.js"></script>
+  <script src="/cw-client-closures.js"></script>
   <script src="/client-portal.js"></script>
   <script src="/client-quotes.js"></script>
   <script src="/ui/core/navigation-context.js"></script>

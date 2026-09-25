@@ -1,0 +1,125 @@
+{
+  "task": "TASK342",
+  "checkedAt": "2026-09-25T03:46:54.750655+00:00",
+  "baseCommit": "8ea6a8eeab2018bff8e688d47b39d05a545e224e",
+  "sourceSha256": {
+    "frontend/admin-company-closures.html": "de404ac948040e5f2f649d8c72c801e3757e30fa5805d061d5e1a60d5fb4b53c",
+    "frontend/client-portal.html": "3bc057b8fb8058ca8b508762cb37abfea592b030f4cbe96f87354d7708e99d7f",
+    "frontend/client-portal.js": "b837147b6e99de56cff5ee327ac89b15a709afbe6ca7e139262e539f3cfff390",
+    "frontend/cw-client-closures.js": "0c9b51ffe0aed81d66abd61d94e10261601a83297178ed573c84f069f6a12d8a",
+    "frontend/sw.js": "9eaf59818a594d0d49204b69dab5d4a68eb970fcbbfa51230e40df74f143ec09",
+    "scripts/test-field-client-closures.js": "42271babee09fdc98926e7b62ed4e48122ea78ba4c0ded8ebc33976d8eab4a26",
+    "scripts/test-field-client-closures-ui.js": "88c960fa033b45d0e687ee8ec5faff38ccde233aed1753c43f0fcac45cb4380f",
+    "scripts/test-field-suite.js": "d5019f918197a121df34841889788b33a7c70911409d4f6983143e8ac5c28442",
+    "src/routes/clientPortalRoutes.js": "9329f464fc099fc322b88e2595b100f2ab5561f25988e579c8ebe7e7168e57e4",
+    "src/services/clientClosureService.js": "34a1a0d841125ae28158d5afa8a95c619ac412b77810c6505b5d529fbd3eb2ac"
+  },
+  "unitTests": {
+    "passed": 606,
+    "files": 83
+  },
+  "technicianTests": 4,
+  "syntax": {
+    "backend": 629,
+    "frontend": 222,
+    "inline": 62
+  },
+  "integration": [
+    {
+      "script": "scripts/test-field-client-closures.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-client-closures-ui.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-company-closures.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-client-documents-ui.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-legacy-admin-access.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-language-reload.js",
+      "code": 0
+    }
+  ],
+  "passLines": [
+    "PASS isolated schema: 40 additive migrations",
+    "PASS client closures API: authenticated customer ownership and ADMIN preview, typed identity collisions refused, public field whitelist, future/current/hidden/cancelled/expired states, exact UTC boundaries, source preservation, explicit cap, no writes or external sends, sanitized failure",
+    "PASS client closures browser: real portal, 5 languages, 320/390/1440, literal original notices, future/current states, empty/partial/error, wrong response identity, offline, timeout, reload lifecycle, cancellation and periodic refresh, exact expiry, late language/client replies, account swap and expiry, preserved sources and no writes",
+    "PASS closures API: exact dates and inclusive final day, ADMIN-only, server actor, immutable metadata, receipts/reuse/recovery ownership, stale review, audit rollback, no duplicate notices, template dates, active clients only, explicit limits and unchanged visits/money",
+    "PASS closures browser: escaped historical text, partial/empty/error/filter states, 320/390/1440, cancelled/empty dialogs never write, lost-response recovery, stale conflicts, late filter replies, quota refusal, receipt identity, timeout, offline retention, account partition and unchanged visits/money",
+    "PASS client documents: authenticated list and real inert downloads, 14 documents, historical/MAX_SAFE_INTEGER IDs, empty files, search, pagination, malformed responses, timeout, offline, expiry and five responsive languages",
+    "PASS administrator preview: exact customer, late A-B-A list/JSON/download cancellation, empty history and cleared selection",
+    "PASS cross-tab session switch and actual 401; manifest, source files, visits, monthly reports and finances preserved",
+    "PASS legacy administration reads, mutations, aliases and AI require active ADMIN; refused requests are inert, administration and canonical field/client routes remain usable",
+    "PASS latest language survives reload during an earlier write and is synchronized to the same account",
+    "PASS lost acknowledgment keeps the preference pending; reload safely confirms it and clears the pending record",
+    "PASS mismatched acknowledgment stays pending; another account cannot receive it; returning to the owner resumes the choice",
+    "PASS restored connectivity synchronizes the pending preference without another page load"
+  ],
+  "logs": {
+    "/tmp/cw342-final-unit.log": "c58331323f1443c90679b6086f0a315cd6ed8520658a5db8674c617cd68ea7f4",
+    "/tmp/cw342-final-syntax.log": "80a77931fee84e7e5decef4867922dfd16126f546f3eb64fa462c0e918387a54",
+    "/tmp/cw342-tech.log": "fc58f31c497fb683fe6f3fc02f9855ffedbe104771e042d408bf3eceff9095aa",
+    "/tmp/cw342-final-integrated.log": "5ac49a1d14174da8b169ff72d9d6b3f6a555915edc9f989286aa4180a82fc2e6"
+  },
+  "runtime": {
+    "database": "PGlite 0.5.8 / pglite-socket 0.2.11, isolated",
+    "additiveMigrations": 40,
+    "chromium": "@sparticuz/chromium 153.0.0, normal multiple processes, web security retained",
+    "runnerSha256": "5bd8f95926470bd82fabef27148ed54a55532bdf80d8dbc557dd19b244486b2b",
+    "preloadSha256": "74ba6986b731dfe5120836cb841c25bed62d334014aa588379558293deb6ec7a"
+  },
+  "screenshots": {
+    "reports/field-visual/client-closures/closures-de-390.png": "1ee2bd9d81445e67205babd8c1e1ac4e52de6820887d555d5542fb2ed9ce489a",
+    "reports/field-visual/client-closures/closures-en-390.png": "7c406360456099196c772b51c0d7562d52e11a5f6467abd7981dca385523f348",
+    "reports/field-visual/client-closures/closures-es-390.png": "7530334d2e8441005af85fb65daff611e64c7626d5935713118285ea7335e564",
+    "reports/field-visual/client-closures/closures-fr-390.png": "edf97d560a5e9370eaea82983beb6201eb6e5ab9f9453fb18f816bf73edc2557",
+    "reports/field-visual/client-closures/closures-pt-1440.png": "ae3e1b9a11a1f3b3c168bbd7ae2aa3c5a1f4cd2f642ea5be22940e846db11067",
+    "reports/field-visual/client-closures/closures-pt-320.png": "388d94133dcdb8c44838a940f3b80f64a2fae305c5ccd7c2f04da2ce3b7bf26f",
+    "reports/field-visual/client-closures/closures-pt-390.png": "60f0aeac4b9357128bb24c3469c2acce3a9a493fcd8a60762713498d03e5197b"
+  },
+  "newSectionLanguages": [
+    "pt",
+    "en",
+    "fr",
+    "es",
+    "de"
+  ],
+  "widths": [
+    320,
+    390,
+    1440
+  ],
+  "fieldSuiteExpectedGroups": 240,
+  "cache": "v154",
+  "inventory": {
+    "htmlFiles": 115,
+    "rootPages": 108,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 78,
+    "catalogueGuardDifferences": 0
+  },
+  "limits": [
+    "Native CI and PostgreSQL restore of this commit remain pending.",
+    "Closure notices are published on ACTIVE plus showOnClientPortal; no automatic visit changes.",
+    "Public notices refresh every 60 seconds, on focus/visibility and manually; not instantaneous broadcast.",
+    "Team message content retains its original language; only the new section interface is translated.",
+    "The five-language review of this section does not certify every portal page."
+  ],
+  "testPreparation": [
+    "Rebuilt missing ephemeral browser/database runtime.",
+    "Final socket connection disables prepared statement caching; PGlite shutdown drains socket callbacks.",
+    "Isolated browser fixture IDs avoid historical chat file IDs; original messages were not deleted."
+  ]
+}

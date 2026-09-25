@@ -1,5 +1,13 @@
 # Cristal Water — matriz atual de conclusão
 
+## Estado de retoma — 25/09/2026, TASK342 validada localmente
+
+Encerramentos ativos em curso e futuros no portal cliente, publicação explícita, projeção pública limitada, titularidade de cliente e pré-visualização ADMIN. Datas/horas originais UTC, mensagens literais, estados vazio/parcial/erro, sessão/expiração, troca de cliente/idioma, respostas tardias, timeout/offline, regresso pelo histórico, atualização periódica e termo do intervalo protegidos. Interface da secção nos cinco idiomas e escolha de idioma por link corrigida, incluindo reload. 606 unitários/83 ficheiros, quatro técnicos, sintaxe 629/222/62, seis grupos integrados completos aprovados, incluindo limpeza dos dados próprios. 40 migrações existentes, cache v154, runner com 240 grupos. [Relatório](CLIENT_CLOSURE_PORTAL_20260925.md) e [evidência local](evidence/20260925_task342_local.json). Publicação e CI identificados no fecho seguinte; não antecipar aprovação nativa.
+
+TASK341 confirmada no CI `36063033475`: 238/238 grupos esperados distintos, 17 etapas aprovadas, restauro de 127 tabelas/47 ficheiros com linhas e hashes iguais. [Evidência](evidence/20260925_task341_ci.json).
+
+Inventário atualizado: 115 HTML, 78 páginas com referência literal em 261 scripts ativos, 37 na fila de pesquisa. Sem pausa/reagendamento automático; avisos atualizam na próxima consulta, com ciclo de 60 segundos enquanto a página está aberta. Mensagens da equipa conservam o idioma original. Retomar CI/restauro do novo código e os critérios restantes de páginas/histórico/produção; aplicação não declarada completa. Sem merge/deploy/contactos reais.
+
 ## Estado de retoma — 24/09/2026, TASK341 publicada
 
 Encerramentos com versão revista, pedido único, comprovativo recuperável, concorrência protegida, origem autenticada e auditoria atómica. Cancelar o diálogo não altera dados; metadados antigos são conservados; avisos não se duplicam. Lista/impacto com limites explícitos, prioridade sem origem por rever, datas UTC inclusivas, sessão, offline, quota, timeout e respostas tardias protegidos. 606 unitários/83 ficheiros, quatro técnicos, sintaxe 628/221/62 e três grupos integrados aprovados. 40 migrações existentes, cache v153, runner com 238 grupos. [Relatório](COMPANY_CLOSURE_RELIABILITY_20260924.md) e [evidência local](evidence/20260924_task341_local.json). Publicada em `09f23f2573b87e83413b6a4c2ecf7aa7307b31dd`, árvore `f114aaf5deff6224b51ceda02b346e3b1cc7018c`, idêntica à validada localmente. [CI 36063033475](https://github.com/ts7520305-svg/cristalwater/actions/runs/36063033475) em execução; os 238 grupos e o restauro nativo continuam por confirmar.

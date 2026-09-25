@@ -1,7 +1,7 @@
 const API = "/api";
 const socket = window.io ? io("/") : { emit() {}, on() {} };
 const queryClientId = new URLSearchParams(location.search).get("clientId");
-const queryLanguage = new URLSearchParams(location.search).get("lang") || new URLSearchParams(location.search).get("language");
+let queryLanguage = new URLSearchParams(location.search).get("lang") || new URLSearchParams(location.search).get("language");
 let clientId = Number(queryClientId || localStorage.getItem("cw_client_id") || localStorage.getItem("clientId") || 0);
 const el = (id) => document.getElementById(id);
 let adminOnline = false;
@@ -35,6 +35,7 @@ function selectionIsCurrent(id, revision) {
 }
 const monthlyReports = window.CWClientMonthlyReports?.create({ context: () => ({ clientId, revision: clientSelectionRevision }), language: () => portalLanguage });
 const clientDocuments = window.CWClientDocuments?.create({ context: () => ({ clientId, revision: clientSelectionRevision }), language: () => portalLanguage });
+const clientClosures = window.CWClientClosures?.create({ context: () => ({ clientId, revision: clientSelectionRevision }), language: () => portalLanguage });
 function updatePortalActionAvailability() {
   ['sendBtn', 'visitRequestBtn', 'paymentNoticeBtn', 'photoBtn'].forEach(id => {
     const button = el(id);
@@ -915,6 +916,7 @@ function applyLanguage(language) {
   portalLanguage = normalizeLanguage(language);
   monthlyReports?.sync();
   clientDocuments?.sync();
+  clientClosures?.sync();
   localStorage.setItem("cw_client_lang", portalLanguage);
   localStorage.setItem("cw_language", portalLanguage);
   document.documentElement.lang = portalLanguage;
@@ -1775,6 +1777,7 @@ async function chooseAdminClient(nextClientId, updateUrl = true) {
   clientId = Number.isInteger(id) && id > 0 ? id : 0;
   monthlyReports?.sync();
   clientDocuments?.sync();
+  clientClosures?.sync();
   const selectionRevision = clientSelectionRevision;
   loadedClientId = 0;
   lastPortalSnapshot = {};
@@ -1991,7 +1994,12 @@ function updatePresence(lastSeen) {
 
 document.addEventListener("DOMContentLoaded", async () => {
   applyLanguage(portalLanguage);
-  el('cwLanguageSelect')?.addEventListener('change',async event=>{applyLanguage(event.target.value);await loadPortal();await loadMessages();});
+  el('cwLanguageSelect')?.addEventListener('change',async event=>{
+    queryLanguage = normalizeLanguage(event.target.value);
+    const url = new URL(location.href); url.searchParams.set('lang', queryLanguage); url.searchParams.delete('language');
+    history.replaceState({}, '', url);
+    applyLanguage(queryLanguage); await loadPortal(); await loadMessages();
+  });
   await setupAdminClientSwitcher();
   window.setInterval(() => syncLanguageFromShell().catch(() => {}), 900);
   if (clientId) {
