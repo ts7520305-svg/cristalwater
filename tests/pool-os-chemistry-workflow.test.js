@@ -14,6 +14,8 @@ describe("Pool OS chemistry workflow", () => {
     mockPoolUpdate.mockReset();
 
     global.__CRISTAL_WATER_PRISMA__ = {
+      $transaction: async work => work(global.__CRISTAL_WATER_PRISMA__),
+      $queryRaw: vi.fn().mockResolvedValue([]),
       pool: {
         findUnique: mockPoolFindUnique,
         update: mockPoolUpdate,

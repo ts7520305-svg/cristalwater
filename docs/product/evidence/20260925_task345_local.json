@@ -123,7 +123,6 @@
     "pagesWithoutLiteralTestReference": 35
   },
   "limits": [
-    "Native CI and PostgreSQL restore of this commit remain pending.",
     "Existing server formulas and persistence APIs are unchanged; atomic versioned writes and a durable calculator receipt remain open.",
     "Reload after an uncertain write reads the current state; it is not recovery of an immutable receipt.",
     "Visual review is PT-PT, not certification of five languages.",
@@ -145,8 +144,9 @@
     "ciRun": 36099280297,
     "ciJob": 107958111534,
     "ciUrl": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36099280297",
-    "status": "in_progress",
-    "nativeRestoreConfirmed": false,
-    "checkedAt": "2026-09-25T05:37:20.809Z"
+    "status": "success",
+    "nativeRestoreConfirmed": true,
+    "checkedAt": "2026-09-25T06:10:26.374Z",
+    "nativeEvidence": "docs/product/evidence/20260925_task345_ci.json"
   }
 }

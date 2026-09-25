@@ -1,9 +1,8 @@
 (function(){
   'use strict';
-  const fields=['shape','shapeFactor','lengthM','widthM','diameterM','depthMinM','depthMaxM','averageDepthM','surfaceM2','volumeM3','pumpFlowM3h','pumpPowerHp','bathersAverage','poolLoad','saltCurrentPpm','targetSalinityPpm','chlorinatorGph','chlorineCurrentPpm','targetChlorinePpm','alkalinityCurrentPpm','targetAlkalinityPpm','phCurrent','targetPh','orpCurrentMv','targetOrpMv','heatPumpPhase','heatPumpThermalKw','heatPumpElectricalKw','cop','currentWaterTempC','targetWaterTempC','covered','ambientLossFactor','notes'];
+  const R=window.CWPoolCalculatorRules,fields=R.fieldKeys;
   const $=id=>document.getElementById(id),root=$('poolCalculator'),keys=['cristalwater_jwt','token','adminToken','cristalwater_user','user'];
   const defaults=Object.fromEntries(fields.map(id=>[id,$(id).value]));
-  const chemistryFields=['alkalinityCurrentPpm','targetAlkalinityPpm','phCurrent','targetPh','orpCurrentMv','targetOrpMv'];
   const blocks=['geometry','filtration','salt','chlorination','heatPump','chemistry','recommendations'];
   const positive=id=>Number.isInteger(id)&&id>0&&id<=2147483647;
   const validId=value=>/^[1-9]\d*$/.test(String(value))&&positive(Number(value));
@@ -13,24 +12,27 @@
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fmt=(value,suffix='')=>value===null||value===undefined?'-':String(value)+suffix;
   const row=(label,value)=>'<div class="resultRow"><span>'+esc(label)+'</span><span class="value">'+esc(value??'-')+'</span></div>';
-  let session=null,invalid=false,suspended=false,sequence=0,request=null,poolsReady=false,loadedId=null,baseline=null,resultInput=null,loading=false,saving=false,uncertain=false;
+  let session=null,invalid=false,suspended=false,sequence=0,request=null,poolsReady=false,loadedId=null,baseline=null,resultInput=null,loading=false,saving=false,uncertain=false,review=null,store=null,durable=null,storageBlocked=false;
   try{
     const token=keys.slice(0,3).map(k=>localStorage.getItem(k)).find(Boolean);
     const claims=JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))),id=Number(claims.userId||claims.id);
     const users=keys.slice(3).map(k=>localStorage.getItem(k)).filter(Boolean).map(JSON.parse);
     if(claims.role!=='ADMIN'||!positive(id)||!Number.isFinite(claims.exp)||claims.exp*1000<=Date.now()||!users.length||users.some(u=>u.role!=='ADMIN'||Number(u.userId||u.id)!==id)||keys.slice(0,3).some(k=>localStorage.getItem(k)&&localStorage.getItem(k)!==token))throw Error();
-    session={token,identity:fingerprint(),expires:claims.exp*1000};
+    session={token,identity:fingerprint(),expires:claims.exp*1000,owner:'ADMIN:'+id};
+    store=window.CWPoolCalculatorStore.open(session.owner);
   }catch(_){invalid=true;}
   function abort(){sequence++;if(request){request.controller.abort();clearTimeout(request.timer);request=null;}}
   function clearResults(){resultInput=null;for(const id of blocks)$(id).replaceChildren();for(const id of ['kVolume','kArea','kSalt','kHeat'])$(id).textContent='-';}
   function controls(){
-    const blocked=invalid||suspended||loading||saving||uncertain||!loadedId;
+    const blocked=invalid||suspended||loading||saving||uncertain||storageBlocked||!!durable?.pending||!loadedId;
     for(const id of fields)$(id).disabled=blocked;
-    document.querySelectorAll('[data-calculator-action]').forEach(button=>{const action=button.dataset.calculatorAction;button.disabled=action==='reload'?invalid||suspended||saving:blocked;});
-    $('poolId').disabled=invalid||suspended||saving||uncertain||!poolsReady;
+    document.querySelectorAll('[data-calculator-action]').forEach(button=>{const action=button.dataset.calculatorAction;button.disabled=action==='reload'?invalid||suspended||saving||storageBlocked||!!durable?.pending:blocked;});
+    $('poolId').disabled=invalid||suspended||saving||uncertain||storageBlocked||!!durable?.pending||!poolsReady;
+    $('recovery').hidden=invalid||storageBlocked||!durable?.pending;
+    $('recoverRequest').disabled=invalid||suspended||saving||storageBlocked;
     root.setAttribute('aria-busy',String(loading||saving));
   }
-  function status(state,message){root.dataset.state=state;$('status').textContent=message;$('status').setAttribute('role',['error','session','uncertain'].includes(state)?'alert':'status');controls();}
+  function status(state,message){root.dataset.state=state;$('status').textContent=message;$('status').setAttribute('role',['error','session','uncertain','storage','conflict'].includes(state)?'alert':'status');controls();if(['uncertain','storage','conflict'].includes(state)&&!root.hidden)$('status').scrollIntoView({block:'center'});}
   function blank(){for(const id of fields)$(id).value='';$('poolBadge').textContent='Piscina';clearResults();}
   function active(){
     try{if(!invalid&&session.identity===fingerprint()&&session.expires>Date.now())return true;}catch(_){}
@@ -48,17 +50,12 @@
     }
   }
   function fill(data){
-    const profile=data.profile||{},values={...profile},stored=profile.lastResultJson?.chemistry;
-    // Chemistry readings belong to this pool's saved result, not to another open form.
-    if(stored&&typeof stored==='object')for(const id of chemistryFields)if(stored[id]===null||typeof stored[id]==='number'&&Number.isFinite(stored[id]))values[id]=stored[id];
-    if(profile.volumeM3===null||profile.volumeM3===undefined)values.volumeM3=data.pool.volumeM3;
-    if(!profile.shape)values.shape=data.pool.type||defaults.shape;
-    setFields(values);
+    setFields(data.fields);review=data;
     $('poolBadge').textContent=(data.pool.client?.name||'Cliente')+' · '+(data.pool.name||'Piscina #'+data.pool.id);
     baseline=payload();
   }
   const dirty=()=>!!baseline&&!same(payload(),baseline);
-  function discard(){return !(dirty()||uncertain)||window.confirm(uncertain?'A gravação não foi confirmada. Recarregar a ficha e descartar estes campos para verificar o estado guardado?':'Descartar as alterações ainda não guardadas nesta piscina?');}
+  function discard(){return !(dirty()||uncertain)||window.confirm(uncertain?'Este pedido não foi aplicado. Descartar estes campos e carregar a versão atual?':'Descartar as alterações ainda não guardadas nesta piscina?');}
   function validCalculation(c){
     if(!c||typeof c!=='object'||!Number.isFinite(Date.parse(c.generatedAt))||!Array.isArray(c.recommendations)||!c.recommendations.every(x=>typeof x==='string'))return false;
     for(const key of ['geometry','filtration','salt','chlorination','heatPump']){
@@ -68,13 +65,14 @@
     if(!['volumeM3','surfaceM2','volumeLitres'].every(key=>typeof c.geometry[key]==='number'&&Number.isFinite(c.geometry[key])))return false;
     return c.chemistry===undefined||c.chemistry&&typeof c.chemistry==='object'&&!Array.isArray(c.chemistry)&&Object.values(c.chemistry).every(x=>x===null||typeof x==='number'&&Number.isFinite(x));
   }
-  async function read(url,body){
+  async function read(url,body,typed=false){
     const generation=sequence,controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);request={controller,timer};
     try{
       const response=await fetch(url,{method:body===undefined?'GET':'POST',headers:{Authorization:'Bearer '+session.token,...(body===undefined?{}:{'Content-Type':'application/json'})},...(body===undefined?{}:{body:JSON.stringify(body)}),signal:controller.signal,cache:'no-store',redirect:'error'});
       if(!active()||suspended||generation!==sequence)throw Error('Obsolete');
       if(response.status===401||response.status===403){invalid=true;active();throw Error('Session');}
       if(response.status!==200||!(response.headers.get('content-type')||'').startsWith('application/json'))throw Error('Unconfirmed response');
+      if(typed&&(response.headers.get('X-CW-Calculator')!=='pool-calculator-v2'||response.headers.get('X-CW-Owner')!==session.owner))throw Error('Response owner mismatch');
       const data=await response.json();
       if(!active()||suspended||generation!==sequence||data?.ok!==true)throw Error('Unconfirmed body');
       return data;
@@ -101,7 +99,7 @@
     }catch(_){if(active()&&!suspended&&generation===sequence){loading=false;poolsReady=false;$('poolId').replaceChildren();status('error','Não foi possível carregar as piscinas. Tenta recarregar.');}}
   }
   async function loadPool(confirmed=false){
-    if(!active()||suspended||saving)return;
+    if(!active()||suspended||saving||storageBlocked||durable?.pending)return;
     if(!poolsReady){await loadPools();return;}
     const target=$('poolId').value;
     if(!confirmed&&!discard()){$('poolId').value=loadedId||'';if(loadedId)writeUrl(loadedId);return;}
@@ -109,50 +107,66 @@
     if(!validId(target)){loading=false;status('error','Escolhe uma piscina válida.');return;}
     writeUrl(target);status('loading','A carregar a ficha da piscina selecionada…');
     try{
-      const data=await read('/api/pool-calculations/'+target);
+      const data=await read('/api/pool-calculations/'+target+'/edit-state',undefined,true);
       if(generation!==sequence||$('poolId').value!==target)return;
-      if(data.pool?.id!==Number(target)||data.profile!==null&&(!data.profile||data.profile.poolId!==Number(target))||!validCalculation(data.calculation))throw Error('Pool mismatch');
+      if(!R.state(data)||data.poolId!==Number(target))throw Error('Pool mismatch');
+      if(durable?.confirmed&&!durable.confirmed.result.applied)durable=await store.clear();
+      if(!active()||suspended||generation!==sequence)return;
       fill(data);loadedId=target;loading=false;clearResults();resultInput=payload();
       status('ready','Ficha carregada. Calcula para consultar os resultados dos campos visíveis. Os campos em falta usam os valores iniciais indicados; as medições químicas guardadas pertencem ao último cálculo desta piscina.');
     }catch(_){if(active()&&!suspended&&generation===sequence){loading=false;loadedId=null;baseline=null;blank();status('error','Não foi possível confirmar a ficha desta piscina. Tenta recarregar.');}}
   }
   function changed(){
-    if(!active()||suspended||loading||saving||uncertain||!loadedId)return;
+    if(!active()||suspended||loading||saving||uncertain||storageBlocked||durable?.pending||!loadedId)return;
     abort();clearResults();status('edited','Campos alterados. Calcula novamente para obter resultados correspondentes a estes valores.');
   }
   function validInputs(){return fields.every(id=>$(id).validity.valid&&($(id).type!=='number'||$(id).value===''||Number.isFinite(Number($(id).value))));}
-  function canonical(value){if(Array.isArray(value))return value.map(canonical);if(value&&typeof value==='object')return Object.fromEntries(Object.keys(value).sort().map(key=>[key,canonical(value[key])]));return value;}
-  function savedMatches(data,input){
-    const profile=data.profile,numericDefaults={targetSalinityPpm:3500,targetChlorinePpm:2,cop:5,targetWaterTempC:27};
-    if(!profile||!profile.lastResultJson||!same(canonical(profile.lastResultJson),canonical(data.calculation)))return false;
-    for(const id of fields.filter(id=>!chemistryFields.includes(id))){
-      let expected=input[id];
-      if($(id).type==='number'){expected=expected===''?null:Number(expected);if(Object.hasOwn(numericDefaults,id))expected=expected||numericDefaults[id];}
-      else if(id==='covered')expected=expected==='true';
-      else if(id==='shape')expected=expected||'RECTANGULAR';
-      else if(id==='poolLoad')expected=expected||'NORMAL';
-      else expected=expected||null;
-      if(profile[id]!==expected)return false;
-    }
-    const chemical=data.calculation.chemistry;
-    if(!chemical)return false;
-    for(const id of chemistryFields){let expected=input[id]===''?null:Number(input[id]);const target={targetPh:7.4,targetAlkalinityPpm:100,targetOrpMv:720}[id];if(target!==undefined)expected=expected||target;if(chemical[id]!==expected)return false;}
-    return true;
+  function storageFailure(){storageBlocked=true;saving=false;clearResults();status('storage','Não foi possível conservar ou validar o pedido neste navegador, ou outra janela o alterou. Os campos continuam visíveis. Reabre a página para verificar o pedido guardado antes de continuar.');}
+  function restore(record){
+    loadedId=String(record.poolId);const option=document.createElement('option');option.value=loadedId;option.textContent=(record.review.pool.client?.name||'Cliente')+' · '+record.review.pool.name;
+    $('poolId').replaceChildren(option);poolsReady=true;fill(record.review);setFields(record.command.fields);writeUrl(loadedId);clearResults();
+  }
+  async function recoverCalculation(){
+    if(!active()||suspended||saving||storageBlocked||!durable?.pending)return;
+    try{if(!store.unchanged()){storageFailure();return;}}catch(_){storageFailure();return;}
+    abort();const generation=sequence,record=durable.pending;saving=true;uncertain=true;clearResults();status('saving','A confirmar o pedido guardado…');
+    try{
+      const recovered=await read('/api/pool-calculations/requests/'+record.command.requestId,undefined,true);
+      if(typeof recovered.found!=='boolean')throw Error('Invalid recovery');
+      if(!store.unchanged())throw Error('Request changed');
+      const result=recovered.found?recovered.result:await read('/api/pool-calculations/'+record.poolId+'/reviewed',record.command,true);
+      if(!R.confirmation(result,record,session.owner)||result.applied&&!validCalculation(result.calculation))throw Error('Unconfirmed receipt');
+      durable=await store.confirm(result);
+      if(!active()||suspended||generation!==sequence)return;
+      saving=false;uncertain=!result.applied;
+      if(result.applied){fill(result.state);renderCalculation(result.calculation);resultInput=payload();status('saved','Gravação confirmada para este pedido. Recarrega para consultar eventuais alterações posteriores.');}
+      else {restore(record);status('conflict',result.message+' Os teus campos foram conservados.');}
+    }catch(_){if(active()&&!suspended&&generation===sequence){saving=false;uncertain=true;clearResults();status('uncertain','A resposta não foi confirmada. O pedido e os campos continuam guardados neste navegador. Usa «Confirmar pedido guardado» para verificar o mesmo pedido.');}}
   }
   async function calculate(save){
-    if(!active()||suspended||loading||saving||uncertain||!loadedId||loadedId!==$('poolId').value)return;
-    if(!validInputs()){clearResults();status('error','Revê os campos numéricos assinalados antes de calcular.');fields.find(id=>!$(id).validity.valid)&&$(fields.find(id=>!$(id).validity.valid)).reportValidity();return;}
+    if(!active()||suspended||loading||saving||uncertain||storageBlocked||durable?.pending||!loadedId||loadedId!==$('poolId').value)return;
+    if(!validInputs()||!R.fields(payload())){clearResults();status('error','Revê os campos numéricos assinalados antes de calcular.');fields.find(id=>!$(id).validity.valid)&&$(fields.find(id=>!$(id).validity.valid)).reportValidity();return;}
     abort();const generation=sequence,target=loadedId,input=payload();clearResults();saving=save;
-    status(save?'saving':'previewing',save?'A guardar o cálculo nesta piscina…':'A calcular os valores atuais…');
-    try{
-      const data=await read('/api/pool-calculations/'+(save?target:'preview'),input);
-      if(generation!==sequence||!active()||suspended||loadedId!==target||$('poolId').value!==target||!same(payload(),input))return;
-      if(!validCalculation(data.calculation)||save&&(data.profile?.poolId!==Number(target)||!savedMatches(data,input)))throw Error('Unconfirmed calculation');
-      saving=false;renderCalculation(data.calculation);resultInput=input;if(save)baseline=input;
-      status(save?'saved':'preview',save?'Gravação confirmada nesta piscina. As medições químicas ficam no resultado guardado.':'Pré-visualização calculada para os campos atuais. Ainda não foi guardada.');
-    }catch(_){
-      if(active()&&!suspended&&generation===sequence){saving=false;clearResults();uncertain=save;status(save?'uncertain':'error',save?'Não foi possível confirmar a gravação. Conservámos os campos; recarrega a ficha para verificar o que ficou guardado antes de voltar a gravar.':'Não foi possível confirmar o cálculo. Os campos foram conservados; tenta novamente.');}
+    status(save?'saving':'previewing',save?'A conservar o pedido antes de guardar…':'A calcular os valores atuais…');
+    if(save){
+      try{durable=await store.prepare(review,input);}catch(_){if(active()&&!suspended&&generation===sequence)storageFailure();return;}
+      saving=false;if(!active()||suspended||generation!==sequence)return;
+      await recoverCalculation();return;
     }
+    try{
+      const data=await read('/api/pool-calculations/preview',input);
+      if(generation!==sequence||!active()||suspended||loadedId!==target||$('poolId').value!==target||!same(payload(),input))return;
+      if(!validCalculation(data.calculation))throw Error('Unconfirmed calculation');
+      renderCalculation(data.calculation);resultInput=input;status('preview','Pré-visualização calculada para os campos atuais. Ainda não foi guardada.');
+    }catch(_){if(active()&&!suspended&&generation===sequence){clearResults();status('error','Não foi possível confirmar o cálculo. Os campos foram conservados; tenta novamente.');}}
+  }
+  async function start(){
+    if(!active())return;
+    try{durable=await store.read();}catch(_){if(active())storageFailure();return;}
+    if(!active()||suspended)return;
+    if(durable.pending){restore(durable.pending);uncertain=true;status('uncertain','Existe um pedido por confirmar nesta conta. Os campos foram recuperados; confirma o pedido guardado antes de continuar.');return;}
+    if(durable.confirmed&&!durable.confirmed.result.applied){restore(durable.confirmed.record);uncertain=true;status('conflict',durable.confirmed.result.message+' Os teus campos foram conservados.');return;}
+    await loadPools();
   }
   function renderBlock(id,rows){$(id).innerHTML=rows.join('');}
   function renderCalculation(c){
@@ -180,17 +194,17 @@
     renderBlock('chemistry',rows.length?rows:['<p class="note">Preenche as medições e calcula para consultar este resultado. Um campo vazio não é uma medição de zero.</p>']);
   }
   function clearInputs(){
-    if(!active()||suspended||loading||saving||uncertain||!loadedId||!window.confirm('Limpar os campos desta piscina e repor os valores iniciais? A ficha guardada só muda se guardares.'))return;
+    if(!active()||suspended||loading||saving||uncertain||storageBlocked||durable?.pending||!loadedId||!window.confirm('Limpar os campos desta piscina e repor os valores iniciais? A ficha guardada só muda se guardares.'))return;
     abort();setFields();clearResults();status('edited','Campos repostos nos valores iniciais. A ficha guardada não foi alterada.');
   }
-  Object.assign(window,{loadPool:()=>loadPool(),onPoolChange:()=>loadPool(),previewCalculation:()=>calculate(false),saveAndCalculate:()=>calculate(true),clearInputs});
+  Object.assign(window,{loadPool:()=>loadPool(),onPoolChange:()=>loadPool(),previewCalculation:()=>calculate(false),saveAndCalculate:()=>calculate(true),clearInputs,recoverCalculation});
   for(const id of fields)$(id).addEventListener('input',changed);
   for(const id of [...blocks,'status','poolBadge','kVolume','kArea','kSalt','kHeat'])$(id).dataset.cwStateManaged='manual';
-  window.addEventListener('storage',active);window.addEventListener('focus',active);document.addEventListener('visibilitychange',()=>{if(!document.hidden)active();});
+  window.addEventListener('storage',event=>{if(active()&&(event.key===store.key||event.key===null)){try{if(!store.unchanged())storageFailure();}catch(_){storageFailure();}}});window.addEventListener('focus',active);document.addEventListener('visibilitychange',()=>{if(!document.hidden)active();});
   window.addEventListener('beforeunload',event=>{if(!invalid&&(dirty()||saving||uncertain)){event.preventDefault();event.returnValue='';}});
   window.addEventListener('pagehide',()=>{suspended=true;if(saving){saving=false;uncertain=true;}abort();loading=false;clearResults();root.hidden=true;controls();});
-  window.addEventListener('pageshow',event=>{if(event.persisted){suspended=false;root.hidden=false;if(!active())return;if(dirty()||uncertain){status(uncertain?'uncertain':'edited',uncertain?'Gravação por confirmar. Recarrega para verificar a ficha.':'Campos não guardados conservados. Recalcula antes de consultar resultados.');}else loadPool(true);}});
-  window.addEventListener('popstate',()=>{if(!active()||suspended)return;const selected=selectionFromUrl();if(!selected||![...$('poolId').options].some(o=>o.value===selected)){if(loadedId)writeUrl(loadedId);return;}$('poolId').value=selected;loadPool();});
+  window.addEventListener('pageshow',event=>{if(event.persisted){suspended=false;root.hidden=false;if(!active())return;if(dirty()||uncertain){status(uncertain?'uncertain':'edited',uncertain?'Pedido conservado. Confirma o pedido guardado antes de continuar.':'Campos não guardados conservados. Recalcula antes de consultar resultados.');}else loadPool(true);}});
+  window.addEventListener('popstate',()=>{if(!active()||suspended)return;if(saving||durable?.pending||storageBlocked){if(loadedId)writeUrl(loadedId);return;}const selected=selectionFromUrl();if(!selected||![...$('poolId').options].some(o=>o.value===selected)){if(loadedId)writeUrl(loadedId);return;}$('poolId').value=selected;loadPool();});
   setInterval(()=>{if(active()&&!suspended&&!loading&&!saving&&!uncertain&&resultInput&&!same(payload(),resultInput))changed();},300);
-  controls();if(active())loadPools();
+  controls();start();
 }());

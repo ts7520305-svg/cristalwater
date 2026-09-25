@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-09-25T05:35:07.015Z",
-  "baseCommit": "8b167546ad7ddf8b1f554d469548b5ed61c7e8ab",
+  "generatedAt": "2026-09-25T06:11:57.600Z",
+  "baseCommit": "05244fe2ea39661825d5cf1592fbceca3c15495b",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 264,
+  "activeScriptsScanned": 266,
   "summary": {
     "htmlFiles": 115,
     "rootPages": 108,
@@ -1218,6 +1218,8 @@
         "/cw-auth.js",
         "/admin-auth-guard.js",
         "/ui/design-system.css",
+        "/cw-pool-calculator-rules.js",
+        "/cw-pool-calculator-store.js",
         "/admin-pool-calculator.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
@@ -1232,7 +1234,8 @@
       "languageAssets": [],
       "directPrintAction": false,
       "testReferences": [
-        "test-field-pool-calculator-state.js"
+        "test-field-pool-calculator-state.js",
+        "test-field-pool-calculator-recovery.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },

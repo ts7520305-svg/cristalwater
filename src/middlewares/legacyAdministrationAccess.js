@@ -18,6 +18,6 @@ const ADMIN_PATHS = Object.freeze([
 
 module.exports = function registerLegacyAdministrationAccess(app) {
   // Keep refused ledger responses private before this earlier ADMIN gate.
-  app.use('/api/admin/payments/ledger/page', (req,res,next)=>{res.set({'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'});res.vary('Authorization');next();});
+  app.use(['/api/admin/payments/ledger/page','/api/pool-calculations','/api/calculator'], (req,res,next)=>{res.set({'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'});res.vary('Authorization');next();});
   app.use(ADMIN_PATHS, auth('ADMIN'));
 };

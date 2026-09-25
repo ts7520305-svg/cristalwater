@@ -1,0 +1,177 @@
+{
+  "task": "TASK346",
+  "checkedAt": "2026-09-25T06:16:58.819025+00:00",
+  "baseCommit": "05244fe2ea39661825d5cf1592fbceca3c15495b",
+  "sourceSha256": {
+    "frontend/admin-pool-calculator.html": "451370210f4915d9cc4c77046b475a9edefb26de544fcebcb8db3d36136b48a0",
+    "frontend/admin-pool-calculator.js": "e88d2d31d94e5290b74f19b567fc08efd588c2ea4d39bc561711d364c41f6c55",
+    "frontend/cw-pool-calculator-rules.js": "624a908a09611c1c99de76cddab1b0f285d5d1d66ea4c524060fde63d154df83",
+    "frontend/cw-pool-calculator-store.js": "7b09da619fabdcc2692b49df5dfa52195926cce5ea4638d73455e4c72f62b840",
+    "frontend/sw.js": "2dc19eca3d506a34a0cc31057b0e2832bc6068ea591e52e6b585e268cc22ecf7",
+    "scripts/fixtures/internal-chat-server.js": "a193b18ed34dfb98940a243c4c6a75fc7ff3e111b456b03c9f1701ee4d8d587b",
+    "scripts/test-field-pool-calculator-recovery.js": "00d04c5bd1723fc271493816f5aaf3809eb11ca398bbfaccbdd1c862ff967842",
+    "scripts/test-field-pool-calculator-state.js": "05bf3c455e804aa5b18925c34ea424cbfe1e02368f1b7cd2564058043f0a4bbc",
+    "scripts/test-field-pool-calculator-writes.js": "4f896eead254ac015cc9b0ddaf7c831f038850ea83a3a4cd8f29c45106f8bd92",
+    "scripts/test-field-suite.js": "8fe67c52d47b6edf9a52ec12ebc5ae16b331681f53fc76b3fd376aea33e14c10",
+    "src/business/pool/PoolCalculationBusiness.js": "de8214870d7c9f0b227b8d5d3f13357c1c6c22aff991d8f72058e1a538420c7f",
+    "src/middlewares/legacyAdministrationAccess.js": "29712c9864b2c2299b2e601b2908d8c7c0864205c522ccdeae3d3ab9fa0f59d1",
+    "src/routes/poolCalculationRoutes.js": "ea9232e02beb782e0d9b5a6a313a9bb6978026e40fe123d88d646f1bcbb7411c",
+    "src/services/fieldWriteRequestService.js": "34d4dc096dfe53fe786b57966294aa84c467fd96175db9560ab3680c91d34ebb",
+    "src/services/poolCalculatorWriteService.js": "9a659ae5c2de9cd02dbdef7382d6b9fd22f0193ee7e7b75f700f92abbf2e6713",
+    "tests/pool-calculation-business.test.js": "62f844f0e6fbc619e2c76789f6ea11bd8aaabdd3af9644c38ca21e2b062e52bb",
+    "tests/pool-calculator-rules.test.js": "fe17273882181a87ad3f2e643775df2eb7fe06f9c43da25e62bc4609b76a6370",
+    "tests/pool-os-chemistry-workflow.test.js": "9647fce2cb0c934e9b91a9a4d61eba6595418702609c61749a8960f92d3a5749"
+  },
+  "unitTests": {
+    "passed": 619,
+    "files": 85
+  },
+  "technicianTests": 4,
+  "syntax": {
+    "backend": 631,
+    "frontend": 226,
+    "inline": 62
+  },
+  "integration": [
+    {
+      "script": "scripts/test-field-pool-calculator-writes.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-pool-calculator-state.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-pool-calculations.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-pool-calculator-recovery.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-legacy-admin-access.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-pool-edit-atomicity.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-pool-edit-recovery.js",
+      "code": 0
+    }
+  ],
+  "finalCalculatorRerun": [
+    {
+      "script": "scripts/test-field-pool-calculator-writes.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-pool-calculator-state.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-pool-calculator-recovery.js",
+      "code": 0
+    }
+  ],
+  "passLines": [
+    "PASS isolated schema: 40 additive migrations",
+    "PASS reviewed calculator writes: access/private headers, strict read/commands, original nulls/zero/parent-profile divergence, mandatory audit/receipt/parent rollback, atomic legacy rollback, two HTTP workers same/different requests, unchanged-timestamp conflict, compatibility conflict, finite calculation refusal, real lost response and process restart, durable rejected receipts, owner/scope/resource reuse refusal, empty-profile creation and recovery after deletion; money unchanged",
+    "PASS pool calculator: real pool/profile and empty-profile separation, nulls and initial values, original CIRCULAR and precision, stored chemistry ownership, source text literal, selected-pool and input races, malformed/failed/offline/timeout responses, dirty discard/clear, three real saves, same-request recovery after reload and one divergent confirmation refused, page history, account switch/reload/expiry, 320/390/1440 and original other pools unchanged",
+    "OK: volume 75m3",
+    "OK: salt 75kg for +1000ppm/75m3",
+    "OK: filtration hours calculated",
+    "OK: chlorinator hours calculated",
+    "OK: heat pump hours calculated",
+    "OK: PoolCalculationProfile model exists",
+    "OK: Pool relation exists",
+    "OK: file src/routes/poolCalculationRoutes.js",
+    "OK: file src/controllers/poolCalculationController.js",
+    "OK: file src/services/poolCalculationService.js",
+    "OK: file frontend/admin-pool-calculator.html",
+    "OK: file frontend/admin-pool-calculator.js",
+    "OK: route mounted",
+    "PASS calculator browser recovery: quota and ignored storage before POST, receipt-quota after commit, divergent body and owner headers refused, reload recovery without fresh pool read, persisted conflict with explicit discard, offline exact request/account isolation, two-tab exclusion, corrupt/hash-mismatched bytes preserved, pending UI 320/390/1440, eight confirmed changes and unchanged money",
+    "PASS legacy administration reads, mutations, aliases and AI require active ADMIN; refused requests are inert, administration and canonical field/client routes remain usable",
+    "PASS both pool edit APIs preserve omitted technical, equipment and calculation data, separate pool type/notes and record authenticated snapshots",
+    "PASS history, sheet and visit failures roll back every related write on both aliases",
+    "PASS reassignment moves only unstarted/unbilled visits, preserves financial/completed history, enforces access, serializes patches and preserves archive",
+    "PASS both pool edit APIs, two processes, one immutable history/receipt and replay after later edits or history deletion",
+    "PASS competing UUIDs and child-only legacy changes cannot overwrite an obsolete pool version",
+    "PASS transfer/lost reply/restart replays original counts without moving later or completed visits or financial history, even after recipient archival",
+    "PASS required history/receipt rollback, invalid requests, access checks, legacy edits and archive version changes"
+  ],
+  "logs": {
+    "/tmp/cw346-unit.log": "e78ee3be74cb2a4a2d9d3a6d2fc3927a31372c42e9e519e08f025c4fefb94ace",
+    "/tmp/cw346-tech.log": "5040e872a5e5ed5f5fa079a278e30cb788a8183c55dadb8b8f9772e1de815567",
+    "/tmp/cw346-syntax.log": "9eef459b07d27ba765c4d0c4a86f51a15e9d5af88f20b0cc6d28b4ca217b204d",
+    "/tmp/cw346-integration.log": "6aa0338536ae6da2779836016859d3272255390852281073cd7dced1f6f0099b",
+    "/tmp/cw346-recovery.log": "79d897615112d761cbcfd35870c8784cbd327e7105edf55c539c387ce0bd5981",
+    "/tmp/cw346-final-calculator.log": "c637f8b147e7a13c11cf4e3cb6afe617d7d3e68edc361a04edb1228ceae61b3c"
+  },
+  "runtime": {
+    "database": "PGlite 0.5.8 / pglite-socket 0.2.11, isolated",
+    "additiveMigrations": 40,
+    "chromium": "@sparticuz/chromium 153.0.0, normal multiple processes, web security retained",
+    "runnerSha256": "5bd8f95926470bd82fabef27148ed54a55532bdf80d8dbc557dd19b244486b2b",
+    "preloadSha256": "74ba6986b731dfe5120836cb841c25bed62d334014aa588379558293deb6ec7a"
+  },
+  "screenshots": {
+    "reports/field-visual/pool-calculator/calculator-pt-1440.png": "2c4b05f0a71c64a39b0aef37c7c5643314bcbdd6d839c4bd00c0a74cb6a7de48",
+    "reports/field-visual/pool-calculator/calculator-pt-320.png": "6bc4cb2e050f2af61e36db2b3efe6c2dafc225a524aa58fca927a0b6f002dd46",
+    "reports/field-visual/pool-calculator/calculator-pt-390.png": "9ec6ef706626ddcd008ff56f9665c87dd6483d4f50b0ae375f9fdc4ae9d983ce",
+    "reports/field-visual/pool-calculator/calculator-recovery-1440.png": "5bfc5d53b07d79eaae42ff64330902b72c3fd60245ca63e4f39052b61c68aaf1",
+    "reports/field-visual/pool-calculator/calculator-recovery-320.png": "8476dcdc23d2f5c40c50544f452628cdd7de6968e25d4e95bdef324ee0328984",
+    "reports/field-visual/pool-calculator/calculator-recovery-390.png": "d5afccaba8c7f37fd4a478b55355d357052bbce9459f2266cae36ec685524bf4",
+    "reports/field-visual/pool-calculator/calculator-results-pt-1440.png": "cf12e42efed08cdfe325efc004a8b9f890ccffc06c73dc5a7ea0adad28db0546",
+    "reports/field-visual/pool-calculator/calculator-results-pt-320.png": "39922186a83a3455715ad930738133eec72cfff962ec25134576ded6016a7014",
+    "reports/field-visual/pool-calculator/calculator-results-pt-390.png": "2c7775e5f31707b04aa7d45e1c42d2129e4ade291fde9029554b3623104beb92"
+  },
+  "reviewedWidths": [
+    320,
+    390,
+    1440
+  ],
+  "reviewedLanguages": [
+    "pt"
+  ],
+  "fieldSuiteExpectedGroups": 245,
+  "cache": "v158",
+  "inventory": {
+    "htmlFiles": 115,
+    "rootPages": 108,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 80,
+    "catalogueGuardDifferences": 0,
+    "activeScripts": 266,
+    "pagesWithoutLiteralTestReference": 35
+  },
+  "limits": [
+    "Native CI and PostgreSQL restore of this commit remain pending.",
+    "The durable browser request starts on Save; unsent edits are not persisted across full reload.",
+    "Existing compatibility writes are atomic but retain their unversioned, non-idempotent contract.",
+    "Existing calculation formulas are preserved; this is not a scientific validation or five-language certification.",
+    "A recovered receipt proves the historic operation, not that the current pool has not changed.",
+    "Browser persistence requires available local storage and Web Locks; corrupt bytes are preserved and block new writes."
+  ],
+  "testPreparation": [
+    "Updated both legacy business mocks for the transactional API; the initial unit run found the second mock.",
+    "Exercised real transaction rollback for parent, history and receipt failures, including the legacy API.",
+    "Used two real HTTP worker processes for identical and competing requests, lost post-commit response and process restart.",
+    "Kept original nulls, zero, historical choices and distinct pool/profile volumes unless explicitly edited.",
+    "Reviewed nine screenshots and waited for the real offline toast to close before pending-state captures.",
+    "Re-ran all three calculator groups after confirmation validation and recovery navigation were final."
+  ],
+  "previousNativeProofs": [
+    "docs/product/evidence/20260925_task344_ci.json",
+    "docs/product/evidence/20260925_task345_ci.json"
+  ],
+  "publication": {
+    "status": "not_published",
+    "nativeRestoreConfirmed": false
+  }
+}

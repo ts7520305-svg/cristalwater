@@ -28,5 +28,6 @@ app.use('/api/gps', require('../../src/routes/gpsRoutes'));
 app.use('/api/technician-intake', require('../../src/routes/technicianIntakeRoutes'));
 app.use('/api/technician', require('../../src/routes/technicianRoutes'));
 app.use('/api/visits', require('../../src/routes/visitRoutes'));
+app.use('/api/pool-calculations', require('../../src/routes/poolCalculationRoutes'));
 const server = app.listen(0, '127.0.0.1', () => process.send({ port: server.address().port }));
 process.on('SIGTERM', () => server.close(async () => { await prisma.$disconnect(); process.exit(0); }));

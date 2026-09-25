@@ -60,40 +60,45 @@ async function getPoolCalculations(poolId, query = {}) {
   };
 }
 
-async function savePoolCalculations(poolId, body = {}) {
-  const existingPool = await prisma.pool.findUnique({
-    where: { id: poolId },
-    include: { equipment: true },
-  });
-
-  if (!existingPool) {
-    return null;
-  }
-
-  const payload = PoolChemistryBusiness.profilePayload(body);
-  const calculation = calculatePoolOptimization(payload);
-  const chem = PoolChemistryBusiness.calculateChemistry(body);
-  calculation.chemistry = chem.result;
-  calculation.recommendations = [...(calculation.recommendations || []), ...chem.recommendations];
-  payload.lastResultJson = calculation;
-
-  const profile = await prisma.poolCalculationProfile.upsert({
-    where: { poolId },
-    update: payload,
-    create: { poolId, ...payload },
-  });
-
-  if (calculation.geometry?.volumeM3) {
-    await prisma.pool.update({
+async function savePoolCalculations(poolId, body = {}, database = prisma) {
+  return database.$transaction(async tx => {
+    // Match reviewed writes and technical-sheet edits: parent before profile.
+    await tx.$queryRaw`SELECT id FROM "Pool" WHERE id=${poolId} FOR UPDATE`;
+    await tx.$queryRaw`SELECT id FROM "PoolCalculationProfile" WHERE "poolId"=${poolId} FOR UPDATE`;
+    const existingPool = await tx.pool.findUnique({
       where: { id: poolId },
-      data: { volumeM3: calculation.geometry.volumeM3, type: payload.shape },
+      include: { equipment: true },
     });
-  }
 
-  return {
-    profile,
-    calculation,
-  };
+    if (!existingPool) {
+      return null;
+    }
+
+    const payload = PoolChemistryBusiness.profilePayload(body);
+    const calculation = calculatePoolOptimization(payload);
+    const chem = PoolChemistryBusiness.calculateChemistry(body);
+    calculation.chemistry = chem.result;
+    calculation.recommendations = [...(calculation.recommendations || []), ...chem.recommendations];
+    payload.lastResultJson = calculation;
+
+    const profile = await tx.poolCalculationProfile.upsert({
+      where: { poolId },
+      update: payload,
+      create: { poolId, ...payload },
+    });
+
+    if (calculation.geometry?.volumeM3) {
+      await tx.pool.update({
+        where: { id: poolId },
+        data: { volumeM3: calculation.geometry.volumeM3, type: payload.shape },
+      });
+    }
+
+    return {
+      profile,
+      calculation,
+    };
+  }, { maxWait: 15000, timeout: 20000 });
 }
 
 function previewCalculation(body = {}) {

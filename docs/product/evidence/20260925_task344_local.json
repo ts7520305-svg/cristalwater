@@ -98,7 +98,6 @@
     "pagesWithoutLiteralTestReference": 36
   },
   "limits": [
-    "Native CI and PostgreSQL restore of this commit remain pending.",
     "Each page is a fresh consistent query, not a frozen snapshot across navigation.",
     "Includes internal credit records; the page does not calculate a cash total, debt or balance.",
     "The query interface is available in five languages; shared navigation and original source text retain their existing language.",
@@ -118,8 +117,9 @@
     "ciRun": 36097287730,
     "ciJob": 107952105645,
     "ciUrl": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36097287730",
-    "status": "in_progress",
-    "nativeRestoreConfirmed": false,
-    "checkedAt": "2026-09-25T05:09:04.878Z"
+    "status": "success",
+    "nativeRestoreConfirmed": true,
+    "checkedAt": "2026-09-25T05:47:46.229Z",
+    "nativeEvidence": "docs/product/evidence/20260925_task344_ci.json"
   }
 }
