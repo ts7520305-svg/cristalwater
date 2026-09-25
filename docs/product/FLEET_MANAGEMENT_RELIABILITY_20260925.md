@@ -23,7 +23,7 @@ Este lote revê o registo da viatura: criação, dados, estado operacional, arqu
 
 **760 testes unitários em 102 ficheiros**, incluindo quinze novos: doze das regras da frota e três dos auxiliares de integração. Quatro testes técnicos aprovados. Sintaxe: 649 backend, 261 frontend e 44 inline; últimas alterações JavaScript verificadas separadamente. Sem dependências, tabelas ou migrações novas; as **42 migrações existentes** foram aplicadas no ambiente isolado.
 
-Sete grupos distintos aprovados:
+Nove grupos distintos aprovados:
 
 1. `test-field-fleet-management.js`: API real, autorização/privacidade, campos e versões, matrículas duplicadas, dois processos/reinício e cinco repetições concorrentes, colisão de duas criações revistas, rollback da auditoria/comprovativo, prova caducada/alterada, anulação, estados e paginação. Comparação de todos os atributos das relações de técnico, guias/itens, movimentos, manutenção/custos, atribuição, documento oficial e preset após editar/arquivar/restaurar.
 2. `test-field-fleet-management-ui.js`: página/API reais, confirmação explícita e duplo clique uma vez, zero/nulo, estado/arquivo/reposição, resposta perdida/recarga, offline/repetição exata, anulação, quota/escrita ignorada/bytes corrompidos, pacote parcial e pesquisas concorrentes. Cinco idiomas e três larguras, suspensão/regresso, duas contas reais em separadores com respostas de revisão/commit atrasadas e expiração. Seletores vizinhos estáveis, opção arquivada indisponível, alertas indisponíveis/incompletos sem fallback de leitura/gravação e limpeza dos formulários/marcas partilhados. Repetido depois dos ajustes finais do cabeçalho.
@@ -33,6 +33,9 @@ Sete grupos distintos aprovados:
 6. `test-real-month-flow-api.js`: cinco clientes, nove piscinas/jacuzzis, três técnicos/viaturas, 54 visitas, químicos/reparações, faturação/pagamentos e mensagens sintéticas. Criação de viaturas adaptada à API revista, sem reduzir as verificações existentes.
 7. `test-field-two-year-api.js`: 731 datas e 312 visitas, 24 meses/72 faturas/144 pagamentos parciais concorrentes e histórico GPS. Simulação acelerada; não representa dois anos contínuos de serviço.
 
+8. `test-system-interconnections.js`: cenário mensal interno, relações e auditoria; executado imediatamente antes de outra execução de `test-real-month-flow-api.js` na mesma base. PINs sintéticos distintos por execução/técnico substituem os três PINs fixos que colidiam no runner completo.
+9. `test-field-equipment-time-review.js`: API e navegador de revisão de tempos/custos, originais imutáveis, concorrência e rollback. O ensaio atrasa deliberadamente a resposta real do histórico após confirmar o comprovativo e aguarda o editor atualizado antes de verificar o mesmo motivo e os mesmos dados. A página de produto não foi alterada para esta correção do ensaio.
+
 A retoma detetou uma regressão do auxiliar de técnicos publicado na TASK364: `status: CONFIRMED` no corpo JSON era comparado ao estado HTTP 200. O resultado local anterior da simulação de dois anos precedia essa alteração final e não validava essa versão do auxiliar. A correção distingue estado HTTP numérico de comprovativo da aplicação; os testes cobrem respostas diretas, com `data` e com `body`, e recusam HTTP 403. A simulação de dois anos foi repetida integralmente e passou. Relatório/evidência anteriores retificados, sem apagar os registos originais. A primeira falha do navegador deste lote foi uma matrícula sintética em minúsculas comparada literalmente após normalização; o fixture foi alinhado com a regra e as verificações mantidas.
 
 Vinte e quatro capturas em `reports/field-visual/fleet-management/`: cinco idiomas × 320/390/1440, três revisões, três diretórios e três cartões. Revistos cabeçalho/formulário, revisão e cartões em móvel/desktop. O aviso transitório comum de rede aparece em parte das capturas após as falhas deliberadas. Dois recursos binários comuns não materializados localmente permanecem uma limitação visual conhecida. Sem piloto físico iPhone/Android.
@@ -41,9 +44,9 @@ Runtime isolado PGlite 0.5.8/pglite-socket 0.2.11 e Chromium 153 com múltiplos 
 
 ## CI e publicação
 
-TASK363 confirmada em [262/262 grupos e restauro PostgreSQL nativo](evidence/20260925_task363_ci.json), 17 etapas, 41 migrações e 127 tabelas/47 ficheiros com linhas e hashes iguais, em 40m50s. TASK364 continua por confirmar no último controlo; a migração passou, mas o auxiliar da simulação tem a regressão descrita acima, corrigida neste lote.
+TASK363 confirmada em [262/262 grupos e restauro PostgreSQL nativo](evidence/20260925_task363_ci.json), 17 etapas, 41 migrações e 127 tabelas/47 ficheiros com linhas e hashes iguais, em 40m50s. [CI TASK364 36158832545](https://github.com/ts7520305-svg/cristalwater/actions/runs/36158832545), job `108150001251`, concluído com **261/264 grupos aprovados** e três falhas: PINs fixos reutilizados na simulação mensal, confusão entre estado HTTP e comprovativo na simulação de dois anos, e histórico verificado antes de terminar a recarga. Migração de 42 alterações e gates de sintaxe/unitários passaram; **restauro não executado** após a falha da suite. Duração 44m09s. [Evidência nativa](evidence/20260925_task364_ci.json). As três causas foram corrigidas na TASK365 e os percursos afetados repetidos localmente.
 
-Publicação deste lote na branch de trabalho em preparação. O CI completo de 266 grupos e restauro PostgreSQL nativo deste código permanece por confirmar. [Evidência local](evidence/20260925_task365_local.json).
+Primeira publicação em `8ca10a130899a5434558e681fd43ccb3213fa2b5`, árvore `8eaa3022cc6b07016882573332d2f41ceffa5ac2`, idêntica à preparada; CI `36163838891`, job `108166636442`. Depois da recolha dos logs da TASK364, este complemento corrige os ensaios mensal repetido e de recarga do histórico, mantendo as verificações. Publicação complementar em preparação. O CI completo de 266 grupos e restauro PostgreSQL nativo deste código permanece por confirmar. [Evidência local](evidence/20260925_task365_local.json).
 
 ## Retoma e limites
 

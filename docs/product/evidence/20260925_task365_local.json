@@ -1,7 +1,7 @@
 {
   "task": "TASK365",
   "baseCommit": "01f71a05c88ab6bd3aa4e96f6152254137d4d927",
-  "validatedAt": "2026-09-25T16:53:49.285158+00:00",
+  "validatedAt": "2026-09-25T17:01:41.990189+00:00",
   "sourceHashes": {
     "frontend/admin-vehicles.html": "90bdfba570db9b535cf5675a12345cff9cc1dfe41c6525a6cb0e082deb09649f",
     "frontend/admin-vehicles.js": "4a715e7c831af1435c2d24d8ec3872a0a58701671a59cc31990a9d9e1093404c",
@@ -14,11 +14,12 @@
     "scripts/fixtures/internal-chat-server.js": "8e224ad4eede3d3030c6d7dd9a00718bc36df3c53bbba06e760c3cf97a80ba20",
     "scripts/helpers/create-reviewed-technician.js": "dbf333454bea7288c34b394ae582e6e0d51db0bd4a61f3959e3748fc60faa787",
     "scripts/helpers/create-reviewed-vehicle.js": "720035166b1668b9396123c1c5a0f4a2bc2554f9efd85a1de7c0f20fb63e9578",
+    "scripts/test-field-equipment-time-review.js": "d036366c39336f40aec488a79b0227ed924432f8e55fb80a6aa5d383a27e6682",
     "scripts/test-field-fleet-management-ui.js": "1c7c7784362202bbaa06c985c0c84ebd157f0f8cfe73d2b1d669c0c441feafc9",
     "scripts/test-field-fleet-management.js": "5175150b36a14253dcc347a059f47987e279f5be02f97d6667f2f05b3f02f189",
     "scripts/test-field-suite.js": "486076d3e426899891feff6f4db0efd12ec88e21e5a929e0fbca39cb7be1e2a4",
     "scripts/test-field-two-year-api.js": "bc72ab9c2a612ee6b45930dd7d3ffbea9d0f8a42d787565f3e1d70e4a04c9d71",
-    "scripts/test-real-month-flow-api.js": "90a6610060d0a4ebc0a4b9ba5ce565f0a20215330eb2520f701ff42cca6a1146",
+    "scripts/test-real-month-flow-api.js": "c76dba8f320ba1bc769fe92a7b67a74d5c7d2f161fb17dbe37eb2ff1708c7fb9",
     "src/controllers/fleetManagementController.js": "c23615dda298d66ef42fcbb007ac72d8a398eb62812921621fd2f11a0ae36309",
     "src/controllers/guideController.js": "ae8dee43c429afb8fed6b6fd9a83f9987c37aa2652452d9326c26b855a010e95",
     "src/routes/fleetManagementRoutes.js": "c1afb7c5445fe535b6ec55e2d8e45372c58ebcee7fe4d309709c2da9434f7ec5",
@@ -74,6 +75,14 @@
     {
       "script": "scripts/test-field-two-year-api.js",
       "code": 0
+    },
+    {
+      "script": "scripts/test-system-interconnections.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-equipment-time-review.js",
+      "code": 0
     }
   ],
   "logs": {
@@ -85,7 +94,8 @@
     "/tmp/cw365-final-visual-ui.log": "c75b290e139ac2a3a99e35b07f87a26effb0d3175abba29daf91d0916cb87d92",
     "/tmp/cw365-final-unit.log": "52fcc4f767066c2ac1617a215270ceeb9978e46c37e1c6fb0f39d6c05313212a",
     "/tmp/cw365-technician.log": "1c3e56847c9adf7a44876b983b8952a28d10323122911feb1fccec308897be3b",
-    "/tmp/cw365-final-syntax.log": "afd9bdab944fe14948e93e1c37808638378f5f570132370d639c2d077e17faea"
+    "/tmp/cw365-final-syntax.log": "afd9bdab944fe14948e93e1c37808638378f5f570132370d639c2d077e17faea",
+    "/tmp/cw365-ci-regressions.log": "0e1dd1e0a0c5b01b5e8b1604e325d6427a827b9a70d91b9c3c1d2be5d9ade6c6"
   },
   "validationNotes": [
     {
@@ -101,6 +111,14 @@
     {
       "kind": "MOBILE_HEADING_RENDERING",
       "resolution": "Removed generic header styling from nested fleet heading; complete browser group repeated, final German 320px title visually verified."
+    },
+    {
+      "kind": "NATIVE_REPEATED_MONTH_PIN_COLLISION",
+      "resolution": "Fixed synthetic PINs replaced with per-run/technician PINs. Parent interconnection scenario then standalone month pass in one database; existing data checks retained."
+    },
+    {
+      "kind": "NATIVE_ASYNC_HISTORY_ASSERTION",
+      "resolution": "Test now deliberately gates the real history response and waits for editor readiness before unchanged content/data assertions. No product code change for this test correction."
     }
   ],
   "browser": {
@@ -169,12 +187,17 @@
     "remainingLiteralQueue": 12
   },
   "publication": {
-    "status": "PREPARED_NATIVE_CI_PENDING",
+    "status": "INITIAL_PUBLISHED_FOLLOWUP_PREPARED_NATIVE_CI_PENDING",
     "branch": "work/field-readiness-20260915-simulation",
     "mainBranch": "feature/technicians-v25",
     "mainShaUnchanged": "6f27081e1d183ff584a62255b016b373836734db",
     "nativeGroupsExpected": 266,
-    "nativeRestore": "PENDING"
+    "nativeRestore": "PENDING",
+    "initialCodeSha": "8ca10a130899a5434558e681fd43ccb3213fa2b5",
+    "initialTreeSha": "8eaa3022cc6b07016882573332d2f41ceffa5ac2",
+    "initialRunId": 36163838891,
+    "initialJobId": 108166636442,
+    "initialPreparedTreeEqualsPublishedTree": true
   },
   "previousCI": [
     {
@@ -189,11 +212,15 @@
       "codeSha": "cf96f66886fc06d938b43722de072adea7482cbc",
       "runId": 36158832545,
       "jobId": 108150001251,
-      "status": "in_progress",
+      "status": "FAILED",
       "groupsExpected": 264,
       "migrationGate": "PASSED",
-      "restore": "PENDING",
-      "knownLocalRegression": "Two-year helper raw status mismatch; repaired and rerun in TASK365."
+      "restore": "SKIPPED_AFTER_SUITE_FAILURE",
+      "knownLocalRegression": "Two-year helper raw status mismatch; repaired and rerun in TASK365.",
+      "groupsPassed": 261,
+      "groupsFailed": 3,
+      "evidence": "docs/product/evidence/20260925_task364_ci.json",
+      "allThreeFailureCausesRepairedAndLocallyRerun": true
     }
   ],
   "limits": [

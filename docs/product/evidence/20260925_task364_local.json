@@ -194,7 +194,7 @@
     "remainingLiteralQueue": 13
   },
   "publication": {
-    "status": "PUBLISHED_NATIVE_CI_PENDING",
+    "status": "PUBLISHED_NATIVE_CI_FAILED",
     "branch": "work/field-readiness-20260915-simulation",
     "mainBranch": "feature/technicians-v25",
     "mainShaUnchanged": "6f27081e1d183ff584a62255b016b373836734db",
@@ -206,7 +206,10 @@
     "jobId": 108150001251,
     "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36158832545",
     "nativeGroupsExpected": 264,
-    "nativeRestore": "PENDING"
+    "nativeRestore": "SKIPPED_AFTER_SUITE_FAILURE",
+    "nativeGroupsPassed": 261,
+    "nativeGroupsFailed": 3,
+    "nativeEvidence": "docs/product/evidence/20260925_task364_ci.json"
   },
   "previousCI": [
     {
@@ -229,7 +232,7 @@
     }
   ],
   "limits": [
-    "Native PostgreSQL full 264-group suite and restore still unconfirmed; migration gate passed. TASK363 confirmed. Known helper regression found locally and repaired in TASK365.",
+    "Native CI completed with 261/264 groups, three failures and restore skipped. All three causes repaired and affected groups rerun locally in TASK365; native rerun still required.",
     "Legacy plaintext PINs and historical request logs are not rewritten.",
     "New PIN verification scans stored PIN hashes by pages; production latency/volume remains a gate.",
     "User records are not deactivated or created; existing User-only workday access retains its existing rules.",
@@ -247,6 +250,10 @@
     "originalLogsPreserved": true,
     "repair": "TASK365 checks HTTP status only when numeric, validates the application receipt, and tests direct/data/body wrappers including HTTP 403 rejection.",
     "localFullTwoYearRerun": "PASSED",
-    "evidence": "docs/product/evidence/20260925_task365_local.json"
+    "evidence": "docs/product/evidence/20260925_task365_local.json",
+    "additionalNativeFailures": [
+      "Repeated monthly scenario reused fixed PINs; repaired in TASK365 and rerun after parent scenario.",
+      "Equipment time-review history assertion preceded reload completion; deterministic delayed response and readiness wait repaired the test in TASK365."
+    ]
   }
 }

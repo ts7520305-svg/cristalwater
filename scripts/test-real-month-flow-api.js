@@ -50,7 +50,7 @@ async function call(method, pathname, body = undefined, expected = [200, 201], a
   let data = {};
   try { data = text ? JSON.parse(text) : {}; } catch (_) { data = { raw: text }; }
   if (!expected.includes(response.status) || (response.status < 400 && data.ok === false)) {
-    const message = data.error || data.message || response.statusText || text;
+    const message = data.error || data.message || data.code || response.statusText || text;
     throw new Error(`${method} ${pathname} -> ${response.status}: ${message}`);
   }
   return { status: response.status, data };
@@ -157,7 +157,7 @@ async function setupPeopleAndFleet() {
       name: `QA Real Tecnico ${i} ${runId}`,
       email: `qa.real.tecnico.${i}.${runId}@cristalwater.test`,
       phone: `91000000${i}`,
-      pin: `90${i}${i}73`,
+      pin: `${String(runId).slice(-10)}${i}`,
       zone: i === 1 ? "Cascais" : i === 2 ? "Sintra" : "Lisboa",
     });
     created.technicians.push(technician);
