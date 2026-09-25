@@ -22,7 +22,7 @@ A evidência conserva hashes das fontes, logs e seis capturas. Cache v162, runne
 
 ## Estado e limites
 
-Preparada e validada localmente; publicação e CI nativo deste lote ainda por registar.
+Publicada em `40659d55428fd2a7fa58469d9f74726af922bc20`, árvore `63df7d69deb3cdcd23068a5aa49cef2a7f8f3809`, idêntica à preparada e validada localmente. [CI 36110064522](https://github.com/ts7520305-svg/cristalwater/actions/runs/36110064522), job `107991263446`, em execução; os 249 grupos e o restauro PostgreSQL nativo deste lote continuam por confirmar.
 
 TASK348 confirmada em [247/247 grupos esperados e restauro PostgreSQL](evidence/20260925_task348_ci.json), 17 etapas e 127 tabelas/47 ficheiros com linhas e hashes iguais. TASK349 permanece em execução no último controlo.
 

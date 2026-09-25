@@ -132,5 +132,16 @@
     "Visual review covers Portuguese client menus and three widths, not five-language certification of these pages or shared navigation.",
     "Two indexed images are not materialized in this local checkout.",
     "Remaining page, financial-history and production criteria retain their own scope."
-  ]
+  ],
+  "publication": {
+    "commit": "40659d55428fd2a7fa58469d9f74726af922bc20",
+    "tree": "63df7d69deb3cdcd23068a5aa49cef2a7f8f3809",
+    "branch": "work/field-readiness-20260915-simulation",
+    "ciRun": 36110064522,
+    "ciJob": 107991263446,
+    "ciUrl": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36110064522",
+    "status": "in_progress",
+    "nativeRestoreConfirmed": false,
+    "checkedAt": "2026-09-25T07:55:27.000318+00:00"
+  }
 }
