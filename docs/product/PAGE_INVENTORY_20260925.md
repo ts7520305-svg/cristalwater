@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `2c02a4ddd3c8560e5cbe56f2ae7e1d60f600577d`. Gerado em 2026-09-25T10:34:12.608Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `07f6a5756e8e6f0b228da6ea87667100786eaa8e`. Gerado em 2026-09-25T10:56:39.814Z. Inclui o estado dos ficheiros locais no momento da geração.
 
 115 ficheiros HTML: 108 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 273 scripts de integração/navegador ativos. 91 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 274 scripts de integração/navegador ativos. 92 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 2 referências existem no índice Git mas não estão materializadas nesta cópia local; não são classificadas como ficheiros ausentes da aplicação.
 
@@ -54,7 +54,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /admin-expenses | Entrada raiz | — | ADMIN | 18 |
 | /admin-inventory | Entrada raiz | ADMIN | ADMIN | 2 |
 | /admin-keys | Entrada raiz | ADMIN | ADMIN | 1 |
-| /admin-live-map | Entrada raiz | ADMIN | ADMIN | 0 |
+| /admin-live-map | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-login | Entrada raiz | PUBLIC | — | 3 |
 | /admin-map | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-master-control | Entrada raiz | ADMIN | ADMIN | 5 |
@@ -156,7 +156,6 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 
 ## Fila finita sem referência literal em QA
 
-- /admin-live-map — Entrada raiz; papéis declarados: ADMIN.
 - /admin-menu — Entrada raiz; papéis declarados: ADMIN.
 - /admin-onboarding — Entrada raiz; papéis declarados: ADMIN.
 - /admin-payment-settings — Entrada raiz; papéis declarados: ADMIN.

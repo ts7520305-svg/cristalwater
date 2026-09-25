@@ -11,3 +11,7 @@ As duas verificações de sintaxe dos scripts e o controlo do diff passaram. A e
 Runner conserva 251 grupos distintos, cache v165 e 40 migrações existentes; não há alterações à página, à API, às regras financeiras ou ao armazenamento. Publicada em `bdd7b7d1a59c1fba843a812d1c8986561b38aa74`, árvore `6b7ae90a2907fdb1059c00bec0c84faf305b7db5`, idêntica à preparada e validada localmente. [CI 36122904203](https://github.com/ts7520305-svg/cristalwater/actions/runs/36122904203), job `108032336473`, em execução; os 251 grupos e o restauro PostgreSQL nativo deste lote continuam por confirmar. TASK351 conserva a evidência de 250/250 grupos e restauro aprovado; TASK352/353 permanecem em execução no último controlo.
 
 O resultado cobre os navegadores e os cenários controlados dos ensaios. Não substitui o piloto iPhone/Android, a medição de volume ou a validação da produção. Retomar esses critérios e a fila finita das restantes páginas. Sem merge, deploy ou contactos reais.
+
+## Confirmação nativa — 25/09/2026
+
+CI `36122904203`, job `108032336473`, concluído com sucesso no commit `bdd7b7d1a59c1fba843a812d1c8986561b38aa74`: 251/251 grupos esperados distintos, 17 etapas e restauro de 127 tabelas/47 ficheiros com linhas e hashes iguais. A lista esperada foi comparada com o runner desse commit. [Evidência nativa](evidence/20260925_task354_ci.json).

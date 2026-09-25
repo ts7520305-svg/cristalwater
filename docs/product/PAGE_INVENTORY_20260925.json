@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-25T10:34:12.608Z",
-  "baseCommit": "2c02a4ddd3c8560e5cbe56f2ae7e1d60f600577d",
+  "generatedAt": "2026-09-25T10:56:39.814Z",
+  "baseCommit": "07f6a5756e8e6f0b228da6ea87667100786eaa8e",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 273,
+  "activeScriptsScanned": 274,
   "summary": {
     "htmlFiles": 115,
     "rootPages": 108,
     "nestedPages": 7,
     "unavailableLocalAssetReferences": 2,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 91,
+    "pagesWithLiteralTestReference": 92,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -739,7 +739,7 @@
       "file": "frontend/admin-live-map.html",
       "route": "/admin-live-map",
       "kind": "Entrada raiz",
-      "title": "Cristal Water - Mapa em Tempo Real",
+      "title": "Posições dos técnicos · Cristal Water",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -753,21 +753,15 @@
       "entryRedirects": {},
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/manifest.webmanifest",
         "/ui/foundation.css",
-        "/cristal-assist.css",
-        "/cw-ui-kit.css",
-        "/cw-auth.js",
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
-        "/admin-auth-guard.js",
         "/ui/design-system.css",
-        "/socket.io/socket.io.js",
+        "/cw-auth.js",
+        "/admin-auth-guard.js",
+        "/cw-live-map-rules.js",
+        "/cw-payment-ledger-copy.js",
+        "/cw-live-map-copy.js",
         "/admin-live-map.js",
-        "/cristal-help-data.js",
-        "/cristal-assist.js",
         "/ui/core/navigation-context.js",
-        "/cw-admin-shortcuts.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
         "/ui/design-system.js"
@@ -776,7 +770,9 @@
       "unavailableLocalAssets": [],
       "languageAssets": [],
       "directPrintAction": false,
-      "testReferences": [],
+      "testReferences": [
+        "test-field-live-map.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {

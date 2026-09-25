@@ -1,0 +1,120 @@
+{
+  "task": "TASK356",
+  "baseCommit": "07f6a5756e8e6f0b228da6ea87667100786eaa8e",
+  "validatedAt": "2026-09-25T11:03:54.267199+00:00",
+  "sourceHashes": {
+    "frontend/admin-live-map.html": "98d75e4facd76ea0e8e3b69f2553d24d076acaeecb3aa9bc4c349e072f6481ac",
+    "frontend/admin-live-map.js": "cbf566c395776969673babfc63defac001df6df837bfa96265d9ad91b4ab04f2",
+    "frontend/cw-live-map-copy.js": "356a9beab9e32052e288eb96d78f907d58302148cf183c69b4a67b91aff5d9f3",
+    "frontend/cw-live-map-rules.js": "a74e3eecdc29cb65e2d2a4163f27f5ffb5bcb6af22a896f8d1734e8a4fd7b651",
+    "frontend/sw.js": "47dff68313974e588777d85ca0d67a0f15c1ecd345ba8370caebae9fe3ad3766",
+    "src/services/liveMapService.js": "3f46007aade71aab286e9348245cb36f9870cd7f6d9b4f56099c3c8507bc48b8",
+    "src/routes/gpsRoutes.js": "7e168dc2105828a498e8cac09b1c6c961f3eac52d15d02c7520891e7bc79090b",
+    "scripts/test-field-suite.js": "f06d07267c69cbb751659aea814bb2e3dc9a491925b5ec6922cb480bc831e8e3",
+    "scripts/test-field-live-map.js": "b24ee14421a8892cc9baa21d8a6cd29697d58a6206d65cf683992887050f669b",
+    "tests/live-map.test.js": "95dc137f12a3b693d9782f87e765f0ea7a2dae905b7419bf087fa70db10019d2"
+  },
+  "unitTests": {
+    "passed": 658,
+    "files": 93
+  },
+  "technicianTests": {
+    "passed": 4,
+    "files": 1
+  },
+  "syntax": {
+    "backend": 636,
+    "frontend": 240,
+    "inline": 51,
+    "finalChangedScripts": "node --check passed"
+  },
+  "integrationGroups": [
+    "scripts/test-field-live-map.js",
+    "scripts/test-field-gps-flow.js",
+    "scripts/test-field-admin-map-recovery.js"
+  ],
+  "finalRepeatedGroup": "scripts/test-field-live-map.js",
+  "fixture": {
+    "identities": 56,
+    "pageCounts": [
+      50,
+      6
+    ],
+    "states": {
+      "RECENT": 4,
+      "STALE": 1,
+      "MISSING": 49,
+      "INVALID": 1,
+      "FUTURE": 1
+    },
+    "originalRowsUnchanged": true,
+    "browserWrites": 0,
+    "realMessages": 0
+  },
+  "logs": {
+    "/tmp/cw356-unit.log": "b6e0b256136017844472b31abb6dc18a28a3733b268d413bcebd2b3f45489b4c",
+    "/tmp/cw356-tech.log": "780c2407c26082f2b47d1dd72014568e15e2e2b238722cafd254d459d3620118",
+    "/tmp/cw356-syntax.log": "7a407374d8bad950910c471aaa31b494d67dfb36d54914c51546a8c0f4681c7c",
+    "/tmp/cw356-integration.log": "6efc14b71d78ddf3db5773b047eb7471a2238044f61f65cfc99ab2b20e7abb59",
+    "/tmp/cw356-final-live-map.log": "bdeeff0151404c1f081757dd80174e82fd866669cea087d02a666cdc7e7bc7f9"
+  },
+  "runtime": {
+    "database": "PGlite 0.5.8 / pglite-socket 0.2.11, isolated",
+    "additiveMigrations": 40,
+    "chromium": "@sparticuz/chromium 153.0.0, normal multiple processes, web security retained",
+    "runnerSha256": "5bd8f95926470bd82fabef27148ed54a55532bdf80d8dbc557dd19b244486b2b",
+    "preloadSha256": "74ba6986b731dfe5120836cb841c25bed62d334014aa588379558293deb6ec7a"
+  },
+  "cache": "v167",
+  "fieldSuiteExpectedGroups": 253,
+  "inventory": {
+    "htmlFiles": 115,
+    "rootPages": 108,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 92,
+    "catalogueGuardDifferences": 0,
+    "activeScripts": 274,
+    "pagesWithoutLiteralTestReference": 23
+  },
+  "screenshots": {
+    "reports/field-visual/live-map/de-1440-position.png": "a42002516bac379f8920596e1e92b7ecfb6506978e09b1ecefd14842f9988227",
+    "reports/field-visual/live-map/de-1440.png": "c33af57342ec405cbfd6f3a313a0998c457da8bb8aa9d677e0fc55c4b77a48ec",
+    "reports/field-visual/live-map/de-320-position.png": "8a444d43e6ed26894c10e3091d1cf0030db03e0e0c25272e7c139f367e7d90b2",
+    "reports/field-visual/live-map/de-320.png": "b833a1993b5b84e73e64ba359be0610aa3fe13ae9c4391aa6218a82b6b27a71c",
+    "reports/field-visual/live-map/de-390-position.png": "816040efd89e9a299f1cd56b2e2436b6bfc445c590c91f00ed830a3bdfac7347",
+    "reports/field-visual/live-map/de-390.png": "95e03a2d0297ded6451419c6c90f9f89c7c4025f6bed43aad54d031224485da2",
+    "reports/field-visual/live-map/en-1440-position.png": "f4d38d513b4a593e9a23358b864702ebae695b534a7dbb8e0c25fe4671711ef8",
+    "reports/field-visual/live-map/en-1440.png": "d56ebfda0373ea79d3da804bcc7f8a8ced91a324a8ce6bf661bbfd6e07c9fe01",
+    "reports/field-visual/live-map/en-320-position.png": "f3385892adc2e5a8b8c2f669a778ab31f766e245c5bb0b6e402b93c5d3b5fc05",
+    "reports/field-visual/live-map/en-320.png": "63c67c14fff5e94c047eae2fd0cb71825292524636cdd515f7b3df5d04bc0dfc",
+    "reports/field-visual/live-map/en-390-position.png": "91603847a50e1985ab3cdc7a99846b19bf73c32bdd4c041e977a2c4ff39955e9",
+    "reports/field-visual/live-map/en-390.png": "9b24835b8941b9d0a8fbefb40e1192f7eb1b3331e63ac1b44bf83233f8fd7442",
+    "reports/field-visual/live-map/es-1440-position.png": "216904ad74edea0674c1b824bf4133b2a11d704ed9d2ec9d982811240a97bc4f",
+    "reports/field-visual/live-map/es-1440.png": "9da5726c67f02588dced698bcd7e07a52ccc7908c7b5e146a45524a60b3a7881",
+    "reports/field-visual/live-map/es-320-position.png": "c270a057856846d8d9876a361b13f0c662641efb11d45f0f8845f8f62d8281f6",
+    "reports/field-visual/live-map/es-320.png": "c6244854ad1e4f612daab445a556d044dde025da88134df892064d4f8863c82b",
+    "reports/field-visual/live-map/es-390-position.png": "d3d24cdbc545300df45e605ed93cac096aa7c930e48ac70c673a80c67a1ccd35",
+    "reports/field-visual/live-map/es-390.png": "d61dbe76d7a377c373cf439b0f6d662842706836d874de8f9460a86a7d113a0c",
+    "reports/field-visual/live-map/fr-1440-position.png": "f1e1acd3ead180553d1d13dc9cce19d0d630d2adc6ca32535370bb38facbe7a8",
+    "reports/field-visual/live-map/fr-1440.png": "953a2eb610cf5d5296a7f31e56cca5289b3ffbd2db844677436ad4078be13d5c",
+    "reports/field-visual/live-map/fr-320-position.png": "96f23a6aacfc05aba9a3aca4525f2b94d3db06ed576c39d70aae0e3a0a2ad94d",
+    "reports/field-visual/live-map/fr-320.png": "cfb29a06abe5edeeaff2819eb7c921c7ef00dfaa563d9704c9c9c337fa78cbce",
+    "reports/field-visual/live-map/fr-390-position.png": "3fd0a70af0bc3f535aeb559165a17e84245a89d77e768870dc2a0643d464143d",
+    "reports/field-visual/live-map/fr-390.png": "28edc02ad533efa4e4ef1c0dccb3ea31f991f4457fc31a3eb1a6eebcb2406eeb",
+    "reports/field-visual/live-map/pt-1440-position.png": "893f90c9b9daf30285086321d8207c3ec899f1eafe7ae0398d20e4841902dfc6",
+    "reports/field-visual/live-map/pt-1440.png": "541aa3648614355d1c111d16ee9c969ed19148148af396f24d69c68104cc9b2c",
+    "reports/field-visual/live-map/pt-320-position.png": "73b5ac8357d4f1a2e822d4d5e0f78f4747510040e87387435e3f889c4de93edf",
+    "reports/field-visual/live-map/pt-320.png": "20557352889a806a6423d853e9e14699a0aae838151ecf091e67278b7d2e4b59",
+    "reports/field-visual/live-map/pt-390-position.png": "aa564a221cdee752f956db1b6110e725afa3eff9027c58d59620e652edb1a0c3",
+    "reports/field-visual/live-map/pt-390.png": "ea9b6baa9f81bbe0744641e5bedc2bd1fcd2fe0368c58a4fe30a2840c68101c0"
+  },
+  "limitations": [
+    "Local QA uses PGlite; native PostgreSQL restore for this commit remains pending.",
+    "External map resources blocked for baseline and controlled Leaflet contract used for markers; provider not validated in production.",
+    "Recent position is not proof of presence, availability or work in progress.",
+    "Active identities and their minimal projections are read before filtering/pagination; production volume unmeasured.",
+    "Historical identity reconciliation, shared navigation translations, VPS and physical devices remain open."
+  ]
+}

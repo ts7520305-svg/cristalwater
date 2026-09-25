@@ -4,7 +4,13 @@ const TechnicianGpsBusiness = require("../business/technician/TechnicianGpsBusin
 const auth = require("../middlewares/authMiddleware");
 const { roleMatches } = require("../utils/roles");
 
+router.use(['/live','/live-legacy'],(req,res,next)=>{res.set({'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'});res.vary('Authorization');next();});
 router.use(auth());
+
+router.get('/live/page',auth('ADMIN'),async(req,res)=>{
+  try{const result=await require('../services/liveMapService').read(req.user,req.query);res.set({'X-CW-Live-Map':'live-map-v1','X-CW-Owner':result.owner});return res.json(result);}
+  catch(error){const status=[400,403].includes(error.statusCode)?error.statusCode:503;return res.status(status).json({ok:false,message:status===503?'Não foi possível confirmar as posições GPS.':error.message});}
+});
 
 const logger = {
   info: (msg, ctx = null) => console.log(`[${new Date().toISOString()}] [INFO] [GPS] ${msg}`, ctx || ""),
@@ -88,7 +94,7 @@ router.get("/live", async (req, res) => {
     return res.json(rows);
   } catch (err) {
     logger.warn("Falha ao carregar posicoes live enriquecidas", err.message);
-    return res.json([]);
+    return res.status(503).json({ok:false,message:'Não foi possível confirmar as posições GPS.'});
   }
 });
 
@@ -101,7 +107,7 @@ router.get("/live-legacy", async (req, res) => {
     return res.json(data);
   } catch (err) {
     logger.warn("Falha ao carregar posições live", err.message);
-    return res.json([]);
+    return res.status(503).json({ok:false,message:'Não foi possível confirmar as posições GPS.'});
   }
 });
 
