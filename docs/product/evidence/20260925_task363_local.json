@@ -1,0 +1,170 @@
+{
+  "task": "TASK363",
+  "baseCommit": "4b1942739a822c323426d75f01c12807cdf8d170",
+  "validatedAt": "2026-09-25T15:27:32.410928+00:00",
+  "sourceHashes": {
+    "frontend/admin-suppliers.html": "1ecb9ff3cf8140cb5482ef72bfa78158d50b14edf00f124e40875c66c6f5f866",
+    "frontend/admin-suppliers.js": "d9f8ef2d5159befaf3521741e64c12d591c9b1fe0b88fcf0430afac48e2b75b0",
+    "frontend/cw-supplier-rules.js": "82e3605a11f65db4d24d07ca31607e79ca7e0e0f99162a9861a547605ab318fb",
+    "frontend/cw-supplier-copy.js": "d67dea3d2e5ec62bd5e75e9337c8bdf500f4d19016d0ab9b5e5bcc218a5a9d84",
+    "frontend/cw-suppliers.css": "2d358bb8b28cb38133d2bb93a9845ab12e46c07ad1ad285c7da1f4c8427f1b4f",
+    "frontend/sw.js": "a2214e87880f4a5eceb6096f83b9446f7b5f873581ce192a99a524b892adcdda",
+    "src/controllers/supplierHubController.js": "c237609eb5fcc49664b237345e46c468b0ea3db970bf98570458302888e2b443",
+    "src/routes/supplierHubRoutes.js": "f20673fddc4689711b7a2dbabef306d72daa5192b46251507082fc98c0ff54dc",
+    "src/services/supplierHubService.js": "7d6cb447249afc6b8bc6c5715807a115943832a9dd14d05af24120b4d744dc82",
+    "src/services/credentialVaultService.js": "5d228f89547d3a6f3da50b14932cf75c113c2a2436444d4908f12e10b1baf689",
+    "src/services/fieldWriteRequestService.js": "ef373de1cb19ab6515dec62e7fac19e73b986155b6cd94b84f606dde6c60a92a",
+    "src/dal/AdministrationRepository.js": "e9ea5bdfa2a99faacda27e57e07d56203ff57f091397ace1a50a2a2df7a95a12",
+    "scripts/fixtures/internal-chat-server.js": "62169494537c10c91950b98bffa7bab0e3d7d207b922b61acad9af0ce6280873",
+    "scripts/test-field-suite.js": "73cacffb8fa423bdbf92fafc9a8a68e080a4608db12e4b8d2273c866f6c845d0",
+    "scripts/test-field-supplier-hub.js": "2ea2bec0e4a5c0a1421526e40b2c64f932f1647c5d7d0b404faf94f526c2ce95",
+    "scripts/test-field-supplier-hub-ui.js": "ecf19eeae955f2930a506ab361aa3a1312242b86d33c286cab4b3093f0629618",
+    "scripts/test-administration-os-operational.js": "c8b4fdc18b02fe464ae78cd27e499bc2238c085208eda8ed1e9a859c66bac985",
+    "scripts/test-shared-navigation-browser.js": "3af7fa34359dc8488b7e5f13deb4da1bf59be986428d74b3e0075dfde605a07e",
+    "tests/supplier-hub.test.js": "0a5c7909ecc0fb2b159c54872be56df7448a3719ab8bc6c8f62db4a650abf4f7",
+    "frontend/admin-auth-guard.js": "8927751815231c2f00caf076f81f24ade055b28526e82b99f7265b504446ce1e",
+    "frontend/cw-auth.js": "3758a9876e10d88c14b60ea7cdb204209b1739b83284bc05e8d5e723aa15dc71"
+  },
+  "unitTests": {
+    "passed": 733,
+    "files": 100,
+    "new": 13,
+    "finalFocusedPassed": 13
+  },
+  "technicianTests": {
+    "passed": 4
+  },
+  "syntax": {
+    "backend": 643,
+    "frontend": 256,
+    "inline": 44,
+    "finalChangedScriptsCheckedSeparately": true
+  },
+  "integrationGroups": [
+    {
+      "script": "scripts/test-field-supplier-hub.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-supplier-hub-ui.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-administration-os-operational.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-shared-navigation-browser.js",
+      "code": 0
+    }
+  ],
+  "finalFourGroupsRepeated": true,
+  "logs": {
+    "/tmp/cw363-focused.log": "759c4c863d69d064d584c571768ff6bd10206047c21f8cdc839e04894532f466",
+    "/tmp/cw363-final-focused.log": "fdf56a6c6390540caf670188906d5cbbd17d07464b316086e292dbca44a24ef5",
+    "/tmp/cw363-unit.log": "161744ce336ef3cbd9fa0829a3f63be35676c4bc18665cf7f5e0a9abf84ce9da",
+    "/tmp/cw363-tech.log": "82564c57826aed6730fd9b618cbf67920aa697c78f027c113d134b344d8a9ef0",
+    "/tmp/cw363-syntax.log": "6a89bd5d960f1ccd3d294beb4d6c6c932160e69e3cc76179ba1aa68d8068865b",
+    "/tmp/cw363-api.log": "1ebe6c41f1d660a01550c68d8f4b401733f489f2691b17dbfc853692d812c034",
+    "/tmp/cw363-integration.log": "d43d07b0434c8cb042e044dc12dfd600c743698f9463c61a64cefe2174d9552e",
+    "/tmp/cw363-final-integration.log": "6fa3185a0352267356117b5287a9586f8b71bfe90edbde82bc39480393c39f2d"
+  },
+  "runtime": {
+    "database": "PGlite 0.5.8 / pglite-socket 0.2.11, isolated",
+    "existingAdditiveMigrations": 41,
+    "newMigrations": 0,
+    "chromium": "153.0.0, multiple processes, web security retained",
+    "runnerSha256": "5bd8f95926470bd82fabef27148ed54a55532bdf80d8dbc557dd19b244486b2b",
+    "preloadSha256": "74ba6986b731dfe5120836cb841c25bed62d334014aa588379558293deb6ec7a"
+  },
+  "fixture": {
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "screenshots": {
+      "reports/field-visual/supplier-hub/de-1440.png": "0a492b44b5d963a5bb7befd60ed6ad5d04baf74743a393eeb54fdb70e5867d27",
+      "reports/field-visual/supplier-hub/de-320.png": "98693df844fad321a403059ff278c8eb8a6c799cb7c79bd244e28d9e7677ccb3",
+      "reports/field-visual/supplier-hub/de-390.png": "64df200ec26b26ebfcb40030bb1c8ee54d4c81257b8c7fd3a910eb9b23c345ae",
+      "reports/field-visual/supplier-hub/directory-de-320.png": "dbf2087fd2dc551ed5b967c52db191dc10d47684ed53a59a14f9aa3c862e0fd6",
+      "reports/field-visual/supplier-hub/directory-pt-1440.png": "a257b916ca43548e19b59a45544fd92aaa060e06f9a63cb9f77c09cf7d74c578",
+      "reports/field-visual/supplier-hub/directory-pt-390.png": "bf20bb7ce8cbb2c25fa02f2929e02a881e29915fd9907a905301dfa7043bf2ca",
+      "reports/field-visual/supplier-hub/en-1440.png": "e32f0d3fb44edc7438eca0508fbaed55cb9d45a4177a82a8d98ba7a2c36ae5c0",
+      "reports/field-visual/supplier-hub/en-320.png": "2f5a6efc35aa5afbb0768e8d2796bab4a7b04c0a1361c14bceeca7953f9302b7",
+      "reports/field-visual/supplier-hub/en-390.png": "edbb27a73fc5a9743306cfdf6b42baedf5078ee04b8d141ab5d6f62e349f94f7",
+      "reports/field-visual/supplier-hub/es-1440.png": "823dcae53a79903fd4e289218c860d25ebe68328c641f73791cd38c694a1f190",
+      "reports/field-visual/supplier-hub/es-320.png": "2a5b7c5127e79181d27342e5aeb2ff2d3b1e8760777b149356cf0ff806d09aac",
+      "reports/field-visual/supplier-hub/es-390.png": "a0057d8f53473f36307db2b0a4eaba6f7a45c1a0f287e29856303bb42e409a19",
+      "reports/field-visual/supplier-hub/fr-1440.png": "0dd8446bd8556d7e62165fa9a1e3834c1d227c86870d4f732bb77c8e0b5820ac",
+      "reports/field-visual/supplier-hub/fr-320.png": "1dd1f2911120ca4162df2dd8da167afa9fd465b7282e20d21b95d247c29f5a37",
+      "reports/field-visual/supplier-hub/fr-390.png": "3f11c5d6759e8f845cf295231d322269f4232b603bd6e03f1fc168a000175a88",
+      "reports/field-visual/supplier-hub/pt-1440.png": "dcc50ca5e8085807bf01489e99537ced3cf6f85cc39de6420b115d55cd667b4b",
+      "reports/field-visual/supplier-hub/pt-320.png": "f309968a23eb32521d49658558f722201572a5e4dcc32a9b58a274fbc9fcf105",
+      "reports/field-visual/supplier-hub/pt-390.png": "7fbd14a56f3d06630731bc26ee2749db079b49b1fa6cc60248c4d237777e4877"
+    },
+    "visuallyReviewed": [
+      "pt-390.png",
+      "pt-1440.png",
+      "de-320.png",
+      "directory-pt-390.png",
+      "directory-pt-1440.png",
+      "directory-de-320.png"
+    ],
+    "clipboard": "Test adapter for success and rejection; no physical OS assertion",
+    "businessCountsUnchanged": [
+      "client",
+      "pool",
+      "invoice",
+      "payment",
+      "emailLog",
+      "chatMessage",
+      "stockPurchase"
+    ]
+  },
+  "runnerGroups": 262,
+  "cacheVersion": "v174",
+  "inventory": {
+    "htmlFiles": 115,
+    "rootPages": 108,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 101,
+    "catalogueGuardDifferences": 0,
+    "activeScriptsScanned": 283,
+    "remainingLiteralQueue": 14
+  },
+  "publication": {
+    "status": "LOCAL_VALIDATED_NOT_YET_PUBLISHED"
+  },
+  "previousCI": {
+    "task": 362,
+    "runId": 36150863744,
+    "jobId": 108123470461,
+    "codeSha": "c2be6caa8649e1d7ab3fc47aef29d5f85c07ac49",
+    "status": "in_progress",
+    "expectedGroups": 260,
+    "nativeRestore": "PENDING"
+  },
+  "initialVerificationFindings": [
+    "Initial browser opening failed; corrected textarea type assignment and explicit state ownership, then passed repeated full affected groups."
+  ],
+  "limits": [
+    "Native PostgreSQL full suite and restore pending for TASK362/TASK363.",
+    "No physical iPhone/Android or clipboard pilot.",
+    "Historical administration snapshots were not rewritten.",
+    "Encryption key/format unchanged; no automatic repair of old ciphertext.",
+    "Create request idempotency is scoped per administrator and UUID, not global supplier-name deduplication.",
+    "Forms are in memory only; only the owned submission reference survives reload in the same tab.",
+    "No new visual edit/delete interface, order placement, portal automation, real external contact, merge or deploy.",
+    "Historical reconciliation, production volume, VPS and operational backups remain pending."
+  ]
+}

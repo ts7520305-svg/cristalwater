@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `9246adca99e330171990be7a82b5a550746adfe2`. Gerado em 2026-09-25T14:49:16.928Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `4b1942739a822c323426d75f01c12807cdf8d170`. Gerado em 2026-09-25T15:24:21.011Z. Inclui o estado dos ficheiros locais no momento da geração.
 
 115 ficheiros HTML: 108 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 281 scripts de integração/navegador ativos. 100 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 283 scripts de integração/navegador ativos. 101 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 2 referências existem no índice Git mas não estão materializadas nesta cópia local; não são classificadas como ficheiros ausentes da aplicação.
 
@@ -74,7 +74,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /admin-rounds | Entrada raiz | ADMIN | ADMIN | 4 |
 | /admin-security | Entrada raiz | ADMIN | ADMIN | 2 |
 | /admin-service-log | Entrada raiz | ADMIN | ADMIN | 1 |
-| /admin-suppliers | Entrada raiz | ADMIN | ADMIN | 0 |
+| /admin-suppliers | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-technicians | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-test-center | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-today | Entrada raiz | ADMIN | ADMIN | 2 |
@@ -156,7 +156,6 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 
 ## Fila finita sem referência literal em QA
 
-- /admin-suppliers — Entrada raiz; papéis declarados: ADMIN.
 - /admin-technicians — Entrada raiz; papéis declarados: ADMIN.
 - /admin-vehicles — Entrada raiz; papéis declarados: ADMIN.
 - /admin-visits — Entrada raiz; papéis declarados: ADMIN.

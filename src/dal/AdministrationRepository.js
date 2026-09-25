@@ -51,7 +51,8 @@ async function updateSupplierAccount(db, id, data) {
 
 async function listSuppliers(db = prisma) {
   if (!db.supplierAccount?.findMany) return [];
-  return db.supplierAccount.findMany({ orderBy: [{ favorite: "desc" }, { updatedAt: "desc" }] });
+  // Workflow snapshots and audit messages do not need portal credentials.
+  return db.supplierAccount.findMany({ select: { id: true, name: true, category: true, phone: true, email: true, notes: true, favorite: true, active: true, createdAt: true, updatedAt: true }, orderBy: [{ favorite: "desc" }, { updatedAt: "desc" }] });
 }
 
 async function createPurchase(db, data) {

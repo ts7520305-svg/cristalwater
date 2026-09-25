@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-25T14:49:16.928Z",
-  "baseCommit": "9246adca99e330171990be7a82b5a550746adfe2",
+  "generatedAt": "2026-09-25T15:24:21.011Z",
+  "baseCommit": "4b1942739a822c323426d75f01c12807cdf8d170",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 281,
+  "activeScriptsScanned": 283,
   "summary": {
     "htmlFiles": 115,
     "rootPages": 108,
     "nestedPages": 7,
     "unavailableLocalAssetReferences": 2,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 100,
+    "pagesWithLiteralTestReference": 101,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -1628,7 +1628,7 @@
       "file": "frontend/admin-suppliers.html",
       "route": "/admin-suppliers",
       "kind": "Entrada raiz",
-      "title": "Cristal Water - Fornecedores",
+      "title": "Cristal Water — Fornecedores",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -1643,16 +1643,18 @@
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/manifest.webmanifest",
-        "/ui/foundation.css",
-        "/cristal-assist.css",
         "/cw-auth.js",
-        "/ui/design-system.css",
         "/admin-auth-guard.js",
+        "/ui/foundation.css",
+        "/ui/design-system.css",
+        "/cristal-assist.css",
+        "/cw-suppliers.css",
+        "/cw-supplier-rules.js",
+        "/cw-supplier-copy.js",
         "/admin-suppliers.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
         "/cw-admin-shortcuts.js",
-        "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
         "/ui/design-system.js"
@@ -1661,7 +1663,9 @@
       "unavailableLocalAssets": [],
       "languageAssets": [],
       "directPrintAction": false,
-      "testReferences": [],
+      "testReferences": [
+        "test-field-supplier-hub-ui.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {

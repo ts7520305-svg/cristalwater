@@ -1,276 +1,43 @@
 (function(){
-  "use strict";
-
-  const API = "/api/suppliers";
-  let suppliersCache = [];
-  let searchTimer = null;
-
-  const els = {
-    supplierForm: document.getElementById("supplierForm"),
-    linkForm: document.getElementById("linkForm"),
-    suppliers: document.getElementById("suppliers"),
-    links: document.getElementById("links"),
-    status: document.getElementById("supplierStatus"),
-    search: document.getElementById("supplierSearch"),
-    active: document.getElementById("activeFilter"),
-    clear: document.getElementById("clearSearch"),
-    refresh: document.getElementById("refreshBtn"),
-    linkSupplier: document.getElementById("linkSupplier")
-  };
-
-  function token(){
-    return localStorage.getItem("token") || localStorage.getItem("adminToken") || "";
-  }
-
-  function headers(extra = {}){
-    const authToken = token();
-    return {
-      "Content-Type": "application/json",
-      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-      ...extra
-    };
-  }
-
-  async function api(path, options = {}){
-    const res = await fetch(API + path, { ...options, headers: headers(options.headers || {}) });
-    const data = await res.json().catch(() => ({ ok:false, error:"Resposta inválida do servidor." }));
-    if(!res.ok || data.ok === false){
-      throw new Error(data.error || data.message || `Erro ${res.status}`);
-    }
-    return data;
-  }
-
-  function formData(form){
-    const data = Object.fromEntries(new FormData(form).entries());
-    form.querySelectorAll('input[type="checkbox"]').forEach((input) => {
-      data[input.name] = input.checked;
-    });
-    Object.keys(data).forEach((key) => {
-      if(typeof data[key] === "string") data[key] = data[key].trim();
-      if(data[key] === "") delete data[key];
-    });
-    return data;
-  }
-
-  function esc(value){
-    return String(value ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-  function setStatus(message, type = ""){
-    els.status.textContent = message || "";
-    els.status.className = `status ${type}`.trim();
-  }
-
-  function validHref(url){
-    const raw = String(url || "").trim();
-    if(!raw) return "";
-    try{
-      const parsed = new URL(raw, window.location.origin);
-      if(!["http:", "https:"].includes(parsed.protocol)) return "";
-      return parsed.href;
-    }catch(_){
-      return "";
-    }
-  }
-
-  async function copyText(text, label){
-    const value = String(text || "");
-    if(!value){
-      setStatus(`${label} não definido.`, "err");
-      return;
-    }
-    try{
-      if(navigator.clipboard?.writeText){
-        await navigator.clipboard.writeText(value);
-      }else{
-        const textarea = document.createElement("textarea");
-        textarea.value = value;
-        textarea.style.position = "fixed";
-        textarea.style.opacity = "0";
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand("copy");
-        textarea.remove();
-      }
-      setStatus(`${label} copiado.`, "ok");
-    }catch(err){
-      setStatus(`Não foi possível copiar ${label.toLowerCase()}: ${err.message}`, "err");
-    }
-  }
-
-  function renderSupplierOptions(){
-    const options = ['<option value="">Sem fornecedor</option>'].concat(
-      suppliersCache.map((supplier) => `<option value="${supplier.id}">${esc(supplier.name)}</option>`)
-    );
-    els.linkSupplier.innerHTML = options.join("");
-  }
-
-  function renderSuppliers(list){
-    if(!Array.isArray(list) || !list.length){
-      els.suppliers.innerHTML = '<p class="muted">Sem fornecedores registados.</p>';
-      return;
-    }
-
-    els.suppliers.innerHTML = list.map((supplier) => {
-      const href = validHref(supplier.loginUrl || supplier.website);
-      const category = supplier.category || "Fornecedor";
-      const password = supplier.password ? "********" : "Sem password";
-      const lastAccess = supplier.lastAccessAt ? new Date(supplier.lastAccessAt).toLocaleString("pt-PT") : "Nunca";
-      return `
-        <article class="card supplier-card" data-supplier-id="${supplier.id}">
-          <div class="card-head">
-            <div>
-              <span class="badge ${supplier.favorite ? "favorite" : ""}">${esc(category)}</span>
-              <h3>${esc(supplier.name)}</h3>
-            </div>
-            <span class="muted small">ID ${esc(supplier.id)}</span>
-          </div>
-          <div>
-            <div class="muted small">Utilizador</div>
-            <strong>${esc(supplier.username || "Não definido")}</strong>
-          </div>
-          <div>
-            <div class="muted small">Password</div>
-            <span class="secret">${esc(password)}</span>
-            ${supplier.passwordHint ? `<div class="muted small">Dica: ${esc(supplier.passwordHint)}</div>` : ""}
-          </div>
-          ${supplier.notes ? `<p class="muted">${esc(supplier.notes)}</p>` : ""}
-          <div class="muted small">Último acesso: ${esc(lastAccess)}</div>
-          <div class="row">
-            ${href ? `<a class="btn primary" href="${esc(href)}" target="_blank" rel="noopener">Abrir portal</a>` : ""}
-            <button class="btn" data-copy-user="${supplier.id}">Copiar user</button>
-            <button class="btn warn" data-copy-password="${supplier.id}">Copiar password</button>
-          </div>
-        </article>
-      `;
-    }).join("");
-  }
-
-  function renderLinks(list){
-    if(!Array.isArray(list) || !list.length){
-      els.links.innerHTML = '<p class="muted">Sem links rápidos.</p>';
-      return;
-    }
-
-    els.links.innerHTML = list.map((link) => {
-      const href = validHref(link.url);
-      return `
-        <article class="card">
-          <div class="card-head">
-            <div>
-              <span class="badge ${link.favorite ? "favorite" : ""}">${esc(link.category || "Link")}</span>
-              <h3>${esc(link.title)}</h3>
-            </div>
-            <span class="muted small">ID ${esc(link.id)}</span>
-          </div>
-          ${link.supplier?.name ? `<p class="muted">Fornecedor: ${esc(link.supplier.name)}</p>` : ""}
-          ${link.notes ? `<p class="muted">${esc(link.notes)}</p>` : ""}
-          <div class="row">
-            ${href ? `<a class="btn primary" href="${esc(href)}" target="_blank" rel="noopener">Abrir</a>` : ""}
-            <button class="btn" data-copy-url="${esc(href || link.url)}">Copiar link</button>
-          </div>
-        </article>
-      `;
-    }).join("");
-  }
-
-  function supplierById(id){
-    return suppliersCache.find((supplier) => Number(supplier.id) === Number(id));
-  }
-
-  async function copyPassword(id){
-    try{
-      setStatus("A pedir password cifrada ao servidor...");
-      const data = await api(`/suppliers/${id}/reveal`, { method:"POST", body: JSON.stringify({}) });
-      await copyText(data.password || "", "Password");
-    }catch(err){
-      setStatus(`Erro ao copiar password: ${err.message}`, "err");
-    }
-  }
-
-  async function loadAll(){
-    try{
-      setStatus("A carregar fornecedores...");
-      const q = els.search.value.trim();
-      const active = els.active.value;
-      const params = new URLSearchParams();
-      if(q) params.set("q", q);
-      if(active !== "all") params.set("active", active);
-      const suffix = params.toString() ? `?${params.toString()}` : "";
-      const [supplierData, linkData] = await Promise.all([
-        api(`/suppliers${suffix}`),
-        api("/links")
-      ]);
-      suppliersCache = supplierData.suppliers || [];
-      renderSupplierOptions();
-      renderSuppliers(suppliersCache);
-      renderLinks(linkData.links || []);
-      setStatus(`${suppliersCache.length} fornecedor(es) carregado(s).`, "ok");
-    }catch(err){
-      setStatus(err.message, "err");
-      els.suppliers.innerHTML = '<p class="muted">Não foi possível carregar fornecedores.</p>';
-      els.links.innerHTML = '<p class="muted">Não foi possível carregar links.</p>';
-    }
-  }
-
-  function scheduleLoad(){
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(loadAll, 250);
-  }
-
-  els.supplierForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    try{
-      await api("/suppliers", { method:"POST", body: JSON.stringify(formData(event.currentTarget)) });
-      event.currentTarget.reset();
-      setStatus("Fornecedor guardado.", "ok");
-      await loadAll();
-    }catch(err){
-      setStatus(`Erro ao guardar fornecedor: ${err.message}`, "err");
-    }
-  });
-
-  els.linkForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    try{
-      await api("/links", { method:"POST", body: JSON.stringify(formData(event.currentTarget)) });
-      event.currentTarget.reset();
-      setStatus("Atalho guardado.", "ok");
-      await loadAll();
-    }catch(err){
-      setStatus(`Erro ao guardar atalho: ${err.message}`, "err");
-    }
-  });
-
-  els.suppliers.addEventListener("click", (event) => {
-    const userId = event.target?.dataset?.copyUser;
-    const passwordId = event.target?.dataset?.copyPassword;
-    if(userId){
-      const supplier = supplierById(userId);
-      copyText(supplier?.username || "", "Utilizador");
-    }
-    if(passwordId) copyPassword(passwordId);
-  });
-
-  els.links.addEventListener("click", (event) => {
-    const url = event.target?.dataset?.copyUrl;
-    if(url) copyText(url, "Link");
-  });
-
-  els.refresh.addEventListener("click", loadAll);
-  els.search.addEventListener("input", scheduleLoad);
-  els.active.addEventListener("change", loadAll);
-  els.clear.addEventListener("click", () => {
-    els.search.value = "";
-    els.active.value = "true";
-    loadAll();
-  });
-
-  window.loadAll = loadAll;
-  loadAll();
-})();
+ 'use strict';
+ const R=window.CWSupplierRules,copy=window.CWSupplierCopy,$=id=>document.getElementById(id),hub=$('supplierHub'),keys=['cristalwater_jwt','token','adminToken','cristalwater_user','user'],jobs={};
+ let actor,invalid=false,suspended=false,key='',raw=null,pending=null,original=null,receipt=null,storageBlocked=false,formKind=null,selected=null,language='pt',state='loading',writeState='idle',copyState='',data=null,query={q:'',active:'true'},pages={supplier:1,link:1};
+ const t=k=>copy[language][k]||k,node=(tag,text)=>{const el=document.createElement(tag);el.textContent=text;return el;},busy=()=>!!jobs.write,unresolved=()=>!!pending&&!receipt,blocked=()=>invalid||suspended||storageBlocked;
+ function identity(){const tokens=keys.slice(0,3).map(k=>localStorage.getItem(k)),token=tokens.find(Boolean),users=keys.slice(3).map(k=>localStorage.getItem(k)).filter(Boolean).map(JSON.parse);if(!token||tokens.some(v=>v&&v!==token))return null;const claims=JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))),id=Number(claims.userId||claims.id);if(claims.role!=='ADMIN'||claims.principalType==='ENV_ADMIN'||!R.positive(id)||!Number.isFinite(claims.exp)||claims.exp*1000<=Date.now()||!users.length||users.some(u=>u.role!=='ADMIN'||Number(u.userId||u.id)!==id))return null;return {token,id,owner:'ADMIN:'+id,expires:claims.exp*1000,fingerprint:JSON.stringify([tokens,users.map(u=>[u.role,Number(u.userId||u.id)])])};}
+ function abort(kind){const job=jobs[kind];if(job){job.controller.abort();clearTimeout(job.timer);delete jobs[kind];}}
+ function clearFields(){$('supplierForm').reset();$('linkForm').reset();selected=null;}
+ function active(){let current;try{current=identity();}catch(_){}if(!invalid&&actor&&current?.fingerprint===actor.fingerprint&&actor.expires>Date.now())return true;if(!invalid||state!=='session'){invalid=true;for(const kind of Object.keys(jobs))abort(kind);clearFields();data=null;original=null;pending=null;receipt=null;formKind=null;copyState='';state='session';writeState='session';render();}return false;}
+ function start(kind){abort(kind);const controller=new AbortController(),job={kind,controller,timer:setTimeout(()=>controller.abort(),15000)};jobs[kind]=job;return job;}
+ const current=job=>active()&&!suspended&&jobs[job.kind]===job;
+ function finish(job){clearTimeout(job.timer);if(jobs[job.kind]===job)delete jobs[job.kind];}
+ async function request(path,job,config={}){const res=await fetch('/api/suppliers'+path,{...config,headers:{Authorization:'Bearer '+actor.token,'Content-Type':'application/json'},cache:'no-store',redirect:'error',signal:job.controller.signal});if(!current(job))throw Error('stale');if([401,403].includes(res.status)){invalid=true;active();throw Error('session');}const trusted=res.headers.get('x-cw-suppliers')==='supplier-hub-v1'&&res.headers.get('x-cw-owner')===actor.owner&&res.headers.get('cache-control')==='private, no-store'&&(res.headers.get('content-type')||'').startsWith('application/json'),value=await res.json();if(!current(job)||!trusted)throw Error('unconfirmed');if(res.status!==200)throw Object.assign(Error('refused'),value?.ok===false&&value.version===1&&value.owner===actor.owner&&typeof value.code==='string'&&value.code.startsWith('SUPPLIER_')?{status:res.status,code:value.code}:{});if(!R.base(value,actor.owner))throw Error('unconfirmed');return value;}
+ const fields={supplier:['name','category','website','loginUrl','username','password','passwordHint','notes','favorite'],link:['title','url','category','notes','favorite']};
+ function build(){for(const [kind,list] of Object.entries(fields))for(const name of list){const label=node('label',''),span=node('span',t(name==='title'?'linkTitle':name)),input=node(name==='notes'?'textarea':'input','');span.dataset.supplierCopy=name==='title'?'linkTitle':name;input.name=name;input.id=(kind==='supplier'?'sf-':'lf-')+name;if(input.tagName==='INPUT')input.type=name==='password'?'password':name==='favorite'?'checkbox':'text';if(name==='password')input.autocomplete='new-password';if(name==='username')input.autocomplete='off';if(['name','title','url'].includes(name))input.required=true;input.maxLength=name==='title'?200:name==='url'?2000:R.limits[name]||100;label.append(span,input);if(name==='favorite')label.className='check';$(kind==='supplier'?'supplierFields':'linkFields').append(label);}}
+ function collect(kind){return Object.fromEntries(fields[kind].map(name=>{const input=$((kind==='supplier'?'sf-':'lf-')+name);return [name,input.type==='checkbox'?input.checked:input.value];}));}
+ function fact(dl,label,value){const group=node('div','');group.append(node('dt',t(label)),node('dd',value===null||value===undefined||value===''?t('missing'):String(value)));dl.append(group);}
+ function button(label,action){const b=node('button',t(label));b.type='button';b.addEventListener('click',action);return b;}
+ function date(value){if(!R.iso(value))return t('missing');return new Intl.DateTimeFormat({pt:'pt-PT',en:'en-GB',fr:'fr-FR',es:'es-ES',de:'de-DE'}[language],{dateStyle:'short',timeStyle:'short',timeZone:'Europe/Lisbon'}).format(new Date(value));}
+ function address(card,value,label,enabled=true){const href=R.href(value);if(href&&enabled){const a=node('a',t(label));a.href=href;a.target='_blank';a.rel='noopener noreferrer';a.referrerPolicy='no-referrer';card.append(a);}else if(value){const p=node('p',t(!enabled&&href?'inactivePortal':'unsafe')+' '+value);p.className='muted';card.append(p);}}
+ function cards(){for(const id of ['suppliers','links'])$(id).replaceChildren();if(!data)return;for(const kind of ['supplier','link']){const plural=kind==='supplier'?'suppliers':'links',packet=data[kind],container=$(plural);if(!packet[plural].length)container.append(node('p',t('empty')));for(const row of packet[plural]){const card=node('article',''),dl=node('dl',''),actions=node('div','');card.className='hub-card';card.dataset[kind+'Id']=row.id;actions.className='hub-actions';card.append(node('h4',row.name||row.title),node('p','#'+row.id+' · '+t(row.active?'active':'inactive')+(row.favorite?' · '+t('favorite'):'')));fact(dl,'category',row.category);if(kind==='supplier'){fact(dl,'username',row.username);fact(dl,'credential',t(row.hasPassword?'yes':'no'));if(row.passwordHint)fact(dl,'passwordHint',row.passwordHint);fact(dl,'lastAccess',date(row.lastAccessAt));}else if(row.supplier)fact(dl,'name','#'+row.supplier.id+' · '+row.supplier.name+' · '+t(row.supplier.active?'active':'inactive'));if(row.notes)fact(dl,'notes',row.notes);card.append(dl);address(actions,kind==='supplier'?row.loginUrl||row.website:row.url,kind==='supplier'?'portal':'open',row.active&&(!row.supplier||row.supplier.active));
+ if(kind==='supplier'){const user=button('copyUser',()=>copyUser(row)),password=button('copyPassword',()=>copyPassword(row)),select=button('select',()=>{if(!active()||blocked()||pending||busy())return;selected={id:row.id,name:row.name,updatedAt:row.updatedAt};formKind='link';writeState='editing';render();$('linkForm').scrollIntoView({block:'start'});});user.dataset.copyUser=row.id;password.dataset.copyPassword=row.id;select.dataset.selectSupplier=row.id;user.disabled=!row.username||!row.active||!!jobs.copy;password.disabled=!row.hasPassword||!row.active||!!jobs.copy;select.disabled=!row.active||blocked()||!!pending||busy();actions.append(user,password,select);}card.append(actions);container.append(card);}}}
+ function render(){$('supplierWritePanel').hidden=!formKind&&!pending&&!storageBlocked;hub.dataset.state=invalid?'session':state;hub.dataset.writeState=writeState;document.documentElement.lang=language;document.title='Cristal Water — '+t('title');for(const el of document.querySelectorAll('[data-supplier-copy]'))el.textContent=t(el.dataset.supplierCopy);$('supplierLanguage').value=language;for(const a of document.querySelectorAll('[data-destination]'))a.href=a.dataset.destination+'?lang='+language;$('supplierStatus').textContent=t(invalid?'session':state);$('copyStatus').textContent=copyState?t(copyState):'';$('writeStatus').textContent=t(writeState);$('writeReference').textContent=pending?t('reference')+': '+pending.requestId+(receipt?.id?' · #'+receipt.id:''):'';$('supplierForm').hidden=formKind!=='supplier'||blocked();$('linkForm').hidden=formKind!=='link'||blocked();$('selectedSupplier').textContent=selected?'#'+selected.id+' — '+selected.name:t('noSupplier');
+ for(const form of [$('supplierForm'),$('linkForm')])for(const el of form.querySelectorAll('input,textarea,button'))el.disabled=blocked()||!!pending||busy();for(const id of ['newSupplier','newLink'])$(id).disabled=blocked()||!!pending||busy();$('checkWrite').hidden=!unresolved()||blocked();$('retryWrite').hidden=!unresolved()||!original||blocked();$('cancelWrite').hidden=!unresolved()||blocked();$('cancelHint').hidden=!unresolved()||blocked();$('nextWrite').hidden=!receipt||blocked();for(const id of ['checkWrite','retryWrite','cancelWrite','nextWrite'])$(id).disabled=busy();
+ for(const kind of ['supplier','link']){const packet=data?.[kind];$(kind+'Count').textContent=packet?t('total')+': '+packet.total:'';$(kind+'Page').textContent=packet?t('page')+' '+packet.page+' / '+Math.max(1,Math.ceil(packet.total/25)):'';$(kind+'Previous').disabled=blocked()||!packet||packet.page<=1;$(kind+'Next').disabled=blocked()||!packet||packet.page*25>=packet.total;}
+ $('refreshBtn').disabled=invalid||suspended;for(const el of $('supplierFilters').elements)el.disabled=invalid||suspended;cards();}
+ async function load(){if(!active()||suspended)return;data=null;state='loading';copyState='';const job=start('list'),requested={...pages},filter={...query};render();try{const values=await Promise.all(['supplier','link'].map(kind=>request('/'+(kind==='supplier'?'suppliers':'links')+'?'+new URLSearchParams({...filter,page:requested[kind]}),job)));if(!R.listPacket(values[0],actor.owner,'suppliers',requested.supplier)||!R.listPacket(values[1],actor.owner,'links',requested.link))throw Error();data={supplier:values[0],link:values[1]};state='ready';}catch(_){if(current(job)){data=null;state='error';}}finally{finish(job);if(active()&&!suspended)render();}}
+ function restore(){try{raw=sessionStorage.getItem(key);const record=R.pending(raw,actor.owner);if(record===false){storageBlocked=true;writeState='corrupt';return;}pending=record;receipt=null;original=null;writeState=pending?'unknown':'idle';}catch(_){storageBlocked=true;writeState='storage';}}
+ function remember(value){try{if(sessionStorage.getItem(key)!==raw){storageBlocked=true;writeState='corrupt';return false;}const next=value===null?null:JSON.stringify(value);if(next===null)sessionStorage.removeItem(key);else sessionStorage.setItem(key,next);if(sessionStorage.getItem(key)!==next)throw Error();raw=next;return true;}catch(_){writeState='storage';return false;}}
+ function accept(value){if(!pending||!R.resultPacket(value,actor.owner,pending.kind,pending.requestId))throw Error('unconfirmed');if(value.status==='UNCONFIRMED'){writeState='unconfirmed';return;}receipt=value.result;writeState=value.status==='CANCELLED'?'cancelled':'saved';original=null;$(pending.kind==='supplier'?'supplierForm':'linkForm').reset();if(pending.kind==='link')selected=null;}
+ async function send(kind,retry=false){if(!active()||blocked()||busy()||(retry?(!pending||!original):!!pending))return;if(!retry){let values=collect(kind);if(kind==='link')values={...values,supplierId:selected?.id||null,supplierVersion:selected?.updatedAt||null};const validated=kind==='supplier'?R.supplier(values):R.link(values);if(!validated){writeState='invalid';render();return;}const candidate={version:1,owner:actor.owner,kind,requestId:crypto.randomUUID()};if(!remember(candidate)){render();return;}pending=candidate;original=JSON.stringify({requestId:candidate.requestId,fields:values});}
+ const job=start('write');writeState='saving';if(pending.kind==='supplier')$('sf-password').value='';render();try{accept(await request('/'+(pending.kind==='supplier'?'suppliers':'links'),job,{method:'POST',body:original}));}catch(e){if(current(job))writeState=e.code==='SUPPLIER_SELECTION_CHANGED'?'changed':'unknown';}finally{finish(job);if(active()&&!suspended){render();if(receipt)load();}}
+ }
+ async function check(cancel=false){if(!active()||blocked()||busy()||!unresolved())return;const job=start('write');writeState='checking';render();try{accept(await request('/'+(cancel?'cancel':'result')+'/'+pending.kind+'/'+pending.requestId,job,cancel?{method:'POST',body:'{}'}:{}));}catch(_){if(current(job))writeState='unknown';}finally{finish(job);if(active()&&!suspended){render();if(receipt)load();}}}
+ async function copyUser(row){if(!active()||suspended||jobs.copy||!row.active||!row.username)return;try{if(!navigator.clipboard?.writeText)throw Error();await navigator.clipboard.writeText(row.username);if(active()&&!suspended){copyState='copied';render();}}catch(_){if(active()&&!suspended){copyState='copyError';render();}}}
+ async function copyPassword(row){if(!active()||suspended||jobs.copy||!row.active||!row.hasPassword)return;const job=start('copy');copyState='copying';render();let value;try{if(!navigator.clipboard?.writeText)throw Error();value=await request('/suppliers/'+row.id+'/reveal',job,{method:'POST',body:JSON.stringify({expectedUpdatedAt:row.updatedAt})});if(value.id!==row.id||!R.text(value.password,4096)||!value.password.length||!R.iso(value.updatedAt)||!R.iso(value.lastAccessAt)||!R.positive(value.auditId)||!current(job))throw Error();row.updatedAt=value.updatedAt;row.lastAccessAt=value.lastAccessAt;if(selected?.id===row.id)selected.updatedAt=value.updatedAt;await navigator.clipboard.writeText(value.password);if(current(job))copyState='copied';}catch(_){if(current(job))copyState='copyError';}finally{value=null;finish(job);if(active()&&!suspended)render();}}
+ build();const lang=new URL(location.href).searchParams.get('lang');if(Object.hasOwn(copy,lang))language=lang;try{actor=identity();if(!actor)throw Error();key='cw:supplier-pending:v1:'+actor.owner;}catch(_){invalid=true;}
+ for(const kind of ['supplier','link']){$(kind==='supplier'?'supplierForm':'linkForm').addEventListener('submit',e=>{e.preventDefault();send(kind);});$(kind==='supplier'?'newSupplier':'newLink').addEventListener('click',()=>{if(active()&&!blocked()&&!pending&&!busy()){formKind=kind;writeState='editing';render();$(kind==='supplier'?'supplierForm':'linkForm').scrollIntoView({block:'start'});}});for(const [suffix,delta] of [['Previous',-1],['Next',1]])$(kind+suffix).addEventListener('click',()=>{pages[kind]=Math.max(1,pages[kind]+delta);load();});}
+ $('clearSupplier').addEventListener('click',()=>{if(active()&&!blocked()&&!pending){selected=null;render();}});$('checkWrite').addEventListener('click',()=>check());$('retryWrite').addEventListener('click',()=>send(pending?.kind,true));$('cancelWrite').addEventListener('click',()=>check(true));$('nextWrite').addEventListener('click',()=>{if(active()&&!blocked()&&!busy()&&receipt&&remember(null)){pending=null;original=null;receipt=null;formKind=null;writeState='idle';render();}else render();});
+ $('supplierFilters').addEventListener('submit',e=>{e.preventDefault();query={q:$('supplierSearch').value.trim(),active:$('activeFilter').value};pages={supplier:1,link:1};load();});$('clearSearch').addEventListener('click',()=>{$('supplierSearch').value='';$('activeFilter').value='true';query={q:'',active:'true'};pages={supplier:1,link:1};load();});$('refreshBtn').addEventListener('click',load);$('supplierLanguage').addEventListener('change',()=>{language=$('supplierLanguage').value;const url=new URL(location.href);url.searchParams.set('lang',language);history.replaceState(null,'',url);render();});
+ window.addEventListener('storage',active);window.addEventListener('focus',active);document.addEventListener('visibilitychange',()=>{if(!document.hidden)active();});window.addEventListener('pagehide',()=>{suspended=true;for(const kind of Object.keys(jobs))abort(kind);clearFields();original=null;receipt=null;data=null;formKind=null;state='loading';writeState=pending?'unknown':'idle';copyState='';render();});window.addEventListener('pageshow',()=>{suspended=false;if(active()){restore();render();load();}});setInterval(active,1000);
+ for(const id of ['supplierStatus','copyStatus','writeStatus','writeReference','suppliers','links'])$(id).dataset.cwStateManaged='manual';render();active();
+}());
