@@ -1,0 +1,119 @@
+{
+  "task": "TASK355",
+  "baseCommit": "2c02a4ddd3c8560e5cbe56f2ae7e1d60f600577d",
+  "validatedAt": "2026-09-25T10:37:43.514490+00:00",
+  "sourceHashes": {
+    "frontend/admin-email-logs.html": "b14e9219553dd958357b3023d8a4692317fed787af9eddc674ec37362bdf202b",
+    "frontend/admin-email-logs.js": "24b173e76325e79f19c5279a2ba3deddafb7dc7502d104b50af0c5c54b0e1768",
+    "frontend/cw-email-history-copy.js": "4197f978ca9b61f1abc0a299488e9b8fbc541a22e1b8efe94c6084233ea06e77",
+    "frontend/cw-email-history-rules.js": "1ceb0b442337494cb98525e062923769219b2da85807a64f7a36947bb1352412",
+    "frontend/sw.js": "6f7654a47838b90b54a5108cc8ecd9a249a9571542d9ed489a36b604328f463b",
+    "src/services/emailHistoryService.js": "778dd7c049354a4978953ef77ab555e1afd0e8208a97aa89ebd534f8a069cebb",
+    "src/services/emailRetryService.js": "5b5298bbe1a0adbfce9d35d4b3cab9e081ccf6c3b015140ad30fac41fdf0eaab",
+    "src/controllers/adminEmailLogController.js": "648c33cfe94d0cffbdba3aaaa44c52e562ff9bd79b21976aa668d398985cb531",
+    "src/controllers/adminEmailRetryController.js": "618adfa1f046f331d499dcf4a53f294319fb5b4c1b6835e0507b1593e497eb7c",
+    "src/routes/adminEmailLogRoutes.js": "4e20975a5dc7b33d9684d79ea579e709db2bea2cfd9eecfdddef64d4af6b93d8",
+    "src/routes/adminEmailRetryRoutes.js": "5f4f18a7eebcf22c5f72a8cbf26a849ca5fcab66b32479f018a90d873a2fdc69",
+    "src/middlewares/legacyAdministrationAccess.js": "13d72c2d556276eb0128a8f942476f76132e76fb8aecfe5b2c4653f2ddb7c332",
+    "scripts/test-field-suite.js": "47bfd57a50cee52e5da27f0f422600770fd45b0311c8b9e19cad8de9e5e0098e",
+    "scripts/test-field-email-history.js": "3c6a18e367e1e32ae5b63a9b8340379d01e619bee7d9d7790e51bfebfd5999c3",
+    "tests/email-history.test.js": "f45effbb05ba3b47eab88e48b54a112f001a8395e64c86230f3ebe519628834d"
+  },
+  "unitTests": {
+    "passed": 651,
+    "files": 92
+  },
+  "technicianTests": {
+    "passed": 4,
+    "files": 1
+  },
+  "syntax": {
+    "backend": 635,
+    "frontend": 238,
+    "inline": 52,
+    "finalChangedScripts": "node --check passed"
+  },
+  "integrationGroups": [
+    "scripts/test-field-email-history.js",
+    "scripts/test-field-monthly-email-delivery.js",
+    "scripts/test-field-legacy-admin-access.js"
+  ],
+  "finalRepeatedGroup": "scripts/test-field-email-history.js",
+  "fixture": {
+    "records": 30,
+    "pageCounts": [
+      25,
+      5
+    ],
+    "withinUtcDay": 28,
+    "distinctStatuses": 5,
+    "emailsSent": 0,
+    "originalRowsUnchanged": true,
+    "browserWrites": 0
+  },
+  "logs": {
+    "/tmp/cw355-unit.log": "3e1a695bc45774c989dbe09e87f3cecf929f8d310579c61bbd48a35a80e7839a",
+    "/tmp/cw355-tech.log": "23bf5e785099b6ea63131944657045be1e8b0cb7cb8878025ed99b03d1f61b50",
+    "/tmp/cw355-syntax.log": "24d7e389e66d744e4f7d7a8638837927784ffe2454a853dc28333d899dc4ed7e",
+    "/tmp/cw355-integration.log": "16624e0568f13762ff60b767c0e6f8ea07399732a1cf4c772d5555fa8fe1cbba",
+    "/tmp/cw355-final-email-history.log": "a5b2b1c4e7bd0306aa4f85136091fe64e19ebd8dc0cb74b508c8ed36317fb01b"
+  },
+  "runtime": {
+    "database": "PGlite 0.5.8 / pglite-socket 0.2.11, isolated",
+    "additiveMigrations": 40,
+    "chromium": "@sparticuz/chromium 153.0.0, normal multiple processes, web security retained",
+    "runnerSha256": "5bd8f95926470bd82fabef27148ed54a55532bdf80d8dbc557dd19b244486b2b",
+    "preloadSha256": "74ba6986b731dfe5120836cb841c25bed62d334014aa588379558293deb6ec7a"
+  },
+  "cache": "v166",
+  "fieldSuiteExpectedGroups": 252,
+  "inventory": {
+    "htmlFiles": 115,
+    "rootPages": 108,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 91,
+    "catalogueGuardDifferences": 0,
+    "activeScripts": 273,
+    "pagesWithoutLiteralTestReference": 24
+  },
+  "screenshots": {
+    "reports/field-visual/email-history/de-1440-record.png": "372b49e0504e4b0b8eaf7c7c12a9798a78b621f5eeb8dcfe7ae0a7ee964de821",
+    "reports/field-visual/email-history/de-1440.png": "08f39e96fd87c6b7d9ae51b8365a9a7aac5872e82b9462a28e1455c6b8a2c6de",
+    "reports/field-visual/email-history/de-320-record.png": "c46880530ea184da0f1d93e9107a13b27556553fcb6bd39a16dc2ccdb5381f9b",
+    "reports/field-visual/email-history/de-320.png": "a3fb7413575a07a2f9aeab825d2e48250b598bcd6f814da6f79f35df5c28586e",
+    "reports/field-visual/email-history/de-390-record.png": "37e8ab25d1b095fe9cb2f8f8e711d62bb0c924e81e2d1fbf89b63c35beaa6f0f",
+    "reports/field-visual/email-history/de-390.png": "40159824b1b3196777c8e31b3f93347b59df33f1b6effa5626a183526fd7e482",
+    "reports/field-visual/email-history/en-1440-record.png": "e2184523349967b9f9a9137b14afb7c14f2dc690fad9770e97ad8388aa44e946",
+    "reports/field-visual/email-history/en-1440.png": "fc87d7dff1c471da1762b3d0372f0bcd942ce9c342bad04d96a3ad15e09ba568",
+    "reports/field-visual/email-history/en-320-record.png": "3d3543c4d7b53584f7cf85b6fb0d5e0c4b2889dbf2835b9c498d59ecfa0f284a",
+    "reports/field-visual/email-history/en-320.png": "966c580503390074a19f125ed1c487c9d7c3c3348542cf77f804153827f99ed9",
+    "reports/field-visual/email-history/en-390-record.png": "66ee26aa70c7306691859c18a69f8ab53b2f37aa4b05498033821ae9313d5d3d",
+    "reports/field-visual/email-history/en-390.png": "120d109ec2f6bc6e22560ed988d94e1b7022ea5f4ca676e806e3f429c2da96bd",
+    "reports/field-visual/email-history/es-1440-record.png": "bb6b76797da7f7f26998d1c6b2f7859e023f3c9554ee616cc4a801b8d18e20bf",
+    "reports/field-visual/email-history/es-1440.png": "96e3938272b865ba077186288c487071c2aa415d7fb5da9067cfcba01f37e7e5",
+    "reports/field-visual/email-history/es-320-record.png": "b20d1c2cfe0827463968c3f007da7362d22f1852698d8b2f6fbb112fbcc693b1",
+    "reports/field-visual/email-history/es-320.png": "2c5e64e1b450bfba41ebec9391ac041b71f3dedd0ddf5b11233571d65c89e5fd",
+    "reports/field-visual/email-history/es-390-record.png": "1dc457699ad2ca63b882c83e15b72d30fb2ae950c778ea8b0793f63c28255558",
+    "reports/field-visual/email-history/es-390.png": "01d3128322a64f067a78ef5856fe21abfe45c24a5866360fbf7087c2ccca1f0b",
+    "reports/field-visual/email-history/fr-1440-record.png": "6511686236d2e61d1836878c81a707eb3fe4ebc9c12ed58452cbae5386f986af",
+    "reports/field-visual/email-history/fr-1440.png": "e6e8bef7ac44466813b3f9c8f5611efe6f3afadb20a899c2cd76145ef6ca9ca5",
+    "reports/field-visual/email-history/fr-320-record.png": "e1cc66f3698e3556f240bfd8bcf092f49175bfc259604c0e9315ac8d13c1c99d",
+    "reports/field-visual/email-history/fr-320.png": "b2ac6c13f479d8ee6febe41713d171bf06924ba3c9e16b364f372127e8f9918e",
+    "reports/field-visual/email-history/fr-390-record.png": "037ea14832fd9c1c60afe3164d370d84130edfccb6664b9cd6120e796c29fa07",
+    "reports/field-visual/email-history/fr-390.png": "7efd3ef081277866e904dece3b7a0c6caeba878f8c5dc294967d5aefcf7caeec",
+    "reports/field-visual/email-history/pt-1440-record.png": "310bcf21b2c591a9301b2c52d5bb45e885b1a1a2279d43506709978bbb2fe1d1",
+    "reports/field-visual/email-history/pt-1440.png": "25b674c520763e0686ba5a2f7564e8dcf34c48a5078faeb5441db03964b61eb9",
+    "reports/field-visual/email-history/pt-320-record.png": "e0cf35a44d4f7afe31e38ea44c65a5ffd3954553814f35e75cc38631db53bffd",
+    "reports/field-visual/email-history/pt-320.png": "792f5450eff6269a7333eec57874d0f139e5f40042695ad5892bbfefc21cda43",
+    "reports/field-visual/email-history/pt-390-record.png": "57d95aa882d5923924e1683e169bec74ea351532eeeb552f54112833b4be9647",
+    "reports/field-visual/email-history/pt-390.png": "9022736a9c2ebe5e511e845fbdbaf60eea9cdc111647bb1a0d2e6f6096a22a91"
+  },
+  "limitations": [
+    "Local QA uses PGlite; native PostgreSQL restore for this commit remains pending.",
+    "Generic legacy resend is blocked until the original source is reviewed; monthly reviewed resend remains available.",
+    "Historical states are not reconciled or proof of recipient delivery.",
+    "Production volume, shared-shell translations, VPS and physical device pilot remain open."
+  ]
+}

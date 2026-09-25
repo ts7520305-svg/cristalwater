@@ -1,151 +1,39 @@
 <!doctype html>
-<html lang="pt">
-<head>
-  <link rel="manifest" href="/manifest.webmanifest">
-  <meta name="theme-color" content="#050b16">
-  <meta charset="utf-8">
-  <title>Cristal Water - Email Logs</title>
-  <link rel="stylesheet" href="/ui/foundation.css">
-
-  <style>
-    html, body { overflow-x: hidden; }
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #e3f2fd;
-      color: #1f2933;
-    }
-
-    header {
-      background: white;
-      border-bottom: 3px solid #1e88e5;
-      padding: 20px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-
-    header img {
-      height: 70px;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 26px;
-      color: #1e88e5;
-    }
-
-    header p {
-      margin: 4px 0 0 0;
-      color: #555;
-      font-size: 14px;
-    }
-
-    main {
-      padding: 25px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    }
-
-    th, td {
-      padding: 8px;
-      border-bottom: 1px solid #ddd;
-      font-size: 14px;
-    }
-
-    th {
-      background: #f5faff;
-      color: #1e88e5;
-      text-align: left;
-    }
-
-    tr:hover {
-      background: #f0f8ff;
-    }
-
-    footer {
-      text-align: center;
-      padding: 15px;
-      font-size: 12px;
-      color: #555;
-    }
-  </style>
-<link rel="stylesheet" href="/cristal-assist.css">
-  <script src="/cw-auth.js"></script>
-  <script src="/admin-auth-guard.js"></script>
-  <link rel="stylesheet" href="/ui/design-system.css">
-</head>
-
-<body data-required-role="ADMIN">
-
-<header>
-  <img src="/logo.png" alt="Cristal Water">
-  <div>
-    <h1>Cristal Water</h1>
-    <p>Email Logs · Administração</p>
-  </div>
-</header>
-
-<main>
-
-  <!-- FILTROS EXISTENTES -->
-  <form id="filters">
-    <label for="status">Status</label>
-    <select id="status" aria-label="Filtro por status">
-      <option value="">Todos</option>
-      <option value="SENT">SENT</option>
-      <option value="FAILED">FAILED</option>
-    </select>
-
-    <label for="type">Tipo</label>
-    <input id="type" aria-label="Filtro por tipo" placeholder="ex: REPORT">
-
-    <label for="recipient">Destinatario</label>
-    <input id="recipient" aria-label="Filtro por destinatario" placeholder="email">
-
-    <button type="submit">Filtrar</button>
-    <button type="button" id="clear">Limpar</button>
-  </form>
-
-  <br>
-
-  <!-- TABELA -->
-  <table>
-    <thead>
-      <tr>
-        <th>Data</th>
-        <th>Status</th>
-        <th>Tipo</th>
-        <th>Email</th>
-        <th>Assunto</th>
-        <th>Erro</th>
-        <th>Ação</th>
-      </tr>
-    </thead>
-    <tbody id="rows"></tbody>
-  </table>
-
-  <p id="summary"></p>
-
-</main>
-
-<footer>
-  © Cristal Water · Swimming Pools
-</footer>
-
-<script src="/admin-email-logs.js"></script>
-<script src="/cristal-help-data.js"></script>
-<script src="/cristal-assist.js"></script>
-<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script>
-<script src="/cw-admin-shortcuts.js"></script>
-  <script src="/ui/core/navigation-context.js"></script>
-  <script src="/crystal-os-v2-shell.js"></script>
-  <script src="/crystal-os-v2-nav.js"></script>
-  <script defer src="/ui/design-system.js"></script>
-</body>
-</html>
+<html lang="pt"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>Histórico de emails · Cristal Water</title>
+<link rel="stylesheet" href="/ui/foundation.css"><link rel="stylesheet" href="/ui/design-system.css"><script src="/cw-auth.js"></script><script src="/admin-auth-guard.js"></script>
+<style>
+#emailHistory{max-width:1280px;margin:auto;padding:20px;min-width:0;color:#183c46}#emailHistory *{box-sizing:border-box}#emailHistory h1{margin:0;font-size:clamp(24px,4vw,34px)}
+#emailHistory .panel,#emailHistory .email-card{background:#fff;color:#183c46;border:1px solid #bed2d8;border-radius:12px;padding:18px;margin:14px 0;min-width:0;overflow-wrap:anywhere}
+#emailHistory .toolbar,#emailHistory .pagination,#emailHistory .card-head{display:flex;gap:10px;flex-wrap:wrap;align-items:center}#emailHistory .card-head{justify-content:space-between}#emailHistory h2{font-size:19px;margin:0}
+#emailHistory .filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:end}#emailHistory label{display:grid;gap:5px;min-width:0;font-weight:600}
+#emailHistory input,#emailHistory select{width:100%;min-width:0;color:#183c46;background:#fff;border:1px solid #91adb7;padding:10px;border-radius:8px}
+#emailHistory button,#emailHistory .button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 14px;border:1px solid #13716f;border-radius:8px;background:#096665;color:#fff;text-decoration:none;white-space:normal;max-width:100%;font:inherit;cursor:pointer}
+#emailHistory button:disabled{opacity:.5;cursor:default}#emailHistory :focus-visible{outline:3px solid #087d79;outline-offset:3px}#emailHistory .muted,#emailHistory dt{color:#45636d}
+#emailHistory .summary,#emailHistory dl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}#emailHistory .summary strong{display:block;font-size:23px;margin-top:5px}#emailHistory dd{margin:4px 0 0;font-weight:600}#emailHistory .amount{font-size:23px}#emailHistory .note{padding:10px;background:#edf6f7;border-radius:8px}
+#emailStatus{padding:12px;background:#edf6f7;border-radius:8px;scroll-margin-top:125px}#emailStatus[data-state=error],#emailStatus[data-state=invalid],#emailStatus[data-state=session]{background:#fff0ed;color:#842f20}
+#emailLanguage{width:auto!important}#emailHistory .pagination{margin:12px 0}
+@media(max-width:650px){#emailHistory{padding:12px}#emailHistory .filters,#emailHistory .summary,#emailHistory dl{grid-template-columns:1fr}#emailHistory .panel,#emailHistory .email-card{padding:14px}}
+</style></head><body data-required-role="ADMIN">
+<main id="emailHistory" data-cw-state-managed="manual">
+<header class="panel"><h1 data-email-copy="title">Histórico de emails</h1><p class="muted" data-email-copy="subtitle"></p>
+<nav class="toolbar"><a class="button" href="/admin-master-control" data-email-copy="center">Centro</a><a class="button" href="/admin-email-review" data-email-copy="review">Revisão de relatórios</a>
+<label for="emailLanguage" data-email-copy="language">Idioma</label><select id="emailLanguage"><option value="pt">Português</option><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option></select></nav></header>
+<section class="panel"><form id="emailFilters" class="filters" autocomplete="off" novalidate>
+<label><span data-email-copy="query"></span><input id="email_q" type="search" maxlength="120"></label>
+<label><span data-email-copy="recipient"></span><input id="email_recipient" type="search" maxlength="254"></label>
+<label><span data-email-copy="recordedStatus"></span><input id="email_status" type="text" maxlength="64"></label>
+<label><span data-email-copy="type"></span><input id="email_type" type="text" maxlength="80"></label>
+<label><span data-email-copy="mode"></span><input id="email_mode" type="text" maxlength="80"></label>
+<label><span data-email-copy="from"></span><input id="email_from" type="date" maxlength="10"></label>
+<label><span data-email-copy="to"></span><input id="email_to" type="date" maxlength="10"></label>
+<div class="toolbar"><button id="refreshEmails" type="submit" data-email-copy="refresh">Atualizar</button><button id="clearEmails" type="button" data-email-copy="clear">Limpar</button></div></form>
+<p class="muted" data-email-copy="basis"></p><p class="note" data-email-copy="retryNote"></p>
+<div id="emailStatus" role="status" aria-live="polite">A confirmar o histórico…</div><p id="emailChecked" class="muted"></p>
+<nav class="pagination"><button id="emailFirst" type="button" data-email-copy="first"></button><button id="emailPrevious" type="button" data-email-copy="previous"></button><button id="emailNext" type="button" data-email-copy="next"></button></nav>
+<div id="emailRows" role="list"></div>
+<nav class="pagination"><button id="emailFirstBottom" type="button" data-email-copy="first"></button><button id="emailPreviousBottom" type="button" data-email-copy="previous"></button><button id="emailNextBottom" type="button" data-email-copy="next"></button></nav>
+</section></main>
+<script src="/cw-email-history-rules.js"></script><script src="/cw-payment-ledger-copy.js"></script><script src="/cw-email-history-copy.js"></script><script src="/admin-email-logs.js"></script>
+<script src="/ui/core/navigation-context.js"></script><script src="/crystal-os-v2-shell.js"></script><script src="/crystal-os-v2-nav.js"></script><script defer src="/ui/design-system.js"></script>
+</body></html>

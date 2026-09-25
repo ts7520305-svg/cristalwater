@@ -1,0 +1,30 @@
+# TASK355 — histórico de emails e recusa do reenvio genérico
+
+O histórico antigo confundia falhas HTTP com listas vazias, filtrava apenas `toEmail` apesar de os envios usarem `to`, mostrava nove células sob sete cabeçalhos e não tinha controlos de paginação. O botão de reenvio substituía o conteúdo original por uma mensagem genérica e convertia o registo em `SENT` sem verificar a aceitação do destinatário. O caminho em lote também não garantia o conteúdo/anexos nem a aceitação. [Evidência local](evidence/20260925_task355_local.json).
+
+## Alterações
+
+- `GET /api/admin/email-logs` mantém os campos de paginação anteriores e acrescenta identidade, filtros confirmados, instante da consulta e contrato de resposta. Exige ADMIN ativo, incluindo quando o router é montado isoladamente. Respostas privadas também nas recusas do middleware anterior. Erros de origem devolvem 503 sem dados internos.
+- Pesquisa literal por assunto/erro e pelos dois campos de destinatário, incluindo `%`, `_` e barras. Filtro exato por estado, modo e pelos dois campos de tipo/evento. Os dois destinatários e os dois tipos históricos são apresentados separadamente; divergências não são substituídas por uma escolha inferida.
+- Datas UTC reais, intervalo inclusivo até ao último milissegundo do dia, implementado por limite exclusivo do dia seguinte. Datas impossíveis, intervalos invertidos, parâmetros repetidos e paginação ambígua são recusados. Campos de data incompletos no navegador também não provocam uma consulta sem esse filtro.
+- Contagem e página usam a mesma transação RepeatableRead. Ordem decrescente por data e ID, 25 registos por página na interface; API admite 1–100. Cada página é uma consulta nova. Metadados selecionados explicitamente; os corpos HTML/texto não são incluídos na lista.
+- Página com resultados, vazio, erro, filtros alterados e página fora de intervalo distintos. Dados anteriores retirados durante carregamento, erro, mudança de conta ou expiração. Validação da identidade, cabeçalhos, filtros, estrutura e ordem; respostas incompatíveis/tardias recusadas. Filtros e idioma recuperados do endereço em `pageshow` após a reposição nativa do formulário.
+- Conteúdo próprio em PT/EN/FR/ES/DE, cartões adaptáveis, navegação de páginas em cima e em baixo e etiquetas de formulário. Estados, assunto, erros e destinatários permanecem literais. A página esclarece que `SENT` guardado não prova receção pelo destinatário.
+- O endpoint antigo `POST /api/admin/email/retry-failed/:id` recusa novo envio com 409 e `SOURCE_REVIEW_REQUIRED`, sem alterar estado, contador ou erro. IDs inválidos dão 400, inexistentes 404 e falha de consulta 503. Autenticação JWT administrativa substitui o segundo segredo fixo antigo. O serviço em lote conserva a função exportada, mas devolve contagens de bloqueio e zero envios, sem chamar o fornecedor.
+- Reenvio mensal continua no percurso existente de revisão explícita, conteúdo confirmado e reserva persistente. A página oferece uma ligação geral a essa revisão; não infere o mês do relatório a partir da data do email. Outros tipos exigem voltar ao documento/pedido de origem: não foi criado um novo reenvio genérico.
+
+## Validação
+
+651 testes unitários em 92 ficheiros, quatro técnicos e sintaxe de 635 ficheiros backend, 238 frontend e 52 scripts inline. Três grupos distintos de API/Chromium aprovados: histórico de emails, entrega mensal e permissões administrativas antigas. O grupo novo foi repetido após os ajustes finais de data incompleta e rótulo do tipo guardado.
+
+O cenário cria 30 registos em cinco estados, incluindo um estado histórico desconhecido, dois campos de destinatário divergentes, tipos antigos, HTML literal no assunto, conteúdo original privado e limites UTC às 00:00:00.000/23:59:59.999. Confirma 25/5 registos em duas páginas, 28 no intervalo de um dia, pesquisa literal e case-insensitive, paginação fora de intervalo, todos os papéis recusados e falha de origem sanitizada. Tentativas concorrentes no endpoint e chamada em lote conservam os registos originais e as contagens de emails, comunicações e entregas. Zero emails reais.
+
+No navegador: cinco idiomas em 320/390/1440, paginação, teclado, dados literais, estados vazio/erro, respostas malformadas, offline, timeout, resposta atrasada, regresso pelo histórico, troca de administrador com filtros recuperados na recarga e expiração. Zero chamadas de escrita pela página. Trinta capturas regeneráveis (página e cartão) em `reports/field-visual/email-history/`; amostras PT 390/1440 e DE 320 revistas. Recursos binários de navegação comum não materializados neste checkout continuam fora da validação visual desta página.
+
+Ambiente local: PGlite isolado, 40 migrações aditivas existentes e Chromium com múltiplos processos e segurança web ativa. Cache v166, runner com 252 grupos distintos, nenhuma dependência ou migração nova. Inventário: 115 HTML, 91 páginas com referência literal em 273 scripts ativos, 24 na fila de pesquisa.
+
+## Limites e publicação
+
+A consulta não reconcilia estados históricos nem prova entrega/receção. Não recupera conteúdo/anexos ausentes. Grandes volumes e pesquisas por substring não foram medidos em produção. Tradução limitada ao conteúdo próprio; navegação comum e revisão mensal conservam o âmbito anterior. O novo grupo não equivale à execução local dos 252 grupos nem ao restauro PostgreSQL nativo do novo commit.
+
+TASK352 confirmada em [250/250 grupos, 17 etapas e restauro nativo de 127 tabelas/47 ficheiros](evidence/20260925_task352_ci.json), com linhas e hashes iguais. TASK353 e TASK354 permanecem em execução no último controlo. Publicação deste lote na branch de trabalho pendente do registo do commit e do CI. Sem merge, deploy de produção ou contactos reais. Aplicação não declarada completa.

@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-25T09:59:13.084Z",
-  "baseCommit": "b0a000d9df20d47dc1079e2db4fe17966525b492",
+  "generatedAt": "2026-09-25T10:34:12.608Z",
+  "baseCommit": "2c02a4ddd3c8560e5cbe56f2ae7e1d60f600577d",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 272,
+  "activeScriptsScanned": 273,
   "summary": {
     "htmlFiles": 115,
     "rootPages": 108,
     "nestedPages": 7,
     "unavailableLocalAssetReferences": 2,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 90,
+    "pagesWithLiteralTestReference": 91,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -516,7 +516,7 @@
       "file": "frontend/admin-email-logs.html",
       "route": "/admin-email-logs",
       "kind": "Entrada raiz",
-      "title": "Cristal Water - Email Logs",
+      "title": "Histórico de emails · Cristal Water",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -530,16 +530,14 @@
       "entryRedirects": {},
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/manifest.webmanifest",
         "/ui/foundation.css",
-        "/cristal-assist.css",
+        "/ui/design-system.css",
         "/cw-auth.js",
         "/admin-auth-guard.js",
-        "/ui/design-system.css",
+        "/cw-email-history-rules.js",
+        "/cw-payment-ledger-copy.js",
+        "/cw-email-history-copy.js",
         "/admin-email-logs.js",
-        "/cristal-help-data.js",
-        "/cristal-assist.js",
-        "/cw-admin-shortcuts.js",
         "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
@@ -549,7 +547,9 @@
       "unavailableLocalAssets": [],
       "languageAssets": [],
       "directPrintAction": false,
-      "testReferences": [],
+      "testReferences": [
+        "test-field-email-history.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -576,6 +576,7 @@
       "languageAssets": [],
       "directPrintAction": false,
       "testReferences": [
+        "test-field-email-history.js",
         "test-field-monthly-email-review-ui.js"
       ],
       "visualReview": "Não reavaliada por este inventário"

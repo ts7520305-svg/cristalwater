@@ -1,9 +1,5 @@
-const express = require("express");
-const router = express.Router();
-
-const { adminAuth } = require("../middlewares/adminAuth");
-const { retryFailed } = require("../controllers/adminEmailRetryController");
-
-router.post("/email/retry-failed/:id", adminAuth, retryFailed);
-
-module.exports = router;
+"use strict";
+const router=require('express').Router(),auth=require('../middlewares/authMiddleware');
+router.use((req,res,next)=>{res.set({'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'});res.vary('Authorization');next();});
+router.post('/email/retry-failed/:id',auth('ADMIN'),require('../controllers/adminEmailRetryController').retryFailed);
+module.exports=router;

@@ -1,15 +1,5 @@
-// ==========================================
-// CRISTAL WATER - ADMIN EMAIL LOG ROUTES
-// ==========================================
-
-const express = require("express");
-const router = express.Router();
-
-const {
-  listEmailLogs,
-} = require("../controllers/adminEmailLogController");
-
-// 🔹 /api/admin/email-logs
-router.get("/email-logs", listEmailLogs);
-
-module.exports = router;
+"use strict";
+const router=require('express').Router(),auth=require('../middlewares/authMiddleware');
+router.use((req,res,next)=>{res.set({'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'});res.vary('Authorization');next();});
+router.get('/email-logs',auth('ADMIN'),require('../controllers/adminEmailLogController').listEmailLogs);
+module.exports=router;

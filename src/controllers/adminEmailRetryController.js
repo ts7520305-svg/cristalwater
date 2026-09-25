@@ -1,93 +1,13 @@
-// ==========================================
-// CRISTAL WATER - ADMIN EMAIL RETRY CONTROLLER
-// ==========================================
-
-const prismaModule = require("../prismaClient");
-const prisma = prismaModule.prisma;
-const emailService = require("../services/emailService");
-
-async function retryFailed(req, res) {
-  try {
-    const id = Number(req.params.id);
-
-    if (Number.isNaN(id)) {
-      return res.status(400).json({
-        ok: false,
-        message: "ID inválido.",
-      });
-    }
-
-    const emailLog = await prisma.emailLog.findUnique({
-      where: { id },
-    });
-
-    if (!emailLog) {
-      return res.status(404).json({
-        ok: false,
-        message: "EmailLog não encontrado.",
-      });
-    }
-
-    if (emailLog.eventType === 'MONTHLY_REPORT') {
-      return res.status(409).json({ ok: false, message: 'Este relatório exige revisão no ecrã de relatórios. O reenvio genérico está bloqueado.' });
-    }
-
-    if (emailLog.status !== "FAILED") {
-      return res.status(400).json({
-        ok: false,
-        message: "Apenas emails com status FAILED podem ser reenviados.",
-      });
-    }
-
-    try {
-      // ENVIO REAL DO EMAIL
-      await emailService.sendEmail({
-        to: emailLog.to,
-        subject: emailLog.subject,
-        html: `<p>Reenvio automático do email.</p>`,
-        text: `Reenvio automático do email.`,
-      });
-
-      const updated = await prisma.emailLog.update({
-        where: { id },
-        data: {
-          status: "SENT",
-          error: null,
-          retryCount: { increment: 1 },
-          lastRetryAt: new Date(),
-        },
-      });
-
-      return res.json({
-        ok: true,
-        message: "Email reenviado com sucesso.",
-        emailLog: updated,
-      });
-    } catch (sendErr) {
-      const updated = await prisma.emailLog.update({
-        where: { id },
-        data: {
-          retryCount: { increment: 1 },
-          lastRetryAt: new Date(),
-          error: String(sendErr.message || sendErr),
-        },
-      });
-
-      return res.status(500).json({
-        ok: false,
-        message: "Falha ao reenviar email.",
-        error: updated.error,
-      });
-    }
-  } catch (err) {
-    console.error("Retry email error:", err);
-    return res.status(500).json({
-      ok: false,
-      message: "Erro interno no retry.",
-    });
-  }
+"use strict";
+const {prisma}=require('../prismaClient');
+async function retryFailed(req,res){
+  const value=req.params.id;if(!/^[1-9]\d*$/.test(value)||Number(value)>2147483647)return res.status(400).json({ok:false,message:'ID inválido.'});
+  try{
+    const log=await prisma.emailLog.findUnique({where:{id:Number(value)},select:{id:true,eventType:true,status:true}});
+    if(!log)return res.status(404).json({ok:false,message:'Registo não encontrado.'});
+    // Legacy logs do not certify a complete message, its attachments or a safe
+    // repeat. Sending replacement text must never convert the original to SENT.
+    return res.status(409).json({ok:false,code:'SOURCE_REVIEW_REQUIRED',sent:0,message:log.eventType==='MONTHLY_REPORT'?'Reveja este envio no ecrã de revisão de emails dos relatórios.':'Reveja o documento ou pedido original antes de preparar um novo envio.'});
+  }catch{return res.status(503).json({ok:false,sent:0,message:'Não foi possível confirmar o registo de email.'});}
 }
-
-module.exports = {
-  retryFailed,
-};
+module.exports={retryFailed};

@@ -24,3 +24,7 @@ Cache v164; o runner mantém 250 grupos distintos, com ampliação de um grupo e
 Publicada em `b0a000d9df20d47dc1079e2db4fe17966525b492`, árvore `ac8fa8cdfd468318f59c09a303d459475e621d40`, confirmada idêntica à preparada e validada localmente. A retoma recuperou o commit já publicado, sem repetir a publicação. [CI 36119724596](https://github.com/ts7520305-svg/cristalwater/actions/runs/36119724596), job `108022109028`, em execução no último controlo; os 250 grupos e o restauro nativo deste lote continuam pendentes.
 
 TASK351 confirmada em [250/250 grupos esperados distintos e restauro nativo](evidence/20260925_task351_ci.json), com 17 etapas e 127 tabelas/47 ficheiros com linhas e hashes iguais. TASK349/350 mantêm CI/restauro aprovados em 248/248 e 249/249 grupos. Este lote verifica encaminhamento e compatibilidade, não certifica os cinco idiomas do texto de fallback nem todas as páginas de destino. Sem alteração de dados de negócio, merge, deploy ou contactos reais; restantes critérios da aplicação continuam abertos.
+
+## Confirmação nativa — 25/09/2026
+
+CI `36119724596`, job `108022109028`, concluído com sucesso no commit `b0a000d9df20d47dc1079e2db4fe17966525b492`: 250/250 grupos esperados distintos, 17 etapas e restauro de 127 tabelas/47 ficheiros com linhas e hashes iguais. A lista esperada foi comparada com o runner desse commit. [Evidência nativa](evidence/20260925_task352_ci.json).

@@ -1,5 +1,11 @@
 # Cristal Water — matriz atual de conclusão
 
+## Estado de retoma — 25/09/2026, TASK355 validada localmente
+
+Histórico de emails com destinatários/tipos históricos separados, filtros literais e UTC, paginação estável, metadados sem corpos, cinco idiomas próprios e proteção de sessão/respostas. Reenvio genérico e em lote recusados sem alterar os originais; revisão mensal explícita conservada. 651 unitários/92 ficheiros, quatro técnicos, sintaxe 635/238/52 e três grupos distintos de API/Chromium aprovados; grupo novo repetido após ajustes finais. Trinta capturas de página/cartão em 320/390/1440. Cache v166, runner com 252 grupos, 40 migrações existentes. [Relatório](EMAIL_HISTORY_RELIABILITY_20260925.md) e [evidência local](evidence/20260925_task355_local.json). Publicação na branch de trabalho pendente de registo do commit e do CI.
+
+TASK352 confirmada em [250/250 grupos e restauro nativo](evidence/20260925_task352_ci.json), 17 etapas e 127 tabelas/47 ficheiros com linhas e hashes iguais. TASK353 (`36122299824`) e TASK354 (`36122904203`) continuam em execução no último controlo. Inventário: 115 HTML, 91 páginas referenciadas em 273 scripts ativos e 24 na fila de pesquisa. Retomar CI/restauro, restantes páginas, conciliação histórica, volume, VPS e piloto físico. Estados guardados não provam receção; reenvio de outros tipos requer a origem. Sem merge/deploy/contactos reais; aplicação não declarada completa.
+
 ## Estado de retoma — 25/09/2026, TASK354 publicada
 
 Verificação dirigida da pesquisa nos históricos de pagamentos e extras após troca de administrador e recarga. Os dois grupos completos de API/Chromium passaram com a pesquisa literal e o cliente recuperados do endereço, um único resultado e originais conservados. A falha encontrada nas cobranças não foi reproduzida nestas duas páginas: a alteração é apenas nos ensaios, sem alteração do código do produto. [Relatório](FINANCIAL_SEARCH_RELOAD_20260925.md) e [evidência local](evidence/20260925_task354_local.json). Publicada em `bdd7b7d1a59c1fba843a812d1c8986561b38aa74`, árvore `6b7ae90a2907fdb1059c00bec0c84faf305b7db5`, idêntica à preparada e validada localmente. [CI 36122904203](https://github.com/ts7520305-svg/cristalwater/actions/runs/36122904203), job `108032336473`, em execução; os 251 grupos e o restauro PostgreSQL nativo deste lote continuam por confirmar.
