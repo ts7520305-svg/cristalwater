@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `e40117887c3ad1c23fe3c85fba17d75a6d11e38b`. Gerado em 2026-09-25T12:21:58.153Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `64e3eb797678d0029682690952564efbd6901f1b`. Gerado em 2026-09-25T12:53:56.534Z. Inclui o estado dos ficheiros locais no momento da geração.
 
 115 ficheiros HTML: 108 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 277 scripts de integração/navegador ativos. 95 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 278 scripts de integração/navegador ativos. 98 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 2 referências existem no índice Git mas não estão materializadas nesta cópia local; não são classificadas como ficheiros ausentes da aplicação.
 
@@ -52,32 +52,32 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /admin-email-logs | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-email-review | Entrada raiz | — | — | 2 |
 | /admin-expenses | Entrada raiz | — | ADMIN | 18 |
-| /admin-inventory | Entrada raiz | ADMIN | ADMIN | 2 |
+| /admin-inventory | Entrada raiz | ADMIN | ADMIN | 3 |
 | /admin-keys | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-live-map | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-login | Entrada raiz | PUBLIC | — | 3 |
 | /admin-map | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-master-control | Entrada raiz | ADMIN | ADMIN | 5 |
-| /admin-menu | Entrada raiz | ADMIN | ADMIN | 0 |
+| /admin-menu | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-notifications | Entrada raiz | ADMIN | ADMIN | 3 |
 | /admin-onboarding | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-operational-flow | Entrada raiz | ADMIN | ADMIN | 1 |
-| /admin-operational-settings | Entrada raiz | ADMIN | ADMIN | 7 |
+| /admin-operational-settings | Entrada raiz | ADMIN | ADMIN | 8 |
 | /admin-payment-settings | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-payments | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-pool-calculator | Entrada raiz | ADMIN | ADMIN | 4 |
-| /admin-pool-technical | Entrada raiz | ADMIN | ADMIN | 9 |
-| /admin-pools | Entrada raiz | ADMIN | ADMIN | 2 |
+| /admin-pool-technical | Entrada raiz | ADMIN | ADMIN | 10 |
+| /admin-pools | Entrada raiz | ADMIN | ADMIN | 3 |
 | /admin-priority | Entrada raiz | ADMIN | ADMIN | 2 |
 | /admin-reports | Entrada raiz | ADMIN | ADMIN | 2 |
 | /admin-revenue | Entrada raiz | — | ADMIN | 1 |
 | /admin-rounds | Entrada raiz | ADMIN | ADMIN | 4 |
-| /admin-security | Entrada raiz | ADMIN | ADMIN | 1 |
+| /admin-security | Entrada raiz | ADMIN | ADMIN | 2 |
 | /admin-service-log | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-suppliers | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-technicians | Entrada raiz | ADMIN | ADMIN | 0 |
-| /admin-test-center | Entrada raiz | ADMIN | ADMIN | 0 |
-| /admin-today | Entrada raiz | ADMIN | ADMIN | 1 |
+| /admin-test-center | Entrada raiz | ADMIN | ADMIN | 1 |
+| /admin-today | Entrada raiz | ADMIN | ADMIN | 2 |
 | /admin-ui-settings | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-vehicles | Entrada raiz | ADMIN | ADMIN | 0 |
 | /admin-visits-dashboard | Entrada raiz | ADMIN | ADMIN | 1 |
@@ -95,14 +95,14 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /client-menu | Entrada raiz | CLIENT | CLIENT | 1 |
 | /client-notifications | Entrada raiz | CLIENT | CLIENT | 3 |
 | /client-payments | Entrada raiz | CLIENT | CLIENT | 4 |
-| /client-portal | Entrada raiz | CLIENT, ADMIN | ADMIN, CLIENT | 17 |
+| /client-portal | Entrada raiz | CLIENT, ADMIN | ADMIN, CLIENT | 18 |
 | /client-wow | Entrada raiz | CLIENT | CLIENT | 1 |
 | /client | Entrada raiz | CLIENT | CLIENT | 13 |
 | /client_chat | Entrada raiz | CLIENT, ADMIN | CLIENT | 4 |
 | /client_tech | Entrada raiz | CLIENT | CLIENT | 1 |
 | /communications | Entrada raiz | ADMIN | ADMIN | 1 |
 | /config-notifications | Entrada raiz | ADMIN, CLIENT, TECHNICIAN, TEAM_LEADER | ADMIN, CLIENT, TEAM_LEADER, TECHNICIAN | 2 |
-| /crystal-os-v2-route-index | Entrada raiz | ADMIN | — | 0 |
+| /crystal-os-v2-route-index | Entrada raiz | ADMIN | ADMIN | 1 |
 | /dashboard | Entrada raiz | ADMIN | ADMIN | 5 |
 | /equipment-history-review | Entrada raiz | — | ADMIN | 1 |
 | /equipment-material-review | Entrada raiz | — | ADMIN | 1 |
@@ -110,9 +110,9 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /help-center | Entrada raiz | ADMIN, CLIENT, TECHNICIAN, TEAM_LEADER | ADMIN, CLIENT, TEAM_LEADER, TECHNICIAN | 3 |
 | /incident-center | Entrada raiz | ADMIN | ADMIN | 0 |
 | /invoice-document | Entrada raiz | — | PUBLIC | 6 |
-| /invoices | Entrada raiz | ADMIN | ADMIN | 7 |
+| /invoices | Entrada raiz | ADMIN | ADMIN | 8 |
 | /labor-cost-bases | Entrada raiz | — | ADMIN | 4 |
-| /login | Entrada raiz | PUBLIC | — | 22 |
+| /login | Entrada raiz | PUBLIC | — | 23 |
 | /map | Entrada raiz | ADMIN | ADMIN | 1 |
 | /metrics | Entrada raiz | ADMIN | ADMIN | 4 |
 | /multi-map | Entrada raiz | ADMIN | ADMIN | 1 |
@@ -131,7 +131,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /settings | Entrada raiz | ADMIN, CLIENT, TECHNICIAN, TEAM_LEADER | ADMIN, CLIENT, TEAM_LEADER, TECHNICIAN | 9 |
 | /splash | Entrada raiz | ADMIN | — | 1 |
 | /technician-chat | Entrada raiz | — | — | 3 |
-| /technician-field-mode | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 34 |
+| /technician-field-mode | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 35 |
 | /technician-gps | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 2 |
 | /technician-guide | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 2 |
 | /technician-history | Entrada raiz | — | TEAM_LEADER, TECHNICIAN | 2 |
@@ -156,15 +156,12 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 
 ## Fila finita sem referência literal em QA
 
-- /admin-menu — Entrada raiz; papéis declarados: ADMIN.
 - /admin-onboarding — Entrada raiz; papéis declarados: ADMIN.
 - /admin-suppliers — Entrada raiz; papéis declarados: ADMIN.
 - /admin-technicians — Entrada raiz; papéis declarados: ADMIN.
-- /admin-test-center — Entrada raiz; papéis declarados: ADMIN.
 - /admin-ui-settings — Entrada raiz; papéis declarados: ADMIN.
 - /admin-vehicles — Entrada raiz; papéis declarados: ADMIN.
 - /admin-visits — Entrada raiz; papéis declarados: ADMIN.
-- /crystal-os-v2-route-index — Entrada raiz; papéis declarados: ADMIN.
 - /incident-center — Entrada raiz; papéis declarados: ADMIN.
 - /operational-dashboard — Entrada raiz; papéis declarados: ADMIN.
 - /reminder-materials — Entrada raiz; papéis declarados: ADMIN.

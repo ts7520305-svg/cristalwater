@@ -29,6 +29,8 @@
   }
 
   const PAGE_META = {
+    '/admin-menu': { area: 'Administração', title: 'Menu de módulos' },
+    '/crystal-os-v2-route-index': { area: 'Administração', title: 'Índice de módulos' },
     '/admin-master-control': { area: 'Visao geral', title: 'Centro de operacoes' },
     '/admin-dashboard': { area: 'Visao geral', title: 'Dashboard administrativo' },
     '/admin-today': { area: 'Operacao', title: 'Resumo do dia' },
@@ -257,6 +259,10 @@
       ]
     }
   };
+
+  // Read-only catalogue of the same destinations used by the live ADMIN shell.
+  // Menu/index pages consume this instead of maintaining another sidebar list.
+  window.CWAdminNavigation = Object.freeze({version:1,groups:Object.freeze(NAV.ADMIN.groups.map((group,index)=>Object.freeze({id:String(index),label:group.label,links:Object.freeze(group.links.map(link=>Object.freeze([...link])))})))});
 
   function flatLinks(config) {
     return config.groups.flatMap((group) => group.links);
