@@ -1,0 +1,216 @@
+{
+  "task": "TASK368",
+  "baseCommit": "1ceb2b90d054949d1125eedd993c7c34e06365a1",
+  "validatedAt": "2026-09-25T20:28:03.062947+00:00",
+  "sourceHashes": {
+    "frontend/admin-vehicles.js": "1f34f12f71004566483c5e36640e3c72ebe25e7ec0abbc380cb572064d145a24",
+    "frontend/cw-transport-guide-create.css": "db643e9219fe20bb396337eaecea416843e814b2443d5de9e97a512534c8787a",
+    "frontend/cw-transport-guide-items.js": "013b103bda03da7c43039d498c244c051e0a10b3823c29358e2cc5123d561bfe",
+    "frontend/cw-transport-items-copy.js": "9d15cbfca358a3b9bcbabf8784d32fb9d589411d1272e9d311f727074a5c5a15",
+    "frontend/cw-transport-items-rules.js": "8df39a899cbf4ebe2dbce56e786a26129f5fcf88ab82942fdbd940bc92fb5200",
+    "frontend/sw.js": "29379c926dcc42fc5d4f94c52f80151b6dcd11f902e4b721b3098d4793256fe3",
+    "frontend/transport-guide-items.html": "6e3f4a8025d64f36254a21fdf40706a5a8a49769136d94d412d7ea6e7f7c3336",
+    "scripts/fixtures/internal-chat-server.js": "a9718f5ba6bcc46f2595ae20c65a89620736fe3ab77fe7df3e6d9976f1a4fd2e",
+    "scripts/helpers/transport-guide-items-fixture.js": "c8ce3db13e2dbc3644a7eb94a52bd1161daa2b31fc66b9d1e90867545c76328e",
+    "scripts/test-field-suite.js": "32d75019398ceaf9ae0b1484b5f931db6d71d8a3128adb10ab1ff3855a38af2e",
+    "scripts/test-field-transport-guide-items-ui.js": "75d3e7053dcc436c9b7076915a3ebd128fa2053861d6ed7b7dde472bd59fbbf5",
+    "scripts/test-field-transport-guide-items.js": "66a7b38cf4fb2f3d8446babf273676be08706cbf54fb10a12078ddfa010a5e94",
+    "scripts/test-field-vehicle-consumption.js": "48193a05d7bbb3f00bb4f0fd2273ab0a1f2bcd54058bfa9f2b9950c518895caf",
+    "src/controllers/guideController.js": "d2a20483b6db7b6cba0bb544a35483395b77b835c10a6db1373e5f6e8fc6a1f1",
+    "src/controllers/transportGuideItemsController.js": "c3661c0502d0670ff101535132aed31d69fe24987d11db9b583f2e601afe22c1",
+    "src/routes/transportGuideItemsRoutes.js": "f7f9fe3aa69b0da61ce27ff2a760091555ee00fa98cf85163e0523fe85feaa33",
+    "src/server.js": "20b5f9cc60ca96495bd2a5398125c7afcc4349c09192ead7c58d46b87faec8af",
+    "src/services/fieldWriteRequestService.js": "b9321261f25a8491e3c5ba3356de900b6fa82a20c3afb745997fbd3c4777277e",
+    "src/services/transportGuideItemsService.js": "24a87b7f1e36d7a6fc95184d6c8eefc0ffb8a9866eb1cf631669fa51331c3688",
+    "tests/transport-guide-items.test.js": "d2845eabd195bfb21d94852bdb919447ed1a8668e645e844b5edca131a1e74da"
+  },
+  "unitTests": {
+    "passed": 805,
+    "files": 105,
+    "new": 12
+  },
+  "technicianTests": 4,
+  "syntax": {
+    "backend": 659,
+    "frontend": 270,
+    "inline": 44,
+    "finalChangedScriptsCheckedSeparately": true
+  },
+  "schema": {
+    "newMigrations": 0,
+    "existingAdditiveMigrationsApplied": 42,
+    "runtime": "PGlite 0.5.8 / pglite-socket 0.2.11, isolated synthetic data; not native PostgreSQL"
+  },
+  "integrationGroups": [
+    {
+      "script": "scripts/test-field-transport-guide-items.js",
+      "code": 0,
+      "log": "/tmp/cw368-final-api.log"
+    },
+    {
+      "script": "scripts/test-field-transport-guide-items-ui.js",
+      "code": 0,
+      "log": "/tmp/cw368-entry-ui-fixed.log"
+    },
+    {
+      "script": "scripts/test-field-transport-guide-create.js",
+      "code": 0,
+      "log": "/tmp/cw368-ui-regressions.log"
+    },
+    {
+      "script": "scripts/test-field-transport-guide-create-ui.js",
+      "code": 0,
+      "log": "/tmp/cw368-final-ui.log"
+    },
+    {
+      "script": "scripts/test-field-vehicle-consumption.js",
+      "code": 0,
+      "log": "/tmp/cw368-consumption-final.log"
+    },
+    {
+      "script": "scripts/test-equipment-stock-os-operational.js",
+      "code": 0,
+      "log": "/tmp/cw368-navigation-stock-final.log"
+    },
+    {
+      "script": "scripts/test-field-guide-pdf.js",
+      "code": 0,
+      "log": "/tmp/cw368-final-ui.log"
+    },
+    {
+      "script": "scripts/test-field-authenticated-document-opening.js",
+      "code": 0,
+      "log": "/tmp/cw368-final-ui.log"
+    },
+    {
+      "script": "scripts/test-field-fleet-management-ui.js",
+      "code": 0,
+      "log": "/tmp/cw368-entry-ui-fixed.log"
+    },
+    {
+      "script": "scripts/test-shared-navigation-browser.js",
+      "code": 0,
+      "log": "/tmp/cw368-navigation-stock-final.log"
+    }
+  ],
+  "logs": {
+    "/tmp/cw368-consumption-final.log": "c44e283aa4ef82edb35796213bd125b6e8fb227b44d0c89802b42a70bc84e54a",
+    "/tmp/cw368-entry-ui-debug.log": "d50e441efda128d39613fd6df93e0dc2a2c443ce8f40f277c010d6017422a224",
+    "/tmp/cw368-entry-ui-final.log": "9012bb0fbb41df9b4948db9d4757ae90d9dedfe3e8377993e6b9b109c5af2f17",
+    "/tmp/cw368-entry-ui-fixed.log": "2be2fabb409898c58ce497bfd64674774e480bab2957d62747751ce76aa12fd0",
+    "/tmp/cw368-final-api.log": "370cd6ace1a390054bbd353c5940e312ca8c60ae70f54891c955c5d95516d168",
+    "/tmp/cw368-final-ui.log": "136fe39168da9e7ae79a0e7ca8ebcb3473acb4a545b277b37c25f6b8f7e7ee11",
+    "/tmp/cw368-navigation-stock-final.log": "6343326c943929f41aef9d428a527eee31fb4b79ffb7e7362892ba979b4ebbb0",
+    "/tmp/cw368-navigation-stock.log": "a7b5f732da214291e20c3faa20eb6b7097e9dd7b66adcdb47c81d4335d383138",
+    "/tmp/cw368-syntax.log": "07446bb8dee4d17d848ec20254267d5d29a7445c434afc393f575757ad2e34f2",
+    "/tmp/cw368-technician.log": "b5ebd8a8b13cd12ebf8a0301fbad7f84e5135452668888d896efb8eeff73cc68",
+    "/tmp/cw368-ui-regressions.log": "7d00c1d4ee6d40afde97d5e8410c68a114eb02f40ec5c0fb3befaa02b9567691",
+    "/tmp/cw368-ui.log": "db72b1c136fe1b7435108104bbfda6afa4296942a02772d336a10687a7128155",
+    "/tmp/cw368-units-final.log": "d47a76506bc90879abbde9589f6224d06c5c8a2e11b328d60636706a47041a96"
+  },
+  "validationNotes": [
+    {
+      "kind": "PRIVACY_FALSE_POSITIVE",
+      "resolution": "Legacy consumption privacy regex matched 997 inside public UUID/timestamps. The regression now rejects explicit monthlyFee/monthlyAmount/hourlyCost/password keys, and still rejects private contacts and PIN."
+    },
+    {
+      "kind": "PGLITE_PREPARED_STATEMENT_COLLISION",
+      "resolution": "Consumption fixture failed before its request after injected SQL failures in the items group (42P05 s23 already exists). The whole consumption group passed in a fresh isolated PGlite instance; no assertions removed."
+    },
+    {
+      "kind": "HARNESS_PREPARATION",
+      "resolution": "The new browser token helper now uses exp or expiresIn, never both. The stock smoke needed its explicit EQUIPMENT_STOCK_OS_BASE_URL to point at the isolated server; complete group rerun passed."
+    },
+    {
+      "kind": "LEGACY_ENTRY_REGRESSION",
+      "resolution": "Clicking the real fleet history edit action exposed missing cleanRiskAnchor/issueText helpers removed in TASK365. Both display helpers were restored without bringing back browser risk calculation. Full real entry and fleet browser groups passed with real alert badges and no error dialogs."
+    }
+  ],
+  "browser": {
+    "engine": "Chromium 153, multiple processes, web security active",
+    "screenshots": 18,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "hashes": {
+      "reports/field-visual/transport-guide-items/de-1440.png": "836cd01b70121a8619f731d4c6c3c56317311d78ed9485bec9fa4ae92334dbdc",
+      "reports/field-visual/transport-guide-items/de-320.png": "14a1ff40d929b13a893f22e16d8529c0c759648801ca11968024d5d7c43aa60c",
+      "reports/field-visual/transport-guide-items/de-390.png": "07e39bdb48e917dee4e6f9c00206e4c25ccbbb1ec89590fe6e51d999faa7bde5",
+      "reports/field-visual/transport-guide-items/en-1440.png": "dbc49cacb39d8ae8685ca50d278909e1483e896749207c98c0c0901d25f4fceb",
+      "reports/field-visual/transport-guide-items/en-320.png": "6c7011490f704c6f19a869f42dbe3c9970d8e52182d450e5281c58804e585edd",
+      "reports/field-visual/transport-guide-items/en-390.png": "873544bb1bb800687d8249463afef57236c4eda8f729678eee4a2764e68b05af",
+      "reports/field-visual/transport-guide-items/es-1440.png": "bd061435e2900a1e9b64bb9618ff76f406ec4ab43570505babba46913139da10",
+      "reports/field-visual/transport-guide-items/es-320.png": "bcbf294df6593a83113983c08a6613a73122179af2e93ee907fa64429b279a46",
+      "reports/field-visual/transport-guide-items/es-390.png": "55eb4869425eb4b6927fd024334391d28b3e5ac020c5f4e9d11c58a000b51d4d",
+      "reports/field-visual/transport-guide-items/fr-1440.png": "fc4e40fb74ed23856fc671671fc3d76527d84335784d63b6cf4fcae02bfd18bf",
+      "reports/field-visual/transport-guide-items/fr-320.png": "3eadb326a8ac1c9e302e4812c240955d7bb2a6cab4bd0753d55708ccd4715f8d",
+      "reports/field-visual/transport-guide-items/fr-390.png": "7d4d0b04c6c33416785c3893e0701b7dc0dc69565882eb262835880a9d7ee14c",
+      "reports/field-visual/transport-guide-items/pt-1440.png": "f9ede9c59f4c37c5d83b01f96c048d01ecc74910ee5ff52f23c044ac8f416afa",
+      "reports/field-visual/transport-guide-items/pt-320.png": "94e5943dfd6e8ee489c041d94eda2a4f8203ecec70531467a9156d6b5ec447df",
+      "reports/field-visual/transport-guide-items/pt-390.png": "90c72d4315139d8d25753ffcd7d94cde563869f0dae10455f2d28991a98fe382",
+      "reports/field-visual/transport-guide-items/review-de-320.png": "86249d14b8b89910d199fd1279ab279ef1875d7ac801d610d146393d520788e6",
+      "reports/field-visual/transport-guide-items/review-pt-1440.png": "92e25a93e2f436c651a93fbdec1d91e39c002b5a8e484b9079a0d3ca0f2d4af3",
+      "reports/field-visual/transport-guide-items/review-pt-390.png": "98399d7bc3af2afa5814e3a2a9f32e102fc3637595cd66b501b0cd9f9d432dc4"
+    },
+    "visuallyReviewed": [
+      "de-320.png",
+      "review-pt-1440.png"
+    ],
+    "entry": "actual /admin-vehicles history button preserves guideId and language; explicit existing item mapping",
+    "profiles": [
+      "ADMIN User",
+      "denied CLIENT, TECHNICIAN PIN/User, TEAM_LEADER PIN/User and ENV_ADMIN"
+    ]
+  },
+  "runnerGroups": 272,
+  "cacheVersion": "v179",
+  "inventory": {
+    "htmlFiles": 118,
+    "rootPages": 111,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 106,
+    "catalogueGuardDifferences": 0,
+    "activeScriptsScanned": 293,
+    "remainingLiteralQueue": 12
+  },
+  "publication": {
+    "status": "READY_NATIVE_CI_PENDING",
+    "branch": "work/field-readiness-20260915-simulation",
+    "mainBranch": "feature/technicians-v25",
+    "mainShaUnchanged": "6f27081e1d183ff584a62255b016b373836734db",
+    "nativeGroupsExpected": 272,
+    "nativeRestore": "PENDING"
+  },
+  "previousCI": [
+    {
+      "task": 367,
+      "codeSha": "1ceb2b90d054949d1125eedd993c7c34e06365a1",
+      "treeSha": "79c2e69555d59d450b593b028d9f89bf42860f24",
+      "runId": 36182594290,
+      "jobId": 108228289199,
+      "status": "IN_PROGRESS_AT_RESUME",
+      "nativeGroupsExpected": 270,
+      "nativeRestore": "PENDING"
+    }
+  ],
+  "limits": [
+    "Native PostgreSQL 272-group suite and restore still required.",
+    "Material total corrections/additions for an active guide/vehicle and exactly one open linked work; historical inconsistency or multiple works require explicit reconciliation.",
+    "Existing names/types/units/IDs/consumption retained; no deletion or automatic mapping by name.",
+    "Signed vehicle ADJUSTMENT is an internal total correction, not a warehouse load or a fiscal document change.",
+    "Metadata/status, official attachments, manual work close, maintenance/costs, assignment, presets and alert rules retain separate review.",
+    "Automatic visit material choice by name not redesigned.",
+    "No merge, deploy, AT issue/validation or real external contact; VPS/operational backups/physical pilot remain open."
+  ]
+}

@@ -206,48 +206,9 @@ function totalByUnit(items, field = "quantity", filter = () => true) {
 function pdfName(prefix, id) {
   return `${prefix}-${String(id || Date.now()).replace(/[^a-zA-Z0-9_-]/g, "")}.pdf`;
 }
-function itemKey(item) {
-  return `${normalize(item?.name || item?.productName || item?.itemName)}|${normalize(item?.unit || "UN")}`;
-}
 function combineNotes(current, addition) {
   const parts = [current, addition].map((part) => String(part || "").trim()).filter(Boolean);
   return parts.length ? Array.from(new Set(parts)).join(" | ") : null;
-}
-async function syncWorkGuideItemsWithTransportGuide(workGuideId, guideItems) {
-  const existing = await prisma.workGuideItem.findMany({ where: { workGuideId: n(workGuideId) } });
-  const existingByKey = new Map(existing.map((item) => [itemKey(item), item]));
-  const seen = new Set();
-
-  for (const source of arr(guideItems)) {
-    const key = itemKey(source);
-    seen.add(key);
-    const target = existingByKey.get(key);
-    const initialQty = n(source.quantity, 0) || 0;
-    if (target) {
-      await prisma.$executeRaw`UPDATE "WorkGuideItem"
-        SET "name" = ${source.name}, "type" = ${source.type}, "unit" = ${source.unit || 'UN'},
-            "initialQty" = ${initialQty}, "quantity" = GREATEST(0, ${initialQty} - "usedQty")
-        WHERE "id" = ${target.id}`;
-    } else {
-      await prisma.workGuideItem.create({
-        data: {
-          workGuideId: n(workGuideId),
-          name: source.name,
-          type: source.type,
-          unit: source.unit || "UN",
-          initialQty,
-          quantity: initialQty,
-          usedQty: 0
-        }
-      }).catch(() => null);
-    }
-  }
-
-  for (const item of existing) {
-    if (!seen.has(itemKey(item)) && (n(item.usedQty, 0) || 0) <= 0) {
-      await prisma.workGuideItem.delete({ where: { id: item.id } }).catch(() => null);
-    }
-  }
 }
 async function notifyMissingTransportGuide({ req, vehicleId, technicianId, workGuideId, reason }) {
   const vehId = n(vehicleId);
@@ -591,21 +552,7 @@ async function downloadLatestTransportGuidePdf(req, res) {
   }
 }
 
-async function updateTransportGuideItems(req, res) {
-  try {
-    const id = n(req.params.id);
-    const guide = await prisma.transportGuide.findUnique({ where: { id }, include: { items: true } });
-    if (!guide) return res.status(404).json({ ok: false, error: 'Guia não encontrada.' });
-    const items = normalizeGuideItems(req.body.items);
-    await prisma.transportGuideItem.deleteMany({ where: { guideId: id } });
-    if (items.length) await prisma.transportGuideItem.createMany({ data: items.map(i => ({ ...i, guideId: id })) });
-    const updated = await prisma.transportGuide.findUnique({ where: { id }, include: { vehicle: true, items: true } });
-    const workGuide = await prisma.workGuide.findFirst({ where: { guideId: id }, orderBy: { createdAt: 'desc' } }).catch(() => null);
-    if (workGuide) await syncWorkGuideItemsWithTransportGuide(workGuide.id, updated.items || []);
-    await audit(req, 'TRANSPORT_GUIDE_ITEMS_UPDATE', 'TransportGuide', id, { oldCount: guide.items.length, newCount: items.length });
-    res.json({ ok: true, guide: updated, message: 'Stock da guia atualizado. Alteração registada em auditoria.' });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
-}
+const updateTransportGuideItems = require('./transportGuideItemsController').legacy;
 
 async function getVehicleStockPreset(req, res) {
   try {

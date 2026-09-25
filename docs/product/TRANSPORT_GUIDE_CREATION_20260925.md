@@ -40,7 +40,7 @@ Cache v178. Runner com 270 grupos distintos. Inventário: 117 HTML, 105 páginas
 
 ## Publicação, limites e retoma
 
-Lote validado localmente e preparado para a branch `work/field-readiness-20260915-simulation`. Publicação ainda por registar; o gate nativo de 270 grupos e restauro permanece pendente.
+Lote publicado na branch `work/field-readiness-20260915-simulation` em `1ceb2b90d054949d1125eedd993c7c34e06365a1`, árvore `79c2e69555d59d450b593b028d9f89bf42860f24`, igual à validada localmente. [CI 36182594290](https://github.com/ts7520305-svg/cristalwater/actions/runs/36182594290), job `108228289199`, em execução na consulta de retoma. O gate nativo de 270 grupos e restauro permanece pendente.
 
 TASK366 confirmada: [CI 36169342475](https://github.com/ts7520305-svg/cristalwater/actions/runs/36169342475), job `108184782991`, **268/268 grupos esperados distintos**, 17 etapas, 42 migrações e restauro de 127 tabelas/47 ficheiros com linhas e hashes iguais, em 40m00s. [Evidência nativa](evidence/20260925_task366_ci.json).
 

@@ -205,6 +205,7 @@ mount("/api/technicians", technicianCrudRoutes);
 mount("/api/fleet-management", require("./routes/fleetManagementRoutes"));
 mount("/api/vehicle-consumption", require("./routes/vehicleConsumptionRoutes"));
 mount("/api/transport-guide-create", require("./routes/transportGuideCreationRoutes"));
+mount("/api/transport-guide-items", require("./routes/transportGuideItemsRoutes"));
 mount("/api/technician-stats", technicianStatsRoutes);
 mount("/api/technician-auth", technicianAuthRoutes);
 mount("/api/technician", technicianRoutes);

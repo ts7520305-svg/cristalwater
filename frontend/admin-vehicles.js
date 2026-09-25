@@ -126,6 +126,14 @@ function normalizeText(value) {
   return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 }
 
+function issueText(issue) {
+  return `${issue?.title || "Atencao"}: ${issue?.message || ""}`.trim();
+}
+
+function cleanRiskAnchor(value) {
+  return String(value || "").split(":")[0].trim();
+}
+
 function riskHref(issue) {
   const targetType = String(issue?.targetType || "");
   if (["Vehicle", "TransportGuide", "WorkGuide", "Technician"].includes(targetType) || issue?.vehicleId) return "/admin-vehicles";
@@ -528,32 +536,11 @@ async function editTransportGuide(id) {
   await load();
 }
 
-async function editTransportGuideItems(id) {
-  const guide = GUIDES.find((item) => Number(item.id) === Number(id));
+function editTransportGuideItems(id) {
+  const guide = GUIDES.find(item => Number(item.id) === Number(id));
   if (!guide) return;
-
-  const current = (guide.items || [])
-    .map((item) => `${item.name};${item.type || ""};${item.unit || "UN"};${item.quantity || 0}`)
-    .join("\n");
-
-  const text = prompt("Editar materiais da guia.\nFormato por linha:\nNome;Tipo;Unidade;Quantidade", current);
-  if (text === null) return;
-
-  const items = text
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const [name, type, unit, quantity] = line.split(";").map((part) => part?.trim());
-      return { name, type: type || "MATERIAL", unit: unit || "UN", quantity: Number(quantity || 0) };
-    })
-    .filter((item) => item.name);
-
-  await j(`${API}/transport/${id}/items`, {
-    method: "PUT",
-    body: JSON.stringify({ items }),
-  });
-  await load();
+  const lang = new URL(location.href).searchParams.get('lang') || document.documentElement.lang || 'pt';
+  location.href = '/transport-guide-items?' + new URLSearchParams({ guideId: String(guide.id), lang });
 }
 
 async function closeTransportGuide(id) {

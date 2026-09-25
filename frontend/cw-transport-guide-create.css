@@ -14,3 +14,5 @@ body{margin:0;background:#eef5f7}#transportCreator{max-width:1160px;margin:auto;
 #transportCreator{box-sizing:border-box}#transportCreator #reviewFacts,#transportCreator #receiptFacts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px}#transportCreator #reviewFacts>div,#transportCreator #receiptFacts>div{min-width:0}@media(max-width:700px){#transportCreator #reviewFacts,#transportCreator #receiptFacts{grid-template-columns:1fr}}
 
 #transportCreator .item-fields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;border:1px solid #becdd3;padding:16px;border-radius:12px;margin:12px 0}#transportCreator .item-fields h4{grid-column:1/-1;margin:0}#transportCreator .item-fields button{align-self:end}#transportCreator #reviewRows{margin:20px 0}#transportCreator input[readonly]{background:#eef3f5}@media(max-width:700px){#transportCreator .item-fields{grid-template-columns:1fr}}
+
+#transportCreator .mapping-detail{white-space:pre-wrap;font-weight:400;font-size:14px;margin:4px 0 0;overflow-wrap:anywhere}
