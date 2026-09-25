@@ -34,5 +34,15 @@
     const c = value?.closure;
     return object(value) && positive(c?.id) && typeof c.title === 'string' && typeof c.status === 'string' && typeof c.closureType === 'string' && typeof c.routeAction === 'string' && booleans.every(key => typeof c[key] === 'boolean') && ['startDate', 'endDate', 'updatedAt'].every(k => typeof c[k] === 'string' && Number.isFinite(Date.parse(c[k]))) && Date.parse(c.endDate) >= Date.parse(c.startDate) && version(value.version) && value.automaticReplanning === false && value.timeZone === 'UTC';
   }
-  return { scope, types, actions, booleans, strings, fieldKeys, day, positive, uuid, version, object, exact, fields, command, intent, envelope, canonical, equal, state };
+  function editable(value) {
+    const c = value.closure;
+    return Object.fromEntries(fieldKeys.map(key => [key, ['startDate', 'endDate'].includes(key) ? c[key].slice(0, 10) : c[key] ?? '']));
+  }
+  function updateValues(before, changes) {
+    return Object.fromEntries(fieldKeys.map(key => {
+      if (['startDate', 'endDate'].includes(key)) return [key, changes[key] === before[key].slice(0, 10) ? before[key] : changes[key] + (key === 'startDate' ? 'T00:00:00.000Z' : 'T23:59:59.999Z')];
+      return [key, before[key] === null && changes[key] === '' ? null : changes[key]];
+    }));
+  }
+  return { scope, types, actions, booleans, strings, fieldKeys, day, positive, uuid, version, object, exact, fields, command, intent, envelope, canonical, equal, state, editable, updateValues };
 }));

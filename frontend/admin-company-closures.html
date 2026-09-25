@@ -48,7 +48,9 @@
 
     <section class="grid">
       <div class="card">
-        <h2>Novo encerramento</h2>
+        <h2 id="closureFormTitle">Novo encerramento</h2>
+        <p id="closureEditStatus" role="status" aria-live="polite" hidden></p>
+        <div id="closureEditActions" class="actions" hidden><button id="reloadClosureEdit" type="button">Carregar versão atual</button><button id="leaveClosureEdit" type="button">Voltar ao novo encerramento</button></div>
         <form id="closureForm">
           <fieldset id="closureFields">
           <label>Título</label><input name="title" value="Encerramento Cristal Water" />

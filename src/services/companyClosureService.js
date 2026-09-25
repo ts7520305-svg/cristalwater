@@ -67,7 +67,10 @@ async function write(actor, body, database = prisma) {
       after = await tx.companyClosure.create({ data: { ...fields, createdByUserId: actorId, ...(fields.status === 'ACTIVE' ? { approvedByUserId: actorId, approvedAt: now, activatedAt: now } : {}) } });
     } else if (body.operation === 'UPDATE') {
       if (body.fields.status !== before.status) return reject('CLOSURE_STATE_REVIEW', 'Use a ação explícita de ativação ou cancelamento para alterar o estado.');
-      after = await tx.companyClosure.update({ where: { id: before.id }, data: storedFields(body.fields) });
+      // Editing another field must not silently expand a historical time window
+      // or rewrite an untouched nullable value. A changed day is an explicit edit.
+      const updated = rules.updateValues(JSON.parse(JSON.stringify(before)), body.fields);
+      after = await tx.companyClosure.update({ where: { id: before.id }, data: { ...updated, startDate: new Date(updated.startDate), endDate: new Date(updated.endDate) } });
     } else if (body.operation === 'ACTIVATE') {
       if (before.status !== 'PLANNED') return reject('CLOSURE_ALREADY_ACTIVE', 'Só pode ativar um encerramento planeado.');
       after = await tx.companyClosure.update({ where: { id: before.id }, data: { status: 'ACTIVE', activatedAt: new Date(), approvedAt: new Date(), approvedByUserId: actorId } });

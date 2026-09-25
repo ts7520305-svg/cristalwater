@@ -1,0 +1,98 @@
+{
+  "task": "TASK343",
+  "checkedAt": "2026-09-25T04:14:06.136357+00:00",
+  "baseCommit": "d8874ecdc1f0964c68902cb3685c4babcbb5bba8",
+  "sourceSha256": {
+    "frontend/admin-company-closures.html": "d9fba0c80d9c44753c17a07b747f2af02d6e4726ae93445463af107e6addfe26",
+    "frontend/admin-company-closures.js": "f8afd2ef2a6ede7550288364eb7c367ea57074122adfd8545921424a7595589e",
+    "frontend/cw-company-closure-rules.js": "1490df7cc3a152febbee3ba04049765ab4ed1db2a69b9574c4db48c618955698",
+    "frontend/sw.js": "fea0f11516e75e974abe8bbe7ea18d23fcb4e3405edb5ddf34b1a402fe8e63d8",
+    "src/services/companyClosureService.js": "7b578ea78c1977bfcc4bba77093772aced37f1c1262fd22c359a57ea5ddf8028",
+    "tests/company-closure-rules.test.js": "e27c3ccff2b42b6347e36e19dd13211414badb12d13da40699f156692881d855",
+    "scripts/test-field-company-closure-edit.js": "2e34c5cb97b34b237126da793e7445dbced2b27e28ccabd383323195c1156f29",
+    "scripts/test-field-suite.js": "75cffee47f9072db0020bc6879f451a625e43ac0f900e2a73d4ff6317b980fc0"
+  },
+  "unitTests": {
+    "passed": 608,
+    "files": 83
+  },
+  "technicianTests": 4,
+  "syntax": {
+    "backend": 629,
+    "frontend": 222,
+    "inline": 62
+  },
+  "integration": [
+    {
+      "script": "scripts/test-field-company-closure-edit.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-company-closures.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-client-closures.js",
+      "code": 0
+    },
+    {
+      "script": "scripts/test-field-client-closures-ui.js",
+      "code": 0
+    }
+  ],
+  "passLines": [
+    "PASS isolated schema: 40 additive migrations",
+    "PASS closure editing API: untouched historical instants/nulls/authorship/metadata preserved, changed days explicit, durable replay, concurrent updates cannot overwrite a newer version, no visit/money/notice changes",
+    "PASS closure editing browser: original/create and separate edit drafts, readonly state, no-change no-op, reload, exact UPDATE receipt and lost response recovery, original hours/nulls, stale conflicts and explicit discard, changed day, offline owner isolation/recovery, legacy options refusal, quota before HTTP, 320/390/1440 and preserved money/visits/notices",
+    "PASS closures API: exact dates and inclusive final day, ADMIN-only, server actor, immutable metadata, receipts/reuse/recovery ownership, stale review, audit rollback, no duplicate notices, template dates, active clients only, explicit limits and unchanged visits/money",
+    "PASS closures browser: escaped historical text, partial/empty/error/filter states, 320/390/1440, cancelled/empty dialogs never write, lost-response recovery, stale conflicts, late filter replies, quota refusal, receipt identity, timeout, offline retention, account partition and unchanged visits/money",
+    "PASS client closures API: authenticated customer ownership and ADMIN preview, typed identity collisions refused, public field whitelist, future/current/hidden/cancelled/expired states, exact UTC boundaries, source preservation, explicit cap, no writes or external sends, sanitized failure",
+    "PASS client closures browser: real portal, 5 languages, 320/390/1440, literal original notices, future/current states, empty/partial/error, wrong response identity, offline, timeout, reload lifecycle, cancellation and periodic refresh, exact expiry, late language/client replies, account swap and expiry, preserved sources and no writes"
+  ],
+  "logs": {
+    "/tmp/cw343-unit.log": "d2fb8b017d60e79c9a2fd9240aef49f6c3158ff2bcb90602c1a7bb18ebeeae14",
+    "/tmp/cw343-final-syntax.log": "80a77931fee84e7e5decef4867922dfd16126f546f3eb64fa462c0e918387a54",
+    "/tmp/cw343-tech.log": "ba58fae54ce9081e395429a2d2fd7bc7f8c4d52062c17b1fcec324f928e03f15",
+    "/tmp/cw343-final-integrated.log": "6bf4ec84ae6a71089e640177db5bf13eeda7547c63f09bc382dff4f296ea52e1"
+  },
+  "runtime": {
+    "database": "PGlite 0.5.8 / pglite-socket 0.2.11, isolated",
+    "additiveMigrations": 40,
+    "chromium": "@sparticuz/chromium 153.0.0, normal multiple processes, web security retained",
+    "runnerSha256": "5bd8f95926470bd82fabef27148ed54a55532bdf80d8dbc557dd19b244486b2b",
+    "preloadSha256": "74ba6986b731dfe5120836cb841c25bed62d334014aa588379558293deb6ec7a"
+  },
+  "screenshots": {
+    "reports/field-visual/company-closure-edit/edit-1440.png": "9cc12ff4717460830bc97b8e247b4ac42c69a40a6aca214f827f54518f0a5774",
+    "reports/field-visual/company-closure-edit/edit-320.png": "098c8044518f8b34abdccf72f62aa4d71330337a1edab994c648dc1e45b42dec",
+    "reports/field-visual/company-closure-edit/edit-390.png": "fcb5eb90739db7f83d3891a771b9d1261069da3753b36ce8948df41c261a9904"
+  },
+  "reviewedWidths": [
+    320,
+    390,
+    1440
+  ],
+  "fieldSuiteExpectedGroups": 241,
+  "cache": "v155",
+  "inventory": {
+    "htmlFiles": 115,
+    "rootPages": 108,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 78,
+    "catalogueGuardDifferences": 0,
+    "activeScripts": 262,
+    "pagesWithoutLiteralTestReference": 37
+  },
+  "limits": [
+    "Native CI and PostgreSQL restore of this commit remain pending.",
+    "Editing does not pause or replan visits and does not reissue previous notices.",
+    "Only explicitly changed calendar days use complete UTC boundaries; untouched historical instants and nullable values are preserved.",
+    "The edit form refuses historical options it cannot represent.",
+    "This administrative form was reviewed in PT-PT; it does not certify the whole application in five languages."
+  ],
+  "testPreparation": [
+    "Corrected the browser test to wait for the refusal of unsupported historical options, which do not enter edit mode. No product protection or assertion was removed."
+  ]
+}

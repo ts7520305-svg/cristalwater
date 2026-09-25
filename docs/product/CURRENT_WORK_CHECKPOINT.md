@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 25/09/2026, TASK343 validada localmente
+
+Edição de encerramentos com versão revista, rascunhos independentes por administrador/registo e comprovativo UPDATE recuperável. Conserva horas/milissegundos/nulos dos campos intocados e metadados/autoria; só dias explicitamente alterados são normalizados. Conflitos bloqueiam Guardar e preservam os campos; descarte explícito, conta/offline/quota e opções antigas protegidos. 608 unitários/83 ficheiros, quatro técnicos, sintaxe 629/222/62, quatro grupos integrados API/Chromium e larguras 320/390/1440 aprovados. 40 migrações existentes, cache v155, runner com 241 grupos. [Relatório](COMPANY_CLOSURE_EDITING_20260925.md) e [evidência local](evidence/20260925_task343_local.json). Publicação e CI/restauro nativo deste código por confirmar.
+
+TASK342 em validação no CI `36091953492`, job `107936060318`; TASK341 confirmada em 238/238 grupos e restauro de 127 tabelas/47 ficheiros. Inventário: 115 HTML, 78 páginas referenciadas em 262 scripts ativos, 37 na fila de pesquisa. Retomar a publicação/CI, depois os restantes critérios de páginas/histórico/produção. Sem merge/deploy/contactos reais; aplicação não declarada completa.
+
 ## Retoma atual — 25/09/2026, TASK342 publicada
 
 Encerramentos ativos em curso e futuros no portal cliente, publicação explícita, projeção pública limitada, titularidade de cliente e pré-visualização ADMIN. Datas/horas originais UTC, mensagens literais, estados vazio/parcial/erro, sessão/expiração, troca de cliente/idioma, respostas tardias, timeout/offline, regresso pelo histórico, atualização periódica e termo do intervalo protegidos. Interface da secção nos cinco idiomas e escolha de idioma por link corrigida, incluindo reload. 606 unitários/83 ficheiros, quatro técnicos, sintaxe 629/222/62, seis grupos integrados completos aprovados, incluindo limpeza dos dados próprios. 40 migrações existentes, cache v154, runner com 240 grupos. [Relatório](CLIENT_CLOSURE_PORTAL_20260925.md) e [evidência local](evidence/20260925_task342_local.json). Publicada em `a2afce1c38f2f2e3bd1c709fdc2f66c9a9d54e31`, árvore `ed4b739fb5ed298c8f49a2f31ed41ec95d30dd9e`, idêntica à validada. [CI 36091953492](https://github.com/ts7520305-svg/cristalwater/actions/runs/36091953492), job `107936060318`, em execução; os 240 grupos e o restauro nativo continuam por confirmar.
@@ -152,8 +158,8 @@ Publicada em `e20b0d47f42b2eee0a6862cb97e58f553c33b1bc`, árvore `e5f44c27429fbe
 
 ## Próxima ação
 
-1. Confirmar CI/restauro integrado TASK336 (`36048931532`, commit `55544f548bc073aadac574770786920f0d0ba68b`). Conservar também o resultado do código TASK335 (`36048130043`, commit `4325bf01e173b3f94df42f2281aebf3de5f7f0c5`) e resultado TASK334 (`36045589129`). TASK332–333 falharam apenas no seletor antigo do editor; correção e regressão local incluídas na TASK335, sem aprovação nativa ainda. TASK329–331 têm evidências de aprovação/restauro guardadas.
-2. Prosseguir custos/ajustes ainda por fechar e inventário finito de apresentação. TASK334 permite inspecionar e TASK336 acrescenta confirmação explícita para o cliente já registado; não atribui cliente ausente. Não repetir TASK300–336 sem falha concreta.
+1. Publicar TASK343 e confirmar o seu CI/restauro integrado. Confirmar também TASK342 (`36091953492`, commit `a2afce1c38f2f2e3bd1c709fdc2f66c9a9d54e31`). TASK341 tem evidência nativa completa; os resultados antigos continuam nos relatórios e evidências próprios.
+2. Prosseguir custos/ajustes ainda por fechar e inventário finito de apresentação. TASK334 permite inspecionar e TASK336 acrescenta confirmação explícita para o cliente já registado; não atribui cliente ausente. Não repetir percursos aprovados sem falha concreta.
 3. Manter separados os critérios de volume/produção/fornecedores/piloto físico e IA offline/aprendizagem/vídeo. Não atribuir percentagem global ou lucro completo sem critérios e fontes fechados.
 
 ## Autorizações e regras vigentes

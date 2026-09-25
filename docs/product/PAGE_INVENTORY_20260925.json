@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-09-25T03:38:39.071Z",
-  "baseCommit": "8ea6a8eeab2018bff8e688d47b39d05a545e224e",
+  "generatedAt": "2026-09-25T04:09:08.087Z",
+  "baseCommit": "d8874ecdc1f0964c68902cb3685c4babcbb5bba8",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 261,
+  "activeScriptsScanned": 262,
   "summary": {
     "htmlFiles": 115,
     "rootPages": 108,
@@ -338,7 +338,8 @@
       "languageAssets": [],
       "directPrintAction": false,
       "testReferences": [
-        "test-field-company-closures.js"
+        "test-field-company-closures.js",
+        "test-field-company-closure-edit.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
