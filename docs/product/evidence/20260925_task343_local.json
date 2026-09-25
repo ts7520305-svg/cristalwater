@@ -94,5 +94,13 @@
   ],
   "testPreparation": [
     "Corrected the browser test to wait for the refusal of unsupported historical options, which do not enter edit mode. No product protection or assertion was removed."
-  ]
+  ],
+  "publication": {
+    "commit": "432dc009e6c109f66a1a0647be9254cb16e7e6c7",
+    "tree": "95284b5ba4b4d0958c5e3c0a75a92e7252eefb10",
+    "runId": 36093788647,
+    "jobId": 107941585249,
+    "status": "in_progress",
+    "nativeRestoreConfirmed": false
+  }
 }

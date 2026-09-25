@@ -111,7 +111,7 @@
     "catalogueGuardDifferences": 0
   },
   "limits": [
-    "Native CI and PostgreSQL restore of this commit remain pending.",
+    "Native CI and PostgreSQL restore were verified after publication; see 20260925_task342_ci.json.",
     "Closure notices are published on ACTIVE plus showOnClientPortal; no automatic visit changes.",
     "Public notices refresh every 60 seconds, on focus/visibility and manually; not instantaneous broadcast.",
     "Team message content retains its original language; only the new section interface is translated.",
@@ -127,7 +127,8 @@
     "tree": "ed4b739fb5ed298c8f49a2f31ed41ec95d30dd9e",
     "runId": 36091953492,
     "jobId": 107936060318,
-    "status": "in_progress",
-    "nativeRestoreConfirmed": false
+    "status": "success",
+    "nativeRestoreConfirmed": true,
+    "evidence": "20260925_task342_ci.json"
   }
 }
