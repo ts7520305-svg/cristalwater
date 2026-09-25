@@ -121,5 +121,13 @@
     "Rebuilt missing ephemeral browser/database runtime.",
     "Final socket connection disables prepared statement caching; PGlite shutdown drains socket callbacks.",
     "Isolated browser fixture IDs avoid historical chat file IDs; original messages were not deleted."
-  ]
+  ],
+  "publication": {
+    "commit": "a2afce1c38f2f2e3bd1c709fdc2f66c9a9d54e31",
+    "tree": "ed4b739fb5ed298c8f49a2f31ed41ec95d30dd9e",
+    "runId": 36091953492,
+    "jobId": 107936060318,
+    "status": "in_progress",
+    "nativeRestoreConfirmed": false
+  }
 }

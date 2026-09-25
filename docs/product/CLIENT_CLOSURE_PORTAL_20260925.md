@@ -1,6 +1,6 @@
 # TASK342 — encerramentos no portal cliente
 
-Data: 25/09/2026. Base: `8ea6a8eeab2018bff8e688d47b39d05a545e224e`. Validação local concluída; o fecho de publicação identifica o commit e o CI correspondentes.
+Data: 25/09/2026. Base: `8ea6a8eeab2018bff8e688d47b39d05a545e224e`. Código publicado: `a2afce1c38f2f2e3bd1c709fdc2f66c9a9d54e31`, árvore `ed4b739fb5ed298c8f49a2f31ed41ec95d30dd9e`, idêntica à validada localmente. [CI 36091953492](https://github.com/ts7520305-svg/cristalwater/actions/runs/36091953492), job `107936060318`, em execução; os 240 grupos e o restauro nativo ainda não estão aprovados.
 
 ## Comportamento entregue
 
