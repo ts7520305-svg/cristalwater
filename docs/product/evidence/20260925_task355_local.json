@@ -115,5 +115,13 @@
     "Generic legacy resend is blocked until the original source is reviewed; monthly reviewed resend remains available.",
     "Historical states are not reconciled or proof of recipient delivery.",
     "Production volume, shared-shell translations, VPS and physical device pilot remain open."
-  ]
+  ],
+  "publication": {
+    "codeCommit": "5e30b15fac8376ae7863d32e28924f00e4b7c1de",
+    "tree": "1812a23633d86a43f60151041caa1d75f3730523",
+    "runId": 36125082129,
+    "jobId": 108039218706,
+    "status": "in_progress",
+    "nativePostgresRestore": "pending"
+  }
 }
