@@ -23,6 +23,6 @@ Inventário: 115 HTML, 81 páginas com referência literal em 269 scripts ativos
 
 ## Estado e limites
 
-Código validado localmente; publicação e CI deste lote por confirmar. TASK347 confirmada em [246/246 grupos e restauro nativo](evidence/20260925_task347_ci.json), com 17 etapas, 127 tabelas e 47 ficheiros com linhas e hashes iguais. TASK348 permanece em execução no último controlo.
+Publicada em `ee8ca0dd9ccf51b038d7c1fba339a443b5c8b6e8`, árvore `246b13a34684d14bc7455ec0b2be8635f5f5c2c8`, idêntica à preparada e validada localmente. [CI 36108653641](https://github.com/ts7520305-svg/cristalwater/actions/runs/36108653641), job `107986874329`, em execução; os 248 grupos e o restauro PostgreSQL nativo deste lote continuam por confirmar. TASK347 confirmada em [246/246 grupos e restauro nativo](evidence/20260925_task347_ci.json), com 17 etapas, 127 tabelas e 47 ficheiros com linhas e hashes iguais. TASK348 permanece em execução no último controlo.
 
 A marcação e o preço do extra não são reconciliação com linhas de documentos nem prova de recebimento ou emissão fiscal. Cada página é uma nova consulta; não se congela todo o histórico entre páginas. A rota agrupada antiga permanece sem paginação e conserva o seu total de compatibilidade. A tradução cobre o conteúdo próprio; navegação comum/assistente mantêm revisão separada. Restantes critérios de páginas, históricos financeiros e produção continuam abertos. Sem merge, deploy ou contactos reais; aplicação não declarada completa.
