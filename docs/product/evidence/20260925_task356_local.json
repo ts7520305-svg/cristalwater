@@ -116,5 +116,13 @@
     "Recent position is not proof of presence, availability or work in progress.",
     "Active identities and their minimal projections are read before filtering/pagination; production volume unmeasured.",
     "Historical identity reconciliation, shared navigation translations, VPS and physical devices remain open."
-  ]
+  ],
+  "publication": {
+    "codeCommit": "4ce09968494c72f751c0db087b011a01eab9ca79",
+    "tree": "5fcfb3eef6ed21b6c36d375d1e376f6c5f534da0",
+    "runId": 36127392240,
+    "jobId": 108046538673,
+    "status": "in_progress",
+    "nativePostgresRestore": "pending"
+  }
 }
