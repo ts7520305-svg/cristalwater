@@ -110,5 +110,16 @@
     "The count-corruption case uses a count contradictory to the returned page; a different plausible first-page total cannot be independently disproved by that page.",
     "Marked filters as managed so the shared navigation memory cannot restore another query over the URL selection.",
     "Native CI timeout increased from 35 to 40 minutes after the verified TASK343 run took 33m06s, before adding this group."
-  ]
+  ],
+  "publication": {
+    "commit": "57724267af9e3512dfb0be739d0b11ddf454dcd4",
+    "tree": "f26e764d8710dc659c4b3954e1fff9368306e366",
+    "branch": "work/field-readiness-20260915-simulation",
+    "ciRun": 36097287730,
+    "ciJob": 107952105645,
+    "ciUrl": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36097287730",
+    "status": "in_progress",
+    "nativeRestoreConfirmed": false,
+    "checkedAt": "2026-09-25T05:09:04.878Z"
+  }
 }
