@@ -137,5 +137,16 @@
     "Verified differing main/profile volumes are preserved and results only describe the visible fields after preview.",
     "Compared normalized save replies and refused a stale same-pool confirmation.",
     "Suppressed only AbortError toasts; retained real connection errors and ran session/login regressions."
-  ]
+  ],
+  "publication": {
+    "commit": "07ed3b0f59eba4418b7a608a32fc1e6a093e00f9",
+    "tree": "262c68776350d69575b284cd47ced3157fb458a2",
+    "branch": "work/field-readiness-20260915-simulation",
+    "ciRun": 36099280297,
+    "ciJob": 107958111534,
+    "ciUrl": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36099280297",
+    "status": "in_progress",
+    "nativeRestoreConfirmed": false,
+    "checkedAt": "2026-09-25T05:37:20.809Z"
+  }
 }

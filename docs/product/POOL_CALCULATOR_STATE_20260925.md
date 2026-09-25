@@ -25,7 +25,7 @@ Seis capturas de formulário/resultados ficam em `reports/field-visual/pool-calc
 
 ## Estado e limites
 
-Publicação e CI/restauro PostgreSQL deste lote por confirmar. A TASK344 está publicada em `57724267af9e3512dfb0be739d0b11ddf454dcd4`; [CI 36097287730](https://github.com/ts7520305-svg/cristalwater/actions/runs/36097287730) ainda por confirmar. A aprovação da TASK343 não aprova estes lotes.
+Publicada em `07ed3b0f59eba4418b7a608a32fc1e6a093e00f9`, árvore `262c68776350d69575b284cd47ced3157fb458a2`, idêntica à validada localmente. [CI 36099280297](https://github.com/ts7520305-svg/cristalwater/actions/runs/36099280297), job `107958111534`, em execução; os 243 grupos e o restauro PostgreSQL nativo continuam por confirmar. A TASK344 está publicada em `57724267af9e3512dfb0be739d0b11ddf454dcd4`; [CI 36097287730](https://github.com/ts7520305-svg/cristalwater/actions/runs/36097287730) ainda por confirmar. A aprovação da TASK343 não aprova estes lotes.
 
 Este lote não altera as fórmulas nem a persistência do backend. As APIs antigas conservam os pressupostos e a projeção anteriores; gravação atómica/versionada, concorrência entre administradores e comprovativo recuperável da calculadora continuam por implementar. Recarregar após uma resposta perdida consulta o estado atual e não substitui esse comprovativo. A revisão visual não certifica os cinco idiomas.
 
