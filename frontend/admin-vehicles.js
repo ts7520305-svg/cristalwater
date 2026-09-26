@@ -5,12 +5,10 @@ let VEHICLES = [];
 let RISK_AVAILABLE=false, legacyLoad=0, vehicleChoiceRead=0, riskRead=0;
 const LEGACY_TOKEN=localStorage.getItem('token')||localStorage.getItem('cristalwater_jwt')||localStorage.getItem('adminToken');
 function requirePageSession(){if(!window.CWFleetPageSession?.isCurrent())throw Error('A sessão mudou ou expirou. Reabra a página com a conta correta.');}
-function clearLegacy(){legacyLoad++;vehicleChoiceRead++;riskRead++;VEHICLES=[];GUIDES=[];WORK_GUIDES=[];RISK_AVAILABLE=false;for(const id of ['guides','works','movements','riskRules','riskSummary'])el(id)?.replaceChildren();for(const input of document.querySelectorAll('main input,main select,main textarea,main button'))if(!input.closest('#fleetManager')){if('value' in input)input.value='';input.disabled=true;}}
+function clearLegacy(){legacyLoad++;vehicleChoiceRead++;riskRead++;VEHICLES=[];RISK_AVAILABLE=false;for(const id of ['riskRules','riskSummary'])el(id)?.replaceChildren();for(const input of document.querySelectorAll('main input,main select,main textarea,main button'))if(!input.closest('#fleetManager,.fh')){if('value' in input)input.value='';input.disabled=true;}}
 window.addEventListener('cw:fleet-session-ended',clearLegacy);window.addEventListener('pagehide',clearLegacy);
-window.addEventListener('pageshow',()=>{if(window.CWFleetPageSession?.isCurrent()){for(const input of document.querySelectorAll('main input,main select,main textarea,main button'))if(!input.closest('#fleetManager'))input.disabled=false;load();}});
+window.addEventListener('pageshow',()=>{if(window.CWFleetPageSession?.isCurrent()){for(const input of document.querySelectorAll('main input,main select,main textarea,main button'))if(!input.closest('#fleetManager,.fh'))input.disabled=false;load();}});
 window.addEventListener('cw:fleet-updated',()=>refreshVehicleChoices().catch(()=>{if(window.CWFleetPageSession?.isCurrent()){VEHICLES=[];renderVehicleChoices();}}));
-let GUIDES = [];
-let WORK_GUIDES = [];
 let RISK_SUMMARY = { issues: [], byVehicleId: {}, byTechnicianId: {}, byClientId: {}, counts: {} };
 let RISK_RULES = {};
 
@@ -240,6 +238,7 @@ function focusStoredRiskTarget() {
   if (target.targetType && target.targetId != null) {
     selectors.push(`[data-risk-target-type="${attrSelector(target.targetType)}"][data-risk-target-id="${attrSelector(target.targetId)}"]`);
   }
+  if (target.targetId != null && ['TransportGuide','WorkGuide'].includes(target.targetType) && !selectors.map(selector=>document.querySelector(selector)).find(Boolean) && window.CWFleetHistory?.focusTarget(target)) return;
   if (target.vehicleId != null) selectors.push(`[data-risk-vehicle-id="${attrSelector(target.vehicleId)}"]`);
 
   let node = selectors.map((selector) => document.querySelector(selector)).find(Boolean);
@@ -248,7 +247,7 @@ function focusStoredRiskTarget() {
     node = Array.from(document.querySelectorAll("[data-risk-target-type],.card"))
       .find((item) => normalizeText(item.innerText || "").includes(needle));
   }
-  if (!node) return;
+  if (!node) {window.CWFleetHistory?.focusTarget(target);return;}
 
   node.classList.add("cw-risk-focus");
   node.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -313,169 +312,19 @@ function renderVehicleChoices(){for(const id of ['guideVehicle','workVehicle','m
 async function refreshVehicleChoices(){const turn=++vehicleChoiceRead,response=await j(`${API}/vehicles?active=all`);if(turn!==vehicleChoiceRead)return;if(!Array.isArray(response.vehicles))throw Error('Lista de viaturas incompleta.');VEHICLES=response.vehicles;renderVehicleChoices();}
 function selectedVehicle(id){const value=Number(val(id));if(!value||!VEHICLES.some(v=>v.id===value&&v.active!==false&&!v.deletedAt)){alert('Escolha uma viatura disponível antes de continuar.');return false;}return true;}
 
-function renderGuideItems(items = []) {
-  if (!items.length) return `<p class="muted">Sem materiais.</p>`;
-  return `
-    <table class="table">
-      <tbody>
-        ${items.map((item) => `
-          <tr>
-            <td>${esc(item.name)}</td>
-            <td>${esc(item.type || "")}</td>
-            <td>${esc(item.quantity)} ${esc(item.unit || "")}</td>
-          </tr>
-        `).join("")}
-      </tbody>
-    </table>
-  `;
-}
-
-function formatFileSize(bytes) {
-  const size = Number(bytes || 0);
-  if (!Number.isFinite(size) || size <= 0) return "";
-  if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`;
-  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function renderOfficialDocument(doc) {
-  if (!doc?.url) {
-    return `<div class="document-note muted">Sem ficheiro oficial da AT anexado.</div>`;
-  }
-  return `
-    <div class="document-note">
-      <strong>Ficheiro AT oficial anexado</strong>
-      <div class="muted">
-        ${esc(doc.originalName || doc.filename || "Documento AT")}
-        ${doc.size ? ` - ${esc(formatFileSize(doc.size))}` : ""}
-        ${doc.uploadedAt ? ` - ${new Date(doc.uploadedAt).toLocaleString("pt-PT")}` : ""}
-      </div>
-    </div>
-  `;
-}
-
 function manageTransportGuideDocuments(id) {
   requirePageSession();
   const lang = document.getElementById('fleetLanguage')?.value || new URL(location.href).searchParams.get('lang') || 'pt';
   location.href = '/transport-guide-documents?' + new URLSearchParams({ ...(id ? { guideId: String(id) } : {}), lang });
 }
 
-function renderTransportGuides() {
-  const target = el("guides");
-  if (!target) return;
-  target.innerHTML = GUIDES.slice(0, 20).map((guide) => {
-    const issues = uniqueIssues([
-      ...targetIssues("TransportGuide", guide.id),
-      ...vehicleIssues(guide.vehicleId).filter((issue) => issue.type === "MISSING_TRANSPORT_GUIDE_DOCUMENT"),
-    ]);
-    return `
-      <div class="card ${riskClass(issues)}" data-risk-target-type="TransportGuide" data-risk-target-id="${esc(guide.id)}" data-risk-transport-guide-id="${esc(guide.id)}" data-risk-vehicle-id="${esc(guide.vehicleId || "")}" data-risk-anchor="${esc(guide.codeAT || guide.vehicle?.plate || guide.id)}" data-risk-issue-types="${esc(riskIssueTypes(issues))}">
-        <strong>Guia ${esc(guide.codeAT || `#${guide.id}`)}</strong>
-        <span class="badge ${guide.status === "ACTIVE" ? "" : "off"}">${esc(guide.status)}</span>
-        ${renderRiskBadges(issues)}
-
-        <div class="muted">
-          ${esc(guide.vehicle?.plate || "sem viatura")} - ${guide.items?.length || 0} itens
-        </div>
-
-        ${renderOfficialDocument(guide.officialDocument)}
-        ${renderGuideItems(guide.items || [])}
-
-        <div class="links">
-          ${guide.officialDocument?.url ? `<a class="btn primary" data-auth-download target="_blank" rel="noopener" href="${esc(guide.officialDocument.url)}">Abrir AT oficial</a>` : ""}
-          <button class="btn primary" onclick="manageTransportGuideDocuments(${guide.id})">Documentos e versões</button>
-          <button class="btn" onclick="editTransportGuide(${guide.id})">Editar guia</button>
-          <button class="btn" onclick="editTransportGuideItems(${guide.id})">Editar materiais</button>
-          <button class="btn warn" onclick="closeTransportGuide(${guide.id})">Fechar</button>
-          <button class="btn warn" onclick="cancelTransportGuide(${guide.id})">Anular</button>
-        </div>
-      </div>
-    `;
-  }).join("") || `<p class="muted">Sem guias AT.</p>`;
-}
-
-function renderWorkGuides() {
-  const target = el("works");
-  if (!target) return;
-  target.innerHTML = WORK_GUIDES.slice(0, 20).map((workGuide) => {
-    const issues = uniqueIssues([
-      ...targetIssues("WorkGuide", workGuide.id),
-      ...vehicleIssues(workGuide.vehicleId).filter((issue) => ["MISSING_TRANSPORT_GUIDE", "VEHICLE_STOCK_LOW", "VEHICLE_STOCK_EMPTY"].includes(issue.type)),
-    ]);
-    return `
-      <div class="card ${riskClass(issues)}" data-risk-target-type="WorkGuide" data-risk-target-id="${esc(workGuide.id)}" data-risk-work-guide-id="${esc(workGuide.id)}" data-risk-vehicle-id="${esc(workGuide.vehicleId || "")}" data-risk-anchor="${esc(workGuide.vehicle?.plate || workGuide.id)}" data-risk-issue-types="${esc(riskIssueTypes(issues))}">
-        <strong>Obra #${workGuide.id}</strong>
-        <span class="badge ${workGuide.status === "OPEN" ? "" : "off"}">${esc(workGuide.status)}</span>
-        <span class="badge ${!workGuide.guideId ? "off" : ""}">${!workGuide.guideId ? "AT em falta" : "AT associada"}</span>
-        ${renderRiskBadges(issues)}
-
-        <div class="muted">
-          ${esc(workGuide.vehicle?.plate || "")} - ${esc(workGuide.technician?.name || "")} - AT ${esc(workGuide.guide?.codeAT || workGuide.guideId || "AT EM FALTA")} - ${workGuide.items?.length || 0} itens
-        </div>
-
-        ${!workGuide.guideId ? `<div class="document-note muted">Guia de obra provisoria: o dia pode continuar, mas a guia de transporte AT deve ser adicionada para fechar a pendencia.</div>` : ""}
-
-        <table class="table">
-          <tbody>
-            ${(workGuide.items || []).slice(0, 8).map((item) => `
-              <tr>
-                <td>${esc(item.name)}</td>
-                <td>${esc(item.quantity)} ${esc(item.unit || "")}</td>
-                <td>usado ${esc(item.usedQty || 0)}</td>
-              </tr>
-            `).join("")}
-          </tbody>
-        </table>
-
-        <div class="links">
-          <a class="btn primary" data-auth-download target="_blank" rel="noopener" href="/api/guides/work/${workGuide.id}/pdf">PDF guia obra</a>
-          ${workGuide.guide?.id ? `<a class="btn" data-auth-download target="_blank" rel="noopener" href="/api/guides/transport/${workGuide.guide.id}/pdf">PDF guia AT</a>` : `<span class="btn warn">AT em falta</span>`}
-          ${workGuide.status === "OPEN" ? `<button class="btn" onclick="closeWork(${workGuide.id})">Rever fecho</button>` : ""}
-        </div>
-      </div>
-    `;
-  }).join("") || `<p class="muted">Sem guias de obra.</p>`;
-}
-
 async function load() {
   const turn=++legacyLoad;
-  try {
-    requirePageSession();
-    await loadRiskState();
-    if(turn!==legacyLoad)return;
-
-    await refreshVehicleChoices();
-    if(turn!==legacyLoad)return;
-
-    const guidesResponse = await j(`${API}/transport`);
-    if(turn!==legacyLoad)return;
-    GUIDES = guidesResponse.guides || [];
-    renderTransportGuides();
-
-    const workResponse = await j(`${API}/work`);
-    if(turn!==legacyLoad)return;
-    WORK_GUIDES = workResponse.workGuides || [];
-    renderWorkGuides();
-    setTimeout(focusStoredRiskTarget, 150);
-
-    const movementsResponse = await j(`${API}/movements?limit=30`);
-    if(turn!==legacyLoad)return;
-    const movements = movementsResponse.movements || [];
-    el("movements").innerHTML = `
-      <h3>Ultimos movimentos</h3>
-      ${
-        movements.map((movement) => `
-          <div class="card">
-            <strong>${esc(movement.movementType)}</strong> - ${esc(movement.itemName)} - ${esc(movement.quantity)} ${esc(movement.unit || "")}
-            <div class="muted">
-              Viatura ${esc(movement.vehicleId || "-")} - ${new Date(movement.createdAt).toLocaleString("pt-PT")}
-            </div>
-          </div>
-        `).join("") || `<p class="muted">Sem movimentos.</p>`
-      }
-    `;
-  } catch (error) {
-    if(turn===legacyLoad&&window.CWFleetPageSession?.isCurrent())alert(error.message);
-  }
+  try { requirePageSession(); } catch (_) { return; }
+  const results=await Promise.allSettled([loadRiskState(),refreshVehicleChoices(),window.CWFleetHistory?.refreshAll()]);
+  if(turn!==legacyLoad||!window.CWFleetPageSession?.isCurrent())return;
+  if(results[1].status==='rejected'){VEHICLES=[];renderVehicleChoices();alert(results[1].reason.message);}
+  focusStoredRiskTarget();
 }
 
 function createTransportGuide() {
@@ -487,18 +336,17 @@ function createTransportGuide() {
 
 function manageTransportGuide(id, action) {
   requirePageSession();
-  const guide = GUIDES.find(item => Number(item.id) === Number(id));
-  if (!guide) return;
+  if (!window.CWFleetHistory?.has('transport',id)) return;
   const lang = new URL(location.href).searchParams.get('lang') || document.documentElement.lang || 'pt';
-  location.href = '/transport-guide-manage?' + new URLSearchParams({ guideId: String(guide.id), action, lang });
+  location.href = '/transport-guide-manage?' + new URLSearchParams({ guideId: String(id), action, lang });
 }
 function editTransportGuide(id) { manageTransportGuide(id, 'EDIT'); }
 
 function editTransportGuideItems(id) {
-  const guide = GUIDES.find(item => Number(item.id) === Number(id));
-  if (!guide) return;
+  requirePageSession();
+  if (!window.CWFleetHistory?.has('transport',id)) return;
   const lang = new URL(location.href).searchParams.get('lang') || document.documentElement.lang || 'pt';
-  location.href = '/transport-guide-items?' + new URLSearchParams({ guideId: String(guide.id), lang });
+  location.href = '/transport-guide-items?' + new URLSearchParams({ guideId: String(id), lang });
 }
 
 function closeTransportGuide(id) { manageTransportGuide(id, 'CLOSE'); }

@@ -1,5 +1,9 @@
 # TASK375 — Revisão das regras globais de alerta
 
+## Confirmação nativa — registada em TASK377
+
+[CI 36221808091](https://github.com/ts7520305-svg/cristalwater/actions/runs/36221808091), job `108348349992`: **286/286 scripts esperados distintos, todos zero**, 17 etapas aprovadas e restauro de **128 tabelas/47 ficheiros** com linhas e hashes iguais. [Evidência](evidence/20260926_task375_ci.json). As referências anteriores a validação pendente conservam o estado conhecido no momento da publicação original.
+
 ## Comportamento
 
 `/operational-risk-rules` oferece à administração uma revisão própria das regras de avisos visuais. A entrada está na frota, mas o âmbito é global: inclui pagamentos, guias, seguro/inspeção, materiais, pendências e associação de riscos aos técnicos. A página explica que desligar uma regra apenas oculta o aviso; não resolve a situação nem envia mensagens.

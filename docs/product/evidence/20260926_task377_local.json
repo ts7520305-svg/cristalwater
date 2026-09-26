@@ -1,0 +1,336 @@
+{
+  "task": "TASK377",
+  "baseCommit": "bb5eb4970d6b3dcdfb41f2c92600b3ae5795f142",
+  "validatedAt": "2026-09-26T06:57:40.836264+00:00",
+  "unitTests": {
+    "passed": 944,
+    "files": 114,
+    "new": 9
+  },
+  "technicianTests": 4,
+  "syntax": {
+    "backend": 687,
+    "frontend": 297,
+    "inline": 44
+  },
+  "schema": {
+    "newMigrations": 0,
+    "totalAdditiveMigrationsApplied": 43,
+    "tablesExpected": 128,
+    "runtime": "PGlite 0.5.8 / pglite-socket 0.2.11; isolated synthetic data, not native PostgreSQL"
+  },
+  "integrationGroups": [
+    {
+      "script": "scripts/test-field-fleet-history.js",
+      "code": 0,
+      "log": "/tmp/cw377-test-field-fleet-history.log",
+      "sha256": "bf2258139a44ec43fe7a0d38b55d445194b85fd0b38bd9e7ee3448424ff847ae",
+      "checks": [
+        "PASS fleet history API: administrator scope and both field identities denied; literal and combined filters; all 27 AT guides, 27 work guides and 207 signed movements traversed with stable order and insertion boundary; 28 exact materials across detail pages; Lisbon 23/25-hour inclusive dates; document metadata states and protected URL; archived and orphan history; strict queries, malformed historical data, absent records and four real SQL failures; read-only snapshots across 27 models and official file bytes unchanged."
+      ]
+    },
+    {
+      "script": "scripts/test-field-fleet-history-ui.js",
+      "code": 0,
+      "log": "/tmp/cw377-test-field-fleet-history-ui.log",
+      "sha256": "541c44de32dbb6a6532c174e94cccdc917dab95c3a0819bebd176e61ef66813a",
+      "checks": [
+        "PASS fleet history browser: actual shared fleet entry, complete list/detail pagination, signed quantities and null/zero mileage, protected document links, stable selected detail and adjacent fleet draft/vehicle choice, independent offline/partial/owner/header errors, stale list/detail rejection, exact older risk target, independent unavailable risks, five languages/three widths/44px/18 screenshots, suspension/recovery/account switch/expiry, no API writes and unchanged 13-model snapshots and official bytes."
+      ]
+    },
+    {
+      "script": "scripts/test-field-transport-guide-documents-ui.js",
+      "code": 0,
+      "log": "/tmp/cw377-test-field-transport-guide-documents-ui.log",
+      "sha256": "a9b961d53e3ae10cf9dde1b046c58776c819949ec34fb290bbd2baa11bf865f3",
+      "checks": [
+        "PASS guide documents browser: actual history entry and protected links; original/file review; PDF/XML authenticated fetch and actual technician document centre; owner/guide/version/hash mismatch rejection; double-click/loss/reload/offline retry/cancel; stale/expired review; storage failure/corrupt reference; partial/latest list and history; five languages/three widths/44px/18 screenshots; suspension/account changes/role denial/expiry; file bytes never persisted in browser storage."
+      ]
+    },
+    {
+      "script": "scripts/test-field-transport-guide-items-ui.js",
+      "code": 0,
+      "log": "/tmp/cw377-test-field-transport-guide-items-ui.log",
+      "sha256": "09a4a8b43b64679ab637ed91b47cafcfda8c0fa9a0d9c4a181094beb6b001715",
+      "checks": [
+        "PASS guide items browser: explicit work-item IDs; used/initial/final review; additions and preserved IDs; once after double-click, loss/reload and offline retry/cancel; changed/expired proof; storage failure and corrupt record; partial/latest reads; stable filters and five languages; 18 screenshots, three widths and 44px controls; suspension, account changes during review/commit, denied field roles and expiry."
+      ]
+    },
+    {
+      "script": "scripts/test-field-transport-guide-manage-ui.js",
+      "code": 0,
+      "log": "/tmp/cw377-test-field-transport-guide-manage-ui.log",
+      "sha256": "2efb63ea8b37763e01a70ecb8f81111db6c10a758dac6f9a9fe7635e70108ed5",
+      "checks": [
+        "PASS guide management browser: actual admin history entry; keep/set/clear fields and exact dates; escaped before/after review; close/cancel/explicit reopen; Lisbon DST gap/fold; double-click/lost-response/reload/offline retry/cancel; stale and expired reviews; storage failure and corrupt references; partial/latest lists; filters and five languages; 18 screenshots/three widths/44px controls; suspension, account changes during review/commit, role denial and expiry."
+      ]
+    },
+    {
+      "script": "scripts/test-field-work-guide-close-ui.js",
+      "code": 0,
+      "log": "/tmp/cw377-test-field-work-guide-close-ui.log",
+      "sha256": "55db16d916cca07787f0c116f4319106b57ae2eda49350778f367e10a44483c0",
+      "checks": [
+        "PASS work closure browser: real admin/field/legacy navigation; explicit mileage/vehicle choices; escaped preserved stock; double-click once; lost response/reload/JSONB recovery; offline exact retry/cancel; stale review; storage quota/ignored/corrupt reference; partial/latest reads; five languages/three widths/44px/18 screenshots; expiration, suspension and account changes during review/commit; ADMIN/TECHNICIAN/TEAM_LEADER with both identities; no altered stock, notes or transport state."
+      ]
+    },
+    {
+      "script": "scripts/test-field-fleet-management-ui.js",
+      "code": 0,
+      "log": "/tmp/cw377-test-field-fleet-management-ui.log",
+      "sha256": "20061280a51d80464a855c2f5ceb003c5ef1e45d953567ecf3ef3d4f79a4b402",
+      "checks": [
+        "PASS fleet browser: actual shared page/API, plate collision refusal, explicit vehicle review and double-click once, null/zero distance and multiline notes, separated operating state/archive/explicit restore, pagination/literal HTML, stable preparation across filters/languages, lost response/reload, offline exact retry, cancellation, stale/expired proof, quota/ignored/corrupt storage, partial packet/latest search, 24 screenshots in five languages/three widths, 44px controls, preserved shared vehicle selections with unavailable archive choice, unavailable/incomplete risks without zero/default/fallback writes, suspension and shared risk restoration, two-tab identity changes during review/commit, expiry and related records/business counts unchanged"
+      ]
+    },
+    {
+      "script": "scripts/test-field-navigation-preferences.js",
+      "code": 0,
+      "log": "/tmp/cw377-test-field-navigation-preferences.log",
+      "sha256": "bf33fb89ab292b4d5a8f447da76a8fffe3d7cb6c8072cb7d683213ebb658abac",
+      "checks": [
+        "PASS navigation preferences: account-bound explicit choices, no default writes or reload, device/live and fixed palettes, three densities with 44px targets, five languages/three widths/contrast, real menu/index/help navigation, business styles and filters preserved, legacy keys/shortcut and work bytes preserved, two windows, storage throw/ignored writes, corrupt/wrong-owner bytes, bfcache, reset, offline save, account change/expiry; zero business writes"
+      ]
+    },
+    {
+      "script": "scripts/test-real-month-flow-api.js",
+      "code": 0,
+      "log": "/tmp/cw377-test-real-month-flow-api.log",
+      "sha256": "788139ec27812e287b3e17ca263ecd4d83c5963db8831e8e827a89c6f8dfe72e",
+      "checks": [
+        "OK EDGE valida pH impossivel - Valor de pH invalido. Deve estar entre 0 e 10.",
+        "OK EDGE concorrencia bloqueia duplo fecho - status 200/409",
+        "OK clientes criados por API real - 5 clientes",
+        "OK piscinas/jacuzzis criados por API real - 9 equipamentos",
+        "OK fichas tecnicas preenchidas - 9/9",
+        "OK tecnicos e viaturas ligados - 3 tecnicos, 3 carros, 3 guias obra",
+        "OK rondas criadas e visitas concluídas - 3 rondas, 54 visitas",
+        "OK produtos da visita viram registo quimico - 60 registos",
+        "OK consumo automatico baixa guia/viatura - 60 movimentos",
+        "OK problemas em campo geram reparacoes/alertas - 6 reparacoes",
+        "OK faturacao mensal gerada - 5 faturas",
+        "OK pagamentos total/parcial registados - PAID, PARTIAL, PENDING, PENDING, PENDING",
+        "OK mensagens reais do portal cliente ficam por ler - 5 mensagens QA por ler",
+        "OK chat mostra conversas por ler - 5 mensagens totais por ler",
+        "OK notificacoes mostram alarme de chat - alarme CHAT_MESSAGE",
+        "OK dashboard recebe dados reais - clientes 5, mensagens 5",
+        "OK guia de obra mantem referencia AT e totais finais - guia AT 1"
+      ]
+    }
+  ],
+  "initialFailures": [
+    {
+      "phase": "API seed",
+      "log": "/tmp/cw377-api-initial-failure.log",
+      "sha256": "9012e307cab3a417471bce85b46941de232aeaeb1c776ed3e7477c2e75240bd9",
+      "resolution": "Prisma rejects NaN during test setup; use a real stored control character to verify incompatible history returns 409. The complete API group passed afterwards."
+    },
+    {
+      "phase": "Static route test",
+      "log": "/tmp/cw377-unit-initial-failure.log",
+      "sha256": "cd2ccb188c12108b1302f3e2649078eb284e0f1b54267fc16500cc8780c1542d",
+      "resolution": "Protected links moved from admin-vehicles.js to the history component. Updated the actual source and HTML import assertions; all 944 unit tests passed."
+    },
+    {
+      "phase": "UI guard setup",
+      "log": "/tmp/cw377-ui-guard-initial-failure.log",
+      "sha256": "2de03a5aca18377a86094171058b7c18232459db0c9d1e804f0750d179364128",
+      "resolution": "A TECHNICIAN correctly redirects to the field entry, so the admin-only history is absent. Replaced the inappropriate page-state expectation with an initially incoherent ADMIN identity; the complete UI group passed."
+    },
+    {
+      "phase": "Runner filename",
+      "log": "/tmp/cw377-test-field-real-monthly-api.log",
+      "sha256": "8e2d6fdc31ee583d7874b5a4fd44fbbebb7a0ceb0c50a05c2b613589e0d7cdac",
+      "resolution": "An incorrect ad hoc monthly script filename could not launch. Ran the existing scripts/test-real-month-flow-api.js in isolated QA; it passed. The committed suite retains its correct script name."
+    }
+  ],
+  "logs": [
+    {
+      "path": "/tmp/cw377-unit.log",
+      "sha256": "c7296610b303d7139ff8cffc8217567537bef10e35f8fdee26e36d4e3a50b4a3"
+    },
+    {
+      "path": "/tmp/cw377-technician.log",
+      "sha256": "69266a5cbe5ffe930bd829af71464910b8ff9e28a0a32202c048fabb05fd5de7"
+    },
+    {
+      "path": "/tmp/cw377-syntax.log",
+      "sha256": "98f7ecc7830d5839c9b0b2f33194f570abf0166b419743ab8e4729aad596a965"
+    }
+  ],
+  "visual": {
+    "screenshots": [
+      {
+        "path": "reports/field-visual/fleet-history/de-1440.png",
+        "sha256": "9a63609709d73b630fa9a4a7d0a0c17959c6df19a2b3092a633a6a9f8ee81cdc"
+      },
+      {
+        "path": "reports/field-visual/fleet-history/de-320.png",
+        "sha256": "f2d8dfd0e9f5d66c3eea5be2c9218492ecaeab1879cddb0b94af31dfb8f7ac7a"
+      },
+      {
+        "path": "reports/field-visual/fleet-history/de-390.png",
+        "sha256": "46ab79936676183724fcd379789815415447cb4b60e2e99751dfce08f9074594"
+      },
+      {
+        "path": "reports/field-visual/fleet-history/detail-movement-pt-1440.png",
+        "sha256": "06fb5a966519559f059d37267492098e7390b2636e1e7ad3df4ae5f34ffb0d8d"
+      },
+      {
+        "path": "reports/field-visual/fleet-history/detail-transport-pt-390.png",
+        "sha256": "6e54679bd3bc08e3b627113e1a4283412309200a7572c0172914cffd4c3346b2"
+      },
+      {
+        "path": "reports/field-visual/fleet-history/detail-work-de-320.png",
+        "sha256": "0d8d327c3b88f97151007a60e407c7b9a778415dac4de08a2bb71fba1580b29b"
+      },
+      {
+        "path": "reports/field-visual/fleet-history/en-1440.png",
+        "sha256": "b5fe6775373de0d08437fbfc5be45820b72703ca44b6dc1402a1ac31ff9b3e59"
+      },
+      {
+        "path": "reports/field-visual/fleet-history/en-320.png",
+        "sha256": "423ee946358cfd3d0eda6f384aa1b12c0f54ac2d5c00263a3aa367e37706880d"
+      },
+      {
+        "path": "reports/field-visual/fleet-history/en-390.png",
+        "sha256": "0b54a433dfdea05560596a0491226dd6ec4c41547325042fdf812dad1e6ed06d"
+      },
+      {
+        "path": "reports/field-visual/fleet-history/es-1440.png",
+        "sha256": "52e4bd114497c71545501d751294bdc774c2e2a74b9ba3188320b9806fe46980"
+      },
+      {
+        "path": "reports/field-visual/fleet-history/es-320.png",
+        "sha256": "b04c30f6371c3bea084ea682627dcdd0bd399278d99eb921377537e9fc5c8033"
+      },
+      {
+        "path": "reports/field-visual/fleet-history/es-390.png",
+        "sha256": "6fa9610eeb9574ec2b664f1084dea17d29e932cb5f5a9c2d91b116441b4fa531"
+      },
+      {
+        "path": "reports/field-visual/fleet-history/fr-1440.png",
+        "sha256": "c9c21fd41faa58eec5df6153c296c332f3b7705cd69fb3cc342b59fb20ed380b"
+      },
+      {
+        "path": "reports/field-visual/fleet-history/fr-320.png",
+        "sha256": "83f1b13ee874e9e463eab892c054451f535ef085c0d4ba531c4d50ba3fac9b88"
+      },
+      {
+        "path": "reports/field-visual/fleet-history/fr-390.png",
+        "sha256": "25165ccd21fc7329a205f2f0acb213cfd5607452820e4a04c557cd8dd17231ec"
+      },
+      {
+        "path": "reports/field-visual/fleet-history/pt-1440.png",
+        "sha256": "523905796434f7c67e4c63f4582e0d6a8bad1c7822398f888bd9389cf7a7e401"
+      },
+      {
+        "path": "reports/field-visual/fleet-history/pt-320.png",
+        "sha256": "ad99ebed8335fbd67292205e6fd36166fceb3625db60458b2923973bd5717887"
+      },
+      {
+        "path": "reports/field-visual/fleet-history/pt-390.png",
+        "sha256": "c773587873e88f4037c276e71a806accb75407e6d3a6b0a42b53a637b329bc7c"
+      }
+    ],
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "minimumControlHeight": 44,
+    "manuallyInspected": [
+      "pt-390.png",
+      "detail-work-de-320.png",
+      "detail-movement-pt-1440.png"
+    ],
+    "scope": "New history components; shared legacy shell retains its existing translation and assets. Final captures wait for transient network toast to close normally."
+  },
+  "readFailures": [
+    "Vehicle",
+    "SystemSetting",
+    "WorkGuideItem",
+    "VehicleStockMovement"
+  ],
+  "preservation": {
+    "apiSnapshotModels": 27,
+    "browserSnapshotModels": 13,
+    "browserApiWrites": 0,
+    "officialBytesUnchanged": true
+  },
+  "pagination": {
+    "pageSize": 25,
+    "transportRows": 27,
+    "workRows": 27,
+    "movementRows": 207,
+    "materialsPerDetail": 28,
+    "boundary": "Highest existing ID retained across pages; refresh includes insertions. Edits/deletions may change results."
+  },
+  "sourceHashes": {
+    "frontend/admin-vehicles.html": "a0b534086418c50d656b92214b14f86965dc71a3d7feec43b206824110894a2b",
+    "frontend/admin-vehicles.js": "8a78eee47a4a75033d429346979e5ac7c479f8168f6e696b3f3e72c19467a50b",
+    "frontend/cw-fleet-history-copy.js": "1795d94e8564666be3962aadd9a83cb6a7041dfd730a2635bdff7aee026249e7",
+    "frontend/cw-fleet-history-rules.js": "02607ab588a8700a1223be71f3840a6ca86b8cc99749bef178a6d62f7420a945",
+    "frontend/cw-fleet-history.css": "0d78a2a628bddfd42f9f71f573c3e5516561b6dc4dc197b87929ff6339c0b4ae",
+    "frontend/cw-fleet-history.js": "f0272fe942f5877dee276f0bcfdffd0e51782e31e4c596603c610ed16f233a0e",
+    "frontend/cw-fleet-management.js": "9ec81ee021c6c1bdb75c849c410121d3a8913fe42d8678d667dc174ea0ad18fb",
+    "frontend/sw.js": "0ff69cbd9ed2103ff51f9c7bdad785c15e714c196b6c29a8cd4c9fac6bd7bc1f",
+    "scripts/fixtures/internal-chat-server.js": "0435a3dbc180f818b9e547b25c0759f467a3fa78833ded47683efcdcc07688ea",
+    "scripts/helpers/fleet-history-fixture.js": "76fa392583fd65b12c505dd26accf8c79c605887db9f70d2d0091f5f2886be89",
+    "scripts/test-field-fleet-history-ui.js": "c58c1daf5d7952524d67c843aab5dbdbd5872ebd75edce252bb2b18d03014f51",
+    "scripts/test-field-fleet-history.js": "d8cbd5c04e1320870174952bdf52130a8f8cb883ef14aca249f2d4531b56e682",
+    "scripts/test-field-suite.js": "15d36727613fb1cd9c258551746e836a169e1c06f2ead1020e5a96a1dfdbf6ab",
+    "src/controllers/fleetHistoryController.js": "d76400ae01d61427f4aaa05471cacc3b0811539850f53cb98fdf1886b0beada0",
+    "src/routes/fleetHistoryRoutes.js": "367a1ccbd7454e0b2c5605a690b1d1cd2cc546a5bc0021263e89c7545b1802e1",
+    "src/server.js": "773b3d8f83111a7e128999b07cd83d84a7f465d7ffbf3c8f3ddd90243c3141ef",
+    "src/services/fleetHistoryService.js": "05bc981d48dd3638f986c0bc56ba21b9a5b49f5c98ee76ce17fdddc026cc7027",
+    "tests/fleet-history.test.js": "b33c0db60ee1e84ffdbbed660306fac988c43a2787d92b4032b9608985b9b1c3",
+    "tests/rc2-security-hardening-routes.test.js": "140168c8d5834913f5c643f2bc7e161ac92a5ac681823b597e626dba92e7b12f"
+  },
+  "serviceWorker": "v188",
+  "runnerGroups": 290,
+  "inventory": {
+    "activeScripts": 311,
+    "htmlFiles": 126,
+    "rootPages": 119,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 114,
+    "catalogueGuardDifferences": 0
+  },
+  "native": {
+    "status": "not_started",
+    "expectedScripts": 290,
+    "fullNativeGateConfirmed": false
+  },
+  "publication": {
+    "branch": "work/field-readiness-20260915-simulation",
+    "status": "prepared"
+  },
+  "priorNative": {
+    "task375": {
+      "runId": 36221808091,
+      "jobId": 108348349992,
+      "groups": 286,
+      "expectedDistinctAllZero": true,
+      "steps": 17,
+      "restoreTables": 128,
+      "restoreFiles": 47,
+      "rowsAndHashesEqual": true
+    },
+    "task376": {
+      "runId": 36223589014,
+      "jobId": 108353287692,
+      "status": "in_progress",
+      "fullNativeGateConfirmed": false
+    }
+  }
+}

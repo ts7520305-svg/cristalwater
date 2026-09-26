@@ -76,6 +76,7 @@ scripts.push('test-field-vehicle-maintenance.js','test-field-vehicle-maintenance
 scripts.push('test-field-vehicle-assignment.js','test-field-vehicle-assignment-ui.js');
 scripts.push('test-field-vehicle-stock-preset.js','test-field-vehicle-stock-preset-ui.js');
 scripts.push('test-field-operational-risk-rules.js','test-field-operational-risk-rules-ui.js');
+scripts.push('test-field-fleet-history.js','test-field-fleet-history-ui.js');
 scripts.push('test-field-work-guide-start.js','test-field-work-guide-start-ui.js');
 scripts.push('test-field-transport-guide-documents.js','test-field-transport-guide-documents-ui.js');
 scripts.push('test-field-financial-pdf.js');

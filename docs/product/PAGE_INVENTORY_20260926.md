@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `d40213a1799d03930426119e7b75a05b2823b22a`. Gerado em 2026-09-26T06:19:05.725Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `bb5eb4970d6b3dcdfb41f2c92600b3ae5795f142`. Gerado em 2026-09-26T06:52:44.832Z. Inclui o estado dos ficheiros locais no momento da geração.
 
 126 ficheiros HTML: 119 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 309 scripts de integração/navegador ativos. 114 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 311 scripts de integração/navegador ativos. 114 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 2 referências existem no índice Git mas não estão materializadas nesta cópia local; não são classificadas como ficheiros ausentes da aplicação.
 
@@ -48,7 +48,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /admin-core-flow | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-credit-revenue | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-crm | Entrada raiz | ADMIN | ADMIN | 4 |
-| /admin-dashboard | Entrada raiz | ADMIN | ADMIN | 1 |
+| /admin-dashboard | Entrada raiz | ADMIN | ADMIN | 2 |
 | /admin-email-logs | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-email-review | Entrada raiz | ADMIN | — | 2 |
 | /admin-expenses | Entrada raiz | ADMIN | ADMIN | 19 |
@@ -79,7 +79,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /admin-test-center | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-today | Entrada raiz | ADMIN | ADMIN | 2 |
 | /admin-ui-settings | Entrada raiz | ADMIN | ADMIN | 1 |
-| /admin-vehicles | Entrada raiz | ADMIN | ADMIN | 11 |
+| /admin-vehicles | Entrada raiz | ADMIN | ADMIN | 12 |
 | /admin-visits-dashboard | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-visits | Entrada raiz | ADMIN | ADMIN | 0 |
 | /alerts-financial | Entrada raiz | ADMIN | ADMIN | 1 |
