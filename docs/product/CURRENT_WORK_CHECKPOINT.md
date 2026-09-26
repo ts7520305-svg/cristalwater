@@ -1,5 +1,17 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 26/09/2026, TASK381 preparada
+
+Materiais de `/technician-field-mode` com linhas duplicadas conservadas, correções negativas e zero visíveis. Utilização acumulada da guia em vez de «Usado hoje»; saldo registado em vez de final presumido. Unidades literais separadas, ausência sem `UN`, quantidades desconhecidas sem zero/quantidade inicial, total por unidade bloqueado quando incompleto. Totais de todos os materiais, sem classificação pelo nome, com soma decimal sem novo arredondamento binário. [Relatório](FIELD_MATERIAL_SUMMARY_20260926.md) e [evidência](evidence/20260926_task381_local.json).
+
+995 unitários/118 ficheiros; sintaxe 689/302/44; quatro grupos locais distintos aprovados. Simulação mensal antes do teste de âmbito demonstrou compatibilidade com dados de outros cenários. Materiais e resumo documental verificados em API/navegador, incluindo recarregamento offline, cópias antigas e regresso à rede. Comparação de 13 modelos no navegador e 19 na API, zero escritas da consulta, bytes oficiais conservados. Cinco idiomas, 320/390/1440, contraste 4,5:1 e dezasseis capturas de materiais. Cache v192; documentos v3; runner 295; nenhuma migração nova.
+
+TASK378 verificada: 292/292 scripts concluídos, **291 aprovados e uma falha**, restauro ignorado. A comparação ADMIN contava toda a base (15 guias em vez das duas da fixture); agora verifica os IDs da viatura do ensaio, mantendo os dois técnicos. [Evidência nativa](evidence/20260926_task378_ci_failed.json). TASK379/380 ainda em execução na última consulta. Aprovação nativa da correção e restauro por confirmar.
+
+PUBLICATION_TASK381_PENDING
+
+**Continuar:** confirmar CI/restauro e rever `productOptions`/`addProductLine`: seleção por nome, unidades predefinidas e ambiguidades de identidade em materiais repetidos, também offline. A apresentação documental corrigida não altera esses escritores. Dimensão das listas, conciliação histórica, limites dos alertas, VPS/cópias e piloto físico permanecem abertos. Sem merge/deploy/contactos reais; aplicação não declarada completa.
+
 ## Retoma atual — 26/09/2026, TASK380 publicada
 
 Resumo documental de `/technician-field-mode` com últimos oito consumos, total confirmado na consulta e ligação à lista completa dos movimentos da obra atual. Cada cartão indica consulta online, cópia guardada com data original ou indisponibilidade. Falha de consulta já não se confunde com ausência de guia/seguro. Contagens, ordem, duplicados, tipo, identidade e cabeçalhos privados validados. Cópias v3 antigas conservadas com total explicitamente por confirmar; cópias incoerentes preservadas sem apresentação. [Relatório](FIELD_DOCUMENT_SUMMARY_20260926.md) e [evidência local](evidence/20260926_task380_local.json).

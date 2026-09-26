@@ -1623,51 +1623,17 @@
     ["ph", "chlorine", "alkalinity", "orp"].forEach((id) => updateReferenceStatus($(`#${id}`)));
   }
 
-  function itemQuantity(item, mode) {
-    if (mode === "work") return item.quantity ?? item.initialQty ?? 0;
-    return item.quantity ?? 0;
-  }
-
-  function isChemical(item) {
-    const raw = `${item?.type || ""} ${item?.name || item?.productName || ""}`.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-    return /chemical|quim|cloro|ph|sal|bromo|alcal|floc|algic|estabil|redutor|aumentador/.test(raw);
-  }
-
-  function totalByUnit(items, field, filter = () => true) {
-    const totals = new Map();
-    (Array.isArray(items) ? items : []).filter(filter).forEach((item) => {
-      const unit = String(item.unit || "UN").toUpperCase();
-      const value = Number(item[field] ?? 0);
-      totals.set(unit, (totals.get(unit) || 0) + (Number.isFinite(value) ? value : 0));
-    });
-    return [...totals.entries()].map(([unit, value]) => `${value} ${unit}`).join(" / ") || "Sem leitura";
-  }
-
   function docButton(href, label) {
     const protectedDownload = (String(href || "").startsWith("/api/guides/") || String(href || "").startsWith("/api/transport-guide-documents/")) ? " data-auth-download" : "";
     return `<a class="doc-btn"${protectedDownload} href="${esc(href)}" target="_blank" rel="noopener">${esc(label)}</a>`;
   }
 
   function renderItems(items, mode) {
-    const rows = Array.isArray(items) ? items : [];
-    if (!rows.length) return '<div class="muted">Sem material registado.</div>';
-    return `<div class="doc-items">${rows.map((item) => `
-      <div class="doc-item">
-        <span>${esc(item.name || item.productName || "Material")}</span>
-        <strong>${mode === "work" ? "Final " : ""}${esc(itemQuantity(item, mode))} ${esc(item.unit || "UN")}</strong>
-      </div>
-    `).join("")}</div>`;
+    return window.CWFieldMaterials.list(items, mode === 'work' ? 'balance' : 'transport');
   }
 
   function renderUsage(items) {
-    const rows = (Array.isArray(items) ? items : []).filter((item) => Number(item.usedQty || 0) > 0);
-    if (!rows.length) return '<div class="muted">Ainda sem saidas de material registadas nesta guia.</div>';
-    return `<div class="doc-items">${rows.map((item) => `
-      <div class="doc-item">
-        <span>${esc(item.name || "Material")}</span>
-        <strong>Usado ${esc(item.usedQty || 0)} ${esc(item.unit || "UN")}</strong>
-      </div>
-    `).join("")}</div>`;
+    return window.CWFieldMaterials.list(items, 'usage');
   }
 
   function movementNotesLabel(move) {
@@ -1714,13 +1680,7 @@
   }
 
   function renderStockSummary(items) {
-    return `
-      <div class="doc-summary">
-        <strong>Leitura final de quimicos</strong>
-        <span>${esc(totalByUnit(items, "quantity", isChemical))}</span>
-        <small>Usado hoje: ${esc(totalByUnit(items, "usedQty", isChemical))}</small>
-      </div>
-    `;
+    return window.CWFieldMaterials.summary(items);
   }
 
   function productOptions(selectedName = "") {
@@ -2401,7 +2361,7 @@
         <span>Validade: ${esc(formatDate(guide.validFrom))} - ${esc(formatDate(guide.validUntil))}</span>
         ${officialDocumentMeta}
       </div>
-      ${renderItems(items || guide.items, "transport")}
+      ${renderItems(items, "transport")}
       <div class="doc-actions">${officialDocumentButton}${docButton(pdfHref, officialDocument?.url ? "Abrir PDF guia AT gerado" : "Abrir PDF guia AT")}</div>
     `;
   }
@@ -2418,7 +2378,7 @@
       return;
     }
 
-    const stockRows = stock || workGuide.items || [];
+    const stockRows = stock;
     box.innerHTML = `
       <div class="doc-head"><span class="chip">Guia de obra</span><strong class="${workGuide.guideId ? "status-ok" : "status-warn"}">${esc(workGuide.status || "OPEN")}</strong></div>
       <div class="doc-number">Obra #${esc(workGuide.id)}</div>
@@ -2429,10 +2389,8 @@
         <span>Guia AT associada: ${esc(workGuide.guide?.codeAT || workGuide.guideId || "AT em falta - associar mais tarde")}</span>
         <span>Inicio: ${esc(formatDate(workGuide.createdAt))}</span>
       </div>
-      <div class="doc-subtitle">Saidas de material registadas</div>
       ${renderUsage(stockRows)}
       ${renderMovements(data)}
-      <div class="doc-subtitle">Stock final da viatura</div>
       ${renderItems(stockRows, "work")}
       ${renderStockSummary(stockRows)}
       <div class="doc-actions">${docButton(`/api/guides/work/${encodeURIComponent(workGuide.id)}/pdf`, "Abrir PDF guia de obra")} <a class="cw-btn" href="/work-guide-close?workGuideId=${encodeURIComponent(workGuide.id)}">Rever fecho da guia</a></div>
