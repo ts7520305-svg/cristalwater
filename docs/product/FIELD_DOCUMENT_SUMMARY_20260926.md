@@ -35,7 +35,7 @@ Os novos textos de origem, contagem, indisponibilidade, ligação e unidades aus
 
 ## Publicação e validação nativa
 
-PUBLICATION_TASK380_PENDING
+Publicada em `28f9a6a4c4a8d6e3f1764f5d714c68d5bd40c804`, árvore `594a3c4a65b36718fb524b4ed5510a3d6cabf5c3`, idêntica à preparada e validada localmente, na branch `work/field-readiness-20260915-simulation`. [CI 36229886559](https://github.com/ts7520305-svg/cristalwater/actions/runs/36229886559), job `108370915827`, em execução com orçamento de 70 minutos. O gate PostgreSQL nativo de 294 grupos e restauro permanece por confirmar.
 
 TASK378 e TASK379 permanecem em execução na última consulta, com dez etapas concluídas; os respetivos conjuntos de 292/293 scripts e restauro ainda não estão confirmados. TASK377 mantém o estado de interrupção, com 283/290 scripts concluídos e restauro ignorado. TASK376 conserva a confirmação de 288/288 e restauro de 128 tabelas/47 ficheiros. O orçamento do job continua a ser de 70 minutos, conservando os testes e o restauro.
 

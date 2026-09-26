@@ -1,12 +1,12 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 26/09/2026, TASK380 preparada
+## Retoma atual — 26/09/2026, TASK380 publicada
 
 Resumo documental de `/technician-field-mode` com últimos oito consumos, total confirmado na consulta e ligação à lista completa dos movimentos da obra atual. Cada cartão indica consulta online, cópia guardada com data original ou indisponibilidade. Falha de consulta já não se confunde com ausência de guia/seguro. Contagens, ordem, duplicados, tipo, identidade e cabeçalhos privados validados. Cópias v3 antigas conservadas com total explicitamente por confirmar; cópias incoerentes preservadas sem apresentação. [Relatório](FIELD_DOCUMENT_SUMMARY_20260926.md) e [evidência local](evidence/20260926_task380_local.json).
 
 982 unitários/117 ficheiros, quatro técnicos, sintaxe 689/301/44 e dez grupos locais distintos aprovados. Oito de 105 consumos e entrada real nos 209 movimentos da obra; recarregamento offline, estados parciais, cópias antigas, bytes adulterados, gravação e sessão verificados. Quantidades negativas/zero e unidades nulas/literais conservadas no resumo. Dezoito capturas do novo conteúdo em cinco idiomas e 320/390/1440, alvos de 44 px sem obstrução e contraste 4,5:1; grupo integral repetido após ajuste visual. Comparação de 19 modelos na API e 13 no navegador, zero escritas no percurso de consulta e bytes oficiais conservados. Cache v191; documentos v3; runner 294; nenhuma nova migração, 43 existentes e 128 tabelas esperadas.
 
-PUBLICATION_TASK380_PENDING
+Publicada em `28f9a6a4c4a8d6e3f1764f5d714c68d5bd40c804`, árvore `594a3c4a65b36718fb524b4ed5510a3d6cabf5c3`, idêntica à preparada e validada localmente, na branch `work/field-readiness-20260915-simulation`. [CI 36229886559](https://github.com/ts7520305-svg/cristalwater/actions/runs/36229886559), job `108370915827`, em execução com orçamento de 70 minutos. O gate PostgreSQL nativo de 294 grupos e restauro permanece por confirmar.
 
 TASK378 e TASK379 continuam em execução na última consulta: 292/293 grupos e restauro por confirmar. TASK377 mantém 283/290 concluídos e restauro ignorado, sem aprovação; TASK376 mantém 288/288 e restauro 128 tabelas/47 ficheiros confirmados. Orçamento nativo de 70 minutos conservado.
 

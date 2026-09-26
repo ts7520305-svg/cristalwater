@@ -375,14 +375,20 @@
     "catalogueGuardDifferences": 0
   },
   "native": {
-    "status": "pending_publication",
+    "status": "in_progress",
     "expectedScripts": 294,
     "jobTimeoutMinutes": 70,
     "restoreExpected": {
       "tables": 128,
       "files": 47
     },
-    "confirmed": false
+    "confirmed": false,
+    "runId": 36229886559,
+    "jobId": 108370915827,
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36229886559",
+    "headSha": "28f9a6a4c4a8d6e3f1764f5d714c68d5bd40c804",
+    "treeSha": "594a3c4a65b36718fb524b4ed5510a3d6cabf5c3",
+    "checkedAt": "2026-09-26T08:34:41.420Z"
   },
   "previousNativeChecks": {
     "checkedAt": "2026-09-26T08:24:02.856Z",
@@ -610,5 +616,15 @@
     "deploy": false,
     "realContacts": false,
     "declaredComplete": false
+  },
+  "publication": {
+    "codeSha": "28f9a6a4c4a8d6e3f1764f5d714c68d5bd40c804",
+    "tree": "594a3c4a65b36718fb524b4ed5510a3d6cabf5c3",
+    "runId": 36229886559,
+    "jobId": 108370915827,
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36229886559",
+    "status": "in_progress",
+    "checkedAt": "2026-09-26T08:34:41.420Z",
+    "mainUnchanged": "6f27081e1d183ff584a62255b016b373836734db"
   }
 }
