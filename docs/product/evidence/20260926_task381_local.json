@@ -236,10 +236,16 @@
     "catalogueGuardDifferences": 0
   },
   "native": {
-    "status": "pending-publication",
+    "status": "in_progress",
     "expectedScripts": 295,
     "restoreExpected": true,
-    "confirmed": false
+    "confirmed": false,
+    "codeSha": "5aa50c57bddd28c2c0a1672fe78866a4fd6da2bf",
+    "treeSha": "e3644312693c14d757328e955b0feafd4674b12d",
+    "runId": 36231076835,
+    "jobId": 108374223988,
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36231076835",
+    "checkedAt": "2026-09-26T08:54:28.077Z"
   },
   "constraints": {
     "branch": "work/field-readiness-20260915-simulation",
@@ -248,5 +254,19 @@
     "realContacts": false,
     "declaredComplete": false
   },
-  "retoma": "Confirm TASK381 exact native script set and restore. Review productOptions/addProductLine in technician field mode: selection still uses names and fallback UN; duplicate-name unit ambiguity and offline material identities must be checked against the existing reviewed consumption flow. Large-list scaling remains open."
+  "retoma": "Confirm TASK381 exact native script set and restore. Review productOptions/productStockByName/normalizedUsedProducts in technician field mode: selection still uses names and fallback UN; duplicate-name unit ambiguity and offline material identities must be checked against the existing reviewed consumption flow. Large-list scaling remains open.",
+  "publication": {
+    "codeSha": "5aa50c57bddd28c2c0a1672fe78866a4fd6da2bf",
+    "treeSha": "e3644312693c14d757328e955b0feafd4674b12d",
+    "runId": 36231076835,
+    "jobId": 108374223988,
+    "status": "in_progress",
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36231076835",
+    "checkedAt": "2026-09-26T08:54:28.077Z"
+  },
+  "previousNativeStatus": {
+    "task378": "291/292 passed; restore skipped; ADMIN assertion fixed in TASK381",
+    "task379": "292/293 passed; same ADMIN assertion; restore skipped",
+    "task380": "in_progress at last check"
+  }
 }

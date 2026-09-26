@@ -30,10 +30,10 @@ O estado remoto do job foi devolvido como `cancelled`; o passo da suite terminou
 
 ## Publicação
 
-PUBLICATION_TASK381_PENDING
+Publicada em `5aa50c57bddd28c2c0a1672fe78866a4fd6da2bf`, árvore `e3644312693c14d757328e955b0feafd4674b12d`, idêntica à preparada e validada localmente, na branch `work/field-readiness-20260915-simulation`. [CI 36231076835](https://github.com/ts7520305-svg/cristalwater/actions/runs/36231076835), job `108374223988`, em execução. Os 295 grupos PostgreSQL e o restauro ainda não estão confirmados.
 
-TASK379 e TASK380 continuavam em execução na última consulta. A falha da TASK378 só será considerada resolvida no gate nativo quando a versão corrigida passar o conjunto completo e o restauro.
+TASK379 terminou com 292/293 grupos aprovados e a mesma falha administrativa; restauro ignorado ([evidência](evidence/20260926_task379_ci_failed.json)). TASK380 continuava em execução na última consulta. A falha da TASK378 só será considerada resolvida no gate nativo quando a versão corrigida passar o conjunto completo e o restauro.
 
 ## Retoma
 
-Confirmar o conjunto exato de 295 scripts e o restauro da TASK381. Rever `productOptions` e `addProductLine`: a seleção de produtos ainda usa nomes e unidades predefinidas, exigindo análise da ambiguidade de nomes repetidos, unidades e identidade offline em conjunto com o percurso de consumo revisto. A dimensão das listas, conciliação histórica, limites dos alertas, VPS/cópias e piloto físico permanecem abertos. Sem merge, deploy ou contactos reais. O sistema não é declarado completo.
+Confirmar o conjunto exato de 295 scripts e o restauro da TASK381. Rever `productOptions`, `productStockByName` e `normalizedUsedProducts`: a seleção de produtos ainda usa nomes e unidades predefinidas, exigindo análise da ambiguidade de nomes repetidos, unidades e identidade offline em conjunto com o percurso de consumo revisto. A dimensão das listas, conciliação histórica, limites dos alertas, VPS/cópias e piloto físico permanecem abertos. Sem merge, deploy ou contactos reais. O sistema não é declarado completo.
