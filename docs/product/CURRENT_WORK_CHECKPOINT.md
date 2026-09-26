@@ -1,10 +1,10 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 26/09/2026, TASK372 validada localmente
+## Retoma atual — 26/09/2026, TASK372 publicada
 
 Manutenção da frota em `/vehicle-maintenance`, com entradas na administração, nas guias técnicas e nos documentos do campo. Criação, edição e conclusão revistas; manter/alterar/limpar, datas precisas/Lisboa, zero/nulo e data de conclusão preservada. Registo, auditoria e comprovativo atómicos; perda de resposta, reinício, concorrência e anulação recuperáveis. Custos e relações financeiras apenas ADMIN, incluindo API e recuperação; técnico/líder só na viatura atual, com custos reais conservados. Despesas/pagamentos mantêm revisão própria. [Relatório](VEHICLE_MAINTENANCE_20260926.md) e [evidência local](evidence/20260926_task372_local.json).
 
-875 unitários/109 ficheiros, quatro técnicos, sintaxe 672/282/44 e sete grupos locais distintos aprovados. Seis pontos SQL de reversão; dezoito capturas, cinco idiomas e 320/390/1440. Nenhuma migração nova: 43 existentes e 128 tabelas. Cache v183; runner 280 grupos. Preparado para publicação na branch `work/field-readiness-20260915-simulation`; **gate PostgreSQL nativo de 280 grupos e restauro ainda por confirmar**.
+875 unitários/109 ficheiros, quatro técnicos, sintaxe 672/282/44 e sete grupos locais distintos aprovados. Seis pontos SQL de reversão; dezoito capturas, cinco idiomas e 320/390/1440. Nenhuma migração nova: 43 existentes e 128 tabelas. Cache v183; runner 280 grupos. Publicada em `cbb552e32f12a704210473359bad56b13a686c98`, árvore `2e48b0523f4b9d5fccbe37cad0035c7c81483a4a`, idêntica à validada localmente, na branch `work/field-readiness-20260915-simulation`. [CI 36217019968](https://github.com/ts7520305-svg/cristalwater/actions/runs/36217019968), job `108334888707`, em execução; **gate PostgreSQL nativo de 280 grupos e restauro ainda por confirmar**.
 
 TASK371 confirmada em **278/278 grupos e restauro de 128 tabelas/47 ficheiros**, [CI 36196942259](https://github.com/ts7520305-svg/cristalwater/actions/runs/36196942259). TASK370 confirmada em **276/276 e o mesmo restauro**, [CI 36193770611](https://github.com/ts7520305-svg/cristalwater/actions/runs/36193770611). Linhas e hashes iguais. Evidências nativas de 26/09 em `evidence/20260926_task371_ci.json` e `evidence/20260926_task370_ci.json`.
 
