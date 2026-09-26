@@ -112,17 +112,8 @@ async function createVehicle(req,res) { return require('./fleetManagementControl
 
 async function updateVehicle(req,res) { return require('./fleetManagementController').legacy(req,res); }
 
-async function assignTechnicianVehicle(req, res) {
-  try {
-    const { technicianId, vehicleId, startKm, notes } = req.body;
-    const techId = n(technicianId); const vehId = n(vehicleId);
-    if (!techId || !vehId) return res.status(400).json({ ok: false, error: "technicianId e vehicleId obrigatórios" });
-    await prisma.technician.update({ where: { id: techId }, data: { vehicleId: vehId } }).catch(()=>null);
-    const log = await prisma.technicianVehicleLog.create({ data: { technicianId: techId, vehicleId: vehId } });
-    if (startKm != null) await prisma.vehicle.update({ where: { id: vehId }, data: { currentKm: n(startKm) } }).catch(()=>null);
-    await audit(req, "VEHICLE_ASSIGN_TECHNICIAN", "TechnicianVehicleLog", log.id, { technicianId: techId, vehicleId: vehId, notes });
-    res.json({ ok: true, log });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+function assignTechnicianVehicle(req, res) {
+  return require('./vehicleAssignmentReviewController').legacy(req, res);
 }
 
 

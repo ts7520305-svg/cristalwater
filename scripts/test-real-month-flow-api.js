@@ -173,7 +173,7 @@ async function setupPeopleAndFleet() {
     });
     created.vehicles.push(vehicle);
 
-    await call("POST", "/api/guides/vehicles/assign", {
+    await require("./helpers/assign-reviewed-vehicle")(call, {
       technicianId: technician.id,
       vehicleId: vehicle.id,
       startKm: 10000 + i * 100,

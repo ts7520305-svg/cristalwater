@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-26T04:07:46.147Z",
-  "baseCommit": "fa7573a9e4e4d3e38d0b2cb701a0bcbc683f2691",
+  "generatedAt": "2026-09-26T04:37:04.493Z",
+  "baseCommit": "741ba4187591053d84d2d52ed9a326b960110dd8",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 301,
+  "activeScriptsScanned": 303,
   "summary": {
-    "htmlFiles": 122,
-    "rootPages": 115,
+    "htmlFiles": 123,
+    "rootPages": 116,
     "nestedPages": 7,
     "unavailableLocalAssetReferences": 2,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 110,
+    "pagesWithLiteralTestReference": 111,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -1708,7 +1708,8 @@
       "languageAssets": [],
       "directPrintAction": false,
       "testReferences": [
-        "test-field-technician-management-ui.js"
+        "test-field-technician-management-ui.js",
+        "test-field-vehicle-assignment-ui.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -1870,6 +1871,7 @@
         "test-field-transport-guide-manage-ui.js",
         "test-field-work-guide-close-ui.js",
         "test-field-vehicle-maintenance-ui.js",
+        "test-field-vehicle-assignment-ui.js",
         "test-field-transport-guide-documents-ui.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
@@ -5068,6 +5070,37 @@
       "languageAssets": [],
       "directPrintAction": false,
       "testReferences": [],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/vehicle-assignment.html",
+      "route": "/vehicle-assignment",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Atribuição de viaturas",
+      "catalogueRoles": [],
+      "guardFiles": [],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/cw-vehicle-assignment.css",
+        "/cw-vehicle-consumption-rules.js",
+        "/cw-vehicle-consumption-copy.js",
+        "/cw-vehicle-assignment-rules.js",
+        "/cw-vehicle-assignment-copy.js",
+        "/cw-vehicle-assignment.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-vehicle-assignment.js",
+        "test-field-vehicle-assignment-ui.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {

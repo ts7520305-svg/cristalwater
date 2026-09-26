@@ -19,6 +19,7 @@ app.use('/api/fleet-management', require('../../src/routes/fleetManagementRoutes
 app.use('/api/vehicle-consumption', require('../../src/routes/vehicleConsumptionRoutes'));
 app.use('/api/work-guide-close', require('../../src/routes/workGuideCloseRoutes'));
 app.use('/api/vehicle-maintenance', require('../../src/routes/vehicleMaintenanceReviewRoutes'));
+app.use('/api/vehicle-assignment', require('../../src/routes/vehicleAssignmentReviewRoutes'));
 app.use('/api/transport-guide-create', require('../../src/routes/transportGuideCreationRoutes'));
 app.use('/api/transport-guide-items', require('../../src/routes/transportGuideItemsRoutes'));
 app.use('/api/transport-guide-manage', require('../../src/routes/transportGuideManageRoutes'));

@@ -8,10 +8,11 @@ const safe=row=>{if(!row)return null;const {pin,authVersion,...value}=row;return
 function noQuery(q){if(!R.object(q)||Object.keys(q).length)fail('TECH_MANAGE_INVALID_REQUEST');}
 function proposal(body){if(!R.object(body)||Object.keys(body).sort().join(',')!=='fields,operation,technicianId'||!R.operations.includes(body.operation)||(body.operation==='CREATE'?body.technicianId!==null:!R.positive(body.technicianId)))fail('TECH_MANAGE_INVALID_REQUEST');const fields=R.fields(body.operation,body.fields);if(!fields)fail('TECH_MANAGE_INVALID_FIELDS');return {operation:body.operation,technicianId:body.technicianId,fields};}
 async function selected(db,p,lock=false){let before=null;if(p.technicianId){if(lock)await db.$queryRaw`SELECT id FROM "Technician" WHERE id=${p.technicianId} FOR UPDATE`;before=await db.technician.findUnique({where:{id:p.technicianId},select:selection});if(!before)fail('TECH_MANAGE_NOT_FOUND',404);if(p.operation==='ACTIVATE'&&before.active&&!before.deletedAt||p.operation==='DEACTIVATE'&&(!before.active||before.deletedAt)||p.operation==='ARCHIVE'&&before.deletedAt)fail('TECH_MANAGE_STATE_CHANGED',409);}
+ if(p.operation==='EDIT'&&p.fields.vehicleId!==before.vehicleId)fail('TECH_MANAGE_ASSIGNMENT_REVIEW_REQUIRED',409);
  const vehicleId=['CREATE','EDIT'].includes(p.operation)?p.fields.vehicleId:before?.vehicleId||null;
  if(lock&&vehicleId)await db.$queryRaw`SELECT id FROM "Vehicle" WHERE id=${vehicleId} FOR SHARE`;
- const vehicle=vehicleId?await db.vehicle.findUnique({where:{id:vehicleId},select:{id:true,plate:true,name:true,active:true,updatedAt:true}}):null;
- if(vehicleId&&(!vehicle||!vehicle.active&&vehicleId!==before?.vehicleId))fail('TECH_MANAGE_VEHICLE_CHANGED',409);
+ const vehicle=vehicleId?await db.vehicle.findUnique({where:{id:vehicleId},select:{id:true,plate:true,name:true,active:true,deletedAt:true,updatedAt:true}}):null;
+ if(vehicleId&&(!vehicle||(!vehicle.active||vehicle.deletedAt)&&vehicleId!==before?.vehicleId))fail('TECH_MANAGE_VEHICLE_CHANGED',409);
  const email=['CREATE','EDIT'].includes(p.operation)?p.fields.email:before?.email;
  const linked=email?await db.user.findMany({where:{email:{equals:email,mode:'insensitive'}},select:{id:true,name:true,email:true,role:true,active:true,updatedAt:true},orderBy:{id:'asc'}}):[];
  if(['CREATE','EDIT'].includes(p.operation)&&email){if(await db.technician.findFirst({where:{email:{equals:email,mode:'insensitive'},...(p.technicianId?{id:{not:p.technicianId}}:{})},select:{id:true}}))fail('TECH_MANAGE_EMAIL_IN_USE',409);if(linked.length>1||linked.some(u=>!['TECH','TECHNICIAN','TEAM_LEADER'].includes(u.role)||u.email!==email))fail('TECH_MANAGE_ACCOUNT_REVIEW',409);}
@@ -33,6 +34,7 @@ async function commit(actor,body={},q={},db=prisma){const subject=owner(actor);n
   const revoke=['PIN','ACTIVATE','DEACTIVATE','ARCHIVE'].includes(p.operation)||p.operation==='EDIT'&&(choice.before.email||'')!==p.fields.email;
   if(revoke)data.authVersion={increment:1};if(['DEACTIVATE','ARCHIVE'].includes(p.operation))data.active=false;if(p.operation==='ACTIVATE'){data.active=true;data.archiveStatus='ATIVO';data.deletedAt=null;}if(p.operation==='ARCHIVE'){data.archiveStatus='ARQUIVADO';data.deletedAt=new Date();}
   if(choice.before)data.updatedAt=new Date(Math.max(Date.now(),choice.before.updatedAt.getTime()+1));const row=p.operation==='CREATE'?await tx.technician.create({data:{...data,active:true,role:'TECHNICIAN'},select:selection}):await tx.technician.update({where:{id:p.technicianId},data,select:selection});
+  if(p.operation==='CREATE'&&row.vehicleId)await tx.technicianVehicleLog.create({data:{technicianId:row.id,vehicleId:row.vehicleId,startAt:new Date()}});
   const audit=await tx.userAuditLog.create({data:{userId:Number(actor.userId||actor.id),actor:subject,action:'TECHNICIAN_'+p.operation,entity:'Technician',entityId:String(row.id),metadata:{requestId:body.requestId,operation:p.operation,changedFields:Object.keys(data).filter(k=>k!=='updatedAt'),revokesSessions:revoke}}});
   return packet(actor,body.requestId,await requests.confirm(tx,request,{operation:p.operation,technicianId:p.technicianId,technician:safe(row),auditId:audit.id,revokesSessions:revoke}));
  },{maxWait:15000,timeout:25000});}catch(e){if(e.code==='FIELD_REQUEST_REUSED')fail('TECH_MANAGE_REQUEST_CONFLICT',409);if(e.code==='P2002')fail('TECH_MANAGE_EMAIL_IN_USE',409);throw e;}

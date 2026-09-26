@@ -1,0 +1,260 @@
+{
+  "task": "TASK373",
+  "baseCommit": "741ba4187591053d84d2d52ed9a326b960110dd8",
+  "validatedAt": "2026-09-26T04:40:23.429195+00:00",
+  "sourceHashes": {
+    "frontend/admin-technicians.js": "c5f6d574836debf1cb3c8d5acab9274e3b709ea3442c5c82d20911ae1608d30c",
+    "frontend/admin-vehicles.html": "5eb9d820722c9ba24dbd7f25effb8c324fc2274effdfb81cadbfbf84a6178211",
+    "frontend/cw-technician-management-copy.js": "7e15fe08c82d97a4a90f3e37c770680e1a96d39643538b7588587c994fa94bf9",
+    "frontend/cw-vehicle-assignment-copy.js": "b0331dffd2d5148b7983b4030621b3e2b86d4bfaaa30886694b81db4b7c6ee5f",
+    "frontend/cw-vehicle-assignment-rules.js": "99500106e65812d600dc65391a3305eb918e4241abd69a885cc444fb29aa0289",
+    "frontend/cw-vehicle-assignment.css": "b32da31b0c4515cbf33e12ad9d2c5de67bc679988ac32a850f1294446b339a29",
+    "frontend/cw-vehicle-assignment.js": "9573546005544273aab29797e76530d307bc5c6f91254fb100b3aabaabab26b1",
+    "frontend/sw.js": "74f98574794d7cc20401362d2398008093b004ae98dac2aa620a3bc30616695d",
+    "frontend/vehicle-assignment.html": "2fa0c473499d25c40bbdd61e7ad69d976b11fc80b19843a128d87191d4e03b4c",
+    "scripts/fixtures/internal-chat-server.js": "4a958532baf19bc49412158df266d9b45ece39cc3db8b69d8ba4d75f65861a2c",
+    "scripts/helpers/assign-reviewed-vehicle.js": "d4483e39fb1fb76282fddb2d84d0fdeb19f1eb2c3b5641c49b465b6179c9fb47",
+    "scripts/test-field-suite.js": "468067bdf822e23920660d5feb2bafc02019458721fda28aec6f9744e92f5e11",
+    "scripts/test-field-technician-management-ui.js": "340efde40ecba6fab9769acbcf8235306978c7327596dcccde94b47f09f0f025",
+    "scripts/test-field-technician-management.js": "aeef389421755a5897ba114561e55abe2e2e55589e2edef834f9d7095393ae32",
+    "scripts/test-field-two-year-api.js": "18140b12c1d9055f760d8fde8e672f33fb6253136eda43a5f7828a38e480a424",
+    "scripts/test-field-vehicle-assignment-ui.js": "f579ba73c3640a0fbf71004e7e58f264760abadcdaef4ca53bcac4fce7ecf1b0",
+    "scripts/test-field-vehicle-assignment.js": "8c0494f96c73f5427d611bced34df20628d578f0218f6cb383d39d6c8967da8e",
+    "scripts/test-real-month-flow-api.js": "15bfc4a561b535e2968cef8abc81bc63979114e0a65d09ca8a50dc317329ce46",
+    "src/controllers/guideController.js": "d83f54a588066e4d8d57d9855bccf8495fd1a108b796ab61133d5fbb46b902c9",
+    "src/controllers/vehicleAssignmentReviewController.js": "65d154e8f5871bc465f23d889ae7a1b1331f16477fbf5697cb32a40f8b1982e9",
+    "src/routes/vehicleAssignmentReviewRoutes.js": "8b587f7b0d8af5fedfdac54455f0134501dc0b976954e8228794b42db9131060",
+    "src/server.js": "eccaf0a50fd599198c7ed1b9cf14be4b19115852175fd6b717cb7b5f5567f19f",
+    "src/services/fieldWriteRequestService.js": "974b672c80b84820c0abb10370c962dcefa078fc9ebe762e320350f7f5286068",
+    "src/services/technicianManagementService.js": "0eeecfedbe3a706794fe2d9618f31c5a4b9e0e10f015f26def3a1208d21763a3",
+    "src/services/vehicleAssignmentReviewService.js": "71a4772a0b061498cfd9e1380067f93ad01870a6ae11eed4161e737c32cef334",
+    "tests/vehicle-assignment-review.test.js": "f072c9a99fb79747aa2b73474435d58a9fc668c0f0ae255abad10be5dab948fc"
+  },
+  "unitTests": {
+    "passed": 889,
+    "files": 110,
+    "new": 14
+  },
+  "technicianTests": 4,
+  "syntax": {
+    "backend": 675,
+    "frontend": 285,
+    "inline": 44
+  },
+  "schema": {
+    "newMigrations": 0,
+    "totalAdditiveMigrationsApplied": 43,
+    "tablesExpected": 128,
+    "runtime": "PGlite 0.5.8 / pglite-socket 0.2.11; isolated synthetic data, not native PostgreSQL"
+  },
+  "integrationGroups": [
+    {
+      "script": "scripts/test-field-vehicle-assignment.js",
+      "code": 0,
+      "log": "/tmp/cw373-test-field-vehicle-assignment.log",
+      "sha256": "da029eb7c44cfa73db2f85731a358904c0a324e4778b835cac9db266eb3c95ca"
+    },
+    {
+      "script": "scripts/test-field-technician-management.js",
+      "code": 0,
+      "log": "/tmp/cw373-test-field-technician-management.log",
+      "sha256": "34782fe53e73f950819be8e8507c2e33902d9f0fd8fe73c0b33dfc1a53fcf479"
+    },
+    {
+      "script": "scripts/test-field-technician-management-ui.js",
+      "code": 0,
+      "log": "/tmp/cw373-test-field-technician-management-ui.log",
+      "sha256": "1ae68aa7f1fba95cf6b479b5432537cf6c02ee23d93465e79b433b5d95559eea"
+    },
+    {
+      "script": "scripts/test-field-fleet-management.js",
+      "code": 0,
+      "log": "/tmp/cw373-test-field-fleet-management.log",
+      "sha256": "db956ef5951c9c703e51cbeb7c2d8a932bf846a2ba97334908261fb6fc36b6bb"
+    },
+    {
+      "script": "scripts/test-field-fleet-management-ui.js",
+      "code": 0,
+      "log": "/tmp/cw373-test-field-fleet-management-ui.log",
+      "sha256": "20061280a51d80464a855c2f5ceb003c5ef1e45d953567ecf3ef3d4f79a4b402"
+    },
+    {
+      "script": "scripts/test-field-transport-guide-create.js",
+      "code": 0,
+      "log": "/tmp/cw373-test-field-transport-guide-create.log",
+      "sha256": "12af5010db6a53b36aec10e5c1e8c2e7bd3f8885bb237f0f3c9b267b70c42aa2"
+    },
+    {
+      "script": "scripts/test-field-work-guide-close.js",
+      "code": 0,
+      "log": "/tmp/cw373-test-field-work-guide-close.log",
+      "sha256": "28db43658d3bf6cd11d1bb1520ba135c097ce71ac582cb87caeeef4729ddae8c"
+    },
+    {
+      "script": "scripts/test-real-month-flow-api.js",
+      "code": 0,
+      "log": "/tmp/cw373-test-real-month-flow-api.log",
+      "sha256": "45bccb6025e465b56cb555d1d98752046bc61b105d7af7d944044bc9c56834a4"
+    },
+    {
+      "script": "scripts/test-field-two-year-api.js",
+      "code": 0,
+      "log": "/tmp/cw373-test-field-two-year-api.log",
+      "sha256": "70138a42271bc866dfb376e6e673d10aa566633ab23388de40ab946a9a85d3e4"
+    },
+    {
+      "script": "scripts/test-field-vehicle-assignment-ui.js",
+      "code": 0,
+      "log": "/tmp/cw373-test-field-vehicle-assignment-ui.log",
+      "sha256": "a7c911ccddf08be7dde5842aa1c0fad1dfb00c6ace077b0020a292641aa1cb83"
+    }
+  ],
+  "logs": {
+    "cw373-unit-final.log": {
+      "path": "/tmp/cw373-unit-final.log",
+      "sha256": "c3b6ff9d04e3eb8a5b14aaa227b21dc4627e8c97e20f9b50c4ecefa6849d1a12"
+    },
+    "cw373-technician.log": {
+      "path": "/tmp/cw373-technician.log",
+      "sha256": "a135569e673ddb00a1440e5bea499c64657d36c509fa60d8c76e7c4abd3a8148"
+    },
+    "cw373-syntax-final.log": {
+      "path": "/tmp/cw373-syntax-final.log",
+      "sha256": "1e40c47e11030f560421e6288cf5e11d2dce70568233624718ed3ce4681c751e"
+    },
+    "cw373-regression-run.log": {
+      "path": "/tmp/cw373-regression-run.log",
+      "sha256": "9cd5624f9e872a15abbf9339038b04771f0afcdcea07114a3c03747456ce1242"
+    },
+    "cw373-ui-final-run.log": {
+      "path": "/tmp/cw373-ui-final-run.log",
+      "sha256": "1b57bc0af5bc00fee997eea50557603d110f2ce445157fadb84637615fe09a67"
+    },
+    "cw373-initial-history-run.log": {
+      "path": "/tmp/cw373-initial-history-run.log",
+      "sha256": "c335637224a040e1c3a3ac7f6eb018a2270c588c924c46287ee416135e4f97d2"
+    },
+    "cw373-inventory.log": {
+      "path": "/tmp/cw373-inventory.log",
+      "sha256": "db0e69aeb1a84d60ec8b12db9d7dfb01847c84c795742b37ec1d82e267830265"
+    }
+  },
+  "screenshots": [
+    {
+      "path": "reports/field-visual/vehicle-assignment/de-1440.png",
+      "sha256": "cee878ad1977cab8453d7c1d7a59e19da21e75e1ab5dff9dc8fba4363dcee4e2"
+    },
+    {
+      "path": "reports/field-visual/vehicle-assignment/de-320.png",
+      "sha256": "d43fdb82642ba4cd170aab043ec11d300d1dc1a596b055aec7eea9bed80f73c9"
+    },
+    {
+      "path": "reports/field-visual/vehicle-assignment/de-390.png",
+      "sha256": "ec7399426e8c8beaf0e22b66e3793b4e5b936bc04a8a518c599d23acae7dec07"
+    },
+    {
+      "path": "reports/field-visual/vehicle-assignment/en-1440.png",
+      "sha256": "674da7047b3b19102faa50697517d332e4a2eb5b9ae492b50c36ec867938084c"
+    },
+    {
+      "path": "reports/field-visual/vehicle-assignment/en-320.png",
+      "sha256": "52d1e28b7e1411ef48147507c9c484b3e59150cea1a16543e8a111a76590f955"
+    },
+    {
+      "path": "reports/field-visual/vehicle-assignment/en-390.png",
+      "sha256": "0a762319cd8367ad0a0af527f64de64047314fb5bd3351b6be2d76e14a4245be"
+    },
+    {
+      "path": "reports/field-visual/vehicle-assignment/es-1440.png",
+      "sha256": "6f6e06683cd7ac16f30905ad893f5934e716d4be702ad563f529748b021ce7e3"
+    },
+    {
+      "path": "reports/field-visual/vehicle-assignment/es-320.png",
+      "sha256": "a816cee7b460a6becec249edf65f800bb9f4c66f424bbf8223b69005e833f302"
+    },
+    {
+      "path": "reports/field-visual/vehicle-assignment/es-390.png",
+      "sha256": "f9d1c669fd6a243db3f725cb20137f42f162c7960befb21b500a73d0c599d4d6"
+    },
+    {
+      "path": "reports/field-visual/vehicle-assignment/fr-1440.png",
+      "sha256": "35f033265ad8764859d595399680e27b36c2f9bba9517d327a4a012bb24d15da"
+    },
+    {
+      "path": "reports/field-visual/vehicle-assignment/fr-320.png",
+      "sha256": "dfc968d144984971fb89ca1e9916c4fa29b4c16030afaa2d10e1c11554233669"
+    },
+    {
+      "path": "reports/field-visual/vehicle-assignment/fr-390.png",
+      "sha256": "ed005ab8bdf0df9440b09dd541e29693f148e91309679552b8e2b1654fb3cbfd"
+    },
+    {
+      "path": "reports/field-visual/vehicle-assignment/pt-1440.png",
+      "sha256": "42e3ea45b68ad5777dca06af090028b6b576b9aca3d4a4da1712a5446a944802"
+    },
+    {
+      "path": "reports/field-visual/vehicle-assignment/pt-320.png",
+      "sha256": "2d9a55a968bcfeae135b5e02823c6682540b84f4d8fbe04aed6f63821049d931"
+    },
+    {
+      "path": "reports/field-visual/vehicle-assignment/pt-390.png",
+      "sha256": "8bc71b8e62310013249c06d432bf4badd960cb3699fe0909c324e98a5157a569"
+    },
+    {
+      "path": "reports/field-visual/vehicle-assignment/review-de-320.png",
+      "sha256": "2cca48bfbba3dccb61882772af1aedf79db6c953f7cb5ebd59677822f2ed37ea"
+    },
+    {
+      "path": "reports/field-visual/vehicle-assignment/review-pt-1440.png",
+      "sha256": "566404a5a576457ccfad3f4a1a35a324d503ea78bcc5cd564717a98b8b549105"
+    },
+    {
+      "path": "reports/field-visual/vehicle-assignment/review-pt-390.png",
+      "sha256": "bcf542f060218f7baa5b2e02557a143efc3dda8faf41af3b8a249c9ad6ce5b20"
+    }
+  ],
+  "visualReview": [
+    "reports/field-visual/vehicle-assignment/de-320.png",
+    "reports/field-visual/vehicle-assignment/review-pt-1440.png"
+  ],
+  "visualIteration": "Corrected inherited consumption status text and exposed the full mileage option below its mobile selector; complete browser group passed again.",
+  "rollbackCases": {
+    "assignment": 6,
+    "initialTechnicianAssignmentHistory": 1
+  },
+  "inventory": {
+    "htmlFiles": 123,
+    "rootPages": 116,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 111,
+    "catalogueGuardDifferences": 0
+  },
+  "runnerGroups": 282,
+  "serviceWorkerVersion": "cristalwater-field-20260926-v184",
+  "previousNativeCI": {
+    "task": "TASK372",
+    "runId": 36217019968,
+    "jobId": 108334888707,
+    "status": "in_progress",
+    "expectedGroups": 280,
+    "restoreConfirmed": false
+  },
+  "lastConfirmedNativeCI": {
+    "task": "TASK371",
+    "runId": 36196942259,
+    "passedGroups": 278,
+    "restoredTables": 128,
+    "restoredFiles": 47,
+    "rowsAndHashesEqual": true
+  },
+  "publication": {
+    "branch": "work/field-readiness-20260915-simulation",
+    "status": "prepared",
+    "nativeGate": "pending",
+    "expectedGroups": 282,
+    "merge": false,
+    "deploy": false
+  }
+}

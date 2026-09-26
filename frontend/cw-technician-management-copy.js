@@ -430,3 +430,5 @@ window.CWTechnicianManagementCopy = {
     "discard": "Vorbereitung verwerfen"
   }
 };
+
+for(const [lang,text]of Object.entries({pt:"Gerir atribuição de viatura",en:"Manage vehicle assignment",fr:"Gérer l’affectation du véhicule",es:"Gestionar asignación de vehículo",de:"Fahrzeugzuweisung verwalten"}))window.CWTechnicianManagementCopy[lang].assignment=text;

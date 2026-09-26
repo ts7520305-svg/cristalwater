@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `fa7573a9e4e4d3e38d0b2cb701a0bcbc683f2691`. Gerado em 2026-09-26T04:07:46.147Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `741ba4187591053d84d2d52ed9a326b960110dd8`. Gerado em 2026-09-26T04:37:04.493Z. Inclui o estado dos ficheiros locais no momento da geração.
 
-122 ficheiros HTML: 115 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
+123 ficheiros HTML: 116 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 301 scripts de integração/navegador ativos. 110 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 303 scripts de integração/navegador ativos. 111 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 2 referências existem no índice Git mas não estão materializadas nesta cópia local; não são classificadas como ficheiros ausentes da aplicação.
 
@@ -75,11 +75,11 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /admin-security | Entrada raiz | ADMIN | ADMIN | 2 |
 | /admin-service-log | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-suppliers | Entrada raiz | ADMIN | ADMIN | 1 |
-| /admin-technicians | Entrada raiz | ADMIN | ADMIN | 1 |
+| /admin-technicians | Entrada raiz | ADMIN | ADMIN | 2 |
 | /admin-test-center | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-today | Entrada raiz | ADMIN | ADMIN | 2 |
 | /admin-ui-settings | Entrada raiz | ADMIN | ADMIN | 1 |
-| /admin-vehicles | Entrada raiz | ADMIN | ADMIN | 7 |
+| /admin-vehicles | Entrada raiz | ADMIN | ADMIN | 8 |
 | /admin-visits-dashboard | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-visits | Entrada raiz | ADMIN | ADMIN | 0 |
 | /alerts-financial | Entrada raiz | ADMIN | ADMIN | 1 |
@@ -156,6 +156,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /v26/index.html | Auxiliar/protótipo/teste | — | — | 0 |
 | /v26/technician-prototype.html | Auxiliar/protótipo/teste | — | — | 0 |
 | /v26/technician/index.html | Auxiliar/protótipo/teste | — | — | 0 |
+| /vehicle-assignment | Entrada raiz | — | ADMIN | 2 |
 | /vehicle-consumption | Entrada raiz | — | ADMIN, TEAM_LEADER, TECHNICIAN | 2 |
 | /vehicle-maintenance | Entrada raiz | — | — | 2 |
 | /visit-report-review | Entrada raiz | — | ADMIN | 2 |
