@@ -400,3 +400,78 @@ Target operating model:
 - administrator handles only exceptions, approvals and ambiguous cases.
 
 This specification intentionally avoids implementation-specific provider assumptions so that WhatsApp, email and future channels can share the same queue, audit and automation model.
+
+## 23. Pool measurement integrity and truthful client reporting
+
+Decision approved by the user on 2026-09-26.
+Status: requirements recorded; implementation and testing remain pending.
+
+Objective: protect service quality and client trust through verification, context and an auditable correction process, never through fabricated or cosmetically normalised readings.
+
+### 23.1 One factual record
+
+- Preserve the original technician-entered or instrument-measured reading, parameter, unit where applicable, pool/visit, timestamp and author/source.
+- Never clamp an out-of-range reading to a minimum/maximum, replace it with a normal-looking number, or maintain a false client-facing version.
+- Do not offer a "real values / adjusted values" setting. Presentation preferences must not change measured facts.
+- A genuine entry correction must retain the original value, corrected value, reason, actor and timestamp. A repeat measurement is a new record, not an overwrite.
+- Measured values, corrected entries, estimates and AI predictions must remain distinguishable in the history and in any report where they appear.
+
+### 23.2 Suspected measurement or entry error
+
+- An unusual or inconsistent result prompts the technician to repeat the measurement and check the test method/instrument; notify the administrator and create a follow-up task.
+- Use "Por confirmar" only while verification is genuinely pending. Being outside a target range does not by itself prove that a measurement is wrong.
+- Never classify a pending, missing or out-of-range result as "Bom", "Ótimo" or confirmed normal.
+- The client summary may show "Resultado por confirmar; nova medição necessária" instead of presenting a suspect value as validated. The detailed record retains the actual reading and its validation status.
+- A pending verification must not hide a possible safety issue, postpone a necessary protective warning or leave an old reassuring status presented as current.
+
+### 23.3 Arrival, intervention and verification
+
+Keep three distinct elements linked to the visit:
+1. Measurement on arrival.
+2. Treatment/intervention actually performed, with time and responsible technician.
+3. A new post-treatment measurement when technically appropriate.
+
+Use "Tratamento realizado; aguarda nova medição" when a treatment has been recorded but its result has not been verified. Applying a product does not itself prove correction.
+
+Use "Parâmetro corrigido e verificado" only when a valid follow-up measurement supports that statement for that parameter. Verification of one parameter must not imply that all pool-use conditions have been checked.
+
+Record when a follow-up measurement is due, who is responsible and whether it has been completed. Do not invent a post-treatment measurement or automatically substitute a predicted result.
+
+### 23.4 Client presentation
+
+Provide two truthful presentation modes:
+- Relatório simplificado: work performed, relevant status, pending checks, next action and any applicable safety/use instruction, in clear language.
+- Relatório técnico: actual readings with times, validation status, applicable reference range and before/after context where available.
+
+Internal staff notes and operational details may have restricted visibility, but relevant safety information must not be hidden. Both modes must be consistent with the same underlying record.
+
+Distinguish "last measured at" from current status. A previous visit's normal value must never be displayed as a new measurement or as proof of current safety. Do not label a parameter normal merely because no new reading exists.
+
+Examples of permitted wording, used only when supported by the record:
+- "Resultado por confirmar; nova medição necessária."
+- "Tratamento realizado; aguarda nova medição."
+- "Parâmetro corrigido e verificado às [hora]."
+
+### 23.5 Safety notifications take priority
+
+- Necessary protective notifications to the responsible client/operator must not wait for approval of the ordinary visit report, confirmation of a suspected reading, or a billing campaign.
+- When a potential bathing risk is identified, communicate the uncertainty and applicable protective instruction clearly; where suspension of pool use is indicated, make that instruction explicit.
+- Report detail settings must never suppress a required warning. These safeguards take precedence over generic approval rules in section 19.
+- A restriction must not disappear solely because a timer expired, a product was added, the interface refreshed or an AI recommendation predicted recovery. Record the verification and responsible decision supporting release.
+- Define and professionally validate safety thresholds and follow-up rules for the applicable pool type, test method and product instructions during implementation. This section does not establish universal numerical limits or treatment dosages.
+- Record notification attempts and the actual delivery evidence available. Unknown delivery is not confirmed receipt. Failed critical notifications must escalate to the administrator for another appropriate contact attempt.
+
+### 23.6 Audit and implementation acceptance criteria
+
+Before marking this feature implemented, verify at least:
+- An out-of-range value is never silently replaced by a boundary or normal-looking value in the client portal, PDF, message or export.
+- A correction retains the original record and an attributable reason; a repeat reading creates a separate measurement.
+- A suspect result remains visibly pending and cannot produce a normal/green status.
+- Recording a treatment without a new reading produces a pending-verification state, not a successful-correction claim.
+- Before/after values display their own timestamps, and a corrected parameter does not imply blanket pool safety.
+- Simplified and technical reports remain factually consistent and retain necessary safety instructions.
+- Critical protective warnings are not blocked by ordinary report approval, report visibility preferences or billing queue pauses.
+- A warning with failed or unknown delivery produces an actionable alert rather than a false delivery confirmation.
+- Tenant isolation and role permissions protect access to measurements and the audit history.
+
+This documentation change does not implement these behaviours, activate notifications, change live measurements or deploy anything to the server.
