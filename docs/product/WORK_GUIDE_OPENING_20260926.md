@@ -41,7 +41,7 @@ Perda de resposta, reinício e reenvios concorrentes recuperam o comprovativo or
 
 ## Publicação e validação nativa
 
-TASK376 preparada para publicação na branch de trabalho. O gate PostgreSQL nativo de 288 grupos e restauro permanece por confirmar.
+Publicada em `8fb9e816311880c22696c1c695e810efa75d3af1`, árvore `c67dca06ed66693ec955bb21959742ffcc8ec22f`, idêntica à preparada e validada localmente, na branch `work/field-readiness-20260915-simulation`. [CI 36223589014](https://github.com/ts7520305-svg/cristalwater/actions/runs/36223589014), job `108353287692`, em execução. O gate PostgreSQL nativo de 288 grupos e restauro permanece por confirmar.
 
 TASK374 confirmada no [CI 36220493972](https://github.com/ts7520305-svg/cristalwater/actions/runs/36220493972), job `108344709185`: 284/284 scripts esperados distintos, todos com código zero, 17 etapas aprovadas e restauro de 128 tabelas e 47 ficheiros com linhas e hashes iguais. [Evidência nativa](evidence/20260926_task374_ci.json). TASK375, [CI 36221808091](https://github.com/ts7520305-svg/cristalwater/actions/runs/36221808091), job `108348349992`, ainda em execução na última consulta; 286 grupos e restauro não declarados aprovados.
 
