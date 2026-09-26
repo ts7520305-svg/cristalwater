@@ -37,7 +37,7 @@ A revisão visual do separador real «Viatura» identificou ações documentais 
 
 ## Publicação e validação nativa
 
-TASK378 preparada e validada localmente; publicação na branch de trabalho e gate PostgreSQL nativo de 292 grupos/restauro ainda por confirmar.
+Publicada em `abd01eeef4ab0fd19bd7cb8af3cbc197a478a415`, árvore `b29eac80da8445daadc511bd65aa957e13405c9e`, idêntica à preparada e validada localmente, na branch `work/field-readiness-20260915-simulation`. [CI 36226988288](https://github.com/ts7520305-svg/cristalwater/actions/runs/36226988288), job `108362806296`, em execução. O gate PostgreSQL nativo de 292 grupos e restauro permanece por confirmar.
 
 TASK376 confirmada no [CI 36223589014](https://github.com/ts7520305-svg/cristalwater/actions/runs/36223589014), job `108353287692`, código `8fb9e816311880c22696c1c695e810efa75d3af1`: 288/288 scripts esperados distintos, todos zero, 17 etapas aprovadas e restauro de 128 tabelas/47 ficheiros com linhas e hashes iguais. [Evidência nativa](evidence/20260926_task376_ci.json). TASK377, [CI 36225374723](https://github.com/ts7520305-svg/cristalwater/actions/runs/36225374723), job `108358260658`, ainda em execução na última consulta; 290 grupos e restauro por confirmar.
 
