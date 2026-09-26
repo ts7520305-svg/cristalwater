@@ -50,3 +50,7 @@ Continuar nos presets de materiais da frota: `saveVehicleStockPreset` grava `Sys
 ## Atualização de evidência — TASK374, 26/09/2026
 
 TASK372 confirmada em 280/280 grupos esperados distintos, todas as 17 etapas aprovadas e restauro de 128 tabelas/47 ficheiros com linhas e hashes iguais. CI `36217019968`, job `108334888707`; [evidência nativa](evidence/20260926_task372_ci.json). TASK373 continua pendente na consulta desta atualização.
+
+## Atualização de evidência — TASK375, 26/09/2026
+
+TASK373 confirmada em 282/282 grupos esperados distintos, todas as 17 etapas aprovadas e restauro de 128 tabelas/47 ficheiros com linhas e hashes iguais. CI `36218570468`, job `108339358313`; [evidência nativa](evidence/20260926_task373_ci.json). TASK374 continua pendente na consulta desta atualização.

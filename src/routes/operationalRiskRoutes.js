@@ -1,73 +1,10 @@
 const express = require("express");
 
 const { prisma } = require("../prismaClient");
-const { getSetting, setSetting } = require("../services/systemSettingService");
+const ruleService=require("../services/operationalRiskRulesReviewService");
+const ruleContract=require("../../frontend/cw-operational-risk-rules");
 
 const router = express.Router();
-
-const RISK_RULES_KEY = "OPERATIONAL_RISK_RULES";
-
-const DEFAULT_RULES = {
-  overduePayments: true,
-  missingTransportGuide: true,
-  missingTransportGuideDocument: true,
-  missingWorkGuide: true,
-  vehicleInsuranceExpiring: true,
-  vehicleInspectionExpiring: true,
-  lowVehicleStock: true,
-  pendingOperationalLocks: true,
-  technicianLinkedVehicleIssues: true,
-  insuranceWarningDays: 30,
-  inspectionWarningDays: 30,
-  stockLowThreshold: 1,
-};
-
-function toBool(value, fallback = true) {
-  if (typeof value === "boolean") return value;
-  if (value === undefined || value === null || value === "") return fallback;
-  return ["true", "1", "yes", "sim", "on"].includes(String(value).toLowerCase());
-}
-
-function toNumber(value, fallback) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : fallback;
-}
-
-function normalizeRules(input = {}) {
-  return {
-    overduePayments: toBool(input.overduePayments, DEFAULT_RULES.overduePayments),
-    missingTransportGuide: toBool(input.missingTransportGuide, DEFAULT_RULES.missingTransportGuide),
-    missingTransportGuideDocument: toBool(input.missingTransportGuideDocument, DEFAULT_RULES.missingTransportGuideDocument),
-    missingWorkGuide: toBool(input.missingWorkGuide, DEFAULT_RULES.missingWorkGuide),
-    vehicleInsuranceExpiring: toBool(input.vehicleInsuranceExpiring, DEFAULT_RULES.vehicleInsuranceExpiring),
-    vehicleInspectionExpiring: toBool(input.vehicleInspectionExpiring, DEFAULT_RULES.vehicleInspectionExpiring),
-    lowVehicleStock: toBool(input.lowVehicleStock, DEFAULT_RULES.lowVehicleStock),
-    pendingOperationalLocks: toBool(input.pendingOperationalLocks, DEFAULT_RULES.pendingOperationalLocks),
-    technicianLinkedVehicleIssues: toBool(input.technicianLinkedVehicleIssues, DEFAULT_RULES.technicianLinkedVehicleIssues),
-    insuranceWarningDays: Math.max(1, toNumber(input.insuranceWarningDays, DEFAULT_RULES.insuranceWarningDays)),
-    inspectionWarningDays: Math.max(1, toNumber(input.inspectionWarningDays, DEFAULT_RULES.inspectionWarningDays)),
-    stockLowThreshold: Math.max(0, toNumber(input.stockLowThreshold, DEFAULT_RULES.stockLowThreshold)),
-  };
-}
-
-function parseRules(raw) {
-  if (!raw) return { ...DEFAULT_RULES };
-  try {
-    return normalizeRules({ ...DEFAULT_RULES, ...JSON.parse(raw) });
-  } catch (_) {
-    return { ...DEFAULT_RULES };
-  }
-}
-
-async function getRiskRules() {
-  return parseRules(await getSetting(RISK_RULES_KEY, JSON.stringify(DEFAULT_RULES)));
-}
-
-async function saveRiskRules(input) {
-  const rules = normalizeRules({ ...DEFAULT_RULES, ...(input || {}) });
-  await setSetting(RISK_RULES_KEY, JSON.stringify(rules), "Regras dos alertas visuais operacionais.");
-  return rules;
-}
 
 function normalizeText(value) {
   return String(value || "")
@@ -154,7 +91,7 @@ async function transportDocumentsByGuideId(guides) {
   const keys = guideIds.map((id) => `transport_guide_at_document_${id}`);
   const settings = await prisma.systemSetting.findMany({
     where: { key: { in: keys } },
-  }).catch(() => []);
+  });
   const docs = new Map();
   settings.forEach((setting) => {
     try {
@@ -186,7 +123,7 @@ function addVehicleIssueToTechnicians(issues, vehicle, sourceIssue, rules) {
 }
 
 async function buildOperationalRiskSummary() {
-  const rules = await getRiskRules();
+  const {rules,rulesState,defaultKeys} = await ruleService.effective();
   const issues = [];
   const now = new Date();
 
@@ -198,7 +135,7 @@ async function buildOperationalRiskSummary() {
         select: { id: true, name: true, email: true, active: true, vehicleId: true },
       },
     },
-  }).catch(() => []);
+  });
   const vehicleIds = vehicles.map((vehicle) => vehicle.id);
 
   const [activeGuides, openWorks, maintenanceRecords, pendingLocks] = await Promise.all([
@@ -206,24 +143,24 @@ async function buildOperationalRiskSummary() {
       where: { vehicleId: { in: vehicleIds }, status: "ACTIVE" },
       orderBy: [{ createdAt: "desc" }],
       include: { items: true, vehicle: true },
-    }).catch(() => []),
+    }),
     prisma.workGuide.findMany({
       where: { vehicleId: { in: vehicleIds }, status: "OPEN" },
       orderBy: [{ createdAt: "desc" }],
       include: { items: true, guide: true, technician: true, vehicle: true },
-    }).catch(() => []),
+    }),
     prisma.vehicleMaintenanceRecord.findMany({
       where: {
         vehicleId: { in: vehicleIds },
         status: { notIn: ["COMPLETED", "DONE", "RESOLVED", "CLOSED"] },
       },
       orderBy: [{ dueDate: "asc" }, { createdAt: "desc" }],
-    }).catch(() => []),
+    }),
     prisma.operationalLock.findMany({
       where: { status: "PENDING" },
       orderBy: { createdAt: "desc" },
       take: 200,
-    }).catch(() => []),
+    }),
   ]);
 
   const documents = await transportDocumentsByGuideId(activeGuides);
@@ -460,7 +397,7 @@ async function buildOperationalRiskSummary() {
       include: { client: { select: { id: true, name: true } } },
       orderBy: [{ dueDate: "asc" }, { createdAt: "desc" }],
       take: 500,
-    }).catch(() => []);
+    });
 
     for (const invoice of invoices) {
       addIssue(issues, {
@@ -483,6 +420,8 @@ async function buildOperationalRiskSummary() {
     ok: true,
     generatedAt: new Date().toISOString(),
     rules,
+    rulesState,
+    defaultKeys,
     counts: {
       total: issues.length,
       critical: issues.filter((item) => item.severity === "CRITICAL").length,
@@ -495,39 +434,8 @@ async function buildOperationalRiskSummary() {
   };
 }
 
-router.get("/rules", async (_req, res) => {
-  try {
-    res.json({ ok: true, rules: await getRiskRules(), defaults: DEFAULT_RULES });
-  } catch (error) {
-    res.status(500).json({ ok: false, error: error.message || "Erro ao carregar regras de risco" });
-  }
-});
-
-router.put("/rules", async (req, res) => {
-  try {
-    const rules = await saveRiskRules(req.body?.rules || req.body || {});
-    await prisma.userAuditLog.create({
-      data: {
-        actor: req.headers["x-user-email"] || req.headers["x-actor"] || "admin",
-        action: "OPERATIONAL_RISK_RULES_UPDATE",
-        entity: "SystemSetting",
-        entityId: RISK_RULES_KEY,
-        metadata: { rules },
-      },
-    }).catch(() => null);
-    res.json({ ok: true, rules });
-  } catch (error) {
-    res.status(500).json({ ok: false, error: error.message || "Erro ao gravar regras de risco" });
-  }
-});
-
-router.get("/summary", async (_req, res) => {
-  try {
-    res.json(await buildOperationalRiskSummary());
-  } catch (error) {
-    console.error("operational risk summary error:", error);
-    res.status(500).json({ ok: false, error: error.message || "Erro ao calcular riscos operacionais" });
-  }
-});
-
-module.exports = router;
+router.use(require('../middlewares/authMiddleware')('ADMIN'));
+router.get('/rules',async(req,res)=>{res.set('Cache-Control','private, no-store');try{res.json({ok:true,...await ruleService.effective(),defaults:ruleContract.defaults});}catch(e){res.status(e.statusCode||503).json({ok:false,code:e.code==='RISK_RULES_DATA_REVIEW'?e.code:'RISK_RULES_UNAVAILABLE'});}});
+router.put('/rules',require('../controllers/operationalRiskRulesReviewController').legacy);
+router.get('/summary',async(req,res)=>{res.set('Cache-Control','private, no-store');try{res.json(await buildOperationalRiskSummary());}catch(e){res.status(e.statusCode||503).json({ok:false,code:e.code==='RISK_RULES_DATA_REVIEW'?e.code:'RISK_SUMMARY_UNAVAILABLE'});}});
+module.exports=router;

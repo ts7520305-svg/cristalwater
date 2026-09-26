@@ -21,6 +21,8 @@ app.use('/api/work-guide-close', require('../../src/routes/workGuideCloseRoutes'
 app.use('/api/vehicle-maintenance', require('../../src/routes/vehicleMaintenanceReviewRoutes'));
 app.use('/api/vehicle-assignment', require('../../src/routes/vehicleAssignmentReviewRoutes'));
 app.use('/api/vehicle-stock-preset', require('../../src/routes/vehicleStockPresetReviewRoutes'));
+app.use('/api/operational-risk-rules', require('../../src/routes/operationalRiskRulesReviewRoutes'));
+app.use('/api/operational-risk', require('../../src/routes/operationalRiskRoutes'));
 app.use('/api/transport-guide-create', require('../../src/routes/transportGuideCreationRoutes'));
 app.use('/api/transport-guide-items', require('../../src/routes/transportGuideItemsRoutes'));
 app.use('/api/transport-guide-manage', require('../../src/routes/transportGuideManageRoutes'));

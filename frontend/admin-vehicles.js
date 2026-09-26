@@ -292,23 +292,23 @@ function renderRiskPanel() {
     rules.innerHTML = `
       ${RISK_RULE_LABELS.map(([key, label]) => `
         <label class="cw-risk-rule">
-          <input type="checkbox" data-risk-key="${esc(key)}" ${RISK_RULES[key] !== false ? "checked" : ""}>
+          <input type="checkbox" disabled data-risk-key="${esc(key)}" ${RISK_RULES[key] !== false ? "checked" : ""}>
           <span>${esc(label)}</span>
         </label>
       `).join("")}
       ${RISK_NUMBER_LABELS.map(([key, label]) => `
         <label class="cw-risk-rule">
           <span>${esc(label)}</span>
-          <input type="number" min="0" data-risk-key="${esc(key)}" value="${esc(RISK_RULES[key] ?? 0)}">
+          <input type="number" disabled min="0" data-risk-key="${esc(key)}" value="${esc(RISK_RULES[key] ?? 0)}">
         </label>
       `).join("")}
     `;
   }
 }
 
-function riskUnavailable(message){RISK_AVAILABLE=false;RISK_SUMMARY={issues:[],byVehicleId:{},byTechnicianId:{},byClientId:{},counts:{}};RISK_RULES={};el('riskSummary').textContent=message;el('riskRules').replaceChildren();el('saveRiskRulesButton').disabled=true;window.dispatchEvent(new Event('cw:fleet-risk-unavailable'));}
-async function loadRiskState(){const turn=++riskRead;RISK_AVAILABLE=false;el('saveRiskRulesButton').disabled=true;try{const summary=await riskRequest('/summary');if(turn!==riskRead)return;if(!Array.isArray(summary.issues)||!summary.rules||!RISK_RULE_LABELS.every(([k])=>typeof summary.rules[k]==='boolean')||!RISK_NUMBER_LABELS.every(([k])=>Number.isFinite(summary.rules[k])&&summary.rules[k]>=0)||!summary.counts||!['total','critical','warning'].every(k=>Number.isSafeInteger(summary.counts[k])&&summary.counts[k]>=0))throw Error('Incomplete risk summary');RISK_SUMMARY=summary;RISK_RULES=summary.rules;RISK_AVAILABLE=true;renderRiskPanel();el('saveRiskRulesButton').disabled=false;window.dispatchEvent(new CustomEvent('cw:fleet-risk-ready',{detail:summary}));}catch(error){if(turn===riskRead&&window.CWFleetPageSession?.isCurrent())riskUnavailable('Não foi possível confirmar os alertas. Atualize para voltar a tentar.');}}
-async function saveRiskRules(){if(!RISK_AVAILABLE)return;const nextRules={};document.querySelectorAll('[data-risk-key]').forEach(input=>{nextRules[input.dataset.riskKey]=input.type==='checkbox'?input.checked:Number(input.value);});try{await riskRequest('/rules',{method:'PUT',body:JSON.stringify({rules:nextRules})});await loadRiskState();}catch(_){if(window.CWFleetPageSession?.isCurrent())riskUnavailable('A gravação das regras não está confirmada. Atualize os alertas antes de voltar a guardar.');}}
+function riskUnavailable(message){RISK_AVAILABLE=false;RISK_SUMMARY={issues:[],byVehicleId:{},byTechnicianId:{},byClientId:{},counts:{}};RISK_RULES={};el('riskSummary').textContent=message;el('riskRules').replaceChildren();el('saveRiskRulesButton').disabled=false;window.dispatchEvent(new Event('cw:fleet-risk-unavailable'));}
+async function loadRiskState(){const turn=++riskRead;RISK_AVAILABLE=false;el('saveRiskRulesButton').disabled=false;try{const summary=await riskRequest('/summary');if(turn!==riskRead)return;if(!Array.isArray(summary.issues)||!summary.rules||!RISK_RULE_LABELS.every(([k])=>typeof summary.rules[k]==='boolean')||!RISK_NUMBER_LABELS.every(([k])=>Number.isFinite(summary.rules[k])&&summary.rules[k]>=0)||!summary.counts||!['total','critical','warning'].every(k=>Number.isSafeInteger(summary.counts[k])&&summary.counts[k]>=0))throw Error('Incomplete risk summary');RISK_SUMMARY=summary;RISK_RULES=summary.rules;RISK_AVAILABLE=true;renderRiskPanel();el('saveRiskRulesButton').disabled=false;window.dispatchEvent(new CustomEvent('cw:fleet-risk-ready',{detail:summary}));}catch(error){if(turn===riskRead&&window.CWFleetPageSession?.isCurrent())riskUnavailable('Não foi possível confirmar os alertas. Atualize para voltar a tentar.');}}
+function saveRiskRules(){requirePageSession();location.href='/operational-risk-rules?lang='+(document.getElementById('fleetLanguage')?.value||'pt');}
 function renderVehicleChoices(){for(const id of ['guideVehicle','workVehicle','maintVehicle']){const select=el(id);if(!select)continue;const selected=select.value;select.replaceChildren();const blank=document.createElement('option');blank.value='';blank.textContent='Escolher viatura…';select.append(blank);for(const vehicle of VEHICLES.filter(v=>v.active!==false&&!v.deletedAt)){const option=document.createElement('option');option.value=String(vehicle.id);option.textContent=vehicle.plate+' — '+(vehicle.name||'');select.append(option);}if(selected&&!Array.from(select.options).some(o=>o.value===selected)){const unavailable=document.createElement('option');unavailable.value=selected;unavailable.textContent='Viatura #'+selected+' indisponível — escolha outra';unavailable.disabled=true;select.append(unavailable);}select.value=selected;}}
 async function refreshVehicleChoices(){const turn=++vehicleChoiceRead,response=await j(`${API}/vehicles?active=all`);if(turn!==vehicleChoiceRead)return;if(!Array.isArray(response.vehicles))throw Error('Lista de viaturas incompleta.');VEHICLES=response.vehicles;renderVehicleChoices();}
 function selectedVehicle(id){const value=Number(val(id));if(!value||!VEHICLES.some(v=>v.id===value&&v.active!==false&&!v.deletedAt)){alert('Escolha uma viatura disponível antes de continuar.');return false;}return true;}

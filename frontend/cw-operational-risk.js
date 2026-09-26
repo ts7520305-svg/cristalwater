@@ -8,24 +8,10 @@
   const managedFleet = path === '/admin-vehicles';
   const fleetCurrent = () => !managedFleet || !!window.CWFleetPageSession?.isCurrent();
   let fleetRiskRead = 0;
-  const clearFleetRisk = () => { if(managedFleet){fleetRiskRead++;window.__CW_OPERATIONAL_RISK_SUMMARY__=null;document.getElementById('cwOperationalRiskPanel')?.remove();document.querySelectorAll('.cw-risk-inline-list,.cw-side-risk-count').forEach(el=>el.remove());document.querySelectorAll('.cw-side-risk,.cw-side-risk-critical,.cw-risk-card,.cw-risk-jump-target,.cw-risk-focus').forEach(el=>el.classList.remove('cw-side-risk','cw-side-risk-critical','cw-risk-card','cw-risk-jump-target','cw-risk-focus'));} };
+  const clearFleetRisk = () => { {fleetRiskRead++;window.__CW_OPERATIONAL_RISK_SUMMARY__=null;document.getElementById('cwOperationalRiskPanel')?.remove();document.querySelectorAll('.cw-risk-inline-list,.cw-side-risk-count').forEach(el=>el.remove());document.querySelectorAll('.cw-side-risk,.cw-side-risk-critical,.cw-risk-card,.cw-risk-jump-target,.cw-risk-focus').forEach(el=>el.classList.remove('cw-side-risk','cw-side-risk-critical','cw-risk-card','cw-risk-jump-target','cw-risk-focus'));} };
   if(managedFleet){window.addEventListener('cw:fleet-session-ended',clearFleetRisk);window.addEventListener('cw:fleet-risk-unavailable',clearFleetRisk);window.addEventListener('pagehide',clearFleetRisk);window.addEventListener('cw:fleet-risk-ready',event=>{if(fleetCurrent()){clearFleetRisk();showRisk(event.detail,fleetRiskRead);}});}
   const isAdmin = path.includes("admin") || path.includes("billing") || path.includes("invoice") || path.includes("to-issue") || path.includes("dashboard");
   if (!isAdmin || ["/login", "/admin-login"].includes(path)) return;
-
-  const DEFAULT_RULES = {
-    overduePayments: true,
-    missingTransportGuide: true,
-    missingTransportGuideDocument: true,
-    missingWorkGuide: true,
-    vehicleInsuranceExpiring: true,
-    vehicleInspectionExpiring: true,
-    lowVehicleStock: true,
-    technicianLinkedVehicleIssues: true,
-    insuranceWarningDays: 30,
-    inspectionWarningDays: 30,
-    stockLowThreshold: 1,
-  };
 
   function esc(value) {
     return String(value ?? "").replace(/[&<>"']/g, (char) => ({
@@ -50,249 +36,7 @@
     return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   }
 
-  function daysUntil(value) {
-    if (!value) return null;
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return null;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    date.setHours(0, 0, 0, 0);
-    return Math.ceil((date.getTime() - today.getTime()) / 86400000);
-  }
-
-  function groupBy(items, key) {
-    return items.reduce((acc, item) => {
-      const value = item[key];
-      if (value !== undefined && value !== null) {
-        const mapKey = String(value);
-        if (!acc[mapKey]) acc[mapKey] = [];
-        acc[mapKey].push(item);
-      }
-      return acc;
-    }, {});
-  }
-
-  function addIssue(issues, issue) {
-    issues.push({
-      id: issue.id || [issue.type, issue.vehicleId, issue.technicianId, issue.clientId, issue.targetId].filter(Boolean).join(":"),
-      severity: issue.severity || "WARNING",
-      type: issue.type || "RISK",
-      module: issue.module || "Sistema",
-      targetType: issue.targetType || null,
-      targetId: issue.targetId == null ? null : Number(issue.targetId),
-      vehicleId: issue.vehicleId == null ? null : Number(issue.vehicleId),
-      technicianId: issue.technicianId == null ? null : Number(issue.technicianId),
-      clientId: issue.clientId == null ? null : Number(issue.clientId),
-      title: issue.title || "Atencao",
-      message: issue.message || "",
-      href: issue.href || "/admin-master-control",
-      anchorText: issue.anchorText || "",
-    });
-  }
-
-  function isInsurance(record) {
-    return /seguro|apolice|apol/.test(normalize(`${record?.type || ""} ${record?.title || ""} ${record?.notes || ""}`));
-  }
-
-  function isInspection(record) {
-    return /inspecao|inspec|ipo|vistoria/.test(normalize(`${record?.type || ""} ${record?.title || ""} ${record?.notes || ""}`));
-  }
-
-  function latest(records, vehicleId, predicate) {
-    return records
-      .filter((record) => Number(record.vehicleId) === Number(vehicleId) && predicate(record))
-      .sort((a, b) => new Date(b.dueDate || b.createdAt || 0).getTime() - new Date(a.dueDate || a.createdAt || 0).getTime())[0] || null;
-  }
-
-  async function loadRules() {
-    try {
-      const data = await api("/api/settings/global/OPERATIONAL_RISK_RULES");
-      return { ...DEFAULT_RULES, ...JSON.parse(data.value || "{}") };
-    } catch (_) {
-      return { ...DEFAULT_RULES };
-    }
-  }
-
-  async function fallbackSummary() {
-    const rules = await loadRules();
-    const [vehiclesData, guidesData, worksData, maintenanceData, invoicesData] = await Promise.all([
-      api("/api/guides/vehicles?active=all").catch(() => ({ vehicles: [] })),
-      api("/api/guides/transport").catch(() => ({ guides: [] })),
-      api("/api/guides/work").catch(() => ({ workGuides: [] })),
-      api("/api/guides/maintenance").catch(() => ({ records: [] })),
-      api("/api/invoices").catch(() => ({ invoices: [] })),
-    ]);
-
-    const vehicles = (vehiclesData.vehicles || []).filter((vehicle) => vehicle.active !== false);
-    const guides = guidesData.guides || [];
-    const works = worksData.workGuides || [];
-    const maintenance = maintenanceData.records || [];
-    const issues = [];
-
-    vehicles.forEach((vehicle) => {
-      const label = vehicle.plate || `Viatura ${vehicle.id}`;
-      const techs = (vehicle.assignedTechnicians || []).filter((tech) => tech.active !== false);
-      const activeGuide = guides.find((guide) => Number(guide.vehicleId) === Number(vehicle.id) && guide.status === "ACTIVE");
-      const openWork = works.find((work) => Number(work.vehicleId) === Number(vehicle.id) && work.status === "OPEN");
-      const vehicleIssues = [];
-
-      if (rules.missingTransportGuide !== false) {
-        if (openWork && !openWork.guideId) {
-          vehicleIssues.push({
-            type: "MISSING_TRANSPORT_GUIDE",
-            severity: "CRITICAL",
-            module: "Viaturas e Guias",
-            targetType: "WorkGuide",
-            targetId: openWork.id,
-            vehicleId: vehicle.id,
-            technicianId: openWork.technicianId,
-            title: "Guia AT em falta",
-            message: `${label}: guia de obra #${openWork.id} esta provisoria sem guia AT.`,
-            href: "/admin-vehicles",
-            anchorText: label,
-          });
-        } else if (techs.length && !activeGuide) {
-          vehicleIssues.push({
-            type: "MISSING_TRANSPORT_GUIDE",
-            severity: "CRITICAL",
-            module: "Viaturas e Guias",
-            targetType: "Vehicle",
-            targetId: vehicle.id,
-            vehicleId: vehicle.id,
-            title: "Sem guia AT ativa",
-            message: `${label}: viatura com tecnico associado sem guia AT ativa.`,
-            href: "/admin-vehicles",
-            anchorText: label,
-          });
-        }
-      }
-
-      if (rules.missingTransportGuideDocument !== false && activeGuide && !activeGuide.officialDocument?.url) {
-        vehicleIssues.push({
-          type: "MISSING_TRANSPORT_GUIDE_DOCUMENT",
-          severity: "WARNING",
-          module: "Viaturas e Guias",
-          targetType: "TransportGuide",
-          targetId: activeGuide.id,
-          vehicleId: vehicle.id,
-          title: "Ficheiro AT oficial em falta",
-          message: `${label}: guia ${activeGuide.codeAT || `#${activeGuide.id}`} sem ficheiro oficial anexado.`,
-          href: "/admin-vehicles",
-          anchorText: label,
-        });
-      }
-
-      if (rules.missingWorkGuide !== false && (activeGuide || techs.length) && !openWork) {
-        vehicleIssues.push({
-          type: "MISSING_WORK_GUIDE",
-          severity: "WARNING",
-          module: "Viaturas e Guias",
-          targetType: "Vehicle",
-          targetId: vehicle.id,
-          vehicleId: vehicle.id,
-          title: "Guia de obra em falta",
-          message: `${label}: sem guia de obra aberta para a operacao atual.`,
-          href: "/admin-vehicles",
-          anchorText: label,
-        });
-      }
-
-      if (rules.vehicleInsuranceExpiring !== false) {
-        const insurance = latest(maintenance, vehicle.id, isInsurance);
-        const left = daysUntil(insurance?.dueDate);
-        if (!insurance) vehicleIssues.push({ type: "VEHICLE_INSURANCE_MISSING", severity: "CRITICAL", module: "Viaturas e Guias", targetType: "Vehicle", targetId: vehicle.id, vehicleId: vehicle.id, title: "Seguro nao registado", message: `${label}: seguro nao registado.`, href: "/admin-vehicles", anchorText: label });
-        else if (left !== null && left < 0) vehicleIssues.push({ type: "VEHICLE_INSURANCE_OVERDUE", severity: "CRITICAL", module: "Viaturas e Guias", targetType: "Vehicle", targetId: vehicle.id, vehicleId: vehicle.id, title: "Seguro expirado", message: `${label}: seguro expirado.`, href: "/admin-vehicles", anchorText: label });
-        else if (left !== null && left <= Number(rules.insuranceWarningDays || 30)) vehicleIssues.push({ type: "VEHICLE_INSURANCE_EXPIRING", severity: "WARNING", module: "Viaturas e Guias", targetType: "Vehicle", targetId: vehicle.id, vehicleId: vehicle.id, title: "Seguro a acabar", message: `${label}: seguro a acabar em ${left} dia(s).`, href: "/admin-vehicles", anchorText: label });
-      }
-
-      if (rules.vehicleInspectionExpiring !== false) {
-        const inspection = latest(maintenance, vehicle.id, isInspection);
-        const left = daysUntil(inspection?.dueDate);
-        if (!inspection) vehicleIssues.push({ type: "VEHICLE_INSPECTION_MISSING", severity: "WARNING", module: "Viaturas e Guias", targetType: "Vehicle", targetId: vehicle.id, vehicleId: vehicle.id, title: "Inspecao nao registada", message: `${label}: inspecao/IPO nao registada.`, href: "/admin-vehicles", anchorText: label });
-        else if (left !== null && left < 0) vehicleIssues.push({ type: "VEHICLE_INSPECTION_OVERDUE", severity: "CRITICAL", module: "Viaturas e Guias", targetType: "Vehicle", targetId: vehicle.id, vehicleId: vehicle.id, title: "Inspecao vencida", message: `${label}: inspecao vencida.`, href: "/admin-vehicles", anchorText: label });
-        else if (left !== null && left <= Number(rules.inspectionWarningDays || 30)) vehicleIssues.push({ type: "VEHICLE_INSPECTION_EXPIRING", severity: "WARNING", module: "Viaturas e Guias", targetType: "Vehicle", targetId: vehicle.id, vehicleId: vehicle.id, title: "Inspecao a acabar", message: `${label}: inspecao a acabar em ${left} dia(s).`, href: "/admin-vehicles", anchorText: label });
-      }
-
-      if (rules.lowVehicleStock !== false && openWork) {
-        const lowItems = (openWork.items || []).filter((item) => Number(item.quantity || 0) <= Number(rules.stockLowThreshold || 1));
-        if (!(openWork.items || []).length || lowItems.length) {
-          const names = lowItems.slice(0, 4).map((item) => `${item.name} (${item.quantity} ${item.unit || "UN"})`).join(", ");
-          vehicleIssues.push({
-            type: "VEHICLE_STOCK_LOW",
-            severity: lowItems.some((item) => Number(item.quantity || 0) <= 0) ? "CRITICAL" : "WARNING",
-            module: "Viaturas e Guias",
-            targetType: "WorkGuide",
-            targetId: openWork.id,
-            vehicleId: vehicle.id,
-            technicianId: openWork.technicianId,
-            title: "Material baixo/em falta",
-            message: names ? `${label}: material baixo/em falta - ${names}.` : `${label}: guia de obra aberta sem material carregado.`,
-            href: "/admin-vehicles",
-            anchorText: label,
-          });
-        }
-      }
-
-      vehicleIssues.forEach((issue) => addIssue(issues, issue));
-      if (rules.technicianLinkedVehicleIssues !== false) {
-        techs.forEach((tech) => vehicleIssues.forEach((issue) => addIssue(issues, {
-          ...issue,
-          id: `TECH:${issue.type}:${vehicle.id}:${tech.id}`,
-          targetType: "Technician",
-          targetId: tech.id,
-          technicianId: tech.id,
-          module: "Tecnicos",
-          title: `Tecnico com viatura em alerta`,
-          message: `${tech.name || `Tecnico ${tech.id}`}: ${issue.message}`,
-          href: "/admin-technicians",
-          anchorText: tech.name || "",
-        })));
-      }
-    });
-
-    const invoices = invoicesData.invoices || invoicesData.data || [];
-    invoices.forEach((invoice) => {
-      const open = Number(invoice.amountOpen || invoice.totalOpen || invoice.openAmount || 0);
-      const overdue = String(invoice.status || "").toUpperCase().includes("OVERDUE") || String(invoice.status || "").toUpperCase().includes("ATRAS") || (invoice.dueDate && new Date(invoice.dueDate) < new Date());
-      if (rules.overduePayments !== false && open > 0 && overdue) {
-        addIssue(issues, {
-          type: "OVERDUE_PAYMENT",
-          severity: "CRITICAL",
-          module: "Financeiro",
-          targetType: "Client",
-          targetId: invoice.clientId || invoice.client?.id,
-          clientId: invoice.clientId || invoice.client?.id,
-          title: "Pagamento em atraso",
-          message: `${invoice.client?.name || `Cliente ${invoice.clientId || ""}`}: ${open.toFixed(2)} EUR em aberto.`,
-          href: "/invoices",
-          anchorText: invoice.client?.name || "",
-        });
-      }
-    });
-
-    return {
-      ok: true,
-      rules,
-      issues,
-      counts: {
-        total: issues.length,
-        critical: issues.filter((issue) => issue.severity === "CRITICAL").length,
-        warning: issues.filter((issue) => issue.severity !== "CRITICAL").length,
-      },
-      byVehicleId: groupBy(issues, "vehicleId"),
-      byTechnicianId: groupBy(issues, "technicianId"),
-      byClientId: groupBy(issues, "clientId"),
-    };
-  }
-
-  async function loadSummary() {
-    try {
-      return await api("/api/operational-risk/summary");
-    } catch (error) {
-      if(managedFleet)throw error;
-      return fallbackSummary();
-    }
-  }
+  async function loadSummary(){const summary=await api('/api/operational-risk/summary');if(!Array.isArray(summary.issues)||!summary.counts||!['total','critical','warning'].every(k=>Number.isSafeInteger(summary.counts[k])&&summary.counts[k]>=0))throw Error('Incomplete risk summary');return summary;}
 
   function issueTooltip(issue) {
     return `${issue.title}: ${issue.message}`;
@@ -454,6 +198,7 @@
   }
 
   function renderGlobalPanel(summary) {
+    document.getElementById("cwOperationalRiskUnavailable")?.remove();
     const issues = summary.issues || [];
     const critical = issues.filter((issue) => issue.severity === "CRITICAL");
     const topIssues = (critical.length ? critical : issues).slice(0, 8);
@@ -570,7 +315,7 @@
   async function bootRisk() {
     setupRiskNavigation();
     const turn=++fleetRiskRead;
-    let summary;try{summary=await loadSummary();if(managedFleet&&(!Array.isArray(summary.issues)||!summary.counts||!['total','critical','warning'].every(k=>Number.isSafeInteger(summary.counts[k])&&summary.counts[k]>=0)))throw Error('Incomplete risk summary');}catch(_){if(turn===fleetRiskRead)clearFleetRisk();return;}
+    let summary;try{summary=await loadSummary();if(managedFleet&&(!Array.isArray(summary.issues)||!summary.counts||!['total','critical','warning'].every(k=>Number.isSafeInteger(summary.counts[k])&&summary.counts[k]>=0)))throw Error('Incomplete risk summary');}catch(_){if(turn===fleetRiskRead){clearFleetRisk();if(!managedFleet&&!document.getElementById('cwOperationalRiskUnavailable')){const status=document.createElement('p');status.id='cwOperationalRiskUnavailable';status.setAttribute('role','status');status.textContent='Não foi possível confirmar os alertas operacionais. Atualize para voltar a tentar.';(document.querySelector('main')||document.body).prepend(status);}}return;}
     showRisk(summary,turn);
   }
 

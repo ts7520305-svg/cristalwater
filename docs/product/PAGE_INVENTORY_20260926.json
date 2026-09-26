@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-26T05:15:27.677Z",
-  "baseCommit": "3f8e9de5ccc37fca15386351a17ebffd5031383c",
+  "generatedAt": "2026-09-26T05:41:11.140Z",
+  "baseCommit": "f91db3f3d6d8af724a86dd17d39019df2794579c",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 305,
+  "activeScriptsScanned": 307,
   "summary": {
-    "htmlFiles": 124,
-    "rootPages": 117,
+    "htmlFiles": 125,
+    "rootPages": 118,
     "nestedPages": 7,
     "unavailableLocalAssetReferences": 2,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 112,
+    "pagesWithLiteralTestReference": 113,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -1873,6 +1873,7 @@
         "test-field-vehicle-maintenance-ui.js",
         "test-field-vehicle-assignment-ui.js",
         "test-field-vehicle-stock-preset-ui.js",
+        "test-field-operational-risk-rules-ui.js",
         "test-field-transport-guide-documents-ui.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
@@ -3256,6 +3257,7 @@
         "test-field-invoice-pdf-access.js",
         "test-field-admin-catalogue.js",
         "test-field-fleet-management-ui.js",
+        "test-field-operational-risk-rules-ui.js",
         "test-field-invoice-document.js",
         "test-field-extra-execution.js",
         "test-field-execution-values-ui.js"
@@ -3586,6 +3588,38 @@
       "languageAssets": [],
       "directPrintAction": false,
       "testReferences": [],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/operational-risk-rules.html",
+      "route": "/operational-risk-rules",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Regras de alerta",
+      "catalogueRoles": [],
+      "guardFiles": [],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/cw-operational-risk-rules.css",
+        "/cw-vehicle-consumption-rules.js",
+        "/cw-vehicle-consumption-copy.js",
+        "/cw-operational-risk-rules.js",
+        "/cw-operational-risk-rules-copy.js",
+        "/cw-operational-risk-rules-page.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-fleet-management-ui.js",
+        "test-field-operational-risk-rules.js",
+        "test-field-operational-risk-rules-ui.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {

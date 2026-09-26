@@ -50,3 +50,7 @@ Publicada em `4f2dbd6a4eb794d5dab21b932e0a41c2584827db`, árvore `52322e6f98950c
 TASK372 confirmada: [CI 36217019968](https://github.com/ts7520305-svg/cristalwater/actions/runs/36217019968), job `108334888707`, 280/280 grupos esperados distintos, 17 etapas aprovadas e restauro de 128 tabelas/47 ficheiros com linhas e hashes iguais. [Evidência nativa](evidence/20260926_task372_ci.json). TASK373: [CI 36218570468](https://github.com/ts7520305-svg/cristalwater/actions/runs/36218570468), job `108339358313`, ainda em execução na última consulta; 282 grupos/restauro por confirmar.
 
 Continuar nas regras de alerta da frota, revendo preservação, validação, auditoria, concorrência e recuperação. A quilometragem na abertura antiga de obra continua por rever. Conciliação histórica, volume real, arquivo/cópias operacionais, VPS e piloto físico permanecem abertos; aplicação não declarada completa. Sem merge, deploy ou contactos reais.
+
+## Atualização de evidência — TASK375, 26/09/2026
+
+TASK373 confirmada em 282/282 grupos esperados distintos, todas as 17 etapas aprovadas e restauro de 128 tabelas/47 ficheiros com linhas e hashes iguais. CI `36218570468`, job `108339358313`; [evidência nativa](evidence/20260926_task373_ci.json). TASK374 continua pendente na consulta desta atualização.

@@ -1,0 +1,247 @@
+{
+  "task": "TASK375",
+  "baseCommit": "f91db3f3d6d8af724a86dd17d39019df2794579c",
+  "validatedAt": "2026-09-26T05:45:54.808377+00:00",
+  "unitTests": {
+    "passed": 918,
+    "files": 112,
+    "new": 14
+  },
+  "technicianTests": 4,
+  "syntax": {
+    "backend": 681,
+    "frontend": 291,
+    "inline": 44
+  },
+  "schema": {
+    "newMigrations": 0,
+    "totalAdditiveMigrationsApplied": 43,
+    "tablesExpected": 128,
+    "runtime": "PGlite 0.5.8 / pglite-socket 0.2.11; isolated synthetic data, not native PostgreSQL"
+  },
+  "integrationGroups": [
+    {
+      "script": "scripts/test-field-operational-risk-rules.js",
+      "code": 0,
+      "log": "/tmp/cw375-test-field-operational-risk-rules.log",
+      "sha256": "73b36cc3de6a83e1876b2e54715dc45a1ae6fff5ea2df73992f01e4e3cd46b37",
+      "checks": [
+        "PASS alert rules API: administrator-only and authenticated audit; missing/partial/invalid distinct; exact original/notes/unknown keys and omitted defaults preserved; false/zero/decimals; legacy and generic writers blocked atomically; six SQL rollback cases; lost response/restart/two-process replay; concurrent creation/edits and metadata/expiry guards; cancellation; actual summary respects toggles/default restoration without mutating any business/notification rows; invalid object repair and raw replacement; volume and real read failures; official bytes unchanged."
+      ]
+    },
+    {
+      "script": "scripts/test-field-operational-risk-rules-ui.js",
+      "code": 0,
+      "log": "/tmp/cw375-test-field-operational-risk-rules-ui.log",
+      "sha256": "26e58e3b09ec2dc057ee5ce51013b7dcb6ea0b33c0b129154be98d192e1c5a23",
+      "checks": [
+        "PASS global alert rules browser: actual fleet entry; existing/default/invalid values; keep/change/default and explicit replacement; zero/false and unknown-data preservation; failed/partial reads; global-effects review and escaped labels; double-click/lost response/reload/offline retry/cancel; stale proof; storage failure/corrupt reference; five languages/320,390,1440/44px/18 screenshots; expiry/suspension/two-account races; admin-only; unrelated admin summary fails visibly without fallback; preserved work, stock, costs, notifications and official bytes."
+      ]
+    },
+    {
+      "script": "scripts/test-field-fleet-management.js",
+      "code": 0,
+      "log": "/tmp/cw375-test-field-fleet-management.log",
+      "sha256": "db956ef5951c9c703e51cbeb7c2d8a932bf846a2ba97334908261fb6fc36b6bb",
+      "checks": [
+        "PASS fleet API: explicit creation never overwrites/reactivates a matching plate, reviewed actor/fields/version and related counts, exact zero/null values, once after response loss/restart/concurrent retries, two reviewed same-plate creates one result, audit/receipt rollback, explicit status restore, archive without deletion and every related guide/item/movement/cost/assignment/official document/preset unchanged, stale/expired proofs, owned cancellation, 25-row pagination and zero unrelated business changes"
+      ]
+    },
+    {
+      "script": "scripts/test-field-fleet-management-ui.js",
+      "code": 0,
+      "log": "/tmp/cw375-test-field-fleet-management-ui.log",
+      "sha256": "20061280a51d80464a855c2f5ceb003c5ef1e45d953567ecf3ef3d4f79a4b402",
+      "checks": [
+        "PASS fleet browser: actual shared page/API, plate collision refusal, explicit vehicle review and double-click once, null/zero distance and multiline notes, separated operating state/archive/explicit restore, pagination/literal HTML, stable preparation across filters/languages, lost response/reload, offline exact retry, cancellation, stale/expired proof, quota/ignored/corrupt storage, partial packet/latest search, 24 screenshots in five languages/three widths, 44px controls, preserved shared vehicle selections with unavailable archive choice, unavailable/incomplete risks without zero/default/fallback writes, suspension and shared risk restoration, two-tab identity changes during review/commit, expiry and related records/business counts unchanged"
+      ]
+    },
+    {
+      "script": "scripts/test-field-access-api.js",
+      "code": 0,
+      "log": "/tmp/cw375-test-field-access-api.log",
+      "sha256": "ab41f039525e146ebbccb3bde0f889598a058dbf75bb53e6b706a702434ae909",
+      "checks": [
+        "PASS global settings require administration and notification settings require ownership",
+        "PASS geofence only validates assigned open visits and never invents missing GPS",
+        "PASS core dashboard is reserved for authenticated administration",
+        "PASS client notifications exclude internal management",
+        "PASS client portal notifications exclude internal management",
+        "PASS legacy client read endpoint protects internal and superseded notices and records confirmation time",
+        "PASS technician sees own targeted notifications",
+        "PASS unread totals and read-all stay within the recipient beyond 500 notifications",
+        "PASS critical water notices are not hidden by a client name that resembles billing",
+        "PASS anonymous offline write rejected",
+        "PASS client offline write rejected",
+        "PASS anonymous document list rejected",
+        "PASS deleted administrator token rejected",
+        "PASS unknown role token rejected",
+        "PASS another client portal rejected",
+        "PASS anonymous numeric portal history rejected",
+        "PASS other client numeric portal history rejected",
+        "PASS anonymous numeric portal latest rejected",
+        "PASS other client numeric portal latest rejected",
+        "PASS anonymous route optimization rejected",
+        "PASS anonymous chat rejected",
+        "PASS other client chat rejected",
+        "PASS client cannot impersonate administrator",
+        "PASS technician cannot use another vehicle",
+        "PASS technician route contains only own visits including missing pool",
+        "PASS completion rejects stock from another vehicle",
+        "PASS correction rejects another technician visit",
+        "PASS push subscription ignores forged role and binds to authenticated technician",
+        "PASS simultaneous subscriptions bind one endpoint to one account",
+        "PASS push subscription rejects internal network destinations",
+        "PASS anonymous realtime connection rejected"
+      ]
+    },
+    {
+      "script": "scripts/test-field-legacy-admin-access.js",
+      "code": 0,
+      "log": "/tmp/cw375-test-field-legacy-admin-access.log",
+      "sha256": "88ea7631addb08e3176507580e4c31ce7b74e7ff0fa64d8558a91ac42b005d6f",
+      "checks": [
+        "PASS legacy administration reads, mutations, aliases and AI require active ADMIN; refused requests are inert, administration and canonical field/client routes remain usable"
+      ]
+    },
+    {
+      "script": "scripts/test-field-navigation-preferences.js",
+      "code": 0,
+      "log": "/tmp/cw375-test-field-navigation-preferences.log",
+      "sha256": "bf33fb89ab292b4d5a8f447da76a8fffe3d7cb6c8072cb7d683213ebb658abac",
+      "checks": [
+        "PASS navigation preferences: account-bound explicit choices, no default writes or reload, device/live and fixed palettes, three densities with 44px targets, five languages/three widths/contrast, real menu/index/help navigation, business styles and filters preserved, legacy keys/shortcut and work bytes preserved, two windows, storage throw/ignored writes, corrupt/wrong-owner bytes, bfcache, reset, offline save, account change/expiry; zero business writes"
+      ]
+    },
+    {
+      "script": "scripts/test-real-month-flow-api.js",
+      "code": 0,
+      "log": "/tmp/cw375-test-real-month-flow-api.log",
+      "sha256": "80f4e519156abb3fc70986d8f24d31208f524038dea792101c1b5580b38de289",
+      "checks": [
+        "OK EDGE valida pH impossivel - Valor de pH invalido. Deve estar entre 0 e 10.",
+        "OK EDGE concorrencia bloqueia duplo fecho - status 200/409",
+        "OK clientes criados por API real - 5 clientes",
+        "OK piscinas/jacuzzis criados por API real - 9 equipamentos",
+        "OK fichas tecnicas preenchidas - 9/9",
+        "OK tecnicos e viaturas ligados - 3 tecnicos, 3 carros, 3 guias obra",
+        "OK rondas criadas e visitas concluídas - 3 rondas, 54 visitas",
+        "OK produtos da visita viram registo quimico - 60 registos",
+        "OK consumo automatico baixa guia/viatura - 60 movimentos",
+        "OK problemas em campo geram reparacoes/alertas - 6 reparacoes",
+        "OK faturacao mensal gerada - 5 faturas",
+        "OK pagamentos total/parcial registados - PAID, PARTIAL, PENDING, PENDING, PENDING",
+        "OK mensagens reais do portal cliente ficam por ler - 5 mensagens QA por ler",
+        "OK chat mostra conversas por ler - 5 mensagens totais por ler",
+        "OK notificacoes mostram alarme de chat - alarme CHAT_MESSAGE",
+        "OK dashboard recebe dados reais - clientes 5, mensagens 5",
+        "OK guia de obra mantem referencia AT e totais finais - guia AT 1"
+      ]
+    }
+  ],
+  "sourceHashes": {
+    "frontend/admin-vehicles.html": "50f685d42dd99e0791a26c9b01e22820e963937049dc7dd5694f82e860b57982",
+    "frontend/admin-vehicles.js": "b4acfc10a5c5c0c83e63544ac5b022e4de500d192f718a95645e09933d5a32d6",
+    "frontend/cw-operational-risk-rules-copy.js": "d16020adfdb805423b18bac6f8d0520c9428880cba2ceeb1d947fa34811f9194",
+    "frontend/cw-operational-risk-rules-page.js": "82e8d56dde6d69164eadb01571378ad94fb5dc4abb53f037f3e725bdfcfadd5a",
+    "frontend/cw-operational-risk-rules.css": "fa43fd631637be32f3f5f1943d010d33940bdaf74bd2eb54e2f62efa82bab2a4",
+    "frontend/cw-operational-risk-rules.js": "5bebef1acacea8f5ae23c42f1cea034951fc20b43057e052d4513366daf5225c",
+    "frontend/cw-operational-risk.js": "46992f9d4a8eef5cd400afcd39aec9a3ab63daab2af4fd5b0bb5e62a4430e234",
+    "frontend/operational-risk-rules.html": "3318cad2ad0e10639e657e211f3d0b39b9ac28eb86a084ef0e5af7789b14a69b",
+    "frontend/sw.js": "e9253ba6d53a3d357ab4957f4617116fff1583e13e8821cfb94a5351c21e5671",
+    "scripts/fixtures/internal-chat-server.js": "a3bbe34d52802a83f42d1b132fa24d381987a9b70893c6b57bf7e88509483666",
+    "scripts/test-field-fleet-management-ui.js": "1fd097d0b93e12e99662d7dad569e67628435512194adcdd6f49f4dfc77b1218",
+    "scripts/test-field-operational-risk-rules-ui.js": "39ea8055a73e8afefc12354da41178318de52013e554988c62c52fb02853c5d6",
+    "scripts/test-field-operational-risk-rules.js": "7af4e5d6842f4db3b469023dca1cf129f729954391ac408f81c72e74d75b2353",
+    "scripts/test-field-suite.js": "081d86d2d9e844a3565aee1fc78aed445d334da80dd4048ffc6e38e0fc9f2aa5",
+    "src/controllers/operationalRiskRulesReviewController.js": "a1e4e10c86c5998dddfed8499a3f693008716e6592b15e0fdbeccbd35e7af43b",
+    "src/routes/operationalRiskRoutes.js": "40a31d0cac3ea94b2573fa640e72005ce26959261f4ad29c6493d4a6373982ca",
+    "src/routes/operationalRiskRulesReviewRoutes.js": "d8045ea2071a64605352ef3966450c100ef45876d47e7c12f459f858b34690e0",
+    "src/server.js": "b95e7ea881d766965c8ac4471197476b142df544bb6b56b69f47cca38dae7e97",
+    "src/services/fieldWriteRequestService.js": "59a281358385c369ecfc2369d4888b7ca782082973bf04eb56517cf3fe7940ca",
+    "src/services/operationalRiskRulesReviewService.js": "f8bebc708972241313f79bad7a76df910f1abb2010c04406c1a28d059616d35c",
+    "src/services/systemSettingService.js": "9fedd5c898a0283d99a48a88df1fc38d6f86a0ab04efb7533045ab128dd79269",
+    "tests/operational-risk-rules-review.test.js": "cae825572fa68c2c67023fe3a460c897101cda894f6719293ff3c967a48d868b"
+  },
+  "screenshots": {
+    "reports/field-visual/operational-risk-rules/de-1440.png": "c628f6621e45f59bb15f62c93b56060e00d980cd173dce74fa30f51f439eb126",
+    "reports/field-visual/operational-risk-rules/de-320.png": "efb6d66c65f189227930184ae060d0c7c3bc7b19cd5d8440882e17646fe28350",
+    "reports/field-visual/operational-risk-rules/de-390.png": "6a55ca6c89ccf013ea0bfd91e4554fa1db76b0cc3c47f2ad14b7f49c66ae5228",
+    "reports/field-visual/operational-risk-rules/en-1440.png": "940a74fd1192d5b2df1f3c23018d2e30f19958dd92dd6a334531e7dee4c6e2b8",
+    "reports/field-visual/operational-risk-rules/en-320.png": "1f4e6a9de03a0918d73d3ca4c8a945a305ebacf769368a8d7e753271a66cdef3",
+    "reports/field-visual/operational-risk-rules/en-390.png": "36886667b4f4a7de68e2224b7c102140e71e0050bdb66c2ccde4b019682d3bc3",
+    "reports/field-visual/operational-risk-rules/es-1440.png": "8142be9bc4c4e4a00fd01d3417a86cc179c55880ae3931dc52c45a08afcd22e5",
+    "reports/field-visual/operational-risk-rules/es-320.png": "41ce85af5213499348eee5dd429d0fbdaf08c47630cac4a2add1494dbe2dcd46",
+    "reports/field-visual/operational-risk-rules/es-390.png": "5d673fea5c0f5315e45a9bb84adda568d0f25a7ea73a0c815be000326ab4b5cd",
+    "reports/field-visual/operational-risk-rules/fr-1440.png": "cb3fbec52850f04f2956de4d603cca55a19fa37e0dacef14de6d876bf1275108",
+    "reports/field-visual/operational-risk-rules/fr-320.png": "b35c05abe42df1617339ed63ac9028e1bfdd16bc58520640ecaffe04a08adc46",
+    "reports/field-visual/operational-risk-rules/fr-390.png": "29668b4c035863e4c5b9dd747296b55a5bd9ba7c627529097eba9413de35c0a0",
+    "reports/field-visual/operational-risk-rules/pt-1440.png": "53c16dc6341017c8eed0327acc92ddd3b7b4e680b468cc6136f925edf700c09e",
+    "reports/field-visual/operational-risk-rules/pt-320.png": "af3eacf4ce493d3c888aaaf5b0d7214a611eb4927e955bf52f4ac66291d36654",
+    "reports/field-visual/operational-risk-rules/pt-390.png": "82f01d53a0972879e5e70a59ec0c42e80546eff92973b2cdc57b96344cfd157f",
+    "reports/field-visual/operational-risk-rules/review-de-320.png": "48279bc048d952d990de6f29e9c150aba68e5438c4ede5bb45f28e20627f1017",
+    "reports/field-visual/operational-risk-rules/review-pt-1440.png": "b45ac5936f2ad40e60d1bc1e25adddefccf458683c9a5d057b463f326debbfde",
+    "reports/field-visual/operational-risk-rules/review-pt-390.png": "5d8bf1d1f162dc0adaa46a251b2adaed2873591a3ef9202ebd6166919664433d"
+  },
+  "visualReview": [
+    "reports/field-visual/operational-risk-rules/de-320.png",
+    "reports/field-visual/operational-risk-rules/review-pt-1440.png"
+  ],
+  "rollbackCases": 6,
+  "readFailureExercise": "Actual SystemSetting and Vehicle table unavailability tested through fresh child API processes. This avoids a PGlite connection failure from a previous table rename; real authentication and 503 assertions remain.",
+  "failedLocalInvocations": [
+    {
+      "script": "scripts/test-field-navigation.js",
+      "code": 1,
+      "log": "/tmp/cw375-test-field-navigation.log",
+      "sha256": "b691d251f4bd7e55724e5ae770b18567482df502ba2cdd758e77fe083bdb0211",
+      "checks": []
+    }
+  ],
+  "invocationCorrection": "An initial local command used nonexistent test-field-navigation.js. It is not a runner group and not counted as a pass. The real test-field-navigation-preferences.js and monthly API simulation were then executed successfully.",
+  "inventory": {
+    "htmlFiles": 125,
+    "rootPages": 118,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 113,
+    "catalogueGuardDifferences": 0
+  },
+  "activeInventoryScripts": 307,
+  "runnerGroups": 286,
+  "serviceWorkerVersion": "cristalwater-field-20260926-v186",
+  "logs": {
+    "/tmp/cw375-unit.log": "c21edd283ace02e59f09a5fce283a2c01ccad4fba65f7682fa18325bc469c7f8",
+    "/tmp/cw375-technician.log": "bfdbb6485b085537c68149c549f00478705e6bd4188b087279072410e59f63cf",
+    "/tmp/cw375-syntax.log": "9f25e3483aa57b113108ee97acfd85a8d0dba36e76b5f541a17182d4e497822b",
+    "/tmp/cw375-inventory.log": "668a117306d115cfe3ef39fa8c90380d4fe9e60c74ce8e0427b14c9024c1ac55"
+  },
+  "previousNativeCI": {
+    "task": "TASK374",
+    "runId": 36220493972,
+    "jobId": 108344709185,
+    "status": "in_progress",
+    "expectedGroups": 284,
+    "restoreConfirmed": false
+  },
+  "lastConfirmedNativeCI": {
+    "task": "TASK373",
+    "runId": 36218570468,
+    "jobId": 108339358313,
+    "passedGroups": 282,
+    "expectedScriptsMatched": true,
+    "successfulSteps": 17,
+    "restoredTables": 128,
+    "restoredFiles": 47,
+    "rowsAndHashesEqual": true
+  },
+  "publication": {
+    "branch": "work/field-readiness-20260915-simulation",
+    "status": "prepared",
+    "nativeGate": "pending",
+    "expectedGroups": 286,
+    "merge": false,
+    "deploy": false
+  }
+}
