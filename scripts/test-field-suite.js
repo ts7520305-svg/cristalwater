@@ -74,6 +74,7 @@ scripts.push('test-field-transport-guide-manage.js','test-field-transport-guide-
 scripts.push('test-field-work-guide-close.js','test-field-work-guide-close-ui.js');
 scripts.push('test-field-vehicle-maintenance.js','test-field-vehicle-maintenance-ui.js');
 scripts.push('test-field-vehicle-assignment.js','test-field-vehicle-assignment-ui.js');
+scripts.push('test-field-vehicle-stock-preset.js','test-field-vehicle-stock-preset-ui.js');
 scripts.push('test-field-transport-guide-documents.js','test-field-transport-guide-documents-ui.js');
 scripts.push('test-field-financial-pdf.js');
 scripts.push('test-field-invoice-document.js');

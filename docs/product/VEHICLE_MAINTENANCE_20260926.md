@@ -39,3 +39,7 @@ TASK370 confirmada em 276/276 grupos e TASK371 em 278/278; ambas com restauro na
 Publicado em `cbb552e32f12a704210473359bad56b13a686c98`, árvore `2e48b0523f4b9d5fccbe37cad0035c7c81483a4a`, na branch `work/field-readiness-20260915-simulation`; árvore remota idêntica à preparada localmente. [CI 36217019968](https://github.com/ts7520305-svg/cristalwater/actions/runs/36217019968), job `108334888707`, em execução. Evidência local: `evidence/20260926_task372_local.json`. Runner passa a 280 grupos; o gate nativo e restauro deste lote ainda não estão confirmados. Cache v183. Sem merge, deploy ou contactos externos.
 
 Continuar na atribuição de técnicos a viaturas: `assignTechnicianVehicle` ainda grava técnico, histórico, leitura e auditoria separadamente e ignora falhas. Rever transação, identidade, quilometragem, concorrência com obras abertas e recuperação. Presets e regras de alerta continuam pendentes de revisão. Conciliação histórica, volume real, arquivo/cópias operacionais, VPS e piloto físico permanecem abertos; aplicação não declarada completa.
+
+## Atualização de evidência — TASK374, 26/09/2026
+
+TASK372 confirmada em 280/280 grupos esperados distintos, todas as 17 etapas aprovadas e restauro de 128 tabelas/47 ficheiros com linhas e hashes iguais. CI `36217019968`, job `108334888707`; [evidência nativa](evidence/20260926_task372_ci.json). TASK373 continua pendente na consulta desta atualização.

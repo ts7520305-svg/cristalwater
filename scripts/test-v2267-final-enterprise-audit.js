@@ -79,8 +79,8 @@ requireIncludes(poolController, [
   'Number.isFinite',
 ], 'poolController');
 requireIncludes(guideController, [
-  'getVehiclePreset',
-  'setVehiclePreset',
+  'getVehicleStockPreset',
+  'saveVehicleStockPreset',
   'latestTransportGuide',
   'inheritedFromId',
   'isDraft',

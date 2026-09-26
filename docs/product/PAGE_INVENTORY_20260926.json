@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-09-26T04:37:04.493Z",
-  "baseCommit": "741ba4187591053d84d2d52ed9a326b960110dd8",
+  "generatedAt": "2026-09-26T05:15:27.677Z",
+  "baseCommit": "3f8e9de5ccc37fca15386351a17ebffd5031383c",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 303,
+  "activeScriptsScanned": 305,
   "summary": {
-    "htmlFiles": 123,
-    "rootPages": 116,
+    "htmlFiles": 124,
+    "rootPages": 117,
     "nestedPages": 7,
     "unavailableLocalAssetReferences": 2,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 111,
+    "pagesWithLiteralTestReference": 112,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -1872,6 +1872,7 @@
         "test-field-work-guide-close-ui.js",
         "test-field-vehicle-maintenance-ui.js",
         "test-field-vehicle-assignment-ui.js",
+        "test-field-vehicle-stock-preset-ui.js",
         "test-field-transport-guide-documents-ui.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
@@ -5163,6 +5164,37 @@
       "testReferences": [
         "test-field-vehicle-maintenance.js",
         "test-field-vehicle-maintenance-ui.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/vehicle-stock-preset.html",
+      "route": "/vehicle-stock-preset",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Modelos de materiais",
+      "catalogueRoles": [],
+      "guardFiles": [],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/cw-vehicle-stock-preset.css",
+        "/cw-vehicle-consumption-rules.js",
+        "/cw-vehicle-consumption-copy.js",
+        "/cw-vehicle-stock-preset-rules.js",
+        "/cw-vehicle-stock-preset-copy.js",
+        "/cw-vehicle-stock-preset.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-vehicle-stock-preset.js",
+        "test-field-vehicle-stock-preset-ui.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },

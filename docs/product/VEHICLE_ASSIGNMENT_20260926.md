@@ -46,3 +46,7 @@ Publicado em `81c6feb4c166db33de227b3456f41843ff7c85ff`, árvore `6eebdb979f68ea
 TASK372: [CI 36217019968](https://github.com/ts7520305-svg/cristalwater/actions/runs/36217019968), job `108334888707`, ainda em execução na última consulta; 280 grupos e restauro pendentes de confirmação. Último gate integral confirmado: TASK371, 278/278 e restauro de 128 tabelas/47 ficheiros com linhas e hashes iguais.
 
 Continuar nos presets de materiais da frota: `saveVehicleStockPreset` grava `SystemSetting` e auditoria separadamente; leitura inválida pode surgir como lista vazia e a normalização antiga aceita alterações implícitas de unidades/quantidades. Rever origem, preservação, validação, concorrência com abertura de obra e recuperação. Regras de alerta e quilometragem na abertura antiga de obra continuam por rever. Conciliação histórica, volume real, arquivo/cópias operacionais, VPS e piloto físico permanecem abertos; aplicação não declarada completa.
+
+## Atualização de evidência — TASK374, 26/09/2026
+
+TASK372 confirmada em 280/280 grupos esperados distintos, todas as 17 etapas aprovadas e restauro de 128 tabelas/47 ficheiros com linhas e hashes iguais. CI `36217019968`, job `108334888707`; [evidência nativa](evidence/20260926_task372_ci.json). TASK373 continua pendente na consulta desta atualização.

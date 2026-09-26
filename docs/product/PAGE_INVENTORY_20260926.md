@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `741ba4187591053d84d2d52ed9a326b960110dd8`. Gerado em 2026-09-26T04:37:04.493Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `3f8e9de5ccc37fca15386351a17ebffd5031383c`. Gerado em 2026-09-26T05:15:27.677Z. Inclui o estado dos ficheiros locais no momento da geração.
 
-123 ficheiros HTML: 116 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
+124 ficheiros HTML: 117 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 303 scripts de integração/navegador ativos. 111 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 305 scripts de integração/navegador ativos. 112 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 2 referências existem no índice Git mas não estão materializadas nesta cópia local; não são classificadas como ficheiros ausentes da aplicação.
 
@@ -79,7 +79,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /admin-test-center | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-today | Entrada raiz | ADMIN | ADMIN | 2 |
 | /admin-ui-settings | Entrada raiz | ADMIN | ADMIN | 1 |
-| /admin-vehicles | Entrada raiz | ADMIN | ADMIN | 8 |
+| /admin-vehicles | Entrada raiz | ADMIN | ADMIN | 9 |
 | /admin-visits-dashboard | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-visits | Entrada raiz | ADMIN | ADMIN | 0 |
 | /alerts-financial | Entrada raiz | ADMIN | ADMIN | 1 |
@@ -159,6 +159,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /vehicle-assignment | Entrada raiz | — | ADMIN | 2 |
 | /vehicle-consumption | Entrada raiz | — | ADMIN, TEAM_LEADER, TECHNICIAN | 2 |
 | /vehicle-maintenance | Entrada raiz | — | — | 2 |
+| /vehicle-stock-preset | Entrada raiz | — | ADMIN | 2 |
 | /visit-report-review | Entrada raiz | — | ADMIN | 2 |
 | /work-guide-close | Entrada raiz | — | — | 2 |
 

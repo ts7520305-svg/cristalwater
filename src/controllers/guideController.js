@@ -121,19 +121,6 @@ async function deleteVehicle(req,res) { return require('./fleetManagementControl
 
 async function restoreVehicle(req,res) { return require('./fleetManagementController').legacy(req,res); }
 
-async function getVehiclePreset(vehicleId) {
-  const row = await prisma.systemSetting.findUnique({ where: { key: `vehicle_preset_${vehicleId}` } }).catch(() => null);
-  if (!row?.value) return [];
-  try { const parsed = JSON.parse(row.value); return Array.isArray(parsed) ? parsed : []; } catch (_) { return []; }
-}
-async function setVehiclePreset(vehicleId, items) {
-  const value = JSON.stringify(arr(items).map(i => ({ name: String(i.name || i.productName || 'Item'), type: i.type || i.category || 'MATERIAL', unit: i.unit || 'UN', quantity: n(i.quantity, 0) || 0 })));
-  return prisma.systemSetting.upsert({
-    where: { key: `vehicle_preset_${vehicleId}` },
-    update: { value, notes: 'Preset de stock base da viatura para novas guias AT.' },
-    create: { key: `vehicle_preset_${vehicleId}`, value, notes: 'Preset de stock base da viatura para novas guias AT.' }
-  });
-}
 async function latestTransportGuide(vehicleId, excludeId = null) {
   const where = { vehicleId: n(vehicleId) };
   if (excludeId) where.id = { not: n(excludeId) };
@@ -443,22 +430,18 @@ async function downloadLatestTransportGuidePdf(req, res) {
 
 const updateTransportGuideItems = require('./transportGuideItemsController').legacy;
 
-async function getVehicleStockPreset(req, res) {
+async function getVehicleStockPreset(req,res) {
+  res.set('Cache-Control','private, no-store');
   try {
-    const vehicleId = n(req.params.vehicleId);
-    res.json({ ok: true, vehicleId, items: await getVehiclePreset(vehicleId) });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+    const R=require('../../frontend/cw-vehicle-stock-preset-rules'),vehicleId=R.id(req.params.vehicleId);
+    if(!vehicleId)return res.status(400).json({ok:false,code:'PRESET_INVALID_REQUEST'});
+    if(!await prisma.vehicle.findUnique({where:{id:vehicleId},select:{id:true}}))return res.status(404).json({ok:false,code:'PRESET_NOT_FOUND'});
+    const record=await prisma.systemSetting.findUnique({where:{key:'vehicle_preset_'+vehicleId}}),parsed=R.parse(record?.value??null);
+    if(['INVALID','TOO_LARGE'].includes(parsed.state))return res.status(409).json({ok:false,code:'PRESET_DATA_REVIEW',vehicleId,state:parsed.state});
+    res.json({ok:true,vehicleId,state:parsed.state,exists:!!record,items:(parsed.items||[]).map(i=>({name:i.name,type:i.type??null,unit:i.unit,quantity:i.quantity}))});
+  } catch(_) {res.status(503).json({ok:false,code:'PRESET_UNAVAILABLE'});}
 }
-
-async function saveVehicleStockPreset(req, res) {
-  try {
-    const vehicleId = n(req.params.vehicleId);
-    if (!vehicleId) return res.status(400).json({ ok: false, error: 'vehicleId obrigatório.' });
-    await setVehiclePreset(vehicleId, req.body.items || []);
-    await audit(req, 'VEHICLE_STOCK_PRESET_SAVE', 'Vehicle', vehicleId, { items: normalizeGuideItems(req.body.items || []) });
-    res.json({ ok: true, vehicleId, items: await getVehiclePreset(vehicleId) });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
-}
+function saveVehicleStockPreset(req,res) {return require('./vehicleStockPresetReviewController').legacy(req,res);}
 
 // ==========================================================
 // WORK GUIDE / GUIA DE OBRA

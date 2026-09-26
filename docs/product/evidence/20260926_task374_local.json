@@ -1,0 +1,226 @@
+{
+  "task": "TASK374",
+  "baseCommit": "3f8e9de5ccc37fca15386351a17ebffd5031383c",
+  "validatedAt": "2026-09-26T05:19:20.384510+00:00",
+  "unitTests": {
+    "passed": 904,
+    "files": 111,
+    "new": 15
+  },
+  "technicianTests": 4,
+  "syntax": {
+    "backend": 678,
+    "frontend": 288,
+    "inline": 44
+  },
+  "schema": {
+    "newMigrations": 0,
+    "totalAdditiveMigrationsApplied": 43,
+    "tablesExpected": 128,
+    "runtime": "PGlite 0.5.8 / pglite-socket 0.2.11; isolated synthetic data, not native PostgreSQL"
+  },
+  "integrationGroups": [
+    {
+      "script": "scripts/test-field-vehicle-stock-preset.js",
+      "code": 0,
+      "log": "/tmp/cw374-test-field-vehicle-stock-preset.log",
+      "sha256": "b04da58964aee8fa94e88ca2196d1ec2c70f85babb4ca7faa43c3fa603da1793",
+      "checks": [
+        "PASS stock preset API: strict admin scope and safe field reader; explicit missing/empty/invalid states; exact metadata/raw original and duplicate rows retained; zero and six-decimal fields; old writer blocked; lost response/restart/two-process replay; six SQL rollback cases; edit races and metadata/archive/expiry guards; durable cancellation; invalid repair and actual read failure; real active-AT/last-guide/preset/empty source precedence; real open-work concurrency; volume/pagination; unchanged existing works, materials, stock, costs and official bytes."
+      ]
+    },
+    {
+      "script": "scripts/test-field-vehicle-stock-preset-ui.js",
+      "code": 0,
+      "log": "/tmp/cw374-test-field-vehicle-stock-preset-ui.log",
+      "sha256": "35b78cb758ec40861c5093b9a20d55d68c80078d80d1859099da68ea1b22d155",
+      "checks": [
+        "PASS stock template browser: real fleet entry; failed-detail gate/retry; exact original, zero, duplicate and extra fields; keep/change/remove/add and explicit empty/invalid repair; escaped review/double-click; owned minimal recovery; loss/reload/offline retry/cancel; concurrent change; storage failure/corrupt reference; partial/latest reads; five languages/320,390,1440/44px/18 screenshots; expiry/suspension/identity races; admin-only; preserved existing work, stock, finance and official bytes."
+      ]
+    },
+    {
+      "script": "scripts/test-field-fleet-management.js",
+      "code": 0,
+      "log": "/tmp/cw374-test-field-fleet-management.log",
+      "sha256": "db956ef5951c9c703e51cbeb7c2d8a932bf846a2ba97334908261fb6fc36b6bb",
+      "checks": [
+        "PASS fleet API: explicit creation never overwrites/reactivates a matching plate, reviewed actor/fields/version and related counts, exact zero/null values, once after response loss/restart/concurrent retries, two reviewed same-plate creates one result, audit/receipt rollback, explicit status restore, archive without deletion and every related guide/item/movement/cost/assignment/official document/preset unchanged, stale/expired proofs, owned cancellation, 25-row pagination and zero unrelated business changes"
+      ]
+    },
+    {
+      "script": "scripts/test-field-fleet-management-ui.js",
+      "code": 0,
+      "log": "/tmp/cw374-test-field-fleet-management-ui.log",
+      "sha256": "20061280a51d80464a855c2f5ceb003c5ef1e45d953567ecf3ef3d4f79a4b402",
+      "checks": [
+        "PASS fleet browser: actual shared page/API, plate collision refusal, explicit vehicle review and double-click once, null/zero distance and multiline notes, separated operating state/archive/explicit restore, pagination/literal HTML, stable preparation across filters/languages, lost response/reload, offline exact retry, cancellation, stale/expired proof, quota/ignored/corrupt storage, partial packet/latest search, 24 screenshots in five languages/three widths, 44px controls, preserved shared vehicle selections with unavailable archive choice, unavailable/incomplete risks without zero/default/fallback writes, suspension and shared risk restoration, two-tab identity changes during review/commit, expiry and related records/business counts unchanged"
+      ]
+    },
+    {
+      "script": "scripts/test-field-vehicle-assignment.js",
+      "code": 0,
+      "log": "/tmp/cw374-test-field-vehicle-assignment.log",
+      "sha256": "da029eb7c44cfa73db2f85731a358904c0a324e4778b835cac9db266eb3c95ca",
+      "checks": [
+        "PASS assignment API: administrative scope; strict fields; old writers refused; open work protected; shared vehicles; exact closed/open intervals; null/zero and nondecreasing mileage; initial legacy gap; lost response/restart/two-process retries; competing reviews and real work opening; six SQL rollback points; changed vehicle/technician/history guards; contradictory and future history refusal; remove assignment; expiry/cancellation; pagination; preserved contacts, credentials, costs, work, stock, official bytes and finances."
+      ]
+    },
+    {
+      "script": "scripts/test-field-work-guide-close.js",
+      "code": 0,
+      "log": "/tmp/cw374-test-field-work-guide-close.log",
+      "sha256": "28db43658d3bf6cd11d1bb1520ba135c097ce71ac582cb87caeeef4729ddae8c",
+      "checks": [
+        "PASS work closure API: explicit keep/set/zero and optional monotonic vehicle km; ADMIN/TECHNICIAN/TEAM_LEADER and both identities; own-current-vehicle scope; immutable notes, stock, documents and transport state; four SQL rollback sites; two-process close race; actual consumption and vehicle/assignment changes; lost response, restart, exact replay and owner recovery; expiry/tampering/cancellation; closed-work refusal; legacy 409; historical orphan."
+      ]
+    },
+    {
+      "script": "scripts/test-field-transport-guide-create.js",
+      "code": 0,
+      "log": "/tmp/cw374-test-field-transport-guide-create.log",
+      "sha256": "12af5010db6a53b36aec10e5c1e8c2e7bd3f8885bb237f0f3c9b267b70c42aa2",
+      "checks": [
+        "PASS transport creation API: explicit vehicle/work/item association and closure plan; ADMIN-only, private projections; exactly one guide/work/LOAD/audit/receipt after loss/restart/retries; racing reviews one winner; eight SQL rollback points; provisional IDs/consumption/movements retained; stale item/assignment/transport, expired/altered proofs and cancellation; read-only stock/repeated start, closed work never reopened or consumed by visit completion; TEAM_LEADER own/foreign scope; unchanged vehicles, visits and finances."
+      ]
+    },
+    {
+      "script": "scripts/test-field-guide-pdf.js",
+      "code": 0,
+      "log": "/tmp/cw374-test-field-guide-pdf.log",
+      "sha256": "5cac51aac9e79e8c4cf66a56b19e4be066884680ed86f4c3397a860e7091e09c",
+      "checks": [
+        "PASS guide PDFs: four endpoints, Unicode, long content, page counts, private cache, role/vehicle isolation, alternate ID rejection, missing/provisional records and unchanged sources"
+      ]
+    },
+    {
+      "script": "scripts/test-real-month-flow-api.js",
+      "code": 0,
+      "log": "/tmp/cw374-test-real-month-flow-api.log",
+      "sha256": "7e7b0b03acdc77b9d388305f2259cc4ebfee910ad7353c42bd33d776b8195204",
+      "checks": [
+        "OK EDGE valida pH impossivel - Valor de pH invalido. Deve estar entre 0 e 10.",
+        "OK EDGE concorrencia bloqueia duplo fecho - status 200/409",
+        "OK clientes criados por API real - 5 clientes",
+        "OK piscinas/jacuzzis criados por API real - 9 equipamentos",
+        "OK fichas tecnicas preenchidas - 9/9",
+        "OK tecnicos e viaturas ligados - 3 tecnicos, 3 carros, 3 guias obra",
+        "OK rondas criadas e visitas concluídas - 3 rondas, 54 visitas",
+        "OK produtos da visita viram registo quimico - 60 registos",
+        "OK consumo automatico baixa guia/viatura - 60 movimentos",
+        "OK problemas em campo geram reparacoes/alertas - 6 reparacoes",
+        "OK faturacao mensal gerada - 5 faturas",
+        "OK pagamentos total/parcial registados - PAID, PARTIAL, PENDING, PENDING, PENDING",
+        "OK mensagens reais do portal cliente ficam por ler - 5 mensagens QA por ler",
+        "OK chat mostra conversas por ler - 5 mensagens totais por ler",
+        "OK notificacoes mostram alarme de chat - alarme CHAT_MESSAGE",
+        "OK dashboard recebe dados reais - clientes 6, mensagens 5",
+        "OK guia de obra mantem referencia AT e totais finais - guia AT 17"
+      ]
+    },
+    {
+      "script": "scripts/test-field-two-year-api.js",
+      "code": 0,
+      "log": "/tmp/cw374-test-field-two-year-api.log",
+      "sha256": "70138a42271bc866dfb376e6e673d10aa566633ab23388de40ab946a9a85d3e4",
+      "checks": [
+        "PASS 731 calendar days, leap year, 312 completed visits, 48 replay requests and exact chemical consumption",
+        "PASS 24 billing months, 72 unique invoices, 144 concurrent partial payments reconciled",
+        "PASS GPS history keeps the latest 1000 positions in chronological order"
+      ]
+    }
+  ],
+  "sourceHashes": {
+    "frontend/admin-vehicles.html": "a16a9a5a8bcfbe78501290981108a9401f4cb879ac9b240df01b92c827d45f34",
+    "frontend/cw-vehicle-stock-preset-copy.js": "6b5909b823ed359cef3af9ae6ba084f16ff401a95b2a2019d8dd0a47798e8192",
+    "frontend/cw-vehicle-stock-preset-rules.js": "98fc507a8f5961a1404374a007be406d8a6f8a7b9fa96871c2fd8bee5a7de869",
+    "frontend/cw-vehicle-stock-preset.css": "c48837be1ec2c8297e02399876cba75cb644fa494c17c9cbecb23c31eea7281c",
+    "frontend/cw-vehicle-stock-preset.js": "7f85d078c18dd5e261d7685f7cf7f28825b33a33923e8d9a6a8038210d8eb938",
+    "frontend/sw.js": "0a7c1babff07764b4a6368ac8c8b3b760b08d9b4e5f528db54737af7d5038950",
+    "frontend/vehicle-stock-preset.html": "f6dbe74b2429ba4d618bd50ac1b3968f18232e90f5e85d89d22b2cf9da4bf376",
+    "scripts/fixtures/internal-chat-server.js": "17dbed3dbe757897cf78ae0890a7be051ca10d504f00e5807682e1a6691d5255",
+    "scripts/test-field-suite.js": "c52c2eab4772d962f91945f2f687140e590879243c8cb521a15fa7b69a4f028e",
+    "scripts/test-field-vehicle-stock-preset-ui.js": "44d8776996e8c15b1745fe2595ee71caa981959b1c8c5e73c3cc0101b472da8a",
+    "scripts/test-field-vehicle-stock-preset.js": "9133f35b0d46ec22864e461345e7fe4def3ad10cc5f8e2f60d770d81b90fe719",
+    "scripts/test-v2267-final-enterprise-audit.js": "583754d2a1b9cab523d20711b42540d78a06cfde2650d5e9965b177270e24dff",
+    "src/controllers/guideController.js": "3239459472eb8e1d2fa0c6975a7a27cacac09170b0049b7312b3d409d5f052e6",
+    "src/controllers/vehicleStockPresetReviewController.js": "c29e4422d380dcaeb227beec9932e14c302ce340b10eb163c25673c49c7eee39",
+    "src/routes/vehicleStockPresetReviewRoutes.js": "ed72620ae5dbcf8bbd72f29923cb1ecac94aec00a91fc51d087a01cd88d7fefb",
+    "src/server.js": "ca8c817e473487945703977fb112a5fca7d031ad86e55a5a2cddf4472ffc4b8d",
+    "src/services/fieldWriteRequestService.js": "a8db587605d30bb7d8c77695bb5c57136d63df23244e9a444f06b2dc726aac9a",
+    "src/services/vehicleStockPresetReviewService.js": "3077cd2120f3c638f480427027ac6643316340ddd9309d8192a2165a37308c30",
+    "src/services/workGuideOpeningService.js": "7477dbb249adffe62b7e9ebb2044c34a86ff3cc14cb6785f4bc4763fd179bd13",
+    "tests/vehicle-stock-preset-review.test.js": "57be6e1afbb37cfd3cbe518dd66713943fec8fb722af2444ab40c77d71ec48de"
+  },
+  "screenshots": {
+    "reports/field-visual/vehicle-stock-preset/de-1440.png": "f37218334010d459a27eb57ef31ca81a3ebd81c2bd7d07cb58dfd34c3f52f0c6",
+    "reports/field-visual/vehicle-stock-preset/de-320.png": "c457ee617b8b6995c15ccf5a99baf150d6407f69c8892ad2301c2401e66b834d",
+    "reports/field-visual/vehicle-stock-preset/de-390.png": "58d7a2179abbf8763f68785ecdff50c0cff167e2820f6408be7a29c90f289aca",
+    "reports/field-visual/vehicle-stock-preset/en-1440.png": "0aa70a3476e451ced85109b291b65457147352aaa1d7e5e9ef97b89109db5e89",
+    "reports/field-visual/vehicle-stock-preset/en-320.png": "52ea2b8a51bae1c087f3cd0a5645c42b36cf8617551dccbdebcb43657dce65f7",
+    "reports/field-visual/vehicle-stock-preset/en-390.png": "ef2112dce108424f867cb4594a58edfa623d537e29937ff3f25a758d61871f59",
+    "reports/field-visual/vehicle-stock-preset/es-1440.png": "7bc8e8c59849f27cefa7ec2549b5e57c9369368602af75c45917fc2f9bfbfe94",
+    "reports/field-visual/vehicle-stock-preset/es-320.png": "c458e1bee08efe7ac44476bd7eee544ae7942d118e742eae5e257f68c4838b02",
+    "reports/field-visual/vehicle-stock-preset/es-390.png": "9faae5d1211c2097c93a9dd59da952653c8116c256b9642faa85ff2f45dfb16a",
+    "reports/field-visual/vehicle-stock-preset/fr-1440.png": "18860b02b67780bc7c1ada9bf4fc8d1570ad833d1bc4ab9e836af2550b479360",
+    "reports/field-visual/vehicle-stock-preset/fr-320.png": "0eafdb430634a68367bf4b559dd8c6fc43794dd629370ad6829f3d48b43a1c61",
+    "reports/field-visual/vehicle-stock-preset/fr-390.png": "8bac612b625d5e32646c89c3057f88739dfb40b49167513394dde613f381c391",
+    "reports/field-visual/vehicle-stock-preset/pt-1440.png": "da86a66b7e25eb3e2e53bb73eaf02882982b5aebcf58c847cdf826c8e50ae772",
+    "reports/field-visual/vehicle-stock-preset/pt-320.png": "fb9bd4d2ae62d9ec8782a16317b531f8fe554035d9bbd07077c466776f425c92",
+    "reports/field-visual/vehicle-stock-preset/pt-390.png": "6318b8f175a5d54977a0f053ff9a449fa432e1c16814526a07da47179cf5eb98",
+    "reports/field-visual/vehicle-stock-preset/review-de-320.png": "7edb57e006f16daa84c20dc1806ccbc3be21bac74fbf83b866eeda8df2815175",
+    "reports/field-visual/vehicle-stock-preset/review-pt-1440.png": "9c066b6d5f1103ae82370d52728810c35e2607582f1d3ec1a0533aa65be136b1",
+    "reports/field-visual/vehicle-stock-preset/review-pt-390.png": "332bb79d583565eb16fb7f2a86f602b171106fb480f8fcc594cae4e319e4491d"
+  },
+  "visualReview": [
+    "reports/field-visual/vehicle-stock-preset/de-320.png",
+    "reports/field-visual/vehicle-stock-preset/review-pt-1440.png"
+  ],
+  "visualIteration": "Replaced initial JSON comparison with labelled before/after fields, additional-data details and full text below narrow inputs. Complete browser group passed again.",
+  "rollbackCases": 6,
+  "readFailureExercise": "Actual table rename/unavailability is tested last; PGlite connection failure after schema rename affected a subsequent auth read in the first run. Full API rerun passed including 503 without rows/items.",
+  "inventory": {
+    "htmlFiles": 124,
+    "rootPages": 117,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 112,
+    "catalogueGuardDifferences": 0
+  },
+  "activeInventoryScripts": 305,
+  "runnerGroups": 284,
+  "serviceWorkerVersion": "cristalwater-field-20260926-v185",
+  "logs": {
+    "/tmp/cw374-unit.log": "1d4f4891485067635b0b7496e0c99f40aa926e7ee95e9c386b81bcd98dd3c398",
+    "/tmp/cw374-technician.log": "c639b4d313b3c169987ed120a6e452378b87a98b4ad2f399a148fa433cb74cdf",
+    "/tmp/cw374-syntax.log": "317c7cf0ad00416138c98737cc8355ea1ec5a56f73eef693b1beeb126c746c1f",
+    "/tmp/cw374-inventory.log": "f83d9681a536e0498cd02440523f672cc93aa5643f29b62d6b889dafc8204b40"
+  },
+  "previousNativeCI": {
+    "task": "TASK373",
+    "runId": 36218570468,
+    "jobId": 108339358313,
+    "status": "in_progress",
+    "expectedGroups": 282,
+    "restoreConfirmed": false
+  },
+  "lastConfirmedNativeCI": {
+    "task": "TASK372",
+    "runId": 36217019968,
+    "jobId": 108334888707,
+    "passedGroups": 280,
+    "expectedScriptsMatched": true,
+    "successfulSteps": 17,
+    "restoredTables": 128,
+    "restoredFiles": 47,
+    "rowsAndHashesEqual": true
+  },
+  "publication": {
+    "branch": "work/field-readiness-20260915-simulation",
+    "status": "prepared",
+    "nativeGate": "pending",
+    "expectedGroups": 284,
+    "merge": false,
+    "deploy": false
+  }
+}
