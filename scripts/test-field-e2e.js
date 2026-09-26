@@ -293,7 +293,7 @@ const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
           await page.locator('#ph').fill('7.4');
           await page.locator('#chlorine').fill('1.5');
           await page.locator('#addDoseBtn').click();
-          await page.locator('[data-dose-field=name]').last().selectOption('Cloro E2E');
+          await page.locator('[data-dose-field=name]').last().selectOption(String(product.id));
           await page.locator('[data-dose-field=quantity]').last().fill('1');
           await page.waitForFunction(()=>document.getElementById('fieldSaveStatus')?.dataset.state==='saved');
           // Cold reload must keep both the assigned route and entered measurements.

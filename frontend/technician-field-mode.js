@@ -656,7 +656,8 @@
       localId: `saved-dose-${visit?.id || "x"}-${product?.id || itemIndex}`,
       name: product?.name || product?.productName || "",
       quantity: inputValue(product?.quantity),
-      unit: product?.unit || "UN",
+      unit: product?.unit ?? "",
+      ...(product?.workGuideItemId !== undefined || product?.workGuideId !== undefined ? {workGuideItemId:product.workGuideItemId,workGuideId:product.workGuideId} : {}),
       notes: product?.notes || "",
     })).filter((product) => product.name || product.quantity);
   }
@@ -1658,7 +1659,7 @@
     });
     document.querySelectorAll('.field-panel-docs time[data-doc-date]').forEach(node => { node.textContent = copy.date(node.dateTime, language); });
   }
-  new MutationObserver(paintDocumentText).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+  new MutationObserver(() => { paintDocumentText(); renderDoseRows(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
 
   function renderMovements(data) {
     const summary = window.CWFieldDocuments.consumptionSummary(data), { rows, available, total } = summary;
@@ -1683,21 +1684,22 @@
     return window.CWFieldMaterials.summary(items);
   }
 
-  function productOptions(selectedName = "") {
-    const rows = Array.isArray(activeWorkStock) ? activeWorkStock : [];
-    const selected = String(selectedName || "");
-    const existing = rows.map((item) => String(item.name || item.productName || "")).filter(Boolean);
-    const options = rows.map((item) => {
-      const name = item.name || item.productName || "";
-      const qty = Number(item.quantity ?? 0);
-      const unit = item.unit || "UN";
-      const label = `${name} - disponivel ${qty} ${unit}`;
-      return `<option value="${esc(name)}" ${name === selected ? "selected" : ""}>${esc(label)}</option>`;
-    }).join("");
-    if (selected && !existing.includes(selected)) {
-      return `<option value="${esc(selected)}" selected>${esc(selected)}</option>${options}`;
-    }
-    return `<option value="">Escolher produto</option>${options}`;
+  const doseText = (key, values) => window.CWFieldDocumentCopy.text(key, values, document.documentElement.lang);
+  function productOptions(row) {
+    const R = window.CWVisitProductIdentity, rows = Array.isArray(activeWorkStock) ? activeWorkStock : [];
+    const selected = row.workGuideItemId;
+    let exact = false;
+    const options = rows.map((item, index) => {
+      const valid = R.positive(item.id) && item.workGuideId === activeWorkGuide?.id && R.text(item.name) && R.text(item.unit) && Number.isFinite(item.quantity);
+      const chosen = valid && item.id === selected && row.workGuideId === activeWorkGuide?.id && row.name === item.name && row.unit === item.unit;
+      exact ||= chosen;
+      const qty = Number.isFinite(item.quantity) ? item.quantity : doseText('quantityUnknown');
+      const label = `${doseText('productRow', { number: index + 1 })} · ${item.name ?? doseText('materialNameUnknown')} · ${qty} ${R.text(item.unit) ? item.unit : doseText('unit')}`;
+      return `<option value="${esc(item.id)}" ${chosen ? 'selected' : ''} ${valid ? '' : 'disabled'}>${esc(label)}</option>`;
+    }).join('');
+    const stored = !exact && (row.name || row.unit || selected)
+      ? `<option value="saved" selected>${esc(row.name || doseText('productUnknown'))} · ${esc(row.unit || doseText('unit'))} · ${esc(doseText('productSaved'))}</option>` : '';
+    return `<option value="" ${!exact && !stored ? 'selected' : ''}>${esc(doseText('productChoose'))}</option>${stored}${options}`;
   }
 
   function ensureDoseRow() {
@@ -1713,22 +1715,23 @@
     saveCurrentDraft();
   }
 
-  function productStockByName(name) {
-    const wanted = String(name || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-    return (activeWorkStock || []).find((item) => {
-      const raw = String(item.name || item.productName || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-      return raw === wanted;
-    }) || null;
+  function productStockForRow(row) {
+    try { return window.CWVisitProductIdentity.resolve(activeWorkStock || [], row, activeWorkGuide?.id); }
+    catch (_) { return null; }
   }
 
   function updateDoseRow(localId, field, value) {
-    const row = usedProducts.find((item) => item.localId === localId);
+    const row = usedProducts.find(item => item.localId === localId);
     if (!row) return;
-    row[field] = value;
-    if (field === "name") {
-      const stock = productStockByName(value);
-      if (stock && !row.unit) row.unit = stock.unit || "UN";
-    }
+    if (field === 'name') {
+      if (value === 'saved') return;
+      if (!value) { delete row.workGuideItemId; delete row.workGuideId; row.name = ''; row.unit = ''; }
+      else {
+        const stock = (activeWorkStock || []).find(item => item.id === Number(value));
+        try { Object.assign(row, window.CWVisitProductIdentity.fromItem(stock, activeWorkGuide?.id)); }
+        catch (error) { toast(error.message); return; }
+      }
+    } else row[field] = value;
     renderDoseRows();
     saveCurrentDraft();
   }
@@ -1743,49 +1746,37 @@
     const box = $("#doseRows");
     if (!box) return;
     if (!usedProducts.length) {
-      box.innerHTML = '<div class="dose-empty">Sem produtos adicionados nesta visita.</div>';
+      box.innerHTML = `<div class="dose-empty" data-cw-no-i18n>${esc(doseText('productEmpty'))}</div>`;
       return;
     }
     box.innerHTML = usedProducts.map((row) => `
-      <div class="dose-row" data-dose-id="${esc(row.localId)}">
-        <select data-dose-field="name" aria-label="Produto usado">
-          ${productOptions(row.name)}
+      <div class="dose-row" data-dose-id="${esc(row.localId)}" data-cw-no-i18n>
+        <select data-dose-field="name" aria-label="${esc(doseText('productUsed'))}">
+          ${productOptions(row)}
         </select>
-        <input data-dose-field="quantity" inputmode="decimal" placeholder="Dosagem" value="${esc(row.quantity || "")}">
-        <input data-dose-field="unit" placeholder="Un." value="${esc(row.unit || productStockByName(row.name)?.unit || "")}">
-        <button class="dose-remove" type="button" data-dose-remove="${esc(row.localId)}">Remover</button>
+        <input data-dose-field="quantity" inputmode="decimal" aria-label="${esc(doseText('productQuantity'))}" placeholder="${esc(doseText('productQuantity'))}" value="${esc(row.quantity ?? "")}">
+        <input data-dose-field="unit" placeholder="Un." value="${esc(row.unit ?? "")}" readonly aria-label="${esc(doseText('productUnit'))}">
+        <button class="dose-remove" type="button" data-dose-remove="${esc(row.localId)}">${esc(doseText('productRemove'))}</button>
       </div>
     `).join("");
   }
 
   function normalizedUsedProducts() {
-    return usedProducts.map((product) => {
-      const stock = productStockByName(product.name);
-      return {
-        name: String(product.name || "").trim(),
-        quantity: readingNumber(product.quantity),
-        unit: String(product.unit || stock?.unit || "UN").trim() || "UN",
-        notes: String(product.notes || "").trim(),
-        available: Number(stock?.quantity ?? NaN),
-      };
-    }).filter((product) => product.name && product.quantity !== null && product.quantity > 0);
+    if (usedProducts.length > 50) throw Error('Registe no máximo 50 linhas de produtos por visita.');
+    return usedProducts.map(product => window.CWVisitProductIdentity.payload(product));
   }
 
   async function validateUsedProducts(products) {
     if (!products.length) return;
-    if (!activeWorkGuide?.id) {
-      await loadGuides(false);
-    }
-    if (!activeWorkGuide?.id) {
-      throw new Error("Sem guia de obra ativa para deduzir produtos.");
-    }
+    if (!activeWorkGuide?.id) await loadGuides(false);
+    if (!activeWorkGuide?.id) throw Error('Sem guia de obra ativa para deduzir produtos.');
+    const totals = new Map();
     for (const product of products) {
-      const stock = productStockByName(product.name);
-      if (!stock) throw new Error(`Produto sem stock na viatura: ${product.name}`);
-      const available = Number(stock.quantity ?? 0);
-      if (available < product.quantity) {
-        throw new Error(`Stock insuficiente para ${product.name}. Disponivel: ${available} ${stock.unit || product.unit}`);
-      }
+      if (!window.CWVisitProductIdentity.hasIdentity(product)) throw Error('Selecione novamente cada produto na guia para confirmar a linha e a unidade. O rascunho foi conservado.');
+      const stock = productStockForRow(product);
+      if (!stock || !Number.isFinite(stock.quantity)) throw Error('A linha do produto mudou ou já não pertence à guia atual. Atualize e reveja a seleção.');
+      const previous = totals.get(stock.id) || [], quantities = [...previous, product.quantity]; totals.set(stock.id, quantities);
+      if (Number(window.CWFieldMaterials.sum(quantities)) > stock.quantity) throw Error(`Stock insuficiente para ${product.name}. Disponível: ${stock.quantity} ${stock.unit}.`);
     }
   }
 
@@ -3411,13 +3402,16 @@
       if (!row || !field) return;
       const item = usedProducts.find((product) => product.localId === row.dataset.doseId);
       if (!item) return;
+      if (field === "name") return;
       item[field] = event.target.value;
       saveCurrentDraft();
     });
     doseRows.addEventListener("change", (event) => {
       const row = event.target.closest("[data-dose-id]");
       const field = event.target.dataset.doseField;
-      if (!row || !field) return;
+      // Quantity edits are already saved by the input event. Saving again on
+      // blur would disable the completion button while its click is arriving.
+      if (!row || field !== 'name') return;
       updateDoseRow(row.dataset.doseId, field, event.target.value);
     });
     doseRows.addEventListener("click", (event) => {
@@ -3484,15 +3478,14 @@
         return;
       }
 
-      const productsUsed = normalizedUsedProducts();
-      if (!wasDone) {
-        try {
-          await validateUsedProducts(productsUsed);
-        } catch (validationError) {
-          $("#finishBtn").disabled = false;
-          toast(validationError.message);
-          return;
-        }
+      let productsUsed;
+      try {
+        productsUsed = normalizedUsedProducts();
+        if (!wasDone) await validateUsedProducts(productsUsed);
+      } catch (validationError) {
+        $("#finishBtn").disabled = false;
+        toast(validationError.message);
+        return;
       }
 
       const productsPayload = productsUsed.map((product) => ({
@@ -3500,6 +3493,7 @@
         quantity: product.quantity,
         unit: product.unit,
         notes: product.notes,
+        ...(window.CWVisitProductIdentity.hasIdentity(product) ? window.CWVisitProductIdentity.identity(product) : {}),
       }));
 
       if (!sameFieldSession() || visitKey(current()) !== visitKey(visit)) { finishBtn.disabled = current()?.visitType === 'EXTRA' && isVisitDone(current()); return; }

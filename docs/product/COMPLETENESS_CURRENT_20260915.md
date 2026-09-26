@@ -1,5 +1,17 @@
 # Cristal Water — matriz atual de conclusão
 
+## Retoma atual — 26/09/2026, TASK382 validada localmente
+
+Produtos de `/technician-field-mode` ligados à linha exata da guia nas visitas normais e extra. IDs, nome e unidade literal conservados em rascunhos, pedido offline, visita e movimentos. Seleção distingue linhas com nomes/unidades iguais; troca de produto atualiza a unidade. Linhas incompletas não são descartadas nem recebem unidade presumida. Rascunhos antigos ficam intactos até seleção explícita. Validação visível e correção do clique que podia ser perdido ao sair da quantidade. [Relatório](VISIT_PRODUCT_IDENTITY_20260926.md) e [evidência](evidence/20260926_task382_local.json).
+
+Débito agregado por linha com soma decimal; servidor valida identidade e guia sob bloqueio. Correções normais/extra comparam consumo e histórico, ajustam a linha original e os dois movimentos atomicamente; registos antigos só usam nome/unidade se únicos. O editor extra preserva a identidade. Sem migração de valores históricos ambíguos.
+
+1023 unitários/119 ficheiros; sintaxe 690/303/44; seis grupos locais distintos aprovados. API com quatro repetições concorrentes e recusas sem efeitos parciais; navegador com seleção, rascunho antigo, recarregamento offline, resposta perdida, UUID original e um débito. Fluxo mensal: 54 visitas/60 consumos. Cinco idiomas, 320/390/1440, 15 capturas, controlos de 44 px sem obstrução após deslocação. O E2E geral local parou no binário do logótipo ausente no checkout, antes dos produtos; não conta como aprovação e o teste original permanece no CI. Cache v193; documentos v3; runner 297; nenhuma migração nova.
+
+TASK380: 293/294 aprovados, mesma fixture ADMIN `15 != 2`, restauro ignorado; [evidência](evidence/20260926_task380_ci_failed.json). A correção está na TASK381, cujo CI/restauro ainda estava em execução na última consulta. Gate nativo atual por confirmar.
+
+**Continuar:** confirmar CI/restauro e rever o registo antigo de produtos em `/technician` (caixa de texto) e os seus pedidos face à identidade estruturada. Pesquisa/seleção em guias extensas, conciliação histórica, limites dos alertas, VPS/cópias e piloto físico permanecem abertos. Sem merge/deploy/contactos reais; aplicação não declarada completa.
+
 ## Retoma atual — 26/09/2026, TASK381 publicada
 
 Materiais de `/technician-field-mode` com linhas duplicadas conservadas, correções negativas e zero visíveis. Utilização acumulada da guia em vez de «Usado hoje»; saldo registado em vez de final presumido. Unidades literais separadas, ausência sem `UN`, quantidades desconhecidas sem zero/quantidade inicial, total por unidade bloqueado quando incompleto. Totais de todos os materiais, sem classificação pelo nome, com soma decimal sem novo arredondamento binário. [Relatório](FIELD_MATERIAL_SUMMARY_20260926.md) e [evidência](evidence/20260926_task381_local.json).

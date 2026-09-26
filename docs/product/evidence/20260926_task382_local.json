@@ -1,0 +1,183 @@
+{
+  "task": "TASK382",
+  "date": "2026-09-26",
+  "baseSha": "1cff4afb842052cbd1364c526b439107c491b468",
+  "scope": "Exact work-guide product identity across regular/extra completion, correction and offline recovery",
+  "unit": {
+    "tests": 1023,
+    "files": 119,
+    "newTests": 28
+  },
+  "syntax": {
+    "backend": 690,
+    "frontend": 303,
+    "inline": 44
+  },
+  "localDatabase": {
+    "engine": "PGlite",
+    "version": "0.5.8",
+    "socketVersion": "0.2.11",
+    "syntheticDataOnly": true,
+    "nativePostgreSQLConfirmed": false,
+    "migrations": 43,
+    "newMigrations": 0
+  },
+  "integration": [
+    {
+      "script": "scripts/test-field-product-identity.js",
+      "code": 0,
+      "logSha256": "4ec961cc9135e2da83ed83333a027fd3aee8dee6063c828c40be39b2ac94ee67",
+      "assertions": [
+        "PASS REGULAR exact duplicate rows, four concurrent replays, both ledgers, corrections by original identity, repeated correction and atomic rejections",
+        "PASS REGULAR missing unit, malformed/stale identity, aggregate insufficiency, unique legacy compatibility, ambiguous historical rejection and exact 0.1 + 0.2 debit/return",
+        "PASS EXTRA exact duplicate rows, four concurrent replays, both ledgers, corrections by original identity, repeated correction and atomic rejections",
+        "PASS EXTRA missing unit, malformed/stale identity, aggregate insufficiency, unique legacy compatibility, ambiguous historical rejection and exact 0.1 + 0.2 debit/return"
+      ]
+    },
+    {
+      "script": "scripts/test-field-product-identity-ui.js",
+      "code": 0,
+      "logSha256": "7ba27ce5e5fb095a68185afebdb52263028f78c9177613e61146c5ab9ec3f109",
+      "assertions": [
+        "PASS distinct selector IDs/units, no assumed unit, literal stock/labels, five languages at 320/390/1440, incomplete and aggregate checks, preserved old draft requiring explicit review",
+        "PASS REGULAR exact product/notes in offline draft, immutable queue, lost committed response, reload and one debit on the selected row",
+        "PASS EXTRA exact product/notes in offline draft, immutable queue, lost committed response, reload and one debit on the selected row",
+        "PASS completed EXTRA editor retains the selected identity and adjusts only its original stock row"
+      ]
+    },
+    {
+      "script": "scripts/test-field-modern-visit-drafts.js",
+      "code": 0,
+      "logSha256": "80a35ffb435197988af76694055b8caa1b9fbe1ec65cf794d82d108ec97636ec",
+      "assertions": [
+        "PASS seven readings/notes, checklist and products survive offline reload; quota preserves saved bytes and visible changes, blocks completion, and supports explicit retry",
+        "PASS server changes merge untouched fields and require explicit decisions for overlapping edits; unresolved differences survive reload and literal text is safe",
+        "PASS real competing Web Locks prevent silent replacement; disjoint edits combine, overlapping text remains reviewable, and 320/390/1440 layouts fit",
+        "PASS same-number REGULAR/EXTRA drafts remain separate; corrupt, wrong-owner and wrong-pool bytes are preserved; unsupported locks and failed readback never claim success",
+        "PASS prior typed drafts without a baseline remain intact until explicit field review; text, measurements and private EXTRA photo survive review with the original typed identity",
+        "PASS frozen offline completion recovers the original UUID once with one stock debit; EXTRA same-number completion remains separate; account callbacks cannot overwrite another draft"
+      ]
+    },
+    {
+      "script": "scripts/test-field-extra-execution.js",
+      "code": 0,
+      "logSha256": "e9c6aa067e2b991de3a703eab891abcdd0fb1f5abff9f11c5c31932a0d705b8c",
+      "assertions": [
+        "PASS typed ownership, eight simultaneous starts/completions, private photo replay, immutable receipts, original regular visit and single stock/report effects",
+        "PASS included/free extras never become chargeable and existing invoice sources cannot be charged in another month even with an inconsistent old billing flag",
+        "PASS invalid quantities, units, identity fields and failed receipt persistence roll back completion, both stock ledgers and audit",
+        "PASS real mobile start, typed draft/photo, offline reload/completion, lost committed response, recovery, protected image and completed read-only record"
+      ]
+    },
+    {
+      "script": "scripts/test-field-extra-correction.js",
+      "code": 0,
+      "logSha256": "6c47366b4f3602f38b217919fc6615ab0cc67940e711916351c2cbb2eae6c770",
+      "assertions": [
+        "PASS typed same-ID isolation, privacy, immutable concurrent receipts, stale version rejection, original completion/billing and difference-only stock correction",
+        "PASS rollback after partial stock adjustment, closed guide, mandatory notification failure and exact recovery after reassignment",
+        "PASS real mobile editor, preserved draft, exact review, lost committed response, wrong acknowledgement rejection, reload recovery and explicit stale-version comparison",
+        "PASS two-window conflict, storage quota/corruption, persistent rejection warning, delayed account change and recovery without duplicated effects"
+      ]
+    },
+    {
+      "script": "scripts/test-real-month-flow-api.js",
+      "code": 0,
+      "logSha256": "816495a9d86de20dcaf10084a78a5ba17d5ad3e854ad80cd408dbc884246a208",
+      "assertions": [
+        "OK EDGE valida pH impossivel - Valor de pH invalido. Deve estar entre 0 e 10.",
+        "OK EDGE concorrencia bloqueia duplo fecho - status 200/409",
+        "OK clientes criados por API real - 5 clientes",
+        "OK piscinas/jacuzzis criados por API real - 9 equipamentos",
+        "OK fichas tecnicas preenchidas - 9/9",
+        "OK tecnicos e viaturas ligados - 3 tecnicos, 3 carros, 3 guias obra",
+        "OK rondas criadas e visitas concluídas - 3 rondas, 54 visitas",
+        "OK produtos da visita viram registo quimico - 60 registos",
+        "OK consumo automatico baixa guia/viatura - 60 movimentos",
+        "OK problemas em campo geram reparacoes/alertas - 6 reparacoes",
+        "OK faturacao mensal gerada - 5 faturas",
+        "OK pagamentos total/parcial registados - PAID, PARTIAL, PENDING, PENDING, PENDING",
+        "OK mensagens reais do portal cliente ficam por ler - 5 mensagens QA por ler",
+        "OK chat mostra conversas por ler - 5 mensagens totais por ler",
+        "OK notificacoes mostram alarme de chat - alarme CHAT_MESSAGE",
+        "OK dashboard recebe dados reais - clientes 6, mensagens 5",
+        "OK guia de obra mantem referencia AT e totais finais - guia AT 2"
+      ]
+    }
+  ],
+  "browser": {
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "horizontalOverflow": false,
+    "controlsMinimumHeight": 44,
+    "controlCentreUnobstructedAfterScroll": true,
+    "screenshots": 15,
+    "visuallyInspected": [
+      "PRODUCT_IDENTITY_pt_390.png",
+      "PRODUCT_IDENTITY_de_320.png",
+      "PRODUCT_IDENTITY_pt_1440.png"
+    ],
+    "pageErrors": 0
+  },
+  "runner": {
+    "groups": 297,
+    "distinct": 297
+  },
+  "cacheVersion": 193,
+  "documentCacheVersion": 3,
+  "checks": [
+    "Exact row among same name/different units and same name/same unit",
+    "Literal unit and name snapshot validated on server; no ID fallback",
+    "Malformed identity, missing units and changed guide rejected",
+    "Four concurrent identical completions per visit type produce one set of movements",
+    "Correction moves quantity between exact duplicate rows",
+    "Correction preserves original guide and refuses ambiguity/closed guide/insufficiency atomically",
+    "Legacy name/unit accepted only when unique",
+    "Exact aggregation 0.1 + 0.2 consumes and returns 0.3",
+    "Drafts keep IDs, quantities and notes, including offline reload",
+    "Older drafts without IDs preserved until explicit reselection",
+    "Blank/zero/negative quantities retained with visible validation; never silently discarded",
+    "Quantity blur no longer swallows completion click",
+    "Both offline completion scopes preserve original UUID after lost committed response",
+    "EXTRA correction editor preserves identity",
+    "Real monthly flow: 54 visits, 60 chemical records, 60 stock movements"
+  ],
+  "preparationAndLimitations": [
+    "The general test-field-e2e.js technician persona stopped before product interaction because the tracked logo binary is unavailable in the local partial Git checkout; client/admin personas passed. This run is not counted as an approved group. Original logo assertion remains in CI.",
+    "Initial screenshot raced a row render; stable container capture and explicit centring now verify unobstructed controls.",
+    "New quantity validation originally threw outside its visible-error handler; corrected and full UI path repeated.",
+    "Quantity blur triggered a redundant draft save and disabled the finish button during the click; change handler now handles only product selection, with quantities saved on input.",
+    "Test setup initially waited for a saved draft on an untouched EXTRA visit; it now accepts the legitimate empty state before input.",
+    "No native PostgreSQL or restore approval is claimed from local PGlite."
+  ],
+  "sourceSha256": {
+    "frontend/cw-extra-visit-correction.js": "9c747dbbcdba2332031641c29fb86f0cef01455939652284153fe72553ce9df7",
+    "frontend/cw-field-document-copy.js": "3ec5d92337de3f96300588be1185d73a9d21809cc33986364f5fa873ab4b4367",
+    "frontend/cw-visit-product-identity.js": "a862096482aefa0e6ddcf3ec193e39b18aac66b8b343fed16a668aad1cbee2ad",
+    "frontend/sw.js": "b81c737d11a82239412f90dfb7e1a14e5fc3d74b12674eb0edbcd3231b57b307",
+    "frontend/technician-field-mode.html": "9ce7be7f091812eba3076c5afa28f0deba07594f5414d1efb747101a42c501a7",
+    "frontend/technician-field-mode.js": "2a313a2a8c1c421c275f65730db9e738b2810d7ac13bc653a3a878db4989b3ca",
+    "scripts/test-field-e2e.js": "07d33d4446d377aad22956f1d8abcf4d52fc52f79ad69cd1c46c3f3dc88ccfd8",
+    "scripts/test-field-modern-visit-drafts.js": "9f69cf8c46424d2ee20d2ed3ea7f729769442f7df22cf4b08f8d2dbee8a6eb28",
+    "scripts/test-field-product-identity-ui.js": "52abb922b8657c83519fcd30e136ff0431d2688f108cf219ddc8bf109e667642",
+    "scripts/test-field-product-identity.js": "b4e09eca0a1a92d3e428f331ae206099de99ece21863d68e88d28fdf6e203ae0",
+    "scripts/test-field-suite.js": "c95bf3bcfcc04ef6402aeccfa54fae96ecf550685fd6cbf89916ff13f5dd328e",
+    "src/routes/technicianRoutes.js": "9c31f6da0c6a59ce4e9259ff960f7320b04fd8d691bc74a0eea491146cd7790e",
+    "src/services/extraVisitCorrectionService.js": "5fa8a890b43a963fe762b5a91a8e43cdd092571a4936152ac0f3ffa594779ab4",
+    "src/services/extraVisitExecutionService.js": "dcba155162bd95daf45fe67a932b65934ebb0b931ca80af802af0e306d6b9aa8",
+    "src/services/serviceVisitCompletionService.js": "494abeff6986d724355a0d8abbcbd41051bcbbdc865c14bcb52d6c643aace45e",
+    "src/services/visitCorrectionStockService.js": "b7c24e2cd83e3ee2c1b62454c5a60157ba26ff9c819e478d989c8b1dcd618398",
+    "src/services/visitProductStockReconciliation.js": "10c8fb3cf41c6697e798c4386ec452d7f1b63c85246d1df024f53a0954c1f56a",
+    "tests/visit-product-identity.test.js": "730926492f88fd5e06f4cb0933a00c4ccc9bac7b216ab81b5df4abcde6d31681"
+  }
+}

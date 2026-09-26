@@ -607,7 +607,10 @@ router.patch("/visits/:id/correction", async (req, res) => {
           status: true,
           technicianId: true,
           endAt: true,
-          internalNotes: true
+          internalNotes: true,
+          chemicalsJson: true,
+          poolId: true,
+          clientId: true
         }
       });
 
@@ -715,6 +718,7 @@ router.patch("/visits/:id/correction", async (req, res) => {
       });
     }
 
+    if (error.code === 'STOCK_CORRECTION_REVIEW') return res.status(409).json({ok:false,code:error.code,error:error.message});
     console.error("visit correction error:", error);
     return res.status(error.statusCode || 500).json({
       ok: false,

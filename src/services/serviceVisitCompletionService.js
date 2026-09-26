@@ -1,5 +1,7 @@
 const RepairBusiness = require("../business/repair/RepairBusiness");
 const fieldRequests = require('./fieldWriteRequestService');
+const productIdentity = require('../../frontend/cw-visit-product-identity');
+const { sum } = require('../../frontend/cw-field-materials');
 class VisitCompletionError extends Error {
   constructor(statusCode, code, message) {
     super(message);
@@ -58,7 +60,11 @@ function normalizeProducts(products) {
   }
 
   const normalized = parsed.map((product, index) => {
-    const name = String(product?.name || product?.productName || "").trim();
+    let identity;
+    try { identity = productIdentity.identity(product); }
+    catch (error) { throw new VisitCompletionError(400, 'INVALID_PRODUCT_IDENTITY', error.message); }
+    const name = identity ? product?.name : String(product?.name || product?.productName || "").trim();
+    if (identity && (typeof name !== 'string' || !productIdentity.text(product.unit))) throw new VisitCompletionError(400, 'INVALID_PRODUCT_IDENTITY', 'Confirme o nome e a unidade da linha selecionada.');
     if (!name) {
       throw new VisitCompletionError(400, "INVALID_PRODUCT_NAME", `Produto #${index + 1} sem nome.`);
     }
@@ -129,15 +135,8 @@ function toBoolean(value, fallback = false) {
   return value === true || value === "true" || value === 1 || value === "1";
 }
 
-function normalize(value) {
-  return String(value || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim()
-    .toLowerCase();
-}
-
 function productUnit(product) {
+  if (productIdentity.hasIdentity(product)) return product.unit;
   return String(product?.unit || "KG").trim().toUpperCase() || "KG";
 }
 
@@ -156,6 +155,7 @@ function movementNotes(body, visit, product) {
       temperature: hasValue(body.temperature) ? Number(body.temperature) : null,
     },
     productName: product.name,
+    ...(productIdentity.hasIdentity(product) ? productIdentity.identity(product) : {}),
     quantity: product.quantity,
     unit: productUnit(product),
   });
@@ -288,73 +288,65 @@ async function registerAutomaticProductConsumption(tx, visit, body, products) {
     throw new VisitCompletionError(409, 'WORK_GUIDE_CHANGED', 'A guia de obra mudou ou foi fechada. Atualize a visita antes de consumir produtos.');
   }
 
+  if (workGuide.technicianId && workGuide.technicianId !== visit.technicianId) throw new VisitCompletionError(409, 'WORK_GUIDE_OWNER_CHANGED', 'A guia pertence a outro técnico. Atualize os documentos.');
+
   const guideItems = await tx.workGuideItem.findMany({
     where: { workGuideId: workGuide.id },
   });
 
+  const grouped = new Map();
   for (const product of items) {
-    const target = guideItems.find((item) => normalize(item.name) === normalize(product.name));
-    if (!target) {
-      throw new VisitCompletionError(
-        409,
-        "WORK_GUIDE_ITEM_NOT_FOUND",
-        `Produto ${product.name} nao existe na guia de obra ativa.`
-      );
-    }
-
-    if (Number(target.quantity || 0) < Number(product.quantity || 0)) {
-      throw new VisitCompletionError(
-        409,
-        "WORK_GUIDE_STOCK_INSUFFICIENT",
-        `Stock insuficiente na viatura para ${product.name}. Disponivel: ${target.quantity} ${target.unit || "UN"}.`
-      );
-    }
-
+    let target;
+    try { target = productIdentity.resolve(guideItems, product, workGuide.id); }
+    catch (error) { throw new VisitCompletionError(409, 'WORK_GUIDE_ITEM_REVIEW', error.message); }
+    const group = grouped.get(target.id) || { target, products: [] };
+    group.products.push(product); grouped.set(target.id, group);
+  }
+  for (const { target, products: selectedProducts } of [...grouped.values()].sort((a, b) => a.target.id - b.target.id)) {
+    const quantity = Number(sum(selectedProducts.map(product => product.quantity)));
     const consumed = await tx.workGuideItem.updateMany({
-      where: { id: target.id, quantity: {gte: Number(product.quantity)} },
-      data: {
-        quantity: {decrement: Number(product.quantity)},
-        usedQty: {increment: Number(product.quantity)},
-      },
+      where: { id: target.id, quantity: { gte: quantity } },
+      data: { quantity: { decrement: quantity }, usedQty: { increment: quantity } },
     });
-    if (consumed.count !== 1) throw new VisitCompletionError(409, 'WORK_GUIDE_STOCK_INSUFFICIENT', `Stock insuficiente na viatura para ${product.name}. Atualize a guia.`);
+    if (consumed.count !== 1) throw new VisitCompletionError(409, 'WORK_GUIDE_STOCK_INSUFFICIENT', `Stock insuficiente na viatura para ${target.name}. Atualize a guia.`);
+    for (const product of selectedProducts) {
+      await tx.vehicleStockMovement.create({
+        data: {
+          vehicleId: workGuide.vehicleId,
+          transportGuideId: workGuide.guideId,
+          workGuideId: workGuide.id,
+          visitId: visit.id,
+          technicianId: visit.technicianId || workGuide.technicianId || null,
+          itemName: target.name,
+          itemType: target.type,
+          unit: target.unit || productUnit(product),
+          quantity: Number(product.quantity || 0),
+          movementType: "CONSUMPTION",
+          source: "VISIT_COMPLETE_AUTO",
+          notes: movementNotes(body, visit, { ...product, workGuideItemId: target.id, workGuideId: workGuide.id }),
+        },
+      });
 
-    await tx.vehicleStockMovement.create({
-      data: {
-        vehicleId: workGuide.vehicleId,
-        transportGuideId: workGuide.guideId,
-        workGuideId: workGuide.id,
-        visitId: visit.id,
-        technicianId: visit.technicianId || workGuide.technicianId || null,
-        itemName: target.name,
-        itemType: target.type,
-        unit: target.unit || productUnit(product),
-        quantity: Number(product.quantity || 0),
-        movementType: "CONSUMPTION",
-        source: "VISIT_COMPLETE_AUTO",
-        notes: movementNotes(body, visit, product),
-      },
-    });
-
-    await tx.stockMovement.create({
-      data: {
-        movementType: "CONSUMPTION",
-        scopeFrom: "VEHICLE",
-        vehicleId: workGuide.vehicleId || null,
-        productName: target.name,
-        category: target.type || "CHEMICAL",
-        unit: target.unit || productUnit(product),
-        quantity: Number(product.quantity || 0),
-        transportGuideId: workGuide.guideId || null,
-        workGuideId: workGuide.id,
-        visitId: visit.id,
-        clientId: visit.clientId || null,
-        poolId: visit.poolId || null,
-        technicianId: visit.technicianId || workGuide.technicianId || null,
-        notes: movementNotes(body, visit, product),
-        createdBy: "TECHNICIAN_FIELD_MODE",
-      },
-    }).catch(() => null);
+      await tx.stockMovement.create({
+        data: {
+          movementType: "CONSUMPTION",
+          scopeFrom: "VEHICLE",
+          vehicleId: workGuide.vehicleId || null,
+          productName: target.name,
+          category: target.type || "CHEMICAL",
+          unit: target.unit || productUnit(product),
+          quantity: Number(product.quantity || 0),
+          transportGuideId: workGuide.guideId || null,
+          workGuideId: workGuide.id,
+          visitId: visit.id,
+          clientId: visit.clientId || null,
+          poolId: visit.poolId || null,
+          technicianId: visit.technicianId || workGuide.technicianId || null,
+          notes: movementNotes(body, visit, { ...product, workGuideItemId: target.id, workGuideId: workGuide.id }),
+          createdBy: "TECHNICIAN_FIELD_MODE",
+        },
+      }).catch(() => null);
+    }
   }
 }
 

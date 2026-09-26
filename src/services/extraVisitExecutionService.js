@@ -2,12 +2,13 @@
 const { prisma } = require('../prismaClient');
 const requests = require('./fieldWriteRequestService');
 const billing = require('./extraVisitBillingService');
+const productIdentity = require('../../frontend/cw-visit-product-identity');
+const { sum } = require('../../frontend/cw-field-materials');
 const { validateVisitCompletionPayload } = require('./serviceVisitCompletionService');
 const checks = ['cleaned','brushed','vacuumed','basketCleaned','waterlineClean','backwashDone'];
 const readings = ['ph','chlorine','alkalinity','salt','temperature','orp','orpMv'];
 const editable = new Set(['PLANNED','PENDING','SCHEDULED','ASSIGNED','ON_ROUTE','A_CAMINHO','IN_PROGRESS','STARTED','INCOMPLETE']);
 const id = value => Number.isSafeInteger(Number(value)) && Number(value) > 0 && Number(value) <= 2147483647 ? Number(value) : requests.fail('Visita extra inválida.');
-const normalize = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
 function project(visit) {
   return { id: visit.id, visitType: 'EXTRA', poolId: visit.poolId, clientId: visit.clientId, technicianId: visit.technicianId, status: visit.status,
     startAt: visit.startAt, endAt: visit.endAt, completionRequestId: visit.completionRequestId, ...(visit.execution || {}), photos: visit.photos || [] };
@@ -33,7 +34,7 @@ function validate(body, completion) {
   let rawProducts = body.products;
   if(typeof rawProducts === 'string' && rawProducts.trim().startsWith('[')) {try {rawProducts=JSON.parse(rawProducts);}catch(_){requests.fail('Lista de produtos inválida.');}}
   if(Array.isArray(rawProducts))for(const product of rawProducts){
-    if(!product || typeof product !== 'object' || Array.isArray(product) || Object.keys(product).some(key=>!['name','productName','quantity','unit','notes'].includes(key)) || !['number','string'].includes(typeof product.quantity) || (product.notes!==undefined && (typeof product.notes!=='string'||product.notes.length>1000)))requests.fail('Dados do produto inválidos.');
+    if(!product || typeof product !== 'object' || Array.isArray(product) || Object.keys(product).some(key=>!['name','productName','quantity','unit','notes','workGuideItemId','workGuideId'].includes(key)) || !['number','string'].includes(typeof product.quantity) || (product.notes!==undefined && (typeof product.notes!=='string'||product.notes.length>1000)))requests.fail('Dados do produto inválidos.');
   }
   const result = validateVisitCompletionPayload(body);
   if (result.productsText && !result.chemicalsJson) requests.fail('Registe cada produto e quantidade na lista.');
@@ -75,15 +76,16 @@ async function consume(tx, visit, body, products, request) {
   const stock = await tx.workGuideItem.findMany({ where: { workGuideId: guide.id }, orderBy: { id: 'asc' } });
   const grouped = new Map();
   for (const product of products) {
-    const matches = stock.filter(item => normalize(item.name) === normalize(product.name) && normalize(item.unit) === normalize(product.unit));
-    if (matches.length !== 1) requests.fail('Confirme o produto e a unidade na guia: ' + product.name, 409);
-    const target = matches[0], previous = grouped.get(target.id);
-    grouped.set(target.id, { target, quantity: (previous?.quantity || 0) + product.quantity });
+    let target;
+    try { target = productIdentity.resolve(stock, product, guide.id); }
+    catch (error) { requests.fail(error.message, 409); }
+    const previous = grouped.get(target.id);
+    grouped.set(target.id, { target, quantity: Number(sum([previous?.quantity || 0, product.quantity])) });
   }
   for (const { target, quantity } of [...grouped.values()].sort((a,b) => a.target.id-b.target.id)) {
     const changed = await tx.workGuideItem.updateMany({ where: { id: target.id, quantity: { gte: quantity } }, data: { quantity: { decrement: quantity }, usedQty: { increment: quantity } } });
     if (changed.count !== 1) requests.fail('Stock insuficiente na viatura para ' + target.name, 409);
-    const notes = JSON.stringify({ extraVisitId: visit.id, visitType: 'EXTRA', poolId: visit.poolId, requestId: request.requestId, owner: request.owner });
+    const notes = JSON.stringify({ extraVisitId: visit.id, visitType: 'EXTRA', poolId: visit.poolId, requestId: request.requestId, owner: request.owner, workGuideItemId: target.id, workGuideId: guide.id });
     await tx.vehicleStockMovement.create({ data: { vehicleId: guide.vehicleId, workGuideId: guide.id, transportGuideId: guide.guideId, extraVisitId: visit.id, technicianId: visit.technicianId, itemName: target.name, itemType: target.type, unit: target.unit, quantity, movementType: 'CONSUMPTION', source: 'EXTRA_VISIT_COMPLETE', notes } });
     await tx.stockMovement.create({ data: { movementType: 'CONSUMPTION', scopeFrom: 'VEHICLE', vehicleId: guide.vehicleId, workGuideId: guide.id, transportGuideId: guide.guideId, extraVisitId: visit.id, poolId: visit.poolId, clientId: visit.clientId, technicianId: visit.technicianId, productName: target.name, category: target.type, unit: target.unit, quantity, notes, createdBy: request.owner } });
   }
