@@ -18,6 +18,7 @@ app.use((req, res, next) => {
 app.use('/api/fleet-management', require('../../src/routes/fleetManagementRoutes'));
 app.use('/api/vehicle-consumption', require('../../src/routes/vehicleConsumptionRoutes'));
 app.use('/api/work-guide-close', require('../../src/routes/workGuideCloseRoutes'));
+app.use('/api/work-guide-start', require('../../src/routes/workGuideStartRoutes'));
 app.use('/api/vehicle-maintenance', require('../../src/routes/vehicleMaintenanceReviewRoutes'));
 app.use('/api/vehicle-assignment', require('../../src/routes/vehicleAssignmentReviewRoutes'));
 app.use('/api/vehicle-stock-preset', require('../../src/routes/vehicleStockPresetReviewRoutes'));

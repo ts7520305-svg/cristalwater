@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `f91db3f3d6d8af724a86dd17d39019df2794579c`. Gerado em 2026-09-26T05:41:11.140Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `d40213a1799d03930426119e7b75a05b2823b22a`. Gerado em 2026-09-26T06:19:05.725Z. Inclui o estado dos ficheiros locais no momento da geração.
 
-125 ficheiros HTML: 118 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
+126 ficheiros HTML: 119 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 307 scripts de integração/navegador ativos. 113 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 309 scripts de integração/navegador ativos. 114 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 2 referências existem no índice Git mas não estão materializadas nesta cópia local; não são classificadas como ficheiros ausentes da aplicação.
 
@@ -79,7 +79,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /admin-test-center | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-today | Entrada raiz | ADMIN | ADMIN | 2 |
 | /admin-ui-settings | Entrada raiz | ADMIN | ADMIN | 1 |
-| /admin-vehicles | Entrada raiz | ADMIN | ADMIN | 10 |
+| /admin-vehicles | Entrada raiz | ADMIN | ADMIN | 11 |
 | /admin-visits-dashboard | Entrada raiz | ADMIN | ADMIN | 1 |
 | /admin-visits | Entrada raiz | ADMIN | ADMIN | 0 |
 | /alerts-financial | Entrada raiz | ADMIN | ADMIN | 1 |
@@ -134,7 +134,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /technician-chat | Entrada raiz | ADMIN | — | 3 |
 | /technician-field-mode | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 37 |
 | /technician-gps | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 2 |
-| /technician-guide | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 5 |
+| /technician-guide | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 6 |
 | /technician-history | Entrada raiz | — | TEAM_LEADER, TECHNICIAN | 2 |
 | /technician-login | Entrada raiz | PUBLIC | — | 3 |
 | /technician-map | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 4 |
@@ -144,7 +144,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /technician-profit | Entrada raiz | ADMIN | ADMIN | 3 |
 | /technician-route | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 2 |
 | /technician-visit | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 1 |
-| /technician | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 11 |
+| /technician | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 12 |
 | /tests/test_extra.html | Auxiliar/protótipo/teste | — | — | 0 |
 | /to-issue | Entrada raiz | ADMIN | ADMIN | 3 |
 | /transport-guide-create | Entrada raiz | — | ADMIN | 2 |
@@ -163,6 +163,7 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /vehicle-stock-preset | Entrada raiz | — | ADMIN | 2 |
 | /visit-report-review | Entrada raiz | — | ADMIN | 2 |
 | /work-guide-close | Entrada raiz | — | — | 2 |
+| /work-guide-start | Entrada raiz | — | — | 2 |
 
 ## Fila finita sem referência literal em QA
 

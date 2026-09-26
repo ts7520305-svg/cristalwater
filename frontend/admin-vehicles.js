@@ -504,20 +504,11 @@ function editTransportGuideItems(id) {
 function closeTransportGuide(id) { manageTransportGuide(id, 'CLOSE'); }
 function cancelTransportGuide(id) { manageTransportGuide(id, 'CANCEL'); }
 
-async function startWorkGuide() {
-  if(!selectedVehicle("workVehicle"))return;
-  const response = await j(`${API}/work/start`, {
-    method: "POST",
-    body: JSON.stringify({
-      vehicleId: val("workVehicle"),
-      technicianId: val("workTech"),
-      startKm: val("startKm"),
-    }),
-  });
-  if (response.message) alert(response.message);
-  await load();
+function startWorkGuide() {
+  requirePageSession();if(!selectedVehicle('workVehicle'))return;
+  const lang=document.getElementById('fleetLanguage')?.value||'pt';
+  location.href='/work-guide-start?vehicleId='+encodeURIComponent(val('workVehicle'))+'&lang='+encodeURIComponent(lang);
 }
-
 
 function closeWork(id) {
   requirePageSession();

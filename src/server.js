@@ -205,6 +205,7 @@ mount("/api/technicians", technicianCrudRoutes);
 mount("/api/fleet-management", require("./routes/fleetManagementRoutes"));
 mount("/api/vehicle-consumption", require("./routes/vehicleConsumptionRoutes"));
 mount("/api/work-guide-close", require("./routes/workGuideCloseRoutes"));
+mount("/api/work-guide-start", require("./routes/workGuideStartRoutes"));
 mount("/api/vehicle-maintenance", require("./routes/vehicleMaintenanceReviewRoutes"));
 mount("/api/vehicle-assignment", require("./routes/vehicleAssignmentReviewRoutes"));
 mount("/api/vehicle-stock-preset", require("./routes/vehicleStockPresetReviewRoutes"));

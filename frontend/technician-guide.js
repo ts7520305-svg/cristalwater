@@ -52,28 +52,10 @@ async function init() {
   }
 }
 
-async function startDay() {
+function startDay() {
   if (!window.CristalAuth?.requireAuth("TECHNICIAN")) return;
-
-  try {
-    setStatus("A iniciar guia de obra.");
-    const response = await j(`${API}/work/start`, {
-      method: "POST",
-      body: JSON.stringify({
-        vehicleId: vehicle.value,
-        technicianId: techId.value,
-        startKm: startKm.value,
-      }),
-    });
-    workGuideId.value = response.workGuide?.id || "";
-    const closeLink = document.getElementById("closeWorkLink");
-    if (closeLink) closeLink.href = "/work-guide-close?workGuideId=" + encodeURIComponent(response.workGuide?.id || "");
-    vehicleStock.value = vehicle.value;
-    setStatus(response.message || "Guia iniciada com sucesso.");
-    await loadStock();
-  } catch (error) {
-    setStatus(error.message || "Nao foi possivel iniciar guia.", "error");
-  }
+  const lang=new URL(location.href).searchParams.get('lang')||'pt';
+  location.href='/work-guide-start?'+new URLSearchParams({...(vehicle.value?{vehicleId:vehicle.value}:{}),lang});
 }
 
 function renderAtDocumentButton(document, vehicleId, workGuide) {

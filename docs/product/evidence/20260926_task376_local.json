@@ -1,0 +1,318 @@
+{
+  "task": "TASK376",
+  "baseCommit": "d40213a1799d03930426119e7b75a05b2823b22a",
+  "validatedAt": "2026-09-26T06:21:49.067230+00:00",
+  "unitTests": {
+    "passed": 935,
+    "files": 113,
+    "new": 17
+  },
+  "technicianTests": 4,
+  "syntax": {
+    "backend": 684,
+    "frontend": 294,
+    "inline": 44
+  },
+  "schema": {
+    "newMigrations": 0,
+    "totalAdditiveMigrationsApplied": 43,
+    "tablesExpected": 128,
+    "runtime": "PGlite 0.5.8 / pglite-socket 0.2.11; isolated synthetic data, not native PostgreSQL"
+  },
+  "integrationGroups": [
+    {
+      "script": "scripts/test-field-work-guide-start.js",
+      "code": 0,
+      "log": "/tmp/cw376-test-field-work-guide-start.log",
+      "sha256": "26a7d45adcf8282531bbae4464f7780b74a2f7998176f6642ca42e62a2879643",
+      "checks": [
+        "PASS work opening API: scoped ADMIN/TECHNICIAN/TEAM_LEADER and both identities; explicit missing/zero/monotonic mileage; strict source precedence, exact duplicate materials and notes; old writers blocked; existing/closed works preserved; seven SQL rollback sites including internal alert and issue; lost response/restart/two-process replay/race; preset/km/assignment/archive changes; tamper/expiry/cancel; field recovery after reassignment; pagination and real unavailable reads; unchanged stock ledger, finances, old works and official bytes."
+      ]
+    },
+    {
+      "script": "scripts/test-field-vehicle-assignment.js",
+      "code": 0,
+      "log": "/tmp/cw376-test-field-vehicle-assignment.log",
+      "sha256": "da029eb7c44cfa73db2f85731a358904c0a324e4778b835cac9db266eb3c95ca",
+      "checks": [
+        "PASS assignment API: administrative scope; strict fields; old writers refused; open work protected; shared vehicles; exact closed/open intervals; null/zero and nondecreasing mileage; initial legacy gap; lost response/restart/two-process retries; competing reviews and real work opening; six SQL rollback points; changed vehicle/technician/history guards; contradictory and future history refusal; remove assignment; expiry/cancellation; pagination; preserved contacts, credentials, costs, work, stock, official bytes and finances."
+      ]
+    },
+    {
+      "script": "scripts/test-field-vehicle-stock-preset.js",
+      "code": 0,
+      "log": "/tmp/cw376-test-field-vehicle-stock-preset.log",
+      "sha256": "b04da58964aee8fa94e88ca2196d1ec2c70f85babb4ca7faa43c3fa603da1793",
+      "checks": [
+        "PASS stock preset API: strict admin scope and safe field reader; explicit missing/empty/invalid states; exact metadata/raw original and duplicate rows retained; zero and six-decimal fields; old writer blocked; lost response/restart/two-process replay; six SQL rollback cases; edit races and metadata/archive/expiry guards; durable cancellation; invalid repair and actual read failure; real active-AT/last-guide/preset/empty source precedence; real open-work concurrency; volume/pagination; unchanged existing works, materials, stock, costs and official bytes."
+      ]
+    },
+    {
+      "script": "scripts/test-field-transport-guide-create.js",
+      "code": 0,
+      "log": "/tmp/cw376-test-field-transport-guide-create.log",
+      "sha256": "12af5010db6a53b36aec10e5c1e8c2e7bd3f8885bb237f0f3c9b267b70c42aa2",
+      "checks": [
+        "PASS transport creation API: explicit vehicle/work/item association and closure plan; ADMIN-only, private projections; exactly one guide/work/LOAD/audit/receipt after loss/restart/retries; racing reviews one winner; eight SQL rollback points; provisional IDs/consumption/movements retained; stale item/assignment/transport, expired/altered proofs and cancellation; read-only stock/repeated start, closed work never reopened or consumed by visit completion; TEAM_LEADER own/foreign scope; unchanged vehicles, visits and finances."
+      ]
+    },
+    {
+      "script": "scripts/test-field-work-guide-start-ui.js",
+      "code": 0,
+      "log": "/tmp/cw376-test-field-work-guide-start-ui.log",
+      "sha256": "78ea0085578f99b0d9d6a87a5c0b06c08501581c1b415fe1afcf1f2e6f8d1108",
+      "checks": [
+        "PASS work opening browser: real admin/technician navigation; explicit technician and mileage; escaped source/stock/notes; existing-work protection; double-click once; lost response/reload/JSONB recovery; offline exact retry/cancel; stale source; storage quota/ignored/corrupt reference; partial/latest reads; five languages/three widths/44px/18 screenshots; expiry/suspension/account changes during review/commit; ADMIN/TECHNICIAN/TEAM_LEADER with both identities; unchanged old works, source and official bytes."
+      ]
+    },
+    {
+      "script": "scripts/test-field-fleet-management-ui.js",
+      "code": 0,
+      "log": "/tmp/cw376-test-field-fleet-management-ui.log",
+      "sha256": "20061280a51d80464a855c2f5ceb003c5ef1e45d953567ecf3ef3d4f79a4b402",
+      "checks": [
+        "PASS fleet browser: actual shared page/API, plate collision refusal, explicit vehicle review and double-click once, null/zero distance and multiline notes, separated operating state/archive/explicit restore, pagination/literal HTML, stable preparation across filters/languages, lost response/reload, offline exact retry, cancellation, stale/expired proof, quota/ignored/corrupt storage, partial packet/latest search, 24 screenshots in five languages/three widths, 44px controls, preserved shared vehicle selections with unavailable archive choice, unavailable/incomplete risks without zero/default/fallback writes, suspension and shared risk restoration, two-tab identity changes during review/commit, expiry and related records/business counts unchanged"
+      ]
+    },
+    {
+      "script": "scripts/test-field-work-guide-close.js",
+      "code": 0,
+      "log": "/tmp/cw376-test-field-work-guide-close.log",
+      "sha256": "28db43658d3bf6cd11d1bb1520ba135c097ce71ac582cb87caeeef4729ddae8c",
+      "checks": [
+        "PASS work closure API: explicit keep/set/zero and optional monotonic vehicle km; ADMIN/TECHNICIAN/TEAM_LEADER and both identities; own-current-vehicle scope; immutable notes, stock, documents and transport state; four SQL rollback sites; two-process close race; actual consumption and vehicle/assignment changes; lost response, restart, exact replay and owner recovery; expiry/tampering/cancellation; closed-work refusal; legacy 409; historical orphan."
+      ]
+    },
+    {
+      "script": "scripts/test-field-work-guide-close-ui.js",
+      "code": 0,
+      "log": "/tmp/cw376-test-field-work-guide-close-ui.log",
+      "sha256": "55db16d916cca07787f0c116f4319106b57ae2eda49350778f367e10a44483c0",
+      "checks": [
+        "PASS work closure browser: real admin/field/legacy navigation; explicit mileage/vehicle choices; escaped preserved stock; double-click once; lost response/reload/JSONB recovery; offline exact retry/cancel; stale review; storage quota/ignored/corrupt reference; partial/latest reads; five languages/three widths/44px/18 screenshots; expiration, suspension and account changes during review/commit; ADMIN/TECHNICIAN/TEAM_LEADER with both identities; no altered stock, notes or transport state."
+      ]
+    },
+    {
+      "script": "scripts/test-field-navigation-preferences.js",
+      "code": 0,
+      "log": "/tmp/cw376-test-field-navigation-preferences.log",
+      "sha256": "bf33fb89ab292b4d5a8f447da76a8fffe3d7cb6c8072cb7d683213ebb658abac",
+      "checks": [
+        "PASS navigation preferences: account-bound explicit choices, no default writes or reload, device/live and fixed palettes, three densities with 44px targets, five languages/three widths/contrast, real menu/index/help navigation, business styles and filters preserved, legacy keys/shortcut and work bytes preserved, two windows, storage throw/ignored writes, corrupt/wrong-owner bytes, bfcache, reset, offline save, account change/expiry; zero business writes"
+      ]
+    },
+    {
+      "script": "scripts/test-real-month-flow-api.js",
+      "code": 0,
+      "log": "/tmp/cw376-test-real-month-flow-api.log",
+      "sha256": "78d64c748802de21887125c4c48dee45f2c5bfefde086a7b84411f4a633fbfa4",
+      "checks": [
+        "OK EDGE valida pH impossivel - Valor de pH invalido. Deve estar entre 0 e 10.",
+        "OK EDGE concorrencia bloqueia duplo fecho - status 409/200",
+        "OK clientes criados por API real - 5 clientes",
+        "OK piscinas/jacuzzis criados por API real - 9 equipamentos",
+        "OK fichas tecnicas preenchidas - 9/9",
+        "OK tecnicos e viaturas ligados - 3 tecnicos, 3 carros, 3 guias obra",
+        "OK rondas criadas e visitas concluídas - 3 rondas, 54 visitas",
+        "OK produtos da visita viram registo quimico - 60 registos",
+        "OK consumo automatico baixa guia/viatura - 60 movimentos",
+        "OK problemas em campo geram reparacoes/alertas - 6 reparacoes",
+        "OK faturacao mensal gerada - 5 faturas",
+        "OK pagamentos total/parcial registados - PAID, PARTIAL, PENDING, PENDING, PENDING",
+        "OK mensagens reais do portal cliente ficam por ler - 5 mensagens QA por ler",
+        "OK chat mostra conversas por ler - 5 mensagens totais por ler",
+        "OK notificacoes mostram alarme de chat - alarme CHAT_MESSAGE",
+        "OK dashboard recebe dados reais - clientes 5, mensagens 5",
+        "OK guia de obra mantem referencia AT e totais finais - guia AT 4"
+      ]
+    }
+  ],
+  "initialFailure": {
+    "script": "scripts/test-field-fleet-management-ui.js",
+    "log": "/tmp/cw376-test-field-fleet-management-ui-first.log",
+    "sha256": "766fb28e53370130dca839e5b4819922b96b95b7aa883b0d69b167b2f59b9ec8",
+    "reason": "Old test attempted to fill removed workTech field. Updated to select the retained workVehicle and still verify clearing/disable on account changes. Full group passed on rerun."
+  },
+  "logs": {
+    "/tmp/cw376-opening-api-run1.log": "6e58890796b0f6caa80855861219ebb9e42b54e939022df5b1dddc153ccead1c",
+    "/tmp/cw376-regression-run1.log": "3e56010528cbf55b827610cf13c141f87ce4ff17595b07db487fc00f1266cade",
+    "/tmp/cw376-regression-run2.log": "e4bc8680e4923c83ec4d4450515dcddf4c2fba0a7ae3db24df67de062edf691c",
+    "/tmp/cw376-unit-all.log": "b5e775259a973b9ff51b3403b110846b7e279faf8d94b3c6776c482fcaceab0e",
+    "/tmp/cw376-technician.log": "6c62a1c0de5fdb3c27d1860573d294df84922ac91575c2b89bbddf03984ab654",
+    "/tmp/cw376-syntax.log": "b0bb1261a4a69ef75264ddde0970d2afbc1c10dd70c8231ef01fcd7f565ad5dc",
+    "/tmp/cw376-inventory.log": "3ff0b399eb882aa2f1fc22417d040fa914996597345d34784030b5ff1ffacd96"
+  },
+  "visual": {
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "screenshots": [
+      {
+        "path": "reports/field-visual/work-guide-start/de-1440.png",
+        "sha256": "df13ce27c2a805145a79c0643a3cc8557ef4b47d4a95e42f13de75f3d027ba79"
+      },
+      {
+        "path": "reports/field-visual/work-guide-start/de-320.png",
+        "sha256": "f8f6825085ef3e5a6807867cc4be2cefea28b7fd6a4614093c76402df7c21398"
+      },
+      {
+        "path": "reports/field-visual/work-guide-start/de-390.png",
+        "sha256": "bcebc8fb1bc047b81321154c1b4b6e41457e4f1663c85c3c6d1f7de3ca5bfddd"
+      },
+      {
+        "path": "reports/field-visual/work-guide-start/en-1440.png",
+        "sha256": "b27e08f50563c24b3776c16e1ee86f4a4f62e29ad3e7b26bbd4e8094e0a35a40"
+      },
+      {
+        "path": "reports/field-visual/work-guide-start/en-320.png",
+        "sha256": "5e151acaa1c534f25613e25b213ef8b1bf42cca5bfb1a3101e1db7cc0f2e696f"
+      },
+      {
+        "path": "reports/field-visual/work-guide-start/en-390.png",
+        "sha256": "895f45315d24d583cd3717f2d8fbf20e5f00fc0170845099ceb5452331f0d689"
+      },
+      {
+        "path": "reports/field-visual/work-guide-start/es-1440.png",
+        "sha256": "8b06f0abb5f13d5415fc385272822dd882c41e5942dae334f0efc83c34cd0764"
+      },
+      {
+        "path": "reports/field-visual/work-guide-start/es-320.png",
+        "sha256": "0c68a3ee287b983a35224a193bff8d84be7c5d1b707b10f6485babff05f91901"
+      },
+      {
+        "path": "reports/field-visual/work-guide-start/es-390.png",
+        "sha256": "64c998484fffa0d8baa92d5fff6acbe39f149a1712a61ec67f0ba6f227a5612b"
+      },
+      {
+        "path": "reports/field-visual/work-guide-start/fr-1440.png",
+        "sha256": "5a3434b881aba631e7317ee6d2fb4d4c2a663f4d1a1b00eaef03ffe8c6950e16"
+      },
+      {
+        "path": "reports/field-visual/work-guide-start/fr-320.png",
+        "sha256": "c163914326ea2b3bd6074715aef77df971d3b8c15282189bb1809becf938c8b0"
+      },
+      {
+        "path": "reports/field-visual/work-guide-start/fr-390.png",
+        "sha256": "38609c7f6110d805b266fb3966ee5b9d6b3ce8a9aa14354989d606bc30a35960"
+      },
+      {
+        "path": "reports/field-visual/work-guide-start/pt-1440.png",
+        "sha256": "6a18ea412ab4c1d2f3c7c813fe60497871d54297dec70d9a9eb95717cef9aec3"
+      },
+      {
+        "path": "reports/field-visual/work-guide-start/pt-320.png",
+        "sha256": "1998943f3e79d45845d5fa636e77fac3673d9140a3d77ca40cded7e1fe580389"
+      },
+      {
+        "path": "reports/field-visual/work-guide-start/pt-390.png",
+        "sha256": "9111a716d4c41381f7419bffcb7c095aab7a2d17410465b01bbced0b76dce4be"
+      },
+      {
+        "path": "reports/field-visual/work-guide-start/review-de-320.png",
+        "sha256": "e58e601ded5313f91425a80353674439cb7fd9836dcde097650d3349a109b48f"
+      },
+      {
+        "path": "reports/field-visual/work-guide-start/review-pt-1440.png",
+        "sha256": "5e573711c9d26d64fde3aaea26bc70cf8e5e603fd7ee2295a1aab817701d95e5"
+      },
+      {
+        "path": "reports/field-visual/work-guide-start/review-pt-390.png",
+        "sha256": "0adc52e1b8328c96b7bd140584859275b5fa46b63672b49c5a2414015e8b94ea"
+      }
+    ],
+    "horizontalOverflow": false,
+    "interactiveTargetMinHeight": 44,
+    "manuallyInspected": [
+      "pt-390.png",
+      "review-de-320.png",
+      "review-pt-1440.png"
+    ],
+    "repair": "Full selected technician text is displayed below the narrow select. Technician choices clear on account change and page suspension."
+  },
+  "rollbackSites": [
+    "WorkGuide INSERT",
+    "WorkGuideItem INSERT",
+    "Vehicle UPDATE",
+    "OperationalLock INSERT",
+    "Notification INSERT",
+    "UserAuditLog INSERT",
+    "FieldWriteRequest INSERT"
+  ],
+  "sourceHashes": {
+    "frontend/admin-vehicles.html": "086a0158af432d975669458e2034422d3297507e8ebd8391c826b0dcc709eb8e",
+    "frontend/admin-vehicles.js": "43e40b03eab5dcd1bcb98566cce4205ffa99f37aa3172d78c6d641b7f70f97d8",
+    "frontend/cw-work-guide-start-copy.js": "c3e2fd4709013aaf819a8e60ab44ef5ffe505b89367e492ffd89eb4e38593fad",
+    "frontend/cw-work-guide-start-rules.js": "ede2ae3c1ffa0daaf94b5259d568fdcc32439784196596e934eccfe61c82ae3f",
+    "frontend/cw-work-guide-start.css": "0ad0d17997c02701e2fdcfc7af6a5cc16c00423226e84215f163268661234976",
+    "frontend/cw-work-guide-start.js": "ecdd259c5024284670046e6733432f3b6a28f076d957c230b82a6847da224860",
+    "frontend/sw.js": "9865c861f2a394674c948fc93328e1b9d40afb0a000cda0ac57f4163a841462e",
+    "frontend/technician-guide.html": "eb48e73b81a3bd3065251d432d3ca72ae3abad9b1ca06bee02ed06f02eeef41d",
+    "frontend/technician-guide.js": "09a8bc3f425fa2e7353b3527d5ce94cb2067b49ce4dcf8f5d69337d1cb65f05e",
+    "frontend/work-guide-start.html": "89cc800a8c7f8f006ec9a0498febaaeb5a94d394769f883b8b2714f95bd54661",
+    "scripts/fixtures/internal-chat-server.js": "6d759fb71badb5975bb85195ef715876839e8b2836a7d299f64f54ab2ac6e579",
+    "scripts/helpers/open-reviewed-work-guide.js": "2de000d232b383d549e8c9d6fc8759eb7c0d5666c78efcf7e9d23504d1ba8bf7",
+    "scripts/helpers/work-guide-start-fixture.js": "0e22cf9d5eb440daf086a810e42f6de09c2be314df09dfa955026bd9be75ab2f",
+    "scripts/test-field-fleet-management-ui.js": "945f2220ea736dd39a1b72fbbb5fdc9f198d0d6120660300f661f322a84cc1dc",
+    "scripts/test-field-suite.js": "5e69f33183301283c675afe3b2cb87f71677ba9929024e21d47a2622cb24de86",
+    "scripts/test-field-transport-guide-create.js": "925763afb1c80bb65a06168a815a1a5103f2142741b5c373decbdd462fd919aa",
+    "scripts/test-field-vehicle-assignment.js": "84279404b7ef9d08953d587d20bd6f96495289c69a26ae04f0c5d18f609a4d33",
+    "scripts/test-field-vehicle-stock-preset.js": "767f4c57fcd5a700cc61733e950cc9fd3efb549f209d93fe42a1393869e860b7",
+    "scripts/test-field-work-guide-start-ui.js": "8a848eb3772012d9762a31aa12a68e91aed4ba696e6c7942afda8f5a852a1a38",
+    "scripts/test-field-work-guide-start.js": "8a6cf78296245ed43ebc3f77fb01673c7c17fbbfa3afdfc6dacb79c27df0af6e",
+    "src/controllers/guideController.js": "84a0b786e07b1993445f4f474f02109c2e4b57d3c359b3281882c582e2cf3aea",
+    "src/controllers/workGuideStartController.js": "d2dc797adc72a7877d827dfac2c42aaf47cc81c7b6c76a1973a4b0288300a561",
+    "src/routes/workGuideStartRoutes.js": "5397f2276220ca2349896f51b5ae9e2d276465e318f04bcbe9bfba8b3fa8b806",
+    "src/server.js": "458254eb04ae47998e6ff87a86d4516b7145f1194e68dd9613dbfdc575423399",
+    "src/services/fieldWriteRequestService.js": "bf1d83d956841d5c7144c4cb6f92e4b6dd31a9b0785a1e616875a1134e9b7de3",
+    "src/services/workGuideOpeningService.js": "3c1cf4f9fe99188ad45f9e993f33c3c2ad8411db4beb3c49b1898d2985250227",
+    "src/services/workGuideStartService.js": "269492ae2334ae846da545d902f8335f80d222e039f67cacdf584c3c1e4ebfbe",
+    "tests/work-guide-start.test.js": "c4e3cd81329e9c5e9874816bb56ac689a52ca27df4b072f1792d6b190c3c1993"
+  },
+  "serviceWorker": "cristalwater-field-20260926-v187",
+  "runnerGroups": 288,
+  "inventory": {
+    "html": 126,
+    "root": 119,
+    "nested": 7,
+    "pagesWithLiteralReference": 114,
+    "activeScripts": 309,
+    "unreferenced": 12,
+    "missingAssets": 0,
+    "trackedButUnavailableAssets": 2
+  },
+  "native": {
+    "task": "TASK376",
+    "status": "not_published",
+    "groupsExpected": 288,
+    "completeNativeGateConfirmed": false,
+    "lastConfirmed": {
+      "task": "TASK374",
+      "runId": 36220493972,
+      "jobId": 108344709185,
+      "groups": 284,
+      "restoreTables": 128,
+      "restoreFiles": 47
+    },
+    "previousPending": {
+      "task": "TASK375",
+      "runId": 36221808091,
+      "jobId": 108348349992,
+      "groupsExpected": 286,
+      "status": "in_progress"
+    }
+  },
+  "publication": {
+    "status": "prepared",
+    "branch": "work/field-readiness-20260915-simulation",
+    "mainUnchanged": "6f27081e1d183ff584a62255b016b373836734db"
+  }
+}

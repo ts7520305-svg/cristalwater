@@ -189,65 +189,6 @@ function combineNotes(current, addition) {
   const parts = [current, addition].map((part) => String(part || "").trim()).filter(Boolean);
   return parts.length ? Array.from(new Set(parts)).join(" | ") : null;
 }
-async function notifyMissingTransportGuide({ req, vehicleId, technicianId, workGuideId, reason }) {
-  const vehId = n(vehicleId);
-  const guideId = n(workGuideId);
-  const vehicle = vehId ? await prisma.vehicle.findUnique({ where: { id: vehId } }).catch(() => null) : null;
-  const plate = vehicle?.plate || `Viatura ${vehId || ""}`.trim();
-  const title = "Guia de transporte AT em falta";
-  const message = `${plate} iniciou uma guia de obra provisoria sem guia AT ativa. Associar a guia de transporte assim que a AT permitir.`;
-  const metadata = { vehicleId: vehId, technicianId: n(technicianId), workGuideId: guideId, reason: reason || "AT_UNAVAILABLE" };
-
-  const lock = guideId ? await prisma.operationalLock.findFirst({
-    where: {
-      lockType: "MISSING_TRANSPORT_GUIDE",
-      entity: "WorkGuide",
-      entityId: guideId,
-      status: "PENDING"
-    }
-  }).catch(() => null) : null;
-
-  if (!lock && guideId) {
-    await prisma.operationalLock.create({
-      data: {
-        lockType: "MISSING_TRANSPORT_GUIDE",
-        severity: "WARNING",
-        status: "PENDING",
-        entity: "WorkGuide",
-        entityId: guideId,
-        technicianId: n(technicianId),
-        vehicleId: vehId,
-        title,
-        message,
-        payload: metadata,
-        requestedBy: req?.headers?.["x-user-email"] || req?.headers?.["x-actor"] || "SYSTEM"
-      }
-    }).catch(() => null);
-  }
-
-  const notification = await prisma.notification.create({
-    data: {
-      type: "WARNING",
-      eventType: "TRANSPORT_GUIDE_MISSING",
-      title,
-      message,
-      role: "ADMIN",
-      severity: "WARNING",
-      metadata
-    }
-  }).catch(() => null);
-
-  if (global.io && notification) {
-    global.io.emit("new-notification", {
-      id: notification.id,
-      type: notification.type,
-      eventType: notification.eventType,
-      title: notification.title,
-      message: notification.message,
-      createdAt: notification.createdAt
-    });
-  }
-}
 function movementMetadataFromNotes(notes) {
   const raw = String(notes || "").trim();
   if (!raw) return { userNotes: "", location: "", readings: null };
@@ -457,13 +398,7 @@ async function listWorkGuides(req, res) {
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
 }
 
-async function startWorkGuide(req,res) {
-  try {
-    const result=await require('../services/workGuideOpeningService').start(req.user,req.body);
-    if(result.missingTransportGuide&&!result.reused)await notifyMissingTransportGuide({req,vehicleId:result.workGuide.vehicleId,technicianId:result.workGuide.technicianId,workGuideId:result.workGuide.id,reason:'AT_UNAVAILABLE_START_DAY'});
-    res.json({ok:true,...result,message:result.reused?'Guia existente conservada, sem reiniciar saldos.':result.missingTransportGuide?'Obra provisória criada; reveja a associação AT na administração.':'Guia de obra criada.'});
-  } catch(e) { res.status(e.statusCode||503).json({ok:false,error:e.statusCode?e.message:'Não foi possível confirmar a abertura da obra.'}); }
-}
+const startWorkGuide = require('./workGuideStartController').legacy;
 
 const consumeMaterial = require('./vehicleConsumptionController').legacy;
 

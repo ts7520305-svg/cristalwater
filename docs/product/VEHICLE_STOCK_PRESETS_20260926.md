@@ -54,3 +54,7 @@ Continuar nas regras de alerta da frota, revendo preservação, validação, aud
 ## Atualização de evidência — TASK375, 26/09/2026
 
 TASK373 confirmada em 282/282 grupos esperados distintos, todas as 17 etapas aprovadas e restauro de 128 tabelas/47 ficheiros com linhas e hashes iguais. CI `36218570468`, job `108339358313`; [evidência nativa](evidence/20260926_task373_ci.json). TASK374 continua pendente na consulta desta atualização.
+
+## Confirmação nativa — TASK376
+
+TASK374 confirmada no [CI 36220493972](https://github.com/ts7520305-svg/cristalwater/actions/runs/36220493972), job `108344709185`: **284/284 scripts esperados distintos**, todos com código zero, 17 etapas aprovadas e restauro de 128 tabelas/47 ficheiros com linhas e hashes iguais. [Evidência nativa](evidence/20260926_task374_ci.json).
