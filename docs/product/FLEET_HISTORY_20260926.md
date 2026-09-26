@@ -36,7 +36,7 @@ Os históricos carregam independentemente dos alertas e das escolhas de viatura.
 
 ## Publicação e validação nativa
 
-Preparada sobre `bb5eb4970d6b3dcdfb41f2c92600b3ae5795f142` para a branch `work/field-readiness-20260915-simulation`. SHA, árvore e CI serão registados após publicação. O gate PostgreSQL nativo deste lote permanece por confirmar.
+Publicada em `f72bfbdd59d98c404d8752834a9094f5f39c641b`, árvore `56efe85a15cc2559678979b4db6e8b7e336306ed`, idêntica à preparada e validada localmente, na branch `work/field-readiness-20260915-simulation`. [CI 36225374723](https://github.com/ts7520305-svg/cristalwater/actions/runs/36225374723), job `108358260658`, em execução. O gate PostgreSQL nativo de 290 grupos e restauro permanece por confirmar.
 
 TASK375 confirmada no [CI 36221808091](https://github.com/ts7520305-svg/cristalwater/actions/runs/36221808091), job `108348349992`: 286/286 scripts esperados distintos com código zero, 17 etapas e restauro de 128 tabelas/47 ficheiros com linhas e hashes iguais. [Evidência nativa](evidence/20260926_task375_ci.json). TASK376, [CI 36223589014](https://github.com/ts7520305-svg/cristalwater/actions/runs/36223589014), job `108353287692`, ainda em execução na última consulta; 288 grupos e restauro não declarados aprovados.
 

@@ -307,13 +307,20 @@
     "catalogueGuardDifferences": 0
   },
   "native": {
-    "status": "not_started",
+    "status": "in_progress",
     "expectedScripts": 290,
-    "fullNativeGateConfirmed": false
+    "fullNativeGateConfirmed": false,
+    "runId": 36225374723,
+    "jobId": 108358260658,
+    "codeSha": "f72bfbdd59d98c404d8752834a9094f5f39c641b",
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36225374723"
   },
   "publication": {
     "branch": "work/field-readiness-20260915-simulation",
-    "status": "prepared"
+    "status": "published",
+    "codeSha": "f72bfbdd59d98c404d8752834a9094f5f39c641b",
+    "treeSha": "56efe85a15cc2559678979b4db6e8b7e336306ed",
+    "matchesValidatedTree": true
   },
   "priorNative": {
     "task375": {
