@@ -657,11 +657,7 @@ async function listMovements(req, res) {
 }
 
 async function createMaintenance(req, res) {
-  try {
-    const { vehicleId, type, title, dueDate, km, cost, notes, status } = req.body;
-    const record = await prisma.vehicleMaintenanceRecord.create({ data: { vehicleId: n(vehicleId), type: type || "GENERAL", title, dueDate: dateOrNull(dueDate), km: n(km), cost: n(cost), notes, status: status || "PENDING" } });
-    res.json({ ok: true, record });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  return require('./vehicleMaintenanceReviewController').legacy(req, res);
 }
 
 async function listMaintenance(req, res) {
@@ -670,16 +666,12 @@ async function listMaintenance(req, res) {
     if (req.query.vehicleId) where.vehicleId = n(req.query.vehicleId);
     if (req.query.status) where.status = req.query.status;
     const records = await prisma.vehicleMaintenanceRecord.findMany({ where, orderBy: [{ status: "asc" }, { dueDate: "asc" }, { createdAt: "desc" }] });
-    res.json({ ok: true, records });
+    res.json({ ok: true, records: req.user.role === 'ADMIN' ? records : records.map(({ cost, ...record }) => record) });
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
 }
 
 async function completeMaintenance(req, res) {
-  try {
-    const id = n(req.params.id);
-    const record = await prisma.vehicleMaintenanceRecord.update({ where: { id }, data: { status: "DONE", completedAt: new Date(), ...req.body } });
-    res.json({ ok: true, record });
-  } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
+  return require('./vehicleMaintenanceReviewController').legacy(req, res);
 }
 
 module.exports = {

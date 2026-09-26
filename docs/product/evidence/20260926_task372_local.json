@@ -1,0 +1,198 @@
+{
+  "task": "TASK372",
+  "baseCommit": "fa7573a9e4e4d3e38d0b2cb701a0bcbc683f2691",
+  "validatedAt": "2026-09-26T04:08:43.322072+00:00",
+  "sourceHashes": {
+    "frontend/admin-vehicles.html": "9271b5d3772d592ba5c59347f3ff324c8d5f1e16369e8967b2385e0023059c9a",
+    "frontend/admin-vehicles.js": "568de8395bcb045c56a54f723c466eae7a2aaec0dd24261aca66580558c8de6c",
+    "frontend/cw-vehicle-maintenance-copy.js": "aa1e260d862cbb5d860ab17ba33f75e2768122704b174383139f9ec8ff1091fe",
+    "frontend/cw-vehicle-maintenance-rules.js": "1accae6bc38e81bdd76754dadb990d3cbd74865354509696f9f5f3748a8eb8b2",
+    "frontend/cw-vehicle-maintenance.css": "2475568bc6b44eb2c8949e3d974b1f82e55b7ba37ad2612a8ac1c3a95cee0da3",
+    "frontend/cw-vehicle-maintenance.js": "7d107a31752c14d33267e86840e8fbe566efd4684f5caee8e56978192447f7cd",
+    "frontend/sw.js": "4b1a9e1ae368d3ceaf2db62e895532324d3e74aed1e836f3a4cec6101f835caa",
+    "frontend/technician-field-mode.html": "0155ddf91fc1bc8079df33c1165ebcab2f5a9695d02aae7de4679d2209f3cebd",
+    "frontend/technician-guide.html": "5798329d0def2f6f99eaedcf121d886b9bb00edca351f566b94d4e9013c38dfb",
+    "frontend/vehicle-maintenance.html": "fc21010d836110e10f14c99500095b0d1b34d311fad1d9e1f019b0e6d1b46575",
+    "scripts/fixtures/internal-chat-server.js": "b822f142ae5ffc90e30e891842943b0e7d85994e5c226c26a898da1a14b5125f",
+    "scripts/test-field-fleet-management-ui.js": "2d127acbbca5070ae4d63c5cbb06b6ae9f1a71ee966f2c986e663caee8fb4438",
+    "scripts/test-field-suite.js": "ec4bedbc4d52d97f54590696d21cc1cf186c3bccd07cfb176d8cf2a70cfe8f21",
+    "scripts/test-field-vehicle-maintenance-ui.js": "9c3fc3e778b16e9e8fcb62c05a76a3a1432d8f7b9156b348a2956e81e7e15df3",
+    "scripts/test-field-vehicle-maintenance.js": "90ffb1c67e656d8468b5caf1d4644dcf24c361668ad9df49c828ee251f6ae9e4",
+    "src/controllers/guideController.js": "681303043c11bb4def4e0373c8f02bb5e476abc9c5c47b1ffdae3994778d88f4",
+    "src/controllers/vehicleMaintenanceReviewController.js": "d4f8e6c5d6e81b4406f92f8e586217a6f081c25d1068e6044784a1de40c76597",
+    "src/routes/vehicleMaintenanceReviewRoutes.js": "96d1a8c070c9603ef6f2aeb1994c11d9ccc4a6a0307c134e732636b52a395076",
+    "src/server.js": "a4eddd280195c6186f987685d68e16bfa008b2c740677d4dd3b3a854609f3645",
+    "src/services/fieldWriteRequestService.js": "2f44a57ededc1a0367b2b49c67b7c9b131695e8e6ac8b27bf664837cd604fc19",
+    "src/services/vehicleMaintenanceReviewService.js": "998bc63e4d15a61b64b7cd6515584b4bf5d97989f216d2948f5d67ac6d47c9bb",
+    "tests/vehicle-maintenance-review.test.js": "b13b4b660e99a02db6a0beb5a74c3ff3c035120410c9022d991c1e86aaba86b6"
+  },
+  "unitTests": {
+    "passed": 875,
+    "files": 109,
+    "new": 18
+  },
+  "technicianTests": 4,
+  "syntax": {
+    "backend": 672,
+    "frontend": 282,
+    "inline": 44
+  },
+  "schema": {
+    "newMigrations": 0,
+    "totalAdditiveMigrationsApplied": 43,
+    "tablesExpected": 128,
+    "runtime": "PGlite 0.5.8 / pglite-socket 0.2.11; isolated synthetic data, not native PostgreSQL"
+  },
+  "integrationGroups": [
+    {
+      "script": "scripts/test-field-vehicle-maintenance.js",
+      "code": 0,
+      "log": "/tmp/cw372-test-field-vehicle-maintenance.log",
+      "sha256": "cd15e8cac240c94b485eedadb2e86666fafd4b8be5a6568c567553c0070d024e"
+    },
+    {
+      "script": "scripts/test-field-vehicle-maintenance-ui.js",
+      "code": 0,
+      "log": "/tmp/cw372-test-field-vehicle-maintenance-ui.log",
+      "sha256": "ed79332b1631609d76cdc8da0e9e284bc43b94cb71cc33cf07a06c46e9a272f5"
+    },
+    {
+      "script": "scripts/test-field-fleet-management.js",
+      "code": 0,
+      "log": "/tmp/cw372-test-field-fleet-management.log",
+      "sha256": "db956ef5951c9c703e51cbeb7c2d8a932bf846a2ba97334908261fb6fc36b6bb"
+    },
+    {
+      "script": "scripts/test-field-fleet-management-ui.js",
+      "code": 0,
+      "log": "/tmp/cw372-test-field-fleet-management-ui.log",
+      "sha256": "20061280a51d80464a855c2f5ceb003c5ef1e45d953567ecf3ef3d4f79a4b402"
+    },
+    {
+      "script": "scripts/test-field-company-expenses.js",
+      "code": 0,
+      "log": "/tmp/cw372-test-field-company-expenses.log",
+      "sha256": "c752cc5651de0dd8adc789b35595aa9c6d177787ba30d7ec4b73b92426b937bd"
+    },
+    {
+      "script": "scripts/test-field-work-guide-close.js",
+      "code": 0,
+      "log": "/tmp/cw372-test-field-work-guide-close.log",
+      "sha256": "28db43658d3bf6cd11d1bb1520ba135c097ce71ac582cb87caeeef4729ddae8c"
+    },
+    {
+      "script": "scripts/test-field-document-recovery.js",
+      "code": 0,
+      "log": "/tmp/cw372-test-field-document-recovery.log",
+      "sha256": "4ec5eae4f8ca88bd10cbac1fedd1a9d61fb016b2c59af27ea8c36c81287a26fd"
+    }
+  ],
+  "logs": {
+    "/tmp/cw372-test-field-fleet-management-ui.log": "20061280a51d80464a855c2f5ceb003c5ef1e45d953567ecf3ef3d4f79a4b402",
+    "/tmp/cw372-test-field-company-expenses.log": "c752cc5651de0dd8adc789b35595aa9c6d177787ba30d7ec4b73b92426b937bd",
+    "/tmp/cw372-test-field-fleet-management.log": "db956ef5951c9c703e51cbeb7c2d8a932bf846a2ba97334908261fb6fc36b6bb",
+    "/tmp/cw372-ui-empty-note-failure.log": "6563e8b4ce67d81965c2049ec6c2b5d022f9f506fb17eb31d78e03e53c3ca9f1",
+    "/tmp/cw372-syntax.log": "f7a1cba6fde62a4c3db8b7b1b6d0b249679c6393ad6fa2862b4acfb9be3e6a04",
+    "/tmp/cw372-units-final.log": "7eaacb715f05ceada385acfebbe144b75d71d700841d4f846405e54d0210d0f1",
+    "/tmp/cw372-test-field-work-guide-close.log": "28db43658d3bf6cd11d1bb1520ba135c097ce71ac582cb87caeeef4729ddae8c",
+    "/tmp/cw372-test-field-document-recovery.log": "4ec5eae4f8ca88bd10cbac1fedd1a9d61fb016b2c59af27ea8c36c81287a26fd",
+    "/tmp/cw372-technician.log": "7983d325977ad1c638ed2e2a1c48666256db0a8f74fafbfa4db12bc0ec927a6a",
+    "/tmp/cw372-test-field-vehicle-maintenance-ui.log": "ed79332b1631609d76cdc8da0e9e284bc43b94cb71cc33cf07a06c46e9a272f5",
+    "/tmp/cw372-test-field-vehicle-maintenance.log": "cd15e8cac240c94b485eedadb2e86666fafd4b8be5a6568c567553c0070d024e"
+  },
+  "browser": {
+    "engine": "Chromium 153.0.0, multiple processes, web security active",
+    "screenshots": 18,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "minimumControlPx": 44,
+    "hashes": {
+      "reports/field-visual/vehicle-maintenance/pt-390.png": "00d82384339d4328a9ffced483a669d4605decd6c2382c831e84594d0a124d52",
+      "reports/field-visual/vehicle-maintenance/de-1440.png": "893dacd2de66833c736632b176a0a1ca2afa60953f716ad78e6b5f936e9c751e",
+      "reports/field-visual/vehicle-maintenance/en-1440.png": "9cafc7d8d64f2fc6ae51540f978c032a137e4777c890558e19a6d3c2b7dcce12",
+      "reports/field-visual/vehicle-maintenance/es-390.png": "194b328762ab59ca9b910d09f54dc084f56938e092abfa1676743dc6cd449a8f",
+      "reports/field-visual/vehicle-maintenance/pt-320.png": "a01c5c3a7845021bfdaf8f0d004cd4e97f6bf056bdfbda79750c957dde71c6eb",
+      "reports/field-visual/vehicle-maintenance/es-1440.png": "6b8d66c4442a21c49096c1e6c58dea7caf0b203d429c506537af70507e0fbfd5",
+      "reports/field-visual/vehicle-maintenance/fr-390.png": "2fe1649fe976ff9aad90943041ba3db62cfc8b9c6a079d0042bb93e0011c8f05",
+      "reports/field-visual/vehicle-maintenance/es-320.png": "8e0a48cd9f003881d3372d4279558a20ebcec4eceb6a054cf2f5c8afb49fc379",
+      "reports/field-visual/vehicle-maintenance/de-390.png": "fa5d9fba001576f2b0715358217cf60bb44af5111a961473141c44277ba59b25",
+      "reports/field-visual/vehicle-maintenance/fr-1440.png": "45aef0d3a1670b25ecff76241ed777dea6f045ea18718bc4a4b6fb2c3ef869b9",
+      "reports/field-visual/vehicle-maintenance/en-320.png": "74f3b4b8e55dea702d8445cc97da83fc095b5d038d2a405e6ba0e4cdcb2f3a49",
+      "reports/field-visual/vehicle-maintenance/review-de-320.png": "dd181b2d24034006364e28ad23c960ed051c3e1682fa3196064b0421cb679f20",
+      "reports/field-visual/vehicle-maintenance/fr-320.png": "ef30f704131f10efc34635205b5d148e526a7246da1e2992f133b14442329228",
+      "reports/field-visual/vehicle-maintenance/review-pt-1440.png": "fc9690d0dfd3c266cb43e7b839855991e473556cdea4f0de988ef886ced1a5bf",
+      "reports/field-visual/vehicle-maintenance/de-320.png": "959bc5d5d50a0f2037e1d586eed9e275b933b7547b541b45f40ef62de5583390",
+      "reports/field-visual/vehicle-maintenance/review-pt-390.png": "2ea3d8f0eea06d72eeef014941c4309d9401b2d7ad7efc5ba628798ead5a2402",
+      "reports/field-visual/vehicle-maintenance/en-390.png": "b092c26292a6ea616888f2ecaf9eeb2ea09a83ab1ae7b020bf73f75b667fa1f3",
+      "reports/field-visual/vehicle-maintenance/pt-1440.png": "f7bd8a1c6d5448cb51d4f7abb021ec0882a85d807587c468cdfaf5bf19183f3e"
+    },
+    "visuallyReviewed": [
+      "de-320.png",
+      "review-pt-1440.png"
+    ],
+    "entry": "ADMIN fleet; technician guide; link in field documents",
+    "identity": "ADMIN, TECHNICIAN and TEAM_LEADER; PIN/technician and associated User; current vehicle",
+    "privacy": "Costs and linked expenses omitted from field API, review and receipts; direct cost edits refused; actual cost preserved"
+  },
+  "runnerGroups": 280,
+  "cacheVersion": "v183",
+  "inventory": {
+    "htmlFiles": 122,
+    "rootPages": 115,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 110,
+    "catalogueGuardDifferences": 0
+  },
+  "validationNotes": [
+    {
+      "kind": "QA_SOCKET_PREPARATION",
+      "resolution": "Initial PGlite prepared statement collision 42P05; disabled statement cache and used pgbouncer mode only in temporary QA runner. Full affected group passed on a fresh isolated database."
+    },
+    {
+      "kind": "QA_BROWSER_VERSION",
+      "resolution": "Chromium 138 lost text insertion in a dynamic textarea. Updated only temporary QA browser to Chromium 153; full group passed with original timeouts and added immediate input/preservation assertions. No application bypass or weakened assertions."
+    }
+  ],
+  "publication": {
+    "status": "PREPARED",
+    "branch": "work/field-readiness-20260915-simulation",
+    "mainBranch": "feature/technicians-v25",
+    "nativeGroupsExpected": 280,
+    "nativeRestore": "PENDING"
+  },
+  "previousCI": [
+    {
+      "task": 370,
+      "runId": 36193770611,
+      "groupsPassed": 276,
+      "groupsExpected": 276,
+      "nativeRestore": "PASSED_128_TABLES_47_FILES"
+    },
+    {
+      "task": 371,
+      "runId": 36196942259,
+      "groupsPassed": 278,
+      "groupsExpected": 278,
+      "nativeRestore": "PASSED_128_TABLES_47_FILES"
+    }
+  ],
+  "limits": [
+    "Native PostgreSQL 280-group suite and restore remain required.",
+    "Maintenance cost is not a recorded invoice or payment; separate financial review remains required.",
+    "Assignments, presets and alert rules remain for review.",
+    "Historical reconciliation, operational volume, backup/archive policy, VPS and physical pilot remain open.",
+    "No merge, deployment or real external contact."
+  ]
+}

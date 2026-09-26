@@ -525,19 +525,10 @@ function closeWork(id) {
   location.href='/work-guide-close?workGuideId='+encodeURIComponent(id)+(lang?'&lang='+encodeURIComponent(lang):'');
 }
 
-async function createMaintenance() {
-  if(!selectedVehicle("maintVehicle"))return;
-  await j(`${API}/maintenance`, {
-    method: "POST",
-    body: JSON.stringify({
-      vehicleId: val("maintVehicle"),
-      type: el("maintType")?.value || "GENERAL",
-      title: val("maintTitle"),
-      dueDate: val("maintDue"),
-      km: val("maintKm"),
-    }),
-  });
-  await load();
+function createMaintenance() {
+  requirePageSession();if(!selectedVehicle('maintVehicle'))return;
+  const lang=document.getElementById('fleetLanguage')?.value||'pt';
+  location.href='/vehicle-maintenance?kind=vehicles&vehicleId='+encodeURIComponent(val('maintVehicle'))+'&lang='+encodeURIComponent(lang);
 }
 
 

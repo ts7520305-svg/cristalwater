@@ -1,5 +1,15 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 26/09/2026, TASK372 validada localmente
+
+Manutenção da frota em `/vehicle-maintenance`, com entradas na administração, nas guias técnicas e nos documentos do campo. Criação, edição e conclusão revistas; manter/alterar/limpar, datas precisas/Lisboa, zero/nulo e data de conclusão preservada. Registo, auditoria e comprovativo atómicos; perda de resposta, reinício, concorrência e anulação recuperáveis. Custos e relações financeiras apenas ADMIN, incluindo API e recuperação; técnico/líder só na viatura atual, com custos reais conservados. Despesas/pagamentos mantêm revisão própria. [Relatório](VEHICLE_MAINTENANCE_20260926.md) e [evidência local](evidence/20260926_task372_local.json).
+
+875 unitários/109 ficheiros, quatro técnicos, sintaxe 672/282/44 e sete grupos locais distintos aprovados. Seis pontos SQL de reversão; dezoito capturas, cinco idiomas e 320/390/1440. Nenhuma migração nova: 43 existentes e 128 tabelas. Cache v183; runner 280 grupos. Preparado para publicação na branch `work/field-readiness-20260915-simulation`; **gate PostgreSQL nativo de 280 grupos e restauro ainda por confirmar**.
+
+TASK371 confirmada em **278/278 grupos e restauro de 128 tabelas/47 ficheiros**, [CI 36196942259](https://github.com/ts7520305-svg/cristalwater/actions/runs/36196942259). TASK370 confirmada em **276/276 e o mesmo restauro**, [CI 36193770611](https://github.com/ts7520305-svg/cristalwater/actions/runs/36193770611). Linhas e hashes iguais. Evidências nativas de 26/09 em `evidence/20260926_task371_ci.json` e `evidence/20260926_task370_ci.json`.
+
+Inventário: 122 HTML, 110 referências em 301 scripts ativos, 12 sem referência literal e nenhum recurso local em falta. **Continuar na atribuição de técnicos a viaturas** em `/admin-vehicles`: `assignTechnicianVehicle` grava técnico, histórico, leitura e auditoria separadamente, com falhas ignoradas. Rever transação, quilometragem, obras abertas, concorrência e recuperação. Presets, regras de alertas, conciliação histórica, volume real, arquivo/cópias operacionais, VPS e piloto físico permanecem abertos. Sem merge/deploy/contactos reais; aplicação não declarada completa.
+
 ## Retoma atual — 25/09/2026, TASK371 publicada
 
 Fecho manual revisto em `/work-guide-close`, com entrada no histórico da administração, documentos do campo e página técnica antiga. Escolha explícita entre conservar/indicar leitura final; zero e nulo distintos. Atualização do conta-quilómetros exige escolha própria, sem diminuir a leitura atual. Revisão identifica obra, técnico, viatura, AT, notas originais e saldos. Fecho, eventual quilometragem, auditoria e comprovativo atómicos; estado AT, notas, stock e documentos conservados. Prova por conta/UUID, recuperação após resposta perdida/reinício, concorrência e anulação persistente. ADMIN e técnico/líder próprios na viatura atual; POST antigo com 409. Cinco idiomas, campos em memória e referência mínima por separador. [Relatório](WORK_GUIDE_CLOSE_20260925.md) e [evidência local](evidence/20260925_task371_local.json).
