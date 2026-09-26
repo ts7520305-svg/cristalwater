@@ -40,7 +40,7 @@ A TASK377 terminou cancelada após cerca de 50 minutos, compatível com o limite
 
 O limite do job passa para 70 minutos. Todos os scripts, o limite individual de 120 segundos, a migração aditiva, os testes prévios e o restauro nativo são mantidos. O ficheiro YAML foi validado. A TASK378 continua em execução na última consulta: [CI 36226988288](https://github.com/ts7520305-svg/cristalwater/actions/runs/36226988288), job `108362806296`, 292 grupos/restauro por confirmar.
 
-TASK379 preparada e validada localmente; publicação na branch de trabalho e gate PostgreSQL nativo de 293 grupos/restauro ainda por confirmar.
+Publicada em `ced5c47835350d1501c69e9f2f296f988522d342`, árvore `932fac333d73ca09500152a45bf15c4b2639a6f6`, idêntica à preparada e validada localmente, na branch `work/field-readiness-20260915-simulation`. [CI 36228505903](https://github.com/ts7520305-svg/cristalwater/actions/runs/36228505903), job `108367008202`, em execução com orçamento de 70 minutos. O gate PostgreSQL nativo de 293 grupos e restauro permanece por confirmar.
 
 ## Retoma
 
