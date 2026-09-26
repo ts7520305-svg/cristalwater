@@ -251,10 +251,16 @@
   },
   "publication": {
     "branch": "work/field-readiness-20260915-simulation",
-    "status": "prepared",
+    "status": "published",
     "nativeGate": "pending",
     "expectedGroups": 282,
     "merge": false,
-    "deploy": false
+    "deploy": false,
+    "codeCommit": "81c6feb4c166db33de227b3456f41843ff7c85ff",
+    "tree": "6eebdb979f68ea7c5d5273a22e06c0588b2a3d97",
+    "treeMatchesLocal": true,
+    "ciRun": 36218570468,
+    "ciJob": 108339358313,
+    "ciStatus": "in_progress"
   }
 }

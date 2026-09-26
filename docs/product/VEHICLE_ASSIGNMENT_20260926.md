@@ -41,7 +41,7 @@ QA isolada com dados sintéticos, PGlite 0.5.8/socket 0.2.11 e Chromium 153. Nen
 
 ## Publicação e próximo ponto
 
-Preparado para publicação na branch `work/field-readiness-20260915-simulation`, sobre `741ba4187591053d84d2d52ed9a326b960110dd8`. Runner com 282 grupos; cache v184. Gate PostgreSQL nativo e restauro deste lote ainda não confirmados. Sem merge, deploy ou contactos externos.
+Publicado em `81c6feb4c166db33de227b3456f41843ff7c85ff`, árvore `6eebdb979f68ea7c5d5273a22e06c0588b2a3d97`, na branch `work/field-readiness-20260915-simulation`; árvore remota idêntica à preparada localmente. [CI 36218570468](https://github.com/ts7520305-svg/cristalwater/actions/runs/36218570468), job `108339358313`, em execução. Runner com 282 grupos; cache v184. Gate PostgreSQL nativo e restauro deste lote ainda não confirmados. Sem merge, deploy ou contactos externos.
 
 TASK372: [CI 36217019968](https://github.com/ts7520305-svg/cristalwater/actions/runs/36217019968), job `108334888707`, ainda em execução na última consulta; 280 grupos e restauro pendentes de confirmação. Último gate integral confirmado: TASK371, 278/278 e restauro de 128 tabelas/47 ficheiros com linhas e hashes iguais.
 
