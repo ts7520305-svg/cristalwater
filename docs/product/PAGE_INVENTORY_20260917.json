@@ -1,14 +1,15 @@
 {
-  "generatedAt": "2026-09-18T08:30:28.886Z",
-  "baseCommit": "b27462fcdca6862197bf79974f9c6ede9343f951",
+  "generatedAt": "2026-09-26T08:21:08.891Z",
+  "baseCommit": "5a2f80cef951f19704d1a2d2e90909545a9918b8",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 169,
+  "activeScriptsScanned": 315,
   "summary": {
-    "htmlFiles": 101,
-    "rootPages": 94,
+    "htmlFiles": 126,
+    "rootPages": 119,
     "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
     "missingAssetReferences": 0,
-    "pagesWithLiteralTestReference": 60,
+    "pagesWithLiteralTestReference": 114,
     "catalogueGuardDifferences": 0
   },
   "pages": [
@@ -16,7 +17,7 @@
       "file": "frontend/admin-ai.html",
       "route": "/admin-ai",
       "kind": "Entrada raiz",
-      "title": "Cristal Water - IA Operacional",
+      "title": "Cristal Water — Gestão com IA",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -31,13 +32,12 @@
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/manifest.webmanifest",
-        "/cristal-assist.css",
-        "/cw-auth.js",
         "/ui/foundation.css",
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
+        "/cristal-assist.css",
         "/ui/design-system.css",
+        "/cw-auth.js",
         "/admin-auth-guard.js",
+        "/cw-execution-values.js",
         "/admin-ai.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
@@ -48,7 +48,21 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-financial-ai-ui.js",
+        "test-field-execution-values-ui.js",
+        "test-field-expense-costs-ui.js",
+        "test-field-repair-costs-ui.js",
+        "test-field-repair-materials-ui.js",
+        "test-field-repair-labor-ui.js",
+        "test-field-cost-period-ui.js",
+        "test-field-maintenance-costs-ui.js",
+        "test-field-expense-valuations-ui.js",
+        "test-field-composed-cost-coverage.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -82,6 +96,7 @@
         "/cw-field-write-store.js",
         "/cw-incomplete-workflow.js",
         "/cw-admin-incomplete.js",
+        "/cw-report-download.js",
         "/admin-alerts.js",
         "/admin-commercial-quotes.js",
         "/cristal-help-data.js",
@@ -94,6 +109,9 @@
         "/cw-browser-push.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-water-api.js",
         "test-field-e2e.js",
@@ -103,7 +121,9 @@
         "test-field-internal-alert-ui.js",
         "test-field-stock-requests-ui.js",
         "test-field-problem-reports-ui.js",
-        "test-field-extra-incomplete.js"
+        "test-field-extra-incomplete.js",
+        "test-field-alert-report-opening.js",
+        "test-commercial-quotes-browser.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -132,6 +152,7 @@
         "/admin-auth-guard.js",
         "/ui/design-system.css",
         "/admin-client-rates.js",
+        "/cw-client-service-pricing.js",
         "/admin-client-services.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
@@ -142,8 +163,12 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
-        "test-field-client-services-ui.js"
+        "test-field-client-services-ui.js",
+        "test-client-rates-browser.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -183,6 +208,11 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [
+        "/cw-i18n.js"
+      ],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-contract-activation-ui.js",
         "test-field-client-edit-recovery-ui.js"
@@ -227,6 +257,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-client-receipts-ui.js"
       ],
@@ -236,31 +269,35 @@
       "file": "frontend/admin-command-center.html",
       "route": "/admin-command-center",
       "kind": "Entrada raiz",
-      "title": "Cristal Water - Command Center (Redirect Legado)",
+      "title": "Cristal Water · Entrada antiga",
       "catalogueRoles": [
         "ADMIN"
       ],
-      "guardFiles": [
-        "admin-auth-guard.js"
-      ],
+      "guardFiles": [],
       "explicitRoleHints": [
         "ADMIN"
       ],
-      "conditionalAccess": [],
-      "entryRedirects": {},
+      "conditionalAccess": [
+        "Entrada neutra: encaminha uma identidade coerente para a área do perfil; identidade inválida abre login. Não concede acesso a dados; guardas e APIs do destino continuam a autenticar."
+      ],
+      "entryRedirects": {
+        "ADMIN": "/admin-master-control",
+        "CLIENT": "/client-portal",
+        "TECHNICIAN": "/technician-field-mode",
+        "TEAM_LEADER": "/technician-field-mode"
+      },
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/cw-auth.js",
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
-        "/admin-auth-guard.js",
-        "/ui/design-system.css",
-        "/crystal-os-v2-shell.js",
-        "/crystal-os-v2-nav.js",
-        "/ui/design-system.js"
+        "/ui/foundation.css",
+        "/cw-admin-legacy-entry.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-legacy-entry.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -289,6 +326,7 @@
         "/crystal-os-v2-foundation.css",
         "/crystal-os-v2-phase2-adapter.css",
         "/ui/design-system.css",
+        "/cw-company-closure-rules.js",
         "/admin-company-closures.js",
         "/cw-admin-shortcuts.js",
         "/ui/core/navigation-context.js",
@@ -297,33 +335,85 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-company-closures.js",
+        "test-field-company-closure-edit.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
       "file": "frontend/admin-core-flow.html",
       "route": "/admin-core-flow",
       "kind": "Entrada raiz",
-      "title": "Cristal Water LDA",
+      "title": "Cristal Water · Entrada antiga",
       "catalogueRoles": [
         "ADMIN"
       ],
       "guardFiles": [],
-      "explicitRoleHints": [],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
+      "conditionalAccess": [
+        "Entrada neutra: encaminha uma identidade coerente para a área do perfil; identidade inválida abre login. Não concede acesso a dados; guardas e APIs do destino continuam a autenticar."
+      ],
+      "entryRedirects": {
+        "ADMIN": "/admin-master-control",
+        "CLIENT": "/client-portal",
+        "TECHNICIAN": "/technician-field-mode",
+        "TEAM_LEADER": "/technician-field-mode"
+      },
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/ui/foundation.css",
+        "/cw-admin-legacy-entry.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-legacy-entry.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/admin-credit-revenue.html",
+      "route": "/admin-credit-revenue",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Reduções por serviço",
+      "catalogueRoles": [
+        "ADMIN"
+      ],
+      "guardFiles": [
+        "admin-auth-guard.js"
+      ],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
       "conditionalAccess": [],
       "entryRedirects": {},
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/cw-auth.js",
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
+        "/ui/foundation.css",
         "/ui/design-system.css",
+        "/cw-auth.js",
+        "/admin-auth-guard.js",
+        "/admin-credit-revenue.js",
+        "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-credit-revenue-ui.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -366,7 +456,17 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [
+        "/cw-i18n.js"
+      ],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-reminder-delete.js",
+        "test-field-crm-reminders.js",
+        "test-field-language-reload.js",
+        "test-field-reminder-lifecycle.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -406,14 +506,20 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-fleet-history-ui.js",
+        "test-field-external-invoice-summary.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
       "file": "frontend/admin-email-logs.html",
       "route": "/admin-email-logs",
       "kind": "Entrada raiz",
-      "title": "Cristal Water - Email Logs",
+      "title": "Histórico de emails · Cristal Water",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -427,23 +533,130 @@
       "entryRedirects": {},
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/manifest.webmanifest",
         "/ui/foundation.css",
-        "/cristal-assist.css",
+        "/ui/design-system.css",
         "/cw-auth.js",
         "/admin-auth-guard.js",
-        "/ui/design-system.css",
+        "/cw-email-history-rules.js",
+        "/cw-payment-ledger-copy.js",
+        "/cw-email-history-copy.js",
         "/admin-email-logs.js",
-        "/cristal-help-data.js",
-        "/cristal-assist.js",
-        "/cw-admin-shortcuts.js",
         "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-email-history.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/admin-email-review.html",
+      "route": "/admin-email-review",
+      "kind": "Entrada raiz",
+      "title": "Revisão de emails · Cristal Water",
+      "catalogueRoles": [
+        "ADMIN"
+      ],
+      "guardFiles": [],
+      "explicitRoleHints": [],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/ui/design-system.css",
+        "/admin-email-review.js",
+        "/ui/core/navigation-context.js",
+        "/crystal-os-v2-shell.js",
+        "/crystal-os-v2-nav.js",
+        "/ui/design-system.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-email-history.js",
+        "test-field-monthly-email-review-ui.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/admin-expenses.html",
+      "route": "/admin-expenses",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Despesas e contas a pagar",
+      "catalogueRoles": [
+        "ADMIN"
+      ],
+      "guardFiles": [
+        "admin-auth-guard.js"
+      ],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/ui/foundation.css",
+        "/ui/design-system.css",
+        "/cw-auth.js",
+        "/admin-auth-guard.js",
+        "/cw-expense-maintenance.js",
+        "/cw-expense-labor-distribution.js",
+        "/cw-maintenance-material-rules.js",
+        "/cw-equipment-material-review-rules.js",
+        "/cw-equipment-history-rules.js",
+        "/cw-equipment-time-review-rules.js",
+        "/cw-reminder-resource-rules.js",
+        "/cw-reminder-visit-rules.js",
+        "/cw-reminder-visit-resource-rules.js",
+        "/cw-reminder-visit-cost-rules.js",
+        "/cw-reminder-labor-rules.js",
+        "/cw-reminder-material-rules.js",
+        "/cw-repair-labor.js",
+        "/cw-expense-valuation.js",
+        "/cw-expense-cost-period.js",
+        "/cw-expense-maintenance-labor.js",
+        "/cw-expense-maintenance-material.js",
+        "/cw-expense-costs.js",
+        "/admin-expenses.js",
+        "/ui/core/navigation-context.js",
+        "/crystal-os-v2-shell.js",
+        "/crystal-os-v2-nav.js",
+        "/ui/design-system.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-vehicle-maintenance-ui.js",
+        "test-field-company-expenses-ui.js",
+        "test-field-expense-costs-ui.js",
+        "test-field-repair-costs-ui.js",
+        "test-field-repair-materials-ui.js",
+        "test-field-repair-labor-ui.js",
+        "test-field-cost-period-ui.js",
+        "test-field-maintenance-costs-ui.js",
+        "test-field-labor-distribution-ui.js",
+        "test-field-expense-valuations-ui.js",
+        "test-field-maintenance-labor.js",
+        "test-field-reminder-visit-costs.js",
+        "test-field-reminder-visit-intervals.js",
+        "test-field-reminder-intervals.js",
+        "test-field-equipment-intervals.js",
+        "test-field-equipment-time-review.js",
+        "test-field-maintenance-share-period.js",
+        "test-field-equipment-history-materials.js",
+        "test-field-equipment-history-time.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -482,9 +695,13 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-e2e.js",
-        "test-field-inventory-count-flow.js"
+        "test-field-inventory-count-flow.js",
+        "test-field-admin-catalogue.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -519,6 +736,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-key-scope.js"
       ],
@@ -528,7 +748,7 @@
       "file": "frontend/admin-live-map.html",
       "route": "/admin-live-map",
       "kind": "Entrada raiz",
-      "title": "Cristal Water - Mapa em Tempo Real",
+      "title": "Posições dos técnicos · Cristal Water",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -542,27 +762,26 @@
       "entryRedirects": {},
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/manifest.webmanifest",
         "/ui/foundation.css",
-        "/cristal-assist.css",
-        "/cw-ui-kit.css",
-        "/cw-auth.js",
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
-        "/admin-auth-guard.js",
         "/ui/design-system.css",
-        "/socket.io/socket.io.js",
+        "/cw-auth.js",
+        "/admin-auth-guard.js",
+        "/cw-live-map-rules.js",
+        "/cw-payment-ledger-copy.js",
+        "/cw-live-map-copy.js",
         "/admin-live-map.js",
-        "/cristal-help-data.js",
-        "/cristal-assist.js",
         "/ui/core/navigation-context.js",
-        "/cw-admin-shortcuts.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-live-map.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -594,6 +813,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-visual-flow.js",
         "test-field-equipment-flow.js",
@@ -635,6 +857,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-admin-map-recovery.js"
       ],
@@ -674,9 +899,13 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-visual-flow.js",
         "test-field-e2e.js",
+        "test-field-legacy-entry.js",
         "test-field-team-leader-entry.js",
         "test-auth-entry-browser.js"
       ],
@@ -686,7 +915,7 @@
       "file": "frontend/admin-menu.html",
       "route": "/admin-menu",
       "kind": "Entrada raiz",
-      "title": "Cristal Water · Menu Completo",
+      "title": "Menu de módulos · Cristal Water",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -700,18 +929,27 @@
       "entryRedirects": {},
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/cw-auth.js",
         "/ui/foundation.css",
-        "/crystal-os-v2-foundation.css",
-        "/cw-premium-admin-phase1.css",
-        "/crystal-os-v2-phase2-adapter.css",
         "/ui/design-system.css",
+        "/cw-admin-catalogue.css",
+        "/cw-auth.js",
         "/admin-auth-guard.js",
-        "/cw-admin-premium-controls.js",
+        "/cw-admin-catalogue.js",
+        "/cw-admin-catalogue-copy.js",
+        "/ui/core/navigation-context.js",
+        "/crystal-os-v2-shell.js",
+        "/crystal-os-v2-nav.js",
+        "/admin-menu.js",
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-admin-catalogue.js",
+        "test-field-navigation-preferences.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -751,6 +989,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-notification-confirmation.js",
         "test-account-notification-settings-browser.js",
@@ -762,7 +1003,7 @@
       "file": "frontend/admin-onboarding.html",
       "route": "/admin-onboarding",
       "kind": "Entrada raiz",
-      "title": "Cristal Water LDA - Entrada Guiada",
+      "title": "Entrada guiada · Cristal Water",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -776,53 +1017,61 @@
       "entryRedirects": {},
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/cw-auth.js",
         "/ui/foundation.css",
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
         "/ui/design-system.css",
+        "/cw-onboarding.css",
+        "/cw-auth.js",
         "/admin-auth-guard.js",
-        "/admin-onboarding.js",
-        "/cristal-help-data.js",
-        "/cristal-assist.js",
+        "/cw-onboarding-rules.js",
+        "/cw-onboarding-copy.js",
         "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
+        "/admin-onboarding.js",
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-admin-onboarding-ui.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
       "file": "frontend/admin-operational-flow.html",
       "route": "/admin-operational-flow",
       "kind": "Entrada raiz",
-      "title": "Cristal Water - Fluxo Operacional (Redirect Legado)",
+      "title": "Cristal Water · Entrada antiga",
       "catalogueRoles": [
         "ADMIN"
       ],
-      "guardFiles": [
-        "admin-auth-guard.js"
-      ],
+      "guardFiles": [],
       "explicitRoleHints": [
         "ADMIN"
       ],
-      "conditionalAccess": [],
-      "entryRedirects": {},
+      "conditionalAccess": [
+        "Entrada neutra: encaminha uma identidade coerente para a área do perfil; identidade inválida abre login. Não concede acesso a dados; guardas e APIs do destino continuam a autenticar."
+      ],
+      "entryRedirects": {
+        "ADMIN": "/admin-master-control",
+        "CLIENT": "/client-portal",
+        "TECHNICIAN": "/technician-field-mode",
+        "TEAM_LEADER": "/technician-field-mode"
+      },
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/cw-auth.js",
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
-        "/admin-auth-guard.js",
-        "/ui/design-system.css",
-        "/crystal-os-v2-shell.js",
-        "/crystal-os-v2-nav.js",
-        "/ui/design-system.js"
+        "/ui/foundation.css",
+        "/cw-admin-legacy-entry.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-legacy-entry.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -856,6 +1105,7 @@
         "/admin-operational-settings.js",
         "/admin-data-protection.js",
         "/admin-equipment-maintenance.js",
+        "/admin-maintenance-billing.js",
         "/admin-equipment-reminders.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
@@ -866,9 +1116,18 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-equipment-flow.js",
-        "test-field-client-intake-ui.js"
+        "test-field-payment-policy-review.js",
+        "test-field-admin-catalogue.js",
+        "test-field-client-intake-ui.js",
+        "test-field-maintenance-billing.js",
+        "test-data-protection-browser.js",
+        "test-equipment-admin-browser.js",
+        "test-equipment-reminders-browser.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -876,7 +1135,7 @@
       "file": "frontend/admin-payment-settings.html",
       "route": "/admin-payment-settings",
       "kind": "Entrada raiz",
-      "title": "Cristal Water - Configuração de Lembretes",
+      "title": "Lembretes de pagamento · Cristal Water",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -890,24 +1149,25 @@
       "entryRedirects": {},
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/manifest.webmanifest",
-        "/cristal-assist.css",
-        "/cw-auth.js",
         "/ui/foundation.css",
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
-        "/admin-auth-guard.js",
         "/ui/design-system.css",
-        "/cristal-help-data.js",
-        "/cristal-assist.js",
-        "/cw-admin-shortcuts.js",
+        "/cw-auth.js",
+        "/admin-auth-guard.js",
+        "/cw-payment-policy-rules.js",
+        "/cw-payment-policy-copy.js",
+        "/admin-payment-settings.js",
         "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-payment-policy-review.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -936,6 +1196,8 @@
         "/crystal-os-v2-foundation.css",
         "/crystal-os-v2-phase2-adapter.css",
         "/ui/design-system.css",
+        "/cw-payment-ledger-rules.js",
+        "/cw-payment-ledger-copy.js",
         "/admin-payments.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
@@ -946,7 +1208,12 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-payment-ledger.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -973,6 +1240,10 @@
         "/cw-auth.js",
         "/admin-auth-guard.js",
         "/ui/design-system.css",
+        "/cw-pool-calculator-copy.js",
+        "/cw-pool-calculator-rules.js",
+        "/cw-pool-calculator-store.js",
+        "/cw-pool-calculator-drafts.js",
         "/admin-pool-calculator.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
@@ -983,7 +1254,15 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-pool-calculator-state.js",
+        "test-field-pool-calculator-recovery.js",
+        "test-field-pool-calculator-drafts.js",
+        "test-field-pool-calculator-languages.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -1025,11 +1304,25 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [
+        "/logo-cristalwater.png"
+      ],
+      "languageAssets": [
+        "/cw-i18n.js"
+      ],
+      "directPrintAction": false,
       "testReferences": [
+        "test-field-reminder-delete.js",
+        "test-field-service-reminders.js",
+        "test-field-reminder-lifecycle.js",
+        "test-field-admin-catalogue.js",
+        "test-field-admin-onboarding-ui.js",
         "test-field-technical-sheet-atomicity.js",
         "test-field-technical-sheet-recovery-ui.js",
         "test-field-technical-proposals.js",
-        "test-field-proposal-recovery-ui.js"
+        "test-field-proposal-recovery-ui.js",
+        "test-field-alert-report-opening.js",
+        "test-field-maintenance-billing.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -1070,7 +1363,13 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [
+        "/cw-i18n.js"
+      ],
+      "directPrintAction": false,
       "testReferences": [
+        "test-field-admin-catalogue.js",
         "test-field-pool-edit-recovery-ui.js",
         "test-field-operational-pages.js"
       ],
@@ -1115,6 +1414,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-operational-pages.js",
         "test-role-help-browser.js"
@@ -1146,6 +1448,7 @@
         "/cw-auth.js",
         "/admin-auth-guard.js",
         "/admin-reports.js",
+        "/cw-monthly-email.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
         "/cw-admin-shortcuts.js",
@@ -1155,8 +1458,49 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
-        "test-field-admin-monthly-reports-ui.js"
+        "test-field-admin-monthly-reports-ui.js",
+        "test-field-monthly-email-ui.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/admin-revenue.html",
+      "route": "/admin-revenue",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Repartição de mensalidades",
+      "catalogueRoles": [
+        "ADMIN"
+      ],
+      "guardFiles": [
+        "admin-auth-guard.js"
+      ],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/ui/foundation.css",
+        "/ui/design-system.css",
+        "/cw-auth.js",
+        "/admin-auth-guard.js",
+        "/admin-revenue.js",
+        "/ui/core/navigation-context.js",
+        "/crystal-os-v2-shell.js",
+        "/crystal-os-v2-nav.js",
+        "/ui/design-system.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-monthly-revenue-ui.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -1194,6 +1538,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-water-api.js",
         "test-route-os-acceptance.js",
@@ -1206,7 +1553,7 @@
       "file": "frontend/admin-security.html",
       "route": "/admin-security",
       "kind": "Entrada raiz",
-      "title": "Cristal Water · Segurança",
+      "title": "Segurança e contas · Cristal Water",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -1220,32 +1567,33 @@
       "entryRedirects": {},
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/manifest.webmanifest",
-        "/cristal-assist.css",
-        "/cw-auth.js",
         "/ui/foundation.css",
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
         "/ui/design-system.css",
+        "/cw-auth.js",
         "/admin-auth-guard.js",
+        "/cw-security-rules.js",
+        "/cw-security-copy.js",
         "/admin-security.js",
-        "/cristal-help-data.js",
-        "/cristal-assist.js",
-        "/cw-admin-shortcuts.js",
         "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-security-review.js",
+        "test-field-admin-catalogue.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
       "file": "frontend/admin-service-log.html",
       "route": "/admin-service-log",
       "kind": "Entrada raiz",
-      "title": "Cristal Water LDA - Registo Diario",
+      "title": "Cristal Water LDA - Registo diário",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -1270,14 +1618,19 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-daily-service-log.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
       "file": "frontend/admin-suppliers.html",
       "route": "/admin-suppliers",
       "kind": "Entrada raiz",
-      "title": "Cristal Water - Fornecedores",
+      "title": "Cristal Water — Fornecedores",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -1292,29 +1645,36 @@
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/manifest.webmanifest",
-        "/ui/foundation.css",
-        "/cristal-assist.css",
         "/cw-auth.js",
-        "/ui/design-system.css",
         "/admin-auth-guard.js",
+        "/ui/foundation.css",
+        "/ui/design-system.css",
+        "/cristal-assist.css",
+        "/cw-suppliers.css",
+        "/cw-supplier-rules.js",
+        "/cw-supplier-copy.js",
         "/admin-suppliers.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
         "/cw-admin-shortcuts.js",
-        "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-supplier-hub-ui.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
       "file": "frontend/admin-technicians.html",
       "route": "/admin-technicians",
       "kind": "Entrada raiz",
-      "title": "Cristal Water LDA - Tecnicos",
+      "title": "Cristal Water — Gestão de técnicos",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -1329,36 +1689,40 @@
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/cw-auth.js",
-        "/ui/foundation.css",
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
-        "/ui/design-system.css",
         "/admin-auth-guard.js",
-        "/cw-ui-feedback.js",
-        "/cw-operational-risk.js",
+        "/manifest.webmanifest",
+        "/ui/foundation.css",
+        "/ui/design-system.css",
+        "/cristal-assist.css",
+        "/cw-technician-management.css",
+        "/cw-technician-management-rules.js",
+        "/cw-technician-management-copy.js",
         "/admin-technicians.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
-        "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-technician-management-ui.js",
+        "test-field-vehicle-assignment-ui.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
       "file": "frontend/admin-test-center.html",
       "route": "/admin-test-center",
       "kind": "Entrada raiz",
-      "title": "Cristal Water LDA",
+      "title": "Cristal Water · Entrada antiga",
       "catalogueRoles": [
         "ADMIN"
       ],
-      "guardFiles": [
-        "admin-auth-guard.js"
-      ],
+      "guardFiles": [],
       "explicitRoleHints": [
         "ADMIN"
       ],
@@ -1366,24 +1730,23 @@
       "entryRedirects": {},
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/cw-auth.js",
-        "/admin-auth-guard.js",
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
-        "/ui/design-system.css",
-        "/crystal-os-v2-shell.js",
-        "/crystal-os-v2-nav.js",
-        "/ui/design-system.js"
+        "/ui/foundation.css",
+        "/cw-admin-legacy-entry.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-legacy-entry.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
       "file": "frontend/admin-today.html",
       "route": "/admin-today",
       "kind": "Entrada raiz",
-      "title": "Cristal Water · Hoje",
+      "title": "Visitas do dia · Cristal Water",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -1397,58 +1760,67 @@
       "entryRedirects": {},
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/cw-auth.js",
         "/ui/foundation.css",
-        "/crystal-os-v2-foundation.css",
-        "/cw-premium-admin-phase1.css",
-        "/crystal-os-v2-phase2-adapter.css",
         "/ui/design-system.css",
+        "/cw-auth.js",
         "/admin-auth-guard.js",
+        "/cw-admin-day-rules.js",
+        "/cw-admin-day-copy.js",
         "/admin-today.js",
-        "/cw-admin-premium-controls.js",
-        "/ui/design-system.js"
-      ],
-      "missingAssets": [],
-      "testReferences": [],
-      "visualReview": "Não reavaliada por este inventário"
-    },
-    {
-      "file": "frontend/admin-ui-settings.html",
-      "route": "/admin-ui-settings",
-      "kind": "Entrada raiz",
-      "title": "Cristal Water · Configuração Visual",
-      "catalogueRoles": [
-        "ADMIN"
-      ],
-      "guardFiles": [
-        "admin-auth-guard.js"
-      ],
-      "explicitRoleHints": [
-        "ADMIN"
-      ],
-      "conditionalAccess": [],
-      "entryRedirects": {},
-      "catalogueRolesMissingFromGuard": [],
-      "localAssets": [
-        "/manifest.webmanifest",
-        "/cristal-assist.css",
-        "/cw-auth.js",
-        "/ui/foundation.css",
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
-        "/ui/design-system.css",
-        "/admin-auth-guard.js",
-        "/admin-ui-settings.js",
-        "/cristal-help-data.js",
-        "/cristal-assist.js",
-        "/cw-admin-shortcuts.js",
         "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-admin-day.js",
+        "test-field-admin-catalogue.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/admin-ui-settings.html",
+      "route": "/admin-ui-settings",
+      "kind": "Entrada raiz",
+      "title": "Preferências de navegação · Cristal Water",
+      "catalogueRoles": [
+        "ADMIN"
+      ],
+      "guardFiles": [
+        "admin-auth-guard.js"
+      ],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/ui/foundation.css",
+        "/ui/design-system.css",
+        "/cw-navigation-preferences.css",
+        "/cw-appearance.css",
+        "/cw-auth.js",
+        "/admin-auth-guard.js",
+        "/cw-navigation-preferences.js",
+        "/cw-appearance-copy.js",
+        "/ui/core/navigation-context.js",
+        "/crystal-os-v2-shell.js",
+        "/crystal-os-v2-nav.js",
+        "/admin-ui-settings.js",
+        "/ui/design-system.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-navigation-preferences.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -1474,20 +1846,44 @@
         "/cw-auth.js",
         "/ui/foundation.css",
         "/ui/design-system.css",
+        "/cw-fleet-management.css",
+        "/cw-fleet-history.css",
         "/admin-auth-guard.js",
         "/cw-auth-download.js",
         "/cw-operational-risk.js",
+        "/cw-fleet-management-rules.js",
+        "/cw-fleet-management-copy.js",
+        "/cw-fleet-management.js",
         "/admin-vehicles.js",
+        "/cw-vehicle-consumption-rules.js",
+        "/cw-fleet-history-rules.js",
+        "/cw-fleet-history-copy.js",
+        "/cw-fleet-history.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
         "/cw-admin-shortcuts.js",
-        "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-fleet-management-ui.js",
+        "test-field-vehicle-consumption-ui.js",
+        "test-field-transport-guide-items-ui.js",
+        "test-field-transport-guide-manage-ui.js",
+        "test-field-work-guide-close-ui.js",
+        "test-field-vehicle-maintenance-ui.js",
+        "test-field-vehicle-assignment-ui.js",
+        "test-field-vehicle-stock-preset-ui.js",
+        "test-field-operational-risk-rules-ui.js",
+        "test-field-fleet-history-ui.js",
+        "test-field-work-guide-start-ui.js",
+        "test-field-transport-guide-documents-ui.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -1524,6 +1920,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-auth-entry-browser.js"
       ],
@@ -1560,6 +1959,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -1596,6 +1998,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-operational-values-ui.js"
       ],
@@ -1632,13 +2037,17 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-equipment-stock-os-operational.js",
         "test-field-alert-visibility.js",
         "test-field-alert-resolution.js",
         "test-field-alert-billing.js",
         "test-field-internal-alert.js",
-        "test-field-stock-requests.js"
+        "test-field-stock-requests.js",
+        "test-field-alert-report-opening.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -1646,7 +2055,7 @@
       "file": "frontend/billing-center.html",
       "route": "/billing-center",
       "kind": "Entrada raiz",
-      "title": "Centro de Cobranças - Cristal Water",
+      "title": "Centro de cobranças · Cristal Water",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -1660,22 +2069,26 @@
       "entryRedirects": {},
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/manifest.webmanifest",
         "/ui/foundation.css",
-        "/cristal-assist.css",
+        "/ui/design-system.css",
         "/cw-auth.js",
         "/admin-auth-guard.js",
-        "/ui/design-system.css",
+        "/cw-collection-summary-rules.js",
+        "/cw-payment-ledger-copy.js",
+        "/cw-collection-summary-copy.js",
         "/billing-center.js",
-        "/cristal-help-data.js",
-        "/cristal-assist.js",
         "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-collection-summary.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -1712,6 +2125,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-extra-execution.js"
       ],
@@ -1721,7 +2137,7 @@
       "file": "frontend/billing-history.html",
       "route": "/billing-history",
       "kind": "Entrada raiz",
-      "title": "Histórico Faturação",
+      "title": "Cristal Water · Histórico de extras",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -1736,22 +2152,31 @@
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
         "/manifest.webmanifest",
+        "/ui/foundation.css",
         "/cristal-assist.css",
         "/cw-auth.js",
-        "/ui/foundation.css",
+        "/admin-auth-guard.js",
         "/crystal-os-v2-foundation.css",
         "/crystal-os-v2-phase2-adapter.css",
-        "/admin-auth-guard.js",
         "/ui/design-system.css",
+        "/cw-extra-history-rules.js",
+        "/cw-extra-history-copy.js",
+        "/billing-history.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
+        "/cw-admin-shortcuts.js",
         "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-extra-history.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -1789,10 +2214,15 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-credit-adjustment.js",
+        "test-field-extra-history.js",
         "test-field-extra-execution.js",
-        "test-field-extra-correction.js"
+        "test-field-extra-correction.js",
+        "test-field-maintenance-billing.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -1832,8 +2262,13 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-system-interconnections.js",
+        "test-field-authenticated-document-opening.js",
+        "test-field-payment-ledger.js",
         "test-field-invoice-chat.js",
         "test-field-chat-identity.js",
         "test-field-client-chat-privacy.js",
@@ -1841,6 +2276,10 @@
         "test-field-client-chat-retry.js",
         "test-field-client-chat-recovery-ui.js",
         "test-field-client-chat-history-ui.js",
+        "test-field-financial-ai-ui.js",
+        "test-field-company-expenses.js",
+        "test-field-expense-costs.js",
+        "test-field-expense-valuations.js",
         "test-auth-entry-browser.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
@@ -1877,14 +2316,19 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-legacy-entry.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
       "file": "frontend/client-history.html",
       "route": "/client-history",
       "kind": "Entrada raiz",
-      "title": "Cristal Water - Historico do Cliente",
+      "title": "Cristal Water · Histórico técnico",
       "catalogueRoles": [
         "CLIENT"
       ],
@@ -1898,27 +2342,27 @@
       "entryRedirects": {},
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/manifest.webmanifest",
-        "/client-auth-guard.js",
         "/ui/foundation.css",
-        "/cristal-assist.css",
         "/cw-auth.js",
-        "/css/crystal-v25.css",
+        "/client-auth-guard.js",
         "/crystal-os-v2-foundation.css",
         "/crystal-os-v2-phase2-adapter.css",
-        "/cw-block2-shell.css",
         "/ui/design-system.css",
+        "/cw-client-technical-rules.js",
+        "/cw-client-technical-copy.js",
         "/client-history.js",
-        "/cristal-help-data.js",
-        "/cristal-assist.js",
         "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
-        "/cw-block2-shell.js",
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
+        "test-field-legacy-entry.js",
+        "test-field-client-technical-history.js",
         "test-role-help-browser.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
@@ -1951,6 +2395,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-visual-flow.js",
         "test-auth-entry-browser.js"
@@ -1995,7 +2442,12 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-legacy-entry.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -2037,7 +2489,11 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
+        "test-field-legacy-entry.js",
         "test-field-notification-confirmation.js",
         "test-role-help-browser.js"
       ],
@@ -2081,7 +2537,11 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
+        "test-field-legacy-entry.js",
         "test-field-team-leader-entry.js",
         "test-auth-entry-browser.js",
         "test-role-help-browser.js"
@@ -2121,6 +2581,10 @@
         "/cw-auth-download.js",
         "/cw-client-chat-send.js",
         "/cw-client-portal-request.js",
+        "/cw-report-download.js",
+        "/cw-client-monthly-reports.js",
+        "/cw-client-documents.js",
+        "/cw-client-closures.js",
         "/client-portal.js",
         "/client-quotes.js",
         "/ui/core/navigation-context.js",
@@ -2128,17 +2592,28 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-visual-flow.js",
         "test-field-e2e.js",
+        "test-field-client-closures.js",
+        "test-field-client-closures-ui.js",
+        "test-field-legacy-entry.js",
+        "test-field-client-technical-history.js",
+        "test-field-admin-catalogue.js",
         "test-field-invoice-chat.js",
         "test-field-chat-attachments.js",
         "test-field-client-chat-recovery-ui.js",
         "test-field-client-chat-history-ui.js",
         "test-field-client-portal-requests-ui.js",
         "test-field-team-leader-entry.js",
+        "test-field-client-monthly-reports-ui.js",
+        "test-field-client-documents-ui.js",
         "test-auth-entry-browser.js",
-        "test-role-help-browser.js"
+        "test-role-help-browser.js",
+        "test-client-quotes-browser.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -2146,36 +2621,35 @@
       "file": "frontend/client-wow.html",
       "route": "/client-wow",
       "kind": "Entrada raiz",
-      "title": "Cristal Water - Portal do Cliente",
+      "title": "Cristal Water · Entrada",
       "catalogueRoles": [
         "CLIENT"
       ],
-      "guardFiles": [
-        "client-auth-guard.js"
-      ],
+      "guardFiles": [],
       "explicitRoleHints": [
         "CLIENT"
       ],
-      "conditionalAccess": [],
-      "entryRedirects": {},
+      "conditionalAccess": [
+        "Entrada neutra: encaminha uma identidade coerente para a área do perfil; identidade inválida abre login. Não concede acesso a dados; guardas e APIs do destino continuam a autenticar."
+      ],
+      "entryRedirects": {
+        "ADMIN": "/admin-master-control",
+        "CLIENT": "/client-portal",
+        "TECHNICIAN": "/technician-field-mode",
+        "TEAM_LEADER": "/technician-field-mode"
+      },
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/cw-auth.js",
-        "/client-auth-guard.js",
         "/ui/foundation.css",
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
-        "/cw-block2-shell.css",
-        "/ui/design-system.css",
-        "/client-wow.js",
-        "/crystal-os-v2-shell.js",
-        "/crystal-os-v2-nav.js",
-        "/ui/core/navigation-context.js",
-        "/cw-block2-shell.js",
-        "/ui/design-system.js"
+        "/cw-admin-legacy-entry.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-legacy-entry.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -2215,14 +2689,23 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-system-interconnections.js",
         "test-field-backup.js",
         "test-field-visit-briefing.js",
         "test-field-alert-billing.js",
         "test-field-credit-allocation.js",
+        "test-field-client-closures-ui.js",
         "test-field-legacy-admin-access.js",
-        "test-field-report-opening-ui.js"
+        "test-field-report-opening-ui.js",
+        "test-field-client-monthly-generation.js",
+        "test-field-execution-values.js",
+        "test-field-financial-revenue-coverage.js",
+        "test-field-maintenance-revenue.js",
+        "test-field-repair-revenue.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -2266,6 +2749,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-client-chat-recovery-ui.js",
         "test-field-client-chat-history-ui.js",
@@ -2278,7 +2764,7 @@
       "file": "frontend/client_tech.html",
       "route": "/client_tech",
       "kind": "Entrada raiz",
-      "title": "Cristal Water - Parametros da Piscina",
+      "title": "Cristal Water · Histórico técnico",
       "catalogueRoles": [
         "CLIENT"
       ],
@@ -2292,25 +2778,27 @@
       "entryRedirects": {},
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/manifest.webmanifest",
         "/ui/foundation.css",
-        "/cristal-assist.css",
         "/cw-auth.js",
+        "/client-auth-guard.js",
         "/crystal-os-v2-foundation.css",
         "/crystal-os-v2-phase2-adapter.css",
-        "/cw-block2-shell.css",
-        "/client-auth-guard.js",
         "/ui/design-system.css",
-        "/cristal-help-data.js",
-        "/cristal-assist.js",
+        "/cw-client-technical-rules.js",
+        "/cw-client-technical-copy.js",
+        "/client-history.js",
         "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
-        "/cw-block2-shell.js",
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-client-technical-history.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -2345,6 +2833,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-legacy-admin-access.js"
       ],
@@ -2382,6 +2873,9 @@
         "/ui/design-system.css"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-team-leader-entry.js",
         "test-notification-sound-browser.js"
@@ -2392,26 +2886,41 @@
       "file": "frontend/crystal-os-v2-route-index.html",
       "route": "/crystal-os-v2-route-index",
       "kind": "Entrada raiz",
-      "title": "Crystal OS V2 - Route Index",
+      "title": "Índice de módulos · Cristal Water",
       "catalogueRoles": [
         "ADMIN"
       ],
-      "guardFiles": [],
-      "explicitRoleHints": [],
+      "guardFiles": [
+        "admin-auth-guard.js"
+      ],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
       "conditionalAccess": [],
       "entryRedirects": {},
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
+        "/ui/foundation.css",
         "/ui/design-system.css",
+        "/cw-admin-catalogue.css",
         "/cw-auth.js",
+        "/admin-auth-guard.js",
+        "/cw-admin-catalogue.js",
+        "/cw-admin-catalogue-copy.js",
+        "/ui/core/navigation-context.js",
         "/crystal-os-v2-shell.js",
         "/crystal-os-v2-nav.js",
+        "/admin-menu.js",
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-admin-catalogue.js",
+        "test-field-navigation-preferences.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -2449,12 +2958,134 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-access-api.js",
         "test-customer-os-operational.js",
         "test-equipment-stock-os-operational.js",
         "test-real-month-flow-api.js",
         "test-production-runtime-health.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/equipment-history-review.html",
+      "route": "/equipment-history-review",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Rever origem histórica",
+      "catalogueRoles": [],
+      "guardFiles": [
+        "admin-auth-guard.js"
+      ],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/ui/foundation.css",
+        "/ui/design-system.css",
+        "/equipment-material-review.css",
+        "/cw-auth.js",
+        "/admin-auth-guard.js",
+        "/cw-maintenance-material-rules.js",
+        "/cw-equipment-material-review-rules.js",
+        "/cw-equipment-history-rules.js",
+        "/equipment-material-review.js",
+        "/ui/core/navigation-context.js",
+        "/crystal-os-v2-shell.js",
+        "/crystal-os-v2-nav.js",
+        "/ui/design-system.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-equipment-history-review.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/equipment-material-review.html",
+      "route": "/equipment-material-review",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Rever materiais do equipamento",
+      "catalogueRoles": [],
+      "guardFiles": [
+        "admin-auth-guard.js"
+      ],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/ui/foundation.css",
+        "/ui/design-system.css",
+        "/equipment-material-review.css",
+        "/cw-auth.js",
+        "/admin-auth-guard.js",
+        "/cw-maintenance-material-rules.js",
+        "/cw-equipment-material-review-rules.js",
+        "/cw-equipment-history-rules.js",
+        "/equipment-material-review.js",
+        "/ui/core/navigation-context.js",
+        "/crystal-os-v2-shell.js",
+        "/crystal-os-v2-nav.js",
+        "/ui/design-system.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-equipment-history-materials.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/equipment-time-review.html",
+      "route": "/equipment-time-review",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Rever tempos do equipamento",
+      "catalogueRoles": [],
+      "guardFiles": [
+        "admin-auth-guard.js"
+      ],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/ui/foundation.css",
+        "/ui/design-system.css",
+        "/equipment-material-review.css",
+        "/cw-auth.js",
+        "/admin-auth-guard.js",
+        "/cw-maintenance-material-rules.js",
+        "/cw-equipment-material-review-rules.js",
+        "/cw-equipment-history-rules.js",
+        "/cw-equipment-time-review-rules.js",
+        "/equipment-material-review.js",
+        "/ui/core/navigation-context.js",
+        "/crystal-os-v2-shell.js",
+        "/crystal-os-v2-nav.js",
+        "/ui/design-system.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-equipment-time-review.js",
+        "test-field-equipment-history-time.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -2500,7 +3131,11 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
+        "test-field-navigation-preferences.js",
         "test-field-team-leader-entry.js",
         "test-role-help-browser.js",
         "test-shared-navigation-browser.js"
@@ -2543,6 +3178,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -2553,8 +3191,12 @@
       "title": "Documento financeiro · Cristal Water",
       "catalogueRoles": [],
       "guardFiles": [],
-      "explicitRoleHints": [],
-      "conditionalAccess": [],
+      "explicitRoleHints": [
+        "PUBLIC"
+      ],
+      "conditionalAccess": [
+        "Entrada pública sem dados financeiros; abrir PDF exige ADMIN ou CLIENT titular na API"
+      ],
       "entryRedirects": {},
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
@@ -2564,7 +3206,12 @@
         "/invoice-document.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
+        "test-field-authenticated-document-opening.js",
+        "test-field-financial-pdf.js",
         "test-field-invoice-document.js",
         "test-field-invoice-chat.js",
         "test-field-invoice-outbound.js",
@@ -2608,13 +3255,65 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-draft-visibility.js",
         "test-invoice-draft-classification-browser.js",
         "test-field-payment-retry-ui.js",
         "test-field-invoice-pdf-access.js",
+        "test-field-admin-catalogue.js",
+        "test-field-fleet-management-ui.js",
+        "test-field-operational-risk-rules-ui.js",
         "test-field-invoice-document.js",
-        "test-field-extra-execution.js"
+        "test-field-extra-execution.js",
+        "test-field-execution-values-ui.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/labor-cost-bases.html",
+      "route": "/labor-cost-bases",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Bases compostas de trabalho",
+      "catalogueRoles": [
+        "ADMIN"
+      ],
+      "guardFiles": [
+        "admin-auth-guard.js"
+      ],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/ui/foundation.css",
+        "/ui/design-system.css",
+        "/cw-auth.js",
+        "/admin-auth-guard.js",
+        "/cw-maintenance-material-rules.js",
+        "/cw-equipment-material-review-rules.js",
+        "/cw-reminder-resource-rules.js",
+        "/cw-reminder-labor-rules.js",
+        "/cw-labor-composition-proof.js",
+        "/labor-cost-bases.js",
+        "/ui/core/navigation-context.js",
+        "/crystal-os-v2-shell.js",
+        "/crystal-os-v2-nav.js",
+        "/ui/design-system.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-labor-composition.js",
+        "test-field-labor-composition-ui.js",
+        "test-field-labor-components-ui.js",
+        "test-field-reminder-intervals.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -2643,6 +3342,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-visual-flow.js",
         "test-field-water-api.js",
@@ -2659,10 +3361,14 @@
         "test-real-month-flow-api.js",
         "test-field-two-year-api.js",
         "test-field-resilience.js",
+        "test-field-legacy-entry.js",
+        "test-field-admin-catalogue.js",
+        "test-field-technician-management.js",
         "test-field-invoice-document.js",
         "test-field-legacy-alert-access.js",
         "test-field-report-opening-ui.js",
         "test-field-team-leader-entry.js",
+        "test-field-alert-report-opening.js",
         "test-auth-entry-browser.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
@@ -2701,6 +3407,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-geographic-areas.js"
       ],
@@ -2739,6 +3448,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-visit-os-operational.js",
         "test-route-os-acceptance.js",
@@ -2781,6 +3493,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-multi-map.js"
       ],
@@ -2821,6 +3536,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-access-api.js",
         "test-route-os-acceptance.js",
@@ -2874,7 +3592,42 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/operational-risk-rules.html",
+      "route": "/operational-risk-rules",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Regras de alerta",
+      "catalogueRoles": [],
+      "guardFiles": [],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/cw-operational-risk-rules.css",
+        "/cw-vehicle-consumption-rules.js",
+        "/cw-vehicle-consumption-copy.js",
+        "/cw-operational-risk-rules.js",
+        "/cw-operational-risk-rules-copy.js",
+        "/cw-operational-risk-rules-page.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-fleet-management-ui.js",
+        "test-field-operational-risk-rules.js",
+        "test-field-operational-risk-rules-ui.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -2911,6 +3664,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-planned-work.js"
       ],
@@ -2946,8 +3702,193 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-operational-pages.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/reminder-materials.html",
+      "route": "/reminder-materials",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Materiais do lembrete",
+      "catalogueRoles": [],
+      "guardFiles": [
+        "admin-auth-guard.js"
+      ],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/ui/foundation.css",
+        "/ui/design-system.css",
+        "/equipment-material-review.css",
+        "/cw-auth.js",
+        "/admin-auth-guard.js",
+        "/cw-maintenance-material-rules.js",
+        "/cw-equipment-material-review-rules.js",
+        "/cw-reminder-resource-rules.js",
+        "/cw-reminder-material-rules.js",
+        "/reminder-materials.js",
+        "/ui/core/navigation-context.js",
+        "/crystal-os-v2-shell.js",
+        "/crystal-os-v2-nav.js",
+        "/ui/design-system.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/reminder-resources.html",
+      "route": "/reminder-resources",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Recursos do lembrete",
+      "catalogueRoles": [],
+      "guardFiles": [
+        "admin-auth-guard.js"
+      ],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/ui/foundation.css",
+        "/ui/design-system.css",
+        "/equipment-material-review.css",
+        "/cw-auth.js",
+        "/admin-auth-guard.js",
+        "/cw-maintenance-material-rules.js",
+        "/cw-equipment-material-review-rules.js",
+        "/cw-reminder-resource-rules.js",
+        "/cw-reminder-visit-rules.js",
+        "/cw-reminder-visit-resource-rules.js",
+        "/reminder-resources.js",
+        "/ui/core/navigation-context.js",
+        "/crystal-os-v2-shell.js",
+        "/crystal-os-v2-nav.js",
+        "/ui/design-system.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-reminder-visit-resources.js",
+        "test-field-reminder-visit-intervals.js",
+        "test-field-reminder-intervals.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/reminder-visits.html",
+      "route": "/reminder-visits",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Visita do lembrete",
+      "catalogueRoles": [],
+      "guardFiles": [
+        "admin-auth-guard.js"
+      ],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/ui/foundation.css",
+        "/ui/design-system.css",
+        "/equipment-material-review.css",
+        "/cw-auth.js",
+        "/admin-auth-guard.js",
+        "/cw-maintenance-material-rules.js",
+        "/cw-equipment-material-review-rules.js",
+        "/cw-reminder-resource-rules.js",
+        "/cw-reminder-visit-rules.js",
+        "/reminder-visits.js",
+        "/ui/core/navigation-context.js",
+        "/crystal-os-v2-shell.js",
+        "/crystal-os-v2-nav.js",
+        "/ui/design-system.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/repair-execution.html",
+      "route": "/repair-execution",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Execução de reparações",
+      "catalogueRoles": [
+        "ADMIN"
+      ],
+      "guardFiles": [],
+      "explicitRoleHints": [],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/ui/foundation.css",
+        "/ui/design-system.css",
+        "/cw-auth.js",
+        "/repair-execution.js",
+        "/ui/core/navigation-context.js",
+        "/crystal-os-v2-shell.js",
+        "/crystal-os-v2-nav.js",
+        "/ui/design-system.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-repair-work-ui.js",
+        "test-field-repair-execution-ui.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/repair-work.html",
+      "route": "/repair-work",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Tempos de reparação",
+      "catalogueRoles": [],
+      "guardFiles": [],
+      "explicitRoleHints": [],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/ui/foundation.css",
+        "/ui/design-system.css",
+        "/cw-auth.js",
+        "/repair-work.js",
+        "/ui/core/navigation-context.js",
+        "/crystal-os-v2-shell.js",
+        "/crystal-os-v2-nav.js",
+        "/ui/design-system.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-repair-work-ui.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -2984,6 +3925,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-report-opening-ui.js"
       ],
@@ -3022,9 +3966,16 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-report-settings-ui.js",
-        "test-field-report-opening-ui.js"
+        "test-field-visit-report.js",
+        "test-field-report-opening-ui.js",
+        "test-field-report-history-review.js",
+        "test-field-extra-report.js",
+        "test-field-visit-report-origin.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -3062,6 +4013,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-admin-map-recovery.js"
       ],
@@ -3109,6 +4063,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-access-api.js",
         "test-fcs-sec-tech-auth.js",
@@ -3126,30 +4083,33 @@
       "file": "frontend/splash.html",
       "route": "/splash",
       "kind": "Entrada raiz",
-      "title": "Cristal Water",
+      "title": "Cristal Water · Entrada",
       "catalogueRoles": [
         "ADMIN"
       ],
       "guardFiles": [],
       "explicitRoleHints": [],
-      "conditionalAccess": [],
-      "entryRedirects": {},
+      "conditionalAccess": [
+        "Entrada neutra: encaminha uma identidade coerente para a área do perfil; identidade inválida abre login. Não concede acesso a dados; guardas e APIs do destino continuam a autenticar."
+      ],
+      "entryRedirects": {
+        "ADMIN": "/admin-master-control",
+        "CLIENT": "/client-portal",
+        "TECHNICIAN": "/technician-field-mode",
+        "TEAM_LEADER": "/technician-field-mode"
+      },
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [
-        "/manifest.json",
-        "/cristal-assist.css",
-        "/cw-auth.js",
-        "/crystal-os-v2-foundation.css",
-        "/crystal-os-v2-phase2-adapter.css",
-        "/ui/design-system.css",
-        "/cristal-help-data.js",
-        "/cristal-assist.js",
-        "/crystal-os-v2-shell.js",
-        "/crystal-os-v2-nav.js",
-        "/ui/design-system.js"
+        "/ui/foundation.css",
+        "/cw-admin-legacy-entry.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-legacy-entry.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -3157,7 +4117,9 @@
       "route": "/technician-chat",
       "kind": "Entrada raiz",
       "title": "Equipa · Cristal Water",
-      "catalogueRoles": [],
+      "catalogueRoles": [
+        "ADMIN"
+      ],
       "guardFiles": [],
       "explicitRoleHints": [],
       "conditionalAccess": [],
@@ -3173,6 +4135,12 @@
         "/technician-chat.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [
+        "/cw-i18n.js",
+        "/staff-chat-i18n.js"
+      ],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-internal-chat-ui.js",
         "test-field-team-leader-entry.js",
@@ -3216,7 +4184,9 @@
         "/cw-incomplete-workflow.js",
         "/cw-field-reminders.js",
         "/cw-field-route-cache.js",
+        "/cw-field-guide-projection.js",
         "/cw-field-documents.js",
+        "/cw-field-document-copy.js",
         "/cw-field-alert-journal.js",
         "/cw-field-photos.js",
         "/cw-field-offline.js",
@@ -3236,11 +4206,23 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [
+        "/cw-i18n.js"
+      ],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-visual-flow.js",
         "test-field-water-api.js",
         "test-field-e2e.js",
         "test-field-visit-briefing.js",
+        "test-field-legacy-entry.js",
+        "test-field-admin-catalogue.js",
+        "test-field-work-guide-close-ui.js",
+        "test-field-technician-guide-ui.js",
+        "test-field-document-summary-ui.js",
+        "test-field-guide-read-scope-ui.js",
+        "test-field-transport-guide-documents-ui.js",
         "test-field-technical-proposals.js",
         "test-field-proposal-recovery-ui.js",
         "test-field-write-recovery-ui.js",
@@ -3259,12 +4241,16 @@
         "test-field-complete-daily-route.js",
         "test-field-document-recovery.js",
         "test-field-alert-source.js",
+        "test-field-equipment-work-time.js",
+        "test-field-equipment-materials.js",
+        "test-field-equipment-intervals.js",
         "test-field-browser.js",
         "test-field-session-browser.js",
         "test-field-push-session-browser.js",
         "test-language-browser.js",
         "test-auth-entry-browser.js",
         "test-role-help-browser.js",
+        "test-field-equipment-browser.js",
         "test-field-briefing-browser.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
@@ -3306,6 +4292,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-gps-recovery.js",
         "test-field-team-leader-entry.js"
@@ -3316,7 +4305,7 @@
       "file": "frontend/technician-guide.html",
       "route": "/technician-guide",
       "kind": "Entrada raiz",
-      "title": "Cristal Water - Guia Tecnico",
+      "title": "Cristal Water — Guias e stock",
       "catalogueRoles": [
         "TECHNICIAN",
         "TEAM_LEADER"
@@ -3336,9 +4325,13 @@
         "/cristal-assist.css",
         "/cw-ui-kit.css",
         "/ui/foundation.css",
+        "/ui/design-system.css",
         "/cw-auth.js",
         "/technician-auth-guard.js",
-        "/ui/design-system.css",
+        "/cw-auth-download.js",
+        "/cw-field-guide-projection.js",
+        "/cw-technician-guide-read-rules.js",
+        "/cw-technician-guide-copy.js",
         "/technician-guide.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
@@ -3348,7 +4341,16 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
+        "test-field-vehicle-consumption-ui.js",
+        "test-field-work-guide-close-ui.js",
+        "test-field-vehicle-maintenance-ui.js",
+        "test-field-technician-guide-ui.js",
+        "test-field-document-summary-ui.js",
+        "test-field-work-guide-start-ui.js",
         "test-field-team-leader-entry.js",
         "test-role-help-browser.js"
       ],
@@ -3381,6 +4383,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-team-leader-entry.js",
         "test-field-complete-daily-route.js"
@@ -3415,6 +4420,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-visual-flow.js",
         "test-field-equipment-flow.js",
@@ -3458,6 +4466,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-visit-types.js",
         "test-field-team-leader-entry.js",
@@ -3500,6 +4511,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-client-intake-ui.js"
       ],
@@ -3532,6 +4546,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-team-leader-entry.js",
         "test-role-help-browser.js"
@@ -3571,6 +4588,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-operational-values-ui.js"
       ],
@@ -3609,6 +4629,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-fcs-sec-tech-auth.js",
         "test-field-operational-values.js",
@@ -3651,6 +4674,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-team-leader-entry.js",
         "test-field-complete-daily-route.js"
@@ -3692,6 +4718,9 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-team-leader-entry.js"
       ],
@@ -3750,10 +4779,24 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [
+        "/icons/icon-192.png"
+      ],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [
         "test-field-gps-flow.js",
+        "test-field-work-guide-start-ui.js",
+        "test-field-gps-recovery.js",
+        "test-field-write-recovery-ui.js",
+        "test-field-internal-alert-ui.js",
+        "test-field-route-preview-ui.js",
+        "test-field-legacy-route-recovery.js",
+        "test-field-legacy-visit-drafts.js",
+        "test-field-workday-recovery.js",
         "test-field-team-leader-entry.js",
-        "test-field-complete-daily-route.js"
+        "test-field-complete-daily-route.js",
+        "test-field-maintenance-labor.js"
       ],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -3770,6 +4813,9 @@
       "catalogueRolesMissingFromGuard": [],
       "localAssets": [],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -3777,7 +4823,7 @@
       "file": "frontend/to-issue.html",
       "route": "/to-issue",
       "kind": "Entrada raiz",
-      "title": "Cristal Water - Faturacao Oficial",
+      "title": "Cristal Water - Faturação Oficial",
       "catalogueRoles": [
         "ADMIN"
       ],
@@ -3808,7 +4854,147 @@
         "/ui/design-system.js"
       ],
       "missingAssets": [],
-      "testReferences": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-external-invoice-registration.js",
+        "test-field-external-reference-review.js",
+        "test-field-external-invoice-summary.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/transport-guide-create.html",
+      "route": "/transport-guide-create",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Nova guia de transporte",
+      "catalogueRoles": [],
+      "guardFiles": [],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/cw-transport-guide-create.css",
+        "/cw-vehicle-consumption-rules.js",
+        "/cw-onboarding-rules.js",
+        "/cw-transport-guide-rules.js",
+        "/cw-transport-guide-copy.js",
+        "/cw-transport-guide-create.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-transport-guide-create.js",
+        "test-field-transport-guide-create-ui.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/transport-guide-documents.html",
+      "route": "/transport-guide-documents",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Documentos da guia",
+      "catalogueRoles": [],
+      "guardFiles": [],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/cw-transport-guide-create.css",
+        "/cw-vehicle-consumption-rules.js",
+        "/cw-transport-guide-rules.js",
+        "/cw-transport-guide-copy.js",
+        "/cw-transport-items-rules.js",
+        "/cw-transport-items-copy.js",
+        "/cw-transport-documents-rules.js",
+        "/cw-transport-documents-copy.js",
+        "/cw-auth-download.js",
+        "/cw-transport-guide-documents.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-transport-guide-documents.js",
+        "test-field-transport-guide-documents-ui.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/transport-guide-items.html",
+      "route": "/transport-guide-items",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Editar materiais da guia",
+      "catalogueRoles": [],
+      "guardFiles": [],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/cw-transport-guide-create.css",
+        "/cw-vehicle-consumption-rules.js",
+        "/cw-transport-guide-rules.js",
+        "/cw-transport-guide-copy.js",
+        "/cw-transport-items-rules.js",
+        "/cw-transport-items-copy.js",
+        "/cw-transport-guide-items.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-transport-guide-items.js",
+        "test-field-transport-guide-items-ui.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/transport-guide-manage.html",
+      "route": "/transport-guide-manage",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Dados e estado da guia",
+      "catalogueRoles": [],
+      "guardFiles": [],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/cw-transport-guide-create.css",
+        "/cw-vehicle-consumption-rules.js",
+        "/cw-transport-guide-rules.js",
+        "/cw-transport-guide-copy.js",
+        "/cw-transport-items-rules.js",
+        "/cw-transport-items-copy.js",
+        "/cw-onboarding-rules.js",
+        "/cw-transport-manage-rules.js",
+        "/cw-transport-manage-copy.js",
+        "/cw-transport-guide-manage.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-transport-guide-manage.js",
+        "test-field-transport-guide-manage-ui.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     },
     {
@@ -3831,6 +5017,9 @@
         "/ui/components/navbar.js"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -3849,6 +5038,9 @@
         "/v26/prototype.css"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -3867,6 +5059,9 @@
         "/v26/prototype.css"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -3885,6 +5080,9 @@
         "/v26/prototype.css"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -3903,6 +5101,9 @@
         "/v26/prototype.css"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [],
       "visualReview": "Não reavaliada por este inventário"
     },
@@ -3921,7 +5122,231 @@
         "/v26/technician/technician.css"
       ],
       "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
       "testReferences": [],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/vehicle-assignment.html",
+      "route": "/vehicle-assignment",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Atribuição de viaturas",
+      "catalogueRoles": [],
+      "guardFiles": [],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/cw-vehicle-assignment.css",
+        "/cw-vehicle-consumption-rules.js",
+        "/cw-vehicle-consumption-copy.js",
+        "/cw-vehicle-assignment-rules.js",
+        "/cw-vehicle-assignment-copy.js",
+        "/cw-vehicle-assignment.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-vehicle-assignment.js",
+        "test-field-vehicle-assignment-ui.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/vehicle-consumption.html",
+      "route": "/vehicle-consumption",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Consumo manual",
+      "catalogueRoles": [],
+      "guardFiles": [],
+      "explicitRoleHints": [
+        "ADMIN",
+        "TEAM_LEADER",
+        "TECHNICIAN"
+      ],
+      "conditionalAccess": [
+        "Sessão coerente verificada no componente; API privada, atribuição atual de viatura e técnico para os perfis de campo."
+      ],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/cw-vehicle-consumption.css",
+        "/cw-vehicle-consumption-rules.js",
+        "/cw-vehicle-consumption-copy.js",
+        "/cw-vehicle-consumption.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-vehicle-consumption.js",
+        "test-field-vehicle-consumption-ui.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/vehicle-maintenance.html",
+      "route": "/vehicle-maintenance",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Manutenção da frota",
+      "catalogueRoles": [],
+      "guardFiles": [],
+      "explicitRoleHints": [],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/cw-vehicle-maintenance.css",
+        "/cw-vehicle-consumption-rules.js",
+        "/cw-vehicle-consumption-copy.js",
+        "/cw-onboarding-rules.js",
+        "/cw-vehicle-maintenance-rules.js",
+        "/cw-vehicle-maintenance-copy.js",
+        "/cw-vehicle-maintenance.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-vehicle-maintenance.js",
+        "test-field-vehicle-maintenance-ui.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/vehicle-stock-preset.html",
+      "route": "/vehicle-stock-preset",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Modelos de materiais",
+      "catalogueRoles": [],
+      "guardFiles": [],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/cw-vehicle-stock-preset.css",
+        "/cw-vehicle-consumption-rules.js",
+        "/cw-vehicle-consumption-copy.js",
+        "/cw-vehicle-stock-preset-rules.js",
+        "/cw-vehicle-stock-preset-copy.js",
+        "/cw-vehicle-stock-preset.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-vehicle-stock-preset.js",
+        "test-field-vehicle-stock-preset-ui.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/visit-report-review.html",
+      "route": "/visit-report-review",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Rever relatório histórico",
+      "catalogueRoles": [],
+      "guardFiles": [
+        "admin-auth-guard.js"
+      ],
+      "explicitRoleHints": [
+        "ADMIN"
+      ],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/ui/foundation.css",
+        "/ui/design-system.css",
+        "/cw-auth.js",
+        "/admin-auth-guard.js",
+        "/cw-visit-report-origin-rules.js",
+        "/cw-report-download.js",
+        "/visit-report-review.js",
+        "/ui/core/navigation-context.js",
+        "/crystal-os-v2-shell.js",
+        "/crystal-os-v2-nav.js",
+        "/ui/design-system.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-admin-day.js",
+        "test-field-visit-report-origin.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/work-guide-close.html",
+      "route": "/work-guide-close",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Fechar guia de obra",
+      "catalogueRoles": [],
+      "guardFiles": [],
+      "explicitRoleHints": [],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/cw-work-guide-close.css",
+        "/cw-vehicle-consumption-rules.js",
+        "/cw-vehicle-consumption-copy.js",
+        "/cw-work-guide-close-rules.js",
+        "/cw-work-guide-close-copy.js",
+        "/cw-work-guide-close.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-work-guide-close.js",
+        "test-field-work-guide-close-ui.js"
+      ],
+      "visualReview": "Não reavaliada por este inventário"
+    },
+    {
+      "file": "frontend/work-guide-start.html",
+      "route": "/work-guide-start",
+      "kind": "Entrada raiz",
+      "title": "Cristal Water — Abrir guia de obra",
+      "catalogueRoles": [],
+      "guardFiles": [],
+      "explicitRoleHints": [],
+      "conditionalAccess": [],
+      "entryRedirects": {},
+      "catalogueRolesMissingFromGuard": [],
+      "localAssets": [
+        "/cw-work-guide-start.css",
+        "/cw-vehicle-consumption-rules.js",
+        "/cw-vehicle-consumption-copy.js",
+        "/cw-work-guide-start-rules.js",
+        "/cw-work-guide-start-copy.js",
+        "/cw-work-guide-start.js"
+      ],
+      "missingAssets": [],
+      "unavailableLocalAssets": [],
+      "languageAssets": [],
+      "directPrintAction": false,
+      "testReferences": [
+        "test-field-work-guide-start.js",
+        "test-field-work-guide-start-ui.js"
+      ],
       "visualReview": "Não reavaliada por este inventário"
     }
   ]

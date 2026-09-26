@@ -3,6 +3,15 @@
   const store = window.CWFieldWriteStore;
   const kinds = ['transport', 'work', 'insurance'];
   const positive = value => Number.isSafeInteger(value) && value > 0;
+  const canonical = v => Array.isArray(v) ? v.map(canonical) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().filter(k => v[k] !== undefined).map(k => [k, canonical(v[k])])) : v;
+  const equal = (a, b) => JSON.stringify(canonical(a)) === JSON.stringify(canonical(b));
+  const count = value => Number.isSafeInteger(value) && value >= 0;
+  const unique = rows => rows.every(row => row && positive(row.id)) && new Set(rows.map(row => row.id)).size === rows.length;
+  const numeric = value => typeof value === 'number' && Number.isFinite(value);
+  function consumptionSummary(data) {
+    const available = data.movements.length;
+    return { rows: data.movements.slice(-8).reverse(), available, total: data.movementsIncluded === true && count(data.consumptionCount) && data.consumptionCount === available ? available : null };
+  }
   const clean = (kind,data) => window.CWFieldGuideProjection.packet(kind,data);
   const day = () => window.CWFieldRouteCache.today();
   function scope(session, vehicleId) {
@@ -14,11 +23,10 @@
   const same = context => !!context && store.same(context.session) && context.day === day();
   const key = context => `cwFieldDocuments:v3:${context.session.owner}:${context.role}:${context.vehicleId}:${context.day}`;
   function requireScope(context) { if (!same(context)) throw Error('A sessão ou o dia mudou. Os documentos guardados foram preservados.'); }
-  function validateData(kind, data, context) {
+  function validateData(kind, data, context, live = false) {
     const bad = () => { throw Error('A resposta documental não confirma a viatura e o conteúdo pedidos.'); };
     if (!data || data.ok !== true) bad();
-    const canonical=v=>Array.isArray(v)?v.map(canonical):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().filter(k=>v[k]!==undefined).map(k=>[k,canonical(v[k])])):v;
-    if (JSON.stringify(canonical(data)) !== JSON.stringify(canonical(clean(kind,data)))) bad();
+    if (!equal(data, clean(kind,data)) || live && !data.scope) bad();
     if (data.scope && (data.scope.version!==1 || data.scope.owner!==context.session.owner || data.scope.technicianId!==context.session.technicianId || data.scope.vehicleId!==context.vehicleId)) bad();
     const vehicle = value => { if (value && value.id !== context.vehicleId) bad(); };
     const record = value => { if (value && (!positive(value.id) || value.vehicleId !== context.vehicleId)) bad(); };
@@ -35,6 +43,14 @@
       if (data.workGuide?.guide && data.workGuide.guideId !== data.workGuide.guide.id) bad();
       if (data.workGuide && data.workGuide.technicianId !== context.session.technicianId) bad();
       if (data.movements.some(m => m.workGuideId !== data.workGuide?.id || m.vehicleId !== context.vehicleId || m.technicianId !== null && m.technicianId !== context.session.technicianId)) bad();
+      // Earlier v3 copies have no count metadata. Keep them readable without
+      // presenting their list length as a confirmed total for the work guide.
+      const hasCounts = ['itemCount', 'movementsIncluded', 'consumptionCount'].some(k => Object.hasOwn(data, k));
+      if (live || hasCounts) {
+        if (!data.scope || !count(data.itemCount) || data.itemCount !== data.stock.length || !unique(data.stock) || data.movementsIncluded !== true || !count(data.consumptionCount) || data.consumptionCount !== data.movements.length) bad();
+        if (data.workGuide && (!Array.isArray(data.workGuide.items) || !equal(data.workGuide.items, data.stock) || data.stock.some(r => r.workGuideId !== data.workGuide.id || typeof r.name !== 'string' || !(r.unit === null || typeof r.unit === 'string') || !['quantity', 'initialQty', 'usedQty'].every(k => numeric(r[k]))))) bad();
+      }
+      if (!unique(data.movements) || data.movements.some((m, i) => m.movementType !== 'CONSUMPTION' || typeof m.itemName !== 'string' || !numeric(m.quantity) || !(m.unit === null || typeof m.unit === 'string') || !Number.isFinite(Date.parse(m.createdAt)) || i > 0 && !(Date.parse(data.movements[i - 1].createdAt) < Date.parse(m.createdAt) || data.movements[i - 1].createdAt === m.createdAt && data.movements[i - 1].id < m.id))) bad();
     } else if (kind === 'insurance') {
       if (!Object.hasOwn(data, 'vehicle') || !Object.hasOwn(data, 'insurance')) bad();
       vehicle(data.vehicle); record(data.insurance); record(data.vehicle?.inspection);
@@ -91,7 +107,9 @@
         const response = await fetch(paths[kind], { headers: { Authorization: 'Bearer ' + context.session.token }, cache: 'no-store', signal: AbortSignal.timeout(12000) });
         const data = clean(kind,await response.json().catch(() => null));
         if (response.status !== 200) throw Object.assign(Error(data?.error || 'Consulta indisponível.'), { denied: [401, 403].includes(response.status) });
-        validateData(kind, data, context);
+        const directives = (response.headers.get('cache-control') || '').toLowerCase().split(',').map(s => s.trim());
+        if (response.headers.get('x-cw-owner') !== context.session.owner || !directives.includes('private') || !directives.includes('no-store')) throw Error('A resposta documental não confirma a conta e a consulta privada.');
+        validateData(kind, data, context, true);
         return { kind, source: 'live', section: { data, requestedAt, confirmedAt: new Date().toISOString() } };
       } catch (error) { return { kind, error: error.message, denied: !!error.denied }; }
     }));
@@ -116,5 +134,5 @@
     if (!same(context) || !relevant()) return null;
     return { sections, sources, warning, denied: false };
   }
-  window.CWFieldDocuments = { scope, same, key, validate, validateData, read, save, load };
+  window.CWFieldDocuments = { scope, same, key, validate, validateData, read, save, load, consumptionSummary };
 })();

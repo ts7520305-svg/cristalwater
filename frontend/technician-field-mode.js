@@ -792,7 +792,7 @@
     ++docsRevision; docsContext = null; documentsLoaded = false;
     activeTransportGuide = null; activeWorkGuide = null; activeWorkStock = []; activeInsurance = null; activeVehicle = null;
     docsSource = 'unavailable'; docsDetail = ''; docsWarning = message;
-    renderTransportGuide(null, []); renderWorkGuide(null, [], []); renderInsurance(null, null, '');
+    ['transport', 'work', 'insurance'].forEach(kind => renderDocumentSection(kind, null, 'unavailable', ''));
     renderDoseRows(); renderCrewStatus(); updateFieldDashboard(current());
   }
 
@@ -1010,7 +1010,7 @@
     if (center) {
       center.innerHTML = `
         <div class="doc-head"><span class="chip">Centro documental</span><strong class="${compliance.readyForOperation ? "status-ok" : "status-warn"}">${compliance.readyForOperation ? "Operacional" : "Bloqueado"}</strong></div>
-        <div class="doc-number">Fonte: ${esc(({live:'online',cache:'cópia guardada',mixed:'parcial — inclui cópia guardada',unavailable:'por confirmar'})[docsSource] || 'por confirmar')}</div>
+        <div class="doc-number">Fonte: ${esc(({live:'online',cache:'cópia guardada',mixed:'parcial — consulte cada documento',unavailable:'por confirmar'})[docsSource] || 'por confirmar')}</div>
         ${docsDetail ? `<div class="muted">${esc(docsDetail)}</div>` : ''}
         ${docsWarning ? `<div class="muted" role="status">${esc(docsWarning)}</div>` : ''}
         <div class="doc-meta">
@@ -1681,16 +1681,36 @@
     }
   }
 
-  function renderMovements(movements) {
-    const rows = Array.isArray(movements) ? movements : [];
-    if (!rows.length) return '<div class="muted">Ainda sem movimentos por local.</div>';
-    return `<div class="doc-items">${rows.slice(-8).reverse().map((move) => `
-      <div class="doc-item">
-        <span>${esc(move.itemName || "Material")}<small>${esc(move.locationLabel || move.location || "Local nao indicado")}</small></span>
-        <strong>${esc(move.quantity || 0)} ${esc(move.unit || "UN")}</strong>
-      </div>
-      ${movementNotesLabel(move) ? `<div class="muted">${esc(movementNotesLabel(move))}</div>` : ""}
-    `).join("")}</div>`;
+  function paintDocumentText() {
+    const copy = window.CWFieldDocumentCopy, language = document.documentElement.lang;
+    document.querySelectorAll('.field-panel-docs [data-doc-copy]').forEach(node => {
+      const summary = node.closest('[data-consumption-summary]'), section = node.closest('[data-confirmed-at]');
+      node.textContent = copy.text(node.dataset.docCopy, {
+        shown: summary?.dataset.shown, total: summary?.dataset.total, available: summary?.dataset.available,
+        date: section?.dataset.confirmedAt ? copy.date(section.dataset.confirmedAt, language) : '',
+      }, language);
+    });
+    document.querySelectorAll('.field-panel-docs time[data-doc-date]').forEach(node => { node.textContent = copy.date(node.dateTime, language); });
+  }
+  new MutationObserver(paintDocumentText).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+
+  function renderMovements(data) {
+    const summary = window.CWFieldDocuments.consumptionSummary(data), { rows, available, total } = summary;
+    const label = rows.length ? (total === null ? 'legacy' : 'confirmed') : (total === null ? 'legacyEmpty' : 'empty');
+    return `<section data-consumption-summary data-shown="${rows.length}" data-available="${available}" data-total="${total ?? ''}" data-cw-no-i18n>
+      <h3 class="doc-subtitle" data-doc-copy="summary"></h3>
+      <p data-consumption-count data-doc-copy="${label}"></p>
+      <div class="doc-items">${rows.map(move => `
+        <article class="doc-item" data-consumption-id="${move.id}">
+          <span>${esc(move.itemName)}<small>${esc(move.locationLabel || move.location || 'Local não indicado')}</small></span>
+          <strong>${esc(move.quantity)} ${move.unit === null ? '<span data-doc-copy="unit"></span>' : esc(move.unit)}</strong>
+          <time data-doc-date datetime="${esc(move.createdAt)}"></time>
+          ${movementNotesLabel(move) ? `<div class="muted">${esc(movementNotesLabel(move))}</div>` : ''}
+        </article>
+      `).join('')}</div>
+      <div class="doc-actions"><a class="doc-btn" data-complete-movements href="/technician-guide#movementPanel" data-doc-copy="full"></a></div>
+      <p class="muted" data-doc-copy="connection"></p>
+    </section>`;
   }
 
   function renderStockSummary(items) {
@@ -2329,6 +2349,24 @@
     } catch (error) { toast(error.message); }
   }
 
+  function renderDocumentSection(kind, section, source, vehicleId) {
+    const box = $(({transport:'#transportGuideBox', work:'#workGuideBox', insurance:'#insuranceBox'})[kind]);
+    if (!box) return;
+    box.dataset.source = section ? source : source === 'loading' ? 'loading' : 'unavailable';
+    if (!section) {
+      delete box.dataset.confirmedAt;
+      box.innerHTML = `<div data-cw-no-i18n><div class="doc-head"><span class="chip" data-doc-copy="${kind}"></span></div><p data-doc-provenance role="status" data-doc-copy="${box.dataset.source}"></p>${source === 'loading' ? '' : '<p class="muted" data-doc-copy="unavailableHelp"></p>'}</div>`;
+    } else {
+      box.dataset.confirmedAt = section.confirmedAt;
+      const data = section.data;
+      if (kind === 'transport') renderTransportGuide(data.guide, data.items);
+      if (kind === 'work') renderWorkGuide(data.workGuide, data.stock, data);
+      if (kind === 'insurance') renderInsurance(data.vehicle, data.insurance, vehicleId);
+      box.insertAdjacentHTML('afterbegin', `<div data-doc-provenance data-cw-no-i18n><strong data-doc-copy="${source}"></strong>${source === 'cache' ? '<p data-doc-copy="cacheHelp"></p>' : ''}</div>`);
+    }
+    paintDocumentText();
+  }
+
   function renderTransportGuide(guide, items) {
     const box = $("#transportGuideBox");
     if (!box) return;
@@ -2368,7 +2406,7 @@
     `;
   }
 
-  function renderWorkGuide(workGuide, stock, movements) {
+  function renderWorkGuide(workGuide, stock, data) {
     const box = $("#workGuideBox");
     if (!box) return;
     if (!workGuide) {
@@ -2393,8 +2431,7 @@
       </div>
       <div class="doc-subtitle">Saidas de material registadas</div>
       ${renderUsage(stockRows)}
-      <div class="doc-subtitle">Saidas por local</div>
-      ${renderMovements(movements)}
+      ${renderMovements(data)}
       <div class="doc-subtitle">Stock final da viatura</div>
       ${renderItems(stockRows, "work")}
       ${renderStockSummary(stockRows)}
@@ -2446,8 +2483,7 @@
     if (technicianInput) { technicianInput.value = String(fieldWriteSession.technicianId); technicianInput.readOnly = true; }
     localStorage.setItem('cwVehicleId', String(vehicleId));
     localStorage.setItem('cwTechnicianId', String(fieldWriteSession.technicianId));
-    $('#transportGuideBox').textContent = 'A carregar guia AT...';
-    $('#workGuideBox').textContent = 'A carregar guia de obra...';
+    ['transport', 'work', 'insurance'].forEach(kind => renderDocumentSection(kind, null, 'loading', vehicleId));
     const result = await window.CWFieldDocuments.load(context, relevant);
     if (!result || !relevant()) return;
     const transport = result.sections.transport?.data, work = result.sections.work?.data, insurance = result.sections.insurance?.data;
@@ -2456,15 +2492,13 @@
     activeWorkStock = work?.stock || [];
     activeInsurance = insurance?.insurance || null;
     activeVehicle = insurance?.vehicle || activeWorkGuide?.vehicle || activeTransportGuide?.vehicle || null;
-    renderTransportGuide(activeTransportGuide, transport?.items || []);
-    renderWorkGuide(activeWorkGuide, activeWorkStock, work?.movements || []);
-    renderInsurance(insurance?.vehicle || null, activeInsurance, vehicleId);
+    ['transport', 'work', 'insurance'].forEach(kind => renderDocumentSection(kind, result.sections[kind], result.sources[kind] || 'unavailable', vehicleId));
     renderDoseRows();
     const sources = Object.values(result.sources), hasCache = sources.includes('cache');
     docsSource = sources.length === 3 && sources.every(source => source === 'live') ? 'live' : sources.length === 3 && sources.every(source => source === 'cache') ? 'cache' : sources.some(source => source === 'live' || source === 'cache') ? 'mixed' : 'unavailable';
     docsDetail = ['transport', 'work', 'insurance'].map(kind => {
       const title = ({transport:'Guia AT',work:'Guia de obra/stock',insurance:'Seguro/inspeção'})[kind], section = result.sections[kind];
-      return title + ': ' + (section ? (result.sources[kind] === 'cache' ? 'guardado em ' : 'consultado em ') + new Date(section.confirmedAt).toLocaleString('pt-PT') : 'indisponível');
+      return title + ': ' + (section ? (result.sources[kind] === 'cache' ? 'cópia consultada em ' : 'consultado em ') + window.CWFieldDocumentCopy.date(section.confirmedAt) : 'indisponível');
     }).join(' · ');
     docsWarning = [result.warning, hasCache ? 'A cópia guardada não confirma alterações recentes. Os PDFs precisam de ligação.' : ''].filter(Boolean).join(' ');
     documentsLoaded = true;

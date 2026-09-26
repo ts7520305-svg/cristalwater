@@ -1,0 +1,614 @@
+{
+  "task": "TASK380",
+  "baseCommit": "5a2f80cef951f19704d1a2d2e90909545a9918b8",
+  "validatedAt": "2026-09-26T08:27:41.854818+00:00",
+  "unitTests": {
+    "passed": 982,
+    "files": 117,
+    "new": 17
+  },
+  "technicianTests": 4,
+  "syntax": {
+    "backend": 689,
+    "frontend": 301,
+    "inline": 44
+  },
+  "schema": {
+    "newMigrations": 0,
+    "totalAdditiveMigrationsApplied": 43,
+    "tablesExpected": 128,
+    "runtime": "PGlite 0.5.8 / pglite-socket 0.2.11; isolated synthetic data, not native PostgreSQL"
+  },
+  "integrationGroups": [
+    {
+      "script": "scripts/test-field-guide-read-scope.js",
+      "code": 0,
+      "log": "/tmp/cw380-test-field-guide-read-scope.log",
+      "sha256": "0ea58aea57b523a5ddd4095407f1876f5af6ebba6310f5f1ee8b710e1469ec55",
+      "checks": [
+        "PASS field guide reads: TECHNICIAN/TEAM_LEADER with PIN and linked User; same-vehicle work, nested AT works, movements and PDFs restricted by technician; explicit safe projections exclude typed contacts, credentials, costs and private JSON metadata; protected document links; strict query IDs/duplicates/limits; complete 207-row paging with insertion boundary and refreshed new rows; explicit stock without movements; null legacy ownership only with own work; foreign visit review; reassignment/unassigned/archive/duplicate-work guards; four real SQL failures; ADMIN compatibility; unchanged 19-model read snapshot and official bytes."
+      ]
+    },
+    {
+      "script": "scripts/test-field-document-summary-ui.js",
+      "code": 0,
+      "log": "/tmp/cw380-test-field-document-summary-ui.log",
+      "sha256": "d507663c305121005e5bfc9b1eae243abfb356169ae009becbfd956d55de87ab",
+      "checks": [
+        "PASS document summary: 8 of 105 exact own consumptions, 209 total movements through actual reader link, zero/negative/null/literal units and notes; independent live/cache/unavailable provenance and original timestamps; rejected truncation/count/duplicates/omission/scope/headers/type; explicit absence and confirmed zero; cold offline reload, old v3 unknown total, corrupt bytes preserved, offline without cache, online recovery; 5 languages x 3 widths, 44px unobscured controls, contrast >= 4.5:1 and 18 screenshots; zero API writes, 13-model snapshot and original official bytes unchanged."
+      ],
+      "finalRerunLog": "/tmp/cw380-visual-verification.log"
+    },
+    {
+      "script": "scripts/test-field-document-recovery.js",
+      "code": 0,
+      "log": "/tmp/cw380-test-field-document-recovery.log",
+      "sha256": "4ec5eae4f8ca88bd10cbac1fedd1a9d61fb016b2c59af27ea8c36c81287a26fd",
+      "checks": [
+        "PASS guide responses omit related credentials; failed document/stock/vehicle reads and corrupt official-document metadata cannot claim an empty successful response",
+        "PASS real documents grouped by typed account/role/vehicle/day; legacy bytes preserved; mixed refresh keeps original section timestamp and current source honest",
+        "PASS quota, missing readback, corrupt cache and wrong vehicle do not overwrite saved bytes or claim offline persistence",
+        "PASS late reply cannot replace newer documents; cold offline reload retains section provenance; even a non-JSON 403 blocks cached operational documents",
+        "PASS editing vehicle invalidates visible documents; another account on the same vehicle cannot inherit cache; current account must consult again and day changes invalidate provenance"
+      ]
+    },
+    {
+      "script": "scripts/test-field-guide-read-scope-ui.js",
+      "code": 0,
+      "log": "/tmp/cw380-test-field-guide-read-scope-ui.log",
+      "sha256": "40e9aef49c36d515fbae473a1c12d92d30cc72c7ae5d85bb1e7d711769afbbf7",
+      "checks": [
+        "PASS field guide browser: actual field page and both roles/PIN/User; each colleague sees only own work and movements, no typed contact/cost/private metadata in v3 cache; successful other-owner reply rejected; old v2 bytes preserved and refused on cold offline reload; current malformed/private cache preserved without display; online recovery; three widths/screenshots; no API writes, 13-model snapshot and official bytes unchanged."
+      ]
+    },
+    {
+      "script": "scripts/test-field-technician-guide-ui.js",
+      "code": 0,
+      "log": "/tmp/cw380-test-field-technician-guide-ui.log",
+      "sha256": "afbf1255fff514b6e1ddf4c66b16133313302da4ab341ed9e266d311d1e7dba4",
+      "checks": [
+        "PASS technician guide: actual field entry; PIN/User TECHNICIAN/TEAM_LEADER; 207 movements in complete pages with insertion boundary and refreshed additions; 28 exact materials, zero/null units/readings and signed amounts; three real authenticated PDFs and the original inert file download; complete/empty/partial/unavailable/review states; owner/header/document/filter/duplicate failures; independent stock/movements; stale replies; five languages/three widths/44px/contrast/16 captures with selection/filter/material page preserved; suspension/recovery/account change/expiry; zero API writes, 13-model snapshot and official bytes unchanged."
+      ]
+    },
+    {
+      "script": "scripts/test-field-authenticated-document-opening.js",
+      "code": 0,
+      "log": "/tmp/cw380-test-field-authenticated-document-opening.log",
+      "sha256": "0e627beed653a6bcfaf4ae9aae1c3949edb4eadc54584ec596f3c4cb594af062",
+      "checks": [
+        "PASS six real PDF endpoints and two historical guides without vehicles confirm document/client/vehicle identity and complete content through the authenticated browser reader",
+        "PASS wrong identity/MIME, HTML, truncated PDF, missing private headers, partial/redirect/error replies, blocked windows, timeout, cancellation, account/body changes, expiry and noncanonical URLs",
+        "PASS displayed files revoked on account change, HTML attachments preserved as inert downloads, owner binding and unchanged original financial/guide/chat records"
+      ]
+    },
+    {
+      "script": "scripts/test-field-work-guide-close-ui.js",
+      "code": 0,
+      "log": "/tmp/cw380-test-field-work-guide-close-ui.log",
+      "sha256": "55db16d916cca07787f0c116f4319106b57ae2eda49350778f367e10a44483c0",
+      "checks": [
+        "PASS work closure browser: real admin/field/legacy navigation; explicit mileage/vehicle choices; escaped preserved stock; double-click once; lost response/reload/JSONB recovery; offline exact retry/cancel; stale review; storage quota/ignored/corrupt reference; partial/latest reads; five languages/three widths/44px/18 screenshots; expiration, suspension and account changes during review/commit; ADMIN/TECHNICIAN/TEAM_LEADER with both identities; no altered stock, notes or transport state."
+      ]
+    },
+    {
+      "script": "scripts/test-field-team-leader-entry.js",
+      "code": 0,
+      "log": "/tmp/cw380-test-field-team-leader-entry.log",
+      "sha256": "b3269739a84da0923ebe82841a7005529f904b244ea4d9474783e807a822440d",
+      "checks": [
+        "PASS real TEAM_LEADER PIN login, assigned REGULAR/EXTRA route, forbidden foreign/admin resources and offline draft recovery",
+        "PASS client payment/portal entry returns TEAM_LEADER to field; account settings explains PIN refusal without losing session or draft",
+        "PASS leader entry into modern/legacy field, visit, route, map and GPS; actual menu opens guide/history/profile without logout or administrative shortcuts",
+        "PASS actual TEAM_LEADER menu, role help and quick commands return to the real route with original session and draft",
+        "PASS real email login binds USER to technician, isolates PIN/USER drafts, and logout/relogin preserves both",
+        "PASS revoked TEAM_LEADER loses active route without losing draft; ordinary TECHNICIAN entry remains functional",
+        "PASS client/admin redirect, mismatched token role, expired/unknown session and preserved local records"
+      ]
+    },
+    {
+      "script": "scripts/test-field-navigation-preferences.js",
+      "code": 0,
+      "log": "/tmp/cw380-test-field-navigation-preferences.log",
+      "sha256": "bf33fb89ab292b4d5a8f447da76a8fffe3d7cb6c8072cb7d683213ebb658abac",
+      "checks": [
+        "PASS navigation preferences: account-bound explicit choices, no default writes or reload, device/live and fixed palettes, three densities with 44px targets, five languages/three widths/contrast, real menu/index/help navigation, business styles and filters preserved, legacy keys/shortcut and work bytes preserved, two windows, storage throw/ignored writes, corrupt/wrong-owner bytes, bfcache, reset, offline save, account change/expiry; zero business writes"
+      ]
+    },
+    {
+      "script": "scripts/test-real-month-flow-api.js",
+      "code": 0,
+      "log": "/tmp/cw380-test-real-month-flow-api.log",
+      "sha256": "99b1636b9f026f3db697adb02fd854f3947f6c43e429cf39b201ccc76bb075b3",
+      "checks": [
+        "OK EDGE valida pH impossivel - Valor de pH invalido. Deve estar entre 0 e 10.",
+        "OK EDGE concorrencia bloqueia duplo fecho - status 200/409",
+        "OK clientes criados por API real - 5 clientes",
+        "OK piscinas/jacuzzis criados por API real - 9 equipamentos",
+        "OK fichas tecnicas preenchidas - 9/9",
+        "OK tecnicos e viaturas ligados - 3 tecnicos, 3 carros, 3 guias obra",
+        "OK rondas criadas e visitas concluídas - 3 rondas, 54 visitas",
+        "OK produtos da visita viram registo quimico - 60 registos",
+        "OK consumo automatico baixa guia/viatura - 60 movimentos",
+        "OK problemas em campo geram reparacoes/alertas - 6 reparacoes",
+        "OK faturacao mensal gerada - 5 faturas",
+        "OK pagamentos total/parcial registados - PAID, PARTIAL, PENDING, PENDING, PENDING",
+        "OK mensagens reais do portal cliente ficam por ler - 5 mensagens QA por ler",
+        "OK chat mostra conversas por ler - 5 mensagens totais por ler",
+        "OK notificacoes mostram alarme de chat - alarme CHAT_MESSAGE",
+        "OK dashboard recebe dados reais - clientes 8, mensagens 5",
+        "OK guia de obra mantem referencia AT e totais finais - guia AT 8"
+      ]
+    }
+  ],
+  "logs": {
+    "unit": {
+      "path": "/tmp/cw380-unit.log",
+      "sha256": "56b33414e6bfaf24d788acdd0c9b3ef9a683fccf5efc83f4c23abfd7e3100155"
+    },
+    "technician": {
+      "path": "/tmp/cw380-technician.log",
+      "sha256": "a78ed561ea90fa5965c7bd32c9200d70436683c56160dc95a7e3142c31fe651d"
+    },
+    "syntax": {
+      "path": "/tmp/cw380-syntax.log",
+      "sha256": "f6097dd5bc7a56b97d913087391d582704efad59433e3eb484a5675331443fbb"
+    },
+    "targeted-unit": {
+      "path": "/tmp/cw380-targeted-unit.log",
+      "sha256": "63a5e9274eb92c231479c2a4b649f16952c2b7f201615ff3e5f1b8a63635c38f"
+    },
+    "targeted-unit-final": {
+      "path": "/tmp/cw380-targeted-unit-final.log",
+      "sha256": "9673cc7c02b7c67a1cf3f7b827de80f7a7030486ce77d85475a5872b607bbe29"
+    },
+    "integration-initial": {
+      "path": "/tmp/cw380-integration-initial.log",
+      "sha256": "2dca7255a7a04097f9dae017caaacbbd392e5533a0663c464cee4eded5284ea6"
+    },
+    "integration-regression": {
+      "path": "/tmp/cw380-integration-regression.log",
+      "sha256": "c88193741b198d53ea73a696a5aec8c6649a559de9dda5687e6cfb48fe2309cb"
+    },
+    "visual-verification": {
+      "path": "/tmp/cw380-visual-verification.log",
+      "sha256": "c89114c42afc2fd5b2d8df13c7c67a7558057c59a8186c25e8be82cb45fb4e45"
+    },
+    "inventory": {
+      "path": "/tmp/cw380-inventory.log",
+      "sha256": "3ff0b399eb882aa2f1fc22417d040fa914996597345d34784030b5ff1ffacd96"
+    }
+  },
+  "initialAdjustment": {
+    "test": "tests/field-document-summary.test.js",
+    "initialLog": "/tmp/cw380-targeted-unit.log",
+    "initialFailures": 1,
+    "reason": "The date assertion assumed a zero-padded hour in every locale; accept 9 or 09 while requiring the same Lisbon time. All 38 targeted cases and the full 982-test suite then passed."
+  },
+  "summaryContract": {
+    "visibleConsumptions": 8,
+    "confirmedConsumptionsInFixture": 105,
+    "movementsAvailableThroughReader": 209,
+    "embeddedMovements": "CONSUMPTION only",
+    "leanStockConsumptionCount": null,
+    "legacyV3Count": "unknown; available records shown without claiming a complete guide total",
+    "metadata": [
+      "itemCount",
+      "movementsIncluded",
+      "consumptionCount"
+    ],
+    "liveRequires": [
+      "scope",
+      "x-cw-owner",
+      "Cache-Control: private, no-store"
+    ],
+    "unavailableIsNotAbsence": true,
+    "perSectionOriginalTimestampRetained": true,
+    "datesTimeZone": "Europe/Lisbon"
+  },
+  "preservation": {
+    "apiReadSnapshotModels": 19,
+    "summaryBrowserSnapshotModels": 13,
+    "summaryApiWrites": 0,
+    "originalOfficialDocumentBytesUnchanged": true,
+    "legacyAndDamagedCacheBytesPreserved": true,
+    "sessionVehicleDayOperationalGuardsRetained": true
+  },
+  "visual": {
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "minimumControlHeight": 44,
+    "minimumContrast": 4.5,
+    "unobscuredControlsChecked": true,
+    "screenshots": [
+      {
+        "path": "reports/field-visual/field-document-summary/legacy-count-390.png",
+        "sha256": "90645460000cbc40e77f3639c1b94de1774987c0b2f45948c9f27472809a56e2",
+        "width": 298,
+        "height": 44
+      },
+      {
+        "path": "reports/field-visual/field-document-summary/mixed-copy-390.png",
+        "sha256": "8aa39c5ce31cc079e5ff8e207cc2af5c6fbe2393c43fcad94fcdde11b43bd490",
+        "width": 298,
+        "height": 114
+      },
+      {
+        "path": "reports/field-visual/field-document-summary/summary-de-1440.png",
+        "sha256": "803e60078f80b537f844566c7bf0e6bb4e3b4bfe40ccb86da7e61baa916fea7a",
+        "width": 276,
+        "height": 1608
+      },
+      {
+        "path": "reports/field-visual/field-document-summary/summary-de-320.png",
+        "sha256": "eacd5d7885a8666f140a51da71d5c4849f570fb63558333beef526d72cc97b12",
+        "width": 240,
+        "height": 1612
+      },
+      {
+        "path": "reports/field-visual/field-document-summary/summary-de-390.png",
+        "sha256": "ed6a4d908a1b875a09e440d9ec98122671f789cbe9f1ecfe901c9552ff3e8f81",
+        "width": 298,
+        "height": 1528
+      },
+      {
+        "path": "reports/field-visual/field-document-summary/summary-en-1440.png",
+        "sha256": "4d319bb6a7f82cf4fbd3a45e7b838841461c9659f770fe73c1ba5da831aa5271",
+        "width": 276,
+        "height": 1587
+      },
+      {
+        "path": "reports/field-visual/field-document-summary/summary-en-320.png",
+        "sha256": "33007acb3b06f8d3163a913ba178e200029eb644f056a4a6b04dd777cd60164a",
+        "width": 240,
+        "height": 1589
+      },
+      {
+        "path": "reports/field-visual/field-document-summary/summary-en-390.png",
+        "sha256": "934c2843b41abfecc5e550ef24029a354f0fea0aee8ec5f3bf9c1c9dd446ae29",
+        "width": 298,
+        "height": 1548
+      },
+      {
+        "path": "reports/field-visual/field-document-summary/summary-es-1440.png",
+        "sha256": "357452f4d331c1ebc10709b676feab10b7f4762b5a1b92b6c3b848855e7f4053",
+        "width": 276,
+        "height": 1587
+      },
+      {
+        "path": "reports/field-visual/field-document-summary/summary-es-320.png",
+        "sha256": "4039e4a0bedb9a3e3de450e4a9873886260191f072fd6d7f07786e23eb987753",
+        "width": 240,
+        "height": 1567
+      },
+      {
+        "path": "reports/field-visual/field-document-summary/summary-es-390.png",
+        "sha256": "ac3e66943784458a3e4f5798b2df3313a6d94cfe005c8c50343b84b3f0502143",
+        "width": 298,
+        "height": 1528
+      },
+      {
+        "path": "reports/field-visual/field-document-summary/summary-fr-1440.png",
+        "sha256": "f9905ff001bee06526f088a8368de7018bfe7ffe9e2b074c7eb8a9ea6cf9e99d",
+        "width": 276,
+        "height": 1608
+      },
+      {
+        "path": "reports/field-visual/field-document-summary/summary-fr-320.png",
+        "sha256": "f9c40fd665d815adc3d8675e25652b104aec7907d6a05cb719d7aeccc2ac0af3",
+        "width": 240,
+        "height": 1612
+      },
+      {
+        "path": "reports/field-visual/field-document-summary/summary-fr-390.png",
+        "sha256": "dd8cb960db23574d9858d76bf12b368b1418825293a9098bf582ab201e2519e4",
+        "width": 298,
+        "height": 1548
+      },
+      {
+        "path": "reports/field-visual/field-document-summary/summary-pt-1440.png",
+        "sha256": "0906c8e5bff52fef9a533f4451083548e87cf5d9b8fad329701f06b09e8dccc5",
+        "width": 276,
+        "height": 1587
+      },
+      {
+        "path": "reports/field-visual/field-document-summary/summary-pt-320.png",
+        "sha256": "5f4975eceb3faaee342200ef285800a0ae7d13600eb9d2e269580772e86a3bb9",
+        "width": 240,
+        "height": 1567
+      },
+      {
+        "path": "reports/field-visual/field-document-summary/summary-pt-390.png",
+        "sha256": "666d574fcbbbd6a36d92319473d2afe88b28180aa9721e417e2b0d9c6946e896",
+        "width": 298,
+        "height": 1528
+      },
+      {
+        "path": "reports/field-visual/field-document-summary/unavailable-390.png",
+        "sha256": "221be2bec0689da88896d3ae47d9f9972f707cdc326eb50087f0bfbdd1ec55cc",
+        "width": 320,
+        "height": 164
+      }
+    ],
+    "manuallyInspected": [
+      "summary-pt-320.png",
+      "summary-de-320.png",
+      "unavailable-390.png",
+      "mixed-copy-390.png"
+    ],
+    "adjustment": "Location now starts on its own line. Complete new browser group repeated; captures wait for temporary messages and fit long sections above fixed navigation without hiding it.",
+    "scope": "New summary/provenance/availability copy; existing field shell and operational record strings retain their prior translation scope."
+  },
+  "sourceSha256": {
+    "frontend/cw-field-document-copy.js": "daf0ddc12b2cdaabe5a1626741781426fa920645bd6ce7e2920ee6442e23e9d6",
+    "frontend/cw-field-documents.js": "994e546ae3d700ca809802b59f951849c0faca54ad7d336e34c92616b0df1a9d",
+    "frontend/cw-field-guide-projection.js": "b1eb79778dd459701cf9b6aec84b47a21572c78f4662521275e1470c0a7f47c0",
+    "frontend/sw.js": "3613ceae5f1f7d7be6e7c228f96f2d97044b742bb088166b265702d91ab4d4fe",
+    "frontend/technician-field-mode.html": "f15e8a9c4ca2e706807f9c56e51eba533296de20b98f693c6d1f9e796b147f22",
+    "frontend/technician-field-mode.js": "49a4af837f82d05df90d2f66eb292e8b75bf29760697f804583eb380fdef0271",
+    "scripts/test-field-document-summary-ui.js": "446f78d9d98b3b53c9df5c9b6ee206351aec535886e5c0a3f7c470614d04d111",
+    "scripts/test-field-guide-read-scope.js": "0c5238ce20a9a18323e78d710f8fb22a0f4d498a2f8c2b32b5fd1dc22cf386d1",
+    "scripts/test-field-suite.js": "e45752343d0b106724ee293ebb2f6220366e2390473ed7331bfeee8fcd51b0db",
+    "src/services/fieldGuideReadService.js": "c36b9d6c9422ef6f9f215118df3a6b085f44c6f162900f01e27f1f598b87a3c9",
+    "tests/field-document-summary.test.js": "ef26265c1a661ad7d3bb466e6cfb9e22f639e827af63ae7066a7f465869b4a3c"
+  },
+  "serviceWorker": "v191",
+  "documentCacheFormat": "v3",
+  "runnerGroups": 294,
+  "inventory": {
+    "activeScripts": 315,
+    "htmlFiles": 126,
+    "rootPages": 119,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 114,
+    "catalogueGuardDifferences": 0
+  },
+  "native": {
+    "status": "pending_publication",
+    "expectedScripts": 294,
+    "jobTimeoutMinutes": 70,
+    "restoreExpected": {
+      "tables": 128,
+      "files": 47
+    },
+    "confirmed": false
+  },
+  "previousNativeChecks": {
+    "checkedAt": "2026-09-26T08:24:02.856Z",
+    "task378": [
+      {
+        "id": 108362806296,
+        "name": "field",
+        "status": "in_progress",
+        "conclusion": null,
+        "run_id": 36226988288,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Initialize containers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Run npm ci",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Run npx prisma validate && npx prisma generate",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Verify additive upgrade from the previous schema",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Run npx playwright install --with-deps chromium",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Run npm run check:syntax",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Run node scripts/test-field-suite.js",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 11
+          },
+          {
+            "name": "Restore database and uploaded files in isolated QA",
+            "status": "pending",
+            "conclusion": null,
+            "number": 12
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "pending",
+            "conclusion": null,
+            "number": 13
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "pending",
+            "conclusion": null,
+            "number": 24
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "pending",
+            "conclusion": null,
+            "number": 25
+          },
+          {
+            "name": "Stop containers",
+            "status": "pending",
+            "conclusion": null,
+            "number": 26
+          }
+        ]
+      }
+    ],
+    "task379": [
+      {
+        "id": 108367008202,
+        "name": "field",
+        "status": "in_progress",
+        "conclusion": null,
+        "run_id": 36228505903,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Initialize containers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Run npm ci",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Run npx prisma validate && npx prisma generate",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Verify additive upgrade from the previous schema",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Run npx playwright install --with-deps chromium",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Run npm run check:syntax",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Run node scripts/test-field-suite.js",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 11
+          },
+          {
+            "name": "Restore database and uploaded files in isolated QA",
+            "status": "pending",
+            "conclusion": null,
+            "number": 12
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "pending",
+            "conclusion": null,
+            "number": 13
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "pending",
+            "conclusion": null,
+            "number": 24
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "pending",
+            "conclusion": null,
+            "number": 25
+          },
+          {
+            "name": "Stop containers",
+            "status": "pending",
+            "conclusion": null,
+            "number": 26
+          }
+        ]
+      }
+    ]
+  },
+  "retoma": "Review renderItems/renderUsage/totalByUnit in field mode: missing units, unit casing/merging, negative corrections, exact quantities and the time scope of Used today; do not mutate stock or movements.",
+  "constraints": {
+    "branch": "work/field-readiness-20260915-simulation",
+    "merge": false,
+    "deploy": false,
+    "realContacts": false,
+    "declaredComplete": false
+  }
+}

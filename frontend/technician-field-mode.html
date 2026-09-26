@@ -411,6 +411,13 @@
 
     .field-panel-docs .doc-number { margin: 8px 0; }
     .field-panel-docs .doc-meta { display: grid; gap: 6px; }
+    .field-panel-docs [data-doc-provenance] { margin: 0 0 12px; padding: 10px; border: 1px solid var(--cw-border); border-radius: 10px; overflow-wrap: anywhere; }
+    .field-panel-docs [data-doc-provenance] p { margin: 4px 0 0; }
+    .field-panel-docs [data-consumption-summary] { overflow-wrap: anywhere; }
+    .field-panel-docs [data-consumption-summary] .doc-item { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; padding: 8px 0; border-bottom: 1px solid var(--cw-border); }
+    .field-panel-docs [data-consumption-summary] .doc-item span, .field-panel-docs [data-consumption-summary] .doc-item strong { white-space: pre-wrap; }
+    .field-panel-docs [data-consumption-summary] .doc-item small { display: block; margin-top: 4px; }
+    .field-panel-docs [data-consumption-summary] time { display: block; font-size: 0.85em; }
     .field-panel-docs .doc-subtitle { margin: 14px 0 6px; font-weight: 800; }
     .field-panel-docs .doc-actions {
       display: flex;
@@ -1671,6 +1678,7 @@
   <script src="/cw-field-route-cache.js"></script>
   <script src="/cw-field-guide-projection.js"></script>
   <script src="/cw-field-documents.js"></script>
+  <script src="/cw-field-document-copy.js"></script>
   <script src="/cw-field-alert-journal.js"></script>
   <script src="/cw-field-photos.js"></script>
   <script src="/cw-field-offline.js"></script>
