@@ -306,7 +306,87 @@ Separate permissions for:
 - change communication credentials;
 - change automation settings.
 
-## 18. Product principle
+## 18. Predictive and decision intelligence
+
+Crystal OS should evolve from a system that records past activity into one that also anticipates operational and financial needs.
+
+The system should progressively support:
+- workload forecasting by day/week/zone;
+- technician and vehicle capacity forecasting;
+- chemical/material consumption forecasting;
+- expected revenue and collections forecasting;
+- cash-flow visibility based on recurring revenue, overdue amounts and approved works;
+- real profitability by client/pool/contract;
+- identification of contracts whose real service cost is above the price charged;
+- suggested price-review candidates without changing prices automatically;
+- maintenance prediction for pumps, filters, chlorinators, probes, heat pumps and other equipment;
+- automatic prioritisation of critical incidents versus low-priority anomalies;
+- internal SLA tracking from detection to diagnosis and resolution.
+
+All predictive recommendations must remain explainable and reviewable by the administrator.
+
+## 19. AI confidence model
+
+Any AI-generated recommendation or automated decision must expose a confidence level and, where possible, a short explanation of the evidence used.
+
+Suggested levels:
+- High confidence;
+- Medium confidence;
+- Low confidence.
+
+Critical financial, safety, contractual or irreversible actions should require human confirmation unless explicitly configured otherwise under well-tested rules.
+
+## 20. Pool Digital Twin
+
+Each pool should progressively have a digital operational model built from its own historical data rather than relying only on generic rules.
+
+The Digital Twin should aggregate, where available:
+- pool volume and geometry;
+- equipment inventory and technical characteristics;
+- hydraulic layout/tubing notes;
+- chemical measurements and trends;
+- salt/chlorine/pH/alkalinity/hardness/temperature history;
+- water-level observations;
+- filtration schedules;
+- equipment runtime and maintenance history;
+- interventions and repairs;
+- photos and visual evidence;
+- seasonal behaviour;
+- chemical and water consumption;
+- recurring anomalies;
+- customer-specific operating constraints.
+
+The objective is for Crystal OS to learn the normal baseline of each individual pool and detect deviations from that baseline.
+
+Examples of future Digital Twin insights:
+- pH rising abnormally for this specific pool;
+- water loss above its normal pattern, suggesting a possible leak;
+- chemical demand higher than expected for current temperature/use;
+- filter or equipment intervention becoming due based on historical behaviour;
+- abnormal runtime or energy pattern;
+- expected consumables for upcoming visits.
+
+The Digital Twin must never silently overwrite factual history. Predictions and inferred states must remain distinguishable from measured or technician-entered data.
+
+## 21. Crystal Command Center integration
+
+Predictive, financial and operational intelligence should surface in the Crystal Command Center as exception-focused summaries rather than overwhelming the administrator with raw data.
+
+Example daily summary:
+- payments awaiting validation;
+- overdue balances requiring attention;
+- possible leaks;
+- pools with abnormal chemical behaviour;
+- route overloads;
+- technician/vehicle capacity risks;
+- low-stock predictions;
+- contracts with negative or weak margin;
+- equipment with predicted maintenance needs;
+- communication channel failures.
+
+Primary question for the administrator dashboard: "What requires my attention today?"
+
+## 22. Product principle
 
 Crystal OS should automate routine work and surface exceptions.
 
@@ -316,6 +396,7 @@ Target operating model:
 - system sends;
 - system retries safe failures;
 - system reconciles what it can;
+- system predicts emerging needs and anomalies;
 - administrator handles only exceptions, approvals and ambiguous cases.
 
 This specification intentionally avoids implementation-specific provider assumptions so that WhatsApp, email and future channels can share the same queue, audit and automation model.
