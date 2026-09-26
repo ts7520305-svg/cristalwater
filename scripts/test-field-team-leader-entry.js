@@ -107,7 +107,7 @@ let browser;
     ['/technician-visit?visit=' + visit.id, '#statusBox', 'Ficha da visita pronta'],
     ['/technician-route', '#statusBox', 'Rota carregada com 2'],
     ['/technician-map', '#infoBox', pool.name],
-    ['/technician-guide', '#statusBox', 'Modulo pronto'],
+    ['/technician-guide', '#statusBox', 'Módulo pronto'],
     ['/technician-history', '#statusBox', 'Sem visitas concluidas'],
     ['/technician-profile', '#profileGrid', 'TEAM_LEADER'],
     ['/technician-gps', '#gpsStatus', 'Pronto para iniciar GPS'],

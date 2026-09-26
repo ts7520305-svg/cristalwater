@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-09-26T07:20:08.107Z",
-  "baseCommit": "2fa0e0b3d92220d84575f8c02eff64e149fbd7fc",
+  "generatedAt": "2026-09-26T07:53:35.498Z",
+  "baseCommit": "8bd48b2a3e7ee8421277e4074860bb3e31265d25",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 313,
+  "activeScriptsScanned": 314,
   "summary": {
     "htmlFiles": 126,
     "rootPages": 119,
@@ -4218,6 +4218,7 @@
         "test-field-legacy-entry.js",
         "test-field-admin-catalogue.js",
         "test-field-work-guide-close-ui.js",
+        "test-field-technician-guide-ui.js",
         "test-field-guide-read-scope-ui.js",
         "test-field-transport-guide-documents-ui.js",
         "test-field-technical-proposals.js",
@@ -4302,7 +4303,7 @@
       "file": "frontend/technician-guide.html",
       "route": "/technician-guide",
       "kind": "Entrada raiz",
-      "title": "Cristal Water - Guia Tecnico",
+      "title": "Cristal Water — Guias e stock",
       "catalogueRoles": [
         "TECHNICIAN",
         "TEAM_LEADER"
@@ -4322,9 +4323,13 @@
         "/cristal-assist.css",
         "/cw-ui-kit.css",
         "/ui/foundation.css",
+        "/ui/design-system.css",
         "/cw-auth.js",
         "/technician-auth-guard.js",
-        "/ui/design-system.css",
+        "/cw-auth-download.js",
+        "/cw-field-guide-projection.js",
+        "/cw-technician-guide-read-rules.js",
+        "/cw-technician-guide-copy.js",
         "/technician-guide.js",
         "/cristal-help-data.js",
         "/cristal-assist.js",
@@ -4341,6 +4346,7 @@
         "test-field-vehicle-consumption-ui.js",
         "test-field-work-guide-close-ui.js",
         "test-field-vehicle-maintenance-ui.js",
+        "test-field-technician-guide-ui.js",
         "test-field-work-guide-start-ui.js",
         "test-field-team-leader-entry.js",
         "test-role-help-browser.js"

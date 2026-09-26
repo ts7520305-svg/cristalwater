@@ -1,5 +1,9 @@
 # TASK377 — Histórico paginado de guias, obras e movimentos da frota
 
+## Interrupção nativa — registada em TASK379
+
+[CI 36225374723](https://github.com/ts7520305-svg/cristalwater/actions/runs/36225374723), job `108358260658`, cancelado após cerca de 50 minutos, compatível com o limite configurado: **283/290 scripts esperados distintos concluídos, todos zero**. Sete scripts sem confirmação e restauro ignorado; gate nativo não aprovado. [Evidência](evidence/20260926_task377_ci_interrupted.json). A TASK379 aumenta o orçamento do job para 70 minutos, mantendo a bateria completa, os limites individuais e o restauro. As referências anteriores conservam o estado conhecido na publicação original.
+
 ## Comportamento
 
 Os três históricos de `/admin-vehicles` usam agora `/api/fleet-history`, reservado a uma conta User ADMIN autenticada. As listas anteriores mostravam apenas 20 guias/obras, oito materiais por obra e 30 movimentos, sem total nem acesso às restantes páginas. A nova consulta apresenta 25 registos por página, total de resultados e detalhe com materiais também paginados. Não há alteração de guias, stock, quilometragem, documentos ou movimentos nesta API.

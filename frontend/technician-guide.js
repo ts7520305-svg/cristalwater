@@ -1,137 +1,35 @@
-const API = "/api/guides";
-const statusBox = document.getElementById("statusBox");
-
-function setStatus(message, tone = "") {
-  if (!statusBox) return;
-  statusBox.textContent = message;
-  if (tone) statusBox.dataset.tone = tone;
-  else statusBox.removeAttribute("data-tone");
-}
-
-async function j(url, opt) {
-  const response = await fetch(url, {
-    headers: { "Content-Type": "application/json" },
-    ...opt
-  });
-  const text = await response.text();
-  let data = {};
-  try {
-    data = text ? JSON.parse(text) : {};
-  } catch (_) {
-    data = { raw: text };
-  }
-  if (!response.ok) {
-    throw new Error(data.error || data.message || `Falha HTTP ${response.status}`);
-  }
-  return data;
-}
-
-function esc(value) {
-  return String(value ?? "").replace(/[&<>"]/g, (char) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;"
-  }[char]));
-}
-
-async function init() {
-  if (!window.CristalAuth?.requireAuth("TECHNICIAN")) return;
-
-  setStatus("A carregar viaturas.");
-  try {
-    const data = await j(`${API}/vehicles`);
-    const vehicles = Array.isArray(data.vehicles) ? data.vehicles : [];
-    vehicle.innerHTML = vehicles
-      .map((item) => `<option value="${item.id}">${esc(item.plate)} - ${esc(item.name || "")}</option>`)
-      .join("");
-    if (vehicles[0]) vehicleStock.value = vehicles[0].id;
-    setStatus(vehicles.length ? `Modulo pronto com ${vehicles.length} viatura(s).` : "Sem viaturas associadas.", vehicles.length ? "" : "warning");
-  } catch (error) {
-    setStatus(error.message || "Falha ao carregar viaturas.", "error");
-  }
-}
-
-function startDay() {
-  if (!window.CristalAuth?.requireAuth("TECHNICIAN")) return;
-  const lang=new URL(location.href).searchParams.get('lang')||'pt';
-  location.href='/work-guide-start?'+new URLSearchParams({...(vehicle.value?{vehicleId:vehicle.value}:{}),lang});
-}
-
-function renderAtDocumentButton(document, vehicleId, workGuide) {
-  if (workGuide && !workGuide.guideId) {
-    return `
-      <div class="movement">
-        <strong>Guia AT em falta</strong>
-        <div class="muted">O administrador foi alertado. Quando a AT for adicionada, fica associada a esta guia de obra.</div>
-      </div>
-    `;
-  }
-
-  if (document?.url) {
-    return `
-      <a class="btn" target="_blank" rel="noopener" href="${esc(document.url)}">Abrir guia AT oficial</a>
-      <div class="muted">Ficheiro AT: ${esc(document.originalName || document.filename || "documento")}</div>
-    `;
-  }
-
-  return `
-    <a class="btn" target="_blank" rel="noopener" href="${API}/transport/latest/${encodeURIComponent(vehicleId)}/pdf">Abrir PDF guia AT gerado</a>
-    <div class="muted">Sem ficheiro oficial AT anexado.</div>
-  `;
-}
-
-async function loadStock() {
-  if (!window.CristalAuth?.requireAuth("TECHNICIAN")) return;
-
-  if (!vehicleStock.value) {
-    setStatus("Seleciona primeiro uma viatura.", "warning");
-    return;
-  }
-
-  setStatus("A atualizar stock e movimentos.");
-
-  try {
-    const response = await j(`${API}/stock/${vehicleStock.value}`);
-    const officialDocument = response.transportGuideDocument || response.workGuide?.guide?.officialDocument;
-
-  const guideActions = response.workGuide ? `
-    <div>
-      <a class="btn" target="_blank" rel="noopener" href="${API}/work/${encodeURIComponent(response.workGuide.id)}/pdf">Abrir PDF guia de obra</a>
-      ${renderAtDocumentButton(officialDocument, vehicleStock.value, response.workGuide)}
-      <a class="btn" target="_blank" rel="noopener" href="${API}/vehicles/${encodeURIComponent(vehicleStock.value)}/insurance/pdf">Abrir PDF seguro</a>
-    </div>
-  ` : "";
-
-  const movementRows = (response.movements || []).slice(-10).reverse().map((move) => `
-    <div class="movement">
-      <strong>${esc(move.itemName || "Material")}</strong>
-      <div>${esc(move.quantity || 0)} ${esc(move.unit || "UN")} - ${esc(move.locationLabel || move.location || "Local nao indicado")}</div>
-      <div class="muted">${esc(new Date(move.createdAt).toLocaleString("pt-PT"))}</div>
-    </div>
-  `).join("");
-
-    stock.innerHTML = response.workGuide
-      ? `<p class="muted">Guia obra #${response.workGuide.id} ligada a AT ${esc(response.workGuide.guide?.codeAT || response.workGuide.guideId || "AT EM FALTA")}</p>${guideActions}${(response.stock || []).map((item) => `
-        <div class="card">
-          <strong>${esc(item.name)}</strong>
-          <div>${esc(item.quantity)} ${esc(item.unit || "")}</div>
-          <div class="muted">Usado: ${esc(item.usedQty || 0)}</div>
-        </div>
-        `).join("")}<h3>Movimentos por local</h3>${movementRows || '<p class="muted">Ainda sem movimentos.</p>'}`
-      : '<p class="muted">Sem guia de obra aberta.</p>';
-    setStatus("Stock atualizado.");
-  } catch (error) {
-    stock.innerHTML = '<p class="muted">Nao foi possivel carregar stock.</p>';
-    setStatus(error.message || "Falha ao carregar stock.", "error");
-  }
-}
-
-
-function closeGuide() {
-  if (!window.CristalAuth?.requireAuth("TECHNICIAN")) return;
-  const id=document.getElementById('closeId')?.value||document.getElementById('workGuideId')?.value;
-  location.href='/work-guide-close'+(/^[1-9]\d{0,9}$/.test(id)?'?workGuideId='+encodeURIComponent(id):'');
-}
-
-init();
+(function(){
+ 'use strict';
+ const R=window.CWTechnicianGuideReadRules,copy=window.CWTechnicianGuideCopy,$=id=>document.getElementById(id),jobs={},keys=['cristalwater_jwt','token','adminToken','cristalwater_user','user'];
+ let actor,invalid=false,suspended=false,assignment=null,stock=null,movements=null,state='loading',stockState='idle',movementState='idle',language='pt',itemPage=1,offset=0,maxId=null,filter=null;
+ const t=k=>copy[language][k]||'',node=(tag,text='')=>{const el=document.createElement(tag);el.textContent=text;return el;},blocked=()=>invalid||suspended;
+ function identity(){const tokens=keys.slice(0,3).map(k=>localStorage.getItem(k)),token=tokens.find(Boolean),users=keys.slice(3).map(k=>localStorage.getItem(k)).filter(Boolean).map(JSON.parse);if(!token||tokens.some(v=>v&&v!==token))return null;const c=JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))),id=Number(c.userId||c.id),technicianId=Number(c.technicianId||c.id);if(!['TECHNICIAN','TEAM_LEADER'].includes(c.role)||!R.positive(id)||!R.positive(technicianId)||c.principalType==='USER'&&!R.positive(c.technicianId)||!Number.isFinite(c.exp)||c.exp*1000<=Date.now()||!users.length||users.some(u=>u.role!==c.role||Number(u.userId||u.id)!==id||Number(u.technicianId||u.id)!==technicianId))return null;return {token,technicianId,owner:c.principalType==='USER'?'USER:'+id+':TECH:'+technicianId:'TECH:'+technicianId,expires:c.exp*1000,fingerprint:JSON.stringify([tokens,users.map(u=>[u.role,u.userId||u.id,u.technicianId||u.id])])};}
+ function abort(k){const j=jobs[k];if(j){j.controller.abort();clearTimeout(j.timer);delete jobs[k];}}
+ function clear(session){if(session)invalid=true;else suspended=true;for(const k of Object.keys(jobs))abort(k);assignment=stock=movements=null;state=stockState=movementState=session?'session':'suspended';maxId=null;offset=0;itemPage=1;if(session){filter=null;$('movementFilters').reset();}window.CristalDownloads?.cancel();render();}
+ function active(){let a;try{a=identity();}catch(_){}if(!invalid&&actor&&a?.fingerprint===actor.fingerprint&&actor.expires>Date.now())return !suspended;if(!invalid)clear(true);return false;}
+ function begin(k){abort(k);const controller=new AbortController(),j={key:k,controller,timer:setTimeout(()=>controller.abort(),30000)};jobs[k]=j;return j;}
+ const current=j=>active()&&jobs[j.key]===j;
+ function finish(j){clearTimeout(j.timer);if(jobs[j.key]===j)delete jobs[j.key];}
+ async function request(path,j){const res=await fetch('/api/guides'+path,{headers:{Authorization:'Bearer '+actor.token},cache:'no-store',redirect:'error',signal:j.controller.signal});if(!current(j))throw Error('stale');if([401,403].includes(res.status)){clear(true);throw Error('session');}const data=await res.json();if(!current(j))throw Error('stale');if(res.status!==200)throw Object.assign(Error('unavailable'),{review:res.status===409&&data?.ok===false&&data.code==='FIELD_GUIDES_DATA_REVIEW'});if(res.headers.get('x-cw-field-guides')!=='field-guides-v1'||res.headers.get('x-cw-owner')!==actor.owner||res.headers.get('cache-control')!=='private, no-store'||!(res.headers.get('content-type')||'').startsWith('application/json'))throw Error('unconfirmed');return data;}
+ function fact(dl,k,v){const row=node('div');row.append(node('dt',t(k)),node('dd',v===null||v===undefined||v===''?t('missing'):String(v)));dl.append(row);}
+ const date=v=>new Intl.DateTimeFormat({pt:'pt-PT',en:'en-GB',fr:'fr-FR',es:'es-ES',de:'de-DE'}[language],{dateStyle:'short',timeStyle:'short',timeZone:'Europe/Lisbon'}).format(new Date(v));
+ function link(box,k,href){const a=node('a',t(k));a.className='btn';a.href=href;a.dataset.authDownload='';a.target='_blank';a.rel='noopener';box.append(a);}
+ function workCard(){const w=stock.workGuide,box=$('stock'),dl=node('dl');box.append(node('h3',t('work')+' #'+w.id));fact(dl,'vehicle',w.vehicle.plate+' · #'+w.vehicleId);fact(dl,'technician',w.technician.name);fact(dl,'at',w.guideId===null?null:(w.guide?.codeAT||'#'+w.guideId));fact(dl,'createdAt',date(w.createdAt));fact(dl,'startKm',w.startKm);fact(dl,'endKm',w.endKm);fact(dl,'notes',w.notes);box.append(dl);const actions=node('div');actions.className='actions';link(actions,'workPdf','/api/guides/work/'+w.id+'/pdf');if(w.guideId){const doc=stock.transportGuideDocument;if(doc)link(actions,'official',doc.url);else box.append(node('p',t('noDocument')));link(actions,'atPdf','/api/guides/transport/'+w.guideId+'/pdf');}else box.append(node('p',t('noAt')));link(actions,'insurance','/api/guides/vehicles/'+w.vehicleId+'/insurance/pdf');box.append(actions);}
+ function pager(prefix,page,total,enabled){$(prefix+'Previous').disabled=!enabled||page<=1;$(prefix+'Next').disabled=!enabled||page*25>=total;$(prefix==='items'?'itemPage':'movementPage').textContent=enabled?t('page')+' '+page+' / '+Math.max(page,Math.ceil(total/25)):'';}
+ function render(){const disabled=blocked();$('guideReader').dataset.state=state;$('assignmentPanel').dataset.state=state;$('stockPanel').dataset.state=stockState;$('movementPanel').dataset.state=movementState;document.documentElement.lang=language;document.title='Cristal Water — '+t('title');for(const el of document.querySelectorAll('[data-copy]'))el.textContent=t(el.dataset.copy);$('guideLanguage').value=language;$('statusBox').textContent=t(state);$('stockStatus').textContent=t(stockState==='ready'?'stockReady':stockState==='empty'?'noWork':stockState);$('movementStatus').textContent=t(movementState==='ready'?'movementReady':movementState);
+  const v=assignment?.vehicles[0];$('vehicle').replaceChildren();if(v)$('vehicle').append(new Option(v.plate+' · '+(v.name||'')+' · #'+v.id,String(v.id)));$('vehicleStock').value=v?.id||'';$('vehicle').disabled=true;$('refreshVehicles').disabled=disabled;$('openWork').disabled=disabled||state!=='ready'||!v;$('refreshStock').disabled=disabled||state!=='ready'||!v;
+  $('stock').replaceChildren();$('materials').replaceChildren();$('itemsTitle').hidden=!stock?.workGuide;$('itemPager').hidden=!stock?.workGuide;$('itemTotal').textContent=stock?.workGuide?t('total')+': '+stock.itemCount:'';$('workGuideId').value=stock?.workGuide?.id||'';if(stock?.workGuide){workCard();if(!stock.itemCount)$('materials').append(node('p',t('noItems')));for(const item of stock.stock.slice((itemPage-1)*25,itemPage*25)){const card=node('article'),dl=node('dl');card.dataset.itemId=item.id;card.append(node('h3',item.name+' · #'+item.id));for(const [k,v]of [['type',item.type],['unit',item.unit],['initial',item.initialQty],['quantity',item.quantity],['used',item.usedQty]])fact(dl,k,v);card.append(dl);$('materials').append(card);}}pager('items',itemPage,stock?.itemCount||0,!disabled&&!!stock?.workGuide);
+  $('movementPanel').hidden=!stock?.workGuide;$('movements').replaceChildren();$('movementTotal').textContent=movements?t('total')+': '+movements.total:'';if(movements)for(const row of movements.movements){const card=node('article'),dl=node('dl');card.dataset.movementId=row.id;card.append(node('h3',row.itemName+' · #'+row.id));for(const [k,v]of [['type',row.movementType],['quantity',row.quantity],['unit',row.unit],['createdAt',date(row.createdAt)],['location',row.locationLabel||row.location],['source',row.source],['notes',row.userNotes??row.notes]])fact(dl,k,v);card.append(dl);$('movements').append(card);}pager('movements',offset/25+1,movements?.total||0,!disabled&&!!movements);for(const el of $('movementFilters').elements)el.disabled=disabled||!stock?.workGuide;
+  const suffix=language==='pt'?'':'?lang='+language;for(const [id,path]of [['consumeLink','/vehicle-consumption'],['closeWorkLink','/work-guide-close'],['vehicleMaintenanceLink','/vehicle-maintenance']]){const a=$(id);a.setAttribute('aria-disabled',String(disabled));if(disabled)a.removeAttribute('href');else a.href=path+suffix;}$('returnLink').href='/technician-field-mode'+suffix;
+ }
+ async function loadAssignment(){if(!active())return;abort('stock');abort('movements');stock=movements=null;state='loading';stockState=movementState='idle';maxId=null;offset=0;itemPage=1;const j=begin('assignment');render();try{const p=await request('/vehicles',j);if(!current(j))return;if(!R.vehicles(p,actor))throw Error('incomplete');assignment=p;state=p.vehicles.length?'ready':'unassigned';}catch(e){if(current(j))state=e.review?'review':'error';}finally{if(current(j)){finish(j);render();if(state==='ready')loadStock();}else finish(j);}}
+ async function loadStock(){if(!active()||state!=='ready'||!assignment?.vehicles[0])return;abort('movements');stock=movements=null;itemPage=1;offset=0;maxId=null;stockState='loading';movementState='idle';const vehicleId=assignment.vehicles[0].id,j=begin('stock');render();try{const p=await request('/stock/'+vehicleId+'?includeMovements=false',j);if(!current(j))return;if(!R.stock(p,actor,vehicleId))throw Error('incomplete');stock=p;stockState=p.workGuide?'ready':'empty';}catch(e){if(current(j))stockState=e.review?'review':'error';}finally{if(current(j)){finish(j);render();if(stock?.workGuide)loadMovements(0);}else finish(j);}}
+ async function loadMovements(nextOffset=0){if(!active()||!stock?.workGuide)return;offset=nextOffset;movements=null;const q={vehicleId:stock.workGuide.vehicleId,workGuideId:stock.workGuide.id,offset,maxId,movementType:filter},j=begin('movements');movementState=R.query(q)?'loading':'invalid';render();if(movementState==='invalid'){finish(j);return;}const params={vehicleId:q.vehicleId,workGuideId:q.workGuideId,limit:25,offset:q.offset,...(q.maxId===null?{}:{maxId:q.maxId}),...(q.movementType===null?{}:{movementType:q.movementType})};try{const p=await request('/movements?'+new URLSearchParams(params),j);if(!current(j))return;if(!R.movements(p,actor,q))throw Error('incomplete');movements=p;maxId=p.maxId;movementState=p.movements.length?'ready':'empty';}catch(e){if(current(j))movementState=e.review?'review':'error';}finally{if(current(j)){finish(j);render();}else finish(j);}}
+ window.loadStock=loadStock;window.startDay=()=>{if(active()&&state==='ready'&&assignment?.vehicles[0])location.href='/work-guide-start?'+new URLSearchParams({vehicleId:assignment.vehicles[0].id,lang:language});};
+ $('refreshVehicles').onclick=loadAssignment;$('itemsPrevious').onclick=()=>{if(active()&&itemPage>1){itemPage--;render();}};$('itemsNext').onclick=()=>{if(active()&&stock&&itemPage*25<stock.itemCount){itemPage++;render();}};$('movementsPrevious').onclick=()=>loadMovements(offset-25);$('movementsNext').onclick=()=>loadMovements(offset+25);
+ $('movementFilters').onsubmit=e=>{e.preventDefault();if(!active())return;filter=$('movementType').value||null;maxId=null;loadMovements(0);};$('clearMovementFilter').onclick=()=>{if(!active())return;$('movementType').value='';filter=null;maxId=null;loadMovements(0);};$('refreshMovements').onclick=()=>{if(active()){maxId=null;loadMovements(0);}};
+ $('guideLanguage').onchange=()=>{language=copy[$('guideLanguage').value]?$('guideLanguage').value:'pt';const url=new URL(location.href);url.searchParams.set('lang',language);history.replaceState(null,'',url);render();};
+ document.addEventListener('click',e=>{const a=e.target.closest('a');if(!a||!$('guideReader').contains(a)||a.id==='returnLink')return;if(!active()||a.getAttribute('aria-disabled')==='true'){e.preventDefault();e.stopImmediatePropagation();}},true);
+ addEventListener('storage',active);addEventListener('focus',active);addEventListener('pagehide',()=>clear(false));addEventListener('pageshow',e=>{if(e.persisted){suspended=false;if(active())loadAssignment();}});document.addEventListener('visibilitychange',()=>{if(!document.hidden)active();});setInterval(active,1000);
+ try{language=copy[new URL(location.href).searchParams.get('lang')]?new URL(location.href).searchParams.get('lang'):'pt';actor=identity();}catch(_){}if(actor){setTimeout(active,Math.max(0,actor.expires-Date.now()+5));loadAssignment();}else clear(true);
+}());

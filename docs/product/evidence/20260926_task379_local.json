@@ -1,0 +1,393 @@
+{
+  "task": "TASK379",
+  "baseCommit": "8bd48b2a3e7ee8421277e4074860bb3e31265d25",
+  "validatedAt": "2026-09-26T07:59:36.651615+00:00",
+  "unitTests": {
+    "passed": 965,
+    "files": 116,
+    "new": 11
+  },
+  "technicianTests": 4,
+  "syntax": {
+    "backend": 689,
+    "frontend": 300,
+    "inline": 44
+  },
+  "schema": {
+    "newMigrations": 0,
+    "totalAdditiveMigrationsApplied": 43,
+    "tablesExpected": 128,
+    "runtime": "PGlite 0.5.8 / pglite-socket 0.2.11; isolated synthetic data, not native PostgreSQL"
+  },
+  "integrationGroups": [
+    {
+      "script": "scripts/test-field-guide-read-scope.js",
+      "code": 0,
+      "log": "/tmp/cw379-test-field-guide-read-scope.log",
+      "sha256": "0ea58aea57b523a5ddd4095407f1876f5af6ebba6310f5f1ee8b710e1469ec55",
+      "checks": [
+        "PASS field guide reads: TECHNICIAN/TEAM_LEADER with PIN and linked User; same-vehicle work, nested AT works, movements and PDFs restricted by technician; explicit safe projections exclude typed contacts, credentials, costs and private JSON metadata; protected document links; strict query IDs/duplicates/limits; complete 207-row paging with insertion boundary and refreshed new rows; explicit stock without movements; null legacy ownership only with own work; foreign visit review; reassignment/unassigned/archive/duplicate-work guards; four real SQL failures; ADMIN compatibility; unchanged 19-model read snapshot and official bytes."
+      ]
+    },
+    {
+      "script": "scripts/test-field-technician-guide-ui.js",
+      "code": 0,
+      "log": "/tmp/cw379-test-field-technician-guide-ui.log",
+      "sha256": "afbf1255fff514b6e1ddf4c66b16133313302da4ab341ed9e266d311d1e7dba4",
+      "checks": [
+        "PASS technician guide: actual field entry; PIN/User TECHNICIAN/TEAM_LEADER; 207 movements in complete pages with insertion boundary and refreshed additions; 28 exact materials, zero/null units/readings and signed amounts; three real authenticated PDFs and the original inert file download; complete/empty/partial/unavailable/review states; owner/header/document/filter/duplicate failures; independent stock/movements; stale replies; five languages/three widths/44px/contrast/16 captures with selection/filter/material page preserved; suspension/recovery/account change/expiry; zero API writes, 13-model snapshot and official bytes unchanged."
+      ],
+      "finalRerunLog": "/tmp/cw379-visual-verification.log"
+    },
+    {
+      "script": "scripts/test-field-guide-read-scope-ui.js",
+      "code": 0,
+      "log": "/tmp/cw379-test-field-guide-read-scope-ui.log",
+      "sha256": "40e9aef49c36d515fbae473a1c12d92d30cc72c7ae5d85bb1e7d711769afbbf7",
+      "checks": [
+        "PASS field guide browser: actual field page and both roles/PIN/User; each colleague sees only own work and movements, no typed contact/cost/private metadata in v3 cache; successful other-owner reply rejected; old v2 bytes preserved and refused on cold offline reload; current malformed/private cache preserved without display; online recovery; three widths/screenshots; no API writes, 13-model snapshot and official bytes unchanged."
+      ]
+    },
+    {
+      "script": "scripts/test-field-document-recovery.js",
+      "code": 0,
+      "log": "/tmp/cw379-test-field-document-recovery.log",
+      "sha256": "4ec5eae4f8ca88bd10cbac1fedd1a9d61fb016b2c59af27ea8c36c81287a26fd",
+      "checks": [
+        "PASS guide responses omit related credentials; failed document/stock/vehicle reads and corrupt official-document metadata cannot claim an empty successful response",
+        "PASS real documents grouped by typed account/role/vehicle/day; legacy bytes preserved; mixed refresh keeps original section timestamp and current source honest",
+        "PASS quota, missing readback, corrupt cache and wrong vehicle do not overwrite saved bytes or claim offline persistence",
+        "PASS late reply cannot replace newer documents; cold offline reload retains section provenance; even a non-JSON 403 blocks cached operational documents",
+        "PASS editing vehicle invalidates visible documents; another account on the same vehicle cannot inherit cache; current account must consult again and day changes invalidate provenance"
+      ]
+    },
+    {
+      "script": "scripts/test-field-authenticated-document-opening.js",
+      "code": 0,
+      "log": "/tmp/cw379-test-field-authenticated-document-opening.log",
+      "sha256": "0e627beed653a6bcfaf4ae9aae1c3949edb4eadc54584ec596f3c4cb594af062",
+      "checks": [
+        "PASS six real PDF endpoints and two historical guides without vehicles confirm document/client/vehicle identity and complete content through the authenticated browser reader",
+        "PASS wrong identity/MIME, HTML, truncated PDF, missing private headers, partial/redirect/error replies, blocked windows, timeout, cancellation, account/body changes, expiry and noncanonical URLs",
+        "PASS displayed files revoked on account change, HTML attachments preserved as inert downloads, owner binding and unchanged original financial/guide/chat records"
+      ]
+    },
+    {
+      "script": "scripts/test-field-work-guide-start-ui.js",
+      "code": 0,
+      "log": "/tmp/cw379-test-field-work-guide-start-ui.log",
+      "sha256": "78ea0085578f99b0d9d6a87a5c0b06c08501581c1b415fe1afcf1f2e6f8d1108",
+      "checks": [
+        "PASS work opening browser: real admin/technician navigation; explicit technician and mileage; escaped source/stock/notes; existing-work protection; double-click once; lost response/reload/JSONB recovery; offline exact retry/cancel; stale source; storage quota/ignored/corrupt reference; partial/latest reads; five languages/three widths/44px/18 screenshots; expiry/suspension/account changes during review/commit; ADMIN/TECHNICIAN/TEAM_LEADER with both identities; unchanged old works, source and official bytes."
+      ]
+    },
+    {
+      "script": "scripts/test-field-work-guide-close-ui.js",
+      "code": 0,
+      "log": "/tmp/cw379-test-field-work-guide-close-ui.log",
+      "sha256": "55db16d916cca07787f0c116f4319106b57ae2eda49350778f367e10a44483c0",
+      "checks": [
+        "PASS work closure browser: real admin/field/legacy navigation; explicit mileage/vehicle choices; escaped preserved stock; double-click once; lost response/reload/JSONB recovery; offline exact retry/cancel; stale review; storage quota/ignored/corrupt reference; partial/latest reads; five languages/three widths/44px/18 screenshots; expiration, suspension and account changes during review/commit; ADMIN/TECHNICIAN/TEAM_LEADER with both identities; no altered stock, notes or transport state."
+      ]
+    },
+    {
+      "script": "scripts/test-field-vehicle-consumption-ui.js",
+      "code": 0,
+      "log": "/tmp/cw379-test-field-vehicle-consumption-ui.log",
+      "sha256": "f51f12c1d74dae3e4b7146a7fd993ed8fcc700f2dc24c8e39c74c86c73efcd82",
+      "checks": [
+        "PASS vehicle consumption browser: real ADMIN/TECHNICIAN/TEAM_LEADER PIN and User flows, exact item and unit selection, review/receipt, double-click once, no stock-on-read legacy call, loss/reload, offline exact retry/cancel, stale proof, quota/ignored/corrupt storage, malformed packet/latest read, target stable across filters and five languages, 18 screenshots/three widths/44px controls, proof expiry, bfcache clearing, account change during review/commit, session expiry and preserved related records."
+      ]
+    },
+    {
+      "script": "scripts/test-field-vehicle-maintenance-ui.js",
+      "code": 0,
+      "log": "/tmp/cw379-test-field-vehicle-maintenance-ui.log",
+      "sha256": "ed79332b1631609d76cdc8da0e9e284bc43b94cb71cc33cf07a06c46e9a272f5",
+      "checks": [
+        "PASS maintenance browser: actual admin entry; explicit create/keep/set/clear; exact retained dates and Lisbon gap/fold; zero versus missing; completion now and protected previous date; linked expense warning/link; escaped before/after; double-click/loss/reload/offline retry/cancel; stale review, storage failures/corrupt reference, latest/partial reads; five languages/three widths/44px/18 screenshots; suspension/identity races/expiry; both field identities and current-vehicle scope; preserved stock, vehicle and financial records."
+      ]
+    },
+    {
+      "script": "scripts/test-field-team-leader-entry.js",
+      "code": 0,
+      "log": "/tmp/cw379-test-field-team-leader-entry.log",
+      "sha256": "b3269739a84da0923ebe82841a7005529f904b244ea4d9474783e807a822440d",
+      "checks": [
+        "PASS real TEAM_LEADER PIN login, assigned REGULAR/EXTRA route, forbidden foreign/admin resources and offline draft recovery",
+        "PASS client payment/portal entry returns TEAM_LEADER to field; account settings explains PIN refusal without losing session or draft",
+        "PASS leader entry into modern/legacy field, visit, route, map and GPS; actual menu opens guide/history/profile without logout or administrative shortcuts",
+        "PASS actual TEAM_LEADER menu, role help and quick commands return to the real route with original session and draft",
+        "PASS real email login binds USER to technician, isolates PIN/USER drafts, and logout/relogin preserves both",
+        "PASS revoked TEAM_LEADER loses active route without losing draft; ordinary TECHNICIAN entry remains functional",
+        "PASS client/admin redirect, mismatched token role, expired/unknown session and preserved local records"
+      ]
+    },
+    {
+      "script": "scripts/test-field-navigation-preferences.js",
+      "code": 0,
+      "log": "/tmp/cw379-test-field-navigation-preferences.log",
+      "sha256": "bf33fb89ab292b4d5a8f447da76a8fffe3d7cb6c8072cb7d683213ebb658abac",
+      "checks": [
+        "PASS navigation preferences: account-bound explicit choices, no default writes or reload, device/live and fixed palettes, three densities with 44px targets, five languages/three widths/contrast, real menu/index/help navigation, business styles and filters preserved, legacy keys/shortcut and work bytes preserved, two windows, storage throw/ignored writes, corrupt/wrong-owner bytes, bfcache, reset, offline save, account change/expiry; zero business writes"
+      ]
+    },
+    {
+      "script": "scripts/test-real-month-flow-api.js",
+      "code": 0,
+      "log": "/tmp/cw379-test-real-month-flow-api.log",
+      "sha256": "0bf33c0b0fb66406ca0768889e642b88d61016638850ba22ba070fb73ec94b63",
+      "checks": [
+        "OK EDGE valida pH impossivel - Valor de pH invalido. Deve estar entre 0 e 10.",
+        "OK EDGE concorrencia bloqueia duplo fecho - status 200/409",
+        "OK clientes criados por API real - 5 clientes",
+        "OK piscinas/jacuzzis criados por API real - 9 equipamentos",
+        "OK fichas tecnicas preenchidas - 9/9",
+        "OK tecnicos e viaturas ligados - 3 tecnicos, 3 carros, 3 guias obra",
+        "OK rondas criadas e visitas concluídas - 3 rondas, 54 visitas",
+        "OK produtos da visita viram registo quimico - 60 registos",
+        "OK consumo automatico baixa guia/viatura - 60 movimentos",
+        "OK problemas em campo geram reparacoes/alertas - 6 reparacoes",
+        "OK faturacao mensal gerada - 5 faturas",
+        "OK pagamentos total/parcial registados - PAID, PARTIAL, PENDING, PENDING, PENDING",
+        "OK mensagens reais do portal cliente ficam por ler - 5 mensagens QA por ler",
+        "OK chat mostra conversas por ler - 5 mensagens totais por ler",
+        "OK notificacoes mostram alarme de chat - alarme CHAT_MESSAGE",
+        "OK dashboard recebe dados reais - clientes 8, mensagens 5",
+        "OK guia de obra mantem referencia AT e totais finais - guia AT 11"
+      ]
+    }
+  ],
+  "initialFailures": [
+    {
+      "phase": "Mileage fixture",
+      "log": "/tmp/cw379-ui-initial-failure.log",
+      "sha256": "5e92b166388f21ad645f78033d364caab1bc2975d6bd035241df6c6b297af801",
+      "resolution": "The inherited work fixture did not seed starting mileage zero. Explicitly seeded zero/null before the read-only snapshot; retained the zero display assertion."
+    },
+    {
+      "phase": "Legacy document expectation",
+      "log": "/tmp/cw379-ui-pdf-initial-failure.log",
+      "sha256": "c57c5936c875d345493c5389f8686482b5d09ed6e4dc24e5807567f2734c32b9",
+      "resolution": "A legacy unreviewed file is intentionally downloaded as inert bytes. The test now confirms the actual download matches the original, alongside the three generated PDF opens. Existing safe document behaviour retained."
+    },
+    {
+      "phase": "Expiry fixture",
+      "log": "/tmp/cw379-ui-expiry-fixture-failure.log",
+      "sha256": "56f0e3ea0f34d5c18a8e5f1d86a1c6fa5b59c904ad1c3af9a16c958a0f6d294b",
+      "resolution": "Removed duplicate expiresIn when the QA token already specifies exp. The full browser group subsequently passed including session expiration."
+    }
+  ],
+  "logs": [
+    {
+      "path": "/tmp/cw379-unit.log",
+      "sha256": "3662052b1c0f6ad2d467883970a033642104642af64aabfa2acfdecad8e1dce9"
+    },
+    {
+      "path": "/tmp/cw379-technician.log",
+      "sha256": "daaa51aa4def374e37970f3d76007661824eda9dc3e80bba73fc02feb353e78b"
+    },
+    {
+      "path": "/tmp/cw379-syntax.log",
+      "sha256": "d8885c112d90abd9e68b02e77d3fd5a7a86951e86f637c03bf7a960e7c5ca32a"
+    },
+    {
+      "path": "/tmp/cw379-integration-run.log",
+      "sha256": "8ff8ccf9c9cf0673ebfade430ae0fa5c9b6cb9542779cb2afc8ced4ace0e7e8f"
+    },
+    {
+      "path": "/tmp/cw379-integration-more.log",
+      "sha256": "16b968f3a1335c45a8e1bd1d785786c01f11c21c668ca606754c953a5d0e02ab"
+    },
+    {
+      "path": "/tmp/cw379-visual-verification.log",
+      "sha256": "b87ac06e200b3b21ab7a5197b21cf4280b51f7a39017014eff129df6633c8a65"
+    }
+  ],
+  "visual": {
+    "screenshots": [
+      {
+        "path": "reports/field-visual/technician-guide-read/de-1440.png",
+        "sha256": "c40ea89bd8a05ce86e3007f972b8b31c3e742b004693f94ee3f26a852405c632"
+      },
+      {
+        "path": "reports/field-visual/technician-guide-read/de-320.png",
+        "sha256": "a81f0b3c542608e2789413fe38c71326952d4a31f9c52e007a4fb48a82df0ef0"
+      },
+      {
+        "path": "reports/field-visual/technician-guide-read/de-390.png",
+        "sha256": "ffe01d5481f65e7c063d57234295232494679a53caacd5f087f7ac183809238f"
+      },
+      {
+        "path": "reports/field-visual/technician-guide-read/en-1440.png",
+        "sha256": "5e08e92fa1295e98d51401c5f48b0b8aba83c1bfb33bbf7a4a968a8263f22bcb"
+      },
+      {
+        "path": "reports/field-visual/technician-guide-read/en-320.png",
+        "sha256": "fa6affbc5d23d86bf56e23d8edb94fe754633eba9b46893dce8684bbf8981fa0"
+      },
+      {
+        "path": "reports/field-visual/technician-guide-read/en-390.png",
+        "sha256": "bbe3759a74f73d2ba0453d64701ac60d17a993df59d7e922815e6e156c19b837"
+      },
+      {
+        "path": "reports/field-visual/technician-guide-read/es-1440.png",
+        "sha256": "92d58797ad4e1e2115bcce4a404ca3d182e079ac3d80422e0ed6ae85ec8203dc"
+      },
+      {
+        "path": "reports/field-visual/technician-guide-read/es-320.png",
+        "sha256": "d1a9dc9196df0e74bc2b0a8caac9dc5bc7205afc983c5e405777cf519c769f2e"
+      },
+      {
+        "path": "reports/field-visual/technician-guide-read/es-390.png",
+        "sha256": "6049bfca3ed7b7f3621bdd7812a45d62e15197ac83b39d59e3b187a938443941"
+      },
+      {
+        "path": "reports/field-visual/technician-guide-read/fr-1440.png",
+        "sha256": "2e7b4d1c059f9943c36bbdddfdf14f6cc1d87b9dcf4f870c73bf0630f2b3178a"
+      },
+      {
+        "path": "reports/field-visual/technician-guide-read/fr-320.png",
+        "sha256": "4dc4ec77b18a96a28c5af9f4ba7ebdddfb9b11a08b286485508d3f6f0b89e5eb"
+      },
+      {
+        "path": "reports/field-visual/technician-guide-read/fr-390.png",
+        "sha256": "1b4fb1bcffa1525c3d60aa72c8cfe0541d3f3c44f3f67f548b94cfc2e3ed5e56"
+      },
+      {
+        "path": "reports/field-visual/technician-guide-read/movements-pt-390.png",
+        "sha256": "6e1857681c942b5e0b789c3337b895cd9f102c9c6d2f66dff7d415e456b79df9"
+      },
+      {
+        "path": "reports/field-visual/technician-guide-read/pt-1440.png",
+        "sha256": "06c5ce0ba4f6b35a803d70e8efdefb386b777dc9583f91fad6348e7e6f2029fd"
+      },
+      {
+        "path": "reports/field-visual/technician-guide-read/pt-320.png",
+        "sha256": "6fe751ddc30d6b9b642d27a24f8b1331373a4ffc7bdd7aa89b6b42e0c007ea3d"
+      },
+      {
+        "path": "reports/field-visual/technician-guide-read/pt-390.png",
+        "sha256": "712814ee50f92d9981962cbe070f76f8b1e98a1191293e38c9379298a993eed5"
+      }
+    ],
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "minimumControlHeight": 44,
+    "minimumContrastRatio": 4.5,
+    "manuallyInspected": [
+      "pt-390.png",
+      "de-320.png",
+      "pt-1440.png",
+      "movements-pt-390.png"
+    ],
+    "initialContrastCapture": {
+      "path": "/tmp/cw379-visual-low-contrast.png",
+      "sha256": "7b0cd262cc854a83fc943fcf8b816d5d67a99a910ede8845e3d7582b728364ef"
+    },
+    "scope": "Revised technician guide content. Shared navigation keeps its existing translations and unavailable Git assets. Legacy theme colours conflicted with white surfaces; page switched to coherent design-system colours, then full browser group reran with painted contrast checks."
+  },
+  "preservation": {
+    "apiSnapshotModels": 19,
+    "browserSnapshotModels": 13,
+    "browserApiWrites": 0,
+    "officialBytesUnchanged": true,
+    "unrelatedLocalDraftPreserved": true
+  },
+  "documents": {
+    "generatedPdfsOpened": 3,
+    "legacyOriginalDownloadedInert": true,
+    "downloadMatchesOriginalBytes": true
+  },
+  "pagination": {
+    "pageSize": 25,
+    "ownMovementRows": 207,
+    "materialRows": 28,
+    "movementPages": 9,
+    "materialPages": 2,
+    "boundary": "Initial maximum ID retained across pages; refresh includes inserted movement. Updates/deletions can alter results.",
+    "materialTransport": "All materials read once, locally paged; full source size remains a real-volume validation item.",
+    "stockWithoutEmbeddedMovements": true
+  },
+  "readFailures": [
+    "Vehicle",
+    "SystemSetting",
+    "WorkGuideItem",
+    "VehicleStockMovement"
+  ],
+  "sourceHashes": {
+    ".github/workflows/field-readiness.yml": "afab56a5128e29479ea3fa5eb7027f626708866d334169c3a8012d2ee4c3aee3",
+    "frontend/cw-technician-guide-copy.js": "6012556d269b37b23ec630de26600cd6aecc04754663f06ae3af728b4928b81c",
+    "frontend/cw-technician-guide-read-rules.js": "fd9118a8a00b3e6a30cbc6e8eb5a696ed15c625d058c694976dc94ba88ef8a1d",
+    "frontend/sw.js": "a27b44a1ce202e7c4008f42c2209d5cbfd8d9c62daceb0372eec40ae2801a7c2",
+    "frontend/technician-guide.html": "e82efbd8ba5b2795b00086bd3835c3b2d46c096c6db3fc4b1796a787df5ae6d2",
+    "frontend/technician-guide.js": "c2da792f1c5f34fd20ccb3dba9295be736546be69b70523ad9f0833b8b4d097c",
+    "scripts/helpers/technician-guide-read-fixture.js": "c644b2904e6c9cfd30a913a6f87055228232dc6da5aedc097c86c5773ba95b99",
+    "scripts/test-field-guide-read-scope.js": "5b709ab1a78d914f216e6dd68b7d91115e2230c9627053e21a1a3e2d787532d5",
+    "scripts/test-field-suite.js": "4d5d1bf54606d43a881e5af1fbe5b577ae046302eb3ac70d48975a9df7705deb",
+    "scripts/test-field-team-leader-entry.js": "75b63910b43f89f55a4b25db52c270c4e5302f9c144f1830624916bb0a8234d6",
+    "scripts/test-field-technician-guide-ui.js": "28f4813c8586608e222f8bfcfea09c2826be60f2ae929a82d7f81b5d363fef66",
+    "src/services/fieldGuideReadService.js": "e5e476b87b49dd99dc2502d2bc92f9ee4f37b877e27ef2496ecf4c2081cfb344",
+    "tests/technician-guide-read.test.js": "27cadba694b182941d42c4a4a7e7c1f6165d06468d5f6186f2770c3c2fe5ca15"
+  },
+  "serviceWorker": "v190",
+  "runnerGroups": 293,
+  "inventory": {
+    "activeScripts": 314,
+    "htmlFiles": 126,
+    "rootPages": 119,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 114,
+    "catalogueGuardDifferences": 0
+  },
+  "workflow": {
+    "previousTimeoutMinutes": 50,
+    "timeoutMinutes": 70,
+    "perScriptTimeoutSeconds": 120,
+    "allScriptsAndRestoreRetained": true,
+    "yamlParsed": true
+  },
+  "native": {
+    "status": "pending_publication",
+    "expectedScripts": 293,
+    "fullNativeGateConfirmed": false
+  },
+  "publication": {
+    "branch": "work/field-readiness-20260915-simulation",
+    "status": "prepared"
+  },
+  "priorNative": {
+    "task377": {
+      "runId": 36225374723,
+      "jobId": 108358260658,
+      "codeSha": "f72bfbdd59d98c404d8752834a9094f5f39c641b",
+      "status": "cancelled",
+      "expectedScripts": 290,
+      "completedScripts": 283,
+      "completedDistinctAllZero": true,
+      "fullNativeGateConfirmed": false,
+      "restoreStatus": "skipped",
+      "evidence": "docs/product/evidence/20260926_task377_ci_interrupted.json"
+    },
+    "task378": {
+      "runId": 36226988288,
+      "jobId": 108362806296,
+      "codeSha": "abd01eeef4ab0fd19bd7cb8af3cbc197a478a415",
+      "expectedScripts": 292,
+      "status": "in_progress",
+      "fullNativeGateConfirmed": false
+    }
+  }
+}

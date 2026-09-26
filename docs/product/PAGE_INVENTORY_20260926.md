@@ -1,10 +1,10 @@
 # Inventário atual de páginas
 
-Base publicada: `2fa0e0b3d92220d84575f8c02eff64e149fbd7fc`. Gerado em 2026-09-26T07:20:08.107Z. Inclui o estado dos ficheiros locais no momento da geração.
+Base publicada: `8bd48b2a3e7ee8421277e4074860bb3e31265d25`. Gerado em 2026-09-26T07:53:35.498Z. Inclui o estado dos ficheiros locais no momento da geração.
 
 126 ficheiros HTML: 119 entradas de raiz e 7 ficheiros auxiliares/protótipos/testes. 0 referências locais a scripts/estilos/recursos sem ficheiro correspondente.
 
-Foram procuradas referências literais em 313 scripts de integração/navegador ativos. 114 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
+Foram procuradas referências literais em 314 scripts de integração/navegador ativos. 114 páginas têm pelo menos uma referência; uma referência não prova execução, validação visual ou cobertura completa. A ausência também não exclui testes com URLs construídos dinamicamente.
 
 2 referências existem no índice Git mas não estão materializadas nesta cópia local; não são classificadas como ficheiros ausentes da aplicação.
 
@@ -132,9 +132,9 @@ No menu ADMIN, Configurações gerais continua a abrir a central administrativa.
 | /settings | Entrada raiz | ADMIN, CLIENT, TECHNICIAN, TEAM_LEADER | ADMIN, CLIENT, TEAM_LEADER, TECHNICIAN | 9 |
 | /splash | Entrada raiz | ADMIN | — | 1 |
 | /technician-chat | Entrada raiz | ADMIN | — | 3 |
-| /technician-field-mode | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 38 |
+| /technician-field-mode | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 39 |
 | /technician-gps | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 2 |
-| /technician-guide | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 6 |
+| /technician-guide | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 7 |
 | /technician-history | Entrada raiz | — | TEAM_LEADER, TECHNICIAN | 2 |
 | /technician-login | Entrada raiz | PUBLIC | — | 3 |
 | /technician-map | Entrada raiz | TECHNICIAN, TEAM_LEADER | TEAM_LEADER, TECHNICIAN | 4 |

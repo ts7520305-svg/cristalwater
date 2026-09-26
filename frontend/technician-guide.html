@@ -3,218 +3,45 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>Cristal Water - Guia Tecnico</title>
+  <title>Cristal Water — Guias e stock</title>
   <link rel="manifest" href="/manifest.webmanifest">
-  <meta name="theme-color" content="#0f1723">
+  <meta name="theme-color" content="#0f7d5d">
   <link rel="stylesheet" href="/cristal-assist.css">
   <link rel="stylesheet" href="/cw-ui-kit.css">
   <link rel="stylesheet" href="/ui/foundation.css">
+  <link rel="stylesheet" href="/ui/design-system.css">
   <script src="/cw-auth.js"></script>
   <script src="/technician-auth-guard.js"></script>
   <style>
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: "Segoe UI", "Noto Sans", sans-serif;
-      color: #1c2d3d;
-      background: radial-gradient(circle at 12% 0%, #f3f9ff 0%, #ebf3fb 48%, #e3edf8 100%);
-    }
-
-    .guide-shell {
-      width: min(960px, 100%);
-      margin: 0 auto;
-      padding: 12px 12px calc(120px + env(safe-area-inset-bottom));
-    }
-
-    .hero,
-    .card {
-      background: #fff;
-      border: 1px solid #cddaea;
-      border-radius: 16px;
-      padding: 14px;
-      margin-bottom: 10px;
-      box-shadow: 0 10px 28px rgba(26, 53, 87, 0.08);
-    }
-
-    .hero h1 {
-      margin: 4px 0;
-      font-size: clamp(26px, 5vw, 38px);
-      line-height: 1.05;
-      font-weight: 900;
-    }
-
-    .muted { color: #56708b; margin: 0; }
-
-    .field {
-      display: grid;
-      gap: 6px;
-      margin-top: 8px;
-    }
-
-    .field label {
-      font-size: 12px;
-      font-weight: 800;
-      color: #4f6883;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .status-box {
-      border-radius: 12px;
-      border: 1px solid #cddaea;
-      background: #f4faf7;
-      padding: 10px;
-      font-weight: 700;
-      margin-bottom: 10px;
-    }
-
-    .status-box[data-tone="error"] {
-      border-color: #efbbc5;
-      background: #fdecef;
-      color: #6f1223;
-    }
-
-    .status-box[data-tone="warning"] {
-      border-color: #e4c289;
-      background: #fff6e7;
-      color: #5f3900;
-    }
-
-    .btn {
-      border: 1px solid #cddaea;
-      border-radius: 12px;
-      padding: 14px 16px;
-      font-weight: 800;
-      background: #fff;
-      color: #102620;
-      width: 100%;
-      margin-top: 7px;
-      text-align: center;
-      text-decoration: none;
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 52px;
-      cursor: pointer;
-    }
-
-    .btn.primary {
-      background: #0f7d5d;
-      border-color: #0f7d5d;
-      color: #fff;
-    }
-
-    .btn.warn {
-      border-color: #deb465;
-      background: #ffd27b;
-      color: #2f1e00;
-    }
-
-    .btn.danger {
-      border-color: #b22f3d;
-      background: #b22f3d;
-      color: #fff;
-    }
-
-    input,
-    select {
-      width: 100%;
-      padding: 14px;
-      border-radius: 12px;
-      border: 1px solid #cddaea;
-      background: #f7fafd;
-      color: #1c2d3d;
-      margin-top: 0;
-      min-height: 50px;
-      font: inherit;
-    }
-
-    input:focus,
-    select:focus {
-      outline: 2px solid #2492ec;
-      outline-offset: 1px;
-      border-color: #2492ec;
-      background: #fff;
-    }
-
-    .movement {
-      padding: 10px;
-      border-radius: 12px;
-      border: 1px solid #cddaea;
-      background: #fff;
-      margin-top: 8px;
-    }
-
-    .grid { display: grid; gap: 8px; grid-template-columns: 1fr 1fr; }
-
-    @media (max-width: 700px) {
-      .grid { grid-template-columns: 1fr; }
-    }
-
-    .cw-help-fab,
-    .cw-help-fab.cw-help-fab-quiet {
-      display: none !important;
-    }
+    *{box-sizing:border-box}body{margin:0;font-family:"Segoe UI","Noto Sans",sans-serif;background:var(--ds-bg,#edf4f7);color:var(--ds-text,#17362e)}
+    #guideReader{color:var(--ds-text,#17362e);width:min(1060px,100%);margin:auto;padding:16px 12px calc(120px + env(safe-area-inset-bottom));overflow-wrap:anywhere}
+    #guideReader section,#guideReader header{background:var(--ds-surface,#fff);border:1px solid var(--ds-border,#cbdcd8);border-radius:16px;padding:16px;margin-bottom:16px;min-width:0}
+    #guideReader h1{font-size:clamp(26px,4vw,38px);line-height:1.15;margin:8px 0}#guideReader h2{font-size:22px;margin:0 0 12px}#guideReader h3{font-size:18px;margin:0 0 10px}
+    #guideReader p{line-height:1.5}#guideReader .muted{color:var(--ds-text-muted,#526c64)}
+    #guideReader label{display:grid;gap:6px;font-weight:700;min-width:0}#guideReader input,#guideReader select{width:100%;min-width:0;min-height:48px;font:inherit;padding:10px;border:1px solid var(--ds-border,#cbdcd8);border-radius:10px;background:var(--ds-surface,#fff);color:inherit}
+    #guideReader button,#guideReader a.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;max-width:100%;white-space:normal;overflow-wrap:anywhere;font:inherit;font-weight:700;border:1px solid var(--ds-border,#cbdcd8);border-radius:10px;padding:12px 16px;background:var(--ds-surface,#fff);color:inherit;text-decoration:none;cursor:pointer}
+    #guideReader button:disabled,#guideReader a[aria-disabled=true]{opacity:.6;cursor:default}#guideReader :focus-visible{outline:3px solid #158872;outline-offset:3px}
+    #guideReader .primary{background:#096450;color:#fff;border-color:#096450}#guideReader .actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}#guideReader .actions>*{flex:1 1 190px;min-width:0}
+    #guideReader .toolbar{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:12px;align-items:end}#guideReader .records{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    #guideReader article{border:1px solid var(--ds-border,#cbdcd8);border-radius:12px;padding:14px;min-width:0}#guideReader dl{display:grid;gap:8px;margin:10px 0}#guideReader dl>div{display:grid;grid-template-columns:minmax(100px,1fr) minmax(0,2fr);gap:12px}#guideReader dt{color:var(--ds-text-muted,#526c64)}#guideReader dd{margin:0;white-space:pre-wrap}
+    #guideReader [role=status]{border-left:4px solid #267b64;padding:8px 12px;background:var(--ds-surface-soft,#f2f7f5)}#guideReader [data-state=error]>[role=status],#guideReader [data-state=review]>[role=status]{border-color:#b87512}
+    #guideReader .pager{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:16px}#guideReader .pager span{flex:1;text-align:center;min-width:80px}#guideReader [hidden]{display:none!important}
+    @media(max-width:650px){#guideReader .records,#guideReader .toolbar{grid-template-columns:minmax(0,1fr)}#guideReader dl>div{grid-template-columns:minmax(0,1fr);gap:3px}#guideReader .pager button{flex:1 1 90px}#guideReader .pager span{flex-basis:100%;order:-1}}
   </style>
-  <link rel="stylesheet" href="/ui/design-system.css">
 </head>
 <body data-required-role="TECHNICIAN">
-  <main class="guide-shell">
-    <section class="hero">
-      <p class="muted">Operacao tecnica</p>
-      <h1>Guia de Obra</h1>
-      <p class="muted">Stock da viatura, consumos e documentos para apresentar quando necessario.</p>
-    </section>
-
-    <p id="statusBox" class="status-box" aria-live="polite">A carregar modulo de guia.</p>
-
-    <section class="card">
-      <h2>Iniciar dia</h2>
-      <div class="grid">
-        <div class="field">
-          <label for="vehicle">Viatura</label>
-          <select id="vehicle" aria-label="Viatura"></select>
-        </div>
-      </div>
-      <button class="btn primary" onclick="startDay()" type="button">Rever abertura de obra</button>
-      <div class="muted">Se a AT estiver indisponivel, o dia pode iniciar. Fica um alerta para a administracao associar a guia de transporte mais tarde.</div>
-    </section>
-
-    <section class="card">
-      <h2>Stock atual</h2>
-      <div class="field">
-        <label for="vehicleStock">ID viatura para ver stock</label>
-        <input id="vehicleStock" type="number" placeholder="ID viatura para ver stock">
-      </div>
-      <button class="btn" onclick="loadStock()" type="button">Atualizar stock</button>
-      <div id="stock"></div>
-    </section>
-
-    <section class="card">
-      <h2>Registar consumo</h2>
-      <p>Escolha o material pelo seu identificador e reveja o saldo antes de confirmar.</p>
-      <a class="btn warn" href="/vehicle-consumption">Rever consumo manual</a>
-      <input id="workGuideId" type="hidden">
-    </section>
-
-    <section class="card">
-      <h2>Fechar guia</h2>
-      <p>Reveja os saldos e escolha o efeito na quilometragem antes de confirmar.</p>
-      <a id="closeWorkLink" class="btn danger" href="/work-guide-close">Rever fecho da guia</a>
-    </section>
-    <section class="card">
-      <h2>Manutenção da viatura</h2>
-      <p>Consulte os lembretes e registe as intervenções da sua viatura.</p>
-      <a id="vehicleMaintenanceLink" class="btn" href="/vehicle-maintenance">Consultar manutenções</a>
-    </section>
+  <main id="guideReader" class="guide-shell" data-cw-state-managed="manual" data-cw-form-memory="managed" data-cw-no-i18n>
+    <header><div class="toolbar"><div><h1 data-copy="title">Guias e stock</h1><p data-copy="intro"></p></div><label><span data-copy="language">Idioma</span><select id="guideLanguage"><option value="pt">Português</option><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option></select></label></div><p class="muted" data-copy="online"></p><a id="returnLink" class="btn" href="/technician-field-mode" data-copy="return"></a></header>
+    <section id="assignmentPanel"><h2 data-copy="vehicle"></h2><p id="statusBox" role="status" aria-live="polite"></p><div class="toolbar"><label><span data-copy="vehicle"></span><select id="vehicle" disabled></select></label><label><span data-copy="vehicleId"></span><input id="vehicleStock" readonly></label></div><div class="actions"><button id="refreshVehicles" type="button" data-copy="refreshVehicles"></button><button id="openWork" type="button" class="primary" onclick="startDay()" data-copy="openReview"></button></div></section>
+    <section id="stockPanel"><h2 data-copy="currentStock"></h2><p id="stockStatus" role="status" aria-live="polite"></p><button id="refreshStock" type="button" onclick="loadStock()" data-copy="refreshStock"></button><div id="stock"></div><h3 id="itemsTitle" hidden data-copy="items"></h3><p id="itemTotal"></p><div id="materials" class="records"></div><div id="itemPager" class="pager" hidden><button id="itemsPrevious" type="button" data-copy="previous"></button><span id="itemPage"></span><button id="itemsNext" type="button" data-copy="following"></button></div></section>
+    <section id="movementPanel" hidden><h2 data-copy="movements"></h2><p class="muted" data-copy="window"></p><form id="movementFilters" autocomplete="off"><label><span data-copy="movementType"></span><input id="movementType" maxlength="80"></label><div class="actions"><button type="submit" data-copy="apply"></button><button id="clearMovementFilter" type="button" data-copy="clear"></button><button id="refreshMovements" type="button" data-copy="refreshMovements"></button></div></form><p id="movementStatus" role="status" aria-live="polite"></p><p id="movementTotal"></p><div id="movements" class="records"></div><div class="pager"><button id="movementsPrevious" type="button" data-copy="previous"></button><span id="movementPage"></span><button id="movementsNext" type="button" data-copy="following"></button></div></section>
+    <section><div class="actions"><a id="consumeLink" class="btn" href="/vehicle-consumption" data-copy="consume"></a><a id="closeWorkLink" class="btn" href="/work-guide-close" data-copy="close"></a><a id="vehicleMaintenanceLink" class="btn" href="/vehicle-maintenance" data-copy="maintenance"></a></div><input id="workGuideId" type="hidden"></section>
   </main>
+  <script src="/cw-auth-download.js"></script>
+  <script src="/cw-field-guide-projection.js"></script>
+  <script src="/cw-technician-guide-read-rules.js"></script>
+  <script src="/cw-technician-guide-copy.js"></script>
   <script src="/technician-guide.js"></script>
-  <script src="/cristal-help-data.js"></script>
-  <script src="/cristal-assist.js"></script>
-  <script src="/ui/core/navigation-context.js"></script>
-  <script src="/crystal-os-v2-shell.js"></script>
-  <script src="/crystal-os-v2-nav.js"></script>
-  <script defer src="/ui/design-system.js"></script>
+  <script src="/cristal-help-data.js"></script><script src="/cristal-assist.js"></script><script src="/ui/core/navigation-context.js"></script><script src="/crystal-os-v2-shell.js"></script><script src="/crystal-os-v2-nav.js"></script><script defer src="/ui/design-system.js"></script>
 </body>
 </html>
