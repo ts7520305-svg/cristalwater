@@ -25,6 +25,7 @@ router.use((req, res, next) => {
   }
   next();
 });
+router.use(require('../middlewares/fieldGuideReads'));
 router.use(require('../middlewares/fieldVehicleScope'));
 // Related technicians/clients are operational context, not credential records.
 router.use((req, res, next) => {

@@ -402,6 +402,36 @@
       padding: var(--cw-space-2);
     }
 
+    .field-panel-docs .doc-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .field-panel-docs .doc-number { margin: 8px 0; }
+    .field-panel-docs .doc-meta { display: grid; gap: 6px; }
+    .field-panel-docs .doc-subtitle { margin: 14px 0 6px; font-weight: 800; }
+    .field-panel-docs .doc-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .field-panel-docs .doc-actions > a {
+      display: flex;
+      flex: 1 1 180px;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      min-width: 0;
+      max-width: 100%;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      text-align: center;
+    }
+
     .field-panel-agora .chip,
     .field-panel-hoje .chip {
       font-weight: 800;
@@ -1639,6 +1669,7 @@
 <script src="/cw-incomplete-workflow.js"></script>
   <script src="/cw-field-reminders.js"></script>
   <script src="/cw-field-route-cache.js"></script>
+  <script src="/cw-field-guide-projection.js"></script>
   <script src="/cw-field-documents.js"></script>
   <script src="/cw-field-alert-journal.js"></script>
   <script src="/cw-field-photos.js"></script>

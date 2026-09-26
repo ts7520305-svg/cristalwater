@@ -3,7 +3,7 @@
   const store = window.CWFieldWriteStore;
   const kinds = ['transport', 'work', 'insurance'];
   const positive = value => Number.isSafeInteger(value) && value > 0;
-  const clean = data => JSON.parse(JSON.stringify(data, (key, value) => ['pin', 'password', 'passwordHash', 'accessToken', 'refreshToken', 'resetToken'].includes(key) ? undefined : value));
+  const clean = (kind,data) => window.CWFieldGuideProjection.packet(kind,data);
   const day = () => window.CWFieldRouteCache.today();
   function scope(session, vehicleId) {
     if (!store.same(session) || !positive(Number(vehicleId))) throw Error('Confirme a sessão e a viatura antes de consultar documentos.');
@@ -12,11 +12,14 @@
     return { session, role, vehicleId: Number(vehicleId), day: day() };
   }
   const same = context => !!context && store.same(context.session) && context.day === day();
-  const key = context => `cwFieldDocuments:v2:${context.session.owner}:${context.role}:${context.vehicleId}:${context.day}`;
+  const key = context => `cwFieldDocuments:v3:${context.session.owner}:${context.role}:${context.vehicleId}:${context.day}`;
   function requireScope(context) { if (!same(context)) throw Error('A sessão ou o dia mudou. Os documentos guardados foram preservados.'); }
   function validateData(kind, data, context) {
     const bad = () => { throw Error('A resposta documental não confirma a viatura e o conteúdo pedidos.'); };
     if (!data || data.ok !== true) bad();
+    const canonical=v=>Array.isArray(v)?v.map(canonical):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().filter(k=>v[k]!==undefined).map(k=>[k,canonical(v[k])])):v;
+    if (JSON.stringify(canonical(data)) !== JSON.stringify(canonical(clean(kind,data)))) bad();
+    if (data.scope && (data.scope.version!==1 || data.scope.owner!==context.session.owner || data.scope.technicianId!==context.session.technicianId || data.scope.vehicleId!==context.vehicleId)) bad();
     const vehicle = value => { if (value && value.id !== context.vehicleId) bad(); };
     const record = value => { if (value && (!positive(value.id) || value.vehicleId !== context.vehicleId)) bad(); };
     if (kind === 'transport') {
@@ -30,7 +33,8 @@
       if (!data.workGuide && (data.stock.length || data.movements.length)) bad();
       if (data.stock.some(item => item.workGuideId != null && item.workGuideId !== data.workGuide?.id)) bad();
       if (data.workGuide?.guide && data.workGuide.guideId !== data.workGuide.guide.id) bad();
-      // A vehicle may have one work guide shared by several assigned technicians.
+      if (data.workGuide && data.workGuide.technicianId !== context.session.technicianId) bad();
+      if (data.movements.some(m => m.workGuideId !== data.workGuide?.id || m.vehicleId !== context.vehicleId || m.technicianId !== null && m.technicianId !== context.session.technicianId)) bad();
     } else if (kind === 'insurance') {
       if (!Object.hasOwn(data, 'vehicle') || !Object.hasOwn(data, 'insurance')) bad();
       vehicle(data.vehicle); record(data.insurance); record(data.vehicle?.inspection);
@@ -39,7 +43,7 @@
     return data;
   }
   function validate(value, context) {
-    if (!value || value.v !== 2 || value.owner !== context.session.owner || value.role !== context.role || value.technicianId !== context.session.technicianId || value.vehicleId !== context.vehicleId || value.day !== context.day || !value.sections || typeof value.sections !== 'object' || Array.isArray(value.sections)) throw Error('Os documentos guardados não correspondem à conta, viatura ou dia. Foram preservados.');
+    if (!value || value.v !== 3 || value.owner !== context.session.owner || value.role !== context.role || value.technicianId !== context.session.technicianId || value.vehicleId !== context.vehicleId || value.day !== context.day || !value.sections || typeof value.sections !== 'object' || Array.isArray(value.sections)) throw Error('Os documentos guardados não correspondem à conta, viatura ou dia. Foram preservados.');
     for (const [kind, section] of Object.entries(value.sections)) {
       if (!kinds.includes(kind) || !section || !Number.isFinite(Date.parse(section.confirmedAt)) || !Number.isFinite(section.requestedAt)) throw Error('Os documentos guardados estão ilegíveis. Foram preservados.');
       validateData(kind, section.data, context);
@@ -50,6 +54,7 @@
     requireScope(context);
     const raw = localStorage.getItem(key(context));
     if (!raw) {
+      if (localStorage.getItem(key(context).replace('cwFieldDocuments:v3:','cwFieldDocuments:v2:'))) throw Error('Existe uma cópia documental anterior às regras atuais de acesso. Foi preservada; atualize com rede antes de a usar.');
       if (localStorage.getItem('cw:tech-field:docs-cache:v1:' + context.vehicleId)) throw Error('Existem documentos antigos sem conta/dia comprovados. Foram preservados; consulte os documentos atuais com rede.');
       return null;
     }
@@ -62,7 +67,7 @@
     return navigator.locks.request(key(context), async () => {
       requireScope(context);
       const previous = localStorage.getItem(key(context)) ? read(context) : null;
-      const value = previous || { v: 2, owner: context.session.owner, role: context.role, technicianId: context.session.technicianId, vehicleId: context.vehicleId, day: context.day, sections: {} };
+      const value = previous || { v: 3, owner: context.session.owner, role: context.role, technicianId: context.session.technicianId, vehicleId: context.vehicleId, day: context.day, sections: {} };
       for (const [kind, section] of Object.entries(sections)) {
         if (!value.sections[kind] || value.sections[kind].requestedAt <= section.requestedAt) value.sections[kind] = section;
       }
@@ -84,7 +89,7 @@
     const results = await Promise.all(kinds.map(async kind => {
       try {
         const response = await fetch(paths[kind], { headers: { Authorization: 'Bearer ' + context.session.token }, cache: 'no-store', signal: AbortSignal.timeout(12000) });
-        const data = clean(await response.json().catch(() => null));
+        const data = clean(kind,await response.json().catch(() => null));
         if (response.status !== 200) throw Object.assign(Error(data?.error || 'Consulta indisponível.'), { denied: [401, 403].includes(response.status) });
         validateData(kind, data, context);
         return { kind, source: 'live', section: { data, requestedAt, confirmedAt: new Date().toISOString() } };

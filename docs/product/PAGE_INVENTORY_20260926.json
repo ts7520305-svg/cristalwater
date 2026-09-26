@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-09-26T06:52:44.832Z",
-  "baseCommit": "bb5eb4970d6b3dcdfb41f2c92600b3ae5795f142",
+  "generatedAt": "2026-09-26T07:20:08.107Z",
+  "baseCommit": "2fa0e0b3d92220d84575f8c02eff64e149fbd7fc",
   "method": "Inventário estático dos HTML, recursos locais, guardas explícitas e referências literais nos scripts ativos. Não executa páginas nem comprova cobertura funcional/visual.",
-  "activeScriptsScanned": 311,
+  "activeScriptsScanned": 313,
   "summary": {
     "htmlFiles": 126,
     "rootPages": 119,
@@ -4184,6 +4184,7 @@
         "/cw-incomplete-workflow.js",
         "/cw-field-reminders.js",
         "/cw-field-route-cache.js",
+        "/cw-field-guide-projection.js",
         "/cw-field-documents.js",
         "/cw-field-alert-journal.js",
         "/cw-field-photos.js",
@@ -4217,6 +4218,7 @@
         "test-field-legacy-entry.js",
         "test-field-admin-catalogue.js",
         "test-field-work-guide-close-ui.js",
+        "test-field-guide-read-scope-ui.js",
         "test-field-transport-guide-documents-ui.js",
         "test-field-technical-proposals.js",
         "test-field-proposal-recovery-ui.js",

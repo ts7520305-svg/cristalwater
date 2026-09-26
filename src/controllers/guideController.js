@@ -333,7 +333,7 @@ async function getTransportGuideDocument(req, res) {
 async function downloadTransportGuidePdf(req, res) {
   try {
     const id = n(req.params.id);
-    const guide = await prisma.transportGuide.findUnique({ where: { id }, include: { vehicle: true, items: true } });
+    const guide = req.fieldGuideRead?.guide || await prisma.transportGuide.findUnique({ where: { id }, include: { vehicle: true, items: true } });
     if (!guide) return res.status(404).json({ ok: false, error: "Guia AT nao encontrada." });
 
     await writePdfResponse(res, pdfName("guia-at", guide.codeAT || guide.id), "Guia de Transporte AT", (doc) => {
@@ -360,7 +360,7 @@ async function downloadLatestTransportGuidePdf(req, res) {
   try {
     const vehicleId = n(req.params.vehicleId);
     if (!vehicleId) return res.status(400).json({ ok: false, error: "vehicleId obrigatorio." });
-    const guide = await strictActiveTransportGuide(vehicleId);
+    const guide = req.fieldGuideRead?.guide || await strictActiveTransportGuide(vehicleId);
     if (!guide) return res.status(404).json({ ok: false, error: "Sem guia AT ativa para esta viatura." });
     req.params.id = String(guide.id);
     return downloadTransportGuidePdf(req, res);
@@ -449,7 +449,7 @@ async function downloadVehicleInsurancePdf(req, res) {
   try {
     const vehicleId = n(req.params.id || req.params.vehicleId);
     if (!vehicleId) return res.status(400).json({ ok: false, error: "vehicleId obrigatorio." });
-    const { vehicle, insurance } = await vehicleInsurancePayload(vehicleId);
+    const { vehicle, insurance } = req.fieldGuideRead || await vehicleInsurancePayload(vehicleId);
     if (!vehicle) return res.status(404).json({ ok: false, error: "Viatura nao encontrada." });
 
     await writePdfResponse(res, pdfName("seguro-viatura", vehicle.plate || vehicle.id), "Ficha de Seguro da Viatura", (doc) => {
@@ -477,13 +477,13 @@ async function downloadVehicleInsurancePdf(req, res) {
 async function downloadWorkGuidePdf(req, res) {
   try {
     const id = n(req.params.id);
-    const workGuide = await prisma.workGuide.findUnique({
+    const workGuide = req.fieldGuideRead?.workGuide || await prisma.workGuide.findUnique({
       where: { id },
       include: { vehicle: true, technician: true, guide: { include: { items: true, vehicle: true } }, items: true }
     });
     if (!workGuide) return res.status(404).json({ ok: false, error: "Guia de obra nao encontrada." });
 
-    const movements = await enrichMovementsWithVisitContext(await prisma.vehicleStockMovement.findMany({
+    const movements = req.fieldGuideRead?.movements || await enrichMovementsWithVisitContext(await prisma.vehicleStockMovement.findMany({
       where: { workGuideId: id, movementType: "CONSUMPTION" },
       orderBy: { createdAt: "asc" }
     }));

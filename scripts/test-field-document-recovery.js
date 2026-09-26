@@ -61,7 +61,7 @@ let browser; const releases = [];
   const documentKey = 'transport_guide_at_document_' + guide.id;
   await prisma.systemSetting.upsert({ where: { key: documentKey }, create: { key: documentKey, value: '{broken' }, update: { value: '{broken' } });
   const corruptDocument = await fetch(base + '/api/guides/transport/latest/' + vehicle.id, { headers: { Authorization: 'Bearer ' + token } });
-  assert.equal(corruptDocument.status, 500); assert.equal((await corruptDocument.json()).ok, false);
+  assert.equal(corruptDocument.status, 409); assert.equal((await corruptDocument.json()).ok, false);
   await prisma.systemSetting.delete({ where: { key: documentKey } });
   console.log('PASS guide responses omit related credentials; failed document/stock/vehicle reads and corrupt official-document metadata cannot claim an empty successful response');
   assert.equal(await page.evaluate(id => localStorage.getItem('cw:tech-field:docs-cache:v1:' + id), vehicle.id), '{"private":"UNATTRIBUTED DOCUMENT"}');

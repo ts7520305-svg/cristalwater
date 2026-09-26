@@ -1,0 +1,292 @@
+{
+  "task": "TASK378",
+  "baseCommit": "2fa0e0b3d92220d84575f8c02eff64e149fbd7fc",
+  "validatedAt": "2026-09-26T07:29:50.241130+00:00",
+  "unitTests": {
+    "passed": 954,
+    "files": 115,
+    "new": 10
+  },
+  "technicianTests": 4,
+  "syntax": {
+    "backend": 689,
+    "frontend": 298,
+    "inline": 44
+  },
+  "schema": {
+    "newMigrations": 0,
+    "totalAdditiveMigrationsApplied": 43,
+    "tablesExpected": 128,
+    "runtime": "PGlite 0.5.8 / pglite-socket 0.2.11; isolated synthetic data, not native PostgreSQL"
+  },
+  "integrationGroups": [
+    {
+      "script": "scripts/test-field-guide-read-scope.js",
+      "code": 0,
+      "log": "/tmp/cw378-test-field-guide-read-scope.log",
+      "sha256": "113d9d0cb493e722b419bdaa3f187ee837a45ed482027a1b9a49be227e24d550",
+      "checks": [
+        "PASS field guide reads: TECHNICIAN/TEAM_LEADER with PIN and linked User; same-vehicle work, nested AT works, movements and PDFs restricted by technician; explicit safe projections exclude typed contacts, credentials, costs and private JSON metadata; protected document links; strict query IDs/duplicates/limits; complete 207-row paging; null legacy ownership only with own work; foreign visit review; reassignment/unassigned/archive/duplicate-work guards; four real SQL failures; ADMIN compatibility; unchanged 19-model read snapshot and official bytes."
+      ]
+    },
+    {
+      "script": "scripts/test-field-guide-read-scope-ui.js",
+      "code": 0,
+      "log": "/tmp/cw378-test-field-guide-read-scope-ui.log",
+      "sha256": "40e9aef49c36d515fbae473a1c12d92d30cc72c7ae5d85bb1e7d711769afbbf7",
+      "checks": [
+        "PASS field guide browser: actual field page and both roles/PIN/User; each colleague sees only own work and movements, no typed contact/cost/private metadata in v3 cache; successful other-owner reply rejected; old v2 bytes preserved and refused on cold offline reload; current malformed/private cache preserved without display; online recovery; three widths/screenshots; no API writes, 13-model snapshot and official bytes unchanged."
+      ],
+      "finalRerunLog": "/tmp/cw378-visual-verification.log"
+    },
+    {
+      "script": "scripts/test-field-document-recovery.js",
+      "code": 0,
+      "log": "/tmp/cw378-test-field-document-recovery.log",
+      "sha256": "4ec5eae4f8ca88bd10cbac1fedd1a9d61fb016b2c59af27ea8c36c81287a26fd",
+      "checks": [
+        "PASS guide responses omit related credentials; failed document/stock/vehicle reads and corrupt official-document metadata cannot claim an empty successful response",
+        "PASS real documents grouped by typed account/role/vehicle/day; legacy bytes preserved; mixed refresh keeps original section timestamp and current source honest",
+        "PASS quota, missing readback, corrupt cache and wrong vehicle do not overwrite saved bytes or claim offline persistence",
+        "PASS late reply cannot replace newer documents; cold offline reload retains section provenance; even a non-JSON 403 blocks cached operational documents",
+        "PASS editing vehicle invalidates visible documents; another account on the same vehicle cannot inherit cache; current account must consult again and day changes invalidate provenance"
+      ]
+    },
+    {
+      "script": "scripts/test-field-authenticated-document-opening.js",
+      "code": 0,
+      "log": "/tmp/cw378-test-field-authenticated-document-opening.log",
+      "sha256": "0e627beed653a6bcfaf4ae9aae1c3949edb4eadc54584ec596f3c4cb594af062",
+      "checks": [
+        "PASS six real PDF endpoints and two historical guides without vehicles confirm document/client/vehicle identity and complete content through the authenticated browser reader",
+        "PASS wrong identity/MIME, HTML, truncated PDF, missing private headers, partial/redirect/error replies, blocked windows, timeout, cancellation, account/body changes, expiry and noncanonical URLs",
+        "PASS displayed files revoked on account change, HTML attachments preserved as inert downloads, owner binding and unchanged original financial/guide/chat records"
+      ]
+    },
+    {
+      "script": "scripts/test-field-transport-guide-documents-ui.js",
+      "code": 0,
+      "log": "/tmp/cw378-test-field-transport-guide-documents-ui.log",
+      "sha256": "a9b961d53e3ae10cf9dde1b046c58776c819949ec34fb290bbd2baa11bf865f3",
+      "checks": [
+        "PASS guide documents browser: actual history entry and protected links; original/file review; PDF/XML authenticated fetch and actual technician document centre; owner/guide/version/hash mismatch rejection; double-click/loss/reload/offline retry/cancel; stale/expired review; storage failure/corrupt reference; partial/latest list and history; five languages/three widths/44px/18 screenshots; suspension/account changes/role denial/expiry; file bytes never persisted in browser storage."
+      ]
+    },
+    {
+      "script": "scripts/test-field-fleet-history.js",
+      "code": 0,
+      "log": "/tmp/cw378-test-field-fleet-history.log",
+      "sha256": "bf2258139a44ec43fe7a0d38b55d445194b85fd0b38bd9e7ee3448424ff847ae",
+      "checks": [
+        "PASS fleet history API: administrator scope and both field identities denied; literal and combined filters; all 27 AT guides, 27 work guides and 207 signed movements traversed with stable order and insertion boundary; 28 exact materials across detail pages; Lisbon 23/25-hour inclusive dates; document metadata states and protected URL; archived and orphan history; strict queries, malformed historical data, absent records and four real SQL failures; read-only snapshots across 27 models and official file bytes unchanged."
+      ]
+    },
+    {
+      "script": "scripts/test-field-fleet-history-ui.js",
+      "code": 0,
+      "log": "/tmp/cw378-test-field-fleet-history-ui.log",
+      "sha256": "541c44de32dbb6a6532c174e94cccdc917dab95c3a0819bebd176e61ef66813a",
+      "checks": [
+        "PASS fleet history browser: actual shared fleet entry, complete list/detail pagination, signed quantities and null/zero mileage, protected document links, stable selected detail and adjacent fleet draft/vehicle choice, independent offline/partial/owner/header errors, stale list/detail rejection, exact older risk target, independent unavailable risks, five languages/three widths/44px/18 screenshots, suspension/recovery/account switch/expiry, no API writes and unchanged 13-model snapshots and official bytes."
+      ]
+    },
+    {
+      "script": "scripts/test-field-transport-guide-create.js",
+      "code": 0,
+      "log": "/tmp/cw378-test-field-transport-guide-create.log",
+      "sha256": "12af5010db6a53b36aec10e5c1e8c2e7bd3f8885bb237f0f3c9b267b70c42aa2",
+      "checks": [
+        "PASS transport creation API: explicit vehicle/work/item association and closure plan; ADMIN-only, private projections; exactly one guide/work/LOAD/audit/receipt after loss/restart/retries; racing reviews one winner; eight SQL rollback points; provisional IDs/consumption/movements retained; stale item/assignment/transport, expired/altered proofs and cancellation; read-only stock/repeated start, closed work never reopened or consumed by visit completion; TEAM_LEADER own/foreign scope; unchanged vehicles, visits and finances."
+      ]
+    },
+    {
+      "script": "scripts/test-field-work-guide-start.js",
+      "code": 0,
+      "log": "/tmp/cw378-test-field-work-guide-start.log",
+      "sha256": "26a7d45adcf8282531bbae4464f7780b74a2f7998176f6642ca42e62a2879643",
+      "checks": [
+        "PASS work opening API: scoped ADMIN/TECHNICIAN/TEAM_LEADER and both identities; explicit missing/zero/monotonic mileage; strict source precedence, exact duplicate materials and notes; old writers blocked; existing/closed works preserved; seven SQL rollback sites including internal alert and issue; lost response/restart/two-process replay/race; preset/km/assignment/archive changes; tamper/expiry/cancel; field recovery after reassignment; pagination and real unavailable reads; unchanged stock ledger, finances, old works and official bytes."
+      ]
+    },
+    {
+      "script": "scripts/test-field-navigation-preferences.js",
+      "code": 0,
+      "log": "/tmp/cw378-test-field-navigation-preferences.log",
+      "sha256": "bf33fb89ab292b4d5a8f447da76a8fffe3d7cb6c8072cb7d683213ebb658abac",
+      "checks": [
+        "PASS navigation preferences: account-bound explicit choices, no default writes or reload, device/live and fixed palettes, three densities with 44px targets, five languages/three widths/contrast, real menu/index/help navigation, business styles and filters preserved, legacy keys/shortcut and work bytes preserved, two windows, storage throw/ignored writes, corrupt/wrong-owner bytes, bfcache, reset, offline save, account change/expiry; zero business writes"
+      ]
+    },
+    {
+      "script": "scripts/test-real-month-flow-api.js",
+      "code": 0,
+      "log": "/tmp/cw378-test-real-month-flow-api.log",
+      "sha256": "316a4b193c6fecca5d85e16c2e9155e176e4d9f181cb45b2ab7edc9e201bdd02",
+      "checks": [
+        "OK EDGE valida pH impossivel - Valor de pH invalido. Deve estar entre 0 e 10.",
+        "OK EDGE concorrencia bloqueia duplo fecho - status 200/409",
+        "OK clientes criados por API real - 5 clientes",
+        "OK piscinas/jacuzzis criados por API real - 9 equipamentos",
+        "OK fichas tecnicas preenchidas - 9/9",
+        "OK tecnicos e viaturas ligados - 3 tecnicos, 3 carros, 3 guias obra",
+        "OK rondas criadas e visitas concluídas - 3 rondas, 54 visitas",
+        "OK produtos da visita viram registo quimico - 60 registos",
+        "OK consumo automatico baixa guia/viatura - 60 movimentos",
+        "OK problemas em campo geram reparacoes/alertas - 6 reparacoes",
+        "OK faturacao mensal gerada - 5 faturas",
+        "OK pagamentos total/parcial registados - PAID, PARTIAL, PENDING, PENDING, PENDING",
+        "OK mensagens reais do portal cliente ficam por ler - 5 mensagens QA por ler",
+        "OK chat mostra conversas por ler - 5 mensagens totais por ler",
+        "OK notificacoes mostram alarme de chat - alarme CHAT_MESSAGE",
+        "OK dashboard recebe dados reais - clientes 7, mensagens 5",
+        "OK guia de obra mantem referencia AT e totais finais - guia AT 80"
+      ]
+    }
+  ],
+  "initialFailures": [
+    {
+      "phase": "API isolated failure-server setup",
+      "log": "/tmp/cw378-api-initial-failure.log",
+      "sha256": "ce53d31b1a6b4d7ca34378b07eef1464ca6a1a5da770066a26903682398ff45e",
+      "resolution": "The auxiliary SQL-failure server did not mount the guide router, returning HTML 404. Added the real router and reran the whole group; all four genuine database failures return unavailable."
+    },
+    {
+      "phase": "Browser document fixture",
+      "log": "/tmp/cw378-ui-initial-failure.log",
+      "sha256": "396fcda1390187293f0e1cfea729c32321f4408e58ea070433c606bbfeccccd4",
+      "resolution": "The new fixture lacked required valid inspection. Added a future inspection and retained the strict document-ready check; the whole group passed."
+    }
+  ],
+  "logs": [
+    {
+      "path": "/tmp/cw378-unit.log",
+      "sha256": "d3b20f1204ed9d7dc2b71208eba7d4e79bf33bf86f9a9f10f9197fcd860114b2"
+    },
+    {
+      "path": "/tmp/cw378-technician.log",
+      "sha256": "8633cd34e0c241a3a4c6c6cee326be03641fba6a09baf71142458112a946d129"
+    },
+    {
+      "path": "/tmp/cw378-syntax.log",
+      "sha256": "dc2682bf8bd051196bcb768db0f5ecf43314da5d03456c073d08b9632d72893d"
+    },
+    {
+      "path": "/tmp/cw378-integration-run.log",
+      "sha256": "67634ba798e3826d8ad5aab12d01bf882dd7e587c20acd73949aa2d1c592e02f"
+    },
+    {
+      "path": "/tmp/cw378-visual-verification.log",
+      "sha256": "64d78d8002b02dc050d1a37179cf7899ee19d07de01bd5bfe75e34df912fc057"
+    }
+  ],
+  "visual": {
+    "screenshots": [
+      {
+        "path": "reports/field-visual/field-guide-read-scope/owned-work-1440.png",
+        "sha256": "e81a46e7cff6742b18114103303d2e74d1a3d28be1473d0269a84cb92d5de64a"
+      },
+      {
+        "path": "reports/field-visual/field-guide-read-scope/owned-work-320.png",
+        "sha256": "7d6ed0ce1f38468182fa993b835169fc33a744374a56b58d9af6f000f75d0b80"
+      },
+      {
+        "path": "reports/field-visual/field-guide-read-scope/owned-work-390.png",
+        "sha256": "8ee8067d039ffaf27e69a6191bb140b4070eaf954b25f00fa657e41adbe2f968"
+      }
+    ],
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "minimumDocumentActionHeight": 44,
+    "documentActionOverlap": false,
+    "manuallyInspected": [
+      "owned-work-320.png",
+      "owned-work-1440.png"
+    ],
+    "scope": "Actual existing Viatura tab in Portuguese. Fixed inherited overlapping document links and metadata spacing; full UI group rerun with visible work card and action geometry checks. No new page or claim of new five-language coverage."
+  },
+  "readFailures": [
+    "Vehicle",
+    "SystemSetting",
+    "WorkGuideItem",
+    "VehicleStockMovement"
+  ],
+  "preservation": {
+    "apiSnapshotModels": 19,
+    "browserSnapshotModels": 13,
+    "browserApiWrites": 0,
+    "officialBytesUnchanged": true,
+    "oldCacheBytesPreserved": true,
+    "oldCacheVersion": 2,
+    "currentCacheVersion": 3
+  },
+  "pagination": {
+    "defaultAndMaxPageSize": 200,
+    "testedPageSize": 100,
+    "ownMovementRows": 207,
+    "pages": 3,
+    "boundary": "Each page and total share a transaction; subsequent requests may reflect concurrent changes."
+  },
+  "sourceHashes": {
+    "frontend/cw-field-documents.js": "25ab03af20c361e31c4605499ea25cf5153fc91aa1a3890ecaabd965ac07e205",
+    "frontend/cw-field-guide-projection.js": "d177a3cd3ad0fb94f6617e54dc892cbe8dacd02d05204ac49f66712ebaf8e78b",
+    "frontend/sw.js": "532bfef79274c445762be09189916e896df4933aef6707d9c190f3dd10c21db6",
+    "frontend/technician-field-mode.html": "2f5d04abbeba3060c8a43a814f343714832f726f405e6dee873af27aee728c28",
+    "scripts/fixtures/internal-chat-server.js": "fdba21bf609210f68314912d28b08f0e05e4137a9468a06575f5ee9aeb073b69",
+    "scripts/helpers/field-guide-read-fixture.js": "17b68ee964a612cffeb2adca14617e05efcf004dfeaeed1a0058afed84af9e59",
+    "scripts/test-field-document-recovery.js": "ef8d8aecb5ebe669dee49553a3df705170fc5f15a528d38828a61403213a0747",
+    "scripts/test-field-guide-read-scope-ui.js": "95c5a0fc061cd262751ddddbcfc369cac33289f0f521e0e640af85521bd0e784",
+    "scripts/test-field-guide-read-scope.js": "a9909754d3b4c6144c2f1b514aeeca0357b2fd0406a6696b212379fd54d34051",
+    "scripts/test-field-suite.js": "93ace4ebda01681376c500abb77945146f8063924845b0343fd844ccfdde7b56",
+    "src/controllers/guideController.js": "a3d94b78294c7f5f18178eb6a300ecf42e76291fe5245a66bb45b444710b99bd",
+    "src/middlewares/fieldGuideReads.js": "beba01ea177f848be3d201f4306d46d6a3373bb784dd3504761944dd45a906b6",
+    "src/routes/guideRoutes.js": "2e8202c0701795ec39b45f1f37e2b666a3b81489b854f7ab300ef46f8bbeecea",
+    "src/services/fieldGuideReadService.js": "c883a1bbef1586eb8d842a2cd48f9d12983ea0a9ced5e9aa06da29b40a19d894",
+    "tests/field-guide-read-scope.test.js": "5228f6de94af846c143da917be2f30a176643ecea5a13e463d32ec00572a6a9d"
+  },
+  "serviceWorker": "v189",
+  "runnerGroups": 292,
+  "inventory": {
+    "activeScripts": 313,
+    "htmlFiles": 126,
+    "rootPages": 119,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 114,
+    "catalogueGuardDifferences": 0
+  },
+  "native": {
+    "status": "pending_publication",
+    "expectedScripts": 292,
+    "fullNativeGateConfirmed": false
+  },
+  "publication": {
+    "branch": "work/field-readiness-20260915-simulation",
+    "status": "prepared"
+  },
+  "priorNative": {
+    "task376": {
+      "runId": 36223589014,
+      "jobId": 108353287692,
+      "codeSha": "8fb9e816311880c22696c1c695e810efa75d3af1",
+      "groups": 288,
+      "expectedDistinctAllZero": true,
+      "successfulSteps": 17,
+      "restoredTables": 128,
+      "restoredFiles": 47,
+      "rowsAndHashesMatch": true,
+      "evidence": "docs/product/evidence/20260926_task376_ci.json"
+    },
+    "task377": {
+      "runId": 36225374723,
+      "jobId": 108358260658,
+      "codeSha": "f72bfbdd59d98c404d8752834a9094f5f39c641b",
+      "expectedScripts": 290,
+      "status": "in_progress",
+      "fullNativeGateConfirmed": false
+    }
+  }
+}

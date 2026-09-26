@@ -15,6 +15,7 @@ app.use((req, res, next) => {
   };
   next();
 });
+app.use('/api/guides', require('../../src/routes/guideRoutes'));
 app.use('/api/fleet-management', require('../../src/routes/fleetManagementRoutes'));
 app.use('/api/vehicle-consumption', require('../../src/routes/vehicleConsumptionRoutes'));
 app.use('/api/work-guide-close', require('../../src/routes/workGuideCloseRoutes'));

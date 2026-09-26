@@ -1,5 +1,9 @@
 # TASK376 — Abertura revista de guias de obra e quilometragem
 
+## Confirmação nativa — registada em TASK378
+
+[CI 36223589014](https://github.com/ts7520305-svg/cristalwater/actions/runs/36223589014), job `108353287692`: **288/288 scripts esperados distintos, todos zero**, 17 etapas aprovadas e restauro de **128 tabelas/47 ficheiros** com linhas e hashes iguais. [Evidência](evidence/20260926_task376_ci.json). As referências anteriores a validação pendente conservam o estado conhecido no momento da publicação original.
+
 ## Comportamento
 
 Abertura em `/work-guide-start`, com entradas reais na frota e na página de guias do técnico. ADMIN escolhe a viatura e um técnico atualmente atribuído, ou escolhe explicitamente abrir sem técnico. TECHNICIAN e TEAM_LEADER, por PIN ou conta User ligada, só podem abrir na sua atribuição atual e em seu nome.
