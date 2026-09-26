@@ -179,5 +179,18 @@
     "src/services/visitCorrectionStockService.js": "b7c24e2cd83e3ee2c1b62454c5a60157ba26ff9c819e478d989c8b1dcd618398",
     "src/services/visitProductStockReconciliation.js": "10c8fb3cf41c6697e798c4386ec452d7f1b63c85246d1df024f53a0954c1f56a",
     "tests/visit-product-identity.test.js": "730926492f88fd5e06f4cb0933a00c4ccc9bac7b216ab81b5df4abcde6d31681"
+  },
+  "publication": {
+    "branch": "work/field-readiness-20260915-simulation",
+    "codeSha": "513cd33b1503de510b6b97daee32958d27fb784b",
+    "treeSha": "0c669e92d7100a8a7c5665e26350c036f0d88880",
+    "matchesValidatedLocalTree": true,
+    "runId": 36232927811,
+    "jobId": 108379357578,
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36232927811",
+    "nativeStatus": "in_progress",
+    "expectedNativeGroups": 297,
+    "nativePostgreSQLApproved": false,
+    "restoreApproved": false
   }
 }

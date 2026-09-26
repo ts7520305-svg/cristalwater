@@ -28,6 +28,10 @@ A base local é PGlite 0.5.8/pglite-socket 0.2.11, apenas com dados sintéticos 
 
 TASK380 terminou 294/294 grupos, com 293 aprovados e a mesma falha da fixture ADMIN (`15 != 2`), corrigida na TASK381. Restauro ignorado; gate não aprovado. [Evidência nativa](evidence/20260926_task380_ci_failed.json). TASK381 permanece em execução na última consulta.
 
+## Publicação
+
+Publicada em `513cd33b1503de510b6b97daee32958d27fb784b`, árvore `0c669e92d7100a8a7c5665e26350c036f0d88880`, idêntica à preparada e validada localmente, na branch `work/field-readiness-20260915-simulation`. [CI 36232927811](https://github.com/ts7520305-svg/cristalwater/actions/runs/36232927811), job `108379357578`, em execução. Os 297 grupos PostgreSQL e o restauro ainda não estão confirmados.
+
 ## Continuação
 
 Confirmar os gates nativos e o restauro. Rever o registo antigo de produtos em `/technician`, que ainda usa uma caixa de texto, e a coerência dos seus pedidos com a seleção estruturada. Depois, seleção/pesquisa em guias extensas, conciliação histórica acompanhada pelo escritório, limites dos alertas, cópias/VPS e piloto físico. Sem merge, implantação ou contacto com clientes reais.
