@@ -4,6 +4,7 @@ const assert=require('node:assert/strict'),{randomUUID}=require('node:crypto'),j
 const {prisma}=require('../src/prismaClient'),{getJwtSecret}=require('../src/utils/jwtSecret');
 if(process.env.NODE_ENV!=='test'||process.env.QA_MODE!=='true'||process.env.QA_ENVIRONMENT_SAFE!=='true')throw Error('Isolated QA required');
 const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['127.0.0.1','localhost'].includes(new URL(base).hostname));
+const wait=require('./fixtures/wait-browser-state');
 let browser;
 (async()=>{
   const client=await prisma.client.create({data:{name:'Extra correction client',active:true}}),pool=await prisma.pool.create({data:{name:'Extra correction API pool',clientId:client.id,active:true}});
@@ -74,7 +75,7 @@ let browser;
   await dialog.locator('#extraCorrectionConfirm').click();await page.waitForFunction(()=>document.querySelector('#extraCorrectionStatus').textContent.includes('por confirmar'));
   const queued=await page.evaluate(()=>CWFieldWriteStore.records('EXTRA_VISIT_CORRECTION'));assert.equal(queued.length,1);assert.equal((await prisma.extraVisit.findUnique({where:{id:ui.id}})).execution.ph,7.6);
   await page.unroute(uiPath);await page.route(uiPath,async route=>{if(route.request().method()!=='POST')return route.continue();const response=await route.fetch(),body=await response.json();body.visit.poolId=pool.id;await route.fulfill({json:body});});await page.evaluate(()=>CWFieldOffline.flush());assert.equal((await page.evaluate(()=>CWFieldWriteStore.records('EXTRA_VISIT_CORRECTION'))).length,1);
-  await page.unroute(uiPath);await page.reload({waitUntil:'networkidle'});await page.evaluate(()=>CWFieldOffline.flush());await page.waitForFunction(()=>CWFieldWriteStore.records('EXTRA_VISIT_CORRECTION').then(rows=>rows.length===0));assert.equal(await prisma.auditTrail.count({where:{entity:'ExtraVisit',entityId:ui.id,eventType:'EXTRA_VISIT_CORRECTED'}}),1);
+  await page.unroute(uiPath);await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>!!window.CWFieldOffline);await page.evaluate(()=>CWFieldOffline.flush());await wait(page,()=>CWFieldWriteStore.records('EXTRA_VISIT_CORRECTION').then(rows=>rows.length===0));assert.equal(await prisma.auditTrail.count({where:{entity:'ExtraVisit',entityId:ui.id,eventType:'EXTRA_VISIT_CORRECTED'}}),1);
   await open(page);assert.equal(await dialog.locator('[name=ph]').inputValue(),'7.6');assert.equal(await dialog.locator('[name=reason]').inputValue(),'');
   await dialog.locator('[name=ph]').fill('7.8');await dialog.locator('[name=reason]').fill('Revisão concorrente não deve substituir o escritório');await page.waitForFunction(()=>document.querySelector('#extraCorrectionStatus').textContent.includes('Rascunho guardado'));
   await prisma.extraVisit.update({where:{id:ui.id},data:{execution:{...(await prisma.extraVisit.findUnique({where:{id:ui.id}})).execution,ph:7.1}}});await dialog.locator('#extraCorrectionPreview').click();await dialog.locator('#extraCorrectionConfirm').click();await page.waitForFunction(()=>document.querySelector('#extraCorrectionStatus').textContent.includes('não aplicada'));
@@ -99,7 +100,7 @@ let browser;
   let timer;try{await Promise.race([waiting,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Delayed correction not sent')),15000);})]);}finally{clearTimeout(timer);}
   await page.evaluate(token=>{for(const key of ['token','cristalwater_jwt'])localStorage.setItem(key,token);window.dispatchEvent(new Event('storage'));},otherToken);release();await sending;await page.waitForFunction(()=>!document.querySelector('#extraCorrectionDialog').open);assert.equal(await dialog.locator('[name=notes]').inputValue(),'');
   assert.equal((await page.evaluate(()=>CWFieldWriteStore.records('EXTRA_VISIT_CORRECTION'))).length,0);
-  await page.unroute(uiPath);await page.evaluate(token=>{for(const key of ['token','cristalwater_jwt'])localStorage.setItem(key,token);window.dispatchEvent(new Event('storage'));},token);await page.reload({waitUntil:'networkidle'});await page.evaluate(()=>CWFieldOffline.flush());await page.waitForFunction(()=>CWFieldWriteStore.records('EXTRA_VISIT_CORRECTION').then(rows=>rows.length===0));
+  await page.unroute(uiPath);await page.evaluate(token=>{for(const key of ['token','cristalwater_jwt'])localStorage.setItem(key,token);window.dispatchEvent(new Event('storage'));},token);await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>!!window.CWFieldOffline);await page.evaluate(()=>CWFieldOffline.flush());await wait(page,()=>CWFieldWriteStore.records('EXTRA_VISIT_CORRECTION').then(rows=>rows.length===0));
   assert.equal(await prisma.auditTrail.count({where:{entity:'ExtraVisit',entityId:ui.id,eventType:'EXTRA_VISIT_CORRECTED',metadata:{path:['requestId'],equals:request.requestId}}}),1);
   assert.deepEqual(errors,[]);console.log('PASS two-window conflict, storage quota/corruption, persistent rejection warning, delayed account change and recovery without duplicated effects');
 })().catch(error=>{console.error(error);process.exitCode=1;}).finally(async()=>{await browser?.close();await prisma.$disconnect();});

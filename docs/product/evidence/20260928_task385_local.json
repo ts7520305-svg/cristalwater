@@ -1,0 +1,297 @@
+{
+  "task": "TASK385",
+  "date": "2026-09-28",
+  "baseSha": "ad80a5c961ada8a1809336924ffe99f66b302278",
+  "scope": "Exact original-guide products in extra visit correction",
+  "unit": {
+    "files": 122,
+    "tests": 1073,
+    "newTests": 15,
+    "exitCode": 0,
+    "logSha256": "4142421c55904485cbd37a2ce440d985820fdf0d8bd1b9a9b1563c6557902573"
+  },
+  "syntax": {
+    "backend": 690,
+    "frontend": 307,
+    "inline": 44,
+    "exitCode": 0,
+    "logSha256": "5496298146060c34314a0f2c8028f45b4e344c9986d60ff7c5560439817ce6c2",
+    "finalEditedJsCheck": true
+  },
+  "localDatabase": {
+    "engine": "PGlite",
+    "version": "0.5.8",
+    "socketVersion": "0.2.11",
+    "migrations": 43,
+    "nativePostgres": false
+  },
+  "browser": {
+    "chromium": "153.0.8010.0",
+    "playwright": "1.61.1",
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "height": 1100,
+    "combinations": 15,
+    "screenshots": [
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_de_1440_bottom.png",
+        "sha256": "cddf12988890bcaf6010af80279518a645fe533da8f53c60774d09ddb3031d76"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_de_1440_top.png",
+        "sha256": "e7b968490f6960ebf71e703b38fc17f18c764d8409e7c6aeee80b6532d53037d"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_de_320_bottom.png",
+        "sha256": "926deb7683cf1f2cae89d712f1993c3a00d244323e9c21540610d240f0393a2b"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_de_320_top.png",
+        "sha256": "6cf520933b08b7da54e19f9dbedc3d1ced26fc413467409d0e62eb396030a23f"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_de_390_bottom.png",
+        "sha256": "9554a2f74df22bd1f3ae3361a5ce7e5b23497efa0732e8de1d79c4c28a47d632"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_de_390_top.png",
+        "sha256": "f7ed0d667018ffbc477d8c6eaba9ea4658d7857714e705590f5ff48526f01a18"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_en_1440_bottom.png",
+        "sha256": "5cb91ba420b0e342f8f63c2f8c21e0ef290a9153ed8566cc37de365f6fe4927a"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_en_1440_top.png",
+        "sha256": "9653b04b4555e4c19bcb96de40503d783aea7a5c1ad15d29afc77879e031533a"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_en_320_bottom.png",
+        "sha256": "3e1bebaef3545672ccaca19254b556da6787ccdd4b11ba1603dff271447cddf9"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_en_320_top.png",
+        "sha256": "a77762e6bda59ed4b7d155d108d16f18f8f07b516fe6df4c0458c2d5fe045f25"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_en_390_bottom.png",
+        "sha256": "b7ad59d430813a403baffbeeef3c0c6e794dc78b985301d1fcb4fdc3aa3d8726"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_en_390_top.png",
+        "sha256": "9af156e7bce7c5f0b04a3f598b30b376058f9ce2a210abe5b6cfcf71e9773b63"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_es_1440_bottom.png",
+        "sha256": "1581c0d3529aeb6b0b33067e75decbdad1d554df99ebdd6ea267a3694b97104e"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_es_1440_top.png",
+        "sha256": "e0bb59dc41ad6e17c09ba666ea6dc165f6aa92880f0828e61fd02bb9e88474dd"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_es_320_bottom.png",
+        "sha256": "4bb74cb895bcee7e7302454588d35746c69a8b14b9038b7c94cb4f54a1aa53e4"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_es_320_top.png",
+        "sha256": "e9fb0f6baf84fc871c44b42a947bae653c8c43c80f0c19f971a4cece63b496ab"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_es_390_bottom.png",
+        "sha256": "e490f2f23a2f30d7df69a0c7a5aa28b7c069d2a14e2d823671139d0a3ce3d76f"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_es_390_top.png",
+        "sha256": "62bdd4e484e1696c403d3adedffabf0cce81b8491393576dcef8ee3000e37b6c"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_fr_1440_bottom.png",
+        "sha256": "e9b1e517c4d942efdd015ed2349cf0b09af11e663adcad631bf1cc691b539b93"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_fr_1440_top.png",
+        "sha256": "285a8db990541a0b78a10ad34b24e5f628b161a30d670d925ac3049e6939e027"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_fr_320_bottom.png",
+        "sha256": "c6d9de61907f8b78751ea98a27d0b7209e9caf2b6cbc0bbb6dd8be77964dc013"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_fr_320_top.png",
+        "sha256": "1ce2f52f1b2f452a6928998f4e440cf7fed79e6760882d1267ceef4e5908b5e3"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_fr_390_bottom.png",
+        "sha256": "0e50ea0b189a2606892ac70899a582ec01306a7c274b62b0cc5e934d338f27f2"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_fr_390_top.png",
+        "sha256": "b065cb46481f59248b369e701a37ff2549019e8070a9230fe746b309b1ecd976"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_pt_1440_bottom.png",
+        "sha256": "28cecb5cd327685efa1655da64f8ceba7bfa3eb5539a3a3623aa30c2e099ddf2"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_pt_1440_top.png",
+        "sha256": "9e25537f24752e26fd11264477f2ec4fa4fceb343a71a168e22b231307ac2e35"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_pt_320_bottom.png",
+        "sha256": "e57d3e47e1083a0b54fd5eafbd563c81d08f3d2eb50f9c42fa750033ee5b38cc"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_pt_320_top.png",
+        "sha256": "7870aec616b8bf576dfca803414665d819d461a98edc561c64b510e675c55daf"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_pt_390_bottom.png",
+        "sha256": "1ed4892e9655a299632d35550214c5344a0d0b9409839bdb89eafe5438e0ee2d"
+      },
+      {
+        "path": "reports/field-ui/EXTRA_PRODUCTS_pt_390_top.png",
+        "sha256": "4c2014546e4bae10809faae05777a3fca3dee46fdf09cf60f4ae309db32faf1b"
+      }
+    ],
+    "manualInspection": [
+      "EXTRA_PRODUCTS_de_320_top.png",
+      "EXTRA_PRODUCTS_pt_1440_bottom.png"
+    ],
+    "controlsMinHeight": 44,
+    "horizontalOverflow": false
+  },
+  "integration": {
+    "distinctGroups": 4,
+    "exitCode": 0,
+    "aggregateLogSha256": "59f194ae4d780d3b4e72ffc0d0f3aad0f29197c2cbd07905ca9002ecafa79154",
+    "groups": [
+      {
+        "script": "scripts/test-field-extra-products.js",
+        "code": 0,
+        "log": "/tmp/cw385-test-field-extra-products.log",
+        "sha256": "84291c513f50f9842ffcc984259725897d7ab1a969bbe585d6fe24d0cec1f223",
+        "checks": [
+          "PASS authenticated original guide projection, later guide excluded, closed/reassigned/no-original states and foreign product rejection",
+          "PASS all original products searchable, literal identity-only change reviewed, drafts unchanged by search/language, 15 responsive views, real offline reload and exact-once correction after lost response",
+          "PASS wrong-context and denied responses never use cached products, closed original guide blocks additions, delayed response cannot paint another account and draft bytes remain intact"
+        ]
+      },
+      {
+        "script": "scripts/test-field-extra-correction.js",
+        "code": 0,
+        "log": "/tmp/cw385-test-field-extra-correction.log",
+        "sha256": "6c47366b4f3602f38b217919fc6615ab0cc67940e711916351c2cbb2eae6c770",
+        "checks": [
+          "PASS typed same-ID isolation, privacy, immutable concurrent receipts, stale version rejection, original completion/billing and difference-only stock correction",
+          "PASS rollback after partial stock adjustment, closed guide, mandatory notification failure and exact recovery after reassignment",
+          "PASS real mobile editor, preserved draft, exact review, lost committed response, wrong acknowledgement rejection, reload recovery and explicit stale-version comparison",
+          "PASS two-window conflict, storage quota/corruption, persistent rejection warning, delayed account change and recovery without duplicated effects"
+        ]
+      },
+      {
+        "script": "scripts/test-field-product-identity-ui.js",
+        "code": 0,
+        "log": "/tmp/cw385-test-field-product-identity-ui.log",
+        "sha256": "7ba27ce5e5fb095a68185afebdb52263028f78c9177613e61146c5ab9ec3f109",
+        "checks": [
+          "PASS distinct selector IDs/units, no assumed unit, literal stock/labels, five languages at 320/390/1440, incomplete and aggregate checks, preserved old draft requiring explicit review",
+          "PASS REGULAR exact product/notes in offline draft, immutable queue, lost committed response, reload and one debit on the selected row",
+          "PASS EXTRA exact product/notes in offline draft, immutable queue, lost committed response, reload and one debit on the selected row",
+          "PASS completed EXTRA editor retains the selected identity and adjusts only its original stock row"
+        ]
+      },
+      {
+        "script": "scripts/test-field-product-identity.js",
+        "code": 0,
+        "log": "/tmp/cw385-test-field-product-identity.log",
+        "sha256": "4ec961cc9135e2da83ed83333a027fd3aee8dee6063c828c40be39b2ac94ee67",
+        "checks": [
+          "PASS REGULAR exact duplicate rows, four concurrent replays, both ledgers, corrections by original identity, repeated correction and atomic rejections",
+          "PASS REGULAR missing unit, malformed/stale identity, aggregate insufficiency, unique legacy compatibility, ambiguous historical rejection and exact 0.1 + 0.2 debit/return",
+          "PASS EXTRA exact duplicate rows, four concurrent replays, both ledgers, corrections by original identity, repeated correction and atomic rejections",
+          "PASS EXTRA missing unit, malformed/stale identity, aggregate insufficiency, unique legacy compatibility, ambiguous historical rejection and exact 0.1 + 0.2 debit/return"
+        ]
+      }
+    ]
+  },
+  "draftFormat": {
+    "version": 1,
+    "optionalCatalogue": true,
+    "previousWithoutCataloguePreserved": true,
+    "searchOrLanguageWrites": false,
+    "corruptCopiesPreserved": true
+  },
+  "originalScope": {
+    "source": "CONSUMPTION/RETURN movements linked to EXTRA visit",
+    "readIsolation": "RepeatableRead",
+    "currentGuideSubstitution": false,
+    "historicalAutomaticReconciliation": false,
+    "nativeWriteRulesChanged": false
+  },
+  "preparationCorrections": [
+    "DOM disabled property for option/fieldset assertions",
+    "Resolved asynchronous browser-state helper for actual receipt confirmation",
+    "Existing correction reload waits for the outbox instead of network silence",
+    "Product language uses application preference and only changed-language notifications repaint selectors"
+  ],
+  "sourceHashes": {
+    "frontend/cw-extra-visit-correction.js": "cd160ca025f91f256593de5bd4930e7838caf04d72a51546eb3f8381bc3f2a8e",
+    "frontend/cw-extra-correction-products.js": "52753b0b54e95734f83b1df1a660d37a215b1b434b953dd7fedc1aa206ac20a9",
+    "frontend/cw-field-document-copy.js": "b0e513180f2caf2cae358a8a5dfc02d7cfb293b99230b52994ce775d244ae870",
+    "frontend/sw.js": "bd91ac4c40ef1d792532c5501832629ef17c02a58af27abf7a19b6152e80bee3",
+    "frontend/technician-field-mode.html": "c2e30493f1502728bf2a81944c579ebfbd3a100c4c370c69ef29eeb21d5cd86c",
+    "src/services/extraVisitCorrectionService.js": "9d429bffa30a62f083030d31bf7a9bcb0cca80a8a5282a5140cc009b5edd212d",
+    "tests/extra-correction-products.test.js": "5e3f6547cf06d7319e6a679759959bc8c5e334efbf7405e9a49a1415d8ee92f2",
+    "scripts/test-field-extra-products.js": "233e4360791e143c687cdff6ed2d0c62540a8c4f8bfabf3474d563b0862cedcf",
+    "scripts/test-field-extra-correction.js": "f30b454b338e7d81a77a3f83555f2440f2bf3b1c80f4fe271071431c643b1214",
+    "scripts/test-field-suite.js": "c8befd159f110cbfc4ca32f0b4d5934d0c4c8d9d2782ec736e2e117c4b351726"
+  },
+  "inventory": {
+    "htmlFiles": 126,
+    "rootPages": 119,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 114,
+    "catalogueGuardDifferences": 0
+  },
+  "cache": "cristalwater-field-20260928-v196",
+  "documentsVersion": 3,
+  "runnerDistinctGroups": 300,
+  "priorNative": {
+    "TASK383": {
+      "runId": 36354384627,
+      "approved": true,
+      "groups": 298,
+      "restoreTables": 128,
+      "restoreFiles": 47
+    },
+    "TASK384": {
+      "runId": 36356317137,
+      "jobId": 108724640933,
+      "status": "in_progress",
+      "nativeGateConfirmed": false
+    }
+  },
+  "publication": {
+    "branch": "work/field-readiness-20260915-simulation",
+    "status": "prepared",
+    "nativeGateConfirmed": false
+  },
+  "externalSideEffects": {
+    "merge": false,
+    "deploy": false,
+    "realContacts": false
+  }
+}

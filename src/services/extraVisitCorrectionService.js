@@ -11,10 +11,24 @@ function version(row) {
 }
 function visitId(value) { const id = Number(value); if(!Number.isSafeInteger(id)||id<=0||id>2147483647)requests.fail('Visita extra inválida.'); return id; }
 async function view(actor,value) {
-  const row = await prisma.extraVisit.findUnique({where:{id:visitId(value)},include:{photos:true}});
-  requests.authorize(actor,row);
-  if(row.status!=='DONE'||!row.endAt)requests.fail('Escolha uma visita extra concluída.',409);
-  return {ok:true,version:version(row),visit:executionService.project(row)};
+  return prisma.$transaction(async tx => {
+    const row = await tx.extraVisit.findUnique({where:{id:visitId(value)},include:{photos:true}});
+    requests.authorize(actor,row);
+    if(row.status!=='DONE'||!row.endAt)requests.fail('Escolha uma visita extra concluída.',409);
+    const baseVersion=version(row), productCatalogue={version:1,owner:requests.owner(actor),visitId:row.id,poolId:row.poolId,baseVersion,asOf:new Date().toISOString(),state:'NO_ORIGINAL_GUIDE',guides:[]};
+    const movements=await tx.vehicleStockMovement.findMany({where:{extraVisitId:row.id,movementType:{in:['CONSUMPTION','RETURN']}},select:{workGuideId:true,vehicleId:true}});
+    if(movements.length){
+      productCatalogue.state='REVIEW_REQUIRED';
+      const ids=[...new Set(movements.map(m=>m.workGuideId))];
+      if(ids.every(id=>Number.isSafeInteger(id)&&id>0)){
+        const guides=await tx.workGuide.findMany({where:{id:{in:ids}},orderBy:{id:'asc'},select:{id:true,vehicleId:true,technicianId:true,status:true,items:{orderBy:{id:'asc'},select:{id:true,workGuideId:true,name:true,unit:true,quantity:true,initialQty:true,usedQty:true}}}});
+        if(guides.length===ids.length&&guides.every(g=>g.status==='OPEN'&&(!g.technicianId||g.technicianId===row.technicianId)&&movements.filter(m=>m.workGuideId===g.id).every(m=>m.vehicleId===g.vehicleId))){
+          productCatalogue.state='AVAILABLE';productCatalogue.guides=guides.map(g=>({...g,itemCount:g.items.length}));
+        }
+      }
+    }
+    return {ok:true,version:baseVersion,visit:executionService.project(row),productCatalogue};
+  },{isolationLevel:'RepeatableRead',maxWait:15000,timeout:20000});
 }
 async function reconcile(tx, visit, desiredRows, request) {
   return require('./visitProductStockReconciliation').reconcile(tx, visit, visit.execution?.chemicalsJson || [], desiredRows, { visitType: 'EXTRA', owner: request.owner, requestId: request.requestId });
