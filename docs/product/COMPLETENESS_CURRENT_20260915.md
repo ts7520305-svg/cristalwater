@@ -1,6 +1,6 @@
 # Cristal Water — matriz atual de conclusão
 
-## Retoma atual — 27/09/2026, TASK384 pronta para publicação
+## Retoma atual — 27/09/2026, TASK384 publicada
 
 Pesquisa de produtos em `/technician-field-mode` e `/technician`, por nome, unidade e ID exato com `#`. Páginas de 25 com intervalo/total, todas as linhas percorríveis, posição original e ID visíveis. Produto selecionado mantido fora da página/filtro; zero resultados não muda a seleção. Unidades/nome/IDs literais e rascunhos conservados. [Relatório](PRODUCT_CATALOGUE_SEARCH_20260927.md) e [evidência](evidence/20260927_task384_local.json).
 
@@ -10,7 +10,7 @@ Pesquisa/página separadas por visita normal/extra, conservadas durante atualiza
 
 TASK383, [CI 36354384627](https://github.com/ts7520305-svg/cristalwater/actions/runs/36354384627), job `108719062994`, continua em execução na última consulta: 298 grupos/restauro ainda por confirmar. TASK381/382 mantêm a confirmação anterior de 295/297 grupos e restauro de 128 tabelas/47 ficheiros, linhas e hashes iguais.
 
-TASK384 preparada para a branch `work/field-readiness-20260915-simulation`. O gate PostgreSQL nativo de 299 grupos e restauro desta alteração ainda não está confirmado.
+Publicada em 27/09/2026 no commit `ae072e3656632a8db0e56eaa45a4ab75994ac9c8`, árvore `783f3daaedb03737413123772bd6550211b25ec0`, idêntica à preparada e validada localmente, na branch `work/field-readiness-20260915-simulation`. [CI 36356317137](https://github.com/ts7520305-svg/cristalwater/actions/runs/36356317137), job `108724640933`, em execução. A sintaxe, os testes unitários/técnico/navegador e a atualização aditiva do esquema já passaram neste CI. Os 299 grupos PostgreSQL e o restauro desta alteração ainda não estão confirmados.
 
 **Continuar:** confirmar os CI/restauros e rever «Adicionar produto» no editor de correção extra, que ainda aceita nome/unidade livres. Confirmar âmbito da guia original e seleção exata sem conciliar automaticamente dados históricos. Tradução integral das páginas antigas, limites dos alertas, VPS/cópias e piloto físico permanecem abertos. Sem merge/deploy/contactos reais; aplicação não declarada completa.
 

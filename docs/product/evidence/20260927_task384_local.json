@@ -282,8 +282,28 @@
   },
   "publication": {
     "branch": "work/field-readiness-20260915-simulation",
-    "status": "prepared",
-    "nativeGateConfirmed": false
+    "status": "published",
+    "codeSha": "ae072e3656632a8db0e56eaa45a4ab75994ac9c8",
+    "codeTree": "783f3daaedb03737413123772bd6550211b25ec0",
+    "publishedAt": "2026-09-27T22:44:13Z",
+    "publishedTreeEqualsValidatedLocalTree": true,
+    "nativeRunId": 36356317137,
+    "nativeJobId": 108724640933,
+    "nativeRunUrl": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36356317137",
+    "nativeStatus": "in_progress",
+    "nativeRunnerDistinctGroupsExpected": 299,
+    "nativeGateConfirmed": false,
+    "nativeRestoreConfirmed": false,
+    "nativeCompletedChecks": [
+      "additive schema upgrade",
+      "syntax",
+      "unit/technician/field-browser"
+    ],
+    "nativePendingChecks": [
+      "299 distinct integration groups",
+      "isolated database/upload restore"
+    ],
+    "nativeCheckedAt": "2026-09-27T22:48:08.413656+00:00"
   },
   "externalSideEffects": {
     "merge": false,
