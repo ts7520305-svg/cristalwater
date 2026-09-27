@@ -44,6 +44,7 @@
   let waterReminders = [];
   let waterRemindersError = '';
   let usedProducts = [];
+  let productCatalogue = null;
   let activeWorkGuide = null;
   let activeWorkStock = [];
   let activeTransportGuide = null;
@@ -1687,19 +1688,15 @@
   const doseText = (key, values) => window.CWFieldDocumentCopy.text(key, values, document.documentElement.lang);
   function productOptions(row) {
     const R = window.CWVisitProductIdentity, rows = Array.isArray(activeWorkStock) ? activeWorkStock : [];
-    const selected = row.workGuideItemId;
-    let exact = false;
-    const options = rows.map((item, index) => {
-      const valid = R.positive(item.id) && item.workGuideId === activeWorkGuide?.id && R.text(item.name) && R.text(item.unit) && Number.isFinite(item.quantity);
-      const chosen = valid && item.id === selected && row.workGuideId === activeWorkGuide?.id && row.name === item.name && row.unit === item.unit;
-      exact ||= chosen;
+    const selection = window.CWProductCatalogue.selection(rows, activeWorkGuide?.id, row, productCatalogue.view);
+    const options = selection.entries.map(({ item, position, valid, chosen, pinned }) => {
       const qty = Number.isFinite(item.quantity) ? item.quantity : doseText('quantityUnknown');
-      const label = `${doseText('productRow', { number: index + 1 })} · ${item.name ?? doseText('materialNameUnknown')} · ${qty} ${R.text(item.unit) ? item.unit : doseText('unit')}`;
-      return `<option value="${esc(item.id)}" ${chosen ? 'selected' : ''} ${valid ? '' : 'disabled'}>${esc(label)}</option>`;
+      const label = `${doseText('productRow', { number: position + 1 })} · #${item.id} · ${item.name ?? doseText('materialNameUnknown')} · ${qty} ${R.text(item.unit) ? item.unit : doseText('unit')}${pinned ? ' · ' + doseText('cataloguePinned') : ''}`;
+      return `<option value="${esc(item.id)}" data-catalogue-result="${pinned ? 'pinned' : 'page'}" ${chosen ? 'selected' : ''} ${valid ? '' : 'disabled'}>${esc(label)}</option>`;
     }).join('');
-    const stored = !exact && (row.name || row.unit || selected)
+    const stored = selection.saved
       ? `<option value="saved" selected>${esc(row.name || doseText('productUnknown'))} · ${esc(row.unit || doseText('unit'))} · ${esc(doseText('productSaved'))}</option>` : '';
-    return `<option value="" ${!exact && !stored ? 'selected' : ''}>${esc(doseText('productChoose'))}</option>${stored}${options}`;
+    return `<option value="" ${!selection.entries.some(entry => entry.chosen) && !stored ? 'selected' : ''}>${esc(doseText('productChoose'))}</option>${stored}${options}`;
   }
 
   function ensureDoseRow() {
@@ -1745,8 +1742,11 @@
   function renderDoseRows() {
     const box = $("#doseRows");
     if (!box) return;
+    if (!productCatalogue) { const host = document.createElement('div'); box.before(host); productCatalogue = window.CWProductCatalogue.mount(host, renderDoseRows); }
+    productCatalogue.update({ key: visitKey(), active: sameFieldSession(), disabled: !current(), available: !!current() && !!activeWorkGuide, items: current() ? activeWorkStock : [], language: document.documentElement.lang });
     if (!usedProducts.length) {
       box.innerHTML = `<div class="dose-empty" data-cw-no-i18n>${esc(doseText('productEmpty'))}</div>`;
+      visitDraftManager.paint(currentDraftEntry);
       return;
     }
     box.innerHTML = usedProducts.map((row) => `
@@ -1759,6 +1759,7 @@
         <button class="dose-remove" type="button" data-dose-remove="${esc(row.localId)}">${esc(doseText('productRemove'))}</button>
       </div>
     `).join("");
+    visitDraftManager.paint(currentDraftEntry);
   }
 
   function normalizedUsedProducts() {

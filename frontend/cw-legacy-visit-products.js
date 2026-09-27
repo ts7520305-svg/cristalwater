@@ -56,13 +56,14 @@
       source = snapshot ? 'cache' : 'unavailable'; warning = error.message;
     } finally { clearTimeout(timer); if (ticket === revision) { loading = false; renderAll(); } }
   }
-  function options(select, row) {
+  function options(select, row, editor) {
     const work = snapshot?.stock?.workGuide, items = snapshot?.stock?.stock || []; let found = false;
     select.append(new Option(common('productChoose'), ''));
-    for (const [index, item] of items.entries()) {
-      const option = new Option(common('productRow', { number: index + 1 }) + ' · ' + item.name + ' · ' + item.quantity + ' ' + (R.text(item.unit) ? item.unit : common('unit')), String(item.id));
-      option.disabled = !R.text(item.name) || !R.text(item.unit); select.append(option);
-      if (row.workGuideId === work.id && row.workGuideItemId === item.id && row.name === item.name && row.unit === item.unit && !option.disabled) { option.selected = true; found = true; }
+    const selection = window.CWProductCatalogue.selection(items, work?.id, row, editor.catalogue.view);
+    for (const { item, position, valid, chosen, pinned } of selection.entries) {
+      const option = new Option(common('productRow', { number: position + 1 }) + ' · #' + item.id + ' · ' + item.name + ' · ' + item.quantity + ' ' + (R.text(item.unit) ? item.unit : common('unit')) + (pinned ? ' · ' + common('cataloguePinned') : ''), String(item.id));
+      option.disabled = !valid; option.dataset.catalogueResult = pinned ? 'pinned' : 'page'; select.append(option);
+      if (chosen) { option.selected = true; found = true; }
     }
     if (!found && (row.name || row.productName || R.hasIdentity(row))) { const option = new Option((row.name || row.productName || common('productUnknown')) + ' · ' + (row.unit || common('unit')) + ' · ' + common('productSaved'), 'saved'); select.append(option); option.selected = true; }
   }
@@ -79,6 +80,7 @@
       : t(source) + (warning ? ' ' + warning : '');
     editor.languageLabel.textContent = t('language'); editor.languagePicker.value = language(); editor.languagePicker.disabled = unavailable;
     editor.refresh.textContent = t('refresh'); editor.refresh.disabled = unavailable || loading;
+    editor.catalogue.update({ key: editor.box.id, active: !unavailable, disabled, available: !!snapshot?.stock?.workGuide, items: snapshot?.stock?.stock, language: language() });
     if (unavailable) { editor.rows.replaceChildren(); editor.previous.replaceChildren(); editor.add.disabled = true; return; }
     const raw = editor.input.value;
     if (force || raw !== editor.raw || editor.language !== language() || editor.guideRevision !== revision) {
@@ -91,7 +93,7 @@
       if (value.kind === 'rows' && !value.rows.length) editor.rows.append(node('p', t('empty')));
       value.rows.forEach((product, index) => {
         const card = node('div'); card.className = 'legacy-product-row'; card.dataset.productRow = String(index);
-        const select = node('select'); select.dataset.productField = 'name'; select.setAttribute('aria-label', common('productUsed')); options(select, product);
+        const select = node('select'); select.dataset.productField = 'name'; select.setAttribute('aria-label', common('productUsed')); options(select, product, editor);
         const quantity = node('input'); quantity.dataset.productField = 'quantity'; quantity.inputMode = 'decimal'; quantity.value = product.quantity ?? ''; quantity.setAttribute('aria-label', common('productQuantity')); quantity.placeholder = common('productQuantity');
         const unit = node('input'); unit.dataset.productField = 'unit'; unit.value = product.unit ?? ''; unit.readOnly = true; unit.setAttribute('aria-label', common('productUnit'));
         const notes = node('textarea'); notes.dataset.productField = 'notes'; notes.value = product.notes ?? ''; notes.placeholder = t('notes'); notes.setAttribute('aria-label', t('notes')); notes.maxLength = 1000;
@@ -104,7 +106,7 @@
       editor.add.onclick = () => { if (value.kind !== 'rows' || value.rows.length >= 50) return; value.rows.push({ name: '', quantity: '', unit: '', notes: '' }); changed(editor, value, true); };
       editor.add.hidden = value.kind !== 'rows'; editor.add.disabled = disabled || value.rows.length >= 50;
     }
-    for (const control of editor.box.querySelectorAll('input,select,textarea,button')) if (control !== editor.refresh && control !== editor.languagePicker) control.disabled = disabled || control === editor.add && rules.read(editor.raw).rows.length >= 50;
+    for (const control of editor.box.querySelectorAll('input,select,textarea,button')) if (control !== editor.refresh && control !== editor.languagePicker && !control.closest('[data-product-catalogue]')) control.disabled = disabled || control === editor.add && rules.read(editor.raw).rows.length >= 50;
   }
   function renderAll() { for (const editor of editors.values()) render(editor, true); }
   function bind(element, visit) {
@@ -114,8 +116,8 @@
     const languageHolder = node('label'), languageLabel = node('span'), languagePicker = node('select'); languagePicker.dataset.productLanguage = ''; languageHolder.append(languageLabel, languagePicker);
     for (const [code, name] of [['pt','Português'],['en','English'],['fr','Français'],['es','Español'],['de','Deutsch']]) languagePicker.append(new Option(name, code));
     languagePicker.onchange = () => { if (!active() || !copy[languagePicker.value]) return; document.documentElement.lang = languagePicker.value; try { localStorage.setItem('cwLegacyProductLanguage:' + actor.owner, languagePicker.value); } catch (_) {} };
-    box.append(title, languageHolder, status, refreshButton, previous, rows, add); element.querySelector('.visit-actions').before(box);
-    const editor = { input, box, title, status, languageLabel, languagePicker, refresh: refreshButton, previous, rows, add, raw: null, blocked: true }; editors.set(visit.id, editor); render(editor, true);
+    const catalogueHost = node('div'); box.append(title, languageHolder, status, refreshButton, previous, catalogueHost, rows, add); element.querySelector('.visit-actions').before(box);
+    const editor = { input, box, title, status, languageLabel, languagePicker, refresh: refreshButton, previous, rows, add, raw: null, blocked: true }; editor.catalogue = window.CWProductCatalogue.mount(catalogueHost, () => render(editor, true), editors.get(visit.id)?.catalogue.states); editors.set(visit.id, editor); render(editor, true);
   }
   function paint(id, blocked) { const editor = editors.get(id); if (!editor) return; editor.blocked = blocked; render(editor); }
   function completion(raw) { requireActive(); return rules.payload(raw, snapshot?.stock); }

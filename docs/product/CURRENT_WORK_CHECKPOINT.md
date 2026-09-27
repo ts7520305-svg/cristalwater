@@ -1,5 +1,19 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 27/09/2026, TASK384 pronta para publicação
+
+Pesquisa de produtos em `/technician-field-mode` e `/technician`, por nome, unidade e ID exato com `#`. Páginas de 25 com intervalo/total, todas as linhas percorríveis, posição original e ID visíveis. Produto selecionado mantido fora da página/filtro; zero resultados não muda a seleção. Unidades/nome/IDs literais e rascunhos conservados. [Relatório](PRODUCT_CATALOGUE_SEARCH_20260927.md) e [evidência](evidence/20260927_task384_local.json).
+
+Pesquisa/página separadas por visita normal/extra, conservadas durante atualização da guia e reconstrução da rota antiga. Estado da pesquisa apenas em memória; após recarregar, a escolha continua recuperável offline. Pesquisa, paginação e tradução não gravam o rascunho. A consulta da guia continua completa: o limite aplica-se às opções de cada seletor, não à API nem à memória de toda a página. Percursos de correção/bloqueios existentes conservados.
+
+1058 unitários/121 ficheiros; sintaxe 690/306/44; cinco grupos locais distintos aprovados com Chromium 153. Modelo com 5001 linhas; navegador com 207 produtos nas duas interfaces, conclusão offline na linha exata, alternância de visitas e atualização da rota. Cinco idiomas, 320/390/1440, 30 capturas e controlos de 44 px sem obstrução após deslocação. Preparação com Chromium 138 e expectativa inicial sobre correções documentadas; aprovação só nos grupos finais. Cache v195; documentos v3; runner 299; nenhuma migração nova. Inventário: 126 HTML, 114 referências literais, zero recursos ausentes e duas referências Git indisponíveis localmente.
+
+TASK383, [CI 36354384627](https://github.com/ts7520305-svg/cristalwater/actions/runs/36354384627), job `108719062994`, continua em execução na última consulta: 298 grupos/restauro ainda por confirmar. TASK381/382 mantêm a confirmação anterior de 295/297 grupos e restauro de 128 tabelas/47 ficheiros, linhas e hashes iguais.
+
+TASK384 preparada para a branch `work/field-readiness-20260915-simulation`. O gate PostgreSQL nativo de 299 grupos e restauro desta alteração ainda não está confirmado.
+
+**Continuar:** confirmar os CI/restauros e rever «Adicionar produto» no editor de correção extra, que ainda aceita nome/unidade livres. Confirmar âmbito da guia original e seleção exata sem conciliar automaticamente dados históricos. Tradução integral das páginas antigas, limites dos alertas, VPS/cópias e piloto físico permanecem abertos. Sem merge/deploy/contactos reais; aplicação não declarada completa.
+
 ## Retoma atual — 27/09/2026, TASK383 publicada
 
 Produtos de `/technician` com seleção da linha exata da guia, quantidade, unidade literal só de leitura e notas. Texto livre anterior exige preparação explícita da lista e fica integralmente conservado no rascunho local, mesmo após conclusão; o pedido contém a lista normalizada. Listas antigas sem IDs exigem nova seleção. Formato v1 dos seis campos e pedidos já preparados conservados. [Relatório](LEGACY_VISIT_PRODUCTS_20260926.md) e [evidência](evidence/20260926_task383_local.json).

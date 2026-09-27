@@ -220,7 +220,7 @@ scripts.push('test-field-repair-execution-command.js',
 scripts.push('test-field-visit-report-origin.js');
 scripts.push('test-field-product-identity.js', 'test-field-product-identity-ui.js');
 
-scripts.push('test-field-legacy-products.js');
+scripts.push('test-field-legacy-products.js', 'test-field-product-catalogue-ui.js');
 
 function run(script){return new Promise(resolve=>{
  const output=fs.createWriteStream(path.join(evidence,script+'.log'));

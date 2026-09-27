@@ -1,0 +1,293 @@
+{
+  "task": "TASK384",
+  "date": "2026-09-27",
+  "baseSha": "0f625a2f59313c7beed1baefab20f81ad6e2d105",
+  "scope": "Search and bounded product options for exact guide-row selection in modern and legacy visit forms",
+  "unit": {
+    "tests": 1058,
+    "files": 121,
+    "newTests": 18,
+    "logSha256": "087689d483eb623ec260c7ceb29765f3d0c1c40671cbb5a895ccc1030cf2a493"
+  },
+  "syntax": {
+    "backend": 690,
+    "frontend": 306,
+    "inline": 44,
+    "logSha256": "d5b7e67894104c1c0a4e2bf39aac60398ca8ff19507cfcd6cd5e9a84cc40473b",
+    "changedFilesCheckedAfterFinalEdits": true
+  },
+  "localDatabase": {
+    "engine": "PGlite",
+    "version": "0.5.8",
+    "socketVersion": "0.2.11",
+    "baselineCommit": "a584369b7372a71c1aaa280078e5aeca00f8f1d1",
+    "baselineSqlSha256": "6a3a755a2ede1340b718aad42b9729eef423939fcec9b57f26ae65f68a990265",
+    "migrations": 43,
+    "newMigrations": 0,
+    "syntheticDataOnly": true,
+    "nativePostgreSQLConfirmed": false
+  },
+  "browser": {
+    "version": "Chromium 153.0.8010.0",
+    "playwright": "1.61.1",
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "height": 1100,
+    "guideRowsTraversedPerSurface": 207,
+    "pageSize": 25,
+    "largestPureModelFixture": 5001,
+    "maxResultOptionsIncludingPinned": 26,
+    "minimumControlHeight": 44,
+    "unobstructedCentersAfterScroll": true,
+    "manuallyInspected": [
+      "MODERN DE320",
+      "LEGACY PT1440"
+    ],
+    "runtimeErrors": 0,
+    "screenshots": [
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_LEGACY_de_1440.png",
+        "sha256": "bd2127f3ff7d8d05be67a919879d96cfc79ce42f02c1bf460a8895f488215ea5"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_LEGACY_de_320.png",
+        "sha256": "4cfaef624a61a4dc339528522d5411b50e44be1b695e1e14b36e5b308c701b58"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_LEGACY_de_390.png",
+        "sha256": "df9cf3422fad969b752a89d6b1696bbc4369cb278ac62f664e38fe892fe39499"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_LEGACY_en_1440.png",
+        "sha256": "9efdca72c807d8611e6c6cd400d176bcde84487814eecceb77e1835963f25f0f"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_LEGACY_en_320.png",
+        "sha256": "3240b6acb01035fbee5e410446d4216f7bd201a2f594528f4bbeba3bb9af45d2"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_LEGACY_en_390.png",
+        "sha256": "d1d9ced2e987704475dfe43f65efbc9c0b91e655bdd2cd00cdca6c72827cba30"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_LEGACY_es_1440.png",
+        "sha256": "95de024a6cb557faf7b25e37f68ca8e8cc578424dfe8389695520202b3892608"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_LEGACY_es_320.png",
+        "sha256": "3501e03c37b77a353ebb6e4ed5228396a7a2c980ebaddcbc27d43f87e8ed32f8"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_LEGACY_es_390.png",
+        "sha256": "46dcb5210f132c8f05760e77721d98b0557b74ed685fe9f5154e006142848702"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_LEGACY_fr_1440.png",
+        "sha256": "038d18e5fd7adfa50de7478ec071ed746015d9308998aea89ff9450bec2e4d64"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_LEGACY_fr_320.png",
+        "sha256": "3ff9925d799e58ee4c8d44ca25fe97c6a798b840c85a8fc27fa2022b22de3f75"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_LEGACY_fr_390.png",
+        "sha256": "4821b903a25e1bc5d3928386367f432358177fadbe0175b9b959eab0368fdfa1"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_LEGACY_pt_1440.png",
+        "sha256": "faab41b2934ab8c68b1649de8096292beb4163a829880379eb1c40191832648b"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_LEGACY_pt_320.png",
+        "sha256": "6a1fd78c52bf737e4f7d03cab41ee4a97abc17456c1ed028b5c132a2f35537fe"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_LEGACY_pt_390.png",
+        "sha256": "21dc611ba4865034fb772d49b2dd932cc8f58566d73ef21dd438aa98eca98912"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_MODERN_de_1440.png",
+        "sha256": "82d341a393f362d0045fc07aafbc61698ddd9a5ddca5a9a810fed9415b2a7844"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_MODERN_de_320.png",
+        "sha256": "6f7b5c12975a9a6078e4106229de96e866939e171b06b749c3254fe9ec57f07a"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_MODERN_de_390.png",
+        "sha256": "b4473b3595d50f6e7ebcb88e5559dd4a81e81374bf91473874f6e682aff16e41"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_MODERN_en_1440.png",
+        "sha256": "835b47e8ede73917fb914ddc5e2a1cc619a15126c993ba4147423d74b982345b"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_MODERN_en_320.png",
+        "sha256": "eaca88457954d82905d4a4a54545c8db2acd0eafb66ba136af8643ab2edc94ed"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_MODERN_en_390.png",
+        "sha256": "eaf6447202f7cdad1cd77de2eda0ef5cadd838a11ba9933075dc102bca544dae"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_MODERN_es_1440.png",
+        "sha256": "caaf0a5c404482f95dd9c674560c6b9bf3c231cab42498a65e287c8de8a24055"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_MODERN_es_320.png",
+        "sha256": "a88ccdc74816aaaa2c1efe93eaafedfee65e605ded431c74993b64c914805b2b"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_MODERN_es_390.png",
+        "sha256": "d9b3edb2023e234a0b06c1cc306c7352bc050c8d88e11308c2767089207bb221"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_MODERN_fr_1440.png",
+        "sha256": "865c60bf26df0234bd7b198d21a96162ad74de70a695861a7f5e825708aee2d2"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_MODERN_fr_320.png",
+        "sha256": "1beb21c62f6f1d87ebe97c66666b30e178dac19fa5d23ad4e2accd31bf65ba19"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_MODERN_fr_390.png",
+        "sha256": "0011ba68fb18f10ed876ec7895a460d4bbe4bab76ff6c24fb852c196b0581a92"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_MODERN_pt_1440.png",
+        "sha256": "3fc550cde9311d16b40535e50b2aa2019f12c64f85cb17046aaac5146a78ab4d"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_MODERN_pt_320.png",
+        "sha256": "a913af055cb5dff609078fa0dbd638ec069b535810268c23aa6846c335d7659a"
+      },
+      {
+        "path": "reports/field-ui/PRODUCT_CATALOGUE_MODERN_pt_390.png",
+        "sha256": "a199ca6312ba9a2c74157fa1a75527de6257a64077fa61c6824603a689791723"
+      }
+    ]
+  },
+  "integration": [
+    {
+      "script": "scripts/test-field-product-catalogue-ui.js",
+      "code": 0,
+      "logSha256": "b52c476b878a00c691c37bc1a6347c912696789e202920bbeb5f6fc576a9c4c3",
+      "assertions": [
+        "PASS MODERN 207 guide rows traversed once in pages of 25; literal/accent/ID search, duplicate rows, null/literal units, pinned selection, unchanged draft bytes, refresh, five languages and real offline reload",
+        "PASS MODERN filtered offline completion debits the chosen original row once; other identical rows retain their balance and filtering preserves the existing correction state",
+        "PASS LEGACY 207 guide rows traversed once in pages of 25; literal/accent/ID search, duplicate rows, null/literal units, pinned selection, unchanged draft bytes, refresh, five languages and real offline reload",
+        "PASS LEGACY filtered offline completion debits the chosen original row once; other identical rows retain their balance and filtering preserves the existing correction state"
+      ]
+    },
+    {
+      "script": "scripts/test-field-product-identity-ui.js",
+      "code": 0,
+      "logSha256": "7ba27ce5e5fb095a68185afebdb52263028f78c9177613e61146c5ab9ec3f109",
+      "assertions": [
+        "PASS distinct selector IDs/units, no assumed unit, literal stock/labels, five languages at 320/390/1440, incomplete and aggregate checks, preserved old draft requiring explicit review",
+        "PASS REGULAR exact product/notes in offline draft, immutable queue, lost committed response, reload and one debit on the selected row",
+        "PASS EXTRA exact product/notes in offline draft, immutable queue, lost committed response, reload and one debit on the selected row",
+        "PASS completed EXTRA editor retains the selected identity and adjusts only its original stock row"
+      ]
+    },
+    {
+      "script": "scripts/test-field-legacy-products.js",
+      "code": 0,
+      "logSha256": "84db94ff8c5e215a510d8aaf15799a2baa0a442a6f946533522efcf065093be2",
+      "assertions": [
+        "PASS explicit original-text conversion, exact duplicate row and literal unit/notes, incomplete/aggregate validation, five languages at 320/390/1440 and genuine offline reload",
+        "PASS legacy rows require reselection; corrupt cache bytes stay intact; denied access and changed literal unit cannot silently use old stock or rewrite the draft",
+        "PASS immutable offline UUID, lost committed response, one debit/audit and two ledgers, original text retained after completion, and late account response cannot repaint or overwrite saved data"
+      ]
+    },
+    {
+      "script": "scripts/test-field-modern-visit-drafts.js",
+      "code": 0,
+      "logSha256": "80a35ffb435197988af76694055b8caa1b9fbe1ec65cf794d82d108ec97636ec",
+      "assertions": [
+        "PASS seven readings/notes, checklist and products survive offline reload; quota preserves saved bytes and visible changes, blocks completion, and supports explicit retry",
+        "PASS server changes merge untouched fields and require explicit decisions for overlapping edits; unresolved differences survive reload and literal text is safe",
+        "PASS real competing Web Locks prevent silent replacement; disjoint edits combine, overlapping text remains reviewable, and 320/390/1440 layouts fit",
+        "PASS same-number REGULAR/EXTRA drafts remain separate; corrupt, wrong-owner and wrong-pool bytes are preserved; unsupported locks and failed readback never claim success",
+        "PASS prior typed drafts without a baseline remain intact until explicit field review; text, measurements and private EXTRA photo survive review with the original typed identity",
+        "PASS frozen offline completion recovers the original UUID once with one stock debit; EXTRA same-number completion remains separate; account callbacks cannot overwrite another draft"
+      ]
+    },
+    {
+      "script": "scripts/test-field-legacy-visit-drafts.js",
+      "code": 0,
+      "logSha256": "dfda75ea3ec04a3545b58cc459a66db322c69e7002dd99a1d89f47f491e1a974",
+      "assertions": [
+        "PASS six unsent fields and separate visit draft survive a real offline reload; quota keeps visible edits, preserves saved bytes and blocks submission until explicit local retry",
+        "PASS unchanged fields follow current server values; overlapping changes require explicit field decisions and preserve literal text without sending a completion",
+        "PASS two-window conflicts retain both visible texts and block stale submission; corrupt or wrongly owned drafts remain untouched",
+        "PASS original completion survives reload and confirms once; prepared/confirmed drafts cannot reopen for duplicate edits and late account callbacks cannot overwrite another draft"
+      ]
+    }
+  ],
+  "preparationCorrections": [
+    "Rebuilt transient QA dependencies and previous schema plus migrations; no product data or user environment changed.",
+    "A test initially assumed completed regular visits were read-only; retained the existing correction contract and tested that filtering preserves it.",
+    "Preserved per-visit search state across rebuilding legacy route cards and switching REGULAR/EXTRA visits.",
+    "Chromium 138 with Playwright 1.61 did not insert the required correction reason; Chromium 153 passed the same flow with an explicit reason-value assertion. No correction form change was made to bypass validation."
+  ],
+  "browser138FailureLogSha256": "777e15570ec95e8f7b2420ca35c83ae1a80d3a7bf190844896d350747f10d154",
+  "draftWritesBySearch": false,
+  "filtersPersistedToStorage": false,
+  "guideReadStillComplete": true,
+  "backendChanges": false,
+  "sourceHashes": {
+    "frontend/cw-product-catalogue.js": "af7d3a11ffbb29872495aa53e95f83b5c015aa1fcf46db82235d8eeebc7d0c8b",
+    "frontend/cw-field-document-copy.js": "f220eb2b53249d77f42c02c3075c0abb49c5727a9d8fb91bcf295ed39da74bc5",
+    "frontend/cw-legacy-visit-products.js": "7e884621cf93baeddbb90146d09bb12b70cfcf7f1a40b33a148e7b4325eb1295",
+    "frontend/technician-field-mode.js": "899ee17f1349a319da7e43ba9bf906dd426fe1a38f0370d0b0e406a40470860e",
+    "frontend/technician-field-mode.html": "4aeb8b297fa6cb06e6c602a73cb3e1052797a7a4b783b2b10be284641c93ecf6",
+    "frontend/technician.html": "4c98dd1c61f865536bc572fd86f4cbd730aa73266c03e61aa739aa48920b6600",
+    "frontend/sw.js": "3bd7a495b4de93a6cd36cdf713ad43358938c13904ea97a6f48e9c8cca943db3",
+    "scripts/test-field-product-catalogue-ui.js": "dddf6fd22e8691e369a6fa2bc2c4ac95512c8c702b1fa58b86548b1c78a2bd3a",
+    "scripts/test-field-product-identity-ui.js": "7f6c3f574750eca881311a064180579c6b157069f4e39457adf493d4fcba45d0",
+    "scripts/test-field-suite.js": "2a085967cacecd097bc828332b64d9eaaa26bddeb2ed5ec509ed56c6d04e228a",
+    "tests/product-catalogue.test.js": "711bd708e769ae9b1ec4f5d6fc9e699a6d86e5e5044e9e38dcde1d87e86e9068"
+  },
+  "inventory": {
+    "htmlFiles": 126,
+    "rootPages": 119,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 114,
+    "catalogueGuardDifferences": 0
+  },
+  "cache": "cristalwater-field-20260927-v195",
+  "runnerDistinctGroups": 299,
+  "priorNative": {
+    "task": "TASK383",
+    "headSha": "d29168fe8008f5686f1f9ef1fe790a2e8993bf56",
+    "runId": 36354384627,
+    "jobId": 108719062994,
+    "status": "in_progress",
+    "expectedDistinctGroups": 298,
+    "approved": false,
+    "restoreConfirmed": false
+  },
+  "publication": {
+    "branch": "work/field-readiness-20260915-simulation",
+    "status": "prepared",
+    "nativeGateConfirmed": false
+  },
+  "externalSideEffects": {
+    "merge": false,
+    "deploy": false,
+    "realContacts": false
+  }
+}

@@ -102,7 +102,8 @@ let browser;
   await select(visits[1], true); await page.locator('#finishBtn').click();
   const dialog = page.locator('#extraCorrectionDialog'); await dialog.locator('[data-product-field=quantity]').fill('0.25');
   assert(await dialog.locator('[data-product-field=name]').getAttribute('readonly') !== null); assert(await dialog.locator('[data-product-field=unit]').getAttribute('readonly') !== null);
-  await dialog.locator('[name=reason]').fill('Quantidade confirmada na linha original'); await dialog.locator('#extraCorrectionPreview').click(); await dialog.locator('#extraCorrectionConfirm').click();
+  await dialog.locator('[name=reason]').fill('Quantidade confirmada na linha original'); assert.equal(await dialog.locator('[name=reason]').inputValue(), 'Quantidade confirmada na linha original'); await dialog.locator('#extraCorrectionPreview').click();
+  try { await dialog.locator('#extraCorrectionConfirm').click(); } catch (error) { console.error({ correctionStatus: await dialog.locator('#extraCorrectionStatus').textContent(), invalidFields: await dialog.locator('input:invalid,textarea:invalid').evaluateAll(nodes => nodes.map(node => ({ name: node.name || node.dataset.productField, value: node.value, message: node.validationMessage }))) }); throw error; }
   await page.waitForFunction(() => document.getElementById('extraCorrectionStatus').textContent.includes('Correção confirmada'));
   assert.equal((await prisma.workGuideItem.findUnique({ where: { id: items[0].id } })).quantity, 9.75);
   const extra = await prisma.extraVisit.findUnique({ where: { id: visits[1].id } }); assert.equal(extra.execution.chemicalsJson[0].workGuideItemId, items[0].id);
