@@ -280,14 +280,32 @@
     "TASK384": {
       "runId": 36356317137,
       "jobId": 108724640933,
-      "status": "in_progress",
-      "nativeGateConfirmed": false
+      "status": "completed",
+      "approved": true,
+      "groups": 299,
+      "restoreTables": 128,
+      "restoreFiles": 47,
+      "rowsMatch": true,
+      "hashesMatch": true
     }
   },
   "publication": {
     "branch": "work/field-readiness-20260915-simulation",
-    "status": "prepared",
-    "nativeGateConfirmed": false
+    "status": "published",
+    "codeSha": "798cc6134478fa6e113c2abc326138484c478c03",
+    "codeTree": "c04db9e0c3f0a269d0957da89ae5d5811de3707b",
+    "publishedAt": "2026-09-27T23:32:17Z",
+    "publishedLocalDate": "2026-09-28",
+    "timezone": "Europe/Lisbon",
+    "publishedTreeEqualsValidatedLocalTree": true,
+    "nativeRunId": 36359031040,
+    "nativeJobId": 108732368488,
+    "nativeRunUrl": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36359031040",
+    "nativeStatus": "in_progress",
+    "nativeRunnerDistinctGroupsExpected": 300,
+    "nativeGateConfirmed": false,
+    "nativeRestoreConfirmed": false,
+    "nativeCheckedAt": "2026-09-27T23:34:02.486818+00:00"
   },
   "externalSideEffects": {
     "merge": false,

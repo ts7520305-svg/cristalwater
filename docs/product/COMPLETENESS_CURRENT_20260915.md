@@ -1,6 +1,6 @@
 # Cristal Water — matriz atual de conclusão
 
-## Retoma atual — 28/09/2026, TASK385 pronta para publicação
+## Retoma atual — 28/09/2026, TASK385 publicada
 
 Correção de visitas extra com seleção exata dos produtos das guias originais comprovadas pelo histórico da visita. A consulta privada conserva conta, visita, piscina e versão; não substitui a guia original pela atual. Pesquisa e páginas de 25, IDs de guia/linha visíveis, escolha retida fora do filtro, nome/unidade literais só de leitura e nenhuma escolha automática. A revisão deteta a troca de ID mesmo com nome/unidade/quantidade iguais. [Relatório](EXTRA_CORRECTION_PRODUCTS_20260928.md) e [evidência](evidence/20260928_task385_local.json).
 
@@ -8,9 +8,9 @@ Catálogo opcional no rascunho v1 para recuperar e escolher offline; formatos an
 
 1073 unitários/122 ficheiros; sintaxe 690/307/44, com verificação final dos JS editados; quatro grupos locais distintos aprovados em Chromium 153. Guia com 61 linhas, revisão só por mudança de ID, recarregamento offline e resposta perdida: um recibo/uma auditoria e movimentos apenas nas linhas originais. Testes existentes de concorrência, reversão, quota, duas janelas e histórico ambíguo preservados. 15 combinações idioma/largura, 30 capturas, controlos de 44 px e sem transbordo. Cache v196; documentos v3; runner 300; nenhuma migração nova. Inventário 126 HTML/114 referências, zero recursos ausentes e duas referências Git indisponíveis localmente.
 
-**CI anterior confirmado:** TASK383, [298/298](https://github.com/ts7520305-svg/cristalwater/actions/runs/36354384627), 17 etapas e restauro de 128 tabelas/47 ficheiros, linhas e hashes iguais. [Evidência](evidence/20260928_task383_ci.json). TASK384, [CI 36356317137](https://github.com/ts7520305-svg/cristalwater/actions/runs/36356317137), continua em execução: 299 grupos/restauro por confirmar. Estados pendentes anteriores são históricos.
+**CI anterior confirmado:** TASK383, [298/298](https://github.com/ts7520305-svg/cristalwater/actions/runs/36354384627), 17 etapas e restauro de 128 tabelas/47 ficheiros, linhas e hashes iguais. [Evidência](evidence/20260928_task383_ci.json). TASK384 também confirmada: [299/299 grupos](https://github.com/ts7520305-svg/cristalwater/actions/runs/36356317137), 17 etapas e restauro de 128 tabelas/47 ficheiros, linhas e hashes iguais. [Evidência](evidence/20260928_task384_ci.json). Estados pendentes anteriores são históricos.
 
-TASK385 preparada para a branch `work/field-readiness-20260915-simulation`. O gate PostgreSQL nativo de 300 grupos e restauro desta alteração ainda não está confirmado.
+Publicada em 28/09/2026 (Europe/Lisbon) no commit `798cc6134478fa6e113c2abc326138484c478c03`, árvore `c04db9e0c3f0a269d0957da89ae5d5811de3707b`, idêntica à preparada e validada localmente, na branch `work/field-readiness-20260915-simulation`. [CI 36359031040](https://github.com/ts7520305-svg/cristalwater/actions/runs/36359031040), job `108732368488`, em execução. Os 300 grupos PostgreSQL e o restauro desta alteração ainda não estão confirmados.
 
 **Continuar:** confirmar os CI/restauros e localizar os restantes textos do diálogo de correção extra — medições, checklist, motivo, revisão e mensagens — em cinco idiomas, preservando os percursos e rascunhos. Tradução integral das páginas antigas, conciliação histórica explícita, limites dos alertas, VPS/cópias e piloto físico permanecem abertos. Sem merge/deploy/contactos reais; aplicação não declarada completa.
 
