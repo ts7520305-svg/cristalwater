@@ -220,6 +220,8 @@ scripts.push('test-field-repair-execution-command.js',
 scripts.push('test-field-visit-report-origin.js');
 scripts.push('test-field-product-identity.js', 'test-field-product-identity-ui.js');
 
+scripts.push('test-field-legacy-products.js');
+
 function run(script){return new Promise(resolve=>{
  const output=fs.createWriteStream(path.join(evidence,script+'.log'));
  const child=spawn(process.execPath,[path.join(__dirname,script)],{cwd:root,env:process.env,stdio:['ignore','pipe','pipe']});

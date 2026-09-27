@@ -1,5 +1,19 @@
 # Cristal Water — matriz atual de conclusão
 
+## Retoma atual — 26/09/2026, TASK383 pronta para publicação
+
+Produtos de `/technician` com seleção da linha exata da guia, quantidade, unidade literal só de leitura e notas. Texto livre anterior exige preparação explícita da lista e fica integralmente conservado no rascunho local, mesmo após conclusão; o pedido contém a lista normalizada. Listas antigas sem IDs exigem nova seleção. Formato v1 dos seis campos e pedidos já preparados conservados. [Relatório](LEGACY_VISIT_PRODUCTS_20260926.md) e [evidência](evidence/20260926_task383_local.json).
+
+Guia validada por conta/técnico/viatura/dia, com origem online/cópia/indisponibilidade explícita. Cópia ilegível conservada, acesso recusado sem reutilização e respostas tardias após troca de conta bloqueadas. Conclusão offline recupera o UUID original e confirma um único débito na linha escolhida e nos dois movimentos. A animação do recuo da página antiga foi removida para evitar sobreposição com o menu lateral.
+
+1040 unitários/120 ficheiros; sintaxe 690/305/44; três grupos locais distintos aprovados. Lista de produtos em cinco idiomas, larguras 320/390/1440, 15 capturas e controlos de 44 px sem obstrução após deslocação. A tradução é desta secção: restante página antiga/erros partilhados permanecem em português. Cache v194; documentos v3; runner 298; nenhuma migração nova. Inventário: 126 HTML, 114 referências literais, zero recursos ausentes e duas referências Git indisponíveis localmente.
+
+**CI anterior confirmado:** TASK381, [295/295](https://github.com/ts7520305-svg/cristalwater/actions/runs/36231076835), e TASK382, [297/297](https://github.com/ts7520305-svg/cristalwater/actions/runs/36232927811), todos os grupos distintos aprovados, 17 etapas concluídas e restauro de 128 tabelas/47 ficheiros com linhas e hashes iguais. [TASK381](evidence/20260926_task381_ci.json), [TASK382](evidence/20260926_task382_ci.json). Os estados pendentes abaixo são históricos.
+
+TASK383 pronta para publicação na branch `work/field-readiness-20260915-simulation`. O gate nativo de 298 grupos e restauro desta alteração ainda não está confirmado.
+
+**Continuar:** confirmar CI/restauro e rever pesquisa/seleção em guias extensas, estabilidade da linha selecionada, atualização e recuperação offline. Localização integral da página antiga, conciliação histórica, limites dos alertas, VPS/cópias e piloto físico permanecem abertos. Sem merge/deploy/contactos reais; aplicação não declarada completa.
+
 ## Retoma atual — 26/09/2026, TASK382 publicada
 
 Produtos de `/technician-field-mode` ligados à linha exata da guia nas visitas normais e extra. IDs, nome e unidade literal conservados em rascunhos, pedido offline, visita e movimentos. Seleção distingue linhas com nomes/unidades iguais; troca de produto atualiza a unidade. Linhas incompletas não são descartadas nem recebem unidade presumida. Rascunhos antigos ficam intactos até seleção explícita. Validação visível e correção do clique que podia ser perdido ao sair da quantidade. [Relatório](VISIT_PRODUCT_IDENTITY_20260926.md) e [evidência](evidence/20260926_task382_local.json).

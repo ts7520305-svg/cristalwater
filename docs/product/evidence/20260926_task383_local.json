@@ -1,0 +1,209 @@
+{
+  "task": "TASK383",
+  "date": "2026-09-26",
+  "baseSha": "72fed12f60347c98e8980795740e3bc6e3d170ff",
+  "scope": "Exact guide-row products in legacy technician visit form with original-text draft preservation and offline completion recovery",
+  "unit": {
+    "tests": 1040,
+    "files": 120,
+    "newTests": 17,
+    "logSha256": "6b88c6e131992cbd29ce2e8d780a98e742f1422fc70e540fe286d0405ac9063a"
+  },
+  "syntax": {
+    "backend": 690,
+    "frontend": 305,
+    "inline": 44,
+    "logSha256": "52bebe0c86813bb326357bb3de1fb820c2ef528b9b272b1d965b80f95b8c20b5"
+  },
+  "localDatabase": {
+    "engine": "PGlite",
+    "version": "0.5.8",
+    "socketVersion": "0.2.11",
+    "syntheticDataOnly": true,
+    "nativePostgreSQLConfirmed": false,
+    "migrations": 43,
+    "newMigrations": 0
+  },
+  "integration": [
+    {
+      "script": "scripts/test-field-legacy-products.js",
+      "code": 0,
+      "logSha256": "84db94ff8c5e215a510d8aaf15799a2baa0a442a6f946533522efcf065093be2",
+      "assertions": [
+        "PASS explicit original-text conversion, exact duplicate row and literal unit/notes, incomplete/aggregate validation, five languages at 320/390/1440 and genuine offline reload",
+        "PASS legacy rows require reselection; corrupt cache bytes stay intact; denied access and changed literal unit cannot silently use old stock or rewrite the draft",
+        "PASS immutable offline UUID, lost committed response, one debit/audit and two ledgers, original text retained after completion, and late account response cannot repaint or overwrite saved data"
+      ]
+    },
+    {
+      "script": "scripts/test-field-legacy-visit-drafts.js",
+      "code": 0,
+      "logSha256": "dfda75ea3ec04a3545b58cc459a66db322c69e7002dd99a1d89f47f491e1a974",
+      "assertions": [
+        "PASS six unsent fields and separate visit draft survive a real offline reload; quota keeps visible edits, preserves saved bytes and blocks submission until explicit local retry",
+        "PASS unchanged fields follow current server values; overlapping changes require explicit field decisions and preserve literal text without sending a completion",
+        "PASS two-window conflicts retain both visible texts and block stale submission; corrupt or wrongly owned drafts remain untouched",
+        "PASS original completion survives reload and confirms once; prepared/confirmed drafts cannot reopen for duplicate edits and late account callbacks cannot overwrite another draft"
+      ]
+    },
+    {
+      "script": "scripts/test-field-legacy-route-recovery.js",
+      "code": 0,
+      "logSha256": "2f4185a7289e55daf31c05c84017233f4dcccf44d711e0b61e23972ffc198abc",
+      "assertions": [
+        "PASS both daily routes exclude future scheduled visits created today and retain earlier visits started or finished today",
+        "PASS real offline reload accepts only a typed owner/day cache; global/numeric histories and foreign-owner cache bytes remain untouched and hidden",
+        "PASS fresh server names/photos replace cached data; existing form entries survive refresh; reassigned visits disappear while their original pending request stays recoverable",
+        "PASS failed or wrong-account response retains current list/cache; quota and corrupt cache are preserved and never presented as saved offline",
+        "PASS an older response cannot overwrite a newer route; changing account hides the previous route without deleting its cache or unconfirmed writes"
+      ]
+    }
+  ],
+  "browser": {
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "geometryHeight": 1100,
+    "captureHeight": 1600,
+    "minimumControlHeight": 44,
+    "unobstructedCentersAfterScroll": true,
+    "screenshots": [
+      {
+        "path": "reports/field-ui/LEGACY_PRODUCTS_de_1440.png",
+        "sha256": "343a7044689cbdaa390054e8efd7550c72a4209f1ba49a8436eb1f7198e50c70"
+      },
+      {
+        "path": "reports/field-ui/LEGACY_PRODUCTS_de_320.png",
+        "sha256": "f9d9b4dc9c9cb3b315f3ee7e51904485d7954a52547c1160292174ba760d542e"
+      },
+      {
+        "path": "reports/field-ui/LEGACY_PRODUCTS_de_390.png",
+        "sha256": "a1961cf3d0494858b9d1187c5b995cd9e201d99ff39d12454a4df07853b52bae"
+      },
+      {
+        "path": "reports/field-ui/LEGACY_PRODUCTS_en_1440.png",
+        "sha256": "b139178c16cb73d29a7ab81b9f59fe0e34eee0801af39e0731e45663098846ff"
+      },
+      {
+        "path": "reports/field-ui/LEGACY_PRODUCTS_en_320.png",
+        "sha256": "8fe272771dd635a6c93ffd02b6d7130396b9d356caeea2395d5b29d829b0531b"
+      },
+      {
+        "path": "reports/field-ui/LEGACY_PRODUCTS_en_390.png",
+        "sha256": "a2ccc21420f83dff5d6999edc182d9a5b8550d0f8d6707784fb1a8035c70b5db"
+      },
+      {
+        "path": "reports/field-ui/LEGACY_PRODUCTS_es_1440.png",
+        "sha256": "77288ce1c108f1d1f055f0c99f0818cedc4bbeb870b46b30b8169ad271165f28"
+      },
+      {
+        "path": "reports/field-ui/LEGACY_PRODUCTS_es_320.png",
+        "sha256": "a46b4a1c0e9595ffdab5d0ed771bc99197c128824d671ef041442e9e24f423a9"
+      },
+      {
+        "path": "reports/field-ui/LEGACY_PRODUCTS_es_390.png",
+        "sha256": "e8a55bda38b211249d82204e0660d651ab0e2520c30587d1cf2ed969f07f53f3"
+      },
+      {
+        "path": "reports/field-ui/LEGACY_PRODUCTS_fr_1440.png",
+        "sha256": "5d255e0958c0e467237c13040829dc5e042c0cff87c28cbc6ac542400b19624d"
+      },
+      {
+        "path": "reports/field-ui/LEGACY_PRODUCTS_fr_320.png",
+        "sha256": "df22cbcbc891aeae8a34ce8fc66bd5f3b6cbe6ebbf511664262d99baecbd0906"
+      },
+      {
+        "path": "reports/field-ui/LEGACY_PRODUCTS_fr_390.png",
+        "sha256": "2d580ecff9c562b1003afaba7e4ef0ec6bb296079cac3b14ec571008c27b8b71"
+      },
+      {
+        "path": "reports/field-ui/LEGACY_PRODUCTS_pt_1440.png",
+        "sha256": "967e6aa89c915d9635cdf35e2d1d91a622682de8ed827d8d18466e21261e7784"
+      },
+      {
+        "path": "reports/field-ui/LEGACY_PRODUCTS_pt_320.png",
+        "sha256": "dcac5183a151cdec216ac8d8854d64a8edc38a5e15b5a3c637b68ff76ae09397"
+      },
+      {
+        "path": "reports/field-ui/LEGACY_PRODUCTS_pt_390.png",
+        "sha256": "4cfdc4f4dbb647ad0fbb7688e3761c93597ea6f56838b204c64b93fbb899a527"
+      }
+    ],
+    "manuallyInspected": [
+      "PT390",
+      "DE320",
+      "PT1440"
+    ],
+    "runtimeErrors": 0,
+    "scope": "Product section; remaining legacy page and shared validation errors are Portuguese"
+  },
+  "preparationCorrections": [
+    "Unit test compared JSON property order instead of semantic equality; corrected assertion.",
+    "Legacy page has no CristalI18n global; implemented an actual per-account product language selector.",
+    "Body transition animated padding while switching to desktop width; restricted transition to colors.",
+    "Capture height increased to show the complete section between fixed navigation; geometry assertions remain at 1100."
+  ],
+  "compatibility": {
+    "draftSchema": "cwLegacyVisitDraft:v1 unchanged six string fields",
+    "originalText": "exact local envelope only; retained after completion",
+    "preparedOldRequests": "preserved payload and UUID; existing backend contracts",
+    "historicalReconciliation": false
+  },
+  "sourceHashes": {
+    "frontend/cw-legacy-product-rules.js": "2692228c74f9370c7d98dde81a576633133f9c9956dea238c0ea02a3b84a6f69",
+    "frontend/cw-legacy-visit-products.js": "d142950fb88b588f66c14157c59bfeda3f14aeebfe2595cb4e8e37a39a8ed1fe",
+    "frontend/cw-legacy-visit-drafts.js": "5737e5c0a90ab6458ddddbc2d99e7459bc6958feb8874080af8b1f27fde0de00",
+    "frontend/technician.html": "03880837c4a2edb4aae7b725bc24610f442c272b260be59442b1327d6756e159",
+    "frontend/sw.js": "fd9c345786bb1d40b304731a7c2817a0ac70cc5e2d53c06c753364ac7c90f214",
+    "scripts/test-field-legacy-products.js": "f11a490ca1bcdd0130dd5bc5c1e78b6fba0028bd7e350d0c91cfee100bfca575",
+    "scripts/test-field-legacy-visit-drafts.js": "d2f66253c7d0c98e009da80b774a218f3ca4b952415abfb3dac354ad643bbe54",
+    "scripts/test-field-suite.js": "b24b926b0d298fa8e998c034a57b99b48c89c92ea13c5437bcaadb6a92cb1054",
+    "tests/legacy-product-rules.test.js": "252adb6b83f91ba078f19fcb6170b12a6cc0413952bdc5444eb4fc7a0017b953"
+  },
+  "inventory": {
+    "htmlFiles": 126,
+    "rootPages": 119,
+    "nestedPages": 7,
+    "unavailableLocalAssetReferences": 2,
+    "missingAssetReferences": 0,
+    "pagesWithLiteralTestReference": 114,
+    "catalogueGuardDifferences": 0
+  },
+  "cache": "cristalwater-field-20260926-v194",
+  "runnerDistinctGroups": 298,
+  "priorNative": {
+    "TASK381": {
+      "groups": 295,
+      "approved": true,
+      "restoreTables": 128,
+      "restoreFiles": 47,
+      "evidence": "20260926_task381_ci.json"
+    },
+    "TASK382": {
+      "groups": 297,
+      "approved": true,
+      "restoreTables": 128,
+      "restoreFiles": 47,
+      "evidence": "20260926_task382_ci.json"
+    }
+  },
+  "publication": {
+    "branch": "work/field-readiness-20260915-simulation",
+    "status": "prepared",
+    "nativeGateConfirmed": false
+  },
+  "externalSideEffects": {
+    "merge": false,
+    "deploy": false,
+    "realContacts": false
+  }
+}

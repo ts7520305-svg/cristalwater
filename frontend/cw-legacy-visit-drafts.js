@@ -19,6 +19,7 @@
     if (!entry.element?.isConnected) return;
     const blocked = !active() || entry.checking || entry.conflict || !!entry.request || entry.completed;
     for (const field of fields) { const input = entry.element.querySelector('#' + field + '-' + entry.id); input.readOnly = blocked; if (fill) input.value = entry.fields[field]; }
+    window.CWLegacyVisitProducts.paint(entry.id, blocked);
     const complete = entry.element.querySelector('[data-action="complete"]');
     if (complete) complete.disabled = entry.routeBlocked || blocked || entry.pending > 0 || !!entry.error || entry.conflicts.size > 0;
     entry.status.textContent = !active() ? 'A sessão mudou. O rascunho foi preservado.' : entry.error || (entry.conflict ? 'O rascunho mudou noutra janela. Copie o texto desta janela antes de recarregar para rever o rascunho guardado.' : entry.request ? (entry.request.response ? 'Conclusão confirmada. Rascunho conservado para consulta.' : 'Existe uma conclusão guardada por confirmar. Use a recuperação do pedido original.') : entry.completed ? 'Visita concluída. Use a correção da visita para alterar o registo.' : entry.conflicts.size ? 'Os dados da visita mudaram. Reveja cada diferença antes de concluir.' : entry.checking ? 'A verificar os pedidos guardados…' : entry.pending ? 'A guardar rascunho neste dispositivo…' : entry.observed ? 'Rascunho guardado neste dispositivo; ainda não submetido.' : 'Os campos serão guardados neste dispositivo enquanto preenche.');
@@ -27,7 +28,7 @@
     for (const [field, server] of entry.conflicts) {
       const row = document.createElement('div'); row.style.cssText = 'margin:12px 0;padding:10px;border:1px solid #a1b5c8;border-radius:8px;overflow-wrap:anywhere';
       const label = document.createElement('strong'); label.textContent = labels[field]; row.append(label);
-      for (const [name, value] of [['Atual na visita',server],['Rascunho',entry.fields[field]]]) { const item = document.createElement('p'); item.textContent = name + ': ' + (value || '(vazio)'); row.append(item); }
+      for (const [name, value] of [['Atual na visita',server],['Rascunho',entry.fields[field]]]) { const item = document.createElement('p'); item.textContent = name + ': ' + (field === 'products' ? window.CWLegacyProductRules.describe(value) : value || '(vazio)'); row.append(item); }
       for (const [name, useServer] of [['Usar atual',true],['Manter rascunho',false]]) { const button = document.createElement('button'); button.type = 'button'; button.textContent = name; button.disabled = blocked; button.style.cssText = 'min-height:44px;margin:4px 0;white-space:normal'; button.addEventListener('click', () => { if (!active()) return; if (useServer) entry.fields[field] = server; entry.baseline[field] = server; entry.conflicts.delete(field); paint(entry,true); schedule(entry); }); row.append(button); }
       entry.review.append(row);
     }
@@ -80,6 +81,7 @@
     entry.retry = document.createElement('button'); entry.retry.type = 'button'; entry.retry.textContent = 'Guardar rascunho novamente'; entry.retry.id = 'legacyDraftRetry-' + visit.id; entry.retry.addEventListener('click',()=>schedule(entry));
     panel.append(entry.status,entry.review,entry.retry); element.querySelector('.visit-actions').before(panel);
     for (const field of fields) element.querySelector('#' + field + '-' + visit.id).addEventListener('input',event=>{if(!active()||entry.conflict||entry.request||entry.completed)return;entry.fields[field]=event.target.value;schedule(entry);});
+    window.CWLegacyVisitProducts.bind(element, visit);
     paint(entry,true); refreshRequests();
   }
   async function beforeComplete(id) {
@@ -87,7 +89,7 @@
     await entry.chain; requireActive(); await refreshRequests();
     if (entry.conflict || entry.error || entry.conflicts.size || entry.request || entry.completed) throw Error(entry.error || entry.status.textContent);
     schedule(entry); await entry.chain; requireActive(); if (entry.error || entry.conflict || entry.request) throw Error(entry.error || entry.status.textContent);
-    return { ...entry.fields };
+    return { ...entry.fields, ...window.CWLegacyVisitProducts.completion(entry.fields.products) };
   }
   window.addEventListener('storage',event=>{for(const entry of entries.values()){if(active()&&event.key===key(entry.id)&&event.newValue!==entry.observed){entry.conflict=true;paint(entry);}else if(!active())paint(entry);}});
   window.addEventListener('cw:field-write-change',refreshRequests);
