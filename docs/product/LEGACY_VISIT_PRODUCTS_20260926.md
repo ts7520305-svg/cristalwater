@@ -37,7 +37,7 @@ TASK382: 297/297 grupos distintos aprovados, 17 etapas concluídas e o mesmo res
 
 ## Publicação
 
-TASK383 pronta para publicação na branch `work/field-readiness-20260915-simulation`. O gate nativo de 298 grupos e restauro desta alteração ainda não está confirmado.
+Publicada em 27/09/2026 no commit `d29168fe8008f5686f1f9ef1fe790a2e8993bf56`, árvore `6dc504ca67e5f2f8882a213b23598b3293241e12`, idêntica à preparada e validada localmente, na branch `work/field-readiness-20260915-simulation`. [CI 36354384627](https://github.com/ts7520305-svg/cristalwater/actions/runs/36354384627), job `108719062994`, em execução. Os 298 grupos PostgreSQL e o restauro desta alteração ainda não estão confirmados.
 
 ## Continuação
 
