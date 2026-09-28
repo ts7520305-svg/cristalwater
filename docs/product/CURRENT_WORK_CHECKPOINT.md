@@ -1,6 +1,6 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK394 validada localmente
+## Retoma atual — 28/09/2026, TASK394 publicada
 
 Corrigida a leitura de `/api/dashboard/metrics`: falhas nas três fontes Prisma deixam de produzir zeros/listas vazias e deixam de contaminar a cache. Sem cópia completa válida, responde 503 sem divulgar a exceção privada. Com cópia válida, mantém os valores/idade e identifica consistentemente a origem degradada, incluindo acessos seguintes/circuito aberto. Zeros reais, soma SQL nula e valores assinados conservados. GET/POST e recusas de acesso usam `private, no-store`, com as mesmas permissões.
 
@@ -8,7 +8,7 @@ TTL, relógio recuado, mudança do dia UTC e invalidação durante a leitura imp
 
 **Local aprovado:** 1 144 unitários/127 ficheiros, quatro técnicos, sintaxe 691/307/44 e três grupos integrados distintos: métricas API, painel administrativo e dashboard operacional. 19 novos testes; 17 falharam na versão anterior. API com dados SQL reais de QA, erros nas três fontes, cache/circuito, permissões, corrida de invalidação e ausência de escritas de negócio. Configuração inicial de porta QA corrigida de 3004 para 3002; grupos afetados repetidos com sucesso. Integração nova com resultado `ok: true`/`assertions-completed` persistido e mensagem final confirmada. [Evidência](evidence/20260928_task394_local.json). Runner 306 grupos.
 
-**Publicação TASK394:** em preparação na branch `work/field-readiness-20260915-simulation`, a partir de `74b9b85405038b14e2e550013494adf0e92e2aea`. Os 306 grupos PostgreSQL e o restauro deste lote não estão confirmados. TASK393 permanece em execução no [CI 36398997535](https://github.com/ts7520305-svg/cristalwater/actions/runs/36398997535), com 305 grupos/restauro por confirmar. TASK391/392 mantêm aprovação nativa anterior de 303/304 grupos e restauro. Ensaios locais PGlite/Chromium, dados sintéticos; sem merge/deploy/contactos reais.
+**Publicação TASK394:** branch `work/field-readiness-20260915-simulation`, commit `30e09a573c761e7f24258ae423d576029e75921f`, árvore `9b7d7df79d8b17e81c317179fe2329bd69e90640`, idêntica à preparada/testada localmente. [CI 36402896543](https://github.com/ts7520305-svg/cristalwater/actions/runs/36402896543), job `108864700056`, em execução. Os 306 grupos PostgreSQL e o restauro deste lote não estão confirmados. TASK393 permanece em execução no [CI 36398997535](https://github.com/ts7520305-svg/cristalwater/actions/runs/36398997535), com 305 grupos/restauro por confirmar. TASK391/392 mantêm aprovação nativa anterior de 303/304 grupos e restauro. Ensaios locais PGlite/Chromium, dados sintéticos; sem merge/deploy/contactos reais.
 
 **Continuar:** confirmar os CI TASK393/394. Rever os cortes de 200 alertas por fonte e a coerência das leituras administrativas; as três fontes de métricas ainda não são um snapshot transacional. Rever significado dos filtros e período UTC legado sem alterar silenciosamente regras financeiras/históricas. Cache por processo, sem invalidação multiprocesso certificada. Idiomas/páginas antigas, volume dos incidentes, conciliação histórica, WhatsApp, IA local, VPS/cópias e piloto físico continuam na fila. Contrato adiado por indicação do utilizador. Sistema não declarado concluído.
 

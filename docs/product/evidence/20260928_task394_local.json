@@ -113,9 +113,22 @@
     "neighbouringDashboardsRunner": "Isolated administrator seeded\nStarted scripts/test-field-dashboard-metrics.js\n{\"script\":\"scripts/test-field-dashboard-metrics.js\",\"code\":0,\"ms\":1159}\nStarted scripts/test-field-admin-dashboard.js\n{\"script\":\"scripts/test-field-admin-dashboard.js\",\"code\":0,\"ms\":9204}\nStarted scripts/test-field-operational-dashboard.js\n{\"script\":\"scripts/test-field-operational-dashboard.js\",\"code\":0,\"ms\":5574}\n"
   },
   "publication": {
-    "status": "prepared_locally",
+    "status": "published_work_branch",
     "expectedNativeGroups": 306,
     "nativeCiConfirmed": false,
-    "restoreConfirmed": false
+    "restoreConfirmed": false,
+    "branch": "work/field-readiness-20260915-simulation",
+    "codeCommit": "30e09a573c761e7f24258ae423d576029e75921f",
+    "tree": "9b7d7df79d8b17e81c317179fe2329bd69e90640",
+    "treeMatchesPreparedIndex": true,
+    "nativeCi": {
+      "runId": 36402896543,
+      "jobId": 108864700056,
+      "status": "in_progress",
+      "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36402896543",
+      "expectedGroups": 306,
+      "confirmed": false,
+      "restoreConfirmed": false
+    }
   }
 }
