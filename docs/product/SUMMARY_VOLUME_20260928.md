@@ -1,5 +1,9 @@
 # Volume dos resumos — C03 / TASK404 e TASK409
 
+## Atualização TASK413 — C03 concluída na validação TASK411
+
+CI TASK411 `36482590787` / job `109131593496`, commit `b649f1a61bf834c1f5a37a675321aef0c2a55f45`: **315 grupos na ordem exata e restauro de 128 tabelas/47 ficheiros aprovados**. JSON nativo lido: 12 perfis + três falhas/limpeza, snapshot com escrita concorrente confirmada, dashboard400 **535,27 MiB/1 185,2 ms**, abaixo da guarda conservada de 768 MiB. Artefacto `10999828669`, SHA-256 `d84c1aca8fa616fc36f601e559297e293d787810c051478aed56d110a0657bef`. [Prova TASK413](evidence/20260928_task413_local.json). C03 fica concluída nesta versão revalidada; os estados abaixo são históricos. Não certifica capacidade do VPS ou volumes reais.
+
 ## Atualização TASK409 — memória do resumo administrativo
 
 **Correção aprovada localmente; CI nativo pendente.** O CI TASK407 (`36466632283`, job `109078229561`, commit `6c77104d...`) falhou no dashboard de 400 clientes: RSS ultrapassou a guarda de **768 MiB**. O pico exato ficou fora do excerto do erro; não é inferido. Passaram 311/312 grupos, e o restauro não correu. C03 mantém-se em validação apesar dos ensaios nativos anteriores aprovados.

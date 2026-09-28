@@ -1,5 +1,16 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 28/09/2026, TASK413 local aprovada / quatro superfícies de uploads
+
+**Corrigidos 500 indevidos para uploads grandes/multipart inválido.** Middleware geral responde413/400 com mensagem segura/no-store; restantes falhas continuam500/logging. Nove unitários novos. Compras20MiB, documentos50MiB, conversa25MiB e guia25MiB: **46 pedidos**, fronteiras−1/0/+1byte, download/hash, acesso, perda/recuperação, recusa/limpeza. [Relatório](OPERATIONAL_VOLUME_PLAN_20260928.md), [prova](evidence/20260928_task413_local.json).
+
+**Gates locais:** volume9 216ms, regressões conversa/stock/guia com marcadores completos, 1 327unitários/136ficheiros, quatro técnicos, sintaxe695/307/44. Runner316, cachev207. Cliente/API em processos separados, ambosRSS<768MiB (não a soma); picoAPI608,83MiB. 26contagens repostas e hashes financeiros conservados. Documentos recuperam por lista, sem idempotênciaPOST; URL legado de compra público (revisãoC14). Regressão antiga de chat/rollback limitada pelo PGlite; exigir CI atual.
+
+**CI TASK411 confirmado:** run36482590787/job109131593496, 315scripts exatos/restauro128tabelas47ficheiros; artefacto10999828669/SHA256 `d84c1aca8fa616fc36f601e559297e293d787810c051478aed56d110a0657bef` lido. Summary12+3/limpeza, dashboard400535,27MiB; snapshot concorrente verdadeiro; relatórios3probes e PDFs3perfis/27documentos/496páginas. **C03 concluída, C04-E/PDFsF nativos aprovados.** TASK412 run36483704663/job109135318014 ainda em execução na última consulta.
+
+**Continuar:** publicar TASK413 e confirmar316grupos/restauro/JSONattachment-volume4probes; **TASK414** fecha os outros quatro uploads: foto regular25MiB, extra25, reparação20, despesa5; −1/0/+1byte, validade conforme contrato, identidade/hashes/acesso, perda/recuperação e limpeza. Projeção de fotos24/25MiB/64MiB agregados por conferir. Não aumentar limites nem executar atualização500MiB. DepoisC05idiomas. Contagem32:28por iniciar,C04em execução,3concluídas. Contrato anual adiado; branch autorizada; sem merge/deploy/contactos reais.
+
+
 ## Retoma atual — 28/09/2026, TASK412 publicada / espera do teste de rascunhos
 
 **Corrigida a condição de corrida no teste que bloqueou o CI TASK409.** `loadRoute` chamado pela recuperação e pela sincronização incrementa uma revisão; uma chamada substituída termina antes de a mais recente pintar os conflitos. O teste contava imediatamente0 em vez de2. Reprodução com duas leituras reais e segunda resposta atrasada750ms falhou no original; a versão corrigida observa o mesmo zero transitório, aguarda exatamente2 conflitos/alcalinidade100 e passa todas as asserções. Nenhuma mudança da aplicação. [Relatório](OPERATIONAL_VOLUME_PLAN_20260928.md), [evidência](evidence/20260928_task412_local.json).
