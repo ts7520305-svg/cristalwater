@@ -81,6 +81,7 @@ scripts.push('test-field-incident-center.js');
 scripts.push('test-field-operational-dashboard.js');
 scripts.push('test-field-ai-zone-grouping.js');
 scripts.push('test-field-admin-dashboard.js');
+scripts.push('test-field-dashboard-metrics.js');
 scripts.push('test-field-technician-guide-ui.js','test-field-document-summary-ui.js','test-field-materials-ui.js');
 scripts.push('test-field-guide-read-scope.js','test-field-guide-read-scope-ui.js');
 scripts.push('test-field-fleet-history.js','test-field-fleet-history-ui.js');

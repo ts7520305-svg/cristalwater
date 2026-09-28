@@ -5,13 +5,17 @@
 
 let dashboardCache = null;
 let cacheTimestamp = 0;
+let cacheGeneration = 0;
 
 const CACHE_TTL_MS = Number(process.env.DASHBOARD_CACHE_TTL_MS || 30000);
 
 function getDashboardCache() {
   if (!dashboardCache) return null;
   const ageMs = Date.now() - cacheTimestamp;
-  if (ageMs > CACHE_TTL_MS) {
+  const now = Date.now();
+  const start = Date.parse(dashboardCache.dayWindow?.gte);
+  const end = Date.parse(dashboardCache.dayWindow?.lte);
+  if (ageMs < 0 || ageMs >= CACHE_TTL_MS || !Number.isFinite(start) || !Number.isFinite(end) || now < start || now > end) {
     dashboardCache = null;
     cacheTimestamp = 0;
     return null;
@@ -27,13 +31,19 @@ function getDashboardCache() {
   };
 }
 
-function setDashboardCache(payload) {
+function getDashboardCacheGeneration() {
+  return cacheGeneration;
+}
+
+function setDashboardCache(payload, expectedGeneration = cacheGeneration) {
+  if (expectedGeneration !== cacheGeneration) return null;
   dashboardCache = payload || null;
   cacheTimestamp = dashboardCache ? Date.now() : 0;
   return dashboardCache;
 }
 
 function invalidateDashboardCache(reason = 'MUTATION_EVENT') {
+  cacheGeneration += 1;
   dashboardCache = null;
   cacheTimestamp = 0;
   if (global.metricCounters) {
@@ -49,5 +59,6 @@ module.exports = {
   CACHE_TTL_MS,
   getDashboardCache,
   setDashboardCache,
+  getDashboardCacheGeneration,
   invalidateDashboardCache,
 };

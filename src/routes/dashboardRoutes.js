@@ -7,7 +7,8 @@ const auth = require("../middlewares/authMiddleware");
 const { analyzeOperationalData } = require("../services/aiOperationalService");
 const { buildPredictiveAnalysis } = require("../services/aiPredictiveService");
 const { buildRedistributionPlan } = require("../services/dispatchEngineService");
-const { getDashboardCache, setDashboardCache, CACHE_TTL_MS } = require("../services/dashboardCacheService");
+const { getDashboardCache, setDashboardCache, getDashboardCacheGeneration, CACHE_TTL_MS } = require("../services/dashboardCacheService");
+let pendingMetrics = null;
 
 const BREAKER = {
   state: "CLOSED", // CLOSED, OPEN, HALF_OPEN
@@ -47,14 +48,14 @@ async function buildLiveMetricsPayload() {
       by: ["status"],
       _count: { id: true },
       where: { OR: [{ plannedDate: { gte: start, lte: end } }, { date: { gte: start, lte: end } }] },
-    }).catch(() => []),
+    }),
     prisma.technicalAlert.count({
       where: { status: { not: "RESOLVED" } },
-    }).catch(() => 0),
+    }),
     prisma.invoice.aggregate({
       _sum: { total: true },
       where: { createdAt: { gte: start, lte: end } },
-    }).catch(() => ({ _sum: { total: 0 } })),
+    }),
   ]);
 
   return {
@@ -70,32 +71,65 @@ async function buildLiveMetricsPayload() {
 }
 
 async function executeLiveMetricsWithBreaker() {
+  // Concurrent callers share one read and one breaker outcome. A failed source
+  // must never publish a partial snapshot or increment failures per caller.
+  if (pendingMetrics) return pendingMetrics;
+  const attempt = refreshLiveMetrics();
+  pendingMetrics = attempt;
+  try {
+    return await attempt;
+  } finally {
+    if (pendingMetrics === attempt) pendingMetrics = null;
+  }
+}
+
+function cachedMetrics(source) {
+  const cached = getDashboardCache();
+  if (!cached) return null;
+  return {
+    ...cached,
+    source,
+    cache: { ...cached.cache, source },
+    ...(source !== "RAM_CACHE_HIT" ? { breakerDegraded: true } : {}),
+    breaker: { ...BREAKER },
+  };
+}
+
+async function refreshLiveMetrics() {
   global.metricCounters = global.metricCounters || {};
 
   if (BREAKER.state === "OPEN") {
     if (Date.now() >= BREAKER.nextAttemptAt) {
       BREAKER.state = "HALF_OPEN";
     } else {
-      const cached = getDashboardCache();
+      const cached = cachedMetrics("RAM_CIRCUIT_BREAKER");
       if (cached) {
         global.metricCounters.dashboard_circuit_cache_total = (global.metricCounters.dashboard_circuit_cache_total || 0) + 1;
-        return { ...cached, source: "RAM_CIRCUIT_BREAKER", breaker: { ...BREAKER } };
+        return cached;
       }
       throw new Error("CIRCUIT_BREAKER_OPEN_WITHOUT_CACHE");
     }
   }
 
   try {
+    const generation = getDashboardCacheGeneration();
     const payload = await buildLiveMetricsPayload();
-    setDashboardCache(payload);
+    // A mutation or a UTC day change during the read invalidates this result.
+    // In particular, a late read cannot undo event-driven cache invalidation.
+    if (Date.now() < Date.parse(payload.dayWindow.gte) || Date.now() > Date.parse(payload.dayWindow.lte) || !setDashboardCache(payload, generation)) {
+      const expired = new Error("DASHBOARD_SNAPSHOT_EXPIRED");
+      expired.code = "DASHBOARD_SNAPSHOT_EXPIRED";
+      throw expired;
+    }
     markBreakerSuccess();
     return { ...payload, source: "DATABASE_HIT", breaker: { ...BREAKER } };
   } catch (err) {
-    markBreakerFailure();
-    const cached = getDashboardCache();
+    // A changed snapshot requires a retry, but is not a database outage.
+    if (err.code !== "DASHBOARD_SNAPSHOT_EXPIRED") markBreakerFailure();
+    const cached = cachedMetrics("RAM_CACHE_FALLBACK");
     if (cached) {
       global.metricCounters.dashboard_degraded_cache_total = (global.metricCounters.dashboard_degraded_cache_total || 0) + 1;
-      return { ...cached, source: "RAM_CACHE_FALLBACK", breakerDegraded: true, breaker: { ...BREAKER } };
+      return cached;
     }
     throw err;
   }
@@ -133,11 +167,11 @@ router.get("/admin", (req, res, next) => {
 
 async function liveMetricsHandler(req, res) {
   try {
-    const cached = getDashboardCache();
+    const cached = cachedMetrics(BREAKER.state === "OPEN" ? "RAM_CIRCUIT_BREAKER" : BREAKER.failureCount ? "RAM_CACHE_FALLBACK" : "RAM_CACHE_HIT");
     if (cached && req.query.force !== "1") {
       global.metricCounters = global.metricCounters || {};
       global.metricCounters.dashboard_cache_hit_total = (global.metricCounters.dashboard_cache_hit_total || 0) + 1;
-      return res.json({ ok: true, source: "RAM_CACHE_HIT", ...cached, breaker: { ...BREAKER } });
+      return res.json({ ok: true, ...cached });
     }
 
     global.metricCounters = global.metricCounters || {};
@@ -145,11 +179,16 @@ async function liveMetricsHandler(req, res) {
     const data = await executeLiveMetricsWithBreaker();
     return res.json({ ok: true, ...data });
   } catch (err) {
-    return res.status(503).json({ ok: false, error: "Dashboard temporariamente degradado", message: err.message, breaker: { ...BREAKER } });
+    return res.status(503).json({ ok: false, error: "Dashboard temporariamente degradado", message: "Não foi possível obter métricas atuais. Tente novamente.", breaker: { ...BREAKER } });
   }
 }
 
-router.get("/metrics", auth("TEAM_LEADER"), liveMetricsHandler);
-router.post("/metrics", auth("TEAM_LEADER"), liveMetricsHandler);
+function privateMetrics(_req, res, next) {
+  res.set('Cache-Control', 'private, no-store');
+  return next();
+}
+
+router.get("/metrics", privateMetrics, auth("TEAM_LEADER"), liveMetricsHandler);
+router.post("/metrics", privateMetrics, auth("TEAM_LEADER"), liveMetricsHandler);
 
 module.exports = router;

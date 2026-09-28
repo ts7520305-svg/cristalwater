@@ -1,6 +1,18 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK393 publicada
+## Retoma atual — 28/09/2026, TASK394 validada localmente
+
+Corrigida a leitura de `/api/dashboard/metrics`: falhas nas três fontes Prisma deixam de produzir zeros/listas vazias e deixam de contaminar a cache. Sem cópia completa válida, responde 503 sem divulgar a exceção privada. Com cópia válida, mantém os valores/idade e identifica consistentemente a origem degradada, incluindo acessos seguintes/circuito aberto. Zeros reais, soma SQL nula e valores assinados conservados. GET/POST e recusas de acesso usam `private, no-store`, com as mesmas permissões.
+
+TTL, relógio recuado, mudança do dia UTC e invalidação durante a leitura impedem reutilização/publicação de cópia ultrapassada. Pedidos simultâneos partilham uma tentativa; a invalidação não aumenta o contador de falhas da base. Nenhuma alteração de dados históricos, esquema, dependências, interface ou versão da cache do navegador.
+
+**Local aprovado:** 1 144 unitários/127 ficheiros, quatro técnicos, sintaxe 691/307/44 e três grupos integrados distintos: métricas API, painel administrativo e dashboard operacional. 19 novos testes; 17 falharam na versão anterior. API com dados SQL reais de QA, erros nas três fontes, cache/circuito, permissões, corrida de invalidação e ausência de escritas de negócio. Configuração inicial de porta QA corrigida de 3004 para 3002; grupos afetados repetidos com sucesso. Integração nova com resultado `ok: true`/`assertions-completed` persistido e mensagem final confirmada. [Evidência](evidence/20260928_task394_local.json). Runner 306 grupos.
+
+**Publicação TASK394:** em preparação na branch `work/field-readiness-20260915-simulation`, a partir de `74b9b85405038b14e2e550013494adf0e92e2aea`. Os 306 grupos PostgreSQL e o restauro deste lote não estão confirmados. TASK393 permanece em execução no [CI 36398997535](https://github.com/ts7520305-svg/cristalwater/actions/runs/36398997535), com 305 grupos/restauro por confirmar. TASK391/392 mantêm aprovação nativa anterior de 303/304 grupos e restauro. Ensaios locais PGlite/Chromium, dados sintéticos; sem merge/deploy/contactos reais.
+
+**Continuar:** confirmar os CI TASK393/394. Rever os cortes de 200 alertas por fonte e a coerência das leituras administrativas; as três fontes de métricas ainda não são um snapshot transacional. Rever significado dos filtros e período UTC legado sem alterar silenciosamente regras financeiras/históricas. Cache por processo, sem invalidação multiprocesso certificada. Idiomas/páginas antigas, volume dos incidentes, conciliação histórica, WhatsApp, IA local, VPS/cópias e piloto físico continuam na fila. Contrato adiado por indicação do utilizador. Sistema não declarado concluído.
+
+## Retoma anterior — 28/09/2026, TASK393 publicada
 
 O painel `/admin-dashboard` apresenta os montantes reais do mês escolhido, incluindo zero, sem os substituir por totais históricos. A regressão na versão anterior mostrou lucro de 9 975 € com os três valores mensais a zero: usava recebimentos históricos e um custo fixo de 12 € por visita. O lucro passa a «Não apurado»; foram retiradas conclusões de saúde financeira, eficiência e previsões para amanhã sem base comprovada. Cadastro, documentos globais, pagamentos mensais, visitas do mês e alertas consultados têm âmbitos explícitos. Visitas noutros estados não são somadas às planeadas; sem visitas não há percentagem de conclusão.
 

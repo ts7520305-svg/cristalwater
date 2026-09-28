@@ -1,0 +1,121 @@
+{
+  "task": "TASK394",
+  "date": "2026-09-28",
+  "branch": "work/field-readiness-20260915-simulation",
+  "baseCommit": "74b9b85405038b14e2e550013494adf0e92e2aea",
+  "scope": "GET/POST /api/dashboard/metrics: source failures, cache freshness and circuit breaker reliability",
+  "runtime": {
+    "node": "24.19.0",
+    "vitest": "4.1.11",
+    "prismaClient": "6.19.3",
+    "playwright": "1.61.1",
+    "database": "Isolated PGlite 0.5.8 copy of synthetic QA data; no production access",
+    "browser": "Chromium 153",
+    "nativePostgres": false,
+    "dependencyFilesChanged": false,
+    "note": "Locally available dependencies reused; GitHub CI installs the committed lockfile."
+  },
+  "regression": {
+    "command": "CW_METRICS_BASELINE=74b9b85405038b14e2e550013494adf0e92e2aea npm test -- --run tests/dashboard-metrics-reliability.test.js",
+    "failedBefore": 17,
+    "passedBefore": 2,
+    "passedAfter": 19,
+    "total": 19
+  },
+  "gates": {
+    "unitTests": 1144,
+    "unitFiles": 127,
+    "technicianTests": 4,
+    "syntax": {
+      "backend": 691,
+      "frontend": 307,
+      "inline": 44
+    },
+    "newScriptsNodeCheck": true,
+    "diffCheck": true,
+    "integrationScripts": [
+      "scripts/test-field-dashboard-metrics.js",
+      "scripts/test-field-admin-dashboard.js",
+      "scripts/test-field-operational-dashboard.js"
+    ],
+    "metricsCompletion": {
+      "ok": true,
+      "prefix": "QA metrics c4976677-6525-4e47-93e7-4a4a81afb709",
+      "phase": "assertions-completed",
+      "failedSourcesChecked": 3,
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "allowedRoles": [
+        "ADMIN",
+        "TEAM_LEADER"
+      ],
+      "refusedRoles": [
+        "CLIENT",
+        "TECHNICIAN"
+      ],
+      "invalidationRaceChecked": true,
+      "businessRecordsUnchanged": true
+    }
+  },
+  "coverage": [
+    "Each of the three Prisma failures returns HTTP 503 without a valid complete cache; no private exception detail in response",
+    "True zero/empty/SQL null and signed aggregate values retained",
+    "Successful GET/POST and denied requests carry private no-store; ADMIN/TEAM_LEADER allowed, CLIENT/TECHNICIAN and missing/invalid token rejected",
+    "Fallback uses the previous complete snapshot, preserves its timestamp and flags both source fields and breakerDegraded",
+    "Open/half-open/closed circuit paths, cooldown, failure recovery and concurrent callers",
+    "TTL boundary, backwards clock, UTC midnight, and invalidation during a pending read",
+    "Metric reads do not alter fixture visits/invoices/alerts or payment/communication counts"
+  ],
+  "preparationIssues": [
+    {
+      "result": "Not used as final acceptance",
+      "detail": "The first local browser run used port 3004. cw-auth.js deliberately points local API traffic to 3002, causing request failures in the operational dashboard. The QA runner was corrected to 3002; both existing dashboards then passed with unchanged production/test code."
+    },
+    {
+      "result": "Final metrics run explicitly verified",
+      "detail": "Some early local invocations returned zero without a completion log. A synchronous result artifact and early-exit guard were added; final uninstrumented run produced ok=true, assertions-completed and PASS. No incomplete run is used as proof."
+    }
+  ],
+  "previousCi": {
+    "task": "TASK393",
+    "runId": 36398997535,
+    "commit": "75f16ec0514f57f46f76e7cdb79f734509ee0d67",
+    "status": "in_progress",
+    "expectedGroups": 305,
+    "nativeSuiteConfirmed": false,
+    "restoreConfirmed": false
+  },
+  "limits": [
+    "Three metric source queries are still separate reads, not a transaction snapshot.",
+    "UTC day window and existing legacy aggregate scope/status filters are unchanged; do not interpret the total as certified revenue or profit.",
+    "Cache and breaker are per process; cross-process cache invalidation is not certified.",
+    "Admin alert caps, historical reconciliation, remaining localization, WhatsApp import, local AI, VPS/external copies and physical pilot remain pending.",
+    "Contract finalization remains deferred per user instruction.",
+    "No schema/dependency/frontend/cache-version changes, merge, deployment or real outbound communication."
+  ],
+  "sourceSha256": {
+    "src/routes/dashboardRoutes.js": "8bed700e71d76c47c9c8c973843054573d1044e18e3bb2ea290c4ba4327c56a8",
+    "src/services/dashboardCacheService.js": "6c89e198f45eb9022c6b3056513146b74d7d11b95dc10f2522de71262d4dae78",
+    "tests/dashboard-metrics-reliability.test.js": "5ebb96b130fcd18856d721a474e4fb56b5d8360ccbc867407bd558eb304f2666",
+    "scripts/test-field-dashboard-metrics.js": "ca09ff7b025c0b7388b0df64c4bc9f83b6afeede1fac57b131576443f8048bb0",
+    "scripts/test-field-suite.js": "2d20ef60128a0e82da9fe89309fe4f5d57fe3180c41b2a62002dd48b7815b76e"
+  },
+  "logs": {
+    "baselineTail": " ❯ tests/dashboard-metrics-reliability.test.js:129:135\n    127|     const h = harness(), rejects = []; h.reads[1].mockImplementation((…\n    128|     const pending = Array.from({ length: 8 }, () => h.call({ force: tr…\n    129|     const responses = await Promise.all(pending); expect(responses.eve…\n       |                                                                                                                                       ^\n    130|     for (const read of h.reads) expect(read).toHaveBeenCalledTimes(1);\n    131|   });\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/17]⎯\n\n\n Test Files  1 failed (1)\n      Tests  17 failed | 2 passed (19)\n   Start at  11:10:17\n   Duration  330ms (transform 21ms, setup 0ms, import 34ms, tests 147ms, environment 0ms)\n\n",
+    "focused": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm.\n\n> cristalwater-backend@22.6.7 test\n> vitest run --run tests/dashboard-metrics-reliability.test.js\n\n\n RUN  v4.1.11 /workspace/scratch/4f3d7636ef52/cristalwater\n\n\n Test Files  1 passed (1)\n      Tests  19 passed (19)\n   Start at  11:10:17\n   Duration  219ms (transform 31ms, setup 0ms, import 45ms, tests 35ms, environment 0ms)\n\n",
+    "unit": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm.\n\n> cristalwater-backend@22.6.7 test\n> vitest run\n\n\n RUN  v4.1.11 /workspace/scratch/4f3d7636ef52/cristalwater\n\n\n Test Files  127 passed (127)\n      Tests  1144 passed (1144)\n   Start at  11:10:33\n   Duration  5.36s (transform 1.88s, setup 0ms, import 5.72s, tests 7.07s, environment 15ms)\n\n",
+    "technician": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm.\n\n> cristalwater-backend@22.6.7 test:technician\n> vitest run tests/technician-business.test.js\n\n\n RUN  v4.1.11 /workspace/scratch/4f3d7636ef52/cristalwater\n\n\n Test Files  1 passed (1)\n      Tests  4 passed (4)\n   Start at  11:10:39\n   Duration  228ms (transform 29ms, setup 0ms, import 40ms, tests 54ms, environment 0ms)\n\n",
+    "syntax": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm.\n\n> cristalwater-backend@22.6.7 check:syntax\n> node scripts/check-syntax.js\n\n✅ Syntax OK: 691 backend JS files, 307 frontend JS files and 44 inline scripts.\n",
+    "metricsRunner": "Isolated administrator seeded\nStarted scripts/test-field-dashboard-metrics.js\n{\"script\":\"scripts/test-field-dashboard-metrics.js\",\"code\":0,\"ms\":1168}\n",
+    "metricsCompletion": "JWT ERROR: jwt malformed\nJWT ERROR: jwt malformed\nPASS live dashboard metrics: real SQL values and UTC scope, GET/POST permissions and private cache policy, each failed source unavailable, retained/degraded complete cache, breaker recovery, invalidation race and no business mutations\n",
+    "neighbouringDashboardsRunner": "Isolated administrator seeded\nStarted scripts/test-field-dashboard-metrics.js\n{\"script\":\"scripts/test-field-dashboard-metrics.js\",\"code\":0,\"ms\":1159}\nStarted scripts/test-field-admin-dashboard.js\n{\"script\":\"scripts/test-field-admin-dashboard.js\",\"code\":0,\"ms\":9204}\nStarted scripts/test-field-operational-dashboard.js\n{\"script\":\"scripts/test-field-operational-dashboard.js\",\"code\":0,\"ms\":5574}\n"
+  },
+  "publication": {
+    "status": "prepared_locally",
+    "expectedNativeGroups": 306,
+    "nativeCiConfirmed": false,
+    "restoreConfirmed": false
+  }
+}
