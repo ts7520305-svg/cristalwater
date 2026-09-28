@@ -2205,14 +2205,20 @@
       "runId": 36410255202,
       "expectedGroups": 307,
       "suiteConfirmed": false,
-      "restoreConfirmed": false
+      "restoreConfirmed": false,
+      "status": "in_progress",
+      "jobId": 108888511102,
+      "step": "Run node scripts/test-field-suite.js"
     },
     {
       "task": "TASK398",
       "runId": 36412740080,
       "expectedGroups": 307,
       "suiteConfirmed": false,
-      "restoreConfirmed": false
+      "restoreConfirmed": false,
+      "status": "in_progress",
+      "jobId": 108896539637,
+      "step": "Run node scripts/test-field-suite.js"
     }
   ],
   "limitations": [
@@ -2222,9 +2228,22 @@
     "Current native PostgreSQL suite and restore not yet confirmed; full-system production acceptance remains open."
   ],
   "publication": {
-    "status": "validated_pending_publication",
+    "status": "published_work_branch",
+    "branch": "work/field-readiness-20260915-simulation",
+    "codeCommit": "f28c325a25f6860c6b30cb4f5324ec6e9d0d9748",
+    "tree": "f5ab12db935a6b8d01b0c8720b724045de4b86a8",
+    "treeMatchesPreparedIndex": true,
     "expectedNativeGroups": 307,
     "suiteConfirmed": false,
-    "restoreConfirmed": false
+    "restoreConfirmed": false,
+    "nativeCi": {
+      "runId": 36414824128,
+      "jobId": 108903326731,
+      "status": "in_progress",
+      "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36414824128",
+      "expectedGroups": 307,
+      "confirmed": false,
+      "restoreConfirmed": false
+    }
   }
 }
