@@ -24,6 +24,23 @@ async function recordRepairPhoto(req, res) {
   return res.json({ ok: true, photo: result.photo });
 }
 
+async function listRepairPhotos(req, res, next) {
+  res.set('Cache-Control', 'private, no-store');
+  const id = Number(req.params.id);
+  if (!Number.isSafeInteger(id) || id <= 0 || id > 2147483647 || String(id) !== req.params.id) {
+    return res.status(400).json({ ok: false, error: 'Identificador de reparação inválido.' });
+  }
+  try {
+    const result = await RepairBusiness.getRepairDetail(id);
+    if (!result.ok) return res.status(result.status || 404).json({ ok: false, error: result.error });
+    const photos = (result.repair.attachments || []).map(item => ({
+      id: item.id, fileName: item.fileName, fileUrl: item.fileUrl,
+      mimeType: item.mimeType, fileSize: item.fileSize, createdAt: item.createdAt,
+    }));
+    return res.json({ ok: true, repairId: id, photos });
+  } catch (error) { return next(error); }
+}
+
 async function repairPdf(req, res) {
   try {
     const result = await RepairBusiness.getRepairDetail(req.params.id);
@@ -131,6 +148,7 @@ module.exports = {
   createRepair,
   listRepairsByPool,
   recordRepairPhoto,
+  listRepairPhotos,
   repairPdf,
   quoteRepair,
   diagnoseRepair,

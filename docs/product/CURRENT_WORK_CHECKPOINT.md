@@ -1,5 +1,18 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 28/09/2026, TASK414 local aprovada / C04 aguarda CI
+
+**Oito superfícies de upload locais concluídas.** TASK414: fotos regular25MiB/extra25/reparação20/despesa5,60pedidosHTTP; TASK413: outras quatro,46pedidos. Fronteiras−1/0/+1byte, hashes, perda/recuperação, recusas/limpeza. Oito casos do serviço real de projeção25/64MiB/24fotos. [Evidência TASK414](evidence/20260928_task414_local.json), [manifesto](OPERATIONAL_VOLUME_PLAN_20260928.md).
+
+**Correções414:** nova consulta autenticada `/api/repairs/:id/photos` para recuperação por lista; não repetirPOST semUUID. Apenas seis campos do anexo, sem contactos/valores; UI automática por integrarC13. Despesa multipart truncada deixa503 e devolve400 acionável; falhas reais503 conservadas. URLs legados regular/reparação/compra públicos: revisãoC14. Extra/despesa privadas. Código não muda limites, esquema, dependências, cachev207 nem finanças.
+
+**Gates414:** grupo7 594ms, despesas3 122ms, fotosPDF/HTML2 560ms, reparação534ms; saídas finais lidas.1 327unitários/136ficheiros, quatro técnicos, sintaxe695/307/44.22contagens repostas, hashes financeiros/originais conservados; API≤274,27MiB/cliente≤358,12MiB em processos separados (não soma/VPS). Runner317. JPEGs pequenos com padding; sem certificação de resolução/concorrência ou modo regular legado semUUID.
+
+**Publicação413:** commit2efae46d4bbec1f468c36f27e672592cfc43dbd9, árvore d30acfe8bb02680728e2b4e82bf27be8f7fd51ca; CI36489954119/job109155898206 na suite, dez etapas aprovadas. **CI412 confirmado:** commit2816af3..., run36483704663/job109135318014,315grupos exatos/restauro128tabelas47ficheiros, rascunhos7 201ms; log lido. C03/E/PDF nativos continuam baseados na prova específica411 guardada na413.
+
+**Continuar:** publicar414/registarSHA/CI; exigir317grupos/restauro, `attachment-volume/results.json`4probes e `photo-evidence-volume/results.json`5probes/8casos, conclusão/limpeza. C04 em validação, ainda não concluída. **TASK415: C05 inventário de idiomas**, `COMPLETION_PLAN_20260928.md` e inventárioTASK386/cw-i18n. Contagem32:28por iniciar,C04em validação,3concluídas. Contrato anual adiado; branchautorizada `work/field-readiness-20260915-simulation`; sem merge/deploy/contactos reais.
+
+
 ## Retoma atual — 28/09/2026, TASK413 local aprovada / quatro superfícies de uploads
 
 **Corrigidos 500 indevidos para uploads grandes/multipart inválido.** Middleware geral responde413/400 com mensagem segura/no-store; restantes falhas continuam500/logging. Nove unitários novos. Compras20MiB, documentos50MiB, conversa25MiB e guia25MiB: **46 pedidos**, fronteiras−1/0/+1byte, download/hash, acesso, perda/recuperação, recusa/limpeza. [Relatório](OPERATIONAL_VOLUME_PLAN_20260928.md), [prova](evidence/20260928_task413_local.json).

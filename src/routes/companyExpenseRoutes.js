@@ -55,6 +55,9 @@ router.get('/:id/evidence/:evidenceId', handle(async (req, res) => {
 router.get('/:id', handle(async (req, res) => res.json(await service.detail(rules.queryId(req.params.id)))));
 router.use((error, req, res, next) => {
   if (res.headersSent) return next(error);
+  const incompleteMultipart = /^multipart\/form-data(?:;|$)/i.test(req.headers['content-type'] || '')
+    && ['Unexpected end of form', 'Unexpected end of file', 'Multipart: Boundary not found', 'Malformed part header'].includes(error.message);
+  if (incompleteMultipart) return res.status(400).json({ ok: false, error: 'Envio do comprovativo incompleto ou inválido. Selecione o ficheiro e tente novamente.' });
   const status = error instanceof multer.MulterError ? 400 : [400, 401, 403, 404, 409, 503].includes(error.status) ? error.status : 503;
   res.status(status).json({ ok: false, error: error instanceof multer.MulterError ? 'Anexe um único ficheiro até 5 MB.' : error.status ? error.message : 'Não foi possível confirmar a operação. Consulte o resultado do pedido antes de repetir.' });
 });

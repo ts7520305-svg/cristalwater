@@ -79,6 +79,7 @@ router.put("/:id/payment", allowRoles("ADMIN"), controller.registerPayment);
 router.put("/:id/close", allowRoles("ADMIN", "TECHNICIAN"), controller.closeRepair);
 router.put("/:id/mark-sent", allowRoles("ADMIN"), controller.markSent);
 router.put("/:id/complete", allowRoles("ADMIN", "TECHNICIAN"), controller.completeRepair);
+router.get("/:id/photos", allowRoles("ADMIN", "TECHNICIAN"), controller.listRepairPhotos);
 router.post("/:id/photo", allowRoles("ADMIN", "TECHNICIAN"), upload.single("photo"), controller.recordRepairPhoto);
 router.delete("/:id", allowRoles("ADMIN"), controller.deleteRepair);
 
