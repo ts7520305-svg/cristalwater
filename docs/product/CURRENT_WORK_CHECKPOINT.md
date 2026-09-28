@@ -1,5 +1,20 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 28/09/2026, TASK412 local aprovada / espera do teste de rascunhos
+
+**Corrigida a condição de corrida no teste que bloqueou o CI TASK409.** `loadRoute` chamado pela recuperação e pela sincronização incrementa uma revisão; uma chamada substituída termina antes de a mais recente pintar os conflitos. O teste contava imediatamente0 em vez de2. Reprodução com duas leituras reais e segunda resposta atrasada750ms falhou no original; a versão corrigida observa o mesmo zero transitório, aguarda exatamente2 conflitos/alcalinidade100 e passa todas as asserções. Nenhuma mudança da aplicação. [Relatório](OPERATIONAL_VOLUME_PLAN_20260928.md), [evidência](evidence/20260928_task412_local.json).
+
+**Lote5:** `scripts/test-field-legacy-visit-drafts.js`, relatórioC04, plano, checkpoint e evidência. Acrescentada espera de estado com timeout10s já existente; deadline60s mantém processo vivo e guarda de saída recusa sucesso sem terminar. Uma tentativa original local saíra0 após2/5 marcadores e não foi aceite; original com keepalive completou5. Novo script direto e cenário atrasado completam5. Produção, cachev207, runner315, esquema/dependências/contratos inalterados.
+
+**Gates:** cenário atrasado7 441ms, grupo direto6 992ms, ambos5 marcadores lidos; 1 318 unitários/135 ficheiros, quatro técnicos, sintaxe695/307/44, node-check/diff-check. Preservados offline/quota, dados e texto literal, decisões de conflito, duas janelas, rascunho corrompido/titular errado, UUID/pedido após reload, erro503/repetição, auditoria de conclusão única e troca de conta. PGlite novo/Chromium153/UTC; fixtures antigas apenas na baseQA descartada.
+
+**Nativo anterior:** TASK408313/313/restauro128/47 e C04-A–D aprovados. TASK409312/313, falha do teste agora corrigida e restauro saltado; JSON otimizado summary-volume12+3 aprovado, dashboard400513,18MiB, snapshot concorrente confirmado. Artefacto10997265072/SHA256 `32a9e8408e15944ea7624c760cb06036fb36b823ed9b0dc3e84f0071d2c39224` lido. TASK410 run36478772257/job109118978818 e TASK411 run36482590787/job109131593496 continuam em execução. TASK411 commitPDF `b649f1a61bf834c1f5a37a675321aef0c2a55f45`, docs `e39003baca7c191f8ec7052e829ff1fc2eda2720`; 27PDFs/496páginas locais aprovados, uploads pendentes.
+
+**Continuar:** publicar TASK412/registar SHA/CI; exigir315 scripts na ordem exata/restauro128tabelas47ficheiros e JSONs summary-volume12+3/RSS<768MiB, snapshot concorrente, report-volume3 e pdf-volume3perfis/27documentos, todos com conclusão/limpeza. Se CI410/411 falhar no mesmo teste antigo, usar a versão corrigida para revalidar, sem inferir aprovação global. **TASK413: uploads C04-F** — oficial25MiB, compra20, geral50, foto regular25, extra25, conversa25, reparação20, despesa5; fronteiras−1/0/+1byte, conteúdo conforme contrato, identidade/download/hash, perda/recuperação e limpeza. Não aumentar limites. Projeção de fotografias24/25MiB/64MiB agregados; arquivo de upgrade500MiB excluído. Inventário detalhado na TASK411.
+
+**Contagem32:**28 por iniciar, C04 em execução, C03 em validação, C01/C02 concluídas. Depois C05 idiomas; contrato anual adiado. Branch autorizada, sem merge/deploy/contactos reais.
+
+
 ## Retoma atual — 28/09/2026, TASK411 publicada / C04-F PDFs
 
 **27 PDFs/496 páginas de nove famílias aprovados localmente**, perfis 0/25/1 001. Até 1 001 movimentos/piscinas/linhas financeiras/extras, 100 itens de guia/orçamento, 50 produtos e 24 fotografias por visita, notas/condições longas. **100 pedidos:** 38 PDFs positivos e 62 recusas/ausências; texto/linhas/totais financeiros/identidade/rodapés, titularidade e privacidade conferidos. Zero escritas SQL, 25 modelos e hashes conservados, 56 fotografias originais limpas. [Relatório C04](OPERATIONAL_VOLUME_PLAN_20260928.md), [evidência TASK411](evidence/20260928_task411_local.json).

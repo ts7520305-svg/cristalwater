@@ -4,7 +4,11 @@ const assert=require('node:assert/strict'),jwt=require('jsonwebtoken'),{chromium
 const {prisma}=require('../src/prismaClient'),{getJwtSecret}=require('../src/utils/jwtSecret');
 if(process.env.NODE_ENV!=='test'||process.env.QA_MODE!=='true'||process.env.QA_ENVIRONMENT_SAFE!=='true')throw Error('Isolated QA required');
 const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['127.0.0.1','localhost'].includes(new URL(base).hostname));
-let browser;
+let browser, completed=false;
+// Keep the process alive until every assertion finishes; a pending Promise alone
+// must not turn an unfinished browser/database operation into a successful exit.
+const deadline=setTimeout(()=>{console.error('Legacy visit draft assertions did not complete');process.exit(1);},60000);
+process.on('exit',()=>{if(!completed&&!process.exitCode)process.exitCode=1;});
 (async()=>{
   const tech=await prisma.technician.create({data:{name:'Draft owner',active:true}}),other=await prisma.technician.create({data:{name:'Draft other',active:true}}),client=await prisma.client.create({data:{name:'Draft client',active:true}}),pool=await prisma.pool.create({data:{name:'Draft pool',clientId:client.id,active:true}});
   const visit=await prisma.serviceVisit.create({data:{clientId:client.id,poolId:pool.id,technicianId:tech.id,plannedDate:new Date(),date:new Date(),status:'PLANNED',notes:'Nota inicial do servidor',ph:7.1,alkalinity:80}}),second=await prisma.serviceVisit.create({data:{clientId:client.id,poolId:pool.id,technicianId:tech.id,plannedDate:new Date(),date:new Date(),status:'PLANNED'}});
@@ -36,6 +40,9 @@ let browser;
   await page.evaluate(()=>{Storage.prototype.setItem=qaSetItem;});await page.locator('#legacyDraftRetry-'+visit.id).click();await saved();assert.equal(JSON.parse(await raw()).fields.ph,'7.5');
   console.log('PASS six unsent fields and separate visit draft survive a real offline reload; quota keeps visible edits, preserves saved bytes and blocks submission until explicit local retry');
   await context.setOffline(false);await page.evaluate(()=>loadRoute());await prisma.serviceVisit.update({where:{id:visit.id},data:{notes:'Nota alterada pelo escritório',ph:7.8,alkalinity:100}});await page.evaluate(()=>loadRoute());
+  // Reconnection sync can supersede that loadRoute call with a later request.
+  // Its Promise may resolve before the current request paints the conflicts.
+  await page.waitForFunction(id=>document.getElementById('legacyDraftReview-'+id)?.children.length===2&&document.getElementById('alkalinity-'+id)?.value==='100',visit.id);
   const review=page.locator('#legacyDraftReview-'+visit.id);assert.equal(await review.locator(':scope > div').count(),2);assert(await page.locator('[data-action="complete"][data-visit-id="'+visit.id+'"]').isDisabled());assert.equal(await page.locator('#alkalinity-'+visit.id).inputValue(),'100');assert.equal(await review.locator('img').count(),0);assert.equal(await page.evaluate(()=>window.qaDraftXss),undefined);
   for(const width of [320,390,1440]){await page.setViewportSize({width,height:900});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));}await page.setViewportSize({width:390,height:1000});
   if(process.env.CW_CAPTURE_UI){require('node:fs').mkdirSync('reports/field-ui',{recursive:true});await review.screenshot({path:'reports/field-ui/VISIT_DRAFT_CONFLICTS.png'});}
@@ -51,4 +58,5 @@ let browser;
   const secondSaved=await page.evaluate(key=>localStorage.getItem(key),secondKey);await page.evaluate(id=>{window.qaOldDraftInput=document.getElementById('notes-'+id);},second.id);
   const change=(token,person)=>page.evaluate(({token,person})=>{for(const key of ['token','cristalwater_jwt'])localStorage.setItem(key,token);for(const key of ['user','cristalwater_user'])localStorage.setItem(key,JSON.stringify({id:person.id,name:person.name,role:'TECHNICIAN'}));},{token,person});await change(otherToken,other);await page.evaluate(()=>{qaOldDraftInput.value='Callback tardio de outra conta';qaOldDraftInput.dispatchEvent(new Event('input',{bubbles:true}));});await page.waitForFunction(()=>document.getElementById('status').textContent.includes('sessão mudou'));assert.equal(await page.evaluate(key=>localStorage.getItem(key),secondKey),secondSaved);assert.equal(await page.evaluate(key=>localStorage.getItem(key),'cwLegacyVisitDraft:v1:TECH:'+other.id+':'+second.id),null);await change(token,tech);await open();assert.equal(await page.locator('#notes-'+second.id).inputValue(),'Rascunho da segunda visita');assert.deepEqual(errors,[]);
   console.log('PASS original completion survives reload and confirms once; prepared/confirmed drafts cannot reopen for duplicate edits and late account callbacks cannot overwrite another draft');
-})().catch(error=>{console.error(error);process.exitCode=1;}).finally(async()=>{await browser?.close();await prisma.$disconnect();});
+  completed=true;
+})().catch(error=>{console.error(error);process.exitCode=1;}).finally(async()=>{try{await browser?.close();await prisma.$disconnect();}finally{clearTimeout(deadline);}});

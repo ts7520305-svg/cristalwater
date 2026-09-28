@@ -1,0 +1,515 @@
+{
+  "task": "TASK412",
+  "date": "2026-09-28",
+  "baseCommit": "e39003baca7c191f8ec7052e829ff1fc2eda2720",
+  "scope": "Readiness and completion proof of existing legacy visit draft browser test; unblock native validation gates",
+  "status": "local-approved-native-pending",
+  "productionChanges": false,
+  "codeHashes": {
+    "scripts/test-field-legacy-visit-drafts.js": "7b861828ace66dc7663bd91b38295db5495305453683dd7d1930c46294b8b7fa"
+  },
+  "previousScriptSha256": "dcfc2729ca908c62b4e243b9cef41ab3e3063604809d1be5c73e6ac4bceb7769",
+  "sourceFailure": {
+    "runId": 36475513427,
+    "jobId": 109108100107,
+    "head": "04005a0831f5fe9e6e588b1467596e03036e1779",
+    "groups": 313,
+    "successfulGroups": 312,
+    "failed": [
+      {
+        "script": "test-field-legacy-visit-drafts.js",
+        "code": 1,
+        "signal": null,
+        "ms": 1647
+      }
+    ],
+    "excerpt": [
+      "PASS route and draft editing are available before a slow image completes; the load event preserves entered text",
+      "PASS six unsent fields and separate visit draft survive a real offline reload; quota keeps visible edits, preserves saved bytes and blocks submission until explicit local retry",
+      "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:",
+      "",
+      "0 !== 2",
+      "",
+      "    at /home/runner/work/cristalwater/cristalwater/scripts/test-field-legacy-visit-drafts.js:39:68 {",
+      "  generatedMessage: true,",
+      "  code: 'ERR_ASSERTION',",
+      "  actual: 0,",
+      "  expected: 2,",
+      "  operator: 'strictEqual',",
+      "  diff: 'simple'",
+      "}",
+      ""
+    ],
+    "restore": "skipped"
+  },
+  "diagnosis": {
+    "cause": "Reconnection invokes loadRoute directly and from runAutoSync. A newer request advances routeLoadRevision, so an older awaited loadRoute resolves as superseded before the current request paints. Immediate Locator.count observes zero review rows, even though the later request correctly paints two conflicts.",
+    "applicationSources": [
+      "frontend/technician.js loadRoute and runAutoSync",
+      "frontend/cw-legacy-visit-drafts.js bind/paint"
+    ],
+    "reproduction": "After the server update, call loadRoute twice; delay the second real route request by 750 ms using Playwright route. Await the first. Old assertion sees 0 conflicts and fails; corrected test observes same transient 0, awaits rendering and completes all original assertions.",
+    "beforeLogSha256": "55364d121c33b6156d87a4b29d872aa5fa73f93667eb73c85b0a03fb9747dbdf",
+    "probeSource": "'use strict';\nconst fs = require('node:fs'), Module = require('node:module');\nconst file='/workspace/scratch/4f3d7636ef52/cristalwater/scripts/test-field-legacy-visit-drafts.js';\nlet source=fs.readFileSync(file,'utf8');\nconst needle=\"await prisma.serviceVisit.update({where:{id:visit.id},data:{notes:'Nota alterada pelo escritório',ph:7.8,alkalinity:100}});await page.evaluate(()=>loadRoute());\";\nif(!source.includes(needle))throw Error('Race insertion point changed');\nsource=source.replace(needle,`await page.waitForFunction(()=>!isSyncing);\n  await prisma.serviceVisit.update({where:{id:visit.id},data:{notes:'Nota alterada pelo escritório',ph:7.8,alkalinity:100}});\n  let raceRequests=0; const routePattern='**/visits/today?*';\n  await page.route(routePattern,async route=>{raceRequests++;if(raceRequests===2)await new Promise(resolve=>setTimeout(resolve,750));await route.continue();});\n  await page.evaluate(()=>{const previous=loadRoute();void loadRoute();return previous;});\n  console.log('RACE previous load resolved while later route is delayed; conflicts='+await page.locator('#legacyDraftReview-'+visit.id+' > div').count());`);\nsource=source.replace(\"console.log('PASS unchanged fields\", \"await page.unroute(routePattern); console.log('PASS unchanged fields\");\nconst markers=[],log=console.log;\nconst keep=setInterval(()=>{},1000),deadline=setTimeout(()=>{console.error('Draft race completion deadline');process.exit(1);},25000);\nconsole.log=(...args)=>{const text=args.map(String).join(' ');if(text.startsWith('PASS ')){markers.push(text);if(markers.length===5){clearInterval(keep);clearTimeout(deadline);}}log(...args);};\nprocess.on('exit',()=>{if(markers.length!==5)process.exitCode=1;});\nconst mod=new Module(file,module);mod.filename=file;mod.paths=Module._nodeModulePaths(require('node:path').dirname(file));mod._compile(source,file);\n",
+    "probeSourceSha256": "957f46a63d2448d56466954f8665d85abc8dcdf9bd51b7236f176b38242f9917",
+    "beforeExpectedFailure": true,
+    "afterPassed": true
+  },
+  "change": {
+    "wait": "Synchronous browser predicate waits for exactly two conflict children and current untouched alkalinity 100; existing 10-second timeout retained",
+    "assertions": "All original count, disabled submission, literal fields, conflict decisions, saved/server values, session and once-only completion assertions retained",
+    "completionGuard": "60-second referenced deadline and exit hook fail incomplete execution; completed set only after the fifth terminal marker; deadline cleared in finally after browser/DB close",
+    "guardMotivation": "Initial unmodified local run returned code 0 after only first two markers (6574 ms); not accepted. Keeping Node alive completed all five (6690 ms). Corrected direct run completes all five without an external wrapper."
+  },
+  "environment": {
+    "node": "24.19.0",
+    "database": "PGlite 0.5.8 PostgreSQL 18.3 WASM, fresh isolated database per invocation",
+    "chromium": "153.0.8010.0",
+    "timezone": "UTC",
+    "externalIntegrationsEnabled": false
+  },
+  "validation": {
+    "groups": {
+      "/workspace/scratch/4f3d7636ef52/qa/draft-race-probe.cjs": {
+        "durationMs": 7441,
+        "terminalMarkers": [
+          "PASS route and draft editing are available before a slow image completes; the load event preserves entered text",
+          "PASS six unsent fields and separate visit draft survive a real offline reload; quota keeps visible edits, preserves saved bytes and blocks submission until explicit local retry",
+          "PASS unchanged fields follow current server values; overlapping changes require explicit field decisions and preserve literal text without sending a completion",
+          "PASS two-window conflicts retain both visible texts and block stale submission; corrupt or wrongly owned drafts remain untouched",
+          "PASS original completion survives reload and confirms once; prepared/confirmed drafts cannot reopen for duplicate edits and late account callbacks cannot overwrite another draft"
+        ],
+        "sha256": "00fa502f1481bd01427f55287aab9a4c73cd76c10f3e9d764f7669b3d64aba70",
+        "raceEvidence": [
+          "RACE previous load resolved while later route is delayed; conflicts=0"
+        ]
+      },
+      "scripts/test-field-legacy-visit-drafts.js": {
+        "durationMs": 6992,
+        "terminalMarkers": [
+          "PASS route and draft editing are available before a slow image completes; the load event preserves entered text",
+          "PASS six unsent fields and separate visit draft survive a real offline reload; quota keeps visible edits, preserves saved bytes and blocks submission until explicit local retry",
+          "PASS unchanged fields follow current server values; overlapping changes require explicit field decisions and preserve literal text without sending a completion",
+          "PASS two-window conflicts retain both visible texts and block stale submission; corrupt or wrongly owned drafts remain untouched",
+          "PASS original completion survives reload and confirms once; prepared/confirmed drafts cannot reopen for duplicate edits and late account callbacks cannot overwrite another draft"
+        ],
+        "sha256": "1fc0bddd988d318d73e0dc6a3e699b5211310468941733e6895b77c79c519104",
+        "raceEvidence": []
+      }
+    },
+    "unit": 1318,
+    "unitFiles": 135,
+    "technician": 4,
+    "syntax": {
+      "backend": 695,
+      "frontend": 307,
+      "inline": 44
+    },
+    "nodeCheck": true,
+    "diffCheck": true,
+    "runnerScripts": 315,
+    "gateLogHashes": {
+      "task412-unit.log": "e8de658db6d1bc0dd002e8d4dae6ac26ef2c7d7f28236bcbf37216920976a748",
+      "task412-technician.log": "b5b723f0ab8360a87f2336d68913b97d7e692560cc8c0eb3f5ef2c041829ce1a",
+      "task412-syntax.log": "7d20a5145437e5670d0376055bf4a65ce58000a565a1aff72875faa758150d36"
+    }
+  },
+  "priorNativeMemory": {
+    "summary": {
+      "sha256": "6d11f3fc62bc3483afab2c77f5971fd1f6ae4eac33b629c46d7d07bc15b86579",
+      "ok": true,
+      "cleanupVerified": true,
+      "probes": 12,
+      "faults": 3,
+      "dashboard400": {
+        "durationMs": 1677.6,
+        "jsonBytes": 9603727,
+        "rssBeforeMiB": 116,
+        "sampledRssPeakMiB": 513.18,
+        "heapBeforeMiB": 16.13,
+        "sampledHeapPeakMiB": 163.16,
+        "lifetimeRssPeakMiB": 513.18,
+        "sql": {
+          "queries": 55,
+          "durationMs": 160,
+          "writes": 0
+        },
+        "scans": [
+          {
+            "model": "client",
+            "rows": 709,
+            "take": null,
+            "rssMiB": 374.35
+          },
+          {
+            "model": "pool",
+            "rows": 650,
+            "take": null,
+            "rssMiB": 374.47
+          },
+          {
+            "model": "technician",
+            "rows": 75,
+            "take": null,
+            "rssMiB": 374.47
+          },
+          {
+            "model": "invoice",
+            "rows": 10127,
+            "take": null,
+            "rssMiB": 374.47
+          },
+          {
+            "model": "payment",
+            "rows": 13559,
+            "take": null,
+            "rssMiB": 374.47
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 374.47
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 374.47
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 374.47
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 1600,
+            "take": null,
+            "rssMiB": 374.47,
+            "where": {
+              "OR": [
+                {
+                  "plannedDate": {
+                    "gte": "2019-12-01T00:00:00.000Z",
+                    "lte": "2019-12-31T23:59:59.999Z"
+                  }
+                },
+                {
+                  "date": {
+                    "gte": "2019-12-01T00:00:00.000Z",
+                    "lte": "2019-12-31T23:59:59.999Z"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "model": "auditTrail",
+            "rows": 0,
+            "take": null,
+            "rssMiB": 374.47
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 372.08
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 372.08
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 372.08
+          },
+          {
+            "model": "client",
+            "rows": 457,
+            "take": null,
+            "rssMiB": 372.08
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 372.96
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 372.96
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 372.96
+          },
+          {
+            "model": "invoice",
+            "rows": 10127,
+            "take": null,
+            "rssMiB": 372.96
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 390.58
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 390.58
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 390.58
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 393.58
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 393.58
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 393.58
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 400.97
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 400.97
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 400.97
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 401.22
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 401.22
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 401.22
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 232,
+            "take": 500,
+            "rssMiB": 401.34
+          },
+          {
+            "model": "notification",
+            "rows": 267,
+            "take": 500,
+            "rssMiB": 401.34
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 220,
+            "take": 500,
+            "rssMiB": 401.34
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 402.84
+          },
+          {
+            "model": "notification",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 402.84
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 402.84
+          }
+        ],
+        "transactions": [
+          {
+            "isolationLevel": "RepeatableRead",
+            "timeout": 30000
+          }
+        ]
+      }
+    },
+    "operationalSnapshot": {
+      "ok": true,
+      "phase": "assertions-completed",
+      "engine": "PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+      "committedBeforeRemaining": true,
+      "transactions": [
+        {
+          "scope": "transaction-1",
+          "options": {
+            "isolationLevel": "RepeatableRead",
+            "timeout": 30000
+          }
+        }
+      ],
+      "reads": [
+        {
+          "model": "client",
+          "scope": "transaction-1"
+        },
+        {
+          "model": "pool",
+          "scope": "transaction-1"
+        },
+        {
+          "model": "technician",
+          "scope": "transaction-1"
+        },
+        {
+          "model": "invoice",
+          "scope": "transaction-1"
+        },
+        {
+          "model": "payment",
+          "scope": "transaction-1"
+        },
+        {
+          "model": "technicalAlert",
+          "scope": "transaction-1"
+        },
+        {
+          "model": "notification",
+          "scope": "transaction-1"
+        },
+        {
+          "model": "serviceVisit",
+          "scope": "transaction-1"
+        },
+        {
+          "model": "serviceVisit",
+          "scope": "transaction-1"
+        },
+        {
+          "model": "auditTrail",
+          "scope": "transaction-1"
+        },
+        {
+          "model": "technicalAlert",
+          "scope": "transaction-1"
+        },
+        {
+          "model": "notification",
+          "scope": "transaction-1"
+        },
+        {
+          "model": "serviceVisit",
+          "scope": "transaction-1"
+        },
+        {
+          "model": "client",
+          "scope": "transaction-1"
+        },
+        {
+          "model": "invoice",
+          "scope": "transaction-1"
+        },
+        {
+          "model": "technicalAlert",
+          "scope": "transaction-1"
+        },
+        {
+          "model": "notification",
+          "scope": "transaction-1"
+        },
+        {
+          "model": "serviceVisit",
+          "scope": "transaction-1"
+        }
+      ],
+      "duringDelta": {
+        "clients": 0,
+        "pools": 0,
+        "technicians": 0,
+        "visits": 0,
+        "notDone": 0,
+        "billed": 0,
+        "paid": 0,
+        "open": 0,
+        "alerts": 0,
+        "fiscalClients": 0,
+        "fiscalInvoices": 0,
+        "fiscalPending": 0,
+        "fiscalPendingAmount": 0
+      },
+      "afterDelta": {
+        "clients": 1,
+        "pools": 1,
+        "technicians": 1,
+        "visits": 1,
+        "notDone": 1,
+        "billed": 123.45,
+        "paid": 5,
+        "open": 118.45,
+        "alerts": 3,
+        "fiscalClients": 1,
+        "fiscalInvoices": 1,
+        "fiscalPending": 1,
+        "fiscalPendingAmount": 123.45
+      }
+    },
+    "artifact": {
+      "id": 10997265072,
+      "bytes": 30434,
+      "sha256": "32a9e8408e15944ea7624c760cb06036fb36b823ed9b0dc3e84f0071d2c39224"
+    }
+  },
+  "limits": [
+    "Only test synchronization/lifecycle changed; no production UI, API, persistence, cache, stock, schema or financial rule changed.",
+    "The deterministic reproduction delays an actual read in an isolated browser. It does not replay every possible CI scheduling interleaving or certify production latency.",
+    "Existing script fixtures remain in the isolated disposable QA database. No claim that this old group removes its fixture rows.",
+    "Native 315-group suite, restore and earlier volume JSONs remain required at the corrected version; local success does not close C03/C04. TASK410 and TASK411 still in progress at the latest query.",
+    "Upload work originally numbered TASK412 is now TASK413, within C04-F; no new completion ID added."
+  ],
+  "publication": {
+    "status": "pending",
+    "branch": "work/field-readiness-20260915-simulation"
+  }
+}
