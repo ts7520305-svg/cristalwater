@@ -93,7 +93,8 @@ function buildPredictiveAnalysis({
   // ZONES
   // ====================================================
 
-  const zoneMap = {};
+  // Keep counters local even for names such as __proto__ or constructor.
+  const zoneMap = Object.create(null);
 
   visits.forEach(v => {
 

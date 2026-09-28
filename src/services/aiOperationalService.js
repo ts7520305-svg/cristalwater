@@ -96,7 +96,8 @@ function analyzeOperationalData(
   // ZONES
   // ====================================================
 
-  const zoneMap = {};
+  // Zone names are data, including names inherited by ordinary objects.
+  const zoneMap = Object.create(null);
 
   visits.forEach(v => {
 
