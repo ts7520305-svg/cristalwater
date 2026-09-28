@@ -1,6 +1,22 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK389 publicada
+## Retoma atual — 28/09/2026, TASK390 preparada
+
+O centro de incidentes deixa de confirmar uma resolução/escalamento apenas porque o pedido terminou. Exige HTTP de sucesso, `ok: true`, incidente válido com o mesmo ID e o estado solicitado. Uma recusa, resposta nula/errada ou resposta perdida não acrescenta sucesso à linha temporal; a lista tem de ser consultada de novo. Cliques repetidos ficam bloqueados durante o envio. A API deixa de converter falhas de leitura em `200` com lista vazia e rejeita resultados de escrita ausentes.
+
+O escalamento tem uma transição condicional na base de dados: pedidos repetidos/concorrentes aumentam impacto/prioridade uma única vez. A marca de escalamento automático já existente é conservada. Uma falha de um incidente agendado não impede processar os seguintes. A resolução mantém o comportamento do serviço existente; não foi introduzida uma fila offline ou um recibo persistente para estas operações.
+
+A página distingue carregamento, vazio real, indisponibilidade, falta de permissão, offline e mudança de sessão. Limpa dados anteriores e ignora respostas tardias quando a conta muda. Todos os textos recebidos são inseridos como texto, sem HTML/ações inline; os eventos em tempo real apenas provocam nova consulta autenticada. O relógio SLA deixa de reconstruir os cartões e os botões a cada atualização. Datas apresentadas em Lisboa; registos históricos não foram convertidos.
+
+**Local aprovado:** 1 079 unitários/123 ficheiros, quatro técnicos, sintaxe 691/307/44 e dois grupos integrados distintos (incidentes API/UI e acessos administrativos antigos). A regressão anterior mostrou `200 / incidents: []` após erro de base e «Incidente resolvido» após `403`. Os cenários finais incluem falhas/nulos/ID ou estado trocado, respostas perdidas, cliques repetidos, concorrência, perfis recusados, conteúdo literal, mudança de sessão durante leitura/escrita, ausência de rede e processamento agendado após uma falha. 320/390/1440 px sem transbordo, botões principais ≥44 px, teclado e contraste do conteúdo/menu em claro/escuro. A inspeção inicial encontrou contraste insuficiente, corrigido antes da aprovação. [Evidência](evidence/20260928_task390_local.json). Cache v200; runner 302 grupos; sem migração/dependência nova.
+
+**CI anteriores:** TASK388 confirmada, [301/301 e restauro](https://github.com/ts7520305-svg/cristalwater/actions/runs/36380011326): 17 etapas, 128 tabelas e 47 ficheiros, linhas/hashes iguais. Grupos comparados com o runner do commit exato `26e3bcaeca2d3c69d9cf651fa6220d0bb43529c9`; prova incluída na evidência desta tarefa. TASK389 permanece em execução na última consulta. TASK386/387 já aprovadas; TASK385 conserva a falha histórica 297/300.
+
+**Publicação TASK390:** alteração preparada; commit/árvore e CI serão registados depois da publicação na branch `work/field-readiness-20260915-simulation`. O ensaio local usa PGlite/Chromium com dados sintéticos; os 302 grupos PostgreSQL e o restauro desta alteração ainda não estão confirmados.
+
+**Continuar:** confirmar CI de TASK389/390. Os testes de `/reminder-materials` e `/reminder-visits` existem nas fixtures de navegador e no runner; a ausência na pesquisa superficial não era ausência de testes. `/admin-visits` tem referências no microsweep, sem equivaler a aceitação completa. Rever agora `/operational-dashboard`: o cliente usa valores zero por omissão e mantém o resultado anterior após erros, sem proteção contra respostas fora de ordem; leitura identificada, correção ainda não feita. O centro de incidentes ainda precisa de localização nos restantes idiomas e de validação de volume/paginação; a linha temporal é apenas das confirmações nesta sessão. Contrato continua adiado por indicação do utilizador. Conciliação histórica, WhatsApp, IA local, VPS/cópias e piloto físico mantêm os limites da revisão global. Sem merge/deploy/contactos reais; sistema não declarado concluído.
+
+## Retoma anterior — 28/09/2026, TASK389 publicada
 
 Corrigida a identidade dos alertas de viatura ligados aos técnicos. A regressão confirmou 20 alertas com apenas 11 IDs distintos: o helper usava `sourceIssue.id` antes de este estar definido. A origem e a ligação passam a usar o mesmo cálculo de identidade, incluindo causa/entidade/viatura/técnico; os IDs dos alertas de origem permanecem iguais. Leituras repetidas e ordem dos registos não alteram as referências. Não houve alteração das regras, dos registos de negócio, da API de autorização ou do esquema.
 

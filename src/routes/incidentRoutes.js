@@ -25,6 +25,9 @@ const {
   "../services/incidentService"
 );
 
+// Operational reads and mutation responses must not be reused from a cache.
+router.use((req, res, next) => { res.set('Cache-Control', 'private, no-store'); next(); });
+
 // ======================================================
 // LIST ALL INCIDENTS
 // ======================================================
@@ -49,7 +52,7 @@ router.get(
 
       console.error(err);
 
-      res.status(500).json({
+      res.status(503).json({
         ok:false,
         error:"Erro ao listar incidentes"
       });
@@ -117,7 +120,7 @@ router.get(
 
       console.error(err);
 
-      res.status(500).json({
+      res.status(503).json({
         ok:false,
         error:"Erro ao gerar resumo"
       });
@@ -149,7 +152,7 @@ router.get(
 
       console.error(err);
 
-      res.status(500).json({
+      res.status(503).json({
         ok:false,
         error:"Erro ao listar críticos"
       });
@@ -174,6 +177,8 @@ router.post(
           req.body
         );
 
+      if (!incident) return res.status(503).json({ ok: false, error: "Não foi possível criar o incidente" });
+
       res.json({
         ok:true,
         incident
@@ -183,7 +188,7 @@ router.post(
 
       console.error(err);
 
-      res.status(500).json({
+      res.status(503).json({
         ok:false,
         error:"Erro ao criar incidente"
       });
@@ -209,6 +214,8 @@ router.post(
           req.body.status
         );
 
+      if (!incident) return res.status(404).json({ ok: false, error: "Incidente não encontrado" });
+
       res.json({
         ok:true,
         incident
@@ -218,7 +225,7 @@ router.post(
 
       console.error(err);
 
-      res.status(500).json({
+      res.status(503).json({
         ok:false,
         error:"Erro ao atualizar incidente"
       });
@@ -244,6 +251,8 @@ router.post(
           false
         );
 
+      if (!incident) return res.status(404).json({ ok: false, error: "Incidente não encontrado" });
+
       res.json({
         ok:true,
         incident
@@ -253,7 +262,7 @@ router.post(
 
       console.error(err);
 
-      res.status(500).json({
+      res.status(503).json({
         ok:false,
         error:"Erro ao escalar incidente"
       });

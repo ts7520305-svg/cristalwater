@@ -304,7 +304,8 @@ async function updateIncidentStatus(
       err
     );
 
-    return null;
+    if (err.code === "P2025") return null;
+    throw err;
   }
 }
 
@@ -312,71 +313,26 @@ async function updateIncidentStatus(
 // ESCALATE
 // ======================================================
 
-async function escalateIncident(
-  incidentId,
-  automatic = false
-){
-
-  try {
-
-    const current =
-      await prisma.incident.findUnique({
-
-        where:{
-          id:Number(incidentId)
-        }
-      });
-
-    if(!current)
-      return null;
-
-    const incident =
-      await prisma.incident.update({
-
-        where:{
-          id:Number(incidentId)
-        },
-
-        data:{
-
-          escalated:true,
-
-          autoEscalated:
-            automatic,
-
-          impactScore:
-            Math.min(
-              100,
-              current.impactScore + 15
-            ),
-
-          priorityScore:
-            Math.min(
-              100,
-              current.priorityScore + 10
-            )
-        }
-      });
-
-    if(global.io){
-
-      global.io.emit(
-        "incident-escalated",
-        incident
-      );
-    }
-
-    return incident;
-
-  } catch(err){
-
-    console.error(
-      "ESCALATE INCIDENT ERROR:",
-      err
-    );
-
-    return null;
-  }
+async function escalateIncident(incidentId, automatic = false) {
+  // Guard the transition in the database: repeated/concurrent requests must
+  // not add impact/priority twice, including after a lost HTTP response.
+  const result = await prisma.$transaction(async tx => {
+    const id = Number(incidentId);
+    const current = await tx.incident.findUnique({ where: { id } });
+    if (!current || current.escalated) return { incident: current, changed: false };
+    const changed = await tx.incident.updateMany({
+      where: { id, escalated: false },
+      data: {
+        escalated: true,
+        autoEscalated: automatic,
+        impactScore: Math.min(100, current.impactScore + 15),
+        priorityScore: Math.min(100, current.priorityScore + 10),
+      },
+    });
+    return { incident: await tx.incident.findUnique({ where: { id } }), changed: changed.count === 1 };
+  });
+  if (result.changed && global.io) global.io.emit("incident-escalated", result.incident);
+  return result.incident;
 }
 
 // ======================================================
@@ -406,7 +362,7 @@ async function listIncidents(){
       err
     );
 
-    return [];
+    throw err;
   }
 }
 
@@ -451,7 +407,7 @@ async function getCriticalIncidents(){
       err
     );
 
-    return [];
+    throw err;
   }
 }
 
@@ -495,10 +451,12 @@ async function processSlaEscalations(){
       if(now < deadline)
         continue;
 
-      await escalateIncident(
-        incident.id,
-        true
-      );
+      // One failed escalation must not stop the remaining scheduled incidents.
+      try {
+        await escalateIncident(incident.id, true);
+      } catch (err) {
+        console.error("SLA INCIDENT ESCALATION ERROR:", err);
+      }
     }
 
   } catch(err){

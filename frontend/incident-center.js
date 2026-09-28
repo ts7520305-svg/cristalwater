@@ -1,703 +1,210 @@
-const API =
-  "/api";
+(function () {
+  'use strict';
+  const authKeys = ['token', 'cristalwater_jwt', 'adminToken', 'user', 'cristalwater_user'];
+  const $ = id => document.getElementById(id);
+  const fingerprint = () => authKeys.map(key => localStorage.getItem(key) || '').join('\u0000');
+  const owner = fingerprint();
+  const token = localStorage.getItem('cristalwater_jwt') || localStorage.getItem('token');
+  let incidents = [], timeline = [], ready = false, loading = false, writing = false;
+  let invalidated = false, readVersion = 0, readController, writeController, socket;
 
-// ======================================================
-// AUTH
-// ======================================================
-
-const token =
-  localStorage.getItem("token");
-
-const user =
-  JSON.parse(
-    localStorage.getItem("user") || "{}"
-  );
-
-// ======================================================
-// SOCKET
-// ======================================================
-
-const socket =
-  io();
-
-// ======================================================
-// STATE
-// ======================================================
-
-let incidents = [];
-
-let timeline = [];
-
-// ======================================================
-// HELPERS
-// ======================================================
-
-function escapeHtml(value){
-
-  return String(value ?? "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
-
-function getHeaders(){
-
-  return {
-    Authorization:
-      `Bearer ${token}`
-  };
-}
-
-function logout(){
-
-  localStorage.removeItem("token");
-
-  localStorage.removeItem("user");
-
-  window.location.href =
-    "/login";
-}
-
-// ======================================================
-// SLA
-// ======================================================
-
-function getRemainingSla(incident){
-
-  if(!incident.slaDeadline)
-    return null;
-
-  const now =
-    Date.now();
-
-  const deadline =
-    new Date(
-      incident.slaDeadline
-    ).getTime();
-
-  return Math.floor(
-    (deadline - now) / 1000 / 60
-  );
-}
-
-function getSlaPercentage(incident){
-
-  if(!incident.slaDeadline)
-    return 0;
-
-  const created =
-    new Date(
-      incident.createdAt
-    ).getTime();
-
-  const deadline =
-    new Date(
-      incident.slaDeadline
-    ).getTime();
-
-  const now =
-    Date.now();
-
-  const total =
-    deadline - created;
-
-  const current =
-    now - created;
-
-  if(total <= 0)
-    return 100;
-
-  let percent =
-    (current / total) * 100;
-
-  if(percent < 0)
-    percent = 0;
-
-  if(percent > 100)
-    percent = 100;
-
-  return Math.floor(percent);
-}
-
-function getSlaColor(percent){
-
-  if(percent >= 90)
-    return "#dc2626";
-
-  if(percent >= 60)
-    return "#ea580c";
-
-  return "#16a34a";
-}
-
-// ======================================================
-// LOAD INCIDENTS
-// ======================================================
-
-async function loadIncidents(){
-
-  try {
-
-    const res =
-      await fetch(
-        `${API}/incidents`,
-        {
-          headers:getHeaders()
+  function textElement(tag, text, className) {
+    const el = document.createElement(tag);
+    if (className) el.className = className;
+    el.textContent = String(text ?? '');
+    return el;
+  }
+  function status(message, state) {
+    $('incidentStatus').textContent = message;
+    $('incidentStatus').dataset.state = state;
+  }
+  function controls() {
+    $('refreshBtn').disabled = invalidated || writing || loading || !navigator.onLine;
+    $('refreshBtn').setAttribute('aria-busy', String(loading));
+    $('incidentList').setAttribute('aria-busy', String(loading || writing));
+    document.querySelectorAll('.incident-actions button').forEach(button => {
+      button.disabled = invalidated || writing || loading || !ready || !navigator.onLine;
+    });
+  }
+  function clearSnapshot(message) {
+    incidents = []; ready = false;
+    for (const id of ['criticalCount', 'highCount', 'activeCount', 'resolvedCount']) $(id).textContent = '—';
+    $('incidentList').replaceChildren(textElement('p', message));
+    controls();
+  }
+  function invalidate() {
+    if (invalidated) return;
+    invalidated = true; readVersion++;
+    readController?.abort(); writeController?.abort(); socket?.disconnect();
+    loading = writing = false; timeline = [];
+    $('incidentTimeline').replaceChildren(); $('actionStatus').textContent = '';
+    clearSnapshot('Volte a abrir esta página com a conta pretendida.');
+    status('A sessão mudou. A informação anterior foi retirada.', 'session');
+  }
+  function sameSession() {
+    if (invalidated) return false;
+    if (!token || fingerprint() !== owner) { invalidate(); return false; }
+    return true;
+  }
+  function validIncident(row) {
+    return row && Number.isSafeInteger(row.id) && row.id > 0 &&
+      ['title', 'severity', 'status'].every(key => typeof row[key] === 'string') &&
+      typeof row.escalated === 'boolean' &&
+      Number.isFinite(row.impactScore) && Number.isFinite(row.priorityScore);
+  }
+  function validList(data) {
+    return data?.ok === true && Array.isArray(data.incidents) && data.incidents.every(validIncident) &&
+      new Set(data.incidents.map(row => row.id)).size === data.incidents.length;
+  }
+  function dateLabel(value) {
+    const date = value ? new Date(value) : null;
+    return date && Number.isFinite(date.getTime()) ? date.toLocaleString('pt-PT', { timeZone: 'Europe/Lisbon' }) : '—';
+  }
+  function sla(row) {
+    const deadline = row.slaDeadline ? new Date(row.slaDeadline).getTime() : NaN;
+    const created = row.createdAt ? new Date(row.createdAt).getTime() : NaN;
+    if (row.status === 'RESOLVED') return { label: 'SLA: encerrado', percent: 0 };
+    if (!Number.isFinite(deadline) || !Number.isFinite(created) || deadline <= created) return { label: 'SLA: —', percent: 0 };
+    const minutes = Math.ceil((deadline - Date.now()) / 60000);
+    return { label: 'SLA: ' + (minutes <= 0 ? 'VENCIDO' : minutes + ' min'), percent: Math.max(0, Math.min(100, Math.floor((Date.now() - created) / (deadline - created) * 100))) };
+  }
+  function refreshSla() {
+    if (!ready || invalidated) return;
+    for (const row of incidents) {
+      const card = $('incident-' + row.id); if (!card) continue;
+      const value = sla(row), bar = card.querySelector('.sla-progress');
+      card.querySelector('.badge-sla').textContent = value.label;
+      bar.style.width = value.percent + '%';
+      bar.style.background = value.percent >= 90 ? '#dc2626' : value.percent >= 60 ? '#ea580c' : '#16a34a';
+    }
+  }
+  function render() {
+    $('criticalCount').textContent = incidents.filter(row => row.severity === 'CRITICAL').length;
+    $('highCount').textContent = incidents.filter(row => row.severity === 'HIGH').length;
+    $('activeCount').textContent = incidents.filter(row => row.status !== 'RESOLVED').length;
+    $('resolvedCount').textContent = incidents.filter(row => row.status === 'RESOLVED').length;
+    const fragment = document.createDocumentFragment();
+    for (const row of incidents) {
+      const severity = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].includes(row.severity) ? row.severity.toLowerCase() : 'unknown';
+      const card = textElement('article', '', 'incident incident-' + severity); card.id = 'incident-' + row.id;
+      card.append(textElement('h3', row.title), textElement('p', row.description));
+      const badges = textElement('div', '', 'badges');
+      badges.append(textElement('span', row.severity, 'badge badge-' + severity), textElement('span', '', 'badge badge-sla'));
+      if (row.escalated) badges.append(textElement('span', 'ESCALADO', 'badge badge-escalated'));
+      card.append(badges);
+      const meta = textElement('div', '', 'incident-meta');
+      for (const [label, value] of [['Estado', row.status], ['Impacto', row.impactScore], ['Prioridade', row.priorityScore], ['Origem', row.source || '—'], ['Criado (Lisboa)', dateLabel(row.createdAt)]]) {
+        const line = textElement('div', label + ': '); line.append(textElement('b', value)); meta.append(line);
+      }
+      const container = textElement('div', '', 'sla-container'), bar = textElement('div', '', 'sla-bar');
+      bar.setAttribute('aria-hidden', 'true'); bar.append(textElement('div', '', 'sla-progress')); container.append(bar);
+      card.append(meta, container);
+      if (row.status !== 'RESOLVED') {
+        const actions = textElement('div', '', 'incident-actions');
+        for (const [action, label] of [['resolve', 'Resolver'], ['escalate', 'Escalar']]) {
+          if (action === 'escalate' && row.escalated) continue;
+          const button = textElement('button', label, 'btn-' + action); button.type = 'button';
+          button.setAttribute('aria-label', label + ' incidente #' + row.id);
+          button.addEventListener('click', () => mutate(row.id, action)); actions.append(button);
         }
-      );
-
-    if(res.status === 401){
-
-      logout();
-
-      return;
+        card.append(actions);
+      }
+      fragment.append(card);
     }
-
-    const data =
-      await res.json();
-
-    incidents =
-      data.incidents || [];
-
-    renderDashboard();
-
-    renderIncidents();
-
-  } catch(err){
-
-    console.error(err);
+    if (!incidents.length) fragment.append(textElement('p', 'Sem incidentes registados.'));
+    $('incidentList').replaceChildren(fragment); refreshSla(); controls();
   }
-}
-
-// ======================================================
-// KPI
-// ======================================================
-
-function renderDashboard(){
-
-  const critical =
-    incidents.filter(i =>
-      i.severity === "CRITICAL"
-    ).length;
-
-  const high =
-    incidents.filter(i =>
-      i.severity === "HIGH"
-    ).length;
-
-  const active =
-    incidents.filter(i =>
-      i.status !== "RESOLVED"
-    ).length;
-
-  const resolved =
-    incidents.filter(i =>
-      i.status === "RESOLVED"
-    ).length;
-
-  setText(
-    "criticalCount",
-    critical
-  );
-
-  setText(
-    "highCount",
-    high
-  );
-
-  setText(
-    "activeCount",
-    active
-  );
-
-  setText(
-    "resolvedCount",
-    resolved
-  );
-}
-
-function setText(id,value){
-
-  const el =
-    document.getElementById(id);
-
-  if(el){
-
-    el.textContent =
-      value;
+  function addTimeline(title, id) {
+    timeline.unshift({ title, id, date: new Date().toISOString() }); timeline = timeline.slice(0, 30);
+    $('incidentTimeline').replaceChildren(...timeline.map(item => {
+      const entry = textElement('div', '', 'timeline-item');
+      entry.append(textElement('b', item.title), textElement('div', 'Incidente #' + item.id), textElement('div', dateLabel(item.date), 'timeline-time'));
+      return entry;
+    }));
   }
-}
-
-// ======================================================
-// BADGES
-// ======================================================
-
-function severityBadge(severity){
-
-  const s =
-    String(severity || "")
-      .toUpperCase();
-
-  const cls =
-    s === "CRITICAL"
-      ? "badge-critical"
-      : s === "HIGH"
-        ? "badge-high"
-        : s === "MEDIUM"
-          ? "badge-medium"
-          : "badge-low";
-
-  return `
-
-    <div class="badge ${cls}">
-      ${escapeHtml(s)}
-    </div>
-
-  `;
-}
-
-// ======================================================
-// INCIDENTS
-// ======================================================
-
-function renderIncidents(){
-
-  const box =
-    document.getElementById(
-      "incidentList"
-    );
-
-  if(!box) return;
-
-  if(!incidents.length){
-
-    box.innerHTML = `
-
-      <div class="incident incident-low">
-
-        ✅ Sem incidentes ativos.
-
-      </div>
-
-    `;
-
-    return;
+  async function loadIncidents() {
+    if (!sameSession() || writing) return;
+    const version = ++readVersion;
+    readController?.abort(); readController = new AbortController();
+    if (!navigator.onLine) {
+      loading = false; clearSnapshot('Ligue-se à rede para consultar os incidentes.');
+      status('Sem ligação. Os incidentes não foram confirmados.', 'offline'); return;
+    }
+    loading = true; clearSnapshot('A consultar os incidentes…'); status('A carregar incidentes…', 'loading');
+    try {
+      const response = await fetch('/api/incidents', { headers: { Authorization: 'Bearer ' + token }, cache: 'no-store', signal: readController.signal });
+      if (!sameSession() || version !== readVersion) return;
+      if (!response.ok) throw Object.assign(Error('read'), { status: response.status });
+      const data = await response.json();
+      if (!sameSession() || version !== readVersion) return;
+      if (!validList(data)) throw Error('invalid response');
+      incidents = data.incidents; ready = true; render();
+      status('Lista atualizada às ' + dateLabel(new Date().toISOString()) + '.', incidents.length ? 'ready' : 'empty');
+    } catch (error) {
+      if (!sameSession() || version !== readVersion) return;
+      if (error.status === 401 || error.status === 403) { timeline = []; $('incidentTimeline').replaceChildren(); }
+      clearSnapshot('Não foi possível consultar a lista. Use Atualizar para tentar novamente.');
+      status(error.status === 403 ? 'Sem permissão para consultar os incidentes.' : error.status === 401 ? 'Sessão inválida. Volte a entrar.' : 'Não foi possível carregar os incidentes. Os totais estão indisponíveis.', 'error');
+    } finally {
+      if (version === readVersion) { loading = false; controls(); }
+    }
   }
-
-  box.innerHTML =
-    incidents.map(i => {
-
-      const severity =
-        String(i.severity || "")
-          .toLowerCase();
-
-      const slaPercent =
-        getSlaPercentage(i);
-
-      const slaRemaining =
-        getRemainingSla(i);
-
-      return `
-
-        <div class="incident incident-${severity}">
-
-          <h3>
-
-            ${escapeHtml(i.title)}
-
-          </h3>
-
-          <div>
-
-            ${escapeHtml(i.description || "")}
-
-          </div>
-
-          <!-- BADGES -->
-
-          <div class="badges">
-
-            ${severityBadge(i.severity)}
-
-            <div class="badge badge-sla">
-
-              SLA:
-              ${
-                slaRemaining == null
-                  ? "-"
-                  : slaRemaining <= 0
-                    ? "VENCIDO"
-                    : `${slaRemaining}m`
-              }
-
-            </div>
-
-            ${
-              i.escalated
-
-              ? `
-
-                <div class="badge badge-escalated">
-
-                  ESCALATED
-
-                </div>
-
-              `
-
-              : ""
-            }
-
-          </div>
-
-          <!-- META -->
-
-          <div class="incident-meta">
-
-            Estado:
-            <b>${escapeHtml(i.status)}</b>
-
-            <br>
-
-            Impact:
-            <b>${i.impactScore}</b>
-
-            <br>
-
-            Priority:
-            <b>${i.priorityScore}</b>
-
-            <br>
-
-            Origem:
-            <b>${escapeHtml(i.source)}</b>
-
-            <br>
-
-            ${
-              i.createdAt
-                ? new Date(i.createdAt)
-                    .toLocaleString("pt-PT")
-                : ""
-            }
-
-          </div>
-
-          <!-- SLA -->
-
-          <div class="sla-container">
-
-            <div class="sla-bar">
-
-              <div
-                class="sla-progress"
-                style="
-                  width:${slaPercent}%;
-                  background:${getSlaColor(slaPercent)}
-                "
-              ></div>
-
-            </div>
-
-          </div>
-
-          <!-- ACTIONS -->
-
-          <div class="incident-actions">
-
-            ${
-              i.status !== "RESOLVED"
-
-              ? `
-
-                <button
-                  class="btn-resolve"
-                  onclick="resolveIncident(${i.id})"
-                >
-
-                  Resolver
-
-                </button>
-
-              `
-
-              : ""
-            }
-
-            ${
-              !i.escalated
-
-              ? `
-
-                <button
-                  class="btn-escalate"
-                  onclick="escalateIncident(${i.id})"
-                >
-
-                  Escalar
-
-                </button>
-
-              `
-
-              : ""
-            }
-
-          </div>
-
-        </div>
-
-      `;
-    }).join("");
-}
-
-// ======================================================
-// TIMELINE
-// ======================================================
-
-function addTimeline(title,message){
-
-  timeline.unshift({
-
-    title,
-
-    message,
-
-    createdAt:new Date()
+  async function mutate(id, action) {
+    if (!sameSession() || !ready || writing || loading || !navigator.onLine) return;
+    const row = incidents.find(item => item.id === id);
+    if (!row || row.status === 'RESOLVED' || (action === 'escalate' && row.escalated)) return;
+    writing = true; controls();
+    $('actionStatus').textContent = 'A confirmar a operação no servidor…';
+    writeController = new AbortController();
+    let confirmed = false;
+    try {
+      const response = await fetch('/api/incidents/' + (action === 'resolve' ? 'status/' : 'escalate/') + id, {
+        method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify(action === 'resolve' ? { status: 'RESOLVED' } : {}), signal: writeController.signal,
+      });
+      if (!sameSession()) return;
+      if (!response.ok) throw Object.assign(Error('write'), { status: response.status });
+      const data = await response.json();
+      if (!sameSession()) return;
+      if (data?.ok !== true || !validIncident(data.incident) || data.incident.id !== id ||
+          (action === 'resolve' ? data.incident.status !== 'RESOLVED' : data.incident.escalated !== true)) throw Error('unconfirmed response');
+      const title = action === 'resolve' ? 'Incidente resolvido' : 'Incidente escalado';
+      addTimeline(title, id); $('actionStatus').textContent = title + ' — confirmação recebida do servidor.'; confirmed = true;
+    } catch (error) {
+      if (!sameSession()) return;
+      ready = false;
+      clearSnapshot('Atualize a lista para verificar o estado dos incidentes.');
+      status('O estado da operação não foi confirmado. Atualize a lista.', 'error');
+      if (error.status === 401 || error.status === 403) {
+        timeline = []; $('incidentTimeline').replaceChildren(); clearSnapshot('Atualize a lista após confirmar o seu acesso.');
+        $('actionStatus').textContent = error.status === 403 ? 'Sem permissão para esta operação.' : 'Sessão inválida. Volte a entrar.';
+      } else {
+        $('actionStatus').textContent = 'Não foi possível confirmar a operação. Atualize a lista para verificar o estado antes de tentar novamente.';
+      }
+    } finally {
+      writing = false; writeController = null; controls();
+    }
+    if (confirmed && sameSession()) await loadIncidents();
+  }
+  $('refreshBtn').addEventListener('click', () => { $('actionStatus').textContent = ''; void loadIncidents(); });
+  $('dashboardBtn').addEventListener('click', () => { window.location.href = '/admin-dashboard'; });
+  window.addEventListener('storage', event => {
+    if ((event.key === null || authKeys.includes(event.key)) && event.oldValue !== event.newValue) invalidate();
   });
-
-  timeline =
-    timeline.slice(0,30);
-
-  renderTimeline();
-}
-
-function renderTimeline(){
-
-  const box =
-    document.getElementById(
-      "incidentTimeline"
-    );
-
-  if(!box) return;
-
-  if(!timeline.length){
-
-    box.innerHTML = `
-
-      <div class="timeline-item">
-
-        Sistema iniciado.
-
-      </div>
-
-    `;
-
-    return;
-  }
-
-  box.innerHTML =
-    timeline.map(item => `
-
-      <div class="timeline-item">
-
-        <b>
-          ${escapeHtml(item.title)}
-        </b>
-
-        <div>
-          ${escapeHtml(item.message)}
-        </div>
-
-        <div class="timeline-time">
-
-          ${
-            new Date(item.createdAt)
-              .toLocaleString("pt-PT")
-          }
-
-        </div>
-
-      </div>
-
-    `).join("");
-}
-
-// ======================================================
-// RESOLVE
-// ======================================================
-
-async function resolveIncident(id){
-
+  window.addEventListener('offline', () => {
+    if (!sameSession()) return;
+    ++readVersion; readController?.abort(); loading = false;
+    clearSnapshot('Ligue-se à rede para consultar os incidentes.'); status('Sem ligação. Os incidentes não foram confirmados.', 'offline');
+  });
+  window.addEventListener('online', () => { if (sameSession() && !writing) void loadIncidents(); });
+  const timer = setInterval(() => { if (sameSession()) refreshSla(); }, 1000);
+  window.addEventListener('pagehide', () => { invalidate(); clearInterval(timer); });
   try {
-
-    await fetch(
-      `${API}/incidents/status/${id}`,
-      {
-
-        method:"POST",
-
-        headers:{
-          ...getHeaders(),
-          "Content-Type":"application/json"
-        },
-
-        body:JSON.stringify({
-
-          status:"RESOLVED"
-        })
-      }
-    );
-
-    addTimeline(
-      "Incidente resolvido",
-      `Incidente #${id}`
-    );
-
-    loadIncidents();
-
-  } catch(err){
-
-    console.error(err);
-  }
-}
-
-// ======================================================
-// ESCALATE
-// ======================================================
-
-async function escalateIncident(id){
-
-  try {
-
-    await fetch(
-      `${API}/incidents/escalate/${id}`,
-      {
-
-        method:"POST",
-
-        headers:getHeaders()
-      }
-    );
-
-    addTimeline(
-      "Incidente escalado",
-      `Incidente #${id}`
-    );
-
-    loadIncidents();
-
-  } catch(err){
-
-    console.error(err);
-  }
-}
-
-// ======================================================
-// SOCKET
-// ======================================================
-
-socket.on(
-  "new-incident",
-  incident => {
-
-    addTimeline(
-      "Novo incidente",
-      incident.title
-    );
-
-    loadIncidents();
-  }
-);
-
-socket.on(
-  "incident-updated",
-  incident => {
-
-    addTimeline(
-      "Incidente atualizado",
-      incident.title
-    );
-
-    loadIncidents();
-  }
-);
-
-socket.on(
-  "incident-escalated",
-  incident => {
-
-    addTimeline(
-      "Incidente escalado",
-      incident.title
-    );
-
-    loadIncidents();
-  }
-);
-
-// ======================================================
-// BUTTONS
-// ======================================================
-
-document
-  .getElementById("refreshBtn")
-  ?.addEventListener(
-    "click",
-    loadIncidents
-  );
-
-document
-  .getElementById("dashboardBtn")
-  ?.addEventListener(
-    "click",
-    ()=>{
-
-      window.location.href =
-        "/admin-dashboard";
+    if (sameSession() && typeof window.io === 'function') {
+      socket = window.io({ auth: { token } });
+      for (const event of ['new-incident', 'incident-updated', 'incident-escalated']) socket.on(event, () => { if (sameSession() && !writing) void loadIncidents(); });
     }
-  );
-
-document
-  .getElementById("logoutBtn")
-  ?.addEventListener(
-    "click",
-    logout
-  );
-
-// ======================================================
-// AUTO REFRESH
-// ======================================================
-
-setInterval(()=>{
-
-  renderIncidents();
-
-},30000);
-
-// ======================================================
-// INIT
-// ======================================================
-
-window.addEventListener(
-  "load",
-  ()=>{
-
-    if(
-      !token ||
-      !user ||
-      user.role !== "ADMIN"
-    ){
-
-      logout();
-
-      return;
-    }
-
-    renderTimeline();
-
-    loadIncidents();
-  }
-);
+  } catch (_) { /* Manual reads remain available if realtime is unavailable. */ }
+  $('incidentTimeline').append(textElement('p', 'As operações confirmadas nesta sessão aparecem aqui.'));
+  void loadIncidents();
+})();

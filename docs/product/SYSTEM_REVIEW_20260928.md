@@ -60,6 +60,16 @@ Validação local: **1 079 unitários/123 ficheiros**, quatro técnicos, sintaxe
 
 O utilizador definiu contrato anual, assinatura inicial na área de cliente e não renovação por e-mail 30 dias antes do termo, deixando a finalização/implementação para mais tarde. [Requisitos guardados](MAINTENANCE_CONTRACT_SIGNATURE_20260928.md); endereço de e-mail e método de assinatura não escolhidos. A ativação administrativa atual não é assinatura de contrato.
 
+## TASK390 — confirmações e estados do centro de incidentes
+
+Reproduzidas duas falhas na versão anterior: uma leitura com erro de base respondia `200` e lista vazia; uma resolução recusada com `403` era anunciada como concluída. Os serviços de leitura agora propagam a falha para respostas 503 e o router recusa escritas sem resultado. A interface exige uma resposta HTTP válida, `ok`, mesmo ID e estado confirmado, antes de acrescentar uma confirmação à linha temporal. Respostas incompletas, de outro incidente, recusadas ou perdidas obrigam a nova consulta, sem reenvio automático.
+
+O escalamento usa atualização condicional dentro de transação para não somar impacto/prioridade novamente em pedidos repetidos ou concorrentes. A rotina agendada mantém o processamento dos restantes incidentes quando um falha. O comportamento de resolução existente não ganhou recibo persistente nem fila offline. A página indica indisponibilidade com totais «—», reservando zero para uma leitura válida; as mudanças de sessão retiram dados e invalidam leituras/escritas pendentes. Conteúdo recebido passa por `textContent`, sem interpolação em classes ou ações inline. Eventos em tempo real só desencadeiam consulta autenticada. Atualizar o SLA conserva o foco dos botões; datas visíveis usam Lisboa sem reescrever registos.
+
+Validação: 1 079 unitários/123 ficheiros, quatro técnicos, sintaxe 691/307/44, dois grupos integrados distintos. API e navegador verificam recusas, falhas de base, recibos nulos/errados, resposta perdida, duplo clique, concorrência, perfis, sessão trocada durante leitura/escrita, vazio real e offline. Teclado, 320/390/1440, botões ≥44 px e contraste claro/escuro do conteúdo e menu; conflitos de CSS encontrados na inspeção foram corrigidos. [Evidência local e confirmação nativa da TASK388](evidence/20260928_task390_local.json). Cache v200, runner 302, sem migração/dependência nova. TASK390 preparada para publicação; PostgreSQL/restauro ainda por confirmar.
+
+**Atualização de estado:** TASK388 concluída com 301/301 grupos e restauro de 128 tabelas/47 ficheiros, linhas e hashes iguais; 17 etapas aprovadas. As referências anteriores a este CI em execução são históricas. TASK389 continua pendente na última consulta. As fixtures `reminder-material-browser.js` e `reminder-visits-browser.js` já cobrem os dois lembretes; não eram páginas sem testes. `/admin-visits` é referida no microsweep. O centro de incidentes ainda tem textos apenas em português, lista completa sem paginação e linha temporal da sessão, sem auditoria histórica nova. O dashboard operacional mantém lacunas de erro/valores omitidos e respostas fora de ordem, identificadas na leitura e ainda não corrigidas.
+
 ## Mapa de módulos e critérios ainda abertos
 
 | Área | Código e capacidade encontrada | Falta para fechar a aceitação |
@@ -87,10 +97,10 @@ O utilizador definiu contrato anual, assinatura inicial na área de cliente e n�
 
 ## Fila finita de trabalho
 
-1. **Fechar a validação das TASK388/389:** TASK386/387 já confirmadas, com 300/301 grupos e restauros PostgreSQL. Confirmar os 301 grupos e restauro dos lotes seguintes. Manter a falha TASK385 no histórico.
+1. **Fechar a validação das TASK389/390:** TASK386/387/388 já confirmadas, com 300/301/301 grupos e restauros PostgreSQL. Confirmar os 301/302 grupos e restauro dos lotes seguintes. Manter a falha TASK385 no histórico.
 2. **Confirmar em dados reais o resumo de riscos:** leitura completa validada na TASK387 e identidades de ligações corrigidas na TASK389. Medir o volume e rever divergências das fontes financeiras; não inferir dívida de documentos não conciliados.
-3. **Localização da correção extra concluída localmente na TASK388:** confirmar CI; continuar depois a localização das páginas antigas e da fila geral, preservando dados literais e pedidos. Não confundir o diálogo traduzido com toda a aplicação traduzida.
-4. **Fechar o inventário de apresentação:** cinco entradas de raiz sem referência literal no inventário (`/admin-visits`, `/incident-center`, `/operational-dashboard`, `/reminder-materials`, `/reminder-visits`), distinguindo aliases reais de páginas auxiliares. Procurar testes com URLs dinâmicos antes de escrever testes repetidos. Verificar ainda erros, vazio, carregamento, teclado, ecrãs pequenos, idiomas e PDFs aplicáveis.
+3. **Localização da correção extra confirmada no CI da TASK388:** continuar a localização das páginas antigas e da fila geral, preservando dados literais e pedidos. Não confundir o diálogo traduzido com toda a aplicação traduzida.
+4. **Fechar o inventário de apresentação:** centro de incidentes revisto na TASK390; lembretes cobertos por fixtures e visitas referidas no microsweep. Corrigir os estados/valores omitidos e concorrência de leituras de `/operational-dashboard`; não tratar referências literais como aceitação completa. Verificar ainda erros, vazio, carregamento, teclado, ecrãs pequenos, idiomas e PDFs aplicáveis.
 5. **Conferir dados históricos e custos/receitas reais:** usar os percursos de revisão existentes; criar só os que faltarem para fontes comprovadas. Não reconstruir valores ou autoria automaticamente.
 6. **Importação WhatsApp e requisitos avançados:** tratar como fluxos próprios, com critérios de aceitação e revisão dos dados. Reutilizar os chats, clientes e registos financeiros atuais.
 7. **Aceitação de produção:** volume representativo, VPS/fornecedores, restauro operacional e piloto físico. Exige ambiente/acessos e execução reais, sem inferir resultados de simulações.

@@ -51,7 +51,15 @@
     .timeline-item { position:relative; padding-left:24px; margin-bottom:14px; color:#d6eeff; }
     .timeline-item::before { content:""; position:absolute; left:0; top:4px; width:12px; height:12px; border-radius:50%; background:#ff6b6b; }
     .timeline-time { font-size:12px; color:#8fb1cc; margin-top:5px; }
-    @media (max-width:1000px) { .layout { grid-template-columns:1fr; } }
+    .panel, .incident, .card { min-width:0; overflow-wrap:anywhere; }
+    .grid { grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr)); }
+    button { min-height:44px; }
+    button:disabled { cursor:default; opacity:.6; }
+    button:focus-visible { outline:3px solid #35d1ff; outline-offset:3px; }
+    #incidentStatus, #actionStatus { overflow-wrap:anywhere; line-height:1.5; }
+    #incidentStatus[data-state="error"], #actionStatus { color:#ffd166; }
+    @media (max-width:1000px) { .layout { grid-template-columns:minmax(0,1fr); } }
+    @media (max-width:480px) { header { padding:14px 16px; gap:12px; flex-wrap:wrap; } main { padding:12px; } h1 { font-size:22px; } .panel { padding:12px; } }
   </style>
   <link rel="stylesheet" href="/cw-ui-kit.css">
   <link rel="stylesheet" href="/cristal-assist.css">
@@ -59,8 +67,29 @@
   <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
   <link rel="stylesheet" href="/ui/design-system.css">
+  <style>
+    body#incidentCenterPage { --incident-bg:#f3f7fa; --incident-surface:#fff; --incident-soft:#f5f8fb; --incident-text:#183047; --incident-muted:#42576b; background:var(--incident-bg); color:var(--incident-text); }
+    #incidentCenterPage header, #incidentCenterPage .panel, #incidentCenterPage .card { background:var(--incident-surface); color:var(--incident-text); }
+    #incidentCenterPage .panel, #incidentCenterPage .card { --cw-surface:var(--incident-surface); }
+    #incidentCenterPage [data-cw-open-drawer] { background:var(--incident-surface); color:var(--incident-text); }
+    #incidentCenterPage main button { min-height:44px; }
+    #incidentCenterPage .incident { background:var(--incident-soft); color:var(--incident-text); }
+    #incidentCenterPage h1, #incidentCenterPage h2, #incidentCenterPage h3, #incidentCenterPage p, #incidentCenterPage .timeline-item { color:inherit; }
+    #incidentCenterPage .label, #incidentCenterPage .incident-meta, #incidentCenterPage .timeline-time { color:var(--incident-muted); }
+    #incidentCenterPage .red { color:#b42335; } #incidentCenterPage .orange { color:#946000; }
+    #incidentCenterPage .blue { color:#1763a0; } #incidentCenterPage .green { color:#167344; }
+    #incidentCenterPage .badge { background:#e4edf6; color:#183047; border-color:#70869b; }
+    #incidentCenterPage #actionStatus, #incidentCenterPage #incidentStatus[data-state="error"] { color:#8b351a; }
+    @media(prefers-color-scheme:dark) {
+      body#incidentCenterPage { --incident-bg:#0b1624; --incident-surface:#101e30; --incident-soft:#14283d; --incident-text:#e6edf7; --incident-muted:#b8cbe0; }
+      #incidentCenterPage .badge { background:#17324d; color:#e7f1ff; }
+      #incidentCenterPage .red { color:#ff8a95; } #incidentCenterPage .orange { color:#ffd166; }
+      #incidentCenterPage .blue { color:#7dc8ff; } #incidentCenterPage .green { color:#81e6b3; }
+      #incidentCenterPage #actionStatus, #incidentCenterPage #incidentStatus[data-state="error"] { color:#ffd166; }
+    }
+  </style>
 </head>
-<body data-required-role="ADMIN">
+<body id="incidentCenterPage" data-required-role="ADMIN">
 
   <div style="padding:12px 16px 0">
     <button type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
@@ -68,32 +97,35 @@
   <header>
     <h1>Centro de Incidentes</h1>
     <div class="header-actions">
-      <button id="logoutBtn" type="button">Sair</button>
+      <button id="logoutBtn" type="button" data-cw-logout>Sair</button>
     </div>
   </header>
 
-  <main>
+  <main data-cw-state-managed="manual">
     <div class="topbar">
       <button id="refreshBtn" type="button">Atualizar</button>
       <button id="dashboardBtn" type="button">Dashboard</button>
     </div>
 
+    <p id="incidentStatus" role="status" aria-live="polite" data-state="loading">A carregar incidentes…</p>
+    <p id="actionStatus" role="status" aria-live="polite"></p>
+
     <section class="grid" aria-label="Indicadores de incidentes">
       <article class="card">
-        <div class="label">Criticos</div>
-        <div id="criticalCount" class="value red">0</div>
+        <div class="label">Críticos</div>
+        <div id="criticalCount" class="value red">—</div>
       </article>
       <article class="card">
         <div class="label">Altos</div>
-        <div id="highCount" class="value orange">0</div>
+        <div id="highCount" class="value orange">—</div>
       </article>
       <article class="card">
         <div class="label">Ativos</div>
-        <div id="activeCount" class="value blue">0</div>
+        <div id="activeCount" class="value blue">—</div>
       </article>
       <article class="card">
         <div class="label">Resolvidos</div>
-        <div id="resolvedCount" class="value green">0</div>
+        <div id="resolvedCount" class="value green">—</div>
       </article>
     </section>
 
@@ -104,7 +136,7 @@
       </article>
 
       <article class="panel">
-        <h2>Incidentes ativos</h2>
+        <h2>Incidentes registados</h2>
         <div id="incidentList" aria-live="polite"></div>
       </article>
     </section>
