@@ -1,6 +1,6 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK403 validada localmente / C02
+## Retoma atual — 28/09/2026, TASK403 publicada / C02
 
 O [plano de conclusão](COMPLETION_PLAN_20260928.md) ficou publicado na TASK402, commit `852c4f3082b51e3d6ad5835ba4230d7e5f0935ac`, com **32 tarefas: 30 por executar e duas em validação, C01/C02**. C01 confirma a TASK401; C02 é a correção agora implementada para `/api/dashboard/metrics`. O contrato anual continua adiado. A numeração de lotes TASK não é uma percentagem nem o número de entregas pendentes.
 
@@ -14,9 +14,9 @@ Reproduzida a mistura de momentos nas métricas: a versão anterior manteve a co
 
 **CI TASK401:** run `36429681410`, job `108952334160`, ainda em execução na última consulta; dez etapas concluídas, grupos integrados em curso, restauro por confirmar. TASK399/400 mantêm prova nativa aprovada na evidência TASK401. TASK402 é documentação e não abriu novo CI.
 
-**Publicação TASK403:** validação local concluída; publicação e CI serão registados após confirmação.
+**Publicação TASK403:** branch `work/field-readiness-20260915-simulation`, commit `a63b6a8b70ec07680587bf0d656b4b73cec8c359`, árvore `3b152c4d65659b8c02f337f3b41e961d8c082480`, idêntica à preparada e testada localmente. [CI 36432110804](https://github.com/ts7520305-svg/cristalwater/actions/runs/36432110804), job `108960622472`, em execução; concorrência PostgreSQL, 308 grupos e restauro ainda não confirmados.
 
-**Continuar:** confirmar CI TASK401/TASK403 e fechar C01/C02 só com a prova exigida. Iniciar C03: medir volume de dashboards/alertas/resumo de riscos, com dimensões, bytes, memória/duração e limites explícitos; não cortar totais. Seguir C04 e inventário C05; novas falhas ou subdivisões devem ficar ligadas aos IDs do plano. Dados reais, VPS, fornecedores e pilotos continuam dependentes dos acessos/participantes indicados. Sem merge/deploy/contactos reais; sistema não declarado concluído.
+**Continuar:** confirmar CI TASK401/TASK403 e fechar C01/C02 só com a prova exigida. Além dos logs/runner exato e restauro, ler nos artefactos nativos `reports/field-visual/operational-dashboard/snapshot.json` e `reports/field-suite/dashboard-metrics.json` para confirmar a escrita concorrente. Iniciar C03: medir volume de dashboards/alertas/resumo de riscos, com dimensões, bytes, memória/duração e limites explícitos; não cortar totais. Seguir C04 e inventário C05; novas falhas ou subdivisões devem ficar ligadas aos IDs do plano. Dados reais, VPS, fornecedores e pilotos continuam dependentes dos acessos/participantes indicados. Sem merge/deploy/contactos reais; sistema não declarado concluído.
 
 ## Retoma anterior — 28/09/2026, TASK402: plano de conclusão definido
 

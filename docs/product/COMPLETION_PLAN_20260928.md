@@ -20,7 +20,7 @@ Este é o plano base do âmbito conhecido, não uma garantia de ausência de nov
 
 | ID | Tarefa / TASK | Critério de conclusão | Dependência / estado |
 |---|---|---|---|
-| C02 | Snapshot comum de `/api/dashboard/metrics` — TASK403 | Visitas, alertas e soma financeira observam o mesmo estado; escrita concorrente reproduz a falha anterior. Erro, cache, invalidação, TTL, circuit breaker, GET/POST e perfis conservados. | **Implementada / validação nativa pendente.** 1 288 unitários, quatro técnicos e dois grupos integrados locais. [Evidência TASK403](evidence/20260928_task403_local.json). |
+| C02 | Snapshot comum de `/api/dashboard/metrics` — TASK403 | Visitas, alertas e soma financeira observam o mesmo estado; escrita concorrente reproduz a falha anterior. Erro, cache, invalidação, TTL, circuit breaker, GET/POST e perfis conservados. | **Implementada / validação nativa pendente.** [CI 36432110804](https://github.com/ts7520305-svg/cristalwater/actions/runs/36432110804). 1 288 unitários, quatro técnicos e dois grupos integrados locais. [Evidência TASK403](evidence/20260928_task403_local.json). |
 | C03 | Medir e limitar leituras de dashboards, alertas e riscos | Ensaios crescentes publicam linhas, bytes, duração e memória; totais completos ou indisponibilidade explícita; nenhuma truncagem silenciosa. Registar a dimensão máxima testada e corrigir só os limites reproduzidos. | Local com dados sintéticos; confirmar depois volume real. `DashboardSnapshotBusiness`, `AlertListBusiness`, `operationalRiskSummaryService`. |
 | C04 | Validar volume de agendas, catálogos, guias e relatórios | Manifesto de cenários por superfície, navegação sem perda/duplicação, anexos/PDFs grandes e limites explícitos. Aceitação de cada cenário, incluindo tempo e memória, fica ligada à versão testada. | Local; dimensão real depende de amostra. Reutilizar testes de stock/guias, CRM e relatórios. |
 
@@ -87,3 +87,5 @@ As indicações de sprint/validação de julho são históricas. O utilizador pe
 
 - TASK402: inventário convertido neste plano de 32 tarefas. Base `11cf22efb50d61630599d599c49202990c64c257`. Três documentos previstos; código de produção inalterado. Gates de base registados no checkpoint.
 - TASK403 / C02: cinco testes unitários novos falharam na versão anterior; SQL reproduziu visitas antigas com mais um alerta e 17,25 €. As três fontes partilham agora uma transação. Validação local aprovada; CI nativo/restauro pendentes. O próximo item local é C03, medir volume sem truncagem silenciosa. C01 continua dependente do CI da TASK401.
+
+- Publicação TASK403: commit `a63b6a8b70ec07680587bf0d656b4b73cec8c359`, árvore `3b152c4d65659b8c02f337f3b41e961d8c082480` igual à testada; CI `36432110804`, job `108960622472`, em execução. C01 e C02 continuam em validação.

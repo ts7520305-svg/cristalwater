@@ -197,11 +197,24 @@
     "Production volumes, real data, providers, VPS/backups and field acceptance remain open as specified by the completion plan."
   ],
   "publication": {
-    "status": "validated-locally-not-yet-published",
+    "status": "published",
     "changedFiles": 8,
     "expectedNativeGroups": 308,
     "cacheVersion": "v206",
     "merged": false,
-    "deployed": false
+    "deployed": false,
+    "codeCommit": "a63b6a8b70ec07680587bf0d656b4b73cec8c359",
+    "codeTree": "3b152c4d65659b8c02f337f3b41e961d8c082480",
+    "exactTestedTree": true,
+    "ci": {
+      "runId": 36432110804,
+      "jobId": 108960622472,
+      "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36432110804",
+      "status": "in_progress",
+      "conclusion": null,
+      "postgresConcurrentSnapshotConfirmed": false,
+      "fullRunnerConfirmed": false,
+      "restoreConfirmed": false
+    }
   }
 }
