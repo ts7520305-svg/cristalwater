@@ -135,8 +135,10 @@
   },
   "next": "TASK416 / C06: localize sync queue display and test pending/conflict/offline/recovery with preserved stored bytes and five languages. Legacy technician page text remains a separate bounded follow-up.",
   "publication": {
-    "status": "pending",
+    "status": "published",
     "branch": "work/field-readiness-20260915-simulation",
-    "ciPolicy": "No new integrated run requested: inventory tooling/docs only; syntax, extractor controls, source hashes and existing language browser regression executed locally. TASK414 native remains required for C04."
+    "commit": "418e16208463c98b96234ed56ab235372873091b",
+    "tree": "830e323dce6809d56249266b85d4725d90eb987c",
+    "ciPolicy": "[skip ci]: inventory tooling/docs only; extractor controls, source hashes, syntax and language browser regression approved locally. Native TASK414 remains required for C04."
   }
 }

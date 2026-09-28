@@ -1,5 +1,19 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 28/09/2026, TASK416 local aprovada / C06 em execução
+
+**Próximo TASK417: idiomas da página técnica antiga.** Partir de `frontend/technician.html`/`frontend/technician.js`, entradas C06 do [inventário](LANGUAGE_INVENTORY_20260928.md), até dez ficheiros por lote. Traduzir apenas texto de aplicação; preservar valores/enums, rascunhos, produtos/rota e recibos. Diálogo extra já aprovado permanece. DE dos relatórios é C09, não concluído por este lote.
+
+**TASK416:** fila de sincronização em cinco idiomas,19 chaves/95 valores, atualização explícita e silenciosa, estados offline/401/403/404/409/recusa/histórico. Original503, rótulos e notas literais. Botão mantém bloqueio com resposta pendente; nova credencial aborta o envio antigo e liberta o controlo da conta atual. [Relatório](SYNC_QUEUE_LANGUAGES_20260928.md), [evidência](evidence/20260928_task416_local.json).
+
+**Validação416:** Chromium/auth/IndexedDB reais com HTTP simulado;15 combinações idioma-largura320/390/1440, troca de idioma sem pedidos operacionais e snapshots de outbox iguais, reload/contas, UUID/payload/hash/recibo conservados, reconhecimento de recusa só `reviewedAt`, dados ilegíveis intactos. Regressões de sessão/idiomas aprovadas.1 327 unitários/136ficheiros, quatro técnicos, sintaxe695/307/44.318 scripts únicos/existentes; cache208. Não é aceitação SQL nativa nem revisão visual universal da página.
+
+**Publicar TASK416 e registar commit/árvore/CI.** TASK415 já publicada: `418e16208463c98b96234ed56ab235372873091b`, árvore `830e323dce6809d56249266b85d4725d90eb987c`; auditor/docs apenas, `[skip ci]`. Snapshot C05 permanece ligado à base3c3e65: este lote fecha as19 entradas de origem da fila por evidência específica; o verificador de hashes do snapshot anterior passa a indicar alteração, como esperado. Não alegar que os restantes16mil candidatos são erros ou estão resolvidos.
+
+**CI ainda pendente:** TASK413 run36489954119/job109155898206 e TASK414 run36491440593/job109160736428 na suite, dez etapas aprovadas na última leitura. C04 exige317 grupos/restauro e os dois JSONs de uploads da versão414; TASK416 exige318 grupos/restauro na sua versão. Provas específicas antigas não são convertidas em aprovação da atual.
+
+**Contagem32:**26 por iniciar, C06 em execução, C04 em validação, quatro concluídas(C01–C03/C05). Branchautorizada `work/field-readiness-20260915-simulation`; contrato anual adiado. Sem merge/deploy/contactos reais. C13 recupera fotos da reparação pela API adicionada414; C14 revê originais legados públicos.
+
 ## Retoma atual — 28/09/2026, TASK415 / inventário C05 concluído
 
 **Continuar na TASK416, C06: fila de sincronização.** Começar em `frontend/cw-field-offline.js`, localizar estados/ações em PT/EN/FR/ES/DE e comprovar que trocar idioma/recarregar preserva UUID, recibos, conteúdos e rascunhos. A página técnica antiga fica num lote próprio; diálogo extra já aprovado não é reescrito. Fontes e unidades de revisão estão no [inventário](LANGUAGE_INVENTORY_20260928.md) e [evidência TASK415](evidence/20260928_task415_local.json).

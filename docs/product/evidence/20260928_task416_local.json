@@ -1,0 +1,231 @@
+{
+  "task": "TASK416",
+  "date": "2026-09-28",
+  "baseCommit": "418e16208463c98b96234ed56ab235372873091b",
+  "status": "local-approved-native-pending",
+  "scope": "C06 sync queue component only; legacy technician page and remaining field modules are still open.",
+  "codeHashes": {
+    "frontend/cw-field-offline.js": "1860d58c4e812e1aae0022b02c1eb086d94a01496466694f33cc4fb5a5568400",
+    "frontend/sw.js": "171f6a8a14cc12c0d1bdb03ac5c25bb5f6071c943d564b489bbf93cbdbc18ddc",
+    "scripts/test-field-sync-languages.js": "2e85427cd554c22d23ed679277644bfee22224e3f57b0d72669362d773071066",
+    "scripts/test-field-suite.js": "1f7eaa3b42abc577f430745b2e7a868b5ca112ebe4af50f46db865fbdb65b381"
+  },
+  "reproduction": {
+    "expectedEnglish": "Confirm saved submission",
+    "actualBefore": "Confirmar envio guardado",
+    "logSha256": "888009fe5b06b5888817c38da925e3f72df1324049c6af02fbf9938452543cac",
+    "result": "Browser assertion failed before the production edit."
+  },
+  "copy": {
+    "keys": 19,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "values": 95,
+    "allNonempty": true,
+    "countAndMessageParametersPreserved": true
+  },
+  "changes": [
+    "Queue summaries, actions, conflict401/403/404/409, offline state, correction refusal, history warning and local error wrappers localized.",
+    "Explicit language event and actual html.lang change handle user choices and silent preference loads; unchanged attributes do not rerender.",
+    "Whole component opts out of generic translation, keeping stored labels, original backend messages and values literal via textContent.",
+    "Active manual requests keep their button disabled during language changes; current-account rendering releases it after credential renewal/abort. No resend is triggered by locale changes.",
+    "Responsive wrapping and44px controls; existing cached component version raised207→208, no new asset."
+  ],
+  "validation": {
+    "browserMarkers": [
+      "PASS five languages ×320/390/1440, offline state, original labels/notes, no injection, byte-identical IndexedDB and zero operational writes",
+      "PASS translated401/403/404/409, original503 evidence, reload and account isolation preserve all stored requests",
+      "PASS delayed receipt during language change keeps retry disabled and confirms original UUID/content once",
+      "PASS renewal aborts an older in-flight request and releases the visible retry without replacing its original content",
+      "PASS correction rejection translates its controls, preserves original evidence/receipt and acknowledgement only records reviewedAt",
+      "PASS unreadable legacy history warns in five languages without replacing bytes or sending requests",
+      "SYNC LANGUAGE RESULT=PASS"
+    ],
+    "sessionMarkers": [
+      "PASS expiry preserves visible work; renewal recovers the original receipt and confirmed content cannot be replaced",
+      "PASS delayed 401 cannot invalidate a newer login",
+      "PASS account switch preserves both photo queues and prevents cross-account completion",
+      "PASS permanent rejection blocks automatic resends and replacement; manual review reuses the same UUID/content",
+      "PASS Retry-After prevents early automatic and manual sends; original request resumes after the pause",
+      "PASS malformed and unattributed historical queues remain untouched and block accidental replacement",
+      "SESSION RESULT=PASS"
+    ],
+    "languageBrowser": "PASS Spanish field labels, stable option values, user text protection, fresh live states, ordered preference writes and delayed read after choice/account change",
+    "unit": {
+      "tests": 1327,
+      "files": 136,
+      "ok": true
+    },
+    "technician": {
+      "tests": 4,
+      "ok": true
+    },
+    "syntax": {
+      "backend": 695,
+      "frontend": 307,
+      "inline": 44,
+      "ok": true
+    },
+    "runner": {
+      "scripts": 318,
+      "unique": 318,
+      "missing": 0
+    },
+    "screenshot": {
+      "description": "German unreadable-history component at320px, with the same header action mount as field mode; reviewed for wrapping, contrast and no selector overlap. Isolated component, not a full-app visual acceptance.",
+      "sha256": "d156e46f289210e9351ca5b5ef9a652ac6ecffee5a4d498296a6685b0ab6c556"
+    },
+    "logHashes": {
+      "before": "888009fe5b06b5888817c38da925e3f72df1324049c6af02fbf9938452543cac",
+      "after": "56b7653e7576e289f99eea468b84b7204de6c3c835bff999c6f03760b9028f86",
+      "unit": "1b8058d584c82a8d4cf7233810f895594a8bafc2beac6623278d387b6eb53d5b",
+      "technician": "00134c83132ab689c21c474253cab73945e1715a78211581529b583e93d735d8",
+      "syntax": "7d20a5145437e5670d0376055bf4a65ce58000a565a1aff72875faa758150d36",
+      "session": "ca0b4bd1a5b0cbf004d295c1d5f299d3d171658e50a19e2e743a257ce00e7ae3",
+      "language-browser": "c6c97e4091ad05d31833bd4028efd03dc71f0a5ae18d7a744645c9f271669fef"
+    }
+  },
+  "inventoryClosure": {
+    "snapshotBase": "3c3e65eb307e59176dc58a316b4822cfb403e651",
+    "snapshotFile": "docs/product/LANGUAGE_INVENTORY_20260928.json",
+    "batch": "C06-004",
+    "entries": [
+      {
+        "id": "2d1bc6ecc0c7d3a5",
+        "oldText": "A sessão mudou. Reabra a página com a conta original.",
+        "disposition": "application copy localized; source and browser evidence in this batch"
+      },
+      {
+        "id": "95df96c65ceb5a29",
+        "oldText": "Historic queue",
+        "disposition": "internal exception marker, caught and replaced by localized warning"
+      },
+      {
+        "id": "bd4b7755c186cf67",
+        "oldText": "Existem envios antigos ou ilegíveis sem conta confirmada. Os dados existentes não serão substituídos. Não limpe os dados da aplicação; peça revisão ao escritório.",
+        "disposition": "application copy localized; source and browser evidence in this batch"
+      },
+      {
+        "id": "28857bd1c173fb74",
+        "oldText": "Sessão expirada. Volte a entrar com a mesma conta.",
+        "disposition": "application copy localized; source and browser evidence in this batch"
+      },
+      {
+        "id": "64846cf86df01a04",
+        "oldText": "A visita pode ter sido alterada ou atribuída a outro técnico. Peça ao escritório para confirmar. O registo foi preservado.",
+        "disposition": "application copy localized; source and browser evidence in this batch"
+      },
+      {
+        "id": "56d89d4c4f8adab3",
+        "oldText": "O servidor detetou um conflito. Confirme a visita, os produtos e o stock com o escritório antes de repetir.",
+        "disposition": "application copy localized; source and browser evidence in this batch"
+      },
+      {
+        "id": "816d7faa7d812cfb",
+        "oldText": "Sem confirmação do servidor.",
+        "disposition": "application copy localized; source and browser evidence in this batch"
+      },
+      {
+        "id": "42226f823d9c8b8c",
+        "oldText": "Há correções não aplicadas. Reveja os avisos antes de continuar.",
+        "disposition": "application copy localized; source and browser evidence in this batch"
+      },
+      {
+        "id": "4bde3e9015e533b5",
+        "oldText": "visita(s) guardada(s) neste dispositivo, por confirmar no servidor.",
+        "disposition": "application copy localized; source and browser evidence in this batch"
+      },
+      {
+        "id": "56a16a0ff1361c88",
+        "oldText": "Ver envios pendentes",
+        "disposition": "application copy localized; source and browser evidence in this batch"
+      },
+      {
+        "id": "33454efcadcca1d5",
+        "oldText": "Aguarda sincronização automática.",
+        "disposition": "application copy localized; source and browser evidence in this batch"
+      },
+      {
+        "id": "4efafdc2898c5ffa",
+        "oldText": "Correção não aplicada.",
+        "disposition": "application copy localized; source and browser evidence in this batch"
+      },
+      {
+        "id": "9f7282c425b7a75d",
+        "oldText": "Abra a visita concluída para rever o registo.",
+        "disposition": "application copy localized; source and browser evidence in this batch"
+      },
+      {
+        "id": "44df6312fe41f794",
+        "oldText": "Confirmar envio guardado",
+        "disposition": "application copy localized; source and browser evidence in this batch"
+      },
+      {
+        "id": "77c64f13bc28ab55",
+        "oldText": "Confirmado pelo escritório — tentar novamente",
+        "disposition": "application copy localized; source and browser evidence in this batch"
+      },
+      {
+        "id": "010a5d7f3e7ca285",
+        "oldText": "Tomei conhecimento da recusa",
+        "disposition": "application copy localized; source and browser evidence in this batch"
+      },
+      {
+        "id": "75c118b6fec91a23",
+        "oldText": "A sessão mudou. O pedido foi preservado.",
+        "disposition": "application copy localized; source and browser evidence in this batch"
+      },
+      {
+        "id": "ec027d9871778895",
+        "oldText": "Visita guardada neste dispositivo.",
+        "disposition": "application copy localized; source and browser evidence in this batch"
+      },
+      {
+        "id": "4e3245cd029bb2d0",
+        "oldText": "Início:",
+        "disposition": "stored original label preserved; not a display-copy mutation"
+      }
+    ],
+    "note": "C05 snapshot remains immutable evidence of the earlier base. Current hash check intentionally becomes stale after source changes; this scoped closure does not claim regeneration of all1129 sources."
+  },
+  "limits": [
+    "HTTP statuses/receipts are controlled browser fixtures, with real auth and IndexedDB outbox. This batch does not claim native SQL/API acceptance from these browser tests.",
+    "Five languages and320/390/1440 apply to the sync queue component, not universal layout acceptance of the entire legacy technician page.",
+    "Stored labels and original server evidence remain in their original language; other field/photo/store errors and legacy technician text are separate C06 work.",
+    "Delayed receipt and credential-abort recovery tested here; no new dropped-response server-idempotency claim. Existing session regression also verifies expiry, different accounts, photos, rejected edits, Retry-After and old corrupt history.",
+    "C04 and TASK416 require native CI/restoration; ongoing TASK413/TASK414 runs are not considered passed."
+  ],
+  "priorPublication": {
+    "status": "published",
+    "branch": "work/field-readiness-20260915-simulation",
+    "commit": "418e16208463c98b96234ed56ab235372873091b",
+    "tree": "830e323dce6809d56249266b85d4725d90eb987c",
+    "ciPolicy": "[skip ci]: inventory tooling/docs only; extractor controls, source hashes, syntax and language browser regression approved locally. Native TASK414 remains required for C04."
+  },
+  "nativePending": [
+    {
+      "task": "TASK413",
+      "runId": 36489954119,
+      "jobId": 109155898206,
+      "status": "in_progress",
+      "stepsPassed": 10
+    },
+    {
+      "task": "TASK414",
+      "runId": 36491440593,
+      "jobId": 109160736428,
+      "status": "in_progress",
+      "stepsPassed": 10
+    }
+  ],
+  "next": "TASK417/C06: legacy technician.html and technician.js text, matched to the inventory; preserve original form values, saved drafts, existing route/stock/visit receipts. Reports DE stays in C09.",
+  "publication": {
+    "status": "pending",
+    "branch": "work/field-readiness-20260915-simulation"
+  }
+}
