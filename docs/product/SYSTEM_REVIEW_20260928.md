@@ -48,6 +48,18 @@ Validação local: 1 075 testes unitários/122 ficheiros, quatro técnicos, sint
 
 Cache v199; runner mantém 301 grupos. Não houve migração, mudança dos pedidos/recibos ou dependência nova. Publicada na branch `work/field-readiness-20260915-simulation` em `26e3bcaeca2d3c69d9cf651fa6220d0bb43529c9`, árvore `5f70f1bd312be5fd25fb8a4b6d46b8e444407a20`, igual à preparada e verificada localmente. [CI 36380011326](https://github.com/ts7520305-svg/cristalwater/actions/runs/36380011326), job `108793645411`, em execução; 301 grupos e restauro ainda não confirmados. Os restantes módulos mantêm os limites da revisão global.
 
+## TASK389 — identidades distintas nos alertas ligados aos técnicos
+
+Foi reproduzida a hipótese registada após TASK387: 20 alertas de duas viaturas e três técnicos ativos tinham apenas 11 IDs distintos. O helper de ligação lia `sourceIssue.id`, ainda ausente no objeto de origem. Agora o cálculo da identidade é partilhado entre o alerta original e a ligação; o ID da ligação inclui o ID original e o técnico. Os alertas originais conservam os IDs e as regras existentes.
+
+Quatro testes unitários cobrem várias causas, técnicos ativos/inativos, alteração da ordem e desativação da regra de ligação. Dois desses testes falharam antes da correção. O ensaio API/UI existente passou a incluir duas viaturas, guia AT sem documento, guias de obra com stock vazio/baixo e seguro/inspeção em falta, além das 760 pendências/documentos já verificados. Vinte alertas de frota distintos; cada ID é percorrido uma vez no painel. Conteúdo e gravidade mantêm a ligação à origem, consultas repetidas são estáveis e a desativação da regra conserva os originais. Perfis, falhas de consulta e ausência de escritas de negócio continuam verificados.
+
+Validação local: **1 079 unitários/123 ficheiros**, quatro técnicos, sintaxe 691/307/44 e três grupos integrados (resumo API/UI, regras e gestão da frota). Paginação/teclado e larguras 320/390/1440 aprovados; captura 320 inspecionada. [Evidência](evidence/20260928_task389_local.json). Runner 301, cache v199; nenhuma alteração de esquema, dependência ou frontend de produção. Publicação/CI deste lote por registar.
+
+**Atualização dos CI anteriores:** TASK386 aprovada, 300/300; TASK387 aprovada, 301/301. Cada execução concluiu 17 etapas e restaurou 128 tabelas/47 ficheiros com linhas e hashes iguais. Os grupos correspondem exatamente ao runner versionado em cada commit. [Evidência nativa](evidence/20260928_task386_task387_ci.json). As menções anteriores a estes dois CI em execução são históricas. TASK388 ainda em execução na última consulta.
+
+O utilizador definiu contrato anual, assinatura inicial na área de cliente e não renovação por e-mail 30 dias antes do termo, deixando a finalização/implementação para mais tarde. [Requisitos guardados](MAINTENANCE_CONTRACT_SIGNATURE_20260928.md); endereço de e-mail e método de assinatura não escolhidos. A ativação administrativa atual não é assinatura de contrato.
+
 ## Mapa de módulos e critérios ainda abertos
 
 | Área | Código e capacidade encontrada | Falta para fechar a aceitação |
@@ -75,8 +87,8 @@ Cache v199; runner mantém 301 grupos. Não houve migração, mudança dos pedid
 
 ## Fila finita de trabalho
 
-1. **Fechar a validação das TASK386/387/388:** confirmar os 300/301/301 grupos e os respetivos restauros PostgreSQL. Manter a falha TASK385 no histórico.
-2. **Confirmar em dados reais o resumo de riscos:** correção e seis grupos locais concluídos na TASK387. Medir o volume e rever divergências das fontes financeiras; não inferir dívida de documentos não conciliados.
+1. **Fechar a validação das TASK388/389:** TASK386/387 já confirmadas, com 300/301 grupos e restauros PostgreSQL. Confirmar os 301 grupos e restauro dos lotes seguintes. Manter a falha TASK385 no histórico.
+2. **Confirmar em dados reais o resumo de riscos:** leitura completa validada na TASK387 e identidades de ligações corrigidas na TASK389. Medir o volume e rever divergências das fontes financeiras; não inferir dívida de documentos não conciliados.
 3. **Localização da correção extra concluída localmente na TASK388:** confirmar CI; continuar depois a localização das páginas antigas e da fila geral, preservando dados literais e pedidos. Não confundir o diálogo traduzido com toda a aplicação traduzida.
 4. **Fechar o inventário de apresentação:** cinco entradas de raiz sem referência literal no inventário (`/admin-visits`, `/incident-center`, `/operational-dashboard`, `/reminder-materials`, `/reminder-visits`), distinguindo aliases reais de páginas auxiliares. Procurar testes com URLs dinâmicos antes de escrever testes repetidos. Verificar ainda erros, vazio, carregamento, teclado, ecrãs pequenos, idiomas e PDFs aplicáveis.
 5. **Conferir dados históricos e custos/receitas reais:** usar os percursos de revisão existentes; criar só os que faltarem para fontes comprovadas. Não reconstruir valores ou autoria automaticamente.

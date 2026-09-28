@@ -1,0 +1,194 @@
+{
+  "task": "TASK389",
+  "atUtc": "2026-09-28T05:41:30.686743+00:00",
+  "baseCommit": "2e5670a78758d6e504b237e64de7cd52dc64b27b",
+  "scope": "Distinct, stable identities for vehicle risk alerts linked to technicians",
+  "testEnvironment": {
+    "node": "24.19.0",
+    "vitest": "4.1.11",
+    "prisma": "6.19.3",
+    "database": "PGlite 0.5.8 / socket 0.2.11",
+    "browser": "Chromium 153 / Playwright 1.61.1",
+    "data": "synthetic isolated QA",
+    "externalIntegrations": false
+  },
+  "tests": {
+    "regressionBefore": {
+      "exitCode": 1,
+      "testsFailed": 2,
+      "testsPassed": 2,
+      "expectedDistinctIds": 20,
+      "actualDistinctIds": 11
+    },
+    "regressionAfter": {
+      "exitCode": 0,
+      "testsPassed": 4
+    },
+    "unit": {
+      "passed": 1079,
+      "files": 123
+    },
+    "technician": {
+      "passed": 4
+    },
+    "syntax": {
+      "backend": 691,
+      "frontend": 307,
+      "inline": 44
+    },
+    "integrated": [
+      {
+        "script": "scripts/test-field-operational-risk-summary.js",
+        "code": 0,
+        "ms": 9645
+      },
+      {
+        "script": "scripts/test-field-operational-risk-rules.js",
+        "code": 0,
+        "ms": 4743
+      },
+      {
+        "script": "scripts/test-field-fleet-management-ui.js",
+        "code": 0,
+        "ms": 34877
+      }
+    ],
+    "fixture": {
+      "pendingLocks": 251,
+      "eligibleOverdueDocuments": 509,
+      "fleetOriginalAlerts": 8,
+      "fleetLinkedAlerts": 12,
+      "fleetDistinctAlertIds": 20,
+      "additionalTotalAlerts": 780,
+      "vehicles": 2,
+      "activeTechnicians": 3,
+      "inactiveTechnicians": 1
+    },
+    "checks": [
+      "Every original vehicle risk and active technician combination has a distinct linked ID",
+      "Primary alert IDs retained when technician linking is disabled",
+      "Stable IDs across repeated reads and changed traversal order",
+      "Inactive technicians excluded from linked alerts",
+      "Guide document, empty/low stock, insurance and inspection risks retained",
+      "All paginated IDs visited exactly once, eight rows per page",
+      "Existing counts, receivable exclusions and 503 on later-batch failure preserved",
+      "ADMIN-only access preserved",
+      "Business snapshots, payment and communication counts unchanged by reads",
+      "Keyboard controls and no horizontal panel overflow at 320/390/1440"
+    ],
+    "visualWidths": [
+      320,
+      390,
+      1440
+    ],
+    "visuallyInspected": [
+      "reports/field-visual/operational-risk-summary/pt-320.png"
+    ]
+  },
+  "implementation": {
+    "sharedIdentityFunction": "sourceIssueId",
+    "primaryIdentityChanged": false,
+    "linkedIdentity": "TECHNICIAN_LINK:<source-issue-id>:<technician-id>",
+    "databaseWritesAdded": false,
+    "migrationsAdded": 0,
+    "dependenciesChanged": false,
+    "frontendProductionFilesChanged": false,
+    "nativeRunnerGroups": 301,
+    "cache": "cristalwater-field-20260928-v199"
+  },
+  "sourceFiles": [
+    {
+      "path": "src/services/operationalRiskSummaryService.js",
+      "sha256": "db1ccf52d5e56e1561e94f654841275c8fcbac1af0ec1979d0af1fc8d2b5ac56"
+    },
+    {
+      "path": "src/routes/operationalRiskRoutes.js",
+      "sha256": "20d29bcd37d62341ba7f18d23d73053775dc4e72b5fcd7e3d94f4fe2e482888a"
+    },
+    {
+      "path": "frontend/cw-operational-risk.js",
+      "sha256": "d437b631dce7e3a5651ff11a757c07ef9de10e200b2f6565fa264fb1f75979ea"
+    },
+    {
+      "path": "frontend/sw.js",
+      "sha256": "480713bb0a3e95e15839b6bacf81d695348971e42100989e3759801e06eec8a5"
+    },
+    {
+      "path": "scripts/test-field-operational-risk-summary.js",
+      "sha256": "35250b447c0acd58483a57e7919c829d8ec28cb78231d2f64fb8218cdfd83b9b"
+    },
+    {
+      "path": "tests/operational-risk-summary.test.js",
+      "sha256": "461c55c6b355c59e60e0a93f9520e86ac2c883767878919dd9f1f7e939a22a2d"
+    },
+    {
+      "path": "scripts/test-field-suite.js",
+      "sha256": "da36df933a445a4fe4a9de31d0655bf84ba96b208030f3f1dd925cef91da1c98"
+    }
+  ],
+  "logs": [
+    {
+      "name": "task389-before.log",
+      "sha256": "b211b85f2f7694f9a8bbb1f4b1d9f3a24dcf943630e9d100b18cd610bc2b1bcb"
+    },
+    {
+      "name": "task389-after.log",
+      "sha256": "a081ebaca40deb8035301fa48c52c2d7dc1f4a2654b7b293cd5faf6a3480ec48"
+    },
+    {
+      "name": "task389-unit.log",
+      "sha256": "bebbc4a575aba405a459302420c9d7b5dbae0c281bb30c8a2b3a981ca9d92934"
+    },
+    {
+      "name": "task389-technician.log",
+      "sha256": "598cb984ad2c6aab9fa87302eb576c465a455289c985825544a1b4d37afa5509"
+    },
+    {
+      "name": "task389-syntax.log",
+      "sha256": "8832e24af2e21f710f342b2a64ca89d06609e13fa70f719051ec1a78ff80677a"
+    },
+    {
+      "name": "task389-integrated.log",
+      "sha256": "0cfdebe59caf1020915669d1cf65e73091e37f5932dc7432691cd4b8360afd19"
+    },
+    {
+      "name": "scripts_test-field-operational-risk-summary.js.log",
+      "sha256": "1a3d86da914a846a5b97fc665f7b3fdb590c3137da04e5b23a5d67435aa78064"
+    },
+    {
+      "name": "scripts_test-field-operational-risk-rules.js.log",
+      "sha256": "73b36cc3de6a83e1876b2e54715dc45a1ae6fff5ea2df73992f01e4e3cd46b37"
+    },
+    {
+      "name": "scripts_test-field-fleet-management-ui.js.log",
+      "sha256": "20061280a51d80464a855c2f5ceb003c5ef1e45d953567ecf3ef3d4f79a4b402"
+    }
+  ],
+  "captures": [
+    {
+      "path": "reports/field-visual/operational-risk-summary/pt-1440.png",
+      "sha256": "b21be1866319936b12df495d9ec1613eb6a32a4d9345cb3cd86d806ff8da4789"
+    },
+    {
+      "path": "reports/field-visual/operational-risk-summary/pt-320.png",
+      "sha256": "0b79ace14995ba783f05983a7865e2dddcb8047f5985ce8293f50deb94e33110"
+    },
+    {
+      "path": "reports/field-visual/operational-risk-summary/pt-390.png",
+      "sha256": "c82de9b50071803a4b4711eb2b9808892ed0e9da9cb48ad8e7005cae81fbda6c"
+    }
+  ],
+  "nativeValidation": {
+    "TASK386": "PASS 300/300 and restore 128 tables/47 files",
+    "TASK387": "PASS 301/301 and restore 128 tables/47 files",
+    "evidence": "20260928_task386_task387_ci.json",
+    "TASK388": "IN_PROGRESS at last check",
+    "TASK389": "NOT_YET_PUBLISHED"
+  },
+  "limits": [
+    "Local integration uses PGlite, not a new native PostgreSQL restore",
+    "No VPS deployment, merge or real customer communication",
+    "Contract drafting and implementation deferred; agreed requirements preserved",
+    "Global production acceptance and remaining review tasks are still open"
+  ]
+}

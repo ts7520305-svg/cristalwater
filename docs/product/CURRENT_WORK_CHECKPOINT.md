@@ -1,5 +1,18 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 28/09/2026, TASK389 validada localmente
+
+Corrigida a identidade dos alertas de viatura ligados aos técnicos. A regressão confirmou 20 alertas com apenas 11 IDs distintos: o helper usava `sourceIssue.id` antes de este estar definido. A origem e a ligação passam a usar o mesmo cálculo de identidade, incluindo causa/entidade/viatura/técnico; os IDs dos alertas de origem permanecem iguais. Leituras repetidas e ordem dos registos não alteram as referências. Não houve alteração das regras, dos registos de negócio, da API de autorização ou do esquema.
+
+**Local aprovado:** 1 079 unitários/123 ficheiros, quatro técnicos, sintaxe 691/307/44; três grupos integrados (resumo de riscos API/UI, regras de risco e gestão da frota). O resumo inclui 251 pendências, 509 documentos elegíveis e 20 alertas de frota da fixture, todos com ID distinto, com técnicos inativos excluídos. A regra de ligação pode ser desligada sem eliminar os alertas de origem. Paginação percorre cada ID uma vez; controlo por teclado, 320/390/1440, dados literais, recusa de perfis e falha de lote sem sucesso parcial conservados. [Evidência local](evidence/20260928_task389_local.json). Cache mantém v199; runner mantém 301 grupos; sem migração/dependência nova.
+
+**CI anteriores confirmados:** TASK386, [300/300](https://github.com/ts7520305-svg/cristalwater/actions/runs/36377664535), e TASK387, [301/301](https://github.com/ts7520305-svg/cristalwater/actions/runs/36378617488). Em ambos, 17 etapas aprovadas e restauro de 128 tabelas/47 ficheiros com linhas e hashes iguais; listas de scripts comparadas com os runners dos commits exatos. [Evidência nativa](evidence/20260928_task386_task387_ci.json). TASK388, [CI 36380011326](https://github.com/ts7520305-svg/cristalwater/actions/runs/36380011326), permanece em execução na última consulta; não declarar os 301 grupos/restauro aprovados. TASK385 mantém a falha histórica 297/300.
+
+**Publicação da TASK389:** preparada para a branch autorizada; commit e CI serão registados após a publicação.
+
+**Continuar:** confirmar CI/restauros de TASK388/389 e seguir o inventário de apresentação das páginas antigas/fluxos ainda abertos. O utilizador deixou a minuta e implementação do contrato para mais tarde: requisitos de assinatura inicial na área de cliente e não renovação por e-mail 30 dias antes do fim mantêm-se na [especificação](MAINTENANCE_CONTRACT_SIGNATURE_20260928.md). Não inventar o e-mail nem o método de assinatura. Dados históricos/finanças, importação WhatsApp, IA local, volume/VPS/cópias e piloto físico continuam abertos. Sem merge/deploy/contactos reais; não declarar conclusão global.
+
+
 ## Requisitos confirmados — 28/09/2026, contrato assinado na área de cliente
 
 O utilizador acrescentou um contrato anual de manutenção e revisões técnicas cobradas, renovável anualmente. Esclareceu que a não renovação deve ser comunicada **30 dias antes do fim do contrato** e que pretende assinatura digital **uma vez, na área de cliente**. A renovação nas condições acordadas mantém a aceitação inicial; alterações materiais têm versão e aceitação próprias. A eventual compensação por saída antecipada exige regra válida, sem montante/percentagem ainda escolhido. O método/fornecedor de assinatura está por definir; não apresentar login/traço/código como assinatura qualificada.

@@ -14,6 +14,7 @@ assert(['127.0.0.1', 'localhost'].includes(new URL(base).hostname));
 const prefix = 'QA Risk Summary ' + randomUUID();
 const sign = value => jwt.sign(value, getJwtSecret(), { expiresIn: '1h' });
 let client, technician, originalRules, rulesRead = false, browser, probe;
+const vehicleIds = [], fleetTechnicianIds = [];
 
 (async () => {
   const admin = await prisma.user.findUniqueOrThrow({ where: { email: process.env.ADMIN_EMAIL } });
@@ -26,10 +27,23 @@ let client, technician, originalRules, rulesRead = false, browser, probe;
   rulesRead = true;
   const rules = Object.fromEntries(Object.entries(R.defaults).map(([key, value]) => [key, typeof value === 'boolean' ? false : value]));
   rules.pendingOperationalLocks = rules.overduePayments = true;
+  for (const key of ['missingTransportGuide', 'missingTransportGuideDocument', 'missingWorkGuide', 'vehicleInsuranceExpiring', 'vehicleInspectionExpiring', 'lowVehicleStock', 'technicianLinkedVehicleIssues']) rules[key] = true;
   await prisma.systemSetting.upsert({ where: { key: R.key }, create: { key: R.key, value: JSON.stringify(rules) }, update: { value: JSON.stringify(rules) } });
   const baseline = (await call()).body;
   client = await prisma.client.create({ data: { name: prefix + ' <img src=x onerror=alert(1)>', status: 'PAUSED', active: false, creditBalance: 999, notes: 'PRIVATE_RISK_CLIENT_NOTES' } });
   technician = await prisma.technician.create({ data: { name: prefix, active: true } });
+  for (const suffix of ['A', 'B']) {
+    const vehicle = await prisma.vehicle.create({ data: { plate: 'QS-' + randomUUID().slice(0, 8) + '-' + suffix, active: true } });
+    vehicleIds.push(vehicle.id);
+  }
+  await prisma.technician.update({ where: { id: technician.id }, data: { vehicleId: vehicleIds[0] } });
+  for (const [vehicleId, active] of [[vehicleIds[0], true], [vehicleIds[0], false], [vehicleIds[1], true]]) {
+    const row = await prisma.technician.create({ data: { name: prefix, vehicleId, active } });
+    fleetTechnicianIds.push(row.id);
+  }
+  const guide = await prisma.transportGuide.create({ data: { vehicleId: vehicleIds[1], status: 'ACTIVE' } });
+  await prisma.workGuide.create({ data: { vehicleId: vehicleIds[0], technicianId: technician.id, status: 'OPEN' } });
+  await prisma.workGuide.create({ data: { vehicleId: vehicleIds[1], technicianId: fleetTechnicianIds[2], guideId: guide.id, status: 'OPEN', items: { create: { name: prefix + ' product', unit: 'kg', quantity: 0 } } } });
   const at = new Date('2000-01-01T00:00:00Z');
   await prisma.operationalLock.createMany({ data: Array.from({ length: 252 }, (_, i) => ({ clientId: client.id, lockType: prefix, title: prefix + ' lock ' + i, severity: i % 2 ? 'CRITICAL' : 'WARNING', status: i === 251 ? 'RESOLVED' : 'PENDING', createdAt: at, payload: { private: 'PRIVATE_LOCK_PAYLOAD' } })) });
   const invoice = (key, extra = {}) => ({ clientId: client.id, invoiceNumber: prefix + ' ' + key, amount: 1.11, amountOpen: 1.11, status: 'PENDING', dueDate: at, createdAt: at, notes: 'PRIVATE_RISK_INVOICE_NOTES', ...extra });
@@ -39,7 +53,12 @@ let client, technician, originalRules, rulesRead = false, browser, probe;
   for (const status of ['DRAFT', 'RASCUNHO', 'CANCELLED', 'CANCELED', 'CANCELADO', 'VOID', 'ARCHIVED', 'SUPERSEDED', ' draft ']) data.push(invoice('excluded-' + status, { status }));
   data.push(invoice('paid', { status: 'PAID', amountPaid: 1.11, amountOpen: 0 }), invoice('future', { dueDate: new Date('2099-01-01T00:00:00Z') }), invoice('undated', { dueDate: null }), invoice('zero', { amount: 0, amountOpen: 0 }));
   await prisma.invoice.createMany({ data });
-  const snapshot = async () => ({ client: await prisma.client.findUnique({ where: { id: client.id } }), invoices: await prisma.invoice.findMany({ where: { clientId: client.id }, orderBy: { id: 'asc' } }), locks: await prisma.operationalLock.findMany({ where: { clientId: client.id }, orderBy: { id: 'asc' } }), payments: await prisma.payment.count(), communications: await prisma.communicationLog.count() });
+  const snapshot = async () => ({ client: await prisma.client.findUnique({ where: { id: client.id } }), invoices: await prisma.invoice.findMany({ where: { clientId: client.id }, orderBy: { id: 'asc' } }), locks: await prisma.operationalLock.findMany({ where: { clientId: client.id }, orderBy: { id: 'asc' } }), payments: await prisma.payment.count(), communications: await prisma.communicationLog.count(), fleet: {
+    vehicles: await prisma.vehicle.findMany({ where: { id: { in: vehicleIds } }, orderBy: { id: 'asc' } }),
+    technicians: await prisma.technician.findMany({ where: { id: { in: [technician.id, ...fleetTechnicianIds] } }, orderBy: { id: 'asc' } }),
+    transportGuides: await prisma.transportGuide.findMany({ where: { vehicleId: { in: vehicleIds } }, orderBy: { id: 'asc' } }),
+    workGuides: await prisma.workGuide.findMany({ where: { vehicleId: { in: vehicleIds } }, orderBy: { id: 'asc' }, include: { items: { orderBy: { id: 'asc' } } } }),
+  } });
   const before = await snapshot();
   const result = await call();
   assert.equal(result.status, 200, JSON.stringify(result.body));
@@ -51,9 +70,35 @@ let client, technician, originalRules, rulesRead = false, browser, probe;
   assert.equal(overdue.length, 509, 'All overdue receivables beyond 500, aliases and legacy balances must be returned');
   assert.equal(new Set(packet.issues.map(issue => issue.id)).size, packet.issues.length);
   assert.deepEqual(packet.counts, { total: packet.issues.length, critical: packet.issues.filter(issue => issue.severity === 'CRITICAL').length, warning: packet.issues.filter(issue => issue.severity !== 'CRITICAL').length });
-  assert.equal(packet.counts.total, baseline.counts.total + 760);
+  assert.equal(packet.counts.total, baseline.counts.total + 780);
   assert.equal(packet.complete, true);
   assert.equal(packet.byClientId[client.id].length, 760);
+  const vehicleIssues = packet.issues.filter(issue => vehicleIds.includes(issue.vehicleId));
+  assert.equal(vehicleIssues.length, 20);
+  assert.equal(new Set(vehicleIssues.map(issue => issue.id)).size, 20, 'Every fleet cause and technician link must have a distinct identity');
+  for (const original of vehicleIssues.filter(issue => issue.source === 'RISK_ENGINE')) {
+    const assigned = original.vehicleId === vehicleIds[0] ? [technician.id, fleetTechnicianIds[0]] : [fleetTechnicianIds[2]];
+    for (const technicianId of assigned) {
+      const linked = vehicleIssues.find(issue => issue.id === 'TECHNICIAN_LINK:' + original.id + ':' + technicianId);
+      assert(linked, 'Missing stable technician link for ' + original.type);
+      assert.equal(linked.message, original.message);
+      assert.equal(linked.severity, original.severity);
+      assert.equal(linked.vehicleId, original.vehicleId);
+      assert.equal(linked.technicianId, technicianId);
+    }
+  }
+  assert.equal(packet.byTechnicianId[fleetTechnicianIds[1]], undefined, 'Inactive technicians must not receive linked alerts');
+  assert.equal(packet.byVehicleId[vehicleIds[0]].length, 12);
+  assert.equal(packet.byVehicleId[vehicleIds[1]].length, 8);
+  for (const technicianId of [technician.id, fleetTechnicianIds[0], fleetTechnicianIds[2]]) assert.equal(packet.byTechnicianId[technicianId].filter(issue => issue.source === 'VEHICLE_RISK').length, 4);
+  await prisma.systemSetting.update({ where: { key: R.key }, data: { value: JSON.stringify({ ...rules, technicianLinkedVehicleIssues: false }) } });
+  const unlinked = await call();
+  assert.equal(unlinked.status, 200);
+  assert.deepEqual(unlinked.body.issues.map(issue => issue.id), packet.issues.filter(issue => issue.source !== 'VEHICLE_RISK').map(issue => issue.id));
+  await prisma.systemSetting.update({ where: { key: R.key }, data: { value: JSON.stringify(rules) } });
+  const repeated = await call();
+  assert.equal(repeated.status, 200);
+  assert.deepEqual(repeated.body.issues.map(issue => issue.id), packet.issues.map(issue => issue.id), 'Repeated reads keep the same identities');
   const ids = new Set(overdue.map(issue => issue.id));
   for (const row of before.invoices) {
     const eligible = / ordinary-| fallback$| alias-/.test(row.invoiceNumber);
@@ -82,7 +127,7 @@ let client, technician, originalRules, rulesRead = false, browser, probe;
     assert.equal(failure.status, 503);
     assert.deepEqual(failure.body, { ok: false, code: 'RISK_SUMMARY_UNAVAILABLE' });
   } finally { service.read = originalRead; }
-  console.log('PASS summary API: 251 pending locks, 509 overdue receivables, full counts/groups, excluded drafts and withdrawn/settled documents, legacy balance, denied roles and no partial success after later-batch failure');
+  console.log('PASS summary API: 251 pending locks, 509 overdue receivables, 20 distinct fleet alerts, inactive technicians excluded, stable linked identities across reads and rule changes, full counts/groups, excluded drafts and withdrawn/settled documents, legacy balance, denied roles and no partial success after later-batch failure');
 
   browser = await require('playwright').chromium.launch({ headless: true, executablePath: process.env.CW_CHROMIUM_PATH, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
   const context = await browser.newContext({ viewport: { width: 390, height: 900 }, serviceWorkers: 'block', extraHTTPHeaders: { Authorization: 'Bearer ' + token } });
@@ -137,7 +182,13 @@ let client, technician, originalRules, rulesRead = false, browser, probe;
     await prisma.invoice.deleteMany({ where: { clientId: client.id } });
     await prisma.client.delete({ where: { id: client.id } });
   }
+  if (vehicleIds.length) {
+    await prisma.workGuide.deleteMany({ where: { vehicleId: { in: vehicleIds } } });
+    await prisma.transportGuide.deleteMany({ where: { vehicleId: { in: vehicleIds } } });
+  }
   if (technician) await prisma.technician.delete({ where: { id: technician.id } });
+  if (fleetTechnicianIds.length) await prisma.technician.deleteMany({ where: { id: { in: fleetTechnicianIds } } });
+  if (vehicleIds.length) await prisma.vehicle.deleteMany({ where: { id: { in: vehicleIds } } });
   if (rulesRead) {
     if (originalRules) await prisma.systemSetting.update({ where: { key: R.key }, data: { value: originalRules.value, notes: originalRules.notes, updatedAt: originalRules.updatedAt } });
     else await prisma.systemSetting.deleteMany({ where: { key: R.key } });

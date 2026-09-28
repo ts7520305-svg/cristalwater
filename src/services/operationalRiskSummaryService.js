@@ -43,9 +43,13 @@ function issueId(parts) {
   return parts.filter((part) => part !== undefined && part !== null && part !== "").join(":");
 }
 
+function sourceIssueId(data) {
+  return data.id || issueId([data.type, data.targetType, data.targetId, data.vehicleId, data.technicianId, data.clientId]);
+}
+
 function addIssue(issues, data) {
   issues.push({
-    id: data.id || issueId([data.type, data.targetType, data.targetId, data.vehicleId, data.technicianId, data.clientId]),
+    id: sourceIssueId(data),
     type: data.type,
     severity: data.severity || "WARNING",
     targetType: data.targetType,
@@ -116,7 +120,7 @@ function addVehicleIssueToTechnicians(issues, vehicle, sourceIssue, rules) {
     if (technician.active === false) continue;
     addIssue(issues, {
       ...sourceIssue,
-      id: issueId(["TECHNICIAN_LINK", sourceIssue.id, technician.id]),
+      id: issueId(["TECHNICIAN_LINK", sourceIssueId(sourceIssue), technician.id]),
       type: "TECHNICIAN_LINKED_VEHICLE_RISK",
       targetType: "Technician",
       targetId: technician.id,
