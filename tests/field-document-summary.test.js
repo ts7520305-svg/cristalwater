@@ -61,4 +61,27 @@ describe('field document summary and confirmed counts', () => {
       expect(copy.date('2026-09-26T08:00:00Z', lang)).toMatch(/\b0?9:00:00\b/);
     }
   });
+  it('keeps correction reasons, original error details and product IDs literal in every language', () => {
+    const literal = '  Name <img src=x> #61 · kg · $& {reason}  ';
+    for (const lang of Object.keys(copy.locales)) {
+      expect(copy.text('correctionReasonLine', { reason: literal }, lang).endsWith(literal)).toBe(true);
+      expect(copy.text('correctionOriginalDetail', { message: literal }, lang).endsWith(literal)).toBe(true);
+      expect(copy.text('correctionPreviousProducts', { products: literal }, lang).endsWith(literal)).toBe(true);
+      expect(copy.text('correctionMinimum', { min: '0.000001' }, lang)).toContain('0.000001');
+      expect(copy.text('correctionTemperature', {}, lang)).toContain('°C');
+      expect(copy.text('correctionChlorine', {}, lang)).toContain('ppm');
+    }
+  });
+  it('uses Portuguese for an unsupported correction language and retains the difference between pending and applied', () => {
+    for (const key of ['correctionTitle', 'correctionPending', 'correctionApplied', 'correctionRejectedStale']) {
+      for (const language of ['unknown', '__proto__', 'constructor']) {
+        expect(copy.text(key, {}, language)).toBe(copy.text(key, {}, 'pt'));
+        expect(copy.date('2026-09-26T08:00:00Z', language)).toBe(copy.date('2026-09-26T08:00:00Z', 'pt'));
+      }
+    }
+    for (const lang of Object.keys(copy.locales)) {
+      expect(copy.text('correctionPending', {}, lang)).not.toBe(copy.text('correctionApplied', {}, lang));
+      expect(copy.text('correctionConfirm', {}, lang)).not.toBe(copy.text('correctionConfirmSaved', {}, lang));
+    }
+  });
 });

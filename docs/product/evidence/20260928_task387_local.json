@@ -140,7 +140,10 @@
   ],
   "publication": {
     "branch": "work/field-readiness-20260915-simulation",
-    "state": "prepared"
+    "state": "published",
+    "commit": "270459f967439a39dbc2b3634bd11801acb1c827",
+    "tree": "d678c2bcd9a73e7c0f02cb989469549a54544d22",
+    "atUtc": "2026-09-28T04:38:37Z"
   },
   "nativeValidation": {
     "task386": {
@@ -151,7 +154,8 @@
       "completeSuiteAndRestoreConfirmed": false
     },
     "task387": {
-      "status": "not_started",
+      "runId": 36378617488,
+      "status": "in_progress",
       "completeSuiteAndRestoreConfirmed": false
     }
   },

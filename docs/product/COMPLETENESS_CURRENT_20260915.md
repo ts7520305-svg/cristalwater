@@ -1,6 +1,17 @@
 # Cristal Water — matriz atual de conclusão
 
-## Retoma atual — 28/09/2026, TASK387 verificada localmente
+## Retoma atual — 28/09/2026, TASK388 verificada localmente
+
+Diálogo de correção extra em PT/EN/FR/ES/DE: título/instruções, medições, checklist, notas/motivo, diferenças, confirmação, rascunhos, validação e erros. 75 chaves novas por idioma. Seletor no início, disponível também com campos bloqueados por envio pendente/403. A troca de idioma conserva revisão aberta, valores, IDs e bytes do rascunho/pedido. Detalhes variáveis do servidor ficam literais sob rótulo traduzido; recibos e textos históricos não são reescritos.
+
+**Local aprovado:** 1 075 unitários/122 ficheiros, quatro técnicos, sintaxe 691/307/44; três grupos integrados distintos (produtos extra, correções extra existentes, resumo de documentos). Cinco idiomas ×320/390/1440, 30 capturas de topo/revisão, sem transbordo após corrigir rótulos longos. Envio offline conserva exatamente o pedido ao traduzir; consulta recusada continua bloqueada. Recarregamento offline, resposta perdida, consumo/recibo/auditoria únicos, quota/concorrência e dados literais verificados. [Evidência](evidence/20260928_task388_local.json), [revisão global atualizada](SYSTEM_REVIEW_20260928.md). Cache v199, runner 301, sem migração/dependência nova.
+
+**Publicação:** lote preparado; registar commit/CI após publicação. TASK386: `9ca86e9bd2929c89b37716c1c9839f000109fa53`, [CI 36377664535](https://github.com/ts7520305-svg/cristalwater/actions/runs/36377664535). TASK387: `270459f967439a39dbc2b3634bd11801acb1c827`, [CI 36378617488](https://github.com/ts7520305-svg/cristalwater/actions/runs/36378617488), job `108789483632`. Ambos em execução; migrações/sintaxe/testes base aprovados, grupos completos e restauros ainda não confirmados. TASK384 mantém a última aprovação completa confirmada; TASK385 conserva a falha 297/300.
+
+**Continuar:** confirmar os CI/restauros de TASK386/387/388 e seguir o inventário de apresentação das páginas antigas/fluxos ainda abertos. Verificar também os IDs dos alertas de viatura replicados para técnicos: o helper antigo usa `sourceIssue.id`, que nem sempre é definido antes de criar a ligação; esta hipótese ainda não foi reproduzida em ensaio. Não tratar o sistema como concluído: dados históricos/finanças, importação WhatsApp, IA local, volume/fornecedores/VPS/cópias e piloto físico mantêm os critérios da revisão. Sem merge/deploy/contactos reais.
+
+
+## Retoma anterior — 28/09/2026, TASK387 publicada
 
 Continuou-se a revisão global com a lacuna concreta do resumo de riscos. Consultas em lotes de 250, sem cortes silenciosos, dentro de uma leitura `RepeatableRead`; contagens e agrupamentos completos. A lógica foi extraída para `operationalRiskSummaryService`, mantendo o router como delegação e a autorização ADMIN. Documentos usam o saldo cobrável já aplicado nas cobranças; rascunhos/retirados não viram dívida, aliases e saldos antigos são reconhecidos sem editar os originais.
 
@@ -8,7 +19,7 @@ O painel permite percorrer todos os alertas em páginas de oito, incluindo aviso
 
 **Local aprovado:** regressão falhou antes (200/251 pendências), passou depois (251 pendências +509 documentos elegíveis =760 alertas), sem perda/duplicação entre páginas nem alteração dos dados de negócio. Seis grupos integrados distintos: resumo API/UI, regras API/UI, gestão da frota, histórico da frota e resumo de cobranças. 1 073 unitários/122 ficheiros, quatro técnicos, sintaxe 691/307/44 e visual a 320/390/1440 px. [Evidência](evidence/20260928_task387_local.json) e [revisão atualizada](SYSTEM_REVIEW_20260928.md). Cache v198; runner 301; nenhuma migração/dependência nova.
 
-**Publicação:** alteração preparada; registar commit e CI após publicação na branch de trabalho autorizada. TASK386 já publicada em `9ca86e9bd2929c89b37716c1c9839f000109fa53`, árvore `9a28f7c09f3f7d83648fa07768f0c4838d74103c`; [CI 36377664535](https://github.com/ts7520305-svg/cristalwater/actions/runs/36377664535), job `108786713737`, em execução, com migrações/sintaxe/testes base aprovados. Os 300 grupos e o restauro ainda não foram confirmados.
+**Publicação:** commit `270459f967439a39dbc2b3634bd11801acb1c827`, árvore `d678c2bcd9a73e7c0f02cb989469549a54544d22`, iguais aos objetos locais verificados, na branch `work/field-readiness-20260915-simulation`. [CI 36378617488](https://github.com/ts7520305-svg/cristalwater/actions/runs/36378617488), em execução; 301 grupos e restauro ainda não confirmados. TASK386 já publicada em `9ca86e9bd2929c89b37716c1c9839f000109fa53`, árvore `9a28f7c09f3f7d83648fa07768f0c4838d74103c`; [CI 36377664535](https://github.com/ts7520305-svg/cristalwater/actions/runs/36377664535), job `108786713737`, em execução, com migrações/sintaxe/testes base aprovados. Os 300 grupos e o restauro ainda não foram confirmados.
 
 **Continuar:** confirmar CI/restauros de TASK386/387; depois localizar os restantes textos da correção extra em PT/EN/FR/ES/DE, conservando rascunhos/IDs/pedidos. Seguir a fila do relatório global para apresentação, históricos/finanças, importação WhatsApp, IA local e aceitação de produção. TASK385 falhou 297/300; TASK384 mantém a última aprovação completa confirmada (299/299, 128 tabelas/47 ficheiros restaurados). Sem merge/deploy/contactos reais; não declarar o sistema concluído.
 

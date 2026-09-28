@@ -4,7 +4,7 @@ A base de trabalho foi confirmada no GitHub em `4186d8b82db76043bc61fc830b776174
 
 ## Âmbito da leitura
 
-Inventário automático integral dos ficheiros de código, páginas, estilos, esquema, migrações e testes versionados: **1 858 ficheiros, 200 214 linhas**. O índice conserva caminhos e SHA-256 na [evidência desta revisão](evidence/20260928_task386_local.json). Há **128 modelos Prisma, 126 montagens de API e 126 HTML**, dos quais 119 são entradas de raiz e sete auxiliares/protótipos.
+Inventário automático integral na base da TASK386 dos ficheiros de código, páginas, estilos, esquema, migrações e testes versionados: **1 858 ficheiros, 200 214 linhas**. O índice conserva caminhos e SHA-256 na [evidência desta revisão](evidence/20260928_task386_local.json). Há **128 modelos Prisma, 126 montagens de API e 126 HTML**, dos quais 119 são entradas de raiz e sete auxiliares/protótipos.
 
 A leitura dos contratos centrais abrangeu arranque, montagem das APIs, autorização, sessão, rotas, rascunhos, filas offline, visitas, guias, planos sazonais, faturação, custos, comunicações, IA e cópias. O inventário automático não equivale a inspeção humana linha a linha das 200 mil linhas, nem a validação funcional e visual de todas as combinações. Referências literais em testes existem para 114 HTML; não se transformam em percentagem de conclusão.
 
@@ -35,12 +35,25 @@ O painel global permite percorrer todos os alertas em páginas de oito, com inte
 
 Validação local: 251 pendências e 509 documentos elegíveis, 760 alertas percorridos uma única vez, exclusão de resolvidos/rascunhos/cancelados/liquidados, aliases, saldo antigo, permissões, erro no segundo lote e ausência de alterações aos dados de negócio. Inspeção visual a 320/390/1440 px, sem transbordo; novos botões de paginação com 44 px de altura. Seis grupos integrados distintos, 1 073 testes unitários/122 ficheiros, quatro técnicos e sintaxe 691/307/44. Cache v198, runner passa de 300 a 301 grupos, nenhuma migração/dependência nova. [Evidência](evidence/20260928_task387_local.json). Publicação e validação PostgreSQL/restauro ficam referenciadas no checkpoint.
 
+
+## TASK388 — diálogo de correção extra em cinco idiomas
+
+O diálogo passa a localizar título, instruções, medições, checklist, notas, motivo, revisão das diferenças, confirmações, rascunhos e estados de erro em PT/EN/FR/ES/DE. Foram acrescentadas 75 chaves por idioma ao catálogo existente. O seletor fica no início do diálogo, fora do bloco que impede editar um envio pendente, para permitir ler nesse idioma também uma recusa ou um pedido guardado.
+
+A troca de idioma atualiza os textos e a revisão aberta sem reconstruir os campos. Nomes de piscinas/produtos, notas, motivo escrito, unidades, valores, IDs, versão, UUID, recibos e bytes dos rascunhos/pedidos mantêm-se literais. As mensagens conhecidas da interface e os estados de recusa são localizados. Detalhes variáveis devolvidos pelo servidor ou por erros não catalogados ficam identificados como «Detalhe original», sem inventar uma tradução ou alterar o recibo. Os textos da fila geral fora deste diálogo não são declarados integralmente traduzidos.
+
+As mensagens de validação dos campos seguem o idioma escolhido, conservando os limites existentes. Idiomas não suportados usam português, incluindo nomes herdados de objetos como `constructor`. Rótulos longos quebram dentro do espaço disponível; medições/checklist usam uma coluna a 320 px. O primeiro ensaio encontrou transbordo e foi corrigido antes da aprovação.
+
+Validação local: 1 075 testes unitários/122 ficheiros, quatro técnicos, sintaxe 691/307/44; três grupos integrados distintos (produtos e correção extra, correções existentes e resumo de documentos). Nos 15 pares idioma/largura, a revisão conserva os valores literais e os IDs, a validação obrigatória está traduzida e os controlos ficam acessíveis sem transbordo. Trinta capturas de topo/revisão; inspeção de DE320 e FR390. A mudança de idioma durante um envio offline conserva todos os bytes do pedido e do rascunho; um 403 traduzido não reabre a edição. Mantiveram-se recarregamento offline, resposta perdida, um recibo/uma auditoria e movimentos apenas nas linhas originais, além de concorrência, quota e versões antigas no teste existente. [Evidência](evidence/20260928_task388_local.json).
+
+Cache v199; runner mantém 301 grupos. Não houve migração, mudança dos pedidos/recibos ou dependência nova. Falta a confirmação nativa PostgreSQL/restauro desta publicação; os restantes módulos mantêm os limites da revisão global.
+
 ## Mapa de módulos e critérios ainda abertos
 
 | Área | Código e capacidade encontrada | Falta para fechar a aceitação |
 |---|---|---|
 | Acessos e perfis | JWT, principal ativo, versões de acesso, guardas ADMIN/TECHNICIAN/TEAM_LEADER/CLIENT e titularidade nas APIs. `authMiddleware`, `jwtPrincipalGuard` e `legacyAdministrationAccess` protegem também APIs antigas, incluindo `/api/brain`. | Ensaios prolongados nos dispositivos usados pela equipa; confirmar configuração de produção. Uma página HTML existente ou uma guarda visual não prova autorização da API. |
-| Técnicos e visitas | Rota, início/fim, REGULAR/EXTRA, leituras, checklist, fotos, impedimentos, regresso, recibos e correções. `technician-field-mode`, `technician`, `TechnicianVisitBusiness` e os serviços de execução. | Tradução dos restantes textos da correção extra e da página antiga; datas nos percursos antigos têm critérios distintos a rever na fronteira do dia. |
+| Técnicos e visitas | Rota, início/fim, REGULAR/EXTRA, leituras, checklist, fotos, impedimentos, regresso, recibos e correções. `technician-field-mode`, `technician`, `TechnicianVisitBusiness` e os serviços de execução. | Diálogo de correção extra localizado na TASK388; restante página antiga/fila geral e datas na fronteira do dia ainda precisam de revisão. |
 | Offline e sincronização | `cw-field-write-store`, cópias por conta/dia, rascunhos, UUID, recuperação do pedido original e rejeição de respostas de outra sessão. | Uso real durante várias horas sem rede, suspensão do Android/iPhone, quota, fotografias grandes e recuperação após reinício do telefone. |
 | Rotas e substituições | Rondas, cadências, atribuições permanentes/por intervalo e confirmação da receção. `RoundAssignmentBusiness`, `VisitCoverageBusiness`, `roundScheduleService`. | Medir tempos de viagem/capacidade no cenário real e unificar explicitamente o contrato de dia entre UI, servidores e APIs antigas. Não alterar horas históricas automaticamente. |
 | Serviços sazonais | `clientServicePlan`, `clientServiceScheduleService` e `clientServicePricing`: épocas, serviços, mensalidade/preço por visita, frequência, exceções e horário Lisboa. Três visitas não é limite. | Importar/conferir os acordos reais de cada cliente e validar faturação e calendário com os respetivos casos. |
@@ -62,9 +75,9 @@ Validação local: 251 pendências e 509 documentos elegíveis, 760 alertas perc
 
 ## Fila finita de trabalho
 
-1. **Fechar a validação das TASK386/387:** confirmar os 300/301 grupos e os respetivos restauros PostgreSQL. Manter a falha TASK385 no histórico.
+1. **Fechar a validação das TASK386/387/388:** confirmar os 300/301/301 grupos e os respetivos restauros PostgreSQL. Manter a falha TASK385 no histórico.
 2. **Confirmar em dados reais o resumo de riscos:** correção e seis grupos locais concluídos na TASK387. Medir o volume e rever divergências das fontes financeiras; não inferir dívida de documentos não conciliados.
-3. **Terminar a localização da correção extra:** medições, checklist, motivo, revisão e mensagens em PT/EN/FR/ES/DE, conservando rascunhos, IDs e pedidos. A TASK385 já traduziu a secção de produtos.
+3. **Localização da correção extra concluída localmente na TASK388:** confirmar CI; continuar depois a localização das páginas antigas e da fila geral, preservando dados literais e pedidos. Não confundir o diálogo traduzido com toda a aplicação traduzida.
 4. **Fechar o inventário de apresentação:** cinco entradas de raiz sem referência literal no inventário (`/admin-visits`, `/incident-center`, `/operational-dashboard`, `/reminder-materials`, `/reminder-visits`), distinguindo aliases reais de páginas auxiliares. Procurar testes com URLs dinâmicos antes de escrever testes repetidos. Verificar ainda erros, vazio, carregamento, teclado, ecrãs pequenos, idiomas e PDFs aplicáveis.
 5. **Conferir dados históricos e custos/receitas reais:** usar os percursos de revisão existentes; criar só os que faltarem para fontes comprovadas. Não reconstruir valores ou autoria automaticamente.
 6. **Importação WhatsApp e requisitos avançados:** tratar como fluxos próprios, com critérios de aceitação e revisão dos dados. Reutilizar os chats, clientes e registos financeiros atuais.

@@ -1,0 +1,237 @@
+{
+  "task": "TASK388",
+  "atUtc": "2026-09-28T04:58:38.406526+00:00",
+  "baseCommit": "270459f967439a39dbc2b3634bd11801acb1c827",
+  "scope": "Extra-visit correction dialog copy and language changes without data mutation",
+  "tests": {
+    "unit": {
+      "passed": 1075,
+      "files": 122
+    },
+    "technician": {
+      "passed": 4
+    },
+    "syntax": {
+      "backend": 691,
+      "frontend": 307,
+      "inline": 44
+    },
+    "integrated": [
+      {
+        "script": "scripts/test-field-extra-products.js",
+        "code": 0,
+        "ms": 29458
+      },
+      {
+        "script": "scripts/test-field-extra-correction.js",
+        "code": 0,
+        "ms": 8958
+      },
+      {
+        "script": "scripts/test-field-document-summary-ui.js",
+        "code": 0,
+        "ms": 24865
+      }
+    ],
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "capturedStates": [
+      "top",
+      "review"
+    ],
+    "screenshots": 30,
+    "reviewRemainsOpen": true,
+    "literalFormValuesPreserved": true,
+    "draftBytesPreservedByLanguage": true,
+    "pendingRequestBytesPreservedByLanguage": true,
+    "languageAvailableWhenFieldsDisabled": true,
+    "requiredValidationTranslated": true,
+    "forbiddenResponseDoesNotUnlockFields": true,
+    "offlineReloadAndLostResponse": true,
+    "exactlyOneCorrectionReceiptAndAudit": true,
+    "originalStockLinesOnly": true,
+    "browserErrors": 0
+  },
+  "implementation": {
+    "newCopyKeysPerLanguage": 75,
+    "draftSchema": 1,
+    "requestAndReceiptSchemasChanged": false,
+    "apiOrSchemaChanges": false,
+    "cache": "cristalwater-field-20260928-v199",
+    "nativeRunnerGroups": 301,
+    "externalIntegrationsEnabled": false,
+    "backendDetails": "Variable or uncatalogued details retained literally with a localized original-detail label"
+  },
+  "preparationNotes": [
+    "Initial narrow-layout overflow corrected by wrapping labels and using one column for readings/checklist at 320 px.",
+    "Removed a redundant second preview/save from the expanded test before comparing reload bytes; all draft equality and receipt/stock assertions remain.",
+    "Captures use reports/field-visual/extra-correction so the existing CI artifact upload includes them."
+  ],
+  "sources": [
+    {
+      "path": "frontend/cw-extra-visit-correction.js",
+      "sha256": "6d33b016daff7203d33d490d98eb4abfc2ad2c12a1a36544f9027e3cecb65d2c"
+    },
+    {
+      "path": "frontend/cw-field-document-copy.js",
+      "sha256": "201126073afb207fe83986b4a6264ba6eefae6802f6bfa09bee30eb0bb808e46"
+    },
+    {
+      "path": "frontend/sw.js",
+      "sha256": "480713bb0a3e95e15839b6bacf81d695348971e42100989e3759801e06eec8a5"
+    },
+    {
+      "path": "scripts/test-field-extra-products.js",
+      "sha256": "0774e4ef4a81a731cfb479f413122b8dbe87f25b2e3ba14feb13564f23b74694"
+    },
+    {
+      "path": "tests/field-document-summary.test.js",
+      "sha256": "42b664906dc1e5883fcd1ce63dfc0292797ef3b8bd7d6a58f94d43ff48c79759"
+    }
+  ],
+  "visualEvidence": [
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_de_1440_review.png",
+      "sha256": "e7e981ccd56294374d0a3df968d7d979acec439a5339cce3b87686912e126569"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_de_1440_top.png",
+      "sha256": "f1cc3d013a8bf3e3c0003b735ef94f4b8325b5784076f6c490387db2ecc6bfa8"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_de_320_review.png",
+      "sha256": "914fd7cebbec550835ca933ec3b508753af1c7052352de4c6321eb70a524efd6"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_de_320_top.png",
+      "sha256": "92879ea177585c5afb18adc4073d9151bbd4c1172ffe81f640d443a152904bde"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_de_390_review.png",
+      "sha256": "a49af0e77fcca6aef649f54c40c9bc142c24119d640c2e6503f594e750ca8107"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_de_390_top.png",
+      "sha256": "cc53e8d05d4d6eb0f5c8654e10cfc4e118db5ec5488f2ad3a101e359e23ae162"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_en_1440_review.png",
+      "sha256": "13450b589848979eea99ad4d9ed93d5ca54d9ee75290909fe8dd3e7cdfd17cab"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_en_1440_top.png",
+      "sha256": "885d422d8be849909a91f8546f5f1cc1898f38170072dc5cc66c56ab2bc091c0"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_en_320_review.png",
+      "sha256": "8279689e955968fd3c0dbc498d18fb6578a84ce6d0113ad672dfb9e7b3b5387a"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_en_320_top.png",
+      "sha256": "98cf0a36eed23c0a7b021f4f558dd917bb4c78294b6cec58cf0bb3bb9cdd48f8"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_en_390_review.png",
+      "sha256": "d1ce1f0f6d8c17ca6e957ecaf198d72754d45fec66ab6e6d97f175e4dc9740aa"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_en_390_top.png",
+      "sha256": "adbe00ac5598c28dd1fc8cbc940883326e10a16e1c2b32c808b6f1dc88e28963"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_es_1440_review.png",
+      "sha256": "c91edb033a67c82517943bb5a0398d559d902852ffd56362deda1bf99a2b9b05"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_es_1440_top.png",
+      "sha256": "e0967114b7f6f1ac20cd8b4ec15a1d551afb5b990bde6bc43eb5552dfb781164"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_es_320_review.png",
+      "sha256": "4e12920230b5083a96642d9ab7a48229154f4e4e5329d3fae27782a1c8de73cc"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_es_320_top.png",
+      "sha256": "3679fda7e1953337d61201b11bd210856bb97004e49ac96d4739c3bbcc5bf8cb"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_es_390_review.png",
+      "sha256": "5e5b68d7abb93b29a7e49326e3bc9edbe4f6e2f96d50a46a35b992155bd47688"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_es_390_top.png",
+      "sha256": "6098f3f5243a9cdf69cf5b11a02896273e3689e54bdc6d57e99a1d5a4fa07356"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_fr_1440_review.png",
+      "sha256": "e47122bc5dd8b8d807f11b08b972a7888460da4918c1ae0dcc361b24983338cf"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_fr_1440_top.png",
+      "sha256": "7dfc0b8dbf13d3c0e4d289c1f5e4463b64c511adcac544c389c685dd13ca0fba"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_fr_320_review.png",
+      "sha256": "9367647a50865bfe7c2cbe1e6adfe68727c137e60c01e199f60b54670d04907a"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_fr_320_top.png",
+      "sha256": "66a489e14645ea87644bc018c23d0c76c78dfc7f1adad800e94d0c8d0de0c641"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_fr_390_review.png",
+      "sha256": "91eb6ba53239ed4849e5d28f42b5a8fe980bdcc7dc2600df009f9f9c1a4a0f48"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_fr_390_top.png",
+      "sha256": "7de76249fa5889b2be75cab110e0c9f3f0c36a1b09230ac2e2dd428c43ed7aa0"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_pt_1440_review.png",
+      "sha256": "0bba861ebd4450d7ac0ea9330d9a12c34e6b556b9835a9b960976aa98bceeda2"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_pt_1440_top.png",
+      "sha256": "8916c97085fd35fc9ccefe745a5036995829b6cf87e3b2175605d66969a45d1f"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_pt_320_review.png",
+      "sha256": "48f48a8301505b899c2e35941433340675e0321577162e722a05cff5c5f1c9ed"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_pt_320_top.png",
+      "sha256": "64c85075d19dddc5e7767f91c975bc3bb61911ebbaaf41e37869767fefeb73b0"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_pt_390_review.png",
+      "sha256": "0122f2b3f640f906d258a7208d26ccd67aafbf76af3e1004f1f5c4b03e3a3018"
+    },
+    {
+      "path": "reports/field-visual/extra-correction/EXTRA_CORRECTION_pt_390_top.png",
+      "sha256": "5d7cae236809b6cef64a73aa36e2b5019d9245ed08f78bae78aef60993651263"
+    }
+  ],
+  "publication": {
+    "branch": "work/field-readiness-20260915-simulation",
+    "status": "prepared"
+  },
+  "nativeValidation": {
+    "status": "not_started",
+    "completeSuiteAndRestoreConfirmed": false
+  },
+  "limits": [
+    "Local PGlite/Chromium evidence does not replace PostgreSQL 16 and native restore.",
+    "Other pages and the shared offline queue are not declared fully translated.",
+    "No merge, production deployment or real recipient messages."
+  ]
+}
