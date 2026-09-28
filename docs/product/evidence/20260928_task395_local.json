@@ -544,9 +544,22 @@
     "syntax": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm.\n\n> cristalwater-backend@22.6.7 check:syntax\n> node scripts/check-syntax.js\n\n✅ Syntax OK: 691 backend JS files, 307 frontend JS files and 44 inline scripts.\n"
   },
   "publication": {
-    "status": "prepared_locally",
+    "status": "published_work_branch",
     "expectedNativeGroups": 306,
     "suiteConfirmed": false,
-    "restoreConfirmed": false
+    "restoreConfirmed": false,
+    "branch": "work/field-readiness-20260915-simulation",
+    "codeCommit": "40d2c926dc5d8dab615f182d4c12b51abb8bf699",
+    "tree": "ee7d8a2cd20df98bc30ee9f8151d41999915179b",
+    "treeMatchesPreparedIndex": true,
+    "nativeCi": {
+      "runId": 36405872569,
+      "jobId": 108874343264,
+      "status": "in_progress",
+      "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36405872569",
+      "expectedGroups": 306,
+      "confirmed": false,
+      "restoreConfirmed": false
+    }
   }
 }
