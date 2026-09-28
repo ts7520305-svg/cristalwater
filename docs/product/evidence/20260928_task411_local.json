@@ -2316,6 +2316,10 @@
       "task411-unit.log": "f6de4c8ac97e3285497053912dc43afb621262e99ca901b0c81e61443be3efbd",
       "task411-technician.log": "af2a515c2683924abb2d6fc04dea637ca7a5b4c0f1b9d80ae10c602e3ab505a1",
       "task411-syntax.log": "7d20a5145437e5670d0376055bf4a65ce58000a565a1aff72875faa758150d36"
+    },
+    "publicationGates": {
+      "task411-publication-unit.log": "13504c953c1fe0903fb2aabe4e2eaca7171ee7a7b738e1ac3c619bd9e9cb6e37",
+      "task411-publication-technician.log": "aefabe79851415a2b2d7cfff994b63707314bbacccefea7a0d61ad254d14dc48"
     }
   },
   "rendering": {
@@ -7361,7 +7365,14 @@
     "TASK408 native runner/restore and agenda/guide JSONs passed. TASK409 memory optimization passed 12 profiles+3 faults at 513.18 MiB for dashboard400, with concurrent operational snapshot confirmed, but suite failed one legacy-draft conflict test (0 vs 2) and skipped restore. C03 remains in validation; TASK410/TASK411 native gates pending. Triage this failure before the subsequent upload batch."
   ],
   "publication": {
-    "status": "pending",
-    "branch": "work/field-readiness-20260915-simulation"
+    "commit": "b649f1a61bf834c1f5a37a675321aef0c2a55f45",
+    "tree": "ece3b97fcaea2f0bbedab24b56c9acf9cd2e8f42",
+    "branch": "work/field-readiness-20260915-simulation",
+    "status": "published-native-pending",
+    "testedTreeMatches": true,
+    "runId": 36482590787,
+    "jobId": 109131593496,
+    "ciStatus": "in_progress",
+    "fullSuiteScripts": 315
   }
 }
