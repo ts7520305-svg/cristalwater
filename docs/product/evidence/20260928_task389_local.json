@@ -183,12 +183,25 @@
     "TASK387": "PASS 301/301 and restore 128 tables/47 files",
     "evidence": "20260928_task386_task387_ci.json",
     "TASK388": "IN_PROGRESS at last check",
-    "TASK389": "NOT_YET_PUBLISHED"
+    "TASK389": "IN_PROGRESS"
   },
   "limits": [
     "Local integration uses PGlite, not a new native PostgreSQL restore",
     "No VPS deployment, merge or real customer communication",
     "Contract drafting and implementation deferred; agreed requirements preserved",
     "Global production acceptance and remaining review tasks are still open"
-  ]
+  ],
+  "publication": {
+    "branch": "work/field-readiness-20260915-simulation",
+    "commit": "8df98f108a874fa5ec043f7a896e7366096cc8e7",
+    "tree": "b9b66772c56625154aa8f7aed31bcdb5bc750161",
+    "runId": 36383123319,
+    "jobId": 108802818778,
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36383123319",
+    "status": "in_progress",
+    "conclusion": null,
+    "expectedGroups": 301,
+    "fullNativeSuiteConfirmed": false,
+    "restoreConfirmed": false
+  }
 }
