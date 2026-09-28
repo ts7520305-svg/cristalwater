@@ -2452,7 +2452,7 @@
   },
   "nativeCurrentValidation": {
     "TASK389": "IN_PROGRESS at last check",
-    "TASK390": "NOT_YET_PUBLISHED"
+    "TASK390": "IN_PROGRESS"
   },
   "limits": [
     "Local integration is PGlite, not native PostgreSQL restore",
@@ -2461,5 +2461,18 @@
     "Full global production acceptance remains open",
     "No merge, VPS deployment or real customer communications",
     "Contract drafting/implementation remain deferred as requested"
-  ]
+  ],
+  "publication": {
+    "branch": "work/field-readiness-20260915-simulation",
+    "commit": "7f818ee4dd257531384ded294ed963d0fb73c966",
+    "tree": "40360164782a2929b64379e6683c949f5f033560",
+    "runId": 36385188783,
+    "jobId": 108808976525,
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36385188783",
+    "status": "in_progress",
+    "conclusion": null,
+    "expectedGroups": 302,
+    "fullNativeSuiteConfirmed": false,
+    "restoreConfirmed": false
+  }
 }

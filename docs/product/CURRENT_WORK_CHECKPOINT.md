@@ -1,6 +1,6 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK390 preparada
+## Retoma atual — 28/09/2026, TASK390 publicada
 
 O centro de incidentes deixa de confirmar uma resolução/escalamento apenas porque o pedido terminou. Exige HTTP de sucesso, `ok: true`, incidente válido com o mesmo ID e o estado solicitado. Uma recusa, resposta nula/errada ou resposta perdida não acrescenta sucesso à linha temporal; a lista tem de ser consultada de novo. Cliques repetidos ficam bloqueados durante o envio. A API deixa de converter falhas de leitura em `200` com lista vazia e rejeita resultados de escrita ausentes.
 
@@ -12,7 +12,7 @@ A página distingue carregamento, vazio real, indisponibilidade, falta de permis
 
 **CI anteriores:** TASK388 confirmada, [301/301 e restauro](https://github.com/ts7520305-svg/cristalwater/actions/runs/36380011326): 17 etapas, 128 tabelas e 47 ficheiros, linhas/hashes iguais. Grupos comparados com o runner do commit exato `26e3bcaeca2d3c69d9cf651fa6220d0bb43529c9`; prova incluída na evidência desta tarefa. TASK389 permanece em execução na última consulta. TASK386/387 já aprovadas; TASK385 conserva a falha histórica 297/300.
 
-**Publicação TASK390:** alteração preparada; commit/árvore e CI serão registados depois da publicação na branch `work/field-readiness-20260915-simulation`. O ensaio local usa PGlite/Chromium com dados sintéticos; os 302 grupos PostgreSQL e o restauro desta alteração ainda não estão confirmados.
+**Publicação TASK390:** Publicada na branch `work/field-readiness-20260915-simulation` em `7f818ee4dd257531384ded294ed963d0fb73c966`, árvore `40360164782a2929b64379e6683c949f5f033560`, igual à preparada e verificada localmente. [CI 36385188783](https://github.com/ts7520305-svg/cristalwater/actions/runs/36385188783), job `108808976525`, em execução; 302 grupos PostgreSQL e restauro ainda não confirmados. O ensaio local usa PGlite/Chromium com dados sintéticos; os 302 grupos PostgreSQL e o restauro desta alteração ainda não estão confirmados.
 
 **Continuar:** confirmar CI de TASK389/390. Os testes de `/reminder-materials` e `/reminder-visits` existem nas fixtures de navegador e no runner; a ausência na pesquisa superficial não era ausência de testes. `/admin-visits` tem referências no microsweep, sem equivaler a aceitação completa. Rever agora `/operational-dashboard`: o cliente usa valores zero por omissão e mantém o resultado anterior após erros, sem proteção contra respostas fora de ordem; leitura identificada, correção ainda não feita. O centro de incidentes ainda precisa de localização nos restantes idiomas e de validação de volume/paginação; a linha temporal é apenas das confirmações nesta sessão. Contrato continua adiado por indicação do utilizador. Conciliação histórica, WhatsApp, IA local, VPS/cópias e piloto físico mantêm os limites da revisão global. Sem merge/deploy/contactos reais; sistema não declarado concluído.
 
