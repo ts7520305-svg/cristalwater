@@ -40,7 +40,7 @@
       const nextAssignment = await request('/vehicles', currentController.signal); if (!readRules.vehicles(nextAssignment, actor)) throw Error(t('response')); assigned = nextAssignment;
       const vehicleId = assigned.scope.vehicleId, stock = vehicleId === null ? null : await request('/stock/' + vehicleId + '?includeMovements=false', currentController.signal);
       if (ticket !== revision || !active()) return;
-      const value = { v: 1, owner: actor.owner, technicianId: actor.technicianId, day, requestedAt, confirmedAt: new Date().toISOString(), assignment: assigned, stock };
+      const value = { v: 1, owner: actor.owner, technicianId: actor.technicianId, day, requestedAt, confirmedAt: new Date().toISOString(), assignment: rules.assignmentForCache(assigned), stock };
       if (!valid(value)) throw Error(t('response')); snapshot = value; source = 'live';
       try {
         if (!navigator.locks?.request) throw Error(t('save'));

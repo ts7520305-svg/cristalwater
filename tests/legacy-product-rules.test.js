@@ -2,6 +2,29 @@ import { describe, it, expect } from 'vitest';
 const rules = require('../frontend/cw-legacy-product-rules');
 const row = { name: 'Cloro', quantity: '0,25', unit: 'L', notes: 'Original\nnotes', workGuideId: 7, workGuideItemId: 2 };
 const stock = { workGuide: { id: 7, vehicleId: 9 }, stock: [{ id: 2, workGuideId: 7, name: 'Cloro', unit: 'L', quantity: 1 }, { id: 3, workGuideId: 7, name: 'Cloro', unit: 'L', quantity: 2 }] };
+describe('Legacy assignment cache keeps identity without duplicate guide catalogues', () => {
+  const read = require('../frontend/cw-technician-guide-read-rules'), actor = { owner: 'TECH:3', technicianId: 3 };
+  const assignment = () => ({ ok: true, scope: { version: 1, owner: actor.owner, technicianId: 3, vehicleId: 9 }, vehicles: [{ id: 9, plate: 'QA-09', active: true, deletedAt: null, name: 'Literal <vehicle>', assignedTechnicians: [{ id: 3, name: 'Técnico', vehicleId: 9, active: true }], workGuides: [{ id: 7, items: [{ id: 2, name: 'Cloro', unit: 'L' }] }], transportGuides: [{ id: 6, items: [{ id: 8, name: 'Cloro', unit: 'L' }] }] }] });
+  it('preserves the account, vehicle and assignment while leaving the input unchanged', () => {
+    const value = assignment(), before = JSON.stringify(value), compact = rules.assignmentForCache(value);
+    const { workGuides, transportGuides, ...vehicle } = value.vehicles[0];
+    expect(compact).toEqual({ ...value, vehicles: [vehicle] }); expect(JSON.stringify(value)).toBe(before);
+    expect(read.vehicles(value, actor)).toBe(true); expect(read.vehicles(compact, actor)).toBe(true);
+  });
+  it('keeps the explicitly unassigned state and old caches compatible', () => {
+    const value = { ok: true, scope: { version: 1, owner: actor.owner, technicianId: 3, vehicleId: null }, vehicles: [] };
+    expect(rules.assignmentForCache(value)).toEqual(value); expect(read.vehicles(value, actor)).toBe(true);
+    expect(read.vehicles(assignment(), actor)).toBe(true);
+  });
+  it('does not retain 10001 unrelated copies of work/transport guide items', () => {
+    const value = assignment(); value.vehicles[0].workGuides[0].items = Array.from({ length: 10001 }, (_, i) => ({ id: i + 1, name: 'Produto grande ' + i, unit: 'KG' }));
+    value.vehicles[0].transportGuides[0].items = value.vehicles[0].workGuides[0].items;
+    expect(JSON.stringify(value).length).toBeGreaterThan(1000000); expect(JSON.stringify(rules.assignmentForCache(value)).length).toBeLessThan(400);
+  });
+  for (const change of [{ owner: 'TECH:4' }, { technicianId: 4 }, { vehicleId: 10 }]) it('does not repair or authorize a mismatched scope: ' + JSON.stringify(change), () => {
+    const value = assignment(); Object.assign(value.scope, change); expect(read.vehicles(rules.assignmentForCache(value), actor)).toBe(false);
+  });
+});
 describe('Legacy product draft conversion without losing original text', () => {
   for (const original of ['2 kg de cloro\n confirmar unidade', '<img src=x> 1 L', '[broken', '{"rows":[]}', '[{"name":"X","private":true}]']) {
     it('preserves opaque original bytes during explicit conversion: ' + original, () => {

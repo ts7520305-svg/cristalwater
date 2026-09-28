@@ -1,0 +1,751 @@
+{
+  "task": "TASK406",
+  "date": "2026-09-28",
+  "completionId": "C04",
+  "scenario": "C04-B",
+  "status": "local-approved-native-pending",
+  "baseCommit": "30b119879b6d2573b143c4c2f63a6281e476e1a0",
+  "branch": "work/field-readiness-20260915-simulation",
+  "counts": {
+    "total": 32,
+    "notStarted": 28,
+    "inProgress": 1,
+    "validation": 3,
+    "closed": 0,
+    "c04Children": 6,
+    "c04ChildrenLocalApproved": 2
+  },
+  "regression": {
+    "fullRun": {
+      "ok": false,
+      "phase": "profiles-in-progress",
+      "results": [
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "API",
+          "products": 201,
+          "durationMs": 78.1,
+          "jsonBytes": 82319,
+          "sampledRssMiB": 100.44,
+          "sampledHeapMiB": 23.56,
+          "sql": {
+            "queries": 22,
+            "writes": 0,
+            "durationMs": 7
+          },
+          "exactOrderedIds": true,
+          "literalFields": true,
+          "anonymousDenied": true,
+          "foreignTechnicianDenied": true
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "MODERN",
+          "products": 201,
+          "loadMs": 1514.2,
+          "traversalMs": 3.8,
+          "pages": 9,
+          "maximumPageOptions": 25,
+          "browserJsHeapMiB": 4.88,
+          "localStorageChars": 91356,
+          "offlineReloadMs": 4715.3,
+          "exactOrderedIds": true,
+          "selectedBeyond200": 201,
+          "identityAndDraftPreserved": true,
+          "literalNames": true,
+          "writes": 0,
+          "pageErrors": 0
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "LEGACY",
+          "products": 201,
+          "loadMs": 878,
+          "traversalMs": 5.3,
+          "pages": 9,
+          "maximumPageOptions": 25,
+          "browserJsHeapMiB": 3.56,
+          "localStorageChars": 126891,
+          "offlineReloadMs": 151.6,
+          "exactOrderedIds": true,
+          "selectedBeyond200": 201,
+          "identityAndDraftPreserved": true,
+          "literalNames": true,
+          "writes": 0,
+          "pageErrors": 0
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "EXTRA",
+          "products": 201,
+          "loadMs": 1501.4,
+          "traversalMs": 4.7,
+          "pages": 9,
+          "maximumPageOptions": 25,
+          "browserJsHeapMiB": 4.9,
+          "localStorageChars": 92603,
+          "offlineReloadMs": 4699.7,
+          "exactOrderedIds": true,
+          "selectedBeyond200": 201,
+          "identityAndDraftPreserved": true,
+          "literalNames": true,
+          "writes": 0,
+          "pageErrors": 0
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "CORRECTION",
+          "products": 201,
+          "loadMs": 1426.1,
+          "traversalMs": 5.2,
+          "pages": 9,
+          "maximumPageOptions": 25,
+          "browserJsHeapMiB": 4.68,
+          "localStorageChars": 113953,
+          "offlineReloadMs": 4867,
+          "exactOrderedIds": true,
+          "selectedBeyond200": 201,
+          "identityAndDraftPreserved": true,
+          "literalNames": true,
+          "writes": 0,
+          "pageErrors": 0
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "API",
+          "products": 1001,
+          "durationMs": 98,
+          "jsonBytes": 402442,
+          "sampledRssMiB": 108.02,
+          "sampledHeapMiB": 28.13,
+          "sql": {
+            "queries": 22,
+            "writes": 0,
+            "durationMs": 5
+          },
+          "exactOrderedIds": true,
+          "literalFields": true,
+          "anonymousDenied": true,
+          "foreignTechnicianDenied": true
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "MODERN",
+          "products": 1001,
+          "loadMs": 1564.5,
+          "traversalMs": 35.4,
+          "pages": 41,
+          "maximumPageOptions": 25,
+          "browserJsHeapMiB": 7.96,
+          "localStorageChars": 411467,
+          "offlineReloadMs": 4804.7,
+          "exactOrderedIds": true,
+          "selectedBeyond200": 1001,
+          "identityAndDraftPreserved": true,
+          "literalNames": true,
+          "writes": 0,
+          "pageErrors": 0
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "LEGACY",
+          "products": 1001,
+          "loadMs": 930.4,
+          "traversalMs": 28.5,
+          "pages": 41,
+          "maximumPageOptions": 25,
+          "browserJsHeapMiB": 5.77,
+          "localStorageChars": 607052,
+          "offlineReloadMs": 153.7,
+          "exactOrderedIds": true,
+          "selectedBeyond200": 1001,
+          "identityAndDraftPreserved": true,
+          "literalNames": true,
+          "writes": 0,
+          "pageErrors": 0
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "EXTRA",
+          "products": 1001,
+          "loadMs": 1534.5,
+          "traversalMs": 31.8,
+          "pages": 41,
+          "maximumPageOptions": 25,
+          "browserJsHeapMiB": 7.97,
+          "localStorageChars": 412714,
+          "offlineReloadMs": 4793.4,
+          "exactOrderedIds": true,
+          "selectedBeyond200": 1001,
+          "identityAndDraftPreserved": true,
+          "literalNames": true,
+          "writes": 0,
+          "pageErrors": 0
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "CORRECTION",
+          "products": 1001,
+          "loadMs": 1434.3,
+          "traversalMs": 40,
+          "pages": 41,
+          "maximumPageOptions": 25,
+          "browserJsHeapMiB": 8.81,
+          "localStorageChars": 517320,
+          "offlineReloadMs": 4911.2,
+          "exactOrderedIds": true,
+          "selectedBeyond200": 1001,
+          "identityAndDraftPreserved": true,
+          "literalNames": true,
+          "writes": 0,
+          "pageErrors": 0
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "API",
+          "products": 10001,
+          "durationMs": 348.6,
+          "jsonBytes": 4020565,
+          "sampledRssMiB": 185.27,
+          "sampledHeapMiB": 42.92,
+          "sql": {
+            "queries": 22,
+            "writes": 0,
+            "durationMs": 26
+          },
+          "exactOrderedIds": true,
+          "literalFields": true,
+          "anonymousDenied": true,
+          "foreignTechnicianDenied": true
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "MODERN",
+          "products": 10001,
+          "loadMs": 2579.5,
+          "traversalMs": 1515.9,
+          "pages": 401,
+          "maximumPageOptions": 25,
+          "browserJsHeapMiB": 17.81,
+          "localStorageChars": 4029578,
+          "offlineReloadMs": 5625.7,
+          "exactOrderedIds": true,
+          "selectedBeyond200": 10001,
+          "identityAndDraftPreserved": true,
+          "literalNames": true,
+          "writes": 0,
+          "pageErrors": 0
+        }
+      ],
+      "cleanupVerified": true
+    },
+    "failure": {
+      "mode": "LEGACY",
+      "products": 10001,
+      "phase": "offline-reload",
+      "error": "page.waitForFunction: Timeout 20000ms exceeded.",
+      "diagnostics": {
+        "storage": [
+          {
+            "key": "cwLegacyVisitDraft:v1:TECH:1:2",
+            "chars": 383
+          }
+        ],
+        "statuses": [
+          {
+            "id": "",
+            "text": "Guia indisponível. Os produtos do rascunho foram conservados."
+          },
+          {
+            "id": "",
+            "text": "Produtos da guia indisponíveis. Consulte ou atualize a guia."
+          },
+          {
+            "id": "",
+            "text": "Guia indisponível. Os produtos do rascunho foram conservados."
+          },
+          {
+            "id": "",
+            "text": "Produtos da guia indisponíveis. Consulte ou atualize a guia."
+          }
+        ]
+      }
+    },
+    "focusedRepeat": [
+      {
+        "productVolumeBrowserMeasurement": {
+          "mode": "LEGACY",
+          "products": 10001,
+          "loadMs": 1382.344733,
+          "traversalMs": 472.8999999985099,
+          "heapMiB": 20.59,
+          "storageChars": 2286,
+          "cacheStatus": "Guia consultada online em 28/09/26, 18:58:53. Guia de obra #1 Failed to execute 'setItem' on 'Storage': Setting the value of 'cwLegacyVisitProducts:v1:TECH:1:2026-09-28' exceeded the quota."
+        }
+      },
+      {
+        "productVolumeFailure": {
+          "mode": "LEGACY",
+          "products": 10001,
+          "phase": "offline-reload",
+          "error": "page.waitForFunction: Timeout 20000ms exceeded.",
+          "diagnostics": {
+            "storage": [
+              {
+                "key": "cwLegacyVisitDraft:v1:TECH:1:2",
+                "chars": 383
+              }
+            ],
+            "statuses": [
+              {
+                "id": "",
+                "text": "Guia indisponível. Os produtos do rascunho foram conservados."
+              },
+              {
+                "id": "",
+                "text": "Produtos da guia indisponíveis. Consulte ou atualize a guia."
+              },
+              {
+                "id": "",
+                "text": "Guia indisponível. Os produtos do rascunho foram conservados."
+              },
+              {
+                "id": "",
+                "text": "Produtos da guia indisponíveis. Consulte ou atualize a guia."
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "interpretation": "Legacy online list remained available but localStorage.setItem exceeded the quota; no guide copy existed after real offline reload. Original draft survived. Baseline application code was unchanged during both failures."
+  },
+  "productionChange": {
+    "helper": "CWLegacyProductRules.assignmentForCache",
+    "removedFromAssignmentOnly": [
+      "vehicles[].workGuides",
+      "vehicles[].transportGuides"
+    ],
+    "retained": [
+      "owner and scope",
+      "vehicle and assigned technician fields",
+      "complete stock packet with exact guide/item identities and quantities",
+      "all API contracts and authorization",
+      "previous v1 saved cache readability",
+      "original draft/receipt bytes"
+    ],
+    "publicCacheVersion": "v207",
+    "schemaOrDependencyChange": false,
+    "limitations": [
+      "API and local copies remain O(n)",
+      "10001 is the maximum synthetic catalogue tested, not a device capacity guarantee",
+      "Extra correction uses 5080487 localStorage characters; larger identifiers/names, additional drafts or less quota can exhaust storage",
+      "Browser JS heap excludes native/DOM memory; storage characters are not disk bytes"
+    ]
+  },
+  "local": {
+    "environment": {
+      "database": "PGlite 0.5.8 PostgreSQL 18.3",
+      "freshDatabase": true,
+      "browser": "Chromium 153.0.8010.0",
+      "externalNotifications": false,
+      "realData": false
+    },
+    "tests": {
+      "unitTests": 1311,
+      "unitFiles": 134,
+      "newUnitTests": 6,
+      "technicianTests": 4,
+      "syntax": {
+        "backend": 695,
+        "frontend": 307,
+        "inline": 44
+      },
+      "nodeCheck": true,
+      "diffCheck": true,
+      "runnerUniqueScripts": 311,
+      "runnerMissingScripts": 0,
+      "groups": [
+        {
+          "script": "test-field-product-volume.js",
+          "code": 0,
+          "ms": 89429
+        },
+        {
+          "script": "test-field-legacy-products.js",
+          "code": 0,
+          "ms": 7625
+        },
+        {
+          "script": "test-field-product-catalogue-ui.js",
+          "code": 0,
+          "ms": 14479,
+          "verification": "Unchanged test body rerun with a QA-only process keepalive and four-terminal-marker guard; all four markers read. Earlier exits returned 0 with only three markers and were not used as completion proof."
+        },
+        {
+          "script": "test-field-extra-products.js",
+          "code": 0,
+          "ms": 29144
+        }
+      ],
+      "regressionCoverage": [
+        "legacy original text, literal product/unit identity, permissions, corrupt cache retention and session swap",
+        "five languages at 320/390/1440",
+        "real offline reload, lost committed response, immutable request and single debit",
+        "extra original/later/closed/reassigned/no guide, isolated technician access and exact-once correction"
+      ]
+    },
+    "volume": {
+      "ok": true,
+      "phase": "assertions-completed",
+      "profiles": [
+        201,
+        1001,
+        10001
+      ],
+      "modes": [
+        "API",
+        "MODERN",
+        "LEGACY",
+        "EXTRA",
+        "CORRECTION"
+      ],
+      "results": [
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "API",
+          "products": 201,
+          "durationMs": 90.4,
+          "jsonBytes": 82319,
+          "sampledRssMiB": 102.22,
+          "sampledHeapMiB": 23.56,
+          "sql": {
+            "queries": 22,
+            "writes": 0,
+            "durationMs": 11
+          },
+          "exactOrderedIds": true,
+          "literalFields": true,
+          "anonymousDenied": true,
+          "foreignTechnicianDenied": true
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "MODERN",
+          "products": 201,
+          "loadMs": 1495.3,
+          "traversalMs": 4.6,
+          "pages": 9,
+          "maximumPageOptions": 25,
+          "browserJsHeapMiB": 4.88,
+          "localStorageChars": 91357,
+          "offlineReloadMs": 4701.9,
+          "exactOrderedIds": true,
+          "selectedBeyond200": 201,
+          "identityAndDraftPreserved": true,
+          "literalNames": true,
+          "writes": 0,
+          "pageErrors": 0
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "LEGACY",
+          "products": 201,
+          "loadMs": 948,
+          "traversalMs": 5.5,
+          "pages": 9,
+          "maximumPageOptions": 25,
+          "browserJsHeapMiB": 4.49,
+          "localStorageChars": 84783,
+          "offlineReloadMs": 184.5,
+          "exactOrderedIds": true,
+          "selectedBeyond200": 201,
+          "identityAndDraftPreserved": true,
+          "literalNames": true,
+          "writes": 0,
+          "pageErrors": 0
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "EXTRA",
+          "products": 201,
+          "loadMs": 1441.7,
+          "traversalMs": 5.3,
+          "pages": 9,
+          "maximumPageOptions": 25,
+          "browserJsHeapMiB": 4.32,
+          "localStorageChars": 92603,
+          "offlineReloadMs": 4746.2,
+          "exactOrderedIds": true,
+          "selectedBeyond200": 201,
+          "identityAndDraftPreserved": true,
+          "literalNames": true,
+          "writes": 0,
+          "pageErrors": 0
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "CORRECTION",
+          "products": 201,
+          "loadMs": 1248.5,
+          "traversalMs": 6.3,
+          "pages": 9,
+          "maximumPageOptions": 25,
+          "browserJsHeapMiB": 4.67,
+          "localStorageChars": 113953,
+          "offlineReloadMs": 4823.8,
+          "exactOrderedIds": true,
+          "selectedBeyond200": 201,
+          "identityAndDraftPreserved": true,
+          "literalNames": true,
+          "writes": 0,
+          "pageErrors": 0
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "API",
+          "products": 1001,
+          "durationMs": 114.7,
+          "jsonBytes": 402442,
+          "sampledRssMiB": 107.45,
+          "sampledHeapMiB": 28.13,
+          "sql": {
+            "queries": 22,
+            "writes": 0,
+            "durationMs": 6
+          },
+          "exactOrderedIds": true,
+          "literalFields": true,
+          "anonymousDenied": true,
+          "foreignTechnicianDenied": true
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "MODERN",
+          "products": 1001,
+          "loadMs": 1536.1,
+          "traversalMs": 27.4,
+          "pages": 41,
+          "maximumPageOptions": 25,
+          "browserJsHeapMiB": 7.8,
+          "localStorageChars": 411468,
+          "offlineReloadMs": 4806.8,
+          "exactOrderedIds": true,
+          "selectedBeyond200": 1001,
+          "identityAndDraftPreserved": true,
+          "literalNames": true,
+          "writes": 0,
+          "pageErrors": 0
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "LEGACY",
+          "products": 1001,
+          "loadMs": 931.3,
+          "traversalMs": 30.5,
+          "pages": 41,
+          "maximumPageOptions": 25,
+          "browserJsHeapMiB": 5.12,
+          "localStorageChars": 404891,
+          "offlineReloadMs": 168.1,
+          "exactOrderedIds": true,
+          "selectedBeyond200": 1001,
+          "identityAndDraftPreserved": true,
+          "literalNames": true,
+          "writes": 0,
+          "pageErrors": 0
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "EXTRA",
+          "products": 1001,
+          "loadMs": 1588,
+          "traversalMs": 27.8,
+          "pages": 41,
+          "maximumPageOptions": 25,
+          "browserJsHeapMiB": 8.16,
+          "localStorageChars": 412713,
+          "offlineReloadMs": 4773.5,
+          "exactOrderedIds": true,
+          "selectedBeyond200": 1001,
+          "identityAndDraftPreserved": true,
+          "literalNames": true,
+          "writes": 0,
+          "pageErrors": 0
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "CORRECTION",
+          "products": 1001,
+          "loadMs": 1346.3,
+          "traversalMs": 60.5,
+          "pages": 41,
+          "maximumPageOptions": 25,
+          "browserJsHeapMiB": 9.16,
+          "localStorageChars": 517320,
+          "offlineReloadMs": 4936.6,
+          "exactOrderedIds": true,
+          "selectedBeyond200": 1001,
+          "identityAndDraftPreserved": true,
+          "literalNames": true,
+          "writes": 0,
+          "pageErrors": 0
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "API",
+          "products": 10001,
+          "durationMs": 629.5,
+          "jsonBytes": 4020565,
+          "sampledRssMiB": 195.81,
+          "sampledHeapMiB": 42.9,
+          "sql": {
+            "queries": 22,
+            "writes": 0,
+            "durationMs": 70
+          },
+          "exactOrderedIds": true,
+          "literalFields": true,
+          "anonymousDenied": true,
+          "foreignTechnicianDenied": true
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "MODERN",
+          "products": 10001,
+          "loadMs": 3599.8,
+          "traversalMs": 1465.1,
+          "pages": 401,
+          "maximumPageOptions": 25,
+          "browserJsHeapMiB": 14.16,
+          "localStorageChars": 4029579,
+          "offlineReloadMs": 5639.9,
+          "exactOrderedIds": true,
+          "selectedBeyond200": 10001,
+          "identityAndDraftPreserved": true,
+          "literalNames": true,
+          "writes": 0,
+          "pageErrors": 0
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "LEGACY",
+          "products": 10001,
+          "loadMs": 1406.1,
+          "traversalMs": 545.2,
+          "pages": 401,
+          "maximumPageOptions": 25,
+          "browserJsHeapMiB": 19.16,
+          "localStorageChars": 4022999,
+          "offlineReloadMs": 333.7,
+          "exactOrderedIds": true,
+          "selectedBeyond200": 10001,
+          "identityAndDraftPreserved": true,
+          "literalNames": true,
+          "writes": 0,
+          "pageErrors": 0
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "EXTRA",
+          "products": 10001,
+          "loadMs": 2725.6,
+          "traversalMs": 1650.8,
+          "pages": 401,
+          "maximumPageOptions": 25,
+          "browserJsHeapMiB": 11.71,
+          "localStorageChars": 4030825,
+          "offlineReloadMs": 5774.4,
+          "exactOrderedIds": true,
+          "selectedBeyond200": 10001,
+          "identityAndDraftPreserved": true,
+          "literalNames": true,
+          "writes": 0,
+          "pageErrors": 0
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "CORRECTION",
+          "products": 10001,
+          "loadMs": 2468,
+          "traversalMs": 1851.5,
+          "pages": 401,
+          "maximumPageOptions": 25,
+          "browserJsHeapMiB": 16.07,
+          "localStorageChars": 5080487,
+          "offlineReloadMs": 6060.7,
+          "exactOrderedIds": true,
+          "selectedBeyond200": 10001,
+          "identityAndDraftPreserved": true,
+          "literalNames": true,
+          "writes": 0,
+          "pageErrors": 0
+        }
+      ],
+      "cleanupVerified": true,
+      "scope": "Fresh Node process per probe. API RSS includes oracle and HTTP client, not DB/browser. UI CDP JS heap excludes native DOM memory. Each UI profile traverses real DOM next handlers, then preserves exact draft/product through real offline reload. No browser stock command is submitted; existing completion/replay regressions run separately."
+    }
+  },
+  "previousNativeCI": {
+    "task": "TASK405",
+    "headSha": "77e424dd8305534fb63a4d251dba29e9a00b3f0e",
+    "runId": 36460017985,
+    "jobId": 109055958055,
+    "status": "in_progress",
+    "conclusion": null,
+    "successfulSteps": 10,
+    "currentStep": "Run node scripts/test-field-suite.js",
+    "expectedRunnerScripts": 310,
+    "runnerConfirmed": false,
+    "restoreConfirmed": false,
+    "smallArtifactsRead": false
+  },
+  "codeSha256": {
+    "frontend/cw-legacy-product-rules.js": "d2a0bd1264ac489e534d9a7ed9ba27aa5b1cc15b3cb784ea3ff25f5fe8abce1d",
+    "frontend/cw-legacy-visit-products.js": "cb779fed55d0b71aa06f1399acfcc8a262e9284bcfc81e4b5c481be2458accf7",
+    "frontend/sw.js": "6cb7cd1d25ea36b5826afac3834c1db44bb450d2a72b6ab8ff3a839a5bcca3f7",
+    "scripts/test-field-product-volume.js": "d5efab196b6872283c499017d9c088a1b3b4eac1098f83c35d1d826a1394b981",
+    "scripts/test-field-suite.js": "820e472c854660820af5076f49e78c40666b9d55546d64474ea854cef397ab9f",
+    "tests/legacy-product-rules.test.js": "29de4d45141ab65b05ad8917f0f2061bc4a6def7400c338774f2998e10ec8a3e"
+  },
+  "scope": {
+    "uniqueFiles": 10,
+    "productionDeploy": false,
+    "merge": false,
+    "realContacts": false
+  },
+  "publication": {
+    "status": "prepared",
+    "commit": null,
+    "tree": null,
+    "runId": null,
+    "jobId": null
+  }
+}

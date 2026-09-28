@@ -1,6 +1,26 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK405 publicada / C04-A
+## Retoma atual — 28/09/2026, TASK406 local / C04-B
+
+Avançado o segundo dos seis cenários de [volume operacional C04](OPERATIONAL_VOLUME_PLAN_20260928.md): stock pela API e catálogos do técnico moderno/antigo, visita extra e correção da guia original. **C04-A e C04-B aprovados localmente, CI pendente; C04-C–F por executar.** Contagem principal: **28 por iniciar, C04 em execução, três em validação (C01–C03), zero fechadas**.
+
+**Falha reproduzida:** com 10 001 itens o técnico antigo funcionava online, mas `localStorage.setItem` excedia a quota ao guardar a atribuição/stock. Após recarregar offline, não havia cópia da guia; o rascunho sobreviveu e a página assinalou indisponibilidade. No ensaio completo, doze probes anteriores passaram. Repetição focada confirmou a exceção de quota. [Evidência TASK406](evidence/20260928_task406_local.json).
+
+**Correção:** `assignmentForCache` remove só `workGuides`/`transportGuides` da atribuição da viatura, que repetiam itens já existentes no pacote de stock. Conserva conta, técnico atribuído e identidade/dados da viatura; stock e validadores continuam integrais. Chave/versão v1 mantém leitura das cópias antigas. Cache pública v207; sem alteração de API, esquema, dependências, movimentos ou recibos.
+
+**Local aprovado:** 1 311 unitários/134 ficheiros (seis novos), quatro técnicos, sintaxe 695/307/44 e quatro grupos integrados. Volume: **15 probes** nas escalas 201/1 001/10 001, API mais quatro percursos reais, com 9/41/401 páginas e ≤25 opções por página. IDs ordenados completos, nomes/unidades literais, pesquisa, seleção fixada e rascunho conservados após recarregar sem rede; zero escritas API/SQL e limpeza das fixtures em onze modelos. Regressões de produtos antigos, catálogo 207 e correção extra confirmam consumo/UUID/recibo, resposta perdida, débito único, permissões, cache inválida conservada, sessão trocada e cinco idiomas × 320/390/1440. O grupo de catálogo precisou de confirmação local com processo mantido ativo/guarda de quatro marcadores: todos lidos, 14 479 ms, corpo do teste inalterado. Não aceitar apenas código 0 sem a prova terminal.
+
+**Medições/limites:** API 10 001: 4 020 565 bytes, 629,5 ms e 195,81 MiB RSS (API+cliente/oracle, sem DB/navegador). Maior perfil UI: 401 páginas em 545,2–1 851,5 ms, heap JS 11,71–19,16 MiB; recarga offline 333,7–6 060,7 ms. Armazenamento local de 4 022 999 caracteres no percurso antigo e 5 080 487 na correção extra. API/cache continuam em O(n); nomes/IDs maiores, mais rascunhos ou menos quota podem esgotar armazenamento. Máximo sintético não certifica VPS/dispositivo. Probes de volume não enviam consumos; os comandos reais foram verificados nos grupos de regressão separados. PGlite novo/Chromium 153 local, CI nativo pendente.
+
+**Lote (10 ficheiros):** `cw-legacy-product-rules.js`, `cw-legacy-visit-products.js`, `sw.js`, unitários de produtos antigos, novo `test-field-product-volume.js`, runner, relatório C04, plano, este checkpoint e evidência. Hashes dos seis ficheiros de código/teste na evidência. Runner: **311 scripts únicos e existentes**. Grupo de volume local: 89 429 ms, dentro do timeout de 120 s do runner; conferir também no CI. O glob JSON já inclui `product-volume/results.json`.
+
+**CI anterior:** TASK405 run `36460017985`, job `109055958055`, commit `77e424dd8305534fb63a4d251dba29e9a00b3f0e`, ainda nos testes integrados na última consulta; dez etapas aprovadas, 310 grupos/restauro e artefactos por confirmar. CI/restauro de C01–C03 aprovados nos lotes anteriores, mas JSONs específicos ainda não lidos. Estados históricos abaixo não substituem esta consulta.
+
+**Publicação TASK406:** preparada na branch `work/field-readiness-20260915-simulation`; commit/árvore/CI serão registados após publicação. Sem merge, deploy ou contactos reais.
+
+**Continuar:** confirmar CI TASK405/TASK406 e os artefactos JSON pequenos. Para TASK406 exigir 311 scripts na ordem exata/restauro, `product-volume/results.json` com 15 probes/limpeza; para C01–C04-A, os gates de snapshot/volumes descritos abaixo. Executar C04-C, agendas/rondas nas escalas do manifesto; não mudar significados de datas/recorrência sem tratar C10. C04 só fecha após seis cenários. Depois C05 idiomas. Contrato anual adiado.
+
+## Retoma anterior — 28/09/2026, TASK405 publicada / C04-A
 
 Fechado o [manifesto C04 de seis cenários](OPERATIONAL_VOLUME_PLAN_20260928.md): catálogo de armazém, catálogos de campo, agendas/rondas, guias/movimentos, relatórios/histórico e PDFs/anexos. São filhos de C04, não novos IDs. Plano principal: **28 por iniciar, C04 em execução, três em validação (C01–C03), zero fechadas**.
 

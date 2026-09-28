@@ -7,6 +7,15 @@
   const object = v => !!v && typeof v === 'object' && !Array.isArray(v);
   const fields = ['name', 'productName', 'quantity', 'unit', 'notes', 'workGuideId', 'workGuideItemId'];
   const editable = rows => Array.isArray(rows) && rows.length <= 50 && rows.every(row => object(row) && Object.keys(row).every(key => fields.includes(key) && (row[key] === null || ['string', 'number'].includes(typeof row[key]))));
+  // The picker uses the independently validated stock packet for products.
+  // Assignment only needs the vehicle and assigned technician identities;
+  // retaining its nested guides stores a redundant third catalogue offline.
+  function assignmentForCache(value) {
+    return { ...value, vehicles: value.vehicles.map(vehicle => {
+      const { workGuides, transportGuides, ...identity } = vehicle;
+      return identity;
+    }) };
+  }
   function read(raw) {
     if (typeof raw !== 'string') throw Error('O registo anterior de produtos precisa de revisão.');
     if (!raw.trim()) return { kind: 'rows', rows: [], originalText: null };
@@ -36,5 +45,5 @@
     const rows = value.rows.map(row => [row.name ?? row.productName ?? '', row.quantity ?? '', row.unit ?? '', row.notes ?? '', ...(R.hasIdentity(row) ? ['Guia ' + (row.workGuideId ?? '?') + ' · linha ' + (row.workGuideItemId ?? '?')] : [])].join(' · '));
     return [value.originalText, ...rows].filter(v => v !== null && v !== '').join('\n') || '(nenhum)';
   }
-  return { read, encode, payload, describe };
+  return { read, encode, payload, describe, assignmentForCache };
 }));
