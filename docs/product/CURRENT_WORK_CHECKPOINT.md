@@ -1,6 +1,6 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK393 validada localmente
+## Retoma atual — 28/09/2026, TASK393 publicada
 
 O painel `/admin-dashboard` apresenta os montantes reais do mês escolhido, incluindo zero, sem os substituir por totais históricos. A regressão na versão anterior mostrou lucro de 9 975 € com os três valores mensais a zero: usava recebimentos históricos e um custo fixo de 12 € por visita. O lucro passa a «Não apurado»; foram retiradas conclusões de saúde financeira, eficiência e previsões para amanhã sem base comprovada. Cadastro, documentos globais, pagamentos mensais, visitas do mês e alertas consultados têm âmbitos explícitos. Visitas noutros estados não são somadas às planeadas; sem visitas não há percentagem de conclusão.
 
@@ -10,7 +10,7 @@ Falhas de leitura de técnicos, alertas, notificações e visitas deixam de ser 
 
 **CI anteriores confirmadas:** TASK391 [303/303](https://github.com/ts7520305-svg/cristalwater/actions/runs/36388765088) e TASK392 [304/304](https://github.com/ts7520305-svg/cristalwater/actions/runs/36390069779), cada uma com 17 etapas aprovadas e restauro de 128 tabelas/47 ficheiros, linhas/hashes iguais. Os scripts correspondem exatamente ao runner de cada commit; prova incluída na evidência TASK393. As referências anteriores a esses CI em execução são históricas. TASK386/387/388/389/390 também aprovadas; TASK385 conserva a falha histórica 297/300.
 
-**Publicação TASK393:** em preparação na branch `work/field-readiness-20260915-simulation`. Os 305 grupos PostgreSQL e o restauro deste lote ainda não estão confirmados. Ensaios locais com PGlite/Chromium e dados sintéticos. Sem merge/deploy/contactos reais.
+**Publicação TASK393:** branch `work/field-readiness-20260915-simulation`, commit `75f16ec0514f57f46f76e7cdb79f734509ee0d67`, árvore `ac80086ae9b95c57ea03d33f3512df5797f39428`, igual à preparada e verificada localmente. [CI 36398997535](https://github.com/ts7520305-svg/cristalwater/actions/runs/36398997535), job `108852117751`, em execução: migrações aditivas, sintaxe, testes base/técnicos e componentes de navegador já aprovados; os 305 grupos PostgreSQL e o restauro ainda não estão confirmados. Ensaios locais com PGlite/Chromium e dados sintéticos. Sem merge/deploy/contactos reais.
 
 **Continuar:** confirmar a CI TASK393 e rever a completude/coerência das fontes administrativas. Subsistem cortes de 200 alertas por fonte, ausência de snapshot comum e campos legados de custo/previsão na API, agora ignorados nesta página. A leitura de `/api/dashboard/metrics` ainda contém conversões de erros em zero/listas vazias; reproduzir antes de corrigir, incluindo cache/circuit breaker. Idiomas/páginas antigas, volume/paginação dos incidentes, conciliação histórica, WhatsApp, IA local, VPS/cópias e piloto físico continuam na fila. Contrato adiado por indicação do utilizador. Sistema não declarado concluído.
 

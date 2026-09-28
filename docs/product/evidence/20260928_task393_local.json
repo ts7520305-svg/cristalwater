@@ -4208,9 +4208,17 @@
     "Contract finalization/implementation remains deferred per user instruction; notice is 30 days before annual term end."
   ],
   "publication": {
-    "status": "prepared_locally",
+    "status": "published_work_branch",
     "branch": "work/field-readiness-20260915-simulation",
+    "codeCommit": "75f16ec0514f57f46f76e7cdb79f734509ee0d67",
+    "tree": "ac80086ae9b95c57ea03d33f3512df5797f39428",
+    "treeMatchesPreparedIndex": true,
     "nativeCi": {
+      "runId": 36398997535,
+      "jobId": 108852117751,
+      "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36398997535",
+      "statusAtPublication": "in_progress",
+      "additiveMigrationsSyntaxAndBaseTechnicianBrowserGatesPassed": true,
       "expectedGroups": 305,
       "confirmed": false,
       "restoreConfirmed": false
