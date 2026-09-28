@@ -1,6 +1,18 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK395 publicada
+## Retoma atual — 28/09/2026, TASK396 validada localmente
+
+Corrigida a sobreposição dos estados de visitas no resumo administrativo. A versão anterior contou quatro visitas `NOT_DONE`/`BLOCKED`/`RETAINED`/`IMPEDIDO` como quatro planeadas e quatro não realizadas, deixando o resto em −4; a interface recusou o resumo. A classificação passa a ser exclusiva, na camada Business, reutilizando os aliases exatos do dia administrativo e conservando os estados históricos de impedimento deste painel.
+
+`visitsPlannedThisMonth` mantém compatibilidade para planeadas e em curso, agora nomeadas explicitamente na interface/gráfico. Canceladas, vazias e desconhecidas ficam em outros estados; o estado literal não é substituído por `PLANNED`. Contagens não alteram os registos guardados, regras financeiras, permissões, esquema ou a consulta temporal existente.
+
+**Local aprovado:** 1 183 unitários/129 ficheiros, quatro técnicos, sintaxe 692/307/44 e três grupos integrados: painel administrativo, dashboard operacional e agrupamento de zonas. Nos 17 testes novos, 16 falharam na versão anterior. Fixture SQL: 27 visitas, 25 no mês selecionado = 4 concluídas + 7 planeadas/em curso + 7 não realizadas + 7 outros estados; mês seguinte e mês vazio conferidos. Leitura repetida, 6 000 linhas na unidade, aliases, estados literais/vazios/desconhecidos, gráficos, resposta incoerente e ausência de escritas verificados. 320 px revisto visualmente, captura também a 1440; gates existentes 320/390/1440 e claro/escuro aprovados. [Evidência](evidence/20260928_task396_local.json). Cache v204; runner mantém 306 grupos, com integração existente ampliada.
+
+**Publicação:** em preparação na branch de trabalho. TASK394/395 continuam em execução nas últimas consultas; 306 grupos e restauro ainda não confirmados para esses lotes. TASK393 conserva confirmação 305/305 e restauro. Ensaios locais PGlite/Chromium/dados sintéticos; sem merge/deploy/contactos reais.
+
+**Continuar:** confirmar CI TASK394/395/396; rever estados encerrados em maiúsculas/minúsculas no centro completo de alertas. A vista diária ainda trata `BLOCKED`/`RETAINED`/`IMPEDIDO` como outros; o consumidor legado `frontend/dashboard.js` continua a chamar planeadas ao agregado com visitas em curso. O filtro mensal legado usa `plannedDate OR date` no fuso do servidor e só visitas regulares; esta tarefa não redefine datas/períodos nem acrescenta visitas extra. Restantes fontes sem snapshot comum e limites TASK395 mantêm-se. Idiomas, conciliação histórica, WhatsApp, IA local, VPS/cópias e piloto físico pendentes. Contrato adiado pelo utilizador. Sistema não declarado concluído.
+
+## Retoma anterior — 28/09/2026, TASK395 publicada
 
 Total de alertas administrativos calculado a partir de todas as linhas elegíveis das três fontes existentes. A regressão anterior mostrou zero apesar de 1 509 registos elegíveis mais antigos, escondidos atrás de 615 candidatos recentes excluídos pelo filtro final. A leitura usa lotes de 500, seleção mínima, 200 pré-visualizações elegíveis por fonte e relações apenas para esses IDs, na mesma transação RepeatableRead.
 

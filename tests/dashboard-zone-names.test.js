@@ -13,6 +13,7 @@ async function summary(pools) {
     if (name === '../services/clientCreditService') return { isReceivableInvoice: () => true };
     if (name === '../business/finance/FinanceOsBusiness') return { listExternalInvoices: async () => ({ summary: {} }) };
     if (name === '../business/admin/AlertListBusiness') return { listDashboardSources: async () => ({ technicalAlerts: [], notificationAlerts: [], visitAlerts: [] }) };
+    if (name === '../business/admin/DashboardVisitBusiness') return { summarize: () => ({ visitsDoneThisMonth: 0, visitsPlannedThisMonth: 0, visitsNotDoneThisMonth: 0 }) };
     throw Error('Unexpected dependency ' + name);
   } };
   vm.createContext(sandbox); vm.runInContext(source, sandbox);

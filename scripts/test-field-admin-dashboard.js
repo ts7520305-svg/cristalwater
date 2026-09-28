@@ -6,7 +6,7 @@ const { prisma } = require('../src/prismaClient'), { getJwtSecret } = require('.
 if (process.env.NODE_ENV !== 'test' || process.env.QA_MODE !== 'true' || process.env.QA_ENVIRONMENT_SAFE !== 'true' || process.env.EXTERNAL_NOTIFICATIONS_ENABLED !== 'false') throw Error('Isolated QA required');
 const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
 assert(['127.0.0.1', 'localhost'].includes(new URL(base).hostname));
-let browser, probe, coverageClient;
+let browser, probe, coverageClient, visitStateClient;
 function installReadFailure(model, shouldFail, message) {
   const originalRead = prisma[model].findMany, originalTransaction = prisma.$transaction;
   const failOrRead = (target, read) => async function(query) {
@@ -29,6 +29,80 @@ function installReadFailure(model, shouldFail, message) {
   };
   return () => { prisma[model].findMany = originalRead; prisma.$transaction = originalTransaction; };
 }
+async function verifyVisitStates(token, admin) {
+  const month = '2146-03', headers = { Authorization: 'Bearer ' + token };
+  const read = async (monthRef = month) => {
+    const response = await fetch(base + '/api/dashboard/admin?monthRef=' + monthRef, { headers });
+    assert.equal(response.status, 200); return response.json();
+  };
+  const before = await read(); assert.equal(before.visits.length, 0, 'Reserved isolated QA month must be empty');
+  visitStateClient = await prisma.client.create({ data: { name: 'QA monthly visit states ' + require('node:crypto').randomUUID(), active: true } });
+  const pool = await prisma.pool.create({ data: { name: 'Literal visit states <img src=x>', clientId: visitStateClient.id } });
+  const add = statuses => prisma.serviceVisit.createMany({ data: statuses.map(status => ({ clientId: visitStateClient.id, poolId: pool.id, status, plannedDate: new Date(month + '-15T12:00:00Z'), date: new Date(month + '-15T12:00:00Z') })) });
+  const counts = data => {
+    const s = data.summary;
+    return [s.visitsDoneThisMonth, s.visitsPlannedThisMonth, s.visitsNotDoneThisMonth, s.visitsThisMonth - s.visitsDoneThisMonth - s.visitsPlannedThisMonth - s.visitsNotDoneThisMonth];
+  };
+  await add(['NOT_DONE', 'BLOCKED', 'RETAINED', 'IMPEDIDO']);
+  if (process.env.CW_DASHBOARD_VISIT_BASELINE === 'true') {
+    const Module = require('node:module'), filename = require.resolve('../src/controllers/dashboardController');
+    const previous = new Module(filename, module); previous.filename = filename; previous.paths = module.paths;
+    previous._compile(require('node:child_process').execFileSync('git', ['show', '97cb9c3112c774665514d1a15d8749ea2ac54874:src/controllers/dashboardController.js'], { encoding: 'utf8' }), filename);
+    const data = await previous.exports.getAdminDashboardData({ query: { monthRef: month } });
+    const context = require('node:vm').createContext({ window: { addEventListener() {} }, localStorage: { getItem: () => null }, document: { getElementById: () => null }, Intl, Date });
+    require('node:vm').runInContext(await fs.readFile(path.join(__dirname, '../frontend/admin-dashboard.js'), 'utf8'), context);
+    console.log(JSON.stringify({ regression: 'TASK396', total: data.summary.visitsThisMonth, counts: counts(data), dashboardRejected: context.buildDashboardView({ ok: true, ...data }, month) === null }));
+    assert.deepEqual(counts(data), [0, 0, 4, 0], 'An impeded visit must count once');
+    return;
+  }
+  assert.deepEqual(counts(await read()), [0, 0, 4, 0]);
+  await add(['DONE', 'completed', 'Concluída', 'CONCLUIDO', 'PLANNED', 'PENDING', 'PENDING_TECHNICIAN', 'Agendada', 'PLANEADO', 'IN_PROGRESS', 'Em execução', 'not done', 'Não concluída', 'FAILED', 'CANCELLED', 'Canceled', 'Cancelada', 'ARCHIVED', 'DONE_LATER', '', '   ']);
+  await prisma.serviceVisit.createMany({ data: ['DONE', 'NOT_DONE'].map(status => ({ clientId: visitStateClient.id, poolId: pool.id, status, plannedDate: new Date('2146-04-15T12:00:00Z'), date: new Date('2146-04-15T12:00:00Z') })) });
+  const snapshot = () => prisma.serviceVisit.findMany({ where: { clientId: visitStateClient.id }, orderBy: { id: 'asc' } });
+  const unchanged = await snapshot(), mixed = await read(), repeat = await read();
+  assert.equal(mixed.visits.length, 25); assert.deepEqual(counts(mixed), [4, 7, 7, 7]);
+  assert.deepEqual(repeat.visits, mixed.visits); assert.deepEqual(repeat.summary, mixed.summary);
+  for (const visit of mixed.visits) assert.equal(visit.status, unchanged.find(row => row.id === visit.id).status, 'Preserve literal stored status');
+  assert.deepEqual(counts(await read('2146-04')), [1, 0, 1, 0]);
+  const context = await browser.newContext({ serviceWorkers: 'block', viewport: { width: 320, height: 1000 }, timezoneId: 'Europe/Lisbon' });
+  await context.route('**/*', route => new URL(route.request().url()).origin === base ? route.continue() : route.abort());
+  await context.addInitScript(({ token, id }) => {
+    for (const key of ['token', 'cristalwater_jwt', 'adminToken']) localStorage.setItem(key, token);
+    for (const key of ['user', 'cristalwater_user']) localStorage.setItem(key, JSON.stringify({ id, role: 'ADMIN' }));
+  }, { token, id: admin.id });
+  const page = await context.newPage(), writes = [], errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('request', request => { if (new URL(request.url()).pathname.startsWith('/api/') && request.method() !== 'GET') writes.push(request.method()); });
+  await page.goto(base + '/admin-dashboard', { waitUntil: 'networkidle' });
+  await page.waitForFunction(() => document.querySelector('#status').dataset.state === 'ready');
+  const select = async value => { await page.locator('#monthRef').fill(value); assert.equal(await page.evaluate(() => loadDashboard()), true); };
+  await select(month);
+  assert.equal(await page.locator('[data-dashboard-card="visits"] strong').textContent(), '4 / 25');
+  assert.equal(await page.locator('#efficiencyRate').textContent(), '16%');
+  const operational = await page.locator('#operationalSummary').textContent();
+  assert.match(operational, /Planeadas \/ em curso7/); assert.match(operational, /Não realizadas \/ impedidas7/); assert.match(operational, /Outros estados7/);
+  await page.evaluate(() => { window.visitChartConfigs = []; window.Chart = function(canvas, config) { window.visitChartConfigs.push({ id: canvas.id, config }); this.destroy = () => {}; }; });
+  assert.equal(await page.evaluate(() => loadDashboard()), true);
+  const chart = await page.evaluate(() => window.visitChartConfigs.find(row => row.id === 'productivityChart').config.data);
+  assert.deepEqual(chart.datasets[0].data, [4, 7, 7, 7]); assert.equal(chart.labels[1], 'Planeadas / em curso');
+  const visual = path.join(__dirname, '../reports/field-visual/admin-dashboard'); await fs.mkdir(visual, { recursive: true });
+  for (const width of [320, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+    await page.screenshot({ path: path.join(visual, 'visit-states-' + width + '.png'), fullPage: true });
+  }
+  await select('2146-04'); assert.equal(await page.locator('[data-dashboard-card="visits"] strong').textContent(), '1 / 2');
+  await select('2146-05'); assert.equal(await page.locator('#monthVisitCount').textContent(), '0'); assert.equal(await page.locator('#efficiencyRate').textContent(), '—');
+  await select(month);
+  const endpoint = '**/api/dashboard/admin?*';
+  await page.route(endpoint, route => route.fulfill({ json: { ...mixed, summary: { ...mixed.summary, visitsPlannedThisMonth: 25 } } }));
+  assert.equal(await page.evaluate(() => loadDashboard()), false); assert.equal(await page.locator('#monthVisitCount').textContent(), '—');
+  await page.unroute(endpoint); assert.equal(await page.evaluate(() => loadDashboard()), true);
+  assert.deepEqual(writes, []); assert.deepEqual(errors, []); assert.deepEqual(await snapshot(), unchanged);
+  await context.close();
+  await fs.writeFile(path.join(visual, 'visit-states.json'), JSON.stringify({ ok: true, phase: 'assertions-completed', fixtureVisits: 27, selectedMonth: month, visits: 25, done: 4, plannedOrInProgress: 7, notDone: 7, other: 7, completionRate: 16, repeatedReadStable: true, literalStatusPreserved: true, otherMonthAndEmptyMonthChecked: true, inconsistentResponseRefused: true, noBusinessWrites: true }, null, 2));
+  console.log('PASS monthly visit states: 27 real SQL records, exclusive totals, literal aliases/blank/unknown states, adjacent and empty months, exact chart, inconsistent response unavailable, no writes');
+}
 (async () => {
   const admin = await prisma.user.findUniqueOrThrow({ where: { email: process.env.ADMIN_EMAIL } });
   const token = jwt.sign({ id: admin.id, role: 'ADMIN', principalType: 'USER' }, getJwtSecret(), { expiresIn: '1h' });
@@ -39,6 +113,8 @@ function installReadFailure(model, shouldFail, message) {
     predictiveAnalysis: { tomorrowRiskZones: [{ zone: 'Zona literal <img src=x onerror=alert(1)>', visits: 8, alerts: 3 }], recommendations: [{ message: 'PREVISÃO NÃO COMPROVADA amanhã' }] },
   };
   browser = await require('playwright').chromium.launch({ headless: true, executablePath: process.env.CW_CHROMIUM_PATH, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
+  await verifyVisitStates(token, admin);
+  if (process.env.CW_DASHBOARD_VISIT_BASELINE === 'true') return;
   const context = await browser.newContext({ serviceWorkers: 'block', viewport: { width: 390, height: 1000 }, timezoneId: 'Europe/Lisbon' });
   await context.route('**/*', route => new URL(route.request().url()).origin === base ? route.continue() : route.abort());
   await context.addInitScript(({ token, user }) => {
@@ -246,6 +322,11 @@ function installReadFailure(model, shouldFail, message) {
     await prisma.serviceVisit.deleteMany({ where: { clientId: coverageClient.id } });
     await prisma.pool.deleteMany({ where: { clientId: coverageClient.id } });
     await prisma.client.delete({ where: { id: coverageClient.id } });
+  }
+  if (visitStateClient) {
+    await prisma.serviceVisit.deleteMany({ where: { clientId: visitStateClient.id } });
+    await prisma.pool.deleteMany({ where: { clientId: visitStateClient.id } });
+    await prisma.client.delete({ where: { id: visitStateClient.id } });
   }
   await prisma.$disconnect();
 });

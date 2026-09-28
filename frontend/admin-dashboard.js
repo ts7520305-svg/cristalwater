@@ -126,7 +126,7 @@ function renderCharts(view) {
   destroyCharts(); if (typeof Chart !== 'function') return;
   const s = view.summary, color = getComputedStyle(document.body).color;
   for (const [id, labels, values] of [
-    ['productivityChart', ['Concluídas', 'Planeadas', 'Não realizadas / impedidas', 'Outros estados'], [s.visitsDoneThisMonth, s.visitsPlannedThisMonth, s.visitsNotDoneThisMonth, view.otherVisits]],
+    ['productivityChart', ['Concluídas', 'Planeadas / em curso', 'Não realizadas / impedidas', 'Outros estados'], [s.visitsDoneThisMonth, s.visitsPlannedThisMonth, s.visitsNotDoneThisMonth, view.otherVisits]],
     ['billingChart', ['Documentos do mês', 'Pagamentos no mês', 'Saldo dos documentos do mês'], [s.monthBilled, s.monthPaid, s.monthOpen]],
   ]) {
     $(id).style.display = 'block';
@@ -141,7 +141,7 @@ function renderOperationalIntelligence(data, month = $('monthRef').value) {
   setText('monthReceived', formatMoney(s.monthPaid)); setText('estimatedProfit', 'Não apurado');
   setText('aiStateText', 'Consulta confirmada'); $('aiDot').className = 'ai-dot ai-neutral';
   setText('summaryScope', 'Período ' + month + ': visitas e documentos do mês; pagamentos pela data de recebimento. Cadastro, faturação externa e lista de alertas abrangem todos os períodos.');
-  renderSummary('operationalSummary', [['Visitas do mês', s.visitsThisMonth], ['Concluídas', s.visitsDoneThisMonth], ['Planeadas', s.visitsPlannedThisMonth], ['Não realizadas / impedidas', s.visitsNotDoneThisMonth], ['Outros estados', view.otherVisits]], 'Outros estados incluem os registos não classificados acima. Estes totais não demonstram a carga de trabalho de um dia.');
+  renderSummary('operationalSummary', [['Visitas do mês', s.visitsThisMonth], ['Concluídas', s.visitsDoneThisMonth], ['Planeadas / em curso', s.visitsPlannedThisMonth], ['Não realizadas / impedidas', s.visitsNotDoneThisMonth], ['Outros estados', view.otherVisits]], 'Cada visita conta numa única categoria. Outros estados incluem canceladas e registos sem classificação reconhecida. Estes totais não demonstram a carga de trabalho de um dia.');
   renderSummary('financialSummary', [['Documentos do mês', formatMoney(s.monthBilled)], ['Pagamentos no mês', formatMoney(s.monthPaid)], ['Saldo dos documentos do mês', formatMoney(s.monthOpen)]], 'Os pagamentos podem liquidar documentos de outros meses. Valores internos, sem confirmação de lucro ou emissão fiscal.');
   const panel = $('intelligencePanel'); panel.replaceChildren(node('p', 'O lucro exige receitas e custos conciliados. Este resumo não o apura.'), link('/billing', 'Conferir documentos e pagamentos', 'ds-nav-link'));
   panel.append(node('p', 'A carga diária e previsões futuras exigem o planeamento das datas pretendidas.'), link('/admin-rounds', 'Consultar o planeamento', 'ds-nav-link'));

@@ -1,0 +1,245 @@
+{
+  "task": "TASK396",
+  "date": "2026-09-28",
+  "parentCommit": "97cb9c3112c774665514d1a15d8749ea2ac54874",
+  "scope": "Exclusive monthly dashboard visit categories; no persisted status changes",
+  "regression": {
+    "baselineCommit": "97cb9c3112c774665514d1a15d8749ea2ac54874",
+    "unit": {
+      "failed": 16,
+      "passed": 1,
+      "total": 17
+    },
+    "sql": {
+      "fixtureVisits": 4,
+      "statuses": [
+        "NOT_DONE",
+        "BLOCKED",
+        "RETAINED",
+        "IMPEDIDO"
+      ],
+      "done": 0,
+      "planned": 4,
+      "notDone": 4,
+      "other": -4,
+      "dashboardRejected": true
+    }
+  },
+  "behavior": {
+    "categorySource": "Existing cw-admin-day-rules.group exact aliases plus historical dashboard impediments BLOCKED/RETAINED/IMPEDIDO",
+    "plannedApiIncludesInProgress": true,
+    "uiLabel": "Planeadas / em curso",
+    "unknownAndCancelled": "Other remainder",
+    "blankStatusPreserved": true,
+    "monthQueryUnchanged": true,
+    "financialRulesUnchanged": true,
+    "schemaUnchanged": true
+  },
+  "validation": {
+    "unit": {
+      "passed": 1183,
+      "files": 129,
+      "newTests": 17
+    },
+    "technician": {
+      "passed": 4
+    },
+    "syntax": {
+      "backend": 692,
+      "frontend": 307,
+      "inline": 44
+    },
+    "integrationGroups": [
+      {
+        "script": "scripts/test-field-admin-dashboard.js",
+        "code": 0,
+        "ms": 11115
+      },
+      {
+        "script": "scripts/test-field-operational-dashboard.js",
+        "code": 0,
+        "ms": 10446
+      },
+      {
+        "script": "scripts/test-field-ai-zone-grouping.js",
+        "code": 0,
+        "ms": 1264
+      }
+    ],
+    "visitFixture": {
+      "ok": true,
+      "phase": "assertions-completed",
+      "fixtureVisits": 27,
+      "selectedMonth": "2146-03",
+      "visits": 25,
+      "done": 4,
+      "plannedOrInProgress": 7,
+      "notDone": 7,
+      "other": 7,
+      "completionRate": 16,
+      "repeatedReadStable": true,
+      "literalStatusPreserved": true,
+      "otherMonthAndEmptyMonthChecked": true,
+      "inconsistentResponseRefused": true,
+      "noBusinessWrites": true
+    },
+    "alertCoverage": {
+      "ok": true,
+      "eligibleFixture": 1509,
+      "excludedFixture": 615,
+      "total": 3046,
+      "coverage": {
+        "scope": "DASHBOARD_ALERT_SOURCES_ALL_PERIODS",
+        "totalsComplete": true,
+        "limitPerSource": 200,
+        "total": 3046,
+        "returned": 600,
+        "truncated": true,
+        "sources": {
+          "technical": {
+            "total": 1009,
+            "returned": 200
+          },
+          "notification": {
+            "total": 1023,
+            "returned": 200
+          },
+          "visit": {
+            "total": 1014,
+            "returned": 200
+          }
+        }
+      },
+      "returnedFixture": 600,
+      "consistentRepeatedRead": true,
+      "malformedMetadataRefused": true,
+      "lateSourceFailuresChecked": 3,
+      "noBusinessWrites": true
+    },
+    "visual": {
+      "visitStatesWidths": [
+        320,
+        1440
+      ],
+      "manuallyInspected": "visit-states-320.png",
+      "existingDashboardWidths": [
+        320,
+        390,
+        1440
+      ],
+      "existingLightDarkContrastPassed": true,
+      "chartConfigurationsCheckedWithAdapter": true,
+      "noExternalProviders": true
+    }
+  },
+  "environment": {
+    "database": "Isolated PGlite with PostgreSQL protocol",
+    "browser": "Chromium",
+    "node": "v24.19.0",
+    "syntheticDataOnly": true,
+    "externalNotifications": false,
+    "productionAccess": false
+  },
+  "files": [
+    {
+      "path": "src/business/admin/DashboardVisitBusiness.js",
+      "sha256": "7398644c1ee89af9ba395bd2cf8a73f769f4a529c61ca82e92fcd4e8e739c857"
+    },
+    {
+      "path": "src/controllers/dashboardController.js",
+      "sha256": "fa11b1c66387dc8d8d8512d23ca11e437ec643853395baa7416989615b91ea84"
+    },
+    {
+      "path": "frontend/admin-dashboard.js",
+      "sha256": "3fec756d149f98980a6aa1ac412cb9f5abb9f6933d9816e2fc1a124db783485a"
+    },
+    {
+      "path": "frontend/sw.js",
+      "sha256": "cd30a530ba75df5b0baed73ea7a92174cead89452fef45764439ede6904bbb1c"
+    },
+    {
+      "path": "tests/dashboard-visit-states.test.js",
+      "sha256": "87a8685599ededbaad4f954e6079ccc4607d867a6451431aa656e7385e7a0d4a"
+    },
+    {
+      "path": "tests/dashboard-zone-names.test.js",
+      "sha256": "b3040cfdea291f8717229be3db0a72d6b9eea5a7a7d005526504317d0220a285"
+    },
+    {
+      "path": "scripts/test-field-admin-dashboard.js",
+      "sha256": "ea62bc6932b44512dad1709bc6fa7adc44fe1e96609085e3ba8b3c9901494dde"
+    }
+  ],
+  "logs": [
+    {
+      "path": "/workspace/scratch/4f3d7636ef52/qa/task396-unit-before.log",
+      "sha256": "b3ed56b71023be5fae325af1a730d2971cedfe3c53eae7790f10468b998f6232",
+      "tail": "> monthly visit categories are exclusive and keep literal status evidence > uses the existing exact aliases for done, planned, in progress and cancelled\nAssertionError: expected [ 3, 10, +0 ] to deeply equal [ 4, 7, +0 ]\n\n- Expected\n+ Received\n\n  [\n-   4,\n-   7,\n+   3,\n+   10,\n    0,\n  ]\n\n ❯ tests/dashboard-visit-states.test.js:46:26\n\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/16]⎯\n\n FAIL  tests/dashboard-visit-states.test.js > monthly visit categories are exclusive and keep literal status evidence > does not let cancelled visits hide overlap in a mixed month\nAssertionError: expected [ 1, 3, 2 ] to deeply equal [ 1, 1, 2 ]\n\n- Expected\n+ Received\n\n  [\n    1,\n-   1,\n+   3,\n    2,\n  ]\n\n ❯ tests/dashboard-visit-states.test.js:51:26\n     49|   it('does not let cancelled visits hide overlap in a mixed month', as…\n     50|     const { data, view } = await read(['NOT_DONE', 'BLOCKED', 'PLANNED…\n     51|     expect(counts(data)).toEqual([1, 1, 2]); expect(view.otherVisits).…\n       |                          ^\n     52|     expect(counts(data).reduce((sum, value) => sum + value, view.other…\n     53|   });\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/16]⎯\n\n FAIL  tests/dashboard-visit-states.test.js > monthly visit categories are exclusive and keep literal status evidence > counts 6000 records once with order-independent results\nAssertionError: expected [ 1000, 5000, 2000 ] to deeply equal [ 1000, 2000, 2000 ]\n\n- Expected\n+ Received\n\n  [\n    1000,\n-   2000,\n+   5000,\n    2000,\n  ]\n\n ❯ tests/dashboard-visit-states.test.js:61:32\n     59|     const statuses = Array.from({ length: 1000 }, () => ['NOT_DONE', '…\n     60|     const first = await read(statuses), reversed = await read(statuses…\n     61|     expect(counts(first.data)).toEqual([1000, 2000, 2000]); expect(fir…\n       |                                ^\n     62|     expect(counts(reversed.data)).toEqual(counts(first.data)); expect(…\n     63|   });\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/16]⎯\n\n\n Test Files  1 failed (1)\n      Tests  16 failed | 1 passed (17)\n   Start at  12:00:12\n   Duration  268ms (transform 22ms, setup 0ms, import 39ms, tests 78ms, environment 0ms)\n\n"
+    },
+    {
+      "path": "/workspace/scratch/4f3d7636ef52/qa/task396-before.log",
+      "sha256": "314aa9799cfdae41b299a694c12b878d3005d25711f597036760028fae42c35e",
+      "tail": "Isolated administrator seeded\nStarted scripts/test-field-admin-dashboard.js\n{\"script\":\"scripts/test-field-admin-dashboard.js\",\"code\":1,\"ms\":1256}\n{\"regression\":\"TASK396\",\"total\":4,\"counts\":[0,4,4,-4],\"dashboardRejected\":true}\nAssertionError [ERR_ASSERTION]: An impeded visit must count once\n+ actual - expected\n\n  [\n    0,\n-   0,\n    4,\n+   4,\n+   -4\n-   0\n  ]\n\n    at verifyVisitStates (/workspace/scratch/4f3d7636ef52/cristalwater/scripts/test-field-admin-dashboard.js:55:12)\n    at async /workspace/scratch/4f3d7636ef52/cristalwater/scripts/test-field-admin-dashboard.js:116:3 {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: [Array],\n  expected: [Array],\n  operator: 'deepStrictEqual',\n  diff: 'simple'\n}\n\nError: scripts/test-field-admin-dashboard.js failed\n    at run (file:///workspace/scratch/4f3d7636ef52/qa/run.mjs:37:84)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async file:///workspace/scratch/4f3d7636ef52/qa/run.mjs:56:5\n"
+    },
+    {
+      "path": "/workspace/scratch/4f3d7636ef52/qa/task396-focused.log",
+      "sha256": "73aad08894e7a1df9309ad268da75d76c97b256f64a440fc64ad97a9ab36448c",
+      "tail": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm.\n\n> cristalwater-backend@22.6.7 test\n> vitest run --run tests/dashboard-visit-states.test.js tests/dashboard-zone-names.test.js tests/admin-dashboard-summary.test.js\n\n\n RUN  v4.1.11 /workspace/scratch/4f3d7636ef52/cristalwater\n\n\n Test Files  3 passed (3)\n      Tests  32 passed (32)\n   Start at  12:01:03\n   Duration  278ms (transform 49ms, setup 0ms, import 123ms, tests 83ms, environment 0ms)\n\n"
+    },
+    {
+      "path": "/workspace/scratch/4f3d7636ef52/qa/task396-unit.log",
+      "sha256": "adb506ad8618328ca6f01ee9248f2036d9d6e65367525f9f407e7bc1722ebb5c",
+      "tail": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm.\n\n> cristalwater-backend@22.6.7 test\n> vitest run\n\n\n RUN  v4.1.11 /workspace/scratch/4f3d7636ef52/cristalwater\n\n\n Test Files  129 passed (129)\n      Tests  1183 passed (1183)\n   Start at  12:03:15\n   Duration  5.37s (transform 1.88s, setup 0ms, import 5.65s, tests 7.29s, environment 13ms)\n\n"
+    },
+    {
+      "path": "/workspace/scratch/4f3d7636ef52/qa/task396-technician.log",
+      "sha256": "eec704c8cddd7faffe30ba63197f1ddec915523e38e66880c37c2c1b2b31035e",
+      "tail": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm.\n\n> cristalwater-backend@22.6.7 test:technician\n> vitest run tests/technician-business.test.js\n\n\n RUN  v4.1.11 /workspace/scratch/4f3d7636ef52/cristalwater\n\n\n Test Files  1 passed (1)\n      Tests  4 passed (4)\n   Start at  12:03:21\n   Duration  218ms (transform 33ms, setup 0ms, import 45ms, tests 32ms, environment 0ms)\n\n"
+    },
+    {
+      "path": "/workspace/scratch/4f3d7636ef52/qa/task396-syntax.log",
+      "sha256": "5ce6314fe6e1947fff27e34d3e9f3f8f059f36812b1e3fd46c6f51276d16c13f",
+      "tail": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm.\n\n> cristalwater-backend@22.6.7 check:syntax\n> node scripts/check-syntax.js\n\n✅ Syntax OK: 692 backend JS files, 307 frontend JS files and 44 inline scripts.\n"
+    },
+    {
+      "path": "/workspace/scratch/4f3d7636ef52/qa/task396-integrated.log",
+      "sha256": "d4dc4f1f5756f52a9e90c91c865a2335cd588ba8d2f285be3700619d68bed110",
+      "tail": "Isolated administrator seeded\nStarted scripts/test-field-admin-dashboard.js\n{\"script\":\"scripts/test-field-admin-dashboard.js\",\"code\":0,\"ms\":11115}\nStarted scripts/test-field-operational-dashboard.js\n{\"script\":\"scripts/test-field-operational-dashboard.js\",\"code\":0,\"ms\":10446}\nStarted scripts/test-field-ai-zone-grouping.js\n{\"script\":\"scripts/test-field-ai-zone-grouping.js\",\"code\":0,\"ms\":1264}\n"
+    }
+  ],
+  "previousNativeCi": [
+    {
+      "task": "TASK394",
+      "runId": 36402896543,
+      "jobId": 108864700056,
+      "headSha": "30e09a573c761e7f24258ae423d576029e75921f",
+      "status": "in_progress",
+      "expectedGroups": 306,
+      "suiteConfirmed": false,
+      "restoreConfirmed": false
+    },
+    {
+      "task": "TASK395",
+      "runId": 36405872569,
+      "jobId": 108874343264,
+      "headSha": "40d2c926dc5d8dab615f182d4c12b51abb8bf699",
+      "status": "in_progress",
+      "expectedGroups": 306,
+      "suiteConfirmed": false,
+      "restoreConfirmed": false
+    }
+  ],
+  "limitations": [
+    "Dashboard retains its legacy month query: plannedDate OR date, server time zone, regular visits only.",
+    "Daily view still classifies BLOCKED/RETAINED/IMPEDIDO as OTHER; not changed here.",
+    "Legacy frontend/dashboard.js still labels the combined planned/in-progress count as planeadas.",
+    "Other dashboard data have no common snapshot; alert counting and production latency retain TASK395 limits.",
+    "Native PostgreSQL suite and restore for TASK396 not yet confirmed."
+  ],
+  "publication": {
+    "status": "prepared",
+    "expectedNativeGroups": 306,
+    "suiteConfirmed": false,
+    "restoreConfirmed": false
+  }
+}

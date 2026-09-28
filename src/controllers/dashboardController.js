@@ -2,6 +2,7 @@ const { prisma } = require("../prismaClient");
 const { isReceivableInvoice } = require('../services/clientCreditService');
 const { listExternalInvoices } = require('../business/finance/FinanceOsBusiness');
 const { listDashboardSources } = require('../business/admin/AlertListBusiness');
+const dashboardVisits = require('../business/admin/DashboardVisitBusiness');
 
 const CLOSED_STATUSES = ["RESOLVED", "DONE", "CLOSED", "CANCELLED", "CANCELED", "ARCHIVED"];
 
@@ -149,7 +150,7 @@ function mapVisit(visit) {
     technicianName: visit.technician?.name || visit.technicianName || "",
     plannedDate: visit.plannedDate,
     date: visit.date,
-    status: visit.status || "PLANNED",
+    status: visit.status ?? "",
     alerts: visit.alerts || null,
     pool: visit.pool || null,
     client: visit.client || visit.pool?.client || null,
@@ -282,9 +283,7 @@ async function getAdminDashboardData(req = {}) {
   ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   const visitsThisMonth = visits.map(mapVisit);
-  const visitsDoneThisMonth = visitsThisMonth.filter((visit) => ["DONE", "COMPLETED", "CONCLUIDA", "CONCLUIDO"].includes(normalizeStatus(visit.status))).length;
-  const visitsNotDoneThisMonth = visitsThisMonth.filter((visit) => ["NOT_DONE", "BLOCKED", "RETAINED", "IMPEDIDO"].includes(normalizeStatus(visit.status))).length;
-  const visitsPlannedThisMonth = visitsThisMonth.filter((visit) => !["DONE", "COMPLETED", "CONCLUIDA", "CONCLUIDO", "CANCELLED", "CANCELED"].includes(normalizeStatus(visit.status))).length;
+  const { visitsDoneThisMonth, visitsNotDoneThisMonth, visitsPlannedThisMonth } = dashboardVisits.summarize(visits);
 
   const monthlyMap = {};
   for (let i = 5; i >= 0; i--) {

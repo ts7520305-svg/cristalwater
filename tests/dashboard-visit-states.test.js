@@ -1,0 +1,64 @@
+import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { createRequire } from 'node:module';
+import vm from 'node:vm';
+
+const require = createRequire(import.meta.url), month = '2146-03';
+const source = process.env.CW_DASHBOARD_VISIT_BASELINE === 'true'
+  ? execFileSync('git', ['show', '97cb9c3112c774665514d1a15d8749ea2ac54874:src/controllers/dashboardController.js'], { encoding: 'utf8' })
+  : readFileSync(new URL('../src/controllers/dashboardController.js', import.meta.url), 'utf8');
+const viewContext = vm.createContext({ window: { addEventListener() {} }, localStorage: { getItem: () => null }, document: { getElementById: () => null }, Intl, Date });
+vm.runInContext(readFileSync(new URL('../frontend/admin-dashboard.js', import.meta.url), 'utf8'), viewContext);
+async function read(statuses) {
+  const visits = statuses.map((status, i) => ({ id: i + 1, status, plannedDate: new Date(month + '-15T12:00:00Z') }));
+  const before = JSON.stringify(visits);
+  const prisma = Object.fromEntries(['client', 'pool', 'technician', 'invoice', 'payment', 'serviceVisit'].map(model => [model, { findMany: async () => model === 'serviceVisit' ? visits : [] }]));
+  const sandbox = { module: { exports: {} }, require(name) {
+    if (name === '../prismaClient') return { prisma };
+    if (name === '../services/clientCreditService') return { isReceivableInvoice: () => true };
+    if (name === '../business/finance/FinanceOsBusiness') return { listExternalInvoices: async () => ({ summary: {} }) };
+    if (name === '../business/admin/AlertListBusiness') return { listDashboardSources: async () => ({ technicalAlerts: [], notificationAlerts: [], visitAlerts: [] }) };
+    if (name === '../business/admin/DashboardVisitBusiness') return require('../src/business/admin/DashboardVisitBusiness');
+    throw Error('Unexpected dependency ' + name);
+  } };
+  vm.runInNewContext(source, sandbox);
+  const data = await sandbox.module.exports.getAdminDashboardData({ query: { monthRef: month } });
+  expect(JSON.stringify(visits)).toBe(before);
+  return { data, view: viewContext.buildDashboardView({ ok: true, ...data }, month) };
+}
+const counts = data => [data.summary.visitsDoneThisMonth, data.summary.visitsPlannedThisMonth, data.summary.visitsNotDoneThisMonth];
+describe('monthly visit categories are exclusive and keep literal status evidence', () => {
+  it.each(['NOT_DONE', 'BLOCKED', 'RETAINED', 'IMPEDIDO', ' blocked ', 'Não concluída', 'FAILED'])('does not also count %s as planned or reject the dashboard', async status => {
+    const { data, view } = await read([status]);
+    expect(counts(data)).toEqual([0, 0, 1]);
+    expect(view).not.toBeNull(); expect(view.otherVisits).toBe(0); expect(view.completionRate).toBe(0);
+    expect(data.visits[0].status).toBe(status);
+  });
+  it.each(['ARCHIVED', 'DONE_LATER', 'NOT_IN_PROGRESS', 'constructor', '', '   '])('retains %s in other states without assuming planned work', async status => {
+    const { data, view } = await read([status]);
+    expect(counts(data)).toEqual([0, 0, 0]); expect(view.otherVisits).toBe(1);
+    expect(data.visits[0].status).toBe(status);
+  });
+  it('uses the existing exact aliases for done, planned, in progress and cancelled', async () => {
+    const statuses = ['DONE', 'completed', 'Concluída', 'CONCLUIDO', 'PLANNED', 'PENDING', 'PENDING_TECHNICIAN', 'Agendada', 'PLANEADO', 'IN_PROGRESS', 'Em execução', 'CANCELLED', 'Canceled', 'Cancelada', 'CANCELADO'];
+    const { data, view } = await read(statuses);
+    expect(counts(data)).toEqual([4, 7, 0]); expect(view.otherVisits).toBe(4);
+    expect(data.visits.map(row => row.status)).toEqual(statuses);
+  });
+  it('does not let cancelled visits hide overlap in a mixed month', async () => {
+    const { data, view } = await read(['NOT_DONE', 'BLOCKED', 'PLANNED', 'DONE', 'CANCELLED', 'CANCELED']);
+    expect(counts(data)).toEqual([1, 1, 2]); expect(view.otherVisits).toBe(2);
+    expect(counts(data).reduce((sum, value) => sum + value, view.otherVisits)).toBe(6);
+  });
+  it('retains an empty month without inventing a completion percentage', async () => {
+    const { data, view } = await read([]);
+    expect(counts(data)).toEqual([0, 0, 0]); expect(view.otherVisits).toBe(0); expect(view.completionRate).toBeNull();
+  });
+  it('counts 6000 records once with order-independent results', async () => {
+    const statuses = Array.from({ length: 1000 }, () => ['NOT_DONE', 'RETAINED', 'PLANNED', 'IN_PROGRESS', 'DONE', 'UNKNOWN']).flat();
+    const first = await read(statuses), reversed = await read(statuses.slice().reverse());
+    expect(counts(first.data)).toEqual([1000, 2000, 2000]); expect(first.view.otherVisits).toBe(1000);
+    expect(counts(reversed.data)).toEqual(counts(first.data)); expect(reversed.view.otherVisits).toBe(first.view.otherVisits);
+  });
+});
