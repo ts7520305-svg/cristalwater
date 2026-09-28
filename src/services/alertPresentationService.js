@@ -1,6 +1,7 @@
 'use strict';
 const extraProjection = require('./extraVisitReportProjection');
 const { parseReference, resolutionVersion, requirement } = require('./alertResolutionStateService');
+const { group } = require('../../frontend/cw-admin-day-rules');
 
 const CLOSED_STATUSES = ["RESOLVED", "DONE", "CLOSED", "CANCELLED", "CANCELED", "ARCHIVED", "SUPERSEDED"];
 const ALERT_NOTIFICATION_TYPES = [
@@ -312,19 +313,31 @@ function mapTechnicalAlert(alert) {
   };
 }
 
+function describeVisitAlert(visit) {
+  const notDone = group(visit.status) === 'NOT_DONE';
+  const hasAlert = Boolean(String(visit.alerts ?? '').trim());
+  return {
+    // Completing a visit does not resolve an explicit operational alert.
+    eligible: notDone || hasAlert,
+    title: notDone ? 'Visita nao realizada' : 'Alerta de visita',
+    message: hasAlert ? visit.alerts : String(visit.reason ?? '').trim() ? visit.reason : notDone ? 'Visita nao realizada' : 'Visita com alerta operacional',
+    priority: notDone ? 'WARNING' : 'NORMAL',
+  };
+}
+
 function mapVisitAlert(visit) {
-  const alertMessage = visit.alerts || visit.reason || "Visita com alerta operacional";
+  const description = describeVisitAlert(visit);
   return {
     resolutionVersion: resolutionVersion('visit', visit),
     resolutionRequirement: requirement('visit', visit),
     id: `visit-${visit.id}`,
     numericId: visit.id,
     source: "visit",
-    title: visit.status === "NOT_DONE" ? "Visita nao realizada" : "Alerta de visita",
-    message: alertMessage,
+    title: description.title,
+    message: description.message,
     type: "VISIT_ALERT",
     eventType: "SERVICE_VISIT_ALERT",
-    priority: visit.status === "NOT_DONE" ? "WARNING" : "NORMAL",
+    priority: description.priority,
     status: visit.status || "OPEN",
     isRead: false,
     createdAt: visit.updatedAt || visit.date || visit.plannedDate,
@@ -374,4 +387,4 @@ function mapGenericAlert(alert) {
   };
 }
 
-module.exports = { CLOSED_STATUSES, ALERT_NOTIFICATION_TYPES, ALERT_EVENT_TYPES, SERVICE_VISIT_INCLUDE, parseReference, reportReference, legacyVisitMetadata, isOpenStatus, metadataOf, numberOrNull, uniqueNumbers, extractVisitIdFromText, enrichAlert, mapNotification, mapTechnicalAlert, mapVisitAlert, mapGenericAlert };
+module.exports = { CLOSED_STATUSES, ALERT_NOTIFICATION_TYPES, ALERT_EVENT_TYPES, SERVICE_VISIT_INCLUDE, parseReference, reportReference, legacyVisitMetadata, isOpenStatus, metadataOf, numberOrNull, uniqueNumbers, extractVisitIdFromText, enrichAlert, mapNotification, mapTechnicalAlert, describeVisitAlert, mapVisitAlert, mapGenericAlert };

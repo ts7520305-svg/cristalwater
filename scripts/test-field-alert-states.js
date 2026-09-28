@@ -6,18 +6,21 @@ const { prisma } = require('../src/prismaClient'), { getJwtSecret } = require('.
 if (process.env.NODE_ENV !== 'test' || process.env.QA_MODE !== 'true' || process.env.QA_ENVIRONMENT_SAFE !== 'true' || process.env.EXTERNAL_NOTIFICATIONS_ENABLED !== 'false') throw Error('Isolated QA required');
 const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
 assert(['127.0.0.1', 'localhost'].includes(new URL(base).hostname));
-const prefix = 'QA397-' + randomUUID(), closed = ['RESOLVED', 'DONE', 'CLOSED', 'CANCELLED', 'CANCELED', 'ARCHIVED', 'SUPERSEDED'];
+const prefix = 'QA399-' + randomUUID(), closed = ['RESOLVED', 'DONE', 'CLOSED', 'CANCELLED', 'CANCELED', 'ARCHIVED', 'SUPERSEDED'];
+const visitAliases = ['BLOCKED', 'RETAINED', 'IMPEDIDO', ' not done ', 'blocked', ' bLoCkEd ', 'retained', ' ReTaInEd ', 'impedido', ' impédido ', 'INCOMPLETE', 'FAILED', 'NOT_COMPLETED', 'Não realizada', 'Não realizado', 'Não concluída', 'Não concluído'];
 let client, browser, probe;
-function legacyList() {
+function legacyList(ref = '5849cb802840c3e77472321d4a53afa101a1a406') {
   const Module = require('node:module'), { execFileSync } = require('node:child_process');
-  const load = (file, presentation) => {
+  const load = (file, dependencies = {}) => {
     const filename = path.join(__dirname, '..', file), loaded = new Module(filename, module);
     loaded.filename = filename; loaded.paths = module.paths;
-    if (presentation) { const original = loaded.require.bind(loaded); loaded.require = name => name === '../../services/alertPresentationService' ? presentation : original(name); }
-    loaded._compile(execFileSync('git', ['show', '5849cb802840c3e77472321d4a53afa101a1a406:' + file], { encoding: 'utf8' }), filename);
+    const original = loaded.require.bind(loaded); loaded.require = name => dependencies[name] || original(name);
+    loaded._compile(execFileSync('git', ['show', ref + ':' + file], { encoding: 'utf8' }), filename);
     return loaded.exports;
   };
-  return load('src/business/admin/AlertListBusiness.js', load('src/services/alertPresentationService.js')).list();
+  const state = load('src/services/alertResolutionStateService.js');
+  const presentation = load('src/services/alertPresentationService.js', { './alertResolutionStateService': state });
+  return load('src/business/admin/AlertListBusiness.js', { '../../services/alertPresentationService': presentation }).list();
 }
 function verifyTotals(data) {
   assert.equal(data.count, data.alerts.length);
@@ -38,6 +41,16 @@ function verifyTotals(data) {
   const alertedVisit = await prisma.serviceVisit.create({ data: { clientId: client.id, poolId: pool.id, status: 'DONE', alerts: prefix + ' completed visit still has an alert' } });
   const blockedVisit = await prisma.serviceVisit.create({ data: { clientId: client.id, poolId: pool.id, status: 'NOT_DONE', reason: prefix + ' blocked visit' } });
   await prisma.serviceVisit.createMany({ data: Array.from({ length: 503 }, () => ({ clientId: client.id, poolId: pool.id, status: 'DONE', alerts: '   ' })) });
+  await prisma.serviceVisit.createMany({ data: Array.from({ length: 503 }, (_, i) => {
+    const message = prefix + (i < visitAliases.length ? ' alias-sample ' : ' volume ') + i + ' <img src=x>';
+    return { clientId: client.id, poolId: pool.id, status: visitAliases[i % visitAliases.length], reason: message,
+      alerts: i % 3 === 0 ? null : i % 3 === 1 ? '  \t ' : '  ' + message + '  ',
+      updatedAt: new Date(i < visitAliases.length ? '2222-01-01T12:00:00Z' : '2221-01-01T12:00:00Z') };
+  }) });
+  const aliasVisits = await prisma.serviceVisit.findMany({ where: { clientId: client.id, status: { in: visitAliases } }, orderBy: { id: 'asc' } });
+  assert.equal(aliasVisits.length, 503);
+  const aliasSample = aliasVisits.slice(0, visitAliases.length), sampleIds = aliasSample.map(row => 'visit-' + row.id).sort();
+  await prisma.serviceVisit.createMany({ data: ['UNDONE', 'NOT_RETAINED', 'DONE', 'Concluída'].flatMap(status => [null, '   '].map(alerts => ({ clientId: client.id, poolId: pool.id, status, alerts, reason: prefix + ' reason alone' }))) });
   const variants = closed.flatMap(status => [status.toLowerCase(), [...status].map((c, i) => i % 2 ? c.toLowerCase() : c).join('')]);
   const closedStatuses = [...Array.from({ length: 1003 }, (_, i) => variants[i % variants.length]), ...closed];
   const states = ['OPEN', 'pEnDiNg', 'UNKNOWN'];
@@ -53,7 +66,13 @@ function verifyTotals(data) {
   await prisma.alert.createMany({ data: closedStatuses.map((status, i) => ({ title: prefix, type: 'ALERT', status, message: prefix + ' CLOSED ' + i })) });
   await prisma.alert.create({ data: { title: prefix, active: false, message: prefix + ' INACTIVE' } });
   const fixture = row => row.clientId === client.id || row.poolId === pool.id || row.message.includes(prefix);
-  const expected = [...notification.map(row => 'notification-' + row.id), ...technical.map(row => 'technical-' + row.id), ...generic.map(row => 'generic-' + row.id), 'visit-' + alertedVisit.id, 'visit-' + blockedVisit.id].sort();
+  const openIds = [...notification.map(row => 'notification-' + row.id), ...technical.map(row => 'technical-' + row.id), ...generic.map(row => 'generic-' + row.id)].sort();
+  const expected = [...openIds, 'visit-' + alertedVisit.id, 'visit-' + blockedVisit.id, ...aliasVisits.map(row => 'visit-' + row.id)].sort();
+  if (process.env.CW_VISIT_ALERT_BASELINE === 'true') {
+    const data = await legacyList('61fc1ca25bcc30f0f613101920778ace6cea5642'), ids = new Set(aliasVisits.map(row => 'visit-' + row.id)), found = data.alerts.filter(row => ids.has(row.id));
+    console.log(JSON.stringify({ regression: 'TASK399', eligibleAliases: aliasVisits.length, returnedAliases: found.length, missingAliases: aliasVisits.length - found.length, wrongPriority: found.filter(row => row.priority !== 'WARNING').length, blankMessages: found.filter(row => !row.message.trim()).length, unprotectedAliases: found.filter(row => row.resolutionRequirement?.code !== 'VISIT_ACTION_REQUIRED').length }));
+    assert.equal(found.length, aliasVisits.length, 'All not-done visit aliases must produce alerts'); return;
+  }
   if (process.env.CW_ALERT_STATES_BASELINE === 'true') {
     const data = await legacyList(), leaked = data.alerts.filter(row => fixture(row) && closed.includes(row.status.toUpperCase()));
     console.log(JSON.stringify({ regression: 'TASK397', seededClosedPerSource: closedStatuses.length, leakedClosed: leaked.length, leakedBySource: Object.fromEntries(['notification', 'technical', 'generic'].map(source => [source, leaked.filter(row => row.source === source).length])), totalCount: data.count, sumOfSourceTotals: data.totals.notifications + data.totals.technical + data.totals.visits + data.totals.generic, technicalContextVisitId: data.alerts.find(row => row.id === 'technical-' + technical[0].id)?.serviceNote?.visitId ?? null, expectedContextVisitId: visit.id }));
@@ -68,13 +87,31 @@ function verifyTotals(data) {
   const unchanged = await snapshot(), data = await read(); verifyTotals(data);
   assert.deepEqual(data.alerts.filter(fixture).map(row => row.id).sort(), expected);
   assert.equal(data.count, before.count + expected.length);
+  for (const visit of aliasVisits) {
+    const alert = data.alerts.find(row => row.id === 'visit-' + visit.id);
+    assert.equal(alert.status, visit.status); assert.equal(alert.priority, 'WARNING'); assert.equal(alert.title, 'Visita nao realizada');
+    assert.equal(alert.resolutionRequirement.code, 'VISIT_ACTION_REQUIRED');
+    assert.equal(alert.message, visit.alerts?.trim() ? visit.alerts : visit.reason);
+  }
   const selected = data.alerts.find(row => row.id === 'technical-' + technical[0].id);
   assert.equal(selected.serviceNote.visitId, visit.id); assert.equal(selected.serviceNote.notes, visit.notes);
   for (const [i, status] of states.entries()) for (const id of ['technical-' + technical[i].id, 'notification-' + notification[i].id, 'generic-' + generic[i].id]) assert.equal(data.alerts.find(row => row.id === id).status, status);
   assert.deepEqual(await read(), data);
   const dashboard = await read('/api/dashboard/admin?monthRef=2079-01');
-  assert.equal(dashboard.alertCoverage.total, dashboardBefore.alertCoverage.total + 8);
-  for (const [source, added] of [['technical', 3], ['notification', 3], ['visit', 2]]) assert.equal(dashboard.alertCoverage.sources[source].total, dashboardBefore.alertCoverage.sources[source].total + added);
+  assert.equal(dashboard.alertCoverage.total, dashboardBefore.alertCoverage.total + 511);
+  for (const [source, added] of [['technical', 3], ['notification', 3], ['visit', 505]]) assert.equal(dashboard.alertCoverage.sources[source].total, dashboardBefore.alertCoverage.sources[source].total + added);
+  assert.equal(dashboard.alertCoverage.sources.visit.returned, 200);
+  for (const id of sampleIds) {
+    const alert = dashboard.alerts.find(row => row.id === id), listed = data.alerts.find(row => row.id === id);
+    assert(alert, 'Representative alias must be in newest preview'); assert.equal(alert.priority, listed.priority); assert.equal(alert.message, listed.message);
+  }
+  const receiptWhere = { OR: aliasSample.map(row => ({ sourceKey: { startsWith: 'alert-resolution:visit-' + row.id + ':' } })) };
+  const receiptsBefore = await prisma.operationalReminder.count({ where: receiptWhere });
+  for (const id of sampleIds) {
+    const response = await fetch(base + '/api/alerts/' + id + '/resolve', { method: 'PUT', headers: { ...headers, 'Content-Type': 'application/json' }, body: JSON.stringify({ expectedVersion: data.alerts.find(row => row.id === id).resolutionVersion }) });
+    assert.equal(response.status, 409); assert.equal((await response.json()).code, 'VISIT_ACTION_REQUIRED');
+  }
+  assert.equal(await prisma.operationalReminder.count({ where: receiptWhere }), receiptsBefore);
   assert.equal((await fetch(base + '/api/alerts')).status, 401);
   browser = await require('playwright').chromium.launch({ headless: true, executablePath: process.env.CW_CHROMIUM_PATH, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
   const context = await browser.newContext({ serviceWorkers: 'block', viewport: { width: 320, height: 1000 } });
@@ -86,16 +123,23 @@ function verifyTotals(data) {
   const page = await context.newPage(), writes = [], errors = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('request', request => { if (new URL(request.url()).pathname.startsWith('/api/') && request.method() !== 'GET') writes.push(request.method()); });
-  await page.goto(base + '/admin-alerts?q=' + encodeURIComponent(prefix), { waitUntil: 'networkidle' });
+  await page.goto(base + '/admin-alerts?q=' + encodeURIComponent(prefix + ' open'), { waitUntil: 'networkidle' });
   await page.waitForFunction(() => alertsLoaded);
-  assert.deepEqual(await page.evaluate(() => filteredAlerts().map(row => row.id).sort()), expected);
-  assert.equal(await page.locator('#alertsTotal').textContent(), '11');
+  assert.deepEqual(await page.evaluate(() => filteredAlerts().map(row => row.id).sort()), openIds);
+  assert.equal(await page.locator('#alertsTotal').textContent(), '9');
+  await page.locator('#alertSearch').fill(prefix + ' alias-sample');
+  assert.deepEqual(await page.evaluate(() => filteredAlerts().map(row => row.id).sort()), sampleIds);
+  assert.equal(await page.locator('#alertsTotal').textContent(), String(visitAliases.length));
+  assert.equal(await page.locator('[data-resolve-alert]').count(), visitAliases.length);
+  assert.equal(await page.locator('#alertsList [data-alert-priority="warning"]').count(), visitAliases.length);
+  for (const text of await page.locator('[data-resolve-alert]').allTextContents()) assert.equal(text, 'Verificar resolucao');
   assert.equal(await page.locator('#alertsList img[src="x"]').count(), 0);
   assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
   const visual = path.join(__dirname, '../reports/field-visual/alert-states'); await fs.mkdir(visual, { recursive: true });
-  await page.screenshot({ path: path.join(visual, 'mobile-320.png'), fullPage: true });
+  await page.setViewportSize({ width: 320, height: 1600 });
+  await page.locator('#alertsList article.card').first().screenshot({ path: path.join(visual, 'mobile-320.png') });
   await page.locator('#refreshAlerts').click(); await page.waitForFunction(() => document.querySelector('#alertsStatus').textContent.includes('carregados'));
-  assert.deepEqual(await page.evaluate(() => filteredAlerts().map(row => row.id).sort()), expected);
+  assert.deepEqual(await page.evaluate(() => filteredAlerts().map(row => row.id).sort()), sampleIds);
   assert.deepEqual(writes, []); assert.deepEqual(errors, []); await context.close();
   const app = require('express')(); app.use('/api/alerts', require('../src/routes/alertRoutes'));
   probe = await new Promise(resolve => { const server = app.listen(0, '127.0.0.1', () => resolve(server)); });
@@ -115,8 +159,8 @@ function verifyTotals(data) {
     } finally { prisma.$transaction = original; }
   }
   assert.deepEqual(await snapshot(), unchanged);
-  await fs.writeFile(path.join(visual, 'evidence.json'), JSON.stringify({ ok: true, phase: 'assertions-completed', closedPerSource: closedStatuses.length, blankVisitCandidates: 503, returnedFixture: expected.length, dashboardFixtureTotal: 8, sourceTotalsMatchRows: true, closedContextExcluded: true, literalStatesPreserved: true, repeatStable: true, lateSourceFailures: 4, noBusinessWrites: true }, null, 2));
-  console.log('PASS closed alert states: 3030 closed records excluded, 503 blank visits excluded, 11 actionable records retained, exact totals/context, dashboard agreement, mobile UI, four late failures refused, unchanged source records');
+  await fs.writeFile(path.join(visual, 'evidence.json'), JSON.stringify({ ok: true, phase: 'assertions-completed', closedPerSource: closedStatuses.length, blankVisitCandidates: 503, aliases: visitAliases, aliasVisits: 503, nonAlertVisits: 8, returnedFixture: expected.length, dashboardFixtureTotal: 511, dashboardVisitPreview: 200, refusedVisitResolutions: sampleIds.length, unchangedResolutionReceipts: true, sourceTotalsMatchRows: true, closedContextExcluded: true, literalStatesPreserved: true, repeatStable: true, lateSourceFailures: 4, noBusinessWrites: true }, null, 2));
+  console.log('PASS alert states: 3030 closed records and 511 blank/non-alert visits excluded, 514 actionable records retained including 503 visit aliases, exact dashboard totals and 200-visit preview, 17 resolutions refused without writes, mobile UI, four late failures refused, unchanged source records');
 })().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => {
   if (browser) await browser.close(); if (probe) await new Promise(resolve => probe.close(resolve));
   if (client) {

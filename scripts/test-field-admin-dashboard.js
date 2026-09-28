@@ -254,7 +254,9 @@ async function verifyVisitStates(token, admin) {
   const amount = 503, excluded = 205;
   await prisma.technicalAlert.createMany({ data: Array.from({ length: amount + excluded }, (_, i) => ({ poolId: coveragePool.id, type: 'QA', message: prefix + ' <img src=x> ' + i, status: i < amount ? 'OPEN' : 'rEsOlVeD', createdAt: i < amount ? at : closedAt })) });
   await prisma.notification.createMany({ data: Array.from({ length: amount + excluded }, (_, i) => ({ clientId: coverageClient.id, type: 'ALERT', message: prefix + ' ' + i, role: 'ADMIN', status: i < amount ? 'PENDING' : 'cLoSeD', createdAt: i < amount ? at : closedAt })) });
-  await prisma.serviceVisit.createMany({ data: Array.from({ length: amount + excluded }, (_, i) => ({ clientId: coverageClient.id, poolId: coveragePool.id, status: 'NOT_DONE', alerts: i < amount ? prefix + ' ' + i : '   ', date: at, plannedDate: at, updatedAt: i < amount ? at : closedAt })) });
+  // Whitespace alone is not an alert on a completed visit. A NOT_DONE visit
+  // remains actionable even without text (covered in test-field-alert-states).
+  await prisma.serviceVisit.createMany({ data: Array.from({ length: amount + excluded }, (_, i) => ({ clientId: coverageClient.id, poolId: coveragePool.id, status: i < amount ? 'NOT_DONE' : 'DONE', alerts: i < amount ? prefix + ' ' + i : '   ', date: at, plannedDate: at, updatedAt: i < amount ? at : closedAt })) });
   const expectedTotal = beforeCoverage.alertCoverage.total + amount * 3;
   if (process.env.CW_DASHBOARD_ALERT_BASELINE === 'true') {
     const Module = require('node:module'), { execFileSync } = require('node:child_process');

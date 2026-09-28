@@ -1,5 +1,6 @@
 'use strict';
 const { createHash } = require('crypto');
+const { group } = require('../../frontend/cw-admin-day-rules');
 function fail(statusCode, message, code) { throw Object.assign(new Error(message), { statusCode, code }); }
 function parseReference(raw) {
   if (typeof raw !== 'string' && typeof raw !== 'number') fail(400, 'Referencia de alerta invalida');
@@ -33,7 +34,7 @@ function requirement(source, row) {
   if (WATER.includes(String(row.type || '').toUpperCase()) || /^(WATER_OPEN|PUMP_MANUAL)_/.test(row.eventType || '')) {
     return { code: 'PHYSICAL_CONFIRMATION_REQUIRED', message: 'Confirme primeiro o fecho da agua ou o regresso da bomba a automatico no respetivo lembrete. Este botao apenas trata o aviso.' };
   }
-  if ((source === 'visit' && ['NOT_DONE', 'BLOCKED', 'RETAINED', 'IMPEDIDO', 'INCOMPLETE'].includes(String(row.status).toUpperCase())) ||
+  if ((source === 'visit' && group(row.status) === 'NOT_DONE') ||
     (source === 'notification' && ['VISIT_INCOMPLETE', 'VISIT_COVERAGE'].includes(row.eventType))) {
     return { code: 'VISIT_ACTION_REQUIRED', message: 'Trate o impedimento ou agende o regresso no fluxo da visita. Resolver este alerta nao conclui a manutencao.' };
   }

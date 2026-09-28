@@ -2,9 +2,14 @@
 const { prisma } = require('../../prismaClient');
 const { CLOSED_STATUSES, ALERT_NOTIFICATION_TYPES, ALERT_EVENT_TYPES, SERVICE_VISIT_INCLUDE,
   metadataOf, numberOrNull, uniqueNumbers, reportReference, legacyVisitMetadata, extractVisitIdFromText, enrichAlert,
-  mapNotification, mapTechnicalAlert, mapVisitAlert, mapGenericAlert, isOpenStatus,
+  mapNotification, mapTechnicalAlert, describeVisitAlert, mapVisitAlert, mapGenericAlert, isOpenStatus,
 } = require('../../services/alertPresentationService');
 const priority = { CRITICAL: 0, WARNING: 1, NORMAL: 2, LOW: 3 };
+// Prune only common exact non-alert states. Historical aliases still reach the
+// shared classifier; SQL is a scan optimization, never the eligibility rule.
+const quietVisitStatuses = ['DONE', 'COMPLETED', 'PLANNED', 'IN_PROGRESS', 'CANCELLED', 'CANCELED']
+  .filter(status => !describeVisitAlert({ status }).eligible);
+const visitCandidatesWhere = { OR: [{ alerts: { not: null } }, { status: { notIn: quietVisitStatuses } }] };
 
 // Keyset reads bound each query without silently bounding the returned list.
 async function readAll(model, { where, ...options }, consume) {
@@ -34,8 +39,7 @@ async function listDashboardSources() {
         total += matching.length;
         preview = [...preview, ...matching].sort(newest).slice(0, limit);
       });
-      const rows = await readLinked(model, preview.map(row => row.id), include);
-      if (rows.length !== preview.length || new Set(rows.map(row => row.id)).size !== preview.length) throw Error('Incomplete dashboard alert preview');
+      const rows = await readLinked(model, preview.map(row => row.id), include, 'Incomplete dashboard alert preview');
       rows.sort(newest);
       return { rows, total, returned: rows.length };
     }
@@ -47,10 +51,10 @@ async function listDashboardSources() {
         { severity: { in: ['HIGH', 'CRITICAL', 'WARNING', 'WARN'] } }], NOT: { status: { in: CLOSED_STATUSES } } },
         { id: true, status: true, createdAt: true }, { client: true },
         row => isOpenStatus(row.status), row => row.createdAt),
-      scan(tx.serviceVisit, { OR: [{ alerts: { not: null } }, { status: { in: ['NOT_DONE', 'BLOCKED', 'RETAINED', 'IMPEDIDO'] } }] },
+      scan(tx.serviceVisit, visitCandidatesWhere,
         { id: true, status: true, alerts: true, reason: true, updatedAt: true, date: true, plannedDate: true },
         { client: true, pool: { include: { client: true } }, technician: true },
-        row => Boolean(String(row.alerts || row.reason || row.status || '').trim()), row => row.updatedAt || row.date || row.plannedDate, row => row.date),
+        row => describeVisitAlert(row).eligible, row => row.updatedAt || row.date || row.plannedDate, row => row.date),
     ]);
     const sources = Object.fromEntries(Object.entries({ technical, notification, visit }).map(([key, value]) => [key, { total: value.total, returned: value.returned }]));
     const total = technical.total + notification.total + visit.total;
@@ -60,12 +64,24 @@ async function listDashboardSources() {
   }, { isolationLevel: 'RepeatableRead', timeout: 30000 });
 }
 
-async function readLinked(model, ids, include) {
+async function readLinked(model, ids, include, completenessError) {
   const rows = [];
   for (let offset = 0; offset < ids.length; offset += 500) {
     rows.push(...await model.findMany({ where: { id: { in: ids.slice(offset, offset + 500) } }, include }));
   }
+  if (completenessError) {
+    const wanted = new Set(ids), found = new Set(rows.map(row => row.id));
+    if (rows.length !== ids.length || found.size !== wanted.size || rows.some(row => !wanted.has(row.id))) throw Error(completenessError);
+  }
   return rows;
+}
+
+async function listVisitAlerts(model) {
+  const ids = [];
+  await readAll(model, { where: visitCandidatesWhere, select: { id: true, status: true, alerts: true } }, batch => {
+    for (const row of batch) if (describeVisitAlert(row).eligible) ids.push(row.id);
+  });
+  return readLinked(model, ids, SERVICE_VISIT_INCLUDE, 'Incomplete visit alert list');
 }
 
 async function list() {
@@ -78,8 +94,7 @@ async function list() {
       }, include: { client: true, user: true } }),
       readAll(tx.technicalAlert, { where: { status: { notIn: CLOSED_STATUSES } },
         include: { pool: { include: { client: true } }, attachments: true } }),
-      readAll(tx.serviceVisit, { where: { OR: [{ alerts: { not: null } },
-        { status: { in: ['NOT_DONE', 'BLOCKED', 'RETAINED', 'IMPEDIDO'] } }] }, include: SERVICE_VISIT_INCLUDE }),
+      listVisitAlerts(tx.serviceVisit),
       readAll(tx.alert, { where: { active: true, status: { notIn: CLOSED_STATUSES } } }),
     ]);
     // SQL excludes canonical closed states, but historical casing can differ.
@@ -87,8 +102,7 @@ async function list() {
     const notifications = notificationCandidates.filter(row => isOpenStatus(row.status));
     const technicalAlerts = technicalCandidates.filter(row => isOpenStatus(row.status));
     const genericAlerts = genericCandidates.filter(row => isOpenStatus(row.status));
-    // Completing a visit does not resolve its recorded operational alert.
-    const visitAlerts = visitCandidates.filter(visit => String(visit.alerts || visit.reason || visit.status || '').trim());
+    const visitAlerts = visitCandidates;
     // Preserve the existing context selection when several notifications refer to an alert.
     notifications.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt) || b.id - a.id);
     const notificationContexts = notifications.map((notification) => ({
@@ -176,4 +190,4 @@ async function listLegacyTechnical() {
   return prisma.technicalAlert.findMany({ where: { status: { in: ['OPEN', 'IN_PROGRESS'] } },
     include: { pool: { include: { client: true } } }, orderBy: { createdAt: 'desc' } });
 }
-module.exports = { list, listLegacyTechnical, listDashboardSources };
+module.exports = { list, listLegacyTechnical, listDashboardSources, describeVisitAlert };

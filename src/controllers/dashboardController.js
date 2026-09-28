@@ -1,7 +1,7 @@
 const { prisma } = require("../prismaClient");
 const { isReceivableInvoice } = require('../services/clientCreditService');
 const { listExternalInvoices } = require('../business/finance/FinanceOsBusiness');
-const { listDashboardSources } = require('../business/admin/AlertListBusiness');
+const { listDashboardSources, describeVisitAlert } = require('../business/admin/AlertListBusiness');
 const dashboardVisits = require('../business/admin/DashboardVisitBusiness');
 
 const CLOSED_STATUSES = ["RESOLVED", "DONE", "CLOSED", "CANCELLED", "CANCELED", "ARCHIVED"];
@@ -124,12 +124,13 @@ function mapNotification(notification) {
 }
 
 function mapVisitAlert(visit) {
+  const description = describeVisitAlert(visit);
   return {
     id: `visit-${visit.id}`,
     source: "visit",
     type: "VISIT_ALERT",
-    message: visit.alerts || visit.reason || "Visita com alerta",
-    priority: normalizeStatus(visit.status) === "NOT_DONE" ? "WARNING" : "NORMAL",
+    message: description.message,
+    priority: description.priority,
     status: visit.status || "OPEN",
     createdAt: visit.updatedAt || visit.date || visit.plannedDate,
     poolId: visit.poolId || null,
@@ -277,9 +278,7 @@ async function getAdminDashboardData(req = {}) {
   const alertsMapped = [
     ...technicalAlerts.filter((alert) => isOpenAlertStatus(alert.status)).map(mapTechnicalAlert),
     ...notificationAlerts.filter((alert) => isOpenAlertStatus(alert.status)).map(mapNotification),
-    ...visitAlerts
-      .filter((visit) => String(visit.alerts || visit.reason || visit.status || "").trim())
-      .map(mapVisitAlert),
+    ...visitAlerts.map(mapVisitAlert),
   ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   const visitsThisMonth = visits.map(mapVisit);
