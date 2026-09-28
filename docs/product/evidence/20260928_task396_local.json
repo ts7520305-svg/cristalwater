@@ -237,9 +237,22 @@
     "Native PostgreSQL suite and restore for TASK396 not yet confirmed."
   ],
   "publication": {
-    "status": "prepared",
+    "status": "published_work_branch",
     "expectedNativeGroups": 306,
     "suiteConfirmed": false,
-    "restoreConfirmed": false
+    "restoreConfirmed": false,
+    "branch": "work/field-readiness-20260915-simulation",
+    "codeCommit": "85478b611068908147bcfa092cc1a1752c4f5d40",
+    "tree": "49fbb3895cdc95fbef3a63375b4d5014856e6803",
+    "treeMatchesPreparedIndex": true,
+    "nativeCi": {
+      "runId": 36407805850,
+      "jobId": 108880608464,
+      "status": "in_progress",
+      "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36407805850",
+      "expectedGroups": 306,
+      "confirmed": false,
+      "restoreConfirmed": false
+    }
   }
 }
