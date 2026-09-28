@@ -2089,9 +2089,22 @@
     "Production performance, common snapshots and full-system acceptance remain pending."
   ],
   "publication": {
-    "status": "prepared",
+    "status": "published_work_branch",
     "expectedNativeGroups": 307,
     "suiteConfirmed": false,
-    "restoreConfirmed": false
+    "restoreConfirmed": false,
+    "branch": "work/field-readiness-20260915-simulation",
+    "codeCommit": "a50caac2a289fb7789aefae5eaa06be99a1bc2be",
+    "tree": "150d16f99d754029da6bc907af7ebd8bb9da3eac",
+    "treeMatchesPreparedIndex": true,
+    "nativeCi": {
+      "runId": 36412740080,
+      "jobId": 108896539637,
+      "status": "in_progress",
+      "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36412740080",
+      "expectedGroups": 307,
+      "confirmed": false,
+      "restoreConfirmed": false
+    }
   }
 }
