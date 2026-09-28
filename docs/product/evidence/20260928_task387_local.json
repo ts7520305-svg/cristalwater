@@ -1,0 +1,164 @@
+{
+  "task": "TASK387",
+  "atUtc": "2026-09-28T04:37:42.618989+00:00",
+  "baseCommit": "9ca86e9bd2929c89b37716c1c9839f000109fa53",
+  "scope": "Complete operational risk summary and traversable alert panel",
+  "testEnvironment": {
+    "database": "PGlite 0.5.8 / socket 0.2.11",
+    "browser": "Chromium 153 / Playwright 1.61.1",
+    "data": "synthetic isolated QA",
+    "externalIntegrations": false
+  },
+  "tests": {
+    "unit": {
+      "passed": 1073,
+      "files": 122
+    },
+    "technician": {
+      "passed": 4
+    },
+    "syntax": {
+      "backend": 691,
+      "frontend": 307,
+      "inline": 44
+    },
+    "integrationGroups": [
+      {
+        "script": "scripts/test-field-operational-risk-summary.js",
+        "code": 0,
+        "ms": 8589
+      },
+      {
+        "script": "scripts/test-field-operational-risk-rules.js",
+        "code": 0,
+        "ms": 4439
+      },
+      {
+        "script": "scripts/test-field-operational-risk-rules-ui.js",
+        "code": 0,
+        "ms": 24462
+      },
+      {
+        "script": "scripts/test-field-fleet-management-ui.js",
+        "code": 0,
+        "ms": 30471
+      },
+      {
+        "script": "scripts/test-field-fleet-history-ui.js",
+        "code": 0,
+        "ms": 21717
+      },
+      {
+        "script": "scripts/test-field-collection-summary.js",
+        "code": 0,
+        "ms": 27784
+      }
+    ],
+    "regressionBefore": {
+      "exitCode": 1,
+      "expectedPendingLocks": 251,
+      "actualPendingLocks": 200
+    },
+    "fixture": {
+      "pendingLocks": 251,
+      "eligibleOverdueDocuments": 509,
+      "alerts": 760
+    },
+    "visualWidths": [
+      320,
+      390,
+      1440
+    ],
+    "paginationControlMinHeightPx": 44,
+    "visibleAlertLimit": 8,
+    "allAlertIdsVisitedExactlyOnce": true,
+    "businessRecordsAndPaymentCommunicationCountsUnchanged": true,
+    "laterBatchFailureReturns503WithoutPartialSummary": true
+  },
+  "contracts": {
+    "authorization": "ADMIN",
+    "sourceSnapshot": "RepeatableRead",
+    "sourceBatchSize": 250,
+    "sourceTimeoutMs": 20000,
+    "receivableBalance": "clientCreditService.invoiceOpen",
+    "response": "Existing fields retained; complete=true only after full read",
+    "frontend": "All critical and warning entries reachable; inconsistent counts rejected",
+    "cache": "cristalwater-field-20260928-v198",
+    "nativeRunnerGroups": 301
+  },
+  "sourceFiles": [
+    {
+      "path": "src/routes/operationalRiskRoutes.js",
+      "sha256": "20d29bcd37d62341ba7f18d23d73053775dc4e72b5fcd7e3d94f4fe2e482888a"
+    },
+    {
+      "path": "src/services/operationalRiskSummaryService.js",
+      "sha256": "b5e26df3a163a4db396f00aa543f6fdc180e48bd45c11d3d613f16f2221bd9be"
+    },
+    {
+      "path": "frontend/cw-operational-risk.js",
+      "sha256": "d437b631dce7e3a5651ff11a757c07ef9de10e200b2f6565fa264fb1f75979ea"
+    },
+    {
+      "path": "frontend/sw.js",
+      "sha256": "134845cd414395a6223dd9c99107ffd0abfed52f081f966ea6d2f6e60c6c4c96"
+    },
+    {
+      "path": "scripts/test-field-operational-risk-summary.js",
+      "sha256": "7742523797705624d13172961f4adab05da330aca96d13e5fa2b71d4131d653f"
+    },
+    {
+      "path": "scripts/test-field-suite.js",
+      "sha256": "da36df933a445a4fe4a9de31d0655bf84ba96b208030f3f1dd925cef91da1c98"
+    }
+  ],
+  "logs": [
+    {
+      "name": "task387-before.log",
+      "sha256": "faf656f12c39dc2681f21f4982bae4f248ed72f20c8c0e7d11c2d7a8ae28e34a"
+    },
+    {
+      "name": "task387-after.log",
+      "sha256": "7c8eb72256a23fe9f145f259133aa9dc616e541993906c6e603432a9bc8b155e"
+    },
+    {
+      "name": "task387-regressions.log",
+      "sha256": "12843b3f2335e9c3338a473edb97440bb036aaf24461f34d02337d3bec412415"
+    },
+    {
+      "name": "task387-unit.log",
+      "sha256": "6f6de596b487febb6109a0c409c8659775b7bcad99041c1d37851a68c5bb1680"
+    },
+    {
+      "name": "task387-technician.log",
+      "sha256": "1e355c74be6ded697828ddeeaed8915cdf802dc6278390d807bea17e4013f4bf"
+    },
+    {
+      "name": "task387-syntax.log",
+      "sha256": "8832e24af2e21f710f342b2a64ca89d06609e13fa70f719051ec1a78ff80677a"
+    }
+  ],
+  "publication": {
+    "branch": "work/field-readiness-20260915-simulation",
+    "state": "prepared"
+  },
+  "nativeValidation": {
+    "task386": {
+      "commit": "9ca86e9bd2929c89b37716c1c9839f000109fa53",
+      "runId": 36377664535,
+      "jobId": 108786713737,
+      "status": "in_progress",
+      "completeSuiteAndRestoreConfirmed": false
+    },
+    "task387": {
+      "status": "not_started",
+      "completeSuiteAndRestoreConfirmed": false
+    }
+  },
+  "limits": [
+    "Response still contains all alerts and groupings; total memory and response size grow with volume.",
+    "Production volume and native PostgreSQL restore not certified by these local tests.",
+    "Existing receivable balance rules are reused; contradictory historical records are not reconciled.",
+    "No production deployment, merge or real recipient communication."
+  ]
+}

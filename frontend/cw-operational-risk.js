@@ -36,7 +36,14 @@
     return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   }
 
-  async function loadSummary(){const summary=await api('/api/operational-risk/summary');if(!Array.isArray(summary.issues)||!summary.counts||!['total','critical','warning'].every(k=>Number.isSafeInteger(summary.counts[k])&&summary.counts[k]>=0))throw Error('Incomplete risk summary');return summary;}
+  function validSummary(summary) {
+    if (!summary || summary.complete === false || !Array.isArray(summary.issues) || !summary.counts) return false;
+    if (!['total', 'critical', 'warning'].every(key => Number.isSafeInteger(summary.counts[key]) && summary.counts[key] >= 0)) return false;
+    const critical = summary.issues.filter(issue => issue && issue.severity === 'CRITICAL').length;
+    return summary.issues.every(issue => issue && typeof issue.id === 'string') && summary.counts.total === summary.issues.length && summary.counts.critical === critical && summary.counts.warning === summary.issues.length - critical;
+  }
+
+  async function loadSummary(){const summary=await api('/api/operational-risk/summary');if(!validSummary(summary))throw Error('Incomplete risk summary');return summary;}
 
   function issueTooltip(issue) {
     return `${issue.title}: ${issue.message}`;
@@ -201,7 +208,9 @@
     document.getElementById("cwOperationalRiskUnavailable")?.remove();
     const issues = summary.issues || [];
     const critical = issues.filter((issue) => issue.severity === "CRITICAL");
-    const topIssues = (critical.length ? critical : issues).slice(0, 8);
+    const ordered = [...critical, ...issues.filter(issue => issue.severity !== 'CRITICAL')];
+    const pageSize = 8;
+    let page = 0;
     const existing = document.getElementById("cwOperationalRiskPanel");
     if (!issues.length) {
       existing?.remove();
@@ -210,7 +219,7 @@
 
     const modules = Array.from(new Set(issues.map((issue) => issue.module || "Sistema")));
     const html = `
-      <section id="cwOperationalRiskPanel" class="cw-risk-global ${critical.length ? "critical" : "warning"}" aria-live="polite">
+      <section id="cwOperationalRiskPanel" class="cw-risk-global ${critical.length ? "critical" : "warning"} ${existing?.classList.contains("is-open") ? "is-open" : ""}" aria-live="polite">
         <div class="cw-risk-global-head">
           <div>
             <strong>${critical.length ? "Intervencao necessaria" : "Avisos operacionais"}</strong>
@@ -218,17 +227,15 @@
           </div>
           <div class="cw-risk-global-actions">
             ${modules.map((moduleName) => `<a href="${esc(moduleHref(moduleName))}">${esc(moduleName)}</a>`).join("")}
-            <button type="button" data-cw-risk-toggle>${existing?.classList.contains("is-open") ? "Fechar" : "Detalhes"}</button>
+            <button type="button" data-cw-risk-toggle aria-expanded="${existing?.classList.contains("is-open") ? "true" : "false"}">${existing?.classList.contains("is-open") ? "Fechar" : "Detalhes"}</button>
           </div>
         </div>
         <div class="cw-risk-global-list">
-          ${topIssues.map((issue) => `
-            <a class="cw-risk-global-item" ${riskLinkAttrs(issue)}>
-              <span class="${issue.severity === "CRITICAL" ? "dot critical" : "dot warning"}"></span>
-              <b>${esc(issue.title)}</b>
-              <small>${esc(issue.message)}</small>
-            </a>
-          `).join("")}
+          <nav class="cw-risk-global-actions" style="grid-column:1/-1;flex-wrap:wrap" aria-label="Páginas de alertas">
+            <button type="button" data-cw-risk-previous style="min-height:44px">Anterior</button>
+            <span data-cw-risk-page role="status"></span>
+            <button type="button" data-cw-risk-next style="min-height:44px">Seguinte</button>
+          </nav>
         </div>
       </section>
     `;
@@ -240,9 +247,30 @@
     }
 
     const panel = document.getElementById("cwOperationalRiskPanel");
+    const list = panel.querySelector('.cw-risk-global-list');
+    const previous = panel.querySelector('[data-cw-risk-previous]');
+    const next = panel.querySelector('[data-cw-risk-next]');
+    const renderPage = () => {
+      list.querySelectorAll('[data-risk-id]').forEach(item => item.remove());
+      const start = page * pageSize;
+      list.insertAdjacentHTML('afterbegin', ordered.slice(start, start + pageSize).map(issue => `
+        <a class="cw-risk-global-item" data-risk-id="${esc(issue.id)}" ${riskLinkAttrs(issue)}>
+          <span class="${issue.severity === 'CRITICAL' ? 'dot critical' : 'dot warning'}"></span>
+          <b>${esc(issue.title)}</b>
+          <small>${esc(issue.message)}</small>
+        </a>
+      `).join(''));
+      previous.disabled = page === 0;
+      next.disabled = start + pageSize >= ordered.length;
+      panel.querySelector('[data-cw-risk-page]').textContent = `${start + 1}–${Math.min(start + pageSize, ordered.length)} de ${ordered.length}`;
+    };
+    previous.addEventListener('click', () => { if (page > 0) { page--; renderPage(); } });
+    next.addEventListener('click', () => { if ((page + 1) * pageSize < ordered.length) { page++; renderPage(); } });
+    renderPage();
     panel?.querySelector("[data-cw-risk-toggle]")?.addEventListener("click", () => {
       panel.classList.toggle("is-open");
       panel.querySelector("[data-cw-risk-toggle]").textContent = panel.classList.contains("is-open") ? "Fechar" : "Detalhes";
+      panel.querySelector("[data-cw-risk-toggle]").setAttribute('aria-expanded', String(panel.classList.contains('is-open')));
     });
   }
 
@@ -305,6 +333,7 @@
 
   function showRisk(summary, turn) {
     if(!fleetCurrent()||managedFleet&&turn!==fleetRiskRead)return;
+    if(!validSummary(summary)){clearFleetRisk();return;}
     window.__CW_OPERATIONAL_RISK_SUMMARY__ = summary;
     renderGlobalPanel(summary);
     markSidebar(summary);

@@ -1,6 +1,19 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK386 verificada localmente
+## Retoma atual — 28/09/2026, TASK387 verificada localmente
+
+Continuou-se a revisão global com a lacuna concreta do resumo de riscos. Consultas em lotes de 250, sem cortes silenciosos, dentro de uma leitura `RepeatableRead`; contagens e agrupamentos completos. A lógica foi extraída para `operationalRiskSummaryService`, mantendo o router como delegação e a autorização ADMIN. Documentos usam o saldo cobrável já aplicado nas cobranças; rascunhos/retirados não viram dívida, aliases e saldos antigos são reconhecidos sem editar os originais.
+
+O painel permite percorrer todos os alertas em páginas de oito, incluindo avisos depois dos críticos. Intervalo/total, teclado, botões de paginação com 44 px e recusa de contagens incompatíveis. O JSON ainda contém o conjunto completo: a paginação limita o DOM, não a memória de toda a resposta. Volumes reais e divergências históricas não estão certificados.
+
+**Local aprovado:** regressão falhou antes (200/251 pendências), passou depois (251 pendências +509 documentos elegíveis =760 alertas), sem perda/duplicação entre páginas nem alteração dos dados de negócio. Seis grupos integrados distintos: resumo API/UI, regras API/UI, gestão da frota, histórico da frota e resumo de cobranças. 1 073 unitários/122 ficheiros, quatro técnicos, sintaxe 691/307/44 e visual a 320/390/1440 px. [Evidência](evidence/20260928_task387_local.json) e [revisão atualizada](SYSTEM_REVIEW_20260928.md). Cache v198; runner 301; nenhuma migração/dependência nova.
+
+**Publicação:** alteração preparada; registar commit e CI após publicação na branch de trabalho autorizada. TASK386 já publicada em `9ca86e9bd2929c89b37716c1c9839f000109fa53`, árvore `9a28f7c09f3f7d83648fa07768f0c4838d74103c`; [CI 36377664535](https://github.com/ts7520305-svg/cristalwater/actions/runs/36377664535), job `108786713737`, em execução, com migrações/sintaxe/testes base aprovados. Os 300 grupos e o restauro ainda não foram confirmados.
+
+**Continuar:** confirmar CI/restauros de TASK386/387; depois localizar os restantes textos da correção extra em PT/EN/FR/ES/DE, conservando rascunhos/IDs/pedidos. Seguir a fila do relatório global para apresentação, históricos/finanças, importação WhatsApp, IA local e aceitação de produção. TASK385 falhou 297/300; TASK384 mantém a última aprovação completa confirmada (299/299, 128 tabelas/47 ficheiros restaurados). Sem merge/deploy/contactos reais; não declarar o sistema concluído.
+
+
+## Retoma anterior — 28/09/2026, TASK386 publicada
 
 O utilizador pediu leitura global do sistema e continuação do trabalho. A [revisão global](SYSTEM_REVIEW_20260928.md) consolida capacidades, lacunas e ordem de trabalho, com inventário de 1 858 ficheiros-fonte, 128 modelos e 126 HTML. É uma leitura automática integral com revisão dos contratos centrais, não uma auditoria humana linha a linha nem aceitação de produção.
 
@@ -10,7 +23,7 @@ TASK386: arranque do técnico antigo em DOMContentLoaded, sem depender da imagem
 
 **Local aprovado:** 1 073 unitários/122 ficheiros, quatro técnicos, sintaxe 690/307/44 e oito grupos integrados distintos, incluindo o E2E geral. 43 migrações aditivas aprovadas em PGlite/Chromium 153, sem substituir PostgreSQL nativo/restauro. Catorze imagens originais recuperadas com hashes Git iguais; inventário sem recursos ausentes. [Evidência local e índice de fontes](evidence/20260928_task386_local.json).
 
-**Próximo passo:** publicar este lote e confirmar CI/restauro. Depois corrigir os limites silenciosos do resumo de riscos (200 pendências/500 documentos) e terminar a localização do diálogo de correção extra. Importação WhatsApp ZIP/TXT não encontrada como fluxo completo; o conector Ollama existe, mas offline no telefone/aprendizagem não estão validados. Históricos/finanças, inventário visual, VPS/cópias e piloto físico mantêm os critérios do relatório global. Sem merge/deploy/contactos reais; não declarar conclusão global.
+**Estado atualizado pela TASK387:** lote publicado em `9ca86e9bd2929c89b37716c1c9839f000109fa53`; CI/restauro por confirmar. Limites do resumo de riscos corrigidos e verificados localmente na TASK387; localização do diálogo de correção extra por concluir. Importação WhatsApp ZIP/TXT não encontrada como fluxo completo; o conector Ollama existe, mas offline no telefone/aprendizagem não estão validados. Históricos/finanças, inventário visual, VPS/cópias e piloto físico mantêm os critérios do relatório global. Sem merge/deploy/contactos reais; não declarar conclusão global.
 
 ## Retoma atual — 28/09/2026, TASK385 publicada
 
