@@ -52,6 +52,6 @@ Base PGlite 0.5.8 nova em cada execução; Chromium 153.0.8010.0. Cada GET medid
 
 **Ficheiros (10):** seis de código/teste/workflow listados com SHA-256 na evidência, este relatório, plano de conclusão, checkpoint e evidência. Risco residual: resposta/DOM em O(n), transação longa no catálogo, dimensões reais desconhecidas e gates PostgreSQL ainda pendentes.
 
-**Publicação:** preparada na branch `work/field-readiness-20260915-simulation`; commit/árvore/run serão registados após publicação. Sem merge, deploy, contactos reais ou alteração do contrato anual adiado.
+**Publicação:** branch `work/field-readiness-20260915-simulation`, commit `77e424dd8305534fb63a4d251dba29e9a00b3f0e`, árvore `534fc2a5893a07ebabec6b857f0edea5706ab9c8`, igual à preparada/testada. [CI 36460017985](https://github.com/ts7520305-svg/cristalwater/actions/runs/36460017985), job `109055958055`, em execução; 310 grupos, restauro e gates nativos ainda por confirmar. Sem merge, deploy, contactos reais ou alteração do contrato anual adiado.
 
 **Próximo passo:** confirmar CI TASK405 (310 grupos/restauro e JSON específicos), depois executar C04-B. C04 só fecha após aceitação dos seis cenários. Contagem principal: **28 por iniciar, uma em execução, três em validação, zero fechadas**.

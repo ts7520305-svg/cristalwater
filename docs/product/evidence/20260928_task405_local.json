@@ -3107,10 +3107,10 @@
     "realContacts": false
   },
   "publication": {
-    "status": "prepared",
-    "commit": null,
-    "tree": null,
-    "runId": null,
-    "jobId": null
+    "status": "published-native-ci-in-progress",
+    "commit": "77e424dd8305534fb63a4d251dba29e9a00b3f0e",
+    "tree": "534fc2a5893a07ebabec6b857f0edea5706ab9c8",
+    "runId": 36460017985,
+    "jobId": 109055958055
   }
 }

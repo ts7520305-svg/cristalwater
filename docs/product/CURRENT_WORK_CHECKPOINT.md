@@ -1,6 +1,6 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK405 local / C04-A
+## Retoma atual — 28/09/2026, TASK405 publicada / C04-A
 
 Fechado o [manifesto C04 de seis cenários](OPERATIONAL_VOLUME_PLAN_20260928.md): catálogo de armazém, catálogos de campo, agendas/rondas, guias/movimentos, relatórios/histórico e PDFs/anexos. São filhos de C04, não novos IDs. Plano principal: **28 por iniciar, C04 em execução, três em validação (C01–C03), zero fechadas**.
 
@@ -14,7 +14,7 @@ Reproduzida a truncagem silenciosa do catálogo: 601 produtos existentes, HTTP 2
 
 **Lote (10 ficheiros):** Business, controller, teste unitário, novo ensaio de volume, runner, workflow, manifesto/relatório C04, evidência, plano e este checkpoint. Runner tem 310 nomes únicos e existentes. Workflow mantém o arquivo completo e acrescenta `field-readiness-gates`, com JSONs de resultados/snapshots/métricas/volumes; o runner escreve resultados em subpasta temporal, coberta pelo glob. Esses novos artefactos ainda não foram produzidos/lidos.
 
-**Publicação TASK405:** preparada na branch `work/field-readiness-20260915-simulation`; commit/árvore/CI serão registados após publicação. Sem merge, deploy ou contactos reais.
+**Publicação TASK405:** branch `work/field-readiness-20260915-simulation`, commit `77e424dd8305534fb63a4d251dba29e9a00b3f0e`, árvore `534fc2a5893a07ebabec6b857f0edea5706ab9c8`, igual à preparada/testada. [CI 36460017985](https://github.com/ts7520305-svg/cristalwater/actions/runs/36460017985), job `109055958055`, em execução. 310 grupos, restauro e gates nativos ainda por confirmar. Sem merge, deploy ou contactos reais.
 
 **Continuar:** confirmar CI TASK405, 310 grupos/restauro e descarregar o artefacto JSON pequeno. Exigir os gates nativos C01/C02 (`committedBeforeRemaining: true`), C03 (`ok: true`, perfis/falhas/limpeza) e C04-A (20 probes, snapshot concorrente verdadeiro, DOM 10 000 e limpeza). Verificar as provas na versão atual antes de fechar C01–C03/C04-A. Executar depois C04-B; C04 só fecha após os seis cenários, não após o catálogo de armazém. C05 idiomas vem a seguir. Contrato anual mantém-se adiado.
 
