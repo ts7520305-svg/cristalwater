@@ -1,6 +1,6 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK391 validada localmente
+## Retoma atual — 28/09/2026, TASK391 publicada
 
 O dashboard operacional passa a apresentar o saldo real devolvido para o mês escolhido. A antiga «Mensalidade potencial» usava um campo inexistente e mostrava sempre zero. Cadastro atual (incluindo inativos), saldo mensal e os 15 documentos com maior saldo de todos os períodos têm agora âmbitos explícitos; estes últimos não são clientes agregados nem a lista completa de dívidas. IDs, nomes, períodos, estados e valores recebidos permanecem literais, inseridos como texto.
 
@@ -12,7 +12,7 @@ Na API, o agrupamento de zonas usa um objeto sem protótipo: `__proto__`, `const
 
 **CI anteriores:** TASK389 confirmada, [301/301 e restauro](https://github.com/ts7520305-svg/cristalwater/actions/runs/36383123319): 17 etapas aprovadas, 128 tabelas e 47 ficheiros, linhas/hashes iguais; grupos comparados com o runner do commit exato `8df98f108a874fa5ec043f7a896e7366096cc8e7`. Prova incluída na evidência desta tarefa. TASK390 continua em execução na última consulta, sem confirmação dos 302 grupos/restauro. TASK386/387/388 já aprovadas; TASK385 conserva a falha histórica 297/300.
 
-**Publicação TASK391:** pendente; estes resultados são locais, com PGlite/Chromium e dados sintéticos. Os 303 grupos PostgreSQL e o restauro deste lote ainda não estão confirmados. Publicar apenas na branch de trabalho autorizada, sem merge/deploy/contactos reais.
+**Publicação TASK391:** publicada na branch `work/field-readiness-20260915-simulation` em `562d7a712ff568738196dfa2c8fc009f37d1d07e`, árvore `815022817b71281a4576105b4586e9e3a2ecaad5`, idêntica à preparada e verificada localmente. [CI 36388765088](https://github.com/ts7520305-svg/cristalwater/actions/runs/36388765088), job `108819728674`, em execução; os 303 grupos PostgreSQL e o restauro deste lote ainda não estão confirmados. Os resultados locais usam PGlite/Chromium e dados sintéticos. Sem merge/deploy/contactos reais.
 
 **Continuar:** confirmar CI de TASK390/391 e seguir as páginas antigas/idiomas ainda abertos. O dashboard e o centro de incidentes continuam apenas em português; incidentes precisam também de validação de volume/paginação e a linha temporal é da sessão. O controlador administrativo partilhado mantém consultas sem snapshot comum e alertas limitados/leituras opcionais com omissão de erros; não generalizar a validação desta página a todas as métricas. Os agrupamentos semelhantes em `aiPredictiveService`/`aiOperationalService` ainda merecem revisão dos nomes herdados. Contrato continua adiado; conciliação histórica, WhatsApp, IA local, VPS/cópias e piloto físico mantêm os limites da revisão global. Sistema não declarado concluído.
 

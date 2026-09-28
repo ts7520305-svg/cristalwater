@@ -2200,8 +2200,15 @@
     "fullGroupsAndRestoreConfirmed": false
   },
   "publication": {
-    "status": "pending",
+    "status": "published",
     "branch": "work/field-readiness-20260915-simulation",
+    "codeCommit": "562d7a712ff568738196dfa2c8fc009f37d1d07e",
+    "codeTree": "815022817b71281a4576105b4586e9e3a2ecaad5",
+    "treeMatchesPreparedIndex": true,
+    "runId": 36388765088,
+    "jobId": 108819728674,
+    "runUrl": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36388765088",
+    "nativeStatus": "in_progress",
     "expectedGroups": 303,
     "nativeGroupsAndRestoreConfirmed": false,
     "merge": false,
