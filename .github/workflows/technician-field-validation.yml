@@ -1,0 +1,42 @@
+name: Technician Field Validation
+
+on:
+  pull_request:
+    paths:
+      - "frontend/crystal-os-v2-shell.js"
+      - "frontend/crystal-os-v2-phase2-adapter.css"
+      - "src/middlewares/authMiddleware.js"
+      - "src/services/technicianResponseSanitizer.js"
+      - "scripts/test-technician-water-state-v2.js"
+      - "tests/technician-response-sanitizer.test.js"
+      - ".github/workflows/technician-field-validation.yml"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Syntax checks
+        run: |
+          node -c frontend/crystal-os-v2-shell.js
+          node -c src/middlewares/authMiddleware.js
+          node -c src/services/technicianResponseSanitizer.js
+          node -c scripts/test-technician-water-state-v2.js
+
+      - name: Technician field contract
+        run: node scripts/test-technician-water-state-v2.js
+
+      - name: Technician response minimization tests
+        run: npx vitest run tests/technician-response-sanitizer.test.js
