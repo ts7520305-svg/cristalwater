@@ -4250,11 +4250,24 @@
     "Remaining locales, WhatsApp import, local AI, VPS/restores and physical pilot remain pending; annual contract work is deferred."
   ],
   "publication": {
-    "status": "validated-locally-not-yet-published",
+    "status": "published",
     "expectedNativeGroups": 308,
     "cacheVersion": "v206",
     "changedFiles": 10,
     "merged": false,
-    "deployed": false
+    "deployed": false,
+    "codeCommit": "e1b6767459226cb4b469a49f375c9deeb89f741e",
+    "codeTree": "107325988bd7190f348de21a7bcd4e8bbb69dbf1",
+    "exactTestedTree": true,
+    "ci": {
+      "runId": 36429681410,
+      "jobId": 108952334160,
+      "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36429681410",
+      "status": "in_progress",
+      "conclusion": null,
+      "postgresConcurrentSnapshotConfirmed": false,
+      "fullRunnerConfirmed": false,
+      "restoreConfirmed": false
+    }
   }
 }

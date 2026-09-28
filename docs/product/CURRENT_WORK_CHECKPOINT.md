@@ -1,6 +1,6 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK401 validada localmente
+## Retoma atual — 28/09/2026, TASK401 publicada
 
 As oito fontes do resumo administrativo passam a usar uma única transação `RepeatableRead`: clientes, instalações, técnicos, documentos, pagamentos, alertas, visitas e faturação externa. A regressão contra `fe280039607d26f9869c43e456a2409d7957dda4` confirmou a mistura de momentos: clientes ainda sem o novo registo, mas já mais uma instalação/técnico/visita, 123,45 € faturados, 5 € recebidos, 118,45 € em aberto e três alertas.
 
@@ -14,7 +14,7 @@ As oito fontes do resumo administrativo passam a usar uma única transação `Re
 
 **CI anteriores confirmados:** TASK399 [307/307 e restauro](https://github.com/ts7520305-svg/cristalwater/actions/runs/36414824128), job `108903326731`; TASK400 [308/308 e restauro](https://github.com/ts7520305-svg/cristalwater/actions/runs/36418458948), job `108915143666`. Cada uma tem 17 etapas aprovadas e restauro de 128 tabelas/47 ficheiros com linhas e hashes iguais; sequência de scripts conferida contra o runner do commit exato. As menções anteriores a estes CI pendentes são históricas.
 
-**Publicação TASK401:** validação local concluída; a publicação na branch de trabalho e o CI nativo serão registados após confirmação. Runner mantém 308 grupos e cache v206.
+**Publicação TASK401:** publicada na branch `work/field-readiness-20260915-simulation`, commit `e1b6767459226cb4b469a49f375c9deeb89f741e`, árvore `107325988bd7190f348de21a7bcd4e8bbb69dbf1`, idêntica à preparada e testada localmente. [CI 36429681410](https://github.com/ts7520305-svg/cristalwater/actions/runs/36429681410), job `108952334160`, em execução; concorrência PostgreSQL, 308 grupos e restauro ainda não confirmados. Runner mantém 308 grupos e cache v206.
 
 **Continuar:** confirmar CI TASK401, incluindo `committedBeforeRemaining: true` no ensaio PostgreSQL, todos os grupos e restauro. Medir volumes representativos: clientes/instalações/documentos/pagamentos/visitas e registo externo continuam materializados em memória; o centro completo conserva todos os detalhes elegíveis e as consultas históricas são amplas. `/api/dashboard/metrics` mantém fontes sem snapshot comum. Crédito agregado e conciliação histórica pendentes. Filtro mensal legado continua `plannedDate OR date`/fuso do servidor, só visitas regulares; o dia inclui extra. Restantes idiomas, WhatsApp, IA local, VPS/cópias e piloto físico pendentes; contrato adiado pelo utilizador. Sem merge/deploy/contactos reais; sistema não declarado concluído.
 
