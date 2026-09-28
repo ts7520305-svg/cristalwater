@@ -91,10 +91,17 @@ let browser;
   for (const principal of [{ id: client.id, clientId: client.id, principalType: 'CLIENT', role: 'CLIENT' }, { id: tech.id, role: 'TECHNICIAN' }, { id: leader.id, role: 'TEAM_LEADER' }]) {
     assert.equal((await call('/api/dashboard/admin', undefined, { Authorization: 'Bearer ' + jwt.sign(principal, getJwtSecret()) })).status, 403);
   }
-  const repository = require('../src/dal/FinanceOsRepository'), transaction = repository.transaction;
-  repository.transaction = async () => { throw Error('QA external register unavailable'); };
+  const transaction = prisma.$transaction;
+  prisma.$transaction = function (callback, options) {
+    return transaction.call(this, tx => callback(new Proxy(tx, { get(target, property) {
+      if (property !== 'auditTrail') return Reflect.get(target, property);
+      return new Proxy(target.auditTrail, { get(model, method) {
+        return method === 'findMany' ? async () => { throw Error('QA external register unavailable'); } : Reflect.get(model, method);
+      } });
+    } })), options);
+  };
   try { await assert.rejects(require('../src/controllers/dashboardController').getAdminDashboardData(), /QA external register unavailable/); }
-  finally { repository.transaction = transaction; }
+  finally { prisma.$transaction = transaction; }
   console.log('PASS historical confirmation updates counts without financial changes; read-only summaries, ADMIN scope, private responses and unavailable-source failure preserved');
 
   const payload = await dashboard(new Date().toISOString().slice(0, 7));

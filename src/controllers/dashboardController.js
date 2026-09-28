@@ -1,7 +1,6 @@
-const { prisma } = require("../prismaClient");
 const { isReceivableInvoice } = require('../services/clientCreditService');
-const { listExternalInvoices } = require('../business/finance/FinanceOsBusiness');
-const { listDashboardSources, describeVisitAlert } = require('../business/admin/AlertListBusiness');
+const { readDashboardSources } = require('../business/admin/DashboardSnapshotBusiness');
+const { describeVisitAlert } = require('../business/admin/AlertListBusiness');
 const dashboardVisits = require('../business/admin/DashboardVisitBusiness');
 
 const CLOSED_STATUSES = ["RESOLVED", "DONE", "CLOSED", "CANCELLED", "CANCELED", "ARCHIVED"];
@@ -164,54 +163,7 @@ async function getAdminDashboardData(req = {}) {
   const currentMonth = isValidMonthRef(requestedMonth) ? requestedMonth : getMonthRef();
   const { start, end } = getMonthWindow(currentMonth);
 
-  const [
-    clients,
-    pools,
-    technicians,
-    invoices,
-    payments,
-    dashboardAlerts,
-    visits,
-    externalBilling,
-  ] = await Promise.all([
-    prisma.client.findMany({
-      include: { pools: true, invoices: true },
-      orderBy: { name: "asc" },
-    }),
-    prisma.pool.findMany({
-      include: { client: true },
-      orderBy: { id: "asc" },
-    }),
-    prisma.technician.findMany({
-      orderBy: { name: "asc" },
-    }),
-    prisma.invoice.findMany({
-      include: { client: true, payments: true },
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.payment.findMany({
-      include: { invoice: { include: { client: true } } },
-      orderBy: { paidAt: "desc" },
-    }),
-    listDashboardSources(),
-    prisma.serviceVisit.findMany({
-      where: {
-        OR: [
-          { plannedDate: { gte: start, lte: end } },
-          { date: { gte: start, lte: end } },
-        ],
-      },
-      include: {
-        client: true,
-        pool: { include: { client: true } },
-        technician: true,
-      },
-      orderBy: [{ plannedDate: "asc" }, { date: "asc" }],
-    }),
-    // Use the same eligibility, history and duplicate checks as /to-issue.
-    // A fiscal read failure must fail the summary, never masquerade as zero.
-    listExternalInvoices({ status: 'all' }),
-  ]);
+  const { clients, pools, technicians, invoices, payments, dashboardAlerts, visits, externalBilling } = await readDashboardSources({ start, end });
 
   const totalClients = clients.length;
   const totalPools = pools.length;

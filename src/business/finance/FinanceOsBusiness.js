@@ -90,10 +90,10 @@ function referenceHistory(history) {
     note: entry.metadata?.note || null, snapshot: entry.metadata?.snapshot || null }));
 }
 
-async function listExternalInvoices(query = {}, flat = false) {
+async function listExternalInvoices(query = {}, flat = false, transaction) {
   const status = String(query.status || 'pending').toLowerCase(), search = String(query.q || '').trim().toLocaleLowerCase('pt-PT');
   if (!['pending', 'issued', 'review', 'missing-data', 'all'].includes(status)) externalFailure('Filtro inválido.');
-  const { rows, registrations, references } = await repository.transaction(async tx => {
+  const read = async tx => {
     const registrations = await tx.auditTrail.findMany({ where: { action: { in: externalHistoryActions }, entity: 'Invoice' }, orderBy: { id: 'desc' } });
     const reviewedIds = [...new Set(registrations.map(entry => entry.entityId).filter(Number.isInteger))];
     const rows = await tx.client.findMany({
@@ -103,7 +103,8 @@ async function listExternalInvoices(query = {}, flat = false) {
     });
     const references = await tx.invoice.findMany({ select: { id: true, invoiceNumber: true, externalInvoiceNo: true } });
     return { rows, registrations, references };
-  });
+  };
+  const { rows, registrations, references } = await (transaction ? read(transaction) : repository.transaction(read));
   const history = new Map(), numberOwners = new Map();
   for (const entry of registrations) { if (!history.has(entry.entityId)) history.set(entry.entityId, []); history.get(entry.entityId).push(entry); }
   for (const row of references) for (const value of [row.invoiceNumber, row.externalInvoiceNo]) {

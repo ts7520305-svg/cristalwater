@@ -28,9 +28,9 @@ async function readAll(model, { where, ...options }, consume) {
 
 // Count every eligible record in the same snapshot, retaining only a bounded
 // preview. Relations are fetched only for the selected IDs, never for the scan.
-async function listDashboardSources() {
+async function listDashboardSources(transaction) {
   const limit = 200;
-  return prisma.$transaction(async tx => {
+  const read = async tx => {
     async function scan(model, where, select, include, eligible, dateOf, tieDateOf = () => 0) {
       let total = 0, preview = [];
       const newest = (a, b) => new Date(dateOf(b)) - new Date(dateOf(a)) || new Date(tieDateOf(b)) - new Date(tieDateOf(a)) || b.id - a.id;
@@ -61,7 +61,8 @@ async function listDashboardSources() {
     const returned = technical.returned + notification.returned + visit.returned;
     return { technicalAlerts: technical.rows, notificationAlerts: notification.rows, visitAlerts: visit.rows,
       coverage: { scope: 'DASHBOARD_ALERT_SOURCES_ALL_PERIODS', totalsComplete: true, limitPerSource: limit, total, returned, truncated: total > returned, sources } };
-  }, { isolationLevel: 'RepeatableRead', timeout: 30000 });
+  };
+  return transaction ? read(transaction) : prisma.$transaction(read, { isolationLevel: 'RepeatableRead', timeout: 30000 });
 }
 
 async function readLinked(model, ids, include, completenessError) {

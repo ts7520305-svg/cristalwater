@@ -14,7 +14,108 @@ const gate = () => { let release; return { promise: new Promise(resolve => { rel
 const money = value => new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(value);
 let browser, client, technician, probe;
 
+// Commit related records between the first source read and every remaining
+// source. PostgreSQL must retain one old snapshot until the whole read ends.
+async function verifyDashboardSnapshot() {
+  let read = require('../src/controllers/dashboardController').getAdminDashboardData;
+  if (process.env.CW_DASHBOARD_SNAPSHOT_BASELINE === 'true') {
+    const { execFileSync } = require('node:child_process'), Module = require('node:module');
+    const filename = require.resolve('../src/controllers/dashboardController'), previous = new Module(filename, module);
+    previous.filename = filename; previous.paths = module.paths;
+    previous._compile(execFileSync('git', ['show', 'fe280039607d26f9869c43e456a2409d7957dda4:src/controllers/dashboardController.js'], { encoding: 'utf8' }), filename);
+    read = previous.exports.getAdminDashboardData;
+  }
+  const writer = new (require('@prisma/client').PrismaClient)();
+  const models = ['client', 'pool', 'technician', 'invoice', 'payment', 'serviceVisit', 'technicalAlert', 'notification', 'auditTrail'];
+  const originalReads = Object.fromEntries(models.map(model => [model, prisma[model].findMany]));
+  const originalTransaction = prisma.$transaction, remaining = gate(), reads = [], transactions = [];
+  const monthRef = '2089-03', fixtureName = 'QA401 snapshot ' + randomUUID();
+  let firstStarted = false, writerPromise, fixture, writerError, committedBeforeRemaining = false, timer;
+  const restore = () => { for (const model of models) prisma[model].findMany = originalReads[model]; prisma.$transaction = originalTransaction; };
+  const createFixture = () => writer.$transaction(async tx => {
+    const client = await tx.client.create({ data: { name: fixtureName, requiresInvoice: true, fiscalName: fixtureName, fiscalNif: '999999990', fiscalAddress: 'Synthetic QA', fiscalEmail: 'snapshot@example.test' } });
+    const pool = await tx.pool.create({ data: { name: fixtureName, clientId: client.id, zone: fixtureName } });
+    const technician = await tx.technician.create({ data: { name: fixtureName } });
+    const visit = await tx.serviceVisit.create({ data: { clientId: client.id, poolId: pool.id, technicianId: technician.id, status: 'NOT_DONE', reason: fixtureName, plannedDate: new Date(monthRef + '-15T12:00:00Z'), date: new Date(monthRef + '-15T12:00:00Z') } });
+    const invoice = await tx.invoice.create({ data: { clientId: client.id, month: monthRef, status: 'PENDING', amount: 123.45, total: 123.45, totalAmount: 123.45, amountPaid: 5, amountOpen: 118.45, requiresInvoice: true } });
+    await tx.payment.create({ data: { invoiceId: invoice.id, amount: 5, method: 'CASH', paidAt: new Date(monthRef + '-15T12:00:00Z') } });
+    await tx.technicalAlert.create({ data: { poolId: pool.id, type: 'ALERT', message: fixtureName, status: 'OPEN' } });
+    await tx.notification.create({ data: { clientId: client.id, type: 'ALERT', role: 'ADMIN', message: fixtureName, status: 'PENDING' } });
+    return { client, pool, technician, visit, invoice };
+  }, { maxWait: 10000, timeout: 30000 });
+  const hook = (model, scope, invoke) => async args => {
+    reads.push({ model, scope });
+    if (model === 'client' && !firstStarted) {
+      firstStarted = true;
+      const rows = await invoke(args);
+      writerPromise = createFixture().then(value => { fixture = value; }, error => { writerError = error; });
+      // PGlite serializes transactions. Release after a bounded wait there;
+      // native PostgreSQL must commit while the reader transaction stays open.
+      committedBeforeRemaining = await Promise.race([
+        writerPromise.then(() => { if (writerError) throw writerError; return true; }),
+        new Promise(resolve => { timer = setTimeout(() => resolve(false), 5000); }),
+      ]);
+      clearTimeout(timer); remaining.release(); return rows;
+    }
+    await remaining.promise; return invoke(args);
+  };
+  try {
+    const engine = (await writer.$queryRawUnsafe('SELECT version() AS version'))[0].version;
+    const before = await read({ query: { monthRef } });
+    for (const model of models) prisma[model].findMany = hook(model, 'root', args => originalReads[model].call(prisma[model], args));
+    prisma.$transaction = async function (callback, options) {
+      if (firstStarted) await remaining.promise;
+      const scope = 'transaction-' + (transactions.length + 1); transactions.push({ scope, options });
+      return originalTransaction.call(this, tx => {
+        const delegates = Object.fromEntries(models.map(model => [model, new Proxy(tx[model], { get(target, property) {
+          return property === 'findMany' ? hook(model, scope, args => target.findMany(args)) : Reflect.get(target, property);
+        } })]));
+        return callback(new Proxy(tx, { get(target, property) { return delegates[property] || Reflect.get(target, property); } }));
+      }, options);
+    };
+    const during = await read({ query: { monthRef } });
+    await writerPromise; if (writerError) throw writerError;
+    restore();
+    const after = await read({ query: { monthRef } });
+    const values = data => ({ clients: data.summary.totalClients, pools: data.summary.totalPools, technicians: data.technicians.length,
+      visits: data.summary.visitsThisMonth, notDone: data.summary.visitsNotDoneThisMonth,
+      billed: data.summary.monthBilled, paid: data.summary.monthPaid, open: data.summary.monthOpen,
+      alerts: data.alertCoverage.total, fiscalClients: data.summary.officialInvoiceClients,
+      fiscalInvoices: data.summary.officialInvoiceTotal, fiscalPending: data.summary.officialInvoicePending,
+      fiscalPendingAmount: data.summary.officialInvoicePendingAmount });
+    const initial = values(before), delta = data => Object.fromEntries(Object.entries(values(data)).map(([key, value]) => [key, Math.round((value - initial[key]) * 100) / 100]));
+    const duringDelta = delta(during), afterDelta = delta(after);
+    const evidence = { engine, committedBeforeRemaining, transactions, reads, duringDelta, afterDelta };
+    console.log(JSON.stringify({ dashboardSnapshot: evidence }));
+    assert.deepEqual(duringDelta, Object.fromEntries(Object.keys(initial).map(key => [key, 0])), 'All dashboard sources must retain the snapshot established by the first read');
+    assert.deepEqual(afterDelta, { clients: 1, pools: 1, technicians: 1, visits: 1, notDone: 1, billed: 123.45, paid: 5, open: 118.45, alerts: 3, fiscalClients: 1, fiscalInvoices: 1, fiscalPending: 1, fiscalPendingAmount: 123.45 });
+    assert.deepEqual(transactions, [{ scope: 'transaction-1', options: { isolationLevel: 'RepeatableRead', timeout: 30000 } }]);
+    assert(reads.every(row => row.scope === 'transaction-1'));
+    assert.deepEqual([...new Set(reads.map(row => row.model))].sort(), models.slice().sort());
+    if (!/wasm|emscripten|pglite/i.test(engine)) assert.equal(committedBeforeRemaining, true, 'Native PostgreSQL must exercise an actual concurrent commit');
+    const folder = path.join(__dirname, '../reports/field-visual/operational-dashboard'); await fs.mkdir(folder, { recursive: true });
+    await fs.writeFile(path.join(folder, 'snapshot.json'), JSON.stringify({ ok: true, phase: 'assertions-completed', ...evidence }, null, 2) + '\n');
+    console.log('PASS dashboard snapshot: eight sources share one transaction, complete pre-commit and post-commit totals, concurrent writer mode recorded');
+  } finally {
+    clearTimeout(timer); remaining.release(); restore();
+    if (writerPromise) await writerPromise;
+    if (fixture) {
+      await writer.payment.deleteMany({ where: { invoiceId: fixture.invoice.id } });
+      await writer.invoice.delete({ where: { id: fixture.invoice.id } });
+      await writer.notification.deleteMany({ where: { clientId: fixture.client.id } });
+      await writer.technicalAlert.deleteMany({ where: { poolId: fixture.pool.id } });
+      await writer.serviceVisit.delete({ where: { id: fixture.visit.id } });
+      await writer.pool.delete({ where: { id: fixture.pool.id } });
+      await writer.client.delete({ where: { id: fixture.client.id } });
+      await writer.technician.delete({ where: { id: fixture.technician.id } });
+    }
+    await writer.$disconnect();
+  }
+}
+
 (async () => {
+  await verifyDashboardSnapshot();
+  if (process.env.CW_DASHBOARD_SNAPSHOT_BASELINE === 'true') return;
   const admin = await prisma.user.findUniqueOrThrow({ where: { email: process.env.ADMIN_EMAIL } });
   const sign = value => jwt.sign(value, getJwtSecret(), { expiresIn: '1h' });
   const token = sign({ id: admin.id, role: 'ADMIN', principalType: 'USER' });
@@ -94,12 +195,20 @@ let browser, client, technician, probe;
   for (const credential of [null, 'invalid', sign({ id: client.id, clientId: client.id, role: 'CLIENT' }), sign({ id: technician.id, technicianId: technician.id, role: 'TECHNICIAN' })]) assert([401, 403].includes((await call(monthA, credential)).status));
   const app = require('express')(); app.use('/api/dashboard', require('../src/routes/dashboardRoutes'));
   probe = await new Promise(resolve => { const server = app.listen(0, '127.0.0.1', () => resolve(server)); });
-  const originalRead = prisma.pool.findMany;
+  const originalRead = prisma.pool.findMany, originalTransaction = prisma.$transaction;
   try {
     prisma.pool.findMany = async () => { throw Error('PRIVATE_OPERATIONAL_READ_FAILURE'); };
+    prisma.$transaction = function (callback, options) {
+      return originalTransaction.call(this, tx => callback(new Proxy(tx, { get(target, property) {
+        if (property !== 'pool') return Reflect.get(target, property);
+        return new Proxy(target.pool, { get(model, method) {
+          return method === 'findMany' ? async () => { throw Error('PRIVATE_OPERATIONAL_READ_FAILURE'); } : Reflect.get(model, method);
+        } });
+      } })), options);
+    };
     const failed = await call(monthA, token, 'http://127.0.0.1:' + probe.address().port);
     assert.equal(failed.status, 500); assert.equal(failed.body.ok, false); assert(!JSON.stringify(failed.body).includes('PRIVATE_OPERATIONAL'));
-  } finally { prisma.pool.findMany = originalRead; }
+  } finally { prisma.pool.findMany = originalRead; prisma.$transaction = originalTransaction; }
   console.log('PASS operational API: reserved zone names counted, inactive records retained as registered totals, exact month balance, drafts/withdrawn/paid excluded from open balance, ADMIN scope and explicit read failures');
 
   const recover = async () => { await page.locator('#monthRef').fill(monthA); assert.equal(await page.evaluate(() => loadOperational()), true); };

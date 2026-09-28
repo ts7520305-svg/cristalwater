@@ -10,6 +10,7 @@ async function summary(pools) {
   const prisma = Object.fromEntries(['client', 'pool', 'technician', 'invoice', 'payment', 'technicalAlert', 'notification', 'serviceVisit'].map(model => [model, { findMany: async () => model === 'pool' ? pools : [] }]));
   const sandbox = { module: { exports: {} }, require(name) {
     if (name === '../prismaClient') return { prisma };
+    if (name === '../business/admin/DashboardSnapshotBusiness') return { readDashboardSources: async () => ({ clients: [], pools, technicians: [], invoices: [], payments: [], visits: [], dashboardAlerts: { technicalAlerts: [], notificationAlerts: [], visitAlerts: [] }, externalBilling: { summary: {} } }) };
     if (name === '../services/clientCreditService') return { isReceivableInvoice: () => true };
     if (name === '../business/finance/FinanceOsBusiness') return { listExternalInvoices: async () => ({ summary: {} }) };
     if (name === '../business/admin/AlertListBusiness') return { listDashboardSources: async () => ({ technicalAlerts: [], notificationAlerts: [], visitAlerts: [] }) };

@@ -16,6 +16,7 @@ async function read(statuses) {
   const prisma = Object.fromEntries(['client', 'pool', 'technician', 'invoice', 'payment', 'serviceVisit'].map(model => [model, { findMany: async () => model === 'serviceVisit' ? visits : [] }]));
   const sandbox = { module: { exports: {} }, require(name) {
     if (name === '../prismaClient') return { prisma };
+    if (name === '../business/admin/DashboardSnapshotBusiness') return { readDashboardSources: async () => ({ clients: [], pools: [], technicians: [], invoices: [], payments: [], visits, dashboardAlerts: { technicalAlerts: [], notificationAlerts: [], visitAlerts: [] }, externalBilling: { summary: {} } }) };
     if (name === '../services/clientCreditService') return { isReceivableInvoice: () => true };
     if (name === '../business/finance/FinanceOsBusiness') return { listExternalInvoices: async () => ({ summary: {} }) };
     if (name === '../business/admin/AlertListBusiness') return { listDashboardSources: async () => ({ technicalAlerts: [], notificationAlerts: [], visitAlerts: [] }) };
@@ -60,5 +61,48 @@ describe('monthly visit categories are exclusive and keep literal status evidenc
     const first = await read(statuses), reversed = await read(statuses.slice().reverse());
     expect(counts(first.data)).toEqual([1000, 2000, 2000]); expect(first.view.otherVisits).toBe(1000);
     expect(counts(reversed.data)).toEqual(counts(first.data)); expect(reversed.view.otherVisits).toBe(first.view.otherVisits);
+  });
+});
+
+describe('dashboard sources share one complete database snapshot', () => {
+  const snapshotSource = readFileSync(new URL('../src/business/admin/DashboardSnapshotBusiness.js', import.meta.url), 'utf8');
+  const sourceNames = ['client', 'pool', 'technician', 'invoice', 'payment', 'serviceVisit', 'alerts', 'external'];
+  function setup(failure) {
+    const calls = [], transactions = [], output = Object.fromEntries(sourceNames.map(name => [name, Object.freeze([{ source: name }])])), error = Error('failed ' + failure);
+    const read = async (name, query) => { calls.push({ name, query }); if (failure === name) throw error; return output[name]; };
+    const tx = Object.fromEntries(sourceNames.slice(0, 6).map(name => [name, { findMany: query => read(name, query) }]));
+    const prisma = new Proxy({ $transaction: async (callback, options) => {
+      transactions.push(options); if (failure === 'transaction') throw error; return callback(tx);
+    } }, { get(target, key) { if (key !== '$transaction') throw Error('Read outside transaction: ' + key); return target[key]; } });
+    const sandbox = { module: { exports: {} }, require(name) {
+      if (name === '../../prismaClient') return { prisma };
+      if (name === './AlertListBusiness') return { listDashboardSources: transaction => { expect(transaction).toBe(tx); return read('alerts'); } };
+      if (name === '../finance/FinanceOsBusiness') return { listExternalInvoices: (query, flat, transaction) => {
+        expect(transaction).toBe(tx); expect(query).toEqual({ status: 'all' }); expect(flat).toBe(false); return read('external', query);
+      } };
+      throw Error('Unexpected dependency ' + name);
+    } };
+    vm.runInNewContext(snapshotSource, sandbox);
+    return { ...sandbox.module.exports, calls, transactions, output, error };
+  }
+  const bounds = { start: new Date('2089-03-01T00:00:00Z'), end: new Date('2089-03-31T23:59:59.999Z') };
+  it('keeps all eight sources in one RepeatableRead transaction and preserves period/relations', async () => {
+    const run = setup(), result = await run.readDashboardSources(bounds);
+    expect(run.transactions).toEqual([{ isolationLevel: 'RepeatableRead', timeout: 30000 }]);
+    expect(run.calls.map(call => call.name).sort()).toEqual(sourceNames.slice().sort());
+    const sources = { clients: 'client', pools: 'pool', technicians: 'technician', invoices: 'invoice', payments: 'payment', visits: 'serviceVisit', dashboardAlerts: 'alerts', externalBilling: 'external' };
+    for (const [key, source] of Object.entries(sources)) expect(result[key]).toBe(run.output[source]);
+    expect(run.calls.find(call => call.name === 'serviceVisit').query).toEqual({
+      where: { OR: [{ plannedDate: { gte: bounds.start, lte: bounds.end } }, { date: { gte: bounds.start, lte: bounds.end } }] },
+      include: { client: true, pool: { include: { client: true } }, technician: true },
+      orderBy: [{ plannedDate: 'asc' }, { date: 'asc' }],
+    });
+    expect(run.calls.find(call => call.name === 'invoice').query).toEqual({ include: { client: true, payments: true }, orderBy: { createdAt: 'desc' } });
+    expect(run.calls.find(call => call.name === 'payment').query).toEqual({ include: { invoice: { include: { client: true } } }, orderBy: { paidAt: 'desc' } });
+  });
+  it.each([...sourceNames, 'transaction'])('rejects the entire summary when %s fails', async failure => {
+    const run = setup(failure);
+    await expect(run.readDashboardSources(bounds)).rejects.toBe(run.error);
+    expect(run.transactions).toHaveLength(1);
   });
 });

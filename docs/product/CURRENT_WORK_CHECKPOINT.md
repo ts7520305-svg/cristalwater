@@ -1,6 +1,24 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK400 publicada
+## Retoma atual — 28/09/2026, TASK401 validada localmente
+
+As oito fontes do resumo administrativo passam a usar uma única transação `RepeatableRead`: clientes, instalações, técnicos, documentos, pagamentos, alertas, visitas e faturação externa. A regressão contra `fe280039607d26f9869c43e456a2409d7957dda4` confirmou a mistura de momentos: clientes ainda sem o novo registo, mas já mais uma instalação/técnico/visita, 123,45 € faturados, 5 € recebidos, 118,45 € em aberto e três alertas.
+
+`DashboardSnapshotBusiness` centraliza as leituras e fornece a mesma transação aos leitores partilhados de alertas e faturação externa, incluindo histórico e referências. Falhas recusam o resumo inteiro. Os caminhos autónomos dos leitores conservam o comportamento existente; API, permissões, filtros, relações, ordenação, regras financeiras e apresentação mantêm-se. O timeout de 30 s abrange agora todas as fontes. Não houve alteração de frontend/cache, esquema, migrações ou dependências versionadas.
+
+**Local aprovado:** 1 283 unitários/133 ficheiros, incluindo dez novos; quatro técnicos; sintaxe 693/307/44 e seis grupos integrados: dashboard operacional, administrativo e antigo, resumo de faturação externa, revisão de referências e estados dos alertas. O teste SQL confirma uma só transação, zero consultas globais e todos os totais antigos durante a leitura, seguidos de todos os novos na consulta seguinte. Erros de cada fonte/transação, falha fiscal real dentro da transação, recusas ADMIN/perfis, ausência de escritas pelo leitor e gates existentes de navegador passaram. A primeira execução do grupo fiscal intercetava a transação autónoma antiga; o teste foi adaptado à consulta `auditTrail` efetiva e passou integralmente.
+
+**Limite da concorrência local:** PGlite serializa transações; a escrita ficou em espera até a leitura acabar. O ensaio nativo exige que o escritor confirme enquanto a transação de leitura permanece aberta. A coerência multiversão no PostgreSQL desta TASK só poderá ser confirmada no CI. [Evidência completa](evidence/20260928_task401_local.json), incluindo regressão, hashes e resultados anteriores. A ligação de dependências local expirada foi reposta com `npm ci`, sem alterar o lockfile.
+
+**Ficheiros do lote (10):** `DashboardSnapshotBusiness.js`, `dashboardController.js`, `AlertListBusiness.js`, `FinanceOsBusiness.js`; testes `dashboard-zone-names`, `dashboard-visit-states`, `test-field-operational-dashboard` e `test-field-external-invoice-summary`; este checkpoint e a evidência TASK401. Caminhos e SHA-256 dos oito ficheiros de código/teste constam da evidência. A revisão global anterior conserva o registo histórico; a continuidade atual é esta secção.
+
+**CI anteriores confirmados:** TASK399 [307/307 e restauro](https://github.com/ts7520305-svg/cristalwater/actions/runs/36414824128), job `108903326731`; TASK400 [308/308 e restauro](https://github.com/ts7520305-svg/cristalwater/actions/runs/36418458948), job `108915143666`. Cada uma tem 17 etapas aprovadas e restauro de 128 tabelas/47 ficheiros com linhas e hashes iguais; sequência de scripts conferida contra o runner do commit exato. As menções anteriores a estes CI pendentes são históricas.
+
+**Publicação TASK401:** validação local concluída; a publicação na branch de trabalho e o CI nativo serão registados após confirmação. Runner mantém 308 grupos e cache v206.
+
+**Continuar:** confirmar CI TASK401, incluindo `committedBeforeRemaining: true` no ensaio PostgreSQL, todos os grupos e restauro. Medir volumes representativos: clientes/instalações/documentos/pagamentos/visitas e registo externo continuam materializados em memória; o centro completo conserva todos os detalhes elegíveis e as consultas históricas são amplas. `/api/dashboard/metrics` mantém fontes sem snapshot comum. Crédito agregado e conciliação histórica pendentes. Filtro mensal legado continua `plannedDate OR date`/fuso do servidor, só visitas regulares; o dia inclui extra. Restantes idiomas, WhatsApp, IA local, VPS/cópias e piloto físico pendentes; contrato adiado pelo utilizador. Sem merge/deploy/contactos reais; sistema não declarado concluído.
+
+## Retoma anterior — 28/09/2026, TASK400 publicada
 
 Revisto o dashboard antigo `/dashboard`, preservando as secções e acessos existentes. A regressão na base sintética mostrou crédito, potencial e montantes por zona inventados como 0 €, apenas 600 alertas apresentados perante um total confirmado de 3 073, uma resposta antiga a substituir o mês escolhido, valores antigos mantidos após 503 e campos ausentes apresentados como zero.
 
