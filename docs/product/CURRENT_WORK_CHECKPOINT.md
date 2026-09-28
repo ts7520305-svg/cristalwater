@@ -1,6 +1,6 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK404 / C03
+## Retoma atual — 28/09/2026, TASK404 publicada / C03
 
 Testes de volume de quatro GETs: dashboard administrativo, métricas diárias, alertas completos e riscos. Escalas de 25/100/400 clientes, 16 técnicos e dois anos de visitas/documentos; maior fixture com **64 816 linhas**, incluindo 41 600 visitas e 9 600 documentos. [Relatório](SUMMARY_VOLUME_20260928.md) e [evidência](evidence/20260928_task404_local.json). Plano: **29 por iniciar, três em validação (C01–C03), zero fechadas**.
 
@@ -10,13 +10,13 @@ A memória excessiva foi reproduzida: 1 119,93 MiB no dashboard a 400 clientes. 
 
 **Falha local isolada:** PGlite reutilizado retornou datas fora do filtro; SQL direto confirmou 125 resultados indexados contra 100 sequenciais. O ensaio final recriou uma base isolada com o esquema atual e passou sem alterar filtros/planeador da aplicação. Preservar a evidência; não usar essa base antiga para certificar novos testes de intervalo sem resolver a anomalia. Não é prova de falha ou aprovação no PostgreSQL nativo.
 
-**CI anteriores:** TASK401 run `36429681410`, job `108952334160`, 17 etapas aprovadas, 308 scripts na ordem exata e restauro de 128 tabelas/47 ficheiros iguais. C01 ainda requer ler `operational-dashboard/snapshot.json` e confirmar `committedBeforeRemaining: true`; artefacto `10976260376` tem 124 761 143 bytes, acima do limite de transferência de 32 MiB, e o URL assinado respondeu 403. TASK403 run `36432110804`, job `108960622472`, ainda em curso na última consulta; depois exigir o JSON `field-suite/dashboard-metrics.json` com a mesma prova concorrente.
+**CI anteriores:** TASK401 run `36429681410`, job `108952334160`, 17 etapas aprovadas, 308 scripts na ordem exata e restauro de 128 tabelas/47 ficheiros iguais. C01 ainda requer ler `operational-dashboard/snapshot.json` e confirmar `committedBeforeRemaining: true`; artefacto `10976260376` tem 124 761 143 bytes, acima do limite de transferência de 32 MiB, e o URL assinado respondeu 403. TASK403 run `36432110804`, job `108960622472`, também terminou com 17 etapas, 308 scripts na ordem exata e restauro de 128 tabelas/47 ficheiros iguais. Exigir ainda `field-suite/dashboard-metrics.json` com `committedBeforeRemaining: true` no artefacto `10976776089` (124 765 391 bytes), ainda não lido; C02 mantém o gate específico pendente.
 
 **Lote (10 ficheiros):** cinco de código/teste (`DashboardSnapshotBusiness`, dois novos scripts de volume, runner e teste de snapshot), relatório, evidência, plano, revisão global e este checkpoint. Caminhos/hashes na evidência; sem frontend, dependências ou migrações novas.
 
-**Publicação TASK404:** preparada na branch `work/field-readiness-20260915-simulation`; ligar commit/árvore/CI depois da publicação autorizada.
+**Publicação TASK404:** branch `work/field-readiness-20260915-simulation`, commit `243f9e72da450af0261eee19f4cbba45beb163bd`, árvore `a37e4c98450216d7aaa2a93b1f74ab15b4079f6a`, igual à testada. [CI 36438347610](https://github.com/ts7520305-svg/cristalwater/actions/runs/36438347610), job `108982012460`, em execução. Confirmar os 309 grupos e restauro antes de aceitar a execução nativa de C03.
 
-**Continuar:** confirmar CI TASK403/TASK404 e os artefactos nativos da TASK401/TASK403. Para TASK404, conferir 309 scripts/restauro, `field-suite/summary-volume/results.json` com `ok: true`, 12 perfis positivos, três falhas tardias recusadas e limpeza. C03 continua em validação; a certificação de VPS/dados reais não é substituída por estes perfis. Iniciar C04: inventário fechado de superfícies e cenários de agendas, catálogos, guias e relatórios, com volumes/IDs/bytes/tempo/memória e lotes até dez ficheiros. Depois C05, inventário de idiomas. Sem merge/deploy/contactos reais; contrato anual adiado.
+**Continuar:** confirmar CI TASK404 e ler os artefactos nativos da TASK401/TASK403. Os CI destas duas já passaram; os gates específicos dos JSON permanecem pendentes. Para TASK404, conferir 309 scripts/restauro, `field-suite/summary-volume/results.json` com `ok: true`, 12 perfis positivos, três falhas tardias recusadas e limpeza. C03 continua em validação; a certificação de VPS/dados reais não é substituída por estes perfis. Iniciar C04: inventário fechado de superfícies e cenários de agendas, catálogos, guias e relatórios, com volumes/IDs/bytes/tempo/memória e lotes até dez ficheiros. Depois C05, inventário de idiomas. Sem merge/deploy/contactos reais; contrato anual adiado.
 
 ## Retoma anterior — 28/09/2026, TASK403 publicada / C02
 

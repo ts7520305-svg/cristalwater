@@ -224,7 +224,7 @@ Cache v202, runner 305; sem alteração de esquema, regras financeiras do servid
 O [plano de conclusão de 28/09](COMPLETION_PLAN_20260928.md) desdobra as sete frentes em **32 tarefas C01–C32**, com critérios, dependências e histórico de execução. Esta fila substitui as prioridades antigas acima; as evidências históricas conservam-se. Após TASK404 local: 29 tarefas por executar e três em validação (C01/C02/C03).
 
 1. C01: CI TASK401 aprovado, 308 grupos/restauro conferidos. Falta ler a prova específica de concorrência no artefacto, cujo download para o ambiente ficou bloqueado. TASK399/400 já aprovadas.
-2. C02 implementada na TASK403, CI nativo pendente. C03 implementada na TASK404: quatro APIs com 25/100/400 clientes, memória excessiva corrigida sem alterar o JSON, IDs/totais completos e falhas tardias explícitas. [Medições](SUMMARY_VOLUME_20260928.md), com a limitação PGlite e gate nativo. C04 é a próxima preparação local: agendas, catálogos, guias e relatórios.
+2. C02 implementada na TASK403, CI com 308 grupos/restauro aprovado; falta ler a prova específica de concorrência no artefacto. C03 implementada na TASK404: quatro APIs com 25/100/400 clientes, memória excessiva corrigida sem alterar o JSON, IDs/totais completos e falhas tardias explícitas. [Medições](SUMMARY_VOLUME_20260928.md), com a limitação PGlite e gate nativo. C04 é a próxima preparação local: agendas, catálogos, guias e relatórios.
 3. C05–C09: inventário e conclusão dos idiomas por percurso e modelo PDF.
 4. C10–C14: política temporal, crédito verificável, incidentes paginados, obras/instalações e critérios de interface/acesso.
 5. C15–C18: identidade/origem, dívidas/créditos, custos/receitas e acordos sazonais/periódicos reais.
