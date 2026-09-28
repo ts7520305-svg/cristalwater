@@ -46,7 +46,7 @@ As mensagens de validação dos campos seguem o idioma escolhido, conservando os
 
 Validação local: 1 075 testes unitários/122 ficheiros, quatro técnicos, sintaxe 691/307/44; três grupos integrados distintos (produtos e correção extra, correções existentes e resumo de documentos). Nos 15 pares idioma/largura, a revisão conserva os valores literais e os IDs, a validação obrigatória está traduzida e os controlos ficam acessíveis sem transbordo. Trinta capturas de topo/revisão; inspeção de DE320 e FR390. A mudança de idioma durante um envio offline conserva todos os bytes do pedido e do rascunho; um 403 traduzido não reabre a edição. Mantiveram-se recarregamento offline, resposta perdida, um recibo/uma auditoria e movimentos apenas nas linhas originais, além de concorrência, quota e versões antigas no teste existente. [Evidência](evidence/20260928_task388_local.json).
 
-Cache v199; runner mantém 301 grupos. Não houve migração, mudança dos pedidos/recibos ou dependência nova. Falta a confirmação nativa PostgreSQL/restauro desta publicação; os restantes módulos mantêm os limites da revisão global.
+Cache v199; runner mantém 301 grupos. Não houve migração, mudança dos pedidos/recibos ou dependência nova. Publicada na branch `work/field-readiness-20260915-simulation` em `26e3bcaeca2d3c69d9cf651fa6220d0bb43529c9`, árvore `5f70f1bd312be5fd25fb8a4b6d46b8e444407a20`, igual à preparada e verificada localmente. [CI 36380011326](https://github.com/ts7520305-svg/cristalwater/actions/runs/36380011326), job `108793645411`, em execução; 301 grupos e restauro ainda não confirmados. Os restantes módulos mantêm os limites da revisão global.
 
 ## Mapa de módulos e critérios ainda abertos
 
