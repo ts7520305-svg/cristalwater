@@ -1,6 +1,6 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK409 local / memória C03
+## Retoma atual — 28/09/2026, TASK409 publicada / memória C03
 
 Corrigida a leitura financeira descartada pelo resumo administrativo. `listExternalInvoices` recebe modo interno `summaryOnly` no quarto argumento, usado apenas pelo `DashboardSnapshotBusiness`: seleciona campos necessários, reutiliza elegibilidade/revisão/normalização e não calcula tokens nem materializa linhas/pagamentos/clientes repetidos. Lista normal mantém documentos/tokens/contratos. Oito fontes continuam na mesma transação. [Relatório C03](SUMMARY_VOLUME_20260928.md), [evidência TASK409](evidence/20260928_task409_local.json).
 
@@ -11,6 +11,8 @@ Corrigida a leitura financeira descartada pelo resumo administrativo. `listExter
 **Lote 10 ficheiros:** dois Business, dois scripts, dois ficheiros de teste, relatório C03, plano, checkpoint/evidência. Runner313, cachev207, schema/dependências inalterados. `results.json` de volume agora inclui medição exata quando um probe falha. C03 continua em validação até CI/restauro da correção. TASK408 guias publicado f5e18e31..., docs28cd3fac...; CI36474118500/job109103422154 está na suite integrada, dez etapas aprovadas na última consulta, não contém TASK409.
 
 **Continuar:** confirmar CI TASK408/TASK409 por SHA, 313grupos exatos/sem falha/restauro e JSONs específicos. TASK409 exige snapshot concorrente verdadeiro e volume12+3/limpeza; TASK408 exige guide-volume3probes/limpeza. C04-E (relatórios/histórico201/1001) e F (PDFs/anexos) por executar; depois C05idiomas. C04-D local aprovado, C04-C probe nativo aprovado mas suite/restauro bloqueados, A/B nativos aprovados. Contagem32:28por iniciar, C04em execução, C03em validação,2concluídas(C01/C02). Contrato anual adiado; branch autorizada, sem merge/deploy/contactos reais.
+
+**Publicação TASK409:** branch `work/field-readiness-20260915-simulation`, commit `04005a0831f5fe9e6e588b1467596e03036e1779`, árvore `0d753e42d95823755419856e590d9b2e231a0c59`, igual à preparada/testada. [CI 36475513427](https://github.com/ts7520305-svg/cristalwater/actions/runs/36475513427), em execução; 313 grupos, restauro e JSONs nativos ainda por confirmar. Sem merge, deploy ou contactos reais.
 
 ## Retoma atual — 28/09/2026, TASK408 publicada / C04-D
 

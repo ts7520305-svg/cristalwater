@@ -4246,5 +4246,17 @@
     "Full response equivalence uses the same baseline/25-client fixtures; largest profile validates totals/IDs/bytes and memory.",
     "PGlite serialized the writer; PostgreSQL concurrency, full 313-script suite and restore remain native gates.",
     "No schema, dependencies, cache v207, deployment, merge, fiscal issuance or real contacts changed."
-  ]
+  ],
+  "publication": {
+    "branch": "work/field-readiness-20260915-simulation",
+    "commit": "04005a0831f5fe9e6e588b1467596e03036e1779",
+    "tree": "0d753e42d95823755419856e590d9b2e231a0c59",
+    "treeMatchedTestedIndex": true,
+    "runId": 36475513427,
+    "status": "in_progress",
+    "nativeGates": "313 ordered scripts, restore, native snapshot and full volume JSONs pending",
+    "jobId": 109108100107,
+    "successfulStepsAtCheck": 6,
+    "activeStepAtCheck": "Verify additive upgrade from the previous schema"
+  }
 }
