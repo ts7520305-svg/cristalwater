@@ -1,0 +1,1811 @@
+{
+  "task": "TASK410",
+  "date": "2026-09-28",
+  "scope": "C04-E saved reports and monthly history volume",
+  "baseCommit": "0e690ed98e4de9e586196c28a339e179e1308570",
+  "status": "local-approved-native-pending",
+  "productionChanges": false,
+  "codeHashes": {
+    "scripts/test-field-report-volume.js": "13c74999512f9fb76de650fac97faba61ddaddc48770ae1a7595930136bcb0e9",
+    "scripts/test-field-suite.js": "cb8735ec963a3e18e46b4ed832ea017cb3d423c59a4a7bec34876583f967ee16"
+  },
+  "implementation": {
+    "newScript": "scripts/test-field-report-volume.js",
+    "runnerScripts": 314,
+    "profiles": [
+      201,
+      1001
+    ],
+    "apiRequests": 116,
+    "apiPositive": 58,
+    "apiExpectedDenialsOrMissing": 38,
+    "injectedFailures": 20,
+    "browserSurfaces": 3,
+    "maximumHistoryPages": 167,
+    "maximumDomRows": 6,
+    "sourceModelsPreserved": 12,
+    "serviceWorkerCache": "v207"
+  },
+  "environment": {
+    "node": "24.19.0",
+    "database": "PostgreSQL 18.3 (PGlite 0.5.8) on wasm32-unknown-emscripten, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.74 (1092ec30a3fb1d46b1782ff1b4db5094d3d06ae5), 32-bit",
+    "chromium": "153.0.8010.0",
+    "timezone": "UTC",
+    "isolatedFreshDatabase": true,
+    "externalIntegrationsEnabled": false
+  },
+  "local": {
+    "ok": true,
+    "phase": "assertions-completed",
+    "engine": "PostgreSQL 18.3 (PGlite 0.5.8) on wasm32-unknown-emscripten, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.74 (1092ec30a3fb1d46b1782ff1b4db5094d3d06ae5), 32-bit",
+    "profiles": [
+      201,
+      1001
+    ],
+    "results": [
+      {
+        "ok": true,
+        "phase": "assertions-completed",
+        "mode": "API",
+        "records": 201,
+        "financialRecords": 201,
+        "reads": [
+          {
+            "url": "/api/client-reports/1/reports",
+            "status": 200,
+            "durationMs": 93.9,
+            "jsonBytes": 431394,
+            "sampledRssMiB": 109.89,
+            "sampledHeapMiB": 27.16,
+            "sql": {
+              "queries": 8,
+              "durationMs": 20,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/client-reports/1/reports",
+            "status": 200,
+            "durationMs": 37.3,
+            "jsonBytes": 431394,
+            "sampledRssMiB": 128.89,
+            "sampledHeapMiB": 34.85,
+            "sql": {
+              "queries": 8,
+              "durationMs": 11,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/client-reports/3/reports",
+            "status": 200,
+            "durationMs": 11.2,
+            "jsonBytes": 24,
+            "sampledRssMiB": 129.23,
+            "sampledHeapMiB": 38.45,
+            "sql": {
+              "queries": 8,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/client-reports/2/reports",
+            "status": 200,
+            "durationMs": 8.6,
+            "jsonBytes": 205,
+            "sampledRssMiB": 129.73,
+            "sampledHeapMiB": 38.67,
+            "sql": {
+              "queries": 8,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports?month=2187-04&type=ADMIN",
+            "status": 200,
+            "durationMs": 34.4,
+            "jsonBytes": 434854,
+            "sampledRssMiB": 136.86,
+            "sampledHeapMiB": 43.81,
+            "sql": {
+              "queries": 9,
+              "durationMs": 8,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports",
+            "status": 200,
+            "durationMs": 50.4,
+            "jsonBytes": 884295,
+            "sampledRssMiB": 148.28,
+            "sampledHeapMiB": 46.14,
+            "sql": {
+              "queries": 9,
+              "durationMs": 12,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/1",
+            "status": 200,
+            "durationMs": 8.7,
+            "jsonBytes": 2227,
+            "sampledRssMiB": 148.66,
+            "sampledHeapMiB": 37.52,
+            "sql": {
+              "queries": 9,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/101",
+            "status": 200,
+            "durationMs": 6.8,
+            "jsonBytes": 2231,
+            "sampledRssMiB": 148.78,
+            "sampledHeapMiB": 37.67,
+            "sql": {
+              "queries": 9,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/201",
+            "status": 200,
+            "durationMs": 7.2,
+            "jsonBytes": 2231,
+            "sampledRssMiB": 149.28,
+            "sampledHeapMiB": 38.53,
+            "sql": {
+              "queries": 9,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/202",
+            "status": 200,
+            "durationMs": 7.5,
+            "jsonBytes": 2228,
+            "sampledRssMiB": 149.53,
+            "sampledHeapMiB": 38.54,
+            "sql": {
+              "queries": 9,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/402",
+            "status": 200,
+            "durationMs": 5.9,
+            "jsonBytes": 2162,
+            "sampledRssMiB": 149.78,
+            "sampledHeapMiB": 38.71,
+            "sql": {
+              "queries": 8,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports?month=2187-06",
+            "status": 200,
+            "durationMs": 5.8,
+            "jsonBytes": 24,
+            "sampledRssMiB": 149.91,
+            "sampledHeapMiB": 38.89,
+            "sql": {
+              "queries": 8,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports?month=2187-04",
+            "status": 200,
+            "durationMs": 26,
+            "jsonBytes": 435574,
+            "sampledRssMiB": 156.41,
+            "sampledHeapMiB": 43.91,
+            "sql": {
+              "queries": 9,
+              "durationMs": 7,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=financial",
+            "status": 200,
+            "durationMs": 19.2,
+            "jsonBytes": 686,
+            "sampledRssMiB": 157.66,
+            "sampledHeapMiB": 45.06,
+            "sql": {
+              "queries": 11,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-06&section=financial",
+            "status": 200,
+            "durationMs": 10.9,
+            "jsonBytes": 674,
+            "sampledRssMiB": 157.91,
+            "sampledHeapMiB": 45.38,
+            "sql": {
+              "queries": 10,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=reports",
+            "status": 200,
+            "durationMs": 13.4,
+            "jsonBytes": 364,
+            "sampledRssMiB": 157.91,
+            "sampledHeapMiB": 45.38,
+            "sql": {
+              "queries": 9,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-06&section=reports",
+            "status": 200,
+            "durationMs": 6.8,
+            "jsonBytes": 360,
+            "sampledRssMiB": 151.41,
+            "sampledHeapMiB": 32.2,
+            "sql": {
+              "queries": 9,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=communications",
+            "status": 200,
+            "durationMs": 7.6,
+            "jsonBytes": 787,
+            "sampledRssMiB": 151.41,
+            "sampledHeapMiB": 32.38,
+            "sql": {
+              "queries": 10,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-06&section=communications",
+            "status": 200,
+            "durationMs": 6.7,
+            "jsonBytes": 366,
+            "sampledRssMiB": 151.41,
+            "sampledHeapMiB": 32.55,
+            "sql": {
+              "queries": 10,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports?month=2187-04&type=ADMIN",
+            "status": 403,
+            "durationMs": 4.7,
+            "jsonBytes": 39,
+            "sampledRssMiB": 151.41,
+            "sampledHeapMiB": 32.88,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports?month=2187-04&type=ADMIN",
+            "status": 403,
+            "durationMs": 4.9,
+            "jsonBytes": 39,
+            "sampledRssMiB": 151.41,
+            "sampledHeapMiB": 33.06,
+            "sql": {
+              "queries": 4,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports?month=2187-04&type=ADMIN",
+            "status": 403,
+            "durationMs": 3.9,
+            "jsonBytes": 39,
+            "sampledRssMiB": 151.41,
+            "sampledHeapMiB": 33.21,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports?month=2187-04&type=ADMIN",
+            "status": 401,
+            "durationMs": 1.9,
+            "jsonBytes": 34,
+            "sampledRssMiB": 151.41,
+            "sampledHeapMiB": 33.29,
+            "sql": {
+              "queries": 0,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/1",
+            "status": 403,
+            "durationMs": 4.3,
+            "jsonBytes": 39,
+            "sampledRssMiB": 151.41,
+            "sampledHeapMiB": 33.6,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/1",
+            "status": 403,
+            "durationMs": 3.4,
+            "jsonBytes": 39,
+            "sampledRssMiB": 151.41,
+            "sampledHeapMiB": 33.74,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/1",
+            "status": 403,
+            "durationMs": 3.7,
+            "jsonBytes": 39,
+            "sampledRssMiB": 151.41,
+            "sampledHeapMiB": 33.89,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/1",
+            "status": 401,
+            "durationMs": 1.7,
+            "jsonBytes": 34,
+            "sampledRssMiB": 151.41,
+            "sampledHeapMiB": 33.96,
+            "sql": {
+              "queries": 0,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=financial",
+            "status": 403,
+            "durationMs": 4.1,
+            "jsonBytes": 39,
+            "sampledRssMiB": 151.54,
+            "sampledHeapMiB": 34.3,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=financial",
+            "status": 403,
+            "durationMs": 3.7,
+            "jsonBytes": 39,
+            "sampledRssMiB": 151.54,
+            "sampledHeapMiB": 34.44,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=financial",
+            "status": 403,
+            "durationMs": 4,
+            "jsonBytes": 39,
+            "sampledRssMiB": 151.54,
+            "sampledHeapMiB": 34.61,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=financial",
+            "status": 401,
+            "durationMs": 1.7,
+            "jsonBytes": 34,
+            "sampledRssMiB": 151.54,
+            "sampledHeapMiB": 34.69,
+            "sql": {
+              "queries": 0,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/client-reports/2/reports",
+            "status": 403,
+            "durationMs": 4.9,
+            "jsonBytes": 63,
+            "sampledRssMiB": 151.54,
+            "sampledHeapMiB": 34.99,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/client-reports/1/reports",
+            "status": 401,
+            "durationMs": 2.1,
+            "jsonBytes": 34,
+            "sampledRssMiB": 151.54,
+            "sampledHeapMiB": 35.09,
+            "sql": {
+              "queries": 0,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/client-reports/1/reports",
+            "status": 403,
+            "durationMs": 4,
+            "jsonBytes": 39,
+            "sampledRssMiB": 151.54,
+            "sampledHeapMiB": 35.23,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/client-reports/1/reports",
+            "status": 403,
+            "durationMs": 3.6,
+            "jsonBytes": 39,
+            "sampledRssMiB": 151.54,
+            "sampledHeapMiB": 35.39,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/client-reports/01/reports",
+            "status": 400,
+            "durationMs": 3.9,
+            "jsonBytes": 47,
+            "sampledRssMiB": 151.54,
+            "sampledHeapMiB": 35.68,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=unknown",
+            "status": 400,
+            "durationMs": 3.8,
+            "jsonBytes": 74,
+            "sampledRssMiB": 151.54,
+            "sampledHeapMiB": 35.85,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/2147483647",
+            "status": 404,
+            "durationMs": 6.8,
+            "jsonBytes": 38,
+            "sampledRssMiB": 151.54,
+            "sampledHeapMiB": 36.01,
+            "sql": {
+              "queries": 8,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/client-reports/1/reports",
+            "status": 503,
+            "durationMs": 20,
+            "jsonBytes": 82,
+            "sampledRssMiB": 152.54,
+            "sampledHeapMiB": 38.82,
+            "sql": {
+              "queries": 8,
+              "durationMs": 6,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/client-reports/1/reports",
+            "status": 200,
+            "durationMs": 26.2,
+            "jsonBytes": 431394,
+            "sampledRssMiB": 157.79,
+            "sampledHeapMiB": 43.92,
+            "sql": {
+              "queries": 8,
+              "durationMs": 6,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports?month=2187-04&type=ADMIN",
+            "status": 500,
+            "durationMs": 27.5,
+            "jsonBytes": 47,
+            "sampledRssMiB": 159.46,
+            "sampledHeapMiB": 46.58,
+            "sql": {
+              "queries": 9,
+              "durationMs": 5,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports?month=2187-04&type=ADMIN",
+            "status": 200,
+            "durationMs": 26,
+            "jsonBytes": 434854,
+            "sampledRssMiB": 162.09,
+            "sampledHeapMiB": 40.06,
+            "sql": {
+              "queries": 9,
+              "durationMs": 6,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/1",
+            "status": 500,
+            "durationMs": 7,
+            "jsonBytes": 47,
+            "sampledRssMiB": 162.09,
+            "sampledHeapMiB": 40.24,
+            "sql": {
+              "queries": 9,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/1",
+            "status": 200,
+            "durationMs": 7,
+            "jsonBytes": 2227,
+            "sampledRssMiB": 162.09,
+            "sampledHeapMiB": 40.44,
+            "sql": {
+              "queries": 9,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=reports",
+            "status": 503,
+            "durationMs": 6.2,
+            "jsonBytes": 97,
+            "sampledRssMiB": 162.09,
+            "sampledHeapMiB": 40.72,
+            "sql": {
+              "queries": 9,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=reports",
+            "status": 200,
+            "durationMs": 6.3,
+            "jsonBytes": 364,
+            "sampledRssMiB": 162.09,
+            "sampledHeapMiB": 41.02,
+            "sql": {
+              "queries": 9,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=financial",
+            "status": 503,
+            "durationMs": 11.6,
+            "jsonBytes": 97,
+            "sampledRssMiB": 162.09,
+            "sampledHeapMiB": 42.1,
+            "sql": {
+              "queries": 11,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=financial",
+            "status": 200,
+            "durationMs": 11.5,
+            "jsonBytes": 686,
+            "sampledRssMiB": 162.09,
+            "sampledHeapMiB": 42.56,
+            "sql": {
+              "queries": 11,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=financial",
+            "status": 503,
+            "durationMs": 15.7,
+            "jsonBytes": 97,
+            "sampledRssMiB": 162.09,
+            "sampledHeapMiB": 43.17,
+            "sql": {
+              "queries": 11,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=financial",
+            "status": 200,
+            "durationMs": 13.7,
+            "jsonBytes": 686,
+            "sampledRssMiB": 162.34,
+            "sampledHeapMiB": 44.29,
+            "sql": {
+              "queries": 11,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=communications",
+            "status": 503,
+            "durationMs": 9.2,
+            "jsonBytes": 97,
+            "sampledRssMiB": 163.21,
+            "sampledHeapMiB": 44.39,
+            "sql": {
+              "queries": 10,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=communications",
+            "status": 200,
+            "durationMs": 8.3,
+            "jsonBytes": 787,
+            "sampledRssMiB": 163.21,
+            "sampledHeapMiB": 44.7,
+            "sql": {
+              "queries": 10,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=communications",
+            "status": 503,
+            "durationMs": 7.5,
+            "jsonBytes": 97,
+            "sampledRssMiB": 163.21,
+            "sampledHeapMiB": 45,
+            "sql": {
+              "queries": 10,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=communications",
+            "status": 200,
+            "durationMs": 9.7,
+            "jsonBytes": 787,
+            "sampledRssMiB": 163.21,
+            "sampledHeapMiB": 45.29,
+            "sql": {
+              "queries": 10,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=financial",
+            "status": 503,
+            "durationMs": 4.9,
+            "jsonBytes": 97,
+            "sampledRssMiB": 163.21,
+            "sampledHeapMiB": 45.53,
+            "sql": {
+              "queries": 8,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=financial",
+            "status": 200,
+            "durationMs": 17,
+            "jsonBytes": 686,
+            "sampledRssMiB": 163.21,
+            "sampledHeapMiB": 46.31,
+            "sql": {
+              "queries": 11,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=financial",
+            "status": 503,
+            "durationMs": 14.7,
+            "jsonBytes": 97,
+            "sampledRssMiB": 163.21,
+            "sampledHeapMiB": 47.07,
+            "sql": {
+              "queries": 11,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=financial",
+            "status": 200,
+            "durationMs": 11.9,
+            "jsonBytes": 686,
+            "sampledRssMiB": 163.21,
+            "sampledHeapMiB": 48,
+            "sql": {
+              "queries": 11,
+              "durationMs": 0,
+              "writes": 0
+            }
+          }
+        ],
+        "orderedClientIdsSha256": "b49d777df2be2bc87fa6a63844c1436d77886a66cf60952b48d05d24b8a26ce7",
+        "adminIdsSha256": "efdbd01f304f2ebe718c969fdae3d21802faa95c77ae1f539fec45c398461ddb",
+        "exactSavedData": true,
+        "totals": true,
+        "permissions": true,
+        "failuresRejected": 10,
+        "summaryTransactionsRepeatableRead": true,
+        "writes": 0
+      },
+      {
+        "ok": true,
+        "phase": "assertions-completed",
+        "mode": "API",
+        "records": 1001,
+        "financialRecords": 10001,
+        "reads": [
+          {
+            "url": "/api/client-reports/4/reports",
+            "status": 200,
+            "durationMs": 160.3,
+            "jsonBytes": 2149512,
+            "sampledRssMiB": 194.5,
+            "sampledHeapMiB": 61.79,
+            "sql": {
+              "queries": 8,
+              "durationMs": 46,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/client-reports/4/reports",
+            "status": 200,
+            "durationMs": 103,
+            "jsonBytes": 2149512,
+            "sampledRssMiB": 233.64,
+            "sampledHeapMiB": 82.87,
+            "sql": {
+              "queries": 8,
+              "durationMs": 29,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/client-reports/6/reports",
+            "status": 200,
+            "durationMs": 11.8,
+            "jsonBytes": 24,
+            "sampledRssMiB": 246.21,
+            "sampledHeapMiB": 67.32,
+            "sql": {
+              "queries": 8,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/client-reports/5/reports",
+            "status": 200,
+            "durationMs": 12.6,
+            "jsonBytes": 206,
+            "sampledRssMiB": 246.21,
+            "sampledHeapMiB": 67.7,
+            "sql": {
+              "queries": 8,
+              "durationMs": 5,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports?month=2187-04&type=ADMIN",
+            "status": 200,
+            "durationMs": 97.3,
+            "jsonBytes": 2166257,
+            "sampledRssMiB": 263.59,
+            "sampledHeapMiB": 87.96,
+            "sql": {
+              "queries": 9,
+              "durationMs": 26,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports",
+            "status": 200,
+            "durationMs": 232.4,
+            "jsonBytes": 4401819,
+            "sampledRssMiB": 359.41,
+            "sampledHeapMiB": 108.06,
+            "sql": {
+              "queries": 9,
+              "durationMs": 83,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/407",
+            "status": 200,
+            "durationMs": 19.1,
+            "jsonBytes": 2229,
+            "sampledRssMiB": 359.41,
+            "sampledHeapMiB": 108.19,
+            "sql": {
+              "queries": 9,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/907",
+            "status": 200,
+            "durationMs": 14.9,
+            "jsonBytes": 2231,
+            "sampledRssMiB": 358.2,
+            "sampledHeapMiB": 89.46,
+            "sql": {
+              "queries": 9,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/1407",
+            "status": 200,
+            "durationMs": 7.2,
+            "jsonBytes": 2233,
+            "sampledRssMiB": 289.38,
+            "sampledHeapMiB": 36.14,
+            "sql": {
+              "queries": 9,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/1408",
+            "status": 200,
+            "durationMs": 7.2,
+            "jsonBytes": 2229,
+            "sampledRssMiB": 289.51,
+            "sampledHeapMiB": 36.28,
+            "sql": {
+              "queries": 9,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/2408",
+            "status": 200,
+            "durationMs": 8.1,
+            "jsonBytes": 2164,
+            "sampledRssMiB": 289.51,
+            "sampledHeapMiB": 36.48,
+            "sql": {
+              "queries": 8,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports?month=2187-06",
+            "status": 200,
+            "durationMs": 6.1,
+            "jsonBytes": 24,
+            "sampledRssMiB": 251.7,
+            "sampledHeapMiB": 36.65,
+            "sql": {
+              "queries": 8,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports?month=2187-04",
+            "status": 200,
+            "durationMs": 107.3,
+            "jsonBytes": 2166980,
+            "sampledRssMiB": 276.45,
+            "sampledHeapMiB": 56.37,
+            "sql": {
+              "queries": 9,
+              "durationMs": 33,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=financial",
+            "status": 200,
+            "durationMs": 196.3,
+            "jsonBytes": 696,
+            "sampledRssMiB": 285.83,
+            "sampledHeapMiB": 79.69,
+            "sql": {
+              "queries": 11,
+              "durationMs": 27,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-06&section=financial",
+            "status": 200,
+            "durationMs": 18.6,
+            "jsonBytes": 674,
+            "sampledRssMiB": 286.08,
+            "sampledHeapMiB": 80.02,
+            "sql": {
+              "queries": 10,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=reports",
+            "status": 200,
+            "durationMs": 7.6,
+            "jsonBytes": 366,
+            "sampledRssMiB": 286.45,
+            "sampledHeapMiB": 80.33,
+            "sql": {
+              "queries": 9,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-06&section=reports",
+            "status": 200,
+            "durationMs": 6,
+            "jsonBytes": 360,
+            "sampledRssMiB": 286.7,
+            "sampledHeapMiB": 80.62,
+            "sql": {
+              "queries": 9,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=communications",
+            "status": 200,
+            "durationMs": 13.3,
+            "jsonBytes": 804,
+            "sampledRssMiB": 287.08,
+            "sampledHeapMiB": 80.95,
+            "sql": {
+              "queries": 10,
+              "durationMs": 6,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-06&section=communications",
+            "status": 200,
+            "durationMs": 7.2,
+            "jsonBytes": 366,
+            "sampledRssMiB": 287.45,
+            "sampledHeapMiB": 81.27,
+            "sql": {
+              "queries": 10,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports?month=2187-04&type=ADMIN",
+            "status": 403,
+            "durationMs": 4.7,
+            "jsonBytes": 39,
+            "sampledRssMiB": 287.83,
+            "sampledHeapMiB": 81.61,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports?month=2187-04&type=ADMIN",
+            "status": 403,
+            "durationMs": 4.1,
+            "jsonBytes": 39,
+            "sampledRssMiB": 287.95,
+            "sampledHeapMiB": 81.79,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports?month=2187-04&type=ADMIN",
+            "status": 403,
+            "durationMs": 3.6,
+            "jsonBytes": 39,
+            "sampledRssMiB": 288.08,
+            "sampledHeapMiB": 81.93,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports?month=2187-04&type=ADMIN",
+            "status": 401,
+            "durationMs": 2.1,
+            "jsonBytes": 34,
+            "sampledRssMiB": 288.2,
+            "sampledHeapMiB": 82.02,
+            "sql": {
+              "queries": 0,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/407",
+            "status": 403,
+            "durationMs": 3.6,
+            "jsonBytes": 39,
+            "sampledRssMiB": 288.45,
+            "sampledHeapMiB": 82.33,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/407",
+            "status": 403,
+            "durationMs": 6.1,
+            "jsonBytes": 39,
+            "sampledRssMiB": 288.58,
+            "sampledHeapMiB": 82.47,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/407",
+            "status": 403,
+            "durationMs": 3.6,
+            "jsonBytes": 39,
+            "sampledRssMiB": 288.7,
+            "sampledHeapMiB": 82.61,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/407",
+            "status": 401,
+            "durationMs": 1.9,
+            "jsonBytes": 34,
+            "sampledRssMiB": 288.83,
+            "sampledHeapMiB": 82.69,
+            "sql": {
+              "queries": 0,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=financial",
+            "status": 403,
+            "durationMs": 4.1,
+            "jsonBytes": 39,
+            "sampledRssMiB": 289.08,
+            "sampledHeapMiB": 83.03,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=financial",
+            "status": 403,
+            "durationMs": 3.5,
+            "jsonBytes": 39,
+            "sampledRssMiB": 289.33,
+            "sampledHeapMiB": 83.17,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=financial",
+            "status": 403,
+            "durationMs": 3.8,
+            "jsonBytes": 39,
+            "sampledRssMiB": 289.45,
+            "sampledHeapMiB": 83.33,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=financial",
+            "status": 401,
+            "durationMs": 1.9,
+            "jsonBytes": 34,
+            "sampledRssMiB": 289.45,
+            "sampledHeapMiB": 83.43,
+            "sql": {
+              "queries": 0,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/client-reports/5/reports",
+            "status": 403,
+            "durationMs": 4.3,
+            "jsonBytes": 63,
+            "sampledRssMiB": 289.83,
+            "sampledHeapMiB": 83.72,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/client-reports/4/reports",
+            "status": 401,
+            "durationMs": 1.8,
+            "jsonBytes": 34,
+            "sampledRssMiB": 289.83,
+            "sampledHeapMiB": 83.81,
+            "sql": {
+              "queries": 0,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/client-reports/4/reports",
+            "status": 403,
+            "durationMs": 3.6,
+            "jsonBytes": 39,
+            "sampledRssMiB": 290.08,
+            "sampledHeapMiB": 83.96,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/client-reports/4/reports",
+            "status": 403,
+            "durationMs": 4.4,
+            "jsonBytes": 39,
+            "sampledRssMiB": 290.2,
+            "sampledHeapMiB": 84.12,
+            "sql": {
+              "queries": 4,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/client-reports/01/reports",
+            "status": 400,
+            "durationMs": 3.9,
+            "jsonBytes": 47,
+            "sampledRssMiB": 290.45,
+            "sampledHeapMiB": 84.42,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=unknown",
+            "status": 400,
+            "durationMs": 4,
+            "jsonBytes": 74,
+            "sampledRssMiB": 290.58,
+            "sampledHeapMiB": 84.56,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/2147483647",
+            "status": 404,
+            "durationMs": 5.4,
+            "jsonBytes": 38,
+            "sampledRssMiB": 290.83,
+            "sampledHeapMiB": 84.72,
+            "sql": {
+              "queries": 8,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/client-reports/4/reports",
+            "status": 503,
+            "durationMs": 84.9,
+            "jsonBytes": 82,
+            "sampledRssMiB": 312.33,
+            "sampledHeapMiB": 97.07,
+            "sql": {
+              "queries": 8,
+              "durationMs": 34,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/client-reports/4/reports",
+            "status": 200,
+            "durationMs": 107.2,
+            "jsonBytes": 2149512,
+            "sampledRssMiB": 339.58,
+            "sampledHeapMiB": 113.63,
+            "sql": {
+              "queries": 8,
+              "durationMs": 31,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports?month=2187-04&type=ADMIN",
+            "status": 500,
+            "durationMs": 91.4,
+            "jsonBytes": 47,
+            "sampledRssMiB": 355.42,
+            "sampledHeapMiB": 69.67,
+            "sql": {
+              "queries": 9,
+              "durationMs": 36,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports?month=2187-04&type=ADMIN",
+            "status": 200,
+            "durationMs": 110.7,
+            "jsonBytes": 2166257,
+            "sampledRssMiB": 377.42,
+            "sampledHeapMiB": 89.36,
+            "sql": {
+              "queries": 9,
+              "durationMs": 28,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/407",
+            "status": 500,
+            "durationMs": 9.7,
+            "jsonBytes": 47,
+            "sampledRssMiB": 377.67,
+            "sampledHeapMiB": 89.54,
+            "sql": {
+              "queries": 9,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/407",
+            "status": 200,
+            "durationMs": 6.3,
+            "jsonBytes": 2229,
+            "sampledRssMiB": 377.79,
+            "sampledHeapMiB": 89.74,
+            "sql": {
+              "queries": 9,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=reports",
+            "status": 503,
+            "durationMs": 6.4,
+            "jsonBytes": 97,
+            "sampledRssMiB": 378.04,
+            "sampledHeapMiB": 90.01,
+            "sql": {
+              "queries": 9,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=reports",
+            "status": 200,
+            "durationMs": 6.7,
+            "jsonBytes": 366,
+            "sampledRssMiB": 378.29,
+            "sampledHeapMiB": 90.32,
+            "sql": {
+              "queries": 9,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=financial",
+            "status": 503,
+            "durationMs": 219.3,
+            "jsonBytes": 97,
+            "sampledRssMiB": 389.17,
+            "sampledHeapMiB": 100.53,
+            "sql": {
+              "queries": 11,
+              "durationMs": 27,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=financial",
+            "status": 200,
+            "durationMs": 246.2,
+            "jsonBytes": 696,
+            "sampledRssMiB": 395.34,
+            "sampledHeapMiB": 101.03,
+            "sql": {
+              "queries": 11,
+              "durationMs": 32,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=financial",
+            "status": 503,
+            "durationMs": 183.3,
+            "jsonBytes": 97,
+            "sampledRssMiB": 397.21,
+            "sampledHeapMiB": 81.02,
+            "sql": {
+              "queries": 11,
+              "durationMs": 27,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=financial",
+            "status": 200,
+            "durationMs": 215.3,
+            "jsonBytes": 696,
+            "sampledRssMiB": 406.21,
+            "sampledHeapMiB": 104.18,
+            "sql": {
+              "queries": 11,
+              "durationMs": 27,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=communications",
+            "status": 503,
+            "durationMs": 12.3,
+            "jsonBytes": 97,
+            "sampledRssMiB": 406.21,
+            "sampledHeapMiB": 104.48,
+            "sql": {
+              "queries": 10,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=communications",
+            "status": 200,
+            "durationMs": 12.8,
+            "jsonBytes": 804,
+            "sampledRssMiB": 406.34,
+            "sampledHeapMiB": 104.8,
+            "sql": {
+              "queries": 10,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=communications",
+            "status": 503,
+            "durationMs": 12.3,
+            "jsonBytes": 97,
+            "sampledRssMiB": 406.34,
+            "sampledHeapMiB": 105.09,
+            "sql": {
+              "queries": 10,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=communications",
+            "status": 200,
+            "durationMs": 12.3,
+            "jsonBytes": 804,
+            "sampledRssMiB": 406.34,
+            "sampledHeapMiB": 105.38,
+            "sql": {
+              "queries": 10,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=financial",
+            "status": 503,
+            "durationMs": 5.7,
+            "jsonBytes": 97,
+            "sampledRssMiB": 406.34,
+            "sampledHeapMiB": 105.63,
+            "sql": {
+              "queries": 8,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=financial",
+            "status": 200,
+            "durationMs": 223.3,
+            "jsonBytes": 696,
+            "sampledRssMiB": 428.2,
+            "sampledHeapMiB": 106.12,
+            "sql": {
+              "queries": 11,
+              "durationMs": 28,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=financial",
+            "status": 503,
+            "durationMs": 212.8,
+            "jsonBytes": 97,
+            "sampledRssMiB": 430.07,
+            "sampledHeapMiB": 106.15,
+            "sql": {
+              "queries": 11,
+              "durationMs": 28,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/admin/reports/summary?monthRef=2187-04&section=financial",
+            "status": 200,
+            "durationMs": 222.1,
+            "jsonBytes": 696,
+            "sampledRssMiB": 440.49,
+            "sampledHeapMiB": 127.4,
+            "sql": {
+              "queries": 11,
+              "durationMs": 45,
+              "writes": 0
+            }
+          }
+        ],
+        "orderedClientIdsSha256": "11b2d99744c3a721d8eceda23bed8c68a83196ab7beee5d84b3ba7e690819ea5",
+        "adminIdsSha256": "6ca304cd1282355f1d635a66ddf1b03d43e6183386c090c993d1d94bc40970ac",
+        "exactSavedData": true,
+        "totals": true,
+        "permissions": true,
+        "failuresRejected": 10,
+        "summaryTransactionsRepeatableRead": true,
+        "writes": 0
+      },
+      {
+        "ok": true,
+        "phase": "assertions-completed",
+        "mode": "UI",
+        "records": 1001,
+        "results": [
+          {
+            "surface": "client-history",
+            "pages": 167,
+            "rows": 1001,
+            "maximumDomRows": 6,
+            "traversalMs": 255.8,
+            "orderedIdsSha256": "11b2d99744c3a721d8eceda23bed8c68a83196ab7beee5d84b3ba7e690819ea5",
+            "jsHeapMiB": 12.03,
+            "pdfBytes": 25437,
+            "pdfSha256": "46ba0579e2f3b6a3988de96d03f474eb5a716c251b71f292723d1cdbb7f29923",
+            "filterAndRecovery": true
+          },
+          {
+            "surface": "admin-client-preview",
+            "pages": 167,
+            "rows": 1001,
+            "maximumDomRows": 6,
+            "traversalMs": 237.1,
+            "orderedIdsSha256": "11b2d99744c3a721d8eceda23bed8c68a83196ab7beee5d84b3ba7e690819ea5",
+            "jsHeapMiB": 12.43,
+            "pdfBytes": 25440,
+            "pdfSha256": "004e718920616a1af3d9ae75097ff74dc5d2beb6a08647acc99d2209c3fc179b",
+            "filterAndRecovery": true
+          },
+          {
+            "surface": "admin-monthly-summary",
+            "savedReports": 1004,
+            "sourceRecords": 10001,
+            "latestRows": 5,
+            "jsHeapMiB": 2.7,
+            "exactTotals": true
+          }
+        ],
+        "pageErrors": 0,
+        "reportWrites": 0,
+        "otherUnexpectedWrites": 0,
+        "surroundingPortalSeenRequests": [
+          {
+            "url": "http://127.0.0.1:3002/api/client-messages/seen/4?actor=client",
+            "method": "POST"
+          },
+          {
+            "url": "http://127.0.0.1:3002/api/client-messages/seen/4?actor=client",
+            "method": "POST"
+          }
+        ]
+      }
+    ],
+    "integrity": [
+      {
+        "records": 201,
+        "sourceSnapshotSha256": "48f43a2fb2b09b65f31c4b7b12eba968a439cc588a380f3f3581a40c5c5d1bb6",
+        "sourcePreserved": true,
+        "unchangedModelCounts": {
+          "client": 3,
+          "technician": 2,
+          "monthlyReport": 406,
+          "monthlyReportDelivery": 0,
+          "invoice": 201,
+          "invoiceLine": 0,
+          "payment": 203,
+          "communicationLog": 203,
+          "clientMessage": 0,
+          "emailLog": 0,
+          "fieldWriteRequest": 0,
+          "userAuditLog": 0
+        }
+      },
+      {
+        "records": 1001,
+        "sourceSnapshotSha256": "51c6bed5c93b3b875c4e706202ea87696cc824e15173c2d10fed7d30bda64d41",
+        "sourcePreserved": true,
+        "unchangedModelCounts": {
+          "client": 3,
+          "technician": 2,
+          "monthlyReport": 2006,
+          "monthlyReportDelivery": 0,
+          "invoice": 10001,
+          "invoiceLine": 0,
+          "payment": 10003,
+          "communicationLog": 10003,
+          "clientMessage": 0,
+          "emailLog": 0,
+          "fieldWriteRequest": 0,
+          "userAuditLog": 0
+        }
+      }
+    ],
+    "durationMs": 18474,
+    "cleanupVerified": true,
+    "scope": "Fresh Node process per API profile; RSS includes routes, HTTP client and fixture oracle, excludes database/browser. Full saved lists remain O(n); portal pages of six are local. Browser traversal dispatches real click handlers and checks every DOM result, not human pacing/painting. Summary sections have individual RepeatableRead transactions, not a common cross-section snapshot. Saved legacy admin listing has createdAt order without an ID tie-break or explicit private cache header. New volume fixtures are removed; source hashes and twelve model counts are preserved. Report HTTP commands are read-only; surrounding portal conversation-seen POSTs are recorded separately and empty message state is preserved. PDF checks cover historical identity, not maximum document/attachment sizes."
+  },
+  "validation": {
+    "unit": 1318,
+    "unitFiles": 135,
+    "technician": 4,
+    "syntax": {
+      "backend": 695,
+      "frontend": 307,
+      "inline": 44
+    },
+    "nodeCheck": true,
+    "diffCheck": true,
+    "runnerScripts": 314,
+    "allTerminalMarkersRead": true,
+    "groups": {
+      "scripts/test-field-report-volume.js": {
+        "ms": 18598,
+        "sha256": "fd4ed393e98721af530f1b291f607c64d6ea2225b90a170b768fdd6f8744c329",
+        "terminalMarkers": [
+          "PASS report volume: 201/1001 saved client/admin reports, 10001 financial/communication records, exact data/totals, six-row pages, scoped details, failures, real UI and cleanup"
+        ]
+      },
+      "scripts/test-field-admin-monthly-reports.js": {
+        "ms": 4837,
+        "sha256": "e9a2347e68f2bc767d3707940a77c172d01835e232ca9c913eb5b9c0b74cd51a",
+        "terminalMarkers": [
+          "PASS monthly sources: real cash at exact UTC boundaries, prepaid cash versus internal credit, document-reference precedence/legacy months, current open balance, drafts/cancellations, 10000+ payments/documents/logs, stable latest five, saved report types, empty month and read-only private projections",
+          "PASS invalid queries and non-ADMIN access, conflicting/unknown/negative/overflow values stay unavailable, real HTTP database-read faults return 503 without fabricated values, independent source recovery and no writes"
+        ]
+      },
+      "scripts/test-field-admin-monthly-reports-ui.js": {
+        "ms": 8592,
+        "sha256": "257c38cf6bf41fa0787f8839349682262550f580051da54c29b84a3f8e48bcd4",
+        "terminalMarkers": [
+          "PASS actual ADMIN report: month transport and current UTC default, real monthly cash/current document balances, saved report types, literal channels/latest five, explicit provenance, separate months, true empty and three responsive widths",
+          "PASS independent failed-source recovery, all-source outage without zeros, malformed/partial/old-month/duplicate/contradictory replies, unknown versus zero, HTML response, offline/reconnect, invalid period and visible mobile retry controls",
+          "PASS late month/mode/account responses, bounded timeout, BFCache revalidation, cross-tab account change, preserved local draft and original account reload"
+        ]
+      },
+      "scripts/test-field-client-monthly-report-access.js": {
+        "ms": 1038,
+        "sha256": "ad6b4f6d7cc1d4e3a0e3fa805d6bc48e359260b6c9cafb5c58ba0a2064bf2c5b",
+        "terminalMarkers": [
+          "PASS saved monthly reports: typed ownership, colliding IDs, legacy client identities, roles, private GET/HEAD and ranges, exact IDs/types, inactive client, read-only history and unchanged PDFs"
+        ]
+      },
+      "scripts/test-field-client-monthly-reports-ui.js": {
+        "ms": 15791,
+        "sha256": "bbfba8e2432c94485602eb87c86f9e0fb1e831e0c36230b3237302e4ee4d76bb",
+        "terminalMarkers": [
+          "PASS monthly portal: exact list/PDF identity, 14 months and pagination, current/legacy files, malformed responses, cancellation, timeout, offline, five languages and responsive layouts",
+          "PASS administrator preview: exact customer, A-B-A late list and PDF cancellation, empty history and cleared selection",
+          "PASS session switch across tabs and actual 401 lifecycle; reports, visit counts and financial records preserved"
+        ]
+      }
+    },
+    "gateLogHashes": {
+      "task410-unit.log": "c020a568c014f0ae1d958a034ee808ac3cc97e7a2611006ef39b553707b3642a",
+      "task410-technician.log": "a677a04a97bd45f2005cb9e5eb371d05c213fd06ae49cea44fee459c0e69aa7f",
+      "task410-syntax.log": "7d20a5145437e5670d0376055bf4a65ce58000a565a1aff72875faa758150d36"
+    }
+  },
+  "screenshots": {
+    "client-1440.png": "824abe113d750897be448a02f68f50485185fb9afb06dc9a7a670b0fa1c820b8",
+    "client-320.png": "df89d92a7511881db9240785da88a52c8b7bbcb3188e1997db06a589154c772c",
+    "client-390.png": "a7bbb62a6428ed60752658f5bf5dc8b088935e00edb7e0b455b24ceccde5f648",
+    "preview-1440.png": "5c1807ec73d1e423c5694f6e1e42ea278b57f6892ed14fbcfe689d81f7fbdaf7",
+    "preview-320.png": "36b4c594b30266b79cd1ef6702a70cacda104423395998a078c48b8a8c0a612f",
+    "preview-390.png": "6d033027beae8bc633ae36e56ec4f6e8ac9cae90c5a3537d5b954b6823455d11",
+    "summary-1440.png": "acf103fc34c59f73180f38bab4feac4ee2dd2a4c817b09c384e691aae1d7b845",
+    "summary-390.png": "01f920d42b45364fe3b307d6f3115e4ba88e884e211c46a95b99401519c2237f"
+  },
+  "visualReview": [
+    "client-320.png",
+    "summary-390.png"
+  ],
+  "priorCI": {
+    "checkedAt": "2026-09-28T20:18:11.917Z",
+    "runs": [
+      {
+        "runId": 36474118500,
+        "jobs": [
+          {
+            "id": 109103422154,
+            "status": "in_progress",
+            "conclusion": null,
+            "successfulSteps": 10,
+            "activeStep": "Run node scripts/test-field-suite.js"
+          }
+        ]
+      },
+      {
+        "runId": 36475513427,
+        "jobs": [
+          {
+            "id": 109108100107,
+            "status": "in_progress",
+            "conclusion": null,
+            "successfulSteps": 10,
+            "activeStep": "Run node scripts/test-field-suite.js"
+          }
+        ]
+      }
+    ]
+  },
+  "fixtureNotes": [
+    "One client report per month; 1001 synthetic months span 2001-01 to 2084-05. This stresses list length, not a claim of actual 83-year operations.",
+    "201/1001 ADMIN saved records in the selected month include nullable owners allowed by the existing schema; other-client and report-type sentinels are excluded from the client list.",
+    "10001 selected invoices use the existing nullable monthRef plus YYYY-MM legacy month representation to preserve the unique client/monthRef constraint. Payments/logs add two out-of-period sentinels each.",
+    "Each saved record contains 24 pool summaries, literal Unicode/HTML-like text, zero/null and a review-version sentinel. Source data are compared in full.",
+    "Harness development corrected a duplicate invoice key in fixture seeding, an overbroad cache-header expectation for rejected requests, and the expected review state for OTHER report types. No application defect was inferred from those test setup errors.",
+    "The portal issued two existing conversation-seen POST requests. They are recorded separately, not relabelled as read HTTP calls. Empty fixture conversations and all source snapshots stayed unchanged."
+  ],
+  "limits": [
+    "List JSON and browser-held rows remain O(n); six-row pagination limits the DOM, not API/database/browser list memory.",
+    "RSS includes API, client and fixture oracle in one fresh process per profile, not per request; excludes the DB/browser. 30s/64MiB/768MiB are QA guards, not a VPS SLA.",
+    "Summary sections have independent RepeatableRead transactions. No cross-section snapshot or concurrent-update stability is claimed.",
+    "Legacy admin listing orders by createdAt only and does not set a private cache header in its controller. Equal-time membership is checked without inventing an ID tie-break.",
+    "New volume fixtures fully cleaned up; older regression scripts retain their fixtures only in the discarded isolated QA database.",
+    "Two historical PDF identity checks are not acceptance of maximum PDF/attachment sizes. C04-F remains to execute.",
+    "Native PostgreSQL, full 314-script order, restore and report-volume JSON still pending; C03 and prior suites remain as recorded in priorCI."
+  ],
+  "publication": {
+    "status": "pending",
+    "branch": "work/field-readiness-20260915-simulation"
+  }
+}

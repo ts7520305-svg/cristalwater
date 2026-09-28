@@ -1,5 +1,18 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 28/09/2026, TASK410 local aprovada / C04-E
+
+Relatórios guardados/histórico mensal aprovados localmente. **201/1 001 CLIENT + ADMIN**, 24 piscinas por relatório, mais **10 001 faturas/pagamentos/comunicações** no maior perfil. Três probes e **116 pedidos**: 58 positivos, 38 recusas/erros de entrada ou ausência, 20 falhas injetadas; dados/IDs/totais exatos, recuperação, hashes de origem e doze modelos conservados/limpos. [Relatório C04](OPERATIONAL_VOLUME_PLAN_20260928.md), [evidência TASK410](evidence/20260928_task410_local.json).
+
+**UI:** cliente e pré-visualização ADMIN percorrem 167 páginas de seis cartões, 255,8/237,1 ms de handlers/DOM, 12,03/12,43 MiB heap; filtros, vazio, 503/recuperação, inserção/atualizar, A→B→A e dois PDFs históricos com identidade correta. Resumo administrativo real: 10 001 registos de comunicação, cinco últimos, 8 572 recebimentos/85,71 €, documentos/em aberto 100,01 €, 1 004 relatórios; OTHER mantém revisão explícita. Dois POST de conversa lida do portal registados separadamente; mensagens vazias e dados conservados. Zero comandos de relatórios/escritas SQL nas APIs medidas; não afirmar ausência de todos os comandos no portal.
+
+**Gates:** cinco grupos com marcadores lidos (volume 18 598 ms, resumo API 4 837 ms, resumo UI 8 592 ms, acesso 1 038 ms, portal UI 15 791 ms), 1 318 unitários/135 ficheiros, quatro técnicos, sintaxe 695/307/44. Maior JSON 4 401 819 bytes, RSS máximo 440,49 MiB; Node/API+cliente+oracle, não só servidor. PGlite novo/Chromium 153, UTC, integrações desligadas. Lista inteira continua O(n); seis cartões limitam só o DOM. Snapshots por secção, sem snapshot comum; legado admin por data sem desempate por ID/cache privada explícita. 1 001 meses são stress sintético 2001–2084, não histórico real.
+
+**Lote de seis ficheiros:** novo `scripts/test-field-report-volume.js`, runner e quatro documentos; runner 314/cache v207. Produção/esquema/dependências inalterados. CI TASK408 run 36474118500/job 109103422154 e TASK409 run 36475513427/job 109108100107 ainda na suite, dez etapas aprovadas cada. TASK409 deve provar correção C03 abaixo de 768 MiB, 313 grupos/restauro e snapshot concorrente; TASK408 não contém a correção. Não fechar C03 com aprovação local.
+
+**Continuar:** publicar TASK410 e registar SHA/CI; confirmar 314 grupos exatos/restauro/JSON report-volume com três probes/limpeza. Depois **C04-F: inventariar limites efetivos de PDFs/anexos e executar mínimo/multipágina/maior fixture e fronteiras de upload sem aumentar limites**. C04-A/B nativos aprovados, C probe nativo mas suite/restauro bloqueados, D/E locais aprovados, F por executar. Contagem 32: 28 por iniciar, C04 em execução, C03 em validação, C01/C02 concluídas. Depois C05, idiomas. Contrato anual adiado; branch autorizada, sem merge/deploy/contactos reais.
+
+
 ## Retoma atual — 28/09/2026, TASK409 publicada / memória C03
 
 Corrigida a leitura financeira descartada pelo resumo administrativo. `listExternalInvoices` recebe modo interno `summaryOnly` no quarto argumento, usado apenas pelo `DashboardSnapshotBusiness`: seleciona campos necessários, reutiliza elegibilidade/revisão/normalização e não calcula tokens nem materializa linhas/pagamentos/clientes repetidos. Lista normal mantém documentos/tokens/contratos. Oito fontes continuam na mesma transação. [Relatório C03](SUMMARY_VOLUME_20260928.md), [evidência TASK409](evidence/20260928_task409_local.json).
