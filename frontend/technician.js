@@ -168,9 +168,7 @@ function markLocalVisitCompleted(id, { pendingSync = false } = {}){
 // INIT
 // ======================================================
 
-window.addEventListener(
-  "load",
-  () => {
+function initializeTechnicianPage() {
 
     hideSplash();
 
@@ -220,26 +218,26 @@ window.addEventListener(
         updateOfflineBar();
       }
     );
-  }
-);
+}
+
+// The route and offline recovery must not wait for images or external assets.
+// Register only one boot; a later window.load must not rebuild edited forms.
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initializeTechnicianPage, { once: true });
+} else {
+  queueMicrotask(initializeTechnicianPage);
+}
 
 // ======================================================
 // SPLASH
 // ======================================================
 
 function hideSplash(){
-
-  setTimeout(() => {
-
-    document
-      .getElementById(
-        "splashScreen"
-      )
-      ?.classList.add(
-        "splash-hide"
-      );
-
-  }, 1800);
+  const splash = document.getElementById("splashScreen");
+  if (splash) {
+    splash.classList.add("splash-hide");
+    splash.setAttribute("aria-hidden", "true");
+  }
 }
 
 // ======================================================

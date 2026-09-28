@@ -188,14 +188,21 @@ async function safeDelete(modelName, where) {
 
     created.poolIds.push(poolA.id, poolB.id);
 
-    const now = Date.now();
+    // Both visits belong to the same explicit civil day, even if this test starts
+    // just before midnight. Adding minutes to the wall clock can cross that day.
+    const day = require('../src/utils/serviceVisitFilters').parseLocalDay();
+    const visitTime = hour => {
+      const value = new Date(day.start);
+      value.setHours(hour, 0, 0, 0);
+      return value;
+    };
     const visitA = await prisma.serviceVisit.create({
       data: {
         clientId: client.id,
         poolId: poolA.id,
         technicianId: technician.id,
         technicianName: technician.name,
-        plannedDate: new Date(now + 3 * 60 * 1000),
+        plannedDate: visitTime(9),
         status: "PLANNED",
       },
     });
@@ -206,7 +213,7 @@ async function safeDelete(modelName, where) {
         poolId: poolB.id,
         technicianId: technician.id,
         technicianName: technician.name,
-        plannedDate: new Date(now + 35 * 60 * 1000),
+        plannedDate: visitTime(10),
         status: "PLANNED",
       },
     });
@@ -218,9 +225,10 @@ async function safeDelete(modelName, where) {
     check("login", login.status === 200 && Boolean(token), `status=${login.status}`);
     if (!token) throw new Error("TECHNICIAN_LOGIN_FAILED");
 
-    const todayBefore = await http("GET", `/api/technician/today?technicianId=${technician.id}`, token);
+    const routePath = `/api/technician/today?technicianId=${technician.id}&date=${day.isoDate}`;
+    const todayBefore = await http("GET", routePath, token);
     const todayBeforeVisits = Array.isArray(todayBefore.data?.visits) ? todayBefore.data.visits : [];
-    const firstVisit = todayBeforeVisits.find((v) => Number(v.id) === Number(visitA.id)) || todayBeforeVisits[0];
+    const firstVisit = todayBeforeVisits.find((v) => Number(v.id) === Number(visitA.id));
     const secondVisit = todayBeforeVisits.find((v) => Number(v.id) === Number(visitB.id));
 
     check("hoje", todayBefore.status === 200 && todayBeforeVisits.length >= 2, `status=${todayBefore.status}; visits=${todayBeforeVisits.length}`);
@@ -319,7 +327,7 @@ async function safeDelete(modelName, where) {
       `status=${chemicalCorrection.status}; error=${chemicalCorrection.data?.error || "-"}`
     );
 
-    const todayAfter = await http("GET", `/api/technician/today?technicianId=${technician.id}`, token);
+    const todayAfter = await http("GET", routePath, token);
     const todayAfterVisits = Array.isArray(todayAfter.data?.visits) ? todayAfter.data.visits : [];
     const doneA = todayAfterVisits.find((v) => Number(v.id) === Number(visitA.id));
     const pendingB = todayAfterVisits.find((v) => Number(v.id) === Number(visitB.id));
@@ -357,7 +365,10 @@ async function safeDelete(modelName, where) {
     fs.writeFileSync(REPORT_JSON, JSON.stringify(report, null, 2));
     console.log(`REPORT_JSON=${path.relative(ROOT, REPORT_JSON)}`);
     console.log(`RESULT=${report.ok ? "PASS" : "FAIL"}`);
-    if (!report.ok) process.exitCode = 1;
+    if (!report.ok) {
+      console.error('FAILED_CHECKS=' + JSON.stringify(checks.filter(item => !item.pass)));
+      process.exitCode = 1;
+    }
   } catch (error) {
     console.error("FCS_TECHNICIAN_T1_ERROR", error);
     process.exitCode = 1;

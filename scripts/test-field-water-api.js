@@ -154,7 +154,7 @@ async function main() {
     await transfer(tech.id);const fresh=await transfer(other.id);assert.equal((await call('POST',`${base}/${first}/acknowledge`,otherToken,{})).status,409);
     const {chromium}=require('playwright'),browser=await chromium.launch({headless:true,executablePath:process.env.CW_CHROMIUM_PATH,args:['--no-sandbox','--disable-dev-shm-usage']});
     try{
-      const context=await browser.newContext({viewport:{width:390,height:844}});
+      const context=await browser.newContext({viewport:{width:390,height:844},timezoneId:'Europe/Lisbon'});
       const seed=({token,user})=>{for(const key of ['token','cristalwater_jwt'])localStorage.setItem(key,token);for(const key of ['user','cristalwater_user'])localStorage.setItem(key,JSON.stringify(user));};
       await context.addInitScript(seed,{token:otherToken,user:foreignLogin.body.user});
       const page=await context.newPage();await page.goto(BASE+'/technician-field-mode',{waitUntil:'networkidle'});const button=page.locator(`[data-receipt="${fresh}"]`);await button.waitFor();
@@ -260,6 +260,7 @@ await prisma.serviceVisit.update({where:{id:own.id},data:{status:'CANCELLED'}});
       await row.locator('[name="technicianId"]').selectOption(String(other.id));await row.locator('[name="instructions"]').fill('Levar peça nova; acesso confirmado com o cliente');
       for(const width of [320,390]){await page.setViewportSize({width,height:844});const size=await page.evaluate(()=>({width:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));assert(size.scroll<=size.width+1,JSON.stringify(size));}
       if(process.env.CW_CAPTURE_UI==='true'){require('node:fs').mkdirSync('reports/field-ui',{recursive:true});await row.screenshot({path:'reports/field-ui/ADMIN_RETURN_FORM.png'});}
+      const returnDay=await row.locator('[name="date"]').inputValue();
       await row.getByRole('button',{name:'Agendar regresso'}).click();await page.getByRole('dialog').getByRole('button',{name:'Agendar',exact:true}).click();
       await page.waitForFunction(()=>document.getElementById('followupStatus').textContent.includes('registado'));
       assert.match(await row.textContent(),/O aviso continua aberto/);
@@ -268,9 +269,9 @@ await prisma.serviceVisit.update({where:{id:own.id},data:{status:'CANCELLED'}});
       if(process.env.CW_CAPTURE_UI==='true'){require('node:fs').mkdirSync('reports/field-ui',{recursive:true});await page.locator('#incompleteFollowups').screenshot({path:'reports/field-ui/ADMIN_RETURN_FOLLOWUP.png'});}
       await page.reload({waitUntil:'networkidle'});await row.waitFor();assert.equal(await row.locator('form').count(),0);
       await context.close();
-      const assigned=await call('GET','/api/technician/today',otherToken);assert.equal(assigned.status,200);
+      const assigned=await call('GET','/api/technician/today?date='+encodeURIComponent(returnDay),otherToken);assert.equal(assigned.status,200);assert.equal(assigned.body.date,returnDay);
       const fieldReturn=assigned.body.visits.find(v=>v.pool?.id===uiPool.id);assert(fieldReturn,'Return appears on assigned technician route');assert.equal(fieldReturn.reason,'INCOMPLETE_RETURN');
-      const techContext=await browser.newContext({viewport:{width:390,height:844}});
+      const techContext=await browser.newContext({viewport:{width:390,height:844},timezoneId:'Europe/Lisbon'});
       await techContext.addInitScript(({token,user})=>{for(const key of ['token','cristalwater_jwt'])localStorage.setItem(key,token);for(const key of ['user','cristalwater_user'])localStorage.setItem(key,JSON.stringify(user));},{token:otherToken,user:foreignLogin.body.user});
       const fieldPage=await techContext.newPage();await fieldPage.goto(BASE+`/technician-field-mode?activeTab=agora&selectedVisitId=${fieldReturn.id}`,{waitUntil:'networkidle'});
       await fieldPage.locator('#visitNoticeStrip').waitFor();assert.match(await fieldPage.locator('#visitNoticeStrip').textContent(),/Levar peça nova; acesso confirmado/);

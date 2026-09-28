@@ -1,5 +1,17 @@
 # Cristal Water — matriz atual de conclusão
 
+## Retoma atual — 28/09/2026, TASK386 verificada localmente
+
+O utilizador pediu leitura global do sistema e continuação do trabalho. A [revisão global](SYSTEM_REVIEW_20260928.md) consolida capacidades, lacunas e ordem de trabalho, com inventário de 1 858 ficheiros-fonte, 128 modelos e 126 HTML. É uma leitura automática integral com revisão dos contratos centrais, não uma auditoria humana linha a linha nem aceitação de produção.
+
+TASK385 terminou com **297/300 grupos aprovados**, falhas em `test-field-water-api.js`, `test-fcs-technician-t1.js` e `test-field-legacy-visit-drafts.js`; restauro ignorado. [Evidência](evidence/20260928_task385_ci_failed.json). TASK384 conserva a última aprovação completa anterior: 299/299 e restauro de 128 tabelas/47 ficheiros. Os estados «em execução» anteriores são históricos.
+
+TASK386: arranque do técnico antigo em DOMContentLoaded, sem depender da imagem nem reconstruir o formulário em window.load. Regressão com imagem retida falhou antes e passou depois. Ensaios de regresso consultam a data escolhida e usam Lisboa; T1 agenda ambos os exemplos dentro de um dia explícito e publica detalhes das falhas. Sem alteração de datas históricas/API. Cache v197, nenhuma migração/dependência nova.
+
+**Local aprovado:** 1 073 unitários/122 ficheiros, quatro técnicos, sintaxe 690/307/44 e oito grupos integrados distintos, incluindo o E2E geral. 43 migrações aditivas aprovadas em PGlite/Chromium 153, sem substituir PostgreSQL nativo/restauro. Catorze imagens originais recuperadas com hashes Git iguais; inventário sem recursos ausentes. [Evidência local e índice de fontes](evidence/20260928_task386_local.json).
+
+**Próximo passo:** publicar este lote e confirmar CI/restauro. Depois corrigir os limites silenciosos do resumo de riscos (200 pendências/500 documentos) e terminar a localização do diálogo de correção extra. Importação WhatsApp ZIP/TXT não encontrada como fluxo completo; o conector Ollama existe, mas offline no telefone/aprendizagem não estão validados. Históricos/finanças, inventário visual, VPS/cópias e piloto físico mantêm os critérios do relatório global. Sem merge/deploy/contactos reais; não declarar conclusão global.
+
 ## Retoma atual — 28/09/2026, TASK385 publicada
 
 Correção de visitas extra com seleção exata dos produtos das guias originais comprovadas pelo histórico da visita. A consulta privada conserva conta, visita, piscina e versão; não substitui a guia original pela atual. Pesquisa e páginas de 25, IDs de guia/linha visíveis, escolha retida fora do filtro, nome/unidade literais só de leitura e nenhuma escolha automática. A revisão deteta a troca de ID mesmo com nome/unidade/quantidade iguais. [Relatório](EXTRA_CORRECTION_PRODUCTS_20260928.md) e [evidência](evidence/20260928_task385_local.json).

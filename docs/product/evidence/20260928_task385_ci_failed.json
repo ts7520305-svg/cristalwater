@@ -1,0 +1,39 @@
+{
+  "task": "TASK385",
+  "checkedAt": "2026-09-28T04:14:54.214Z",
+  "runId": 36359031040,
+  "jobId": 108732368488,
+  "commit": "798cc6134478fa6e113c2abc326138484c478c03",
+  "conclusion": "failure",
+  "expectedGroups": 300,
+  "completedGroups": 300,
+  "passed": 297,
+  "failed": [
+    {
+      "script": "test-field-water-api.js",
+      "code": 1,
+      "signal": null,
+      "ms": 4833
+    },
+    {
+      "script": "test-fcs-technician-t1.js",
+      "code": 1,
+      "signal": null,
+      "ms": 314
+    },
+    {
+      "script": "test-field-legacy-visit-drafts.js",
+      "code": 1,
+      "signal": null,
+      "ms": 13194
+    }
+  ],
+  "restore": "skipped",
+  "source": "GitHub Actions decoded job log",
+  "failureDetails": {
+    "water": "Return appears on assigned technician route: UI default day Europe/Lisbon but API implicit server-local day",
+    "technician": "RESULT=FAIL; detailed JSON not included in uploaded CI paths. Fixture scheduled second visit at now +35min; run was 23:36 UTC.",
+    "legacyDrafts": "Retry button click timed out; splashScreen intercepted pointer events before the target detached."
+  },
+  "resolution": "TASK386 verifies selected civil day explicitly, fixes day-boundary fixtures, and starts legacy UI at DOMContentLoaded."
+}

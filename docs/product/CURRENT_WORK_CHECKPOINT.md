@@ -1,5 +1,17 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 28/09/2026, TASK386 verificada localmente
+
+O utilizador pediu leitura global do sistema e continuação do trabalho. A [revisão global](SYSTEM_REVIEW_20260928.md) consolida capacidades, lacunas e ordem de trabalho, com inventário de 1 858 ficheiros-fonte, 128 modelos e 126 HTML. É uma leitura automática integral com revisão dos contratos centrais, não uma auditoria humana linha a linha nem aceitação de produção.
+
+TASK385 terminou com **297/300 grupos aprovados**, falhas em `test-field-water-api.js`, `test-fcs-technician-t1.js` e `test-field-legacy-visit-drafts.js`; restauro ignorado. [Evidência](evidence/20260928_task385_ci_failed.json). TASK384 conserva a última aprovação completa anterior: 299/299 e restauro de 128 tabelas/47 ficheiros. Os estados «em execução» anteriores são históricos.
+
+TASK386: arranque do técnico antigo em DOMContentLoaded, sem depender da imagem nem reconstruir o formulário em window.load. Regressão com imagem retida falhou antes e passou depois. Ensaios de regresso consultam a data escolhida e usam Lisboa; T1 agenda ambos os exemplos dentro de um dia explícito e publica detalhes das falhas. Sem alteração de datas históricas/API. Cache v197, nenhuma migração/dependência nova.
+
+**Local aprovado:** 1 073 unitários/122 ficheiros, quatro técnicos, sintaxe 690/307/44 e oito grupos integrados distintos, incluindo o E2E geral. 43 migrações aditivas aprovadas em PGlite/Chromium 153, sem substituir PostgreSQL nativo/restauro. Catorze imagens originais recuperadas com hashes Git iguais; inventário sem recursos ausentes. [Evidência local e índice de fontes](evidence/20260928_task386_local.json).
+
+**Próximo passo:** publicar este lote e confirmar CI/restauro. Depois corrigir os limites silenciosos do resumo de riscos (200 pendências/500 documentos) e terminar a localização do diálogo de correção extra. Importação WhatsApp ZIP/TXT não encontrada como fluxo completo; o conector Ollama existe, mas offline no telefone/aprendizagem não estão validados. Históricos/finanças, inventário visual, VPS/cópias e piloto físico mantêm os critérios do relatório global. Sem merge/deploy/contactos reais; não declarar conclusão global.
+
 ## Retoma atual — 28/09/2026, TASK385 publicada
 
 Correção de visitas extra com seleção exata dos produtos das guias originais comprovadas pelo histórico da visita. A consulta privada conserva conta, visita, piscina e versão; não substitui a guia original pela atual. Pesquisa e páginas de 25, IDs de guia/linha visíveis, escolha retida fora do filtro, nome/unidade literais só de leitura e nenhuma escolha automática. A revisão deteta a troca de ID mesmo com nome/unidade/quantidade iguais. [Relatório](EXTRA_CORRECTION_PRODUCTS_20260928.md) e [evidência](evidence/20260928_task385_local.json).
@@ -502,7 +514,7 @@ Publicada em `e20b0d47f42b2eee0a6862cb97e58f553c33b1bc`, árvore `e5f44c27429fbe
 - Relatório: [EQUIPMENT_MATERIAL_ORIGINS_20260924.md](EQUIPMENT_MATERIAL_ORIGINS_20260924.md). Evidência: [evidence/20260924_task309_ci.json](evidence/20260924_task309_ci.json). Cache v124, sem novas migrações/tabelas/dependências. Job com 35 minutos de limite, conservando todos os testes/restauro. O fecho posterior altera apenas documentação; a aprovação refere-se ao código e árvore acima.
 - Aprovação anterior: TASK308, repartição explícita do custo de trabalho REGULAR/EXTRA pelas revisões do mesmo mês UTC, usando tempos próprios e destino histórico confirmados. Código `040d2b46c6f16908e6b9e3b3882ebfb2308e61ce`, [CI 35928674518](https://github.com/ts7520305-svg/cristalwater/actions/runs/35928674518), 211 grupos e restauro de 126 tabelas/46 ficheiros; [MAINTENANCE_LABOR_SHARE_20260923.md](MAINTENANCE_LABOR_SHARE_20260923.md) e [evidence/20260923_task308_ci.json](evidence/20260923_task308_ci.json). A aprovação atual é a TASK309 acima.
 
-## Próxima ação
+## Próxima ação histórica — TASK344 (ultrapassada; consultar início)
 
 1. Publicar TASK344 e confirmar o seu CI/restauro integrado. TASK341–343 têm evidência nativa completa; os resultados antigos continuam nos relatórios e evidências próprios.
 2. Prosseguir custos/ajustes ainda por fechar e inventário finito de apresentação. TASK334 permite inspecionar e TASK336 acrescenta confirmação explícita para o cliente já registado; não atribui cliente ausente. Não repetir percursos aprovados sem falha concreta.
