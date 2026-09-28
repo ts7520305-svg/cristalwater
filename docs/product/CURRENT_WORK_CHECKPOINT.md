@@ -1,5 +1,17 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 28/09/2026, TASK408 local / C04-D
+
+Guias/movimentos aprovados localmente: 201/1 001 registos em listas técnicas e históricas administrativas, páginas completas de 200/25, `maxId` com inserção por outra conexão, stock/detalhes de 100 itens, permissões e oito falhas tardias por perfil. 272 HTTP, três probes API/UI, 31 415 ms; zero comandos API/escritas SQL instrumentadas e doze modelos repostos. UI de 1 001 registos: 41 páginas por percurso, quatro percursos; detalhes de materiais em quatro páginas. [Relatório C04](OPERATIONAL_VOLUME_PLAN_20260928.md), [evidência TASK408](evidence/20260928_task408_local.json).
+
+Cinco grupos integrados concluídos com marcadores terminais lidos; 1 311 unitários/134 ficheiros, quatro técnicos, sintaxe 695/307/44, node-check e diff-check. Runner 313 únicos/existentes. Seis ficheiros: teste novo, runner e quatro documentos. Produção/cache v207, esquema/dependências inalterados. Capturas 390/1440 revistas; PGlite novo/Chromium 153, UTC, integrações desligadas.
+
+**Validação anterior atualizada:** TASK405 run36460017985/job109055958055 e TASK406 run36463317792/job109067069909 aprovados, 18 etapas cada, 310/311 grupos exatos, restauro 128 tabelas/47 ficheiros, hashes/linhas iguais. ZIPs pequenos10988903063/10990683702 lidos e hashes conferidos. C01/C02 concluídas por revalidação na versão TASK406 com testes originais inalterados e JSONs concorrentes positivos; não afirmar leitura dos artefactos históricos grandes. C04-A/B nativos aprovados.
+
+**Bloqueio novo:** CI TASK407 run36466632283/job109078229561, commit6c77104d..., 311/312 grupos aprovados; `test-field-summary-volume.js` falha no dashboard de 400 clientes por RSS >=768 MiB. Valor exato truncado no erro; não inventar. Restauro saltado. ZIP pequeno10991504417 lido: agenda-volume `ok:true`, quatro probes/limpeza, grupo89 639ms; resumo-volume `ok:false`. C03 continua em validação; C04-C probe nativo aprovado, suite/restauro pendentes.
+
+**Continuar imediatamente:** lote próprio TASK409 para memória C03 sem aumentar a guarda. Inspecção inicial: `DashboardSnapshotBusiness` chama `listExternalInvoices({status:'all'},false,tx)` mas o controller só usa `.summary`; esta chamada materializa clientes, faturas, linhas, pagamentos e tokens de revisão completos. Isto é uma hipótese de causa/otimização ainda por reproduzir, não uma correção feita. Preservar o JSON/semântica financeira e transação comum; testes da falha, equivalência e permissões. Depois C04-E/F; C05 segue-se. Contagem 28 por iniciar, C04 em execução, C03 em validação, duas concluídas. Contrato anual adiado. Branch autorizada; sem merge/deploy/contactos reais.
+
 ## Retoma atual — 28/09/2026, TASK407 publicada / C04-C
 
 Concluído localmente o terceiro cenário de [volume C04](OPERATIONAL_VOLUME_PLAN_20260928.md), agendas e rondas. **C04-A/B/C aprovados localmente, CI pendente; C04-D/E/F por executar.** Contagem principal: **28 por iniciar, C04 em execução, três em validação (C01–C03), zero fechadas**. Nenhuma falha nova da aplicação reproduzida; acrescentados apenas o grupo de regressão `test-field-agenda-volume.js`, o seu registo no runner e documentação. [Evidência TASK407](evidence/20260928_task407_local.json).

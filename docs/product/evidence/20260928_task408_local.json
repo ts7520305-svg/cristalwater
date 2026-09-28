@@ -1,0 +1,4293 @@
+{
+  "task": "TASK408",
+  "date": "2026-09-28",
+  "baseCommit": "a5a08dd4ff679b51f9f63661f09dee15ac4965be",
+  "scope": "C04-D guide and movement volume",
+  "status": "local-approved-native-pending",
+  "codeHashes": {
+    "scripts/test-field-guide-volume.js": "d8bd1d999ca86387ddbad4438cb91dc44622744053d1f3e897c06602c7711e94",
+    "scripts/test-field-suite.js": "fee60a9e878fbe658235928c8d8d15bfd07b18573489a26c4efcc14d081160ff"
+  },
+  "local": {
+    "ok": true,
+    "phase": "assertions-completed",
+    "engine": "PostgreSQL 18.3 (PGlite 0.5.8) on wasm32-unknown-emscripten, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.74 (1092ec30a3fb1d46b1782ff1b4db5094d3d06ae5), 32-bit",
+    "profiles": [
+      201,
+      1001
+    ],
+    "results": [
+      {
+        "ok": true,
+        "phase": "assertions-completed",
+        "mode": "API",
+        "records": 201,
+        "reads": [
+          {
+            "url": "/api/guides/transport?limit=200&offset=0",
+            "status": 200,
+            "durationMs": 89.5,
+            "jsonBytes": 205326,
+            "sampledRssMiB": 109.69,
+            "sampledHeapMiB": 26.63,
+            "sql": {
+              "queries": 16,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/transport?limit=200&offset=200",
+            "status": 200,
+            "durationMs": 18.8,
+            "jsonBytes": 1108,
+            "sampledRssMiB": 110.94,
+            "sampledHeapMiB": 27.38,
+            "sql": {
+              "queries": 16,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/transport?limit=200&offset=201",
+            "status": 200,
+            "durationMs": 14.9,
+            "jsonBytes": 146,
+            "sampledRssMiB": 128.57,
+            "sampledHeapMiB": 27.97,
+            "sql": {
+              "queries": 12,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/work?limit=200&offset=0",
+            "status": 200,
+            "durationMs": 46.6,
+            "jsonBytes": 305735,
+            "sampledRssMiB": 127.89,
+            "sampledHeapMiB": 28.72,
+            "sql": {
+              "queries": 18,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/work?limit=200&offset=200",
+            "status": 200,
+            "durationMs": 18.6,
+            "jsonBytes": 1499,
+            "sampledRssMiB": 128.89,
+            "sampledHeapMiB": 28.06,
+            "sql": {
+              "queries": 18,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/work?limit=200&offset=201",
+            "status": 200,
+            "durationMs": 12.7,
+            "jsonBytes": 150,
+            "sampledRssMiB": 129.02,
+            "sampledHeapMiB": 28.62,
+            "sql": {
+              "queries": 12,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/movements?limit=200&offset=0",
+            "status": 200,
+            "durationMs": 35,
+            "jsonBytes": 115426,
+            "sampledRssMiB": 131.89,
+            "sampledHeapMiB": 32.06,
+            "sql": {
+              "queries": 16,
+              "durationMs": 6,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/movements?limit=200&offset=200&maxId=201",
+            "status": 200,
+            "durationMs": 21.5,
+            "jsonBytes": 798,
+            "sampledRssMiB": 132.3,
+            "sampledHeapMiB": 27.71,
+            "sql": {
+              "queries": 15,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/movements?limit=200&offset=201&maxId=201",
+            "status": 200,
+            "durationMs": 19.2,
+            "jsonBytes": 236,
+            "sampledRssMiB": 132.68,
+            "sampledHeapMiB": 29.22,
+            "sql": {
+              "queries": 15,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/movements",
+            "status": 200,
+            "durationMs": 34.6,
+            "jsonBytes": 115317,
+            "sampledRssMiB": 133.43,
+            "sampledHeapMiB": 30.03,
+            "sql": {
+              "queries": 16,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/movements?limit=1&offset=134",
+            "status": 200,
+            "durationMs": 31.1,
+            "jsonBytes": 688,
+            "sampledRssMiB": 134.8,
+            "sampledHeapMiB": 28.03,
+            "sql": {
+              "queries": 16,
+              "durationMs": 7,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=1&page=1",
+            "status": 200,
+            "durationMs": 17.4,
+            "jsonBytes": 12254,
+            "sampledRssMiB": 135.11,
+            "sampledHeapMiB": 29,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=1&page=2&maxId=202",
+            "status": 200,
+            "durationMs": 16.7,
+            "jsonBytes": 12219,
+            "sampledRssMiB": 135.11,
+            "sampledHeapMiB": 29.59,
+            "sql": {
+              "queries": 12,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=1&page=3&maxId=202",
+            "status": 200,
+            "durationMs": 14.2,
+            "jsonBytes": 12211,
+            "sampledRssMiB": 135.36,
+            "sampledHeapMiB": 30.16,
+            "sql": {
+              "queries": 12,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=1&page=4&maxId=202",
+            "status": 200,
+            "durationMs": 13.7,
+            "jsonBytes": 12251,
+            "sampledRssMiB": 135.36,
+            "sampledHeapMiB": 30.72,
+            "sql": {
+              "queries": 12,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=1&page=5&maxId=202",
+            "status": 200,
+            "durationMs": 15.4,
+            "jsonBytes": 12203,
+            "sampledRssMiB": 135.36,
+            "sampledHeapMiB": 31.26,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=1&page=6&maxId=202",
+            "status": 200,
+            "durationMs": 17,
+            "jsonBytes": 12227,
+            "sampledRssMiB": 135.36,
+            "sampledHeapMiB": 31.81,
+            "sql": {
+              "queries": 12,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=1&page=7&maxId=202",
+            "status": 200,
+            "durationMs": 13.4,
+            "jsonBytes": 12236,
+            "sampledRssMiB": 135.36,
+            "sampledHeapMiB": 32.37,
+            "sql": {
+              "queries": 12,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=1&page=8&maxId=202",
+            "status": 200,
+            "durationMs": 13.2,
+            "jsonBytes": 12196,
+            "sampledRssMiB": 135.36,
+            "sampledHeapMiB": 32.92,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=1&page=9&maxId=202",
+            "status": 200,
+            "durationMs": 10.2,
+            "jsonBytes": 799,
+            "sampledRssMiB": 135.48,
+            "sampledHeapMiB": 33.62,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=1&page=10&maxId=202",
+            "status": 200,
+            "durationMs": 10.4,
+            "jsonBytes": 329,
+            "sampledRssMiB": 135.48,
+            "sampledHeapMiB": 33.71,
+            "sql": {
+              "queries": 11,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=1",
+            "status": 200,
+            "durationMs": 11.6,
+            "jsonBytes": 12254,
+            "sampledRssMiB": 135.86,
+            "sampledHeapMiB": 34.27,
+            "sql": {
+              "queries": 13,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=1&recordId=203",
+            "status": 200,
+            "durationMs": 10.6,
+            "jsonBytes": 780,
+            "sampledRssMiB": 136.23,
+            "sampledHeapMiB": 34.64,
+            "sql": {
+              "queries": 13,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=1&technicianId=1&page=1",
+            "status": 200,
+            "durationMs": 13.1,
+            "jsonBytes": 13164,
+            "sampledRssMiB": 137.11,
+            "sampledHeapMiB": 35.47,
+            "sql": {
+              "queries": 14,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=1&technicianId=1&page=2&maxId=203",
+            "status": 200,
+            "durationMs": 17.3,
+            "jsonBytes": 13099,
+            "sampledRssMiB": 137.73,
+            "sampledHeapMiB": 36.04,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=1&technicianId=1&page=3&maxId=203",
+            "status": 200,
+            "durationMs": 14.9,
+            "jsonBytes": 13083,
+            "sampledRssMiB": 138.23,
+            "sampledHeapMiB": 36.58,
+            "sql": {
+              "queries": 13,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=1&technicianId=1&page=4&maxId=203",
+            "status": 200,
+            "durationMs": 15.2,
+            "jsonBytes": 13163,
+            "sampledRssMiB": 138.86,
+            "sampledHeapMiB": 37.11,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=1&technicianId=1&page=5&maxId=203",
+            "status": 200,
+            "durationMs": 12.9,
+            "jsonBytes": 13067,
+            "sampledRssMiB": 139.36,
+            "sampledHeapMiB": 37.65,
+            "sql": {
+              "queries": 13,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=1&technicianId=1&page=6&maxId=203",
+            "status": 200,
+            "durationMs": 12,
+            "jsonBytes": 13115,
+            "sampledRssMiB": 139.98,
+            "sampledHeapMiB": 38.18,
+            "sql": {
+              "queries": 13,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=1&technicianId=1&page=7&maxId=203",
+            "status": 200,
+            "durationMs": 11.2,
+            "jsonBytes": 13134,
+            "sampledRssMiB": 140.48,
+            "sampledHeapMiB": 38.95,
+            "sql": {
+              "queries": 13,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=1&technicianId=1&page=8&maxId=203",
+            "status": 200,
+            "durationMs": 13,
+            "jsonBytes": 13054,
+            "sampledRssMiB": 141.11,
+            "sampledHeapMiB": 38.73,
+            "sql": {
+              "queries": 13,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=1&technicianId=1&page=9&maxId=203",
+            "status": 200,
+            "durationMs": 10.3,
+            "jsonBytes": 819,
+            "sampledRssMiB": 141.11,
+            "sampledHeapMiB": 28.99,
+            "sql": {
+              "queries": 13,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=1&technicianId=1&page=10&maxId=203",
+            "status": 200,
+            "durationMs": 8.2,
+            "jsonBytes": 316,
+            "sampledRssMiB": 141.11,
+            "sampledHeapMiB": 29.33,
+            "sql": {
+              "queries": 10,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=1&technicianId=1",
+            "status": 200,
+            "durationMs": 12,
+            "jsonBytes": 13164,
+            "sampledRssMiB": 141.11,
+            "sampledHeapMiB": 29.88,
+            "sql": {
+              "queries": 14,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=1&technicianId=1&recordId=204",
+            "status": 200,
+            "durationMs": 10.5,
+            "jsonBytes": 827,
+            "sampledRssMiB": 141.11,
+            "sampledHeapMiB": 30.24,
+            "sql": {
+              "queries": 14,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=1&workGuideId=201&page=1",
+            "status": 200,
+            "durationMs": 12.4,
+            "jsonBytes": 12574,
+            "sampledRssMiB": 141.11,
+            "sampledHeapMiB": 31.07,
+            "sql": {
+              "queries": 13,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=1&workGuideId=201&page=2&maxId=203",
+            "status": 200,
+            "durationMs": 10.5,
+            "jsonBytes": 12541,
+            "sampledRssMiB": 141.11,
+            "sampledHeapMiB": 31.64,
+            "sql": {
+              "queries": 12,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=1&workGuideId=201&page=3&maxId=203",
+            "status": 200,
+            "durationMs": 23.2,
+            "jsonBytes": 12533,
+            "sampledRssMiB": 141.11,
+            "sampledHeapMiB": 32.18,
+            "sql": {
+              "queries": 12,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=1&workGuideId=201&page=4&maxId=203",
+            "status": 200,
+            "durationMs": 12,
+            "jsonBytes": 12573,
+            "sampledRssMiB": 141.23,
+            "sampledHeapMiB": 32.73,
+            "sql": {
+              "queries": 12,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=1&workGuideId=201&page=5&maxId=203",
+            "status": 200,
+            "durationMs": 9.9,
+            "jsonBytes": 12525,
+            "sampledRssMiB": 141.23,
+            "sampledHeapMiB": 33.27,
+            "sql": {
+              "queries": 12,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=1&workGuideId=201&page=6&maxId=203",
+            "status": 200,
+            "durationMs": 10.6,
+            "jsonBytes": 11253,
+            "sampledRssMiB": 141.23,
+            "sampledHeapMiB": 33.78,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=1&workGuideId=201&page=7&maxId=203",
+            "status": 200,
+            "durationMs": 10.7,
+            "jsonBytes": 10533,
+            "sampledRssMiB": 141.36,
+            "sampledHeapMiB": 34.38,
+            "sql": {
+              "queries": 12,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=1&workGuideId=201&page=8&maxId=203",
+            "status": 200,
+            "durationMs": 11.5,
+            "jsonBytes": 10493,
+            "sampledRssMiB": 141.61,
+            "sampledHeapMiB": 34.81,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=1&workGuideId=201&page=9&maxId=203",
+            "status": 200,
+            "durationMs": 10.3,
+            "jsonBytes": 726,
+            "sampledRssMiB": 141.98,
+            "sampledHeapMiB": 35.2,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=1&workGuideId=201&page=10&maxId=203",
+            "status": 200,
+            "durationMs": 10.1,
+            "jsonBytes": 326,
+            "sampledRssMiB": 142.36,
+            "sampledHeapMiB": 35.59,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=1&workGuideId=201",
+            "status": 200,
+            "durationMs": 11.6,
+            "jsonBytes": 12574,
+            "sampledRssMiB": 142.86,
+            "sampledHeapMiB": 36.16,
+            "sql": {
+              "queries": 13,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=1&workGuideId=201&recordId=205",
+            "status": 200,
+            "durationMs": 11.2,
+            "jsonBytes": 789,
+            "sampledRssMiB": 143.23,
+            "sampledHeapMiB": 36.56,
+            "sql": {
+              "queries": 13,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/stock/1?includeMovements=false",
+            "status": 200,
+            "durationMs": 17.2,
+            "jsonBytes": 59047,
+            "sampledRssMiB": 144.73,
+            "sampledHeapMiB": 37.79,
+            "sql": {
+              "queries": 18,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/stock/1",
+            "status": 200,
+            "durationMs": 28.5,
+            "jsonBytes": 136754,
+            "sampledRssMiB": 149.23,
+            "sampledHeapMiB": 38.8,
+            "sql": {
+              "queries": 22,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/movements?workGuideId=201&transportGuideId=201&movementType=LOAD",
+            "status": 200,
+            "durationMs": 22,
+            "jsonBytes": 38279,
+            "sampledRssMiB": 149.36,
+            "sampledHeapMiB": 33.11,
+            "sql": {
+              "queries": 17,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/movements?maxId=0",
+            "status": 200,
+            "durationMs": 15.3,
+            "jsonBytes": 230,
+            "sampledRssMiB": 149.36,
+            "sampledHeapMiB": 33.79,
+            "sql": {
+              "queries": 15,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/transport?status=ACTIVE",
+            "status": 200,
+            "durationMs": 15.4,
+            "jsonBytes": 12522,
+            "sampledRssMiB": 149.48,
+            "sampledHeapMiB": 34.86,
+            "sql": {
+              "queries": 16,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/work?status=OPEN",
+            "status": 200,
+            "durationMs": 18.8,
+            "jsonBytes": 35918,
+            "sampledRssMiB": 149.48,
+            "sampledHeapMiB": 35.47,
+            "sql": {
+              "queries": 18,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/transport/latest/1",
+            "status": 200,
+            "durationMs": 16.8,
+            "jsonBytes": 23634,
+            "sampledRssMiB": 149.48,
+            "sampledHeapMiB": 36.22,
+            "sql": {
+              "queries": 14,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history/work/201?page=1",
+            "status": 200,
+            "durationMs": 13.5,
+            "jsonBytes": 5463,
+            "sampledRssMiB": 149.48,
+            "sampledHeapMiB": 36.68,
+            "sql": {
+              "queries": 13,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history/work/201?page=2",
+            "status": 200,
+            "durationMs": 13,
+            "jsonBytes": 5513,
+            "sampledRssMiB": 149.48,
+            "sampledHeapMiB": 37.1,
+            "sql": {
+              "queries": 13,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history/work/201?page=3",
+            "status": 200,
+            "durationMs": 10.1,
+            "jsonBytes": 5508,
+            "sampledRssMiB": 149.48,
+            "sampledHeapMiB": 37.51,
+            "sql": {
+              "queries": 13,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history/work/201?page=4",
+            "status": 200,
+            "durationMs": 11,
+            "jsonBytes": 5514,
+            "sampledRssMiB": 149.48,
+            "sampledHeapMiB": 38.25,
+            "sql": {
+              "queries": 13,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history/work/201?page=5",
+            "status": 200,
+            "durationMs": 10.6,
+            "jsonBytes": 724,
+            "sampledRssMiB": 149.48,
+            "sampledHeapMiB": 38.28,
+            "sql": {
+              "queries": 13,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history/transport/201?page=1",
+            "status": 200,
+            "durationMs": 8.9,
+            "jsonBytes": 3523,
+            "sampledRssMiB": 149.48,
+            "sampledHeapMiB": 38.72,
+            "sql": {
+              "queries": 12,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history/transport/201?page=2",
+            "status": 200,
+            "durationMs": 8.3,
+            "jsonBytes": 3566,
+            "sampledRssMiB": 149.48,
+            "sampledHeapMiB": 39.12,
+            "sql": {
+              "queries": 12,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history/transport/201?page=3",
+            "status": 200,
+            "durationMs": 8.5,
+            "jsonBytes": 3561,
+            "sampledRssMiB": 149.48,
+            "sampledHeapMiB": 39.54,
+            "sql": {
+              "queries": 12,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history/transport/201?page=4",
+            "status": 200,
+            "durationMs": 9.3,
+            "jsonBytes": 3567,
+            "sampledRssMiB": 149.48,
+            "sampledHeapMiB": 39.97,
+            "sql": {
+              "queries": 12,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history/transport/201?page=5",
+            "status": 200,
+            "durationMs": 8.5,
+            "jsonBytes": 702,
+            "sampledRssMiB": 149.48,
+            "sampledHeapMiB": 40.33,
+            "sql": {
+              "queries": 12,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/work?technicianId=2",
+            "status": 403,
+            "durationMs": 6.5,
+            "jsonBytes": 149,
+            "sampledRssMiB": 149.61,
+            "sampledHeapMiB": 40.67,
+            "sql": {
+              "queries": 9,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/stock/2",
+            "status": 403,
+            "durationMs": 4.9,
+            "jsonBytes": 149,
+            "sampledRssMiB": 149.61,
+            "sampledHeapMiB": 40.98,
+            "sql": {
+              "queries": 9,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/movements?workGuideId=202",
+            "status": 403,
+            "durationMs": 8,
+            "jsonBytes": 149,
+            "sampledRssMiB": 149.61,
+            "sampledHeapMiB": 41.4,
+            "sql": {
+              "queries": 11,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/transport?vehicleId=2",
+            "status": 403,
+            "durationMs": 6.2,
+            "jsonBytes": 149,
+            "sampledRssMiB": 149.61,
+            "sampledHeapMiB": 41.74,
+            "sql": {
+              "queries": 9,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work",
+            "status": 403,
+            "durationMs": 4.8,
+            "jsonBytes": 39,
+            "sampledRssMiB": 150.88,
+            "sampledHeapMiB": 41.74,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history/work/201",
+            "status": 403,
+            "durationMs": 3.4,
+            "jsonBytes": 39,
+            "sampledRssMiB": 150.88,
+            "sampledHeapMiB": 32.47,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/movements",
+            "status": 401,
+            "durationMs": 2.2,
+            "jsonBytes": 34,
+            "sampledRssMiB": 150.88,
+            "sampledHeapMiB": 32.55,
+            "sql": {
+              "queries": 0,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history",
+            "status": 401,
+            "durationMs": 1.8,
+            "jsonBytes": 34,
+            "sampledRssMiB": 150.88,
+            "sampledHeapMiB": 32.63,
+            "sql": {
+              "queries": 0,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/movements?limit=201",
+            "status": 400,
+            "durationMs": 3.8,
+            "jsonBytes": 153,
+            "sampledRssMiB": 150.88,
+            "sampledHeapMiB": 32.78,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/stock/1",
+            "status": 403,
+            "durationMs": 5.2,
+            "jsonBytes": 149,
+            "sampledRssMiB": 151,
+            "sampledHeapMiB": 33.12,
+            "sql": {
+              "queries": 9,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/transport?offset=200",
+            "status": 503,
+            "durationMs": 7.3,
+            "jsonBytes": 151,
+            "sampledRssMiB": 151,
+            "sampledHeapMiB": 33.53,
+            "sql": {
+              "queries": 11,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/work?offset=200",
+            "status": 503,
+            "durationMs": 8.6,
+            "jsonBytes": 151,
+            "sampledRssMiB": 151,
+            "sampledHeapMiB": 33.91,
+            "sql": {
+              "queries": 11,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/movements?offset=200",
+            "status": 503,
+            "durationMs": 14.6,
+            "jsonBytes": 151,
+            "sampledRssMiB": 151,
+            "sampledHeapMiB": 34.51,
+            "sql": {
+              "queries": 13,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=1&page=2",
+            "status": 503,
+            "durationMs": 7.3,
+            "jsonBytes": 77,
+            "sampledRssMiB": 151,
+            "sampledHeapMiB": 34.81,
+            "sql": {
+              "queries": 10,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=1&technicianId=1&page=2",
+            "status": 503,
+            "durationMs": 7.2,
+            "jsonBytes": 77,
+            "sampledRssMiB": 151,
+            "sampledHeapMiB": 35.1,
+            "sql": {
+              "queries": 10,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=1&workGuideId=201&page=2",
+            "status": 503,
+            "durationMs": 12.2,
+            "jsonBytes": 77,
+            "sampledRssMiB": 151,
+            "sampledHeapMiB": 35.42,
+            "sql": {
+              "queries": 10,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history/work/201?page=2",
+            "status": 503,
+            "durationMs": 8.9,
+            "jsonBytes": 77,
+            "sampledRssMiB": 151,
+            "sampledHeapMiB": 35.74,
+            "sql": {
+              "queries": 12,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history/transport/201?page=2",
+            "status": 503,
+            "durationMs": 8.1,
+            "jsonBytes": 77,
+            "sampledRssMiB": 151,
+            "sampledHeapMiB": 36.09,
+            "sql": {
+              "queries": 11,
+              "durationMs": 1,
+              "writes": 0
+            }
+          }
+        ],
+        "proofs": [
+          {
+            "surface": "field-transport",
+            "rows": 201,
+            "pages": 2,
+            "orderedIdsSha256": "c52ac55a0fd2241eb24e5e42320159245be142bfe946167db2c49dd8358ce7c9",
+            "insertionBoundary": false
+          },
+          {
+            "surface": "field-work",
+            "rows": 201,
+            "pages": 2,
+            "orderedIdsSha256": "c52ac55a0fd2241eb24e5e42320159245be142bfe946167db2c49dd8358ce7c9",
+            "insertionBoundary": false
+          },
+          {
+            "surface": "field-movement",
+            "rows": 201,
+            "pages": 2,
+            "orderedIdsSha256": "c52ac55a0fd2241eb24e5e42320159245be142bfe946167db2c49dd8358ce7c9",
+            "insertionBoundary": true
+          },
+          {
+            "surface": "admin-transport",
+            "rows": 201,
+            "pages": 9,
+            "orderedIdsSha256": "c52ac55a0fd2241eb24e5e42320159245be142bfe946167db2c49dd8358ce7c9",
+            "insertionBoundary": true
+          },
+          {
+            "surface": "admin-work",
+            "rows": 201,
+            "pages": 9,
+            "orderedIdsSha256": "c52ac55a0fd2241eb24e5e42320159245be142bfe946167db2c49dd8358ce7c9",
+            "insertionBoundary": true
+          },
+          {
+            "surface": "admin-movement",
+            "rows": 201,
+            "pages": 9,
+            "orderedIdsSha256": "c52ac55a0fd2241eb24e5e42320159245be142bfe946167db2c49dd8358ce7c9",
+            "insertionBoundary": true
+          }
+        ],
+        "stockItems": 100,
+        "consumptions": 134,
+        "partialFailuresRejected": 8,
+        "permissions": true,
+        "literalFields": true,
+        "transactionsRepeatableRead": true,
+        "writes": 0
+      },
+      {
+        "ok": true,
+        "phase": "assertions-completed",
+        "mode": "API",
+        "records": 1001,
+        "reads": [
+          {
+            "url": "/api/guides/transport?limit=200&offset=0",
+            "status": 200,
+            "durationMs": 95.7,
+            "jsonBytes": 194547,
+            "sampledRssMiB": 114.05,
+            "sampledHeapMiB": 28.24,
+            "sql": {
+              "queries": 16,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/transport?limit=200&offset=200",
+            "status": 200,
+            "durationMs": 36.3,
+            "jsonBytes": 206129,
+            "sampledRssMiB": 117.55,
+            "sampledHeapMiB": 31.83,
+            "sql": {
+              "queries": 16,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/transport?limit=200&offset=400",
+            "status": 200,
+            "durationMs": 36.4,
+            "jsonBytes": 194351,
+            "sampledRssMiB": 133.55,
+            "sampledHeapMiB": 36.31,
+            "sql": {
+              "queries": 16,
+              "durationMs": 5,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/transport?limit=200&offset=600",
+            "status": 200,
+            "durationMs": 36.2,
+            "jsonBytes": 194514,
+            "sampledRssMiB": 138.05,
+            "sampledHeapMiB": 39.94,
+            "sql": {
+              "queries": 16,
+              "durationMs": 5,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/transport?limit=200&offset=800",
+            "status": 200,
+            "durationMs": 35.8,
+            "jsonBytes": 194309,
+            "sampledRssMiB": 138.95,
+            "sampledHeapMiB": 30.74,
+            "sql": {
+              "queries": 16,
+              "durationMs": 5,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/transport?limit=200&offset=1000",
+            "status": 200,
+            "durationMs": 18.7,
+            "jsonBytes": 1116,
+            "sampledRssMiB": 139.95,
+            "sampledHeapMiB": 31.53,
+            "sql": {
+              "queries": 16,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/transport?limit=200&offset=1001",
+            "status": 200,
+            "durationMs": 12.7,
+            "jsonBytes": 148,
+            "sampledRssMiB": 140.45,
+            "sampledHeapMiB": 32.39,
+            "sql": {
+              "queries": 12,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/work?limit=200&offset=0",
+            "status": 200,
+            "durationMs": 39,
+            "jsonBytes": 271951,
+            "sampledRssMiB": 149.45,
+            "sampledHeapMiB": 38.13,
+            "sql": {
+              "queries": 18,
+              "durationMs": 5,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/work?limit=200&offset=200",
+            "status": 200,
+            "durationMs": 49.8,
+            "jsonBytes": 306746,
+            "sampledRssMiB": 155.45,
+            "sampledHeapMiB": 42.62,
+            "sql": {
+              "queries": 18,
+              "durationMs": 8,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/work?limit=200&offset=400",
+            "status": 200,
+            "durationMs": 57.3,
+            "jsonBytes": 271755,
+            "sampledRssMiB": 156.02,
+            "sampledHeapMiB": 34.96,
+            "sql": {
+              "queries": 18,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/work?limit=200&offset=600",
+            "status": 200,
+            "durationMs": 36.6,
+            "jsonBytes": 271918,
+            "sampledRssMiB": 158.64,
+            "sampledHeapMiB": 39.94,
+            "sql": {
+              "queries": 18,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/work?limit=200&offset=800",
+            "status": 200,
+            "durationMs": 48.7,
+            "jsonBytes": 271713,
+            "sampledRssMiB": 159.89,
+            "sampledHeapMiB": 43.86,
+            "sql": {
+              "queries": 18,
+              "durationMs": 6,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/work?limit=200&offset=1000",
+            "status": 200,
+            "durationMs": 23.1,
+            "jsonBytes": 1507,
+            "sampledRssMiB": 159.26,
+            "sampledHeapMiB": 32.44,
+            "sql": {
+              "queries": 18,
+              "durationMs": 6,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/work?limit=200&offset=1001",
+            "status": 200,
+            "durationMs": 13.5,
+            "jsonBytes": 152,
+            "sampledRssMiB": 159.39,
+            "sampledHeapMiB": 33.01,
+            "sql": {
+              "queries": 12,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/movements?limit=200&offset=0",
+            "status": 200,
+            "durationMs": 51.1,
+            "jsonBytes": 116903,
+            "sampledRssMiB": 159.39,
+            "sampledHeapMiB": 38.83,
+            "sql": {
+              "queries": 16,
+              "durationMs": 11,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/movements?limit=200&offset=200&maxId=1206",
+            "status": 200,
+            "durationMs": 37.1,
+            "jsonBytes": 116868,
+            "sampledRssMiB": 161.91,
+            "sampledHeapMiB": 41.17,
+            "sql": {
+              "queries": 15,
+              "durationMs": 9,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/movements?limit=200&offset=400&maxId=1206",
+            "status": 200,
+            "durationMs": 34.7,
+            "jsonBytes": 116838,
+            "sampledRssMiB": 161.91,
+            "sampledHeapMiB": 36.88,
+            "sql": {
+              "queries": 15,
+              "durationMs": 9,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/movements?limit=200&offset=600&maxId=1206",
+            "status": 200,
+            "durationMs": 31.8,
+            "jsonBytes": 115273,
+            "sampledRssMiB": 161.91,
+            "sampledHeapMiB": 41.43,
+            "sql": {
+              "queries": 15,
+              "durationMs": 6,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/movements?limit=200&offset=800&maxId=1206",
+            "status": 200,
+            "durationMs": 46.1,
+            "jsonBytes": 114400,
+            "sampledRssMiB": 162.54,
+            "sampledHeapMiB": 43.61,
+            "sql": {
+              "queries": 15,
+              "durationMs": 6,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/movements?limit=200&offset=1000&maxId=1206",
+            "status": 200,
+            "durationMs": 39.1,
+            "jsonBytes": 805,
+            "sampledRssMiB": 162.54,
+            "sampledHeapMiB": 36.35,
+            "sql": {
+              "queries": 15,
+              "durationMs": 8,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/movements?limit=200&offset=1001&maxId=1206",
+            "status": 200,
+            "durationMs": 31.1,
+            "jsonBytes": 239,
+            "sampledRssMiB": 162.79,
+            "sampledHeapMiB": 37.74,
+            "sql": {
+              "queries": 15,
+              "durationMs": 10,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/movements",
+            "status": 200,
+            "durationMs": 44.6,
+            "jsonBytes": 116903,
+            "sampledRssMiB": 162.91,
+            "sampledHeapMiB": 42.11,
+            "sql": {
+              "queries": 16,
+              "durationMs": 9,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/movements?limit=1&offset=667",
+            "status": 200,
+            "durationMs": 37.2,
+            "jsonBytes": 693,
+            "sampledRssMiB": 163.04,
+            "sampledHeapMiB": 44.05,
+            "sql": {
+              "queries": 16,
+              "durationMs": 11,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=1",
+            "status": 200,
+            "durationMs": 19.8,
+            "jsonBytes": 12279,
+            "sampledRssMiB": 164.57,
+            "sampledHeapMiB": 45.35,
+            "sql": {
+              "queries": 13,
+              "durationMs": 5,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=2&maxId=1205",
+            "status": 200,
+            "durationMs": 14.2,
+            "jsonBytes": 12279,
+            "sampledRssMiB": 164.57,
+            "sampledHeapMiB": 34.1,
+            "sql": {
+              "queries": 12,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=3&maxId=1205",
+            "status": 200,
+            "durationMs": 14.3,
+            "jsonBytes": 12272,
+            "sampledRssMiB": 164.57,
+            "sampledHeapMiB": 34.66,
+            "sql": {
+              "queries": 12,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=4&maxId=1205",
+            "status": 200,
+            "durationMs": 16.2,
+            "jsonBytes": 12254,
+            "sampledRssMiB": 164.57,
+            "sampledHeapMiB": 35.21,
+            "sql": {
+              "queries": 12,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=5&maxId=1205",
+            "status": 200,
+            "durationMs": 14.8,
+            "jsonBytes": 12254,
+            "sampledRssMiB": 164.57,
+            "sampledHeapMiB": 35.75,
+            "sql": {
+              "queries": 12,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=6&maxId=1205",
+            "status": 200,
+            "durationMs": 15.4,
+            "jsonBytes": 12254,
+            "sampledRssMiB": 164.57,
+            "sampledHeapMiB": 36.3,
+            "sql": {
+              "queries": 12,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=7&maxId=1205",
+            "status": 200,
+            "durationMs": 15.8,
+            "jsonBytes": 12254,
+            "sampledRssMiB": 164.57,
+            "sampledHeapMiB": 37.13,
+            "sql": {
+              "queries": 12,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=8&maxId=1205",
+            "status": 200,
+            "durationMs": 17.2,
+            "jsonBytes": 12254,
+            "sampledRssMiB": 164.57,
+            "sampledHeapMiB": 37.42,
+            "sql": {
+              "queries": 12,
+              "durationMs": 6,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=9&maxId=1205",
+            "status": 200,
+            "durationMs": 24.4,
+            "jsonBytes": 12254,
+            "sampledRssMiB": 164.57,
+            "sampledHeapMiB": 37.99,
+            "sql": {
+              "queries": 12,
+              "durationMs": 11,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=10&maxId=1205",
+            "status": 200,
+            "durationMs": 14.9,
+            "jsonBytes": 12256,
+            "sampledRssMiB": 164.57,
+            "sampledHeapMiB": 38.55,
+            "sql": {
+              "queries": 12,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=11&maxId=1205",
+            "status": 200,
+            "durationMs": 21.4,
+            "jsonBytes": 12256,
+            "sampledRssMiB": 164.57,
+            "sampledHeapMiB": 39.09,
+            "sql": {
+              "queries": 12,
+              "durationMs": 6,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=12&maxId=1205",
+            "status": 200,
+            "durationMs": 17.3,
+            "jsonBytes": 12256,
+            "sampledRssMiB": 164.69,
+            "sampledHeapMiB": 39.67,
+            "sql": {
+              "queries": 12,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=13&maxId=1205",
+            "status": 200,
+            "durationMs": 13.4,
+            "jsonBytes": 12231,
+            "sampledRssMiB": 164.69,
+            "sampledHeapMiB": 40.22,
+            "sql": {
+              "queries": 12,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=14&maxId=1205",
+            "status": 200,
+            "durationMs": 12.9,
+            "jsonBytes": 12265,
+            "sampledRssMiB": 164.69,
+            "sampledHeapMiB": 40.77,
+            "sql": {
+              "queries": 12,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=15&maxId=1205",
+            "status": 200,
+            "durationMs": 15.6,
+            "jsonBytes": 12281,
+            "sampledRssMiB": 164.69,
+            "sampledHeapMiB": 41.32,
+            "sql": {
+              "queries": 12,
+              "durationMs": 5,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=16&maxId=1205",
+            "status": 200,
+            "durationMs": 14.2,
+            "jsonBytes": 12281,
+            "sampledRssMiB": 164.69,
+            "sampledHeapMiB": 42.23,
+            "sql": {
+              "queries": 12,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=17&maxId=1205",
+            "status": 200,
+            "durationMs": 15.2,
+            "jsonBytes": 12258,
+            "sampledRssMiB": 164.69,
+            "sampledHeapMiB": 42.42,
+            "sql": {
+              "queries": 12,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=18&maxId=1205",
+            "status": 200,
+            "durationMs": 13.4,
+            "jsonBytes": 12256,
+            "sampledRssMiB": 164.69,
+            "sampledHeapMiB": 42.97,
+            "sql": {
+              "queries": 12,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=19&maxId=1205",
+            "status": 200,
+            "durationMs": 21.5,
+            "jsonBytes": 12256,
+            "sampledRssMiB": 164.69,
+            "sampledHeapMiB": 43.51,
+            "sql": {
+              "queries": 12,
+              "durationMs": 11,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=20&maxId=1205",
+            "status": 200,
+            "durationMs": 14,
+            "jsonBytes": 12256,
+            "sampledRssMiB": 164.82,
+            "sampledHeapMiB": 44.07,
+            "sql": {
+              "queries": 12,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=21&maxId=1205",
+            "status": 200,
+            "durationMs": 16,
+            "jsonBytes": 12256,
+            "sampledRssMiB": 164.82,
+            "sampledHeapMiB": 44.65,
+            "sql": {
+              "queries": 12,
+              "durationMs": 5,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=22&maxId=1205",
+            "status": 200,
+            "durationMs": 13.1,
+            "jsonBytes": 12256,
+            "sampledRssMiB": 164.82,
+            "sampledHeapMiB": 45.2,
+            "sql": {
+              "queries": 12,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=23&maxId=1205",
+            "status": 200,
+            "durationMs": 13.5,
+            "jsonBytes": 12256,
+            "sampledRssMiB": 164.82,
+            "sampledHeapMiB": 45.76,
+            "sql": {
+              "queries": 12,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=24&maxId=1205",
+            "status": 200,
+            "durationMs": 14.5,
+            "jsonBytes": 12256,
+            "sampledRssMiB": 164.94,
+            "sampledHeapMiB": 46.3,
+            "sql": {
+              "queries": 12,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=25&maxId=1205",
+            "status": 200,
+            "durationMs": 16.4,
+            "jsonBytes": 12256,
+            "sampledRssMiB": 165.44,
+            "sampledHeapMiB": 46.85,
+            "sql": {
+              "queries": 12,
+              "durationMs": 6,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=26&maxId=1205",
+            "status": 200,
+            "durationMs": 14.6,
+            "jsonBytes": 12240,
+            "sampledRssMiB": 165.94,
+            "sampledHeapMiB": 47.4,
+            "sql": {
+              "queries": 12,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=27&maxId=1205",
+            "status": 200,
+            "durationMs": 19.8,
+            "jsonBytes": 12244,
+            "sampledRssMiB": 166.44,
+            "sampledHeapMiB": 47.95,
+            "sql": {
+              "queries": 12,
+              "durationMs": 8,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=28&maxId=1205",
+            "status": 200,
+            "durationMs": 21.8,
+            "jsonBytes": 12281,
+            "sampledRssMiB": 166.94,
+            "sampledHeapMiB": 48.49,
+            "sql": {
+              "queries": 12,
+              "durationMs": 5,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=29&maxId=1205",
+            "status": 200,
+            "durationMs": 15.7,
+            "jsonBytes": 12281,
+            "sampledRssMiB": 167.57,
+            "sampledHeapMiB": 49.37,
+            "sql": {
+              "queries": 12,
+              "durationMs": 5,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=30&maxId=1205",
+            "status": 200,
+            "durationMs": 21.7,
+            "jsonBytes": 12266,
+            "sampledRssMiB": 168.07,
+            "sampledHeapMiB": 49.64,
+            "sql": {
+              "queries": 12,
+              "durationMs": 10,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=31&maxId=1205",
+            "status": 200,
+            "durationMs": 16.5,
+            "jsonBytes": 12256,
+            "sampledRssMiB": 168.57,
+            "sampledHeapMiB": 50.19,
+            "sql": {
+              "queries": 12,
+              "durationMs": 5,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=32&maxId=1205",
+            "status": 200,
+            "durationMs": 20.3,
+            "jsonBytes": 12256,
+            "sampledRssMiB": 169.19,
+            "sampledHeapMiB": 50.73,
+            "sql": {
+              "queries": 12,
+              "durationMs": 5,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=33&maxId=1205",
+            "status": 200,
+            "durationMs": 14.5,
+            "jsonBytes": 12256,
+            "sampledRssMiB": 169.69,
+            "sampledHeapMiB": 51.27,
+            "sql": {
+              "queries": 12,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=34&maxId=1205",
+            "status": 200,
+            "durationMs": 23.8,
+            "jsonBytes": 12256,
+            "sampledRssMiB": 170.19,
+            "sampledHeapMiB": 51.82,
+            "sql": {
+              "queries": 12,
+              "durationMs": 11,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=35&maxId=1205",
+            "status": 200,
+            "durationMs": 15.2,
+            "jsonBytes": 12256,
+            "sampledRssMiB": 170.82,
+            "sampledHeapMiB": 52.39,
+            "sql": {
+              "queries": 12,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=36&maxId=1205",
+            "status": 200,
+            "durationMs": 13.6,
+            "jsonBytes": 12256,
+            "sampledRssMiB": 171.32,
+            "sampledHeapMiB": 52.94,
+            "sql": {
+              "queries": 12,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=37&maxId=1205",
+            "status": 200,
+            "durationMs": 17.4,
+            "jsonBytes": 12256,
+            "sampledRssMiB": 171.82,
+            "sampledHeapMiB": 53.49,
+            "sql": {
+              "queries": 12,
+              "durationMs": 5,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=38&maxId=1205",
+            "status": 200,
+            "durationMs": 15.8,
+            "jsonBytes": 12256,
+            "sampledRssMiB": 172.32,
+            "sampledHeapMiB": 54.04,
+            "sql": {
+              "queries": 12,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=39&maxId=1205",
+            "status": 200,
+            "durationMs": 16.5,
+            "jsonBytes": 12248,
+            "sampledRssMiB": 172.94,
+            "sampledHeapMiB": 54.59,
+            "sql": {
+              "queries": 12,
+              "durationMs": 5,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=40&maxId=1205",
+            "status": 200,
+            "durationMs": 15.4,
+            "jsonBytes": 12228,
+            "sampledRssMiB": 173.57,
+            "sampledHeapMiB": 55.15,
+            "sql": {
+              "queries": 12,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=41&maxId=1205",
+            "status": 200,
+            "durationMs": 22.7,
+            "jsonBytes": 806,
+            "sampledRssMiB": 173.94,
+            "sampledHeapMiB": 55.51,
+            "sql": {
+              "queries": 12,
+              "durationMs": 5,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=42&maxId=1205",
+            "status": 200,
+            "durationMs": 18.2,
+            "jsonBytes": 332,
+            "sampledRssMiB": 174.32,
+            "sampledHeapMiB": 55.92,
+            "sql": {
+              "queries": 11,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3",
+            "status": 200,
+            "durationMs": 15.5,
+            "jsonBytes": 12279,
+            "sampledRssMiB": 174.82,
+            "sampledHeapMiB": 56.48,
+            "sql": {
+              "queries": 13,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&recordId=1206",
+            "status": 200,
+            "durationMs": 11.1,
+            "jsonBytes": 783,
+            "sampledRssMiB": 175.19,
+            "sampledHeapMiB": 56.85,
+            "sql": {
+              "queries": 13,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=1",
+            "status": 200,
+            "durationMs": 18.6,
+            "jsonBytes": 13241,
+            "sampledRssMiB": 177.32,
+            "sampledHeapMiB": 58.14,
+            "sql": {
+              "queries": 14,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=2&maxId=1207",
+            "status": 200,
+            "durationMs": 13,
+            "jsonBytes": 13241,
+            "sampledRssMiB": 177.32,
+            "sampledHeapMiB": 38.2,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=3&maxId=1207",
+            "status": 200,
+            "durationMs": 13.2,
+            "jsonBytes": 13220,
+            "sampledRssMiB": 177.32,
+            "sampledHeapMiB": 38.74,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=4&maxId=1207",
+            "status": 200,
+            "durationMs": 13,
+            "jsonBytes": 13166,
+            "sampledRssMiB": 177.32,
+            "sampledHeapMiB": 39.27,
+            "sql": {
+              "queries": 13,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=5&maxId=1207",
+            "status": 200,
+            "durationMs": 13.9,
+            "jsonBytes": 13166,
+            "sampledRssMiB": 177.32,
+            "sampledHeapMiB": 39.81,
+            "sql": {
+              "queries": 13,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=6&maxId=1207",
+            "status": 200,
+            "durationMs": 14.6,
+            "jsonBytes": 13166,
+            "sampledRssMiB": 177.32,
+            "sampledHeapMiB": 40.34,
+            "sql": {
+              "queries": 13,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=7&maxId=1207",
+            "status": 200,
+            "durationMs": 13.9,
+            "jsonBytes": 13166,
+            "sampledRssMiB": 177.32,
+            "sampledHeapMiB": 40.89,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=8&maxId=1207",
+            "status": 200,
+            "durationMs": 13.3,
+            "jsonBytes": 13166,
+            "sampledRssMiB": 177.32,
+            "sampledHeapMiB": 41.43,
+            "sql": {
+              "queries": 13,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=9&maxId=1207",
+            "status": 200,
+            "durationMs": 14.5,
+            "jsonBytes": 13166,
+            "sampledRssMiB": 177.32,
+            "sampledHeapMiB": 41.97,
+            "sql": {
+              "queries": 13,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=10&maxId=1207",
+            "status": 200,
+            "durationMs": 13.8,
+            "jsonBytes": 13168,
+            "sampledRssMiB": 177.32,
+            "sampledHeapMiB": 42.5,
+            "sql": {
+              "queries": 13,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=11&maxId=1207",
+            "status": 200,
+            "durationMs": 12.3,
+            "jsonBytes": 13168,
+            "sampledRssMiB": 177.32,
+            "sampledHeapMiB": 43.04,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=12&maxId=1207",
+            "status": 200,
+            "durationMs": 12.1,
+            "jsonBytes": 13168,
+            "sampledRssMiB": 177.32,
+            "sampledHeapMiB": 43.58,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=13&maxId=1207",
+            "status": 200,
+            "durationMs": 12.8,
+            "jsonBytes": 13143,
+            "sampledRssMiB": 177.32,
+            "sampledHeapMiB": 44.12,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=14&maxId=1207",
+            "status": 200,
+            "durationMs": 12.7,
+            "jsonBytes": 13209,
+            "sampledRssMiB": 177.32,
+            "sampledHeapMiB": 44.66,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=15&maxId=1207",
+            "status": 200,
+            "durationMs": 13.5,
+            "jsonBytes": 13243,
+            "sampledRssMiB": 177.32,
+            "sampledHeapMiB": 45.19,
+            "sql": {
+              "queries": 13,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=16&maxId=1207",
+            "status": 200,
+            "durationMs": 15.1,
+            "jsonBytes": 13243,
+            "sampledRssMiB": 177.32,
+            "sampledHeapMiB": 45.73,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=17&maxId=1207",
+            "status": 200,
+            "durationMs": 15.3,
+            "jsonBytes": 13174,
+            "sampledRssMiB": 177.32,
+            "sampledHeapMiB": 46.27,
+            "sql": {
+              "queries": 13,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=18&maxId=1207",
+            "status": 200,
+            "durationMs": 14.2,
+            "jsonBytes": 13168,
+            "sampledRssMiB": 177.32,
+            "sampledHeapMiB": 46.8,
+            "sql": {
+              "queries": 13,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=19&maxId=1207",
+            "status": 200,
+            "durationMs": 13.2,
+            "jsonBytes": 13168,
+            "sampledRssMiB": 177.32,
+            "sampledHeapMiB": 47.38,
+            "sql": {
+              "queries": 13,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=20&maxId=1207",
+            "status": 200,
+            "durationMs": 11.4,
+            "jsonBytes": 13168,
+            "sampledRssMiB": 177.32,
+            "sampledHeapMiB": 47.93,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=21&maxId=1207",
+            "status": 200,
+            "durationMs": 14,
+            "jsonBytes": 13168,
+            "sampledRssMiB": 177.32,
+            "sampledHeapMiB": 48.47,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=22&maxId=1207",
+            "status": 200,
+            "durationMs": 19.7,
+            "jsonBytes": 13168,
+            "sampledRssMiB": 177.32,
+            "sampledHeapMiB": 49.02,
+            "sql": {
+              "queries": 13,
+              "durationMs": 6,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=23&maxId=1207",
+            "status": 200,
+            "durationMs": 15.7,
+            "jsonBytes": 13168,
+            "sampledRssMiB": 177.94,
+            "sampledHeapMiB": 49.55,
+            "sql": {
+              "queries": 13,
+              "durationMs": 6,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=24&maxId=1207",
+            "status": 200,
+            "durationMs": 14.1,
+            "jsonBytes": 13168,
+            "sampledRssMiB": 178.44,
+            "sampledHeapMiB": 50.09,
+            "sql": {
+              "queries": 13,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=25&maxId=1207",
+            "status": 200,
+            "durationMs": 14.4,
+            "jsonBytes": 13168,
+            "sampledRssMiB": 178.94,
+            "sampledHeapMiB": 50.62,
+            "sql": {
+              "queries": 13,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=26&maxId=1207",
+            "status": 200,
+            "durationMs": 13.4,
+            "jsonBytes": 13152,
+            "sampledRssMiB": 179.44,
+            "sampledHeapMiB": 51.17,
+            "sql": {
+              "queries": 13,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=27&maxId=1207",
+            "status": 200,
+            "durationMs": 17.8,
+            "jsonBytes": 13172,
+            "sampledRssMiB": 179.94,
+            "sampledHeapMiB": 51.71,
+            "sql": {
+              "queries": 13,
+              "durationMs": 5,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=28&maxId=1207",
+            "status": 200,
+            "durationMs": 15.4,
+            "jsonBytes": 13243,
+            "sampledRssMiB": 180.57,
+            "sampledHeapMiB": 52.24,
+            "sql": {
+              "queries": 13,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=29&maxId=1207",
+            "status": 200,
+            "durationMs": 13.5,
+            "jsonBytes": 13243,
+            "sampledRssMiB": 181.07,
+            "sampledHeapMiB": 52.79,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=30&maxId=1207",
+            "status": 200,
+            "durationMs": 11.6,
+            "jsonBytes": 13199,
+            "sampledRssMiB": 181.57,
+            "sampledHeapMiB": 53.32,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=31&maxId=1207",
+            "status": 200,
+            "durationMs": 12.4,
+            "jsonBytes": 13168,
+            "sampledRssMiB": 182.07,
+            "sampledHeapMiB": 53.85,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=32&maxId=1207",
+            "status": 200,
+            "durationMs": 12.3,
+            "jsonBytes": 13168,
+            "sampledRssMiB": 182.57,
+            "sampledHeapMiB": 54.39,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=33&maxId=1207",
+            "status": 200,
+            "durationMs": 15,
+            "jsonBytes": 13168,
+            "sampledRssMiB": 183.32,
+            "sampledHeapMiB": 54.92,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=34&maxId=1207",
+            "status": 200,
+            "durationMs": 12.2,
+            "jsonBytes": 13168,
+            "sampledRssMiB": 183.82,
+            "sampledHeapMiB": 55.46,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=35&maxId=1207",
+            "status": 200,
+            "durationMs": 12.4,
+            "jsonBytes": 13168,
+            "sampledRssMiB": 184.32,
+            "sampledHeapMiB": 55.99,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=36&maxId=1207",
+            "status": 200,
+            "durationMs": 13.7,
+            "jsonBytes": 13168,
+            "sampledRssMiB": 184.82,
+            "sampledHeapMiB": 56.66,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=37&maxId=1207",
+            "status": 200,
+            "durationMs": 11.8,
+            "jsonBytes": 13168,
+            "sampledRssMiB": 185.32,
+            "sampledHeapMiB": 57.07,
+            "sql": {
+              "queries": 13,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=38&maxId=1207",
+            "status": 200,
+            "durationMs": 13.9,
+            "jsonBytes": 13168,
+            "sampledRssMiB": 185.94,
+            "sampledHeapMiB": 57.62,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=39&maxId=1207",
+            "status": 200,
+            "durationMs": 14.5,
+            "jsonBytes": 13160,
+            "sampledRssMiB": 186.44,
+            "sampledHeapMiB": 58.15,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=40&maxId=1207",
+            "status": 200,
+            "durationMs": 13,
+            "jsonBytes": 13140,
+            "sampledRssMiB": 186.94,
+            "sampledHeapMiB": 58.69,
+            "sql": {
+              "queries": 13,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=41&maxId=1207",
+            "status": 200,
+            "durationMs": 11.2,
+            "jsonBytes": 830,
+            "sampledRssMiB": 187.32,
+            "sampledHeapMiB": 59.03,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=42&maxId=1207",
+            "status": 200,
+            "durationMs": 11.2,
+            "jsonBytes": 319,
+            "sampledRssMiB": 190.94,
+            "sampledHeapMiB": 59.31,
+            "sql": {
+              "queries": 10,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4",
+            "status": 200,
+            "durationMs": 12.6,
+            "jsonBytes": 13241,
+            "sampledRssMiB": 190.94,
+            "sampledHeapMiB": 41.01,
+            "sql": {
+              "queries": 14,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&recordId=1208",
+            "status": 200,
+            "durationMs": 10.7,
+            "jsonBytes": 833,
+            "sampledRssMiB": 190.94,
+            "sampledHeapMiB": 41.37,
+            "sql": {
+              "queries": 14,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=1",
+            "status": 200,
+            "durationMs": 13.7,
+            "jsonBytes": 12652,
+            "sampledRssMiB": 190.94,
+            "sampledHeapMiB": 43.22,
+            "sql": {
+              "queries": 13,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=2&maxId=1208",
+            "status": 200,
+            "durationMs": 10.2,
+            "jsonBytes": 12652,
+            "sampledRssMiB": 190.94,
+            "sampledHeapMiB": 43.78,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=3&maxId=1208",
+            "status": 200,
+            "durationMs": 10.6,
+            "jsonBytes": 12646,
+            "sampledRssMiB": 190.94,
+            "sampledHeapMiB": 44.32,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=4&maxId=1208",
+            "status": 200,
+            "durationMs": 11.4,
+            "jsonBytes": 12627,
+            "sampledRssMiB": 190.94,
+            "sampledHeapMiB": 44.85,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=5&maxId=1208",
+            "status": 200,
+            "durationMs": 10.7,
+            "jsonBytes": 12627,
+            "sampledRssMiB": 190.94,
+            "sampledHeapMiB": 45.39,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=6&maxId=1208",
+            "status": 200,
+            "durationMs": 9.6,
+            "jsonBytes": 12627,
+            "sampledRssMiB": 190.94,
+            "sampledHeapMiB": 45.93,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=7&maxId=1208",
+            "status": 200,
+            "durationMs": 11.3,
+            "jsonBytes": 12627,
+            "sampledRssMiB": 191.07,
+            "sampledHeapMiB": 46.46,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=8&maxId=1208",
+            "status": 200,
+            "durationMs": 12.9,
+            "jsonBytes": 12627,
+            "sampledRssMiB": 191.07,
+            "sampledHeapMiB": 47.03,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=9&maxId=1208",
+            "status": 200,
+            "durationMs": 11.4,
+            "jsonBytes": 12627,
+            "sampledRssMiB": 191.07,
+            "sampledHeapMiB": 47.56,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=10&maxId=1208",
+            "status": 200,
+            "durationMs": 10.9,
+            "jsonBytes": 12629,
+            "sampledRssMiB": 191.07,
+            "sampledHeapMiB": 48.11,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=11&maxId=1208",
+            "status": 200,
+            "durationMs": 10.6,
+            "jsonBytes": 12629,
+            "sampledRssMiB": 191.07,
+            "sampledHeapMiB": 48.66,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=12&maxId=1208",
+            "status": 200,
+            "durationMs": 12.4,
+            "jsonBytes": 12629,
+            "sampledRssMiB": 191.07,
+            "sampledHeapMiB": 49.19,
+            "sql": {
+              "queries": 12,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=13&maxId=1208",
+            "status": 200,
+            "durationMs": 11.9,
+            "jsonBytes": 12604,
+            "sampledRssMiB": 191.07,
+            "sampledHeapMiB": 49.75,
+            "sql": {
+              "queries": 12,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=14&maxId=1208",
+            "status": 200,
+            "durationMs": 16.1,
+            "jsonBytes": 12636,
+            "sampledRssMiB": 191.07,
+            "sampledHeapMiB": 50.29,
+            "sql": {
+              "queries": 12,
+              "durationMs": 5,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=15&maxId=1208",
+            "status": 200,
+            "durationMs": 13,
+            "jsonBytes": 12654,
+            "sampledRssMiB": 191.07,
+            "sampledHeapMiB": 50.84,
+            "sql": {
+              "queries": 12,
+              "durationMs": 4,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=16&maxId=1208",
+            "status": 200,
+            "durationMs": 12.2,
+            "jsonBytes": 12654,
+            "sampledRssMiB": 191.07,
+            "sampledHeapMiB": 51.39,
+            "sql": {
+              "queries": 12,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=17&maxId=1208",
+            "status": 200,
+            "durationMs": 11.1,
+            "jsonBytes": 12631,
+            "sampledRssMiB": 191.07,
+            "sampledHeapMiB": 52.33,
+            "sql": {
+              "queries": 12,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=18&maxId=1208",
+            "status": 200,
+            "durationMs": 12.1,
+            "jsonBytes": 12629,
+            "sampledRssMiB": 191.19,
+            "sampledHeapMiB": 52.49,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=19&maxId=1208",
+            "status": 200,
+            "durationMs": 11.4,
+            "jsonBytes": 12629,
+            "sampledRssMiB": 191.19,
+            "sampledHeapMiB": 53.03,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=20&maxId=1208",
+            "status": 200,
+            "durationMs": 10.3,
+            "jsonBytes": 12629,
+            "sampledRssMiB": 191.19,
+            "sampledHeapMiB": 53.56,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=21&maxId=1208",
+            "status": 200,
+            "durationMs": 11.7,
+            "jsonBytes": 12629,
+            "sampledRssMiB": 191.19,
+            "sampledHeapMiB": 54.12,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=22&maxId=1208",
+            "status": 200,
+            "durationMs": 12.2,
+            "jsonBytes": 12629,
+            "sampledRssMiB": 191.19,
+            "sampledHeapMiB": 54.65,
+            "sql": {
+              "queries": 12,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=23&maxId=1208",
+            "status": 200,
+            "durationMs": 11.9,
+            "jsonBytes": 12629,
+            "sampledRssMiB": 191.19,
+            "sampledHeapMiB": 55.21,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=24&maxId=1208",
+            "status": 200,
+            "durationMs": 11.4,
+            "jsonBytes": 12629,
+            "sampledRssMiB": 191.19,
+            "sampledHeapMiB": 55.74,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=25&maxId=1208",
+            "status": 200,
+            "durationMs": 10.1,
+            "jsonBytes": 12629,
+            "sampledRssMiB": 191.19,
+            "sampledHeapMiB": 56.28,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=26&maxId=1208",
+            "status": 200,
+            "durationMs": 10.4,
+            "jsonBytes": 12613,
+            "sampledRssMiB": 191.19,
+            "sampledHeapMiB": 56.81,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=27&maxId=1208",
+            "status": 200,
+            "durationMs": 10.3,
+            "jsonBytes": 11969,
+            "sampledRssMiB": 191.19,
+            "sampledHeapMiB": 57.35,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=28&maxId=1208",
+            "status": 200,
+            "durationMs": 10.2,
+            "jsonBytes": 10629,
+            "sampledRssMiB": 191.19,
+            "sampledHeapMiB": 57.87,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=29&maxId=1208",
+            "status": 200,
+            "durationMs": 9.8,
+            "jsonBytes": 10629,
+            "sampledRssMiB": 191.19,
+            "sampledHeapMiB": 58.37,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=30&maxId=1208",
+            "status": 200,
+            "durationMs": 12.7,
+            "jsonBytes": 10615,
+            "sampledRssMiB": 191.19,
+            "sampledHeapMiB": 58.87,
+            "sql": {
+              "queries": 12,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=31&maxId=1208",
+            "status": 200,
+            "durationMs": 11.5,
+            "jsonBytes": 10604,
+            "sampledRssMiB": 191.19,
+            "sampledHeapMiB": 59.39,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=32&maxId=1208",
+            "status": 200,
+            "durationMs": 13.7,
+            "jsonBytes": 10604,
+            "sampledRssMiB": 191.19,
+            "sampledHeapMiB": 59.89,
+            "sql": {
+              "queries": 12,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=33&maxId=1208",
+            "status": 200,
+            "durationMs": 11.4,
+            "jsonBytes": 10604,
+            "sampledRssMiB": 191.19,
+            "sampledHeapMiB": 60.39,
+            "sql": {
+              "queries": 12,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=34&maxId=1208",
+            "status": 200,
+            "durationMs": 10.9,
+            "jsonBytes": 10604,
+            "sampledRssMiB": 191.19,
+            "sampledHeapMiB": 60.9,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=35&maxId=1208",
+            "status": 200,
+            "durationMs": 10.5,
+            "jsonBytes": 10604,
+            "sampledRssMiB": 191.19,
+            "sampledHeapMiB": 61.41,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=36&maxId=1208",
+            "status": 200,
+            "durationMs": 11.7,
+            "jsonBytes": 10604,
+            "sampledRssMiB": 191.19,
+            "sampledHeapMiB": 61.91,
+            "sql": {
+              "queries": 12,
+              "durationMs": 3,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=37&maxId=1208",
+            "status": 200,
+            "durationMs": 11.1,
+            "jsonBytes": 10604,
+            "sampledRssMiB": 191.32,
+            "sampledHeapMiB": 62.42,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=38&maxId=1208",
+            "status": 200,
+            "durationMs": 9.8,
+            "jsonBytes": 10604,
+            "sampledRssMiB": 191.32,
+            "sampledHeapMiB": 62.92,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=39&maxId=1208",
+            "status": 200,
+            "durationMs": 14.6,
+            "jsonBytes": 10596,
+            "sampledRssMiB": 194.44,
+            "sampledHeapMiB": 62.93,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=40&maxId=1208",
+            "status": 200,
+            "durationMs": 10.9,
+            "jsonBytes": 10576,
+            "sampledRssMiB": 194.44,
+            "sampledHeapMiB": 44.53,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=41&maxId=1208",
+            "status": 200,
+            "durationMs": 10.3,
+            "jsonBytes": 736,
+            "sampledRssMiB": 194.44,
+            "sampledHeapMiB": 44.9,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=42&maxId=1208",
+            "status": 200,
+            "durationMs": 8.6,
+            "jsonBytes": 330,
+            "sampledRssMiB": 194.44,
+            "sampledHeapMiB": 45.32,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205",
+            "status": 200,
+            "durationMs": 11.7,
+            "jsonBytes": 12652,
+            "sampledRssMiB": 194.44,
+            "sampledHeapMiB": 45.88,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&recordId=1210",
+            "status": 200,
+            "durationMs": 11.2,
+            "jsonBytes": 795,
+            "sampledRssMiB": 194.44,
+            "sampledHeapMiB": 46.27,
+            "sql": {
+              "queries": 13,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/stock/3?includeMovements=false",
+            "status": 200,
+            "durationMs": 17.2,
+            "jsonBytes": 59675,
+            "sampledRssMiB": 194.44,
+            "sampledHeapMiB": 47.52,
+            "sql": {
+              "queries": 18,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/stock/3",
+            "status": 200,
+            "durationMs": 48.7,
+            "jsonBytes": 448600,
+            "sampledRssMiB": 196.07,
+            "sampledHeapMiB": 58.04,
+            "sql": {
+              "queries": 22,
+              "durationMs": 5,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/movements?workGuideId=1205&transportGuideId=1204&movementType=LOAD",
+            "status": 200,
+            "durationMs": 35.3,
+            "jsonBytes": 114504,
+            "sampledRssMiB": 196.07,
+            "sampledHeapMiB": 63.49,
+            "sql": {
+              "queries": 17,
+              "durationMs": 6,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/movements?maxId=0",
+            "status": 200,
+            "durationMs": 25.1,
+            "jsonBytes": 230,
+            "sampledRssMiB": 196.07,
+            "sampledHeapMiB": 64.82,
+            "sql": {
+              "queries": 15,
+              "durationMs": 6,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/transport?status=ACTIVE",
+            "status": 200,
+            "durationMs": 12.5,
+            "jsonBytes": 12734,
+            "sampledRssMiB": 196.07,
+            "sampledHeapMiB": 65.48,
+            "sql": {
+              "queries": 16,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/work?status=OPEN",
+            "status": 200,
+            "durationMs": 15.8,
+            "jsonBytes": 36338,
+            "sampledRssMiB": 196.07,
+            "sampledHeapMiB": 66.46,
+            "sql": {
+              "queries": 18,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/transport/latest/3",
+            "status": 200,
+            "durationMs": 13.3,
+            "jsonBytes": 24052,
+            "sampledRssMiB": 196.07,
+            "sampledHeapMiB": 67.22,
+            "sql": {
+              "queries": 14,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history/work/1205?page=1",
+            "status": 200,
+            "durationMs": 12.9,
+            "jsonBytes": 5527,
+            "sampledRssMiB": 198.04,
+            "sampledHeapMiB": 67.46,
+            "sql": {
+              "queries": 13,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history/work/1205?page=2",
+            "status": 200,
+            "durationMs": 12.1,
+            "jsonBytes": 5568,
+            "sampledRssMiB": 198.16,
+            "sampledHeapMiB": 46.91,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history/work/1205?page=3",
+            "status": 200,
+            "durationMs": 10.4,
+            "jsonBytes": 5563,
+            "sampledRssMiB": 198.16,
+            "sampledHeapMiB": 47.3,
+            "sql": {
+              "queries": 13,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history/work/1205?page=4",
+            "status": 200,
+            "durationMs": 12.6,
+            "jsonBytes": 5568,
+            "sampledRssMiB": 198.16,
+            "sampledHeapMiB": 47.71,
+            "sql": {
+              "queries": 13,
+              "durationMs": 2,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history/work/1205?page=5",
+            "status": 200,
+            "durationMs": 9.1,
+            "jsonBytes": 729,
+            "sampledRssMiB": 198.16,
+            "sampledHeapMiB": 48.03,
+            "sql": {
+              "queries": 13,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history/transport/1204?page=1",
+            "status": 200,
+            "durationMs": 10.1,
+            "jsonBytes": 3585,
+            "sampledRssMiB": 198.16,
+            "sampledHeapMiB": 48.43,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history/transport/1204?page=2",
+            "status": 200,
+            "durationMs": 9.3,
+            "jsonBytes": 3619,
+            "sampledRssMiB": 198.16,
+            "sampledHeapMiB": 48.82,
+            "sql": {
+              "queries": 12,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history/transport/1204?page=3",
+            "status": 200,
+            "durationMs": 8.4,
+            "jsonBytes": 3614,
+            "sampledRssMiB": 198.16,
+            "sampledHeapMiB": 49.21,
+            "sql": {
+              "queries": 12,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history/transport/1204?page=4",
+            "status": 200,
+            "durationMs": 11,
+            "jsonBytes": 3619,
+            "sampledRssMiB": 198.29,
+            "sampledHeapMiB": 49.64,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history/transport/1204?page=5",
+            "status": 200,
+            "durationMs": 8.9,
+            "jsonBytes": 705,
+            "sampledRssMiB": 198.29,
+            "sampledHeapMiB": 50.01,
+            "sql": {
+              "queries": 12,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/work?technicianId=5",
+            "status": 403,
+            "durationMs": 6.2,
+            "jsonBytes": 149,
+            "sampledRssMiB": 198.29,
+            "sampledHeapMiB": 50.33,
+            "sql": {
+              "queries": 9,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/stock/4",
+            "status": 403,
+            "durationMs": 5.7,
+            "jsonBytes": 149,
+            "sampledRssMiB": 198.29,
+            "sampledHeapMiB": 50.65,
+            "sql": {
+              "queries": 9,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/movements?workGuideId=1206",
+            "status": 403,
+            "durationMs": 8.4,
+            "jsonBytes": 149,
+            "sampledRssMiB": 198.29,
+            "sampledHeapMiB": 51.19,
+            "sql": {
+              "queries": 11,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/transport?vehicleId=4",
+            "status": 403,
+            "durationMs": 5.3,
+            "jsonBytes": 149,
+            "sampledRssMiB": 198.29,
+            "sampledHeapMiB": 51.48,
+            "sql": {
+              "queries": 9,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work",
+            "status": 403,
+            "durationMs": 3.2,
+            "jsonBytes": 39,
+            "sampledRssMiB": 198.29,
+            "sampledHeapMiB": 51.62,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history/work/1205",
+            "status": 403,
+            "durationMs": 3.4,
+            "jsonBytes": 39,
+            "sampledRssMiB": 198.29,
+            "sampledHeapMiB": 51.76,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/movements",
+            "status": 401,
+            "durationMs": 2,
+            "jsonBytes": 34,
+            "sampledRssMiB": 198.29,
+            "sampledHeapMiB": 51.85,
+            "sql": {
+              "queries": 0,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history",
+            "status": 401,
+            "durationMs": 1.6,
+            "jsonBytes": 34,
+            "sampledRssMiB": 198.29,
+            "sampledHeapMiB": 51.92,
+            "sql": {
+              "queries": 0,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/movements?limit=201",
+            "status": 400,
+            "durationMs": 3.8,
+            "jsonBytes": 153,
+            "sampledRssMiB": 198.29,
+            "sampledHeapMiB": 52.08,
+            "sql": {
+              "queries": 4,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/stock/3",
+            "status": 403,
+            "durationMs": 3.9,
+            "jsonBytes": 149,
+            "sampledRssMiB": 198.29,
+            "sampledHeapMiB": 52.56,
+            "sql": {
+              "queries": 9,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/transport?offset=200",
+            "status": 503,
+            "durationMs": 8.2,
+            "jsonBytes": 151,
+            "sampledRssMiB": 198.29,
+            "sampledHeapMiB": 52.77,
+            "sql": {
+              "queries": 11,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/work?offset=200",
+            "status": 503,
+            "durationMs": 7.1,
+            "jsonBytes": 151,
+            "sampledRssMiB": 198.29,
+            "sampledHeapMiB": 53.14,
+            "sql": {
+              "queries": 11,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/guides/movements?offset=200",
+            "status": 503,
+            "durationMs": 19.7,
+            "jsonBytes": 151,
+            "sampledRssMiB": 198.29,
+            "sampledHeapMiB": 54.36,
+            "sql": {
+              "queries": 13,
+              "durationMs": 6,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=transport&vehicleId=3&page=2",
+            "status": 503,
+            "durationMs": 7.3,
+            "jsonBytes": 77,
+            "sampledRssMiB": 198.29,
+            "sampledHeapMiB": 54.64,
+            "sql": {
+              "queries": 10,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=work&vehicleId=3&technicianId=4&page=2",
+            "status": 503,
+            "durationMs": 6.6,
+            "jsonBytes": 77,
+            "sampledRssMiB": 198.29,
+            "sampledHeapMiB": 54.91,
+            "sql": {
+              "queries": 10,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history?kind=movement&vehicleId=3&workGuideId=1205&page=2",
+            "status": 503,
+            "durationMs": 7.6,
+            "jsonBytes": 77,
+            "sampledRssMiB": 198.29,
+            "sampledHeapMiB": 55.19,
+            "sql": {
+              "queries": 10,
+              "durationMs": 1,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history/work/1205?page=2",
+            "status": 503,
+            "durationMs": 9.6,
+            "jsonBytes": 77,
+            "sampledRssMiB": 198.29,
+            "sampledHeapMiB": 55.49,
+            "sql": {
+              "queries": 12,
+              "durationMs": 0,
+              "writes": 0
+            }
+          },
+          {
+            "url": "/api/fleet-history/transport/1204?page=2",
+            "status": 503,
+            "durationMs": 7.9,
+            "jsonBytes": 77,
+            "sampledRssMiB": 198.29,
+            "sampledHeapMiB": 55.81,
+            "sql": {
+              "queries": 11,
+              "durationMs": 0,
+              "writes": 0
+            }
+          }
+        ],
+        "proofs": [
+          {
+            "surface": "field-transport",
+            "rows": 1001,
+            "pages": 6,
+            "orderedIdsSha256": "ccd1248454ceaed636a65ecda4e035118a9ae88b5f39ea68deb78ee93627ddef",
+            "insertionBoundary": false
+          },
+          {
+            "surface": "field-work",
+            "rows": 1001,
+            "pages": 6,
+            "orderedIdsSha256": "02dd7845232f06e0d1529fca693ce5f7b60d5acd5ff6d62b4c1ed0a4428f2d05",
+            "insertionBoundary": false
+          },
+          {
+            "surface": "field-movement",
+            "rows": 1001,
+            "pages": 6,
+            "orderedIdsSha256": "e0656dd24bca3728e30707622b111b2b3d352fa0983e442713528c30d62e76db",
+            "insertionBoundary": true
+          },
+          {
+            "surface": "admin-transport",
+            "rows": 1001,
+            "pages": 41,
+            "orderedIdsSha256": "ccd1248454ceaed636a65ecda4e035118a9ae88b5f39ea68deb78ee93627ddef",
+            "insertionBoundary": true
+          },
+          {
+            "surface": "admin-work",
+            "rows": 1001,
+            "pages": 41,
+            "orderedIdsSha256": "02dd7845232f06e0d1529fca693ce5f7b60d5acd5ff6d62b4c1ed0a4428f2d05",
+            "insertionBoundary": true
+          },
+          {
+            "surface": "admin-movement",
+            "rows": 1001,
+            "pages": 41,
+            "orderedIdsSha256": "e0656dd24bca3728e30707622b111b2b3d352fa0983e442713528c30d62e76db",
+            "insertionBoundary": true
+          }
+        ],
+        "stockItems": 100,
+        "consumptions": 667,
+        "partialFailuresRejected": 8,
+        "permissions": true,
+        "literalFields": true,
+        "transactionsRepeatableRead": true,
+        "writes": 0
+      },
+      {
+        "ok": true,
+        "phase": "assertions-completed",
+        "mode": "UI",
+        "records": 1001,
+        "results": [
+          {
+            "surface": "technician",
+            "rows": 1001,
+            "pages": 41,
+            "materialPages": 4,
+            "loadAndTraversalMs": 10675.8,
+            "jsHeapMiB": 3.51,
+            "insertionBoundary": true,
+            "offlineRecovery": true
+          },
+          {
+            "surface": "admin-transport",
+            "rows": 1001,
+            "pages": 41,
+            "traversalMs": 5111.5,
+            "jsHeapMiB": 5.35
+          },
+          {
+            "surface": "admin-work",
+            "rows": 1001,
+            "pages": 41,
+            "traversalMs": 4896.8,
+            "jsHeapMiB": 4.31
+          },
+          {
+            "surface": "admin-movement",
+            "rows": 1001,
+            "pages": 41,
+            "traversalMs": 3240.9,
+            "jsHeapMiB": 3.9
+          }
+        ],
+        "exactIds": true,
+        "pageErrors": 0,
+        "writes": 0
+      }
+    ],
+    "durationMs": 31415,
+    "cleanupVerified": true,
+    "scope": "Fresh Node process per API profile. RSS includes API, HTTP client and fixture oracle, excludes DB/browser. Real SQL and UI, explicit ID boundaries for insertions between requests. Does not certify stability under updates/deletions or cross-request snapshots for legacy field guide lists. Read tests do not submit stock commands or generate PDFs."
+  },
+  "validation": {
+    "unit": 1311,
+    "unitFiles": 134,
+    "technician": 4,
+    "syntax": {
+      "backend": 695,
+      "frontend": 307,
+      "inline": 44
+    },
+    "runnerScripts": 313,
+    "groups": {
+      "test-field-guide-volume.js": 31520,
+      "test-field-guide-read-scope.js": 4559,
+      "test-field-fleet-history.js": 3113,
+      "test-field-technician-guide-ui.js": 22572,
+      "test-field-fleet-history-ui.js": 22083
+    },
+    "allTerminalMarkersRead": true,
+    "diffCheck": true
+  },
+  "screenshots": {
+    "technician-390.png": "27aa72545418b49e1c796e2e776c8d46f828e6f861032a1e960874486a36f992",
+    "admin-detail-390.png": "0dcd2424f9d9e2eb1b9d2ebdb3bc5d5f39ebb1a63ebd7e988995f6b1a33c93ad",
+    "admin-detail-1440.png": "f37c4e32ec898397eb72ecd74eb55104e4a8ba09cd6c7b3b42e93d58ccc86fbd"
+  },
+  "previousNative": [
+    {
+      "runId": 36460017985,
+      "headSha": "77e424dd8305534fb63a4d251dba29e9a00b3f0e",
+      "conclusion": "success",
+      "steps": 18,
+      "restore": "PASS restored 128 tables and 47 uploaded files; database rows and file hashes match",
+      "runnerExactOrder": true,
+      "artifactId": 10988903063,
+      "scripts": 310,
+      "gates": {
+        "field-visual/operational-dashboard/snapshot.json": {
+          "ok": true,
+          "phase": "assertions-completed",
+          "engine": "PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+          "sha256": "ca06e8a460cff9802c8b718d2416c5c6fc52c8c6031188f85b17d1a87f2ec3cc",
+          "proof": {
+            "ok": true,
+            "phase": "assertions-completed",
+            "engine": "PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+            "committedBeforeRemaining": true,
+            "transactions": [
+              {
+                "scope": "transaction-1",
+                "options": {
+                  "isolationLevel": "RepeatableRead",
+                  "timeout": 30000
+                }
+              }
+            ],
+            "reads": [
+              {
+                "model": "client",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "pool",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "technician",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "invoice",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "payment",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "technicalAlert",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "notification",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "serviceVisit",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "serviceVisit",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "auditTrail",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "technicalAlert",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "notification",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "serviceVisit",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "client",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "invoice",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "technicalAlert",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "notification",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "serviceVisit",
+                "scope": "transaction-1"
+              }
+            ],
+            "duringDelta": {
+              "clients": 0,
+              "pools": 0,
+              "technicians": 0,
+              "visits": 0,
+              "notDone": 0,
+              "billed": 0,
+              "paid": 0,
+              "open": 0,
+              "alerts": 0,
+              "fiscalClients": 0,
+              "fiscalInvoices": 0,
+              "fiscalPending": 0,
+              "fiscalPendingAmount": 0
+            },
+            "afterDelta": {
+              "clients": 1,
+              "pools": 1,
+              "technicians": 1,
+              "visits": 1,
+              "notDone": 1,
+              "billed": 123.45,
+              "paid": 5,
+              "open": 118.45,
+              "alerts": 3,
+              "fiscalClients": 1,
+              "fiscalInvoices": 1,
+              "fiscalPending": 1,
+              "fiscalPendingAmount": 123.45
+            }
+          }
+        },
+        "field-suite/dashboard-metrics.json": {
+          "ok": true,
+          "phase": "assertions-completed",
+          "sha256": "3d844c06283c96b3a9e95a43125605148f3d32245e2320e16f8b0f7b3e6faa71",
+          "proof": {
+            "ok": true,
+            "prefix": "QA metrics ee316672-003f-4ae5-ba12-bcf615c854e5",
+            "phase": "assertions-completed",
+            "snapshot": {
+              "engine": "PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+              "transactions": [
+                {
+                  "scope": "transaction-1",
+                  "options": {
+                    "isolationLevel": "RepeatableRead",
+                    "timeout": 30000
+                  }
+                }
+              ],
+              "reads": [
+                {
+                  "model": "serviceVisit",
+                  "scope": "transaction-1"
+                },
+                {
+                  "model": "technicalAlert",
+                  "scope": "transaction-1"
+                },
+                {
+                  "model": "invoice",
+                  "scope": "transaction-1"
+                }
+              ],
+              "committedBeforeRemaining": true,
+              "duringDelta": {
+                "done": 0,
+                "alerts": 0,
+                "total": 0
+              },
+              "afterDelta": {
+                "done": 1,
+                "alerts": 1,
+                "total": 17.25
+              }
+            },
+            "failedSourcesChecked": 3,
+            "methods": [
+              "GET",
+              "POST"
+            ],
+            "allowedRoles": [
+              "ADMIN",
+              "TEAM_LEADER"
+            ],
+            "refusedRoles": [
+              "CLIENT",
+              "TECHNICIAN"
+            ],
+            "invalidationRaceChecked": true,
+            "businessRecordsUnchanged": true
+          }
+        },
+        "field-suite/summary-volume/results.json": {
+          "ok": true,
+          "phase": "assertions-completed",
+          "engine": "PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+          "cleanupVerified": true,
+          "sha256": "26900776d5a19c63838f9d52c7f6026e245d58ebd4b825b7b21cdcd1fab7d3ab",
+          "profiles": 12,
+          "laterPageFaults": 3,
+          "allPassed": true
+        },
+        "field-suite/inventory-volume/results.json": {
+          "ok": true,
+          "phase": "assertions-completed",
+          "cleanupVerified": true,
+          "sha256": "89dc0d8258882712ad425b25fbfcce9489a8e489902874d232a4d555eaf6097b",
+          "probes": 20,
+          "concurrency": {
+            "engine": "PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+            "committedBeforeRemaining": true,
+            "oldIdsComplete": true,
+            "nextReadIncludesCommit": true
+          },
+          "ui": [
+            {
+              "products": 10000,
+              "renderedFixtureCount": 10000,
+              "durationMs": 2291,
+              "browserJsHeapMiB": 16.82,
+              "writes": 0,
+              "exactOrderedIds": true,
+              "literalNames": true,
+              "viewport": 390
+            }
+          ]
+        }
+      }
+    },
+    {
+      "runId": 36463317792,
+      "headSha": "6b35739d193f3d15c5c378bbbcb93153402ed3d3",
+      "conclusion": "success",
+      "steps": 18,
+      "restore": "PASS restored 128 tables and 47 uploaded files; database rows and file hashes match",
+      "runnerExactOrder": true,
+      "artifactId": 10990683702,
+      "scripts": 311,
+      "gates": {
+        "field-visual/operational-dashboard/snapshot.json": {
+          "ok": true,
+          "phase": "assertions-completed",
+          "engine": "PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+          "sha256": "ca06e8a460cff9802c8b718d2416c5c6fc52c8c6031188f85b17d1a87f2ec3cc",
+          "proof": {
+            "ok": true,
+            "phase": "assertions-completed",
+            "engine": "PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+            "committedBeforeRemaining": true,
+            "transactions": [
+              {
+                "scope": "transaction-1",
+                "options": {
+                  "isolationLevel": "RepeatableRead",
+                  "timeout": 30000
+                }
+              }
+            ],
+            "reads": [
+              {
+                "model": "client",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "pool",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "technician",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "invoice",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "payment",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "technicalAlert",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "notification",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "serviceVisit",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "serviceVisit",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "auditTrail",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "technicalAlert",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "notification",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "serviceVisit",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "client",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "invoice",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "technicalAlert",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "notification",
+                "scope": "transaction-1"
+              },
+              {
+                "model": "serviceVisit",
+                "scope": "transaction-1"
+              }
+            ],
+            "duringDelta": {
+              "clients": 0,
+              "pools": 0,
+              "technicians": 0,
+              "visits": 0,
+              "notDone": 0,
+              "billed": 0,
+              "paid": 0,
+              "open": 0,
+              "alerts": 0,
+              "fiscalClients": 0,
+              "fiscalInvoices": 0,
+              "fiscalPending": 0,
+              "fiscalPendingAmount": 0
+            },
+            "afterDelta": {
+              "clients": 1,
+              "pools": 1,
+              "technicians": 1,
+              "visits": 1,
+              "notDone": 1,
+              "billed": 123.45,
+              "paid": 5,
+              "open": 118.45,
+              "alerts": 3,
+              "fiscalClients": 1,
+              "fiscalInvoices": 1,
+              "fiscalPending": 1,
+              "fiscalPendingAmount": 123.45
+            }
+          }
+        },
+        "field-suite/dashboard-metrics.json": {
+          "ok": true,
+          "phase": "assertions-completed",
+          "sha256": "e3c1650e284b7c1c2003cc5182d216fcee1ad4b3fa4c16f84c9804450c0ebe76",
+          "proof": {
+            "ok": true,
+            "prefix": "QA metrics 84bffbf3-80f3-4090-8808-fc219f16bab6",
+            "phase": "assertions-completed",
+            "snapshot": {
+              "engine": "PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+              "transactions": [
+                {
+                  "scope": "transaction-1",
+                  "options": {
+                    "isolationLevel": "RepeatableRead",
+                    "timeout": 30000
+                  }
+                }
+              ],
+              "reads": [
+                {
+                  "model": "serviceVisit",
+                  "scope": "transaction-1"
+                },
+                {
+                  "model": "technicalAlert",
+                  "scope": "transaction-1"
+                },
+                {
+                  "model": "invoice",
+                  "scope": "transaction-1"
+                }
+              ],
+              "committedBeforeRemaining": true,
+              "duringDelta": {
+                "done": 0,
+                "alerts": 0,
+                "total": 0
+              },
+              "afterDelta": {
+                "done": 1,
+                "alerts": 1,
+                "total": 17.25
+              }
+            },
+            "failedSourcesChecked": 3,
+            "methods": [
+              "GET",
+              "POST"
+            ],
+            "allowedRoles": [
+              "ADMIN",
+              "TEAM_LEADER"
+            ],
+            "refusedRoles": [
+              "CLIENT",
+              "TECHNICIAN"
+            ],
+            "invalidationRaceChecked": true,
+            "businessRecordsUnchanged": true
+          }
+        },
+        "field-suite/summary-volume/results.json": {
+          "ok": true,
+          "phase": "assertions-completed",
+          "engine": "PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+          "cleanupVerified": true,
+          "sha256": "7ffc6c00b263c9f9d77384c69e34b714f5db0ad89158f6020a15b38426385aca",
+          "profiles": 12,
+          "laterPageFaults": 3,
+          "allPassed": true
+        },
+        "field-suite/inventory-volume/results.json": {
+          "ok": true,
+          "phase": "assertions-completed",
+          "cleanupVerified": true,
+          "sha256": "68b0296718369672934a22a5d799a8818de7430ef22704ee86811f77418fef48",
+          "probes": 20,
+          "concurrency": {
+            "engine": "PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+            "committedBeforeRemaining": true,
+            "oldIdsComplete": true,
+            "nextReadIncludesCommit": true
+          },
+          "ui": [
+            {
+              "products": 10000,
+              "renderedFixtureCount": 10000,
+              "durationMs": 2956.6,
+              "browserJsHeapMiB": 15.12,
+              "writes": 0,
+              "exactOrderedIds": true,
+              "literalNames": true,
+              "viewport": 390
+            }
+          ]
+        },
+        "field-suite/product-volume/results.json": {
+          "ok": true,
+          "phase": "assertions-completed",
+          "cleanupVerified": true,
+          "profiles": [
+            201,
+            1001,
+            10001
+          ],
+          "modes": [
+            "API",
+            "MODERN",
+            "LEGACY",
+            "EXTRA",
+            "CORRECTION"
+          ],
+          "sha256": "181a15ca2c379d77a82027d3b70749c4780b6dbf1d323bb5fd7353d023d18aab",
+          "probes": 15,
+          "allPassed": true
+        }
+      }
+    }
+  ],
+  "task407": {
+    "run": 36466632283,
+    "job": 109078229561,
+    "commit": "6c77104d02ad4e7f56c77867329ef40278d7726a",
+    "scriptsInExactOrder": 312,
+    "passed": 311,
+    "failed": [
+      {
+        "script": "test-field-summary-volume.js",
+        "code": 1,
+        "signal": null,
+        "ms": 23687,
+        "reason": "dashboard 400-client probe: sampled process RSS exceeded the unchanged 768 MiB QA guard; exact peak omitted from truncated job error"
+      }
+    ],
+    "restore": "skipped after suite failure",
+    "artifactId": 10991504417,
+    "artifactSha256": "16bd89e66cc6cbcd638dd05b7710b76e2de7ffaa6f391a070f488f6720c64d66",
+    "agendaProofSha256": "76c7b89cbdf0fb71381a04b57e2c6dd4ae57e449b0f4d29189a35d879acc3d0d",
+    "agendaProof": {
+      "ok": true,
+      "probes": 4,
+      "cleanupVerified": true,
+      "runnerMs": 89639
+    },
+    "summaryVolumeOk": false
+  },
+  "completion": {
+    "total": 32,
+    "notStarted": 28,
+    "inProgress": [
+      "C04"
+    ],
+    "validation": [
+      "C03"
+    ],
+    "closed": [
+      "C01",
+      "C02"
+    ],
+    "C04Children": {
+      "A": "native-approved-TASK406",
+      "B": "native-approved-TASK406",
+      "C": "native-probe-approved-global-suite-restore-blocked",
+      "D": "local-approved-native-pending",
+      "E": "not-started",
+      "F": "not-started"
+    }
+  },
+  "limits": [
+    "Fresh process per API profile, not request; RSS includes client/oracle and excludes DB/browser.",
+    "ID boundary protects new insertions, not mutations/deletions; field transport/work lists use offset without an inter-request snapshot.",
+    "Field movement scope still reads all own work IDs; stock/items and nested guide payloads remain proportional to data.",
+    "100 items follows current command limits; read-only test does not validate create/close at larger limits.",
+    "Legacy administrative guide list/movement endpoints are not the current history UI; no new contract or pagination was imposed.",
+    "No production deployment, migration, merge or real contacts. Annual contract deferred."
+  ]
+}
