@@ -1,0 +1,142 @@
+{
+  "task": "TASK415",
+  "date": "2026-09-28",
+  "baseCommit": "3c3e65eb307e59176dc58a316b4822cfb403e651",
+  "status": "inventory-approved-no-production-change",
+  "scope": "C05 source inventory and candidate assignment; C06-C09 translation execution remains open.",
+  "summary": {
+    "htmlFiles": 126,
+    "rootPages": 119,
+    "serverHTML": 1,
+    "frontendJS": 307,
+    "backendJS": 695,
+    "inlineScripts": 45,
+    "entries": 16322,
+    "dictionaryRows": 2929,
+    "batches": 283,
+    "statuses": {
+      "engine-excluded-review": 1047,
+      "global-key-available": 183,
+      "module-provider-candidate": 215,
+      "no-static-provider": 13611,
+      "translation-key-review": 1266
+    }
+  },
+  "artifacts": {
+    "scripts/audit-language-inventory.js": "16858a5296c9744b48e5208fd834866a5e93aa6f768c67b9823f75e21ba79922",
+    "docs/product/LANGUAGE_INVENTORY_20260928.json": "22e1f35afa846c9980ee85f8b96d9b3030a2a0221104282c31b305ee42dd236f",
+    "docs/product/LANGUAGE_INVENTORY_20260928.md": "624cf893bcaa70fa3f83d794744dd14561c1f6357779c6925081a96b322c8f2e"
+  },
+  "validation": {
+    "inventory": {
+      "ok": true,
+      "phase": "inventory-complete",
+      "htmlFiles": 126,
+      "rootPages": 119,
+      "serverHTML": 1,
+      "frontendJS": 307,
+      "backendJS": 695,
+      "inlineScripts": 45,
+      "entries": 16322,
+      "dictionaryRows": 2929,
+      "batches": 283,
+      "statuses": {
+        "engine-excluded-review": 1047,
+        "global-key-available": 183,
+        "module-provider-candidate": 215,
+        "no-static-provider": 13611,
+        "translation-key-review": 1266
+      }
+    },
+    "check": {
+      "ok": true,
+      "phase": "snapshot-checked",
+      "htmlFiles": 126,
+      "rootPages": 119,
+      "serverHTML": 1,
+      "frontendJS": 307,
+      "backendJS": 695,
+      "inlineScripts": 45,
+      "entries": 16322,
+      "dictionaryRows": 2929,
+      "batches": 283,
+      "statuses": {
+        "engine-excluded-review": 1047,
+        "global-key-available": 183,
+        "module-provider-candidate": 215,
+        "no-static-provider": 13611,
+        "translation-key-review": 1266
+      }
+    },
+    "browser": "PASS Spanish field labels, stable option values, user text protection, fresh live states, ordered preference writes and delayed read after choice/account change",
+    "controls": [
+      "ESTree locale-column arrays preserve missing indices instead of assuming completeness.",
+      "Indexed language arrays use declared order; unknown order is retained for review.",
+      "Executable script-reference extraction excludes service-worker cache lists.",
+      "Inert DOM excludes user input values; marks protected text, select without opt-in, textarea placeholders and document title; includes opt-in select.",
+      "Parser traversed307 browser JS,695 server JS,44 frontend inline scripts and1 server inline script without errors.",
+      "Every source/page/candidate has C06-C09 owner and batch; every batch has at most4 source files, leaving room within10 changed files.",
+      "Snapshot source/tooling hashes and Markdown agreement checked; node --check and git diff --check passed."
+    ],
+    "unitTests": "Not rerun: no application code changed. TASK414 already passed1327 units/4 technician; current native gates pending.",
+    "fieldRunner": 317
+  },
+  "confirmedGap": [
+    {
+      "file": "src/services/visitReportLanguage.js",
+      "accepted": [
+        "pt",
+        "en",
+        "fr",
+        "es"
+      ],
+      "rejected": [
+        "de"
+      ],
+      "evidence": "Called exported language validator locally; no PDF rendering claimed."
+    },
+    {
+      "file": "src/services/monthlyReportLanguage.js",
+      "accepted": [
+        "pt",
+        "en",
+        "fr",
+        "es"
+      ],
+      "rejected": [
+        "de"
+      ],
+      "evidence": "Called exported language validator locally; no PDF rendering claimed."
+    }
+  ],
+  "limitations": [
+    "16322 entries are conservative source candidates, not16322 missing translations.",
+    "2929 dictionary/format rows include fragments and indexed rows; only global198 keys evaluated at runtime.",
+    "Six HTML entry graphs reference global cw-i18n; custom modules remain separate. No inference that the other120 pages have no language support.",
+    "Literal source loading and role hints are not full runtime reachability or authorization proofs. Server consumers and calculated branches remain review work assigned in bounded batches.",
+    "UI and PDF execution/rendering remain C06-C09. Original notes, names, values, UUIDs, receipts and enums are not application copy.",
+    "Snapshot is tied to base3c3e65 and recorded source hashes; later code changes require regeneration or explicitly scoped closure evidence."
+  ],
+  "priorPublication": {
+    "status": "published-native-pending",
+    "branch": "work/field-readiness-20260915-simulation",
+    "commit": "3c3e65eb307e59176dc58a316b4822cfb403e651",
+    "tree": "18d6eaca8d0a97fea9f5fe06318068f59b1d6e34",
+    "runId": 36491440593,
+    "jobId": 109160736428,
+    "nativeStatus": "in_progress",
+    "stepsPassed": 10
+  },
+  "native413": {
+    "runId": 36489954119,
+    "jobId": 109155898206,
+    "status": "in_progress",
+    "stepsPassed": 10
+  },
+  "next": "TASK416 / C06: localize sync queue display and test pending/conflict/offline/recovery with preserved stored bytes and five languages. Legacy technician page text remains a separate bounded follow-up.",
+  "publication": {
+    "status": "pending",
+    "branch": "work/field-readiness-20260915-simulation",
+    "ciPolicy": "No new integrated run requested: inventory tooling/docs only; syntax, extractor controls, source hashes and existing language browser regression executed locally. TASK414 native remains required for C04."
+  }
+}

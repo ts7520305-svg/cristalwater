@@ -1,5 +1,17 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 28/09/2026, TASK415 / inventário C05 concluído
+
+**Continuar na TASK416, C06: fila de sincronização.** Começar em `frontend/cw-field-offline.js`, localizar estados/ações em PT/EN/FR/ES/DE e comprovar que trocar idioma/recarregar preserva UUID, recibos, conteúdos e rascunhos. A página técnica antiga fica num lote próprio; diálogo extra já aprovado não é reescrito. Fontes e unidades de revisão estão no [inventário](LANGUAGE_INVENTORY_20260928.md) e [evidência TASK415](evidence/20260928_task415_local.json).
+
+**C05 concluído como inventário:** 126 HTML frontend (119 raiz/7 auxiliares), um HTML servidor, 307 JS frontend, 695 JS servidor e 45 inline. 16 322 candidatos de texto, 2 929 linhas de dicionário/formatação, 283 unidades de revisão de até quatro fontes, todos com C06–C09 responsável. São candidatos conservadores, não contagem de traduções em falta. Motor global198 chaves avaliado com quatro traduções; dicionários próprios/indexados separados, caminhos incertos atribuídos. Lacuna confirmada: visita/mensal recusam DE; tratar em C09. UI/PDF/estados e caminhos calculados continuam por aceitar nos lotes respetivos.
+
+**Gates415:** extrator completo sem erros; controlos de arrays/índices, carregamento JS versus cache e DOM inerte; hashes das1 129fontes/ferramentas e Markdown conferidos, node-check/diff-check; regressão de idiomas com texto de utilizador, valores, estados vivos, ordem de gravação e troca de conta aprovada. Aplicação/runner317/cachev207 não alterados. Não repetir unitários sem risco novo:414 já tinha1 327/quatro técnicos aprovados. Snapshot ligado à base3c3e65; futuras alterações exigem nova fotografia ou prova de fecho específica.
+
+**TASK414 publicada:** commit `3c3e65eb307e59176dc58a316b4822cfb403e651`, árvore `18d6eaca8d0a97fea9f5fe06318068f59b1d6e34`, branch `work/field-readiness-20260915-simulation`. CI36491440593/job109160736428 na suite após dez etapas aprovadas. TASK413 CI36489954119/job109155898206 também em execução. C04 aguarda317grupos exatos/restauro128tabelas47ficheiros, attachment-volume4probes e photo-evidence-volume5probes/8casos, conclusão/limpeza. Não confundir aprovação local com CI concluído.
+
+**Contagem32:**27 por iniciar, C04 em validação, quatro concluídas(C01–C03/C05). Branch de trabalho autorizada; contrato anual adiado. Preservar limites existentes, originais e histórico. C13 integra a consulta de fotos da reparação na recuperação visível; C14 revê URLs legados públicos.
+
 ## Retoma atual — 28/09/2026, TASK414 local aprovada / C04 aguarda CI
 
 **Oito superfícies de upload locais concluídas.** TASK414: fotos regular25MiB/extra25/reparação20/despesa5,60pedidosHTTP; TASK413: outras quatro,46pedidos. Fronteiras−1/0/+1byte, hashes, perda/recuperação, recusas/limpeza. Oito casos do serviço real de projeção25/64MiB/24fotos. [Evidência TASK414](evidence/20260928_task414_local.json), [manifesto](OPERATIONAL_VOLUME_PLAN_20260928.md).

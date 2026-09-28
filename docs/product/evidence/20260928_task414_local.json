@@ -2836,7 +2836,13 @@
     "No dependency/schema/cache/financial-rule changes, merge, VPS deployment, real customer contact or annual-contract work."
   ],
   "publication": {
-    "status": "pending",
-    "branch": "work/field-readiness-20260915-simulation"
+    "status": "published-native-pending",
+    "branch": "work/field-readiness-20260915-simulation",
+    "commit": "3c3e65eb307e59176dc58a316b4822cfb403e651",
+    "tree": "18d6eaca8d0a97fea9f5fe06318068f59b1d6e34",
+    "runId": 36491440593,
+    "jobId": 109160736428,
+    "nativeStatus": "in_progress",
+    "stepsPassed": 10
   }
 }

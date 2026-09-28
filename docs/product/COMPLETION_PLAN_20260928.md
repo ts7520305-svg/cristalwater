@@ -4,7 +4,7 @@ Data: 28/09/2026. Preparado na TASK402 a partir da revisão global, do checkpoin
 
 ## Contagem e regra de fecho
 
-**32 tarefas de conclusão identificadas: C01–C32.** Estado após TASK414 local: **28 por iniciar, zero em execução, uma em validação(C04), três concluídas(C01–C03)**. C04-A–E/PDFs nativos; oito uploads/106pedidos HTTP e oito casos de projeção locais. Exigir317grupos/restauro e dois JSONs de uploads no CI da versãoTASK414 antes de concluirC04. TASK413 publicada/CI em execução; TASK412 confirmada315grupos/restauro. [Evidência TASK414](evidence/20260928_task414_local.json).
+**32 tarefas de conclusão identificadas: C01–C32.** Estado após TASK415: **27 por iniciar, zero em execução, uma em validação (C04), quatro concluídas (C01–C03 e C05)**. C05 fecha o inventário e a atribuição; traduções e aceitação dos percursos continuam em C06–C09. TASK414 publicada; exigir 317 grupos/restauro e os dois JSONs de uploads na versão atual antes de concluir C04. [Evidência TASK415](evidence/20260928_task415_local.json).
 
 Uma tarefa pode ter preparação, implementação local e validação externa em momentos diferentes. Só passa a **Concluída** quando cumpre o critério e tem evidência ligada. **Implementada / CI pendente** não equivale a validação nativa nem a instalação no VPS. Cada lote de código mantém uma responsabilidade, até dez ficheiros, teste da falha/resultado e documentação.
 
@@ -28,11 +28,11 @@ Este é o plano base do âmbito conhecido, não uma garantia de ausência de nov
 
 | ID | Tarefa / TASK | Critério de conclusão | Dependência / estado |
 |---|---|---|---|
-| C05 | Fechar o inventário de textos por página/perfil | Manifesto das entradas efetivamente usadas: chaves, idioma, estados dinâmicos, mensagens do servidor e PDF; cada lacuna fica atribuída a C06–C09 e a um lote limitado, sem considerar referências em testes como tradução concluída. | Próximo lote TASK415. Partir do inventário TASK386 e `cw-i18n.js`; PT/EN/FR/ES/DE já existentes. |
-| C06 | Idiomas do técnico e fila de sincronização | Página técnica antiga e fila geral cobrem estados de envio, conflito, offline e recuperação nos idiomas existentes; trocar idioma não altera UUID, recibos, valores ou rascunhos. | C05; preservar o diálogo extra já aprovado. |
+| C05 | Fechar o inventário de textos por página/perfil | Manifesto das entradas efetivamente usadas: chaves, idioma, estados dinâmicos, mensagens do servidor e PDF; cada lacuna fica atribuída a C06–C09 e a um lote limitado, sem considerar referências em testes como tradução concluída. | **Inventário concluído TASK415.** 126 páginas, 1 129 fontes, 16 322 candidatos e 2 929 linhas de dicionário/formatação; todos atribuídos C06–C09 e lotes ≤4 fontes/≤10 ficheiros alterados. Candidatos não equivalem a erros. [Mapa e limites](LANGUAGE_INVENTORY_20260928.md). |
+| C06 | Idiomas do técnico e fila de sincronização | Página técnica antiga e fila geral cobrem estados de envio, conflito, offline e recuperação nos idiomas existentes; trocar idioma não altera UUID, recibos, valores ou rascunhos. | Próximo TASK416: fila de sincronização (`cw-field-offline.js`), cinco idiomas e preservação dos dados; página técnica antiga em lote próprio. Preservar o diálogo extra já aprovado. |
 | C07 | Idiomas dos três dashboards e incidentes | Rótulos, filtros e estados de `/dashboard`, `/admin-dashboard`, `/operational-dashboard` e centro de incidentes localizados; texto de clientes e evidência original continuam literais; pequenos ecrãs aprovados. | C05; executar por página quando necessário para respeitar o limite do lote. |
 | C08 | Idiomas dos restantes percursos administrativos | Todas as lacunas atribuídas pelo manifesto de C05 em clientes, equipamento, CRM, orçamentos, stock, guias e obras têm um lote/evidência; não há linha por resolver nesse conjunto. | C05; lista fechada de páginas antes de editar, até dez ficheiros por lote. |
-| C09 | Idiomas do cliente, relatórios e PDFs | Portal, pedidos, histórico, documentos e modelos PDF do manifesto passam nos idiomas aplicáveis, sem datas/valores traduzidos como texto livre, cortes ou troca de titular. | C05; fixtures de cada modelo e perfil. |
+| C09 | Idiomas do cliente, relatórios e PDFs | Portal, pedidos, histórico, documentos e modelos PDF do manifesto passam nos idiomas aplicáveis, sem datas/valores traduzidos como texto livre, cortes ou troca de titular. | Manifesto C05; visita/mensal recusam DE no validador atual. Acrescentar DE e fixtures HTML/PDF em lote próprio; restantes modelos e percursos continuam atribuídos. |
 
 ## 4. Interfaces e significado dos dados — cinco tarefas
 
@@ -121,3 +121,7 @@ As indicações de sprint/validação de julho são históricas. O utilizador pe
 
 
 **Publicação TASK413:** commit `2efae46d4bbec1f468c36f27e672592cfc43dbd9`, árvore `d30acfe8bb02680728e2b4e82bf27be8f7fd51ca`, igual à testada; branch `work/field-readiness-20260915-simulation`. [CI36489954119](https://github.com/ts7520305-svg/cristalwater/actions/runs/36489954119), job109155898206, em execução na suite após dez etapas aprovadas. Exigir316grupos/restauro e quatro probes de anexos. Publicação pela ligação GitHub; push Git por HTTPS não tinha credencial de escrita, sem impacto na árvore publicada.
+
+**TASK414 publicada:** commit `3c3e65eb307e59176dc58a316b4822cfb403e651`, árvore `18d6eaca8d0a97fea9f5fe06318068f59b1d6e34`, igual à validada; [CI 36491440593](https://github.com/ts7520305-svg/cristalwater/actions/runs/36491440593), job 109160736428, na suite integrada após dez etapas aprovadas. TASK413 também na suite; C04 mantém os gates de aceitação anteriores.
+
+**TASK415 / C05:** auditor reproduzível percorreu todas as fontes de aplicação rastreadas, separou motor global, dicionários próprios, texto protegido e candidatos do servidor/PDF; 283 unidades de revisão com até quatro fontes. Atribuição não prova uso por um único perfil nem exige editar fontes sem texto. Extrator e snapshot validados, regressão de idioma aprovada. DE recusado em visita/mensal é lacuna confirmada C09. Inventário não certifica traduções, layout ou ramos de execução. Próximo TASK416/C06: fila de sincronização. Código da aplicação e runner317 inalterados.
