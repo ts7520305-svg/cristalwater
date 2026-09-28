@@ -1,6 +1,6 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK392 validada localmente
+## Retoma atual — 28/09/2026, TASK392 publicada
 
 Corrigidos os agrupamentos por zona de `aiOperationalService` e `aiPredictiveService`. A regressão confirmou que os 12 nomes herdados de `Object.prototype` desapareciam dos resultados da API, apesar de terem visitas/alertas suficientes. O serviço preditivo também acrescentava contadores a objetos/funções herdados. Os dois mapas passam a usar objetos sem protótipo, mantendo cada nome literal e os contadores locais à consulta.
 
@@ -10,7 +10,7 @@ Foram conservados os limites de visitas/alertas, regras de disponibilidade/sobre
 
 **CI anteriores:** TASK390 confirmada, [302/302 e restauro](https://github.com/ts7520305-svg/cristalwater/actions/runs/36385188783): 17 etapas aprovadas, 128 tabelas e 47 ficheiros, linhas/hashes iguais. Grupos comparados com o runner do commit exato `7f818ee4dd257531384ded294ed963d0fb73c966`; prova incluída na evidência desta tarefa. TASK391 continua em execução, com 303 grupos/restauro por confirmar. TASK386/387/388/389 já aprovadas; TASK385 conserva a falha histórica 297/300.
 
-**Publicação TASK392:** pendente. Os ensaios locais usam PGlite/Chromium e dados sintéticos; os 304 grupos PostgreSQL e o restauro deste lote ainda não estão confirmados. Publicar só na branch de trabalho autorizada, sem merge/deploy/contactos reais.
+**Publicação TASK392:** publicada na branch `work/field-readiness-20260915-simulation` em `7b5aad6ef407cd44dbb34baebe12325618058bb2`, árvore `647386bbc8244f360994e01549bbae0e8cf02dd1`, idêntica à preparada e verificada localmente. [CI 36390069779](https://github.com/ts7520305-svg/cristalwater/actions/runs/36390069779), job `108823732157`, em execução; os 304 grupos PostgreSQL e o restauro deste lote ainda não estão confirmados. Os ensaios locais usam PGlite/Chromium e dados sintéticos. Sem merge/deploy/contactos reais.
 
 **Continuar:** confirmar CI de TASK391/392 e rever o significado dos indicadores de `/admin-dashboard`. A leitura mostra visitas do mês a alimentar campos/mensagens «amanhã» e `operationalCost = visitas × 12` a alimentar lucro estimado; falta reproduzir/decidir a apresentação correta, sem inventar custos nem previsões. O controlador partilhado mantém limites de alertas, leituras opcionais com omissão de erros e ausência de snapshot comum. Idiomas/páginas antigas, volume/paginação dos incidentes, conciliação histórica, importação WhatsApp, IA local, VPS/cópias e piloto físico continuam na fila. Contrato permanece adiado por indicação do utilizador. Sistema não declarado concluído.
 
