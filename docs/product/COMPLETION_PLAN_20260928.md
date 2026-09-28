@@ -4,7 +4,7 @@ Data: 28/09/2026. Preparado na TASK402 a partir da revisão global, do checkpoin
 
 ## Contagem e regra de fecho
 
-**32 tarefas de conclusão identificadas: C01–C32.** Na abertura deste plano, nenhuma tem aceitação final registada nesta tabela; a C01 é o gate pendente da TASK401 já implementada. Estes IDs mantêm-se estáveis; a coluna TASK identifica o lote de execução correspondente. A numeração TASK anterior não representa percentagem de conclusão.
+**32 tarefas de conclusão identificadas: C01–C32.** Estado após TASK403 local: **30 por executar e duas em validação (C01 e C02)**. C01 é o gate pendente da TASK401; C02 está implementada e aprovada localmente, com confirmação nativa pendente. Nenhuma destas duas está marcada como aceitação final. Estes IDs mantêm-se estáveis; a coluna TASK identifica o lote de execução correspondente. A numeração TASK anterior não representa percentagem de conclusão.
 
 Uma tarefa pode ter preparação, implementação local e validação externa em momentos diferentes. Só passa a **Concluída** quando cumpre o critério e tem evidência ligada. **Implementada / CI pendente** não equivale a validação nativa nem a instalação no VPS. Cada lote de código mantém uma responsabilidade, até dez ficheiros, teste da falha/resultado e documentação.
 
@@ -20,7 +20,7 @@ Este é o plano base do âmbito conhecido, não uma garantia de ausência de nov
 
 | ID | Tarefa / TASK | Critério de conclusão | Dependência / estado |
 |---|---|---|---|
-| C02 | Snapshot comum de `/api/dashboard/metrics` | Visitas, alertas e soma financeira observam o mesmo estado; escrita concorrente reproduz a falha anterior. Erro, cache, invalidação, TTL, circuit breaker, GET/POST e perfis conservados. | Próxima execução local. `dashboardRoutes.js`, `dashboardCacheService.js`. |
+| C02 | Snapshot comum de `/api/dashboard/metrics` — TASK403 | Visitas, alertas e soma financeira observam o mesmo estado; escrita concorrente reproduz a falha anterior. Erro, cache, invalidação, TTL, circuit breaker, GET/POST e perfis conservados. | **Implementada / validação nativa pendente.** 1 288 unitários, quatro técnicos e dois grupos integrados locais. [Evidência TASK403](evidence/20260928_task403_local.json). |
 | C03 | Medir e limitar leituras de dashboards, alertas e riscos | Ensaios crescentes publicam linhas, bytes, duração e memória; totais completos ou indisponibilidade explícita; nenhuma truncagem silenciosa. Registar a dimensão máxima testada e corrigir só os limites reproduzidos. | Local com dados sintéticos; confirmar depois volume real. `DashboardSnapshotBusiness`, `AlertListBusiness`, `operationalRiskSummaryService`. |
 | C04 | Validar volume de agendas, catálogos, guias e relatórios | Manifesto de cenários por superfície, navegação sem perda/duplicação, anexos/PDFs grandes e limites explícitos. Aceitação de cada cenário, incluindo tempo e memória, fica ligada à versão testada. | Local; dimensão real depende de amostra. Reutilizar testes de stock/guias, CRM e relatórios. |
 
@@ -42,7 +42,7 @@ Este é o plano base do âmbito conhecido, não uma garantia de ausência de nov
 | C11 | Apurar crédito agregado com fonte verificável | O resumo distingue crédito confirmado, desconhecido e divergente; reconcilia o total com as fontes existentes e não duplica notas/pagamentos. Zero só com leitura completa; perfis e falhas testados. | C16 fornece validação histórica; implementação local usa fixtures. `clientCreditService`, `BillingCreditBusiness`, `creditRevenueData`. |
 | C12 | Paginar o centro de incidentes | Todos os incidentes elegíveis alcançáveis, ordem/IDs estáveis e totais exatos; seleção e resolução não se perdem ao paginar/atualizar. Erro não apaga a existência da pendência nem confirma uma ação. | Local. `incidentService`, `incident-center.js`. |
 | C13 | Validar instalações e obras de ponta a ponta | Percurso real de interface: plano, equipa, material, fotos, assinatura, marcos comerciais e custos; perfis, repetição e falhas preservam uma execução e o histórico. | Local primeiro; aceitação física em C31. `InstallationBusiness`, `ConstructionBusiness`. |
-| C14 | Fechar lacunas de interface e acesso do inventário | Manifesto C05 complementado com perfil, teclado, 320/390/1440, claro/escuro, vazio/erro/offline, sessão e ligações; cada falha tem reprodução e correção limitada. Sem teste aplicável não há aceitação marcada. | Local; dispositivos reais em C30/C31. Não reabrir páginas já aprovadas sem risco concreto. |
+| C14 | Fechar lacunas de interface e acesso do inventário | Manifesto C05 complementado com perfil, teclado, 320/390/1440, claro/escuro, vazio/erro/offline, sessão, ligações e correspondência entre rótulos/totais e fontes (incluindo estados legados das métricas); cada falha tem reprodução e correção limitada. Sem teste aplicável não há aceitação marcada. | Local; dispositivos reais em C30/C31. Não reabrir páginas já aprovadas sem risco concreto. |
 
 ## 5. Dados e finanças reais — quatro tarefas
 
@@ -86,4 +86,4 @@ As indicações de sprint/validação de julho são históricas. O utilizador pe
 ## Histórico de execução
 
 - TASK402: inventário convertido neste plano de 32 tarefas. Base `11cf22efb50d61630599d599c49202990c64c257`. Três documentos previstos; código de produção inalterado. Gates de base registados no checkpoint.
-- Próximo lote: C02, coerência das três fontes de métricas. O restante resumo administrativo já usa o snapshot comum da TASK401.
+- TASK403 / C02: cinco testes unitários novos falharam na versão anterior; SQL reproduziu visitas antigas com mais um alerta e 17,25 €. As três fontes partilham agora uma transação. Validação local aprovada; CI nativo/restauro pendentes. O próximo item local é C03, medir volume sem truncagem silenciosa. C01 continua dependente do CI da TASK401.

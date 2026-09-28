@@ -1,0 +1,207 @@
+{
+  "task": "TASK403",
+  "completionItem": "C02",
+  "date": "2026-09-28",
+  "recordedAt": "2026-09-28T13:54:14.811748+00:00",
+  "branch": "work/field-readiness-20260915-simulation",
+  "baseCommit": "852c4f3082b51e3d6ad5835ba4230d7e5f0935ac",
+  "scope": "Consistent snapshot for the three existing /api/dashboard/metrics sources, preserving cache and breaker behavior",
+  "environment": {
+    "database": "Isolated PGlite 0.5.8",
+    "browser": "Local Chromium through Playwright",
+    "syntheticData": true,
+    "externalNotifications": false,
+    "backgroundJobs": false,
+    "productionMutations": false
+  },
+  "regression": {
+    "unit": {
+      "newFailed": 5,
+      "existingPassed": 19
+    },
+    "sql": {
+      "engine": "PostgreSQL 18.3 (PGlite 0.5.8) on wasm32-unknown-emscripten, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.74 (1092ec30a3fb1d46b1782ff1b4db5094d3d06ae5), 32-bit",
+      "transactions": [],
+      "reads": [
+        {
+          "model": "serviceVisit",
+          "scope": "root"
+        },
+        {
+          "model": "technicalAlert",
+          "scope": "root"
+        },
+        {
+          "model": "invoice",
+          "scope": "root"
+        }
+      ],
+      "committedBeforeRemaining": true,
+      "duringDelta": {
+        "done": 0,
+        "alerts": 1,
+        "total": 17.25
+      },
+      "afterDelta": {
+        "done": 1,
+        "alerts": 1,
+        "total": 17.25
+      }
+    },
+    "baselineCommit": "852c4f3082b51e3d6ad5835ba4230d7e5f0935ac"
+  },
+  "implementation": {
+    "orchestration": "DashboardMetricsBusiness executes groupBy/count/aggregate in one RepeatableRead transaction with timeout 30000 ms",
+    "cachePublication": "Only after transaction completion; start/completion/source failures retain only a valid older complete cache with explicit degraded source, otherwise 503",
+    "compatibility": "UTC day bounds, plannedDate OR date, raw visit statuses, technical alert filter, invoice total/createdAt semantics, signed values, nullable SQL sum, routes, roles, cache TTL, breaker and invalidation preserved"
+  },
+  "validation": {
+    "unit": {
+      "passed": 1288,
+      "files": 133,
+      "newTests": 5
+    },
+    "technician": {
+      "passed": 4,
+      "rerun": "Initial command exited zero without its summary in the log; standalone rerun confirmed all four tests."
+    },
+    "syntax": {
+      "backend": 694,
+      "frontend": 307,
+      "inline": 44,
+      "commonJsAndVitestEsmChecked": true
+    },
+    "diffCheck": true,
+    "integrated": [
+      {
+        "script": "scripts/test-field-dashboard-metrics.js",
+        "code": 0,
+        "ms": 6394
+      },
+      {
+        "script": "scripts/test-field-admin-dashboard.js",
+        "code": 0,
+        "ms": 12588
+      }
+    ],
+    "metrics": {
+      "ok": true,
+      "prefix": "QA metrics 5adad9b1-afb0-4fae-8ef7-ee8ecd6424b0",
+      "phase": "assertions-completed",
+      "snapshot": {
+        "engine": "PostgreSQL 18.3 (PGlite 0.5.8) on wasm32-unknown-emscripten, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.74 (1092ec30a3fb1d46b1782ff1b4db5094d3d06ae5), 32-bit",
+        "transactions": [
+          {
+            "scope": "transaction-1",
+            "options": {
+              "isolationLevel": "RepeatableRead",
+              "timeout": 30000
+            }
+          }
+        ],
+        "reads": [
+          {
+            "model": "serviceVisit",
+            "scope": "transaction-1"
+          },
+          {
+            "model": "technicalAlert",
+            "scope": "transaction-1"
+          },
+          {
+            "model": "invoice",
+            "scope": "transaction-1"
+          }
+        ],
+        "committedBeforeRemaining": false,
+        "duringDelta": {
+          "done": 0,
+          "alerts": 0,
+          "total": 0
+        },
+        "afterDelta": {
+          "done": 1,
+          "alerts": 1,
+          "total": 17.25
+        }
+      },
+      "failedSourcesChecked": 3,
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "allowedRoles": [
+        "ADMIN",
+        "TEAM_LEADER"
+      ],
+      "refusedRoles": [
+        "CLIENT",
+        "TECHNICIAN"
+      ],
+      "invalidationRaceChecked": true,
+      "businessRecordsUnchanged": true
+    },
+    "adminDashboard": "Existing API/browser contract, alert source failure injection, volume/preview, visit categories, period/session and layout assertions passed"
+  },
+  "changedCodeAndTests": [
+    {
+      "path": "src/business/admin/DashboardMetricsBusiness.js",
+      "sha256": "6f30d33478bd9b3de5b4ff847c029e03b8f1d356c015998f8062db9827d64ae9"
+    },
+    {
+      "path": "src/routes/dashboardRoutes.js",
+      "sha256": "97a96b21a85c2f3c59b35da53611300a34d7acf81761d42f578013fda0eb32c7"
+    },
+    {
+      "path": "tests/dashboard-metrics-reliability.test.js",
+      "sha256": "2e09222ecdbba84c409cbae3362256c40186d156e4e7e72dae58d76557d9ddf9"
+    },
+    {
+      "path": "scripts/test-field-dashboard-metrics.js",
+      "sha256": "1f07c7617aee87f24681649866595a7162f92d4ab99e5b331e6f11413b802d19"
+    }
+  ],
+  "changedDocumentation": [
+    "docs/product/COMPLETION_PLAN_20260928.md",
+    "docs/product/CURRENT_WORK_CHECKPOINT.md",
+    "docs/product/SYSTEM_REVIEW_20260928.md",
+    "docs/product/evidence/20260928_task403_local.json"
+  ],
+  "plan": {
+    "total": 32,
+    "notStarted": 30,
+    "inValidation": [
+      "C01",
+      "C02"
+    ],
+    "completed": 0,
+    "nextLocal": "C03"
+  },
+  "previousNativeCiPending": [
+    {
+      "task": "TASK401",
+      "headSha": "e1b6767459226cb4b469a49f375c9deeb89f741e",
+      "runId": 36429681410,
+      "jobId": 108952334160,
+      "status": "in_progress",
+      "completedSteps": 10,
+      "activeStep": "Run node scripts/test-field-suite.js",
+      "expectedGroups": 308,
+      "restoreConfirmed": false
+    }
+  ],
+  "limitations": [
+    "Local PGlite queues the writer until the read transaction closes. Native PostgreSQL CI must show committedBeforeRemaining=true and coherent old/new vectors.",
+    "Cache remains process-local; multi-process invalidation is not certified. The shared transaction timeout is 30 seconds.",
+    "Legacy metric date/status/financial eligibility semantics are intentionally unchanged; read consistency is not financial or business-semantic reconciliation.",
+    "Production volumes, real data, providers, VPS/backups and field acceptance remain open as specified by the completion plan."
+  ],
+  "publication": {
+    "status": "validated-locally-not-yet-published",
+    "changedFiles": 8,
+    "expectedNativeGroups": 308,
+    "cacheVersion": "v206",
+    "merged": false,
+    "deployed": false
+  }
+}

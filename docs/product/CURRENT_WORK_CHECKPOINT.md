@@ -1,6 +1,24 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK402: plano de conclusão definido
+## Retoma atual — 28/09/2026, TASK403 validada localmente / C02
+
+O [plano de conclusão](COMPLETION_PLAN_20260928.md) ficou publicado na TASK402, commit `852c4f3082b51e3d6ad5835ba4230d7e5f0935ac`, com **32 tarefas: 30 por executar e duas em validação, C01/C02**. C01 confirma a TASK401; C02 é a correção agora implementada para `/api/dashboard/metrics`. O contrato anual continua adiado. A numeração de lotes TASK não é uma percentagem nem o número de entregas pendentes.
+
+Reproduzida a mistura de momentos nas métricas: a versão anterior manteve a contagem antiga de visitas, mas já incluiu mais um alerta e 17,25 € criados numa única escrita. `DashboardMetricsBusiness` reúne as três leituras numa transação `RepeatableRead`, timeout 30 s, e o router só publica/cacheia após a transação concluir. Falhas de abertura/conclusão não publicam valores parciais. Conservam-se fontes/filtros UTC legados, valores assinados/soma SQL nula, GET/POST, perfis, TTL, circuit breaker, partilha de pedidos e invalidação por geração/dia.
+
+**Local aprovado:** 1 288 unitários/133 ficheiros, incluindo cinco novos que falharam antes; quatro técnicos; sintaxe 694/307/44; dois grupos integrados, métricas e dashboard administrativo. SQL confirma três leituras na mesma transação, vetor antigo durante o pedido e vetor novo completo na consulta seguinte. Falhas individuais, abertura/conclusão da transação, cache degradada/expirada, GET/POST, ADMIN/TEAM_LEADER, recusas CLIENT/TECHNICIAN, invalidação durante leitura e ausência de escritas pelo leitor verificados. Gates existentes de interface administrativa passaram. [Evidência](evidence/20260928_task403_local.json).
+
+**Limite local:** PGlite serializa transações; o escritor só concluiu após o leitor. O teste nativo exige confirmação concorrente (`committedBeforeRemaining: true`) antes das restantes fontes. Isso e os 308 grupos/restauro ainda dependem do CI. Cache continua por processo; filtros de estados e significados financeiros antigos não foram conciliados nesta tarefa.
+
+**Ficheiros do lote (8):** `DashboardMetricsBusiness.js`, `dashboardRoutes.js`, `dashboard-metrics-reliability.test.js`, `test-field-dashboard-metrics.js`; plano de conclusão, revisão global, este checkpoint e evidência TASK403. Caminhos/hashes na evidência. Runner 308, cache v206; sem alteração de frontend, esquema, migrações ou dependências.
+
+**CI TASK401:** run `36429681410`, job `108952334160`, ainda em execução na última consulta; dez etapas concluídas, grupos integrados em curso, restauro por confirmar. TASK399/400 mantêm prova nativa aprovada na evidência TASK401. TASK402 é documentação e não abriu novo CI.
+
+**Publicação TASK403:** validação local concluída; publicação e CI serão registados após confirmação.
+
+**Continuar:** confirmar CI TASK401/TASK403 e fechar C01/C02 só com a prova exigida. Iniciar C03: medir volume de dashboards/alertas/resumo de riscos, com dimensões, bytes, memória/duração e limites explícitos; não cortar totais. Seguir C04 e inventário C05; novas falhas ou subdivisões devem ficar ligadas aos IDs do plano. Dados reais, VPS, fornecedores e pilotos continuam dependentes dos acessos/participantes indicados. Sem merge/deploy/contactos reais; sistema não declarado concluído.
+
+## Retoma anterior — 28/09/2026, TASK402: plano de conclusão definido
 
 As sete frentes foram desdobradas em **32 tarefas de conclusão, C01–C32**, com resultado verificável, fonte de código, dependência e distinção entre preparação local, dados reais, acessos externos e participação da equipa. [Plano completo](COMPLETION_PLAN_20260928.md). É a contagem base do âmbito conhecido; subdivisões dos lotes e novas falhas comprovadas têm de ficar visíveis, sem inventar uma percentagem de conclusão.
 

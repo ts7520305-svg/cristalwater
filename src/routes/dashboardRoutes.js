@@ -1,5 +1,5 @@
 const express = require("express");
-const prisma = require("../prismaClient");
+const { readMetricsSources } = require('../business/admin/DashboardMetricsBusiness');
 const router = express.Router();
 
 const controller = require("../controllers/dashboardController");
@@ -43,20 +43,7 @@ function getUtcDayWindow(reference = new Date()) {
 
 async function buildLiveMetricsPayload() {
   const { start, end } = getUtcDayWindow();
-  const [serviceVisitsByStatus, activeAlerts, financialAggregates] = await Promise.all([
-    prisma.serviceVisit.groupBy({
-      by: ["status"],
-      _count: { id: true },
-      where: { OR: [{ plannedDate: { gte: start, lte: end } }, { date: { gte: start, lte: end } }] },
-    }),
-    prisma.technicalAlert.count({
-      where: { status: { not: "RESOLVED" } },
-    }),
-    prisma.invoice.aggregate({
-      _sum: { total: true },
-      where: { createdAt: { gte: start, lte: end } },
-    }),
-  ]);
+  const { serviceVisitsByStatus, activeAlerts, financialAggregates } = await readMetricsSources({ start, end });
 
   return {
     timezoneMode: "UTC_SAFE_WINDOW",

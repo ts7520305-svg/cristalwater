@@ -23,10 +23,90 @@ process.on('exit', () => {
   }
 });
 const counts = rows => Object.fromEntries(rows.map(row => [row.status, row._count.id]));
+const sources = [['serviceVisit', 'groupBy'], ['technicalAlert', 'count'], ['invoice', 'aggregate']];
+function interceptSources(intercept, onTransaction = () => {}) {
+  const originals = sources.map(([model, operation]) => prisma[model][operation]), transaction = prisma.$transaction;
+  for (const [index, [model, operation]] of sources.entries()) prisma[model][operation] = (...args) => intercept({ model, operation, scope: 'root', read: () => originals[index].apply(prisma[model], args) });
+  let index = 0;
+  prisma.$transaction = function (callback, options) {
+    const scope = 'transaction-' + (++index); onTransaction({ scope, options });
+    return transaction.call(this, tx => callback(new Proxy(tx, { get(target, property) {
+      const entry = sources.find(([model]) => model === property);
+      if (!entry) return Reflect.get(target, property);
+      const [model, operation] = entry;
+      return new Proxy(target[model], { get(delegate, method) {
+        return method === operation ? (...args) => intercept({ model, operation, scope, read: () => delegate[method](...args) }) : Reflect.get(delegate, method);
+      } });
+    } })), options);
+  };
+  return () => { for (const [index, [model, operation]] of sources.entries()) prisma[model][operation] = originals[index]; prisma.$transaction = transaction; };
+}
+
+async function verifySnapshot(call, poolId, date) {
+  const writer = new (require('@prisma/client').PrismaClient)();
+  let restore = () => {}, release, firstStarted = false, writerPromise, fixture, writerError, timer, committedBeforeRemaining;
+  const remaining = new Promise(resolve => { release = resolve; }), reads = [], transactions = [];
+  try {
+    const engine = (await writer.$queryRawUnsafe('SELECT version() AS version'))[0].version;
+    cache.invalidateDashboardCache('QA_SNAPSHOT_BASELINE');
+    const before = await call(); assert.equal(before.status, 200);
+    restore = interceptSources(async ({ model, scope, read }) => {
+      reads.push({ model, scope });
+      if (model === 'serviceVisit' && !firstStarted) {
+        firstStarted = true; const result = await read();
+        writerPromise = writer.$transaction(async tx => {
+          const visit = await tx.serviceVisit.create({ data: { clientId: client.id, poolId, status: 'DONE', plannedDate: date, date } });
+          const alert = await tx.technicalAlert.create({ data: { poolId, type: 'QA', status: 'OPEN', message: prefix + ' concurrent' } });
+          const invoice = await tx.invoice.create({ data: { clientId: client.id, total: 17.25, createdAt: date } });
+          return { visit, alert, invoice };
+        }, { maxWait: 10000, timeout: 30000 }).then(value => { fixture = value; }, error => { writerError = error; });
+        // Local PGlite queues writers; native PostgreSQL must commit while the
+        // reader remains open, proving the actual MVCC isolation level.
+        committedBeforeRemaining = await Promise.race([
+          writerPromise.then(() => { if (writerError) throw writerError; return true; }),
+          new Promise(resolve => { timer = setTimeout(() => resolve(false), 5000); }),
+        ]);
+        clearTimeout(timer); release(); return result;
+      }
+      await remaining; return read();
+    }, row => transactions.push(row));
+    const during = await call(); assert.equal(during.status, 200);
+    await writerPromise; if (writerError) throw writerError;
+    restore();
+    const after = await call(); assert.equal(after.status, 200);
+    const values = data => ({ done: counts(data.body.serviceVisitsByStatus).DONE || 0, alerts: data.body.activeAlerts, total: data.body.financialAggregates._sum.total || 0 });
+    const initial = values(before), delta = data => Object.fromEntries(Object.entries(values(data)).map(([key, value]) => [key, Math.round((value - initial[key]) * 100) / 100]));
+    const proof = { engine, transactions, reads, committedBeforeRemaining, duringDelta: delta(during), afterDelta: delta(after) };
+    console.log(JSON.stringify({ metricsSnapshot: proof }));
+    assert.deepEqual(proof.duringDelta, { done: 0, alerts: 0, total: 0 }, 'Metrics must retain the same database snapshot across all sources');
+    assert.deepEqual(proof.afterDelta, { done: 1, alerts: 1, total: 17.25 });
+    assert.deepEqual(transactions, [{ scope: 'transaction-1', options: { isolationLevel: 'RepeatableRead', timeout: 30000 } }]);
+    assert(reads.every(row => row.scope === 'transaction-1')); assert.equal(reads.length, 3);
+    if (!/wasm|emscripten|pglite/i.test(engine)) assert.equal(committedBeforeRemaining, true, 'Native PostgreSQL must exercise a concurrent commit');
+    return proof;
+  } finally {
+    clearTimeout(timer); release(); restore(); if (writerPromise) await writerPromise;
+    if (fixture) {
+      await writer.serviceVisit.delete({ where: { id: fixture.visit.id } });
+      await writer.technicalAlert.delete({ where: { id: fixture.alert.id } });
+      await writer.invoice.delete({ where: { id: fixture.invoice.id } });
+    }
+    await writer.$disconnect(); cache.invalidateDashboardCache('QA_SNAPSHOT_CLEANUP');
+  }
+}
+
 (async () => {
   const admin = await prisma.user.findUniqueOrThrow({ where: { email: process.env.ADMIN_EMAIL } });
   const token = jwt.sign({ id: admin.id, role: 'ADMIN', principalType: 'USER' }, getJwtSecret(), { expiresIn: '1h' });
-  const app = require('express')(); app.use('/api/dashboard', require('../src/routes/dashboardRoutes'));
+  let router = require('../src/routes/dashboardRoutes');
+  if (process.env.CW_METRICS_SNAPSHOT_BASELINE === 'true') {
+    const Module = require('node:module'), { execFileSync } = require('node:child_process');
+    const filename = require.resolve('../src/routes/dashboardRoutes'), previous = new Module(filename, module);
+    previous.filename = filename; previous.paths = module.paths;
+    previous._compile(execFileSync('git', ['show', '852c4f3082b51e3d6ad5835ba4230d7e5f0935ac:src/routes/dashboardRoutes.js'], { encoding: 'utf8' }), filename);
+    router = previous.exports;
+  }
+  const app = require('express')(); app.use('/api/dashboard', router);
   server = await new Promise(resolve => { const listening = app.listen(0, '127.0.0.1', () => resolve(listening)); });
   const origin = 'http://127.0.0.1:' + server.address().port;
   const call = async ({ force = true, method = 'GET', credential = token } = {}) => {
@@ -45,6 +125,7 @@ const counts = rows => Object.fromEntries(rows.map(row => [row.status, row._coun
   }
   for (const status of ['OPEN', 'ACKNOWLEDGED', 'RESOLVED']) await prisma.technicalAlert.create({ data: { poolId: pool.id, type: 'QA', message: prefix, status } });
   for (const [total, createdAt] of [[123.45, midday], [-12.34, midday], [999, yesterday]]) await prisma.invoice.create({ data: { clientId: client.id, total, createdAt } });
+  const snapshotProof = await verifySnapshot(call, pool.id, midday);
   const snapshot = async () => ({ visits: await prisma.serviceVisit.findMany({ where: { clientId: client.id }, orderBy: { id: 'asc' } }), invoices: await prisma.invoice.findMany({ where: { clientId: client.id }, orderBy: { id: 'asc' } }), alerts: await prisma.technicalAlert.findMany({ where: { poolId: pool.id }, orderBy: { id: 'asc' } }), payments: await prisma.payment.count(), communications: await prisma.communicationLog.count() });
   const before = await snapshot(); cache.invalidateDashboardCache('QA_FIXTURE');
   const complete = await call(); assert.equal(complete.status, 200); assert.equal(complete.cache, 'private, no-store');
@@ -63,20 +144,20 @@ const counts = rows => Object.fromEntries(rows.map(row => [row.status, row._coun
     }
     assert.equal((await call({ method, credential: sign({ id: leader.id, technicianId: leader.id, role: 'TEAM_LEADER' }) })).status, 200);
   }
-  for (const [model, operation] of [['serviceVisit', 'groupBy'], ['technicalAlert', 'count'], ['invoice', 'aggregate']]) {
-    const original = prisma[model][operation];
+  for (const [model] of sources) {
+    let restore;
     try {
-      cache.invalidateDashboardCache('QA_FAILURE'); prisma[model][operation] = async () => { throw Error('PRIVATE_METRIC_SOURCE_SECRET'); };
+      cache.invalidateDashboardCache('QA_FAILURE'); restore = interceptSources(entry => { if (entry.model === model) throw Error('PRIVATE_METRIC_SOURCE_SECRET'); return entry.read(); });
       for (const method of ['GET', 'POST']) {
         const failed = await call({ method }); assert.equal(failed.status, 503, model + ' failure must not become zero');
         assert.equal(failed.body.ok, false); assert(!JSON.stringify(failed).includes('PRIVATE_METRIC_SOURCE_SECRET')); assert.equal(cache.getDashboardCache(), null);
       }
       const blocked = await call(); assert.equal(blocked.status, 503); assert.equal(blocked.body.breaker.state, 'OPEN');
-    } finally { prisma[model][operation] = original; }
+    } finally { restore?.(); }
     await new Promise(resolve => setTimeout(resolve, 70));
     const recovered = await call(); assert.equal(recovered.status, 200); assert.equal(recovered.body.breaker.state, 'CLOSED'); assert.equal(recovered.body.activeAlerts, complete.body.activeAlerts);
     try {
-      prisma[model][operation] = async () => { throw Error('PRIVATE_METRIC_SOURCE_SECRET'); };
+      restore = interceptSources(entry => { if (entry.model === model) throw Error('PRIVATE_METRIC_SOURCE_SECRET'); return entry.read(); });
       const fallback = await call(); assert.equal(fallback.status, 200); assert.equal(fallback.body.source, 'RAM_CACHE_FALLBACK');
       assert.equal(fallback.body.cache.source, fallback.body.source); assert.equal(fallback.body.breakerDegraded, true);
       assert.deepEqual(counts(fallback.body.serviceVisitsByStatus), counts(complete.body.serviceVisitsByStatus));
@@ -84,21 +165,20 @@ const counts = rows => Object.fromEntries(rows.map(row => [row.status, row._coun
       assert.equal((await call({ force: false })).body.breakerDegraded, true);
       const opened = await call(); assert.equal(opened.body.breaker.state, 'OPEN');
       const cachedOpen = await call({ force: false }); assert.equal(cachedOpen.body.source, 'RAM_CIRCUIT_BREAKER'); assert.equal(cachedOpen.body.breakerDegraded, true);
-    } finally { prisma[model][operation] = original; }
+    } finally { restore?.(); }
     await new Promise(resolve => setTimeout(resolve, 70)); assert.equal((await call()).body.breaker.state, 'CLOSED');
   }
-  const originalCount = prisma.technicalAlert.count;
-  let release, arrived;
+  let release, arrived, restore;
   const reached = new Promise(resolve => { arrived = resolve; });
   try {
     cache.invalidateDashboardCache('QA_BEFORE_RACE');
-    prisma.technicalAlert.count = async (...args) => { const result = await originalCount.apply(prisma.technicalAlert, args); arrived(); await new Promise(resolve => { release = resolve; }); return result; };
+    restore = interceptSources(async entry => { const result = await entry.read(); if (entry.model === 'technicalAlert') { arrived(); await new Promise(resolve => { release = resolve; }); } return result; });
     const pending = call(); await reached; cache.invalidateDashboardCache('VISIT_COMPLETED'); release();
     const outdated = await pending; assert.equal(outdated.status, 503); assert.equal(outdated.body.breaker.failureCount, 0); assert.equal(cache.getDashboardCache(), null);
-  } finally { prisma.technicalAlert.count = originalCount; if (release) release(); }
+  } finally { restore?.(); if (release) release(); }
   assert.equal((await call()).status, 200); assert.deepEqual(await snapshot(), before, 'Metrics must not write business records');
   completed = true;
-  fs.writeFileSync(resultPath, JSON.stringify({ ok: true, prefix, phase: 'assertions-completed', failedSourcesChecked: 3, methods: ['GET', 'POST'], allowedRoles: ['ADMIN', 'TEAM_LEADER'], refusedRoles: ['CLIENT', 'TECHNICIAN'], invalidationRaceChecked: true, businessRecordsUnchanged: true }, null, 2) + '\n');
+  fs.writeFileSync(resultPath, JSON.stringify({ ok: true, prefix, phase: 'assertions-completed', snapshot: snapshotProof, failedSourcesChecked: 3, methods: ['GET', 'POST'], allowedRoles: ['ADMIN', 'TEAM_LEADER'], refusedRoles: ['CLIENT', 'TECHNICIAN'], invalidationRaceChecked: true, businessRecordsUnchanged: true }, null, 2) + '\n');
   fs.writeSync(1, 'PASS live dashboard metrics: real SQL values and UTC scope, GET/POST permissions and private cache policy, each failed source unavailable, retained/degraded complete cache, breaker recovery, invalidation race and no business mutations\n');
 })().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => {
   if (server) await new Promise(resolve => server.close(resolve));

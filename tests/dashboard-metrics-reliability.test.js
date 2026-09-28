@@ -19,11 +19,20 @@ function harness() {
   const cache = cacheContext.module.exports;
   const reads = [vi.fn().mockResolvedValue([{ status: 'DONE', _count: { id: 3 } }]), vi.fn().mockResolvedValue(7), vi.fn().mockResolvedValue({ _sum: { total: -12.34 } })];
   const prisma = { serviceVisit: { groupBy: reads[0] }, technicalAlert: { count: reads[1] }, invoice: { aggregate: reads[2] } };
+  const transaction = vi.fn(async callback => callback(prisma)); prisma.$transaction = transaction;
   const routes = [];
   const router = Object.fromEntries(['get', 'post'].map(method => [method, (path, ...handlers) => routes.push({ method, path, handlers })]));
   const context = vm.createContext({ module: { exports: {} }, process, global, Date: Clock, console, require(name) {
     if (name === 'express') return { Router: () => router };
     if (name === '../prismaClient') return prisma;
+    if (name === '../business/admin/DashboardMetricsBusiness') {
+      const business = { module: { exports: {} }, require(dependency) {
+        if (dependency === '../../prismaClient') return { prisma };
+        throw Error('Unexpected business dependency ' + dependency);
+      } };
+      vm.runInNewContext(readFileSync(new URL('../src/business/admin/DashboardMetricsBusiness.js', import.meta.url), 'utf8'), business);
+      return business.module.exports;
+    }
     if (name === '../services/dashboardCacheService') return cache;
     if (name === '../middlewares/authMiddleware') return () => (_req, _res, next) => next();
     if (['../controllers/dashboardController', '../services/aiOperationalService', '../services/aiPredictiveService', '../services/dispatchEngineService'].includes(name)) return {};
@@ -38,10 +47,42 @@ function harness() {
     async function next() { if (index < route.handlers.length) return route.handlers[index++]({ query: force ? { force: '1' } : {} }, res, next); }
     await next(); return result;
   }
-  return { call, reads, cache, clock: value => { now = typeof value === 'string' ? Date.parse(value) : now + value; } };
+  return { call, reads, cache, transaction, prisma, clock: value => { now = typeof value === 'string' ? Date.parse(value) : now + value; } };
 }
 
 describe('live dashboard metrics retain failures instead of manufacturing zero', () => {
+  it('reads all metrics in one RepeatableRead transaction and avoids transactions on cache hits', async () => {
+    const h = harness(); const result = await h.call(); expect(result.status).toBe(200);
+    expect(h.transaction).toHaveBeenCalledTimes(1);
+    expect(h.transaction.mock.calls[0][1]).toEqual({ isolationLevel: 'RepeatableRead', timeout: 30000 });
+    await h.call(); expect(h.transaction).toHaveBeenCalledTimes(1);
+    await h.call({ force: true }); expect(h.transaction).toHaveBeenCalledTimes(2);
+  });
+  it('uses only the supplied transaction delegates', async () => {
+    const h = harness();
+    h.transaction.mockImplementationOnce(async callback => callback({ serviceVisit: { groupBy: async () => [] }, technicalAlert: { count: async () => 0 }, invoice: { aggregate: async () => ({ _sum: { total: null } }) } }));
+    const result = await h.call(); expect(result.status).toBe(200); expect(result.body.activeAlerts).toBe(0);
+    expect(result.body.serviceVisitsByStatus).toEqual([]); expect(result.body.financialAggregates._sum.total).toBeNull();
+    for (const read of h.reads) expect(read).not.toHaveBeenCalled();
+  });
+  it('does not query or publish when opening the transaction fails', async () => {
+    const h = harness(); h.transaction.mockRejectedValueOnce(Error('PRIVATE_TRANSACTION_FAILURE'));
+    const result = await h.call(); expect(result.status).toBe(503); expect(h.cache.getDashboardCache()).toBeNull();
+    expect(JSON.stringify(result)).not.toContain('PRIVATE_TRANSACTION_FAILURE');
+    for (const read of h.reads) expect(read).not.toHaveBeenCalled();
+  });
+  it('waits for transaction completion before publishing otherwise successful reads', async () => {
+    const h = harness(); h.transaction.mockImplementationOnce(async callback => { await callback(h.prisma); throw Error('PRIVATE_COMMIT_FAILURE'); });
+    const result = await h.call(); expect(result.status).toBe(503); expect(result.body.breaker.failureCount).toBe(1);
+    expect(h.cache.getDashboardCache()).toBeNull(); expect(JSON.stringify(result)).not.toContain('PRIVATE_COMMIT_FAILURE');
+    for (const read of h.reads) expect(read).toHaveBeenCalledTimes(1);
+  });
+  it('retains the older complete cache when transaction completion fails', async () => {
+    const h = harness(); await h.call(); h.clock(700); h.reads[1].mockResolvedValue(99);
+    h.transaction.mockImplementationOnce(async callback => { await callback(h.prisma); throw Error('PRIVATE_COMMIT_FAILURE'); });
+    const result = await h.call({ force: true }); expect(result.status).toBe(200); expect(result.body.activeAlerts).toBe(7);
+    expect(result.body.source).toBe('RAM_CACHE_FALLBACK'); expect(result.body.cache.ageMs).toBe(700); expect(result.body.breakerDegraded).toBe(true);
+  });
   it.each([0, 1, 2])('rejects source %i failure without cache and recovers with original values', async index => {
     const h = harness(); h.reads[index].mockRejectedValueOnce(Error('PRIVATE_SOURCE_SECRET'));
     const failed = await h.call();
