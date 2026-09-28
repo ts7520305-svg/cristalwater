@@ -1759,10 +1759,10 @@
     "summary-390.png"
   ],
   "priorCI": {
-    "checkedAt": "2026-09-28T20:18:11.917Z",
+    "checkedAt": "2026-09-28T20:24:19.504Z",
     "runs": [
       {
-        "runId": 36474118500,
+        "run_id": 36474118500,
         "jobs": [
           {
             "id": 109103422154,
@@ -1774,7 +1774,7 @@
         ]
       },
       {
-        "runId": 36475513427,
+        "run_id": 36475513427,
         "jobs": [
           {
             "id": 109108100107,
@@ -1782,6 +1782,18 @@
             "conclusion": null,
             "successfulSteps": 10,
             "activeStep": "Run node scripts/test-field-suite.js"
+          }
+        ]
+      },
+      {
+        "run_id": 36478772257,
+        "jobs": [
+          {
+            "id": 109118978818,
+            "status": "in_progress",
+            "conclusion": null,
+            "successfulSteps": 4,
+            "activeStep": "Run npm ci"
           }
         ]
       }
@@ -1805,7 +1817,15 @@
     "Native PostgreSQL, full 314-script order, restore and report-volume JSON still pending; C03 and prior suites remain as recorded in priorCI."
   ],
   "publication": {
-    "status": "pending",
-    "branch": "work/field-readiness-20260915-simulation"
+    "branch": "work/field-readiness-20260915-simulation",
+    "commit": "19569a6145ab049b6dca058ae791d81cefc6fc26",
+    "tree": "6726513a322e496354724643cb28852a0d24b1d2",
+    "treeMatchedTestedIndex": true,
+    "runId": 36478772257,
+    "jobId": 109118978818,
+    "status": "in_progress",
+    "successfulStepsAtCheck": 4,
+    "activeStepAtCheck": "Run npm ci",
+    "nativeGates": "314 ordered scripts, full restore and report-volume/results.json with three probes and cleanup pending"
   }
 }

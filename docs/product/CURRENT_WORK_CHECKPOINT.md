@@ -1,6 +1,6 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK410 local aprovada / C04-E
+## Retoma atual — 28/09/2026, TASK410 publicada / C04-E
 
 Relatórios guardados/histórico mensal aprovados localmente. **201/1 001 CLIENT + ADMIN**, 24 piscinas por relatório, mais **10 001 faturas/pagamentos/comunicações** no maior perfil. Três probes e **116 pedidos**: 58 positivos, 38 recusas/erros de entrada ou ausência, 20 falhas injetadas; dados/IDs/totais exatos, recuperação, hashes de origem e doze modelos conservados/limpos. [Relatório C04](OPERATIONAL_VOLUME_PLAN_20260928.md), [evidência TASK410](evidence/20260928_task410_local.json).
 
@@ -10,8 +10,11 @@ Relatórios guardados/histórico mensal aprovados localmente. **201/1 001 CLIENT
 
 **Lote de seis ficheiros:** novo `scripts/test-field-report-volume.js`, runner e quatro documentos; runner 314/cache v207. Produção/esquema/dependências inalterados. CI TASK408 run 36474118500/job 109103422154 e TASK409 run 36475513427/job 109108100107 ainda na suite, dez etapas aprovadas cada. TASK409 deve provar correção C03 abaixo de 768 MiB, 313 grupos/restauro e snapshot concorrente; TASK408 não contém a correção. Não fechar C03 com aprovação local.
 
-**Continuar:** publicar TASK410 e registar SHA/CI; confirmar 314 grupos exatos/restauro/JSON report-volume com três probes/limpeza. Depois **C04-F: inventariar limites efetivos de PDFs/anexos e executar mínimo/multipágina/maior fixture e fronteiras de upload sem aumentar limites**. C04-A/B nativos aprovados, C probe nativo mas suite/restauro bloqueados, D/E locais aprovados, F por executar. Contagem 32: 28 por iniciar, C04 em execução, C03 em validação, C01/C02 concluídas. Depois C05, idiomas. Contrato anual adiado; branch autorizada, sem merge/deploy/contactos reais.
+**Continuar:** confirmar 314 grupos exatos/restauro/JSON report-volume com três probes/limpeza. Depois **C04-F: inventariar limites efetivos de PDFs/anexos e executar mínimo/multipágina/maior fixture e fronteiras de upload sem aumentar limites**. C04-A/B nativos aprovados, C probe nativo mas suite/restauro bloqueados, D/E locais aprovados, F por executar. Contagem 32: 28 por iniciar, C04 em execução, C03 em validação, C01/C02 concluídas. Depois C05, idiomas. Contrato anual adiado; branch autorizada, sem merge/deploy/contactos reais.
 
+
+
+**Publicação TASK410:** branch `work/field-readiness-20260915-simulation`, commit `19569a6145ab049b6dca058ae791d81cefc6fc26`, árvore `6726513a322e496354724643cb28852a0d24b1d2`, igual à preparada/testada. [CI 36478772257](https://github.com/ts7520305-svg/cristalwater/actions/runs/36478772257), job `109118978818`, em execução; quatro etapas aprovadas e instalação de dependências na consulta. Exigir 314 grupos na ordem exata, restauro e `report-volume/results.json` com três probes e limpeza aprovados. TASK408/TASK409 continuam na suite integrada, dez etapas aprovadas cada. Sem merge, deploy ou contactos reais.
 
 ## Retoma atual — 28/09/2026, TASK409 publicada / memória C03
 
