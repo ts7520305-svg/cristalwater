@@ -112,6 +112,10 @@
       "task412-unit.log": "e8de658db6d1bc0dd002e8d4dae6ac26ef2c7d7f28236bcbf37216920976a748",
       "task412-technician.log": "b5b723f0ab8360a87f2336d68913b97d7e692560cc8c0eb3f5ef2c041829ce1a",
       "task412-syntax.log": "7d20a5145437e5670d0376055bf4a65ce58000a565a1aff72875faa758150d36"
+    },
+    "publicationGates": {
+      "task412-publication-unit.log": "0bea80b4b0bb78bd2c8aeffc0c348ad36808e2d7ed2b68500b6fec749aa9bcf4",
+      "task412-publication-technician.log": "49d2dd6c60370f633cded8c4f59198fdf902b5c55718a9cffd4d45a65ce391d1"
     }
   },
   "priorNativeMemory": {
@@ -509,7 +513,14 @@
     "Upload work originally numbered TASK412 is now TASK413, within C04-F; no new completion ID added."
   ],
   "publication": {
-    "status": "pending",
-    "branch": "work/field-readiness-20260915-simulation"
+    "status": "published-native-pending",
+    "commit": "2816af3c375797b5d673b19b05c05597470f10f9",
+    "tree": "76e8afeb98e7d0ee0023ebc1a4f41d6c1c9cae32",
+    "branch": "work/field-readiness-20260915-simulation",
+    "testedTreeMatches": true,
+    "runId": 36483704663,
+    "jobId": 109135318014,
+    "ciStatus": "in_progress",
+    "fullSuiteScripts": 315
   }
 }
