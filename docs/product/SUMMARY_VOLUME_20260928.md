@@ -1,4 +1,36 @@
-# Volume dos resumos — TASK404 / C03
+# Volume dos resumos — C03 / TASK404 e TASK409
+
+## Atualização TASK409 — memória do resumo administrativo
+
+**Correção aprovada localmente; CI nativo pendente.** O CI TASK407 (`36466632283`, job `109078229561`, commit `6c77104d...`) falhou no dashboard de 400 clientes: RSS ultrapassou a guarda de **768 MiB**. O pico exato ficou fora do excerto do erro; não é inferido. Passaram 311/312 grupos, e o restauro não correu. C03 mantém-se em validação apesar dos ensaios nativos anteriores aprovados.
+
+O dashboard só utiliza `.summary` do catálogo de referências externas, mas carregava também todos os clientes, faturas, linhas, pagamentos, cópias do cliente, hashes de revisão e histórico projetado dos documentos. O novo modo interno do mesmo Business seleciona os campos necessários e reutiliza as regras existentes de elegibilidade, referências, conflitos, precedência do histórico, normalização e arredondamento. A lista financeira normal mantém documentos/tokens, ações e contratos públicos. As oito fontes continuam na mesma transação `RepeatableRead`; falha de qualquer fonte recusa todo o resumo.
+
+**Sete testes novos**, três dos quais falharam antes da correção: o resumo devolvia clientes completos, lia relações desnecessárias e gerava tokens descartados. Conferem também valores esperados explicitamente (incluindo montantes divergentes antes da normalização), referências confirmadas/internas/duplicadas/inválidas, histórico divergente/interno, herança do pedido por cliente/documento, dados fiscais incompletos, falhas das três fontes e preservação dos tokens da lista normal. Não se alterou nenhuma regra financeira.
+
+### Medição local antes/depois
+
+Duas execuções anteriores em base PGlite 0.5.8 nova ficaram dentro da guarda: **576,76 e 601,26 MiB** no maior perfil. O erro de RSS é o reproduzido no CI PostgreSQL, não uma falha local inventada. A tabela compara a segunda medição anterior (com conclusão integral confirmada) com a versão corrigida, usando o mesmo formato de fixture e base nova.
+
+| Clientes | RSS anterior (MiB) | RSS corrigido (MiB) | Tempo anterior (ms) | Tempo corrigido (ms) | JSON (bytes) |
+|---:|---:|---:|---:|---:|---:|
+| 25 | 175.42 | 165.05 | 276.3 | 285.0 | 2,733,855 |
+| 100 | 267.12 | 219.93 | 685.4 | 446.0 | 4,208,417 |
+| 400 | 601.26 | 438.89 | 2534.6 | 1410.1 | 10,098,101 |
+
+No perfil de 400, RSS **601,26 → 438,89 MiB** (cerca de 27% nesta comparação); corpo **10 098 101 bytes**, totais/IDs completos. Processo Node novo por GET, API+cliente HTTP; exclui base e navegador. Guardas **30 s / 64 MiB JSON / 768 MiB RSS** conservadas. São observações, não percentis nem garantia de VPS.
+
+O ensaio de volume passou em **27 285 ms**, incluindo processo: quatro APIs × três escalas = doze perfis positivos, três falhas tardias, limpeza de dez modelos/configuração original. O modo de referência repõe agora também a leitura financeira completa anterior; hashes do JSON integral coincidem na base e com 25 clientes da mesma fixture. A maior escala tem **64 816 linhas**, 41 600 visitas/9 600 documentos/3 200 pagamentos. A prova não afirma comparação byte a byte entre fixtures novas com UUIDs diferentes.
+
+**Regressões:** snapshot/API/UI operacionais, resumo fiscal, revisão de referências e registo externo passaram; marcadores finais lidos. Confirmados documentos pagos/retirados, Unicode, cêntimos, referências históricas, perfis, falhas, concorrência de comandos, resposta perdida/repetição e interface. Todas as operações usam QA com integrações desligadas. Snapshot local mantém os totais anteriores e seguintes; PGlite serializa o escritor (`committedBeforeRemaining: false`), pelo que a prova concorrente real continua dependente do PostgreSQL.
+
+**Gates:** 1 318 unitários/135 ficheiros, quatro técnicos, sintaxe 695/307/44, node-check/diff-check. Runner continua com **313 scripts**. Uma falha futura de volume inclui a medição exata também no `results.json` pequeno do CI, conservando o JSON próprio; evita perder o pico no excerto de erro truncado.
+
+**Lote (10 ficheiros):** dois Business, dois scripts de volume, teste unitário novo e teste de snapshot atualizado, este relatório, plano, checkpoint e evidência. [Evidência TASK409](evidence/20260928_task409_local.json). Sem alteração de schema, dependências, endpoints/cache v207, implantação, merge ou contactos reais.
+
+**Limites e continuação:** continuam leituras proporcionais ao total de documentos, referências/histórico e visitas do mês; esta alteração retira relações/tokens descartados, não certifica memória constante. CI TASK408 (`36474118500`) está na suite integrada na última consulta; não cobre ainda a correção TASK409. Exigir no CI da correção 313 grupos exatos, restauro 128 tabelas/ficheiros conferidos e JSONs de snapshot/volume aprovados. Depois seguir C04-E/F. Contagem principal: 28 por iniciar, C04 em execução, C03 em validação e duas concluídas.
+
+## Histórico TASK404
 
 28/09/2026. **Validação local concluída; confirmação nativa pendente.** A correção elimina o carregamento de campos e relações que o resumo administrativo não utiliza. Na reprodução com 400 clientes acrescentados à base QA anterior, o pico passou de **1 119,93 para 672,23 MiB**; a resposta JSON foi comparada integralmente com as projeções antigas. O ensaio final abaixo usa uma base nova e mede **705,55 MiB** no maior dashboard. São observações locais, não uma garantia de capacidade do VPS.
 

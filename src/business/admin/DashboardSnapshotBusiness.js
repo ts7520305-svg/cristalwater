@@ -28,7 +28,7 @@ async function readDashboardSources({ start, end }) {
         include: { client: true, pool: { include: { client: true } }, technician: true },
         orderBy: [{ plannedDate: 'asc' }, { date: 'asc' }],
       }),
-      listExternalInvoices({ status: 'all' }, false, tx),
+      listExternalInvoices({ status: 'all' }, false, tx, true),
     ]);
     return { clients, pools, technicians, invoices, payments, dashboardAlerts, visits, externalBilling };
   }, { isolationLevel: 'RepeatableRead', timeout: 30000 });

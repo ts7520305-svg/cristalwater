@@ -1,5 +1,17 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 28/09/2026, TASK409 local / memória C03
+
+Corrigida a leitura financeira descartada pelo resumo administrativo. `listExternalInvoices` recebe modo interno `summaryOnly` no quarto argumento, usado apenas pelo `DashboardSnapshotBusiness`: seleciona campos necessários, reutiliza elegibilidade/revisão/normalização e não calcula tokens nem materializa linhas/pagamentos/clientes repetidos. Lista normal mantém documentos/tokens/contratos. Oito fontes continuam na mesma transação. [Relatório C03](SUMMARY_VOLUME_20260928.md), [evidência TASK409](evidence/20260928_task409_local.json).
+
+**Falha de origem:** CI TASK407 run36466632283/job109078229561, 311/312 grupos; RSS do dashboard400 >=768MiB, valor exato truncado. Restauro saltado. C04-C passou como probe nativo, não como suite/restauro. C01/C02 e C04-A/B foram aceites com JSONs/runner/restauro completos TASK406; estados históricos não apagam a falha C03 posterior.
+
+**Antes/depois local:** duas medições antigas576,76/601,26MiB; corrigido438,89MiB, 1 410,1ms,10 098 101bytes, mesmo formato de fixture/base nova. Erro de RSS nativo não reproduzido como ultrapassagem local. Três novos unitários falharam antes por materialização/tokens inúteis. Sete novos passaram; **1 318 unitários/135 ficheiros, quatro técnicos, sintaxe695/307/44**. Cinco grupos com marcadores finais lidos: volume27 285ms, operacional9 953ms, resumo fiscal5 065ms, revisão referências5 843ms, registo externo6 088ms. Volume:12perfis+3falhas tardias, limpeza completa; hashes JSON integral iguais à leitura antiga na base/25clientes da mesma fixture. PGlite serializa escritor; `committedBeforeRemaining:false` local não comprova concorrência PostgreSQL.
+
+**Lote 10 ficheiros:** dois Business, dois scripts, dois ficheiros de teste, relatório C03, plano, checkpoint/evidência. Runner313, cachev207, schema/dependências inalterados. `results.json` de volume agora inclui medição exata quando um probe falha. C03 continua em validação até CI/restauro da correção. TASK408 guias publicado f5e18e31..., docs28cd3fac...; CI36474118500/job109103422154 está na suite integrada, dez etapas aprovadas na última consulta, não contém TASK409.
+
+**Continuar:** confirmar CI TASK408/TASK409 por SHA, 313grupos exatos/sem falha/restauro e JSONs específicos. TASK409 exige snapshot concorrente verdadeiro e volume12+3/limpeza; TASK408 exige guide-volume3probes/limpeza. C04-E (relatórios/histórico201/1001) e F (PDFs/anexos) por executar; depois C05idiomas. C04-D local aprovado, C04-C probe nativo aprovado mas suite/restauro bloqueados, A/B nativos aprovados. Contagem32:28por iniciar, C04em execução, C03em validação,2concluídas(C01/C02). Contrato anual adiado; branch autorizada, sem merge/deploy/contactos reais.
+
 ## Retoma atual — 28/09/2026, TASK408 publicada / C04-D
 
 Guias/movimentos aprovados localmente: 201/1 001 registos em listas técnicas e históricas administrativas, páginas completas de 200/25, `maxId` com inserção por outra conexão, stock/detalhes de 100 itens, permissões e oito falhas tardias por perfil. 272 HTTP, três probes API/UI, 31 415 ms; zero comandos API/escritas SQL instrumentadas e doze modelos repostos. UI de 1 001 registos: 41 páginas por percurso, quatro percursos; detalhes de materiais em quatro páginas. [Relatório C04](OPERATIONAL_VOLUME_PLAN_20260928.md), [evidência TASK408](evidence/20260928_task408_local.json).

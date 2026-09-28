@@ -96,6 +96,12 @@ process.on('exit', () => { if (!completed && !process.exitCode) { fs.writeSync(2
   const admin = await prisma.user.findUniqueOrThrow({ where: { email: process.env.ADMIN_EMAIL } });
   const token = require('jsonwebtoken').sign({ id: admin.id, role: 'ADMIN', principalType: 'USER' }, require('../src/utils/jwtSecret').getJwtSecret(), { expiresIn: '10m' });
   const app = require('express')();
+  if (fault === 'legacy-projections') {
+    // Restore the previous full external-document catalogue as well as the
+    // old root projections below, then compare the entire HTTP JSON hash.
+    const finance = require('../src/business/finance/FinanceOsBusiness'), list = finance.listExternalInvoices;
+    finance.listExternalInvoices = (query, flat, transaction) => list(query, flat, transaction, false);
+  }
   const mount = { dashboard: '/api/dashboard', metrics: '/api/dashboard', alerts: '/api/alerts', risk: '/api/operational-risk' }[mode];
   app.use(mount, require('../src/routes/' + { dashboard: 'dashboardRoutes', metrics: 'dashboardRoutes', alerts: 'alertRoutes', risk: 'operationalRiskRoutes' }[mode]));
   server = await new Promise(resolve => { const s = app.listen(0, '127.0.0.1', () => resolve(s)); });

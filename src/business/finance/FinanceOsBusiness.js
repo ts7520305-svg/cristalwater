@@ -62,7 +62,7 @@ function externalConfirmation(entry) {
     && (entry.action === 'EXTERNAL_INVOICE_REGISTERED' || metadata.decision === 'CONFIRM_EXTERNAL')
     && typeof metadata.externalInvoiceNo === 'string' && Array.isArray(metadata.snapshot?.lines);
 }
-function referenceReview(invoice, history, conflicts) {
+function referenceReview(invoice, history, conflicts, summaryOnly = false) {
   const number = invoice.externalInvoiceNo?.trim() || '';
   const confirmations = history.filter(externalConfirmation);
   const confirmation = confirmations.find(entry => entry.metadata.externalInvoiceNo.trim() === number
@@ -75,6 +75,7 @@ function referenceReview(invoice, history, conflicts) {
   if (number && conflicts.length) status = 'DUPLICATE_REFERENCE';
   if (number && !validExternalNumber(invoice.externalInvoiceNo)) status = 'INVALID_REFERENCE';
   const needsReview = !['CONFIRMED', 'NO_REFERENCE', 'INTERNAL_ONLY'].includes(status);
+  if (summaryOnly) return { status, needsReview };
   const token = createHash('sha256').update(JSON.stringify({ snapshot: externalSnapshot(invoice),
     invoiceNumber: invoice.invoiceNumber, externalInvoiceNo: invoice.externalInvoiceNo, invoiceIssued: invoice.invoiceIssued,
     history: history.map(entry => ({ id: entry.id, action: entry.action, metadata: entry.metadata })), conflicts })).digest('hex');
@@ -90,7 +91,7 @@ function referenceHistory(history) {
     note: entry.metadata?.note || null, snapshot: entry.metadata?.snapshot || null }));
 }
 
-async function listExternalInvoices(query = {}, flat = false, transaction) {
+async function listExternalInvoices(query = {}, flat = false, transaction, summaryOnly = false) {
   const status = String(query.status || 'pending').toLowerCase(), search = String(query.q || '').trim().toLocaleLowerCase('pt-PT');
   if (!['pending', 'issued', 'review', 'missing-data', 'all'].includes(status)) externalFailure('Filtro inválido.');
   const read = async tx => {
@@ -98,7 +99,14 @@ async function listExternalInvoices(query = {}, flat = false, transaction) {
     const reviewedIds = [...new Set(registrations.map(entry => entry.entityId).filter(Number.isInteger))];
     const rows = await tx.client.findMany({
     where: { OR: [{ requiresInvoice: true }, { invoices: { some: { OR: [{ requiresInvoice: true }, { externalInvoiceNo: { not: null } }, { invoiceIssued: true }, { id: { in: reviewedIds } }] } } }] },
-    include: { pools: { select: { id: true } }, invoices: { include: { client: true, lines: { orderBy: { id: 'asc' } }, payments: true }, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }] } },
+    // The dashboard needs counters only. Read the fields consumed by the same
+    // eligibility/review/amount rules without documents or repeated clients.
+    ...(summaryOnly ? { select: {
+      id: true, requiresInvoice: true, fiscalName: true, fiscalNif: true, fiscalAddress: true, fiscalEmail: true,
+      invoices: { select: { id: true, clientId: true, status: true, requiresInvoice: true,
+        externalInvoiceNo: true, invoiceNumber: true, invoiceIssued: true, amount: true, total: true, totalAmount: true },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }] },
+    } } : { include: { pools: { select: { id: true } }, invoices: { include: { client: true, lines: { orderBy: { id: 'asc' } }, payments: true }, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }] } } }),
     orderBy: [{ name: 'asc' }, { id: 'asc' }],
     });
     const references = await tx.invoice.findMany({ select: { id: true, invoiceNumber: true, externalInvoiceNo: true } });
@@ -112,10 +120,15 @@ async function listExternalInvoices(query = {}, flat = false, transaction) {
     if (!numberOwners.has(number)) numberOwners.set(number, new Set()); numberOwners.get(number).add(row.id);
   }
   const clients = rows.map(client => {
-    const invoices = client.invoices.filter(row => externalRegistered(row) || externalEligible(row) || history.has(row.id)).map(row => {
+    const sourceInvoices = summaryOnly ? client.invoices.map(row => ({ ...row, client: { requiresInvoice: client.requiresInvoice } })) : client.invoices;
+    const invoices = sourceInvoices.filter(row => externalRegistered(row) || externalEligible(row) || history.has(row.id)).map(row => {
       const entries = history.get(row.id) || [];
       const conflicts = [...(numberOwners.get(row.externalInvoiceNo?.trim()) || [])].filter(id => id !== row.id).sort((a, b) => a - b);
-      const { confirmation, ...review } = referenceReview(row, entries, conflicts);
+      const { confirmation, ...review } = referenceReview(row, entries, conflicts, summaryOnly);
+      if (summaryOnly) return {
+        ...normalizeInvoice(row), externalReferenceReview: review,
+        externalRegistrationAllowed: externalEligible(row) && !externalRegistered(row) && !review.needsReview,
+      };
       return {
       ...normalizeInvoice(row), externalReviewToken: externalReviewToken(row),
       externalRegistration: confirmation?.metadata || null,
@@ -127,12 +140,14 @@ async function listExternalInvoices(query = {}, flat = false, transaction) {
     });
     const pendingInvoices = invoices.filter(row => !externalRegistered(row) && row.externalRegistrationAllowed), issuedInvoices = invoices.filter(externalRegistered);
     const historyInvoices = invoices.filter(row => !externalRegistered(row) && !row.externalRegistrationAllowed);
+    const fiscalDataComplete = ['fiscalName', 'fiscalNif', 'fiscalAddress', 'fiscalEmail'].every(key => typeof client[key] === 'string' && client[key].trim());
+    if (summaryOnly) return { requiresInvoice: Boolean(client.requiresInvoice), fiscalDataComplete, invoices, pendingInvoices, issuedInvoices };
     return {
       id: client.id, name: client.name, email: client.email, phone: client.phone, zone: client.zone,
       active: client.active, status: client.status, paymentReference: `CW-${String(client.id).padStart(6, '0')}`,
       requiresInvoice: Boolean(client.requiresInvoice), fiscalName: client.fiscalName, fiscalNif: client.fiscalNif,
       fiscalAddress: client.fiscalAddress, fiscalEmail: client.fiscalEmail, externalBillingNotes: client.externalBillingNotes,
-      fiscalDataComplete: ['fiscalName', 'fiscalNif', 'fiscalAddress', 'fiscalEmail'].every(key => typeof client[key] === 'string' && client[key].trim()),
+      fiscalDataComplete,
       poolsCount: client.pools.length, invoices, pendingInvoices, issuedInvoices, historyInvoices,
       pendingTotal: externalSum(pendingInvoices), issuedTotal: externalSum(issuedInvoices),
       lastIssuedAt: issuedInvoices[0]?.updatedAt || issuedInvoices[0]?.issueDate || null,
@@ -141,13 +156,14 @@ async function listExternalInvoices(query = {}, flat = false, transaction) {
   if (flat) return { ok: true, invoices: clients.flatMap(client => client.invoices) };
   const pending = clients.flatMap(client => client.pendingInvoices), issued = clients.flatMap(client => client.issuedInvoices);
   const allInvoices = clients.flatMap(client => client.invoices);
-  return {
-    ok: true,
-    summary: { clients: clients.length, missingFiscalData: clients.filter(client => !client.fiscalDataComplete).length,
+  const summary = { clients: clients.length, missingFiscalData: clients.filter(client => !client.fiscalDataComplete).length,
       pendingInvoices: pending.length, issuedInvoices: issued.length, totalInvoices: allInvoices.length,
       confirmedReferences: allInvoices.filter(row => row.externalReferenceReview.status === 'CONFIRMED').length,
       reviewReferences: allInvoices.filter(row => row.externalReferenceReview.needsReview).length,
-      pendingTotal: externalSum(pending), issuedTotal: externalSum(issued) },
+      pendingTotal: externalSum(pending), issuedTotal: externalSum(issued) };
+  if (summaryOnly) return { ok: true, summary };
+  return {
+    ok: true, summary,
     clients: clients.filter(client => (status === 'all' || (status === 'pending' && client.pendingInvoices.length) || (status === 'issued' && client.issuedInvoices.length) || (status === 'review' && client.invoices.some(row => row.externalReferenceReview.needsReview)) || (status === 'missing-data' && !client.fiscalDataComplete))
       && (!search || [client.name, client.email, client.phone, client.zone, client.fiscalName, client.fiscalNif, client.fiscalAddress, client.fiscalEmail, client.paymentReference, ...client.invoices.flatMap(row => [row.externalInvoiceNo, row.invoiceNumber, ...row.externalReferenceHistory.map(entry => entry.reference)])].filter(Boolean).join(' ').toLocaleLowerCase('pt-PT').includes(search))),
     generatedAt: new Date().toISOString(),

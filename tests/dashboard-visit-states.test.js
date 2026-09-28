@@ -77,8 +77,8 @@ describe('dashboard sources share one complete database snapshot', () => {
     const sandbox = { module: { exports: {} }, require(name) {
       if (name === '../../prismaClient') return { prisma };
       if (name === './AlertListBusiness') return { listDashboardSources: transaction => { expect(transaction).toBe(tx); return read('alerts'); } };
-      if (name === '../finance/FinanceOsBusiness') return { listExternalInvoices: (query, flat, transaction) => {
-        expect(transaction).toBe(tx); expect(query).toEqual({ status: 'all' }); expect(flat).toBe(false); return read('external', query);
+      if (name === '../finance/FinanceOsBusiness') return { listExternalInvoices: (query, flat, transaction, summaryOnly) => {
+        expect(transaction).toBe(tx); expect(query).toEqual({ status: 'all' }); expect(flat).toBe(false); expect(summaryOnly).toBe(true); return read('external', query);
       } };
       throw Error('Unexpected dependency ' + name);
     } };

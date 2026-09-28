@@ -1,0 +1,4250 @@
+{
+  "task": "TASK409",
+  "date": "2026-09-28",
+  "scope": "C03 dashboard memory regression",
+  "baseCommit": "28cd3fac2002b9b97b5dba8a25d54503e60bb635",
+  "status": "local-approved-native-pending",
+  "reproduction": {
+    "nativeRun": 36466632283,
+    "nativeJob": 109078229561,
+    "commit": "6c77104d02ad4e7f56c77867329ef40278d7726a",
+    "failedGroup": "test-field-summary-volume.js",
+    "profile": 400,
+    "guardMiB": 768,
+    "failure": "sampled process RSS >=768 MiB; exact native value absent from truncated error",
+    "originalLocalRuns": [
+      {
+        "durationMs": 2385.5,
+        "jsonBytes": 10098101,
+        "rssBeforeMiB": 92.45,
+        "sampledRssPeakMiB": 576.76,
+        "heapBeforeMiB": 17.67,
+        "sampledHeapPeakMiB": 215.92,
+        "lifetimeRssPeakMiB": 576.76,
+        "sql": {
+          "queries": 61,
+          "durationMs": 205,
+          "writes": 0
+        },
+        "scans": [
+          {
+            "model": "client",
+            "rows": 400,
+            "take": null,
+            "rssMiB": 288.77
+          },
+          {
+            "model": "pool",
+            "rows": 400,
+            "take": null,
+            "rssMiB": 288.77
+          },
+          {
+            "model": "technician",
+            "rows": 16,
+            "take": null,
+            "rssMiB": 288.77
+          },
+          {
+            "model": "invoice",
+            "rows": 9600,
+            "take": null,
+            "rssMiB": 288.77
+          },
+          {
+            "model": "payment",
+            "rows": 3200,
+            "take": null,
+            "rssMiB": 288.77
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 288.77
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 288.77
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 288.77
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 1600,
+            "take": null,
+            "rssMiB": 288.77,
+            "where": {
+              "OR": [
+                {
+                  "plannedDate": {
+                    "gte": "2019-12-01T00:00:00.000Z",
+                    "lte": "2019-12-31T23:59:59.999Z"
+                  }
+                },
+                {
+                  "date": {
+                    "gte": "2019-12-01T00:00:00.000Z",
+                    "lte": "2019-12-31T23:59:59.999Z"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "model": "auditTrail",
+            "rows": 0,
+            "take": null,
+            "rssMiB": 288.77
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 524.88
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 524.88
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 524.88
+          },
+          {
+            "model": "client",
+            "rows": 400,
+            "take": null,
+            "rssMiB": 524.88
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 525.88
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 525.88
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 525.88
+          },
+          {
+            "model": "invoice",
+            "rows": 9600,
+            "take": null,
+            "rssMiB": 525.88
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 532.25
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 532.25
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 532.25
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 532.5
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 532.5
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 532.5
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 532.75
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 532.75
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 532.75
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 200,
+            "take": 500,
+            "rssMiB": 475.44
+          },
+          {
+            "model": "notification",
+            "rows": 200,
+            "take": 500,
+            "rssMiB": 475.44
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 200,
+            "take": 500,
+            "rssMiB": 475.44
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 475.32
+          },
+          {
+            "model": "notification",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 475.32
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 475.32
+          }
+        ],
+        "transactions": [
+          {
+            "isolationLevel": "RepeatableRead",
+            "timeout": 30000
+          }
+        ]
+      },
+      {
+        "durationMs": 2534.6,
+        "jsonBytes": 10098101,
+        "rssBeforeMiB": 91.89,
+        "sampledRssPeakMiB": 601.26,
+        "heapBeforeMiB": 17.63,
+        "sampledHeapPeakMiB": 214.62,
+        "lifetimeRssPeakMiB": 601.26,
+        "sql": {
+          "queries": 61,
+          "durationMs": 267,
+          "writes": 0
+        },
+        "scans": [
+          {
+            "model": "client",
+            "rows": 400,
+            "take": null,
+            "rssMiB": 274.9
+          },
+          {
+            "model": "pool",
+            "rows": 400,
+            "take": null,
+            "rssMiB": 274.9
+          },
+          {
+            "model": "technician",
+            "rows": 16,
+            "take": null,
+            "rssMiB": 274.9
+          },
+          {
+            "model": "invoice",
+            "rows": 9600,
+            "take": null,
+            "rssMiB": 274.9
+          },
+          {
+            "model": "payment",
+            "rows": 3200,
+            "take": null,
+            "rssMiB": 274.9
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 274.9
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 274.9
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 274.9
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 1600,
+            "take": null,
+            "rssMiB": 274.9,
+            "where": {
+              "OR": [
+                {
+                  "plannedDate": {
+                    "gte": "2019-12-01T00:00:00.000Z",
+                    "lte": "2019-12-31T23:59:59.999Z"
+                  }
+                },
+                {
+                  "date": {
+                    "gte": "2019-12-01T00:00:00.000Z",
+                    "lte": "2019-12-31T23:59:59.999Z"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "model": "auditTrail",
+            "rows": 0,
+            "take": null,
+            "rssMiB": 274.9
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 544.75
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 544.75
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 544.75
+          },
+          {
+            "model": "client",
+            "rows": 400,
+            "take": null,
+            "rssMiB": 544.75
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 545.75
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 545.75
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 545.75
+          },
+          {
+            "model": "invoice",
+            "rows": 9600,
+            "take": null,
+            "rssMiB": 545.75
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 494.52
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 494.52
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 494.52
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 494.77
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 494.77
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 494.77
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 495.02
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 495.02
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 495.02
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 200,
+            "take": 500,
+            "rssMiB": 496.15
+          },
+          {
+            "model": "notification",
+            "rows": 200,
+            "take": 500,
+            "rssMiB": 496.15
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 200,
+            "take": 500,
+            "rssMiB": 496.15
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 501.15
+          },
+          {
+            "model": "notification",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 501.15
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 501.15
+          }
+        ],
+        "transactions": [
+          {
+            "isolationLevel": "RepeatableRead",
+            "timeout": 30000
+          }
+        ]
+      }
+    ],
+    "note": "Fresh local PGlite runs stayed below the guard. Native failure is not relabelled as locally reproduced RSS failure; local red tests reproduce redundant data and token work.",
+    "redUnit": {
+      "failed": 3,
+      "passed": 4,
+      "failures": [
+        "summary returns full clients/documents",
+        "query includes lines/payments/repeated clients",
+        "summary hashes discarded review documents"
+      ]
+    },
+    "redLogSha256": "9b3cc2949b9fd7000271258a99854fee67c52069897de5cb6d4014dd15815a85"
+  },
+  "implementation": {
+    "summaryOnlyInternalFourthArgument": true,
+    "sameEligibilityReviewAndNormalization": true,
+    "sameTransaction": true,
+    "publicEndpointsUnchanged": true,
+    "normalCatalogueUnchanged": true,
+    "noGuardRaised": true,
+    "exactFailedMeasurementAddedToSmallCiResults": true
+  },
+  "codeHashes": {
+    "src/business/finance/FinanceOsBusiness.js": "021d414ca551684fd63050bdabf561a2f20022f8e6ce84cb0f91e699eda4a3c8",
+    "src/business/admin/DashboardSnapshotBusiness.js": "fffd380830a3a679647c468c63ba9a4479d48e16bb2fb2383bfdb6393c2497eb",
+    "scripts/summary-volume-probe.js": "54a8c49d6ee6fc67a4aa43e389ffb9c52e1ebe616d72712126538dff62b0cec9",
+    "scripts/test-field-summary-volume.js": "4b2c7808b22bc07724a100bd370ed702580131fc2f7e36011f2376bf162c02d4",
+    "tests/external-invoice-summary.test.js": "785b7c515d83767e62e77518904a017758e2e5e7d0c271d65eb07fe5f2896be2",
+    "tests/dashboard-visit-states.test.js": "4593f934c265a83ab278c727083fa166190dffcae8f50d38cc4bd8610c292921"
+  },
+  "local": {
+    "ok": true,
+    "phase": "assertions-completed",
+    "engine": "PostgreSQL 18.3 (PGlite 0.5.8) on wasm32-unknown-emscripten, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.74 (1092ec30a3fb1d46b1782ff1b4db5094d3d06ae5), 32-bit",
+    "scenarios": [
+      25,
+      100,
+      400
+    ],
+    "baselineRows": {
+      "client": 0,
+      "pool": 0,
+      "technician": 0,
+      "serviceVisit": 0,
+      "invoice": 0,
+      "payment": 0,
+      "technicalAlert": 0,
+      "notification": 0,
+      "alert": 0,
+      "operationalLock": 0
+    },
+    "profileRows": [
+      {
+        "clients": 25,
+        "fixtureRows": {
+          "client": 25,
+          "pool": 25,
+          "technician": 16,
+          "serviceVisit": 2600,
+          "invoice": 600,
+          "payment": 200,
+          "technicalAlert": 250,
+          "notification": 250,
+          "alert": 50,
+          "operationalLock": 50
+        },
+        "totalRows": {
+          "client": 25,
+          "pool": 25,
+          "technician": 16,
+          "serviceVisit": 2600,
+          "invoice": 600,
+          "payment": 200,
+          "technicalAlert": 250,
+          "notification": 250,
+          "alert": 50,
+          "operationalLock": 50
+        }
+      },
+      {
+        "clients": 100,
+        "fixtureRows": {
+          "client": 100,
+          "pool": 100,
+          "technician": 16,
+          "serviceVisit": 10400,
+          "invoice": 2400,
+          "payment": 800,
+          "technicalAlert": 1000,
+          "notification": 1000,
+          "alert": 200,
+          "operationalLock": 200
+        },
+        "totalRows": {
+          "client": 100,
+          "pool": 100,
+          "technician": 16,
+          "serviceVisit": 10400,
+          "invoice": 2400,
+          "payment": 800,
+          "technicalAlert": 1000,
+          "notification": 1000,
+          "alert": 200,
+          "operationalLock": 200
+        }
+      },
+      {
+        "clients": 400,
+        "fixtureRows": {
+          "client": 400,
+          "pool": 400,
+          "technician": 16,
+          "serviceVisit": 41600,
+          "invoice": 9600,
+          "payment": 3200,
+          "technicalAlert": 4000,
+          "notification": 4000,
+          "alert": 800,
+          "operationalLock": 800
+        },
+        "totalRows": {
+          "client": 400,
+          "pool": 400,
+          "technician": 16,
+          "serviceVisit": 41600,
+          "invoice": 9600,
+          "payment": 3200,
+          "technicalAlert": 4000,
+          "notification": 4000,
+          "alert": 800,
+          "operationalLock": 800
+        }
+      }
+    ],
+    "baseline": [
+      {
+        "ok": true,
+        "phase": "assertions-completed",
+        "mode": "dashboard",
+        "clients": 0,
+        "fault": null,
+        "measurements": {
+          "durationMs": 135.5,
+          "jsonBytes": 1551,
+          "rssBeforeMiB": 83.37,
+          "sampledRssPeakMiB": 87.62,
+          "heapBeforeMiB": 13.68,
+          "sampledHeapPeakMiB": 15.35,
+          "lifetimeRssPeakMiB": 87.62,
+          "sql": {
+            "queries": 20,
+            "durationMs": 54,
+            "writes": 0
+          },
+          "scans": [
+            {
+              "model": "client",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 86.87
+            },
+            {
+              "model": "pool",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 86.87
+            },
+            {
+              "model": "technician",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 86.87
+            },
+            {
+              "model": "invoice",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 86.87
+            },
+            {
+              "model": "payment",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 86.87
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 0,
+              "take": 500,
+              "rssMiB": 86.87
+            },
+            {
+              "model": "notification",
+              "rows": 0,
+              "take": 500,
+              "rssMiB": 86.87
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 0,
+              "take": 500,
+              "rssMiB": 86.87
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 86.87,
+              "where": {
+                "OR": [
+                  {
+                    "plannedDate": {
+                      "gte": "2019-12-01T00:00:00.000Z",
+                      "lte": "2019-12-31T23:59:59.999Z"
+                    }
+                  },
+                  {
+                    "date": {
+                      "gte": "2019-12-01T00:00:00.000Z",
+                      "lte": "2019-12-31T23:59:59.999Z"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "model": "auditTrail",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 86.87
+            },
+            {
+              "model": "client",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 87.37
+            },
+            {
+              "model": "invoice",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 87.37
+            }
+          ],
+          "transactions": [
+            {
+              "isolationLevel": "RepeatableRead",
+              "timeout": 30000
+            }
+          ]
+        },
+        "verified": {
+          "summary": {
+            "totalClients": 0,
+            "totalPools": 0,
+            "totalBilledAll": 0,
+            "totalPaidAll": 0,
+            "totalOpenAll": 0,
+            "totalInvoicesAll": 0,
+            "openInvoicesAll": 0,
+            "overdueInvoices": 0,
+            "overdueClients": 0,
+            "overdueAmount": 0,
+            "officialInvoiceClients": 0,
+            "officialInvoiceTotal": 0,
+            "officialInvoicePending": 0,
+            "officialInvoicePendingAmount": 0,
+            "officialInvoiceConfirmed": 0,
+            "officialInvoiceReview": 0,
+            "monthBilled": 0,
+            "monthPaid": 0,
+            "monthOpen": 0,
+            "totalInvoices": 0,
+            "paidInvoices": 0,
+            "pendingInvoices": 0,
+            "partialInvoices": 0,
+            "openAlerts": 0,
+            "visitsThisMonth": 0,
+            "visitsDoneThisMonth": 0,
+            "visitsPlannedThisMonth": 0,
+            "visitsNotDoneThisMonth": 0,
+            "operationalCost": 0
+          },
+          "technicians": 0,
+          "coverage": {
+            "scope": "DASHBOARD_ALERT_SOURCES_ALL_PERIODS",
+            "totalsComplete": true,
+            "limitPerSource": 200,
+            "total": 0,
+            "returned": 0,
+            "truncated": false,
+            "sources": {
+              "technical": {
+                "total": 0,
+                "returned": 0
+              },
+              "notification": {
+                "total": 0,
+                "returned": 0
+              },
+              "visit": {
+                "total": 0,
+                "returned": 0
+              }
+            }
+          },
+          "visits": 0,
+          "fixtureVisits": 0,
+          "fixtureIdsHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "returnedAlerts": 0,
+          "topDebtors": 0,
+          "latestPayments": 0
+        },
+        "responseSha256": "7eeea7a51d38356fd01a5229a7ca1437ed0961c7af6c0ea3da92817c0b706028"
+      },
+      {
+        "ok": true,
+        "phase": "assertions-completed",
+        "mode": "metrics",
+        "clients": 0,
+        "fault": null,
+        "measurements": {
+          "durationMs": 75.8,
+          "jsonBytes": 413,
+          "rssBeforeMiB": 83.53,
+          "sampledRssPeakMiB": 86.03,
+          "heapBeforeMiB": 13.8,
+          "sampledHeapPeakMiB": 14.92,
+          "lifetimeRssPeakMiB": 86.03,
+          "sql": {
+            "queries": 11,
+            "durationMs": 21,
+            "writes": 0
+          },
+          "scans": [
+            {
+              "model": "serviceVisit",
+              "operation": "groupBy",
+              "rows": 0
+            },
+            {
+              "model": "technicalAlert",
+              "operation": "count",
+              "rows": 1
+            },
+            {
+              "model": "invoice",
+              "operation": "aggregate",
+              "rows": 1
+            }
+          ],
+          "transactions": [
+            {
+              "isolationLevel": "RepeatableRead",
+              "timeout": 30000
+            }
+          ]
+        },
+        "verified": {
+          "activeAlerts": 0,
+          "serviceVisitsByStatus": [],
+          "financialAggregates": {
+            "_sum": {
+              "total": null
+            }
+          },
+          "dayWindow": {
+            "gte": "2026-09-28T00:00:00.000Z",
+            "lte": "2026-09-28T23:59:59.999Z"
+          },
+          "cacheSource": "DATABASE_HIT"
+        },
+        "responseSha256": "244124a117f633cde2f3adffc83fe15ada4faa40f92e883444969290c5af8497"
+      },
+      {
+        "ok": true,
+        "phase": "assertions-completed",
+        "mode": "alerts",
+        "clients": 0,
+        "fault": null,
+        "measurements": {
+          "durationMs": 62.4,
+          "jsonBytes": 112,
+          "rssBeforeMiB": 83.1,
+          "sampledRssPeakMiB": 85.73,
+          "heapBeforeMiB": 13.58,
+          "sampledHeapPeakMiB": 14.93,
+          "lifetimeRssPeakMiB": 85.73,
+          "sql": {
+            "queries": 12,
+            "durationMs": 13,
+            "writes": 0
+          },
+          "scans": [
+            {
+              "model": "notification",
+              "rows": 0,
+              "take": 500,
+              "rssMiB": 85.35
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 0,
+              "take": 500,
+              "rssMiB": 85.35
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 0,
+              "take": 500,
+              "rssMiB": 85.35
+            },
+            {
+              "model": "alert",
+              "rows": 0,
+              "take": 500,
+              "rssMiB": 85.35
+            }
+          ],
+          "transactions": [
+            {
+              "isolationLevel": "RepeatableRead",
+              "timeout": 30000
+            }
+          ]
+        },
+        "verified": {
+          "count": 0,
+          "totals": {
+            "notifications": 0,
+            "technical": 0,
+            "visits": 0,
+            "generic": 0,
+            "critical": 0
+          },
+          "fixtureCount": 0,
+          "fixtureIdsHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "responseSha256": "dd2d054a0e0b4d1db1c5cbb227364bf143125d5702a828d7b7263e507e829a51"
+      },
+      {
+        "ok": true,
+        "phase": "assertions-completed",
+        "mode": "risk",
+        "clients": 0,
+        "fault": null,
+        "measurements": {
+          "durationMs": 61.5,
+          "jsonBytes": 571,
+          "rssBeforeMiB": 78.19,
+          "sampledRssPeakMiB": 80.94,
+          "heapBeforeMiB": 13.15,
+          "sampledHeapPeakMiB": 14.66,
+          "lifetimeRssPeakMiB": 80.94,
+          "sql": {
+            "queries": 15,
+            "durationMs": 15,
+            "writes": 0
+          },
+          "scans": [
+            {
+              "model": "vehicle",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 79.69
+            },
+            {
+              "model": "transportGuide",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 80.06
+            },
+            {
+              "model": "workGuide",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 80.06
+            },
+            {
+              "model": "vehicleMaintenanceRecord",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 80.06
+            },
+            {
+              "model": "operationalLock",
+              "rows": 0,
+              "take": 250,
+              "rssMiB": 80.19
+            },
+            {
+              "model": "invoice",
+              "rows": 0,
+              "take": 250,
+              "rssMiB": 80.31
+            }
+          ],
+          "transactions": [
+            {
+              "isolationLevel": "RepeatableRead",
+              "maxWait": 15000,
+              "timeout": 20000
+            }
+          ]
+        },
+        "verified": {
+          "counts": {
+            "total": 0,
+            "critical": 0,
+            "warning": 0
+          },
+          "fixtureCount": 0,
+          "fixtureIdsHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "complete": true
+        },
+        "responseSha256": "20cc1fb06892d00cdeefb37e77d14b373f27678a4444111a375b09dd24802ddd"
+      }
+    ],
+    "results": [
+      {
+        "ok": true,
+        "phase": "assertions-completed",
+        "mode": "dashboard",
+        "clients": 25,
+        "fault": null,
+        "measurements": {
+          "durationMs": 285,
+          "jsonBytes": 2733855,
+          "rssBeforeMiB": 84.3,
+          "sampledRssPeakMiB": 165.05,
+          "heapBeforeMiB": 14.13,
+          "sampledHeapPeakMiB": 34.84,
+          "lifetimeRssPeakMiB": 165.55,
+          "sql": {
+            "queries": 39,
+            "durationMs": 37,
+            "writes": 0
+          },
+          "scans": [
+            {
+              "model": "client",
+              "rows": 25,
+              "take": null,
+              "rssMiB": 99.43
+            },
+            {
+              "model": "pool",
+              "rows": 25,
+              "take": null,
+              "rssMiB": 99.55
+            },
+            {
+              "model": "technician",
+              "rows": 16,
+              "take": null,
+              "rssMiB": 99.55
+            },
+            {
+              "model": "invoice",
+              "rows": 600,
+              "take": null,
+              "rssMiB": 99.55
+            },
+            {
+              "model": "payment",
+              "rows": 200,
+              "take": null,
+              "rssMiB": 99.55
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 200,
+              "take": 500,
+              "rssMiB": 99.55
+            },
+            {
+              "model": "notification",
+              "rows": 200,
+              "take": 500,
+              "rssMiB": 99.55
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 200,
+              "take": 500,
+              "rssMiB": 99.55
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 100,
+              "take": null,
+              "rssMiB": 99.55,
+              "where": {
+                "OR": [
+                  {
+                    "plannedDate": {
+                      "gte": "2019-12-01T00:00:00.000Z",
+                      "lte": "2019-12-31T23:59:59.999Z"
+                    }
+                  },
+                  {
+                    "date": {
+                      "gte": "2019-12-01T00:00:00.000Z",
+                      "lte": "2019-12-31T23:59:59.999Z"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "model": "auditTrail",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 99.55
+            },
+            {
+              "model": "client",
+              "rows": 25,
+              "take": null,
+              "rssMiB": 123.25
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 200,
+              "take": null,
+              "rssMiB": 123.25
+            },
+            {
+              "model": "notification",
+              "rows": 200,
+              "take": null,
+              "rssMiB": 123.25
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 200,
+              "take": null,
+              "rssMiB": 123.25
+            },
+            {
+              "model": "invoice",
+              "rows": 600,
+              "take": null,
+              "rssMiB": 124
+            }
+          ],
+          "transactions": [
+            {
+              "isolationLevel": "RepeatableRead",
+              "timeout": 30000
+            }
+          ]
+        },
+        "verified": {
+          "summary": {
+            "totalClients": 25,
+            "totalPools": 25,
+            "totalBilledAll": 4000,
+            "totalPaidAll": 1200,
+            "totalOpenAll": 2800,
+            "totalInvoicesAll": 400,
+            "openInvoicesAll": 300,
+            "overdueInvoices": 300,
+            "overdueClients": 25,
+            "overdueAmount": 2800,
+            "officialInvoiceClients": 25,
+            "officialInvoiceTotal": 400,
+            "officialInvoicePending": 400,
+            "officialInvoicePendingAmount": 4000,
+            "officialInvoiceConfirmed": 0,
+            "officialInvoiceReview": 0,
+            "monthBilled": 250,
+            "monthPaid": 0,
+            "monthOpen": 250,
+            "totalInvoices": 25,
+            "paidInvoices": 0,
+            "pendingInvoices": 25,
+            "partialInvoices": 0,
+            "openAlerts": 600,
+            "visitsThisMonth": 100,
+            "visitsDoneThisMonth": 75,
+            "visitsPlannedThisMonth": 25,
+            "visitsNotDoneThisMonth": 0,
+            "operationalCost": 1200
+          },
+          "technicians": 16,
+          "coverage": {
+            "scope": "DASHBOARD_ALERT_SOURCES_ALL_PERIODS",
+            "totalsComplete": true,
+            "limitPerSource": 200,
+            "total": 600,
+            "returned": 600,
+            "truncated": false,
+            "sources": {
+              "technical": {
+                "total": 200,
+                "returned": 200
+              },
+              "notification": {
+                "total": 200,
+                "returned": 200
+              },
+              "visit": {
+                "total": 200,
+                "returned": 200
+              }
+            }
+          },
+          "visits": 100,
+          "fixtureVisits": 100,
+          "fixtureIdsHash": "dbf67cea30714fc3638d58f2272bb3de1b81ae294b514c88576bca3e2057a094",
+          "returnedAlerts": 600,
+          "topDebtors": 15,
+          "latestPayments": 15
+        },
+        "responseSha256": "2a62132ea63f822dd8c958821aaca2c486091e67c3b67d208bc59ab3fb229143"
+      },
+      {
+        "ok": true,
+        "phase": "assertions-completed",
+        "mode": "metrics",
+        "clients": 25,
+        "fault": null,
+        "measurements": {
+          "durationMs": 35.7,
+          "jsonBytes": 415,
+          "rssBeforeMiB": 84.31,
+          "sampledRssPeakMiB": 86.68,
+          "heapBeforeMiB": 13.88,
+          "sampledHeapPeakMiB": 15.16,
+          "lifetimeRssPeakMiB": 86.68,
+          "sql": {
+            "queries": 11,
+            "durationMs": 2,
+            "writes": 0
+          },
+          "scans": [
+            {
+              "model": "serviceVisit",
+              "operation": "groupBy",
+              "rows": 0
+            },
+            {
+              "model": "technicalAlert",
+              "operation": "count",
+              "rows": 1
+            },
+            {
+              "model": "invoice",
+              "operation": "aggregate",
+              "rows": 1
+            }
+          ],
+          "transactions": [
+            {
+              "isolationLevel": "RepeatableRead",
+              "timeout": 30000
+            }
+          ]
+        },
+        "verified": {
+          "activeAlerts": 200,
+          "serviceVisitsByStatus": [],
+          "financialAggregates": {
+            "_sum": {
+              "total": null
+            }
+          },
+          "dayWindow": {
+            "gte": "2026-09-28T00:00:00.000Z",
+            "lte": "2026-09-28T23:59:59.999Z"
+          },
+          "cacheSource": "DATABASE_HIT"
+        },
+        "responseSha256": "318a649136ba28b44e01f74cc917261fe9f9ced9e247f722d76ef9bd59e84862"
+      },
+      {
+        "ok": true,
+        "phase": "assertions-completed",
+        "mode": "alerts",
+        "clients": 25,
+        "fault": null,
+        "measurements": {
+          "durationMs": 167.5,
+          "jsonBytes": 887251,
+          "rssBeforeMiB": 83.67,
+          "sampledRssPeakMiB": 119.97,
+          "heapBeforeMiB": 13.88,
+          "sampledHeapPeakMiB": 29.85,
+          "lifetimeRssPeakMiB": 119.97,
+          "sql": {
+            "queries": 24,
+            "durationMs": 24,
+            "writes": 0
+          },
+          "scans": [
+            {
+              "model": "notification",
+              "rows": 200,
+              "take": 500,
+              "rssMiB": 97.42
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 200,
+              "take": 500,
+              "rssMiB": 97.42
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 200,
+              "take": 500,
+              "rssMiB": 97.42
+            },
+            {
+              "model": "alert",
+              "rows": 25,
+              "take": 500,
+              "rssMiB": 97.42
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 200,
+              "take": null,
+              "rssMiB": 112.97
+            }
+          ],
+          "transactions": [
+            {
+              "isolationLevel": "RepeatableRead",
+              "timeout": 30000
+            }
+          ]
+        },
+        "verified": {
+          "count": 625,
+          "totals": {
+            "notifications": 200,
+            "technical": 200,
+            "visits": 200,
+            "generic": 25,
+            "critical": 0
+          },
+          "fixtureCount": 625,
+          "fixtureIdsHash": "5a60be5153f0fb2b7e6626780872dbf30e8d4fc2ce82a4636b385213e069563b"
+        },
+        "responseSha256": "0beb9d31d6bc819b5aa1e4fbe363e49ef5471d8440fe1ee9b64477cef74dc513"
+      },
+      {
+        "ok": true,
+        "phase": "assertions-completed",
+        "mode": "risk",
+        "clients": 25,
+        "fault": null,
+        "measurements": {
+          "durationMs": 75.7,
+          "jsonBytes": 280368,
+          "rssBeforeMiB": 78.74,
+          "sampledRssPeakMiB": 83.87,
+          "heapBeforeMiB": 13.39,
+          "sampledHeapPeakMiB": 18.06,
+          "lifetimeRssPeakMiB": 83.87,
+          "sql": {
+            "queries": 20,
+            "durationMs": 10,
+            "writes": 0
+          },
+          "scans": [
+            {
+              "model": "vehicle",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 80.24
+            },
+            {
+              "model": "transportGuide",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 80.49
+            },
+            {
+              "model": "workGuide",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 80.49
+            },
+            {
+              "model": "vehicleMaintenanceRecord",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 80.49
+            },
+            {
+              "model": "operationalLock",
+              "rows": 25,
+              "take": 250,
+              "rssMiB": 80.62
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 81.49
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 82.62
+            },
+            {
+              "model": "invoice",
+              "rows": 100,
+              "take": 250,
+              "rssMiB": 82.62
+            }
+          ],
+          "transactions": [
+            {
+              "isolationLevel": "RepeatableRead",
+              "maxWait": 15000,
+              "timeout": 20000
+            }
+          ]
+        },
+        "verified": {
+          "counts": {
+            "total": 325,
+            "critical": 300,
+            "warning": 25
+          },
+          "fixtureCount": 325,
+          "fixtureIdsHash": "20b86dbe4f53e1e3cf2c43eec288c751d61a47a63727474b0eca0a1c591771cd",
+          "complete": true
+        },
+        "responseSha256": "95f87016d62c5a2f1750d28949c330248a9790234018d8e2b90a7680a09b64f5"
+      },
+      {
+        "ok": true,
+        "phase": "assertions-completed",
+        "mode": "dashboard",
+        "clients": 100,
+        "fault": null,
+        "measurements": {
+          "durationMs": 446,
+          "jsonBytes": 4208417,
+          "rssBeforeMiB": 84.95,
+          "sampledRssPeakMiB": 219.93,
+          "heapBeforeMiB": 14.63,
+          "sampledHeapPeakMiB": 57.24,
+          "lifetimeRssPeakMiB": 219.93,
+          "sql": {
+            "queries": 42,
+            "durationMs": 52,
+            "writes": 0
+          },
+          "scans": [
+            {
+              "model": "client",
+              "rows": 100,
+              "take": null,
+              "rssMiB": 149.52
+            },
+            {
+              "model": "pool",
+              "rows": 100,
+              "take": null,
+              "rssMiB": 149.52
+            },
+            {
+              "model": "technician",
+              "rows": 16,
+              "take": null,
+              "rssMiB": 149.52
+            },
+            {
+              "model": "invoice",
+              "rows": 2400,
+              "take": null,
+              "rssMiB": 149.52
+            },
+            {
+              "model": "payment",
+              "rows": 800,
+              "take": null,
+              "rssMiB": 149.52
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 149.52
+            },
+            {
+              "model": "notification",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 149.52
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 149.52
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 400,
+              "take": null,
+              "rssMiB": 149.52,
+              "where": {
+                "OR": [
+                  {
+                    "plannedDate": {
+                      "gte": "2019-12-01T00:00:00.000Z",
+                      "lte": "2019-12-31T23:59:59.999Z"
+                    }
+                  },
+                  {
+                    "date": {
+                      "gte": "2019-12-01T00:00:00.000Z",
+                      "lte": "2019-12-31T23:59:59.999Z"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "model": "auditTrail",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 149.52
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 300,
+              "take": 500,
+              "rssMiB": 152.64
+            },
+            {
+              "model": "notification",
+              "rows": 300,
+              "take": 500,
+              "rssMiB": 152.64
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 300,
+              "take": 500,
+              "rssMiB": 152.64
+            },
+            {
+              "model": "client",
+              "rows": 100,
+              "take": null,
+              "rssMiB": 152.64
+            },
+            {
+              "model": "invoice",
+              "rows": 2400,
+              "take": null,
+              "rssMiB": 171.4
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 200,
+              "take": null,
+              "rssMiB": 171.4
+            },
+            {
+              "model": "notification",
+              "rows": 200,
+              "take": null,
+              "rssMiB": 171.4
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 200,
+              "take": null,
+              "rssMiB": 171.4
+            }
+          ],
+          "transactions": [
+            {
+              "isolationLevel": "RepeatableRead",
+              "timeout": 30000
+            }
+          ]
+        },
+        "verified": {
+          "summary": {
+            "totalClients": 100,
+            "totalPools": 100,
+            "totalBilledAll": 16000,
+            "totalPaidAll": 4800,
+            "totalOpenAll": 11200,
+            "totalInvoicesAll": 1600,
+            "openInvoicesAll": 1200,
+            "overdueInvoices": 1200,
+            "overdueClients": 100,
+            "overdueAmount": 11200,
+            "officialInvoiceClients": 100,
+            "officialInvoiceTotal": 1600,
+            "officialInvoicePending": 1600,
+            "officialInvoicePendingAmount": 16000,
+            "officialInvoiceConfirmed": 0,
+            "officialInvoiceReview": 0,
+            "monthBilled": 1000,
+            "monthPaid": 0,
+            "monthOpen": 1000,
+            "totalInvoices": 100,
+            "paidInvoices": 0,
+            "pendingInvoices": 100,
+            "partialInvoices": 0,
+            "openAlerts": 600,
+            "visitsThisMonth": 400,
+            "visitsDoneThisMonth": 300,
+            "visitsPlannedThisMonth": 100,
+            "visitsNotDoneThisMonth": 0,
+            "operationalCost": 4800
+          },
+          "technicians": 16,
+          "coverage": {
+            "scope": "DASHBOARD_ALERT_SOURCES_ALL_PERIODS",
+            "totalsComplete": true,
+            "limitPerSource": 200,
+            "total": 2400,
+            "returned": 600,
+            "truncated": true,
+            "sources": {
+              "technical": {
+                "total": 800,
+                "returned": 200
+              },
+              "notification": {
+                "total": 800,
+                "returned": 200
+              },
+              "visit": {
+                "total": 800,
+                "returned": 200
+              }
+            }
+          },
+          "visits": 400,
+          "fixtureVisits": 400,
+          "fixtureIdsHash": "be8234fb9ab05ea8b84386a4b3dcad28d4928adcf05c38c9f57678fc346dc4b3",
+          "returnedAlerts": 600,
+          "topDebtors": 15,
+          "latestPayments": 15
+        },
+        "responseSha256": "42373eaeb12980e0e0c7c3eceb9ae042f787335f82d77512e7dbd5175ce1c24d"
+      },
+      {
+        "ok": true,
+        "phase": "assertions-completed",
+        "mode": "metrics",
+        "clients": 100,
+        "fault": null,
+        "measurements": {
+          "durationMs": 37.2,
+          "jsonBytes": 415,
+          "rssBeforeMiB": 85.24,
+          "sampledRssPeakMiB": 87.49,
+          "heapBeforeMiB": 14.63,
+          "sampledHeapPeakMiB": 15.9,
+          "lifetimeRssPeakMiB": 87.49,
+          "sql": {
+            "queries": 11,
+            "durationMs": 3,
+            "writes": 0
+          },
+          "scans": [
+            {
+              "model": "serviceVisit",
+              "operation": "groupBy",
+              "rows": 0
+            },
+            {
+              "model": "technicalAlert",
+              "operation": "count",
+              "rows": 1
+            },
+            {
+              "model": "invoice",
+              "operation": "aggregate",
+              "rows": 1
+            }
+          ],
+          "transactions": [
+            {
+              "isolationLevel": "RepeatableRead",
+              "timeout": 30000
+            }
+          ]
+        },
+        "verified": {
+          "activeAlerts": 800,
+          "serviceVisitsByStatus": [],
+          "financialAggregates": {
+            "_sum": {
+              "total": null
+            }
+          },
+          "dayWindow": {
+            "gte": "2026-09-28T00:00:00.000Z",
+            "lte": "2026-09-28T23:59:59.999Z"
+          },
+          "cacheSource": "DATABASE_HIT"
+        },
+        "responseSha256": "5cb337853250261c0cd5c964678a0b9aef8e80e4eeab602e6419c6e5ba7d121e"
+      },
+      {
+        "ok": true,
+        "phase": "assertions-completed",
+        "mode": "alerts",
+        "clients": 100,
+        "fault": null,
+        "measurements": {
+          "durationMs": 450.5,
+          "jsonBytes": 3554872,
+          "rssBeforeMiB": 84.59,
+          "sampledRssPeakMiB": 201.22,
+          "heapBeforeMiB": 14.64,
+          "sampledHeapPeakMiB": 55.13,
+          "lifetimeRssPeakMiB": 207.63,
+          "sql": {
+            "queries": 39,
+            "durationMs": 55,
+            "writes": 0
+          },
+          "scans": [
+            {
+              "model": "notification",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 117.61
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 117.61
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 117.61
+            },
+            {
+              "model": "alert",
+              "rows": 100,
+              "take": 500,
+              "rssMiB": 117.61
+            },
+            {
+              "model": "notification",
+              "rows": 300,
+              "take": 500,
+              "rssMiB": 129.48
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 300,
+              "take": 500,
+              "rssMiB": 129.48
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 300,
+              "take": 500,
+              "rssMiB": 129.48
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 500,
+              "take": null,
+              "rssMiB": 154.48
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 300,
+              "take": null,
+              "rssMiB": 161.86
+            }
+          ],
+          "transactions": [
+            {
+              "isolationLevel": "RepeatableRead",
+              "timeout": 30000
+            }
+          ]
+        },
+        "verified": {
+          "count": 2500,
+          "totals": {
+            "notifications": 800,
+            "technical": 800,
+            "visits": 800,
+            "generic": 100,
+            "critical": 0
+          },
+          "fixtureCount": 2500,
+          "fixtureIdsHash": "91bea14c04a3599a953abbd780011ef16c35ba39aca03032231e438bb76e11a3"
+        },
+        "responseSha256": "32b84052cce24c0a162cd880b6bab7e834e272488eacf0e06d4a1599b81082f4"
+      },
+      {
+        "ok": true,
+        "phase": "assertions-completed",
+        "mode": "risk",
+        "clients": 100,
+        "fault": null,
+        "measurements": {
+          "durationMs": 215.4,
+          "jsonBytes": 1123151,
+          "rssBeforeMiB": 79.2,
+          "sampledRssPeakMiB": 102.95,
+          "heapBeforeMiB": 14.14,
+          "sampledHeapPeakMiB": 21.89,
+          "lifetimeRssPeakMiB": 102.95,
+          "sql": {
+            "queries": 34,
+            "durationMs": 54,
+            "writes": 0
+          },
+          "scans": [
+            {
+              "model": "vehicle",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 80.95
+            },
+            {
+              "model": "transportGuide",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 81.2
+            },
+            {
+              "model": "workGuide",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 81.2
+            },
+            {
+              "model": "vehicleMaintenanceRecord",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 81.2
+            },
+            {
+              "model": "operationalLock",
+              "rows": 100,
+              "take": 250,
+              "rssMiB": 81.45
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 82.45
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 84.95
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 85.7
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 86.82
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 87.32
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 88.32
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 88.95
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 89.45
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 89.45
+            },
+            {
+              "model": "invoice",
+              "rows": 150,
+              "take": 250,
+              "rssMiB": 90.2
+            }
+          ],
+          "transactions": [
+            {
+              "isolationLevel": "RepeatableRead",
+              "maxWait": 15000,
+              "timeout": 20000
+            }
+          ]
+        },
+        "verified": {
+          "counts": {
+            "total": 1300,
+            "critical": 1200,
+            "warning": 100
+          },
+          "fixtureCount": 1300,
+          "fixtureIdsHash": "eb9ca4d2395888ca00e4cf60bf3ff1d901d27befb7b00dcdb93c4d9eb93a43a5",
+          "complete": true
+        },
+        "responseSha256": "974c010923a6bcbe1f2b14deb222c5a97b2d06d052e1d082832dfa6cf4a22b95"
+      },
+      {
+        "ok": true,
+        "phase": "assertions-completed",
+        "mode": "dashboard",
+        "clients": 400,
+        "fault": null,
+        "measurements": {
+          "durationMs": 1410.1,
+          "jsonBytes": 10098101,
+          "rssBeforeMiB": 91.53,
+          "sampledRssPeakMiB": 438.89,
+          "heapBeforeMiB": 17.86,
+          "sampledHeapPeakMiB": 140.41,
+          "lifetimeRssPeakMiB": 438.89,
+          "sql": {
+            "queries": 57,
+            "durationMs": 178,
+            "writes": 0
+          },
+          "scans": [
+            {
+              "model": "client",
+              "rows": 400,
+              "take": null,
+              "rssMiB": 268.93
+            },
+            {
+              "model": "pool",
+              "rows": 400,
+              "take": null,
+              "rssMiB": 268.93
+            },
+            {
+              "model": "technician",
+              "rows": 16,
+              "take": null,
+              "rssMiB": 268.93
+            },
+            {
+              "model": "invoice",
+              "rows": 9600,
+              "take": null,
+              "rssMiB": 268.93
+            },
+            {
+              "model": "payment",
+              "rows": 3200,
+              "take": null,
+              "rssMiB": 268.93
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 268.93
+            },
+            {
+              "model": "notification",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 268.93
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 268.93
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 1600,
+              "take": null,
+              "rssMiB": 268.93,
+              "where": {
+                "OR": [
+                  {
+                    "plannedDate": {
+                      "gte": "2019-12-01T00:00:00.000Z",
+                      "lte": "2019-12-31T23:59:59.999Z"
+                    }
+                  },
+                  {
+                    "date": {
+                      "gte": "2019-12-01T00:00:00.000Z",
+                      "lte": "2019-12-31T23:59:59.999Z"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "model": "auditTrail",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 268.93
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 300.18
+            },
+            {
+              "model": "notification",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 300.18
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 300.18
+            },
+            {
+              "model": "client",
+              "rows": 400,
+              "take": null,
+              "rssMiB": 300.18
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 305.68
+            },
+            {
+              "model": "notification",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 305.68
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 305.68
+            },
+            {
+              "model": "invoice",
+              "rows": 9600,
+              "take": null,
+              "rssMiB": 305.68
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 328.26
+            },
+            {
+              "model": "notification",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 328.26
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 328.26
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 328.51
+            },
+            {
+              "model": "notification",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 328.51
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 328.51
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 328.76
+            },
+            {
+              "model": "notification",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 328.76
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 328.76
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 200,
+              "take": 500,
+              "rssMiB": 328.76
+            },
+            {
+              "model": "notification",
+              "rows": 200,
+              "take": 500,
+              "rssMiB": 328.76
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 200,
+              "take": 500,
+              "rssMiB": 328.76
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 200,
+              "take": null,
+              "rssMiB": 333.38
+            },
+            {
+              "model": "notification",
+              "rows": 200,
+              "take": null,
+              "rssMiB": 333.38
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 200,
+              "take": null,
+              "rssMiB": 333.38
+            }
+          ],
+          "transactions": [
+            {
+              "isolationLevel": "RepeatableRead",
+              "timeout": 30000
+            }
+          ]
+        },
+        "verified": {
+          "summary": {
+            "totalClients": 400,
+            "totalPools": 400,
+            "totalBilledAll": 64000,
+            "totalPaidAll": 19200,
+            "totalOpenAll": 44800,
+            "totalInvoicesAll": 6400,
+            "openInvoicesAll": 4800,
+            "overdueInvoices": 4800,
+            "overdueClients": 400,
+            "overdueAmount": 44800,
+            "officialInvoiceClients": 400,
+            "officialInvoiceTotal": 6400,
+            "officialInvoicePending": 6400,
+            "officialInvoicePendingAmount": 64000,
+            "officialInvoiceConfirmed": 0,
+            "officialInvoiceReview": 0,
+            "monthBilled": 4000,
+            "monthPaid": 0,
+            "monthOpen": 4000,
+            "totalInvoices": 400,
+            "paidInvoices": 0,
+            "pendingInvoices": 400,
+            "partialInvoices": 0,
+            "openAlerts": 600,
+            "visitsThisMonth": 1600,
+            "visitsDoneThisMonth": 1200,
+            "visitsPlannedThisMonth": 400,
+            "visitsNotDoneThisMonth": 0,
+            "operationalCost": 19200
+          },
+          "technicians": 16,
+          "coverage": {
+            "scope": "DASHBOARD_ALERT_SOURCES_ALL_PERIODS",
+            "totalsComplete": true,
+            "limitPerSource": 200,
+            "total": 9600,
+            "returned": 600,
+            "truncated": true,
+            "sources": {
+              "technical": {
+                "total": 3200,
+                "returned": 200
+              },
+              "notification": {
+                "total": 3200,
+                "returned": 200
+              },
+              "visit": {
+                "total": 3200,
+                "returned": 200
+              }
+            }
+          },
+          "visits": 1600,
+          "fixtureVisits": 1600,
+          "fixtureIdsHash": "d6ea8df2e6f711e4ac9105e435fafb928c7917a9efa359fb638c0d575a5a4126",
+          "returnedAlerts": 600,
+          "topDebtors": 15,
+          "latestPayments": 15
+        },
+        "responseSha256": "b0a1f98e24107e13ef358e3f4bd963f18b732750423028d8e2167748c6cc8354"
+      },
+      {
+        "ok": true,
+        "phase": "assertions-completed",
+        "mode": "metrics",
+        "clients": 400,
+        "fault": null,
+        "measurements": {
+          "durationMs": 39.8,
+          "jsonBytes": 416,
+          "rssBeforeMiB": 91.72,
+          "sampledRssPeakMiB": 93.97,
+          "heapBeforeMiB": 17.64,
+          "sampledHeapPeakMiB": 18.9,
+          "lifetimeRssPeakMiB": 93.97,
+          "sql": {
+            "queries": 11,
+            "durationMs": 4,
+            "writes": 0
+          },
+          "scans": [
+            {
+              "model": "serviceVisit",
+              "operation": "groupBy",
+              "rows": 0
+            },
+            {
+              "model": "technicalAlert",
+              "operation": "count",
+              "rows": 1
+            },
+            {
+              "model": "invoice",
+              "operation": "aggregate",
+              "rows": 1
+            }
+          ],
+          "transactions": [
+            {
+              "isolationLevel": "RepeatableRead",
+              "timeout": 30000
+            }
+          ]
+        },
+        "verified": {
+          "activeAlerts": 3200,
+          "serviceVisitsByStatus": [],
+          "financialAggregates": {
+            "_sum": {
+              "total": null
+            }
+          },
+          "dayWindow": {
+            "gte": "2026-09-28T00:00:00.000Z",
+            "lte": "2026-09-28T23:59:59.999Z"
+          },
+          "cacheSource": "DATABASE_HIT"
+        },
+        "responseSha256": "bc9281bc561cf4077db4295e3d23653f3a853f408e2511c64a89b621d046d8b3"
+      },
+      {
+        "ok": true,
+        "phase": "assertions-completed",
+        "mode": "alerts",
+        "clients": 400,
+        "fault": null,
+        "measurements": {
+          "durationMs": 1494.9,
+          "jsonBytes": 14281840,
+          "rssBeforeMiB": 91.52,
+          "sampledRssPeakMiB": 439.1,
+          "heapBeforeMiB": 17.58,
+          "sampledHeapPeakMiB": 156.13,
+          "lifetimeRssPeakMiB": 439.1,
+          "sql": {
+            "queries": 114,
+            "durationMs": 162,
+            "writes": 0
+          },
+          "scans": [
+            {
+              "model": "notification",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 120.72
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 120.72
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 120.72
+            },
+            {
+              "model": "alert",
+              "rows": 400,
+              "take": 500,
+              "rssMiB": 120.72
+            },
+            {
+              "model": "notification",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 147.34
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 147.34
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 147.34
+            },
+            {
+              "model": "notification",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 158.72
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 158.72
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 158.72
+            },
+            {
+              "model": "notification",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 178.59
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 178.59
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 178.59
+            },
+            {
+              "model": "notification",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 192.32
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 192.32
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 192.32
+            },
+            {
+              "model": "notification",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 206.45
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 206.45
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 206.45
+            },
+            {
+              "model": "notification",
+              "rows": 200,
+              "take": 500,
+              "rssMiB": 209.82
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 200,
+              "take": 500,
+              "rssMiB": 209.82
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 200,
+              "take": 500,
+              "rssMiB": 209.82
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 500,
+              "take": null,
+              "rssMiB": 216.07
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 500,
+              "take": null,
+              "rssMiB": 224.82
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 500,
+              "take": null,
+              "rssMiB": 245.95
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 500,
+              "take": null,
+              "rssMiB": 261.39
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 500,
+              "take": null,
+              "rssMiB": 275.86
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 500,
+              "take": null,
+              "rssMiB": 292.93
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 200,
+              "take": null,
+              "rssMiB": 313.99
+            }
+          ],
+          "transactions": [
+            {
+              "isolationLevel": "RepeatableRead",
+              "timeout": 30000
+            }
+          ]
+        },
+        "verified": {
+          "count": 10000,
+          "totals": {
+            "notifications": 3200,
+            "technical": 3200,
+            "visits": 3200,
+            "generic": 400,
+            "critical": 0
+          },
+          "fixtureCount": 10000,
+          "fixtureIdsHash": "6bbcb866ecfabca30ad320fec6efd9dba85c8860027bf5256a975cb3c7317745"
+        },
+        "responseSha256": "32054fdd00ae5f19749588dd1fdb405545a7da9d57e87b8abf4ac9cc6a2e1a04"
+      },
+      {
+        "ok": true,
+        "phase": "assertions-completed",
+        "mode": "risk",
+        "clients": 400,
+        "fault": null,
+        "measurements": {
+          "durationMs": 1922.2,
+          "jsonBytes": 4511351,
+          "rssBeforeMiB": 85.46,
+          "sampledRssPeakMiB": 188.83,
+          "heapBeforeMiB": 17.14,
+          "sampledHeapPeakMiB": 38.01,
+          "lifetimeRssPeakMiB": 188.95,
+          "sql": {
+            "queries": 93,
+            "durationMs": 710,
+            "writes": 0
+          },
+          "scans": [
+            {
+              "model": "vehicle",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 86.96
+            },
+            {
+              "model": "transportGuide",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 87.46
+            },
+            {
+              "model": "workGuide",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 87.46
+            },
+            {
+              "model": "vehicleMaintenanceRecord",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 87.46
+            },
+            {
+              "model": "operationalLock",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 88.09
+            },
+            {
+              "model": "operationalLock",
+              "rows": 150,
+              "take": 250,
+              "rssMiB": 88.71
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 89.46
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 103.71
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 106.71
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 112.96
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 110.4
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 110.4
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 111.15
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 111.65
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 114.4
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 119.9
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 127.03
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 127.65
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 127.43
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 127.93
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 128.43
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 129.18
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 129.93
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 130.68
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 131.43
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 132.18
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 133.55
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 134.05
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 134.55
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 135.05
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 135.55
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 136.55
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 136.55
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 136.55
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 136.55
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 136.55
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 136.55
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 136.55
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 136.55
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 137.05
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 137.55
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 138.3
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 139.18
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 139.8
+            },
+            {
+              "model": "invoice",
+              "rows": 100,
+              "take": 250,
+              "rssMiB": 140.43
+            }
+          ],
+          "transactions": [
+            {
+              "isolationLevel": "RepeatableRead",
+              "maxWait": 15000,
+              "timeout": 20000
+            }
+          ]
+        },
+        "verified": {
+          "counts": {
+            "total": 5200,
+            "critical": 4800,
+            "warning": 400
+          },
+          "fixtureCount": 5200,
+          "fixtureIdsHash": "ab405fd76741e683765ed7a614f01f5537abefdc555f991c1da360f002e05d8b",
+          "complete": true
+        },
+        "responseSha256": "8af0c2e12bc3246834576c1e44aadaff4f08b0266ea120a68b40051a1861e149"
+      }
+    ],
+    "faultResults": [
+      {
+        "ok": true,
+        "phase": "assertions-completed",
+        "mode": "dashboard",
+        "clients": 400,
+        "fault": "late-page",
+        "measurements": {
+          "durationMs": 841,
+          "jsonBytes": 37,
+          "rssBeforeMiB": 92.2,
+          "sampledRssPeakMiB": 292.26,
+          "heapBeforeMiB": 17.65,
+          "sampledHeapPeakMiB": 72.38,
+          "lifetimeRssPeakMiB": 292.26,
+          "sql": {
+            "queries": 26,
+            "durationMs": 90,
+            "writes": 0
+          },
+          "scans": [
+            {
+              "model": "client",
+              "rows": 400,
+              "take": null,
+              "rssMiB": 289.39
+            },
+            {
+              "model": "pool",
+              "rows": 400,
+              "take": null,
+              "rssMiB": 289.39
+            },
+            {
+              "model": "technician",
+              "rows": 16,
+              "take": null,
+              "rssMiB": 289.39
+            },
+            {
+              "model": "invoice",
+              "rows": 9600,
+              "take": null,
+              "rssMiB": 289.39
+            },
+            {
+              "model": "payment",
+              "rows": 3200,
+              "take": null,
+              "rssMiB": 289.39
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 289.39
+            },
+            {
+              "model": "notification",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 289.39
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 289.39
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 1600,
+              "take": null,
+              "rssMiB": 289.39,
+              "where": {
+                "OR": [
+                  {
+                    "plannedDate": {
+                      "gte": "2019-12-01T00:00:00.000Z",
+                      "lte": "2019-12-31T23:59:59.999Z"
+                    }
+                  },
+                  {
+                    "date": {
+                      "gte": "2019-12-01T00:00:00.000Z",
+                      "lte": "2019-12-31T23:59:59.999Z"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "model": "auditTrail",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 289.39
+            }
+          ],
+          "transactions": [
+            {
+              "isolationLevel": "RepeatableRead",
+              "timeout": 30000
+            }
+          ]
+        },
+        "verified": {
+          "laterPageRejected": true,
+          "status": 500
+        },
+        "responseSha256": "929b5046e6dd3b6028ff404196af72010c41d0509c5b4871ede7afcee5cc2ce1"
+      },
+      {
+        "ok": true,
+        "phase": "assertions-completed",
+        "mode": "alerts",
+        "clients": 400,
+        "fault": "late-page",
+        "measurements": {
+          "durationMs": 139.1,
+          "jsonBytes": 57,
+          "rssBeforeMiB": 90.97,
+          "sampledRssPeakMiB": 125.19,
+          "heapBeforeMiB": 17.57,
+          "sampledHeapPeakMiB": 32.72,
+          "lifetimeRssPeakMiB": 125.19,
+          "sql": {
+            "queries": 16,
+            "durationMs": 15,
+            "writes": 0
+          },
+          "scans": [
+            {
+              "model": "notification",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 124.19
+            },
+            {
+              "model": "technicalAlert",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 124.19
+            },
+            {
+              "model": "serviceVisit",
+              "rows": 500,
+              "take": 500,
+              "rssMiB": 124.19
+            },
+            {
+              "model": "alert",
+              "rows": 400,
+              "take": 500,
+              "rssMiB": 124.19
+            }
+          ],
+          "transactions": [
+            {
+              "isolationLevel": "RepeatableRead",
+              "timeout": 30000
+            }
+          ]
+        },
+        "verified": {
+          "laterPageRejected": true,
+          "status": 500
+        },
+        "responseSha256": "fd0855025c19b73abfff23c2b840f68ee616271514daa08d83ff32b032c88faa"
+      },
+      {
+        "ok": true,
+        "phase": "assertions-completed",
+        "mode": "risk",
+        "clients": 400,
+        "fault": "late-page",
+        "measurements": {
+          "durationMs": 65.4,
+          "jsonBytes": 46,
+          "rssBeforeMiB": 85.67,
+          "sampledRssPeakMiB": 90.05,
+          "heapBeforeMiB": 17.14,
+          "sampledHeapPeakMiB": 20.54,
+          "lifetimeRssPeakMiB": 90.05,
+          "sql": {
+            "queries": 17,
+            "durationMs": 8,
+            "writes": 0
+          },
+          "scans": [
+            {
+              "model": "vehicle",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 87.17
+            },
+            {
+              "model": "transportGuide",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 87.42
+            },
+            {
+              "model": "workGuide",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 87.42
+            },
+            {
+              "model": "vehicleMaintenanceRecord",
+              "rows": 0,
+              "take": null,
+              "rssMiB": 87.42
+            },
+            {
+              "model": "operationalLock",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 88.17
+            },
+            {
+              "model": "operationalLock",
+              "rows": 150,
+              "take": 250,
+              "rssMiB": 88.3
+            },
+            {
+              "model": "invoice",
+              "rows": 250,
+              "take": 250,
+              "rssMiB": 89.3
+            }
+          ],
+          "transactions": [
+            {
+              "isolationLevel": "RepeatableRead",
+              "maxWait": 15000,
+              "timeout": 20000
+            }
+          ]
+        },
+        "verified": {
+          "laterPageRejected": true,
+          "status": 503
+        },
+        "responseSha256": "d6a6a4c219dd82057d6046e9048bbfe4f70deb79fc5c68a39a4fedff7394d5f7"
+      }
+    ],
+    "projectionComparisons": [
+      {
+        "clients": 0,
+        "responseSha256": "7eeea7a51d38356fd01a5229a7ca1437ed0961c7af6c0ea3da92817c0b706028",
+        "identical": true
+      },
+      {
+        "clients": 25,
+        "responseSha256": "2a62132ea63f822dd8c958821aaca2c486091e67c3b67d208bc59ab3fb229143",
+        "identical": true
+      }
+    ],
+    "guards": {
+      "requestMs": 30000,
+      "responseMiB": 64,
+      "sampledRssMiB": 768
+    },
+    "measurementScope": "Fresh Node process for each authenticated API GET. Request timing ends after response.text; memory is sampled every 5 ms and after body parsing. Module initialization precedes the baseline; the separate process lifetime RSS peak also includes startup. Excludes fixture setup, database server memory, browser rendering and production certification.",
+    "cleanupVerified": true
+  },
+  "beforeAfter": [
+    {
+      "clients": 25,
+      "before": {
+        "durationMs": 276.3,
+        "jsonBytes": 2733855,
+        "rssBeforeMiB": 84.32,
+        "sampledRssPeakMiB": 175.42,
+        "heapBeforeMiB": 13.88,
+        "sampledHeapPeakMiB": 40.94,
+        "lifetimeRssPeakMiB": 182.05,
+        "sql": {
+          "queries": 43,
+          "durationMs": 34,
+          "writes": 0
+        },
+        "scans": [
+          {
+            "model": "client",
+            "rows": 25,
+            "take": null,
+            "rssMiB": 99.44
+          },
+          {
+            "model": "pool",
+            "rows": 25,
+            "take": null,
+            "rssMiB": 99.57
+          },
+          {
+            "model": "technician",
+            "rows": 16,
+            "take": null,
+            "rssMiB": 99.57
+          },
+          {
+            "model": "invoice",
+            "rows": 600,
+            "take": null,
+            "rssMiB": 99.57
+          },
+          {
+            "model": "payment",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 99.57
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 200,
+            "take": 500,
+            "rssMiB": 99.57
+          },
+          {
+            "model": "notification",
+            "rows": 200,
+            "take": 500,
+            "rssMiB": 99.57
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 200,
+            "take": 500,
+            "rssMiB": 99.57
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 100,
+            "take": null,
+            "rssMiB": 99.57,
+            "where": {
+              "OR": [
+                {
+                  "plannedDate": {
+                    "gte": "2019-12-01T00:00:00.000Z",
+                    "lte": "2019-12-31T23:59:59.999Z"
+                  }
+                },
+                {
+                  "date": {
+                    "gte": "2019-12-01T00:00:00.000Z",
+                    "lte": "2019-12-31T23:59:59.999Z"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "model": "auditTrail",
+            "rows": 0,
+            "take": null,
+            "rssMiB": 99.57
+          },
+          {
+            "model": "client",
+            "rows": 25,
+            "take": null,
+            "rssMiB": 135.12
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 135.12
+          },
+          {
+            "model": "notification",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 135.12
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 135.12
+          },
+          {
+            "model": "invoice",
+            "rows": 600,
+            "take": null,
+            "rssMiB": 140.12
+          }
+        ],
+        "transactions": [
+          {
+            "isolationLevel": "RepeatableRead",
+            "timeout": 30000
+          }
+        ]
+      },
+      "after": {
+        "durationMs": 285,
+        "jsonBytes": 2733855,
+        "rssBeforeMiB": 84.3,
+        "sampledRssPeakMiB": 165.05,
+        "heapBeforeMiB": 14.13,
+        "sampledHeapPeakMiB": 34.84,
+        "lifetimeRssPeakMiB": 165.55,
+        "sql": {
+          "queries": 39,
+          "durationMs": 37,
+          "writes": 0
+        },
+        "scans": [
+          {
+            "model": "client",
+            "rows": 25,
+            "take": null,
+            "rssMiB": 99.43
+          },
+          {
+            "model": "pool",
+            "rows": 25,
+            "take": null,
+            "rssMiB": 99.55
+          },
+          {
+            "model": "technician",
+            "rows": 16,
+            "take": null,
+            "rssMiB": 99.55
+          },
+          {
+            "model": "invoice",
+            "rows": 600,
+            "take": null,
+            "rssMiB": 99.55
+          },
+          {
+            "model": "payment",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 99.55
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 200,
+            "take": 500,
+            "rssMiB": 99.55
+          },
+          {
+            "model": "notification",
+            "rows": 200,
+            "take": 500,
+            "rssMiB": 99.55
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 200,
+            "take": 500,
+            "rssMiB": 99.55
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 100,
+            "take": null,
+            "rssMiB": 99.55,
+            "where": {
+              "OR": [
+                {
+                  "plannedDate": {
+                    "gte": "2019-12-01T00:00:00.000Z",
+                    "lte": "2019-12-31T23:59:59.999Z"
+                  }
+                },
+                {
+                  "date": {
+                    "gte": "2019-12-01T00:00:00.000Z",
+                    "lte": "2019-12-31T23:59:59.999Z"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "model": "auditTrail",
+            "rows": 0,
+            "take": null,
+            "rssMiB": 99.55
+          },
+          {
+            "model": "client",
+            "rows": 25,
+            "take": null,
+            "rssMiB": 123.25
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 123.25
+          },
+          {
+            "model": "notification",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 123.25
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 123.25
+          },
+          {
+            "model": "invoice",
+            "rows": 600,
+            "take": null,
+            "rssMiB": 124
+          }
+        ],
+        "transactions": [
+          {
+            "isolationLevel": "RepeatableRead",
+            "timeout": 30000
+          }
+        ]
+      }
+    },
+    {
+      "clients": 100,
+      "before": {
+        "durationMs": 685.4,
+        "jsonBytes": 4208417,
+        "rssBeforeMiB": 84.81,
+        "sampledRssPeakMiB": 267.12,
+        "heapBeforeMiB": 14.64,
+        "sampledHeapPeakMiB": 65.32,
+        "lifetimeRssPeakMiB": 267.37,
+        "sql": {
+          "queries": 46,
+          "durationMs": 74,
+          "writes": 0
+        },
+        "scans": [
+          {
+            "model": "client",
+            "rows": 100,
+            "take": null,
+            "rssMiB": 144.06
+          },
+          {
+            "model": "pool",
+            "rows": 100,
+            "take": null,
+            "rssMiB": 144.06
+          },
+          {
+            "model": "technician",
+            "rows": 16,
+            "take": null,
+            "rssMiB": 144.06
+          },
+          {
+            "model": "invoice",
+            "rows": 2400,
+            "take": null,
+            "rssMiB": 144.06
+          },
+          {
+            "model": "payment",
+            "rows": 800,
+            "take": null,
+            "rssMiB": 144.06
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 144.06
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 144.06
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 144.06
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 400,
+            "take": null,
+            "rssMiB": 144.06,
+            "where": {
+              "OR": [
+                {
+                  "plannedDate": {
+                    "gte": "2019-12-01T00:00:00.000Z",
+                    "lte": "2019-12-31T23:59:59.999Z"
+                  }
+                },
+                {
+                  "date": {
+                    "gte": "2019-12-01T00:00:00.000Z",
+                    "lte": "2019-12-31T23:59:59.999Z"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "model": "auditTrail",
+            "rows": 0,
+            "take": null,
+            "rssMiB": 144.06
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 300,
+            "take": 500,
+            "rssMiB": 190.33
+          },
+          {
+            "model": "notification",
+            "rows": 300,
+            "take": 500,
+            "rssMiB": 190.33
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 300,
+            "take": 500,
+            "rssMiB": 190.33
+          },
+          {
+            "model": "client",
+            "rows": 100,
+            "take": null,
+            "rssMiB": 190.33
+          },
+          {
+            "model": "invoice",
+            "rows": 2400,
+            "take": null,
+            "rssMiB": 200.41
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 200.41
+          },
+          {
+            "model": "notification",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 200.41
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 200.41
+          }
+        ],
+        "transactions": [
+          {
+            "isolationLevel": "RepeatableRead",
+            "timeout": 30000
+          }
+        ]
+      },
+      "after": {
+        "durationMs": 446,
+        "jsonBytes": 4208417,
+        "rssBeforeMiB": 84.95,
+        "sampledRssPeakMiB": 219.93,
+        "heapBeforeMiB": 14.63,
+        "sampledHeapPeakMiB": 57.24,
+        "lifetimeRssPeakMiB": 219.93,
+        "sql": {
+          "queries": 42,
+          "durationMs": 52,
+          "writes": 0
+        },
+        "scans": [
+          {
+            "model": "client",
+            "rows": 100,
+            "take": null,
+            "rssMiB": 149.52
+          },
+          {
+            "model": "pool",
+            "rows": 100,
+            "take": null,
+            "rssMiB": 149.52
+          },
+          {
+            "model": "technician",
+            "rows": 16,
+            "take": null,
+            "rssMiB": 149.52
+          },
+          {
+            "model": "invoice",
+            "rows": 2400,
+            "take": null,
+            "rssMiB": 149.52
+          },
+          {
+            "model": "payment",
+            "rows": 800,
+            "take": null,
+            "rssMiB": 149.52
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 149.52
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 149.52
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 149.52
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 400,
+            "take": null,
+            "rssMiB": 149.52,
+            "where": {
+              "OR": [
+                {
+                  "plannedDate": {
+                    "gte": "2019-12-01T00:00:00.000Z",
+                    "lte": "2019-12-31T23:59:59.999Z"
+                  }
+                },
+                {
+                  "date": {
+                    "gte": "2019-12-01T00:00:00.000Z",
+                    "lte": "2019-12-31T23:59:59.999Z"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "model": "auditTrail",
+            "rows": 0,
+            "take": null,
+            "rssMiB": 149.52
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 300,
+            "take": 500,
+            "rssMiB": 152.64
+          },
+          {
+            "model": "notification",
+            "rows": 300,
+            "take": 500,
+            "rssMiB": 152.64
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 300,
+            "take": 500,
+            "rssMiB": 152.64
+          },
+          {
+            "model": "client",
+            "rows": 100,
+            "take": null,
+            "rssMiB": 152.64
+          },
+          {
+            "model": "invoice",
+            "rows": 2400,
+            "take": null,
+            "rssMiB": 171.4
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 171.4
+          },
+          {
+            "model": "notification",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 171.4
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 171.4
+          }
+        ],
+        "transactions": [
+          {
+            "isolationLevel": "RepeatableRead",
+            "timeout": 30000
+          }
+        ]
+      }
+    },
+    {
+      "clients": 400,
+      "before": {
+        "durationMs": 2534.6,
+        "jsonBytes": 10098101,
+        "rssBeforeMiB": 91.89,
+        "sampledRssPeakMiB": 601.26,
+        "heapBeforeMiB": 17.63,
+        "sampledHeapPeakMiB": 214.62,
+        "lifetimeRssPeakMiB": 601.26,
+        "sql": {
+          "queries": 61,
+          "durationMs": 267,
+          "writes": 0
+        },
+        "scans": [
+          {
+            "model": "client",
+            "rows": 400,
+            "take": null,
+            "rssMiB": 274.9
+          },
+          {
+            "model": "pool",
+            "rows": 400,
+            "take": null,
+            "rssMiB": 274.9
+          },
+          {
+            "model": "technician",
+            "rows": 16,
+            "take": null,
+            "rssMiB": 274.9
+          },
+          {
+            "model": "invoice",
+            "rows": 9600,
+            "take": null,
+            "rssMiB": 274.9
+          },
+          {
+            "model": "payment",
+            "rows": 3200,
+            "take": null,
+            "rssMiB": 274.9
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 274.9
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 274.9
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 274.9
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 1600,
+            "take": null,
+            "rssMiB": 274.9,
+            "where": {
+              "OR": [
+                {
+                  "plannedDate": {
+                    "gte": "2019-12-01T00:00:00.000Z",
+                    "lte": "2019-12-31T23:59:59.999Z"
+                  }
+                },
+                {
+                  "date": {
+                    "gte": "2019-12-01T00:00:00.000Z",
+                    "lte": "2019-12-31T23:59:59.999Z"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "model": "auditTrail",
+            "rows": 0,
+            "take": null,
+            "rssMiB": 274.9
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 544.75
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 544.75
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 544.75
+          },
+          {
+            "model": "client",
+            "rows": 400,
+            "take": null,
+            "rssMiB": 544.75
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 545.75
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 545.75
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 545.75
+          },
+          {
+            "model": "invoice",
+            "rows": 9600,
+            "take": null,
+            "rssMiB": 545.75
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 494.52
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 494.52
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 494.52
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 494.77
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 494.77
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 494.77
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 495.02
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 495.02
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 495.02
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 200,
+            "take": 500,
+            "rssMiB": 496.15
+          },
+          {
+            "model": "notification",
+            "rows": 200,
+            "take": 500,
+            "rssMiB": 496.15
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 200,
+            "take": 500,
+            "rssMiB": 496.15
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 501.15
+          },
+          {
+            "model": "notification",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 501.15
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 501.15
+          }
+        ],
+        "transactions": [
+          {
+            "isolationLevel": "RepeatableRead",
+            "timeout": 30000
+          }
+        ]
+      },
+      "after": {
+        "durationMs": 1410.1,
+        "jsonBytes": 10098101,
+        "rssBeforeMiB": 91.53,
+        "sampledRssPeakMiB": 438.89,
+        "heapBeforeMiB": 17.86,
+        "sampledHeapPeakMiB": 140.41,
+        "lifetimeRssPeakMiB": 438.89,
+        "sql": {
+          "queries": 57,
+          "durationMs": 178,
+          "writes": 0
+        },
+        "scans": [
+          {
+            "model": "client",
+            "rows": 400,
+            "take": null,
+            "rssMiB": 268.93
+          },
+          {
+            "model": "pool",
+            "rows": 400,
+            "take": null,
+            "rssMiB": 268.93
+          },
+          {
+            "model": "technician",
+            "rows": 16,
+            "take": null,
+            "rssMiB": 268.93
+          },
+          {
+            "model": "invoice",
+            "rows": 9600,
+            "take": null,
+            "rssMiB": 268.93
+          },
+          {
+            "model": "payment",
+            "rows": 3200,
+            "take": null,
+            "rssMiB": 268.93
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 268.93
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 268.93
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 268.93
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 1600,
+            "take": null,
+            "rssMiB": 268.93,
+            "where": {
+              "OR": [
+                {
+                  "plannedDate": {
+                    "gte": "2019-12-01T00:00:00.000Z",
+                    "lte": "2019-12-31T23:59:59.999Z"
+                  }
+                },
+                {
+                  "date": {
+                    "gte": "2019-12-01T00:00:00.000Z",
+                    "lte": "2019-12-31T23:59:59.999Z"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "model": "auditTrail",
+            "rows": 0,
+            "take": null,
+            "rssMiB": 268.93
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 300.18
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 300.18
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 300.18
+          },
+          {
+            "model": "client",
+            "rows": 400,
+            "take": null,
+            "rssMiB": 300.18
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 305.68
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 305.68
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 305.68
+          },
+          {
+            "model": "invoice",
+            "rows": 9600,
+            "take": null,
+            "rssMiB": 305.68
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 328.26
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 328.26
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 328.26
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 328.51
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 328.51
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 328.51
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 328.76
+          },
+          {
+            "model": "notification",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 328.76
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 500,
+            "take": 500,
+            "rssMiB": 328.76
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 200,
+            "take": 500,
+            "rssMiB": 328.76
+          },
+          {
+            "model": "notification",
+            "rows": 200,
+            "take": 500,
+            "rssMiB": 328.76
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 200,
+            "take": 500,
+            "rssMiB": 328.76
+          },
+          {
+            "model": "technicalAlert",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 333.38
+          },
+          {
+            "model": "notification",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 333.38
+          },
+          {
+            "model": "serviceVisit",
+            "rows": 200,
+            "take": null,
+            "rssMiB": 333.38
+          }
+        ],
+        "transactions": [
+          {
+            "isolationLevel": "RepeatableRead",
+            "timeout": 30000
+          }
+        ]
+      }
+    }
+  ],
+  "snapshot": {
+    "ok": true,
+    "phase": "assertions-completed",
+    "engine": "PostgreSQL 18.3 (PGlite 0.5.8) on wasm32-unknown-emscripten, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.74 (1092ec30a3fb1d46b1782ff1b4db5094d3d06ae5), 32-bit",
+    "committedBeforeRemaining": false,
+    "transactions": [
+      {
+        "scope": "transaction-1",
+        "options": {
+          "isolationLevel": "RepeatableRead",
+          "timeout": 30000
+        }
+      }
+    ],
+    "reads": [
+      {
+        "model": "client",
+        "scope": "transaction-1"
+      },
+      {
+        "model": "pool",
+        "scope": "transaction-1"
+      },
+      {
+        "model": "technician",
+        "scope": "transaction-1"
+      },
+      {
+        "model": "invoice",
+        "scope": "transaction-1"
+      },
+      {
+        "model": "payment",
+        "scope": "transaction-1"
+      },
+      {
+        "model": "technicalAlert",
+        "scope": "transaction-1"
+      },
+      {
+        "model": "notification",
+        "scope": "transaction-1"
+      },
+      {
+        "model": "serviceVisit",
+        "scope": "transaction-1"
+      },
+      {
+        "model": "serviceVisit",
+        "scope": "transaction-1"
+      },
+      {
+        "model": "auditTrail",
+        "scope": "transaction-1"
+      },
+      {
+        "model": "client",
+        "scope": "transaction-1"
+      },
+      {
+        "model": "invoice",
+        "scope": "transaction-1"
+      }
+    ],
+    "duringDelta": {
+      "clients": 0,
+      "pools": 0,
+      "technicians": 0,
+      "visits": 0,
+      "notDone": 0,
+      "billed": 0,
+      "paid": 0,
+      "open": 0,
+      "alerts": 0,
+      "fiscalClients": 0,
+      "fiscalInvoices": 0,
+      "fiscalPending": 0,
+      "fiscalPendingAmount": 0
+    },
+    "afterDelta": {
+      "clients": 1,
+      "pools": 1,
+      "technicians": 1,
+      "visits": 1,
+      "notDone": 1,
+      "billed": 123.45,
+      "paid": 5,
+      "open": 118.45,
+      "alerts": 3,
+      "fiscalClients": 1,
+      "fiscalInvoices": 1,
+      "fiscalPending": 1,
+      "fiscalPendingAmount": 123.45
+    }
+  },
+  "validation": {
+    "unit": 1318,
+    "unitFiles": 135,
+    "newTests": 7,
+    "technician": 4,
+    "syntax": {
+      "backend": 695,
+      "frontend": 307,
+      "inline": 44
+    },
+    "runnerScripts": 313,
+    "groupsMs": {
+      "test-field-summary-volume.js": 27285,
+      "test-field-operational-dashboard.js": 9953,
+      "test-field-external-invoice-summary.js": 5065,
+      "test-field-external-reference-review.js": 5843,
+      "test-field-external-invoice-registration.js": 6088
+    },
+    "allTerminalMarkersRead": true,
+    "diffCheck": true
+  },
+  "ci408": {
+    "run": 36474118500,
+    "job": 109103422154,
+    "head": "f5e18e31daf28f5a074d7a516b6c1f0f44e75d63",
+    "status": "in_progress",
+    "successfulSteps": 10,
+    "activeStep": "Run node scripts/test-field-suite.js"
+  },
+  "limits": [
+    "Memory includes API and local HTTP client; excludes DB and browser; fresh process per read.",
+    "Queries still scale with invoices, audit history and monthly visits; no constant-space claim.",
+    "Two original local runs and one optimized run are observations, not latency percentiles/SLA.",
+    "Full response equivalence uses the same baseline/25-client fixtures; largest profile validates totals/IDs/bytes and memory.",
+    "PGlite serialized the writer; PostgreSQL concurrency, full 313-script suite and restore remain native gates.",
+    "No schema, dependencies, cache v207, deployment, merge, fiscal issuance or real contacts changed."
+  ]
+}

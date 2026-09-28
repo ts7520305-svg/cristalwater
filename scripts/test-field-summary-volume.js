@@ -77,7 +77,13 @@ async function probe(mode, file, fault) {
     child.once('error', error => { clearTimeout(timer); reject(error); });
     child.once('close', (code, signal) => { clearTimeout(timer); if (code !== 0 || signal) {
       const line = output.split('\n').find(line => line.startsWith('{"summaryVolumeMeasurement"'));
-      if (line) fs.writeFileSync(path.join(folder, 'failed-probe.json'), JSON.stringify({ ok: false, code, signal, ...JSON.parse(line).summaryVolumeMeasurement }, null, 2) + '\n');
+      if (line) {
+        const failedProbe = { ok: false, code, signal, ...JSON.parse(line).summaryVolumeMeasurement };
+        fs.writeFileSync(path.join(folder, 'failed-probe.json'), JSON.stringify(failedProbe, null, 2) + '\n');
+        // Keep the exact failing measurement in the small CI artifact too.
+        const partial = JSON.parse(fs.readFileSync(resultPath, 'utf8'));
+        fs.writeFileSync(resultPath, JSON.stringify({ ...partial, ok: false, phase: 'probe-failed', failedProbe }, null, 2) + '\n');
+      }
       return reject(Error(mode + ' probe failed: ' + code + '/' + signal + '\n' + output.slice(-2000) + errors.slice(-4000)));
     } const line = output.split('\n').find(line => line.startsWith('{"summaryVolumeProbe"')); if (!line) return reject(Error('Probe missing completion evidence')); resolve(JSON.parse(line).summaryVolumeProbe); });
   });
