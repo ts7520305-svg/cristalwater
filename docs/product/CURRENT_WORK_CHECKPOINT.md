@@ -1,6 +1,26 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK406 publicada / C04-B
+## Retoma atual — 28/09/2026, TASK407 local aprovada / C04-C
+
+Concluído localmente o terceiro cenário de [volume C04](OPERATIONAL_VOLUME_PLAN_20260928.md), agendas e rondas. **C04-A/B/C aprovados localmente, CI pendente; C04-D/E/F por executar.** Contagem principal: **28 por iniciar, C04 em execução, três em validação (C01–C03), zero fechadas**. Nenhuma falha nova da aplicação reproduzida; acrescentados apenas o grupo de regressão `test-field-agenda-volume.js`, o seu registo no runner e documentação. [Evidência TASK407](evidence/20260928_task407_local.json).
+
+**Escalas:** 25/100/400 piscinas, 16 técnicos/16 rondas, 104 semanas de regulares e 24 meses de extras em 2032–2033, com visitas atuais e limites explícitos. Maior fixture: **43 612 regulares + 10 012 extras = 53 624 visitas**. Verificados calendários diário/semanal/mensal, ronda inativa, janelas de início/fim, aliases administrativos, 29 de fevereiro, mudança de ano, milissegundos de fronteira e dias de Lisboa de 23/25 horas. Semana móvel/semana de domingo/dia de Lisboa/mês legado continuam com os seus critérios atuais; decisões novas pertencem ao C10.
+
+**Local aprovado:** 1 311 unitários/134 ficheiros, quatro técnicos, sintaxe 695/307/44, `node --check` e `git diff --check`. Ensaio final **UTC, 58 133 ms**, quatro probes, **177 pedidos HTTP**: 144 positivos, 24 recusas de permissões e nove falhas de consulta injetadas sem dados parciais. IDs completos/únicos, ordem contratada, totais, identidade técnica imposta e reconstituição da rota por páginas aprovados. Zero escritas SQL nas APIs instrumentadas e zero comandos de escrita no navegador; contagens em onze modelos/campos de agenda conservados e limpeza própria confirmada. Não se apresenta isto como auditoria SQL de toda a telemetria do navegador.
+
+**UI real:** planeador 1 200 linhas a 1440/390 px, 7 155,5 ms e 25,55 MiB heap JS; dia administrativo 1 600 registos/32 páginas a 390 px, 8 619,8 ms, volta à primeira página sem duplicados/perdas; técnico 825 visitas, seleção última/primeira/última, 2 319,1 ms e 7,93 MiB heap JS. Nomes literais, zero erros de página. Capturas enquadradas e hashes na evidência. Tabela móvel continua a usar deslocamento horizontal.
+
+**Medições/limites:** no perfil de 400, maior resumo mensal com 2 002 regulares, 7 852 868 bytes, 638,3 ms e 470,70 MiB RSS. RSS inclui API+cliente/oracle num processo novo por perfil, não por pedido; exclui DB/navegador. Dia/técnico continuam a materializar todos os elegíveis antes de paginar; semana/mês/DOM e histórico de extras continuam proporcionais aos dados. Não se certificaram geração, pausas sazonais, concorrência de alterações, VPS/dispositivos nem dois anos de disponibilidade. Primeira execução completa do rascunho do teste em Europe/Amsterdam: 156 pedidos/59 207 ms; depois só se ajustaram aliases do oracle, registo de fuso e capturas. A fixture de meia-noite muda de instante com o fuso; contagens diárias 800/1 600 são esperadas para essas duas fixtures distintas.
+
+**Lote (6 ficheiros):** dois scripts, relatório C04, plano, este checkpoint e evidência TASK407. Sem alteração de aplicação/cache v207, esquema ou dependências. Runner: **312 scripts únicos e existentes**; glob do artefacto pequeno cobre `agenda-volume/results.json`. PGlite 0.5.8 novo em cada execução, Chromium 153.0.8010.0; integrações externas desligadas.
+
+**CI anteriores:** TASK405 `36460017985`/job `109055958055` e TASK406 `36463317792`/job `109067069909` continuam na suite integrada na última consulta, cada uma com dez etapas aprovadas. Não foram confirmados os 310/311 grupos, restauros ou JSONs específicos. Gates C01–C03 mantêm o estado histórico de CI/restauro aprovados e artefactos específicos por ler; não fechar por inferência.
+
+**Publicação TASK407:** preparada para a branch `work/field-readiness-20260915-simulation`, base `a1f93dd85ca4e94d35477c3b4c9e1bce1842d505`; commit/árvore/CI a registar após publicação autorizada. Sem merge, deploy ou contactos reais.
+
+**Continuar:** C04-D, guias e movimentos com 201/1 001 registos, páginas/stock/isolamento conforme manifesto; depois C04-E/F. Confirmar CI TASK405–TASK407, respetivamente 310/311/312 scripts na ordem exata/restauro e os JSONs específicos. Para TASK407 exigir `agenda-volume/results.json`, `ok: true`, três perfis API e um UI, IDs/totais/falhas/limpeza aprovados; contagens diárias dependem do fuso e data da fixture. Para C01–C04-B manter os gates exatos abaixo. C04 só fecha após seis cenários; C05 idiomas segue-se. Contrato anual adiado.
+
+## Retoma anterior — 28/09/2026, TASK406 publicada / C04-B
 
 Avançado o segundo dos seis cenários de [volume operacional C04](OPERATIONAL_VOLUME_PLAN_20260928.md): stock pela API e catálogos do técnico moderno/antigo, visita extra e correção da guia original. **C04-A e C04-B aprovados localmente, CI pendente; C04-C–F por executar.** Contagem principal: **28 por iniciar, C04 em execução, três em validação (C01–C03), zero fechadas**.
 

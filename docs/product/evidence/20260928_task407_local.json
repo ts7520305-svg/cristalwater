@@ -1,0 +1,2780 @@
+{
+  "task": "TASK407",
+  "date": "2026-09-28",
+  "completionId": "C04",
+  "scenario": "C04-C",
+  "status": "local-approved-native-pending",
+  "baseCommit": "a1f93dd85ca4e94d35477c3b4c9e1bce1842d505",
+  "branch": "work/field-readiness-20260915-simulation",
+  "counts": {
+    "total": 32,
+    "notStarted": 28,
+    "inProgress": 1,
+    "validation": 3,
+    "closed": 0,
+    "c04Children": 6,
+    "c04ChildrenLocalApproved": 3,
+    "c04ChildrenNotStarted": 3
+  },
+  "findings": {
+    "newApplicationFailureReproduced": false,
+    "applicationChanged": false,
+    "change": "New isolated agenda-volume regression group and runner registration; documentation/evidence.",
+    "largestFixture": {
+      "pools": 400,
+      "technicians": 16,
+      "rounds": 16,
+      "regularVisits": 43612,
+      "extraVisits": 10012,
+      "totalVisits": 53624,
+      "historyWeeks": 104,
+      "historyMonths": 24
+    },
+    "temporalContracts": {
+      "rollingWeek": "Server local today inclusive, plus seven local dates exclusive; regular plannedDate only.",
+      "calendarWeek": "Sunday server-local calendar week; regular plannedDate only. Active rounds by default, includeInactive and configured recurrence/windows verified.",
+      "adminDay": "Europe/Lisbon scheduled day, regular plannedDate fallback to date; extras scheduledAt. Pages of 50.",
+      "adminMonth": "Existing server-local month: plannedDate OR date, regular visits only.",
+      "technicianDay": "Server-local day; planned schedule/fallback or start/end; cancelled/archived aliases excluded; authenticated technician overrides query technicianId."
+    }
+  },
+  "validation": {
+    "unit": {
+      "files": 134,
+      "tests": 1311,
+      "passed": true
+    },
+    "technician": {
+      "tests": 4,
+      "passed": true
+    },
+    "syntax": {
+      "backend": 695,
+      "frontend": 307,
+      "inline": 44,
+      "passed": true
+    },
+    "nodeCheck": true,
+    "gitDiffCheck": true,
+    "runner": {
+      "scripts": 312,
+      "unique": true,
+      "allExist": true
+    },
+    "integrated": {
+      "script": "scripts/test-field-agenda-volume.js",
+      "terminalMarker": "PASS agenda volume: 25/100/400 pools, 16 technicians, two-year history, exact rolling/calendar/day/month IDs, recurrence, pagination, real UI, permissions, failures and cleanup",
+      "utc": {
+        "exitCode": 0,
+        "durationMs": 58133,
+        "reads": 177,
+        "successfulHttp": 144,
+        "permissionRejections": 24,
+        "injectedReadFailures": 9,
+        "probeCount": 4
+      },
+      "initial": {
+        "stage": "Complete initial test draft, before test-only alias/UTC-reporting/screenshot adjustments. Production files identical.",
+        "timeZone": "Europe/Amsterdam",
+        "exitCode": 0,
+        "durationMs": 59207,
+        "reads": 156,
+        "ui": {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "UI",
+          "pools": 400,
+          "plannerRows": 1200,
+          "plannerLoadMs": 7833.9,
+          "plannerJsHeapMiB": 40.65,
+          "dayRows": 800,
+          "dayPages": 16,
+          "dayTraversalMs": 4289.8,
+          "technicianRows": 825,
+          "technicianLoadAndNavigationMs": 2293.8,
+          "technicianJsHeapMiB": 6.36,
+          "exactIds": true,
+          "repeatedFilters": true,
+          "pageErrors": 0,
+          "writes": 0
+        }
+      }
+    }
+  },
+  "environment": {
+    "database": "Fresh PGlite 0.5.8 per run; socket adapter 0.2.11; schema unchanged.",
+    "browser": "Chromium 153.0.8010.0",
+    "notificationsAndExternalIntegrationsEnabled": false,
+    "unitRuntime": "Node 24.19.0 / Vitest 4.1.11",
+    "authoritativeTestTimeZone": "UTC",
+    "cacheVersion": "v207"
+  },
+  "gates": {
+    "nativePending": true,
+    "positiveUtc": {
+      "ok": true,
+      "phase": "assertions-completed",
+      "profiles": [
+        25,
+        100,
+        400
+      ],
+      "serverTimeZone": "UTC",
+      "results": [
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "API",
+          "pools": 25,
+          "historicalWeeks": 104,
+          "historicalMonths": 24,
+          "regular": 2737,
+          "extras": 637,
+          "reads": [
+            {
+              "url": "/api/round-planner/week",
+              "status": 200,
+              "durationMs": 64.8,
+              "jsonBytes": 152853,
+              "sampledRssMiB": 93.12,
+              "sampledHeapMiB": 18.57,
+              "sql": {
+                "queries": 12,
+                "writes": 0,
+                "durationMs": 3
+              }
+            },
+            {
+              "url": "/api/rounds/week?date=2032-02-29",
+              "status": 200,
+              "durationMs": 37,
+              "jsonBytes": 21671,
+              "sampledRssMiB": 96.07,
+              "sampledHeapMiB": 19,
+              "sql": {
+                "queries": 26,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/admin/rounds/week?date=2032-02-29",
+              "status": 200,
+              "durationMs": 36.3,
+              "jsonBytes": 21671,
+              "sampledRssMiB": 108.1,
+              "sampledHeapMiB": 18.85,
+              "sql": {
+                "queries": 30,
+                "writes": 0,
+                "durationMs": 7
+              }
+            },
+            {
+              "url": "/api/rounds/week?date=2032-12-31",
+              "status": 200,
+              "durationMs": 31.9,
+              "jsonBytes": 21379,
+              "sampledRssMiB": 108.22,
+              "sampledHeapMiB": 19.13,
+              "sql": {
+                "queries": 26,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/admin/rounds/week?date=2032-12-31",
+              "status": 200,
+              "durationMs": 28.5,
+              "jsonBytes": 21379,
+              "sampledRssMiB": 109.6,
+              "sampledHeapMiB": 19.15,
+              "sql": {
+                "queries": 30,
+                "writes": 0,
+                "durationMs": 2
+              }
+            },
+            {
+              "url": "/api/rounds/week?date=2033-01-01",
+              "status": 200,
+              "durationMs": 27.6,
+              "jsonBytes": 21379,
+              "sampledRssMiB": 109.97,
+              "sampledHeapMiB": 18.85,
+              "sql": {
+                "queries": 26,
+                "writes": 0,
+                "durationMs": 1
+              }
+            },
+            {
+              "url": "/api/admin/rounds/week?date=2033-01-01",
+              "status": 200,
+              "durationMs": 32.2,
+              "jsonBytes": 21379,
+              "sampledRssMiB": 110.22,
+              "sampledHeapMiB": 18.98,
+              "sql": {
+                "queries": 30,
+                "writes": 0,
+                "durationMs": 2
+              }
+            },
+            {
+              "url": "/api/rounds/week?date=2026-09-28",
+              "status": 200,
+              "durationMs": 37.5,
+              "jsonBytes": 36194,
+              "sampledRssMiB": 112.35,
+              "sampledHeapMiB": 20.43,
+              "sql": {
+                "queries": 26,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/admin/rounds/week?date=2026-09-28",
+              "status": 200,
+              "durationMs": 34.9,
+              "jsonBytes": 36194,
+              "sampledRssMiB": 113.85,
+              "sampledHeapMiB": 20.95,
+              "sql": {
+                "queries": 30,
+                "writes": 0,
+                "durationMs": 1
+              }
+            },
+            {
+              "url": "/api/rounds/week?date=2032-02-29&includeInactive=true",
+              "status": 200,
+              "durationMs": 40.1,
+              "jsonBytes": 22105,
+              "sampledRssMiB": 113.79,
+              "sampledHeapMiB": 19.45,
+              "sql": {
+                "queries": 26,
+                "writes": 0,
+                "durationMs": 6
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=1",
+              "status": 200,
+              "durationMs": 18.7,
+              "jsonBytes": 23995,
+              "sampledRssMiB": 114.29,
+              "sampledHeapMiB": 18.54,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 1
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=2",
+              "status": 200,
+              "durationMs": 15.1,
+              "jsonBytes": 2395,
+              "sampledRssMiB": 114.41,
+              "sampledHeapMiB": 18.47,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=3",
+              "status": 200,
+              "durationMs": 17.9,
+              "jsonBytes": 512,
+              "sampledRssMiB": 114.41,
+              "sampledHeapMiB": 18.42,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 1
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-03-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=1",
+              "status": 200,
+              "durationMs": 15.4,
+              "jsonBytes": 2396,
+              "sampledRssMiB": 114.41,
+              "sampledHeapMiB": 18.3,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 1
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-03-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=2",
+              "status": 200,
+              "durationMs": 13,
+              "jsonBytes": 508,
+              "sampledRssMiB": 114.41,
+              "sampledHeapMiB": 18.31,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-10-31&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=1",
+              "status": 200,
+              "durationMs": 14.8,
+              "jsonBytes": 14245,
+              "sampledRssMiB": 114.54,
+              "sampledHeapMiB": 18.48,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-10-31&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=2",
+              "status": 200,
+              "durationMs": 17,
+              "jsonBytes": 511,
+              "sampledRssMiB": 114.66,
+              "sampledHeapMiB": 18.43,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=1",
+              "status": 200,
+              "durationMs": 16.7,
+              "jsonBytes": 24285,
+              "sampledRssMiB": 114.91,
+              "sampledHeapMiB": 19.08,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=2",
+              "status": 200,
+              "durationMs": 15.9,
+              "jsonBytes": 24121,
+              "sampledRssMiB": 114.91,
+              "sampledHeapMiB": 18.88,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=3",
+              "status": 200,
+              "durationMs": 16.3,
+              "jsonBytes": 514,
+              "sampledRssMiB": 115.41,
+              "sampledHeapMiB": 18.75,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 2
+              }
+            },
+            {
+              "url": "/api/dashboard/admin?monthRef=2032-02",
+              "status": 200,
+              "durationMs": 129.2,
+              "jsonBytes": 1107406,
+              "sampledRssMiB": 138.89,
+              "sampledHeapMiB": 28.02,
+              "sql": {
+                "queries": 30,
+                "writes": 0,
+                "durationMs": 15
+              }
+            },
+            {
+              "url": "/api/dashboard/admin?monthRef=2032-12",
+              "status": 200,
+              "durationMs": 89.9,
+              "jsonBytes": 1010994,
+              "sampledRssMiB": 150.02,
+              "sampledHeapMiB": 35.64,
+              "sql": {
+                "queries": 30,
+                "writes": 0,
+                "durationMs": 8
+              }
+            },
+            {
+              "url": "/api/dashboard/admin?monthRef=2033-01",
+              "status": 200,
+              "durationMs": 94.6,
+              "jsonBytes": 1011018,
+              "sampledRssMiB": 158.72,
+              "sampledHeapMiB": 35.5,
+              "sql": {
+                "queries": 30,
+                "writes": 0,
+                "durationMs": 8
+              }
+            },
+            {
+              "url": "/api/technician/today?date=2026-09-28&technicianId=2",
+              "status": 200,
+              "durationMs": 49.2,
+              "jsonBytes": 46838,
+              "sampledRssMiB": 156.14,
+              "sampledHeapMiB": 22.21,
+              "sql": {
+                "queries": 39,
+                "writes": 0,
+                "durationMs": 7
+              }
+            },
+            {
+              "url": "/api/technician/today?date=2026-09-28&technicianId=2&limit=200&offset=0",
+              "status": 200,
+              "durationMs": 44.5,
+              "jsonBytes": 46837,
+              "sampledRssMiB": 155.39,
+              "sampledHeapMiB": 21.35,
+              "sql": {
+                "queries": 39,
+                "writes": 0,
+                "durationMs": 6
+              }
+            },
+            {
+              "url": "/api/round-planner/week",
+              "status": 401,
+              "durationMs": 1.5,
+              "jsonBytes": 34,
+              "sampledRssMiB": 155.39,
+              "sampledHeapMiB": 19.26,
+              "sql": {
+                "queries": 0,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/round-planner/week",
+              "status": 403,
+              "durationMs": 8.6,
+              "jsonBytes": 39,
+              "sampledRssMiB": 155.39,
+              "sampledHeapMiB": 19.33,
+              "sql": {
+                "queries": 4,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/rounds/week",
+              "status": 401,
+              "durationMs": 2.5,
+              "jsonBytes": 34,
+              "sampledRssMiB": 155.39,
+              "sampledHeapMiB": 19.25,
+              "sql": {
+                "queries": 0,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/rounds/week",
+              "status": 403,
+              "durationMs": 5.2,
+              "jsonBytes": 39,
+              "sampledRssMiB": 155.39,
+              "sampledHeapMiB": 19.34,
+              "sql": {
+                "queries": 4,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/admin/rounds/week",
+              "status": 401,
+              "durationMs": 2.4,
+              "jsonBytes": 34,
+              "sampledRssMiB": 155.39,
+              "sampledHeapMiB": 19.26,
+              "sql": {
+                "queries": 0,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/admin/rounds/week",
+              "status": 403,
+              "durationMs": 5,
+              "jsonBytes": 39,
+              "sampledRssMiB": 155.39,
+              "sampledHeapMiB": 19.35,
+              "sql": {
+                "queries": 4,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page",
+              "status": 401,
+              "durationMs": 1.5,
+              "jsonBytes": 34,
+              "sampledRssMiB": 155.39,
+              "sampledHeapMiB": 19.28,
+              "sql": {
+                "queries": 0,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page",
+              "status": 403,
+              "durationMs": 5.5,
+              "jsonBytes": 39,
+              "sampledRssMiB": 155.39,
+              "sampledHeapMiB": 19.37,
+              "sql": {
+                "queries": 4,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/round-planner/week",
+              "status": 500,
+              "durationMs": 5.4,
+              "jsonBytes": 51,
+              "sampledRssMiB": 155.39,
+              "sampledHeapMiB": 19.38,
+              "sql": {
+                "queries": 4,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/rounds/week",
+              "status": 500,
+              "durationMs": 5.3,
+              "jsonBytes": 55,
+              "sampledRssMiB": 155.39,
+              "sampledHeapMiB": 19.41,
+              "sql": {
+                "queries": 4,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/admin/rounds/week",
+              "status": 500,
+              "durationMs": 6.8,
+              "jsonBytes": 55,
+              "sampledRssMiB": 155.39,
+              "sampledHeapMiB": 19.9,
+              "sql": {
+                "queries": 17,
+                "writes": 0,
+                "durationMs": 0
+              }
+            }
+          ],
+          "weekProofs": [
+            {
+              "day": "2032-02-29",
+              "fixtureVisits": 28,
+              "orderedIdsSha256": "128ee234a3591d53cb0666db930f1a35cb7951871c77b19a6a9b6bbeacf880a7"
+            },
+            {
+              "day": "2032-12-31",
+              "fixtureVisits": 27,
+              "orderedIdsSha256": "15ecb6b26c7bc6d1fe6fb5ab933ed89fb4060fbf1f37cf83fed0269e406b19b3"
+            },
+            {
+              "day": "2033-01-01",
+              "fixtureVisits": 27,
+              "orderedIdsSha256": "15ecb6b26c7bc6d1fe6fb5ab933ed89fb4060fbf1f37cf83fed0269e406b19b3"
+            },
+            {
+              "day": "2026-09-28",
+              "fixtureVisits": 75,
+              "orderedIdsSha256": "b1e93fa15806816ed2018dc4991db2778d873e8a31562b52dcd2eb131436c4a8"
+            }
+          ],
+          "dayProofs": [
+            {
+              "day": "2032-02-29",
+              "rows": 54,
+              "pages": 2,
+              "orderedKeysSha256": "95aae00c42dd9bffb7c4e96b4362595d63fbf94fe6e74c7ec539d95d9295ac05",
+              "hours": 24
+            },
+            {
+              "day": "2032-03-28",
+              "rows": 4,
+              "pages": 1,
+              "orderedKeysSha256": "e194bce0c016e940201d8e6625bd53fdbbf81e747e7860d281ce0384f6f75d72",
+              "hours": 23
+            },
+            {
+              "day": "2032-10-31",
+              "rows": 29,
+              "pages": 1,
+              "orderedKeysSha256": "cc219334fe33b6972ec5ac182bb7a67b09c4a8e778ea5e166dbcb9597e97c14e",
+              "hours": 25
+            },
+            {
+              "day": "2026-09-28",
+              "rows": 100,
+              "pages": 2,
+              "orderedKeysSha256": "6261ee70f45afdb5a1f398009cf9052cf9b54954c85846a38c0bcb01f6a95318",
+              "hours": 24
+            }
+          ],
+          "monthProofs": [
+            {
+              "month": "2032-02",
+              "fixtureVisits": 128,
+              "idsSha256": "97a36838fa8b39f1e59ab5dc4957fdf918390e934e4d07e66cbd1789a05626cb"
+            },
+            {
+              "month": "2032-12",
+              "fixtureVisits": 101,
+              "idsSha256": "f0207a855b491b65d6bcacffe13e47dd2aaae1e153a17f54988b3479fc157013"
+            },
+            {
+              "month": "2033-01",
+              "fixtureVisits": 101,
+              "idsSha256": "10c280ecd1e77b6998ad6632e3cc36d943c76d1bd010e04462fbf33a25aa67db"
+            }
+          ],
+          "rollingVisits": 50,
+          "technicianVisits": 52,
+          "technicianPages": 1,
+          "permissions": true,
+          "partialFailuresRejected": 3,
+          "writes": 0
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "API",
+          "pools": 100,
+          "historicalWeeks": 104,
+          "historicalMonths": 24,
+          "regular": 10912,
+          "extras": 2512,
+          "reads": [
+            {
+              "url": "/api/round-planner/week",
+              "status": 200,
+              "durationMs": 87.1,
+              "jsonBytes": 611765,
+              "sampledRssMiB": 104.77,
+              "sampledHeapMiB": 26.15,
+              "sql": {
+                "queries": 12,
+                "writes": 0,
+                "durationMs": 6
+              }
+            },
+            {
+              "url": "/api/rounds/week?date=2032-02-29",
+              "status": 200,
+              "durationMs": 50,
+              "jsonBytes": 60740,
+              "sampledRssMiB": 112.05,
+              "sampledHeapMiB": 25.13,
+              "sql": {
+                "queries": 26,
+                "writes": 0,
+                "durationMs": 3
+              }
+            },
+            {
+              "url": "/api/admin/rounds/week?date=2032-02-29",
+              "status": 200,
+              "durationMs": 48,
+              "jsonBytes": 60740,
+              "sampledRssMiB": 126.2,
+              "sampledHeapMiB": 24.03,
+              "sql": {
+                "queries": 30,
+                "writes": 0,
+                "durationMs": 6
+              }
+            },
+            {
+              "url": "/api/rounds/week?date=2032-12-31",
+              "status": 200,
+              "durationMs": 43.7,
+              "jsonBytes": 60523,
+              "sampledRssMiB": 120.99,
+              "sampledHeapMiB": 24.03,
+              "sql": {
+                "queries": 26,
+                "writes": 0,
+                "durationMs": 3
+              }
+            },
+            {
+              "url": "/api/admin/rounds/week?date=2032-12-31",
+              "status": 200,
+              "durationMs": 46.3,
+              "jsonBytes": 60523,
+              "sampledRssMiB": 121.18,
+              "sampledHeapMiB": 24.21,
+              "sql": {
+                "queries": 30,
+                "writes": 0,
+                "durationMs": 3
+              }
+            },
+            {
+              "url": "/api/rounds/week?date=2033-01-01",
+              "status": 200,
+              "durationMs": 45.3,
+              "jsonBytes": 60523,
+              "sampledRssMiB": 122.04,
+              "sampledHeapMiB": 24.2,
+              "sql": {
+                "queries": 26,
+                "writes": 0,
+                "durationMs": 6
+              }
+            },
+            {
+              "url": "/api/admin/rounds/week?date=2033-01-01",
+              "status": 200,
+              "durationMs": 48.5,
+              "jsonBytes": 60523,
+              "sampledRssMiB": 122.91,
+              "sampledHeapMiB": 24.41,
+              "sql": {
+                "queries": 30,
+                "writes": 0,
+                "durationMs": 4
+              }
+            },
+            {
+              "url": "/api/rounds/week?date=2026-09-28",
+              "status": 200,
+              "durationMs": 65.5,
+              "jsonBytes": 122520,
+              "sampledRssMiB": 131.14,
+              "sampledHeapMiB": 30.54,
+              "sql": {
+                "queries": 26,
+                "writes": 0,
+                "durationMs": 4
+              }
+            },
+            {
+              "url": "/api/admin/rounds/week?date=2026-09-28",
+              "status": 200,
+              "durationMs": 72.2,
+              "jsonBytes": 122520,
+              "sampledRssMiB": 138.71,
+              "sampledHeapMiB": 30.96,
+              "sql": {
+                "queries": 30,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/rounds/week?date=2032-02-29&includeInactive=true",
+              "status": 200,
+              "durationMs": 53.5,
+              "jsonBytes": 61929,
+              "sampledRssMiB": 138.38,
+              "sampledHeapMiB": 24.98,
+              "sql": {
+                "queries": 26,
+                "writes": 0,
+                "durationMs": 8
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=1",
+              "status": 200,
+              "durationMs": 33.9,
+              "jsonBytes": 24055,
+              "sampledRssMiB": 138.38,
+              "sampledHeapMiB": 21.15,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=2",
+              "status": 200,
+              "durationMs": 19.3,
+              "jsonBytes": 24153,
+              "sampledRssMiB": 138.75,
+              "sampledHeapMiB": 21.22,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 1
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=3",
+              "status": 200,
+              "durationMs": 26.3,
+              "jsonBytes": 24031,
+              "sampledRssMiB": 138.75,
+              "sampledHeapMiB": 21.24,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 8
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=4",
+              "status": 200,
+              "durationMs": 38,
+              "jsonBytes": 24067,
+              "sampledRssMiB": 138.75,
+              "sampledHeapMiB": 21.24,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 10
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=5",
+              "status": 200,
+              "durationMs": 28,
+              "jsonBytes": 2404,
+              "sampledRssMiB": 138.75,
+              "sampledHeapMiB": 21.14,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 3
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=6",
+              "status": 200,
+              "durationMs": 28.4,
+              "jsonBytes": 516,
+              "sampledRssMiB": 138.75,
+              "sampledHeapMiB": 21.12,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 6
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-03-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=1",
+              "status": 200,
+              "durationMs": 15.1,
+              "jsonBytes": 2396,
+              "sampledRssMiB": 138.75,
+              "sampledHeapMiB": 20.59,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 1
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-03-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=2",
+              "status": 200,
+              "durationMs": 17.1,
+              "jsonBytes": 508,
+              "sampledRssMiB": 138.88,
+              "sampledHeapMiB": 20.59,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 3
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-10-31&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=1",
+              "status": 200,
+              "durationMs": 16.4,
+              "jsonBytes": 24247,
+              "sampledRssMiB": 139,
+              "sampledHeapMiB": 21.02,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-10-31&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=2",
+              "status": 200,
+              "durationMs": 18.3,
+              "jsonBytes": 24351,
+              "sampledRssMiB": 139,
+              "sampledHeapMiB": 21.09,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 1
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-10-31&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=3",
+              "status": 200,
+              "durationMs": 17.8,
+              "jsonBytes": 2410,
+              "sampledRssMiB": 139,
+              "sampledHeapMiB": 20.97,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 1
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-10-31&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=4",
+              "status": 200,
+              "durationMs": 18.5,
+              "jsonBytes": 514,
+              "sampledRssMiB": 139,
+              "sampledHeapMiB": 20.93,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 1
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=1",
+              "status": 200,
+              "durationMs": 22.5,
+              "jsonBytes": 24325,
+              "sampledRssMiB": 139.25,
+              "sampledHeapMiB": 22.3,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 1
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=2",
+              "status": 200,
+              "durationMs": 25.1,
+              "jsonBytes": 24370,
+              "sampledRssMiB": 139.25,
+              "sampledHeapMiB": 22.03,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 1
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=3",
+              "status": 200,
+              "durationMs": 23,
+              "jsonBytes": 24324,
+              "sampledRssMiB": 139.38,
+              "sampledHeapMiB": 22.03,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 1
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=4",
+              "status": 200,
+              "durationMs": 25.2,
+              "jsonBytes": 24370,
+              "sampledRssMiB": 139.38,
+              "sampledHeapMiB": 22.05,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 4
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=5",
+              "status": 200,
+              "durationMs": 21.8,
+              "jsonBytes": 24019,
+              "sampledRssMiB": 139.38,
+              "sampledHeapMiB": 22.05,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 1
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=6",
+              "status": 200,
+              "durationMs": 21.5,
+              "jsonBytes": 24113,
+              "sampledRssMiB": 139.38,
+              "sampledHeapMiB": 22.06,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 2
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=7",
+              "status": 200,
+              "durationMs": 24.3,
+              "jsonBytes": 24285,
+              "sampledRssMiB": 139.38,
+              "sampledHeapMiB": 22.07,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 1
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=8",
+              "status": 200,
+              "durationMs": 29,
+              "jsonBytes": 24332,
+              "sampledRssMiB": 139.38,
+              "sampledHeapMiB": 22.09,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 2
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=9",
+              "status": 200,
+              "durationMs": 22.1,
+              "jsonBytes": 514,
+              "sampledRssMiB": 139.38,
+              "sampledHeapMiB": 21.94,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 1
+              }
+            },
+            {
+              "url": "/api/dashboard/admin?monthRef=2032-02",
+              "status": 200,
+              "durationMs": 222.8,
+              "jsonBytes": 2459064,
+              "sampledRssMiB": 178.65,
+              "sampledHeapMiB": 40.46,
+              "sql": {
+                "queries": 36,
+                "writes": 0,
+                "durationMs": 36
+              }
+            },
+            {
+              "url": "/api/dashboard/admin?monthRef=2032-12",
+              "status": 200,
+              "durationMs": 197.1,
+              "jsonBytes": 2094346,
+              "sampledRssMiB": 199.34,
+              "sampledHeapMiB": 55.15,
+              "sql": {
+                "queries": 36,
+                "writes": 0,
+                "durationMs": 29
+              }
+            },
+            {
+              "url": "/api/dashboard/admin?monthRef=2033-01",
+              "status": 200,
+              "durationMs": 184.6,
+              "jsonBytes": 2094444,
+              "sampledRssMiB": 205.2,
+              "sampledHeapMiB": 54.68,
+              "sql": {
+                "queries": 36,
+                "writes": 0,
+                "durationMs": 31
+              }
+            },
+            {
+              "url": "/api/technician/today?date=2026-09-28&technicianId=2",
+              "status": 200,
+              "durationMs": 70,
+              "jsonBytes": 186210,
+              "sampledRssMiB": 202.02,
+              "sampledHeapMiB": 31.92,
+              "sql": {
+                "queries": 39,
+                "writes": 0,
+                "durationMs": 8
+              }
+            },
+            {
+              "url": "/api/technician/today?date=2026-09-28&technicianId=2&limit=200&offset=0",
+              "status": 200,
+              "durationMs": 62.2,
+              "jsonBytes": 179641,
+              "sampledRssMiB": 203.2,
+              "sampledHeapMiB": 30.68,
+              "sql": {
+                "queries": 39,
+                "writes": 0,
+                "durationMs": 2
+              }
+            },
+            {
+              "url": "/api/technician/today?date=2026-09-28&technicianId=2&limit=200&offset=200",
+              "status": 200,
+              "durationMs": 59.7,
+              "jsonBytes": 6727,
+              "sampledRssMiB": 202.85,
+              "sampledHeapMiB": 29.51,
+              "sql": {
+                "queries": 39,
+                "writes": 0,
+                "durationMs": 3
+              }
+            },
+            {
+              "url": "/api/round-planner/week",
+              "status": 401,
+              "durationMs": 2.7,
+              "jsonBytes": 34,
+              "sampledRssMiB": 202.1,
+              "sampledHeapMiB": 22.73,
+              "sql": {
+                "queries": 0,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/round-planner/week",
+              "status": 403,
+              "durationMs": 5.1,
+              "jsonBytes": 39,
+              "sampledRssMiB": 202.1,
+              "sampledHeapMiB": 22.8,
+              "sql": {
+                "queries": 4,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/rounds/week",
+              "status": 401,
+              "durationMs": 2.3,
+              "jsonBytes": 34,
+              "sampledRssMiB": 202.1,
+              "sampledHeapMiB": 22.72,
+              "sql": {
+                "queries": 0,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/rounds/week",
+              "status": 403,
+              "durationMs": 5.5,
+              "jsonBytes": 39,
+              "sampledRssMiB": 202.1,
+              "sampledHeapMiB": 22.81,
+              "sql": {
+                "queries": 4,
+                "writes": 0,
+                "durationMs": 1
+              }
+            },
+            {
+              "url": "/api/admin/rounds/week",
+              "status": 401,
+              "durationMs": 2.4,
+              "jsonBytes": 34,
+              "sampledRssMiB": 202.1,
+              "sampledHeapMiB": 22.73,
+              "sql": {
+                "queries": 0,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/admin/rounds/week",
+              "status": 403,
+              "durationMs": 5.8,
+              "jsonBytes": 39,
+              "sampledRssMiB": 202.1,
+              "sampledHeapMiB": 22.81,
+              "sql": {
+                "queries": 4,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page",
+              "status": 401,
+              "durationMs": 1.6,
+              "jsonBytes": 34,
+              "sampledRssMiB": 202.1,
+              "sampledHeapMiB": 22.75,
+              "sql": {
+                "queries": 0,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page",
+              "status": 403,
+              "durationMs": 6.5,
+              "jsonBytes": 39,
+              "sampledRssMiB": 202.1,
+              "sampledHeapMiB": 22.84,
+              "sql": {
+                "queries": 4,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/round-planner/week",
+              "status": 500,
+              "durationMs": 5.9,
+              "jsonBytes": 51,
+              "sampledRssMiB": 202.1,
+              "sampledHeapMiB": 22.86,
+              "sql": {
+                "queries": 4,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/rounds/week",
+              "status": 500,
+              "durationMs": 5.6,
+              "jsonBytes": 55,
+              "sampledRssMiB": 202.1,
+              "sampledHeapMiB": 22.88,
+              "sql": {
+                "queries": 4,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/admin/rounds/week",
+              "status": 500,
+              "durationMs": 19.5,
+              "jsonBytes": 55,
+              "sampledRssMiB": 202.22,
+              "sampledHeapMiB": 24.45,
+              "sql": {
+                "queries": 17,
+                "writes": 0,
+                "durationMs": 11
+              }
+            }
+          ],
+          "weekProofs": [
+            {
+              "day": "2032-02-29",
+              "fixtureVisits": 103,
+              "orderedIdsSha256": "32cc6484b2a280db3292e39b0ed6448107df232100bfa58547a0dc92899a08b8"
+            },
+            {
+              "day": "2032-12-31",
+              "fixtureVisits": 102,
+              "orderedIdsSha256": "158077993f8738fc87e0540dc7cec807b3db8bdf3ab2b907fa620e82f98380ed"
+            },
+            {
+              "day": "2033-01-01",
+              "fixtureVisits": 102,
+              "orderedIdsSha256": "158077993f8738fc87e0540dc7cec807b3db8bdf3ab2b907fa620e82f98380ed"
+            },
+            {
+              "day": "2026-09-28",
+              "fixtureVisits": 300,
+              "orderedIdsSha256": "f68335701fdef891c382b87b1eb8e668a6aa074d8d0cf9b6fa78444a0c8b91bf"
+            }
+          ],
+          "dayProofs": [
+            {
+              "day": "2032-02-29",
+              "rows": 204,
+              "pages": 5,
+              "orderedKeysSha256": "f033e89eb588e4a551a22f480ff489096b327088087f3d6a6abb5211a7471337",
+              "hours": 24
+            },
+            {
+              "day": "2032-03-28",
+              "rows": 4,
+              "pages": 1,
+              "orderedKeysSha256": "e194bce0c016e940201d8e6625bd53fdbbf81e747e7860d281ce0384f6f75d72",
+              "hours": 23
+            },
+            {
+              "day": "2032-10-31",
+              "rows": 104,
+              "pages": 3,
+              "orderedKeysSha256": "1c552ec898abc0eadef21f962a61e61480c0bd56a3cd379c68e526678cc7d048",
+              "hours": 25
+            },
+            {
+              "day": "2026-09-28",
+              "rows": 400,
+              "pages": 8,
+              "orderedKeysSha256": "6b017791bcb3a8b0cf1f3697d0c6670705d9bcff7a4b4e4b05c98e818479a493",
+              "hours": 24
+            }
+          ],
+          "monthProofs": [
+            {
+              "month": "2032-02",
+              "fixtureVisits": 503,
+              "idsSha256": "d65c955a2b37c9149df1231f4c438140ec9aded2cc68d5c39ced23e82611bfc9"
+            },
+            {
+              "month": "2032-12",
+              "fixtureVisits": 401,
+              "idsSha256": "0cc0f9c85accc55bc36bce94f31f38c0e6231532679715459d67a7d53e6bd1ca"
+            },
+            {
+              "month": "2033-01",
+              "fixtureVisits": 401,
+              "idsSha256": "91d39991be9adc311c11a4775612b5c85e0126a79e5d4bade1a5c590792a78ec"
+            }
+          ],
+          "rollingVisits": 200,
+          "technicianVisits": 207,
+          "technicianPages": 2,
+          "permissions": true,
+          "partialFailuresRejected": 3,
+          "writes": 0
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "API",
+          "pools": 400,
+          "historicalWeeks": 104,
+          "historicalMonths": 24,
+          "regular": 43612,
+          "extras": 10012,
+          "reads": [
+            {
+              "url": "/api/round-planner/week",
+              "status": 200,
+              "durationMs": 182.8,
+              "jsonBytes": 2449044,
+              "sampledRssMiB": 188.76,
+              "sampledHeapMiB": 36.4,
+              "sql": {
+                "queries": 12,
+                "writes": 0,
+                "durationMs": 8
+              }
+            },
+            {
+              "url": "/api/rounds/week?date=2032-02-29",
+              "status": 200,
+              "durationMs": 115.4,
+              "jsonBytes": 216585,
+              "sampledRssMiB": 218.26,
+              "sampledHeapMiB": 52.15,
+              "sql": {
+                "queries": 26,
+                "writes": 0,
+                "durationMs": 9
+              }
+            },
+            {
+              "url": "/api/admin/rounds/week?date=2032-02-29",
+              "status": 200,
+              "durationMs": 114.5,
+              "jsonBytes": 216585,
+              "sampledRssMiB": 218.32,
+              "sampledHeapMiB": 45.88,
+              "sql": {
+                "queries": 30,
+                "writes": 0,
+                "durationMs": 11
+              }
+            },
+            {
+              "url": "/api/rounds/week?date=2032-12-31",
+              "status": 200,
+              "durationMs": 127.8,
+              "jsonBytes": 216668,
+              "sampledRssMiB": 228.6,
+              "sampledHeapMiB": 45.91,
+              "sql": {
+                "queries": 26,
+                "writes": 0,
+                "durationMs": 15
+              }
+            },
+            {
+              "url": "/api/admin/rounds/week?date=2032-12-31",
+              "status": 200,
+              "durationMs": 99.5,
+              "jsonBytes": 216668,
+              "sampledRssMiB": 228.94,
+              "sampledHeapMiB": 46.03,
+              "sql": {
+                "queries": 30,
+                "writes": 0,
+                "durationMs": 8
+              }
+            },
+            {
+              "url": "/api/rounds/week?date=2033-01-01",
+              "status": 200,
+              "durationMs": 134.3,
+              "jsonBytes": 216668,
+              "sampledRssMiB": 236.27,
+              "sampledHeapMiB": 46.07,
+              "sql": {
+                "queries": 26,
+                "writes": 0,
+                "durationMs": 21
+              }
+            },
+            {
+              "url": "/api/admin/rounds/week?date=2033-01-01",
+              "status": 200,
+              "durationMs": 111.3,
+              "jsonBytes": 216668,
+              "sampledRssMiB": 238.02,
+              "sampledHeapMiB": 46.23,
+              "sql": {
+                "queries": 30,
+                "writes": 0,
+                "durationMs": 6
+              }
+            },
+            {
+              "url": "/api/rounds/week?date=2026-09-28",
+              "status": 200,
+              "durationMs": 219.9,
+              "jsonBytes": 468609,
+              "sampledRssMiB": 283.79,
+              "sampledHeapMiB": 56.74,
+              "sql": {
+                "queries": 26,
+                "writes": 0,
+                "durationMs": 13
+              }
+            },
+            {
+              "url": "/api/admin/rounds/week?date=2026-09-28",
+              "status": 200,
+              "durationMs": 220.8,
+              "jsonBytes": 468609,
+              "sampledRssMiB": 281.5,
+              "sampledHeapMiB": 56.47,
+              "sql": {
+                "queries": 30,
+                "writes": 0,
+                "durationMs": 10
+              }
+            },
+            {
+              "url": "/api/rounds/week?date=2032-02-29&includeInactive=true",
+              "status": 200,
+              "durationMs": 113.6,
+              "jsonBytes": 220678,
+              "sampledRssMiB": 287.16,
+              "sampledHeapMiB": 47.32,
+              "sql": {
+                "queries": 26,
+                "writes": 0,
+                "durationMs": 11
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=1",
+              "status": 200,
+              "durationMs": 39.7,
+              "jsonBytes": 24056,
+              "sampledRssMiB": 287.11,
+              "sampledHeapMiB": 31.63,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=2",
+              "status": 200,
+              "durationMs": 35.5,
+              "jsonBytes": 24154,
+              "sampledRssMiB": 287.3,
+              "sampledHeapMiB": 31.74,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 4
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=3",
+              "status": 200,
+              "durationMs": 33.8,
+              "jsonBytes": 24203,
+              "sampledRssMiB": 287.29,
+              "sampledHeapMiB": 31.76,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 4
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=4",
+              "status": 200,
+              "durationMs": 35.6,
+              "jsonBytes": 24204,
+              "sampledRssMiB": 287.41,
+              "sampledHeapMiB": 31.79,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 4
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=5",
+              "status": 200,
+              "durationMs": 31.8,
+              "jsonBytes": 24204,
+              "sampledRssMiB": 287.42,
+              "sampledHeapMiB": 31.8,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 4
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=6",
+              "status": 200,
+              "durationMs": 33.8,
+              "jsonBytes": 24205,
+              "sampledRssMiB": 287.37,
+              "sampledHeapMiB": 31.82,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 4
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=7",
+              "status": 200,
+              "durationMs": 37.9,
+              "jsonBytes": 24208,
+              "sampledRssMiB": 287.43,
+              "sampledHeapMiB": 31.83,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 6
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=8",
+              "status": 200,
+              "durationMs": 36.3,
+              "jsonBytes": 24208,
+              "sampledRssMiB": 287.39,
+              "sampledHeapMiB": 31.86,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=9",
+              "status": 200,
+              "durationMs": 38.2,
+              "jsonBytes": 24037,
+              "sampledRssMiB": 287.45,
+              "sampledHeapMiB": 31.88,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 8
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=10",
+              "status": 200,
+              "durationMs": 31.7,
+              "jsonBytes": 24069,
+              "sampledRssMiB": 287.46,
+              "sampledHeapMiB": 31.88,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 3
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=11",
+              "status": 200,
+              "durationMs": 37.3,
+              "jsonBytes": 24204,
+              "sampledRssMiB": 287.47,
+              "sampledHeapMiB": 31.89,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 8
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=12",
+              "status": 200,
+              "durationMs": 36.6,
+              "jsonBytes": 24205,
+              "sampledRssMiB": 287.51,
+              "sampledHeapMiB": 31.89,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=13",
+              "status": 200,
+              "durationMs": 36.8,
+              "jsonBytes": 24205,
+              "sampledRssMiB": 287.51,
+              "sampledHeapMiB": 31.9,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 8
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=14",
+              "status": 200,
+              "durationMs": 31.5,
+              "jsonBytes": 24206,
+              "sampledRssMiB": 287.55,
+              "sampledHeapMiB": 31.8,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=15",
+              "status": 200,
+              "durationMs": 35.8,
+              "jsonBytes": 24209,
+              "sampledRssMiB": 287.55,
+              "sampledHeapMiB": 31.81,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 4
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=16",
+              "status": 200,
+              "durationMs": 33.9,
+              "jsonBytes": 24209,
+              "sampledRssMiB": 287.58,
+              "sampledHeapMiB": 31.81,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 4
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=17",
+              "status": 200,
+              "durationMs": 35.4,
+              "jsonBytes": 2411,
+              "sampledRssMiB": 287.61,
+              "sampledHeapMiB": 31.62,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 4
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-02-29&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=18",
+              "status": 200,
+              "durationMs": 35.2,
+              "jsonBytes": 518,
+              "sampledRssMiB": 287.61,
+              "sampledHeapMiB": 31.59,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-03-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=1",
+              "status": 200,
+              "durationMs": 16.5,
+              "jsonBytes": 2396,
+              "sampledRssMiB": 287.36,
+              "sampledHeapMiB": 29.57,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 1
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-03-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=2",
+              "status": 200,
+              "durationMs": 15.4,
+              "jsonBytes": 508,
+              "sampledRssMiB": 287.21,
+              "sampledHeapMiB": 29.58,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 1
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-10-31&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=1",
+              "status": 200,
+              "durationMs": 21.9,
+              "jsonBytes": 24247,
+              "sampledRssMiB": 287.34,
+              "sampledHeapMiB": 30.57,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 3
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-10-31&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=2",
+              "status": 200,
+              "durationMs": 23.6,
+              "jsonBytes": 24351,
+              "sampledRssMiB": 287.46,
+              "sampledHeapMiB": 30.77,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 2
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-10-31&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=3",
+              "status": 200,
+              "durationMs": 22.9,
+              "jsonBytes": 24400,
+              "sampledRssMiB": 287.46,
+              "sampledHeapMiB": 30.77,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 2
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-10-31&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=4",
+              "status": 200,
+              "durationMs": 22.9,
+              "jsonBytes": 24401,
+              "sampledRssMiB": 287.46,
+              "sampledHeapMiB": 30.78,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 1
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-10-31&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=5",
+              "status": 200,
+              "durationMs": 22.9,
+              "jsonBytes": 24401,
+              "sampledRssMiB": 287.46,
+              "sampledHeapMiB": 30.8,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 2
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-10-31&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=6",
+              "status": 200,
+              "durationMs": 23.3,
+              "jsonBytes": 24402,
+              "sampledRssMiB": 287.46,
+              "sampledHeapMiB": 30.8,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 2
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-10-31&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=7",
+              "status": 200,
+              "durationMs": 21.6,
+              "jsonBytes": 24405,
+              "sampledRssMiB": 287.46,
+              "sampledHeapMiB": 30.81,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 2
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-10-31&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=8",
+              "status": 200,
+              "durationMs": 24.6,
+              "jsonBytes": 24405,
+              "sampledRssMiB": 287.46,
+              "sampledHeapMiB": 30.82,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 4
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-10-31&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=9",
+              "status": 200,
+              "durationMs": 25.8,
+              "jsonBytes": 2415,
+              "sampledRssMiB": 287.46,
+              "sampledHeapMiB": 30.72,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 4
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2032-10-31&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=10",
+              "status": 200,
+              "durationMs": 21.2,
+              "jsonBytes": 515,
+              "sampledRssMiB": 287.46,
+              "sampledHeapMiB": 30.95,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 1
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=1",
+              "status": 200,
+              "durationMs": 50.3,
+              "jsonBytes": 24329,
+              "sampledRssMiB": 288.01,
+              "sampledHeapMiB": 34.07,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 7
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=2",
+              "status": 200,
+              "durationMs": 56.7,
+              "jsonBytes": 24374,
+              "sampledRssMiB": 288.01,
+              "sampledHeapMiB": 34.11,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 6
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=3",
+              "status": 200,
+              "durationMs": 50.8,
+              "jsonBytes": 24505,
+              "sampledRssMiB": 288.04,
+              "sampledHeapMiB": 34.13,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=4",
+              "status": 200,
+              "durationMs": 48.3,
+              "jsonBytes": 24505,
+              "sampledRssMiB": 288.04,
+              "sampledHeapMiB": 34.15,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=5",
+              "status": 200,
+              "durationMs": 52.1,
+              "jsonBytes": 24506,
+              "sampledRssMiB": 288.04,
+              "sampledHeapMiB": 34.15,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 7
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=6",
+              "status": 200,
+              "durationMs": 56.4,
+              "jsonBytes": 24509,
+              "sampledRssMiB": 288.04,
+              "sampledHeapMiB": 34.16,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 9
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=7",
+              "status": 200,
+              "durationMs": 51.4,
+              "jsonBytes": 24509,
+              "sampledRssMiB": 288.17,
+              "sampledHeapMiB": 34.17,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 6
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=8",
+              "status": 200,
+              "durationMs": 54.9,
+              "jsonBytes": 24509,
+              "sampledRssMiB": 288.17,
+              "sampledHeapMiB": 34.19,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=9",
+              "status": 200,
+              "durationMs": 54.2,
+              "jsonBytes": 24328,
+              "sampledRssMiB": 288.17,
+              "sampledHeapMiB": 34.19,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 7
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=10",
+              "status": 200,
+              "durationMs": 52,
+              "jsonBytes": 24375,
+              "sampledRssMiB": 288.17,
+              "sampledHeapMiB": 34.19,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=11",
+              "status": 200,
+              "durationMs": 51,
+              "jsonBytes": 24506,
+              "sampledRssMiB": 288.17,
+              "sampledHeapMiB": 34.2,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=12",
+              "status": 200,
+              "durationMs": 51.7,
+              "jsonBytes": 24506,
+              "sampledRssMiB": 288.17,
+              "sampledHeapMiB": 34.21,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=13",
+              "status": 200,
+              "durationMs": 51,
+              "jsonBytes": 24507,
+              "sampledRssMiB": 288.17,
+              "sampledHeapMiB": 34.21,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=14",
+              "status": 200,
+              "durationMs": 49.3,
+              "jsonBytes": 24510,
+              "sampledRssMiB": 288.17,
+              "sampledHeapMiB": 34.21,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=15",
+              "status": 200,
+              "durationMs": 50.5,
+              "jsonBytes": 24510,
+              "sampledRssMiB": 288.17,
+              "sampledHeapMiB": 34.22,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 6
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=16",
+              "status": 200,
+              "durationMs": 49.5,
+              "jsonBytes": 24510,
+              "sampledRssMiB": 288.17,
+              "sampledHeapMiB": 34.23,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=17",
+              "status": 200,
+              "durationMs": 51.9,
+              "jsonBytes": 24024,
+              "sampledRssMiB": 288.17,
+              "sampledHeapMiB": 34.23,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=18",
+              "status": 200,
+              "durationMs": 52.8,
+              "jsonBytes": 24118,
+              "sampledRssMiB": 288.17,
+              "sampledHeapMiB": 34.24,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 6
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=19",
+              "status": 200,
+              "durationMs": 53.7,
+              "jsonBytes": 24167,
+              "sampledRssMiB": 288.17,
+              "sampledHeapMiB": 34.24,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 7
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=20",
+              "status": 200,
+              "durationMs": 49.8,
+              "jsonBytes": 24167,
+              "sampledRssMiB": 288.17,
+              "sampledHeapMiB": 34.25,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=21",
+              "status": 200,
+              "durationMs": 49.2,
+              "jsonBytes": 24167,
+              "sampledRssMiB": 288.17,
+              "sampledHeapMiB": 34.26,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=22",
+              "status": 200,
+              "durationMs": 52.9,
+              "jsonBytes": 24167,
+              "sampledRssMiB": 288.3,
+              "sampledHeapMiB": 34.21,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=23",
+              "status": 200,
+              "durationMs": 51.7,
+              "jsonBytes": 24167,
+              "sampledRssMiB": 288.32,
+              "sampledHeapMiB": 34.21,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=24",
+              "status": 200,
+              "durationMs": 50.6,
+              "jsonBytes": 24169,
+              "sampledRssMiB": 288.32,
+              "sampledHeapMiB": 34.21,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 6
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=25",
+              "status": 200,
+              "durationMs": 53.8,
+              "jsonBytes": 24290,
+              "sampledRssMiB": 288.32,
+              "sampledHeapMiB": 34.22,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=26",
+              "status": 200,
+              "durationMs": 49.8,
+              "jsonBytes": 24336,
+              "sampledRssMiB": 288.32,
+              "sampledHeapMiB": 34.22,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=27",
+              "status": 200,
+              "durationMs": 49.8,
+              "jsonBytes": 24467,
+              "sampledRssMiB": 288.32,
+              "sampledHeapMiB": 34.23,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=28",
+              "status": 200,
+              "durationMs": 51.1,
+              "jsonBytes": 24467,
+              "sampledRssMiB": 288.32,
+              "sampledHeapMiB": 34.23,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 6
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=29",
+              "status": 200,
+              "durationMs": 50,
+              "jsonBytes": 24467,
+              "sampledRssMiB": 288.32,
+              "sampledHeapMiB": 34.24,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 6
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=30",
+              "status": 200,
+              "durationMs": 47.9,
+              "jsonBytes": 24467,
+              "sampledRssMiB": 288.32,
+              "sampledHeapMiB": 34.24,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=31",
+              "status": 200,
+              "durationMs": 47.3,
+              "jsonBytes": 24467,
+              "sampledRssMiB": 288.45,
+              "sampledHeapMiB": 34.25,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 5
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=32",
+              "status": 200,
+              "durationMs": 54.6,
+              "jsonBytes": 24468,
+              "sampledRssMiB": 288.45,
+              "sampledHeapMiB": 34.25,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 6
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page?date=2026-09-28&q=QA407+30b5c8da-213b-481c-8f7b-596b83089bcb&page=33",
+              "status": 200,
+              "durationMs": 49.7,
+              "jsonBytes": 519,
+              "sampledRssMiB": 288.45,
+              "sampledHeapMiB": 34.12,
+              "sql": {
+                "queries": 16,
+                "writes": 0,
+                "durationMs": 6
+              }
+            },
+            {
+              "url": "/api/dashboard/admin?monthRef=2032-02",
+              "status": 200,
+              "durationMs": 638.3,
+              "jsonBytes": 7852868,
+              "sampledRssMiB": 440.31,
+              "sampledHeapMiB": 89.96,
+              "sql": {
+                "queries": 57,
+                "writes": 0,
+                "durationMs": 60
+              }
+            },
+            {
+              "url": "/api/dashboard/admin?monthRef=2032-12",
+              "status": 200,
+              "durationMs": 529.4,
+              "jsonBytes": 6414556,
+              "sampledRssMiB": 470.7,
+              "sampledHeapMiB": 99.29,
+              "sql": {
+                "queries": 57,
+                "writes": 0,
+                "durationMs": 41
+              }
+            },
+            {
+              "url": "/api/dashboard/admin?monthRef=2033-01",
+              "status": 200,
+              "durationMs": 511.2,
+              "jsonBytes": 6414954,
+              "sampledRssMiB": 447.95,
+              "sampledHeapMiB": 99.04,
+              "sql": {
+                "queries": 57,
+                "writes": 0,
+                "durationMs": 43
+              }
+            },
+            {
+              "url": "/api/technician/today?date=2026-09-28&technicianId=2",
+              "status": 200,
+              "durationMs": 153.1,
+              "jsonBytes": 743114,
+              "sampledRssMiB": 447.64,
+              "sampledHeapMiB": 66.59,
+              "sql": {
+                "queries": 39,
+                "writes": 0,
+                "durationMs": 9
+              }
+            },
+            {
+              "url": "/api/technician/today?date=2026-09-28&technicianId=2&limit=200&offset=0",
+              "status": 200,
+              "durationMs": 162.2,
+              "jsonBytes": 176407,
+              "sampledRssMiB": 445.75,
+              "sampledHeapMiB": 61.28,
+              "sql": {
+                "queries": 39,
+                "writes": 0,
+                "durationMs": 17
+              }
+            },
+            {
+              "url": "/api/technician/today?date=2026-09-28&technicianId=2&limit=200&offset=200",
+              "status": 200,
+              "durationMs": 146.9,
+              "jsonBytes": 175248,
+              "sampledRssMiB": 445.87,
+              "sampledHeapMiB": 61.59,
+              "sql": {
+                "queries": 39,
+                "writes": 0,
+                "durationMs": 16
+              }
+            },
+            {
+              "url": "/api/technician/today?date=2026-09-28&technicianId=2&limit=200&offset=400",
+              "status": 200,
+              "durationMs": 150.8,
+              "jsonBytes": 180502,
+              "sampledRssMiB": 445.85,
+              "sampledHeapMiB": 61.75,
+              "sql": {
+                "queries": 39,
+                "writes": 0,
+                "durationMs": 13
+              }
+            },
+            {
+              "url": "/api/technician/today?date=2026-09-28&technicianId=2&limit=200&offset=600",
+              "status": 200,
+              "durationMs": 148.2,
+              "jsonBytes": 187960,
+              "sampledRssMiB": 445.85,
+              "sampledHeapMiB": 61.91,
+              "sql": {
+                "queries": 39,
+                "writes": 0,
+                "durationMs": 10
+              }
+            },
+            {
+              "url": "/api/technician/today?date=2026-09-28&technicianId=2&limit=200&offset=800",
+              "status": 200,
+              "durationMs": 144.9,
+              "jsonBytes": 23636,
+              "sampledRssMiB": 445.63,
+              "sampledHeapMiB": 61.56,
+              "sql": {
+                "queries": 39,
+                "writes": 0,
+                "durationMs": 13
+              }
+            },
+            {
+              "url": "/api/round-planner/week",
+              "status": 401,
+              "durationMs": 2.8,
+              "jsonBytes": 34,
+              "sampledRssMiB": 442.63,
+              "sampledHeapMiB": 36.47,
+              "sql": {
+                "queries": 0,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/round-planner/week",
+              "status": 403,
+              "durationMs": 5.6,
+              "jsonBytes": 39,
+              "sampledRssMiB": 442.63,
+              "sampledHeapMiB": 36.54,
+              "sql": {
+                "queries": 4,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/rounds/week",
+              "status": 401,
+              "durationMs": 2.7,
+              "jsonBytes": 34,
+              "sampledRssMiB": 442.63,
+              "sampledHeapMiB": 36.46,
+              "sql": {
+                "queries": 0,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/rounds/week",
+              "status": 403,
+              "durationMs": 5.1,
+              "jsonBytes": 39,
+              "sampledRssMiB": 442.63,
+              "sampledHeapMiB": 36.56,
+              "sql": {
+                "queries": 4,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/admin/rounds/week",
+              "status": 401,
+              "durationMs": 1.7,
+              "jsonBytes": 34,
+              "sampledRssMiB": 442.63,
+              "sampledHeapMiB": 36.48,
+              "sql": {
+                "queries": 0,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/admin/rounds/week",
+              "status": 403,
+              "durationMs": 5.9,
+              "jsonBytes": 39,
+              "sampledRssMiB": 442.63,
+              "sampledHeapMiB": 36.56,
+              "sql": {
+                "queries": 4,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page",
+              "status": 401,
+              "durationMs": 2.5,
+              "jsonBytes": 34,
+              "sampledRssMiB": 442.63,
+              "sampledHeapMiB": 36.49,
+              "sql": {
+                "queries": 0,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/core/visits/day/page",
+              "status": 403,
+              "durationMs": 5.5,
+              "jsonBytes": 39,
+              "sampledRssMiB": 442.63,
+              "sampledHeapMiB": 36.58,
+              "sql": {
+                "queries": 4,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/round-planner/week",
+              "status": 500,
+              "durationMs": 6,
+              "jsonBytes": 51,
+              "sampledRssMiB": 442.63,
+              "sampledHeapMiB": 36.59,
+              "sql": {
+                "queries": 4,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/rounds/week",
+              "status": 500,
+              "durationMs": 6.2,
+              "jsonBytes": 55,
+              "sampledRssMiB": 442.63,
+              "sampledHeapMiB": 36.63,
+              "sql": {
+                "queries": 4,
+                "writes": 0,
+                "durationMs": 0
+              }
+            },
+            {
+              "url": "/api/admin/rounds/week",
+              "status": 500,
+              "durationMs": 25.1,
+              "jsonBytes": 55,
+              "sampledRssMiB": 443.38,
+              "sampledHeapMiB": 41.66,
+              "sql": {
+                "queries": 17,
+                "writes": 0,
+                "durationMs": 3
+              }
+            }
+          ],
+          "weekProofs": [
+            {
+              "day": "2032-02-29",
+              "fixtureVisits": 403,
+              "orderedIdsSha256": "3ecc4e55dd2167954cccc277d451385f911c2e4f769e34dbb99cd5175bec190a"
+            },
+            {
+              "day": "2032-12-31",
+              "fixtureVisits": 402,
+              "orderedIdsSha256": "f6fa73ca39de3e58c9e498f6b87ed15a92beb931ed871fe3847eb105d7a10445"
+            },
+            {
+              "day": "2033-01-01",
+              "fixtureVisits": 402,
+              "orderedIdsSha256": "f6fa73ca39de3e58c9e498f6b87ed15a92beb931ed871fe3847eb105d7a10445"
+            },
+            {
+              "day": "2026-09-28",
+              "fixtureVisits": 1200,
+              "orderedIdsSha256": "1a246b90ca31baf8a17a1587bced0f9333176bc18890214ec1ded0f759766e31"
+            }
+          ],
+          "dayProofs": [
+            {
+              "day": "2032-02-29",
+              "rows": 804,
+              "pages": 17,
+              "orderedKeysSha256": "8a9db6c87926fd721e44f4109c77ddc70396dd1b5a990cbc1e1c2aac0c7eca03",
+              "hours": 24
+            },
+            {
+              "day": "2032-03-28",
+              "rows": 4,
+              "pages": 1,
+              "orderedKeysSha256": "e194bce0c016e940201d8e6625bd53fdbbf81e747e7860d281ce0384f6f75d72",
+              "hours": 23
+            },
+            {
+              "day": "2032-10-31",
+              "rows": 404,
+              "pages": 9,
+              "orderedKeysSha256": "f3815bad00cb7458f13f756de5ccc769e4a06ae3bb28c1fc223d33b79c362cdb",
+              "hours": 25
+            },
+            {
+              "day": "2026-09-28",
+              "rows": 1600,
+              "pages": 32,
+              "orderedKeysSha256": "fa4b86b6069aa9d41c070923547bd4068bfaf46dcbe54724444d76440db566d7",
+              "hours": 24
+            }
+          ],
+          "monthProofs": [
+            {
+              "month": "2032-02",
+              "fixtureVisits": 2003,
+              "idsSha256": "64587c7ec28f3eb9b9f23bd8e3aa853d03aebbeb11dea69fb163c9432e8b2faa"
+            },
+            {
+              "month": "2032-12",
+              "fixtureVisits": 1601,
+              "idsSha256": "0d1cac66a462b70bc614ed4fefe35e7525ff67d155c7e9eb933949418fee17a1"
+            },
+            {
+              "month": "2033-01",
+              "fixtureVisits": 1601,
+              "idsSha256": "e890cd0b9f10a601eafeca5dad2dad924bf31c89227ee3c17cf9d8dc88b68fda"
+            }
+          ],
+          "rollingVisits": 800,
+          "technicianVisits": 825,
+          "technicianPages": 5,
+          "permissions": true,
+          "partialFailuresRejected": 3,
+          "writes": 0
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "UI",
+          "pools": 400,
+          "plannerRows": 1200,
+          "plannerLoadMs": 7155.5,
+          "plannerJsHeapMiB": 25.55,
+          "dayRows": 1600,
+          "dayPages": 32,
+          "dayTraversalMs": 8619.8,
+          "technicianRows": 825,
+          "technicianLoadAndNavigationMs": 2319.1,
+          "technicianJsHeapMiB": 7.93,
+          "exactIds": true,
+          "repeatedFilters": true,
+          "pageErrors": 0,
+          "writes": 0
+        }
+      ],
+      "cleanupVerified": true,
+      "scope": "Fresh Node process per API profile; RSS includes routers, HTTP client and fixture oracle, excludes DB/browser. Real browser, 1440/390px. Synthetic history does not certify generation or physical devices. Existing temporal contracts are distinct; no calendar-policy change."
+    },
+    "readonlyScope": "Instrumented API SQL write count zero; real browser sends no API mutation. Eleven model counts and fixture scheduling/status identity unchanged. This does not claim a SQL audit of all browser-triggered server telemetry.",
+    "cleanupModels": [
+      "client",
+      "pool",
+      "technician",
+      "round",
+      "roundPool",
+      "roundTechnician",
+      "serviceVisit",
+      "extraVisit",
+      "notification",
+      "chatMessage",
+      "emailLog"
+    ]
+  },
+  "risks": [
+    "PostgreSQL CI, runner completion, native restore and artifacts remain unconfirmed.",
+    "Read-only synthetic history does not certify visit generation, pauses of seasonal services, concurrent calendar writes, production hardware, or uninterrupted two-year operation.",
+    "No C10 calendar-policy harmonization: tested separate current meanings and independent fixture eligibility.",
+    "Week/month/planner replies and DOM remain proportional to result size. Admin-day and technician pagination still materialize complete eligible lists before slicing. Planner also loads full extra-visit history.",
+    "RSS covers a fresh combined API/client/oracle process per profile, not a fresh process per request, and excludes DB/browser. Sampled heap excludes native browser/DOM allocations.",
+    "Mobile planner retains existing horizontal table scrolling and long lists; this is volume/navigation evidence, not a redesign or complete mobile-usability audit."
+  ],
+  "previousNativeCI": [
+    {
+      "task": "TASK405",
+      "runId": 36460017985,
+      "jobId": 109055958055,
+      "headSha": "77e424dd8305534fb63a4d251dba29e9a00b3f0e",
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "expectedRunnerScripts": 310,
+      "runnerConfirmed": false,
+      "restoreConfirmed": false,
+      "smallArtifactsRead": false
+    },
+    {
+      "task": "TASK406",
+      "runId": 36463317792,
+      "jobId": 109067069909,
+      "headSha": "6b35739d193f3d15c5c378bbbcb93153402ed3d3",
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "expectedRunnerScripts": 311,
+      "runnerConfirmed": false,
+      "restoreConfirmed": false,
+      "smallArtifactsRead": false
+    }
+  ],
+  "codeSha256": {
+    "scripts/test-field-agenda-volume.js": "ca79764f402f2baba27b1e2a09d71fe14eb6b2fc089bffe38a302fac8e311583",
+    "scripts/test-field-suite.js": "0ceb2bf9c28a2ef9c9b28c4533fe5d66eb93c086efaafcafe07b68f24512e930"
+  },
+  "visualSha256": {
+    "reports/field-suite/agenda-volume/day-390.png": "8161f1dc8e1fa8153cd04a9c2190d91d911358170ed0e7a8f28787b5b1d9ae97",
+    "reports/field-suite/agenda-volume/planner-390.png": "af6aa5cf5ca72095752be25a6dd467f4b600bc9baca312aa17516a50646cc0fd",
+    "reports/field-suite/agenda-volume/technician-390.png": "e869bf30c87cf850c188a9c7beefaa0d771e038e4b45026516943e5938c2b7c0"
+  },
+  "scope": {
+    "uniqueFiles": 6,
+    "productionDeploy": false,
+    "merge": false,
+    "realContacts": false
+  },
+  "publication": {
+    "status": "prepared-for-authorized-publication"
+  }
+}
