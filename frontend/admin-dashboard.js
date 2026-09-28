@@ -35,6 +35,23 @@ function validExternalInvoiceSummary(summary) {
     && Number.isFinite(summary.officialInvoicePendingAmount) && summary.officialInvoicePendingAmount >= 0
     && summary.officialInvoicePending + summary.officialInvoiceConfirmed + summary.officialInvoiceReview <= summary.officialInvoiceTotal;
 }
+function readAlertCoverage(coverage, alerts) {
+  if (coverage === undefined) return undefined;
+  const count = value => Number.isSafeInteger(value) && value >= 0;
+  if (!coverage || coverage.scope !== 'DASHBOARD_ALERT_SOURCES_ALL_PERIODS' || coverage.totalsComplete !== true
+      || coverage.limitPerSource !== 200 || !count(coverage.total) || !count(coverage.returned)
+      || coverage.returned !== alerts.length || coverage.total < coverage.returned
+      || coverage.truncated !== (coverage.total > coverage.returned) || !coverage.sources) return null;
+  let total = 0, returned = 0;
+  for (const source of ['technical', 'notification', 'visit']) {
+    const row = coverage.sources[source];
+    if (!row || !count(row.total) || !count(row.returned) || row.returned !== Math.min(row.total, coverage.limitPerSource)
+        || alerts.filter(alert => alert.source === source).length !== row.returned) return null;
+    total += row.total; returned += row.returned;
+  }
+  if (!count(total) || total !== coverage.total || returned !== coverage.returned) return null;
+  return coverage;
+}
 function buildDashboardView(data, month) {
   const summary = data?.summary;
   const counts = ['totalPools', 'totalClients', 'totalInvoicesAll', 'openInvoicesAll', 'overdueClients', 'totalInvoices', 'pendingInvoices', 'partialInvoices', 'visitsThisMonth', 'visitsDoneThisMonth', 'visitsNotDoneThisMonth', 'visitsPlannedThisMonth', 'openAlerts'];
@@ -49,7 +66,10 @@ function buildDashboardView(data, month) {
       || new Set(data.alerts.map(row => row.id)).size !== data.alerts.length) return null;
   const otherVisits = summary.visitsThisMonth - summary.visitsDoneThisMonth - summary.visitsNotDoneThisMonth - summary.visitsPlannedThisMonth;
   if (otherVisits < 0 || summary.pendingInvoices + summary.partialInvoices > summary.totalInvoices) return null;
+  const alertCoverage = readAlertCoverage(data.alertCoverage, data.alerts);
+  if (alertCoverage === null) return null;
   return { summary, month, otherVisits, alerts: data.alerts, technicianCount: data.technicians.length,
+    alertCoverage, alertTotal: alertCoverage?.total,
     completionRate: summary.visitsThisMonth ? Math.round(summary.visitsDoneThisMonth / summary.visitsThisMonth * 100) : null };
 }
 function externalInvoiceCards(summary) {
@@ -70,7 +90,7 @@ function renderAdminRoleDashboard(view) {
   head.append(title, node('span', view ? 'Consulta confirmada' : 'Por confirmar', 'role-pulse'));
   const cards = [
     { key: 'visits', label: 'Visitas · mês selecionado', value: s ? s.visitsDoneThisMonth + ' / ' + s.visitsThisMonth : '—', text: s ? 'Concluídas / registadas · ' + s.visitsNotDoneThisMonth + ' não realizadas ou impedidas' : 'Dados ainda não confirmados', href: '/admin-visits' },
-    { key: 'alerts', label: 'Alertas na consulta', value: s?.openAlerts ?? '—', text: 'Todos os períodos. A lista pode ser parcial; consulte os alertas para confirmar.', href: '/admin-alerts' },
+    { key: 'alerts', label: 'Registos de alerta · três fontes', value: view?.alertTotal ?? '—', text: view?.alertCoverage ? view.alertCoverage.returned + ' de ' + view.alertTotal + ' registos carregados. ' + (view.alertCoverage.truncated ? 'Pré-visualização parcial. ' : '') + 'Técnicos, notificações e visitas · todos os períodos.' : 'Total por confirmar; ' + (s?.openAlerts ?? '—') + ' registos recebidos na consulta.', href: '/admin-alerts' },
     { key: 'team', label: 'Técnicos registados', value: view?.technicianCount ?? '—', text: 'Cadastro atual, incluindo registos inativos', href: '/admin-rounds' },
     { key: 'documents', label: 'Documentos internos', value: s?.totalInvoicesAll ?? '—', text: s ? 'Todos os períodos · total ' + formatMoney(s.totalBilledAll) : 'Dados ainda não confirmados', href: '/invoices' },
     ...externalInvoiceCards(s),
@@ -116,7 +136,7 @@ function renderCharts(view) {
 function renderOperationalIntelligence(data, month = $('monthRef').value) {
   const view = buildDashboardView(data, month); if (!view) throw Error('Resposta incompleta ou incompatível');
   const s = view.summary; renderAdminRoleDashboard(view);
-  setText('monthVisitCount', s.visitsThisMonth); setText('monthDocumentCount', s.totalInvoices); setText('criticalAlerts', s.openAlerts);
+  setText('monthVisitCount', s.visitsThisMonth); setText('monthDocumentCount', s.totalInvoices); setText('criticalAlerts', view.alertTotal ?? '—');
   setText('efficiencyRate', view.completionRate === null ? '—' : view.completionRate + '%');
   setText('monthReceived', formatMoney(s.monthPaid)); setText('estimatedProfit', 'Não apurado');
   setText('aiStateText', 'Consulta confirmada'); $('aiDot').className = 'ai-dot ai-neutral';
@@ -126,12 +146,13 @@ function renderOperationalIntelligence(data, month = $('monthRef').value) {
   const panel = $('intelligencePanel'); panel.replaceChildren(node('p', 'O lucro exige receitas e custos conciliados. Este resumo não o apura.'), link('/billing', 'Conferir documentos e pagamentos', 'ds-nav-link'));
   panel.append(node('p', 'A carga diária e previsões futuras exigem o planeamento das datas pretendidas.'), link('/admin-rounds', 'Consultar o planeamento', 'ds-nav-link'));
   if (view.alerts.length) {
-    panel.append(node('h3', 'Alertas recebidos na consulta'), node('p', 'Primeiros ' + Math.min(5, view.alerts.length) + ' de ' + view.alerts.length + ' registos recebidos; a lista pode ser parcial.'));
+    panel.append(node('h3', 'Alertas recebidos na consulta'), node('p', 'Primeiros ' + Math.min(5, view.alerts.length) + ' de ' + view.alerts.length + ' registos carregados. ' + (view.alertCoverage ? 'Total nas três fontes: ' + view.alertTotal + '.' : 'Total por confirmar.')));
     for (const alert of view.alerts.slice(0, 5)) panel.append(node('p', alert.message, 'intelligence-item'));
-  } else panel.append(node('p', 'A consulta não devolveu alertas. Confirme o estado no módulo de alertas.'));
+  } else panel.append(node('p', view.alertCoverage ? 'Sem registos nas três fontes consultadas.' : 'A consulta não devolveu alertas. Total por confirmar.'));
+  panel.append(node('p', 'Registos técnicos, notificações e avisos de visitas podem referir-se ao mesmo acontecimento.'), link('/admin-alerts', 'Abrir a lista de alertas e respetivo contexto', 'ds-nav-link'));
   const actions = $('criticalBannerActions'); actions.replaceChildren();
   if (s.visitsNotDoneThisMonth) actions.append(link('/admin-visits', 'Visitas a rever (' + s.visitsNotDoneThisMonth + ')', 'ds-nav-link'));
-  if (s.openAlerts) actions.append(link('/admin-alerts', 'Consultar alertas (' + s.openAlerts + ')', 'ds-nav-link'));
+  if (s.openAlerts) actions.append(link('/admin-alerts', 'Consultar alertas (' + (view.alertTotal ?? s.openAlerts) + ')', 'ds-nav-link'));
   if (s.totalOpenAll > 0) actions.append(link('/invoices', 'Documentos por receber', 'ds-nav-link'));
   $('criticalBanner').classList.toggle('is-hidden', !actions.children.length);
   setText('criticalBannerText', 'Conferir os registos e o respetivo contexto antes de tomar uma decisão.');

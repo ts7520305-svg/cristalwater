@@ -7,17 +7,57 @@ const { CLOSED_STATUSES, ALERT_NOTIFICATION_TYPES, ALERT_EVENT_TYPES, SERVICE_VI
 const priority = { CRITICAL: 0, WARNING: 1, NORMAL: 2, LOW: 3 };
 
 // Keyset reads bound each query without silently bounding the returned list.
-async function readAll(model, { where, ...options }) {
+async function readAll(model, { where, ...options }, consume) {
   const rows = [];
   let after = 0;
   for (;;) {
     const batch = await model.findMany({ ...options,
       where: { AND: [where, { id: { gt: after } }] }, orderBy: { id: 'asc' }, take: 500,
     });
-    rows.push(...batch);
+    if (consume) consume(batch);
+    else rows.push(...batch);
     if (batch.length < 500) return rows;
     after = batch.at(-1).id;
   }
+}
+
+// Count every eligible record in the same snapshot, retaining only a bounded
+// preview. Relations are fetched only for the selected IDs, never for the scan.
+async function listDashboardSources() {
+  const limit = 200;
+  return prisma.$transaction(async tx => {
+    async function scan(model, where, select, include, eligible, dateOf, tieDateOf = () => 0) {
+      let total = 0, preview = [];
+      const newest = (a, b) => new Date(dateOf(b)) - new Date(dateOf(a)) || new Date(tieDateOf(b)) - new Date(tieDateOf(a)) || b.id - a.id;
+      await readAll(model, { where, select }, batch => {
+        const matching = batch.filter(eligible);
+        total += matching.length;
+        preview = [...preview, ...matching].sort(newest).slice(0, limit);
+      });
+      const rows = await readLinked(model, preview.map(row => row.id), include);
+      if (rows.length !== preview.length || new Set(rows.map(row => row.id)).size !== preview.length) throw Error('Incomplete dashboard alert preview');
+      rows.sort(newest);
+      return { rows, total, returned: rows.length };
+    }
+    const [technical, notification, visit] = await Promise.all([
+      scan(tx.technicalAlert, { status: { notIn: CLOSED_STATUSES } },
+        { id: true, status: true, createdAt: true }, { pool: { include: { client: true } } },
+        row => isOpenStatus(row.status), row => row.createdAt),
+      scan(tx.notification, { OR: [{ type: { in: ALERT_NOTIFICATION_TYPES } }, { eventType: { in: ALERT_EVENT_TYPES } },
+        { severity: { in: ['HIGH', 'CRITICAL', 'WARNING', 'WARN'] } }], NOT: { status: { in: CLOSED_STATUSES } } },
+        { id: true, status: true, createdAt: true }, { client: true },
+        row => isOpenStatus(row.status), row => row.createdAt),
+      scan(tx.serviceVisit, { OR: [{ alerts: { not: null } }, { status: { in: ['NOT_DONE', 'BLOCKED', 'RETAINED', 'IMPEDIDO'] } }] },
+        { id: true, status: true, alerts: true, reason: true, updatedAt: true, date: true, plannedDate: true },
+        { client: true, pool: { include: { client: true } }, technician: true },
+        row => Boolean(String(row.alerts || row.reason || row.status || '').trim()), row => row.updatedAt || row.date || row.plannedDate, row => row.date),
+    ]);
+    const sources = Object.fromEntries(Object.entries({ technical, notification, visit }).map(([key, value]) => [key, { total: value.total, returned: value.returned }]));
+    const total = technical.total + notification.total + visit.total;
+    const returned = technical.returned + notification.returned + visit.returned;
+    return { technicalAlerts: technical.rows, notificationAlerts: notification.rows, visitAlerts: visit.rows,
+      coverage: { scope: 'DASHBOARD_ALERT_SOURCES_ALL_PERIODS', totalsComplete: true, limitPerSource: limit, total, returned, truncated: total > returned, sources } };
+  }, { isolationLevel: 'RepeatableRead', timeout: 30000 });
 }
 
 async function readLinked(model, ids, include) {
@@ -131,4 +171,4 @@ async function listLegacyTechnical() {
   return prisma.technicalAlert.findMany({ where: { status: { in: ['OPEN', 'IN_PROGRESS'] } },
     include: { pool: { include: { client: true } } }, orderBy: { createdAt: 'desc' } });
 }
-module.exports = { list, listLegacyTechnical };
+module.exports = { list, listLegacyTechnical, listDashboardSources };

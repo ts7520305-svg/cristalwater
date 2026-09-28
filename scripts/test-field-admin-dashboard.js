@@ -6,13 +6,35 @@ const { prisma } = require('../src/prismaClient'), { getJwtSecret } = require('.
 if (process.env.NODE_ENV !== 'test' || process.env.QA_MODE !== 'true' || process.env.QA_ENVIRONMENT_SAFE !== 'true' || process.env.EXTERNAL_NOTIFICATIONS_ENABLED !== 'false') throw Error('Isolated QA required');
 const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
 assert(['127.0.0.1', 'localhost'].includes(new URL(base).hostname));
-let browser, probe;
+let browser, probe, coverageClient;
+function installReadFailure(model, shouldFail, message) {
+  const originalRead = prisma[model].findMany, originalTransaction = prisma.$transaction;
+  const failOrRead = (target, read) => async function(query) {
+    if (shouldFail(query)) throw Error(message);
+    return read.apply(target, arguments);
+  };
+  prisma[model].findMany = failOrRead(prisma[model], originalRead);
+  // Interactive transactions expose their own delegates; inject the same
+  // source fault there so this test exercises the snapshot, not just root reads.
+  prisma.$transaction = function(callback, options) {
+    if (typeof callback !== 'function') return originalTransaction.apply(this, arguments);
+    return originalTransaction.call(this, tx => callback(new Proxy(tx, {
+      get(target, key) {
+        if (key !== model) return target[key];
+        return new Proxy(target[key], { get(delegate, operation) {
+          return operation === 'findMany' ? failOrRead(delegate, delegate.findMany) : delegate[operation];
+        } });
+      },
+    })), options);
+  };
+  return () => { prisma[model].findMany = originalRead; prisma.$transaction = originalTransaction; };
+}
 (async () => {
   const admin = await prisma.user.findUniqueOrThrow({ where: { email: process.env.ADMIN_EMAIL } });
   const token = jwt.sign({ id: admin.id, role: 'ADMIN', principalType: 'USER' }, getJwtSecret(), { expiresIn: '1h' });
   const response = await fetch(base + '/api/dashboard/admin?monthRef=2079-01', { headers: { Authorization: 'Bearer ' + token } });
   assert.equal(response.status, 200); const original = await response.json();
-  const packet = { ...original, visits: [], technicians: [], alerts: [],
+  const packet = { ...original, alertCoverage: undefined, visits: [], technicians: [], alerts: [],
     summary: { ...original.summary, visitsThisMonth: 0, visitsDoneThisMonth: 0, visitsNotDoneThisMonth: 0, visitsPlannedThisMonth: 0, openAlerts: 0, totalInvoices: 0, pendingInvoices: 0, partialInvoices: 0, monthBilled: 0, monthPaid: 0, monthOpen: 0, totalBilledAll: 12000, totalPaidAll: 9999, totalOpenAll: 5000, operationalCost: 24 },
     predictiveAnalysis: { tomorrowRiskZones: [{ zone: 'Zona literal <img src=x onerror=alert(1)>', visits: 8, alerts: 3 }], recommendations: [{ message: 'PREVISÃO NÃO COMPROVADA amanhã' }] },
   };
@@ -137,13 +159,93 @@ let browser, probe;
   const app = require('express')(); app.use('/api/dashboard', require('../src/routes/dashboardRoutes'));
   probe = await new Promise(resolve => { const server = app.listen(0, '127.0.0.1', () => resolve(server)); });
   for (const model of ['technician', 'technicalAlert', 'notification', 'serviceVisit']) {
-    const originalRead = prisma[model].findMany;
+    const restore = installReadFailure(model, () => true, 'PRIVATE_SOURCE_FAILURE');
     try {
-      prisma[model].findMany = async () => { throw Error('PRIVATE_SOURCE_FAILURE'); };
       const result = await fetch('http://127.0.0.1:' + probe.address().port + '/api/dashboard/admin', { headers: { Authorization: 'Bearer ' + token } });
       assert.equal(result.status, 500, model + ' read failure must not become zero');
       const body = await result.json(); assert.equal(body.ok, false); assert(!JSON.stringify(body).includes('PRIVATE_SOURCE'));
-    } finally { prisma[model].findMany = originalRead; }
+    } finally { restore(); }
   }
+  const readCoverage = async () => {
+    const response = await fetch(base + '/api/dashboard/admin?monthRef=2079-01', { headers: { Authorization: 'Bearer ' + token } });
+    assert.equal(response.status, 200); return response.json();
+  };
+  const beforeCoverage = await readCoverage();
+  const prefix = 'QA alert coverage ' + require('node:crypto').randomUUID();
+  coverageClient = await prisma.client.create({ data: { name: prefix, active: true } });
+  const coveragePool = await prisma.pool.create({ data: { name: prefix, clientId: coverageClient.id } });
+  const at = new Date('2199-01-01T12:00:00Z'), closedAt = new Date('2199-01-02T12:00:00Z');
+  const amount = 503, excluded = 205;
+  await prisma.technicalAlert.createMany({ data: Array.from({ length: amount + excluded }, (_, i) => ({ poolId: coveragePool.id, type: 'QA', message: prefix + ' <img src=x> ' + i, status: i < amount ? 'OPEN' : 'rEsOlVeD', createdAt: i < amount ? at : closedAt })) });
+  await prisma.notification.createMany({ data: Array.from({ length: amount + excluded }, (_, i) => ({ clientId: coverageClient.id, type: 'ALERT', message: prefix + ' ' + i, role: 'ADMIN', status: i < amount ? 'PENDING' : 'cLoSeD', createdAt: i < amount ? at : closedAt })) });
+  await prisma.serviceVisit.createMany({ data: Array.from({ length: amount + excluded }, (_, i) => ({ clientId: coverageClient.id, poolId: coveragePool.id, status: 'NOT_DONE', alerts: i < amount ? prefix + ' ' + i : '   ', date: at, plannedDate: at, updatedAt: i < amount ? at : closedAt })) });
+  const expectedTotal = beforeCoverage.alertCoverage.total + amount * 3;
+  if (process.env.CW_DASHBOARD_ALERT_BASELINE === 'true') {
+    const Module = require('node:module'), { execFileSync } = require('node:child_process');
+    const file = path.join(__dirname, '../src/controllers/dashboardController.js');
+    const historical = new Module(file); historical.filename = file; historical.paths = Module._nodeModulePaths(path.dirname(file));
+    historical._compile(execFileSync('git', ['show', '5caafa64e24dff443da824a2c8f80233683d7921:src/controllers/dashboardController.js'], { encoding: 'utf8' }), file);
+    const old = await historical.exports.getAdminDashboardData({ query: { monthRef: '2079-01' } });
+    console.log(JSON.stringify({ regression: 'TASK395', eligibleFixture: amount * 3, legacyVisibleFixture: old.alerts.filter(row => row.clientId === coverageClient.id).length, legacyOpenAlerts: old.summary.openAlerts, expectedTotal, legacyTotal: old.alertCoverage?.total ?? null }));
+    assert.equal(old.alertCoverage?.total, expectedTotal, 'Older eligible alerts must not disappear behind the 200 newest candidates');
+  }
+  const afterCoverage = await readCoverage();
+  assert.equal(afterCoverage.alertCoverage.total, expectedTotal);
+  assert.equal(afterCoverage.alertCoverage.returned, 600); assert.equal(afterCoverage.alertCoverage.truncated, true);
+  assert.equal(afterCoverage.summary.openAlerts, afterCoverage.alerts.length, 'Preserve the legacy returned-row count');
+  for (const source of ['technical', 'notification', 'visit']) {
+    assert.equal(afterCoverage.alertCoverage.sources[source].total, beforeCoverage.alertCoverage.sources[source].total + amount);
+    assert.equal(afterCoverage.alertCoverage.sources[source].returned, 200);
+  }
+  assert.equal(afterCoverage.alerts.filter(row => row.clientId === coverageClient.id).length, 600);
+  assert(afterCoverage.alerts.every(row => !/resolved|closed/i.test(row.status)));
+  const repeatCoverage = await readCoverage();
+  assert.deepEqual(repeatCoverage.alertCoverage, afterCoverage.alertCoverage);
+  assert.deepEqual(repeatCoverage.alerts.map(row => row.id), afterCoverage.alerts.map(row => row.id));
+  const coverageContext = await browser.newContext({ serviceWorkers: 'block', viewport: { width: 320, height: 1000 } });
+  await coverageContext.route('**/*', route => new URL(route.request().url()).origin === base ? route.continue() : route.abort());
+  await coverageContext.addInitScript(({ token, id }) => {
+    for (const key of ['token', 'cristalwater_jwt', 'adminToken']) localStorage.setItem(key, token);
+    for (const key of ['user', 'cristalwater_user']) localStorage.setItem(key, JSON.stringify({ id, role: 'ADMIN' }));
+  }, { token, id: admin.id });
+  const coveragePage = await coverageContext.newPage();
+  const coverageWrites = []; coveragePage.on('request', request => { if (new URL(request.url()).pathname.startsWith('/api/') && request.method() !== 'GET') coverageWrites.push(request.url()); });
+  await coveragePage.goto(base + '/admin-dashboard', { waitUntil: 'networkidle' });
+  await coveragePage.waitForFunction(() => document.querySelector('#status').dataset.state === 'ready');
+  assert.equal(await coveragePage.locator('[data-dashboard-card="alerts"] strong').textContent(), String(expectedTotal));
+  assert.match(await coveragePage.locator('[data-dashboard-card="alerts"] small').textContent(), /600 de .*Pré-visualização parcial/);
+  assert.equal(await coveragePage.locator('#criticalAlerts').textContent(), String(expectedTotal));
+  assert.equal(await coveragePage.locator('#intelligencePanel img').count(), 0);
+  assert(await coveragePage.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+  await coveragePage.screenshot({ path: path.join(visual, 'alert-coverage-320.png'), fullPage: true });
+  await coveragePage.route('**/api/dashboard/admin?*', route => route.fulfill({ json: { ...afterCoverage, monthRef: new URL(route.request().url()).searchParams.get('monthRef'), alertCoverage: { ...afterCoverage.alertCoverage, total: 0 } } }));
+  assert.equal(await coveragePage.evaluate(() => loadDashboard()), false);
+  assert.equal(await coveragePage.locator('#criticalAlerts').textContent(), '—');
+  assert.equal(await coveragePage.locator('[data-dashboard-card="alerts"] strong').textContent(), '—');
+  assert.deepEqual(coverageWrites, []); await coverageContext.close();
+  for (const model of ['technicalAlert', 'notification', 'serviceVisit']) {
+    const restore = installReadFailure(model, query => query.where?.AND?.some(condition => condition.id?.gt > 0), 'PRIVATE_LATE_ALERT_PAGE');
+    try {
+      const failed = await fetch('http://127.0.0.1:' + probe.address().port + '/api/dashboard/admin', { headers: { Authorization: 'Bearer ' + token } });
+      assert.equal(failed.status, 500, model + ' later page failure');
+      const body = await failed.json(); assert.equal(body.ok, false); assert(!JSON.stringify(body).includes('PRIVATE_LATE_ALERT_PAGE'));
+    } finally { restore(); }
+  }
+  assert.equal(await prisma.technicalAlert.count({ where: { poolId: coveragePool.id } }), amount + excluded);
+  assert.equal(await prisma.notification.count({ where: { clientId: coverageClient.id } }), amount + excluded);
+  assert.equal(await prisma.serviceVisit.count({ where: { clientId: coverageClient.id } }), amount + excluded);
+  const coverageEvidence = { ok: true, eligibleFixture: amount * 3, excludedFixture: excluded * 3, total: expectedTotal, coverage: afterCoverage.alertCoverage, returnedFixture: 600, consistentRepeatedRead: true, malformedMetadataRefused: true, lateSourceFailuresChecked: 3, noBusinessWrites: true };
+  await fs.writeFile(path.join(visual, 'alert-coverage.json'), JSON.stringify(coverageEvidence, null, 2));
+  console.log('PASS dashboard alert coverage: 1509 eligible records beyond 200/source, 615 excluded rows do not consume the preview, exact counts, bounded details, deterministic ties, incomplete totals unavailable, late failures rejected');
   console.log('PASS administrative dashboard: exact monthly zero, no unsupported profit/forecast/health score, explicit scope, failed reads unavailable, restored month, offline/session/late reads, responsive layout and no business requests');
-})().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => { if (browser) await browser.close(); if (probe) await new Promise(resolve => probe.close(resolve)); await prisma.$disconnect(); });
+})().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => {
+  if (browser) await browser.close(); if (probe) await new Promise(resolve => probe.close(resolve));
+  if (coverageClient) {
+    await prisma.technicalAlert.deleteMany({ where: { pool: { clientId: coverageClient.id } } });
+    await prisma.notification.deleteMany({ where: { clientId: coverageClient.id } });
+    await prisma.serviceVisit.deleteMany({ where: { clientId: coverageClient.id } });
+    await prisma.pool.deleteMany({ where: { clientId: coverageClient.id } });
+    await prisma.client.delete({ where: { id: coverageClient.id } });
+  }
+  await prisma.$disconnect();
+});

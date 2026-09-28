@@ -1,25 +1,9 @@
 const { prisma } = require("../prismaClient");
 const { isReceivableInvoice } = require('../services/clientCreditService');
 const { listExternalInvoices } = require('../business/finance/FinanceOsBusiness');
+const { listDashboardSources } = require('../business/admin/AlertListBusiness');
 
 const CLOSED_STATUSES = ["RESOLVED", "DONE", "CLOSED", "CANCELLED", "CANCELED", "ARCHIVED"];
-const ALERT_NOTIFICATION_TYPES = [
-  "ALERT",
-  "CRITICAL",
-  "WARNING",
-  "STOCK",
-  "STOCK_CRITICAL",
-  "WATER_OPEN",
-  "OPERATIONAL_PENDING",
-  "GPS_OFFLINE",
-];
-const ALERT_EVENT_TYPES = [
-  "FIELD_PROBLEM_REPORTED",
-  "TECHNICIAN_STOCK_REQUEST",
-  "WATER_OPEN_OVERDUE",
-  "OPERATIONAL_FLOW",
-  "GPS_OFFLINE",
-];
 
 function getMonthRef(date = new Date()) {
   const y = date.getFullYear();
@@ -184,10 +168,8 @@ async function getAdminDashboardData(req = {}) {
     technicians,
     invoices,
     payments,
-    technicalAlerts,
-    notificationAlerts,
+    dashboardAlerts,
     visits,
-    visitAlerts,
     externalBilling,
   ] = await Promise.all([
     prisma.client.findMany({
@@ -209,25 +191,7 @@ async function getAdminDashboardData(req = {}) {
       include: { invoice: { include: { client: true } } },
       orderBy: { paidAt: "desc" },
     }),
-    prisma.technicalAlert.findMany({
-      where: { status: { notIn: CLOSED_STATUSES } },
-      include: { pool: { include: { client: true } } },
-      orderBy: { createdAt: "desc" },
-      take: 200,
-    }),
-    prisma.notification.findMany({
-      where: {
-        OR: [
-          { type: { in: ALERT_NOTIFICATION_TYPES } },
-          { eventType: { in: ALERT_EVENT_TYPES } },
-          { severity: { in: ["HIGH", "CRITICAL", "WARNING", "WARN"] } },
-        ],
-        NOT: { status: { in: CLOSED_STATUSES } },
-      },
-      include: { client: true },
-      orderBy: { createdAt: "desc" },
-      take: 200,
-    }),
+    listDashboardSources(),
     prisma.serviceVisit.findMany({
       where: {
         OR: [
@@ -241,21 +205,6 @@ async function getAdminDashboardData(req = {}) {
         technician: true,
       },
       orderBy: [{ plannedDate: "asc" }, { date: "asc" }],
-    }),
-    prisma.serviceVisit.findMany({
-      where: {
-        OR: [
-          { alerts: { not: null } },
-          { status: { in: ["NOT_DONE", "BLOCKED", "RETAINED", "IMPEDIDO"] } },
-        ],
-      },
-      include: {
-        client: true,
-        pool: { include: { client: true } },
-        technician: true,
-      },
-      orderBy: [{ updatedAt: "desc" }, { date: "desc" }],
-      take: 200,
     }),
     // Use the same eligibility, history and duplicate checks as /to-issue.
     // A fiscal read failure must fail the summary, never masquerade as zero.
@@ -323,6 +272,7 @@ async function getAdminDashboardData(req = {}) {
     paidAt: payment.paidAt,
   }));
 
+  const { technicalAlerts, notificationAlerts, visitAlerts, coverage: alertCoverage } = dashboardAlerts;
   const alertsMapped = [
     ...technicalAlerts.filter((alert) => isOpenAlertStatus(alert.status)).map(mapTechnicalAlert),
     ...notificationAlerts.filter((alert) => isOpenAlertStatus(alert.status)).map(mapNotification),
@@ -404,6 +354,7 @@ async function getAdminDashboardData(req = {}) {
     latestPayments,
     poolsByZone: Object.values(zoneMap),
     alerts: alertsMapped,
+    alertCoverage,
   };
 }
 

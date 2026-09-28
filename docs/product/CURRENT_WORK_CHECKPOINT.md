@@ -1,6 +1,18 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK394 publicada
+## Retoma atual — 28/09/2026, TASK395 validada localmente
+
+Total de alertas administrativos calculado a partir de todas as linhas elegíveis das três fontes existentes. A regressão anterior mostrou zero apesar de 1 509 registos elegíveis mais antigos, escondidos atrás de 615 candidatos recentes excluídos pelo filtro final. A leitura usa lotes de 500, seleção mínima, 200 pré-visualizações elegíveis por fonte e relações apenas para esses IDs, na mesma transação RepeatableRead.
+
+`alertCoverage` distingue total, registos carregados, limite e lista parcial; `summary.openAlerts` mantém a contagem antiga de linhas devolvidas. O painel usa o total confirmado, apresenta o âmbito técnico/notificações/visitas e avisa que vários registos podem descrever o mesmo acontecimento. Falta/incoerência dos metadados não se transforma em zero ou total presumido. Falhas em páginas posteriores recusam o resumo. Ordenação determinística; lista completa/contexto em `/admin-alerts`.
+
+**Local aprovado:** 1 166 unitários/128 ficheiros, 22 novos testes, quatro técnicos, sintaxe 691/307/44 e quatro grupos integrados (painel administrativo, área de alertas, dashboard operacional e zonas). Fixture: 1 509 elegíveis + 615 excluídos, total confirmado 1 524 com 600 linhas carregadas. Falhas nas três fontes/páginas posteriores, metadados incoerentes, repetição e ausência de escritas verificados. 320 px revisto visualmente; testes existentes a 390/1440 px/claro/escuro passaram. [Evidência](evidence/20260928_task395_local.json). Cache v203; runner mantém 306 grupos, com integração do dashboard ampliada.
+
+**CI anteriores:** TASK393 confirmada: [305/305 e restauro](https://github.com/ts7520305-svg/cristalwater/actions/runs/36398997535), 17 etapas, 128 tabelas/47 ficheiros, linhas/hashes iguais; scripts comparados com o runner do commit exato. TASK394 permanece em execução no [CI 36402896543](https://github.com/ts7520305-svg/cristalwater/actions/runs/36402896543); os 306 grupos/restauro ainda não estão confirmados. TASK395 em preparação na branch `work/field-readiness-20260915-simulation`, base `5caafa64e24dff443da824a2c8f80233683d7921`. PostgreSQL/restauro deste lote ainda pendentes. Ensaios locais PGlite/Chromium/dados sintéticos.
+
+**Continuar:** confirmar CI TASK394/395 e reproduzir a classificação de visitas `NOT_DONE`/`BLOCKED`/`RETAINED`/`IMPEDIDO` face ao contador de planeadas; o código ainda merece revisão de sobreposições. Rever estados encerrados em maiúsculas/minúsculas no centro completo de alertas. Os motores legados continuam a receber a pré-visualização; restantes dados do dashboard sem snapshot comum, contagem O(N) com timeout 30 s e desempenho real por validar. Idiomas, finanças históricas, WhatsApp, IA local, VPS/cópias e piloto físico mantêm-se pendentes. Contrato adiado pelo utilizador. Sem merge/deploy/contactos reais; sistema não declarado concluído.
+
+## Retoma anterior — 28/09/2026, TASK394 publicada
 
 Corrigida a leitura de `/api/dashboard/metrics`: falhas nas três fontes Prisma deixam de produzir zeros/listas vazias e deixam de contaminar a cache. Sem cópia completa válida, responde 503 sem divulgar a exceção privada. Com cópia válida, mantém os valores/idade e identifica consistentemente a origem degradada, incluindo acessos seguintes/circuito aberto. Zeros reais, soma SQL nula e valores assinados conservados. GET/POST e recusas de acesso usam `private, no-store`, com as mesmas permissões.
 
