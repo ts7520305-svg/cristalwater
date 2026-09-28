@@ -1,6 +1,6 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK416 local aprovada / C06 em execução
+## Retoma atual — 28/09/2026, TASK416 publicada / C06 em execução
 
 **Próximo TASK417: idiomas da página técnica antiga.** Partir de `frontend/technician.html`/`frontend/technician.js`, entradas C06 do [inventário](LANGUAGE_INVENTORY_20260928.md), até dez ficheiros por lote. Traduzir apenas texto de aplicação; preservar valores/enums, rascunhos, produtos/rota e recibos. Diálogo extra já aprovado permanece. DE dos relatórios é C09, não concluído por este lote.
 
@@ -8,7 +8,7 @@
 
 **Validação416:** Chromium/auth/IndexedDB reais com HTTP simulado;15 combinações idioma-largura320/390/1440, troca de idioma sem pedidos operacionais e snapshots de outbox iguais, reload/contas, UUID/payload/hash/recibo conservados, reconhecimento de recusa só `reviewedAt`, dados ilegíveis intactos. Regressões de sessão/idiomas aprovadas.1 327 unitários/136ficheiros, quatro técnicos, sintaxe695/307/44.318 scripts únicos/existentes; cache208. Não é aceitação SQL nativa nem revisão visual universal da página.
 
-**Publicar TASK416 e registar commit/árvore/CI.** TASK415 já publicada: `418e16208463c98b96234ed56ab235372873091b`, árvore `830e323dce6809d56249266b85d4725d90eb987c`; auditor/docs apenas, `[skip ci]`. Snapshot C05 permanece ligado à base3c3e65: este lote fecha as19 entradas de origem da fila por evidência específica; o verificador de hashes do snapshot anterior passa a indicar alteração, como esperado. Não alegar que os restantes16mil candidatos são erros ou estão resolvidos.
+**TASK416 publicada:** `e1306ecd5991b7a1266ec67fbe7c8967cfa7497c`, árvore `6ebf796ddcabfdb0808fbd34ff9169b267330b3e`; CI36495253808/job109173198905 em execução, seis etapas aprovadas. Exigir318 grupos exatos/restauro. TASK415 já publicada: `418e16208463c98b96234ed56ab235372873091b`, árvore `830e323dce6809d56249266b85d4725d90eb987c`; auditor/docs apenas, `[skip ci]`. Snapshot C05 permanece ligado à base3c3e65: este lote fecha as19 entradas de origem da fila por evidência específica; o verificador de hashes do snapshot anterior passa a indicar alteração, como esperado. Não alegar que os restantes16mil candidatos são erros ou estão resolvidos.
 
 **CI ainda pendente:** TASK413 run36489954119/job109155898206 e TASK414 run36491440593/job109160736428 na suite, dez etapas aprovadas na última leitura. C04 exige317 grupos/restauro e os dois JSONs de uploads da versão414; TASK416 exige318 grupos/restauro na sua versão. Provas específicas antigas não são convertidas em aprovação da atual.
 

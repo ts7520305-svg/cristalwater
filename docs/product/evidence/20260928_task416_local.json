@@ -225,7 +225,15 @@
   ],
   "next": "TASK417/C06: legacy technician.html and technician.js text, matched to the inventory; preserve original form values, saved drafts, existing route/stock/visit receipts. Reports DE stays in C09.",
   "publication": {
-    "status": "pending",
-    "branch": "work/field-readiness-20260915-simulation"
+    "status": "published-native-pending",
+    "branch": "work/field-readiness-20260915-simulation",
+    "commit": "e1306ecd5991b7a1266ec67fbe7c8967cfa7497c",
+    "tree": "6ebf796ddcabfdb0808fbd34ff9169b267330b3e",
+    "treeMatchesPrepared": true,
+    "runId": 36495253808,
+    "jobId": 109173198905,
+    "nativeStatus": "in_progress",
+    "stepsPassed": 6,
+    "required": "318 exact ordered scripts, restoration and existing gate artifact; no completion claimed."
   }
 }
