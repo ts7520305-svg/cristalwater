@@ -4,7 +4,9 @@
 
 O utilizador acrescentou um contrato anual de manutenção e revisões técnicas cobradas, renovável anualmente. Esclareceu que a não renovação deve ser comunicada **30 dias antes do fim do contrato** e que pretende assinatura digital **uma vez, na área de cliente**. A renovação nas condições acordadas mantém a aceitação inicial; alterações materiais têm versão e aceitação próprias. A eventual compensação por saída antecipada exige regra válida, sem montante/percentagem ainda escolhido. O método/fornecedor de assinatura está por definir; não apresentar login/traço/código como assinatura qualificada.
 
-[Especificação e fontes jurídicas](MAINTENANCE_CONTRACT_SIGNATURE_20260928.md). Requisito registado, assinatura ainda não implementada. A ativação administrativa existente não constitui prova de assinatura. Lembrete aos 60 dias permanece proposta de funcionamento. Nenhum cliente foi contactado, contrato celebrado ou valor cobrado; os resultados de testes abaixo dizem respeito aos lotes anteriores.
+**Canal de não renovação confirmado:** o cliente envia e-mail para o endereço indicado no contrato («email x», endereço real ainda por definir), pelo menos 30 dias antes do fim. O portal mostra o endereço e o estado; não exige outro pedido nem nova assinatura. Conservar o e-mail e as datas originais; registo/leitura tardios pelo administrador não alteram essas datas. A não renovação atempada impede a renovação seguinte, mantendo o serviço até ao termo. Endereço, integração de correio e confirmação ainda não configurados.
+
+[Especificação e fontes jurídicas](MAINTENANCE_CONTRACT_SIGNATURE_20260928.md). Requisito registado, assinatura e fluxo de não renovação ainda não implementados. A ativação administrativa existente não constitui prova de assinatura. Lembrete aos 60 dias permanece proposta de funcionamento. Nenhum cliente foi contactado, contrato celebrado ou valor cobrado; os resultados de testes abaixo dizem respeito aos lotes anteriores.
 
 ## Retoma atual — 28/09/2026, TASK388 publicada
 
