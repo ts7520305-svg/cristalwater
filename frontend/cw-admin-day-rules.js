@@ -8,7 +8,7 @@
  function midnight(d){const wall=Date.parse(d+'T00:00:00Z');let instant=wall;for(let i=0;i<4;i++){const p=parts(instant),rendered=Date.parse(p.year+'-'+p.month+'-'+p.day+'T'+p.hour+':'+p.minute+':00Z'),delta=wall-rendered;if(!delta)return new Date(instant).toISOString();instant+=delta;}return null;}
  function bounds(d){if(!day(d))return null;const next=new Date(Date.parse(d+'T00:00:00Z')+86400000).toISOString().slice(0,10),start=midnight(d),end=midnight(next);return start&&end?{start,end}:null;}
  function group(raw){const status=String(raw??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toUpperCase().replace(/\s+/g,'_');
-  if(['NOT_DONE','INCOMPLETE','FAILED','NOT_COMPLETED','NAO_REALIZADA','NAO_REALIZADO','NAO_CONCLUIDA','NAO_CONCLUIDO'].includes(status))return 'NOT_DONE';
+  if(['NOT_DONE','BLOCKED','RETAINED','IMPEDIDO','INCOMPLETE','FAILED','NOT_COMPLETED','NAO_REALIZADA','NAO_REALIZADO','NAO_CONCLUIDA','NAO_CONCLUIDO'].includes(status))return 'NOT_DONE';
   if(['DONE','COMPLETED','CONCLUIDA','CONCLUIDO'].includes(status))return 'DONE';
   if(['CANCELLED','CANCELED','CANCELADA','CANCELADO'].includes(status))return 'CANCELLED';
   if(['IN_PROGRESS','EM_EXECUCAO'].includes(status))return 'IN_PROGRESS';

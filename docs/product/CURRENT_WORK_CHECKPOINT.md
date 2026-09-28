@@ -1,6 +1,18 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK397 publicada
+## Retoma atual — 28/09/2026, TASK398 validada localmente
+
+Unificada a classificação de visitas bloqueadas/retidas/impedidas entre o dia administrativo e o resumo mensal. A versão anterior mostrava apenas 4 de 16 não realizadas na fixture diária; 12 impedimentos ficavam em outros estados. Entre regulares, o dia mostrava duas não realizadas e o resumo mensal onze. `BLOCKED`/`RETAINED`/`IMPEDIDO` passam a usar o mesmo grupo `NOT_DONE`, com a normalização já existente de maiúsculas, acentos e espaços. O ramo especial do resumo mensal foi removido.
+
+Os filtros, cartões, totais e validação do navegador aplicam a mesma regra às visitas regulares e extra. Os estados originais continuam literais e não houve alteração de dados guardados, datas, horários, regras financeiras ou permissões. Strings desconhecidas ou com prefixos/sufixos não passam a impedimento por semelhança.
+
+**Local aprovado:** 1 214 unitários/131 ficheiros, quatro técnicos, sintaxe 692/307/44 e dois grupos integrados dos consumidores afetados: dia administrativo e dashboard. Nos 15 testes novos, 14 falharam antes da correção. Fixture: 65 visitas em páginas de 50/15, 16 não realizadas (11 regulares + 5 extra), os 12 impedimentos presentes no filtro e contagem mensal regular coincidente. Cinco idiomas × três larguras (320/390/1440), fuso de Los Angeles, fronteiras de Lisboa/dias de 23/25 h, registos mínimos, permissões, sessão, falhas e ausência de escritas/mensagens aprovados. Cartão de impedimento a 320 px inspecionado. [Evidência](evidence/20260928_task398_local.json). Cache v205; runner mantém 307 grupos, com ensaio diário ampliado.
+
+**CI anterior confirmado:** TASK395 [306/306 e restauro](https://github.com/ts7520305-svg/cristalwater/actions/runs/36405872569), 17 etapas, 128 tabelas/47 ficheiros com linhas/hashes iguais; sequência dos scripts igual ao runner do commit exato. TASK396/397 continuam em execução nas últimas consultas, com 306/307 grupos e restauro por confirmar. **Publicação TASK398:** em preparação na branch de trabalho. Ensaios locais PGlite/Chromium/dados sintéticos; sem merge/deploy/contactos reais.
+
+**Continuar:** confirmar CI TASK396/397/398. Rever agora a fonte de alertas de visitas: na mesma fixture, as 11 regulares não realizadas acrescentam apenas quatro alertas, devido aos quatro estados exatos da consulta em `AlertListBusiness`. Avaliar aliases, mensagens/gravidade e requisitos de resolução em conjunto, preservando alertas em visitas concluídas e a confirmação física de água/bomba. A classificação diária/mensal está alinhada; os âmbitos temporais e inclusão de extra continuam diferentes. `frontend/dashboard.js` mantém rótulo antigo para planeadas/em curso. Restantes snapshots, limites de volume, idiomas, conciliação histórica, WhatsApp, IA local, VPS/cópias e piloto físico pendentes. Contrato adiado pelo utilizador. Sistema não declarado concluído.
+
+## Retoma anterior — 28/09/2026, TASK397 publicada
 
 Corrigida a seleção do centro de alertas antes da associação de contexto e dos totais. A versão anterior emitiu 2 152 registos encerrados da fixture (1 004 notificações, 1 004 técnicos e 143 genéricos), apresentou 5 564 no somatório por origem para 4 200 linhas e perdeu a nota da visita associada a um alerta técnico devido a uma notificação encerrada com referência divergente.
 
