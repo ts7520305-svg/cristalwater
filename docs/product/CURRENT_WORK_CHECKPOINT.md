@@ -1,6 +1,22 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK390 publicada
+## Retoma atual — 28/09/2026, TASK391 validada localmente
+
+O dashboard operacional passa a apresentar o saldo real devolvido para o mês escolhido. A antiga «Mensalidade potencial» usava um campo inexistente e mostrava sempre zero. Cadastro atual (incluindo inativos), saldo mensal e os 15 documentos com maior saldo de todos os períodos têm agora âmbitos explícitos; estes últimos não são clientes agregados nem a lista completa de dívidas. IDs, nomes, períodos, estados e valores recebidos permanecem literais, inseridos como texto.
+
+Respostas incompletas, falhas e ausência de rede retiram valores anteriores e apresentam «—», nunca zero inventado. A seleção de outro mês invalida a consulta; respostas atrasadas, mesmo de transportes que ignoram o cancelamento, não substituem a seleção atual. Mudanças de sessão, incluindo A→B→A, limpam e bloqueiam a página até ser reaberta. Corrigido também o recarregamento: a primeira consulta começa depois de a navegação partilhada restaurar o mês, evitando ficar em carregamento com períodos diferentes no campo e no pedido.
+
+Na API, o agrupamento de zonas usa um objeto sem protótipo: `__proto__`, `constructor` e `toString` são nomes de dados válidos, sem perda de instalações ou alteração de objetos herdados. Não foram alteradas regras financeiras, registos históricos ou o esquema. A resposta administrativa partilhada ainda tem outras consultas e limites antigos, não certificados por este lote.
+
+**Local aprovado:** 1 082 unitários/124 ficheiros, quatro técnicos, sintaxe 691/307/44, 21 scripts do gate de componentes de navegador e três grupos integrados distintos (dashboard API/UI, resumo de emissão externa e visibilidade de rascunhos). Regressões anteriores confirmadas: zero em vez do saldo, resposta antiga a substituir a nova, resposta incompleta convertida em zero e zonas reservadas omitidas. O ensaio final cobre ADMIN/perfis recusados, erro de base, resposta nula/incompatível, vazio real, conteúdo literal, mês/teclado, offline, sessão e recarregamento com mês restaurado. 320/390/1440 px, claro/escuro, contraste do conteúdo/menu ≥4,5 e controlos principais ≥44 px; tabela larga com deslocação local e teclado. Zero escritas de negócio no percurso de consulta. [Evidência](evidence/20260928_task391_local.json). Cache v201; runner 303 grupos; sem migração/dependência nova.
+
+**CI anteriores:** TASK389 confirmada, [301/301 e restauro](https://github.com/ts7520305-svg/cristalwater/actions/runs/36383123319): 17 etapas aprovadas, 128 tabelas e 47 ficheiros, linhas/hashes iguais; grupos comparados com o runner do commit exato `8df98f108a874fa5ec043f7a896e7366096cc8e7`. Prova incluída na evidência desta tarefa. TASK390 continua em execução na última consulta, sem confirmação dos 302 grupos/restauro. TASK386/387/388 já aprovadas; TASK385 conserva a falha histórica 297/300.
+
+**Publicação TASK391:** pendente; estes resultados são locais, com PGlite/Chromium e dados sintéticos. Os 303 grupos PostgreSQL e o restauro deste lote ainda não estão confirmados. Publicar apenas na branch de trabalho autorizada, sem merge/deploy/contactos reais.
+
+**Continuar:** confirmar CI de TASK390/391 e seguir as páginas antigas/idiomas ainda abertos. O dashboard e o centro de incidentes continuam apenas em português; incidentes precisam também de validação de volume/paginação e a linha temporal é da sessão. O controlador administrativo partilhado mantém consultas sem snapshot comum e alertas limitados/leituras opcionais com omissão de erros; não generalizar a validação desta página a todas as métricas. Os agrupamentos semelhantes em `aiPredictiveService`/`aiOperationalService` ainda merecem revisão dos nomes herdados. Contrato continua adiado; conciliação histórica, WhatsApp, IA local, VPS/cópias e piloto físico mantêm os limites da revisão global. Sistema não declarado concluído.
+
+## Retoma anterior — 28/09/2026, TASK390 publicada
 
 O centro de incidentes deixa de confirmar uma resolução/escalamento apenas porque o pedido terminou. Exige HTTP de sucesso, `ok: true`, incidente válido com o mesmo ID e o estado solicitado. Uma recusa, resposta nula/errada ou resposta perdida não acrescenta sucesso à linha temporal; a lista tem de ser consultada de novo. Cliques repetidos ficam bloqueados durante o envio. A API deixa de converter falhas de leitura em `200` com lista vazia e rejeita resultados de escrita ausentes.
 

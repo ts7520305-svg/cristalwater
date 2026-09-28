@@ -70,6 +70,18 @@ Validação: 1 079 unitários/123 ficheiros, quatro técnicos, sintaxe 691/307/4
 
 **Atualização de estado:** TASK388 concluída com 301/301 grupos e restauro de 128 tabelas/47 ficheiros, linhas e hashes iguais; 17 etapas aprovadas. As referências anteriores a este CI em execução são históricas. TASK389 continua pendente na última consulta. As fixtures `reminder-material-browser.js` e `reminder-visits-browser.js` já cobrem os dois lembretes; não eram páginas sem testes. `/admin-visits` é referida no microsweep. O centro de incidentes ainda tem textos apenas em português, lista completa sem paginação e linha temporal da sessão, sem auditoria histórica nova. O dashboard operacional mantém lacunas de erro/valores omitidos e respostas fora de ordem, identificadas na leitura e ainda não corrigidas.
 
+## TASK391 — dashboard operacional sem zeros ou confirmações inventadas
+
+O campo antigo `totalMonthlyAmount` não existe no contrato da API; a página mostrava «Mensalidade potencial» sempre a zero. Foi substituído pelo `monthOpen` já devolvido, identificado como saldo de documentos internos do mês, não previsão nem fatura fiscal. Clientes/instalações são o cadastro atual, incluindo inativos; zonas usam localização quando a zona falta. A lista global contém no máximo 15 documentos com maior saldo, preservando os IDs e os períodos/estados originais; não representa clientes agregados ou todas as dívidas.
+
+A página valida os campos usados, contagens por zona e identidades únicas. Carregamento, seleção alterada, resposta inválida, erro, vazio real, falta de rede e mudança de sessão são distintos. Valores anteriores são retirados; zero exige uma resposta válida. Cancelamento e geração da consulta impedem resultados fora de ordem mesmo sem cooperação do transporte. Troca de sessão invalida definitivamente a instância; o recarregamento com nova sessão funciona. A consulta inicial espera pela restauração do mês na navegação, corrigindo uma corrida reproduzida no ensaio. Conteúdo variável é texto, não HTML.
+
+O agrupamento no controlador passa de `{}` para `Object.create(null)`: três testes unitários verificam nomes herdados, repetições, fallback e texto literal. Na versão anterior, o caso dos três nomes reservados devolvia uma lista vazia. As regras e fontes financeiras não foram modificadas. Outros agrupamentos semelhantes nos serviços de IA e as leituras/limites antigos do controlador administrativo partilhado ficam para revisão própria; não foi introduzido snapshot transacional comum.
+
+**Validação local:** 1 082 unitários/124 ficheiros, quatro técnicos, sintaxe 691/307/44, os 21 scripts do gate de componentes de navegador e três grupos integrados distintos. Dashboard API/UI, resumo de emissão externa e visibilidade de rascunhos aprovados. Casos de erro/permissões, saldo exato, resposta incompleta, dados literais, concorrência, mês restaurado, sessão e offline; nenhuma escrita de negócio pelo leitor. 320/390/1440, claro/escuro, contraste ≥4,5 no conteúdo/menu medido e controlos principais ≥44 px. Tabela de documentos deslocável localmente por teclado. [Evidência local e confirmação nativa da TASK389](evidence/20260928_task391_local.json). Cache v201, runner 303, nenhuma migração/dependência nova. Publicação pendente; CI PostgreSQL/restauro desta tarefa ainda não confirmado.
+
+**Atualização dos CI:** TASK389 concluída com 301/301 scripts do runner exato, 17 etapas aprovadas e restauro de 128 tabelas/47 ficheiros com linhas/hashes iguais. Referências anteriores a esse CI em execução são históricas. TASK390 continua em execução na última consulta. O dashboard e os incidentes ainda precisam de localização nos restantes idiomas; esta revisão não certifica finanças históricas, todo o controlador administrativo ou o sistema completo.
+
 ## Mapa de módulos e critérios ainda abertos
 
 | Área | Código e capacidade encontrada | Falta para fechar a aceitação |
@@ -97,10 +109,10 @@ Validação: 1 079 unitários/123 ficheiros, quatro técnicos, sintaxe 691/307/4
 
 ## Fila finita de trabalho
 
-1. **Fechar a validação das TASK389/390:** TASK386/387/388 já confirmadas, com 300/301/301 grupos e restauros PostgreSQL. Confirmar os 301/302 grupos e restauro dos lotes seguintes. Manter a falha TASK385 no histórico.
+1. **Fechar a validação das TASK390/391:** TASK386/387/388/389 já confirmadas, com 300/301/301/301 grupos e restauros PostgreSQL. Confirmar os 302/303 grupos e restauro dos lotes seguintes. Manter a falha TASK385 no histórico.
 2. **Confirmar em dados reais o resumo de riscos:** leitura completa validada na TASK387 e identidades de ligações corrigidas na TASK389. Medir o volume e rever divergências das fontes financeiras; não inferir dívida de documentos não conciliados.
 3. **Localização da correção extra confirmada no CI da TASK388:** continuar a localização das páginas antigas e da fila geral, preservando dados literais e pedidos. Não confundir o diálogo traduzido com toda a aplicação traduzida.
-4. **Fechar o inventário de apresentação:** centro de incidentes revisto na TASK390; lembretes cobertos por fixtures e visitas referidas no microsweep. Corrigir os estados/valores omitidos e concorrência de leituras de `/operational-dashboard`; não tratar referências literais como aceitação completa. Verificar ainda erros, vazio, carregamento, teclado, ecrãs pequenos, idiomas e PDFs aplicáveis.
+4. **Fechar o inventário de apresentação:** centro de incidentes revisto na TASK390 e dashboard operacional na TASK391; lembretes cobertos por fixtures e visitas referidas no microsweep. Continuar idiomas/páginas restantes e validar os limites do controlador administrativo partilhado; não tratar referências literais como aceitação completa. Verificar ainda erros, vazio, carregamento, teclado, ecrãs pequenos e PDFs aplicáveis.
 5. **Conferir dados históricos e custos/receitas reais:** usar os percursos de revisão existentes; criar só os que faltarem para fontes comprovadas. Não reconstruir valores ou autoria automaticamente.
 6. **Importação WhatsApp e requisitos avançados:** tratar como fluxos próprios, com critérios de aceitação e revisão dos dados. Reutilizar os chats, clientes e registos financeiros atuais.
 7. **Aceitação de produção:** volume representativo, VPS/fornecedores, restauro operacional e piloto físico. Exige ambiente/acessos e execução reais, sem inferir resultados de simulações.

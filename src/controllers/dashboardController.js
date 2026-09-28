@@ -304,7 +304,8 @@ async function getAdminDashboardData(req = {}) {
     .sort((a, b) => b.amountOpen - a.amountOpen)
     .slice(0, 15);
 
-  const zoneMap = {};
+  // Zone names are user data, including names inherited by ordinary objects.
+  const zoneMap = Object.create(null);
   pools.forEach((pool) => {
     const zone = pool.zone || pool.location || "Sem zona";
     if (!zoneMap[zone]) zoneMap[zone] = { zone, count: 0 };
