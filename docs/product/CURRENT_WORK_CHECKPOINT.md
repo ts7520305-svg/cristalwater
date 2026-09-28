@@ -1,5 +1,19 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 29/09/2026, TASK418 local / C04 nativa concluída
+
+**Publicar TASK418; próximo TASK419: estados e recuperação da jornada antiga.** Lote de dez ficheiros: seis de código/teste mais este checkpoint, plano, manifesto de volume e evidência. Textos próprios de `technician.html`/`technician.js` em PT/EN/FR/ES/DE;67 chaves/335 valores. Rótulos/placeholders atualizados no lugar: conservar nós, seis valores, foco/cursor, bytes de rascunho/cache/outbox, enums BEFORE/AFTER, UUID/payload/hash. Datas só mudam apresentação. Estado sync usa identificador estável; alerta pendente não pode anunciar sincronização concluída. Cache209, runner319. [Prova TASK418](evidence/20260929_task418_local.json).
+
+**Limite C06:** não declarar página inteira traduzida. Jornada (`cw-legacy-workday.js`), rascunhos (`cw-legacy-visit-drafts.js`), alertas internos, pré-visualização da rota e chrome partilhado têm texto próprio por rever. O inventário83 entradas das duas fontes tem disposição explícita na prova; dois controlos de HTML pertencem aos componentes e ficam diferidos. Brand/pH/enums/markup conservados. Snapshot global C05 mantém a base antiga; não alegar --check de hashes atual.
+
+**Validação418:** falha anterior sem seletor reproduzida. Chromium/Express/PGlite reais,15 combinações320/390/1440, erro de rota, offline/reload real com SW, sessão/conta vazia, envio503 retido entre idiomas e erro original literal. Último ensaio focado4 877ms; regressões rascunhos6 535ms, rota3 087ms, jornada4 686ms, entradas36 370ms; grupos idioma global/fila416 aprovados.1 327 unitários/136ficheiros, quatro técnicos, sintaxe695/308/44, node-check/diff-check. Capturas DE320 inspecionadas; não é auditoria visual universal dos módulos importados. CI atual requer319 nomes/ordem exatos e restauro.
+
+**C04 concluída:** CI414 run36491440593/job109160736428 bem-sucedido,317 grupos exatos/restauro128 tabelas47ficheiros. Artefacto11003024031/hash conferido, JSONs anexos/fotos lidos:4+5 probes,106HTTP,8 casos projeção, limpeza e hashes aprovados. Manifesto A–F fechado nas versões ensaiadas; limites/VPS/concurrency/C13/C14 explícitos. [Manifesto](OPERATIONAL_VOLUME_PLAN_20260928.md).
+
+**TASK417 publicada:** `5c96ff382d12e5827cee332d00369562f7866499`, árvore `adc0bcbefb142fddc71d42cc3374b186f0771a91`; CI36496967888/job109178694799 em execução na última leitura,10 etapas aprovadas. TASK416 run36495253808/job109173198905 também na suite; cada uma exige318 grupos/restauro. Não converter C04 aprovada na versão414 em aceitação da aplicação418.
+
+**Contagem32:**26 por iniciar, C06 em execução, cinco concluídas(C01–C05). Publicação apenas na branch autorizada, sem merge/deploy/contactos reais; contrato anual adiado.
+
 ## Retoma atual — 29/09/2026, TASK417 / teste da frota corrigido localmente
 
 **Publicar TASK417 e retomar idiomas na TASK418.** O CI413 falhou no teste da frota:316 grupos exatos,315 aprovados; busca de3655 em todo o JSON deu positivo e o restauro foi saltado. Anexos passaram como grupo, sem aprovação global nem nova leitura do JSON específico. [Prova e limites](evidence/20260929_task417_local.json).

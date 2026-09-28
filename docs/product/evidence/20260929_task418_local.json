@@ -1,0 +1,1217 @@
+{
+  "task": "TASK418",
+  "date": "2026-09-29",
+  "baseCommit": "5c96ff382d12e5827cee332d00369562f7866499",
+  "scope": "C06: UI copy owned by legacy technician.html/technician.js. Imported workday/draft/alert/route-preview/shell text remains separately tracked; not whole-page language completion.",
+  "reproduction": {
+    "before": "Actual legacy HTML exposes no language selector: expected1,actual0,assertion failed before editing application sources.",
+    "beforeMs": 1463,
+    "additionalHarnessCorrection": "Screenshot selector initially matched two headers; narrowed to header containing the language selector. No acceptance assertion or application gate was weakened."
+  },
+  "implementation": {
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "dictionaryKeys": 67,
+    "dictionaryValues": 335,
+    "updates": "Only explicitly annotated labels/placeholders are repainted; existing form nodes, values, focus/caret and disabled states are preserved. Explicit language events and html.lang attribute updates supported.",
+    "untrustedText": "Body excludes generic text translation. Names, saved labels, server errors, notes, products and unknown statuses remain literal; joined parameters use textContent/escaped HTML.",
+    "protocol": "BEFORE/AFTER upload arguments, raw visit status, UUID/payload/hash/receipt/cache/draft formats unchanged. Synchronization uses stable state identifiers instead of searching a translated label.",
+    "dates": "ISO input unchanged; pt-PT/en-GB/fr-FR/es-ES/de-DE rendering with existing browser time zone.",
+    "cache": 209,
+    "runner": 319,
+    "lineEndings": "Existing mixed CRLF/LF retained for untouched technician.js lines; changed lines use LF."
+  },
+  "validation": {
+    "environment": "Isolated local PGlite, real Express/SQL/Chromium, service-worker cache, localStorage and IndexedDB. Route503 and delayed completion503 controlled in browser.",
+    "integrated": [
+      {
+        "script": "scripts/test-field-legacy-page-languages.js",
+        "code": 0,
+        "ms": 4831
+      },
+      {
+        "script": "scripts/test-field-legacy-visit-drafts.js",
+        "code": 0,
+        "ms": 6535
+      },
+      {
+        "script": "scripts/test-field-legacy-route-recovery.js",
+        "code": 0,
+        "ms": 3087
+      },
+      {
+        "script": "scripts/test-field-workday-recovery.js",
+        "code": 0,
+        "ms": 4686
+      },
+      {
+        "script": "scripts/test-field-legacy-entry.js",
+        "code": 0,
+        "ms": 36370
+      }
+    ],
+    "finalFocused": [
+      {
+        "script": "scripts/test-field-legacy-page-languages.js",
+        "code": 0,
+        "ms": 4877
+      }
+    ],
+    "browserMarkers": [
+      "PASS translation tuples: 67 keys, five languages and identical template parameters",
+      "PASS five languages ×320/390/1440: original form nodes, focus/caret, six values, storage bytes, names, disabled states, date locale and zero operational requests",
+      "PASS unavailable route remains an error in all five languages while original route/draft bytes stay intact",
+      "PASS cached offline reload keeps selected language, draft bytes and original pending UUID/payload; offline copy updates without rebuilding inputs",
+      "PASS delayed send stays disabled across languages, retains original UUID/content and displays server failure literally",
+      "PASS pending alerts prevent a false synced state in every language using a stable state identifier",
+      "PASS changed account clears old route, preserves the original draft, and localizes session/empty states"
+    ],
+    "unitTests": 1327,
+    "unitFiles": 136,
+    "technicianTests": 4,
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44
+    },
+    "regressions": [
+      "Existing global language browser group",
+      "TASK416 sync queue language/receipt/browser group",
+      "Legacy visit drafts: six fields, conflict/quota/corruption, receipt/reload/account",
+      "Legacy route recovery and workday recovery",
+      "Legacy entry aliases and role-routing browser group"
+    ],
+    "visual": "German320 header/card/full-page captures inspected. Owned controls wrap within viewport; imported shell/workday/draft labels remain outside translation scope. Not a universal vertical overlap or all-theme audit.",
+    "nodeCheckAndDiffCheck": true,
+    "logs": {
+      "task418-before.log": "fa8f062d67d01f68c2b1dcb32caef71a4fe934cc0bc6feb7039b68ea11ab332c",
+      "task418-integrated.log": "95eb0387833630246b6d2053ae79559170c95d72e91552e4befa9e9cb3dd6ad1",
+      "task418-final.log": "193710952ffd98a283521f284a0e6f7ece2ee3874a04ef35949b991b4acd3f50",
+      "task418-unit.log": "6fa0b10785b4770c92372ad382e47c8a48117fc19e1996b4f0962ecda1d1e119",
+      "task418-technician.log": "4742cf127b2557b01254b54925726c8f5d8eed35eee4721f9dfc08802f7b711f",
+      "task418-syntax.log": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4",
+      "task418-language-browser.log": "c6c97e4091ad05d31833bd4028efd03dc71f0a5ae18d7a744645c9f271669fef",
+      "task418-sync-languages.log": "56b7653e7576e289f99eea468b84b7204de6c3c835bff999c6f03760b9028f86"
+    }
+  },
+  "inventoryReview": {
+    "snapshotBase": "3c3e65eb307e59176dc58a316b4822cfb403e651",
+    "sourceEntries": 83,
+    "counts": {
+      "deferred-component-owned": 2,
+      "invariant": 3,
+      "localized-date-format": 2,
+      "localized-owned-copy": 69,
+      "protocol-or-markup": 7
+    },
+    "entries": [
+      {
+        "id": "10c49a5913499290",
+        "file": "frontend/technician.html",
+        "line": 11,
+        "text": "Cristal Water - Técnico",
+        "status": "localized-owned-copy",
+        "provider": "title"
+      },
+      {
+        "id": "4faf5e48f412949f",
+        "file": "frontend/technician.html",
+        "line": 422,
+        "text": "Cristal Water",
+        "status": "invariant",
+        "reason": "Brand/subtitle or scientific symbol preserved."
+      },
+      {
+        "id": "3231df45d47310c7",
+        "file": "frontend/technician.html",
+        "line": 426,
+        "text": "Enterprise Field System",
+        "status": "invariant",
+        "reason": "Brand/subtitle or scientific symbol preserved."
+      },
+      {
+        "id": "314777722a97a99e",
+        "file": "frontend/technician.html",
+        "line": 436,
+        "text": "Ronda do Técnico",
+        "status": "localized-owned-copy",
+        "provider": "route"
+      },
+      {
+        "id": "58d19f2d620b0211",
+        "file": "frontend/technician.html",
+        "line": 443,
+        "text": "Sair",
+        "status": "localized-owned-copy",
+        "provider": "logout"
+      },
+      {
+        "id": "542bb2696f4faa89",
+        "file": "frontend/technician.html",
+        "line": 455,
+        "text": "📲 Instalar App",
+        "status": "localized-owned-copy",
+        "provider": "install"
+      },
+      {
+        "id": "f74c6bee55946c76",
+        "file": "frontend/technician.html",
+        "line": 462,
+        "text": "🌙 Modo Escuro",
+        "status": "localized-owned-copy",
+        "provider": "dark"
+      },
+      {
+        "id": "f43ca0e097bba45d",
+        "file": "frontend/technician.html",
+        "line": 469,
+        "text": "Sugerir ordem da rota",
+        "status": "localized-owned-copy",
+        "provider": "suggest"
+      },
+      {
+        "id": "63668735dae61a3d",
+        "file": "frontend/technician.html",
+        "line": 476,
+        "text": "▶️ Iniciar Dia",
+        "status": "localized-owned-copy",
+        "provider": "startDay"
+      },
+      {
+        "id": "ae98df994c2ea9e9",
+        "file": "frontend/technician.html",
+        "line": 483,
+        "text": "⏹️ Terminar Dia",
+        "status": "localized-owned-copy",
+        "provider": "endDay"
+      },
+      {
+        "id": "d584270d7e642770",
+        "file": "frontend/technician.html",
+        "line": 489,
+        "text": "Estado: ...",
+        "status": "deferred-component-owned",
+        "component": "cw-legacy-workday.js",
+        "reason": "Component owns the live status/button; a static page translation must not overwrite its busy/recovery state."
+      },
+      {
+        "id": "221555c7f1980eb2",
+        "file": "frontend/technician.html",
+        "line": 495,
+        "text": "🟢 Online",
+        "status": "localized-owned-copy",
+        "provider": "online"
+      },
+      {
+        "id": "57210a8fbff57af0",
+        "file": "frontend/technician.html",
+        "line": 499,
+        "text": "📦 0 visitas pendentes",
+        "status": "localized-owned-copy",
+        "provider": "visitsPending"
+      },
+      {
+        "id": "7f5f834fb1abf2f7",
+        "file": "frontend/technician.html",
+        "line": 503,
+        "text": "📸 0 fotos pendentes",
+        "status": "localized-owned-copy",
+        "provider": "evidencePending"
+      },
+      {
+        "id": "67f38d52de652f98",
+        "file": "frontend/technician.html",
+        "line": 511,
+        "text": "A carregar...",
+        "status": "localized-owned-copy",
+        "provider": "loading"
+      },
+      {
+        "id": "3f4ccf2f6fcb3559",
+        "file": "frontend/technician.html",
+        "line": 519,
+        "text": "🚨 Alerta Técnico Interno",
+        "status": "localized-owned-copy",
+        "provider": "alertTitle"
+      },
+      {
+        "id": "ca51a25832847cb5",
+        "file": "frontend/technician.html",
+        "line": 525,
+        "text": "Problema encontrado, material necessário, avaria, acesso, etc...",
+        "status": "localized-owned-copy",
+        "provider": "alertPlaceholder"
+      },
+      {
+        "id": "f82c902fb6019f13",
+        "file": "frontend/technician.html",
+        "line": 531,
+        "text": "Enviar Alerta Admin",
+        "status": "deferred-component-owned",
+        "component": "cw-field-internal-alert.js",
+        "reason": "Component owns the live status/button; a static page translation must not overwrite its busy/recovery state."
+      },
+      {
+        "id": "c411499e8d2004f7",
+        "file": "frontend/technician.js",
+        "line": 98,
+        "text": "Rota atualizada para",
+        "status": "localized-owned-copy",
+        "provider": "routeCurrent"
+      },
+      {
+        "id": "e0d703287d80f08d",
+        "file": "frontend/technician.js",
+        "line": 98,
+        "text": "Rota offline da conta atual, consultada em",
+        "status": "localized-owned-copy",
+        "provider": "routeOffline"
+      },
+      {
+        "id": "c5ecd16271d873ac",
+        "file": "frontend/technician.js",
+        "line": 103,
+        "text": "CONCLUÍDA",
+        "status": "protocol-or-markup",
+        "reason": "Internal comparison/HTML/image URL; protocol values and original image URLs unchanged."
+      },
+      {
+        "id": "f033ea97505648f1",
+        "file": "frontend/technician.js",
+        "line": 130,
+        "text": "A rota não ficou guardada para uso offline.",
+        "status": "localized-owned-copy",
+        "provider": "routeNotSaved"
+      },
+      {
+        "id": "ff090e1c70e292d3",
+        "file": "frontend/technician.js",
+        "line": 329,
+        "text": "Instalacao disponivel atraves do menu do navegador.",
+        "status": "localized-owned-copy",
+        "provider": "installHelp"
+      },
+      {
+        "id": "add084df267d0946",
+        "file": "frontend/technician.js",
+        "line": 346,
+        "text": "Modo escuro",
+        "status": "localized-owned-copy",
+        "provider": "dark"
+      },
+      {
+        "id": "cd07573af4f05ef5",
+        "file": "frontend/technician.js",
+        "line": 346,
+        "text": "Modo claro",
+        "status": "localized-owned-copy",
+        "provider": "light"
+      },
+      {
+        "id": "daf536b224619d30",
+        "file": "frontend/technician.js",
+        "line": 374,
+        "text": "🟢 Online",
+        "status": "localized-owned-copy",
+        "provider": "online"
+      },
+      {
+        "id": "a23de1209a14dce7",
+        "file": "frontend/technician.js",
+        "line": 379,
+        "text": "🔴 Offline",
+        "status": "localized-owned-copy",
+        "provider": "offline"
+      },
+      {
+        "id": "8563e52c81703776",
+        "file": "frontend/technician.js",
+        "line": 391,
+        "text": "A sessão mudou. Reabra a página para consultar a rota da conta atual.",
+        "status": "localized-owned-copy",
+        "provider": "sessionChanged"
+      },
+      {
+        "id": "b6e4a261b296e250",
+        "file": "frontend/technician.js",
+        "line": 409,
+        "text": "GPS por rever; os registos foram preservados.",
+        "status": "localized-owned-copy",
+        "provider": "gpsReview"
+      },
+      {
+        "id": "18b14d9d4e934a3a",
+        "file": "frontend/technician.js",
+        "line": 412,
+        "text": "Alertas por confirmar",
+        "status": "localized-owned-copy",
+        "provider": "alertsPending"
+      },
+      {
+        "id": "3a3a1a5ed672e996",
+        "file": "frontend/technician.js",
+        "line": 412,
+        "text": "Offline",
+        "status": "localized-owned-copy",
+        "provider": "offline"
+      },
+      {
+        "id": "8660408629a99caa",
+        "file": "frontend/technician.js",
+        "line": 412,
+        "text": "Online",
+        "status": "localized-owned-copy",
+        "provider": "online"
+      },
+      {
+        "id": "512ef87c6fd60c2d",
+        "file": "frontend/technician.js",
+        "line": 413,
+        "text": "fulfilled",
+        "status": "protocol-or-markup",
+        "reason": "Internal comparison/HTML/image URL; protocol values and original image URLs unchanged."
+      },
+      {
+        "id": "622a9abdf51299e9",
+        "file": "frontend/technician.js",
+        "line": 413,
+        "text": "visitas por confirmar",
+        "status": "localized-owned-copy",
+        "provider": "visitsPending"
+      },
+      {
+        "id": "5b04f3a13da8abfa",
+        "file": "frontend/technician.js",
+        "line": 414,
+        "text": "fotos por confirmar ·",
+        "status": "localized-owned-copy",
+        "provider": "evidencePending"
+      },
+      {
+        "id": "97c2faa18a1ef886",
+        "file": "frontend/technician.js",
+        "line": 414,
+        "text": "alertas por confirmar",
+        "status": "localized-owned-copy",
+        "provider": "evidencePending"
+      },
+      {
+        "id": "e8abb68631b51d18",
+        "file": "frontend/technician.js",
+        "line": 414,
+        "text": "GPS pendentes ·",
+        "status": "localized-owned-copy",
+        "provider": "evidencePending"
+      },
+      {
+        "id": "5b8ee490bcb8a8e8",
+        "file": "frontend/technician.js",
+        "line": 421,
+        "text": "por confirmar.",
+        "status": "localized-owned-copy",
+        "provider": "pending"
+      },
+      {
+        "id": "64fde8fc685f283b",
+        "file": "frontend/technician.js",
+        "line": 421,
+        "text": "Confirmar envio guardado",
+        "status": "localized-owned-copy",
+        "provider": "retry"
+      },
+      {
+        "id": "dca3235b61e51ea5",
+        "file": "frontend/technician.js",
+        "line": 441,
+        "text": "🔄 A sincronizar...",
+        "status": "localized-owned-copy",
+        "provider": "syncing"
+      },
+      {
+        "id": "5a4c333f75e584da",
+        "file": "frontend/technician.js",
+        "line": 452,
+        "text": "Conclusões por confirmar ou a rever.",
+        "status": "localized-owned-copy",
+        "provider": "completionReview"
+      },
+      {
+        "id": "3359fbf7a058223d",
+        "file": "frontend/technician.js",
+        "line": 461,
+        "text": "Fotografias por confirmar ou a rever.",
+        "status": "localized-owned-copy",
+        "provider": "photoReview"
+      },
+      {
+        "id": "418304d937a69f66",
+        "file": "frontend/technician.js",
+        "line": 470,
+        "text": "GPS ainda por confirmar ou a rever.",
+        "status": "localized-owned-copy",
+        "provider": "gpsPending"
+      },
+      {
+        "id": "1bec0a00124d9404",
+        "file": "frontend/technician.js",
+        "line": 474,
+        "text": "✅ Sincronizado",
+        "status": "localized-owned-copy",
+        "provider": "synced"
+      },
+      {
+        "id": "79417dc20a234f51",
+        "file": "frontend/technician.js",
+        "line": 492,
+        "text": "⚠️ Erro sync",
+        "status": "localized-owned-copy",
+        "provider": "syncError"
+      },
+      {
+        "id": "a86013a1f42a91d8",
+        "file": "frontend/technician.js",
+        "line": 562,
+        "text": "Não há rota offline confirmada para esta conta e dia. Abra a ronda com ligação.",
+        "status": "localized-owned-copy",
+        "provider": "noOfflineRoute"
+      },
+      {
+        "id": "51ca108385ffd206",
+        "file": "frontend/technician.js",
+        "line": 570,
+        "text": "Não foi possível confirmar a rota completa desta conta e dia. A lista anterior foi conservada; tente atualizar com rede.",
+        "status": "localized-owned-copy",
+        "provider": "incompleteRoute"
+      },
+      {
+        "id": "eb645a7193daa352",
+        "file": "frontend/technician.js",
+        "line": 576,
+        "text": "Não foi possível carregar a ronda. A lista anterior foi conservada.",
+        "status": "localized-owned-copy",
+        "provider": "routeError"
+      },
+      {
+        "id": "1567785b41088181",
+        "file": "frontend/technician.js",
+        "line": 598,
+        "text": "offline",
+        "status": "protocol-or-markup",
+        "reason": "Internal comparison/HTML/image URL; protocol values and original image URLs unchanged."
+      },
+      {
+        "id": "7b5c7e5f1125b591",
+        "file": "frontend/technician.js",
+        "line": 598,
+        "text": "Sem visitas hoje",
+        "status": "localized-owned-copy",
+        "provider": "empty"
+      },
+      {
+        "id": "e086ac6a138acc2e",
+        "file": "frontend/technician.js",
+        "line": 598,
+        "text": "Rota indisponível sem confirmação desta conta e dia.",
+        "status": "localized-owned-copy",
+        "provider": "routeUnavailable"
+      },
+      {
+        "id": "0f99d034d7aa3b75",
+        "file": "frontend/technician.js",
+        "line": 646,
+        "text": "Estado:",
+        "status": "localized-owned-copy",
+        "provider": "state"
+      },
+      {
+        "id": "8360d58d6078d325",
+        "file": "frontend/technician.js",
+        "line": 651,
+        "text": "Esta visita está bloqueada enquanto o stop atual estiver em curso.",
+        "status": "localized-owned-copy",
+        "provider": "blockedStop"
+      },
+      {
+        "id": "b64572715db42e7a",
+        "file": "frontend/technician.js",
+        "line": 651,
+        "text": "Stop atual bloqueado para evitar execução duplicada.",
+        "status": "localized-owned-copy",
+        "provider": "currentStop"
+      },
+      {
+        "id": "4f0db5faeb13162e",
+        "file": "frontend/technician.js",
+        "line": 653,
+        "text": "Início: ${…}",
+        "status": "localized-owned-copy",
+        "provider": "start"
+      },
+      {
+        "id": "36e4174f5ce9a029",
+        "file": "frontend/technician.js",
+        "line": 658,
+        "text": "pt-PT",
+        "status": "localized-date-format",
+        "provider": "time",
+        "reason": "Five Intl locales, original ISO timestamp and browser time zone unchanged."
+      },
+      {
+        "id": "be7e11fcb69f9b37",
+        "file": "frontend/technician.js",
+        "line": 658,
+        "text": "Fim: ${…}",
+        "status": "localized-owned-copy",
+        "provider": "end"
+      },
+      {
+        "id": "45bd1acda6ff53d1",
+        "file": "frontend/technician.js",
+        "line": 667,
+        "text": "pH",
+        "status": "invariant",
+        "reason": "Brand/subtitle or scientific symbol preserved."
+      },
+      {
+        "id": "aa4a49d90118d94d",
+        "file": "frontend/technician.js",
+        "line": 668,
+        "text": "pt-PT",
+        "status": "localized-date-format",
+        "provider": "time",
+        "reason": "Five Intl locales, original ISO timestamp and browser time zone unchanged."
+      },
+      {
+        "id": "e9b1aa5abec073d8",
+        "file": "frontend/technician.js",
+        "line": 674,
+        "text": "Cloro",
+        "status": "localized-owned-copy",
+        "provider": "chlorine"
+      },
+      {
+        "id": "9712594c76a99bf9",
+        "file": "frontend/technician.js",
+        "line": 681,
+        "text": "Alcalinidade",
+        "status": "localized-owned-copy",
+        "provider": "alkalinity"
+      },
+      {
+        "id": "30c96085c2708bd7",
+        "file": "frontend/technician.js",
+        "line": 687,
+        "text": "Sal",
+        "status": "localized-owned-copy",
+        "provider": "salt"
+      },
+      {
+        "id": "899e9f27a2b4f9dc",
+        "file": "frontend/technician.js",
+        "line": 693,
+        "text": "Produtos adicionados",
+        "status": "localized-owned-copy",
+        "provider": "products"
+      },
+      {
+        "id": "10ca3dacb3b4bb50",
+        "file": "frontend/technician.js",
+        "line": 700,
+        "text": "BEFORE",
+        "status": "localized-owned-copy",
+        "provider": "before"
+      },
+      {
+        "id": "f4ef51dd8af88d44",
+        "file": "frontend/technician.js",
+        "line": 708,
+        "text": "AFTER",
+        "status": "localized-owned-copy",
+        "provider": "after"
+      },
+      {
+        "id": "d09a835681c4aa92",
+        "file": "frontend/technician.js",
+        "line": 713,
+        "text": "<img src=\"${…}\" class=\"visit-photo\" >",
+        "status": "protocol-or-markup",
+        "reason": "Internal comparison/HTML/image URL; protocol values and original image URLs unchanged."
+      },
+      {
+        "id": "4bc4edc1f85911fb",
+        "file": "frontend/technician.js",
+        "line": 716,
+        "text": "Observações técnicas",
+        "status": "localized-owned-copy",
+        "provider": "notes"
+      },
+      {
+        "id": "4c9e3b2f291f2478",
+        "file": "frontend/technician.js",
+        "line": 725,
+        "text": "📸 BEFORE",
+        "status": "localized-owned-copy",
+        "provider": "beforePhoto"
+      },
+      {
+        "id": "c7257b23294787b1",
+        "file": "frontend/technician.js",
+        "line": 728,
+        "text": "<img src=\"${…}\" class=\"visit-photo\" >",
+        "status": "protocol-or-markup",
+        "reason": "Internal comparison/HTML/image URL; protocol values and original image URLs unchanged."
+      },
+      {
+        "id": "247024110591c53c",
+        "file": "frontend/technician.js",
+        "line": 733,
+        "text": "📸 AFTER",
+        "status": "localized-owned-copy",
+        "provider": "afterPhoto"
+      },
+      {
+        "id": "df52352b9f1e5edd",
+        "file": "frontend/technician.js",
+        "line": 742,
+        "text": "✔ Concluir",
+        "status": "localized-owned-copy",
+        "provider": "complete"
+      },
+      {
+        "id": "29a8e4b5e026d7bb",
+        "file": "frontend/technician.js",
+        "line": 765,
+        "text": "disabled",
+        "status": "protocol-or-markup",
+        "reason": "Internal comparison/HTML/image URL; protocol values and original image URLs unchanged."
+      },
+      {
+        "id": "c3f03d46854225c3",
+        "file": "frontend/technician.js",
+        "line": 775,
+        "text": "disabled",
+        "status": "protocol-or-markup",
+        "reason": "Internal comparison/HTML/image URL; protocol values and original image URLs unchanged."
+      },
+      {
+        "id": "02311ee469ac4630",
+        "file": "frontend/technician.js",
+        "line": 777,
+        "text": "Sem coordenadas: confirmar morada",
+        "status": "localized-owned-copy",
+        "provider": "noCoordinates"
+      },
+      {
+        "id": "75be4339fbe6d715",
+        "file": "frontend/technician.js",
+        "line": 777,
+        "text": "Navegar",
+        "status": "localized-owned-copy",
+        "provider": "navigate"
+      },
+      {
+        "id": "f2860d2abb6513fa",
+        "file": "frontend/technician.js",
+        "line": 862,
+        "text": "Há uma visita em curso. Conclua essa visita antes de avançar.",
+        "status": "localized-owned-copy",
+        "provider": "activeVisit"
+      },
+      {
+        "id": "873dfeb01c20f1d5",
+        "file": "frontend/technician.js",
+        "line": 870,
+        "text": "Visita confirmada no servidor.",
+        "status": "localized-owned-copy",
+        "provider": "visitConfirmed"
+      },
+      {
+        "id": "449f0994fb76b6e5",
+        "file": "frontend/technician.js",
+        "line": 871,
+        "text": "Conclusão guardada, por confirmar.",
+        "status": "localized-owned-copy",
+        "provider": "completionSaved"
+      },
+      {
+        "id": "5448d93711ebb836",
+        "file": "frontend/technician.js",
+        "line": 872,
+        "text": "Não foi possível guardar a conclusão. Os campos foram preservados.",
+        "status": "localized-owned-copy",
+        "provider": "completionError"
+      },
+      {
+        "id": "a5e98c1206aa2e37",
+        "file": "frontend/technician.js",
+        "line": 887,
+        "text": "Fotografia confirmada no servidor.",
+        "status": "localized-owned-copy",
+        "provider": "photoConfirmed"
+      },
+      {
+        "id": "4058908185ac818b",
+        "file": "frontend/technician.js",
+        "line": 888,
+        "text": "A fotografia não ficou guardada. Selecione-a novamente.",
+        "status": "localized-owned-copy",
+        "provider": "photoNotSaved"
+      },
+      {
+        "id": "6c523e233c3afa2f",
+        "file": "frontend/technician.js",
+        "line": 888,
+        "text": "Fotografia guardada neste dispositivo; por confirmar.",
+        "status": "localized-owned-copy",
+        "provider": "photoSaved"
+      },
+      {
+        "id": "f55be64e841a4a8c",
+        "file": "frontend/technician.js",
+        "line": 904,
+        "text": "Coordenadas indisponíveis. Confirme a morada com o escritório.",
+        "status": "localized-owned-copy",
+        "provider": "coordinatesHelp"
+      }
+    ],
+    "note": "Scoped source-entry disposition only. TASK415 global source hashes are intentionally stale after later code changes; the full inventory --check is not claimed current."
+  },
+  "nativeC04Acceptance": {
+    "commit": "3c3e65eb307e59176dc58a316b4822cfb403e651",
+    "run": 36491440593,
+    "job": 109160736428,
+    "groups": 317,
+    "exactOrder": true,
+    "allPassed": true,
+    "restoration": "2026-09-28T23:12:24.6655868Z PASS restored 128 tables and 47 uploaded files; database rows and file hashes match",
+    "artifact": 11003024031,
+    "artifactSHA256": "ad3a1f37df678590c1c450ad53500b0c8d86a09b922c0759ebeb127c641a8dd6",
+    "specificArtifacts": {
+      "attachment-volume": {
+        "sha256": "742a53f33b3993e2a3e6952b762a6563bc924a0aabd91837d9f88c04867d23c2",
+        "engine": "PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+        "ok": true,
+        "phase": "assertions-completed",
+        "cleanupVerified": true,
+        "results": [
+          {
+            "ok": true,
+            "mode": "inventory",
+            "phase": "assertions-completed",
+            "limit": 20971520,
+            "downloadHash": "3e872f2c5008f32b024a9cb02112280e7ef9e2f1bb54a417f685dd96537fa504",
+            "belowAndExactAccepted": true,
+            "aboveRejected": true,
+            "malformedRejected": true,
+            "responseLossRecovered": true,
+            "duplicateWritesPrevented": true,
+            "manualListingRecoveryOnly": false,
+            "downloadPolicy": "Existing public inventory attachment path; not a private download guarantee",
+            "unrelatedFinancePreserved": true,
+            "cleanupVerified": true,
+            "http": 10,
+            "maxServerMiB": 155.69,
+            "maxClientMiB": 371.63,
+            "maxDurationMs": 186.5,
+            "boundaries": [
+              {
+                "status": 201,
+                "uploadBytes": 20971519,
+                "boundaryDelta": -1
+              },
+              {
+                "status": 201,
+                "uploadBytes": 20971520,
+                "boundaryDelta": 0
+              },
+              {
+                "status": 413,
+                "uploadBytes": 20971521,
+                "boundaryDelta": 1
+              }
+            ]
+          },
+          {
+            "ok": true,
+            "mode": "documents",
+            "phase": "assertions-completed",
+            "limit": 52428800,
+            "downloadHash": "3ee008a438903184494e4568fe575136b096075c862b699a187a63293b0b2901",
+            "belowAndExactAccepted": true,
+            "aboveRejected": true,
+            "malformedRejected": true,
+            "responseLossRecovered": true,
+            "duplicateWritesPrevented": false,
+            "manualListingRecoveryOnly": true,
+            "downloadPolicy": "Authenticated download with foreign/anonymous refusal",
+            "unrelatedFinancePreserved": true,
+            "cleanupVerified": true,
+            "http": 12,
+            "maxServerMiB": 159.25,
+            "maxClientMiB": 701.99,
+            "maxDurationMs": 223.1,
+            "boundaries": [
+              {
+                "status": 201,
+                "uploadBytes": 52428799,
+                "boundaryDelta": -1
+              },
+              {
+                "status": 201,
+                "uploadBytes": 52428800,
+                "boundaryDelta": 0
+              },
+              {
+                "status": 413,
+                "uploadBytes": 52428801,
+                "boundaryDelta": 1
+              }
+            ]
+          },
+          {
+            "ok": true,
+            "mode": "chat",
+            "phase": "assertions-completed",
+            "limit": 26214400,
+            "downloadHash": "285f1e531d8e7602360a4eb299773983458642ae82e70a2dcc50cfe70699652e",
+            "belowAndExactAccepted": true,
+            "aboveRejected": true,
+            "malformedRejected": true,
+            "responseLossRecovered": true,
+            "duplicateWritesPrevented": true,
+            "manualListingRecoveryOnly": false,
+            "downloadPolicy": "Authenticated download with foreign/anonymous refusal",
+            "unrelatedFinancePreserved": true,
+            "cleanupVerified": true,
+            "http": 12,
+            "maxServerMiB": 186.89,
+            "maxClientMiB": 430.37,
+            "maxDurationMs": 201.3,
+            "boundaries": [
+              {
+                "status": 200,
+                "uploadBytes": 26214399,
+                "boundaryDelta": -1
+              },
+              {
+                "status": 200,
+                "uploadBytes": 26214400,
+                "boundaryDelta": 0
+              },
+              {
+                "status": 413,
+                "uploadBytes": 26214401,
+                "boundaryDelta": 1
+              }
+            ]
+          },
+          {
+            "ok": true,
+            "mode": "official",
+            "phase": "assertions-completed",
+            "limit": 26214400,
+            "downloadHash": "285f1e531d8e7602360a4eb299773983458642ae82e70a2dcc50cfe70699652e",
+            "belowAndExactAccepted": true,
+            "aboveRejected": true,
+            "malformedRejected": true,
+            "responseLossRecovered": true,
+            "duplicateWritesPrevented": true,
+            "manualListingRecoveryOnly": false,
+            "downloadPolicy": "Authenticated download with foreign/anonymous refusal",
+            "unrelatedFinancePreserved": true,
+            "cleanupVerified": true,
+            "http": 12,
+            "maxServerMiB": 601.6,
+            "maxClientMiB": 485.36,
+            "maxDurationMs": 911.9,
+            "boundaries": [
+              {
+                "status": 200,
+                "uploadBytes": 26214399,
+                "boundaryDelta": -1
+              },
+              {
+                "status": 200,
+                "uploadBytes": 26214400,
+                "boundaryDelta": 0
+              },
+              {
+                "status": 400,
+                "uploadBytes": 26214401,
+                "boundaryDelta": 1
+              }
+            ]
+          }
+        ]
+      },
+      "photo-evidence-volume": {
+        "sha256": "88cf17859c50e0e418acd7fdfd0307432429bcac21a69ae08352c2614599b1cd",
+        "engine": "PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+        "ok": true,
+        "phase": "assertions-completed",
+        "cleanupVerified": true,
+        "results": [
+          {
+            "ok": true,
+            "phase": "assertions-completed",
+            "mode": "regular",
+            "limit": 26214400,
+            "downloadHash": "fce6fc478078ad500c7656b23f4ae77e8fb14d375f1fb9a0b992aeb29dce2b59",
+            "boundariesAccepted": true,
+            "malformedRejected": true,
+            "responseLossRecovered": true,
+            "repeatIsIdempotent": true,
+            "recoveryByListingOnly": false,
+            "privateDownload": false,
+            "policy": "Guarded request path; assigned upload, legacy original URL still public.",
+            "unrelatedFinancePreserved": true,
+            "cleanupVerified": true,
+            "http": 13,
+            "maxServerMiB": 185.09,
+            "maxClientMiB": 391.16,
+            "maxDurationMs": 199.7,
+            "boundaries": [
+              {
+                "status": 200,
+                "uploadBytes": 26214399,
+                "boundaryDelta": -1
+              },
+              {
+                "status": 200,
+                "uploadBytes": 26214400,
+                "boundaryDelta": 0
+              },
+              {
+                "status": 413,
+                "uploadBytes": 26214401,
+                "boundaryDelta": 1
+              }
+            ]
+          },
+          {
+            "ok": true,
+            "phase": "assertions-completed",
+            "mode": "extra",
+            "limit": 26214400,
+            "downloadHash": "fce6fc478078ad500c7656b23f4ae77e8fb14d375f1fb9a0b992aeb29dce2b59",
+            "boundariesAccepted": true,
+            "malformedRejected": true,
+            "responseLossRecovered": true,
+            "repeatIsIdempotent": true,
+            "recoveryByListingOnly": false,
+            "privateDownload": true,
+            "policy": "Scoped private download and upload.",
+            "unrelatedFinancePreserved": true,
+            "cleanupVerified": true,
+            "http": 14,
+            "maxServerMiB": 188.17,
+            "maxClientMiB": 414.75,
+            "maxDurationMs": 192.1,
+            "boundaries": [
+              {
+                "status": 200,
+                "uploadBytes": 26214399,
+                "boundaryDelta": -1
+              },
+              {
+                "status": 200,
+                "uploadBytes": 26214400,
+                "boundaryDelta": 0
+              },
+              {
+                "status": 400,
+                "uploadBytes": 26214401,
+                "boundaryDelta": 1
+              }
+            ]
+          },
+          {
+            "ok": true,
+            "phase": "assertions-completed",
+            "mode": "repair",
+            "limit": 20971520,
+            "downloadHash": "c372ec089dd7cf48c7a5addc0628f0f9e4aa438dd8c707a002ddc5b8d5182fca",
+            "boundariesAccepted": true,
+            "malformedRejected": true,
+            "responseLossRecovered": true,
+            "repeatIsIdempotent": false,
+            "recoveryByListingOnly": true,
+            "privateDownload": false,
+            "policy": "Legacy repair MIME filter and public file URL; no request UUID or assigned-technician model. Lost response recovered through ADMIN list, no repeat POST.",
+            "unrelatedFinancePreserved": true,
+            "cleanupVerified": true,
+            "http": 18,
+            "maxServerMiB": 181.77,
+            "maxClientMiB": 315.33,
+            "maxDurationMs": 96.8,
+            "boundaries": [
+              {
+                "status": 200,
+                "uploadBytes": 20971519,
+                "boundaryDelta": -1
+              },
+              {
+                "status": 200,
+                "uploadBytes": 20971520,
+                "boundaryDelta": 0
+              },
+              {
+                "status": 413,
+                "uploadBytes": 20971521,
+                "boundaryDelta": 1
+              }
+            ]
+          },
+          {
+            "ok": true,
+            "phase": "assertions-completed",
+            "mode": "expense",
+            "limit": 5242880,
+            "downloadHash": "312d3f3c2c0307d7e17a30a09a1073efbd2f9e5246f3155efb9f814759f7f8b4",
+            "boundariesAccepted": true,
+            "malformedRejected": true,
+            "responseLossRecovered": true,
+            "repeatIsIdempotent": true,
+            "recoveryByListingOnly": false,
+            "privateDownload": true,
+            "policy": "Scoped private download and upload.",
+            "unrelatedFinancePreserved": true,
+            "cleanupVerified": true,
+            "http": 15,
+            "maxServerMiB": 308.83,
+            "maxClientMiB": 201.11,
+            "maxDurationMs": 283.6,
+            "boundaries": [
+              {
+                "status": 200,
+                "uploadBytes": 5242879,
+                "boundaryDelta": -1
+              },
+              {
+                "status": 200,
+                "uploadBytes": 5242880,
+                "boundaryDelta": 0
+              },
+              {
+                "status": 400,
+                "uploadBytes": 5242881,
+                "boundaryDelta": 1
+              }
+            ]
+          },
+          {
+            "ok": true,
+            "phase": "assertions-completed",
+            "mode": "projection",
+            "cases": [
+              {
+                "name": "single25MiB-1",
+                "records": 1,
+                "accepted": 1,
+                "limited": 0,
+                "durationMs": 48.4
+              },
+              {
+                "name": "single25MiB+0",
+                "records": 1,
+                "accepted": 1,
+                "limited": 0,
+                "durationMs": 29.9
+              },
+              {
+                "name": "single25MiB+1",
+                "records": 1,
+                "accepted": 0,
+                "limited": 1,
+                "durationMs": 0.6
+              },
+              {
+                "name": "aggregate64MiB-1",
+                "records": 3,
+                "accepted": 3,
+                "limited": 0,
+                "durationMs": 82.2
+              },
+              {
+                "name": "aggregate64MiB+0",
+                "records": 3,
+                "accepted": 3,
+                "limited": 0,
+                "durationMs": 73.2
+              },
+              {
+                "name": "aggregate64MiB+1",
+                "records": 3,
+                "accepted": 2,
+                "limited": 1,
+                "durationMs": 54.2
+              },
+              {
+                "name": "count24",
+                "records": 24,
+                "accepted": 24,
+                "limited": 0,
+                "durationMs": 48.2
+              },
+              {
+                "name": "count25",
+                "records": 25,
+                "accepted": 24,
+                "limited": 1,
+                "durationMs": 47.4
+              }
+            ],
+            "originalHashesPreserved": true,
+            "scope": "Direct real projection service, valid JPEG with padding, exact byte/count boundaries. No HTTP/PDF or simultaneous load measurement in this probe; those have separate regressions.",
+            "cleanupVerified": true,
+            "http": 0,
+            "maxServerMiB": 0,
+            "maxClientMiB": 0,
+            "maxDurationMs": 0,
+            "boundaries": []
+          }
+        ]
+      }
+    },
+    "acceptance": "C04 closed for the documented synthetic manifest at tested versions. This accepts TASK413/TASK414 upload probes on TASK414, not the failed TASK413 overall run."
+  },
+  "previousPublication": {
+    "task": "TASK417",
+    "commit": "5c96ff382d12e5827cee332d00369562f7866499",
+    "tree": "adc0bcbefb142fddc71d42cc3374b186f0771a91",
+    "run": 36496967888,
+    "job": 109178694799,
+    "state": "in_progress; ten steps passed at last read, native318/restoration still required"
+  },
+  "nativeCurrent": "TASK418 requires319 exact ordered groups and restore; not claimed from older CI.",
+  "next": "TASK419: localized workday component statuses/recovery with original pending request preserved; remaining internal alerts, legacy drafts, route preview and shared chrome remain C06.",
+  "counts": {
+    "total": 32,
+    "notStarted": 26,
+    "inProgress": 1,
+    "inValidation": 0,
+    "completed": 5,
+    "completedIDs": [
+      "C01",
+      "C02",
+      "C03",
+      "C04",
+      "C05"
+    ]
+  },
+  "files": {
+    "frontend/cw-legacy-technician-copy.js": "34fff91186c7cbd7511ef2ce4ce90fe0f840e34452cb91fb2cf5ffe9047fadc1",
+    "frontend/technician.html": "1f0b2e9b31de85291cdaee6005669b7304af3a5b15a0f2873fb572e4898b8129",
+    "frontend/technician.js": "1b92a2329f015faa5564c26a608c8c1898d9f1e1c25569b963d42763c3db3a93",
+    "frontend/sw.js": "bb5e6bd664c948f0ee7bba5cb3d860fdeae2a3065c83b302ac946ba277909fbc",
+    "scripts/test-field-legacy-page-languages.js": "66b1568a78b6b347fe6640c2b60a7006143893a4ed2f1c84c7a731c9bc16033a",
+    "scripts/test-field-suite.js": "4d54f94890b05498b44da2c96aaa1c3400cfe605226c6cfaf3aa038ff556184e"
+  },
+  "authorization": "Work branch only; no merge, VPS deployment or real notifications; annual legal contract deferred.",
+  "publication": "Pending. Final commit/tree/run will be recorded after publication in the checkpoint."
+}

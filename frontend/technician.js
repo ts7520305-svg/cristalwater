@@ -80,6 +80,8 @@ if (!token || !userRaw){
 // STATE
 // ======================================================
 
+const legacyCopy = window.CWLegacyTechnicianCopy;
+
 let visits = [];
 
 let isSyncing = false;
@@ -95,7 +97,10 @@ function readRouteState() {
 }
 function showRouteStatus(message) {
   const status = document.getElementById('status');
-  if (status) status.textContent = message || (routeViewSource === 'offline' ? 'Rota offline da conta atual, consultada em ' + routeServerConfirmedAt + '. Confirme alterações com o escritório.' : 'Rota atualizada para ' + routeVisibleDay + '.') + (routeCacheWarning ? ' ' + routeCacheWarning : '');
+  if (!status) return;
+  const base = routeViewSource === 'offline' ? legacyCopy.spec('routeOffline', { at: legacyCopy.spec('time', { iso: routeServerConfirmedAt }) }) : legacyCopy.spec('routeCurrent', { day: routeVisibleDay });
+  const text = message || legacyCopy.spec('joined', { parts: [base, routeCacheWarning ? ' ' : '', routeCacheWarning] });
+  legacyCopy.set(status, typeof text === 'string' ? legacyCopy.spec('literal', { text }) : text);
 }
 
 function isVisitCompleted(visit){
@@ -127,7 +132,7 @@ function persistRouteSnapshot(nextVisits, extra = {}) {
     updatedAt: new Date().toISOString(), source: extra.source || 'server'
   };
   try { window.CWLegacyRouteCache.save(snapshot, legacyWriteSession); routeCacheWarning = ''; }
-  catch (error) { routeCacheWarning = 'A rota não ficou guardada para uso offline. ' + error.message; }
+  catch (error) { routeCacheWarning = legacyCopy.spec('routeNotSaved', { error: error.message }); }
   return snapshot;
 }
 function validVisitCoordinates(pool) {
@@ -326,7 +331,7 @@ function bindInstallAppButton(button){
 
   button.addEventListener("click", async () => {
     if (!deferredInstallPrompt){
-      alert("Instalacao disponivel atraves do menu do navegador.");
+      alert(legacyCopy.t('installHelp'));
       return;
     }
 
@@ -343,7 +348,7 @@ function bindThemeToggle(button){
   const applyTheme = (theme) => {
     const dark = theme === "dark";
     document.body.classList.toggle("dark-mode", dark);
-    button.textContent = dark ? "Modo claro" : "Modo escuro";
+    legacyCopy.set(button, dark ? 'light' : 'dark');
     localStorage.setItem("cw-technician-theme", theme);
   };
 
@@ -368,16 +373,7 @@ function updateConnectionStatus(){
 
   if (!status) return;
 
-  if (navigator.onLine){
-
-    status.innerText =
-      "🟢 Online";
-
-  } else {
-
-    status.innerText =
-      "🔴 Offline";
-  }
+  legacyCopy.set(status, navigator.onLine ? 'online' : 'offline');
 }
 
 // ======================================================
@@ -388,7 +384,7 @@ let offlineBarRevision = 0, legacyEntryGeneration = 0;
 const legacyWriteSession = window.CWFieldWriteStore.session();
 const legacyCompletionBusy = new Set();
 function protectLegacyRouteSession() {
-  if (!window.CWFieldWriteStore.same(legacyWriteSession)) { ++routeLoadRevision; visits = []; document.getElementById('list')?.replaceChildren(); showRouteStatus('A sessão mudou. Reabra a página para consultar a rota da conta atual.'); }
+  if (!window.CWFieldWriteStore.same(legacyWriteSession)) { ++routeLoadRevision; visits = []; document.getElementById('list')?.replaceChildren(); showRouteStatus(legacyCopy.spec('sessionChanged')); }
   else if (routeVisibleDay && routeVisibleDay !== todayRouteKey()) { visits = []; document.getElementById('list')?.replaceChildren(); routeVisibleDay = null; loadRoute(); }
 }
 window.addEventListener('storage', protectLegacyRouteSession);
@@ -397,7 +393,7 @@ setInterval(protectLegacyRouteSession, 1000);
 window.addEventListener('pagehide', () => { legacyEntryGeneration++; });
 window.addEventListener('pageshow', () => updateOfflineBar());
 window.addEventListener('cw:field-write-change', () => updateOfflineBar());
-async function updateOfflineBar(syncText) {
+async function updateOfflineBar(syncState) {
   const revision = ++offlineBarRevision, credential = window.CristalAuth?.getToken?.();
   const results = await Promise.allSettled([
     typeof getOfflineQueue === 'function' ? getOfflineQueue() : [],
@@ -406,21 +402,21 @@ async function updateOfflineBar(syncText) {
     window.CWFieldWriteStore.records('TECHNICIAN_ALERT')
   ]);
   if (revision !== offlineBarRevision || credential !== window.CristalAuth?.getToken?.()) return;
-  const errors = results.map((result, index) => result.status === 'rejected' ? (index === 2 ? 'GPS por rever; os registos foram preservados.' : result.reason.message) : '').filter(Boolean);
+  const errors = results.map((result, index) => result.status === 'rejected' ? (index === 2 ? legacyCopy.spec('gpsReview') : legacyCopy.spec('literal', { text: result.reason.message })) : '').filter(Boolean);
   const rows = results.map(result => result.status === 'fulfilled' ? result.value : []);
   const network = document.getElementById('offlineNetwork'), visitsEl = document.getElementById('offlineVisits'), photosEl = document.getElementById('offlinePhotos');
-  if (network) network.textContent = errors[0] || (rows[3].length && syncText?.includes('Sincronizado') ? 'Alertas por confirmar' : syncText) || (navigator.onLine ? 'Online' : 'Offline');
-  if (visitsEl) visitsEl.textContent = (results[0].status === 'fulfilled' ? rows[0].length : '?') + ' visitas por confirmar';
-  if (photosEl) photosEl.textContent = (results[1].status === 'fulfilled' ? rows[1].length : '?') + ' fotos por confirmar · ' + rows[2].length + ' GPS pendentes · ' + (results[3].status === 'fulfilled' ? rows[3].length : '?') + ' alertas por confirmar';
+  legacyCopy.set(network, errors[0] || (rows[3].length && syncState === 'synced' ? 'alertsPending' : syncState) || (navigator.onLine ? 'online' : 'offline'));
+  legacyCopy.set(visitsEl, 'visitsPending', { count: results[0].status === 'fulfilled' ? rows[0].length : '?' });
+  legacyCopy.set(photosEl, 'evidencePending', { photos: results[1].status === 'fulfilled' ? rows[1].length : '?', gps: rows[2].length, alerts: results[3].status === 'fulfilled' ? rows[3].length : '?' });
   let panel = document.getElementById('legacyFieldRecovery');
   if (!panel) { panel = document.createElement('section'); panel.id = 'legacyFieldRecovery'; panel.setAttribute('role', 'status'); panel.style.cssText = 'padding:14px;background:#fff4ce;color:#624400'; (network?.parentElement || document.body).append(panel); }
   panel.replaceChildren(); panel.hidden = !errors.length && !rows[0].length && !rows[1].length && !rows[3].length;
-  for (const message of errors) { const item = document.createElement('p'); item.textContent = message; panel.append(item); }
+  for (const message of errors) { const item = document.createElement('p'); legacyCopy.set(item, message); panel.append(item); }
   for (const record of [...rows[1], ...rows[0], ...rows[3]]) {
     const row = document.createElement('div'), label = document.createElement('span'), retry = document.createElement('button');
-    label.textContent = record.label + ' — ' + (record.failure?.message || 'por confirmar. '); retry.textContent = 'Confirmar envio guardado'; retry.type = 'button'; retry.style.cssText = 'min-height:44px;white-space:normal';
+    legacyCopy.set(label, 'joined', { parts: [record.label, ' — ', record.failure?.message || legacyCopy.spec('pending')] }); legacyCopy.set(retry, 'retry'); retry.type = 'button'; retry.style.cssText = 'min-height:44px;white-space:normal';
     const captured = window.CWFieldWriteStore.session();
-    retry.onclick = async () => { retry.disabled = true; try { if (record.scope === 'VISIT_COMPLETION') await sendOfflineAction(record, captured); else await window.CWFieldWriteStore.send(record.requestId, captured); if (window.CWFieldWriteStore.same(captured)) { await updateOfflineBar(); loadRoute(); } } catch (error) { if (window.CWFieldWriteStore.same(captured)) label.textContent = record.label + ' — ' + error.message; } finally { retry.disabled = false; } };
+    retry.onclick = async () => { retry.disabled = true; try { if (record.scope === 'VISIT_COMPLETION') await sendOfflineAction(record, captured); else await window.CWFieldWriteStore.send(record.requestId, captured); if (window.CWFieldWriteStore.same(captured)) { await updateOfflineBar(); loadRoute(); } } catch (error) { if (window.CWFieldWriteStore.same(captured)) legacyCopy.set(label, 'joined', { parts: [record.label, ' — ', error.message] }); } finally { retry.disabled = false; } };
     row.append(label, retry); panel.append(row);
   }
 }
@@ -438,7 +434,7 @@ async function runAutoSync(){
   const sameSyncSession = () => !!syncCredential && window.CristalAuth?.getToken?.() === syncCredential;
 
   updateOfflineBar(
-    "🔄 A sincronizar..."
+    'syncing'
   );
 
   try {
@@ -449,7 +445,7 @@ async function runAutoSync(){
 
       const queueResult = await syncOfflineQueue();
       if (!sameSyncSession()) return;
-      if (queueResult?.pending || queueResult?.unattributed) throw new Error(queueResult.error || 'Conclusões por confirmar ou a rever.');
+      if (queueResult?.pending || queueResult?.unattributed) throw new Error(queueResult.error || legacyCopy.t('completionReview'));
     }
 
     if (
@@ -458,7 +454,7 @@ async function runAutoSync(){
 
       const photoResult = await syncOfflinePhotos();
       if (!sameSyncSession()) return;
-      if (photoResult?.pending || photoResult?.unattributed) throw new Error(photoResult.error || 'Fotografias por confirmar ou a rever.');
+      if (photoResult?.pending || photoResult?.unattributed) throw new Error(photoResult.error || legacyCopy.t('photoReview'));
     }
 
     if (
@@ -467,11 +463,11 @@ async function runAutoSync(){
 
       const gpsResult = await syncOfflineGps();
       if (!sameSyncSession()) return;
-      if (gpsResult?.pending || gpsResult?.unattributed || gpsResult?.busy) throw new Error('GPS ainda por confirmar ou a rever.');
+      if (gpsResult?.pending || gpsResult?.unattributed || gpsResult?.busy) throw new Error(legacyCopy.t('gpsPending'));
     }
 
     updateOfflineBar(
-      "✅ Sincronizado"
+      'synced'
     );
 
     setTimeout(() => {
@@ -489,7 +485,7 @@ async function runAutoSync(){
     console.error(err);
 
     updateOfflineBar(
-      "⚠️ Erro sync"
+      'syncError'
     );
 
   } finally {
@@ -559,7 +555,7 @@ async function loadRoute() {
       if (!current()) return;
       visits = mergeRouteVisits(snapshot?.visits || [], pending); routeVisibleDay = day; routeServerConfirmedAt = snapshot?.serverConfirmedAt || null; routeViewSource = 'offline';
       renderVisits();
-      showRouteStatus(snapshot ? null : routeCacheWarning || 'Não há rota offline confirmada para esta conta e dia. Abra a ronda com ligação.');
+      showRouteStatus(snapshot ? null : routeCacheWarning || legacyCopy.spec('noOfflineRoute'));
       return;
     }
     const response = await fetch(API + '/visits/today?date=' + encodeURIComponent(day), { headers: { Authorization: 'Bearer ' + captured.token }, cache: 'no-store' });
@@ -567,13 +563,13 @@ async function loadRoute() {
     if (response.status === 401 || response.status === 403) { redirectToLogin(); return; }
     const data = await response.json(); if (!current()) return;
     const ids = new Set();
-    if (!response.ok || data.ok !== true || data.complete !== true || data.date !== day || data.technicianId !== captured.technicianId || !Array.isArray(data.visits) || data.total !== data.visits.length || data.visits.some(visit => { if (!visit || !Number.isSafeInteger(visit.id) || visit.id <= 0 || ids.has(visit.id) || visit.technicianId !== captured.technicianId || typeof visit.status !== 'string') return true; ids.add(visit.id); return false; })) throw Error('Não foi possível confirmar a rota completa desta conta e dia. A lista anterior foi conservada; tente atualizar com rede.');
+    if (!response.ok || data.ok !== true || data.complete !== true || data.date !== day || data.technicianId !== captured.technicianId || !Array.isArray(data.visits) || data.total !== data.visits.length || data.visits.some(visit => { if (!visit || !Number.isSafeInteger(visit.id) || visit.id <= 0 || ids.has(visit.id) || visit.technicianId !== captured.technicianId || typeof visit.status !== 'string') return true; ids.add(visit.id); return false; })) throw legacyCopy.error('incompleteRoute');
     const previous = readRouteState();
     const pending = await window.CWFieldWriteStore.records('VISIT_COMPLETION', captured); if (!current()) return;
     visits = mergeRouteVisits(data.visits, pending); routeVisibleDay = day; routeServerConfirmedAt = new Date().toISOString(); routeViewSource = 'server';
     persistRouteSnapshot(visits, { activeVisitId: previous?.activeVisitId && visits.some(visit => visit.id === previous.activeVisitId && !isVisitCompleted(visit)) ? previous.activeVisitId : nextPendingVisitId(visits), source: 'server' });
     renderVisits(); showRouteStatus();
-  } catch (error) { if (current()) showRouteStatus(error.message || 'Não foi possível carregar a ronda. A lista anterior foi conservada.'); }
+  } catch (error) { if (current()) showRouteStatus(error.copy || error.message || legacyCopy.spec('routeError')); }
 }
 
 // ======================================================
@@ -595,7 +591,7 @@ function renderVisits() {
 
     list.innerHTML = `
       <div class="card">
-        ${routeViewSource === 'offline' && !routeServerConfirmedAt ? 'Rota indisponível sem confirmação desta conta e dia.' : 'Sem visitas hoje'}
+        ${legacyCopy.span(routeViewSource === 'offline' && !routeServerConfirmedAt ? 'routeUnavailable' : 'empty')}
       </div>
     `;
 
@@ -644,31 +640,14 @@ function renderVisits() {
       </div>
 
       <div>
-        Estado:
-        <b>${escapeHtml(v.status || "-")}</b>
+        ${legacyCopy.span('state')}
+        <b data-visit-status="${v.id}" ${legacyCopy.mark('visitState', { status: v.status })}>${escapeHtml(legacyCopy.t('visitState', { status: v.status }))}</b>
       </div>
 
-      ${isLocked ? '<div class="visit-lock-note">Stop atual bloqueado para evitar execução duplicada.</div>' : (isBlocked ? '<div class="visit-block-note">Esta visita está bloqueada enquanto o stop atual estiver em curso.</div>' : '')}
+      ${isLocked ? '<div class="visit-lock-note">' + legacyCopy.span('currentStop') + '</div>' : (isBlocked ? '<div class="visit-block-note">' + legacyCopy.span('blockedStop') + '</div>' : '')}
 
-      <div>
-        Início:
-        ${
-          v.startAt
-            ? new Date(v.startAt)
-                .toLocaleString("pt-PT")
-            : "-"
-        }
-      </div>
-
-      <div>
-        Fim:
-        ${
-          v.endAt
-            ? new Date(v.endAt)
-                .toLocaleString("pt-PT")
-            : "-"
-        }
-      </div>
+      <div>${legacyCopy.span('start')} <span data-visit-time="${v.id}" ${legacyCopy.mark('time', { iso: v.startAt })}>${escapeHtml(legacyCopy.t('time', { iso: v.startAt }))}</span></div>
+      <div>${legacyCopy.span('end')} ${legacyCopy.span('time', { iso: v.endAt })}</div>
 
       <div style="margin-top:15px;">
 
@@ -681,33 +660,33 @@ function renderVisits() {
 
         <input
           id="chlorine-${v.id}"
-          placeholder="Cloro"
+          placeholder="Cloro" data-cw-legacy-placeholder="chlorine"
           type="number"
           step="0.1"
         >
 
         <input
           id="alkalinity-${v.id}"
-          placeholder="Alcalinidade"
+          placeholder="Alcalinidade" data-cw-legacy-placeholder="alkalinity"
           type="number"
         >
 
         <input
           id="salt-${v.id}"
-          placeholder="Sal"
+          placeholder="Sal" data-cw-legacy-placeholder="salt"
           type="number"
         >
 
         <textarea
           id="products-${v.id}"
-          placeholder="Produtos adicionados"
+          placeholder="Produtos adicionados" data-cw-legacy-placeholder="products"
         ></textarea>
 
       </div>
 
       <div style="margin-top:10px;">
 
-        <b>BEFORE</b><br>
+        <b>${legacyCopy.span('before')}</b><br>
 
         ${
           beforePhotos.map(p => `
@@ -722,7 +701,7 @@ function renderVisits() {
 
       <div style="margin-top:10px;">
 
-        <b>AFTER</b><br>
+        <b>${legacyCopy.span('after')}</b><br>
 
         ${
           afterPhotos.map(p => `
@@ -737,14 +716,14 @@ function renderVisits() {
 
       <textarea
         id="notes-${v.id}"
-        placeholder="Observações técnicas"
+        placeholder="Observações técnicas" data-cw-legacy-placeholder="notes"
       ></textarea>
 
       <div class="visit-actions">
 
         <button
           class="photo-btn"
-          data-action="before"
+          data-action="before" data-cw-legacy-text="beforePhoto"
           data-visit-id="${v.id}"
         >
           📸 BEFORE
@@ -752,7 +731,7 @@ function renderVisits() {
 
         <button
           class="photo-btn"
-          data-action="after"
+          data-action="after" data-cw-legacy-text="afterPhoto"
           data-visit-id="${v.id}"
         >
           📸 AFTER
@@ -760,7 +739,7 @@ function renderVisits() {
 
         <button
           class="complete-btn"
-          data-action="complete"
+          data-action="complete" data-cw-legacy-text="complete"
           data-visit-id="${v.id}"
           ${isBlocked ? "disabled" : ""}
         >
@@ -769,7 +748,7 @@ function renderVisits() {
 
         <button
           class="map-btn"
-          data-action="map"
+          data-action="map" data-cw-legacy-text="${validVisitCoordinates(v.pool) ? 'navigate' : 'noCoordinates'}"
           data-lat="${v.pool?.latitude ?? ''}"
           data-lng="${v.pool?.longitude ?? ''}"
           ${validVisitCoordinates(v.pool) ? '' : 'disabled'}
@@ -781,6 +760,7 @@ function renderVisits() {
 
     `;
 
+    legacyCopy.apply(div);
     list.appendChild(div);
     window.CWLegacyVisitDrafts.bind(div, v);
   });
@@ -859,7 +839,7 @@ async function completeVisit(id) {
   legacyCompletionBusy.add(id);
   try {
     const visit = visits.find(item => String(item.id) === String(id)), lockedId = activeVisitId();
-    if (lockedId && String(lockedId) !== String(id) && visit && !isVisitCompleted(visit)) throw Error('Há uma visita em curso. Conclua essa visita antes de avançar.');
+    if (lockedId && String(lockedId) !== String(id) && visit && !isVisitCompleted(visit)) throw legacyCopy.error('activeVisit');
     const body = { visitId: Number(id), ...await window.CWLegacyVisitDrafts.beforeComplete(id) };
     const record = await addOfflineAction({ url: '/api/core/visits/' + id + '/complete', method: 'POST', body }, captured);
     if (!window.CWFieldWriteStore.same(captured) || generation !== legacyEntryGeneration) return;
@@ -867,9 +847,9 @@ async function completeVisit(id) {
     try {
       await sendOfflineAction(record, captured);
       if (!window.CWFieldWriteStore.same(captured) || generation !== legacyEntryGeneration) return;
-      markLocalVisitCompleted(id, { pendingSync: false }); renderVisits(); alert('Visita confirmada no servidor.'); loadRoute();
-    } catch (error) { if (window.CWFieldWriteStore.same(captured) && generation === legacyEntryGeneration) alert('Conclusão guardada, por confirmar. ' + error.message); }
-  } catch (error) { if (window.CWFieldWriteStore.same(captured) && generation === legacyEntryGeneration) alert(error.message || 'Não foi possível guardar a conclusão. Os campos foram preservados.'); }
+      markLocalVisitCompleted(id, { pendingSync: false }); renderVisits(); alert(legacyCopy.t('visitConfirmed')); loadRoute();
+    } catch (error) { if (window.CWFieldWriteStore.same(captured) && generation === legacyEntryGeneration) alert(legacyCopy.t('completionSaved', { error: error.message })); }
+  } catch (error) { if (window.CWFieldWriteStore.same(captured) && generation === legacyEntryGeneration) alert(error.copy ? legacyCopy.t(error.copy) : error.message || legacyCopy.t('completionError')); }
   finally { legacyCompletionBusy.delete(id); if (window.CWFieldWriteStore.same(captured)) updateOfflineBar(); }
 }
 
@@ -884,8 +864,8 @@ async function uploadPhoto(id, type) {
       const record = await saveOfflinePhoto({ visitId: Number(id), type, file }, captured); saved = true;
       if (!window.CWFieldWriteStore.same(captured) || generation !== legacyEntryGeneration) return;
       await window.CWFieldWriteStore.send(record.requestId, captured);
-      if (window.CWFieldWriteStore.same(captured) && generation === legacyEntryGeneration) { alert('Fotografia confirmada no servidor.'); loadRoute(); }
-    } catch (error) { if (window.CWFieldWriteStore.same(captured) && generation === legacyEntryGeneration) alert((saved ? 'Fotografia guardada neste dispositivo; por confirmar. ' : 'A fotografia não ficou guardada. Selecione-a novamente. ') + error.message); }
+      if (window.CWFieldWriteStore.same(captured) && generation === legacyEntryGeneration) { alert(legacyCopy.t('photoConfirmed')); loadRoute(); }
+    } catch (error) { if (window.CWFieldWriteStore.same(captured) && generation === legacyEntryGeneration) alert(legacyCopy.t(saved ? 'photoSaved' : 'photoNotSaved', { error: error.message })); }
     finally { if (window.CWFieldWriteStore.same(captured)) updateOfflineBar(); }
   };
   input.click();
@@ -901,7 +881,7 @@ async function sendInternalAlert(){
 
 function openGoogleMaps(lat, lng) {
   if (!window.CWFieldWriteStore.same(legacyWriteSession)) return;
-  if (lat == null || lng == null || String(lat).trim() === '' || String(lng).trim() === '' || !validVisitCoordinates({ latitude: Number(lat), longitude: Number(lng) })) { alert('Coordenadas indisponíveis. Confirme a morada com o escritório.'); return; }
+  if (lat == null || lng == null || String(lat).trim() === '' || String(lng).trim() === '' || !validVisitCoordinates({ latitude: Number(lat), longitude: Number(lng) })) { alert(legacyCopy.t('coordinatesHelp')); return; }
   window.open(
     `https://www.google.com/maps?q=${lat},${lng}`,
     "_blank", "noopener,noreferrer"

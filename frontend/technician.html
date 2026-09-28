@@ -7,7 +7,7 @@
 
 <meta charset="utf-8">
 
-<title>
+<title data-cw-legacy-text="title">
   Cristal Water - Técnico
 </title>
 
@@ -400,6 +400,13 @@ textarea{
   }
 }
 
+/* Own translated controls wrap without changing visit field nodes. */
+.top-row{flex-wrap:wrap;gap:10px}
+.cw-global-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px}
+body .cw-global-actions #cwLanguageSelect{min-height:44px}
+button,.offline-bar,.visit-lock-note,.visit-block-note{white-space:normal;overflow-wrap:anywhere}
+#legacyFieldRecovery{min-width:0;max-width:100%}
+#legacyFieldRecovery button{max-width:100%}
 </style>
 
 <link rel="stylesheet" href="/cristal-assist.css">
@@ -410,7 +417,7 @@ textarea{
   <link rel="stylesheet" href="/ui/design-system.css">
 </head>
 
-<body data-required-role="TECHNICIAN">
+<body data-required-role="TECHNICIAN" data-cw-no-i18n>
 
 <div id="splashScreen">
 
@@ -433,24 +440,26 @@ textarea{
 
   <div class="top-row">
 
-    <h2>
+    <h2 data-cw-legacy-text="route">
       Ronda do Técnico
     </h2>
 
     <button
       class="logout"
-      id="logoutBtn"
+      id="logoutBtn" data-cw-legacy-text="logout"
     >
       Sair
     </button>
 
   </div>
 
+  <div class="cw-global-actions"></div>
+
   <div class="top-buttons">
 
     <button
       class="route"
-      id="installAppBtn"
+      id="installAppBtn" data-cw-legacy-text="install"
       style="display:none"
     >
       📲 Instalar App
@@ -458,28 +467,28 @@ textarea{
 
     <button
       class="route"
-      id="themeToggle"
+      id="themeToggle" data-cw-legacy-text="dark"
     >
       🌙 Modo Escuro
     </button>
 
     <button
       class="route"
-      id="optimizeRouteBtn"
+      id="optimizeRouteBtn" data-cw-legacy-text="suggest"
     >
       Sugerir ordem da rota
     </button>
 
     <button
       class="start-day"
-      id="startDayBtn"
+      id="startDayBtn" data-cw-legacy-text="startDay"
     >
       ▶️ Iniciar Dia
     </button>
 
     <button
       class="end-day"
-      id="endDayBtn"
+      id="endDayBtn" data-cw-legacy-text="endDay"
     >
       ⏹️ Terminar Dia
     </button>
@@ -492,15 +501,15 @@ textarea{
 
   <div id="offlineBar" class="offline-bar">
 
-    <span id="offlineNetwork">
+    <span id="offlineNetwork" data-cw-legacy-text="online">
       🟢 Online
     </span>
 
-    <span id="offlineVisits">
+    <span id="offlineVisits" data-cw-legacy-text="visitsPending" data-cw-legacy-params='{"count":0}'>
       📦 0 visitas pendentes
     </span>
 
-    <span id="offlinePhotos">
+    <span id="offlinePhotos" data-cw-legacy-text="evidencePending" data-cw-legacy-params='{"photos":0,"gps":0,"alerts":0}'>
       📸 0 fotos pendentes
     </span>
 
@@ -508,7 +517,7 @@ textarea{
 
 </header>
 
-<div id="status">
+<div id="status" data-cw-legacy-text="loading">
   A carregar...
 </div>
 
@@ -516,12 +525,12 @@ textarea{
 
 <div class="card">
 
-  <h3>
+  <h3 data-cw-legacy-text="alertTitle">
     🚨 Alerta Técnico Interno
   </h3>
 
   <textarea
-    id="internalAlert"
+    id="internalAlert" data-cw-legacy-placeholder="alertPlaceholder"
     placeholder="Problema encontrado, material necessário, avaria, acesso, etc..."
   ></textarea>
 
@@ -544,6 +553,8 @@ textarea{
 
 <script src="/js/push/push-realtime.js"></script>
 
+<script src="/cw-i18n.js"></script>
+<script src="/cw-legacy-technician-copy.js"></script>
 <script src="/cw-field-write-store.js"></script>
 <script src="/cw-field-internal-alert.js"></script>
 <script src="/cw-field-route-preview.js"></script>
