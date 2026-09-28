@@ -97,8 +97,13 @@ describe('dashboard sources share one complete database snapshot', () => {
       include: { client: true, pool: { include: { client: true } }, technician: true },
       orderBy: [{ plannedDate: 'asc' }, { date: 'asc' }],
     });
-    expect(run.calls.find(call => call.name === 'invoice').query).toEqual({ include: { client: true, payments: true }, orderBy: { createdAt: 'desc' } });
-    expect(run.calls.find(call => call.name === 'payment').query).toEqual({ include: { invoice: { include: { client: true } } }, orderBy: { paidAt: 'desc' } });
+    const invoice = run.calls.find(call => call.name === 'invoice').query;
+    expect(invoice.orderBy).toEqual({ createdAt: 'desc' });
+    expect(invoice.select.payments).toEqual({ select: { amount: true, amountCents: true } });
+    expect(invoice.select.client).toEqual({ select: { name: true } });
+    const payment = run.calls.find(call => call.name === 'payment').query;
+    expect(payment.orderBy).toEqual({ paidAt: 'desc' });
+    expect(payment.select.invoice).toEqual({ select: { clientId: true, client: { select: { name: true } } } });
   });
   it.each([...sourceNames, 'transaction'])('rejects the entire summary when %s fails', async failure => {
     const run = setup(failure);

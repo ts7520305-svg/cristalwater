@@ -4,7 +4,7 @@ Data: 28/09/2026. Preparado na TASK402 a partir da revisão global, do checkpoin
 
 ## Contagem e regra de fecho
 
-**32 tarefas de conclusão identificadas: C01–C32.** Estado após TASK403 local: **30 por executar e duas em validação (C01 e C02)**. C01 é o gate pendente da TASK401; C02 está implementada e aprovada localmente, com confirmação nativa pendente. Nenhuma destas duas está marcada como aceitação final. Estes IDs mantêm-se estáveis; a coluna TASK identifica o lote de execução correspondente. A numeração TASK anterior não representa percentagem de conclusão.
+**32 tarefas de conclusão identificadas: C01–C32.** Estado após TASK404 local: **29 por executar e três em validação (C01, C02 e C03)**. C01 tem CI/restauro aprovados, faltando ler a prova específica no artefacto; C02 e C03 estão implementadas e aprovadas localmente, com confirmação nativa pendente. Nenhuma destas três está marcada como aceitação final. Estes IDs mantêm-se estáveis; a coluna TASK identifica o lote de execução correspondente. A numeração TASK anterior não representa percentagem de conclusão.
 
 Uma tarefa pode ter preparação, implementação local e validação externa em momentos diferentes. Só passa a **Concluída** quando cumpre o critério e tem evidência ligada. **Implementada / CI pendente** não equivale a validação nativa nem a instalação no VPS. Cada lote de código mantém uma responsabilidade, até dez ficheiros, teste da falha/resultado e documentação.
 
@@ -14,14 +14,14 @@ Este é o plano base do âmbito conhecido, não uma garantia de ausência de nov
 
 | ID | Tarefa / TASK | Critério de conclusão | Dependência / estado |
 |---|---|---|---|
-| C01 | Confirmar TASK401 no PostgreSQL nativo | Commit `e1b6767459226cb4b469a49f375c9deeb89f741e`: escritor confirma com a transação de leitura aberta (`committedBeforeRemaining: true`), oito fontes antigas coerentes, nova leitura completa, 308 scripts na ordem exata e restauro de base/uploads com linhas/hashes iguais. | CI `36429681410`, job `108952334160`: em execução na abertura. |
+| C01 | Confirmar TASK401 no PostgreSQL nativo | Commit `e1b6767459226cb4b469a49f375c9deeb89f741e`: escritor confirma com a transação de leitura aberta (`committedBeforeRemaining: true`), oito fontes antigas coerentes, nova leitura completa, 308 scripts na ordem exata e restauro de base/uploads com linhas/hashes iguais. | **CI/restauro aprovados; prova específica por ler.** 17 etapas, 308 scripts na ordem exata, 128 tabelas/47 ficheiros iguais. Artefacto `10976260376` excedeu o limite de transferência (32 MiB); URL respondeu 403. C01 não fecha sem ler o snapshot. [Evidência TASK404](evidence/20260928_task404_local.json). |
 
 ## 2. Consistência e desempenho — três tarefas
 
 | ID | Tarefa / TASK | Critério de conclusão | Dependência / estado |
 |---|---|---|---|
 | C02 | Snapshot comum de `/api/dashboard/metrics` — TASK403 | Visitas, alertas e soma financeira observam o mesmo estado; escrita concorrente reproduz a falha anterior. Erro, cache, invalidação, TTL, circuit breaker, GET/POST e perfis conservados. | **Implementada / validação nativa pendente.** [CI 36432110804](https://github.com/ts7520305-svg/cristalwater/actions/runs/36432110804). 1 288 unitários, quatro técnicos e dois grupos integrados locais. [Evidência TASK403](evidence/20260928_task403_local.json). |
-| C03 | Medir e limitar leituras de dashboards, alertas e riscos | Ensaios crescentes publicam linhas, bytes, duração e memória; totais completos ou indisponibilidade explícita; nenhuma truncagem silenciosa. Registar a dimensão máxima testada e corrigir só os limites reproduzidos. | Local com dados sintéticos; confirmar depois volume real. `DashboardSnapshotBusiness`, `AlertListBusiness`, `operationalRiskSummaryService`. |
+| C03 | Medir e limitar leituras de dashboards, alertas e riscos — TASK404 | Ensaios crescentes publicam linhas, bytes, duração e memória; totais completos ou indisponibilidade explícita; nenhuma truncagem silenciosa. Registar a dimensão máxima testada e corrigir só os limites reproduzidos. | **Implementada / validação nativa pendente.** Quatro APIs, 25/100/400 clientes, 64 816 linhas no maior perfil; correção de memória e totais/IDs sem cortes. [Medições e limites](SUMMARY_VOLUME_20260928.md). Anomalia do PGlite reutilizado isolada; ensaio final em base nova. Volume real ainda por confirmar. |
 | C04 | Validar volume de agendas, catálogos, guias e relatórios | Manifesto de cenários por superfície, navegação sem perda/duplicação, anexos/PDFs grandes e limites explícitos. Aceitação de cada cenário, incluindo tempo e memória, fica ligada à versão testada. | Local; dimensão real depende de amostra. Reutilizar testes de stock/guias, CRM e relatórios. |
 
 ## 3. Idiomas — cinco tarefas

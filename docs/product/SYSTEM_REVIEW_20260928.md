@@ -219,12 +219,12 @@ Cache v202, runner 305; sem alteração de esquema, regras financeiras do servid
 | IA | Há recomendações por regras, contexto financeiro e providers externos; `OllamaProvider` já existe no servidor. `BrainMemory` e um dos motores de memória usam listas em RAM. | Instalar/validar o modelo local, persistência e aprendizagem por piscina; não confundir o conector Ollama com IA generativa disponível offline no telefone. Falta prova de vídeo completo. |
 | Backups e operação | Backup SQL, monitorização e timer systemd; restauro de base/uploads validado em CIs anteriores. `scheduledBackupService` declara expressamente cópia local da base, sem uploads/cópia externa/restauro verificados. | Instalar a versão aprovada no VPS, verificar HTTPS/supervisão, cópia externa de base e uploads, alertas e restauro operacional. GitHub não demonstra a versão instalada no VPS. |
 
-## Fila finita de trabalho — atualização TASK403
+## Fila finita de trabalho — atualização TASK404
 
-O [plano de conclusão de 28/09](COMPLETION_PLAN_20260928.md) desdobra as sete frentes em **32 tarefas C01–C32**, com critérios, dependências e histórico de execução. Esta fila substitui as prioridades antigas acima; as evidências históricas conservam-se. Após TASK403 local: 30 tarefas por executar e duas em validação (C01/C02).
+O [plano de conclusão de 28/09](COMPLETION_PLAN_20260928.md) desdobra as sete frentes em **32 tarefas C01–C32**, com critérios, dependências e histórico de execução. Esta fila substitui as prioridades antigas acima; as evidências históricas conservam-se. Após TASK404 local: 29 tarefas por executar e três em validação (C01/C02/C03).
 
-1. C01: confirmar CI TASK401. TASK399/400 já aprovadas, respetivamente 307/308 grupos e restauro.
-2. C02 implementada na TASK403: snapshot comum das três fontes de métricas, validado localmente; CI nativo pendente. C03–C04: medição de volume nas fontes, agendas, catálogos, guias e relatórios.
+1. C01: CI TASK401 aprovado, 308 grupos/restauro conferidos. Falta ler a prova específica de concorrência no artefacto, cujo download para o ambiente ficou bloqueado. TASK399/400 já aprovadas.
+2. C02 implementada na TASK403, CI nativo pendente. C03 implementada na TASK404: quatro APIs com 25/100/400 clientes, memória excessiva corrigida sem alterar o JSON, IDs/totais completos e falhas tardias explícitas. [Medições](SUMMARY_VOLUME_20260928.md), com a limitação PGlite e gate nativo. C04 é a próxima preparação local: agendas, catálogos, guias e relatórios.
 3. C05–C09: inventário e conclusão dos idiomas por percurso e modelo PDF.
 4. C10–C14: política temporal, crédito verificável, incidentes paginados, obras/instalações e critérios de interface/acesso.
 5. C15–C18: identidade/origem, dívidas/créditos, custos/receitas e acordos sazonais/periódicos reais.

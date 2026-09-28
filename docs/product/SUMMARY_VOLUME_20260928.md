@@ -1,0 +1,54 @@
+# Volume dos resumos — TASK404 / C03
+
+28/09/2026. **Validação local concluída; confirmação nativa pendente.** A correção elimina o carregamento de campos e relações que o resumo administrativo não utiliza. Na reprodução com 400 clientes acrescentados à base QA anterior, o pico passou de **1 119,93 para 672,23 MiB**; a resposta JSON foi comparada integralmente com as projeções antigas. O ensaio final abaixo usa uma base nova e mede **705,55 MiB** no maior dashboard. São observações locais, não uma garantia de capacidade do VPS.
+
+## Cenários e método
+
+Cada escala contém 25, 100 ou 400 clientes com uma piscina, 104 visitas semanais de 2018–2019, 24 documentos e oito pagamentos por cliente. Dez alertas técnicos e dez notificações por cliente incluem estados abertos e resolvidos; existem ainda dois alertas gerais e duas pendências operacionais por cliente. São usados 16 técnicos. A escala maior tem **64 816 linhas sintéticas**, incluindo 41 600 visitas, 9 600 documentos e 3 200 pagamentos. Contagens reais por tabela, linhas lidas, número/duração SQL, bytes e hashes de IDs estão na [evidência](evidence/20260928_task404_local.json).
+
+Os quatro GETs autenticados são `/api/dashboard/admin?monthRef=2019-12`, `/api/dashboard/metrics?force=1`, `/api/alerts` e `/api/operational-risk/summary`. Cada chamada corre num processo Node novo. O tempo vai do início do pedido à leitura completa do corpo HTTP; o RSS/heap é amostrado a cada 5 ms e após o parse. A inicialização ocorre antes da medição; o pico de vida do processo é registado separadamente. A memória inclui a API e o cliente HTTP local, não inclui o servidor de base de dados nem o navegador. Há uma observação final por escala/API, sem percentis de latência.
+
+A base final PGlite 0.5.8 foi criada com o esquema atual, sem mudar o planeador. Os perfis são cumulativos e as linhas/configuração sintéticas são removidas no fim; as contagens das dez tabelas e o registo original das regras têm de coincidir com o início. Testes novos entram no runner oficial: **309 grupos**, mantendo o limite existente de 120 s por grupo. O grupo de volume final levou **24,2 s**, incluindo preparação, 21 subprocessos, falhas e limpeza.
+
+## Medições finais
+
+Bytes são os bytes reais do JSON; MiB = 1 048 576 bytes. O pico é RSS absoluto do processo, não apenas a diferença para o arranque.
+
+| Clientes | API | Tempo, ms | JSON, bytes | Pico RSS, MiB | Pico heap, MiB |
+|---:|---|---:|---:|---:|---:|
+| 25 | Resumo administrativo | 285.9 | 2 733 855 | 174.41 | 36.38 |
+| 25 | Métricas diárias | 33.0 | 415 | 86.82 | 15.15 |
+| 25 | Alertas completos | 133.4 | 887 251 | 121.06 | 29.83 |
+| 25 | Riscos operacionais | 68.6 | 280 368 | 83.62 | 18.06 |
+| 100 | Resumo administrativo | 658.2 | 4 208 417 | 287.17 | 65.43 |
+| 100 | Métricas diárias | 28.9 | 415 | 86.85 | 15.90 |
+| 100 | Alertas completos | 389.8 | 3 554 872 | 204.30 | 65.61 |
+| 100 | Riscos operacionais | 187.3 | 1 123 151 | 105.41 | 21.88 |
+| 400 | Resumo administrativo | 2172.5 | 10 098 101 | 705.55 | 213.37 |
+| 400 | Métricas diárias | 34.7 | 416 | 94.77 | 18.90 |
+| 400 | Alertas completos | 1360.0 | 14 281 840 | 447.93 | 156.58 |
+| 400 | Riscos operacionais | 1685.8 | 4 511 351 | 190.82 | 38.00 |
+
+## Completude e compatibilidade
+
+Na escala de 400 clientes: 1 600 visitas mensais; 64 000 € faturados elegíveis, 19 200 € pagos e 44 800 € em aberto; 6 400 documentos elegíveis e 4 800 em aberto. Rascunhos, cancelados, liquidados, pagamentos parciais e saldo legado calculável entram nas asserções próprias. A faturação externa confirma 6 400 documentos pendentes e 64 000 €, conservando o tratamento do histórico.
+
+O resumo conta **9 600 alertas elegíveis** das três fontes e apresenta até 200 por fonte: 600 registos com truncagem explícita. A lista completa contém **10 000 alertas**, incluindo os gerais, e o resumo de riscos **5 200 ocorrências**. IDs únicos e hashes do conjunto esperado recusam perdas, duplicações e estados indevidos. As métricas diárias contam os 3 200 alertas técnicos abertos; o histórico de 2018–2019 não altera os agregados do dia UTC corrente. Este ensaio não simula 41 600 visitas no mesmo dia.
+
+Falhas na segunda página devolvem 500 no dashboard/lista de alertas e 503 nos riscos, sempre `ok: false`, sem dados parciais válidos ou mensagem interna. Uma lista vazia acompanha o erro de alertas no contrato existente. Todos os GETs medidos executam zero escritas; cada leitura de negócio usa uma transação `RepeatableRead`. Comparações dos bytes do JSON completo com as consultas anteriores passaram na base sem fixture e com 25 clientes. Sete grupos existentes passaram adicionalmente: dashboards operacional/administrativo/antigo, resumo de faturação externa, revisão de referências, estados de alertas e riscos.
+
+## Limites e falha do ambiente local
+
+Os testes recusam pedido de 30 s ou mais, JSON de 64 MiB ou mais e RSS amostrado de 768 MiB ou mais. São limites de regressão em QA; não são cortes de resultados nem novas restrições impostas às APIs. Mantêm-se os timeouts de transação existentes, as regras financeiras e as relações efetivamente devolvidas.
+
+Após várias cargas/limpezas, a base PGlite reutilizada devolveu visitas de outros meses apesar do filtro mensal inalterado. Um diagnóstico SQL isolado reproduziu **125 linhas com índice contra 100 numa leitura sequencial**, incluindo datas fora do intervalo. A origem interna não foi atribuída ao código da aplicação nem a uma causa específica do motor. O diagnóstico fez rollback; o ensaio final passou numa base nova, com todas as asserções e sem desativar índices. A prova SQL fica preservada. A primeira execução do ambiente novo também exigiu recuperar o adaptador local de criação do esquema, que estava em falta; não houve migração de produção.
+
+Os detalhes completos de alertas/riscos e o histórico de faturação externa continuam a crescer em memória. A validação de volume real, concorrência entre pedidos, memória do servidor de base de dados e renderização de listas grandes continua a depender do ambiente alvo. Esta tarefa não certifica produção.
+
+## Gates e estado
+
+**1 288 unitários/133 ficheiros, quatro técnicos, sintaxe 694/307/44 e oito grupos integrados distintos aprovados.** O cenário novo passou em duas bases novas; a tabela mostra a execução final do código publicado. Dez ficheiros no lote: cinco de código/testes e cinco documentos, todos listados com hashes na evidência. Cache v206, sem alteração de dependências, esquema ou frontend.
+
+TASK401: CI `36429681410`, job `108952334160`, 17 etapas aprovadas, **308 scripts na ordem exata** e restauro de **128 tabelas/47 ficheiros**, linhas e hashes iguais. C01 fica em validação até ler `operational-dashboard/snapshot.json` do artefacto `10976260376`: a transferência de 124 761 143 bytes excedeu o limite de 32 MiB e o URL assinado respondeu 403. TASK403/C02 mantém CI `36432110804` pendente na última consulta. O plano tem **29 tarefas por iniciar e três em validação (C01–C03)**; nenhuma aceitação final inventada.
+
+**Publicação TASK404:** preparada na branch `work/field-readiness-20260915-simulation`; commit e CI serão ligados após publicação. A seguir: confirmar os gates nativos e executar C04, volume de agendas, catálogos, guias e relatórios.

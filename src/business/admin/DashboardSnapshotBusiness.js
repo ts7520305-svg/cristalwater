@@ -8,11 +8,20 @@ const { listExternalInvoices } = require('../finance/FinanceOsBusiness');
 async function readDashboardSources({ start, end }) {
   return prisma.$transaction(async tx => {
     const [clients, pools, technicians, invoices, payments, dashboardAlerts, visits, externalBilling] = await Promise.all([
-      tx.client.findMany({ include: { pools: true, invoices: true }, orderBy: { name: 'asc' } }),
-      tx.pool.findMany({ include: { client: true }, orderBy: { id: 'asc' } }),
+      // These records feed counters and calculated rows, never raw JSON. Avoid
+      // materializing every client's documents and full related client copies.
+      tx.client.findMany({ select: { id: true }, orderBy: { name: 'asc' } }),
+      tx.pool.findMany({ select: { zone: true, location: true }, orderBy: { id: 'asc' } }),
       tx.technician.findMany({ orderBy: { name: 'asc' } }),
-      tx.invoice.findMany({ include: { client: true, payments: true }, orderBy: { createdAt: 'desc' } }),
-      tx.payment.findMany({ include: { invoice: { include: { client: true } } }, orderBy: { paidAt: 'desc' } }),
+      tx.invoice.findMany({ select: {
+        id: true, clientId: true, status: true, monthRef: true, month: true, year: true, issueDate: true, createdAt: true,
+        total: true, totalAmount: true, amount: true, totalCents: true, amountCents: true, amountPaid: true, amountOpen: true,
+        client: { select: { name: true } }, payments: { select: { amount: true, amountCents: true } },
+      }, orderBy: { createdAt: 'desc' } }),
+      tx.payment.findMany({ select: {
+        id: true, invoiceId: true, amount: true, amountCents: true, method: true, notes: true, paidAt: true, createdAt: true,
+        invoice: { select: { clientId: true, client: { select: { name: true } } } },
+      }, orderBy: { paidAt: 'desc' } }),
       listDashboardSources(tx),
       tx.serviceVisit.findMany({
         where: { OR: [{ plannedDate: { gte: start, lte: end } }, { date: { gte: start, lte: end } }] },

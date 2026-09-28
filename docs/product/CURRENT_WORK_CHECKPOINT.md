@@ -1,6 +1,24 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK403 publicada / C02
+## Retoma atual — 28/09/2026, TASK404 / C03
+
+Testes de volume de quatro GETs: dashboard administrativo, métricas diárias, alertas completos e riscos. Escalas de 25/100/400 clientes, 16 técnicos e dois anos de visitas/documentos; maior fixture com **64 816 linhas**, incluindo 41 600 visitas e 9 600 documentos. [Relatório](SUMMARY_VOLUME_20260928.md) e [evidência](evidence/20260928_task404_local.json). Plano: **29 por iniciar, três em validação (C01–C03), zero fechadas**.
+
+A memória excessiva foi reproduzida: 1 119,93 MiB no dashboard a 400 clientes. `DashboardSnapshotBusiness` agora seleciona só os campos necessários de clientes, piscinas, documentos e pagamentos; mantém relações devolvidas, ordem, filtros, finanças e uma transação. Na primeira comparação caiu para 672,23 MiB; no ensaio final em base nova mediu 705,55 MiB. JSON integral idêntico às consultas anteriores nos dois cenários de compatibilidade. Não há cortes nos totais.
+
+**Local aprovado:** 1 288 unitários/133 ficheiros, quatro técnicos, sintaxe 694/307/44 e oito grupos integrados. Doze perfis positivos, três erros de página posterior, 10 000 alertas e 5 200 riscos completos na maior escala, hashes de IDs, zero escritas GET, limpeza/configuração restauradas. Limites QA: 30 s, 64 MiB de JSON e 768 MiB RSS por processo medido. Tempo inclui HTTP; memória inclui API+cliente local, sem DB/navegador. O grupo de volume leva 24,2 s e aumenta o runner de 308 para 309. Cache v206.
+
+**Falha local isolada:** PGlite reutilizado retornou datas fora do filtro; SQL direto confirmou 125 resultados indexados contra 100 sequenciais. O ensaio final recriou uma base isolada com o esquema atual e passou sem alterar filtros/planeador da aplicação. Preservar a evidência; não usar essa base antiga para certificar novos testes de intervalo sem resolver a anomalia. Não é prova de falha ou aprovação no PostgreSQL nativo.
+
+**CI anteriores:** TASK401 run `36429681410`, job `108952334160`, 17 etapas aprovadas, 308 scripts na ordem exata e restauro de 128 tabelas/47 ficheiros iguais. C01 ainda requer ler `operational-dashboard/snapshot.json` e confirmar `committedBeforeRemaining: true`; artefacto `10976260376` tem 124 761 143 bytes, acima do limite de transferência de 32 MiB, e o URL assinado respondeu 403. TASK403 run `36432110804`, job `108960622472`, ainda em curso na última consulta; depois exigir o JSON `field-suite/dashboard-metrics.json` com a mesma prova concorrente.
+
+**Lote (10 ficheiros):** cinco de código/teste (`DashboardSnapshotBusiness`, dois novos scripts de volume, runner e teste de snapshot), relatório, evidência, plano, revisão global e este checkpoint. Caminhos/hashes na evidência; sem frontend, dependências ou migrações novas.
+
+**Publicação TASK404:** preparada na branch `work/field-readiness-20260915-simulation`; ligar commit/árvore/CI depois da publicação autorizada.
+
+**Continuar:** confirmar CI TASK403/TASK404 e os artefactos nativos da TASK401/TASK403. Para TASK404, conferir 309 scripts/restauro, `field-suite/summary-volume/results.json` com `ok: true`, 12 perfis positivos, três falhas tardias recusadas e limpeza. C03 continua em validação; a certificação de VPS/dados reais não é substituída por estes perfis. Iniciar C04: inventário fechado de superfícies e cenários de agendas, catálogos, guias e relatórios, com volumes/IDs/bytes/tempo/memória e lotes até dez ficheiros. Depois C05, inventário de idiomas. Sem merge/deploy/contactos reais; contrato anual adiado.
+
+## Retoma anterior — 28/09/2026, TASK403 publicada / C02
 
 O [plano de conclusão](COMPLETION_PLAN_20260928.md) ficou publicado na TASK402, commit `852c4f3082b51e3d6ad5835ba4230d7e5f0935ac`, com **32 tarefas: 30 por executar e duas em validação, C01/C02**. C01 confirma a TASK401; C02 é a correção agora implementada para `/api/dashboard/metrics`. O contrato anual continua adiado. A numeração de lotes TASK não é uma percentagem nem o número de entregas pendentes.
 
