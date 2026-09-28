@@ -2070,9 +2070,22 @@
     "Native PostgreSQL and restore for TASK397 not yet confirmed."
   ],
   "publication": {
-    "status": "prepared",
+    "status": "published_work_branch",
     "expectedNativeGroups": 307,
     "suiteConfirmed": false,
-    "restoreConfirmed": false
+    "restoreConfirmed": false,
+    "branch": "work/field-readiness-20260915-simulation",
+    "codeCommit": "337914ebf8f928f37c9a6a12f2ae1f0135001770",
+    "tree": "b5d82466319b4265644bd5c11c764cbcfbbd0957",
+    "treeMatchesPreparedIndex": true,
+    "nativeCi": {
+      "runId": 36410255202,
+      "jobId": 108888511102,
+      "status": "in_progress",
+      "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36410255202",
+      "expectedGroups": 307,
+      "confirmed": false,
+      "restoreConfirmed": false
+    }
   }
 }
