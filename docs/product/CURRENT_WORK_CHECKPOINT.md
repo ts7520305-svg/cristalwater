@@ -1,6 +1,18 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK401 publicada
+## Retoma atual — 28/09/2026, TASK402: plano de conclusão definido
+
+As sete frentes foram desdobradas em **32 tarefas de conclusão, C01–C32**, com resultado verificável, fonte de código, dependência e distinção entre preparação local, dados reais, acessos externos e participação da equipa. [Plano completo](COMPLETION_PLAN_20260928.md). É a contagem base do âmbito conhecido; subdivisões dos lotes e novas falhas comprovadas têm de ficar visíveis, sem inventar uma percentagem de conclusão.
+
+C01 corresponde à confirmação nativa da TASK401. C02 é a próxima correção local: as três fontes de `/api/dashboard/metrics` ainda são consultadas separadamente. C03–C04 cobrem volume; C05–C09 idiomas; C10–C14 significado dos dados/interfaces; C15–C18 dados e finanças; C19–C24 WhatsApp/IA; C25–C32 operação e aceitação. O contrato anual continua adiado.
+
+TASK402 altera apenas três documentos: `COMPLETION_PLAN_20260928.md`, este checkpoint e a fila atual de `SYSTEM_REVIEW_20260928.md`. A inspeção conferiu 32 IDs únicos consecutivos, cobertura das sete frentes e critérios/dependências em todas as linhas. Gates da base passaram: 1 283 unitários/133 ficheiros, quatro técnicos e sintaxe 693/307/44. Sem alteração de código ou de APIs; cache v206 e runner 308 conservados.
+
+**CI TASK401:** run `36429681410`, job `108952334160`, em execução na consulta desta tarefa. Preparação, migrações, sintaxe e testes unitários/técnicos/componentes de navegador aprovados; os grupos integrados e restauro ainda não confirmados. TASK399/400 já têm aprovação nativa registada na evidência TASK401.
+
+**Continuar:** executar C02 com reprodução da mistura de momentos, snapshot das três fontes, preservação de cache/circuito/invalidação e testes. Atualizar a linha C02 com o lote/estado/evidência, mantendo C01 pendente até ler a prova completa. Preparar localmente o que depender de acessos, sem declarar VPS, entrega de mensagens, dados reais ou piloto já aceites.
+
+## Retoma anterior — 28/09/2026, TASK401 publicada
 
 As oito fontes do resumo administrativo passam a usar uma única transação `RepeatableRead`: clientes, instalações, técnicos, documentos, pagamentos, alertas, visitas e faturação externa. A regressão contra `fe280039607d26f9869c43e456a2409d7957dda4` confirmou a mistura de momentos: clientes ainda sem o novo registo, mas já mais uma instalação/técnico/visita, 123,45 € faturados, 5 € recebidos, 118,45 € em aberto e três alertas.
 

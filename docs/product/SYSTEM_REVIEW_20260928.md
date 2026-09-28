@@ -219,15 +219,19 @@ Cache v202, runner 305; sem alteração de esquema, regras financeiras do servid
 | IA | Há recomendações por regras, contexto financeiro e providers externos; `OllamaProvider` já existe no servidor. `BrainMemory` e um dos motores de memória usam listas em RAM. | Instalar/validar o modelo local, persistência e aprendizagem por piscina; não confundir o conector Ollama com IA generativa disponível offline no telefone. Falta prova de vídeo completo. |
 | Backups e operação | Backup SQL, monitorização e timer systemd; restauro de base/uploads validado em CIs anteriores. `scheduledBackupService` declara expressamente cópia local da base, sem uploads/cópia externa/restauro verificados. | Instalar a versão aprovada no VPS, verificar HTTPS/supervisão, cópia externa de base e uploads, alertas e restauro operacional. GitHub não demonstra a versão instalada no VPS. |
 
-## Fila finita de trabalho
+## Fila finita de trabalho — atualização TASK402
 
-1. **Fechar a validação das TASK399/400:** TASK386/387/388/389/390/391/392 confirmadas, com 300/301/301/301/302/303/304 grupos e restauros PostgreSQL. TASK393 confirmada com 305, TASK394/395/396 com 306 e TASK397/398 com 307 grupos/restauro. Confirmar os 307/308 grupos/restauro das TASK399/400; manter a falha TASK385 no histórico.
-2. **Confirmar em dados reais o resumo de riscos:** leitura completa validada na TASK387 e identidades de ligações corrigidas na TASK389. Medir o volume e rever divergências das fontes financeiras; não inferir dívida de documentos não conciliados.
-3. **Localização da correção extra confirmada no CI da TASK388:** continuar a localização das páginas antigas e da fila geral, preservando dados literais e pedidos. Não confundir o diálogo traduzido com toda a aplicação traduzida.
-4. **Fechar o inventário de apresentação e fontes administrativas:** centro de incidentes revisto na TASK390, dashboard operacional na TASK391, agrupamentos dos motores na TASK392 e indicadores de `/admin-dashboard` na TASK393. As falhas ocultadas em `/api/dashboard/metrics` e a cache/circuit breaker foram corrigidas na TASK394; os totais/cortes do resumo de alertas foram corrigidos na TASK395. A TASK396 corrige a sobreposição dos estados das visitas mensais. A TASK397 exclui encerrados/substituídos antes do contexto e totais de alertas. A TASK398 unifica os impedimentos da agenda diária e resumo mensal. A TASK399 alinha seleção, mensagens/gravidade e requisitos de resolução dos aliases de visitas, preservando alertas explícitos de visitas concluídas. A TASK400 corrige o dashboard antigo, retirando zeros sem fonte e recusando respostas ultrapassadas. Rever coerência das restantes fontes, crédito agregado, volumes e filtros/períodos das APIs antigas. Continuar idiomas/páginas restantes, volume/paginação dos incidentes, teclado, ecrãs pequenos e PDFs aplicáveis; não tratar referências literais como aceitação completa.
-5. **Conferir dados históricos e custos/receitas reais:** usar os percursos de revisão existentes; criar só os que faltarem para fontes comprovadas. Não reconstruir valores ou autoria automaticamente.
-6. **Importação WhatsApp e requisitos avançados:** tratar como fluxos próprios, com critérios de aceitação e revisão dos dados. Reutilizar os chats, clientes e registos financeiros atuais.
-7. **Aceitação de produção:** volume representativo, VPS/fornecedores, restauro operacional e piloto físico. Exige ambiente/acessos e execução reais, sem inferir resultados de simulações.
+O [plano de conclusão de 28/09](COMPLETION_PLAN_20260928.md) desdobra as sete frentes em **32 tarefas C01–C32**, com critérios, dependências e histórico de execução. Esta fila substitui as prioridades antigas acima; as evidências históricas conservam-se.
+
+1. C01: confirmar CI TASK401. TASK399/400 já aprovadas, respetivamente 307/308 grupos e restauro.
+2. C02–C04: snapshot das métricas e medição de volume nas fontes, agendas, catálogos, guias e relatórios.
+3. C05–C09: inventário e conclusão dos idiomas por percurso e modelo PDF.
+4. C10–C14: política temporal, crédito verificável, incidentes paginados, obras/instalações e critérios de interface/acesso.
+5. C15–C18: identidade/origem, dívidas/créditos, custos/receitas e acordos sazonais/periódicos reais.
+6. C19–C24: importação WhatsApp com revisão e aplicação confirmada; IA local, memória persistente e recomendações demonstráveis.
+7. C25–C32: VPS, canais e fornecedores reais, cópias externas/restauro, pilotos e decisão final de aceitação.
+
+A contagem representa o âmbito conhecido, não certifica uma data de conclusão nem impede registar uma nova falha reproduzida. Dados/acessos de produção, destinatários e participação da equipa ficam explícitos nas dependências; não são substituídos por simulações. Contrato anual permanece adiado.
 
 Os contratos antigos de dia merecem decisão explícita antes de migração transversal: `serviceVisitFilters` interpreta o dia no fuso do servidor; o planeamento sazonal utiliza Lisboa; alguns registos de «data civil» usam meia-noite UTC. A TASK386 corrige os ensaios sem reescrever esses dados. Também subsiste dívida arquitetural: há routers/controladores com Prisma e lógica direta, apesar da arquitetura alvo controller → business → services. Nenhuma refatoração geral foi feita nesta revisão.
 
