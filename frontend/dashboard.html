@@ -21,7 +21,7 @@ body {
 
 /* HEADER */
 .header {
-  background:linear-gradient(135deg,#0f75bc,#1e88e5);
+  background:#155c92;
   color:white;
   padding:20px;
   display:flex;
@@ -61,7 +61,7 @@ body {
 }
 
 .toolbar button {
-  background:#1e88e5;
+  background:#155c92;
   color:white;
   border:none;
   cursor:pointer;
@@ -142,7 +142,7 @@ body {
 
 /* BUTTON */
 .btn {
-  background:#1e88e5;
+  background:#155c92;
   color:white;
   border:none;
   padding:6px 10px;
@@ -160,15 +160,51 @@ body {
 @media(max-width:900px){
   .two-col { grid-template-columns:1fr; }
 }
+/* Keep the existing sections usable on narrow screens and in both themes. */
+.header, .header-actions, .toolbar { flex-wrap:wrap; gap:12px; }
+.header > div, .grid > *, .two-col > * { min-width:0; }
+.header-actions { display:flex; }
+.header-actions a { margin-left:0; display:inline-flex; align-items:center; min-height:44px; }
+.toolbar { align-items:center; }
+.toolbar input, .toolbar button, .btn { min-height:44px; max-width:100%; }
+.toolbar label { font-weight:700; }
+.grid { grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr)); }
+.card, .panel, .small-card, .scope, #dashboardStatus { overflow-wrap:anywhere; }
+.card-title, .card-sub, .scope { color:#4b5563; line-height:1.5; }
+.small-card { padding:12px 0; border-bottom:1px solid #d5dce5; }
+.small-card p { margin:6px 0; }
+.table-wrap { overflow:auto; }
+.table { table-layout:fixed; min-width:500px; text-align:left; }
+.table .btn { margin:3px; }
+a.btn { display:inline-flex; align-items:center; text-decoration:none; margin-top:8px; }
+button:disabled { opacity:.6; cursor:default; }
+@media(max-width:420px) { .container { padding:12px; } .header { padding:16px; } }
+@media(prefers-color-scheme:dark) {
+  body { background:#101b28; color:#e4edf7; }
+  .card,.panel { background:#182737; color:#e4edf7; }
+  .card-title,.card-sub,.scope { color:#c8d2de; }
+  .small-card,.table td,.table th { border-color:#415265; }
+  .toolbar input { background:#182737; color:#e4edf7; }
+}
 </style>
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
   <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
   <link rel="stylesheet" href="/ui/design-system.css">
+  <style>
+    body#legacyDashboardPage { --ld-bg:#f3f7fa; --ld-surface:#fff; --ld-text:#183047; --ld-muted:#42576b; --ld-border:#b7cbd3; --cw-surface:var(--ld-surface); background:var(--ld-bg); color:var(--ld-text); }
+    #legacyDashboardPage .card, #legacyDashboardPage .panel { background:var(--ld-surface); color:var(--ld-text); border-color:var(--ld-border); }
+    #legacyDashboardPage .section { background:transparent; border:0; box-shadow:none; }
+    #legacyDashboardPage main h2, #legacyDashboardPage main strong, #legacyDashboardPage .card-value { color:var(--ld-text); }
+    #legacyDashboardPage main p, #legacyDashboardPage main label, #legacyDashboardPage main th, #legacyDashboardPage main td, #legacyDashboardPage .card-title, #legacyDashboardPage .card-sub { color:var(--ld-muted); }
+    #legacyDashboardPage input, #legacyDashboardPage [data-cw-open-drawer] { background:var(--ld-surface); color:var(--ld-text); }
+    #legacyDashboardPage main :focus-visible { outline:3px solid #a34a00; outline-offset:3px; }
+    @media(prefers-color-scheme:dark) { body#legacyDashboardPage { --ld-bg:#0b1624; --ld-surface:#101e30; --ld-text:#e6edf7; --ld-muted:#b8cbe0; --ld-border:#536b85; } #legacyDashboardPage input { color-scheme:dark; } #legacyDashboardPage main :focus-visible { outline-color:#ffbf75; } }
+  </style>
 </head>
 
-<body data-required-role="ADMIN">
+<body id="legacyDashboardPage" data-required-role="ADMIN">
 
 <div style="padding:12px 16px 0">
   <button type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
@@ -177,21 +213,23 @@ body {
 <div class="header">
   <div>
     <div class="header-title">Cristal Water Dashboard</div>
-    <div id="dashboardStatus">A carregar...</div>
+    <div id="dashboardStatus" role="status" aria-live="polite">A carregar...</div>
   </div>
 
   <div class="header-actions">
-    <a href="/billing">💶 Cobranças</a>
-    <a href="/">🏠 Início</a>
+    <a href="/billing">Cobranças</a>
+    <a href="/">Início</a>
   </div>
 </div>
 
-<div class="container">
+<main class="container" id="dashboardResults" aria-busy="true" data-cw-state-managed="manual">
 
-<div class="toolbar">
-  <input type="month" id="monthRef" aria-label="Mes de referencia">
-  <button onclick="loadDashboard()">Atualizar</button>
-</div>
+<form class="toolbar" id="queryForm">
+  <label for="monthRef">Mês de referência</label>
+  <input type="month" id="monthRef" required>
+  <button type="submit" id="refreshBtn">Atualizar</button>
+</form>
+<p id="dashboardScope" class="scope">Período ainda não confirmado.</p>
 
 <!-- KPIs -->
 <div class="grid">
@@ -209,35 +247,38 @@ body {
 </div>
 
 <div class="card">
-<div class="card-title">Faturado</div>
+<div class="card-title">Documentos · mês selecionado</div>
 <div id="monthBilled" class="card-value">-</div>
 </div>
 
 <div class="card">
-<div class="card-title">Recebido</div>
+<div class="card-title">Pagamentos · mês selecionado</div>
 <div id="monthPaid" class="card-value">-</div>
 <div id="receivedPercent" class="card-sub"></div>
 </div>
 
 <div class="card">
-<div class="card-title">Em aberto</div>
+<div class="card-title">Saldo dos documentos · mês selecionado</div>
 <div id="monthOpen" class="card-value">-</div>
-<div id="overdueInvoices" class="card-sub"></div>
+<div class="card-sub">Valores internos, sem confirmação de emissão fiscal</div>
 </div>
 
 <div class="card">
-<div class="card-title">Crédito</div>
+<div class="card-title">Crédito · por confirmar</div>
 <div id="creditBalance" class="card-value">-</div>
 <div id="clientsWithCredit" class="card-sub"></div>
+<a class="btn" href="/billing">Conferir cobranças e créditos</a>
 </div>
 
 <div class="card">
-<div class="card-title">Alertas</div>
-<div id="openAlerts" class="card-value">-</div>
+<div class="card-title">Registos de alerta · três fontes</div>
+<div id="openAlerts" class="card-value">—</div>
+<p id="alertScope" class="card-sub">Total por confirmar</p>
+<a class="btn" href="/admin-alerts">Consultar todos os alertas</a>
 </div>
 
 <div class="card">
-<div class="card-title">Visitas</div>
+<div class="card-title">Visitas · mês selecionado</div>
 <div id="visitsThisMonth" class="card-value">-</div>
 <div id="visitsSub" class="card-sub"></div>
 </div>
@@ -249,11 +290,13 @@ body {
 
 <div class="panel">
 <h2>Evolução mensal</h2>
+<p class="scope">Histórico por mês, independente do mês selecionado acima.</p>
 <div id="monthlyEvolution"></div>
 </div>
 
 <div class="panel">
-<h2>Distribuição financeira</h2>
+<h2>Valores do mês</h2>
+<p class="scope">Os pagamentos podem liquidar documentos de outros meses. Este resumo não apura lucro.</p>
 <div id="financialDistribution"></div>
 </div>
 
@@ -263,12 +306,14 @@ body {
 <div class="section two-col">
 
 <div class="panel">
-<h2>Top devedores</h2>
-<div id="topDebtorsTable"></div>
+<h2>Documentos com maior saldo</h2>
+<p class="scope">Até 15 documentos de todos os períodos. Um cliente pode aparecer mais de uma vez; não é uma classificação por vencimento.</p>
+<div id="topDebtorsTable" class="table-wrap" tabindex="0" role="region" aria-label="Documentos com saldo"></div>
 </div>
 
 <div class="panel">
 <h2>Pagamentos recentes</h2>
+<p class="scope">Até 15 pagamentos de todos os períodos.</p>
 <div id="latestPayments"></div>
 </div>
 
@@ -277,18 +322,20 @@ body {
 <div class="section two-col">
 
 <div class="panel">
-<h2>Zonas</h2>
+<h2>Instalações por zona</h2>
+<p class="scope">Cadastro atual, incluindo instalações inativas.</p>
 <div id="poolsByZone"></div>
 </div>
 
 <div class="panel">
-<h2>Alertas</h2>
+<h2>Alertas carregados</h2>
+<p class="scope">Até 200 por fonte: técnicos, notificações e visitas regulares de todos os períodos. Vários registos podem descrever o mesmo acontecimento.</p>
 <div id="alertsList"></div>
 </div>
 
 </div>
 
-</div>
+</main>
 
 <script src="/admin-auth-guard.js"></script>
 <script src="/dashboard.js"></script>

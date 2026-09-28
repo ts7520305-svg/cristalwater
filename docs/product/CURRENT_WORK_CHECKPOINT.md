@@ -1,6 +1,20 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK399 publicada
+## Retoma atual — 28/09/2026, TASK400 validada localmente
+
+Revisto o dashboard antigo `/dashboard`, preservando as secções e acessos existentes. A regressão na base sintética mostrou crédito, potencial e montantes por zona inventados como 0 €, apenas 600 alertas apresentados perante um total confirmado de 3 073, uma resposta antiga a substituir o mês escolhido, valores antigos mantidos após 503 e campos ausentes apresentados como zero.
+
+A página valida o contrato efetivamente recebido, conserva zero e valores assinados reais e identifica crédito/total de alertas sem metadados como não apurados. Os alertas usam os totais completos das três fontes e distinguem os até 200 registos carregados por fonte. Planeadas/em curso, impedidas e outros estados ficam explícitos; documentos mensais, pagamentos por data, cadastro e listas globais têm âmbitos próprios. Retirados potencial, montantes por zona e percentagem de pagamentos sem suporte na API. Dados literais passam por nós de texto e ligações de cliente usam IDs válidos.
+
+Mudança do mês, erro, resposta parcial, timeout, offline ou troca de sessão retiram os dados anteriores. Gerações de pedido e sessão recusam respostas atrasadas mesmo se o transporte ignora cancelamento; mudança A→B→A mantém a instância bloqueada. O mês guardado é reposto antes da primeira consulta e a escolha inicial usa Lisboa. 401 mantém o logout central. O painel usa o opt-out manual já existente do adaptador de estados, evitando que todo o conteúdo seja comprimido numa faixa de carregamento/erro.
+
+**Local aprovado:** 1 273 unitários/133 ficheiros, incluindo 33 novos, quatro técnicos, sintaxe 692/307/44 e três grupos integrados: dashboard antigo, administrativo e operacional. Dois meses SQL reais de QA, valores exatos, crédito desconhecido, cobertura de alertas, textos literais, erro/403/401, resposta incompatível, timeout com relógio de teste acelerado, offline, reposição do mês, teclado, sessão e ausência de escritas verificados. 320/390/1440, claro/escuro, controlos ≥44 px, cartões ≥200 px, controlos perto do topo e contraste de texto medido ≥4,5; capturas revistas. [Evidência](evidence/20260928_task400_local.json). Nove ficheiros no lote, cache v206 e runner 308 grupos. Sem alteração de APIs, esquema, dependências, dados ou regras financeiras.
+
+**CI anteriores confirmados:** TASK397 [307/307 e restauro](https://github.com/ts7520305-svg/cristalwater/actions/runs/36410255202) e TASK398 [307/307 e restauro](https://github.com/ts7520305-svg/cristalwater/actions/runs/36412740080), cada uma com 17 etapas e 128 tabelas/47 ficheiros, linhas/hashes iguais; scripts conferidos na ordem exata de cada commit. TASK399 continua em execução na última consulta. **Publicação TASK400:** pendente de publicação da árvore validada. Os 308 grupos PostgreSQL/restauro deste lote ainda não estão confirmados.
+
+**Continuar:** confirmar CI TASK399/400. Medir volumes e coerência das restantes fontes do dashboard; ainda não existe snapshot comum entre todas as leituras. Crédito não passa a ser apurado por esta página. O centro completo carrega os detalhes elegíveis em memória, a seleção de alertas históricos é ampla e mantém timeout de 30 s. Filtros mensais legados continuam `plannedDate OR date`/fuso do servidor e apenas visitas regulares; o dia inclui extra. Restantes idiomas, conciliação histórica, WhatsApp, IA local, VPS/cópias e piloto físico pendentes. Contrato adiado pelo utilizador. Sem merge/deploy/contactos reais; sistema não declarado concluído.
+
+## Retoma anterior — 28/09/2026, TASK399 publicada
 
 Unificadas a seleção, apresentação e proteção de resolução dos alertas de visitas com a classificação diária/mensal. Na regressão, a versão anterior omitiu 306 de 503 visitas elegíveis com aliases, apresentou as restantes 197 com prioridade normal e deixou 98 sem o requisito de tratar o impedimento. Estados como `FAILED`, `NOT_COMPLETED`, `INCOMPLETE`, variantes de bloqueada/retida/impedida e formas portuguesas passam a originar alertas `WARNING` e `VISIT_ACTION_REQUIRED`.
 

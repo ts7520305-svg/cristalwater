@@ -1,328 +1,167 @@
-const API = "/api";
+'use strict';
+const API = '/api';
+const dashboardAuthKeys = ['token', 'cristalwater_jwt', 'adminToken', 'authToken', 'cwAdminToken', 'user', 'cristalwater_user'];
+const dashboardFingerprint = () => JSON.stringify(dashboardAuthKeys.map(key => localStorage.getItem(key)));
+const dashboardOwner = dashboardFingerprint();
+const dashboardToken = localStorage.getItem('cristalwater_jwt') || localStorage.getItem('token') || '';
+const monthPattern = /^[1-9]\d{3}-(0[1-9]|1[0-2])$/;
+const count = value => Number.isSafeInteger(value) && value >= 0;
+const amount = value => typeof value === 'number' && Number.isFinite(value);
+const positiveId = value => Number.isSafeInteger(value) && value > 0;
+const $ = id => document.getElementById(id);
+let dashboardGeneration = 0, dashboardController, dashboardInvalidated = false;
 
-// ======================================================
-// INIT
-// ======================================================
-
-window.addEventListener("DOMContentLoaded", () => {
-  const monthInput = document.getElementById("monthRef");
-
-  if (monthInput) {
-    const now = new Date();
-    monthInput.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-  }
-
-  loadDashboard();
-});
-
-// ======================================================
-// HELPERS
-// ======================================================
-
-function formatMoney(v) {
-  return `${Number(v || 0).toFixed(2)} €`;
+function formatMoney(value) { return amount(value) ? new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(value) : '—'; }
+function setText(id, value) { if ($(id)) $(id).textContent = value; }
+function node(tag, text, className) {
+  const el = document.createElement(tag); if (text != null) el.textContent = String(text); if (className) el.className = className; return el;
 }
-
-function setText(id, value) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = value ?? "-";
+function link(href, text) { const el = node('a', text, 'btn'); el.href = href; return el; }
+function getMonthRef() { return $('monthRef')?.value || ''; }
+function currentMonthRef() {
+  const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Lisbon', year: 'numeric', month: '2-digit' }).formatToParts(new Date());
+  return parts.find(part => part.type === 'year').value + '-' + parts.find(part => part.type === 'month').value;
 }
-
-function esc(value) {
-  return String(value ?? "").replace(/[&<>"']/g, (m) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  }[m]));
+function status(message, state) {
+  setText('dashboardStatus', message); $('dashboardStatus').dataset.state = state;
+  $('dashboardResults').setAttribute('aria-busy', String(state === 'loading'));
+  $('refreshBtn').disabled = dashboardInvalidated || !navigator.onLine;
+  $('monthRef').disabled = dashboardInvalidated;
 }
-
-function getMonthRef() {
-  return document.getElementById("monthRef")?.value || "";
+function clearDashboard(message) {
+  for (const id of ['totalClients', 'totalPools', 'monthBilled', 'monthPaid', 'monthOpen', 'creditBalance', 'openAlerts', 'visitsThisMonth']) setText(id, '—');
+  for (const id of ['clientsSub', 'monthlyPotential', 'receivedPercent', 'clientsWithCredit', 'visitsSub', 'alertScope']) setText(id, 'Por confirmar');
+  setText('dashboardScope', 'Período ainda não confirmado.'); $('dashboardResults').removeAttribute('data-month');
+  for (const id of ['topDebtorsTable', 'latestPayments', 'poolsByZone', 'alertsList', 'monthlyEvolution', 'financialDistribution']) $(id).replaceChildren(node('p', message));
 }
-
-function getHeaders() {
-  const token = localStorage.getItem("token") || localStorage.getItem("authToken") || localStorage.getItem("cwAdminToken") || "";
-  const headers = {
-    "Content-Type": "application/json"
-  };
-  if (token) headers.Authorization = "Bearer " + token;
-  return headers;
+function cancelDashboardRead() { dashboardGeneration++; dashboardController?.abort(); dashboardController = null; }
+function invalidateDashboardSession() {
+  if (dashboardInvalidated) return;
+  dashboardInvalidated = true; cancelDashboardRead(); clearDashboard('A informação da sessão anterior foi retirada.');
+  status('A sessão mudou. Volte a abrir esta página com a conta pretendida.', 'session');
 }
-
-function renderSimpleSeries(containerId, rows, valueKey, suffix = "") {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-  if (!Array.isArray(rows) || !rows.length) {
-    container.innerHTML = "<div class='empty'>Sem dados</div>";
-    return;
-  }
-  container.innerHTML = rows.map((row) => `
-    <div class="small-card">
-      <b>${esc(row.month || row.label || "-")}</b><br>
-      ${esc(row[valueKey] ?? 0)}${suffix}
-    </div>
-  `).join("");
+function sameDashboardSession() {
+  if (dashboardInvalidated) return false;
+  if (!dashboardToken || dashboardFingerprint() !== dashboardOwner) { invalidateDashboardSession(); return false; }
+  return true;
 }
-
-function setError(message) {
-  setText("dashboardStatus", message || "Erro");
-  const targets = ["topDebtorsTable", "latestPayments", "poolsByZone", "alertsList", "monthlyEvolution", "financialDistribution"];
-  targets.forEach((id) => {
-    const el = document.getElementById(id);
-    if (el && !el.innerHTML) el.innerHTML = `<div class='empty'>${esc(message || "Erro ao carregar")}</div>`;
-  });
-}
-
-function renderFinancialDistribution(summary = {}) {
-  const container = document.getElementById("financialDistribution");
-  if (!container) return;
-  const total = Number(summary.monthBilled || 0);
-  const paid = Number(summary.monthPaid || 0);
-  const open = Number(summary.monthOpen || 0);
-  const pct = total > 0 ? Math.round((paid / total) * 100) : 0;
-  container.innerHTML = `
-    <div class="small-card"><b>Recebido</b><br>${formatMoney(paid)} (${pct}%)</div>
-    <div class="small-card"><b>Em aberto</b><br>${formatMoney(open)}</div>
-    <div class="small-card"><b>Faturado</b><br>${formatMoney(total)}</div>
-  `;
-}
-
-function loadDashboard() {
-  return loadDashboardImpl();
-}
-
-// ======================================================
-// LOAD DASHBOARD
-// ======================================================
-
-async function loadDashboardImpl() {
-  try {
-
-    setText("dashboardStatus", "A carregar...");
-
-    const monthRef = getMonthRef();
-
-    const res = await fetch(`${API}/dashboard/admin?monthRef=${monthRef}`, {
-      headers: getHeaders()
-    });
-
-    const data = await res.json();
-
-    if (!res.ok || !data.ok) {
-      const msg = data.error || data.message || "Erro ao carregar dashboard";
-      setError(msg);
-      return;
+function buildLegacyDashboardView(data, month) {
+  const s = data?.summary;
+  const counts = ['totalClients', 'totalPools', 'openAlerts', 'visitsThisMonth', 'visitsDoneThisMonth', 'visitsPlannedThisMonth', 'visitsNotDoneThisMonth'];
+  if (!monthPattern.test(month) || data?.ok !== true || data.monthRef !== month || !s || !counts.every(key => count(s[key]))
+      || !['monthBilled', 'monthPaid', 'monthOpen'].every(key => amount(s[key]))
+      || !['visits', 'alerts', 'poolsByZone', 'topDebtors', 'latestPayments', 'monthlyEvolution'].every(key => Array.isArray(data[key]))) return null;
+  const otherVisits = s.visitsThisMonth - s.visitsDoneThisMonth - s.visitsPlannedThisMonth - s.visitsNotDoneThisMonth;
+  const unique = (rows, key) => new Set(rows.map(row => row[key])).size === rows.length;
+  if (otherVisits < 0 || data.visits.length !== s.visitsThisMonth || !data.visits.every(row => row && positiveId(row.id)) || !unique(data.visits, 'id')
+      || data.alerts.length !== s.openAlerts || !data.alerts.every(row => row && typeof row.id === 'string' && typeof row.message === 'string' && ['technical', 'notification', 'visit'].includes(row.source)) || !unique(data.alerts, 'id')
+      || !data.poolsByZone.every(row => row && typeof row.zone === 'string' && row.zone.length > 0 && count(row.count) && row.count > 0) || !unique(data.poolsByZone, 'zone')
+      || data.poolsByZone.reduce((sum, row) => sum + row.count, 0) !== s.totalPools
+      || data.topDebtors.length > 15 || !data.topDebtors.every(row => row && positiveId(row.invoiceId) && positiveId(row.clientId) && typeof row.clientName === 'string' && typeof row.monthRef === 'string' && amount(row.amountOpen) && row.amountOpen > 0) || !unique(data.topDebtors, 'invoiceId')
+      || data.latestPayments.length > 15 || !data.latestPayments.every(row => row && positiveId(row.paymentId) && typeof row.clientName === 'string' && typeof row.method === 'string' && amount(row.amount) && typeof row.paidAt === 'string' && Number.isFinite(Date.parse(row.paidAt))) || !unique(data.latestPayments, 'paymentId')
+      || !data.monthlyEvolution.every(row => row && monthPattern.test(row.month) && ['billed', 'paid', 'open'].every(key => amount(row[key]))) || !unique(data.monthlyEvolution, 'month')) return null;
+  // Complete totals are available only with mutually consistent source counts.
+  // Without that contract, retain the known preview and leave the total unknown.
+  const coverage = data.alertCoverage;
+  if (coverage !== undefined) {
+    if (!coverage || coverage.scope !== 'DASHBOARD_ALERT_SOURCES_ALL_PERIODS' || coverage.totalsComplete !== true || coverage.limitPerSource !== 200
+        || !count(coverage.total) || !count(coverage.returned) || coverage.returned !== data.alerts.length || coverage.total < coverage.returned
+        || coverage.truncated !== (coverage.total > coverage.returned) || !coverage.sources) return null;
+    let total = 0, returned = 0;
+    for (const source of ['technical', 'notification', 'visit']) {
+      const entry = coverage.sources[source];
+      if (!entry || !count(entry.total) || !count(entry.returned) || entry.returned !== Math.min(entry.total, 200) || data.alerts.filter(row => row.source === source).length !== entry.returned) return null;
+      total += entry.total; returned += entry.returned;
     }
-
-    const s = data.summary || {};
-    const safe = {
-      totalClients: Number(s.totalClients ?? 0),
-      clientsRequiresInvoice: Number(s.clientsRequiresInvoice ?? 0),
-      clientsWithCredit: Number(s.clientsWithCredit ?? 0),
-      totalPools: Number(s.totalPools ?? 0),
-      monthlyPotential: Number(s.monthlyPotential ?? 0),
-      monthBilled: Number(s.monthBilled ?? 0),
-      monthPaid: Number(s.monthPaid ?? 0),
-      monthOpen: Number(s.monthOpen ?? 0),
-      receivedPercent: Number(s.receivedPercent ?? 0),
-      totalCreditBalance: Number(s.totalCreditBalance ?? 0),
-      openAlerts: Number(s.openAlerts ?? 0),
-      visitsThisMonth: Number(s.visitsThisMonth ?? 0),
-      visitsDoneThisMonth: Number(s.visitsDoneThisMonth ?? 0),
-      visitsPlannedThisMonth: Number(s.visitsPlannedThisMonth ?? 0),
-    };
-
-    // =========================
-    // KPIs
-    // =========================
-
-    setText("totalClients", safe.totalClients);
-    setText("clientsSub", `${safe.clientsRequiresInvoice} com fatura · ${safe.clientsWithCredit} com crédito`);
-
-    setText("totalPools", safe.totalPools);
-    setText("monthlyPotential", `Potencial: ${formatMoney(safe.monthlyPotential)}`);
-
-    setText("monthBilled", formatMoney(safe.monthBilled));
-    setText("monthPaid", formatMoney(safe.monthPaid));
-    setText("monthOpen", formatMoney(safe.monthOpen));
-    setText("receivedPercent", `${safe.receivedPercent}%`);
-
-    setText("creditBalance", formatMoney(safe.totalCreditBalance));
-    setText("clientsWithCredit", `${safe.clientsWithCredit} clientes`);
-
-    setText("openAlerts", safe.openAlerts);
-
-    setText("visitsThisMonth", safe.visitsThisMonth);
-    setText("visitsSub",
-      `${safe.visitsDoneThisMonth} feitas · ${safe.visitsPlannedThisMonth} planeadas`
-    );
-
-    // =========================
-    // COMPONENTES
-    // =========================
-
-    renderCharts(data);
-    renderTopDebtors(data.topDebtors || []);
-    renderPayments(data.latestPayments || []);
-    renderZones(data.poolsByZone || []);
-    renderAlerts(data.alerts || []);
-
-    setText("dashboardStatus", `Atualizado · ${data.monthRef}`);
-
-  } catch (err) {
-    console.error(err);
-    setError("Erro de ligação ao servidor");
+    if (!count(total) || total !== coverage.total || returned !== coverage.returned) return null;
   }
+  return { data, summary: s, month, otherVisits, coverage };
 }
-
-// ======================================================
-// GRÁFICOS
-// ======================================================
-
-function renderCharts(data) {
-
-  const evolution = data.monthlyEvolution || [];
-  renderSimpleSeries("monthlyEvolution", evolution, "billed", " EUR");
-  renderFinancialDistribution(data.summary || {});
+function smallCards(target, rows, emptyMessage) {
+  $(target).replaceChildren(...(rows.length ? rows.map(([title, ...lines]) => {
+    const card = node('div', null, 'small-card'); card.append(node('strong', title));
+    for (const line of lines) card.append(node('p', line)); return card;
+  }) : [node('p', emptyMessage)]));
 }
-
-// ======================================================
-// DEVEDORES
-// ======================================================
-
-function renderTopDebtors(rows = []) {
-
-  const container = document.getElementById("topDebtorsTable");
-  if (!container) return;
-
-  if (!rows.length) {
-    container.innerHTML = "<div class='empty'>Sem devedores</div>";
-    return;
+function renderTopDebtors(rows) {
+  if (!rows.length) { $('topDebtorsTable').replaceChildren(node('p', 'Sem documentos com saldo na consulta.')); return; }
+  const table = node('table', null, 'table'), head = node('thead'), header = node('tr'), body = node('tbody');
+  for (const title of ['Documento / cliente', 'Por receber', 'Consultar']) { const cell = node('th', title); cell.scope = 'col'; header.append(cell); }
+  head.append(header);
+  for (const row of rows) {
+    const tr = node('tr'), identity = node('td'), actions = node('td');
+    identity.append(node('strong', '#' + row.invoiceId + ' · ' + row.clientName), node('p', 'Período original: ' + row.monthRef));
+    actions.append(link('/admin-clients?clientId=' + row.clientId, 'Cliente'), link('/billing', 'Cobranças'));
+    tr.append(identity, node('td', formatMoney(row.amountOpen)), actions); body.append(tr);
   }
-
-  let html = `
-    <table class="table">
-      <tr>
-        <th>Cliente</th>
-        <th>Dívida</th>
-        <th>Ação</th>
-      </tr>
-  `;
-
-  rows.forEach(r => {
-    html += `
-      <tr>
-        <td>${esc(r.clientName)}</td>
-        <td>${formatMoney(r.amountOpen)}</td>
-        <td>
-          <button onclick="openClient(${r.clientId})">Cliente</button>
-          <button onclick="openBilling()">Cobrança</button>
-        </td>
-      </tr>
-    `;
+  table.append(head, body); $('topDebtorsTable').replaceChildren(table);
+}
+function renderLegacyDashboard(view) {
+  const { data, summary: s, month, otherVisits, coverage } = view;
+  setText('totalClients', s.totalClients); setText('clientsSub', 'Cadastro atual, incluindo inativos');
+  setText('totalPools', s.totalPools); setText('monthlyPotential', 'Instalações registadas, incluindo inativas');
+  setText('monthBilled', formatMoney(s.monthBilled)); setText('monthPaid', formatMoney(s.monthPaid)); setText('monthOpen', formatMoney(s.monthOpen));
+  setText('receivedPercent', 'Pagamentos pela data de recebimento');
+  setText('creditBalance', '—'); setText('clientsWithCredit', 'Crédito não apurado nesta consulta');
+  setText('visitsThisMonth', s.visitsThisMonth);
+  setText('visitsSub', `${s.visitsDoneThisMonth} concluídas · ${s.visitsPlannedThisMonth} planeadas / em curso · ${s.visitsNotDoneThisMonth} não realizadas / impedidas · ${otherVisits} noutros estados`);
+  setText('openAlerts', coverage?.total ?? '—');
+  setText('alertScope', coverage ? `${coverage.returned} de ${coverage.total} registos carregados. ${coverage.truncated ? 'Pré-visualização parcial. ' : ''}Três fontes · todos os períodos.` : `Total por confirmar; ${data.alerts.length} registos carregados.`);
+  setText('dashboardScope', 'Mês ' + month + ': visitas e documentos do período; pagamentos pela data de recebimento. Cadastro, crédito por confirmar e alertas têm os âmbitos indicados nos cartões.');
+  smallCards('monthlyEvolution', data.monthlyEvolution.map(row => [row.month, 'Documentos: ' + formatMoney(row.billed), 'Pagamentos: ' + formatMoney(row.paid), 'Saldo dos documentos: ' + formatMoney(row.open)]), 'Sem períodos na consulta.');
+  smallCards('financialDistribution', [['Documentos do período', formatMoney(s.monthBilled)], ['Pagamentos no período', formatMoney(s.monthPaid)], ['Saldo dos documentos', formatMoney(s.monthOpen)]], 'Sem valores confirmados.');
+  renderTopDebtors(data.topDebtors);
+  smallCards('latestPayments', data.latestPayments.map(row => [row.clientName, formatMoney(row.amount) + ' · ' + row.method, new Date(row.paidAt).toLocaleString('pt-PT', { timeZone: 'Europe/Lisbon' })]), 'Sem pagamentos na consulta.');
+  smallCards('poolsByZone', data.poolsByZone.map(row => [row.zone, row.count + ' instalações registadas']), 'Sem zonas na consulta.');
+  smallCards('alertsList', data.alerts.map(row => [row.type || 'Alerta', row.message, row.client?.name || row.pool?.client?.name || 'Cliente por identificar', row.status || 'Estado por confirmar']), coverage ? 'Sem alertas nas três fontes consultadas.' : 'Sem alertas carregados; total por confirmar.');
+  data.alerts.forEach((row, index) => {
+    if (positiveId(row.clientId)) $('alertsList').children[index].append(link('/admin-clients?clientId=' + row.clientId, 'Abrir cliente'));
+    else if (positiveId(row.poolId)) $('alertsList').children[index].append(link('/admin-pool-technical?poolId=' + row.poolId, 'Abrir ficha'));
   });
-
-  html += "</table>";
-
-  container.innerHTML = html;
+  $('dashboardResults').dataset.month = month;
 }
-
-// ======================================================
-// PAGAMENTOS
-// ======================================================
-
-function renderPayments(rows = []) {
-
-  const container = document.getElementById("latestPayments");
-  if (!container) return;
-
-  if (!rows.length) {
-    container.innerHTML = "<div class='empty'>Sem pagamentos</div>";
-    return;
-  }
-
-  let html = "";
-
-  rows.forEach(p => {
-    html += `
-      <div class="small-card">
-        <b>${esc(p.clientName)}</b><br>
-        ${formatMoney(p.amount)} - ${esc(p.method)}<br>
-        <small>${new Date(p.paidAt).toLocaleString()}</small>
-      </div>
-    `;
-  });
-
-  container.innerHTML = html;
+async function loadDashboard() {
+  if (!sameDashboardSession()) return false;
+  cancelDashboardRead(); const month = getMonthRef(), request = dashboardGeneration;
+  clearDashboard('Os dados desta consulta ainda não foram confirmados.');
+  if (!monthPattern.test(month)) { status('Escolha um mês válido antes de atualizar.', 'invalid'); return false; }
+  if (!navigator.onLine) { status('Sem ligação. Ligue-se à rede para confirmar os dados.', 'offline'); return false; }
+  const controller = new AbortController(); dashboardController = controller;
+  const current = () => sameDashboardSession() && request === dashboardGeneration && getMonthRef() === month;
+  const timeout = setTimeout(() => {
+    if (!current()) return;
+    cancelDashboardRead(); clearDashboard('A consulta demorou demasiado. Use Atualizar para tentar de novo.'); status('Tempo de consulta excedido.', 'error');
+  }, 15000);
+  status('A consultar o mês ' + month + '…', 'loading');
+  try {
+    const response = await fetch(API + '/dashboard/admin?monthRef=' + encodeURIComponent(month), { headers: { Authorization: 'Bearer ' + dashboardToken }, cache: 'no-store', signal: controller.signal });
+    if (!current()) return false;
+    if (!response.ok) throw Object.assign(Error('unavailable'), { status: response.status });
+    const data = await response.json(); if (!current()) return false;
+    const view = buildLegacyDashboardView(data, month); if (!view) throw Error('Incomplete or incompatible response');
+    renderLegacyDashboard(view); status('Consulta confirmada · ' + month, 'ready'); return true;
+  } catch (error) {
+    if (!current()) return false;
+    clearDashboard('Informação indisponível. Use Atualizar para consultar novamente.');
+    status(error.status === 401 ? 'Sessão inválida. Volte a entrar.' : error.status === 403 ? 'Sem permissão para consultar o dashboard.' : 'Não foi possível confirmar os dados.', 'error');
+    return false;
+  } finally { clearTimeout(timeout); }
 }
-
-// ======================================================
-// ZONAS
-// ======================================================
-
-function renderZones(rows = []) {
-
-  const container = document.getElementById("poolsByZone");
-  if (!container) return;
-
-  if (!rows.length) {
-    container.innerHTML = "<div class='empty'>Sem zonas</div>";
-    return;
-  }
-
-  let html = "";
-
-  rows.forEach(z => {
-    html += `
-      <div class="small-card">
-        <b>${esc(z.zone)}</b><br>
-        ${z.count} piscinas · ${formatMoney(z.monthlyAmount)}
-      </div>
-    `;
-  });
-
-  container.innerHTML = html;
+function monthChanged() {
+  if (!sameDashboardSession()) return;
+  cancelDashboardRead(); clearDashboard('Atualize para consultar o mês escolhido.');
+  status(navigator.onLine ? 'O mês mudou. Use Atualizar para confirmar os dados.' : 'Sem ligação.', navigator.onLine ? 'changed' : 'offline');
 }
-
-// ======================================================
-// ALERTAS
-// ======================================================
-
-function renderAlerts(rows = []) {
-
-  const container = document.getElementById("alertsList");
-  if (!container) return;
-
-  if (!rows.length) {
-    container.innerHTML = "<div class='empty'>Sem alertas</div>";
-    return;
-  }
-
-  let html = "";
-
-  rows.forEach(a => {
-    html += `
-      <div class="small-card" onclick="openClient(${a.clientId})" style="cursor:pointer;">
-        <b>${esc(a.type)}</b><br>
-        ${esc(a.message)}<br>
-        <small>${esc(a.clientName)}</small>
-      </div>
-    `;
-  });
-
-  container.innerHTML = html;
-}
-
-// ======================================================
-// AÇÕES
-// ======================================================
-
-function openBilling() {
-  window.location.href = "/billing";
-}
-
-function openClient(id) {
-  window.location.href = `/admin-clients?clientId=${id}`;
-}
+if ($('monthRef')) $('monthRef').value = currentMonthRef();
+window.addEventListener('DOMContentLoaded', () => {
+  $('queryForm').addEventListener('submit', event => { event.preventDefault(); void loadDashboard(); });
+  $('monthRef').addEventListener('input', monthChanged);
+  $('monthRef').addEventListener('change', monthChanged);
+});
+// The common navigation restores the saved month at DOMContentLoaded.
+window.addEventListener('pageshow', event => { if (event.persisted) invalidateDashboardSession(); else void loadDashboard(); });
+window.addEventListener('storage', event => { if (event.key === null || (dashboardAuthKeys.includes(event.key) && event.oldValue !== event.newValue)) invalidateDashboardSession(); });
+window.addEventListener('offline', () => { if (sameDashboardSession()) { cancelDashboardRead(); clearDashboard('Sem ligação. Os dados não foram confirmados.'); status('Ligue-se à rede para voltar a consultar.', 'offline'); } });
+window.addEventListener('online', () => { if (sameDashboardSession()) void loadDashboard(); });
+const dashboardSessionTimer = setInterval(sameDashboardSession, 1000);
+window.addEventListener('pagehide', () => { invalidateDashboardSession(); clearInterval(dashboardSessionTimer); });
