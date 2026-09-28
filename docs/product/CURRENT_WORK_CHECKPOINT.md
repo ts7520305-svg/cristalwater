@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Requisitos confirmados — 28/09/2026, contrato assinado na área de cliente
+
+O utilizador acrescentou um contrato anual de manutenção e revisões técnicas cobradas, renovável anualmente. Esclareceu que a não renovação deve ser comunicada **30 dias antes do fim do contrato** e que pretende assinatura digital **uma vez, na área de cliente**. A renovação nas condições acordadas mantém a aceitação inicial; alterações materiais têm versão e aceitação próprias. A eventual compensação por saída antecipada exige regra válida, sem montante/percentagem ainda escolhido. O método/fornecedor de assinatura está por definir; não apresentar login/traço/código como assinatura qualificada.
+
+[Especificação e fontes jurídicas](MAINTENANCE_CONTRACT_SIGNATURE_20260928.md). Requisito registado, assinatura ainda não implementada. A ativação administrativa existente não constitui prova de assinatura. Lembrete aos 60 dias permanece proposta de funcionamento. Nenhum cliente foi contactado, contrato celebrado ou valor cobrado; os resultados de testes abaixo dizem respeito aos lotes anteriores.
+
 ## Retoma atual — 28/09/2026, TASK388 publicada
 
 Diálogo de correção extra em PT/EN/FR/ES/DE: título/instruções, medições, checklist, notas/motivo, diferenças, confirmação, rascunhos, validação e erros. 75 chaves novas por idioma. Seletor no início, disponível também com campos bloqueados por envio pendente/403. A troca de idioma conserva revisão aberta, valores, IDs e bytes do rascunho/pedido. Detalhes variáveis do servidor ficam literais sob rótulo traduzido; recibos e textos históricos não são reescritos.
