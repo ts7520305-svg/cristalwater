@@ -4289,5 +4289,14 @@
     "100 items follows current command limits; read-only test does not validate create/close at larger limits.",
     "Legacy administrative guide list/movement endpoints are not the current history UI; no new contract or pagination was imposed.",
     "No production deployment, migration, merge or real contacts. Annual contract deferred."
-  ]
+  ],
+  "publication": {
+    "branch": "work/field-readiness-20260915-simulation",
+    "commit": "f5e18e31daf28f5a074d7a516b6c1f0f44e75d63",
+    "tree": "ae5862e40277e057404c0b12625ee741b8c5e8e3",
+    "treeMatchedTestedIndex": true,
+    "runId": 36474118500,
+    "status": "in_progress",
+    "nativeGates": "313 exact ordered scripts, restore and guide-volume/results.json pending"
+  }
 }

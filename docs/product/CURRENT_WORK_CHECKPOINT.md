@@ -1,6 +1,6 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK408 local / C04-D
+## Retoma atual — 28/09/2026, TASK408 publicada / C04-D
 
 Guias/movimentos aprovados localmente: 201/1 001 registos em listas técnicas e históricas administrativas, páginas completas de 200/25, `maxId` com inserção por outra conexão, stock/detalhes de 100 itens, permissões e oito falhas tardias por perfil. 272 HTTP, três probes API/UI, 31 415 ms; zero comandos API/escritas SQL instrumentadas e doze modelos repostos. UI de 1 001 registos: 41 páginas por percurso, quatro percursos; detalhes de materiais em quatro páginas. [Relatório C04](OPERATIONAL_VOLUME_PLAN_20260928.md), [evidência TASK408](evidence/20260928_task408_local.json).
 
@@ -11,6 +11,8 @@ Cinco grupos integrados concluídos com marcadores terminais lidos; 1 311 unitá
 **Bloqueio novo:** CI TASK407 run36466632283/job109078229561, commit6c77104d..., 311/312 grupos aprovados; `test-field-summary-volume.js` falha no dashboard de 400 clientes por RSS >=768 MiB. Valor exato truncado no erro; não inventar. Restauro saltado. ZIP pequeno10991504417 lido: agenda-volume `ok:true`, quatro probes/limpeza, grupo89 639ms; resumo-volume `ok:false`. C03 continua em validação; C04-C probe nativo aprovado, suite/restauro pendentes.
 
 **Continuar imediatamente:** lote próprio TASK409 para memória C03 sem aumentar a guarda. Inspecção inicial: `DashboardSnapshotBusiness` chama `listExternalInvoices({status:'all'},false,tx)` mas o controller só usa `.summary`; esta chamada materializa clientes, faturas, linhas, pagamentos e tokens de revisão completos. Isto é uma hipótese de causa/otimização ainda por reproduzir, não uma correção feita. Preservar o JSON/semântica financeira e transação comum; testes da falha, equivalência e permissões. Depois C04-E/F; C05 segue-se. Contagem 28 por iniciar, C04 em execução, C03 em validação, duas concluídas. Contrato anual adiado. Branch autorizada; sem merge/deploy/contactos reais.
+
+**Publicação TASK408:** branch `work/field-readiness-20260915-simulation`, commit `f5e18e31daf28f5a074d7a516b6c1f0f44e75d63`, árvore `ae5862e40277e057404c0b12625ee741b8c5e8e3`, igual à preparada/testada. [CI 36474118500](https://github.com/ts7520305-svg/cristalwater/actions/runs/36474118500), em execução; exigir 313 grupos exatos, restauro e `guide-volume/results.json` com três probes/limpeza aprovados. Bloqueio conhecido C03 por tratar no lote seguinte. Sem merge/deploy/contactos reais.
 
 ## Retoma atual — 28/09/2026, TASK407 publicada / C04-C
 
