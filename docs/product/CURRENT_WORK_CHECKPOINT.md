@@ -1,6 +1,20 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK392 publicada
+## Retoma atual — 28/09/2026, TASK393 validada localmente
+
+O painel `/admin-dashboard` apresenta os montantes reais do mês escolhido, incluindo zero, sem os substituir por totais históricos. A regressão na versão anterior mostrou lucro de 9 975 € com os três valores mensais a zero: usava recebimentos históricos e um custo fixo de 12 € por visita. O lucro passa a «Não apurado»; foram retiradas conclusões de saúde financeira, eficiência e previsões para amanhã sem base comprovada. Cadastro, documentos globais, pagamentos mensais, visitas do mês e alertas consultados têm âmbitos explícitos. Visitas noutros estados não são somadas às planeadas; sem visitas não há percentagem de conclusão.
+
+Falhas de leitura de técnicos, alertas, notificações e visitas deixam de ser convertidas em listas vazias no controlador partilhado. A página recusa respostas incompletas/incompatíveis e limpa valores em carregamento, erro, offline ou mudança de mês/sessão. Respostas atrasadas do resumo e do GPS são rejeitadas mesmo quando o transporte ignora o cancelamento; mudança real de sessão bloqueia a instância até ser reaberta. O mapa conta posições recebidas, sem as chamar técnicos online. Conteúdo recebido é texto; a linha temporal contém apenas eventos recebidos nesta página. Mantêm-se os atalhos e a distinção da faturação externa por associar/rever.
+
+**Local aprovado:** 1 125 unitários/126 ficheiros (12 novos), quatro técnicos, sintaxe 691/307/44 e quatro grupos integrados: painel administrativo, resumo de faturação externa, agrupamentos por zona e dashboard operacional. Zero mensal, valores assinados, erro de fonte, seleção/recarregamento do mês, teclado, falhas de rede, sessão A→B→A e respostas atrasadas verificados. 320/390/1440 px, claro/escuro, sem transbordo; controlos principais ≥44 px e contraste do conteúdo/menu medido ≥4,5. A consulta no navegador não enviou escritas de negócio. Os testes de configuração de gráficos e callbacks de mapa usam adaptadores; as capturas mostram o fallback sem fornecedores externos. [Evidência](evidence/20260928_task393_local.json). Cache v202; runner 305 grupos; sem migração/dependência nova.
+
+**CI anteriores confirmadas:** TASK391 [303/303](https://github.com/ts7520305-svg/cristalwater/actions/runs/36388765088) e TASK392 [304/304](https://github.com/ts7520305-svg/cristalwater/actions/runs/36390069779), cada uma com 17 etapas aprovadas e restauro de 128 tabelas/47 ficheiros, linhas/hashes iguais. Os scripts correspondem exatamente ao runner de cada commit; prova incluída na evidência TASK393. As referências anteriores a esses CI em execução são históricas. TASK386/387/388/389/390 também aprovadas; TASK385 conserva a falha histórica 297/300.
+
+**Publicação TASK393:** em preparação na branch `work/field-readiness-20260915-simulation`. Os 305 grupos PostgreSQL e o restauro deste lote ainda não estão confirmados. Ensaios locais com PGlite/Chromium e dados sintéticos. Sem merge/deploy/contactos reais.
+
+**Continuar:** confirmar a CI TASK393 e rever a completude/coerência das fontes administrativas. Subsistem cortes de 200 alertas por fonte, ausência de snapshot comum e campos legados de custo/previsão na API, agora ignorados nesta página. A leitura de `/api/dashboard/metrics` ainda contém conversões de erros em zero/listas vazias; reproduzir antes de corrigir, incluindo cache/circuit breaker. Idiomas/páginas antigas, volume/paginação dos incidentes, conciliação histórica, WhatsApp, IA local, VPS/cópias e piloto físico continuam na fila. Contrato adiado por indicação do utilizador. Sistema não declarado concluído.
+
+## Retoma anterior — 28/09/2026, TASK392 publicada
 
 Corrigidos os agrupamentos por zona de `aiOperationalService` e `aiPredictiveService`. A regressão confirmou que os 12 nomes herdados de `Object.prototype` desapareciam dos resultados da API, apesar de terem visitas/alertas suficientes. O serviço preditivo também acrescentava contadores a objetos/funções herdados. Os dois mapas passam a usar objetos sem protótipo, mantendo cada nome literal e os contadores locais à consulta.
 

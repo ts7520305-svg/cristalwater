@@ -200,7 +200,7 @@ async function getAdminDashboardData(req = {}) {
     }),
     prisma.technician.findMany({
       orderBy: { name: "asc" },
-    }).catch(() => []),
+    }),
     prisma.invoice.findMany({
       include: { client: true, payments: true },
       orderBy: { createdAt: "desc" },
@@ -214,7 +214,7 @@ async function getAdminDashboardData(req = {}) {
       include: { pool: { include: { client: true } } },
       orderBy: { createdAt: "desc" },
       take: 200,
-    }).catch(() => []),
+    }),
     prisma.notification.findMany({
       where: {
         OR: [
@@ -227,7 +227,7 @@ async function getAdminDashboardData(req = {}) {
       include: { client: true },
       orderBy: { createdAt: "desc" },
       take: 200,
-    }).catch(() => []),
+    }),
     prisma.serviceVisit.findMany({
       where: {
         OR: [
@@ -241,7 +241,7 @@ async function getAdminDashboardData(req = {}) {
         technician: true,
       },
       orderBy: [{ plannedDate: "asc" }, { date: "asc" }],
-    }).catch(() => []),
+    }),
     prisma.serviceVisit.findMany({
       where: {
         OR: [
@@ -256,7 +256,7 @@ async function getAdminDashboardData(req = {}) {
       },
       orderBy: [{ updatedAt: "desc" }, { date: "desc" }],
       take: 200,
-    }).catch(() => []),
+    }),
     // Use the same eligibility, history and duplicate checks as /to-issue.
     // A fiscal read failure must fail the summary, never masquerade as zero.
     listExternalInvoices({ status: 'all' }),

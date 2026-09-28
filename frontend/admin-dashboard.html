@@ -805,14 +805,38 @@ RESPONSIVE
   <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
   <link rel="stylesheet" href="/ui/design-system.css">
+  <style>
+    body#adminDashboardPage { --ad-bg:#f3f7fa; --ad-surface:#fff; --ad-soft:#edf3f8; --ad-text:#183047; --ad-muted:#42576b; --ad-border:#b7cbd3; --cw-surface:var(--ad-surface); background:var(--ad-bg); color:var(--ad-text); }
+    #adminDashboardPage main { max-width:1440px; margin:auto; padding-bottom:100px; }
+    #adminDashboardPage main * { min-width:0; overflow-wrap:anywhere; }
+    #adminDashboardPage .card, #adminDashboardPage .role-dashboard, #adminDashboardPage .role-card, #adminDashboardPage .role-action, #adminDashboardPage .ai-status, #adminDashboardPage .alert-bar, #adminDashboardPage .chart-box, #adminDashboardPage .intelligence-item { background:var(--ad-surface); color:var(--ad-text); border:1px solid var(--ad-border); }
+    #adminDashboardPage .chart-mini-card, #adminDashboardPage .role-pulse { background:var(--ad-soft); color:var(--ad-text); border-color:var(--ad-border); }
+    #adminDashboardPage main h2, #adminDashboardPage main h3, #adminDashboardPage main strong, #adminDashboardPage main b, #adminDashboardPage .kpi-value, #adminDashboardPage .ds-nav-link { color:var(--ad-text); }
+    #adminDashboardPage main p, #adminDashboardPage main label, #adminDashboardPage main small, #adminDashboardPage .role-card span, #adminDashboardPage .role-action span, #adminDashboardPage .chart-mini-card span, #adminDashboardPage .chart-note, #adminDashboardPage .kpi-label, #adminDashboardPage .timeline-time { color:var(--ad-muted); line-height:1.5; }
+    #adminDashboardPage .role-grid, #adminDashboardPage .role-actions, #adminDashboardPage .kpi-grid { grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr)); }
+    #adminDashboardPage .chart-summary-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    #adminDashboardPage .role-pulse { flex-shrink:0; }
+    #adminDashboardPage .ai-status { flex-wrap:wrap; }
+    #adminDashboardPage .ai-neutral { background:#155db1; }
+    #adminDashboardPage #estimatedProfit { font-size:26px; }
+    #adminDashboardPage button, #adminDashboardPage input, #adminDashboardPage .ds-nav-link, #adminDashboardPage .role-action { min-height:44px; }
+    #adminDashboardPage input { max-width:100%; padding:10px; color:var(--ad-text); background:var(--ad-surface); border:1px solid var(--ad-border); }
+    #adminDashboardPage .ds-nav-link { background:var(--ad-surface); }
+    #adminDashboardPage main :focus-visible { outline:3px solid #a34a00; outline-offset:3px; }
+    #adminDashboardPage [data-cw-open-drawer] { color:var(--ad-text); background:var(--ad-surface); }
+    #adminDashboardPage #status { white-space:normal; }
+    #adminDashboardPage .alert-bar { cursor:default; }
+    @media(max-width:600px) { #adminDashboardPage main { padding:12px 12px 100px; } #adminDashboardPage .chart-summary-grid { grid-template-columns:1fr; } #adminDashboardPage .dashboard-card, #adminDashboardPage .chart-box, #adminDashboardPage .role-dashboard { padding:14px; } }
+    @media(prefers-color-scheme:dark) { body#adminDashboardPage { --ad-bg:#0b1624; --ad-surface:#101e30; --ad-soft:#14283d; --ad-text:#e6edf7; --ad-muted:#b8cbe0; --ad-border:#536b85; } #adminDashboardPage input { color-scheme:dark; } #adminDashboardPage main :focus-visible { outline-color:#ffbf75; } }
+  </style>
 </head>
 
-<body data-required-role="ADMIN">
+<body id="adminDashboardPage" data-required-role="ADMIN">
 
 <header class="dashboard-topbar card">
 
   <h1>
-    Centro de Operacoes
+    Resumo operacional
   </h1>
 
   <button
@@ -824,21 +848,22 @@ RESPONSIVE
 
 </header>
 
-<main class="dashboard-page page">
+<main class="dashboard-page page" data-cw-state-managed="manual">
 
 <!-- TOOLBAR -->
 
-<section class="card dashboard-toolbar">
+<form id="dashboardQuery" class="card dashboard-toolbar">
 
   <div class="toolbar-field">
-    <label for="monthRef">Mes de referencia</label>
+    <label for="monthRef">Mês de referência</label>
     <input
       type="month"
       id="monthRef"
+      min="1000-01" max="9999-12" required
     >
   </div>
 
-  <button class="cw-v2-btn primary" id="refreshBtn">
+  <button class="cw-v2-btn primary" id="refreshBtn" type="submit">
     Atualizar
   </button>
 
@@ -855,14 +880,16 @@ RESPONSIVE
   </button>
 
   <button class="cw-v2-btn" id="notificationsBtn" type="button">
-    Notificacoes
+    Notificações
   </button>
 
   <div class="status ds-badge is-muted" id="status" role="status" aria-live="polite">
-    Sistema operacional
+    Dados por confirmar
   </div>
 
-</section>
+</form>
+
+<p id="summaryScope" class="dashboard-scope">Período ainda não confirmado.</p>
 
 <!-- ROLE COMMAND CENTER -->
 
@@ -874,8 +901,8 @@ RESPONSIVE
   <div class="role-dashboard-head">
 
     <div>
-      <h2>Command Center do administrador</h2>
-      <p>Prioridades de decisao, equipa em campo, risco financeiro e atalhos para resolver.</p>
+      <h2>Resumo do administrador</h2>
+      <p>A consultar os registos e os respetivos períodos.</p>
     </div>
 
     <span class="role-pulse">A calcular...</span>
@@ -883,7 +910,7 @@ RESPONSIVE
   </div>
 
   <div class="role-grid" role="navigation" aria-label="Atalhos operacionais">
-    <a class="role-card ds-nav-link" href="/admin-visits"><span>Hoje</span><strong>-</strong><small>Visitas e execucao no terreno</small></a>
+    <a class="role-card ds-nav-link" href="/admin-visits"><span>Visitas do mês</span><strong>—</strong><small>Dados por confirmar</small></a>
     <a class="role-card ds-nav-link" href="/admin-alerts"><span>Problemas</span><strong>-</strong><small>Alertas e reparacoes abertas</small></a>
     <a class="role-card ds-nav-link" href="/admin-rounds"><span>Equipa</span><strong>-</strong><small>Tecnicos, rondas e carga</small></a>
     <a class="role-card ds-nav-link" href="/billing"><span>Financeiro</span><strong>-</strong><small>Faturas e valores em aberto</small></a>
@@ -901,12 +928,12 @@ RESPONSIVE
 
     <div
       id="aiDot"
-      class="ai-dot ai-green"
+      class="ai-dot ai-neutral"
     ></div>
 
     <div id="aiStateText">
 
-      Sistema estável
+      Dados por confirmar
 
     </div>
 
@@ -914,27 +941,27 @@ RESPONSIVE
 
   <div>
 
-    Score Operacional:
-    <b id="operationsScore">
-      0
+    Visitas do mês:
+    <b id="monthVisitCount">
+      —
     </b>
 
   </div>
 
   <div>
 
-    Score Financeiro:
-    <b id="financialScore">
-      0
+    Documentos do mês:
+    <b id="monthDocumentCount">
+      —
     </b>
 
   </div>
 
   <div>
 
-    Alertas:
+    Alertas na consulta:
     <b id="criticalAlerts">
-      0
+      —
     </b>
 
   </div>
@@ -949,7 +976,7 @@ RESPONSIVE
 >
 
   <h2>
-    🚨 Situação Crítica
+    Registos para rever
   </h2>
 
   <div id="criticalBannerText"></div>
@@ -968,14 +995,14 @@ RESPONSIVE
   <article class="card ds-kpi-card">
 
     <div class="kpi-label">
-      Técnicos Online
+      Posições consultadas no mapa
     </div>
 
     <div
       id="liveTechnicians"
       class="kpi-value green"
     >
-      0
+      —
     </div>
 
   </article>
@@ -983,14 +1010,14 @@ RESPONSIVE
   <article class="card ds-kpi-card">
 
     <div class="kpi-label">
-      Clientes Online
+      Pagamentos no mês
     </div>
 
     <div
-      id="liveClients"
+      id="monthReceived"
       class="kpi-value blue"
     >
-      0
+      —
     </div>
 
   </article>
@@ -998,14 +1025,14 @@ RESPONSIVE
   <article class="card ds-kpi-card">
 
     <div class="kpi-label">
-      Eficiência
+      Visitas concluídas · mês
     </div>
 
     <div
       id="efficiencyRate"
       class="kpi-value purple"
     >
-      0%
+      —
     </div>
 
   </article>
@@ -1013,14 +1040,14 @@ RESPONSIVE
   <article class="card ds-kpi-card">
 
     <div class="kpi-label">
-      Lucro Estimado
+      Lucro
     </div>
 
     <div
       id="estimatedProfit"
       class="kpi-value green"
     >
-      €0
+      —
     </div>
 
   </article>
@@ -1039,7 +1066,9 @@ RESPONSIVE
 
     <section class="card dashboard-card">
 
-      <h2>Live Operations Map</h2>
+      <h2>Posições registadas</h2>
+
+      <p id="mapStatus">Posições por confirmar.</p>
 
       <div id="liveMap"></div>
 
@@ -1049,7 +1078,7 @@ RESPONSIVE
 
     <section class="card dashboard-card">
 
-      <h2>Tendencias</h2>
+      <h2>Registos do período</h2>
 
       <div class="chart-grid">
 
@@ -1101,7 +1130,7 @@ RESPONSIVE
 
     <section class="card dashboard-card">
 
-      <h2>Operational Timeline</h2>
+      <h2>Eventos recebidos nesta página</h2>
 
       <div id="timelineFeed" role="log" aria-live="polite"></div>
 
