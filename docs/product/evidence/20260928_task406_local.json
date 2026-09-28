@@ -742,10 +742,10 @@
     "realContacts": false
   },
   "publication": {
-    "status": "prepared",
-    "commit": null,
-    "tree": null,
-    "runId": null,
-    "jobId": null
+    "status": "published-native-ci-in-progress",
+    "commit": "6b35739d193f3d15c5c378bbbcb93153402ed3d3",
+    "tree": "5f24f58520e0cfac852196732fbed441918c9091",
+    "runId": 36463317792,
+    "jobId": 109067069909
   }
 }

@@ -1,6 +1,6 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK406 local / C04-B
+## Retoma atual — 28/09/2026, TASK406 publicada / C04-B
 
 Avançado o segundo dos seis cenários de [volume operacional C04](OPERATIONAL_VOLUME_PLAN_20260928.md): stock pela API e catálogos do técnico moderno/antigo, visita extra e correção da guia original. **C04-A e C04-B aprovados localmente, CI pendente; C04-C–F por executar.** Contagem principal: **28 por iniciar, C04 em execução, três em validação (C01–C03), zero fechadas**.
 
@@ -16,7 +16,7 @@ Avançado o segundo dos seis cenários de [volume operacional C04](OPERATIONAL_V
 
 **CI anterior:** TASK405 run `36460017985`, job `109055958055`, commit `77e424dd8305534fb63a4d251dba29e9a00b3f0e`, ainda nos testes integrados na última consulta; dez etapas aprovadas, 310 grupos/restauro e artefactos por confirmar. CI/restauro de C01–C03 aprovados nos lotes anteriores, mas JSONs específicos ainda não lidos. Estados históricos abaixo não substituem esta consulta.
 
-**Publicação TASK406:** preparada na branch `work/field-readiness-20260915-simulation`; commit/árvore/CI serão registados após publicação. Sem merge, deploy ou contactos reais.
+**Publicação TASK406:** branch `work/field-readiness-20260915-simulation`, commit `6b35739d193f3d15c5c378bbbcb93153402ed3d3`, árvore `5f24f58520e0cfac852196732fbed441918c9091`, igual à preparada/testada. [CI 36463317792](https://github.com/ts7520305-svg/cristalwater/actions/runs/36463317792), job `109067069909`, em execução; 311 grupos/restauro e gates nativos ainda por confirmar. Sem merge, deploy ou contactos reais.
 
 **Continuar:** confirmar CI TASK405/TASK406 e os artefactos JSON pequenos. Para TASK406 exigir 311 scripts na ordem exata/restauro, `product-volume/results.json` com 15 probes/limpeza; para C01–C04-A, os gates de snapshot/volumes descritos abaixo. Executar C04-C, agendas/rondas nas escalas do manifesto; não mudar significados de datas/recorrência sem tratar C10. C04 só fecha após seis cenários. Depois C05 idiomas. Contrato anual adiado.
 
