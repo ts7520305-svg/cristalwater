@@ -200,7 +200,19 @@
   ],
   "next": "TASK418/C06: legacy technician.html/technician.js application copy, five languages, original values/drafts/receipts preserved.",
   "publication": {
-    "status": "pending",
-    "branch": "work/field-readiness-20260915-simulation"
+    "status": "published",
+    "branch": "work/field-readiness-20260915-simulation",
+    "commit": "5c96ff382d12e5827cee332d00369562f7866499",
+    "tree": "adc0bcbefb142fddc71d42cc3374b186f0771a91",
+    "exactTreeMatch": true,
+    "ci": {
+      "run": 36496967888,
+      "job": 109178694799,
+      "status": "in_progress",
+      "passedSteps": 10,
+      "expectedOrderedGroups": 318,
+      "restoration": "pending"
+    },
+    "evidenceUpdatedBy": "TASK418 publication checkpoint; this does not claim completed native fleet correction acceptance."
   }
 }

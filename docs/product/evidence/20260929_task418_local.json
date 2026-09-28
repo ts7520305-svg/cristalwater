@@ -1213,5 +1213,19 @@
     "scripts/test-field-suite.js": "4d54f94890b05498b44da2c96aaa1c3400cfe605226c6cfaf3aa038ff556184e"
   },
   "authorization": "Work branch only; no merge, VPS deployment or real notifications; annual legal contract deferred.",
-  "publication": "Pending. Final commit/tree/run will be recorded after publication in the checkpoint."
+  "publication": {
+    "status": "published",
+    "branch": "work/field-readiness-20260915-simulation",
+    "commit": "e63048ccb8cb22ec3420bf1d58f0fe6775d61fbe",
+    "tree": "a3fc2ac92297e00a60744f3377299f2bb0ba2aef",
+    "exactTreeMatch": true,
+    "ci": {
+      "run": 36499020853,
+      "job": 109185204660,
+      "status": "in_progress",
+      "passedSteps": 3,
+      "expectedOrderedGroups": 319,
+      "restoration": "pending"
+    }
+  }
 }

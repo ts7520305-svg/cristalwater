@@ -1,8 +1,10 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 29/09/2026, TASK418 local / C04 nativa concluída
+## Retoma atual — 29/09/2026, TASK418 publicada / C04 nativa concluída
 
-**Publicar TASK418; próximo TASK419: estados e recuperação da jornada antiga.** Lote de dez ficheiros: seis de código/teste mais este checkpoint, plano, manifesto de volume e evidência. Textos próprios de `technician.html`/`technician.js` em PT/EN/FR/ES/DE;67 chaves/335 valores. Rótulos/placeholders atualizados no lugar: conservar nós, seis valores, foco/cursor, bytes de rascunho/cache/outbox, enums BEFORE/AFTER, UUID/payload/hash. Datas só mudam apresentação. Estado sync usa identificador estável; alerta pendente não pode anunciar sincronização concluída. Cache209, runner319. [Prova TASK418](evidence/20260929_task418_local.json).
+**TASK418 publicada; próximo TASK419: estados e recuperação da jornada antiga.** Lote de dez ficheiros: seis de código/teste mais este checkpoint, plano, manifesto de volume e evidência. Textos próprios de `technician.html`/`technician.js` em PT/EN/FR/ES/DE;67 chaves/335 valores. Rótulos/placeholders atualizados no lugar: conservar nós, seis valores, foco/cursor, bytes de rascunho/cache/outbox, enums BEFORE/AFTER, UUID/payload/hash. Datas só mudam apresentação. Estado sync usa identificador estável; alerta pendente não pode anunciar sincronização concluída. Cache209, runner319. [Prova TASK418](evidence/20260929_task418_local.json).
+
+**Publicação418:** `e63048ccb8cb22ec3420bf1d58f0fe6775d61fbe`, árvore `a3fc2ac92297e00a60744f3377299f2bb0ba2aef`, igual à árvore preparada/testada. [CI 36499020853](https://github.com/ts7520305-svg/cristalwater/actions/runs/36499020853), job109185204660, em execução; três etapas aprovadas na leitura inicial. Exigir319 grupos ordenados exatos e restauro. A confirmação deste parágrafo é um lote documental `[skip ci]`; não substitui a prova da execução do commit de código.
 
 **Limite C06:** não declarar página inteira traduzida. Jornada (`cw-legacy-workday.js`), rascunhos (`cw-legacy-visit-drafts.js`), alertas internos, pré-visualização da rota e chrome partilhado têm texto próprio por rever. O inventário83 entradas das duas fontes tem disposição explícita na prova; dois controlos de HTML pertencem aos componentes e ficam diferidos. Brand/pH/enums/markup conservados. Snapshot global C05 mantém a base antiga; não alegar --check de hashes atual.
 
