@@ -2,7 +2,7 @@
 const extraProjection = require('./extraVisitReportProjection');
 const { parseReference, resolutionVersion, requirement } = require('./alertResolutionStateService');
 
-const CLOSED_STATUSES = ["RESOLVED", "DONE", "CLOSED", "CANCELLED", "CANCELED", "ARCHIVED"];
+const CLOSED_STATUSES = ["RESOLVED", "DONE", "CLOSED", "CANCELLED", "CANCELED", "ARCHIVED", "SUPERSEDED"];
 const ALERT_NOTIFICATION_TYPES = [
   "ALERT",
   "CRITICAL",

@@ -70,7 +70,7 @@ async function readLinked(model, ids, include) {
 
 async function list() {
   return prisma.$transaction(async tx => {
-    const [notifications, technicalAlerts, visitAlerts, genericAlerts] = await Promise.all([
+    const [notificationCandidates, technicalCandidates, visitCandidates, genericCandidates] = await Promise.all([
       readAll(tx.notification, { where: {
         OR: [{ type: { in: ALERT_NOTIFICATION_TYPES } }, { eventType: { in: ALERT_EVENT_TYPES } },
           { severity: { in: ['HIGH', 'CRITICAL', 'WARNING', 'WARN'] } }],
@@ -82,6 +82,13 @@ async function list() {
         { status: { in: ['NOT_DONE', 'BLOCKED', 'RETAINED', 'IMPEDIDO'] } }] }, include: SERVICE_VISIT_INCLUDE }),
       readAll(tx.alert, { where: { active: true, status: { notIn: CLOSED_STATUSES } } }),
     ]);
+    // SQL excludes canonical closed states, but historical casing can differ.
+    // Apply the same eligibility before context selection, mapping and totals.
+    const notifications = notificationCandidates.filter(row => isOpenStatus(row.status));
+    const technicalAlerts = technicalCandidates.filter(row => isOpenStatus(row.status));
+    const genericAlerts = genericCandidates.filter(row => isOpenStatus(row.status));
+    // Completing a visit does not resolve its recorded operational alert.
+    const visitAlerts = visitCandidates.filter(visit => String(visit.alerts || visit.reason || visit.status || '').trim());
     // Preserve the existing context selection when several notifications refer to an alert.
     notifications.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt) || b.id - a.id);
     const notificationContexts = notifications.map((notification) => ({
@@ -146,10 +153,8 @@ async function list() {
           attachments: technicalAlert.attachments || [],
         });
       }),
-      ...visitAlerts
-        .filter((visit) => String(visit.alerts || visit.reason || visit.status || "").trim())
-        .map((visit) => enrichAlert(mapVisitAlert(visit), { visit, reportVisit: true })),
-      ...genericAlerts.filter((alert) => isOpenStatus(alert.status)).map(mapGenericAlert),
+      ...visitAlerts.map((visit) => enrichAlert(mapVisitAlert(visit), { visit, reportVisit: true })),
+      ...genericAlerts.map(mapGenericAlert),
     ].sort((a, b) => priority[a.priority] - priority[b.priority] || new Date(b.createdAt) - new Date(a.createdAt) || a.id.localeCompare(b.id));
 
     return {

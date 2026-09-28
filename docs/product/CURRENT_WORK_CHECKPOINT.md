@@ -1,6 +1,18 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK396 publicada
+## Retoma atual — 28/09/2026, TASK397 validada localmente
+
+Corrigida a seleção do centro de alertas antes da associação de contexto e dos totais. A versão anterior emitiu 2 152 registos encerrados da fixture (1 004 notificações, 1 004 técnicos e 143 genéricos), apresentou 5 564 no somatório por origem para 4 200 linhas e perdeu a nota da visita associada a um alerta técnico devido a uma notificação encerrada com referência divergente.
+
+Os estados encerrados são filtrados sem distinguir maiúsculas/minúsculas antes de enriquecer ou contar. `SUPERSEDED` passa a integrar os estados encerrados, em acordo com o fluxo de resolução e os avisos substituídos de água/equipamento, também no resumo do dashboard. Os totais por origem passam a usar exatamente as linhas emitidas. Visitas concluídas com alerta conservam esse alerta; candidatos com texto apenas em branco deixam de aumentar o total. Estados desconhecidos permanecem visíveis e os textos/estados guardados não são alterados.
+
+**Local aprovado:** 1 199 unitários/130 ficheiros, quatro técnicos, sintaxe 692/307/44 e quatro grupos integrados: estados dos alertas, visibilidade, dashboard administrativo e resolução. Dos 16 testes novos, 11 falharam na versão anterior. Fixture: 3 030 encerrados e 503 candidatos de visita vazios excluídos; 11 registos válidos mantidos e oito nas três fontes do dashboard. Contexto correto, totais, repetição, página posterior de cada uma das quatro fontes, 320 px/literalidade e ausência de escritas verificados. Gates existentes de resolução concorrente, recibos, água/bomba, visita impedida, permissões e sessão aprovados. [Evidência](evidence/20260928_task397_local.json). Cache mantém v204; runner passa a 307 grupos com ensaio dedicado. Sem alteração de esquema/dependências/interface.
+
+**CI anterior confirmado:** TASK394 [306/306 e restauro](https://github.com/ts7520305-svg/cristalwater/actions/runs/36402896543), 17 etapas, 128 tabelas/47 ficheiros com linhas/hashes iguais; sequência dos 306 scripts comparada com o runner do commit exato. TASK395/396 continuam em execução nas últimas consultas; 306 grupos e restauro ainda por confirmar. **Publicação TASK397:** em preparação na branch de trabalho. Ensaios locais PGlite/Chromium/dados sintéticos; sem merge/deploy/contactos reais.
+
+**Continuar:** confirmar CI TASK395/396/397. Rever consistência dos estados de visita entre vista diária, fontes de alertas e consumidores antigos, incluindo aliases/maiúsculas. Espaços nos estados desconhecidos conservam a interpretação antiga; não houve normalização histórica. A lista completa ainda carrega todos os detalhes elegíveis numa transação de 30 s e requer medição representativa. Filtros mensais/âmbito de visitas, restantes snapshots, idiomas, conciliação histórica, WhatsApp, IA local, VPS/cópias e piloto físico pendentes. Contrato adiado pelo utilizador. Sistema não declarado concluído.
+
+## Retoma anterior — 28/09/2026, TASK396 publicada
 
 Corrigida a sobreposição dos estados de visitas no resumo administrativo. A versão anterior contou quatro visitas `NOT_DONE`/`BLOCKED`/`RETAINED`/`IMPEDIDO` como quatro planeadas e quatro não realizadas, deixando o resto em −4; a interface recusou o resumo. A classificação passa a ser exclusiva, na camada Business, reutilizando os aliases exatos do dia administrativo e conservando os estados históricos de impedimento deste painel.
 
