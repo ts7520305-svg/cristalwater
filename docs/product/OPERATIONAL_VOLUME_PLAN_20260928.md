@@ -1,6 +1,6 @@
 # C04 — Volume operacional: manifesto e resultados
 
-Data: 28/09/2026. TASK405–TASK410; TASK410 parte de `0e690ed98e4de9e586196c28a339e179e1308570`. Âmbito: C04 do [plano de conclusão](COMPLETION_PLAN_20260928.md). **C04 em execução; A/B aprovadas nativamente, C com probe nativo aprovado mas suite/restauro bloqueados por C03, D/E aprovados localmente.** Os seis cenários abaixo são filhos de C04, não seis novos IDs de conclusão. Um cenário ainda por executar: C04-F.
+Data: 28/09/2026. TASK405–TASK411; TASK411 parte de `2a25807e50c487d604805a2cf8e0fff6e67f5881`. Âmbito: C04 do [plano de conclusão](COMPLETION_PLAN_20260928.md). **C04 em execução; A–D aprovados nativamente, E e PDFs de F aprovados localmente; uploads de F pendentes.** Os seis cenários abaixo são filhos de C04, não seis novos IDs de conclusão. C04-F em execução: PDFs validados neste lote, oito superfícies de upload no lote seguinte.
 
 ## Manifesto fechado de cenários
 
@@ -10,10 +10,10 @@ As escalas seguintes são propostas sintéticas de QA, não dimensões confirmad
 |---|---|---|---|
 | C04-A — catálogo de armazém | `/api/inventory/products`, alias `/api/stock/products`, `/admin-inventory`; `inventoryController` e `InventoryCatalogueBusiness` | 100/1 000/10 000 produtos; ativos/todos/inativos, pesquisa por nome/SKU/marca, ordem/IDs sem perdas nem duplicados; páginas SQL limitadas, alteração concorrente, falha tardia sem resposta parcial, interface real e limpeza | TASK405/TASK406: local e nativo aprovados |
 | C04-B — catálogos de campo | Técnico moderno, antigo, visita extra e correção da guia original; `cw-product-catalogue.js`, stock da guia de trabalho e `test-field-product-catalogue-ui.js` | 201/1 001/10 001 itens, pesquisa/seleção para além dos primeiros 200, nomes repetidos com unidades distintas, disponibilidade conforme contrato e item sem unidade; não trocar identidade, unidade ou recibo ao navegar | TASK406: 15 probes e regressões aprovados localmente; quota offline do percurso antigo corrigida; nativo aprovado na TASK406 |
-| C04-C — agendas e rondas | Dia/mês administrativos e técnico; `/api/round-planner/week`, `/api/rounds/week`, `/api/admin/rounds/week`; `roundController`, `AdminWeeklyPlanningBusiness` | 25/100/400 piscinas, até 16 técnicos e dois anos; regulares/extra, limites de dia/semana/mês, pausas/recorrência existentes; IDs elegíveis exatos, sem duplicação na navegação e totais coerentes | TASK407: consultas e navegação aprovadas localmente, 53 624 visitas e três interfaces; probe nativo aprovado na TASK407, suite/restauro bloqueados pela memória C03. Significados temporais atuais conservados; decisões novas em C10 |
-| C04-D — guias e movimentos | Listas/detalhes de transporte/trabalho, movimentos, stock e consulta técnica; `fieldGuideReadService.js` e grupos `test-field-guide-*` | 201/1 001 guias/movimentos, itens numerosos dentro dos limites existentes; percorrer páginas de até 200, `maxId`, inserções concorrentes, relações e isolamento por técnico/viatura; stock/total/última página sem perdas | TASK408: 272 pedidos e quatro percursos UI aprovados localmente; CI pendente |
+| C04-C — agendas e rondas | Dia/mês administrativos e técnico; `/api/round-planner/week`, `/api/rounds/week`, `/api/admin/rounds/week`; `roundController`, `AdminWeeklyPlanningBusiness` | 25/100/400 piscinas, até 16 técnicos e dois anos; regulares/extra, limites de dia/semana/mês, pausas/recorrência existentes; IDs elegíveis exatos, sem duplicação na navegação e totais coerentes | TASK407: consultas e navegação aprovadas localmente, 53 624 visitas e três interfaces; revalidado nativamente na TASK408 com suite/restauro completos. Significados temporais atuais conservados; decisões novas em C10 |
+| C04-D — guias e movimentos | Listas/detalhes de transporte/trabalho, movimentos, stock e consulta técnica; `fieldGuideReadService.js` e grupos `test-field-guide-*` | 201/1 001 guias/movimentos, itens numerosos dentro dos limites existentes; percorrer páginas de até 200, `maxId`, inserções concorrentes, relações e isolamento por técnico/viatura; stock/total/última página sem perdas | TASK408: 272 pedidos e quatro percursos UI aprovados localmente e no PostgreSQL nativo; 313 grupos/restauro confirmados na TASK411 |
 | C04-E — relatórios e histórico | Resumo mensal administrativo por secção, relatórios guardados/cliente e comunicação/finanças; `adminReportsController`, `test-field-admin-monthly-reports*` | Reexecutar o cenário existente acima de 10 000 documentos/pagamentos/registos e acrescentar 201/1 001 relatórios guardados; meses vazios/completos, dados e totais exatos, navegação/detalhes, titularidade, erro e memória | TASK410: três probes, 116 pedidos, 201/1 001 relatórios, 10 001 registos por fonte financeira/comunicação e três interfaces aprovados localmente; CI pendente |
-| C04-F — PDFs e anexos grandes | PDFs de visita, mês e guias; documentos oficiais/anexos de inventário e dos percursos anteriores | Para cada modelo: mínimo, multipágina e maior fixture válida; extrair texto/IDs/totais e conferir paginação. Para cada upload aplicável: um byte abaixo/no/acima do limite efetivo, truncado/tipo inválido, abertura/download/hashes/permissões, resposta perdida e limpeza | Por executar; inventariar limites efetivos antes do lote, sem os aumentar para fazer passar testes |
+| C04-F — PDFs e anexos grandes | PDFs de visita, mês e guias; documentos oficiais/anexos de inventário e dos percursos anteriores | Para cada modelo: mínimo, multipágina e maior fixture válida; extrair texto/IDs/totais e conferir paginação. Para cada upload aplicável: um byte abaixo/no/acima do limite efetivo, truncado/tipo inválido, abertura/download/hashes/permissões, resposta perdida e limpeza | TASK411: nove famílias/27 PDFs/496 páginas aprovados localmente. Oito superfícies de upload inventariadas; fronteiras e recuperação pendentes na TASK412. CI PDF pendente |
 
 Gates comuns: dados sintéticos isolados, notificações/integrações externas desligadas, resultado e versão identificados, contagens/IDs e bytes verificáveis, tempo/memória com âmbito explícito, ausência de escritas nas consultas, falha sem falso sucesso e limpeza das fixtures próprias. O ensaio nativo e o restauro mantêm-se obrigatórios. Estes perfis não substituem amostras reais, dispositivos físicos ou o piloto C30/C31.
 
@@ -207,3 +207,66 @@ Máximos das leituras positivas da superfície correspondente; bytes, tempo e me
 **Lote de seis ficheiros:** dois scripts, este relatório, plano, checkpoint e evidência. CI TASK408/TASK409 ainda na suite integrada, dez etapas aprovadas em cada um; 313 grupos/restauro/JSONs ainda por confirmar. TASK410 requer 314 grupos na ordem exata, restauro e `report-volume/results.json` com três probes e limpeza aprovados. **C04-E local aprovado; C04-F é o único cenário por executar.** C03 continua em validação e C04 em execução; total principal mantém 28 por iniciar, uma em execução, uma em validação e duas concluídas. Contrato anual adiado; branch autorizada, sem merge/deploy/contactos reais.
 
 **Publicação TASK410:** branch `work/field-readiness-20260915-simulation`, commit `19569a6145ab049b6dca058ae791d81cefc6fc26`, árvore `6726513a322e496354724643cb28852a0d24b1d2`, igual à preparada/testada. [CI 36478772257](https://github.com/ts7520305-svg/cristalwater/actions/runs/36478772257), job `109118978818`, em execução; quatro etapas aprovadas e instalação de dependências na consulta. Exigir 314 grupos na ordem exata, restauro e `report-volume/results.json` com três probes e limpeza aprovados. TASK408/TASK409 continuam na suite integrada, dez etapas aprovadas cada. Sem merge, deploy ou contactos reais.
+
+
+## C04-F / TASK411 — volume e paginação de PDFs
+
+**PDFs aprovados localmente; uploads ainda pendentes.** Novo `test-field-pdf-volume.js`, acrescentado ao runner de **315 scripts únicos e existentes**. Nenhuma alteração de aplicação, esquema, dependências ou cache v207. [Evidência e hashes](evidence/20260928_task411_local.json).
+
+Inventário fechado de **nove famílias**: visita regular, visita extra, relatório mensal guardado, guia de transporte, guia de obra, seguro de viatura, documento financeiro interno, extras pendentes e orçamento. Três perfis 0/25/1 001 geraram **27 documentos e 496 páginas**. O perfil mínimo usa uma linha para extras faturáveis, porque a ausência de extras produz 404, e uma estimativa antiga sem valores para o orçamento, com revisão explícita. As demais dimensões mínimas admitem zero linhas.
+
+O maior perfil contém **1 001 movimentos, piscinas no relatório mensal, linhas financeiras e extras faturáveis**, **100 itens de guia e de orçamento** dentro do limite de escrita, **50 produtos e 24 fotografias por visita**. Descrições de 300 caracteres, notas de seguro de 2 000 caracteres com quebras e condições de orçamento de 3 000 caracteres. Estes são máximos sintéticos ensaiados, não limites universais da aplicação. As fontes de stock e movimentos foram semeadas separadamente para apresentação; o teste não certifica reconciliação do livro de movimentos.
+
+**100 pedidos HTTP:** 38 PDFs positivos (27 guardados mais acessos do titular e alias) e 62 recusas/IDs ausentes esperados. Marcadores de linhas completos e únicos, texto Unicode, valores financeiros guardados, soma em cêntimos de extras (**10,01 €** no maior perfil), valor final do orçamento, identidade/tipo de documento, cabeçalhos privados e rodapé em todas as páginas conferidos. Acesso do técnico da viatura e do cliente titular, cliente/técnico estrangeiro, anónimo, modo ADMIN do cliente recusado, notas privadas omitidas ao cliente e alias da última guia verificados. Não foram enviados comandos ou entregas.
+
+### PDFs guardados do maior perfil
+
+Medições por resposta ADMIN guardada. Processo Node novo por perfil, não por documento; a memória pode acumular entre pedidos. RSS inclui API, cliente HTTP, dados de fixture e extração de texto, excluindo a base. O pico de todos os pedidos, incluindo acessos repetidos, foi **494,01 MiB**. Guardas de 30 s/64 MiB/768 MiB mantidas.
+
+| Família | Páginas | Bytes | HTTP (ms) | RSS amostrado (MiB) |
+|---|---:|---:|---:|---:|
+| Guia de transporte | 12 | 41 785 | 173,1 | 158,53 |
+| Guia de obra | 170 | 308 620 | 626,4 | 282,92 |
+| Seguro | 2 | 24 506 | 58,6 | 351,60 |
+| Relatório mensal | 120 | 201 840 | 213,7 | 374,60 |
+| Documento financeiro | 49 | 94 734 | 174,7 | 401,53 |
+| Extras pendentes | 48 | 98 248 | 317,4 | 472,46 |
+| Orçamento | 13 | 46 820 | 79,1 | 476,78 |
+| Visita regular, 24 fotografias | 17 | 88 631 | 150,3 | 490,26 |
+| Visita extra, 24 fotografias | 17 | 89 197 | 148,4 | 493,26 |
+
+**Renderização:** Poppler extraiu caixas de **138 926 palavras** das 496 páginas: zero palavras fora da página e zero sobreposições superiores a 40% da menor caixa, com interseção superior a um ponto em cada eixo. Primeira/intermédia/última página dos PDFs grandes renderizadas; **13 páginas revistas visualmente**, cobrindo as nove famílias, linhas longas, finais, totais e fotografias. Sem cortes ou sobreposições observados nas amostras. Secções mensais e resumos financeiros podem continuar na página seguinte; o conteúdo mantém-se completo. A geometria de palavras não verifica todas as colisões de imagens e a revisão manual não abrange todas as páginas. Caracteres sem suporte mantêm o aviso e marcador `[U+6F22]`; não equivale a cobertura integral de glifos/idiomas.
+
+**Integridade:** zero escritas SQL nas leituras, snapshot das fontes conservado, contagens de **25 modelos** iguais antes/depois e repostas após limpeza própria. Os **56 originais JPEG sintéticos de 640×360** mantiveram hash e foram removidos no fim. Testar 24 fotografias pequenas não testa ainda a fronteira de 25 MiB por upload ou de 64 MiB agregados na projeção de fotografias.
+
+**Gates locais:** volume **8 963 ms** (8 861 ms internos), guias PDF **1 334 ms**, documento financeiro **712 ms**, regressão financeira **2 895 ms**, fotografias **2 293 ms** e histórico/revisão **5 051 ms**, todos com marcadores finais lidos. **1 318 unitários/135 ficheiros, quatro técnicos, sintaxe 695/307/44**, node-check e diff-check. As regressões existentes cobrem truncagem/tipo/identidade PDF, falha de renderização, sessão/offline, cinco formatos de imagem, orientação/remoção de metadados, ficheiros corrompidos/externos/symlinks recusados, permissões e interfaces estreitas. PGlite 0.5.8/PostgreSQL 18.3 WASM, Chromium 153 para regressões, UTC e integrações desligadas. Os grupos antigos mantêm fixtures apenas na base QA descartada; a limpeza certificada acima pertence ao novo grupo.
+
+### Inventário de uploads para TASK412
+
+Valores encontrados no código, **ainda sem aceitação das fronteiras HTTP neste lote**. Testar limite−1, limite e limite+1 em bytes, original/descarga/hash/permissões, resposta perdida/recuperação e limpeza. Tipos inválidos/corrompidos aplicam-se ao contrato de cada superfície; anexos genéricos não ganham uma whitelist inventada. Confirmar a inclusão do byte do limite no parser e na regra, sem aumentar limites para passar testes.
+
+| Superfície | Limite configurado | Fonte |
+|---|---:|---|
+| Documento oficial de guia | 25 MiB; regra inclusiva e parser +1 byte | `transportGuideDocumentRoutes.js` / `transportGuideDocumentFiles.js` |
+| Compra de inventário | 20 MiB | `inventoryRoutes.js` |
+| Documento geral | 50 MiB | `documentRoutes.js` |
+| Fotografia de visita regular | 25 MiB | `visitRoutes.js` |
+| Fotografia de visita extra | 25 MiB | `extraVisitExecutionRoutes.js` |
+| Anexo de conversa do cliente | 25 MiB | `clientMessageRoutes.js` |
+| Fotografia de reparação | 20 MiB | `repairRoutes.js` |
+| Comprovativo de despesa | 5 MiB | `companyExpenseRoutes.js` / `expenseLedgerRules.js` |
+
+A regressão de documentos oficiais já contém 25 MiB/mais um byte, revisão/commit/recibo e recuperação; será reutilizada. O arquivo administrativo de atualização do sistema (500 MiB) é uma operação de deploy e fica fora dos anexos operacionais C04-F. Fotografias de relatório têm ainda 24 imagens/25 MiB por ficheiro/64 MiB agregados; preservar exclusão explícita e estados atuais.
+
+### CI anterior confirmado neste lote
+
+**TASK408 aprovada nativamente:** commit `f5e18e31daf28f5a074d7a516b6c1f0f44e75d63`, [run 36474118500](https://github.com/ts7520305-svg/cristalwater/actions/runs/36474118500), job `109103422154`, 18 etapas e **313 scripts na ordem exata**, sem falhas. Restauro de **128 tabelas/47 ficheiros**, linhas e hashes iguais. Artefacto `field-readiness-gates` **10996767155**, 30 532 bytes, SHA-256 `6f75b6111fc8ff605db86c1ee20ae2f64ed3399818bcfcd39ae65339d605bf2d`, transferido e lido.
+
+JSON de agendas: quatro probes (três API + UI), perfis 25/100/400 e limpeza; teste idêntico ao da TASK407. JSON de guias: três probes (duas API + UI), 201/1 001, 272 pedidos e limpeza, PostgreSQL 16.15. **C04-C/D aceites nativamente na TASK408**, juntamente com A/B já aceites. A versão C03 anterior à otimização passou aqui, mas alcançou **735,34 MiB** no dashboard de 400 clientes; isso não valida a implementação TASK409. CI TASK409 terminou entretanto com uma falha de rascunhos; TASK410 continua em execução. Ver atualização abaixo.
+
+**Lote de seis ficheiros:** dois scripts e quatro documentos. Exigir na TASK411 **315 scripts na ordem exata, restauro e `pdf-volume/results.json` com três perfis/27 PDFs/limpeza**. C04 continua em execução: E aguarda CI, F aguarda uploads e CI dos PDFs. C03 tem o probe da otimização aprovado, mas aguarda suite/restauro completos. Contagem principal: 28 por iniciar, uma em execução, uma em validação e duas concluídas. Próximo lote TASK412: uploads C04-F; depois C05 idiomas. Contrato anual adiado. Sem merge, deploy ou contactos reais.
+
+
+**Atualização CI TASK409 antes da publicação:** commit `04005a0831f5fe9e6e588b1467596e03036e1779`, [run 36475513427](https://github.com/ts7520305-svg/cristalwater/actions/runs/36475513427), job `109108100107`, **312/313 grupos aprovados** na ordem exata; restauro saltado. Única falha: `test-field-legacy-visit-drafts.js:39`, após recuperar a ligação e alterar a visita no servidor, a contagem imediata dos conflitos foi **0 em vez de 2**. Os dois primeiros marcadores passaram. Causa ainda em diagnóstico; não se conclui perda de dados nem defeito de aplicação apenas desta asserção.
+
+Artefacto pequeno **10997265072**, 30 434 bytes, SHA256 `32a9e8408e15944ea7624c760cb06036fb36b823ed9b0dc3e84f0071d2c39224`, lido: **summary-volume 12 perfis + três falhas/limpeza aprovados**, dashboard400 otimizado **513,18 MiB/1 677,6 ms**, snapshot operacional com `committedBeforeRemaining: true`. A correção de memória passou nativamente; **C03 mantém-se em validação por falta de suite/restauro completos**. Antes do lote de uploads, reproduzir e resolver a falha dos rascunhos num lote próprio caso necessário, sem enfraquecer as asserções ou aumentar guardas. TASK410 continua em execução.
