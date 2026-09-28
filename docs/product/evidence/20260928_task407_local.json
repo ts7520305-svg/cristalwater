@@ -2775,6 +2775,16 @@
     "realContacts": false
   },
   "publication": {
-    "status": "prepared-for-authorized-publication"
+    "status": "published-native-ci-in-progress",
+    "commit": "6c77104d02ad4e7f56c77867329ef40278d7726a",
+    "tree": "87c643a2bde495e2a4b2511479a57795af3670df",
+    "runId": 36466632283,
+    "jobId": 109078229561,
+    "successfulSteps": 6,
+    "currentStep": "Verify additive upgrade from the previous schema",
+    "expectedRunnerScripts": 312,
+    "runnerConfirmed": false,
+    "restoreConfirmed": false,
+    "artifactsRead": false
   }
 }

@@ -1,6 +1,6 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK407 local aprovada / C04-C
+## Retoma atual — 28/09/2026, TASK407 publicada / C04-C
 
 Concluído localmente o terceiro cenário de [volume C04](OPERATIONAL_VOLUME_PLAN_20260928.md), agendas e rondas. **C04-A/B/C aprovados localmente, CI pendente; C04-D/E/F por executar.** Contagem principal: **28 por iniciar, C04 em execução, três em validação (C01–C03), zero fechadas**. Nenhuma falha nova da aplicação reproduzida; acrescentados apenas o grupo de regressão `test-field-agenda-volume.js`, o seu registo no runner e documentação. [Evidência TASK407](evidence/20260928_task407_local.json).
 
@@ -16,7 +16,7 @@ Concluído localmente o terceiro cenário de [volume C04](OPERATIONAL_VOLUME_PLA
 
 **CI anteriores:** TASK405 `36460017985`/job `109055958055` e TASK406 `36463317792`/job `109067069909` continuam na suite integrada na última consulta, cada uma com dez etapas aprovadas. Não foram confirmados os 310/311 grupos, restauros ou JSONs específicos. Gates C01–C03 mantêm o estado histórico de CI/restauro aprovados e artefactos específicos por ler; não fechar por inferência.
 
-**Publicação TASK407:** preparada para a branch `work/field-readiness-20260915-simulation`, base `a1f93dd85ca4e94d35477c3b4c9e1bce1842d505`; commit/árvore/CI a registar após publicação autorizada. Sem merge, deploy ou contactos reais.
+**Publicação TASK407:** branch `work/field-readiness-20260915-simulation`, commit `6c77104d02ad4e7f56c77867329ef40278d7726a`, árvore `87c643a2bde495e2a4b2511479a57795af3670df`, igual à preparada/testada. [CI 36466632283](https://github.com/ts7520305-svg/cristalwater/actions/runs/36466632283), job `109078229561`: seis etapas aprovadas e migração aditiva em execução na consulta; 312 grupos/restauro/JSONs ainda por confirmar. Sem merge, deploy ou contactos reais.
 
 **Continuar:** C04-D, guias e movimentos com 201/1 001 registos, páginas/stock/isolamento conforme manifesto; depois C04-E/F. Confirmar CI TASK405–TASK407, respetivamente 310/311/312 scripts na ordem exata/restauro e os JSONs específicos. Para TASK407 exigir `agenda-volume/results.json`, `ok: true`, três perfis API e um UI, IDs/totais/falhas/limpeza aprovados; contagens diárias dependem do fuso e data da fixture. Para C01–C04-B manter os gates exatos abaixo. C04 só fecha após seis cenários; C05 idiomas segue-se. Contrato anual adiado.
 
