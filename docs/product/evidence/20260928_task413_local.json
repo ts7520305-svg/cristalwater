@@ -3021,5 +3021,145 @@
     "jobId": 109155898206,
     "ciStatus": "in_progress",
     "fullSuiteScripts": 316
+  },
+  "nativeRunResult": {
+    "task": "TASK413",
+    "commit": "2efae46d4bbec1f468c36f27e672592cfc43dbd9",
+    "runId": 36489954119,
+    "jobId": 109155898206,
+    "conclusion": "failure",
+    "groups": 316,
+    "passed": 315,
+    "failed": [
+      {
+        "script": "test-field-fleet-management.js",
+        "code": 1,
+        "signal": null,
+        "ms": 1604
+      }
+    ],
+    "specific": [
+      {
+        "script": "test-field-summary-volume.js",
+        "code": 0,
+        "signal": null,
+        "ms": 31908
+      },
+      {
+        "script": "test-field-attachment-volume.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10473
+      },
+      {
+        "script": "test-field-chat-attachments.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2970
+      },
+      {
+        "script": "test-field-legacy-visit-drafts.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7446
+      }
+    ],
+    "restorationConfirmed": false,
+    "scriptOrderConfirmed": true,
+    "jobSteps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Initialize containers",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Run actions/setup-node@v4",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Run npm ci",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Run npx prisma validate && npx prisma generate",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Verify additive upgrade from the previous schema",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Run npx playwright install --with-deps chromium",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Run npm run check:syntax",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Run node scripts/test-field-suite.js",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      {
+        "name": "Restore database and uploaded files in isolated QA",
+        "status": "completed",
+        "conclusion": "skipped"
+      },
+      {
+        "name": "Run actions/upload-artifact@v4",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Run actions/upload-artifact@v4",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Post Run actions/setup-node@v4",
+        "status": "completed",
+        "conclusion": "skipped"
+      },
+      {
+        "name": "Post Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Stop containers",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Complete job",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "failureExcerpt": "AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n2026-09-28T22:20:30.8705315Z \n2026-09-28T22:20:30.8705606Z   assert(!JSON.stringify((await call(prefix)).body).includes('3655'))\n2026-09-28T22:20:30.8705931Z \n2026-09-28T22:20:30.8706333Z     at /home/runner/work/cristalwater/cristalwater/scripts/test-field-fleet-management.js:39:117\n2026-09-28T22:20:30.8707052Z     at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {\n2026-09-28T22:20:30.8707524Z   generatedMessage: true,\n2026-09-28T22:20:30.8707776Z   code: 'ERR_ASSERTION',\n2026-09-28T22:20:30.8708290Z   actual: false,\n2026-09-28T22:20:30.8708513Z   expected: true,\n2026-09-28T22:20:30.8708721Z   operator: '==',\n2026-09-28T22:20:30.8708920Z   diff: 'simple'\n2026-09-28T22:20:30.8709491Z }\n2026-09-28T22:20:30.8709653Z \n2026-09-28T22:21:04.8567787Z ",
+    "artifactScope": "Job log inspected only. Attachment-volume exit0 is not a claim to have read its JSON or passed the full suite/restoration.",
+    "followUp": "TASK417 replaces brittle whole-JSON numeric substring matching with exact public projection checks and rejection controls; application unchanged."
   }
 }

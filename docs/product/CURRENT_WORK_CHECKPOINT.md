@@ -1,5 +1,17 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 29/09/2026, TASK417 / teste da frota corrigido localmente
+
+**Publicar TASK417 e retomar idiomas na TASK418.** O CI413 falhou no teste da frota:316 grupos exatos,315 aprovados; busca de3655 em todo o JSON deu positivo e o restauro foi saltado. Anexos passaram como grupo, sem aprovação global nem nova leitura do JSON específico. [Prova e limites](evidence/20260929_task417_local.json).
+
+**Reprodução determinística:** matrícula pública `QA-3655-<UUID>` e PIN3655 coexistem; a asserção antiga falha. O log nativo não regista qual campo continha a sequência, portanto não atribuir a colisão original a uma matrícula específica. A implementação da lista projeta campos explícitos sem relação do técnico.
+
+**Correção de teste:** projeção exata do envelope e dos13 campos públicos do veículo em cada GET aprovado; consulta global e consulta filtrada da fixture mantidas. Campos PIN, password, custo ou técnico aninhado são recusados nos cinco controlos negativos. API1 879ms, navegador30 805ms,24 unitários/2 ficheiros e node-check/diff-check aprovados. Mantidos resposta perdida/reinício, concorrência, rollback SQL, histórico/relacionados, paginação e contagens. Aplicação, cache208, esquema e runner318 inalterados. Validação local PGlite; CI nativo da correção necessário.
+
+**TASK418 / C06:** `frontend/technician.html` e `frontend/technician.js`, até dez ficheiros por lote. Traduzir texto da aplicação em cinco idiomas, conservar rascunhos, valores/enums, fotografias e recibos; não redesenhar o percurso nem reescrever o diálogo extra. Partir do inventário C05 e da fila416 aprovada localmente. A TASK417 inicialmente prevista para idiomas foi usada para tratar esta falha concreta de CI.
+
+**Estado principal:**32 tarefas,26 por iniciar, C06 em execução, C04 em validação, quatro concluídas(C01–C03/C05). TASK414 run36491440593/job109160736428 e TASK416 run36495253808/job109173198905 ainda na suite na última leitura. Exigir317 grupos/restauro/JSONs de upload para414 e318 grupos/restauro para416/417; não assumir sucesso. Contrato anual adiado; publicação apenas na branch de trabalho autorizada, sem merge/deploy/contactos reais.
+
 ## Retoma atual — 28/09/2026, TASK416 publicada / C06 em execução
 
 **Próximo TASK417: idiomas da página técnica antiga.** Partir de `frontend/technician.html`/`frontend/technician.js`, entradas C06 do [inventário](LANGUAGE_INVENTORY_20260928.md), até dez ficheiros por lote. Traduzir apenas texto de aplicação; preservar valores/enums, rascunhos, produtos/rota e recibos. Diálogo extra já aprovado permanece. DE dos relatórios é C09, não concluído por este lote.
