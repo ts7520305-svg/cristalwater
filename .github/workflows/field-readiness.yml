@@ -58,6 +58,19 @@ jobs:
         env:
           CW_POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
         run: node scripts/test-field-restore.js
+      # Small machine-readable proofs remain downloadable independently of the
+      # screenshots/PDF archive, which can exceed workspace transfer limits.
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: field-readiness-gates
+          path: |
+            reports/field-suite/*/results.json
+            reports/field-visual/operational-dashboard/snapshot.json
+            reports/field-suite/dashboard-metrics.json
+            reports/field-suite/summary-volume/results.json
+            reports/field-suite/inventory-volume/results.json
+          retention-days: 7
       - uses: actions/upload-artifact@v4
         if: always()
         with:

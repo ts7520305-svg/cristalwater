@@ -1,6 +1,24 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 28/09/2026, TASK404 publicada / C03
+## Retoma atual — 28/09/2026, TASK405 local / C04-A
+
+Fechado o [manifesto C04 de seis cenários](OPERATIONAL_VOLUME_PLAN_20260928.md): catálogo de armazém, catálogos de campo, agendas/rondas, guias/movimentos, relatórios/histórico e PDFs/anexos. São filhos de C04, não novos IDs. Plano principal: **28 por iniciar, C04 em execução, três em validação (C01–C03), zero fechadas**.
+
+Reproduzida a truncagem silenciosa do catálogo: 601 produtos existentes, HTTP 200 com apenas 500. `InventoryCatalogueBusiness` passa a reunir páginas de até 500 numa única transação `RepeatableRead`, ordem ativo/nome/ID, timeout 30 s. Controller delega e recusa falhas com 503 genérico, sem produtos parciais. JSON/campos/filtros/pesquisa/alias e permissões ADMIN conservados. Sem mudança de frontend/cache v206, esquema ou dependências versionadas.
+
+**Local aprovado:** 1 305 unitários/134 ficheiros (17 novos), quatro técnicos, sintaxe 695/307/44, três grupos: volume, contagem real e movimentos de navegador. 20 probes de volume: 18 positivos nas escalas 100/1 000/10 000, alteração concorrente e falha na segunda página. No perfil completo de 10 000: 10 331 878 bytes, 575,1 ms, 219,11 MiB RSS amostrado e 21 páginas SQL incluindo vazia final. Interface real a 390 px: 10 000 IDs exatos, nome literal, zero erros/escritas, 2 636,3 ms e 16,71 MiB heap JS. Leitor sem escritas, 401 anónimo e limpeza própria confirmados. [Evidência e hashes](evidence/20260928_task405_local.json).
+
+**Limites:** JSON e DOM continuam em O(n), não houve paginação pública/virtualização. RSS inclui API e cliente HTTP local, sem DB/navegador; heap JS não representa toda a memória do navegador. PGlite novo serializou a escrita (`committedBeforeRemaining: false`); só o CI pode confirmar a escrita antes das restantes páginas, exigida explicitamente no PostgreSQL. Máximo 10 000 produtos sintéticos, não SLA nem certificação do VPS. Navegador/dependências QA expirados recuperados fora do repositório, sem alterar lockfile; Chromium 153.0.8010.0 efetivamente arrancou e executou todos os cenários finais.
+
+**CI TASK404 confirmado:** run `36438347610`, job `108982012460`, commit `243f9e72da450af0261eee19f4cbba45beb163bd`; 17 etapas, **309 scripts na ordem exata**, restauro de 128 tabelas/47 ficheiros com linhas/hashes iguais. Artefacto `10980061941`, 124 840 609 bytes; `summary-volume/results.json` ainda não lido. C01/C02 conservam CI/restauro aprovados e os gates específicos pendentes descritos abaixo. Não foi contornado o bloqueio de transferência/URL anterior.
+
+**Lote (10 ficheiros):** Business, controller, teste unitário, novo ensaio de volume, runner, workflow, manifesto/relatório C04, evidência, plano e este checkpoint. Runner tem 310 nomes únicos e existentes. Workflow mantém o arquivo completo e acrescenta `field-readiness-gates`, com JSONs de resultados/snapshots/métricas/volumes; o runner escreve resultados em subpasta temporal, coberta pelo glob. Esses novos artefactos ainda não foram produzidos/lidos.
+
+**Publicação TASK405:** preparada na branch `work/field-readiness-20260915-simulation`; commit/árvore/CI serão registados após publicação. Sem merge, deploy ou contactos reais.
+
+**Continuar:** confirmar CI TASK405, 310 grupos/restauro e descarregar o artefacto JSON pequeno. Exigir os gates nativos C01/C02 (`committedBeforeRemaining: true`), C03 (`ok: true`, perfis/falhas/limpeza) e C04-A (20 probes, snapshot concorrente verdadeiro, DOM 10 000 e limpeza). Verificar as provas na versão atual antes de fechar C01–C03/C04-A. Executar depois C04-B; C04 só fecha após os seis cenários, não após o catálogo de armazém. C05 idiomas vem a seguir. Contrato anual mantém-se adiado.
+
+## Retoma anterior — 28/09/2026, TASK404 publicada / C03
 
 Testes de volume de quatro GETs: dashboard administrativo, métricas diárias, alertas completos e riscos. Escalas de 25/100/400 clientes, 16 técnicos e dois anos de visitas/documentos; maior fixture com **64 816 linhas**, incluindo 41 600 visitas e 9 600 documentos. [Relatório](SUMMARY_VOLUME_20260928.md) e [evidência](evidence/20260928_task404_local.json). Plano: **29 por iniciar, três em validação (C01–C03), zero fechadas**.
 

@@ -3,6 +3,7 @@ const prisma = require('../prismaClient');
 const { invalidateDashboardCache } = require('../services/dashboardCacheService');
 const { normalizeProductName, normalizeUnit } = require('../utils/stockNormalizer');
 const { toPublicUploadUrl } = require('../config/uploadPath');
+const catalogue = require('../business/inventory/InventoryCatalogueBusiness');
 
 function n(v, d = 0) { const x = Number(v); return Number.isFinite(x) ? x : d; }
 function s(v) { return typeof v === 'string' ? v.trim() : v == null ? '' : String(v).trim(); }
@@ -24,11 +25,12 @@ const { upsertProduct } = require('../dal/InventoryProductRepository');
 async function adjustBalance(tx,payload){return require('../dal/EquipmentStockRepository').adjustBalance(tx,{...payload,productName:stockName(payload.productName),unit:stockUnit(payload.unit)});}
 
 async function listProducts(req, res) {
-  const q = s(req.query.q);
-  const where = q ? { OR: [{ name: { contains: q, mode: 'insensitive' } }, { sku: { contains: q, mode: 'insensitive' } }, { brand: { contains: q, mode: 'insensitive' } }] } : {};
-  if (req.query.includeInactive !== 'true' && req.query.active !== 'all') where.active = true;
-  const products = await prisma.inventoryProduct.findMany({ where, orderBy: [{ active: 'desc' }, { name: 'asc' }], take: 500 });
-  res.json({ ok: true, products });
+  try {
+    return res.json(await catalogue.listProducts(req.query));
+  } catch (error) {
+    console.error('[INVENTORY_CATALOGUE_READ_FAILED]', error.code || error.name);
+    return res.status(503).json({ ok: false, error: 'Não foi possível obter o catálogo completo. Tente novamente.' });
+  }
 }
 
 async function createProduct(req, res) {
