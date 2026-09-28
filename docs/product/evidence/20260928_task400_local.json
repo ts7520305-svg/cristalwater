@@ -4060,10 +4060,23 @@
     "Current native PostgreSQL suite and restore unconfirmed; full production acceptance is pending."
   ],
   "publication": {
-    "status": "validated_pending_publication",
+    "status": "published_work_branch",
     "cache": "cristalwater-field-20260928-v206",
     "expectedNativeGroups": 308,
     "suiteConfirmed": false,
-    "restoreConfirmed": false
+    "restoreConfirmed": false,
+    "branch": "work/field-readiness-20260915-simulation",
+    "codeCommit": "a8904d659194c33775501c5e2f5085980439f162",
+    "tree": "90aafc9a7c016bb01ac239fa309e96084c7e987e",
+    "treeMatchesPreparedIndex": true,
+    "nativeCi": {
+      "runId": 36418458948,
+      "jobId": 108915143666,
+      "status": "in_progress",
+      "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36418458948",
+      "expectedGroups": 308,
+      "confirmed": false,
+      "restoreConfirmed": false
+    }
   }
 }
