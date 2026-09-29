@@ -12,7 +12,7 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 CI446 terminou338/339; a única falha usa o seletor de idioma depois de a guarda ocultar a página. Reprodução determinística39 174ms confirma o listener existente. Teste corrigido mantém os cinco avisos e o botão desativado, comprova bloqueio persistente após repor o token e segue o link real de reabertura offline. Bytes de rascunhos REGULAR/EXTRA, contexto/arquivo e pedidos/UUID/hash/recibos/revisão conservados; mudança de idioma bloqueada não relê produtores nem faz pedidos operacionais. Quatro integrações e sintaxe individual/diff aprovados; nenhuma guarda/espera/asserção retirada. [Prova449](evidence/20260929_task449_local.json).
 
-Aplicação/cache232/runner341 e contagens de traduções inalterados; gates de produto448 herdados sem repetição. Restauro446 não executado; CI447/448 nas suites340/341 após dez etapas iniciais aprovadas. Publicação e PostgreSQL16/upgrade/suite341/restauro449 pendentes. C06/C06-010/C08/C10 continuam abertos; próximo: fila antiga `js/offline/offline-queue.js` depois dos gates. Entradas anteriores conservam o estado histórico.
+Aplicação/cache232/runner341 e contagens de traduções inalterados; gates de produto448 herdados sem repetição. Restauro446 não executado; CI447/448 nas suites340/341 após dez etapas iniciais aprovadas. TASK449 publicada `217cdbee`, CI36632923826 em execução no commit exato; PostgreSQL16/upgrade/suite341/restauro449 pendentes. C06/C06-010/C08/C10 continuam abertos; próximo: fila antiga `js/offline/offline-queue.js` depois dos gates. Entradas anteriores conservam o estado histórico.
 
 ## Progresso funcional — TASK448 / erros de fotografias da página antiga
 

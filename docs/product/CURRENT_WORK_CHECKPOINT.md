@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 29/09/2026, TASK449 / CI em execução
+
+TASK449 publicada na branch `work/field-readiness-20260915-simulation`: código `217cdbee1110faec49d07c9e1ea9c758ee7d1e1a`, árvore `692411c36e4a22ed89866e9ff452c6da673606dd`, igual à validada. Checkout alinhado; histórico local original preservado. [CI36632923826](https://github.com/ts7520305-svg/cristalwater/actions/runs/36632923826), job109626354811, arrancou no commit exato; quatro etapas iniciais aprovadas, `Run npm ci` em execução. Quatro integrações/sintaxe individual/diff aprovados; teste respeita bloqueio e reabertura reais de sessão, conservando rascunhos/pedidos/recibos. Aplicação/cache232/runner341 inalterados; gates de produto448 herdados. Exigir PostgreSQL16/upgrade/suite341/restauro128 tabelas47ficheiros para aceitação. Atualização documental posterior `[skip ci]` conserva o código. [Prova449](evidence/20260929_task449_local.json).
+
+CI446 terminou338/339, única falha no seletor oculto corrigida em449; restauro não executado. CI447/448 continuam nas suites340/341 após dez etapas iniciais aprovadas; nenhum restauro declarado. Próximo: verificar gates447–449 e reparar qualquer falha; depois `js/offline/offline-queue.js`/C06-010 e consumidores reais. C06 aberta;32=26 por iniciar/uma em execução/cinco concluídas. Público autorizado durante desenvolvimento; privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Entradas abaixo históricas.
+
 ## Retoma atual — 29/09/2026, TASK449 local validada / sessão do teste de impedimentos
 
 **TASK449:** CI446 terminou com338/339 grupos aprovados. A única falha foi `test-field-impediment-form-languages.js`: tentava selecionar idioma numa página ocultada pela guarda de sessão; restauro não executado. Reprodução determinística39 174ms confirma a mesma falha ao ativar o listener storage existente. O teste usa agora a API de idioma enquanto bloqueado, verifica os cinco avisos e o botão desativado, confirma que repor o token não desbloqueia a página antiga e segue o link real de reabertura offline. Dados e guardas conservados. [Prova449](evidence/20260929_task449_local.json).

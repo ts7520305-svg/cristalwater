@@ -144,8 +144,27 @@
     "No merge/deploy/external communications. Public repository authorized during development; private before completion/C32."
   ],
   "publication": {
-    "status": "local_validated_publication_pending",
+    "status": "published_ci_in_progress",
     "branch": "work/field-readiness-20260915-simulation",
+    "codeCommit": "217cdbee1110faec49d07c9e1ea9c758ee7d1e1a",
+    "tree": "692411c36e4a22ed89866e9ff452c6da673606dd",
+    "remoteTreeEqualsValidatedTree": true,
+    "checkoutAligned": true,
+    "originalLocalCommit": "befe5d1d29380b520bc57aeaebdbdfda797a19cd",
+    "originalHistoryBranch": "work/local-task449-20260929",
+    "ci": {
+      "task": 449,
+      "run": 36632923826,
+      "job": 109626354811,
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 4,
+      "currentStep": "Run npm ci",
+      "failedSteps": [],
+      "restore": "pending",
+      "head": "217cdbee1110faec49d07c9e1ea9c758ee7d1e1a",
+      "fullSuiteGroups": 341
+    },
     "merged": false,
     "deployed": false
   }
