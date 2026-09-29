@@ -1,11 +1,19 @@
 (function () {
   'use strict';
   const store = window.CWFieldWriteStore;
+  // Presentation follows the original Error identity; persisted/server text is literal.
+  const errors = new WeakMap();
+  function problem(key, message) {
+    const error = Error(message);
+    errors.set(error, Object.freeze({ key, params: Object.freeze({}) }));
+    return error;
+  }
+  window.CWLegacyQueueErrors = Object.freeze({ copy: error => errors.get(error) });
   function legacy() { const raw = localStorage.getItem('cristalwater_offline_queue'); return !!raw && raw !== '[]'; }
-  window.getOfflineQueue = async () => { const rows = await store.records('VISIT_COMPLETION'); if (legacy()) throw Error('Conclusões antigas sem conta confirmada foram preservadas; peça revisão ao escritório.'); return rows; };
+  window.getOfflineQueue = async () => { const rows = await store.records('VISIT_COMPLETION'); if (legacy()) throw problem('legacyQueueHistory', 'Conclusões antigas sem conta confirmada foram preservadas; peça revisão ao escritório.'); return rows; };
   window.addOfflineAction = async (action, captured = store.session()) => {
     const match = /^\/api\/core\/visits\/([1-9][0-9]*)\/complete$/.exec(action.url);
-    if (!match || (action.method && action.method !== 'POST') || action.headers) throw Error('Operação offline não reconhecida. Os dados não foram enviados.');
+    if (!match || (action.method && action.method !== 'POST') || action.headers) throw problem('legacyQueueOperation', 'Operação offline não reconhecida. Os dados não foram enviados.');
     return store.prepare('VISIT_COMPLETION', Number(match[1]), action.body, { label: 'Conclusão da visita ' + match[1] }, captured);
   };
   window.sendOfflineAction = async (record, captured = store.session(), options = {}) => { for (const photo of (await store.records('VISIT_PHOTO', captured)).filter(item => item.resourceId === record.resourceId)) await store.send(photo.requestId, captured, options); return store.send(record.requestId, captured, options); };

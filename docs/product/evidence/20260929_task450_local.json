@@ -1,0 +1,265 @@
+{
+  "task": "TASK450",
+  "item": "C06-010",
+  "date": "2026-09-29",
+  "base": "ee4876f2edcbe4e5383b91eba7e5ded20c6c3698",
+  "scope": "Two owned legacy completion-queue errors and their actual legacy technician-page consumers in PT/EN/FR/ES/DE. Original Error.message, serialized labels, packet identity, validation and send order remain unchanged.",
+  "negative": [
+    {
+      "script": "test-field-legacy-queue-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 3753,
+      "timedOut": false,
+      "logSha256": "c5e9e8e0e16213c000b46174eb5a1300a2b99b290c133411bcc9fd2cc5a60443"
+    }
+  ],
+  "negativeDescription": "On technician.html, selecting English leaves the actual queue-history warning and network caption in Portuguese.",
+  "intermediate": [
+    {
+      "results": [
+        {
+          "script": "test-field-legacy-queue-languages.js",
+          "code": 1,
+          "signal": null,
+          "ms": 8945,
+          "timedOut": false,
+          "logSha256": "a4a2b0dc00e4624c33c5362a8c0915501d4b3b4c67983a5b0f87ef86af589877"
+        }
+      ],
+      "reason": "Browser reload correctly removes test instrumentation. The fixture now reinstalls its read/send counters after the offline reload; the zero-producer assertion remains intact."
+    },
+    {
+      "results": [
+        {
+          "script": "capture-queue.cjs",
+          "code": 1,
+          "signal": null,
+          "ms": 10197,
+          "timedOut": false,
+          "logSha256": "cdd6cd0b7366f1c0e6f2434f99441695174203d45108bc3832d37a3b48949e43"
+        }
+      ],
+      "reason": "The test wrongly expected the photo-only X-CW-Field-Request header on JSON completion. It now checks the existing JSON contract: no multipart header, original requestId in the body, authenticated owner, payload/hash and receipt identity. Application transport unchanged."
+    },
+    {
+      "results": [
+        {
+          "script": "capture-queue.cjs",
+          "code": 0,
+          "signal": null,
+          "ms": 9679,
+          "timedOut": false,
+          "logSha256": "4833dbc38c9be52367969ed417dcf6d2fb91ccf592dd955f86badbeb94e35b98"
+        }
+      ],
+      "reason": "Complete scenario passes with the optional German320 screenshot; final four-group regression run omits capture."
+    }
+  ],
+  "integration": [
+    {
+      "script": "test-field-legacy-queue-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 9922,
+      "timedOut": false,
+      "logSha256": "4833dbc38c9be52367969ed417dcf6d2fb91ccf592dd955f86badbeb94e35b98"
+    },
+    {
+      "script": "test-field-legacy-photo-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 9053,
+      "timedOut": false,
+      "logSha256": "f27246f6be02942d800efede6906ab432dd310b6c58ba1222c72d3d9dc00e770"
+    },
+    {
+      "script": "test-field-write-recovery-ui.js",
+      "code": 0,
+      "signal": null,
+      "ms": 16944,
+      "timedOut": false,
+      "logSha256": "352d88c2e6cfcfaa3d97bc8fb74388152f00143c296153d1081fd2bf6665e27f"
+    },
+    {
+      "script": "test-field-session-browser.js",
+      "code": 0,
+      "signal": null,
+      "ms": 2952,
+      "timedOut": false,
+      "logSha256": "ca0b4bd1a5b0cbf004d295c1d5f299d3d171658e50a19e2e743a257ce00e7ae3"
+    }
+  ],
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 122174,
+      "logSha256": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 20662,
+      "logSha256": "2e01bad1f35c79c8dd674873651615ab67d2e3ce9e5991ad423e59e38226a1cc"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 1979,
+      "logSha256": "3c702d4545496b4155741cc232f4960e6d2f9ac73c7be268f0606a127ba5a0d8"
+    }
+  ],
+  "localEnvironmentRepair": {
+    "initialUnitGate": {
+      "name": "unit",
+      "code": 1,
+      "signal": null,
+      "ms": 20971,
+      "logSha256": "3e62355a987e5f99e992f030bf00d6595d55819df2fe6a4a75b3227f741f461a"
+    },
+    "initialUnitTotals": {
+      "passed": 1355,
+      "failed": 1
+    },
+    "reason": "The new writable checkout lacked the historical Git objects used by an unchanged unit comparison. Five original commit/tree/blob objects were restored after checking each canonical object hash and checking the historical3100-byte source against GitHub. No application or test was changed; only the failed unit gate and unexecuted technician gate were rerun.",
+    "proof": {
+      "commit": "61fc1ca25bcc30f0f613101920778ace6cea5642",
+      "sourceMatchesGitHub": true,
+      "sourceSha256": "dd9741b03cad123608c96bf9fc2bd89265de4549588426382e95953a1ca488e4",
+      "restoredCanonicalObjects": [
+        {
+          "oid": "61fc1ca25bcc30f0f613101920778ace6cea5642",
+          "type": "commit",
+          "bytes": 293
+        },
+        {
+          "oid": "ea0b63243f7709b6de4f643556b81ec0724a7379",
+          "type": "tree",
+          "bytes": 5554
+        },
+        {
+          "oid": "8779277ad0da0e4c0104691aaff11148e41d1e12",
+          "type": "tree",
+          "bytes": 835
+        },
+        {
+          "oid": "d46bd2bbf9deb7cd03bd1932d2d3940e231875fa",
+          "type": "tree",
+          "bytes": 10791
+        },
+        {
+          "oid": "9ff6047f80570a9a18231e79e73a5dc16374a7b6",
+          "type": "blob",
+          "bytes": 3100
+        }
+      ],
+      "productOrTestsEdited": false
+    }
+  },
+  "totals": {
+    "unitTests": 1356,
+    "unitFiles": 138,
+    "technicianTests": 4,
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44
+    }
+  },
+  "checks": [
+    "Actual legacy queue history warning and network caption in five languages at320/390/1440 plus direct html.lang change. Original historical and corrupt bytes, six draft fields, DOM nodes, focus/caret and account remain. Locale changes cause no queue producer calls or operational API requests.",
+    "History and invalid URL/method/headers guards keep original Portuguese Error.message. Only original Error identities have private frozen specs/params; no enumerable metadata, cloned errors, JSON or spoofed .copy classification by the queue helper.",
+    "The actual completion button receives a malformed action through the test adapter, exercising the original helper rejection and real alert consumer in all five languages without saving/sending a request. Unowned same-text IndexedDB failure stays literal; malformed/spoofed warning text stays literal and does not execute markup.",
+    "Actual offline camera and completion buttons save the photo and all six original completion fields. Cached reload preserves photo bytes/name/type/UUID, completion owner/UUID/payload/hash/untranslated label and exact draft bytes. No completion applies while offline.",
+    "Original photo is uploaded before its completion. Server403 matching the helper operation text stays literal in every language and in the stored failure. Photo confirms once; the visit stays exactly unchanged until actual accepted completion.",
+    "Real recovery control with held response, lost acknowledgement and explicit retry preserves account, UUID, original fields/hash/body/label/attempt time. Locale changes while held preserve nodes/data without new producer calls or operational requests. One completion audit, one photo and two receipts; final metrics/notes/products/owner match original submitted values.",
+    "Legacy photograph-language, comprehensive write-recovery and account-session regression groups pass in the same isolated run. German320 warning capture reviewed; no horizontal overflow. Syntax individual and diff checks pass."
+  ],
+  "preservation": {
+    "helperOperationsIdenticalAfterTwoErrorConstructorReversals": true,
+    "consumerIdenticalAfterTwoPresentationReversals": true,
+    "mixedLineEndingsPreserved": true,
+    "previousCatalogueExactBytes": true,
+    "backendSchemaWorkflowsWriteStoreModernPagePhotoHelperUnchanged": true,
+    "previousRunner341OrderExact": true,
+    "runner": 342,
+    "cache": 233,
+    "newEntries": 2,
+    "newStrings": 10
+  },
+  "sourceSha256": {
+    "frontend/js/offline/offline-queue.js": "efc1950f140fe5ef0a09f349d6bf534648858ef0339abd19a511bdb988eed949",
+    "frontend/cw-legacy-technician-copy.js": "1356739a5c6d7c4b9056245ee46d20ff89dac94827093016b8e2891d685780e3",
+    "frontend/technician.js": "688baef2d42e7ab46dcd72a1911e3239dc127352816d662488e244a7e732b11e",
+    "scripts/test-field-suite.js": "320796ce918f798e31c77199cc870ff54fc89556c7c4c140f597f50e0a14fcfd",
+    "frontend/sw.js": "df5475714b1a7b805de43b70d53a4ed2b96774c618a5907d5d4d00a245b6cd41",
+    "scripts/test-field-legacy-queue-languages.js": "8e3bfd9f0aab2f780650c0d8fdf51445710b478b445549f4443c0c3d879d2efa"
+  },
+  "capture": {
+    "path": "reports/field-ui/LEGACY_QUEUE_DE_320.png",
+    "sha256": "6594b693d07e50d004986e44b439ac5a5b845f9bae929c1b9988f07b4e2a19c3",
+    "reviewed": true
+  },
+  "environment": {
+    "database": "isolated PGlite via TCP",
+    "browser": "Chromium153",
+    "timezone": "Europe/Lisbon",
+    "externalEffects": "notifications/email/WhatsApp/fiscal/webhooks/background jobs disabled"
+  },
+  "nativePrevious": [
+    {
+      "task": 447,
+      "run": 36627447422,
+      "job": 109607960844,
+      "counts": {
+        "total": 340,
+        "passed": 340
+      },
+      "failures": [],
+      "restore": {
+        "status": "success",
+        "tables": 128,
+        "uploadedFiles": 49,
+        "databaseRowsAndFileHashesMatch": true,
+        "excerpt": "2026-09-29T21:39:23.7488651Z PASS restored 128 tables and 49 uploaded files; database rows and file hashes match"
+      }
+    },
+    {
+      "task": 448,
+      "run": 36629776697,
+      "job": 109615752303,
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "restore": "pending"
+    },
+    {
+      "task": 449,
+      "run": 36632923826,
+      "job": 109626354811,
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "restore": "pending"
+    }
+  ],
+  "limits": [
+    "PGlite does not replace PostgreSQL16/additive-upgrade/full342-group suite/full database and uploaded-file restore with measured counts and matching hashes.",
+    "TASK447 native340/340 and restore128 tables49files are accepted only for that exact prior commit; TASK448/449 remain pending.",
+    "C06/C06-010/C08/C10 remain open. Next: offline GPS helper/C06-009 after current native gates; reminder-visits and remaining modern panels still need review.",
+    "Unattributed history remains preserved for office review. Native alerts use the language at opening; an already opened alert is not repainted. Stored labels and external/persisted failures remain literal.",
+    "No merge/deploy/external communications. Public repository authorized during development; private before completion/C32."
+  ],
+  "publication": {
+    "status": "local_validated_publication_pending",
+    "branch": "work/field-readiness-20260915-simulation",
+    "merged": false,
+    "deployed": false
+  }
+}

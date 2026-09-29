@@ -402,7 +402,7 @@ async function updateOfflineBar(syncState) {
     window.CWFieldWriteStore.records('TECHNICIAN_ALERT')
   ]);
   if (revision !== offlineBarRevision || credential !== window.CristalAuth?.getToken?.()) return;
-  const errors = results.map((result, index) => result.status === 'rejected' ? (index === 2 ? legacyCopy.spec('gpsReview') : window.CWLegacyPhotoErrors.copy(result.reason) || legacyCopy.spec('literal', { text: result.reason.message })) : '').filter(Boolean);
+  const errors = results.map((result, index) => result.status === 'rejected' ? (index === 2 ? legacyCopy.spec('gpsReview') : window.CWLegacyQueueErrors.copy(result.reason) || window.CWLegacyPhotoErrors.copy(result.reason) || legacyCopy.spec('literal', { text: result.reason.message })) : '').filter(Boolean);
   const rows = results.map(result => result.status === 'fulfilled' ? result.value : []);
   const network = document.getElementById('offlineNetwork'), visitsEl = document.getElementById('offlineVisits'), photosEl = document.getElementById('offlinePhotos');
   legacyCopy.set(network, errors[0] || (rows[3].length && syncState === 'synced' ? 'alertsPending' : syncState) || (navigator.onLine ? 'online' : 'offline'));
@@ -849,7 +849,7 @@ async function completeVisit(id) {
       if (!window.CWFieldWriteStore.same(captured) || generation !== legacyEntryGeneration) return;
       markLocalVisitCompleted(id, { pendingSync: false }); renderVisits(); alert(legacyCopy.t('visitConfirmed')); loadRoute();
     } catch (error) { if (window.CWFieldWriteStore.same(captured) && generation === legacyEntryGeneration) alert(legacyCopy.t('completionSaved', { error: error.message })); }
-  } catch (error) { if (window.CWFieldWriteStore.same(captured) && generation === legacyEntryGeneration) alert(error.copy ? legacyCopy.t(error.copy) : error.message || legacyCopy.t('completionError')); }
+  } catch (error) { if (window.CWFieldWriteStore.same(captured) && generation === legacyEntryGeneration) { const copy = window.CWLegacyQueueErrors.copy(error) || error.copy; alert(copy ? legacyCopy.t(copy) : error.message || legacyCopy.t('completionError')); } }
   finally { legacyCompletionBusy.delete(id); if (window.CWFieldWriteStore.same(captured)) updateOfflineBar(); }
 }
 
