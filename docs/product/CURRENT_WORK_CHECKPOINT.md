@@ -1,5 +1,19 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 29/09/2026, TASK428 validada localmente / rascunhos modernos
+
+**TASK428 pronta para publicação na branch autorizada.** Rascunhos do modo de campo:61 chaves/305 valores em PT/EN/FR/ES/DE, cache217/runner326. Antes: idioma EN, estado guardado em PT. Agora estados, erros próprios, comparação de17 campos, três origens e ações/aria são localizados. Nomes, notas, quantidades, datas e fotografias mantêm os dados originais. [Prova428](evidence/20260929_task428_local.json).
+
+**Dados e limites:**descritores só em WeakMaps; entry.error continua string e os enums Servidor/Outra janela/Registo anterior mantêm-se no protocolo. Inversão das substituições reconstruiu exatamente o corpo anterior. Idioma só repinta texto/atributos, sem preencher campos, reconciliar, guardar ou enviar. Mesmos nós, foco/cursor, campos, baseline, conflitos, revisão, UUID/hash/recibo e bloqueios verificados. pendingSummary traduz quando consultado; snapshots já apresentados na revisão diária e outros módulos continuam no respetivo lote. A instrução EXTRA conserva o rótulo real «Corrigir registo».
+
+**Diagnóstico novo:**primeiro teste de idiomas detetou substituição dos nós após comparação entre janelas; repetição diagnóstica passou, sem captar o callback exato. Prova controlada: reposição silenciosa de html.lang deixava texto antigo; paint seguinte, com a mesma entrada, recriava os botões. Observador só de mudanças reais de lang agora atualiza os mesmos nós; prova antes=false/depois=true e dados idênticos. Fixture publicada exige cinco idiomas silenciosos seguidos de paint, preservando nós. Sem relaxar asserções/limites, sleeps ou refresh manual.
+
+**Validação428:**1 345 unitários/137 ficheiros; sintaxe695/308/44 e node-check dos quatro JS finais. Três integrações passaram: rascunhos modernos anterior, novo grupo de idiomas e reposição do idioma, mais probe silenciosa. Teste anterior e unitários precederam o observador DOM final; grupo novo/reposição/probe passaram após a correção. Página real: guardado/a guardar/erro, locks/quota, servidor/duas janelas, bytes inválidos, reload offline e conclusão congelada. Cinco idiomas/a320,390,1440 nos estados principais; fixture separada cobre17 tipos/origens/estados raros. Captura DE320 inspecionada. O teste anterior conserva conclusão SQL única, um débito, EXTRA/foto/correção e troca de conta.
+
+**Gates:**CI425 terminou323/324, único erro dos alertas na linha104 após reload offline, já corrigido em427. Log completo e324 resultados na prova428; restauro ignorado. CI426/427 continuam em execução, dez etapas aprovadas; não há ainda325 grupos/restauro aceites. TASK428 exige326 grupos exatos/restauro128 tabelas47 ficheiros próprios. Sete ficheiros, quatro código/teste e três documentação; nenhuma outra entrada C06 encerrada por associação.
+
+**Próximo TASK429:**confirmar CI426/427/428 e corrigir qualquer nova falha primeiro. Depois continuar C06 por fonte no inventário, incluindo restantes rascunhos/consumidores ainda pendentes. Chrome/nav continua C08-025/026.32 tarefas=26 por iniciar/1 em execução/5 concluídas. Sem merge/deploy/contactos reais; contrato anual adiado. Entradas abaixo são históricas.
+
 ## Retoma atual — 29/09/2026, TASK427 publicada / reposição offline dos alertas
 
 **TASK427 publicada na branch autorizada.** Corrige a espera do teste de idiomas dos alertas após reload offline. CI424 terminou322/323: único erro de identidade dos nós na linha104; restauro ignorado. Log nativo completo e323 resultados estão na prova426; diagnóstico/correção na [prova427](evidence/20260929_task427_local.json). TASK426 (52 mensagens dos pedidos de material) já está publicada, CI325 em execução.
