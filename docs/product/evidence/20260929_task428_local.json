@@ -3,7 +3,7 @@
   "date": "2026-09-29",
   "branch": "work/field-readiness-20260915-simulation",
   "baseCommit": "b3281cd9d227c83016184d1a185f431104ecd761",
-  "status": "local_validation_passed_publication_pending",
+  "status": "published_native_ci_in_progress",
   "scope": {
     "inventory": "C06-006",
     "module": "frontend/cw-field-visit-drafts.js",
@@ -2124,5 +2124,19 @@
     "inProgress": 1,
     "complete": 5
   },
-  "next": "Confirm pending native runs and repair any new failure first; then continue C06 against the per-source inventory. Shared chrome remains C08-025/026; do not close other C06 entries by association."
+  "next": "Confirm pending native runs and repair any new failure first; then continue C06 against the per-source inventory. Shared chrome remains C08-025/026; do not close other C06 entries by association.",
+  "publication": {
+    "sha": "47b23074d6738e3d8e5c20c421964a892012a827",
+    "tree": "1cd4a2459a185b8dca912e481cd7295b3cb0208a",
+    "runId": 36552918795,
+    "jobId": 109355149687,
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36552918795",
+    "status": "in_progress",
+    "conclusion": null,
+    "successfulSteps": 4,
+    "remoteTreeMatchedLocalIndex": true,
+    "exactGitHubCommitImportedLocally": true,
+    "cleanCheckoutAtPublication": true,
+    "confirmationCommit": "documentation-only [skip ci]"
+  }
 }

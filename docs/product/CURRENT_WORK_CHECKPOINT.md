@@ -1,8 +1,8 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 29/09/2026, TASK428 validada localmente / rascunhos modernos
+## Retoma atual — 29/09/2026, TASK428 publicada / rascunhos modernos
 
-**TASK428 pronta para publicação na branch autorizada.** Rascunhos do modo de campo:61 chaves/305 valores em PT/EN/FR/ES/DE, cache217/runner326. Antes: idioma EN, estado guardado em PT. Agora estados, erros próprios, comparação de17 campos, três origens e ações/aria são localizados. Nomes, notas, quantidades, datas e fotografias mantêm os dados originais. [Prova428](evidence/20260929_task428_local.json).
+**TASK428 publicada na branch autorizada.** Rascunhos do modo de campo:61 chaves/305 valores em PT/EN/FR/ES/DE, cache217/runner326. Antes: idioma EN, estado guardado em PT. Agora estados, erros próprios, comparação de17 campos, três origens e ações/aria são localizados. Nomes, notas, quantidades, datas e fotografias mantêm os dados originais. [Prova428](evidence/20260929_task428_local.json).
 
 **Dados e limites:**descritores só em WeakMaps; entry.error continua string e os enums Servidor/Outra janela/Registo anterior mantêm-se no protocolo. Inversão das substituições reconstruiu exatamente o corpo anterior. Idioma só repinta texto/atributos, sem preencher campos, reconciliar, guardar ou enviar. Mesmos nós, foco/cursor, campos, baseline, conflitos, revisão, UUID/hash/recibo e bloqueios verificados. pendingSummary traduz quando consultado; snapshots já apresentados na revisão diária e outros módulos continuam no respetivo lote. A instrução EXTRA conserva o rótulo real «Corrigir registo».
 
@@ -11,6 +11,8 @@
 **Validação428:**1 345 unitários/137 ficheiros; sintaxe695/308/44 e node-check dos quatro JS finais. Três integrações passaram: rascunhos modernos anterior, novo grupo de idiomas e reposição do idioma, mais probe silenciosa. Teste anterior e unitários precederam o observador DOM final; grupo novo/reposição/probe passaram após a correção. Página real: guardado/a guardar/erro, locks/quota, servidor/duas janelas, bytes inválidos, reload offline e conclusão congelada. Cinco idiomas/a320,390,1440 nos estados principais; fixture separada cobre17 tipos/origens/estados raros. Captura DE320 inspecionada. O teste anterior conserva conclusão SQL única, um débito, EXTRA/foto/correção e troca de conta.
 
 **Gates:**CI425 terminou323/324, único erro dos alertas na linha104 após reload offline, já corrigido em427. Log completo e324 resultados na prova428; restauro ignorado. CI426/427 continuam em execução, dez etapas aprovadas; não há ainda325 grupos/restauro aceites. TASK428 exige326 grupos exatos/restauro128 tabelas47 ficheiros próprios. Sete ficheiros, quatro código/teste e três documentação; nenhuma outra entrada C06 encerrada por associação.
+
+**Publicação428:**commit `47b23074d6738e3d8e5c20c421964a892012a827`, árvore `1cd4a2459a185b8dca912e481cd7295b3cb0208a`; igualdade local/remota e checkout limpo confirmados. [CI36552918795](https://github.com/ts7520305-svg/cristalwater/actions/runs/36552918795), job109355149687, em execução; quatro etapas aprovadas na primeira consulta. Confirmação documental[skip ci]; não substitui326 grupos/restauro próprios.
 
 **Próximo TASK429:**confirmar CI426/427/428 e corrigir qualquer nova falha primeiro. Depois continuar C06 por fonte no inventário, incluindo restantes rascunhos/consumidores ainda pendentes. Chrome/nav continua C08-025/026.32 tarefas=26 por iniciar/1 em execução/5 concluídas. Sem merge/deploy/contactos reais; contrato anual adiado. Entradas abaixo são históricas.
 
