@@ -138,7 +138,7 @@ scripts.push('test-field-write-recovery-ui.js');
 scripts.push('test-field-internal-alert.js');
 scripts.push('test-field-internal-alert-ui.js');
 scripts.push('test-field-internal-alert-languages.js');
-scripts.push('test-field-stock-requests.js','test-field-stock-requests-ui.js');
+scripts.push('test-field-stock-requests.js','test-field-stock-requests-ui.js','test-field-stock-request-languages.js');
 scripts.push('test-field-problem-reports.js','test-field-problem-reports-ui.js');
 scripts.push('test-field-client-intake.js','test-field-client-intake-ui.js');
 scripts.push('test-field-admin-monthly-reports.js','test-field-admin-monthly-reports-ui.js');

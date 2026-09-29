@@ -1,0 +1,413 @@
+{
+  "task": "TASK426",
+  "date": "2026-09-29",
+  "baseCommit": "5c6d293db288e872c62a372db53ebe8645d5a7e0",
+  "scope": "C06-006: owned controls, status/error copy and pendingSummary strings of cw-field-stock-request.js; consumer technician-field-mode.html. No acceptance of the full modern page or whole C06.",
+  "reproduction": {
+    "language": "en",
+    "send": "Enviar aviso ao administrador",
+    "status": "O pedido ficará guardado nesta conta antes de enviar.",
+    "options": [
+      "Falta de material / stock",
+      "Lembrete para comprar",
+      "Nota para administrador"
+    ]
+  },
+  "implementation": {
+    "bodyReconstructedExactly": true,
+    "consumers": [
+      "technician-field-mode.html"
+    ],
+    "keys": 52,
+    "values": 260,
+    "savedPoolFallbackUnchanged": true,
+    "languageListener": "Only paints bound text/attributes; does not call refresh, contextChanged, show, read, write or send",
+    "summaryBoundary": "pendingSummary returns current-language strings when called; day-review page itself remains a separate pending source",
+    "ownedNodeMarkers": "Only bound nodes; shared field header is not excluded from existing translation",
+    "runner": 325,
+    "cache": 216,
+    "runtime": "Self-contained catalogue,52 keys/260 values in PT/EN/FR/ES/DE. Existing element and option nodes receive explicit textContent/attribute bindings. Language event only repaints these bindings; no refresh, form rebuilding, focus movement, guard recalculation, storage read/write or operational request.",
+    "errors": "Owned Error instances are associated with ephemeral descriptors in a private WeakMap. Existing fieldWriteError descriptors use the shared store formatter. Raw server/browser errors and already-persisted failure.message values remain literal, including server text identical to an owned Portuguese message. No descriptor is saved.",
+    "preserved": "Original requestType/priority/visitType enums, selected and original visit/pool/owner, six field values, exact raw draft bytes, label and saved fallback Piscina N, UUID/payload/hash/receipt, locks, schema, limits, guards and ordering. Reversing only text substitutions and removing the presentation adapter reconstructs the previous module body exactly.",
+    "navigation": "Summary instructions retain the actual shared labels Mais → Avisos in every language. Those shared navigation labels and the generated section header have a separate C08 owner and are not marked out of the existing language engine.",
+    "summaryLimit": "pendingSummary returns localized strings when called; it retains the exact kind/text shape. The caller day-review and previously rendered day-review summaries are not made live-localized by this batch."
+  },
+  "validation": {
+    "environment": "Isolated local PGlite SQL, real Express and Chromium with service worker/offline reload. External communications disabled.503 response is an explicit HTTP fixture; receipt mismatch, lost response and delayed account-switch responses use real route.fetch and SQL effects.",
+    "integrated": [
+      {
+        "script": "scripts/test-field-stock-request-languages.js",
+        "code": 0,
+        "ms": 38318
+      },
+      {
+        "script": "scripts/test-field-stock-requests.js",
+        "code": 0,
+        "ms": 6418
+      },
+      {
+        "script": "scripts/test-field-stock-requests-ui.js",
+        "code": 0,
+        "ms": 24214
+      },
+      {
+        "script": "scripts/test-field-language-reload.js",
+        "code": 0,
+        "ms": 9232
+      }
+    ],
+    "earlierCompleteNewGroup": {
+      "script": "scripts/test-field-stock-request-languages.js",
+      "code": 0,
+      "ms": 40903
+    },
+    "unitTests": 1345,
+    "unitFiles": 137,
+    "technicianTests": 4,
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44
+    },
+    "nodeCheckAndDiffCheck": true,
+    "syntaxTiming": "Full syntax suite ran before final copy-only navigation/option-label changes; four changed JavaScript files explicitly node-checked afterward. New integration reran with the final text and all-option width assertions.",
+    "matrix": "Actual initial/editable/pending/confirmed-preserved/confirmed form states in five languages at320/390/1440; identity of eleven owned nodes and five options, focus/caret, all control values/guards, exact draft/outbox bytes, horizontal bounds,44px layout controls with0.01px paint-rounding allowance, and zero language-caused stock submissions.",
+    "guards": "Draft quota, missing/busy Web Lock, change of selected visit, offline/reload, raw legacy notices, literal503 matching owned Portuguese, invalid receipt, lost acknowledgement, cleanup quota, two windows, corrupt/missing/mismatched draft, response in flight and account change. Error states run in five languages at320; account guard remains inert/hidden and is not subjected to editable-form focus assertions.",
+    "receiptProof": "One real ADMIN notification, operational reminder and audit after retries for the original UUID. Exact body, payload, owner, hash, label and receipt; isRead=false, no duplicate send when clearing a confirmed draft. Second delayed request survives account switch and recovers one SQL notification. Submitted HTML-like text remains inert text.",
+    "existingTests": "Unmodified API and UI groups passed, including51 byte-identical old requests, IndexedDB receipt quota, actual ADMIN alert display, multi-process/restart idempotency, permissions, rollback and account separation. Existing language-reload group passed.",
+    "newBrowserMarkers": [
+      "PASS actual stock form, six fields, original visit across selection, quota and locks in five languages; stable nodes/options/focus/caret, exact draft bytes and no submissions",
+      "PASS offline reload and pending summary in five languages at320/390/1440; original visit/pool/enums/quantity/text/UUID/hash/label and old alerts preserved",
+      "PASS literal server text, translated live receipt rejection, lost acknowledgement and cleanup quota; exact original receipt and one real SQL notification/reminder/audit, no resend when clearing",
+      "PASS two windows, corrupt/missing/mismatched drafts, in-flight language changes and account isolation in five languages; original request recovered once and no submitted markup executed"
+    ],
+    "screenshots": {
+      "reports/field-ui/STOCK_FORM_DE_320.png": "d7fc994b1d7f67822f86f378795212844124f0ffd56bc7cf6bc1cabf60c1b674",
+      "reports/field-ui/STOCK_LANGUAGES_DE_320.png": "aebd60370c57f394230ccacc39ccd9f101b178a196daa41eaa4b518d58b91ff9"
+    },
+    "visualLimit": "DE320 screenshots inspected for this form and recovery action. Shared Portuguese chrome and adjacent modules remain out of scope; this is not universal visual/theme acceptance.",
+    "navigationOnlyGroup": {
+      "script": "scripts/test-field-stock-request-languages.js",
+      "code": 0,
+      "ms": 37625
+    },
+    "optionLabels": {
+      "initialFinding": "DE320 screenshot visibly clipped the long stock option. The added canvas/font measurement, with24px reserved for the native arrow, also reported existing PT labels219.06/213.67/222.38px for212px available.",
+      "firstProbe": {
+        "script": "scripts/test-field-stock-request-languages.js",
+        "code": 1,
+        "ms": 5438
+      },
+      "spanishProbe": {
+        "script": "scripts/test-field-stock-request-languages.js",
+        "code": 1,
+        "ms": 5103
+      },
+      "change": "Shortened stock/note option captions in translated languages, three Portuguese option captions and the Spanish purchase reminder (217.53px for212px available). Exact STOCK_REQUEST/PURCHASE_REMINDER/ADMIN_NOTE enum values are unchanged; no CSS, form rebuilding or native select replacement.",
+      "proof": "Final full language group passes measurements of every option in both selects for five languages at320/390/1440. Final DE320 form and recovery screenshots inspected."
+    }
+  },
+  "newTestCorrection": {
+    "initialFailure": {
+      "script": "scripts/test-field-stock-request-languages.js",
+      "code": 1,
+      "ms": 64209
+    },
+    "finding": "The new test first reached the final account-switch state and incorrectly required focus in an intentionally hidden/inert form. The existing protectFieldRouteSession explicitly hides main.field and sets inert on account change.",
+    "baselineProbe": {
+      "script": "/workspace/scratch/0e7a196f6955/qa/probe-task426-account-focus.cjs",
+      "code": 0,
+      "ms": 5996
+    },
+    "baselineObserved": {
+      "baselineStock": true,
+      "inert": true,
+      "display": "none",
+      "attemptedFocus": false,
+      "value": "",
+      "readonly": false,
+      "status": "O pedido ficará guardado nesta conta antes de enviar."
+    },
+    "baselineLimit": "Probe served the previous unchanged stock module. It proves main.inert/display:none prevent focus; the initially empty field and status were observed before that module next refreshed, so they are not presented as proof of draft clearing.",
+    "fix": "Only the new account-state check now requires hidden/inert main, cleared read-only field, disabled send, same owned nodes, preserved original-account draft bytes, no current-account records and no new POST for each language. All visible-form focus/caret assertions remain. No application guard, existing test, timeout, animation or click mechanism was changed."
+  },
+  "nativePrevious": {
+    "424": {
+      "jobs": [
+        {
+          "id": 109319183700,
+          "name": "field",
+          "status": "in_progress",
+          "conclusion": null,
+          "run_id": 36541935848,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run npm ci",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run npx prisma validate && npx prisma generate",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Verify additive upgrade from the previous schema",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Run npm run check:syntax",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Run node scripts/test-field-suite.js",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 11
+            },
+            {
+              "name": "Restore database and uploaded files in isolated QA",
+              "status": "pending",
+              "conclusion": null,
+              "number": 12
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 13
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 14
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 26
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 27
+            },
+            {
+              "name": "Stop containers",
+              "status": "pending",
+              "conclusion": null,
+              "number": 28
+            }
+          ]
+        }
+      ]
+    },
+    "425": {
+      "jobs": [
+        {
+          "id": 109327457174,
+          "name": "field",
+          "status": "in_progress",
+          "conclusion": null,
+          "run_id": 36544481091,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run npm ci",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run npx prisma validate && npx prisma generate",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Verify additive upgrade from the previous schema",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Run npm run check:syntax",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Run node scripts/test-field-suite.js",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 11
+            },
+            {
+              "name": "Restore database and uploaded files in isolated QA",
+              "status": "pending",
+              "conclusion": null,
+              "number": 12
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 13
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 14
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 26
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 27
+            },
+            {
+              "name": "Stop containers",
+              "status": "pending",
+              "conclusion": null,
+              "number": 28
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "nativeAcceptance": "Previous TASK424/425 remain in progress at last query. TASK423 success is recorded in evidence/20260929_task425_local.json and does not approve later commits. TASK426 requires325 exact ordered unique groups/code0/signalnull and its own128-table/47-file restoration proof.",
+  "fileHashes": {
+    "frontend/cw-field-stock-request.js": "62eb137242cb9b4eae15423297d06b5af1ea411590118b5770e3e854c869472d",
+    "frontend/sw.js": "5a2750760b6cf579a96f99f80c79e7c489369ce7edd6d8f7322e836d8bee27a3",
+    "scripts/test-field-suite.js": "d3bfb7b2864c9b2535eeebb4c99038a2b13c3abdcf1534cc811841785650a9a5",
+    "scripts/test-field-stock-request-languages.js": "5c73a5a93a9146300038312fc557d5590d76515e2855e449cfbf60077f7d4778"
+  },
+  "logHashes": {
+    "task426-before.log": "94b998d7ef8dd21bb975199ec66f9d448e3e12fbf316fbc1911b5329b987f540",
+    "task426-languages-first.log": "110a621bba01ab267967566943dcd53d89491b649bf9801e09fba07180ee4ff6",
+    "task426-regressions.log": "c423c54c1d18d7bc5df667e8fe2ffdb7d4066f27890533d2028b4c64d852d153",
+    "task426-languages-final.log": "46f086b17079f54b2efa42e99b1a17ac3972ff863feade00567d2af533dadb55",
+    "task426-unit.log": "a5dd8b8407d92f6321587e8cfebca8f71f13a6fad719169e999b2369513b7ca6",
+    "task426-technician.log": "a0c0403bad119bebb123f7347b824cdfaf2cc857f526592ff439635b2bc2827f",
+    "task426-syntax.log": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4",
+    "task426-label-fit-first.log": "e578d3530e1adc2afc490edfc0510b9b2e43d154529a8bb5597f89b5b7f498c8",
+    "task426-label-fit-es.log": "4135918d3d5755d9de1906ed95003b555c1e99d6158bff2a47974705d6ec5a1b",
+    "task426-label-fit-final.log": "edfde73c9001dd93a876afb2e8c36099ffa31e3047da2cf259b5f672f2e16649"
+  },
+  "publication": {
+    "status": "ready",
+    "branch": "work/field-readiness-20260915-simulation",
+    "ci": {
+      "status": "not_started",
+      "expectedOrderedGroups": 325,
+      "restoration": "pending"
+    }
+  },
+  "remaining": "TASK427: check native424/425/426, then owned modern visit-draft copy in cw-field-visit-drafts.js/C06-006. Preserve typed visit, fields, baseline, conflicts and original records. Shared chrome/nav C08-025/026 and other inventory entries remain pending.",
+  "counts": {
+    "total": 32,
+    "notStarted": 26,
+    "inProgress": 1,
+    "completed": 5
+  },
+  "authorization": "Authorized branch only; no merge, VPS deployment or real contacts. Annual legal contract remains deferred.",
+  "changedFiles": [
+    "frontend/cw-field-stock-request.js",
+    "frontend/sw.js",
+    "scripts/test-field-suite.js",
+    "scripts/test-field-stock-request-languages.js",
+    "docs/product/CURRENT_WORK_CHECKPOINT.md",
+    "docs/product/COMPLETION_PLAN_20260928.md",
+    "docs/product/evidence/20260929_task426_local.json"
+  ]
+}

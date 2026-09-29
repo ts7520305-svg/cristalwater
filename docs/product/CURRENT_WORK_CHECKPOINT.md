@@ -1,5 +1,19 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 29/09/2026, TASK426 local / pedidos de material
+
+**TASK426 local validada.** Formulário de material do modo de campo em PT/EN/FR/ES/DE:52 chaves/260 valores, cache216/runner325. Reproduzido antes: idioma EN mas botão/estado/opções em PT. Etiquetas, opções, contexto, recuperação, erros próprios e texto de pendingSummary traduzidos; nomes, notas e erros brutos conservados. Só os nós próprios recebem marcadores; nav/cabeçalho partilhados mantêm o percurso existente. Instruções conservam os rótulos reais «Mais → Avisos». [Prova426](evidence/20260929_task426_local.json).
+
+**Dados e comportamento:**inversão das substituições de texto reconstruiu exatamente o módulo anterior. Seis campos, conta, visita/piscina original, enums, rascunho, UUID/payload/hash/recibo, limites/bloqueios e ordem de envio preservados. Mudança de idioma só repinta texto/atributos nos mesmos nós, sem recalcular estado ou enviar. Erros do store com descritor transitório atualizam; falhas persistidas permanecem literais. pendingSummary traduz quando consultado; o módulo de revisão diária e resumos já apresentados continuam por tratar no respetivo lote.
+
+**Validação426:**1 345 unitários/137 ficheiros, quatro técnicos, sintaxe695/308/44 e quatro integrações: idiomas dos pedidos, API/UI anteriores e reposição de idioma. Cinco idiomas/a320,390,1440 nos estados principais; quota, locks, troca de visita, reload offline, duas janelas, corrupção, erros/recibos, resposta perdida e troca de conta cobertos. Um alerta ADMIN/lembrete/auditoria SQL para o UUID original; recibo exato e limpeza sem novo envio. Capturas DE320 inspecionadas; outros módulos/chrome continuam fora de aceitação.
+
+**Ajuste do teste novo:**a falha inicial exigia foco após troca de conta, quando a proteção existente oculta main e o torna inert. Reproduzido com o módulo anterior. A asserção dessa fase agora exige bloqueio, campo limpo/readOnly, bytes originais e zero envios; as de foco/cursor ficam nos estados visíveis. Sem alterar comportamento da aplicação, testes anteriores ou limites. O grupo completo passou após a correção e novamente após o ajuste dos nomes de navegação. A captura mostrou uma opção DE cortada; medição também encontrou três etiquetas PT acima do espaço disponível. Rótulos encurtados, enums/CSS conservados; teste final mede todas as opções em cinco idiomas/a320,390,1440.
+
+**Gates:** TASK424/425 ainda em execução na última consulta, dez etapas aprovadas cada. Sucesso423 está registado na prova425 e não aprova versões seguintes. TASK426 exige325 grupos únicos na ordem exata e restauro128 tabelas/47 ficheiros com linhas/hashes iguais. Publicação426 ainda pendente.
+
+**Próximo TASK427:** confirmar CI424/425/426 e continuar com rascunhos modernos de visita (`cw-field-visit-drafts.js`, C06-006), preservando campos, baseline e conflitos. Chrome/nav é C08-025/026; nenhuma outra entrada C06 é encerrada por associação. Sete ficheiros neste lote, quatro código/teste e três documentação.32 tarefas=26 por iniciar/1 em execução(C06)/5 concluídas. Sem merge/deploy/contactos reais; contrato anual adiado. Entradas abaixo são históricas.
+
 ## Retoma atual — 29/09/2026, TASK425 publicada / mensagens do write-store
 
 **TASK425 publicada na branch autorizada.** Mensagens próprias do write-store em PT/EN/FR/ES/DE:70 chaves/350 valores,71 pontos de erro; cache215/runner324. Os cinco consumidores HTML mantêm o carregamento existente. Error.message usa o idioma à criação; descritor transitório permite ao adaptador antigo atualizar o texto nos mesmos nós. WeakMap privado conserva a mensagem-fonte PT ao guardar uma falha própria; erros de servidor/navegador e falhas já guardadas continuam literais. Não há correspondência por texto nem campos novos no pedido/recibo. Inversão das substituições reconstruiu o corpo anterior do store exatamente. [Prova425](evidence/20260929_task425_local.json).
