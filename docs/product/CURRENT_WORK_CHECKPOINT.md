@@ -1,5 +1,17 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 29/09/2026, TASK420 local / jornada em cinco idiomas
+
+**Publicar TASK420; próximo TASK421: alertas internos do técnico.** Jornada antiga localizada em PT/EN/FR/ES/DE:32 chaves novas/160 valores, catálogo total99/495. Lote de dez ficheiros: seis código/teste e quatro documentação/evidência. [Prova420](evidence/20260929_task420_local.json). Cache211; runner320 grupos únicos.
+
+**Sem alteração operacional:** descritores de apresentação atualizam texto nos mesmos nós. Conservar oito campos/bytes do pedido, User≠Technician, dia/linha/hora, JSON, validação e bloqueios. Mudança de idioma não inicia consulta nem POST. Erros locais mantêm a chave traduzível; mensagem original do servidor/navegador fica literal. Texto longo recebido ultrapassava320px (scroll425/client288/document441); quebra de linha corrigida apenas no estado da jornada.
+
+**Validação420:**1 327 testes/136 ficheiros, quatro técnicos, sintaxe695/308/44, node-check/diff-check; novos idiomas18605ms, recuperação existente11949ms e página antiga13870ms. Cinco idiomas nos estados principais a320/390/1440; ocupado/pendente/offline/erro/corrupção/sessão a320. Um POST de início e um de fim; resposta errada/perdida recuperada por GET, sem segunda linha nem alteração de endAt. Suite existente mantém testes de quota, bloqueio real entre janelas, oito inícios/fins concorrentes e resposta tardia de outra conta. Capturas DE320 inspecionadas; chrome/toasts partilhados ainda têm texto PT/sobreposição e continuação própria, sem afirmar auditoria visual universal.
+
+**Publicação419:** `d07f107e0588808eb2eddd79e7abff148c35a8ce`, árvore `c6da73899d1fbe9c118f731faea4813623cd001d`, igualdade local/remota e checkout limpo confirmados antes420. CI run36523607761/job109261656242 em execução na última leitura, dez passos aprovados;319 grupos/restauro ainda não aceites. CI416/417318 grupos/restauro aprovados; CI418318/319, único timeout da pré-visualização. Não extrapolar resultados entre versões;420 exige320 grupos/restauro próprios.
+
+**Continuação421:** ler `cw-field-internal-alert.js` e os consumidores efetivos; traduzir botões, visita/prioridade, estados de rascunho/envio/recibo/erro, preservando texto, seleção/foco, UUID/payload/hash/recibo e isolamento por conta. Cobrir offline, falha após POST, conflitos/corrupção e resposta tardia; não anunciar leitura do alerta sem prova. Depois rascunhos antigos, pré-visualização e chrome.32 tarefas:26 por iniciar, C06 em execução, cinco concluídas(C01–C05). Branch autorizada apenas; sem merge/deploy/contactos reais; contrato anual adiado.
+
 ## Retoma atual — 29/09/2026, TASK419 local / estabilidade dos idiomas
 
 **Publicar TASK419 e continuar TASK420: jornada antiga.** CI418:319 grupos na ordem exata,318 aprovados; único erro no clique do botão de recalcular a pré-visualização, que não estabilizou em10s; restauro saltado. O timeout exato não se repetiu localmente, mas foram reproduzidos o ciclo de notificações do mesmo idioma e a reversão do seletor de produtos. [Prova e limites TASK419](evidence/20260929_task419_local.json).

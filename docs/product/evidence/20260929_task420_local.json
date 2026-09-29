@@ -1,0 +1,129 @@
+{
+  "task": "TASK420",
+  "date": "2026-09-29",
+  "baseCommit": "d07f107e0588808eb2eddd79e7abff148c35a8ce",
+  "scope": "C06: localized legacy-workday component controls, local errors and dynamic status. Presentation only; the explicit completion plan owns this component despite its filename-based C08-038 bucket in the original inventory.",
+  "reproduction": {
+    "before": {
+      "script": "scripts/test-field-workday-languages.js",
+      "code": 1,
+      "ms": 11074,
+      "failure": "Actual workday refresh button never changes to the selected English label before implementation (existing7s wait)."
+    },
+    "longEvidence": {
+      "failure": "New real-page503 test with a literal long script-like server message overflowed at320px. All controls fit, but dayStatus had425px scroll width versus288px client width; document grew to441px.",
+      "fix": "overflow-wrap:anywhere on #dayStatus; preserve complete original text via textContent. Same test passes after this scoped CSS change."
+    }
+  },
+  "implementation": {
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "addedKeys": 32,
+    "addedValues": 160,
+    "catalogueKeys": 99,
+    "catalogueValues": 495,
+    "presentation": "Explicit copy descriptors annotate the existing status and buttons. Locale changes repaint text only; do not rerun paint/operations, rebuild controls or alter guards. Local error descriptors remain translatable after failure.",
+    "literalEvidence": "Server-provided messages, network/storage exception text and original yyyy-mm-dd operating day stay literal. Missing server message uses a localized fallback; no innerHTML execution.",
+    "preserved": "Same eight-field localStorage request, owner/User mapping, workDayId/dayStart/date, createdAt, request JSON, API contract, HTTP statuses, SQL state, lock coordination, validation, retries and cleanup ordering. No schema or dependency changes.",
+    "cache": 211,
+    "runner": 320,
+    "files": 6
+  },
+  "validation": {
+    "environment": "Isolated PGlite0.5.8, real Express/Prisma SQL and Chromium153.0.8010.0; disposable QA with external notifications disabled. New language fixture suppresses the unrelated15s page autosync; existing unchanged workday-recovery fixture retains it.",
+    "integrated": [
+      {
+        "script": "scripts/test-field-workday-languages.js",
+        "code": 0,
+        "ms": 18605
+      },
+      {
+        "script": "scripts/test-field-workday-recovery.js",
+        "code": 0,
+        "ms": 11949
+      },
+      {
+        "script": "scripts/test-field-legacy-page-languages.js",
+        "code": 0,
+        "ms": 13870
+      }
+    ],
+    "unitTests": 1327,
+    "unitFiles": 136,
+    "technicianTests": 4,
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44
+    },
+    "nodeCheckAndDiffCheck": true,
+    "browserMarkers": [
+      "PASS workday controls and not-started state in five languages at 320/390/1440; same nodes, guards and zero workday requests",
+      "PASS language changes during GET and saved start preserve the in-flight request; wrong-owner acknowledgement stays pending; read-only recovery confirms one linked User row",
+      "PASS translated error/stale states preserve literal server evidence and last known day; missing server message uses a translated fallback",
+      "PASS lost end acknowledgement, real service-worker offline reload and five-language recovery preserve original bytes/day/row/end time and issue no duplicate POST",
+      "PASS unreadable/foreign attempts and session changes stay localized, blocked and byte-preserving; no script injection or browser errors"
+    ],
+    "coreMatrix": "All five languages at320/390/1440 for not-started, wrong-owner response, active, raw server error and closed states. Busy GET, saved start/end, missing-message fallback, stale/offline/reload, corrupt/foreign request and changed account checked in all five at320. Each cycle checks exact stored bytes, same five DOM nodes, unchanged disabled/hidden guards and zero new workday requests.",
+    "sql": "Technician ID differs from linked User ID. Exactly one start and one end POST; one SQL workday row. Wrong-owner start acknowledgement retained and recovered through GET; lost end acknowledgement plus offline reload retains original request; GET recovery preserves original endAt.",
+    "companion": "Existing recovery group passes quota refusal/no unpersisted POST, real two-window lock, scope/date/row validation/private cache, eight concurrent starts/ends and late old-account response. Existing legacy-page group passes99 five-language tuples, route/draft/UUID preservation and global-product picker regression.",
+    "visual": "Inspected German320 saved-end and changed-session captures. Workday text wraps and controls meet44px and horizontal bounds in the tested matrix. Shared shell/toasts retain some Portuguese and can overlay lower content; those remain C06 follow-up, not a whole-page/all-theme/vertical-overlap acceptance.",
+    "unchangedLimits": "No increased timeout, forced click, disabled animations or weakened original recovery assertion."
+  },
+  "previousPublication": {
+    "status": "published",
+    "branch": "work/field-readiness-20260915-simulation",
+    "commit": "d07f107e0588808eb2eddd79e7abff148c35a8ce",
+    "tree": "c6da73899d1fbe9c118f731faea4813623cd001d",
+    "exactTreeMatch": true,
+    "ci": {
+      "run": 36523607761,
+      "job": 109261656242,
+      "status": "in_progress",
+      "conclusion": null,
+      "passedSteps": 10,
+      "expectedOrderedGroups": 319,
+      "restoration": "pending"
+    }
+  },
+  "files": {
+    "frontend/cw-legacy-technician-copy.js": "7385b299f572586dee0e2f5e7f9086072ba6eb1c9e973d125a1788db3caaf2ad",
+    "frontend/cw-legacy-workday.js": "58bc393e4f7af288dbe917bff58c823052ff296a345ada486df0b07abeae1841",
+    "frontend/technician.html": "9dc8eca2ad0d611393e7136a81100ca520927bf16f9eb189379575d15189e411",
+    "frontend/sw.js": "ebbd328ad2b8c4a41a48307fe9b3c2a56ef6171f3eb9097c25d9979da629b173",
+    "scripts/test-field-suite.js": "dd7b0b35ecc8316bf947e4739349a2316a9a7ad4b93ba522eef1d73bfc81052e",
+    "scripts/test-field-workday-languages.js": "62aed572d2800d9aa8e5f7299e385098e7df7650199ddf6db14770e8e8051df8"
+  },
+  "logHashes": {
+    "task420-before.log": "cc60b1b08f71f0907c6e8e9fc5c3447d63d529ebac4809be4b7bd2367a05f6dc",
+    "task420-after.log": "33b0ef8d1936f17e0b1af58f0b41b55e1ff03807b00dd6eee5bf8c702441d735",
+    "task420-layout-probe.log": "1b6dbd67904e752713e8d6aacb579b9a3808e967ec2f643b6aa0abfffc60a00c",
+    "task420-final.log": "1682c88d4bdd6188d8a7ac062eecb5dbe3f9f9f36139f87685eac33f29eca6d0",
+    "task420-unit.log": "9df06841dbfb1c779dd5d6318a45e5d33f1d3399bd37721c19fef5140eb7f66b",
+    "task420-technician.log": "cb2c3e1a2bc9045013b3ce04b276f94781c9f3910cf205acea506fa400942842",
+    "task420-syntax.log": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4"
+  },
+  "screenshots": {
+    "reports/field-ui/LEGACY_WORKDAY_PENDING_DE_320.png": "3ae082c0ce1300554f97d65f161e8d11f2847e1684cac05e442ba5122a1fb85a",
+    "reports/field-ui/LEGACY_WORKDAY_LANGUAGES_DE_320.png": "aaf87090643592a24a7f6c98d80e540f39726939a1f4682a247a6f93f276bd56"
+  },
+  "publication": {
+    "status": "pending",
+    "branch": "work/field-readiness-20260915-simulation"
+  },
+  "nativeAcceptance": "TASK420 requires its own320 exact ordered groups and restoration. Local pass does not claim native PostgreSQL/whole-suite acceptance. TASK419319/restoration still pending at last read.",
+  "remaining": "Next TASK421: internal-alert controls/status/recovery copy; then legacy drafts, route-preview text and shared chrome. C06 remains in execution; C04 remains accepted at version414.",
+  "counts": {
+    "total": 32,
+    "notStarted": 26,
+    "inProgress": 1,
+    "inValidation": 0,
+    "completed": 5
+  },
+  "authorization": "Authorized work branch only; no merge, VPS deployment or real contacts; annual legal contract remains deferred."
+}
