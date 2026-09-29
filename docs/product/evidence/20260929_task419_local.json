@@ -198,11 +198,14 @@
     "ci": {
       "run": 36523607761,
       "job": 109261656242,
-      "status": "in_progress",
-      "conclusion": null,
-      "passedSteps": 10,
+      "status": "completed",
+      "conclusion": "success",
+      "passedSteps": 18,
       "expectedOrderedGroups": 319,
-      "restoration": "pending"
+      "restoration": "2026-09-29T05:51:02.5173983Z PASS restored 128 tables and 47 uploaded files; database rows and file hashes match",
+      "passedOrderedGroups": 319,
+      "exactOrder": true,
+      "failedOrderedGroups": []
     }
   },
   "authorization": "Existing authorization covers work-branch publication; no merge, VPS deployment, real contact or annual legal contract work.",
@@ -216,5 +219,60 @@
     "task419-unit-final.log": "fbbf33ee23f59c86da46b75789a7a0edfd93b6c88b9022cc40ff5c05ffed20d8",
     "task419-technician.log": "b8bc1d5de6a306610b04eb635958cd15c8b7100c79c3bdf30cd1792b34e5835f",
     "task419-syntax.log": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4"
-  }
+  },
+  "nativeVerification": {
+    "task": 419,
+    "run": 36523607761,
+    "job": 109261656242,
+    "commit": "d07f107e0588808eb2eddd79e7abff148c35a8ce",
+    "groups": 319,
+    "unique": 319,
+    "exactOrder": true,
+    "passed": 319,
+    "failures": [],
+    "restoration": "2026-09-29T05:51:02.5173983Z PASS restored 128 tables and 47 uploaded files; database rows and file hashes match",
+    "focused": [
+      {
+        "script": "test-field-legacy-page-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5258
+      },
+      {
+        "script": "test-field-route-preview.js",
+        "code": 0,
+        "signal": null,
+        "ms": 321
+      },
+      {
+        "script": "test-field-route-preview-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3809
+      },
+      {
+        "script": "test-field-legacy-visit-drafts.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7296
+      },
+      {
+        "script": "test-field-workday-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4808
+      },
+      {
+        "script": "test-field-legacy-products.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5927
+      }
+    ],
+    "firstErrors": [],
+    "status": "completed",
+    "conclusion": "success",
+    "passedSteps": 18
+  },
+  "lastCorrectionVerification": "20260929_correction_verification.json"
 }

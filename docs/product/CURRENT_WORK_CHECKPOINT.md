@@ -1,5 +1,13 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Verificação prioritária — 29/09/2026, correção419 nativa confirmada
+
+**Pedido do utilizador: corrigir/validar os erros do GitHub antes de avançar.** TASK419 aprovada:319 grupos na ordem exata, todos código0, restauro128 tabelas/47ficheiros com linhas e hashes iguais. Run36523607761/job109261656242, commit `d07f107e0588808eb2eddd79e7abff148c35a8ce`. O grupo original da pré-visualização passou. TASK420 CI36524598102/job109264733805 ainda em execução;320 grupos/restauro por confirmar. [Registo atual](evidence/20260929_correction_verification.json).
+
+**Verificação local atual:** rota7058ms, produtos16813ms, idiomas da página13466ms, jornada18041ms;1 327 testes/136ficheiros e quatro técnicos novamente aprovados, node-check/diff-check. Duas sondagens do hover8928/9569ms e navegador com CPU limitada4x11647ms passaram com o mesmo clique normal/limite10s. Não se reproduziu o timeout exato antigo; sem mudança especulativa de animação, clique forçado, prazo ou asserção. Código do GitHub e hashes dos seis ficheiros420 iguais ao checkout limpo.
+
+**Documentação corrigida:** CI418 tinha o contador inicial de três etapas aprovadas junto do resultado final; atualizado para15, mantendo a falha318/319 e restauro saltado. Os erros antigos continuam no histórico e não são reclassificados como sucesso. Este lote só documenta validação; as correções de produção já estão419/420. Próximo421 continua reservado aos alertas internos após os gates atuais; nenhum novo módulo nesta verificação. C06 em execução, contagem32=26por iniciar/1em execução/5concluídas. Sem merge/deploy/contactos reais; contrato anual adiado.
+
 ## Retoma atual — 29/09/2026, TASK420 publicada / jornada em cinco idiomas
 
 **TASK420 publicada; próximo TASK421: alertas internos do técnico.** Jornada antiga localizada em PT/EN/FR/ES/DE:32 chaves novas/160 valores, catálogo total99/495. Lote de dez ficheiros: seis código/teste e quatro documentação/evidência. [Prova420](evidence/20260929_task420_local.json). Cache211; runner320 grupos únicos.

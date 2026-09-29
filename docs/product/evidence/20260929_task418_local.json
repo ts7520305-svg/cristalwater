@@ -1223,7 +1223,7 @@
       "run": 36499020853,
       "job": 109185204660,
       "status": "completed",
-      "passedSteps": 3,
+      "passedSteps": 15,
       "expectedOrderedGroups": 319,
       "restoration": "skipped",
       "conclusion": "failure",
@@ -1235,7 +1235,11 @@
           "ms": 12163
         }
       ],
-      "exactOrder": true
+      "exactOrder": true,
+      "skippedSteps": [
+        "Restore database and uploaded files in isolated QA",
+        "Post Run actions/setup-node@v4"
+      ]
     }
   }
 }

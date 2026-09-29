@@ -1,0 +1,147 @@
+{
+  "date": "2026-09-29",
+  "scope": "User-requested correction verification before continuing new modules. Existing production fixes are TASK419/420; this is a documentation-only confirmation, not a further application patch.",
+  "native": {
+    "419": {
+      "task": 419,
+      "run": 36523607761,
+      "job": 109261656242,
+      "commit": "d07f107e0588808eb2eddd79e7abff148c35a8ce",
+      "groups": 319,
+      "unique": 319,
+      "exactOrder": true,
+      "passed": 319,
+      "failures": [],
+      "restoration": "2026-09-29T05:51:02.5173983Z PASS restored 128 tables and 47 uploaded files; database rows and file hashes match",
+      "focused": [
+        {
+          "script": "test-field-legacy-page-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 5258
+        },
+        {
+          "script": "test-field-route-preview.js",
+          "code": 0,
+          "signal": null,
+          "ms": 321
+        },
+        {
+          "script": "test-field-route-preview-ui.js",
+          "code": 0,
+          "signal": null,
+          "ms": 3809
+        },
+        {
+          "script": "test-field-legacy-visit-drafts.js",
+          "code": 0,
+          "signal": null,
+          "ms": 7296
+        },
+        {
+          "script": "test-field-workday-recovery.js",
+          "code": 0,
+          "signal": null,
+          "ms": 4808
+        },
+        {
+          "script": "test-field-legacy-products.js",
+          "code": 0,
+          "signal": null,
+          "ms": 5927
+        }
+      ],
+      "firstErrors": [],
+      "status": "completed",
+      "conclusion": "success",
+      "passedSteps": 18
+    },
+    "420": {
+      "task": 420,
+      "run": 36524598102,
+      "job": 109264733805,
+      "commit": "d524a701f53d164185a958cbc2475d03e07bac4f",
+      "status": "in_progress",
+      "conclusion": null,
+      "passedSteps": 10,
+      "expectedOrderedGroups": 320,
+      "restoration": "pending",
+      "checkedAt": "2026-09-29T05:53:48.539Z"
+    }
+  },
+  "local": {
+    "date": "2026-09-29",
+    "intent": "User requested correction of remaining GitHub errors before further modules.",
+    "head": "3a8a3c03a5a9f2b61a9bb15f3c8ec90159c32f2f",
+    "latestCode": "d524a701f53d164185a958cbc2475d03e07bac4f",
+    "integrated": [
+      {
+        "script": "scripts/test-field-route-preview-ui.js",
+        "code": 0,
+        "ms": 7058
+      },
+      {
+        "script": "scripts/test-field-legacy-products.js",
+        "code": 0,
+        "ms": 16813
+      },
+      {
+        "script": "scripts/test-field-legacy-page-languages.js",
+        "code": 0,
+        "ms": 13466
+      },
+      {
+        "script": "scripts/test-field-workday-languages.js",
+        "code": 0,
+        "ms": 18041
+      }
+    ],
+    "hoverDiagnostics": [
+      {
+        "log": "task421-hover-before.log",
+        "script": "../qa/probe-route-hover.cjs",
+        "code": 0,
+        "ms": 8928
+      },
+      {
+        "log": "task421-hover-resting.log",
+        "script": "../qa/probe-route-hover.cjs",
+        "code": 0,
+        "ms": 9569
+      }
+    ],
+    "findings": "All current targeted regressions pass. Pointer near lower edge, both initially hovered and after returning to rest, gives only the existing short one-pixel easing and a successful normal click. The exact native418 timeout has not reproduced; no speculative animation or timeout change justified.",
+    "unchanged": "No source, schema, API, payload, test acceptance assertion or timeout changed in this verification.",
+    "logHashes": {
+      "task421-current-regressions.log": "582f194b9331929afdf85f00e8daeb291bb8a57106bbf73ee7a2537e18847bff",
+      "task421-hover-before.log": "28d8e21124e9be184c5a0edfb7f444944ef33311b9d706d1aa0e01abf8153a29",
+      "task421-hover-resting.log": "cbd5e2f7dee081528a97d36e1fe060d96c65c9d73ef2582ec10c54eda63e522e",
+      "task421-route-slow.log": "01ff287f86009c0a44777ce17e82ba91f7610e06f88af68562676e4f0a025d90",
+      "correction-verification-unit.log": "b2dc38079f75530d34ea4bbc884a218539c762f3fb710dd25575c7d650113651",
+      "correction-verification-technician.log": "205373f08ba048797837a5b7f6e7967602b7f2d11b787cae1bbf7b90cb725d64"
+    },
+    "slowBrowser": {
+      "emulationCpuThrottlingRate": 4,
+      "clickTimeoutMs": 10000,
+      "result": {
+        "script": "../qa/probe-route-slow.cjs",
+        "code": 0,
+        "ms": 11647
+      },
+      "meaning": "A bounded browser-load diagnostic, not a reproduction of native runner resource scheduling."
+    },
+    "unitTests": 1327,
+    "unitFiles": 136,
+    "technicianTests": 4,
+    "nodeCheckAndDiffCheck": true
+  },
+  "acceptance": "TASK419 correction confirmed by319 exact ordered native groups and matching restoration. TASK420 is still pending full native acceptance; its local pass is not converted into a native pass.",
+  "historical418": "One real route-preview click failure remains recorded at the original418 version; its exact timing cause was not reproduced. The419 integration defects were reproduced and fixed, then the original native group passed. No claim that every possible timing cause is proven.",
+  "next": "TASK421 internal-alert localization only after current native gate succeeds; if420 fails, diagnose the actual failed group first. No merge/deploy/real contact; annual legal contract deferred.",
+  "counts": {
+    "total": 32,
+    "notStarted": 26,
+    "inProgress": 1,
+    "completed": 5
+  }
+}

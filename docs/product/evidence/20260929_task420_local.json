@@ -84,11 +84,14 @@
     "ci": {
       "run": 36523607761,
       "job": 109261656242,
-      "status": "in_progress",
-      "conclusion": null,
-      "passedSteps": 10,
+      "status": "completed",
+      "conclusion": "success",
+      "passedSteps": 18,
       "expectedOrderedGroups": 319,
-      "restoration": "pending"
+      "restoration": "2026-09-29T05:51:02.5173983Z PASS restored 128 tables and 47 uploaded files; database rows and file hashes match",
+      "passedOrderedGroups": 319,
+      "exactOrder": true,
+      "failedOrderedGroups": []
     }
   },
   "files": {
@@ -123,12 +126,12 @@
       "job": 109264733805,
       "status": "in_progress",
       "conclusion": null,
-      "passedSteps": 4,
+      "passedSteps": 10,
       "expectedOrderedGroups": 320,
       "restoration": "pending"
     }
   },
-  "nativeAcceptance": "TASK420 requires its own320 exact ordered groups and restoration. Local pass does not claim native PostgreSQL/whole-suite acceptance. TASK419319/restoration still pending at last read.",
+  "nativeAcceptance": "TASK419319 exact ordered groups/restoration confirmed. TASK420 still requires its own320 exact ordered groups/restoration; currently in progress.",
   "remaining": "Next TASK421: internal-alert controls/status/recovery copy; then legacy drafts, route-preview text and shared chrome. C06 remains in execution; C04 remains accepted at version414.",
   "counts": {
     "total": 32,
@@ -137,5 +140,6 @@
     "inValidation": 0,
     "completed": 5
   },
-  "authorization": "Authorized work branch only; no merge, VPS deployment or real contacts; annual legal contract remains deferred."
+  "authorization": "Authorized work branch only; no merge, VPS deployment or real contacts; annual legal contract remains deferred.",
+  "lastCorrectionVerification": "20260929_correction_verification.json"
 }
