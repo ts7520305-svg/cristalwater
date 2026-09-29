@@ -257,8 +257,25 @@
     "No merge/deploy/external communications. Public repository authorized during development; private before completion/C32."
   ],
   "publication": {
-    "status": "local_validated_publication_pending",
+    "status": "published_ci_in_progress",
     "branch": "work/field-readiness-20260915-simulation",
+    "codeCommit": "78a384fce3b43dd55a3c9c32962727976bd1e273",
+    "tree": "5a2b078a65c5a85238939b79cb6cfd03984b3e41",
+    "remoteTreeEqualsValidatedTree": true,
+    "checkoutAligned": true,
+    "originalLocalCommit": "16a2bc75ab6347e249d976fd1fa01c9d1b3bb7e6",
+    "originalHistoryBranch": "work/local-task450-20260929",
+    "ci": {
+      "run": 36636579876,
+      "job": 109638576785,
+      "head": "78a384fce3b43dd55a3c9c32962727976bd1e273",
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 5,
+      "currentStep": "Run npx prisma validate && npx prisma generate",
+      "fullSuiteGroups": 342,
+      "restore": "pending"
+    },
     "merged": false,
     "deployed": false
   }

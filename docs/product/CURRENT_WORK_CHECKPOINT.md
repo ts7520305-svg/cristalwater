@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 29/09/2026, TASK450 / CI em execução
+
+TASK450 publicada na branch `work/field-readiness-20260915-simulation`: código `78a384fce3b43dd55a3c9c32962727976bd1e273`, árvore `5a2b078a65c5a85238939b79cb6cfd03984b3e41`, igual à validada. Checkout alinhado; histórico local original preservado em `work/local-task450-20260929`. [CI36636579876](https://github.com/ts7520305-svg/cristalwater/actions/runs/36636579876), job109638576785, arrancou no commit exato; cinco etapas iniciais aprovadas, `Run npx prisma validate && npx prisma generate` em execução na consulta. Quatro integrações,1 356 unitários/quatro técnicos/sintaxe locais aprovados. Exigir PostgreSQL16/upgrade/suite342/restauro completo com contagens medidas e hashes iguais para aceitação. Atualização documental posterior `[skip ci]` conserva o código. [Prova450](evidence/20260929_task450_local.json).
+
+CI447 aceite340/340 e restauro128 tabelas49 ficheiros medidos/hashes iguais; CI448/449 continuam nas suites341 após dez etapas iniciais aprovadas. Próximo: confirmar gates448–450 e reparar falhas; depois `js/offline/offline-gps.js`/C06-009 pelos consumidores reais. Fila antiga conserva dados, pedidos e ordem fotografia→conclusão; reenvio sem duplicação. C06/C06-010/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público autorizado no desenvolvimento; privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Entradas abaixo históricas.
+
 ## Retoma atual — 29/09/2026, TASK450 local validada / fila antiga de conclusões
 
 **TASK450 / C06-010:** dois erros próprios de `js/offline/offline-queue.js` em PT/EN/FR/ES/DE: arquivo antigo e operação inválida. Dez textos no catálogo existente; os avisos reais da barra/recuperação e o alert da conclusão usam a identidade privada do Error. Error.message português, rótulos guardados, erros externos/persistidos, UUID/payload/hash e ordem fotografia→conclusão conservados. [Prova450](evidence/20260929_task450_local.json).
