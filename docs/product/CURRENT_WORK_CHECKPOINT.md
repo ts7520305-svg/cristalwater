@@ -1,5 +1,15 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 29/09/2026, TASK446 local validada / correção dos testes nativos
+
+**TASK446:** três pressupostos incorretos dos testes revelados pelos CI441/442 foram reproduzidos e corrigidos. A revisão do dia ativa agora a guarda de sessão de forma determinística, confirma o bloqueio e usa o link real de reabertura, conservando rascunho/pedido/arquivo. O teste de visitas extra verifica os IDs exatos das pendências e inclui uma visita sem regresso, sem desreferenciar pendências alheias. O teste de química escolhe alemão independentemente de capturar imagens. [Prova446](evidence/20260929_task446_local.json).
+
+**Validação:** três falhas reproduzidas (20 880 / 3 048 / 6 398 ms). Seis integrações aprovadas na mesma ronda: review-summary-languages: 16986 ms, impediment-form-languages: 32389 ms, chemical-preparation-languages: 9766 ms, extra-incomplete: 16605 ms, session-browser: 2814 ms, chemical-with-capture.cjs: 9660 ms. Química passa com e sem capturas; guardas, limites, asserções de identidade/dados/recibos, rollback e percurso móvel/escritório conservados ou reforçados. Três scripts passam sintaxe individual e diff sem erros. Backend/frontend/schema/workflow/cache230/runner339 são idênticos à TASK445 validada com 1 356 unitários/138 ficheiros, quatro técnicos e sintaxe695/308/44; esses gates não foram repetidos neste lote de testes.
+
+**Publicação445 confirmada:** código `19ad97273cd0bc5c776887c115eeef4621b83fea`, árvore `6f268c292d5abb76a0947e54ee260113ee1c4f9d`, igual à validada; checkout alinhado e original local preservado. [CI36622422522](https://github.com/ts7520305-svg/cristalwater/actions/runs/36622422522), job109590889576, na suite339 após dez etapas aprovadas. [Prova445](evidence/20260929_task445_local.json).
+
+**Gates/retoma:** CI441 terminou333/335 (sessão e regresso nulo); CI442 terminou334/336 (captura/idioma e regresso nulo), ambos sem restauro. CI443/444/445 ainda na suite na última consulta e anteriores às correções446. Publicação446 e PostgreSQL16/upgrade/suite339/restauro128 tabelas47ficheiros próprios pendentes. Depois de resolver os gates, continuar rótulos/seleção/feedback das fotografias modernas; helper antigo separado. Oito ficheiros, sem alteração de produto. C06/C06-005/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público durante desenvolvimento autorizado; privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado.
+
 ## Retoma atual — 29/09/2026, TASK445 local validada / erros de fotografias
 
 **TASK445 / C06-005:** sete erros próprios de `cw-field-photos.js` e duas apresentações do modo de campo em PT/EN/FR/ES/DE: nove entradas/45 textos. Fila de sincronização também usa a cópia do erro real. Error.message, erros externos/persistidos, blobs, IDs/UUID, nomes, payload e recibos conservados. Tradução por identidade do erro, sem classificar texto coincidente. [Prova445](evidence/20260929_task445_local.json).

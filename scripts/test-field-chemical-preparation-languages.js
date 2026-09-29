@@ -78,7 +78,9 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
     assert.deepEqual(state, { nodes: true, focus: true, disabled: false, overflow: false }); assert.deepEqual(await bytes(), stored);
   } } onlyLanguageSince(beforeRequests);
   await page.evaluate(() => CristalI18n.applyLanguage('fr', { silent: true })); await page.waitForFunction(title => document.querySelector('#fieldShortagePreparation h2').textContent === title, words.fr.title);
-  if (process.env.CW_CAPTURE_UI) { fs.mkdirSync('reports/field-ui', { recursive: true }); await page.setViewportSize({ width: 320, height: 900 }); await locale('de'); await panel.scrollIntoViewIfNeeded(); await panel.screenshot({ path: 'reports/field-ui/CHEMICAL_PREPARATION_DE_320.png' }); }
+  // Optional screenshots must not decide the language used by subsequent assertions.
+  await locale('de');
+  if (process.env.CW_CAPTURE_UI) { fs.mkdirSync('reports/field-ui', { recursive: true }); await page.setViewportSize({ width: 320, height: 900 }); await panel.scrollIntoViewIfNeeded(); await panel.screenshot({ path: 'reports/field-ui/CHEMICAL_PREPARATION_DE_320.png' }); }
   await extraRow.locator('[data-delivery-options]').click(); assert((await status()).startsWith(words.de.open)); assert.equal(await form().count(), 1);
   console.log('PASS five languages/three widths, same-ID visit types, unknown need, literal names/markup, missing transfer recovery, stable form nodes/focus/values/storage and language-only preference writes');
 

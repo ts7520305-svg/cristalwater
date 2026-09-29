@@ -1,142 +1,220 @@
 {
-  "task": "TASK445",
-  "item": "C06-005",
+  "task": "TASK446",
+  "item": "C06 validation",
   "date": "2026-09-29",
-  "base": "0b11f77cf397fc9b1b5046f31167d537a3f6ceb2",
-  "scope": "Localize owned photograph helper errors at actual modern-field and synchronization consumers; preserve original errors, files and requests.",
-  "languages": [
-    "pt",
-    "en",
-    "fr",
-    "es",
-    "de"
-  ],
-  "catalogue": {
-    "helperEntries": 7,
-    "presentationEntries": 2,
-    "strings": 45
-  },
-  "cache": 230,
-  "suiteGroups": 339,
-  "negative": {
-    "script": "test-field-photo-error-languages.js",
-    "code": 1,
-    "ms": 11238,
-    "failure": "English historic-photo warning never appears: owned helper message remains Portuguese.",
-    "logSha256": "3dfedd2183fd0130c33e1ef3a042df23666344b6e62c828e03f569e7a8c58bca"
-  },
-  "preparation": [
+  "base": "19ad97273cd0bc5c776887c115eeef4621b83fea",
+  "scope": "Repair three test assumptions revealed by native CI without changing application behavior, guards, timeouts, runner membership or order.",
+  "causes": [
     {
-      "code": 1,
-      "ms": 14229,
-      "reason": "Test attempted to fill notes while the Today tab was selected after reload. Test now opens the actual Agora tab; no application guard or assertion relaxed."
-    }
-  ],
-  "integration": [
-    {
-      "script": "test-field-photo-error-languages.js",
-      "code": 0,
-      "signal": null,
-      "ms": 12863,
-      "timedOut": false,
-      "logSha256": "ed63a550233e2521f33b20ef49ec6a8bb4b0175d8aa376311585cfd477ec2d6c"
+      "script": "scripts/test-field-review-summary-languages.js",
+      "native": "TASK441: timeout clicking dayReviewBtn after authentication was intentionally removed.",
+      "cause": "The production session guard permanently hides/inerts the old page; restoring a mocked token does not reopen it. Passing depended on beating the one-second guard.",
+      "fix": "Trigger the existing storage/session listener deterministically, assert hidden/inert before and after restoring credentials, reject captured rows, use the actual reopen link, compare all saved draft/outbox/legacy bytes."
     },
     {
-      "script": "test-field-sync-languages.js",
+      "script": "scripts/test-field-extra-incomplete.js",
+      "native": "TASK441 and TASK442: TypeError reading returnVisit.id on null.",
+      "cause": "The full office list legitimately contains unrelated EXTRA impediments with no scheduled return. The test dereferenced every EXTRA row before locating its own fixture.",
+      "fix": "Create a real unscheduled EXTRA before the future return, assert it is present with null return and unchanged visit, and verify the exact reminder IDs/types/visit IDs/return IDs for all three fixtures."
+    },
+    {
+      "script": "scripts/test-field-chemical-preparation-languages.js",
+      "native": "TASK442: expected German open-receipt warning after selecting French.",
+      "cause": "Selecting German was inside CW_CAPTURE_UI. Native CI does not enable optional screenshots.",
+      "fix": "Select German outside the optional capture block; run the complete chemical scenario both without and with capture."
+    }
+  ],
+  "negative": [
+    {
+      "script": "repro-summary.cjs",
+      "code": 1,
+      "ms": 20880,
+      "method": "Original test plus dispatch of the existing storage listener while the test removes authentication. Same hidden-button timeout as native CI.",
+      "logSha256": "8ea96bcdd3d54f4e4a32084124cfec29629b91f3b7b5ddd294fe62a943773db9"
+    },
+    {
+      "script": "repro-extra.cjs",
+      "code": 1,
+      "ms": 3048,
+      "method": "Original test plus a real unscheduled EXTRA impediment created through the API. Same null returnVisit.id TypeError.",
+      "logSha256": "e902d16f93e719506f29c357c259620d5d3ff7e7a53c9653e0f446ff7526894e"
+    },
+    {
+      "script": "scripts/test-field-chemical-preparation-languages.js",
+      "code": 1,
+      "ms": 6398,
+      "method": "Unchanged chemical test with CW_CAPTURE_UI unset; identical German-prefix assertion failure.",
+      "logSha256": "a3646ee0cf337ceab9f7eee13786e69aab00c7ab596e99089ac1e9db89b29a3c"
+    }
+  ],
+  "intermediate": {
+    "run": "four affected/regression groups before the chemical fix",
+    "allPassed": true,
+    "results": [
+      {
+        "script": "test-field-review-summary-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 16781,
+        "timedOut": false
+      },
+      {
+        "script": "test-field-impediment-form-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 32323,
+        "timedOut": false
+      },
+      {
+        "script": "test-field-extra-incomplete.js",
+        "code": 0,
+        "signal": null,
+        "ms": 16014,
+        "timedOut": false
+      },
+      {
+        "script": "test-field-session-browser.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2823,
+        "timedOut": false
+      }
+    ],
+    "limits": "An earlier summary/impediment-summary/extra run reproduced the session failure but extra passed alone without an unscheduled fixture. The dedicated fixture reproduced the native list condition."
+  },
+  "integration": [
+    {
+      "script": "test-field-review-summary-languages.js",
       "code": 0,
       "signal": null,
-      "ms": 5343,
+      "ms": 16986,
       "timedOut": false,
-      "logSha256": "56b7653e7576e289f99eea468b84b7204de6c3c835bff999c6f03760b9028f86"
+      "logSha256": "81fc77a88c2bf8f96b7955b04df72b09c54549d7e1d5b0f4d92f4e403ae2cff4"
+    },
+    {
+      "script": "test-field-impediment-form-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 32389,
+      "timedOut": false,
+      "logSha256": "e31713d5c327ce411e1a96ac8a0c6960454d4aa397759733cbc01846efda83da"
+    },
+    {
+      "script": "test-field-chemical-preparation-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 9766,
+      "timedOut": false,
+      "logSha256": "6074e25cac8e446666e195df3695a44c2444636271babee3934f9a4acda13b2e"
+    },
+    {
+      "script": "test-field-extra-incomplete.js",
+      "code": 0,
+      "signal": null,
+      "ms": 16605,
+      "timedOut": false,
+      "logSha256": "a81c72571ee493689ed69f1aad417b24c2f09dd17faa29d392ea5357612baf66"
     },
     {
       "script": "test-field-session-browser.js",
       "code": 0,
       "signal": null,
-      "ms": 3158,
+      "ms": 2814,
       "timedOut": false,
       "logSha256": "ca0b4bd1a5b0cbf004d295c1d5f299d3d171658e50a19e2e743a257ce00e7ae3"
     },
     {
-      "script": "test-field-e2e.js",
+      "script": "chemical-with-capture.cjs",
       "code": 0,
       "signal": null,
-      "ms": 51806,
+      "ms": 9660,
       "timedOut": false,
-      "logSha256": "a90a3dd42265b6e6e06d5afe6b430786b9eee76a6e367dab4c55b72214adf319"
+      "logSha256": "6074e25cac8e446666e195df3695a44c2444636271babee3934f9a4acda13b2e"
     }
   ],
-  "gates": [
-    {
-      "name": "syntax",
-      "code": 0,
-      "signal": null,
-      "ms": 198767,
-      "logSha256": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4"
-    },
-    {
-      "name": "unit",
-      "code": 0,
-      "signal": null,
-      "ms": 23315,
-      "logSha256": "3cdac41ca4b15b9cd3939c97bc6ddde0023e894d359f50005f15625b846a6eca"
-    },
-    {
-      "name": "technician",
-      "code": 0,
-      "signal": null,
-      "ms": 2036,
-      "logSha256": "1404e68c97cc8acae1839796c6bb4a86048c8dc015d171e6828f3dce1d022e7c"
-    }
-  ],
-  "unitTests": 1356,
-  "unitFiles": 138,
-  "technicianTests": 4,
-  "syntax": {
-    "backend": 695,
-    "frontend": 308,
-    "inline": 44
-  },
-  "static": {
-    "operationalPhotoCodeByteIdenticalAfterPresentationSubstitutions": true,
-    "originalRunnerOrderPreserved": true,
-    "previousGroups": 338,
-    "groups": 339,
-    "helperEntries": 7,
-    "presentationEntries": 2,
-    "languageStrings": 45
-  },
   "checks": [
-    "Actual route warning in five languages at320/390/1440 preserves historic Blob and stored notes; reload restore toast changes language and later ordinary toast clears its binding.",
-    "Real offline gallery chooser creates a VISIT_PHOTO request. Five languages preserve DOM nodes, retry focus, preview URL, filename, notes/draft bytes, owner, UUID, payload, SHA256 and all photograph bytes.",
-    "Language repaint invokes no save/list/send/remove/sync/pendingSummary producer or operational API request. Existing queue render/history reads are retained, not claimed absent. Language preference PUT remains allowed.",
-    "Direct helper guards reject stale identity, empty/oversized file, another resource ID and EXTRA with the same numeric ID. Original Error.message stays Portuguese, copy maps are frozen, metadata is not enumerable and same-text cloned/server/persisted errors are not classified as owned.",
-    "HTTP403 with exactly the owned Portuguese message remains literal in all languages; markup and {detail} remain text. Cached offline reload preserves original failure, photograph and notes.",
-    "A real server upload response is held while changing all five languages, then lost. Actual UI retry resends the same request, original bytes, name, type and payload hash. Exactly one SQL photo and one receipt; local file removed only after matching confirmation.",
-    "Regular and extra visits with the same ID remain separate; regular status stays PLANNED, extra execution unchanged, no extra photograph created. Confirmed photograph cannot be removed.",
-    "Synchronization language/session regressions and full field E2E pass, including stock idempotence, real photographs and client/technician/administrator routes."
+    "Summary languages retain all five locale/three width checks, captured-node/focus/bytes/no-extra-producer assertions, blocked stock request, quota failure, held result, refused session result and offline reconstruction.",
+    "Session guard is exercised synchronously through its actual event listener, not disabled or shortened; returning credentials leaves the old page inert until the user-facing reopen link is followed.",
+    "Extra visit test retains access restrictions, concurrent requests, immutable receipts, stale refusal, chemical transfer/receipt, atomic rollback, typed same-ID visits, single commercial charge and mobile/office reload/replay flows.",
+    "A real unrelated open EXTRA appears before the scheduled return in the complete API list. The test checks all fixture identities and both null-return cases without modifying or filtering the response.",
+    "Full chemical language flow passes both capture modes, including missing transfer, stable form, quota,403 literal, held/lost real response, exact replay, partial quantities1.25+2.75, unchanged stock/visits, offline and empty state.",
+    "Original impediment form language and session-browser regressions pass in the same isolated run. Three changed scripts pass node --check and git diff --check."
   ],
-  "implementation": [
-    "Private WeakMap binds only helper-created Error objects to frozen language copy; all seven original Portuguese error messages remain unchanged.",
-    "Modern consumer keeps captured presentation separately from photo.error and persisted drafts; locale edits only existing text leaves. Clearing ordinary toast removes its old photo binding.",
-    "Queue status precedence401/403/404/409 and external original-message behavior remain; only known photo error copy is localized. Existing render/flush/listeners/timeouts are unchanged.",
-    "Helper operations are byte-identical after reversing the seven error-construction substitutions and added accessor. No backend/schema/workflow changes."
-  ],
-  "visual": {
-    "path": "reports/field-ui/PHOTO_ERROR_DE_320.png",
-    "sha256": "230904e82e18bc5566569e2527a24d6e558135b11070e7fd8f40e3fb09e8c340",
-    "review": "German pending error fully visible and wrapped in320px; filename and retry/remove controls fit. Other photo controls still Portuguese and remain next scope."
+  "applicationUnchanged": {
+    "base": "19ad97273cd0bc5c776887c115eeef4621b83fea",
+    "paths": [
+      "frontend",
+      "src",
+      "prisma",
+      ".github/workflows",
+      "scripts/test-field-suite.js"
+    ],
+    "gitDiffExitCode": 0,
+    "cache": 230,
+    "groups": 339,
+    "orderUnchanged": true
+  },
+  "inheritedApplicationGates": {
+    "source": "20260929_task445_local.json",
+    "unitTests": 1356,
+    "unitFiles": 138,
+    "technicianTests": 4,
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44
+    },
+    "freshRerun": false,
+    "reason": "This task changes three integration scripts and documentation; all application/backend/schema/cache/runner/workflow files are identical to the tree validated in TASK445."
+  },
+  "sourceSha256": {
+    "scripts/test-field-review-summary-languages.js": "6efa188cb5dd0129f6b13090c79b4e04c2cc5acf3eda6ac9a973bd9c181918f0",
+    "scripts/test-field-extra-incomplete.js": "1bea678477f4fd3f70e126d784347fcc85927d3a486e9702a3499356aeae9a8e",
+    "scripts/test-field-chemical-preparation-languages.js": "197b972038763671e1dfd0ae03faf9356daccc1dfa523f500b2a6ff4922e82e5"
   },
   "nativePrevious": {
-    "previous": {
-      "task441": {
+    "task441": {
+      "run": 36613209845,
+      "job": 109559577064,
+      "total": 335,
+      "passed": 333,
+      "failed": [
+        {
+          "script": "test-field-review-summary-languages.js",
+          "code": 1,
+          "signal": null,
+          "ms": 15922,
+          "error": [
+            "2026-09-29T18:40:38.2320750Z locator.click: Timeout 7000ms exceeded.",
+            "2026-09-29T18:40:38.2329360Z       - element is not visible",
+            "2026-09-29T18:40:38.2331497Z       - element is not visible",
+            "2026-09-29T18:40:38.2333404Z        - element is not visible",
+            "2026-09-29T18:40:38.2336417Z     at async /home/runner/work/cristalwater/cristalwater/scripts/test-field-review-summary-languages.js:78:334 {",
+            "2026-09-29T18:40:38.2342191Z     '      - element is not visible',"
+          ]
+        },
+        {
+          "script": "test-field-extra-incomplete.js",
+          "code": 1,
+          "signal": null,
+          "ms": 832,
+          "error": [
+            "2026-09-29T19:19:00.6620853Z TypeError: Cannot read properties of null (reading 'id')",
+            "2026-09-29T19:19:00.6621810Z     at /home/runner/work/cristalwater/cristalwater/scripts/test-field-extra-incomplete.js:45:182"
+          ]
+        }
+      ],
+      "restore": "skipped after failed suite"
+    },
+    "task442": {
+      "jobs": {
         "jobs": [
           {
-            "id": 109559577064,
+            "id": 109567101107,
             "name": "field",
             "status": "completed",
             "conclusion": "failure",
-            "run_id": 36613209845,
+            "run_id": 36615430755,
             "logs_url": null,
             "steps": [
               {
@@ -251,122 +329,43 @@
           }
         ]
       },
-      "task442": {
-        "jobs": [
-          {
-            "id": 109567101107,
-            "name": "field",
-            "status": "in_progress",
-            "conclusion": null,
-            "run_id": 36615430755,
-            "logs_url": null,
-            "steps": [
-              {
-                "name": "Set up job",
-                "status": "completed",
-                "conclusion": "success",
-                "number": 1
-              },
-              {
-                "name": "Initialize containers",
-                "status": "completed",
-                "conclusion": "success",
-                "number": 2
-              },
-              {
-                "name": "Run actions/checkout@v4",
-                "status": "completed",
-                "conclusion": "success",
-                "number": 3
-              },
-              {
-                "name": "Run actions/setup-node@v4",
-                "status": "completed",
-                "conclusion": "success",
-                "number": 4
-              },
-              {
-                "name": "Run npm ci",
-                "status": "completed",
-                "conclusion": "success",
-                "number": 5
-              },
-              {
-                "name": "Run npx prisma validate && npx prisma generate",
-                "status": "completed",
-                "conclusion": "success",
-                "number": 6
-              },
-              {
-                "name": "Verify additive upgrade from the previous schema",
-                "status": "completed",
-                "conclusion": "success",
-                "number": 7
-              },
-              {
-                "name": "Run npx playwright install --with-deps chromium",
-                "status": "completed",
-                "conclusion": "success",
-                "number": 8
-              },
-              {
-                "name": "Run npm run check:syntax",
-                "status": "completed",
-                "conclusion": "success",
-                "number": 9
-              },
-              {
-                "name": "Run npm test && npm run test:technician && npm run test:field-browser",
-                "status": "completed",
-                "conclusion": "success",
-                "number": 10
-              },
-              {
-                "name": "Run node scripts/test-field-suite.js",
-                "status": "in_progress",
-                "conclusion": null,
-                "number": 11
-              },
-              {
-                "name": "Restore database and uploaded files in isolated QA",
-                "status": "pending",
-                "conclusion": null,
-                "number": 12
-              },
-              {
-                "name": "Run actions/upload-artifact@v4",
-                "status": "pending",
-                "conclusion": null,
-                "number": 13
-              },
-              {
-                "name": "Run actions/upload-artifact@v4",
-                "status": "pending",
-                "conclusion": null,
-                "number": 14
-              },
-              {
-                "name": "Post Run actions/setup-node@v4",
-                "status": "pending",
-                "conclusion": null,
-                "number": 26
-              },
-              {
-                "name": "Post Run actions/checkout@v4",
-                "status": "pending",
-                "conclusion": null,
-                "number": 27
-              },
-              {
-                "name": "Stop containers",
-                "status": "pending",
-                "conclusion": null,
-                "number": 28
-              }
-            ]
-          }
-        ]
-      },
+      "resultCount": 336,
+      "passed": 334,
+      "failures": [
+        {
+          "result": {
+            "script": "test-field-chemical-preparation-languages.js",
+            "code": 1,
+            "signal": null,
+            "ms": 2689
+          },
+          "context": [
+            "2026-09-29T19:00:35.1382356Z {\"script\":\"test-field-chemical-preparation-languages.js\",\"code\":1,\"signal\":null,\"ms\":2689}",
+            "2026-09-29T19:00:35.1385559Z AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:",
+            "2026-09-29T19:00:35.1386140Z ",
+            "2026-09-29T19:00:35.1386522Z   assert((await status()).startsWith(words.de.open))",
+            "2026-09-29T19:00:35.1386925Z "
+          ]
+        },
+        {
+          "result": {
+            "script": "test-field-extra-incomplete.js",
+            "code": 1,
+            "signal": null,
+            "ms": 811
+          },
+          "context": [
+            "2026-09-29T19:37:12.3207935Z {\"script\":\"test-field-extra-incomplete.js\",\"code\":1,\"signal\":null,\"ms\":811}",
+            "2026-09-29T19:37:12.3209211Z TypeError: Cannot read properties of null (reading 'id')",
+            "2026-09-29T19:37:12.3209970Z     at /home/runner/work/cristalwater/cristalwater/scripts/test-field-extra-incomplete.js:45:182",
+            "2026-09-29T19:37:12.3210601Z     at Array.some (<anonymous>)",
+            "2026-09-29T19:37:12.3211221Z     at /home/runner/work/cristalwater/cristalwater/scripts/test-field-extra-incomplete.js:45:128"
+          ]
+        }
+      ],
+      "restore": "skipped after suite failure"
+    },
+    "latest": {
       "task443": {
         "jobs": [
           {
@@ -598,52 +597,135 @@
             ]
           }
         ]
+      },
+      "task445": {
+        "jobs": [
+          {
+            "id": 109590889576,
+            "name": "field",
+            "status": "in_progress",
+            "conclusion": null,
+            "run_id": 36622422522,
+            "logs_url": null,
+            "steps": [
+              {
+                "name": "Set up job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 1
+              },
+              {
+                "name": "Initialize containers",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 2
+              },
+              {
+                "name": "Run actions/checkout@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 3
+              },
+              {
+                "name": "Run actions/setup-node@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 4
+              },
+              {
+                "name": "Run npm ci",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 5
+              },
+              {
+                "name": "Run npx prisma validate && npx prisma generate",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 6
+              },
+              {
+                "name": "Verify additive upgrade from the previous schema",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 7
+              },
+              {
+                "name": "Run npx playwright install --with-deps chromium",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 8
+              },
+              {
+                "name": "Run npm run check:syntax",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 9
+              },
+              {
+                "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 10
+              },
+              {
+                "name": "Run node scripts/test-field-suite.js",
+                "status": "in_progress",
+                "conclusion": null,
+                "number": 11
+              },
+              {
+                "name": "Restore database and uploaded files in isolated QA",
+                "status": "pending",
+                "conclusion": null,
+                "number": 12
+              },
+              {
+                "name": "Run actions/upload-artifact@v4",
+                "status": "pending",
+                "conclusion": null,
+                "number": 13
+              },
+              {
+                "name": "Run actions/upload-artifact@v4",
+                "status": "pending",
+                "conclusion": null,
+                "number": 14
+              },
+              {
+                "name": "Post Run actions/setup-node@v4",
+                "status": "pending",
+                "conclusion": null,
+                "number": 26
+              },
+              {
+                "name": "Post Run actions/checkout@v4",
+                "status": "pending",
+                "conclusion": null,
+                "number": 27
+              },
+              {
+                "name": "Stop containers",
+                "status": "pending",
+                "conclusion": null,
+                "number": 28
+              }
+            ]
+          }
+        ]
       }
-    },
-    "task441Failure": {
-      "run": 36613209845,
-      "job": 109559577064,
-      "total": 335,
-      "passed": 333,
-      "failed": [
-        {
-          "script": "test-field-review-summary-languages.js",
-          "code": 1,
-          "signal": null,
-          "ms": 15922,
-          "error": [
-            "2026-09-29T18:40:38.2320750Z locator.click: Timeout 7000ms exceeded.",
-            "2026-09-29T18:40:38.2329360Z       - element is not visible",
-            "2026-09-29T18:40:38.2331497Z       - element is not visible",
-            "2026-09-29T18:40:38.2333404Z        - element is not visible",
-            "2026-09-29T18:40:38.2336417Z     at async /home/runner/work/cristalwater/cristalwater/scripts/test-field-review-summary-languages.js:78:334 {",
-            "2026-09-29T18:40:38.2342191Z     '      - element is not visible',"
-          ]
-        },
-        {
-          "script": "test-field-extra-incomplete.js",
-          "code": 1,
-          "signal": null,
-          "ms": 832,
-          "error": [
-            "2026-09-29T19:19:00.6620853Z TypeError: Cannot read properties of null (reading 'id')",
-            "2026-09-29T19:19:00.6621810Z     at /home/runner/work/cristalwater/cristalwater/scripts/test-field-extra-incomplete.js:45:182"
-          ]
-        }
-      ],
-      "restore": "skipped after failed suite"
     }
   },
   "limits": [
-    "Local PGlite/Chromium153 does not replace native PostgreSQL16, additive upgrade, all339 groups in exact order and restore128 tables/47 files for the published commit.",
-    "TASK441 native suite finished333/335: review-summary test clicks hidden controls after session protection; extra-incomplete test dereferences returnVisit.id on an unrelated unplanned return. Restore skipped. TASK442/443/444 still running at latest check; no acceptance inferred.",
-    "No full photograph-panel translation: normal labels, selection/feedback and legacy offline-photos.js remain separate. Persisted/external errors stay literal, including own messages saved before reload.",
-    "C06/C06-005 remain open, as do shared navigation C08 and time policy C10. TASK415 static totals are historical."
+    "TASK441333/335 and TASK442334/336 remain failed historical runs; their restores were skipped. Local fixes do not turn those runs green.",
+    "TASK443/444/445 were still in their suites after ten successful initial steps at latest check. They predate these test fixes.",
+    "Local PGlite/Chromium153 results do not replace a fresh native PostgreSQL16/additive upgrade/all339 groups/restore128 tables47 files for this commit.",
+    "No additional strings translated. C06/C06-005 and modern photograph labels/selection/feedback, legacy helper, shared navigation C08 and time policy C10 remain open."
   ],
   "authorization": {
     "repositoryPublicDuringDevelopment": true,
     "makePrivateBeforeProjectCompletion": "C32",
-    "continuationLisbon": "2026-09-29T20:30:56+01:00",
+    "continuationLisbon": "2026-09-29T20:52:34+01:00",
     "merge": false,
     "deploy": false,
     "externalMessages": false
@@ -655,143 +737,8 @@
     "complete": 5
   },
   "next": {
-    "first": "Repair the two TASK441 native-suite test failures in a separate responsibility, reproduce them and rerun their affected groups. Check later native jobs.",
-    "afterGates": "Modern photograph panel labels/selection/feedback; legacy photograph helper remains separate.",
+    "first": "Confirm exact TASK446 native suite/restore and diagnose any remaining failure; do not infer acceptance from historical runs.",
+    "afterGates": "Continue modern photograph panel labels/selection/feedback, keeping original files, requests and external evidence.",
     "deferred": "Annual maintenance contract."
-  },
-  "sourceSha256": {
-    "frontend/cw-field-photos.js": "44d4ee412c321528ff71e4f509b5a1eadf88795023af444f1fd1c6acf1de18fa",
-    "frontend/technician-field-mode.js": "dd343b1b5b25ed8115f1a75ee4fbc7015dcf3afff1e87824d33f682517d69667",
-    "frontend/cw-field-offline.js": "e1c65d24e014c22d5a93ab0322f2c16ad2047d6964bb86e2300991b2d00d18e4",
-    "frontend/sw.js": "1fc88f84b8d44b7e9db3d4770a82c88e0a7dd4dd699399b836ba2976daf011a9",
-    "scripts/test-field-photo-error-languages.js": "daff475d6292dc909e0a6515478babc69d85e95d5c3c8cac40a7c46092184177",
-    "scripts/test-field-suite.js": "50daa0bddcdd5f2a15678861cc91d77ce1aede1df1aebfa2606b1dee6ebdc173"
-  },
-  "publication": {
-    "commit": "19ad97273cd0bc5c776887c115eeef4621b83fea",
-    "tree": "6f268c292d5abb76a0947e54ee260113ee1c4f9d",
-    "matchesValidatedTree": true,
-    "runId": 36622422522,
-    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36622422522",
-    "jobs": {
-      "jobs": [
-        {
-          "id": 109590889576,
-          "name": "field",
-          "status": "in_progress",
-          "conclusion": null,
-          "run_id": 36622422522,
-          "logs_url": null,
-          "steps": [
-            {
-              "name": "Set up job",
-              "status": "completed",
-              "conclusion": "success",
-              "number": 1
-            },
-            {
-              "name": "Initialize containers",
-              "status": "completed",
-              "conclusion": "success",
-              "number": 2
-            },
-            {
-              "name": "Run actions/checkout@v4",
-              "status": "completed",
-              "conclusion": "success",
-              "number": 3
-            },
-            {
-              "name": "Run actions/setup-node@v4",
-              "status": "completed",
-              "conclusion": "success",
-              "number": 4
-            },
-            {
-              "name": "Run npm ci",
-              "status": "completed",
-              "conclusion": "success",
-              "number": 5
-            },
-            {
-              "name": "Run npx prisma validate && npx prisma generate",
-              "status": "completed",
-              "conclusion": "success",
-              "number": 6
-            },
-            {
-              "name": "Verify additive upgrade from the previous schema",
-              "status": "in_progress",
-              "conclusion": null,
-              "number": 7
-            },
-            {
-              "name": "Run npx playwright install --with-deps chromium",
-              "status": "pending",
-              "conclusion": null,
-              "number": 8
-            },
-            {
-              "name": "Run npm run check:syntax",
-              "status": "pending",
-              "conclusion": null,
-              "number": 9
-            },
-            {
-              "name": "Run npm test && npm run test:technician && npm run test:field-browser",
-              "status": "pending",
-              "conclusion": null,
-              "number": 10
-            },
-            {
-              "name": "Run node scripts/test-field-suite.js",
-              "status": "pending",
-              "conclusion": null,
-              "number": 11
-            },
-            {
-              "name": "Restore database and uploaded files in isolated QA",
-              "status": "pending",
-              "conclusion": null,
-              "number": 12
-            },
-            {
-              "name": "Run actions/upload-artifact@v4",
-              "status": "pending",
-              "conclusion": null,
-              "number": 13
-            },
-            {
-              "name": "Run actions/upload-artifact@v4",
-              "status": "pending",
-              "conclusion": null,
-              "number": 14
-            },
-            {
-              "name": "Post Run actions/setup-node@v4",
-              "status": "pending",
-              "conclusion": null,
-              "number": 26
-            },
-            {
-              "name": "Post Run actions/checkout@v4",
-              "status": "pending",
-              "conclusion": null,
-              "number": 27
-            },
-            {
-              "name": "Stop containers",
-              "status": "pending",
-              "conclusion": null,
-              "number": 28
-            }
-          ]
-        }
-      ]
-    },
-    "originalLocalCommit": "2fea6fb927741c014c65f142e9b77873952a41a2",
-    "originalHistoryBranch": "work/local-task445-20260929",
-    "merged": false,
-    "deployed": false
   }
 }

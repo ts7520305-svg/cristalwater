@@ -42,7 +42,20 @@ async function waitFor(page,predicate){for(let i=0;i<200;i++){if(await page.eval
   assert.equal((await api('POST',`/api/technician/chemical-shortages/${reminder.id}/deliveries`,deliveryBody,otherToken)).body.receipt.quantity,3);
   assert.equal((await api('POST',`/api/technician/chemical-shortages/${reminder.id}/deliveries`,{...deliveryBody,requestId:randomUUID()},adminToken)).status,403,'Office cannot confirm physical receipt for a technician');
   assert.equal((await api('GET','/api/technician/chemical-shortages',undefined,otherToken)).body.rows.find(r=>r.shortageId===reminder.id).receivedQuantity,3);
-  const followups=await api('GET','/api/technician/incomplete-followups',undefined,adminToken);assert(followups.body.reminders.some(r=>r.metadata.visitType==='EXTRA'&&r.returnVisit.id===child.id));assert(followups.body.reminders.some(r=>r.metadata.visitType==='REGULAR'&&r.visit.id===id&&!r.returnVisit));
+  // The office list includes unrelated impediments whose return has not been scheduled.
+  // Keep one before this test's future return, as earlier suite groups legitimately do.
+  const unrelated=await prisma.extraVisit.create({data:{poolId:pool.id,clientId:client.id,technicianId:tech.id,scheduledAt:new Date(),status:'PLANNED'}});
+  const {chemicalShortage:ignoredShortage,...unrelatedBody}=await report(unrelated.id,'EXTRA',token,{reason:'ACCESS_BLOCKED'});
+  const unrelatedResult=await api('POST',endpoint(unrelated.id),unrelatedBody);assert.equal(unrelatedResult.status,200);assert.equal(unrelatedResult.body.applied,true);
+  const unrelatedBefore=await prisma.extraVisit.findUniqueOrThrow({where:{id:unrelated.id}});
+  const followups=await api('GET','/api/technician/incomplete-followups',undefined,adminToken);assert.equal(followups.status,200);
+  const rows=followups.body.reminders,extraFollowup=rows.find(r=>r.id===reminder.id),regularFollowup=rows.find(r=>r.id===regularReport.body.reminder.id),unplannedFollowup=rows.find(r=>r.id===unrelatedResult.body.reminder.id);
+  assert(extraFollowup&&regularFollowup&&unplannedFollowup,'Every fixture must be present in the complete office list');
+  assert.equal(extraFollowup.metadata.visitType,'EXTRA');assert.equal(extraFollowup.visit.id,id);assert.equal(extraFollowup.returnVisit.id,child.id);
+  assert.equal(regularFollowup.metadata.visitType,'REGULAR');assert.equal(regularFollowup.visit.id,id);assert.equal(regularFollowup.returnVisit,null);
+  assert.equal(unplannedFollowup.metadata.visitType,'EXTRA');assert.equal(unplannedFollowup.visit.id,unrelated.id);assert.equal(unplannedFollowup.returnVisit,null);assert(rows.indexOf(unplannedFollowup)<rows.indexOf(extraFollowup));
+  assert.deepEqual(await prisma.extraVisit.findUniqueOrThrow({where:{id:unrelated.id}}),unrelatedBefore);
+  console.log('PASS complete followup list preserves unrelated EXTRA without a return and validates exact REGULAR/EXTRA reminder identities');
   const receipt=(await api('GET','/api/technician/visit-receipts',undefined,otherToken)).body.receipts.find(r=>r.visitType==='EXTRA'&&r.visitId===child.id);assert(receipt);assert.equal((await api('POST',`/api/technician/visit-receipts/${receipt.id}/acknowledge`,{},otherToken)).status,200);
   await prisma.extraVisit.update({where:{id},data:{technicianId:other.id}});assert.deepEqual((await api('POST',endpoint(id),body)).body,saved);assert.equal((await view()).status,403);assert.deepEqual((await api('POST',endpoint(id,'schedule-return'),plan,adminToken)).body,plans[0].body);
   console.log('PASS typed equal-ID reports, preserved execution, private access, concurrent immutable receipts, frozen stale refusals, office returns, chemical assignment and typed receipt');

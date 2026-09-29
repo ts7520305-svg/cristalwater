@@ -8,6 +8,10 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
+## Validação de continuidade — TASK446 / testes dos idiomas e impedimentos
+
+CI441 (333/335) e CI442 (334/336) revelaram três erros nos testes: página protegida após perda de sessão, pendência extra sem regresso e escolha de alemão dependente de capturas opcionais. Todos reproduzidos; testes corrigidos para reabrir a página real preservando dados, verificar pendências por ID/tipo e escolher o idioma sempre. Seis integrações aprovadas, incluindo química com/sem capturas e regressões de impedimentos/sessão. Aplicação/cache230/runner339 e ordem inalterados; gates de produto445 conservados, sem nova contagem de traduções. TASK445 publicada `19ad9727`, CI36622422522 na suite; publicação/gates nativos446 pendentes. [Prova446](evidence/20260929_task446_local.json).
+
 ## Progresso funcional — TASK445 / erros próprios de fotografias
 
 `cw-field-photos.js`: sete erros/35 textos em PT/EN/FR/ES/DE; duas apresentações/dez textos no modo de campo. Fila e recuperação utilizam a identidade do erro, preservando Error.message e detalhes externos/persistidos mesmo quando coincidem com texto próprio. Idioma atualiza folhas existentes sem reler produtores de fotografias, alterar rascunhos ou enviar; renderizações de arquivo já existentes na fila mantêm-se. Cache230/runner339. [Prova445](evidence/20260929_task445_local.json).
