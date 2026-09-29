@@ -8,6 +8,12 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
+## Validação de continuidade — TASK449 / sessão do formulário de impedimentos
+
+CI446 terminou338/339; a única falha usa o seletor de idioma depois de a guarda ocultar a página. Reprodução determinística39 174ms confirma o listener existente. Teste corrigido mantém os cinco avisos e o botão desativado, comprova bloqueio persistente após repor o token e segue o link real de reabertura offline. Bytes de rascunhos REGULAR/EXTRA, contexto/arquivo e pedidos/UUID/hash/recibos/revisão conservados; mudança de idioma bloqueada não relê produtores nem faz pedidos operacionais. Quatro integrações e sintaxe individual/diff aprovados; nenhuma guarda/espera/asserção retirada. [Prova449](evidence/20260929_task449_local.json).
+
+Aplicação/cache232/runner341 e contagens de traduções inalterados; gates de produto448 herdados sem repetição. Restauro446 não executado; CI447/448 nas suites340/341 após dez etapas iniciais aprovadas. Publicação e PostgreSQL16/upgrade/suite341/restauro449 pendentes. C06/C06-010/C08/C10 continuam abertos; próximo: fila antiga `js/offline/offline-queue.js` depois dos gates. Entradas anteriores conservam o estado histórico.
+
 ## Progresso funcional — TASK448 / erros de fotografias da página antiga
 
 `js/offline/offline-photos.js`, C06-010:três erros/15 textos em PT/EN/FR/ES/DE no catálogo existente. `technician.js` apresenta o aviso do arquivo na barra/recuperação e o erro da seleção no alert atual, por identidade privada do Error. Error.message, labels guardados, detalhes externos/persistidos e blobs não são traduzidos nem regravados. Catálogo anterior/helper/consumidor preservados após inverter só apresentação. Cache232/runner341;340 grupos anteriores na ordem exata. [Prova448](evidence/20260929_task448_local.json).

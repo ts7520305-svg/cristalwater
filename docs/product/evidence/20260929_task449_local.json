@@ -1,0 +1,152 @@
+{
+  "task": "TASK449",
+  "item": "C06 validation",
+  "date": "2026-09-29",
+  "base": "49d19c187a98885d91c0adfe29d9ebacb235c89e",
+  "scope": "Repair the impediment-form test session recovery path after native TASK446 exposed the hidden language selector. Product behavior is unchanged.",
+  "nativeFailure": {
+    "run": 36623638975,
+    "job": 109594988678,
+    "counts": {
+      "total": 339,
+      "passed": 338
+    },
+    "failures": [
+      {
+        "script": "test-field-impediment-form-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 30112
+      }
+    ],
+    "restore": "skipped after suite failure"
+  },
+  "negative": [
+    {
+      "script": "repro-impediment.cjs",
+      "code": 1,
+      "signal": null,
+      "ms": 39174,
+      "timedOut": false,
+      "logSha256": "e1786a1f5676d3df54add8250a539c475be828073f8086d991d9d11b38b5b1d1"
+    }
+  ],
+  "negativeDescription": "The original test is compiled with only a real storage event added immediately after its existing null-token fixture. This deterministically activates the unchanged session listener. selectOption times out because main.field is hidden and inert, matching the native failure.",
+  "integration": [
+    {
+      "script": "test-field-impediment-form-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 32973,
+      "timedOut": false,
+      "logSha256": "e31713d5c327ce411e1a96ac8a0c6960454d4aa397759733cbc01846efda83da"
+    },
+    {
+      "script": "test-field-review-summary-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 16698,
+      "timedOut": false,
+      "logSha256": "81fc77a88c2bf8f96b7955b04df72b09c54549d7e1d5b0f4d92f4e403ae2cff4"
+    },
+    {
+      "script": "test-field-review-impediment-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 13577,
+      "timedOut": false,
+      "logSha256": "10a01b9624a58807fd35f2d2e21a8d6f247478e40ab9a757e645d4287c66b190"
+    },
+    {
+      "script": "test-field-session-browser.js",
+      "code": 0,
+      "signal": null,
+      "ms": 2739,
+      "timedOut": false,
+      "logSha256": "ca0b4bd1a5b0cbf004d295c1d5f299d3d171658e50a19e2e743a257ce00e7ae3"
+    }
+  ],
+  "integrationRuns": [
+    "One complete corrected impediment-form test on a fresh isolated database.",
+    "Three unchanged review/session regression groups on another fresh isolated database."
+  ],
+  "checks": [
+    "The actual storage listener blocks the field route, hides and makes main.field inert, and exposes the existing alert and recovery link.",
+    "All five session refusal translations and the disabled save control remain asserted. The existing language API repaints while blocked without reconnecting nodes, rereading workflow producers, changing cwIncomplete bytes or making operational requests.",
+    "Restoring the same token leaves the old page blocked. Following the actual recovery link offline opens a new page, preserving exact regular/extra drafts, context cache, legacy text and immutable outbox rows including account, UUID, payload, digest, response and review acknowledgement.",
+    "The complete form test still covers five languages at320/390/1440, equal-ID typed drafts, comma quantities, quota/cross-tab conflicts, literal403, cancelled resend, real regular stale refusal, one successful EXTRA report, review isolation, valid/corrupt legacy records, cache and missing context.",
+    "Final database assertions retain the exact regular row, EXTRA execution/endAt, full stock row, two immutable receipts, one technical-history report and one notification. No markup execution or browser errors.",
+    "Review-summary, impediment-review and account-session regression groups pass without edits. No timeout increases, disabled guards, sleeps or retries were added."
+  ],
+  "gates": {
+    "nodeCheck": "passed",
+    "diffCheck": "passed",
+    "productDiffAgainstBase": "empty",
+    "inheritedFromTask448": {
+      "notRerun": true,
+      "unitTests": 1356,
+      "unitFiles": 138,
+      "technicianTests": 4,
+      "syntax": {
+        "backend": 695,
+        "frontend": 308,
+        "inline": 44
+      },
+      "evidence": "20260929_task448_local.json"
+    }
+  },
+  "preservation": {
+    "backendFrontendSchemaWorkflowsUnchanged": true,
+    "sessionGuardUnchanged": true,
+    "runner341ExactBytesAndOrderUnchanged": true,
+    "cache232Unchanged": true,
+    "translationCountsUnchanged": true,
+    "changedFilesIncludingDocs": 5
+  },
+  "sourceSha256": {
+    "scripts/test-field-impediment-form-languages.js": "26433ffc9351418a22ec13559a0f843b4a254aac356770323c9512bfdc05f333",
+    "frontend/technician-field-mode.js": "69a79f8658ab9e2675ec43c04b8da350cf2702d631a0a01115373d01b5d9f21c",
+    "frontend/sw.js": "b9ad5f4ea0dd8be6657314055f2065fccf95961a20d1304086ecf2fbabdba5f8",
+    "scripts/test-field-suite.js": "1e06884e0a64e71e1eef6de2a9ab387501d36bfe70ad66c4524b1c07b9f83f90"
+  },
+  "baselineTestSha256": "7e02d97e000d09bef4a4367c44d06b3176639409cf480a4f9b0a7efbddb3e3e6",
+  "nativePrevious": [
+    {
+      "task": 447,
+      "run": 36627447422,
+      "job": 109607960844,
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "restore": "pending"
+    },
+    {
+      "task": 448,
+      "run": 36629776697,
+      "job": 109615752303,
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "restore": "pending"
+    }
+  ],
+  "environment": {
+    "database": "isolated PGlite via TCP",
+    "browser": "Chromium153",
+    "timezone": "Europe/Lisbon",
+    "externalEffects": "notifications/email/WhatsApp/fiscal/webhooks/background jobs disabled"
+  },
+  "limits": [
+    "PGlite does not replace PostgreSQL16/additive-upgrade/full341-group suite/restore128 tables47files.",
+    "C06/C06-010/C08/C10 remain open; next source is the legacy completion queue after native gates.",
+    "No merge/deploy/external communications. Public repository authorized during development; private before completion/C32."
+  ],
+  "publication": {
+    "status": "local_validated_publication_pending",
+    "branch": "work/field-readiness-20260915-simulation",
+    "merged": false,
+    "deployed": false
+  }
+}
