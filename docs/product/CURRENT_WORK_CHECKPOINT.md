@@ -1,5 +1,17 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 29/09/2026, TASK432 validada localmente / revisão diária em cinco idiomas
+
+**TASK432 / C06-003:** mensagens próprias da revisão diária localizadas em PT/EN/FR/ES/DE: água aberta, bomba manual, trabalho regular/extra, envios, fotografias, rascunhos, cadastros, avisos de revisão incompleta e datas. 42 entradas. Nomes, notas, erros do servidor e resumos externos conservam o texto original. Descritores privados não acrescentam campos aos resultados públicos. [Prova432](evidence/20260929_task432_local.json).
+
+**Estado preservado:** o seletor real de idioma deixa de invalidar a revisão. Reescreve apenas o texto dos nós existentes; não consulta novamente dados, não muda a hora de confirmação e não altera dados operacionais. Uma resposta em curso mantém botão ocupado/aria-busy; entradas operacionais continuam a invalidar a revisão e respostas de outra sessão continuam recusadas. A reposição silenciosa do idioma também atualiza as mensagens. Cache218 e runner327, mantendo a ordem dos326 grupos anteriores.
+
+**Validação local:** seis casos novos falharam antes;1 356 unitários/138 ficheiros, quatro técnicos e sintaxe695 backend/308 frontend/44 inline aprovados. Primeiro ensaio completo de idiomas15 545ms, E2E59 150ms e ronda completa37 632ms aprovados. Versão final de idiomas14 203ms e cadastro23 269ms aprovados; quatro grupos únicos no total. Nos cinco idiomas e320/390/1440px: avisos críticos, nós/foco, bytes de storage/registos e hora preservados; zero consultas adicionais pela tradução. Resposta tardia, input operacional, token alterado, falha parcial, dados corrompidos, offline/reload/cache e estado vazio cobertos. Captura alemã320px revista.
+
+**Limites e gates:** este lote cobre apenas mensagens próprias da revisão, não os resumos produzidos por outros módulos nem todos os painéis deste ficheiro. O restante módulo, desde handoverPanel, permanece byte a byte. Nove ficheiros incluindo quatro de documentação. **CI430 confirmado:**326 grupos únicos na ordem exata, todos aprovados; restauro128 tabelas/47 ficheiros com linhas/hashes iguais. Log integral389 147 caracteres lido;18 etapas aprovadas. O novo supervisor fica validado nessa versão. CI431 continua em execução após dez etapas aprovadas; não se transfere430 para431/432. CI432 exige327 grupos exatos e restauro128 tabelas/47 ficheiros próprios.
+
+**Próximo TASK433:** confirmar os gates e tratar qualquer falha; depois ligar a mudança de idioma aos resumos externos capturados pela revisão, mantendo identidade/dados/tempo. C06 continua aberta; chrome/nav C08-025/026.32 tarefas=26 por iniciar/1 em execução/5 concluídas. Sem merge/deploy/contactos reais; contrato anual adiado. Entradas abaixo são históricas.
+
 ## Retoma atual — 29/09/2026, TASK431 publicada / gravação completa antes do teste de idiomas
 
 **TASK431 publicada na branch autorizada.** O alerta da captura, referido às11:17 de Lisboa, corresponde ao email da TASK426, cuja espera da rota foi corrigida em429. Durante a investigação chegou às12:33 outro email: **CI429 terminou325/326**, única falha em `test-field-legacy-page-languages.js:93`; restauro ignorado. Log completo397 829 caracteres lido,326 grupos únicos na ordem exata. A rota corrigida429 passou em17 407ms. [Prova431](evidence/20260929_task431_local.json).

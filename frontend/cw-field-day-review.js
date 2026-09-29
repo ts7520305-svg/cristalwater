@@ -1,5 +1,63 @@
 (function () {
   'use strict';
+  const messages = {
+    "title": ["Antes de sair","Before leaving","Avant de partir","Antes de salir","Vor dem Verlassen"],
+    "intro": ["Reveja trabalhos, envios e lembretes. Esta revisão não encerra a jornada nem transfere responsabilidades.","Review work, submissions and reminders. This review does not end the workday or transfer responsibilities.","Vérifiez les travaux, les envois et les rappels. Cette vérification ne termine pas la journée et ne transfère aucune responsabilité.","Revise trabajos, envíos y recordatorios. Esta revisión no cierra la jornada ni transfiere responsabilidades.","Prüfen Sie Arbeiten, Übermittlungen und Erinnerungen. Diese Prüfung beendet weder den Arbeitstag noch überträgt sie Verantwortlichkeiten."],
+    "review": ["Rever pendências do dia","Review outstanding items today","Vérifier les éléments en attente du jour","Revisar pendientes del día","Offene Punkte des Tages prüfen"],
+    "visit": ["Visita {id}","Visit {id}","Visite {id}","Visita {id}","Besuch {id}"],
+    "routeUnknown": ["Ronda sem confirmação atual. Ligue à rede e atualize a agenda; podem existir alterações do escritório.","Route not currently confirmed. Connect and refresh the schedule; the office may have made changes.","Tournée sans confirmation à jour. Connectez-vous et actualisez le planning ; le bureau peut avoir effectué des modifications.","Ruta sin confirmación actual. Conéctese y actualice la agenda; la oficina puede haber realizado cambios.","Route derzeit nicht bestätigt. Stellen Sie eine Verbindung her und aktualisieren Sie den Terminplan; das Büro könnte Änderungen vorgenommen haben."],
+    "verification": ["{section}: não foi possível confirmar os dados no servidor. A revisão está incompleta.","{section}: could not confirm the server data. The review is incomplete.","{section} : impossible de confirmer les données du serveur. La vérification est incomplète.","{section}: no se pudieron confirmar los datos del servidor. La revisión está incompleta.","{section}: Die Serverdaten konnten nicht bestätigt werden. Die Prüfung ist unvollständig."],
+    "waterOpen": ["{name} — água aberta. Confirme o fecho físico ou contacte o responsável.","{name} — water left on. Confirm it has physically been turned off or contact the person responsible.","{name} — eau ouverte. Confirmez la fermeture physique ou contactez la personne responsable.","{name} — agua abierta. Confirme el cierre físico o contacte con la persona responsable.","{name} — Wasser läuft. Bestätigen Sie, dass es vor Ort abgestellt wurde, oder kontaktieren Sie die verantwortliche Person."],
+    "waterPending": ["{name} — estado da água por confirmar no servidor.","{name} — water status awaiting server confirmation.","{name} — état de l’eau à confirmer sur le serveur.","{name} — estado del agua por confirmar en el servidor.","{name} — Wasserstatus wartet auf Serverbestätigung."],
+    "pumpManual": ["{name} — bomba em manual. Confirme o regresso físico a automático ou contacte o responsável.","{name} — pump in manual mode. Confirm it has physically returned to automatic or contact the person responsible.","{name} — pompe en mode manuel. Confirmez le retour physique en mode automatique ou contactez la personne responsable.","{name} — bomba en modo manual. Confirme el retorno físico al modo automático o contacte con la persona responsable.","{name} — Pumpe im manuellen Modus. Bestätigen Sie, dass sie vor Ort auf Automatik zurückgestellt wurde, oder kontaktieren Sie die verantwortliche Person."],
+    "pumpPending": ["{name} — estado da bomba por confirmar no servidor.","{name} — pump status awaiting server confirmation.","{name} — état de la pompe à confirmer sur le serveur.","{name} — estado de la bomba por confirmar en el servidor.","{name} — Pumpenstatus wartet auf Serverbestätigung."],
+    "unfinished": ["{name} — {work}. Combine o próximo passo com o escritório.","{name} — {work}. Agree on the next step with the office.","{name} — {work}. Convenez de la prochaine étape avec le bureau.","{name} — {work}. Acuerde el siguiente paso con la oficina.","{name} — {work}. Vereinbaren Sie den nächsten Schritt mit dem Büro."],
+    "regularWork": ["trabalho por concluir","unfinished work","travail à terminer","trabajo sin terminar","unerledigte Arbeit"],
+    "extraWork": ["visita extra por concluir","unfinished extra visit","visite supplémentaire à terminer","visita extra sin terminar","unerledigter Zusatzbesuch"],
+    "rejected": ["{name} — correção não aplicada: {detail}","{name} — correction not applied: {detail}","{name} — correction non appliquée : {detail}","{name} — corrección no aplicada: {detail}","{name} — Korrektur nicht angewendet: {detail}"],
+    "queued": ["{name} — {operation} por confirmar no servidor{blocked}.","{name} — {operation} awaiting server confirmation{blocked}.","{name} — {operation} à confirmer sur le serveur{blocked}.","{name} — {operation} por confirmar en el servidor{blocked}.","{name} — {operation} wartet auf Serverbestätigung{blocked}."],
+    "start": ["início","start","début","inicio","Beginn"],
+    "correction": ["correção","correction","correction","corrección","Korrektur"],
+    "completion": ["conclusão","completion","fin","finalización","Abschluss"],
+    "blocked": ["; precisa de apoio do escritório","; office support needed"," ; aide du bureau nécessaire","; necesita apoyo de la oficina","; Unterstützung durch das Büro erforderlich"],
+    "photos": ["{name} — {count} fotografia(s) por enviar.","{name} — {count} photo(s) awaiting upload.","{name} — {count} photo(s) à envoyer.","{name} — {count} foto(s) por enviar.","{name} — {count} Foto(s) zum Senden."],
+    "problemDraft": ["{name} — ocorrência guardada no telemóvel, por enviar.","{name} — issue saved on the phone, awaiting sending.","{name} — incident enregistré sur le téléphone, à envoyer.","{name} — incidencia guardada en el teléfono, por enviar.","{name} — Vorfall auf dem Telefon gespeichert, noch zu senden."],
+    "route": ["Ronda","Route","Tournée","Ruta","Route"],
+    "water": ["Água aberta","Water left on","Eau ouverte","Agua abierta","Laufendes Wasser"],
+    "pumps": ["Bombas em manual","Pumps in manual mode","Pompes en mode manuel","Bombas en modo manual","Pumpen im manuellen Modus"],
+    "criticalReminders": ["Lembretes críticos","Critical reminders","Rappels critiques","Recordatorios críticos","Kritische Erinnerungen"],
+    "legacyReminders": ["Lembretes antigos por reconciliar com o escritório","Old reminders to reconcile with the office","Anciens rappels à rapprocher avec le bureau","Recordatorios antiguos por conciliar con la oficina","Alte Erinnerungen mit dem Büro abgleichen"],
+    "legacyDrafts": ["Rascunhos antigos sem conta/tipo de visita confirmados","Old drafts without a confirmed account/visit type","Anciens brouillons sans compte/type de visite confirmé","Borradores antiguos sin cuenta/tipo de visita confirmados","Alte Entwürfe ohne bestätigtes Konto/bestätigten Besuchstyp"],
+    "changed": ["O estado pode ter mudado. Volte a rever as pendências antes de sair.","The state may have changed. Review outstanding items again before leaving.","L’état peut avoir changé. Vérifiez à nouveau les éléments en attente avant de partir.","El estado puede haber cambiado. Revise de nuevo los pendientes antes de salir.","Der Zustand könnte sich geändert haben. Prüfen Sie die offenen Punkte vor dem Verlassen erneut."],
+    "checking": ["A verificar pendências neste telemóvel…","Checking outstanding items on this phone…","Vérification des éléments en attente sur ce téléphone…","Comprobando pendientes en este teléfono…","Offene Punkte auf diesem Telefon werden geprüft…"],
+    "sessionChanged": ["Sessão alterada. Repita a revisão com a conta atual.","Session changed. Repeat the review with the current account.","Session modifiée. Recommencez la vérification avec le compte actuel.","Sesión cambiada. Repita la revisión con la cuenta actual.","Sitzung geändert. Wiederholen Sie die Prüfung mit dem aktuellen Konto."],
+    "intakePending": ["{name} — cadastro por confirmar. Abra Novo cliente em campo.","{name} — registration awaiting confirmation. Open New client in the field.","{name} — inscription à confirmer. Ouvrez Nouveau client sur le terrain.","{name} — alta por confirmar. Abra Nuevo cliente en campo.","{name} — Registrierung wartet auf Bestätigung. Öffnen Sie Neuer Kunde vor Ort."],
+    "intakeDraft": ["Rascunho de cadastro por enviar. Abra Novo cliente em campo.","Registration draft awaiting sending. Open New client in the field.","Brouillon d’inscription à envoyer. Ouvrez Nouveau client sur le terrain.","Borrador de alta por enviar. Abra Nuevo cliente en campo.","Registrierungsentwurf noch zu senden. Öffnen Sie Neuer Kunde vor Ort."],
+    "correctionDraft": ["{name} — rascunho de correção guardado, ainda não confirmado.","{name} — correction draft saved, not yet confirmed.","{name} — brouillon de correction enregistré, pas encore confirmé.","{name} — borrador de corrección guardado, aún sin confirmar.","{name} — Korrekturentwurf gespeichert, noch nicht bestätigt."],
+    "outstanding": ["Existem pendências antes de sair:","There are outstanding items before leaving:","Des éléments sont en attente avant de partir :","Hay pendientes antes de salir:","Vor dem Verlassen sind noch Punkte offen:"],
+    "empty": ["Não foram encontradas pendências nos dados verificados. Confirme as condições físicas antes de sair.","No outstanding items were found in the checked data. Confirm the physical conditions before leaving.","Aucun élément en attente dans les données vérifiées. Confirmez les conditions sur place avant de partir.","No se encontraron pendientes en los datos verificados. Confirme las condiciones físicas antes de salir.","In den geprüften Daten wurden keine offenen Punkte gefunden. Prüfen Sie vor dem Verlassen die Bedingungen vor Ort."],
+    "critical": ["Atenção imediata","Immediate attention","Attention immédiate","Atención inmediata","Sofortige Aufmerksamkeit"],
+    "pending": ["Por concluir ou enviar","To finish or send","À terminer ou envoyer","Por terminar o enviar","Abzuschließen oder zu senden"],
+    "unknown": ["Por confirmar","Awaiting confirmation","À confirmer","Por confirmar","Noch zu bestätigen"],
+    "group": ["{label} ({count})","{label} ({count})","{label} ({count})","{label} ({count})","{label} ({count})"],
+    "unconfirmed": ["não confirmada","not confirmed","non confirmée","sin confirmar","nicht bestätigt"],
+    "stamp": ["Revisão: {reviewed}. Última ronda confirmada: {confirmed}. Não limpe os dados da aplicação enquanto existirem envios pendentes.","Reviewed: {reviewed}. Last confirmed route: {confirmed}. Do not clear the application data while submissions are pending.","Vérification : {reviewed}. Dernière tournée confirmée : {confirmed}. N’effacez pas les données de l’application tant que des envois sont en attente.","Revisión: {reviewed}. Última ruta confirmada: {confirmed}. No borre los datos de la aplicación mientras haya envíos pendientes.","Geprüft: {reviewed}. Letzte bestätigte Route: {confirmed}. Löschen Sie keine Anwendungsdaten, solange Übermittlungen ausstehen."],
+    "failed": ["Não foi possível verificar todas as pendências. Não considere o dia conferido. Preserve os dados e peça apoio ao escritório.","Could not check all outstanding items. Do not consider the day checked. Preserve the data and ask the office for support.","Impossible de vérifier tous les éléments en attente. Ne considérez pas la journée comme vérifiée. Conservez les données et demandez de l’aide au bureau.","No se pudieron comprobar todos los pendientes. No considere el día revisado. Conserve los datos y pida apoyo a la oficina.","Nicht alle offenen Punkte konnten geprüft werden. Betrachten Sie den Tag nicht als geprüft. Bewahren Sie die Daten auf und bitten Sie das Büro um Unterstützung."]
+  };
+  // Only descriptors created here are translated; names, notes and server errors stay literal.
+  const descriptors = new WeakSet(), itemCopies = new WeakMap();
+  const copy = (key, params = {}) => { const value = {key, params}; descriptors.add(value); return value; };
+  const dateCopy = (value, timeOnly = false) => { const entry = {date:value, timeOnly}; descriptors.add(entry); return entry; };
+  const languages = ['pt','en','fr','es','de'], locales = ['pt-PT','en-GB','fr-FR','es-ES','de-DE'];
+  function text(value, language = 'pt') {
+    if (!value || typeof value !== 'object' || !descriptors.has(value)) return String(value ?? '');
+    const index = Math.max(0,languages.indexOf(String(language).toLowerCase().split('-')[0]));
+    if ('date' in value) return new Date(value.date)[value.timeOnly ? 'toLocaleTimeString' : 'toLocaleString'](locales[index]);
+    return messages[value.key][index].replace(/\{(\w+)\}/g,(_,key)=>text(value.params[key],language));
+  }
+  function reviewItem(kind, value, language) {
+    const item = {kind, text:text(value,language)}; itemCopies.set(item,value); return item;
+  }
   function mergeReminders(local, remote, pump = false) {
     const transferred = remote.filter(row=>row.transferredAway);
     const merged = local.filter(item=>!transferred.some(row=>String(item.serverId)===String(row.id)||item.localId===row.metadata?.localId)).map(item => ({ ...item }));
@@ -11,29 +69,31 @@
     }
     return merged;
   }
-  function buildReview({ snapshot, water, pumps, outbox, drafts, photos, online, verificationErrors = [] }) {
+  function buildReview({ snapshot, water, pumps, outbox, drafts, photos, online, verificationErrors = [] }, language = 'pt') {
     const items = [];
-    const add = (kind, text) => items.push({ kind, text });
-    const name = (id,type='REGULAR') => snapshot.visits.find(v => (v.visitType || 'REGULAR') === type && String(v.id) === String(id))?.name || `Visita ${id}`;
-    if (!online || !snapshot.confirmedAt) add('unknown', 'Ronda sem confirmação atual. Ligue à rede e atualize a agenda; podem existir alterações do escritório.');
-    for (const section of verificationErrors) add('unknown', `${section}: não foi possível confirmar os dados no servidor. A revisão está incompleta.`);
+    const add = (kind, value) => items.push(reviewItem(kind,value,language));
+    const name = (id,type='REGULAR') => snapshot.visits.find(v => (v.visitType || 'REGULAR') === type && String(v.id) === String(id))?.name || copy('visit',{id});
+    if (!online || !snapshot.confirmedAt) add('unknown', copy('routeUnknown'));
+    for (const section of verificationErrors) add('unknown', copy('verification',{section}));
     for (const reminder of water) {
-      if (reminder.status !== 'CLOSED') add('critical', `${reminder.poolName || name(reminder.visitId,reminder.visitType || 'REGULAR')} — água aberta. Confirme o fecho físico ou contacte o responsável.`);
-      if (!reminder.serverId || reminder.syncError || (reminder.status === 'CLOSED' && !reminder.closeSyncedAt)) add('pending', `${reminder.poolName || name(reminder.visitId,reminder.visitType || 'REGULAR')} — estado da água por confirmar no servidor.`);
+      const pool = reminder.poolName || name(reminder.visitId,reminder.visitType || 'REGULAR');
+      if (reminder.status !== 'CLOSED') add('critical', copy('waterOpen',{name:pool}));
+      if (!reminder.serverId || reminder.syncError || (reminder.status === 'CLOSED' && !reminder.closeSyncedAt)) add('pending', copy('waterPending',{name:pool}));
     }
     for (const reminder of Object.values(pumps)) {
-      if (!reminder.closed) add('critical', `${reminder.poolName || name(reminder.visitId,reminder.visitType || 'REGULAR')} — bomba em manual. Confirme o regresso físico a automático ou contacte o responsável.`);
-      if (!reminder.serverId || reminder.closed) add('pending', `${reminder.poolName || name(reminder.visitId,reminder.visitType || 'REGULAR')} — estado da bomba por confirmar no servidor.`);
+      const pool = reminder.poolName || name(reminder.visitId,reminder.visitType || 'REGULAR');
+      if (!reminder.closed) add('critical', copy('pumpManual',{name:pool}));
+      if (!reminder.serverId || reminder.closed) add('pending', copy('pumpPending',{name:pool}));
     }
     for (const visit of snapshot.visits) {
-      if (!visit.done && !visit.future && !Object.values(outbox).some(item=>String(item.visitId)===String(visit.id)&&(item.visitType || 'REGULAR')===(visit.visitType || 'REGULAR')&&item.scope!=='EXTRA_VISIT_START')) add('pending', `${visit.name} — ${visit.visitType === 'EXTRA' ? 'visita extra por concluir' : 'trabalho por concluir'}. Combine o próximo passo com o escritório.`);
+      if (!visit.done && !visit.future && !Object.values(outbox).some(item=>String(item.visitId)===String(visit.id)&&(item.visitType || 'REGULAR')===(visit.visitType || 'REGULAR')&&item.scope!=='EXTRA_VISIT_START')) add('pending', copy('unfinished',{name:visit.name,work:copy(visit.visitType === 'EXTRA' ? 'extraWork' : 'regularWork')}));
     }
-    for (const item of Object.values(outbox)) add('pending', item.rejected ? `${name(item.visitId,'EXTRA')} — correção não aplicada: ${item.rejected}` : `${name(item.visitId,item.visitType || 'REGULAR')} — ${item.scope === 'EXTRA_VISIT_START' ? 'início' : item.scope === 'EXTRA_VISIT_CORRECTION' ? 'correção' : 'conclusão'} por confirmar no servidor${item.blocked ? '; precisa de apoio do escritório' : ''}.`);
+    for (const item of Object.values(outbox)) add('pending', item.rejected ? copy('rejected',{name:name(item.visitId,'EXTRA'),detail:item.rejected}) : copy('queued',{name:name(item.visitId,item.visitType || 'REGULAR'),operation:copy(item.scope === 'EXTRA_VISIT_START' ? 'start' : item.scope === 'EXTRA_VISIT_CORRECTION' ? 'correction' : 'completion'),blocked:item.blocked ? copy('blocked') : ''}));
     const photoCounts = new Map();
     for (const photo of photos) { const key=(photo.visitType || 'REGULAR')+':'+photo.visitId; photoCounts.set(key,(photoCounts.get(key)||0)+1); }
-    for (const [key, count] of photoCounts) add('pending', `${name(key.split(':')[1],key.split(':')[0])} — ${count} fotografia(s) por enviar.`);
+    for (const [key, count] of photoCounts) add('pending', copy('photos',{name:name(key.split(':')[1],key.split(':')[0]),count}));
     for (const [id, draft] of Object.entries(drafts)) {
-      if (draft.pendingProblems?.some(problem => !problem.synced)) add('pending', `${name(id.replace(/^visit-(?:REGULAR-)?/, ''))} — ocorrência guardada no telemóvel, por enviar.`);
+      if (draft.pendingProblems?.some(problem => !problem.synced)) add('pending', copy('problemDraft',{name:name(id.replace(/^visit-(?:REGULAR-)?/, ''))}));
     }
     return items;
   }
@@ -41,6 +101,28 @@
   if (typeof document === 'undefined') return;
   const button = document.getElementById('dayReviewBtn'), result = document.getElementById('dayReviewResult');
   if (!button || !result) return;
+  const bindings = new WeakMap();
+  const language = () => document.documentElement.lang || 'pt';
+  function setCopy(node,value) {
+    if (!node) return;
+    bindings.set(node,value);node.setAttribute('data-cw-day-review-copy','');node.setAttribute('data-cw-no-i18n','');
+    node.textContent = text(value,language());
+  }
+  function repaintCopy() {
+    for (const node of document.querySelectorAll('[data-cw-day-review-copy]')) {
+      const value = text(bindings.get(node),language());
+      if (node.textContent !== value) node.textContent = value;
+    }
+  }
+  result.setAttribute('data-cw-no-i18n','');
+  const card = document.getElementById('dayReviewCard');
+  setCopy(card?.querySelector('h2'),copy('title'));setCopy(card?.querySelector('p'),copy('intro'));setCopy(button,copy('review'));
+  window.addEventListener('cw-language-change',repaintCopy);
+  let observedLanguage = document.documentElement.lang;
+  new MutationObserver(()=>{
+    if (observedLanguage === document.documentElement.lang) return;
+    observedLanguage = document.documentElement.lang;repaintCopy();
+  }).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
   const owner = () => { const user = window.CristalAuth?.parseUser?.() || {}; return String(user.technicianId || user.id || 'none'); };
   function read(key, array = false) {
     const raw = localStorage.getItem(key);
@@ -65,13 +147,13 @@
   }
   function invalidate() {
     ++revision;
-    if (result.textContent) result.textContent = 'O estado pode ter mudado. Volte a rever as pendências antes de sair.';
+    if (result.textContent) setCopy(result,copy('changed'));
     button.disabled = false;
     result.setAttribute('aria-busy', 'false');
   }
   async function review() {
     const requestedOwner = owner(), requestedRevision = ++revision, token = window.CristalAuth?.getToken?.();
-    button.disabled = true; result.textContent = 'A verificar pendências neste telemóvel…';
+    button.disabled = true; setCopy(result,copy('checking'));
     result.setAttribute('aria-busy', 'true');
     try {
       if (requestedOwner === 'none') throw new Error('Sem técnico identificado');
@@ -81,54 +163,54 @@
         window.CWFieldOffline.entries().then(async rows=>[...rows,...await window.CWFieldOffline.rejections()]),
       ]);
       if (revision !== requestedRevision) return;
-      if (owner() !== requestedOwner || token !== window.CristalAuth?.getToken?.()) { result.textContent = 'Sessão alterada. Repita a revisão com a conta atual.'; return; }
+      if (owner() !== requestedOwner || token !== window.CristalAuth?.getToken?.()) { setCopy(result,copy('sessionChanged')); return; }
       let snapshot = window.CWFieldDaySnapshot();
       let water = window.CWFieldReminders.list('WATER_OPEN');
       let pumps = window.CWFieldReminders.list('PUMP_MANUAL').filter(row=>row.status!=='CLOSED'||!row.closeSyncedAt);
-      const verificationErrors = remote ? remote.filter(section=>section.error).map(section=>section.label) : ['Lembretes críticos'];
-      if (remote?.[0].rows) snapshot = {confirmedAt:new Date().toISOString(),visits:remote[0].rows.map(visit=>({id:visit.id,visitType:visit.visitType || 'REGULAR',name:visit.pool?.name || `Visita ${visit.id}`,done:Boolean(visit.endAt) || ['DONE','COMPLETED','CONCLUIDA'].includes(String(visit.status).toUpperCase())}))};
+      const verificationErrors = remote ? remote.filter(section=>section.error).map(section=>copy({'Ronda':'route','Água aberta':'water','Bombas em manual':'pumps'}[section.label])) : [copy('criticalReminders')];
+      if (remote?.[0].rows) snapshot = {confirmedAt:new Date().toISOString(),visits:remote[0].rows.map(visit=>({id:visit.id,visitType:visit.visitType || 'REGULAR',name:visit.pool?.name || copy('visit',{id:visit.id}),done:Boolean(visit.endAt) || ['DONE','COMPLETED','CONCLUIDA'].includes(String(visit.status).toUpperCase())}))};
       else snapshot = {...snapshot,confirmedAt:null};
       if (remote?.[1].rows) water = mergeReminders(water, remote[1].rows);
       if (remote?.[2].rows) pumps = mergeReminders(pumps, remote[2].rows, true);
-      if (window.CWFieldReminders.legacyWarning()) verificationErrors.push('Lembretes antigos por reconciliar com o escritório');
+      if (window.CWFieldReminders.legacyWarning()) verificationErrors.push(copy('legacyReminders'));
       const outbox = Object.fromEntries(completions.map(row => [row.scope+':'+row.resourceId, { visitId: row.resourceId, visitType:row.scope.startsWith('EXTRA_') ? 'EXTRA' : 'REGULAR', scope:row.scope, blocked: row.failure?.blocked, rejected:row.response?.applied===false ? row.response.message : null }]));
-      if (Object.keys(read(`cwFieldVisitDrafts:${requestedOwner}`)).length) verificationErrors.push('Rascunhos antigos sem conta/tipo de visita confirmados');
-      const items = buildReview({ snapshot, water, pumps, outbox, drafts: window.CWFieldDraftSnapshot ? window.CWFieldDraftSnapshot() : {}, photos, online: navigator.onLine, verificationErrors });
+      if (Object.keys(read(`cwFieldVisitDrafts:${requestedOwner}`)).length) verificationErrors.push(copy('legacyDrafts'));
+      const items = buildReview({ snapshot, water, pumps, outbox, drafts: window.CWFieldDraftSnapshot ? window.CWFieldDraftSnapshot() : {}, photos, online: navigator.onLine, verificationErrors },language());
       for(const item of await window.CWFieldIncomplete?.pendingSummary?.()||[])items.push(item);
       for(const item of await window.CWFieldEquipment?.pendingSummary?.()||[])items.push(item);
       for(const item of await window.CWFieldStockRequest?.pendingSummary?.()||[])items.push(item);
       for(const item of await window.CWFieldProblemReport?.pendingSummary?.()||[])items.push(item);
       const intakeSession=window.CWFieldWriteStore.session(),intakes=await window.CWFieldWriteStore.records('FIELD_CLIENT_INTAKE',intakeSession,true);
-      for(const row of intakes.filter(row=>!row.response))items.push({kind:'pending',text:row.payload.clientName+' — cadastro por confirmar. Abra Novo cliente em campo.'});
+      for(const row of intakes.filter(row=>!row.response))items.push(reviewItem('pending',copy('intakePending',{name:row.payload.clientName}),language()));
       const intakeRaw=localStorage.getItem('cwFieldIntakeDraft:'+intakeSession.owner);
-      if(intakeRaw){let draft;try{draft=JSON.parse(intakeRaw);}catch(_){throw Error('Rascunho de cadastro ilegível. Preserve os dados.');}const keys=['clientName','phone','email','address','zone','poolName','poolType','volumeM3','latitude','longitude','notes'];if(!draft||Object.keys(draft).length!==14||Object.keys(draft).some(k=>!['v','owner','requestId',...keys].includes(k))||draft.v!==1||draft.owner!==intakeSession.owner||keys.some(k=>typeof draft[k]!=='string')||draft.requestId!==null&&!/^[0-9a-f-]{36}$/i.test(draft.requestId)||draft.requestId&&!intakes.some(row=>row.requestId===draft.requestId))throw Error('Rascunho de cadastro inválido. Preserve os dados.');if(keys.some(k=>draft[k]!=='')&&!intakes.some(row=>row.requestId===draft.requestId))items.push({kind:'pending',text:'Rascunho de cadastro por enviar. Abra Novo cliente em campo.'});}
-      for(const draft of await window.CWExtraVisitCorrection?.pendingDrafts?.()||[])items.push({kind:'pending',text:`${draft.name} — rascunho de correção guardado, ainda não confirmado.`});
+      if(intakeRaw){let draft;try{draft=JSON.parse(intakeRaw);}catch(_){throw Error('Rascunho de cadastro ilegível. Preserve os dados.');}const keys=['clientName','phone','email','address','zone','poolName','poolType','volumeM3','latitude','longitude','notes'];if(!draft||Object.keys(draft).length!==14||Object.keys(draft).some(k=>!['v','owner','requestId',...keys].includes(k))||draft.v!==1||draft.owner!==intakeSession.owner||keys.some(k=>typeof draft[k]!=='string')||draft.requestId!==null&&!/^[0-9a-f-]{36}$/i.test(draft.requestId)||draft.requestId&&!intakes.some(row=>row.requestId===draft.requestId))throw Error('Rascunho de cadastro inválido. Preserve os dados.');if(keys.some(k=>draft[k]!=='')&&!intakes.some(row=>row.requestId===draft.requestId))items.push(reviewItem('pending',copy('intakeDraft'),language()));}
+      for(const draft of await window.CWExtraVisitCorrection?.pendingDrafts?.()||[])items.push(reviewItem('pending',copy('correctionDraft',{name:draft.name}),language()));
       for(const item of await window.CWFieldDraftSummary?.()||[])items.push(item);
       if(revision!==requestedRevision||owner()!==requestedOwner||token!==window.CristalAuth?.getToken?.())return;
-      result.replaceChildren();
+      bindings.delete(result);result.removeAttribute('data-cw-day-review-copy');result.replaceChildren();
       const title = document.createElement('p');
-      title.textContent = items.length ? 'Existem pendências antes de sair:' : 'Não foram encontradas pendências nos dados verificados. Confirme as condições físicas antes de sair.';
+      setCopy(title,copy(items.length ? 'outstanding' : 'empty'));
       result.append(title);
-      for (const [kind,label] of [['critical','Atenção imediata'],['pending','Por concluir ou enviar'],['unknown','Por confirmar']]) {
+      for (const kind of ['critical','pending','unknown']) {
         const rows = items.filter(item=>item.kind===kind);
         if (!rows.length) continue;
         const group = document.createElement('section'); group.className = `day-review-group day-review-${kind}`;
-        const heading = document.createElement('h3'); heading.textContent = `${label} (${rows.length})`; group.append(heading);
+        const heading = document.createElement('h3'); setCopy(heading,copy('group',{label:copy(kind),count:rows.length})); group.append(heading);
         const list = document.createElement('ul');
-        for (const item of rows) { const row = document.createElement('li'); row.textContent = item.text; list.append(row); }
+        for (const item of rows) { const row = document.createElement('li'); if(itemCopies.has(item))setCopy(row,itemCopies.get(item));else row.textContent=item.text; list.append(row); }
         group.append(list); result.append(group);
       }
       const stamp = document.createElement('small');
-      stamp.textContent = `Revisão: ${new Date().toLocaleTimeString('pt-PT')}. Última ronda confirmada: ${snapshot.confirmedAt ? new Date(snapshot.confirmedAt).toLocaleString('pt-PT') : 'não confirmada'}. Não limpe os dados da aplicação enquanto existirem envios pendentes.`;
+      setCopy(stamp,copy('stamp',{reviewed:dateCopy(new Date().toISOString(),true),confirmed:snapshot.confirmedAt ? dateCopy(snapshot.confirmedAt) : copy('unconfirmed')}));
       result.append(stamp);
     } catch (error) {
-      if (owner() === requestedOwner && revision === requestedRevision) result.textContent = 'Não foi possível verificar todas as pendências. Não considere o dia conferido. Preserve os dados e peça apoio ao escritório.';
+      if (owner() === requestedOwner && revision === requestedRevision) setCopy(result,copy('failed'));
     } finally { if (revision === requestedRevision) { button.disabled = false; result.setAttribute('aria-busy','false'); } }
   }
   button.addEventListener('click', review);
   ['online', 'offline', 'storage', 'cw:visit-synced', 'cw:water-state-updated', 'cw:field-write-change'].forEach(event => window.addEventListener(event, invalidate));
   document.addEventListener('visibilitychange', invalidate);
-  document.addEventListener('input', invalidate);
+  document.addEventListener('input', event=>{ if(event.target !== document.getElementById('cwLanguageSelect'))invalidate(); });
   window.setInterval(invalidate, 60000);
 
   const handoverPanel=document.createElement('section');
