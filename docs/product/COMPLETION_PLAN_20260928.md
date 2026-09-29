@@ -4,7 +4,7 @@ Data: 28/09/2026. Preparado na TASK402 a partir da revisão global, do checkpoin
 
 ## Contagem e regra de fecho
 
-**32 tarefas de conclusão identificadas: C01–C32.** Estado após TASK427 local: **26 por iniciar, uma em execução (C06), cinco concluídas (C01–C05)**. Teste dos alertas aguarda reposição offline completa; falha nativa424 reproduzida, três grupos atuais aprovados.426 pedidos de material publicada/CI325 pendente;427 exige325 grupos/restauro próprios. Runner325/cache216 inalterados. [Prova427](evidence/20260929_task427_local.json).
+**32 tarefas de conclusão identificadas: C01–C32.** Estado após TASK427 publicada / CI pendente: **26 por iniciar, uma em execução (C06), cinco concluídas (C01–C05)**. Teste dos alertas aguarda reposição offline completa; falha nativa424 reproduzida, três grupos atuais aprovados.426 pedidos de material publicada/CI325 pendente;427 exige325 grupos/restauro próprios. Runner325/cache216 inalterados. [Prova427](evidence/20260929_task427_local.json).
 
 Uma tarefa pode ter preparação, implementação local e validação externa em momentos diferentes. Só passa a **Concluída** quando cumpre o critério e tem evidência ligada. **Implementada / CI pendente** não equivale a validação nativa nem a instalação no VPS. Cada lote de código mantém uma responsabilidade, até dez ficheiros, teste da falha/resultado e documentação.
 
@@ -155,3 +155,5 @@ As indicações de sprint/validação de julho são históricas. O utilizador pe
 **Publicação TASK426:**`d2d006d377475353f8fee266318b5d3674998087`, árvore `b97fe6c96770ace29d0ed5f819733650a197c320`, CI36548004591/job109338958249 em execução. Native424:322/323, erro de identidade no reload offline de alertas, restauro ignorado; prioridade427.
 
 - TASK427:falha nativa424 de identidade após reload offline reproduzida com leitura real retida. Só o teste passa a aguardar pageshow/leituras/rota; asserções e limites preservados. Três grupos integrados aprovados, quatro ficheiros, runner325/cache216 inalterados. CI325/restauro próprios pendentes. [Prova427](evidence/20260929_task427_local.json).
+
+**Publicação TASK427:**`3eed386567d4fa0b26c1498e34f2ae152d53cfc6`, árvore `07f2855584285ab0ba102bc30c6b9d8a7a1452d3`; CI36549439362/job109343707374 em execução, exige325 grupos/restauro.425/426 continuam em execução;424 permanece historicamente falhado.
