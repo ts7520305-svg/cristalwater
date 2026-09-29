@@ -53,12 +53,17 @@ let browser; const releases = [];
   assert.equal((await records(page, 'VISIT_PHOTO'))[0].bytes, png.length);
   assert.equal(await prisma.visitPhoto.count({ where: { visitId: original[0].resourceId } }), 1);
   await page.evaluate(() => { IDBObjectStore.prototype.put = qaOriginalPut; delete window.qaOriginalPut; });
+  // The receipt reaches IndexedDB before the retry handler reloads the route.
+  // Keep the old input reference so the next fill targets the completed render.
+  await page.evaluate(id => { window.qaBeforePhotoRecoveryNotes = document.getElementById('notes-' + id); }, original[0].resourceId);
   await page.locator('#legacyFieldRecovery button').first().click(); await waitBrowserState(page, () => CWFieldWriteStore.records('VISIT_PHOTO').then(rows => !rows.length)); assert.equal(await prisma.visitPhoto.count({ where: { visitId: original[0].resourceId } }), 1);
+  await page.waitForFunction(id => document.getElementById('notes-' + id) !== qaBeforePhotoRecoveryNotes && document.getElementById('notes-' + id)?.readOnly === false, original[0].resourceId);
   console.log('PASS actual old photo button persists before send, reloads binary data and retains malformed/mismatched acknowledgements until explicit recovery');
   console.log('PASS real IndexedDB quota failures before persistence prevent network writes; receipt quota retains the original binary until recovery');
 
   const originalVisit = original[0].resourceId;
   await page.locator('#notes-' + originalVisit).fill('Conclusão pelo botão real');
+  assert.equal(await page.locator('#notes-' + originalVisit).inputValue(), 'Conclusão pelo botão real');
   await context.setOffline(true); await page.locator('[data-action="complete"][data-visit-id="' + originalVisit + '"]').click();
   await waitBrowserState(page, () => CWFieldWriteStore.records('VISIT_COMPLETION').then(rows => rows.length === 1));
   assert.equal((await records(page, 'VISIT_COMPLETION'))[0].payload.notes, 'Conclusão pelo botão real');

@@ -198,6 +198,7 @@
     if (value && typeof value === 'object') return t(value.key, value.params);
     const index = languageIndex();
     if (value === 'literal') return String(params.text ?? '');
+    if (value === 'fieldWriteError') return window.CWFieldWriteStore.message(params.code);
     if (value === 'time') return params.iso && Number.isFinite(Date.parse(params.iso)) ? new Date(params.iso).toLocaleString(locales[index]) : '-';
     if (value === 'timeOnly') return params.iso && Number.isFinite(Date.parse(params.iso)) ? new Date(params.iso).toLocaleTimeString(locales[index]) : '-';
     if (value === 'joined') return (params.parts || []).map(part => typeof part === 'object' ? t(part) : String(part ?? '')).join('');
