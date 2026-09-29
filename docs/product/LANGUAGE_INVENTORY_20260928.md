@@ -8,7 +8,13 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
-## Progresso funcional — TASK440 / formulário e fila de equipamento
+## Progresso funcional — TASK441 / passagem de responsabilidade e receção de visitas
+
+`cw-field-day-review.js`: dois painéis em PT/EN/FR/ES/DE, incluindo atributos acessíveis, diálogo de aceitação, estados, erros próprios e apresentação de datas. 39 entradas/195 textos; catálogo anterior42 e regras de recolha/revisão preservados. Texto literal dos técnicos/piscinas/motivos/erros externos, dados, nós, foco, seleção, inputs e abertura de dias futuros mantidos na mudança de idioma. A preferência continua a ser guardada pelo mecanismo existente; não há consultas/envios operacionais por traduzir. Cache226/runner335; [prova441](evidence/20260929_task441_local.json).
+
+Quatro integrações, 1 356 unitários/quatro técnicos e sintaxe aprovados. REGULAR/EXTRA de igual ID, pedido/cancelamento/aceitação reais, cinco diálogos cancelados, recusa literal, confirmação extra única com resposta retida, offline/cache/vazio. Capturas alemãs320 revistas. **Limites:** preparação/receção de química continua byte a byte por traduzir; C06/C06-003 abertas, nav/chrome C08-025/026 e datas C10 pendentes. Publicação autorizada em repositório público durante desenvolvimento, com conversão para privado antes da conclusão. PostgreSQL16/suite335/restauro ainda pendentes. Contagens estáticas TASK415 não recalculadas.
+
+## Histórico funcional — TASK440 / formulário e fila de equipamento
 
 `field-equipment-maintenance.js`: formulário/fila, rótulos, opções, controlos de tempo/material, estados de consulta/recuperação e erros próprios em PT/EN/FR/ES/DE. 115 entradas/575 textos; catálogo existente do write-store reutilizado para erros identificados. Associações a nós de texto conservam inputs dentro de labels, valores, seleção, foco, nós e estado dos controlos. Datas e números mudam apenas de apresentação, com instantes/fuso conservados. Títulos/instruções/notas, materiais/unidades, recibos e falhas persistidas mantêm os originais; erros próprios conservam Error.message português. Resumos anteriores e regras de negócio conservados. Cache225/runner334; [prova440](evidence/20260929_task440_local.json).
 

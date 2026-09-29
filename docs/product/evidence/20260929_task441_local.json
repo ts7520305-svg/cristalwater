@@ -1,0 +1,308 @@
+{
+  "task": "TASK441",
+  "date": "2026-09-29",
+  "branch": "work/field-readiness-20260915-simulation",
+  "baseCommit": "752b1980210e70877dc95658edb6076e1c125a22",
+  "status": "local_validated_publication_authorized_native_ci_pending",
+  "scope": {
+    "responsibility": "Localize responsibility handover and visit receipt panels while retaining assignments, visit state, reminder ownership and explicit actions",
+    "files": [
+      "frontend/cw-field-day-review.js",
+      "frontend/sw.js",
+      "scripts/test-field-suite.js",
+      "scripts/test-field-handover-receipt-languages.js",
+      "docs/product/CURRENT_WORK_CHECKPOINT.md",
+      "docs/product/COMPLETION_PLAN_20260928.md",
+      "docs/product/LANGUAGE_INVENTORY_20260928.md",
+      "docs/product/evidence/20260929_task441_local.json"
+    ],
+    "fileCount": 8,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "newMessageEntries": 39,
+    "newPresentationStrings": 195,
+    "cache": 226,
+    "runnerGroups": 335,
+    "backendChanged": false,
+    "schemaChanged": false,
+    "githubWorkflowChanged": false
+  },
+  "before": {
+    "result": {
+      "script": "test-field-handover-receipt-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 4465,
+      "timedOut": false
+    },
+    "actual": "Passar responsabilidade",
+    "expected": "Hand over responsibility",
+    "expectedFailure": true
+  },
+  "intermediateTestPreparation": [
+    {
+      "runs": [
+        "run-1790706378243",
+        "run-1790706429696"
+      ],
+      "cause": "The real language selector intentionally persists language using PUT /api/settings/language/me. Initial assertion counted these preference writes as operational requests.",
+      "resolution": "Retain every request; require each request during locale repaint to be this exact endpoint, PUT method and a single supported language field. All source reads and operational writes still fail the assertion."
+    },
+    {
+      "run": "run-1790706480099",
+      "cause": "The real water reminder opening/request/cancellation appends its legitimate audit history to the regular visit. The initial receipt assertion compared against the pre-handover visit.",
+      "resolution": "Capture the complete visit after handover, assert its PLANNED/unstarted/unclosed state and audit events, then compare the entire row unchanged after receipt. EXTRA row remains byte-equivalent to its original fixture."
+    }
+  ],
+  "browserGroups": [
+    {
+      "script": "test-field-handover-receipt-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 11687,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-day-review-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 12310,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-extra-reminders.js",
+      "code": 0,
+      "signal": null,
+      "ms": 24226,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-water-api.js",
+      "code": 0,
+      "signal": null,
+      "ms": 18057,
+      "timedOut": false
+    }
+  ],
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 198962,
+      "log": "gate-syntax.log"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 23777,
+      "log": "gate-unit.log"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 2138,
+      "log": "gate-technician.log"
+    }
+  ],
+  "counts": {
+    "unitPassed": 1356,
+    "unitFiles": 138,
+    "technicianPassed": 4,
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44
+    }
+  },
+  "preservation": {
+    "checks": {
+      "priorCatalogEntriesUnchanged": true,
+      "dayReviewCollectionAndValidationUnchanged": true,
+      "reviewBuilderAndReminderMergeUnchanged": true,
+      "chemicalPreparationPanelByteIdentical": true
+    },
+    "messages": {
+      "before": 42,
+      "after": 81,
+      "added": 39,
+      "stringsAdded": 195
+    },
+    "runner": {
+      "before": 334,
+      "after": 335,
+      "previousOrderPreserved": true,
+      "unique": true
+    },
+    "beforeSHA256": "1cb4187944382fd57a4d1dddb6693c572379cb0acbde6fe907ff43a43078c466",
+    "afterSHA256": "c376b7751099724b6e356906d0f2a5bd7c1110591bc462244402697883877de3"
+  },
+  "coverage": {
+    "fiveLanguagesAtWidths": [
+      320,
+      390,
+      1440
+    ],
+    "regularAndExtraSameNumericId": true,
+    "realPickerAndSilentPreference": true,
+    "literalNamesNotesServerErrorAndMarkup": true,
+    "originalFieldsNodesFocusSelectionDisclosureAndStoragePreserved": true,
+    "noOperationalRequestsDuringLanguageChanges": true,
+    "onlyValidatedLanguagePreferenceWritesAllowed": true,
+    "SQLReminderAndReceiptRowsUnchangedDuringRepaint": true,
+    "requestAndCancellationKeepOriginalOwner": true,
+    "fiveTranslatedAcceptDialogsCancelledWithoutOperationalWrites": true,
+    "explicitAcceptanceTransfersActiveReminder": true,
+    "literal403Refusal": true,
+    "delayedRealExtraAcknowledgementWithStableDisabledControl": true,
+    "exactlyOneAssignmentReceivedHistory": true,
+    "receiptsDoNotStartOrFinishVisits": true,
+    "offlineAcknowledgementSendsNothing": true,
+    "cachedReloadRetainsLanguage": true,
+    "emptyStateInFiveLanguages": true,
+    "pageErrors": 0,
+    "markupExecuted": false
+  },
+  "visual": {
+    "reviewed": [
+      "reports/field-ui/HANDOVER_DE_320.png",
+      "reports/field-ui/VISIT_RECEIPTS_DE_320.png"
+    ],
+    "observation": "Translated headings, descriptions, fields and actions fit the 320px viewport; raw markup is displayed as literal text. Existing fixed shared navigation appears across long element screenshots.",
+    "limit": "Shared navigation/section chrome remains C08-025/026; not complete-page visual acceptance."
+  },
+  "environment": {
+    "database": "Isolated PGlite / schema from current Prisma",
+    "browser": "Chromium153 via @sparticuz/chromium",
+    "timezone": "Europe/Lisbon",
+    "productionDataUsed": false,
+    "externalContactsEnabled": false,
+    "backgroundJobsEnabled": false,
+    "browserTestIntervalsDisabledMs": [
+      15000,
+      30000,
+      60000
+    ],
+    "sessionProtectionIntervalsPreserved": true,
+    "nativePostgres16UpgradeFull335SuiteOrRestoreValidated": false
+  },
+  "privacy": {
+    "repository": "ts7520305-svg/cristalwater",
+    "visibilityObserved": "public",
+    "authorizationAt": "2026-09-29T19:20:39+01:00",
+    "authorization": "User explicitly permits keeping the repository public during development and publishing validated work; make it private before project completion. Supersedes the earlier publication hold.",
+    "privateBeforeCompletionRequired": true,
+    "repositoryVisibilityChanged": false,
+    "applicationOrVpsAccessChanged": false
+  },
+  "publication": {
+    "publicBaseCommit": "b2d51e445a18d3c0456197b73f90cb1363f6aa18",
+    "preparedCommitMap": [
+      {
+        "task": "TASK434",
+        "localCommit": "4f1538a8e638f177978b4935262365db25efd892",
+        "remoteCommit": "952d7ada3ef21da91167903546a99710ec2f4854",
+        "tree": "3c07c2e02508d30e6d0ad684d125d8ffbd5dce8d"
+      },
+      {
+        "task": "TASK435",
+        "localCommit": "553c4027b7bb9b32fde4c0fc87d8fd90df9551a5",
+        "remoteCommit": "3c341c4fd8464768e53703d165eb403f159c0bed",
+        "tree": "4f88ab6e2587cffe8bcd11e8a0ce6bff043e958e"
+      },
+      {
+        "task": "TASK436",
+        "localCommit": "7c6c091fceeec7522b0751fa2f8f36554a819b3c",
+        "remoteCommit": "dba0baf7178fae426c4f7a42b616c2ee30db3d23",
+        "tree": "bd718fb415fe40b09ea5be4e341d7e94a87c517f"
+      },
+      {
+        "task": "TASK437",
+        "localCommit": "b159381824aff0e48fcacce95fb0731c1a042ef8",
+        "remoteCommit": "e7b087220365046205da5001eedacbb49a6f7dc9",
+        "tree": "e717c6ba4ac7ceb0d288361373dff3b60cf71915"
+      },
+      {
+        "task": "TASK438",
+        "localCommit": "0688dbd2cd5d2a4b01304981b35878e181478b8a",
+        "remoteCommit": "6a66138738bebda22a269b8abb2454071a1a523c",
+        "tree": "b7f7bc9af64f7d45328059f442a8c4df9245ca81"
+      },
+      {
+        "task": "TASK439",
+        "localCommit": "265efefe63f04e26700b63eadd868d0c7b9bd5eb",
+        "remoteCommit": "09495c95941dbddb40b7b9faba25d0560a4bdf48",
+        "tree": "6d5d17a31bea44e1e94bba841a40df78fa5e5efb"
+      },
+      {
+        "task": "TASK440",
+        "localCommit": "752b1980210e70877dc95658edb6076e1c125a22",
+        "remoteCommit": "bd54d460f81dfe97a0ef5b13d6e2cbc9a38813d3",
+        "tree": "41a507a5bd473659d6b964d2bd9c831337175ac0"
+      }
+    ],
+    "branchUpdated": false,
+    "merged": false,
+    "deployed": false,
+    "nativeRun": null,
+    "requiredNativeGates": "Exact final code revision: PostgreSQL16, additive upgrade, 335 groups and restore of 128 tables / 47 files"
+  },
+  "next": {
+    "completionCounts": {
+      "notStarted": 26,
+      "inProgress": 1,
+      "completed": 5,
+      "total": 32
+    },
+    "C06Closed": false,
+    "C06_003Closed": false,
+    "source": "Chemical preparation and delivery receipt panel at the end of cw-field-day-review.js, then remaining C06 sources",
+    "sharedNavigation": "C08-025/026",
+    "datePolicy": "C10 open",
+    "annualContractDeferred": true
+  },
+  "logDigests": [
+    {
+      "name": "run-1790706540009/test-field-handover-receipt-languages.js.log",
+      "bytes": 586,
+      "sha256": "88b479834f782111ea2e7a29de2ff4e9c77e4d154aae620a87d894767f2629ee"
+    },
+    {
+      "name": "run-1790706540009/test-field-day-review-languages.js.log",
+      "bytes": 465,
+      "sha256": "9c70cf6b38fccf431c9dab3c97968821e29815504dfdbb3c08247125ee08e18e"
+    },
+    {
+      "name": "run-1790706540009/test-field-extra-reminders.js.log",
+      "bytes": 616,
+      "sha256": "48c1350d06832035b364abf337296b56caea5a12c7773ca6d3c98c262156a944"
+    },
+    {
+      "name": "run-1790706540009/test-field-water-api.js.log",
+      "bytes": 3472,
+      "sha256": "990d32907566b2e68ba8817ac21167825919466a7c4aff710caf708084cccc62"
+    },
+    {
+      "name": "gate-unit.log",
+      "bytes": 400,
+      "sha256": "1351c9921b7c52a4110ed1aff6090e79bd55381f5991148eadf14de366c84a17"
+    },
+    {
+      "name": "gate-technician.log",
+      "bytes": 430,
+      "sha256": "2b58bd69fc98d3e9ede35fd3bf640f09081d34e76fe1ca3ad493adef3e7c6738"
+    },
+    {
+      "name": "gate-syntax.log",
+      "bytes": 257,
+      "sha256": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4"
+    }
+  ]
+}

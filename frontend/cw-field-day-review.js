@@ -1,6 +1,45 @@
 (function () {
   'use strict';
   const messages = {
+    "handoverTitle": ["Passar responsabilidade","Hand over responsibility","Transmettre la responsabilité","Transferir la responsabilidad","Verantwortung übergeben"],
+    "handoverIntro": ["Água aberta e bomba manual: continua responsável até o colega aceitar. Combine a passagem com ele; o pedido não confirma que foi visto.","Water left on and pump in manual mode: you remain responsible until your colleague accepts. Arrange the handover with them; the request does not confirm that it was seen.","Eau ouverte et pompe en mode manuel : vous restez responsable jusqu’à l’acceptation de votre collègue. Convenez de la transmission avec lui ; la demande ne confirme pas qu’elle a été vue.","Agua abierta y bomba en manual: sigue siendo responsable hasta que el compañero acepte. Acuerde el traspaso con él; la solicitud no confirma que se haya visto.","Laufendes Wasser und Pumpe im manuellen Modus: Sie bleiben verantwortlich, bis Ihr Kollege annimmt. Sprechen Sie die Übergabe ab; die Anfrage bestätigt nicht, dass sie gesehen wurde."],
+    "handoverRefresh": ["Atualizar passagens","Refresh handovers","Actualiser les transmissions","Actualizar traspasos","Übergaben aktualisieren"],
+    "handoverLoading": ["A consultar passagens…","Checking handovers…","Consultation des transmissions…","Consultando traspasos…","Übergaben werden abgerufen…"],
+    "handoverIncoming": ["Pedido para si: {reason}. Só aceite se consegue assumir esta responsabilidade.","Request for you: {reason}. Only accept if you can take this responsibility.","Demande pour vous : {reason}. Acceptez uniquement si vous pouvez assumer cette responsabilité.","Solicitud para usted: {reason}. Acepte solo si puede asumir esta responsabilidad.","Anfrage an Sie: {reason}. Nehmen Sie nur an, wenn Sie diese Verantwortung übernehmen können."],
+    "handoverWaiting": ["À espera de {name}. Continua responsável.","Waiting for {name}. You remain responsible.","En attente de {name}. Vous restez responsable.","Esperando a {name}. Sigue siendo responsable.","Warten auf {name}. Sie bleiben verantwortlich."],
+    "handoverChoose": ["Escolha quem pode assumir este lembrete.","Choose who can take responsibility for this reminder.","Choisissez qui peut assumer ce rappel.","Elija quién puede asumir este recordatorio.","Wählen Sie, wer diese Erinnerung übernehmen kann."],
+    "handoverTarget": ["Técnico destinatário","Receiving technician","Technicien destinataire","Técnico destinatario","Übernehmender Techniker"],
+    "handoverSelect": ["Escolher técnico","Choose technician","Choisir un technicien","Elegir técnico","Techniker wählen"],
+    "handoverReason": ["Motivo da passagem","Reason for handover","Motif de la transmission","Motivo del traspaso","Grund der Übergabe"],
+    "handoverRequest": ["Pedir passagem","Request handover","Demander la transmission","Solicitar traspaso","Übergabe anfragen"],
+    "handoverAccept": ["Aceitar responsabilidade","Accept responsibility","Accepter la responsabilité","Aceptar la responsabilidad","Verantwortung übernehmen"],
+    "handoverCancel": ["Cancelar pedido","Cancel request","Annuler la demande","Cancelar solicitud","Anfrage zurückziehen"],
+    "handoverConfirm": ["Confirma que consegue assumir este lembrete a partir de agora?","Can you confirm that you can take responsibility for this reminder from now on?","Confirmez-vous pouvoir assumer ce rappel à partir de maintenant ?","¿Confirma que puede asumir este recordatorio a partir de ahora?","Bestätigen Sie, dass Sie ab jetzt die Verantwortung für diese Erinnerung übernehmen können?"],
+    "handoverActionFailed": ["{detail}. Atualize a lista antes de repetir; a resposta pode ter-se perdido.","{detail}. Refresh the list before retrying; the response may have been lost.","{detail}. Actualisez la liste avant de réessayer ; la réponse a pu se perdre.","{detail}. Actualice la lista antes de repetir; la respuesta puede haberse perdido.","{detail}. Aktualisieren Sie die Liste vor einem erneuten Versuch; die Antwort könnte verloren gegangen sein."],
+    "handoverCount": ["{count} pedido(s) para aceitar.","{count} request(s) to accept.","{count} demande(s) à accepter.","{count} solicitud(es) por aceptar.","{count} Anfrage(n) zum Annehmen."],
+    "handoverUpdated": ["Passagens atualizadas.","Handovers updated.","Transmissions actualisées.","Traspasos actualizados.","Übergaben aktualisiert."],
+    "handoverEmpty": ["Sem lembretes ativos ou pedidos de passagem.","No active reminders or handover requests.","Aucun rappel actif ni demande de transmission.","Sin recordatorios activos ni solicitudes de traspaso.","Keine aktiven Erinnerungen oder Übergabeanfragen."],
+    "handoverUnavailable": ["Sem confirmação do servidor. Não considere nenhuma responsabilidade transferida; atualize com rede.","No server confirmation. Do not consider any responsibility transferred; refresh when connected.","Aucune confirmation du serveur. Ne considérez aucune responsabilité comme transmise ; actualisez avec une connexion.","Sin confirmación del servidor. No considere transferida ninguna responsabilidad; actualice con conexión.","Keine Serverbestätigung. Betrachten Sie keine Verantwortung als übergeben; aktualisieren Sie bei bestehender Verbindung."],
+    "panelResponseUnavailable": ["Resposta indisponível","Response unavailable","Réponse indisponible","Respuesta no disponible","Antwort nicht verfügbar"],
+    "receiptTitle": ["Novas visitas atribuídas","Newly assigned visits","Nouvelles visites attribuées","Nuevas visitas asignadas","Neu zugewiesene Besuche"],
+    "receiptIntro": ["Confirme que recebeu o trabalho. Esta confirmação não inicia a visita e não transfere água aberta ou bombas em manual.","Confirm that you received the work. This confirmation does not start the visit or transfer responsibility for water left on or pumps in manual mode.","Confirmez la réception du travail. Cette confirmation ne démarre pas la visite et ne transfère pas la responsabilité de l’eau ouverte ou des pompes en mode manuel.","Confirme que recibió el trabajo. Esta confirmación no inicia la visita ni transfiere la responsabilidad del agua abierta o de las bombas en manual.","Bestätigen Sie den Empfang des Auftrags. Diese Bestätigung startet keinen Besuch und überträgt keine Verantwortung für laufendes Wasser oder Pumpen im manuellen Modus."],
+    "receiptRefresh": ["Atualizar atribuições","Refresh assignments","Actualiser les attributions","Actualizar asignaciones","Zuweisungen aktualisieren"],
+    "receiptLoading": ["A verificar atribuições…","Checking assignments…","Vérification des attributions…","Comprobando asignaciones…","Zuweisungen werden geprüft…"],
+    "receiptOfflineQuery": ["Sem ligação. Ligue à rede para consultar e confirmar as novas atribuições.","Offline. Connect to view and confirm new assignments.","Hors ligne. Connectez-vous pour consulter et confirmer les nouvelles attributions.","Sin conexión. Conéctese para consultar y confirmar las nuevas asignaciones.","Offline. Stellen Sie eine Verbindung her, um neue Zuweisungen anzusehen und zu bestätigen."],
+    "receiptQueryFailed": ["Falha ao consultar atribuições","Could not retrieve assignments","Impossible de consulter les attributions","No se pudieron consultar las asignaciones","Zuweisungen konnten nicht abgerufen werden"],
+    "receiptRegular": ["{name} · visita #{id}","{name} · visit #{id}","{name} · visite n°{id}","{name} · visita #{id}","{name} · Besuch #{id}"],
+    "receiptExtra": ["{name} · visita extra #{id}","{name} · extra visit #{id}","{name} · visite supplémentaire n°{id}","{name} · visita extra #{id}","{name} · Zusatzbesuch #{id}"],
+    "receiptDateUnknown": ["Data por confirmar","Date to be confirmed","Date à confirmer","Fecha por confirmar","Datum noch zu bestätigen"],
+    "receiptConfirm": ["Confirmar receção desta visita","Confirm receipt of this visit","Confirmer la réception de cette visite","Confirmar recepción de esta visita","Empfang dieses Besuchs bestätigen"],
+    "receiptFuture": ["{count} visita(s) de dias futuros","{count} visit(s) on future days","{count} visite(s) à venir","{count} visita(s) de días futuros","{count} Besuch(e) an künftigen Tagen"],
+    "receiptCount": ["{count} visita(s) por confirmar.","{count} visit(s) awaiting confirmation.","{count} visite(s) à confirmer.","{count} visita(s) por confirmar.","{count} Besuch(e) noch zu bestätigen."],
+    "receiptEmpty": ["Sem novas atribuições por confirmar no servidor.","No new assignments awaiting confirmation on the server.","Aucune nouvelle attribution à confirmer sur le serveur.","No hay nuevas asignaciones por confirmar en el servidor.","Keine neuen Zuweisungen auf dem Server zu bestätigen."],
+    "receiptRefreshFailed": ["Não foi possível atualizar: {detail}. Confirme as atribuições com o escritório.","Could not refresh: {detail}. Check the assignments with the office.","Impossible d’actualiser : {detail}. Vérifiez les attributions auprès du bureau.","No se pudo actualizar: {detail}. Confirme las asignaciones con la oficina.","Aktualisierung fehlgeschlagen: {detail}. Prüfen Sie die Zuweisungen mit dem Büro."],
+    "receiptOfflineAction": ["Sem ligação. A receção ainda não foi confirmada no escritório.","Offline. Receipt has not yet been confirmed with the office.","Hors ligne. La réception n’a pas encore été confirmée auprès du bureau.","Sin conexión. La recepción aún no se ha confirmado con la oficina.","Offline. Der Empfang wurde beim Büro noch nicht bestätigt."],
+    "receiptConfirmFailed": ["Falha na confirmação","Confirmation failed","Échec de la confirmation","Fallo en la confirmación","Bestätigung fehlgeschlagen"],
+    "receiptConfirmed": ["Receção confirmada no escritório. Atualize a rota para consultar o trabalho.","Receipt confirmed with the office. Refresh the route to view the work.","Réception confirmée auprès du bureau. Actualisez la tournée pour consulter le travail.","Recepción confirmada con la oficina. Actualice la ruta para consultar el trabajo.","Empfang beim Büro bestätigt. Aktualisieren Sie die Route, um den Auftrag anzusehen."],
+    "receiptActionFailed": ["Receção não confirmada: {detail}. Pode atualizar e tentar novamente.","Receipt not confirmed: {detail}. You can refresh and try again.","Réception non confirmée : {detail}. Vous pouvez actualiser et réessayer.","Recepción no confirmada: {detail}. Puede actualizar e intentarlo de nuevo.","Empfang nicht bestätigt: {detail}. Sie können aktualisieren und es erneut versuchen."],
+    "receiptOffline": ["Sem ligação. As confirmações exigem ligação ao escritório.","Offline. Confirmations require a connection to the office.","Hors ligne. Les confirmations nécessitent une connexion au bureau.","Sin conexión. Las confirmaciones requieren conexión con la oficina.","Offline. Bestätigungen erfordern eine Verbindung zum Büro."],
     "title": ["Antes de sair","Before leaving","Avant de partir","Antes de salir","Vor dem Verlassen"],
     "intro": ["Reveja trabalhos, envios e lembretes. Esta revisão não encerra a jornada nem transfere responsabilidades.","Review work, submissions and reminders. This review does not end the workday or transfer responsibilities.","Vérifiez les travaux, les envois et les rappels. Cette vérification ne termine pas la journée et ne transfère aucune responsabilité.","Revise trabajos, envíos y recordatorios. Esta revisión no cierra la jornada ni transfiere responsabilidades.","Prüfen Sie Arbeiten, Übermittlungen und Erinnerungen. Diese Prüfung beendet weder den Arbeitstag noch überträgt sie Verantwortlichkeiten."],
     "review": ["Rever pendências do dia","Review outstanding items today","Vérifier les éléments en attente du jour","Revisar pendientes del día","Offene Punkte des Tages prüfen"],
@@ -47,13 +86,13 @@
   // Only descriptors created here are translated; names, notes and server errors stay literal.
   const descriptors = new WeakSet(), itemCopies = new WeakMap();
   const copy = (key, params = {}) => { const value = {key, params}; descriptors.add(value); return value; };
-  const dateCopy = (value, timeOnly = false) => { const entry = {date:value, timeOnly}; descriptors.add(entry); return entry; };
+  const dateCopy = (value, timeOnly = false, dateOnly = false) => { const entry = {date:value, timeOnly, dateOnly}; descriptors.add(entry); return entry; };
   const languages = ['pt','en','fr','es','de'], locales = ['pt-PT','en-GB','fr-FR','es-ES','de-DE'];
   function text(value, language = 'pt') {
     if (!value || typeof value !== 'object' || !descriptors.has(value)) return String(value ?? '');
     const index = Math.max(0,languages.indexOf(String(language).toLowerCase().split('-')[0]));
     if (value.translations) return value.translations[languages[index]];
-    if ('date' in value) return new Date(value.date)[value.timeOnly ? 'toLocaleTimeString' : 'toLocaleString'](locales[index]);
+    if ('date' in value) return new Date(value.date)[value.dateOnly ? 'toLocaleDateString' : value.timeOnly ? 'toLocaleTimeString' : 'toLocaleString'](locales[index]);
     return messages[value.key][index].replace(/\{(\w+)\}/g,(_,key)=>text(value.params[key],language));
   }
   function reviewItem(kind, value, language) {
@@ -111,17 +150,32 @@
   if (typeof document === 'undefined') return;
   const button = document.getElementById('dayReviewBtn'), result = document.getElementById('dayReviewResult');
   if (!button || !result) return;
-  const bindings = new WeakMap();
+  const bindings = new WeakMap(), attributeBindings = new WeakMap(), panelErrors = new WeakMap();
+  function panelError(key) {
+    const value = copy(key), error = new Error(text(value));
+    panelErrors.set(error,value);return error;
+  }
+  const panelErrorCopy = error => panelErrors.get(error) || error.message;
   const language = () => document.documentElement.lang || 'pt';
+  const textCopy = key => text(copy(key),language());
   function setCopy(node,value) {
     if (!node) return;
     bindings.set(node,value);node.setAttribute('data-cw-day-review-copy','');node.setAttribute('data-cw-no-i18n','');
     node.textContent = text(value,language());
   }
+  function setCopyAttribute(node,attribute,value) {
+    if (!attributeBindings.has(node)) attributeBindings.set(node,new Map());
+    attributeBindings.get(node).set(attribute,value);
+    node.setAttribute('data-cw-day-review-attributes','');node.setAttribute('data-cw-no-i18n','');
+    node.setAttribute(attribute,text(value,language()));
+  }
   function repaintCopy() {
     for (const node of document.querySelectorAll('[data-cw-day-review-copy]')) {
       const value = text(bindings.get(node),language());
       if (node.textContent !== value) node.textContent = value;
+    }
+    for (const node of document.querySelectorAll('[data-cw-day-review-attributes]')) {
+      for (const [attribute,value] of attributeBindings.get(node) || []) node.setAttribute(attribute,text(value,language()));
     }
   }
   result.setAttribute('data-cw-no-i18n','');
@@ -227,17 +281,19 @@
   handoverPanel.id='handoverPanel';
   handoverPanel.className='card field-panel field-panel-hoje';
   handoverPanel.setAttribute('data-cw-state-managed','manual');
-  handoverPanel.innerHTML='<h2>Passar responsabilidade</h2><p>Água aberta e bomba manual: continua responsável até o colega aceitar. Combine a passagem com ele; o pedido não confirma que foi visto.</p><button type="button" class="big" id="handoverRefresh">Atualizar passagens</button><div id="handoverStatus" role="status" aria-live="polite"></div><div id="handoverList"></div>';
+  handoverPanel.setAttribute('data-cw-no-i18n','');
+  handoverPanel.innerHTML='<h2></h2><p></p><button type="button" class="big" id="handoverRefresh"></button><div id="handoverStatus" role="status" aria-live="polite"></div><div id="handoverList"></div>';
+  setCopy(handoverPanel.querySelector('h2'),copy('handoverTitle'));setCopy(handoverPanel.querySelector('p'),copy('handoverIntro'));setCopy(handoverPanel.querySelector('button'),copy('handoverRefresh'));
   document.getElementById('dayReviewCard').after(handoverPanel);
   const handoverStatus=document.getElementById('handoverStatus'),handoverList=document.getElementById('handoverList');
   let handoverRevision=0;
   async function handoverApi(path,body) {
     const response=await fetch(`/api/technician/${path}`,{method:body?'POST':'GET',headers:{'Content-Type':'application/json',Authorization:`Bearer ${window.CristalAuth?.getToken?.()}`},...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(10000)});
-    const data=await response.json();if(!response.ok||data.ok===false)throw new Error(data.error||'Resposta indisponível');return data;
+    const data=await response.json();if(!response.ok||data.ok===false)throw data.error?new Error(data.error):panelError('panelResponseUnavailable');return data;
   }
   async function loadHandovers() {
     const principal=owner(),token=window.CristalAuth?.getToken?.(),version=++handoverRevision;
-    handoverList.replaceChildren();handoverStatus.textContent='A consultar passagens…';
+    handoverList.replaceChildren();setCopy(handoverStatus,copy('handoverLoading'));
     try {
       const [water,pump,incoming,targets]=await Promise.all(['water-reminders','pump-reminders','reminder-handovers/incoming','reminder-handovers/targets'].map(path=>handoverApi(path)));
       if(version!==handoverRevision||owner()!==principal||token!==window.CristalAuth?.getToken?.())return;
@@ -248,70 +304,80 @@
         const card=document.createElement('section');card.className='day-review-group';card.dataset.handoverReminder=row.id;
         const title=document.createElement('h3');title.textContent=row.title;card.append(title);
         const text=document.createElement('p'),proposal=row.metadata?.handover;
-        text.textContent=isIncoming ? `Pedido para si: ${proposal.reason}. Só aceite se consegue assumir esta responsabilidade.` : proposal?.status==='PENDING' ? `À espera de ${proposal.toName}. Continua responsável.` : 'Escolha quem pode assumir este lembrete.';card.append(text);
+        setCopy(text,isIncoming ? copy('handoverIncoming',{reason:proposal.reason}) : proposal?.status==='PENDING' ? copy('handoverWaiting',{name:proposal.toName}) : copy('handoverChoose'));card.append(text);
         const action=document.createElement('button');action.type='button';action.className='big';
         let select,reason;
         const operation=isIncoming?'accept':proposal?.status==='PENDING'?'cancel':'request';
         if(operation==='request') {
-          select=document.createElement('select');select.setAttribute('aria-label','Técnico destinatário');
-          const empty=document.createElement('option');empty.value='';empty.textContent='Escolher técnico';select.append(empty);
+          select=document.createElement('select');setCopyAttribute(select,'aria-label',copy('handoverTarget'));
+          const empty=document.createElement('option');empty.value='';setCopy(empty,copy('handoverSelect'));select.append(empty);
           for(const tech of targets.technicians.filter(tech=>tech.id!==row.assignedToTechnicianId)){const option=document.createElement('option');option.value=tech.id;option.textContent=tech.name;select.append(option);}
-          reason=document.createElement('textarea');reason.placeholder='Motivo da passagem';reason.setAttribute('aria-label','Motivo da passagem');reason.maxLength=1000;card.append(select,reason);
+          reason=document.createElement('textarea');setCopyAttribute(reason,'placeholder',copy('handoverReason'));setCopyAttribute(reason,'aria-label',copy('handoverReason'));reason.maxLength=1000;card.append(select,reason);
         }
-        action.textContent={request:'Pedir passagem',accept:'Aceitar responsabilidade',cancel:'Cancelar pedido'}[operation];
+        setCopy(action,copy({request:'handoverRequest',accept:'handoverAccept',cancel:'handoverCancel'}[operation]));
         action.onclick=async()=>{
           if(owner()!==principal||token!==window.CristalAuth?.getToken?.())return loadHandovers();
-          if(operation==='accept'&&!confirm('Confirma que consegue assumir este lembrete a partir de agora?'))return;
+          if(operation==='accept'&&!confirm(textCopy('handoverConfirm')))return;
           action.disabled=true;
           try {
             await handoverApi(`reminder-handovers/${row.id}/${operation}`,operation==='request'?{technicianId:Number(select.value),reason:reason.value}:{handoverId:proposal.id});
             if(owner()!==principal||token!==window.CristalAuth?.getToken?.())return;
             invalidate();await window.CWPumpReminders?.sync?.();await loadHandovers();
-          } catch(error){if(owner()===principal&&token===window.CristalAuth?.getToken?.()){handoverStatus.textContent=`${error.message}. Atualize a lista antes de repetir; a resposta pode ter-se perdido.`;action.disabled=false;}}
+          } catch(error){if(owner()===principal&&token===window.CristalAuth?.getToken?.()){setCopy(handoverStatus,copy('handoverActionFailed',{detail:panelErrorCopy(error)}));action.disabled=false;}}
         };card.append(action);handoverList.append(card);
       }
-      handoverStatus.textContent=incoming.reminders.length?`${incoming.reminders.length} pedido(s) para aceitar.`:outgoing.length?'Passagens atualizadas.':'Sem lembretes ativos ou pedidos de passagem.';
-    }catch(error){if(version===handoverRevision&&owner()===principal)handoverStatus.textContent='Sem confirmação do servidor. Não considere nenhuma responsabilidade transferida; atualize com rede.';}
+      setCopy(handoverStatus,incoming.reminders.length?copy('handoverCount',{count:incoming.reminders.length}):copy(outgoing.length?'handoverUpdated':'handoverEmpty'));
+    }catch(error){if(version===handoverRevision&&owner()===principal)setCopy(handoverStatus,copy('handoverUnavailable'));}
   }
   document.getElementById('handoverRefresh').onclick=loadHandovers;
   window.addEventListener('online',loadHandovers);
   loadHandovers();
 
   const receiptPanel=document.createElement('section');receiptPanel.id='visitReceiptPanel';receiptPanel.className='card field-panel field-panel-hoje';receiptPanel.setAttribute('data-cw-state-managed','manual');
-  receiptPanel.innerHTML='<h2>Novas visitas atribuídas</h2><p>Confirme que recebeu o trabalho. Esta confirmação não inicia a visita e não transfere água aberta ou bombas em manual.</p><button class="big" id="receiptRefresh" type="button">Atualizar atribuições</button><p id="receiptStatus" role="status" aria-live="polite"></p><div id="receiptList"></div>';
+  receiptPanel.setAttribute('data-cw-no-i18n','');
+  receiptPanel.innerHTML='<h2></h2><p></p><button class="big" id="receiptRefresh" type="button"></button><p id="receiptStatus" role="status" aria-live="polite"></p><div id="receiptList"></div>';
+  setCopy(receiptPanel.querySelector('h2'),copy('receiptTitle'));setCopy(receiptPanel.querySelector('p'),copy('receiptIntro'));setCopy(receiptPanel.querySelector('button'),copy('receiptRefresh'));
   document.getElementById('dayReviewCard').before(receiptPanel);
   let receiptRevision=0;
   const receiptEscape=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   async function loadReceipts(){
     const revision=++receiptRevision,token=window.CristalAuth?.getToken?.(),principal=owner(),status=document.getElementById('receiptStatus');
-    status.textContent=navigator.onLine?'A verificar atribuições…':'Sem ligação. Ligue à rede para consultar e confirmar as novas atribuições.';
+    setCopy(status,copy(navigator.onLine?'receiptLoading':'receiptOfflineQuery'));
     if(!navigator.onLine)return;
     try{
       const response=await fetch('/api/technician/visit-receipts',{headers:{Authorization:`Bearer ${token}`},cache:'no-store',signal:AbortSignal.timeout(8000)}),data=await response.json();
-      if(!response.ok)throw new Error(data.error||'Falha ao consultar atribuições');
+      if(!response.ok)throw data.error?new Error(data.error):panelError('receiptQueryFailed');
       if(revision!==receiptRevision||principal!==owner()||token!==window.CristalAuth?.getToken?.())return;
       const tomorrow=new Date();tomorrow.setHours(0,0,0,0);tomorrow.setDate(tomorrow.getDate()+1);
       const current=data.receipts.filter(row=>!row.plannedDate||new Date(row.plannedDate)<tomorrow),future=data.receipts.filter(row=>row.plannedDate&&new Date(row.plannedDate)>=tomorrow);
-      const renderReceipt=row=>`<div style="padding:12px 0;overflow-wrap:anywhere"><strong>${receiptEscape(row.poolName)} · visita ${row.visitType==='EXTRA'?'extra ':''}#${row.visitId}</strong><p>${row.plannedDate?new Date(row.plannedDate).toLocaleDateString('pt-PT'):'Data por confirmar'}</p><button class="big" type="button" data-receipt="${row.id}" style="min-height:48px;white-space:normal">Confirmar receção desta visita</button></div>`;
-      document.getElementById('receiptList').innerHTML=current.map(renderReceipt).join('')+(future.length?`<details><summary style="min-height:48px;padding:12px 0">${future.length} visita(s) de dias futuros</summary>${future.map(renderReceipt).join('')}</details>`:'');
-      status.textContent=data.receipts.length?`${data.receipts.length} visita(s) por confirmar.`:'Sem novas atribuições por confirmar no servidor.';
-    }catch(error){if(revision===receiptRevision&&principal===owner()&&token===window.CristalAuth?.getToken?.())status.textContent=`Não foi possível atualizar: ${error.message}. Confirme as atribuições com o escritório.`;}
+      const renderReceipt=row=>{
+        const item=document.createElement('div');item.style.cssText='padding:12px 0;overflow-wrap:anywhere';
+        const title=document.createElement('strong'),date=document.createElement('p'),action=document.createElement('button');
+        setCopy(title,copy(row.visitType==='EXTRA'?'receiptExtra':'receiptRegular',{name:row.poolName,id:row.visitId}));
+        setCopy(date,row.plannedDate?dateCopy(row.plannedDate,false,true):copy('receiptDateUnknown'));
+        action.className='big';action.type='button';action.dataset.receipt=row.id;action.style.cssText='min-height:48px;white-space:normal';setCopy(action,copy('receiptConfirm'));
+        item.append(title,date,action);return item;
+      };
+      const list=document.getElementById('receiptList');list.replaceChildren(...current.map(renderReceipt));
+      if(future.length){const details=document.createElement('details'),summary=document.createElement('summary');summary.style.cssText='min-height:48px;padding:12px 0';setCopy(summary,copy('receiptFuture',{count:future.length}));details.append(summary,...future.map(renderReceipt));list.append(details);}
+      setCopy(status,data.receipts.length?copy('receiptCount',{count:data.receipts.length}):copy('receiptEmpty'));
+    }catch(error){if(revision===receiptRevision&&principal===owner()&&token===window.CristalAuth?.getToken?.())setCopy(status,copy('receiptRefreshFailed',{detail:panelErrorCopy(error)}));}
   }
   document.getElementById('receiptRefresh').onclick=loadReceipts;
   document.getElementById('receiptList').onclick=async event=>{
     const button=event.target.closest('[data-receipt]');if(!button||button.disabled)return;
     const token=window.CristalAuth?.getToken?.(),principal=owner(),status=document.getElementById('receiptStatus');
-    if(!navigator.onLine){status.textContent='Sem ligação. A receção ainda não foi confirmada no escritório.';return;}
+    if(!navigator.onLine){setCopy(status,copy('receiptOfflineAction'));return;}
     button.disabled=true;
     try{
       const response=await fetch(`/api/technician/visit-receipts/${button.dataset.receipt}/acknowledge`,{method:'POST',headers:{Authorization:`Bearer ${token}`},signal:AbortSignal.timeout(8000)}),data=await response.json();
-      if(!response.ok)throw new Error(data.error||'Falha na confirmação');
+      if(!response.ok)throw data.error?new Error(data.error):panelError('receiptConfirmFailed');
       if(principal!==owner()||token!==window.CristalAuth?.getToken?.())return;
-      await loadReceipts();if(principal!==owner()||token!==window.CristalAuth?.getToken?.())return;status.textContent='Receção confirmada no escritório. Atualize a rota para consultar o trabalho.';
-    }catch(error){if(principal===owner()&&token===window.CristalAuth?.getToken?.())status.textContent=`Receção não confirmada: ${error.message}. Pode atualizar e tentar novamente.`;}
+      await loadReceipts();if(principal!==owner()||token!==window.CristalAuth?.getToken?.())return;setCopy(status,copy('receiptConfirmed'));
+    }catch(error){if(principal===owner()&&token===window.CristalAuth?.getToken?.())setCopy(status,copy('receiptActionFailed',{detail:panelErrorCopy(error)}));}
     finally{button.disabled=false;}
   };
-  window.addEventListener('online',loadReceipts);window.addEventListener('offline',()=>{receiptRevision++;document.getElementById('receiptStatus').textContent='Sem ligação. As confirmações exigem ligação ao escritório.';});
+  window.addEventListener('online',loadReceipts);window.addEventListener('offline',()=>{receiptRevision++;setCopy(document.getElementById('receiptStatus'),copy('receiptOffline'));});
   setInterval(loadReceipts,60000);loadReceipts();
 
   const shortagePanel=document.createElement('section');shortagePanel.id='fieldShortagePreparation';shortagePanel.className='card field-panel field-panel-hoje';shortagePanel.setAttribute('data-cw-state-managed','manual');

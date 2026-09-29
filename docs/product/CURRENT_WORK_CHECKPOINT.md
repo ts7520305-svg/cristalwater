@@ -1,5 +1,19 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 29/09/2026, TASK441 local validada / publicação autorizada
+
+**Decisão atual do utilizador, 19:20 de Lisboa:** manter `ts7520305-svg/cristalwater` público durante o desenvolvimento e limitar para privado antes da conclusão do projeto. A suspensão anterior de publicação fica levantada. É permitido publicar alterações validadas na branch de trabalho; não altera o âmbito de instalação no VPS, destinatários externos ou aceitação final. A condição de privacidade fica em C32.
+
+**TASK441 / C06:** painéis de passagem de responsabilidade e receção de visitas em PT/EN/FR/ES/DE: 39 entradas/195 textos, atributos acessíveis, diálogo de aceitação, estados e mensagens próprias. Nomes, motivos e erros externos literais; erros próprios mantêm Error.message português. A mudança de idioma conserva campos, nós, foco/seleção, details aberto, bytes locais e registos SQL; só admite a gravação normal da preferência de idioma, sem consultas/envios operacionais. Datas apenas mudam de apresentação. [Prova441](evidence/20260929_task441_local.json).
+
+**Validação:** reprodução anterior falha em 4 465 ms. Novo grupo 11 687 ms; revisão diária 12 310 ms, lembretes extra 24 226 ms e API da água 18 057 ms, aprovados. 1 356 unitários/138 ficheiros, quatro técnicos e sintaxe 695/308/44 aprovados. Cinco idiomas/320/390/1440; visitas REGULAR/EXTRA de igual ID; pedido/cancelamento/aceitação reais; diálogos cancelados sem escrita; recusa403 literal; resposta de receção retida; um histórico de receção extra; visitas não iniciadas/concluídas; offline/cache/vazio. A auditoria legítima da passagem é preservada na comparação integral da visita regular antes/depois da receção.
+
+**Preservação e limites:** catálogo anterior42, construtor da revisão, recolha/validação e painel de química permanecem iguais. Backend/schema/workflows sem alteração. Cache226/runner335, ordem anterior conservada. Capturas alemãs320 revistas; navegação fixa comum sobreposta nas capturas longas continua C08-025/026. PGlite/Chromium153 não substituem PostgreSQL16/upgrade/suite335/restauro128 tabelas47 ficheiros. C06/C06-003 abertas.
+
+**Publicação preparada:** TASK440 preservada no commit local `752b1980210e70877dc95658edb6076e1c125a22`. TASK434–440 reconstruídas em commits individuais pela ligação GitHub, com todas as árvores iguais às locais; ref da branch ainda não atualizada nesta entrada. TASK441 preparada; ver atualização de publicação acima quando existir. Nenhum merge ou deploy aplicado.
+
+**Próximo:** publicar TASK434–441 na branch autorizada e confirmar o arranque dos gates nativos; depois painel de preparação/receção de química no final de `cw-field-day-review.js`, restantes fontes C06. Oito ficheiros. 32 tarefas = 26 por iniciar, uma em execução e cinco concluídas. Contrato anual adiado; sem contactos/dados reais. Entradas abaixo são históricas.
+
 ## Retoma atual — 29/09/2026, TASK440 local / formulário e fila de equipamento
 
 **TASK440 / C06:** rótulos, opções, fila, tempo/material, estados e erros próprios do formulário de equipamento em PT/EN/FR/ES/DE: 115 entradas/575 textos; reutiliza o catálogo existente para erros identificados do write-store. Reprodução anterior falha em 5 755 ms: cabeçalho português após selecionar inglês. [Prova440](evidence/20260929_task440_local.json).
