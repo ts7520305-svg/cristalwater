@@ -4,7 +4,7 @@ Data: 28/09/2026. Preparado na TASK402 a partir da revisão global, do checkpoin
 
 ## Contagem e regra de fecho
 
-**32 tarefas de conclusão identificadas: C01–C32.** Estado após TASK422 local: **26 por iniciar, uma em execução (C06), cinco concluídas (C01–C05)**. Rascunhos e diferenças em cinco idiomas aprovados localmente; cache213/runner322. TASK421 ainda aguarda321 grupos/restauro nativos; TASK422 requer322 grupos/restauro próprios. TASK419/420 permanecem aprovadas e falhas históricas preservadas. [Prova422](evidence/20260929_task422_local.json).
+**32 tarefas de conclusão identificadas: C01–C32.** Estado após TASK422 publicada / CI pendente: **26 por iniciar, uma em execução (C06), cinco concluídas (C01–C05)**. Rascunhos e diferenças em cinco idiomas aprovados localmente; cache213/runner322. TASK421 ainda aguarda321 grupos/restauro nativos; TASK422 requer322 grupos/restauro próprios. TASK419/420 permanecem aprovadas e falhas históricas preservadas. [Prova422](evidence/20260929_task422_local.json).
 
 Uma tarefa pode ter preparação, implementação local e validação externa em momentos diferentes. Só passa a **Concluída** quando cumpre o critério e tem evidência ligada. **Implementada / CI pendente** não equivale a validação nativa nem a instalação no VPS. Cada lote de código mantém uma responsabilidade, até dez ficheiros, teste da falha/resultado e documentação.
 
@@ -135,3 +135,5 @@ As indicações de sprint/validação de julho são históricas. O utilizador pe
 **TASK417 — correção do teste de privacidade da frota:** CI TASK413 terminou com315/316 grupos aprovados; a lista foi rejeitada por conter a sequência3655 algures no JSON. Restauro não executado. Reproduzido com matrícula pública legítima contendo os dígitos do PIN. O teste agora exige a projeção pública exata e recusa cinco injeções de campos privados, sem alterar aplicação/permissões. API1 879ms, navegador30 805ms e24 unitários focados aprovados. Runner318; C04 mantém validação pendente, C06 mantém execução. [Prova](evidence/20260929_task417_local.json). Idiomas da página técnica passam para TASK418.
 
 - TASK422: rascunhos/diferenças localizados, pedido original e dados conservados;1 332 unitários/quatro técnicos e três integrações atuais aprovados. Falsa falha de geometria reproduzida com80 amostras e tolerância de0,01px só no teste novo. Sete ficheiros de código/teste+três documentação; runner322/cache213. Próximo423: pré-visualização. CI421/422 ainda não aceites.
+
+- Publicação TASK422: `22d72fa26da3370169f1306179184fb3096a260d`, árvore `5300919f4acc2ea8db4c4a434b2a1c028b228475`, iguais local/remoto. CI36534583004/job109295609200 em execução;322 grupos/restauro ainda pendentes. Próximo423: pré-visualização.

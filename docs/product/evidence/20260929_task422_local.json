@@ -136,10 +136,17 @@
     "reports/field-ui/LEGACY_DRAFT_LANGUAGES_PENDING_DE_320.png": "92a3ea256618d9f88bc5a67c709f47dd682b476653b6e900fde03784c5a3aa1e"
   },
   "publication": {
-    "status": "local_validated",
+    "status": "published",
     "branch": "work/field-readiness-20260915-simulation",
+    "commit": "22d72fa26da3370169f1306179184fb3096a260d",
+    "tree": "5300919f4acc2ea8db4c4a434b2a1c028b228475",
+    "localRemoteTreeEqual": true,
     "ci": {
-      "status": "not_started",
+      "run": 36534583004,
+      "job": 109295609200,
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulSteps": 4,
       "expectedOrderedGroups": 322,
       "restoration": "pending"
     }
