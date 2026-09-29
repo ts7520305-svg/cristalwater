@@ -1,5 +1,19 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 29/09/2026, TASK429 validada localmente / espera da rota diária
+
+**TASK429 pronta para publicação na branch autorizada.** CI426 terminou 324/325 grupos únicos na ordem exata: única falha em `test-field-complete-daily-route.js:85`, ao voltar online após rejeitar cache v2 incompleta. `page.goto(networkidle)` excedeu 10 s; as asserções API de 305 visitas regulares + 305 extra já tinham passado. Restauro ignorado. Log nativo completo lido e 325 resultados na [prova429](evidence/20260929_task429_local.json).
+
+**Diagnóstico:**o teste anterior passou localmente, com as dez navegações registadas. Prova controlada na mesma transição: resposta real `/api/push/public-key` retida; a aplicação confirma 610 visitas únicas/cache completas em 1 078 ms, mas a espera networkidle falha aos 10 003 ms. V2 preservada. O log nativo não identifica o pedido pendente; não se atribui a falha original especificamente ao push nem se alega captura do trace original.
+
+**Correção só do teste:**navegação aguarda DOMContentLoaded e cada página continua a exigir o seu resultado. A rota moderna agora exige 610 identidades tipadas únicas, erro oculto e confirmação atual online; offline exige confirmação nula. O caso de regressão mantém a resposta push pendente até a rota estar pronta e compara ordem das identidades, conta/dia, instante de confirmação e bytes v2. Também exige que a nova condição recuse cache completa sem confirmação após resposta parcial. Mantidos limites de 10 s/120 s, dados, cliques e asserções anteriores; sem sleeps/repetições automáticas. Aplicação/cache217/runner326 inalterados.
+
+**Validação429:**grupo completo aprovado (35 435 ms): API/paginação, visita final >300, offline, caches v2/v3, rejeição de respostas parciais, revisão diária, mapa/rota/histórico e lista antiga 305. Probe controlada aprovada; node-check/diff-check aprovados. Unitários/sintaxe global não repetidos numa alteração só do teste; 1 345 é evidência428, não nova execução429. Quatro ficheiros: um teste e três documentação.
+
+**Gates:**CI427/428 em execução na última consulta, dez etapas aprovadas em cada. TASK429 exige 326 grupos exatos/restauro 128 tabelas/47 ficheiros próprios; local não substitui PostgreSQL nativo/restauro. CI426 permanece falhado. C06 continua em execução; restantes entradas não fechadas por associação.
+
+**Próximo TASK430:**confirmar CI427/428/429 e corrigir nova falha primeiro. Depois retomar C06 por fonte do inventário; revisão diária e restantes consumidores pendentes. Chrome/nav continua C08-025/026. 32 tarefas = 26 por iniciar/1 em execução/5 concluídas. Sem merge/deploy/contactos reais; contrato anual adiado. Entradas abaixo são históricas.
+
 ## Retoma atual — 29/09/2026, TASK428 publicada / rascunhos modernos
 
 **TASK428 publicada na branch autorizada.** Rascunhos do modo de campo:61 chaves/305 valores em PT/EN/FR/ES/DE, cache217/runner326. Antes: idioma EN, estado guardado em PT. Agora estados, erros próprios, comparação de17 campos, três origens e ações/aria são localizados. Nomes, notas, quantidades, datas e fotografias mantêm os dados originais. [Prova428](evidence/20260929_task428_local.json).

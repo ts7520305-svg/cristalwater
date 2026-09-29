@@ -63,8 +63,16 @@ let browser;
   }, { token, tech });
   const page = await context.newPage(), errors = [];
   page.setDefaultTimeout(10000); page.on('pageerror', error => errors.push(error.message)); page.on('dialog', dialog => dialog.accept());
-  const open = path => page.goto(base + path, { waitUntil: 'networkidle' });
-  const modernReady = () => page.waitForFunction(total => window.CWFieldDaySnapshot?.().visits.length === total, size * 2);
+  // Unrelated requests may remain active after the route is usable. Each page
+  // below waits for its own result; online route readiness also requires freshness.
+  const open = path => page.goto(base + path, { waitUntil: 'domcontentloaded' });
+  const modernComplete = ({ total, confirmed }) => {
+    const snapshot = window.CWFieldDaySnapshot?.();
+    return snapshot?.visits.length === total && new Set(snapshot.visits.map(row => row.visitType + ':' + row.id)).size === total
+      && document.getElementById('fieldLoadError')?.hidden
+      && (confirmed ? Number.isFinite(Date.parse(snapshot.confirmedAt)) : snapshot.confirmedAt === null);
+  };
+  const modernReady = (confirmed = true) => page.waitForFunction(modernComplete, { total: size * 2, confirmed });
   await open('/technician-field-mode'); await modernReady();
   const modernKey = await page.evaluate(() => CWFieldRouteCache.key(CWFieldRouteCache.scope()));
   const modernRaw = await page.evaluate(key => localStorage.getItem(key), modernKey);
@@ -74,7 +82,7 @@ let browser;
   await page.locator('[data-field-tab-button="agora"]').click();
   assert.equal(await page.locator('#notes').inputValue(), 'Last regular server note');
   await page.evaluate(() => navigator.serviceWorker.ready); await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
-  await context.setOffline(true); await page.reload({ waitUntil: 'domcontentloaded' }); await modernReady();
+  await context.setOffline(true); await page.reload({ waitUntil: 'domcontentloaded' }); await modernReady(false);
   assert.equal(await page.locator('#notes').inputValue(), 'Last regular server note');
   const oldModern = JSON.stringify({ ...JSON.parse(modernRaw), v: 2, visits: JSON.parse(modernRaw).visits.slice(0, 200) });
   await page.evaluate(({ key, old }) => { localStorage.setItem(key.replace(':v3:', ':v2:'), old); localStorage.removeItem(key); }, { key: modernKey, old: oldModern });
@@ -82,7 +90,23 @@ let browser;
   await page.waitForFunction(() => document.getElementById('fieldLoadErrorText')?.textContent.includes('incompleta'));
   assert.equal(await page.locator('#visitList [data-visit-index]').count(), 0);
   assert.equal(await page.evaluate(key => localStorage.getItem(key.replace(':v3:', ':v2:')), modernKey), oldModern);
-  await context.setOffline(false); await open('/technician-field-mode'); await modernReady();
+  // Hold the real push configuration response across the exact offline-to-online
+  // transition. A complete route must not depend on this separate startup request.
+  let releasePush, heldPush = 0, finishedPush = 0;
+  const pushGate = new Promise(resolve => { releasePush = resolve; }), pushTasks = [];
+  await page.route('**/api/push/public-key', route => {
+    const task = (async () => { ++heldPush; const response = await route.fetch(); await pushGate; await route.fulfill({ response }); ++finishedPush; })();
+    pushTasks.push(task); return task;
+  });
+  try {
+    await context.setOffline(false); await open('/technician-field-mode'); await modernReady();
+    assert(heldPush > 0 && finishedPush === 0, 'Readiness must accept a confirmed complete route while push configuration is still pending');
+    const recovered = JSON.parse(await page.evaluate(key => localStorage.getItem(key), modernKey));
+    assert.equal(recovered.owner, 'TECH:' + tech.id); assert.equal(recovered.day, day);
+    assert.deepEqual(recovered.visits.map(identity), JSON.parse(modernRaw).visits.map(identity));
+    assert.equal(recovered.serverConfirmedAt, await page.evaluate(() => CWFieldDaySnapshot().confirmedAt));
+    assert.equal(await page.evaluate(key => localStorage.getItem(key.replace(':v3:', ':v2:')), modernKey), oldModern);
+  } finally { releasePush(); await Promise.all(pushTasks); await page.unroute('**/api/push/public-key'); }
   console.log('PASS last regular visit beyond 300 is editable and survives offline reload; potentially truncated v2 cache is preserved without claiming a complete route');
 
   const partial = async route => { const response = await route.fetch(), data = await response.json(); await route.fulfill({ response, json: { ...data, complete: false, visits: data.visits.slice(0, 1), returned: 1, hasMore: true } }); };
@@ -92,6 +116,7 @@ let browser;
   await page.evaluate(() => document.getElementById('fieldReloadBtn').click());
   await page.waitForFunction(() => document.getElementById('fieldRouteAge')?.textContent.includes('Sem confirmação atual'));
   assert.equal(await page.evaluate(() => CWFieldDaySnapshot().confirmedAt), null);
+  assert.equal(await page.evaluate(modernComplete, { total: size * 2, confirmed: true }), false, 'A full cached route with no current confirmation is not ready online');
   assert.equal(await page.evaluate(key => localStorage.getItem(key), modernKey), beforePartial);
   await page.locator('[data-field-tab-button="hoje"]').click(); await page.locator('#dayReviewBtn').click();
   await page.waitForFunction(() => document.getElementById('dayReviewResult').textContent.includes('Ronda: não foi possível confirmar'));
