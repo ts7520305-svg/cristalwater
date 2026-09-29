@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 29/09/2026, TASK442 / CI em execução
+
+TASK442 publicada na branch `work/field-readiness-20260915-simulation`: commit de código `da2f7b1fa21cc7c1ca5cd88acef03b0fb29f3ea2`, árvore `ea6620f21fb331f4105510e42adcf9f8e49aa5f5`, igual à validada localmente. Checkout alinhado; história local original preservada. [CI36615430755](https://github.com/ts7520305-svg/cristalwater/actions/runs/36615430755), job109567101107, arrancou por push do commit exato e permanece em execução. Exigir PostgreSQL16/upgrade/suite336/restauro128 tabelas47 ficheiros antes da aceitação. Atualização documental posterior com `[skip ci]` não muda o código.
+
+CI441/36613209845 continua na suite335; não se declara aceitação de nenhuma destas duas versões. Próximo: consultar ambos os gates e seguir revisão administrativa de cadastros em `cw-field-intake-review.js`/C06-004 (`admin-operational-settings.html`). Repositório público autorizado durante desenvolvimento; privado antes da conclusão/C32. C06 aberta; contagem32=26 por iniciar/uma em execução/cinco concluídas. Sem merge/deploy/contactos externos. [Prova442](evidence/20260929_task442_local.json).
+
 ## Retoma atual — 29/09/2026, TASK442 local validada / preparação e receção de química
 
 **TASK442 / C06:** painel de química de `cw-field-day-review.js` em PT/EN/FR/ES/DE:34 entradas/170 textos. Necessidades, entregas, quantidades, formulário, estados e erros próprios. Elementos de texto dentro de labels conservam inputs; avisos sem transferência usam um filho para não apagar o formulário após recuperação/mudança de idioma. Nomes, unidades, mensagens externas e valores originais preservados. [Prova442](evidence/20260929_task442_local.json).
