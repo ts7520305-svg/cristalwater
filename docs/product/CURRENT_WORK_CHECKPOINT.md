@@ -1,5 +1,15 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 29/09/2026, TASK445 local validada / erros de fotografias
+
+**TASK445 / C06-005:** sete erros próprios de `cw-field-photos.js` e duas apresentações do modo de campo em PT/EN/FR/ES/DE: nove entradas/45 textos. Fila de sincronização também usa a cópia do erro real. Error.message, erros externos/persistidos, blobs, IDs/UUID, nomes, payload e recibos conservados. Tradução por identidade do erro, sem classificar texto coincidente. [Prova445](evidence/20260929_task445_local.json).
+
+**Validação:** falha inglesa reproduzida11 238ms. Novo grupo12 863ms, sincronização5 343ms, sessão3 158ms e E2E51 806ms aprovados. Cinco idiomas/320/390/1440, nós/foco/preview/rascunhos/bytes conservados; mudança de idioma não chama produtores de fotografias nem envia operações. Fila mantém as leituras de arquivo já existentes. Toast de recuperação e limpeza por toast posterior, erro403 coincidente literal, markup literal, offline/cache, guardas por conta/tipo/ID/tamanho e confirmação cobertos. Resposta real retida/perdida e reenvio deixam uma fotografia/um recibo; REGULAR/EXTRA iguais não se misturam. 1 356 unitários/138 ficheiros, quatro técnicos e sintaxe695/308/44 aprovados. Ensaio intermédio corrigiu apenas o percurso do teste para abrir Agora antes das notas.
+
+**Preservação/limites:** operações do helper idênticas ao inverter substituições de apresentação. Cache230/runner339, ordem anterior intacta; backend/schema/workflow inalterados. Captura alemã320 revista. Rótulos normais/seleção/feedback do painel e helper antigo ainda por localizar. C06/C06-005/C08/C10 abertas; PGlite/Chromium153 não substituem PostgreSQL16/upgrade/suite339/restauro128 tabelas47ficheiros.
+
+**CI anterior/retoma prioritária:** CI44136613209845 terminou com333/335 grupos aprovados: `test-field-review-summary-languages.js` tenta clicar depois de a guarda de sessão ocultar o modo de campo; `test-field-extra-incomplete.js` lê `returnVisit.id` numa pendência alheia sem regresso. Restauro não executado. Corrigir/reproduzir estas duas falhas num lote separado antes de prosseguir nos idiomas. CI442/443/444 ainda na suite na última consulta. Publicação445/gates próprios pendentes. Dez ficheiros;32=26 por iniciar/uma em execução/cinco concluídas. Público autorizado durante desenvolvimento; privado antes do fecho/C32. Contrato anual adiado; sem merge/deploy/contactos externos.
+
 ## Publicação confirmada — 29/09/2026, TASK444 / CI em execução
 
 TASK444 publicada na branch `work/field-readiness-20260915-simulation`: código `f36099587a7fdf6fd264a41b757312c13d689c49`, árvore `1b9f9d8df72e988ea8a1e66b20ce965568773b3e`, igual à validada; checkout alinhado e original local preservado. [CI36619407550](https://github.com/ts7520305-svg/cristalwater/actions/runs/36619407550), job109580657444, arrancou no commit exato; 6 etapas aprovadas, etapa atual: `Verify additive upgrade from the previous schema`. Exigir PostgreSQL16/upgrade/suite338/restauro128 tabelas47ficheiros antes da aceitação. Atualização documental posterior `[skip ci]` não muda o código. [Prova444](evidence/20260929_task444_local.json).

@@ -13,6 +13,47 @@
     '"': "&quot;",
   }[char]));
 
+  // Capture presentation separately: photo.error, drafts and stored failures remain literal.
+  const photoErrors = new WeakMap(), photoErrorBindings = new WeakMap();
+  const photoErrorLanguages = ['pt', 'en', 'fr', 'es', 'de'];
+  const photoErrorMessages = {
+    restore: ['Falha ao recuperar fotografias: {detail}', 'Failed to recover photographs: {detail}', 'Impossible de récupérer les photographies : {detail}', 'No se pudieron recuperar las fotografías: {detail}', 'Fotos konnten nicht wiederhergestellt werden: {detail}'],
+    pending: ['Pendente: {detail}', 'Pending: {detail}', 'En attente : {detail}', 'Pendiente: {detail}', 'Ausstehend: {detail}'],
+  };
+  function photoErrorText(value) {
+    const language = String(document.documentElement.lang || 'pt').toLowerCase().split('-')[0];
+    const detail = value.copy?.[language] || value.copy?.pt || value.detail;
+    return value.wrapper ? photoErrorMessages[value.wrapper][Math.max(0, photoErrorLanguages.indexOf(language))].replace('{detail}', () => detail) : detail;
+  }
+  function bindPhotoError(node, value) {
+    photoErrorBindings.set(node, { ...value, protected: node.hasAttribute('data-cw-no-i18n') });
+    node.setAttribute('data-cw-photo-error-copy', ''); node.setAttribute('data-cw-no-i18n', '');
+    node.textContent = photoErrorText(value);
+  }
+  function clearPhotoError(node) {
+    const value = photoErrorBindings.get(node);
+    if (!value) return;
+    if (!value.protected) node.removeAttribute('data-cw-no-i18n');
+    node.removeAttribute('data-cw-photo-error-copy'); photoErrorBindings.delete(node);
+  }
+  function repaintPhotoErrors() {
+    for (const node of document.querySelectorAll('[data-cw-photo-error-copy]')) {
+      const value = photoErrorBindings.get(node);
+      if (value && node.textContent !== photoErrorText(value)) node.textContent = photoErrorText(value);
+    }
+  }
+  function photoErrorToast(error, wrapper) {
+    const value = { detail: error.message, copy: window.CWFieldPhotos.errorCopy(error), wrapper };
+    toast(photoErrorText(value));
+    const node = $('#toast'); if (node) bindPhotoError(node, value);
+  }
+  window.addEventListener('cw-language-change', repaintPhotoErrors);
+  let photoErrorLanguage = document.documentElement.lang;
+  new MutationObserver(() => {
+    if (document.documentElement.lang === photoErrorLanguage) return;
+    photoErrorLanguage = document.documentElement.lang; repaintPhotoErrors();
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+
   let visits = [];
   let routeConfirmedAt = null;
   window.CWFieldDaySnapshot = () => ({
@@ -545,6 +586,7 @@
       ui.info(message);
       return;
     }
+    clearPhotoError(node);
     node.textContent = message;
     node.classList.add("show");
     setTimeout(() => node.classList.remove("show"), 2400);
@@ -753,7 +795,7 @@
       if (!sameFieldSession() || visitKey(current()) !== key) { pending.forEach(photo => { if (photo.previewUrl) URL.revokeObjectURL(photo.previewUrl); }); return; }
       for(const photo of pending) { const position=visitPhotos.findIndex(p=>p.localId===photo.localId);if(position>=0){if(visitPhotos[position].previewUrl?.startsWith('blob:'))URL.revokeObjectURL(visitPhotos[position].previewUrl);visitPhotos[position]=photo;}else visitPhotos.push(photo); }
       renderPhotoList();
-    }).catch(error=>{if(sameFieldSession())toast('Falha ao recuperar fotografias: '+error.message)});
+    }).catch(error=>{if(sameFieldSession())photoErrorToast(error, 'restore')});
     renderPhotoList();
     visitDraftManager.paint(currentDraftEntry);
   }
@@ -2039,6 +2081,13 @@
       </div>
     `).join("");
 
+    for (const node of list.querySelectorAll('[data-photo-id]')) {
+      const photo = visitPhotos.find(item => item.localId === node.dataset.photoId);
+      if (!photo?.error || ['uploaded', 'uploading'].includes(photo.status)) continue;
+      const captured = photoErrors.get(photo);
+      bindPhotoError(node.querySelector('.photo-status'), { detail: photo.error, copy: captured?.detail === photo.error ? captured.copy : undefined, wrapper: 'pending' });
+    }
+
     for (const node of list.querySelectorAll('[data-extra-photo-url]')) {
       const url = node.dataset.extraPhotoUrl;
       if (photoPreviewCache.has(url)) { node.src = photoPreviewCache.get(url); continue; }
@@ -2068,7 +2117,7 @@
           if (!sameFieldSession()) return;
           visitPhotos = visitPhotos.filter((item) => item.localId !== photo.localId);
           saveCurrentDraft(); renderPhotoList();
-        } catch (error) { if (sameFieldSession()) toast(error.message); }
+        } catch (error) { if (sameFieldSession()) photoErrorToast(error); }
         finally { button.disabled = false; }
       });
     });
@@ -2101,6 +2150,7 @@
     } catch (error) {
       photo.status = "pending";
       photo.error = error.message;
+      photoErrors.set(photo, { detail: error.message, copy: window.CWFieldPhotos.errorCopy(error) });
       if (sameFieldSession() && generation === fieldWriteGeneration && visitKey(current()) === visitKey(visit)) renderPhotoList();
       return false;
     }

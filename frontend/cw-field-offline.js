@@ -43,7 +43,14 @@
     if (error.status === 401) return t('expired');
     if ([403,404].includes(error.status)) return t('assignment');
     if (error.status === 409) return t('conflict');
+    const copy = photoErrorText(error);
+    if (copy !== undefined) return copy;
     return error.message ? t('originalError', { message: error.message }) : t('unconfirmed');
+  }
+  function photoErrorText(error) {
+    const copy = window.CWFieldPhotos?.errorCopy?.(error);
+    const language = String(document.documentElement.lang || 'pt').toLowerCase().split('-')[0];
+    return copy?.[language] || copy?.pt;
   }
   async function entries(captured = store.session()) { assertHistory(captured); return (await store.records(null, captured)).filter(row=>['VISIT_COMPLETION','EXTRA_VISIT_COMPLETION','EXTRA_VISIT_START','EXTRA_VISIT_CORRECTION'].includes(row.scope)); }
   async function rejections(captured=store.session()) { const latest=new Map();for(const row of await store.records('EXTRA_VISIT_CORRECTION',captured,true))latest.set(row.resourceId,row);return [...latest.values()].filter(row=>row.response?.applied===false&&!row.reviewedAt); }
@@ -85,7 +92,7 @@
       banner.hidden = true;
       let warning = document.getElementById('cwFieldStorageError');
       if (!warning) { warning = document.createElement('aside'); warning.id = 'cwFieldStorageError'; warning.setAttribute('role','alert'); warning.setAttribute('data-cw-no-i18n',''); warning.style.cssText = 'padding:16px;background:#ffe2cf;color:#562800;font-weight:700;overflow-wrap:anywhere;box-sizing:border-box;max-width:100%'; document.body.prepend(warning); }
-      warning.textContent = error.message;
+      warning.textContent = photoErrorText(error) ?? error.message;
     }
   }
   async function send(row, captured, options = {}) {

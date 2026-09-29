@@ -8,7 +8,13 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
-## Progresso funcional — TASK444 / recuperação do arquivo antigo
+## Progresso funcional — TASK445 / erros próprios de fotografias
+
+`cw-field-photos.js`: sete erros/35 textos em PT/EN/FR/ES/DE; duas apresentações/dez textos no modo de campo. Fila e recuperação utilizam a identidade do erro, preservando Error.message e detalhes externos/persistidos mesmo quando coincidem com texto próprio. Idioma atualiza folhas existentes sem reler produtores de fotografias, alterar rascunhos ou enviar; renderizações de arquivo já existentes na fila mantêm-se. Cache230/runner339. [Prova445](evidence/20260929_task445_local.json).
+
+Quatro integrações,1 356 unitários/quatro técnicos/sintaxe aprovados. Cinco idiomas/320/390/1440, erro de arquivo/recuperação, fotografia offline real, nós/foco/preview/bytes/UUID/hash,403 literal, recarregamento cache e resposta real retida/perdida/reenvio com uma fotografia/um recibo. Captura alemã320 revista. C06/C06-005 abertas: painel normal/seleção/feedback e helper antigo ainda por traduzir. Antes de continuar, reparar dois testes do CI441 (333/335; restauro não executado); CI442–444 ainda em execução. Gates339/restauro nativos pendentes. C08/C10 e inventário estático415 não fechados por associação.
+
+## Histórico funcional — TASK444 / recuperação do arquivo antigo
 
 `cw-field-recovery.js`: aviso de registos antigos e botão de guardar cópia em PT/EN/FR/ES/DE, duas entradas/dez textos. Contagem e nós capturados; idioma não consulta IndexedDB nem exporta/envia. Filtro de conta/role, leituras, projeção/exportação binária e nome do ficheiro originais preservados byte a byte. Cache229/runner338. [Prova444](evidence/20260929_task444_local.json).
 

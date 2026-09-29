@@ -1,9 +1,28 @@
 (function () {
   'use strict';
   const store = window.CWFieldWriteStore;
+  const languages = ['pt', 'en', 'fr', 'es', 'de'];
+  const messages = {
+    session: ['A sessão mudou. Reabra a página com a conta original.', 'The session changed. Reopen the page with the original account.', 'La session a changé. Rouvrez la page avec le compte d’origine.', 'La sesión cambió. Abra la página con la cuenta original.', 'Die Sitzung wurde geändert. Öffnen Sie die Seite mit dem ursprünglichen Konto erneut.'],
+    unreadable: ['Arquivo de fotografias ilegível. Preserve os dados.', 'The photograph archive cannot be read. Preserve the data.', 'L’archive de photographies est illisible. Conservez les données.', 'No se puede leer el archivo de fotografías. Conserve los datos.', 'Das Fotoarchiv kann nicht gelesen werden. Bewahren Sie die Daten auf.'],
+    preserved: ['A sessão mudou. As fotografias foram preservadas.', 'The session changed. The photographs were preserved.', 'La session a changé. Les photographies ont été conservées.', 'La sesión cambió. Las fotografías se han conservado.', 'Die Sitzung wurde geändert. Die Fotos bleiben erhalten.'],
+    history: ['Existem fotografias antigas sem conta confirmada. Os ficheiros foram preservados; peça revisão ao escritório antes de enviar.', 'There are older photographs without a confirmed account. The files were preserved; ask the office to review them before sending.', 'Des photographies anciennes n’ont pas de compte confirmé. Les fichiers ont été conservés ; demandez une vérification au bureau avant de les envoyer.', 'Hay fotografías antiguas sin una cuenta confirmada. Los archivos se han conservado; pida una revisión a la oficina antes de enviarlos.', 'Es gibt ältere Fotos ohne bestätigtes Konto. Die Dateien bleiben erhalten; bitten Sie das Büro vor dem Senden um Prüfung.'],
+    file: ['Escolha uma fotografia até 25 MB.', 'Choose a photograph up to 25 MB.', 'Choisissez une photographie de 25 Mo maximum.', 'Elija una fotografía de hasta 25 MB.', 'Wählen Sie ein Foto mit höchstens 25 MB.'],
+    visit: ['A fotografia pertence a outra visita. Preserve o envio.', 'The photograph belongs to another visit. Preserve the submission.', 'La photographie appartient à une autre visite. Conservez l’envoi.', 'La fotografía pertenece a otra visita. Conserve el envío.', 'Das Foto gehört zu einem anderen Besuch. Bewahren Sie die Sendung auf.'],
+    remove: ['Esta fotografia já foi confirmada ou pertence a outra visita. Peça revisão ao escritório.', 'This photograph has already been confirmed or belongs to another visit. Ask the office to review it.', 'Cette photographie a déjà été confirmée ou appartient à une autre visite. Demandez une vérification au bureau.', 'Esta fotografía ya se ha confirmado o pertenece a otra visita. Pida una revisión a la oficina.', 'Dieses Foto wurde bereits bestätigt oder gehört zu einem anderen Besuch. Bitten Sie das Büro um Prüfung.'],
+  };
+  // Only errors created here carry presentation copy. Persisted/server errors stay literal,
+  // even if their message happens to match. The original Error.message remains unchanged.
+  const errors = new WeakMap();
+  function problem(key) {
+    const error = Error(messages[key][0]);
+    errors.set(error, Object.freeze(Object.fromEntries(languages.map((language, index) => [language, messages[key][index]]))));
+    return error;
+  }
+  const errorCopy = error => errors.get(error);
   const scope = type => type === 'EXTRA' ? 'EXTRA_VISIT_PHOTO' : 'VISIT_PHOTO';
   async function assertHistory(captured = store.session()) {
-    if (!store.same(captured)) throw Error('A sessão mudou. Reabra a página com a conta original.');
+    if (!store.same(captured)) throw problem('session');
     // Older records have only a numeric identity, not the authenticated principal type.
     const rows = await new Promise((resolve, reject) => {
       const open = indexedDB.open('cw-field-media', 1);
@@ -11,17 +30,17 @@
       open.onerror = () => reject(open.error);
       open.onsuccess = () => {
         const db = open.result;
-        if (!db.objectStoreNames.contains('photos')) { db.close(); reject(Error('Arquivo de fotografias ilegível. Preserve os dados.')); return; }
+        if (!db.objectStoreNames.contains('photos')) { db.close(); reject(problem('unreadable')); return; }
         const tx = db.transaction('photos'), read = tx.objectStore('photos').getAll();
         read.onsuccess = () => { db.close(); resolve(read.result); }; read.onerror = () => { db.close(); reject(read.error); };
       };
     });
-    if (!store.same(captured)) throw Error('A sessão mudou. As fotografias foram preservadas.');
-    if (rows.some(row => !row.owner || row.owner === 'none' || String(row.owner) === String(captured.technicianId))) throw Error('Existem fotografias antigas sem conta confirmada. Os ficheiros foram preservados; peça revisão ao escritório antes de enviar.');
+    if (!store.same(captured)) throw problem('preserved');
+    if (rows.some(row => !row.owner || row.owner === 'none' || String(row.owner) === String(captured.technicianId))) throw problem('history');
   }
   async function save(visitId, photo, captured = store.session(), visitType = 'REGULAR') {
     await assertHistory(captured);
-    if (!(photo.file instanceof Blob) || !photo.file.size || photo.file.size > 25 * 1024 * 1024) throw Error('Escolha uma fotografia até 25 MB.');
+    if (!(photo.file instanceof Blob) || !photo.file.size || photo.file.size > 25 * 1024 * 1024) throw problem('file');
     const payload = { type: photo.type || 'AFTER', size: photo.file.size, sha256: await store.digest(await photo.file.arrayBuffer()), ...(visitType === 'EXTRA' ? {poolId:photo.poolId} : {}) };
     return store.prepare(scope(visitType), Number(visitId), payload, { requestId: photo.localId, file: photo.file, fileName: photo.fileName, label: 'Fotografia da visita ' + visitId }, captured);
   }
@@ -37,12 +56,12 @@
   async function send(visitId, localId, captured = store.session(), options = {}, visitType = 'REGULAR') {
     await assertHistory(captured);
     const row = await store.get(localId, captured);
-    if (row.scope !== scope(visitType) || row.resourceId !== Number(visitId)) throw Error('A fotografia pertence a outra visita. Preserve o envio.');
+    if (row.scope !== scope(visitType) || row.resourceId !== Number(visitId)) throw problem('visit');
     return store.send(localId, captured, options);
   }
   async function remove(visitId, localId, captured = store.session(), visitType = 'REGULAR') {
     const row = await store.get(localId, captured);
-    if (row.scope !== scope(visitType) || row.resourceId !== Number(visitId) || row.response) throw Error('Esta fotografia já foi confirmada ou pertence a outra visita. Peça revisão ao escritório.');
+    if (row.scope !== scope(visitType) || row.resourceId !== Number(visitId) || row.response) throw problem('remove');
     return store.remove(localId, captured);
   }
   async function sync(visitId, captured = store.session(), options = {}, visitType = 'REGULAR') {
@@ -50,5 +69,5 @@
     for (const row of await store.records(scope(visitType), captured)) if (row.resourceId === Number(visitId)) await store.send(row.requestId, captured, options);
   }
   async function pendingSummary(captured = store.session()) { await assertHistory(captured); return (await store.records(null, captured)).filter(row=>['VISIT_PHOTO','EXTRA_VISIT_PHOTO'].includes(row.scope)).map(row => ({ visitId: row.resourceId, visitType:row.scope === 'EXTRA_VISIT_PHOTO' ? 'EXTRA' : 'REGULAR' })); }
-  window.CWFieldPhotos = { save, remove, list, sync, send, pendingSummary, assertHistory };
+  window.CWFieldPhotos = { save, remove, list, sync, send, pendingSummary, assertHistory, errorCopy };
 })();
