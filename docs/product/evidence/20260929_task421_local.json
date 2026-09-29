@@ -192,13 +192,14 @@
     "ci": {
       "run": 36530531859,
       "job": 109282983732,
-      "status": "in_progress",
-      "conclusion": null,
-      "passedSteps": 4,
+      "status": "completed",
+      "conclusion": "success",
+      "passedSteps": 18,
       "expectedOrderedGroups": 321,
-      "restoration": "pending",
-      "checkedAt": "2026-09-29T06:21:17.128Z",
-      "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36530531859"
+      "passedOrderedGroups": 321,
+      "exactOrder": true,
+      "failedOrderedGroups": [],
+      "restoration": "2026-09-29T07:12:11.4077665Z PASS restored 128 tables and 47 uploaded files; database rows and file hashes match"
     }
   },
   "remaining": "TASK422: legacy visit-draft copy; then route-preview and shared chrome/store messages. C06 remains in execution. C04 remains accepted at version414; C09 report DE is separate.",
@@ -220,5 +221,22 @@
     "scripts/test-field-suite.js",
     "docs/product/evidence/20260929_task421_local.json",
     "scripts/test-field-internal-alert-languages.js"
-  ]
+  ],
+  "nativeVerification": {
+    "task": "TASK421",
+    "commit": "a1e693222ac7ee4b5775ff9016d307cb6d86ce24",
+    "run": 36530531859,
+    "job": 109282983732,
+    "status": "completed",
+    "conclusion": "success",
+    "successfulSteps": 18,
+    "groups": 321,
+    "passed": 321,
+    "unique": 321,
+    "exactOrder": true,
+    "failures": [],
+    "restoration": "2026-09-29T07:12:11.4077665Z PASS restored 128 tables and 47 uploaded files; database rows and file hashes match",
+    "orderedResultsEvidence": "20260929_correction_verification.json: native.421.results"
+  },
+  "nativeAcceptance": "Confirmed from completed GitHub job and decoded job log:321 unique groups in exact committed runner order, all code0/signalnull,18 successful steps and matching restoration of128 tables/47 files. Does not approve later versions422/423; no separate artifact-specific JSON claim."
 }

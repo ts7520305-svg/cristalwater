@@ -1,0 +1,189 @@
+{
+  "task": "TASK423",
+  "date": "2026-09-29",
+  "baseCommit": "615a324c62bbffb02753b00fa6127d43270f2ec1",
+  "scope": "C06: presentation of the legacy technician proximity-preview component. Only technician.html loads cw-field-route-preview.js; cache references are not additional consumers. Five source/test files and five documentation/evidence files.",
+  "reproduction": {
+    "baseline": [
+      {
+        "script": "scripts/test-field-route-preview.js",
+        "code": 0,
+        "ms": 1421
+      },
+      {
+        "script": "scripts/test-field-route-preview-ui.js",
+        "code": 0,
+        "ms": 7223
+      }
+    ],
+    "probe": {
+      "script": "../qa/probe-route-language.cjs",
+      "code": 1,
+      "ms": 4340
+    },
+    "failure": "Real selector sets English but preview heading, calculation button and status remain Portuguese. Independent Proximity suggestion assertion fails before implementation and passes afterwards.",
+    "firstLanguageRun": [
+      {
+        "script": "../qa/probe-route-language.cjs",
+        "code": 0,
+        "ms": 5647
+      },
+      {
+        "script": "scripts/test-field-route-preview-languages.js",
+        "code": 1,
+        "ms": 44924
+      }
+    ],
+    "testRepair": "First language run passed content/GPS/response matrices then timed out waiting for global networkidle after a service-worker offline navigation. New test now waits for the actual online route-node replacement, completed sync and original saved notes; no production behavior, timeout or original regression assertion was changed."
+  },
+  "nativePrerequisite": {
+    "task": "TASK421",
+    "commit": "a1e693222ac7ee4b5775ff9016d307cb6d86ce24",
+    "run": 36530531859,
+    "job": 109282983732,
+    "status": "completed",
+    "conclusion": "success",
+    "successfulSteps": 18,
+    "groups": 321,
+    "passed": 321,
+    "unique": 321,
+    "exactOrder": true,
+    "failures": [],
+    "restoration": "2026-09-29T07:12:11.4077665Z PASS restored 128 tables and 47 uploaded files; database rows and file hashes match"
+  },
+  "implementation": {
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "newKeys": 26,
+    "newValues": 130,
+    "catalogueKeys": 186,
+    "catalogueValues": 930,
+    "cache": 214,
+    "runner": 323,
+    "copy": "Heading, caveat about straight-line distances, day label, actions, lookup/GPS/network/session/error states, fallback visit label, navigation label, missing coordinates, singular/plural and checked-at timestamp have explicit descriptors. Timestamp represents the original accepted response and only its display locale changes.",
+    "literal": "Pool/client names, ids, coordinates, chosen ISO day, URLs and source server/browser error text remain original. The date input is native: browser/device locale controls its visible date format; its ISO value is never rewritten.",
+    "preserved": "GET-only endpoint, query and auth, geographic validation and timeouts, three response headers, unique visit/technician ids, planned/unstarted rules, cancellation/revision guards, operational visit order/current visit, draft fields/storage and focus. Language changes do not recalculate, acquire GPS, rewrite storage, rebuild the list or initiate operational HTTP.",
+    "schemaOrDependenciesChanged": false
+  },
+  "validation": {
+    "environment": "Isolated PGlite with real Express/Prisma and Chromium; external notifications disabled. New language fixture suppresses only the unrelated15s autosync; original UI group runs unmodified.",
+    "integrated": [
+      {
+        "script": "scripts/test-field-route-preview-languages.js",
+        "code": 0,
+        "ms": 42155
+      },
+      {
+        "script": "scripts/test-field-route-preview.js",
+        "code": 0,
+        "ms": 1453
+      },
+      {
+        "script": "scripts/test-field-route-preview-ui.js",
+        "code": 0,
+        "ms": 7560
+      },
+      {
+        "script": "scripts/test-field-legacy-page-languages.js",
+        "code": 0,
+        "ms": 16673
+      },
+      {
+        "script": "scripts/test-field-legacy-draft-languages.js",
+        "code": 0,
+        "ms": 30503
+      }
+    ],
+    "visualProbe": [
+      {
+        "script": "../qa/probe-route-language-controls.cjs",
+        "code": 0,
+        "ms": 6461
+      }
+    ],
+    "unitTests": 1332,
+    "unitFiles": 136,
+    "technicianTests": 4,
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44
+    },
+    "nodeCheckAndDiffCheck": true,
+    "browserMarkers": [
+      "PASS five languages at320/390/1440: literal pool/client names, unchanged preview order/links/day/timestamp, stable nodes and focus, reachable controls, unchanged operational route/draft/storage and no locale-triggered GPS or HTTP",
+      "PASS selected day, singular and empty routes, missing date, denied/unavailable/failed/invalid/stale GPS in five languages; every failure leaves drafts and SQL untouched",
+      "PASS literal long server error, missing server message, abort rejection and eight mismatched response variants stay truthful and block stale results in five languages",
+      "PASS language changes during GPS/HTTP waits, late GPS after day change, close-focus return, in-flight offline cancellation and service-worker offline reload; no stale result is painted",
+      "PASS changed account rejects the late response, clears private form and keeps stored evidence; original SQL visits unchanged, zero operational writes/audits and no script injection"
+    ],
+    "matrix": "Five languages x320/390/1440 for plural/singular/empty preview and literal long error. Five languages at320 for missing day, denied/failed/invalid/stale/unavailable GPS, GPS/HTTP waits, missing server message, abort rejection, eight response mismatches, offline/reload, late GPS, close and late response after account change. Every active-form language cycle checks stable nodes/focus/caret, field values, guards, dates/URLs/timestamp descriptors, operational order, storage bytes and request/GPS counts.",
+    "mismatches": [
+      "wrong day header",
+      "wrong mode header",
+      "wrong technician header",
+      "duplicate visit id",
+      "started visit",
+      "finished visit",
+      "wrong row owner",
+      "non-array response"
+    ],
+    "abortLimit": "AbortError display is tested by injecting the browser rejection; existing20s timer is unchanged. Real in-flight cancellation is exercised through offline/close/account change. GPS platform error is simulated; no physical device or real permission-dialog claim.",
+    "database": "All seeded SQL visits remain deeply equal, zero visit audit rows and no operational writes. Original API regression retains native date/profile validation and full projection protections; native323-group gate still required.",
+    "visual": "Inspected German320 summary/list and separately scrolled action controls. Text wraps, both action labels remain complete; all buttons/links are hit-tested after scroll in the matrix and original normal-click regression passes. Native date formatting and shared Portuguese navigation remain outside this owned-copy acceptance.",
+    "limits": "No full C06/C08 acceptance, physical GPS test, universal theme/device review or approval of native422/423. Current422 run is still in progress. Source error evidence remains literal."
+  },
+  "files": {
+    "frontend/cw-field-route-preview.js": "2b8c28345a4e4889eebc079ca9b492bbfd8f13552ba3dd6e50c44b5542d97026",
+    "frontend/cw-legacy-technician-copy.js": "76b260ccc6bc7df0e52c4b344131da04b7c26794ceecbe5f636f769a8f8d605a",
+    "frontend/sw.js": "733efcfa8c2c0388eddc877310ea629f67d337d71b008cf7a19f0d802012b081",
+    "scripts/test-field-suite.js": "6f50749eabf0099f684d11f34dd8d0ae7edf216ed11c2880c0b6eaba51a3f6de",
+    "scripts/test-field-route-preview-languages.js": "3bec9b81e8ea63d902b0d37977facc90e37463bd6340d77b648877987b2b0ceb"
+  },
+  "logHashes": {
+    "task423-before.log": "242ae102da8c9cfa0672dea512dc0316533e6f044b3151dfe8b0b53f07192ad2",
+    "task423-language-first.log": "65707c696fec22e701111f0ae6844456fb0f6c4d636e6aca0752a08dea86f2f7",
+    "task423-final-regressions.log": "b7dcdde9c6ca7fde1a9eee8fbddc230a7f723f7827b200dff42c66cb068674ca",
+    "task423-controls.log": "1caf69a1cac95d2a01ef1556729c2c67bf94d588fb7d6c5e4e31181982d78c43",
+    "task423-unit.log": "1e987ce206c0f575baba1288bed8488ae102d6a38b1a5cb4222569fa1a535871",
+    "task423-technician.log": "281b35da3fd31f6d64486bdf4a0b4a5cfcc9a60f51d2105e0c96d05f090fb3a8",
+    "task423-syntax.log": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4",
+    "native421-confirmed.json": "ba67d85f0ba2965af5fa29f3ce57bdb833c923329fcd70e7bbd078a23fd2c8c8"
+  },
+  "screenshots": {
+    "reports/field-ui/ROUTE_PREVIEW_LANGUAGES_SUMMARY_DE_320.png": "0afb4e1db9596d7e4ba9f115baa534ae23b43abb6d54902690d18cefe83be697",
+    "reports/field-ui/ROUTE_PREVIEW_LANGUAGES_CONTROLS_DE_320.png": "a02d8550675277e2f5ea956e48c678eade6984e88ab13a3d688a80113c3bf9d4"
+  },
+  "publication": {
+    "status": "local_validated",
+    "branch": "work/field-readiness-20260915-simulation",
+    "ci": {
+      "status": "not_started",
+      "expectedOrderedGroups": 323,
+      "restoration": "pending"
+    }
+  },
+  "previousNative": {
+    "task": "TASK422",
+    "commit": "22d72fa26da3370169f1306179184fb3096a260d",
+    "run": 36534583004,
+    "job": 109295609200,
+    "status": "in_progress",
+    "successfulSteps": 10,
+    "expectedOrderedGroups": 322,
+    "restoration": "pending"
+  },
+  "remaining": "TASK424: shared write-store messages (C06-006), with original persisted failures and receipts intact. Shared navigation/shell remain C08-025/C08-026 and require their own scoped review; other inventory entries are not implicitly closed.",
+  "counts": {
+    "total": 32,
+    "notStarted": 26,
+    "inProgress": 1,
+    "completed": 5
+  },
+  "authorization": "Authorized work branch only. No merge, VPS deployment or real contacts; annual legal contract deferred."
+}

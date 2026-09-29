@@ -149,6 +149,7 @@ scripts.push('test-field-visit-report.js','test-field-report-opening-ui.js');
 scripts.push('test-field-report-history-review.js');
 scripts.push('test-field-route-preview.js');
 scripts.push('test-field-route-preview-ui.js');
+scripts.push('test-field-route-preview-languages.js');
 scripts.push('test-field-legacy-route-recovery.js');
 scripts.push('test-field-legacy-visit-drafts.js');
 scripts.push('test-field-legacy-draft-languages.js');
