@@ -85,11 +85,28 @@
     contextChanged();
   }
   function clearConfirmed(){write(blank());state=null;opened=false;show(draft);}
+  const summaryMessages={
+    unlinked:['sem associação','unlinked','sans association','sin asociación','ohne Zuordnung'],
+    pending:['Visita {visit} — ocorrência por confirmar. Abra Mais → Extras / problemas{blocked}.','Visit {visit} — problem report awaiting confirmation. Open More → Extras / problems{blocked}.','Visite {visit} — signalement à confirmer. Ouvrez Plus → Extras / problèmes{blocked}.','Visita {visit} — incidencia pendiente de confirmación. Abra Más → Extras / problemas{blocked}.','Besuch {visit} — Problemmeldung wartet auf Bestätigung. Öffnen Sie Mehr → Extras / Probleme{blocked}.'],
+    blocked:['; confirme o contexto com o escritório','; confirm the context with the office','; confirmez le contexte avec le bureau','; confirme el contexto con la oficina','; klären Sie den Kontext mit dem Büro'],
+    unsaved:['A ocorrência não ficou guardada. Conserve o texto em Mais → Extras / problemas.','The problem report was not saved. Keep the text in More → Extras / problems.','Le signalement n’a pas été enregistré. Conservez le texte dans Plus → Extras / problèmes.','La incidencia no se ha guardado. Conserve el texto en Más → Extras / problemas.','Die Problemmeldung wurde nicht gespeichert. Bewahren Sie den Text unter Mehr → Extras / Probleme auf.'],
+    draft:['Visita {visit} — rascunho de ocorrência por enviar em Mais → Extras / problemas.','Visit {visit} — problem report draft awaiting submission in More → Extras / problems.','Visite {visit} — brouillon de signalement à envoyer dans Plus → Extras / problèmes.','Visita {visit} — borrador de incidencia pendiente de envío en Más → Extras / problemas.','Besuch {visit} — Problemmeldungsentwurf wartet auf Versand unter Mehr → Extras / Probleme.'],
+    legacy:['Há registos antigos de ocorrências sem conta confirmada neste dispositivo. Foram preservados; peça revisão ao escritório. Não serão enviados automaticamente.','There are old problem reports without a confirmed account on this device. They have been preserved; ask the office to review them. They will not be sent automatically.','Des signalements anciens sans compte confirmé sont présents sur cet appareil. Ils ont été conservés ; demandez leur vérification au bureau. Ils ne seront pas envoyés automatiquement.','Hay incidencias antiguas sin cuenta confirmada en este dispositivo. Se han conservado; solicite su revisión a la oficina. No se enviarán automáticamente.','Es gibt alte Problemmeldungen ohne bestätigtes Konto auf diesem Gerät. Sie wurden aufbewahrt; bitten Sie das Büro um Prüfung. Sie werden nicht automatisch gesendet.'],
+    legacyUnreadable:['O histórico antigo não pôde ser lido. Preserve os dados e peça revisão ao escritório.','The old history could not be read. Preserve the data and ask the office to review it.','L’ancien historique n’a pas pu être lu. Conservez les données et demandez leur vérification au bureau.','No se ha podido leer el historial antiguo. Conserve los datos y solicite su revisión a la oficina.','Der alte Verlauf konnte nicht gelesen werden. Bewahren Sie die Daten auf und bitten Sie das Büro um Prüfung.']
+  };
+  function summaryItem(kind,key,parameters={}){
+    const reviewText=Object.freeze(Object.fromEntries(['pt','en','fr','es','de'].map((language,index)=>{
+      const values={...parameters,visit:key==='pending'?(parameters.visit||summaryMessages.unlinked[index]):parameters.visit,blocked:parameters.blocked?summaryMessages.blocked[index]:''};
+      return [language,summaryMessages[key][index].replace(/\{(\w+)\}/g,(_,name)=>String(values[name]))];
+    })));
+    // Preserve the Portuguese JSON contract; only captured strings reach the review.
+    const item={kind,text:reviewText.pt};Object.defineProperty(item,'reviewText',{value:reviewText});return item;
+  }
   async function pendingSummary(){
     requireActive();const saved=read(), rows=await store.records(scope,captured,true);requireActive();const items=[];
-    for(const row of rows.filter(row=>!row.response))items.push({kind:'pending',text:`Visita ${row.payload.visitId || 'sem associação'} — ocorrência por confirmar. Abra Mais → Extras / problemas${row.failure?.blocked?'; confirme o contexto com o escritório':''}.`});
-    if((unsaved||hasContent(saved))&&!rows.some(row=>row.requestId===saved.requestId||!row.response&&samePayload(row.payload,saved)))items.push({kind:'pending',text:unsaved?'A ocorrência não ficou guardada. Conserve o texto em Mais → Extras / problemas.':`Visita ${saved.visitId} — rascunho de ocorrência por enviar em Mais → Extras / problemas.`});
-    legacyNotice();if(legacy.textContent)items.push({kind:'unknown',text:legacy.textContent});
+    for(const row of rows.filter(row=>!row.response))items.push(summaryItem('pending','pending',{visit:row.payload.visitId,blocked:row.failure?.blocked}));
+    if((unsaved||hasContent(saved))&&!rows.some(row=>row.requestId===saved.requestId||!row.response&&samePayload(row.payload,saved)))items.push(summaryItem('pending',unsaved?'unsaved':'draft',{visit:saved.visitId}));
+    legacyNotice();if(legacy.textContent)items.push(summaryItem('unknown',legacy.textContent===summaryMessages.legacy[0]?'legacy':'legacyUnreadable'));
     return items;
   }
   async function send(){

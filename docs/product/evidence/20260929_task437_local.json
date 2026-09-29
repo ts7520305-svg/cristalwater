@@ -1,0 +1,280 @@
+{
+  "task": "TASK437",
+  "date": "2026-09-29",
+  "branch": "work/field-readiness-20260915-simulation",
+  "baseCommit": "7c6c091fceeec7522b0751fa2f8f36554a819b3c",
+  "status": "local_validated_publication_blocked_pending_repository_privacy",
+  "scope": {
+    "responsibility": "Capture problem-report summaries in five languages for the existing day-review consumer, preserving Portuguese JSON and original operational data",
+    "files": [
+      "frontend/cw-field-problem-report.js",
+      "frontend/sw.js",
+      "scripts/test-field-suite.js",
+      "scripts/test-field-review-problem-languages.js",
+      "docs/product/CURRENT_WORK_CHECKPOINT.md",
+      "docs/product/COMPLETION_PLAN_20260928.md",
+      "docs/product/LANGUAGE_INVENTORY_20260928.md",
+      "docs/product/evidence/20260929_task437_local.json"
+    ],
+    "fileCount": 8,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "summaryMessageEntries": 7,
+    "presentationStrings": 35,
+    "cache": 222,
+    "runnerGroups": 331,
+    "formBannerAndOperationalMessagesTranslated": false,
+    "consumerChanged": false,
+    "writeStoreChanged": false,
+    "serverCodeChanged": false,
+    "schemaChanged": false,
+    "sessionProtectionChanged": false,
+    "timeoutsIncreased": false,
+    "retriesAdded": false
+  },
+  "before": {
+    "script": "test-field-review-problem-languages.js",
+    "code": 1,
+    "signal": null,
+    "ms": 6811,
+    "timedOut": false,
+    "expectedFailure": true,
+    "symptom": "English day review still displays the Portuguese occurrence draft summary.",
+    "assertion": "en: missing problem report draft awaiting submission",
+    "actualFragment": "Visita 1 — rascunho de ocorrência por enviar em Mais → Extras / problemas."
+  },
+  "browserGroups": [
+    {
+      "script": "test-field-review-problem-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 34502,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-problem-reports-ui.js",
+      "code": 0,
+      "signal": null,
+      "ms": 32483,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-problem-reports.js",
+      "code": 0,
+      "signal": null,
+      "ms": 5844,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-review-equipment-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 22434,
+      "timedOut": false
+    }
+  ],
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 251202,
+      "log": "gate-syntax.log"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 30804,
+      "log": "gate-unit.log"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 2327,
+      "log": "gate-technician.log"
+    }
+  ],
+  "counts": {
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44
+    },
+    "unit": {
+      "passed": 1356,
+      "files": 138,
+      "failed": 0
+    },
+    "technician": {
+      "passed": 4,
+      "failed": 0
+    },
+    "nodeChecks": 4,
+    "diffCheck": true
+  },
+  "coverage": {
+    "realFormFourFields": true,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "originalPortugueseEnumerableJsonPreserved": true,
+    "nonEnumerableImmutableReviewText": true,
+    "nodesFocusAndReviewTimePreserved": true,
+    "draftAndLegacyBytesPreserved": true,
+    "requestUuidPayloadHashFailurePreserved": true,
+    "noProducerReadsOrOperationalRequestsOnLocaleChange": true,
+    "quotaPreservesUnsavedInputAndOriginalSavedBytes": true,
+    "realFormWithIntercepted403BlockedResponse": true,
+    "matchingPendingRequestSuppressesDraft": true,
+    "unlinkedContextProjection": true,
+    "validAndUnreadableLegacyPreserved": true,
+    "heldSummaryUsesCurrentLanguage": true,
+    "silentLocaleChange": true,
+    "offlineReloadCurrentCache": true,
+    "corruptDraftPreservedAndReviewIncomplete": true,
+    "explicitRetryCreatesOneRepairOneNotificationOneAudit": true,
+    "confirmedDraftExcluded": true,
+    "visitUnchanged": true,
+    "accountChangeRefusesCapturedSummary": true,
+    "literalMarkupAndTemplateTokens": true,
+    "pageErrors": 0
+  },
+  "preservation": {
+    "prefixIncludingDraftFormAndSessionLogicByteIdentical": true,
+    "suffixIncludingSendRecoveryAndStartupByteIdentical": true,
+    "sourceBeforeSHA256": "142e5b9db07ee06ce7aa5296e21ce5a4ce355bd86b2a8d939b6350360c51e755",
+    "sourceAfterSHA256": "67b2fe98039bada667644000575bd1fe240a61ad9319846ebfe794ee08da0093",
+    "runner": {
+      "before": 330,
+      "after": 331,
+      "unique": true,
+      "previousOrderPreserved": true
+    }
+  },
+  "visual": {
+    "reviewed": "reports/field-ui/REVIEW_PROBLEMS_DE_320.png",
+    "locale": "de",
+    "width": 320,
+    "observation": "Long pending and legacy messages wrap within their panels; original pool markup remains literal. Shared bottom navigation remains outside this task.",
+    "limit": "Not acceptance of the occurrence form, every field screen or all navigation translations."
+  },
+  "environment": {
+    "database": "Isolated PGlite 0.5.8 / pglite-socket 0.2.11",
+    "browser": "Chromium153.0.0 via @sparticuz/chromium",
+    "schema": "Generated from current Prisma schema",
+    "externalContactsEnabled": false,
+    "backgroundJobsEnabled": false,
+    "productionDataUsed": false,
+    "browserTestIntervalsDisabledMs": [
+      15000,
+      30000,
+      60000
+    ],
+    "sessionProtectionIntervalsPreserved": true,
+    "nativePostgres16UpgradeFull331SuiteOrRestoreValidatedInThisTask": false
+  },
+  "privacy": {
+    "repository": "ts7520305-svg/cristalwater",
+    "lastApiObservationTask": "TASK436",
+    "lastObservedAt": "2026-09-29T15:29:49.141Z",
+    "privateAtLastObservation": false,
+    "visibilityAtLastObservation": "public",
+    "recheckedThisTask": false,
+    "lastBrowserObservationTask": "TASK435",
+    "lastBrowserState": "Repository settings page was unauthenticated.",
+    "changeApplied": false,
+    "applicationOrVpsAccessAudited": false,
+    "billingPlanBudgetOrNameChanged": false
+  },
+  "publication": {
+    "publicBaseCommit": "b2d51e445a18d3c0456197b73f90cb1363f6aa18",
+    "TASK434LocalCommit": "4f1538a8e638f177978b4935262365db25efd892",
+    "TASK435LocalCommit": "553c4027b7bb9b32fde4c0fc87d8fd90df9551a5",
+    "TASK436LocalCommit": "7c6c091fceeec7522b0751fa2f8f36554a819b3c",
+    "TASK434To436Published": false,
+    "TASK437Committed": false,
+    "TASK437Published": false,
+    "merged": false,
+    "deployed": false,
+    "nativeRun": null,
+    "condition": "Resolve privacy before publication, then require 331 exact groups and restore of 128 tables / 47 files for the final revision.",
+    "previousNativeEvidence": "20260929_task434_local.json; historical TASK431/433 passes do not accept TASK434–437."
+  },
+  "next": {
+    "completionCounts": {
+      "notStarted": 26,
+      "inProgress": 1,
+      "completed": 5,
+      "total": 32
+    },
+    "C06Closed": false,
+    "C06_003Closed": false,
+    "remaining": [
+      "problem-report form and own status/recovery messages",
+      "impediment form/banner messages",
+      "equipment form/queue/time/material messages",
+      "remaining handover/receipt panels",
+      "other C06 inventory sources"
+    ],
+    "sharedNavigationAllocation": "C08-025/026",
+    "annualContractDeferred": true
+  },
+  "logDigests": [
+    {
+      "name": "run-1790698152244/test-field-review-problem-languages.js.log",
+      "bytes": 851,
+      "sha256": "185e184cbf68fcc81003ac0176b0db082fd46e4600bcb0ab7285a9b992c871f2"
+    },
+    {
+      "name": "run-1790698235824/test-field-review-problem-languages.js.log",
+      "bytes": 530,
+      "sha256": "0e26979397c40e1b301343305a22d677f8e62d77768f05bedd75dc37ca98f88d"
+    },
+    {
+      "name": "run-1790698235824/test-field-problem-reports-ui.js.log",
+      "bytes": 791,
+      "sha256": "f32b968a5170da3ff4adaf97fc84fcd1166b3ff864dfafd127dba7a268db4cef"
+    },
+    {
+      "name": "run-1790698235824/test-field-problem-reports.js.log",
+      "bytes": 502,
+      "sha256": "a054e55ddba92e8f2ed37209a7c00f4eb6176ec914848882e914cd01d657fad8"
+    },
+    {
+      "name": "run-1790698235824/test-field-review-equipment-languages.js.log",
+      "bytes": 608,
+      "sha256": "b55d21770b21fb3339e661474694c7b0b79dc72c015462012cf63b0ab77fca52"
+    },
+    {
+      "name": "gate-syntax.log",
+      "bytes": 257,
+      "sha256": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4"
+    },
+    {
+      "name": "gate-unit.log",
+      "bytes": 400,
+      "sha256": "82d82ac3751c377ace63dad8d2d6fda30cc8e0ed08bf3d86a18905b57efb4f5c"
+    },
+    {
+      "name": "gate-technician.log",
+      "bytes": 431,
+      "sha256": "0b444c15848e842f52947f5601cfff2a598096f9af7a444d781dca71569ce280"
+    }
+  ]
+}

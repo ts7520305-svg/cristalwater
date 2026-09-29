@@ -8,7 +8,15 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
-## Progresso funcional — TASK436 / resumos de equipamento
+## Progresso funcional — TASK437 / resumos de ocorrências
+
+`cw-field-problem-report.js` captura textos PT/EN/FR/ES/DE para rascunho por enviar, ocorrência por confirmar/bloqueada, falha ao guardar e avisos de histórico antigo válido/ilegível, incluindo contexto sem associação. Sete entradas/35 textos. JSON `{kind,text}` português conservado; fotografia adicional imutável e não enumerável. A revisão existente escolhe o idioma sem reler o produtor nem alterar dados. Cache222/runner331; [prova437](evidence/20260929_task437_local.json).
+
+Novo grupo e três regressões aprovados: formulário real/quatro campos, cinco idiomas/320/390/1440, quota com texto não guardado preservado, pedido bloqueado, histórico válido/ilegível, resposta retida, mudança silenciosa, offline/cache, rascunho ilegível, confirmação explícita única e troca de conta. Dados/UUID/payload/hash/nós/foco/hora conservados; nenhuma escrita operacional por mudar idioma. Captura alemã320 revista. Sintaxe, 1 356 unitários e quatro técnicos aprovados. Publicação pendente da privacidade; PGlite não substitui suite331/restauro nativo.
+
+**Âmbito parcial:** formulário e mensagens próprias de estado/recuperação de ocorrências continuam por localizar, sendo o próximo lote. Mantêm-se pendentes formulários/banners de impedimentos/equipamento e painéis de passagem/receção. C06 e C06-003 abertas; chrome/nav C08-025/026. Contagens estáticas TASK415 não recalculadas; histórico abaixo conserva o âmbito à data.
+
+## Histórico funcional — TASK436 / resumos de equipamento
 
 `field-equipment-maintenance.js` fornece textos capturados em PT/EN/FR/ES/DE para rascunhos guardados, revisões por confirmar (incluindo pedidos bloqueados) e revisões recusadas. Os rótulos REGULAR/EXTRA traduzem-se mantendo a identidade do tipo; títulos e mensagens do servidor permanecem literais. Seis entradas/30 textos. O consumidor existente escolhe o idioma sem reler o produtor; o JSON `{kind,text}` conserva o português anterior. Propriedade adicional não enumerável e imutável, sem alterar os registos persistidos. Cache221/runner330; [prova436](evidence/20260929_task436_local.json).
 
