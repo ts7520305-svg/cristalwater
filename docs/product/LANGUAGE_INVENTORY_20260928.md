@@ -8,7 +8,13 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
-## Progresso funcional — TASK432 / C06-003
+## Progresso funcional — TASK433 / resumos da revisão
+
+Material (`cw-field-stock-request.js`) e rascunhos de trabalho (`cw-field-visit-drafts.js`) fornecem textos capturados nos cinco idiomas ao consumidor `cw-field-day-review.js`. Alterar idioma conserva a fotografia de dados, a hora, a identidade dos nós e o contrato JSON anterior; não invoca novamente os produtores. Catálogos existentes inalterados. Cache219/runner328; [prova433](evidence/20260929_task433_local.json).
+
+Continuam pendentes os resumos de impedimentos, equipamento e ocorrências e os painéis posteriores de passagem/receção. C06 permanece aberta. O histórico abaixo descreve os limites de cada lote à data; as contagens estáticas TASK415 não foram recalculadas.
+
+## Histórico funcional — TASK432 / C06-003
 
 Mensagens **próprias da revisão diária** de `cw-field-day-review.js`: 42 entradas PT/EN/FR/ES/DE; identidade dos avisos, dados literais e hora da revisão preservados na mudança de idioma. Ensaios de idioma/layout/estado assíncrono/offline locais e gates nativos constam da [prova432](evidence/20260929_task432_local.json). Cache218, runner327. Não reclassifica as contagens estáticas da base TASK415.
 

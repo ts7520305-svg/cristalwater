@@ -67,12 +67,18 @@
   };
   const bindings = new WeakMap(), errors = new WeakMap(), entryErrors = new WeakMap();
   const copy = (key, params = {}) => ({key,params});
-  function text(value) {
+  function text(value,selectedLanguage = document.documentElement.lang || 'pt') {
     if (!value || typeof value !== 'object') return String(value ?? '');
-    if (value.store) return store.message(value.store);
-    const language = String(document.documentElement.lang || 'pt').toLowerCase().split('-')[0];
+    if (value.store) return store.message(value.store,selectedLanguage);
+    const language = String(selectedLanguage).toLowerCase().split('-')[0];
     const index = Math.max(0,['pt','en','fr','es','de'].indexOf(language));
-    return messages[value.key][index].replace(/\{(\w+)\}/g,(_,key)=>text(value.params[key]));
+    return messages[value.key][index].replace(/\{(\w+)\}/g,(_,key)=>text(value.params[key],selectedLanguage));
+  }
+  // Non-enumerable presentation snapshot keeps the existing {kind,text} JSON contract.
+  function summaryItem(kind,value) {
+    const item = {kind,text:text(value)};
+    Object.defineProperty(item,'reviewText',{value:Object.freeze(Object.fromEntries(['pt','en','fr','es','de'].map(language=>[language,text(value,language)])))});
+    return item;
   }
   function paintCopy(node, attribute, value) {
     const rendered = text(value);
@@ -285,9 +291,9 @@
       for(const [key,draft] of Object.entries(drafts)){
         const entry=[...entries.values()].find(item=>item.key===key);const meta=draft._draft;
         if(meta?.mode==='WORK'&&rows.some(row=>row.resourceId===meta.visitId&&row.scope===(meta.visitType==='EXTRA'?'EXTRA_VISIT_COMPLETION':'VISIT_COMPLETION')))continue;
-        if(!meta||Object.keys(meta.conflicts||{}).length||fields.some(id=>!sameField(id,flatten(draft)[id],meta.baseline?.[id])))items.push({kind:'pending',text:text(copy('summaryPending',{name:entry?.name || key}))});
+        if(!meta||Object.keys(meta.conflicts||{}).length||fields.some(id=>!sameField(id,flatten(draft)[id],meta.baseline?.[id])))items.push(summaryItem('pending',copy('summaryPending',{name:entry?.name || key})));
       }
-      for(const entry of entries.values())if(entry.pending||entry.error||entry.external)items.push({kind:'unknown',text:text(copy('summaryUnknown',{name:entry.name}))});
+      for(const entry of entries.values())if(entry.pending||entry.error||entry.external)items.push(summaryItem('unknown',copy('summaryUnknown',{name:entry.name})));
       return items;
     }
     return {bind,save,prepare,acceptCorrection,paint,read,expand:entry=>expand(entry.fields,entry.original),pendingSummary};

@@ -1,0 +1,162 @@
+{
+  "task": "TASK433",
+  "date": "2026-09-29",
+  "branch": "work/field-readiness-20260915-simulation",
+  "baseCommit": "63e31a2208b14ded37aec051863ab82e98707797",
+  "status": "locally_validated_publication_pending",
+  "scope": {
+    "responsibility": "Repaint captured material and work-draft summaries in the selected language without reading or changing operational state",
+    "inventory": [
+      "C06-003 review consumer",
+      "C06 material and modern work-draft summary producers"
+    ],
+    "files": [
+      "frontend/cw-field-day-review.js",
+      "frontend/cw-field-stock-request.js",
+      "frontend/cw-field-visit-drafts.js",
+      "frontend/sw.js",
+      "scripts/test-field-review-summary-languages.js",
+      "scripts/test-field-suite.js",
+      "docs/product/CURRENT_WORK_CHECKPOINT.md",
+      "docs/product/COMPLETION_PLAN_20260928.md",
+      "docs/product/LANGUAGE_INVENTORY_20260928.md",
+      "docs/product/evidence/20260929_task433_local.json"
+    ],
+    "fileCount": 10,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "cache": 219,
+    "runnerGroups": 328,
+    "original327GroupOrderPreserved": true,
+    "existingCataloguesByteIdentical": true,
+    "dayReviewLaterPanelsByteIdentical": true,
+    "stockSendAndRecoverySuffixByteIdentical": true
+  },
+  "before": {
+    "script": "test-field-review-summary-languages.js",
+    "code": 1,
+    "ms": 7338,
+    "failure": "Switching the actual selector from Portuguese to English changed review headings while material draft, work draft and old-alert warning stayed Portuguese. Browser assertion failed on the captured English material summary.",
+    "logSha256": "9be18a5ef316699395927904bdf3bf0da5ba7454a06e706ceb93cf77e2196f60"
+  },
+  "implementation": {
+    "producerContract": "An optional non-enumerable, non-writable reviewText property contains a frozen map of five strings rendered from the same captured values. Enumerated keys and JSON stay exactly kind/text. The existing text string still uses the current language.",
+    "consumer": "Copies the complete five-string presentation map once into a private binding. Repaint only selects a captured string. No callback, provider read, storage read, write or operational network request is used to change language. Incomplete/invalid opt-in maps and legacy plain items retain their literal text.",
+    "coverage": "Material drafts, pending/blocked requests, unsaved-copy branch and legacy warnings; modern work drafts and pending/error/external-state warnings. Formatting helpers now pass the selected language through nested owned descriptors and store-message formatting. Existing catalogues, payloads, queue logic, persistence and session guards remain intact."
+  },
+  "local": {
+    "unit": {
+      "passed": 1356,
+      "files": 138,
+      "durationSeconds": 44.98
+    },
+    "technician": {
+      "passed": 4,
+      "files": 1
+    },
+    "syntax": {
+      "status": "passed",
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44,
+      "additionalScripts": [
+        "test-field-review-summary-languages.js",
+        "test-field-suite.js"
+      ]
+    },
+    "browser": [
+      {
+        "script": "scripts/test-field-review-summary-languages.js",
+        "code": 0,
+        "ms": 29244
+      },
+      {
+        "script": "scripts/test-field-day-review-languages.js",
+        "code": 0,
+        "ms": 14835
+      },
+      {
+        "script": "scripts/test-field-stock-request-languages.js",
+        "code": 0,
+        "ms": 40020
+      },
+      {
+        "script": "scripts/test-field-modern-visit-draft-languages.js",
+        "code": 0,
+        "ms": 40436
+      }
+    ],
+    "newBrowserAssertions": [
+      "Real material/work draft summaries and old-alert warning update through the actual picker in five languages at320/390/1440px; silent preference also repaints.",
+      "Nodes, focus, original review/route stamp, raw drafts, account, full queued records, UUID, payload, digest and blocked failure are unchanged.",
+      "Producer call counts and all operational request counts are unchanged during language cycles.",
+      "Public enumerable and JSON shape unchanged; captured five-language map frozen and property non-writable/non-enumerable.",
+      "Literal pool name containing markup and translation-key syntax remains text; incomplete opt-in map falls back to literal text.",
+      "Actual failed stock request produces a blocked queue row; real storage quota failure preserves the old draft and adds the unsaved-work warning.",
+      "A held producer response captured in Portuguese renders in the current language after release, while button and aria-busy stay occupied.",
+      "Token change while the producer is held refuses its captured rows; restored session reviews safely again.",
+      "Offline reload rebuilds translations from the same saved drafts/queue and current service-worker cache; zero page errors or markup execution."
+    ],
+    "visual": {
+      "file": "reports/field-ui/REVIEW_SUMMARIES_DE_320.png",
+      "reviewed": true,
+      "result": "German material summary and heading wrap within320px; the original HTML-like name remains visible literal text."
+    },
+    "fixtureNotes": [
+      "Background15s/30s polling is disabled only in the isolated snapshot fixture, following the existing modern-draft language fixture; production polling and60s review invalidation are unchanged.",
+      "Before the blocked-request phase ran, its independent expected wording was corrected to the existing catalogue phrase about confirming context; no application translation or assertion strength changed."
+    ],
+    "browserLogSha256": "1ff0f390b077a04dd0d04ebaae5e253b009a2977f0a20f35955493d58a662534",
+    "sha256": {
+      "frontend/cw-field-day-review.js": "1cb4187944382fd57a4d1dddb6693c572379cb0acbde6fe907ff43a43078c466",
+      "frontend/cw-field-stock-request.js": "c5f404da2f06bfa3f276efcb431a1ba5e10e796fe22fd0cde89922b0275717e1",
+      "frontend/cw-field-visit-drafts.js": "74f4207ef05c28afe6dee72ad678a1f02c25388c12d52e59dd256e32e465478e",
+      "frontend/sw.js": "70c1577f58d9056dd3520288cb078ab0a8b481a3db3c524f33dede2297b6c99a",
+      "scripts/test-field-review-summary-languages.js": "2d07a1eae5e3faa99a4a8559d944e49f6974640d8ad5beb85390be1f812eb508",
+      "scripts/test-field-suite.js": "a1acaa87b958adbf1661957f10ca46827b87bb6dea82398c0a31593946db2a1a"
+    }
+  },
+  "native431": {
+    "runId": 36563570810,
+    "jobId": 109389979085,
+    "status": "in_progress",
+    "successfulSteps": 10,
+    "suite": "running",
+    "restoration": "pending"
+  },
+  "native432": {
+    "runId": 36566598638,
+    "jobId": 109399933877,
+    "status": "in_progress",
+    "successfulSteps": 10,
+    "suite": "running",
+    "restoration": "pending"
+  },
+  "historicalNative430": {
+    "runId": 36559737364,
+    "jobId": 109377434265,
+    "status": "success",
+    "groups": 326,
+    "restoredTables": 128,
+    "restoredFiles": 47,
+    "proof": "20260929_task432_local.json",
+    "appliesTo433": false
+  },
+  "nativeGateFor433": {
+    "status": "not_started",
+    "expectedGroups": 328,
+    "order": "Exact unique original327 groups plus review-summary-languages immediately after day-review-languages",
+    "restoration": "128 tables/47 uploaded files, matching database rows and file hashes"
+  },
+  "limits": [
+    "Only the already localized material and modern work-draft producers adopt the presentation snapshot in this batch. Incomplete-visit, equipment and problem-report summaries remain pending, as do later day-review panels.",
+    "C06 remains in progress;32 tasks:26 not started,1 in progress,5 complete.",
+    "Local browser database is isolated PGlite; native PostgreSQL and restoration remain separate gates.",
+    "No merge, deployment, real contacts/messages or automation changes; annual contract remains deferred."
+  ]
+}

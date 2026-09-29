@@ -74,12 +74,18 @@
   };
   const bindings=new Map(), errors=new WeakMap();
   const copy=(key,params={})=>({key,params});
-  function text(value){
+  function text(value,selectedLanguage=document.documentElement.lang||'pt'){
     if(!value||typeof value!=='object')return String(value??'');
-    if(value.store)return store.message(value.store);
-    const language=String(document.documentElement.lang||'pt').toLowerCase().split('-')[0];
+    if(value.store)return store.message(value.store,selectedLanguage);
+    const language=String(selectedLanguage).toLowerCase().split('-')[0];
     const index=Math.max(0,['pt','en','fr','es','de'].indexOf(language));
-    return messages[value.key][index].replace(/\{(\w+)\}/g,(_,key)=>text(value.params[key]));
+    return messages[value.key][index].replace(/\{(\w+)\}/g,(_,key)=>text(value.params[key],selectedLanguage));
+  }
+  // Capture only presentation strings. Locale changes must not read current records again.
+  function summaryItem(kind,value){
+    const item={kind,text:text(value)};
+    Object.defineProperty(item,'reviewText',{value:Object.freeze(Object.fromEntries(['pt','en','fr','es','de'].map(language=>[language,text(value,language)])))});
+    return item;
   }
   function paint(node,attribute,value){
     const rendered=text(value);
@@ -168,9 +174,9 @@
   function clearConfirmed(){write(blank());state=null;show(draft);}
   async function pendingSummary(){
     requireActive();const saved=read(), rows=await store.records(scope,captured,true);requireActive();const items=[];
-    for(const row of rows.filter(row=>!row.response))items.push({kind:'pending',text:text(copy('summaryPending',{id:row.payload.visitId||copy('unassociated'),detail:row.failure?.blocked?copy('summaryBlocked'):''}))});
-    if((unsaved||hasContent(saved))&&!rows.some(row=>row.requestId===saved.requestId||!row.response&&samePayload(row.payload,saved)))items.push({kind:'pending',text:text(unsaved?copy('summaryUnsaved'):copy('summaryDraft',{id:saved.visitId}))});
-    legacyNotice();if(legacy.textContent)items.push({kind:'unknown',text:legacy.textContent});
+    for(const row of rows.filter(row=>!row.response))items.push(summaryItem('pending',copy('summaryPending',{id:row.payload.visitId||copy('unassociated'),detail:row.failure?.blocked?copy('summaryBlocked'):''})));
+    if((unsaved||hasContent(saved))&&!rows.some(row=>row.requestId===saved.requestId||!row.response&&samePayload(row.payload,saved)))items.push(summaryItem('pending',unsaved?copy('summaryUnsaved'):copy('summaryDraft',{id:saved.visitId})));
+    legacyNotice();if(legacy.textContent)items.push(summaryItem('unknown',bindings.get(legacy)?.get('textContent')??legacy.textContent));
     return items;
   }
   async function send(){

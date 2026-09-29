@@ -1,5 +1,17 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 29/09/2026, TASK433 validada localmente / resumos capturados da revisão
+
+**TASK433 / C06:** resumos de material e rascunhos de trabalho acompanham agora a mudança de idioma da revisão já apresentada. Reprodução anterior7 338ms: títulos em inglês, mas estes resumos e o aviso de alertas antigos permaneciam em português. [Prova433](evidence/20260929_task433_local.json).
+
+**Correção delimitada:** os dois produtores capturam cinco textos numa propriedade opcional, imutável e não enumerável; `{kind,text}` e o JSON existentes permanecem iguais. A revisão guarda uma cópia dos textos e só escolhe o idioma. Não relê produtores/dados, não atualiza a hora da revisão nem altera dados operacionais. Itens antigos ou mapas incompletos conservam texto literal. Catálogos de tradução existentes, envio/recuperação de material e painéis posteriores da revisão byte a byte. Cache219/runner328, ordem anterior preservada.
+
+**Validação local:**1 356 unitários/138 ficheiros e quatro técnicos aprovados. Novo navegador29 244ms, revisão própria14 835ms e material40 020ms aprovados; rascunhos modernos40 436ms também aprovados. Quatro grupos de navegador e sintaxe695 backend/308 frontend/44 inline aprovados; os dois scripts alterados também passaram node-check. Cinco idiomas/320/390/1440: nós/foco/hora/bytes/registos/UUID/payload/hash preservados, sem novas consultas nem pedidos operacionais. Pedido de material bloqueado, quota do rascunho, resposta capturada antes da mudança de idioma, recusa após troca de token, offline/reload e texto literal com markup cobertos. Captura alemã320px revista. Dez ficheiros incluindo quatro de documentação.
+
+**Gates e limites:** CI431/432 continuam em execução após dez etapas aprovadas; nenhum novo erro nessa consulta. Sucesso430 é histórico e não aceita433. Exigir328 grupos exatos/restauro128 tabelas47 ficheiros no CI433. Ainda faltam os produtores de impedimentos, equipamento e ocorrências, e os restantes painéis da revisão; C06 não fica encerrada.
+
+**Próximo TASK434:** confirmar gates e tratar qualquer falha; depois localizar o resumo de impedimentos e integrá-lo na captura da revisão, mantendo texto do servidor, identidade e dados. Chrome/nav C08-025/026.32 tarefas=26 por iniciar/1 em execução/5 concluídas. Sem merge/deploy/contactos reais; contrato anual adiado. Entradas abaixo são históricas.
+
 ## Retoma atual — 29/09/2026, TASK432 publicada / revisão diária em cinco idiomas
 
 **TASK432 publicada / C06-003:** mensagens próprias da revisão diária localizadas em PT/EN/FR/ES/DE: água aberta, bomba manual, trabalho regular/extra, envios, fotografias, rascunhos, cadastros, avisos de revisão incompleta e datas. 42 entradas. Nomes, notas, erros do servidor e resumos externos conservam o texto original. Descritores privados não acrescentam campos aos resultados públicos. [Prova432](evidence/20260929_task432_local.json).

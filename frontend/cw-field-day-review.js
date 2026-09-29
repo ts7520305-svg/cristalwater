@@ -52,11 +52,21 @@
   function text(value, language = 'pt') {
     if (!value || typeof value !== 'object' || !descriptors.has(value)) return String(value ?? '');
     const index = Math.max(0,languages.indexOf(String(language).toLowerCase().split('-')[0]));
+    if (value.translations) return value.translations[languages[index]];
     if ('date' in value) return new Date(value.date)[value.timeOnly ? 'toLocaleTimeString' : 'toLocaleString'](locales[index]);
     return messages[value.key][index].replace(/\{(\w+)\}/g,(_,key)=>text(value.params[key],language));
   }
   function reviewItem(kind, value, language) {
     const item = {kind, text:text(value,language)}; itemCopies.set(item,value); return item;
+  }
+  function externalReviewItem(item) {
+    const values = item && Object.hasOwn(item,'reviewText') ? item.reviewText : null;
+    if (values && languages.every(language=>typeof values[language] === 'string')) {
+      // Copy strings once; neither producer callbacks nor mutable records survive in the binding.
+      const value = {translations:Object.freeze(Object.fromEntries(languages.map(language=>[language,values[language]])))};
+      descriptors.add(value);itemCopies.set(item,value);
+    }
+    return item;
   }
   function mergeReminders(local, remote, pump = false) {
     const transferred = remote.filter(row=>row.transferredAway);
@@ -176,16 +186,16 @@
       const outbox = Object.fromEntries(completions.map(row => [row.scope+':'+row.resourceId, { visitId: row.resourceId, visitType:row.scope.startsWith('EXTRA_') ? 'EXTRA' : 'REGULAR', scope:row.scope, blocked: row.failure?.blocked, rejected:row.response?.applied===false ? row.response.message : null }]));
       if (Object.keys(read(`cwFieldVisitDrafts:${requestedOwner}`)).length) verificationErrors.push(copy('legacyDrafts'));
       const items = buildReview({ snapshot, water, pumps, outbox, drafts: window.CWFieldDraftSnapshot ? window.CWFieldDraftSnapshot() : {}, photos, online: navigator.onLine, verificationErrors },language());
-      for(const item of await window.CWFieldIncomplete?.pendingSummary?.()||[])items.push(item);
-      for(const item of await window.CWFieldEquipment?.pendingSummary?.()||[])items.push(item);
-      for(const item of await window.CWFieldStockRequest?.pendingSummary?.()||[])items.push(item);
-      for(const item of await window.CWFieldProblemReport?.pendingSummary?.()||[])items.push(item);
+      for(const item of await window.CWFieldIncomplete?.pendingSummary?.()||[])items.push(externalReviewItem(item));
+      for(const item of await window.CWFieldEquipment?.pendingSummary?.()||[])items.push(externalReviewItem(item));
+      for(const item of await window.CWFieldStockRequest?.pendingSummary?.()||[])items.push(externalReviewItem(item));
+      for(const item of await window.CWFieldProblemReport?.pendingSummary?.()||[])items.push(externalReviewItem(item));
       const intakeSession=window.CWFieldWriteStore.session(),intakes=await window.CWFieldWriteStore.records('FIELD_CLIENT_INTAKE',intakeSession,true);
       for(const row of intakes.filter(row=>!row.response))items.push(reviewItem('pending',copy('intakePending',{name:row.payload.clientName}),language()));
       const intakeRaw=localStorage.getItem('cwFieldIntakeDraft:'+intakeSession.owner);
       if(intakeRaw){let draft;try{draft=JSON.parse(intakeRaw);}catch(_){throw Error('Rascunho de cadastro ilegível. Preserve os dados.');}const keys=['clientName','phone','email','address','zone','poolName','poolType','volumeM3','latitude','longitude','notes'];if(!draft||Object.keys(draft).length!==14||Object.keys(draft).some(k=>!['v','owner','requestId',...keys].includes(k))||draft.v!==1||draft.owner!==intakeSession.owner||keys.some(k=>typeof draft[k]!=='string')||draft.requestId!==null&&!/^[0-9a-f-]{36}$/i.test(draft.requestId)||draft.requestId&&!intakes.some(row=>row.requestId===draft.requestId))throw Error('Rascunho de cadastro inválido. Preserve os dados.');if(keys.some(k=>draft[k]!=='')&&!intakes.some(row=>row.requestId===draft.requestId))items.push(reviewItem('pending',copy('intakeDraft'),language()));}
       for(const draft of await window.CWExtraVisitCorrection?.pendingDrafts?.()||[])items.push(reviewItem('pending',copy('correctionDraft',{name:draft.name}),language()));
-      for(const item of await window.CWFieldDraftSummary?.()||[])items.push(item);
+      for(const item of await window.CWFieldDraftSummary?.()||[])items.push(externalReviewItem(item));
       if(revision!==requestedRevision||owner()!==requestedOwner||token!==window.CristalAuth?.getToken?.())return;
       bindings.delete(result);result.removeAttribute('data-cw-day-review-copy');result.replaceChildren();
       const title = document.createElement('p');
