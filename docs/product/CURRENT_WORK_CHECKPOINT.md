@@ -1,8 +1,8 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 29/09/2026, TASK430 validada localmente / limite do executor de testes
+## Retoma atual — 29/09/2026, TASK430 publicada / limite do executor de testes
 
-**TASK430 pronta para publicação na branch autorizada.** CI427 foi cancelado aos70min:286/325 resultados exatos,285 aprovados e uma falha de networkidle já tratada em429. Após `expense-valuations`, o grupo seguinte `expense-valuations-ui` ficou sem resultado durante19m24s. Restauro ignorado. **CI428 confirmado:326 grupos únicos na ordem exata e restauro128 tabelas/47 ficheiros, linhas/hashes iguais.** Logs nativos completos lidos; [prova430](evidence/20260929_task430_local.json).
+**TASK430 publicada na branch autorizada.** CI427 foi cancelado aos70min:286/325 resultados exatos,285 aprovados e uma falha de networkidle já tratada em429. Após `expense-valuations`, o grupo seguinte `expense-valuations-ui` ficou sem resultado durante19m24s. Restauro ignorado. **CI428 confirmado:326 grupos únicos na ordem exata e restauro128 tabelas/47 ficheiros, linhas/hashes iguais.** Logs nativos completos lidos; [prova430](evidence/20260929_task430_local.json).
 
 **Diagnóstico e limite da prova:**o executor antigo mata só o processo principal e espera close, que depende dos pipes herdados. Reprodução com processos reais: principal morto, descendente vivo e close bloqueado; terminar o descendente liberta a espera. A fixture de despesas herda stderr. O ZIP nativo devolveu403 na transferência: não se conhece a instrução interna que primeiro bloqueou nem se alega captura dos descritores do CI. O mesmo teste de despesas, sem alterações, passou no CI428 e localmente.
 
@@ -11,6 +11,8 @@
 **Validação430:**quatro novos testes de processos aprovados;1 349 unitários/138 ficheiros aprovados. Três grupos reais sob o novo supervisor: despesas API12 728ms, despesas UI24 219ms e cobertura financeira8 474ms, todos aprovados. Logs tardios de stderr, saída7, falhas de arranque/ficheiro, timeout, descendentes e continuação cobertos. Primeiro ensaio corrigiu só a deteção de processos do teste (/proc indisponível para PID vivo); prova final usa kill(pid,0) e não relaxa limites. node-check dos dois scripts/diff-check aprovados. Seis ficheiros: três código/testes e três documentação. Caminho Windows não executado nesta validação Linux.
 
 **Gates:**TASK429 continua em execução após dez etapas aprovadas. TASK430 exige326 grupos/restauro próprios; sucesso428 não aceita o novo supervisor. CI427 permanece cancelado/incompleto; CI426 permanece historicamente falhado. C06 não foi encerrada por associação.
+
+**Publicação430:**commit `aecb9e19debeb4957c72fe3c2bf5342e840eba20`, árvore `56155a52ebcf9e7ee338df60de85ea5605b09a40`; igualdade local/remota e checkout limpo confirmados. [CI36559737364](https://github.com/ts7520305-svg/cristalwater/actions/runs/36559737364), job109377434265, em execução; seis etapas aprovadas na primeira consulta. Confirmação documental [skip ci];326 grupos/restauro próprios continuam pendentes.
 
 **Próximo TASK431:**confirmar CI429/430 e tratar qualquer falha ainda emitida; depois retomar C06 por fonte do inventário, incluindo revisão diária/consumidores pendentes. Chrome/nav continua C08-025/026.32 tarefas=26 por iniciar/1 em execução/5 concluídas. Sem merge/deploy/contactos reais; contrato anual adiado. Entradas abaixo são históricas.
 

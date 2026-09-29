@@ -3,7 +3,7 @@
   "date": "2026-09-29",
   "branch": "work/field-readiness-20260915-simulation",
   "baseCommit": "edb5a2abf8f0ffcb753e7b39b449a526210364b8",
-  "status": "local_validation_passed_publication_pending",
+  "status": "published_native_validation_pending",
   "scope": {
     "responsibility": "Bounded field-suite process supervision and failure reporting",
     "files": 6,
@@ -4127,5 +4127,16 @@
     "inProgress": 1,
     "complete": 5
   },
-  "next": "Confirm native429/430 and inspect any remaining failed group first; then continue C06 source inventory. No merge/deploy/real contacts; annual legal contract deferred."
+  "next": "Confirm native429/430 and inspect any remaining failed group first; then continue C06 source inventory. No merge/deploy/real contacts; annual legal contract deferred.",
+  "publication": {
+    "commit": "aecb9e19debeb4957c72fe3c2bf5342e840eba20",
+    "tree": "56155a52ebcf9e7ee338df60de85ea5605b09a40",
+    "runId": 36559737364,
+    "jobId": 109377434265,
+    "status": "in_progress",
+    "successfulSteps": 6,
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36559737364",
+    "localRemoteTreeEqual": true,
+    "cleanAfterCodeImport": true
+  }
 }

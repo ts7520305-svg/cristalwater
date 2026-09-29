@@ -4,7 +4,7 @@ Data: 28/09/2026. Preparado na TASK402 a partir da revisão global, do checkpoin
 
 ## Contagem e regra de fecho
 
-**32 tarefas de conclusão identificadas: C01–C32.** Estado após TASK430 local / publicação pendente: **26 por iniciar, uma em execução (C06), cinco concluídas (C01–C05)**. CI428 confirmado:326 grupos exatos/restauro128/47. CI427 cancelado após286 resultados; bloqueio de close por descendente reproduzido. TASK430 corrige supervisão/logs, mantendo120s/70min, ordem326 e gates.1 349 unitários e três integrações aprovados. CI429 em execução;430 exige326 grupos/restauro próprios. [Prova430](evidence/20260929_task430_local.json).
+**32 tarefas de conclusão identificadas: C01–C32.** Estado após TASK430 publicada / CI pendente: **26 por iniciar, uma em execução (C06), cinco concluídas (C01–C05)**. CI428 confirmado:326 grupos exatos/restauro128/47. CI427 cancelado após286 resultados; bloqueio de close por descendente reproduzido. TASK430 corrige supervisão/logs, mantendo120s/70min, ordem326 e gates.1 349 unitários e três integrações aprovados. CI429 em execução;430 exige326 grupos/restauro próprios. [Prova430](evidence/20260929_task430_local.json).
 
 Uma tarefa pode ter preparação, implementação local e validação externa em momentos diferentes. Só passa a **Concluída** quando cumpre o critério e tem evidência ligada. **Implementada / CI pendente** não equivale a validação nativa nem a instalação no VPS. Cada lote de código mantém uma responsabilidade, até dez ficheiros, teste da falha/resultado e documentação.
 
@@ -157,3 +157,5 @@ As indicações de sprint/validação de julho são históricas. O utilizador pe
 - TASK427:falha nativa424 de identidade após reload offline reproduzida com leitura real retida. Só o teste passa a aguardar pageshow/leituras/rota; asserções e limites preservados. Três grupos integrados aprovados, quatro ficheiros, runner325/cache216 inalterados. CI325/restauro próprios pendentes. [Prova427](evidence/20260929_task427_local.json).
 
 **Publicação TASK427:**`3eed386567d4fa0b26c1498e34f2ae152d53cfc6`, árvore `07f2855584285ab0ba102bc30c6b9d8a7a1452d3`; CI36549439362/job109343707374 em execução, exige325 grupos/restauro.425/426 continuam em execução;424 permanece historicamente falhado.
+
+**Publicação TASK430:**`aecb9e19debeb4957c72fe3c2bf5342e840eba20`, árvore `56155a52ebcf9e7ee338df60de85ea5605b09a40`; CI36559737364/job109377434265 em execução, seis etapas aprovadas.326 grupos/restauro próprios pendentes. CI428 confirmado326/restauro128/47;427 permanece cancelado. Próximo431: gates e restantes fontes C06.
