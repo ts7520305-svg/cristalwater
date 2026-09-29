@@ -79,6 +79,34 @@
   window.addEventListener('online',()=>{void select(true);void sync();});window.addEventListener('pageshow',()=>sync());
   window.addEventListener('storage',()=>{if(state&&!store.same(state.captured)){state=null;message='Sessão alterada. Reabra a página.';}void render();});
   setInterval(()=>{void render();void sync();},15000);
-  async function pendingSummary(){const captured=store.session();if(!captured)throw Error('Sessão alterada');const rows=await store.records(scope,captured,true);const items=rows.filter(r=>!r.response||r.response.applied===false&&!r.reviewedAt).map(row=>({kind:'pending',text:`${row.label} — ${row.response?.message||'impedimento por confirmar no escritório'}.`}));if(legacy(captured))items.push({kind:'unknown',text:'Impedimentos antigos por reconciliar com o escritório.'});for(let i=0;i<localStorage.length;i++){const name=localStorage.key(i);if(name.startsWith(`cwIncompleteV2:${captured.owner}:${scope}:`)){const value=JSON.parse(localStorage.getItem(name));if(value?.values?.incompleteNextStep)items.push({kind:'pending',text:`Visita ${value.context.visitType==='EXTRA'?'extra ':''}#${value.context.id} — rascunho de impedimento guardado.`});}}return items;}
+  const summaryMessages={
+    pending:['{label} — impedimento por confirmar no escritório.','{label} — impediment awaiting confirmation by the office.','{label} — empêchement à confirmer par le bureau.','{label} — impedimento pendiente de confirmación por la oficina.','{label} — Besuchshinderung wartet auf Bestätigung durch das Büro.'],
+    receipt:['{label} — {message}.','{label} — {message}.','{label} — {message}.','{label} — {message}.','{label} — {message}.'],
+    legacy:['Impedimentos antigos por reconciliar com o escritório.','Old impediments awaiting reconciliation with the office.','Anciens empêchements à rapprocher avec le bureau.','Impedimentos antiguos pendientes de conciliación con la oficina.','Alte Besuchshinderungen müssen mit dem Büro abgeglichen werden.'],
+    regularDraft:['Visita #{id} — rascunho de impedimento guardado.','Visit #{id} — impediment draft saved.','Visite n°{id} — brouillon d’empêchement enregistré.','Visita #{id} — borrador de impedimento guardado.','Besuch #{id} — Entwurf einer Besuchshinderung gespeichert.'],
+    extraDraft:['Visita extra #{id} — rascunho de impedimento guardado.','Extra visit #{id} — impediment draft saved.','Visite supplémentaire n°{id} — brouillon d’empêchement enregistré.','Visita extra #{id} — borrador de impedimento guardado.','Zusatzbesuch #{id} — Entwurf einer Besuchshinderung gespeichert.']
+  };
+  function summaryItem(kind,key,parameters={}){
+    const reviewText=Object.freeze(Object.fromEntries(['pt','en','fr','es','de'].map((language,index)=>[language,summaryMessages[key][index].replace(/\{(\w+)\}/g,(_,name)=>String(parameters[name]))])));
+    // Keep the existing Portuguese {kind,text} JSON; the review uses a private,
+    // immutable presentation snapshot without rereading records on locale changes.
+    const item={kind,text:reviewText.pt};
+    Object.defineProperty(item,'reviewText',{value:reviewText});
+    return item;
+  }
+  async function pendingSummary(){
+    const captured=store.session();if(!captured)throw Error('Sessão alterada');
+    const rows=await store.records(scope,captured,true);
+    const items=rows.filter(r=>!r.response||r.response.applied===false&&!r.reviewedAt).map(row=>summaryItem('pending',row.response?.message?'receipt':'pending',{label:row.label,message:row.response?.message}));
+    if(legacy(captured))items.push(summaryItem('unknown','legacy'));
+    for(let i=0;i<localStorage.length;i++){
+      const name=localStorage.key(i);
+      if(name.startsWith('cwIncompleteV2:'+captured.owner+':'+scope+':')){
+        const value=JSON.parse(localStorage.getItem(name));
+        if(value?.values?.incompleteNextStep)items.push(summaryItem('pending',value.context.visitType==='EXTRA'?'extraDraft':'regularDraft',{id:value.context.id}));
+      }
+    }
+    return items;
+  }
   window.CWFieldIncomplete={refresh:render,pendingSummary};void select();void sync();
 })();

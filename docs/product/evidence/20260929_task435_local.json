@@ -1,0 +1,294 @@
+{
+  "task": "TASK435",
+  "date": "2026-09-29",
+  "branch": "work/field-readiness-20260915-simulation",
+  "baseCommit": "4f1538a8e638f177978b4935262365db25efd892",
+  "status": "local_validated_publication_blocked_pending_repository_privacy",
+  "scope": {
+    "responsibility": "Capture impediment summaries in five languages for the existing day-review consumer while preserving data and the original JSON contract",
+    "files": [
+      "frontend/cw-field-incomplete.js",
+      "frontend/sw.js",
+      "scripts/test-field-suite.js",
+      "scripts/test-field-review-impediment-languages.js",
+      "docs/product/CURRENT_WORK_CHECKPOINT.md",
+      "docs/product/COMPLETION_PLAN_20260928.md",
+      "docs/product/LANGUAGE_INVENTORY_20260928.md",
+      "docs/product/evidence/20260929_task435_local.json"
+    ],
+    "fileCount": 8,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "summaryMessageEntries": 5,
+    "presentationStrings": 25,
+    "cache": 220,
+    "runnerGroups": 329,
+    "formBannerAndOperationalMessagesTranslated": false,
+    "consumerChanged": false,
+    "workflowChanged": false,
+    "writeStoreChanged": false,
+    "serverCodeChanged": false,
+    "schemaChanged": false,
+    "timeoutsIncreased": false,
+    "retriesAdded": false
+  },
+  "before": {
+    "script": "test-field-review-impediment-languages.js",
+    "code": 1,
+    "signal": null,
+    "ms": 6910,
+    "timedOut": false,
+    "expectedFailure": true,
+    "symptom": "The real review is in English but the REGULAR and EXTRA impediment drafts are still in Portuguese.",
+    "assertion": "en: missing Visit #1 — impediment draft saved.",
+    "actualFragments": [
+      "Visita #1 — rascunho de impedimento guardado.",
+      "Visita extra #1 — rascunho de impedimento guardado."
+    ]
+  },
+  "intermediateTestPreparation": {
+    "script": "test-field-review-impediment-languages.js",
+    "code": 1,
+    "signal": null,
+    "ms": 21739,
+    "timedOut": false,
+    "mainTranslationAndReceiptCasesPassed": true,
+    "failure": "The silent-locale assertion after restoring the previous token timed out; a downstream equipment producer deliberately stays closed after an account change.",
+    "source": "frontend/field-equipment-maintenance.js protect() and assertSession()",
+    "resolution": "Exercise account change last and assert that restoring a token does not reopen the equipment producer. Application protection and all time limits are unchanged."
+  },
+  "browserGroups": [
+    {
+      "script": "test-field-review-impediment-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 18197,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-extra-incomplete.js",
+      "code": 0,
+      "signal": null,
+      "ms": 23591,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-review-summary-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 20896,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-day-review-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 16800,
+      "timedOut": false
+    }
+  ],
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 242844,
+      "log": "gate-syntax.log"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 31939,
+      "log": "gate-unit.log"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 2517,
+      "log": "gate-technician.log"
+    }
+  ],
+  "counts": {
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44
+    },
+    "unit": {
+      "passed": 1356,
+      "failed": 0,
+      "files": 138
+    },
+    "technician": {
+      "passed": 4,
+      "failed": 0
+    },
+    "nodeChecks": 4,
+    "diffCheck": true
+  },
+  "coverage": {
+    "sameIdRegularAndExtra": true,
+    "realFormsAndDrafts": true,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "originalPortugueseEnumerableJsonPreserved": true,
+    "nonEnumerableImmutableReviewText": true,
+    "originalLabelsAndServerMessagesPreserved": true,
+    "nodesFocusAndReviewTimePreserved": true,
+    "draftAndContextBytesPreserved": true,
+    "requestUuidPayloadHashFailureAndReceiptPreserved": true,
+    "noProducerReadsOrOperationalRequestsOnLocaleChange": true,
+    "real503PendingRequest": true,
+    "realStaleRefusalReceipt": true,
+    "legacyWarning": true,
+    "resolvedAndReviewedReceiptsExcluded": true,
+    "literalMarkupAndTemplateTokens": true,
+    "heldSummaryUsesCurrentLanguage": true,
+    "silentLocaleChange": true,
+    "accountChangeRefusesCapturedSummary": true,
+    "equipmentRemainsClosedAfterTokenRestoration": true,
+    "offlineReload": true,
+    "currentCacheUsed": true,
+    "corruptDraftPreservedAndReviewIncomplete": true,
+    "exactlyOneRefusalStoredInDatabase": true,
+    "extraVisitUnchanged": true,
+    "pageErrors": 0
+  },
+  "preservation": {
+    "mainModuleBodyByteIdentical": true,
+    "exportsAndStartupByteIdentical": true,
+    "otherUnchangedFiles": [
+      "frontend/cw-field-day-review.js",
+      "frontend/cw-incomplete-workflow.js",
+      "frontend/cw-field-write-store.js",
+      "scripts/test-field-incident-center.js"
+    ],
+    "sourceBeforeSHA256": "556d231e86a3a79ae29189c248c7c25b8e87701134d777ef40c8b7a10747d41f",
+    "sourceAfterSHA256": "16a907aeee9ed5c4472da2b2de78cc35333006f3c59069e144a26f173d55d126",
+    "runner": {
+      "before": 328,
+      "after": 329,
+      "unique": true,
+      "previousOrderPreserved": true
+    }
+  },
+  "visual": {
+    "reviewed": "reports/field-ui/REVIEW_IMPEDIMENTS_DE_320.png",
+    "locale": "de",
+    "width": 320,
+    "observation": "Summary text wraps within the narrow panel. Stored labels and the Portuguese server refusal remain literal; lower content is reached by scrolling.",
+    "limit": "This is not acceptance of every field-module screen or the shared navigation translations."
+  },
+  "environment": {
+    "database": "Isolated PGlite 0.5.8 / pglite-socket 0.2.11",
+    "browser": "Chromium153.0.0 via @sparticuz/chromium",
+    "schema": "Generated from current Prisma schema",
+    "externalContactsEnabled": false,
+    "backgroundJobsEnabled": false,
+    "productionDataUsed": false,
+    "nativePostgres16OrRestoreValidatedInThisTask": false
+  },
+  "privacy": {
+    "repository": "ts7520305-svg/cristalwater",
+    "lastObservationDate": "2026-09-29",
+    "private": false,
+    "visibility": "public",
+    "browserState": "Repository settings still shows a logged-out page with Sign in after reload.",
+    "changeApplied": false,
+    "applicationOrVpsAccessAudited": false,
+    "billingPlanBudgetOrNameChanged": false
+  },
+  "publication": {
+    "TASK434LocalCommit": "4f1538a8e638f177978b4935262365db25efd892",
+    "TASK434Published": false,
+    "TASK435Committed": false,
+    "TASK435Published": false,
+    "merged": false,
+    "deployed": false,
+    "nativeRun": null,
+    "condition": "Resolve privacy before publication, then require 329 exact groups and restore of 128 tables / 47 files for the final revision.",
+    "previousNativeEvidence": "20260929_task434_local.json: TASK431 and TASK433 passed; TASK432 retains its historical incident-test failure."
+  },
+  "next": {
+    "completionCounts": {
+      "notStarted": 26,
+      "inProgress": 1,
+      "completed": 5,
+      "total": 32
+    },
+    "C06Closed": false,
+    "C06_003Closed": false,
+    "nextProducer": "equipment summary",
+    "remaining": [
+      "problem-report summary",
+      "impediment form/banner messages",
+      "remaining handover/receipt panels",
+      "other C06 inventory sources"
+    ],
+    "annualContractDeferred": true
+  },
+  "logDigests": [
+    {
+      "name": "run-1790694278612/test-field-review-impediment-languages.js.log",
+      "bytes": 998,
+      "sha256": "417cccd594c71ebd699500394d80bde4d264a9f0c75076440d52f7ca19fbd8bb"
+    },
+    {
+      "name": "run-1790694428408/test-field-review-impediment-languages.js.log",
+      "bytes": 525,
+      "sha256": "4642e729f9bfc3ccb0c879b90ae486d86f9f80bcff82889c6656ea9c491335e7"
+    },
+    {
+      "name": "run-1790694569200/test-field-review-impediment-languages.js.log",
+      "bytes": 685,
+      "sha256": "10a01b9624a58807fd35f2d2e21a8d6f247478e40ab9a757e645d4287c66b190"
+    },
+    {
+      "name": "run-1790694569200/test-field-extra-incomplete.js.log",
+      "bytes": 468,
+      "sha256": "41dfef56529d3e38d6c2f3d7f58c40f6569f154d554a60f532d97cb518d5540b"
+    },
+    {
+      "name": "run-1790694569200/test-field-review-summary-languages.js.log",
+      "bytes": 632,
+      "sha256": "f978bbf6bdf7e600a235d83031d7b744a70bcf311ff150266c94d57d234097f3"
+    },
+    {
+      "name": "run-1790694569200/test-field-day-review-languages.js.log",
+      "bytes": 465,
+      "sha256": "9c70cf6b38fccf431c9dab3c97968821e29815504dfdbb3c08247125ee08e18e"
+    },
+    {
+      "name": "gate-syntax.log",
+      "bytes": 257,
+      "sha256": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4"
+    },
+    {
+      "name": "gate-unit.log",
+      "bytes": 400,
+      "sha256": "529219106441497282e0d812b98e0fa7f0d90142a01fbf2ce81746ee0218e866"
+    },
+    {
+      "name": "gate-technician.log",
+      "bytes": 431,
+      "sha256": "be80826f3d96941a7a1231860ae58f70da15e719e7d6406c143c7fb284bff496"
+    }
+  ]
+}

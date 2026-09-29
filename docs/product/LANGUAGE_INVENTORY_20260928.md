@@ -8,7 +8,15 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
-## Progresso funcional — TASK433 / resumos da revisão
+## Progresso funcional — TASK435 / resumos de impedimentos
+
+`cw-field-incomplete.js` fornece textos capturados em PT/EN/FR/ES/DE para pedidos por confirmar, aviso antigo e rascunhos REGULAR/EXTRA. O consumidor da revisão diária já existente seleciona o idioma sem reler o produtor. O JSON `{kind,text}` conserva o português anterior e os rótulos/mensagens de origem mantêm-se literais. Uma propriedade não enumerável e imutável contém apenas os textos; não altera os registos persistidos. Cache220/runner329; [prova435](evidence/20260929_task435_local.json).
+
+Quatro grupos de navegador aprovados, incluindo formulário real, rascunhos de igual ID/tipos diferentes, pedido pendente, recusa do servidor, legado, resposta retida, troca de conta, offline/reload e bytes ilegíveis preservados. Mudança de idioma mantém nós/foco/hora/UUID/payload/hash/recibo e não faz pedidos operacionais. Captura alemã320 revista. Publicação pendente da privacidade; não se considera aceite nativamente.
+
+**Âmbito parcial:** formulário, banner, seleção, gravação/envio/sincronização e respetivas mensagens próprias dos impedimentos permanecem por localizar. Resumos de equipamento e ocorrências, além dos painéis de passagem/receção, também continuam pendentes. C06 e C06-003 permanecem abertas. As contagens estáticas TASK415 não foram recalculadas.
+
+## Histórico funcional — TASK433 / resumos da revisão
 
 Material (`cw-field-stock-request.js`) e rascunhos de trabalho (`cw-field-visit-drafts.js`) fornecem textos capturados nos cinco idiomas ao consumidor `cw-field-day-review.js`. Alterar idioma conserva a fotografia de dados, a hora, a identidade dos nós e o contrato JSON anterior; não invoca novamente os produtores. Catálogos existentes inalterados. Cache219/runner328; [prova433](evidence/20260929_task433_local.json).
 
