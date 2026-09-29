@@ -1,5 +1,17 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 29/09/2026, TASK443 local validada / revisão de clientes e piscinas
+
+**TASK443 / C06-004:** revisão administrativa dos cadastros em PT/EN/FR/ES/DE:41 entradas/205 textos, título/intro, contactos, dados em falta, estados, diálogo, aprovação/recuperação e erros próprios. A página não carregava o seletor: passa a incluir `cw-i18n.js`, com tradução automática protegida no body; o painel usa associações explícitas e os outros painéis/dados conservam a apresentação. C08 não é aceite por esta integração. [Prova443](evidence/20260929_task443_local.json).
+
+**Validação:** ausência do seletor reproduzida10 855ms; com motor e sem tradução, falha esperada3 642ms. Novo grupo13 037ms, cadastro UI19 327ms, API6 055ms e percurso de equipamento9 179ms aprovados. 1 356 unitários/138 ficheiros, quatro técnicos e sintaxe695/308/44 aprovados. Cinco idiomas/320/390/1440, dados literais/nós/foco/bytes preservados; cancelamento não escreve, quota não envia,403 literal, recusa real por alteração da ficha, revisão explícita, resposta real perdida/reload/reenvio exato com uma aprovação/auditoria. Dois recibos SQL (recusa+sucesso); cliente igual salvo ativação legítima, piscina já revista e faturas/visitas/stock conservados. Offline/vazio/atributo lang/troca de conta cobertos.
+
+**Preparação:** ensaio intermédio corrigido para exigir a mudança legítima do cliente para ACTIVE. Outro ensaio deixou a preferência DE no administrador partilhado, interferindo com o teste UI português; o novo teste usa agora administrador próprio. API devolveu401 em vez de503 nessa ronda; causa separada não estabelecida. Nova ronda isolada com os três grupos consecutivos passou, sem alterar aplicação/backend, testes anteriores, limites ou asserções. Prova contém os resultados históricos.
+
+**Preservação/limites:** sessão/guardas, payload, versão/piscinas, recuperação, validação e listeners originais conservados. Mensagens externas/recibos persistidos literais; erros próprios mantêm Error.message português. Cache228/runner337, ordem anterior conservada; backend/schema/workflow inalterados. Captura alemã320 revista dentro do contentor com scroll. PGlite/Chromium153 não substituem PostgreSQL16/upgrade/suite337/restauro128 tabelas47ficheiros. C06 e restantes painéis da página/C08 continuam abertos.
+
+**Publicação/retoma:** autorização para manter repositório público durante desenvolvimento e privado antes da conclusão/C32. CI441/442 ainda na suite após dez etapas aprovadas; publicar443 e confirmar gates próprios. Próximo:`cw-field-recovery.js`/C06-005, aviso/exportação de registos antigos; mensagens de `cw-field-photos.js` também por localizar. Nove ficheiros;32=26 por iniciar/uma em execução/cinco concluídas. Contrato anual adiado. Sem merge/deploy/contactos reais. Entradas abaixo são históricas.
+
 ## Publicação confirmada — 29/09/2026, TASK442 / CI em execução
 
 TASK442 publicada na branch `work/field-readiness-20260915-simulation`: commit de código `da2f7b1fa21cc7c1ca5cd88acef03b0fb29f3ea2`, árvore `ea6620f21fb331f4105510e42adcf9f8e49aa5f5`, igual à validada localmente. Checkout alinhado; história local original preservada. [CI36615430755](https://github.com/ts7520305-svg/cristalwater/actions/runs/36615430755), job109567101107, arrancou por push do commit exato e permanece em execução. Exigir PostgreSQL16/upgrade/suite336/restauro128 tabelas47 ficheiros antes da aceitação. Atualização documental posterior com `[skip ci]` não muda o código.

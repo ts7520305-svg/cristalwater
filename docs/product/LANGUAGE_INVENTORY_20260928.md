@@ -8,7 +8,13 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
-## Progresso funcional — TASK442 / preparação e receção de química
+## Progresso funcional — TASK443 / revisão administrativa dos cadastros
+
+`cw-field-intake-review.js`:41 entradas/205 textos em PT/EN/FR/ES/DE, com título/intro, rótulos, estados, diálogos, recuperação e erros próprios. `admin-operational-settings.html` passa a carregar o seletor normal, com `data-cw-no-i18n` no body para proteger os outros painéis e dados; o painel de revisão usa associações explícitas. Não equivale a tradução da página C08-013. Datas apenas mudam de formato; dados/notas/servidor/recibos permanecem literais. Cache228/runner337. [Prova443](evidence/20260929_task443_local.json).
+
+Quatro grupos aprovados;1 356 unitários/quatro técnicos/sintaxe. Cinco idiomas/320/390/1440, nós/foco/bytes/payload/UUID íntegros sem reler produtores nem pedidos operacionais; cancelamento/quota,403 literal, recusa real por edição posterior, revisão explícita, resposta retida/perdida/reload e reenvio exato sem duplicação, offline/vazio/troca de conta. Teste usa administrador próprio, preservando preferência do administrador comum; ajustada expectativa para ativação legítima do cliente. Captura alemã320 revista no contentor com scroll; PostgreSQL16/suite337/restauro pendentes. C06-004/C06 e C08/C10 continuam abertos. Próximo:`cw-field-recovery.js`/C06-005; mensagens próprias de fotos ainda pendentes. Contagens estáticas TASK415 não recalculadas.
+
+## Histórico funcional — TASK442 / preparação e receção de química
 
 `cw-field-day-review.js`: necessidades, quantidades, transferências, receção física, formulário e estados/erros próprios em PT/EN/FR/ES/DE:34 entradas/170 textos. Textos dentro de labels conservam inputs; mensagens de recuperação usam um filho, preservando o formulário após recuperar uma transferência em falta. Dados/valores/IDs/chaves/UUID/payload e detalhes externos conservados; idioma não consulta fontes nem envia operações, apenas a preferência habitual pode ser gravada. Catálogo81 e código anterior inalterados. Cache227/runner336; [prova442](evidence/20260929_task442_local.json).
 

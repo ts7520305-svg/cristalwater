@@ -1,0 +1,447 @@
+{
+  "task": "TASK443",
+  "date": "2026-09-29",
+  "branch": "work/field-readiness-20260915-simulation",
+  "baseCommit": "6dba5f6bc12d8ffd0d2f296bc89807fd0e47aae9",
+  "status": "local_validated_publication_pending",
+  "scope": {
+    "responsibility": "Translate the administrative review of field-created clients/pools, preserving the captured review, approval request, recovery and original evidence",
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "messageEntries": 41,
+    "presentationStrings": 205,
+    "cache": 228,
+    "runnerGroups": 337,
+    "fileCount": 9,
+    "files": [
+      "frontend/cw-field-intake-review.js",
+      "frontend/admin-operational-settings.html",
+      "frontend/sw.js",
+      "scripts/test-field-intake-review-languages.js",
+      "scripts/test-field-suite.js",
+      "docs/product/CURRENT_WORK_CHECKPOINT.md",
+      "docs/product/COMPLETION_PLAN_20260928.md",
+      "docs/product/LANGUAGE_INVENTORY_20260928.md",
+      "docs/product/evidence/20260929_task443_local.json"
+    ],
+    "backendChanged": false,
+    "schemaChanged": false,
+    "githubWorkflowChanged": false
+  },
+  "before": [
+    {
+      "ms": 10855,
+      "outcome": "The original page did not load cw-i18n.js; waiting for the actual language selector failed at the unchanged 7000ms limit.",
+      "expectedFailure": true
+    },
+    {
+      "ms": 3642,
+      "outcome": "With the normal engine loaded but before localizing the panel, the reload label remained Atualizar fichas instead of Refresh records.",
+      "expectedFailure": true
+    }
+  ],
+  "preparationCorrections": [
+    {
+      "ms": 11042,
+      "outcome": "Presentation, quota and stale-request scenarios passed. Full-client comparison rejected the legitimate existing PENDING_REVIEW to ACTIVE transition. The final test requires the exact expected approved client, including ACTIVE, original financial fields and actual reviewer/date."
+    },
+    {
+      "run": "run-1790709078910",
+      "outcome": "New group passed (13713ms); old intake UI timed out (25677ms) waiting for Portuguese after the new test changed the shared administrator language. The subsequent API test returned 401 instead of injected 503 (3968ms); its separate cause was not established. Equipment flow passed (9179ms).",
+      "resolution": "New language test now creates its own administrator instead of changing the shared QA administrator preference. A fresh isolated run of the new group followed by both unmodified intake regressions passed. No application/backend change, assertion removal, sleep, automatic retry or increased timeout used."
+    }
+  ],
+  "browserGroups": [
+    {
+      "script": "test-field-intake-review-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 13037,
+      "timedOut": false,
+      "logSha256": "331de28527323c17f89253e4ebdffcb3e8a39da31bd88c381b6ee2dc5885ac19",
+      "markers": [
+        "PASS five languages/320/390/1440, literal client/pool fields, missing data, pending/reviewed states, links, immutable nodes/focus/records and cancelled confirmation",
+        "PASS quota sends nothing, server error remains literal in all languages, stale refusal preserves UUID/payload and explicit rereview reveals the current record",
+        "PASS language changes during the held real approval preserve locks; lost response/reload/exact retry gives one approval and original reviewer/date with no billing, visits or stock effects",
+        "PASS query failure/offline/empty states, attribute-only language change and account change preserve receipts and disable approvals"
+      ]
+    },
+    {
+      "script": "test-field-client-intake-ui.js",
+      "code": 0,
+      "signal": null,
+      "ms": 19327,
+      "timedOut": false,
+      "logSha256": "9571e51b8ea07caded60a1ac976b7b7251dbd070c9a4486e2ef42784aab33243",
+      "markers": [
+        "PASS actual intake: quota prevents POST, all eleven fields survive offline reload, delayed GPS cannot replace newer fields, recovery action visible at 320/390/1440",
+        "PASS altered saved data and receipt/cleanup quota failures keep the original request; exact recovery creates one client/pool/task/audit and cleanup does not resend",
+        "PASS account changes/late replies, BFCache, cross-tab conflicts and corrupt drafts preserve the account-owned intake",
+        "PASS actual ADMIN review: literal fields, offline approval/reload, immutable stale refusal, explicit rereview, lost acknowledgement after client disappears from pending list and exact reviewer confirmation",
+        "PASS late ADMIN account change retains only the original reviewer operation; reentry recovers without a second approval"
+      ]
+    },
+    {
+      "script": "test-field-client-intake.js",
+      "code": 0,
+      "signal": null,
+      "ms": 6055,
+      "timedOut": false,
+      "logSha256": "2a8155136f80fa893f82409b75ab4af0c60b18ea1d17a764d7670a3183e0574d",
+      "markers": [
+        "PASS narrow settings, lost response/restart and concurrent retry: one client/pool/task/audit and exact receipt; confirmation survives disabled intake; no credentials/finance projection or unrelated writes",
+        "PASS required write failures roll back all creation; validation, authenticated User/leader, policy states and permission guards",
+        "PASS stale review produces immutable refusal; failed pool/audit/receipt approval rolls back both resources; lost reply/concurrency keeps one genuine reviewer/audit and first date",
+        "PASS existing partial approvals remain visible and can be reconciled atomically with authenticated ADMIN identity; legacy calls remain explicit"
+      ]
+    },
+    {
+      "script": "test-field-equipment-flow.js",
+      "code": 0,
+      "signal": null,
+      "ms": 9179,
+      "timedOut": false,
+      "logSha256": "4f77e69d6e65397eb308d5f0ef0d62adfff0c8cb15a193da74cd5bca1d7c0624",
+      "markers": [
+        "PASS preventive plan created through real administration form",
+        "PASS technician real preventive completion, calendar advance, immutable execution/history once and refresh without duplicate"
+      ]
+    }
+  ],
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 194364,
+      "logSha256": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 24228,
+      "logSha256": "cccba0d9d9420cdd54355515c949a2bca31d5b9904b10ea79ea3e8a40202a6c2"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 2194,
+      "logSha256": "c086518e31757f766ccc1df7ecc503f199c45e3ce4ac9cab00a66f8745d2727a"
+    }
+  ],
+  "unitTests": 1356,
+  "unitFiles": 138,
+  "technicianTests": 4,
+  "syntax": {
+    "backend": 695,
+    "frontend": 308,
+    "inline": 44
+  },
+  "preservation": {
+    "beforeSha256": "994255553d3491ec4648c3e62b27dbc26de5ceed8be48ecfd7cb56ccad428b19",
+    "afterSha256": "d4dd3435d1b875d471961f7f17525168c9b5027db57f3da07b4a9828a6c1f94c",
+    "checks": {
+      "sessionCapture": true,
+      "livePredicate": true,
+      "buttonFunction": true,
+      "approvalPayload": true,
+      "recoveryFunction": true,
+      "lifecycle": true,
+      "serverValidation": true,
+      "previousSuiteOrder": true,
+      "originalErrorMessagesPreserved": true
+    },
+    "suiteBefore": 336,
+    "suiteAfter": 337
+  },
+  "verified": [
+    "Actual administrative page and existing language selector; title/intro, labels, client/pool state, missing fields, links and native confirmation dialogs in five languages at 320/390/1440.",
+    "Literal client/pool names, contact details, notes, HTML-like text, braces, zero GPS and decimal volume; no markup execution.",
+    "Locale changes preserve element identity/focus, disabled state, all captured records/UUID/payload/hash/failure/receipt fields and local storage; no outbox rereads or operational requests. Only the actual language preference PUT is allowed.",
+    "IndexedDB quota sends nothing and preserves the current record; 403 with text resembling an owned session error remains literal.",
+    "A genuine intervening pool edit causes INTAKE_APPROVAL_STALE on the same request; its immutable refusal remains literal, and explicit acknowledgement reveals the updated record.",
+    "A real approval is committed while its response is held; locale changes keep all approval controls disabled. Returning 503 without an error exercises translated write-store presentation with its Portuguese persisted failure untouched.",
+    "Reload and exact UUID/body retry after the lost response recover one approval and one audit. SQL contains exactly two approval receipts: one refusal and one success. Original reviewer/date and pending pool IDs agree.",
+    "Previously reviewed inactive pool and full invoice/visit/stock collections remain identical; full client matches original except the exact expected approval fields and updated timestamp.",
+    "Query error, offline query, controlled empty read, direct lang attribute change and different-account guard; no cross-account approval.",
+    "Unmodified intake browser/API regressions cover offline saved approvals, late accounts, receipt mismatch, restart/concurrent retry, transactional rollback and legacy partial approvals.",
+    "Unmodified equipment flow passes with the final application changes; the new engine cannot auto-translate other page sections, and the language test preserves the access-control panel text."
+  ],
+  "implementation": [
+    "Private descriptors and leaf bindings repaint captured presentation only; empty article/action containers are not bound.",
+    "Owned errors retain Portuguese Error.message and private descriptors; write-store error translations are captured once. Persisted failures and server messages remain literal.",
+    "The administrative page previously lacked the global engine. It now loads cw-i18n.js; data-cw-no-i18n protects the page from automatic text translation while the intake panel uses its own explicit bindings. Other administrative panels remain C08 work.",
+    "Dates change presentation locale only, keeping the same instant and device timezone."
+  ],
+  "visual": {
+    "path": "reports/field-ui/INTAKE_REVIEW_DE_320.png",
+    "sha256": "1a9477d25e24b9c4cb34ee7f10df00d0c3a071890f615c01396c8210bfa75962",
+    "review": "German text wraps within the 320px panel; approval button fits. The existing scroll container shows a scrolled portion of the list. This is not whole-page visual acceptance."
+  },
+  "nativePrevious": {
+    "task441": {
+      "jobs": [
+        {
+          "id": 109559577064,
+          "name": "field",
+          "status": "in_progress",
+          "conclusion": null,
+          "run_id": 36613209845,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run npm ci",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run npx prisma validate && npx prisma generate",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Verify additive upgrade from the previous schema",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Run npm run check:syntax",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Run node scripts/test-field-suite.js",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 11
+            },
+            {
+              "name": "Restore database and uploaded files in isolated QA",
+              "status": "pending",
+              "conclusion": null,
+              "number": 12
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 13
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 14
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 26
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 27
+            },
+            {
+              "name": "Stop containers",
+              "status": "pending",
+              "conclusion": null,
+              "number": 28
+            }
+          ]
+        }
+      ]
+    },
+    "task442": {
+      "jobs": [
+        {
+          "id": 109567101107,
+          "name": "field",
+          "status": "in_progress",
+          "conclusion": null,
+          "run_id": 36615430755,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run npm ci",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run npx prisma validate && npx prisma generate",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Verify additive upgrade from the previous schema",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Run npm run check:syntax",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Run node scripts/test-field-suite.js",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 11
+            },
+            {
+              "name": "Restore database and uploaded files in isolated QA",
+              "status": "pending",
+              "conclusion": null,
+              "number": 12
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 13
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 14
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 26
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 27
+            },
+            {
+              "name": "Stop containers",
+              "status": "pending",
+              "conclusion": null,
+              "number": 28
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "limits": [
+    "Local PGlite/Chromium153 is not native PostgreSQL16 acceptance. Require additive upgrade, all 337 groups in exact order and database/file restore (128 tables/47 files) for the new commit.",
+    "Previous TASK441/442 jobs were still in their full suites after ten passed steps; neither was declared accepted.",
+    "C06, C06-004/C06-005, C08 administrative page/chrome and C10 date policy remain open. Static TASK415 counts were not recomputed."
+  ],
+  "authorization": {
+    "repositoryPublicDuringDevelopment": true,
+    "decisionLisbon": "2026-09-29T19:20:39+01:00",
+    "makePrivateBeforeProjectCompletion": "C32",
+    "merge": false,
+    "deploy": false,
+    "externalMessages": false
+  },
+  "completionCount": {
+    "total": 32,
+    "notStarted": 26,
+    "inProgress": 1,
+    "complete": 5
+  },
+  "next": {
+    "first": "Check native TASK441/442/443 and address any failure.",
+    "source": "frontend/cw-field-recovery.js / C06-005",
+    "scope": "Translate the old offline-record recovery banner and copy action, preserving account filtering/exported original bytes. Photo helper errors in cw-field-photos.js also remain unlocalized.",
+    "deferred": "Annual maintenance contract remains deferred."
+  }
+}
