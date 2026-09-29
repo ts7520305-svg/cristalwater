@@ -64,10 +64,12 @@ process.on('exit',code=>{if(!code&&!completed)process.exitCode=1;});
       assert.deepEqual(await form(),initial,'Locale must preserve values and every guard');
       assert.equal(await raw(),before.raw,'Locale must preserve exact draft bytes');
       assert.equal(JSON.stringify(await rows()),before.rows,'Locale must preserve UUID, payload, hash, owner, failures and receipts');
-      const layout=await page.evaluate(ids=>({same:ids.every((id,i)=>document.getElementById(id)===qaAlertNodes[i]),options:qaAlertOptions.every(node=>node.isConnected),focus:document.activeElement===qaAlertNodes[0],selection:[qaAlertNodes[0].selectionStart,qaAlertNodes[0].selectionEnd],overflow:document.documentElement.scrollWidth>innerWidth+1,controls:ids.slice(0,4).map(id=>document.getElementById(id)).every(node=>{const b=node.getBoundingClientRect();return b.height>=44&&b.left>=-1&&b.right<=innerWidth+1;})}),ids);
+      const layout=await page.evaluate(ids=>({same:ids.every((id,i)=>document.getElementById(id)===qaAlertNodes[i]),options:qaAlertOptions.every(node=>node.isConnected),focus:document.activeElement===qaAlertNodes[0],selection:[qaAlertNodes[0].selectionStart,qaAlertNodes[0].selectionEnd],overflow:document.documentElement.scrollWidth>innerWidth+1,controls:ids.slice(0,4).map(id=>{const node=document.getElementById(id),b=node.getBoundingClientRect();return{id,height:b.height,layoutHeight:node.offsetHeight,left:b.left,right:b.right};})}),ids);
       assert(layout.same&&layout.options,'Locale must retain original form and option nodes');assert(layout.focus,'Locale must retain textarea focus');
       assert.deepEqual(layout.selection,[Math.min(2,initial.message.length),Math.min(7,initial.message.length)],'Locale must retain caret/selection');
-      assert(!layout.overflow&&layout.controls,'Alert controls must fit '+width+'/'+lang);
+      // translateY hover can report 43.99994px for a real 44px control. Allow
+      // only 0.01px of paint rounding, while still requiring 44px of layout.
+      assert(!layout.overflow&&layout.controls.every(b=>b.layoutHeight>=44&&b.height>=43.99&&b.left>=-1&&b.right<=width+1),'Alert controls must fit '+width+'/'+lang+': '+JSON.stringify(layout));
     }}
     assert.equal(requests.length,before.requests,'Changing language must never send/recover an alert');
   }
@@ -106,7 +108,15 @@ process.on('exit',code=>{if(!code&&!completed)process.exitCode=1;});
   // Retain complete server evidence as text; changing language must not retry it.
   const serverMessage='Original <script>qaInjected=1</script> evidence';
   await page.route(endpoint,route=>route.fulfill({status:503,json:{error:serverMessage}}));
-  await context.setOffline(false);await page.waitForFunction(id=>document.querySelector('#internalAlertVisit option[value="'+id+'"]'),visit.id);await remember();
+  // Cached options already satisfy a presence check. Online recovery starts
+  // two real route loads; wait for both to finish before remembering nodes.
+  await page.evaluate(()=>{
+    window.qaAlertOnlineRoutes={started:0,pending:0};window.qaAlertLoadRoute=window.loadRoute;
+    window.loadRoute=async function(...args){qaAlertOnlineRoutes.started++;qaAlertOnlineRoutes.pending++;try{return await qaAlertLoadRoute.apply(this,args);}finally{qaAlertOnlineRoutes.pending--;}};
+  });
+  await context.setOffline(false);
+  await page.waitForFunction(id=>qaAlertOnlineRoutes.started>0&&qaAlertOnlineRoutes.pending===0&&!isSyncing&&routeViewSource==='server'&&document.querySelector('#internalAlertVisit option[value="'+id+'"]'),visit.id);
+  await page.evaluate(()=>{window.loadRoute=qaAlertLoadRoute;delete window.qaAlertLoadRoute;delete window.qaAlertOnlineRoutes;});await remember();
   await page.locator('#sendAlertBtn').click();await ready();await page.waitForFunction(text=>document.getElementById('internalAlertStatus').textContent.includes(text),serverMessage);await remember();
   await cycle(words=>[words.savedError,serverMessage],'confirm');
   assert.equal(await page.locator('#internalAlertStatus script').count(),0);assert.equal(await page.evaluate(()=>window.qaInjected),undefined);

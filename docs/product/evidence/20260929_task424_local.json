@@ -1,0 +1,251 @@
+{
+  "task": "TASK424",
+  "date": "2026-09-29",
+  "baseCommit": "e0917a8abfdef349224056ed3c4d008dd23138cc",
+  "scope": "Correct two reproduced timing/geometry defects in the existing internal-alert language test before continuing C06. Application, dictionaries, CSS, schema, runner323 and cache214 are unchanged.",
+  "nativeFailure": {
+    "task": 422,
+    "commit": "22d72fa26da3370169f1306179184fb3096a260d",
+    "run": 36534583004,
+    "job": 109295609200,
+    "conclusion": "failure",
+    "expectedCount": 322,
+    "orderedResultsMatch": true,
+    "passed": 321,
+    "failed": 1,
+    "restore": "skipped",
+    "failureExcerpt": [
+      "2026-09-29T07:41:01.2703081Z AssertionError [ERR_ASSERTION]: Alert controls must fit 1440/en",
+      "2026-09-29T07:41:01.2704302Z     at cycle (/home/runner/work/cristalwater/cristalwater/scripts/test-field-internal-alert-languages.js:70:7)",
+      "2026-09-29T07:41:01.2705816Z     at async /home/runner/work/cristalwater/cristalwater/scripts/test-field-internal-alert-languages.js:102:3 {"
+    ]
+  },
+  "nativeOrderedResultsEvidence": "20260929_correction_verification.json: native.422.results",
+  "reproduction": {
+    "geometry": {
+      "result": {
+        "script": "../qa/probe-alert-geometry.cjs",
+        "code": 1,
+        "ms": 22069
+      },
+      "state": "Actual offline-pending alert after service-worker reload, native hover animation, five languages at1440/320/390.360 animation-frame samples. Original strict44px predicate rejects two frames.",
+      "frames": 360,
+      "oldRejectedFrames": 2,
+      "correctedRejectedFrames": 0,
+      "minimumPaintedHeight": 43.99993896484375,
+      "negativeControlsRejected": {
+        "height=43": true,
+        "height=43.98": true,
+        "layoutHeight=43": true,
+        "left=-2": true,
+        "right=1442": true,
+        "overflow=2px": true
+      },
+      "invalidFrames": [
+        {
+          "width": 1440,
+          "lang": "es",
+          "pass": 0,
+          "frame": 3,
+          "scrollWidth": 1440,
+          "controls": [
+            {
+              "id": "internalAlert",
+              "height": 61.5,
+              "layoutHeight": 62,
+              "left": 306,
+              "right": 1414,
+              "top": 557.40625,
+              "bottom": 618.90625,
+              "transform": "none"
+            },
+            {
+              "id": "internalAlertVisit",
+              "height": 44,
+              "layoutHeight": 44,
+              "left": 306,
+              "right": 1414,
+              "top": 406.21875,
+              "bottom": 450.21875,
+              "transform": "none"
+            },
+            {
+              "id": "internalAlertPriority",
+              "height": 44,
+              "layoutHeight": 44,
+              "left": 306,
+              "right": 1414,
+              "top": 493.40625,
+              "bottom": 537.40625,
+              "transform": "none"
+            },
+            {
+              "id": "sendAlertBtn",
+              "height": 43.99993896484375,
+              "layoutHeight": 44,
+              "left": 306,
+              "right": 572.0625,
+              "top": 679.4288940429688,
+              "bottom": 723.4288330078125,
+              "transform": "matrix(1, 0, 0, 1, 0, -0.852386)"
+            }
+          ]
+        },
+        {
+          "width": 320,
+          "lang": "es",
+          "pass": 1,
+          "frame": 0,
+          "scrollWidth": 320,
+          "controls": [
+            {
+              "id": "internalAlert",
+              "height": 61.5,
+              "layoutHeight": 62,
+              "left": 24,
+              "right": 296,
+              "top": 488.09375,
+              "bottom": 549.59375,
+              "transform": "none"
+            },
+            {
+              "id": "internalAlertVisit",
+              "height": 44,
+              "layoutHeight": 44,
+              "left": 24,
+              "right": 296,
+              "top": 338.34375,
+              "bottom": 382.34375,
+              "transform": "none"
+            },
+            {
+              "id": "internalAlertPriority",
+              "height": 44,
+              "layoutHeight": 44,
+              "left": 24,
+              "right": 296,
+              "top": 424.09375,
+              "bottom": 468.09375,
+              "transform": "none"
+            },
+            {
+              "id": "sendAlertBtn",
+              "height": 43.99993896484375,
+              "layoutHeight": 44,
+              "left": 24,
+              "right": 296,
+              "top": 650.5957641601562,
+              "bottom": 694.595703125,
+              "transform": "matrix(1, 0, 0, 1, 0, -0.998015)"
+            }
+          ]
+        }
+      ],
+      "rawSamplesSha256": "d86cd59aa8af19fca3bde27aaadd0328e6d2e23f0637edcb769a08677aad0a78"
+    },
+    "onlineRace": {
+      "firstLocalFailure": {
+        "script": "scripts/test-field-internal-alert-languages.js",
+        "code": 1,
+        "ms": 11190
+      },
+      "firstAssertion": "Locale must retain original form and option nodes",
+      "controlledProbe": {
+        "script": "../qa/probe-alert-online-race.cjs",
+        "code": 1,
+        "ms": 12732
+      },
+      "evidence": {
+        "beforeRelease": {
+          "calls": {
+            "started": 2,
+            "pending": 2
+          },
+          "cachedOptionsStillPresent": false,
+          "oldReadyPredicate": true,
+          "requestNodes": true
+        },
+        "afterRelease": {
+          "calls": {
+            "started": 2,
+            "pending": 0
+          },
+          "cachedOptionsStillPresent": false,
+          "originalNodes": true,
+          "requestNodes": false
+        }
+      },
+      "meaning": "The old visit-option presence predicate resolves while two genuine online route requests remain pending. After the503 send has finished and options have been remembered, releasing route responses replaces those option nodes while the form nodes remain identical; no language change is needed. Earlier pre-send options are separately replaced by normal alert refresh."
+    }
+  },
+  "correction": {
+    "geometry": "Collect each control id, painted height, layout height and horizontal bounds. Require layoutHeight>=44 and paintedHeight>=43.99, with the original left>=-1,right<=viewport+1 and page-overflow limit. Emit actual geometry on failure. Only0.01px painted rounding is allowed; observed error is0.00006103515625px.",
+    "onlineReadiness": "Temporarily wrap the genuine loadRoute function to count started/pending calls without changing arguments, return values, errors or requests. Wait until at least one started, all completed, isSyncing=false, server route rendered and expected option present. Restore the original function before remembering nodes or changing languages.",
+    "preserved": "Original node/option identity, caret/focus, draft bytes, values, guards, UUID/payload/hash/receipt, request-count, SQL and injection assertions. No forced clicks, animation changes, timeout increases, retries or removed assertions. Default7s and overall90s unchanged.",
+    "negativeGeometryChecks": "Six synthetic perturbations of measured geometry reject43px/43.98px painted height,43px layout height,2px left/right overflow and2px page overflow. These are predicate checks on recorded metrics, not six live browser mutation cases."
+  },
+  "validation": {
+    "environment": "Isolated local PGlite SQL/Express/Chromium with external communications disabled. Existing language fixture suppresses only unrelated15s autosync; original API/UI remain unchanged.",
+    "integrated": [
+      {
+        "script": "scripts/test-field-internal-alert-languages.js",
+        "code": 0,
+        "ms": 31943
+      },
+      {
+        "script": "scripts/test-field-internal-alert.js",
+        "code": 0,
+        "ms": 4298
+      },
+      {
+        "script": "scripts/test-field-internal-alert-ui.js",
+        "code": 0,
+        "ms": 13803
+      }
+    ],
+    "markers": [
+      "PASS actual alert controls and local validation in five languages at 320/390/1440; stable nodes, focus, guards and zero submissions",
+      "PASS draft quota blocks submissions; editable draft and missing visit context keep exact text, visit, HIGH enum, selection and bytes in five languages",
+      "PASS real service-worker offline reload retains original alert UUID/payload/hash/owner and exact draft bytes; five-language pending state at three widths",
+      "PASS literal server error and language changes during a committed POST with lost acknowledgement preserve one SQL alert and the original pending request",
+      "PASS receipt plus failed draft cleanup stays translated and recoverable; clear sends nothing, original receipt remains exact, ADMIN alert exists once and reading is not claimed",
+      "PASS real cross-tab conflict, corrupt/invalid draft, missing request and conflicting draft remain blocked, translated and byte-preserving",
+      "PASS changed account cannot expose/send the original draft or receipt; translated session guard preserves the original bytes; no injected markup or browser errors"
+    ],
+    "nodeCheckAndDiffCheck": true,
+    "unitSuite": "Not rerun for this test-only change. Previous1332 unit/4 technician results are historical, not new validation. Full native323-group run and restoration required on the correction commit.",
+    "screenshotsInspected": [
+      "reports/field-ui/INTERNAL_ALERT_LANGUAGES_PENDING_DE_320.png"
+    ],
+    "acceptanceLimit": "Local focused groups pass. Native TASK422 remains failed with restoration skipped; TASK423 was still running at last check. Neither inherits TASK421 success. No claim of every theme/device or full C06 closure.",
+    "screenshotSha256": {
+      "reports/field-ui/INTERNAL_ALERT_LANGUAGES_PENDING_DE_320.png": "ebcf41389c2a382f2bb9113ab3fa8a69998af44cfe9bed6208b19c9aa7e22083"
+    }
+  },
+  "fileHashes": {
+    "scripts/test-field-internal-alert-languages.js": "149a8fe372d09fe941021ee661dd3132a4dc1962cf0c3933515a616b3262433f"
+  },
+  "logHashes": {
+    "task424-geometry-before.log": "e66e14b484e8eff0b88ada4c5ff2bd92371b60e4e472fa4b3332b78b65c6236c",
+    "task424-alert-regressions.log": "53a7289efc31e78370dac845bb0d980fdeee4526bfc29e9c5cadd46e88c36f6a",
+    "task424-online-race-before.log": "c1fbf4f2c50807a408ae6609edfb9ce3c4b4d5e39cbc017e2436c6533e587760",
+    "task424-final-regressions.log": "b4e39cd1fe01c47b687a075b133949d57be3a5bfbdf253555a6c495ed4d590b8"
+  },
+  "publication": {
+    "status": "ready",
+    "branch": "work/field-readiness-20260915-simulation",
+    "ci": {
+      "status": "not_started",
+      "expectedOrderedGroups": 323,
+      "restoration": "pending"
+    }
+  },
+  "remaining": "TASK425: own messages in cw-field-write-store.js/C06-006. Confirm native runs first, consumers/loading order, dynamic fallbacks; preserve saved original failures, request UUID, payload/hash/receipt and protocol.67 fixed Error literals were inventoried; no write-store implementation in TASK424.",
+  "counts": {
+    "total": 32,
+    "notStarted": 26,
+    "inProgress": 1,
+    "completed": 5
+  },
+  "authorization": "Authorized work branch only. No merge/deployment/real contacts; annual legal contract deferred."
+}

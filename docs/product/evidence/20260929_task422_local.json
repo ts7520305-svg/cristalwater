@@ -144,11 +144,22 @@
     "ci": {
       "run": 36534583004,
       "job": 109295609200,
-      "status": "in_progress",
-      "conclusion": null,
-      "successfulSteps": 4,
+      "status": "completed",
+      "conclusion": "failure",
+      "successfulSteps": 15,
       "expectedOrderedGroups": 322,
-      "restoration": "pending"
+      "restoration": "skipped",
+      "passedOrderedGroups": 321,
+      "failedOrderedGroups": [
+        {
+          "script": "test-field-internal-alert-languages.js",
+          "code": 1,
+          "signal": null,
+          "ms": 3679
+        }
+      ],
+      "exactOrder": true,
+      "orderedResultsEvidence": "20260929_correction_verification.json: native.422.results"
     }
   },
   "previousNative": {
@@ -168,5 +179,6 @@
     "inProgress": 1,
     "completed": 5
   },
-  "authorization": "Authorized work branch only; no merge, deployment or real contacts."
+  "authorization": "Authorized work branch only; no merge, deployment or real contacts.",
+  "nativeAcceptance": "Not accepted: one native test failure, restoration skipped. TASK424 reproduces and corrects the failing geometry predicate and a separate online-recovery test race; native correction validation remains pending."
 }

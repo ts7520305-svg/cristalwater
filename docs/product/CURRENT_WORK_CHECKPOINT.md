@@ -1,5 +1,15 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 29/09/2026, TASK424 local / teste dos alertas
+
+**TASK424 corrige o teste de idiomas dos alertas.** O CI422 terminou com321/322 grupos aprovados na ordem exata; único erro em `test-field-internal-alert-languages.js`, «Alert controls must fit1440/en»; restauro ignorado. Log nativo completo lido e resultados registados. TASK421 mantém a aprovação própria; TASK423 continua em execução na última consulta. [Prova424](evidence/20260929_task424_local.json), [verificação](evidence/20260929_correction_verification.json).
+
+**Reprodução e correção:**360 frames reais de hover em cinco idiomas/a1440,320,390; dois retângulos43,99993896484375px com layout44px. O teste admite0,01px de arredondamento pintado e continua a exigir layout44px, limites horizontais e ausência de overflow; falhas agora mostram as medidas. Seis perturbações sintéticas dos valores medidos continuam recusadas. Uma segunda falha local de identidade das opções foi reproduzida com dois pedidos reais de rota retidos: a condição antiga de presença já era verdadeira antes do redesenho. O teste acompanha os pedidos reais de loadRoute, aguarda a conclusão/sincronização e restaura a função antes de guardar referências/trocar idioma. Asserções de identidade mantidas; sem mudar limites7s/90s, animações ou cliques.
+
+**Validação local424:**três grupos completos aprovados: idiomas dos alertas, API e UI anteriores. Revalidados cinco idiomas/a320,390,1440, reload offline, quota, erros literais, resposta perdida, recibo original/um alerta SQL, duas janelas, corrupção e troca de conta. node-check/diff-check aprovados; captura DE320 pendente inspecionada. Suite unitária global não repetida numa alteração só do teste; não apresentar1332 testes históricos como nova execução. Aplicação/CSS/dicionários/write-store/runner323/cache214 inalterados. Seis ficheiros no lote, uma responsabilidade. Publicação e CI323/restauro próprios ainda pendentes.
+
+**Próximo TASK425:** confirmar CI423/424, depois mensagens próprias de `cw-field-write-store.js` (C06-006), inicialmente67 Error literais. Confirmar consumidores/carregamento e fallbacks; preservar falhas originais guardadas, UUID/payload/hash/recibo/protocolo. C06 continua aberto; chrome/nav pertence a C08-025/026.32 tarefas=26 por iniciar/1 em execução/5 concluídas. Sem merge/deploy/contactos reais; contrato anual adiado. Entradas abaixo são históricas.
+
 ## Retoma atual — 29/09/2026, TASK423 publicada / pré-visualização
 
 **TASK423 publicada na branch autorizada.** Pré-visualização por proximidade em PT/EN/FR/ES/DE: 26 chaves/130 valores novos, catálogo 186/930; cache214, runner323. Controlos, estados GPS/rede/conta, respostas recusadas, visitas sem coordenadas, singular/plural e hora da consulta traduzidos nos mesmos nós. Dia ISO, nomes, URLs, dados e mensagens originais conservados; a troca de idioma não obtém GPS nem inicia pedidos operacionais. [Prova423](evidence/20260929_task423_local.json).
