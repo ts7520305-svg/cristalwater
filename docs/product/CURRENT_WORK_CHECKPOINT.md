@@ -1,5 +1,17 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 29/09/2026, TASK421 local / alertas internos
+
+**TASK420 nativa confirmada antes de avançar.** Run36524598102/job109264733805, commit `d524a701f53d164185a958cbc2475d03e07bac4f`:320 grupos únicos na ordem exata, todos código0/signalnull,18 etapas aprovadas; restauro128 tabelas/47ficheiros com linhas e hashes iguais. TASK419 também confirmada com319 grupos/restauro. Falhas históricas mantidas. [Verificação atual](evidence/20260929_correction_verification.json).
+
+**TASK421: alertas internos da página técnica antiga em cinco idiomas.**29 chaves/145 valores novos, catálogo128/640; cache212, runner321. Consumidores confirmados: `technician.html`/`technician.js`. Reproduzido antes: seletor EN, mas botão/estado continuam PT. Cópia explícita nos mesmos nós/opções; mudança de idioma não reconstrói campos, recalcula bloqueios nem envia. Texto/nome da piscina/evidência original e rótulo guardado conservados; erros próprios traduzíveis. [Prova421](evidence/20260929_task421_local.json).
+
+**Validação421:**1 327 testes/136ficheiros, quatro técnicos, sintaxe695/308/44, node-check/diff-check; novo grupo de idiomas e regressões API/UI de alertas, página antiga e pré-visualização aprovados. Cinco idiomas×320/390/1440 nos estados principais; quotas, pedido em voo/perda de resposta, conflitos, dados inválidos e sessão também nos cinco. Bytes, UUID/payload/hash/owner/recibo, visita/prioridade, mesmos controlos/opções e foco/cursor conservados. Um alerta SQL ADMIN, isRead=false; recuperação preserva recibo e limpeza não envia de novo. Grupo anterior mantém quota de recibo e resposta tardia de outra conta. Capturas DE320 inspecionadas; não equivale a aprovação visual de todo o chrome/temas.
+
+**Publicação421:** validação local concluída; publicar na branch autorizada e exigir321 grupos exatos/restauro128/47 no respetivo commit. O sucesso nativo420 não aprova automaticamente421. Dez ficheiros: cinco código/teste e cinco documentação/evidência; uma responsabilidade.
+
+**Próximo TASK422:** rascunhos das visitas antigas; depois pré-visualização e mensagens/chrome partilhados. Mensagens recebidas da outbox/servidor permanecem literais neste lote. C06 continua em execução;32 tarefas=26por iniciar/1em execução/5concluídas. Sem merge/deploy/contactos reais; contrato anual adiado. As entradas abaixo são estados históricos.
+
 ## Verificação prioritária — 29/09/2026, correção419 nativa confirmada
 
 **Pedido do utilizador: corrigir/validar os erros do GitHub antes de avançar.** TASK419 aprovada:319 grupos na ordem exata, todos código0, restauro128 tabelas/47ficheiros com linhas e hashes iguais. Run36523607761/job109261656242, commit `d07f107e0588808eb2eddd79e7abff148c35a8ce`. O grupo original da pré-visualização passou. TASK420 CI36524598102/job109264733805 ainda em execução;320 grupos/restauro por confirmar. [Registo atual](evidence/20260929_correction_verification.json).

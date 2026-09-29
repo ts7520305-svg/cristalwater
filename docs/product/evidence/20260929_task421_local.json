@@ -1,0 +1,215 @@
+{
+  "task": "TASK421",
+  "date": "2026-09-29",
+  "baseCommit": "162c7d5f32fed30a4417c78c9186ddd5f97c8764",
+  "scope": "C06: translate the legacy technician internal-alert component. The only consumer is technician.html/technician.js. No other module, shared write-store protocol or backend behavior is changed.",
+  "nativePrerequisite": {
+    "task": 420,
+    "run": 36524598102,
+    "job": 109264733805,
+    "commit": "d524a701f53d164185a958cbc2475d03e07bac4f",
+    "status": "completed",
+    "conclusion": "success",
+    "passedSteps": 18,
+    "groups": 320,
+    "unique": 320,
+    "exactOrder": true,
+    "passed": 320,
+    "failures": [],
+    "restoration": "2026-09-29T06:05:24.8896840Z PASS restored 128 tables and 47 uploaded files; database rows and file hashes match",
+    "focused": [
+      {
+        "script": "test-field-legacy-page-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6495
+      },
+      {
+        "script": "test-fcs-sec-tech-workday.js",
+        "code": 0,
+        "signal": null,
+        "ms": 726
+      },
+      {
+        "script": "test-field-internal-alert.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1538
+      },
+      {
+        "script": "test-field-internal-alert-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8583
+      },
+      {
+        "script": "test-field-route-preview-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3792
+      },
+      {
+        "script": "test-field-workday-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4801
+      },
+      {
+        "script": "test-field-workday-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6968
+      }
+    ],
+    "checkedAt": "2026-09-29T06:07:27.578Z"
+  },
+  "reproduction": {
+    "probe": "QA-only real-page probe-alert-language.cjs",
+    "result": {
+      "script": "../qa/probe-alert-language.cjs",
+      "code": 1,
+      "ms": 10844
+    },
+    "failure": "Selecting English sets html.lang=en, but the original button remains Enviar alerta à administração and the local draft status remains Portuguese; original7s assertion fails.",
+    "baseline": [
+      {
+        "script": "scripts/test-field-internal-alert.js",
+        "code": 0,
+        "ms": 4638
+      },
+      {
+        "script": "scripts/test-field-internal-alert-ui.js",
+        "code": 0,
+        "ms": 13408
+      }
+    ]
+  },
+  "implementation": {
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "addedKeys": 29,
+    "addedValues": 145,
+    "catalogueKeys": 128,
+    "catalogueValues": 640,
+    "cache": 212,
+    "runner": 321,
+    "presentation": "Explicit descriptors repaint owned text in existing nodes, including each option. Local errors retain their descriptor after failure. Locale changes do not call refresh/show/choices, change guards or rebuild inputs/options.",
+    "literalEvidence": "User message, pool name, source error text and stored outbox label remain literal. Browser/network/shared-store/server failures retain original wording. Dynamic local status is translated around the evidence; confirmed registration never claims confirmed reading.",
+    "preserved": "Same v1 draft fields and exact serialized bytes, visitId/null, NORMAL/HIGH, UUID, owner, payload/hash, receipt, validation, API/HTTP and SQL contracts, save/send/cleanup order, session guards and cross-window conflict behavior.",
+    "changedSourceFiles": 5,
+    "dependenciesOrSchemaChanged": false
+  },
+  "validation": {
+    "environment": "Isolated PGlite0.5.8, real Express/Prisma SQL and Chromium153.0.8010.0. External notifications disabled. New language fixture suppresses only the unrelated15s route autosync; unchanged companion UI test retains it.",
+    "integrated": [
+      {
+        "script": "scripts/test-field-internal-alert-languages.js",
+        "code": 0,
+        "ms": 32231
+      },
+      {
+        "script": "scripts/test-field-internal-alert.js",
+        "code": 0,
+        "ms": 10532
+      },
+      {
+        "script": "scripts/test-field-internal-alert-ui.js",
+        "code": 0,
+        "ms": 15601
+      },
+      {
+        "script": "scripts/test-field-legacy-page-languages.js",
+        "code": 0,
+        "ms": 14368
+      },
+      {
+        "script": "scripts/test-field-route-preview-ui.js",
+        "code": 0,
+        "ms": 7217
+      }
+    ],
+    "firstLanguageRun": {
+      "script": "scripts/test-field-internal-alert-languages.js",
+      "code": 0,
+      "ms": 27974
+    },
+    "unitTests": 1327,
+    "unitFiles": 136,
+    "technicianTests": 4,
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44
+    },
+    "nodeCheckAndDiffCheck": true,
+    "browserMarkers": [
+      "PASS actual alert controls and local validation in five languages at 320/390/1440; stable nodes, focus, guards and zero submissions",
+      "PASS draft quota blocks submissions; editable draft and missing visit context keep exact text, visit, HIGH enum, selection and bytes in five languages",
+      "PASS real service-worker offline reload retains original alert UUID/payload/hash/owner and exact draft bytes; five-language pending state at three widths",
+      "PASS literal server error and language changes during a committed POST with lost acknowledgement preserve one SQL alert and the original pending request",
+      "PASS receipt plus failed draft cleanup stays translated and recoverable; clear sends nothing, original receipt remains exact, ADMIN alert exists once and reading is not claimed",
+      "PASS real cross-tab conflict, corrupt/invalid draft, missing request and conflicting draft remain blocked, translated and byte-preserving",
+      "PASS changed account cannot expose/send the original draft or receipt; translated session guard preserves the original bytes; no injected markup or browser errors"
+    ],
+    "matrix": "Five languages x320/390/1440 for controls/initial status, editable draft, offline pending reload, literal503, confirmed receipt with failed draft cleanup and successful clear. Empty input, draft quota, absent visit context, in-flight POST/lost response, conflict, corrupt/invalid/missing/mismatching draft and changed account checked in all five at320. Every cycle compares draft bytes, serialized outbox including receipts, five node identities, option nodes, form values, guards, textarea focus/caret and request count.",
+    "sql": "One TECHNICIAN_INTERNAL_ALERT notification with ADMIN recipient and isRead=false. POST commits with acknowledgement deliberately lost; original request is retried with identical fields/UUID/hash, yielding the original receipt. Clearing the confirmed draft adds no POST or alert.",
+    "companion": "Original API/UI groups remain unchanged and pass lost response/restart, six submissions across two processes, SQL rollback, recipient mismatch, receipt quota, late account response, real ADMIN rendering, conflict/corruption. Legacy page languages now validate128 tuples/640 values; original route-preview UI also passes.",
+    "visual": "Inspected German320 pending and changed-account card screenshots. Tested form controls fit horizontally and meet44px; text wraps. Native selects retain full option text in the DOM, with normal collapsed-label truncation. This is not acceptance of every page, theme, device or shared overlay.",
+    "limits": "No increased timeout, forced click, disabled animation or weakened existing assertion. New321-group GitHub execution/restoration required for this version; previous420 success is not attributed to421."
+  },
+  "files": {
+    "frontend/cw-field-internal-alert.js": "d4d72573d2b659a00697775b1b9b193452d94f2043aa5beafad10912ce275b07",
+    "frontend/cw-legacy-technician-copy.js": "d23ad3d7dd235a2911a7f5aea50054518876edbb0fd81fc71abe58a71638c194",
+    "frontend/sw.js": "f9c51dbf71864096bd7acdb194e99a1e012fe1f7174af049ce2d3b7fd662d447",
+    "scripts/test-field-suite.js": "a6bbf71c53fde129903cb686825b5f8e7cc4683e2963b119de5d77ba6ebe413c",
+    "scripts/test-field-internal-alert-languages.js": "880be17242bc15e50780f5ff59b46c0f9e6499ce72bf9e956dc4aeb47a1ad26a"
+  },
+  "logHashes": {
+    "task421-alert-baseline.log": "bed0a1b58d9282c3fcc14daf11161371794765c2098751f2ed1c65deac572660",
+    "task421-language-before.log": "4594724615e001c32fcba01cf142b99e5a6744efd86122d192506bd60288b124",
+    "task421-language-first.log": "413ffba5eba8d1b9e44f9442306bc39d6cdebdd0ebfeb735d17231e54a9751d7",
+    "task421-language-final.log": "b4d4906638b8f177897af655048977538b7e6ced7194a57ce6646f43f10a6927",
+    "task421-regressions.log": "13990e5370cc6c1f3cc0453ba904460963a46372f95eb105f361d1178dcc8b01",
+    "task421-unit.log": "ed88e1134744f74b9ca744c221d299f73b77426da0bb7b0c6e931f84fe9a0445",
+    "task421-technician.log": "e8aa8df02f9dae60624d1541738304494e18daa6621123528001f2ab0e9fa432",
+    "task421-syntax.log": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4"
+  },
+  "screenshots": {
+    "reports/field-ui/INTERNAL_ALERT_LANGUAGES_PENDING_DE_320.png": "0164a05112dbd50a328e29511a1198ed799e8075e53f5537afa3a80702f18c50",
+    "reports/field-ui/INTERNAL_ALERT_LANGUAGES_SESSION_DE_320.png": "e9742924a5a283f3b7322e97d904b4b281d79830cca4c5fa44584aeb6d38289b"
+  },
+  "publication": {
+    "status": "local_validated",
+    "branch": "work/field-readiness-20260915-simulation",
+    "ci": {
+      "status": "not_started",
+      "expectedOrderedGroups": 321,
+      "restoration": "pending"
+    }
+  },
+  "remaining": "TASK422: legacy visit-draft copy; then route-preview and shared chrome/store messages. C06 remains in execution. C04 remains accepted at version414; C09 report DE is separate.",
+  "counts": {
+    "total": 32,
+    "notStarted": 26,
+    "inProgress": 1,
+    "completed": 5
+  },
+  "authorization": "Authorized work branch only; no merge, VPS deployment or real contacts; annual legal contract remains deferred.",
+  "changedFiles": [
+    "docs/product/COMPLETION_PLAN_20260928.md",
+    "docs/product/CURRENT_WORK_CHECKPOINT.md",
+    "docs/product/evidence/20260929_correction_verification.json",
+    "docs/product/evidence/20260929_task420_local.json",
+    "frontend/cw-field-internal-alert.js",
+    "frontend/cw-legacy-technician-copy.js",
+    "frontend/sw.js",
+    "scripts/test-field-suite.js",
+    "docs/product/evidence/20260929_task421_local.json",
+    "scripts/test-field-internal-alert-languages.js"
+  ]
+}

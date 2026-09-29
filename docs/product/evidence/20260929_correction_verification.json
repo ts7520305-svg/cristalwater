@@ -61,12 +61,60 @@
       "run": 36524598102,
       "job": 109264733805,
       "commit": "d524a701f53d164185a958cbc2475d03e07bac4f",
-      "status": "in_progress",
-      "conclusion": null,
-      "passedSteps": 10,
-      "expectedOrderedGroups": 320,
-      "restoration": "pending",
-      "checkedAt": "2026-09-29T05:53:48.539Z"
+      "status": "completed",
+      "conclusion": "success",
+      "passedSteps": 18,
+      "groups": 320,
+      "unique": 320,
+      "exactOrder": true,
+      "passed": 320,
+      "failures": [],
+      "restoration": "2026-09-29T06:05:24.8896840Z PASS restored 128 tables and 47 uploaded files; database rows and file hashes match",
+      "focused": [
+        {
+          "script": "test-field-legacy-page-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 6495
+        },
+        {
+          "script": "test-fcs-sec-tech-workday.js",
+          "code": 0,
+          "signal": null,
+          "ms": 726
+        },
+        {
+          "script": "test-field-internal-alert.js",
+          "code": 0,
+          "signal": null,
+          "ms": 1538
+        },
+        {
+          "script": "test-field-internal-alert-ui.js",
+          "code": 0,
+          "signal": null,
+          "ms": 8583
+        },
+        {
+          "script": "test-field-route-preview-ui.js",
+          "code": 0,
+          "signal": null,
+          "ms": 3792
+        },
+        {
+          "script": "test-field-workday-recovery.js",
+          "code": 0,
+          "signal": null,
+          "ms": 4801
+        },
+        {
+          "script": "test-field-workday-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 6968
+        }
+      ],
+      "checkedAt": "2026-09-29T06:07:27.578Z"
     }
   },
   "local": {
@@ -135,9 +183,9 @@
     "technicianTests": 4,
     "nodeCheckAndDiffCheck": true
   },
-  "acceptance": "TASK419 correction confirmed by319 exact ordered native groups and matching restoration. TASK420 is still pending full native acceptance; its local pass is not converted into a native pass.",
+  "acceptance": "TASK419 correction confirmed by319 exact ordered native groups and matching restoration. Follow-up TASK420 now confirmed by its own320 exact ordered groups and128table/47file restoration. Historical failed runs remain recorded; no retroactive success claim.",
   "historical418": "One real route-preview click failure remains recorded at the original418 version; its exact timing cause was not reproduced. The419 integration defects were reproduced and fixed, then the original native group passed. No claim that every possible timing cause is proven.",
-  "next": "TASK421 internal-alert localization only after current native gate succeeds; if420 fails, diagnose the actual failed group first. No merge/deploy/real contact; annual legal contract deferred.",
+  "next": "Current native gate succeeded before TASK421 implementation. TASK421 local validation/publication is recorded separately in20260929_task421_local.json; its own321-group native gate remains required. No merge/deploy/real contact; annual legal contract deferred.",
   "counts": {
     "total": 32,
     "notStarted": 26,

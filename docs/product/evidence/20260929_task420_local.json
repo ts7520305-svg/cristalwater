@@ -124,14 +124,17 @@
     "ci": {
       "run": 36524598102,
       "job": 109264733805,
-      "status": "in_progress",
-      "conclusion": null,
-      "passedSteps": 10,
+      "status": "completed",
+      "conclusion": "success",
+      "passedSteps": 18,
       "expectedOrderedGroups": 320,
-      "restoration": "pending"
+      "passedOrderedGroups": 320,
+      "exactOrder": true,
+      "failedOrderedGroups": [],
+      "restoration": "2026-09-29T06:05:24.8896840Z PASS restored 128 tables and 47 uploaded files; database rows and file hashes match"
     }
   },
-  "nativeAcceptance": "TASK419319 exact ordered groups/restoration confirmed. TASK420 still requires its own320 exact ordered groups/restoration; currently in progress.",
+  "nativeAcceptance": "Confirmed: TASK420 has320 unique groups in the exact committed runner order, all code0/signalnull, eighteen successful steps and128tables/47files restoration with matching rows/hashes. TASK419 also remains confirmed at its own319-group version.",
   "remaining": "Next TASK421: internal-alert controls/status/recovery copy; then legacy drafts, route-preview text and shared chrome. C06 remains in execution; C04 remains accepted at version414.",
   "counts": {
     "total": 32,
@@ -141,5 +144,65 @@
     "completed": 5
   },
   "authorization": "Authorized work branch only; no merge, VPS deployment or real contacts; annual legal contract remains deferred.",
-  "lastCorrectionVerification": "20260929_correction_verification.json"
+  "lastCorrectionVerification": "20260929_correction_verification.json",
+  "nativeVerification": {
+    "task": 420,
+    "run": 36524598102,
+    "job": 109264733805,
+    "commit": "d524a701f53d164185a958cbc2475d03e07bac4f",
+    "status": "completed",
+    "conclusion": "success",
+    "passedSteps": 18,
+    "groups": 320,
+    "unique": 320,
+    "exactOrder": true,
+    "passed": 320,
+    "failures": [],
+    "restoration": "2026-09-29T06:05:24.8896840Z PASS restored 128 tables and 47 uploaded files; database rows and file hashes match",
+    "focused": [
+      {
+        "script": "test-field-legacy-page-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6495
+      },
+      {
+        "script": "test-fcs-sec-tech-workday.js",
+        "code": 0,
+        "signal": null,
+        "ms": 726
+      },
+      {
+        "script": "test-field-internal-alert.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1538
+      },
+      {
+        "script": "test-field-internal-alert-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8583
+      },
+      {
+        "script": "test-field-route-preview-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3792
+      },
+      {
+        "script": "test-field-workday-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4801
+      },
+      {
+        "script": "test-field-workday-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6968
+      }
+    ],
+    "checkedAt": "2026-09-29T06:07:27.578Z"
+  }
 }
