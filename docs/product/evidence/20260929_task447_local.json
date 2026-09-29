@@ -211,8 +211,24 @@
     }
   },
   "publication": {
-    "status": "local_validated_pending_publication",
+    "status": "published_ci_in_progress",
     "branch": "work/field-readiness-20260915-simulation",
+    "codeCommit": "bc178c71e17aa76be57923f92354dfd4105f5757",
+    "tree": "427e2e3b5a596be3780f2912b40ea9043e701559",
+    "remoteTreeEqualsValidatedTree": true,
+    "checkoutAligned": true,
+    "originalLocalCommit": "16e4001f0a802c1cbd596a44579bb0b8438d78bc",
+    "originalHistoryBranch": "work/local-task447-20260929",
+    "ci": {
+      "run": 36627447422,
+      "job": 109607960844,
+      "head": "bc178c71e17aa76be57923f92354dfd4105f5757",
+      "status": "in_progress",
+      "successfulSteps": 4,
+      "currentStep": "Run npm ci",
+      "fullSuiteGroups": 340,
+      "restore": "pending"
+    },
     "merged": false,
     "deployed": false
   }

@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 29/09/2026, TASK447 / CI em execução
+
+TASK447 publicada na branch `work/field-readiness-20260915-simulation`: código `bc178c71e17aa76be57923f92354dfd4105f5757`, árvore `427e2e3b5a596be3780f2912b40ea9043e701559`, igual à validada. Checkout alinhado; histórico local original preservado. [CI36627447422](https://github.com/ts7520305-svg/cristalwater/actions/runs/36627447422), job109607960844, arrancou no commit exato; quatro etapas aprovadas e `Run npm ci` em execução. Quatro integrações locais,1 356 unitários/quatro técnicos/sintaxe aprovados. Exigir PostgreSQL16/upgrade/suite340/restauro128 tabelas47ficheiros antes da aceitação. Atualização documental posterior `[skip ci]` mantém o código. [Prova447](evidence/20260929_task447_local.json).
+
+Painel de fotografias em cinco idiomas com seleção, armazenamento, envios e recibos preservados. CI44636623638975 continua na suite339 após dez etapas aprovadas, sem aceitação/restauro declarado. Próximo: verificar446/447 e corrigir qualquer falha; depois helper antigo `js/offline/offline-photos.js`/C06-010 pelos consumidores reais. C06 e restantes painéis modernos abertos;32=26 por iniciar/uma em execução/cinco concluídas. Público autorizado no desenvolvimento; privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado.
+
 ## Retoma atual — 29/09/2026, TASK447 local validada / painel de fotografias
 
 **TASK447 / C06-012:** painel moderno de fotografias em PT/EN/FR/ES/DE: 38 entradas/190 textos para títulos, botões, tipos, seleção, estados, alternativas de imagem, feedback e avisos próprios. Trocar idioma repinta texto/atributos dos mesmos nós, conservando inputs, detalhes abertos, foco, rascunhos, ficheiros e pedidos. Nomes e falhas externas continuam literais. [Prova447](evidence/20260929_task447_local.json).
