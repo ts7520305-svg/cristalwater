@@ -113,8 +113,20 @@
     "reports/field-ui/LEGACY_WORKDAY_LANGUAGES_DE_320.png": "aaf87090643592a24a7f6c98d80e540f39726939a1f4682a247a6f93f276bd56"
   },
   "publication": {
-    "status": "pending",
-    "branch": "work/field-readiness-20260915-simulation"
+    "status": "published",
+    "branch": "work/field-readiness-20260915-simulation",
+    "commit": "d524a701f53d164185a958cbc2475d03e07bac4f",
+    "tree": "a0fb6a13a4c513c98a32330d35af1a35d87d02cc",
+    "exactTreeMatch": true,
+    "ci": {
+      "run": 36524598102,
+      "job": 109264733805,
+      "status": "in_progress",
+      "conclusion": null,
+      "passedSteps": 4,
+      "expectedOrderedGroups": 320,
+      "restoration": "pending"
+    }
   },
   "nativeAcceptance": "TASK420 requires its own320 exact ordered groups and restoration. Local pass does not claim native PostgreSQL/whole-suite acceptance. TASK419319/restoration still pending at last read.",
   "remaining": "Next TASK421: internal-alert controls/status/recovery copy; then legacy drafts, route-preview text and shared chrome. C06 remains in execution; C04 remains accepted at version414.",
