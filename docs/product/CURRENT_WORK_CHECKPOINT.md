@@ -1,8 +1,8 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 29/09/2026, TASK431 validada localmente / gravação completa antes do teste de idiomas
+## Retoma atual — 29/09/2026, TASK431 publicada / gravação completa antes do teste de idiomas
 
-**TASK431 pronta para publicação na branch autorizada.** O alerta da captura, referido às11:17 de Lisboa, corresponde ao email da TASK426, cuja espera da rota foi corrigida em429. Durante a investigação chegou às12:33 outro email: **CI429 terminou325/326**, única falha em `test-field-legacy-page-languages.js:93`; restauro ignorado. Log completo397 829 caracteres lido,326 grupos únicos na ordem exata. A rota corrigida429 passou em17 407ms. [Prova431](evidence/20260929_task431_local.json).
+**TASK431 publicada na branch autorizada.** O alerta da captura, referido às11:17 de Lisboa, corresponde ao email da TASK426, cuja espera da rota foi corrigida em429. Durante a investigação chegou às12:33 outro email: **CI429 terminou325/326**, única falha em `test-field-legacy-page-languages.js:93`; restauro ignorado. Log completo397 829 caracteres lido,326 grupos únicos na ordem exata. A rota corrigida429 passou em17 407ms. [Prova431](evidence/20260929_task431_local.json).
 
 **Causa reproduzida:**o teste esperava apenas pelas notas guardadas, mas cada um dos seis inputs enfileira uma gravação. A fotografia inicial ainda tinha products vazio; a seguinte já tinha o texto introduzido e savedAt1ms posterior. Restantes caches/outbox iguais. Retendo o sexto Web Lock real, reproduziu-se a mesma diferença ao libertar a escrita sem mudar de idioma. A aplicação não perdeu dados: o teste começou a comparação antes de terminar a preparação.
 
@@ -11,6 +11,8 @@
 **Validação431:**probe controlada4 838ms; idiomas14 021ms, rascunhos14 199ms e reposição do idioma9 234ms, todos aprovados. node-check/diff-check aprovados.1 349 unitários são evidência430, não nova execução431; unitários/sintaxe global não repetidos numa alteração só do teste. Quatro ficheiros: um teste e três documentação. Aplicação, cache217, runner326, workflow e tarefa de emails inalterados.
 
 **Gates:**CI430 ainda em execução após dez etapas aprovadas. CI431 exige326 grupos/restauro128 tabelas47 ficheiros próprios. CI429 permanece falhado e427 cancelado; sucesso428 permanece prova histórica. C06 não foi encerrada por associação.
+
+**Publicação431:**commit `2b3b74d47efdf15705a2dfb3804cd4d158a28608`, árvore `70eb91f832c459ecd235baf36f8050d534b56e22`; igualdade local/remota e checkout limpo confirmados. [CI36563570810](https://github.com/ts7520305-svg/cristalwater/actions/runs/36563570810), job109389979085, em execução;7 etapas aprovadas na primeira consulta. Confirmação documental [skip ci];326 grupos/restauro próprios continuam pendentes.
 
 **Próximo TASK432:**confirmar CI430/431 e tratar qualquer falha primeiro; depois retomar C06 por fonte do inventário, incluindo revisão diária/consumidores pendentes. Chrome/nav continua C08-025/026.32 tarefas=26 por iniciar/1 em execução/5 concluídas. Sem merge/deploy/contactos reais; contrato anual adiado. Entradas abaixo são históricas.
 

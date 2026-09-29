@@ -3,7 +3,7 @@
   "date": "2026-09-29",
   "branch": "work/field-readiness-20260915-simulation",
   "baseCommit": "5e86209fca4553d4ca390c5a155142881b7f5cc8",
-  "status": "local_validation_passed_publication_pending",
+  "status": "published_native_validation_pending",
   "scope": {
     "responsibility": "Wait for the complete queued draft before taking the language-invariance baseline",
     "files": 4,
@@ -2358,5 +2358,16 @@
     "inProgress": 1,
     "complete": 5
   },
-  "next": "Confirm CI430/431 and repair any new failure first. Then continue remaining C06 source inventory. No merge/deploy/real contacts; annual legal contract deferred."
+  "next": "Confirm CI430/431 and repair any new failure first. Then continue remaining C06 source inventory. No merge/deploy/real contacts; annual legal contract deferred.",
+  "publication": {
+    "commit": "2b3b74d47efdf15705a2dfb3804cd4d158a28608",
+    "tree": "70eb91f832c459ecd235baf36f8050d534b56e22",
+    "runId": 36563570810,
+    "jobId": 109389979085,
+    "status": "in_progress",
+    "successfulSteps": 7,
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36563570810",
+    "localRemoteTreeEqual": true,
+    "cleanAfterCodeImport": true
+  }
 }
