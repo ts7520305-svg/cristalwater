@@ -62,9 +62,45 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
   await page.locator('#cwLanguageSelect').selectOption('en');
   await page.waitForFunction(() => document.querySelector('header h2')?.textContent === 'Technician route');
   const values = { notes: originalNotes, ph: '7.4', chlorine: '1.5', alkalinity: '90', salt: '3500', products: 'Nota original Guardar' };
-  await page.evaluate(({ id, values }) => { for (const [field,value] of Object.entries(values)) { const node = document.getElementById(field + '-' + id); node.value = value; node.dispatchEvent(new Event('input', { bubbles: true })); } }, { id: visit.id, values });
   const draftKey = 'cwLegacyVisitDraft:v1:TECH:' + tech.id + ':' + visit.id;
-  await page.waitForFunction(({ key, notes }) => JSON.parse(localStorage.getItem(key) || 'null')?.fields.notes === notes, { key: draftKey, notes: originalNotes });
+  const draftReady = ({ key, id, values }) => {
+    const saved = JSON.parse(localStorage.getItem(key) || 'null')?.fields;
+    return !!saved && Object.keys(saved).length === Object.keys(values).length &&
+      Object.entries(values).every(([field,value]) => saved[field] === value) &&
+      document.getElementById('legacyDraftStatus-' + id)?.getAttribute('data-cw-legacy-text') === 'draftSaved';
+  };
+  const draftState = { key: draftKey, id: visit.id, values };
+  // Every input queues a real save. Hold only the final Web Lock callback to
+  // reproduce the partial baseline that previously passed the notes-only wait.
+  await page.evaluate(({ key, count }) => {
+    const original = navigator.locks.request;
+    const state = window.qaLegacyDraftSaveGate = { original, entered: 0, held: false, release: null };
+    const hold = new Promise(resolve => { state.release = resolve; });
+    navigator.locks.request = function (name, ...args) {
+      if (name !== key) return original.call(this, name, ...args);
+      const callback = args.pop();
+      return original.call(this, name, ...args, async lock => {
+        if (++state.entered === count) { state.held = true; await hold; }
+        return callback(lock);
+      });
+    };
+  }, { key: draftKey, count: fields.length });
+  let partialDraft;
+  try {
+    await page.evaluate(({ id, values }) => { for (const [field,value] of Object.entries(values)) { const node = document.getElementById(field + '-' + id); node.value = value; node.dispatchEvent(new Event('input', { bubbles: true })); } }, { id: visit.id, values });
+    await page.waitForFunction(() => qaLegacyDraftSaveGate.held);
+    partialDraft = await page.evaluate(key => JSON.parse(localStorage.getItem(key)), draftKey);
+    assert.deepEqual(partialDraft.fields, { ...values, products: '' });
+    assert.equal(await page.evaluate(draftReady, draftState), false, 'A partial queued save must not become the language baseline');
+    assert.equal(await page.locator('#legacyDraftStatus-' + visit.id).getAttribute('data-cw-legacy-text'), 'draftSaving');
+  } finally {
+    await page.evaluate(() => { navigator.locks.request = qaLegacyDraftSaveGate.original; qaLegacyDraftSaveGate.release(); });
+  }
+  await page.waitForFunction(draftReady, draftState);
+  const savedDraft = await page.evaluate(key => JSON.parse(localStorage.getItem(key)), draftKey);
+  assert.deepEqual(savedDraft.fields, values); assert.deepEqual(savedDraft.baseline, partialDraft.baseline);
+  assert.equal(await page.locator('html').getAttribute('lang'), 'en');
+  console.log('PASS queued draft regression: notes-only partial save rejected; all six fields and saved state required before language baseline');
   const pending = await page.evaluate(async ({ label }) => { const record = await CWFieldWriteStore.prepare('VISIT_COMPLETION', 424242, { notes: 'Original pending notes', products: [] }, { label }); await updateOfflineBar(); return record; }, { label: originalName });
   const snapshot = () => page.evaluate(async () => {
     const local = Object.fromEntries(Object.keys(localStorage).filter(key => /^(cwLegacy|cwWorkday|cwField|offline)/.test(key)).sort().map(key => [key,localStorage.getItem(key)]));
