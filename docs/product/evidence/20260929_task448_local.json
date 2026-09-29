@@ -1,0 +1,196 @@
+{
+  "task": "TASK448",
+  "item": "C06-010",
+  "date": "2026-09-29",
+  "base": "a6bc1534ae4a9d8e8b65da824dc174dd7b7643e6",
+  "scope": "Three owned errors of the legacy photograph helper and their two actual legacy-page consumers in PT/EN/FR/ES/DE. Original Error.message and file/request operations remain unchanged.",
+  "negative": [
+    {
+      "script": "test-field-legacy-photo-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 3784,
+      "timedOut": false,
+      "logSha256": "6f240a3cfe30faf6e226d31d50c6928f9e5db5aca379cfcf0065fb24a02c165d"
+    }
+  ],
+  "negativeDescription": "On the actual technician.html route, selecting English leaves the legacy photograph history warning in Portuguese.",
+  "intermediate": [
+    {
+      "results": [
+        {
+          "script": "test-field-legacy-photo-languages.js",
+          "code": 1,
+          "signal": null,
+          "ms": 10923,
+          "timedOut": false,
+          "logSha256": "30de854cd2cfa6174e52a6bb24aab5dd8efcd8a85ec95b20b7dba26617148a03"
+        }
+      ],
+      "reason": "Test tried filling the hidden products storage adapter as a visible field. Fixture now sets that existing adapter and dispatches its real input handler; other five fields use visible controls and all six persisted fields must be saved before the baseline."
+    },
+    {
+      "results": [
+        {
+          "script": "test-field-legacy-photo-languages.js",
+          "code": 1,
+          "signal": null,
+          "ms": 9475,
+          "timedOut": false,
+          "logSha256": "b068d0ad3d5cd9b1a0b26cc1c07881c94226cead681e73f9424082e0ec08180b"
+        }
+      ],
+      "reason": "Final test receipt read omitted the required captured session parameter. The guard correctly rejected it; test now passes the actual current session. Product guards/timeouts/assertions remain unchanged."
+    },
+    {
+      "results": [
+        {
+          "script": "test-field-legacy-photo-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 10370,
+          "timedOut": false,
+          "logSha256": "f27246f6be02942d800efede6906ab432dd310b6c58ba1222c72d3d9dc00e770"
+        }
+      ],
+      "reason": "Full new scenario passes with optional screenshot capture. Final four-group regression run omits the capture flag."
+    }
+  ],
+  "integration": [
+    {
+      "script": "test-field-legacy-photo-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 10495,
+      "timedOut": false,
+      "logSha256": "f27246f6be02942d800efede6906ab432dd310b6c58ba1222c72d3d9dc00e770"
+    },
+    {
+      "script": "test-field-legacy-page-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 12828,
+      "timedOut": false,
+      "logSha256": "f958d27606a47be093c33cc8e3ce60f2d7229601bd2e69c8907a1bd0fd2d6dca"
+    },
+    {
+      "script": "test-field-write-recovery-ui.js",
+      "code": 0,
+      "signal": null,
+      "ms": 17805,
+      "timedOut": false,
+      "logSha256": "352d88c2e6cfcfaa3d97bc8fb74388152f00143c296153d1081fd2bf6665e27f"
+    },
+    {
+      "script": "test-field-session-browser.js",
+      "code": 0,
+      "signal": null,
+      "ms": 3017,
+      "timedOut": false,
+      "logSha256": "ca0b4bd1a5b0cbf004d295c1d5f299d3d171658e50a19e2e743a257ce00e7ae3"
+    }
+  ],
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 199670,
+      "logSha256": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 22903,
+      "logSha256": "a3d8d86f2e79281d5a46fb6273c20d4240ceb314b06e968abfebc31aee521483"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 2001,
+      "logSha256": "cc960cf356430cd71eca53aef4e0f17b5fb33a87f9288901b0e674a35e562467"
+    }
+  ],
+  "totals": {
+    "unitTests": 1356,
+    "unitFiles": 138,
+    "technicianTests": 4,
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44
+    }
+  },
+  "checks": [
+    "Actual legacy route history warning and offlineNetwork caption, five languages at320/390/1440 plus direct html.lang change. Exact historical bytes and all six saved draft fields remain, with same DOM nodes/focus/caret. No photo get/save/sync producer or operational API request during locale changes.",
+    "History, changed-session, invalid MIME, empty and oversized file guards retain original Portuguese Error.message. Only original Error identities have frozen copy/spec and frozen empty params. No enumerable metadata; clones, JSON and spoofed .copy are not classified.",
+    "Real old camera button rejects invalid files with localized alert details in all five languages. A real IndexedDB add failure with text identical to the file guard stays literal and creates/sends no request. Text resembling markup/placeholders stays text in both warning consumers.",
+    "Actual offline file chooser preserves exact PNG bytes, filename, BEFORE category, UUID, owner, visit ID, payload/hash and legacy archive. Cached offline reload retains the photograph, untranslated stored failure, original archive and six-field draft; cache232 is present.",
+    "A server403 whose text exactly matches the helper file error remains literal in every language and in the stored failure; no receipt is created for the refusal.",
+    "Actual recovery control uploads with a held real response, loses that response and retries. Locale changes while held preserve nodes and exact request bytes without extra requests. Same UUID/payload/hash/first-attempt time, one photo/one receipt, file removed only after confirmation; visit SQL row unchanged and six draft fields restored.",
+    "Legacy-page language integration, comprehensive write-recovery UI and session-browser guard regressions pass in the same isolated run. German320 history-warning capture reviewed; no horizontal overflow."
+  ],
+  "preservation": {
+    "helperOperationsIdenticalAfterErrorConstructorReversal": true,
+    "legacyConsumerIdenticalAfterTwoPresentationReversals": true,
+    "mixedLineEndingsPreserved": true,
+    "priorCatalogueExactBytesPreserved": true,
+    "previousRunner340OrderExact": true,
+    "runner": 341,
+    "cache": 232,
+    "backendSchemaWorkflowWriteStoreModernPhotoUnchanged": true,
+    "newEntries": 3,
+    "newStrings": 15
+  },
+  "sourceSha256": {
+    "frontend/js/offline/offline-photos.js": "6246676e0f9c6f885e05877d72b1ca388c212f38dd18b482156a2c8dda8e0162",
+    "frontend/cw-legacy-technician-copy.js": "d4ad456ef9395edb987cbc16105df9457ed4eabb3cea627fe5fdfffc523c0221",
+    "frontend/technician.js": "0c8d75f794e583dba992cbc5616996fef503b1c3689ef3beef92ea547712f2a7",
+    "frontend/sw.js": "b9ad5f4ea0dd8be6657314055f2065fccf95961a20d1304086ecf2fbabdba5f8",
+    "scripts/test-field-legacy-photo-languages.js": "aa016c64a92ffd479ece5aa4f377d814abdc8ed28ce162adba8d22b07d254cf0",
+    "scripts/test-field-suite.js": "1e06884e0a64e71e1eef6de2a9ab387501d36bfe70ad66c4524b1c07b9f83f90"
+  },
+  "capture": {
+    "path": "reports/field-ui/LEGACY_PHOTO_DE_320.png",
+    "sha256": "54b596144a6e87d3ba061a26942535b923b8bbe50993c707e74b8aadea584a34",
+    "reviewed": true
+  },
+  "environment": {
+    "database": "isolated PGlite via TCP",
+    "browser": "Chromium153",
+    "timezone": "Europe/Lisbon",
+    "externalEffects": "notifications/email/WhatsApp/fiscal/webhooks/background jobs disabled"
+  },
+  "nativePrevious": {
+    "task446": {
+      "run": 36623638975,
+      "job": 109594988678,
+      "status": "in_progress",
+      "successfulSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "restore": "pending"
+    },
+    "task447": {
+      "run": 36627447422,
+      "job": 109607960844,
+      "status": "in_progress",
+      "successfulSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "restore": "pending"
+    }
+  },
+  "limits": [
+    "PGlite does not replace PostgreSQL16/additive-upgrade/full341-group suite/restore128 tables47files.",
+    "C06/C06-010/C08/C10 stay open; legacy completion queue/GPS helper messages and other modern panels are outside this scope.",
+    "Original stored labels and server/persisted errors stay literal. A previously shown native alert is not repainted; each new alert uses the current language.",
+    "No merge/deploy/external communication. Public repository authorized during development; private before completion/C32."
+  ],
+  "publication": {
+    "status": "local_validated_pending_publication",
+    "branch": "work/field-readiness-20260915-simulation",
+    "merged": false,
+    "deployed": false
+  }
+}

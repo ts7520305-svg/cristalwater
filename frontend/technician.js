@@ -402,7 +402,7 @@ async function updateOfflineBar(syncState) {
     window.CWFieldWriteStore.records('TECHNICIAN_ALERT')
   ]);
   if (revision !== offlineBarRevision || credential !== window.CristalAuth?.getToken?.()) return;
-  const errors = results.map((result, index) => result.status === 'rejected' ? (index === 2 ? legacyCopy.spec('gpsReview') : legacyCopy.spec('literal', { text: result.reason.message })) : '').filter(Boolean);
+  const errors = results.map((result, index) => result.status === 'rejected' ? (index === 2 ? legacyCopy.spec('gpsReview') : window.CWLegacyPhotoErrors.copy(result.reason) || legacyCopy.spec('literal', { text: result.reason.message })) : '').filter(Boolean);
   const rows = results.map(result => result.status === 'fulfilled' ? result.value : []);
   const network = document.getElementById('offlineNetwork'), visitsEl = document.getElementById('offlineVisits'), photosEl = document.getElementById('offlinePhotos');
   legacyCopy.set(network, errors[0] || (rows[3].length && syncState === 'synced' ? 'alertsPending' : syncState) || (navigator.onLine ? 'online' : 'offline'));
@@ -865,7 +865,7 @@ async function uploadPhoto(id, type) {
       if (!window.CWFieldWriteStore.same(captured) || generation !== legacyEntryGeneration) return;
       await window.CWFieldWriteStore.send(record.requestId, captured);
       if (window.CWFieldWriteStore.same(captured) && generation === legacyEntryGeneration) { alert(legacyCopy.t('photoConfirmed')); loadRoute(); }
-    } catch (error) { if (window.CWFieldWriteStore.same(captured) && generation === legacyEntryGeneration) alert(legacyCopy.t(saved ? 'photoSaved' : 'photoNotSaved', { error: error.message })); }
+    } catch (error) { if (window.CWFieldWriteStore.same(captured) && generation === legacyEntryGeneration) alert(legacyCopy.t(saved ? 'photoSaved' : 'photoNotSaved', { error: window.CWLegacyPhotoErrors.copy(error) || error.message })); }
     finally { if (window.CWFieldWriteStore.same(captured)) updateOfflineBar(); }
   };
   input.click();

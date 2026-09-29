@@ -8,6 +8,12 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
+## Progresso funcional — TASK448 / erros de fotografias da página antiga
+
+`js/offline/offline-photos.js`, C06-010:três erros/15 textos em PT/EN/FR/ES/DE no catálogo existente. `technician.js` apresenta o aviso do arquivo na barra/recuperação e o erro da seleção no alert atual, por identidade privada do Error. Error.message, labels guardados, detalhes externos/persistidos e blobs não são traduzidos nem regravados. Catálogo anterior/helper/consumidor preservados após inverter só apresentação. Cache232/runner341;340 grupos anteriores na ordem exata. [Prova448](evidence/20260929_task448_local.json).
+
+Quatro integrações,1 356 unitários/quatro técnicos/sintaxe aprovados. Cinco idiomas/320/390/1440, erros de arquivo/sessão/MIME/vazio/tamanho, falsa propriedade copy e erros externos de texto coincidente; seis campos/nós/foco/bytes estáveis. Botão/câmara real, fotografia offline/cache,403 literal, resposta perdida/reenvio:uma fotografia/um recibo, visita SQL inalterada. Captura alemã320 revista; cenário passa com/sem captura. Publicação/gates341/restauro pendentes; CI446/447 nas suites. C06/C06-010 abertas: fila antiga `js/offline/offline-queue.js` e outros consumidores/fontes continuam; GPS, outros painéis modernos, C08/C10 e inventário estático415 não fechados por associação.
+
 ## Progresso funcional — TASK447 / painel moderno de fotografias
 
 `technician-field-mode.html/js`, C06-012:38 entradas/190 textos em PT/EN/FR/ES/DE para títulos/aria, botões, tipos, estados, seleção/armazenamento, toasts e alternativas de imagem. Textos próprios repintam os mesmos nós; ficheiros, nomes literais, rascunhos, seleção, foco, pedido e recibo preservados. Ajuste local das ações a320px resolve o excesso de largura alemão. Cache231/runner340;339 grupos anteriores na ordem exata. [Prova447](evidence/20260929_task447_local.json).
