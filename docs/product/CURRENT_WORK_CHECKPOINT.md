@@ -1,5 +1,17 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 29/09/2026, TASK422 local / rascunhos e diferenças
+
+**TASK422 pronta para publicação na branch autorizada.** Rascunhos das visitas antigas em PT/EN/FR/ES/DE:32 chaves/160 valores novos, catálogo160/800; cache213, runner322. Os seis campos e diferenças mantêm texto original, baseline, savedAt, identidades, produto/guia e pedido/recibo. Mudança de idioma conserva nós, foco/cursor, bloqueios e bytes; não envia nem consulta operações. [Prova422](evidence/20260929_task422_local.json).
+
+**Validação422:**1 332 unitários/136 ficheiros, quatro técnicos, sintaxe695/308/44 e três integrações atuais aprovadas (idiomas de rascunhos, rascunhos existentes e produtos). Idiomas da página/alertas também passaram na preparação deste lote. Cinco idiomas×320/390/1440 nos estados principais; quota, limites, duas janelas, offline/reload, corrupção, conta e resposta perdida cobertos. Escolhas mistas nas seis diferenças; uma conclusão/auditoria SQL e recibo original após recuperação, sem duplicação.
+
+**Falha visual investigada:**80 amostras reproduziram um botão com layout44px mas retângulo43,9999389px durante hover. Apenas a verificação nova admite0,01px de arredondamento e continua a exigir altura de layout44px. Sem clique forçado, alteração de timeout ou animação. Todas as escolhas foram alcançáveis ao deslocar a página em15 combinações; capturas separadas de notas/produtos DE320 inspecionadas. Chrome partilhado com texto PT/overlays continua pendente, sem aceitação visual universal.
+
+**Gates nativos:** TASK421 run36530531859/job109282983732 ainda em execução na última leitura, dez etapas aprovadas; exige321 grupos/restauro próprios. TASK422 terá de cumprir322 grupos exatos/restauro128 tabelas47ficheiros. TASK419/420 continuam aprovadas; não converter testes locais nem versões anteriores em aprovação desta versão.
+
+**Próximo TASK423:** pré-visualização de proximidade (`cw-field-route-preview.js`), preservando a consulta só de leitura, dia/conta, posição válida, pedidos cancelados e texto original. Depois mensagens/chrome partilhados. Dez ficheiros neste lote;32 tarefas=26 por iniciar/1 em execução(C06)/5 concluídas. Sem merge/deploy/contactos reais; contrato anual adiado. Entradas abaixo são históricas.
+
 ## Retoma atual — 29/09/2026, TASK421 publicada / alertas internos
 
 **TASK420 nativa confirmada antes de avançar.** Run36524598102/job109264733805, commit `d524a701f53d164185a958cbc2475d03e07bac4f`:320 grupos únicos na ordem exata, todos código0/signalnull,18 etapas aprovadas; restauro128 tabelas/47ficheiros com linhas e hashes iguais. TASK419 também confirmada com319 grupos/restauro. Falhas históricas mantidas. [Verificação atual](evidence/20260929_correction_verification.json).

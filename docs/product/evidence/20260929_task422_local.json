@@ -1,0 +1,165 @@
+{
+  "task": "TASK422",
+  "date": "2026-09-29",
+  "baseCommit": "d49ded859160622a4d9b95155341f39aa2ae414b",
+  "scope": "C06: owned copy in legacy visit drafts and six-field conflict review, preserving draft baselines and original completion requests. Seven source/test files and three documentation files.",
+  "reproduction": {
+    "before": [
+      {
+        "script": "../qa/probe-draft-language.cjs",
+        "code": 1,
+        "ms": 12346
+      }
+    ],
+    "failure": "English selected on the real legacy page; initial draft status and retry button remained Portuguese. Existing seven-second expectation failed.",
+    "geometry": {
+      "priorFailure": "Strict b.height >= 44 rejected a retry control at 320/en in the additional layout gate. No coordinate diagnostics were captured in that first failure.",
+      "probe": "Eighty animation-frame samples of the real retry control at 320px reproduced height 43.99993896484375 while layoutHeight=44; viewport and scrollWidth both320, left24/right296.",
+      "failedSamples": [
+        {
+          "height": 43.99993896484375,
+          "layoutHeight": 44,
+          "top": 800.9834594726562,
+          "bottom": 844.9833984375,
+          "width": 272,
+          "left": 24,
+          "right": 296,
+          "viewport": 320,
+          "scrollWidth": 320,
+          "transform": "matrix(1, 0, 0, 1, 0, -0.938445)"
+        }
+      ],
+      "repair": "The new test still requires layoutHeight >=44 and physical height >=43.99 (0.01px float tolerance). Bounds, hit-testing, timeouts, normal clicks and production animations remain unchanged. This explains a reproduced false positive; it does not claim the unlogged original coordinates are known."
+    }
+  },
+  "implementation": {
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "newKeys": 32,
+    "newValues": 160,
+    "catalogueKeys": 160,
+    "catalogueValues": 800,
+    "cache": 213,
+    "orderedRunnerGroups": 322,
+    "presentation": "Explicit copy descriptors update existing status/review nodes. Local errors preserve translatable descriptors; external errors and user/server evidence remain literal. Product descriptions accept optional guide/line/none presentation labels with original Portuguese defaults.",
+    "preserved": "Six field strings, baseline, savedAt, account/visit identity, JSON storage format, product quantity/unit/guide ids, UUID, payload/hash/receipt, locks, validation, blocked controls and explicit conflict choices. Locale changes neither rebuild controls nor issue operational requests.",
+    "dependenciesOrSchemaChanged": false
+  },
+  "validation": {
+    "environment": "Isolated PGlite, real Express/Prisma and Chromium. External notifications disabled. New fixture suppresses only unrelated15s route autosync; original draft/product groups retain normal behavior.",
+    "currentIntegrated": [
+      {
+        "script": "scripts/test-field-legacy-draft-languages.js",
+        "code": 0,
+        "ms": 34304
+      },
+      {
+        "script": "scripts/test-field-legacy-visit-drafts.js",
+        "code": 0,
+        "ms": 15846
+      },
+      {
+        "script": "scripts/test-field-legacy-products.js",
+        "code": 0,
+        "ms": 17901
+      }
+    ],
+    "previousCompanionLanguages": [
+      {
+        "script": "scripts/test-field-legacy-draft-languages.js",
+        "code": 0,
+        "ms": 36322
+      },
+      {
+        "script": "scripts/test-field-legacy-page-languages.js",
+        "code": 0,
+        "ms": 26694
+      },
+      {
+        "script": "scripts/test-field-internal-alert-languages.js",
+        "code": 0,
+        "ms": 25939
+      }
+    ],
+    "unitTests": 1332,
+    "unitFiles": 136,
+    "technicianTests": 4,
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44
+    },
+    "nodeCheckAndDiffCheck": true,
+    "browserMarkers": [
+      "PASS initial request read, editable and completed visit states in five languages; stable inputs, focus, guards and zero operational requests",
+      "PASS saving under a real cross-window lock, quota refusal, missing locks and size limits stay localized; unsaved input and original bytes survive, retry is explicit and guards remain unchanged",
+      "PASS six real SQL differences in five languages at three widths; empty/none and guide/line labels translate, original data remains literal, and explicit mixed choices change only the local draft/baseline",
+      "PASS real two-window conflict keeps both texts; service-worker offline draft and pending completion reload retain the chosen language, original UUID/payload/hash and locked fields",
+      "PASS language changes during a committed completion with lost response preserve the original request; recovery confirms one SQL completion/audit and retains the exact receipt and chosen values",
+      "PASS corrupt/wrong-owner drafts stay blocked and byte-preserving in five languages; account change clears the private form and late callbacks cannot modify the original draft/receipt"
+    ],
+    "matrix": "Five languages x320/390/1440 for initial/saved/error, six SQL differences, pending completion and confirmed receipt. Checking/saving, missing locks, oversized text, two-window conflicts, offline reload, corruption/wrong owner and changed account covered in all five at320. Stable fields/review nodes, focus/caret, guards, storage bytes and operational request counts checked throughout.",
+    "sql": "Mixed explicit conflict choices preserve selected draft values and accept selected current values. Local review causes no POST. Completion commits with acknowledgement lost; recovery reuses identical payload/request and produces one SQL completion/audit with the exact receipt.",
+    "visual": "Inspected German320 viewport captures centered separately on notes and product differences: wrapped literal source text, both choices visible and reachable. Hit-tested every scrolled choice across15 language/width combinations with normal subsequent clicks. Long full-panel screenshot includes sticky chrome overlays; it is not a claim that all rows are visible simultaneously.",
+    "limits": "Shared chrome still has Portuguese copy and persistent overlays; its language/visual review is separate. No universal theme/device or native PostgreSQL acceptance is asserted. Existing421 GitHub run was still in progress at this checkpoint."
+  },
+  "files": {
+    "frontend/cw-legacy-product-rules.js": "fd16e478b49d71dc0f71ec9ec39669f9b8edfd8d27d408a429408cdd60ab8e04",
+    "frontend/cw-legacy-technician-copy.js": "844c73d95472536eb938d3b2c7f190c57a6e78eeafb8e701751f7bd39d2c6083",
+    "frontend/cw-legacy-visit-drafts.js": "d3c72a4d5704aba56ff71af976436913f826a69ac035bff03c2894c60a0a4845",
+    "frontend/sw.js": "c1b9c4896f770f1a587d62ec5e28a9299acc54a0fec6a131e81a681888c51a44",
+    "scripts/test-field-suite.js": "8a3fd9c621c8cf6f8c677a7a85ed3a34875ff617aaf34689ec8ab59de65218d5",
+    "tests/legacy-product-rules.test.js": "16d4b2bbbac61e2e951dc5bb61b08cf5377f29e0799d7065b48b65a8f1546603",
+    "scripts/test-field-legacy-draft-languages.js": "20a18cfbff731c2385c4981dffdffad09bed1ebe0fc653f7225e642c050eb606"
+  },
+  "logHashes": {
+    "task422-before.log": "c6afd2078bf85495aacbbf130e47cbd6a7fc4a2a5af1370282e7da5bf078e65f",
+    "task422-initial-regressions.log": "295d2e27776e593d4ae0577ff07f9f07edc3c3c612bb95645345ac3a1e37bfac",
+    "task422-language-final.log": "b136cdfb158de6b14085968014d64f300f0e0e047ba74ab4237ace93126b7bd7",
+    "task422-hit-targets-final.log": "c17e32ed428d5de68e3e999461e177ae3445402168238f3ea15a2a3d2d3a37e3",
+    "task422-current-layout.log": "2130b2ce50771c2c2912016dcf762b047c88d96763cc5c30a12e86b040e81f88",
+    "task422-hover-geometry.log": "d41a29d949c77abe33bcd9914aeca59faf2641219a6faef11c7ea9e46d4014f5",
+    "task422-hover-geometry.json": "512af6d461262441785c408d6f4728e0eb214a811832695e7ebeb081ab50da03",
+    "task422-current-final.log": "22abdbba45590349f308e423313a069519249a357faf84693de7171c2e13f867",
+    "task422-current-unit.log": "1f805a9360e31aa1a413d6047f3fee9e6ace0716e9b584e2e76749c859fee4f8",
+    "task422-current-technician.log": "1a80282e28147a96b6036b726c4acdf1b0ad5d0c1c668b6a93d860af0fa373de",
+    "task422-current-syntax.log": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4"
+  },
+  "screenshots": {
+    "reports/field-ui/LEGACY_DRAFT_LANGUAGES_NOTES_DE_320.png": "c2315532146017641ee5bb736fe5ca0b167290a35ff12a20040d8c124133ff4b",
+    "reports/field-ui/LEGACY_DRAFT_LANGUAGES_PRODUCTS_DE_320.png": "f210756d6bf661a068ca8405aed33d0701d98796dcbd93a94bc88911290cf997",
+    "reports/field-ui/LEGACY_DRAFT_LANGUAGES_PENDING_DE_320.png": "92a3ea256618d9f88bc5a67c709f47dd682b476653b6e900fde03784c5a3aa1e"
+  },
+  "publication": {
+    "status": "local_validated",
+    "branch": "work/field-readiness-20260915-simulation",
+    "ci": {
+      "status": "not_started",
+      "expectedOrderedGroups": 322,
+      "restoration": "pending"
+    }
+  },
+  "previousNative": {
+    "task": "TASK421",
+    "commit": "a1e693222ac7ee4b5775ff9016d307cb6d86ce24",
+    "run": 36530531859,
+    "job": 109282983732,
+    "status": "in_progress",
+    "successfulSteps": 10,
+    "requiredGroups": 321,
+    "restoration": "pending"
+  },
+  "remaining": "TASK423: route-preview component; then shared chrome/write-store messages. C06 remains in execution. Annual legal contract remains deferred.",
+  "counts": {
+    "total": 32,
+    "notStarted": 26,
+    "inProgress": 1,
+    "completed": 5
+  },
+  "authorization": "Authorized work branch only; no merge, deployment or real contacts."
+}

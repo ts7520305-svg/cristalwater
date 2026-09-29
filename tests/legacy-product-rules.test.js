@@ -46,6 +46,22 @@ describe('Legacy product draft conversion without losing original text', () => {
   it('does not require a guide for an explicitly empty product list', () => {
     expect(rules.payload('', null)).toEqual({ products: '[]' }); expect(rules.payload('[]', null)).toEqual({ products: '[]' });
   });
+  for (const labels of [
+    {guide:'Guide',line:'line',none:'(none)'}, {guide:'Bon',line:'ligne',none:'(aucun)'},
+    {guide:'Guía',line:'línea',none:'(ninguno)'}, {guide:'Beleg',line:'Zeile',none:'(keine)'},
+  ]) it('localizes presentation labels without changing original data: '+labels.guide, () => {
+    const original='Original <script>raw</script>\nGuia não traduzida', encoded=rules.encode([row],original), before=encoded;
+    const text=rules.describe(encoded,labels);
+    expect(text).toContain(original);expect(text).toContain('Cloro · 0,25 · L · Original\nnotes');
+    expect(text).toContain(labels.guide+' 7 · '+labels.line+' 2');expect(rules.describe('[]',labels)).toBe(labels.none);
+    expect(rules.describe('',labels)).toBe(labels.none);expect(rules.describe('[broken',labels)).toBe('[broken');
+    expect(encoded).toBe(before);expect(rules.payload(encoded,stock)).toEqual(rules.payload(before,stock));
+  });
+  it('retains Portuguese defaults when no labels or only one label is supplied', () => {
+    const encoded=rules.encode([row],null);
+    expect(rules.describe(encoded)).toContain('Guia 7 · linha 2');expect(rules.describe('[]')).toBe('(nenhum)');
+    expect(rules.describe(encoded,{guide:'Ticket'})).toContain('Ticket 7 · linha 2');
+  });
   it('preserves old structured rows but requires reselection of a missing identity', () => {
     const old = JSON.stringify([{ name: 'Cloro', quantity: 1, unit: 'L' }]);
     expect(rules.read(old).kind).toBe('rows'); expect(() => rules.payload(old, stock)).toThrow(/Selecione novamente/);

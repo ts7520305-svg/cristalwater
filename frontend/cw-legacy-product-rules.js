@@ -40,10 +40,10 @@
     }
     return { products: JSON.stringify(products), ...(products.length ? { workGuideId: stock.workGuide.id, vehicleId: stock.workGuide.vehicleId } : {}) };
   }
-  function describe(raw) {
+  function describe(raw, labels = {}) {
     const value = read(raw); if (value.kind === 'text') return raw;
-    const rows = value.rows.map(row => [row.name ?? row.productName ?? '', row.quantity ?? '', row.unit ?? '', row.notes ?? '', ...(R.hasIdentity(row) ? ['Guia ' + (row.workGuideId ?? '?') + ' · linha ' + (row.workGuideItemId ?? '?')] : [])].join(' · '));
-    return [value.originalText, ...rows].filter(v => v !== null && v !== '').join('\n') || '(nenhum)';
+    const rows = value.rows.map(row => [row.name ?? row.productName ?? '', row.quantity ?? '', row.unit ?? '', row.notes ?? '', ...(R.hasIdentity(row) ? [(labels.guide ?? 'Guia') + ' ' + (row.workGuideId ?? '?') + ' · ' + (labels.line ?? 'linha') + ' ' + (row.workGuideItemId ?? '?')] : [])].join(' · '));
+    return [value.originalText, ...rows].filter(v => v !== null && v !== '').join('\n') || (labels.none ?? '(nenhum)');
   }
   return { read, encode, payload, describe, assignmentForCache };
 }));

@@ -151,6 +151,7 @@ scripts.push('test-field-route-preview.js');
 scripts.push('test-field-route-preview-ui.js');
 scripts.push('test-field-legacy-route-recovery.js');
 scripts.push('test-field-legacy-visit-drafts.js');
+scripts.push('test-field-legacy-draft-languages.js');
 scripts.push('test-field-modern-route-recovery.js');
 scripts.push('test-field-workday-recovery.js','test-field-workday-languages.js');
 scripts.push('test-field-visit-types.js');
