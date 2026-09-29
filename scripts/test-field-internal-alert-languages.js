@@ -25,6 +25,15 @@ process.on('exit',code=>{if(!code&&!completed)process.exitCode=1;});
   const context=await browser.newContext({viewport:{width:390,height:900}});
   await context.addInitScript(({token,tech,origin})=>{
     if(top!==window||location.origin!==origin)return;
+    // Alert recovery, the pageshow refresh and offline route hydration read
+    // independently. An enabled button alone does not mean boot has finished.
+    window.qaAlertBoot={pageshow:false,reads:0};
+    window.addEventListener('pageshow',()=>{qaAlertBoot.pageshow=true;},{once:true});
+    let writeStore;
+    Object.defineProperty(window,'CWFieldWriteStore',{configurable:true,get:()=>writeStore,set(value){
+      writeStore=value;const records=value.records;
+      value.records=async function(...args){qaAlertBoot.reads++;try{return await records.apply(this,args);}finally{qaAlertBoot.reads--;}};
+    }});
     if(!localStorage.getItem('qaAlertLanguageSession')){
       for(const key of ['token','cristalwater_jwt'])localStorage.setItem(key,token);
       for(const key of ['user','cristalwater_user'])localStorage.setItem(key,JSON.stringify({id:tech.id,name:tech.name,role:'TECHNICIAN'}));
@@ -98,7 +107,9 @@ process.on('exit',code=>{if(!code&&!completed)process.exitCode=1;});
   await wait(page,()=>CWFieldWriteStore.records('TECHNICIAN_ALERT').then(rows=>rows.length===1));
   const original=(await rows())[0], pendingRaw=await raw();
   assert.deepEqual(original.payload,{message,visitId:visit.id,priority:'HIGH'});assert.equal(original.label,'Alerta para a administração');assert.equal(requests.length,0);
-  await page.reload({waitUntil:'domcontentloaded'});await ready();await remember();
+  await page.reload({waitUntil:'domcontentloaded'});await ready();
+  await page.waitForFunction(()=>qaAlertBoot.pageshow&&qaAlertBoot.reads===0&&routeViewSource==='offline');
+  await remember();
   assert.equal(await raw(),pendingRaw);assert.equal(await page.locator('#internalAlert').inputValue(),message);
   assert.equal(await page.evaluate(()=>document.documentElement.lang),'de');assert.equal(await page.locator('#sendAlertBtn').textContent(),copy.de.confirm);
   await cycle(words=>[words.pending],'confirm');

@@ -1,5 +1,17 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 29/09/2026, TASK427 local / reposição offline dos alertas
+
+**TASK427 local validada.** Corrige a espera do teste de idiomas dos alertas após reload offline. CI424 terminou322/323: único erro de identidade dos nós na linha104; restauro ignorado. Log nativo completo e323 resultados estão na prova426; diagnóstico/correção na [prova427](evidence/20260929_task427_local.json). TASK426 (52 mensagens dos pedidos de material) já está publicada, CI325 em execução.
+
+**Reprodução controlada:**com a aplicação inalterada, leitura real da rota em IndexedDB retida: pageshow e leituras do alerta concluídos, botão ativo, mas rota por repor. A condição antiga já aceita; a nova ainda recusa. Libertar a leitura substitui as opções, sem mudar o idioma, a visita escolhida, os bytes do rascunho/pedido ou fazer um envio. Depois a nova condição aceita. A sequência exata do CI não foi capturada; esta prova reproduz a janela de corrida, sem alegar um trace do run original.
+
+**Correção/testes:**o init do teste observa pageshow e conta leituras reais do store; após reload espera rota offline e zero leituras pendentes antes de memorizar os nós. Permanecem asserções de identidade/foco/cursor/bloqueios/bytes/SQL, limites7s/90s e espera online anterior. Sem refresh manual, leitura retida, sleeps, cliques forçados ou repetições no teste publicado. Três grupos completos passaram: idiomas, API e UI dos alertas. node-check/diff-check aprovados; captura DE320 inspecionada. Unitários/sintaxe global não repetidos numa alteração só do teste;1 345 é prova426, não nova execução427.
+
+**Gates/publicação:**425/426 em execução na última consulta;427 exige325 grupos únicos na ordem exata e restauro128 tabelas/47 ficheiros com linhas/hashes iguais. Aplicação, catálogos, CSS, runner325/cache216 inalterados. Quatro ficheiros no lote, um teste e três documentação. Publicação427 ainda pendente.
+
+**Próximo TASK428:** confirmar CI425/426/427; corrigir nova falha antes de avançar. Depois rascunhos modernos de visita (`cw-field-visit-drafts.js`, C06-006), preservando campos/baseline/conflitos. Chrome/nav continua C08-025/026; outras entradas C06 não são encerradas por associação.32 tarefas=26 por iniciar/1 em execução/5 concluídas. Sem merge/deploy/contactos reais; contrato anual adiado. Entradas abaixo são históricas.
+
 ## Retoma atual — 29/09/2026, TASK426 publicada / pedidos de material
 
 **TASK426 publicada na branch autorizada.** Formulário de material do modo de campo em PT/EN/FR/ES/DE:52 chaves/260 valores, cache216/runner325. Reproduzido antes: idioma EN mas botão/estado/opções em PT. Etiquetas, opções, contexto, recuperação, erros próprios e texto de pendingSummary traduzidos; nomes, notas e erros brutos conservados. Só os nós próprios recebem marcadores; nav/cabeçalho partilhados mantêm o percurso existente. Instruções conservam os rótulos reais «Mais → Avisos». [Prova426](evidence/20260929_task426_local.json).

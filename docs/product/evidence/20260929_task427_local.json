@@ -1,0 +1,156 @@
+{
+  "task": "TASK427",
+  "date": "2026-09-29",
+  "baseCommit": "26cca9baf4d5ed0c3444e34022c7da8fb3f62971",
+  "scope": "C06 native acceptance: fix offline-reload readiness of the existing internal-alert language test. Production application, dictionaries, styles, runner325 and cache216 are unchanged.",
+  "native424": {
+    "task": 424,
+    "commit": "32b4fde7f578dca1e13bd215698a5f4912007621",
+    "run": 36541935848,
+    "job": 109319183700,
+    "status": "completed",
+    "conclusion": "failure",
+    "successfulSteps": 15,
+    "expectedCount": 323,
+    "passed": 322,
+    "unique": 323,
+    "orderedResultsMatch": true,
+    "failures": [
+      {
+        "script": "test-field-internal-alert-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 3087
+      }
+    ],
+    "restoration": "skipped",
+    "logCharacters": 384325,
+    "failureExcerpt": "2026-09-29T08:52:34.4921925Z PASS actual alert controls and local validation in five languages at 320/390/1440; stable nodes, focus, guards and zero submissions\n2026-09-29T08:52:34.4924175Z PASS draft quota blocks submissions; editable draft and missing visit context keep exact text, visit, HIGH enum, selection and bytes in five languages\n2026-09-29T08:52:34.4925120Z AssertionError [ERR_ASSERTION]: Locale must retain original form and option nodes\n2026-09-29T08:52:34.4925881Z     at cycle (/home/runner/work/cristalwater/cristalwater/scripts/test-field-internal-alert-languages.js:68:7)\n2026-09-29T08:52:34.4927067Z     at async /home/runner/work/cristalwater/cristalwater/scripts/test-field-internal-alert-languages.js:104:3 {\n2026-09-29T08:52:34.4927493Z   generatedMessage: false,\n2026-09-29T08:52:34.4927696Z   code: 'ERR_ASSERTION',\n2026-09-29T08:52:34.4927894Z   actual: false,\n2026-09-29T08:52:34.4928121Z   expected: true,\n2026-09-29T08:52:34.4928301Z   operator: '==',\n2026-09-29T08:52:34.4928471Z   diff: 'simple'\n2026-09-29T08:52:34.4928645Z }\n2026-09-29T08:52:34.4928740Z \n2026-09-29T08:52:35.8440224Z {\"script\":\"test-field-stock-requests.js\",\"code\":0,\"signal\":null,\"ms\":1349}\n2026-09-29T08:52:50.1397507Z {\"script\":\"test-field-stock-requests-ui.js\",\"code\":0,\"signal\":null,\"ms\":14294}\n2026-09-29T08:52:51.5916882Z {\"script\":\"test-field-problem-reports.js\",\"code\":0,\"signal\":null,\"ms\":1450}"
+  },
+  "fullNativeEvidence": "docs/product/evidence/20260929_task426_local.json: native424.results (all323 exact ordered rows)",
+  "reproduction": {
+    "probe": {
+      "script": "/workspace/scratch/0e7a196f6955/qa/probe-task427-offline-read.cjs",
+      "code": 0,
+      "ms": 10728
+    },
+    "controlledWindow": {
+      "before": {
+        "boot": {
+          "pageshow": true,
+          "alertReads": 0,
+          "routeReads": 1,
+          "allReads": 1,
+          "events": [
+            "pageshow",
+            "route-read-held"
+          ]
+        },
+        "oldReadyPredicate": true,
+        "source": "",
+        "newReadyPredicate": false,
+        "originalOptionsConnected": true,
+        "selected": "1",
+        "label": "Besuch 1 · Kontext mit dem Büro klären",
+        "language": "de"
+      },
+      "after": {
+        "boot": {
+          "pageshow": true,
+          "alertReads": 0,
+          "routeReads": 0,
+          "allReads": 0,
+          "events": [
+            "pageshow",
+            "route-read-held",
+            "route-read-released"
+          ]
+        },
+        "oldReadyPredicate": true,
+        "source": "offline",
+        "newReadyPredicate": true,
+        "originalOptionsConnected": false,
+        "selected": "1",
+        "label": "Besuch 1 · Piscina Original <b>Azul</b>",
+        "language": "de"
+      },
+      "unchangedModule": true,
+      "sameDraftAndRequest": true,
+      "requests": 0
+    },
+    "mechanism": "Unmodified application, real service-worker offline reload and genuine IndexedDB data. Probe holds only the direct loadRoute VISIT_COMPLETION read after it resolves; alert reads and pageshow finish independently. Old enabled-button predicate is true with route read still held and routeViewSource empty. Releasing it renders the cached route, replaces remembered option nodes and retains the same language/selected visit/draft/request with zero HTTP submissions. New predicate remains false before and becomes true after route hydration and all reads complete.",
+    "qualification": "Native failure itself records detached option identity at line104, not the precise scheduling trace. The controlled local probe reproduces that readiness gap and replacement without a language change; it is not described as a recording of the original CI interleaving. An exploratory broad-stack hook also held a nested draft read; final probe targets only the direct loadRoute caller."
+  },
+  "change": {
+    "testBootTracking": "Init script observes first pageshow and counts public records calls, forwarding the same arguments/receiver/results/errors to the genuine store. The production module remains unchanged and no data is mocked in the committed test.",
+    "reloadBarrier": "After real offline reload and the original ready check, require pageshow observed, zero unfinished local records reads and routeViewSource===offline before the original remember() and language cycles.",
+    "preserved": "All original node/option identity, focus/caret, guards, bytes, UUID/payload/hash/receipt, lost-response/SQL and layout assertions remain. Default7000ms and90000ms deadline unchanged; no sleeps, forced clicks, automatic reruns, manual refresh, artificial read hold or source edits in the committed test. Existing online-route wait remains in place."
+  },
+  "validation": {
+    "integrated": [
+      {
+        "script": "scripts/test-field-internal-alert-languages.js",
+        "code": 0,
+        "ms": 28395
+      },
+      {
+        "script": "scripts/test-field-internal-alert.js",
+        "code": 0,
+        "ms": 3922
+      },
+      {
+        "script": "scripts/test-field-internal-alert-ui.js",
+        "code": 0,
+        "ms": 13985
+      }
+    ],
+    "nodeCheckAndDiffCheck": true,
+    "newUnitOrFullSyntaxRun": false,
+    "reason": "Only the existing browser test changes. Application still has TASK426 unit/syntax acceptance; those executions are not represented as rerun for TASK427.",
+    "markers": [
+      "PASS actual alert controls and local validation in five languages at 320/390/1440; stable nodes, focus, guards and zero submissions",
+      "PASS draft quota blocks submissions; editable draft and missing visit context keep exact text, visit, HIGH enum, selection and bytes in five languages",
+      "PASS real service-worker offline reload retains original alert UUID/payload/hash/owner and exact draft bytes; five-language pending state at three widths",
+      "PASS literal server error and language changes during a committed POST with lost acknowledgement preserve one SQL alert and the original pending request",
+      "PASS receipt plus failed draft cleanup stays translated and recoverable; clear sends nothing, original receipt remains exact, ADMIN alert exists once and reading is not claimed",
+      "PASS real cross-tab conflict, corrupt/invalid draft, missing request and conflicting draft remain blocked, translated and byte-preserving",
+      "PASS changed account cannot expose/send the original draft or receipt; translated session guard preserves the original bytes; no injected markup or browser errors"
+    ],
+    "coverage": "Complete five-language test plus unchanged API and UI groups. Covers offline reload, original pending UUID/hash/owner/text,320/390/1440, quota, literal errors, lost response with one SQL alert, confirmed draft cleanup, two windows, corruption and account switch.",
+    "screenshot": {
+      "path": "reports/field-ui/INTERNAL_ALERT_LANGUAGES_PENDING_DE_320.png",
+      "sha256": "ebcf41389c2a382f2bb9113ab3fa8a69998af44cfe9bed6208b19c9aa7e22083"
+    }
+  },
+  "fileHashes": {
+    "scripts/test-field-internal-alert-languages.js": "fb9820e2ae964e85c16b6ed6b6f58f82c30f4a99ce5d7404ee7ad77a11c370da"
+  },
+  "logHashes": {
+    "task427-offline-read-final.log": "c58754570326f24c38109b894054164d628c45adbba771b55d3026a294e631ab",
+    "task427-regressions.log": "212f91d8fb241618da9c9c6722bc40bcc63f02683ef2733b551e885282a722bb"
+  },
+  "publication": {
+    "status": "ready",
+    "branch": "work/field-readiness-20260915-simulation",
+    "ci": {
+      "status": "not_started",
+      "expectedOrderedGroups": 325,
+      "restoration": "pending"
+    }
+  },
+  "previousGates": "TASK424 failed322/323, restoration skipped. TASK425 and426 still in progress at latest GitHub query. TASK423 remains the last confirmed323-group/restoration proof; later versions need their own gates.",
+  "next": "TASK428: check CI425/426/427; resolve any new failure first, then modern visit-draft owned copy in cw-field-visit-drafts.js/C06-006. Shared chrome/nav C08-025/026 and other inventory entries remain pending.",
+  "counts": {
+    "total": 32,
+    "notStarted": 26,
+    "inProgress": 1,
+    "completed": 5
+  },
+  "authorization": "Authorized branch only; no merge, VPS deployment or real contacts. Annual legal contract deferred.",
+  "changedFiles": [
+    "scripts/test-field-internal-alert-languages.js",
+    "docs/product/CURRENT_WORK_CHECKPOINT.md",
+    "docs/product/COMPLETION_PLAN_20260928.md",
+    "docs/product/evidence/20260929_task427_local.json"
+  ]
+}
