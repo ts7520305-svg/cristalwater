@@ -8,7 +8,15 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
-## Progresso funcional — TASK437 / resumos de ocorrências
+## Progresso funcional — TASK438 / mensagens do formulário de ocorrências
+
+`cw-field-problem-report.js`: rótulos, opções, atributos acessíveis, contexto, gravação e recuperação localizados em PT/EN/FR/ES/DE. 49 entradas/245 textos novos e dois avisos antigos reutilizados. Valores das opções/campos e textos de origem conservados; eventos de idioma só repintam associações de apresentação. Erros próprios conservam Error.message português, com cópia de apresentação privada; detalhes externos e erros do servidor ficam literais. Catálogo/construtor dos resumos437 inalterados; classificação do legado independente do idioma mostrado. Cache223/runner332; [prova438](evidence/20260929_task438_local.json).
+
+Novo grupo e três regressões aprovados. Cinco idiomas/320/390/1440, valores/bytes/UUID/payload/hash/recibos/nós/foco/seleção/bloqueios preservados, sem novas leituras/envios por mudar idioma. Quota, recuperação fechada, contexto diferente, recusa403, lock ocupado, offline/cache, resposta retida, falha de limpeza após confirmação, conflito entre janelas, rascunho ilegível, pedido ausente/incompatível e troca de conta cobertos. Preparação aguarda sincronização de lembretes no arranque/reconexão antes de medir os pedidos. Sintaxe, 1 356 unitários e quatro técnicos aprovados; captura alemã320 revista.
+
+**Limites:** publicação pendente de privacidade e aceitação nativa PostgreSQL16/suite332/restauro; cabeçalho/subtítulo comuns da secção e navegação continuam C08-025/026. C06/C06-003 não encerradas. Próximo: formulário/banner de impedimentos; permanecem equipamento, painéis de passagem/receção e outras fontes do inventário. Contagens estáticas TASK415 não recalculadas; histórico abaixo conserva o âmbito à data.
+
+## Histórico funcional — TASK437 / resumos de ocorrências
 
 `cw-field-problem-report.js` captura textos PT/EN/FR/ES/DE para rascunho por enviar, ocorrência por confirmar/bloqueada, falha ao guardar e avisos de histórico antigo válido/ilegível, incluindo contexto sem associação. Sete entradas/35 textos. JSON `{kind,text}` português conservado; fotografia adicional imutável e não enumerável. A revisão existente escolhe o idioma sem reler o produtor nem alterar dados. Cache222/runner331; [prova437](evidence/20260929_task437_local.json).
 

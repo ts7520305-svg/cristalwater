@@ -1,0 +1,349 @@
+{
+  "task": "TASK438",
+  "date": "2026-09-29",
+  "branch": "work/field-readiness-20260915-simulation",
+  "baseCommit": "b159381824aff0e48fcacce95fb0731c1a042ef8",
+  "status": "local_validated_publication_held_pending_repository_privacy",
+  "scope": {
+    "responsibility": "Localize occurrence form presentation and recovery states while preserving original inputs, option values, Portuguese error messages and operational writes",
+    "files": [
+      "frontend/cw-field-problem-report.js",
+      "frontend/sw.js",
+      "scripts/test-field-suite.js",
+      "scripts/test-field-problem-form-languages.js",
+      "docs/product/CURRENT_WORK_CHECKPOINT.md",
+      "docs/product/COMPLETION_PLAN_20260928.md",
+      "docs/product/LANGUAGE_INVENTORY_20260928.md",
+      "docs/product/evidence/20260929_task438_local.json"
+    ],
+    "fileCount": 8,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "newFormMessageEntries": 49,
+    "newPresentationStrings": 245,
+    "existingLegacyEntriesReused": 2,
+    "cache": 223,
+    "runnerGroups": 332,
+    "sharedSectionHeaderAndNavigationTranslated": false,
+    "backendChanged": false,
+    "schemaChanged": false,
+    "writeStoreChanged": false,
+    "consumerChanged": false,
+    "timeoutsIncreased": false,
+    "retriesAdded": false
+  },
+  "before": {
+    "script": "test-field-problem-form-languages.js",
+    "code": 1,
+    "signal": null,
+    "ms": 6033,
+    "timedOut": false,
+    "expectedFailure": true,
+    "symptom": "The form draft-saved status remains Portuguese after selecting English.",
+    "assertion": "en: missing Draft saved on this device; not sent yet. in Rascunho guardado neste dispositivo; ainda não enviado."
+  },
+  "intermediateTestPreparation": [
+    {
+      "script": "test-field-problem-form-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 16329,
+      "timedOut": false,
+      "mainFormAndQuotaCasesPassed": true,
+      "failure": "One operational request occurred during a language cycle after reconnection; the first assertion did not yet include its endpoint."
+    },
+    {
+      "script": "test-field-problem-form-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 17263,
+      "timedOut": false,
+      "mainFormAndQuotaCasesPassed": true,
+      "failure": "The diagnostic identifies GET /api/technician/pump-reminders during the post-reconnection cycle."
+    },
+    {
+      "script": "test-field-problem-form-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 21896,
+      "timedOut": false,
+      "mainFormQuotaRecoveryAndConfirmationCasesPassed": true,
+      "failure": "A later fresh-page corrupt-draft case overlaps initial GET /api/technician/water-reminders and GET /api/technician/pump-reminders."
+    }
+  ],
+  "testPreparationResolution": {
+    "cause": "CWFieldReminders starts a real serialized water/pump synchronization on online and on initial load; form readiness alone does not await it.",
+    "source": "frontend/cw-field-reminders.js: sync() exposes a completion promise and is called on online and initial load.",
+    "change": "Await the existing CWFieldReminders.sync() completion during initial-page setup and after reconnecting, before capturing the language-cycle request baseline.",
+    "requestAssertionRetained": true,
+    "requestsFilteredOut": false,
+    "applicationChangedForThisIssue": false,
+    "sleepsAdded": false,
+    "timeoutsIncreased": false,
+    "automaticRetriesAdded": false
+  },
+  "browserGroups": [
+    {
+      "script": "test-field-problem-form-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 25216,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-problem-reports-ui.js",
+      "code": 0,
+      "signal": null,
+      "ms": 30972,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-review-problem-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 31962,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-problem-reports.js",
+      "code": 0,
+      "signal": null,
+      "ms": 6069,
+      "timedOut": false
+    }
+  ],
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 261151,
+      "log": "gate-syntax.log"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 31362,
+      "log": "gate-unit.log"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 2710,
+      "log": "gate-technician.log"
+    }
+  ],
+  "counts": {
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44
+    },
+    "unit": {
+      "passed": 1356,
+      "files": 138,
+      "failed": 0
+    },
+    "technician": {
+      "passed": 4,
+      "failed": 0
+    },
+    "nodeChecks": 4,
+    "diffCheck": true
+  },
+  "coverage": {
+    "realFormAndFourOriginalValues": true,
+    "fiveLanguagesAtWidths": [
+      320,
+      390,
+      1440
+    ],
+    "optionValuesAndTextareaPreserved": true,
+    "draftLegacyAndOutboxBytesPreserved": true,
+    "uuidPayloadHashFailureAndReceiptPreserved": true,
+    "sameNodesFocusAndTextSelection": true,
+    "visibilityDisabledAndReadOnlyStatesPreserved": true,
+    "noProducerReadsOrOperationalRequestsOnLocaleChange": true,
+    "directDocumentLanguageMutation": true,
+    "quotaPreservesUnsavedTextAndPriorSavedBytes": true,
+    "closedFormRecovery": true,
+    "differentVisitContextLocksSubmission": true,
+    "blocked403ResponseThroughRealForm": true,
+    "externalServerAndBrowserErrorDetailsStayLiteral": true,
+    "unavailableCrossWindowLock": true,
+    "legacyAndOfflineReloadCurrentCache": true,
+    "heldRealReceiptReleasedInCurrentLanguage": true,
+    "confirmedDraftCleanupFailureRetainsReceiptAndText": true,
+    "explicitCleanupDoesNotCreateSecondOccurrence": true,
+    "crossTabConflict": true,
+    "corruptDraft": true,
+    "missingDraftRequest": true,
+    "mismatchedDraftRequest": true,
+    "accountChangeClearsVisibleInputsButPreservesOriginalStorage": true,
+    "visitAndSecondVisitUnchanged": true,
+    "repairsCreated": 1,
+    "internalNotificationsCreated": 1,
+    "pageErrors": 0,
+    "markupExecuted": false
+  },
+  "preservation": {
+    "unchangedDefinitions": {
+      "const blank=": true,
+      "const payloadFields=": true,
+      "const id=": true,
+      "const current=": true,
+      "const payload=": true,
+      "const samePayload=": true,
+      "const hasContent=": true,
+      "function active()": true,
+      "function show(": true,
+      "function clearConfirmed()": true,
+      "function open()": true,
+      "function close()": true
+    },
+    "summaryCatalogAndItemBuilderByteIdentical": true,
+    "runner": {
+      "before": 331,
+      "after": 332,
+      "unique": true,
+      "previousOrderPreserved": true
+    },
+    "beforeSHA256": "67b2fe98039bada667644000575bd1fe240a61ad9319846ebfe794ee08da0093",
+    "afterSHA256": "46b61175a27fcbb50fcf01b28536176b6d0efc06853601614905bc55f26383e8"
+  },
+  "implementation": {
+    "bindingStrategy": "Locally owned descriptors and private error WeakMap; repaint retained text/attribute bindings only on language event or document lang mutation.",
+    "ownErrorMessageContract": "Own errors retain their original Portuguese Error.message; displayed copies localize. External details and stored failure strings remain literal.",
+    "legacySummary": "Legacy classification now uses the return key of legacyNotice rather than comparing translated DOM text; the existing summary catalog and item builder are byte-identical."
+  },
+  "visual": {
+    "reviewed": "reports/field-ui/PROBLEM_FORM_DE_320.png",
+    "locale": "de",
+    "width": 320,
+    "observation": "German controls and draft-mismatch/legacy messages wrap within the narrow card. Original pool name and text containing markup/braces remain literal. Text selection and disabled recovery remain visible.",
+    "limit": "The shared section heading/subtitle and shared bottom navigation remain allocated to C08-025/026; this task does not accept every field page."
+  },
+  "environment": {
+    "database": "Isolated PGlite 0.5.8 / pglite-socket 0.2.11",
+    "browser": "Chromium153.0.0 via @sparticuz/chromium",
+    "schema": "Generated from current Prisma schema",
+    "externalContactsEnabled": false,
+    "backgroundJobsEnabled": false,
+    "productionDataUsed": false,
+    "browserTestIntervalsDisabledMs": [
+      15000,
+      30000,
+      60000
+    ],
+    "sessionProtectionIntervalsPreserved": true,
+    "nativePostgres16UpgradeFull332SuiteOrRestoreValidatedInThisTask": false
+  },
+  "privacy": {
+    "repository": "ts7520305-svg/cristalwater",
+    "lastApiObservation": "Conversation status check on 2026-09-29 immediately before TASK438",
+    "visibilityAtLastObservation": "public",
+    "linkedAccountAdminPermission": true,
+    "recheckedDuringImplementation": false,
+    "repositoryVisibilityChangeApplied": false,
+    "applicationOrVpsAccessAudited": false,
+    "billingPlanBudgetOrNameChanged": false,
+    "authorization": "User already authorized restricting outsiders; publication remains held until privacy is resolved."
+  },
+  "publication": {
+    "publicBaseCommit": "b2d51e445a18d3c0456197b73f90cb1363f6aa18",
+    "TASK434LocalCommit": "4f1538a8e638f177978b4935262365db25efd892",
+    "TASK435LocalCommit": "553c4027b7bb9b32fde4c0fc87d8fd90df9551a5",
+    "TASK436LocalCommit": "7c6c091fceeec7522b0751fa2f8f36554a819b3c",
+    "TASK437LocalCommit": "b159381824aff0e48fcacce95fb0731c1a042ef8",
+    "TASK434To437Published": false,
+    "TASK438Committed": false,
+    "TASK438Published": false,
+    "merged": false,
+    "deployed": false,
+    "nativeRun": null,
+    "condition": "Resolve repository privacy before publication; require exact 332-group native run and restore of 128 tables / 47 files for the final revision.",
+    "previousNativeEvidence": "20260929_task434_local.json; historical TASK431/433 passes do not accept TASK434–438."
+  },
+  "next": {
+    "completionCounts": {
+      "notStarted": 26,
+      "inProgress": 1,
+      "completed": 5,
+      "total": 32
+    },
+    "C06Closed": false,
+    "C06_003Closed": false,
+    "nextSource": "impediment form/banner",
+    "remaining": [
+      "equipment form/queue/time/material messages",
+      "handover/receipt panels",
+      "other C06 inventory sources"
+    ],
+    "sharedNavigationAndSectionChrome": "C08-025/026",
+    "annualContractDeferred": true
+  },
+  "logDigests": [
+    {
+      "name": "run-1790699647606/test-field-problem-form-languages.js.log",
+      "bytes": 510,
+      "sha256": "e142de344ebcbdb8a2b91641b5381e91ae3ec0a34efceeadddc47793721a5029"
+    },
+    {
+      "name": "run-1790699877785/test-field-problem-form-languages.js.log",
+      "bytes": 617,
+      "sha256": "37fd4789f908bbd5b28ffb0f63fe58692c36cfe2d0265a00a9147e147a3fc84c"
+    },
+    {
+      "name": "run-1790699877785/test-field-problem-reports-ui.js.log",
+      "bytes": 791,
+      "sha256": "f32b968a5170da3ff4adaf97fc84fcd1166b3ff864dfafd127dba7a268db4cef"
+    },
+    {
+      "name": "run-1790699877785/test-field-review-problem-languages.js.log",
+      "bytes": 530,
+      "sha256": "0e26979397c40e1b301343305a22d677f8e62d77768f05bedd75dc37ca98f88d"
+    },
+    {
+      "name": "run-1790699877785/test-field-problem-reports.js.log",
+      "bytes": 502,
+      "sha256": "a054e55ddba92e8f2ed37209a7c00f4eb6176ec914848882e914cd01d657fad8"
+    },
+    {
+      "name": "run-1790699981828/test-field-problem-form-languages.js.log",
+      "bytes": 677,
+      "sha256": "7464109d1a9bf81451e67c5ff7d6aff54cf350e10c57e8c7f29744db0e2c61f7"
+    },
+    {
+      "name": "run-1790700097428/test-field-problem-form-languages.js.log",
+      "bytes": 873,
+      "sha256": "b0cc1db3ab65e219da809c02f430b86a6e160bf34201c935d3f3bbaa9ad9a36a"
+    },
+    {
+      "name": "run-1790700189926/test-field-problem-form-languages.js.log",
+      "bytes": 428,
+      "sha256": "fccc3d7dea9143ac285eee2eea90c69b7d511fcce172ff7846bc29f239f34dbb"
+    },
+    {
+      "name": "gate-syntax.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "gate-unit.log",
+      "bytes": 400,
+      "sha256": "c3431bbf5b30e9829bac265a96e8f8d0cae3de67cc738253237ee17d722a8027"
+    },
+    {
+      "name": "gate-technician.log",
+      "bytes": 431,
+      "sha256": "6af54af6472340cc334cd030f9faffaae20cae57a7ccc3a544c8f702a1067401"
+    }
+  ]
+}
