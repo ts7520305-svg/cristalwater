@@ -160,10 +160,17 @@
     "reports/field-ui/ROUTE_PREVIEW_LANGUAGES_CONTROLS_DE_320.png": "a02d8550675277e2f5ea956e48c678eade6984e88ab13a3d688a80113c3bf9d4"
   },
   "publication": {
-    "status": "local_validated",
+    "status": "published",
     "branch": "work/field-readiness-20260915-simulation",
+    "commit": "db0a9435497eadf188376ee4978a85805305cd80",
+    "tree": "94ebc8ee1d8ad7f02f2be2ed640ca33de44eaf4d",
+    "localRemoteTreeEqual": true,
     "ci": {
-      "status": "not_started",
+      "run": 36536885893,
+      "job": 109302869348,
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulSteps": 5,
       "expectedOrderedGroups": 323,
       "restoration": "pending"
     }
@@ -185,5 +192,10 @@
     "inProgress": 1,
     "completed": 5
   },
-  "authorization": "Authorized work branch only. No merge, VPS deployment or real contacts; annual legal contract deferred."
+  "authorization": "Authorized work branch only. No merge, VPS deployment or real contacts; annual legal contract deferred.",
+  "nextPreparation": {
+    "source": "frontend/cw-field-write-store.js",
+    "fixedErrorLiteralsFound": 67,
+    "limit": "Initial lexical inventory of Error(quoted literal); review variable expressions, callers and loading order before implementation. No write-store code changed in423."
+  }
 }

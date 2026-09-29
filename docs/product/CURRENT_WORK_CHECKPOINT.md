@@ -1,8 +1,8 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 29/09/2026, TASK423 local / pré-visualização
+## Retoma atual — 29/09/2026, TASK423 publicada / pré-visualização
 
-**TASK423 validada localmente; publicar na branch autorizada.** Pré-visualização por proximidade em PT/EN/FR/ES/DE: 26 chaves/130 valores novos, catálogo 186/930; cache214, runner323. Controlos, estados GPS/rede/conta, respostas recusadas, visitas sem coordenadas, singular/plural e hora da consulta traduzidos nos mesmos nós. Dia ISO, nomes, URLs, dados e mensagens originais conservados; a troca de idioma não obtém GPS nem inicia pedidos operacionais. [Prova423](evidence/20260929_task423_local.json).
+**TASK423 publicada na branch autorizada.** Pré-visualização por proximidade em PT/EN/FR/ES/DE: 26 chaves/130 valores novos, catálogo 186/930; cache214, runner323. Controlos, estados GPS/rede/conta, respostas recusadas, visitas sem coordenadas, singular/plural e hora da consulta traduzidos nos mesmos nós. Dia ISO, nomes, URLs, dados e mensagens originais conservados; a troca de idioma não obtém GPS nem inicia pedidos operacionais. [Prova423](evidence/20260929_task423_local.json).
 
 **Validação423:** 1 332 unitários/136 ficheiros, quatro técnicos, sintaxe695/308/44, node-check/diff-check; cinco integrações aprovadas (novo grupo de idiomas, API/UI anteriores, idiomas da página e rascunhos). Cinco idiomas a320/390/1440 nos estados principais; oito respostas inválidas, GPS/rede, atraso após troca de dia/conta, fecho e reload offline. Visitas SQL iguais, zero escritas/auditorias operacionais. O teste novo passou a aguardar o redesenho real da rota após recuperar rede, em vez de silêncio global; sem aumentar limites ou enfraquecer asserções anteriores. Capturas DE320 do resumo e botões inspecionadas. O calendário nativo segue a apresentação do navegador; chrome partilhado ainda tem texto PT.
 
@@ -10,7 +10,9 @@
 
 **Gates pendentes:** TASK422 run36534583004/job109295609200 em execução na última consulta, dez etapas aprovadas; exige322 grupos/restauro próprios. TASK423 exige323 grupos exatos/restauro no seu commit. Não atribuir o sucesso421 a versões posteriores.
 
-**Próximo TASK424:** mensagens próprias de `cw-field-write-store.js` (C06-006). Confirmar os consumidores e a ordem de carregamento; preservar textos de falhas já guardados, UUID/payload/hash/recibo e protocolos. Chrome/nav partilhados têm responsabilidade C08-025/C08-026 no inventário e continuam por rever em lote próprio. Outras entradas C06 não ficam automaticamente concluídas. Dez ficheiros neste lote;32 tarefas =26 por iniciar/1 em execução(C06)/5 concluídas. Sem merge/deploy/contactos reais; contrato anual adiado. Entradas abaixo são históricas.
+**Publicação423:** commit `db0a9435497eadf188376ee4978a85805305cd80`, árvore `94ebc8ee1d8ad7f02f2be2ed640ca33de44eaf4d`; igualdade local/remota e checkout limpo confirmados. [CI36536885893](https://github.com/ts7520305-svg/cristalwater/actions/runs/36536885893), job109302869348, em execução; cinco etapas aprovadas na primeira consulta. Esta confirmação documental usa[skip ci]; não substitui os323 grupos/restauro do commit de código.
+
+**Próximo TASK424:** mensagens próprias de `cw-field-write-store.js` (C06-006). Sondagem inicial encontrou67 literais fixos Error(...), sem contar todas as expressões variáveis. Confirmar os consumidores e a ordem de carregamento; preservar textos de falhas já guardados, UUID/payload/hash/recibo e protocolos. Chrome/nav partilhados têm responsabilidade C08-025/C08-026 no inventário e continuam por rever em lote próprio. Outras entradas C06 não ficam automaticamente concluídas. Dez ficheiros neste lote;32 tarefas =26 por iniciar/1 em execução(C06)/5 concluídas. Sem merge/deploy/contactos reais; contrato anual adiado. Entradas abaixo são históricas.
 
 ## Retoma atual — 29/09/2026, TASK422 publicada / rascunhos e diferenças
 
