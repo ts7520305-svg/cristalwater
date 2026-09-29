@@ -1,5 +1,17 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 29/09/2026, TASK447 local validada / painel de fotografias
+
+**TASK447 / C06-012:** painel moderno de fotografias em PT/EN/FR/ES/DE: 38 entradas/190 textos para títulos, botões, tipos, seleção, estados, alternativas de imagem, feedback e avisos próprios. Trocar idioma repinta texto/atributos dos mesmos nós, conservando inputs, detalhes abertos, foco, rascunhos, ficheiros e pedidos. Nomes e falhas externas continuam literais. [Prova447](evidence/20260929_task447_local.json).
+
+**Validação:** falha inicial inglesa reproduzida3 865ms. Quatro integrações aprovadas: painel24 993ms, erros de fotografias16 024ms, sessão2 921ms e E2E48 511ms. Cinco idiomas/320/390/1440; cancelamento, MIME/ficheiro vazio, quota, câmara indisponível, remoção offline, recarregamento cache e seleção numa visita diferente cobertos. REGULAR/EXTRA do mesmo ID mantêm ficheiros separados. Resposta real extra retida/perdida e repetida conserva UUID/bytes/nome/tipo/piscina/payload/hash, deixando uma fotografia/um recibo e ambas as visitas SQL inalteradas. Confirmação e falha de preview traduzem sem novo envio/fetch. 1 356 unitários/138 ficheiros, quatro técnicos e sintaxe695/308/44 aprovados.
+
+**Correções encontradas no ensaio:** botão alemão ultrapassava o painel a320px; quebra de texto e duas colunas nas ações pequenas corrigidas e captura final revista. O teste passou a aguardar a sincronização real dos lembretes ao recuperar a rede antes de medir pedidos causados pelo idioma; nenhuma guarda/listener de produto foi desligada. Sobreposição da navegação fixa comum na captura longa continua C08.
+
+**Preservação/limites:** sete funções idênticas após inverter apenas apresentação. Backend/schema/workflows/helper de fotografias/write-store inalterados. Cache231/runner340, os339 grupos anteriores na mesma ordem. PGlite/Chromium153 não substituem PostgreSQL16/upgrade/suite340/restauro128 tabelas47ficheiros. C06/C06-012/C08/C10 abertas. Nove ficheiros.32=26 por iniciar/uma em execução/cinco concluídas.
+
+**Publicação/retoma:** publicar447 e confirmar gates próprios; CI44636623638975 continua na suite339 após dez etapas aprovadas na última consulta, restauro pendente. Depois de corrigir eventuais falhas nativas, continuar o helper antigo `frontend/js/offline/offline-photos.js`/C06-010 e os seus consumidores reais; os restantes painéis modernos ficam por localizar. Público durante desenvolvimento autorizado; privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Entradas abaixo são históricas.
+
 ## Publicação confirmada — 29/09/2026, TASK446 / CI em execução
 
 TASK446 publicada na branch `work/field-readiness-20260915-simulation`: código `6ca81c6d008d838ef05a2a2d810331e7e124d7ac`, árvore `39e0ad27ab9d814a83c08186758a17903a21a902`, igual à validada; checkout alinhado e histórico local preservado. [CI36623638975](https://github.com/ts7520305-svg/cristalwater/actions/runs/36623638975), job109594988678, arrancou no commit exato; 10 etapas aprovadas, etapa atual: `Run node scripts/test-field-suite.js`. Seis integrações locais aprovadas; as três falhas de testes dos CI441/442 estão corrigidas neste commit, sem alterar produto/cache230/runner339. Exigir PostgreSQL16/upgrade/suite339/restauro128 tabelas47ficheiros antes da aceitação. Atualização documental posterior `[skip ci]` não altera o código. [Prova446](evidence/20260929_task446_local.json).

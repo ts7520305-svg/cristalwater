@@ -8,6 +8,12 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
+## Progresso funcional — TASK447 / painel moderno de fotografias
+
+`technician-field-mode.html/js`, C06-012:38 entradas/190 textos em PT/EN/FR/ES/DE para títulos/aria, botões, tipos, estados, seleção/armazenamento, toasts e alternativas de imagem. Textos próprios repintam os mesmos nós; ficheiros, nomes literais, rascunhos, seleção, foco, pedido e recibo preservados. Ajuste local das ações a320px resolve o excesso de largura alemão. Cache231/runner340;339 grupos anteriores na ordem exata. [Prova447](evidence/20260929_task447_local.json).
+
+Quatro integrações,1 356 unitários/quatro técnicos/sintaxe aprovados. Cinco idiomas/320/390/1440; falhas de seleção/ficheiro/quota/câmara, remoção offline, cache, visitas REGULAR/EXTRA com igual ID, resposta extra real retida/perdida/reenvio, uma fotografia/um recibo e visitas SQL intactas. Captura alemã320 revista; sobreposição comum da navegação fixa continua C08. Sete funções operacionais iguais após inverter apresentação; backend/schema/workflows/helper/write-store inalterados. Publicação/gates340/restauro próprios pendentes; CI446 continua na suite339. C06/C06-012 abertas: helper antigo `js/offline/offline-photos.js`/C06-010 e restantes painéis modernos ainda por localizar. C08/C10 e inventário estático415 não fechados por associação.
+
 ## Validação de continuidade — TASK446 / testes dos idiomas e impedimentos
 
 CI441 (333/335) e CI442 (334/336) revelaram três erros nos testes: página protegida após perda de sessão, pendência extra sem regresso e escolha de alemão dependente de capturas opcionais. Todos reproduzidos; testes corrigidos para reabrir a página real preservando dados, verificar pendências por ID/tipo e escolher o idioma sempre. Seis integrações aprovadas, incluindo química com/sem capturas e regressões de impedimentos/sessão. Aplicação/cache230/runner339 e ordem inalterados; gates de produto445 conservados, sem nova contagem de traduções. TASK445 publicada `19ad9727`, CI36622422522 na suite; publicação/gates nativos446 pendentes. [Prova446](evidence/20260929_task446_local.json).

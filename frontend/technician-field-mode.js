@@ -54,6 +54,78 @@
     photoErrorLanguage = document.documentElement.lang; repaintPhotoErrors();
   }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
 
+  const photoUiBindings = new WeakMap();
+  const photoUiMessages = {
+    title: ['Fotografias', 'Photographs', 'Photographies', 'Fotografías', 'Fotos'],
+    section: ['Fotografias da visita', 'Visit photographs', 'Photographies de la visite', 'Fotografías de la visita', 'Fotos des Besuchs'],
+    quick: ['registo rapido', 'quick record', 'enregistrement rapide', 'registro rápido', 'schnelle Erfassung'],
+    beforeButton: ['Foto antes', 'Before photo', 'Photo avant', 'Foto antes', 'Foto vorher'],
+    afterButton: ['Foto depois', 'After photo', 'Photo après', 'Foto después', 'Foto nachher'],
+    problemButton: ['Foto problema', 'Problem photo', 'Photo du problème', 'Foto del problema', 'Problemfoto'],
+    gallery: ['Câmara indisponível? Escolher do telemóvel', 'Camera unavailable? Choose from your phone', 'Appareil photo indisponible ? Choisir sur le téléphone', '¿Cámara no disponible? Elegir del teléfono', 'Kamera nicht verfügbar? Vom Telefon auswählen'],
+    type: ['Tipo de fotografia', 'Photograph type', 'Type de photographie', 'Tipo de fotografía', 'Art des Fotos'],
+    before: ['Antes', 'Before', 'Avant', 'Antes', 'Vorher'],
+    after: ['Depois', 'After', 'Après', 'Después', 'Nachher'],
+    problem: ['Problema', 'Problem', 'Problème', 'Problema', 'Problem'],
+    access: ['Acesso', 'Access', 'Accès', 'Acceso', 'Zugang'],
+    record: ['Registo', 'Record', 'Enregistrement', 'Registro', 'Dokumentation'],
+    choose: ['Escolher fotografia guardada', 'Choose a saved photograph', 'Choisir une photographie enregistrée', 'Elegir una fotografía guardada', 'Gespeichertes Foto auswählen'],
+    empty: ['Ainda sem fotografias nesta visita.', 'No photographs for this visit yet.', 'Aucune photographie pour cette visite pour le moment.', 'Todavía no hay fotografías de esta visita.', 'Noch keine Fotos für diesen Besuch.'],
+    sync: ['Sincronizar fotografias', 'Synchronize photographs', 'Synchroniser les photographies', 'Sincronizar fotografías', 'Fotos synchronisieren'],
+    uploaded: ['Sincronizada no registo', 'Synchronized with the record', 'Synchronisée avec le dossier', 'Sincronizada con el registro', 'Mit dem Datensatz synchronisiert'],
+    uploading: ['A enviar...', 'Sending...', 'Envoi...', 'Enviando...', 'Wird gesendet...'],
+    pending: ['Pendente por sincronizar', 'Awaiting synchronization', 'En attente de synchronisation', 'Pendiente de sincronización', 'Synchronisierung ausstehend'],
+    alt: ['Fotografia {kind}', 'Photograph: {kind}', 'Photographie : {kind}', 'Fotografía: {kind}', 'Foto: {kind}'],
+    file: ['Foto do servico', 'Service photograph', 'Photographie du service', 'Fotografía del servicio', 'Servicefoto'],
+    send: ['Enviar', 'Send', 'Envoyer', 'Enviar', 'Senden'],
+    remove: ['Remover', 'Remove', 'Supprimer', 'Eliminar', 'Entfernen'],
+    savedAlt: ['Fotografia guardada no servidor; ligue à rede para consultar.', 'Photograph saved on the server; connect to view it.', 'Photographie enregistrée sur le serveur ; connectez-vous pour la consulter.', 'Fotografía guardada en el servidor; conéctese para verla.', 'Foto auf dem Server gespeichert; stellen Sie eine Verbindung her, um es anzusehen.'],
+    session: ['A sessão mudou. Reabra a página com a conta original.', 'The session changed. Reopen the page with the original account.', 'La session a changé. Rouvrez la page avec le compte d’origine.', 'La sesión cambió. Abra la página con la cuenta original.', 'Die Sitzung wurde geändert. Öffnen Sie die Seite mit dem ursprünglichen Konto erneut.'],
+    inactive: ['Sem visita ativa', 'No active visit', 'Aucune visite active', 'No hay una visita activa', 'Kein aktiver Besuch'],
+    confirmed: ['Fotografia confirmada pelo servidor.', 'Photograph confirmed by the server.', 'Photographie confirmée par le serveur.', 'Fotografía confirmada por el servidor.', 'Foto vom Server bestätigt.'],
+    alreadySynced: ['Fotografias ja sincronizadas.', 'Photographs already synchronized.', 'Photographies déjà synchronisées.', 'Fotografías ya sincronizadas.', 'Fotos bereits synchronisiert.'],
+    stillPending: ['Ainda existem fotos pendentes.', 'Some photographs are still pending.', 'Certaines photographies sont encore en attente.', 'Todavía hay fotografías pendientes.', 'Einige Fotos sind noch ausstehend.'],
+    synced: ['Fotografias sincronizadas.', 'Photographs synchronized.', 'Photographies synchronisées.', 'Fotografías sincronizadas.', 'Fotos synchronisiert.'],
+    cameraFailed: ['Não foi possível abrir a câmara. Use a opção de fotografia guardada no telemóvel.', 'Could not open the camera. Choose a photograph saved on your phone.', 'Impossible d’ouvrir l’appareil photo. Choisissez une photographie enregistrée sur le téléphone.', 'No se pudo abrir la cámara. Elija una fotografía guardada en el teléfono.', 'Die Kamera konnte nicht geöffnet werden. Wählen Sie ein auf dem Telefon gespeichertes Foto.'],
+    selectionChanged: ['A visita ou a sessão mudou. Escolha novamente a fotografia na visita correta.', 'The visit or session changed. Select the photograph again for the correct visit.', 'La visite ou la session a changé. Sélectionnez à nouveau la photographie pour la bonne visite.', 'La visita o la sesión cambió. Seleccione de nuevo la fotografía para la visita correcta.', 'Der Besuch oder die Sitzung wurde geändert. Wählen Sie das Foto für den richtigen Besuch erneut aus.'],
+    chooseVisit: ['Escolha uma visita antes de adicionar fotografias.', 'Choose a visit before adding photographs.', 'Choisissez une visite avant d’ajouter des photographies.', 'Elija una visita antes de añadir fotografías.', 'Wählen Sie einen Besuch, bevor Sie Fotos hinzufügen.'],
+    invalid: ['Escolha uma imagem válida, até 25 MB. A fotografia não foi adicionada.', 'Choose a valid image up to 25 MB. The photograph was not added.', 'Choisissez une image valide de 25 Mo maximum. La photographie n’a pas été ajoutée.', 'Elija una imagen válida de hasta 25 MB. La fotografía no se ha añadido.', 'Wählen Sie ein gültiges Bild mit höchstens 25 MB. Das Foto wurde nicht hinzugefügt.'],
+    storageFailed: ['Não foi possível guardar a fotografia neste dispositivo. Liberte espaço e tente novamente; a fotografia não foi adicionada.', 'Could not save the photograph on this device. Free up space and try again; the photograph was not added.', 'Impossible d’enregistrer la photographie sur cet appareil. Libérez de l’espace et réessayez ; la photographie n’a pas été ajoutée.', 'No se pudo guardar la fotografía en este dispositivo. Libere espacio e inténtelo de nuevo; la fotografía no se ha añadido.', 'Das Foto konnte nicht auf diesem Gerät gespeichert werden. Geben Sie Speicherplatz frei und versuchen Sie es erneut; das Foto wurde nicht hinzugefügt.'],
+    saved: ['Fotografia guardada neste telemóvel. Aguarda confirmação do envio.', 'Photograph saved on this phone. Awaiting confirmation of the upload.', 'Photographie enregistrée sur ce téléphone. En attente de confirmation de l’envoi.', 'Fotografía guardada en este teléfono. Pendiente de confirmación del envío.', 'Foto auf diesem Telefon gespeichert. Die Bestätigung des Uploads steht aus.'],
+    cancelled: ['Nenhuma fotografia adicionada. Pode tentar novamente ou escolher uma fotografia guardada.', 'No photograph added. Try again or choose a saved photograph.', 'Aucune photographie ajoutée. Réessayez ou choisissez une photographie enregistrée.', 'No se ha añadido ninguna fotografía. Inténtelo de nuevo o elija una fotografía guardada.', 'Kein Foto hinzugefügt. Versuchen Sie es erneut oder wählen Sie ein gespeichertes Foto.'],
+    finishBlocked: ['Ha fotografias pendentes. Sincroniza ou remove antes de concluir.', 'There are pending photographs. Synchronize or remove them before completing the visit.', 'Des photographies sont en attente. Synchronisez-les ou supprimez-les avant de terminer la visite.', 'Hay fotografías pendientes. Sincronícelas o elimínelas antes de finalizar la visita.', 'Es gibt ausstehende Fotos. Synchronisieren oder entfernen Sie sie, bevor Sie den Besuch abschließen.'],
+  };
+  function photoUiText(key, values = {}, language = document.documentElement.lang || 'pt') {
+    const index = Math.max(0, photoErrorLanguages.indexOf(String(language).toLowerCase().split('-')[0]));
+    return photoUiMessages[key][index].replace('{kind}', () => photoUiText(values.kind, {}, language));
+  }
+  function bindPhotoUi(node, key, values = {}, attribute) {
+    if (!node) return;
+    photoUiBindings.set(node, { key, values: Object.freeze({ ...values }), attribute, protected: node.hasAttribute('data-cw-no-i18n') });
+    node.setAttribute('data-cw-photo-ui-copy', ''); node.setAttribute('data-cw-no-i18n', '');
+    const text = photoUiText(key, values); if (attribute) node.setAttribute(attribute, text); else node.textContent = text;
+  }
+  function clearPhotoUi(node) {
+    const value = photoUiBindings.get(node); if (!value) return;
+    if (!value.protected) node.removeAttribute('data-cw-no-i18n');
+    node.removeAttribute('data-cw-photo-ui-copy'); photoUiBindings.delete(node);
+  }
+  function repaintPhotoUi() {
+    for (const node of document.querySelectorAll('[data-cw-photo-ui-copy]')) {
+      const value = photoUiBindings.get(node); if (!value) continue;
+      const text = photoUiText(value.key, value.values);
+      if (value.attribute) { if (node.getAttribute(value.attribute) !== text) node.setAttribute(value.attribute, text); }
+      else if (node.textContent !== text) node.textContent = text;
+    }
+  }
+  function photoToast(key) { toast(photoUiText(key)); bindPhotoUi($('#toast'), key); }
+  window.addEventListener('cw-language-change', repaintPhotoUi);
+  let photoUiLanguage = document.documentElement.lang;
+  new MutationObserver(() => {
+    if (document.documentElement.lang === photoUiLanguage) return;
+    photoUiLanguage = document.documentElement.lang; repaintPhotoUi();
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+
   let visits = [];
   let routeConfirmedAt = null;
   window.CWFieldDaySnapshot = () => ({
@@ -587,6 +659,7 @@
       return;
     }
     clearPhotoError(node);
+    clearPhotoUi(node);
     node.textContent = message;
     node.classList.add("show");
     setTimeout(() => node.classList.remove("show"), 2400);
@@ -2040,20 +2113,16 @@
     list.innerHTML = `${notesHtml}${accessHtml}${reminderHtml}`;
   }
 
-  function photoTypeLabel(type) {
-    const labels = {
-      BEFORE: "Antes",
-      AFTER: "Depois",
-      PROBLEM: "Problema",
-      ACCESS: "Acesso",
-    };
-    return labels[type] || "Registo";
+  function photoTypeKey(type) {
+    const keys = { BEFORE: 'before', AFTER: 'after', PROBLEM: 'problem', ACCESS: 'access' };
+    return Object.hasOwn(keys, type) ? keys[type] : 'record';
   }
+  function photoTypeLabel(type) { return photoUiText(photoTypeKey(type)); }
 
   function photoStatusText(photo) {
-    if (photo.status === "uploaded") return "Sincronizada no registo";
-    if (photo.status === "uploading") return "A enviar...";
-    return photo.error ? `Pendente: ${photo.error}` : "Pendente por sincronizar";
+    if (photo.status === "uploaded") return photoUiText('uploaded');
+    if (photo.status === "uploading") return photoUiText('uploading');
+    return photo.error ? `Pendente: ${photo.error}` : photoUiText('pending');
   }
 
   function renderPhotoList() {
@@ -2063,6 +2132,7 @@
 
     if (!visitPhotos.length) {
       list.innerHTML = '<div class="muted">Ainda sem fotografias nesta visita.</div>';
+      bindPhotoUi(list.firstElementChild, 'empty');
       return;
     }
 
@@ -2083,6 +2153,13 @@
 
     for (const node of list.querySelectorAll('[data-photo-id]')) {
       const photo = visitPhotos.find(item => item.localId === node.dataset.photoId);
+      if (!photo) continue;
+      bindPhotoUi(node.querySelector('strong'), photoTypeKey(photo.type));
+      bindPhotoUi(node.querySelector('.photo-thumb'), 'alt', { kind: photoTypeKey(photo.type) }, 'alt');
+      bindPhotoUi(node.querySelector('[data-photo-retry]'), 'send');
+      bindPhotoUi(node.querySelector('[data-photo-remove]'), 'remove');
+      if (!photo.fileName) bindPhotoUi(node.querySelector('.photo-meta > .muted'), 'file');
+      if (!photo.error || ['uploaded', 'uploading'].includes(photo.status)) bindPhotoUi(node.querySelector('.photo-status'), ['uploaded', 'uploading'].includes(photo.status) ? photo.status : 'pending');
       if (!photo?.error || ['uploaded', 'uploading'].includes(photo.status)) continue;
       const captured = photoErrors.get(photo);
       bindPhotoError(node.querySelector('.photo-status'), { detail: photo.error, copy: captured?.detail === photo.error ? captured.copy : undefined, wrapper: 'pending' });
@@ -2096,7 +2173,7 @@
         if (!response.ok || !response.headers.get('content-type')?.startsWith('image/')) throw Error('Fotografia por confirmar.');
         const file=await response.blob(); if (!sameFieldSession()) return;
         const preview=URL.createObjectURL(file); photoPreviewCache.set(url,preview); if(node.isConnected)node.src=preview;
-      }).catch(()=>{if(node.isConnected)node.alt='Fotografia guardada no servidor; ligue à rede para consultar.';});
+      }).catch(()=>{if(node.isConnected)bindPhotoUi(node, 'savedAlt', {}, 'alt');});
     }
 
     list.querySelectorAll("[data-photo-retry]").forEach((button) => {
@@ -2125,12 +2202,13 @@
 
   async function uploadPhoto(photo) {
     const generation = fieldWriteGeneration;
-    if (!sameFieldSession()) { photoFeedback('A sessão mudou. Reabra a página com a conta original.'); return false; }
+    if (!sameFieldSession()) { photoFeedback('session'); return false; }
     const visit = visits.find(v => (v.visitType || 'REGULAR') === (photo?.visitType || 'REGULAR') && String(v.id) === String(photo?.visitId));
     if (photo?.status === 'uploading') return false;
     if (!visit?.id || !(photo?.file instanceof Blob)) {
       photo.status = "pending";
       photo.error = "Sem visita ativa";
+      photoErrors.set(photo, { detail: photo.error, copy: Object.freeze(Object.fromEntries(photoErrorLanguages.map(language => [language, photoUiText('inactive', {}, language)]))) });
       renderPhotoList();
       return false;
     }
@@ -2145,7 +2223,7 @@
       photo.status = "uploaded";
       photo.url = data.photo.url;
       photo.serverId = data.photo?.id || null;
-      if (visitKey(current()) === visitKey(visit)) { saveCurrentDraft(); photoFeedback("Fotografia confirmada pelo servidor."); renderPhotoList(); }
+      if (visitKey(current()) === visitKey(visit)) { saveCurrentDraft(); photoFeedback('confirmed'); renderPhotoList(); }
       return true;
     } catch (error) {
       photo.status = "pending";
@@ -2161,7 +2239,7 @@
     const target = visitKey();
     const pending = visitPhotos.filter((photo) => photo.status !== "uploaded");
     if (!pending.length) {
-      if (showFeedback) toast("Fotografias ja sincronizadas.");
+      if (showFeedback) photoToast('alreadySynced');
       return true;
     }
 
@@ -2172,14 +2250,14 @@
 
     const stillPending = visitPhotos.some((photo) => photo.status !== "uploaded");
     if (showFeedback) {
-      toast(stillPending ? "Ainda existem fotos pendentes." : "Fotografias sincronizadas.");
+      photoToast(stillPending ? 'stillPending' : 'synced');
     }
     return !stillPending;
   }
 
-  function photoFeedback(message) {
+  function photoFeedback(key) {
     const node = $('#photoFeedback');
-    if(node){node.textContent=message;node.hidden=!message;}
+    if(node){if(key)bindPhotoUi(node,key);else{clearPhotoUi(node);node.textContent='';}node.hidden=!key;}
   }
 
   function pickPhoto(type, gallery = false) {
@@ -2187,21 +2265,21 @@
     const input = $(gallery ? '#galleryPhotoInput' : '#photoInput');
     if (!input) return;
     selectedPhotoType = type || "AFTER";
-    if (!sameFieldSession()) { photoFeedback('A sessão mudou. Reabra a página com a conta original.'); return; }
+    if (!sameFieldSession()) { photoFeedback('session'); return; }
     selectedPhotoContext = { visitId: current()?.id, visitKey:visitKey(), type: selectedPhotoType, generation: fieldWriteGeneration };
     input.value = "";
     try { input.click(); }
-    catch(error){ photoFeedback('Não foi possível abrir a câmara. Use a opção de fotografia guardada no telemóvel.'); }
+    catch(error){ photoFeedback('cameraFailed'); }
   }
 
   async function addSelectedPhoto(file, selection = selectedPhotoContext) {
     if (!file) return;
-    if (!sameFieldSession() || (selection && (selection.generation !== fieldWriteGeneration || selection.visitKey !== visitKey()))) { photoFeedback('A visita ou a sessão mudou. Escolha novamente a fotografia na visita correta.'); return; }
+    if (!sameFieldSession() || (selection && (selection.generation !== fieldWriteGeneration || selection.visitKey !== visitKey()))) { photoFeedback('selectionChanged'); return; }
     if (!requireExecutableVisit()) return;
     const target = visitKey();
-    if (!current()?.id) { photoFeedback('Escolha uma visita antes de adicionar fotografias.'); return; }
+    if (!current()?.id) { photoFeedback('chooseVisit'); return; }
     if (!file.type.startsWith('image/') || !file.size || file.size > 25*1024*1024) {
-      photoFeedback('Escolha uma imagem válida, até 25 MB. A fotografia não foi adicionada.'); return;
+      photoFeedback('invalid'); return;
     }
     const photo = {
       localId: crypto.randomUUID(),
@@ -2214,9 +2292,9 @@
       error: "",
     };
     try { await window.CWFieldPhotos.save(photo.visitId,photo,fieldWriteSession, current()?.visitType || 'REGULAR'); }
-    catch(error) { URL.revokeObjectURL(photo.previewUrl);photoFeedback('Não foi possível guardar a fotografia neste dispositivo. Liberte espaço e tente novamente; a fotografia não foi adicionada.');return; }
+    catch(error) { URL.revokeObjectURL(photo.previewUrl);photoFeedback('storageFailed');return; }
     if (!sameFieldSession() || target !== visitKey()) { URL.revokeObjectURL(photo.previewUrl); return; }
-    photoFeedback("Fotografia guardada neste telemóvel. Aguarda confirmação do envio.");
+    photoFeedback('saved');
     visitPhotos.unshift(photo);
     saveCurrentDraft();
     renderPhotoList();
@@ -3146,6 +3224,10 @@
     markFieldSection("#cleaningCard", "field-panel-agora", "Servico", "limpeza e leituras");
     markFieldSection("#doseRows", "field-panel-agora", "Produtos", "consumo do carro");
     markFieldSection("#photoList", "field-panel-agora", "Fotografias", "registo rapido");
+    bindPhotoUi($('#photosCard'), 'section', {}, 'aria-label');
+    for (const node of document.querySelectorAll('#photosCard [data-cw-photo-text]')) bindPhotoUi(node, node.dataset.cwPhotoText);
+    bindPhotoUi($('#photosCard .field-tab-title h2'), 'title');
+    bindPhotoUi($('#photosCard .field-tab-title span'), 'quick');
     markFieldSection("#accessCard", "field-panel-agora", "Acesso", "chaves e codigos");
     markFieldSection("#routeCard", "field-panel-hoje", "Rota", "proximo local");
     markFieldSection("#visitList", "field-panel-hoje", "Lista do dia", "corrigir ou avancar");
@@ -3424,7 +3506,7 @@
   for(const id of ['photoInput','galleryPhotoInput']){
     const input = $(`#${id}`);
     input?.addEventListener('change', () => { const selection = selectedPhotoContext; selectedPhotoContext = null; Array.from(input.files || []).forEach(file => addSelectedPhoto(file, selection)); });
-    input?.addEventListener('cancel', () => photoFeedback('Nenhuma fotografia adicionada. Pode tentar novamente ou escolher uma fotografia guardada.'));
+    input?.addEventListener('cancel', () => photoFeedback('cancelled'));
   }
   $('#galleryPhotoBtn')?.addEventListener('click', () => pickPhoto($('#galleryPhotoType').value, true));
 
@@ -3525,7 +3607,7 @@
       if (!sameFieldSession() || visitKey(current()) !== visitKey(visit)) { finishBtn.disabled = current()?.visitType === 'EXTRA' && isVisitDone(current()); return; }
       if (!photosReady && navigator.onLine) {
         $("#finishBtn").disabled = false;
-        toast("Ha fotografias pendentes. Sincroniza ou remove antes de concluir.");
+        photoToast('finishBlocked');
         return;
       }
 

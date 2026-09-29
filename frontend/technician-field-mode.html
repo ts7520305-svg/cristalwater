@@ -892,6 +892,20 @@
       letter-spacing: 0.01em;
     }
 
+    #photosCard :is(button, summary, .photo-meta, #photoFeedback) {
+      min-width: 0;
+      max-width: 100%;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    #photosCard .field-tab-title { flex-wrap: wrap; }
+    #photosCard select { max-width: 100%; }
+    @media (max-width: 420px) {
+      #photosCard .photo-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      #photosCard .photo-actions > button:last-child { grid-column: 1 / -1; }
+    }
+
     .check {
       border-radius: 14px;
       background: #fbfefd;
@@ -1552,22 +1566,22 @@
       <div id="fieldEquipmentList"></div>
     </section>
 
-    <section id="photosCard" class="card photo-card field-panel field-panel-agora" aria-label="Fotografias da visita">
-      <span class="chip">Fotografias</span>
+    <section id="photosCard" class="card photo-card field-panel field-panel-agora" aria-label="Fotografias da visita" data-cw-no-i18n>
+      <span class="chip" data-cw-photo-text="title">Fotografias</span>
       <input id="photoInput" type="file" accept="image/*" capture="environment" hidden>
       <div class="photo-actions">
-        <button class="photo-btn" type="button" data-photo-type="BEFORE">Foto antes</button>
-        <button class="photo-btn" type="button" data-photo-type="AFTER">Foto depois</button>
-        <button class="photo-btn" type="button" data-photo-type="PROBLEM">Foto problema</button>
+        <button class="photo-btn" type="button" data-photo-type="BEFORE" data-cw-photo-text="beforeButton">Foto antes</button>
+        <button class="photo-btn" type="button" data-photo-type="AFTER" data-cw-photo-text="afterButton">Foto depois</button>
+        <button class="photo-btn" type="button" data-photo-type="PROBLEM" data-cw-photo-text="problemButton">Foto problema</button>
       </div>
-      <details><summary>Câmara indisponível? Escolher do telemóvel</summary>
-        <label>Tipo de fotografia <select id="galleryPhotoType"><option value="BEFORE">Antes</option><option value="AFTER" selected>Depois</option><option value="PROBLEM">Problema</option></select></label>
-        <button type="button" class="photo-btn" id="galleryPhotoBtn">Escolher fotografia guardada</button>
+      <details><summary data-cw-photo-text="gallery">Câmara indisponível? Escolher do telemóvel</summary>
+        <label><span data-cw-photo-text="type">Tipo de fotografia</span> <select id="galleryPhotoType"><option value="BEFORE" data-cw-photo-text="before">Antes</option><option value="AFTER" selected data-cw-photo-text="after">Depois</option><option value="PROBLEM" data-cw-photo-text="problem">Problema</option></select></label>
+        <button type="button" class="photo-btn" id="galleryPhotoBtn" data-cw-photo-text="choose">Escolher fotografia guardada</button>
         <input id="galleryPhotoInput" type="file" accept="image/*" hidden>
       </details>
       <p id="photoFeedback" role="status" hidden></p>
-      <div class="photo-list" id="photoList"><div class="empty">Ainda sem fotografias nesta visita.</div></div>
-      <div class="actions"><button class="big ghost" id="syncPhotosBtn" type="button">Sincronizar fotografias</button></div>
+      <div class="photo-list" id="photoList"><div class="empty" data-cw-photo-text="empty">Ainda sem fotografias nesta visita.</div></div>
+      <div class="actions"><button class="big ghost" id="syncPhotosBtn" type="button" data-cw-photo-text="sync">Sincronizar fotografias</button></div>
     </section>
 
     <section class="card field-panel field-panel-hoje" id="dayVisitsCard">

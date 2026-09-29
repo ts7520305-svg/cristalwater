@@ -1,0 +1,219 @@
+{
+  "task": "TASK447",
+  "item": "C06-012",
+  "date": "2026-09-29",
+  "base": "f2b3d8521429ed474c8e984805e7823d413dc6cd",
+  "scope": "Modern photograph panel presentation in PT/EN/FR/ES/DE; 38 entries/190 strings. Labels, controls, types, image alternatives, send states, local selection/storage feedback and photo toasts. Scope excludes other field panels and the legacy photo helper.",
+  "negative": [
+    {
+      "script": "test-field-photo-panel-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 3865,
+      "timedOut": false,
+      "logSha256": "385943c682c4ad5e572449e94de30d7919f54a0c89e06347762f6cbbdee32970"
+    }
+  ],
+  "negativeDescription": "Before the implementation the actual English gallery caption remained Portuguese.",
+  "intermediate": [
+    {
+      "results": [
+        {
+          "script": "test-field-photo-panel-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 3975,
+          "timedOut": false,
+          "logSha256": "959f4544fe481d39329c2513f860db3d54140da4fe35c56e509f4400e9dc9fee"
+        }
+      ],
+      "reason": "Initial gallery-caption assertion passes; not a full integration result."
+    },
+    {
+      "results": [
+        {
+          "script": "test-field-photo-panel-languages.js",
+          "code": 1,
+          "signal": null,
+          "ms": 4822,
+          "timedOut": false,
+          "logSha256": "7f6318eb3ca37466c6cbc3bd3b6f6c25a2100367b58861ed2e2d7e7b98e64c16"
+        }
+      ],
+      "reason": "Expanded integration detects photograph panel horizontal overflow on a small screen."
+    },
+    {
+      "results": [
+        {
+          "script": "test-field-photo-panel-languages.js",
+          "code": 1,
+          "signal": null,
+          "ms": 5185,
+          "timedOut": false,
+          "logSha256": "41fa51bbdd739ee244479b91792acb39bbb43a8e146331adc54e5f052d77866e"
+        }
+      ],
+      "reason": "Diagnostic reproduction identifies DE/320px: panel scrollWidth320/clientWidth298. Scoped wrapping and two-column small-screen actions resolve it."
+    },
+    {
+      "results": [
+        {
+          "script": "test-field-photo-panel-languages.js",
+          "code": 1,
+          "signal": null,
+          "ms": 22963,
+          "timedOut": false,
+          "logSha256": "012a0266477614cd5563df8ccaaa536f2042ac10820136de71dfc261dc34eecf"
+        }
+      ],
+      "reason": "Layout and offline scenarios pass. The no-extra-request assertion captured existing reminder refreshes caused by reconnection. Test now awaits the real reminder synchronization promise before holding the photograph upload; no endpoint allowlist broadening or production listener changes."
+    },
+    {
+      "results": [
+        {
+          "script": "test-field-photo-panel-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 23509,
+          "timedOut": false,
+          "logSha256": "5746daa97017fdd1815b9062a1168adf79b95a4fcd07f38f52eae1886fa058d0"
+        }
+      ],
+      "reason": "Full new scenario passes before final small-screen button arrangement."
+    }
+  ],
+  "integration": [
+    {
+      "script": "test-field-photo-panel-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 24993,
+      "timedOut": false,
+      "logSha256": "5746daa97017fdd1815b9062a1168adf79b95a4fcd07f38f52eae1886fa058d0"
+    },
+    {
+      "script": "test-field-photo-error-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 16024,
+      "timedOut": false,
+      "logSha256": "ed63a550233e2521f33b20ef49ec6a8bb4b0175d8aa376311585cfd477ec2d6c"
+    },
+    {
+      "script": "test-field-session-browser.js",
+      "code": 0,
+      "signal": null,
+      "ms": 2921,
+      "timedOut": false,
+      "logSha256": "ca0b4bd1a5b0cbf004d295c1d5f299d3d171658e50a19e2e743a257ce00e7ae3"
+    },
+    {
+      "script": "test-field-e2e.js",
+      "code": 0,
+      "signal": null,
+      "ms": 48511,
+      "timedOut": false,
+      "logSha256": "42c680a0a512008775133758f1b89c446b1ed37c38eb8e8187c228d577c603fc"
+    }
+  ],
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 194424,
+      "logSha256": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 26530,
+      "logSha256": "5637e7d2e6707150274060455cfb4afe545fdf5edf9dbd5a4f44a5e7251ebcf0"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 2482,
+      "logSha256": "0df010aebfbe70e95c135589161c0f4359d5ae0e059ccd64ce76ea0d7c9f8ecb"
+    }
+  ],
+  "totals": {
+    "unitTests": 1356,
+    "unitFiles": 138,
+    "technicianTests": 4,
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44
+    }
+  },
+  "checks": [
+    "Actual route, five languages, widths320/390/1440: captions, accessible label, camera controls, gallery/select option values, empty state, synchronization button and header. Same panel nodes, focus, open details, selected category and exact stored draft remain; only normal language-preference PUTs are allowed.",
+    "Cancelled chooser, invalid MIME, empty image, controlled quota and camera-unavailable failures produce localized status feedback without creating a photograph or write request. Original accept/capture attributes remain.",
+    "Real native gallery file chooser saves a literal-markup filename and exact PNG bytes, UUID, owner, typed visit, hash and type. Locale changes preserve preview/nodes/focus/draft and invoke no photo list/save/send/remove/sync/pendingSummary. Filename markup is plain text.",
+    "Actual offline removal deletes only the unattempted request. A second photo survives cached offline reload with its exact bytes/request/hash and original notes. Current shell cache231 is present.",
+    "A real chooser opened for REGULAR is rejected after switching through the visit list to an EXTRA with the same numeric ID. The retained REGULAR photograph remains untouched.",
+    "Real EXTRA upload response is held, lost and retried. Five languages update uploading state without recreating nodes or sending/fetching again. Exact request ID, bytes, filename, AFTER category, poolId, payload/hash and first attemptedAt are preserved; one EXTRA photo and one server receipt, zero REGULAR photos.",
+    "Confirmed state, feedback, pending/success/already-synchronized toasts and protected-image fallback alt update in all five languages. No new preview fetch or operational request on locale; server confirmation removes retry/remove controls. Complete SQL REGULAR/EXTRA rows remain identical to their original fixtures.",
+    "Original photo-error integration, session-browser guard and full field E2E regressions pass in the same isolated run. German320 capture reviewed after the button layout fix; no horizontal overflow. Existing shared sticky-navigation overlap remains C08, not accepted by this task."
+  ],
+  "preservation": {
+    "presentationEntries": 38,
+    "strings": 190,
+    "functionsIdenticalAfterPresentationReversal": [
+      "uploadPhoto",
+      "syncPendingPhotos",
+      "pickPhoto",
+      "addSelectedPhoto",
+      "renderPhotoList",
+      "setupFieldLayout",
+      "toast"
+    ],
+    "backendSchemaWorkflowPhotoHelperWriteStoreUnchanged": true,
+    "priorRunner339ExactOrderPreserved": true,
+    "runnerGroups": 340,
+    "cache": 231
+  },
+  "sourceSha256": {
+    "frontend/technician-field-mode.js": "69a79f8658ab9e2675ec43c04b8da350cf2702d631a0a01115373d01b5d9f21c",
+    "frontend/technician-field-mode.html": "8a47913b45924839f64d007f84b917e8f8e4f76b00b751fbd03b188e814e749c",
+    "frontend/sw.js": "6074b353b57b626fe5ac6906d8210be53b8e4fadd38fda117d4796b60b3dba19",
+    "scripts/test-field-photo-panel-languages.js": "acebc906068d59398ca031e6f329df7aea65d88bb3d3c73e12b17364cfae3bc6",
+    "scripts/test-field-suite.js": "81acf0e4aa2d13b5dfdb4f27bb03d8317ff26ac9af293c6f0befbe313d902149"
+  },
+  "capture": {
+    "path": "reports/field-ui/PHOTO_PANEL_DE_320.png",
+    "sha256": "b368dafd4a87420e09bd39ccf8ce63278308888430ea1c3949481718b981bec7",
+    "reviewed": true
+  },
+  "environment": {
+    "database": "isolated PGlite via TCP",
+    "browser": "Chromium153",
+    "timezone": "Europe/Lisbon",
+    "externalEffects": "notifications/email/WhatsApp/fiscal/webhooks/background jobs disabled"
+  },
+  "limits": [
+    "Local checks do not substitute PostgreSQL16/additive-upgrade/full340-group suite/restore128 tables47files.",
+    "C06/C06-012/C08/C10 remain open. Legacy photograph helper and other modern-field panels remain outside this scope.",
+    "No merge, deploy or external communication; repository public during development authorized, private before completion/C32."
+  ],
+  "nativePrevious": {
+    "task446": {
+      "run": 36623638975,
+      "job": 109594988678,
+      "status": "in_progress",
+      "successfulSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "restore": "pending",
+      "checkedDuringTask447": true
+    }
+  },
+  "publication": {
+    "status": "local_validated_pending_publication",
+    "branch": "work/field-readiness-20260915-simulation",
+    "merged": false,
+    "deployed": false
+  }
+}
