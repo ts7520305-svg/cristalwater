@@ -3,7 +3,7 @@
   "date": "2026-09-29",
   "branch": "work/field-readiness-20260915-simulation",
   "baseCommit": "63e31a2208b14ded37aec051863ab82e98707797",
-  "status": "locally_validated_publication_pending",
+  "status": "published_native_validation_pending",
   "scope": {
     "responsibility": "Repaint captured material and work-draft summaries in the selected language without reading or changing operational state",
     "inventory": [
@@ -148,15 +148,29 @@
     "appliesTo433": false
   },
   "nativeGateFor433": {
-    "status": "not_started",
+    "status": "in_progress",
     "expectedGroups": 328,
     "order": "Exact unique original327 groups plus review-summary-languages immediately after day-review-languages",
-    "restoration": "128 tables/47 uploaded files, matching database rows and file hashes"
+    "restoration": "128 tables/47 uploaded files, matching database rows and file hashes",
+    "runId": 36568588473,
+    "jobId": 109406585437
   },
   "limits": [
     "Only the already localized material and modern work-draft producers adopt the presentation snapshot in this batch. Incomplete-visit, equipment and problem-report summaries remain pending, as do later day-review panels.",
     "C06 remains in progress;32 tasks:26 not started,1 in progress,5 complete.",
     "Local browser database is isolated PGlite; native PostgreSQL and restoration remain separate gates.",
     "No merge, deployment, real contacts/messages or automation changes; annual contract remains deferred."
-  ]
+  ],
+  "publication": {
+    "commit": "1e16b90ec5a03c967ee4cd9d01eb11fc32a4a887",
+    "tree": "810a0f9acbb1c58d6a6bab645013a535d01e368a",
+    "branch": "work/field-readiness-20260915-simulation",
+    "runId": 36568588473,
+    "runUrl": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36568588473",
+    "jobId": 109406585437,
+    "status": "in_progress",
+    "successfulSteps": 4,
+    "localRemoteTreeEqual": true,
+    "localCheckoutClean": true
+  }
 }
