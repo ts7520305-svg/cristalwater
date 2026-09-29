@@ -1,8 +1,8 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 29/09/2026, TASK429 validada localmente / espera da rota diária
+## Retoma atual — 29/09/2026, TASK429 publicada / espera da rota diária
 
-**TASK429 pronta para publicação na branch autorizada.** CI426 terminou 324/325 grupos únicos na ordem exata: única falha em `test-field-complete-daily-route.js:85`, ao voltar online após rejeitar cache v2 incompleta. `page.goto(networkidle)` excedeu 10 s; as asserções API de 305 visitas regulares + 305 extra já tinham passado. Restauro ignorado. Log nativo completo lido e 325 resultados na [prova429](evidence/20260929_task429_local.json).
+**TASK429 publicada na branch autorizada.** CI426 terminou 324/325 grupos únicos na ordem exata: única falha em `test-field-complete-daily-route.js:85`, ao voltar online após rejeitar cache v2 incompleta. `page.goto(networkidle)` excedeu 10 s; as asserções API de 305 visitas regulares + 305 extra já tinham passado. Restauro ignorado. Log nativo completo lido e 325 resultados na [prova429](evidence/20260929_task429_local.json).
 
 **Diagnóstico:**o teste anterior passou localmente, com as dez navegações registadas. Prova controlada na mesma transição: resposta real `/api/push/public-key` retida; a aplicação confirma 610 visitas únicas/cache completas em 1 078 ms, mas a espera networkidle falha aos 10 003 ms. V2 preservada. O log nativo não identifica o pedido pendente; não se atribui a falha original especificamente ao push nem se alega captura do trace original.
 
@@ -11,6 +11,8 @@
 **Validação429:**grupo completo aprovado (35 435 ms): API/paginação, visita final >300, offline, caches v2/v3, rejeição de respostas parciais, revisão diária, mapa/rota/histórico e lista antiga 305. Probe controlada aprovada; node-check/diff-check aprovados. Unitários/sintaxe global não repetidos numa alteração só do teste; 1 345 é evidência428, não nova execução429. Quatro ficheiros: um teste e três documentação.
 
 **Gates:**CI427/428 em execução na última consulta, dez etapas aprovadas em cada. TASK429 exige 326 grupos exatos/restauro 128 tabelas/47 ficheiros próprios; local não substitui PostgreSQL nativo/restauro. CI426 permanece falhado. C06 continua em execução; restantes entradas não fechadas por associação.
+
+**Publicação429:**commit `4e28b4a56b38802a4aac73fdb703a851878e6b4e`, árvore `8ef47d6e8edf0e38416dc36db013cd403aff32b6`; igualdade local/remota e checkout limpo confirmados. [CI36556236947](https://github.com/ts7520305-svg/cristalwater/actions/runs/36556236947), job109365943070, em execução; cinco etapas aprovadas na primeira consulta. Confirmação documental [skip ci]; não substitui os 326 grupos/restauro próprios.
 
 **Próximo TASK430:**confirmar CI427/428/429 e corrigir nova falha primeiro. Depois retomar C06 por fonte do inventário; revisão diária e restantes consumidores pendentes. Chrome/nav continua C08-025/026. 32 tarefas = 26 por iniciar/1 em execução/5 concluídas. Sem merge/deploy/contactos reais; contrato anual adiado. Entradas abaixo são históricas.
 

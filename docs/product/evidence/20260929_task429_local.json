@@ -3,7 +3,7 @@
   "date": "2026-09-29",
   "branch": "work/field-readiness-20260915-simulation",
   "baseCommit": "4a493459282c5ae4943ca7443b139782e94fe6d6",
-  "status": "local_validation_passed_publication_pending",
+  "status": "published_native_ci_in_progress",
   "scope": {
     "changedTest": "scripts/test-field-complete-daily-route.js",
     "responsibility": "Route readiness after offline-to-online navigation",
@@ -2186,5 +2186,19 @@
     "inProgress": 1,
     "complete": 5
   },
-  "next": "Confirm native427/428/429 and repair any new failure first; then continue remaining C06 source inventory. No merge/deploy/real contacts; annual legal contract deferred."
+  "next": "Confirm native427/428/429 and repair any new failure first; then continue remaining C06 source inventory. No merge/deploy/real contacts; annual legal contract deferred.",
+  "publication": {
+    "sha": "4e28b4a56b38802a4aac73fdb703a851878e6b4e",
+    "tree": "8ef47d6e8edf0e38416dc36db013cd403aff32b6",
+    "runId": 36556236947,
+    "jobId": 109365943070,
+    "status": "in_progress",
+    "conclusion": null,
+    "successfulSteps": 5,
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36556236947",
+    "remoteTreeMatchedLocalIndex": true,
+    "exactGitHubCommitImportedLocally": true,
+    "cleanCheckoutAtPublication": true,
+    "confirmationCommit": "documentation-only [skip ci]"
+  }
 }
