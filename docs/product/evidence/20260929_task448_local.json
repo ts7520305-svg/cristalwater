@@ -188,8 +188,24 @@
     "No merge/deploy/external communication. Public repository authorized during development; private before completion/C32."
   ],
   "publication": {
-    "status": "local_validated_pending_publication",
+    "status": "published_ci_in_progress",
     "branch": "work/field-readiness-20260915-simulation",
+    "codeCommit": "0a102e99c9d3f3533d0bb6dabfd17b9ab7ef2cfd",
+    "tree": "04ca84ab4b32cd64f39f20a6dec10826e48a7434",
+    "remoteTreeEqualsValidatedTree": true,
+    "checkoutAligned": true,
+    "originalLocalCommit": "656b43954d17cdc8e6275969827b74e245229332",
+    "originalHistoryBranch": "work/local-task448-20260929",
+    "ci": {
+      "run": 36629776697,
+      "job": 109615752303,
+      "head": "0a102e99c9d3f3533d0bb6dabfd17b9ab7ef2cfd",
+      "status": "in_progress",
+      "successfulSteps": 3,
+      "currentStep": "Run actions/setup-node@v4",
+      "fullSuiteGroups": 341,
+      "restore": "pending"
+    },
     "merged": false,
     "deployed": false
   }

@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 29/09/2026, TASK448 / CI em execução
+
+TASK448 publicada na branch `work/field-readiness-20260915-simulation`: código `0a102e99c9d3f3533d0bb6dabfd17b9ab7ef2cfd`, árvore `04ca84ab4b32cd64f39f20a6dec10826e48a7434`, igual à validada; finais de linha mistos de `technician.js` preservados. Checkout alinhado e histórico local original preservado. [CI36629776697](https://github.com/ts7520305-svg/cristalwater/actions/runs/36629776697), job109615752303, arrancou no commit exato; três etapas aprovadas, setup-node em execução. Quatro integrações,1 356 unitários/quatro técnicos/sintaxe locais aprovados. Exigir PostgreSQL16/upgrade/suite341/restauro128 tabelas47ficheiros para aceitação. Atualização documental posterior `[skip ci]` conserva o código. [Prova448](evidence/20260929_task448_local.json).
+
+Três erros da página técnica antiga traduzidos por identidade, sem alterar ficheiros, rascunhos ou pedidos. CI446/447 continuam nas suites339/340 após dez etapas aprovadas; nenhum restauro declarado. Próximo: verificar gates446–448 e reparar qualquer falha; depois `js/offline/offline-queue.js`/C06-010 e consumidores reais. C06 continua aberta;32=26 por iniciar/uma em execução/cinco concluídas. Público autorizado durante desenvolvimento; privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado.
+
 ## Retoma atual — 29/09/2026, TASK448 local validada / fotografias na página antiga
 
 **TASK448 / C06-010:** três erros próprios de `js/offline/offline-photos.js` em PT/EN/FR/ES/DE: arquivo antigo, sessão alterada e ficheiro inválido. Quinze textos no catálogo existente; as duas apresentações reais em `technician.js` usam a identidade privada do erro. Error.message português, falhas externas/persistidas e labels guardados mantêm-se literais. [Prova448](evidence/20260929_task448_local.json).
