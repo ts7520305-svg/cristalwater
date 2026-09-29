@@ -8,7 +8,15 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
-## Progresso funcional — TASK435 / resumos de impedimentos
+## Progresso funcional — TASK436 / resumos de equipamento
+
+`field-equipment-maintenance.js` fornece textos capturados em PT/EN/FR/ES/DE para rascunhos guardados, revisões por confirmar (incluindo pedidos bloqueados) e revisões recusadas. Os rótulos REGULAR/EXTRA traduzem-se mantendo a identidade do tipo; títulos e mensagens do servidor permanecem literais. Seis entradas/30 textos. O consumidor existente escolhe o idioma sem reler o produtor; o JSON `{kind,text}` conserva o português anterior. Propriedade adicional não enumerável e imutável, sem alterar os registos persistidos. Cache221/runner330; [prova436](evidence/20260929_task436_local.json).
+
+Novo grupo e três regressões de navegador aprovados. Cobertura: cinco idiomas/320/390/1440, formulários reais com notas/tempos/materiais, REGULAR/EXTRA de igual ID, pedido bloqueado403, recusa real EQUIPMENT_STALE, correspondência exata de confirmação/rascunho, texto literal, resposta retida, troca silenciosa de idioma, offline/reload/cache, rascunho ilegível e bloqueio após troca de conta. Mudanças de idioma preservam nós/foco/hora/bytes/UUID/payload/hash/recibo e não fazem pedidos operacionais. Captura alemã320 revista; 1 356 unitários, quatro técnicos e sintaxe aprovados. Publicação pendente da privacidade; ensaios PGlite não equivalem a aceitação PostgreSQL16/suite330/restauro nativo.
+
+**Âmbito parcial:** formulário, fila, controlos de tempo/material e mensagens próprias de equipamento permanecem por localizar; parsing, gravação/envio/sincronização e proteção de sessão estão inalterados. Próxima fonte: resumos de ocorrências (`cw-field-problem-report.js`). Mensagens próprias de impedimentos, painéis de passagem/receção e outras fontes do inventário também continuam pendentes. C06 e C06-003 permanecem abertas. Chrome/nav é C08-025/026. Contagens estáticas TASK415 não recalculadas; as entradas históricas abaixo conservam os limites à data de cada lote.
+
+## Histórico funcional — TASK435 / resumos de impedimentos
 
 `cw-field-incomplete.js` fornece textos capturados em PT/EN/FR/ES/DE para pedidos por confirmar, aviso antigo e rascunhos REGULAR/EXTRA. O consumidor da revisão diária já existente seleciona o idioma sem reler o produtor. O JSON `{kind,text}` conserva o português anterior e os rótulos/mensagens de origem mantêm-se literais. Uma propriedade não enumerável e imutável contém apenas os textos; não altera os registos persistidos. Cache220/runner329; [prova435](evidence/20260929_task435_local.json).
 

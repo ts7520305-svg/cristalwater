@@ -98,15 +98,35 @@
     if (sameVisit(draft, selected)) await load();
     await renderQueue();
   }
+  const summaryMessages = {
+    regularVisit: ['Visita {id}','Visit {id}','Visite {id}','Visita {id}','Besuch {id}'],
+    extraVisit: ['Visita extra {id}','Extra visit {id}','Visite supplémentaire {id}','Visita extra {id}','Zusatzbesuch {id}'],
+    pending: ['{visit} — {title}: revisão por confirmar no servidor{blocked}.','{visit} — {title}: maintenance awaiting server confirmation{blocked}.','{visit} — {title}: entretien à confirmer sur le serveur{blocked}.','{visit} — {title}: revisión pendiente de confirmación en el servidor{blocked}.','{visit} — {title}: Wartung wartet auf Serverbestätigung{blocked}.'],
+    blocked: ['; precisa de apoio do escritório','; office support needed','; aide du bureau nécessaire','; necesita apoyo de la oficina','; Unterstützung durch das Büro erforderlich'],
+    rejected: ['{visit} — revisão não aplicada: {message}','{visit} — maintenance not applied: {message}','{visit} — entretien non appliqué : {message}','{visit} — revisión no aplicada: {message}','{visit} — Wartung nicht übernommen: {message}'],
+    draft: ['{visit} — {title}: rascunho de revisão guardado, ainda não enviado.','{visit} — {title}: maintenance draft saved, not sent yet.','{visit} — {title}: brouillon d’entretien enregistré, pas encore envoyé.','{visit} — {title}: borrador de revisión guardado, aún no enviado.','{visit} — {title}: Wartungsentwurf gespeichert, noch nicht gesendet.']
+  };
+  const summaryText = (key, parameters, index) => summaryMessages[key][index].replace(/\{(\w+)\}/g, (_, name) => String(parameters[name]));
+  function summaryItem(key, visit, parameters = {}) {
+    const reviewText = Object.freeze(Object.fromEntries(['pt','en','fr','es','de'].map((language, index) => [language, summaryText(key, {
+      ...parameters, visit: summaryText(visit.visitType === 'EXTRA' ? 'extraVisit' : 'regularVisit', {id:visit.visitId}, index),
+      blocked: parameters.blocked ? summaryMessages.blocked[index] : ''
+    }, index)])));
+    // Preserve the existing Portuguese JSON; the review selects from captured
+    // strings without retaining callbacks, records or mutable draft objects.
+    const item = {kind:'pending', text:reviewText.pt};
+    Object.defineProperty(item, 'reviewText', {value:reviewText});
+    return item;
+  }
   async function pendingSummary() {
     assertSession(); const rows = await store.records(scope, captured, true), result = [];
     for (const row of rows) {
-      if (!row.response) result.push({ kind: 'pending', text: `${label(row.payload)} — ${row.label}: revisão por confirmar no servidor${row.failure?.blocked ? '; precisa de apoio do escritório' : ''}.` });
-      else if (row.response.applied === false && !row.reviewedAt) result.push({ kind: 'pending', text: `${label(row.payload)} — revisão não aplicada: ${row.response.message}` });
+      if (!row.response) result.push(summaryItem('pending', row.payload, {title:row.label, blocked:row.failure?.blocked}));
+      else if (row.response.applied === false && !row.reviewedAt) result.push(summaryItem('rejected', row.payload, {message:row.response.message}));
     }
     for (const storageKey of Object.keys(localStorage).filter(name => name.startsWith(prefix))) {
       const draft = parseDraft(localStorage.getItem(storageKey), storageKey);
-      if (hasDraft(draft) && !rows.some(row => matching(row, draft) && (!row.response || acknowledgedDraft(row, draft)))) result.push({ kind: 'pending', text: `${label(draft)} — ${draft.title}: rascunho de revisão guardado, ainda não enviado.` });
+      if (hasDraft(draft) && !rows.some(row => matching(row, draft) && (!row.response || acknowledgedDraft(row, draft)))) result.push(summaryItem('draft', draft, {title:draft.title}));
     }
     assertSession(); return result;
   }
