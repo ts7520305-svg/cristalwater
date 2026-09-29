@@ -1,5 +1,13 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 29/09/2026, TASK434–TASK441 / CI em execução
+
+TASK434–TASK441 publicadas em oito commits individuais na branch `work/field-readiness-20260915-simulation`, conforme autorização expressa das 19:20 de Lisboa para continuar com repositório público. Commit de código `fb26890f72dc1a47fd2add51bd8d6a8a6a8292af`, árvore `bec41b483211b42ece9c5e565ddab6ee7301ce47`, igual à validada localmente; os oito pares local/remoto constam da [prova441](evidence/20260929_task441_local.json). História local original preservada; checkout alinhado com GitHub. Nenhum merge ou deploy.
+
+[CI36613209845](https://github.com/ts7520305-svg/cristalwater/actions/runs/36613209845), job109559577064, arrancou por push do commit exato. Última consulta: quatro etapas iniciais aprovadas, instalação de dependências em execução. Não equivale a aceitação: exigir PostgreSQL16, upgrade, todos os335 grupos e restauro128 tabelas47 ficheiros. Atualização documental posterior com `[skip ci]` mantém o código validado inalterado.
+
+**Retoma:** verificar este CI; depois traduzir preparação/receção de química no final de `cw-field-day-review.js`, seguindo C06. C32 exige tornar o repositório privado e confirmar acesso antes da conclusão do projeto. A suspensão antiga por privacidade foi revogada; não a reativar a partir de entradas históricas. C06 aberta, contagem32=26 por iniciar/uma em execução/cinco concluídas. Contrato anual adiado.
+
 ## Retoma atual — 29/09/2026, TASK441 local validada / publicação autorizada
 
 **Decisão atual do utilizador, 19:20 de Lisboa:** manter `ts7520305-svg/cristalwater` público durante o desenvolvimento e limitar para privado antes da conclusão do projeto. A suspensão anterior de publicação fica levantada. É permitido publicar alterações validadas na branch de trabalho; não altera o âmbito de instalação no VPS, destinatários externos ou aceitação final. A condição de privacidade fica em C32.

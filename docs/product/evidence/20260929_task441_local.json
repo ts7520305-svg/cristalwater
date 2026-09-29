@@ -3,7 +3,7 @@
   "date": "2026-09-29",
   "branch": "work/field-readiness-20260915-simulation",
   "baseCommit": "752b1980210e70877dc95658edb6076e1c125a22",
-  "status": "local_validated_publication_authorized_native_ci_pending",
+  "status": "published_native_ci_running",
   "scope": {
     "responsibility": "Localize responsibility handover and visit receipt panels while retaining assignments, visit state, reminder ownership and explicit actions",
     "files": [
@@ -204,7 +204,130 @@
   },
   "publication": {
     "publicBaseCommit": "b2d51e445a18d3c0456197b73f90cb1363f6aa18",
-    "preparedCommitMap": [
+    "branchUpdated": true,
+    "merged": false,
+    "deployed": false,
+    "nativeRun": {
+      "runId": 36613209845,
+      "codeCommit": "fb26890f72dc1a47fd2add51bd8d6a8a6a8292af",
+      "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36613209845",
+      "jobs": [
+        {
+          "id": 109559577064,
+          "name": "field",
+          "status": "in_progress",
+          "conclusion": null,
+          "run_id": 36613209845,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run npm ci",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 5
+            },
+            {
+              "name": "Run npx prisma validate && npx prisma generate",
+              "status": "pending",
+              "conclusion": null,
+              "number": 6
+            },
+            {
+              "name": "Verify additive upgrade from the previous schema",
+              "status": "pending",
+              "conclusion": null,
+              "number": 7
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium",
+              "status": "pending",
+              "conclusion": null,
+              "number": 8
+            },
+            {
+              "name": "Run npm run check:syntax",
+              "status": "pending",
+              "conclusion": null,
+              "number": 9
+            },
+            {
+              "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+              "status": "pending",
+              "conclusion": null,
+              "number": 10
+            },
+            {
+              "name": "Run node scripts/test-field-suite.js",
+              "status": "pending",
+              "conclusion": null,
+              "number": 11
+            },
+            {
+              "name": "Restore database and uploaded files in isolated QA",
+              "status": "pending",
+              "conclusion": null,
+              "number": 12
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 13
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 14
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 26
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 27
+            },
+            {
+              "name": "Stop containers",
+              "status": "pending",
+              "conclusion": null,
+              "number": 28
+            }
+          ]
+        }
+      ]
+    },
+    "requiredNativeGates": "Exact final code revision: PostgreSQL16, additive upgrade, 335 groups and restore of 128 tables / 47 files",
+    "commits": [
       {
         "task": "TASK434",
         "localCommit": "4f1538a8e638f177978b4935262365db25efd892",
@@ -246,13 +369,20 @@
         "localCommit": "752b1980210e70877dc95658edb6076e1c125a22",
         "remoteCommit": "bd54d460f81dfe97a0ef5b13d6e2cbc9a38813d3",
         "tree": "41a507a5bd473659d6b964d2bd9c831337175ac0"
+      },
+      {
+        "task": "TASK441",
+        "localCommit": "c9affc1dcfd582fd1705aee1a5cc913b6f4113a2",
+        "remoteCommit": "fb26890f72dc1a47fd2add51bd8d6a8a6a8292af",
+        "tree": "bec41b483211b42ece9c5e565ddab6ee7301ce47"
       }
     ],
-    "branchUpdated": false,
-    "merged": false,
-    "deployed": false,
-    "nativeRun": null,
-    "requiredNativeGates": "Exact final code revision: PostgreSQL16, additive upgrade, 335 groups and restore of 128 tables / 47 files"
+    "TASK434To441Published": true,
+    "codeCommit": "fb26890f72dc1a47fd2add51bd8d6a8a6a8292af",
+    "codeTree": "bec41b483211b42ece9c5e565ddab6ee7301ce47",
+    "eachPublishedTreeEqualsLocalTree": true,
+    "documentationUpdatesMayFollowWithSkipCi": true,
+    "localOriginalHistoryPreservedAt": "work/local-task434-441-20260929"
   },
   "next": {
     "completionCounts": {
