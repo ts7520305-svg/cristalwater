@@ -1,0 +1,208 @@
+{
+  "task": "TASK419",
+  "date": "2026-09-29",
+  "baseCommit": "71560b0326bf2c31d267399fbaa63510156fa533",
+  "scope": "C06: stable coordination of global and legacy-product language changes; regression prompted by CI418 route-preview interaction failure.",
+  "nativeRead": [
+    {
+      "task": 416,
+      "commit": "e1306ecd5991b7a1266ec67fbe7c8967cfa7497c",
+      "job": 109173198905,
+      "groups": 318,
+      "exactOrder": true,
+      "failures": [],
+      "restore": "2026-09-28T23:55:16.7589213Z PASS restored 128 tables and 47 uploaded files; database rows and file hashes match",
+      "run": 36495253808
+    },
+    {
+      "task": 417,
+      "commit": "5c96ff382d12e5827cee332d00369562f7866499",
+      "job": 109178694799,
+      "groups": 318,
+      "exactOrder": true,
+      "failures": [],
+      "restore": "2026-09-29T00:14:38.8784272Z PASS restored 128 tables and 47 uploaded files; database rows and file hashes match",
+      "run": 36496967888
+    },
+    {
+      "task": 418,
+      "commit": "e63048ccb8cb22ec3420bf1d58f0fe6775d61fbe",
+      "job": 109185204660,
+      "groups": 319,
+      "exactOrder": true,
+      "failures": [
+        {
+          "script": "test-field-route-preview-ui.js",
+          "code": 1,
+          "signal": null,
+          "ms": 12163
+        }
+      ],
+      "restore": null,
+      "run": 36499020853
+    }
+  ],
+  "reproduction": {
+    "native418": "319 exact ordered groups, only route-preview-ui failed after first PASS; calculate button did not stabilize within its existing10s click limit. No restoration.",
+    "localOriginalRoute": {
+      "code": 0,
+      "ms": 7242,
+      "limitation": "The exact native timeout did not reproduce in the original local test; no claim that its full timing cause is proven."
+    },
+    "sameLanguage": "New browser consumer regression fails before code edit: observed en-to-en attribute write and managed node replacement. Automatic translation of newly inserted text triggers the unchanged-lang write.",
+    "productPicker": "New real legacy-page assertion fails before code edit: local product choice en is not adopted by the global selector and is reverted by its delayed pass.",
+    "probeBefore": {
+      "events": [
+        {
+          "old": "pt",
+          "value": "pt"
+        },
+        {
+          "old": "pt",
+          "value": "pt"
+        },
+        {
+          "old": "pt",
+          "value": "pt"
+        },
+        {
+          "old": "pt",
+          "value": "pt"
+        },
+        {
+          "old": "pt",
+          "value": "pt"
+        },
+        {
+          "old": "pt",
+          "value": "pt"
+        },
+        {
+          "old": "pt",
+          "value": "pt"
+        },
+        {
+          "old": "pt",
+          "value": "pt"
+        }
+      ],
+      "products": 312,
+      "frames": [
+        "[487.03,44,803,7189]",
+        "[486.56,44,803,7189]",
+        "[486.33,44,803,7189]",
+        "[486.18,44,803,7189]",
+        "[486.09,44,803,7189]",
+        "[486.05,44,803,7189]",
+        "[486.03,44,803,7189]"
+      ]
+    },
+    "probeAfter": {
+      "events": [],
+      "products": 0,
+      "frames": [
+        "[487.03,44,803,7189]",
+        "[486.87,44,803,7189]",
+        "[486.56,44,803,7189]",
+        "[486.33,44,803,7189]",
+        "[486.18,44,803,7189]",
+        "[486.09,44,803,7189]",
+        "[486.05,44,803,7189]",
+        "[486.03,44,803,7189]"
+      ]
+    },
+    "probeScope": "1.5s sampling on real route-preview page: eight unchanged-pt notifications/312 product DOM records before, zero/zero after. Button bounding box has a short CSS easing transition in both; no claim of universally motionless layout."
+  },
+  "changes": {
+    "global": "Only write html.lang and body data-cw-language when their value changes. Continue translating new text and preserving explicit events/remote preference ordering.",
+    "products": "Only repaint on an actual effective-language change. Product picker delegates to the global language API when present, retaining its standalone fallback and existing product preference key.",
+    "testRace": "Changed-unit product test previously accepted the saved placeholder while stock was still loading; captured actual guard was Consulte a guia. Now wait for the refresh button to be enabled AND the saved selection before demanding the unchanged unique-line rejection. No forced click, animation suppression, timeout increase or weakened assertion.",
+    "protocol": "No operational payload, UUID, receipt, stock rule, route ordering, schema or API contract change. Cache210; runner319."
+  },
+  "validation": {
+    "environment": "Fresh clone/npm ci, generated Prisma/schema, isolated PGlite0.5.8 plus real Express and Chromium153.0.8010.0. No external notifications.",
+    "unitTests": 1327,
+    "unitFiles": 136,
+    "technicianTests": 4,
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44
+    },
+    "integrated": [
+      {
+        "script": "scripts/test-field-route-preview-ui.js",
+        "code": 0,
+        "ms": 7131
+      },
+      {
+        "script": "scripts/test-field-legacy-page-languages.js",
+        "code": 0,
+        "ms": 15048
+      },
+      {
+        "script": "scripts/test-field-legacy-products.js",
+        "code": 0,
+        "ms": 18623
+      },
+      {
+        "script": "scripts/test-field-legacy-visit-drafts.js",
+        "code": 0,
+        "ms": 13958
+      },
+      {
+        "script": "scripts/test-field-route-preview.js",
+        "code": 0,
+        "ms": 1170
+      },
+      {
+        "script": "../qa/probe-route.cjs",
+        "code": 0,
+        "ms": 7758
+      }
+    ],
+    "finalProducts": [
+      {
+        "script": "scripts/test-field-legacy-products.js",
+        "code": 0,
+        "ms": 16844
+      }
+    ],
+    "globalLanguageBrowser": "PASS same-language automatic/explicit behavior, focus/caret, one effective change, fresh dynamic text, preference races and current existing controls.",
+    "knownLocalFailures": "First full-unit execution timed out loading a historical git-show test in a fresh partial clone; unchanged rerun passed at the existing5s limit. A new FR assertion was corrected to the existing catalogue spelling Termine; no production translation was changed.",
+    "actualProductEditor": "Same-value lang notification preserves the real product note node, focus, selection2..8 and exact saved draft bytes.",
+    "codeChecks": "node --check for all six changed JS files and git diff --check passed."
+  },
+  "files": {
+    "frontend/cw-i18n.js": "4649a836f3ac48331db8222d22d64be8e1e5156fc2c1e74121a28483689bb935",
+    "frontend/cw-legacy-visit-products.js": "d15c433adb8e49ec422e2b9514509c0455af2855601ff20ec552daf7c46d36de",
+    "frontend/sw.js": "590ee83f6d24e4607ce0b496456be207c3c1d46450e15e2514712ca128263170",
+    "scripts/test-language-browser.js": "d79024e007ea610bcb93abf14546930f568b434a73c91a67721764cdb865db42",
+    "scripts/test-field-legacy-page-languages.js": "c56f28f0618497062ace0342eb7732e7b0143536c56fdd22e1561748a4b8f331",
+    "scripts/test-field-legacy-products.js": "baa9b411980fdd6f1b0c634c405f8d40820b63f48c4d772f84b25e1cb8bc8a52"
+  },
+  "remaining": "C06 stays in execution. TASK420 localizes workday states and recovery. Internal alerts, legacy drafts, route preview text and shared chrome still have scoped follow-ups. C04 acceptance remains version414; CI419 requires319 exact ordered groups plus restoration.",
+  "counts": {
+    "total": 32,
+    "notStarted": 26,
+    "inProgress": 1,
+    "inValidation": 0,
+    "completed": 5
+  },
+  "publication": {
+    "status": "pending",
+    "branch": "work/field-readiness-20260915-simulation"
+  },
+  "authorization": "Existing authorization covers work-branch publication; no merge, VPS deployment, real contact or annual legal contract work.",
+  "logHashes": {
+    "task419-before.log": "0335b5f1b330eab4d808c3fbe0d2eb232725fc6543551a1868eb057e2b595f06",
+    "task419-language-before.log": "fe46cd3d81a4d0592d2dc7294af448af1384644f051eb87268575b040a57d313",
+    "task419-picker-before.log": "2f808262fa7867e8ef4f39f13c7ffb341efac42c412804d5eb27e1d0c5f60ac1",
+    "task419-language-final.log": "5319a0a0ddbe416504131319a225095350c9cffb0f94ebeba217a7885d4b4bc6",
+    "task419-final.log": "0d3b584870b851813678d67db40f5543f47b61216c5a2f67ed1fb2cb80e7026f",
+    "task419-products-final.log": "5dd5a962d72891012350f8d1bc6e710091af98da5bc46c1bb546d3e415dad784",
+    "task419-unit-final.log": "fbbf33ee23f59c86da46b75789a7a0edfd93b6c88b9022cc40ff5c05ffed20d8",
+    "task419-technician.log": "b8bc1d5de6a306610b04eb635958cd15c8b7100c79c3bdf30cd1792b34e5835f",
+    "task419-syntax.log": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4"
+  }
+}

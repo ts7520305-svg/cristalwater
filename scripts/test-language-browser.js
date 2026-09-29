@@ -40,6 +40,32 @@ const {chromium}=require('playwright');
   assert.equal(await field.locator('#incompleteReason option[value=CHEMICAL_MISSING]').textContent(),'Faltan productos químicos');
   const bounds=await field.locator('#cwLanguageSelect').boundingBox();assert(bounds.x>=0&&bounds.x+bounds.width<=320);
   assert.equal(await field.locator('.top .cw-lang-switch').count(),1);await field.close();
+  // A component may repaint after an actual lang change. Reapplying the same
+  // language for new text must not trigger that component again or lose focus.
+  const consumer=await browser.newPage();consumer.setDefaultTimeout(5000);
+  await consumer.addInitScript(()=>localStorage.setItem('cw_language','en'));
+  await consumer.route('**/*',route=>new URL(route.request().url()).pathname==='/cw-i18n.js'
+    ?route.fulfill({contentType:'text/javascript',body:fs.readFileSync(path.join(__dirname,'../frontend/cw-i18n.js'),'utf8')})
+    :route.fulfill({contentType:'text/html',body:'<!doctype html><html lang="pt"><meta charset="utf-8"><body><div id="consumer" data-cw-no-i18n><input id="managed" value="Original Guardar"></div><p id="fresh">Guardar</p><script src="/cw-i18n.js"></script></body></html>'}));
+  await consumer.goto('http://consumer-language.test/');
+  await consumer.waitForFunction(()=>document.getElementById('fresh').textContent==='Save');
+  await consumer.evaluate(()=>{
+    window.qaLanguageMutations=[];window.qaManaged=document.getElementById('managed');qaManaged.focus();qaManaged.setSelectionRange(2,7);
+    new MutationObserver(rows=>{qaLanguageMutations.push(...rows.map(row=>({old:row.oldValue,current:document.documentElement.lang})));const input=document.createElement('input');input.id='managed';input.value=qaManaged.value;document.getElementById('consumer').replaceChildren(input);}).observe(document.documentElement,{attributes:true,attributeFilter:['lang'],attributeOldValue:true});
+    document.getElementById('fresh').textContent='Concluído';
+  });
+  await consumer.waitForFunction(()=>document.getElementById('fresh').textContent==='Completed');
+  let state=await consumer.evaluate(()=>({mutations:qaLanguageMutations,same:qaManaged===document.getElementById('managed'),focus:document.activeElement===qaManaged,selection:[qaManaged.selectionStart,qaManaged.selectionEnd]}));
+  assert.deepEqual(state.mutations,[],'Automatic translation must not emit a same-language attribute mutation');assert(state.same&&state.focus);assert.deepEqual(state.selection,[2,7]);
+  await consumer.locator('#cwLanguageSelect').selectOption('fr');
+  await consumer.waitForFunction(()=>document.getElementById('fresh').textContent==='Termine');
+  await consumer.evaluate(()=>{window.qaManaged=document.getElementById('managed');qaManaged.focus();qaManaged.setSelectionRange(2,7);document.getElementById('fresh').textContent='Água aberta';});
+  await consumer.waitForFunction(()=>document.getElementById('fresh').textContent==='Eau ouverte');
+  state=await consumer.evaluate(()=>({mutations:qaLanguageMutations,same:qaManaged===document.getElementById('managed'),focus:document.activeElement===qaManaged}));
+  assert.deepEqual(state.mutations,[{old:'en',current:'fr'}]);assert(state.same&&state.focus);
+  await consumer.evaluate(()=>CristalI18n.applyLanguage('fr'));
+  assert.equal(await consumer.evaluate(()=>qaLanguageMutations.length),1);assert.equal(await consumer.locator('#managed').inputValue(),'Original Guardar');await consumer.close();
+  console.log('PASS same-language automatic/explicit updates preserve managed nodes/focus; actual language changes notify once and fresh text still translates');
   console.log('PASS Spanish field labels, stable option values, user text protection, fresh live states, ordered preference writes and delayed read after choice/account change');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

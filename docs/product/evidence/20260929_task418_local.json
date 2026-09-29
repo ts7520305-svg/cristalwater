@@ -1188,7 +1188,7 @@
     "job": 109178694799,
     "state": "in_progress; ten steps passed at last read, native318/restoration still required"
   },
-  "nativeCurrent": "TASK418 requires319 exact ordered groups and restore; not claimed from older CI.",
+  "nativeCurrent": "CI418319 groups exact,318 passed, route-preview-ui click unstable. Restoration skipped. TASK419 handles reproduced language-observer feedback and product-picker coordination; no current-version native acceptance yet.",
   "next": "TASK419: localized workday component statuses/recovery with original pending request preserved; remaining internal alerts, legacy drafts, route preview and shared chrome remain C06.",
   "counts": {
     "total": 32,
@@ -1222,10 +1222,20 @@
     "ci": {
       "run": 36499020853,
       "job": 109185204660,
-      "status": "in_progress",
+      "status": "completed",
       "passedSteps": 3,
       "expectedOrderedGroups": 319,
-      "restoration": "pending"
+      "restoration": "skipped",
+      "conclusion": "failure",
+      "passedOrderedGroups": 318,
+      "failedOrderedGroups": [
+        {
+          "script": "test-field-route-preview-ui.js",
+          "code": 1,
+          "ms": 12163
+        }
+      ],
+      "exactOrder": true
     }
   }
 }

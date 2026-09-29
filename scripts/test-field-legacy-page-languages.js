@@ -107,6 +107,18 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
   for (const [language,expected] of Object.entries(routeError)) { await page.evaluate(language=>CristalI18n.applyLanguage(language),language); assert((await page.locator('#status').textContent()).startsWith(expected)); assert.equal(await page.locator('#notes-'+visit.id).inputValue(),originalNotes); }
   assert.equal(await snapshot(),stable); await page.unroute('**/api/visits/today?*');
   console.log('PASS unavailable route remains an error in all five languages while original route/draft bytes stay intact');
+  // Both real selectors must share the current preference once the global
+  // engine is loaded; its delayed repaint must not revert a product choice.
+  await page.locator('#legacyProducts-'+visit.id+' [data-product-language]').selectOption('en');
+  await page.waitForFunction(()=>document.querySelector('header h2').textContent==='Technician route' && document.getElementById('cwLanguageSelect').value==='en');
+  await page.waitForTimeout(600); // More than two 180ms translation-observer cycles.
+  assert.equal(await page.locator('html').getAttribute('lang'),'en');
+  assert.equal(await page.locator('#cwLanguageSelect').inputValue(),'en');
+  assert.equal(await page.evaluate(key=>localStorage.getItem(key),draftKey),JSON.parse(stable).local[draftKey]);
+  assert.equal((await page.evaluate(id=>CWFieldWriteStore.get(id,CWFieldWriteStore.session()),pending.requestId)).payloadHash,pending.payloadHash);
+  await page.locator('#legacyProducts-'+visit.id+' [data-product-language]').selectOption('de');
+  await page.waitForFunction(()=>document.getElementById('cwLanguageSelect').value==='de');
+  console.log('PASS the product language selector shares the global preference without delayed reversal or operational byte changes');
   await page.evaluate(() => navigator.serviceWorker.ready);
   await context.setOffline(true); await page.reload({waitUntil:'domcontentloaded'});
   await page.waitForFunction(id => document.getElementById('notes-' + id)?.value.includes('17,25'), visit.id);

@@ -1,5 +1,17 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 29/09/2026, TASK419 local / estabilidade dos idiomas
+
+**Publicar TASK419 e continuar TASK420: jornada antiga.** CI418:319 grupos na ordem exata,318 aprovados; único erro no clique do botão de recalcular a pré-visualização, que não estabilizou em10s; restauro saltado. O timeout exato não se repetiu localmente, mas foram reproduzidos o ciclo de notificações do mesmo idioma e a reversão do seletor de produtos. [Prova e limites TASK419](evidence/20260929_task419_local.json).
+
+**Correção419:** o motor global só altera os atributos de idioma quando mudam; o componente de produtos também só repinta nessa situação. Seletor de produtos usa a preferência global quando o motor está presente, mantendo fallback autónomo. Sondagem1,5s:8 notificações pt→pt/312 mutações de produtos antes;0/0 depois. Novos testes protegem nós, foco/cursor e bytes do editor real, além da preferência escolhida. Sem mudança de API, schema, payload, UUID/recibo ou regras de stock; cache210, runner319.
+
+**Validação419:**1 327 testes/136 ficheiros, quatro técnicos, sintaxe695/308/44, node-check/diff-check. Seis execuções integradas (incluindo sondagem fora do repositório), navegador global e reexecução final de produtos aprovados. O teste de unidade da guia agora espera a consulta acabar antes de exigir o erro de unidade, mantendo a asserção original; nenhum limite aumentado, clique forçado ou animação desligada. Primeiro unitário de versão histórica teve timeout num clone parcial novo; repetição inalterada passou. Os tempos exatos e hashes estão na evidência.
+
+**CI416/417 nativos aprovados:** ambos318 grupos na ordem exata dos respetivos commits e restauro128 tabelas/47ficheiros. CI416 run36495253808/job109173198905; CI417 run36496967888/job109178694799. Não se afirma nova leitura de JSONs específicos desses runs. C04 continua aceite na versão414. CI419 terá de aprovar os319 grupos/restauro da sua própria versão.
+
+**Continuação420:** `cw-legacy-workday.js` e cópia explícita, cinco idiomas nos estados de consulta/início/fim/pendência/erro, sem reescrever o pedido original nem repetir POST ao mudar idioma. Manter User/Technician distintos, bloqueio entre janelas, perda de resposta, mudança de conta, erro/corrupção e recuperação offline. C06 ainda inclui outros componentes.32 tarefas:26 por iniciar, C06 em execução, cinco concluídas(C01–C05). Branch autorizada apenas; sem merge/deploy/contactos reais; contrato anual adiado.
+
 ## Retoma atual — 29/09/2026, TASK418 publicada / C04 nativa concluída
 
 **TASK418 publicada; próximo TASK419: estados e recuperação da jornada antiga.** Lote de dez ficheiros: seis de código/teste mais este checkpoint, plano, manifesto de volume e evidência. Textos próprios de `technician.html`/`technician.js` em PT/EN/FR/ES/DE;67 chaves/335 valores. Rótulos/placeholders atualizados no lugar: conservar nós, seis valores, foco/cursor, bytes de rascunho/cache/outbox, enums BEFORE/AFTER, UUID/payload/hash. Datas só mudam apresentação. Estado sync usa identificador estável; alerta pendente não pode anunciar sincronização concluída. Cache209, runner319. [Prova TASK418](evidence/20260929_task418_local.json).

@@ -36,6 +36,10 @@ let browser;
   await row.locator('select').selectOption(String(items[1].id)); await row.locator('[data-product-field=quantity]').fill('1.25'); await saved();
   await row.locator('select').selectOption(String(items[0].id)); await saved(); assert.equal(await row.locator('[data-product-field=unit]').inputValue(), 'L'); assert.equal(await row.locator('[data-product-field=quantity]').inputValue(), '1.25');
   await row.locator('[data-product-field=notes]').fill('Nota literal <b>texto</b>\nsegunda linha'); await saved();
+  const languageDraft=await raw();
+  const stableEditor=await row.locator('[data-product-field=notes]').evaluate(async node=>{node.focus();node.setSelectionRange(2,8);document.documentElement.lang=document.documentElement.lang;await new Promise(requestAnimationFrame);return {same:node.isConnected,focused:document.activeElement===node,selection:[node.selectionStart,node.selectionEnd]};});
+  assert(stableEditor.same&&stableEditor.focused);assert.deepEqual(stableEditor.selection,[2,8]);assert.equal(await raw(),languageDraft);
+  console.log('PASS same-language attribute notification preserves the actual product editor node, focus, caret and draft bytes');
   for (const quantity of ['', '0', '-1']) { await row.locator('[data-product-field=quantity]').fill(quantity); await saved(); await rejected('quantidade positiva'); assert.equal((await products()).rows[0].quantity, quantity); }
   await row.locator('[data-product-field=quantity]').fill('6'); await box.locator('[data-product-add]').click(); const second = box.locator('[data-product-row]').nth(1);
   await second.locator('select').selectOption(String(items[0].id)); await second.locator('[data-product-field=quantity]').fill('6'); await saved(); await rejected('Stock insuficiente'); assert.equal((await products()).rows.length, 2);
@@ -68,7 +72,11 @@ let browser;
   const stockUrl = '**/api/guides/stock/' + vehicle.id + '?includeMovements=false';
   await page.route(stockUrl, route => route.fulfill({ status: 403, json: { ok: false } })); await box.locator('[data-product-refresh]').click(); await page.waitForFunction(id => document.querySelector('#legacyProducts-' + id + ' [role=status]').textContent.includes('recusado'), visit.id); await rejected('Consulte a guia');
   await page.unroute(stockUrl); await box.locator('[data-product-refresh]').click(); await page.waitForFunction(id => document.querySelector('#legacyProducts-' + id + ' [role=status]').textContent.includes('Guia consultada online'), visit.id);
-  const staleGuide = await prisma.workGuideItem.update({ where: { id: items[2].id }, data: { unit: 'kg' } }); await box.locator('[data-product-refresh]').click(); await page.waitForFunction(id => document.querySelector('#legacyProducts-' + id + ' [data-product-field=name]')?.value === 'saved', visit.id); await rejected('única linha'); assert.equal((await products()).rows[0].unit, 'KG');
+  const staleGuide = await prisma.workGuideItem.update({ where: { id: items[2].id }, data: { unit: 'kg' } }); await box.locator('[data-product-refresh]').click();
+  // "saved" is also shown while stock is loading. Confirm the new lookup has
+  // finished before testing the changed-unit rejection, not the loading guard.
+  await page.waitForFunction(id => document.querySelector('#legacyProducts-' + id + ' [data-product-refresh]')?.disabled === false && document.querySelector('#legacyProducts-' + id + ' [data-product-field=name]')?.value === 'saved', visit.id);
+  await rejected('única linha'); assert.equal((await products()).rows[0].unit, 'KG');
   await prisma.workGuideItem.update({ where: { id: staleGuide.id }, data: { unit: 'KG' } }); await box.locator('[data-product-refresh]').click(); await page.waitForFunction(({ id, item }) => document.querySelector('#legacyProducts-' + id + ' [data-product-field=name]')?.value === String(item), { id: visit.id, item: items[2].id });
   assert.deepEqual((await draft()).fields, JSON.parse(healthy).fields);
   console.log('PASS legacy rows require reselection; corrupt cache bytes stay intact; denied access and changed literal unit cannot silently use old stock or rewrite the draft');

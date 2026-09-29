@@ -765,8 +765,10 @@
   function applyLanguage(language, options = {}) {
     if (!options.silent) languageRevision++;
     const normalized = normalizeLanguage(language);
-    document.documentElement.lang = normalized;
-    document.body?.setAttribute("data-cw-language", normalized);
+    // Same-value attribute writes still notify MutationObserver consumers.
+    // Their repaint creates new text, which this engine observes in turn.
+    if (document.documentElement.lang !== normalized) document.documentElement.lang = normalized;
+    if (document.body && document.body.getAttribute("data-cw-language") !== normalized) document.body.setAttribute("data-cw-language", normalized);
     saveUserLanguage(normalized);
     // Publish the latest pending choice before listeners read the language.
     if (!options.silent) syncRemoteLanguage(normalized);
