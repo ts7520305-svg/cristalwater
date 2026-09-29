@@ -740,5 +740,132 @@
     "first": "Confirm exact TASK446 native suite/restore and diagnose any remaining failure; do not infer acceptance from historical runs.",
     "afterGates": "Continue modern photograph panel labels/selection/feedback, keeping original files, requests and external evidence.",
     "deferred": "Annual maintenance contract."
+  },
+  "publication": {
+    "commit": "6ca81c6d008d838ef05a2a2d810331e7e124d7ac",
+    "tree": "39e0ad27ab9d814a83c08186758a17903a21a902",
+    "matchesValidatedTree": true,
+    "runId": 36623638975,
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36623638975",
+    "jobs": {
+      "jobs": [
+        {
+          "id": 109594988678,
+          "name": "field",
+          "status": "in_progress",
+          "conclusion": null,
+          "run_id": 36623638975,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run npm ci",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run npx prisma validate && npx prisma generate",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Verify additive upgrade from the previous schema",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Run npm run check:syntax",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Run node scripts/test-field-suite.js",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 11
+            },
+            {
+              "name": "Restore database and uploaded files in isolated QA",
+              "status": "pending",
+              "conclusion": null,
+              "number": 12
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 13
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 14
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 26
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 27
+            },
+            {
+              "name": "Stop containers",
+              "status": "pending",
+              "conclusion": null,
+              "number": 28
+            }
+          ]
+        }
+      ]
+    },
+    "originalLocalCommit": "0bb4649721b7db465e58fff26941b6178a69cfed",
+    "originalHistoryBranch": "work/local-task446-20260929",
+    "merged": false,
+    "deployed": false
   }
 }

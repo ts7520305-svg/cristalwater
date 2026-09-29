@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 29/09/2026, TASK446 / CI em execução
+
+TASK446 publicada na branch `work/field-readiness-20260915-simulation`: código `6ca81c6d008d838ef05a2a2d810331e7e124d7ac`, árvore `39e0ad27ab9d814a83c08186758a17903a21a902`, igual à validada; checkout alinhado e histórico local preservado. [CI36623638975](https://github.com/ts7520305-svg/cristalwater/actions/runs/36623638975), job109594988678, arrancou no commit exato; 10 etapas aprovadas, etapa atual: `Run node scripts/test-field-suite.js`. Seis integrações locais aprovadas; as três falhas de testes dos CI441/442 estão corrigidas neste commit, sem alterar produto/cache230/runner339. Exigir PostgreSQL16/upgrade/suite339/restauro128 tabelas47ficheiros antes da aceitação. Atualização documental posterior `[skip ci]` não altera o código. [Prova446](evidence/20260929_task446_local.json).
+
+TASK445 também publicada (`19ad9727`): erros próprios de fotografias em cinco idiomas, com ficheiros/pedidos preservados e reenvio sem duplicação. Próximo: verificar CI446 e corrigir qualquer falha remanescente; depois continuar rótulos/seleção/feedback das fotografias modernas. C06 aberta;32=26 por iniciar/uma em execução/cinco concluídas. Público autorizado no desenvolvimento; privado antes do fecho/C32. Contrato anual adiado; sem merge/deploy/contactos externos.
+
 ## Retoma atual — 29/09/2026, TASK446 local validada / correção dos testes nativos
 
 **TASK446:** três pressupostos incorretos dos testes revelados pelos CI441/442 foram reproduzidos e corrigidos. A revisão do dia ativa agora a guarda de sessão de forma determinística, confirma o bloqueio e usa o link real de reabertura, conservando rascunho/pedido/arquivo. O teste de visitas extra verifica os IDs exatos das pendências e inclui uma visita sem regresso, sem desreferenciar pendências alheias. O teste de química escolhe alemão independentemente de capturar imagens. [Prova446](evidence/20260929_task446_local.json).
