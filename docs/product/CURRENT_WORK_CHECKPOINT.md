@@ -1,6 +1,6 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 29/09/2026, TASK421 local / alertas internos
+## Retoma atual — 29/09/2026, TASK421 publicada / alertas internos
 
 **TASK420 nativa confirmada antes de avançar.** Run36524598102/job109264733805, commit `d524a701f53d164185a958cbc2475d03e07bac4f`:320 grupos únicos na ordem exata, todos código0/signalnull,18 etapas aprovadas; restauro128 tabelas/47ficheiros com linhas e hashes iguais. TASK419 também confirmada com319 grupos/restauro. Falhas históricas mantidas. [Verificação atual](evidence/20260929_correction_verification.json).
 
@@ -8,7 +8,7 @@
 
 **Validação421:**1 327 testes/136ficheiros, quatro técnicos, sintaxe695/308/44, node-check/diff-check; novo grupo de idiomas e regressões API/UI de alertas, página antiga e pré-visualização aprovados. Cinco idiomas×320/390/1440 nos estados principais; quotas, pedido em voo/perda de resposta, conflitos, dados inválidos e sessão também nos cinco. Bytes, UUID/payload/hash/owner/recibo, visita/prioridade, mesmos controlos/opções e foco/cursor conservados. Um alerta SQL ADMIN, isRead=false; recuperação preserva recibo e limpeza não envia de novo. Grupo anterior mantém quota de recibo e resposta tardia de outra conta. Capturas DE320 inspecionadas; não equivale a aprovação visual de todo o chrome/temas.
 
-**Publicação421:** validação local concluída; publicar na branch autorizada e exigir321 grupos exatos/restauro128/47 no respetivo commit. O sucesso nativo420 não aprova automaticamente421. Dez ficheiros: cinco código/teste e cinco documentação/evidência; uma responsabilidade.
+**Publicação421:** commit `a1e693222ac7ee4b5775ff9016d307cb6d86ce24`, árvore `d7502931c6084005f6a38d832adc2b467e0feddb`; igualdade local/remota confirmada. CI run36530531859/job109282983732 em execução, quatro etapas aprovadas na última consulta. Exigir321 grupos exatos/restauro128/47 neste commit. O sucesso nativo420 não aprova automaticamente421. Dez ficheiros: cinco código/teste e cinco documentação/evidência; uma responsabilidade. Atualização documental com [skip ci] conserva o código publicado.
 
 **Próximo TASK422:** rascunhos das visitas antigas; depois pré-visualização e mensagens/chrome partilhados. Mensagens recebidas da outbox/servidor permanecem literais neste lote. C06 continua em execução;32 tarefas=26por iniciar/1em execução/5concluídas. Sem merge/deploy/contactos reais; contrato anual adiado. As entradas abaixo são estados históricos.
 

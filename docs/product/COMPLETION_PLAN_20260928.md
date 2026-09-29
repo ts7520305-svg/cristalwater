@@ -4,7 +4,7 @@ Data: 28/09/2026. Preparado na TASK402 a partir da revisão global, do checkpoin
 
 ## Contagem e regra de fecho
 
-**32 tarefas de conclusão identificadas: C01–C32.** Estado após TASK421 local: **26 por iniciar, uma em execução (C06), cinco concluídas (C01–C05)**. C04 aceite na versão414. TASK419/420 nativas confirmadas, respetivamente319/320 grupos exatos e restauro128/47; as falhas antigas continuam registadas. TASK421 localiza os alertas internos em cinco idiomas, preservando rascunho/envio/recibo; a sua versão exige321 grupos/restauro próprios. [Evidência TASK421](evidence/20260929_task421_local.json), [verificação atual](evidence/20260929_correction_verification.json).
+**32 tarefas de conclusão identificadas: C01–C32.** Estado após TASK421 publicada / CI pendente: **26 por iniciar, uma em execução (C06), cinco concluídas (C01–C05)**. C04 aceite na versão414. TASK419/420 nativas confirmadas, respetivamente319/320 grupos exatos e restauro128/47; as falhas antigas continuam registadas. TASK421 publicada localiza os alertas internos em cinco idiomas, preservando rascunho/envio/recibo; CI36530531859 em execução, exige321 grupos/restauro próprios. [Evidência TASK421](evidence/20260929_task421_local.json), [verificação atual](evidence/20260929_correction_verification.json).
 
 Uma tarefa pode ter preparação, implementação local e validação externa em momentos diferentes. Só passa a **Concluída** quando cumpre o critério e tem evidência ligada. **Implementada / CI pendente** não equivale a validação nativa nem a instalação no VPS. Cada lote de código mantém uma responsabilidade, até dez ficheiros, teste da falha/resultado e documentação.
 

@@ -184,12 +184,21 @@
     "reports/field-ui/INTERNAL_ALERT_LANGUAGES_SESSION_DE_320.png": "e9742924a5a283f3b7322e97d904b4b281d79830cca4c5fa44584aeb6d38289b"
   },
   "publication": {
-    "status": "local_validated",
+    "status": "published",
     "branch": "work/field-readiness-20260915-simulation",
+    "commit": "a1e693222ac7ee4b5775ff9016d307cb6d86ce24",
+    "tree": "d7502931c6084005f6a38d832adc2b467e0feddb",
+    "exactTreeMatch": true,
     "ci": {
-      "status": "not_started",
+      "run": 36530531859,
+      "job": 109282983732,
+      "status": "in_progress",
+      "conclusion": null,
+      "passedSteps": 4,
       "expectedOrderedGroups": 321,
-      "restoration": "pending"
+      "restoration": "pending",
+      "checkedAt": "2026-09-29T06:21:17.128Z",
+      "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36530531859"
     }
   },
   "remaining": "TASK422: legacy visit-draft copy; then route-preview and shared chrome/store messages. C06 remains in execution. C04 remains accepted at version414; C09 report DE is separate.",
