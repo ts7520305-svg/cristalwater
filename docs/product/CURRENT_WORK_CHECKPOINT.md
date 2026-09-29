@@ -1,8 +1,8 @@
 # CURRENT_WORK_CHECKPOINT
 
-## Retoma atual — 29/09/2026, TASK426 local / pedidos de material
+## Retoma atual — 29/09/2026, TASK426 publicada / pedidos de material
 
-**TASK426 local validada.** Formulário de material do modo de campo em PT/EN/FR/ES/DE:52 chaves/260 valores, cache216/runner325. Reproduzido antes: idioma EN mas botão/estado/opções em PT. Etiquetas, opções, contexto, recuperação, erros próprios e texto de pendingSummary traduzidos; nomes, notas e erros brutos conservados. Só os nós próprios recebem marcadores; nav/cabeçalho partilhados mantêm o percurso existente. Instruções conservam os rótulos reais «Mais → Avisos». [Prova426](evidence/20260929_task426_local.json).
+**TASK426 publicada na branch autorizada.** Formulário de material do modo de campo em PT/EN/FR/ES/DE:52 chaves/260 valores, cache216/runner325. Reproduzido antes: idioma EN mas botão/estado/opções em PT. Etiquetas, opções, contexto, recuperação, erros próprios e texto de pendingSummary traduzidos; nomes, notas e erros brutos conservados. Só os nós próprios recebem marcadores; nav/cabeçalho partilhados mantêm o percurso existente. Instruções conservam os rótulos reais «Mais → Avisos». [Prova426](evidence/20260929_task426_local.json).
 
 **Dados e comportamento:**inversão das substituições de texto reconstruiu exatamente o módulo anterior. Seis campos, conta, visita/piscina original, enums, rascunho, UUID/payload/hash/recibo, limites/bloqueios e ordem de envio preservados. Mudança de idioma só repinta texto/atributos nos mesmos nós, sem recalcular estado ou enviar. Erros do store com descritor transitório atualizam; falhas persistidas permanecem literais. pendingSummary traduz quando consultado; o módulo de revisão diária e resumos já apresentados continuam por tratar no respetivo lote.
 
@@ -10,9 +10,11 @@
 
 **Ajuste do teste novo:**a falha inicial exigia foco após troca de conta, quando a proteção existente oculta main e o torna inert. Reproduzido com o módulo anterior. A asserção dessa fase agora exige bloqueio, campo limpo/readOnly, bytes originais e zero envios; as de foco/cursor ficam nos estados visíveis. Sem alterar comportamento da aplicação, testes anteriores ou limites. O grupo completo passou após a correção e novamente após o ajuste dos nomes de navegação. A captura mostrou uma opção DE cortada; medição também encontrou três etiquetas PT acima do espaço disponível. Rótulos encurtados, enums/CSS conservados; teste final mede todas as opções em cinco idiomas/a320,390,1440.
 
-**Gates:** TASK424/425 ainda em execução na última consulta, dez etapas aprovadas cada. Sucesso423 está registado na prova425 e não aprova versões seguintes. TASK426 exige325 grupos únicos na ordem exata e restauro128 tabelas/47 ficheiros com linhas/hashes iguais. Publicação426 ainda pendente.
+**TASK424 nativa falhada:**322/323 grupos únicos na ordem exata, um erro em `test-field-internal-alert-languages.js:104` após reload offline: «Locale must retain original form and option nodes». Restauro ignorado. Log completo lido e323 resultados registados na prova426. A correção424 cobria arredondamento/retoma online, não esta fase de reload. TASK425 continua em execução;426 exige325 grupos/restauro próprios. Próxima prioridade é reproduzir esta falha, antes de traduzir rascunhos.
 
-**Próximo TASK427:** confirmar CI424/425/426 e continuar com rascunhos modernos de visita (`cw-field-visit-drafts.js`, C06-006), preservando campos, baseline e conflitos. Chrome/nav é C08-025/026; nenhuma outra entrada C06 é encerrada por associação. Sete ficheiros neste lote, quatro código/teste e três documentação.32 tarefas=26 por iniciar/1 em execução(C06)/5 concluídas. Sem merge/deploy/contactos reais; contrato anual adiado. Entradas abaixo são históricas.
+**Publicação426:**commit `d2d006d377475353f8fee266318b5d3674998087`, árvore `b97fe6c96770ace29d0ed5f819733650a197c320`; igualdade local/remota e checkout limpo confirmados. [CI36548004591](https://github.com/ts7520305-svg/cristalwater/actions/runs/36548004591), job109338958249, em execução; seis etapas aprovadas na primeira consulta. Confirmação documental[skip ci]; não substitui325 grupos/restauro próprios.
+
+**Próximo TASK427:** reproduzir/corrigir a falha nativa424 na reposição offline dos alertas, mantendo asserções de identidade e limites; confirmar CI425/426. Só depois continuar rascunhos modernos (`cw-field-visit-drafts.js`, C06-006). Chrome/nav é C08-025/026; nenhuma outra entrada C06 é encerrada por associação. Sete ficheiros neste lote, quatro código/teste e três documentação.32 tarefas=26 por iniciar/1 em execução(C06)/5 concluídas. Sem merge/deploy/contactos reais; contrato anual adiado. Entradas abaixo são históricas.
 
 ## Retoma atual — 29/09/2026, TASK425 publicada / mensagens do write-store
 
