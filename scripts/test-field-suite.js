@@ -3,6 +3,7 @@ require('../src/loadEnv')();
 const fs=require('fs');
 const path=require('path');
 const {spawn}=require('child_process');
+const {runFieldScript}=require('./lib/run-field-script');
 const {randomBytes}=require('crypto');
 const {prisma}=require('../src/prismaClient');
 const bcrypt=require('bcryptjs');
@@ -242,14 +243,12 @@ scripts.push('test-field-product-identity.js', 'test-field-product-identity-ui.j
 
 scripts.push('test-field-legacy-products.js', 'test-field-product-catalogue-ui.js', 'test-field-extra-products.js');
 
-function run(script){return new Promise(resolve=>{
- const output=fs.createWriteStream(path.join(evidence,script+'.log'));
- const child=spawn(process.execPath,[path.join(__dirname,script)],{cwd:root,env:process.env,stdio:['ignore','pipe','pipe']});
- child.stdout.pipe(output);child.stderr.pipe(output);
- const start=Date.now(),timer=setTimeout(()=>child.kill('SIGKILL'),120000);
- child.once('error',error=>{clearTimeout(timer);output.end();resolve({script,code:1,error:error.message})});
- child.once('close',(code,signal)=>{clearTimeout(timer);output.end(()=>{const result={script,code,signal,ms:Date.now()-start};console.log(JSON.stringify(result));if(code!==0)console.error(fs.readFileSync(path.join(evidence,script+'.log'),'utf8').slice(-12000));resolve(result)})});
-});}
+async function run(script){
+ const result=await runFieldScript(script,{root,evidence});
+ console.log(JSON.stringify(result));
+ if(result.code!==0){const log=path.join(evidence,script+'.log');console.error(fs.existsSync(log)?fs.readFileSync(log,'utf8').slice(-12000):result.error);}
+ return result;
+}
 (async()=>{
  await prisma.user.upsert({where:{email:process.env.ADMIN_EMAIL},create:{email:process.env.ADMIN_EMAIL,name:'Field QA Administrator',password:await bcrypt.hash(process.env.ADMIN_PASSWORD,10),role:'ADMIN',active:true,mustChangePassword:false},update:{password:await bcrypt.hash(process.env.ADMIN_PASSWORD,10),active:true,role:'ADMIN'}});
  await prisma.$disconnect();
