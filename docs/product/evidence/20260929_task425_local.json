@@ -2145,10 +2145,17 @@
     "task425-syntax.log": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4"
   },
   "publication": {
-    "status": "ready",
+    "status": "published",
     "branch": "work/field-readiness-20260915-simulation",
+    "commit": "79601dbcb10a951353898cde3f36d445b515b06b",
+    "tree": "20c0dbeb09e0e0a9501e1d1baa8500f63f4ed3b2",
+    "localRemoteTreeEqual": true,
     "ci": {
-      "status": "not_started",
+      "run": 36544481091,
+      "job": 109327457174,
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulSteps": 1,
       "expectedOrderedGroups": 324,
       "restoration": "pending"
     }

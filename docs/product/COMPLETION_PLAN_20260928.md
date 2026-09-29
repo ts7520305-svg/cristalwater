@@ -4,7 +4,7 @@ Data: 28/09/2026. Preparado na TASK402 a partir da revisão global, do checkpoin
 
 ## Contagem e regra de fecho
 
-**32 tarefas de conclusão identificadas: C01–C32.** Estado após TASK425 local: **26 por iniciar, uma em execução (C06), cinco concluídas (C01–C05)**. Write-store:70 mensagens/350 valores localizados, provas originais conservadas;1 345 unitários/quatro técnicos e seis integrações aprovados, runner324/cache215. CI423 confirmado com323 grupos/restauro128/47;424 ainda em execução.425 exige324 grupos/restauro próprios. [Prova425](evidence/20260929_task425_local.json).
+**32 tarefas de conclusão identificadas: C01–C32.** Estado após TASK425 publicada / CI pendente: **26 por iniciar, uma em execução (C06), cinco concluídas (C01–C05)**. Write-store:70 mensagens/350 valores localizados, provas originais conservadas;1 345 unitários/quatro técnicos e seis integrações aprovados, runner324/cache215. CI423 confirmado com323 grupos/restauro128/47;424 ainda em execução.425 exige324 grupos/restauro próprios. [Prova425](evidence/20260929_task425_local.json).
 
 Uma tarefa pode ter preparação, implementação local e validação externa em momentos diferentes. Só passa a **Concluída** quando cumpre o critério e tem evidência ligada. **Implementada / CI pendente** não equivale a validação nativa nem a instalação no VPS. Cada lote de código mantém uma responsabilidade, até dez ficheiros, teste da falha/resultado e documentação.
 
@@ -147,3 +147,5 @@ As indicações de sprint/validação de julho são históricas. O utilizador pe
 - Publicação TASK424: `32b4fde7f578dca1e13bd215698a5f4912007621`, árvore `127b67c68cb75e1c66ffdd7de7884db2a78a9d55`, iguais local/remoto. CI36541935848/job109319183700 em execução;323 grupos e restauro128 tabelas/47ficheiros ainda pendentes.
 
 - TASK425:70 mensagens próprias/350 valores em cinco idiomas; erros brutos e falhas persistidas conservados, source body reconstruído exatamente retirando só as adaptações de texto.1 345 unitários/quatro técnicos/sintaxe e seis grupos integrados aprovados. O teste de recuperação agora aguarda o redesenho pós-recibo e confirma a nota antes de continuar. Native423:323 grupos/restauro128/47 confirmados;425 precisa324 grupos/restauro próprios. Dez ficheiros, runner324/cache215. [Prova425](evidence/20260929_task425_local.json).
+
+- Publicação TASK425: `79601dbcb10a951353898cde3f36d445b515b06b`, árvore `20c0dbeb09e0e0a9501e1d1baa8500f63f4ed3b2`, iguais local/remoto. CI36544481091/job109327457174 em execução;324 grupos e restauro128 tabelas/47ficheiros ainda pendentes. Próximo426: pedidos de material do técnico.
