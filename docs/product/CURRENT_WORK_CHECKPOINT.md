@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 29/09/2026, TASK444 / CI em execução
+
+TASK444 publicada na branch `work/field-readiness-20260915-simulation`: código `f36099587a7fdf6fd264a41b757312c13d689c49`, árvore `1b9f9d8df72e988ea8a1e66b20ce965568773b3e`, igual à validada; checkout alinhado e original local preservado. [CI36619407550](https://github.com/ts7520305-svg/cristalwater/actions/runs/36619407550), job109580657444, arrancou no commit exato; 6 etapas aprovadas, etapa atual: `Verify additive upgrade from the previous schema`. Exigir PostgreSQL16/upgrade/suite338/restauro128 tabelas47ficheiros antes da aceitação. Atualização documental posterior `[skip ci]` não muda o código. [Prova444](evidence/20260929_task444_local.json).
+
+TASK443 também publicada (`c72f70e4`, CI36618282299), com revisão de clientes/piscinas em cinco idiomas. CI441/442/443 ainda nas suas suites após dez etapas aprovadas na última consulta. Próximo: verificar gates e localizar erros próprios de `cw-field-photos.js`/C06-005 pelos consumidores reais, conservando blobs e pedidos. C06 aberta;32=26 por iniciar/uma em execução/cinco concluídas. Público autorizado no desenvolvimento; privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado.
+
 ## Retoma atual — 29/09/2026, TASK444 / recuperação de registos antigos
 
 **TASK444 / C06-005:** aviso de arquivo antigo e botão de guardar cópia em PT/EN/FR/ES/DE:duas entradas/dez textos. Mudança de idioma repinta os mesmos nós e a contagem capturada, sem consultar o arquivo nem exportar/enviar dados. Filtro por conta/role, leitura IndexedDB e handler de exportação conservados byte a byte. [Prova444](evidence/20260929_task444_local.json).

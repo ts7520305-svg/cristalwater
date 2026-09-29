@@ -3,7 +3,7 @@
   "date": "2026-09-29",
   "branch": "work/field-readiness-20260915-simulation",
   "baseCommit": "c72f70e4127ba594913aad97ae95aced3c0268fa",
-  "status": "local_validated_publication_pending",
+  "status": "published_native_ci_running",
   "scope": {
     "responsibility": "Translate the legacy offline archive recovery banner and copy action without changing account filtering, archive bytes or export semantics. Also record the already authorized TASK443 publication.",
     "languages": [
@@ -561,5 +561,132 @@
     "backend": 695,
     "frontend": 308,
     "inline": 44
+  },
+  "publication": {
+    "commit": "f36099587a7fdf6fd264a41b757312c13d689c49",
+    "tree": "1b9f9d8df72e988ea8a1e66b20ce965568773b3e",
+    "matchesValidatedTree": true,
+    "runId": 36619407550,
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36619407550",
+    "jobs": {
+      "jobs": [
+        {
+          "id": 109580657444,
+          "name": "field",
+          "status": "in_progress",
+          "conclusion": null,
+          "run_id": 36619407550,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run npm ci",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run npx prisma validate && npx prisma generate",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Verify additive upgrade from the previous schema",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 7
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium",
+              "status": "pending",
+              "conclusion": null,
+              "number": 8
+            },
+            {
+              "name": "Run npm run check:syntax",
+              "status": "pending",
+              "conclusion": null,
+              "number": 9
+            },
+            {
+              "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+              "status": "pending",
+              "conclusion": null,
+              "number": 10
+            },
+            {
+              "name": "Run node scripts/test-field-suite.js",
+              "status": "pending",
+              "conclusion": null,
+              "number": 11
+            },
+            {
+              "name": "Restore database and uploaded files in isolated QA",
+              "status": "pending",
+              "conclusion": null,
+              "number": 12
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 13
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 14
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 26
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 27
+            },
+            {
+              "name": "Stop containers",
+              "status": "pending",
+              "conclusion": null,
+              "number": 28
+            }
+          ]
+        }
+      ]
+    },
+    "originalLocalCommit": "adccf62d3eec1d0ad639192f7c55f597571b18ea",
+    "originalHistoryBranch": "work/local-task444-20260929",
+    "merged": false,
+    "deployed": false
   }
 }
