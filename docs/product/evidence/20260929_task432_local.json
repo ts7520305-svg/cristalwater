@@ -3,7 +3,7 @@
   "date": "2026-09-29",
   "branch": "work/field-readiness-20260915-simulation",
   "baseCommit": "da023de9271609980bd1c87695179ecdfdb94987",
-  "status": "locally_validated_publication_pending",
+  "status": "published_native_validation_pending",
   "scope": {
     "responsibility": "Localize the owned day-review copy while preserving the captured review and its operational guards",
     "inventory": "C06-003, review section only",
@@ -2109,7 +2109,9 @@
     "expectedGroups": 327,
     "order": "exact, unique;326 original groups plus the new day-review language group after language-reload",
     "restoration": "128 tables and47 uploaded files with matching rows/hashes",
-    "status": "not_started"
+    "status": "in_progress",
+    "runId": 36566598638,
+    "jobId": 109399933877
   },
   "limits": [
     "C06 remains in progress; the32-item plan still has26 not started,1 in progress and5 completed.",
@@ -2117,5 +2119,17 @@
     "Handover, visit receipts and material receipt panels later in the same module are byte-identical and remain outside this batch.",
     "Local database is isolated PGlite; native PostgreSQL suite and restoration are separate acceptance gates.",
     "No merge, VPS deployment, real contacts or automation changes; annual contract remains deferred."
-  ]
+  ],
+  "publication": {
+    "commit": "472d036a4b37738783da02c580250966b957aa7d",
+    "tree": "05d668ecefc78d975350eb1572b4ba8e13c8086c",
+    "branch": "work/field-readiness-20260915-simulation",
+    "runId": 36566598638,
+    "runUrl": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36566598638",
+    "jobId": 109399933877,
+    "status": "in_progress",
+    "successfulSteps": 6,
+    "localRemoteTreeEqual": true,
+    "localCheckoutClean": true
+  }
 }
