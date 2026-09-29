@@ -232,10 +232,17 @@
     "task424-final-regressions.log": "b4e39cd1fe01c47b687a075b133949d57be3a5bfbdf253555a6c495ed4d590b8"
   },
   "publication": {
-    "status": "ready",
+    "status": "published",
     "branch": "work/field-readiness-20260915-simulation",
+    "commit": "32b4fde7f578dca1e13bd215698a5f4912007621",
+    "tree": "127b67c68cb75e1c66ffdd7de7884db2a78a9d55",
+    "localRemoteTreeEqual": true,
     "ci": {
-      "status": "not_started",
+      "run": 36541935848,
+      "job": 109319183700,
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulSteps": 6,
       "expectedOrderedGroups": 323,
       "restoration": "pending"
     }

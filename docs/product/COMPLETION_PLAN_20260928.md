@@ -4,7 +4,7 @@ Data: 28/09/2026. Preparado na TASK402 a partir da revisão global, do checkpoin
 
 ## Contagem e regra de fecho
 
-**32 tarefas de conclusão identificadas: C01–C32.** Estado após TASK424 local: **26 por iniciar, uma em execução (C06), cinco concluídas (C01–C05)**. CI422 terminou com321/322 aprovados/restauro ignorado. Correção do teste dos alertas reproduzida e validada localmente em três grupos; aplicação/runner323/cache214 inalterados. CI423 ainda em execução;424 requer323 grupos/restauro próprios. [Prova424](evidence/20260929_task424_local.json).
+**32 tarefas de conclusão identificadas: C01–C32.** Estado após TASK424 publicada / CI pendente: **26 por iniciar, uma em execução (C06), cinco concluídas (C01–C05)**. CI422 terminou com321/322 aprovados/restauro ignorado. Correção do teste dos alertas reproduzida e validada localmente em três grupos; aplicação/runner323/cache214 inalterados. CI423 ainda em execução;424 requer323 grupos/restauro próprios. [Prova424](evidence/20260929_task424_local.json).
 
 Uma tarefa pode ter preparação, implementação local e validação externa em momentos diferentes. Só passa a **Concluída** quando cumpre o critério e tem evidência ligada. **Implementada / CI pendente** não equivale a validação nativa nem a instalação no VPS. Cada lote de código mantém uma responsabilidade, até dez ficheiros, teste da falha/resultado e documentação.
 
@@ -143,3 +143,5 @@ As indicações de sprint/validação de julho são históricas. O utilizador pe
 - Publicação TASK423: `db0a9435497eadf188376ee4978a85805305cd80`, árvore `94ebc8ee1d8ad7f02f2be2ed640ca33de44eaf4d`, iguais local/remoto. CI36536885893/job109302869348 em execução,323 grupos/restauro pendentes. Preparação424 encontrou67 mensagens fixas; nenhuma mudança no write-store neste lote.
 
 - TASK424: prioridade à falha nativa422.360 frames reproduziram arredondamento de44px; dois pedidos reais retidos reproduziram a corrida de identidade após recuperação de rede. Apenas o teste de alertas muda: tolerância pintada0,01px com layout>=44px e espera pelos pedidos reais antes de guardar os nós. Três grupos locais aprovados; aplicação e runner323/cache214 conservados. CI424/restauro pendentes, idiomas do write-store passam a425. [Prova424](evidence/20260929_task424_local.json).
+
+- Publicação TASK424: `32b4fde7f578dca1e13bd215698a5f4912007621`, árvore `127b67c68cb75e1c66ffdd7de7884db2a78a9d55`, iguais local/remoto. CI36541935848/job109319183700 em execução;323 grupos e restauro128 tabelas/47ficheiros ainda pendentes.
