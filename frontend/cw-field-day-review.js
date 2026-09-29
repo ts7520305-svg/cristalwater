@@ -1,6 +1,40 @@
 (function () {
   'use strict';
   const messages = {
+    "chemicalTitle": ["Química a preparar","Chemicals to prepare","Produits chimiques à préparer","Productos químicos a preparar","Chemikalien vorbereiten"],
+    "chemicalIntro": ["Confira as faltas reportadas antes de sair. Confirme apenas produtos que recebeu fisicamente. A receção não conclui a visita nem calcula dosagens.","Check reported shortages before leaving. Only confirm products you have physically received. Receipt does not complete the visit or calculate doses.","Vérifiez les manques signalés avant de partir. Confirmez uniquement les produits reçus physiquement. La réception ne termine pas la visite et ne calcule pas les dosages.","Compruebe las faltas reportadas antes de salir. Confirme solo productos que haya recibido físicamente. La recepción no finaliza la visita ni calcula dosis.","Prüfen Sie gemeldete Fehlmengen vor der Abfahrt. Bestätigen Sie nur tatsächlich erhaltene Produkte. Der Empfang schließt keinen Besuch ab und berechnet keine Dosierungen."],
+    "chemicalRefresh": ["Atualizar necessidades","Refresh requirements","Actualiser les besoins","Actualizar necesidades","Bedarf aktualisieren"],
+    "chemicalOfflineQuery": ["Sem rede. Confirme as necessidades com o escritório; a lista pode estar desatualizada.","Offline. Check requirements with the office; the list may be outdated.","Hors ligne. Vérifiez les besoins auprès du bureau ; la liste peut être obsolète.","Sin conexión. Confirme las necesidades con la oficina; la lista puede estar desactualizada.","Offline. Klären Sie den Bedarf mit dem Büro; die Liste könnte veraltet sein."],
+    "chemicalLoading": ["A consultar necessidades de reposição…","Checking replenishment requirements…","Consultation des besoins de réapprovisionnement…","Consultando necesidades de reposición…","Nachschubbedarf wird abgerufen…"],
+    "chemicalQueryFailed": ["Falha ao consultar necessidades","Could not retrieve requirements","Impossible de consulter les besoins","No se pudieron consultar las necesidades","Bedarf konnte nicht abgerufen werden"],
+    "chemicalProduct": ["{name} · {quantity}","{name} · {quantity}","{name} · {quantity}","{name} · {quantity}","{name} · {quantity}"],
+    "chemicalQuantityUnknown": ["Quantidade por confirmar","Quantity to be confirmed","Quantité à confirmer","Cantidad por confirmar","Menge noch zu bestätigen"],
+    "chemicalVisit": ["{visit} · {date}","{visit} · {date}","{visit} · {date}","{visit} · {date}","{visit} · {date}"],
+    "chemicalReceived": ["Recebido na sua viatura: {quantity} {unit}{remaining}","Received in your vehicle: {quantity} {unit}{remaining}","Reçu dans votre véhicule : {quantity} {unit}{remaining}","Recibido en su vehículo: {quantity} {unit}{remaining}","In Ihrem Fahrzeug erhalten: {quantity} {unit}{remaining}"],
+    "chemicalTotalUnknown": [" · Total necessário por confirmar"," · Total required to be confirmed"," · Total nécessaire à confirmer"," · Total necesario por confirmar"," · Gesamtbedarf noch zu bestätigen"],
+    "chemicalRemaining": [" · Falta receber: {quantity} {unit}"," · Still to receive: {quantity} {unit}"," · Reste à recevoir : {quantity} {unit}"," · Falta recibir: {quantity} {unit}"," · Noch zu erhalten: {quantity} {unit}"],
+    "chemicalReturned": ["Devolvido ao armazém: {quantity} {unit}. Os valores acima descontam as devoluções.","Returned to the warehouse: {quantity} {unit}. The amounts above account for returns.","Retourné à l’entrepôt : {quantity} {unit}. Les valeurs ci-dessus déduisent les retours.","Devuelto al almacén: {quantity} {unit}. Los valores anteriores descuentan las devoluciones.","Ins Lager zurückgegeben: {quantity} {unit}. Die obigen Mengen berücksichtigen Rückgaben."],
+    "chemicalReceive": ["Confirmar receção de química","Confirm chemical receipt","Confirmer la réception des produits","Confirmar recepción de productos","Chemikalienempfang bestätigen"],
+    "chemicalComplete": ["Quantidade reportada recebida. A visita continua por resolver.","Reported quantity received. The visit remains unresolved.","Quantité signalée reçue. La visite reste à traiter.","Cantidad reportada recibida. La visita sigue por resolver.","Gemeldete Menge erhalten. Der Besuch bleibt offen."],
+    "chemicalCount": ["{count} necessidade(s) reportada(s) para as suas visitas.","{count} requirement(s) reported for your visits.","{count} besoin(s) signalé(s) pour vos visites.","{count} necesidad(es) reportada(s) para sus visitas.","{count} gemeldete(r) Bedarf(e) für Ihre Besuche."],
+    "chemicalEmpty": ["Sem faltas de química reportadas por resolver. Verifique também o stock da viatura.","No reported chemical shortages remain unresolved. Also check the vehicle stock.","Aucun manque de produits chimiques signalé ne reste à traiter. Vérifiez aussi le stock du véhicule.","No hay faltas de productos químicos reportadas por resolver. Compruebe también el stock del vehículo.","Keine gemeldeten Chemikalienfehlmengen sind noch offen. Prüfen Sie auch den Fahrzeugbestand."],
+    "chemicalRefreshFailed": ["Não foi possível atualizar: {detail}. Confirme com o escritório.","Could not refresh: {detail}. Check with the office.","Impossible d’actualiser : {detail}. Vérifiez auprès du bureau.","No se pudo actualizar: {detail}. Confirme con la oficina.","Aktualisierung fehlgeschlagen: {detail}. Fragen Sie beim Büro nach."],
+    "chemicalOpenReceipt": ["Termine ou cancele a receção em aberto antes de iniciar outra.","Finish or cancel the open receipt before starting another.","Terminez ou annulez la réception en cours avant d’en commencer une autre.","Termine o cancele la recepción abierta antes de iniciar otra.","Schließen Sie die offene Empfangsbestätigung ab oder brechen Sie sie ab, bevor Sie eine weitere beginnen."],
+    "chemicalConnect": ["Ligue-se à rede para confirmar a receção.","Connect to confirm receipt.","Connectez-vous pour confirmer la réception.","Conéctese para confirmar la recepción.","Stellen Sie eine Verbindung her, um den Empfang zu bestätigen."],
+    "chemicalDeliveriesFailed": ["Falha ao consultar entregas","Could not retrieve deliveries","Impossible de consulter les livraisons","No se pudieron consultar las entregas","Lieferungen konnten nicht abgerufen werden"],
+    "chemicalNoTransfer": ["Sem transferência correspondente registada após esta falta. Confirme com a gestão.","No matching transfer has been recorded after this shortage. Check with management.","Aucun transfert correspondant n’a été enregistré après ce manque. Vérifiez auprès de la gestion.","No se ha registrado una transferencia correspondiente después de esta falta. Confirme con la administración.","Keine passende Umlagerung wurde erfasst, nachdem diese Fehlmenge gemeldet wurde. Fragen Sie bei der Verwaltung nach."],
+    "chemicalTransfer": ["Transferência para a viatura","Transfer to the vehicle","Transfert vers le véhicule","Transferencia al vehículo","Umlagerung ins Fahrzeug"],
+    "chemicalMovement": ["{quantity} {unit} · {date} · #{id}","{quantity} {unit} · {date} · #{id}","{quantity} {unit} · {date} · #{id}","{quantity} {unit} · {date} · #{id}","{quantity} {unit} · {date} · #{id}"],
+    "chemicalQuantity": ["Quantidade recebida","Quantity received","Quantité reçue","Cantidad recibida","Erhaltene Menge"],
+    "chemicalSubmit": ["Recebi esta quantidade","I received this quantity","J’ai reçu cette quantité","He recibido esta cantidad","Diese Menge habe ich erhalten"],
+    "chemicalCancel": ["Cancelar","Cancel","Annuler","Cancelar","Abbrechen"],
+    "chemicalAvailable": ["Disponível para confirmar: {quantity} {unit}","Available to confirm: {quantity} {unit}","Disponible à confirmer : {quantity} {unit}","Disponible para confirmar: {quantity} {unit}","Zur Bestätigung verfügbar: {quantity} {unit}"],
+    "chemicalOfflineAction": ["Sem rede. A receção ainda não foi confirmada.","Offline. Receipt has not yet been confirmed.","Hors ligne. La réception n’a pas encore été confirmée.","Sin conexión. La recepción aún no se ha confirmado.","Offline. Der Empfang wurde noch nicht bestätigt."],
+    "chemicalStorageFailed": ["Não foi possível guardar o pedido neste dispositivo. Confirme com o escritório.","Could not save the request on this device. Check with the office.","Impossible d’enregistrer la demande sur cet appareil. Vérifiez auprès du bureau.","No se pudo guardar la solicitud en este dispositivo. Confirme con la oficina.","Die Anfrage konnte nicht gespeichert werden. Fragen Sie beim Büro nach."],
+    "chemicalConfirmFailed": ["Falha ao confirmar","Confirmation failed","Échec de la confirmation","Fallo al confirmar","Bestätigung fehlgeschlagen"],
+    "chemicalConfirmed": ["Receção confirmada.","Receipt confirmed.","Réception confirmée.","Recepción confirmada.","Empfang bestätigt."],
+    "chemicalRetry": ["{detail} Pode repetir com os mesmos dados.","{detail} You can retry with the same details.","{detail} Vous pouvez réessayer avec les mêmes données.","{detail} Puede repetir con los mismos datos.","{detail} Sie können es mit denselben Angaben erneut versuchen."],
+    "chemicalOffline": ["Sem rede. A lista anterior pode estar desatualizada.","Offline. The previous list may be outdated.","Hors ligne. La liste précédente peut être obsolète.","Sin conexión. La lista anterior puede estar desactualizada.","Offline. Die vorherige Liste könnte veraltet sein."],
     "handoverTitle": ["Passar responsabilidade","Hand over responsibility","Transmettre la responsabilité","Transferir la responsabilidad","Verantwortung übergeben"],
     "handoverIntro": ["Água aberta e bomba manual: continua responsável até o colega aceitar. Combine a passagem com ele; o pedido não confirma que foi visto.","Water left on and pump in manual mode: you remain responsible until your colleague accepts. Arrange the handover with them; the request does not confirm that it was seen.","Eau ouverte et pompe en mode manuel : vous restez responsable jusqu’à l’acceptation de votre collègue. Convenez de la transmission avec lui ; la demande ne confirme pas qu’elle a été vue.","Agua abierta y bomba en manual: sigue siendo responsable hasta que el compañero acepte. Acuerde el traspaso con él; la solicitud no confirma que se haya visto.","Laufendes Wasser und Pumpe im manuellen Modus: Sie bleiben verantwortlich, bis Ihr Kollege annimmt. Sprechen Sie die Übergabe ab; die Anfrage bestätigt nicht, dass sie gesehen wurde."],
     "handoverRefresh": ["Atualizar passagens","Refresh handovers","Actualiser les transmissions","Actualizar traspasos","Übergaben aktualisieren"],
@@ -381,52 +415,76 @@
   setInterval(loadReceipts,60000);loadReceipts();
 
   const shortagePanel=document.createElement('section');shortagePanel.id='fieldShortagePreparation';shortagePanel.className='card field-panel field-panel-hoje';shortagePanel.setAttribute('data-cw-state-managed','manual');
-  shortagePanel.innerHTML='<h2>Química a preparar</h2><p>Confira as faltas reportadas antes de sair. Confirme apenas produtos que recebeu fisicamente. A receção não conclui a visita nem calcula dosagens.</p><button type="button" class="big" id="shortageRefresh" style="background:#075c4c!important;color:#fff!important;min-height:48px">Atualizar necessidades</button><p id="shortageStatus" role="status" aria-live="polite"></p><div id="shortageList"></div>';
+  shortagePanel.setAttribute('data-cw-no-i18n','');
+  shortagePanel.innerHTML='<h2></h2><p></p><button type="button" class="big" id="shortageRefresh" style="background:#075c4c!important;color:#fff!important;min-height:48px"></button><p id="shortageStatus" role="status" aria-live="polite"></p><div id="shortageList"></div>';
+  setCopy(shortagePanel.querySelector('h2'),copy('chemicalTitle'));setCopy(shortagePanel.querySelector('p'),copy('chemicalIntro'));setCopy(shortagePanel.querySelector('button'),copy('chemicalRefresh'));
   receiptPanel.after(shortagePanel);let shortageRevision=0,shortageIdentity=null;
+  function deliveryMessage(container,value){
+    // Bind a leaf: replacing this message with a form must not leave a binding that later removes its inputs.
+    const message=document.createElement('span');setCopy(message,value);container.replaceChildren(message);
+  }
+  function renderShortage(row){
+    const item=document.createElement('div');item.dataset.shortage=row.shortageId;item.style.cssText='padding:12px 0;overflow-wrap:anywhere';
+    const title=document.createElement('strong'),visit=document.createElement('p'),received=document.createElement('p');
+    setCopy(title,copy('chemicalProduct',{name:row.productName,quantity:row.quantity===null?copy('chemicalQuantityUnknown'):row.quantity+' '+row.unit}));
+    setCopy(visit,copy('chemicalVisit',{visit:copy(row.visitType==='EXTRA'?'receiptExtra':'receiptRegular',{name:row.poolName,id:row.visitId}),date:row.plannedDate?dateCopy(row.plannedDate,false,true):copy('receiptDateUnknown')}));
+    setCopy(received,copy('chemicalReceived',{quantity:row.receivedQuantity||0,unit:row.unit,remaining:row.quantity===null?copy('chemicalTotalUnknown'):copy('chemicalRemaining',{quantity:Math.max(0,row.quantity-(row.receivedQuantity||0)),unit:row.unit})}));
+    item.append(title,visit,received);
+    if(row.returnedQuantity){const returned=document.createElement('p');setCopy(returned,copy('chemicalReturned',{quantity:row.returnedQuantity,unit:row.unit}));item.append(returned);}
+    if(row.quantity===null||row.receivedQuantity<row.quantity){
+      const button=document.createElement('button'),container=document.createElement('div');
+      button.type='button';button.className='big';button.style.cssText='background:#075c4c!important;color:#fff!important;min-height:48px';button.dataset.deliveryOptions=row.shortageId;setCopy(button,copy('chemicalReceive'));
+      container.setAttribute('data-delivery-form','');item.append(button,container);
+    }else{const complete=document.createElement('p');setCopy(complete,copy('chemicalComplete'));item.append(complete);}
+    return item;
+  }
   async function loadShortages(){
     const token=window.CristalAuth?.getToken?.(),principal=owner(),status=document.getElementById('shortageStatus'),identity=JSON.stringify([principal,token]);
     if(identity!==shortageIdentity){shortageIdentity=identity;shortageRevision++;document.getElementById('shortageList').replaceChildren();}
     if(shortagePanel.querySelector('form')&&arguments[0]!==true)return;
     const revision=++shortageRevision;
-    if(!navigator.onLine){status.textContent='Sem rede. Confirme as necessidades com o escritório; a lista pode estar desatualizada.';return;}
-    status.textContent='A consultar necessidades de reposição…';
+    if(!navigator.onLine){setCopy(status,copy('chemicalOfflineQuery'));return;}
+    setCopy(status,copy('chemicalLoading'));
     try{
       const response=await fetch('/api/technician/chemical-shortages',{headers:{Authorization:`Bearer ${token}`},cache:'no-store',signal:AbortSignal.timeout(8000)}),data=await response.json();
-      if(!response.ok)throw new Error(data.error||'Falha ao consultar necessidades');
+      if(!response.ok)throw data.error?new Error(data.error):panelError('chemicalQueryFailed');
       if(revision!==shortageRevision||principal!==owner()||token!==window.CristalAuth?.getToken?.())return;
-      document.getElementById('shortageList').innerHTML=data.rows.map(row=>`<div data-shortage="${row.shortageId}" style="padding:12px 0;overflow-wrap:anywhere"><strong>${receiptEscape(row.productName)} · ${row.quantity===null?'Quantidade por confirmar':receiptEscape(row.quantity+' '+row.unit)}</strong><p>${receiptEscape(row.poolName)} · visita ${row.visitType==='EXTRA'?'extra ':''}#${row.visitId} · ${row.plannedDate?new Date(row.plannedDate).toLocaleDateString('pt-PT'):'Data por confirmar'}</p><p>Recebido na sua viatura: ${receiptEscape(row.receivedQuantity||0)} ${receiptEscape(row.unit)}${row.quantity===null?' · Total necessário por confirmar':' · Falta receber: '+receiptEscape(Math.max(0,row.quantity-(row.receivedQuantity||0)))+' '+receiptEscape(row.unit)}</p>${row.returnedQuantity?'<p>Devolvido ao armazém: '+receiptEscape(row.returnedQuantity+' '+row.unit)+'. Os valores acima descontam as devoluções.</p>':''}${row.quantity===null||row.receivedQuantity<row.quantity?'<button type="button" class="big" style="background:#075c4c!important;color:#fff!important;min-height:48px" data-delivery-options="'+row.shortageId+'">Confirmar receção de química</button><div data-delivery-form></div>':'<p>Quantidade reportada recebida. A visita continua por resolver.</p>'}</div>`).join('');
-      status.textContent=data.rows.length?`${data.rows.length} necessidade(s) reportada(s) para as suas visitas.`:'Sem faltas de química reportadas por resolver. Verifique também o stock da viatura.';
-    }catch(error){if(revision===shortageRevision&&principal===owner()&&token===window.CristalAuth?.getToken?.())status.textContent=`Não foi possível atualizar: ${error.message}. Confirme com o escritório.`;}
+      document.getElementById('shortageList').replaceChildren(...data.rows.map(renderShortage));
+      setCopy(status,data.rows.length?copy('chemicalCount',{count:data.rows.length}):copy('chemicalEmpty'));
+    }catch(error){if(revision===shortageRevision&&principal===owner()&&token===window.CristalAuth?.getToken?.())setCopy(status,copy('chemicalRefreshFailed',{detail:panelErrorCopy(error)}));}
   }
   shortagePanel.addEventListener('click',async event=>{
     const button=event.target.closest('[data-delivery-options]');if(!button)return;
-    if(shortagePanel.querySelector('form')){document.getElementById('shortageStatus').textContent='Termine ou cancele a receção em aberto antes de iniciar outra.';return;}
+    if(shortagePanel.querySelector('form')){setCopy(document.getElementById('shortageStatus'),copy('chemicalOpenReceipt'));return;}
     const id=button.dataset.deliveryOptions,container=button.parentElement.querySelector('[data-delivery-form]'),token=window.CristalAuth?.getToken?.(),principal=owner();
-    if(!navigator.onLine){container.textContent='Ligue-se à rede para confirmar a receção.';return;}
+    if(!navigator.onLine){deliveryMessage(container,copy('chemicalConnect'));return;}
     button.disabled=true;
     try{
       const response=await fetch(`/api/technician/chemical-shortages/${id}/deliveries`,{headers:{Authorization:`Bearer ${token}`},cache:'no-store',signal:AbortSignal.timeout(8000)}),data=await response.json();
       if(token!==window.CristalAuth?.getToken?.()||principal!==owner()||!container.isConnected)return;
-      if(!response.ok)throw new Error(data.error||'Falha ao consultar entregas');
-      if(!data.rows.length){container.textContent='Sem transferência correspondente registada após esta falta. Confirme com a gestão.';return;}
+      if(!response.ok)throw data.error?new Error(data.error):panelError('chemicalDeliveriesFailed');
+      if(!data.rows.length){deliveryMessage(container,copy('chemicalNoTransfer'));return;}
       if(shortagePanel.querySelector('form'))return;
       shortageRevision++;button.hidden=true;
-      container.innerHTML=`<form><label>Transferência para a viatura<select name="movement" required style="min-height:48px;width:100%">${data.rows.map(m=>`<option value="${m.id}">${receiptEscape(m.available+' '+m.unit)} · ${receiptEscape(new Date(m.createdAt).toLocaleString('pt-PT'))} · #${m.id}</option>`).join('')}</select></label><p data-delivery-details></p><label>Quantidade recebida<input name="quantity" type="number" min="0.001" step="any" required inputmode="decimal" style="min-height:48px;width:100%"></label><button type="submit" class="big" style="background:#075c4c!important;color:#fff!important;min-height:48px">Recebi esta quantidade</button><button type="button" data-delivery-cancel style="min-height:48px">Cancelar</button><p role="status"></p></form>`;
-      const select=container.querySelector('select');select.onchange=()=>{const movement=data.rows.find(m=>m.id===Number(select.value));container.querySelector('[data-delivery-details]').textContent='Disponível para confirmar: '+movement.available+' '+movement.unit;};select.onchange();
+      container.innerHTML='<form><label><span data-transfer-label></span><select name="movement" required style="min-height:48px;width:100%"></select></label><p data-delivery-details></p><label><span data-quantity-label></span><input name="quantity" type="number" min="0.001" step="any" required inputmode="decimal" style="min-height:48px;width:100%"></label><button type="submit" class="big" style="background:#075c4c!important;color:#fff!important;min-height:48px"></button><button type="button" data-delivery-cancel style="min-height:48px"></button><p role="status"></p></form>';
+      setCopy(container.querySelector('[data-transfer-label]'),copy('chemicalTransfer'));setCopy(container.querySelector('[data-quantity-label]'),copy('chemicalQuantity'));setCopy(container.querySelector('[type=submit]'),copy('chemicalSubmit'));setCopy(container.querySelector('[data-delivery-cancel]'),copy('chemicalCancel'));
+      const select=container.querySelector('select');
+      for(const movement of data.rows){const option=document.createElement('option');option.value=movement.id;setCopy(option,copy('chemicalMovement',{quantity:movement.available,unit:movement.unit,date:dateCopy(movement.createdAt),id:movement.id}));select.append(option);}
+      select.onchange=()=>{const movement=data.rows.find(m=>m.id===Number(select.value));setCopy(container.querySelector('[data-delivery-details]'),copy('chemicalAvailable',{quantity:movement.available,unit:movement.unit}));};select.onchange();
       container.querySelector('[data-delivery-cancel]').onclick=()=>loadShortages(true);
       container.querySelector('form').onsubmit=async e=>{
         e.preventDefault();const form=e.currentTarget,message=form.querySelector('[role=status]');
         if(token!==window.CristalAuth?.getToken?.()||principal!==owner())return;
-        if(!navigator.onLine){message.textContent='Sem rede. A receção ainda não foi confirmada.';return;}
+        if(!navigator.onLine){setCopy(message,copy('chemicalOfflineAction'));return;}
         const body={movementId:Number(form.elements.movement.value),quantity:Number(form.elements.quantity.value)},key='cwChemicalDelivery:'+JSON.stringify([principal,id,body]);
-        try{body.requestId=localStorage.getItem(key)||crypto.randomUUID();localStorage.setItem(key,body.requestId);}catch{message.textContent='Não foi possível guardar o pedido neste dispositivo. Confirme com o escritório.';return;}
+        try{body.requestId=localStorage.getItem(key)||crypto.randomUUID();localStorage.setItem(key,body.requestId);}catch{setCopy(message,copy('chemicalStorageFailed'));return;}
         for(const control of form.elements)control.disabled=true;document.getElementById('shortageRefresh').disabled=true;
         try{const reply=await fetch(`/api/technician/chemical-shortages/${id}/deliveries`,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(10000)}),result=await reply.json();
           if(token!==window.CristalAuth?.getToken?.()||principal!==owner())return;
-          if(!reply.ok)throw new Error(result.error||'Falha ao confirmar');localStorage.removeItem(key);message.textContent='Receção confirmada.';await loadShortages(true);
-        }catch(error){if(token===window.CristalAuth?.getToken?.()&&principal===owner())message.textContent=error.message+' Pode repetir com os mesmos dados.';}finally{for(const control of form.elements)control.disabled=false;document.getElementById('shortageRefresh').disabled=false;}
+          if(!reply.ok)throw result.error?new Error(result.error):panelError('chemicalConfirmFailed');localStorage.removeItem(key);setCopy(message,copy('chemicalConfirmed'));await loadShortages(true);
+        }catch(error){if(token===window.CristalAuth?.getToken?.()&&principal===owner())setCopy(message,copy('chemicalRetry',{detail:panelErrorCopy(error)}));}finally{for(const control of form.elements)control.disabled=false;document.getElementById('shortageRefresh').disabled=false;}
       };
-    }catch(error){if(token===window.CristalAuth?.getToken?.()&&principal===owner())container.textContent=error.message;}finally{button.disabled=false;}
+    }catch(error){if(token===window.CristalAuth?.getToken?.()&&principal===owner())deliveryMessage(container,panelErrorCopy(error));}finally{button.disabled=false;}
   });
-  document.getElementById('shortageRefresh').onclick=()=>loadShortages(true);window.addEventListener('online',loadShortages);window.addEventListener('offline',()=>{shortageRevision++;document.getElementById('shortageStatus').textContent='Sem rede. A lista anterior pode estar desatualizada.';});setInterval(loadShortages,60000);loadShortages();
+  document.getElementById('shortageRefresh').onclick=()=>loadShortages(true);window.addEventListener('online',loadShortages);window.addEventListener('offline',()=>{shortageRevision++;setCopy(document.getElementById('shortageStatus'),copy('chemicalOffline'));});setInterval(loadShortages,60000);loadShortages();
 })();

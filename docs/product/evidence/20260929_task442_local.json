@@ -1,0 +1,271 @@
+{
+  "task": "TASK442",
+  "date": "2026-09-29",
+  "branch": "work/field-readiness-20260915-simulation",
+  "baseCommit": "cb8edd45af9399d862896447d6ca75dbfe6db4b2",
+  "status": "local_validated_publication_authorized_native_ci_pending",
+  "scope": {
+    "responsibility": "Localize chemical preparation and physical receipt presentation without changing stock, visits, receipt identity or explicit actions",
+    "files": [
+      "frontend/cw-field-day-review.js",
+      "frontend/sw.js",
+      "scripts/test-field-suite.js",
+      "scripts/test-field-chemical-preparation-languages.js",
+      "docs/product/CURRENT_WORK_CHECKPOINT.md",
+      "docs/product/COMPLETION_PLAN_20260928.md",
+      "docs/product/LANGUAGE_INVENTORY_20260928.md",
+      "docs/product/evidence/20260929_task442_local.json"
+    ],
+    "fileCount": 8,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "newMessageEntries": 34,
+    "newPresentationStrings": 170,
+    "cache": 227,
+    "runnerGroups": 336,
+    "backendChanged": false,
+    "schemaChanged": false,
+    "githubWorkflowChanged": false
+  },
+  "before": {
+    "result": {
+      "script": "test-field-chemical-preparation-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 4061,
+      "timedOut": false
+    },
+    "actual": "Química a preparar",
+    "expected": "Chemicals to prepare",
+    "expectedFailure": true
+  },
+  "browserGroups": [
+    {
+      "script": "test-field-chemical-preparation-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 9781,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-chemical-options.js",
+      "code": 0,
+      "signal": null,
+      "ms": 1500,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-extra-incomplete.js",
+      "code": 0,
+      "signal": null,
+      "ms": 18202,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-handover-receipt-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 11425,
+      "timedOut": false
+    }
+  ],
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 194865,
+      "log": "gate-syntax.log"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 24284,
+      "log": "gate-unit.log"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 2198,
+      "log": "gate-technician.log"
+    }
+  ],
+  "counts": {
+    "unitPassed": 1356,
+    "unitFiles": 138,
+    "technicianPassed": 4,
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44
+    }
+  },
+  "preservation": {
+    "previousCatalogUnchanged": true,
+    "sharedReviewAndHandoverReceiptByteIdentical": true,
+    "preservedOperationalStatements": {
+      "const body={movementId:Number(form.elements.movement.value),quantity:Number(form.elements.quantity.value)},key='cwChemicalDelivery:'+JSON.stringify([principal,id,body]);": true,
+      "body.requestId=localStorage.getItem(key)||crypto.randomUUID();localStorage.setItem(key,body.requestId);": true,
+      "if(token!==window.CristalAuth?.getToken?.()||principal!==owner()||!container.isConnected)return;": true,
+      "if(shortagePanel.querySelector('form')&&arguments[0]!==true)return;": true,
+      "for(const control of form.elements)control.disabled=true;document.getElementById('shortageRefresh').disabled=true;": true,
+      "signal:AbortSignal.timeout(10000)": true
+    },
+    "messages": {
+      "before": 81,
+      "after": 115,
+      "added": 34,
+      "stringsAdded": 170
+    },
+    "runner": {
+      "before": 335,
+      "after": 336,
+      "unique": true,
+      "previousOrderPreserved": true
+    },
+    "hashes": {
+      "before": "c376b7751099724b6e356906d0f2a5bd7c1110591bc462244402697883877de3",
+      "after": "9ffe453bb7e18ffafb8d81d0873df0f4a1406d3083d6e12ff0be14564f02d330"
+    }
+  },
+  "coverage": {
+    "fiveLanguagesAtWidths": [
+      320,
+      390,
+      1440
+    ],
+    "regularAndExtraSameNumericId": true,
+    "realPickerAndSilentPreference": true,
+    "literalProductPoolAndServerErrorText": true,
+    "unknownRequiredQuantity": true,
+    "noTransferThenRealFormRecovery": true,
+    "labelsOptionsNodesFocusInputValuesAndStorageBytesPreserved": true,
+    "onlyValidatedLanguagePreferenceWritesDuringLocaleChanges": true,
+    "oneOpenReceiptGuard": true,
+    "quotaFailureSendsNothing": true,
+    "literal403RefusalPreservesUUIDAndPayload": true,
+    "lostRealResponseThenSameRequestRetry": true,
+    "singleReceiptForFirstRequest": true,
+    "heldResponseRetainsDisabledControls": true,
+    "firstReceiptQuantity": 1.25,
+    "secondReceiptQuantity": 2.75,
+    "totalDurableReceipts": 2,
+    "offlineFormGuardSendsNothing": true,
+    "completedNeedCannotReceiveAgain": true,
+    "separateExtraUnknownNeedUnchanged": true,
+    "stockMovementRowsUnchanged": true,
+    "regularAndExtraVisitRowsUnchanged": true,
+    "cachedOfflineReloadRetainsLanguage": true,
+    "returnedQuantityPresentation": "Controlled overlay on a real GET response: returnedQuantity=0.5; no persisted physical return is claimed.",
+    "emptyStatesInFiveLanguages": true,
+    "pageErrors": 0,
+    "markupExecuted": false
+  },
+  "implementation": {
+    "binding": "Captured descriptors repaint text leaves only; label spans retain nested controls. Recovery messages bind a child span so later form insertion is not overwritten by a stale container binding.",
+    "data": "Request UUID, body, localStorage key, selected movement ID, numeric values, thresholds, identity/revision guards, timeout and disabled conditions retained.",
+    "errors": "Private descriptors preserve owned Portuguese Error.message; external server messages remain literal.",
+    "previousPanels": "Code between the catalogue and chemical panel is byte-identical.",
+    "formatting": "Only date presentation follows language; instants, device timezone and quantitative data retained."
+  },
+  "visual": {
+    "reviewed": "reports/field-ui/CHEMICAL_PREPARATION_DE_320.png",
+    "observation": "Needs, quantity form and buttons fit at320; source markup stays literal. Shared fixed navigation appears across the long element capture.",
+    "limit": "Common chrome/navigation remains C08-025/026; not complete-page acceptance."
+  },
+  "environment": {
+    "database": "Isolated PGlite; current Prisma schema",
+    "browser": "Chromium153 via @sparticuz/chromium",
+    "timezone": "Europe/Lisbon",
+    "productionDataUsed": false,
+    "externalContactsEnabled": false,
+    "backgroundJobsEnabled": false,
+    "browserTestIntervalsDisabledMs": [
+      15000,
+      30000,
+      60000
+    ],
+    "sessionProtectionIntervalsPreserved": true,
+    "nativePostgres16UpgradeFull336SuiteOrRestoreValidated": false
+  },
+  "privacy": {
+    "authorizationAt": "2026-09-29T19:20:39+01:00",
+    "publicDevelopmentAndPublicationAuthorized": true,
+    "privateBeforeCompletionRequired": true,
+    "trackedAt": "C32",
+    "repositoryVisibilityChanged": false,
+    "applicationOrVpsAccessChanged": false
+  },
+  "publication": {
+    "branchUpdated": false,
+    "merged": false,
+    "deployed": false,
+    "nativeRun": null,
+    "requiredGates": "Exact final code revision: PostgreSQL16, additive upgrade, 336 integration groups, restore of128 tables/47 files",
+    "previousRun": {
+      "id": 36613209845,
+      "codeCommit": "fb26890f72dc1a47fd2add51bd8d6a8a6a8292af",
+      "latestObservation": "Ten initial steps passed;335-group suite still running. Does not accept TASK442."
+    }
+  },
+  "next": {
+    "completionCounts": {
+      "notStarted": 26,
+      "inProgress": 1,
+      "completed": 5,
+      "total": 32
+    },
+    "C06Closed": false,
+    "C06_003Closed": false,
+    "source": "frontend/cw-field-intake-review.js / C06-004",
+    "consumer": "frontend/admin-operational-settings.html",
+    "confirmedGap": "Client/pool review labels, states and confirmation remain Portuguese-only in inspected source.",
+    "sharedNavigation": "C08-025/026",
+    "datePolicy": "C10 open",
+    "annualContractDeferred": true
+  },
+  "logDigests": [
+    {
+      "name": "run-1790707628707/test-field-chemical-preparation-languages.js.log",
+      "bytes": 518,
+      "sha256": "6074e25cac8e446666e195df3695a44c2444636271babee3934f9a4acda13b2e"
+    },
+    {
+      "name": "run-1790707702938/test-field-handover-receipt-languages.js.log",
+      "bytes": 586,
+      "sha256": "88b479834f782111ea2e7a29de2ff4e9c77e4d154aae620a87d894767f2629ee"
+    },
+    {
+      "name": "run-1790707702938/test-field-extra-incomplete.js.log",
+      "bytes": 468,
+      "sha256": "41dfef56529d3e38d6c2f3d7f58c40f6569f154d554a60f532d97cb518d5540b"
+    },
+    {
+      "name": "run-1790707702938/test-field-chemical-options.js.log",
+      "bytes": 165,
+      "sha256": "55033579b0b40f8381c5a96e6c5c3f2d798f1077d3ee7a669e0c14f606424b73"
+    },
+    {
+      "name": "gate-unit.log",
+      "bytes": 400,
+      "sha256": "97e0953771ec7900445440064f64a3014ee9fdb99f832265a9155c51e2fd566f"
+    },
+    {
+      "name": "gate-technician.log",
+      "bytes": 429,
+      "sha256": "ffbeaa2117e12fbb7a29cd99e256789752fe23cd99399c3f3c6e8aab8a58b3be"
+    },
+    {
+      "name": "gate-syntax.log",
+      "bytes": 257,
+      "sha256": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4"
+    }
+  ]
+}

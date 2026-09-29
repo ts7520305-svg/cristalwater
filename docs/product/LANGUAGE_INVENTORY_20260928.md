@@ -8,7 +8,13 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
-## Progresso funcional — TASK441 / passagem de responsabilidade e receção de visitas
+## Progresso funcional — TASK442 / preparação e receção de química
+
+`cw-field-day-review.js`: necessidades, quantidades, transferências, receção física, formulário e estados/erros próprios em PT/EN/FR/ES/DE:34 entradas/170 textos. Textos dentro de labels conservam inputs; mensagens de recuperação usam um filho, preservando o formulário após recuperar uma transferência em falta. Dados/valores/IDs/chaves/UUID/payload e detalhes externos conservados; idioma não consulta fontes nem envia operações, apenas a preferência habitual pode ser gravada. Catálogo81 e código anterior inalterados. Cache227/runner336; [prova442](evidence/20260929_task442_local.json).
+
+Novo grupo e três regressões aprovados;1 356 unitários/quatro técnicos/sintaxe. Cinco idiomas/320/390/1440, REGULAR/EXTRA de igual ID, quantidade desconhecida, formulário após falta de transferência, quota,403 literal, resposta perdida/reenvio exato, receções parciais1,25+2,75 sem duplicação, stock/visitas íntegros, offline/cache/vazio. Devolução0,5 apenas em leitura controlada. Captura alemã320 revista; nav/chrome C08-025/026 e datas C10 pendentes. C06/C06-003 abertas; gates336/restauro nativos pendentes. Próximo:`cw-field-intake-review.js`/C06-004 em `admin-operational-settings.html`, com rótulos/estados/confirmação ainda em português. Contagens estáticas TASK415 não recalculadas.
+
+## Histórico funcional — TASK441 / passagem de responsabilidade e receção de visitas
 
 `cw-field-day-review.js`: dois painéis em PT/EN/FR/ES/DE, incluindo atributos acessíveis, diálogo de aceitação, estados, erros próprios e apresentação de datas. 39 entradas/195 textos; catálogo anterior42 e regras de recolha/revisão preservados. Texto literal dos técnicos/piscinas/motivos/erros externos, dados, nós, foco, seleção, inputs e abertura de dias futuros mantidos na mudança de idioma. A preferência continua a ser guardada pelo mecanismo existente; não há consultas/envios operacionais por traduzir. Cache226/runner335; [prova441](evidence/20260929_task441_local.json).
 

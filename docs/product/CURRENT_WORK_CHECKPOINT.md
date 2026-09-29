@@ -1,5 +1,17 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 29/09/2026, TASK442 local validada / preparação e receção de química
+
+**TASK442 / C06:** painel de química de `cw-field-day-review.js` em PT/EN/FR/ES/DE:34 entradas/170 textos. Necessidades, entregas, quantidades, formulário, estados e erros próprios. Elementos de texto dentro de labels conservam inputs; avisos sem transferência usam um filho para não apagar o formulário após recuperação/mudança de idioma. Nomes, unidades, mensagens externas e valores originais preservados. [Prova442](evidence/20260929_task442_local.json).
+
+**Validação:** reprodução anterior4 061ms; novo grupo9 781ms, opções de química1 500ms, impedimentos extra18 202ms e passagem/receção11 425ms aprovados. 1 356 unitários/138 ficheiros, quatro técnicos e sintaxe695/308/44 aprovados. Cinco idiomas/320/390/1440, REGULAR/EXTRA de igual ID, quantidade desconhecida, recuperação sem transferência→formulário, campos/nós/foco/bytes estáveis. Quota não envia; recusa403 conserva pedido; resposta real perdida e reenvio do mesmo UUID/payload produzem um recibo. Receções1,25+2,75 completam necessidade4, com stock/visitas íntegros. Offline/vazio/cache aprovados. Devolução0,5 é apenas fixture explícita de apresentação, sem declarar movimento físico.
+
+**Preservação/limites:** catálogo81 e código dos painéis anteriores byte a byte; UUID/payload/chave local, guardas, condições e limites conservados. Backend/schema/workflow inalterados. Cache227/runner336, ordem anterior conservada. Captura alemã320 revista; navegação fixa comum sobrepõe-se à captura longa e continua C08-025/026. PGlite/Chromium153 não substituem PostgreSQL16/upgrade/suite336/restauro128 tabelas47 ficheiros. C06/C06-003 abertas.
+
+**Publicação:** autorizada em repositório público durante desenvolvimento; privado antes da conclusão, decisão19:20/C32. TASK434–441 publicadas; CI36613209845 passou dez etapas e continua na suite335. TASK442 validada localmente, publicação/gates próprios pendentes nesta entrada. Nenhum merge/deploy/contacto externo.
+
+**Próximo:** verificar CI441/442; seguir `cw-field-intake-review.js`/C06-004, consumidor `admin-operational-settings.html`: rótulos/estados/confirmação de revisão de clientes/piscinas ainda em português. Oito ficheiros;32=26 por iniciar/uma em execução/cinco concluídas. Contrato anual adiado. Entradas abaixo são históricas.
+
 ## Publicação confirmada — 29/09/2026, TASK434–TASK441 / CI em execução
 
 TASK434–TASK441 publicadas em oito commits individuais na branch `work/field-readiness-20260915-simulation`, conforme autorização expressa das 19:20 de Lisboa para continuar com repositório público. Commit de código `fb26890f72dc1a47fd2add51bd8d6a8a6a8292af`, árvore `bec41b483211b42ece9c5e565ddab6ee7301ce47`, igual à validada localmente; os oito pares local/remoto constam da [prova441](evidence/20260929_task441_local.json). História local original preservada; checkout alinhado com GitHub. Nenhum merge ou deploy.
