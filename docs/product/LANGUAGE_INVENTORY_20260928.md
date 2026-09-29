@@ -8,7 +8,13 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
-## Progresso funcional — TASK443 / revisão administrativa dos cadastros
+## Progresso funcional — TASK444 / recuperação do arquivo antigo
+
+`cw-field-recovery.js`: aviso de registos antigos e botão de guardar cópia em PT/EN/FR/ES/DE, duas entradas/dez textos. Contagem e nós capturados; idioma não consulta IndexedDB nem exporta/envia. Filtro de conta/role, leituras, projeção/exportação binária e nome do ficheiro originais preservados byte a byte. Cache229/runner338. [Prova444](evidence/20260929_task444_local.json).
+
+Quatro integrações aprovadas: cinco idiomas/320/390/1440, seis registos/dois elegíveis, nós/foco/bytes iguais, seis downloads reais incluindo offline, texto UTF-8 e32 017 bytes binários íntegros sem credenciais nem registos alheios; nada apagado/enviado. Atualização explícita da conta/exportação conserva o filtro anterior. 1 356 unitários/138 ficheiros, quatro técnicos e sintaxe695/308/44 aprovados. Captura alemã320 revista; PostgreSQL16/suite338/restauro pendentes. C06/C06-005 permanecem abertos; próximo:`cw-field-photos.js`, mensagens próprias ainda em português. C08/C10 e inventário estático415 não encerrados por associação.
+
+## Histórico funcional — TASK443 / revisão administrativa dos cadastros
 
 `cw-field-intake-review.js`:41 entradas/205 textos em PT/EN/FR/ES/DE, com título/intro, rótulos, estados, diálogos, recuperação e erros próprios. `admin-operational-settings.html` passa a carregar o seletor normal, com `data-cw-no-i18n` no body para proteger os outros painéis e dados; o painel de revisão usa associações explícitas. Não equivale a tradução da página C08-013. Datas apenas mudam de formato; dados/notas/servidor/recibos permanecem literais. Cache228/runner337. [Prova443](evidence/20260929_task443_local.json).
 

@@ -1,11 +1,11 @@
 {
-  "task": "TASK443",
+  "task": "TASK444",
   "date": "2026-09-29",
   "branch": "work/field-readiness-20260915-simulation",
-  "baseCommit": "6dba5f6bc12d8ffd0d2f296bc89807fd0e47aae9",
-  "status": "published_native_ci_running",
+  "baseCommit": "c72f70e4127ba594913aad97ae95aced3c0268fa",
+  "status": "local_validated_publication_pending",
   "scope": {
-    "responsibility": "Translate the administrative review of field-created clients/pools, preserving the captured review, approval request, recovery and original evidence",
+    "responsibility": "Translate the legacy offline archive recovery banner and copy action without changing account filtering, archive bytes or export semantics. Also record the already authorized TASK443 publication.",
     "languages": [
       "pt",
       "en",
@@ -13,177 +13,147 @@
       "es",
       "de"
     ],
-    "messageEntries": 41,
-    "presentationStrings": 205,
-    "cache": 228,
-    "runnerGroups": 337,
+    "messageEntries": 2,
+    "presentationStrings": 10,
+    "cache": 229,
+    "runnerGroups": 338,
     "fileCount": 9,
     "files": [
-      "frontend/cw-field-intake-review.js",
-      "frontend/admin-operational-settings.html",
+      "frontend/cw-field-recovery.js",
       "frontend/sw.js",
-      "scripts/test-field-intake-review-languages.js",
+      "scripts/test-field-recovery-languages.js",
       "scripts/test-field-suite.js",
       "docs/product/CURRENT_WORK_CHECKPOINT.md",
       "docs/product/COMPLETION_PLAN_20260928.md",
       "docs/product/LANGUAGE_INVENTORY_20260928.md",
-      "docs/product/evidence/20260929_task443_local.json"
+      "docs/product/evidence/20260929_task443_local.json",
+      "docs/product/evidence/20260929_task444_local.json"
     ],
     "backendChanged": false,
     "schemaChanged": false,
     "githubWorkflowChanged": false
   },
-  "before": [
-    {
-      "ms": 10855,
-      "outcome": "The original page did not load cw-i18n.js; waiting for the actual language selector failed at the unchanged 7000ms limit.",
-      "expectedFailure": true
-    },
-    {
-      "ms": 3642,
-      "outcome": "With the normal engine loaded but before localizing the panel, the reload label remained Atualizar fichas instead of Refresh records.",
-      "expectedFailure": true
-    }
-  ],
-  "preparationCorrections": [
-    {
-      "ms": 11042,
-      "outcome": "Presentation, quota and stale-request scenarios passed. Full-client comparison rejected the legitimate existing PENDING_REVIEW to ACTIVE transition. The final test requires the exact expected approved client, including ACTIVE, original financial fields and actual reviewer/date."
-    },
-    {
-      "run": "run-1790709078910",
-      "outcome": "New group passed (13713ms); old intake UI timed out (25677ms) waiting for Portuguese after the new test changed the shared administrator language. The subsequent API test returned 401 instead of injected 503 (3968ms); its separate cause was not established. Equipment flow passed (9179ms).",
-      "resolution": "New language test now creates its own administrator instead of changing the shared QA administrator preference. A fresh isolated run of the new group followed by both unmodified intake regressions passed. No application/backend change, assertion removal, sleep, automatic retry or increased timeout used."
-    }
-  ],
+  "before": {
+    "ms": 4128,
+    "expectedFailure": true,
+    "actual": "Guardar cópia dos registos",
+    "expected": "Save a copy of the records"
+  },
   "browserGroups": [
     {
-      "script": "test-field-intake-review-languages.js",
+      "script": "test-field-recovery-languages.js",
       "code": 0,
       "signal": null,
-      "ms": 13037,
+      "ms": 14476,
       "timedOut": false,
-      "logSha256": "331de28527323c17f89253e4ebdffcb3e8a39da31bd88c381b6ee2dc5885ac19",
+      "logSha256": "8d329bac6b006b1b42fd5cd5711c0483e573e8e4cceb3ffec6ec5a343b693723",
       "markers": [
-        "PASS five languages/320/390/1440, literal client/pool fields, missing data, pending/reviewed states, links, immutable nodes/focus/records and cancelled confirmation",
-        "PASS quota sends nothing, server error remains literal in all languages, stale refusal preserves UUID/payload and explicit rereview reveals the current record",
-        "PASS language changes during the held real approval preserve locks; lost response/reload/exact retry gives one approval and original reviewer/date with no billing, visits or stock effects",
-        "PASS query failure/offline/empty states, attribute-only language change and account change preserve receipts and disable approvals"
+        "PASS actual route, five languages/320/390/1440, account-filtered count, unchanged nodes/focus and all six original records without rereading or operational requests",
+        "PASS five real downloads preserve JSON and 32017 binary bytes, original IDs/URLs/methods/timestamps and filename, exclude credentials/foreign records and never send or remove an operation",
+        "PASS cached offline reload/export, direct language attribute change and explicit account refresh/removal keep original bytes and export only the current account"
       ]
     },
     {
-      "script": "test-field-client-intake-ui.js",
+      "script": "test-field-sync-languages.js",
       "code": 0,
       "signal": null,
-      "ms": 19327,
+      "ms": 5207,
       "timedOut": false,
-      "logSha256": "9571e51b8ea07caded60a1ac976b7b7251dbd070c9a4486e2ef42784aab33243",
+      "logSha256": "56b7653e7576e289f99eea468b84b7204de6c3c835bff999c6f03760b9028f86",
       "markers": [
-        "PASS actual intake: quota prevents POST, all eleven fields survive offline reload, delayed GPS cannot replace newer fields, recovery action visible at 320/390/1440",
-        "PASS altered saved data and receipt/cleanup quota failures keep the original request; exact recovery creates one client/pool/task/audit and cleanup does not resend",
-        "PASS account changes/late replies, BFCache, cross-tab conflicts and corrupt drafts preserve the account-owned intake",
-        "PASS actual ADMIN review: literal fields, offline approval/reload, immutable stale refusal, explicit rereview, lost acknowledgement after client disappears from pending list and exact reviewer confirmation",
-        "PASS late ADMIN account change retains only the original reviewer operation; reentry recovers without a second approval"
+        "PASS five languages ×320/390/1440, offline state, original labels/notes, no injection, byte-identical IndexedDB and zero operational writes",
+        "PASS translated401/403/404/409, original503 evidence, reload and account isolation preserve all stored requests",
+        "PASS delayed receipt during language change keeps retry disabled and confirms original UUID/content once",
+        "PASS renewal aborts an older in-flight request and releases the visible retry without replacing its original content",
+        "PASS correction rejection translates its controls, preserves original evidence/receipt and acknowledgement only records reviewedAt",
+        "PASS unreadable legacy history warns in five languages without replacing bytes or sending requests"
       ]
     },
     {
-      "script": "test-field-client-intake.js",
+      "script": "test-field-session-browser.js",
       "code": 0,
       "signal": null,
-      "ms": 6055,
+      "ms": 3100,
       "timedOut": false,
-      "logSha256": "2a8155136f80fa893f82409b75ab4af0c60b18ea1d17a764d7670a3183e0574d",
+      "logSha256": "ca0b4bd1a5b0cbf004d295c1d5f299d3d171658e50a19e2e743a257ce00e7ae3",
       "markers": [
-        "PASS narrow settings, lost response/restart and concurrent retry: one client/pool/task/audit and exact receipt; confirmation survives disabled intake; no credentials/finance projection or unrelated writes",
-        "PASS required write failures roll back all creation; validation, authenticated User/leader, policy states and permission guards",
-        "PASS stale review produces immutable refusal; failed pool/audit/receipt approval rolls back both resources; lost reply/concurrency keeps one genuine reviewer/audit and first date",
-        "PASS existing partial approvals remain visible and can be reconciled atomically with authenticated ADMIN identity; legacy calls remain explicit"
+        "PASS expiry preserves visible work; renewal recovers the original receipt and confirmed content cannot be replaced",
+        "PASS delayed 401 cannot invalidate a newer login",
+        "PASS account switch preserves both photo queues and prevents cross-account completion",
+        "PASS permanent rejection blocks automatic resends and replacement; manual review reuses the same UUID/content",
+        "PASS Retry-After prevents early automatic and manual sends; original request resumes after the pause",
+        "PASS malformed and unattributed historical queues remain untouched and block accidental replacement"
       ]
     },
     {
-      "script": "test-field-equipment-flow.js",
+      "script": "test-field-e2e.js",
       "code": 0,
       "signal": null,
-      "ms": 9179,
+      "ms": 51969,
       "timedOut": false,
-      "logSha256": "4f77e69d6e65397eb308d5f0ef0d62adfff0c8cb15a193da74cd5bca1d7c0624",
+      "logSha256": "a90a3dd42265b6e6e06d5afe6b430786b9eee76a6e367dab4c55b72214adf319",
       "markers": [
-        "PASS preventive plan created through real administration form",
-        "PASS technician real preventive completion, calendar advance, immutable execution/history once and refresh without duplicate"
+        "PASS Técnico móvel online {\"apiErrors\":[]}",
+        "PASS review queries server reminders, detects partial failure and fits 320/390/768px",
+        "PASS two technicians request and accept responsibility in separate mobile sessions",
+        "PASS one navigation, 320/390/768px layout, touch targets and explicit local storage failure",
+        "PASS photo cancellation, invalid file and storage failure do not claim a saved photograph",
+        "PASS management records warehouse load with lost response retry and no duplicate debit",
+        "PASS mobile chemical reception with partial quantity, lost response retry and unchanged stock",
+        "PASS warehouse return UI replay, technician net receipt and preserved original confirmation",
+        "PASS technician offline reload preserves route and draft",
+        "PASS day review identifies offline completion, pending photo and manual pump; unreadable data never appears clear",
+        "PASS pump manual reminder survives offline reload and reconciles automatic confirmation",
+        "PASS modern real recovery buttons retain mismatched photo/completion acknowledgements and replay original content without duplicate effects",
+        "PASS offline completion and response replay consume stock exactly once, with persisted photograph",
+        "PASS incomplete visit survives offline reload, notifies once and resolves follow-up only after actual completion",
+        "PASS concurrent visits and repeated product lines cannot overspend stock",
+        "PASS corrections reconcile quantity differences once and reject insufficient stock atomically",
+        "PASS older pending records remain preserved and export excludes authentication tokens",
+        "PASS missing route cache shows a recoverable error and retry restores the route",
+        "PASS missing GPS and address prevents guessed navigation; address-only destination works without geolocation permission",
+        "PASS Cliente móvel online {\"apiErrors\":[]}",
+        "PASS client partial failure recovery, retained message, double-click guard, busy attachment controls and persisted attachment",
+        "PASS Administrador desktop online {\"apiErrors\":[]}",
+        "PASS management partial technician data is visible and refresh restores complete status",
+        "PASS admin client switch ignores late responses and isolates/restores drafts",
+        "PASS inventory distinguishes product units and replays a lost transfer after reload once",
+        "PASS manual consumption and purchase recover after reload with identical attachment and no duplicate stock"
       ]
     }
   ],
-  "gates": [
-    {
-      "name": "syntax",
-      "code": 0,
-      "signal": null,
-      "ms": 194364,
-      "logSha256": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4"
-    },
-    {
-      "name": "unit",
-      "code": 0,
-      "signal": null,
-      "ms": 24228,
-      "logSha256": "cccba0d9d9420cdd54355515c949a2bca31d5b9904b10ea79ea3e8a40202a6c2"
-    },
-    {
-      "name": "technician",
-      "code": 0,
-      "signal": null,
-      "ms": 2194,
-      "logSha256": "c086518e31757f766ccc1df7ecc503f199c45e3ce4ac9cab00a66f8745d2727a"
-    }
-  ],
-  "unitTests": 1356,
-  "unitFiles": 138,
-  "technicianTests": 4,
-  "syntax": {
-    "backend": 695,
-    "frontend": 308,
-    "inline": 44
-  },
+  "finalGates": "passed",
   "preservation": {
-    "beforeSha256": "994255553d3491ec4648c3e62b27dbc26de5ceed8be48ecfd7cb56ccad428b19",
-    "afterSha256": "d4dd3435d1b875d471961f7f17525168c9b5027db57f3da07b4a9828a6c1f94c",
     "checks": {
-      "sessionCapture": true,
-      "livePredicate": true,
-      "buttonFunction": true,
-      "approvalPayload": true,
-      "recoveryFunction": true,
-      "lifecycle": true,
-      "serverValidation": true,
-      "previousSuiteOrder": true,
-      "originalErrorMessagesPreserved": true
+      "accountFilteringAndDatabaseReads": true,
+      "exportHandlerAndPublicInterface": true,
+      "sameBannerRoleAndStyles": true,
+      "previousSuiteOrder": true
     },
-    "suiteBefore": 336,
-    "suiteAfter": 337
+    "beforeSha256": "6ceb357f62196e90c727dca22257fa431be59455a3bf5d8a17168d99437179a7",
+    "afterSha256": "d536c157c6de73ab22575dae9303170e14c353cb4630360a97cefa15cbe92bfe",
+    "suiteBefore": 337,
+    "suiteAfter": 338
   },
   "verified": [
-    "Actual administrative page and existing language selector; title/intro, labels, client/pool state, missing fields, links and native confirmation dialogs in five languages at 320/390/1440.",
-    "Literal client/pool names, contact details, notes, HTML-like text, braces, zero GPS and decimal volume; no markup execution.",
-    "Locale changes preserve element identity/focus, disabled state, all captured records/UUID/payload/hash/failure/receipt fields and local storage; no outbox rereads or operational requests. Only the actual language preference PUT is allowed.",
-    "IndexedDB quota sends nothing and preserves the current record; 403 with text resembling an owned session error remains literal.",
-    "A genuine intervening pool edit causes INTAKE_APPROVAL_STALE on the same request; its immutable refusal remains literal, and explicit acknowledgement reveals the updated record.",
-    "A real approval is committed while its response is held; locale changes keep all approval controls disabled. Returning 503 without an error exercises translated write-store presentation with its Portuguese persisted failure untouched.",
-    "Reload and exact UUID/body retry after the lost response recover one approval and one audit. SQL contains exactly two approval receipts: one refusal and one success. Original reviewer/date and pending pool IDs agree.",
-    "Previously reviewed inactive pool and full invoice/visit/stock collections remain identical; full client matches original except the exact expected approval fields and updated timestamp.",
-    "Query error, offline query, controlled empty read, direct lang attribute change and different-account guard; no cross-account approval.",
-    "Unmodified intake browser/API regressions cover offline saved approvals, late accounts, receipt mismatch, restart/concurrent retry, transactional rollback and legacy partial approvals.",
-    "Unmodified equipment flow passes with the final application changes; the new engine cannot auto-translate other page sections, and the language test preserves the access-control panel text."
+    "Real technician route, real auth and IndexedDB, six legacy fixtures across PayloadQueue and MediaQueue; only the two matching current role/technician records appear in the count.",
+    "Five languages at 320/390/1440 preserve original DOM nodes, button focus, alert role, all six complete IndexedDB rows and their header/body bytes. No archive reads or operational API requests on locale changes; only normal language preference PUT is allowed.",
+    "Five actual downloads in different languages plus one after offline cached reload; exact JSON text with markup, UTF-8 and braces, and 32017 original binary bytes (crossing the existing 16000-byte encoding chunk) are preserved.",
+    "Original export filename, IDs, URLs, methods, timestamps, content types and base64 bodies match; only entries/exportedAt root fields and the original safe entry projection are exported. Authentication tokens, other accounts, wrong-role and malformed/missing-header records are excluded.",
+    "Exports keep all archive records and do not create a field-write SQL receipt or send/recover an operation. Account filtering and export code remain byte-identical.",
+    "Offline reload loads cache229 and retains German text and export; direct lang attribute update repaints without a language event.",
+    "Explicit refresh after switching to the other account shows/exports only its one record; removing the current identity removes the banner but preserves all six records.",
+    "Original synchronization-language and session-browser regressions pass; full field E2E passes, including stock idempotency, real photograph, incomplete visits, historic archive export and client/technician/administrator flows."
   ],
   "implementation": [
-    "Private descriptors and leaf bindings repaint captured presentation only; empty article/action containers are not bound.",
-    "Owned errors retain Portuguese Error.message and private descriptors; write-store error translations are captured once. Persisted failures and server messages remain literal.",
-    "The administrative page previously lacked the global engine. It now loads cw-i18n.js; data-cw-no-i18n protects the page from automatic text translation while the intake panel uses its own explicit bindings. Other administrative panels remain C08 work.",
-    "Dates change presentation locale only, keeping the same instant and device timezone."
+    "The presentation retains only the banner/text/button nodes and captured count, never archive records or authorization headers.",
+    "Language repaint updates existing text nodes/buttons and never calls records(), refresh() or the export handler. Empty refresh discards the presentation reference.",
+    "The banner is protected from the generic translator; the existing engine and private change listener handle its owned text."
   ],
   "visual": {
-    "path": "reports/field-ui/INTAKE_REVIEW_DE_320.png",
-    "sha256": "1a9477d25e24b9c4cb34ee7f10df00d0c3a071890f615c01396c8210bfa75962",
-    "review": "German text wraps within the 320px panel; approval button fits. The existing scroll container shows a scrolled portion of the list. This is not whole-page visual acceptance."
+    "path": "reports/field-ui/RECOVERY_DE_320.png",
+    "sha256": "02b637909b2e450ee6129a07e19fc174dbb04ae820b545ec863c3edbc247b054",
+    "review": "German warning and focused export button fully visible and wrapped within320px; no clipping in the inspected banner. Not whole-page acceptance."
   },
   "nativePrevious": {
     "task441": {
@@ -417,40 +387,8 @@
           ]
         }
       ]
-    }
-  },
-  "limits": [
-    "Local PGlite/Chromium153 is not native PostgreSQL16 acceptance. Require additive upgrade, all 337 groups in exact order and database/file restore (128 tables/47 files) for the new commit.",
-    "Previous TASK441/442 jobs were still in their full suites after ten passed steps; neither was declared accepted.",
-    "C06, C06-004/C06-005, C08 administrative page/chrome and C10 date policy remain open. Static TASK415 counts were not recomputed."
-  ],
-  "authorization": {
-    "repositoryPublicDuringDevelopment": true,
-    "decisionLisbon": "2026-09-29T19:20:39+01:00",
-    "makePrivateBeforeProjectCompletion": "C32",
-    "merge": false,
-    "deploy": false,
-    "externalMessages": false
-  },
-  "completionCount": {
-    "total": 32,
-    "notStarted": 26,
-    "inProgress": 1,
-    "complete": 5
-  },
-  "next": {
-    "first": "Check native TASK441/442/443 and address any failure.",
-    "source": "frontend/cw-field-recovery.js / C06-005",
-    "scope": "Translate the old offline-record recovery banner and copy action, preserving account filtering/exported original bytes. Photo helper errors in cw-field-photos.js also remain unlocalized.",
-    "deferred": "Annual maintenance contract remains deferred."
-  },
-  "publication": {
-    "commit": "c72f70e4127ba594913aad97ae95aced3c0268fa",
-    "tree": "be61d48f8d546b170a24b710b83b9bf4953e1ffe",
-    "matchesValidatedTree": true,
-    "runId": 36618282299,
-    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36618282299",
-    "jobs": {
+    },
+    "task443": {
       "jobs": [
         {
           "id": 109576824059,
@@ -516,13 +454,13 @@
             },
             {
               "name": "Run npm test && npm run test:technician && npm run test:field-browser",
-              "status": "in_progress",
-              "conclusion": null,
+              "status": "completed",
+              "conclusion": "success",
               "number": 10
             },
             {
               "name": "Run node scripts/test-field-suite.js",
-              "status": "pending",
+              "status": "in_progress",
               "conclusion": null,
               "number": 11
             },
@@ -565,10 +503,63 @@
           ]
         }
       ]
+    }
+  },
+  "limits": [
+    "PGlite/Chromium153 local results do not replace native PostgreSQL16, additive upgrade, all338 groups in exact order and restore128 tables/47 files for this commit.",
+    "TASK441/442/443 jobs were still running after ten initial steps passed. No acceptance inferred from them.",
+    "Original archive identity filtering/current-account refresh/export behavior is deliberately preserved; this task adds no migration, deletion, synchronization or new session-security mechanism.",
+    "C06-005/C06 remain open; cw-field-photos.js still contains Portuguese-only owned errors. C08 shared navigation and C10 timezone policy remain open; TASK415 static counts are historical."
+  ],
+  "authorization": {
+    "repositoryPublicDuringDevelopment": true,
+    "makePrivateBeforeProjectCompletion": "C32",
+    "continuationLisbon": "2026-09-29T20:17:08+01:00",
+    "merge": false,
+    "deploy": false,
+    "externalMessages": false
+  },
+  "completionCount": {
+    "total": 32,
+    "notStarted": 26,
+    "inProgress": 1,
+    "complete": 5
+  },
+  "next": {
+    "first": "Check TASK441/442/443/444 native gates and correct any failure.",
+    "source": "frontend/cw-field-photos.js / C06-005",
+    "scope": "Localize owned photograph helper errors through their real consumers while preserving blobs, identity, requests and original persisted labels/failures.",
+    "deferred": "Annual maintenance contract remains deferred."
+  },
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 197700,
+      "logSha256": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4"
     },
-    "originalLocalCommit": "3f1d4c6da1d38ff700f605a6b4369ab1bd5aec03",
-    "originalHistoryBranch": "work/local-task443-20260929",
-    "merged": false,
-    "deployed": false
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 23798,
+      "logSha256": "628765475d0329df268e9f14f2239482e3d48b7422bd254bfe3087a3b8eff9b1"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 2109,
+      "logSha256": "cc9cee14992ae8b5d01788d900804d375fd44e0cadd5309bccd80925f67825e2"
+    }
+  ],
+  "unitTests": 1356,
+  "unitFiles": 138,
+  "technicianTests": 4,
+  "syntax": {
+    "backend": 695,
+    "frontend": 308,
+    "inline": 44
   }
 }

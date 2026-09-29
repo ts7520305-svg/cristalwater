@@ -1,5 +1,21 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 29/09/2026, TASK444 / recuperação de registos antigos
+
+**TASK444 / C06-005:** aviso de arquivo antigo e botão de guardar cópia em PT/EN/FR/ES/DE:duas entradas/dez textos. Mudança de idioma repinta os mesmos nós e a contagem capturada, sem consultar o arquivo nem exportar/enviar dados. Filtro por conta/role, leitura IndexedDB e handler de exportação conservados byte a byte. [Prova444](evidence/20260929_task444_local.json).
+
+**Validação de integração:** reprodução anterior4 128ms; novo grupo14 476ms, idiomas da fila5 207ms, sessão3 100ms e E2E completo51 969ms aprovados. Cinco idiomas/320/390/1440, seis registos entre duas filas (dois da conta atual), nós/foco/bytes intactos. Seis downloads reais, incluindo offline: texto UTF-8/markup/chavetas e32 017 bytes binários idênticos, nome/IDs/URLs/métodos/datas/tipos conservados, sem credenciais nem registos alheios. Nada eliminado/enviado. Nova conta só exporta o seu registo após atualização explícita; sem identidade o aviso desaparece, mantendo as seis entradas. 1 356 unitários/138 ficheiros, quatro técnicos e sintaxe695/308/44 aprovados.
+
+**Preservação/limites:** cache229/runner338, ordem anterior mantida; backend/schema/workflow sem alteração. Captura alemã320 revista, aviso e botão cabem. PGlite/Chromium153 não substituem PostgreSQL16/upgrade/suite338/restauro128 tabelas47ficheiros. C06/C06-005 abertas; navegação comum C08 e datas C10 pendentes.
+
+**Publicação/retoma:** TASK443 publicada`c72f70e4`, CI36618282299/job109576824059 na suite337 após dez etapas aprovadas; CI441/442 também em execução na última consulta. Publicação444 e gates próprios pendentes. Próximo:`cw-field-photos.js`/C06-005, erros próprios pelos consumidores reais, sem alterar blobs/identidade/recibos. Nove ficheiros incluindo confirmação documental443;32=26 por iniciar/uma em execução/cinco concluídas. Público autorizado durante desenvolvimento; privado antes do fecho/C32. Contrato anual adiado; sem merge/deploy/contactos reais.
+
+## Publicação confirmada — 29/09/2026, TASK443 / CI em execução
+
+TASK443 publicada na branch `work/field-readiness-20260915-simulation`: código `c72f70e4127ba594913aad97ae95aced3c0268fa`, árvore `be61d48f8d546b170a24b710b83b9bf4953e1ffe`, igual à validada; checkout alinhado e original local preservado. [CI36618282299](https://github.com/ts7520305-svg/cristalwater/actions/runs/36618282299), job109576824059, arrancou no commit exato. Nove etapas aprovadas; testes unitários/técnicos/navegador em execução na última consulta. Exigir PostgreSQL16/upgrade/suite337/restauro128 tabelas47ficheiros antes da aceitação. [Prova443](evidence/20260929_task443_local.json).
+
+CI441/442 ainda nas suas suites após dez etapas aprovadas. Continuação pedida às20:17 de Lisboa: seguir recuperação de registos antigos. Público durante desenvolvimento autorizado; privado antes do fecho/C32. Sem merge/deploy/contactos externos.
+
 ## Retoma atual — 29/09/2026, TASK443 local validada / revisão de clientes e piscinas
 
 **TASK443 / C06-004:** revisão administrativa dos cadastros em PT/EN/FR/ES/DE:41 entradas/205 textos, título/intro, contactos, dados em falta, estados, diálogo, aprovação/recuperação e erros próprios. A página não carregava o seletor: passa a incluir `cw-i18n.js`, com tradução automática protegida no body; o painel usa associações explícitas e os outros painéis/dados conservam a apresentação. C08 não é aceite por esta integração. [Prova443](evidence/20260929_task443_local.json).
