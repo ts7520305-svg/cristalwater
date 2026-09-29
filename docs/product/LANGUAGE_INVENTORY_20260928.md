@@ -8,7 +8,15 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
-## Progresso funcional — TASK439 / formulário e banner de impedimentos
+## Progresso funcional — TASK440 / formulário e fila de equipamento
+
+`field-equipment-maintenance.js`: formulário/fila, rótulos, opções, controlos de tempo/material, estados de consulta/recuperação e erros próprios em PT/EN/FR/ES/DE. 115 entradas/575 textos; catálogo existente do write-store reutilizado para erros identificados. Associações a nós de texto conservam inputs dentro de labels, valores, seleção, foco, nós e estado dos controlos. Datas e números mudam apenas de apresentação, com instantes/fuso conservados. Títulos/instruções/notas, materiais/unidades, recibos e falhas persistidas mantêm os originais; erros próprios conservam Error.message português. Resumos anteriores e regras de negócio conservados. Cache225/runner334; [prova440](evidence/20260929_task440_local.json).
+
+Novo grupo e três regressões aprovados. Cinco idiomas/320/390/1440, rascunhos REGULAR/EXTRA de igual ID, dois intervalos, quantidade com vírgula, material inválido, mudança de modo protegida, quota, conflito, erro403 literal, revisão extra aplicada uma vez, recusa regular/ack, rascunho ilegível, offline/cache ausente e proteção permanente de conta. Mudanças de idioma conservam dados/bytes/UUID/payload/hash/recibo e não invocam produtores nem pedidos operacionais. Stock e execução das visitas preservados, descontando apenas a alteração deliberada do início da fixture regular. Sintaxe, 1 356 unitários e quatro técnicos aprovados.
+
+**Limites:** publicação suspensa por privacidade; PostgreSQL16/suite334/restauro pendentes. Captura alemã320 revista e opções traduzidas encurtadas; ações/nav comuns fixas sobrepõem-se ao meio da captura longa, permanecendo C08-025/026. QA alinhada com Lisboa; política entre fusos/datas C10 não alterada nem aceite. C06/C06-003 abertas. Próximo: passagem/receção e restantes fontes. Contagens estáticas TASK415 não recalculadas; histórico abaixo mantém o âmbito à data.
+
+## Histórico funcional — TASK439 / formulário e banner de impedimentos
 
 `cw-field-incomplete.js` localiza rótulos, opções, ajuda, estados, banner, confirmação e recuperação em PT/EN/FR/ES/DE (46 entradas); `cw-incomplete-workflow.js` associa dez erros próprios a cópias de apresentação privadas e imutáveis. Total280 textos. Error.message português e SyntaxError original conservados; erros externos/servidor e texto dos registos continuam literais, mesmo com conteúdo igual ao de um erro próprio. Mudança de idioma só repinta textos/atributos; dados, decisões operacionais e catálogo/construtor/produtor dos resumos permanecem conservados. Cache224/runner333; [prova439](evidence/20260929_task439_local.json).
 

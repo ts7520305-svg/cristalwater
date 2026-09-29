@@ -1,0 +1,405 @@
+{
+  "task": "TASK440",
+  "date": "2026-09-29",
+  "branch": "work/field-readiness-20260915-simulation",
+  "baseCommit": "265efefe63f04e26700b63eadd868d0c7b9bd5eb",
+  "status": "local_validated_publication_held_pending_repository_privacy",
+  "scope": {
+    "responsibility": "Localize equipment form, queue, work-time/material presentation and owned errors while retaining original values and operational rules",
+    "files": [
+      "frontend/field-equipment-maintenance.js",
+      "frontend/sw.js",
+      "scripts/test-field-suite.js",
+      "scripts/test-field-equipment-form-languages.js",
+      "docs/product/CURRENT_WORK_CHECKPOINT.md",
+      "docs/product/COMPLETION_PLAN_20260928.md",
+      "docs/product/LANGUAGE_INVENTORY_20260928.md",
+      "docs/product/evidence/20260929_task440_local.json"
+    ],
+    "fileCount": 8,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "newMessageEntries": 115,
+    "newPresentationStrings": 575,
+    "existingTaggedWriteStoreErrorCatalogReused": true,
+    "cache": 225,
+    "runnerGroups": 334,
+    "backendChanged": false,
+    "schemaChanged": false,
+    "writeStoreChanged": false,
+    "summaryConsumerChanged": false,
+    "githubWorkflowChanged": false,
+    "timeoutsIncreased": false,
+    "retriesAdded": false
+  },
+  "before": {
+    "script": "test-field-equipment-form-languages.js",
+    "code": 1,
+    "signal": null,
+    "ms": 5755,
+    "timedOut": false,
+    "expectedFailure": true,
+    "actual": "Revisões dos equipamentos",
+    "expected": "Equipment maintenance"
+  },
+  "intermediateTestPreparation": [
+    {
+      "script": "test-field-equipment-form-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 24671,
+      "timedOut": false,
+      "cause": "The fixture starts both visits simultaneously; the real equipment work-time validator correctly refuses the EXTRA completion because another service overlaps.",
+      "resolution": "Set the REGULAR fixture start after the already recorded EXTRA intervals, before entering the REGULAR form; assert the final regular row equals this deliberately updated fixture. No guard changed."
+    },
+    {
+      "script": "test-field-equipment-form-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 26590,
+      "timedOut": false,
+      "cause": "The acknowledgement wait refers to the Node-side pending variable inside page.evaluate.",
+      "resolution": "Pass the request ID explicitly as the browser predicate argument."
+    },
+    {
+      "script": "test-field-equipment-form-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 11081,
+      "timedOut": false,
+      "cause": "The browser was changed to Europe/Lisbon while the QA server retained GMT+8. The requested day excludes the fixture timestamps under the server-local day filter; readiness times out at 7000ms.",
+      "resolution": "Set TZ=Europe/Lisbon for the isolated QA server/test process and the same browser timezone. No product date policy or wait limit changed."
+    }
+  ],
+  "testPreparationLimits": {
+    "noApplicationChangeForFixtureFailures": true,
+    "allAssertionsRetained": true,
+    "noSleepAdded": true,
+    "noTimeoutIncreased": true,
+    "noAutomaticRetryAdded": true,
+    "timezoneSource": "frontend/cw-field-route-cache.js uses browser calendar day; src/utils/serviceVisitFilters.js parseLocalDay uses server-local midnight. This task aligns QA to Lisbon and does not accept C10 multi-timezone/date policy."
+  },
+  "browserGroups": [
+    {
+      "script": "test-field-equipment-form-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 37656,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-review-equipment-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 19001,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-equipment-browser.js",
+      "code": 0,
+      "signal": null,
+      "ms": 4777,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-equipment-flow.js",
+      "code": 0,
+      "signal": null,
+      "ms": 9993,
+      "timedOut": false
+    }
+  ],
+  "initialGates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 218087,
+      "log": "gate-syntax.log"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 27155,
+      "log": "gate-unit.log"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 2591,
+      "log": "gate-technician.log"
+    }
+  ],
+  "finalNodeChecks": 4,
+  "counts": {
+    "unit": {
+      "passed": 1356,
+      "files": 138,
+      "failed": 0
+    },
+    "technician": {
+      "passed": 4,
+      "failed": 0
+    },
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44
+    },
+    "diffCheck": true
+  },
+  "coverage": {
+    "fiveLanguagesAtWidths": [
+      320,
+      390,
+      1440
+    ],
+    "regularAndExtraSameNumericId": true,
+    "realFormNotesTwoIntervalsAndMaterials": true,
+    "commaQuantityInInput": "1,25",
+    "storedAndSubmittedDecimal": "1.25",
+    "exactDurationMatchesSubmittedIntervals": true,
+    "draftCacheRawBytesAndOutboxRecordsPreservedOnLocaleChange": true,
+    "uuidPayloadHashFailureReceiptAndTypedIdentityPreserved": true,
+    "sameNodesFocusSelectionCheckedDisabledHiddenOpenStates": true,
+    "nestedLabelInputsPreserved": true,
+    "noProducerCallsOrOperationalRequestsOnLocaleChange": true,
+    "materialValidationUsesExistingTaggedErrorCatalog": true,
+    "negativeQuantityDisablesSubmission": true,
+    "changingMaterialModeKeepsExistingLines": true,
+    "quotaKeepsUnsavedTextAndPriorDraft": true,
+    "crossWindowConflictKeepsOtherWindowRawBytes": true,
+    "blocked403DetailsLiteral": true,
+    "oneRealExtraCompletionWithTimeAndMaterials": true,
+    "oneRegularStaleRefusalOfOriginalFrozenRequest": true,
+    "acknowledgementRetainsRegularDraft": true,
+    "corruptDraftBytesRetained": true,
+    "offlineReloadCurrentCacheAndMissingCache": true,
+    "accountChangePermanentlyClosesProducer": true,
+    "extraRowUnchanged": true,
+    "regularRowEqualsDeliberatelyUpdatedNonoverlapFixture": true,
+    "centralStockRowUnchanged": true,
+    "equipmentCompletions": 1,
+    "equipmentHistoryEntries": 1,
+    "durableServerRequests": 2,
+    "planVersionIncrements": 1,
+    "pageErrors": 0,
+    "markupExecuted": false
+  },
+  "preservation": {
+    "unchangedCoreDefinitionsAfterRestoringOriginalErrorConstruction": {
+      "protect": true,
+      "valid": true,
+      "assertSession": true,
+      "draftKey": true,
+      "parseDraft": true,
+      "draftState": true,
+      "saveDraft": true,
+      "matching": true,
+      "cleanConfirmed": true,
+      "discardDraft": true,
+      "validateView": true,
+      "cached": true,
+      "flush": true,
+      "sameMaterials": true,
+      "positive": true,
+      "instant": true,
+      "times": true,
+      "validTime": true,
+      "storedTimeInput": true,
+      "sameTime": true,
+      "validMaterialDraft": true,
+      "hasDraft": true,
+      "acknowledgedDraft": true,
+      "key": true,
+      "sameVisit": true,
+      "cacheKey": true
+    },
+    "summaryCatalogBuilderAndProducerByteIdentical": true,
+    "selectionRefreshSessionAndTimerListenersByteIdentical": true,
+    "runner": {
+      "before": 333,
+      "after": 334,
+      "unique": true,
+      "previousOrderPreserved": true
+    },
+    "sourceSHA256": {
+      "before": "448b630bb7f9c369de125e6efa375cadbfd553afe014766d6119ff1b51f075ea",
+      "after": "ccdc4dd84226ddb5a3c80e780fef1ef74b47e2fdc18faa9aab3538564ade1cd8"
+    },
+    "messages": {
+      "entries": 115,
+      "strings": 575
+    },
+    "allCatalogEntriesHaveFiveNonemptyValuesAndMatchingPlaceholders": true
+  },
+  "implementation": {
+    "bindingStrategy": "Private descriptors and weak bindings to text nodes. Locale repaint changes nodeValue only, preserving nested label inputs and every connected form/queue node. Detached bindings are not enumerated.",
+    "ownedErrors": "This module retains the original Portuguese Error.message; private metadata provides presentation translations. Tagged write-store errors capture its existing five-language catalog.",
+    "literalData": "Plan titles, instructions, notes, material names/units, original server receipts and persisted failure evidence stay literal. Existing network-error classification is retained and its help text localized.",
+    "timePresentation": "ISO instants and computed duration are captured; only date/number formatting and surrounding labels change with locale. Device timezone is retained.",
+    "summaries": "Original summary catalog, builder and producer remain byte-identical; parser/session errors retain their old messages."
+  },
+  "visual": {
+    "reviewed": "reports/field-ui/EQUIPMENT_FORM_DE_320.png",
+    "locale": "de",
+    "width": 320,
+    "timezone": "Europe/Lisbon",
+    "observation": "Header, nested labels, time controls, material inputs and confirmation wrap inside the narrow card. Raw braces/markup, comma quantity, focus and selection remain visible. Four translated select labels were shortened after inspecting the initial capture.",
+    "limit": "Shared fixed actions/navigation overlap the middle of the long element capture and remain C08-025/026. This task does not accept the complete page layout."
+  },
+  "environment": {
+    "database": "Isolated PGlite 0.5.8 / pglite-socket 0.2.11",
+    "browser": "Chromium153.0.0 via @sparticuz/chromium",
+    "schema": "Generated from current Prisma schema",
+    "externalContactsEnabled": false,
+    "backgroundJobsEnabled": false,
+    "productionDataUsed": false,
+    "browserTestIntervalsDisabledMs": [
+      15000,
+      30000,
+      60000
+    ],
+    "sessionProtectionIntervalsPreserved": true,
+    "finalServerAndTestTimezone": "Europe/Lisbon",
+    "finalBrowserTimezone": "Europe/Lisbon",
+    "existingRegressionTimezone": "Default QA runtime before explicit Lisbon alignment",
+    "nativePostgres16UpgradeFull334SuiteOrRestoreValidatedInThisTask": false
+  },
+  "privacy": {
+    "repository": "ts7520305-svg/cristalwater",
+    "lastApiObservation": "Conversation API check on 2026-09-29 before TASK438; not repeated during TASK439",
+    "visibilityAtLastObservation": "public",
+    "linkedAccountAdminPermission": true,
+    "recheckedDuringImplementation": false,
+    "repositoryVisibilityChangeApplied": false,
+    "applicationOrVpsAccessAudited": false,
+    "billingPlanBudgetOrNameChanged": false,
+    "authorization": "User already authorized restricting outsiders; publication remains held until privacy is resolved."
+  },
+  "publication": {
+    "publicBaseCommit": "b2d51e445a18d3c0456197b73f90cb1363f6aa18",
+    "TASK434LocalCommit": "4f1538a8e638f177978b4935262365db25efd892",
+    "TASK435LocalCommit": "553c4027b7bb9b32fde4c0fc87d8fd90df9551a5",
+    "TASK436LocalCommit": "7c6c091fceeec7522b0751fa2f8f36554a819b3c",
+    "TASK437LocalCommit": "b159381824aff0e48fcacce95fb0731c1a042ef8",
+    "TASK438LocalCommit": "0688dbd2cd5d2a4b01304981b35878e181478b8a",
+    "TASK439LocalCommit": "265efefe63f04e26700b63eadd868d0c7b9bd5eb",
+    "TASK434To439Published": false,
+    "TASK440Committed": false,
+    "TASK440Published": false,
+    "merged": false,
+    "deployed": false,
+    "nativeRun": null,
+    "condition": "Resolve repository privacy before publication; require exact 334-group native run and restore of 128 tables / 47 files before final revision acceptance.",
+    "previousNativeEvidence": "20260929_task434_local.json; historical TASK431/433 passes do not accept TASK434–440."
+  },
+  "next": {
+    "completionCounts": {
+      "notStarted": 26,
+      "inProgress": 1,
+      "completed": 5,
+      "total": 32
+    },
+    "C06Closed": false,
+    "C06_003Closed": false,
+    "nextSource": "handover/receipt panels in cw-field-day-review.js",
+    "remaining": [
+      "other C06 inventory sources"
+    ],
+    "sharedNavigationAndSectionChrome": "C08-025/026",
+    "dateAndTimezonePolicy": "C10 still open",
+    "annualContractDeferred": true
+  },
+  "logDigests": [
+    {
+      "name": "run-1790703556636/test-field-equipment-form-languages.js.log",
+      "bytes": 567,
+      "sha256": "ac13c2a7546669ba70515d321999b6e4a7604f59ae76853fefeb12ee56e9ec14"
+    },
+    {
+      "name": "run-1790703950334/test-field-equipment-browser.js.log",
+      "bytes": 358,
+      "sha256": "f199b33633f6aaeb963bd0ae897e1a19e96eedb10d27f50f522ff38914cffff1"
+    },
+    {
+      "name": "run-1790703950334/test-field-equipment-flow.js.log",
+      "bytes": 304,
+      "sha256": "28c705f113e8130bb4e566a076137bb25b2450fdd4273f0892e32012953c9978"
+    },
+    {
+      "name": "run-1790703950334/test-field-equipment-form-languages.js.log",
+      "bytes": 760,
+      "sha256": "f711ce1fb635003a6a07346191033f77730fc7108fe25ba916c51f07573ff168"
+    },
+    {
+      "name": "run-1790703950334/test-field-review-equipment-languages.js.log",
+      "bytes": 608,
+      "sha256": "b55d21770b21fb3339e661474694c7b0b79dc72c015462012cf63b0ab77fca52"
+    },
+    {
+      "name": "run-1790704084310/test-field-equipment-form-languages.js.log",
+      "bytes": 713,
+      "sha256": "711531166e2d2d42f69ea40d76e7102dcb62e35b8b4e150d29466fc330dab9d2"
+    },
+    {
+      "name": "run-1790704195196/test-field-equipment-form-languages.js.log",
+      "bytes": 326,
+      "sha256": "71f6bd7a14ada4bfc7a973438631d4e4fe1be089d6679eb5d7f437ce7c0b2818"
+    },
+    {
+      "name": "run-1790704334134/test-field-equipment-form-languages.js.log",
+      "bytes": 616,
+      "sha256": "ccdfaa2bbfcf94a1ac7cd73e35f7bdce088ff25de4cdda44bcbcce478200944d"
+    },
+    {
+      "name": "gate-syntax.log",
+      "bytes": 257,
+      "sha256": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4"
+    },
+    {
+      "name": "gate-technician.log",
+      "bytes": 431,
+      "sha256": "3f01f91573f1360f920886553607f3f3f8c824fa342fd777080d3f383f167a81"
+    },
+    {
+      "name": "gate-unit.log",
+      "bytes": 400,
+      "sha256": "d18f56f6f1a32d9ae956eeaed216af661f3edc30f2ede132ba4ad9b019a703a0"
+    },
+    {
+      "name": "gate-final-technician.log",
+      "bytes": 430,
+      "sha256": "c929ddb50624322c1bdcee2e075d848902e8b7d8923a8f90959b71beb405dcfd"
+    },
+    {
+      "name": "gate-final-unit.log",
+      "bytes": 400,
+      "sha256": "7b306ce75bc86449af06dea4b693cd7c3a1f8e9045b39c7c324f1aa8866ad0a2"
+    }
+  ],
+  "finalUnitAndTechnicianGates": [
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 25604,
+      "log": "gate-final-unit.log"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 2217,
+      "log": "gate-final-technician.log"
+    }
+  ],
+  "gateSequence": "Initial complete syntax/unit/technician gates passed. After four translated select labels were shortened, final module/test node checks, the complete new browser group, and unit/technician gates passed. Existing Portuguese regressions retain their approved results."
+}
