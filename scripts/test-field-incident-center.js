@@ -156,18 +156,52 @@ const ids = [];
   assert.equal(escalated.impactScore, 85); assert.equal(escalated.priorityScore, 90);
   console.log('PASS incident API: failures are explicit, null/missing receipts rejected, ADMIN scope, refused writes inert, repeated/concurrent escalation changes scores once');
 
-  // Read states: failed/malformed responses never become zero; real empty data does.
-  for (const response of [{ status: 503, json: { ok: false } }, { json: { ok: true } }, { json: { ok: true, incidents: [first, first] } }, { json: { ok: true, incidents: [{ ...first, impactScore: '<img src=x>' }] } }]) {
-    await page.route('**/api/incidents', route => route.fulfill(response), { times: 1 });
-    await page.locator('#refreshBtn').click();
-    await page.waitForFunction(() => document.querySelector('#incidentStatus').dataset.state === 'error');
-    assert.equal(await page.locator('#activeCount').innerText(), '—');
-    assert.equal(await page.locator('.incident').count(), 0);
+  // A read-state fixture describes the endpoint for the whole assertion, including
+  // realtime GETs that can supersede a manual read. A one-shot response can be
+  // consumed by an aborted read and expose the real successful list instead.
+  const readCases = [
+    ...[{ status: 503, json: { ok: false } }, { json: { ok: true } }, { json: { ok: true, incidents: [first, first] } }, { json: { ok: true, incidents: [{ ...first, impactScore: '<img src=x>' }] } }]
+      .map(response => ({ response, state: 'error' })),
+    { response: { json: { ok: true, incidents: [] } }, state: 'empty' }
+  ];
+  for (const [index, { response, state }] of readCases.entries()) {
+    let releaseRead, readStarted;
+    const heldRead = new Promise(resolve => { releaseRead = resolve; });
+    const firstRead = new Promise(resolve => { readStarted = resolve; });
+    const reads = [];
+    const readHandler = route => {
+      const hold = index === 0 && reads.length === 0;
+      const completion = (async () => {
+        if (hold) { readStarted(route.request()); await heldRead; }
+        await route.fulfill(response);
+      })();
+      reads.push(completion);
+      return completion;
+    };
+    await page.route('**/api/incidents', readHandler);
+    try {
+      await page.locator('#refreshBtn').click();
+      if (index === 0) {
+        const manualRead = await firstRead;
+        const replacement = page.waitForResponse(result => new URL(result.url()).pathname === '/api/incidents' && result.request().method() === 'GET' && result.request() !== manualRead);
+        // This real, authorized write emits incident-updated through Socket.IO.
+        // It preserves OPEN and the escalation scores, and replaces the held GET.
+        assert.equal((await call('/status/' + concurrent.id, 'POST', { status: 'OPEN' })).status, 200);
+        assert.equal((await replacement).status(), 503, 'Realtime replacement must receive the same simulated endpoint failure');
+        assert(reads.length >= 2, 'The real notification must start a replacement read');
+        releaseRead();
+        console.log('PASS incident realtime read: a real notification supersedes the held GET while the endpoint failure remains active');
+      }
+      await page.waitForFunction(expected => document.querySelector('#incidentStatus').dataset.state === expected, state);
+      assert.equal(await page.locator('#activeCount').innerText(), state === 'empty' ? '0' : '—');
+      assert.equal(await page.locator('.incident').count(), 0);
+      if (state === 'empty') assert((await page.locator('#incidentList').innerText()).includes('Sem incidentes registados'));
+    } finally {
+      releaseRead();
+      await page.unroute('**/api/incidents', readHandler);
+      await Promise.all(reads);
+    }
   }
-  await page.route('**/api/incidents', route => route.fulfill({ json: { ok: true, incidents: [] } }), { times: 1 });
-  await page.locator('#refreshBtn').click();
-  await page.waitForFunction(() => document.querySelector('#activeCount').textContent === '0');
-  assert((await page.locator('#incidentList').innerText()).includes('Sem incidentes registados'));
   await page.locator('#refreshBtn').focus(); await page.keyboard.press('Enter');
   await firstCard.waitFor();
   assert.equal(await page.locator('#incidentList img, #incidentList script, #incidentList [onclick]').count(), 0);
