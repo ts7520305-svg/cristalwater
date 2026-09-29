@@ -8,7 +8,15 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
-## Progresso funcional — TASK438 / mensagens do formulário de ocorrências
+## Progresso funcional — TASK439 / formulário e banner de impedimentos
+
+`cw-field-incomplete.js` localiza rótulos, opções, ajuda, estados, banner, confirmação e recuperação em PT/EN/FR/ES/DE (46 entradas); `cw-incomplete-workflow.js` associa dez erros próprios a cópias de apresentação privadas e imutáveis. Total280 textos. Error.message português e SyntaxError original conservados; erros externos/servidor e texto dos registos continuam literais, mesmo com conteúdo igual ao de um erro próprio. Mudança de idioma só repinta textos/atributos; dados, decisões operacionais e catálogo/construtor/produtor dos resumos permanecem conservados. Cache224/runner333; [prova439](evidence/20260929_task439_local.json).
+
+Novo grupo e três regressões aprovados: cinco idiomas/320/390/1440, rascunhos reais REGULAR/EXTRA de igual ID, quantidade com vírgula, validação, quota, conflito entre janelas, recusa403 literal, diálogo cancelado, recusa real INCOMPLETE_STALE, envio extra único, revisão de recusa no outro tipo de visita, legado válido/ilegível/recuperado, offline/cache/contexto ausente e sessão inválida. Valores/bytes/UUID/payload/hash/recibos/nós/foco/seleção/visibilidade/bloqueios preservados nas mudanças de idioma, sem chamadas aos produtores nem pedidos operacionais. Stock e execução extra original conservados. Sintaxe, 1 356 unitários e quatro técnicos aprovados.
+
+**Limites:** publicação suspensa até resolver privacidade; aceitação PostgreSQL16/suite333/restauro pendente. Captura alemã320 revista, com texto/controlos dentro da largura; ações/nav fixas comuns aparecem sobre o meio da captura longa e continuam C08-025/026. Outros consumidores do workflow continuam a receber Error.message original; não são traduzidos por esta alteração. Próximo: formulário/fila/tempo/material de equipamento, depois passagem/receção e restantes fontes. C06/C06-003 abertas. Contagens estáticas TASK415 não recalculadas; histórico abaixo conserva o âmbito à data.
+
+## Histórico funcional — TASK438 / mensagens do formulário de ocorrências
 
 `cw-field-problem-report.js`: rótulos, opções, atributos acessíveis, contexto, gravação e recuperação localizados em PT/EN/FR/ES/DE. 49 entradas/245 textos novos e dois avisos antigos reutilizados. Valores das opções/campos e textos de origem conservados; eventos de idioma só repintam associações de apresentação. Erros próprios conservam Error.message português, com cópia de apresentação privada; detalhes externos e erros do servidor ficam literais. Catálogo/construtor dos resumos437 inalterados; classificação do legado independente do idioma mostrado. Cache223/runner332; [prova438](evidence/20260929_task438_local.json).
 
