@@ -1,7 +1,7 @@
 {
   "task": 480,
   "parent": "fe4699da157e734c5e69dac8acebf699144f07c9",
-  "status": "local_pass_publication_pending",
+  "status": "published_native_pending",
   "catalog": {
     "entries": 2,
     "variants": 10,
@@ -203,7 +203,15 @@
       "suite": "in_progress",
       "restore": "pending"
     },
-    "task480": "publication/native CI pending"
+    "task480": {
+      "code": "2c485bf0d3d7ca82e95b114abe49ca78d61dd501",
+      "tree": "21eb626110641aa6d5a4a97015a2a6b022c67da2",
+      "run": 36773818920,
+      "job": 110086590419,
+      "status": "in_progress",
+      "suiteGroups": 372,
+      "restore": "pending"
+    }
   },
   "constraints": {
     "open": [
@@ -228,5 +236,24 @@
     "vps": false,
     "externalContacts": false,
     "annualContract": "deferred"
+  },
+  "publication": {
+    "code": "2c485bf0d3d7ca82e95b114abe49ca78d61dd501",
+    "tree": "21eb626110641aa6d5a4a97015a2a6b022c67da2",
+    "parent": "fe4699da157e734c5e69dac8acebf699144f07c9",
+    "exactLocalTree": true,
+    "branch": "work/field-readiness-20260915-simulation",
+    "ci": {
+      "run": 36773818920,
+      "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36773818920",
+      "job": 110086590419,
+      "status": "in_progress",
+      "initialStepsPassed": 1,
+      "currentStep": "Initialize containers",
+      "suiteGroups": 372,
+      "suite": "pending",
+      "restore": "pending"
+    },
+    "noProductChangesInDocumentationFollowup": true
   }
 }

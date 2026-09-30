@@ -1,5 +1,13 @@
 # Inventário de idiomas — C05 / TASK415
 
+## Publicação confirmada — 30/09/2026, TASK480 / avisos do cache de ronda
+
+Código `2c485bf0d3d7ca82e95b114abe49ca78d61dd501`, árvore `21eb626110641aa6d5a4a97015a2a6b022c67da2`, igual à validada localmente; parent `fe4699da157e734c5e69dac8acebf699144f07c9` confirmado. [CI36773818920](https://github.com/ts7520305-svg/cristalwater/actions/runs/36773818920), job110086590419: uma etapa inicial aprovada, inicialização de containers em curso na consulta; suite372/restauro pendentes. Duas entradas/10 variantes, catálogo340 com338 entradas preservadas,80 verificações e cinco integrações finais aprovadas;1 384 unitários/140 ficheiros/quatro técnicos/sintaxe695/308/44. Detalhes de erro e datas permanecem literais; cache/drafts/outbox, confirmação e início offline em memória preservados. Inversão exata e falha do teste final contra o módulo anterior reconfirmadas. Cache259/runner372. [Prova480](evidence/20260930_task480_local.json).
+
+Última aceitação completa mantém-se TASK477/CI36760759887/job110042399644:369 grupos distintos/code0 na ordem exata do código `dc7f14107efc39201440c8140788ad9395d9a476`, PostgreSQL16/43 migrações e restauro128 tabelas/51 ficheiros, linhas/hashes iguais. Fontes e resultados completos na prova479. TASK478/479 na suite370/371 após dez etapas iniciais aprovadas, restauros pendentes na última consulta; não atribuir a aprovação477 aos códigos478–480.
+
+Próximo: acompanhar478–480 e continuar falhas próprias de carregamento e avisos legados da ronda, mantendo erros alheios literais. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público no desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/VPS/contactos externos; contrato anual adiado. Atualização documental [skip ci]; entradas abaixo históricas.
+
 ## Retoma atual — 30/09/2026, TASK480 / avisos do cache de ronda
 
 TASK480 / C06-015 implementada e validada localmente: duas entradas/10 variantes PT/EN/FR/ES/DE para falha ao guardar a ronda offline e ausência de confirmação atual da cópia guardada. Catálogo principal340,338 entradas anteriores exatamente preservadas. Só os três produtores próprios do aviso passam descritores ao apresentador existente; detalhes de Error.message e dia/data consultada permanecem literais, inclusive o formato pt-PT original. Não atribui tradução a mensagens de módulos/servidor nem modifica erros, identidade/name/message. O texto de outro produtor, mesmo idêntico ao português próprio, perde ownership e permanece literal. CSS, nó, role=status, ocultação após confirmação atual e fluxo/cache originais mantidos.
