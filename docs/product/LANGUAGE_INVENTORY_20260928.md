@@ -1,5 +1,13 @@
 # Inventário de idiomas — C05 / TASK415
 
+## Publicação confirmada — 30/09/2026, TASK477 / inscrição push
+
+Código `dc7f14107efc39201440c8140788ad9395d9a476`, árvore `ebb0a28b0dffd273e14e8ae5683dda9998e76301`, igual à árvore validada localmente; parent `a220b778bdafbdba6b73ea41828940d46dcbf40b` confirmado. [CI36760759887](https://github.com/ts7520305-svg/cristalwater/actions/runs/36760759887), job110042399644: dez etapas iniciais aprovadas, suite369 em curso/restauro pendente. 12 entradas/60 variantes,75 verificações de idioma, quatro integrações finais,1 374 unitários/139 ficheiros, quatro técnicos e sintaxe695/308/44 aprovados localmente. Inversão exata do módulo original confirmada; só apresentação alterada. Cache256/runner369. [Prova477](evidence/20260930_task477_local.json).
+
+TASK475 aceite nativamente: código `82ccbc0173ddc029b917b484f7b7490dadceb2e4`, árvore `e4c844a302efb49468db82125d05d0d2cf6f7bb2`, head/checkout/árvore remota confirmados. [CI36751168770](https://github.com/ts7520305-svg/cristalwater/actions/runs/36751168770), job110009859426, sucesso. Logs lidos:367 grupos distintos, todos code0 na ordem exata do runner desse commit; PostgreSQL16/43 migrações aditivas,1 356 unitários/138 ficheiros, quatro técnicos e sintaxe695/308/44 aprovados. Restauro128 tabelas/51 ficheiros, linhas/hashes iguais, PASS em2026-09-30T18:39:59Z. Resultados completos na prova477. Última aceitação completa475; não atribuída ao código477. TASK476 permanece na suite368/restauro pendente na última consulta. Exigir CI/restauros476/477 exatos.
+
+Próximo: acompanhar476/477, depois apresentação auth/nav e consumidores programáticos. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público no desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Atualização documental [skip ci]; entradas abaixo históricas.
+
 ## Retoma atual — 30/09/2026, TASK477 / apresentação da inscrição push
 
 TASK477 / C06-015 implementada e validada localmente: 12 entradas/60 variantes PT/EN/FR/ES/DE para botão e estados da inscrição push. Catálogo principal336 intacto. Mudança de idioma repinta apenas folhas próprias; erros do servidor/navegador permanecem literais, mesmo quando iguais a uma mensagem própria. Identidade opaca por WeakMap; ownership libertada se outro produtor substituir o nó/texto. Permissões, sessão, pedidos, payload, opções de inscrição, conflito409, unsubscribe e retirada da inscrição tardia preservados. Não altera cw-push-session nem entrega/privacidade. A inscrição continua a exigir confirmação administrativa de um aviso de teste; não prova entrega real.
