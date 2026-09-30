@@ -426,6 +426,146 @@
   const alertUi = (() => {
     const languages = ['pt', 'en', 'fr', 'es', 'de'];
     const copy = {
+  "roundChip": [
+    "Piscinas do dia",
+    "Today’s pools",
+    "Piscines du jour",
+    "Piscinas del día",
+    "Pools des Tages"
+  ],
+  "roundTitle": [
+    "Lista do dia",
+    "Today’s list",
+    "Liste du jour",
+    "Lista del día",
+    "Tagesliste"
+  ],
+  "roundHint": [
+    "corrigir ou avançar",
+    "correct or continue",
+    "corriger ou continuer",
+    "corregir o continuar",
+    "korrigieren oder fortfahren"
+  ],
+  "roundFilters": [
+    "Estado das piscinas",
+    "Pool status",
+    "État des piscines",
+    "Estado de las piscinas",
+    "Poolstatus"
+  ],
+  "roundTODO": [
+    "Por fazer",
+    "To do",
+    "À faire",
+    "Por hacer",
+    "Offen"
+  ],
+  "roundIN_PROGRESS": [
+    "Em curso",
+    "In progress",
+    "En cours",
+    "En curso",
+    "In Arbeit"
+  ],
+  "roundDONE": [
+    "Concluídas",
+    "Completed",
+    "Terminées",
+    "Completadas",
+    "Erledigt"
+  ],
+  "roundEmpty": [
+    "Sem piscinas neste estado.",
+    "No pools with this status.",
+    "Aucune piscine dans cet état.",
+    "No hay piscinas en este estado.",
+    "Keine Pools mit diesem Status."
+  ],
+  "roundNoVisits": [
+    "Sem visitas",
+    "No visits",
+    "Aucune visite",
+    "Sin visitas",
+    "Keine Besuche"
+  ],
+  "roundNoAssigned": [
+    "Não existem visitas atribuídas neste momento.",
+    "No visits are assigned at the moment.",
+    "Aucune visite n’est attribuée pour le moment.",
+    "No hay visitas asignadas en este momento.",
+    "Derzeit sind keine Besuche zugewiesen."
+  ],
+  "roundFreeAction": [
+    "Atualiza a agenda, abre o calendário ou comunica com o administrador.",
+    "Refresh the schedule, open the calendar or contact the administrator.",
+    "Actualisez le planning, ouvrez le calendrier ou contactez l’administrateur.",
+    "Actualiza la agenda, abre el calendario o contacta con el administrador.",
+    "Terminplan aktualisieren, Kalender öffnen oder die Verwaltung kontaktieren."
+  ],
+  "roundTechnician": [
+    "Técnico",
+    "Technician",
+    "Technicien",
+    "Técnico",
+    "Techniker"
+  ],
+  "roundDoneEdit": [
+    "Feita / pode corrigir",
+    "Completed / can be corrected",
+    "Terminée / correction possible",
+    "Completada / se puede corregir",
+    "Abgeschlossen / Korrektur möglich"
+  ],
+  "roundPending": [
+    "Pendente",
+    "Pending",
+    "En attente",
+    "Pendiente",
+    "Ausstehend"
+  ],
+  "roundPlanned": [
+    "Planeada",
+    "Planned",
+    "Planifiée",
+    "Planificada",
+    "Geplant"
+  ],
+  "roundExtraStatus": [
+    "Extra / {status}",
+    "Extra / {status}",
+    "Supplémentaire / {status}",
+    "Extra / {status}",
+    "Zusatzbesuch / {status}"
+  ],
+  "roundLocation": [
+    "Local: {location}",
+    "Location: {location}",
+    "Lieu : {location}",
+    "Lugar: {location}",
+    "Ort: {location}"
+  ],
+  "roundLocationUnknown": [
+    "Localização por confirmar",
+    "Location to be confirmed",
+    "Lieu à confirmer",
+    "Ubicación por confirmar",
+    "Ort noch zu bestätigen"
+  ],
+  "roundGPS": [
+    "GPS: {latitude}, {longitude}",
+    "GPS: {latitude}, {longitude}",
+    "GPS : {latitude}, {longitude}",
+    "GPS: {latitude}, {longitude}",
+    "GPS: {latitude}, {longitude}"
+  ],
+  "roundGPSMissing": [
+    "GPS por registar",
+    "GPS not recorded",
+    "GPS à enregistrer",
+    "GPS sin registrar",
+    "GPS noch nicht erfasst"
+  ],
   "nowCurrent": [
     "Visita atual",
     "Current visit",
@@ -1421,6 +1561,7 @@
 
   for (const node of document.querySelectorAll('[data-dashboard-copy]')) alertUi.bind(node, alertUi.value(node.dataset.dashboardCopy));
   for (const node of document.querySelectorAll('[data-now-copy]')) alertUi.bind(node, alertUi.value(node.dataset.nowCopy));
+  for (const node of document.querySelectorAll('[data-round-copy]')) alertUi.bind(node, alertUi.value(node.dataset.roundCopy));
 
   let visits = [];
   let routeConfirmedAt = null;
@@ -4024,10 +4165,32 @@
     alertUi.bind(timingLine, elapsedMinutesCopy(visit.startAt || startedAt));
   }
 
+  // Exact protocol codes only; unknown source values remain literal.
+  function roundStatusCopy(status) {
+    const keys = {
+      PLANNED: 'roundPlanned', PENDING: 'roundPending',
+      IN_PROGRESS: 'nowStateIN_PROGRESS', STARTED: 'nowStateIN_PROGRESS', ACTIVE: 'nowStateIN_PROGRESS',
+      ON_ROUTE: 'nowStateTRAVEL', TRAVEL: 'nowStateTRAVEL', EM_TRANSITO: 'nowStateTRAVEL', A_CAMINHO: 'nowStateTRAVEL',
+      INCOMPLETE: 'nowStateINCOMPLETE',
+    };
+    const key = Object.hasOwn(keys, status) ? keys[status] : null;
+    return key ? alertUi.value(key) : (status || alertUi.value('roundPending'));
+  }
+
   function renderList() {
     const list = $("#visitList");
     const segments = $("#poolSegments");
     if (!list) return;
+    alertUi.clearTree(list);
+    const entries = [];
+    function leaf(entry, tag = 'span', className = '') {
+      const key = entries.push(entry) - 1;
+      return `<${tag} class="${className}" data-round-value="${key}">${esc(alertUi.format(entry))}</${tag}>`;
+    }
+    function paintList(html) {
+      list.innerHTML = html;
+      for (const node of list.querySelectorAll('[data-round-value]')) alertUi.bind(node, entries[Number(node.dataset.roundValue)]);
+    }
 
     if (segments) {
       segments.querySelectorAll("[data-pool-filter]").forEach((button) => {
@@ -4036,16 +4199,16 @@
     }
 
     if (!visits.length) {
-      list.innerHTML = `
+      paintList(`
         <div class="visit">
           <div class="visit-top">
-            <b>Hoje está livre</b>
-            <span class="chip">Sem visitas</span>
+            ${leaf(alertUi.value('nowFree'), 'b')}
+            ${leaf(alertUi.value('roundNoVisits'), 'span', 'chip')}
           </div>
-          <span>Não existem visitas atribuídas neste momento.</span>
-          <div class="visit-state">Atualiza a agenda, abre o calendário ou comunica com o administrador.</div>
+          ${leaf(alertUi.value('roundNoAssigned'))}
+          ${leaf(alertUi.value('roundFreeAction'), 'div', 'visit-state')}
         </div>
-      `;
+      `);
       return;
     }
 
@@ -4062,56 +4225,50 @@
     });
 
     const groupOrder = activePoolFilter === "ALL" ? ["TODO", "IN_PROGRESS", "DONE"] : [activePoolFilter];
-    const groupTitle = {
-      TODO: "Por fazer",
-      IN_PROGRESS: "Em curso",
-      DONE: "Concluídas",
-    };
-
     const html = groupOrder.map((groupKey) => {
       const rows = grouped[groupKey] || [];
       if (!rows.length) {
         return `
           <div class="visit-group">
-            <div class="visit-group-title">${groupTitle[groupKey]}</div>
-            <div class="empty">Sem piscinas neste estado.</div>
+            ${leaf(alertUi.value('round' + groupKey), 'div', 'visit-group-title')}
+            ${leaf(alertUi.value('roundEmpty'), 'div', 'empty')}
           </div>
         `;
       }
 
       const rowsHtml = rows.map(({ visit, i, code }) => {
-      const location = visitLocation(visit);
-      const done = isVisitDone(visit);
-      const status = !isRegularVisit(visit) ? `Extra / ${isVisitDone(visit) ? 'Concluída' : visit.status || 'Pendente'}` : done ? "Feita / pode corrigir" : (visit.status || "Pendente");
-      const techName = visit?.technician?.name || activeTechnician?.name || "Técnico";
-      const taskType = pendingProblems.length ? "Reparação" : "Manutenção";
-      const stateLabel = POOL_STATE[code] || POOL_STATE.TODO;
-      return `
-      <button class="visit ${i === index ? "active" : ""} ${done ? "done" : ""}" type="button" data-visit-index="${i}">
-        <div class="visit-top">
-          <b>${esc(visit.pool?.name || "Piscina")}</b>
-          <span class="chip">${esc(stateLabel)}</span>
-        </div>
-        <span>${esc(visit.client?.name || "Cliente")}</span>
-        <div class="visit-state">${esc(techName)} · ${esc(elapsedMinutesLabel(visit.startAt))} · ${esc(taskType)} · ${esc(status)}</div>
-        <div class="visit-location">
-          <span>Local: ${esc(location.address || visit.pool?.zone || "Localizacao por confirmar")}</span>
-          <span>${location.lat && location.lng ? `GPS: ${esc(location.lat.toFixed(5))}, ${esc(location.lng.toFixed(5))}` : "GPS por registar"}</span>
-        </div>
-      </button>
-    `;
+        const location = visitLocation(visit);
+        const done = isVisitDone(visit);
+        const status = !isRegularVisit(visit)
+          ? alertUi.value('roundExtraStatus', { status: done ? alertUi.value('nowStateDONE') : roundStatusCopy(visit.status) })
+          : done ? alertUi.value('roundDoneEdit') : roundStatusCopy(visit.status);
+        const techName = visit?.technician?.name || activeTechnician?.name || alertUi.value('roundTechnician');
+        const taskType = alertUi.value(pendingProblems.length ? 'nowRepair' : 'nowMaintenance');
+        return `
+          <button class="visit ${i === index ? "active" : ""} ${done ? "done" : ""}" type="button" data-visit-index="${i}">
+            <div class="visit-top">
+              ${leaf(visit.pool?.name || alertUi.value('sourcePool'), 'b')}
+              ${leaf(alertUi.value('nowState' + code), 'span', 'chip')}
+            </div>
+            ${leaf(visit.client?.name || alertUi.value('sourceClient'))}
+            ${leaf(alertUi.join([techName, elapsedMinutesCopy(visit.startAt), taskType, status], ' · '), 'div', 'visit-state')}
+            <div class="visit-location">
+              ${leaf(alertUi.value('roundLocation', { location: location.address || visit.pool?.zone || alertUi.value('roundLocationUnknown') }))}
+              ${leaf(location.lat && location.lng ? alertUi.value('roundGPS', { latitude: location.lat.toFixed(5), longitude: location.lng.toFixed(5) }) : alertUi.value('roundGPSMissing'))}
+            </div>
+          </button>
+        `;
       }).join("");
 
       return `
         <div class="visit-group">
-          <div class="visit-group-title">${groupTitle[groupKey]}</div>
+          ${leaf(alertUi.value('round' + groupKey), 'div', 'visit-group-title')}
           ${rowsHtml}
         </div>
       `;
     }).join("");
 
-    list.innerHTML = html;
-
+    paintList(html);
     list.querySelectorAll("[data-visit-index]").forEach((button) => {
       button.addEventListener("click", () => selectVisit(Number(button.dataset.visitIndex)));
     });
@@ -4625,6 +4782,8 @@
     markFieldSection("#accessCard", "field-panel-agora", "Acesso", "chaves e codigos");
     markFieldSection("#routeCard", "field-panel-hoje", "Rota", "proximo local");
     markFieldSection("#visitList", "field-panel-hoje", "Lista do dia", "corrigir ou avancar");
+    alertUi.bind($('#dayVisitsCard .field-tab-title h2'), alertUi.value('roundTitle'));
+    alertUi.bind($('#dayVisitsCard .field-tab-title span'), alertUi.value('roundHint'));
     markFieldSection(".crew-card", "field-panel-docs", "Tecnico", "viatura e documentos");
     markFieldSection("#transportGuideBox", "field-panel-docs", "Documentos", "AT, obra e seguro");
     markFieldSection("#waterReminderList", "field-panel-more", "Agua aberta", "alarme obrigatorio");

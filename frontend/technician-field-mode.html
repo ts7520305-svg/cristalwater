@@ -745,6 +745,13 @@
       letter-spacing: 0.01em;
     }
 
+    #dayVisitsCard .pool-segments button {
+      min-width: 0;
+      padding: 8px 4px;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
     .visit-group {
       display: grid;
       gap: var(--cw-space-1);
@@ -1592,12 +1599,13 @@
       <div class="actions"><button class="big ghost" id="syncPhotosBtn" type="button" data-cw-photo-text="sync">Sincronizar fotografias</button></div>
     </section>
 
-    <section class="card field-panel field-panel-hoje" id="dayVisitsCard">
-      <span class="chip">Piscinas do dia</span>
-      <div class="pool-segments" id="poolSegments" role="tablist" aria-label="Estado das piscinas">
-        <button type="button" class="active" data-pool-filter="TODO">Por fazer</button>
-        <button type="button" data-pool-filter="IN_PROGRESS">Em curso</button>
-        <button type="button" data-pool-filter="DONE">Concluídas</button>
+    <section class="card field-panel field-panel-hoje" id="dayVisitsCard" data-cw-no-i18n>
+      <span class="chip" data-round-copy="roundChip">Piscinas do dia</span>
+      <span id="poolSegmentsLabel" data-round-copy="roundFilters" hidden>Estado das piscinas</span>
+      <div class="pool-segments" id="poolSegments" role="tablist" aria-labelledby="poolSegmentsLabel">
+        <button type="button" class="active" data-pool-filter="TODO" data-round-copy="roundTODO">Por fazer</button>
+        <button type="button" data-pool-filter="IN_PROGRESS" data-round-copy="roundIN_PROGRESS">Em curso</button>
+        <button type="button" data-pool-filter="DONE" data-round-copy="roundDONE">Concluídas</button>
       </div>
       <div id="visitList" style="margin-top:10px"></div>
     </section>

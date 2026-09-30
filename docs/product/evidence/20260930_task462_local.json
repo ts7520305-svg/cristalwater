@@ -1,0 +1,323 @@
+{
+  "task": 462,
+  "date": "2026-09-30",
+  "base": "44dd4262888329cc4d197b35ab96fce5c9846a1c",
+  "item": "C06-012",
+  "scope": {
+    "productSources": 3,
+    "batchFiles": 10,
+    "description": "Day-round list, filters, group headings, rows, known protocol status labels, locations/GPS and empty content. Surrounding visit metadata/actions and shared UI remain pending."
+  },
+  "catalogue": {
+    "entries": 20,
+    "texts": 100,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "reused": "Existing current-visit operational states, repair/maintenance, elapsed time, free-day title and pool/client fallbacks.",
+    "privatePresentation": "The existing private alertUi owns immutable text descriptions; locale changes repaint the same leaf nodes without rendering the list or calling producers.",
+    "exactProtocolCodes": [
+      "PLANNED",
+      "PENDING",
+      "IN_PROGRESS",
+      "STARTED",
+      "ACTIVE",
+      "ON_ROUTE",
+      "TRAVEL",
+      "EM_TRANSITO",
+      "A_CAMINHO",
+      "INCOMPLETE"
+    ],
+    "unknownStatuses": "Literal original values; no normalization or writes."
+  },
+  "negative": {
+    "run": "qa-task462/run-1790760787234",
+    "script": "test-field-round-list-languages.js",
+    "code": 1,
+    "ms": 1459,
+    "actual": "Por fazer",
+    "expected": "To do",
+    "description": "The real language selector left the round filter in Portuguese."
+  },
+  "layoutCorrection": {
+    "negativeRun": "qa-task462/run-1790760989171",
+    "measurements": [
+      {
+        "viewport": 320,
+        "language": "pt",
+        "text": "Concluídas",
+        "buttonClientWidth": 80,
+        "scrollWidth": 91
+      },
+      {
+        "viewport": 390,
+        "language": "es",
+        "text": "Completadas",
+        "buttonClientWidth": 99,
+        "scrollWidth": 105
+      }
+    ],
+    "fix": "Scoped filter padding, min-width and wrapping in dayVisitsCard; concise German filter labels. No shared layout changes."
+  },
+  "integration": [
+    {
+      "script": "test-field-round-list-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 20891,
+      "timedOut": false,
+      "evidence": "qa-task462/run-1790761632954"
+    },
+    {
+      "script": "test-field-round-navigation-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 20924,
+      "timedOut": false,
+      "evidence": "qa-task462/run-1790761524671"
+    },
+    {
+      "script": "test-field-modern-route-recovery.js",
+      "code": 0,
+      "signal": null,
+      "ms": 5081,
+      "timedOut": false,
+      "evidence": "qa-task462/run-1790761131200"
+    },
+    {
+      "script": "test-field-extra-reminders.js",
+      "code": 0,
+      "signal": null,
+      "ms": 15700,
+      "timedOut": false,
+      "evidence": "qa-task462/run-1790761131200"
+    },
+    {
+      "script": "test-field-modern-visit-drafts.js",
+      "code": 0,
+      "signal": null,
+      "ms": 18960,
+      "timedOut": false,
+      "evidence": "qa-task462/run-1790761131200"
+    },
+    {
+      "script": "test-field-browser.js",
+      "code": 0,
+      "signal": null,
+      "ms": 930,
+      "timedOut": false,
+      "evidence": "qa-task462/run-1790761131200"
+    }
+  ],
+  "withCapture": {
+    "script": "test-field-round-list-languages.js",
+    "code": 0,
+    "signal": null,
+    "ms": 23682,
+    "timedOut": false,
+    "evidence": "qa-task462/run-1790761043231"
+  },
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 39531,
+      "log": "/workspace/scratch/b364087eee9d/qa-task462/gate-syntax.log"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 6786,
+      "log": "/workspace/scratch/b364087eee9d/qa-task462/gate-unit.log"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 666,
+      "log": "/workspace/scratch/b364087eee9d/qa-task462/gate-technician.log"
+    }
+  ],
+  "unitTotals": {
+    "files": 138,
+    "tests": 1356
+  },
+  "technicianTotals": 4,
+  "syntaxTotals": {
+    "backend": 695,
+    "frontend": 308,
+    "inline": 44
+  },
+  "coverage": [
+    "All eight operational states, all three filters, group titles, row state/technician/task/time, known status labels and location/GPS content through the real five-language selector. Initial320/390/1440 matrix, critical/completed/fallback and empty-filter cases at320.",
+    "Same actual button/leaf nodes and focus after each locale, exact row index/order/classes, active filter, typed visit, controls, inputs, tokens, own raw local data, complete outbox and cw:tech-field session navigation records. Only language-preference PUTs allowed during each matrix; producers and SQL unchanged.",
+    "REGULAR/EXTRA share the same number and have different pools. Real list clicks preserve their identity and the regular draft; an actual EXTRA offline water reminder appears only on the EXTRA row and moves it to the existing in-progress group. Original reminder and route-cache bytes are restored before fresh navigation.",
+    "Known planned/start/travel/incomplete/completed states; regular completion through endAt retains the correction label. Unknown HTML/placeholder-like status remains literal. Literal pool/client/technician/address/zone, five-decimal coordinates, missing GPS, empty names/status/location, invalid start time and65 elapsed minutes.",
+    "Source order remains the existing schedule order. Task type still uses the existing selected-draft rule for every row; elapsed time still uses each visit startAt. No changes to classification, grouping, rounding, address precedence, GPS validation, selection or physical confirmations.",
+    "Empty route content translates while the list remains hidden by the existing free-mode policy. Empty visible filter groups remain usable. Persisted DONE filter survives an actual offline reload; subsequent row clicks retain typed navigation and the original draft.",
+    "Existing modern-route recovery verifies account/day privacy, cache corruption and stale replies. Existing extra-reminder, modern-draft and browser-component regressions pass. New profiles retain9s locator/110s scenario/120s runner deadlines; no page errors or operational POST/PATCH/DELETE calls."
+  ],
+  "qaCorrections": [
+    "Fixture expectations follow the actual API ordering (scheduled EXTRA before the late planned REGULAR) and preserve the server-provided literal zone placeholder -; truly absent location is tested separately in the valid offline fixture.",
+    "Navigation-state byte comparison covers cw:tech-field session records. The generic page-context snapshot legitimately stores the selected language and scroll position, so it is not treated as unchanged locale-independent data.",
+    "An empty route hides dayVisitsCard by existing policy. Its translations and hidden state are checked without clicking a hidden filter or claiming visible empty-card layout coverage.",
+    "Readiness now also waits for the existing draft save/check phase to settle, alongside document/photo readiness, before assertions and subsequent selection. This follows the existing draft regression and retains the original timeout budgets."
+  ],
+  "preservation": {
+    "base": "44dd4262888329cc4d197b35ab96fce5c9846a1c",
+    "unchangedFunctionSha256": {
+      "visitHasWaterOpen": "6bf6a77d4a2427c79c2293da4743fcd1ee7197f36261193f75d65fa05f10fd1f",
+      "visitHasCriticalProblem": "f37a1d75de9869015e08a053813f544b87a4cff0cab844f11d9463becbfe7e96",
+      "visitHasMaterialBlock": "58b8036d869fe060577663e1cadf1907120896d561aee1efdbd3e4859fe472b0",
+      "operationalStateCode": "641a4412d5032cca2b85e93ea881e8b241068dc6e78e68bdc8d691be2d9acbe5",
+      "elapsedMinutesLabel": "df46ca146984208a769e4fbd66baf63940a1d90547313f14638266acb43572d5",
+      "elapsedMinutesCopy": "a890ac56857f5d0f4734e57ccee36da8e27b5c66bea80c201424503e933838e8",
+      "elapsedSinceLabel": "fdeea2ca4b2cef15fbdf49cd8bed6e0f852f9cc1f20934fa0803c5ec4f2667c8",
+      "isVisitDone": "8a6af4ee62a327e7aceb31a5947f6f59b957c22718ffbf12f9768568c98930c0",
+      "isRegularVisit": "e390a4f0b9cac9bd908f06d6cbba4ba638550b39da0e8da0da6802f1591b03c9",
+      "normalizePoolFilter": "0b01ab242458b1eae80a82738344caa3358594b94888b41d9b9b77a37496e584",
+      "persistFieldUiState": "bdc31c38d2c546bdaa6d70d2b7f0a44d042a014022375a1f6d655e1187411fdd",
+      "writeLastExplicitFilter": "8d0fc8e8c9f5df9628abf59667347fff8c59382b9339bda441e1d5f256f11032",
+      "applyVisitSelectionFromId": "b604828a897095864ce5af42d85138fd5c36a90cb2147abdce74a736b44c6ff6",
+      "loadCurrentDraft": "91cffd9831ff43bdf55c61ff43c3538dea3d311a2e60d868dee2b8de89b0fb05",
+      "visitLocation": "5d527a41c9e32f0c4fbc2d2abcbb718d9376ab0b9da818e1f94e242f17de5abc",
+      "syncTechnicianContextFromVisit": "687fefc682a5e2d07938325f9380b2670666b0f6469a2fd3635cf954989659a9",
+      "poolFilterGroup": "d5dc61b28111f3efc29e33bcc0d6df3776d0f19ac25d1191633d23a15892b14b",
+      "renderNowBoard": "c63be02231a13d02e0563242bb86e4592ebe06c766230c9b79e4b1137c500483",
+      "selectVisit": "fce7dcb8e18db96ad97d71ad945cce2970674a01340a745631bc40c0927a4e3c",
+      "load": "7e0fff5fedfb06cf74d689ddb1c8c859671d5b006bbc82c66baa278d55faf620",
+      "switchFieldTab": "984c68f994cfaa29ead6878b4fa5d40e8962dbc17d2563795562a1214c2fadf5"
+    },
+    "waterPresentationUnchanged": true,
+    "previousCatalogueEntries": 137,
+    "previousCataloguePreserved": true,
+    "addedCatalogueEntries": 20,
+    "previousGroups": 353,
+    "newGroups": 355,
+    "priorExactOrderPreserved": true
+  },
+  "sourceSha256": {
+    "frontend/technician-field-mode.js": "3b9c17630d4350a7c5d25e40033bba4c28177dacb634d69f2a880c9912fb6984",
+    "frontend/technician-field-mode.html": "d6c42a4c15349c79caed2a1f8e87340846c60745a290a229daeda4c762fd0b5b",
+    "frontend/sw.js": "bc9eb42bb388f13cc5c91edc7de93f3fb3d216c4160699aca376062a6c1ccc05",
+    "scripts/test-field-round-list-languages.js": "315c08800d619563e37793ea25d7812bc4f0f522a8636608f03b653653ee04c5",
+    "scripts/test-field-round-navigation-languages.js": "7c071237c680acc6dc571e4a1648b07ca4652fce0265ab020c0001303e47b9a7",
+    "scripts/test-field-suite.js": "c93e052384a7f854e024f2979c91c0dcf6d75a2a6a6860819cb52dd6dba829bf"
+  },
+  "visual": {
+    "capture": "qa-task462/round-list-de-320.png",
+    "sha256": "485d2948fd1bf4a4e9080bd2b9de31d76adce8a1cbe36ea7d735ec2b09c72332",
+    "viewport": {
+      "width": 320,
+      "height": 1400
+    },
+    "target": "dayVisitsCard",
+    "review": "German320px screenshot inspected: three filters fit; rows, states, raw names/HTML-like text and coordinates remain legible; active selection is visible."
+  },
+  "environment": {
+    "database": "isolated PGlite",
+    "browser": "Chromium153",
+    "externalEffects": "disabled",
+    "prismaCheckpointDisabled": true
+  },
+  "nativeAccepted": [
+    {
+      "task": 460,
+      "code": "4389454f8e7e5bfa34f2ea3ef352c792942f8daf",
+      "run": 36688218583,
+      "job": 109798932582,
+      "conclusion": "success",
+      "groupCount": 351,
+      "postgres16": true,
+      "sourceHashesVerified": {
+        "frontend/technician-field-mode.js": "58827a5f706d82c542004c6d60ea994f8c992c140977e8a1af51b6766156aa09",
+        "frontend/technician-field-mode.html": "e0396199e6c03c62a143777e1eb96aea57c5f467d2d823ee97f10efcdf6f34cf",
+        "frontend/sw.js": "44a838b641c2c449231a653c608060fa4a81959470bfbb76320cb131f6c7d831",
+        "scripts/test-field-dashboard-languages.js": "784dc27ccba11cd57141f2fee75dec528ac8714569e625bfd0429b87cb188ef8",
+        "scripts/test-field-suite.js": "6fbe5b93153f932c3248f84b53ec289f4d9d817bc9940e374904a4e426cdd12d"
+      },
+      "gitBlobsVerified": {
+        "frontend/technician-field-mode.js": "5c299be3e9db0b3427fe0b489902f867d9bf476e",
+        "frontend/technician-field-mode.html": "4b22f50be4f9c064a5afb3d21432d3901aff49be",
+        "frontend/sw.js": "22815ba4efadc064f294f30b168088b9b718b76e",
+        "scripts/test-field-dashboard-languages.js": "adf3eaea0532adf1bf1b76f03b74ff9a05af4883",
+        "scripts/test-field-suite.js": "89d2b44b0017dbb943e39febb98f8913a57c5510"
+      },
+      "suiteSha256": "6fbe5b93153f932c3248f84b53ec289f4d9d817bc9940e374904a4e426cdd12d",
+      "upgrade": [
+        {
+          "name": "Verify additive upgrade from the previous schema",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        }
+      ],
+      "restore": {
+        "tables": 128,
+        "files": 51,
+        "databaseRowsAndFileHashesMatch": true
+      },
+      "groupsEvidenceCount": 351,
+      "groupEvidenceSha256": "d1b1cd0067e967e3d6e0876f8188ab513b2dee9e5e91b1c73f189f392d1f6e58"
+    }
+  ],
+  "historicalFailure": {
+    "task": 454,
+    "run": 36674413317,
+    "job": 109756159173,
+    "groupsPassed": 345,
+    "groupsTotal": 346,
+    "restore": "not_run",
+    "fix": 458,
+    "fixAcceptedInTask": 460
+  },
+  "pendingNative": [
+    {
+      "task": 461,
+      "code": "143060d8a3234c3bc008546f4867a0d6b545fa7a",
+      "run": 36694971218,
+      "job": 109820630724,
+      "status": "in_progress",
+      "successfulInitialSteps": 10,
+      "fullSuiteGroups": 353,
+      "restore": "pending"
+    },
+    {
+      "task": 462,
+      "status": "not_yet_published",
+      "fullSuiteGroups": 355,
+      "restore": "pending"
+    }
+  ],
+  "limits": {
+    "C06": "open",
+    "C08": "open",
+    "C10": "open",
+    "completion": {
+      "total": 32,
+      "notStarted": 26,
+      "inProgress": 1,
+      "done": 5
+    },
+    "publicDuringDevelopment": true,
+    "privateBeforeCloseC32": true,
+    "merge": false,
+    "deploy": false,
+    "externalContacts": false,
+    "annualContract": "deferred"
+  },
+  "additionalNavigationPass": {
+    "script": "test-field-round-navigation-languages.js",
+    "code": 0,
+    "signal": null,
+    "ms": 23146,
+    "timedOut": false,
+    "evidence": "qa-task462/run-1790761392578"
+  }
+}
