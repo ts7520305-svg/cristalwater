@@ -399,13 +399,31 @@
     }
   ],
   "limits": [
-    "Native PostgreSQL16/additive upgrade/exact351-group suite/database and uploaded-file restore at TASK460 code remain required. Local PGlite success is separate.",
+    "TASK460 is published at the validated tree. Native PostgreSQL16/additive upgrade/exact351-group suite/database and uploaded-file restore at this code remain pending. Local PGlite results are separate.",
     "The live dashboard function is covered; unused updateFieldDashboardLegacy remains unchanged. Visit state/responsibility/time, route-list presentation, crew/document details and shared push/auth/navigation remain next. Date/C10 semantics are unchanged.",
     "No full-app completion claim: C06/C08/C10 open;32 tasks=26 not started/one active/five complete. Public during development, private before completion/C32. Only work/field-readiness-20260915-simulation; no merge/deploy/external messages. Annual maintenance contract deferred."
   ],
   "publication": {
-    "status": "local_validated",
+    "status": "published_ci_in_progress",
+    "date": "2026-09-30",
     "branch": "work/field-readiness-20260915-simulation",
+    "codeCommit": "4389454f8e7e5bfa34f2ea3ef352c792942f8daf",
+    "tree": "289ab1a81b1f941fff1bfcf6f0f0917c26451fbe",
+    "remoteTreeEqualsValidatedTree": true,
+    "checkoutAligned": true,
+    "originalLocalCommit": "bcf5c391e15532c17675c005536c935b90aeb58f",
+    "originalHistoryBranch": "work/local-task460-20260930",
+    "ci": {
+      "run": 36688218583,
+      "job": 109798932582,
+      "head": "4389454f8e7e5bfa34f2ea3ef352c792942f8daf",
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 6,
+      "currentStep": "Verify additive upgrade from the previous schema",
+      "fullSuiteGroups": 351,
+      "restore": "pending"
+    },
     "merged": false,
     "deployed": false
   }

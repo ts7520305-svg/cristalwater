@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 30/09/2026, TASK460 / CI em execução
+
+TASK460 publicada na branch `work/field-readiness-20260915-simulation`: código `4389454f8e7e5bfa34f2ea3ef352c792942f8daf`, árvore `289ab1a81b1f941fff1bfcf6f0f0917c26451fbe`, igual à validada. Checkout alinhado e histórico local conservado em `work/local-task460-20260930`. [CI36688218583](https://github.com/ts7520305-svg/cristalwater/actions/runs/36688218583), job109798932582, no commit exato: 6 etapas iniciais aprovadas; `Verify additive upgrade from the previous schema` em execução na consulta. Dashboard com55 entradas/275 textos, causa P0 correta, atualização imediata dos lembretes e cartões móveis legíveis. Seis integrações,1 356 unitários/quatro técnicos/sintaxe aprovados. Cache242/runner351. [Prova460](evidence/20260930_task460_local.json).
+
+TASK457/458 aceites349/349 grupos em ambos/PostgreSQL16/upgrade/restauro128 tabelas51 ficheiros/linhas e hashes iguais. Correção documental458 revalidada; falha histórica454 preservada345/346/restauro não executado. CI459 na suite350; exigir gates/restauros459–460. Próximo funcional: estado/responsável/tempo da visita atual e lista da ronda; equipa/documentos e push/auth/nav pendentes. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público durante desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Atualização documental `[skip ci]` conserva o código. Entradas abaixo históricas.
+
 ## Retoma atual — 30/09/2026, TASK460 local validada / dashboard do técnico
 
 **TASK460 / C06-012:**55 entradas/275 textos PT/EN/FR/ES/DE para cabeçalho, progresso, documentos, envios, ações e nome acessível do resumo. Apresentador privado existente reutilizado; nomes/dados/contagens/identidades e mensagens históricas preservados. Datas/C10 intactos. [Prova460](evidence/20260930_task460_local.json).
