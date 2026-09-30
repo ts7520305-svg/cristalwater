@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 30/09/2026, TASK463 / CI em execução
+
+TASK463 publicada na branch `work/field-readiness-20260915-simulation`: código `e62427d9bea2a1ff6d381d6cb10af2cc8bfdb226`, árvore `7a54ce3e911f13d0a516f9d20e51c833603921ef`, igual à validada. Checkout alinhado e histórico local conservado em `work/local-task463-20260930`. [CI36701344336](https://github.com/ts7520305-svg/cristalwater/actions/runs/36701344336), job109841249507, no commit exato: 4 etapas iniciais aprovadas; `Run npm ci` em execução na consulta. Apresentação da visita/ações com31 entradas/155 textos, atalhos móveis corrigidos e dados/regras conservados. Seis integrações,1 356 unitários/quatro técnicos/sintaxe aprovados; handlers operacionais e23 funções byte a byte. Cache245/runner357. [Prova463](evidence/20260930_task463_local.json)
+
+Gates461/462 nas suites353/355, após dez etapas aprovadas; exigir gates/restauros461–463. TASK460 já aceite351/351/PostgreSQL16/upgrade/restauro128 tabelas51 ficheiros/linhas e hashes iguais; TASK457–459 aceites, falha histórica454 preservada e correção458 revalidada. Próximo funcional: mensagens e bloqueios de início/conclusão; equipa/documentos e push/auth/nav pendentes. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público durante desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Atualização documental `[skip ci]` conserva o código. Entradas abaixo históricas.
+
 ## Retoma atual — 30/09/2026, TASK463 local validada / apresentação e ações da visita
 
 **TASK463 / C06-012:** apresentação da visita atual com31 entradas/155 textos PT/EN/FR/ES/DE. Título/metadados, progresso da ronda, rótulos e nomes acessíveis das ações, atalhos, instruções EXTRA, avisos de seleção concluída e falha de carregamento. Nomes, estados desconhecidos e erros externos permanecem literais. [Prova463](evidence/20260930_task463_local.json)

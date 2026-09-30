@@ -282,9 +282,14 @@
     },
     {
       "task": 463,
-      "status": "not_yet_published",
+      "status": "in_progress",
       "fullSuiteGroups": 357,
-      "restore": "pending"
+      "restore": "pending",
+      "code": "e62427d9bea2a1ff6d381d6cb10af2cc8bfdb226",
+      "run": 36701344336,
+      "job": 109841249507,
+      "successfulInitialSteps": 4,
+      "currentStep": "Run npm ci"
     }
   ],
   "limits": {
@@ -304,5 +309,24 @@
     "externalContacts": false,
     "annualContract": "deferred",
     "next": "Start/completion feedback and guards; remaining crew/documents and shared push/auth/navigation."
+  },
+  "publication": {
+    "task": 463,
+    "code": "e62427d9bea2a1ff6d381d6cb10af2cc8bfdb226",
+    "tree": "7a54ce3e911f13d0a516f9d20e51c833603921ef",
+    "branch": "work/field-readiness-20260915-simulation",
+    "run": 36701344336,
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36701344336",
+    "job": 109841249507,
+    "status": "in_progress",
+    "successfulInitialSteps": 4,
+    "currentStep": "Run npm ci",
+    "defaultBranch": "feature/technicians-v25",
+    "defaultSha": "cc73bba77368a605fd7710b31c98cb0c680915ac",
+    "publicDuringDevelopment": true,
+    "treeMatchesValidatedLocalTree": true,
+    "merge": false,
+    "deploy": false,
+    "externalContacts": false
   }
 }
