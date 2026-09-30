@@ -426,6 +426,41 @@
   const alertUi = (() => {
     const languages = ['pt', 'en', 'fr', 'es', 'de'];
     const copy = {
+  "productLineLimit": [
+    "Registe no máximo 50 linhas de produtos por visita.",
+    "Record no more than 50 product lines per visit.",
+    "Enregistrez au maximum 50 lignes de produits par visite.",
+    "Registra como máximo 50 líneas de productos por visita.",
+    "Erfassen Sie höchstens 50 Produktzeilen pro Besuch."
+  ],
+  "productGuideMissing": [
+    "Sem guia de obra ativa para deduzir produtos.",
+    "There is no active work guide to deduct products from.",
+    "Aucun bon de travail actif ne permet de déduire les produits.",
+    "No hay una guía de trabajo activa de la que descontar productos.",
+    "Es gibt keinen aktiven Arbeitsbeleg, von dem Produkte abgebucht werden können."
+  ],
+  "productReselect": [
+    "Selecione novamente cada produto na guia para confirmar a linha e a unidade. O rascunho foi conservado.",
+    "Select each product again in the guide to confirm the line and unit. The draft has been preserved.",
+    "Sélectionnez de nouveau chaque produit dans le bon pour confirmer la ligne et l’unité. Le brouillon a été conservé.",
+    "Selecciona de nuevo cada producto en la guía para confirmar la línea y la unidad. El borrador se ha conservado.",
+    "Wählen Sie jedes Produkt im Beleg erneut aus, um Zeile und Einheit zu bestätigen. Der Entwurf wurde aufbewahrt."
+  ],
+  "productLineChanged": [
+    "A linha do produto mudou ou já não pertence à guia atual. Atualize e reveja a seleção.",
+    "The product line has changed or no longer belongs to the current guide. Refresh and review the selection.",
+    "La ligne du produit a changé ou n’appartient plus au bon actuel. Actualisez et vérifiez la sélection.",
+    "La línea del producto ha cambiado o ya no pertenece a la guía actual. Actualiza y revisa la selección.",
+    "Die Produktzeile wurde geändert oder gehört nicht mehr zum aktuellen Beleg. Aktualisieren und prüfen Sie die Auswahl."
+  ],
+  "productStockInsufficient": [
+    "Stock insuficiente para {name}. Disponível: {quantity} {unit}.",
+    "Insufficient stock for {name}. Available: {quantity} {unit}.",
+    "Stock insuffisant pour {name}. Disponible : {quantity} {unit}.",
+    "Existencias insuficientes de {name}. Disponible: {quantity} {unit}.",
+    "Unzureichender Bestand für {name}. Verfügbar: {quantity} {unit}."
+  ],
   "actionSessionChanged": [
     "A sessão mudou. Reabra a página com a conta original.",
     "The session has changed. Reopen the page with the original account.",
@@ -1841,14 +1876,23 @@
     "Besuch öffnen"
   ]
 };
-    const specs = new WeakSet(), bindings = new Map(), reminderSpecs = new WeakMap(), errorCopies = new WeakMap();
+    const specs = new WeakSet(), bindings = new Map(), reminderSpecs = new WeakMap(), errorCopies = new WeakMap(), delegatedCopies = new WeakMap();
     function value(key, params = {}) { const entry = Object.freeze({ key, params: Object.freeze({ ...params }) }); specs.add(entry); return entry; }
     function join(parts, separator = ' | ') { const entry = Object.freeze({ parts: Object.freeze([...parts]), separator }); specs.add(entry); return entry; }
     function reminder(value) { const entry = Object.freeze({}); reminderSpecs.set(entry, value); return entry; }
     // Only errors created here own translated presentation; original Error.message stays literal.
     function error(message, entry) { const failure = Error(message); errorCopies.set(failure, entry); return failure; }
-    function failure(error, fallback = '') { return errorCopies.get(error) || error?.message || fallback; }
+    function delegated(source, entry) { const value = Object.freeze({}); delegatedCopies.set(value, { source, entry }); return value; }
+    function draftStatus(node) { const source = window.CWFieldVisitDrafts.presentation; return delegated(source, source.copy(node)); }
+    function failure(error, fallback = '') {
+      if (errorCopies.has(error)) return errorCopies.get(error);
+      for (const source of [window.CWFieldVisitDrafts?.presentation, window.CWVisitProductIdentity?.presentation]) {
+        const entry = source?.error(error); if (entry) return delegated(source, entry);
+      }
+      return error?.message || fallback;
+    }
     function format(entry, language = document.documentElement.lang || 'pt') {
+      const delegated = delegatedCopies.get(entry); if (delegated) return delegated.source.format(delegated.entry, language);
       if (reminderSpecs.has(entry)) return window.CWFieldReminders.presentation.format(reminderSpecs.get(entry), language);
       if (!specs.has(entry)) return window.CWFieldAlertJournal?.presentation?.format(entry, language) ?? String(entry ?? '');
       if (entry.parts) return entry.parts.map(part => format(part, language)).join(entry.separator);
@@ -1874,7 +1918,7 @@
     window.addEventListener('cw-language-change', paint);
     let lastLanguage = document.documentElement.lang;
     new MutationObserver(() => { const language = document.documentElement.lang; if (language !== lastLanguage) { lastLanguage = language; paint(); } }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
-    return { value, join, reminder, error, failure, format, bind, clear, clearTree, notify };
+    return { value, join, reminder, error, failure, draftStatus, format, bind, clear, clearTree, notify };
   })();
 
   for (const node of document.querySelectorAll('[data-dashboard-copy]')) alertUi.bind(node, alertUi.value(node.dataset.dashboardCopy));
@@ -3676,7 +3720,7 @@
       else {
         const stock = (activeWorkStock || []).find(item => item.id === Number(value));
         try { Object.assign(row, window.CWVisitProductIdentity.fromItem(stock, activeWorkGuide?.id)); }
-        catch (error) { toast(error.message); return; }
+        catch (error) { alertUi.notify(alertUi.failure(error)); return; }
       }
     } else row[field] = value;
     renderDoseRows();
@@ -3713,21 +3757,21 @@
   }
 
   function normalizedUsedProducts() {
-    if (usedProducts.length > 50) throw Error('Registe no máximo 50 linhas de produtos por visita.');
+    if (usedProducts.length > 50) throw alertUi.error('Registe no máximo 50 linhas de produtos por visita.', alertUi.value('productLineLimit'));
     return usedProducts.map(product => window.CWVisitProductIdentity.payload(product));
   }
 
   async function validateUsedProducts(products) {
     if (!products.length) return;
     if (!activeWorkGuide?.id) await loadGuides(false);
-    if (!activeWorkGuide?.id) throw Error('Sem guia de obra ativa para deduzir produtos.');
+    if (!activeWorkGuide?.id) throw alertUi.error('Sem guia de obra ativa para deduzir produtos.', alertUi.value('productGuideMissing'));
     const totals = new Map();
     for (const product of products) {
-      if (!window.CWVisitProductIdentity.hasIdentity(product)) throw Error('Selecione novamente cada produto na guia para confirmar a linha e a unidade. O rascunho foi conservado.');
+      if (!window.CWVisitProductIdentity.hasIdentity(product)) throw alertUi.error('Selecione novamente cada produto na guia para confirmar a linha e a unidade. O rascunho foi conservado.', alertUi.value('productReselect'));
       const stock = productStockForRow(product);
-      if (!stock || !Number.isFinite(stock.quantity)) throw Error('A linha do produto mudou ou já não pertence à guia atual. Atualize e reveja a seleção.');
+      if (!stock || !Number.isFinite(stock.quantity)) throw alertUi.error('A linha do produto mudou ou já não pertence à guia atual. Atualize e reveja a seleção.', alertUi.value('productLineChanged'));
       const previous = totals.get(stock.id) || [], quantities = [...previous, product.quantity]; totals.set(stock.id, quantities);
-      if (Number(window.CWFieldMaterials.sum(quantities)) > stock.quantity) throw Error(`Stock insuficiente para ${product.name}. Disponível: ${stock.quantity} ${stock.unit}.`);
+      if (Number(window.CWFieldMaterials.sum(quantities)) > stock.quantity) throw alertUi.error(`Stock insuficiente para ${product.name}. Disponível: ${stock.quantity} ${stock.unit}.`, alertUi.value('productStockInsufficient', { name: product.name, quantity: stock.quantity, unit: stock.unit }));
     }
   }
 
@@ -5469,8 +5513,8 @@
       if (draftEntry?.submitting) return;
       await saveCurrentDraft();
       if (!sameFieldSession() || visitKey() !== target) return;
-      if (draftEntry.error || draftEntry.external || Object.keys(draftEntry.conflicts).length || draftEntry.request) { visitDraftManager.paint(draftEntry);toast($('#fieldSaveStatus').textContent);return; }
-      try { readFieldDrafts(); } catch (error) { toast(error.message); return; }
+      if (draftEntry.error || draftEntry.external || Object.keys(draftEntry.conflicts).length || draftEntry.request) { visitDraftManager.paint(draftEntry);alertUi.notify(alertUi.draftStatus($('#fieldSaveStatus')));return; }
+      try { readFieldDrafts(); } catch (error) { alertUi.notify(alertUi.failure(error)); return; }
       docsCompliance = computeDocsCompliance();
       if (!wasDone && !docsCompliance.readyForOperation) {
         switchFieldTab("docs", true);
@@ -5496,7 +5540,7 @@
         if (!wasDone) await validateUsedProducts(productsUsed);
       } catch (validationError) {
         $("#finishBtn").disabled = false;
-        toast(validationError.message);
+        alertUi.notify(alertUi.failure(validationError));
         return;
       }
 

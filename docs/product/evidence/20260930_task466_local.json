@@ -1,0 +1,379 @@
+{
+  "task": 466,
+  "date": "2026-09-30",
+  "base": "205b470e4c5e2d251dbd70e04c30cac9788c1bad",
+  "item": "C06-014",
+  "scope": {
+    "productSources": 4,
+    "batchFiles": 10,
+    "description": "Owned product-validation and draft-blocking feedback in visit handlers. Add private branded presentation to product identity errors and immutable text snapshots to draft errors/status; original messages, rules, stored sources and operational requests remain unchanged."
+  },
+  "catalogue": {
+    "entries": 12,
+    "texts": 60,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "fieldEntries": {
+      "previous": 202,
+      "added": 5,
+      "total": 207
+    },
+    "productIdentityEntries": 7,
+    "existingDraftEntriesReused": 61,
+    "privatePresentation": "Private WeakMap/WeakSet membership identifies owned errors, never text matching. Draft descriptors contain five immutable text snapshots; changed or replaced DOM text becomes literal. Forged descriptors and external errors with identical Portuguese messages remain literal."
+  },
+  "preparation": {
+    "validatedBeforeTask465": true,
+    "originalBase": "891bd02acd94d12aa0a1b5974e53edf783d22ae6",
+    "preservedStash": "12fa22db06683e1215bfc48fa3e1ea1d0f67cbb3",
+    "restoredSixFilesMatchPreparedHashes": true,
+    "interveningProductChanges": 0,
+    "qaDirectoryRenamedFrom": "qa-task465",
+    "note": "Original product-validation runs/gates were captured before the priority native462 test repair. The QA folder was renamed to466; captured run ids/timings retained. Gate paths now point to relocated original logs. Two repaired integrations additionally pass on the restored feature sources."
+  },
+  "negative": {
+    "script": "test-field-visit-validation-languages.js",
+    "code": 1,
+    "signal": null,
+    "ms": 1595,
+    "timedOut": false,
+    "evidence": "qa-task466/run-1790766314262",
+    "actual": "Selecione o produto e confirme a unidade em cada linha, ou remova a linha.",
+    "expected": "Select the product and confirm the unit on each line, or remove the line.",
+    "description": "Actual English selector left the product validation notice in Portuguese before the presentation change."
+  },
+  "integration": [
+    {
+      "script": "test-field-visit-validation-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 19555,
+      "timedOut": false,
+      "evidence": "qa-task466/run-1790766338113"
+    },
+    {
+      "script": "test-field-product-identity-ui.js",
+      "code": 0,
+      "signal": null,
+      "ms": 7856,
+      "timedOut": false,
+      "evidence": "qa-task466/run-1790766407372"
+    },
+    {
+      "script": "test-field-modern-visit-drafts.js",
+      "code": 0,
+      "signal": null,
+      "ms": 21290,
+      "timedOut": false,
+      "evidence": "qa-task466/run-1790766407372"
+    },
+    {
+      "script": "test-field-modern-visit-draft-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 16998,
+      "timedOut": false,
+      "evidence": "qa-task466/run-1790766407372"
+    },
+    {
+      "script": "test-field-visit-completion-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 8104,
+      "timedOut": false,
+      "evidence": "qa-task466/run-1790766407372"
+    },
+    {
+      "script": "test-field-browser.js",
+      "code": 0,
+      "signal": null,
+      "ms": 852,
+      "timedOut": false,
+      "evidence": "qa-task466/run-1790766407372"
+    },
+    {
+      "script": "test-field-photo-panel-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 15594,
+      "timedOut": false,
+      "evidence": "qa-task466/run-1790767387425"
+    },
+    {
+      "script": "test-field-round-navigation-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 20887,
+      "timedOut": false,
+      "evidence": "qa-task466/run-1790767387425"
+    }
+  ],
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 39141,
+      "log": "/workspace/scratch/b364087eee9d/qa-task466/gate-syntax.log"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 7319,
+      "log": "/workspace/scratch/b364087eee9d/qa-task466/gate-unit.log"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 699,
+      "log": "/workspace/scratch/b364087eee9d/qa-task466/gate-technician.log"
+    }
+  ],
+  "unitTotals": {
+    "files": 138,
+    "tests": 1356
+  },
+  "technicianTotals": 4,
+  "syntaxTotals": {
+    "backend": 695,
+    "frontend": 308,
+    "inline": 44
+  },
+  "coverage": [
+    "Real PT/EN/FR/ES/DE selector, initial product selection at320/390/1440 and remaining validation/status notices at320. Toast, notes, water controls and primary buttons remain connected; original handlers/focus, typed visit, navigation state, tokens, field values, stored bytes and full outbox remain equal after every locale change.",
+    "Product inputs retain values; the pre-existing locale listener still calls renderDoseRows and recreates product input nodes. This existing behavior is preserved, not claimed to be node-stable. The new error/status presentation itself formats immutable descriptions without producers, navigation, writes or requests.",
+    "Empty product and quantity are refused; zero, negative, above100000 and Infinity remain invalid. Two6-unit rows for the same10-unit stock item are aggregated and blocked. Missing saved product identity, invalid guide identity, absent stock row, changed literal unit and51-row limit preserve drafts and block submission. Same-number REGULAR/EXTRA drafts remain separate.",
+    "Database rows and operational HTTP writes are unchanged during validation/locale matrices. Literal HTML-like product names, units, notes and errors are rendered as text; no toast HTML execution. Instrumented reminder/journal/document/offline/photo/route producers stay invariant.",
+    "Exact-key quota error with the same text as an owned unreadable-draft error: only the owned not-saved prefix translates; raw detail and original entry.error remain literal. Missing navigator.locks yields owned nested draft feedback in all five languages; restoring locks allows the original retry.",
+    "Explicit race fixture wraps the real manager.save and corrupts only its own storage key immediately after save resolves. The existing second read refuses completion, translating its owned error while retaining corrupt bytes. Healthy original bytes are restored afterwards; no production storage logic changed.",
+    "All seven product error contracts preserve Error.message, JSON and enumerable keys. Private descriptions are frozen; forged descriptors and same-text external errors are not branded. Draft text snapshots stay immutable after DOM text replacement; equal text in a new text node is literal, and raw errors remain unbranded.",
+    "Real offline completions create the original prepared REGULAR/EXTRA requests with equal numeric id but distinct UUIDs and the EXTRA pool/type. Comma quantity0,25 normalizes to0.25 with exact guide/item/name/unit identity. Pending-completion feedback translates without altering full request/hash/payload/bytes. No operational HTTP writes or database mutation.",
+    "Original product-identity UI, modern drafts, draft-language, completion and browser regressions pass. Repaired photograph and round-navigation integrations from TASK465 also pass with the feature restored. One-second session guard remains active; only periodic15/30/60s timers are disabled in the fixture. Scenario110s/locator9s/runner120s budgets retained. Zero page errors.",
+    "Three German320px toast captures visually reviewed for long stock, unreadable-draft and pending-completion feedback. Text fits the existing300px toast with wrapping and literal HTML-like data."
+  ],
+  "reviewedOnly": [
+    "productGuideMissing is source-reviewed because the earlier document guard normally blocks this path. Rare nameUnit/ambiguous/invalidItem errors are covered directly through the original module API contract, not claimed as real UI branches.",
+    "When the original draft state disables finish, tests invoke its existing captured callback to check the secondary guard; the real button remains disabled."
+  ],
+  "preservation": {
+    "base": "205b470e4c5e2d251dbd70e04c30cac9788c1bad",
+    "sources": {
+      "frontend/cw-visit-product-identity.js": {
+        "documentedTransformsReversedExactly": true,
+        "baseSha256": "a862096482aefa0e6ddcf3ec193e39b18aac66b8b343fed16a668aad1cbee2ad"
+      },
+      "frontend/cw-field-visit-drafts.js": {
+        "documentedTransformsReversedExactly": true,
+        "baseSha256": "74f4207ef05c28afe6dee72ad678a1f02c25388c12d52e59dd256e32e465478e"
+      },
+      "frontend/technician-field-mode.js": {
+        "documentedTransformsReversedExactly": true,
+        "baseSha256": "0fbbcd59dba14181a9eb562b6c29e851216711dfca40585b0a22b4a800704e87"
+      },
+      "frontend/sw.js": {
+        "documentedTransformsReversedExactly": true,
+        "baseSha256": "68f3300b2eaf5945d0a2b8698f3f97c30f1420da7db3ebf9f01756bb8120c781"
+      }
+    },
+    "unchangedFunctionSha256": {
+      "visitHasWaterOpen": "6bf6a77d4a2427c79c2293da4743fcd1ee7197f36261193f75d65fa05f10fd1f",
+      "visitHasCriticalProblem": "f37a1d75de9869015e08a053813f544b87a4cff0cab844f11d9463becbfe7e96",
+      "visitHasMaterialBlock": "58b8036d869fe060577663e1cadf1907120896d561aee1efdbd3e4859fe472b0",
+      "operationalStateCode": "641a4412d5032cca2b85e93ea881e8b241068dc6e78e68bdc8d691be2d9acbe5",
+      "elapsedMinutesLabel": "df46ca146984208a769e4fbd66baf63940a1d90547313f14638266acb43572d5",
+      "elapsedMinutesCopy": "a890ac56857f5d0f4734e57ccee36da8e27b5c66bea80c201424503e933838e8",
+      "elapsedSinceLabel": "fdeea2ca4b2cef15fbdf49cd8bed6e0f852f9cc1f20934fa0803c5ec4f2667c8",
+      "isVisitDone": "8a6af4ee62a327e7aceb31a5947f6f59b957c22718ffbf12f9768568c98930c0",
+      "isRegularVisit": "e390a4f0b9cac9bd908f06d6cbba4ba638550b39da0e8da0da6802f1591b03c9",
+      "normalizePoolFilter": "0b01ab242458b1eae80a82738344caa3358594b94888b41d9b9b77a37496e584",
+      "persistFieldUiState": "bdc31c38d2c546bdaa6d70d2b7f0a44d042a014022375a1f6d655e1187411fdd",
+      "writeLastExplicitFilter": "8d0fc8e8c9f5df9628abf59667347fff8c59382b9339bda441e1d5f256f11032",
+      "applyVisitSelectionFromId": "b604828a897095864ce5af42d85138fd5c36a90cb2147abdce74a736b44c6ff6",
+      "loadCurrentDraft": "91cffd9831ff43bdf55c61ff43c3538dea3d311a2e60d868dee2b8de89b0fb05",
+      "visitLocation": "5d527a41c9e32f0c4fbc2d2abcbb718d9376ab0b9da818e1f94e242f17de5abc",
+      "syncTechnicianContextFromVisit": "687fefc682a5e2d07938325f9380b2670666b0f6469a2fd3635cf954989659a9",
+      "poolFilterGroup": "d5dc61b28111f3efc29e33bcc0d6df3776d0f19ac25d1191633d23a15892b14b",
+      "renderNowBoard": "c63be02231a13d02e0563242bb86e4592ebe06c766230c9b79e4b1137c500483",
+      "renderList": "094fdcb010e8631720e90854264b4b63e442e412cfdba8a11c81eca564b86ed5",
+      "switchFieldTab": "984c68f994cfaa29ead6878b4fa5d40e8962dbc17d2563795562a1214c2fadf5",
+      "openAssistVisit": "1e51a1133089112bc202d92ac95a054909a3399b1235b31ab334a6b7fe2c1d2c",
+      "loadAssistOptions": "93e4676ad06eed6fab4b6fdaef40d53e5d02caa68930d8c64ddd00fe47ceb272",
+      "computeDocsCompliance": "14c85f19c3bfb50df113dfb2ebf39245bb0897a6f86aa111737a27309995e780",
+      "persistModernRoute": "65faa325b7f690a0252412123b7af59d0abc4a02218e1d76188cbf0313a4a42d",
+      "mergeVisitSnapshot": "88e14c9c1dd72ccae80c8928daaeb78199a5472e2c0cd1ccf7ce31fb32217fc7",
+      "savedVisitDraft": "3d7c1480e76fbd08b2fae3451a305ce871ed301986bd7a6f0b5796b426be6681",
+      "saveCurrentDraft": "60d8216a6b6186571fc521d84efeecd3cb3a0467724de0143901b689e4137ed7",
+      "syncPendingPhotos": "a720bc001b2e019ddeb90e4e8f53d46accf2f06842eb8f80376142f12ad41429"
+    },
+    "followingSyncHandlersSha256": "dba1a2092d259b9d9a9768b9f7386ed5db0b20224abf426285c7f61e1282ec6d",
+    "waterPresentationUnchanged": true,
+    "previousCatalogueEntries": 202,
+    "previousCataloguePreserved": true,
+    "addedCatalogueEntries": 5,
+    "previousGroups": 359,
+    "newGroups": 360,
+    "priorExactOrderPreserved": true,
+    "handlerChanges": "Only owned validation notifications and immutable branded presentation of product/draft errors; original conditions, values, errors, payloads, ordering and returns restored exactly by reversing documented substitutions.",
+    "draftManagerByteIdentical": true,
+    "draftCatalogueAndOriginalErrorBehaviorUnchanged": true,
+    "draftManagerSha256": "0759ecfbd0bcc36d29f2d29e748839af5f985eeaac2690c8cd73603d01f7b1b0",
+    "startAndIntermediateHandlersUnchanged": true
+  },
+  "sourceSha256": {
+    "frontend/cw-field-visit-drafts.js": "5d375c49e1486ece9a8aba25cfbaee8c6e5c6810883a5345710de9e641a91744",
+    "frontend/cw-visit-product-identity.js": "d1bb5522aa207cc75675d2adf6375ab3bc88f392e48acbd49c66662bb11071da",
+    "frontend/technician-field-mode.js": "c1287e3f0cadae57bc472fb4e4eb2a932ffae49ffb04e854ed0ebe5956acb920",
+    "frontend/sw.js": "c441c9990246138108d390f9c03976802a2f4f65393eae79819d22646cfa3c61",
+    "scripts/test-field-suite.js": "82ddaf153c305d6c89ac01663755d9873349c2af8e9de4ebdebd6afc52045b76",
+    "scripts/test-field-visit-validation-languages.js": "5eaa67086dbea6146a164256763281dbf8e86bd2c47549174af599373aeab2b7"
+  },
+  "visual": {
+    "captures": [
+      {
+        "path": "qa-task466/validation-de-320-pendingCompletion.png",
+        "sha256": "865e6a3b645c98646e8f6cf604d5df4f123b7aba5d722f3de28e566a46c78eb4"
+      },
+      {
+        "path": "qa-task466/validation-de-320-productStockInsufficient.png",
+        "sha256": "5207bd4700d012e96d7de3d8c92294f398734090d0f8f597f5a07bff74bffc55"
+      },
+      {
+        "path": "qa-task466/validation-de-320-unreadableEnvelope.png",
+        "sha256": "f33dd1237f6793856290250b753d4de7a0d7d32545500b0d5f34e6bd09e08985"
+      }
+    ],
+    "viewport": {
+      "width": 320,
+      "height": 1400
+    },
+    "review": "Existing toast300px remains legible without horizontal clipping; literal markup remains text."
+  },
+  "environment": {
+    "database": "isolated PGlite",
+    "browser": "Chromium153",
+    "externalEffects": "disabled",
+    "prismaCheckpointDisabled": true
+  },
+  "nativeFailure462": {
+    "task": 462,
+    "code": "e2e70d8cda65cee46aa78266dfd490d54524b4f5",
+    "run": 36698494469,
+    "job": 109832087499,
+    "sourceSha256": {
+      "frontend/technician-field-mode.js": "3b9c17630d4350a7c5d25e40033bba4c28177dacb634d69f2a880c9912fb6984",
+      "frontend/technician-field-mode.html": "d6c42a4c15349c79caed2a1f8e87340846c60745a290a229daeda4c762fd0b5b",
+      "frontend/sw.js": "bc9eb42bb388f13cc5c91edc7de93f3fb3d216c4160699aca376062a6c1ccc05",
+      "scripts/test-field-round-list-languages.js": "315c08800d619563e37793ea25d7812bc4f0f522a8636608f03b653653ee04c5",
+      "scripts/test-field-round-navigation-languages.js": "7c071237c680acc6dc571e4a1648b07ca4652fce0265ab020c0001303e47b9a7",
+      "scripts/test-field-suite.js": "c93e052384a7f854e024f2979c91c0dcf6d75a2a6a6860819cb52dd6dba829bf"
+    },
+    "gitBlobs": {
+      "frontend/technician-field-mode.js": "5bc6ccfee0332d040563fd6384d4bf08d4065b1b",
+      "frontend/technician-field-mode.html": "4ed90a305765e1c7307d79bb2f695d5f1dde0b66",
+      "frontend/sw.js": "8cd97fe4f00ee09c24488c19b7ea180e2ea165c5",
+      "scripts/test-field-round-list-languages.js": "3a8a122d8b6b282409ed9af1ca6f2257c3f1ec93",
+      "scripts/test-field-round-navigation-languages.js": "a6f5d35de70e3871379125eae39242a77cad7afc",
+      "scripts/test-field-suite.js": "c2e63bd57adfde4619b9b33516cf16878b6616c3"
+    },
+    "status": "completed",
+    "conclusion": "failure",
+    "passed": 354,
+    "total": 355,
+    "exactScriptOrderVerified": true,
+    "sourceBlobsVerified": true,
+    "postgres16": true,
+    "upgrade": true,
+    "restore": "skipped",
+    "failure": {
+      "script": "test-field-photo-panel-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 17496,
+      "message": "locator.click: Timeout7000ms exceeded searching #visitList button[data-visit-index] by hasText:'Extra /' at line97 after the language matrix and offline reload.",
+      "cause": "TASK462 localizes that status label. The photo fixture has REGULAR and EXTRA with the same numeric id and pool; selection must use the typed day-snapshot index and retain the real UI click.",
+      "fixTask": 465
+    },
+    "groupsSha256": "d50a4e217000cae3262a45c45a69ba17daf6d31b0e4eef95435f394d659c2549",
+    "fixCode": "aa548357fcd4cb5643e3e3452bc66981fc1cdc81",
+    "fixRun": 36708004453,
+    "fixAcceptance": "pending"
+  },
+  "previousNativeAcceptance": {
+    "task": 461,
+    "groups": 353,
+    "postgres16": true,
+    "upgrade": true,
+    "restoredTables": 128,
+    "restoredFiles": 51,
+    "rowsAndHashesMatch": true,
+    "proof": "20260930_task464_local.json"
+  },
+  "pendingNative": [
+    {
+      "task": 463,
+      "code": "e62427d9bea2a1ff6d381d6cb10af2cc8bfdb226",
+      "run": 36701344336,
+      "job": 109841249507,
+      "status": "in_progress",
+      "groups": 357,
+      "restore": "pending",
+      "predatesFix": true,
+      "successfulInitialSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js"
+    },
+    {
+      "task": 464,
+      "code": "34ce7355832c4784b8aa404aaea11965fe2cfaf4",
+      "run": 36704725001,
+      "job": 109852165087,
+      "status": "in_progress",
+      "groups": 359,
+      "restore": "pending",
+      "predatesFix": true,
+      "successfulInitialSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js"
+    },
+    {
+      "task": 465,
+      "status": "in_progress",
+      "groups": 359,
+      "restore": "pending",
+      "code": "aa548357fcd4cb5643e3e3452bc66981fc1cdc81",
+      "run": 36708004453,
+      "job": 109862765829,
+      "successfulInitialSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js"
+    },
+    {
+      "task": 466,
+      "status": "not_yet_published",
+      "fullSuiteGroups": 360,
+      "restore": "pending"
+    }
+  ],
+  "limits": {
+    "C06": "open",
+    "C08": "open",
+    "C10": "open",
+    "completion": {
+      "total": 32,
+      "notStarted": 26,
+      "inProgress": 1,
+      "done": 5
+    },
+    "publicDuringDevelopment": true,
+    "privateBeforeCloseC32": true,
+    "merge": false,
+    "deploy": false,
+    "externalContacts": false,
+    "annualContract": "deferred",
+    "next": "Crew/document status, remaining correction-summary own messages, then shared push/auth/navigation. Require native465/466 full suites and restore; inspect older463/464 failures without rerunning known faulty code."
+  }
+}

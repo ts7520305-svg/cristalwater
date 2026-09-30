@@ -80,9 +80,28 @@
     Object.defineProperty(item,'reviewText',{value:Object.freeze(Object.fromEntries(['pt','en','fr','es','de'].map(language=>[language,text(value,language)])))});
     return item;
   }
+  // Immutable text snapshots leave the draft, its errors and its persisted representation untouched.
+  const exportedCopies = new WeakMap(), renderedCopies = new WeakMap();
+  function describe(value) {
+    const entry = Object.freeze({});
+    exportedCopies.set(entry, Object.freeze(Object.fromEntries(['pt','en','fr','es','de'].map(language => [language, text(value, language)]))));
+    return entry;
+  }
+  const presentation = Object.freeze({
+    error: error => errors.has(error) ? describe(errors.get(error)) : null,
+    copy(node) {
+      const saved = renderedCopies.get(node);
+      return saved && node.textContent === saved.rendered && node.firstChild === saved.textNode ? describe(saved.value) : String(node?.textContent ?? '');
+    },
+    format(entry, language = document.documentElement.lang || 'pt') {
+      const values = exportedCopies.get(entry);
+      if (!values) return String(entry ?? '');
+      return values[String(language).toLowerCase().split('-')[0]] || values.pt;
+    },
+  });
   function paintCopy(node, attribute, value) {
     const rendered = text(value);
-    if (attribute === 'textContent') { if (node.textContent !== rendered) node.textContent = rendered; }
+    if (attribute === 'textContent') { if (node.textContent !== rendered) node.textContent = rendered; renderedCopies.set(node, { value, rendered, textNode: node.firstChild }); }
     else if (node.getAttribute(attribute) !== rendered) node.setAttribute(attribute,rendered);
   }
   function setCopy(node, value, attribute = 'textContent') {
@@ -298,5 +317,5 @@
     }
     return {bind,save,prepare,acceptCorrection,paint,read,expand:entry=>expand(entry.fields,entry.original),pendingSummary};
   }
-  window.CWFieldVisitDrafts = {create};
+  window.CWFieldVisitDrafts = {create,presentation};
 })();
